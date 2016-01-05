@@ -14,30 +14,22 @@ ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def fullname(name):
-    return os.path.join(app.config['UPLOAD_FOLDER'], name)
-
 def upload_file(infile):
     """ Save file 'infile' in upload folder """
     if not infile:
         # 404 Not Found
         return redirect(url_for('virhesivu', code=404, text="tiedostonimi puuttuu"))
-    if infile and allowed_file(infile.filename):
-        filename = secure_filename(infile.filename)
-        infile.save(fullname(filename))
-        return redirect(url_for('nayta1', filename=filename))
-    else:
+    if not allowed_file(infile.filename):
         # 415 Unsupported Media Type
         return redirect(url_for('virhesivu', code=415, text=infile.filename))
+        
+    filename = secure_filename(infile.filename)
+    infile.save(fullname(filename))
+    return redirect(url_for('nayta1', filename=filename))
     
+def fullname(name):
+    return os.path.join(app.config['UPLOAD_FOLDER'], name)
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-#----------------
-
-from flask import send_from_directory
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)

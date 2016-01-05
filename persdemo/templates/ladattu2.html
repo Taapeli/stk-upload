@@ -5,11 +5,7 @@
 {{ super() }}
 {% if name %}
 <p>Luettu tiedosto [<i>{{name}}</i>]</p>
-<pre>
-{{ data.decode('utf-8') }}
-</pre>
-{% else %}
-<p>Näytettäisiin luetut tiedot</p>
+<p>Näytettäisiin tilastoa</p>
 {% endif %}
 <p>&gt; <a href="/">Palaa alkuun</a></p>
 {% endblock %}

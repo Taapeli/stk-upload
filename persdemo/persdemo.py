@@ -2,7 +2,7 @@
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 29.12.2015
 
-from __future__ import print_function
+#from __future__ import print_function
 from flask import Flask, render_template, request
 
 app = Flask(__name__, instance_relative_config=True)
