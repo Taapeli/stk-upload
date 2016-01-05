@@ -1,0 +1,14 @@
+{# _myapp/templates/layout.html_ #}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fi" lang="fi">
+  <head>
+    <meta charset="utf-8" /> 
+    <title>{% block title %}{% endblock %} - Person demo</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  </head>
+  <body>
+    {% block body %}
+    <h1><a href="/"><img src="/static/hlo.png" /></a> Taapeli henkilötietodemo</h1>
+    {% endblock %}
+  </body>
+</html>

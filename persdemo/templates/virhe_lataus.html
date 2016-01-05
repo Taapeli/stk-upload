@@ -1,0 +1,18 @@
+{# _myapp/templates/virhe_lataus.html_ #}
+{% extends "layout.html" %}
+{% block title %}Lataus epäonnistui{% endblock %}
+{% block body %}
+    {{ super() }}
+    <p>
+    {% if code == 415 %}
+        Tiedoston lataaminen ei onnistu: kielletty tiedostotyyppi
+    {% else %}
+        Tiedoston lataus ei onnistu, koodi={{code}}
+    {% endif %}
+    {% if text %}
+        "{{text}}"
+    {% endif %}
+    </p>
+    <p>&gt; <a href="/">Palaa alkuun</a>
+{% endblock %}
+

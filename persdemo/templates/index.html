@@ -1,0 +1,29 @@
+{# _myapp/templates/index.html_ #}
+{% extends "layout.html" %}
+{% block title %}Alkusivu{% endblock %}
+{% block body %}
+{{ super() }}
+<div>
+    <h2>Versio 1</h2>
+    <!-- 
+    <p><a href="/lataa1">Lataa tiedoston</a> ja näyttää luettujen nimien listan</p>
+    -->
+    <p>Lataa tiedoston ja näyttää luettujen nimien listan</p>
+    <form action="/lataa1" method="post" enctype="multipart/form-data">
+        <input type="file" name="filenm">
+        <input type="submit" value="Lataa">
+    </form>
+</div>
+<div>
+    <h2>Versio 2</h2>
+    <p>Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset, yhteenvetotilasto</p>
+    <form action="/lataa2" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Lataa">
+    </form>
+</div>
+<div>
+    <h2>Versio 3</h2>
+    <p>nimien listaus tietokannasta</p>
+</div>
+{% endblock %}
