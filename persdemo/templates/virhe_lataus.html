@@ -5,7 +5,7 @@
     {{ super() }}
     <p>
     {% if code == 415 %}
-        Tiedoston lataaminen ei onnistu: kielletty tiedostotyyppi
+        Tiedoston lataaminen ei onnistu.
     {% else %}
         Tiedoston lataus ei onnistu, koodi={{code}}
     {% endif %}
