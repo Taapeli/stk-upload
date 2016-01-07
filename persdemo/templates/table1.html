@@ -4,12 +4,11 @@
 {% block body %}
 {{ super() }}
 {% if name %}
-<p>Luettu tiedosto [<i>{{name}}</i>]</p>
+<p>Luettu aineisto [<i>{{name}}</i>] taulukkona (ei toteutettu)</p>
 <pre>
 {{ data }}
 </pre>
 {% else %}
 <p>Näytettäisiin luetut tiedot</p>
 {% endif %}
-<hr />
 {% endblock %}

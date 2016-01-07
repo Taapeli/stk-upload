@@ -8,7 +8,10 @@
   </head>
   <body>
     {% block body %}
-    <h1><a href="/"><img src="/static/hlo.png" /></a> Taapeli henkilötietodemo</h1>
+    <h1><a href="/"><img src="/static/hlo.png" alt="Palaa alkuun" 
+             onmouseover="this.src='/static/hlo1.png';" 
+             onmouseout="this.src='/static/hlo.png';"/></a>
+        Taapeli henkilötietodemo</h1>
     {% endblock %}
   </body>
 </html>

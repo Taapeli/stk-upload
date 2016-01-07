@@ -16,21 +16,29 @@ def index():
     """Aloitussivun piirtäminen"""
     return render_template("index.html")
 
-@app.route('/lataa1', methods=['POST'])
-def lataa1(): # Lataa tiedoston ja näyttää sen
+@app.route('/lataa1a', methods=['POST'])
+def lataa1a(): # Lataa tiedoston ja näyttää sen
     infile = request.files['filenm']
-    return upload_file(infile)
+    return upload_file(infile, fmt='list')
 
-@app.route('/lista1/<string:filename>')
-def nayta1(filename):   # tiedoston näyttäminen ruudulla
+@app.route('/lataa1b', methods=['POST'])
+def lataa1b(): # Lataa tiedoston ja näyttää sen taulukkona
+    infile = request.files['filenm']
+    return upload_file(infile, fmt='table')
+
+@app.route('/lista1/<string:fmt>/<string:filename>')
+def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
     pathname = fullname(filename)
     try:
         with open(pathname, 'r') as f:
-            read_data = f.read()
+            read_data = f.read().decode('UTF-8')
     except IOError as e:
         read_data = "(Tiedoston lukeminen ei onnistu" + e.strerror + ")"
     
-    return render_template("lista1.html", name=pathname, data=read_data)
+    if fmt == 'list':   # Tiedosto sellaisenaan
+        return render_template("lista1.html", name=pathname, data=read_data)
+    else:               # Tiedot taulukkona
+        return render_template("table1.html", name=pathname, data=read_data)
 
 
 @app.route('/lataa2', methods=['POST'])
@@ -43,7 +51,7 @@ def lataa2():
 @app.route('/lista2/<string:ehto>')
 def nayta2(ehto):   
     """ Nimien listaus tietokannasta
-        mahdollisella määrittelemättömälä ehtolauseella
+        mahdollisella määrittelemättömällä ehtolauseella
     """
     return render_template("lista2.html", my_arg=ehto)
 

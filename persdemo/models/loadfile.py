@@ -14,22 +14,29 @@ ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def upload_file(infile):
-    """ Save file 'infile' in upload folder """
+def upload_file(infile, fmt='list'):
+    """ Save file 'infile' in the upload folder 
+    and show as 'list' or 'table' """
+    filename = normalized_name(infile)
+    infile.save(filename)
+    return redirect(url_for('nayta1', filename=filename, fmt=fmt))
+
+def normalized_name(infile):
+    """ Tarkastetaan tiedostonimi ja palautetaan täysi polkunimi """
+    # Tiedostonimi saatu?
     if not infile:
         # 404 Not Found
         return redirect(url_for('virhesivu', code=404, text="tiedostonimi puuttuu"))
-    if not allowed_file(infile.filename):
+    # Tiedostopääte ok?
+    ok_name = '.' in infile.filename and \
+           infile.filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+    if not ok_name:
         # 415 Unsupported Media Type
         return redirect(url_for('virhesivu', code=415, text=infile.filename))
-        
-    filename = secure_filename(infile.filename)
-    infile.save(fullname(filename))
-    return redirect(url_for('nayta1', filename=filename))
-    
-def fullname(name):
-    return os.path.join(app.config['UPLOAD_FOLDER'], name)
+    # Palautetaan nimi ilman ylimääräisiä hakemistotasoja
+    return secure_filename(infile.filename)
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+def fullname(name):
+    """ Palauttaa täyden polkunimen """
+    return os.path.join(app.config['UPLOAD_FOLDER'], name)
+ 
