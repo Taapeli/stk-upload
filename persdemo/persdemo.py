@@ -74,7 +74,9 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
                     nimi=nimi.decode('UTF-8'), \
                     ammatti=row['Ammatti_vakioitu'].decode('UTF-8'), \
                     paikka=row['Paikka_vakioitu'].decode('UTF-8'), \
-                    karajat=karaja.decode('UTF-8'))
+                    karajat=karaja.decode('UTF-8'), \
+                    signum=row['Signum'].decode('UTF-8') \
+                )
                 rivit.append(rivi)
 
         return render_template("table1.html", name=pathname, rivit=rivit)
