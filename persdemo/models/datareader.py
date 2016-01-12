@@ -29,6 +29,7 @@ def henkilolista(pathname):
             suku=row['Sukunimi_vakioitu']
             etu=row['Etunimi_vakioitu']
             if suku == '' and etu == '':
+                logging.warning('%s: nimikentät tyhjiä!' % person_id)
                 continue
 
             if etu == '': etu = 'N'
@@ -36,7 +37,13 @@ def henkilolista(pathname):
 
             """ Käräjät-tieto on yhdessä sarakkeessa muodossa 'Tiurala 1666.02.20-22'
                 Paikka erotetaan ja aika muunnetaan muotoon '1666-02-20 … 22'
-            """
+                Päivämäärän korjaus tehdään jos kentässä on väli+numero:
+                    * Tekstin jakaminen sarakkeisiin käyttäen välimerkkiä ”-” 
+                      tai ”,” (kentät tekstimuotoiltuna)
+                    * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
+                      ”.” viivaksi
+                    - TODO Pelkää vuosiluku käräjäpaikkana pitäisi siirtää alkuajaksi
+             """
             if ' 1' in row['Käräjät']:
                 kpaikka, aika = row['Käräjät'].split(' 1')
                 aika = '1' + aika.replace('-','|').replace(',','|') 
@@ -52,6 +59,7 @@ def henkilolista(pathname):
             else:
                 kpaikka, aika = (row['Käräjät'], '')
 
+            # Luodaan rivitieto tulostettavaksi
             rivi = dict( \
                 id=person_id, \
                 etunimi=etu, \
