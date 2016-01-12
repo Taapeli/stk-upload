@@ -3,40 +3,68 @@
 # JMä 12.1.2016
 
 import csv
+import logging
 
 def henkilolista(pathname):
+    """ Lukee csv-tiedostosta aineiston listaan, niin että kustakin 
+        syöttörivistä talletetaan dictionary
+    """
+    rivit = []
+    row_nro = 0;
+    url = '';
+
     with open(pathname, 'rb') as f:
         reader = csv.DictReader(f)
-        rivit = []
-
         for row in reader:
+            row_nro += 1
+            person_id = (u'P%06d' % row_nro)
+
+            # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
+            if row['Käräjät'][:4] == 'http':
+                url = row['Käräjät']
+                logging.debug('%s: url=%s' % (person_id, url))
+                continue
+
             # Onko henkilörivi?
-            etu=row['Sukunimi_vakioitu']
-            suku=row['Etunimi_vakioitu']
+            suku=row['Sukunimi_vakioitu']
+            etu=row['Etunimi_vakioitu']
             if suku == '' and etu == '':
                 continue
 
             if etu == '': etu = 'N'
             if suku == '': suku = 'N'
-            nimi='%s %s' % (etu, suku)
 
-            """ Käräjät-tieto on yhdessä sarakkeessa tai 
-                Juhan muuntamana kolmessa: käräjä, alku, loppu
+            """ Käräjät-tieto on yhdessä sarakkeessa muodossa 'Tiurala 1666.02.20-22'
+                Paikka erotetaan ja aika muunnetaan muotoon '1666-02-20 … 22'
             """
-            if 'Käräjäpaikka' in row:
-                karaja = '%s %s...%s' % \
-                     (row['Käräjäpaikka'], row['Alkuaika'], row['Loppuaika'])
-                if karaja[-3:] == '...':
-                    karaja = karaja[:-3]
+            if ' 1' in row['Käräjät']:
+                kpaikka, aika = row['Käräjät'].split(' 1')
+                aika = '1' + aika.replace('-','|').replace(',','|') 
+                if '|' in aika:
+                    osat = aika.split('|')
+                    # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
+                    aika = '%s … %s' % (osat[0], osat[-1])
+                    if len(osat) > 2:
+                        logging.warning('%s: aika korjattu (%s) -> %s' % \
+                            (person_id, row['Käräjät'], aika.decode('UTF-8')))
+  
+                aika = aika.replace('.', '-')
             else:
-                karaja = row['Käräjät']
+                kpaikka, aika = (row['Käräjät'], '')
 
             rivi = dict( \
-                nimi=nimi.decode('UTF-8'), \
+                id=person_id, \
+                etunimi=etu.decode('UTF-8'), \
+                sukunimi=suku.decode('UTF-8'), \
                 ammatti=row['Ammatti_vakioitu'].decode('UTF-8'), \
                 paikka=row['Paikka_vakioitu'].decode('UTF-8'), \
-                karajat=karaja.decode('UTF-8'), \
-                signum=row['Signum'].decode('UTF-8') \
+                kpaikka=kpaikka.decode('UTF-8'), \
+                kaika=aika.decode('UTF-8'), \
+                signum=row['Signum'].decode('UTF-8'),
+                url=url.decode('UTF-8') \
             )
             rivit.append(rivi)
-        return (rivit)
+    
+    logging.info(u'%s: %d riviä' % (pathname, row_nro))
+
+    return (rivit)

@@ -4,29 +4,28 @@
 {% block body %}
 {{ super() }}
 {% if name %}
-<p>Luettu aineisto [<i>{{name}}</i>] taulukkona</p>
+<p>Henkilöt tiedostosta [<i>{{name}}</i>] taulukkona</p>
 <table>
-    <tr><th>nimi</th>
+    <tr><th>id</th>
+        <th>nimi</th>
         <th>ammatti</th>
         <th>paikka</th>
-        <th>käräjät</th>
+        <th>käräjäpaikka</th>
+        <th>aika</th>
         <th>signum</th>
     </tr>
     {% for r in rivit %}
         <tr>
-          {% if r.karajat[:4] == 'http' %}
-            {% set url = r.karajat %}
-            <td colspan="5"><hr /></td>
-          {% else %}
-            <td>{{r.nimi}}</td>
+            <td style="font-size: 8pt;">{{r.id}}</td>
+            <td>{{r.etunimi}} <b> {{r.sukunimi}}</b></td>
             <td>{{r.ammatti}}</td>
             <td>{{r.paikka}}</td>
-            <td>{{r.karajat}}</td>
-            <td>{% if url %}
-                <a href='{{url}}'>{{r.signum}}</a>
+            <td>{{r.kpaikka}}</td>
+            <td nowrap>{{r.kaika}}</td>
+            <td><!-- ({{r.url}}) --> {% if r.url %}
+                <a href='{{r.url}}'>{{r.signum}}</a>
                 {% else %}{{r.signum}}
                 {% endif %}</td>
-          {% endif %}
         </tr>
     {% endfor %}
 </table>
