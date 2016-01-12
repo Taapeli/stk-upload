@@ -36,7 +36,7 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
     pathname = models.loadfile.fullname(filename)
     try:
         with open(pathname, 'r') as f:
-            read_data = f.read().decode('UTF-8')    
+            read_data = f.read()    
     except IOError as e:
         read_data = "(Tiedoston lukeminen ei onnistu" + e.strerror + ")"
 
