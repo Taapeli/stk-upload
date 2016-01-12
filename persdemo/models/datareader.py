@@ -13,7 +13,7 @@ def henkilolista(pathname):
     row_nro = 0;
     url = '';
 
-    with open(pathname, 'rb') as f:
+    with open(pathname, 'r') as f:
         reader = csv.DictReader(f)
         for row in reader:
             row_nro += 1
@@ -46,7 +46,7 @@ def henkilolista(pathname):
                     aika = '%s … %s' % (osat[0], osat[-1])
                     if len(osat) > 2:
                         logging.warning('%s: aika korjattu (%s) -> %s' % \
-                            (person_id, row['Käräjät'], aika.decode('UTF-8')))
+                            (person_id, row['Käräjät'], aika))
   
                 aika = aika.replace('.', '-')
             else:
@@ -54,14 +54,14 @@ def henkilolista(pathname):
 
             rivi = dict( \
                 id=person_id, \
-                etunimi=etu.decode('UTF-8'), \
-                sukunimi=suku.decode('UTF-8'), \
-                ammatti=row['Ammatti_vakioitu'].decode('UTF-8'), \
-                paikka=row['Paikka_vakioitu'].decode('UTF-8'), \
-                kpaikka=kpaikka.decode('UTF-8'), \
-                kaika=aika.decode('UTF-8'), \
-                signum=row['Signum'].decode('UTF-8'),
-                url=url.decode('UTF-8') \
+                etunimi=etu, \
+                sukunimi=suku, \
+                ammatti=row['Ammatti_vakioitu'], \
+                paikka=row['Paikka_vakioitu'], \
+                kpaikka=kpaikka, \
+                kaika=aika, \
+                signum=row['Signum'],
+                url=url \
             )
             rivit.append(rivi)
     
