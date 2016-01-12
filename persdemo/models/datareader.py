@@ -3,7 +3,6 @@
 # JMä 12.1.2016
 
 import csv
-import logging
 
 def henkilolista(pathname):
     with open(pathname, 'rb') as f:
