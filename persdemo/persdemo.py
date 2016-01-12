@@ -2,7 +2,6 @@
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 29.12.2015
 
-import csv
 import logging
 #from __future__ import print_function
 from flask import Flask, render_template, request
@@ -13,7 +12,8 @@ app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 #app.config.from_pyfile('config.py') # instance-hakemistosta
 
-from models.loadfile import upload_file, fullname
+import models.loadfile
+import models.datareader
 
 @app.route('/')
 def index(): 
@@ -24,16 +24,16 @@ def index():
 def lataa1a(): # Lataa tiedoston ja näyttää sen
     infile = request.files['filenm']
     logging.debug('Ladataan tiedosto ' + infile.filename)
-    return upload_file(infile, fmt='list')
+    return models.loadfile.upload_file(infile, fmt='list')
 
 @app.route('/lataa1b', methods=['POST'])
 def lataa1b(): # Lataa tiedoston ja näyttää sen taulukkona
     infile = request.files['filenm']
-    return upload_file(infile, fmt='table')
+    return models.loadfile.upload_file(infile, fmt='table')
 
 @app.route('/lista1/<string:fmt>/<string:filename>')
 def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
-    pathname = fullname(filename)
+    pathname = models.loadfile.fullname(filename)
     try:
         with open(pathname, 'r') as f:
             read_data = f.read().decode('UTF-8')    
@@ -46,41 +46,7 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
     
     # Vaihtoehto b: Luetaan tiedot taulukoksi
     else:
-        with open(pathname, 'rb') as f:
-            reader = csv.DictReader(f)
-            rivit = []
-
-            for row in reader:
-                # Onko henkilörivi?
-                etu=row['Sukunimi_vakioitu']
-                suku=row['Etunimi_vakioitu']
-                if suku == '' and etu == '':
-                    continue
-
-                if etu == '': etu = 'N'
-                if suku == '': suku = 'N'
-                nimi='%s %s' % (etu, suku)
-
-                """ Käräjät-tieto on yhdessä sarakkeessa tai 
-                    Juhan muuntamana kolmessa: käräjä, alku, loppu
-                """
-                if 'Käräjäpaikka' in row:
-                    karaja = '%s %s...%s' % \
-                         (row['Käräjäpaikka'], row['Alkuaika'], row['Loppuaika'])
-                    if karaja[-3:] == '...':
-                        karaja = karaja[:-3]
-                else:
-                    karaja = row['Käräjät']
-
-                rivi = dict( \
-                    nimi=nimi.decode('UTF-8'), \
-                    ammatti=row['Ammatti_vakioitu'].decode('UTF-8'), \
-                    paikka=row['Paikka_vakioitu'].decode('UTF-8'), \
-                    karajat=karaja.decode('UTF-8'), \
-                    signum=row['Signum'].decode('UTF-8') \
-                )
-                rivit.append(rivi)
-
+        rivit = models.datareader.henkilolista(pathname)
         return render_template("table1.html", name=pathname, rivit=rivit)
 
 
