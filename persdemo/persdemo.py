@@ -39,7 +39,7 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
             read_data = f.read()    
     except IOError as e:
         read_data = "(Tiedoston lukeminen ei onnistu" + e.strerror + ")"
-    except UnicodeDecodeError:
+    except UnicodeDecodeError as e:
         read_data = "(Tiedosto ei ole UTF-8 " + e.strerror + ")"
     
 
