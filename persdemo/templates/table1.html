@@ -22,7 +22,7 @@
             <td>{{r.paikka}}</td>
             <td>{{r.kpaikka}}</td>
             <td nowrap>{{r.kaika}}</td>
-            <td><!-- ({{r.url}}) --> {% if r.url %}
+            <td>{% if r.url %}
                 <a href='{{r.url}}'>{{r.signum}}</a>
                 {% else %}{{r.signum}}
                 {% endif %}</td>
