@@ -35,10 +35,13 @@ def lataa1b(): # Lataa tiedoston ja näyttää sen taulukkona
 def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
     pathname = models.loadfile.fullname(filename)
     try:
-        with open(pathname, 'r') as f:
+        with open(pathname, 'r', encoding='UTF-8') as f:
             read_data = f.read()    
     except IOError as e:
         read_data = "(Tiedoston lukeminen ei onnistu" + e.strerror + ")"
+    except UnicodeDecodeError:
+        read_data = "(Tiedosto ei ole UTF-8 " + e.strerror + ")"
+    
 
     # Vaihtoehto a:
     if fmt == 'list':   # Tiedosto sellaisenaan

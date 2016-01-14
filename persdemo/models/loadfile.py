@@ -9,7 +9,11 @@ import logging
 from flask import Flask, redirect, url_for
 from werkzeug import secure_filename
 
-UPLOAD_FOLDER = '/tmp'
+if 'TMPDIR' in os.environ:
+    UPLOAD_FOLDER = os.environ['TMPDIR']
+else:
+    UPLOAD_FOLDER = os.environ['TMP']
+
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
 app = Flask(__name__)
