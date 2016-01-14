@@ -40,7 +40,7 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
     except IOError as e:
         read_data = "(Tiedoston lukeminen ei onnistu" + e.strerror + ")"
     except UnicodeDecodeError as e:
-        read_data = "(Tiedosto ei ole UTF-8 " + e.strerror + ")"
+        read_data = "(Tiedosto ei ole UTF-8)"
     
 
     # Vaihtoehto a:
@@ -76,3 +76,4 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     app.run(debug=True)
     # app.run(host='0.0.0.0', port=80)
+
