@@ -22,7 +22,7 @@ def henkilolista(pathname):
             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
             if row['Käräjät'][:4] == 'http':
                 url = row['Käräjät']
-                logging.debug('%s: url=%s' % (person_id, url))
+                #logging.debug('%s: url=%s' % (person_id, url))
                 continue
 
             # Onko henkilörivi?
