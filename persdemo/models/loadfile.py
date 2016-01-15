@@ -11,7 +11,7 @@ from werkzeug import secure_filename
 
 if 'TMPDIR' in os.environ:
     UPLOAD_FOLDER = os.environ['TMPDIR']
-if 'TMP' in os.environ:
+elif 'TMP' in os.environ:
     UPLOAD_FOLDER = os.environ['TMP']
 else:
     UPLOAD_FOLDER = '/tmp'
