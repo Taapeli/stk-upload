@@ -11,8 +11,10 @@ from werkzeug import secure_filename
 
 if 'TMPDIR' in os.environ:
     UPLOAD_FOLDER = os.environ['TMPDIR']
-else:
+if 'TMP' in os.environ:
     UPLOAD_FOLDER = os.environ['TMP']
+else:
+    UPLOAD_FOLDER = '/tmp'
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
