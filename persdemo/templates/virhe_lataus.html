@@ -4,15 +4,19 @@
 {% block body %}
     {{ super() }}
     <p>
-    {% if code == 415 %}
-        Tiedoston lataaminen ei onnistu.
+    {% if code == 1 %}
+        Virheellinen syöttötiedosto.
     {% else %}
+        {% if code == 415 %}
+        Tiedoston lataaminen ei onnistu.
+        {% else %}
         Tiedoston lataus ei onnistu, koodi={{code}}
-    {% endif %}
-    {% if text %}
-        "{{text}}"
+        {% endif %}
     {% endif %}
     </p>
+    {% if text %}
+    <p>{{text}}</p>
+    {% endif %}
     <p>&gt; <a href="/">Palaa alkuun</a>
 {% endblock %}
 

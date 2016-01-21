@@ -4,18 +4,49 @@
 {% block body %}
 {{ super() }}
 {% if name %}
+<script>
+function info(id, nimi, amm, paikka, kar, aika, sig) {
+    var str="<h3>Kohteet</h3><ul>";
+    str += "<li><b>Person</b>: id='" + id + "', nimi='" + nimi + "' ";
+    if (amm != "") { str += "', ammatti='" + amm + "'"; }
+    str += "<br />&nbsp;</li>";
+    var kid = "K" + id.substring(3);  /* Ei tietysti ole joka rivillä eri! */
+    str += "<li><b>Event</b>: type='Käräjät', kid='" + kid 
+            + "', nimi='" + kar + " " + aika + "'</li>";
+        str += "<li><i>" + " Person -[Osallistuu]-> Event</i><br />&nbsp;</li>";
+    if (paikka != "") {
+        var lid = "L" + id.substring(3);  /* Ei tietysti ole joka rivillä eri! */
+        str += "<li><b>" + "Place</b>: id = '" + lid + "', nimi='" + paikka + "'</li>";
+        var ajat = aika.split(" … ");
+        str += "<li><i>" + " Person -[Asuu " + ajat[0] + "]-> Place</i><br />&nbsp;</li>";
+    }
+    
+    /* Lähdetiedot */
+    var parts = sig.split("/");
+    if (parts.length == 3) {
+        str += "<li><b>Lainaus</b>: sivu " 
+                + parts[1] + " kohta " + parts[2] + "</li>";
+        str += "<li><b>Lähde</b>: " + kar + " käräjät " + aika + "</li>";
+        str += "<li><b>Arkisto</b>: Tuomiokirjat " + parts[0];
+    }
+    document.getElementById("tiedot").innerHTML = str + "</ul>";
+}
+</script>
 <p>Henkilöt tiedostosta [<i>{{name}}</i>] taulukkona</p>
+<section id="lista">
 <table>
     <tr><th>id</th>
         <th>nimi</th>
         <th>ammatti</th>
         <th>paikka</th>
         <th>käräjäpaikka</th>
-        <th>aika</th>
+        <th>&nbsp;-aika</th>
         <th>signum</th>
     </tr>
     {% for r in rivit %}
-        <tr>
+        <tr onmouseover="info('{{r.id}}', '{{r.sukunimi}}, {{r.etunimi}}',
+            '{{r.ammatti}}', '{{r.paikka}}', 
+            '{{r.kpaikka}}', '{{r.kaika}}', '{{r.signum}}')" >
             <td class="id">{{r.id}}</td>
             <td>{{r.etunimi}} <b> {{r.sukunimi}}</b></td>
             <td>{{r.ammatti}}</td>
@@ -32,4 +63,6 @@
 {% else %}
 <p>Ei tietoja</p>
 {% endif %}
+</section>
+<section id="tiedot"><p>Solmut ja yhteydet</p></section>
 {% endblock %}

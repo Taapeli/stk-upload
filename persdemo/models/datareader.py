@@ -7,14 +7,17 @@ import logging
 
 def henkilolista(pathname):
     """ Lukee csv-tiedostosta aineiston listaan, niin että kustakin 
-        syöttörivistä talletetaan dictionary
+        syöttörivistä talletetaan dictionary listaan
     """
     rivit = []
     row_nro = 0;
     url = '';
 
-    with open(pathname, 'r') as f:
-        reader = csv.DictReader(f)
+    with open(pathname, 'r', newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f, dialect='excel')
+        if not "Käräjät" in reader.fieldnames:
+            raise KeyError('sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
+
         for row in reader:
             row_nro += 1
             person_id = (u'P%06d' % row_nro)

@@ -49,8 +49,11 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
     
     # Vaihtoehto b: Luetaan tiedot taulukoksi
     else:
-        rivit = models.datareader.henkilolista(pathname)
-        return render_template("table1.html", name=pathname, rivit=rivit)
+        try:
+            rivit = models.datareader.henkilolista(pathname)
+            return render_template("table1.html", name=pathname, rivit=rivit)
+        except KeyError as e:
+            return render_template("virhe_lataus.html", code=1, text=e)
 
 
 @app.route('/lataa2', methods=['POST'])
