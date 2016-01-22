@@ -4,6 +4,20 @@
 
 import logging
 #from __future__ import print_function
+from py2neo import Graph, Node, Relationship
+
+graph = Graph()
+
+class User:
+
+   def __init__(self, username):
+      self.username = username
+
+   def new_user(self, name):
+      user = Node("User", username="User123", name=name)
+      graph.create(user)
+      return True
+
 from flask import Flask, render_template, request
 
 app = Flask(__name__, instance_relative_config=True)
@@ -50,6 +64,9 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
     # Vaihtoehto b: Luetaan tiedot taulukoksi
     else:
         try:
+            username='Testi'
+            User(username).new_user(name='Pekka')
+
             rivit = models.datareader.henkilolista(pathname)
             return render_template("table1.html", name=pathname, rivit=rivit)
         except KeyError as e:
