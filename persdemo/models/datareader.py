@@ -79,3 +79,67 @@ def henkilolista(pathname):
     logging.info(u'%s: %d riviä' % (pathname, row_nro))
 
     return (rivit)
+
+
+def referenssinimet(pathname):
+    """ Lukee csv-tiedostosta referenssinimet
+        Syöte: ['Nimi', 'RefNimi', 'On_itse_refnimi', 'Lähde', 'Sukupuoli']
+    """
+    rivit = []
+    row_nro = 0
+    tyhjia = 0
+
+    with open(pathname, 'r', newline='', encoding='utf-8') as f:
+        hei='vaan'
+        reader=csv.reader(f, dialect='excel')
+        # Tarkastetaan ja ohitetaan otsikkorivi
+        row = reader.__next__()
+        if row.__len__ != 5 and row[1] != "RefNimi":
+            raise KeyError('Väärät sarakeotsikot: ' + str(row))
+       
+        for row in reader:
+            row_nro += 1
+            rid = (u'R%04d' % row_nro)
+            nimi=row[0].strip()
+            if row[0].__len__() == 0:
+                tyhjia += 1
+                continue # Tyhjä nimi ohitetaan
+            
+            ref=row[1]
+            on_ref=(row[2].lower().startswith('k'))
+            source=row[3]
+            if row[4].startswith('m'):
+                sp = 'M'
+            else:
+                if row[4].startswith('n'):
+                    sp = 'F'
+                else:
+                    sp = ''
+
+            # Luodaan rivitieto tulostettavaksi
+            rivi = dict( \
+                id=rid, \
+                nimi=nimi, \
+                refnimi=ref, \
+                onref=on_ref, \
+                source=source, \
+                sp=sp )
+            rivit.append(rivi)
+    
+    logging.info(u'%s: %d riviä, %d tyhjää' % (pathname, row_nro, tyhjia))
+    return (rivit)
+
+# Testaa referenssinimet
+# python3 models/datareader.py tiedosto.csv > lst
+
+import sys
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("Käyttö: " + sys.argv[0] + " tiedosto.csv", file=sys.stderr)
+        exit(1)
+        
+    rivit = referenssinimet(sys.argv[1])
+    n=0
+    for r in rivit:
+        print("{0}: {1:20s}{2:20s}{3} {4:1s} ({5:s})".format( r['id'],
+            r['nimi'], r['refnimi'], r['onref'], r['sp'], r['source']) )
