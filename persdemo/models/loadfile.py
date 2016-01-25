@@ -44,7 +44,7 @@ def normalized_name(infile):
     ok_name = '.' in infile.filename and \
            infile.filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
     if not ok_name:
-        raise IOError('Tiedostopääte ei ole sallittu')
+        raise IOError('Tiedostopääte pitää olla .csv tai .txt')
     # Palautetaan nimi ilman ylimääräisiä hakemistotasoja
     return secure_filename(infile.filename)
 
