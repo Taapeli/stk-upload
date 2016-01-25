@@ -14,11 +14,11 @@ Luokkamalli
     ( RefName {id, luokka, nimi} )  luokka = (etu, suku, paikka, ...)
     ( Citation {id, nimi, aika} )   --> (Source)
     ( Source {id, nimi, aika} )     --> (Archieve)
+    ( Archieve {id, nimi} )
     ( Migration {id, aika} )        -[from] (Paikka), -[to]-> (Paikka)
 
 """
 from py2neo import Graph, Node, Relationship
-
 graph = Graph()
 
 class User:
@@ -86,4 +86,7 @@ class Citation:
     pass
 
 class Source:
+    pass
+
+class Archieve:
     pass
