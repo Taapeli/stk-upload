@@ -21,7 +21,7 @@ ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def upload_file(infile, fmt='list'):
+def upload_file(infile, fmt=None):
     """ Save file 'infile' in the upload folder 
     and show as 'list' or 'table' """
     try:
@@ -33,7 +33,10 @@ def upload_file(infile, fmt='list'):
         
     infile.save(kokonimi)
     logging.debug('Tiedosto "' + kokonimi + '" talletettu')
-    return redirect(url_for('nayta1', filename=filename, fmt=fmt))
+    if fmt: # == 'list' tai 'table'
+        return redirect(url_for('nayta1', filename=filename, fmt=fmt))
+    else:
+        return redirect(url_for('talleta', filename=filename))
 
 def normalized_name(infile):
     """ Tarkastetaan tiedostonimi ja palautetaan täysi polkunimi """

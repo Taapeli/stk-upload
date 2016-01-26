@@ -52,23 +52,49 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
     # Vaihtoehto b: Luetaan tiedot taulukoksi
     else:
         try:
-            u = User('u1234', 'Pekka')
-            u.save()
-            logging.debug('Talletettiin uusi käyttäjä ' + str(u))
-
             persons, events = models.datareader.henkilolista(pathname)
             return render_template("table1.html", name=pathname, \
                    persons=persons, events=events)
         except KeyError as e:
             return render_template("virhe_lataus.html", code=1, text=e)
+        
 
-
-@app.route('/lataa2', methods=['POST'])
-def lataa2(): 
-    """ Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset, 
-        yhteenvetotilasto
+@app.route('/lataa', methods=['POST'])
+def lataa(): 
+    """ Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset
     """
-    return render_template("ladattu2.html")
+    infile = request.files['filenm']
+    return models.loadfile.upload_file(infile)
+
+@app.route('/talleta/<string:filename>')
+def talleta(filename):   # tietojen tallettaminen kantaan
+    pathname = models.loadfile.fullname(filename)
+    try:
+        with open(pathname, 'r', encoding='UTF-8') as f:
+            read_data = f.read()    
+    except IOError as e:
+        read_data = "(Tiedoston lukeminen ei onnistu" + e.strerror + ")"
+    except UnicodeDecodeError as e:
+        read_data = "(Tiedosto ei ole UTF-8)"
+    
+    # Luetaan tmp-tiedosto ja talletetaan tiedot tietokantaan 
+    try:
+#       u = User('u1234', 'Pekka')
+#       u.save()
+#       logging.debug('Talletettiin uusi käyttäjä ' + str(u))
+
+        status = models.datareader.henkilolista(read_data)
+    except KeyError as e:
+        return render_template("virhe_lataus.html", code=1, text=e)
+    return render_template("talletettu.html", status=status)
+
+@app.route('/lista/henkilot')
+def nayta_henkilot():   # tietokannan henkiloiden näyttäminen ruudulla
+    try:
+        persons, events = models.datareader.henkilolista(pathname)
+        return render_template("table1.html", persons=persons, events=events)
+    except KeyError as e:
+        return render_template("virhe_lataus.html", code=1, text=e)
 
 @app.route('/lista2/<string:ehto>')
 def nayta2(ehto):   

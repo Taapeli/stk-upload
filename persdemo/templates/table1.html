@@ -3,11 +3,15 @@
 {% block title %}Tiedot kannasta{% endblock %}
 {% block body %}
 {{ super() }}
-{% if name %}
 <script src="/static/infobox.js"></script>
 
+{% if name %}
 <p>Henkilöt tiedostosta [<i>{{name}}</i>] taulukkona</p>
+{% else %}
+<p>Henkilöt taulukkona</p>
+{% endif %}
 <!-- p>Mukana - henkilöä ja - tapahtumaa</p -->
+
 <section id="lista">
 <table>
     <tr><th>id</th>
@@ -36,9 +40,6 @@
         </tr>
     {% endfor %}
 </table>
-{% else %}
-<p>Ei tietoja</p>
-{% endif %}
 </section>
 <section id="tiedot"><p>Solmut ja yhteydet</p></section>
 {% endblock %}

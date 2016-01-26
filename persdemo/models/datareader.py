@@ -27,8 +27,8 @@ def dateformatter(aika):
     
             
 def henkilolista(pathname):
-    """ Lukee csv-tiedostosta aineiston listaan, niin että kustakin 
-        syöttörivistä talletetaan dictionary listaan
+    """ Lukee csv-tiedostosta aineiston, ja luo kustakin 
+        syöttörivistä Person- ja Event- objektit
     """
     persons = []
     events = {}
@@ -96,6 +96,27 @@ def henkilolista(pathname):
 
     return ((persons, events))
 
+def datawriter(pathname):
+    """ Lukee csv-tiedostosta aineiston kantaan
+    """
+    message = "Toteutetaan henkilölistan tapaan, " + \
+              "mutta luetut objektit talletetaan kantaan"
+    
+    return message
+
+def lue_henkilot(pathname):
+    """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
+    """
+    persons = []
+    events = {}
+    row_nro = 0;
+    url = '';
+
+    """Toteutetaan henkilölistan tapaan, mutta objektit luetaan kannasta"""
+    
+    return ((persons, events))
+
+#-----------------------------------------------------------------------------
 
 def referenssinimet(pathname):
     """ Lukee csv-tiedostosta referenssinimet
