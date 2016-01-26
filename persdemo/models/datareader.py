@@ -4,7 +4,28 @@
 
 import csv
 import logging
+from models.genealogy import *  # Tietokannan luokat
 
+def dateformatter(aika):
+    """ Aika esim. '1666.02.20-22' muunnetaan muotoon '1666-02-20 … 22':
+        * Tekstin jakaminen sarakkeisiin käyttäen välimerkkiä ”-” 
+          tai ”,” (kentät tekstimuotoiltuna)
+        * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
+          ”.” viivaksi
+     """
+    t = '1' + aika.replace('-','|').replace(',','|') 
+    if '|' in t:
+        osat = t.split('|')
+        # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
+        t = '%s … %s' % (osat[0], osat[-1])
+        if len(osat) > 2:
+            logging.warning('%s: aika korjattu (%s) -> %s' % \
+                (person_id, row['Käräjät'], t))
+
+    t = t.replace('.', '-')
+    return t;
+    
+            
 def henkilolista(pathname):
     """ Lukee csv-tiedostosta aineiston listaan, niin että kustakin 
         syöttörivistä talletetaan dictionary listaan
@@ -40,25 +61,12 @@ def henkilolista(pathname):
 
             """ Käräjät-tieto on yhdessä sarakkeessa muodossa 'Tiurala 1666.02.20-22'
                 Paikka erotetaan ja aika muunnetaan muotoon '1666-02-20 … 22'
-                Päivämäärän korjaus tehdään jos kentässä on väli+numero:
-                    * Tekstin jakaminen sarakkeisiin käyttäen välimerkkiä ”-” 
-                      tai ”,” (kentät tekstimuotoiltuna)
-                    * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
-                      ”.” viivaksi
-                    - TODO Pelkää vuosiluku käräjäpaikkana pitäisi siirtää alkuajaksi
+                Päivämäärän korjaus tehdään jos kentässä on väli+numero.
+                - TODO Pelkää vuosiluku käräjäpaikkana pitäisi siirtää alkuajaksi
              """
             if ' 1' in row['Käräjät']:
                 kpaikka, aika = row['Käräjät'].split(' 1')
-                aika = '1' + aika.replace('-','|').replace(',','|') 
-                if '|' in aika:
-                    osat = aika.split('|')
-                    # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
-                    aika = '%s … %s' % (osat[0], osat[-1])
-                    if len(osat) > 2:
-                        logging.warning('%s: aika korjattu (%s) -> %s' % \
-                            (person_id, row['Käräjät'], aika))
-  
-                aika = aika.replace('.', '-')
+                aika = dateformatter(aika)
             else:
                 kpaikka, aika = (row['Käräjät'], '')
 
