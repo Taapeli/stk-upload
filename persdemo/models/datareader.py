@@ -30,7 +30,8 @@ def henkilolista(pathname):
     """ Lukee csv-tiedostosta aineiston listaan, niin että kustakin 
         syöttörivistä talletetaan dictionary listaan
     """
-    rivit = []
+    persons = []
+    events = {}
     row_nro = 0;
     url = '';
 
@@ -41,7 +42,7 @@ def henkilolista(pathname):
 
         for row in reader:
             row_nro += 1
-            person_id = (u'P%06d' % row_nro)
+            person_id = u'P%06d' % row_nro
 
             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
             if row['Käräjät'][:4] == 'http':
@@ -56,9 +57,6 @@ def henkilolista(pathname):
                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
                 continue
 
-            if etu == '': etu = 'N'
-            if suku == '': suku = 'N'
-
             """ Käräjät-tieto on yhdessä sarakkeessa muodossa 'Tiurala 1666.02.20-22'
                 Paikka erotetaan ja aika muunnetaan muotoon '1666-02-20 … 22'
                 Päivämäärän korjaus tehdään jos kentässä on väli+numero.
@@ -70,23 +68,33 @@ def henkilolista(pathname):
             else:
                 kpaikka, aika = (row['Käräjät'], '')
 
-            # Luodaan rivitieto tulostettavaksi
-            rivi = dict( \
-                id=person_id, \
-                etunimi=etu, \
-                sukunimi=suku, \
-                ammatti=row['Ammatti_vakioitu'], \
-                paikka=row['Paikka_vakioitu'], \
-                kpaikka=kpaikka, \
-                kaika=aika, \
-                signum=row['Signum'],
-                url=url \
-            )
-            rivit.append(rivi)
-    
+            # Luodaan henkilö ja käräjätapahtuma
+            
+            p = Person(person_id)
+            p.name = Name(etu, suku)
+            p.ammatti = row['Ammatti_vakioitu']
+            p.paikka=row['Paikka_vakioitu']
+            event_id = u'E%06d' % row_nro
+            p.events.append(event_id)   # Viittaukset tapahtumiin
+            
+            e = Event(event_id, 'Käräjät')
+            e.nimi = kpaikka
+            e.aika = aika
+            
+            c = Citation()
+            c.tyyppi = 'Signum'
+            c.id = row['Signum']
+            c.url = url
+            c.source = Source()
+            c.source.nimi = kpaikka + ' ' + aika
+            e.citation = c
+            
+            persons.append(p)
+            events[event_id] = e
+
     logging.info(u'%s: %d riviä' % (pathname, row_nro))
 
-    return (rivit)
+    return ((persons, events))
 
 
 def referenssinimet(pathname):
@@ -98,7 +106,6 @@ def referenssinimet(pathname):
     tyhjia = 0
 
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
-        hei='vaan'
         reader=csv.reader(f, dialect='excel')
         # Tarkastetaan ja ohitetaan otsikkorivi
         row = reader.__next__()
@@ -147,7 +154,6 @@ if __name__ == '__main__':
         exit(1)
         
     rivit = referenssinimet(sys.argv[1])
-    n=0
     for r in rivit:
         print("{0}: {1:20s}{2:20s}{3} {4:1s} ({5:s})".format( r['id'],
             r['nimi'], r['refnimi'], r['onref'], r['sp'], r['source']) )

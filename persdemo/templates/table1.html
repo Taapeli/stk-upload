@@ -7,6 +7,7 @@
 <script src="/static/infobox.js"></script>
 
 <p>Henkilöt tiedostosta [<i>{{name}}</i>] taulukkona</p>
+<!-- p>Mukana - henkilöä ja - tapahtumaa</p -->
 <section id="lista">
 <table>
     <tr><th>id</th>
@@ -17,19 +18,20 @@
         <th>&nbsp;-aika</th>
         <th>signum</th>
     </tr>
-    {% for r in rivit %}
-        <tr onmouseover="info('{{r.id}}', '{{r.sukunimi}}, {{r.etunimi}}',
-            '{{r.ammatti}}', '{{r.paikka}}', 
-            '{{r.kpaikka}}', '{{r.kaika}}', '{{r.signum}}')" >
-            <td class="id">{{r.id}}</td>
-            <td>{{r.etunimi}} <b> {{r.sukunimi}}</b></td>
-            <td>{{r.ammatti}}</td>
-            <td>{{r.paikka}}</td>
-            <td>{{r.kpaikka}}</td>
-            <td nowrap>{{r.kaika}}</td>
-            <td>{% if r.url %}
-                <a href='{{r.url}}'>{{r.signum}}</a>
-                {% else %}{{r.signum}}
+    {% for p in persons %}
+        {% set e = events[p.events[0]] %}
+        <tr onmouseover="info('{{p.id}}', '{{p.name.last}}, {{p.name.fist}}',
+            '{{p.ammatti}}', '{{p.paikka}}', 
+            '{{e.nimi}}', '{{e.aika}}', '{{e.citation.id}}')" >
+            <td class="id">{{p.id}}</td>
+            <td>{{p.name.first}} <b> {{p.name.last}}</b></td>
+            <td>{{p.ammatti}}</td>
+            <td>{{p.paikka}}</td>
+            <td>{{e.nimi}}</td>
+            <td nowrap>{{e.aika}}</td>
+            <td>{% if e.citation.url %}
+                <a href='{{e.citation.url}}'>{{e.citation.id}}</a>
+                {% else %}{{e.citation.id}}
                 {% endif %}</td>
         </tr>
     {% endfor %}

@@ -5,17 +5,19 @@
 """
 Luokkamalli
     ( User {uid, nimi} )
-    
-    ( Person {id, gender} )         --> (Event)
-    ( Event {id, name, aika} )      --> (Place), (Citation)
+
+    ( Person {id, gender, norm_name} )    --> (Event)
+    ( Event {id, name, aika} )            --> (Place), (Citation), (Name)
     ( Name {id, orig, etu, suku, patro} ) --> (RefName)
-    ( Place {id, orig, nimi} )      --> (RefName), -[ylempi]-> (Place)
+    ( Place {id, orig, nimi} )            --> (RefName)
     ( Note {id, teksti, url} )
-    ( RefName {id, luokka, nimi} )  luokka = (etu, suku, paikka, ...)
-    ( Citation {id, nimi, aika} )   --> (Source)
-    ( Source {id, nimi, aika} )     --> (Archieve)
+    ( RefName {id, luokka, nimi} )        -[reftype]-> (RefName)
+                   luokka = (etu, suku, paikka, ...)
+                   reftype = (refnimi, patronyymi, ...)
+    ( Citation {id, nimi, aika} )         --> (Source)
+    ( Source {id, nimi, aika} )           --> (Archieve)
     ( Archieve {id, nimi} )
-    ( Migration {id, aika} )        -[from] (Paikka), -[to]-> (Paikka)
+    ( Migration {id, aika} )        -[from]-> (Place), -[to]-> (Place)
 
 """
 from py2neo import Graph, Node, Relationship
@@ -24,7 +26,7 @@ graph = Graph()
 class User:
     """ Järjestelmän käyttäjä """
     
-    _label = "User"
+    _label_ = "User"
     
     def __init__(self, username, name):
         """ Luo uuden käyttäjä-instanssin """
@@ -33,7 +35,7 @@ class User:
 
     def save(self):
         """ Talletta sen kantaan """
-        user = Node(self._label, uid=self.id, name=self.name)
+        user = Node(self._label_, uid=self.id, name=self.name)
         graph.create(user)
         return True
     
@@ -49,25 +51,42 @@ class User:
         return "User username=" + self.id + ", nimi=" + self.name;
 
 
+#   Taapelin Suomikannan luokat
+
 class Person:
     """ Henkilötiedot """
     def __init__(self, id):
         self.id=id
+        self.events = []
         return
 
 class Event:
-    pass
+    def __init__(self, id, tyyppi):
+        self.id=id
+        self.type = tyyppi
+        return
 
 class Name:
     """ Etu- ja sukunimi, patronyymi sekä nimen alkuperäismuoto
     """
-    etu = ""
-    suku = ""
-    
+    def __init__(self, etu, suku):
+        if etu == '': 
+            self.first = 'N'
+        else:
+            self.first = etu
+
+        if suku == '': 
+            self.last = 'N'
+        else:
+            self.last = etu
+
+        if suku == '': suku = 'N'
+
+
     def __str__(self):
-        s = "Nimi %s, %s", (self.suku, self.etu)
-        if self.pvm:
-            s += " (kirjattu %s)", (self.pvm, )
+        s = "Name %s, %s", (self.last, self.first)
+        if self.date:
+            s += " (kirjattu %s)", (self.date, )
         if ref:
             s += " [%s]"
         return s

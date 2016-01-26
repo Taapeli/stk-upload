@@ -56,8 +56,9 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
             u.save()
             logging.debug('Talletettiin uusi käyttäjä ' + str(u))
 
-            rivit = models.datareader.henkilolista(pathname)
-            return render_template("table1.html", name=pathname, rivit=rivit)
+            persons, events = models.datareader.henkilolista(pathname)
+            return render_template("table1.html", name=pathname, \
+                   persons=persons, events=events)
         except KeyError as e:
             return render_template("virhe_lataus.html", code=1, text=e)
 
