@@ -13,7 +13,7 @@ def dateformatter(aika, id=''):
         * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
           ”.” viivaksi
      """
-    t = aika.replace('-','|').replace(',','|') 
+    t = aika.replace('-','|').replace(',','|').replace('.', '-')
     if '|' in t:
         osat = t.split('|')
         # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
