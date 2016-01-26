@@ -1,0 +1,12 @@
+{# _myapp/templates/virhe_lataus.html_ #}
+{% extends "layout.html" %}
+{% block title %}Tiedot talletettu{% endblock %}
+{% block body %}
+    {{ super() }}
+    <h2>Tietojen talletus kantaan</h2>
+    {% if text %}
+    <p>{{text}}</p>
+    {% endif %}
+    <p>&gt; <a href="/lista/henkilot">Näytä kannassa olevat henkilöt</a></p>
+{% endblock %}
+

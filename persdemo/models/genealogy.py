@@ -23,6 +23,11 @@ Luokkamalli
 from py2neo import Graph, Node, Relationship
 graph = Graph()
 
+def tyhjenna_kanta():
+    """ Koko kanta tyhjennetään """
+    graph.delete_all()
+    
+
 class User:
     """ Järjestelmän käyttäjä """
     

@@ -69,13 +69,6 @@ def lataa():
 @app.route('/talleta/<string:filename>')
 def talleta(filename):   # tietojen tallettaminen kantaan
     pathname = models.loadfile.fullname(filename)
-    try:
-        with open(pathname, 'r', encoding='UTF-8') as f:
-            read_data = f.read()    
-    except IOError as e:
-        read_data = "(Tiedoston lukeminen ei onnistu" + e.strerror + ")"
-    except UnicodeDecodeError as e:
-        read_data = "(Tiedosto ei ole UTF-8)"
     
     # Luetaan tmp-tiedosto ja talletetaan tiedot tietokantaan 
     try:
@@ -83,18 +76,23 @@ def talleta(filename):   # tietojen tallettaminen kantaan
 #       u.save()
 #       logging.debug('Talletettiin uusi käyttäjä ' + str(u))
 
-        status = models.datareader.henkilolista(read_data)
+        status = models.datareader.datastorer(pathname)
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, text=e)
-    return render_template("talletettu.html", status=status)
+    return render_template("talletettu.html", text=status)
 
 @app.route('/lista/henkilot')
 def nayta_henkilot():   # tietokannan henkiloiden näyttäminen ruudulla
     try:
-        persons, events = models.datareader.henkilolista(pathname)
+        persons, events = models.datareader.lue_henkilot()
         return render_template("table1.html", persons=persons, events=events)
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, text=e)
+
+@app.route('/tyhjenna/kaikki/kannasta')
+def tyhjenna():   # tietokannan tyhjentäminen mitään kyselemättä
+    tyhjenna_kanta()
+    return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
 @app.route('/lista2/<string:ehto>')
 def nayta2(ehto):   

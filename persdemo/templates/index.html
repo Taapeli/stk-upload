@@ -20,15 +20,15 @@
     </form>
 </div>
 <div>
-    <h2>Versio 2 (ei toteutettu)</h2>
+    <h2>Versio 2</h2>
     <p>Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset, yhteenvetotilasto</p>
-    <form action="/lataa2" method="post" enctype="multipart/form-data">
+    <form action="/lataa" method="post" enctype="multipart/form-data">
         <input type="file" name="filenm">
         <input type="submit" value="Lataa">
     </form>
-</div>
-<div>
-    <h2>Versio 3 (ei toteutettu)</h2>
-    <p>nimien listaus tietokannasta</p>
+    <ul>
+        <li><a href="/lista/henkilot">Näytä kannassa olevat henkilöt</a></li>
+        <li><a href="/tyhjenna/kaikki/kannasta">Tyhjennä koko kanta!</a></li>
+    </ul>
 </div>
 {% endblock %}

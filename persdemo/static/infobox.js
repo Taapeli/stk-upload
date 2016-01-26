@@ -5,7 +5,7 @@
  */
 
 function info(id, nimi, ammatti, paikka, karaja, aika, sig) {
-    var str="<h3>Kohteet</h3><ul>";
+    var str="<h3>Kohteet</h3><ul class='info'>";
     str += "<li><b>Person</b> {id='" + id + "', nimi='" + nimi + "' ";
     if (ammatti !== "") { str += "', ammatti='" + ammatti + "' "; }
     str += "}<br />&nbsp;</li>";

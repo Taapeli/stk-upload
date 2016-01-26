@@ -96,15 +96,15 @@ def henkilolista(pathname):
 
     return ((persons, events))
 
-def datawriter(pathname):
+def datastorer(pathname):
     """ Lukee csv-tiedostosta aineiston kantaan
     """
     message = "Toteutetaan henkilölistan tapaan, " + \
-              "mutta luetut objektit talletetaan kantaan"
+              "mutta luetut objektit talletetaan kantaan eikä taulukkoihin"
     
     return message
 
-def lue_henkilot(pathname):
+def lue_henkilot():
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
     """
     persons = []
@@ -112,7 +112,7 @@ def lue_henkilot(pathname):
     row_nro = 0;
     url = '';
 
-    """Toteutetaan henkilölistan tapaan, mutta objektit luetaan kannasta"""
+    # Toteutetaan henkilölistan tapaan, mutta objektit luetaan kannasta
     
     return ((persons, events))
 
