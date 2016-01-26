@@ -6,24 +6,23 @@ import csv
 import logging
 from models.genealogy import *  # Tietokannan luokat
 
-def dateformatter(aika):
+def dateformatter(aika, id=''):
     """ Aika esim. '1666.02.20-22' muunnetaan muotoon '1666-02-20 … 22':
         * Tekstin jakaminen sarakkeisiin käyttäen välimerkkiä ”-” 
           tai ”,” (kentät tekstimuotoiltuna)
         * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
           ”.” viivaksi
      """
-    t = '1' + aika.replace('-','|').replace(',','|') 
+    t = aika.replace('-','|').replace(',','|') 
     if '|' in t:
         osat = t.split('|')
         # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
         t = '%s … %s' % (osat[0], osat[-1])
         if len(osat) > 2:
-            logging.warning('%s: aika korjattu (%s) -> %s' % \
-                (person_id, row['Käräjät'], t))
+            logging.warning('%s: aika korjattu (%s) -> %s' % (id, aika, t))
 
     t = t.replace('.', '-')
-    return t;
+    return t
     
             
 def henkilolista(pathname):
@@ -32,8 +31,8 @@ def henkilolista(pathname):
     """
     persons = []
     events = {}
-    row_nro = 0;
-    url = '';
+    row_nro = 0
+    url = ''
 
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f, dialect='excel')
@@ -64,7 +63,7 @@ def henkilolista(pathname):
              """
             if ' 1' in row['Käräjät']:
                 kpaikka, aika = row['Käräjät'].split(' 1')
-                aika = dateformatter(aika)
+                aika = dateformatter('1' + aika, person_id)
             else:
                 kpaikka, aika = (row['Käräjät'], '')
 
@@ -109,8 +108,8 @@ def lue_henkilot():
     """
     persons = []
     events = {}
-    row_nro = 0;
-    url = '';
+    row_nro = 0
+    url = ''
 
     # Toteutetaan henkilölistan tapaan, mutta objektit luetaan kannasta
     
