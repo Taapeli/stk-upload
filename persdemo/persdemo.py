@@ -21,18 +21,20 @@ def index():
     return render_template("index.html")
 
 @app.route('/lataa1a', methods=['POST'])
-def lataa1a(): # Lataa tiedoston ja näyttää sen
-    infile = request.files['filenm']
-    logging.debug('Ladataan tiedosto ' + infile.filename)
+def lataa1a(): 
+    """ Lataa tiedoston ja näyttää sen """
     try:
+        infile = request.files['filenm']
+        logging.debug('Ladataan tiedosto ' + infile.filename)
         models.loadfile.upload_file(infile)
     except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        return render_template("virhe_lataus.html", code=code, text=str(e))
 
     return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
         
 @app.route('/lataa1b', methods=['POST'])
-def lataa1b(): # Lataa tiedoston ja näyttää sen taulukkona
+def lataa1b(): 
+    """ Lataa tiedoston ja näyttää sen taulukkona """
     infile = request.files['filenm']
     try:
         models.loadfile.upload_file(infile)
@@ -42,7 +44,8 @@ def lataa1b(): # Lataa tiedoston ja näyttää sen taulukkona
     return redirect(url_for('nayta1', filename=infile.filename, fmt='table'))
 
 @app.route('/lista1/<string:fmt>/<string:filename>')
-def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
+def nayta1(filename, fmt):   
+    """ tiedoston näyttäminen ruudulla """
     try:
         pathname = models.loadfile.fullname(filename)
         with open(pathname, 'r', encoding='UTF-8') as f:
@@ -80,7 +83,8 @@ def lataa():
     return redirect(url_for('talleta', filename=infile.filename))
 
 @app.route('/talleta/<string:filename>')
-def talleta(filename):   # tietojen tallettaminen kantaan
+def talleta(filename):   
+    """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
     
     try:
@@ -94,7 +98,8 @@ def talleta(filename):   # tietojen tallettaminen kantaan
     return render_template("talletettu.html", text=status)
 
 @app.route('/lista/henkilot')
-def nayta_henkilot():   # tietokannan henkiloiden näyttäminen ruudulla
+def nayta_henkilot():   
+    """ tietokannan henkiloiden näyttäminen ruudulla """
     try:
         persons, events = models.datareader.lue_henkilot()
         return render_template("table1.html", persons=persons, events=events)
@@ -102,7 +107,8 @@ def nayta_henkilot():   # tietokannan henkiloiden näyttäminen ruudulla
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/tyhjenna/kaikki/kannasta')
-def tyhjenna():   # tietokannan tyhjentäminen mitään kyselemättä
+def tyhjenna():   
+    """ tietokannan tyhjentäminen mitään kyselemättä """
     tyhjenna_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 

@@ -89,7 +89,7 @@ class Person:
         self.events = []
         return
     
-    def make_id(self, i):
+    def make_id(i):
         """ Muodostetaan rivinumeroa vastaava person_id """
         return 'P%06d' % i
 
