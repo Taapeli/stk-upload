@@ -3,9 +3,7 @@
 # JMä 29.12.2015
 
 import logging
-#from __future__ import print_function
-
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -13,7 +11,7 @@ app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 #app.config.from_pyfile('config.py') # instance-hakemistosta
 
-from models.genealogy import *  # Tietokannan luokat
+from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
 
@@ -26,24 +24,34 @@ def index():
 def lataa1a(): # Lataa tiedoston ja näyttää sen
     infile = request.files['filenm']
     logging.debug('Ladataan tiedosto ' + infile.filename)
-    return models.loadfile.upload_file(infile, fmt='list')
+    try:
+        models.loadfile.upload_file(infile)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
 
+    return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
+        
 @app.route('/lataa1b', methods=['POST'])
 def lataa1b(): # Lataa tiedoston ja näyttää sen taulukkona
     infile = request.files['filenm']
-    return models.loadfile.upload_file(infile, fmt='table')
+    try:
+        models.loadfile.upload_file(infile)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('nayta1', filename=infile.filename, fmt='table'))
 
 @app.route('/lista1/<string:fmt>/<string:filename>')
 def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
-    pathname = models.loadfile.fullname(filename)
     try:
+        pathname = models.loadfile.fullname(filename)
         with open(pathname, 'r', encoding='UTF-8') as f:
             read_data = f.read()    
     except IOError as e:
-        read_data = "(Tiedoston lukeminen ei onnistu" + e.strerror + ")"
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
     except UnicodeDecodeError as e:
-        read_data = "(Tiedosto ei ole UTF-8)"
-    
+        return redirect(url_for('virhesivu', code=1, \
+               text="Tiedosto ei ole UTF-8. " + str(e)))  
 
     # Vaihtoehto a:
     if fmt == 'list':   # Tiedosto sellaisenaan
@@ -56,21 +64,25 @@ def nayta1(filename, fmt):   # tiedoston näyttäminen ruudulla
             return render_template("table1.html", name=pathname, \
                    persons=persons, events=events)
         except KeyError as e:
-            return render_template("virhe_lataus.html", code=1, text=e)
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
         
 
 @app.route('/lataa', methods=['POST'])
 def lataa(): 
-    """ Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset
+    """ Versio 2: Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset
     """
-    infile = request.files['filenm']
-    return models.loadfile.upload_file(infile)
+    try:
+        infile = request.files['filenm']
+        models.loadfile.upload_file(infile)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('talleta', filename=infile.filename))
 
 @app.route('/talleta/<string:filename>')
 def talleta(filename):   # tietojen tallettaminen kantaan
     pathname = models.loadfile.fullname(filename)
     
-    # Luetaan tmp-tiedosto ja talletetaan tiedot tietokantaan 
     try:
 #       u = User('u1234', 'Pekka')
 #       u.save()
@@ -87,7 +99,7 @@ def nayta_henkilot():   # tietokannan henkiloiden näyttäminen ruudulla
         persons, events = models.datareader.lue_henkilot()
         return render_template("table1.html", persons=persons, events=events)
     except KeyError as e:
-        return render_template("virhe_lataus.html", code=1, text=e)
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   # tietokannan tyhjentäminen mitään kyselemättä
@@ -104,10 +116,11 @@ def nayta2(ehto):
 @app.route('/virhe_lataus/<int:code>/<text>')
 def virhesivu(code, text=''):
     """ Virhesivu näytetään """
+    logging.debug('Virhesivu ' + str(code) )
     return render_template("virhe_lataus.html", code=code, text=text)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     app.run(debug=True)
-    # app.run(host='0.0.0.0', port=80)
+    # tai vaikka app.run(host='0.0.0.0', port=80)
 

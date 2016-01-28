@@ -6,7 +6,7 @@
 
 import os
 import logging
-from flask import Flask, redirect, url_for
+from flask import Flask
 from werkzeug import secure_filename
 
 if 'TMPDIR' in os.environ:
@@ -14,42 +14,41 @@ if 'TMPDIR' in os.environ:
 elif 'TMP' in os.environ:
     UPLOAD_FOLDER = os.environ['TMP']
 else:
-    UPLOAD_FOLDER = '/tmp'
+    UPLOAD_FOLDER = os.sep + 'tmp'
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def upload_file(infile, fmt=None):
+def upload_file(infile):
     """ Save file 'infile' in the upload folder 
-    and show as 'list' or 'table' """
+        and return a list of row dictionaries 
+    """
     try:
-        filename = normalized_name(infile)
-        kokonimi=fullname(filename)
-    except IOError as e:
-        # 415 Unsupported Media Type
-        return redirect(url_for('virhesivu', code=415, text=str(e)))
+        filename = normalized_name(infile.filename)
+    except Exception:
+        logging.debug('Tiedostonimen "' + infile.filename + '" normalisointi ei onnaa')
+        raise
         
+    kokonimi=fullname(filename)
     infile.save(kokonimi)
     logging.debug('Tiedosto "' + kokonimi + '" talletettu')
-    if fmt: # == 'list' tai 'table'
-        return redirect(url_for('nayta1', filename=filename, fmt=fmt))
-    else:
-        return redirect(url_for('talleta', filename=filename))
+    return (kokonimi)
 
-def normalized_name(infile):
+def normalized_name(in_name):
     """ Tarkastetaan tiedostonimi ja palautetaan täysi polkunimi """
     # Tiedostonimi saatu?
-    if not infile:
+    if not in_name:
         raise IOError('Tiedostonimi puuttuu')
     # Tiedostopääte ok?
-    ok_name = '.' in infile.filename and \
-           infile.filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+    ok_name = '.' in in_name and \
+           in_name.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
     if not ok_name:
-        raise IOError('Tiedostopääte pitää olla .csv tai .txt')
+        raise ValueError('Tiedostopääte nimessä "' + in_name + \
+              '" pitää olla .csv tai .txt ')
     # Palautetaan nimi ilman ylimääräisiä hakemistotasoja
-    return secure_filename(infile.filename)
+    return secure_filename(in_name)
 
 def fullname(name):
     """ Palauttaa täyden polkunimen """

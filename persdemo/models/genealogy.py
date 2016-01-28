@@ -21,6 +21,8 @@ Luokkamalli
 
 """
 from py2neo import Graph, Node, Relationship
+import logging
+
 graph = Graph()
 
 def tyhjenna_kanta():
@@ -55,8 +57,30 @@ class User:
     def __str__(self):
         return "User username=" + self.id + ", nimi=" + self.name;
 
+class Date():
+    """ Päivämäärän muuntofunktioita """
+    def range_str(aikamaare):
+        """ Karkea aikamäären siivous, palauttaa merkkijonon
+        
+            Aika esim. '1666.02.20-22' muunnetaan muotoon '1666-02-20 … 22':
+            * Tekstin jakaminen sarakkeisiin käyttäen välimerkkiä ”-” 
+              tai ”,” (kentät tekstimuotoiltuna)
+            * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
+              ”.” viivaksi
+         """
+        t = aikamaare.replace('-','|').replace(',','|').replace('.', '-')
+        if '|' in t:
+            osat = t.split('|')
+            # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
+            t = '%s … %s' % (osat[0], osat[-1])
+            if len(osat) > 2:
+                logging.warning('Aika korjattu: %s -> %s' % (id, t))
 
-#   Taapelin Suomikannan luokat
+        t = t.replace('.', '-')
+        return t
+
+
+#  ------------------------ Taapelin Suomikannan luokat ------------------------
 
 class Person:
     """ Henkilötiedot """
@@ -64,6 +88,10 @@ class Person:
         self.id=id
         self.events = []
         return
+    
+    def make_id(self, i):
+        """ Muodostetaan rivinumeroa vastaava person_id """
+        return 'P%06d' % i
 
 class Event:
     def __init__(self, id, tyyppi):
