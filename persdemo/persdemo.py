@@ -76,7 +76,15 @@ def lataa():
     """
     try:
         infile = request.files['filenm']
-        models.loadfile.upload_file(infile)
+        aineisto = request.form['aineisto']
+        logging.debug('Saatiin ' + aineisto + ", tiedosto: " + infile.filename )
+        
+        if aineisto == 'henkilot':
+            models.loadfile.upload_file(infile)
+        else:
+            return redirect(url_for('virhesivu', code=1, text= \
+                "Aineistotyypin '" + aineisto + "' käsittely puuttuu vielä"))
+        
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
