@@ -50,7 +50,7 @@ def henkilolista(pathname):
                 aika = Date.range_str('1' + aika)
             else:
                 kpaikka, aika = (row['Käräjät'], '')
-
+            
             # Luodaan henkilö ja käräjätapahtuma
             
             p = Person(person_id)
@@ -74,6 +74,10 @@ def henkilolista(pathname):
             
             persons.append(p)
             events[event_id] = e
+
+            # Testi2
+
+            p.testi2(etu=etu, suku=suku)
 
     logging.info(u'%s: %d riviä' % (pathname, row_nro))
 

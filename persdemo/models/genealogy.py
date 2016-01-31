@@ -93,6 +93,12 @@ class Person:
         """ Muodostetaan rivinumeroa vastaava person_id """
         return 'P%06d' % i
 
+    def testi2(self, etu, suku):
+        """ Testitallennus kantaan """
+        persoona = Node(pid=self.id, firstname=etu, lastname=suku)
+        graph.create(persoona)
+        return True
+
 class Event:
     def __init__(self, id, tyyppi):
         self.id=id
