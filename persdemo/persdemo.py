@@ -66,9 +66,9 @@ def nayta1(filename, fmt):
     # Vaihtoehto b: Luetaan tiedot taulukoksi
     else:
         try:
-            persons, events = models.datareader.henkilolista(pathname)
+            persons = models.datareader.henkilolista(pathname)
             return render_template("table1.html", name=pathname, \
-                   persons=persons, events=events)
+                   persons=persons)
         except KeyError as e:
             return redirect(url_for('virhesivu', code=1, text=str(e)))
         

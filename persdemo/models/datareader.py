@@ -9,7 +9,7 @@ from models.genealogy import *  # Tietokannan luokat
            
 def henkilolista(pathname):
     """ Lukee csv-tiedostosta aineiston, ja luo kustakin 
-        syöttörivistä Person- ja Event- objektit
+        syöttörivistä Person-objektit
     """
     persons = []
     events = {}
@@ -80,7 +80,7 @@ def henkilolista(pathname):
 
     logging.info(u'%s: %d riviä' % (pathname, row_nro))
 
-    return ((persons, events))
+    return (persons)
 
 def datastorer(pathname):
     """ Lukee csv-tiedostosta aineiston kantaan
