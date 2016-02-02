@@ -14,11 +14,13 @@ app = Flask(__name__, instance_relative_config=True)
 from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
+import models.cvs_refnames      # Referenssinimien luonti
 
 @app.route('/')
 def index(): 
     """Aloitussivun piirtäminen"""
     return render_template("index.html")
+
 
 @app.route('/lataa1a', methods=['POST'])
 def lataa1a(): 
@@ -42,6 +44,7 @@ def lataa1b():
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     return redirect(url_for('nayta1', filename=infile.filename, fmt='table'))
+
 
 @app.route('/lista1/<string:fmt>/<string:filename>')
 def nayta1(filename, fmt):   
@@ -79,19 +82,16 @@ def lataa():
         aineisto = request.form['aineisto']
         logging.debug('Saatiin ' + aineisto + ", tiedosto: " + infile.filename )
         
-        if aineisto == 'henkilot':
-            models.loadfile.upload_file(infile)
-        else:
-            return redirect(url_for('virhesivu', code=1, text= \
-                "Aineistotyypin '" + aineisto + "' käsittely puuttuu vielä"))
-        
+        models.loadfile.upload_file(infile)
+         
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    return redirect(url_for('talleta', filename=infile.filename))
+    return redirect(url_for('talleta', filename=infile.filename, subj=aineisto))
 
-@app.route('/talleta/<string:filename>')
-def talleta(filename):   
+
+@app.route('/talleta/<string:subj>/<string:filename>')
+def talleta(filename, subj):   
     """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
     
@@ -100,17 +100,34 @@ def talleta(filename):
 #       u.save()
 #       logging.debug('Talletettiin uusi käyttäjä ' + str(u))
 
-        status = models.datareader.datastorer(pathname)
+        if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
+            status = models.datareader.datastorer(pathname)
+        else:
+            if subj == 'refnimet': # Referenssinimet
+                # Palauttaa toistaiseksi taulukon Refname-objekteja
+                refnames=models.cvs_refnames.referenssinimet(pathname)
+                logging.debug('Tuli ' + str(len(refnames)) + ' nimeä ')
+                return render_template("table_refnames.html", name=pathname, \
+                    refnames=refnames)
+                pass
+            else:
+                if subj == 'karajat': # TODO: Tekemättä
+                    status="Käräjätietojen lukua ei ole vielä tehty"
+                    pass
+                else:
+                    return redirect(url_for('virhesivu', code=1, text= \
+                        "Aineistotyypin '" + aineisto + "' käsittely puuttuu vielä"))
     except KeyError as e:
-        return render_template("virhe_lataus.html", code=1, text=e)
+        return render_template("virhe_lataus.html", code=1, \
+               text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
     return render_template("talletettu.html", text=status)
 
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
     try:
-        persons, events = models.datareader.lue_henkilot()
-        return render_template("table1.html", persons=persons, events=events)
+        persons = models.datareader.lue_henkilot()
+        return render_template("table1.html", persons=persons)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 

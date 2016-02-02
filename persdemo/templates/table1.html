@@ -23,15 +23,15 @@
         <th>signum</th>
     </tr>
     {% for p in persons %}
-        {% set e = events[p.events[0]] %}
+        {% set e = p.events[0] %}
         <tr onmouseover="info('{{p.id}}', '{{p.name.last}}, {{p.name.fist}}',
-            '{{p.ammatti}}', '{{p.paikka}}', 
+            '{{p.occupation}}', '{{p.place}}', 
             '{{e.nimi}}', '{{e.aika}}', '{{e.citation.id}}')" >
             <td class="id">{{p.id}}</td>
             <td>{{p.name.first}} <b> {{p.name.last}}</b></td>
-            <td>{{p.ammatti}}</td>
-            <td>{{p.paikka}}</td>
-            <td>{{e.nimi}}</td>
+            <td>{{p.occupation}}</td>
+            <td>{{p.place}}</td>
+            <td>{{e.name}}</td>
             <td nowrap>{{e.aika}}</td>
             <td>{% if e.citation.url %}
                 <a href='{{e.citation.url}}'>{{e.citation.id}}</a>

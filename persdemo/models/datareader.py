@@ -55,14 +55,13 @@ def henkilolista(pathname):
             
             p = Person(person_id)
             p.name = Name(etu, suku)
-            p.ammatti = row['Ammatti_vakioitu']
-            p.paikka=row['Paikka_vakioitu']
-            event_id = u'E%06d' % row_nro
-            p.events.append(event_id)   # Viittaukset tapahtumiin
+            p.occupation = row['Ammatti_vakioitu']
+            p.place=row['Paikka_vakioitu']
             
+            event_id = u'E%06d' % row_nro
             e = Event(event_id, 'Käräjät')
-            e.nimi = kpaikka
-            e.aika = aika
+            e.name = kpaikka
+            e.date = aika
             
             c = Citation()
             c.tyyppi = 'Signum'
@@ -72,12 +71,12 @@ def henkilolista(pathname):
             c.source.nimi = kpaikka + ' ' + aika
             e.citation = c
             
+            p.events.append(e)
             persons.append(p)
-            events[event_id] = e
 
             # Testi2
 
-            p.testi2(etu=etu, suku=suku)
+            p.save()
 
     logging.info(u'%s: %d riviä' % (pathname, row_nro))
 
