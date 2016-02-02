@@ -5,11 +5,10 @@
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
+<p>Näytetään {{persons|count}} henkilöä 
 {% if name %}
-<p>Henkilöt tiedostosta [<i>{{name}}</i>] taulukkona</p>
-{% else %}
-<p>Henkilöt taulukkona</p>
-{% endif %}
+tiedostosta [<i>{{name}}</i>] 
+{% endif %}</p>
 <!-- p>Mukana - henkilöä ja - tapahtumaa</p -->
 
 <section id="lista">
@@ -22,6 +21,7 @@
         <th>&nbsp;-aika</th>
         <th>signum</th>
     </tr>
+{% if persons %}
     {% for p in persons %}
         {% set e = p.events[0] %}
         <tr onmouseover="info('{{p.id}}', '{{p.name.last}}, {{p.name.fist}}',
@@ -39,6 +39,9 @@
                 {% endif %}</td>
         </tr>
     {% endfor %}
+{% else %}
+        <tr><td colspan="7">Ei tietoja</td></tr>
+{% endif %}
 </table>
 </section>
 <section id="tiedot"><p>Solmut ja yhteydet</p></section>

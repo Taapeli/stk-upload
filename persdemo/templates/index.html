@@ -5,7 +5,7 @@
 {{ super() }}
 <div>
     <h2>Versio 1</h2>
-    <p>Lataa tiedoston ja näyttää sen</p>
+    <p>Lataa tiedoston ja näyttää sen <em>(ei tietokantakäsittelyä)</em></p>
     <form action="/lataa1a" method="post" enctype="multipart/form-data">
         <input type="file" name="filenm" />
         <input type="submit" value="Lataa" />
@@ -13,7 +13,7 @@
 </div>
 <div>
     <h3>Versio 1b</h3>
-     <p>Lataa tiedoston ja näyttää sen taulukkona</p>
+    <p>Lataa tiedoston ja näyttää sen taulukkona <em>(ei tietokantakäsittelyä)</em></p>
     <form action="/lataa1b" method="post" enctype="multipart/form-data">
         <input type="file" name="filenm" />
         <input type="submit" value="Lataa" />
