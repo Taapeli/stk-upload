@@ -181,7 +181,7 @@ class Name:
         s = "Name %s, %s", (self.last, self.first)
         if self.date:
             s += " (kirjattu %s)", (self.date, )
-        if ref:
+        if self.ref:
             s += " [%s]"
         return s
 
@@ -236,7 +236,7 @@ class Refname:
         s = "Refname type:%s '%s'", (self.type, self.name)
         if self.date:
             s += " (kirjattu %s)", (self.date, )
-        if ref:
+        if self.ref:
             s += " [%s]"
         return s
 
