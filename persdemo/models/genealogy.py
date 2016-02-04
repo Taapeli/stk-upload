@@ -144,6 +144,13 @@ class Person:
             graph.create(persoona)
             
         return 
+        
+    def get_all_persons (self):
+        query = """
+        MATCH (n:Person) RETURN n LIMIT 10;
+        """
+        return graph.cypher.execute(query)
+    
 
 class Event:
     """ Tapahtuma

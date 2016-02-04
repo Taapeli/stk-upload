@@ -124,10 +124,45 @@ def lue_henkilot():
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
     """
     persons = []
-    events = {}
     row_nro = 0
     url = ''
 
     # Toteutetaan henkilölistan tapaan, mutta objektit luetaan kannasta
     
+    vp = Person('P00001')
+    v_persons = vp.get_all_persons()
+    
+    for person in v_persons:
+        for attr in person:
+            pid = attr.properties['id']
+            etu = attr.properties['firstname']
+            suku = attr.properties['lastname']
+            paikka = attr.properties['place']
+            p = Person(pid)
+            p.name = Name(etu,suku)
+            p.occupation = attr.properties['occu']
+            if paikka:
+                p.place= attr.properties['place']
+            else:
+                p.place = ''
+            
+            event_id = u'E%06d' % row_nro
+            e = Event(event_id, 'Käräjät')
+            e.name = 'Testi3'
+            e.date = 'Testi3'
+
+            c = Citation()
+            c.tyyppi = 'Signum'
+            c.id = 'Testi3'
+            c.url = url
+            c.source = Source()
+            c.source.nimi = 'Testi3'
+            e.citation = c
+        
+            p.events.append(e)
+        
+            row_nro += 1
+        
+            persons.append(p)
+        
     return (persons)
