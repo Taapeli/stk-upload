@@ -150,6 +150,12 @@ class Person:
         MATCH (n:Person) RETURN n LIMIT 10;
         """
         return graph.cypher.execute(query)
+
+    def get_events (self):
+        query = """
+        MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) WHERE n.id = {pid} RETURN e;
+        """
+        return graph.cypher.execute(query,  pid=self.id)
     
 
 class Event:

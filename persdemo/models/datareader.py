@@ -146,10 +146,14 @@ def lue_henkilot():
             else:
                 p.place = ''
             
-            event_id = u'E%06d' % row_nro
-            e = Event(event_id, 'Käräjät')
-            e.name = 'Testi3'
-            e.date = 'Testi3'
+            p_events = p.get_events()
+            
+            for event in p_events:
+                for event_attr in event:
+                    event_id = event_attr.properties['id']
+                    e = Event(event_id, 'Käräjät')
+                    e.name = event_attr.properties['name']
+                    e.date = event_attr.properties['date']
 
             c = Citation()
             c.tyyppi = 'Signum'
