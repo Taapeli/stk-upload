@@ -4,33 +4,33 @@
 {% block body %}
 {{ super() }}
 
-{% for person in persons %}
+{% for p in persons %}
     <h3>Henkilö</h3>
     <ol id="itemlist">
         <li class="itemrow">
                 <div class="col1">Tunniste</div>
-                <div class="col2">{{person.id}}</div>
+                <div class="col2">{{p.id}}</div>
                 <div class="also"></div>
         </li>
         <li class="itemrow">
                 <div class="col1">Nimi</div>
-                <div class="col2">{{person.name.first}} <b>{{person.name.last}}</b></div>
-                <div class="also">(Vakioitu nimi tähän)</div>
+                <div class="col2">{{p.name.first}} <b>{{p.name.last}}</b></div>
+                <div class="also">orig: {{p.name_orig}}</div>
         </li>
         <li class="itemrow">
                 <div class="col1">Ammatti</div>
-                <div class="col2">överste</div>
-                <div class="also">(suomennos tähän)</div>
+                <div class="col2">{{p.occupation}}</div>
+                <div class="also"></div>
         </li>
         <li class="itemrow">
                 <div class="col1">Paikka</div>
-                <div class="col2">&nbsp;</div>
+                <div class="col2">{{p.place}}</div>
         </li>
     </ol>
-    {% if person.citation %}
+    {% if p.citation %}
     <h4>Ollut käräjillä</h4>
     <ol class="num">
-        {% for e in person.citation %}
+        {% for e in p.citation %}
         <li><div class="itemrow">
                 <div class="col1">Paikka, aika</div>
                 <div class="col1">{{e.id}}<br />Signum:

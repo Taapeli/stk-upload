@@ -29,6 +29,7 @@ def _poimi_(row_nro, row, url):
 
     p = Person(person_id)
     p.name = Name(etu, suku)
+    p.name_orig = "{0} /{1}/".format(etu, suku)
     p.occupation = row['Ammatti_vakioitu']
     p.place=row['Paikka_vakioitu']
 
@@ -36,11 +37,13 @@ def _poimi_(row_nro, row, url):
     e = Event(event_id, 'Käräjät')
     e.name = kpaikka
     e.date = aika
+    e.name_orig = row['Käräjät']
 
     c = Citation()
     c.tyyppi = 'Signum'
     c.id = row['Signum']
     c.url = url
+    c.name_orig = row['Signum']
     c.source = Source()
     c.source.nimi = kpaikka + ' ' + aika
     e.citation = c
@@ -143,6 +146,7 @@ def lue_henkilot(id=None):
             etu = attr.properties['firstname']
             suku = attr.properties['lastname']
             p.name = Name(etu,suku)
+            p.name_orig = attr.properties['name_orig']
             p.occupation = attr.properties['occu']
             p.place= attr.properties['place']
             
@@ -153,6 +157,7 @@ def lue_henkilot(id=None):
                     e = Event(event_id, 'Käräjät')
                     e.name = event_attr.properties['name']
                     e.date = event_attr.properties['date']
+                    e.name_orig = attr.properties['name_orig']
 
 #            c = Citation()
 #            c.tyyppi = 'Signum'
