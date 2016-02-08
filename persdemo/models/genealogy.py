@@ -29,6 +29,7 @@ graph = Graph()
 
 def tyhjenna_kanta():
     """ Koko kanta tyhjennetään """
+    logging.info('Tietokanta tyhjennetään!')
     graph.delete_all()
     
 def make_id(prefix, int):
@@ -145,10 +146,14 @@ class Person:
             
         return 
         
-    def get_all_persons (self):
+    def get_all_persons (self, max=0):
+        if max > 0:
+            qmax = "LIMIT " + str(max)
+        else:
+            qmax = ""
         query = """
-        MATCH (n:Person) RETURN n LIMIT 10;
-        """
+        MATCH (n:Person) RETURN n {0};
+        """.format(qmax)
         return graph.cypher.execute(query)
 
     def get_events (self):

@@ -25,18 +25,19 @@ tiedostosta [<i>{{name}}</i>]
     {% for p in persons %}
         {% set e = p.events[0] %}
         <tr onmouseover="info('{{p.id}}', '{{p.name.last}}, {{p.name.fist}}',
-            '{{p.occupation}}', '{{p.place}}', 
-            '{{e.nimi}}', '{{e.aika}}', '{{e.citation.id}}')" >
+            '{% if p.occupation %}{{p.occupation}}{% endif %}', 
+            '{% if p.place %}{{p.place}}{% endif %}', '{{e.nimi}}', '{{e.aika}}', 
+            '{% if e.citation %}{{e.citation.id}}{% endif %})')" >
             <td class="id">{{p.id}}</td>
             <td>{{p.name.first}} <b> {{p.name.last}}</b></td>
-            <td>{{p.occupation}}</td>
-            <td>{{p.place}}</td>
+            <td>{% if p.occupation %}{{p.occupation}}{% endif %}</td>
+            <td>{% if p.place %}{{p.place}}{% endif %}</td>
             <td>{{e.name}}</td>
             <td nowrap>{{e.date}}</td>
-            <td>{% if e.citation.url %}
+            <td>{% if e.citation %}{% if e.citation.url %}
                 <a href='{{e.citation.url}}'>{{e.citation.id}}</a>
                 {% else %}{{e.citation.id}}
-                {% endif %}</td>
+                {% endif %}{% endif %}</td>
         </tr>
     {% endfor %}
 {% else %}

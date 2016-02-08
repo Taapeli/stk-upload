@@ -4,6 +4,7 @@
 
 import csv
 import logging
+import time
 from models.genealogy import *  # Tietokannan luokat
 
 def _poimi_(row_nro, row, url):
@@ -130,24 +131,20 @@ def lue_henkilot():
     # Toteutetaan henkilölistan tapaan, mutta objektit luetaan kannasta
     
     vp = Person('P00001')
-    v_persons = vp.get_all_persons()
+    t0 = time.time()
+    v_persons = vp.get_all_persons(max=100)
     
     for person in v_persons:
         for attr in person:
             pid = attr.properties['id']
+            p = Person(pid)
             etu = attr.properties['firstname']
             suku = attr.properties['lastname']
-            paikka = attr.properties['place']
-            p = Person(pid)
             p.name = Name(etu,suku)
             p.occupation = attr.properties['occu']
-            if paikka:
-                p.place= attr.properties['place']
-            else:
-                p.place = ''
+            p.place= attr.properties['place']
             
             p_events = p.get_events()
-            
             for event in p_events:
                 for event_attr in event:
                     event_id = event_attr.properties['id']
@@ -155,18 +152,17 @@ def lue_henkilot():
                     e.name = event_attr.properties['name']
                     e.date = event_attr.properties['date']
 
-            c = Citation()
-            c.tyyppi = 'Signum'
-            c.id = 'Testi3'
-            c.url = url
-            c.source = Source()
-            c.source.nimi = 'Testi3'
-            e.citation = c
+#            c = Citation()
+#            c.tyyppi = 'Signum'
+#            c.id = 'Testi3'
+#            c.url = url
+#            c.source = Source()
+#            c.source.nimi = 'Testi3'
+#            e.citation = c
         
-            p.events.append(e)
-        
-            row_nro += 1
-        
+            p.events.append(e)    
             persons.append(p)
-        
+
+    logging.debug("TIME get_all_persons {} sek".format(time.time()-t0))
+
     return (persons)
