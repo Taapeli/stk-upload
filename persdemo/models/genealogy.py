@@ -146,14 +146,16 @@ class Person:
             
         return 
         
-    def get_all_persons (self, max=0):
+    def get_persons (self, max=0, pid=None):
         if max > 0:
             qmax = "LIMIT " + str(max)
         else:
             qmax = ""
-        query = """
-        MATCH (n:Person) RETURN n {0};
-        """.format(qmax)
+        if pid:
+            where = "WHERE n.id='{}' ".format(pid)
+        else:
+            where = ""
+        query = "MATCH (n:Person) {0} RETURN n {1};".format(where, qmax)
         return graph.cypher.execute(query)
 
     def get_events (self):

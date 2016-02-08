@@ -1,4 +1,4 @@
-{# _myapp/templates/lista2.html_ #}
+{# _myapp/templates/table1.html_ #}
 {% extends "layout.html" %}
 {% block title %}Tiedot kannasta{% endblock %}
 {% block body %}
@@ -9,7 +9,6 @@
 {% if name %}
 tiedostosta [<i>{{name}}</i>] 
 {% endif %}</p>
-<!-- p>Mukana - henkilöä ja - tapahtumaa</p -->
 
 <section id="lista">
 <table>
@@ -28,7 +27,7 @@ tiedostosta [<i>{{name}}</i>]
             '{% if p.occupation %}{{p.occupation}}{% endif %}', 
             '{% if p.place %}{{p.place}}{% endif %}', '{{e.nimi}}', '{{e.aika}}', 
             '{% if e.citation %}{{e.citation.id}}{% endif %})')" >
-            <td class="id">{{p.id}}</td>
+            <td class="id"><a href="/poimi/id={{p.id}}">{{p.id}}</a></td>
             <td>{{p.name.first}} <b> {{p.name.last}}</b></td>
             <td>{% if p.occupation %}{{p.occupation}}{% endif %}</td>
             <td>{% if p.place %}{{p.place}}{% endif %}</td>

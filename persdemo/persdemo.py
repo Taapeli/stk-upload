@@ -137,12 +137,19 @@ def tyhjenna():
     tyhjenna_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
-@app.route('/lista2/<string:ehto>')
-def nayta2(ehto):   
+@app.route('/poimi/<string:ehto>')
+def nayta_ehdolla(ehto):   
     """ Nimien listaus tietokannasta
         mahdollisella määrittelemättömällä ehtolauseella
     """
-    return render_template("lista2.html", my_arg=ehto)
+    key, value = ehto.split('=')
+    try:
+        if key != 'id':
+            raise(KeyError("Vain id:llä voi hakea"))
+        persons = models.datareader.lue_henkilot(id=value)
+        return render_template("person.html", persons=persons)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/virhe_lataus/<int:code>/<text>')
 def virhesivu(code, text=''):

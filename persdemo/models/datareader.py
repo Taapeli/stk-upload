@@ -121,8 +121,10 @@ def datastorer(pathname):
     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
     return message
 
-def lue_henkilot():
+def lue_henkilot(id=None):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
+        
+        Jos id on annettu, luetaan vain se henkilö, jonka id täsmää
     """
     persons = []
     row_nro = 0
@@ -130,9 +132,9 @@ def lue_henkilot():
 
     # Toteutetaan henkilölistan tapaan, mutta objektit luetaan kannasta
     
-    vp = Person('P00001')
+    vp = Person(None)
     t0 = time.time()
-    v_persons = vp.get_all_persons(max=100)
+    v_persons = vp.get_persons(max=100, pid=id)
     
     for person in v_persons:
         for attr in person:
