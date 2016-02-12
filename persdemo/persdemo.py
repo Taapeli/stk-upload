@@ -96,10 +96,6 @@ def talleta(filename, subj):
     pathname = models.loadfile.fullname(filename)
     
     try:
-#       u = User('u1234', 'Pekka')
-#       u.save()
-#       logging.debug('Talletettiin uusi käyttäjä ' + str(u))
-
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
         else:
@@ -113,7 +109,6 @@ def talleta(filename, subj):
             else:
                 if subj == 'karajat': # TODO: Tekemättä
                     status="Käräjätietojen lukua ei ole vielä tehty"
-                    pass
                 else:
                     return redirect(url_for('virhesivu', code=1, text= \
                         "Aineistotyypin '" + aineisto + "' käsittely puuttuu vielä"))
@@ -139,8 +134,8 @@ def tyhjenna():
 
 @app.route('/poimi/<string:ehto>')
 def nayta_ehdolla(ehto):   
-    """ Nimien listaus tietokannasta
-        mahdollisella määrittelemättömällä ehtolauseella
+    """ Nimien listaus tietokannasta ehtolauseella
+        id=arvo         näyttää nimetyn henkilön
     """
     key, value = ehto.split('=')
     try:
