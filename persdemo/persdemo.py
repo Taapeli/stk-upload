@@ -142,6 +142,11 @@ def nayta_ehdolla(ehto):
         if key != 'id':
             raise(KeyError("Vain id:llä voi hakea"))
         persons = models.datareader.lue_henkilot(id=value)
+        
+        # Testi5
+        vkey  = persons[0].make_key()
+        logging.info(vkey)
+        
         return render_template("person.html", persons=persons)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))

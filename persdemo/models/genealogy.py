@@ -163,7 +163,15 @@ class Person:
         MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) WHERE n.id = {pid} RETURN e;
         """
         return graph.cypher.execute(query,  pid=self.id)
-    
+  
+    # Testi5
+    def make_key (self):
+        key =   self.id + '/' +\
+                    self.name.first + '/' +\
+                    self.name.last + '/' +\
+                    self.occupation +  '/';
+        return key
+  
 
 class Event:
     """ Tapahtuma
