@@ -132,22 +132,40 @@ def tyhjenna():
     tyhjenna_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
+
+@app.route('/yhdista', methods=['POST'])
+def nimien_yhdistely():   
+    """ Nimien listaus tietokannasta ehtolauseella
+        id=arvo         näyttää nimetyn henkilön
+        names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
+    """
+    names = request.form['names']
+    logging.debug('Poimitaan ' + names )
+    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+
 @app.route('/poimi/<string:ehto>')
 def nayta_ehdolla(ehto):   
     """ Nimien listaus tietokannasta ehtolauseella
         id=arvo         näyttää nimetyn henkilön
+        names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
+
     key, value = ehto.split('=')
     try:
-        if key != 'id':
-            raise(KeyError("Vain id:llä voi hakea"))
         persons = models.datareader.lue_henkilot(id=value)
-        
-        # Testi5
-        vkey  = persons[0].make_key()
-        logging.info(vkey)
-        
-        return render_template("person.html", persons=persons)
+        if key == 'id':
+            persons = models.datareader.lue_henkilot(id=value)
+            # Testi5
+            vkey  = persons[0].make_key()
+            logging.info(vkey)
+            
+            return render_template("person.html", persons=persons)
+        else:
+            if key == 'names':
+                persons = models.datareader.lue_henkilot(names=value)
+                return render_template("join_persons.html", persons=persons)
+            else:
+                raise(KeyError("Vain id:llä voi hakea"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 

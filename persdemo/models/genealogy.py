@@ -146,7 +146,13 @@ class Person:
             
         return 
         
-    def get_persons (self, max=0, pid=None):
+    def get_persons (self, max=0, pid=None, names=None):
+        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
+            get_persons()               kaikki
+            get_persons(id='P000123')   tietty henkilö id:n mukaan poimittuna
+            get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
+            - lisäksi (max=100)         rajaa luettavien henkilöiden määrää
+        """
         if max > 0:
             qmax = "LIMIT " + str(max)
         else:
@@ -154,7 +160,10 @@ class Person:
         if pid:
             where = "WHERE n.id='{}' ".format(pid)
         else:
-            where = ""
+            if names:
+                where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
+            else:
+                where = ""
         query = "MATCH (n:Person) {0} RETURN n {1};".format(where, qmax)
         return graph.cypher.execute(query)
 

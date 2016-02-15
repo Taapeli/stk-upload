@@ -124,7 +124,7 @@ def datastorer(pathname):
     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
     return message
 
-def lue_henkilot(id=None):
+def lue_henkilot(id=None, names=None):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
         Jos id on annettu, luetaan vain se henkilö, jonka id täsmää
@@ -137,7 +137,7 @@ def lue_henkilot(id=None):
     
     vp = Person(None)
     t0 = time.time()
-    v_persons = vp.get_persons(max=100, pid=id)
+    v_persons = vp.get_persons(max=100, pid=id, names=names)
     
     for person in v_persons:
         for attr in person:
@@ -158,6 +158,7 @@ def lue_henkilot(id=None):
                     e.name = event_attr.properties['name']
                     e.date = event_attr.properties['date']
                     e.name_orig = attr.properties['name_orig']
+                    p.events.append(e)    
 
 #            c = Citation()
 #            c.tyyppi = 'Signum'
@@ -167,7 +168,6 @@ def lue_henkilot(id=None):
 #            c.source.nimi = 'Testi3'
 #            e.citation = c
         
-            p.events.append(e)    
             persons.append(p)
 
     logging.debug("TIME get_all_persons {} sek".format(time.time()-t0))

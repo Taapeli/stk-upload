@@ -1,0 +1,67 @@
+{# _myapp/templates/person.html_ #}
+{% extends "layout.html" %}
+{% block title %}Henkilöiden yhdistäminen{% endblock %}
+{% block body %}
+{{ super() }}
+   
+<div id="lista">
+<table>
+    <tr><th><center>liitä o&Larr;x</center></th>
+        <th>henkilö</th>
+        <th>käräjät, signum</th>
+        <th>sama kuin</th>
+    </tr>
+
+{% for p in persons %}
+    {% set e = p.events[0] %}
+        <tr>
+            <td><center>
+                <input type="radio" name="base" value="{{p.id}}" />
+                <input type="checkbox" name="join" value="{{p.id}}" />
+                </center>
+            </td>
+            <td><span class="id">{{p.id}}</span>
+                {{p.name.first}} <b>{{p.name.last}}</b> <i>{{p.occupation}}</i></td>
+            <td>{% if p.events|count %}<ul class="event">
+                    {% for e in p.events %}
+                    <li>{{e.name}} {{e.date}} {% if e.citation %}
+                    ({% if e.citation.url %}<a href='{{e.citation.url}}'>{{e.citation.id}}</a>)
+                    {% else %}{{e.citation.id}})
+                    {% endif %}{% endif %}
+                    </li>{% endfor %}</ul>
+                {% endif %}
+                </td>
+            <td><!--span class="id">P000013</span> Alexander Andersson <i>överste</i --></td>
+        </tr>
+{% endfor %}    
+        <tr>
+            <td colspan="4">
+                1. Merkitse päähenkilö (1. valintasarake) ja yhdistettävät henkilöt (2. sarake)<br />
+                2. Poimi tarvittaessa referenssinimet vierestä<br />
+                3. <input type="submit" value="Yhdistä merkittyyn (ei tot.)" />
+            </td>
+        </tr>
+    
+</table>
+</div>
+<div id="tiedot">
+    <h3>Referenssinimiä</h3>
+    <h4>Etunimi</h4>
+    <ul>
+        <li><input type="radio" name="retu" value="Aleksi" /> Aleksi</li>
+        <li><input type="radio" name="retu" value="Aleksanteri" /> Aleksanteri</li>
+        <li><input type="radio" name="retu" value="Alex" /> Alex</li>
+    </ul>
+    <h4>Sukunimi</h4>
+    <ul>
+        <li><input type="radio" name="rsuku" value="Andersson" /> Andersson</li>
+        <li><input type="radio" name="rsuku" value="Andersen" /> Andersen</li>
+    </ul>
+    <h4>Patronyymi</h4>
+    <ul>
+        <li><input type="radio" name="rsuku" value="Andersson:p" /> Andersson</li>
+        <li><input type="radio" name="rsuku" value="Antinpoika:p" /> Antinpoika</li>
+    </ul>
+</div>
+
+{% endblock %}
