@@ -152,7 +152,6 @@ def nayta_ehdolla(ehto):
 
     key, value = ehto.split('=')
     try:
-        persons = models.datareader.lue_henkilot(id=value)
         if key == 'id':
             persons = models.datareader.lue_henkilot(id=value)
             # Testi5
