@@ -75,7 +75,7 @@ def nayta1(filename, fmt):
 
 @app.route('/lataa', methods=['POST'])
 def lataa(): 
-    """ Versio 2: Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset
+    """ Versio 2: Lataa cvs-tiedoston talletettavaksi
     """
     try:
         infile = request.files['filenm']
@@ -100,12 +100,8 @@ def talleta(filename, subj):
             status = models.datareader.datastorer(pathname)
         else:
             if subj == 'refnimet': # Referenssinimet
-                # Palauttaa toistaiseksi taulukon Refname-objekteja
-                refnames=models.cvs_refnames.referenssinimet(pathname)
-                logging.debug('Tuli ' + str(len(refnames)) + ' nimeä ')
-                return render_template("table_refnames.html", name=pathname, \
-                    refnames=refnames)
-                pass
+                # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
+                status=models.cvs_refnames.referenssinimet(pathname, max=100)
             else:
                 if subj == 'karajat': # TODO: Tekemättä
                     status="Käräjätietojen lukua ei ole vielä tehty"
