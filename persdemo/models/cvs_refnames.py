@@ -7,12 +7,11 @@ import logging
 
 from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
 
-def referenssinimet(pathname):
+def referenssinimet(pathname, max=0):
     """ Lukee csv-tiedostosta referenssinimet
         Syötteen 1. rivi: ['Nimi', 'RefNimi', 'On_itse_refnimi', 'Lähde', 'Sukupuoli']
                             0       1          2 boolean          3        4 ('M'/'N'/'')
     """
-    rivit = []
     row_nro = 0
     tyhjia = 0
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
@@ -23,6 +22,8 @@ def referenssinimet(pathname):
 
         for row in reader:
             row_nro += 1
+            if max > 0 and row_nro > max:
+                break
             rid = make_id('R', row_nro)
             nimi=row['Nimi'].strip()
             if nimi.__len__() == 0:
@@ -30,8 +31,8 @@ def referenssinimet(pathname):
                 continue # Tyhjä nimi ohitetaan
 
             try:
-                ref=row['RefNimi']
-            except KeyError as e:
+                ref_name=row['RefNimi']
+            except KeyError:
                 raise
 
             on_ref=(row['On_itse_refnimi'].lower().startswith('k'))
@@ -45,34 +46,25 @@ def referenssinimet(pathname):
                     sp = ''
 
             # Luodaan Refname
-            inst = Refname(rid, 'fname', nimi)
-            if ref != '':
-                inst.setref(ref, 'refname')
-            inst.is_ref = on_ref
+            r = Refname(rid, 'fname', nimi)
+            r.is_ref = on_ref
+            if ref_name != '':
+                # Tullaan viittaamaan tähän nimeen
+                r.setref(ref_name, 'REFFIRST')
             if sp != '':
-                inst.gender = sp
+                r.gender = sp
             if sp != '':
-                inst.source = source
+                r.source = source
                 
-            rivit.append(inst)
+            # Tallettaa Refname-olion ja mahdollisen yhteyden referenssinimeen
+            # (a:Refname {nimi='Nimi'})
+            #   -[r:Reftype]->
+            #   (b:Refname {nimi='RefNimi'})
+            r.save()
 
-    logging.info(u'%s: %d riviä, %d tyhjää' % (pathname, row_nro, tyhjia))
-    return (rivit)
+    msg = '{0}: {1} riviä, {2} ohitettu'.format(pathname, row_nro, tyhjia)
+    if max > 0:
+        msg = msg + ". KATKAISTU {0} nimen kohdalta".format(max)
+    logging.info(msg)
+    return (msg)
 
-
-# Testaa referenssinimet
-# python3 models/datareader.py tiedosto.csv > lst
-
-import sys
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Käyttö: " + sys.argv[0] + " tiedosto.csv", file=sys.stderr)
-        exit(1)
-    
-    try:
-        rivit = referenssinimet(sys.argv[1])
-        for r in rivit:
-            print("{0}: {1:20s}{2:20s}{3} {4:1s} ({5:s})".format( r['id'],
-                r['nimi'], r['refnimi'], r['onref'], r['sp'], r['source']) )
-    except KeyError as e:
-        print ("Väärät sarakeotsikot, tämä puuttuu: " + str(e))
