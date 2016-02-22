@@ -1,6 +1,6 @@
 {# _myapp/templates/lista2.html_ #}
 {% extends "layout.html" %}
-{% block title %}Tiedot csv-tiedostosta{% endblock %}
+{% block title %}Referenssinimet kannasta{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
@@ -23,15 +23,15 @@
         <th>sukupuoli</th>
         <th>lähde</th>
     </tr>
-    {% for r in refnames %}
+    {% for r in names %}
         <tr>
             <td class="id">{{r.id}}</td>
             <td>{{r.type}}</td>
             <td>{% if r.is_ref %}<b>{% endif %}{{r.name}}{% if r.is_ref %}</b>{% endif %}</td>
-            <td class="center">{% if r.is_ref %}{{r.reftype}}&mdash;>{% endif %}</td>
-            <td>{{r.ref}}</td>
-            <td class="center">{{r.gender}}</td>
-            <td>{{r.source}}</td>
+            <td class="center"><!--{% if r.reftype %}{{r.reftype}}&mdash;>{% endif %}--></td>
+            <td>{{r.refname}}</td>
+            <td class="center">{% if r.gender %}{{r.gender}}{% endif %}</td>
+            <td>{% if r.source %}{{r.source}}{% endif %}</td>
         </tr>
     {% endfor %}
 </table>

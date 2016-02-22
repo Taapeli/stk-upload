@@ -1,0 +1,54 @@
+/* 
+    Created on : 22.2.2016, 18:12:41
+    Author     : jm
+*/
+
+    body {  font-family: verdana, sans-serif;
+            font-size: 10pt;
+    }
+    table, th, td {
+            border: 1px solid silver;
+            border-collapse: collapse;
+            padding: 2px;
+            text-align: left;
+            vertical-align: text-top;
+    }
+    .id { color: sienna; }
+    tr:hover {background-color: #f5f5f5}
+
+    #lista { width:80%; float:left}
+    #tiedot { border: 1px solid silver;
+            background-color: whitesmoke;
+            opacity: 0.8;
+            width: 18%; 
+            position:fixed; top:95pt; right: 10pt;}
+    #tiedot li {margin-left: -20pt;}
+    #tiedot ul {list-style-type: none; font-size: 80%;}
+
+    ul.event {
+        list-style:circle;
+        vertical-align: text-top;
+        margin:0;
+    }
+    ul.event > li {margin-left: -1em;}
+    ol#itemlist {
+        list-style: none; 
+        vertical-align: text-top;
+    }
+    li.itemrow { 
+        margin: 2pt;
+    }
+    .itemrow div.col1 {
+        display: inline-block;
+        width: 80pt;
+        padding-right: 5pt;
+    }
+    .itemrow div.col2 {
+        display: inline-block;
+        width: 150pt;
+    }
+    .itemrow div.also { 
+        display: inline-block;
+        font-style: italic;
+        color: skyblue;
+    }

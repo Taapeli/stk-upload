@@ -122,6 +122,15 @@ def nayta_henkilot():
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
+@app.route('/lista/refnimet')
+def nayta_refnimet():   
+    """ tietokannan henkiloiden näyttäminen ruudulla """
+    try:
+        names = models.datareader.lue_refnames()
+        return render_template("table_refnames.html", names=names)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
@@ -157,8 +166,10 @@ def nayta_ehdolla(ehto):
             return render_template("person.html", persons=persons)
         else:
             if key == 'names':
+                value=value.title()
                 persons = models.datareader.lue_henkilot(names=value)
-                return render_template("join_persons.html", persons=persons)
+                return render_template("join_persons.html", 
+                                       persons=persons, pattern=value)
             else:
                 raise(KeyError("Vain id:llä voi hakea"))
     except KeyError as e:
