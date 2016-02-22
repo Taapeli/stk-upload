@@ -200,8 +200,9 @@ def lue_refnames():
         r.gender = n.properties['gender']
         r.source= n.properties['source']
         
-        r.reftype = f.type
-        r.refname = m.properties['name']
+        if f:
+            r.reftype = f.type
+            r.refname = m.properties['name']
         
         namelist.append(r)
 

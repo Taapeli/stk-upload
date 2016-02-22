@@ -348,12 +348,12 @@ class Refname:
     
     def getrefnames(self):
         """ Haetaan kannasta kaikki Refnamet 
-            Palautetaan Refname-olioita, johon on haettu myös viitatun 
-            referenssinimen nimi ja tyyppi.
+            Palautetaan Refname-olioita, johon on haettu myös mahdollisen
+            viitatun referenssinimen nimi ja tyyppi.
         """
-        # TODO: poiminnasta puuttuu nyt nimet, jotka ovat itse ref.nimiä! 
         query = """
-            MATCH (n:Refname)-[r]->(m)
+            MATCH (n:Refname)
+            OPTIONAL MATCH (n:Refname)-[r]->(m)
             RETURN n,r,m;
         """
         return graph.cypher.execute(query)
