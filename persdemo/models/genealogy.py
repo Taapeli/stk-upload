@@ -230,36 +230,41 @@ class Note:
 
 class Refname:
     """
-        ( RefName {id, luokka, nimi} ) -[reftype]-> (RefName)
+        ( Refname {id, luokka, nimi} ) -[reftype]-> (Refname)
                    luokka = (etu, suku, paikka, ...)
                    reftype = (refnimi, patronyymi, ...)
         Properties:                                             testiaineistossa
             id      R00001 ...                                  (rivinumerosta)
             type    in REFTYPES                                 ('REFFIRST')
             name    1st letter capitalized                      (Nimi)
-            refname id points to reference name, ei exists      (RefNimi)
+            refname the referenced name, if exists              (RefNimi)
             reftype which kind of reference refname points to   ('REFFIRST')
             is_ref  true, if this is a reference name           (On_itse_refnimi)
             gender  gender 'F', 'M' or ''                       (Sukupuoli)
             source  points to Source                            (Lähde)
+            
+        Note: refnamea ja reftypeä ei talleteta tekstinä, vaan kannassa tehdään
+              viittaus tyyppiä reftype ko Refnameen
     """
-    # TODO: refname'en on laitettu nyt nimi, pitäisi olla nimen id
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
     __REFNAMETYPES__ = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
     __REFTYPES__ = ['REFFIRST', 'REFLAST', 'REFPATRO']
     
-    def __init__(self, id, tyyppi, nimi):
-        """ Luodaan referenssinimi (id, tyyppi, nimi)
+    def __init__(self, id, type='undef', nimi=None):
+        """ Luodaan referenssinimi (id, type, nimi)
         """
         self.id=id
         # Nimi alkukirjain isolla, alku- ja loppublankot poistettuna
-        self.name = nimi.strip().title()
-        if tyyppi in self.__REFNAMETYPES__:
-            self.type = tyyppi
+        if nimi:
+            self.name = nimi.strip().title()
+        else:
+            self.name = None
+        if type in self.__REFNAMETYPES__:
+            self.type = type
         else:
             self.type = self.__REFNAMETYPES__[0]
-            logging.warning('Referenssinimen tyyppi ' + tyyppi + \
+            logging.warning('Referenssinimen tyyppi ' + type + \
                             ' hylätty. ' + self.__str__())
         return
 
@@ -289,17 +294,21 @@ class Refname:
             instance.properties["gender"] = self.gender
         if 'source' in dir(self):
             instance.properties["source"] = self.source
+        if 'is_ref' in dir(self):
+            instance.properties["is_ref"] = self.is_ref
         logging.debug(self.id + ' tekeillä: ' + self.__str__())
         
         # Luodaan viittaus referenssinimeen, jos on
         if 'refname' in dir(self):
             # Hae kannasta viitattu nimi tai luo uusi nimi
-            viitattu = self.get_ref(self.refname)
+            viitattu = self.getref()
             if viitattu:
                 logging.debug(self.id + ' Viitattu löytyi: ' + viitattu.__str__())
+                # TODO: Viitattu.is_ref pitää asettaa, jos ei ole päällä
             else:
                 id = "R1"+self.id[1:]
-                viitattu = Node("Refname", id=id, name=self.refname, type=self.type)
+                viitattu = Node("Refname", id=id, name=self.refname, 
+                                type=self.type, is_ref=True)
                 logging.debug(self.id + ' Viitattu luotiin: ' + viitattu.__str__())
                 
             # Luo yhteys referoitavaan nimeen
@@ -326,22 +335,35 @@ class Refname:
                         ' hylätty. ' + self.__str__())
         return
 
-    def get_ref (self, name):
-        """ Haetaan viitattu refnimi kannasta
+    def getref(self):
+        """ Haetaan kannasta self:iin liittyvä Refname.
         """
         query = """
-            MATCH (n:Refname) 
-            WHERE n.name='{0}' AND n.type='{1}' 
-            RETURN n;
-        """.format(name, self.type)
+            MATCH (r:Refname) 
+            WHERE r.name ='{0}' AND r.type='{1}' 
+            RETURN r;
+        """.format(self.refname, self.type)
+
         return graph.cypher.execute(query).one
+    
+    def getrefnames(self):
+        """ Haetaan kannasta kaikki Refnamet 
+            Palautetaan Refname-olioita, johon on haettu myös mahdollisen
+            viitatun referenssinimen nimi ja tyyppi.
+        """
+        query = """
+            MATCH (n:Refname)
+            OPTIONAL MATCH (n:Refname)-[r]->(m)
+            RETURN n,r,m;
+        """
+        return graph.cypher.execute(query)
             
     def __str__(self):
         s = "Refname type:{0} name:'{1}'".format(self.type, self.name)
         if 'gender' in dir(self):
             s += " {0}".format(self.gender)
         if 'is_ref' in dir(self):
-            s += " (referenssinimi)"
+            s += " ref=" + str(self.is_ref)
         if 'refname' in dir(self):
             s += " -[{0}]-> (b: name='{1}')".format(self.reftype, self.refname)
         return s

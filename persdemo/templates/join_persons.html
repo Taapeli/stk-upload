@@ -5,6 +5,7 @@
 {{ super() }}
    
 <div id="lista">
+    <p>Henkilöt, joiden nimi alkaa '{{pattern}}'</p>
 <table>
     <tr><th><center>liitä o&Larr;x</center></th>
         <th>henkilö</th>
@@ -21,7 +22,8 @@
                 </center>
             </td>
             <td><span class="id">{{p.id}}</span>
-                {{p.name.first}} <b>{{p.name.last}}</b> <i>{{p.occupation}}</i></td>
+                {{p.name.first}} <b>{{p.name.last}}</b>
+                <i>{% if p.occupation %}{{p.occupation}}{% endif %}</i></td>
             <td>{% if p.events|count %}<ul class="event">
                     {% for e in p.events %}
                     <li>{{e.name}} {{e.date}} {% if e.citation %}

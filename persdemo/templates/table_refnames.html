@@ -1,37 +1,34 @@
 {# _myapp/templates/lista2.html_ #}
 {% extends "layout.html" %}
-{% block title %}Tiedot csv-tiedostosta{% endblock %}
+{% block title %}Referenssinimet kannasta{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
-<style>
-    .center { text-align: center;}
-</style>
-{% if name %}
-<p>Referenssinimet tiedostosta [<i>{{name}}</i>] </p>
-{% else %}
-<p>Nimet taulukkona</p>
-{% endif %}
-<!-- p>Mukana - henkilöä ja - tapahtumaa</p -->
+
+{% set sp = {"M": "mies", "N": "nainen", "U": "?"} %}
+{% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", "place":"paikka", "occu":"ammatti"} %}
+{% set rt = {'REFFIRST':'etunimi', 'REFLAST':'sukunimi', 'REFPATRO':'patron.'} %}
+<h2>Referenssinimet</h2>
+<p>Mukana {{names|count}} nimeä</p>
 <section id="lista">
-<table>
+<table style="width:500pt">
     <tr><th>id</th>
-        <th>tyyppi</th>
+        <th class="center">tyyppi</th>
         <th>nimi</th>
-        <th>on ref.</th>
+        <th class="center">viittaus</th>
         <th>ref.nimi</th>
         <th>sukupuoli</th>
         <th>lähde</th>
     </tr>
-    {% for r in refnames %}
+    {% for r in names %}
         <tr>
             <td class="id">{{r.id}}</td>
-            <td>{{r.type}}</td>
+            <td class="typevar">{{tp[r.type]}}</td>
             <td>{% if r.is_ref %}<b>{% endif %}{{r.name}}{% if r.is_ref %}</b>{% endif %}</td>
-            <td class="center">{% if r.is_ref %}{{r.reftype}}&mdash;>{% endif %}</td>
-            <td>{{r.ref}}</td>
-            <td class="center">{{r.gender}}</td>
-            <td>{{r.source}}</td>
+            <td class="typevar">{{rt[r.reftype]}}</td>
+            <td>{{r.refname}}</td>
+            <td class="center">{% if r.gender %}{{sp[r.gender]}}{% endif %}</td>
+            <td>{% if r.source %}{{r.source}}{% endif %}</td>
         </tr>
     {% endfor %}
 </table>

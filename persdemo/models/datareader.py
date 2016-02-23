@@ -130,11 +130,6 @@ def lue_henkilot(id=None, names=None):
         Jos id on annettu, luetaan vain se henkilö, jonka id täsmää
     """
     persons = []
-    row_nro = 0
-    url = ''
-
-    # Toteutetaan henkilölistan tapaan, mutta objektit luetaan kannasta
-    
     vp = Person(None)
     t0 = time.time()
     v_persons = vp.get_persons(max=100, pid=id, names=names)
@@ -173,3 +168,44 @@ def lue_henkilot(id=None, names=None):
     logging.debug("TIME get_all_persons {} sek".format(time.time()-t0))
 
     return (persons)
+
+
+def lue_refnames():
+    """ Lukee tietokannasta Refname- objektit näytettäväksi
+    """
+    namelist = []
+    refn = Refname(None)
+    t0 = time.time()
+    v_names = refn.getrefnames()
+    
+    for n,f,m in v_names:
+#>>> n
+#<Node graph='http://localhost:7474/db/data/' ref='node/24610' labels={'Refname'} 
+#   properties={'id': 'R00001', 'name': 'Aabeli', 'type': 'fname'}>
+#>>> f
+#<Relationship graph='http://localhost:7474/db/data/' ref='relationship/10737' 
+#   start='node/24610' end='node/24611' type='REFFIRST' properties={}>
+#>>> m
+#<Node graph='http://localhost:7474/db/data/' ref='node/24611' labels={'Refname'} 
+#   properties={'id': 'R100001', 'name': 'Aapeli', 'type': 'fname'}>
+
+        logging.debug("n=" + n.__str__())
+        logging.debug("--> m=" + m.__str__())
+        rid = n.properties['id']
+        r = Refname(rid)
+        r.type = n.properties['type']
+        r.name = n.properties['name']
+        logging.debug("** name={}, is_ref={}".format(r.name, n.properties['is_ref']))
+        r.is_ref = n.properties['is_ref']    # näinkö?
+        r.gender = n.properties['gender']
+        r.source= n.properties['source']
+        
+        if f:
+            r.reftype = f.type
+            r.refname = m.properties['name']
+        
+        namelist.append(r)
+
+    logging.info("TIME get_refnames {} sek".format(time.time()-t0))
+
+    return (namelist)
