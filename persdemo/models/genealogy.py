@@ -106,12 +106,11 @@ class Person:
     def __init__(self, id):
         self.id=id
         self.events = []
-        return
     
-    def make_id(int):
+    def make_id(int_id):
         """ Palautetaan rivinumeroa int vastaava person_id, esim. 'P00001' """
         # TODO: korvaa ohjelmissa Person.make_id(i) --> make_id('P', i)
-        return 'P'+str(int).zfill(5)
+        return 'P'+str(int_id).zfill(5)
 
     def save(self):
         """ Tallennus kantaan. Edellytetään, että henkilölle on asetettu:
@@ -143,10 +142,8 @@ class Person:
         else:
             # Henkilö ilman tapahtumaa (näitä ei taida aineistossamme olla)
             graph.create(persoona)
-            
-        return 
         
-    def get_persons (self, max=0, pid=None, names=None):
+    def get_persons (max=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
             get_persons(id='P000123')   tietty henkilö id:n mukaan poimittuna
@@ -195,7 +192,7 @@ class Event:
     def __init__(self, id, tyyppi):
         self.id=id
         self.type = tyyppi
-        return
+
 
 class Name:
     """ Etu- ja sukunimi, patronyymi sekä nimen alkuperäismuoto
@@ -212,7 +209,6 @@ class Name:
             self.last = suku
 
         if suku == '': suku = 'N'
-
 
     def __str__(self):
         s = "Name %s, %s", (self.last, self.first)
@@ -260,13 +256,12 @@ class Refname:
             self.name = nimi.strip().title()
         else:
             self.name = None
-        if type in self.__REFNAMETYPES__:
+        if type in __REFNAMETYPES__:
             self.type = type
         else:
-            self.type = self.__REFNAMETYPES__[0]
+            self.type = __REFNAMETYPES__[0]
             logging.warning('Referenssinimen tyyppi ' + type + \
                             ' hylätty. ' + self.__str__())
-        return
 
     def save(self):
         """ Referenssinimen tallennus kantaan. Edellytetään, että sille on asetettu:
@@ -317,7 +312,6 @@ class Refname:
         else:
             logging.debug(self.id + ' Viitattua ei ole')
             graph.merge(instance)
-        return 
         
     def setref(self, refname, reftype):
         """ Laitetaan muistiin, että self viittaa refname'een
@@ -333,7 +327,6 @@ class Refname:
         else:
             logging.warning('Referenssinimen viittaus ' + reftype + \
                         ' hylätty. ' + self.__str__())
-        return
 
     def getref(self):
         """ Haetaan kannasta self:iin liittyvä Refname.

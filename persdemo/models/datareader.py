@@ -130,9 +130,8 @@ def lue_henkilot(id=None, names=None):
         Jos id on annettu, luetaan vain se henkilö, jonka id täsmää
     """
     persons = []
-    vp = Person(None)
     t0 = time.time()
-    v_persons = vp.get_persons(max=100, pid=id, names=names)
+    v_persons = Person.get_persons(max=100, pid=id, names=names)
     
     for person in v_persons:
         for attr in person:

@@ -3,7 +3,7 @@
 {% block title %}Lataus epäonnistui{% endblock %}
 {% block body %}
     {{ super() }}
-    <p>
+    <h2>
     {% if code == 1 %}
         Virheellinen syöttötiedosto.
     {% else %}
@@ -13,7 +13,7 @@
         Tiedoston lataus ei onnistu, koodi={{code}}
         {% endif %}
     {% endif %}
-    </p>
+    </h2>
     {% if text %}
     <p>{{text}}</p>
     {% endif %}
