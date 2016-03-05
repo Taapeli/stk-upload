@@ -20,11 +20,19 @@ Luokkamalli
     ( Migration {id, aika} )        -[from]-> (Place), -[to]-> (Place)
 
 """
-from py2neo import Graph, Node, Relationship
+from py2neo import Graph, Node, Relationship, authenticate
 import logging
 
-graph = Graph()
+import config
 
+#print ("genealogy dir(config): {0}".format(dir(config)))
+
+if 'DB_HOST_PORT' in dir(config):
+    authenticate(config.DB_HOST_PORT, config.DB_USER, config.DB_AUTH)
+    graph = Graph('http://{0}/db/data/'.format(config.DB_HOST_PORT))
+else:
+    graph = Graph()
+    
 # ---------------------------------- Funktiot ----------------------------------
 
 def tyhjenna_kanta():

@@ -1,3 +1,4 @@
 *.pyc
 instance/
 /p3env/
+config.py
