@@ -264,10 +264,10 @@ class Refname:
             self.name = nimi.strip().title()
         else:
             self.name = None
-        if type in __REFNAMETYPES__:
+        if type in self.__REFNAMETYPES__:
             self.type = type
         else:
-            self.type = __REFNAMETYPES__[0]
+            self.type = self.__REFNAMETYPES__[0]
             logging.warning('Referenssinimen tyyppi ' + type + \
                             ' hylätty. ' + self.__str__())
 
