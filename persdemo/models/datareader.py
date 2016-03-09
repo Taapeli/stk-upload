@@ -173,9 +173,8 @@ def lue_refnames():
     """ Lukee tietokannasta Refname- objektit näytettäväksi
     """
     namelist = []
-    refn = Refname(None)
     t0 = time.time()
-    v_names = refn.getrefnames()
+    v_names = Refname.getrefnames()
     
     for n,f,m in v_names:
 #>>> n

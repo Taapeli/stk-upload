@@ -347,7 +347,7 @@ class Refname:
 
         return graph.cypher.execute(query).one
     
-    def getrefnames(self):
+    def getrefnames():
         """ Haetaan kannasta kaikki Refnamet 
             Palautetaan Refname-olioita, johon on haettu myös mahdollisen
             viitatun referenssinimen nimi ja tyyppi.

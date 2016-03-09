@@ -7,9 +7,8 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__, instance_relative_config=True)
 
-# config-tiedostot ei toimi ainakaan komentoriviltä, missähän vika?
-#app.config.from_object('config')
-#app.config.from_pyfile('config.py') # instance-hakemistosta
+app.config.from_object('config')
+app.config.from_pyfile('config.py') # instance-hakemistosta
 
 from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
 import models.loadfile          # Datan lataus käyttäjältä
@@ -21,6 +20,26 @@ def index():
     """Aloitussivun piirtäminen"""
     return render_template("index.html")
 
+#--------
+@app.route('/dbtest')
+def dbtest():
+    "Onkohan tietokantayhteyttä palvelimelle?"
+    try:
+        graph = Graph('http://{0}/db/data/'.format(app.config['DB_HOST_PORT']))
+        authenticate(app.config['DB_HOST_PORT'], 
+                     app.config['DB_USER'], app.config['DB_AUTH'])
+        query = "MATCH (p:Person) RETURN p.firstname, p.lastname LIMIT 5"
+        x = graph.cypher.execute(query).one
+        text = "Henkilö: {0}, {1}".format(x[0], x[1])
+        return redirect(url_for('db_test_tulos', text=text))
+
+    except Exception as e:
+        return redirect(url_for('db_test_tulos', text="Exception "+str(e)))
+    
+@app.route('/dbtest/tulos/<text>')
+def db_test_tulos(text=''):
+    return render_template("db_test.html", text=text)
+#-------
 
 @app.route('/lataa1a', methods=['POST'])
 def lataa1a(): 
@@ -69,7 +88,7 @@ def nayta1(filename, fmt):
             persons = models.datareader.henkilolista(pathname)
             return render_template("table1.html", name=pathname, \
                    persons=persons)
-        except KeyError as e:
+        except Exception as e:
             return redirect(url_for('virhesivu', code=1, text=str(e)))
         
 
@@ -119,7 +138,7 @@ def nayta_henkilot():
     try:
         persons = models.datareader.lue_henkilot()
         return render_template("table1.html", persons=persons)
-    except KeyError as e:
+    except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/lista/refnimet')
@@ -128,7 +147,7 @@ def nayta_refnimet():
     try:
         names = models.datareader.lue_refnames()
         return render_template("table_refnames.html", names=names)
-    except KeyError as e:
+    except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/tyhjenna/kaikki/kannasta')
