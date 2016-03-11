@@ -18,6 +18,7 @@ import models.cvs_refnames      # Referenssinimien luonti
 @app.route('/')
 def index(): 
     """Aloitussivun piirtäminen"""
+    connect_db(app.config)
     return render_template("index.html")
 
 #--------
@@ -135,17 +136,15 @@ def talleta(filename, subj):
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
-    connect_db(app.config)
-    #try:
-    persons = models.datareader.lue_henkilot()
-    return render_template("table1.html", persons=persons)
-    #except Exception as e:
-    return redirect(url_for('virhesivu', code=1, text=str(e)))
+    try:
+        persons = models.datareader.lue_henkilot()
+        return render_template("table1.html", persons=persons)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/lista/refnimet')
 def nayta_refnimet():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
-    connect_db(app.config)
     try:
         names = models.datareader.lue_refnames()
         return render_template("table_refnames.html", names=names)
