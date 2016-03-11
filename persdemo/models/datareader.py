@@ -129,6 +129,8 @@ def lue_henkilot(id=None, names=None):
         
         Jos id on annettu, luetaan vain se henkilö, jonka id täsmää
     """
+    # TODO: Poista määrän rajoitus max=100
+    
     persons = []
     t0 = time.time()
     v_persons = Person.get_persons(max=100, pid=id, names=names)

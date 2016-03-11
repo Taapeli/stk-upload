@@ -18,7 +18,6 @@ import models.cvs_refnames      # Referenssinimien luonti
 @app.route('/')
 def index(): 
     """Aloitussivun piirtäminen"""
-    connect_db(app.config)
     return render_template("index.html")
 
 #--------
@@ -114,7 +113,7 @@ def lataa():
 def talleta(filename, subj):   
     """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
-    
+    connect_db(app.config)    
     try:
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
@@ -136,6 +135,7 @@ def talleta(filename, subj):
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
+    connect_db(app.config)
     try:
         persons = models.datareader.lue_henkilot()
         return render_template("table1.html", persons=persons)
@@ -145,6 +145,7 @@ def nayta_henkilot():
 @app.route('/lista/refnimet')
 def nayta_refnimet():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
+    connect_db(app.config)
     try:
         names = models.datareader.lue_refnames()
         return render_template("table_refnames.html", names=names)
@@ -154,6 +155,7 @@ def nayta_refnimet():
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
+    connect_db(app.config)
     tyhjenna_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
@@ -174,8 +176,8 @@ def nayta_ehdolla(ehto):
         id=arvo         näyttää nimetyn henkilön
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
-
     key, value = ehto.split('=')
+    connect_db(app.config)
     try:
         if key == 'id':
             persons = models.datareader.lue_henkilot(id=value)
