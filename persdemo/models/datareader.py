@@ -187,13 +187,13 @@ def lue_refnames():
 #<Node graph='http://localhost:7474/db/data/' ref='node/24611' labels={'Refname'} 
 #   properties={'id': 'R100001', 'name': 'Aapeli', 'type': 'fname'}>
 
-        logging.debug("n=" + n.__str__())
-        logging.debug("--> m=" + m.__str__())
+        #logging.debug("n=" + n.__str__())
+        #logging.debug("--> m=" + m.__str__())
         rid = n.properties['id']
         r = Refname(rid)
         r.type = n.properties['type']
         r.name = n.properties['name']
-        logging.debug("** name={}, is_ref={}".format(r.name, n.properties['is_ref']))
+        #logging.debug("** name={}, is_ref={}".format(r.name, n.properties['is_ref']))
         r.is_ref = n.properties['is_ref']    # näinkö?
         r.gender = n.properties['gender']
         r.source= n.properties['source']

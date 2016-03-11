@@ -23,17 +23,25 @@ Luokkamalli
 from py2neo import Graph, Node, Relationship, authenticate
 import logging
 
-import config
-
-#print ("genealogy dir(config): {0}".format(dir(config)))
-
-if 'DB_HOST_PORT' in dir(config):
-    authenticate(config.DB_HOST_PORT, config.DB_USER, config.DB_AUTH)
-    graph = Graph('http://{0}/db/data/'.format(config.DB_HOST_PORT))
-else:
-    graph = Graph()
-    
 # ---------------------------------- Funktiot ----------------------------------
+
+def connect_db(config):
+    """ 
+        genelogy-paketin tarvitsema tietokantayhteys 
+    """
+    print ("connect_db – dir(config): {0}".format(dir(config)))
+    global graph
+    try:
+        graph
+        print ("connect_db – graph on jo määritelty")
+    except NameError:
+        if 'DB_HOST_PORT' in dir(config):
+            print ("connect_db – server {}".format(config.DB_HOST_PORT))
+            authenticate(config.DB_HOST_PORT, config.DB_USER, config.DB_AUTH)
+            graph = Graph('http://{0}/db/data/'.format(config.DB_HOST_PORT))
+        else:
+            print ("connect_db – oletusympäristö")
+            graph = Graph()
 
 def tyhjenna_kanta():
     """ Koko kanta tyhjennetään """
@@ -131,6 +139,7 @@ class Person:
         """
         # TODO: pitäsi huolehtia, että käytetään entistä tapahtumaa, jos on
         
+        global graph
         # Henkilö-noodi
         persoona = Node("Person", id=self.id, \
                 firstname=self.name.first, lastname=self.name.last)
@@ -158,6 +167,7 @@ class Person:
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
             - lisäksi (max=100)         rajaa luettavien henkilöiden määrää
         """
+        global graph
         if max > 0:
             qmax = "LIMIT " + str(max)
         else:
@@ -176,6 +186,7 @@ class Person:
         query = """
         MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) WHERE n.id = {pid} RETURN e;
         """
+        global graph
         return graph.cypher.execute(query,  pid=self.id)
   
     # Testi5
@@ -252,8 +263,8 @@ class Refname:
     """
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
-    __REFNAMETYPES__ = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
-    __REFTYPES__ = ['REFFIRST', 'REFLAST', 'REFPATRO']
+    __REFNAMETYPES = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
+    __REFTYPES = ['REFFIRST', 'REFLAST', 'REFPATRO']
     
     def __init__(self, id, type='undef', nimi=None):
         """ Luodaan referenssinimi (id, type, nimi)
@@ -264,10 +275,10 @@ class Refname:
             self.name = nimi.strip().title()
         else:
             self.name = None
-        if type in self.__REFNAMETYPES__:
+        if type in self.__REFNAMETYPES:
             self.type = type
         else:
-            self.type = self.__REFNAMETYPES__[0]
+            self.type = self.__REFNAMETYPES[0]
             logging.warning('Referenssinimen tyyppi ' + type + \
                             ' hylätty. ' + self.__str__())
 
@@ -287,6 +298,8 @@ class Refname:
         """
         # TODO: source pitäisi tallettaa Source-objektina
         
+        global graph
+
         # Pakolliset tiedot
         if self.id == None or self.name == None or self.type == None:
             raise NameError
@@ -329,7 +342,7 @@ class Refname:
             self.is_ref = True
             return
         # Viittaustiedot muistiin
-        if reftype in self.__REFTYPES__:
+        if reftype in self.__REFTYPES:
             self.refname = refname
             self.reftype = reftype
         else:
@@ -339,6 +352,7 @@ class Refname:
     def getref(self):
         """ Haetaan kannasta self:iin liittyvä Refname.
         """
+        global graph
         query = """
             MATCH (r:Refname) 
             WHERE r.name ='{0}' AND r.type='{1}' 
@@ -352,6 +366,7 @@ class Refname:
             Palautetaan Refname-olioita, johon on haettu myös mahdollisen
             viitatun referenssinimen nimi ja tyyppi.
         """
+        global graph
         query = """
             MATCH (n:Refname)
             OPTIONAL MATCH (n:Refname)-[r]->(m)
