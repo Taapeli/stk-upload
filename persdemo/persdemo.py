@@ -6,8 +6,7 @@ import logging
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__, instance_relative_config=True)
-
-app.config.from_object('config')
+#app.config.from_object('config')
 app.config.from_pyfile('config.py') # instance-hakemistosta
 
 from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
@@ -24,6 +23,7 @@ def index():
 @app.route('/dbtest')
 def dbtest():
     "Onkohan tietokantayhteyttä palvelimelle?"
+    #TODO Poista dbtest ja app.config -käyttö
     try:
         graph = Graph('http://{0}/db/data/'.format(app.config['DB_HOST_PORT']))
         authenticate(app.config['DB_HOST_PORT'], 
@@ -113,7 +113,7 @@ def lataa():
 def talleta(filename, subj):   
     """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
-    connect_db(app.config)    
+    dburi = connect_db()
     try:
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
@@ -130,22 +130,22 @@ def talleta(filename, subj):
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
-    return render_template("talletettu.html", text=status)
+    return render_template("talletettu.html", text=status, uri=dburi)
 
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
-    connect_db(app.config)
+    dburi = connect_db()
     try:
         persons = models.datareader.lue_henkilot()
-        return render_template("table1.html", persons=persons)
+        return render_template("table1.html", persons=persons, uri=dburi)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/lista/refnimet')
 def nayta_refnimet():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
-    connect_db(app.config)
+    connect_db()
     try:
         names = models.datareader.lue_refnames()
         return render_template("table_refnames.html", names=names)
@@ -155,7 +155,7 @@ def nayta_refnimet():
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
-    connect_db(app.config)
+    connect_db()
     tyhjenna_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
@@ -177,7 +177,7 @@ def nayta_ehdolla(ehto):
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
     key, value = ehto.split('=')
-    connect_db(app.config)
+    connect_db()
     try:
         if key == 'id':
             persons = models.datareader.lue_henkilot(id=value)

@@ -9,6 +9,8 @@
 <p>Näytetään {{persons|count}} henkilöä 
 {% if name %}
 tiedostosta [<i>{{name}}</i>] 
+{% endif %}{% if uri %}
+palvelimelta <i>{{uri}}</i>
 {% endif %}</p>
 
 <section id="lista">

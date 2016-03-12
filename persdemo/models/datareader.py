@@ -35,7 +35,7 @@ def _poimi_(row_nro, row, url):
 
     event_id = u'E%06d' % row_nro
     e = Event(event_id, 'Käräjät')
-    e.name = kpaikka
+    e.name = "{0}\t{1}".format(kpaikka, aika)
     e.date = aika
     e.name_orig = row['Käräjät']
 

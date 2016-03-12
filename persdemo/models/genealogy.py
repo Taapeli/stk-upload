@@ -22,30 +22,35 @@ Luokkamalli
 """
 from py2neo import Graph, Node, Relationship, authenticate
 import logging
+import instance.config as dbconf      # Tietokannan tiedot
 
 # ---------------------------------- Funktiot ----------------------------------
 
-def connect_db(config):
+def connect_db():
     """ 
         genelogy-paketin tarvitsema tietokantayhteys 
     """
-    print ("connect_db – dir(config): {0}".format(dir(config)))
     global graph
-    try:
-        graph
-        print ("connect_db – graph on jo määritelty")
-    except NameError:
-        if 'DB_HOST_PORT' in dir(config):
-            print ("connect_db – server {}".format(config.DB_HOST_PORT))
-            authenticate(config.DB_HOST_PORT, config.DB_USER, config.DB_AUTH)
-            graph = Graph('http://{0}/db/data/'.format(config.DB_HOST_PORT))
+
+    logging.debug("-- dbconf = {}".format(dir(dbconf)))
+    if 'graph' in globals():
+        print ("connect_db - already done")
+    else:
+        if 'DB_HOST_PORT' in dir(dbconf):
+            print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
+            authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
+            graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
         else:
-            print ("connect_db – oletusympäristö")
+            print ("connect_db - default local")
             graph = Graph()
 
+    # Palautetaan tietokannan sijainnin hostname
+    return graph.uri.host
+        
 def tyhjenna_kanta():
     """ Koko kanta tyhjennetään """
     logging.info('Tietokanta tyhjennetään!')
+    global graph
     graph.delete_all()
     
 def make_id(prefix, int):
@@ -57,7 +62,7 @@ def make_id(prefix, int):
 class User:
     """ Järjestelmän käyttäjä """
     
-    _label_ = "User"
+    label = "User"
     
     def __init__(self, username, name):
         """ Luo uuden käyttäjä-instanssin """
@@ -66,7 +71,7 @@ class User:
 
     def save(self):
         """ Talletta sen kantaan """
-        user = Node(self._label_, uid=self.id, name=self.name)
+        user = Node(self.label, uid=self.id, name=self.name)
         graph.create(user)
         return True
     
@@ -119,6 +124,8 @@ class Person:
             place           str paikka
             events[]        list of Event
     """
+    label = "Person"
+
     def __init__(self, id):
         self.id=id
         self.events = []
@@ -141,7 +148,7 @@ class Person:
         
         global graph
         # Henkilö-noodi
-        persoona = Node("Person", id=self.id, \
+        persoona = Node(self.label, id=self.id, \
                 firstname=self.name.first, lastname=self.name.last)
         if self.occupation:
             persoona.properties["occu"] = self.occupation
@@ -152,7 +159,7 @@ class Person:
             # Luodaan (Person)-->(Event) solmuparit
             for event in self.events:
                 # Tapahtuma-noodi
-                tapahtuma = Node("Event", id=event.id, type=event.type, \
+                tapahtuma = Node(Event.label, id=event.id, type=event.type, \
                         name=event.name, date=event.date)
                 osallistui = Relationship(persoona, "OSALLISTUI", tapahtuma)
                 graph.create(osallistui)
@@ -208,6 +215,8 @@ class Event:
             date            str aika
             place           str paikka
      """
+    label = "Event"
+
     def __init__(self, id, tyyppi):
         self.id=id
         self.type = tyyppi
@@ -216,6 +225,8 @@ class Event:
 class Name:
     """ Etu- ja sukunimi, patronyymi sekä nimen alkuperäismuoto
     """
+    label = "Name"
+
     def __init__(self, etu, suku):
         if etu == '': 
             self.first = 'N'
@@ -238,9 +249,13 @@ class Name:
         return s
 
 class Place:
+    label = "Place"
+
     pass
 
 class Note:
+    label = "Note"
+
     pass
 
 class Refname:
@@ -262,6 +277,8 @@ class Refname:
               viittaus tyyppiä reftype ko Refnameen
     """
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
+
+    label = "Refname"
 
     __REFNAMETYPES = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
     __REFTYPES = ['REFFIRST', 'REFLAST', 'REFPATRO']
@@ -305,7 +322,7 @@ class Refname:
             raise NameError
         
         # Refname-noodi
-        instance = Node("Refname", id=self.id, name=self.name, type=self.type)
+        instance = Node(self.label, id=self.id, name=self.name, type=self.type)
         if 'gender' in dir(self):
             instance.properties["gender"] = self.gender
         if 'source' in dir(self):
@@ -323,7 +340,7 @@ class Refname:
                 # TODO: Viitattu.is_ref pitää asettaa, jos ei ole päällä
             else:
                 id = "R1"+self.id[1:]
-                viitattu = Node("Refname", id=id, name=self.refname, 
+                viitattu = Node(self.label, id=id, name=self.refname, 
                                 type=self.type, is_ref=True)
                 logging.debug(self.id + ' Viitattu luotiin: ' + viitattu.__str__())
                 
@@ -386,10 +403,16 @@ class Refname:
 
 
 class Citation:
+    label = "Citation"
+
     pass
 
 class Source:
+    label = "Source"
+
     pass
 
 class Archieve:
+    label = "Archieve"
+
     pass
