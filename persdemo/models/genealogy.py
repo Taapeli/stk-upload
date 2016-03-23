@@ -20,16 +20,37 @@ Luokkamalli
     ( Migration {id, aika} )        -[from]-> (Place), -[to]-> (Place)
 
 """
-from py2neo import Graph, Node, Relationship
+from py2neo import Graph, Node, Relationship, authenticate
 import logging
-
-graph = Graph()
+import instance.config as dbconf      # Tietokannan tiedot
 
 # ---------------------------------- Funktiot ----------------------------------
 
+def connect_db():
+    """ 
+        genelogy-paketin tarvitsema tietokantayhteys 
+    """
+    global graph
+
+    logging.debug("-- dbconf = {}".format(dir(dbconf)))
+    if 'graph' in globals():
+        print ("connect_db - already done")
+    else:
+        if 'DB_HOST_PORT' in dir(dbconf):
+            print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
+            authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
+            graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
+        else:
+            print ("connect_db - default local")
+            graph = Graph()
+
+    # Palautetaan tietokannan sijainnin hostname
+    return graph.uri.host
+        
 def tyhjenna_kanta():
     """ Koko kanta tyhjennetään """
     logging.info('Tietokanta tyhjennetään!')
+    global graph
     graph.delete_all()
     
 def make_id(prefix, int):
@@ -41,7 +62,7 @@ def make_id(prefix, int):
 class User:
     """ Järjestelmän käyttäjä """
     
-    _label_ = "User"
+    label = "User"
     
     def __init__(self, username, name):
         """ Luo uuden käyttäjä-instanssin """
@@ -50,7 +71,7 @@ class User:
 
     def save(self):
         """ Talletta sen kantaan """
-        user = Node(self._label_, uid=self.id, name=self.name)
+        user = Node(self.label, uid=self.id, name=self.name)
         graph.create(user)
         return True
     
@@ -103,15 +124,16 @@ class Person:
             place           str paikka
             events[]        list of Event
     """
+    label = "Person"
+
     def __init__(self, id):
         self.id=id
         self.events = []
-        return
     
-    def make_id(int):
+    def make_id(int_id):
         """ Palautetaan rivinumeroa int vastaava person_id, esim. 'P00001' """
         # TODO: korvaa ohjelmissa Person.make_id(i) --> make_id('P', i)
-        return 'P'+str(int).zfill(5)
+        return 'P'+str(int_id).zfill(5)
 
     def save(self):
         """ Tallennus kantaan. Edellytetään, että henkilölle on asetettu:
@@ -124,8 +146,9 @@ class Person:
         """
         # TODO: pitäsi huolehtia, että käytetään entistä tapahtumaa, jos on
         
+        global graph
         # Henkilö-noodi
-        persoona = Node("Person", id=self.id, \
+        persoona = Node(self.label, id=self.id, \
                 firstname=self.name.first, lastname=self.name.last)
         if self.occupation:
             persoona.properties["occu"] = self.occupation
@@ -136,23 +159,22 @@ class Person:
             # Luodaan (Person)-->(Event) solmuparit
             for event in self.events:
                 # Tapahtuma-noodi
-                tapahtuma = Node("Event", id=event.id, type=event.type, \
+                tapahtuma = Node(Event.label, id=event.id, type=event.type, \
                         name=event.name, date=event.date)
                 osallistui = Relationship(persoona, "OSALLISTUI", tapahtuma)
                 graph.create(osallistui)
         else:
             # Henkilö ilman tapahtumaa (näitä ei taida aineistossamme olla)
             graph.create(persoona)
-            
-        return 
         
-    def get_persons (self, max=0, pid=None, names=None):
+    def get_persons (max=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
             get_persons(id='P000123')   tietty henkilö id:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
             - lisäksi (max=100)         rajaa luettavien henkilöiden määrää
         """
+        global graph
         if max > 0:
             qmax = "LIMIT " + str(max)
         else:
@@ -171,6 +193,7 @@ class Person:
         query = """
         MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) WHERE n.id = {pid} RETURN e;
         """
+        global graph
         return graph.cypher.execute(query,  pid=self.id)
   
     # Testi5
@@ -192,14 +215,18 @@ class Event:
             date            str aika
             place           str paikka
      """
+    label = "Event"
+
     def __init__(self, id, tyyppi):
         self.id=id
         self.type = tyyppi
-        return
+
 
 class Name:
     """ Etu- ja sukunimi, patronyymi sekä nimen alkuperäismuoto
     """
+    label = "Name"
+
     def __init__(self, etu, suku):
         if etu == '': 
             self.first = 'N'
@@ -213,7 +240,6 @@ class Name:
 
         if suku == '': suku = 'N'
 
-
     def __str__(self):
         s = "Name %s, %s", (self.last, self.first)
         if self.date:
@@ -223,9 +249,13 @@ class Name:
         return s
 
 class Place:
+    label = "Place"
+
     pass
 
 class Note:
+    label = "Note"
+
     pass
 
 class Refname:
@@ -248,8 +278,10 @@ class Refname:
     """
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
-    __REFNAMETYPES__ = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
-    __REFTYPES__ = ['REFFIRST', 'REFLAST', 'REFPATRO']
+    label = "Refname"
+
+    __REFNAMETYPES = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
+    __REFTYPES = ['REFFIRST', 'REFLAST', 'REFPATRO']
     
     def __init__(self, id, type='undef', nimi=None):
         """ Luodaan referenssinimi (id, type, nimi)
@@ -260,13 +292,12 @@ class Refname:
             self.name = nimi.strip().title()
         else:
             self.name = None
-        if type in self.__REFNAMETYPES__:
+        if type in self.__REFNAMETYPES:
             self.type = type
         else:
-            self.type = self.__REFNAMETYPES__[0]
+            self.type = self.__REFNAMETYPES[0]
             logging.warning('Referenssinimen tyyppi ' + type + \
                             ' hylätty. ' + self.__str__())
-        return
 
     def save(self):
         """ Referenssinimen tallennus kantaan. Edellytetään, että sille on asetettu:
@@ -284,12 +315,14 @@ class Refname:
         """
         # TODO: source pitäisi tallettaa Source-objektina
         
+        global graph
+
         # Pakolliset tiedot
         if self.id == None or self.name == None or self.type == None:
             raise NameError
         
         # Refname-noodi
-        instance = Node("Refname", id=self.id, name=self.name, type=self.type)
+        instance = Node(self.label, id=self.id, name=self.name, type=self.type)
         if 'gender' in dir(self):
             instance.properties["gender"] = self.gender
         if 'source' in dir(self):
@@ -307,7 +340,7 @@ class Refname:
                 # TODO: Viitattu.is_ref pitää asettaa, jos ei ole päällä
             else:
                 id = "R1"+self.id[1:]
-                viitattu = Node("Refname", id=id, name=self.refname, 
+                viitattu = Node(self.label, id=id, name=self.refname, 
                                 type=self.type, is_ref=True)
                 logging.debug(self.id + ' Viitattu luotiin: ' + viitattu.__str__())
                 
@@ -317,7 +350,6 @@ class Refname:
         else:
             logging.debug(self.id + ' Viitattua ei ole')
             graph.merge(instance)
-        return 
         
     def setref(self, refname, reftype):
         """ Laitetaan muistiin, että self viittaa refname'een
@@ -327,17 +359,17 @@ class Refname:
             self.is_ref = True
             return
         # Viittaustiedot muistiin
-        if reftype in self.__REFTYPES__:
+        if reftype in self.__REFTYPES:
             self.refname = refname
             self.reftype = reftype
         else:
             logging.warning('Referenssinimen viittaus ' + reftype + \
                         ' hylätty. ' + self.__str__())
-        return
 
     def getref(self):
         """ Haetaan kannasta self:iin liittyvä Refname.
         """
+        global graph
         query = """
             MATCH (r:Refname) 
             WHERE r.name ='{0}' AND r.type='{1}' 
@@ -346,11 +378,12 @@ class Refname:
 
         return graph.cypher.execute(query).one
     
-    def getrefnames(self):
+    def getrefnames():
         """ Haetaan kannasta kaikki Refnamet 
             Palautetaan Refname-olioita, johon on haettu myös mahdollisen
             viitatun referenssinimen nimi ja tyyppi.
         """
+        global graph
         query = """
             MATCH (n:Refname)
             OPTIONAL MATCH (n:Refname)-[r]->(m)
@@ -370,10 +403,16 @@ class Refname:
 
 
 class Citation:
+    label = "Citation"
+
     pass
 
 class Source:
+    label = "Source"
+
     pass
 
 class Archieve:
+    label = "Archieve"
+
     pass

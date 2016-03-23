@@ -3,7 +3,7 @@
 {% block title %}Tiedot talletettu{% endblock %}
 {% block body %}
     {{ super() }}
-    <h2>Tietojen talletus kantaan</h2>
+    <h2>Tietojen talletus kantaan{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
     {% if text %}
     <p>{{text}}</p>
     {% endif %}

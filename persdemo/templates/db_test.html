@@ -1,0 +1,12 @@
+{# _myapp/templates/db_test.html_ #}
+{% extends "layout.html" %}
+{% block title %}Käsittelyn tulos{% endblock %}
+{% block body %}
+    {{ super() }}
+    <h2>Tietokantakäsittelyn onnistuminen</h2>
+    <pre>
+{{text}}
+    </pre>
+    <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
+{% endblock %}
+

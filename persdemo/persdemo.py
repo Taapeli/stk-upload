@@ -6,14 +6,8 @@ import logging
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__, instance_relative_config=True)
-print('app luotu')
-
-# config-tiedostot ei toimi ainakaan komentoriviltä, missähän vika?
-if app.config.from_object('config'):
-    print(' - config from object')
-#if app.config.from_pyfile('config.py'): # instance-hakemistosta
-#    print(' - config from pyfile ')
-#print('Aletaan, server='+app.config['NEO_SERVER'])
+#app.config.from_object('config')
+app.config.from_pyfile('config.py') # instance-hakemistosta
 
 from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
 import models.loadfile          # Datan lataus käyttäjältä
@@ -25,6 +19,27 @@ def index():
     """Aloitussivun piirtäminen"""
     return render_template("index.html")
 
+#--------
+@app.route('/dbtest')
+def dbtest():
+    "Onkohan tietokantayhteyttä palvelimelle?"
+    #TODO Poista dbtest ja app.config -käyttö
+    try:
+        graph = Graph('http://{0}/db/data/'.format(app.config['DB_HOST_PORT']))
+        authenticate(app.config['DB_HOST_PORT'], 
+                     app.config['DB_USER'], app.config['DB_AUTH'])
+        query = "MATCH (p:Person) RETURN p.firstname, p.lastname LIMIT 5"
+        x = graph.cypher.execute(query).one
+        text = "Henkilö: {0}, {1}".format(x[0], x[1])
+        return redirect(url_for('db_test_tulos', text=text))
+
+    except Exception as e:
+        return redirect(url_for('db_test_tulos', text="Exception "+str(e)))
+    
+@app.route('/dbtest/tulos/<text>')
+def db_test_tulos(text=''):
+    return render_template("db_test.html", text=text)
+#-------
 
 @app.route('/lataa1a', methods=['POST'])
 def lataa1a(): 
@@ -73,7 +88,7 @@ def nayta1(filename, fmt):
             persons = models.datareader.henkilolista(pathname)
             return render_template("table1.html", name=pathname, \
                    persons=persons)
-        except KeyError as e:
+        except Exception as e:
             return redirect(url_for('virhesivu', code=1, text=str(e)))
         
 
@@ -98,7 +113,7 @@ def lataa():
 def talleta(filename, subj):   
     """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
-    
+    dburi = connect_db()
     try:
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
@@ -115,29 +130,32 @@ def talleta(filename, subj):
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
-    return render_template("talletettu.html", text=status)
+    return render_template("talletettu.html", text=status, uri=dburi)
 
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
+    dburi = connect_db()
     try:
         persons = models.datareader.lue_henkilot()
-        return render_template("table1.html", persons=persons)
-    except KeyError as e:
+        return render_template("table1.html", persons=persons, uri=dburi)
+    except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/lista/refnimet')
 def nayta_refnimet():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
+    connect_db()
     try:
         names = models.datareader.lue_refnames()
         return render_template("table_refnames.html", names=names)
-    except KeyError as e:
+    except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
+    connect_db()
     tyhjenna_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
@@ -158,8 +176,8 @@ def nayta_ehdolla(ehto):
         id=arvo         näyttää nimetyn henkilön
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
-
     key, value = ehto.split('=')
+    connect_db()
     try:
         if key == 'id':
             persons = models.datareader.lue_henkilot(id=value)

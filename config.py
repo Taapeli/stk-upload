@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # config.py oletusarvot
 DEBUG = False # Turns on debugging features in Flask
 
@@ -7,4 +8,4 @@ DEBUG = False # Turns on debugging features in Flask
 #USERNAME = 'admin'
 #PASSWORD = 'default'
 
-print('Luettu yleinen config.py')
+print("Tätä ROOT/config-tiedostoa ei pitäisi ollenkaan käyttää")
