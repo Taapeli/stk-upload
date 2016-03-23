@@ -6,10 +6,14 @@ import logging
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__, instance_relative_config=True)
+print('app luotu')
 
 # config-tiedostot ei toimi ainakaan komentoriviltä, missähän vika?
-#app.config.from_object('config')
-#app.config.from_pyfile('config.py') # instance-hakemistosta
+if app.config.from_object('config'):
+    print(' - config from object')
+#if app.config.from_pyfile('config.py'): # instance-hakemistosta
+#    print(' - config from pyfile ')
+#print('Aletaan, server='+app.config['NEO_SERVER'])
 
 from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
 import models.loadfile          # Datan lataus käyttäjältä
@@ -181,8 +185,14 @@ def virhesivu(code, text=''):
     logging.debug('Virhesivu ' + str(code) )
     return render_template("virhe_lataus.html", code=code, text=text)
 
+
+
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    app.run(debug=True)
-    # tai vaikka app.run(host='0.0.0.0', port=80)
+    if True:
+        # Ajo paikallisesti
+        logging.basicConfig(level=logging.DEBUG)
+        app.run(debug='DEBUG')
+    else:
+        # Julkinen sovellus
+        app.run(host='0.0.0.0', port=80)
 

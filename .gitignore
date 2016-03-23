@@ -1,3 +1,6 @@
 *.pyc
 instance/
 /p3env/
+persdemo/.DS_Store
+
+persdemo/static/.DS_Store
