@@ -198,10 +198,8 @@ class Person:
   
     # Testi5
     def make_key (self):
-        key =   self.id + '/' +\
-                    self.name.first + '/' +\
-                    self.name.last + '/' +\
-                    self.occupation +  '/';
+        key = "{}:{}:{}:{}".format(self.id, 
+              self.name.first, self.name.last, self.occupation);
         return key
   
 
