@@ -133,28 +133,29 @@ def lue_henkilot(id=None, names=None):
     
     persons = []
     t0 = time.time()
-    v_persons = Person.get_persons(max=100, pid=id, names=names)
+    retList = Person.get_persons_w_events(max=100, pid=id, names=names)
+    print ("Lue_henkilot:\n", retList[0])
     
-    for person in v_persons:
-        for attr in person:
-            pid = attr.properties['id']
-            p = Person(pid)
-            etu = attr.properties['firstname']
-            suku = attr.properties['lastname']
-            p.name = Name(etu,suku)
-            p.name_orig = attr.properties['name_orig']
-            p.occupation = attr.properties['occu']
-            p.place= attr.properties['place']
-            
-            p_events = p.get_events()
-            for event in p_events:
-                for event_attr in event:
-                    event_id = event_attr.properties['id']
-                    e = Event(event_id, 'Käräjät')
-                    e.name = event_attr.properties['name']
-                    e.date = event_attr.properties['date']
-                    e.name_orig = attr.properties['name_orig']
-                    p.events.append(e)    
+    for row in retList:
+        
+        thisPerson = row.n
+        pid = thisPerson.properties['id']
+        p = Person(pid)
+        etu = thisPerson.properties['firstname']
+        suku = thisPerson.properties['lastname']
+        p.name = Name(etu,suku)
+        p.name_orig = thisPerson.properties['name_orig']
+        p.occupation = thisPerson.properties['occu']
+        p.place= thisPerson.properties['place']
+
+        if row.e: 
+            thisEvent = row.e
+            event_id = thisEvent.properties['id']
+            e = Event(event_id, 'Käräjät')
+            e.name = thisEvent.properties['name']
+            e.date = thisEvent.properties['date']
+            e.name_orig = thisEvent.properties['name_orig']
+            p.events.append(e)    
 
 #            c = Citation()
 #            c.tyyppi = 'Signum'
@@ -163,10 +164,10 @@ def lue_henkilot(id=None, names=None):
 #            c.source = Source()
 #            c.source.nimi = 'Testi3'
 #            e.citation = c
-        
-            persons.append(p)
 
-    logging.debug("TIME get_all_persons {} sek".format(time.time()-t0))
+        persons.append(p)
+
+    logging.debug("TIME lue_henkilot {} sek".format(time.time()-t0))
 
     return (persons)
 

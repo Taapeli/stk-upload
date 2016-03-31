@@ -182,8 +182,8 @@ def nayta_ehdolla(ehto):
         if key == 'id':
             persons = models.datareader.lue_henkilot(id=value)
             # Testi5
-            vkey  = persons[0].make_key()
-            logging.info(vkey)
+#            vkey  = persons[0].key()
+#            logging.info(vkey)
             
             return render_template("person.html", persons=persons)
         else:
