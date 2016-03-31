@@ -133,12 +133,11 @@ def lue_henkilot(id=None, names=None):
     
     persons = []
     t0 = time.time()
-    retList = Person.get_persons_w_events(max=100, pid=id, names=names)
+    retList = Person.get_person_events(max=100, pid=id, names=names)
     print ("Lue_henkilot:\n", retList[0])
     
     for row in retList:
-        
-        thisPerson = row.n
+        thisPerson, thisEvent = row
         pid = thisPerson.properties['id']
         p = Person(pid)
         etu = thisPerson.properties['firstname']
@@ -148,8 +147,7 @@ def lue_henkilot(id=None, names=None):
         p.occupation = thisPerson.properties['occu']
         p.place= thisPerson.properties['place']
 
-        if row.e: 
-            thisEvent = row.e
+        if thisEvent:
             event_id = thisEvent.properties['id']
             e = Event(event_id, 'Käräjät')
             e.name = thisEvent.properties['name']

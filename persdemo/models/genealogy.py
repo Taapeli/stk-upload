@@ -189,7 +189,7 @@ class Person:
         query = "MATCH (n:Person) {0} RETURN n {1};".format(where, qmax)
         return graph.cypher.execute(query)
 
-    def get_persons_w_events (max=0, pid=None, names=None):
+    def get_person_events (max=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
             get_persons(id='P000123')   tietty henkilö id:n mukaan poimittuna
@@ -213,7 +213,6 @@ class Person:
             OPTIONAL MATCH (n)-->(e) 
              RETURN n,e {1};""".format(where, qmax)
         ret = graph.cypher.execute(query)
-    #    print (ret)
         return ret
 
     def get_events (self):
