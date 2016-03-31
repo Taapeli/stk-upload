@@ -134,7 +134,7 @@ def lue_henkilot(id=None, names=None):
     persons = []
     t0 = time.time()
     retList = Person.get_person_events(max=100, pid=id, names=names)
-    print ("Lue_henkilot:\n", retList[0])
+    #print ("Lue_henkilot:\n", retList[0])
     
     for row in retList:
         thisPerson, thisEvent = row

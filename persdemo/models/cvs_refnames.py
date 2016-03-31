@@ -48,11 +48,10 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
             source=row['Lähde']
             if row['Sukupuoli'].startswith('m'):
                 sp = 'M'
+            elif row['Sukupuoli'].startswith('n'):
+                sp = 'F'
             else:
-                if row['Sukupuoli'].startswith('n'):
-                    sp = 'F'
-                else:
-                    sp = ''
+                sp = ''
 
             # Luodaan Refname
             r = Refname(rid, 'fname', nimi)

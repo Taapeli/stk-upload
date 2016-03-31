@@ -33,11 +33,10 @@ def karajat_loader(pathname):
             source=row[3]
             if row[4].startswith('m'):
                 sp = 'M'
+            elif row[4].startswith('n'):
+                sp = 'F'
             else:
-                if row[4].startswith('n'):
-                    sp = 'F'
-                else:
-                    sp = ''
+                sp = ''
 
             # Luodaan rivitieto tulostettavaksi
             rivi = dict( \

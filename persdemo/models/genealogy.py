@@ -35,14 +35,13 @@ def connect_db():
     logging.debug("-- dbconf = {}".format(dir(dbconf)))
     if 'graph' in globals():
         print ("connect_db - already done")
+    elif 'DB_HOST_PORT' in dir(dbconf):
+        print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
+        authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
+        graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
     else:
-        if 'DB_HOST_PORT' in dir(dbconf):
-            print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
-            authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
-            graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
-        else:
-            print ("connect_db - default local")
-            graph = Graph()
+        print ("connect_db - default local")
+        graph = Graph()
 
     # Palautetaan tietokannan sijainnin hostname
     return graph.uri.host
@@ -168,7 +167,7 @@ class Person:
             graph.create(persoona)
         
     def get_persons (max=0, pid=None, names=None):
-        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
+        """ Voidaan lukea henkilöitä kannasta seuraavasti:
             get_persons()               kaikki
             get_persons(id='P000123')   tietty henkilö id:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
@@ -181,11 +180,10 @@ class Person:
             qmax = ""
         if pid:
             where = "WHERE n.id='{}' ".format(pid)
+        elif names:
+            where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
-            if names:
-                where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
-            else:
-                where = ""
+            where = ""
         query = "MATCH (n:Person) {0} RETURN n {1};".format(where, qmax)
         return graph.cypher.execute(query)
 
@@ -203,17 +201,15 @@ class Person:
             qmax = ""
         if pid:
             where = "WHERE n.id='{}' ".format(pid)
+        elif names:
+            where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
-            if names:
-                where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
-            else:
-                where = ""
+            where = ""
         query = """
             MATCH (n:Person) {0}  
             OPTIONAL MATCH (n)-->(e) 
-             RETURN n,e {1};""".format(where, qmax)
-        ret = graph.cypher.execute(query)
-        return ret
+            RETURN n,e {1};""".format(where, qmax)
+        return graph.cypher.execute(query)
 
     def get_events (self):
         query = """
