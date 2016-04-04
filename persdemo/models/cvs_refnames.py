@@ -23,6 +23,19 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
     
     row_nro = 0
     tyhjia = 0
+
+    usedids = UsedIds()
+    all_usedids = usedids.get_used_ids()
+
+    for usedid in all_usedids:
+        usedids.personid = usedid.properties['personid']
+        usedids.eventid = usedid.properties['eventid']
+        usedids.referencenameid = usedid.properties['referencenameid']
+
+ #   msg = 'personid: {0}, eventid: {1}, referencenameid: {2}'.format(usedids.personid, \
+#                usedids.eventid,  usedids.referencenameid )
+#    logging.info(msg)
+    
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
         reader=csv.DictReader(f, dialect='excel')
         
@@ -33,7 +46,9 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
             row_nro += 1
             if max > 0 and row_nro > max:
                 break
-            rid = make_id('R', row_nro)
+#            rid = make_id('R', row_nro)
+            idtype = "referencenameid"
+            rid = usedids.get_new_id(idtype)
             nimi=row['Nimi'].strip()
             if nimi.__len__() == 0:
                 tyhjia += 1

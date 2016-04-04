@@ -436,3 +436,70 @@ class Archieve:
     label = "Archieve"
 
     pass
+
+class UsedIds:
+    """ Last used ids
+        
+        Properties:
+            personid             00001 ...
+            eventid              00001 ...
+            referencenameid      00001 ...
+    """
+
+    label = "UsedIds"
+
+    def __init__(self):
+        self.personid = 1
+        self.eventid = 1
+        self.referencenameid = 123
+
+    def get_used_ids(self):
+        """ Fetch last used ids from the database.
+        """
+        global graph
+        query = """
+            MATCH (n:UsedIds) 
+            RETURN n;
+        """
+
+        return graph.cypher.execute(query)
+
+    def set_init_values(self):
+        """ Set init values to the database.
+        """
+        global graph
+
+        init_values = Node(self.label,\
+                personid=self.personid,\
+                eventid=self.eventid,\
+                referencenameid=self.referencenameid)
+
+        graph.cypher.create(init_values)
+
+    def get_new_id(self, idtype):
+        """ Update last used id to the database.
+        """
+        global graph
+
+        if idtype == "personid":
+            setstring = "SET n.personid = {}".format(self.personid)
+            id = make_id('P', self.personid)
+            self.personid += 1
+        elif idtype == "eventid":
+            setstring = "SET n.eventid = {}".format(self.eventid)
+            id = make_id('E', self.eventid)
+            self.eventid += 1
+        elif idtype == "referencenameid":
+            setstring = "SET n.referencenameid = {}".format(self.referencenameid)
+            id = make_id('R', self.referencenameid)
+            self.referencenameid += 1
+
+        query = """
+            MATCH (n:UsedIds) 
+            {}
+            RETURN n;
+        """.format(setstring)
+
+        graph.cypher.execute(query)
+        return id
+
