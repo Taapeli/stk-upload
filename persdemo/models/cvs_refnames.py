@@ -27,10 +27,12 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
     usedids = UsedIds()
     all_usedids = usedids.get_used_ids()
 
-    for usedid in all_usedids:
-        usedids.personid = usedid.properties['personid']
-        usedids.eventid = usedid.properties['eventid']
-        usedids.referencenameid = usedid.properties['referencenameid']
+    if all_usedids:
+        usedids.personid =all_usedids[0].n.properties['personid']
+        usedids.eventid = all_usedids[0].n.properties['eventid']
+        usedids.referencenameid = all_usedids[0].n.properties['referencenameid']
+    else:
+         usedids.set_init_values()
 
  #   msg = 'personid: {0}, eventid: {1}, referencenameid: {2}'.format(usedids.personid, \
 #                usedids.eventid,  usedids.referencenameid )

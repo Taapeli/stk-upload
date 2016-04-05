@@ -474,7 +474,7 @@ class UsedIds:
                 eventid=self.eventid,\
                 referencenameid=self.referencenameid)
 
-        graph.cypher.create(init_values)
+        graph.create(init_values)
 
     def get_new_id(self, idtype):
         """ Update last used id to the database.
