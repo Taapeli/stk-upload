@@ -7,10 +7,11 @@ import logging
 import time
 from models.genealogy import *  # Tietokannan luokat
 
-def _poimi_(row_nro, row, url):
+def _poimi_(person_id, event_id, row, url):
     """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
     """
-    person_id = Person.make_id(row_nro)
+
+#    person_id = Person.make_id(row_nro)
     suku=row['Sukunimi_vakioitu']
     etu=row['Etunimi_vakioitu']
 
@@ -33,7 +34,6 @@ def _poimi_(row_nro, row, url):
     p.occupation = row['Ammatti_vakioitu']
     p.place=row['Paikka_vakioitu']
 
-    event_id = u'E%06d' % row_nro
     e = Event(event_id, 'Käräjät')
     e.name = "{0}\t{1}".format(kpaikka, aika)
     e.date = aika
@@ -79,7 +79,7 @@ def henkilolista(pathname):
             if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
                 continue
-                
+                            
             p = _poimi_(row_nro, row, url)
             persons.append(p)
 
@@ -93,6 +93,16 @@ def datastorer(pathname):
     """
     row_nro = 0
     url = ''
+
+    usedids = UsedIds()
+    all_usedids = usedids.get_used_ids()
+
+    if all_usedids:
+        usedids.personid =all_usedids[0].n.properties['personid']
+        usedids.eventid = all_usedids[0].n.properties['eventid']
+        usedids.referencenameid = all_usedids[0].n.properties['referencenameid']
+    else:
+         usedids.set_init_values()
 
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f, dialect='excel')
@@ -115,7 +125,12 @@ def datastorer(pathname):
                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
                 continue
                 
-            p = _poimi_(row_nro, row, url)
+            idtype = "personid"
+            person_id = usedids.get_new_id(idtype)
+            idtype = "eventid"
+            event_id = usedids.get_new_id(idtype)
+            
+            p = _poimi_(person_id,  event_id, row, url)
     
             # Tallettaa Person-olion ja siihen sisältyvät Eventit
             # (Person)-[OSALLISTUU]->(Event)

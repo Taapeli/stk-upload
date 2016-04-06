@@ -451,7 +451,7 @@ class UsedIds:
     def __init__(self):
         self.personid = 1
         self.eventid = 1
-        self.referencenameid = 123
+        self.referencenameid = 1
 
     def get_used_ids(self):
         """ Fetch last used ids from the database.
