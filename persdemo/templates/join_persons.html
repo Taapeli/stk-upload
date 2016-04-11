@@ -15,12 +15,23 @@ function myFunction(id, fn, ln) {
     "</ul>";
 }</script>
 <h2>Henkilöiden yhdistely</h2>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul style='color: darkblue; border: solid 2pt darkblue; background-color: lightblue'>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<form action="/samahenkilo" method="post" enctype="multipart/form-data">
 <div id="lista">
     <p>Henkilöt, joiden nimi alkaa '{{pattern}}'</p>
+       <input type="text" name="names" value="{{pattern}}" readonly hidden>
     <ol>
         <li> Merkitse päähenkilö (1. valintasarake) ja yhdistettävät henkilöt (2. sarake)
         <li> Poimi tarvittaessa referenssinimet vierestä
-        <li> <input type="submit" value="Yhdistä merkittyyn (ei tot.)" />
+        <li> <input type="submit" value="Yhdistä valittuun päähenkilöön" />
     </ol>
 <table>
     <tr><th><center>liitä o&Larr;x</center></th>
@@ -58,5 +69,5 @@ function myFunction(id, fn, ln) {
     <h3>Referenssinimiä</h3>
     <p>&nbsp;</p>
 </div>
-
+</form>
 {% endblock %}

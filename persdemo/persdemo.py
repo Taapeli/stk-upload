@@ -3,16 +3,18 @@
 # JMä 29.12.2015
 
 import logging
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 app.config.from_pyfile('config.py') # instance-hakemistosta
+app.secret_key = "kuu on juustoa"
 
 from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
 import models.cvs_refnames      # Referenssinimien luonti
+import models.dataupdater       # Tietojen päivitysmetodit
 
 @app.route('/')
 def index(): 
@@ -169,6 +171,21 @@ def nimien_yhdistely():
     names = request.form['names']
     logging.debug('Poimitaan ' + names )
     return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+
+@app.route('/samahenkilo', methods=['POST'])
+def henkiloiden_yhdistely():   
+    """ Yhdistetään base-henkilöön join-henkilöt tapahtumineen, 
+        minkä jälkeen näytetään muuttunut henkilölista
+    """
+    names = request.form['names']
+    print (dir(request.form))
+    base_id = request.form['base']
+    join_ids = request.form.getlist('join')
+    #TODO lisättävä valitut ref.nimet, jahka niitä tulee
+    models.dataupdater.joinpersons(base_id, join_ids)
+    flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
+    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+
 
 @app.route('/poimi/<string:ehto>')
 def nayta_ehdolla(ehto):   

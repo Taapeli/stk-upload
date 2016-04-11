@@ -32,7 +32,7 @@ def connect_db():
     """
     global graph
 
-    logging.debug("-- dbconf = {}".format(dir(dbconf)))
+    #logging.debug("-- dbconf = {}".format(dir(dbconf)))
     if 'graph' in globals():
         print ("connect_db - already done")
     else:
@@ -218,13 +218,27 @@ class Person:
         """
         global graph
         return graph.cypher.execute(query,  pid=self.id)
-  
+
+    def join_persons(self, others):
+        """
+        Päähenkilöön self yhdistetään henkilöiden others tiedot ja tapahtumat
+        """
+        othersList = ""
+        for i in others:
+            otherslist.append(str(i) + " ")
+        logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), othersList))
+        pass
+    
     # Testi5
     def key (self):
         key = "{}:{}:{}:{}".format(self.id, 
               self.name.first, self.name.last, self.occupation);
         return key
-  
+
+    def __str__(self):
+        s = "Person {}:{} {}".format(self.id, self.firstname, self.lastname)
+        return s
+
 
 class Event:
     """ Tapahtuma
