@@ -36,7 +36,7 @@ def connect_db():
     """
     global graph
 
-    logging.debug("-- dbconf = {}".format(dir(dbconf)))
+    #logging.debug("-- dbconf = {}".format(dir(dbconf)))
     if 'graph' in globals():
         print ("connect_db - already done")
     elif 'DB_HOST_PORT' in dir(dbconf):
@@ -236,7 +236,27 @@ class Person:
         graph.create(key_node)
         key_person = Relationship(key_node, "KEY_PERSON", persoona)
         graph.create(key_person)
-        
+
+    def join_persons(self, others):
+        """
+        Päähenkilöön self yhdistetään henkilöiden others tiedot ja tapahtumat
+        """
+        othersList = ""
+        for i in others:
+            otherslist.append(str(i) + " ")
+        logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), othersList))
+        pass
+    
+    # Testi5
+    def key (self):
+        key = "{}:{}:{}:{}".format(self.id, 
+              self.name.first, self.name.last, self.occupation);
+        return key
+
+    def __str__(self):
+        s = "Person {}:{} {}".format(self.id, self.firstname, self.lastname)
+        return s
+
 
 class Event:
     """ Tapahtuma

@@ -3,16 +3,18 @@
 # JMä 29.12.2015
 
 import logging
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 app.config.from_pyfile('config.py') # instance-hakemistosta
+app.secret_key = "kuu on juustoa"
 
 from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
 import models.cvs_refnames      # Referenssinimien luonti
+import models.dataupdater       # Tietojen päivitysmetodit
 
 @app.route('/')
 def index(): 
@@ -20,25 +22,25 @@ def index():
     return render_template("index.html")
 
 #--------
-@app.route('/dbtest')
-def dbtest():
-    "Onkohan tietokantayhteyttä palvelimelle?"
-    #TODO Poista dbtest ja app.config -käyttö
-    try:
-        graph = Graph('http://{0}/db/data/'.format(app.config['DB_HOST_PORT']))
-        authenticate(app.config['DB_HOST_PORT'], 
-                     app.config['DB_USER'], app.config['DB_AUTH'])
-        query = "MATCH (p:Person) RETURN p.firstname, p.lastname LIMIT 5"
-        x = graph.cypher.execute(query).one
-        text = "Henkilö: {0}, {1}".format(x[0], x[1])
-        return redirect(url_for('db_test_tulos', text=text))
-
-    except Exception as e:
-        return redirect(url_for('db_test_tulos', text="Exception "+str(e)))
-    
-@app.route('/dbtest/tulos/<text>')
-def db_test_tulos(text=''):
-    return render_template("db_test.html", text=text)
+#@app.route('/dbtest')
+#def dbtest():
+#    "Onkohan tietokantayhteyttä palvelimelle?"
+#    #TODO Poista dbtest ja app.config -käyttö
+#    try:
+#        graph = Graph('http://{0}/db/data/'.format(app.config['DB_HOST_PORT']))
+#        authenticate(app.config['DB_HOST_PORT'], 
+#                     app.config['DB_USER'], app.config['DB_AUTH'])
+#        query = "MATCH (p:Person) RETURN p.firstname, p.lastname LIMIT 5"
+#        x = graph.cypher.execute(query).one
+#        text = "Henkilö: {0}, {1}".format(x[0], x[1])
+#        return redirect(url_for('db_test_tulos', text=text))
+#
+#    except Exception as e:
+#        return redirect(url_for('db_test_tulos', text="Exception "+str(e)))
+#    
+#@app.route('/dbtest/tulos/<text>')
+#def db_test_tulos(text=''):
+#    return render_template("db_test.html", text=text)
 #-------
 
 @app.route('/lataa1a', methods=['POST'])
@@ -170,6 +172,21 @@ def nimien_yhdistely():
     logging.debug('Poimitaan ' + names )
     return redirect(url_for('nayta_ehdolla', ehto='names='+names))
 
+@app.route('/samahenkilo', methods=['POST'])
+def henkiloiden_yhdistely():   
+    """ Yhdistetään base-henkilöön join-henkilöt tapahtumineen, 
+        minkä jälkeen näytetään muuttunut henkilölista
+    """
+    names = request.form['names']
+    print (dir(request.form))
+    base_id = request.form['base']
+    join_ids = request.form.getlist('join')
+    #TODO lisättävä valitut ref.nimet, jahka niitä tulee
+    models.dataupdater.joinpersons(base_id, join_ids)
+    flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
+    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+
+
 @app.route('/poimi/<string:ehto>')
 def nayta_ehdolla(ehto):   
     """ Nimien listaus tietokannasta ehtolauseella
@@ -202,8 +219,14 @@ def virhesivu(code, text=''):
     logging.debug('Virhesivu ' + str(code) )
     return render_template("virhe_lataus.html", code=code, text=text)
 
+
+
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    app.run(debug=True)
-    # tai vaikka app.run(host='0.0.0.0', port=80)
+    if True:
+        # Ajo paikallisesti
+        logging.basicConfig(level=logging.DEBUG)
+        app.run(debug='DEBUG')
+    else:
+        # Julkinen sovellus
+        app.run(host='0.0.0.0', port=80)
 

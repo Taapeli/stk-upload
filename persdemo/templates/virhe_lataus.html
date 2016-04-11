@@ -5,10 +5,10 @@
     {{ super() }}
     <h2>
     {% if code == 1 %}
-        Virheellinen syöttötiedosto.
+        Virheellinen syöttötiedosto
     {% else %}
         {% if code == 415 %}
-        Tiedoston lataaminen ei onnistu.
+        Tiedoston lataaminen ei onnistu
         {% else %}
         Tiedoston lataus ei onnistu, koodi={{code}}
         {% endif %}

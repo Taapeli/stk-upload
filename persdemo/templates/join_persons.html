@@ -3,67 +3,71 @@
 {% block title %}Henkilöiden yhdistäminen{% endblock %}
 {% block body %}
 {{ super() }}
-   
+<script>
+function myFunction(id, fn, ln) {
+    document.getElementById("tiedot").innerHTML = "<h3>Mahdollisia referenssinimiä</h3><p>Henkilö " + id +
+            "</p><h4>Etunimi " + fn + "</h4><ul>" + 
+        "<li><input type='radio' name='retu' value='Aleksi' /> Demo-Aleksi</li>" +
+    "</ul><h4>Sukunimi " + ln + "</h4><ul>" + 
+        "<li><input type='radio' name='rsuku' value='Andersson' /> Demo-Andersson (sukunimi)</li>" +
+        "<li><input type='radio' name='rsuku' value='Andersson:p' /> Demo-Andersson (patronyymi)</li>" +
+        "<li><input type='radio' name='rsuku' value='Antinpoika:p' /> Demo-Antinpoika (patronyymi)</li>" +
+    "</ul>";
+}</script>
+<h2>Henkilöiden yhdistely</h2>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul style='color: darkblue; border: solid 2pt darkblue; background-color: lightblue'>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<form action="/samahenkilo" method="post" enctype="multipart/form-data">
 <div id="lista">
     <p>Henkilöt, joiden nimi alkaa '{{pattern}}'</p>
-<table>
+       <input type="text" name="names" value="{{pattern}}" readonly hidden>
+    <ol style='border: solid 1pt gray; background-color: lightgoldenrodyellow'>
+        <li> Merkitse päähenkilö (1. valintasarake) ja yhdistettävät henkilöt (2. sarake)
+        <li> Poimi tarvittaessa referenssinimet vierestä <i>(ei vielä käytössä)</i>
+        <li> <input type="submit" value="Yhdistä valittuun päähenkilöön" />
+    </ol>
+<table width="100%">
     <tr><th><center>liitä o&Larr;x</center></th>
         <th>henkilö</th>
         <th>käräjät, signum</th>
-        <th>sama kuin</th>
     </tr>
 
 {% for p in persons %}
     {% set e = p.events[0] %}
-        <tr>
-            <td><center>
-                <input type="radio" name="base" value="{{p.id}}" />
-                <input type="checkbox" name="join" value="{{p.id}}" />
-                </center>
+    <tr>
+        <td><center>
+            <input type="radio" name="base" value="{{p.id}}"
+                   onchange="myFunction('{{p.id}}', '{{p.name.first}}', '{{p.name.last}}')"/>
+            <input type="checkbox" name="join" value="{{p.id}}" />
+            </center>
+        </td>
+        <td><span class="id">{{p.id}}</span>
+            {{p.name.first}} <b>{{p.name.last}}</b>
+            <i>{% if p.occupation %}{{p.occupation}}{% endif %}</i></td>
+        <td>{% if p.events|count %}<ul class="event">
+                {% for e in p.events %}
+                <li>{{e.name}} {{e.date}} {% if e.citation %}
+                ({% if e.citation.url %}<a href='{{e.citation.url}}'>{{e.citation.id}}</a>)
+                {% else %}{{e.citation.id}})
+                {% endif %}{% endif %}
+                </li>{% endfor %}</ul>
+            {% endif %}
             </td>
-            <td><span class="id">{{p.id}}</span>
-                {{p.name.first}} <b>{{p.name.last}}</b>
-                <i>{% if p.occupation %}{{p.occupation}}{% endif %}</i></td>
-            <td>{% if p.events|count %}<ul class="event">
-                    {% for e in p.events %}
-                    <li>{{e.name}} {{e.date}} {% if e.citation %}
-                    ({% if e.citation.url %}<a href='{{e.citation.url}}'>{{e.citation.id}}</a>)
-                    {% else %}{{e.citation.id}})
-                    {% endif %}{% endif %}
-                    </li>{% endfor %}</ul>
-                {% endif %}
-                </td>
-            <td><!--span class="id">P000013</span> Alexander Andersson <i>överste</i --></td>
-        </tr>
+    </tr>
 {% endfor %}    
-        <tr>
-            <td colspan="4">
-                1. Merkitse päähenkilö (1. valintasarake) ja yhdistettävät henkilöt (2. sarake)<br />
-                2. Poimi tarvittaessa referenssinimet vierestä<br />
-                3. <input type="submit" value="Yhdistä merkittyyn (ei tot.)" />
-            </td>
-        </tr>
     
 </table>
 </div>
 <div id="tiedot">
     <h3>Referenssinimiä</h3>
-    <h4>Etunimi</h4>
-    <ul>
-        <li><input type="radio" name="retu" value="Aleksi" /> Aleksi</li>
-        <li><input type="radio" name="retu" value="Aleksanteri" /> Aleksanteri</li>
-        <li><input type="radio" name="retu" value="Alex" /> Alex</li>
-    </ul>
-    <h4>Sukunimi</h4>
-    <ul>
-        <li><input type="radio" name="rsuku" value="Andersson" /> Andersson</li>
-        <li><input type="radio" name="rsuku" value="Andersen" /> Andersen</li>
-    </ul>
-    <h4>Patronyymi</h4>
-    <ul>
-        <li><input type="radio" name="rsuku" value="Andersson:p" /> Andersson</li>
-        <li><input type="radio" name="rsuku" value="Antinpoika:p" /> Antinpoika</li>
-    </ul>
+    <p>&nbsp;</p>
 </div>
-
+</form>
 {% endblock %}
