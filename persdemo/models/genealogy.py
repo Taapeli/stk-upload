@@ -24,6 +24,10 @@ from py2neo import Graph, Node, Relationship, authenticate
 import logging
 import instance.config as dbconf      # Tietokannan tiedot
 
+# -------------------------- Globaalit muuttujat -------------------------
+
+graph = Graph()
+
 # ---------------------------------- Funktiot ----------------------------------
 
 def connect_db():
@@ -35,14 +39,13 @@ def connect_db():
     #logging.debug("-- dbconf = {}".format(dir(dbconf)))
     if 'graph' in globals():
         print ("connect_db - already done")
+    elif 'DB_HOST_PORT' in dir(dbconf):
+        print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
+        authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
+        graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
     else:
-        if 'DB_HOST_PORT' in dir(dbconf):
-            print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
-            authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
-            graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
-        else:
-            print ("connect_db - default local")
-            graph = Graph()
+        print ("connect_db - default local")
+        graph = Graph()
 
     # Palautetaan tietokannan sijainnin hostname
     return graph.uri.host
@@ -166,6 +169,9 @@ class Person:
         else:
             # Henkilö ilman tapahtumaa (näitä ei taida aineistossamme olla)
             graph.create(persoona)
+            
+        key = self.key()
+        self.save_key(key=key,  persoona=persoona)
         
     def get_persons (max=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
@@ -209,7 +215,7 @@ class Person:
         query = """
             MATCH (n:Person) {0}  
             OPTIONAL MATCH (n)-->(e) 
-            RETURN n, collect(e) {1};""".format(where, qmax)
+            RETURN n, COLLECT(e) {1};""".format(where, qmax)
         return graph.cypher.execute(query)
 
     def get_events (self):
@@ -218,6 +224,18 @@ class Person:
         """
         global graph
         return graph.cypher.execute(query,  pid=self.id)
+  
+    def key (self):
+        "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
+        key =   "{}:{}/{}/:{}".format(self.id, \
+                self.name.first, self.name.last, self.occupation)
+        return key
+        
+    def save_key(self,  key=None,  persoona=None):
+        key_node = Node("Key", key=key)
+        graph.create(key_node)
+        key_person = Relationship(key_node, "KEY_PERSON", persoona)
+        graph.create(key_person)
 
     def join_persons(self, others):
         """
@@ -451,3 +469,70 @@ class Archieve:
     label = "Archieve"
 
     pass
+
+class UsedIds:
+    """ Last used ids
+        
+        Properties:
+            personid             00001 ...
+            eventid              00001 ...
+            referencenameid      00001 ...
+    """
+
+    label = "UsedIds"
+
+    def __init__(self):
+        self.personid = 1
+        self.eventid = 1
+        self.referencenameid = 1
+
+    def get_used_ids(self):
+        """ Fetch last used ids from the database.
+        """
+        global graph
+        query = """
+            MATCH (n:UsedIds) 
+            RETURN n;
+        """
+
+        return graph.cypher.execute(query)
+
+    def set_init_values(self):
+        """ Set init values to the database.
+        """
+        global graph
+
+        init_values = Node(self.label,\
+                personid=self.personid,\
+                eventid=self.eventid,\
+                referencenameid=self.referencenameid)
+
+        graph.create(init_values)
+
+    def get_new_id(self, idtype):
+        """ Update last used id to the database.
+        """
+        global graph
+
+        if idtype == "personid":
+            setstring = "SET n.personid = {}".format(self.personid)
+            id = make_id('P', self.personid)
+            self.personid += 1
+        elif idtype == "eventid":
+            setstring = "SET n.eventid = {}".format(self.eventid)
+            id = make_id('E', self.eventid)
+            self.eventid += 1
+        elif idtype == "referencenameid":
+            setstring = "SET n.referencenameid = {}".format(self.referencenameid)
+            id = make_id('R', self.referencenameid)
+            self.referencenameid += 1
+
+        query = """
+            MATCH (n:UsedIds) 
+            {}
+            RETURN n;
+        """.format(setstring)
+
+        graph.cypher.execute(query)
+        return id
+

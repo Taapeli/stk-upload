@@ -23,6 +23,21 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
     
     row_nro = 0
     tyhjia = 0
+
+    usedids = UsedIds()
+    all_usedids = usedids.get_used_ids()
+
+    if all_usedids:
+        usedids.personid =all_usedids[0].n.properties['personid']
+        usedids.eventid = all_usedids[0].n.properties['eventid']
+        usedids.referencenameid = all_usedids[0].n.properties['referencenameid']
+    else:
+         usedids.set_init_values()
+
+ #   msg = 'personid: {0}, eventid: {1}, referencenameid: {2}'.format(usedids.personid, \
+#                usedids.eventid,  usedids.referencenameid )
+#    logging.info(msg)
+    
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
         reader=csv.DictReader(f, dialect='excel')
         
@@ -33,7 +48,9 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
             row_nro += 1
             if max > 0 and row_nro > max:
                 break
-            rid = make_id('R', row_nro)
+#            rid = make_id('R', row_nro)
+            idtype = "referencenameid"
+            rid = usedids.get_new_id(idtype)
             nimi=row['Nimi'].strip()
             if nimi.__len__() == 0:
                 tyhjia += 1
@@ -48,11 +65,10 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
             source=row['Lähde']
             if row['Sukupuoli'].startswith('m'):
                 sp = 'M'
+            elif row['Sukupuoli'].startswith('n'):
+                sp = 'F'
             else:
-                if row['Sukupuoli'].startswith('n'):
-                    sp = 'F'
-                else:
-                    sp = ''
+                sp = ''
 
             # Luodaan Refname
             r = Refname(rid, 'fname', nimi)

@@ -203,14 +203,13 @@ def nayta_ehdolla(ehto):
             logging.info(vkey)
             
             return render_template("person.html", persons=persons)
+        elif key == 'names':
+            value=value.title()
+            persons = models.datareader.lue_henkilot(names=value)
+            return render_template("join_persons.html", 
+                                   persons=persons, pattern=value)
         else:
-            if key == 'names':
-                value=value.title()
-                persons = models.datareader.lue_henkilot(names=value)
-                return render_template("join_persons.html", 
-                                       persons=persons, pattern=value)
-            else:
-                raise(KeyError("Vain id:llä voi hakea"))
+            raise(KeyError("Vain id:llä voi hakea"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
