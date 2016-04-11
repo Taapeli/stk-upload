@@ -188,6 +188,30 @@ class Person:
         query = "MATCH (n:Person) {0} RETURN n {1};".format(where, qmax)
         return graph.cypher.execute(query)
 
+    def get_person_events (max=0, pid=None, names=None):
+        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
+            get_persons()               kaikki
+            get_persons(id='P000123')   tietty henkilö id:n mukaan poimittuna
+            get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
+            - lisäksi (max=100)         rajaa luettavien henkilöiden määrää
+        """
+        global graph
+        if max > 0:
+            qmax = "LIMIT " + str(max)
+        else:
+            qmax = ""
+        if pid:
+            where = "WHERE n.id='{}' ".format(pid)
+        elif names:
+            where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
+        else:
+            where = ""
+        query = """
+            MATCH (n:Person) {0}  
+            OPTIONAL MATCH (n)-->(e) 
+            RETURN n, collect(e) {1};""".format(where, qmax)
+        return graph.cypher.execute(query)
+
     def get_events (self):
         query = """
         MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) WHERE n.id = {pid} RETURN e;
