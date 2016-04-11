@@ -24,6 +24,10 @@ from py2neo import Graph, Node, Relationship, authenticate
 import logging
 import instance.config as dbconf      # Tietokannan tiedot
 
+# -------------------------- Globaalit muuttujat -------------------------
+
+graph = Graph()
+
 # ---------------------------------- Funktiot ----------------------------------
 
 def connect_db():
@@ -165,6 +169,9 @@ class Person:
         else:
             # Henkilö ilman tapahtumaa (näitä ei taida aineistossamme olla)
             graph.create(persoona)
+            
+        key = self.key()
+        self.save_key(key=key,  persoona=persoona)
         
     def get_persons (max=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä kannasta seuraavasti:
@@ -223,7 +230,13 @@ class Person:
         key =   "{}:{}/{}/:{}".format(self.id, \
                 self.name.first, self.name.last, self.occupation)
         return key
-
+        
+    def save_key(self,  key=None,  persoona=None):
+        key_node = Node("Key", key=key)
+        graph.create(key_node)
+        key_person = Relationship(key_node, "KEY_PERSON", persoona)
+        graph.create(key_person)
+        
 
 class Event:
     """ Tapahtuma
