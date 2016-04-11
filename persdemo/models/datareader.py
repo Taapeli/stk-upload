@@ -152,7 +152,8 @@ def lue_henkilot(id=None, names=None):
     #print ("Lue_henkilot:\n", retList[0])
     
     for row in retList:
-        thisPerson, thisEvent = row
+        # Saatu Person ja collection(Event)
+        thisPerson, theseEvents = row
         pid = thisPerson.properties['id']
         p = Person(pid)
         etu = thisPerson.properties['firstname']
@@ -162,12 +163,12 @@ def lue_henkilot(id=None, names=None):
         p.occupation = thisPerson.properties['occu']
         p.place= thisPerson.properties['place']
 
-        if thisEvent:
-            event_id = thisEvent.properties['id']
+        for gotEvent in theseEvents:
+            event_id = gotEvent.properties['id']
             e = Event(event_id, 'Käräjät')
-            e.name = thisEvent.properties['name']
-            e.date = thisEvent.properties['date']
-            e.name_orig = thisEvent.properties['name_orig']
+            e.name = gotEvent.properties['name']
+            e.date = gotEvent.properties['date']
+            e.name_orig = gotEvent.properties['name_orig']
             p.events.append(e)    
 
 #            c = Citation()

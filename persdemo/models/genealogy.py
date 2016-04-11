@@ -174,7 +174,7 @@ class Person:
         self.save_key(key=key,  persoona=persoona)
         
     def get_persons (max=0, pid=None, names=None):
-        """ Voidaan lukea henkilöitä kannasta seuraavasti:
+        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
             get_persons(id='P000123')   tietty henkilö id:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
@@ -215,7 +215,7 @@ class Person:
         query = """
             MATCH (n:Person) {0}  
             OPTIONAL MATCH (n)-->(e) 
-            RETURN n,e {1};""".format(where, qmax)
+            RETURN n, COLLECT(e) {1};""".format(where, qmax)
         return graph.cypher.execute(query)
 
     def get_events (self):
