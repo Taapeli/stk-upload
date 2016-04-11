@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # config.py oletusarvot
 DEBUG = False # Turns on debugging features in Flask
 

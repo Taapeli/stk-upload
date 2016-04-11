@@ -181,11 +181,10 @@ class Person:
             qmax = ""
         if pid:
             where = "WHERE n.id='{}' ".format(pid)
+        elif names:
+            where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
-            if names:
-                where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
-            else:
-                where = ""
+            where = ""
         query = "MATCH (n:Person) {0} RETURN n {1};".format(where, qmax)
         return graph.cypher.execute(query)
 
@@ -197,7 +196,7 @@ class Person:
         return graph.cypher.execute(query,  pid=self.id)
   
     # Testi5
-    def make_key (self):
+    def key (self):
         key = "{}:{}:{}:{}".format(self.id, 
               self.name.first, self.name.last, self.occupation);
         return key

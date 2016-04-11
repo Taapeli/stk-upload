@@ -20,25 +20,25 @@ def index():
     return render_template("index.html")
 
 #--------
-@app.route('/dbtest')
-def dbtest():
-    "Onkohan tietokantayhteyttä palvelimelle?"
-    #TODO Poista dbtest ja app.config -käyttö
-    try:
-        graph = Graph('http://{0}/db/data/'.format(app.config['DB_HOST_PORT']))
-        authenticate(app.config['DB_HOST_PORT'], 
-                     app.config['DB_USER'], app.config['DB_AUTH'])
-        query = "MATCH (p:Person) RETURN p.firstname, p.lastname LIMIT 5"
-        x = graph.cypher.execute(query).one
-        text = "Henkilö: {0}, {1}".format(x[0], x[1])
-        return redirect(url_for('db_test_tulos', text=text))
-
-    except Exception as e:
-        return redirect(url_for('db_test_tulos', text="Exception "+str(e)))
-    
-@app.route('/dbtest/tulos/<text>')
-def db_test_tulos(text=''):
-    return render_template("db_test.html", text=text)
+#@app.route('/dbtest')
+#def dbtest():
+#    "Onkohan tietokantayhteyttä palvelimelle?"
+#    #TODO Poista dbtest ja app.config -käyttö
+#    try:
+#        graph = Graph('http://{0}/db/data/'.format(app.config['DB_HOST_PORT']))
+#        authenticate(app.config['DB_HOST_PORT'], 
+#                     app.config['DB_USER'], app.config['DB_AUTH'])
+#        query = "MATCH (p:Person) RETURN p.firstname, p.lastname LIMIT 5"
+#        x = graph.cypher.execute(query).one
+#        text = "Henkilö: {0}, {1}".format(x[0], x[1])
+#        return redirect(url_for('db_test_tulos', text=text))
+#
+#    except Exception as e:
+#        return redirect(url_for('db_test_tulos', text="Exception "+str(e)))
+#    
+#@app.route('/dbtest/tulos/<text>')
+#def db_test_tulos(text=''):
+#    return render_template("db_test.html", text=text)
 #-------
 
 @app.route('/lataa1a', methods=['POST'])
@@ -182,7 +182,7 @@ def nayta_ehdolla(ehto):
         if key == 'id':
             persons = models.datareader.lue_henkilot(id=value)
             # Testi5
-            vkey  = persons[0].make_key()
+            vkey  = persons[0].key()
             logging.info(vkey)
             
             return render_template("person.html", persons=persons)
