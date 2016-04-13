@@ -53,12 +53,39 @@ def connect_db():
 def tyhjenna_kanta():
     """ Koko kanta tyhjennetään """
     logging.info('Tietokanta tyhjennetään!')
+    
     global graph
     graph.delete_all()
+
+    # Luodaan Refname:n rajoitteet ja indeksit, jos sellaisia ei näytä olevan    
+    sch = graph.schema
+    if not 'name' in sch.get_indexes('Refname'):
+        sch.create_uniqueness_constraint("Refname", "id")
+        sch.create_uniqueness_constraint("Refname", "name")
+        sch.create_index("Refname", "name")
+        sch.create_index("Refname", "reftype")
     
-def make_id(prefix, int):
-    """ Palautetaan rivinumeroa int vastaava id, esim. 'P00001' """
-    return prefix + str(int).zfill(5)
+    # Luodaan id-laskuri, jos se puuttuu
+    
+    
+def get_new_id():
+    """ Fetch a new object id from the database. All types of objects get
+        their id from a common series of numbers 1,2,3, ...
+        
+        Last used id is in the node :NextId, which is created if needed.
+        
+        NOTE: If you delete node :NextId, the numbering starts from 1 again!
+    """
+    # Fetch and update last used 'id + 1' from the database
+    
+    global graph
+    query = """
+        MERGE (n:NextId)
+        ON CREATE SET n.nextid=1
+        ON MATCH SET n.nextid = n.nextid + 1
+        RETURN n.nextid
+    """
+    return graph.cypher.execute(query).one
 
 # --------------------------------- Apuluokat ----------------------------------
 
@@ -106,7 +133,7 @@ class Date():
             # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
             t = '%s … %s' % (osat[0], osat[-1])
             if len(osat) > 2:
-                logging.warning('Aika korjattu: %s -> %s' % (id, t))
+                logging.warning('Aika korjattu: {} -> {}'.format(id, t))
 
         t = t.replace('.', '-')
         return t
@@ -133,11 +160,6 @@ class Person:
         self.id=id
         self.events = []
     
-    def make_id(int_id):
-        """ Palautetaan rivinumeroa int vastaava person_id, esim. 'P00001' """
-        # TODO: korvaa ohjelmissa Person.make_id(i) --> make_id('P', i)
-        return 'P'+str(int_id).zfill(5)
-
     def save(self):
         """ Tallennus kantaan. Edellytetään, että henkilölle on asetettu:
             - id
@@ -313,16 +335,13 @@ class Note:
 
 class Refname:
     """
-        ( Refname {id, luokka, nimi} ) -[reftype]-> (Refname)
-                   luokka = (etu, suku, paikka, ...)
-                   reftype = (refnimi, patronyymi, ...)
+        ( Refname {id, nimi} ) -[reftype]-> (Refname)
+                   reftype = (etunimi, sukunimi, patronyymi)
         Properties:                                             testiaineistossa
             id      R00001 ...                                  (rivinumerosta)
-            type    in REFTYPES                                 ('REFFIRST')
             name    1st letter capitalized                      (Nimi)
             refname the referenced name, if exists              (RefNimi)
             reftype which kind of reference refname points to   ('REFFIRST')
-            is_ref  true, if this is a reference name           (On_itse_refnimi)
             gender  gender 'F', 'M' or ''                       (Sukupuoli)
             source  points to Source                            (Lähde)
             
@@ -332,76 +351,78 @@ class Refname:
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
     label = "Refname"
-
-    __REFNAMETYPES = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
     __REFTYPES = ['REFFIRST', 'REFLAST', 'REFPATRO']
-    
-    def __init__(self, id, type='undef', nimi=None):
-        """ Luodaan referenssinimi (id, type, nimi)
+
+#   Type-muuttuja poistettu tarpeettomana. Esim. samasta nimestä "Persson" voisi
+#   olla linkki REFLAST nimeen "Pekanpoika" ja REFPATRO nimeen "Pekka".
+#   Ei tarvita useita soluja.
+#   __REFNAMETYPES = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
+
+    def __init__(self, nimi):
+        """ Luodaan referenssinimi (type, nimi)
         """
-        self.id=id
         # Nimi alkukirjain isolla, alku- ja loppublankot poistettuna
         if nimi:
             self.name = nimi.strip().title()
         else:
             self.name = None
-        if type in self.__REFNAMETYPES:
-            self.type = type
-        else:
-            self.type = self.__REFNAMETYPES[0]
-            logging.warning('Referenssinimen tyyppi ' + type + \
-                            ' hylätty. ' + self.__str__())
 
     def save(self):
         """ Referenssinimen tallennus kantaan. Edellytetään, että sille on asetettu:
-            - id (R...)
-            - type (fname)
             - name (Nimi)
-            - is_ref (On_itse_refnimi)
+            Tunniste luodaan tai käytetään sitä joka löytyi kannasta
+            - id (int)
             Lisäksi tallennetaan valinnaiset tiedot:
             - gender (Sukupuoli='M'/'N'/'')
             - source (Lähde merkkijonona)
             - reference (a:Refname {nimi='Nimi'})
                         -[r:Reftype]->
                         (b:Refname {nimi='RefNimi'})
-
         """
         # TODO: source pitäisi tallettaa Source-objektina
         
         global graph
 
         # Pakolliset tiedot
-        if self.id == None or self.name == None or self.type == None:
+        if self.name == None:
             raise NameError
-        
+            
         # Refname-noodi
-        instance = Node(self.label, id=self.id, name=self.name, type=self.type)
+        instance = Node(self.label, name=self.name)
         if 'gender' in dir(self):
             instance.properties["gender"] = self.gender
         if 'source' in dir(self):
             instance.properties["source"] = self.source
-        if 'is_ref' in dir(self):
-            instance.properties["is_ref"] = self.is_ref
-        logging.debug(self.id + ' tekeillä: ' + self.__str__())
+    
+        # Onko refnimi olemassa kannassa?
+        query = """
+            MATCH (a:Refname) 
+            WHERE a.name='{}' 
+            RETURN a.id;
+            """.format(self.name)
+        self.id = graph.cypher.execute(query).one
+        if self.id == None:
+            self.id = get_new_id()
+            logging.debug('{} tekeillä uusi: {}'.format(self.id, self.__str__()))
+        else:
+            logging.debug('{} tekeillä, ei id:tä! {}'.format(self.id, self.__str__()))
         
         # Luodaan viittaus referenssinimeen, jos on
         if 'refname' in dir(self):
             # Hae kannasta viitattu nimi tai luo uusi nimi
             viitattu = self.getref()
             if viitattu:
-                logging.debug(self.id + ' Viitattu löytyi: ' + viitattu.__str__())
-                # TODO: Viitattu.is_ref pitää asettaa, jos ei ole päällä
+                logging.debug('{} Viitattu löytyi: {}'.format(self.id, viitattu.__str__()))
             else:
-                id = "R1"+self.id[1:]
-                viitattu = Node(self.label, id=id, name=self.refname, 
-                                type=self.type, is_ref=True)
-                logging.debug(self.id + ' Viitattu luotiin: ' + viitattu.__str__())
+                vid = get_new_id()
+                viitattu = Node(self.label, id=vid, name=self.refname)
+                logging.debug('{} Viitattu luotiin: {}'.format(self.id, viitattu.__str__()))
                 
             # Luo yhteys referoitavaan nimeen
             r = Relationship(instance, self.reftype, viitattu)
             graph.create(r)
         else:
-            logging.debug(self.id + ' Viitattua ei ole')
+            logging.debug('{} Viitattua ei ole'.format(self.id))
             graph.merge(instance)
         
     def setref(self, refname, reftype):
@@ -409,25 +430,26 @@ class Refname:
         """
         # Ei luoda viittausta itseen
         if self.name == refname:
-            self.is_ref = True
+#            self.is_ref = True
             return
         # Viittaustiedot muistiin
         if reftype in self.__REFTYPES:
             self.refname = refname
             self.reftype = reftype
         else:
-            logging.warning('Referenssinimen viittaus ' + reftype + \
-                        ' hylätty. ' + self.__str__())
+            logging.warning( 
+                'Referenssinimen viittaus {} hylätty. '.format(reftype, 
+                self.__str__()))
 
     def getref(self):
-        """ Haetaan kannasta self:iin liittyvä Refname.
+        """ Haetaan kannasta self:istä viitattu Refname.
         """
         global graph
         query = """
-            MATCH (r:Refname) 
+            MATCH (r:Refname)-[:{1}]->(p:Refname) 
             WHERE r.name ='{0}' AND r.type='{1}' 
-            RETURN r;
-        """.format(self.refname, self.type)
+            RETURN p;
+        """.format(self.refname, self.reftype)
 
         return graph.cypher.execute(query).one
     
@@ -445,13 +467,13 @@ class Refname:
         return graph.cypher.execute(query)
             
     def __str__(self):
-        s = "Refname type:{0} name:'{1}'".format(self.type, self.name)
+        s = "Refname name:'{}'".format(self.name)
         if 'gender' in dir(self):
-            s += " {0}".format(self.gender)
+            s += " {}".format(self.gender)
         if 'is_ref' in dir(self):
             s += " ref=" + str(self.is_ref)
         if 'refname' in dir(self):
-            s += " -[{0}]-> (b: name='{1}')".format(self.reftype, self.refname)
+            s += " -[:{}]-> (name='{}')".format(self.reftype, self.refname)
         return s
 
 
@@ -469,70 +491,3 @@ class Archieve:
     label = "Archieve"
 
     pass
-
-class UsedIds:
-    """ Last used ids
-        
-        Properties:
-            personid             00001 ...
-            eventid              00001 ...
-            referencenameid      00001 ...
-    """
-
-    label = "UsedIds"
-
-    def __init__(self):
-        self.personid = 1
-        self.eventid = 1
-        self.referencenameid = 1
-
-    def get_used_ids(self):
-        """ Fetch last used ids from the database.
-        """
-        global graph
-        query = """
-            MATCH (n:UsedIds) 
-            RETURN n;
-        """
-
-        return graph.cypher.execute(query)
-
-    def set_init_values(self):
-        """ Set init values to the database.
-        """
-        global graph
-
-        init_values = Node(self.label,\
-                personid=self.personid,\
-                eventid=self.eventid,\
-                referencenameid=self.referencenameid)
-
-        graph.create(init_values)
-
-    def get_new_id(self, idtype):
-        """ Update last used id to the database.
-        """
-        global graph
-
-        if idtype == "personid":
-            setstring = "SET n.personid = {}".format(self.personid)
-            id = make_id('P', self.personid)
-            self.personid += 1
-        elif idtype == "eventid":
-            setstring = "SET n.eventid = {}".format(self.eventid)
-            id = make_id('E', self.eventid)
-            self.eventid += 1
-        elif idtype == "referencenameid":
-            setstring = "SET n.referencenameid = {}".format(self.referencenameid)
-            id = make_id('R', self.referencenameid)
-            self.referencenameid += 1
-
-        query = """
-            MATCH (n:UsedIds) 
-            {}
-            RETURN n;
-        """.format(setstring)
-
-        graph.cypher.execute(query)
-        return id
-
