@@ -22,6 +22,7 @@ Luokkamalli
 """
 from py2neo import Graph, Node, Relationship, authenticate
 import logging
+import sys
 import instance.config as dbconf      # Tietokannan tiedot
 
 # -------------------------- Globaalit muuttujat -------------------------
@@ -57,23 +58,35 @@ def tyhjenna_kanta():
     global graph
     graph.delete_all()
 
-    # Luodaan Refname:n rajoitteet ja indeksit, jos sellaisia ei näytä olevan    
     sch = graph.schema
-    if not 'name' in sch.get_indexes('Refname'):
-        sch.create_uniqueness_constraint("Refname", "id")
-        sch.create_uniqueness_constraint("Refname", "name")
-        sch.create_index("Refname", "name")
-        sch.create_index("Refname", "reftype")
     
-    # Luodaan id-laskuri, jos se puuttuu
-    
+    # Poistetaan vanhat rajoitteet ja indeksit
+    for uv in sch.get_uniqueness_constraints('Refname'):
+        try:
+            sch.drop_uniqueness_constraint('Refname', uv)
+        except:
+            logging.warning("drop_uniqueness_constraint ei onnistunut:", 
+                sys.exc_info()[0])
+    for iv in sch.get_indexes('Refname'):
+        try:
+            sch.drop_index('Refname', iv)
+        except:
+            logging.warning("drop_index ei onnistunut:", sys.exc_info()[0])
+
+    # Luodaan Refname:n rajoitteet ja indeksit    
+    refname_uniq = ["id", "name"]
+    refname_index = ["reftype"]
+    for u in refname_uniq:
+        sch.create_uniqueness_constraint("Refname", u)
+    for i in refname_index:
+        sch.create_index("Refname", i)
+        
     
 def get_new_id():
     """ Fetch a new object id from the database. All types of objects get
         their id from a common series of numbers 1,2,3, ...
         
         Last used id is in the node :NextId, which is created if needed.
-        
         NOTE: If you delete node :NextId, the numbering starts from 1 again!
     """
     # Fetch and update last used 'id + 1' from the database
