@@ -157,6 +157,8 @@ class Person:
             persoona.properties["occu"] = self.occupation
         if self.place:
             persoona.properties["place"] = self.place
+            
+        persoona.properties["key"] = self.key()
 
         if len(self.events) > 0:
             # Luodaan (Person)-->(Event) solmuparit
@@ -169,10 +171,7 @@ class Person:
         else:
             # Henkilö ilman tapahtumaa (näitä ei taida aineistossamme olla)
             graph.create(persoona)
-            
-        key = self.key()
-        self.save_key(key=key,  persoona=persoona)
-        
+                    
     def get_persons (max=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
@@ -230,12 +229,6 @@ class Person:
         key =   "{}:{}/{}/:{}".format(self.id, \
                 self.name.first, self.name.last, self.occupation)
         return key
-        
-    def save_key(self,  key=None,  persoona=None):
-        key_node = Node("Key", key=key)
-        graph.create(key_node)
-        key_person = Relationship(key_node, "KEY_PERSON", persoona)
-        graph.create(key_person)
 
     def join_persons(self, others):
         """
