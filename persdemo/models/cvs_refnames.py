@@ -57,7 +57,7 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
             r = Refname(nimi)
             if ref_name != '':
                 # Tullaan viittaamaan tähän nimeen
-                r.setref(ref_name, 'REFFIRST')
+                r.mark_reference(ref_name, 'REFFIRST')
             if sp != '':
                 r.gender = sp
             if sp != '':

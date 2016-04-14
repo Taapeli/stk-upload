@@ -158,14 +158,14 @@ def nayta_refnimet():
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
     connect_db()
-    tyhjenna_kanta()
+    alusta_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
 
 @app.route('/yhdista', methods=['POST'])
 def nimien_yhdistely():   
     """ Nimien listaus tietokannasta ehtolauseella
-        id=arvo         näyttää nimetyn henkilön
+        oid=arvo        näyttää nimetyn henkilön
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
     names = request.form['names']
@@ -190,14 +190,14 @@ def henkiloiden_yhdistely():
 @app.route('/poimi/<string:ehto>')
 def nayta_ehdolla(ehto):   
     """ Nimien listaus tietokannasta ehtolauseella
-        id=arvo         näyttää nimetyn henkilön
+        oid=arvo        näyttää nimetyn henkilön
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
     key, value = ehto.split('=')
     connect_db()
     try:
-        if key == 'id':
-            persons = models.datareader.lue_henkilot(id=value)
+        if key == 'oid':
+            persons = models.datareader.lue_henkilot(oid=value)
             # Testi5
 #            vkey  = persons[0].key()
 #            logging.info(vkey)
@@ -209,7 +209,7 @@ def nayta_ehdolla(ehto):
             return render_template("join_persons.html", 
                                    persons=persons, pattern=value)
         else:
-            raise(KeyError("Vain id:llä voi hakea"))
+            raise(KeyError("Vain oid:llä voi hakea"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
