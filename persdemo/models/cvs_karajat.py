@@ -40,7 +40,7 @@ def karajat_loader(pathname):
 
             # Luodaan rivitieto tulostettavaksi
             rivi = dict( \
-                id=rid, \
+                oid=rid, \
                 nimi=nimi, \
                 refnimi=ref, \
                 onref=on_ref, \
@@ -65,5 +65,5 @@ if __name__ == '__main__':
         
     rivit = karajat_loader(sys.argv[1])
     for r in rivit:
-        print("{0}: {1:20s}{2:20s}{3} {4:1s} ({5:s})".format( r['id'],
+        print("{0}: {1:20s}{2:20s}{3} {4:1s} ({5:s})".format( r['oid'],
             r['nimi'], r['refnimi'], r['onref'], r['sp'], r['source']) )

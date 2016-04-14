@@ -15,7 +15,7 @@ palvelimelta <i>{{uri}}</i>
 
 <section id="lista">
 <table>
-    <tr><th>id</th>
+    <tr><th>oid</th>
         <th>nimi</th>
         <th>ammatti</th>
         <th>paikka</th>
@@ -26,19 +26,19 @@ palvelimelta <i>{{uri}}</i>
 {% if persons %}
     {% for p in persons %}
         {% set e = p.events[0] %}
-        <tr onmouseover="info('{{p.id}}', '{{p.name.last}}, {{p.name.fist}}',
+        <tr onmouseover="info('{{p.oid}}', '{{p.name.last}}, {{p.name.fist}}',
             '{% if p.occupation %}{{p.occupation}}{% endif %}', 
             '{% if p.place %}{{p.place}}{% endif %}', '{{e.nimi}}', '{{e.aika}}', 
             '{% if e.citation %}{{e.citation.id}}{% endif %})')" >
-            <td class="id"><a href="/poimi/id={{p.id}}">{{p.id}}</a></td>
+            <td class="id"><a href="/poimi/id={{p.oid}}">{{p.oid}}</a></td>
             <td>{{p.name.first}} <b> {{p.name.last}}</b></td>
             <td>{% if p.occupation %}{{p.occupation}}{% endif %}</td>
             <td>{% if p.place %}{{p.place}}{% endif %}</td>
             <td>{{e.name}}</td>
             <td nowrap>{{e.date}}</td>
             <td>{% if e.citation %}{% if e.citation.url %}
-                <a href='{{e.citation.url}}'>{{e.citation.id}}</a>
-                {% else %}{{e.citation.id}}
+                <a href='{{e.citation.url}}'>{{e.citation.oid}}</a>
+                {% else %}{{e.citation.oid}}
                 {% endif %}{% endif %}</td>
         </tr>
     {% endfor %}

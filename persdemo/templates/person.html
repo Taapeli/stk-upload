@@ -9,7 +9,7 @@
     <ol id="itemlist">
         <li class="itemrow">
                 <div class="col1">Tunniste</div>
-                <div class="col2">{{p.id}}</div>
+                <div class="col2">{{p.oid}}</div>
                 <div class="also"></div>
         </li>
         <li class="itemrow">
@@ -33,7 +33,7 @@
         {% for e in p.citation %}
         <li><div class="itemrow">
                 <div class="col1">Paikka, aika</div>
-                <div class="col1">{{e.id}}<br />Signum:
+                <div class="col1">{{e.oid}}<br />Signum:
                 <a href='http://www.narc.fi/Arkistolaitos/tma/kaki/tth/tth1.htm'>
                     {{e.signum}}</a>
                 </div>

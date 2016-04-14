@@ -28,7 +28,7 @@ table, th, td {
     text-align: left;
     vertical-align: text-top;
 }
-.id { color: sienna; }
+.id { color: sienna; text-align: right; }
 .typevar { font-size: 80%; font-style: italic;
     text-align: center;
 }

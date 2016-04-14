@@ -6,7 +6,7 @@ import logging
 from models.genealogy import *  # Tietokannan luokat
 
 def joinpersons(base_id, join_ids):
-    """ Yhdistetään henkilöön id=base_id toiset henkilöt, joiden id:t on
+    """ Yhdistetään henkilöön oid=base_id toiset henkilöt, joiden oid:t on
         listassa join_ids.
         
         Yhdistämisen tulisi koskea attribuutteja ja tapahtumia, 

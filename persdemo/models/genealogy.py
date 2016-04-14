@@ -6,18 +6,18 @@
 Luokkamalli
     ( User {uid, nimi} )
 
-    ( Person {id, gender, norm_name} )    --> (Event)
-    ( Event {id, name, aika} )            --> (Place), (Citation), (Name)
-    ( Name {id, orig, etu, suku, patro} ) --> (RefName)
-    ( Place {id, orig, nimi} )            --> (RefName)
-    ( Note {id, teksti, url} )
-    ( RefName {id, luokka, nimi} )        -[reftype]-> (RefName)
+    ( Person {oid, gender, norm_name} )    --> (Event)
+    ( Event {oid, name, aika} )            --> (Place), (Citation), (Name)
+    ( Name {oid, orig, etu, suku, patro} ) --> (RefName)
+    ( Place {oid, orig, nimi} )            --> (RefName)
+    ( Note {oid, teksti, url} )
+    ( RefName {oid, luokka, nimi} )        -[reftype]-> (RefName)
                    luokka = (etu, suku, paikka, ...)
                    reftype = (refnimi, patronyymi, ...)
-    ( Citation {id, nimi, aika} )         --> (Source)
-    ( Source {id, nimi, aika} )           --> (Archieve)
-    ( Archieve {id, nimi} )
-    ( Migration {id, aika} )        -[from]-> (Place), -[to]-> (Place)
+    ( Citation {oid, nimi, aika} )         --> (Source)
+    ( Source {oid, nimi, aika} )           --> (Archieve)
+    ( Archieve {oid, nimi} )
+    ( Migration {oid, aika} )        -[from]-> (Place), -[to]-> (Place)
 
 """
 from py2neo import Graph, Node, Relationship, authenticate
@@ -400,7 +400,7 @@ class Refname:
             self.oid = get_new_oid()
             logging.debug('{} tekeillä uusi {}'.format(self.oid, str(self)))
         else:
-            logging.debug('{} päivitetään vanhaa {}'.format(self.oid, str(self)))
+            logging.debug('{} päivitetään vanhaa EI TOIMI {}'.format(self.oid, str(self)))
 
         # Luodaan Refname-noodi
         instance = Node(self.label, name=self.name)
@@ -483,13 +483,13 @@ class Refname:
         return graph.cypher.execute(query)
 
     def __str__(self):
-        s = "({}:Refname {name='{}'".format(seld.oid, self.name)
+        s = "({}:Refname {}name='{}'".format(self.oid, '{', self.name)
         if 'gender' in dir(self):
             s += " {}".format(self.gender)
         if 'is_ref' in dir(self):
             s += " ref=" + str(self.is_ref)
         if 'refname' in dir(self):
-            s += "}) -[:{}]-> (name='{}')".format(self.reftype, self.refname)
+            s += "{}) -[:{}]-> (name='{}')".format('}', self.reftype, self.refname)
         return s
 
 

@@ -4,8 +4,8 @@
 {% block body %}
 {{ super() }}
 <script>
-function myFunction(id, fn, ln) {
-    document.getElementById("tiedot").innerHTML = "<h3>Mahdollisia referenssinimiä</h3><p>Henkilö " + id +
+function myFunction(oid, fn, ln) {
+    document.getElementById("tiedot").innerHTML = "<h3>Mahdollisia referenssinimiä</h3><p>Henkilö " + oid +
             "</p><h4>Etunimi " + fn + "</h4><ul>" + 
         "<li><input type='radio' name='retu' value='Aleksi' /> Demo-Aleksi</li>" +
     "</ul><h4>Sukunimi " + ln + "</h4><ul>" + 
@@ -43,19 +43,19 @@ function myFunction(id, fn, ln) {
     {% set e = p.events[0] %}
     <tr>
         <td><center>
-            <input type="radio" name="base" value="{{p.id}}"
-                   onchange="myFunction('{{p.id}}', '{{p.name.first}}', '{{p.name.last}}')"/>
-            <input type="checkbox" name="join" value="{{p.id}}" />
+            <input type="radio" name="base" value="{{p.oid}}"
+                   onchange="myFunction('{{p.oid}}', '{{p.name.first}}', '{{p.name.last}}')"/>
+            <input type="checkbox" name="join" value="{{p.oid}}" />
             </center>
         </td>
-        <td><span class="id">{{p.id}}</span>
+        <td><span class="id">{{p.oid}}</span>
             {{p.name.first}} <b>{{p.name.last}}</b>
             <i>{% if p.occupation %}{{p.occupation}}{% endif %}</i></td>
         <td>{% if p.events|count %}<ul class="event">
                 {% for e in p.events %}
                 <li>{{e.name}} {{e.date}} {% if e.citation %}
-                ({% if e.citation.url %}<a href='{{e.citation.url}}'>{{e.citation.id}}</a>)
-                {% else %}{{e.citation.id}})
+                ({% if e.citation.url %}<a href='{{e.citation.url}}'>{{e.citation.oid}}</a>)
+                {% else %}{{e.citation.oid}})
                 {% endif %}{% endif %}
                 </li>{% endfor %}</ul>
             {% endif %}

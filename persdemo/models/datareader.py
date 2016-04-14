@@ -11,7 +11,6 @@ def _poimi_(person_id, event_id, row, url):
     """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
     """
 
-#    person_id = Person.make_id(row_nro)
     suku=row['Sukunimi_vakioitu']
     etu=row['Etunimi_vakioitu']
 
@@ -41,7 +40,7 @@ def _poimi_(person_id, event_id, row, url):
 
     c = Citation()
     c.tyyppi = 'Signum'
-    c.id = row['Signum']
+    c.oid = row['Signum']
     c.url = url
     c.name_orig = row['Signum']
     c.source = Source()
@@ -94,16 +93,6 @@ def datastorer(pathname):
     row_nro = 0
     url = ''
 
-    usedids = UsedIds()
-    all_usedids = usedids.get_used_ids()
-
-    if all_usedids:
-        usedids.personid =all_usedids[0].n.properties['personid']
-        usedids.eventid = all_usedids[0].n.properties['eventid']
-        usedids.referencenameid = all_usedids[0].n.properties['referencenameid']
-    else:
-         usedids.set_init_values()
-
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f, dialect='excel')
 
@@ -125,10 +114,8 @@ def datastorer(pathname):
                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
                 continue
                 
-            idtype = "personid"
-            person_id = usedids.get_new_id(idtype)
-            idtype = "eventid"
-            event_id = usedids.get_new_id(idtype)
+            person_id = get_new_oid()
+            event_id = get_new_oid()
             
             p = _poimi_(person_id,  event_id, row, url)
     
@@ -139,22 +126,22 @@ def datastorer(pathname):
     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
     return message
 
-def lue_henkilot(id=None, names=None):
+def lue_henkilot(oid=None, names=None):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
-        Jos id on annettu, luetaan vain se henkilö, jonka id täsmää
+        Jos oid on annettu, luetaan vain se henkilö, jonka oid täsmää
     """
     # TODO: Poista määrän rajoitus max=100
     
     persons = []
     t0 = time.time()
-    retList = Person.get_person_events(max=100, pid=id, names=names)
+    retList = Person.get_person_events(max=100, pid=oid, names=names)
     #print ("Lue_henkilot:\n", retList[0])
     
     for row in retList:
         # Saatu Person ja collection(Event)
         thisPerson, theseEvents = row
-        pid = thisPerson.properties['id']
+        pid = thisPerson.properties['oid']
         p = Person(pid)
         etu = thisPerson.properties['firstname']
         suku = thisPerson.properties['lastname']
@@ -164,7 +151,7 @@ def lue_henkilot(id=None, names=None):
         p.place= thisPerson.properties['place']
 
         for gotEvent in theseEvents:
-            event_id = gotEvent.properties['id']
+            event_id = gotEvent.properties['oid']
             e = Event(event_id, 'Käräjät')
             e.name = gotEvent.properties['name']
             e.date = gotEvent.properties['date']
@@ -173,7 +160,7 @@ def lue_henkilot(id=None, names=None):
 
 #            c = Citation()
 #            c.tyyppi = 'Signum'
-#            c.id = 'Testi3'
+#            c.oid = 'Testi3'
 #            c.url = url
 #            c.source = Source()
 #            c.source.nimi = 'Testi3'
@@ -196,22 +183,18 @@ def lue_refnames():
     for n,f,m in v_names:
 #>>> n
 #<Node graph='http://localhost:7474/db/data/' ref='node/24610' labels={'Refname'} 
-#   properties={'id': 'R00001', 'name': 'Aabeli', 'type': 'fname'}>
+#   properties={'oid': 123, 'name': 'Aabeli'}>
 #>>> f
 #<Relationship graph='http://localhost:7474/db/data/' ref='relationship/10737' 
 #   start='node/24610' end='node/24611' type='REFFIRST' properties={}>
 #>>> m
 #<Node graph='http://localhost:7474/db/data/' ref='node/24611' labels={'Refname'} 
-#   properties={'id': 'R100001', 'name': 'Aapeli', 'type': 'fname'}>
+#   properties={'oid': 124, 'name': 'Aapeli'}>
 
-        #logging.debug("n=" + n.__str__())
-        #logging.debug("--> m=" + m.__str__())
-        rid = n.properties['id']
-        r = Refname(rid)
-        r.type = n.properties['type']
-        r.name = n.properties['name']
-        #logging.debug("** name={}, is_ref={}".format(r.name, n.properties['is_ref']))
-        r.is_ref = n.properties['is_ref']    # näinkö?
+        logging.debug("n=" + str(n))
+        logging.debug("--> m=" + str(m))
+        r = Refname(n.properties['name'])
+        r.oid = n.properties['oid']
         r.gender = n.properties['gender']
         r.source= n.properties['source']
         

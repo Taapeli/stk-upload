@@ -148,11 +148,11 @@ def nayta_henkilot():
 def nayta_refnimet():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
     connect_db()
-    try:
-        names = models.datareader.lue_refnames()
-        return render_template("table_refnames.html", names=names)
-    except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+#    try:
+    names = models.datareader.lue_refnames()
+    return render_template("table_refnames.html", names=names)
+#    except Exception as e:
+#        return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   

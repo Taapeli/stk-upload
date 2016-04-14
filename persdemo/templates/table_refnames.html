@@ -12,8 +12,7 @@
 <p>Mukana {{names|count}} nimeä</p>
 <section id="lista">
 <table style="width:500pt">
-    <tr><th>id</th>
-        <th class="center">tyyppi</th>
+    <tr><th>oid</th>
         <th>nimi</th>
         <th class="center">viittaus</th>
         <th>ref.nimi</th>
@@ -22,9 +21,9 @@
     </tr>
     {% for r in names %}
         <tr>
-            <td class="id">{{r.id}}</td>
-            <td class="typevar">{{tp[r.type]}}</td>
-            <td>{% if r.is_ref %}<b>{% endif %}{{r.name}}{% if r.is_ref %}</b>{% endif %}</td>
+            <td class="id">{{r.oid}}</td>
+            <td>{% if not r.refname %}<b>{% endif %}{{r.name}}
+                {% if not r.refname %}</b>{% endif %}</td>
             <td class="typevar">{{rt[r.reftype]}}</td>
             <td>{{r.refname}}</td>
             <td class="center">{% if r.gender %}{{sp[r.gender]}}{% endif %}</td>
