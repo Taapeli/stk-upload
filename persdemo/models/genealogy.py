@@ -262,8 +262,7 @@ class Person:
   
     def key (self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
-        key =   "{}:{}/{}/:{}".format(self.oid, \
-                self.name.first, self.name.last, self.occupation)
+        key =   "{}/{}/:{}".format(self.name.first, self.name.last, self.occupation)
         return key
 
     def join_persons(self, others):
@@ -276,12 +275,6 @@ class Person:
         logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), othersList))
         pass
     
-    # Testi5
-    def key (self):
-        key = "{}:{}:{}:{}".format(self.oid, 
-              self.name.first, self.name.last, self.occupation);
-        return key
-
     def __str__(self):
         s = "Person {}:{} {}".format(self.oid, self.firstname, self.lastname)
         return s
@@ -397,47 +390,47 @@ class Refname:
         # Onko refnimi jo kannassa?
         self.oid = self.find_refname_id()
         
-        if self.oid == None:
+        if self.oid != None:
+            logging.debug('{} päivitetään vanhaa EI TOIMI {}'.format(self.oid, str(self)))
+        else:
             self.oid = get_new_oid()
             logging.debug('{} tekeillä uusi {}'.format(self.oid, self))
-        else:
-            logging.debug('{} päivitetään vanhaa EI TOIMI {}'.format(self.oid, str(self)))
 
-        # Luodaan Refname-noodi
-        instance = Node(self.label, name=self.name)
-        if self.oid:
-            instance.properties["oid"] = self.oid
-        else:
-            raise ValueError("Pakollinen tieto 'oid' puuttuu")
-
-        if 'gender' in dir(self):
-            instance.properties["gender"] = self.gender
-        if 'source' in dir(self):
-            instance.properties["source"] = self.source
-
-        # Luodaan viittaus referenssinimeen, jos on
-        if 'refname' in dir(self):
-            # Hae kannasta viitattu nimi tai luo uusi nimi
-            viitattu = self.find_the_refname()
-            if viitattu:
-                logging.debug('{} Viitattu löytyi: {}'.format(self.oid, viitattu))
+            # Luodaan Refname-noodi
+            instance = Node(self.label, name=self.name)
+            if self.oid:
+                instance.properties["oid"] = self.oid
             else:
-                vid = get_new_oid()
-                viitattu = Node(self.label, oid=vid, name=self.refname)
-                logging.debug('{} Viitattu luodaan: {}'.format(self.oid, viitattu))
+                raise ValueError("Pakollinen tieto 'oid' puuttuu")
+
+            if 'gender' in dir(self):
+                instance.properties["gender"] = self.gender
+            if 'source' in dir(self):
+                instance.properties["source"] = self.source
+
+            # Luodaan viittaus referenssinimeen, jos on
+            if 'refname' in dir(self):
+                # Hae kannasta viitattu nimi tai luo uusi nimi
+                viitattu = self.find_the_refname()
+                if viitattu:
+                    logging.debug('{} Viitattu löytyi: {}'.format(self.oid, viitattu))
+                else:
+                    vid = get_new_oid()
+                    viitattu = Node(self.label, oid=vid, name=self.refname)
+                    logging.debug('{} Viitattu luodaan: {}'.format(self.oid, viitattu))
                 
-            # Luo yhteys referoitavaan nimeen
-            r = Relationship(instance, self.reftype, viitattu)
-            try:
-                graph.create(r)
-            except Exception as e:
-                flash('Päivittäminen ei onnistunut: {}.'\
-                    'nimi {}, viitattu nimi {}'.\
-                    format(e, instance, viitattu))
-                logging.warning('Päivittäminen ei onnistunut: {}'.format(e))
-        else:
-            logging.debug('{} Viitattua ei ole'.format(self.oid))
-            graph.merge(instance)
+                # Luo yhteys referoitavaan nimeen
+                r = Relationship(instance, self.reftype, viitattu)
+                try:
+                    graph.create(r)
+                except Exception as e:
+                    flash('Päivittäminen ei onnistunut: {}.'\
+                        'nimi {}, viitattu nimi {}'.\
+                        format(e, instance, viitattu))
+                    logging.warning('Päivittäminen ei onnistunut: {}'.format(e))
+            else:
+                logging.debug('{} Viitattua ei ole'.format(self.oid))   
+                graph.merge(instance)
 
     def find_the_refname(self):
         """ Haetaan kannasta self:istä viitattu Refname.
