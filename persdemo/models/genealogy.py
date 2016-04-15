@@ -21,6 +21,7 @@ Luokkamalli
 
 """
 from py2neo import Graph, Node, Relationship, authenticate
+from flask import flash
 import logging
 import sys
 import instance.config as dbconf      # Tietokannan tiedot
@@ -398,7 +399,7 @@ class Refname:
         
         if self.oid == None:
             self.oid = get_new_oid()
-            logging.debug('{} tekeillä uusi {}'.format(self.oid, str(self)))
+            logging.debug('{} tekeillä uusi {}'.format(self.oid, self))
         else:
             logging.debug('{} päivitetään vanhaa EI TOIMI {}'.format(self.oid, str(self)))
 
@@ -419,15 +420,21 @@ class Refname:
             # Hae kannasta viitattu nimi tai luo uusi nimi
             viitattu = self.find_the_refname()
             if viitattu:
-                logging.debug('{} Viitattu löytyi: {}'.format(self.oid, str(viitattu)))
+                logging.debug('{} Viitattu löytyi: {}'.format(self.oid, viitattu))
             else:
                 vid = get_new_oid()
                 viitattu = Node(self.label, oid=vid, name=self.refname)
-                logging.debug('{} Viitattu luodaan: {}'.format(self.oid, str(viitattu)))
+                logging.debug('{} Viitattu luodaan: {}'.format(self.oid, viitattu))
                 
             # Luo yhteys referoitavaan nimeen
             r = Relationship(instance, self.reftype, viitattu)
-            graph.create(r)
+            try:
+                graph.create(r)
+            except Exception as e:
+                flash('Päivittäminen ei onnistunut: {}.'\
+                    'nimi {}, viitattu nimi {}'.\
+                    format(e, instance, viitattu))
+                logging.warning('Päivittäminen ei onnistunut: {}'.format(e))
         else:
             logging.debug('{} Viitattua ei ole'.format(self.oid))
             graph.merge(instance)
@@ -489,7 +496,8 @@ class Refname:
         if 'is_ref' in dir(self):
             s += " ref=" + str(self.is_ref)
         if 'refname' in dir(self):
-            s += "{}) -[:{}]-> (name='{}')".format('}', self.reftype, self.refname)
+            s += "{}) -[:{}]-> (:Refname {}name='{}'".format('}', self.reftype, self.refname, '{')
+        s += "{})".format('}')
         return s
 
 

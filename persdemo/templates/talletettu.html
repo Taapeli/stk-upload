@@ -4,6 +4,15 @@
 {% block body %}
     {{ super() }}
     <h2>Tietojen talletus kantaan{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul style='color: darkblue; border: solid 2pt darkblue; background-color: lightblue'>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
     {% if text %}
     <p>{{text}}</p>
     {% endif %}
