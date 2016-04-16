@@ -203,7 +203,12 @@ class Person:
                 tapahtuma = Node(Event.label, oid=event.oid, kind=event.kind, \
                         name=event.name, date=event.date)
                 osallistui = Relationship(persoona, "OSALLISTUI", tapahtuma)
+            try:
                 graph.create(osallistui)
+            except Exception as e:
+                flash('Lisääminen ei onnistunut: {}. henkilö {}, tapahtuma {}'.\
+                    format(e, persoona, tapahtuma))
+                logging.warning('Lisääminen ei onnistunut: {}'.format(e))
         else:
             # Henkilö ilman tapahtumaa (näitä ei taida aineistossamme olla)
             graph.create(persoona)
@@ -254,6 +259,7 @@ class Person:
         return graph.cypher.execute(query)
 
     def get_events (self):
+        "HEataan henkilön tapahtumat. (Ei käytössä!) "
         query = """
  MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) 
  WHERE n.oid = {pid} 
