@@ -27,16 +27,17 @@
                 <div class="col2">{{p.place}}</div>
         </li>
     </ol>
-    {% if p.citation %}
+    {% if p.events %}
     <h4>Ollut käräjillä</h4>
     <ol class="num">
-        {% for e in p.citation %}
+        {% for e in p.events %}
         <li><div class="itemrow">
-                <div class="col1">Paikka, aika</div>
-                <div class="col1">{{e.oid}}<br />Signum:
+                <div class="col1">Tunniste, paikka</div>
+                <div class="col1"><span class="id">{{e.oid}}</span><br/> {{e.name}}
+                {% if e.signum %}<br />Signum:
                 <a href='http://www.narc.fi/Arkistolaitos/tma/kaki/tth/tth1.htm'>
                     {{e.signum}}</a>
-                </div>
+                </div>{% endif %}
             </div>
         </li>
         {% endfor %}

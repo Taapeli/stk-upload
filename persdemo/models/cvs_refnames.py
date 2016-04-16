@@ -44,7 +44,6 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
             except KeyError:
                 raise
 
-            on_ref=(row['On_itse_refnimi'].lower().startswith('k'))
             source=row['Lähde']
             if row['Sukupuoli'].startswith('m'):
                 sp = 'M'
@@ -55,22 +54,31 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
 
             # Luodaan Refname
             r = Refname(nimi)
-            if ref_name != '':
+            if (ref_name != '') and (ref_name != nimi):
                 # Tullaan viittaamaan tähän nimeen
-                r.mark_reference(ref_name, 'REFFIRST')
+                #r.mark_reference(ref_name, 'REFFIRST')
+                # Laitetaan muistiin, että self viittaa refname'een
+                reftype = 'REFFIRST'
+                if reftype in r.REFTYPES:
+                    r.refname = ref_name
+                    r.reftype = reftype
+                    logging.debug("cvs_refnames: {0} --> {1}".format(nimi, ref_name))
+                else:
+                    logging.warning('cvs_refnames: Referenssinimen viittaus {} hylätty. '.format(reftype, self))
             if sp != '':
                 r.gender = sp
-            if sp != '':
+            if source != '':
                 r.source = source
-                
-            # Tallettaa Refname-olion ja mahdollisen yhteyden referenssinimeen
-            # (a:Refname {nimi='Nimi'})
-            #   -[r:Reftype]->
-            #   (b:Refname {nimi='RefNimi'})
+
+            """
+            Tallettaa Refname-olion ja mahdollisen yhteyden referenssinimeen:
+            
+            (a:Refname {nimi='Nimi'}) -[r:Reftype]-> (b:Refname {nimi='RefNimi'})
+            """
             r.save()
 
     msg = '{0}: {1} riviä, {2} ohitettu'.format(pathname, row_nro, tyhjia)
-    if max > 0:
+    if max > 0 and row_nro > max:
         msg = msg + ". KATKAISTU {0} nimen kohdalta".format(max)
     logging.info(msg)
     return (msg)

@@ -60,12 +60,13 @@ li.itemrow {
 }
 .itemrow div.col1 {
     display: inline-block;
-    width: 80pt;
+    width: 150pt;
+    vertical-align:top;
     padding-right: 5pt;
 }
 .itemrow div.col2 {
     display: inline-block;
-    width: 150pt;
+    width: 200pt;
 }
 .itemrow div.also { 
     display: inline-block;

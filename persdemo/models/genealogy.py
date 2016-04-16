@@ -94,11 +94,10 @@ def get_new_oid():
 
     global graph
     query = """
-        MERGE (n:NextId)
-        ON CREATE SET n.nextid=1
-        ON MATCH SET n.nextid = n.nextid + 1
-        RETURN n.nextid
-    """
+ MERGE (n:NextId)
+ ON CREATE SET n.nextid=1
+ ON MATCH SET n.nextid = n.nextid + 1
+ RETURN n.nextid"""
     return graph.cypher.execute(query).one
 
 # --------------------------------- Apuluokat ----------------------------------
@@ -128,7 +127,8 @@ class User:
         return ( User(username, name), )
     
     def __str__(self):
-        return "User username=" + self.oid + ", nimi=" + self.name;
+        return "(User {}username={}, name={}{})".format('{',
+                self.oid, self.name);
 
 class Date():
     """ Päivämäärän muuntofunktioita """
@@ -200,7 +200,7 @@ class Person:
             # Luodaan (Person)-->(Event) solmuparit
             for event in self.events:
                 # Tapahtuma-noodi
-                tapahtuma = Node(Event.label, oid=event.oid, type=event.type, \
+                tapahtuma = Node(Event.label, oid=event.oid, kind=event.kind, \
                         name=event.name, date=event.date)
                 osallistui = Relationship(persoona, "OSALLISTUI", tapahtuma)
                 graph.create(osallistui)
@@ -221,7 +221,7 @@ class Person:
         else:
             qmax = ""
         if pid:
-            where = "WHERE n.oid='{}' ".format(pid)
+            where = "WHERE n.oid={} ".format(pid)
         elif names:
             where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
@@ -242,27 +242,29 @@ class Person:
         else:
             qmax = ""
         if pid:
-            where = "WHERE n.oid='{}' ".format(pid)
+            where = "WHERE n.oid={} ".format(pid)
         elif names:
             where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
             where = ""
         query = """
-            MATCH (n:Person) {0}  
-            OPTIONAL MATCH (n)-->(e) 
-            RETURN n, COLLECT(e) {1};""".format(where, qmax)
+ MATCH (n:Person) {0}  
+ OPTIONAL MATCH (n)-->(e) 
+ RETURN n, COLLECT(e) {1};""".format(where, qmax)
         return graph.cypher.execute(query)
 
     def get_events (self):
         query = """
-        MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) WHERE n.oid = {pid} RETURN e;
-        """
+ MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) 
+ WHERE n.oid = {pid} 
+ RETURN e;"""
         global graph
         return graph.cypher.execute(query,  pid=self.oid)
   
     def key (self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
-        key =   "{}/{}/:{}".format(self.name.first, self.name.last, self.occupation)
+        key = "{}:{}:{}:{}".format(self.name.first, self.name.last, 
+              self.occupation, self.place)
         return key
 
     def join_persons(self, others):
@@ -276,7 +278,8 @@ class Person:
         pass
     
     def __str__(self):
-        s = "Person {}:{} {}".format(self.oid, self.firstname, self.lastname)
+        s = "(Person {0}oid={1}, {2} {3}{4})".format('{', 
+            self.oid, self.firstname, self.lastname, '}')
         return s
 
 
@@ -285,7 +288,7 @@ class Event:
         
         Properties:
             oid             str event_id esim. 1234
-            type            esim. "Käräjät"
+            kind            esim. "Käräjät"
             name            tapahtuman nimi "käräjäpaikka aika"
             date            str aika
             place           str paikka
@@ -293,9 +296,12 @@ class Event:
     label = "Event"
 
     def __init__(self, oid, tyyppi):
-        self.oid=oid
-        self.type = tyyppi
+        self.oid=int(oid)
+        self.kind = tyyppi
 
+    def __str__(self):
+        return "(Event {}oid={}, kind={}{})".format('{', 
+               self.oid, self.kind, '}')
 
 class Name:
     """ Etu- ja sukunimi, patronyymi sekä nimen alkuperäismuoto
@@ -352,7 +358,7 @@ class Refname:
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
     label = "Refname"
-    __REFTYPES = ['REFFIRST', 'REFLAST', 'REFPATRO']
+    REFTYPES = ['REFFIRST', 'REFLAST', 'REFPATRO']
 
 #   Type-property poistettu tarpeettomana. Esim. samasta nimestä "Persson" voisi
 #   olla linkki REFLAST nimeen "Pekanpoika" ja REFPATRO nimeen "Pekka".
@@ -360,7 +366,7 @@ class Refname:
 #   __REFNAMETYPES = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
 
     def __init__(self, nimi):
-        """ Luodaan referenssinimi (type, nimi)
+        """ Luodaan referenssinimi
             Nimi talletetaan alkukirjain isolla, alku- ja loppublankot poistettuna
         """
         if nimi:
@@ -386,87 +392,75 @@ class Refname:
         # Pakolliset tiedot
         if self.name == None:
             raise NameError
-            
-        # Onko refnimi jo kannassa?
+
+        # Onko tämä refnimi jo kannassa?
         self.oid = self.find_refname_id()
         
-        if self.oid != None:
-            logging.debug('{} päivitetään vanhaa EI TOIMI {}'.format(self.oid, str(self)))
+        nodeA_upd = (self.oid != None)
+        if nodeA_upd:
+            logging.debug('{} päivitetään vanhaa {}'.format(self.oid, str(self)))
         else:
             self.oid = get_new_oid()
             logging.debug('{} tekeillä uusi {}'.format(self.oid, self))
 
-            # Luodaan Refname-noodi
-            instance = Node(self.label, name=self.name)
-            if self.oid:
-                instance.properties["oid"] = self.oid
-            else:
-                raise ValueError("Pakollinen tieto 'oid' puuttuu")
+        # Luodaan Refname-noodi
+        instance = Node(self.label, name=self.name)
+        instance.properties["oid"] = self.oid
 
-            if 'gender' in dir(self):
-                instance.properties["gender"] = self.gender
-            if 'source' in dir(self):
-                instance.properties["source"] = self.source
+        if 'gender' in dir(self):
+            instance.properties["gender"] = self.gender
+        if 'source' in dir(self):
+            instance.properties["source"] = self.source
 
-            # Luodaan viittaus referenssinimeen, jos on
-            if 'refname' in dir(self):
-                # Hae kannasta viitattu nimi tai luo uusi nimi
-                viitattu = self.find_the_refname()
-                if viitattu:
-                    logging.debug('{} Viitattu löytyi: {}'.format(self.oid, viitattu))
-                else:
-                    vid = get_new_oid()
-                    viitattu = Node(self.label, oid=vid, name=self.refname)
-                    logging.debug('{} Viitattu luodaan: {}'.format(self.oid, viitattu))
-                
-                # Luo yhteys referoitavaan nimeen
-                r = Relationship(instance, self.reftype, viitattu)
-                try:
-                    graph.create(r)
-                except Exception as e:
-                    flash('Päivittäminen ei onnistunut: {}.'\
-                        'nimi {}, viitattu nimi {}'.\
-                        format(e, instance, viitattu))
-                    logging.warning('Päivittäminen ei onnistunut: {}'.format(e))
+        # Luodaan viittaus referenssinimeen, jos on
+        if 'refname' in dir(self):
+            # Hae kannasta viitattu nimi tai luo uusi nimi
+            viitattu = self.find_referenced()
+            nodeB_upd = (viitattu != None)
+            if nodeB_upd:
+                logging.debug('{} Viitattu löytyi: {}'.format(self.oid, viitattu))
+                self.vid = viitattu.properties["oid"]
             else:
-                logging.debug('{} Viitattua ei ole'.format(self.oid))   
+                self.vid = get_new_oid()
+                viitattu = Node(self.label, oid=self.vid, name=self.refname)
+                logging.debug('{} Viitattu luodaan: {}'.format(self.oid, viitattu))
+
+            # Luo yhteys referoitavaan nimeen
+            r = Relationship(instance, self.reftype, viitattu)
+            try:
+                graph.create(r)
+            except Exception as e:
+                flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
+                    format(e, instance, viitattu))
+                logging.warning('Lisääminen ei onnistunut: {}'.format(e))
+        else:
+            logging.debug('{} Itse referenssinimi'.format(self.oid))
+            try:
                 graph.merge(instance)
+            except Exception as e:
+                flash('Päivittäminen ei onnistunut: {}. nimi {}'.\
+                    format(e, instance))
+                logging.warning('Päivittäminen ei onnistunut: {}'.format(e))
 
-    def find_the_refname(self):
+    def find_referenced(self):
         """ Haetaan kannasta self:istä viitattu Refname.
         """
         global graph
         query = """
-            MATCH (:Refname)-[:{1}]->(p:Refname) 
-            WHERE p.name ='{0}' 
-            RETURN p;
-        """.format(self.refname, self.reftype)
+ MATCH (:Refname)-[:{1}]->(p:Refname) 
+ WHERE p.name ='{0}' 
+ RETURN p;""".format(self.refname, self.reftype)
 
         return graph.cypher.execute(query).one
-
-    def mark_reference(self, refname, reftype):
-        """ Laitetaan muistiin, että self viittaa refname'een
-        """
-        # Ei luoda viittausta itseen
-        if self.name == refname:
-#            self.is_ref = True
-            return
-        # Viittaustiedot muistiin
-        if reftype in self.__REFTYPES:
-            self.refname = refname
-            self.reftype = reftype
-        else:
-            logging.warning('Referenssinimen viittaus {} hylätty. '.format(reftype, str(self)))
 
     def find_refname_id(self):
         """ Etsitään kannasta, onko tämä referenssinimi siellä.
             Palautetaan ko oid
         """
         query = """
-            MATCH (a:Refname) 
-            WHERE a.name='{}' 
-            RETURN a.oid;
-            """.format(self.name)
+ MATCH (a:Refname) 
+ WHERE a.name='{}' 
+ RETURN a.oid;""".format(self.name)
         return graph.cypher.execute(query).one
 
     def getrefnames():
@@ -476,20 +470,20 @@ class Refname:
         """
         global graph
         query = """
-            MATCH (n:Refname)
-            OPTIONAL MATCH (n:Refname)-[r]->(m)
-            RETURN n,r,m;
-        """
+ MATCH (n:Refname)
+ OPTIONAL MATCH (n:Refname)-[r]->(m)
+ RETURN n,r,m;"""
         return graph.cypher.execute(query)
 
     def __str__(self):
-        s = "({}:Refname {}name='{}'".format(self.oid, '{', self.name)
+        s = "(Refname {0}oid={1}, name='{2}'".format('{', self.oid, self.name)
         if 'gender' in dir(self):
-            s += " {}".format(self.gender)
-        if 'is_ref' in dir(self):
-            s += " ref=" + str(self.is_ref)
+            s += ", gender={}".format(self.gender)
         if 'refname' in dir(self):
-            s += "{}) -[:{}]-> (:Refname {}name='{}'".format('}', self.reftype, self.refname, '{')
+            s += "{0}) -[{1}]-> (Refname {2}".format('}', self.reftype, '{')
+            if 'vid' in dir(self):
+                s += "oid={}, ".format(self.vid)
+            s += "name='{}'".format(self.refname)
         s += "{})".format('}')
         return s
 

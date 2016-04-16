@@ -136,7 +136,11 @@ def lue_henkilot(oid=None, names=None):
     persons = []
     t0 = time.time()
     retList = Person.get_person_events(max=100, pid=oid, names=names)
-    #print ("Lue_henkilot:\n", retList[0])
+    if len(retList.records) == 0:
+        logging.warning("lue_henkilot: ei ketään oid={}, names={}".format(oid, names))
+    else:
+        logging.info("lue_henkilot: {} henkiloä".format(len(retList.records)))
+        #print ("Lue_henkilot:\n", retList[0])
     
     for row in retList:
         # Saatu Person ja collection(Event)
@@ -150,6 +154,8 @@ def lue_henkilot(oid=None, names=None):
         p.occupation = thisPerson.properties['occu']
         p.place= thisPerson.properties['place']
 
+#        logging.info("lue_henkilot: Person {}, {} tapahtumaa".format(pid, 
+#            len(theseEvents)))
         for gotEvent in theseEvents:
             event_id = gotEvent.properties['oid']
             e = Event(event_id, 'Käräjät')
@@ -157,6 +163,7 @@ def lue_henkilot(oid=None, names=None):
             e.date = gotEvent.properties['date']
             e.name_orig = gotEvent.properties['name_orig']
             p.events.append(e)    
+            logging.info("lue_henkilot: Tapahtuma {}".format(e))
 
 #            c = Citation()
 #            c.tyyppi = 'Signum'
@@ -186,13 +193,12 @@ def lue_refnames():
 #   properties={'oid': 123, 'name': 'Aabeli'}>
 #>>> f
 #<Relationship graph='http://localhost:7474/db/data/' ref='relationship/10737' 
-#   start='node/24610' end='node/24611' type='REFFIRST' properties={}>
+#   start='node/24610' end='node/24611' kind='REFFIRST' properties={}>
 #>>> m
 #<Node graph='http://localhost:7474/db/data/' ref='node/24611' labels={'Refname'} 
 #   properties={'oid': 124, 'name': 'Aapeli'}>
 
-        logging.debug("n=" + str(n))
-        logging.debug("--> m=" + str(m))
+        logging.debug("n=" + str(n) + "--> m=" + str(m))
         r = Refname(n.properties['name'])
         r.oid = n.properties['oid']
         r.gender = n.properties['gender']

@@ -122,7 +122,7 @@ def talleta(filename, subj):
         else:
             if subj == 'refnimet': # Referenssinimet
                 # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
-                status=models.cvs_refnames.referenssinimet(pathname, max=100)
+                status=models.cvs_refnames.referenssinimet(pathname, max=1100)
             else:
                 if subj == 'karajat': # TODO: Tekemättä
                     status="Käräjätietojen lukua ei ole vielä tehty"
@@ -197,11 +197,7 @@ def nayta_ehdolla(ehto):
     connect_db()
     try:
         if key == 'oid':
-            persons = models.datareader.lue_henkilot(oid=value)
-            # Testi5
-#            vkey  = persons[0].key()
-#            logging.info(vkey)
-            
+            persons = models.datareader.lue_henkilot(oid=value)            
             return render_template("person.html", persons=persons)
         elif key == 'names':
             value=value.title()
