@@ -163,7 +163,7 @@ def lue_henkilot(oid=None, names=None):
             e.date = gotEvent.properties['date']
             e.name_orig = gotEvent.properties['name_orig']
             p.events.append(e)    
-            logging.info("lue_henkilot: Tapahtuma {}".format(e))
+#            logging.info("lue_henkilot: Tapahtuma {}".format(e))
 
 #            c = Citation()
 #            c.tyyppi = 'Signum'

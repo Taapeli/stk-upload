@@ -19,9 +19,7 @@ palvelimelta <i>{{uri}}</i>
         <th>nimi</th>
         <th>ammatti</th>
         <th>paikka</th>
-        <th>käräjäpaikka</th>
-        <th>&nbsp;-aika</th>
-        <th>signum</th>
+        <th>käräjäpaikka, aika</th>
     </tr>
 {% if persons %}
     {% for p in persons %}
@@ -34,12 +32,16 @@ palvelimelta <i>{{uri}}</i>
             <td>{{p.name.first}} <b> {{p.name.last}}</b></td>
             <td>{% if p.occupation %}{{p.occupation}}{% endif %}</td>
             <td>{% if p.place %}{{p.place}}{% endif %}</td>
-            <td>{{e.name}}</td>
-            <td nowrap>{{e.date}}</td>
-            <td>{% if e.citation %}{% if e.citation.url %}
-                <a href='{{e.citation.url}}'>{{e.citation.oid}}</a>
-                {% else %}{{e.citation.oid}}
-                {% endif %}{% endif %}</td>
+            <td>{% if p.events|count %}
+                <ul class="event">{% for e in p.events %}
+                <li>{{e.name}} {% if e.citation %}
+                ({% if e.citation.url %}signum <a href='{{e.citation.url}}'>{{e.citation.oid}}</a>)
+                {% else %}{{e.citation.oid}})
+                {% endif %}{% endif %}
+                </li>{% endfor %}</ul>
+            {% endif %}
+            </td>
+
         </tr>
     {% endfor %}
 {% else %}
