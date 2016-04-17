@@ -19,7 +19,7 @@ palvelimelta <i>{{uri}}</i>
         <th>nimi</th>
         <th>ammatti</th>
         <th>paikka</th>
-        <th>käräjäpaikka, aika</th>
+        <th>käräjät</th>
     </tr>
 {% if persons %}
     {% for p in persons %}
@@ -34,8 +34,10 @@ palvelimelta <i>{{uri}}</i>
             <td>{% if p.place %}{{p.place}}{% endif %}</td>
             <td>{% if p.events|count %}
                 <ul class="event">{% for e in p.events %}
-                <li>{{e.name}} {% if e.citation %}
-                ({% if e.citation.url %}signum <a href='{{e.citation.url}}'>{{e.citation.oid}}</a>)
+                <li><span class="id">{{e.oid}}</span> {{e.name}}
+                <span style="font-size:80%; font-style: italic">{{e.date}}</span> 
+                {% if e.citation %}({% if e.citation.url %}signum
+                <a href='{{e.citation.url}}'>{{e.citation.oid}}</a>)
                 {% else %}{{e.citation.oid}})
                 {% endif %}{% endif %}
                 </li>{% endfor %}</ul>

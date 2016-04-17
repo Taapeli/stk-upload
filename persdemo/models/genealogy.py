@@ -202,6 +202,9 @@ class Person:
                 # Tapahtuma-noodi
                 tapahtuma = Node(Event.label, oid=event.oid, kind=event.kind, \
                         name=event.name, date=event.date)
+                tapahtuma.properties["key"] = event.key()
+                if event.name_orig:
+                    tapahtuma.properties["name_orig"] = event.name_orig
                 osallistui = Relationship(persoona, "OSALLISTUI", tapahtuma)
             try:
                 graph.create(osallistui)
@@ -259,7 +262,7 @@ class Person:
         return graph.cypher.execute(query)
 
     def get_events (self):
-        "HEataan henkilön tapahtumat. (Ei käytössä!) "
+        "Haetaan henkilön tapahtumat. (Ei käytössä!) "
         query = """
  MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) 
  WHERE n.oid = {pid} 
@@ -273,10 +276,35 @@ class Person:
               self.occupation, self.place)
         return key
 
+    def join_events(self, events, kind=None):
+        """
+        Päähenkilöön self yhdistetään tapahtumat listalta events.
+        Yhteyden tyyppi on kind, esim. "OSALLISTUI"
+        """
+        eventList = ""
+        for i in events:
+            # Luodaan yhteys (Person)-[:kind]->(Event)
+            for event in self.events:
+                if event.__class__ != "Event":
+                    raise TypeError("Piti olla Event: {}".format(event.__class__))
+
+                # Tapahtuma-noodi
+                tapahtuma = Node(Event.label, oid=event.oid, kind=event.kind, \
+                        name=event.name, date=event.date)
+                osallistui = Relationship(persoona, kind, tapahtuma)
+            try:
+                graph.create(osallistui)
+            except Exception as e:
+                flash('Lisääminen ei onnistunut: {}. henkilö {}, tapahtuma {}'.\
+                    format(e, persoona, tapahtuma))
+                logging.warning('Lisääminen ei onnistunut: {}'.format(e))
+        logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), eventList))
+    
     def join_persons(self, others):
         """
         Päähenkilöön self yhdistetään henkilöiden others tiedot ja tapahtumat
         """
+        #TODO Kahden henkilön ja heidän tapahtumiensa yhdistäminen
         othersList = ""
         for i in others:
             otherslist.append(str(i) + " ")
@@ -295,9 +323,10 @@ class Event:
         Properties:
             oid             str event_id esim. 1234
             kind            esim. "Käräjät"
-            name            tapahtuman nimi "käräjäpaikka aika"
+            name            tapahtuman nimi
             date            str aika
             place           str paikka
+            key             str vertailuavain tuplien löytämiseksi
      """
     label = "Event"
 
@@ -308,6 +337,10 @@ class Event:
     def __str__(self):
         return "(Event {}oid={}, kind={}{})".format('{', 
                self.oid, self.kind, '}')
+               
+    def key (self):
+        "Hakuavain tuplatapahtumien löytämiseksi yhdistelyssä"
+        return "{}:{}".format(self.name, self.date)
 
 class Name:
     """ Etu- ja sukunimi, patronyymi sekä nimen alkuperäismuoto

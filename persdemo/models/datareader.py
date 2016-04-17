@@ -34,7 +34,7 @@ def _poimi_(person_id, event_id, row, url):
     p.place=row['Paikka_vakioitu']
 
     e = Event(event_id, 'Käräjät')
-    e.name = "{0}\t{1}".format(kpaikka, aika)
+    e.name = kpaikka
     e.date = aika
     e.name_orig = row['Käräjät']
 

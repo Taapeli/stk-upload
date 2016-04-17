@@ -32,12 +32,14 @@
     <ol class="num">
         {% for e in p.events %}
         <li><div class="itemrow">
-                <div class="col1">Tunniste<br>paikka, aika</div>
-                <div class="col1"><span class="id">{{e.oid}}</span><br/> {{e.name}}
+                <div class="col1">Tunniste<br />paikka<br />aika</div>
+                <div class="col1"><span class="id">{{e.oid}}</span><br />{{e.name}} 
+                    <br /><span style="font-size:80%; font-style: italic">{{e.date}}</span>
                 {% if e.signum %}<br />Signum:
                 <a href='http://www.narc.fi/Arkistolaitos/tma/kaki/tth/tth1.htm'>
                     {{e.signum}}</a>
-                </div>{% endif %}
+                {% endif %}</div>
+                <div class="also">orig: {{e.name_orig}}</div>
             </div>
         </li>
         {% endfor %}
