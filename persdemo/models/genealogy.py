@@ -174,6 +174,18 @@ class Person:
         self.oid=oid
         self.events = []
     
+    def __eq__(self, other):
+        "Mahdollistaa vertailun 'person1 == person2', eli onko niillä sama key-arvo"
+        if isinstance(other, self.__class__):
+            return self.key() == other.key()
+        else:
+            return False
+
+    def __str__(self):
+        s = "(Person {0}oid={1}, {2} {3}{4})".format('{', 
+            self.oid, self.firstname, self.lastname, '}')
+        return s
+
     def save(self):
         """ Tallennus kantaan. Edellytetään, että henkilölle on asetettu:
             - oid
@@ -311,11 +323,6 @@ class Person:
         logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), othersList))
         pass
     
-    def __str__(self):
-        s = "(Person {0}oid={1}, {2} {3}{4})".format('{', 
-            self.oid, self.firstname, self.lastname, '}')
-        return s
-
 
 class Event:
     """ Tapahtuma
@@ -337,7 +344,14 @@ class Event:
     def __str__(self):
         return "(Event {}oid={}, kind={}{})".format('{', 
                self.oid, self.kind, '}')
-               
+
+    def __eq__(self, other):
+        "Mahdollistaa vertailun 'event1 == event2'"
+        if isinstance(other, self.__class__):
+            return self.key() == other.key()
+        else:
+            return False
+
     def key (self):
         "Hakuavain tuplatapahtumien löytämiseksi yhdistelyssä"
         return "{}:{}".format(self.name, self.date)
@@ -412,6 +426,25 @@ class Refname:
             self.name = nimi.strip().title()
         else:
             self.name = None
+
+    def __eq__(self, other):
+        "Mahdollistaa vertailun 'refname1 == refname2'"
+        if isinstance(other, self.__class__):
+            return self.name() == other.name()
+        else:
+            return False
+
+    def __str__(self):
+        s = "(Refname {0}oid={1}, name='{2}'".format('{', self.oid, self.name)
+        if 'gender' in dir(self):
+            s += ", gender={}".format(self.gender)
+        if 'refname' in dir(self):
+            s += "{0}) -[{1}]-> (Refname {2}".format('}', self.reftype, '{')
+            if 'vid' in dir(self):
+                s += "oid={}, ".format(self.vid)
+            s += "name='{}'".format(self.refname)
+        s += "{})".format('}')
+        return s
 
     def save(self):
         """ Referenssinimen tallennus kantaan. Edellytetään, että sille on asetettu:
@@ -513,18 +546,6 @@ class Refname:
  OPTIONAL MATCH (n:Refname)-[r]->(m)
  RETURN n,r,m;"""
         return graph.cypher.execute(query)
-
-    def __str__(self):
-        s = "(Refname {0}oid={1}, name='{2}'".format('{', self.oid, self.name)
-        if 'gender' in dir(self):
-            s += ", gender={}".format(self.gender)
-        if 'refname' in dir(self):
-            s += "{0}) -[{1}]-> (Refname {2}".format('}', self.reftype, '{')
-            if 'vid' in dir(self):
-                s += "oid={}, ".format(self.vid)
-            s += "name='{}'".format(self.refname)
-        s += "{})".format('}')
-        return s
 
 
 class Citation:
