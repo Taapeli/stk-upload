@@ -466,23 +466,24 @@ class Refname:
             raise NameError
 
         # Onko tämä refnimi jo kannassa?
-        self.oid = self.find_refname_id()
+        v_instance = self.find_refname()
         
-        nodeA_upd = (self.oid != None)
-        if nodeA_upd:
+        if v_instance:
+            self.oid = v_instance.properties["oid"]
             logging.debug('{} päivitetään vanhaa {}'.format(self.oid, str(self)))
+            instance = v_instance
         else:
             self.oid = get_new_oid()
             logging.debug('{} tekeillä uusi {}'.format(self.oid, self))
 
-        # Luodaan Refname-noodi
-        instance = Node(self.label, name=self.name)
-        instance.properties["oid"] = self.oid
+            # Luodaan Refname-noodi
+            instance = Node(self.label, name=self.name)
+            instance.properties["oid"] = self.oid
 
-        if 'gender' in dir(self):
-            instance.properties["gender"] = self.gender
-        if 'source' in dir(self):
-            instance.properties["source"] = self.source
+            if 'gender' in dir(self):
+                instance.properties["gender"] = self.gender
+            if 'source' in dir(self):
+                instance.properties["source"] = self.source
 
         # Luodaan viittaus referenssinimeen, jos on
         if 'refname' in dir(self):
@@ -519,20 +520,20 @@ class Refname:
         """
         global graph
         query = """
- MATCH (:Refname)-[:{1}]->(p:Refname) 
+ MATCH (:Refname)-[:{1}]-(p:Refname) 
  WHERE p.name ='{0}' 
  RETURN p;""".format(self.refname, self.reftype)
 
         return graph.cypher.execute(query).one
 
-    def find_refname_id(self):
+    def find_refname(self):
         """ Etsitään kannasta, onko tämä referenssinimi siellä.
             Palautetaan ko oid
         """
         query = """
  MATCH (a:Refname) 
  WHERE a.name='{}' 
- RETURN a.oid;""".format(self.name)
+ RETURN a;""".format(self.name)
         return graph.cypher.execute(query).one
 
     def getrefnames():
