@@ -15,11 +15,11 @@ function myFunction(oid, fn, ln) {
     "</ul>";
 }</script>
 <h2>Henkilöiden yhdistely</h2>
-{% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <ul style='color: darkblue; border: solid 2pt darkblue; background-color: lightblue'>
-    {% for message in messages %}
-      <li>{{ message }}</li>
+    <ul  class='flashes'>
+    {% for category, message in messages %}
+      <li class='flash_{{category}}}'>{{ message }}</li>
     {% endfor %}
     </ul>
   {% endif %}

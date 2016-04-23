@@ -126,16 +126,14 @@ def datastorer(pathname):
     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
     return message
 
-def lue_henkilot(oid=None, names=None):
+def lue_henkilot(oid=None, names=None, max=1000):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
         Jos oid on annettu, luetaan vain se henkilö, jonka oid täsmää
-    """
-    # TODO: Poista määrän rajoitus max=1000
-    
+    """    
     persons = []
     t0 = time.time()
-    retList = Person.get_person_events(max=1000, pid=oid, names=names)
+    retList = Person.get_person_events(max=max, pid=oid, names=names)
     if len(retList.records) == 0:
         logging.warning("lue_henkilot: ei ketään oid={}, names={}".format(oid, names))
     else:

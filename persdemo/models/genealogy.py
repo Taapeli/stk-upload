@@ -222,7 +222,7 @@ class Person:
                 graph.create(osallistui)
             except Exception as e:
                 flash('Lisääminen ei onnistunut: {}. henkilö {}, tapahtuma {}'.\
-                    format(e, persoona, tapahtuma))
+                    format(e, persoona, tapahtuma), 'error')
                 logging.warning('Lisääminen ei onnistunut: {}'.format(e))
         else:
             # Henkilö ilman tapahtumaa (näitä ei taida aineistossamme olla)
@@ -308,7 +308,7 @@ class Person:
                 graph.create(osallistui)
             except Exception as e:
                 flash('Lisääminen ei onnistunut: {}. henkilö {}, tapahtuma {}'.\
-                    format(e, persoona, tapahtuma))
+                    format(e, persoona, tapahtuma), 'error')
                 logging.warning('Lisääminen ei onnistunut: {}'.format(e))
         logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), eventList))
     
@@ -467,7 +467,7 @@ class Refname:
 
         # Onko tämä refnimi jo kannassa?
         v_instance = self.find_refname()
-        
+
         if v_instance:
             self.oid = v_instance.properties["oid"]
             logging.debug('{} päivitetään vanhaa {}'.format(self.oid, str(self)))
@@ -480,17 +480,29 @@ class Refname:
             instance = Node(self.label, name=self.name)
             instance.properties["oid"] = self.oid
 
-            if 'gender' in dir(self):
-                instance.properties["gender"] = self.gender
-            if 'source' in dir(self):
-                instance.properties["source"] = self.source
+        # Yhdistetään ominaisuudet
+        if 'gender' in dir(self):
+            g = instance.properties["gender"]
+            if g:
+                if g == self.gender:
+                    instance.properties["gender"] = self.gender
+                else:
+                    flash ("({}) {}: ristiriitainen sukupuoli, oli {}, esitetään {}".\
+                        format(seld.oid, self.name, g, self.gender), 'error')
+        if 'source' in dir(self):
+            s = instance.properties["source"]
+            if s:
+                if s == self.source:
+                    instance.properties["source"] = self.source
+                else:
+                    flash ("({}) {}: ristiriitainen lähde, oli {}, esitetään {}".\
+                        format(seld.oid, self.name, s, self.source), 'error')
 
         # Luodaan viittaus referenssinimeen, jos on
         if 'refname' in dir(self):
             # Hae kannasta viitattu nimi tai luo uusi nimi
             viitattu = self.find_referenced()
-            nodeB_upd = (viitattu != None)
-            if nodeB_upd:
+            if viitattu:
                 logging.debug('{} Viitattu löytyi: {}'.format(self.oid, viitattu))
                 self.vid = viitattu.properties["oid"]
             else:
@@ -504,15 +516,17 @@ class Refname:
                 graph.create(r)
             except Exception as e:
                 flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
-                    format(e, instance, viitattu))
+                    format(e, instance, viitattu), 'error')
                 logging.warning('Lisääminen ei onnistunut: {}'.format(e))
         else:
-            logging.debug('{} Itse referenssinimi'.format(self.oid))
+            logging.debug('{} viittaa itseensä'.format(self.oid))
             try:
                 graph.merge(instance)
+                flash('Varoitus: {} ({}) on referenssinimi'.\
+                    format(self.name, self.oid))
             except Exception as e:
                 flash('Päivittäminen ei onnistunut: {}. nimi {}'.\
-                    format(e, instance))
+                    format(e, instance), 'error')
                 logging.warning('Päivittäminen ei onnistunut: {}'.format(e))
 
     def find_referenced(self):

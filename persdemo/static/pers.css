@@ -73,3 +73,11 @@ li.itemrow {
     font-style: italic;
     color: skyblue;
 }
+
+ul.flashes {
+    color: darkblue; 
+    border: solid 2pt darkblue; 
+    background-color:#eef
+}
+.flash_error { color: red }
+.flash_message { }
