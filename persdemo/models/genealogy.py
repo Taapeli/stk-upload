@@ -465,13 +465,15 @@ class Refname:
         if self.name == None:
             raise NameError
 
+        name_found = '0' # reset the variable
+        
         # Onko tämä refnimi jo kannassa?
-        v_instance = self.find_refname()
+        instance = self.find_refname()
 
-        if v_instance:
-            self.oid = v_instance.properties["oid"]
+        if instance:
+            name_found = '1' # name alredy in data base
+            self.oid = instance.properties["oid"]
             logging.debug('{} päivitetään vanhaa {}'.format(self.oid, str(self)))
-            instance = v_instance
         else:
             self.oid = get_new_oid()
             logging.debug('{} tekeillä uusi {}'.format(self.oid, self))
@@ -488,7 +490,7 @@ class Refname:
                     instance.properties["gender"] = self.gender
                 else:
                     flash ("({}) {}: ristiriitainen sukupuoli, oli {}, esitetään {}".\
-                        format(seld.oid, self.name, g, self.gender), 'error')
+                        format(self.oid, self.name, g, self.gender), 'error')
         if 'source' in dir(self):
             s = instance.properties["source"]
             if s:
@@ -496,28 +498,52 @@ class Refname:
                     instance.properties["source"] = self.source
                 else:
                     flash ("({}) {}: ristiriitainen lähde, oli {}, esitetään {}".\
-                        format(seld.oid, self.name, s, self.source), 'error')
+                        format(self.oid, self.name, s, self.source), 'error')
 
         # Luodaan viittaus referenssinimeen, jos on
         if 'refname' in dir(self):
             # Hae kannasta viitattu nimi tai luo uusi nimi
             viitattu = self.find_referenced()
             if viitattu:
-                logging.debug('{} Viitattu löytyi: {}'.format(self.oid, viitattu))
-                self.vid = viitattu.properties["oid"]
+                if name_found == '1':
+                    ihan_viitattu = self.find_fully_referenced()
+                    if ihan_viitattu:
+                        logging.debug('{} Viittaus, relaatio ja viitattu löytyi, ei tehdä mitään: {}'.format(self.oid, viitattu))
+                    else:
+                        logging.debug('{} Viitattu jo kannassa: {}'.format(self.oid, viitattu))
+
+                        # Luo yhteys referoitavaan nimeen
+                        r = Relationship(instance, self.reftype, viitattu)
+                        try:
+                            graph.create(r)
+                        except Exception as e:
+                            flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
+                            format(e, instance, viitattu), 'error')
+                            logging.warning('Lisääminen ei onnistunut: {}'.format(e))
+                else:
+                    logging.debug('{} Viitattu jo kannassa: {}'.format(self.oid, viitattu))
+
+                    # Luo yhteys referoitavaan nimeen
+                    r = Relationship(instance, self.reftype, viitattu)
+                    try:
+                        graph.create(r)
+                    except Exception as e:
+                        flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
+                        format(e, instance, viitattu), 'error')
+                        logging.warning('Lisääminen ei onnistunut: {}'.format(e))
             else:
                 self.vid = get_new_oid()
                 viitattu = Node(self.label, oid=self.vid, name=self.refname)
                 logging.debug('{} Viitattu luodaan: {}'.format(self.oid, viitattu))
 
-            # Luo yhteys referoitavaan nimeen
-            r = Relationship(instance, self.reftype, viitattu)
-            try:
-                graph.create(r)
-            except Exception as e:
-                flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
+                # Luo yhteys referoitavaan nimeen
+                r = Relationship(instance, self.reftype, viitattu)
+                try:
+                    graph.create(r)
+                except Exception as e:
+                    flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
                     format(e, instance, viitattu), 'error')
-                logging.warning('Lisääminen ei onnistunut: {}'.format(e))
+                    logging.warning('Lisääminen ei onnistunut: {}'.format(e))
         else:
             logging.debug('{} viittaa itseensä'.format(self.oid))
             try:
@@ -537,6 +563,17 @@ class Refname:
  MATCH (:Refname)-[:{1}]-(p:Refname) 
  WHERE p.name ='{0}' 
  RETURN p;""".format(self.refname, self.reftype)
+
+        return graph.cypher.execute(query).one
+
+    def find_fully_referenced(self):
+        """ Haetaan kannasta self:istä viitattu Refname.
+        """
+        global graph
+        query = """
+ MATCH (n:Refname)-[:{1}]-(p:Refname) 
+ WHERE n.name ='{2}' AND p.name ='{0}' 
+ RETURN p;""".format(self.refname, self.reftype,  self.name)
 
         return graph.cypher.execute(query).one
 
