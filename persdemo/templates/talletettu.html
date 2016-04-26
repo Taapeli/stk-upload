@@ -6,11 +6,11 @@
     <h2>Tietojen talletus kantaan{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <ul  class='flashes'>
+        <ol  class='flashes'>
         {% for category, message in messages %}
           <li class='flash_{{category}}'>{{ message }}</li>
         {% endfor %}
-        </ul>
+        </ol>
       {% endif %}
     {% endwith %}
     {% if text %}

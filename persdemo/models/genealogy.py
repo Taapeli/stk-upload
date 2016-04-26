@@ -447,7 +447,13 @@ class Refname:
         return s
 
     def save(self):
-        """ Referenssinimen tallennus kantaan. Edellytetään, että sille on asetettu:
+        """ Referenssinimen tallennus kantaan. Kysessä on joko 
+            - nimi ilman viittausta, olkoon (A:{name=name})
+            - nimi ja viittaus, (A:{name=name})-->(B:{name=refname})
+
+            Jompi kumpi (name) tai (refname) tai molemmat voivat jo olla kannassa
+
+            Edellytetään, että tälle oliolle on asetettu:
             - name (Nimi)
             Tunniste luodaan tai käytetään sitä joka löytyi kannasta
             - oid (int)
@@ -460,137 +466,72 @@ class Refname:
         # TODO: source pitäisi tallettaa Source-objektina
         
         global graph
-
+        a_oid  = ''
+        a_name = ''
+        b_oid  = ''
+        b_name = ''
+        
         # Pakolliset tiedot
         if self.name == None:
             raise NameError
-
-        name_found = '0' # reset the variable
         
-        # Onko tämä refnimi jo kannassa?
-        instance = self.find_refname()
+        # Asetetaan A:n attribuutit
+        a_attr = "{name:'" + self.name + "'"
+        if hasattr(self, 'gender'):
+            a_attr += ", gender:'{}'".format(self.gender)
+        if hasattr(self, 'source'):
+            a_attr += ", source:'{}'".format(self.source)
+        a_attr += '}'
+        a_newoid = get_new_oid()
 
-        if instance:
-            name_found = '1' # name alredy in data base
-            self.oid = instance.properties["oid"]
-            logging.debug('{} päivitetään vanhaa {}'.format(self.oid, str(self)))
-        else:
-            self.oid = get_new_oid()
-            logging.debug('{} tekeillä uusi {}'.format(self.oid, self))
-
-            # Luodaan Refname-noodi
-            instance = Node(self.label, name=self.name)
-            instance.properties["oid"] = self.oid
-
-        # Yhdistetään ominaisuudet
-        if 'gender' in dir(self):
-            g = instance.properties["gender"]
-            if g:
-                if g == self.gender:
-                    instance.properties["gender"] = self.gender
-                else:
-                    flash ("({}) {}: ristiriitainen sukupuoli, oli {}, esitetään {}".\
-                        format(self.oid, self.name, g, self.gender), 'error')
-        if 'source' in dir(self):
-            s = instance.properties["source"]
-            if s:
-                if s == self.source:
-                    instance.properties["source"] = self.source
-                else:
-                    flash ("({}) {}: ristiriitainen lähde, oli {}, esitetään {}".\
-                        format(self.oid, self.name, s, self.source), 'error')
-
-        # Luodaan viittaus referenssinimeen, jos on
-        if 'refname' in dir(self):
-            # Hae kannasta viitattu nimi tai luo uusi nimi
-            viitattu = self.find_referenced()
-            if viitattu:
-                if name_found == '1':
-                    ihan_viitattu = self.find_fully_referenced()
-                    if ihan_viitattu:
-                        logging.debug('{} Viittaus, relaatio ja viitattu löytyi, ei tehdä mitään: {}'.format(self.oid, viitattu))
-                    else:
-                        logging.debug('{} Viitattu jo kannassa: {}'.format(self.oid, viitattu))
-
-                        # Luo yhteys referoitavaan nimeen
-                        r = Relationship(instance, self.reftype, viitattu)
-                        try:
-                            graph.create(r)
-                        except Exception as e:
-                            flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
-                            format(e, instance, viitattu), 'error')
-                            logging.warning('Lisääminen ei onnistunut: {}'.format(e))
-                else:
-                    logging.debug('{} Viitattu jo kannassa: {}'.format(self.oid, viitattu))
-
-                    # Luo yhteys referoitavaan nimeen
-                    r = Relationship(instance, self.reftype, viitattu)
-                    try:
-                        graph.create(r)
-                    except Exception as e:
-                        flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
-                        format(e, instance, viitattu), 'error')
-                        logging.warning('Lisääminen ei onnistunut: {}'.format(e))
-            else:
-                self.vid = get_new_oid()
-                viitattu = Node(self.label, oid=self.vid, name=self.refname)
-                logging.debug('{} Viitattu luodaan: {}'.format(self.oid, viitattu))
-
-                # Luo yhteys referoitavaan nimeen
-                r = Relationship(instance, self.reftype, viitattu)
-                try:
-                    graph.create(r)
-                except Exception as e:
-                    flash('Lisääminen ei onnistunut: {}. nimi {}, viitattu nimi {}'.\
-                    format(e, instance, viitattu), 'error')
-                    logging.warning('Lisääminen ei onnistunut: {}'.format(e))
-        else:
-            logging.debug('{} viittaa itseensä'.format(self.oid))
+        if hasattr(self, 'refname'):
+            # Luodaan viittaus (A:{name=name})-->(B:{name=refname})
+            # Jos A tai B puuttuvat kannasta, ne luodaan
+            b_attr = "{name:'" + self.refname + "'}"
+            b_newoid = get_new_oid()
+            query="""
+ MERGE (a:Refname {}) ON CREATE SET a.oid={} 
+ MERGE (b:Refname {}) ON CREATE SET b.oid={} 
+ CREATE UNIQUE (a)-[:REFFIRST]->(b)
+ RETURN a.oid, a.name, b.oid, b.name;""".format(a_attr, a_newoid,\
+                                               b_attr, b_newoid)
             try:
-                graph.merge(instance)
-                flash('Varoitus: {} ({}) on referenssinimi'.\
-                    format(self.name, self.oid))
+                ret=graph.cypher.execute(query)
+#                logging.info('ret = {}'.format(ret))
+                (a_oid, a_name, b_oid, b_name) = \
+                                (ret[0][0], ret[0][1], ret[0][2], ret[0][3])
             except Exception as e:
-                flash('Päivittäminen ei onnistunut: {}. nimi {}'.\
-                    format(e, instance), 'error')
-                logging.warning('Päivittäminen ei onnistunut: {}'.format(e))
+                flash('Varoitus: {}. / (a {}) --> (b {})'.\
+                      format(e, a_attr, b_attr), 'warning')
+                logging.warning('Lisääminen (a)-->(b) ei onnistunut: {}'.format(e))
 
-    def find_referenced(self):
-        """ Haetaan kannasta self:istä viitattu Refname.
-        """
-        global graph
-        query = """
- MATCH (:Refname)-[:{1}]-(p:Refname) 
- WHERE p.name ='{0}' 
- RETURN p;""".format(self.refname, self.reftype)
+            if a_oid == a_newoid: logging.debug('Luotiin (a {}:{})'.format(a_oid, a_name))
+            if b_oid == b_newoid: logging.debug('Luotiin (b {}:{})'.format(b_oid, b_name))
+            logging.debug('Luotiin ({}:{})-->({}:{})'.format(a_oid, a_name, b_oid, b_name))
+        else:
+            # Luodaan (A:{name=name}) ilman viittausta B:hen
+            # Jos A puuttuu kannasta, se luodaan
+            query="""
+ MERGE (a:Refname {}) ON CREATE SET a.oid={} 
+ RETURN a.oid, a.name;""".format(a_attr, a_newoid)
+            try:
+                ret=graph.cypher.execute(query)
+#                logging.info('ret = {}'.format(ret))
+                (a_oid, a_name)=(ret[0][0], ret[0][1])
+            except Exception as e:
+                # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
+                flash('Ei onnistunut: {}.  (a:{})'.format(e, a_attr), 'message')
+                logging.warning('Lisääminen (a) ei onnistunut: {}'.format(e))
 
-        return graph.cypher.execute(query).one
-
-    def find_fully_referenced(self):
-        """ Haetaan kannasta self:istä viitattu Refname.
-        """
-        global graph
-        query = """
- MATCH (n:Refname)-[:{1}]-(p:Refname) 
- WHERE n.name ='{2}' AND p.name ='{0}' 
- RETURN p;""".format(self.refname, self.reftype,  self.name)
-
-        return graph.cypher.execute(query).one
-
-    def find_refname(self):
-        """ Etsitään kannasta, onko tämä referenssinimi siellä.
-            Palautetaan ko oid
-        """
-        query = """
- MATCH (a:Refname) 
- WHERE a.name='{}' 
- RETURN a;""".format(self.name)
-        return graph.cypher.execute(query).one
-
+            if a_oid == a_newoid: s = ' uusi'
+            else: s =''
+            logging.debug('Luotiin{} ({}:{})'.format(s, a_oid, a_name))
+        
     def getrefnames():
         """ Haetaan kannasta kaikki Refnamet 
             Palautetaan Refname-olioita, johon on haettu myös mahdollisen
             viitatun referenssinimen nimi ja tyyppi.
+            [Kutsu: datareader.lue_refnames()]
         """
         global graph
         query = """
