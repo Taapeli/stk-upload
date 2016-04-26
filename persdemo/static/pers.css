@@ -74,10 +74,12 @@ li.itemrow {
     color: skyblue;
 }
 
-ul.flashes {
+.flashes {
+    font-size: 80%;
     color: darkblue; 
     border: solid 2pt darkblue; 
     background-color:#eef
 }
 .flash_error { color: red }
+.flash_warning { color: blueviolet }
 .flash_message { color: blue }

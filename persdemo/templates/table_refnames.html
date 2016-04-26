@@ -10,6 +10,15 @@
 {% set rt = {'REFFIRST':'etunimi', 'REFLAST':'sukunimi', 'REFPATRO':'patron.'} %}
 <h2>Referenssinimet</h2>
 <p>Mukana {{names|count}} nimeä</p>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ol  class='flashes'>
+    {% for category, message in messages %}
+      <li class='flash_{{category}}'>{{ message }}</li>
+    {% endfor %}
+    </ol>
+  {% endif %}
+{% endwith %}
 <section id="lista">
 <table style="width:500pt">
     <tr><th>oid</th>
