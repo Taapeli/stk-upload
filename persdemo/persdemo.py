@@ -144,15 +144,17 @@ def nayta_henkilot():
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-@app.route('/lista/refnimet')
-def nayta_refnimet():   
-    """ tietokannan henkiloiden näyttäminen ruudulla """
+@app.route('/lista/refnimet/<reftype>')
+def nayta_refnimet(reftype): 
+    """ referenssinimien näyttäminen ruudulla """
+    logging.debug('Näytä refnimet, refname-määritelty: {}'.format('?'))
     connect_db()
-#    try:
-    names = models.datareader.lue_refnames()
-    return render_template("table_refnames.html", names=names)
-#    except Exception as e:
-#        return redirect(url_for('virhesivu', code=1, text=str(e)))
+#    if reftype and reftype != "":
+#        names = models.datareader.lue_refnames()
+#        return render_template("table_refnames.html", names=names)
+#    else:
+    names = models.datareader.lue_typed_refnames(reftype)
+    return render_template("table_refnames_1.html", names=names)
 
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   

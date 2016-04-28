@@ -527,6 +527,21 @@ class Refname:
             else: s =''
             logging.debug('Luotiin{} ({}:{})'.format(s, a_oid, a_name))
         
+    def get_typed_refnames(reftype=""):
+        """ Haetaan kannasta kaikki referenssinimet sekä lista nimistä, jotka
+            viittaavat ko refnameen. 
+            Palautetaan referenssinimen attribuutteja sekä lista nimistä, 
+            jotka suoraan tai ketjutetusti viittaavat ko. referenssinimeen
+            [Kutsu: datareader.lue_refnames()]
+        """
+        global graph
+        query = """
+ MATCH (n:Refname)
+ OPTIONAL MATCH (m:Refname)-[r:«reftype»*]->(n)
+ RETURN n.oid, n.name, n.gender, n.source, COLLECT (m.name) AS names
+ ORDER BY n.name"""
+        return graph.cypher.execute(query, reftype=reftype)
+
     def getrefnames():
         """ Haetaan kannasta kaikki Refnamet 
             Palautetaan Refname-olioita, johon on haettu myös mahdollisen

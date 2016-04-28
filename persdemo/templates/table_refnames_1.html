@@ -5,10 +5,10 @@
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-{% set sp = {"M": "mies", "N": "nainen", "U": "?"} %}
+{% set sp = {"M": "♂", "F": "♀", "U": "?"} %}
 {% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", "place":"paikka", "occu":"ammatti"} %}
 {% set rt = {'REFFIRST':'etunimi', 'REFLAST':'sukunimi', 'REFPATRO':'patron.'} %}
-<h2>Ohjaukset referenssinimiin</h2>
+<h2>Referenssinimet</h2>
 <p>Mukana {{names|count}} nimeä</p>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -22,20 +22,17 @@
 <section id="lista">
 <table style="width:500pt">
     <tr><th>oid</th>
-        <th>nimi</th>
-        <th class="center">viittaus</th>
         <th>ref.nimi</th>
-        <th>sukupuoli</th>
+        <th style="width:40%">etunimet</th>
         <th>lähde</th>
     </tr>
-    {% for r in names %}
+    {% for (r,names) in names %}
         <tr>
             <td class="id">{{r.oid}}</td>
-            <td>{% if not r.refname %}<b>{% endif %}{{r.name}}
-                {% if not r.refname %}</b>{% endif %}</td>
-            <td class="typevar">{{rt[r.reftype]}}</td>
-            <td>{{r.refname}}</td>
-            <td class="center">{% if r.gender %}{{sp[r.gender]}}{% endif %}</td>
+            <td>{{r.name}} 
+                {% if r.gender %}<span class="gender{{r.gender}}">{{sp[r.gender]}}</span>{% endif %}</td>
+            <!-- td>{{names}}</td --!>
+            <td>{% for n in names %} {{n}} {% endfor %}</td>
             <td>{% if r.source %}{{r.source}}{% endif %}</td>
         </tr>
     {% endfor %}

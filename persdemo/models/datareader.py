@@ -211,3 +211,27 @@ def lue_refnames():
     logging.info("TIME get_refnames {} sek".format(time.time()-t0))
 
     return (namelist)
+
+def lue_typed_refnames(reftype):
+    """ Lukee tietokannasta Refname- objektit näytettäväksi
+    """
+    namelist = []
+    t0 = time.time()
+    if not (reftype and reftype != ""):
+        raise AttributeError("Mitä referenssityyppiä halutaan?")
+    
+    v_names = Refname.get_typed_refnames(reftype)
+    
+    for oid, name, gender, source, names in v_names:
+#        logging.debug("lue_typed_refnames: oid={}, name='{}', names={}".format(oid, name, names))
+        r = Refname(name)
+        r.oid = oid
+        if gender:
+            r.gender = gender
+        if source:
+            r.source= source        
+        namelist.append((r,names))
+    
+    logging.info("TIME get_named_refnames {} sek".format(time.time()-t0))
+
+    return (namelist)

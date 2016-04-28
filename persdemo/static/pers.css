@@ -73,6 +73,9 @@ li.itemrow {
     font-style: italic;
     color: skyblue;
 }
+.genderF {color:red}
+.genderM {color:blue}
+.gender {}
 
 .flashes {
     font-size: 80%;
