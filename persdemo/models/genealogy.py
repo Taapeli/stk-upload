@@ -270,7 +270,8 @@ class Person:
         query = """
  MATCH (n:Person) {0}  
  OPTIONAL MATCH (n)-->(e) 
- RETURN n, COLLECT(e) {1};""".format(where, qmax)
+ RETURN n, COLLECT(e)
+ ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
         return graph.cypher.execute(query)
 
     def get_events (self):

@@ -138,11 +138,8 @@ def talleta(filename, subj):
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
     dburi = connect_db()
-    try:
-        persons = models.datareader.lue_henkilot()
-        return render_template("table1.html", persons=persons, uri=dburi)
-    except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    persons = models.datareader.lue_henkilot()
+    return render_template("table1.html", persons=persons, uri=dburi)
 
 @app.route('/lista/refnimet', defaults={'reftype': None})
 @app.route('/lista/refnimet/<string:reftype>')
