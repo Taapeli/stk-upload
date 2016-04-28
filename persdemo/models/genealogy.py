@@ -270,7 +270,8 @@ class Person:
         query = """
  MATCH (n:Person) {0}  
  OPTIONAL MATCH (n)-->(e) 
- RETURN n, COLLECT(e) {1};""".format(where, qmax)
+ RETURN n, COLLECT(e)
+ ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
         return graph.cypher.execute(query)
 
     def get_events (self):
@@ -451,8 +452,6 @@ class Refname:
             - nimi ilman viittausta, olkoon (A:{name=name})
             - nimi ja viittaus, (A:{name=name})-->(B:{name=refname})
 
-            Jompi kumpi (name) tai (refname) tai molemmat voivat jo olla kannassa
-
             Edellytetään, että tälle oliolle on asetettu:
             - name (Nimi)
             Tunniste luodaan tai käytetään sitä joka löytyi kannasta
@@ -466,10 +465,6 @@ class Refname:
         # TODO: source pitäisi tallettaa Source-objektina
         
         global graph
-        a_oid  = ''
-        a_name = ''
-        b_oid  = ''
-        b_name = ''
         
         # Pakolliset tiedot
         if self.name == None:
@@ -527,6 +522,24 @@ class Refname:
             else: s =''
             logging.debug('Luotiin{} ({}:{})'.format(s, a_oid, a_name))
         
+    def get_typed_refnames(reftype=""):
+        """ Haetaan kannasta kaikki referenssinimet sekä lista nimistä, jotka
+            viittaavat ko refnameen. 
+            Palautetaan referenssinimen attribuutteja sekä lista nimistä, 
+            jotka suoraan tai ketjutetusti viittaavat ko. referenssinimeen
+            [Kutsu: datareader.lue_refnames()]
+        """
+        global graph
+        query="""
+ MATCH (a:Refname)
+   OPTIONAL MATCH (m:Refname)-[:«reftype1»*]->(a:Refname)
+   OPTIONAL MATCH (a:Refname)-[:«reftype2»]->(n:Refname)
+ RETURN a.oid, a.name, a.gender, a.source,
+   COLLECT ([n.oid, n.name, n.gender]) AS base,
+   COLLECT ([m.oid, m.name, m.gender]) AS other
+ ORDER BY a.name"""
+        return graph.cypher.execute(query, reftype1=reftype, reftype2=reftype)
+
     def getrefnames():
         """ Haetaan kannasta kaikki Refnamet 
             Palautetaan Refname-olioita, johon on haettu myös mahdollisen

@@ -1,0 +1,51 @@
+{# _myapp/templates/lista2.html_ #}
+{% extends "layout.html" %}
+{% block title %}Referenssinimet kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+<script src="/static/infobox.js"></script>
+
+{% set sp = {"M": "♂", "F": "♀", "U": "?"} %}
+{% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", "place":"paikka", "occu":"ammatti"} %}
+{% set rt = {'REFFIRST':'etunimi', 'REFLAST':'sukunimi', 'REFPATRO':'patronyymi'} %}
+<h2>Ohjaukset referenssinimiin</h2>
+<p>Mukana {{names|count}} nimeä</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ol  class='flashes'>
+    {% for category, message in messages %}
+      <li class='flash_{{category}}'>{{ message }}</li>
+    {% endfor %}
+    </ol>
+  {% endif %}
+{% endwith %}
+<section id="lista">
+<table style="width:500pt">
+    <tr><th>oid</th>
+        <th>ref.nimi</th>
+        <th style="width:50%">{{rt[reftype]}}-viittaus</th>
+        <th>lähde</th>
+    </tr>
+    {% for (r, base, other) in names %}
+        <tr>
+            <td class="id">{{r.oid}}</td>
+            <td>{% if other != [] %}<b>{% endif %}{{r.name}}
+                {% if other != [] %}</b>{% endif %} 
+                {% if r.gender %}<span class="gender{{r.gender}}">{{sp[r.gender]}}</span>{% endif %}</td>
+            <td>{% if base != [] %}<i>{{rt[reftype]}}</i> →{% for n in base %}
+                <span class="id">{{n.oid}}</span>&nbsp;{{n.name}}{% if n.gender 
+                %}&nbsp;<span class="gender{{n.gender}}">{{sp[n.gender]}}</span>{% endif %}
+                {% endfor %}
+                {% elif other != [] %}{% for n in other %}
+                <span class="id">{{n.oid}}</span>&nbsp;{{n.name}}{% if n.gender 
+                %}&nbsp;<span class="gender{{n.gender}}">{{sp[n.gender]}}</span>{% endif %} 
+                {% endfor %}
+                {% endif %}
+            </td>
+            <td>{% if r.source %}{{r.source}}{% endif %}</td>
+        </tr>
+    {% endfor %}
+</table>
+</section>
+{% endblock %}
