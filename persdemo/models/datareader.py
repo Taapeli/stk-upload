@@ -66,7 +66,7 @@ def henkilolista(pathname):
                 logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
                 if not "Käräjät" in reader.fieldnames:
                     raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
-            row_nro += 1
+            row_nro += 2
     
             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
             if row['Käräjät'][:4] == 'http':
@@ -79,7 +79,7 @@ def henkilolista(pathname):
                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
                 continue
                             
-            p = _poimi_(row_nro, row, url)
+            p = _poimi_(row_nro, row_nro+1, row, url)
             persons.append(p)
 
     logging.info(u'%s: %d riviä' % (pathname, row_nro))
@@ -101,7 +101,7 @@ def datastorer(pathname):
                 logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
                 if not "Käräjät" in reader.fieldnames:
                     raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
-            row_nro += 1
+            row_nro += 2
     
             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
             if row['Käräjät'][:4] == 'http':
@@ -114,10 +114,7 @@ def datastorer(pathname):
                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
                 continue
                 
-            person_id = get_new_oid()
-            event_id = get_new_oid()
-            
-            p = _poimi_(person_id,  event_id, row, url)
+            p = _poimi_(row_nro, row_nro+1, row, url)
     
             # Tallettaa Person-olion ja siihen sisältyvät Eventit
             # (Person)-[OSALLISTUU]->(Event)
@@ -196,7 +193,7 @@ def lue_refnames():
 #<Node graph='http://localhost:7474/db/data/' ref='node/24611' labels={'Refname'} 
 #   properties={'oid': 124, 'name': 'Aapeli'}>
 
-        logging.debug("n=" + str(n) + "--> m=" + str(m))
+#        logging.debug("n=" + str(n) + "--> m=" + str(m))
         r = Refname(n.properties['name'])
         r.oid = n.properties['oid']
         r.gender = n.properties['gender']
@@ -221,16 +218,47 @@ def lue_typed_refnames(reftype):
         raise AttributeError("Mitä referenssityyppiä halutaan?")
     
     v_names = Refname.get_typed_refnames(reftype)
-    
-    for oid, name, gender, source, names in v_names:
-#        logging.debug("lue_typed_refnames: oid={}, name='{}', names={}".format(oid, name, names))
+# Esimerkki:
+#a.oid  a.name  a.gender  a.source   base                 other
+#                                     [oid, name, gender]  [oid, name, gender]
+#-----  ------  --------  --------   ----                 -----
+#3493   Aake	F	  Messu- ja  [[null, null, null], [[3495, Aakke, null],
+#                         kalenteri   [null, null, null],  [3660, Acatius, null],
+#                                     [null, null, null],  [3662, Achat, null],
+#                                     [null, null, null],  [3664, Achatius, M],
+#                                     [null, null, null],  [3973, Akatius, null],
+#                                     [null, null, null],  [3975, Ake, null],
+#                                     [null, null, null]]  [3990, Akke, null]]
+#3495   Aakke   null     harvinainen [[3493, Aake, F]]    [[null, null, null]]
+
+    for oid, name, gender, source, base, other in v_names:
+        # Luodaan nimi
         r = Refname(name)
         r.oid = oid
         if gender:
             r.gender = gender
         if source:
-            r.source= source        
-        namelist.append((r,names))
+            r.source= source
+        baselist = []
+        # Luodaan mahdollinen kantanimi, johon tämä viittaa (yksi?)
+        for boid, bname, bgender in base:
+            if boid:
+                b = Refname(bname)
+                b.oid = boid
+                if bgender:
+                    b.gender = bgender
+                baselist.append(b)
+        otherlist = []
+        # Luodaan lista nimistä, joihin tämä viittaa
+        for ooid, oname, ogender in other:
+            if ooid:
+                o = Refname(oname)
+                o.oid = ooid
+                if ogender:
+                    o.gender = ogender
+                otherlist.append(o)
+
+        namelist.append((r,baselist,otherlist))
     
     logging.info("TIME get_named_refnames {} sek".format(time.time()-t0))
 

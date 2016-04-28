@@ -451,8 +451,6 @@ class Refname:
             - nimi ilman viittausta, olkoon (A:{name=name})
             - nimi ja viittaus, (A:{name=name})-->(B:{name=refname})
 
-            Jompi kumpi (name) tai (refname) tai molemmat voivat jo olla kannassa
-
             Edellytetään, että tälle oliolle on asetettu:
             - name (Nimi)
             Tunniste luodaan tai käytetään sitä joka löytyi kannasta
@@ -466,10 +464,6 @@ class Refname:
         # TODO: source pitäisi tallettaa Source-objektina
         
         global graph
-        a_oid  = ''
-        a_name = ''
-        b_oid  = ''
-        b_name = ''
         
         # Pakolliset tiedot
         if self.name == None:
@@ -535,12 +529,15 @@ class Refname:
             [Kutsu: datareader.lue_refnames()]
         """
         global graph
-        query = """
- MATCH (n:Refname)
- OPTIONAL MATCH (m:Refname)-[r:«reftype»*]->(n)
- RETURN n.oid, n.name, n.gender, n.source, COLLECT (m.name) AS names
- ORDER BY n.name"""
-        return graph.cypher.execute(query, reftype=reftype)
+        query="""
+ MATCH (a:Refname)
+   OPTIONAL MATCH (m:Refname)-[:«reftype1»*]->(a:Refname)
+   OPTIONAL MATCH (a:Refname)-[:«reftype2»]->(n:Refname)
+ RETURN a.oid, a.name, a.gender, a.source,
+   COLLECT ([n.oid, n.name, n.gender]) AS base,
+   COLLECT ([m.oid, m.name, m.gender]) AS other
+ ORDER BY a.name"""
+        return graph.cypher.execute(query, reftype1=reftype, reftype2=reftype)
 
     def getrefnames():
         """ Haetaan kannasta kaikki Refnamet 

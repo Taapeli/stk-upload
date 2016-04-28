@@ -13,7 +13,8 @@
 </div>
 <div>
     <h3>Versio 1b</h3>
-    <p>Lataa tiedoston ja näyttää sen taulukkona <em>(ei tietokantakäsittelyä)</em></p>
+    <p>Lataa tuomiokirjojen henkilötiedoston ja näyttää sen taulukkona 
+       <em>(ei tietokantakäsittelyä)</em></p>
     <form action="/lataa1b" method="post" enctype="multipart/form-data">
         <input type="file" name="filenm" />
         <input type="submit" value="Lataa" />
@@ -42,14 +43,15 @@
     <ul>
     <!-- li><a href="/dbtest">Testaa tietokantayhteys</a></li -->
     <li><a href="/lista/henkilot">Näytä kannassa olevat henkilöt</a></li>
-    <li><a href="/lista/refnimet/REFFIRST">Näytä referenssietunimet</a>
+    <li><a href="/lista/refnimet/REFFIRST">Näytä referenssietunimet aakkosjärjestyksessä</a>
         (<a href="/lista/refnimet">kaikki järjestämättä</a>)</li>
     <li><form action="/yhdista" method="post" enctype="multipart/form-data">
         <p>Yhdistelynäyttö<br />
         Anna sukunimen alkuosa: <input type="text" name="names"><input type="submit" value="Näytä"/></p>
         </form>
     </li>
-    <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> koko kanta!</li>
+    <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> koko kanta
+        <i>(Mitään kysymättä!)</li>
     </ul>
 </div>
 {% endblock %}
