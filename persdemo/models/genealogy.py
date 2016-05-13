@@ -465,6 +465,10 @@ class Refname:
         # TODO: source pitäisi tallettaa Source-objektina
         
         global graph
+        a_oid  = ''
+        a_name = ''
+        b_oid  = ''
+        b_name = ''
         
         # Pakolliset tiedot
         if self.name == None:
