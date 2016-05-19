@@ -564,7 +564,7 @@ class Refname:
         query = """
  MATCH (n:Refname)
  OPTIONAL MATCH (n:Refname)-[r]->(m)
- RETURN n,r,m;"""
+ RETURN n.oid, n.name, n.gender, n.source, type(r), m.oid, m.name"""
         return session.run(query)
 
 

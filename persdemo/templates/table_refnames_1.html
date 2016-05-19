@@ -37,7 +37,7 @@
                 <span class="id">{{n.oid}}</span>&nbsp;{{n.name}}{% if n.gender 
                 %}&nbsp;<span class="gender{{n.gender}}">{{sp[n.gender]}}</span>{% endif %}
                 {% endfor %}
-                {% elif other != [] %}{% for n in other %}
+                {% elif other != [] %} ← {% for n in other %}
                 <span class="id">{{n.oid}}</span>&nbsp;{{n.name}}{% if n.gender 
                 %}&nbsp;<span class="gender{{n.gender}}">{{sp[n.gender]}}</span>{% endif %} 
                 {% endfor %}

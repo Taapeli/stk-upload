@@ -177,32 +177,27 @@ def lue_henkilot(oid=None, names=None, max=1000):
 
 def lue_refnames():
     """ Lukee tietokannasta Refname- objektit näytettäväksi
+        (n:Refname)-[r]->(m)
     """
     namelist = []
     t0 = time.time()
-    v_names = Refname.getrefnames()
+    recs = Refname.getrefnames()
     
-    for n,f,m in v_names:
-#>>> n
-#<Node graph='http://localhost:7474/db/data/' ref='node/24610' labels={'Refname'} 
-#   properties={'oid': 123, 'name': 'Aabeli'}>
-#>>> f
-#<Relationship graph='http://localhost:7474/db/data/' ref='relationship/10737' 
-#   start='node/24610' end='node/24611' kind='REFFIRST' properties={}>
-#>>> m
-#<Node graph='http://localhost:7474/db/data/' ref='node/24611' labels={'Refname'} 
-#   properties={'oid': 124, 'name': 'Aapeli'}>
+    for rec in recs:
+        # n.oid, n.name, n.gender, n.source, type(r), m.oid, m.name
+        # 0      1       2         3         4        5      6
 
-#        logging.debug("n=" + str(n) + "--> m=" + str(m))
-        r = Refname(n.properties['name'])
-        r.oid = n.properties['oid']
-        r.gender = n.properties['gender']
-        r.source= n.properties['source']
+        r = Refname(rec[1])
+        r.oid = rec[0]
+        if rec[2]:
+            r.gender = rec[2]
+        if rec[3]:
+            r.source= rec[3]
         
-        if f:
-            r.reftype = f.type
-            r.refname = m.properties['name']
-        
+        if rec[4]:
+            r.reftype = rec[4]
+            r.refname = rec[6]
+
         namelist.append(r)
 
     logging.info("TIME get_refnames {} sek".format(time.time()-t0))
