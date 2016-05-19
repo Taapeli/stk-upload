@@ -20,7 +20,8 @@ Luokkamalli
     ( Migration {oid, aika} )        -[from]-> (Place), -[to]-> (Place)
 
 """
-from py2neo import Graph, Node, Relationship, authenticate
+from neo4j.v1 import GraphDatabase, basic_auth
+#from py2neo import Graph, Node, Relationship, authenticate
 from flask import flash
 import logging
 import sys
@@ -28,29 +29,38 @@ import instance.config as dbconf      # Tietokannan tiedot
 
 # -------------------------- Globaalit muuttujat -------------------------
 
-graph = Graph()
+#graph = Graph()
 
 # ---------------------------------- Funktiot ----------------------------------
 
 def connect_db():
     """ 
-        genelogy-paketin tarvitsema tietokantayhteys 
+        genelogy-paketin tarvitsema tietokantayhteys
+        
+        Ks. http://neo4j.com/developer/language-guides/
+        tarkemmin http://neo4j.com/developer/python/
+        ja https://pypi.python.org/pypi/neo4j-driver
     """
-    global graph
+    #global graph
+    global session
 
     #logging.debug("-- dbconf = {}".format(dir(dbconf)))
-    if 'graph' in globals():
-        print ("connect_db - already done")
-    elif 'DB_HOST_PORT' in dir(dbconf):
+#    if 'session' in globals():
+#        print ("connect_db - already done")
+    if 'DB_HOST_PORT' in dir(dbconf):
         print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
-        authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
-        graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
+        driver = GraphDatabase.driver(dbconf.DB_HOST_PORT, auth=basic_auth(dbconf.DB_USER, dbconf.DB_AUTH))
+        session = driver.session()
+        #authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
+        #graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
     else:
-        print ("connect_db - default local")
-        graph = Graph()
+        print ("connect_db - default local – EI TUETTU?")
+        driver = GraphDatabase.driver("bolt://localhost", auth=basic_auth("neo4j", "localTaapeli"))
+        session = driver.session()
+        #graph = Graph()
 
     # Palautetaan tietokannan sijainnin hostname
-    return graph.uri.host
+    return driver.url
         
 def alusta_kanta():
     """ Koko kanta tyhjennetään """
@@ -533,16 +543,16 @@ class Refname:
             jotka suoraan tai ketjutetusti viittaavat ko. referenssinimeen
             [Kutsu: datareader.lue_refnames()]
         """
-        global graph
+        global session
         query="""
  MATCH (a:Refname)
-   OPTIONAL MATCH (m:Refname)-[:«reftype1»*]->(a:Refname)
-   OPTIONAL MATCH (a:Refname)-[:«reftype2»]->(n:Refname)
+   OPTIONAL MATCH (m:Refname)-[:{0}*]->(a:Refname)
+   OPTIONAL MATCH (a:Refname)-[:{1}]->(n:Refname)
  RETURN a.oid, a.name, a.gender, a.source,
    COLLECT ([n.oid, n.name, n.gender]) AS base,
    COLLECT ([m.oid, m.name, m.gender]) AS other
- ORDER BY a.name"""
-        return graph.cypher.execute(query, reftype1=reftype, reftype2=reftype)
+ ORDER BY a.name""".format(reftype, reftype)
+        return session.run(query)
 
     def getrefnames():
         """ Haetaan kannasta kaikki Refnamet 
@@ -550,12 +560,12 @@ class Refname:
             viitatun referenssinimen nimi ja tyyppi.
             [Kutsu: datareader.lue_refnames()]
         """
-        global graph
+        global session
         query = """
  MATCH (n:Refname)
  OPTIONAL MATCH (n:Refname)-[r]->(m)
  RETURN n,r,m;"""
-        return graph.cypher.execute(query)
+        return session.run(query)
 
 
 class Citation:

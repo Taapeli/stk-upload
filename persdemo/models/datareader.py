@@ -217,8 +217,20 @@ def lue_typed_refnames(reftype):
     if not (reftype and reftype != ""):
         raise AttributeError("Mitä referenssityyppiä halutaan?")
     
-    v_names = Refname.get_typed_refnames(reftype)
+    recs = Refname.get_typed_refnames(reftype)
 # Esimerkki:
+# >>> for x in v_names: print(x)
+# <Record a.oid=3 a.name='Aabi' a.gender=None a.source='harvinainen' 
+#         base=[[2, 'Aapeli', None]] other=[[None, None, None]]>
+# <Record a.oid=5 a.name='Aabraham' a.gender='M' a.source='Pojat 1990-luvulla' 
+#         base=[[None, None, None]] other=[[None, None, None]]>
+# <Record a.oid=6 a.name='Aabrahami' a.gender=None a.source='harvinainen' 
+#         base=[[7, 'Aappo', None]] other=[[None, None, None]]>
+# >>> for x in v_names: print(x[1])
+# Aabrahami
+# Aabrami
+# Aaca
+
 #a.oid  a.name  a.gender  a.source   base                 other
 #                                     [oid, name, gender]  [oid, name, gender]
 #-----  ------  --------  --------   ----                 -----
@@ -231,31 +243,35 @@ def lue_typed_refnames(reftype):
 #                                     [null, null, null]]  [3990, Akke, null]]
 #3495   Aakke   null     harvinainen [[3493, Aake, F]]    [[null, null, null]]
 
-    for oid, name, gender, source, base, other in v_names:
+    for rec in recs:
+#        logging.debug("oid={}, name={}, gender={}, source={}, base={}, other={}".\
+#               format( rec[0], rec[1],  rec[2],    rec[3],    rec[4],  rec[5]))
         # Luodaan nimi
-        r = Refname(name)
-        r.oid = oid
-        if gender:
-            r.gender = gender
-        if source:
-            r.source= source
-        baselist = []
+        r = Refname(rec['a.name'])
+        r.oid = rec['a.oid']
+        if rec['a.gender']:
+            r.gender = rec['a.gender']
+        if rec['a.source']:
+            r.source= rec['a.source']
+
         # Luodaan mahdollinen kantanimi, johon tämä viittaa (yksi?)
-        for boid, bname, bgender in base:
-            if boid:
-                b = Refname(bname)
-                b.oid = boid
-                if bgender:
-                    b.gender = bgender
+        baselist = []
+        for fld in rec['base']:
+            if fld[0]:
+                b = Refname(fld[1])
+                b.oid = fld[0]
+                if fld[2]:
+                    b.gender = fld[2]
                 baselist.append(b)
+
+        # Luodaan lista muista nimistä, joihin tämä viittaa
         otherlist = []
-        # Luodaan lista nimistä, joihin tämä viittaa
-        for ooid, oname, ogender in other:
-            if ooid:
-                o = Refname(oname)
-                o.oid = ooid
-                if ogender:
-                    o.gender = ogender
+        for fld in rec['other']:
+            if fld[0]:
+                o = Refname(fld[1])
+                o.oid = fld[0]
+                if fld[2]:
+                    o.gender = fld[2]
                 otherlist.append(o)
 
         namelist.append((r,baselist,otherlist))
