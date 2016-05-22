@@ -265,6 +265,17 @@ class Person:
             get_persons(oid=123)        tietty henkilö oid:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
             - lisäksi (max=100)         rajaa luettavien henkilöiden määrää
+            
+        Palauttaa riveillä listan muuttujia:
+        n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
+          0      1            2           3       4      5        6
+         146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]	
+
+        jossa 'events' on lista käräjiä, jonka jäseninä on lista ko 
+        käräjäin muuttujia:
+        [[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
+            0      1        2        3                4
+        [[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
         """
         global graph
         if max > 0:
@@ -277,12 +288,18 @@ class Person:
             where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
             where = ""
+#       query = """
+# MATCH (n:Person) {0}  
+# OPTIONAL MATCH (n)-->(e) 
+# RETURN n, COLLECT(e)
+# ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
         query = """
- MATCH (n:Person) {0}  
- OPTIONAL MATCH (n)-->(e) 
- RETURN n, COLLECT(e)
+ MATCH (n:Person) {0}
+ OPTIONAL MATCH (n)-[r]->(e) 
+ RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), 
+  COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
-        return graph.cypher.execute(query)
+        return session.run(query)
 
     def get_events (self):
         "Haetaan henkilön tapahtumat. (Ei käytössä!) "

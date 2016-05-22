@@ -126,37 +126,48 @@ def datastorer(pathname):
 def lue_henkilot(oid=None, names=None, max=1000):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
-        Jos oid on annettu, luetaan vain se henkilö, jonka oid täsmää
+        Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
+        käräjätapahtuman muuttujalistoja
     """    
     persons = []
     t0 = time.time()
-    retList = Person.get_person_events(max=max, pid=oid, names=names)
-    if len(retList.records) == 0:
-        logging.warning("lue_henkilot: ei ketään oid={}, names={}".format(oid, names))
-    else:
-        logging.info("lue_henkilot: {} henkiloä".format(len(retList.records)))
-        #print ("Lue_henkilot:\n", retList[0])
-    
-    for row in retList:
+    recs = Person.get_person_events(max=max, pid=oid, names=names)
+    nro = 0
+    for rec in recs:
+        nro = nro + 1
         # Saatu Person ja collection(Event)
-        thisPerson, theseEvents = row
-        pid = thisPerson.properties['oid']
-        p = Person(pid)
-        etu = thisPerson.properties['firstname']
-        suku = thisPerson.properties['lastname']
-        p.name = Name(etu,suku)
-        p.name_orig = thisPerson.properties['name_orig']
-        p.occupation = thisPerson.properties['occu']
-        p.place= thisPerson.properties['place']
+        #Palauttaa riveillä listan muuttujia:
+        #n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
+        #  0      1            2           3       4      5        6
+        # 146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]	
 
-#        logging.info("lue_henkilot: Person {}, {} tapahtumaa".format(pid, 
-#            len(theseEvents)))
-        for gotEvent in theseEvents:
-            event_id = gotEvent.properties['oid']
-            e = Event(event_id, 'Käräjät')
-            e.name = gotEvent.properties['name']
-            e.date = gotEvent.properties['date']
-            e.name_orig = gotEvent.properties['name_orig']
+        pid = rec['n.oid']
+        p = Person(pid)
+        etu = ""
+        suku = ""
+        if rec['n.firstname']:
+            etu = rec['n.firstname']
+        if rec['n.lastname']:
+            suku = rec['n.lastname']
+        p.name = Name(etu,suku)
+#        if rec['n.name_orig']:
+#            p.name_orig = rec['n.name_orig']
+        if rec['n.occu']:
+            p.occupation = rec['n.occu']
+        if rec['n.place']:
+            p.place= rec['n.place']
+
+        for ev in rec['events']:
+            # 'events' on lista käräjiä, jonka jäseninä on lista muuttujia:
+            #[[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
+            #    0      1        2        3                4
+            #[[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
+
+            event_id = ev[0]
+            e = Event(event_id, ev[1])
+            e.name = ev[2]
+            e.date = ev[3]
+            e.name_orig = ev[4]
             p.events.append(e)    
 #            logging.info("lue_henkilot: Tapahtuma {}".format(e))
 
@@ -170,6 +181,11 @@ def lue_henkilot(oid=None, names=None, max=1000):
 
         persons.append(p)
 
+    if nro == 0:
+        logging.warning("lue_henkilot: ei ketään oid={}, names={}".format(oid, names))
+    else:
+        logging.info("lue_henkilot: {} henkiloä".format(nro))
+        #print ("Lue_henkilot:\n", retList[0])
     logging.debug("TIME lue_henkilot {} sek".format(time.time()-t0))
 
     return (persons)
