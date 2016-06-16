@@ -88,7 +88,7 @@ def henkilolista(pathname):
 
 def datastorer(pathname):
     """ Lukee csv-tiedostosta aineiston, ja tallettaa kustakin 
-        syöttörivistä Person-objektit
+        syöttörivistä Person-objektit sisältäen käräjä-Eventit
     """
     row_nro = 0
     url = ''

@@ -27,8 +27,6 @@ import logging
 import sys
 import instance.config as dbconf      # Tietokannan tiedot
 
-# -------------------------- Globaalit muuttujat -------------------------
-
 #graph = Graph()
 
 # ---------------------------------- Funktiot ----------------------------------
@@ -36,10 +34,8 @@ import instance.config as dbconf      # Tietokannan tiedot
 def connect_db():
     """ 
         genelogy-paketin tarvitsema tietokantayhteys
+        Ks- http://neo4j.com/docs/developer-manual/current/#driver-manual-index
         
-        Ks. http://neo4j.com/developer/language-guides/
-        tarkemmin http://neo4j.com/developer/python/
-        ja https://pypi.python.org/pypi/neo4j-driver
     """
     #global graph
     global session
@@ -109,6 +105,7 @@ def get_new_oid():
  ON MATCH SET n.nextid = n.nextid + 1
  RETURN n.nextid"""
     return graph.cypher.execute(query).one
+
 
 # --------------------------------- Apuluokat ----------------------------------
 
@@ -207,7 +204,9 @@ class Person:
         """
         # TODO: pitäsi huolehtia, että käytetään entistä tapahtumaa, jos on
         
-        global graph
+        global graph    # TODO: Ei tätä enää, muutos kesken
+        global session
+
         # Henkilö-noodi
         persoona = Node(self.label, oid=self.oid, \
                 firstname=self.name.first, lastname=self.name.last)
@@ -238,27 +237,6 @@ class Person:
             # Henkilö ilman tapahtumaa (näitä ei taida aineistossamme olla)
             graph.create(persoona)
                     
-    def get_persons (max=0, pid=None, names=None):
-        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
-            get_persons()               kaikki
-            get_persons(oid=123)        tietty henkilö oid:n mukaan poimittuna
-            get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
-            - lisäksi (max=100)         rajaa luettavien henkilöiden määrää
-        """
-        global graph
-        if max > 0:
-            qmax = "LIMIT " + str(max)
-        else:
-            qmax = ""
-        if pid:
-            where = "WHERE n.oid={} ".format(pid)
-        elif names:
-            where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
-        else:
-            where = ""
-        query = "MATCH (n:Person) {0} RETURN n {1};".format(where, qmax)
-        return graph.cypher.execute(query)
-
     def get_person_events (max=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
@@ -277,7 +255,8 @@ class Person:
             0      1        2        3                4
         [[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
         """
-        global graph
+        global session
+
         if max > 0:
             qmax = "LIMIT " + str(max)
         else:
@@ -301,16 +280,7 @@ class Person:
  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
         return session.run(query)
 
-    def get_events (self):
-        "Haetaan henkilön tapahtumat. (Ei käytössä!) "
-        query = """
- MATCH (n:Person) - [:OSALLISTUI] -> (e:Event) 
- WHERE n.oid = {pid} 
- RETURN e;"""
-        global graph
-        return graph.cypher.execute(query,  pid=self.oid)
-  
-    def key (self):
+    def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
         key = "{}:{}:{}:{}".format(self.name.first, self.name.last, 
               self.occupation, self.place)
@@ -322,6 +292,7 @@ class Person:
         Yhteyden tyyppi on kind, esim. "OSALLISTUI"
         """
         eventList = ""
+        #Todo: TÄMÄ ON RISA, i:hin EI LAINKAAN VIITATTU
         for i in events:
             # Luodaan yhteys (Person)-[:kind]->(Event)
             for event in self.events:
@@ -384,6 +355,7 @@ class Event:
         "Hakuavain tuplatapahtumien löytämiseksi yhdistelyssä"
         return "{}:{}".format(self.name, self.date)
 
+
 class Name:
     """ Etu- ja sukunimi, patronyymi sekä nimen alkuperäismuoto
     """
@@ -410,15 +382,18 @@ class Name:
             s += " [%s]"
         return s
 
+
 class Place:
     label = "Place"
 
     pass
 
+
 class Note:
     label = "Note"
 
     pass
+
 
 class Refname:
     """
@@ -489,10 +464,10 @@ class Refname:
             - reference 
               (a:Refname {nimi='Nimi'}) -[r:Reftype]-> (b:Refname {nimi='RefNimi'})
         """
-        # TODO: source pitäisi tallettaa Source-objektina
+        # TODO: source pitäisi joskus tallettaa Source-objektina
         
-        global graph
-        a_oid  = ''
+        global session
+        a_oid  = -1
         a_name = ''
         b_oid  = ''
         b_name = ''
@@ -502,12 +477,15 @@ class Refname:
             raise NameError
         
         # Asetetaan A:n attribuutit
-        a_attr = "{name:'" + self.name + "'"
+        a_param = {"name": self.name}
+        #a_attr = "{name:'" + self.name + "'"
         if hasattr(self, 'gender'):
-            a_attr += ", gender:'{}'".format(self.gender)
+            a_param['gender'] = self.gender
+            #a_attr += ", gender:'{}'".format(self.gender)
         if hasattr(self, 'source'):
-            a_attr += ", source:'{}'".format(self.source)
-        a_attr += '}'
+            a_param['source'] = self.source
+            #a_attr += ", source:'{}'".format(self.source)
+        #a_attr += '}'
         a_newoid = get_new_oid()
 
         if hasattr(self, 'refname'):
@@ -516,13 +494,13 @@ class Refname:
             b_attr = "{name:'" + self.refname + "'}"
             b_newoid = get_new_oid()
             query="""
- MERGE (a:Refname {}) ON CREATE SET a.oid={} 
+ MERGE (a:Refname {name} {gender} {source}) ON CREATE SET a.oid={} 
  MERGE (b:Refname {}) ON CREATE SET b.oid={} 
  CREATE UNIQUE (a)-[:REFFIRST]->(b)
  RETURN a.oid, a.name, b.oid, b.name;""".format(a_attr, a_newoid,\
                                                b_attr, b_newoid)
             try:
-                ret=graph.cypher.execute(query)
+                ret=session.run(query, a_param)
 #                logging.info('ret = {}'.format(ret))
                 (a_oid, a_name, b_oid, b_name) = \
                                 (ret[0][0], ret[0][1], ret[0][2], ret[0][3])
@@ -541,7 +519,7 @@ class Refname:
  MERGE (a:Refname {}) ON CREATE SET a.oid={} 
  RETURN a.oid, a.name;""".format(a_attr, a_newoid)
             try:
-                ret=graph.cypher.execute(query)
+                ret=session.run(query)
 #                logging.info('ret = {}'.format(ret))
                 (a_oid, a_name)=(ret[0][0], ret[0][1])
             except Exception as e:
@@ -590,10 +568,12 @@ class Citation:
 
     pass
 
+
 class Source:
     label = "Source"
 
     pass
+
 
 class Archieve:
     label = "Archieve"
