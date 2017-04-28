@@ -1,5 +1,5 @@
 # Stk-upload
-Person data demo to learn a bit Python2.
+Skeleton for creating Suomitietokanta server for genealogical data upload and browsing.
 
 Tämän pitäisi käynnistyä näin:
 
