@@ -88,7 +88,7 @@ def henkilolista(pathname):
 
 def datastorer(pathname):
     """ Lukee csv-tiedostosta aineiston, ja tallettaa kustakin 
-        syöttörivistä Person-objektit
+        syöttörivistä Person-objektit sisältäen käräjä-Eventit
     """
     row_nro = 0
     url = ''
@@ -126,37 +126,48 @@ def datastorer(pathname):
 def lue_henkilot(oid=None, names=None, max=1000):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
-        Jos oid on annettu, luetaan vain se henkilö, jonka oid täsmää
+        Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
+        käräjätapahtuman muuttujalistoja
     """    
     persons = []
     t0 = time.time()
-    retList = Person.get_person_events(max=max, pid=oid, names=names)
-    if len(retList.records) == 0:
-        logging.warning("lue_henkilot: ei ketään oid={}, names={}".format(oid, names))
-    else:
-        logging.info("lue_henkilot: {} henkiloä".format(len(retList.records)))
-        #print ("Lue_henkilot:\n", retList[0])
-    
-    for row in retList:
+    recs = Person.get_person_events(max=max, pid=oid, names=names)
+    nro = 0
+    for rec in recs:
+        nro = nro + 1
         # Saatu Person ja collection(Event)
-        thisPerson, theseEvents = row
-        pid = thisPerson.properties['oid']
-        p = Person(pid)
-        etu = thisPerson.properties['firstname']
-        suku = thisPerson.properties['lastname']
-        p.name = Name(etu,suku)
-        p.name_orig = thisPerson.properties['name_orig']
-        p.occupation = thisPerson.properties['occu']
-        p.place= thisPerson.properties['place']
+        #Palauttaa riveillä listan muuttujia:
+        #n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
+        #  0      1            2           3       4      5        6
+        # 146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]	
 
-#        logging.info("lue_henkilot: Person {}, {} tapahtumaa".format(pid, 
-#            len(theseEvents)))
-        for gotEvent in theseEvents:
-            event_id = gotEvent.properties['oid']
-            e = Event(event_id, 'Käräjät')
-            e.name = gotEvent.properties['name']
-            e.date = gotEvent.properties['date']
-            e.name_orig = gotEvent.properties['name_orig']
+        pid = rec['n.oid']
+        p = Person(pid)
+        etu = ""
+        suku = ""
+        if rec['n.firstname']:
+            etu = rec['n.firstname']
+        if rec['n.lastname']:
+            suku = rec['n.lastname']
+        p.name = Name(etu,suku)
+#        if rec['n.name_orig']:
+#            p.name_orig = rec['n.name_orig']
+        if rec['n.occu']:
+            p.occupation = rec['n.occu']
+        if rec['n.place']:
+            p.place= rec['n.place']
+
+        for ev in rec['events']:
+            # 'events' on lista käräjiä, jonka jäseninä on lista muuttujia:
+            #[[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
+            #    0      1        2        3                4
+            #[[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
+
+            event_id = ev[0]
+            e = Event(event_id, ev[1])
+            e.name = ev[2]
+            e.date = ev[3]
+            e.name_orig = ev[4]
             p.events.append(e)    
 #            logging.info("lue_henkilot: Tapahtuma {}".format(e))
 
@@ -170,6 +181,11 @@ def lue_henkilot(oid=None, names=None, max=1000):
 
         persons.append(p)
 
+    if nro == 0:
+        logging.warning("lue_henkilot: ei ketään oid={}, names={}".format(oid, names))
+    else:
+        logging.info("lue_henkilot: {} henkiloä".format(nro))
+        #print ("Lue_henkilot:\n", retList[0])
     logging.debug("TIME lue_henkilot {} sek".format(time.time()-t0))
 
     return (persons)
@@ -177,32 +193,27 @@ def lue_henkilot(oid=None, names=None, max=1000):
 
 def lue_refnames():
     """ Lukee tietokannasta Refname- objektit näytettäväksi
+        (n:Refname)-[r]->(m)
     """
     namelist = []
     t0 = time.time()
-    v_names = Refname.getrefnames()
+    recs = Refname.getrefnames()
     
-    for n,f,m in v_names:
-#>>> n
-#<Node graph='http://localhost:7474/db/data/' ref='node/24610' labels={'Refname'} 
-#   properties={'oid': 123, 'name': 'Aabeli'}>
-#>>> f
-#<Relationship graph='http://localhost:7474/db/data/' ref='relationship/10737' 
-#   start='node/24610' end='node/24611' kind='REFFIRST' properties={}>
-#>>> m
-#<Node graph='http://localhost:7474/db/data/' ref='node/24611' labels={'Refname'} 
-#   properties={'oid': 124, 'name': 'Aapeli'}>
+    for rec in recs:
+        # n.oid, n.name, n.gender, n.source, type(r), m.oid, m.name
+        # 0      1       2         3         4        5      6
 
-#        logging.debug("n=" + str(n) + "--> m=" + str(m))
-        r = Refname(n.properties['name'])
-        r.oid = n.properties['oid']
-        r.gender = n.properties['gender']
-        r.source= n.properties['source']
+        r = Refname(rec[1])
+        r.oid = rec[0]
+        if rec[2]:
+            r.gender = rec[2]
+        if rec[3]:
+            r.source= rec[3]
         
-        if f:
-            r.reftype = f.type
-            r.refname = m.properties['name']
-        
+        if rec[4]:
+            r.reftype = rec[4]
+            r.refname = rec[6]
+
         namelist.append(r)
 
     logging.info("TIME get_refnames {} sek".format(time.time()-t0))
@@ -217,8 +228,20 @@ def lue_typed_refnames(reftype):
     if not (reftype and reftype != ""):
         raise AttributeError("Mitä referenssityyppiä halutaan?")
     
-    v_names = Refname.get_typed_refnames(reftype)
+    recs = Refname.get_typed_refnames(reftype)
 # Esimerkki:
+# >>> for x in v_names: print(x)
+# <Record a.oid=3 a.name='Aabi' a.gender=None a.source='harvinainen' 
+#         base=[[2, 'Aapeli', None]] other=[[None, None, None]]>
+# <Record a.oid=5 a.name='Aabraham' a.gender='M' a.source='Pojat 1990-luvulla' 
+#         base=[[None, None, None]] other=[[None, None, None]]>
+# <Record a.oid=6 a.name='Aabrahami' a.gender=None a.source='harvinainen' 
+#         base=[[7, 'Aappo', None]] other=[[None, None, None]]>
+# >>> for x in v_names: print(x[1])
+# Aabrahami
+# Aabrami
+# Aaca
+
 #a.oid  a.name  a.gender  a.source   base                 other
 #                                     [oid, name, gender]  [oid, name, gender]
 #-----  ------  --------  --------   ----                 -----
@@ -231,31 +254,35 @@ def lue_typed_refnames(reftype):
 #                                     [null, null, null]]  [3990, Akke, null]]
 #3495   Aakke   null     harvinainen [[3493, Aake, F]]    [[null, null, null]]
 
-    for oid, name, gender, source, base, other in v_names:
+    for rec in recs:
+#        logging.debug("oid={}, name={}, gender={}, source={}, base={}, other={}".\
+#               format( rec[0], rec[1],  rec[2],    rec[3],    rec[4],  rec[5]))
         # Luodaan nimi
-        r = Refname(name)
-        r.oid = oid
-        if gender:
-            r.gender = gender
-        if source:
-            r.source= source
-        baselist = []
+        r = Refname(rec['a.name'])
+        r.oid = rec['a.oid']
+        if rec['a.gender']:
+            r.gender = rec['a.gender']
+        if rec['a.source']:
+            r.source= rec['a.source']
+
         # Luodaan mahdollinen kantanimi, johon tämä viittaa (yksi?)
-        for boid, bname, bgender in base:
-            if boid:
-                b = Refname(bname)
-                b.oid = boid
-                if bgender:
-                    b.gender = bgender
+        baselist = []
+        for fld in rec['base']:
+            if fld[0]:
+                b = Refname(fld[1])
+                b.oid = fld[0]
+                if fld[2]:
+                    b.gender = fld[2]
                 baselist.append(b)
+
+        # Luodaan lista muista nimistä, joihin tämä viittaa
         otherlist = []
-        # Luodaan lista nimistä, joihin tämä viittaa
-        for ooid, oname, ogender in other:
-            if ooid:
-                o = Refname(oname)
-                o.oid = ooid
-                if ogender:
-                    o.gender = ogender
+        for fld in rec['other']:
+            if fld[0]:
+                o = Refname(fld[1])
+                o.oid = fld[0]
+                if fld[2]:
+                    o.gender = fld[2]
                 otherlist.append(o)
 
         namelist.append((r,baselist,otherlist))

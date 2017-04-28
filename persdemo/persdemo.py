@@ -217,11 +217,12 @@ def virhesivu(code, text=''):
 
 
 if __name__ == '__main__':
-    if True:
+    if False:
         # Ajo paikallisesti
         logging.basicConfig(level=logging.DEBUG)
         app.run(debug='DEBUG')
     else:
         # Julkinen sovellus
-        app.run(host='0.0.0.0', port=80)
+        logging.basicConfig(level=logging.INFO)
+        app.run(host='0.0.0.0', port=8000)
 
