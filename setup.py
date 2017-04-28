@@ -16,7 +16,7 @@ setup (
        #summary = 'Just another Python package for the cheese shop',
        url='',
        license='',
-       long_description='Henkilötietojen harjoitussovellus',
+       long_description='Taapeli-palvelimen harjoitussovellus',
 
        # could also include long_description, download_url, classifiers, etc.
 
