@@ -183,7 +183,92 @@ class Person:
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
                 self.name.append(pname)
-                
+
+    def get_person_events (max=0, pid=None, names=None):
+        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
+            get_persons()               kaikki
+            get_persons(oid=123)        tietty henkilö oid:n mukaan poimittuna
+            get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
+            - lisäksi (max=100)         rajaa luettavien henkilöiden määrää
+            
+        Palauttaa riveillä listan muuttujia:
+        n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
+          0      1            2           3       4      5        6
+         146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]    
+
+        jossa 'events' on lista käräjiä, jonka jäseninä on lista ko 
+        käräjäin muuttujia:
+        [[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
+            0      1        2        3                4
+        [[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
+        """
+        global session
+
+        if max > 0:
+            qmax = "LIMIT " + str(max)
+        else:
+            qmax = ""
+        if pid:
+            where = "WHERE n.oid={} ".format(pid)
+        elif names:
+            where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
+        else:
+            where = ""
+#       query = """
+# MATCH (n:Person) {0}  
+# OPTIONAL MATCH (n)-->(e) 
+# RETURN n, COLLECT(e)
+# ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
+        query = """
+ MATCH (n:Person) {0}
+ OPTIONAL MATCH (n)-[r]->(e) 
+ RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), 
+  COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
+ ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
+        return session.run(query)
+
+    def key(self):
+        "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
+        key = "{}:{}:{}:{}".format(self.name.first, self.name.last, 
+              self.occupation, self.place)
+        return key
+
+    def join_events(self, events, kind=None):
+        """
+        Päähenkilöön self yhdistetään tapahtumat listalta events.
+        Yhteyden tyyppi on kind, esim. "OSALLISTUI"
+        """
+        eventList = ""
+        #Todo: TÄMÄ ON RISA, i:hin EI LAINKAAN VIITATTU
+        for i in events:
+            # Luodaan yhteys (Person)-[:kind]->(Event)
+            for event in self.events:
+                if event.__class__ != "Event":
+                    raise TypeError("Piti olla Event: {}".format(event.__class__))
+
+                # Tapahtuma-noodi
+                tapahtuma = Node(Event.label, oid=event.oid, kind=event.kind, \
+                        name=event.name, date=event.date)
+                osallistui = Relationship(persoona, kind, tapahtuma)
+            try:
+                graph.create(osallistui)
+            except Exception as e:
+                flash('Lisääminen ei onnistunut: {}. henkilö {}, tapahtuma {}'.\
+                    format(e, persoona, tapahtuma), 'error')
+                logging.warning('Lisääminen ei onnistunut: {}'.format(e))
+        logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), eventList))
+    
+    def join_persons(self, others):
+        """
+        Päähenkilöön self yhdistetään henkilöiden others tiedot ja tapahtumat
+        """
+        #TODO Kahden henkilön ja heidän tapahtumiensa yhdistäminen
+        othersList = ""
+        for i in others:
+            otherslist.append(str(i) + " ")
+        logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), othersList))
+        pass
+    
                 
     @staticmethod
     def get_total():

@@ -8,6 +8,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
     Genealogy database objects are described as a series of class instances
     (which all have previously been included in this genealogy.py):
 
+    genealogy.User, genealogy.Date
     person.Person, person.Name
     family.Family
     place.Place
@@ -133,5 +134,28 @@ class User:
             MATCH (u:User) RETURN u.userid AS userid ORDER BY u.userid
             """
         return session.run(query)
+
+
+class Date():
+    """ Päivämäärän muuntofunktioita """
+    def range_str(aikamaare):
+        """ Karkea aikamäären siivous, palauttaa merkkijonon
+        
+            Aika esim. '1666.02.20-22' muunnetaan muotoon '1666-02-20 … 22':
+            * Tekstin jakaminen sarakkeisiin käyttäen välimerkkiä ”-” 
+              tai ”,” (kentät tekstimuotoiltuna)
+            * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
+              ”.” viivaksi
+         """
+        t = aikamaare.replace('-','|').replace(',','|').replace('.', '-')
+        if '|' in t:
+            osat = t.split('|')
+            # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
+            t = '%s … %s' % (osat[0], osat[-1])
+            if len(osat) > 2:
+                logging.warning('Aika korjattu: {} -> {}'.format(aikamaare, t))
+
+        t = t.replace('.', '-')
+        return t
 
 

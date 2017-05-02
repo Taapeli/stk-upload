@@ -5,7 +5,11 @@
 import csv
 import logging
 import time
-from models.genealogy import *  # Tietokannan luokat
+from models.genealogy import Date
+from models.person import Person, Name
+from models.event import Event
+from models.source_citation import Source, Citation
+from models.refname import Refname
 
 def _poimi_(person_id, event_id, row, url):
     """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
