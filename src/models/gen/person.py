@@ -8,7 +8,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from datetime import date
 from sys import stderr
-
+import logging
 
 class Person:
     """ Henkilö
@@ -16,6 +16,7 @@ class Person:
         Properties:
                 handle          
                 change
+                uniq_id            int noden id
                 id                 esim. "I0001"
                 gender             str sukupuoli
                 name:
@@ -35,9 +36,12 @@ class Person:
         """ Luo uuden person-instanssin """
         self.handle = ''
         self.change = ''
+        self.uniq_id = 0
         self.id = pid
         self.name = []
-        self.eventref_hlink = []
+        self.gender = ''
+        self.events = []                # For creating display sets
+        self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
         self.parentin_hlink = []
         self.citationref_hlink = []
@@ -69,6 +73,19 @@ class Person:
         return  session.run(query)
     
     
+    def get_event_data_by_id(self):
+        """ Luetaan henkilön tapahtumien id:t """
+        
+        global session
+                
+        query = """
+            MATCH (person:Person)-[r:EVENT]->(event:Event) 
+                WHERE ID(person)={}
+                RETURN r.role AS eventref_role, ID(event) AS eventref_hlink
+            """.format(self.uniq_id)
+        return  session.run(query)
+    
+    
     def get_her_families(self):
         """ Luetaan naisen perheiden handlet """
         
@@ -79,6 +96,19 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS handle
             """.format(self.handle)
+        return  session.run(query)
+    
+    
+    def get_her_families_by_id(self):
+        """ Luetaan naisen perheiden id:t """
+        
+        global session
+                
+        query = """
+            MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
+                WHERE ID(person)={}
+                RETURN ID(family) AS uniq_id
+            """.format(self.uniq_id)
         return  session.run(query)
     
     
@@ -93,12 +123,44 @@ class Person:
                 RETURN family.gramps_handle AS handle
             """.format(self.handle)
         return  session.run(query)
+    
+    
+    def get_his_families_by_id(self):
+        """ Luetaan miehen perheiden id:t """
+        
+        global session
+                
+        query = """
+            MATCH (person:Person)<-[r:FATHER]-(family:Family) 
+                WHERE ID(person)={}
+                RETURN ID(family) AS uniq_id
+            """.format(self.uniq_id)
+        return  session.run(query)
 
     
     def get_hlinks(self):
         """ Luetaan henkilön linkit """
             
         event_result = self.get_event_data()
+        for event_record in event_result:            
+            self.eventref_hlink.append(event_record["eventref_hlink"])
+            self.eventref_role.append(event_record["eventref_role"])
+
+        family_result = self.get_parentin_handle()
+        for family_record in family_result:            
+            self.parentin_hlink.append(family_record["parentin_hlink"])
+            
+        citation_result = self.get_citation_handle()
+        for citation_record in citation_result:            
+            self.citationref_hlink.append(citation_record["citationref_hlink"])
+            
+        return True
+
+    
+    def get_hlinks_by_id(self):
+        """ Luetaan henkilön linkit """
+            
+        event_result = self.get_event_data_by_id()
         for event_record in event_result:            
             self.eventref_hlink.append(event_record["eventref_hlink"])
             self.eventref_role.append(event_record["eventref_role"])
@@ -124,6 +186,19 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS parentin_hlink
             """.format(self.handle)
+        return  session.run(query)
+    
+    
+    def get_parentin_id(self):
+        """ Luetaan henkilön perheen id """
+        
+        global session
+                
+        query = """
+            MATCH (person:Person)-[r:FAMILY]->(family:Family) 
+                WHERE ID(person)={}
+                RETURN ID(family) AS parentin_hlink
+            """.format(self.uniq_id)
         return  session.run(query)
     
     
@@ -166,7 +241,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN person, name
                 ORDER BY name.alt
-            """.format(self.id)
+            """.format(self.uniq_id)
         person_result = session.run(query)
         
         for person_record in person_result:
@@ -184,7 +259,8 @@ class Person:
                 pname.suffix = person_record["name"]['suffix']
                 self.name.append(pname)
 
-    def get_person_events (self, nmax=0, pid=None, names=None):
+    @staticmethod       
+    def get_person_events (nmax=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
             get_persons(oid=123)        tietty henkilö oid:n mukaan poimittuna
@@ -202,6 +278,7 @@ class Person:
             0      1        2        3                4
         [[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
         """
+        
         global session
 
         if nmax > 0:
@@ -214,18 +291,15 @@ class Person:
             where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
             where = ""
-#       query = """
-# MATCH (n:Person) {0}  
-# OPTIONAL MATCH (n)-->(e) 
-# RETURN n, COLLECT(e)
-# ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
         query = """
  MATCH (n:Person) {0}
  OPTIONAL MATCH (n)-[r]->(e) 
  RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), 
   COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
+ 
         return session.run(query)
+
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
@@ -265,10 +339,11 @@ class Person:
         #TODO Kahden henkilön ja heidän tapahtumiensa yhdistäminen
         othersList = ""
         for i in others:
-            otherslist.append(str(i) + " ")
+            othersList.append(str(i) + " ")
         logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), othersList))
         pass
     
+                
                 
     @staticmethod
     def get_total():
@@ -283,6 +358,77 @@ class Person:
         
         for result in results:
             return str(result[0])
+
+
+    def get_points_for_compared_data(self, comp_person, print_out=True):
+        """ Tulostaa kahden henkilön tiedot vieretysten """
+        points = 0
+        print ("*****Person*****")
+        if (print_out):
+            print ("Handle: " + self.handle + " # " + comp_person.handle)
+            print ("Change: " + self.change + " # " + comp_person.change)
+            print ("Unique id: " + str(self.uniq_id) + " # " + str(comp_person.uniq_id))
+            print ("Id: " + self.id + " # " + comp_person.id)
+            print ("Gender: " + self.gender + " # " + comp_person.gender)
+        if len(self.name) > 0:
+            alt1 = []
+            type1 = []
+            first1 = []
+            refname1 = []
+            surname1 = []
+            suffix1 = [] 
+            alt2 = []
+            type2 = []
+            first2 = []
+            refname2 = [] 
+            surname2 = []
+            suffix2 = []
+            
+            names = self.name
+            for pname in names:
+                alt1.append(pname.alt)
+                type1.append(pname.type)
+                first1.append(pname.first)
+                refname1.append(pname.refname)
+                surname1.append(pname.surname)
+                suffix1.append(pname.suffix)
+            
+            names2 = comp_person.name
+            for pname in names2:
+                alt2.append(pname.alt)
+                type2.append(pname.type)
+                first2.append(pname.first)
+                refname2.append(pname.refname)
+                surname2.append(pname.surname)
+                suffix2.append(pname.suffix)
+                
+            if (len(first2) >= len(first1)):
+                for i in range(len(first1)):
+                    # Give points if refnames match
+                    if refname1[i] != ' ':
+                        if refname1[i] == refname2[i]:
+                            points += 1
+                    if (print_out):
+                        print ("Alt: " + alt1[i] + " # " + alt2[i])
+                        print ("Type: " + type1[i] + " # " + type2[i])
+                        print ("First: " + first1[i] + " # " + first2[i])
+                        print ("Refname: " + refname1[i] + " # " + refname2[i])
+                        print ("Surname: " + surname1[i] + " # " + surname2[i])
+                        print ("Suffix: " + suffix1[i] + " # " + suffix2[i])
+            else:
+                for i in range(len(first2)):
+                    # Give points if refnames match
+                    if refname1[i] == refname2[i]:
+                        points += 1
+                    if (print_out):
+                        print ("Alt: " + alt1[i] + " # " + alt2[i])
+                        print ("Type: " + type1[i] + " # " + type2[i])
+                        print ("First: " + first1[i] + " # " + first2[i])
+                        print ("Refname: " + refname1[i] + " # " + refname2[i])
+                        print ("Surname: " + surname1[i] + " # " + surname2[i])
+                        print ("Suffix: " + suffix1[i] + " # " + suffix2[i])
+
+        return points
 
 
     def print_data(self):
@@ -519,13 +665,13 @@ class Name:
                 suffix          str patronyymi
     """
     
-    def __init__(self, first='', last=''):
+    def __init__(self, givn='', surn=''):
         """ Luo uuden name-instanssin """
         self.type = ''
         self.alt = ''
-        self.first = first
+        self.first = givn
         self.refname = ''
-        self.surname = last
+        self.surname = surn
         self.suffix = ''
         
         

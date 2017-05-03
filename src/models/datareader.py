@@ -11,6 +11,7 @@ from models.gen.event import Event
 from models.gen.source_citation import Source, Citation
 from models.gen.refname import Refname
 
+
 def _poimi_(person_id, event_id, row, url):
     """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
     """
@@ -32,7 +33,8 @@ def _poimi_(person_id, event_id, row, url):
     # Luodaan henkilö ja käräjätapahtuma
 
     p = Person(person_id)
-    p.name = Name(etu, suku)
+    n = Name(etu, suku)
+    p.name.append(n)
     p.name_orig = "{0} /{1}/".format(etu, suku)
     p.occupation = row['Ammatti_vakioitu']
     p.place=row['Paikka_vakioitu']
@@ -122,20 +124,24 @@ def datastorer(pathname):
     
             # Tallettaa Person-olion ja siihen sisältyvät Eventit
             # (Person)-[OSALLISTUU]->(Event)
-            p.save()
+            p.save("juha100")
 
     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
     return message
 
-def lue_henkilot(oid=None, names=None, max=1000):
+def lue_henkilot(oid=None, names=None, nmax=1000):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
         Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
         käräjätapahtuman muuttujalistoja
-    """    
+    """
+
+    # Turha kutsu?
+    global session
+    
     persons = []
     t0 = time.time()
-    recs = Person.get_person_events(max=max, pid=oid, names=names)
+    recs = Person.get_person_events(nmax=nmax, pid=oid, names=names)
     nro = 0
     for rec in recs:
         nro = nro + 1

@@ -15,13 +15,12 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
     event.Event
     note.Note
     refname.Refname
-
 '''
 
 from neo4j.v1 import GraphDatabase, basic_auth
 from sys import stderr
+import logging
 import instance.config as dbconf
-
 
 def connect_db():
     """ 
@@ -29,11 +28,12 @@ def connect_db():
         Ks- http://neo4j.com/docs/developer-manual/current/#driver-manual-index
         
     """
-    global driver, session
+    global driver
+    global session      # TÄMÄ EI TOIMI
 
     #logging.debug("-- dbconf = {}".format(dir(dbconf)))
-#    if 'session' in globals():
-#        print ("connect_db - already done")
+    if 'session' in globals():
+        print ("connect_db - already done")
     if hasattr(dbconf,'DB_HOST_PORT'):
         print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
         driver = GraphDatabase.driver(dbconf.DB_HOST_PORT, auth=basic_auth(dbconf.DB_USER, dbconf.DB_AUTH))
@@ -44,6 +44,7 @@ def connect_db():
         print ("connect_db - default local – EI TUETTU?")
         driver = GraphDatabase.driver("bolt://localhost", auth=basic_auth("neo4j", "localTaapeli"))
         session = driver.session()
+    print("Sessio {} avattu".format(session))
     return session
     
     
@@ -138,6 +139,8 @@ class User:
 
 class Date():
     """ Päivämäärän muuntofunktioita """
+
+    @staticmethod       
     def range_str(aikamaare):
         """ Karkea aikamäären siivous, palauttaa merkkijonon
         
