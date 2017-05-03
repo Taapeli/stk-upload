@@ -9,12 +9,15 @@ app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 app.config.from_pyfile('config.py') # instance-hakemistosta
 app.secret_key = "kuu on juustoa"
-
-from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
+import models.genealogy
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
 import models.cvs_refnames      # Referenssinimien luonti
 import models.dataupdater       # Tietojen päivitysmetodit
+
+global session
+session = None
+
 
 @app.route('/')
 def index(): 
@@ -115,7 +118,7 @@ def lataa():
 def talleta(filename, subj):   
     """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
-    dburi = connect_db()
+    dburi = models.genealogy.connect_db()
     try:
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
@@ -137,7 +140,7 @@ def talleta(filename, subj):
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
-    dburi = connect_db()
+    dburi = models.genealogy.connect_db()
     persons = models.datareader.lue_henkilot()
     return render_template("table1.html", persons=persons, uri=dburi)
 
@@ -145,7 +148,7 @@ def nayta_henkilot():
 @app.route('/lista/refnimet/<string:reftype>')
 def nayta_refnimet(reftype): 
     """ referenssinimien näyttäminen ruudulla """
-    connect_db()
+    models.genealogy.connect_db()
     if reftype and reftype != "":
         names = models.datareader.lue_typed_refnames(reftype)
         return render_template("table_refnames_1.html", names=names, reftype=reftype)
