@@ -24,12 +24,12 @@ class Event:
                 citationref_hlink  str viittauksen osoite
      """
 
-    def __init__(self):
+    def __init__(self, eid='', desc=''):
         """ Luo uuden event-instanssin """
         self.handle = ''
         self.change = ''
-        self.id = ''
-        self.description = ''
+        self.id = eid
+        self.description = desc
         self.date = ''
         self.place_hlink = ''
         self.attr_type = ''

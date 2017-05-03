@@ -31,11 +31,11 @@ class Person:
                 citationref_hlink  str viittauksen osoite
      """
 
-    def __init__(self):
+    def __init__(self, pid=''):
         """ Luo uuden person-instanssin """
         self.handle = ''
         self.change = ''
-        self.id = ''
+        self.id = pid
         self.name = []
         self.eventref_hlink = []
         self.eventref_role = []
@@ -184,12 +184,12 @@ class Person:
                 pname.suffix = person_record["name"]['suffix']
                 self.name.append(pname)
 
-    def get_person_events (max=0, pid=None, names=None):
+    def get_person_events (self, nmax=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
             get_persons(oid=123)        tietty henkilö oid:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
-            - lisäksi (max=100)         rajaa luettavien henkilöiden määrää
+            - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
             
         Palauttaa riveillä listan muuttujia:
         n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
@@ -204,8 +204,8 @@ class Person:
         """
         global session
 
-        if max > 0:
-            qmax = "LIMIT " + str(max)
+        if nmax > 0:
+            qmax = "LIMIT " + str(nmax)
         else:
             qmax = ""
         if pid:
@@ -519,13 +519,13 @@ class Name:
                 suffix          str patronyymi
     """
     
-    def __init__(self):
+    def __init__(self, first='', last=''):
         """ Luo uuden name-instanssin """
         self.type = ''
         self.alt = ''
-        self.first = ''
+        self.first = first
         self.refname = ''
-        self.surname = ''
+        self.surname = last
         self.suffix = ''
         
         
