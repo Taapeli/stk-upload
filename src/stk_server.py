@@ -9,14 +9,14 @@ app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 app.config.from_pyfile('config.py') # instance-hakemistosta
 app.secret_key = "kuu on juustoa"
+global app
+
+
 import models.genealogy
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
-import models.cvs_refnames      # Referenssinimien luonti
 import models.dataupdater       # Tietojen päivitysmetodit
-
-global session
-session = None
+import models.cvs_refnames      # Referenssinimien luonti
 
 
 @app.route('/')
@@ -54,7 +54,7 @@ def lataa1a():
         logging.debug('Ladataan tiedosto ' + infile.filename)
         models.loadfile.upload_file(infile)
     except Exception as e:
-        return render_template("virhe_lataus.html", code=code, text=str(e))
+        return render_template("virhe_lataus.html", text=str(e))
 
     return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
         
@@ -131,7 +131,7 @@ def talleta(filename, subj):
                     status="Käräjätietojen lukua ei ole vielä tehty"
                 else:
                     return redirect(url_for('virhesivu', code=1, text= \
-                        "Aineistotyypin '" + aineisto + "' käsittely puuttuu vielä"))
+                        "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
@@ -140,7 +140,8 @@ def talleta(filename, subj):
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
-    dburi = models.genealogy.connect_db()
+    dbaddr = models.genealogy.connect_db()
+    dburi = ':'.join((dbaddr[0],str(dbaddr[1])))
     persons = models.datareader.lue_henkilot()
     return render_template("table1.html", persons=persons, uri=dburi)
 
@@ -159,8 +160,8 @@ def nayta_refnimet(reftype):
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
-    connect_db()
-    alusta_kanta()
+    models.genealogy.connect_db()
+    models.genealogy.alusta_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
 
@@ -196,7 +197,7 @@ def nayta_ehdolla(ehto):
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
     key, value = ehto.split('=')
-    connect_db()
+    models.genealogy.connect_db()
     try:
         if key == 'oid':
             persons = models.datareader.lue_henkilot(oid=value)            

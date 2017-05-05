@@ -56,6 +56,7 @@ def _poimi_(person_id, event_id, row, url):
     p.events.append(e)
     return p
 
+
 def henkilolista(pathname):
     """ Lukee csv-tiedostosta aineiston, ja luo kustakin 
         syöttörivistä Person-objektit
@@ -73,6 +74,7 @@ def henkilolista(pathname):
                 if not "Käräjät" in reader.fieldnames:
                     raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
             row_nro += 2
+            person_id = row_nro
     
             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
             if row['Käräjät'][:4] == 'http':
@@ -108,6 +110,7 @@ def datastorer(pathname):
                 if not "Käräjät" in reader.fieldnames:
                     raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
             row_nro += 2
+            person_id = row_nro
     
             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
             if row['Käräjät'][:4] == 'http':
@@ -129,6 +132,7 @@ def datastorer(pathname):
     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
     return message
 
+
 def lue_henkilot(oid=None, names=None, nmax=1000):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
@@ -137,7 +141,7 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
     """
 
     # Turha kutsu?
-    global session
+    global db_session
     
     persons = []
     t0 = time.time()
