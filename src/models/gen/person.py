@@ -9,6 +9,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from datetime import date
 from sys import stderr
 import logging
+from flask import g
 
 class Person:
     """ Henkilö
@@ -50,92 +51,78 @@ class Person:
     def get_citation_handle(self):
         """ Luetaan henkilön viittauksen handle """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)-[r:CITATION]->(c:Citation) 
                 WHERE person.gramps_handle='{}'
                 RETURN c.gramps_handle AS citationref_hlink
             """.format(self.handle)
-        return  db_session.run(query)
+        return  g.session.run(query)
     
     
     def get_event_data(self):
         """ Luetaan henkilön tapahtumien handlet """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)-[r:EVENT]->(event:Event) 
                 WHERE person.gramps_handle='{}'
                 RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink
             """.format(self.handle)
-        return  db_session.run(query)
+        return  g.session.run(query)
     
     
     def get_event_data_by_id(self):
         """ Luetaan henkilön tapahtumien id:t """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)-[r:EVENT]->(event:Event) 
                 WHERE ID(person)={}
                 RETURN r.role AS eventref_role, ID(event) AS eventref_hlink
             """.format(self.uniq_id)
-        return  db_session.run(query)
+        return  g.session.run(query)
     
     
     def get_her_families(self):
         """ Luetaan naisen perheiden handlet """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS handle
             """.format(self.handle)
-        return  db_session.run(query)
+        return  g.session.run(query)
     
     
     def get_her_families_by_id(self):
         """ Luetaan naisen perheiden id:t """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
                 WHERE ID(person)={}
                 RETURN ID(family) AS uniq_id
             """.format(self.uniq_id)
-        return  db_session.run(query)
+        return  g.session.run(query)
     
     
     def get_his_families(self):
         """ Luetaan miehen perheiden handlet """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)<-[r:FATHER]-(family:Family) 
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS handle
             """.format(self.handle)
-        return  db_session.run(query)
+        return  g.session.run(query)
     
     
     def get_his_families_by_id(self):
         """ Luetaan miehen perheiden id:t """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)<-[r:FATHER]-(family:Family) 
                 WHERE ID(person)={}
                 RETURN ID(family) AS uniq_id
             """.format(self.uniq_id)
-        return  db_session.run(query)
+        return  g.session.run(query)
 
     
     def get_hlinks(self):
@@ -179,41 +166,35 @@ class Person:
     def get_parentin_handle(self):
         """ Luetaan henkilön perheen handle """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)-[r:FAMILY]->(family:Family) 
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS parentin_hlink
             """.format(self.handle)
-        return  db_session.run(query)
+        return  g.session.run(query)
     
     
     def get_parentin_id(self):
         """ Luetaan henkilön perheen id """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)-[r:FAMILY]->(family:Family) 
                 WHERE ID(person)={}
                 RETURN ID(family) AS parentin_hlink
             """.format(self.uniq_id)
-        return  db_session.run(query)
+        return  g.session.run(query)
     
     
     def get_person_and_name_data(self):
         """ Luetaan kaikki henkilön tiedot """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)-[r:NAME]-(name:Name) 
                 WHERE person.gramps_handle='{}'
                 RETURN person, name
                 ORDER BY name.alt
             """.format(self.handle)
-        person_result = db_session.run(query)
+        person_result = g.session.run(query)
         
         for person_record in person_result:
             self.change = person_record["person"]['change']
@@ -234,15 +215,13 @@ class Person:
     def get_person_and_name_data_by_id(self):
         """ Luetaan kaikki henkilön tiedot """
         
-        global db_session
-                
         query = """
             MATCH (person:Person)-[r:NAME]-(name:Name) 
                 WHERE ID(person)={}
                 RETURN person, name
                 ORDER BY name.alt
             """.format(self.uniq_id)
-        person_result = db_session.run(query)
+        person_result = g.session.run(query)
         
         for person_record in person_result:
             self.change = person_record["person"]['change']
@@ -279,8 +258,6 @@ class Person:
         [[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
         """
         
-        global db_session
-
         if nmax > 0:
             qmax = "LIMIT " + str(nmax)
         else:
@@ -298,7 +275,7 @@ class Person:
   COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
  
-        return db_session.run(query)
+        return g.session.run(query)
 
 
     def key(self):
@@ -349,12 +326,10 @@ class Person:
     def get_total():
         """ Tulostaa henkilöiden määrän tietokannassa """
         
-        global db_session
-                
         query = """
             MATCH (p:Person) RETURN COUNT(p)
             """
-        results =  db_session.run(query)
+        results =  g.session.run(query)
         
         for result in results:
             return str(result[0])
@@ -533,8 +508,6 @@ class Person:
     def save(self, userid):
         """ Tallettaa henkilön kantaan """
 
-        global db_session
-        
         today = date.today()
         
         try:
@@ -546,7 +519,7 @@ class Person:
                     p.gender='{}'
                 """.format(self.handle, self.change, self.id, self.gender)
                 
-            db_session.run(query)
+            g.session.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -558,7 +531,7 @@ class Person:
                 SET r.date='{}'
                 """.format(userid, self.handle, today)
                 
-            db_session.run(query)
+            g.session.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
@@ -592,7 +565,7 @@ class Person:
                                p_suffix, 
                                self.handle)
                 
-                    db_session.run(query)
+                    g.session.run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
 
@@ -606,7 +579,7 @@ class Person:
                         MERGE (n)-[r:EVENT]->(m)
                          """.format(self.handle, self.eventref_hlink[i])
                                  
-                    db_session.run(query)
+                    g.session.run(query)
                 except Exception as err:
                     print("Virhe: {0}".format(err), file=stderr)
 
@@ -619,7 +592,7 @@ class Person:
                                     self.eventref_hlink[i], 
                                     self.eventref_role[i])
                                  
-                    db_session.run(query)
+                    g.session.run(query)
                 except Exception as err:
                     print("Virhe: {0}".format(err), file=stderr)
    
@@ -634,7 +607,7 @@ class Person:
 #                        MERGE (n)-[r:FAMILY]->(m)
 #                        """.format(self.handle, self.parentin_hlink[i])
 #                                 
-#                    db_session.run(query)
+#                    g.session.run(query)
 #                except Exception as err:
 #                    print("Virhe: {0}".format(err), file=stderr)
    
@@ -647,7 +620,7 @@ class Person:
                     MERGE (n)-[r:CITATION]->(m)
                      """.format(self.handle, self.citationref_hlink[0])
                                  
-                db_session.run(query)
+                g.session.run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
         return
@@ -679,87 +652,73 @@ class Name:
     def get_people_with_refname(refname):
         """ Etsi kaikki henkilöt, joiden referenssinimi on annettu"""
         
-        global db_session
-        
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
                 RETURN p.gramps_handle AS handle
             """.format(refname)
-        return db_session.run(query)
+        return g.session.run(query)
 
         
     @staticmethod
     def get_people_with_refname_and_user_given(userid, refname):
         """ Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
         
-        global db_session
-        
         query = """
             MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 
                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
                 RETURN p.gramps_handle AS handle
             """.format(userid, refname)
-        return db_session.run(query)
+        return g.session.run(query)
 
         
     @staticmethod
     def get_ids_of_people_with_refname_and_user_given(userid, refname):
         """ Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
         
-        global db_session
-        
         query = """
             MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 
                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
                 RETURN ID(p) AS id
             """.format(userid, refname)
-        return db_session.run(query)
+        return g.session.run(query)
         
     @staticmethod
     def get_people_with_surname(surname):
         """ Etsi kaikki henkilöt, joiden sukunimi on annettu"""
         
-        global db_session
-        
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.surname='{}'
                 RETURN p.gramps_handle AS handle
             """.format(surname)
-        return db_session.run(query)
+        return g.session.run(query)
         
     
     @staticmethod
     def get_all_first_names():
         """ Listaa kaikki etunimet tietokannassa """
         
-        global db_session
-        
         query = """
             MATCH (n:Name) RETURN distinct n.first AS first
                 ORDER BY n.first
             """
-        return db_session.run(query)
+        return g.session.run(query)
         
     
     @staticmethod
     def get_surnames():
         """ Listaa kaikki sukunimet tietokannassa """
         
-        global db_session
-        
         query = """
             MATCH (n:Name) RETURN distinct n.surname AS surname
                 ORDER BY n.surname
             """
-        return db_session.run(query)
+        return g.session.run(query)
     
     def set_refname(self):
         """Asetetaan etunimen referenssinimi """
-        
-        global db_session
         
         query = """
             MATCH (n:Name) WHERE n.first='{}' 
             SET n.refname='{}'
             """.format(self.first, self.refname)
-        return db_session.run(query)
+        return g.session.run(query)

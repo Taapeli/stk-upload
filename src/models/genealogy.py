@@ -17,37 +17,41 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
     refname.Refname
 '''
 
-from neo4j.v1 import GraphDatabase, basic_auth
 import sys
 import logging
-import instance.config as dbconf
+from neo4j.v1 import GraphDatabase, basic_auth
+from flask import g
+import instance.config as config
+
 
 def connect_db():
-    """ 
-        genelogy-paketin tarvitsema tietokantayhteys
-        Ks- http://neo4j.com/docs/developer-manual/current/#driver-manual-index
-        
-    """
-    global driver
-    global db_session
+    """ Opens a new database connection if there is none yet for the
+        current application context.
 
-    #logging.debug("-- dbconf = {}".format(dir(dbconf)))
-    if 'db_session' in globals():
+        Ks. http://neo4j.com/docs/developer-manual/current/#driver-manual-index
+    """
+
+    #logging.debug("-- config = {}".format(dir(config)))
+    if hasattr(g, 'session'):
         print ("connect_db - already done")
-    if hasattr(dbconf,'DB_HOST_PORT'):
-        print ("connect_db - server {}".format(dbconf.DB_HOST_PORT))
-        driver = GraphDatabase.driver(dbconf.DB_HOST_PORT, auth=basic_auth(dbconf.DB_USER, dbconf.DB_AUTH))
-        db_session = driver.session()
-        #authenticate(dbconf.DB_HOST_PORT, dbconf.DB_USER, dbconf.DB_AUTH)
-        #graph = Graph('http://{0}/db/data/'.format(dbconf.DB_HOST_PORT))
+        return g.session
+
+    if hasattr(config,'DB_HOST_PORT'):
+        print ("connect_db - server {}".format(config.DB_HOST_PORT))
+        driver = GraphDatabase.driver(config.DB_HOST_PORT, \
+                                      auth=basic_auth(config.DB_USER, \
+                                                      config.DB_AUTH))
+        g.session = driver.session()
+        #authenticate(config.DB_HOST_PORT, config.DB_USER, config.DB_AUTH)
+        #graph = Graph('http://{0}/db/data/'.format(config.DB_HOST_PORT))
     else:
         print ("connect_db - default local – EI TUETTU?")
         driver = GraphDatabase.driver("bolt://localhost", auth=basic_auth("neo4j", "localTaapeli"))
-        db_session = driver.session()
-    print("Sessio {} avattu".format(db_session.connection.server[1]))
-    return db_session.connection.server.address
-
-
+        g.session = driver.session()
+    print("connect_db - Sessio {} avattu".format(g.session.connection.server[1]))
+    return g.session.connection.server.address
+    
+    
 def alusta_kanta():
     """ Koko kanta tyhjennetään """
     logging.info('Tietokanta tyhjennetään!')
@@ -86,15 +90,13 @@ class User:
     def create_user(userid):
         """ Käyttäjä tallennetaan kantaan, jos hän ei jo ole siellä"""
 
-        global db_session
-        
         try:
             record = None
             query = """
                 MATCH (u:User) WHERE u.userid='{}' RETURN u.userid
                 """.format(userid)
                 
-            result = db_session.run(query)
+            result = g.session.run(query)
             
             for record in result:
                 continue
@@ -107,7 +109,7 @@ class User:
                         SET u.userid='{}'
                         """.format(userid)
                         
-                    db_session.run(query)
+                    g.session.run(query)
             
                 except Exception as err:
                     print("Virhe: {0}".format(err), file=sys.stderr)
@@ -119,49 +121,41 @@ class User:
     def get_ids_and_refnames_of_people_of_user(self):
         """ Etsi kaikki käyttäjän henkilöt"""
         
-        global db_session
-        
         query = """
             MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) WHERE u.userid='{}'
                 RETURN ID(p) AS id, n.refname AS refname
             """.format(self.userid)
-        return db_session.run(query)
+        return g.session.run(query)
         
         
     def get_refnames_of_people_of_user(self):
         """ Etsi kaikki käyttäjän henkilöt"""
         
-        global db_session
-        
         query = """
             MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) WHERE u.userid='{}'
                 RETURN p.gramps_handle AS handle, n.refname AS refname
             """.format(self.userid)
-        return db_session.run(query)
+        return g.session.run(query)
         
         
     def get_revisions_of_the_user(self):
         """ Etsi kaikki käyttäjän versiot"""
         
-        global db_session
-        
         query = """
             MATCH (u:User)-[r:REVISION]->() WHERE u.userid='{}'
                 RETURN distinct r.date AS date ORDER BY r.date
             """.format(self.userid)
-        return db_session.run(query)
+        return g.session.run(query)
         
         
     @staticmethod       
     def get_all_userids():
         """ Listaa kaikki käyttäjätunnukset"""
         
-        global db_session
-        
         query = """
             MATCH (u:User) RETURN u.userid AS userid ORDER BY u.userid
             """
-        return db_session.run(query)
+        return g.session.run(query)
 
 
 class Date():

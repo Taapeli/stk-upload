@@ -139,9 +139,6 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
         Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
         käräjätapahtuman muuttujalistoja
     """
-
-    # Turha kutsu?
-    global db_session
     
     persons = []
     t0 = time.time()

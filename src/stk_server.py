@@ -3,7 +3,8 @@
 # JMä 29.12.2015
 
 import logging
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, g
+from models.loadfile import app
 
 app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
@@ -11,7 +12,7 @@ app.config.from_pyfile('config.py') # instance-hakemistosta
 app.secret_key = "kuu on juustoa"
 global app
 
-
+#import instance.config as config
 import models.genealogy
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
@@ -57,6 +58,7 @@ def lataa1a():
         return render_template("virhe_lataus.html", text=str(e))
 
     return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
+
         
 @app.route('/lataa1b', methods=['POST'])
 def lataa1b(): 
@@ -101,6 +103,7 @@ def nayta1(filename, fmt):
 def lataa(): 
     """ Versio 2: Lataa cvs-tiedoston talletettavaksi
     """
+    models.genealogy.connect_db()
     try:
         infile = request.files['filenm']
         aineisto = request.form['aineisto']
@@ -137,6 +140,7 @@ def talleta(filename, subj):
                text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
     return render_template("talletettu.html", text=status, uri=dburi)
 
+
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
@@ -144,6 +148,7 @@ def nayta_henkilot():
     dburi = ':'.join((dbaddr[0],str(dbaddr[1])))
     persons = models.datareader.lue_henkilot()
     return render_template("table1.html", persons=persons, uri=dburi)
+
 
 @app.route('/lista/refnimet', defaults={'reftype': None})
 @app.route('/lista/refnimet/<string:reftype>')
@@ -156,6 +161,7 @@ def nayta_refnimet(reftype):
     else:
         names = models.datareader.lue_refnames()
         return render_template("table_refnames.html", names=names)
+
 
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   
@@ -174,6 +180,7 @@ def nimien_yhdistely():
     names = request.form['names']
     logging.debug('Poimitaan ' + names )
     return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+
 
 @app.route('/samahenkilo', methods=['POST'])
 def henkiloiden_yhdistely():   
@@ -211,6 +218,7 @@ def nayta_ehdolla(ehto):
             raise(KeyError("Vain oid:llä voi hakea"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+
 
 @app.route('/virhe_lataus/<int:code>/<text>')
 def virhesivu(code, text=''):
