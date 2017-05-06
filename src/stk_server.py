@@ -3,18 +3,22 @@
 # JMä 29.12.2015
 
 import logging
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, g
+from models.loadfile import app
 
 app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 app.config.from_pyfile('config.py') # instance-hakemistosta
 app.secret_key = "kuu on juustoa"
+global app
 
-from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
+#import instance.config as config
+import models.genealogy
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
-import models.cvs_refnames      # Referenssinimien luonti
 import models.dataupdater       # Tietojen päivitysmetodit
+import models.cvs_refnames      # Referenssinimien luonti
+
 
 @app.route('/')
 def index(): 
@@ -51,9 +55,10 @@ def lataa1a():
         logging.debug('Ladataan tiedosto ' + infile.filename)
         models.loadfile.upload_file(infile)
     except Exception as e:
-        return render_template("virhe_lataus.html", code=code, text=str(e))
+        return render_template("virhe_lataus.html", text=str(e))
 
     return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
+
         
 @app.route('/lataa1b', methods=['POST'])
 def lataa1b(): 
@@ -98,6 +103,7 @@ def nayta1(filename, fmt):
 def lataa(): 
     """ Versio 2: Lataa cvs-tiedoston talletettavaksi
     """
+    models.genealogy.connect_db()
     try:
         infile = request.files['filenm']
         aineisto = request.form['aineisto']
@@ -115,7 +121,7 @@ def lataa():
 def talleta(filename, subj):   
     """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
-    dburi = connect_db()
+    dburi = models.genealogy.connect_db()
     try:
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
@@ -128,24 +134,27 @@ def talleta(filename, subj):
                     status="Käräjätietojen lukua ei ole vielä tehty"
                 else:
                     return redirect(url_for('virhesivu', code=1, text= \
-                        "Aineistotyypin '" + aineisto + "' käsittely puuttuu vielä"))
+                        "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
     return render_template("talletettu.html", text=status, uri=dburi)
 
+
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
-    dburi = connect_db()
+    dbaddr = models.genealogy.connect_db()
+    dburi = ':'.join((dbaddr[0],str(dbaddr[1])))
     persons = models.datareader.lue_henkilot()
     return render_template("table1.html", persons=persons, uri=dburi)
+
 
 @app.route('/lista/refnimet', defaults={'reftype': None})
 @app.route('/lista/refnimet/<string:reftype>')
 def nayta_refnimet(reftype): 
     """ referenssinimien näyttäminen ruudulla """
-    connect_db()
+    models.genealogy.connect_db()
     if reftype and reftype != "":
         names = models.datareader.lue_typed_refnames(reftype)
         return render_template("table_refnames_1.html", names=names, reftype=reftype)
@@ -153,11 +162,12 @@ def nayta_refnimet(reftype):
         names = models.datareader.lue_refnames()
         return render_template("table_refnames.html", names=names)
 
+
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
-    connect_db()
-    alusta_kanta()
+    models.genealogy.connect_db()
+    models.genealogy.alusta_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
 
@@ -170,6 +180,7 @@ def nimien_yhdistely():
     names = request.form['names']
     logging.debug('Poimitaan ' + names )
     return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+
 
 @app.route('/samahenkilo', methods=['POST'])
 def henkiloiden_yhdistely():   
@@ -193,7 +204,7 @@ def nayta_ehdolla(ehto):
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
     key, value = ehto.split('=')
-    connect_db()
+    models.genealogy.connect_db()
     try:
         if key == 'oid':
             persons = models.datareader.lue_henkilot(oid=value)            
@@ -207,6 +218,7 @@ def nayta_ehdolla(ehto):
             raise(KeyError("Vain oid:llä voi hakea"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+
 
 @app.route('/virhe_lataus/<int:code>/<text>')
 def virhesivu(code, text=''):

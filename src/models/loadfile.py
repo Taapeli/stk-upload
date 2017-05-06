@@ -7,7 +7,7 @@
 import os
 import logging
 from flask import Flask
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 
 if 'TMPDIR' in os.environ:
     UPLOAD_FOLDER = os.environ['TMPDIR']
@@ -20,6 +20,7 @@ ALLOWED_EXTENSIONS = set(['txt', 'csv'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 def upload_file(infile):
     """ Save file 'infile' in the upload folder 

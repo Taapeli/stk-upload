@@ -25,21 +25,21 @@
     <h2>Versio 2</h2>
     <p>Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset, yhteenvetotilasto</p>
     <div style="height: 70pt">
-        <div style="float: left; width: 300px;"><input type="file" name="filenm" />
+        <div style="float: left; width: 350px;"><input type="file" name="filenm" />
             <ul style=" margin-left: 15pt; list-style-type:none">
                 <li><input type="radio" name="aineisto" 
-                           value="henkilot" checked="">Tuomiokirjojen henkilöt</li>
+                           value="henkilot" checked>Tuomiokirjojen henkilöt</li>
                 <li><input type="radio" name="aineisto" 
                            value="refnimet">Henkilöiden referenssinimet</li>
-                <!-- li><input type="radio" name="aineisto" 
-                           value="karajat">Tuomiokirjat</li -->
             </ul>
         </div>
         <div style="float: left; padding-top: 40pt">
             <input type="submit" value="Lataa"/></div>
     </div>
     </form>
-    <h3> Muita toimintoja</h3>
+</div>
+<div>
+    <h3>Muita toimintoja</h3>
     <ul>
     <!-- li><a href="/dbtest">Testaa tietokantayhteys</a></li -->
     <li><a href="/lista/henkilot">Näytä kannassa olevat henkilöt</a></li>
@@ -51,7 +51,7 @@
         </form>
     </li>
     <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> koko kanta
-        <i>(Mitään kysymättä!)</li>
+        <i>(Mitään kysymättä!)</i></li>
     </ul>
 </div>
 {% endblock %}
