@@ -4,7 +4,6 @@
 
 import logging
 from flask import Flask, render_template, request, redirect, url_for, flash, g
-from models.loadfile import app
 
 app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
@@ -229,7 +228,7 @@ def virhesivu(code, text=''):
 
 
 if __name__ == '__main__':
-    if False:
+    if True:
         # Ajo paikallisesti
         logging.basicConfig(level=logging.DEBUG)
         app.run(debug='DEBUG')
