@@ -3,7 +3,7 @@
 # JMä 11.4.2016
 
 import logging
-from models.genealogy import *  # Tietokannan luokat
+from models.gen import *  # Tietokannan luokat
 
 def joinpersons(base_id, join_ids):
     """ Yhdistetään henkilöön oid=base_id toiset henkilöt, joiden oid:t on

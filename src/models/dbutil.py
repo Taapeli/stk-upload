@@ -3,7 +3,7 @@ Created on 11.5.2017
 
 @author: jm
 '''
-import sys
+#import sys
 import logging
 from neo4j.v1 import GraphDatabase, basic_auth
 from flask import g

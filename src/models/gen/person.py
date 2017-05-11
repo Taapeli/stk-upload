@@ -274,8 +274,9 @@ class Person:
  RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), 
   COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
- 
-        return g.session.run(query)
+
+        
+        return g.driver.session().run(query)
 
 
     def key(self):

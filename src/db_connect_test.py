@@ -4,7 +4,7 @@ Created on 11.5.2017
 @author: jm
 '''
 # from neo4j.v1 import GraphDatabase, basic_auth
-import models.genealogy
+import models.dbutil
 from flask import Flask, g
 from neo4j.v1 import ServiceUnavailable
 import time
@@ -16,7 +16,7 @@ app.config.from_pyfile('config.py') # instance-hakemistosta
 @app.route('/')
 def hello_world():
     ''' Connects database, writes a TestPerson and prints all TestPersons '''
-    models.genealogy.connect_db()
+    models.dbutil.connect_db()
     
     t = time.strftime('%Y-%m-%d %H:%M:%S')
     session = g.driver.session()
