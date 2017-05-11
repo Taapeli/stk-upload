@@ -3,13 +3,13 @@
 # JMä 29.12.2015
 
 import logging
-from flask import Flask, render_template, request, redirect, url_for, flash, g
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 app.config.from_pyfile('config.py') # instance-hakemistosta
 app.secret_key = "kuu on juustoa"
-global app
+#global app
 
 #import instance.config as config
 import models.genealogy
