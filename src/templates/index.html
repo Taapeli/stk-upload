@@ -4,8 +4,8 @@
 {% block body %}
 {{ super() }}
 <div>
-    <h2>Versio 1</h2>
-    <p>Lataa tiedoston ja näyttää sen <em>(ei tietokantakäsittelyä)</em></p>
+    <h2>Versio 1 – tiedostojen lataus</h2>
+    <p>Esiversio lataa tiedoston ja näyttää sen <em>(ei tietokantakäsittelyä)</em></p>
     <form action="/lataa1a" method="post" enctype="multipart/form-data">
         <input type="file" name="filenm" />
         <input type="submit" value="Lataa" />
@@ -13,7 +13,7 @@
 </div>
 <div>
     <h3>Versio 1b</h3>
-    <p>Lataa tuomiokirjojen henkilötiedoston ja näyttää sen taulukkona 
+    <p>Esiversio lataa tuomiokirjojen henkilötiedoston olioiksi ja näyttää ne taulukkona 
        <em>(ei tietokantakäsittelyä)</em></p>
     <form action="/lataa1b" method="post" enctype="multipart/form-data">
         <input type="file" name="filenm" />
@@ -22,7 +22,7 @@
 </div>
 <div>
     <form action="/lataa" method="post" enctype="multipart/form-data">
-    <h2>Versio 2</h2>
+    <h2>Versio 2 – tietokantaan talletus</h2>
     <p>Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset, yhteenvetotilasto</p>
     <div style="height: 70pt">
         <div style="float: left; width: 350px;"><input type="file" name="filenm" />

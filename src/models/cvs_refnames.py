@@ -5,9 +5,9 @@
 import csv
 import logging
 
-from models.genealogy import *  # Tietokannan kaikki luokat ja apuluokkia
+from models.gen import *  # Tietokannan kaikki luokat
 
-def referenssinimet(pathname, colA=None, colB=None, max=0):
+def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
     """ Lukee csv-tiedostosta referenssinimet
         Jos colA on määrittelemättä, lataa vain tiedoston alun niin että 
         voidaan esittää käyttäjälle sarakkeiden valintasivu
@@ -53,7 +53,7 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
                 sp = ''
 
             # Luodaan Refname
-            r = Refname(nimi)
+            r = refname.Refname(nimi)
             if (ref_name != '') and (ref_name != nimi):
                 # Tullaan viittaamaan tähän nimeen
                 #r.mark_reference(ref_name, 'REFFIRST')
@@ -64,7 +64,7 @@ def referenssinimet(pathname, colA=None, colB=None, max=0):
                     r.reftype = reftype
                     logging.debug("cvs_refnames: {0} --> {1}".format(nimi, ref_name))
                 else:
-                    logging.warning('cvs_refnames: Referenssinimen viittaus {} hylätty. '.format(reftype, self))
+                    logging.warning('cvs_refnames: Referenssinimen viittaus {} hylätty. '.format(reftype))
             if sp != '':
                 r.gender = sp
             if source != '':

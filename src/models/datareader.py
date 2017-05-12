@@ -5,7 +5,7 @@
 import csv
 import logging
 import time
-from models.genealogy import Date
+from models.dbutil import Date
 from models.gen.person import Person, Name
 from models.gen.event import Event
 from models.gen.source_citation import Source, Citation

@@ -6,7 +6,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
-from datetime import date
+from datetime import datetime
+from time import clock
 from sys import stderr
 import logging
 from flask import g
@@ -238,6 +239,7 @@ class Person:
                 pname.suffix = person_record["name"]['suffix']
                 self.name.append(pname)
 
+
     @staticmethod       
     def get_person_events (nmax=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
@@ -274,8 +276,9 @@ class Person:
  RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), 
   COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
- 
-        return g.session.run(query)
+
+        
+        return g.driver.session().run(query)
 
 
     def key(self):
@@ -289,25 +292,26 @@ class Person:
         Päähenkilöön self yhdistetään tapahtumat listalta events.
         Yhteyden tyyppi on kind, esim. "OSALLISTUI"
         """
-        eventList = ""
+        print("**** person.join_events() on toteuttamatta!")
+#         eventList = ""
         #Todo: TÄMÄ ON RISA, i:hin EI LAINKAAN VIITATTU
-        for i in events:
-            # Luodaan yhteys (Person)-[:kind]->(Event)
-            for event in self.events:
-                if event.__class__ != "Event":
-                    raise TypeError("Piti olla Event: {}".format(event.__class__))
-
-                # Tapahtuma-noodi
-                tapahtuma = Node(Event.label, oid=event.oid, kind=event.kind, \
-                        name=event.name, date=event.date)
-                osallistui = Relationship(persoona, kind, tapahtuma)
-            try:
-                graph.create(osallistui)
-            except Exception as e:
-                flash('Lisääminen ei onnistunut: {}. henkilö {}, tapahtuma {}'.\
-                    format(e, persoona, tapahtuma), 'error')
-                logging.warning('Lisääminen ei onnistunut: {}'.format(e))
-        logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), eventList))
+#         for i in events:
+#             # Luodaan yhteys (Person)-[:kind]->(Event)
+#             for event in self.events:
+#                 if event.__class__ != "Event":
+#                     raise TypeError("Piti olla Event: {}".format(event.__class__))
+# 
+#                 # Tapahtuma-noodi
+#                 tapahtuma = Node(Event.label, oid=event.oid, kind=event.kind, \
+#                         name=event.name, date=event.date)
+#                 osallistui = Relationship(persoona, kind, tapahtuma)
+#             try:
+#                 graph.create(osallistui)
+#             except Exception as e:
+#                 flash('Lisääminen ei onnistunut: {}. henkilö {}, tapahtuma {}'.\
+#                     format(e, persoona, tapahtuma), 'error')
+#                 logging.warning('Lisääminen ei onnistunut: {}'.format(e))
+#         logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), eventList))
     
     def join_persons(self, others):
         """
@@ -506,10 +510,16 @@ class Person:
 
 
     def save(self, userid):
-        """ Tallettaa henkilön kantaan """
+        """ Tallettaa henkilön sekä mahdollisesti viitatut nimet, tapahtumat 
+            ja sitaatit kantaan 
+        """
 
-        today = date.today()
-        
+        today = datetime.today()
+        session = g.driver.session()
+        if not self.handle:
+            self.handle = "handle_{}".format(self.id)
+
+        # Talleta Person node
         try:
             query = """
                 CREATE (p:Person) 
@@ -518,23 +528,23 @@ class Person:
                     p.id='{}', 
                     p.gender='{}'
                 """.format(self.handle, self.change, self.id, self.gender)
-                
-            g.session.run(query)
+            session.run(query)
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
+        # Linkitä User nodeen
         try:
             query = """
-                MATCH (u:User )WHERE u.userid='{}'
+                MATCH (u:User)   WHERE u.userid='{}'
                 MATCH (n:Person) WHERE n.gramps_handle='{}'
                 MERGE (u)-[r:REVISION]->(n)
                 SET r.date='{}'
                 """.format(userid, self.handle, today)
-                
-            g.session.run(query)
+            session.run(query)
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe (Person.save:User): {0}".format(err), file=stderr)
             
+        # Talleta Name nodet ja linkitä henkilöön
         if len(self.name) > 0:
             try:
                 names = self.name
@@ -564,10 +574,9 @@ class Person:
                                p_surname, 
                                p_suffix, 
                                self.handle)
-                
-                    g.session.run(query)
+                    session.run(query)
             except Exception as err:
-                print("Virhe: {0}".format(err), file=stderr)
+                print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
 
         # Make possible relations to the Event node
         if len(self.eventref_hlink) > 0:
@@ -575,13 +584,13 @@ class Person:
                 try:
                     query = """
                         MATCH (n:Person) WHERE n.gramps_handle='{}'
-                        MATCH (m:Event) WHERE m.gramps_handle='{}'
+                        MATCH (m:Event)  WHERE m.gramps_handle='{}'
                         MERGE (n)-[r:EVENT]->(m)
                          """.format(self.handle, self.eventref_hlink[i])
                                  
-                    g.session.run(query)
+                    session.run(query)
                 except Exception as err:
-                    print("Virhe: {0}".format(err), file=stderr)
+                    print("Virhe (Person.save:Event 1): {0}".format(err), file=stderr)
 
                 try:
                     query = """
@@ -591,10 +600,9 @@ class Person:
                          """.format(self.handle, 
                                     self.eventref_hlink[i], 
                                     self.eventref_role[i])
-                                 
-                    g.session.run(query)
+                    session.run(query)
                 except Exception as err:
-                    print("Virhe: {0}".format(err), file=stderr)
+                    print("Virhe (Person.save:Event 2): {0}".format(err), file=stderr)
    
         # Make relations to the Family node
         # This is done in Family.save(), because the Family object is not yet created
@@ -606,7 +614,6 @@ class Person:
 #                        MATCH (m:Family) WHERE m.gramps_handle='{}'
 #                        MERGE (n)-[r:FAMILY]->(m)
 #                        """.format(self.handle, self.parentin_hlink[i])
-#                                 
 #                    g.session.run(query)
 #                except Exception as err:
 #                    print("Virhe: {0}".format(err), file=stderr)
@@ -615,14 +622,14 @@ class Person:
         if len(self.citationref_hlink) > 0:
             try:
                 query = """
-                    MATCH (n:Person) WHERE n.gramps_handle='{}'
+                    MATCH (n:Person)   WHERE n.gramps_handle='{}'
                     MATCH (m:Citation) WHERE m.gramps_handle='{}'
                     MERGE (n)-[r:CITATION]->(m)
                      """.format(self.handle, self.citationref_hlink[0])
-                                 
-                g.session.run(query)
+                session.run(query)
             except Exception as err:
-                print("Virhe: {0}".format(err), file=stderr)
+                print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
+        session.close()
         return
 
 

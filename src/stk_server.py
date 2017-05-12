@@ -3,16 +3,16 @@
 # JMä 29.12.2015
 
 import logging
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, g
 
+global app
 app = Flask(__name__, instance_relative_config=True)
 #app.config.from_object('config')
 app.config.from_pyfile('config.py') # instance-hakemistosta
 app.secret_key = "kuu on juustoa"
-#global app
 
 #import instance.config as config
-import models.genealogy
+import models.dbutil
 import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
 import models.dataupdater       # Tietojen päivitysmetodit
@@ -100,9 +100,9 @@ def nayta1(filename, fmt):
 
 @app.route('/lataa', methods=['POST'])
 def lataa(): 
-    """ Versio 2: Lataa cvs-tiedoston talletettavaksi
+    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
     """
-    models.genealogy.connect_db()
+#     models.dbutil.connect_db()
     try:
         infile = request.files['filenm']
         aineisto = request.form['aineisto']
@@ -120,7 +120,7 @@ def lataa():
 def talleta(filename, subj):   
     """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
-    dburi = models.genealogy.connect_db()
+    dburi = models.dbutil.connect_db()
     try:
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
@@ -143,8 +143,9 @@ def talleta(filename, subj):
 @app.route('/lista/henkilot')
 def nayta_henkilot():   
     """ tietokannan henkiloiden näyttäminen ruudulla """
-    dbaddr = models.genealogy.connect_db()
-    dburi = ':'.join((dbaddr[0],str(dbaddr[1])))
+    models.dbutil.connect_db()
+    dbloc = g.driver.address
+    dburi = ':'.join((dbloc[0],str(dbloc[1])))
     persons = models.datareader.lue_henkilot()
     return render_template("table1.html", persons=persons, uri=dburi)
 
@@ -153,7 +154,7 @@ def nayta_henkilot():
 @app.route('/lista/refnimet/<string:reftype>')
 def nayta_refnimet(reftype): 
     """ referenssinimien näyttäminen ruudulla """
-    models.genealogy.connect_db()
+    models.dbutil.connect_db()
     if reftype and reftype != "":
         names = models.datareader.lue_typed_refnames(reftype)
         return render_template("table_refnames_1.html", names=names, reftype=reftype)
@@ -165,8 +166,8 @@ def nayta_refnimet(reftype):
 @app.route('/tyhjenna/kaikki/kannasta')
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
-    models.genealogy.connect_db()
-    models.genealogy.alusta_kanta()
+    models.dbutil.connect_db()
+    models.dbutil.alusta_kanta()
     return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
 
 
@@ -203,7 +204,7 @@ def nayta_ehdolla(ehto):
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
     key, value = ehto.split('=')
-    models.genealogy.connect_db()
+    models.dbutil.connect_db()
     try:
         if key == 'oid':
             persons = models.datareader.lue_henkilot(oid=value)            
