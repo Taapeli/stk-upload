@@ -3,7 +3,6 @@ Created on 11.5.2017
 
 @author: jm
 '''
-#import sys
 import logging
 from neo4j.v1 import GraphDatabase, basic_auth
 from flask import g
@@ -28,7 +27,8 @@ def connect_db():
             print ("connect_db - default local")
             g.driver = GraphDatabase.driver("bolt://localhost", 
                                             auth=basic_auth("neo4j", "localTaapeli"))
-
+    else:
+        print('connect_db - ok')
     # Return True, if no driver can be accessed
     return g.driver.pool.closed
     

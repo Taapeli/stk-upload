@@ -100,9 +100,9 @@ def nayta1(filename, fmt):
 
 @app.route('/lataa', methods=['POST'])
 def lataa(): 
-    """ Versio 2: Lataa cvs-tiedoston talletettavaksi
+    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
     """
-    models.dbutil.connect_db()
+#     models.dbutil.connect_db()
     try:
         infile = request.files['filenm']
         aineisto = request.form['aineisto']
