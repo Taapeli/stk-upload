@@ -6,6 +6,7 @@ Created on 2.5.2017
 '''
 from datetime import date
 from sys import stderr
+from flask import g
 
 
 class Event:
@@ -24,9 +25,9 @@ class Event:
                 citationref_hlink  str viittauksen osoite
      """
 
-    def __init__(self, eid='', desc=''):
+    def __init__(self, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
-        self.handle = ''
+        self.handle = handle
         self.change = ''
         self.id = eid
         self.description = desc
@@ -40,21 +41,18 @@ class Event:
     def get_citation_handle(self):
         """ Luetaan tapahtuman viittauksen handle """
         
-        global session
-                
         query = """
             MATCH (event:Event)-[r:CITATION]->(c:Citation) 
                 WHERE event.gramps_handle='{}'
                 RETURN c.gramps_handle AS citationref_hlink
             """.format(self.handle)
-        return  session.run(query)
+        return  g.driver.session.run(query)
 
 
     def get_event_data(self):
         """ Luetaan tapahtuman tiedot """
-        
-        global session
-                
+
+        session = g.session
         query = """
             MATCH (event:Event)
                 WHERE event.gramps_handle='{}'
@@ -82,26 +80,22 @@ class Event:
     def get_place_handle(self):
         """ Luetaan tapahtuman paikan handle """
         
-        global session
-                
         query = """
             MATCH (event:Event)-[r:PLACE]->(place:Place) 
                 WHERE event.gramps_handle='{}'
                 RETURN place.gramps_handle AS handle
             """.format(self.handle)
-        return  session.run(query)
+        return  g.driver.session.run(query)
         
     
     @staticmethod        
     def get_total():
         """ Tulostaa tapahtumien määrän tietokannassa """
         
-        global session
-                
         query = """
             MATCH (e:Event) RETURN COUNT(e)
             """
-        results =  session.run(query)
+        results =  g.driver.session.run(query)
         
         for result in results:
             return str(result[0])
@@ -144,10 +138,8 @@ class Event:
     def save(self, userid):
         """ Tallettaa sen kantaan """
 
-        global session
-        
         today = date.today()
-
+        session = g.driver.session
         try:
             query = """
                 CREATE (e:Event) 

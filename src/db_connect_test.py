@@ -36,6 +36,21 @@ def hello_world():
     
     session.close()
     return "\n<br>".join(ret)
+
+@app.route('/seq')
+@app.route('/seq/<string:count>')
+def sequence_test(count="1"):
+    ''' Test handle generation '''
+    models.dbutil.connect_db()
+
+    if count:
+        cnt = int(count)
+    else:
+        cnt = 1
+#    with  as hand:
+    hand = models.dbutil.get_new_handles(cnt)
+    return ("Saatu handlet: {}".format(hand))
+
   
 if __name__ == '__main__':
     app.run(debug='DEBUG')
