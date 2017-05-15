@@ -1,13 +1,23 @@
 '''
-Created on 11.5.2017
-
-@author: jm
+Ohjelma sisältää kaksi toimintoa, jotka kirjoittavat ja lukevat Neo4j-kantaa.
+- "/" kutsuu hello_word()-funktiota ja lisää yhden trestihenkilön joka kutsulla
+- "/seq[/lkm] on transaktioesimerkki, joka hakee simuloituja Gramps-handleja
+  metodilla models.dbutil.get_new_handles(). 
+    
+Usage:
+    Käynnistä serveri "python db_connect_test.py"
+    Mene selaimella osoitteeseen http://127.0.0.1:5000/
 '''
 # from neo4j.v1 import GraphDatabase, basic_auth
 import models.dbutil
 from flask import Flask, g
 from neo4j.v1 import ServiceUnavailable
 import time
+help='''<ul>
+<li><a href="/">Luo testihenkilö ja listaa luodut testihenkilöt</a></li>
+<li><a href="/seq">Pyydä uusi simuloitu Gramps-handle</a></li>
+<li><a href="/seq/3">Pyydä kolme simuloitua Gramps-handlea</a></li>
+</ul><br/>'''
 
 global app, g
 app = Flask(__name__, instance_relative_config=True)
@@ -35,7 +45,22 @@ def hello_world():
         ret.append("{} {} <small>({})</small>".format(record["title"], record["name"], record["date"]))
     
     session.close()
-    return "\n<br>".join(ret)
+    return help + "\n<br>".join(ret)
+
+@app.route('/seq')
+@app.route('/seq/<string:count>')
+def sequence_test(count="1"):
+    ''' Test handle generation '''
+    models.dbutil.connect_db()
+
+    if count:
+        cnt = int(count)
+    else:
+        cnt = 1
+#    with  as hand:
+    hand = models.dbutil.get_new_handles(cnt)
+    return (help + "Saatu handlet: {}".format(hand))
+
   
 if __name__ == '__main__':
     app.run(debug='DEBUG')

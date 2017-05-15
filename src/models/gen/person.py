@@ -7,7 +7,6 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from datetime import datetime
-from time import clock
 from sys import stderr
 import logging
 from flask import g
@@ -57,7 +56,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN c.gramps_handle AS citationref_hlink
             """.format(self.handle)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
     
     
     def get_event_data(self):
@@ -68,7 +67,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink
             """.format(self.handle)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
     
     
     def get_event_data_by_id(self):
@@ -79,7 +78,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN r.role AS eventref_role, ID(event) AS eventref_hlink
             """.format(self.uniq_id)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
     
     
     def get_her_families(self):
@@ -90,7 +89,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS handle
             """.format(self.handle)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
     
     
     def get_her_families_by_id(self):
@@ -101,7 +100,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN ID(family) AS uniq_id
             """.format(self.uniq_id)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
     
     
     def get_his_families(self):
@@ -112,7 +111,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS handle
             """.format(self.handle)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
     
     
     def get_his_families_by_id(self):
@@ -123,7 +122,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN ID(family) AS uniq_id
             """.format(self.uniq_id)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
 
     
     def get_hlinks(self):
@@ -172,7 +171,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS parentin_hlink
             """.format(self.handle)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
     
     
     def get_parentin_id(self):
@@ -183,7 +182,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN ID(family) AS parentin_hlink
             """.format(self.uniq_id)
-        return  g.session.run(query)
+        return  g.driver.session.run(query)
     
     
     def get_person_and_name_data(self):
@@ -195,7 +194,7 @@ class Person:
                 RETURN person, name
                 ORDER BY name.alt
             """.format(self.handle)
-        person_result = g.session.run(query)
+        person_result = g.driver.session.run(query)
         
         for person_record in person_result:
             self.change = person_record["person"]['change']
@@ -222,7 +221,7 @@ class Person:
                 RETURN person, name
                 ORDER BY name.alt
             """.format(self.uniq_id)
-        person_result = g.session.run(query)
+        person_result = g.driver.session.run(query)
         
         for person_record in person_result:
             self.change = person_record["person"]['change']
@@ -258,6 +257,13 @@ class Person:
         [[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
             0      1        2        3                4
         [[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
+
+        │ Person                       │   │ Name                         │
+        ├──────────────────────────────┼───┼──────────────────────────────┤
+        │{"gender":"","gramps_handle":"│{} │{"surname":"Andersen","alt":""│
+        │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","first"│
+        │}                             │   │:"Alexander","refname":""}    │
+        ├──────────────────────────────┼───┼──────────────────────────────┤
         """
         
         if nmax > 0:
@@ -270,14 +276,20 @@ class Person:
             where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
             where = ""
-        query = """
- MATCH (n:Person) {0}
- OPTIONAL MATCH (n)-[r]->(e) 
- RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), 
-  COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
- ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
+#         query = """
+#  MATCH (n:Person) {0}
+#  OPTIONAL MATCH (n)-[r]->(e) 
+#  RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), 
+#   COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
+#  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
 
-        
+        query = """
+ MATCH (n:Person)-->(k:Name) {0}
+ OPTIONAL MATCH (n)-[r]->(e) 
+ RETURN n.id, k.first, k.surname,
+  COLLECT([e.name, e.kind]) AS events
+ ORDER BY k.surname, k.first {1}""".format(where, qmax)
+                
         return g.driver.session().run(query)
 
 
@@ -333,7 +345,7 @@ class Person:
         query = """
             MATCH (p:Person) RETURN COUNT(p)
             """
-        results =  g.session.run(query)
+        results =  g.driver.session.run(query)
         
         for result in results:
             return str(result[0])
@@ -614,7 +626,7 @@ class Person:
 #                        MATCH (m:Family) WHERE m.gramps_handle='{}'
 #                        MERGE (n)-[r:FAMILY]->(m)
 #                        """.format(self.handle, self.parentin_hlink[i])
-#                    g.session.run(query)
+#                    g.driver.session.run(query)
 #                except Exception as err:
 #                    print("Virhe: {0}".format(err), file=stderr)
    
@@ -663,7 +675,7 @@ class Name:
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
                 RETURN p.gramps_handle AS handle
             """.format(refname)
-        return g.session.run(query)
+        return g.driver.session.run(query)
 
         
     @staticmethod
@@ -675,7 +687,7 @@ class Name:
                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
                 RETURN p.gramps_handle AS handle
             """.format(userid, refname)
-        return g.session.run(query)
+        return g.driver.session.run(query)
 
         
     @staticmethod
@@ -687,7 +699,7 @@ class Name:
                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
                 RETURN ID(p) AS id
             """.format(userid, refname)
-        return g.session.run(query)
+        return g.driver.session.run(query)
         
     @staticmethod
     def get_people_with_surname(surname):
@@ -697,7 +709,7 @@ class Name:
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.surname='{}'
                 RETURN p.gramps_handle AS handle
             """.format(surname)
-        return g.session.run(query)
+        return g.driver.session.run(query)
         
     
     @staticmethod
@@ -708,7 +720,7 @@ class Name:
             MATCH (n:Name) RETURN distinct n.first AS first
                 ORDER BY n.first
             """
-        return g.session.run(query)
+        return g.driver.session.run(query)
         
     
     @staticmethod
@@ -719,7 +731,7 @@ class Name:
             MATCH (n:Name) RETURN distinct n.surname AS surname
                 ORDER BY n.surname
             """
-        return g.session.run(query)
+        return g.driver.session.run(query)
     
     def set_refname(self):
         """Asetetaan etunimen referenssinimi """
@@ -728,4 +740,4 @@ class Name:
             MATCH (n:Name) WHERE n.first='{}' 
             SET n.refname='{}'
             """.format(self.first, self.refname)
-        return g.session.run(query)
+        return g.driver.session.run(query)

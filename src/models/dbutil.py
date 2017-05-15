@@ -15,7 +15,6 @@ def connect_db():
 
         Ks. https://neo4j.com/docs/developer-manual/current/drivers/client-applications/
     """
-    global g
 
     if not hasattr(g, 'driver'):
         # Create driver for application life time
@@ -31,8 +30,34 @@ def connect_db():
         print('connect_db - ok')
     # Return True, if no driver can be accessed
     return g.driver.pool.closed
-    
-    
+
+
+def get_new_handles(inc=1):
+    ''' Create a sequence of new handle keys '''
+    ret = []
+
+    with g.driver.session() as session:
+#         newhand = session.write_transaction(lambda tx: _update_seq_node(tx, inc))
+        with session.begin_transaction() as tx:
+            for record in tx.run('''
+MERGE (a:Seq) 
+SET a.handle = coalesce(a.handle, 10000) + {inc} 
+RETURN a.handle AS handle''', {"inc": inc} ):
+                newhand=record["handle"]
+            tx.commit()
+
+    for i in range(inc, 0, -1):
+        ret.append("Handle{}".format(newhand - i))
+    return (ret)
+
+def _update_seq_node(self, tx, inc):
+    record_list = tx.run('''
+MATCH (a:Seq) 
+SET a.seq = coalesce(a.seq, 10000) + {inc} 
+RETURN a.handle AS handle''', {"inc": inc})
+    return int(record_list[0][0])
+
+
 def alusta_kanta():
     """ Koko kanta tyhjennetään """
     logging.info('Tietokanta tyhjennetään!')

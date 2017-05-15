@@ -152,21 +152,21 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
         #  0      1            2           3       4      5        6
         # 146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]	
 
-        pid = rec['n.oid']
+        pid = rec['n.id']
         p = Person(pid)
         etu = ""
         suku = ""
-        if rec['n.firstname']:
-            etu = rec['n.firstname']
-        if rec['n.lastname']:
-            suku = rec['n.lastname']
+        if rec['k.first']:
+            etu = rec['k.first']
+        if rec['k.surname']:
+            suku = rec['k.surname']
         p.name = Name(etu,suku)
 #        if rec['n.name_orig']:
 #            p.name_orig = rec['n.name_orig']
-        if rec['n.occu']:
-            p.occupation = rec['n.occu']
-        if rec['n.place']:
-            p.place= rec['n.place']
+#         if rec['n.occu']:
+#             p.occupation = rec['n.occu']
+#         if rec['n.place']:
+#             p.place= rec['n.place']
 
         for ev in rec['events']:
             # 'events' on lista käräjiä, jonka jäseninä on lista muuttujia:
@@ -175,12 +175,13 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
             #[[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
 
             event_id = ev[0]
-            e = Event(event_id, ev[1])
-            e.name = ev[2]
-            e.date = ev[3]
-            e.name_orig = ev[4]
-            p.events.append(e)    
-#            logging.info("lue_henkilot: Tapahtuma {}".format(e))
+            if event_id:
+                e = Event(event_id, ev[1])
+    #             e.name = ev[2]
+    #             e.date = ev[3]
+    #             e.name_orig = ev[4]
+                p.events.append(e)    
+    #            logging.info("lue_henkilot: Tapahtuma {}".format(e))
 
 #            c = Citation()
 #            c.tyyppi = 'Signum'
