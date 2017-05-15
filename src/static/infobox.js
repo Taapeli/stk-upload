@@ -7,7 +7,7 @@
 function info(id, nimi, ammatti, paikka, karaja, aika, sig) {
     var str="<h3>Kohteet</h3><ul class='info'>";
     str += "<li><b>Person</b> {id=" + id + ", nimi='" + nimi + "' ";
-    if (ammatti !== "") { str += "', ammatti='" + ammatti + "' "; }
+    if (ammatti !== "") { str += ", ammatti='" + ammatti + "' "; }
     str += "}<br />&nbsp;</li>";
     var kid = "?";  /* Ei tietysti ole joka rivillä eri! */
     str += "<li><b>Event</b> {type='Käräjät', id=" + kid 
