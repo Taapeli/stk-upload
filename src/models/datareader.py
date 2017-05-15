@@ -95,8 +95,9 @@ def henkilolista(pathname):
 
 
 def datastorer(pathname):
-    """ Lukee csv-tiedostosta aineiston, ja tallettaa kustakin 
-        syöttörivistä Person-objektit sisältäen käräjä-Eventit
+    """ Lukee csv-tiedostosta aineiston, ja tallettaa kustakin syöttörivistä
+         Person-objektit sisältäen käräjä-Eventit, Citation-viittaukset ja
+         Place-paikat
     """
     row_nro = 0
     url = ''
@@ -127,7 +128,7 @@ def datastorer(pathname):
     
             # Tallettaa Person-olion ja siihen sisältyvät Eventit
             # (Person)-[OSALLISTUU]->(Event)
-            p.save("juha100")
+            p.save("User100")
 
     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
     return message

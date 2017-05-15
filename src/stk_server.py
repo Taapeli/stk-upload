@@ -17,6 +17,7 @@ import models.loadfile          # Datan lataus käyttäjältä
 import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
 import models.dataupdater       # Tietojen päivitysmetodit
 import models.cvs_refnames      # Referenssinimien luonti
+import models.gen.user          # Käyttäjien tiedot
 
 
 @app.route('/')
@@ -24,27 +25,6 @@ def index():
     """Aloitussivun piirtäminen"""
     return render_template("index.html")
 
-#--------
-#@app.route('/dbtest')
-#def dbtest():
-#    "Onkohan tietokantayhteyttä palvelimelle?"
-#    #TODO Poista dbtest ja app.config -käyttö
-#    try:
-#        graph = Graph('http://{0}/db/data/'.format(app.config['DB_HOST_PORT']))
-#        authenticate(app.config['DB_HOST_PORT'], 
-#                     app.config['DB_USER'], app.config['DB_AUTH'])
-#        query = "MATCH (p:Person) RETURN p.firstname, p.lastname LIMIT 5"
-#        x = graph.cypher.execute(query).one
-#        text = "Henkilö: {0}, {1}".format(x[0], x[1])
-#        return redirect(url_for('db_test_tulos', text=text))
-#
-#    except Exception as e:
-#        return redirect(url_for('db_test_tulos', text="Exception "+str(e)))
-#    
-#@app.route('/dbtest/tulos/<text>')
-#def db_test_tulos(text=''):
-#    return render_template("db_test.html", text=text)
-#-------
 
 @app.route('/lataa1a', methods=['POST'])
 def lataa1a(): 
@@ -102,7 +82,6 @@ def nayta1(filename, fmt):
 def lataa(): 
     """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
     """
-#     models.dbutil.connect_db()
     try:
         infile = request.files['filenm']
         aineisto = request.form['aineisto']
@@ -124,30 +103,37 @@ def talleta(filename, subj):
     try:
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
+        elif subj == 'refnimet': # Referenssinimet
+            # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
+            status=models.cvs_refnames.referenssinimet(pathname, max=1100)
+        elif subj == 'karajat': # TODO: Tekemättä
+            status="Käräjätietojen lukua ei ole vielä tehty"
         else:
-            if subj == 'refnimet': # Referenssinimet
-                # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
-                status=models.cvs_refnames.referenssinimet(pathname, max=1100)
-            else:
-                if subj == 'karajat': # TODO: Tekemättä
-                    status="Käräjätietojen lukua ei ole vielä tehty"
-                else:
-                    return redirect(url_for('virhesivu', code=1, text= \
-                        "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
+            return redirect(url_for('virhesivu', code=1, text= \
+                "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
     return render_template("talletettu.html", text=status, uri=dburi)
 
 
-@app.route('/lista/henkilot')
-def nayta_henkilot():   
-    """ tietokannan henkiloiden näyttäminen ruudulla """
+@app.route('/lista/<string:subj>')
+def nayta_henkilot(subj):   
+    """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     models.dbutil.connect_db()
-    dbloc = g.driver.address
-    dburi = ':'.join((dbloc[0],str(dbloc[1])))
-    persons = models.datareader.lue_henkilot()
-    return render_template("table1.html", persons=persons, uri=dburi)
+    if subj == "henkilot":
+        # dburi vain tiedoksi!
+        dbloc = g.driver.address
+        dburi = ':'.join((dbloc[0],str(dbloc[1])))
+
+        persons = models.datareader.lue_henkilot()
+        return render_template("table1.html", persons=persons, uri=dburi)
+    elif subj == "users":
+        lista = models.gen.user.User.get_all_userids()
+        return render_template("table_users.html", users=lista)
+    else:
+        return redirect(url_for('virhesivu', code=1, text= \
+            "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
 
 
 @app.route('/lista/refnimet', defaults={'reftype': None})
@@ -218,6 +204,22 @@ def nayta_ehdolla(ehto):
             raise(KeyError("Vain oid:llä voi hakea"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+@app.route('/newuser', methods=['POST'])
+def new_user(): 
+    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
+    """
+    try:
+        models.dbutil.connect_db()
+        userid = request.form['userid']
+        name = request.form['name']
+        
+        models.gen.user.User.create_user(userid, name)
+         
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('nayta_henkilot', subj='users'))
 
 
 @app.route('/virhe_lataus/<int:code>/<text>')

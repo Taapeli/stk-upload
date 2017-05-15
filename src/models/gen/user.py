@@ -18,10 +18,10 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 import sys
-import logging
-from neo4j.v1 import GraphDatabase, basic_auth
+#import logging
+#from neo4j.v1 import GraphDatabase, basic_auth
 from flask import g
-import instance.config as config
+#import instance.config as config
 
 
 class User:
@@ -30,67 +30,69 @@ class User:
         Properties:
                 userid          esim. User123
      """
-     
+    def __init__(self):
+        pass
+
+
     @staticmethod       
-    def create_user(userid):
+    def create_user(userid, name=None):
         """ Käyttäjä tallennetaan kantaan, jos hän ei jo ole siellä"""
 
-        try:
-            record = None
-            query = """
-                MATCH (u:User) WHERE u.userid='{}' RETURN u.userid
-                """.format(userid)
-                
-            result = g.session.run(query)
-            
-            for record in result:
-                continue
-            
-            if not record:
+#         try:
+#             record = None
+#             query = """
+#                 MATCH (u:User) WHERE u.userid='{}' RETURN u.userid
+#                 """.format(userid)
+#                 
+#             result = g.driver.session().run(query)
+#             
+#             for record in result:
+#                 continue
+#             
+#             if not record:
                 # User doesn't exist in db, the userid should be stored there
-                try:
-                    query = """
-                        CREATE (u:User) 
-                        SET u.userid='{}'
-                        """.format(userid)
-                        
-                    g.session.run(query)
-            
-                except Exception as err:
-                    print("Virhe: {0}".format(err), file=sys.stderr)
-            
+        if name == None:
+            name = ''
+        try:
+            query = "MERGE (u:User {userid: $uid, name: $name})"
+            g.driver.session().run(query, {"uid": userid, "name": name})
+    
         except Exception as err:
             print("Virhe: {0}".format(err), file=sys.stderr)
-        
+            raise
+            
         
     def get_ids_and_refnames_of_people_of_user(self):
         """ Etsi kaikki käyttäjän henkilöt"""
         
         query = """
-            MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) WHERE u.userid='{}'
-                RETURN ID(p) AS id, n.refname AS refname
+MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 
+WHERE u.userid='{}'
+RETURN ID(p) AS id, n.refname AS refname
             """.format(self.userid)
-        return g.session.run(query)
+        return g.driver.session().run(query)
         
         
     def get_refnames_of_people_of_user(self):
         """ Etsi kaikki käyttäjän henkilöt"""
         
         query = """
-            MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) WHERE u.userid='{}'
-                RETURN p.gramps_handle AS handle, n.refname AS refname
+MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 
+WHERE u.userid='{}'
+RETURN p.gramps_handle AS handle, n.refname AS refname
             """.format(self.userid)
-        return g.session.run(query)
+        return g.driver.session().run(query)
         
         
     def get_revisions_of_the_user(self):
         """ Etsi kaikki käyttäjän versiot"""
         
         query = """
-            MATCH (u:User)-[r:REVISION]->() WHERE u.userid='{}'
-                RETURN distinct r.date AS date ORDER BY r.date
+MATCH (u:User)-[r:REVISION]->() 
+WHERE u.userid='{}'
+RETURN distinct r.date AS date ORDER BY r.date
             """.format(self.userid)
-        return g.session.run(query)
+        return g.driver.session().run(query)
         
         
     @staticmethod       
@@ -98,7 +100,9 @@ class User:
         """ Listaa kaikki käyttäjätunnukset"""
         
         query = """
-            MATCH (u:User) RETURN u.userid AS userid ORDER BY u.userid
+MATCH (u:User) 
+RETURN u.userid AS userid, u.name AS name
+ORDER BY u.userid
             """
-        return g.session.run(query)
+        return g.driver.session().run(query)
 
