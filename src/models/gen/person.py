@@ -23,7 +23,7 @@ class Person:
                 name:
                    alt             str muun nimen nro
                    type            str nimen tyyppi
-                   first           str etunimi
+                   firstname       str etunimi
                    refname         str referenssinimi
                    surname         str sukunimi
                    suffix          str patronyymi
@@ -205,7 +205,7 @@ class Person:
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
-                pname.first = person_record["name"]['first']
+                pname.firstname = person_record["name"]['firstname']
                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
@@ -232,7 +232,7 @@ class Person:
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
-                pname.first = person_record["name"]['first']
+                pname.firstname = person_record["name"]['firstname']
                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
@@ -261,7 +261,7 @@ class Person:
         │ Person                       │   │ Name                         │
         ├──────────────────────────────┼───┼──────────────────────────────┤
         │{"gender":"","gramps_handle":"│{} │{"surname":"Andersen","alt":""│
-        │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","first"│
+        │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","firstname"│
         │}                             │   │:"Alexander","refname":""}    │
         ├──────────────────────────────┼───┼──────────────────────────────┤
         """
@@ -286,16 +286,16 @@ class Person:
         query = """
  MATCH (n:Person)-->(k:Name) {0}
  OPTIONAL MATCH (n)-[r]->(e) 
- RETURN n.id, k.first, k.surname,
+ RETURN n.id, k.firstname, k.surname,
   COLLECT([e.name, e.kind]) AS events
- ORDER BY k.surname, k.first {1}""".format(where, qmax)
+ ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
                 
         return g.driver.session().run(query)
 
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
-        key = "{}:{}:{}:{}".format(self.name.first, self.name.last, 
+        key = "{}:{}:{}:{}".format(self.name.firstname, self.name.last, 
               self.occupation, self.place)
         return key
 
@@ -379,7 +379,7 @@ class Person:
             for pname in names:
                 alt1.append(pname.alt)
                 type1.append(pname.type)
-                first1.append(pname.first)
+                first1.append(pname.firstname)
                 refname1.append(pname.refname)
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
@@ -388,7 +388,7 @@ class Person:
             for pname in names2:
                 alt2.append(pname.alt)
                 type2.append(pname.type)
-                first2.append(pname.first)
+                first2.append(pname.firstname)
                 refname2.append(pname.refname)
                 surname2.append(pname.surname)
                 suffix2.append(pname.suffix)
@@ -434,7 +434,7 @@ class Person:
             for pname in names:
                 print ("Alt: " + pname.alt)
                 print ("Type: " + pname.type)
-                print ("First: " + pname.first)
+                print ("First: " + pname.firstname)
                 print ("Refname: " + pname.refname)
                 print ("Surname: " + pname.surname)
                 print ("Suffix: " + pname.suffix)
@@ -478,7 +478,7 @@ class Person:
             for pname in names:
                 alt1.append(pname.alt)
                 type1.append(pname.type)
-                first1.append(pname.first)
+                first1.append(pname.firstname)
                 refname1.append(pname.refname)
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
@@ -487,7 +487,7 @@ class Person:
             for pname in names2:
                 alt2.append(pname.alt)
                 type2.append(pname.type)
-                first2.append(pname.first)
+                first2.append(pname.firstname)
                 refname2.append(pname.refname)
                 surname2.append(pname.surname)
                 suffix2.append(pname.suffix)
@@ -563,7 +563,7 @@ class Person:
                 for name in names:
                     p_alt = name.alt
                     p_type = name.type
-                    p_first = name.first
+                    p_first = name.firstname
                     p_refname = name.refname
                     p_surname = name.surname
                     p_suffix = name.suffix
@@ -572,7 +572,7 @@ class Person:
                         CREATE (m:Name) 
                         SET m.alt='{}', 
                             m.type='{}', 
-                            m.first='{}', 
+                            m.firstname='{}', 
                             m.refname='{}', 
                             m.surname='{}', 
                             m.suffix='{}'
@@ -651,7 +651,7 @@ class Name:
         Properties:
                 type            str nimen tyyppi
                 alt             str muun nimen numero
-                first           str etunimi
+                firstname       str etunimi
                 refname         str reference name
                 surname         str sukunimi
                 suffix          str patronyymi
@@ -661,7 +661,7 @@ class Name:
         """ Luo uuden name-instanssin """
         self.type = ''
         self.alt = ''
-        self.first = givn
+        self.firstname = givn
         self.refname = ''
         self.surname = surn
         self.suffix = ''
@@ -713,12 +713,12 @@ class Name:
         
     
     @staticmethod
-    def get_all_first_names():
+    def get_all_firstnames():
         """ Listaa kaikki etunimet tietokannassa """
         
         query = """
-            MATCH (n:Name) RETURN distinct n.first AS first
-                ORDER BY n.first
+            MATCH (n:Name) RETURN distinct n.firstname AS firstname
+                ORDER BY n.firstname
             """
         return g.driver.session.run(query)
         
@@ -737,7 +737,7 @@ class Name:
         """Asetetaan etunimen referenssinimi """
         
         query = """
-            MATCH (n:Name) WHERE n.first='{}' 
+            MATCH (n:Name) WHERE n.firstname='{}' 
             SET n.refname='{}'
-            """.format(self.first, self.refname)
+            """.format(self.firstname, self.refname)
         return g.driver.session.run(query)

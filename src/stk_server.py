@@ -72,7 +72,7 @@ def nayta1(filename, fmt):
     else:
         try:
             persons = models.datareader.henkilolista(pathname)
-            return render_template("table1.html", name=pathname, \
+            return render_template("table_persons.html", name=pathname, \
                    persons=persons)
         except Exception as e:
             return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -127,7 +127,7 @@ def nayta_henkilot(subj):
         dburi = ':'.join((dbloc[0],str(dbloc[1])))
 
         persons = models.datareader.lue_henkilot()
-        return render_template("table1.html", persons=persons, uri=dburi)
+        return render_template("table_persons.html", persons=persons, uri=dburi)
     elif subj == "users":
         lista = models.gen.user.User.get_all_userids()
         return render_template("table_users.html", users=lista)
