@@ -157,11 +157,11 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
         p = Person(pid)
         etu = ""
         suku = ""
-        if rec['k.first']:
-            etu = rec['k.first']
+        if rec['k.firstname']:
+            etu = rec['k.firstname']
         if rec['k.surname']:
             suku = rec['k.surname']
-        p.name = Name(etu,suku)
+        p.name.append(Name(etu,suku))
 #        if rec['n.name_orig']:
 #            p.name_orig = rec['n.name_orig']
 #         if rec['n.occu']:

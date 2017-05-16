@@ -6,10 +6,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
-from datetime import datetime
+import datetime
 from sys import stderr
 import logging
 from flask import g
+import models.dbutil
 
 class Person:
     """ Henkilö
@@ -526,10 +527,11 @@ class Person:
             ja sitaatit kantaan 
         """
 
-        today = datetime.today()
+        today = str(datetime.date.today())
         session = g.driver.session()
         if not self.handle:
-            self.handle = "handle_{}".format(self.id)
+            handles = models.dbutil.get_new_handles(3)
+            self.handle = handles.pop()
 
         # Talleta Person node
         try:
@@ -591,7 +593,30 @@ class Person:
                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
 
         # Make possible relations to the Event node
-        if len(self.eventref_hlink) > 0:
+        if len(self.events) > 0:
+            ''' Create and connect to an Person.event[*] '''
+            query = """
+MATCH (n:Person) WHERE n.gramps_handle={p_handle}
+CREATE (n)-[r:EVENT {role: {role}}]->
+      (m:Event {gramps_handle: {e_handle}, id: {e_id},
+                name: {e_name}, date: {e_date}, descr: {e_descr}})"""
+            for e in self.events:
+                if handles:
+                    e.handle = handles.pop()
+                values = {"p_handle": self.handle,
+                          "role": 'osallistuja',
+                          "e_handle": e.handle, 
+                          "e_id": e.id,
+                          "e_name": e.name, # "e_type": e.tyyppi,
+                          "e_date": e.date,
+                          "e_descr": e.description}
+                try:
+                    session.run(query, values)
+                except Exception as err:
+                    print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
+
+        elif len(self.eventref_hlink) > 0:
+            ''' Connect to an Event loaded form Gramps '''
             for i in range(len(self.eventref_hlink)):
                 try:
                     query = """
