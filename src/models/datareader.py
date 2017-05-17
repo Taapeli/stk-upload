@@ -211,27 +211,13 @@ def lue_refnames():
     namelist = []
     t0 = time.time()
     recs = Refname.getrefnames()
-    
     for rec in recs:
-        # n.oid, n.name, n.gender, n.source, type(r), m.oid, m.name
-        # 0      1       2         3         4        5      6
-
-        r = Refname(rec[1])
-        r.oid = rec[0]
-        if rec[2]:
-            r.gender = rec[2]
-        if rec[3]:
-            r.source= rec[3]
-        
-        if rec[4]:
-            r.reftype = rec[4]
-            r.refname = rec[6]
-
-        namelist.append(r)
+        namelist.append(rec)
 
     logging.info("TIME get_refnames {} sek".format(time.time()-t0))
 
     return (namelist)
+
 
 def lue_typed_refnames(reftype):
     """ Lukee tietokannasta Refname- objektit näytettäväksi
@@ -272,7 +258,7 @@ def lue_typed_refnames(reftype):
 #               format( rec[0], rec[1],  rec[2],    rec[3],    rec[4],  rec[5]))
         # Luodaan nimi
         r = Refname(rec['a.name'])
-        r.oid = rec['a.oid']
+        r.oid = rec['a.id']
         if rec['a.gender']:
             r.gender = rec['a.gender']
         if rec['a.source']:

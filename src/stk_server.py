@@ -105,7 +105,7 @@ def talleta(filename, subj):
             status = models.datareader.datastorer(pathname)
         elif subj == 'refnimet': # Referenssinimet
             # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
-            status=models.cvs_refnames.referenssinimet(pathname, max=1100)
+            status=models.cvs_refnames.referenssinimet(pathname, maxrows=100)
         elif subj == 'karajat': # TODO: Tekemättä
             status="Käräjätietojen lukua ei ole vielä tehty"
         else:

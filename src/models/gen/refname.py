@@ -4,6 +4,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 import logging
+from sys import stderr
+from flask import g
 
 class Refname:
     """
@@ -39,12 +41,14 @@ class Refname:
         else:
             self.name = None
 
+
     def __eq__(self, other):
         "Mahdollistaa vertailun 'refname1 == refname2'"
         if isinstance(other, self.__class__):
             return self.name() == other.name()
         else:
             return False
+
 
     def __str__(self):
         s = "(Refname {0}oid={1}, name='{2}'".format('{', self.oid, self.name)
@@ -57,6 +61,7 @@ class Refname:
             s += "name='{}'".format(self.refname)
         s += "{})".format('}')
         return s
+
 
     def save(self):
         """ Referenssinimen tallennus kantaan. Kysessä on joko 
@@ -74,10 +79,9 @@ class Refname:
         """
         # TODO: source pitäisi tallettaa Source-objektina
         
-        global session
         
         # Pakolliset tiedot
-        if self.name == None:
+        if not self.name:
             raise NameError
         
         # Asetetaan A:n attribuutit
@@ -95,13 +99,13 @@ class Refname:
             b_attr = "{name:'" + self.refname + "'}"
 #            b_newoid = get_new_oid()
             query="""
-                MERGE (a:Refname {})
-                MERGE (b:Refname {})
-                CREATE UNIQUE (a)-[:REFFIRST]->(b)
-                RETURN a.id AS aid, a.name AS aname, b.id AS bid, b.name AS bname;""".format(a_attr, b_attr)
+MERGE (a:Refname {})
+MERGE (b:Refname {})
+CREATE UNIQUE (a)-[:REFFIRST]->(b)
+RETURN a.id AS aid, a.name AS aname, b.id AS bid, b.name AS bname;""".format(a_attr, b_attr)
                 
             try:
-                result = session.run(query)
+                result = g.driver.session().run(query)
         
                 for record in result:
                     a_oid = record["aid"]
@@ -124,7 +128,7 @@ class Refname:
                  MERGE (a:Refname {})
                  RETURN a.id AS aid, a.name AS aname;""".format(a_attr)
             try:
-                result = session.run(query)
+                result = g.driver.session().run(query)
         
                 for record in result:
                     a_oid = record["aid"]
@@ -137,17 +141,17 @@ class Refname:
                 print("Virhe: {0}".format(err), file=stderr)
                 logging.warning('Lisääminen (a) ei onnistunut: {}'.format(err))
 
+
     @staticmethod   
     def get_refname(name):
         """ Haetaan nimeä vastaava referenssinimi
         """
-        global session
         query="""
             MATCH (a:Refname)-[r:REFFIRST]->(b:Refname) WHERE a.name='{}'
             RETURN a.name AS aname, b.name AS bname LIMIT 1;""".format(name)
             
         try:
-            return session.run(query)
+            return g.driver.session().run(query)
     
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
@@ -158,19 +162,19 @@ class Refname:
     def get_name(name):
         """ Haetaan referenssinimi
         """
-        global session
         query="""
             MATCH (a:Refname)-[r:REFFIRST]->(b:Refname) WHERE b.name='{}'
             RETURN a.name AS aname, b.name AS bname;""".format(name)
             
         try:
-            return session.run(query)
+            return g.driver.session().run(query)
         
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             logging.warning('Kannan lukeminen ei onnistunut: {}'.format(err))
         
         
+    @staticmethod
     def get_typed_refnames(reftype=""):
         """ Haetaan kannasta kaikki referenssinimet sekä lista nimistä, jotka
             viittaavat ko refnameen. 
@@ -178,26 +182,54 @@ class Refname:
             jotka suoraan tai ketjutetusti viittaavat ko. referenssinimeen
             [Kutsu: datareader.lue_refnames()]
         """
-        global session
         query="""
-             MATCH (a:Refname)
-               OPTIONAL MATCH (m:Refname)-[:«reftype1»*]->(a:Refname)
-               OPTIONAL MATCH (a:Refname)-[:«reftype2»]->(n:Refname)
-             RETURN a.id, a.name, a.gender, a.source,
-               COLLECT ([n.oid, n.name, n.gender]) AS base,
-               COLLECT ([m.oid, m.name, m.gender]) AS other
-             ORDER BY a.name"""
-        return session.run(query)
+MATCH (a:Refname)
+  OPTIONAL MATCH (m:Refname)-[:{0}*]->(a:Refname)
+  OPTIONAL MATCH (a:Refname)-[:{1}]->(n:Refname)
+RETURN a.id, a.name, a.gender, a.source,
+  COLLECT ([n.oid, n.name, n.gender]) AS base,
+  COLLECT ([m.oid, m.name, m.gender]) AS other
+ORDER BY a.name""".format(reftype, reftype)
+        return g.driver.session().run(query)
 
+
+    @staticmethod
     def getrefnames():
         """ Haetaan kannasta kaikki Refnamet 
-            Palautetaan Refname-olioita, johon on haettu myös mahdollisen
+            Palautetaan lista Refname-olioita, johon on haettu myös mahdollisen
             viitatun referenssinimen nimi ja tyyppi.
             [Kutsu: datareader.lue_refnames()]
         """
-        global sessiopn
         query = """
-             MATCH (n:Refname)
-             OPTIONAL MATCH (n:Refname)-[r]->(m)
-             RETURN n,r,m;"""
-        return session.run(query)
+MATCH (n:Refname)
+OPTIONAL MATCH (n:Refname)-[r]->(m)
+RETURN n,r,m;"""
+        try:
+            results = g.driver.session().run(query)
+            return Refname._triples_to_objects(results)
+        except Exception as err:
+            print("Virhe (Refname.getrefnames): {0}".format(err), file=stderr)
+            return []
+
+
+    @staticmethod
+    def _triples_to_objects(results):
+        # n = <Node id=17378 labels={'Refname'} 
+        #      properties={'name': 'Aabeli', 'source': 'harvinainen'}>
+        # r = <Relationship id=259 start=17378 end=17439 type='REFFIRST'
+        #      properties={}>
+        # m = <Node id=17439 labels={'Refname'} 
+        #      properties={'name': 'Aapeli', 'gender': 'M', 
+        #                  'source': 'Messu- ja kalenteri'}>
+        ret = []
+        for result in results:
+            rn = Refname(result['n']["name"])
+            rn.oid = result['n'].id
+            rn.gender = result['n']["gender"]
+            rn.source = result['n']["source"]
+            if result['m']:
+                # Referenced name exists
+                rn.reftype = result['r'].type
+                rn.refname = result['m']["name"]
+            ret.append(rn)
+        return ret

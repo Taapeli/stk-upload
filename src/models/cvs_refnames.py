@@ -17,7 +17,7 @@ def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
     """
     # TODO: colA ja colB käyttöön!
     if colA:
-        # Luetaan cvs-tiedoston kaikki kentät, max maxrows riviä
+        # Luetaan cvs-tiedoston kaikki kentät, maxrows maxrows riviä
         maxrows=50
         return list()
     
@@ -32,7 +32,7 @@ def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
 
         for row in reader:
             row_nro += 1
-            if max > 0 and row_nro > max:
+            if maxrows > 0 and row_nro > maxrows:
                 break
             nimi=row['Nimi'].strip()
             if nimi.__len__() == 0:
@@ -78,8 +78,8 @@ def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
             r.save()
 
     msg = '{0}: {1} riviä, {2} ohitettu'.format(pathname, row_nro, tyhjia)
-    if max > 0 and row_nro > max:
-        msg = msg + ". KATKAISTU {0} nimen kohdalta".format(max)
+    if maxrows > 0 and row_nro > maxrows:
+        msg = msg + ". KATKAISTU {0} nimen kohdalta".format(maxrows)
     logging.info(msg)
     return (msg)
 
