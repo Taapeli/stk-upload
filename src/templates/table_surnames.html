@@ -1,0 +1,23 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+
+<h2>All different surnames in db</h2>
+<section id="lista">
+<table>
+    <tr><th>surname</th>
+    </tr>
+{% if surnames %}
+    {% for name in surnames %}
+        <tr>
+            <td>{{name.surname}}</td>
+        </tr>
+    {% endfor %}
+{% else %}
+        <tr><td colspan="1">Ei tietoja</td></tr>
+{% endif %}
+</table>
+</section>
+{% endblock %}

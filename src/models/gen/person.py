@@ -756,7 +756,7 @@ class Name:
             MATCH (n:Name) RETURN distinct n.surname AS surname
                 ORDER BY n.surname
             """
-        return g.driver.session.run(query)
+        return g.driver.session().run(query)
     
     def set_refname(self):
         """Asetetaan etunimen referenssinimi """

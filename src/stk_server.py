@@ -128,6 +128,9 @@ def nayta_henkilot(subj):
 
         persons = models.datareader.lue_henkilot()
         return render_template("table_persons.html", persons=persons, uri=dburi)
+    elif subj == "surnames":
+        surnames = models.gen.person.Name.get_surnames()
+        return render_template("table_surnames.html", surnames=surnames)
     elif subj == "users":
         lista = models.gen.user.User.get_all_userids()
         return render_template("table_users.html", users=lista)
