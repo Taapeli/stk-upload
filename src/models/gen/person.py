@@ -195,7 +195,7 @@ class Person:
                 RETURN person, name
                 ORDER BY name.alt
             """.format(self.handle)
-        person_result = g.driver.session.run(query)
+        person_result = g.driver.session().run(query)
         
         for person_record in person_result:
             self.change = person_record["person"]['change']
@@ -206,7 +206,7 @@ class Person:
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
-                pname.firstname = person_record["name"]['firstname']
+                pname.firstname = person_record["name"]['first']
                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
@@ -734,7 +734,7 @@ class Name:
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.surname='{}'
                 RETURN p.gramps_handle AS handle
             """.format(surname)
-        return g.driver.session.run(query)
+        return g.driver.session().run(query)
         
     
     @staticmethod

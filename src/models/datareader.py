@@ -289,3 +289,22 @@ def lue_typed_refnames(reftype):
     logging.info("TIME get_named_refnames {} sek".format(time.time()-t0))
 
     return (namelist)
+
+
+def get_people_by_surname(surname):
+    names = []
+    result = Name.get_people_with_surname(surname)
+    for record in result:
+        handle = record['handle']
+        p = Person()
+        p.handle = handle
+        p.get_person_and_name_data()
+        
+        if len(p.name) > 0:
+            name_data = p.name
+            for pname in name_data:
+                names.append(pname)
+        
+    return (names)
+        
+        

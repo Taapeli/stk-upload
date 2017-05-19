@@ -4,15 +4,16 @@
 {% block body %}
 {{ super() }}
 
-<h2>All different surnames in db</h2>
+<h2>People who has the specific surname</h2>
 <section id="lista">
 <table>
-    <tr><th>surname</th>
+    <tr><th>firstname</th><th>surname</th>
     </tr>
-{% if surnames %}
-    {% for name in surnames %}
+{% if names %}
+    {% for person in names %}
         <tr>
-            <td><a href="/lista/people_by_surname/{{name.surname}}">{{name.surname}}</a></td>
+            <td>{% if person.firstname %}{{person.firstname}}{% endif %}</td>
+            <td>{{person.surname}}</td>
         </tr>
     {% endfor %}
 {% else %}
