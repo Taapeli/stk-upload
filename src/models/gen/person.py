@@ -192,12 +192,13 @@ class Person:
         query = """
             MATCH (person:Person)-[r:NAME]-(name:Name) 
                 WHERE person.gramps_handle='{}'
-                RETURN person, name
+                RETURN ID(person) AS id, person, name
                 ORDER BY name.alt
             """.format(self.handle)
         person_result = g.driver.session().run(query)
         
         for person_record in person_result:
+            self.uniq_id = person_record['id']
             self.change = person_record["person"]['change']
             self.id = person_record["person"]['id']
             self.gender = person_record["person"]['gender']

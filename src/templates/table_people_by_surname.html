@@ -7,14 +7,23 @@
 <h2>People who has the specific surname</h2>
 <section id="lista">
 <table>
-    <tr><th>firstname</th><th>surname</th>
+    <tr><th>unique id</th><th>firstname</th><th>surname</th>
     </tr>
-{% if names %}
-    {% for person in names %}
-        <tr>
-            <td>{% if person.firstname %}{{person.firstname}}{% endif %}</td>
-            <td>{{person.surname}}</td>
-        </tr>
+{% if people %}
+    {% for person in people %}
+     	{% if person.name %}
+        	{% for pname in person.name %}
+        		<tr>
+	        		<td>{{person.uniq_id}}</td>
+	        		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
+	        		<td>{{pname.surname}}</td>
+        		</tr>
+    		{% endfor %}
+		{% else %}
+    		<tr>
+        		<td>{{person.uniq_id}}</td>
+    		</tr>
+		{% endif %}
     {% endfor %}
 {% else %}
         <tr><td colspan="1">Ei tietoja</td></tr>

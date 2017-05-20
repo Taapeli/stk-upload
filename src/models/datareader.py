@@ -292,19 +292,15 @@ def lue_typed_refnames(reftype):
 
 
 def get_people_by_surname(surname):
-    names = []
+    people = []
     result = Name.get_people_with_surname(surname)
     for record in result:
         handle = record['handle']
         p = Person()
         p.handle = handle
         p.get_person_and_name_data()
+        people.append(p)
         
-        if len(p.name) > 0:
-            name_data = p.name
-            for pname in name_data:
-                names.append(pname)
-        
-    return (names)
+    return (people)
         
         

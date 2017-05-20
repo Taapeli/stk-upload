@@ -156,8 +156,8 @@ def nayta_refnimet(reftype):
 def list_people_by_surname(surname): 
     """ henkilöiden, joilla on sama sukunimie näyttäminen ruudulla """
     models.dbutil.connect_db()
-    names = models.datareader.get_people_by_surname(surname)
-    return render_template("table_people_by_surname.html", names=names)
+    people = models.datareader.get_people_by_surname(surname)
+    return render_template("table_people_by_surname.html", people=people)
 
 
 @app.route('/tyhjenna/kaikki/kannasta')
