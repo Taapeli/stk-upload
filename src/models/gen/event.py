@@ -46,19 +46,31 @@ class Event:
                 WHERE event.gramps_handle='{}'
                 RETURN c.gramps_handle AS citationref_hlink
             """.format(self.handle)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
+    
+    
+    def get_citation_by_id(self):
+        """ Luetaan tapahtuman viittauksen id """
+        
+        global session
+                
+        query = """
+            MATCH (event:Event)-[r:CITATION]->(c:Citation) 
+                WHERE ID(event)={}
+                RETURN ID(c) AS citationref_hlink
+            """.format(self.uniq_id)
+        return  g.driver.session().run(query)
 
 
     def get_event_data(self):
         """ Luetaan tapahtuman tiedot """
 
-        session = g.session
         query = """
             MATCH (event:Event)
                 WHERE event.gramps_handle='{}'
                 RETURN event
             """.format(self.handle)
-        event_result = session.run(query)
+        event_result = g.driver.session().run(query)
 
         for event_record in event_result:
             self.id = event_record["event"]["id"]
@@ -75,6 +87,35 @@ class Event:
                 self.citationref_hlink = event_citation_record["citationref_hlink"]
                 
         return True
+
+
+    def get_event_data_by_id(self):
+        """ Luetaan tapahtuman tiedot """
+        
+        global session
+                
+        query = """
+            MATCH (event:Event)
+                WHERE ID(event)={}
+                RETURN event
+            """.format(self.uniq_id)
+        event_result = g.driver.session().run(query)
+
+        for event_record in event_result:
+            self.id = event_record["event"]["id"]
+            self.change = event_record["event"]["change"]
+            self.type = event_record["event"]["type"]
+            self.date = event_record["event"]["date"]
+    
+            event_place_result = self.get_place_by_id()
+            for event_place_record in event_place_result:
+                self.place_hlink = event_place_record["uniq_id"]
+    
+            event_citation_result = self.get_citation_by_id()
+            for event_citation_record in event_citation_result:
+                self.citationref_hlink = event_citation_record["citationref_hlink"]
+                
+        return True
     
     
     def get_place_handle(self):
@@ -86,6 +127,21 @@ class Event:
                 RETURN place.gramps_handle AS handle
             """.format(self.handle)
         return  g.driver.session.run(query)
+    
+    
+        
+    def get_place_by_id(self):
+        """ Luetaan tapahtuman paikan uniq_id """
+        
+        global session
+                
+        query = """
+            MATCH (event:Event)-[r:PLACE]->(place:Place) 
+                WHERE ID(event)={}
+                RETURN ID(place) AS uniq_id
+            """.format(self.uniq_id)
+        return  g.driver.session().run(query)
+
         
     
     @staticmethod        

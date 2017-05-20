@@ -57,7 +57,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN c.gramps_handle AS citationref_hlink
             """.format(self.handle)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
     def get_event_data(self):
@@ -68,7 +68,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink
             """.format(self.handle)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
     def get_event_data_by_id(self):
@@ -79,7 +79,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN r.role AS eventref_role, ID(event) AS eventref_hlink
             """.format(self.uniq_id)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
     def get_her_families(self):
@@ -90,7 +90,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS handle
             """.format(self.handle)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
     def get_her_families_by_id(self):
@@ -101,7 +101,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN ID(family) AS uniq_id
             """.format(self.uniq_id)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
     def get_his_families(self):
@@ -112,7 +112,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS handle
             """.format(self.handle)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
     def get_his_families_by_id(self):
@@ -123,7 +123,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN ID(family) AS uniq_id
             """.format(self.uniq_id)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
 
     
     def get_hlinks(self):
@@ -172,7 +172,7 @@ class Person:
                 WHERE person.gramps_handle='{}'
                 RETURN family.gramps_handle AS parentin_hlink
             """.format(self.handle)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
     def get_parentin_id(self):
@@ -183,7 +183,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN ID(family) AS parentin_hlink
             """.format(self.uniq_id)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
     def get_person_and_name_data(self):
@@ -223,7 +223,7 @@ class Person:
                 RETURN person, name
                 ORDER BY name.alt
             """.format(self.uniq_id)
-        person_result = g.driver.session.run(query)
+        person_result = g.driver.session().run(query)
         
         for person_record in person_result:
             self.change = person_record["person"]['change']
@@ -234,7 +234,7 @@ class Person:
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
-                pname.firstname = person_record["name"]['firstname']
+                pname.firstname = person_record["name"]['first']
                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']

@@ -302,5 +302,24 @@ def get_people_by_surname(surname):
         people.append(p)
         
     return (people)
+
+
+def get_person_data_by_id(uniq_id):
+    p = Person()
+    p.uniq_id = uniq_id
+    p.get_person_and_name_data_by_id()
+    p.get_hlinks_by_id()
+    event = Event()
+    event.handle = p.eventref_hlink
+    event.get_event_data()
+    
+    events = []
+    for link in p.eventref_hlink:
+        e = Event()
+        e.uniq_id = link
+        e.get_event_data_by_id()
+        events.append(e)
+        
+    return (p, events)
         
         
