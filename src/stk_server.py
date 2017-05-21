@@ -154,10 +154,18 @@ def nayta_refnimet(reftype):
     
 @app.route('/lista/people_by_surname/<string:surname>')
 def list_people_by_surname(surname): 
-    """ henkilöiden, joilla on sama sukunimie näyttäminen ruudulla """
+    """ henkilöiden, joilla on sama sukunimi näyttäminen ruudulla """
     models.dbutil.connect_db()
     people = models.datareader.get_people_by_surname(surname)
-    return render_template("table_people_by_surname.html", people=people)
+    return render_template("table_people_by_surname.html", surname=surname, people=people)
+    
+    
+@app.route('/lista/person_data/<string:uniq_id>')
+def show_person_data(uniq_id): 
+    """ henkilön tietojen näyttäminen ruudulla """
+    models.dbutil.connect_db()
+    person, events = models.datareader.get_person_data_by_id(uniq_id)
+    return render_template("table_person_by_id.html", person=person, events=events)
 
 
 @app.route('/tyhjenna/kaikki/kannasta')

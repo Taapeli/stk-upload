@@ -3,7 +3,12 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 @author: jm
 '''
+
+import datetime
 from sys import stderr
+import logging
+from flask import g
+import models.dbutil
 
 
 class Place:
@@ -30,15 +35,33 @@ class Place:
     
     def get_place_data(self):
         """ Luetaan kaikki paikan tiedot """
-        
-        global session
                 
         query = """
             MATCH (place:Place)
                 WHERE place.gramps_handle='{}'
                 RETURN place
             """.format(self.handle)
-        place_result = session.run(query)
+        place_result = g.driver.session().run(query)
+        
+        for place_record in place_result:
+            self.change = place_record["place"]["change"]
+            self.id = place_record["place"]["id"]
+            self.type = place_record["place"]["type"]
+            self.pname = place_record["place"]["pname"]
+            
+        return True
+        self.placeref_hlink = ''
+    
+    
+    def get_place_data_by_id(self):
+        """ Luetaan kaikki paikan tiedot """
+                
+        query = """
+            MATCH (place:Place)
+                WHERE ID(place)={}
+                RETURN place
+            """.format(self.uniq_id)
+        place_result = g.driver.session().run(query)
         
         for place_record in place_result:
             self.change = place_record["place"]["change"]
@@ -53,12 +76,11 @@ class Place:
     def get_total():
         """ Tulostaa paikkojen määrän tietokannassa """
         
-        global session
                 
         query = """
             MATCH (p:Place) RETURN COUNT(p)
             """
-        results =  session.run(query)
+        results =  g.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -80,9 +102,6 @@ class Place:
 
     def save(self):
         """ Tallettaa sen kantaan """
-
-        global session
-        
         if len(self.pname) >= 1:
             p_pname = self.pname
             if len(self.pname) > 1:

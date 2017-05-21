@@ -347,7 +347,7 @@ class Person:
         query = """
             MATCH (p:Person) RETURN COUNT(p)
             """
-        results =  g.driver.session.run(query)
+        results =  g.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -529,7 +529,6 @@ class Person:
         """
 
         today = str(datetime.date.today())
-        session = g.driver.session()
         if not self.handle:
             handles = models.dbutil.get_new_handles(3)
             self.handle = handles.pop()
@@ -543,7 +542,7 @@ class Person:
                     p.id='{}', 
                     p.gender='{}'
                 """.format(self.handle, self.change, self.id, self.gender)
-            session.run(query)
+            g.driver.session().run(query)
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
@@ -555,7 +554,7 @@ class Person:
                 MERGE (u)-[r:REVISION]->(n)
                 SET r.date='{}'
                 """.format(userid, self.handle, today)
-            session.run(query)
+            g.driver.session().run(query)
         except Exception as err:
             print("Virhe (Person.save:User): {0}".format(err), file=stderr)
             
@@ -589,7 +588,7 @@ class Person:
                                p_surname, 
                                p_suffix, 
                                self.handle)
-                    session.run(query)
+                    g.driver.session().run(query)
             except Exception as err:
                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
 
@@ -664,10 +663,10 @@ CREATE (n)-[r:EVENT {role: {role}}]->
                     MATCH (m:Citation) WHERE m.gramps_handle='{}'
                     MERGE (n)-[r:CITATION]->(m)
                      """.format(self.handle, self.citationref_hlink[0])
-                session.run(query)
+                g.driver.session().run(query)
             except Exception as err:
                 print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
-        session.close()
+#        session.close()
         return
 
 
@@ -701,7 +700,7 @@ class Name:
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
                 RETURN p.gramps_handle AS handle
             """.format(refname)
-        return g.driver.session.run(query)
+        return g.driver.session().run(query)
 
         
     @staticmethod
@@ -713,7 +712,7 @@ class Name:
                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
                 RETURN p.gramps_handle AS handle
             """.format(userid, refname)
-        return g.driver.session.run(query)
+        return g.driver.session().run(query)
 
         
     @staticmethod
@@ -725,7 +724,7 @@ class Name:
                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
                 RETURN ID(p) AS id
             """.format(userid, refname)
-        return g.driver.session.run(query)
+        return g.driver.session().run(query)
         
     @staticmethod
     def get_people_with_surname(surname):
@@ -746,7 +745,7 @@ class Name:
             MATCH (n:Name) RETURN distinct n.firstname AS firstname
                 ORDER BY n.firstname
             """
-        return g.driver.session.run(query)
+        return g.driver.session().run(query)
         
     
     @staticmethod
@@ -766,4 +765,4 @@ class Name:
             MATCH (n:Name) WHERE n.firstname='{}' 
             SET n.refname='{}'
             """.format(self.firstname, self.refname)
-        return g.driver.session.run(query)
+        return g.driver.session().run(query)

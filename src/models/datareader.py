@@ -7,6 +7,7 @@ import logging
 import time
 from models.dbutil import Date
 from models.gen.person import Person, Name
+from models.gen.place import Place
 from models.gen.event import Event
 from models.gen.source_citation import Source, Citation
 from models.gen.refname import Refname
@@ -318,6 +319,11 @@ def get_person_data_by_id(uniq_id):
         e = Event()
         e.uniq_id = link
         e.get_event_data_by_id()
+        place = Place()
+        place.uniq_id = e.place_hlink
+        place.get_place_data_by_id()
+        
+        e.place = place.pname
         events.append(e)
         
     return (p, events)

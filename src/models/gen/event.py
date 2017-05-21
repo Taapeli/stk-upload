@@ -19,6 +19,7 @@ class Event:
                 type               esim. "Birth"
                 description        esim. ammatin kuvaus
                 date               str aika
+                place              str paikka
                 place_hlink        str paikan osoite
                 attr_type          str lisätiedon tyyppi
                 attr_value         str lisätiedon arvo
@@ -32,6 +33,7 @@ class Event:
         self.id = eid
         self.description = desc
         self.date = ''
+        self.place = ''
         self.place_hlink = ''
         self.attr_type = ''
         self.attr_value = ''
@@ -195,7 +197,6 @@ class Event:
         """ Tallettaa sen kantaan """
 
         today = date.today()
-        session = g.driver.session
         try:
             query = """
                 CREATE (e:Event) 
@@ -211,7 +212,7 @@ class Event:
                            self.description, self.date, self.attr_type, 
                            self.attr_value)
                 
-            session.run(query)
+            g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -223,7 +224,7 @@ class Event:
                 SET r.date='{}'
                 """.format(userid, self.handle, today)
                 
-            session.run(query)
+            g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -236,7 +237,7 @@ class Event:
                     MERGE (n)-[r:PLACE]->(m)
                      """.format(self.handle, self.place_hlink)
                                  
-                session.run(query)
+                g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -249,7 +250,7 @@ class Event:
                     MERGE (n)-[r:CITATION]->(m)
                      """.format(self.handle, self.citationref_hlink)
                                  
-                session.run(query)
+                g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
