@@ -216,14 +216,14 @@ class Person:
     
     def get_person_and_name_data_by_id(self):
         """ Luetaan kaikki henkilön tiedot """
-        
+
+        pid = int(self.uniq_id)
         query = """
-            MATCH (person:Person)-[r:NAME]-(name:Name) 
-                WHERE ID(person)={}
-                RETURN person, name
-                ORDER BY name.alt
-            """.format(self.uniq_id)
-        person_result = g.driver.session().run(query)
+MATCH (person:Person)-[r:NAME]-(name:Name) 
+  WHERE ID(person)=$pid
+RETURN person, name
+  ORDER BY name.alt"""
+        person_result = g.driver.session().run(query, {"pid": pid})
         
         for person_record in person_result:
             self.change = person_record["person"]['change']

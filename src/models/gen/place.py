@@ -55,13 +55,14 @@ class Place:
     
     def get_place_data_by_id(self):
         """ Luetaan kaikki paikan tiedot """
-                
+        
+        plid = self.uniq_id
         query = """
             MATCH (place:Place)
-                WHERE ID(place)={}
+                WHERE ID(place)=$place_id
                 RETURN place
             """.format(self.uniq_id)
-        place_result = g.driver.session().run(query)
+        place_result = g.driver.session().run(query, {"place_id": plid})
         
         for place_record in place_result:
             self.change = place_record["place"]["change"]
