@@ -120,7 +120,7 @@ class Place:
                     p.pname='{}'
                 """.format(self.handle, self.change, self.id, self.type, p_pname)
                 
-            session.run(query)
+            g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -133,7 +133,7 @@ class Place:
                     MERGE (n)-[r:HIERARCY]->(m)
                      """.format(self.handle, self.placeref_hlink)
                                  
-                session.run(query)
+                g.driver.session().run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
             

@@ -19,7 +19,6 @@ class Event:
                 type               esim. "Birth"
                 description        esim. ammatin kuvaus
                 date               str aika
-                place              str paikka
                 place_hlink        str paikan osoite
                 attr_type          str lisätiedon tyyppi
                 attr_value         str lisätiedon arvo
@@ -33,7 +32,6 @@ class Event:
         self.id = eid
         self.description = desc
         self.date = ''
-        self.place = ''
         self.place_hlink = ''
         self.attr_type = ''
         self.attr_value = ''
@@ -128,7 +126,7 @@ class Event:
                 WHERE event.gramps_handle='{}'
                 RETURN place.gramps_handle AS handle
             """.format(self.handle)
-        return  g.driver.session.run(query)
+        return  g.driver.session().run(query)
     
     
         
@@ -153,7 +151,7 @@ class Event:
         query = """
             MATCH (e:Event) RETURN COUNT(e)
             """
-        results =  g.driver.session.run(query)
+        results =  g.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -256,3 +254,26 @@ class Event:
             
         return
 
+
+
+
+class Event_for_template(Event):
+    """ Template-tapahtuma perii Tapahtuma-luokan
+            
+        Properties:
+                place              str paikka
+                
+    """
+
+    def __init__(self, eid='', desc='', handle=''):
+        """ Luo uuden event-instanssin """
+        self.handle = handle
+        self.change = ''
+        self.id = eid
+        self.description = desc
+        self.date = ''
+        self.place = ''
+        self.place_hlink = ''
+        self.attr_type = ''
+        self.attr_value = ''
+        self.citationref_hlink = ''

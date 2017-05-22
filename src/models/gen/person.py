@@ -611,7 +611,7 @@ CREATE (n)-[r:EVENT {role: {role}}]->
                           "e_date": e.date,
                           "e_descr": e.description}
                 try:
-                    session.run(query, values)
+                    g.driver.session().run(query, values)
                 except Exception as err:
                     print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
 
@@ -625,7 +625,7 @@ CREATE (n)-[r:EVENT {role: {role}}]->
                         MERGE (n)-[r:EVENT]->(m)
                          """.format(self.handle, self.eventref_hlink[i])
                                  
-                    session.run(query)
+                    g.driver.session().run(query)
                 except Exception as err:
                     print("Virhe (Person.save:Event 1): {0}".format(err), file=stderr)
 
@@ -637,7 +637,7 @@ CREATE (n)-[r:EVENT {role: {role}}]->
                          """.format(self.handle, 
                                     self.eventref_hlink[i], 
                                     self.eventref_role[i])
-                    session.run(query)
+                    g.driver.session().run(query)
                 except Exception as err:
                     print("Virhe (Person.save:Event 2): {0}".format(err), file=stderr)
    
@@ -651,7 +651,7 @@ CREATE (n)-[r:EVENT {role: {role}}]->
 #                        MATCH (m:Family) WHERE m.gramps_handle='{}'
 #                        MERGE (n)-[r:FAMILY]->(m)
 #                        """.format(self.handle, self.parentin_hlink[i])
-#                    g.driver.session.run(query)
+#                    g.driver.session().run(query)
 #                except Exception as err:
 #                    print("Virhe: {0}".format(err), file=stderr)
    

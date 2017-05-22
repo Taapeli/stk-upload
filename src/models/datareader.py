@@ -8,7 +8,7 @@ import time
 from models.dbutil import Date
 from models.gen.person import Person, Name
 from models.gen.place import Place
-from models.gen.event import Event
+from models.gen.event import Event, Event_for_template
 from models.gen.source_citation import Source, Citation
 from models.gen.refname import Refname
 
@@ -316,7 +316,7 @@ def get_person_data_by_id(uniq_id):
     
     events = []
     for link in p.eventref_hlink:
-        e = Event()
+        e = Event_for_template()
         e.uniq_id = link
         e.get_event_data_by_id()
         place = Place()
