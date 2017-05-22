@@ -74,12 +74,12 @@ class Person:
     def get_event_data_by_id(self):
         """ Luetaan henkilön tapahtumien id:t """
         
+        pid = int(self.uniq_id)
         query = """
-            MATCH (person:Person)-[r:EVENT]->(event:Event) 
-                WHERE ID(person)={}
-                RETURN r.role AS eventref_role, ID(event) AS eventref_hlink
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (person:Person)-[r:EVENT]->(event:Event) 
+  WHERE ID(person)=$pid
+RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
+        return  g.driver.session().run(query, {"pid": pid})
     
     
     def get_her_families(self):
@@ -96,12 +96,12 @@ class Person:
     def get_her_families_by_id(self):
         """ Luetaan naisen perheiden id:t """
         
+        pid = int(self.uniq_id)
         query = """
-            MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
-                WHERE ID(person)={}
-                RETURN ID(family) AS uniq_id
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
+  WHERE ID(person)=$pid
+RETURN ID(family) AS uniq_id"""
+        return  g.driver.session().run(query, {"pid": pid})
     
     
     def get_his_families(self):
@@ -118,12 +118,12 @@ class Person:
     def get_his_families_by_id(self):
         """ Luetaan miehen perheiden id:t """
         
+        pid = int(self.uniq_id)
         query = """
-            MATCH (person:Person)<-[r:FATHER]-(family:Family) 
-                WHERE ID(person)={}
-                RETURN ID(family) AS uniq_id
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (person:Person)<-[r:FATHER]-(family:Family) 
+  WHERE ID(person)=$pid
+RETURN ID(family) AS uniq_id"""
+        return  g.driver.session().run(query, {"pid": pid})
 
     
     def get_hlinks(self):

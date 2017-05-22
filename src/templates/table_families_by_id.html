@@ -52,7 +52,7 @@
 			 	{% if family.spouse_data.name %}
 			    	{% for pname in family.spouse_data.name %}
 			    		<tr>
-			        		<td>{{family.spouse_data.uniq_id}}</td>
+			        		<td><a href="/lista/family_data/{{family.spouse_data.uniq_id}}">{{family.spouse_data.uniq_id}}</a></td>
 			        		<td>{% if family.spouse_data.gender %}{{family.spouse_data.gender}}{% endif %}</td>
 			        		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
 			        		<td>{% if pname.suffix %}{{pname.suffix}}{% endif %}</td>
@@ -79,7 +79,7 @@
 				 	{% if child.name %}
 				    	{% for pname in child.name %}
 				    		<tr>
-				        		<td>{{child.uniq_id}}</td>
+				        		<td><a href="/lista/family_data/{{child.uniq_id}}">{{child.uniq_id}}</a></td>
 				        		<td>{% if child.gender %}{{child.gender}}{% endif %}</td>
 				        		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
 				        		<td>{% if pname.suffix %}{{pname.suffix}}{% endif %}</td>

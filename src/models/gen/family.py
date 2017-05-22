@@ -49,12 +49,12 @@ class Family:
     def get_children_by_id(self):
         """ Luetaan perheen lasten tiedot """
                         
+        pid = int(self.uniq_id)
         query = """
-            MATCH (family:Family)-[r:CHILD]->(person:Person)
-                WHERE ID(family)={}
-                RETURN ID(person) AS children
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (family:Family)-[r:CHILD]->(person:Person)
+  WHERE ID(family)=$pid
+RETURN ID(person) AS children"""
+        return  g.driver.session().run(query, {"pid": pid})
     
     
     def get_event_data(self):
@@ -71,12 +71,12 @@ class Family:
     def get_event_data_by_id(self):
         """ Luetaan perheen tapahtumien tiedot """
                         
+        pid = int(self.uniq_id)
         query = """
-            MATCH (family:Family)-[r:EVENT]->(event:Event)
-                WHERE ID(family)={}
-                RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (family:Family)-[r:EVENT]->(event:Event)
+  WHERE ID(family)=$pid
+RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink"""
+        return  g.driver.session().run(query, {"pid": pid})
     
     
     def get_family_data(self):
@@ -118,15 +118,13 @@ class Family:
     
     def get_family_data_by_id(self):
         """ Luetaan perheen tiedot """
-        
-        global session
-                
+                        
+        pid = int(self.uniq_id)
         query = """
-            MATCH (family:Family)
-                WHERE ID(family)={}
-                RETURN family
-            """.format(self.uniq_id)
-        family_result = g.driver.session().run(query)
+MATCH (family:Family)
+  WHERE ID(family)=$pid
+RETURN family"""
+        family_result = g.driver.session().run(query, {"pid": pid})
         
         for family_record in family_result:
             self.change = family_record["family"]['change']
@@ -168,15 +166,13 @@ class Family:
     
     def get_father_by_id(self):
         """ Luetaan perheen isän tiedot """
-        
-        global session
-                
+                        
+        pid = int(self.uniq_id)
         query = """
-            MATCH (family:Family)-[r:FATHER]->(person:Person)
-                WHERE ID(family)={}
-                RETURN ID(person) AS father
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (family:Family)-[r:FATHER]->(person:Person)
+  WHERE ID(family)=$pid
+RETURN ID(person) AS father"""
+        return  g.driver.session().run(query, {"pid": pid})
     
     
     def get_mother(self):
@@ -194,15 +190,13 @@ class Family:
     
     def get_mother_by_id(self):
         """ Luetaan perheen äidin tiedot """
-        
-        global session
-                
+                        
+        pid = int(self.uniq_id)
         query = """
-            MATCH (family:Family)-[r:MOTHER]->(person:Person)
-                WHERE ID(family)={}
-                RETURN ID(person) AS mother
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (family:Family)-[r:MOTHER]->(person:Person)
+  WHERE ID(family)=$pid
+RETURN ID(person) AS mother"""
+        return  g.driver.session().run(query, {"pid": pid})
         
     
     @staticmethod       
