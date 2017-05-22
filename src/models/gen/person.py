@@ -216,7 +216,7 @@ class Person:
     
     def get_person_and_name_data_by_id(self):
         """ Luetaan kaikki henkilön tiedot """
-
+        
         pid = int(self.uniq_id)
         query = """
 MATCH (person:Person)-[r:NAME]-(name:Name) 
@@ -226,6 +226,7 @@ RETURN person, name
         person_result = g.driver.session().run(query, {"pid": pid})
         
         for person_record in person_result:
+            self.handle = person_record["person"]['handle']
             self.change = person_record["person"]['change']
             self.id = person_record["person"]['id']
             self.gender = person_record["person"]['gender']

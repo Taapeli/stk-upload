@@ -6,9 +6,10 @@ import csv
 import logging
 import time
 from models.dbutil import Date
+from models.gen.event import Event, Event_for_template
+from models.gen.family import Family_for_template
 from models.gen.person import Person, Name
 from models.gen.place import Place
-from models.gen.event import Event, Event_for_template
 from models.gen.source_citation import Source, Citation
 from models.gen.refname import Refname
 
@@ -327,5 +328,40 @@ def get_person_data_by_id(uniq_id):
         events.append(e)
         
     return (p, events)
+
+
+def get_families_data_by_id(uniq_id):
+    families = []
+    
+    p = Person()
+    p.uniq_id = uniq_id
+    p.get_person_and_name_data_by_id()
+    if p.gender == 'M':
+        result = p.get_his_families_by_id()
+    else:
+        result = p.get_her_families_by_id()
+        
+    for record in result:
+        f = Family_for_template()
+        f.uniq_id = record['uniq_id']
+        f.get_family_data_by_id()
+        
+        spouse = Person()
+        if p.gender == 'M':
+            spouse.uniq_id = f.mother
+        else:
+            spouse.uniq_id = f.father
+        spouse.get_person_and_name_data_by_id()
+        f.spouse_data = spouse
+            
+        for child_id in f.childref_hlink:
+            child = Person()
+            child.uniq_id = child_id
+            child.get_person_and_name_data_by_id()
+            f.children_data.append(child)
+            
+        families.append(f)
+        
+    return (p, families)
         
         

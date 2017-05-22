@@ -166,6 +166,14 @@ def show_person_data(uniq_id):
     models.dbutil.connect_db()
     person, events = models.datareader.get_person_data_by_id(uniq_id)
     return render_template("table_person_by_id.html", person=person, events=events)
+    
+    
+@app.route('/lista/family_data/<string:uniq_id>')
+def show_family_data(uniq_id): 
+    """ henkilön perheen tietojen näyttäminen ruudulla """
+    models.dbutil.connect_db()
+    person, families = models.datareader.get_families_data_by_id(uniq_id)
+    return render_template("table_families_by_id.html", person=person, families=families)
 
 
 @app.route('/tyhjenna/kaikki/kannasta')
