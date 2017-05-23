@@ -207,7 +207,7 @@ RETURN ID(family) AS uniq_id"""
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
-                pname.firstname = person_record["name"]['first']
+                pname.firstname = person_record["name"]['firstname']
                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
@@ -235,7 +235,7 @@ RETURN person, name
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
-                pname.firstname = person_record["name"]['first']
+                pname.firstname = person_record["name"]['firstname']
                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']

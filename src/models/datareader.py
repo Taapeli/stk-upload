@@ -485,7 +485,7 @@ def handle_people(collection, userid):
                 if len(person_name.getElementsByTagName('first') ) == 1:
                     person_first = person_name.getElementsByTagName('first')[0]
                     if len(person_first.childNodes) == 1:
-                        pname.first = person_first.childNodes[0].data
+                        pname.firstname = person_first.childNodes[0].data
                     elif len(person_first.childNodes) > 1:
                         print("Error: More than one child node in a first name of a person")
                 elif len(person_name.getElementsByTagName('first') ) > 1:
