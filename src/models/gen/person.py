@@ -74,12 +74,12 @@ class Person:
     def get_event_data_by_id(self):
         """ Luetaan henkilön tapahtumien id:t """
         
+        pid = int(self.uniq_id)
         query = """
-            MATCH (person:Person)-[r:EVENT]->(event:Event) 
-                WHERE ID(person)={}
-                RETURN r.role AS eventref_role, ID(event) AS eventref_hlink
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (person:Person)-[r:EVENT]->(event:Event) 
+  WHERE ID(person)=$pid
+RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
+        return  g.driver.session().run(query, {"pid": pid})
     
     
     def get_her_families(self):
@@ -96,12 +96,12 @@ class Person:
     def get_her_families_by_id(self):
         """ Luetaan naisen perheiden id:t """
         
+        pid = int(self.uniq_id)
         query = """
-            MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
-                WHERE ID(person)={}
-                RETURN ID(family) AS uniq_id
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
+  WHERE ID(person)=$pid
+RETURN ID(family) AS uniq_id"""
+        return  g.driver.session().run(query, {"pid": pid})
     
     
     def get_his_families(self):
@@ -118,12 +118,12 @@ class Person:
     def get_his_families_by_id(self):
         """ Luetaan miehen perheiden id:t """
         
+        pid = int(self.uniq_id)
         query = """
-            MATCH (person:Person)<-[r:FATHER]-(family:Family) 
-                WHERE ID(person)={}
-                RETURN ID(family) AS uniq_id
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (person:Person)<-[r:FATHER]-(family:Family) 
+  WHERE ID(person)=$pid
+RETURN ID(family) AS uniq_id"""
+        return  g.driver.session().run(query, {"pid": pid})
 
     
     def get_hlinks(self):
@@ -207,7 +207,7 @@ class Person:
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
-                pname.firstname = person_record["name"]['first']
+                pname.firstname = person_record["name"]['firstname']
                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
@@ -216,7 +216,7 @@ class Person:
     
     def get_person_and_name_data_by_id(self):
         """ Luetaan kaikki henkilön tiedot """
-
+        
         pid = int(self.uniq_id)
         query = """
 MATCH (person:Person)-[r:NAME]-(name:Name) 
@@ -226,6 +226,7 @@ RETURN person, name
         person_result = g.driver.session().run(query, {"pid": pid})
         
         for person_record in person_result:
+            self.handle = person_record["person"]['handle']
             self.change = person_record["person"]['change']
             self.id = person_record["person"]['id']
             self.gender = person_record["person"]['gender']
@@ -234,7 +235,7 @@ RETURN person, name
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
-                pname.firstname = person_record["name"]['first']
+                pname.firstname = person_record["name"]['firstname']
                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']

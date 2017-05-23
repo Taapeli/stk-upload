@@ -13,7 +13,7 @@
  	{% if person.name %}
     	{% for pname in person.name %}
     		<tr>
-        		<td>{{person.uniq_id}}</td>
+        		<td><a href="/lista/family_data/{{person.uniq_id}}">{{person.uniq_id}}</a></td>
         		<td>{% if person.gender %}{{person.gender}}{% endif %}</td>
         		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
         		<td>{% if pname.suffix %}{{pname.suffix}}{% endif %}</td>

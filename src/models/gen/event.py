@@ -52,14 +52,12 @@ class Event:
     def get_citation_by_id(self):
         """ Luetaan tapahtuman viittauksen id """
         
-        global session
-                
+        pid = int(self.uniq_id)
         query = """
-            MATCH (event:Event)-[r:CITATION]->(c:Citation) 
-                WHERE ID(event)={}
-                RETURN ID(c) AS citationref_hlink
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (event:Event)-[r:CITATION]->(c:Citation) 
+  WHERE ID(event)=$pid
+RETURN ID(c) AS citationref_hlink"""
+        return  g.driver.session().run(query, {"pid": pid})
 
 
     def get_event_data(self):
@@ -91,15 +89,13 @@ class Event:
 
     def get_event_data_by_id(self):
         """ Luetaan tapahtuman tiedot """
-        
-        global session
-                
+                        
+        pid = int(self.uniq_id)
         query = """
-            MATCH (event:Event)
-                WHERE ID(event)={}
-                RETURN event
-            """.format(self.uniq_id)
-        event_result = g.driver.session().run(query)
+MATCH (event:Event)
+  WHERE ID(event)=$pid
+RETURN event"""
+        event_result = g.driver.session().run(query, {"pid": pid})
 
         for event_record in event_result:
             self.id = event_record["event"]["id"]
@@ -132,15 +128,13 @@ class Event:
         
     def get_place_by_id(self):
         """ Luetaan tapahtuman paikan uniq_id """
-        
-        global session
-                
+                        
+        pid = int(self.uniq_id)
         query = """
-            MATCH (event:Event)-[r:PLACE]->(place:Place) 
-                WHERE ID(event)={}
-                RETURN ID(place) AS uniq_id
-            """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+MATCH (event:Event)-[r:PLACE]->(place:Place) 
+  WHERE ID(event)=$pid
+RETURN ID(place) AS uniq_id"""
+        return  g.driver.session().run(query, {"pid": pid})
 
         
     

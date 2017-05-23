@@ -105,9 +105,11 @@ def talleta(filename, subj):
             status = models.datareader.datastorer(pathname)
         elif subj == 'refnimet': # Referenssinimet
             # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
-            status=models.cvs_refnames.referenssinimet(pathname, maxrows=100)
+            status = models.cvs_refnames.referenssinimet(pathname, maxrows=100)
+        elif subj == 'xml_file': # gramps backup xml file to Neo4j db
+            status = models.datareader.xml_to_neo4j(pathname)
         elif subj == 'karajat': # TODO: Tekemättä
-            status="Käräjätietojen lukua ei ole vielä tehty"
+            status = "Käräjätietojen lukua ei ole vielä tehty"
         else:
             return redirect(url_for('virhesivu', code=1, text= \
                 "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
@@ -166,6 +168,14 @@ def show_person_data(uniq_id):
     models.dbutil.connect_db()
     person, events = models.datareader.get_person_data_by_id(uniq_id)
     return render_template("table_person_by_id.html", person=person, events=events)
+    
+    
+@app.route('/lista/family_data/<string:uniq_id>')
+def show_family_data(uniq_id): 
+    """ henkilön perheen tietojen näyttäminen ruudulla """
+    models.dbutil.connect_db()
+    person, families = models.datareader.get_families_data_by_id(uniq_id)
+    return render_template("table_families_by_id.html", person=person, families=families)
 
 
 @app.route('/tyhjenna/kaikki/kannasta')

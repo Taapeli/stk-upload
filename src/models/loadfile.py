@@ -16,7 +16,7 @@ elif 'TMP' in os.environ:
 else:
     UPLOAD_FOLDER = os.sep + 'tmp'
 
-ALLOWED_EXTENSIONS = set(['txt', 'csv'])
+ALLOWED_EXTENSIONS = set(['txt', 'csv', 'xml'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -47,7 +47,7 @@ def normalized_name(in_name):
            in_name.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
     if not ok_name:
         raise ValueError('Tiedostopääte nimessä "' + in_name + \
-              '" pitää olla .csv tai .txt ')
+              '" pitää olla .csv .txt tai .xml ')
     # Palautetaan nimi ilman ylimääräisiä hakemistotasoja
     return secure_filename(in_name)
 
