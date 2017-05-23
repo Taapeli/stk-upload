@@ -24,7 +24,7 @@
     <form action="/lataa" method="post" enctype="multipart/form-data">
     <h2>Versio 2 – tietokantaan talletus</h2>
     <p>Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset, yhteenvetotilasto</p>
-    <div style="height: 70pt">
+    <div style="height: 90pt">
         <div style="float: left; width: 350px;"><input type="file" name="filenm" />
             <ul style=" margin-left: 15pt; list-style-type:none">
                 <li><input type="radio" name="aineisto" 
@@ -32,7 +32,7 @@
                 <li><input type="radio" name="aineisto" 
                            value="refnimet">Henkilöiden referenssinimet</li>
                 <li><input type="radio" name="aineisto" 
-                           value="xml_file">XML-tiedosto Neo4j-kantaan</li>
+                           value="xml_file">Gramps XML-tiedosto</li>
             </ul>
         </div>
         <div style="float: left; padding-top: 40pt">
@@ -44,7 +44,7 @@
     <h3>Muita toimintoja</h3>
     <ul>
     <li><a href="/lista/henkilot">Näytä kannassa olevat henkilöt</a></li>
-    <li><a href="/lista/surnames">List all different surnames in db</a></li>
+    <li><a href="/lista/surnames">Luettelo eri sukunimistä</a></li>
     <li><a href="/lista/refnimet/REFFIRST">Näytä referenssietunimet aakkosjärjestyksessä</a>
         (<a href="/lista/refnimet">kaikki järjestämättä</a>)</li>
     <li><form action="/yhdista" method="post" enctype="multipart/form-data">

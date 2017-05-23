@@ -154,6 +154,7 @@ def nayta_refnimet(reftype):
         return render_template("table_refnames.html", names=names)
     
     
+@app.route('/lista/people_by_surname/', defaults={'surname': ""})
 @app.route('/lista/people_by_surname/<string:surname>')
 def list_people_by_surname(surname): 
     """ henkilöiden, joilla on sama sukunimi näyttäminen ruudulla """
