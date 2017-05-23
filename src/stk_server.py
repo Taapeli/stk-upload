@@ -132,7 +132,7 @@ def nayta_henkilot(subj):
         surnames = models.gen.person.Name.get_surnames()
         return render_template("table_surnames.html", surnames=surnames)
     elif subj == "users":
-        lista = models.gen.user.User.get_all_userids()
+        lista = models.gen.user.User.get_all()
         return render_template("table_users.html", users=lista)
     else:
         return redirect(url_for('virhesivu', code=1, text= \
@@ -224,19 +224,25 @@ def nayta_ehdolla(ehto):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
+
 @app.route('/newuser', methods=['POST'])
 def new_user(): 
-    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
+    """ Lisää tai päivittää käyttäjätiedon
     """
     try:
         models.dbutil.connect_db()
         userid = request.form['userid']
-        name = request.form['name']
-        
-        models.gen.user.User.create_user(userid, name)
+        if userid:
+            u = models.gen.user.User(userid)
+            u.name = request.form['name']
+            u.save()
+        else:
+            flash("Anna vähintään käyttäjätunnus", 'warning')
          
     except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        flash("Lisääminen ei onnistunut: {} - {}".\
+              format(e.__class__.__name__,str(e)), 'error')
+        #return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     return redirect(url_for('nayta_henkilot', subj='users'))
 

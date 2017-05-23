@@ -27,15 +27,18 @@ from flask import g
 class User:
     """ Käyttäjä
             
-        Properties:
-                userid          esim. User123
+        Properties:            example
+                userid         User123
+                name           "Matti Mainio"
+                roles[]        ?
      """
-    def __init__(self):
-        pass
+    def __init__(self, userid):
+        self.userid = userid
+        self.name = None
+        self.roles = []
 
 
-    @staticmethod       
-    def create_user(userid, name=None):
+    def save(self):
         """ Käyttäjä tallennetaan kantaan, jos hän ei jo ole siellä"""
 
 #         try:
@@ -51,11 +54,9 @@ class User:
 #             
 #             if not record:
                 # User doesn't exist in db, the userid should be stored there
-        if name == None:
-            name = ''
         try:
-            query = "MERGE (u:User {userid: $uid, name: $name})"
-            g.driver.session().run(query, {"uid": userid, "name": name})
+            query = "MERGE (u:User {userid: $uid}) SET u.name=$name"
+            g.driver.session().run(query, {"uid": self.userid, "name": self.name})
     
         except Exception as err:
             print("Virhe: {0}".format(err), file=sys.stderr)
@@ -96,7 +97,7 @@ RETURN distinct r.date AS date ORDER BY r.date
         
         
     @staticmethod       
-    def get_all_userids():
+    def get_all():
         """ Listaa kaikki käyttäjätunnukset"""
         
         query = """
