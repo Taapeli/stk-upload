@@ -844,7 +844,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     collection = DOMTree.documentElement
     
     # Create User if needed
-    User(userid)
+    user = User(userid)
+    user.save()
 
     result = handle_notes(collection)
     print("Notes stored: " + str(result))
