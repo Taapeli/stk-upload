@@ -189,60 +189,66 @@ RETURN ID(place) AS uniq_id"""
         """ Tallettaa sen kantaan """
 
         today = date.today()
+        handle = self.handle
+        change = self.change
+        id = self.id
+        type = self.type
+        description = self.description
+        edate = self.date
+        attr_type = self.attr_type
+        attr_value = self.attr_value
         try:
             query = """
-                CREATE (e:Event) 
-                SET e.gramps_handle='{}', 
-                    e.change='{}', 
-                    e.id='{}', 
-                    e.type='{}', 
-                    e.description='{}',
-                    e.date='{}',
-                    e.attr_type='{}',
-                    e.attr_value='{}'
-                """.format(self.handle, self.change, self.id, self.type, 
-                           self.description, self.date, self.attr_type, 
-                           self.attr_value)
-                
-            g.driver.session().run(query)
+CREATE (e:Event) 
+SET e.gramps_handle=$handle, 
+    e.change=$change, 
+    e.id=$id, 
+    e.type=$type, 
+    e.description=$description,
+    e.date=$date,
+    e.attr_type=$attr_type,
+    e.attr_value=$attr_value"""
+            g.driver.session().run(query, 
+               {"handle": handle, "change": change, "id": id, 
+                "type": type, "description": description, "date": edate, 
+                "attr_type": attr_type, "attr_value": attr_value})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
         try:
             query = """
-                MATCH (u:User) WHERE u.userid='{}'  
-                MATCH (n:Event) WHERE n.gramps_handle='{}'
-                MERGE (u)-[r:REVISION]->(n)
-                SET r.date='{}'
-                """.format(userid, self.handle, today)
-                
-            g.driver.session().run(query)
+MATCH (u:User) WHERE u.userid=$userid  
+MATCH (n:Event) WHERE n.gramps_handle=$handle
+MERGE (u)-[r:REVISION]->(n)
+SET r.date=$date"""
+            g.driver.session().run(query, 
+               {"userid": userid, "handle": handle, "date": today})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Place node
             if self.place_hlink != '':
+                place_hlink = self.place_hlink
                 query = """
-                    MATCH (n:Event) WHERE n.gramps_handle='{}'
-                    MATCH (m:Place) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:PLACE]->(m)
-                     """.format(self.handle, self.place_hlink)
-                                 
-                g.driver.session().run(query)
+MATCH (n:Event) WHERE n.gramps_handle=$handle
+MATCH (m:Place) WHERE m.gramps_handle=$place_hlink
+MERGE (n)-[r:PLACE]->(m)"""  
+                g.driver.session().run(query, 
+               {"handle": handle, "place_hlink": place_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Citation node
             if self.citationref_hlink != '':
+                citationref_hlink = self.citationref_hlink
                 query = """
-                    MATCH (n:Event) WHERE n.gramps_handle='{}'
-                    MATCH (m:Citation) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:CITATION]->(m)
-                     """.format(self.handle, self.citationref_hlink)
-                                 
-                g.driver.session().run(query)
+MATCH (n:Event) WHERE n.gramps_handle=$handle
+MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
+MERGE (n)-[r:CITATION]->(m)"""                       
+                g.driver.session().run(query, 
+               {"handle": handle, "citationref_hlink": citationref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
