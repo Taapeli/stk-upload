@@ -6,7 +6,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
+import datetime
 from sys import stderr
+import logging
+from flask import g
+import models.dbutil
 
 
 class Citation:
@@ -33,13 +37,11 @@ class Citation:
     @staticmethod       
     def get_total():
         """ Tulostaa lähteiden määrän tietokannassa """
-        
-        global session
-                
+                        
         query = """
             MATCH (c:Citation) RETURN COUNT(c)
             """
-        results =  session.run(query)
+        results =  g.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -62,8 +64,6 @@ class Citation:
     def save(self):
         """ Tallettaa sen kantaan """
 
-        global session
-
         try:
             # Create a new Citation node
             query = """
@@ -74,7 +74,7 @@ class Citation:
                     n.confidence='{}'
                 """.format(self.handle, self.change, self.id, self.confidence)
                 
-            session.run(query)
+            g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -87,7 +87,7 @@ class Citation:
                     MERGE (n)-[r:NOTE]->(m)
                      """.format(self.handle, self.noteref_hlink)
                                  
-                session.run(query)
+                g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -100,7 +100,7 @@ class Citation:
                     MERGE (n)-[r:SOURCE]->(m)
                      """.format(self.handle, self.sourceref_hlink)
                                  
-                session.run(query)
+                g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
@@ -129,38 +129,32 @@ class Repository:
     @staticmethod       
     def get_repositories():
         """ Luetaan kaikki arkistot """
-        
-        global session
-                
+                        
         query = """
             MATCH (repo:Repository) RETURN repo
             """
-        return  session.run(query)
+        return  g.driver.session().run(query)
     
     
     @staticmethod       
     def get_repository(rname):
         """ Luetaan arkiston handle """
-        
-        global session
-                
+                        
         query = """
             MATCH (repo:Repository) WHERE repo.rname='{}'
                 RETURN repo
             """.format(rname)
-        return  session.run(query)
+        return  g.driver.session().run(query)
                 
     
     @staticmethod       
     def get_total():
         """ Tulostaa arkistojen määrän tietokannassa """
-        
-        global session
-                
+                        
         query = """
             MATCH (r:Repository) RETURN COUNT(r)
             """
-        results =  session.run(query)
+        results =  g.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -180,8 +174,6 @@ class Repository:
     def save(self):
         """ Tallettaa sen kantaan """
 
-        global session
-
         try:
             query = """
                 CREATE (r:Repository) 
@@ -192,7 +184,7 @@ class Repository:
                     r.type='{}'
                 """.format(self.handle, self.change, self.id, self.rname, self.type)
                 
-            session.run(query)
+            g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
@@ -226,27 +218,23 @@ class Source:
     @staticmethod       
     def get_sources(repository_handle):
         """ Luetaan kaikki arkiston lähteet """
-        
-        global session
-                
+                        
         query = """
             MATCH (source:Source)-[r:REPOSITORY]->(repo:Repository) 
                 WHERE repo.gramps_handle='{}' 
                 RETURN r.medium AS medium, source
             """.format(repository_handle)
-        return  session.run(query)
+        return  g.driver.session().run(query)
         
     
     @staticmethod       
     def get_total():
         """ Tulostaa lähteiden määrän tietokannassa """
-        
-        global session
-                
+                        
         query = """
             MATCH (s:Source) RETURN COUNT(s)
             """
-        results =  session.run(query)
+        results =  g.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -270,8 +258,6 @@ class Source:
     def save(self):
         """ Tallettaa sen kantaan """
 
-        global session
-
         try:
             query = """
                 CREATE (s:Source) 
@@ -281,7 +267,7 @@ class Source:
                     s.stitle='{}'
                 """.format(self.handle, self.change, self.id, self.stitle)
                 
-            session.run(query)
+            g.driver.session().run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
  
@@ -294,7 +280,7 @@ class Source:
                     MERGE (n)-[r:NOTE]->(m)
                      """.format(self.handle, self.noteref_hlink)
                                  
-                session.run(query)
+                g.driver.session().run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
    
@@ -307,7 +293,7 @@ class Source:
                     MERGE (n)-[r:REPOSITORY]->(m)
                      """.format(self.handle, self.reporef_hlink)
                                  
-                session.run(query)
+                g.driver.session().run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
                 
@@ -319,7 +305,7 @@ class Source:
                     SET r.medium='{}'
                      """.format(self.handle, self.reporef_medium)
                                  
-                session.run(query)
+                g.driver.session().run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
                 

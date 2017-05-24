@@ -8,11 +8,12 @@ import time
 import xml.dom.minidom
 from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
-from models.gen.family import Family_for_template
+from models.gen.family import Family, Family_for_template
+from models.gen.note import Note
 from models.gen.person import Person, Name
 from models.gen.place import Place
-from models.gen.source_citation import Source, Citation
 from models.gen.refname import Refname
+from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
 
 
@@ -367,6 +368,66 @@ def get_families_data_by_id(uniq_id):
     return (p, families)
 
 
+def handle_citations(collection):
+    # Get all the citations in the collection
+    citations = collection.getElementsByTagName("citation")
+    
+    print ("*****Citations*****")
+    counter = 0
+    
+    # Print detail of each citation
+    for citation in citations:
+        
+        c = Citation()
+        
+        if citation.hasAttribute("handle"):
+            c.handle = citation.getAttribute("handle")
+        if citation.hasAttribute("change"):
+            c.change = citation.getAttribute("change")
+        if citation.hasAttribute("id"):
+            c.id = citation.getAttribute("id")
+    
+        if len(citation.getElementsByTagName('dateval') ) == 1:
+            citation_dateval = citation.getElementsByTagName('dateval')[0]
+            if citation_dateval.hasAttribute("val"):
+                c.dateval = citation_dateval.getAttribute("val")
+        elif len(citation.getElementsByTagName('dateval') ) > 1:
+            print("Error: More than one dateval tag in a citation")
+    
+        if len(citation.getElementsByTagName('page') ) == 1:
+            citation_page = citation.getElementsByTagName('page')[0]
+            c.page = citation_page.childNodes[0].data
+        elif len(citation.getElementsByTagName('page') ) > 1:
+            print("Error: More than one page tag in a citation")
+    
+        if len(citation.getElementsByTagName('confidence') ) == 1:
+            citation_confidence = citation.getElementsByTagName('confidence')[0]
+            c.confidence = citation_confidence.childNodes[0].data
+        elif len(citation.getElementsByTagName('confidence') ) > 1:
+            print("Error: More than one confidence tag in a citation")
+    
+        if len(citation.getElementsByTagName('noteref') ) == 1:
+            citation_noteref = citation.getElementsByTagName('noteref')[0]
+            if citation_noteref.hasAttribute("hlink"):
+                c.noteref_hlink = citation_noteref.getAttribute("hlink")
+        elif len(citation.getElementsByTagName('noteref') ) > 1:
+            print("Error: More than one noteref tag in a citation")
+    
+        if len(citation.getElementsByTagName('sourceref') ) == 1:
+            citation_sourceref = citation.getElementsByTagName('sourceref')[0]
+            if citation_sourceref.hasAttribute("hlink"):
+                c.sourceref_hlink = citation_sourceref.getAttribute("hlink")
+        elif len(citation.getElementsByTagName('sourceref') ) > 1:
+            print("Error: More than one sourceref tag in a citation")
+                
+        c.save()
+        counter += 1
+        
+    msg = "Citations stored: " + str(counter)
+        
+    return(msg)
+
+
 
 def handle_events(collection, userid):
     # Get all the events in the collection
@@ -441,9 +502,104 @@ def handle_events(collection, userid):
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
-        time.sleep(0.1)
+        # time.sleep(0.1)
         
-        msg = "Events stored: " + str(counter)
+    msg = "Events stored: " + str(counter)
+        
+    return(msg)
+
+
+def handle_families(collection):
+    # Get all the families in the collection
+    families = collection.getElementsByTagName("family")
+    
+    print ("*****Families*****")
+    counter = 0
+    
+    # Print detail of each family
+    for family in families:
+        
+        f = Family()
+        
+        if family.hasAttribute("handle"):
+            f.handle = family.getAttribute("handle")
+        if family.hasAttribute("change"):
+            f.change = family.getAttribute("change")
+        if family.hasAttribute("id"):
+            f.id = family.getAttribute("id")
+    
+        if len(family.getElementsByTagName('rel') ) == 1:
+            family_rel = family.getElementsByTagName('rel')[0]
+            if family_rel.hasAttribute("type"):
+                f.rel_type = family_rel.getAttribute("type")
+        elif len(family.getElementsByTagName('rel') ) > 1:
+            print("Error: More than one rel tag in a family")
+    
+        if len(family.getElementsByTagName('father') ) == 1:
+            family_father = family.getElementsByTagName('father')[0]
+            if family_father.hasAttribute("hlink"):
+                f.father = family_father.getAttribute("hlink")
+        elif len(family.getElementsByTagName('father') ) > 1:
+            print("Error: More than one father tag in a family")
+    
+        if len(family.getElementsByTagName('mother') ) == 1:
+            family_mother = family.getElementsByTagName('mother')[0]
+            if family_mother.hasAttribute("hlink"):
+                f.mother = family_mother.getAttribute("hlink")
+        elif len(family.getElementsByTagName('mother') ) > 1:
+            print("Error: More than one mother tag in a family")
+    
+        if len(family.getElementsByTagName('eventref') ) >= 1:
+            for i in range(len(family.getElementsByTagName('eventref') )):
+                family_eventref = family.getElementsByTagName('eventref')[i]
+                if family_eventref.hasAttribute("hlink"):
+                    f.eventref_hlink.append(family_eventref.getAttribute("hlink"))
+                if family_eventref.hasAttribute("role"):
+                    f.eventref_role.append(family_eventref.getAttribute("role"))
+    
+        if len(family.getElementsByTagName('childref') ) >= 1:
+            for i in range(len(family.getElementsByTagName('childref') )):
+                family_childref = family.getElementsByTagName('childref')[i]
+                if family_childref.hasAttribute("hlink"):
+                    f.childref_hlink.append(family_childref.getAttribute("hlink"))
+                    
+        f.save()
+        counter += 1
+        
+    msg = "Families stored: " + str(counter)
+        
+    return(msg)
+
+
+def handle_notes(collection):
+    # Get all the notes in the collection
+    notes = collection.getElementsByTagName("note")
+
+    print ("*****Notes*****")
+    counter = 0
+
+    # Print detail of each note
+    for note in notes:
+        
+        n = Note()
+
+        if note.hasAttribute("handle"):
+            n.handle = note.getAttribute("handle")
+        if note.hasAttribute("change"):
+            n.change = note.getAttribute("change")
+        if note.hasAttribute("id"):
+            n.id = note.getAttribute("id")
+        if note.hasAttribute("type"):
+            n.type = note.getAttribute("type")
+    
+        if len(note.getElementsByTagName('text') ) == 1:
+            note_text = note.getElementsByTagName('text')[0]
+            n.text = note_text.childNodes[0].data
+            
+        n.save()
+        counter += 1
+        
+    msg = "Notes stored: " + str(counter)
         
     return(msg)
 
@@ -532,9 +688,9 @@ def handle_people(collection, userid):
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
-        time.sleep(0.5)
+        # time.sleep(0.1)
         
-        msg = "People stored: " + str(counter)
+    msg = "People stored: " + str(counter)
         
     return(msg)
 
@@ -584,9 +740,97 @@ def handle_places(collection):
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
-        time.sleep(0.1)
+        # time.sleep(0.1)
         
-        msg = "Places stored: " + str(counter)
+    msg = "Places stored: " + str(counter)
+        
+    return(msg)
+
+
+def handle_repositories(collection):
+    # Get all the repositories in the collection
+    repositories = collection.getElementsByTagName("repository")
+    
+    print ("*****Repositories*****")
+    counter = 0
+    
+    # Print detail of each repository
+    for repository in repositories:
+        
+        r = Repository()
+
+        if repository.hasAttribute("handle"):
+            r.handle = repository.getAttribute("handle")
+        if repository.hasAttribute("change"):
+            r.change = repository.getAttribute("change")
+        if repository.hasAttribute("id"):
+            r.id = repository.getAttribute("id")
+    
+        if len(repository.getElementsByTagName('rname') ) == 1:
+            repository_rname = repository.getElementsByTagName('rname')[0]
+            r.rname = repository_rname.childNodes[0].data
+        elif len(repository.getElementsByTagName('rname') ) > 1:
+            print("Error: More than one rname in a repository")
+    
+        if len(repository.getElementsByTagName('type') ) == 1:
+            repository_type = repository.getElementsByTagName('type')[0]
+            r.type =  repository_type.childNodes[0].data
+        elif len(repository.getElementsByTagName('type') ) > 1:
+            print("Error: More than one type in a repository")
+    
+        r.save()
+        counter += 1
+        
+    msg = "Repositories stored: " + str(counter)
+        
+    return(msg)
+
+
+def handle_sources(collection):
+    # Get all the sources in the collection
+    sources = collection.getElementsByTagName("source")
+    
+    print ("*****Sources*****")
+    counter = 0
+    
+    # Print detail of each source
+    for source in sources:
+    
+        s = Source()
+
+        if source.hasAttribute("handle"):
+            s.handle = source.getAttribute("handle")
+        if source.hasAttribute("change"):
+            s.change = source.getAttribute("change")
+        if source.hasAttribute("id"):
+            s.id = source.getAttribute("id")
+    
+        if len(source.getElementsByTagName('stitle') ) == 1:
+            source_stitle = source.getElementsByTagName('stitle')[0]
+            s.stitle = source_stitle.childNodes[0].data
+        elif len(source.getElementsByTagName('stitle') ) > 1:
+            print("Error: More than one stitle in a source")
+    
+        if len(source.getElementsByTagName('noteref') ) == 1:
+            source_noteref = source.getElementsByTagName('noteref')[0]
+            if source_noteref.hasAttribute("hlink"):
+                s.noteref_hlink = source_noteref.getAttribute("hlink")
+        elif len(source.getElementsByTagName('noteref') ) > 1:
+            print("Error: More than one noteref in a source")
+    
+        if len(source.getElementsByTagName('reporef') ) == 1:
+            source_reporef = source.getElementsByTagName('reporef')[0]
+            if source_reporef.hasAttribute("hlink"):
+                s.reporef_hlink = source_reporef.getAttribute("hlink")
+            if source_reporef.hasAttribute("medium"):
+                s.reporef_medium = source_reporef.getAttribute("medium")
+        elif len(source.getElementsByTagName('reporef') ) > 1:
+            print("Error: More than one reporef in a source")
+    
+        s.save()
+        counter += 1
+        
+    msg = "Sources stored: " + str(counter)
         
     return(msg)
 
@@ -600,15 +844,26 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     collection = DOMTree.documentElement
     
     # Create User if needed
-    User.create_user(userid)
+    User(userid)
 
-    msg = ''
+    result = handle_notes(collection)
+    print("Notes stored: " + str(result))
+    result = handle_repositories(collection)
+    print("Repositories stored: " + str(result))
     result = handle_places(collection)
-    msg = msg + result + "\n"
+    print("Places stored: " + str(result))
+    result = handle_sources(collection)
+    print("Sources stored: " + str(result))
+    result = handle_citations(collection)
+    print("Citations stored: " + str(result))
     result = handle_events(collection, userid)
-    msg = msg + result + "\n"
+    print("Events stored: " + str(result))
     result = handle_people(collection, userid)
-    msg = msg + result + "\n"
+    print("People stored: " + str(result))
+    result = handle_families(collection)
+    print("Families stored: " + str(result))
+    
+    msg = "XML file stored to Neo4j database"
 
     return(msg)    
         

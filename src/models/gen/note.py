@@ -3,7 +3,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 @author: jm
 '''
+
 from sys import stderr
+from flask import g
+import models.dbutil
+
 
 class Note:
     """ Huomautus
@@ -27,14 +31,12 @@ class Note:
     @staticmethod
     def get_total():
         """ Tulostaa huomautusten määrän tietokannassa """
-        
-        global session
-                
+                        
         query = """
             MATCH (n:Note) RETURN COUNT(n)
             """
             
-        results =  session.run(query)
+        results =  g.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -54,8 +56,6 @@ class Note:
     def save(self):
         """ Tallettaa sen kantaan """
 
-        global session
-
         try:
             query = """
                 CREATE (n:Note) 
@@ -66,7 +66,7 @@ class Note:
                     n.text='{}'
                 """.format(self.handle, self.change, self.id, self.type, self.text)
                 
-            return session.run(query)
+            return g.driver.session().run(query)
         except Exception as err:
             print("Virhe {}: {}".format(err.__class__.__name__, str(err), file=stderr))
             raise SystemExit("Stopped due to errors")    # Stop processing
