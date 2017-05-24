@@ -843,28 +843,38 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     DOMTree = xml.dom.minidom.parse(open(pathname))
     collection = DOMTree.documentElement
     
+    msg = []
+    
     # Create User if needed
     user = User(userid)
     user.save()
 
-    result = handle_notes(collection)
-    print("Notes stored: " + str(result))
-    result = handle_repositories(collection)
-    print("Repositories stored: " + str(result))
-    result = handle_places(collection)
-    print("Places stored: " + str(result))
-    result = handle_sources(collection)
-    print("Sources stored: " + str(result))
-    result = handle_citations(collection)
-    print("Citations stored: " + str(result))
-    result = handle_events(collection, userid)
-    print("Events stored: " + str(result))
-    result = handle_people(collection, userid)
-    print("People stored: " + str(result))
-    result = handle_families(collection)
-    print("Families stored: " + str(result))
-    
-    msg = "XML file stored to Neo4j database"
+    msg.append("XML file stored to Neo4j database:")
 
+    result = handle_notes(collection)
+    msg.append(str(result))
+    print(str(result))
+    result = handle_repositories(collection)
+    msg.append(str(result))
+    print(str(result))
+    result = handle_places(collection)
+    msg.append(str(result))
+    print(str(result))
+    result = handle_sources(collection)
+    msg.append(str(result))
+    print(str(result))
+    result = handle_citations(collection)
+    msg.append(str(result))
+    print(str(result))
+    result = handle_events(collection, userid)
+    msg.append(str(result))
+    print(str(result))
+    result = handle_people(collection, userid)
+    msg.append(str(result))
+    print(str(result))
+    result = handle_families(collection)
+    msg.append(str(result))
+    print(str(result))
+    
     return(msg)    
         

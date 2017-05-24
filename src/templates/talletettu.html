@@ -14,7 +14,9 @@
       {% endif %}
     {% endwith %}
     {% if text %}
-    <p>{{text}}</p>
+	    {% for line in text %}
+	    	<p>{{line}}</p>
+	    {% endfor %}
     {% endif %}
     <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
 {% endblock %}
