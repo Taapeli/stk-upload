@@ -538,7 +538,7 @@ RETURN person, name
         try:
             handle = self.handle
             change = self.change
-            id = self.id
+            pid = self.id
             gender = self.gender
             query = """
 CREATE (p:Person) 
@@ -547,7 +547,7 @@ SET p.gramps_handle=$handle,
     p.id=$id, 
     p.gender=$gender"""
             g.driver.session().run(query, 
-               {"handle": handle, "change": change, "id": id, "gender": gender})
+               {"handle": handle, "change": change, "id": pid, "gender": gender})
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 

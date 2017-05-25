@@ -4,7 +4,7 @@ Created on 2.5.2017
 
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
-from datetime import date
+import datetime
 from sys import stderr
 from flask import g
 
@@ -188,11 +188,11 @@ RETURN ID(place) AS uniq_id"""
     def save(self, userid):
         """ Tallettaa sen kantaan """
 
-        today = date.today()
+        today = str(datetime.date.today())
         handle = self.handle
         change = self.change
-        id = self.id
-        type = self.type
+        eid = self.id
+        etype = self.type
         description = self.description
         edate = self.date
         attr_type = self.attr_type
@@ -209,8 +209,8 @@ SET e.gramps_handle=$handle,
     e.attr_type=$attr_type,
     e.attr_value=$attr_value"""
             g.driver.session().run(query, 
-               {"handle": handle, "change": change, "id": id, 
-                "type": type, "description": description, "date": edate, 
+               {"handle": handle, "change": change, "id": eid, 
+                "type": etype, "description": description, "date": edate, 
                 "attr_type": attr_type, "attr_value": attr_value})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
