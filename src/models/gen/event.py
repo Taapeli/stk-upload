@@ -185,7 +185,7 @@ RETURN ID(place) AS uniq_id"""
         return points
 
 
-    def save(self, userid):
+    def save(self, userid, tx):
         """ Tallettaa sen kantaan """
 
         today = str(datetime.date.today())
@@ -208,7 +208,7 @@ SET e.gramps_handle=$handle,
     e.date=$date,
     e.attr_type=$attr_type,
     e.attr_value=$attr_value"""
-            g.driver.session().run(query, 
+            tx.run(query, 
                {"handle": handle, "change": change, "id": eid, 
                 "type": etype, "description": description, "date": edate, 
                 "attr_type": attr_type, "attr_value": attr_value})
@@ -221,7 +221,7 @@ MATCH (u:User) WHERE u.userid=$userid
 MATCH (n:Event) WHERE n.gramps_handle=$handle
 MERGE (u)-[r:REVISION]->(n)
 SET r.date=$date"""
-            g.driver.session().run(query, 
+            tx.run(query, 
                {"userid": userid, "handle": handle, "date": today})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
@@ -234,7 +234,7 @@ SET r.date=$date"""
 MATCH (n:Event) WHERE n.gramps_handle=$handle
 MATCH (m:Place) WHERE m.gramps_handle=$place_hlink
 MERGE (n)-[r:PLACE]->(m)"""  
-                g.driver.session().run(query, 
+                tx.run(query, 
                {"handle": handle, "place_hlink": place_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
@@ -247,7 +247,7 @@ MERGE (n)-[r:PLACE]->(m)"""
 MATCH (n:Event) WHERE n.gramps_handle=$handle
 MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
 MERGE (n)-[r:CITATION]->(m)"""                       
-                g.driver.session().run(query, 
+                tx.run(query, 
                {"handle": handle, "citationref_hlink": citationref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)

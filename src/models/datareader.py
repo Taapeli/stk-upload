@@ -368,7 +368,7 @@ def get_families_data_by_id(uniq_id):
     return (p, families)
 
 
-def handle_citations(collection):
+def handle_citations(collection, tx):
     # Get all the citations in the collection
     citations = collection.getElementsByTagName("citation")
     
@@ -420,7 +420,7 @@ def handle_citations(collection):
         elif len(citation.getElementsByTagName('sourceref') ) > 1:
             print("Error: More than one sourceref tag in a citation")
                 
-        c.save()
+        c.save(tx)
         counter += 1
         
     msg = "Citations stored: " + str(counter)
@@ -429,7 +429,7 @@ def handle_citations(collection):
 
 
 
-def handle_events(collection, userid):
+def handle_events(collection, userid, tx):
     # Get all the events in the collection
     events = collection.getElementsByTagName("event")
     
@@ -498,7 +498,7 @@ def handle_events(collection, userid):
         elif len(event.getElementsByTagName('citationref') ) > 1:
             print("Error: More than one citationref tag in an event")
                 
-        e.save(userid)
+        e.save(userid, tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
@@ -509,7 +509,7 @@ def handle_events(collection, userid):
     return(msg)
 
 
-def handle_families(collection):
+def handle_families(collection, tx):
     # Get all the families in the collection
     families = collection.getElementsByTagName("family")
     
@@ -563,7 +563,7 @@ def handle_families(collection):
                 if family_childref.hasAttribute("hlink"):
                     f.childref_hlink.append(family_childref.getAttribute("hlink"))
                     
-        f.save()
+        f.save(tx)
         counter += 1
         
     msg = "Families stored: " + str(counter)
@@ -571,7 +571,7 @@ def handle_families(collection):
     return(msg)
 
 
-def handle_notes(collection):
+def handle_notes(collection, tx):
     # Get all the notes in the collection
     notes = collection.getElementsByTagName("note")
 
@@ -596,7 +596,7 @@ def handle_notes(collection):
             note_text = note.getElementsByTagName('text')[0]
             n.text = note_text.childNodes[0].data
             
-        n.save()
+        n.save(tx)
         counter += 1
         
     msg = "Notes stored: " + str(counter)
@@ -604,7 +604,7 @@ def handle_notes(collection):
     return(msg)
 
 
-def handle_people(collection, userid):
+def handle_people(collection, userid, tx):
     # Get all the people in the collection
     people = collection.getElementsByTagName("person")
     
@@ -684,7 +684,7 @@ def handle_people(collection, userid):
                 if person_citationref.hasAttribute("hlink"):
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     
-        p.save(userid)
+        p.save(userid, tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
@@ -696,7 +696,7 @@ def handle_people(collection, userid):
 
 
 
-def handle_places(collection):
+def handle_places(collection, tx):
     # Get all the places in the collection
     places = collection.getElementsByTagName("placeobj")
     
@@ -736,7 +736,7 @@ def handle_places(collection):
         elif len(placeobj.getElementsByTagName('placeref') ) > 1:
             print("Error: More than one placeref in a place")
                 
-        place.save()
+        place.save(tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
@@ -747,17 +747,17 @@ def handle_places(collection):
     return(msg)
 
 
-def handle_repositories(collection):
+def handle_repositories(collection, tx):
     # Get all the repositories in the collection
     repositories = collection.getElementsByTagName("repository")
     
     print ("*****Repositories*****")
     counter = 0
+        
+    r = Repository()
     
     # Print detail of each repository
     for repository in repositories:
-        
-        r = Repository()
 
         if repository.hasAttribute("handle"):
             r.handle = repository.getAttribute("handle")
@@ -778,15 +778,15 @@ def handle_repositories(collection):
         elif len(repository.getElementsByTagName('type') ) > 1:
             print("Error: More than one type in a repository")
     
-        r.save()
+        r.save(tx)
         counter += 1
-        
+                
     msg = "Repositories stored: " + str(counter)
         
     return(msg)
 
 
-def handle_sources(collection):
+def handle_sources(collection, tx):
     # Get all the sources in the collection
     sources = collection.getElementsByTagName("source")
     
@@ -827,7 +827,7 @@ def handle_sources(collection):
         elif len(source.getElementsByTagName('reporef') ) > 1:
             print("Error: More than one reporef in a source")
     
-        s.save()
+        s.save(tx)
         counter += 1
         
     msg = "Sources stored: " + str(counter)
@@ -851,28 +851,45 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
 
     msg.append("XML file stored to Neo4j database:")
 
-    result = handle_notes(collection)
+    
+    tx = user.beginTransaction()
+    result = handle_notes(collection, tx)
+    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    result = handle_repositories(collection)
+    tx = user.beginTransaction()
+    result = handle_repositories(collection, tx)
+    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    result = handle_places(collection)
+    tx = user.beginTransaction()
+    result = handle_places(collection, tx)
+    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    result = handle_sources(collection)
+    tx = user.beginTransaction()
+    result = handle_sources(collection, tx)
+    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    result = handle_citations(collection)
+    tx = user.beginTransaction()
+    result = handle_citations(collection, tx)
+    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    result = handle_events(collection, userid)
+    tx = user.beginTransaction()
+    result = handle_events(collection, userid, tx)
+    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    result = handle_people(collection, userid)
+    tx = user.beginTransaction()
+    result = handle_people(collection, userid, tx)
+    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    result = handle_families(collection)
+    tx = user.beginTransaction()
+    result = handle_families(collection, tx)
+    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
     

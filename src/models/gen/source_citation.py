@@ -61,7 +61,7 @@ class Citation:
         return True
 
 
-    def save(self):
+    def save(self, tx):
         """ Tallettaa sen kantaan """
 
         try:
@@ -74,7 +74,7 @@ class Citation:
                     n.confidence='{}'
                 """.format(self.handle, self.change, self.id, self.confidence)
                 
-            g.driver.session().run(query)
+            tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -87,7 +87,7 @@ class Citation:
                     MERGE (n)-[r:NOTE]->(m)
                      """.format(self.handle, self.noteref_hlink)
                                  
-                g.driver.session().run(query)
+                tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -100,7 +100,7 @@ class Citation:
                     MERGE (n)-[r:SOURCE]->(m)
                      """.format(self.handle, self.sourceref_hlink)
                                  
-                g.driver.session().run(query)
+                tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
@@ -171,7 +171,7 @@ class Repository:
         return True
 
 
-    def save(self):
+    def save(self, tx):
         """ Tallettaa sen kantaan """
 
         try:
@@ -184,9 +184,10 @@ class Repository:
                     r.type='{}'
                 """.format(self.handle, self.change, self.id, self.rname, self.type)
                 
-            g.driver.session().run(query)
+            tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
+            
             
         return
 
@@ -255,7 +256,7 @@ class Source:
         return True
         
 
-    def save(self):
+    def save(self, tx):
         """ Tallettaa sen kantaan """
 
         try:
@@ -267,7 +268,7 @@ class Source:
                     s.stitle='{}'
                 """.format(self.handle, self.change, self.id, self.stitle)
                 
-            g.driver.session().run(query)
+            tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
  
@@ -280,7 +281,7 @@ class Source:
                     MERGE (n)-[r:NOTE]->(m)
                      """.format(self.handle, self.noteref_hlink)
                                  
-                g.driver.session().run(query)
+                tx.run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
    
@@ -293,7 +294,7 @@ class Source:
                     MERGE (n)-[r:REPOSITORY]->(m)
                      """.format(self.handle, self.reporef_hlink)
                                  
-                g.driver.session().run(query)
+                tx.run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
                 
@@ -305,7 +306,7 @@ class Source:
                     SET r.medium='{}'
                      """.format(self.handle, self.reporef_medium)
                                  
-                g.driver.session().run(query)
+                tx.run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
                 

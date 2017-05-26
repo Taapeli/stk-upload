@@ -53,7 +53,7 @@ class Note:
         return True
 
 
-    def save(self):
+    def save(self, tx):
         """ Tallettaa sen kantaan """
 
         try:
@@ -66,7 +66,7 @@ class Note:
                     n.text='{}'
                 """.format(self.handle, self.change, self.id, self.type, self.text)
                 
-            return g.driver.session().run(query)
+            return tx.run(query)
         except Exception as err:
             print("Virhe {}: {}".format(err.__class__.__name__, str(err), file=stderr))
             raise SystemExit("Stopped due to errors")    # Stop processing

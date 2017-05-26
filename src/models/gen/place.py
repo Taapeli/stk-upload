@@ -101,7 +101,7 @@ class Place:
         return True
 
 
-    def save(self):
+    def save(self, tx):
         """ Tallettaa sen kantaan """
         if len(self.pname) >= 1:
             p_pname = self.pname
@@ -121,7 +121,7 @@ class Place:
                     p.pname='{}'
                 """.format(self.handle, self.change, self.id, self.type, p_pname)
                 
-            g.driver.session().run(query)
+            tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -134,7 +134,7 @@ class Place:
                     MERGE (n)-[r:HIERARCY]->(m)
                      """.format(self.handle, self.placeref_hlink)
                                  
-                g.driver.session().run(query)
+                tx.run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
             

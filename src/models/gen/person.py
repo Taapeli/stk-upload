@@ -524,7 +524,7 @@ RETURN person, name
         return points
 
 
-    def save(self, userid):
+    def save(self, userid, tx):
         """ Tallettaa henkilön sekä mahdollisesti viitatut nimet, tapahtumat 
             ja sitaatit kantaan 
         """
@@ -546,7 +546,7 @@ SET p.gramps_handle=$handle,
     p.change=$change, 
     p.id=$id, 
     p.gender=$gender"""
-            g.driver.session().run(query, 
+            tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "gender": gender})
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
@@ -558,7 +558,7 @@ MATCH (u:User)   WHERE u.userid=$userid
 MATCH (n:Person) WHERE n.gramps_handle=$handle
 MERGE (u)-[r:REVISION]->(n)
 SET r.date=$date"""
-            g.driver.session().run(query, 
+            tx.run(query, 
                {"userid": userid, "handle": handle, "date": today})
         except Exception as err:
             print("Virhe (Person.save:User): {0}".format(err), file=stderr)
@@ -586,7 +586,7 @@ SET m.alt=$alt,
 WITH m
 MATCH (n:Person) WHERE n.gramps_handle=$handle
 MERGE (n)-[r:NAME]->(m)"""
-                    g.driver.session().run(query, 
+                    tx.run(query, 
                        {"alt": p_alt, "type": p_type, "firstname": p_firstname, 
                         "refname": p_refname, "surname": p_surname, 
                         "suffix": p_suffix, "handle": handle})
@@ -612,7 +612,7 @@ CREATE (n)-[r:EVENT {role: {role}}]->
                           "e_date": e.date,
                           "e_descr": e.description}
                 try:
-                    g.driver.session().run(query, values)
+                    tx.run(query, values)
                 except Exception as err:
                     print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
 
@@ -625,7 +625,7 @@ CREATE (n)-[r:EVENT {role: {role}}]->
 MATCH (n:Person) WHERE n.gramps_handle=$handle
 MATCH (m:Event)  WHERE m.gramps_handle=$eventref_hlink
 MERGE (n)-[r:EVENT]->(m)"""
-                    g.driver.session().run(query, 
+                    tx.run(query, 
                        {"handle": handle, "eventref_hlink": eventref_hlink})
                 except Exception as err:
                     print("Virhe (Person.save:Event 1): {0}".format(err), file=stderr)
@@ -636,7 +636,7 @@ MERGE (n)-[r:EVENT]->(m)"""
 MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE n.gramps_handle=$handle AND m.gramps_handle=$eventref_hlink
 SET r.role =$role"""
-                    g.driver.session().run(query, 
+                    tx.run(query, 
                        {"handle": handle, "eventref_hlink": eventref_hlink, "role": role})
                 except Exception as err:
                     print("Virhe (Person.save:Event 2): {0}".format(err), file=stderr)
@@ -663,7 +663,7 @@ SET r.role =$role"""
 MATCH (n:Person)   WHERE n.gramps_handle=$handle
 MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
 MERGE (n)-[r:CITATION]->(m)"""
-                g.driver.session().run(query, 
+                tx.run(query, 
                        {"handle": handle, "citationref_hlink": citationref_hlink})
             except Exception as err:
                 print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)

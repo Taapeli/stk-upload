@@ -107,3 +107,20 @@ ORDER BY u.userid
             """
         return g.driver.session().run(query)
 
+                
+    
+    @staticmethod       
+    def beginTransaction():
+        """ Aloittaa transaction """
+                        
+        tx = g.driver.session().begin_transaction()
+
+        return tx
+
+
+    @staticmethod       
+    def endTransaction(tx):
+        """ Lopettaa transaction """
+                        
+        tx.commit()
+

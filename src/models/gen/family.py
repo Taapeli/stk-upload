@@ -235,7 +235,7 @@ RETURN ID(person) AS mother"""
         return True
 
 
-    def save(self):
+    def save(self, tx):
         """ Tallettaa sen kantaan """
 
         try:
@@ -247,7 +247,7 @@ RETURN ID(person) AS mother"""
                     n.rel_type='{}'
                 """.format(self.handle, self.change, self.id, self.rel_type)
                 
-            g.driver.session().run(query)
+            tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -260,7 +260,7 @@ RETURN ID(person) AS mother"""
                     MERGE (n)-[r:FATHER]->(m)
                      """.format(self.handle, self.father)
                                  
-                g.driver.session().run(query)
+                tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -273,7 +273,7 @@ RETURN ID(person) AS mother"""
                     MERGE (n)-[r:MOTHER]->(m)
                      """.format(self.handle, self.mother)
                                  
-                g.driver.session().run(query)
+                tx.run(query)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -287,7 +287,7 @@ RETURN ID(person) AS mother"""
                         MERGE (n)-[r:EVENT]->(m)
                          """.format(self.handle, self.eventref_hlink[i])
                                  
-                    g.driver.session().run(query)
+                    tx.run(query)
                 except Exception as err:
                     print("Virhe: {0}".format(err), file=stderr)
                 
@@ -298,7 +298,7 @@ RETURN ID(person) AS mother"""
                         SET r.role ='{}'
                          """.format(self.handle, self.eventref_hlink[i], self.eventref_role[i])
                                  
-                    g.driver.session().run(query)
+                    tx.run(query)
                 except Exception as err:
                     print("Virhe: {0}".format(err), file=stderr)
   
@@ -313,7 +313,7 @@ RETURN ID(person) AS mother"""
                         MERGE (n)<-[s:FAMILY]-(m)
                          """.format(self.handle, self.childref_hlink[i])
                                  
-                    g.driver.session().run(query)
+                    tx.run(query)
                 except Exception as err:
                     print("Virhe: {0}".format(err), file=stderr)
             
