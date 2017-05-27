@@ -339,6 +339,7 @@ def get_families_data_by_id(uniq_id):
     p = Person()
     p.uniq_id = uniq_id
     p.get_person_and_name_data_by_id()
+        
     if p.gender == 'M':
         result = p.get_his_families_by_id()
     else:
@@ -348,6 +349,23 @@ def get_families_data_by_id(uniq_id):
         f = Family_for_template()
         f.uniq_id = record['uniq_id']
         f.get_family_data_by_id()
+    
+        result = p.get_parentin_id()
+        for record in result:
+            parents_hlink = record["parentin_hlink"]
+            pf = Family()
+            pf.uniq_id = parents_hlink
+            pf.get_family_data_by_id()
+            
+            father = Person()
+            father.uniq_id = pf.father
+            father.get_person_and_name_data_by_id()
+            f.father_data = father
+            
+            mother = Person()
+            mother.uniq_id = pf.mother
+            mother.get_person_and_name_data_by_id()
+            f.mother_data = mother
         
         spouse = Person()
         if p.gender == 'M':
@@ -753,11 +771,11 @@ def handle_repositories(collection, tx):
     
     print ("*****Repositories*****")
     counter = 0
-        
-    r = Repository()
     
     # Print detail of each repository
     for repository in repositories:
+        
+        r = Repository()
 
         if repository.hasAttribute("handle"):
             r.handle = repository.getAttribute("handle")
