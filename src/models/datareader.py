@@ -156,7 +156,7 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
         #Palauttaa riveillä listan muuttujia:
         #n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
         #  0      1            2           3       4      5        6
-        # 146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]	
+        # 146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]    
 
         pid = rec['n.id']
         p = Person(pid)
@@ -205,6 +205,43 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
         logging.info("lue_henkilot: {} henkiloä".format(nro))
         #print ("Lue_henkilot:\n", retList[0])
     logging.debug("TIME lue_henkilot {} sek".format(time.time()-t0))
+
+    return (persons)
+
+
+def lue_henkilot2():
+    """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
+        
+        Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
+        tapahtuman muuttujalistoja
+    """
+    
+    persons = []
+    result = Person.get_person_events2()
+    nro = 0
+    for record in result:
+        nro = nro + 1
+
+        pid = record['id']
+        p = Person()
+        p.uniq_id = pid
+        pname = Name()
+        if record['firstname']:
+            pname.firstname = record['firstname']
+        if record['surname']:
+            pname.surname = record['surname']
+        p.name.append(pname)
+
+        for event in record['events']:
+ 
+            event_type = event[0]
+            if event_type:
+                e = Event()
+                e.type = event_type
+                e.date = event[1]
+                p.events.append(e)
+ 
+        persons.append(p)
 
     return (persons)
 

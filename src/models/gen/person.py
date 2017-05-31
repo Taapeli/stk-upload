@@ -296,6 +296,21 @@ RETURN person, name
         return g.driver.session().run(query)
 
 
+    @staticmethod       
+    def get_person_events2 ():
+        """ Voidaan lukea henkilöitä tapahtumineen kannasta
+        """
+
+        query = """
+ MATCH (person:Person)-->(name:Name)
+ OPTIONAL MATCH (person)-[r]->(event:Event)
+ RETURN ID(person) AS id, name.firstname AS firstname, name.surname AS surname,
+  COLLECT([event.type, event.date]) AS events
+ ORDER BY name.surname, name.firstname"""
+                
+        return g.driver.session().run(query)
+
+
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
         key = "{}:{}:{}:{}".format(self.name.firstname, self.name.last, 

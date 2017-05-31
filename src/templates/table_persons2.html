@@ -1,0 +1,40 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+<script src="/static/infobox.js"></script>
+
+<h2>Henkilöluettelo</h2>
+<p>Näytetään henkilöitä</p>
+
+<section id="lista">
+<table>
+    <tr><th>uniq_id</th>
+        <th>name</th>
+        <th>type</th>
+        <th>date</th>
+    </tr>
+{% if persons %}
+    {% for p in persons %}
+    	{% if p.events %}
+        	{% for event in p.events %}
+		        <tr>
+		            <td>{{p.uniq_id}}</td>
+		            <td>{{p.name[0].firstname}} <b> {{p.name[0].surname}}</b></td>
+		            		 <td>{{event.type}}</td>
+		            		 <td>{{event.date}}</td>
+			{% endfor %}
+		{% else %}
+	        <tr>
+	            <td>{{p.uniq_id}}</td>
+	            <td>{{p.name[0].firstname}} <b> {{p.name[0].surname}}</b></td>
+	            <td>-</td><td>-</td>
+		{% endif %}
+        </tr>
+    {% endfor %}
+{% else %}
+        <tr><td colspan="5">Ei tietoja</td></tr>
+{% endif %}
+</table>
+{% endblock %}
