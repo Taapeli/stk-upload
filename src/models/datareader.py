@@ -209,7 +209,7 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
     return (persons)
 
 
-def lue_henkilot2():
+def lue_henkilot2(uniq_id=None):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
         Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
@@ -217,7 +217,7 @@ def lue_henkilot2():
     """
     
     persons = []
-    result = Person.get_person_events2()
+    result = Person.get_person_events2(uniq_id)
     nro = 0
     for record in result:
         nro = nro + 1
@@ -234,11 +234,12 @@ def lue_henkilot2():
 
         for event in record['events']:
  
-            event_type = event[0]
+            e = Event()
+            e.uniq_id = event[0]
+            event_type = event[1]
             if event_type:
-                e = Event()
                 e.type = event_type
-                e.date = event[1]
+                e.date = event[2]
                 p.events.append(e)
  
         persons.append(p)

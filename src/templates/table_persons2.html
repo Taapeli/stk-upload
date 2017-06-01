@@ -20,7 +20,7 @@
     	{% if p.events %}
         	{% for event in p.events %}
 		        <tr>
-		            <td>{{p.uniq_id}}</td>
+		            <td><a href="/poimi/uniq_id={{p.uniq_id}}">{{p.uniq_id}}</a></td>
 		            <td>{{p.name[0].firstname}} <b> {{p.name[0].surname}}</b></td>
 		            		 <td>{{event.type}}</td>
 		            		 <td>{{event.date}}</td>

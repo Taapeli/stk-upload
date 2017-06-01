@@ -297,16 +297,21 @@ RETURN person, name
 
 
     @staticmethod       
-    def get_person_events2 ():
+    def get_person_events2 (uniq_id):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta
         """
 
+        if uniq_id:
+            where = "WHERE ID(person)={} ".format(uniq_id)
+        else:
+            where = ''
+        
         query = """
- MATCH (person:Person)-->(name:Name)
+ MATCH (person:Person)-->(name:Name) {0}
  OPTIONAL MATCH (person)-[r]->(event:Event)
  RETURN ID(person) AS id, name.firstname AS firstname, name.surname AS surname,
-  COLLECT([event.type, event.date]) AS events
- ORDER BY name.surname, name.firstname"""
+  COLLECT([ID(event), event.type, event.date]) AS events
+ ORDER BY name.surname, name.firstname""".format(where)
                 
         return g.driver.session().run(query)
 

@@ -233,6 +233,9 @@ def nayta_ehdolla(ehto):
             persons = models.datareader.lue_henkilot(names=value)
             return render_template("join_persons.html", 
                                    persons=persons, pattern=value)
+        if key == 'uniq_id':
+            persons = models.datareader.lue_henkilot2(uniq_id=value)            
+            return render_template("person2.html", persons=persons)
         else:
             raise(KeyError("Vain oid:llä voi hakea"))
     except KeyError as e:
