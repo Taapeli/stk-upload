@@ -56,4 +56,4 @@ def fullname(name):
     if not name:
         return ''
     else:
-        return os.path.join(app.config['UPLOAD_FOLDER'], name)
+        return os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(name))

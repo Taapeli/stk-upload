@@ -27,14 +27,14 @@ def index():
 
 
 @app.route('/lataa1a', methods=['POST'])
-def lataa1a(): 
+def lataa1a():
     """ Lataa tiedoston ja näyttää sen """
     try:
         infile = request.files['filenm']
         logging.debug('Ladataan tiedosto ' + infile.filename)
         models.loadfile.upload_file(infile)
     except Exception as e:
-        return render_template("virhe_lataus.html", text=str(e))
+        return redirect(url_for('virhesivu', code=415, text=str(e)))
 
     return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
 

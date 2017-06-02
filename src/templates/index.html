@@ -3,26 +3,28 @@
 {% block title %}Alkusivu{% endblock %}
 {% block body %}
 {{ super() }}
-<div>
-    <h2>Versio 1 – tiedostojen lataus</h2>
-    <p>Esiversio lataa tiedoston ja näyttää sen <em>(ei tietokantakäsittelyä)</em></p>
-    <form action="/lataa1a" method="post" enctype="multipart/form-data">
-        <input type="file" name="filenm" />
-        <input type="submit" value="Lataa" />
-    </form>
-</div>
-<div>
-    <h3>Versio 1b</h3>
-    <p>Esiversio lataa tuomiokirjojen henkilötiedoston olioiksi ja näyttää ne taulukkona 
-       <em>(ei tietokantakäsittelyä)</em></p>
-    <form action="/lataa1b" method="post" enctype="multipart/form-data">
-        <input type="file" name="filenm" />
-        <input type="submit" value="Lataa" />
-    </form>
-</div>
+
+<details style="margin-left:40pt; background-color:lightgray; width:410pt">
+	<summary><b>Versio 1 – tiedostojen lataus</b> (ilman tietokantaa)</summary>
+    <div>
+        <h3>Versio 1 – tiedostojen lataus</h3>
+        <p>Esiversio lataa tiedoston ja näyttää sen <em>(ei tietokantakäsittelyä)</em></p>
+        <form action="/lataa1a" method="post" enctype="multipart/form-data">
+            <input type="file" name="filenm" />
+            <input type="submit" value="Lataa" />
+        </form>
+        <h3>Versio 1b</h3>
+        <p>Esiversio lataa tuomiokirjojen henkilötiedoston olioiksi ja näyttää ne taulukkona 
+           <em>(ei tietokantakäsittelyä)</em></p>
+        <form action="/lataa1b" method="post" enctype="multipart/form-data">
+            <input type="file" name="filenm" />
+            <input type="submit" value="Lataa" />
+        </form>
+    </div>
+</details>
 <div>
     <form action="/lataa" method="post" enctype="multipart/form-data">
-    <h2>Versio 2 – tietokantaan talletus</h2>
+    <h3>Versio 2 – tietokantaan talletus</h3>
     <p>Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset, yhteenvetotilasto</p>
     <div style="height: 90pt">
         <div style="float: left; width: 350px;"><input type="file" name="filenm" />
@@ -53,9 +55,13 @@
         Anna sukunimen alkuosa: <input type="text" name="names"><input type="submit" value="Näytä"/></p>
         </form>
     </li>
-    <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> koko kanta
-        <i>(Mitään kysymättä!)</i></li>
-    <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
-    </ul>
 </div>
+<details style="background-color:lightgray; width:450pt">
+    <summary><b>Hallintatoiminnot</b></summary>
+    <ul>
+	    <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> koko kanta
+	        <i>(Mitään kysymättä!)</i></li>
+	    <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
+    </ul>
+</details>
 {% endblock %}
