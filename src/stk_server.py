@@ -144,6 +144,16 @@ def nayta_henkilot(subj):
             "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
 
 
+@app.route('/aseta/refnames')
+def aseta_refnames(): 
+    """ referenssinimien asettaminen henkilöille """
+    models.dbutil.connect_db()
+    dburi = models.dbutil.connect_db()
+    
+    message = models.datareader.set_refnames()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+
 @app.route('/lista/refnimet', defaults={'reftype': None})
 @app.route('/lista/refnimet/<string:reftype>')
 def nayta_refnimet(reftype): 

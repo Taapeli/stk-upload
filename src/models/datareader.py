@@ -228,6 +228,8 @@ def lue_henkilot2(uniq_id=None):
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
+        if record['refname']:
+            pname.refname = record['refname']
         if record['surname']:
             pname.surname = record['surname']
         p.name.append(pname)
@@ -245,6 +247,40 @@ def lue_henkilot2(uniq_id=None):
         persons.append(p)
 
     return (persons)
+
+
+def set_refnames():
+    """ Asettaa henkilöille refnamet
+    """
+    
+    message = []
+    counter = 0
+    result = Name.get_all_firstnames()
+    for record1 in result:
+        firstname = record1["firstname"]
+        
+        ref_name = ''
+        names = firstname.split(" ")
+        for name in names:
+            record2 = None # If there is no refname
+            result = Refname.get_refname(name)
+            
+            for record2 in result:
+                bname = record2["bname"]
+                ref_name = ref_name + bname + " "
+                
+            if not record2:
+                ref_name = ref_name + name + " "
+                        
+        n = Name()
+        n.firstname = firstname
+        n.refname = ref_name
+        n.set_refname()
+        counter += 1
+        
+    text = "Number of refnames set: " + str(counter)
+    message.append(text)
+    return (message)
 
 
 def lue_refnames():

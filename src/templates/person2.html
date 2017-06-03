@@ -15,6 +15,10 @@
                 <div class="col1">Nimi</div>
                 <div class="col2">{{p.name[0].firstname}} <b>{{p.name[0].surname}}</b></div>
         </li>
+        <li class="itemrow">
+                <div class="col1">Referenssinimi</div>
+                <div class="col2">{{p.name[0].refname}}</div>
+        </li>
      </ol>
     {% if p.events %}
     <h4>Tapahtumat</h4>
