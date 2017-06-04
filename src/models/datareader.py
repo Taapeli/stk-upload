@@ -255,6 +255,9 @@ def set_refnames():
     
     message = []
     counter = 0
+    
+    tx = User.beginTransaction()
+
     result = Name.get_all_firstnames()
     for record1 in result:
         firstname = record1["firstname"]
@@ -275,9 +278,10 @@ def set_refnames():
         n = Name()
         n.firstname = firstname
         n.refname = ref_name
-        n.set_refname()
+        n.set_refname(tx)
         counter += 1
         
+    User.endTransaction(tx)
     text = "Number of refnames set: " + str(counter)
     message.append(text)
     return (message)

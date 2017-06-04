@@ -780,11 +780,11 @@ class Name:
             """
         return g.driver.session().run(query)
     
-    def set_refname(self):
+    def set_refname(self, tx):
         """Asetetaan etunimen referenssinimi """
         
         query = """
             MATCH (n:Name) WHERE n.firstname='{}' 
             SET n.refname='{}'
             """.format(self.firstname, self.refname)
-        return g.driver.session().run(query)
+        return tx.run(query)
