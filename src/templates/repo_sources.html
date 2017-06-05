@@ -1,0 +1,40 @@
+{# _myapp/templates/person.html_ #}
+{% extends "layout.html" %}
+{% block title %}Repositoryn tiedot{% endblock %}
+{% block body %}
+{{ super() }}
+
+{% for r in repositories %}
+    <h2>Repository</h2>
+    <ol id="itemlist">
+        <li class="itemrow">
+                <div class="col1">Tunniste</div>
+                <div class="col2">{{r.uniq_id}}</div>
+        </li>
+        <li class="itemrow">
+                <div class="col1">Nimi</div>
+                <div class="col2">{{r.rname}}</div>
+        </li>
+        <li class="itemrow">
+                <div class="col1">Type</div>
+                <div class="col2">{{r.type}}</div>
+        </li>
+     </ol>
+    {% if r.sources %}
+    <h4>Sources</h4>
+    <ol class="num">
+        {% for s in r.sources %}
+        <li><div class="itemrow">
+                <div class="col1">Tunniste<br />Title<br />Medium<br /><br /></div>
+                <div class="col3"><span class="id">{{s.uniq_id}}</span><br />
+                	{{s.stitle}}<br />
+                    {{s.reporef_medium}}<br /><br /></div>
+            </div>
+        </li>
+        {% endfor %}
+    </ol>
+    {% endif %}
+{% endfor %}
+    <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
+
+{% endblock %}

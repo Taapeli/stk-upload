@@ -68,6 +68,12 @@ li.itemrow {
     display: inline-block;
     width: 200pt;
 }
+.itemrow div.col3 {
+    display: inline-block;
+    width: 250pt;
+    vertical-align:top;
+    padding-right: 5pt;
+}
 .itemrow div.also { 
     display: inline-block;
     font-style: italic;

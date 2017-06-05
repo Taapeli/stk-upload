@@ -124,6 +124,7 @@ class Repository:
         self.handle = ''
         self.change = ''
         self.id = ''
+        self.sources = []   # For creating display sets
         
     
     @staticmethod       
@@ -145,6 +146,26 @@ class Repository:
                 RETURN repo
             """.format(rname)
         return  g.driver.session().run(query)
+    
+    
+    @staticmethod       
+    def get_repository_source (uniq_id):
+        """ Voidaan lukea repositoreja sourceneen kannasta
+        """
+
+        if uniq_id:
+            where = "WHERE ID(repository)={} ".format(uniq_id)
+        else:
+            where = ''
+        
+        query = """
+ MATCH (repository:Repository)<-[r]-(source:Source) {0}
+ RETURN ID(repository) AS id, repository.rname AS rname, 
+   repository.type AS type,
+  COLLECT([ID(source), source.stitle, r.medium]) AS sources
+ ORDER BY repository.rname""".format(where)
+                
+        return g.driver.session().run(query)
                 
     
     @staticmethod       

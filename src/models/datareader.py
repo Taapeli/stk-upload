@@ -218,10 +218,7 @@ def lue_henkilot2(uniq_id=None):
     
     persons = []
     result = Person.get_person_events2(uniq_id)
-    nro = 0
     for record in result:
-        nro = nro + 1
-
         pid = record['id']
         p = Person()
         p.uniq_id = pid
@@ -372,6 +369,35 @@ def lue_typed_refnames(reftype):
     logging.info("TIME get_named_refnames {} sek".format(time.time()-t0))
 
     return (namelist)
+
+
+def read_repositories(uniq_id=None):
+    """ Lukee tietokannasta Repository- ja Source- objektit näytettäväksi
+
+    """
+    
+    repositories = []
+    result = Repository.get_repository_source(uniq_id)
+    for record in result:
+        pid = record['id']
+        r = Repository()
+        r.uniq_id = pid
+        if record['rname']:
+            r.rname = record['rname']
+        if record['type']:
+            r.type = record['type']
+
+        for source in record['sources']:
+ 
+            s = Source()
+            s.uniq_id = source[0]
+            s.stitle = source[1]
+            s.reporef_medium = source[2]
+            r.sources.append(s)
+ 
+        repositories.append(r)
+
+    return (repositories)
 
 
 def get_people_by_surname(surname):

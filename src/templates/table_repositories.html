@@ -1,0 +1,29 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+<script src="/static/infobox.js"></script>
+
+<h2>Repositoryluettelo</h2>
+<p>Näytetään repositories</p>
+
+<section id="lista">
+<table>
+    <tr><th>uniq_id</th>
+        <th>rname</th>
+        <th>type</th>
+    </tr>
+{% if repositories %}
+    {% for r in repositories %}
+	    <tr>
+	        <td><a href="/poimi/repo_uniq_id={{r.uniq_id}}">{{r.uniq_id}}</a></td>
+	        <td>{{r.rname}}</td>
+    		<td>{{r.type}}</td>
+        </tr>
+    {% endfor %}
+{% else %}
+        <tr><td colspan="5">Ei tietoja</td></tr>
+{% endif %}
+</table>
+{% endblock %}
