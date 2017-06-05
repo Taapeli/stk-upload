@@ -160,6 +160,7 @@ class Repository:
         
         query = """
  MATCH (repository:Repository)<-[r]-(source:Source) {0}
+   WITH repository, r, source ORDER BY source.stitle
  RETURN ID(repository) AS id, repository.rname AS rname, 
    repository.type AS type,
   COLLECT([ID(source), source.stitle, r.medium]) AS sources
