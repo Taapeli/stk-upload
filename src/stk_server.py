@@ -140,6 +140,10 @@ def nayta_henkilot(subj):
         repositories = models.datareader.read_repositories()
         return render_template("table_repositories.html", 
                                repositories=repositories)
+    elif subj == 'sources':
+        sources = models.datareader.read_sources()
+        return render_template("table_sources.html", 
+                               sources=sources)
     elif subj == "users":
         lista = models.gen.user.User.get_all()
         return render_template("table_users.html", users=lista)
@@ -251,6 +255,10 @@ def nayta_ehdolla(ehto):
             repositories = models.datareader.read_repositories(uniq_id=value)
             return render_template("repo_sources.html", 
                                    repositories=repositories)
+        elif key == 'source_uniq_id':
+            sources = models.datareader.read_sources(uniq_id=value)
+            return render_template("source_citations.html", 
+                                   sources=sources)
         elif key == 'uniq_id':
             persons = models.datareader.lue_henkilot2(uniq_id=value)            
             return render_template("person2.html", persons=persons)

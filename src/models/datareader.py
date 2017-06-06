@@ -400,6 +400,34 @@ def read_repositories(uniq_id=None):
     return (repositories)
 
 
+def read_sources(uniq_id=None):
+    """ Lukee tietokannasta Source- ja Citation- objektit näytettäväksi
+
+    """
+    
+    sources = []
+    result = Source.get_source_citation(uniq_id)
+    for record in result:
+        pid = record['id']
+        s = Source()
+        s.uniq_id = pid
+        if record['stitle']:
+            s.stitle = record['stitle']
+
+        for citation in record['citations']:
+ 
+            c = Citation()
+            c.uniq_id = citation[0]
+            c.dateval = citation[1]
+            c.page = citation[2]
+            c.confidence = citation[3]
+            s.citations.append(c)
+ 
+        sources.append(s)
+
+    return (sources)
+
+
 def get_people_by_surname(surname):
     people = []
     result = Name.get_people_with_surname(surname)

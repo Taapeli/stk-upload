@@ -1,0 +1,27 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+<script src="/static/infobox.js"></script>
+
+<h2>Lähdeluettelo</h2>
+<p>Näytetään lähteet</p>
+
+<section id="lista">
+<table>
+    <tr><th>uniq_id</th>
+        <th>stitle</th>
+    </tr>
+{% if sources %}
+    {% for s in sources %}
+	    <tr>
+	        <td><a href="/poimi/source_uniq_id={{s.uniq_id}}">{{s.uniq_id}}</a></td>
+	        <td>{{s.stitle}}</td>
+        </tr>
+    {% endfor %}
+{% else %}
+        <tr><td colspan="5">Ei tietoja</td></tr>
+{% endif %}
+</table>
+{% endblock %}

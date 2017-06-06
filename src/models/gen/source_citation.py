@@ -245,6 +245,7 @@ class Source:
         self.noteref_hlink = ''
         self.reporef_hlink = ''
         self.reporef_medium = ''
+        self.citations = []   # For creating display sets
         
     
     @staticmethod       
@@ -257,6 +258,26 @@ class Source:
                 RETURN r.medium AS medium, source
             """.format(repository_handle)
         return  g.driver.session().run(query)
+    
+    
+    @staticmethod       
+    def get_source_citation (uniq_id):
+        """ Voidaan lukea läheitä viittauksineen kannasta
+        """
+
+        if uniq_id:
+            where = "WHERE ID(source)={} ".format(uniq_id)
+        else:
+            where = ''
+        
+        query = """
+ MATCH (citation:Citation)-[r]->(source:Source) {0}
+   WITH citation, r, source ORDER BY citation.page
+ RETURN ID(source) AS id, source.stitle AS stitle, 
+  COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence]) AS citations
+ ORDER BY source.stitle""".format(where)
+                
+        return g.driver.session().run(query)
         
     
     @staticmethod       

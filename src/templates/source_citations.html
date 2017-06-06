@@ -1,0 +1,37 @@
+{# _myapp/templates/person.html_ #}
+{% extends "layout.html" %}
+{% block title %}Lähteen tiedot{% endblock %}
+{% block body %}
+{{ super() }}
+
+{% for s in sources %}
+    <h2>Lähde</h2>
+    <ol id="itemlist">
+        <li class="itemrow">
+                <div class="col1">Tunniste</div>
+                <div class="col2">{{s.uniq_id}}</div>
+        </li>
+        <li class="itemrow">
+                <div class="col1">Otsikko</div>
+                <div class="col2">{{s.stitle}}</div>
+        </li>
+     </ol>
+    {% if s.citations %}
+    <h4>Viittaukset</h4>
+    <ol class="num">
+        {% for c in s.citations %}
+        <li><div class="itemrow">
+                <div class="col1">Tunniste<br />Date<br />Page<br />Confidence<br /><br /></div>
+                <div class="col3"><span class="id">{{c.uniq_id}}</span><br />
+                	{{c.dateval}}<br />
+                	{{c.page}}<br />
+                    {{c.confidence}}<br /><br /></div>
+            </div>
+        </li>
+        {% endfor %}
+    </ol>
+    {% endif %}
+{% endfor %}
+    <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
+
+{% endblock %}
