@@ -20,6 +20,8 @@ class Citation:
                 handle          
                 change
                 id               esim. "C0001"
+                dateval          str date
+                page             str page
                 confidence       str confidence
                 noteref_hlink    str huomautuksen osoite
                 sourceref_hlink  str lähteen osoite
@@ -30,6 +32,8 @@ class Citation:
         self.handle = ''
         self.change = ''
         self.id = ''
+        self.dateval = ''
+        self.page = ''
         self.noteref_hlink = ''
         self.sourceref_hlink = ''
 
@@ -53,6 +57,8 @@ class Citation:
         print ("Handle: " + self.handle)
         print ("Change: " + self.change)
         print ("Id: " + self.id)
+        print ("Dateval: " + self.dateval)
+        print ("Page: " + self.page)
         print ("Confidence: " + self.confidence)
         if self.noteref_hlink != '':
             print ("Noteref_hlink: " + self.noteref_hlink)
@@ -71,8 +77,11 @@ class Citation:
                 SET n.gramps_handle='{}', 
                     n.change='{}', 
                     n.id='{}', 
+                    n.dateval='{}', 
+                    n.page='{}', 
                     n.confidence='{}'
-                """.format(self.handle, self.change, self.id, self.confidence)
+                """.format(self.handle, self.change, self.id, self.dateval, 
+                           self.page, self.confidence)
                 
             tx.run(query)
         except Exception as err:
