@@ -36,6 +36,7 @@ class Event:
         self.attr_type = ''
         self.attr_value = ''
         self.citationref_hlink = ''
+        self.citations = []   # For creating display sets
     
     
     def get_citation_handle(self):
@@ -58,6 +59,25 @@ MATCH (event:Event)-[r:CITATION]->(c:Citation)
   WHERE ID(event)=$pid
 RETURN ID(c) AS citationref_hlink"""
         return  g.driver.session().run(query, {"pid": pid})
+    
+    @staticmethod       
+    def get_cite_sour_repo (uniq_id):
+        """ Voidaan lukea läheitä viittauksineen kannasta
+        """
+
+        if uniq_id:
+            where = "WHERE ID(event)={} ".format(uniq_id)
+        else:
+            where = ''
+        
+        query = """
+ MATCH (event:Event)-[a]->(citation:Citation)-[b]->(source:Source)-[c]->(repo:Repository) {0}
+ RETURN ID(event) AS id, event.type AS type, event.date AS date, 
+  COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence,
+      ID(source), source.stitle, c.medium, ID(repo), repo.rname, repo.type] ) AS sources
+ ORDER BY event.date""".format(where)
+                
+        return g.driver.session().run(query)
 
 
     def get_event_data(self):

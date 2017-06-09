@@ -251,6 +251,10 @@ def nayta_ehdolla(ehto):
             persons = models.datareader.lue_henkilot(names=value)
             return render_template("join_persons.html", 
                                    persons=persons, pattern=value)
+        elif key == 'cite_sour_repo':
+            events = models.datareader.read_cite_sour_repo(uniq_id=value)
+            return render_template("cite_sour_repo.html", 
+                                   events=events)
         elif key == 'repo_uniq_id':
             repositories = models.datareader.read_repositories(uniq_id=value)
             return render_template("repo_sources.html", 

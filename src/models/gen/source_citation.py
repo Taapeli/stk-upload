@@ -36,6 +36,7 @@ class Citation:
         self.page = ''
         self.noteref_hlink = ''
         self.sourceref_hlink = ''
+        self.sources = []   # For creating display sets
 
     
     @staticmethod       
@@ -246,6 +247,7 @@ class Source:
         self.reporef_hlink = ''
         self.reporef_medium = ''
         self.citations = []   # For creating display sets
+        self.repos = []   # For creating display sets
         
     
     @staticmethod       

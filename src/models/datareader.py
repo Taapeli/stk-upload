@@ -371,6 +371,49 @@ def lue_typed_refnames(reftype):
     return (namelist)
 
 
+def read_cite_sour_repo(uniq_id=None):
+    """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi
+
+    """
+    
+    sources = []
+    result = Event.get_cite_sour_repo(uniq_id)
+    for record in result:
+        pid = record['id']
+        e = Event()
+        e.uniq_id = pid
+        if record['type']:
+            e.type = record['type']
+        if record['date']:
+            e.date = record['date']
+
+        for source in record['sources']:
+ 
+            c = Citation()
+            c.uniq_id = source[0]
+            c.dateval = source[1]
+            c.page = source[2]
+            c.confidence = source[3]
+
+            s = Source()
+            s.uniq_id = source[4]
+            s.stitle = source[5]
+            s.reporef_medium = source[6]
+
+            r = Repository()
+            r.uniq_id = source[7]
+            r.rname = source[8]
+            r.type = source[9]
+            
+            s.repos.append(r)
+            c.sources.append(s)
+            e.citations.append(c)
+            
+        sources.append(e)
+
+    return (sources)
+
+
 def read_repositories(uniq_id=None):
     """ Lukee tietokannasta Repository- ja Source- objektit näytettäväksi
 

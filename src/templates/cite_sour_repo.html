@@ -1,0 +1,73 @@
+{# _myapp/templates/person.html_ #}
+{% extends "layout.html" %}
+{% block title %}Lähteen tiedot{% endblock %}
+{% block body %}
+{{ super() }}
+
+{% for e in events %}
+    <h2>Tapahtuma</h2>
+    <ol id="itemlist">
+        <li class="itemrow">
+                <div class="col1">Tunniste</div>
+                <div class="col2">{{e.uniq_id}}</div>
+        </li>
+        <li class="itemrow">
+                <div class="col1">Type</div>
+                <div class="col2">{{e.type}}</div>
+        </li>
+        <li class="itemrow">
+                <div class="col1">Date</div>
+                <div class="col2">{{e.date}}</div>
+        </li>
+    </ol>
+    
+    {% if e.citations %}
+    <h4>Viittaukset</h4>
+    <ol class="num">
+        {% for c in e.citations %}
+        <li><div class="itemrow">
+                <div class="col1">Tunniste<br />Date<br />Page<br />Confidence<br /><br /></div>
+                <div class="col3"><span class="id">{{c.uniq_id}}</span><br />
+                	{{c.dateval}}<br />
+                	{{c.page}}<br />
+                    {{c.confidence}}<br /><br /></div>
+            </div>
+        </li>
+    </ol>
+    
+	    {% if c.sources %}
+	    <h4>Lähteet</h4>
+	    <ol class="num">
+	        {% for s in c.sources %}
+	        <li><div class="itemrow">
+	                <div class="col1">Tunniste<br />Stitle<br />Medium<br /></div>
+	                <div class="col3"><span class="id">{{s.uniq_id}}</span><br />
+	                	{{s.stitle}}<br />
+	                	{{s.reporef_medium}}<br /><br /></div>
+	            </div>
+	        </li>
+	    </ol>
+    
+		    {% if s.repos %}
+		    <h4>Arkistot</h4>
+		    <ol class="num">
+		        {% for r in s.repos %}
+		        <li><div class="itemrow">
+		                <div class="col1">Tunniste<br />Rname<br />Type<br /><br /></div>
+		                <div class="col3"><span class="id">{{r.uniq_id}}</span><br />
+		                	{{r.rname}}<br />
+		                	{{r.type}}<br /><br /></div>
+		            </div>
+		        </li>
+		        {% endfor %}
+		    </ol>
+    
+    		{% endif %}
+	        {% endfor %}
+    	{% endif %}
+        {% endfor %}
+    {% endif %}
+{% endfor %}
+    <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
+
+{% endblock %}
