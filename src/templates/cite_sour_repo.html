@@ -41,7 +41,8 @@
 	        {% for s in c.sources %}
 	        <li><div class="itemrow">
 	                <div class="col1">Tunniste<br />Stitle<br />Medium<br /></div>
-	                <div class="col3"><span class="id">{{s.uniq_id}}</span><br />
+	                <div class="col3"><span class="id">
+	                	<a href="/poimi/source_uniq_id={{s.uniq_id}}">{{s.uniq_id}}</a></span><br />
 	                	{{s.stitle}}<br />
 	                	{{s.reporef_medium}}<br /><br /></div>
 	            </div>
@@ -54,7 +55,8 @@
 		        {% for r in s.repos %}
 		        <li><div class="itemrow">
 		                <div class="col1">Tunniste<br />Rname<br />Type<br /><br /></div>
-		                <div class="col3"><span class="id">{{r.uniq_id}}</span><br />
+		                <div class="col3"><span class="id">
+		                	<a href="/poimi/repo_uniq_id={{r.uniq_id}}">{{r.uniq_id}}</a></span><br />
 		                	{{r.rname}}<br />
 		                	{{r.type}}<br /><br /></div>
 		            </div>
