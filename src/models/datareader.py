@@ -561,6 +561,16 @@ def get_families_data_by_id(uniq_id):
     return (p, families)
 
 
+def get_notes(uniq_id=None):
+    """ Lukee tietokannasta Note- objektit näytettäväksi
+
+    """
+    
+    titles, notes = Note.get_notes(uniq_id)
+
+    return (titles, notes)
+
+
 def handle_citations(collection, tx):
     # Get all the citations in the collection
     citations = collection.getElementsByTagName("citation")

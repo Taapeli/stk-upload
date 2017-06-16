@@ -29,6 +29,56 @@ class Note:
         
         
     @staticmethod
+    def get_notes(uniq_id):
+        """ Lukee kaikki huomautukset tietokannasta """
+                        
+        if uniq_id:
+            where = "WHERE ID(note)={} ".format(uniq_id)
+        else:
+            where = ''
+
+        query = """
+            MATCH (n:Note) {0} RETURN ID(n) AS uniq_id, n ORDER BY n.type
+            """.format(where)
+            
+        result =  g.driver.session().run(query)
+        
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'text']
+        notes = []
+        
+        for record in result:
+            note_line = []
+            if record['uniq_id']:
+                note_line.append(record['uniq_id'])
+            else:
+                note_line.append('-')
+            if record["n"]['gramps_handle']:
+                note_line.append(record["n"]['gramps_handle'])
+            else:
+                note_line.append('-')
+            if record["n"]['change']:
+                note_line.append(record["n"]['change'])
+            else:
+                note_line.append('-')
+            if record["n"]['id']:
+                note_line.append(record["n"]['id'])
+            else:
+                note_line.append('-')
+            if record["n"]['type']:
+                note_line.append(record["n"]['type'])
+            else:
+                note_line.append('-')
+            if record["n"]['text']:
+                note_line.append(record["n"]['text'])
+            else:
+                note_line.append('-')
+                                
+            notes.append(note_line)
+                
+        return (titles, notes)
+        
+        
+    @staticmethod
     def get_total():
         """ Tulostaa huomautusten määrän tietokannassa """
                         
