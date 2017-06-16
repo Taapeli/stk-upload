@@ -149,9 +149,9 @@ def nayta_henkilot(subj):
         return render_template("table_sources.html", 
                                sources=sources)
     elif subj == 'sources_wo_cites':
-        sources = models.datareader.read_sources_wo_cites()
-        return render_template("table_sources.html", 
-                               sources=sources)
+        titles, sources = models.datareader.read_sources_wo_cites()
+        return render_template("table_sources2.html", 
+                               titles=titles, sources=sources)
     elif subj == "users":
         lista = models.gen.user.User.get_all()
         return render_template("table_users.html", users=lista)

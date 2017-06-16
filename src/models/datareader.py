@@ -476,18 +476,9 @@ def read_sources_wo_cites():
 
     """
     
-    sources = []
-    result = Source.get_sources_wo_citation()
-    for record in result:
-        pid = record['id']
-        s = Source()
-        s.uniq_id = pid
-        if record['stitle']:
-            s.stitle = record['stitle']
- 
-        sources.append(s)
+    titles, sources = Source.get_sources_wo_citation()
 
-    return (sources)
+    return (titles, sources)
 
 
 def get_people_by_surname(surname):

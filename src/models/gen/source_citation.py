@@ -288,12 +288,41 @@ class Source:
         """
         
         query = """
- MATCH (source:Source) WHERE NOT EXISTS((:Citation)-[:SOURCE]->(source:Source))
- RETURN ID(source) AS id, source.stitle AS stitle 
- ORDER BY source.stitle"""
+ MATCH (s:Source) WHERE NOT EXISTS((:Citation)-[:SOURCE]->(s:Source))
+ RETURN ID(s) AS uniq_id, s
+ ORDER BY s.stitle"""
                 
-        return g.driver.session().run(query)
+        result = g.driver.session().run(query)
         
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
+        sources = []
+        
+        for record in result:
+            source_line = []
+            if record['uniq_id']:
+                source_line.append(record['uniq_id'])
+            else:
+                source_line.append('-')
+            if record["s"]['gramps_handle']:
+                source_line.append(record["s"]['gramps_handle'])
+            else:
+                source_line.append('-')
+            if record["s"]['change']:
+                source_line.append(record["s"]['change'])
+            else:
+                source_line.append('-')
+            if record["s"]['id']:
+                source_line.append(record["s"]['id'])
+            else:
+                source_line.append('-')
+            if record["s"]['stitle']:
+                source_line.append(record["s"]['stitle'])
+            else:
+                source_line.append('-')
+                
+            sources.append(source_line)
+        
+        return (titles, sources)
     
     @staticmethod       
     def get_total():
