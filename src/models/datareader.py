@@ -471,6 +471,25 @@ def read_sources(uniq_id=None):
     return (sources)
 
 
+def read_sources_wo_cites():
+    """ Lukee tietokannasta Source- objektit, joilta puuttuu viittaus näytettäväksi
+
+    """
+    
+    sources = []
+    result = Source.get_sources_wo_citation()
+    for record in result:
+        pid = record['id']
+        s = Source()
+        s.uniq_id = pid
+        if record['stitle']:
+            s.stitle = record['stitle']
+ 
+        sources.append(s)
+
+    return (sources)
+
+
 def get_people_by_surname(surname):
     people = []
     result = Name.get_people_with_surname(surname)

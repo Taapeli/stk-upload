@@ -280,6 +280,19 @@ class Source:
  ORDER BY source.stitle""".format(where)
                 
         return g.driver.session().run(query)
+    
+    
+    @staticmethod       
+    def get_sources_wo_citation ():
+        """ Voidaan lukea viittauksettomia läheitä kannasta
+        """
+        
+        query = """
+ MATCH (source:Source) WHERE NOT EXISTS((:Citation)-[:SOURCE]->(source:Source))
+ RETURN ID(source) AS id, source.stitle AS stitle 
+ ORDER BY source.stitle"""
+                
+        return g.driver.session().run(query)
         
     
     @staticmethod       
