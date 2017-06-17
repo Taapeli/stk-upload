@@ -134,6 +134,66 @@ RETURN event"""
         return True
     
     
+    @staticmethod       
+    def get_events_wo_citation():
+        """ Voidaan lukea viittauksettomia tapahtumia kannasta
+        """
+        
+        query = """
+ MATCH (e:Event) WHERE NOT EXISTS((:Citation)<-[:CITATION]-(e:Event))
+ RETURN ID(e) AS uniq_id, e
+ ORDER BY e.type, e.date"""
+                
+        result = g.driver.session().run(query)
+        
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
+                  'description', 'date', 'attr_type', 'attr_value']
+        events = []
+        
+        for record in result:
+            event_line = []
+            if record['uniq_id']:
+                event_line.append(record['uniq_id'])
+            else:
+                event_line.append('-')
+            if record["e"]['gramps_handle']:
+                event_line.append(record["e"]['gramps_handle'])
+            else:
+                event_line.append('-')
+            if record["e"]['change']:
+                event_line.append(record["e"]['change'])
+            else:
+                event_line.append('-')
+            if record["e"]['id']:
+                event_line.append(record["e"]['id'])
+            else:
+                event_line.append('-')
+            if record["e"]['type']:
+                event_line.append(record["e"]['type'])
+            else:
+                event_line.append('-')
+            if record["e"]['description']:
+                event_line.append(record["e"]['description'])
+            else:
+                event_line.append('-')
+            if record["e"]['date']:
+                event_line.append(record["e"]['date'])
+            else:
+                event_line.append('-')
+            if record["e"]['attr_type']:
+                event_line.append(record["e"]['attr_type'])
+            else:
+                event_line.append('-')
+            if record["e"]['attr_value']:
+                event_line.append(record["e"]['attr_value'])
+            else:
+                event_line.append('-')
+                
+            events.append(event_line)
+        
+        return (titles, events)
+    
+    
     def get_place_handle(self):
         """ Luetaan tapahtuman paikan handle """
         

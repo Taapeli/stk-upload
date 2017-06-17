@@ -136,6 +136,10 @@ def nayta_henkilot(subj):
     elif subj == "surnames":
         surnames = models.gen.person.Name.get_surnames()
         return render_template("table_surnames.html", surnames=surnames)
+    elif subj == 'events_wo_cites':
+        titles, events = models.datareader.read_events_wo_cites()
+        return render_template("table_events.html", 
+                               titles=titles, events=events)
     elif subj == 'notes':
         titles, notes = models.datareader.get_notes()
         return render_template("table_notes.html", 

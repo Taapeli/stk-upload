@@ -471,6 +471,16 @@ def read_sources(uniq_id=None):
     return (sources)
 
 
+def read_events_wo_cites():
+    """ Lukee tietokannasta Event- objektit, joilta puuttuu viittaus näytettäväksi
+
+    """
+    
+    titles, events = Event.get_events_wo_citation()
+
+    return (titles, events)
+
+
 def read_sources_wo_cites():
     """ Lukee tietokannasta Source- objektit, joilta puuttuu viittaus näytettäväksi
 
