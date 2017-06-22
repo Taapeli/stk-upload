@@ -71,6 +71,53 @@ class Place:
             self.pname = place_record["place"]["pname"]
             
         return True
+    
+    
+    @staticmethod       
+    def get_places():
+        """ Voidaan lukea paikkoja kannasta
+        """
+        
+        query = """
+ MATCH (p:Place)
+ RETURN ID(p) AS uniq_id, p
+ ORDER BY p.pname, p.type"""
+                
+        result = g.driver.session().run(query)
+        
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname']
+        lists = []
+        
+        for record in result:
+            data_line = []
+            if record['uniq_id']:
+                data_line.append(record['uniq_id'])
+            else:
+                data_line.append('-')
+            if record["p"]['gramps_handle']:
+                data_line.append(record["p"]['gramps_handle'])
+            else:
+                data_line.append('-')
+            if record["p"]['change']:
+                data_line.append(record["p"]['change'])
+            else:
+                data_line.append('-')
+            if record["p"]['id']:
+                data_line.append(record["p"]['id'])
+            else:
+                data_line.append('-')
+            if record["p"]['type']:
+                data_line.append(record["p"]['type'])
+            else:
+                data_line.append('-')
+            if record["p"]['pname']:
+                data_line.append(record["p"]['pname'])
+            else:
+                data_line.append('-')
+                
+            lists.append(data_line)
+        
+        return (titles, lists)
         
     
     @staticmethod       
@@ -103,15 +150,16 @@ class Place:
 
     def save(self, tx):
         """ Tallettaa sen kantaan """
-        if len(self.pname) >= 1:
-            p_pname = self.pname
-            if len(self.pname) > 1:
-                print("Warning: More than one pname in a place, " + 
-                      "handle: " + self.handle)
-        else:
-            p_pname = ''
-
+        
         try:
+            if len(self.pname) >= 1:
+                p_pname = self.pname
+                if len(self.pname) > 1:
+                    print("Warning: More than one pname in a place, " + 
+                          "handle: " + self.handle)
+            else:
+                p_pname = ''
+
             query = """
                 CREATE (p:Place) 
                 SET p.gramps_handle='{}', 

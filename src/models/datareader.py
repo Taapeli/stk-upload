@@ -485,6 +485,20 @@ def read_events_wo_cites():
     return (headings, titles, events)
 
 
+def read_places():
+    """ Lukee tietokannasta Place- objektit näytettäväksi
+
+    """
+    
+    headings = []
+    titles, events = Place.get_places()
+    
+    headings.append("Paikkaluettelo")
+    headings.append("Näytetään paikat")
+
+    return (headings, titles, events)
+
+
 def read_sources_wo_cites():
     """ Lukee tietokannasta Source- objektit, joilta puuttuu viittaus näytettäväksi
 
