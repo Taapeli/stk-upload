@@ -295,34 +295,34 @@ class Source:
         result = g.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
-        sources = []
+        lists = []
         
         for record in result:
-            source_line = []
+            data_line = []
             if record['uniq_id']:
-                source_line.append(record['uniq_id'])
+                data_line.append(record['uniq_id'])
             else:
-                source_line.append('-')
+                data_line.append('-')
             if record["s"]['gramps_handle']:
-                source_line.append(record["s"]['gramps_handle'])
+                data_line.append(record["s"]['gramps_handle'])
             else:
-                source_line.append('-')
+                data_line.append('-')
             if record["s"]['change']:
-                source_line.append(record["s"]['change'])
+                data_line.append(record["s"]['change'])
             else:
-                source_line.append('-')
+                data_line.append('-')
             if record["s"]['id']:
-                source_line.append(record["s"]['id'])
+                data_line.append(record["s"]['id'])
             else:
-                source_line.append('-')
+                data_line.append('-')
             if record["s"]['stitle']:
-                source_line.append(record["s"]['stitle'])
+                data_line.append(record["s"]['stitle'])
             else:
-                source_line.append('-')
+                data_line.append('-')
                 
-            sources.append(source_line)
+            lists.append(data_line)
         
-        return (titles, sources)
+        return (titles, lists)
     
     @staticmethod       
     def get_total():

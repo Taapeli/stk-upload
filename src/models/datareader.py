@@ -476,9 +476,13 @@ def read_events_wo_cites():
 
     """
     
+    headings = []
     titles, events = Event.get_events_wo_citation()
+    
+    headings.append("Lähdeluettelo")
+    headings.append("Näytetään viitteettömät tapahtumat")
 
-    return (titles, events)
+    return (headings, titles, events)
 
 
 def read_sources_wo_cites():
@@ -486,9 +490,13 @@ def read_sources_wo_cites():
 
     """
     
-    titles, sources = Source.get_sources_wo_citation()
+    headings = []
+    titles, lists = Source.get_sources_wo_citation()
+    
+    headings.append("Lähdeluettelo")
+    headings.append("Näytetään viitteettömät lähteet")
 
-    return (titles, sources)
+    return (headings, titles, lists)
 
 
 def get_people_by_surname(surname):

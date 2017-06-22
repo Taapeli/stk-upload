@@ -148,50 +148,50 @@ RETURN event"""
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
                   'description', 'date', 'attr_type', 'attr_value']
-        events = []
+        lists = []
         
         for record in result:
-            event_line = []
+            data_line = []
             if record['uniq_id']:
-                event_line.append(record['uniq_id'])
+                data_line.append(record['uniq_id'])
             else:
-                event_line.append('-')
+                data_line.append('-')
             if record["e"]['gramps_handle']:
-                event_line.append(record["e"]['gramps_handle'])
+                data_line.append(record["e"]['gramps_handle'])
             else:
-                event_line.append('-')
+                data_line.append('-')
             if record["e"]['change']:
-                event_line.append(record["e"]['change'])
+                data_line.append(record["e"]['change'])
             else:
-                event_line.append('-')
+                data_line.append('-')
             if record["e"]['id']:
-                event_line.append(record["e"]['id'])
+                data_line.append(record["e"]['id'])
             else:
-                event_line.append('-')
+                data_line.append('-')
             if record["e"]['type']:
-                event_line.append(record["e"]['type'])
+                data_line.append(record["e"]['type'])
             else:
-                event_line.append('-')
+                data_line.append('-')
             if record["e"]['description']:
-                event_line.append(record["e"]['description'])
+                data_line.append(record["e"]['description'])
             else:
-                event_line.append('-')
+                data_line.append('-')
             if record["e"]['date']:
-                event_line.append(record["e"]['date'])
+                data_line.append(record["e"]['date'])
             else:
-                event_line.append('-')
+                data_line.append('-')
             if record["e"]['attr_type']:
-                event_line.append(record["e"]['attr_type'])
+                data_line.append(record["e"]['attr_type'])
             else:
-                event_line.append('-')
+                data_line.append('-')
             if record["e"]['attr_value']:
-                event_line.append(record["e"]['attr_value'])
+                data_line.append(record["e"]['attr_value'])
             else:
-                event_line.append('-')
+                data_line.append('-')
                 
-            events.append(event_line)
+            lists.append(data_line)
         
-        return (titles, events)
+        return (titles, lists)
     
     
     def get_place_handle(self):

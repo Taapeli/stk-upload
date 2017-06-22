@@ -5,8 +5,10 @@
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-<h2>Lähdeluettelo</h2>
-<p>Näytetään viitteettömät lähteet</p>
+{% if headings %}
+	<h2>{{headings[0]}}</h2>
+	<p>{{headings[1]}}</p>
+{% endif %}
 
 <section id="lista">
 <table>
@@ -16,11 +18,11 @@
 	    <th>{{title}}</th>
 	{% endfor %}
     </tr>
-	{% if sources %}
-	    {% for s in sources %}
+	{% if lists %}
+	    {% for list in lists %}
 		    <tr>
-	    	{% for source_line in s %}
-		        <td>{{source_line}}</td>
+	    	{% for data_line in list %}
+		        <td>{{data_line}}</td>
 	    	{% endfor %}
 	        </tr>
 	    {% endfor %}
