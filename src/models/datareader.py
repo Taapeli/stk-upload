@@ -233,12 +233,13 @@ def lue_henkilot2(uniq_id=None):
 
         for event in record['events']:
  
-            e = Event()
+            e = Event_for_template()
             e.uniq_id = event[0]
             event_type = event[1]
             if event_type:
                 e.type = event_type
                 e.date = event[2]
+                e.place = event[3]
                 p.events.append(e)
  
         persons.append(p)

@@ -12,8 +12,10 @@
 <table>
     <tr><th>uniq_id</th>
         <th>name</th>
+        <th>refname</th>
         <th>type</th>
         <th>date</th>
+        <th>place</th>
     </tr>
 {% if persons %}
     {% for p in persons %}
@@ -24,6 +26,7 @@
 		            <td>{{p.name[0].firstname}} <b> {{p.name[0].surname}}</b></td>
 		            		 <td>{{event.type}}</td>
 		            		 <td>{{event.date}}</td>
+		            		 <td>{{event.place}}</td>
 			{% endfor %}
 		{% else %}
 	        <tr>
