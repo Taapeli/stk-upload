@@ -312,7 +312,7 @@ RETURN person, name
  OPTIONAL MATCH (event)-[s]->(place:Place)
  RETURN ID(person) AS id, name.firstname AS firstname, 
    name.refname AS refname, name.surname AS surname,
-  COLLECT([ID(event), event.type, event.date], place.pname) AS events
+  COLLECT([ID(event), event.type, event.date, place.pname]) AS events
  ORDER BY name.surname, name.firstname""".format(where)
                 
         return g.driver.session().run(query)
