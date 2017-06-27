@@ -541,11 +541,13 @@ def get_person_data_by_id(uniq_id):
         e = Event_for_template()
         e.uniq_id = link
         e.get_event_data_by_id()
-        place = Place()
-        place.uniq_id = e.place_hlink
-        place.get_place_data_by_id()
         
-        e.place = place.pname
+        if e.place_hlink != '':
+            place = Place()
+            place.uniq_id = e.place_hlink
+            place.get_place_data_by_id()
+            e.place = place.pname
+            
         events.append(e)
         
     return (p, events)
