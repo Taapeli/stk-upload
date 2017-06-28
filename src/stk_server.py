@@ -140,6 +140,10 @@ def nayta_henkilot(subj):
         headings, titles, lists = models.datareader.read_events_wo_cites()
         return render_template("table_of_data.html", 
                headings=headings, titles=titles, lists=lists)
+    elif subj == 'events_wo_place':
+        headings, titles, lists = models.datareader.read_events_wo_place()
+        return render_template("table_of_data.html", 
+               headings=headings, titles=titles, lists=lists)
     elif subj == 'notes':
         titles, notes = models.datareader.get_notes()
         return render_template("table_notes.html", 

@@ -194,6 +194,66 @@ RETURN event"""
         return (titles, lists)
     
     
+    @staticmethod       
+    def get_events_wo_place():
+        """ Voidaan lukea paikattomia tapahtumia kannasta
+        """
+        
+        query = """
+ MATCH (e:Event) WHERE NOT EXISTS((:Place)<-[:PLACE]-(e:Event))
+ RETURN ID(e) AS uniq_id, e
+ ORDER BY e.type, e.date"""
+                
+        result = g.driver.session().run(query)
+        
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
+                  'description', 'date', 'attr_type', 'attr_value']
+        lists = []
+        
+        for record in result:
+            data_line = []
+            if record['uniq_id']:
+                data_line.append(record['uniq_id'])
+            else:
+                data_line.append('-')
+            if record["e"]['gramps_handle']:
+                data_line.append(record["e"]['gramps_handle'])
+            else:
+                data_line.append('-')
+            if record["e"]['change']:
+                data_line.append(record["e"]['change'])
+            else:
+                data_line.append('-')
+            if record["e"]['id']:
+                data_line.append(record["e"]['id'])
+            else:
+                data_line.append('-')
+            if record["e"]['type']:
+                data_line.append(record["e"]['type'])
+            else:
+                data_line.append('-')
+            if record["e"]['description']:
+                data_line.append(record["e"]['description'])
+            else:
+                data_line.append('-')
+            if record["e"]['date']:
+                data_line.append(record["e"]['date'])
+            else:
+                data_line.append('-')
+            if record["e"]['attr_type']:
+                data_line.append(record["e"]['attr_type'])
+            else:
+                data_line.append('-')
+            if record["e"]['attr_value']:
+                data_line.append(record["e"]['attr_value'])
+            else:
+                data_line.append('-')
+                
+            lists.append(data_line)
+        
+        return (titles, lists)
+    
+    
     def get_place_handle(self):
         """ Luetaan tapahtuman paikan handle """
         

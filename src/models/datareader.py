@@ -480,8 +480,22 @@ def read_events_wo_cites():
     headings = []
     titles, events = Event.get_events_wo_citation()
     
-    headings.append("Lähdeluettelo")
+    headings.append("Tapahtumaluettelo")
     headings.append("Näytetään viitteettömät tapahtumat")
+
+    return (headings, titles, events)
+
+
+def read_events_wo_place():
+    """ Lukee tietokannasta Event- objektit, joilta puuttuu paikka näytettäväksi
+
+    """
+    
+    headings = []
+    titles, events = Event.get_events_wo_place()
+    
+    headings.append("Tapahtumaluettelo")
+    headings.append("Näytetään paikattomat tapahtumat")
 
     return (headings, titles, events)
 
