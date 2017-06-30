@@ -49,17 +49,35 @@ body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
     <h3 class="w3-wide"><b>Suomi-tk</b></h3>
   </div>
   <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
-    <a href="#" class="w3-bar-item w3-button">Näkymä</a>
-    <a onclick="myAccFunc()" href="javascript:void(0)"
-       class="w3-button w3-block w3-white w3-left-align" id="myBtn">
-      Selailu <i class="fa fa-caret-down"></i>
+    <a onclick="myAccFunc('a_nakyma')" href="javascript:void(0)"
+       class="w3-button w3-block w3-white w3-left-align" id="btnNakyma">
+         Näkymä <i class="fa fa-caret-down"></i>
     </a>
-    <div id="demoAcc" class="w3-bar-block w3-hide w3-padding-large w3-medium">
+    <div id="a_nakyma" class="w3-bar-block w3-hide w3-padding-large w3-medium">
       <a href="#" class="w3-bar-item w3-button w3-light-grey"><i 
          class="fa fa-caret-right w3-margin-right"></i>Suomi-tietokanta</a>
       <a href="#" class="w3-bar-item w3-button">Ehdokasaineistoni</a>
     </div>
-    <a href="#" class="w3-bar-item w3-button">Hallinta</a>
+
+    <a onclick="myAccFunc('a_selailu')" href="javascript:void(0)"
+       class="w3-button w3-block w3-white w3-left-align" id="btnSelailu">
+         Selailu <i class="fa fa-caret-down"></i>
+    </a>
+    <div id="a_selailu" class="w3-bar-block w3-hide w3-padding-large w3-medium">
+      <a href="#" class="w3-bar-item w3-button w3-light-grey"><i 
+         class="fa fa-caret-right w3-margin-right"></i>Henkilöt</a>
+      <a href="#" class="w3-bar-item w3-button">Lähteet</a>
+    </div>
+
+    <a onclick="myAccFunc('a_hallinta')" href="javascript:void(0)"
+       class="w3-button w3-block w3-white w3-left-align" id="btnHallinta">
+         Hallinta <i class="fa fa-caret-down"></i>
+    </a>
+    <div id="a_hallinta" class="w3-bar-block w3-hide w3-padding-large w3-medium">
+      <a href="#" class="w3-bar-item w3-button w3-light-grey"><i 
+         class="fa fa-caret-right w3-margin-right"></i>Kirjautuminen</a>
+      <a href="#" class="w3-bar-item w3-button">Käyttäjät</a>
+    </div>
   </div>
   <a href="#footer" class="w3-bar-item w3-button w3-padding">Contact</a> 
   <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding"
@@ -236,8 +254,8 @@ body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
 
 <script>
 // Accordion 
-function myAccFunc() {
-    var x = document.getElementById("demoAcc");
+function myAccFunc(bid) {
+    var x = document.getElementById(bid);
     if (x.className.indexOf("w3-show") == -1) {
         x.className += " w3-show";
     } else {
@@ -245,8 +263,8 @@ function myAccFunc() {
     }
 }
 
-// Click on the "Jeans" link on page load to open the accordion for demo purposes
-document.getElementById("myBtn").click();
+// Click on the "Selailu" link on page load to open the accordion for demo purposes
+document.getElementById("btnNakyma").click();
 
 
 // Script to open and close sidebar
