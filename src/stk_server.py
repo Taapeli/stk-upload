@@ -321,6 +321,11 @@ def virhesivu(code, text=''):
     return render_template("virhe_lataus.html", code=code, text=text)
 
 
+@app.route('/stk')
+def stk_harjoitus():   
+    return render_template("a_home.html")
+
+
 
 if __name__ == '__main__':
     if True:
