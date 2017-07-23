@@ -10,6 +10,7 @@ from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
+from models.gen.object import Object
 from models.gen.person import Person, Name
 from models.gen.place import Place
 from models.gen.refname import Refname
@@ -866,6 +867,43 @@ def handle_notes(collection, tx):
     return(msg)
 
 
+def handle_objects(collection, tx):
+    # Get all the objects in the collection
+    objects = collection.getElementsByTagName("object")
+
+    print ("*****Objects*****")
+    counter = 0
+
+    # Print detail of each object
+    for obj in objects:
+        
+        o = Object()
+
+        if obj.hasAttribute("handle"):
+            o.handle = obj.getAttribute("handle")
+        if obj.hasAttribute("change"):
+            o.change = obj.getAttribute("change")
+        if obj.hasAttribute("id"):
+            o.id = obj.getAttribute("id")
+            
+        if len(obj.getElementsByTagName('file') ) == 1:
+            obj_file = obj.getElementsByTagName('file')[0]
+                
+            if obj_file.hasAttribute("src"):
+                o.src = obj_file.getAttribute("src")
+            if obj_file.hasAttribute("mime"):
+                o.mime = obj_file.getAttribute("mime")
+            if obj_file.hasAttribute("description"):
+                o.description = obj_file.getAttribute("description")
+    
+        o.save(tx)
+        counter += 1
+        
+    msg = "Objects stored: " + str(counter)
+        
+    return(msg)
+
+
 def handle_people(collection, userid, tx):
     # Get all the people in the collection
     people = collection.getElementsByTagName("person")
@@ -1121,6 +1159,11 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     print(str(result))
     tx = user.beginTransaction()
     result = handle_repositories(collection, tx)
+    user.endTransaction(tx)
+    msg.append(str(result))
+    print(str(result))
+    tx = user.beginTransaction()
+    result = handle_objects(collection, tx)
     user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
