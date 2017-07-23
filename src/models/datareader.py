@@ -416,6 +416,29 @@ def read_cite_sour_repo(uniq_id=None):
     return (sources)
 
 
+def read_objects(uniq_id=None):
+    """ Lukee tietokannasta Object- objektit näytettäväksi
+
+    """
+    
+    objects = []
+    result = Object.get_objects(uniq_id)
+    for record in result:
+        pid = record['uniq_id']
+        o = Object()
+        o.uniq_id = pid
+        if record['o']['src']:
+            o.src = record['o']['src']
+        if record['o']['mime']:
+            o.mime = record['o']['mime']
+        if record['o']['description']:
+            o.description = record['o']['description']
+ 
+        objects.append(o)
+
+    return (objects)
+
+
 def read_repositories(uniq_id=None):
     """ Lukee tietokannasta Repository- ja Source- objektit näytettäväksi
 

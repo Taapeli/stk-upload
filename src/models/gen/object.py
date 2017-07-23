@@ -41,47 +41,8 @@ class Object:
             MATCH (o:Object) {0} RETURN ID(o) AS uniq_id, o
             """.format(where)
             
-        result =  g.driver.session().run(query)
-        
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 
-                  'src', 'mime', 'description']
-        objects = []
-        
-        for record in result:
-            note_line = []
-            if record['uniq_id']:
-                note_line.append(record['uniq_id'])
-            else:
-                note_line.append('-')
-            if record["o"]['gramps_handle']:
-                note_line.append(record["n"]['gramps_handle'])
-            else:
-                note_line.append('-')
-            if record["o"]['change']:
-                note_line.append(record["n"]['change'])
-            else:
-                note_line.append('-')
-            if record["o"]['id']:
-                note_line.append(record["n"]['id'])
-            else:
-                note_line.append('-')
-            if record["o"]['src']:
-                note_line.append(record["n"]['src'])
-            else:
-                note_line.append('-')
-            if record["o"]['mime']:
-                note_line.append(record["n"]['mime'])
-            else:
-                note_line.append('-')
-            if record["o"]['description']:
-                note_line.append(record["n"]['description'])
-            else:
-                note_line.append('-')
-                                
-            objects.append(note_line)
+        return  g.driver.session().run(query)
                 
-        return (titles, objects)
-        
         
     @staticmethod
     def get_total():
