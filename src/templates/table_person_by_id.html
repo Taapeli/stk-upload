@@ -4,6 +4,21 @@
 {% block body %}
 {{ super() }}
 
+{% if photos %}
+	<br><br><table>
+	<tr>
+	{% for photo in photos %}
+		<td><img src="/static/{{photo.src}}" alt="Picture cannot be found" width="300"></td>
+	{% endfor %}
+	</tr>
+	<tr>
+	{% for photo in photos %}
+		<td>{{photo.description}}</td>
+	{% endfor %}
+	</tr>
+	</table>
+{% endif %}
+
 <h2>Person data</h2>
 <section id="lista">
 <table>

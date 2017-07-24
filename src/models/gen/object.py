@@ -42,6 +42,26 @@ class Object:
             """.format(where)
             
         return  g.driver.session().run(query)
+
+
+    def get_object_data_by_id(self):
+        """ Luetaan tallenteen tiedot """
+
+        query = """
+            MATCH (obj:Object)
+                WHERE ID(obj)={}
+                RETURN obj
+            """.format(self.uniq_id)
+        obj_result = g.driver.session().run(query)
+
+        for obj_record in obj_result:
+            self.id = obj_record["obj"]["id"]
+            self.change = obj_record["obj"]["change"]
+            self.src = obj_record["obj"]["src"]
+            self.mime = obj_record["obj"]["mime"]
+            self.description = obj_record["obj"]["description"]
+                    
+        return True
                 
         
     @staticmethod

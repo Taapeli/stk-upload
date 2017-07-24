@@ -155,6 +155,10 @@ RETURN ID(family) AS uniq_id"""
             self.eventref_hlink.append(event_record["eventref_hlink"])
             self.eventref_role.append(event_record["eventref_role"])
 
+        object_result = self.get_object_id()
+        for object_record in object_result:            
+            self.objref_hlink.append(object_record["objref_hlink"])
+
         family_result = self.get_parentin_handle()
         for family_record in family_result:            
             self.parentin_hlink.append(family_record["parentin_hlink"])
@@ -164,6 +168,17 @@ RETURN ID(family) AS uniq_id"""
             self.citationref_hlink.append(citation_record["citationref_hlink"])
             
         return True
+    
+    
+    def get_object_id(self):
+        """ Luetaan henkilön tallenteen id """
+        
+        query = """
+            MATCH (person:Person)-[r:OBJECT]->(obj:Object) 
+                WHERE ID(person)={}
+                RETURN ID(obj) AS objref_hlink
+            """.format(self.uniq_id)
+        return  g.driver.session().run(query)
     
     
     def get_parentin_handle(self):

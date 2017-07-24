@@ -587,8 +587,16 @@ def get_person_data_by_id(uniq_id):
             e.place = place.pname
             
         events.append(e)
+            
+    photos = []
+    for link in p.objref_hlink:
+        o = Object()
+        o.uniq_id = link
+        o.get_object_data_by_id()
+                    
+        photos.append(o)
         
-    return (p, events)
+    return (p, events, photos)
 
 
 def get_families_data_by_id(uniq_id):
