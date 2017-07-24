@@ -30,6 +30,7 @@ class Person:
                    suffix          str patronyymi
                 eventref_hlink     str tapahtuman osoite
                 eventref_role      str tapahtuman rooli
+                objref_hlink       str tallenteen osoite
                 parentin_hlink     str vanhempien osoite
                 citationref_hlink  str viittauksen osoite
      """
@@ -45,6 +46,7 @@ class Person:
         self.events = []                # For creating display sets
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
+        self.objref_hlink = []
         self.parentin_hlink = []
         self.citationref_hlink = []
     
@@ -662,6 +664,20 @@ SET r.role =$role"""
                        {"handle": handle, "eventref_hlink": eventref_hlink, "role": role})
                 except Exception as err:
                     print("Virhe (Person.save:Event 2): {0}".format(err), file=stderr)
+   
+        # Make relations to the Object node
+        if len(self.objref_hlink) > 0:
+            for i in range(len(self.objref_hlink)):
+                try:
+                    objref_hlink = self.objref_hlink[i]
+                    query = """
+MATCH (n:Person)   WHERE n.gramps_handle=$handle
+MATCH (m:Object) WHERE m.gramps_handle=$objref_hlink
+MERGE (n)-[r:OBJECT]->(m)"""
+                    tx.run(query, 
+                           {"handle": handle, "objref_hlink": objref_hlink})
+                except Exception as err:
+                    print("Virhe (Person.save:Object): {0}".format(err), file=stderr)
    
         # Make relations to the Family node
         # This is done in Family.save(), because the Family object is not yet created

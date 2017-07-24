@@ -995,6 +995,12 @@ def handle_people(collection, userid, tx):
                 if person_eventref.hasAttribute("role"):
                     p.eventref_role.append(person_eventref.getAttribute("role"))
                     
+        if len(person.getElementsByTagName('objref') ) >= 1:
+            for i in range(len(person.getElementsByTagName('objref') )):
+                person_objref = person.getElementsByTagName('objref')[i]
+                if person_objref.hasAttribute("hlink"):
+                    p.objref_hlink.append(person_objref.getAttribute("hlink"))
+                    
         if len(person.getElementsByTagName('parentin') ) >= 1:
             for i in range(len(person.getElementsByTagName('parentin') )):
                 person_parentin = person.getElementsByTagName('parentin')[i]
