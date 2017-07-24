@@ -31,6 +31,9 @@ class Person:
                 eventref_hlink     str tapahtuman osoite
                 eventref_role      str tapahtuman rooli
                 objref_hlink       str tallenteen osoite
+                url_href           str url osoite
+                url_type           str url tyyppi
+                url_description    str url kuvaus
                 parentin_hlink     str vanhempien osoite
                 citationref_hlink  str viittauksen osoite
      """
@@ -47,6 +50,9 @@ class Person:
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
         self.objref_hlink = []
+        self.url_href = []
+        self.url_type = []
+        self.url_description = []
         self.parentin_hlink = []
         self.citationref_hlink = []
     
@@ -247,6 +253,9 @@ RETURN person, name
             self.change = person_record["person"]['change']
             self.id = person_record["person"]['id']
             self.gender = person_record["person"]['gender']
+            self.url_href = person_record["person"]['url_href']
+            self.url_type = person_record["person"]['url_type']
+            self.url_description = person_record["person"]['url_description']
             
             if len(person_record["name"]) > 0:
                 pname = Name()
@@ -471,6 +480,9 @@ RETURN person, name
         print ("Change: " + self.change)
         print ("Id: " + self.id)
         print ("Gender: " + self.gender)
+        print ("Url href: " + self.url_href)
+        print ("Url type: " + self.url_type)
+        print ("Url description: " + self.url_description)
         if len(self.name) > 0:
             names = self.name
             for pname in names:
@@ -579,14 +591,21 @@ RETURN person, name
             change = self.change
             pid = self.id
             gender = self.gender
+            url_href = self.url_href
+            url_type = self.url_type
+            url_description = self.url_description
             query = """
 CREATE (p:Person) 
 SET p.gramps_handle=$handle, 
     p.change=$change, 
     p.id=$id, 
-    p.gender=$gender"""
+    p.gender=$gender, 
+    p.url_href=$url_href, 
+    p.url_type=$url_type, 
+    p.url_description=$url_description"""
             tx.run(query, 
-               {"handle": handle, "change": change, "id": pid, "gender": gender})
+               {"handle": handle, "change": change, "id": pid, "gender": gender, 
+                "url_href": url_href, "url_type": url_type, "url_description": url_description})
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 

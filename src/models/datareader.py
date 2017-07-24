@@ -1009,6 +1009,16 @@ def handle_people(collection, userid, tx):
                 if person_objref.hasAttribute("hlink"):
                     p.objref_hlink.append(person_objref.getAttribute("hlink"))
                     
+        if len(person.getElementsByTagName('url') ) >= 1:
+            for i in range(len(person.getElementsByTagName('url') )):
+                person_url = person.getElementsByTagName('url')[i]
+                if person_url.hasAttribute("href"):
+                    p.url_href.append(person_url.getAttribute("href"))
+                if person_url.hasAttribute("type"):
+                    p.url_type.append(person_url.getAttribute("type"))
+                if person_url.hasAttribute("description"):
+                    p.url_description.append(person_url.getAttribute("description"))
+                    
         if len(person.getElementsByTagName('parentin') ) >= 1:
             for i in range(len(person.getElementsByTagName('parentin') )):
                 person_parentin = person.getElementsByTagName('parentin')[i]
