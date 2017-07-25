@@ -65,5 +65,27 @@
         <tr><td colspan="1">Ei event tietoja</td></tr>
 {% endif %}
 </table>
+
+<br>
+<br>
+
+<h2>URLs</h2>
+<table>
+    <tr><th>description</th><th>URL</th>
+    </tr>
+{% if person %}
+	{% for i in range(person.url_href|length) %}
+		<tr>
+    		<td>{{person.url_description[i]}}</a></td>
+    		<td><a href="{{person.url_href[i]}}">{{person.url_href[i]}}</a></td>
+		</tr>
+	{% endfor %}
+{% else %}
+        <tr><td colspan="1">Ei event tietoja</td></tr>
+{% endif %}
+</table>
+
+<br>
+<br>
 </section>
 {% endblock %}
