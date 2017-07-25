@@ -74,16 +74,18 @@
     <tr><th>description</th><th>URL</th>
     </tr>
 {% if person %}
-	{% for i in range(person.url_href|length) %}
-		<tr>
-    		<td>{{person.url_description[i]}}</a></td>
-    		<td><a href="{{person.url_href[i]}}">{{person.url_href[i]}}</a></td>
-		</tr>
-	{% endfor %}
-{% else %}
-        <tr><td colspan="1">Ei event tietoja</td></tr>
-{% endif %}
+	{% if person.url_href|length == 0 %}
+		<tr><td colspan="1">Ei URL tietoja</td></tr>
+	{% else %}
+		{% for i in range(person.url_href|length) %}
+			<tr>
+	    		<td>{{person.url_description[i]}}</a></td>
+	    		<td><a href="{{person.url_href[i]}}">{{person.url_href[i]}}</a></td>
+			</tr>
+		{% endfor %}
+	{% endif %}
 </table>
+{% endif %}
 
 <br>
 <br>
