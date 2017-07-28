@@ -454,6 +454,12 @@ def read_repositories(uniq_id=None):
             r.rname = record['rname']
         if record['type']:
             r.type = record['type']
+        if record['url_href']:
+            r.url_href.append(record['url_href'])
+        if record['url_type']:
+            r.url_type.append(record['url_type'])
+        if record['url_description']:
+            r.url_description.append(record['url_description'])
 
         for source in record['sources']:
  
@@ -1124,6 +1130,16 @@ def handle_repositories(collection, tx):
             r.type =  repository_type.childNodes[0].data
         elif len(repository.getElementsByTagName('type') ) > 1:
             print("Error: More than one type in a repository")
+            
+        if len(repository.getElementsByTagName('url') ) >= 1:
+            for i in range(len(repository.getElementsByTagName('url') )):
+                repository_url = repository.getElementsByTagName('url')[i]
+                if repository_url.hasAttribute("href"):
+                    r.url_href.append(repository_url.getAttribute("href"))
+                if repository_url.hasAttribute("type"):
+                    r.url_type.append(repository_url.getAttribute("type"))
+                if repository_url.hasAttribute("description"):
+                    r.url_description.append(repository_url.getAttribute("description"))
     
         r.save(tx)
         counter += 1

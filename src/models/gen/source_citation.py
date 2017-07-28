@@ -126,6 +126,9 @@ class Repository:
                 id              esim. "R0001"
                 rname           str arkiston nimi
                 type            str arkiston tyyppi
+                url_href        str url osoite
+                url_type        str url tyyppi
+                url_description str url kuvaus
 
      """
 
@@ -134,6 +137,9 @@ class Repository:
         self.handle = ''
         self.change = ''
         self.id = ''
+        self.url_href = []
+        self.url_type = []
+        self.url_description = []
         self.sources = []   # For creating display sets
         
     
@@ -172,7 +178,8 @@ class Repository:
  MATCH (repository:Repository)<-[r]-(source:Source) {0}
    WITH repository, r, source ORDER BY source.stitle
  RETURN ID(repository) AS id, repository.rname AS rname, 
-   repository.type AS type,
+   repository.type AS type, repository.url_href AS url_href, 
+   repository.url_type AS url_type, repository.url_description AS url_description,
   COLLECT([ID(source), source.stitle, r.medium]) AS sources
  ORDER BY repository.rname""".format(where)
                 
@@ -200,6 +207,9 @@ class Repository:
         print ("Id: " + self.id)
         print ("Rname: " + self.rname)
         print ("Type: " + self.type)
+        print ("Url href: " + self.url_href)
+        print ("Url type: " + self.url_type)
+        print ("Url description: " + self.url_description)
         return True
 
 
@@ -207,16 +217,27 @@ class Repository:
         """ Tallettaa sen kantaan """
 
         try:
+            handle = self.handle
+            change = self.change
+            pid = self.id
+            rname = self.rname
+            type = self.type
+            url_href = self.url_href
+            url_type = self.url_type
+            url_description = self.url_description
             query = """
-                CREATE (r:Repository) 
-                SET r.gramps_handle='{}', 
-                    r.change='{}', 
-                    r.id='{}', 
-                    r.rname='{}', 
-                    r.type='{}'
-                """.format(self.handle, self.change, self.id, self.rname, self.type)
-                
-            tx.run(query)
+CREATE (r:Repository) 
+SET r.gramps_handle=$handle, 
+    r.change=$change, 
+    r.id=$id, 
+    r.rname=$rname, 
+    r.type=$type,
+    r.url_href=$url_href,
+    r.url_type=$url_type,
+    r.url_description=$url_description"""
+            tx.run(query, 
+               {"handle": handle, "change": change, "id": pid, "rname": rname, "type": type, 
+                "url_href": url_href, "url_type": url_type, "url_description": url_description})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             

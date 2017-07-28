@@ -19,6 +19,20 @@
                 <div class="col1">Type</div>
                 <div class="col2">{{r.type}}</div>
         </li>
+        {% for i in range(r.url_href|length) %}
+	        <li class="itemrow">
+	                <div class="col1">URL href</div>
+	                <div class="col2">{{r.url_href[i]}}</div>
+	        </li>
+	        <li class="itemrow">
+	                <div class="col1">URL type</div>
+	                <div class="col2">{{r.url_type[i]}}</div>
+	        </li>
+	        <li class="itemrow">
+	                <div class="col1">URL description</div>
+	                <div class="col2">{{r.url_description[i]}}</div>
+	        </li>
+	     {% endfor %}
      </ol>
     {% if r.sources %}
     <h4>Sources</h4>
