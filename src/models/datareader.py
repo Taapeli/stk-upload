@@ -1203,7 +1203,27 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
          tiedot Neo4j-kantaan
     """
     
-    DOMTree = xml.dom.minidom.parse(open(pathname))
+    # Make a precheck
+    a = pathname.split(".")
+    pathname2 = a[0] + "_pre." + a[1]
+    
+    file1 = open(pathname)
+    file2 = open(pathname2, "w")
+    
+    for line in file1:
+        # Already \' in line
+        if line.find("\\\'") > 0:
+            line2 = line
+        else:
+            # Replace ' with \'
+            line2 = line.replace("\'", "\\\'")
+        file2.write(line2)
+        
+    file1.close()
+    file2.close()
+
+    
+    DOMTree = xml.dom.minidom.parse(open(pathname2))
     collection = DOMTree.documentElement
     
     msg = []
