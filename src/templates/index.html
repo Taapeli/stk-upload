@@ -27,14 +27,14 @@
     <h3>Versio 2 – tietokantaan talletus</h3>
     <p>Lataa tiedoston ja näyttää latauksen mahdolliset ilmoitukset, yhteenvetotilasto</p>
     <div style="height: 90pt">
-        <div style="float: left; width: 350px;"><input type="file" name="filenm" />
-            <ul style=" margin-left: 15pt; list-style-type:none">
-                <li><input type="radio" name="aineisto" 
-                           value="henkilot" checked>Tuomiokirjojen henkilöt</li>
+        <div style="float: left; width: 350px; margin-left: 15pt;"><input type="file" name="filenm" />
+            <ul style="list-style-type:none">
+                <li><input type="radio" name="aineisto" checked
+                           value="xml_file">Gramps XML-tiedosto</li>
                 <li><input type="radio" name="aineisto" 
                            value="refnimet">Henkilöiden referenssinimet</li>
                 <li><input type="radio" name="aineisto" 
-                           value="xml_file">Gramps XML-tiedosto</li>
+                           value="henkilot">Tuomiokirjojen henkilöt</li>
             </ul>
         </div>
         <div style="float: left; padding-top: 40pt">
@@ -43,27 +43,38 @@
     </form>
 </div>
 <div>
-    <h3>Muita toimintoja</h3>
+    <h3>Toimintoja Grampsista tuodulle aineistolle</h3>
     <ul>
-    <li><a href="/lista/henkilot">Näytä kannassa olevat henkilöt</a></li>
-    <li><a href="/lista/henkilot2">Näytä kannassa olevat Gramps-henkilöt</a></li>
-    <li><a href="/lista/surnames">Luettelo eri sukunimistä</a></li>
+    <li><a href="/lista/henkilot2">Näytä henkilöt</a> (pääsy henkilötietosivulle)</li>
+    <li><a href="/lista/surnames">Luettelo sukunimistä</a></li>
+    <li><a href="/lista/objects">Luettelo mediatiedostoista eli tallenteista</a></li>
+    <li><a href="/lista/repositories">Luettelo arkistoista</a> 
+        (arkistosivulla arkiston lähteet)</li>
+    <li><a href="/lista/sources">Luettelo lähteistä (lähdesivulla viittauet)</a></li>
+    <li><a href="/lista/notes">Huomautukset</a></li>
+    <li><a href="/lista/places">Paikat</a></li>
+    <li>Ongelmaselvitusvälineitä<ul>
+	    <li><a href="/lista/events_wo_place">Paikattomat tapahtumat</a></li>
+	    <li><a href="/lista/sources_wo_cites">Viittauksettomat lähteet</a></li>
+	    <li><a href="/lista/events_wo_cites">Viittauksettomat tapahtumat</a></li>
+    </ul>
+</div>
+
+<details style="background-color:lightgray; width:450pt">
+    <summary><b>Aiempia harjoitustoimintoja</b></summary>
+    <ul>
+    <li><a href="/lista/henkilot">Näytä tuomiokirjoista tuodut henkilöt</a></li>
     <li><a href="/lista/refnimet/REFFIRST">Näytä referenssietunimet aakkosjärjestyksessä</a>
         (<a href="/lista/refnimet">kaikki järjestämättä</a>)</li>
-    <li><a href="/lista/objects">Näytä kannassa olevat tallenteet</a></li>
-    <li><a href="/lista/repositories">Näytä kannassa olevat arkistot</a></li>
-    <li><a href="/lista/sources">Näytä kannassa olevat lähteet</a></li>
-    <li><a href="/lista/notes">Näytä kannassa olevat huomautukset</a></li>
-    <li><a href="/lista/places">Näytä kannassa olevat paikat</a></li>
-    <li><a href="/lista/events_wo_place">Näytä paikattomat tapahtumat</a></li>
-    <li><a href="/lista/sources_wo_cites">Näytä viittauksettomat lähteet</a></li>
-    <li><a href="/lista/events_wo_cites">Näytä viittauksettomat tapahtumat</a></li>
     <li><form action="/yhdista" method="post" enctype="multipart/form-data">
         <p>Yhdistelynäyttö<br />
         Anna sukunimen alkuosa: <input type="text" name="names"><input type="submit" value="Näytä"/></p>
         </form>
     </li>
-</div>
+    <li><a href="/stk">Ensimmäinen UI-harjoitus</a></li>
+    </ul>
+</details>
+
 <details style="background-color:lightgray; width:450pt">
     <summary><b>Hallintatoiminnot</b></summary>
     <ul>
@@ -73,6 +84,4 @@
 	    <li><a href="/aseta/refnames">Aseta referenssinimet</a></li>
     </ul>
 </details>
-<div><a href="/stk">UI-harjoitus</a>
-</div>
 {% endblock %}
