@@ -1,0 +1,32 @@
+{# _myapp/templates/layout2.html_ narrative #}
+<!DOCTYPE html>
+<html xml:lang="fi-FI" xmlns="http://www.w3.org/1999/xhtml" lang="fi-FI"><head lang="fi-FI">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Stk – {% block title %}{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="generator" content="stk-server">
+    <meta name="author" content="SSS / JMä">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="{{ url_for('static', filename='k_screen.css') }}" media="screen" rel="stylesheet" type="text/css">
+    <link href="{{ url_for('static', filename='k_print.css') }}" media="print" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <h1><a href="/"><img id="logo" src="/static/hlo.png" alt="Palaa alkuun" title="Palaa alkuun"
+             onmouseover="this.src='/static/hlo1.png';" 
+             onmouseout="this.src='/static/hlo.png';"/></a>
+    {% block body %}
+    
+    {% endblock %}
+    <div class="fullclear"></div>
+    <div id="footer">
+        <p id="createdate">
+        Stk-server
+        </p>
+        <p id="copyright">
+        © 2017 SSS
+        </p>
+    </div>
+
+</body></html>

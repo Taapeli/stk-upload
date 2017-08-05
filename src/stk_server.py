@@ -133,6 +133,9 @@ def nayta_henkilot(subj):
     elif subj == "henkilot2":
         persons = models.datareader.lue_henkilot2()
         return render_template("table_persons2.html", persons=persons)
+    elif subj == "k_persons":
+        persons = models.datareader.lue_henkilot2()
+        return render_template("k_persons.html", persons=persons)
     elif subj == "surnames":
         surnames = models.gen.person.Name.get_surnames()
         return render_template("table_surnames.html", surnames=surnames)

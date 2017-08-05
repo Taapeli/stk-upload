@@ -1,0 +1,84 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "k_layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+        Stk – Henkilöluettelo</h1>
+{{ super() }}
+
+	<div class="wrapper" id="nav" role="navigation">
+		<div class="container">
+			<ul class="menu" id="dropmenu">
+				<li class="CurrentSection"><a href="k_persons" title="Henkilöt">Henkilöt</a></li>
+				<li><a href="#" title="Sukunimet">Sukunimet</a></li>
+				<li><a href="#" title="Perheet">Perheet</a></li>
+				<li><a href="#" title="Paikat">Paikat</a></li>
+				<li><a href="#" title="Lähteet">Lähteet</a></li>
+				<li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="content" id="Individuals">
+		<p id="description">
+		Tällä sivulla on hakemisto kaikista tietokannan henkilöistä sukunimen 
+mukaan lajiteltuna. Henkilön nimen napsauttaminen vie sinut valitun 
+henkilön sivulle.
+		</p>
+		<div id="alphanav">
+			<ul>
+				<li><a href="#%C2%A0" title="Aakkosmenu: &nbsp;">&nbsp;</a></li>
+				<li><a href="#A" title="Aakkosmenu: A">A</a></li>
+				<li><a href="#B" title="Aakkosmenu: B">B</a></li>
+				<li><a href="#C" title="Aakkosmenu: C">C</a></li>
+				<li><a href="#D" title="Aakkosmenu: D">D</a></li>
+				<li><a href="#E" title="Aakkosmenu: E">E</a></li>
+				<li><a href="#F" title="Aakkosmenu: F">F</a></li>
+				<li><a href="#G" title="Aakkosmenu: G">G</a></li>
+				<li><a href="#H" title="Aakkosmenu: H">H</a></li>
+				<li><a href="#J" title="Aakkosmenu: J">J</a></li>
+				<li><a href="#K" title="Aakkosmenu: K">K</a></li>
+				<li><a href="#L" title="Aakkosmenu: L">L</a></li>
+				<li><a href="#M" title="Aakkosmenu: M">M</a></li>
+				<li><a href="#N" title="Aakkosmenu: N">N</a></li>
+				<li><a href="#P" title="Aakkosmenu: P">P</a></li>
+				<li><a href="#S" title="Aakkosmenu: S">S</a></li>
+				<li><a href="#T" title="Aakkosmenu: T">T</a></li>
+				<li><a href="#V" title="Aakkosmenu: V">V</a></li>
+				<li><a href="#W" title="Aakkosmenu: W">W</a></li>
+				<li><a href="#%C3%96" title="Aakkosmenu: Ö">Ö</a></li>
+			</ul>
+		</div>
+		<table class="IndividualList">
+			<thead>
+				<tr>
+					<th>A-Ö</th>
+					<th>Henkilö</th>
+					<th>Tapahtumat</th>
+				</tr>
+			</thead>
+			<tbody>
+	{% if persons %}
+	    {% for p in persons %}
+	            <tr><td></td>
+	                <td class="ColumnPerson"><div>
+	                   <a href="/poimi/uniq_id={{p.uniq_id}}" class="id">{{p.uniq_id}}</a>
+		               {{p.name[0].firstname}} <b>{{p.name[0].surname}}</b>
+		               {% if p.name[0].refname %}<br>referenssinimi: {{p.name[0].refname}}{% endif %}
+	                </div></td>
+	        {% if p.events %}
+		           <td class="ColumnEvent"><ul>{% for event in p.events %}
+		              <li>{{event.type}} {{event.date}} {{event.place}}</li>
+		              {% endfor %}
+		           </ul></tr>
+	        {% else %}
+	               <td></td>
+	        {% endif %}
+	           </tr>
+	    {% endfor %}
+	{% else %}
+	        <tr><td colspan="3">Ei ketään</td></tr>
+	{% endif %}
+				</tr>
+			</tbody>
+		</table>
+	</div>
+{% endblock %}
