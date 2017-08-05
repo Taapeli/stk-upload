@@ -6,7 +6,7 @@
 <script src="/static/infobox.js"></script>
 
 <h2>Henkilöluettelo</h2>
-<p>Näytetään henkilöitä</p>
+<p>Näytetään {{persons|count}} henkilöä</p>
 
 <section id="lista">
 <table>
@@ -19,26 +19,25 @@
     </tr>
 {% if persons %}
     {% for p in persons %}
+        {% set ecnt = p.events|count %}{% if ecnt %}{% else %}{% set ecnt = 1 %}{% endif %}
+        {% set tr_tag = "" %}
+            <tr>
+                <td rowspan="{{ecnt}}"><a href="/poimi/uniq_id={{p.uniq_id}}">{{p.uniq_id}}</a></td>
+                <td rowspan="{{ecnt}}">{{p.name[0].firstname}} <b>{{p.name[0].surname}}</b></td>
+                <td rowspan="{{ecnt}}">{{p.name[0].refname}}</td>
     	{% if p.events %}
-        	{% for event in p.events %}
-		        <tr>
-		            <td><a href="/poimi/uniq_id={{p.uniq_id}}">{{p.uniq_id}}</a></td>
-		            <td>{{p.name[0].firstname}} <b> {{p.name[0].surname}}</b></td>
-		            		 <td>{{p.name[0].refname}}</td>
-		            		 <td>{{event.type}}</td>
-		            		 <td>{{event.date}}</td>
-		            		 <td>{{event.place}}</td>
+        	{% for event in p.events %} {{tr_tag|safe}} {% set tr_tag="<tr>" %}
+	    		<td style="align:right;">{{event.type}}</td>
+	    		<td>{{event.date}}</td>
+	    		<td>{{event.place}}</td>
+	    	</tr>
 			{% endfor %}
 		{% else %}
-	        <tr>
-	            <td>{{p.uniq_id}}</td>
-	            <td>{{p.name[0].firstname}} <b> {{p.name[0].surname}}</b></td>
-	            <td>-</td><td>-</td>
+            </tr>
 		{% endif %}
-        </tr>
     {% endfor %}
 {% else %}
-        <tr><td colspan="5">Ei tietoja</td></tr>
+        <tr><td colspan="5">Ei henkilöitä</td></tr>
 {% endif %}
 </table>
 {% endblock %}
