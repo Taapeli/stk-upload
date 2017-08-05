@@ -80,7 +80,7 @@ body > div {
     clear: both;
 }
 
-/* Stk specialities
+/* Stk objects
 ----------------------------------------------------- */
 .id { color: sienna; text-align: right; }
 
@@ -284,6 +284,11 @@ table.surname td.ColumnName {
 
 /* Individuals
 ----------------------------------------------------- */
+td.ColumnAlpha {
+    background-color: #EEE;
+    font-weight: bold;
+    font-size: larger;
+}
 table.IndividualList td.ColumnSurname  {
     background-color: #EEE;
 }
@@ -292,7 +297,9 @@ td.ColumnPerson div {
 }
 td.ColumnEvent ul {
 	margin: 2px;
+	padding-left: 1em;
 }
+tr:nth-child(even){background-color: #f2f2f2}
 
 /* Places
 ----------------------------------------------------- */
