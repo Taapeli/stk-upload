@@ -1,9 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 import sys
 import logging
 
 logging.basicConfig(stream=sys.stderr)
-sys.path.insert(0,"/opt/shared/webroot/ROOT")
+sys.path.insert(0,"/opt/shared/webroot/ROOT/stk_server")
 
-from FlaskApp import app as application
+from stk_server import stk_server as application
 application.secret_key = 'Add your secret key'

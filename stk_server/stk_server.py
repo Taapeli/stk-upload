@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # coding=UTF-8
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 29.12.2015
