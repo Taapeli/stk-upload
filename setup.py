@@ -6,7 +6,7 @@ setup (
        packages=find_packages(),
 
        # Declare your packages' dependencies here, for eg:
-       install_requires=['flask', 'werkzeug', 'neo4j'],
+       install_requires=['flask', 'werkzeug', 'neo4j-driver'],
 
        # Fill in these to make your Egg ready for upload to
        # PyPI
