@@ -342,6 +342,7 @@ if __name__ == '__main__':
     if True:
         # Ajo paikallisesti
         logging.basicConfig(level=logging.DEBUG)
+        print ("stk-run.__main__ ajetaan DEGUB-moodissa")
         app.run(debug='DEBUG')
     else:
         # Julkinen sovellus
