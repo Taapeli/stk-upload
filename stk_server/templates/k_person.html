@@ -1,0 +1,510 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "k_layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+        Stk – Henkilön tiedot</h1>
+{{ super() }}
+
+    <div class="wrapper" id="nav" role="navigation">
+        <div class="container">
+            <ul class="menu" id="dropmenu">
+                <li class="CurrentSection"><a href="k_persons" title="Henkilöt">Henkilöt</a></li>
+                <li><a href="#" title="Sukunimet">Sukunimet</a></li>
+                <li><a href="#" title="Perheet">Perheet</a></li>
+                <li><a href="#" title="Paikat">Paikat</a></li>
+                <li><a href="#" title="Lähteet">Lähteet</a></li>
+                <li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
+            </ul>
+        </div>
+    </div>
+{% for p in persons %}
+    <div class="content" id="IndividualDetail">
+        <!-- div class="snapshot">
+            <div class="thumbnail">
+                <img alt="Kalle Kustaa Airola" src="../../../thumb/f/d/d4874a6fb2d54a8c0df19,10-81,59.png" />
+            </div>
+        </div -->
+        <h3><!--Airola, Kalle Kustaa ent. Silius<sup><small> <a href="#sref1">1</a> <a href="#sref2a">2a</a></small></sup>-->
+        {{p.name[0].firstname}} <b>{{p.name[0].surname}}</b></h3>
+
+        <div id="summaryarea">
+            <table class="infolist">
+                <tr>
+                    <td class="ColumnAttribute">Referenssinimi</td>
+                    <td class="ColumnValue">{% if p.name[0].refname %}<br>{{p.name[0].refname}}{% else %}<i>Ei tiedossa</i>{% endif %}</td>
+                </tr>
+<!--
+                <tr>
+                    <td class="ColumnAttribute">Syntymänimi</td>
+                    <td class="ColumnValue">
+                    Silius, Kaarlo Kustaa <a href="#sref3a">3a</a> <a href="#sref5a">5a</a>
+                        <ul>
+                            <div class="grampsstylednote">
+                                <p>
+                                Kalle vai Kaarlo? Jouko Airolan otteen mukaan syntymänimi Kaarlo, Alli Airolan virkatodistuksessa nimi on Kalle.
+                                </p>
+                            </div>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ColumnAttribute">Sukupuoli</td>
+                    <td class="ColumnValue">mies</td>
+                </tr>
+                <tr>
+                    <td class="ColumnAttribute">Ikä kuollessa</td>
+                    <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
+                </tr>
+-->
+            </table>
+        </div -->
+
+        <div class="subsection" id="events">
+            <h4>Tapahtumat</h4>
+            <table class="infolist eventlist">
+                <thead>
+                    <tr>
+                        <th class="ColumnEvent">Tapahtuma</th>
+                        <th class="ColumnDate">Päivämäärä</th>
+                        <th class="ColumnPlace">Paikka</th>
+                        <th class="ColumnDescription">Kuvaus</th>
+                        <th class="ColumnNotes">Lisätiedot</th>
+                        <th class="ColumnSources">Lähteet</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for e in p.events %}
+                    <tr>
+                        <td class="ColumnEvent">
+                            <span class="id">{{e.uniq_id}}</span> {{e.type}}
+                        </td>
+                        <td class="ColumnDate">{{e.date}}</td>
+                        <td class="ColumnPlace">
+                            <a href="../../../plc/c/8/ce373c1942625f1bf8c.html" title="Tampere">
+                            Tampere
+                            </a>
+                        </td>
+                        <td class="ColumnDescription">&nbsp;</td>
+                        <td class="ColumnNotes">
+                            <div>
+                            </div>
+                        </td>
+                        <td class="ColumnSources">
+                         <a href="#sref3a">3a</a>
+                        </td>
+                    </tr>
+         {% endfor %}
+                 </tbody>
+            </table>
+        </div>
+        <div class="subsection" id="parents">
+            <h4>Vanhemmat (vakiodataa, ei ohjelmoitu tästä eteenpäin!)</h4>
+            <table class="infolist">
+                <thead>
+                    <tr>
+                        <th class="ColumnAttribute">Suhde kotihenkilöön</th>
+                        <th class="ColumnValue">Nimi</th>
+                        <th class="ColumnValue">Suhde tähän perheeseen (jollei syntymän kautta)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+                <tr>
+                    <td class="ColumnAttribute">Isä</td>
+                    <td class="ColumnValue">
+                        <a href="../../../ppl/8/a/ce373c19c2f1a78cda8.html">Silius, Carl Gustaf</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ColumnAttribute">Äiti</td>
+                    <td class="ColumnValue">
+                        <a href="../../../ppl/8/a/ce373c19c692ce8a5a8.html">Berttunen, Brita Kristina Eriksdotter</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ColumnAttribute">&nbsp;&nbsp;&nbsp;&nbsp;Veli</td>
+                    <td class="ColumnValue">&nbsp;&nbsp;&nbsp;&nbsp;<a href="../../../ppl/4/b/ce373c19c935b19acb4.html">Silius, Knut</a></td>
+                    <td class="ColumnValue"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="subsection" id="families">
+            <h4>Perheet</h4>
+            <table class="infolist fixed_subtables">
+                <tr class="BeginFamily">
+                    <td class="ColumnType">&nbsp</td>
+                    <td class="ColumnAttribute">&nbsp</td>
+                    <td class="ColumnValue"><a href="../../../fam/3/a/ce373c1906a3a1135a3.html" title="Airola, Kalle Kustaa ent. Silius ja Serenius, Saimi Alli Zuleima muodostama perhe">Airola, Kalle Kustaa ent. Silius ja Serenius, Saimi Alli Zuleima muodostama perhe</a></td>
+                </tr>
+                <tr class="BeginFamily">
+                    <td class="ColumnType">Avioliitto</td>
+                    <td class="ColumnAttribute">Vaimo</td>
+                    <td class="ColumnValue">
+                        <a href="../../../ppl/d/3/ce373c1949b5af12e3d.html">Serenius, Saimi Alli Zuleima</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ColumnType">&nbsp;</td>
+                    <td class="ColumnAttribute">&nbsp;</td>
+                    <td class="ColumnValue">
+                        <table class="infolist eventlist">
+                            <thead>
+                                <tr>
+                                    <th class="ColumnEvent">Tapahtuma</th>
+                                    <th class="ColumnDate">Päivämäärä</th>
+                                    <th class="ColumnPlace">Paikka</th>
+                                    <th class="ColumnDescription">Kuvaus</th>
+                                    <th class="ColumnNotes">Lisätiedot</th>
+                                    <th class="ColumnSources">Lähteet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ColumnEvent">
+                                    Avioliitto
+                                    </td>
+                                    <td class="ColumnDate">14.5.1912</td>
+                                    <td class="ColumnPlace">
+                                        <a href="../../../plc/f/7/ce373c18f583466d97f.html" title="Helsinki">
+                                        Helsinki
+                                        </a>
+                                    </td>
+                                    <td class="ColumnDescription">&nbsp;</td>
+                                    <td class="ColumnNotes">
+                                        <div>
+                                        </div>
+                                    </td>
+                                    <td class="ColumnSources">
+                                    &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ColumnEvent">
+                                    Avioero
+                                    </td>
+                                    <td class="ColumnDate">18.2.1926</td>
+                                    <td class="ColumnPlace">
+                                        <a href="../../../plc/f/7/ce373c18f583466d97f.html" title="Helsinki">
+                                        Helsinki
+                                        </a>
+                                    </td>
+                                    <td class="ColumnDescription">&nbsp;</td>
+                                    <td class="ColumnNotes">
+                                        <div>
+                                            <i class="NoteType">
+                                            Yleistä
+                                            </i>
+                                            <div class="grampsstylednote">
+                                                <p>
+                                                Maija kertoi eron tapahtuneen hänen ollessa 14 ikäinen / Heikin muistitieto 9.5.2014
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="ColumnSources">
+                                     <a href="#sref3a">3a</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <tr>
+                        <td class="ColumnType">&nbsp;</td>
+                        <td class="ColumnAttribute">Lapset (ei ohjelmoitu!)</td>
+                        <td class="ColumnValue">
+                            <ol>
+                                <li>
+                                    <a href="../../../ppl/f/d/ce373c18ffb7fb981df.html">Airola, Maija Kyllikki</a>
+                                </li>
+                            </ol>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ColumnType">&nbsp;</td>
+                        <td class="ColumnAttribute">Ominaisuudet</td>
+                        <td class="ColumnValue">
+                            <table class="infolist attrlist">
+                                <thead>
+                                    <tr>
+                                        <th class="ColumnType">Tyyppi</th>
+                                        <th class="ColumnValue">Arvo</th>
+                                        <th class="ColumnNotes">Lisätiedot</th>
+                                        <th class="ColumnSources">Lähteet</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="ColumnType">Lasten lukumäärä</td>
+                                        <td class="ColumnValue">1</td>
+                                        <td class="ColumnNotes"><div></div></td>
+                                        <td class="ColumnSources">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tr>
+                <tr class="BeginFamily">
+                    <td class="ColumnType">&nbsp</td>
+                    <td class="ColumnAttribute">&nbsp</td>
+                    <td class="ColumnValue"><a href="../../../fam/c/6/ce373c1945d4b51686c.html" title="Airola, Kalle Kustaa ent. Silius ja Airola, Irja Tuulikki os. Kajander muodostama perhe">Airola, Kalle Kustaa ent. Silius ja Airola, Irja Tuulikki os. Kajander muodostama perhe</a></td>
+                </tr>
+                <tr class="BeginFamily">
+                    <td class="ColumnType">Avioliitto</td>
+                    <td class="ColumnAttribute">Vaimo</td>
+                    <td class="ColumnValue">
+                        <a href="../../../ppl/1/e/ce373c195ac3fcc8ce1.html">Airola, Irja Tuulikki os. Kajander</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="ColumnType">&nbsp;</td>
+                    <td class="ColumnAttribute">&nbsp;</td>
+                    <td class="ColumnValue">
+                        <table class="infolist eventlist">
+                            <thead>
+                                <tr>
+                                    <th class="ColumnEvent">Tapahtuma</th>
+                                    <th class="ColumnDate">Päivämäärä</th>
+                                    <th class="ColumnPlace">Paikka</th>
+                                    <th class="ColumnDescription">Kuvaus</th>
+                                    <th class="ColumnNotes">Lisätiedot</th>
+                                    <th class="ColumnSources">Lähteet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ColumnEvent">
+                                    Avioliitto
+                                    </td>
+                                    <td class="ColumnDate">&nbsp;</td>
+                                    <td class="ColumnPlace">
+                                        <a href="../../../plc/f/7/ce373c18f583466d97f.html" title="Helsinki">
+                                        Helsinki
+                                        </a>
+                                    </td>
+                                    <td class="ColumnDescription">&nbsp;</td>
+                                    <td class="ColumnNotes">
+                                        <div>
+                                        </div>
+                                    </td>
+                                    <td class="ColumnSources">
+                                    &nbsp;
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <tr>
+                        <td class="ColumnType">&nbsp;</td>
+                        <td class="ColumnAttribute">Lapset</td>
+                        <td class="ColumnValue">
+                            <ol>
+                                <li>
+                                    <a href="../../../ppl/f/e/ce373c195dc54f0c8ef.html">Airola, Kalle Eero Ilmari</a>
+                                </li>
+                                <li>
+                                    <a href="../../../ppl/f/2/ce373c1984203db7f2f.html">Airola, Leena Irja Tuulikki</a>
+                                </li>
+                            </ol>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ColumnType">&nbsp;</td>
+                        <td class="ColumnAttribute">Ominaisuudet</td>
+                        <td class="ColumnValue">
+                            <table class="infolist attrlist">
+                                <thead>
+                                    <tr>
+                                        <th class="ColumnType">Tyyppi</th>
+                                        <th class="ColumnValue">Arvo</th>
+                                        <th class="ColumnNotes">Lisätiedot</th>
+                                        <th class="ColumnSources">Lähteet</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="ColumnType">Lasten lukumäärä</td>
+                                        <td class="ColumnValue">2</td>
+                                        <td class="ColumnNotes"><div></div></td>
+                                        <td class="ColumnSources">&nbsp;</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tr>
+            </table>
+        </div>
+        <div class="subsection" id="indivgallery">
+            <h4>Media</h4>
+            <div class="thumbnail">
+                <img alt="Kalle Kustaa Airola" src="../../../thumb/f/d/d4874a6fb2d54a8c0df.png" />
+                    <p>Kalle Kustaa Airola</p>
+            </div>
+            <div class="thumbnail">
+                <img alt="Kalle Airolan rippikuva" src="../../../thumb/1/1/d69a277c15e36abe511.png" />
+                    <p>Kalle Airolan rippikuva</p>
+            </div>
+            <div class="thumbnail">
+                <img alt="Kalle apteekissa" src="../../../thumb/b/5/d69a282586c65d1305b.png" />
+                    <p>Kalle apteekissa</p>
+            </div>
+            <div class="fullclear"></div>
+        </div>
+        <div class="subsection narrative">
+            <h4>Kerrottua</h4>
+            <div class="grampsstylednote">
+                <p>
+                http://www.helsinki.fi/keskusarkisto/matrikkelit/yomatrikkeli_1900_1907/Ylioppilasmatrikkeli_1905_1907.pdf
+                </p>
+                <p>
+                30107.    AIROLA    Kalle  Kustaa,  HO.  *  Tampere  5.6.1884,  vanht  seppä  Kaarle  Kustaa  Silius  ja  Birgitta  (Brita)  Stina  Perttunen.  Yo  Tampereen  reaalilys.  (yksit.).  Fm - yo → 1915. Farmaseutti 1905? Apteekkari (ei vielä 1932vk). † Loppi 26.4.1951. <br />
+                — Pso 2) 1927 Irja Tuulikki Kajander.
+                </p>
+            </div>
+        </div>
+        <div class="subsection" id="pedigree">
+            <h4>Esipolvien taulu</h4>
+            <ol class="pedigreegen">
+                <li>
+                    <a href="../../../ppl/8/a/ce373c19c2f1a78cda8.html">Silius, Carl Gustaf</a>
+                    <ol>
+                        <li class="spouse">
+                            <a href="../../../ppl/8/a/ce373c19c692ce8a5a8.html">Berttunen, Brita Kristina Eriksdotter</a>
+                            <ol>
+                                <li>
+                                    <a href="../../../ppl/4/b/ce373c19c935b19acb4.html">Silius, Knut</a>
+                                </li>
+                                <li>
+                                    <a href="../../../ppl/9/8/ce373c19cba64453b89.html">Silius, Karl Aleksander</a>
+                                </li>
+                                <li>
+                                    <a href="../../../ppl/3/a/d62cce4aee65110a2a3.html">Silius, Knut Theodor nuor.</a>
+                                </li>
+                                <li>
+                                    <a href="../../../ppl/1/5/ce373c19ce0245e8851.html">Silius, Aina Alina</a>
+                                </li>
+                                <li>
+                                    <a href="../../../ppl/2/a/ce373c19da6166834a2.html">Airola ent. Silius, Knut Theodor</a>
+                                </li>
+                                <li class="thisperson">
+                                Airola, Kalle Kustaa ent. Silius
+                                    <ol class="spouselist">
+                                        <li class="spouse">
+                                            <a href="../../../ppl/d/3/ce373c1949b5af12e3d.html">Serenius, Saimi Alli Zuleima</a>
+                                            <ol>
+                                                <li>
+                                                    <a href="../../../ppl/f/d/ce373c18ffb7fb981df.html">Airola, Maija Kyllikki</a>
+                                                </li>
+                                            </ol>
+                                        </li>
+                                        <li class="spouse">
+                                            <a href="../../../ppl/1/e/ce373c195ac3fcc8ce1.html">Airola, Irja Tuulikki os. Kajander</a>
+                                            <ol>
+                                                <li>
+                                                    <a href="../../../ppl/f/e/ce373c195dc54f0c8ef.html">Airola, Kalle Eero Ilmari</a>
+                                                </li>
+                                                <li>
+                                                    <a href="../../../ppl/f/2/ce373c1984203db7f2f.html">Airola, Leena Irja Tuulikki</a>
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li>
+                                    <a href="../../../ppl/2/1/ce373c19d7f6d6f7412.html">Silius, Hilja Kristina</a>
+                                </li>
+                                <li>
+                                    <a href="../../../ppl/3/1/ce373c19de07cf7a113.html">Airola, Saima Adele ent. Silius</a>
+                                </li>
+                                <li>
+                                    <a href="../../../ppl/8/5/ce373c19e4557f46258.html">Airola, Elsa Elina</a>
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        </div>
+        <!-- div class="subsection" id="tree"><h4>Esivanhemmat -->
+        <div class="subsection" id="sourcerefs">
+            <h4>Lähdeviitteet</h4>
+            <ol>
+                <li>
+                    <a href="../../../src/8/1/ce373c1945e77cfa818.html" title="Merikoski, Osmo: Kangasalan Silius-seppien suku" name ="sref1">
+                    Merikoski, Osmo: Kangasalan Silius-seppien suku
+                    </a>
+                </li>
+                <li>
+                    <a href="../../../src/c/3/ce373c18f8e0110453c.html" title="Mäkeläinen, Osmo: Osmon tutkimukset" name ="sref2">
+                    Mäkeläinen, Osmo: Osmon tutkimukset
+                    </a>
+                    <ol>
+                        <li id="sref2a">
+                            <ul>
+                                <li>
+                                Sivu: Osmon kirjaamia
+                                </li>
+                                <li>
+                                Lainaus: <div class="grampsstylednote"><p>Osmon omat selvitykset</p></div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="../../../src/1/1/cef51700e883ddf2011.html" title="Helsingin seurakuntayhtymä: Alli Airola virkatodistus" name ="sref3">
+                    Helsingin seurakuntayhtymä: Alli Airola virkatodistus
+                    </a>
+                    <ol>
+                        <li id="sref3a">
+                            <ul>
+                                <li>
+                                Sivu: ainoa sivu
+                                </li>
+                                <li>
+                                Luotettavuus: Korkea
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="../../../src/1/8/d64bb9e649d1b902981.html" title="Suomalainen Wirallinen Lehti" name ="sref4">
+                    Suomalainen Wirallinen Lehti
+                    </a>
+                    <ol>
+                        <li id="sref4a">
+                            <ul>
+                                <li>
+                                Päivämäärä: 3.6.1905
+                                </li>
+                                <li>
+                                Sivu: nro 101 lisälehti
+                                </li>
+                                <li>
+                                Luotettavuus: Korkea
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="../../../src/b/9/d60f8a2c58a28a6559b.html" title="Jouko Airola: K. G. Silius, yhteenveto" name ="sref5">
+                    Jouko Airola: K. G. Silius, yhteenveto
+                    </a>
+                    <ol>
+                        <li id="sref5a">
+                            <ul>
+                                <li>
+                                Sivu: s. 5
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}
