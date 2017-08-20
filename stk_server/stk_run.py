@@ -161,6 +161,7 @@ def list_people_by_surname(surname):
                            surname=surname, people=people)
     
     
+    #  linkki oli sukunimiluettelosta
 @app.route('/lista/person_data/<string:uniq_id>')
 def show_person_data(uniq_id): 
     """ henkilön tietojen näyttäminen ruudulla """
@@ -169,6 +170,28 @@ def show_person_data(uniq_id):
     return render_template("table_person_by_id.html", 
                            person=person, events=events, photos=photos)
 
+
+@app.route('/person/<string:ehto>')
+def show_person_page(ehto): 
+    """ henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
+    try:
+        if key == 'uniq_id':
+            person, events, photos = models.datareader.get_person_data_by_id(value)            
+        else:
+            raise(KeyError("Väärä hakuavain"))
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+#     return render_template("table_person_by_id.html", 
+#                            person=person, events=events, photos=photos)
+    return render_template("k_person.html", 
+                           person=person, events=events, photos=photos)
+
+    
     
 @app.route('/lista/family_data/<string:uniq_id>')
 def show_family_data(uniq_id): 
@@ -217,24 +240,24 @@ def nayta_ehdolla(ehto):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 
-@app.route('/k/<string:ehto>')
-def show_person_page(ehto):   
-    """ Näytä henkilötietosivu
-        oid=arvo        näyttää henkilön id:n mukaan
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
-    """
-    key, value = ehto.split('=')
-    models.dbutil.connect_db()
-    try:
-        if key == 'oid':
-            persons = models.datareader.lue_henkilot(oid=value)            
-        elif key == 'uniq_id':
-            persons = models.datareader.lue_henkilot2(uniq_id=value)            
-        else:
-            raise(KeyError("Väärä hakuavain"))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("k_person.html", persons=persons)
+# @app.route('/k/<string:ehto>')
+# def show_person_page(ehto):
+#     """ Näytä henkilötietosivu
+#         oid=arvo        näyttää henkilön id:n mukaan
+#         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+#     """
+#     key, value = ehto.split('=')
+#     models.dbutil.connect_db()
+#     try:
+#         if key == 'oid':
+#             persons = models.datareader.lue_henkilot(oid=value)            
+#         elif key == 'uniq_id':
+#             persons = models.datareader.lue_henkilot2(uniq_id=value)            
+#         else:
+#             raise(KeyError("Väärä hakuavain"))
+#     except KeyError as e:
+#         return redirect(url_for('virhesivu', code=1, text=str(e)))
+#     return render_template("k_person.html", persons=persons)
 
 
 """ ----------------------------------------------------------------------------
@@ -246,7 +269,7 @@ def tyhjenna():
     """ tietokannan tyhjentäminen mitään kyselemättä """
     models.dbutil.connect_db()
     models.dbutil.alusta_kanta()
-    return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
+    return render_template("talletettu.html", text="Koko kanta on muka tyhjennetty")
 
 
 @app.route('/yhdista', methods=['POST'])

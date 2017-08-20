@@ -2,13 +2,14 @@
 {% extends "k_layout.html" %}
 {% block title %}Tiedot kannasta{% endblock %}
 {% block body %}
-        Stk – Henkilön tiedot</h1>
+        Sukujaan – Henkilön tiedot</h1>
 {{ super() }}
 
+{% if person %}
     <div class="wrapper" id="nav" role="navigation">
         <div class="container">
             <ul class="menu" id="dropmenu">
-                <li class="CurrentSection"><a href="k_persons" title="Henkilöt">Henkilöt</a></li>
+                <li class="CurrentSection"><a href="/lista/k_persons" title="Henkilöt">Henkilöt</a></li>
                 <li><a href="#" title="Sukunimet">Sukunimet</a></li>
                 <li><a href="#" title="Perheet">Perheet</a></li>
                 <li><a href="#" title="Paikat">Paikat</a></li>
@@ -17,41 +18,40 @@
             </ul>
         </div>
     </div>
-{% for p in persons %}
     <div class="content" id="IndividualDetail">
-        <!-- div class="snapshot">
+        {% if photos %}<div class="snapshot">
             <div class="thumbnail">
-                <img alt="Kalle Kustaa Airola" src="../../../thumb/f/d/d4874a6fb2d54a8c0df19,10-81,59.png" />
+                <img alt="Kuvassa {{photos[0].description}}" src="{{photos[0].src}}" />
             </div>
-        </div -->
+        </div>{% endif %}
         <h3><!--Airola, Kalle Kustaa ent. Silius<sup><small> <a href="#sref1">1</a> <a href="#sref2a">2a</a></small></sup>-->
-        {{p.name[0].firstname}} <b>{{p.name[0].surname}}</b></h3>
+        {{person.name[0].firstname}} <i>{{person.name[0].suffix}}</i> <b>{{person.name[0].surname}}</b></h3>
 
         <div id="summaryarea">
             <table class="infolist">
                 <tr>
-                    <td class="ColumnAttribute">Referenssinimi</td>
-                    <td class="ColumnValue">{% if p.name[0].refname %}<br>{{p.name[0].refname}}{% else %}<i>Ei tiedossa</i>{% endif %}</td>
+                    <td class="ColumnAttribute">Tunniste</td>
+                    <td class="ColumnValue">{{person.id}}</td>
                 </tr>
-<!--
-                <tr>
-                    <td class="ColumnAttribute">Syntymänimi</td>
+                {% for pname in person.name %}<tr>
+                    <td class="ColumnAttribute">{{pname.type}}</td>
                     <td class="ColumnValue">
-                    Silius, Kaarlo Kustaa <a href="#sref3a">3a</a> <a href="#sref5a">5a</a>
-                        <ul>
-                            <div class="grampsstylednote">
-                                <p>
-                                Kalle vai Kaarlo? Jouko Airolan otteen mukaan syntymänimi Kaarlo, Alli Airolan virkatodistuksessa nimi on Kalle.
-                                </p>
-                            </div>
-                        </ul>
+                        {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
+                        <span title="etunimi">{{pname.firstname}}</span>
+                        <i title="patronyymi">{{pname.suffix}}</i>
+                        <b title="sukunimi">{{pname.surname}}</b> <!-- todo: <a href="#sref3a">3a</a> -->
+                        {% if pname.refname %}<tt title="referenssinimi">{{pname.refname}}</tt>{% endif %}
+                   <!-- <ul><div class="grampsstylednote">
+                            <p>Kalle vai Kaarlo? Jouko Airolan otteen mukaan syntymänimi Kaarlo, Alli Airolan virkatodistuksessa nimi on Kalle.</p>
+                        </div></ul>
+                   -->
                     </td>
-                </tr>
-                <tr>
+                </tr>{% endfor %}
+                {% if person.gender %}<tr>
                     <td class="ColumnAttribute">Sukupuoli</td>
-                    <td class="ColumnValue">mies</td>
-                </tr>
-                <tr>
+                    <td class="ColumnValue">{{person.gender}}</td>
+                </tr>{% endif %}
+<!--                <tr>
                     <td class="ColumnAttribute">Ikä kuollessa</td>
                     <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
                 </tr>
@@ -73,7 +73,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in p.events %}
+        {% for e in events %}
                     <tr>
                         <td class="ColumnEvent">
                             <span class="id">{{e.uniq_id}}</span> {{e.type}}
@@ -98,8 +98,8 @@
             </table>
         </div>
         <div class="subsection" id="parents">
-            <h4>Vanhemmat (vakiodataa, ei ohjelmoitu tästä eteenpäin!)</h4>
-            <table class="infolist">
+            <h4>Vanhemmat</h4>
+<!--        <table class="infolist">
                 <thead>
                     <tr>
                         <th class="ColumnAttribute">Suhde kotihenkilöön</th>
@@ -127,10 +127,11 @@
                     <td class="ColumnValue"></td>
                 </tr>
             </table>
+-->
         </div>
         <div class="subsection" id="families">
             <h4>Perheet</h4>
-            <table class="infolist fixed_subtables">
+<!--        <table class="infolist fixed_subtables">
                 <tr class="BeginFamily">
                     <td class="ColumnType">&nbsp</td>
                     <td class="ColumnAttribute">&nbsp</td>
@@ -334,14 +335,16 @@
                     </tr>
                 </tr>
             </table>
+-->
         </div>
         <div class="subsection" id="indivgallery">
             <h4>Media</h4>
-            <div class="thumbnail">
-                <img alt="Kalle Kustaa Airola" src="../../../thumb/f/d/d4874a6fb2d54a8c0df.png" />
-                    <p>Kalle Kustaa Airola</p>
+        {% for photo in photos %}<div class="thumbnail">
+                <img alt="kuva" src="{{photo.src}}" />
+                    <p>{{photo.description}}</p>
             </div>
-            <div class="thumbnail">
+        {% endfor %}
+<!--        <div class="thumbnail">
                 <img alt="Kalle Airolan rippikuva" src="../../../thumb/1/1/d69a277c15e36abe511.png" />
                     <p>Kalle Airolan rippikuva</p>
             </div>
@@ -349,6 +352,7 @@
                 <img alt="Kalle apteekissa" src="../../../thumb/b/5/d69a282586c65d1305b.png" />
                     <p>Kalle apteekissa</p>
             </div>
+-->
             <div class="fullclear"></div>
         </div>
         <div class="subsection narrative">
@@ -506,5 +510,9 @@
             </ol>
         </div>
     </div>
-    {% endfor %}
+{% else %}
+        <p>{{person.uniq_id}}</p>
+{% endif %}
+
 {% endblock %}
+
