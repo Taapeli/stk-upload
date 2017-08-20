@@ -30,8 +30,8 @@
         <div id="summaryarea">
             <table class="infolist">
                 <tr>
-                    <td class="ColumnAttribute">Tunniste</td>
-                    <td class="ColumnValue">{{person.id}}</td>
+                    <td class="ColumnAttribute">Tunnisteet</td>
+                    <td class="ColumnValue">{{person.uniq_id}} / <tt>{{person.id}}</tt></td>
                 </tr>
                 {% for pname in person.name %}<tr>
                     <td class="ColumnAttribute">{{pname.type}}</td>

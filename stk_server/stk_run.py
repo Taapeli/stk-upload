@@ -192,7 +192,6 @@ def show_person_page(ehto):
                            person=person, events=events, photos=photos)
 
     
-    
 @app.route('/lista/family_data/<string:uniq_id>')
 def show_family_data(uniq_id): 
     """ henkilön perheen tietojen näyttäminen ruudulla """
