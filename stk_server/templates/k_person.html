@@ -2,10 +2,9 @@
 {% extends "k_layout.html" %}
 {% block title %}Tiedot kannasta{% endblock %}
 {% block body %}
-        Sukujaan – Henkilön tiedot</h1>
+        Sukujaan – henkilön tiedot</h1>
 {{ super() }}
 
-{% if person %}
     <div class="wrapper" id="nav" role="navigation">
         <div class="container">
             <ul class="menu" id="dropmenu">
@@ -24,14 +23,15 @@
                 <img alt="Kuvassa {{photos[0].description}}" src="{{photos[0].src}}" />
             </div>
         </div>{% endif %}
-        <h3><!--Airola, Kalle Kustaa ent. Silius<sup><small> <a href="#sref1">1</a> <a href="#sref2a">2a</a></small></sup>-->
-        {{person.name[0].firstname}} <i>{{person.name[0].suffix}}</i> <b>{{person.name[0].surname}}</b></h3>
+        <h3>{{person.name[0].firstname}} <i>{{person.name[0].suffix}}</i> <b>{{person.name[0].surname}}</b>
+            <sup><small> <a href="#sref1a">1a</a></small></sup>
+        </h3>
 
         <div id="summaryarea">
             <table class="infolist">
                 <tr>
                     <td class="ColumnAttribute">Tunnisteet</td>
-                    <td class="ColumnValue">{{person.uniq_id}} / <tt>{{person.id}}</tt></td>
+                    <td class="ColumnValue"><span class="id">{{person.uniq_id}}</span> / <tt>{{person.id}}</tt></td>
                 </tr>
                 {% for pname in person.name %}<tr>
                     <td class="ColumnAttribute">{{pname.type}}</td>
@@ -42,7 +42,7 @@
                         <b title="sukunimi">{{pname.surname}}</b> <!-- todo: <a href="#sref3a">3a</a> -->
                         {% if pname.refname %}<tt title="referenssinimi">{{pname.refname}}</tt>{% endif %}
                    <!-- <ul><div class="grampsstylednote">
-                            <p>Kalle vai Kaarlo? Jouko Airolan otteen mukaan syntymänimi Kaarlo, Alli Airolan virkatodistuksessa nimi on Kalle.</p>
+                            <p>Kalle vai Kaarlo? Tähän tulee Note</p>
                         </div></ul>
                    -->
                     </td>
@@ -51,7 +51,7 @@
                     <td class="ColumnAttribute">Sukupuoli</td>
                     <td class="ColumnValue">{{person.gender}}</td>
                 </tr>{% endif %}
-<!--                <tr>
+<!--            <tr>
                     <td class="ColumnAttribute">Ikä kuollessa</td>
                     <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
                 </tr>
@@ -81,13 +81,11 @@
                         <td class="ColumnDate">{{e.date}}</td>
                         <td class="ColumnPlace">
                             <a href="../../../plc/c/8/ce373c1942625f1bf8c.html" title="Tampere">
-                            Tampere
-                            </a>
+                            Tampere</a>
                         </td>
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">
-                            <div>
-                            </div>
+                            <div></div>
                         </td>
                         <td class="ColumnSources">
                          <a href="#sref3a">3a</a>
@@ -369,7 +367,7 @@
         </div>
         <div class="subsection" id="pedigree">
             <h4>Esipolvien taulu</h4>
-            <ol class="pedigreegen">
+<!--        <ol class="pedigreegen">
                 <li>
                     <a href="../../../ppl/8/a/ce373c19c2f1a78cda8.html">Silius, Carl Gustaf</a>
                     <ol>
@@ -430,38 +428,17 @@
                 </li>
             </ol>
         </div>
+-->
         <!-- div class="subsection" id="tree"><h4>Esivanhemmat -->
         <div class="subsection" id="sourcerefs">
             <h4>Lähdeviitteet</h4>
             <ol>
                 <li>
-                    <a href="../../../src/8/1/ce373c1945e77cfa818.html" title="Merikoski, Osmo: Kangasalan Silius-seppien suku" name ="sref1">
-                    Merikoski, Osmo: Kangasalan Silius-seppien suku
-                    </a>
-                </li>
-                <li>
-                    <a href="../../../src/c/3/ce373c18f8e0110453c.html" title="Mäkeläinen, Osmo: Osmon tutkimukset" name ="sref2">
-                    Mäkeläinen, Osmo: Osmon tutkimukset
-                    </a>
-                    <ol>
-                        <li id="sref2a">
-                            <ul>
-                                <li>
-                                Sivu: Osmon kirjaamia
-                                </li>
-                                <li>
-                                Lainaus: <div class="grampsstylednote"><p>Osmon omat selvitykset</p></div>
-                                </li>
-                            </ul>
-                        </li>
-                    </ol>
-                </li>
-                <li>
                     <a href="../../../src/1/1/cef51700e883ddf2011.html" title="Helsingin seurakuntayhtymä: Alli Airola virkatodistus" name ="sref3">
                     Helsingin seurakuntayhtymä: Alli Airola virkatodistus
                     </a>
                     <ol>
-                        <li id="sref3a">
+                        <li id="sref1a">
                             <ul>
                                 <li>
                                 Sivu: ainoa sivu
@@ -473,46 +450,8 @@
                         </li>
                     </ol>
                 </li>
-                <li>
-                    <a href="../../../src/1/8/d64bb9e649d1b902981.html" title="Suomalainen Wirallinen Lehti" name ="sref4">
-                    Suomalainen Wirallinen Lehti
-                    </a>
-                    <ol>
-                        <li id="sref4a">
-                            <ul>
-                                <li>
-                                Päivämäärä: 3.6.1905
-                                </li>
-                                <li>
-                                Sivu: nro 101 lisälehti
-                                </li>
-                                <li>
-                                Luotettavuus: Korkea
-                                </li>
-                            </ul>
-                        </li>
-                    </ol>
-                </li>
-                <li>
-                    <a href="../../../src/b/9/d60f8a2c58a28a6559b.html" title="Jouko Airola: K. G. Silius, yhteenveto" name ="sref5">
-                    Jouko Airola: K. G. Silius, yhteenveto
-                    </a>
-                    <ol>
-                        <li id="sref5a">
-                            <ul>
-                                <li>
-                                Sivu: s. 5
-                                </li>
-                            </ul>
-                        </li>
-                    </ol>
-                </li>
             </ol>
         </div>
     </div>
-{% else %}
-        <p>{{person.uniq_id}}</p>
-{% endif %}
-
 {% endblock %}
 

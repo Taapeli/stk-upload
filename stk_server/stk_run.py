@@ -27,46 +27,29 @@ def index():
     return render_template("index.html")
 
 
-@app.route('/lataa', methods=['POST'])
-def lataa(): 
-    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
+""" ----------------------------- Kertova-sivut --------------------------------
+"""
+
+@app.route('/person/<string:ehto>')
+def show_person_page(ehto): 
+    """ henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
     """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
     try:
-        infile = request.files['filenm']
-        aineisto = request.form['aineisto']
-        logging.debug('Saatiin ' + aineisto + ", tiedosto: " + infile.filename )
-        
-        models.loadfile.upload_file(infile)
-         
-    except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-
-    return redirect(url_for('talleta', filename=infile.filename, subj=aineisto))
-
-
-@app.route('/talleta/<string:subj>/<string:filename>')
-def talleta(filename, subj):   
-    """ tietojen tallettaminen kantaan """
-    pathname = models.loadfile.fullname(filename)
-    dburi = models.dbutil.connect_db()
-    try:
-        if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
-            status = models.datareader.datastorer(pathname)
-        elif subj == 'refnimet': # Referenssinimet
-            # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
-            status = models.cvs_refnames.referenssinimet(pathname, maxrows=100)
-        elif subj == 'xml_file': # gramps backup xml file to Neo4j db
-            status = models.datareader.xml_to_neo4j(pathname)
-        elif subj == 'karajat': # TODO: Tekemättä
-            status = "Käräjätietojen lukua ei ole vielä tehty"
+        if key == 'uniq_id':
+            person, events, photos = models.datareader.get_person_data_by_id(value)            
         else:
-            return redirect(url_for('virhesivu', code=1, text= \
-                "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
+            raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
-        return render_template("virhe_lataus.html", code=1, \
-               text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
-    return render_template("talletettu.html", text=status, uri=dburi)
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_person.html", 
+                           person=person, events=events, photos=photos)
 
+
+""" ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
+"""
 
 @app.route('/lista/<string:subj>')
 def nayta_henkilot(subj):   
@@ -128,16 +111,6 @@ def nayta_henkilot(subj):
             "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
 
 
-@app.route('/aseta/refnames')
-def aseta_refnames(): 
-    """ referenssinimien asettaminen henkilöille """
-    models.dbutil.connect_db()
-    dburi = models.dbutil.connect_db()
-    
-    message = models.datareader.set_refnames()
-    return render_template("talletettu.html", text=message, uri=dburi)
-
-
 @app.route('/lista/refnimet', defaults={'reftype': None})
 @app.route('/lista/refnimet/<string:reftype>')
 def nayta_refnimet(reftype): 
@@ -168,27 +141,6 @@ def show_person_data(uniq_id):
     models.dbutil.connect_db()
     person, events, photos = models.datareader.get_person_data_by_id(uniq_id)
     return render_template("table_person_by_id.html", 
-                           person=person, events=events, photos=photos)
-
-
-@app.route('/person/<string:ehto>')
-def show_person_page(ehto): 
-    """ henkilön tietojen näyttäminen ruudulla 
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
-    """
-    models.dbutil.connect_db()
-    key, value = ehto.split('=')
-    try:
-        if key == 'uniq_id':
-            person, events, photos = models.datareader.get_person_data_by_id(value)            
-        else:
-            raise(KeyError("Väärä hakuavain"))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-
-#     return render_template("table_person_by_id.html", 
-#                            person=person, events=events, photos=photos)
-    return render_template("k_person.html", 
                            person=person, events=events, photos=photos)
 
     
@@ -239,24 +191,49 @@ def nayta_ehdolla(ehto):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 
-# @app.route('/k/<string:ehto>')
-# def show_person_page(ehto):
-#     """ Näytä henkilötietosivu
-#         oid=arvo        näyttää henkilön id:n mukaan
-#         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
-#     """
-#     key, value = ehto.split('=')
-#     models.dbutil.connect_db()
-#     try:
-#         if key == 'oid':
-#             persons = models.datareader.lue_henkilot(oid=value)            
-#         elif key == 'uniq_id':
-#             persons = models.datareader.lue_henkilot2(uniq_id=value)            
-#         else:
-#             raise(KeyError("Väärä hakuavain"))
-#     except KeyError as e:
-#         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     return render_template("k_person.html", persons=persons)
+
+""" -------------------------- Tietojen talletus ------------------------------
+"""
+
+@app.route('/lataa', methods=['POST'])
+def lataa(): 
+    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
+    """
+    try:
+        infile = request.files['filenm']
+        aineisto = request.form['aineisto']
+        logging.debug('Saatiin ' + aineisto + ", tiedosto: " + infile.filename )
+        
+        models.loadfile.upload_file(infile)
+         
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('talleta', filename=infile.filename, subj=aineisto))
+
+
+@app.route('/talleta/<string:subj>/<string:filename>')
+def talleta(filename, subj):   
+    """ tietojen tallettaminen kantaan """
+    pathname = models.loadfile.fullname(filename)
+    dburi = models.dbutil.connect_db()
+    try:
+        if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
+            status = models.datareader.datastorer(pathname)
+        elif subj == 'refnimet': # Referenssinimet
+            # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
+            status = models.cvs_refnames.referenssinimet(pathname, maxrows=100)
+        elif subj == 'xml_file': # gramps backup xml file to Neo4j db
+            status = models.datareader.xml_to_neo4j(pathname)
+        elif subj == 'karajat': # TODO: Tekemättä
+            status = "Käräjätietojen lukua ei ole vielä tehty"
+        else:
+            return redirect(url_for('virhesivu', code=1, text= \
+                "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
+    except KeyError as e:
+        return render_template("virhe_lataus.html", code=1, \
+               text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
+    return render_template("talletettu.html", text=status, uri=dburi)
 
 
 """ ----------------------------------------------------------------------------
@@ -269,6 +246,16 @@ def tyhjenna():
     models.dbutil.connect_db()
     models.dbutil.alusta_kanta()
     return render_template("talletettu.html", text="Koko kanta on muka tyhjennetty")
+
+
+@app.route('/aseta/refnames')
+def aseta_refnames(): 
+    """ referenssinimien asettaminen henkilöille """
+    models.dbutil.connect_db()
+    dburi = models.dbutil.connect_db()
+    
+    message = models.datareader.set_refnames()
+    return render_template("talletettu.html", text=message, uri=dburi)
 
 
 @app.route('/yhdista', methods=['POST'])
