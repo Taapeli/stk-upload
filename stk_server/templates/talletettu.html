@@ -13,7 +13,9 @@
         </ol>
       {% endif %}
     {% endwith %}
-    {% if text %}
+    {% if text is string %}
+	       <p>{{text}}</p>
+	    {% else %}
 	    {% for line in text %}
 	    	<p>{{line}}</p>
 	    {% endfor %}

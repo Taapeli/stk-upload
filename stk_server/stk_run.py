@@ -27,98 +27,29 @@ def index():
     return render_template("index.html")
 
 
-@app.route('/lataa1a', methods=['POST'])
-def lataa1a():
-    """ Lataa tiedoston ja näyttää sen """
-    try:
-        infile = request.files['filenm']
-        logging.debug('Ladataan tiedosto ' + infile.filename)
-        models.loadfile.upload_file(infile)
-    except Exception as e:
-        return redirect(url_for('virhesivu', code=415, text=str(e)))
+""" ----------------------------- Kertova-sivut --------------------------------
+"""
 
-    return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
-
-        
-@app.route('/lataa1b', methods=['POST'])
-def lataa1b(): 
-    """ Lataa tiedoston ja näyttää sen taulukkona """
-    infile = request.files['filenm']
-    try:
-        models.loadfile.upload_file(infile)
-    except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-
-    return redirect(url_for('nayta1', filename=infile.filename, fmt='table'))
-
-
-@app.route('/lista1/<string:fmt>/<string:filename>')
-def nayta1(filename, fmt):   
-    """ tiedoston näyttäminen ruudulla """
-    try:
-        pathname = models.loadfile.fullname(filename)
-        with open(pathname, 'r', encoding='UTF-8') as f:
-            read_data = f.read()    
-    except IOError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    except UnicodeDecodeError as e:
-        return redirect(url_for('virhesivu', code=1, \
-               text="Tiedosto ei ole UTF-8. " + str(e)))  
-
-    # Vaihtoehto a:
-    if fmt == 'list':   # Tiedosto sellaisenaan
-        return render_template("lista1.html", name=pathname, data=read_data)
-    
-    # Vaihtoehto b: Luetaan tiedot taulukoksi
-    else:
-        try:
-            persons = models.datareader.henkilolista(pathname)
-            return render_template("table_persons.html", name=pathname, \
-                   persons=persons)
-        except Exception as e:
-            return redirect(url_for('virhesivu', code=1, text=str(e)))
-        
-
-@app.route('/lataa', methods=['POST'])
-def lataa(): 
-    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
+@app.route('/person/<string:ehto>')
+def show_person_page(ehto): 
+    """ henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
     """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
     try:
-        infile = request.files['filenm']
-        aineisto = request.form['aineisto']
-        logging.debug('Saatiin ' + aineisto + ", tiedosto: " + infile.filename )
-        
-        models.loadfile.upload_file(infile)
-         
-    except Exception as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-
-    return redirect(url_for('talleta', filename=infile.filename, subj=aineisto))
-
-
-@app.route('/talleta/<string:subj>/<string:filename>')
-def talleta(filename, subj):   
-    """ tietojen tallettaminen kantaan """
-    pathname = models.loadfile.fullname(filename)
-    dburi = models.dbutil.connect_db()
-    try:
-        if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
-            status = models.datareader.datastorer(pathname)
-        elif subj == 'refnimet': # Referenssinimet
-            # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
-            status = models.cvs_refnames.referenssinimet(pathname, maxrows=100)
-        elif subj == 'xml_file': # gramps backup xml file to Neo4j db
-            status = models.datareader.xml_to_neo4j(pathname)
-        elif subj == 'karajat': # TODO: Tekemättä
-            status = "Käräjätietojen lukua ei ole vielä tehty"
+        if key == 'uniq_id':
+            person, events, photos = models.datareader.get_person_data_by_id(value)            
         else:
-            return redirect(url_for('virhesivu', code=1, text= \
-                "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
+            raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
-        return render_template("virhe_lataus.html", code=1, \
-               text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
-    return render_template("talletettu.html", text=status, uri=dburi)
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_person.html", 
+                           person=person, events=events, photos=photos)
 
+
+""" ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
+"""
 
 @app.route('/lista/<string:subj>')
 def nayta_henkilot(subj):   
@@ -180,16 +111,6 @@ def nayta_henkilot(subj):
             "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
 
 
-@app.route('/aseta/refnames')
-def aseta_refnames(): 
-    """ referenssinimien asettaminen henkilöille """
-    models.dbutil.connect_db()
-    dburi = models.dbutil.connect_db()
-    
-    message = models.datareader.set_refnames()
-    return render_template("talletettu.html", text=message, uri=dburi)
-
-
 @app.route('/lista/refnimet', defaults={'reftype': None})
 @app.route('/lista/refnimet/<string:reftype>')
 def nayta_refnimet(reftype): 
@@ -213,6 +134,7 @@ def list_people_by_surname(surname):
                            surname=surname, people=people)
     
     
+    #  linkki oli sukunimiluettelosta
 @app.route('/lista/person_data/<string:uniq_id>')
 def show_person_data(uniq_id): 
     """ henkilön tietojen näyttäminen ruudulla """
@@ -220,7 +142,7 @@ def show_person_data(uniq_id):
     person, events, photos = models.datareader.get_person_data_by_id(uniq_id)
     return render_template("table_person_by_id.html", 
                            person=person, events=events, photos=photos)
-    
+
     
 @app.route('/lista/family_data/<string:uniq_id>')
 def show_family_data(uniq_id): 
@@ -229,40 +151,6 @@ def show_family_data(uniq_id):
     person, families = models.datareader.get_families_data_by_id(uniq_id)
     return render_template("table_families_by_id.html", 
                            person=person, families=families)
-
-
-@app.route('/tyhjenna/kaikki/kannasta')
-def tyhjenna():   
-    """ tietokannan tyhjentäminen mitään kyselemättä """
-    models.dbutil.connect_db()
-    models.dbutil.alusta_kanta()
-    return render_template("talletettu.html", text="Koko kanta on tyhjennetty")
-
-
-@app.route('/yhdista', methods=['POST'])
-def nimien_yhdistely():   
-    """ Nimien listaus tietokannasta ehtolauseella
-        oid=arvo        näyttää nimetyn henkilön
-        names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
-    """
-    names = request.form['names']
-    logging.debug('Poimitaan ' + names )
-    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
-
-
-@app.route('/samahenkilo', methods=['POST'])
-def henkiloiden_yhdistely():   
-    """ Yhdistetään base-henkilöön join-henkilöt tapahtumineen, 
-        minkä jälkeen näytetään muuttunut henkilölista
-    """
-    names = request.form['names']
-    print (dir(request.form))
-    base_id = request.form['base']
-    join_ids = request.form.getlist('join')
-    #TODO lisättävä valitut ref.nimet, jahka niitä tulee
-    models.dataupdater.joinpersons(base_id, join_ids)
-    flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
-    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
 
 
 @app.route('/poimi/<string:ehto>')
@@ -303,6 +191,99 @@ def nayta_ehdolla(ehto):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 
+
+""" -------------------------- Tietojen talletus ------------------------------
+"""
+
+@app.route('/lataa', methods=['POST'])
+def lataa(): 
+    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
+    """
+    try:
+        infile = request.files['filenm']
+        aineisto = request.form['aineisto']
+        logging.debug('Saatiin ' + aineisto + ", tiedosto: " + infile.filename )
+        
+        models.loadfile.upload_file(infile)
+         
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('talleta', filename=infile.filename, subj=aineisto))
+
+
+@app.route('/talleta/<string:subj>/<string:filename>')
+def talleta(filename, subj):   
+    """ tietojen tallettaminen kantaan """
+    pathname = models.loadfile.fullname(filename)
+    dburi = models.dbutil.connect_db()
+    try:
+        if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
+            status = models.datareader.datastorer(pathname)
+        elif subj == 'refnimet': # Referenssinimet
+            # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
+            status = models.cvs_refnames.referenssinimet(pathname, maxrows=100)
+        elif subj == 'xml_file': # gramps backup xml file to Neo4j db
+            status = models.datareader.xml_to_neo4j(pathname)
+        elif subj == 'karajat': # TODO: Tekemättä
+            status = "Käräjätietojen lukua ei ole vielä tehty"
+        else:
+            return redirect(url_for('virhesivu', code=1, text= \
+                "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
+    except KeyError as e:
+        return render_template("virhe_lataus.html", code=1, \
+               text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
+    return render_template("talletettu.html", text=status, uri=dburi)
+
+
+""" ----------------------------------------------------------------------------
+    Hallinta- ja harjoitusnäyttöjä
+"""
+
+@app.route('/tyhjenna/kaikki/kannasta')
+def tyhjenna():   
+    """ tietokannan tyhjentäminen mitään kyselemättä """
+    models.dbutil.connect_db()
+    models.dbutil.alusta_kanta()
+    return render_template("talletettu.html", text="Koko kanta on muka tyhjennetty")
+
+
+@app.route('/aseta/refnames')
+def aseta_refnames(): 
+    """ referenssinimien asettaminen henkilöille """
+    models.dbutil.connect_db()
+    dburi = models.dbutil.connect_db()
+    
+    message = models.datareader.set_refnames()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+
+@app.route('/yhdista', methods=['POST'])
+def nimien_yhdistely():   
+    """ Nimien listaus tietokannasta ehtolauseella
+        oid=arvo        näyttää nimetyn henkilön
+        names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
+    """
+    names = request.form['names']
+    logging.debug('Poimitaan ' + names )
+    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+
+
+@app.route('/samahenkilo', methods=['POST'])
+def henkiloiden_yhdistely():   
+    """ Yhdistetään base-henkilöön join-henkilöt tapahtumineen, 
+        minkä jälkeen näytetään muuttunut henkilölista
+    """
+    names = request.form['names']
+    print (dir(request.form))
+    base_id = request.form['base']
+    join_ids = request.form.getlist('join')
+    #TODO lisättävä valitut ref.nimet, jahka niitä tulee
+    models.dataupdater.joinpersons(base_id, join_ids)
+    flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
+    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+
+
 @app.route('/newuser', methods=['POST'])
 def new_user(): 
     """ Lisää tai päivittää käyttäjätiedon
@@ -332,11 +313,74 @@ def virhesivu(code, text=''):
     return render_template("virhe_lataus.html", code=code, text=text)
 
 
+""" ----------------------------------------------------------------------------
+    Version 1 vanhoja harjoitussivuja ilman tietokantaa
+"""
+
+@app.route('/vanhat')
+def index_old(): 
+    """Vanhan aloitussivun piirtäminen"""
+    return render_template("index_1.html")
+
+
+@app.route('/lataa1a', methods=['POST'])
+def lataa1a():
+    """ Lataa tiedoston ja näyttää sen """
+    try:
+        infile = request.files['filenm']
+        logging.debug('Ladataan tiedosto ' + infile.filename)
+        models.loadfile.upload_file(infile)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=415, text=str(e)))
+
+    return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
+
+        
+@app.route('/lataa1b', methods=['POST'])
+def lataa1b(): 
+    """ Lataa tiedoston ja näyttää sen taulukkona """
+    infile = request.files['filenm']
+    try:
+        models.loadfile.upload_file(infile)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('nayta1', filename=infile.filename, fmt='table'))
+
+
+@app.route('/lista1/<string:fmt>/<string:filename>')
+def nayta1(filename, fmt):   
+    """ tiedoston näyttäminen ruudulla """
+    try:
+        pathname = models.loadfile.fullname(filename)
+        with open(pathname, 'r', encoding='UTF-8') as f:
+            read_data = f.read()    
+    except IOError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    except UnicodeDecodeError as e:
+        return redirect(url_for('virhesivu', code=1, \
+               text="Tiedosto ei ole UTF-8. " + str(e)))  
+
+    # Vaihtoehto a:
+    if fmt == 'list':   # Tiedosto sellaisenaan
+        return render_template("lista1.html", name=pathname, data=read_data)
+    
+    # Vaihtoehto b: Luetaan tiedot taulukoksi
+    else:
+        try:
+            persons = models.datareader.henkilolista(pathname)
+            return render_template("table_persons.html", name=pathname, \
+                   persons=persons)
+        except Exception as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+
 @app.route('/stk')
 def stk_harjoitus():   
     return render_template("a_home.html")
 
 
+""" ----------------------------- Käynnistys ------------------------------- """
 
 if __name__ == '__main__':
     if True:

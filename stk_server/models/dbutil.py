@@ -60,7 +60,7 @@ RETURN a.handle AS handle''', {"inc": inc})
 
 def alusta_kanta():
     """ Koko kanta tyhjennetään """
-    logging.info('Tietokanta tyhjennetään!')
+    logging.info('EI KÄYTÖSSÄ! Tietokanta tyhjennetään!')
     
 #TODO: Korjaa tämä: skeema sch määrittelemättä
 #     # Poistetaan vanhat rajoitteet ja indeksit
