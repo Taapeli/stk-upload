@@ -2,7 +2,7 @@
 {% extends "k_layout.html" %}
 {% block title %}Tiedot kannasta{% endblock %}
 {% block body %}
-        Sukujaan – henkilön tiedot</h1>
+        Sukujaan – paikan tapahtumat</h1>
 {{ super() }}
 
     <div class="wrapper" id="nav" role="navigation">
@@ -80,7 +80,7 @@
                         </td>
                         <td class="ColumnDate">{{e.date}}</td>
                         <td class="ColumnPlace">
-                            <a href="/events/{{e.locid}}/{{e.location}}" title="{{e.ltype}}">
+                            <a href="/events/locid={{e.lid}}" title="{{e.ltype}}">
                             {{e.location}}</a>
                         </td>
                         <td class="ColumnDescription">&nbsp;</td>

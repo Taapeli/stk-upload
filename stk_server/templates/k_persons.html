@@ -44,7 +44,6 @@ henkilön sivulle.
 			<tbody>
 	{% if persons %}
 	    {% for p in persons %}{% set ini = p.name[0].surname|list|first %}
-<p> {{p.name[0].surname}} | jos "{{ini}}" != "{{alpha}}" {% if alpha != ini %} niin uusi {% endif %} </p> 
 	            <tr><td class="ColumnAlpha">{% if alpha != ini %}
 		               {%set alpha = ini %}
 		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>

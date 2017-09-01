@@ -323,6 +323,38 @@ RETURN person, name
 
 
     @staticmethod       
+    def get_person_events_by_place (loc_id=None, nmax=0):
+        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
+            get_person_events_by_place(loc_id=123) Paikan mukaan poimitut henkilötapahtumat
+            - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
+            
+        Palauttaa esimerkin mukaiset tiedot:
+        ╒═══════╤══════════════════════════════╤═══════╤════════════╕
+        │"uid"  │"names"                       │"etype"│"edate"     │
+        ╞═══════╪══════════════════════════════╪═══════╪════════════╡
+        │"23063"│[["Birth Name","Justina Cathar│"Death"│"1789-12-26"│
+        │       │ina","Justander"]]            │       │            │
+        ├───────┼──────────────────────────────┼───────┼────────────┤
+        │"23194"│[["Birth Name","Johanna Ulrika│"Death"│"1835-08-05"│
+        │       │","Hedberg"],["Also Known As",│       │            │
+        │       │"","Borg"]]                   │       │            │
+        └───────┴──────────────────────────────┴───────┴────────────┘
+        """
+        
+        query = """
+MATCH (i:Person)-->(e:Event)-[:PLACE]->(p:Place)
+  WHERE id(p) = {pid}
+MATCH (i) --> (n:Name)
+RETURN id(i) AS uid,
+       COLLECT([n.type, n.firstname, n.surname]) AS names,
+       e.type AS etype,
+       e.date AS edate
+ORDER BY edate"""
+                
+        return g.driver.session().run(query, pid=loc_id)
+
+
+    @staticmethod       
     def get_person_events2 (uniq_id):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta
         """
@@ -338,7 +370,7 @@ RETURN person, name
  OPTIONAL MATCH (event)-[s]->(place:Place)
  RETURN ID(person) AS id, name.firstname AS firstname, 
    name.refname AS refname, name.surname AS surname,
-  COLLECT([ID(event), event.type, event.date, place.pname]) AS events
+   COLLECT([ID(event), event.type, event.date, place.pname]) AS events
  ORDER BY name.surname, name.firstname""".format(where)
                 
         return g.driver.session().run(query)

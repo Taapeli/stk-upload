@@ -572,6 +572,11 @@ def get_people_by_surname(surname):
 
 
 def get_person_data_by_id(uniq_id):
+    """ Get 3 data sets:
+        person: uniq_id and name data
+        events list: uniq_id, date, location name and id (?)
+        photos
+    """
     p = Person()
     p.uniq_id = uniq_id
     p.get_person_and_name_data_by_id()
@@ -590,7 +595,10 @@ def get_person_data_by_id(uniq_id):
             place = Place()
             place.uniq_id = e.place_hlink
             place.get_place_data_by_id()
-            e.place = place.pname
+            # Location / place data
+            e.location = place.pname
+            e.locid = place.uniq_id
+            e.ltype = place.type
             
         events.append(e)
             

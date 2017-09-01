@@ -48,6 +48,20 @@ def show_person_page(ehto):
                            person=person, events=events, photos=photos)
 
 
+@app.route('/events/<locid>/<lname>')
+def show_location_page(locid, lname): 
+    """ henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    try:
+        events = models.gen.person.Person.get_person_events_by_place(locid)
+        print(events)      # TÄHÄN LOPUU, jatkettava   
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_place_events.html", events=events, lname=lname)
+
+
 """ ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
 """
 
