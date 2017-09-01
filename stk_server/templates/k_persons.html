@@ -55,7 +55,7 @@ henkilön sivulle.
 	                </div></td>
 	        {% if p.events %}
 		           <td class="ColumnEvent"><ul>{% for e in p.events %}
-		              <li><i>{{e.type}}</i> {{e.date}}
+		              <li><i>{{e.type}}</i> {{e.date|pvm}}
 		              {% if e.place %} – {{e.place}}{% endif %}</li>
 		              {% endfor %}
 		           </ul></tr>

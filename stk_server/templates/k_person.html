@@ -40,7 +40,7 @@
                         <span title="etunimi">{{pname.firstname}}</span>
                         <i title="patronyymi">{{pname.suffix}}</i>
                         <b title="sukunimi">{{pname.surname}}</b> <!-- todo: <a href="#sref3a">3a</a> -->
-                        {% if pname.refname %}<tt title="referenssinimi">{{pname.refname}}</tt>{% endif %}
+                        {% if pname.refname %}&nbsp; <tt title="referenssinimi">{{pname.refname}}</tt>{% endif %}
                    <!-- <ul><div class="grampsstylednote">
                             <p>Kalle vai Kaarlo? Tähän tulee Note</p>
                         </div></ul>
@@ -78,7 +78,7 @@
                         <td class="ColumnEvent">
                             <span class="id">{{e.uniq_id}}</span> {{e.type}}
                         </td>
-                        <td class="ColumnDate">{{e.date}}</td>
+                        <td class="ColumnDate">{{e.date|pvm}}</td>
                         <td class="ColumnPlace">
                             <a href="/events/{{e.locid}}/{{e.location}}" title="{{e.ltype}}">
                             {{e.location}}</a>

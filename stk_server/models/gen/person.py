@@ -323,7 +323,7 @@ RETURN person, name
 
 
     @staticmethod       
-    def get_person_events_by_place (loc_id=None, nmax=0):
+    def get_person_events_by_place (loc_id=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_person_events_by_place(loc_id=123) Paikan mukaan poimitut henkilötapahtumat
             - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
@@ -342,16 +342,16 @@ RETURN person, name
         """
         
         query = """
-MATCH (i:Person)-->(e:Event)-[:PLACE]->(p:Place)
-  WHERE id(p) = {pid}
-MATCH (i) --> (n:Name)
-RETURN id(i) AS uid,
-       COLLECT([n.type, n.firstname, n.surname]) AS names,
-       e.type AS etype,
-       e.date AS edate
+MATCH (p:Person)-->(e:Event)-[:PLACE]->(l:Place)
+  WHERE id(l) = {locid}
+MATCH (p) --> (n:Name)
+RETURN id(p) AS uid,
+  COLLECT([n.type, n.firstname, n.surname]) AS names,
+  e.type AS etype,
+  e.date AS edate
 ORDER BY edate"""
                 
-        return g.driver.session().run(query, pid=loc_id)
+        return g.driver.session().run(query, locid=int(loc_id))
 
 
     @staticmethod       

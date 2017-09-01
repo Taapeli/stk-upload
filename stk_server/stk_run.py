@@ -56,7 +56,6 @@ def show_location_page(locid, lname):
     models.dbutil.connect_db()
     try:
         events = models.gen.person.Person.get_person_events_by_place(locid)
-        print(events)      # TÄHÄN LOPUU, jatkettava   
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("k_place_events.html", events=events, lname=lname)
@@ -393,6 +392,19 @@ def nayta1(filename, fmt):
 def stk_harjoitus():   
     return render_template("a_home.html")
 
+@app.template_filter('pvm')
+def _jinja2_filter_date(date_str, fmt=None):
+    """ ISO-päivämäärä 2017-09-20 suodatetaan suomalaiseksi 20.9.2017 """
+    a = date_str.split('-')
+    if len(a) == 3:
+        p = int(a[2])
+        k = int(a[1])
+        return "{}.{}.{}".format(p,k,a[0]) 
+    elif len(a) == 2:
+        k = int(a[1])
+        return "{}.{}".format(k,a[0]) 
+    else:
+        return "{}".format(a[0]) 
 
 """ ----------------------------- Käynnistys ------------------------------- """
 

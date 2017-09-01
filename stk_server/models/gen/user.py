@@ -55,7 +55,7 @@ class User:
 #             if not record:
                 # User doesn't exist in db, the userid should be stored there
         try:
-            query = "MERGE (u:User {userid: $uid}) SET u.name=$name"
+            query = "MERGE (u:User { userid: {uid} }) SET u.name={name}"
             g.driver.session().run(query, {"uid": self.userid, "name": self.name})
     
         except Exception as err:
