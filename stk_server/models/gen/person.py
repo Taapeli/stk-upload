@@ -323,38 +323,6 @@ RETURN person, name
 
 
     @staticmethod       
-    def get_person_events_by_place (loc_id=None):
-        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
-            get_person_events_by_place(loc_id=123) Paikan mukaan poimitut henkilötapahtumat
-            - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
-            
-        Palauttaa esimerkin mukaiset tiedot:
-        ╒═══════╤══════════════════════════════╤═══════╤════════════╕
-        │"uid"  │"names"                       │"etype"│"edate"     │
-        ╞═══════╪══════════════════════════════╪═══════╪════════════╡
-        │"23063"│[["Birth Name","Justina Cathar│"Death"│"1789-12-26"│
-        │       │ina","Justander"]]            │       │            │
-        ├───────┼──────────────────────────────┼───────┼────────────┤
-        │"23194"│[["Birth Name","Johanna Ulrika│"Death"│"1835-08-05"│
-        │       │","Hedberg"],["Also Known As",│       │            │
-        │       │"","Borg"]]                   │       │            │
-        └───────┴──────────────────────────────┴───────┴────────────┘
-        """
-        
-        query = """
-MATCH (p:Person)-->(e:Event)-[:PLACE]->(l:Place)
-  WHERE id(l) = {locid}
-MATCH (p) --> (n:Name)
-RETURN id(p) AS uid,
-  COLLECT([n.type, n.firstname, n.surname]) AS names,
-  e.type AS etype,
-  e.date AS edate
-ORDER BY edate"""
-                
-        return g.driver.session().run(query, locid=int(loc_id))
-
-
-    @staticmethod       
     def get_person_events2 (uniq_id):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta
         """

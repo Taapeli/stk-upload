@@ -18,9 +18,20 @@
         </div>
     </div>
     <div class="content" id="IndividualDetail">
-        <h3>{{lname}}</h3>
+    {% for p in places %}{% if p.id ~ "" == locid %}
+    <h3>{{p.pname}}</h3>
+    {% endif %}{% endfor %}
         <div id="summaryarea">
-            <p id="description">Kaikki henkilöiden tapahtumat tässä paikassa</p>
+            <ul>{% set marg = -3 %}{% for p in places %}{% set marg = marg + 3 %}
+                <li style="margin-left: {{marg}}em;">
+                {% if p.id ~ "" == locid %}
+                    <span class="id">{{p.id}}</span>
+                    <b>{{p.pname}}</b>
+                {% else %}
+                    <a href="/events/loc={{p.id}}"><span class="id">{{p.id}}</span></a>
+                    {{p.pname}}
+                {% endif %} <i>{{p.type}}</i></li>
+            {% endfor %}</ul>
         </div>
         <div class="subsection" id="events">
             <h4>Tapahtumat</h4>
@@ -31,7 +42,6 @@
                         <th class="ColumnPerson">Henkilö</th>
                         <th class="ColumnEvent">Tapahtuma</th>
                         <th class="ColumnDate">Päivämäärä</th>
-                        <th class="ColumnPlace">Paikka</th>
                         <th class="ColumnDescription">Kuvaus</th>
                         <th class="ColumnNotes">Lisätiedot</th>
                         <th class="ColumnSources">Lähteet</th>
@@ -51,9 +61,6 @@
                         </td>
                         <td class="ColumnEvent">{{e.etype}}</td>
                         <td class="ColumnDate">{{e.edate|pvm}}</td>
-                        <td class="ColumnPlace"><div title="{{e.ltype}}">
-                            {{lname}}</div>
-                        </td>
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">
                             <div></div>
