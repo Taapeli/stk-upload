@@ -22,15 +22,13 @@
     <h3>{{p.pname}}</h3>
     {% endif %}{% endfor %}
         <div id="summaryarea">
-            <ul>{% set marg = -3 %}{% for p in places %}{% set marg = marg + 3 %}
-                <li style="margin-left: {{marg}}em;">
-                {% if p.id ~ "" == locid %}
-                    <span class="id">{{p.id}}</span>
+            <ul>{% for p in places %}
+                <li style="margin-left: {{p.level * 2}}em;">
+                {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
                     <b>{{p.pname}}</b>
-                {% else %}
-                    <a href="/events/loc={{p.id}}"><span class="id">{{p.id}}</span></a>
+                {% else %}<a href="/events/loc={{p.id}}"><span class="id">{{p.id}}</span></a>
                     {{p.pname}}
-                {% endif %} <i>{{p.type}}</i></li>
+                {% endif %} <small>&nbsp;{{p.type}}</small></li>
             {% endfor %}</ul>
         </div>
         <div class="subsection" id="events">
@@ -38,8 +36,8 @@
             <table class="infolist eventlist">
                 <thead>
                     <tr>
-                        <th class="ColumnId">id</th>
-                        <th class="ColumnPerson">Henkilö</th>
+                        <th class="ColumnId">Henkilö</th>
+                        <th class="ColumnPerson">Nimi</th>
                         <th class="ColumnEvent">Tapahtuma</th>
                         <th class="ColumnDate">Päivämäärä</th>
                         <th class="ColumnDescription">Kuvaus</th>
@@ -53,9 +51,7 @@
                         <td class="ColumnPerson">
                             <a href="/person/uniq_id={{e.uid}}" class="id">{{e.uid}}</a>
                         </td>
-                        <td>{% for n in e.names|sort %}
-                            {{n[1]}}
-                         <b>{{n[2]}}</b>
+                        <td>{% for n in e.names|sort %}{{n[1]}} <b>{{n[2]}}</b>
                          <small>{{n[0]}}</small>
                          <br />{% endfor %}
                         </td>

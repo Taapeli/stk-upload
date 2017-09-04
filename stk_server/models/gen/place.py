@@ -131,59 +131,72 @@ class Place:
             
             Esim. Männistön hierarkia Pekkala (talo) > Männistö (kylä) > Artjärvi (kunta)
                   tulee tietokannasta:
-            ╒═══════╤═════════╤══════════╤═══════╤═════════╤══════════╕
-            │"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"   │
-            ╞═══════╪═════════╪══════════╪═══════╪═════════╪══════════╡
-            │"21992"│"Village"│"Männistö"│"21729"│"City"   │"Artjärvi"│
-            ├───────┼─────────┼──────────┼───────┼─────────┼──────────┤
-            │"22022"│"Farm"   │"Pekkala" │"21992"│"Village"│"Männistö"│
-            └───────┴─────────┴──────────┴───────┴─────────┴──────────┘
+            ╒═══════╤═════════╤══════════╤═══════╤═════════╤══════════╤════╕
+            │"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"   │"lv"│
+            ╞═══════╪═════════╪══════════╪═══════╪═════════╪══════════╪════╡
+            │"21992"│"Village"│"Männistö"│"21729"│"City"   │"Artjärvi"│  0 │
+            ├───────┼─────────┼──────────┼───────┼─────────┼──────────┼────┤
+            │"22022"│"Farm"   │"Pekkala" │"21992"│"Village"│"Männistö"│  2 │
+            └───────┴─────────┴──────────┴───────┴─────────┴──────────┴────┘
             Metodi palauttaa siitä listan
                 Place(result[0].id2) # Artjärvi City
-                Place(result[0].id1) # Männistö Village, current=True
+                Place(result[0].id1) # Männistö Village
                 Place(result[1].id1) # Pekkala Farm
+            Muuttuja lv on taso: 
+                0 = ylemmät, 
+                1 = tämä, 
+                2 = seuraava alempi
         """
 
         query = """
 MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
-  RETURN ID(p) AS id1, p.type AS type1, p.pname AS name1,
-         ID(i) AS id2, i.type AS type2, i.pname AS name2 LIMIT 10
-UNION
-MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
-  RETURN ID(i) AS id1, i.type AS type1, i.pname AS name1,
-         ID(p) AS id2, p.type AS type2, p.pname AS name2 LIMIT 10
+    RETURN ID(p) AS id1, p.type AS type1, p.pname AS name1,
+           ID(i) AS id2, i.type AS type2, i.pname AS name2, 
+           0 AS lv
+    UNION
+MATCH x= (p:Place)<-[r:HIERARCY]-(i:Place) WHERE ID(p) = $locid
+    RETURN ID(i) AS id1, i.type AS type1, i.pname AS name1,
+           ID(p) AS id2, p.type AS type2, p.pname AS name2,
+           2 AS lv
 """
         result = g.driver.session().run(query, locid=int(locid))
         ret = []
-        current = False
 
         for record in result:
-            if len(ret) == 0:
-                p = Place()     # Ensimmäisen rivin oikeanpuoleinen paikka
+            if len(ret) == 0:       # Ensimmäinen rivi
+                if record["lv"] == 0:
+                    levels = [0,1]
+                else:
+                    levels = [1,2]
+                p = Place()         # 1. rivin oikeanpuoleinen paikka
                 p.id = record["id2"]
                 p.type = record["type2"]
                 p.pname = record["name2"]
-                p.current = current
-                current = True
+                p.level = levels[0]
                 ret.append(p)
-
-            p = Place()          # Tulosrivin vasemmanpuoleinen paikka
-            p.id = record["id1"]
-            p.type = record["type1"]
-            p.pname = record["name1"]
-            #p.handle = ''
-            #p.change = ''
-            #p.placeref_hlink = ''
-            p.current = current
-            current = False
-            ret.append(p)
+                p = Place()          # 1. rivin vasemmanpuoleinen paikka
+                p.id = record["id1"]
+                p.type = record["type1"]
+                p.pname = record["name1"]
+                p.level = levels[1]      # Kysytty paikka
+                ret.append(p)
+            else:
+                p = Place()          # Tulosrivin vasemmanpuoleinen paikka
+                p.id = record["id1"]
+                p.type = record["type1"]
+                p.pname = record["name1"]
+                #p.handle = ''
+                #p.change = ''
+                #p.placeref_hlink = ''
+                p.level = record["lv"]
+                ret.append(p)
 
         if len(ret) == 0:
             # Tällä paikalla ei ole hierarkiaa. 
             # Hae oman paikan tiedot ilman yhteyksiä
             query = """
 MATCH (p:Place) WHERE ID(p) = $locid
-  RETURN ID(p) AS id, p.type AS type, p.pname AS name
+  RETURN ID(p) AS id, p.type AS type, p.pname AS name, 1 AS lv
 """
             result = g.driver.session().run(query, locid=int(locid))
             record = result.single()
@@ -191,7 +204,7 @@ MATCH (p:Place) WHERE ID(p) = $locid
             p.id = record["id"]
             p.type = record["type"]
             p.pname = record["name"]
-            p.current = True
+            p.level = record["lv"]
             ret = [p,]
 
         return ret
