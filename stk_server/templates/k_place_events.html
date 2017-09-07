@@ -1,0 +1,79 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "k_layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+        Sukujaan – paikan tapahtumat</h1>
+{{ super() }}
+
+    <div class="wrapper" id="nav" role="navigation">
+        <div class="container">
+            <ul class="menu" id="dropmenu">
+                <li><a href="/lista/k_persons" title="Henkilöt">Henkilöt</a></li>
+                <li><a href="#" title="Sukunimet">Sukunimet</a></li>
+                <li><a href="#" title="Perheet">Perheet</a></li>
+                <li class="CurrentSection"><a href="#" title="Paikat">Paikat</a></li>
+                <li><a href="#" title="Lähteet">Lähteet</a></li>
+                <li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="content" id="IndividualDetail">
+    {% for p in places %}{% if p.id ~ "" == locid %}
+    <h3>{{p.pname}}</h3>
+    {% endif %}{% endfor %}
+        <div id="summaryarea">
+            <ul>{% for p in places %}
+                <li style="margin-left: {{p.level * 2}}em;">
+                {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
+                    <b>{{p.pname}}</b>
+                {% else %}<a href="/events/loc={{p.id}}"><span class="id">{{p.id}}</span></a>
+                    {{p.pname}}
+                {% endif %} <small>&nbsp;{{p.type}}</small></li>
+            {% endfor %}</ul>
+        </div>
+        <div class="subsection" id="events">
+            <h4>Tapahtumat</h4>
+            <table class="infolist eventlist">
+                <thead>
+                    <tr>
+                        <th class="ColumnId">Henkilö</th>
+                        <th class="ColumnPerson">Nimi</th>
+                        <th class="ColumnEvent">Tapahtuma</th>
+                        <th class="ColumnDate">Päivämäärä</th>
+                        <th class="ColumnDescription">Kuvaus</th>
+                        <th class="ColumnNotes">Lisätiedot</th>
+                        <th class="ColumnSources">Lähteet</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for e in events %}
+                    <tr>
+                        <td class="ColumnPerson">
+                            <a href="/person/uniq_id={{e.uid}}" class="id">{{e.uid}}</a>
+                        </td>
+                        <td>{% for n in e.names|sort %}{{n[1]}} <b>{{n[2]}}</b>
+                         <small>{{n[0]}}</small>
+                         <br />{% endfor %}
+                        </td>
+                        <td class="ColumnEvent">{{e.etype}}</td>
+                        <td class="ColumnDate">{{e.edate|pvm}}</td>
+                        <td class="ColumnDescription">&nbsp;</td>
+                        <td class="ColumnNotes">
+                            <div></div>
+                        </td>
+                        <td class="ColumnSources">
+                         <a href="#sref3a">3a</a>
+                        </td>
+                    </tr>
+         {% endfor %}
+                 </tbody>
+            </table>
+        </div>
+
+        <div class="subsection" id="sourcerefs">
+            <h4>Lähdeviitteet</h4>
+            <p>Ei lähdeviitteitä haettuna</p>
+        </div>
+    </div>
+{% endblock %}
+

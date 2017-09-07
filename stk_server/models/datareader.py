@@ -572,6 +572,11 @@ def get_people_by_surname(surname):
 
 
 def get_person_data_by_id(uniq_id):
+    """ Get 3 data sets:
+        person: uniq_id and name data
+        events list: uniq_id, date, location name and id (?)
+        photos
+    """
     p = Person()
     p.uniq_id = uniq_id
     p.get_person_and_name_data_by_id()
@@ -590,7 +595,10 @@ def get_person_data_by_id(uniq_id):
             place = Place()
             place.uniq_id = e.place_hlink
             place.get_place_data_by_id()
-            e.place = place.pname
+            # Location / place data
+            e.location = place.pname
+            e.locid = place.uniq_id
+            e.ltype = place.type
             
         events.append(e)
             
@@ -658,13 +666,33 @@ def get_families_data_by_id(uniq_id):
     return (p, families)
 
 
+def get_place_with_events (loc_id=None):
+    """ Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
+        Palauttaa paikkahierarkian ja (henkilö)tapahtumat muodossa
+        [Place_list, Event_table].
+
+    place_list: Lista Place-objekteja, joissa kentät 
+        p.id    locid eli uniq_id
+        type    paikan tyyppi (Farm, Village, ...)
+        pname   paikannimi
+        current True haetun paikan kohdalla
+
+    event_table:
+        uid      person's uniq_id
+        names    list of tuples [name_type, given_name, surname]
+        etype    event type
+        edate    event date
+    """
+    place_list = Place.get_place_path(loc_id)
+    event_table = Place.get_place_events(loc_id)
+    return (place_list, event_table)
+
+
 def get_notes(uniq_id=None):
     """ Lukee tietokannasta Note- objektit näytettäväksi
-
     """
     
     titles, notes = Note.get_notes(uniq_id)
-
     return (titles, notes)
 
 

@@ -51,11 +51,11 @@ henkilön sivulle.
 	                <td class="ColumnPerson"><div>
 	                   <a href="/person/uniq_id={{p.uniq_id}}" class="id">{{p.uniq_id}}</a>
 		               {{p.name[0].firstname}} <b>{{p.name[0].surname}}</b>
-		               {% if p.name[0].refname %}<br>referenssinimi: {{p.name[0].refname}}{% endif %}
+		               {% if p.name[0].refname %}<br><small>referenssinimi: {{p.name[0].refname}}</small>{% endif %}
 	                </div></td>
 	        {% if p.events %}
 		           <td class="ColumnEvent"><ul>{% for e in p.events %}
-		              <li><i>{{e.type}}</i> {{e.date}}
+		              <li><i>{{e.type}}</i> {{e.date|pvm}}
 		              {% if e.place %} – {{e.place}}{% endif %}</li>
 		              {% endfor %}
 		           </ul></tr>

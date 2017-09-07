@@ -48,6 +48,20 @@ def show_person_page(ehto):
                            person=person, events=events, photos=photos)
 
 
+@app.route('/events/loc=<locid>')
+def show_location_page(locid): 
+    """ henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    try:
+        #events = models.gen.person.Person.get_person_events_by_place(locid)
+        places, events = models.datareader.get_place_with_events(locid)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_place_events.html", locid=locid, events=events, places=places)
+
+
 """ ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
 """
 
@@ -379,6 +393,20 @@ def nayta1(filename, fmt):
 def stk_harjoitus():   
     return render_template("a_home.html")
 
+
+@app.template_filter('pvm')
+def _jinja2_filter_date(date_str, fmt=None):
+    """ ISO-päivämäärä 2017-09-20 suodatetaan suomalaiseksi 20.9.2017 """
+    a = date_str.split('-')
+    if len(a) == 3:
+        p = int(a[2])
+        k = int(a[1])
+        return "{}.{}.{}".format(p,k,a[0]) 
+    elif len(a) == 2:
+        k = int(a[1])
+        return "{}.{}".format(k,a[0]) 
+    else:
+        return "{}".format(a[0]) 
 
 """ ----------------------------- Käynnistys ------------------------------- """
 

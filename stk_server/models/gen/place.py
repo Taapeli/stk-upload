@@ -4,11 +4,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 
-import datetime
+#import datetime
 from sys import stderr
-import logging
+#import logging
 from flask import g
-import models.dbutil
+#import models.dbutil
 
 
 class Place:
@@ -23,14 +23,16 @@ class Place:
                 placeref_hlink  str paikan osoite
      """
 
-    def __init__(self):
-        """ Luo uuden place-instanssin """
-        self.handle = ''
+    def __init__(self, locid = ""):
+        """ Luo uuden place-instanssin. 
+            Argumenttina voidaan antaa paikan uniq_id 
+        """
+        self.handle = ''            # Gramps-handle
         self.change = ''
-        self.id = ''
+        self.id = locid
         self.type = ''
         self.pname = ''
-        self.placeref_hlink = ''
+        self.placeref_hlink = ''    # ?
     
     
     def get_place_data(self):
@@ -75,7 +77,8 @@ class Place:
     
     @staticmethod       
     def get_places():
-        """ Voidaan lukea paikkoja kannasta
+        """ Luetaan kaikki paikat kannasta
+        #TODO Eikö voisi palauttaa listan Place-olioita?
         """
         
         query = """
@@ -118,7 +121,133 @@ class Place:
             lists.append(data_line)
         
         return (titles, lists)
+
+
+    @staticmethod       
+    def get_place_path(locid):
+        """ Haetaan koko paikkojen ketju paikan locid ympärillä
+            Palauttaa listan paikka-olioita sisemmästä uloimpaan. 
+            Jos hierarkiaa ei ole, listalla on vain oma Place.
+            
+            Esim. Männistön hierarkia Pekkala (talo) > Männistö (kylä) > Artjärvi (kunta)
+                  tulee tietokannasta:
+            ╒═══════╤═════════╤══════════╤═══════╤═════════╤══════════╤════╕
+            │"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"   │"lv"│
+            ╞═══════╪═════════╪══════════╪═══════╪═════════╪══════════╪════╡
+            │"21992"│"Village"│"Männistö"│"21729"│"City"   │"Artjärvi"│  0 │
+            ├───────┼─────────┼──────────┼───────┼─────────┼──────────┼────┤
+            │"22022"│"Farm"   │"Pekkala" │"21992"│"Village"│"Männistö"│  2 │
+            └───────┴─────────┴──────────┴───────┴─────────┴──────────┴────┘
+            Metodi palauttaa siitä listan
+                Place(result[0].id2) # Artjärvi City
+                Place(result[0].id1) # Männistö Village
+                Place(result[1].id1) # Pekkala Farm
+            Muuttuja lv on taso: 
+                0 = ylemmät, 
+                1 = tämä, 
+                2 = seuraava alempi
+        """
+
+        query = """
+MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
+    RETURN ID(p) AS id1, p.type AS type1, p.pname AS name1,
+           ID(i) AS id2, i.type AS type2, i.pname AS name2, 
+           0 AS lv
+    UNION
+MATCH x= (p:Place)<-[r:HIERARCY]-(i:Place) WHERE ID(p) = $locid
+    RETURN ID(i) AS id1, i.type AS type1, i.pname AS name1,
+           ID(p) AS id2, p.type AS type2, p.pname AS name2,
+           2 AS lv
+"""
+        result = g.driver.session().run(query, locid=int(locid))
+        ret = []
+
+        for record in result:
+            if len(ret) == 0:       # Ensimmäinen rivi
+                if record["lv"] == 0:
+                    levels = [0,1]
+                else:
+                    levels = [1,2]
+                p = Place()         # 1. rivin oikeanpuoleinen paikka
+                p.id = record["id2"]
+                p.type = record["type2"]
+                p.pname = record["name2"]
+                p.level = levels[0]
+                ret.append(p)
+                p = Place()          # 1. rivin vasemmanpuoleinen paikka
+                p.id = record["id1"]
+                p.type = record["type1"]
+                p.pname = record["name1"]
+                p.level = levels[1]      # Kysytty paikka
+                ret.append(p)
+            else:
+                p = Place()          # Tulosrivin vasemmanpuoleinen paikka
+                p.id = record["id1"]
+                p.type = record["type1"]
+                p.pname = record["name1"]
+                #p.handle = ''
+                #p.change = ''
+                #p.placeref_hlink = ''
+                p.level = record["lv"]
+                ret.append(p)
+
+        if len(ret) == 0:
+            # Tällä paikalla ei ole hierarkiaa. 
+            # Hae oman paikan tiedot ilman yhteyksiä
+            query = """
+MATCH (p:Place) WHERE ID(p) = $locid
+  RETURN ID(p) AS id, p.type AS type, p.pname AS name, 1 AS lv
+"""
+            result = g.driver.session().run(query, locid=int(locid))
+            record = result.single()
+            p = Place()         # Ainoan rivin paikka
+            p.id = record["id"]
+            p.type = record["type"]
+            p.pname = record["name"]
+            p.level = record["lv"]
+            ret = [p,]
+
+        return ret
+
+
+    @staticmethod       
+    def get_place_events(loc_id):
+        """ Haetaan paikkaan liittyvät tapahtumat sekä
+            osallisen henkilön nimitiedot.
+            
+        Palauttaa esimerkin mukaiset tiedot:
+        ╒═══════╤══════════════════════════════╤═══════╤════════════╕
+        │"uid"  │"names"                       │"etype"│"edate"     │
+        ╞═══════╪══════════════════════════════╪═══════╪════════════╡
+        │"23063"│[["Birth Name","Justina Cathar│"Death"│"1789-12-26"│
+        │       │ina","Justander"]]            │       │            │
+        ├───────┼──────────────────────────────┼───────┼────────────┤
+        │"23194"│[["Birth Name","Johanna Ulrika│"Death"│"1835-08-05"│
+        │       │","Hedberg"],["Also Known As",│       │            │
+        │       │"","Borg"]]                   │       │            │
+        └───────┴──────────────────────────────┴───────┴────────────┘
+        """
         
+        query = """
+MATCH (p:Person)-->(e:Event)-[:PLACE]->(l:Place)
+  WHERE id(l) = {locid}
+MATCH (p) --> (n:Name)
+RETURN id(p) AS uid,
+  COLLECT([n.type, n.firstname, n.surname]) AS names,
+  e.type AS etype,
+  e.date AS edate
+ORDER BY edate"""
+                
+        result = g.driver.session().run(query, locid=int(loc_id))
+        ret = []
+        for record in result:
+            p = Place()
+            p.uid = record["uid"]
+            p.etype = record["etype"]
+            p.edate = record["edate"]
+            p.names = record["names"]   # tuples [name_type, given_name, surname]
+            ret.append(p)
+        return ret
     
     @staticmethod       
     def get_total():
