@@ -23,20 +23,32 @@ class Place:
                 placeref_hlink  str paikan osoite
      """
 
-    def __init__(self, locid = ""):
+    def __init__(self, locid="", ptype="", pname="", level=None):
         """ Luo uuden place-instanssin. 
-            Argumenttina voidaan antaa paikan uniq_id 
+            Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyylin, nimen
+            ja (tulossivua varten) mahdollisen hierarkiatason
         """
-        self.handle = ''            # Gramps-handle
-        self.change = ''
         self.id = locid
-        self.type = ''
-        self.pname = ''
-        self.placeref_hlink = ''    # ?
+        self.type = ptype
+        self.pname = pname
+        if level != None:
+            self.level = level
+        # Gramps-tietoja
+        self.handle = ''
+        self.change = ''
+        self.placeref_hlink = ''
     
+    
+    def __str__(self):
+        try:
+            desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, self.level)
+        except:
+            desc = "Place (undefined)"
+        return desc
+
     
     def get_place_data(self):
-        """ Luetaan kaikki paikan tiedot """
+        """ Luetaan kannasta kaikki paikan tiedot """
                 
         query = """
             MATCH (place:Place)
@@ -126,85 +138,88 @@ class Place:
     @staticmethod       
     def get_place_path(locid):
         """ Haetaan koko paikkojen ketju paikan locid ympärillä
-            Palauttaa listan paikka-olioita sisemmästä uloimpaan. 
+            Palauttaa listan paikka-olioita ylimmästä alimpaan. 
             Jos hierarkiaa ei ole, listalla on vain oma Place.
             
-            Esim. Männistön hierarkia Pekkala (talo) > Männistö (kylä) > Artjärvi (kunta)
-                  tulee tietokannasta:
-            ╒═══════╤═════════╤══════════╤═══════╤═════════╤══════════╤════╕
-            │"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"   │"lv"│
-            ╞═══════╪═════════╪══════════╪═══════╪═════════╪══════════╪════╡
-            │"21992"│"Village"│"Männistö"│"21729"│"City"   │"Artjärvi"│  0 │
-            ├───────┼─────────┼──────────┼───────┼─────────┼──────────┼────┤
-            │"22022"│"Farm"   │"Pekkala" │"21992"│"Village"│"Männistö"│  2 │
-            └───────┴─────────┴──────────┴───────┴─────────┴──────────┴────┘
+            Esim. Tuutarin hierarkia 
+                  2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala
+                  tulee tietokannasta näin:
+            ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
+            │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
+            ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
+            │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
+            ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
+            │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
+            ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
+            │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
+            └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
             Metodi palauttaa siitä listan
                 Place(result[0].id2) # Artjärvi City
                 Place(result[0].id1) # Männistö Village
                 Place(result[1].id1) # Pekkala Farm
             Muuttuja lv on taso: 
-                0 = ylemmät, 
-                1 = tämä, 
-                2 = seuraava alempi
+                >0 = ylemmät, 
+                 0 = tämä, 
+                <0 = alemmat
         """
+        def retappend(p):
+            """ Append a new Place to vector ret[], only if p is not a duplicate """
+            if len(ret) > 0:
+                if ret[-1].id == p.id:
+                    return
+            ret.append(p)
 
         query = """
-MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
-    RETURN ID(p) AS id1, p.type AS type1, p.pname AS name1,
-           ID(i) AS id2, i.type AS type2, i.pname AS name2, 
-           0 AS lv
+MATCH (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
+    RETURN SIZE(r) AS lv,
+           ID(p) AS id1, p.type AS type1, p.pname AS name1,
+           ID(i) AS id2, i.type AS type2, i.pname AS name2
     UNION
-MATCH x= (p:Place)<-[r:HIERARCY]-(i:Place) WHERE ID(p) = $locid
-    RETURN ID(i) AS id1, i.type AS type1, i.pname AS name1,
-           ID(p) AS id2, p.type AS type2, p.pname AS name2,
-           2 AS lv
+MATCH (p:Place) WHERE ID(p) = $locid
+    RETURN 0 AS lv,
+           ID(p) AS id1, p.type AS type1, p.pname AS name1,
+           0 AS id2, "" AS type2, "" AS name2
+    UNION
+MATCH (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
+    RETURN SIZE(r)*-1 AS lv,
+           ID(i) AS id1, i.type AS type1, i.pname AS name1,
+           ID(p) AS id2, p.type AS type2, p.pname AS name2
 """
         result = g.driver.session().run(query, locid=int(locid))
         ret = []
+        p0 = None
 
         for record in result:
-            if len(ret) == 0:       # Ensimmäinen rivi
-                if record["lv"] == 0:
-                    levels = [0,1]
-                else:
-                    levels = [1,2]
-                p = Place()         # 1. rivin oikeanpuoleinen paikka
-                p.id = record["id2"]
-                p.type = record["type2"]
-                p.pname = record["name2"]
-                p.level = levels[0]
-                ret.append(p)
-                p = Place()          # 1. rivin vasemmanpuoleinen paikka
-                p.id = record["id1"]
-                p.type = record["type1"]
-                p.pname = record["name1"]
-                p.level = levels[1]      # Kysytty paikka
-                ret.append(p)
-            else:
-                p = Place()          # Tulosrivin vasemmanpuoleinen paikka
-                p.id = record["id1"]
-                p.type = record["type1"]
-                p.pname = record["name1"]
-                #p.handle = ''
-                #p.change = ''
-                #p.placeref_hlink = ''
-                p.level = record["lv"]
-                ret.append(p)
+            #│"lv"│"id1"│"type1"│"name1"│"id2"│"type2"│"name2"│
+            level = record["lv"]
+            id1 = int(record["id1"])
+            id2 = int(record["id2"])
+            if level > 0:
+                if id1 == int(locid):
+                    ptype =record["type2"]
+                    name = record["name2"]
+                    retappend(Place(id2, ptype, name, level))
+                    p0 = Place(id1, record["type1"], record["name1"], 0)
+            elif level == 0:
+                retappend(Place(id1, record["type1"], record["name1"], level))
+            else: # level < 0:
+                if  p0:
+                    retappend(p0)
+                    p0 = None
+                retappend(Place(id1, record["type1"], record["name1"], level))
+        if  p0:
+            retappend(p0)
 
         if len(ret) == 0:
             # Tällä paikalla ei ole hierarkiaa. 
             # Hae oman paikan tiedot ilman yhteyksiä
             query = """
 MATCH (p:Place) WHERE ID(p) = $locid
-  RETURN ID(p) AS id, p.type AS type, p.pname AS name, 1 AS lv
+  RETURN 0 AS lv, ID(p) AS id, p.type AS type, p.pname AS name
 """
             result = g.driver.session().run(query, locid=int(locid))
             record = result.single()
-            p = Place()         # Ainoan rivin paikka
-            p.id = record["id"]
-            p.type = record["type"]
-            p.pname = record["name"]
-            p.level = record["lv"]
+            p = Place(record["id"], record["type"], record["name"], record["lv"])
             ret = [p,]
 
         return ret
