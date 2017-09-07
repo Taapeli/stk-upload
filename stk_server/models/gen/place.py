@@ -35,8 +35,20 @@ class Place:
         self.placeref_hlink = ''    # ?
     
     
+    def __str__(self):
+        try:
+            if self.level == None:
+                lv = ""
+            else:
+                lv = self.level
+            desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, lv)
+        except:
+            desc = "Place (undefined)"
+        return desc
+
+    
     def get_place_data(self):
-        """ Luetaan kaikki paikan tiedot """
+        """ Luetaan kannasta kaikki paikan tiedot """
                 
         query = """
             MATCH (place:Place)

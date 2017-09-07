@@ -50,15 +50,15 @@ def show_person_page(ehto):
 
 @app.route('/events/loc=<locid>')
 def show_location_page(locid): 
-    """ henkilön tietojen näyttäminen ruudulla 
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """ Paikan tietojen näyttäminen ruudulla: hierarkia ja tapahtumat
     """
     models.dbutil.connect_db()
     try:
-        #events = models.gen.person.Person.get_person_events_by_place(locid)
         places, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+    for p in places:
+        print ("# " + str(p))
     return render_template("k_place_events.html", 
                            locid=locid, events=events, places=places)
 
@@ -81,6 +81,7 @@ def nayta_henkilot(subj):
         persons = models.datareader.lue_henkilot2()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "k_persons":
+        # Kertova-tyyliin
         persons = models.datareader.lue_henkilot2()
         return render_template("k_persons.html", persons=persons)
     elif subj == "surnames":

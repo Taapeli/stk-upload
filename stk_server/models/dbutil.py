@@ -29,7 +29,7 @@ def connect_db():
     else:
         print('connect_db - ok')
     # Return True, if no driver can be accessed
-    return g.driver.pool.closed
+    #return g.driver.pool.closed
 
 
 def get_new_handles(inc=1):
