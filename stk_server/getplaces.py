@@ -16,33 +16,39 @@ def lue(locid):
     global driver
     query = """
 MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
-    RETURN ID(p) AS id1, p.type AS type1, p.pname AS name1,
-           ID(i) AS id2, i.type AS type2, i.pname AS name2, 
-           LENGTH(r) AS lv, r
+    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
 MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
-    RETURN ID(i) AS id1, i.type AS type1, i.pname AS name1,
-           ID(p) AS id2, p.type AS type2, p.pname AS name2,
-           LENGTH(r)*-1 AS lv, r
+    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
     return (driver.session().run(query, locid=int(locid)))
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
+    if len(sys.argv) <= 1:
         locid = 21773
     else:
-        print(str(sys.argv[1]))
         locid = int(sys.argv[1])
-    print ("lue({})".format(locid))
+    print ("paikka {}".format(locid))
 
     connect_db()
     result = lue(locid)
+    nl = {}
+    nl[0] = ('root', '')
+    rl = {}
+    print("NODE {},{} {} {}".format("root", 0, nl[0][0], nl[0][1]))
     for record in result:
-        nuoli = record['r']
-        print("{:2d}: {},{},{} / {},{},{}".format(record["lv"],
-               record["id1"], record["type1"], record["name1"],
-               record["id2"], record["type2"], record["name2"]
-               )
-              )
-        for rel in nuoli:
-            print("    {}->{}".format(rel.start,rel.end))
+        for node in record['nodes']:
+            if node.id in nl:
+                print("#{:2d}: {},{} {}".format(record["lv"],
+                    node.id, node["type"], node["pname"]))
+            else:
+                nl[node.id] = (node["type"], node["pname"])
+                print("NODE {},{} {} {}".format(record["lv"],
+                    node.id, node["type"], node["pname"]))
+        for rel in record['r']:
+            if len(rl) == 0:
+                print("LINK {}->{}".format(nl[rel.end],nl[0]))
+                rl[0] = (rel.end, 0)
+            rl[rel.id] = (rel.start, rel.end)
+            print("LINK {}->{}".format(nl[rel.start],nl[rel.end]))
+    print("# Relaatiot {}".format(rl))
