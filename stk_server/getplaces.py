@@ -15,10 +15,10 @@ def connect_db():
 def lue(locid):
     global driver
     query = """
-MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
-MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
     return (driver.session().run(query, locid=int(locid)))
@@ -33,22 +33,41 @@ if __name__ == '__main__':
     connect_db()
     result = lue(locid)
     nl = {}
-    nl[0] = ('root', '')
+    nl[0] = 'root'
+    nstack = []
     rl = {}
-    print("NODE {},{} {} {}".format("root", 0, nl[0][0], nl[0][1]))
+    print("create_node('{}', '{}')".format('', 0))
+    nstack.append((0, "root", "", -99))
+
     for record in result:
         for node in record['nodes']:
             if node.id in nl:
                 print("#{:2d}: {},{} {}".format(record["lv"],
                     node.id, node["type"], node["pname"]))
             else:
-                nl[node.id] = (node["type"], node["pname"])
-                print("NODE {},{} {} {}".format(record["lv"],
+                nl[node.id] = node["pname"]
+                nstack.append((node.id, node["type"], 
+                               node["pname"], record["lv"]))
+                print("# NODE {},{} {} {}".format(record["lv"],
                     node.id, node["type"], node["pname"]))
         for rel in record['r']:
-            if len(rl) == 0:
-                print("LINK {}->{}".format(nl[rel.end],nl[0]))
-                rl[0] = (rel.end, 0)
-            rl[rel.id] = (rel.start, rel.end)
-            print("LINK {}->{}".format(nl[rel.start],nl[rel.end]))
-    print("# Relaatiot {}".format(rl))
+            if not rel.id in rl:
+                rl[rel.id] = rel.end
+                nid, ntype, nname, lv = nstack.pop()
+                if len(rl) == 1:    # Ensimmäinen solmu rootin alle
+                    nid1, ntype1, nname1, lv1 = nstack.pop()
+                    rl[0] = rel.end
+                    print("create_node('{}', '{}', parent={}, data={})".\
+                          format(nname1, nid1, 0, {'type':ntype1}))
+                if lv > 0:
+                    parent = rel.end
+                else:
+                    parent = "Parent({})".format(rel.start)
+                print("# LINK {}->{}".format(rel.start,rel.end))
+    
+                print("create_node('{}', '{}', parent={}, data={})".\
+                      format(nname, nid, parent, {'type':ntype}))
+                if lv < 0:
+                    print("move_node('{}', '{}')".format(parent, nid))
+
+    #print("# Relaatiot {}".format(rl))
