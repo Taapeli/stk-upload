@@ -1,5 +1,5 @@
 '''
-  Kokeillaan paikkahierarkian lukemista
+  Demo-ohjelma: Kokeillaan paikkahierarkian lukemista
 Created on 8.9.2017
 @author: jm
 '''
