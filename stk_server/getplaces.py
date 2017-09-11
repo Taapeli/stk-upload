@@ -29,20 +29,24 @@ MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        locid = 21773
+        locid = input("Give the unique id of the place (q to quit): ")
     else:
         print(str(sys.argv[1]))
         locid = int(sys.argv[1])
-    print ("lue({})".format(locid))
+        
 
     connect_db()
-    result = lue(locid)
-    for record in result:
-        nuoli = record['r']
-        print("{:2d}: {},{},{} / {},{},{}".format(record["lv"],
-               record["id1"], record["type1"], record["name1"],
-               record["id2"], record["type2"], record["name2"]
-               )
-              )
-        for rel in nuoli:
-            print("    {}->{}".format(rel.start,rel.end))
+    while locid != 'q':
+        print ("lue({})".format(locid))
+        result = lue(locid)
+        for record in result:
+            nuoli = record['r']
+            print("{:2d}: {},{},{} / {},{},{}".format(record["lv"],
+                   record["id1"], record["type1"], record["name1"],
+                   record["id2"], record["type2"], record["name2"]
+                   )
+                  )
+            for rel in nuoli:
+                print("    {}->{}".format(rel.start,rel.end))
+                
+        locid = input("\n\nGive the unique id of the place (q to quit): ")
