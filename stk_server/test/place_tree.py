@@ -6,8 +6,6 @@ Created on 8.9.2017
 import sys
 from neo4j.v1 import GraphDatabase, basic_auth
 import treelib
-driver = None
-
 
 def connect_db():
     global driver
@@ -73,20 +71,21 @@ def create_tree(result):
     nl[0] = 'root'
     nstack = []
     rl = {}
-    #print("create_node('{}', '{}')".format('', 0))
+    # Juurisolu 0 mahdollistaa solun lisäämisen ylimmän varsinaisen solun
+    # yläpuolelle
     t.create_node('', 0)
     nstack.append((0, "root", "", -99))
 
     for record in result:
+        # Tuloksessa on kaikki ko. relaatioon osallistuvat solut ja niiden
+        # väliset yksittäiset yhteydet
         for node in record['nodes']:
             if not node.id in nl:
                 nl[node.id] = node["pname"]
                 nstack.append((node.id, node["type"], 
                                node["pname"], record["lv"]))
-#                 print("# NODE {},{} {} {}".format(record["lv"],
-#                     node.id, node["type"], node["pname"]))
         for rel in record['r']:
-            # Käytääv läpi relaatioketjun yksittäiset (start)-->(end) -välit
+            # Käydään läpi relaatioketjun yksittäiset (start)-->(end) -välit
             if not rel.id in rl:
                 rl[rel.id] = rel.end
                 nid, ntype, nname, lv = nstack.pop()
@@ -125,7 +124,5 @@ if __name__ == '__main__':
     neo_result = get_connections(locid)
     # Talletetaan tiedot muistinvaraiseen puurakenteeseen
     tree = create_tree(neo_result)
-    # Korjataan Treelib bugi: tulos on byte string, ei string
-    #str(tree.show(),'utf-8')
     print(tree)
     
