@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding:utf-8 -*-
 '''
   Demo-ohjelma: Kokeillaan paikkahierarkian lukemista
 Created on 8.9.2017
@@ -92,24 +94,38 @@ def create_tree(result):
                 if len(rl) == 1:    # Ensimmäinen solmu rootin alle
                     nid1, ntype1, nname1, lv1 = nstack.pop()
                     rl[0] = rel.end
-                    print("create_node('{}', '{}', parent={}, data={})".\
-                          format(nname1, nid1, 0, {'type':ntype1}))
+#                     print("create_node('{}', '{}', parent={}, data={})".\
+#                           format(nname1, nid1, 0, {'type':ntype1}))
                     t.create_node(nname1, nid1, parent=0, data={'type':ntype1})
                 if lv > 0:
                     parent = rel.end
                 else:
-                    parent = "Parent({})".format(rel.start)
                     parent = t.parent(rel.start).identifier
                 # Lisätään uusi solu ensin nykyisen rinnalle ja 
                 # sitten siirretään nykyinen uuden alle
                 t.create_node(nname, nid, parent=parent, data={'type':ntype})
-                print("create_node('{}', '{}', parent={}, data={})".\
-                      format(nname, nid, parent, {'type':ntype}))
+#                 print("create_node('{}', '{}', parent={}, data={})".\
+#                       format(nname, nid, parent, {'type':ntype}))
                 if lv < 0:
-                    print("  move_node('{}', '{}')".format(rel.start, nid))
+#                     print("  move_node('{}', '{}')".format(rel.start, nid))
                     t.move_node(rel.start, nid)
     return t
 
+def print_tree(tree):
+    nl = {}
+    lv = 0
+    fill = ""
+    nodes = [tree[node] for node in tree.expand_tree(mode=tree.DEPTH)]
+    for node in nodes:
+        if node.bpointer != None:
+            if node.bpointer in nl:
+                lv = nl[node.bpointer] + 1
+            else:
+                lv = lv + 1
+                nl[node.identifier] = lv
+            fill = ''.join([ "       " for n in range(lv-1)])
+            print("({}){} {:5d}<-{:5d} {} ".format(lv, fill, 
+                  node.bpointer, node.identifier, node.tag))
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
@@ -125,4 +141,6 @@ if __name__ == '__main__':
     # Talletetaan tiedot muistinvaraiseen puurakenteeseen
     tree = create_tree(neo_result)
     print(tree)
+    print_tree(tree)
+#     print(tree.to_json())
     
