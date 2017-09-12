@@ -39,13 +39,13 @@ def show_person_page(ehto):
     key, value = ehto.split('=')
     try:
         if key == 'uniq_id':
-            person, events, photos = models.datareader.get_person_data_by_id(value)            
+            person, events, photos, sources = models.datareader.get_person_data_by_id(value)            
         else:
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("k_person.html", 
-                           person=person, events=events, photos=photos)
+                       person=person, events=events, photos=photos, sources=sources)
 
 
 @app.route('/events/loc=<locid>')
