@@ -433,28 +433,28 @@
         <div class="subsection" id="sourcerefs">
             <h4>Lähdeviitteet</h4>
             <ol>
+                {% for source in sources %}
                 <li>
-                	{% for source in sources %}
-                		{% for record in source.sources %}
-                			{% for repo in record.repos %}
-	            				{{repo.rname}}:
-                 			{% endfor %}
-	            			{{record.stitle}}
-                 		{% endfor %}
-	                     <ol>
-	                        <li id="sref1a">
-	                            <ul>
-	                                <li>
-	                				Sivu: {{source.page}}
-                                	</li>
-	                                <li>
-	                				Luotettavuus: {{source.confidence}}
-                                	</li>
-                            	</ul>
-                            </li>
-                    	</ol>
-                 	{% endfor %}
+            		{% for record in source.sources %}
+            			{% for repo in record.repos %}
+            				{{repo.rname}}:
+             			{% endfor %}
+            			{{record.stitle}}
+             		{% endfor %}
+                     <ol>
+                        <li id="sref1a">
+                            <ul>
+                                <li>
+                				Sivu: {{source.page}}
+                            	</li>
+                                <li>
+                				Luotettavuus: {{source.confidence}}
+                            	</li>
+                        	</ul>
+                        </li>
+                	</ol>
                 </li>
+				{% endfor %}
                 <li>
                     <a href="../../../src/1/1/cef51700e883ddf2011.html" title="Helsingin seurakuntayhtymä: Alli Airola virkatodistus" name ="sref3">
                     Helsingin seurakuntayhtymä: Alli Airola virkatodistus
