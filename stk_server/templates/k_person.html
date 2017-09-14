@@ -73,7 +73,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events %}
+        {% for e in events|sort(attribute='date') %}
                     <tr>
                         <td class="ColumnEvent">
                             <span class="id">{{e.uniq_id}}</span> {{e.type}}
@@ -433,6 +433,28 @@
         <div class="subsection" id="sourcerefs">
             <h4>Lähdeviitteet</h4>
             <ol>
+                {% for source in sources %}
+                <li>
+            		{% for record in source.sources %}
+            			{% for repo in record.repos %}
+            				{{repo.rname}}:
+             			{% endfor %}
+            			{{record.stitle}}
+             		{% endfor %}
+                     <ol>
+                        <li id="sref1a">
+                            <ul>
+                                <li>
+                				Sivu: {{source.page}}
+                            	</li>
+                                <li>
+                				Luotettavuus: {{source.confidence}}
+                            	</li>
+                        	</ul>
+                        </li>
+                	</ol>
+                </li>
+				{% endfor %}
                 <li>
                     <a href="../../../src/1/1/cef51700e883ddf2011.html" title="Helsingin seurakuntayhtymä: Alli Airola virkatodistus" name ="sref3">
                     Helsingin seurakuntayhtymä: Alli Airola virkatodistus
