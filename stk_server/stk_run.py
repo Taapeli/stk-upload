@@ -39,29 +39,28 @@ def show_person_page(ehto):
     key, value = ehto.split('=')
     try:
         if key == 'uniq_id':
-            person, events, photos = models.datareader.get_person_data_by_id(value)            
+            person, events, photos, sources = models.datareader.get_person_data_by_id(value)            
         else:
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("k_person.html", 
-                           person=person, events=events, photos=photos)
+                       person=person, events=events, photos=photos, sources=sources)
 
 
 @app.route('/events/loc=<locid>')
 def show_location_page(locid): 
-    """ henkilön tietojen näyttäminen ruudulla 
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """ Paikan tietojen näyttäminen ruudulla: hierarkia ja tapahtumat
     """
     models.dbutil.connect_db()
     try:
-        #events = models.gen.person.Person.get_person_events_by_place(locid)
         places, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     for p in places:
         print ("# " + str(p))
-    return render_template("k_place_events.html", locid=locid, events=events, places=places)
+    return render_template("k_place_events.html", 
+                           locid=locid, events=events, places=places)
 
 
 """ ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
@@ -82,6 +81,7 @@ def nayta_henkilot(subj):
         persons = models.datareader.lue_henkilot2()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "k_persons":
+        # Kertova-tyyliin
         persons = models.datareader.lue_henkilot2()
         return render_template("k_persons.html", persons=persons)
     elif subj == "surnames":
@@ -155,9 +155,9 @@ def list_people_by_surname(surname):
 def show_person_data(uniq_id): 
     """ henkilön tietojen näyttäminen ruudulla """
     models.dbutil.connect_db()
-    person, events, photos = models.datareader.get_person_data_by_id(uniq_id)
+    person, events, photos, sources = models.datareader.get_person_data_by_id(uniq_id)
     return render_template("table_person_by_id.html", 
-                           person=person, events=events, photos=photos)
+                       person=person, events=events, photos=photos, sources=sources)
 
     
 @app.route('/lista/family_data/<string:uniq_id>')
