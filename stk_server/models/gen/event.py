@@ -122,6 +122,7 @@ RETURN event"""
             self.change = event_record["event"]["change"]
             self.type = event_record["event"]["type"]
             self.date = event_record["event"]["date"]
+            self.description = event_record["event"]["description"]
     
             event_place_result = self.get_place_by_id()
             for event_place_record in event_place_result:
