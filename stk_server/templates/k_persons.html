@@ -54,7 +54,7 @@ henkilön sivulle.
 		               {% if p.name[0].refname %}<br><small>referenssinimi: {{p.name[0].refname}}</small>{% endif %}
 	                </div></td>
 	        {% if p.events %}
-		           <td class="ColumnEvent"><ul>{% for e in p.events %}
+		           <td class="ColumnEvent"><ul>{% for e in p.events|sort(attribute='date') %}
 		              <li><i>{{e.type}}</i> {{e.date|pvm}}
 		              {% if e.place %} – {{e.place}}{% endif %}</li>
 		              {% endfor %}

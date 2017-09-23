@@ -41,7 +41,11 @@ class Place:
     
     def __str__(self):
         try:
-            desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, self.level)
+            if self.level == None:
+                lv = ""
+            else:
+                lv = self.level
+            desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, lv)
         except:
             desc = "Place (undefined)"
         return desc

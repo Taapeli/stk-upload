@@ -23,7 +23,7 @@
     {% endif %}{% endfor %}
         <div id="summaryarea">
             <ul>{% for p in places %}
-                <li style="margin-left: {{4 + p.level * -2}}em;">
+                <li style="margin-left: {{p.level * 2}}em;">
                 {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
                     <b>{{p.pname}}</b>
                 {% else %}<a href="/events/loc={{p.id}}"><span class="id">{{p.id}}</span></a>
@@ -46,7 +46,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events %}
+        {% for e in events|sort(attribute='edate') %}
                     <tr>
                         <td class="ColumnPerson">
                             <a href="/person/uniq_id={{e.uid}}" class="id">{{e.uid}}</a>
