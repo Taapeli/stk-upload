@@ -67,7 +67,7 @@ MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
     return (driver.session().run(query, locid=int(locid)))
 
 
-def create_tree(result):
+def load_to_tree_struct(result):
     t = treelib.Tree()
     nl = {}
     nl[0] = 'root'
@@ -111,11 +111,11 @@ def create_tree(result):
                     t.move_node(rel.start, nid)
     return t
 
-def print_tree(tree):
+def print_tree(t):
     nl = {}
     lv = 0
     fill = ""
-    nodes = [tree[node] for node in tree.expand_tree(mode=tree.DEPTH)]
+    nodes = [t[node] for node in t.expand_tree(mode=t.DEPTH)]
     for node in nodes:
         if node.bpointer != None:
             if node.bpointer in nl:
@@ -139,8 +139,8 @@ if __name__ == '__main__':
     # solmut ja relaatiot
     neo_result = get_connections(locid)
     # Talletetaan tiedot muistinvaraiseen puurakenteeseen
-    tree = create_tree(neo_result)
-    print(tree)
-    print_tree(tree)
-#     print(tree.to_json())
+    t = load_to_tree_struct(neo_result)
+    print(t)
+    print_tree(t)
+#     print(t.to_json())
     

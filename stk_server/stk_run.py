@@ -57,8 +57,8 @@ def show_location_page(locid):
         places, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    for p in places:
-        print ("# " + str(p))
+#     for p in places:
+#         print ("# {} ".format(p))
     return render_template("k_place_events.html", 
                            locid=locid, events=events, places=places)
 

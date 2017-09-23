@@ -4,11 +4,10 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 
-#import datetime
 from sys import stderr
 #import logging
 from flask import g
-#import models.dbutil
+from models.dbtree import DbTree
 
 
 class Place:
@@ -140,7 +139,7 @@ class Place:
 
 
     @staticmethod       
-    def get_place_path(locid):
+    def get_place_tree(locid):
         """ Haetaan koko paikkojen ketju paikan locid ympärillä
             Palauttaa listan paikka-olioita ylimmästä alimpaan. 
             Jos hierarkiaa ei ole, listalla on vain oma Place.
@@ -166,66 +165,39 @@ class Place:
                  0 = tämä, 
                 <0 = alemmat
         """
-        def retappend(p):
-            """ Append a new Place to vector ret[], only if p is not a duplicate """
-            if len(ret) > 0:
-                if ret[-1].id == p.id:
-                    return
-            ret.append(p)
-
+        
         query = """
-MATCH (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
-    RETURN SIZE(r) AS lv,
-           ID(p) AS id1, p.type AS type1, p.pname AS name1,
-           ID(i) AS id2, i.type AS type2, i.pname AS name2
+MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
+    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
-MATCH (p:Place) WHERE ID(p) = $locid
-    RETURN 0 AS lv,
-           ID(p) AS id1, p.type AS type1, p.pname AS name1,
-           0 AS id2, "" AS type2, "" AS name2
-    UNION
-MATCH (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
-    RETURN SIZE(r)*-1 AS lv,
-           ID(i) AS id1, i.type AS type1, i.pname AS name1,
-           ID(p) AS id2, p.type AS type2, p.pname AS name2
+MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
+    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
-        result = g.driver.session().run(query, locid=int(locid))
-        ret = []
-        p0 = None
-
-        for record in result:
-            #│"lv"│"id1"│"type1"│"name1"│"id2"│"type2"│"name2"│
-            level = record["lv"]
-            id1 = int(record["id1"])
-            id2 = int(record["id2"])
-            if level > 0:
-                if id1 == int(locid):
-                    ptype =record["type2"]
-                    name = record["name2"]
-                    retappend(Place(id2, ptype, name, level))
-                    p0 = Place(id1, record["type1"], record["name1"], 0)
-            elif level == 0:
-                retappend(Place(id1, record["type1"], record["name1"], level))
-            else: # level < 0:
-                if  p0:
-                    retappend(p0)
-                    p0 = None
-                retappend(Place(id1, record["type1"], record["name1"], level))
-        if  p0:
-            retappend(p0)
-
-        if len(ret) == 0:
-            # Tällä paikalla ei ole hierarkiaa. 
+        t = DbTree(g.driver, query, 'pname', 'type')
+        t.load_to_tree_struct(locid)
+        if t.tree.depth() == 0:
+            # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
             # Hae oman paikan tiedot ilman yhteyksiä
             query = """
 MATCH (p:Place) WHERE ID(p) = $locid
-  RETURN 0 AS lv, ID(p) AS id, p.type AS type, p.pname AS name
+RETURN p.type AS type, p.pname AS name
 """
-            result = g.driver.session().run(query, locid=int(locid))
-            record = result.single()
-            p = Place(record["id"], record["type"], record["name"], record["lv"])
-            ret = [p,]
-
+            with g.driver.session() as session:
+                result = session.run(query, locid=int(locid))
+                record = result.single()
+                t.tree.create_node(record["name"], locid, parent=0, 
+                                   data={'type': record["type"]})
+# locid="", ptype="", pname="", level=None
+        ret = []
+        for node in t.tree.expand_tree(mode=t.tree.DEPTH):
+#             print ("{} {} {}".format(t.tree.depth(t.tree[node]), t.tree[node], 
+#                                      t.tree[node].bpointer))
+            if node != 0:
+                n = t.tree[node]
+                p = Place(locid=node, ptype=n.data['type'], 
+                          pname=n.tag, level=t.tree.depth(n))
+                p.parent = n.bpointer
+                ret.append(p)
         return ret
 
 
@@ -246,7 +218,7 @@ MATCH (p:Place) WHERE ID(p) = $locid
         │       │"","Borg"]]                   │       │            │
         └───────┴──────────────────────────────┴───────┴────────────┘
         """
-        
+
         query = """
 MATCH (p:Person)-->(e:Event)-[:PLACE]->(l:Place)
   WHERE id(l) = {locid}
