@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 '''
-  Demo-ohjelma: Kokeillaan paikkahierarkian lukemista
+  hierarkiapuun luonti kannasta
 Created on 8.9.2017
 @author: jm
 '''
@@ -9,40 +9,31 @@ import sys
 from neo4j.v1 import GraphDatabase, basic_auth
 import treelib
 
-class Tree():
+class DbTree():
     """ Builds a tree structure in memory by Neo4j query and offers
         services to access it
     """
 
-    def __init__(self, query=None, field_id='name', field_type='type'):
+    def __init__(self, driver, query=None, field_id='name', field_type='type'):
         """ Defines a Neo4j query to access database data as a tree structure.
     
             Query result must have the following mandatory fields:
                 nodes   terminal nodes
                 r       relation between terminal nodes
                 lv      lenght of the relation SIZE(r); 
-                        negative, if upwards to the root of the tree
+                        negative, if upwards towards the root of the tree
             Other field names form arguments:
-                field_id    node instance display name
-                field_type  node instance type
+                name_field_name  node instance display name
+                type_field_name  node instance type
                 
         """
-        if query:
-            self.query = query
-        else:
-            # Default example query gets place hierarcy
-            self.query = """
-MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
-    UNION
-MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
-"""
-        self.field_id = field_id
-        self.field_type = field_type
+        self.driver = driver
+        self.query = query
+        self.name_field_name = field_id
+        self.type_field_name = field_type
 
 
-    def _get_db_connections(self, node_id):
+    def _get_tree_branches(self, node_id):
         """ Example: Kyselyn tulos, kun puurakenne on
              ── Venäjä
                 └── Inkeri (kysytty node_id)
@@ -83,12 +74,14 @@ MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
             │type":"Country"}]             │    │       │
             └──────────────────────────────┴────┴───────┘
         """
-        global driver
         self.node_id = node_id
-        self.result = driver.session().run(self.query, locid=int(node_id))
+        with self.driver.session() as session:
+            result = session.run(self.query, locid=int(node_id))
+            return [(record["nodes"], record["lv"], record["r"]) 
+                    for record in result]
 
 
-    def create_tree(self):
+    def load_to_tree_struct(self, node_id):
         """ Build a tree structure in memory from Neo4j query result
             about self.node_id
     
@@ -98,11 +91,10 @@ MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
                 lv      lenght of the relation SIZE(r); 
                         negative, if upwards to the root of the tree
             Other field names form arguments:
-                field_id    node instance display name
-                field_type  node instance type
+                name_field_name  node instance display name
+                type_field_name  node instance type
                 
         """
-        #self._get_db_connections(node_id)
         self.tree = treelib.Tree()
         nl = {}
         nl[0] = 'root'
@@ -113,16 +105,16 @@ MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
         self.tree.create_node('', 0)
         nstack.append((0, "root", "", -9999))
     
-        for record in self.result:
+        for nodes, level, relations in self._get_tree_branches(node_id):
             # Tuloksessa on kaikki ko. relaatioon osallistuvat solut ja niiden
             # väliset yksittäiset yhteydet
-            for node in record['nodes']:
+            for node in nodes:
                 if not node.id in nl:
-                    nl[node.id] = node[self.field_id]              #["pname"]
-                    nstack.append((node.id, node[self.field_type], #["type"], 
-                                   node[self.field_id],            #["pname"], 
-                                   record["lv"]))
-            for rel in record['r']:
+                    nl[node.id] = node[self.name_field_name]            #["pname"]
+                    nstack.append((node.id, node[self.type_field_name], #["type"], 
+                                   node[self.name_field_name],          #["pname"], 
+                                   level))
+            for rel in relations:
                 # Käydään läpi relaatioketjun yksittäiset (start)-->(end) -välit
                 if not rel.id in rl:
                     rl[rel.id] = rel.end
@@ -133,7 +125,7 @@ MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
     #                     print("create_node('{}', '{}', parent={}, data={})".\
     #                           format(nname1, nid1, 0, {'type':ntype1}))
                         self.tree.create_node(nname1, nid1, parent=0, 
-                                              data={self.field_type:ntype1})
+                                              data={self.type_field_name:ntype1})
                     if lv > 0:
                         parent = rel.end
                     else:
@@ -141,7 +133,7 @@ MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
                     # Lisätään uusi solu ensin nykyisen rinnalle ja 
                     # sitten siirretään nykyinen uuden alle
                     self.tree.create_node(nname, nid, parent=parent, 
-                                          data={self.field_type:ntype})
+                                          data={self.type_field_name:ntype})
     #                 print("create_node('{}', '{}', parent={}, data={})".\
     #                       format(nname, nid, parent, {'type':ntype}))
                     if lv < 0:
@@ -178,17 +170,34 @@ if __name__ == '__main__':
     print ("paikka {}".format(locid))
 
     # Connect db
-    global driver
     host = "bolt:localhost:7687"
     driver = GraphDatabase.driver(host, auth=basic_auth("neo4j", "2000Neo4j"))
 
     # Suoritetaan haku tietokannasta: paikkaan locid liittyvät
     # solmut ja relaatiot
-    t = Tree(None, 'pname', 'type')
-    t._get_db_connections(locid)
-    # Talletetaan tiedot muistinvaraiseen puurakenteeseen
-    tree = t.create_tree()
-    print(tree)
+    query = """
+MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
+    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
+    UNION
+MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
+    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
+"""
+    t = DbTree(driver, query, 'pname', 'type')
+    # Luetaan tiedot muistinvaraiseen puurakenteeseen
+    t.load_to_tree_struct(locid)
+    if t.tree.depth() == 0:
+        # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
+        # Hae oman paikan tiedot ilman yhteyksiä
+        query = """
+MATCH (p:Place) WHERE ID(p) = $locid
+RETURN p.type AS type, p.pname AS name
+"""
+        with driver.session() as session:
+            result = session.run(query, locid=int(locid))
+            record = result.single()
+            t.tree.create_node(record["name"], locid, parent=0, 
+                                      data={'type': record["type"]})
+
+    print(t.tree)
     t.print_tree()
-#     print(tree.to_json())
-    
+#     print(t.to_json())
