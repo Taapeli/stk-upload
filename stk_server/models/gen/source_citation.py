@@ -37,6 +37,28 @@ class Citation:
         self.noteref_hlink = ''
         self.sourceref_hlink = ''
         self.sources = []   # For creating display sets
+    
+    
+    @staticmethod       
+    def get_source_repo (uniq_id=None):
+        """ Voidaan lukea viittauksen lähde ja arkisto kannasta
+        """
+
+        if uniq_id:
+            where = "WHERE ID(citation)={} ".format(uniq_id)
+        else:
+            where = ''
+        
+        query = """
+ MATCH (citation:Citation)-[r]->(source:Source)-[p]->(repo:Repository) {0}
+   WITH citation, r, source, p, repo ORDER BY citation.page
+ RETURN ID(citation) AS id, citation.dateval AS date, citation.page AS page, 
+     citation.confidence AS confidence, 
+   COLLECT([ID(source), source.stitle, source.reporef_medium, 
+       ID(repo), repo.rname, repo.type]) AS sources
+ """.format(where)
+                
+        return g.driver.session().run(query)
 
     
     @staticmethod       
@@ -285,7 +307,7 @@ class Source:
     
     @staticmethod       
     def get_source_citation (uniq_id):
-        """ Voidaan lukea läheitä viittauksineen kannasta
+        """ Voidaan lukea lähteitä viittauksineen kannasta
         """
 
         if uniq_id:

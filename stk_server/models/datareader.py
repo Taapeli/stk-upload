@@ -572,10 +572,11 @@ def get_people_by_surname(surname):
 
 
 def get_person_data_by_id(uniq_id):
-    """ Get 3 data sets:
+    """ Get 4 data sets:
         person: uniq_id and name data
         events list: uniq_id, date, location name and id (?)
         photos
+        sources
     """
     p = Person()
     p.uniq_id = uniq_id
@@ -586,6 +587,7 @@ def get_person_data_by_id(uniq_id):
     event.get_event_data()
     
     events = []
+    sources = []
     for link in p.eventref_hlink:
         e = Event_for_template()
         e.uniq_id = link
@@ -601,6 +603,32 @@ def get_person_data_by_id(uniq_id):
             e.ltype = place.type
             
         events.append(e)
+        
+        if e.citationref_hlink != '':
+            citation = Citation()
+            citation.uniq_id = e.citationref_hlink
+            result = citation.get_source_repo(citation.uniq_id)
+            
+            for record in result:
+                citation.dateval = record['date']
+                citation.page = record['page']
+                citation.confidence = record['confidence']
+                
+                for source in record['sources']:
+                    s = Source()
+                    s.uniq_id = source[0]
+                    s.stitle = source[1]
+                    s.reporef_medium = source[2]
+        
+                    r = Repository()
+                    r.uniq_id = source[3]
+                    r.rname = source[4]
+                    r.type = source[5]
+                    
+                    s.repos.append(r)
+                    citation.sources.append(s)
+                    
+                sources.append(citation)
             
     photos = []
     for link in p.objref_hlink:
@@ -610,7 +638,7 @@ def get_person_data_by_id(uniq_id):
                     
         photos.append(o)
         
-    return (p, events, photos)
+    return (p, events, photos, sources)
 
 
 def get_families_data_by_id(uniq_id):
