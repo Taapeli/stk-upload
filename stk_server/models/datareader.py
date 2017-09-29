@@ -588,6 +588,7 @@ def get_person_data_by_id(uniq_id):
     
     events = []
     sources = []
+    source_cnt = 0
     for link in p.eventref_hlink:
         e = Event_for_template()
         e.uniq_id = link
@@ -601,6 +602,7 @@ def get_person_data_by_id(uniq_id):
             e.location = place.pname
             e.locid = place.uniq_id
             e.ltype = place.type
+            e.sources = ''
             
         events.append(e)
         
@@ -615,6 +617,8 @@ def get_person_data_by_id(uniq_id):
                 citation.confidence = record['confidence']
                 
                 for source in record['sources']:
+                    source_cnt += 1
+                    e.source = source_cnt
                     s = Source()
                     s.uniq_id = source[0]
                     s.stitle = source[1]

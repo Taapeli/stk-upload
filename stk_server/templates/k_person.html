@@ -88,7 +88,7 @@
                             <div></div>
                         </td>
                         <td class="ColumnSources">
-                         <!-- a href="#sref3a">3a</a -->
+                         <a href="#sref{{e.source}}a">{{e.source}}a</a>
                         </td>
                     </tr>
          {% endfor %}
@@ -433,6 +433,7 @@
         <div class="subsection" id="sourcerefs">
             <h4>Lähdeviitteet</h4>
             <ol>
+                {% set source_cnt = 0 %}
                 {% for source in sources %}
                 <li>
             		{% for record in source.sources %}
@@ -442,7 +443,8 @@
             			{{record.stitle}}
              		{% endfor %}
                      <ol>
-                        <li id="sref1a">
+                         {% set source_cnt = source_cnt + 1 %}
+                         <li id="sref{{ source_cnt }}a">
                             <ul>
                                 <li>
                 				Sivu: {{source.page}}
