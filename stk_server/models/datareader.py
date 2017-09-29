@@ -602,7 +602,6 @@ def get_person_data_by_id(uniq_id):
             e.location = place.pname
             e.locid = place.uniq_id
             e.ltype = place.type
-            e.sources = ''
             
         events.append(e)
         

@@ -88,7 +88,9 @@
                             <div></div>
                         </td>
                         <td class="ColumnSources">
-                         <a href="#sref{{e.source}}a">{{e.source}}a</a>
+                         {% if e.source %}
+                         	<a href="#sref{{e.source}}a">{{e.source}}a</a>
+                     	 {% endif %}
                         </td>
                     </tr>
          {% endfor %}
