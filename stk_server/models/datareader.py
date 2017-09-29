@@ -715,7 +715,7 @@ def get_place_with_events (loc_id=None):
         etype    event type
         edate    event date
     """
-    place_list = Place.get_place_pathloc_id)
+    place_list = Place.get_place_path(loc_id)
     event_table = Place.get_place_events(loc_id)
     return (place_list, event_table)
 
