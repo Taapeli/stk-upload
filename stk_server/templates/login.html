@@ -1,0 +1,70 @@
+{# _myapp/templates/index.html_ #}
+{% extends "layout.html" %}
+{% block title %}Alkusivu{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div style="margin-left:50px; padding-bottom: 2em;">
+  <div>
+    <h3>Tietokanta-aineistojen selaus</h3>
+    <div>
+	    <div style="display: inline-block;vertical-align:top;margin-right: 2em;padding: 1em; background-color: bisque;">
+		    <h4>Kertova-tyyli</h4>
+		    <ul>
+		        <li><a href="/lista/k_persons">Näytä henkilöt</a></li>
+		    </ul>
+	    </div>
+	    <div style="display: inline-block; vertical-align:top;padding: 1em; background-color: bisque;">
+		    <h4>Talukkoina</h4>
+		    <ul>
+		    <li><a href="/lista/henkilot2">Näytä henkilöt</a></li>
+		    <li><a href="/lista/surnames">Luettelo sukunimistä</a></li>
+		    <li><a href="/lista/objects">Luettelo mediatiedostoista eli tallenteista</a></li>
+		    <li><a href="/lista/repositories">Luettelo arkistoista</a> 
+		        (arkistosivulla arkiston lähteet)</li>
+		    <li><a href="/lista/sources">Luettelo lähteistä (lähdesivulla viittaukset)</a></li>
+		    <li><a href="/lista/notes">Huomautukset</a></li>
+		    <li><a href="/lista/places">Paikat</a></li>
+		    <li>Ongelmaselvitusvälineitä<ul>
+			    <li><a href="/lista/events_wo_place">Paikattomat tapahtumat</a></li>
+			    <li><a href="/lista/sources_wo_cites">Viittauksettomat lähteet</a></li>
+			    <li><a href="/lista/events_wo_cites">Viittauksettomat tapahtumat</a></li>
+		    </ul>
+	    </div>
+    </div>
+  </div>
+  <div>
+    <form action="/lataa" method="post" enctype="multipart/form-data">
+    <h3>Tietojen lisääminen</h3>
+    <div>
+        <div style="display: inline-block;">
+            <ul style="list-style-type:none; margin-top: 0; padding-left: 20px;">
+                <li><input type="radio" name="aineisto" checked
+                           value="xml_file">Gramps XML-tiedosto</li>
+                <li><input type="radio" name="aineisto" 
+                           value="refnimet">Henkilöiden referenssinimet</li>
+            </ul>
+            <input type="file" name="filenm" />
+        </div>
+        <div style="display: inline-block;">
+            <input type="submit" value="Lataa"/>
+        </div>
+    </div>
+    </form>
+  </div>
+</div>
+	
+<details style="background-color:lightgray; width:450pt">
+    <summary><b>Hallintatoiminnot</b></summary>
+    <ul>
+	    <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> koko kanta
+	        <i>(Mitään kysymättä!)</i></li>
+	    <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
+	    <li><a href="/aseta/refnames">Aseta referenssinimet</a></li>
+    </ul>
+</details>
+<div style="background-color:lightgray; width:450pt; clear: both;">
+    <p>&gt;&nbsp;<a href="/vanhat">Vanhat toiminnot</a></p>
+</div>
+
+{% endblock %}

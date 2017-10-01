@@ -1,0 +1,78 @@
+{# _myapp/templates/index.html_ #}
+{% extends "layout.html" %}
+{% block title %}Alkusivu{% endblock %}
+{% block body %}
+{{ super() }}
+
+
+<style>
+/* Create three equal columns that floats next to each other */
+.column {
+    float: left;
+    width: 30%;
+    padding: 5px;
+}
+.column div { 
+    height: 55px;
+    padding: 5px;
+    font: italic 18px Georgia, serif;
+}
+.column div img {
+	height: 50px;
+	padding-right: 5px;
+	vertical-align: middle;
+}
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+/* Style the footer */
+.footer {
+    background-color: #f1f1f1;
+    padding: 10px;
+    text-align: center;
+}
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media (max-width: 600px) {
+    .column {
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h2>Tervetuloa Suomitietokantaan</h2>
+  <h3>Demoversion ominaisuudet</h3>
+  <p>Toistaiseksi käytössä on vain suppea henkilötietojen selailu.
+     Henkilön tietosivulta voit päästä paikkakunnan nimen kautta paikan
+     tietoihin ja tapahtumiin.</p>
+</div>
+
+​<div class="row">
+  <div class="column">
+    <div style="background:pink"><a href="/lista/k_persons">
+        <img src="/static/if_person-stalker.svg" />
+         Henkilöt</a></div>
+  </div>
+  <div class="column">
+    <div style="background:palegreen"><img src="/static/if_CloudUpload.svg"/>
+        Lataa tietoja</div>
+  </div>
+  <div class="column">
+    <div style="background:lightblue"><img src="/static/if_Administrative.png"/>
+        Järjestelmän hallinta</div>
+  </div>
+  <div class="column">
+    <div style="background:gray"><img src="/static/if_old-versions.png"/>
+        <a href="/oldindex">Vanhat toiminnot</a></div>
+  </div>
+</div>
+
+​<div class="footer">
+  <p>Footer</p>
+</div>
+
+{% endblock %}
