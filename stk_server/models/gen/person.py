@@ -266,6 +266,59 @@ RETURN person, name
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
                 self.name.append(pname)
+    
+    
+    @staticmethod       
+    def get_people_wo_birth():
+        """ Voidaan lukea henkilöitä ilman syntymätapahtumaa kannasta
+        """
+        
+        query = """
+ MATCH (p:Person) WHERE NOT EXISTS ((p)-[:EVENT]->(:Event {type:'Birth'}))
+ WITH p 
+ MATCH (p)-[:NAME]->(n:Name)
+ RETURN ID(p) AS uniq_id, p, n ORDER BY n.surname, n.firstname"""
+                
+        result = g.driver.session().run(query)
+        
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'gender',
+                  'firstname', 'surname']
+        lists = []
+        
+        for record in result:
+            data_line = []
+            if record['uniq_id']:
+                data_line.append(record['uniq_id'])
+            else:
+                data_line.append('-')
+            if record["p"]['gramps_handle']:
+                data_line.append(record["p"]['gramps_handle'])
+            else:
+                data_line.append('-')
+            if record["p"]['change']:
+                data_line.append(record["p"]['change'])
+            else:
+                data_line.append('-')
+            if record["p"]['id']:
+                data_line.append(record["p"]['id'])
+            else:
+                data_line.append('-')
+            if record["p"]['gender']:
+                data_line.append(record["p"]['type'])
+            else:
+                data_line.append('-')
+            if record["n"]['firstname']:
+                data_line.append(record["n"]['firstname'])
+            else:
+                data_line.append('-')
+            if record["n"]['surname']:
+                data_line.append(record["n"]['surname'])
+            else:
+                data_line.append('-')
+                
+            lists.append(data_line)
+        
+        return (titles, lists)
 
 
     @staticmethod       
