@@ -60,8 +60,13 @@ RETURN a.handle AS handle''', {"inc": inc})
 
 def alusta_kanta():
     """ Koko kanta tyhjennetään """
-    logging.info('EI KÄYTÖSSÄ! Tietokanta tyhjennetään!')
-    
+    result = g.driver.session().run("MATCH (a) DETACH DELETE a")
+    counters = result.consume().counters
+    msg = "Poistettu {} solmua, {} relaatiota".\
+          format(counters.nodes_deleted, counters.relationships_deleted)
+    logging.info('Tietokanta tyhjennetty! ' + msg)
+    return (msg)
+
 #TODO: Korjaa tämä: skeema sch määrittelemättä
 #     # Poistetaan vanhat rajoitteet ja indeksit
 #     for uv in sch.get_uniqueness_constraints('Refname'):

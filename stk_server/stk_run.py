@@ -260,8 +260,8 @@ def talleta(filename, subj):
 def tyhjenna():   
     """ tietokannan tyhjentäminen mitään kyselemättä """
     models.dbutil.connect_db()
-    models.dbutil.alusta_kanta()
-    return render_template("talletettu.html", text="Koko kanta on muka tyhjennetty")
+    msg = models.dbutil.alusta_kanta()
+    return render_template("talletettu.html", text=msg)
 
 
 @app.route('/aseta/refnames')
