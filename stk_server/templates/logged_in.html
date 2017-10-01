@@ -8,37 +8,14 @@
   <div>
     <h3>Tietokanta-aineistojen selaus</h3>
     <div>
-	    <div class="startbox">
-            <h4>Kertova-tyyli</h4>
-            <ul>
-                <li><a href="/lista/k_persons">Näytä henkilöt</a></li>
-            </ul>
-            <h4>Ylläpitotoiminnot</h4>
-            <ul>
-                <li><a href="/update">Hallinnoi käyttäjiä, lisää aineistoja ym.</a></li>
-            </ul>
+	    <div style="display: inline-block;vertical-align:top;margin-right: 2em;padding: 1em; background-color: bisque;">
+		    <h4>Kertova-tyyli</h4>
+		    <ul>
+		        <li><a href="/lista/k_persons">Näytä henkilöt</a></li>
+		    </ul>
 	    </div>
-		<div class="startbox">
-		    <form action="/lataa" method="post" enctype="multipart/form-data">
-		    <h4>Tietojen lisääminen</h4>
-		    <div>
-		        <div style="display: inline-block;">
-		            <ul style="list-style-type:none; margin-top: 0; padding-left: 20px;">
-		                <li><input type="radio" name="aineisto" checked
-		                           value="xml_file">Gramps XML-tiedosto</li>
-		                <li><input type="radio" name="aineisto" 
-		                           value="refnimet">Henkilöiden referenssinimet</li>
-		            </ul>
-		            <input type="file" name="filenm" />
-		        </div>
-		        <div style="display: inline-block;">
-		            <input type="submit" value="Lataa"/>
-		        </div>
-		    </div>
-		    </form>
-		</div>
-	    <div class="startbox">
-		    <h4>Taulukkoina</h4>
+	    <div style="display: inline-block; vertical-align:top;padding: 1em; background-color: bisque;">
+		    <h4>Talukkoina</h4>
 		    <ul>
 		    <li><a href="/lista/henkilot2">Näytä henkilöt</a></li>
 		    <li><a href="/lista/surnames">Luettelo sukunimistä</a></li>
@@ -49,7 +26,6 @@
 		    <li><a href="/lista/notes">Huomautukset</a></li>
 		    <li><a href="/lista/places">Paikat</a></li>
 		    <li>Ongelmaselvitusvälineitä<ul>
-			    <li><a href="/lista/people_wo_birth">Henkilöt ilman syntymätapahtumaa</a></li>
 			    <li><a href="/lista/events_wo_place">Paikattomat tapahtumat</a></li>
 			    <li><a href="/lista/sources_wo_cites">Viittauksettomat lähteet</a></li>
 			    <li><a href="/lista/events_wo_cites">Viittauksettomat tapahtumat</a></li>
@@ -57,9 +33,29 @@
 	    </div>
     </div>
   </div>
+  <div>
+    <form action="/lataa" method="post" enctype="multipart/form-data">
+    <h3>Tietojen lisääminen</h3>
+    <div>
+        <div style="display: inline-block;">
+            <ul style="list-style-type:none; margin-top: 0; padding-left: 20px;">
+                <li><input type="radio" name="aineisto" checked
+                           value="xml_file">Gramps XML-tiedosto</li>
+                <li><input type="radio" name="aineisto" 
+                           value="refnimet">Henkilöiden referenssinimet</li>
+            </ul>
+            <input type="file" name="filenm" />
+        </div>
+        <div style="display: inline-block;">
+            <input type="submit" value="Lataa"/>
+        </div>
+    </div>
+    </form>
+  </div>
+</div>
 	
 <details style="background-color:lightgray; width:450pt">
-    <summary><b>Ylläpitotoiminnot</b></summary>
+    <summary><b>Hallintatoiminnot</b></summary>
     <ul>
 	    <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> koko kanta
 	        <i>(Mitään kysymättä!)</i></li>

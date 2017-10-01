@@ -530,6 +530,21 @@ def read_events_wo_place():
     return (headings, titles, events)
 
 
+def read_people_wo_birth():
+    """ Lukee tietokannasta Person- objektit, joilta puuttuu syntymätapahtuma
+        näytettäväksi
+
+    """
+    
+    headings = []
+    titles, people = Person.get_people_wo_birth()
+    
+    headings.append("Tapahtumaluettelo")
+    headings.append("Näytetään henkilöt ilman syntymätapahtumat")
+
+    return (headings, titles, people)
+
+
 def read_places():
     """ Lukee tietokannasta Place- objektit näytettäväksi
 
@@ -697,16 +712,15 @@ def get_families_data_by_id(uniq_id):
     return (p, families)
 
 
-def get_place_with_events (loc_id=None):
+def get_place_with_events (loc_id):
     """ Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
         Palauttaa paikkahierarkian ja (henkilö)tapahtumat muodossa
         [Place_list, Event_table].
 
     place_list: Lista Place-objekteja, joissa kentät
-        p.id    locid eli uniq_id
+        id      locid eli uniq_id
         type    paikan tyyppi (Farm, Village, ...)
         pname   paikannimi
-	current True haetun paikan kohdalla
         parent  isäsolmun id
 
     event_table:
@@ -715,7 +729,7 @@ def get_place_with_events (loc_id=None):
         etype    event type
         edate    event date
     """
-    place_list = Place.get_place_path(loc_id)
+    place_list = Place.get_place_tree(loc_id)
     event_table = Place.get_place_events(loc_id)
     return (place_list, event_table)
 

@@ -57,8 +57,8 @@ def show_location_page(locid):
         places, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    for p in places:
-        print ("# " + str(p))
+#     for p in places:
+#         print ("# {} ".format(p))
     return render_template("k_place_events.html", 
                            locid=locid, events=events, places=places)
 
@@ -103,6 +103,10 @@ def nayta_henkilot(subj):
         objects = models.datareader.read_objects()
         return render_template("table_objects.html", 
                                objects=objects)
+    elif subj == 'people_wo_birth':
+        headings, titles, lists = models.datareader.read_people_wo_birth()
+        return render_template("table_of_data.html", 
+               headings=headings, titles=titles, lists=lists)
     elif subj == 'repositories':
         repositories = models.datareader.read_repositories()
         return render_template("table_repositories.html", 
