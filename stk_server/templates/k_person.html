@@ -97,9 +97,9 @@
                  </tbody>
             </table>
         </div>
-        <div class="subsection" id="parents">
+<!--    <div class="subsection" id="parents">
             <h4>Vanhemmat</h4>
-<!--        <table class="infolist">
+            <table class="infolist">
                 <thead>
                     <tr>
                         <th class="ColumnAttribute">Suhde kotihenkilöön</th>
@@ -127,11 +127,11 @@
                     <td class="ColumnValue"></td>
                 </tr>
             </table>
--->
         </div>
-        <div class="subsection" id="families">
+-->
+<!--    <div class="subsection" id="families">
             <h4>Perheet</h4>
-<!--        <table class="infolist fixed_subtables">
+            <table class="infolist fixed_subtables">
                 <tr class="BeginFamily">
                     <td class="ColumnType">&nbsp</td>
                     <td class="ColumnAttribute">&nbsp</td>
@@ -337,8 +337,8 @@
                     </tr>
                 </tr>
             </table>
--->
         </div>
+-->
         <div class="subsection" id="indivgallery">
             <h4>Media</h4>
         {% for photo in photos %}<div class="thumbnail">
@@ -346,30 +346,22 @@
                     <p>{{photo.description}}</p>
             </div>
         {% endfor %}
-<!--        <div class="thumbnail">
-                <img alt="Kalle Airolan rippikuva" src="d69a277c15e36abe511.png" />
-                    <p>Kalle Airolan rippikuva</p>
-            </div>
-            <div class="thumbnail">
-                <img alt="Kalle apteekissa" src="d69a282586c65d1305b.png" />
-                    <p>Kalle apteekissa</p>
-            </div>
--->
             <div class="fullclear"></div>
         </div>
+<!--
         <div class="subsection narrative">
             <h4>Kerrottua</h4>
-<!--
             <div class="grampsstylednote">
                 <p>
                 Note
                 </p>
             </div>
--->
         </div>
+-->
+<!--
         <div class="subsection" id="pedigree">
             <h4>Esipolvien taulu</h4>
-<!--        <ol class="pedigreegen">
+            <ol class="pedigreegen">
                 <li>
                     <a href="../../../ppl/8/a/ce373c19c2f1a78cda8.html">Silius, Carl Gustaf</a>
                     <ol>
@@ -447,14 +439,8 @@
                      <ol>
                          {% set source_cnt = source_cnt + 1 %}
                          <li id="sref{{ source_cnt }}a">
-                            <ul>
-                                <li>
-                				Sivu: {{source.page}}
-                            	</li>
-                                <li>
-                				Luotettavuus: {{source.confidence}}
-                            	</li>
-                        	</ul>
+                            Sivu: {{source.page}}{% if source.confidence %} &nbsp;
+                            <small>(luotettavuus {{source.confidence}})</small>{% endif %}
                         </li>
                 	</ol>
                 </li>
