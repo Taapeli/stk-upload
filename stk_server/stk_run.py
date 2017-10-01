@@ -103,6 +103,10 @@ def nayta_henkilot(subj):
         objects = models.datareader.read_objects()
         return render_template("table_objects.html", 
                                objects=objects)
+    elif subj == 'people_wo_birth':
+        headings, titles, lists = models.datareader.read_people_wo_birth()
+        return render_template("table_of_data.html", 
+               headings=headings, titles=titles, lists=lists)
     elif subj == 'repositories':
         repositories = models.datareader.read_repositories()
         return render_template("table_repositories.html", 

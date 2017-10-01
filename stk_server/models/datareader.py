@@ -530,6 +530,21 @@ def read_events_wo_place():
     return (headings, titles, events)
 
 
+def read_people_wo_birth():
+    """ Lukee tietokannasta Person- objektit, joilta puuttuu syntymätapahtuma
+        näytettäväksi
+
+    """
+    
+    headings = []
+    titles, people = Person.get_people_wo_birth()
+    
+    headings.append("Tapahtumaluettelo")
+    headings.append("Näytetään henkilöt ilman syntymätapahtumat")
+
+    return (headings, titles, people)
+
+
 def read_places():
     """ Lukee tietokannasta Place- objektit näytettäväksi
 
