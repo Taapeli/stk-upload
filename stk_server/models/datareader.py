@@ -6,6 +6,7 @@ import csv
 import logging
 import time
 import xml.dom.minidom
+from operator import itemgetter
 from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
@@ -543,6 +544,26 @@ def read_people_wo_birth():
     headings.append("Näytetään henkilöt ilman syntymätapahtumat")
 
     return (headings, titles, people)
+
+
+def read_old_people_top():
+    """ Lukee tietokannasta Person- objektit, joilla syntymä- ja kuolintapahtuma
+        näytettäväksi
+
+    """
+    
+    headings = []
+    titles, people = Person.get_old_people_top()
+    
+    sorted_people = sorted(people, key=itemgetter(7), reverse=True)
+    top_of_sorted_people = []
+    for i in range(20):
+        top_of_sorted_people.append(sorted_people[i])
+    
+    headings.append("Tapahtumaluettelo")
+    headings.append("Näytetään vanhat henkilöt ja heidän ikä")
+
+    return (headings, titles, top_of_sorted_people)
 
 
 def read_places():

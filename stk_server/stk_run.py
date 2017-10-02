@@ -5,6 +5,7 @@
 
 import logging
 from flask import Flask, render_template, request, redirect, url_for, flash, g
+from datetime import datetime
 
 global app
 app = Flask(__name__, instance_relative_config=True)
@@ -96,15 +97,20 @@ def nayta_henkilot(subj):
         return render_template("table_of_data.html", 
                headings=headings, titles=titles, lists=lists)
     elif subj == 'notes':
-        titles, notes = models.datareader.get_notes()
-        return render_template("table_notes.html", 
-                               titles=titles, notes=notes)
+        titles, lists = models.datareader.get_notes()
+        return render_template("table_of_data.html", 
+                               headings=("Huomautusluettelo", "Note-kohteet"),
+                               titles=titles, lists=lists)
     elif subj == 'objects':
         objects = models.datareader.read_objects()
         return render_template("table_objects.html", 
                                objects=objects)
     elif subj == 'people_wo_birth':
         headings, titles, lists = models.datareader.read_people_wo_birth()
+        return render_template("table_of_data.html", 
+               headings=headings, titles=titles, lists=lists)
+    elif subj == 'old_people_top':
+        headings, titles, lists = models.datareader.read_old_people_top()
         return render_template("table_of_data.html", 
                headings=headings, titles=titles, lists=lists)
     elif subj == 'repositories':
@@ -403,16 +409,30 @@ def stk_harjoitus():
 @app.template_filter('pvm')
 def _jinja2_filter_date(date_str, fmt=None):
     """ ISO-päivämäärä 2017-09-20 suodatetaan suomalaiseksi 20.9.2017 """
-    a = date_str.split('-')
-    if len(a) == 3:
-        p = int(a[2])
-        k = int(a[1])
-        return "{}.{}.{}".format(p,k,a[0]) 
-    elif len(a) == 2:
-        k = int(a[1])
-        return "{}.{}".format(k,a[0]) 
-    else:
-        return "{}".format(a[0]) 
+#     if len(date_str) < 4:
+#         return date_str
+    try:
+        a = date_str.split('-')
+        if len(a) == 3:
+            p = int(a[2])
+            k = int(a[1])
+            return "{}.{}.{}".format(p,k,a[0]) 
+        elif len(a) == 2:
+            k = int(a[1])
+            return "{}.{}".format(k,a[0]) 
+        else:
+            return "{}".format(a[0])
+    except:
+        return date_str
+    
+@app.template_filter('timestamp')
+def _jinja2_filter_datestamp(time_str, fmt=None):
+    """ Unix time 1506950049 suodatetaan selväkieliseksi 20.9.2017 """
+    try:
+        s = datetime.fromtimestamp(int(time_str)).strftime('%d.%m.%Y %H:%M:%S')
+        return s
+    except:
+        return time_str
 
 """ ----------------------------- Käynnistys ------------------------------- """
 
