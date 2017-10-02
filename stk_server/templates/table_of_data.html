@@ -13,16 +13,20 @@
 <section id="lista">
 <table>
 {% if titles %}
-	<tr>
+	<tr>{% set len = titles.__len__() %}
     {% for title in titles %}
 	    <th>{{title}}</th>
 	{% endfor %}
     </tr>
 	{% if lists %}
-	    {% for list in lists %}
+	    {% for line in lists %}
 		    <tr>
-	    	{% for data_line in list %}
-		        <td>{{data_line}}</td>
+	    	{% for i in range(len) %}
+	    	  {% if titles[i] == "date" %}<td>{{line[i]|pvm}}</td>
+              {% elif  titles[i] == "change" %}<td><small>{{line[i]|timestamp}}</small></td>
+              {% elif  titles[i] == "gramps_handle" %}<td><small>{{line[i]}}</small></td>
+              {% else %}<td>{{line[i]}}</td>
+		      {% endif %}
 	    	{% endfor %}
 	        </tr>
 	    {% endfor %}
