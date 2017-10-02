@@ -319,6 +319,80 @@ RETURN person, name
             lists.append(data_line)
         
         return (titles, lists)
+    
+    
+    @staticmethod       
+    def get_old_people_top():
+        """ Voidaan lukea henkilöitä joilla syntymä- ja kuolintapahtumaa kannasta
+        """
+        
+        query = """
+ MATCH (p:Person)-[:EVENT]->(a:Event) WHERE EXISTS ((p)-[:EVENT]->(a:Event {type:'Birth'}))
+ WITH p, a 
+ MATCH (p)-[:EVENT]->(b:Event) WHERE EXISTS ((p)-[:EVENT]->(b:Event {type:'Death'}))
+ WITH p, a, b
+ MATCH (p)-[:NAME]->(n:Name)
+ RETURN ID(p) AS uniq_id, p, n, a.date AS birth, b.date AS death ORDER BY n.surname, n.firstname"""
+                
+        result = g.driver.session().run(query)
+        
+        titles = ['uniq_id', 'firstname', 'surname', 'birth', 'death', 
+                  'age (years)', 'age (months)', 'age(12*years + months)']
+        lists = []
+        
+        for record in result:
+            data_line = []
+            if record['uniq_id']:
+                data_line.append(record['uniq_id'])
+            else:
+                data_line.append('-')
+            if record["n"]['firstname']:
+                data_line.append(record["n"]['firstname'])
+            else:
+                data_line.append('-')
+            if record["n"]['surname']:
+                data_line.append(record["n"]['surname'])
+            else:
+                data_line.append('-')
+            if record['birth']:
+                birth_str = record['birth']
+                birth_data = birth_str.split("-")
+                data_line.append(record['birth'])
+            else:
+                data_line.append('-')
+            if record['death']:
+                death_str = record['death']
+                death_data = death_str.split("-")
+                data_line.append(record['death'])
+            else:
+                data_line.append('-')
+                
+            # Counting the age when the dates are as YYYY-mm-dd
+            if (len(birth_data) > 2) and (len(death_data) > 2):
+                years = int(death_data[0])-int(birth_data[0])
+                months = int(death_data[1])-int(birth_data[1])
+                
+                if int(death_data[2]) < int(death_data[2]):
+                   months -= 1
+                
+                if months < 0:
+                   months += 12
+                   years -= 1
+                
+                years_months = years * 12 + months
+            else:
+                years = '-'
+                months = '-'
+                years_months = 0
+                
+            data_line.append(years)
+            data_line.append(months)
+            data_line.append(years_months)
+
+                
+            lists.append(data_line)
+        
+        return (titles, lists)
 
 
     @staticmethod       

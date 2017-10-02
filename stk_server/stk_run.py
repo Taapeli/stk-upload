@@ -107,6 +107,10 @@ def nayta_henkilot(subj):
         headings, titles, lists = models.datareader.read_people_wo_birth()
         return render_template("table_of_data.html", 
                headings=headings, titles=titles, lists=lists)
+    elif subj == 'old_people_top':
+        headings, titles, lists = models.datareader.read_old_people_top()
+        return render_template("table_of_data.html", 
+               headings=headings, titles=titles, lists=lists)
     elif subj == 'repositories':
         repositories = models.datareader.read_repositories()
         return render_template("table_repositories.html", 
