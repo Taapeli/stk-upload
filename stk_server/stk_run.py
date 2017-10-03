@@ -27,6 +27,17 @@ def index():
     """Aloitussivun piirtäminen"""
     return render_template("index.html")
 
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'GET':
+        return render_template("login/login.html")
+    else:
+        from flask import make_response
+        resp = make_response(render_template('login/logged.html', 
+                                             usrname=request.form['usrname']))
+        return resp
+            #render_template("login/logged.html", usrname = usrname)
+    
 
 """ ----------------------------- Kertova-sivut --------------------------------
 """
