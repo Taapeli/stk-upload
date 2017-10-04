@@ -644,30 +644,44 @@ def get_person_data_by_id(uniq_id):
         if e.citationref_hlink != '':
             citation = Citation()
             citation.uniq_id = e.citationref_hlink
-            result = citation.get_source_repo(citation.uniq_id)
             
-            for record in result:
-                citation.dateval = record['date']
-                citation.page = record['page']
-                citation.confidence = record['confidence']
+            # If there is already the same citation on the list,
+            # use that index
+            citation_ind = -1
+            for i in range(len(sources)):
+                if sources[i].uniq_id == citation.uniq_id:
+                    citation_ind = i + 1
+                    break
                 
-                for source in record['sources']:
-                    source_cnt += 1
-                    e.source = source_cnt
-                    s = Source()
-                    s.uniq_id = source[0]
-                    s.stitle = source[1]
-                    s.reporef_medium = source[2]
-        
-                    r = Repository()
-                    r.uniq_id = source[3]
-                    r.rname = source[4]
-                    r.type = source[5]
+            # Citation found
+            if citation_ind > 0:
+                e.source = citation_ind
+            else: # Store the new source to the list
+                source_cnt += 1
+                e.source = source_cnt
+            
+                result = citation.get_source_repo(citation.uniq_id)
+                
+                for record in result:
+                    citation.dateval = record['date']
+                    citation.page = record['page']
+                    citation.confidence = record['confidence']
                     
-                    s.repos.append(r)
-                    citation.sources.append(s)
-                    
-                sources.append(citation)
+                    for source in record['sources']:
+                        s = Source()
+                        s.uniq_id = source[0]
+                        s.stitle = source[1]
+                        s.reporef_medium = source[2]
+            
+                        r = Repository()
+                        r.uniq_id = source[3]
+                        r.rname = source[4]
+                        r.type = source[5]
+                        
+                        s.repos.append(r)
+                        citation.sources.append(s)
+                        
+                    sources.append(citation)
             
     photos = []
     for link in p.objref_hlink:
