@@ -50,8 +50,18 @@
                      Laadi viesti</button>
                 </p>
             </div>
-        </div><div class="startbox">
-            <div>
+        </div>
+        {% if usrname and usrname[0] == "a" %}<div class="startbox admin">
+            <div style="display: inline-block;">
+			    <h3>Ylläpitäjän toiminnot</h3>
+			    <ul>
+			        <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> 
+			             koko kanta <i>(Mitään kysymättä!)</i></li>
+			        <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
+			        <li><a href="/aseta/refnames">Aseta referenssinimet</a></li>
+			    </ul>
+            </div>
+        </div>{% endif %}<div class="startbox">
                 <h3>Kirjaudu ulos</h3>
                 <p>Istunnon lopettaminen<br>&nbsp;</p>
 				<form method="get" action="/login">

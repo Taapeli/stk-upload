@@ -82,18 +82,35 @@ body > div {
 
 /* Stk objects
 ----------------------------------------------------- */
+h1 {
+    background-color:bisque;
+    font-size: 11pt;
+    width: 100%;
+}
+img#logo {
+    width: 43px;
+    height: 44px;
+    float: left;
+    margin: -5px 5px 0 5px;
+    vertical-align: text-top;
+}
 .id { color: sienna; text-align: right; }
+
 
 /* General Text
 ----------------------------------------------------- */
-h1 {
+/*h1 {
     font-size: x-large;
     font-weight: bold;
     padding-left: 15px;
-}
+}*/
 h3 {
     font-size: large;
     padding-left: 15px;
+}
+.sticky {  /* Stk/JMä */
+    position: sticky; 
+    top: 0;
 }
 h4 {
     font-size: medium;
@@ -172,6 +189,8 @@ div#nav ul li.CurrentSection a {
 ----------------------------------------------------- */
 div#alphanav {
     background-color: #EEE;
+    position: sticky; top: 0;  /* Stk/JMä */
+    opacity: .7;
 }
 div#alphanav ul {
     list-style: none;
