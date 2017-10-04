@@ -2,8 +2,9 @@
 {% extends "k_layout.html" %}
 {% block title %}Tiedot kannasta{% endblock %}
 {% block body %}
-        Sukujaan – henkilön tiedot</h1>
 {{ super() }}
+
+<h2>Stk – Henkilön tiedot</h2>
 
     <div class="wrapper" id="nav" role="navigation">
         <div class="container">
@@ -23,7 +24,8 @@
                 <img alt="Kuvassa {{photos[0].description}}" src="{{photos[0].src}}" />
             </div>
         </div>{% endif %}
-        <h3>{{person.name[0].firstname}} <i>{{person.name[0].suffix}}</i> <b>{{person.name[0].surname}}</b>
+        <h3 style="position:sticky; top:0;">{{person.name[0].firstname}} 
+            <i>{{person.name[0].suffix}}</i> <b>{{person.name[0].surname}}</b>
             <sup><small> <a href="#sref1a">1a</a></small></sup>
         </h3>
 

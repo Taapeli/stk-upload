@@ -9,32 +9,32 @@ body {
 }
 h1 {
     background-color:bisque;
-    height: 14pt;
     font-size: 11pt;
+    width: 100%;
 }
-h2 {
-    margin-left: 38pt;
+img#logo {
+    width: 43px;
+    height: 44px;
+    float: left;
+    margin: -5px 5px 0 5px;
+    vertical-align: text-top;
 }
+
 .startbox {
     display: inline-block;
     vertical-align:top;
     margin: 0 1em 1em 0;
 	padding: 1em; 
 	background-color: bisque;
-	width: 300px;
+	width: 280px;
 	min-height: 150px;
 }
+.admin {background-color: pink;}
 .startbox h3 { margin-top: 5px; margin-bottom: 5px; }
 .startbox div { display: inline-block; width: 100%; }
 .inp {display: inline; }
 .inp label { display: inline-block; width: 100px; }
 .inp input { width: 120px;  margin-left: 1em; }
-
-img#logo {
-    width: 43px;
-    height: 44px;
-    vertical-align: text-top;
-}
 
 table, th, td {
     border: 1px solid silver;

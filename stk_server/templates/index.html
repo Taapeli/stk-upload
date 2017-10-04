@@ -15,11 +15,12 @@
             </ul>
             <h4>Ylläpitotoiminnot</h4>
             <ul>
-                <li><a href="#">Hallinnoi käyttäjiä, lisää aineistoja ym.</a></li>
+                <li><a href="/login">Hallinnoi käyttäjiä, lisää aineistoja ym.</a></li>
             </ul>
 	    </div>
+<!--
 		<div class="startbox">
-		    <form action="/lataa" method="post" enctype="multipart/form-data">
+    	    <form action="/lataa" method="post" enctype="multipart/form-data">
 		    <h4>Tietojen lisääminen</h4>
 		    <div>
 		        <div style="display: inline-block;">
@@ -37,8 +38,9 @@
 		    </div>
 		    </form>
 		</div>
+-->
 	    <div class="startbox">
-		    <h4>Taulukkoina</h4>
+		    <h4>Datanäkymiä taulukkoina</h4>
 		    <ul>
 		    <li><a href="/lista/henkilot2">Näytä henkilöt</a></li>
 		    <li><a href="/lista/surnames">Luettelo sukunimistä</a></li>
@@ -59,17 +61,8 @@
     </div>
   </div>
 	
-<details style="background-color:lightgray; width:450pt">
-    <summary><b>Ylläpitotoiminnot</b></summary>
-    <ul>
-	    <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> koko kanta
-	        <i>(Mitään kysymättä!)</i></li>
-	    <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
-	    <li><a href="/aseta/refnames">Aseta referenssinimet</a></li>
-    </ul>
-</details>
 <div style="background-color:lightgray; width:450pt; clear: both;">
-    <p>&gt;&nbsp;<a href="/vanhat">Vanhat toiminnot</a></p>
+    <p>&gt;&nbsp;<a href="/vanhat">Vanha etusivu</a></p>
 </div>
 
 {% endblock %}
