@@ -304,7 +304,7 @@ RETURN person, name
             else:
                 data_line.append('-')
             if record["p"]['gender']:
-                data_line.append(record["p"]['type'])
+                data_line.append(record["p"]['gender'])
             else:
                 data_line.append('-')
             if record["n"]['firstname']:
