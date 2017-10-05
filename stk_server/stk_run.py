@@ -148,6 +148,21 @@ def nayta_henkilot(subj):
             "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
 
 
+@app.route('/locations')
+def show_locations(): 
+    """ Paikkaluettelon näyttäminen ruudulla
+    """
+    models.dbutil.connect_db()
+    try:
+        places = models.gen.place.Place.get_place_names()
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    for p in places:
+        print ("# {} ".format(p))
+    return "Onnistui"
+    return render_template("k_places.html", places=places) # TODO template
+
+
 @app.route('/lista/refnimet', defaults={'reftype': None})
 @app.route('/lista/refnimet/<string:reftype>')
 def nayta_refnimet(reftype): 
