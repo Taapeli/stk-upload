@@ -405,8 +405,6 @@ def read_cite_sour_repo(uniq_id=None):
                 for record_source in result_source:
                     if record_source['stitle']:
                         s.stitle = record_source['stitle']
-                    if record_source['reporef_medium']:
-                        s.reporef_medium = record_source['reporef_medium']
                         
                     s.get_reporef_hlink()
                     if s.reporef_hlink != '':
