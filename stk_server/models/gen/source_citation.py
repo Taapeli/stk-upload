@@ -54,7 +54,7 @@ class Citation:
    WITH citation, r, source, p, repo ORDER BY citation.page
  RETURN ID(citation) AS id, citation.dateval AS date, citation.page AS page, 
      citation.confidence AS confidence, 
-   COLLECT([ID(source), source.stitle, source.reporef_medium, 
+   COLLECT([ID(source), source.stitle, p.medium, 
        ID(repo), repo.rname, repo.type]) AS sources
  """.format(where)
                 
@@ -324,13 +324,15 @@ class Source:
         query = """
             MATCH (source:Source)-[r:REPOSITORY]->(repo:Repository)
                 WHERE ID(source)={}
-                RETURN ID(repo) AS id
+                RETURN ID(repo) AS id, r.medium AS reporef_medium
             """.format(self.uniq_id)
             
         result = g.driver.session().run(query)
         for record in result:
             if record['id']:
                 self.reporef_hlink = record['id']
+            if record['reporef_medium']:
+                self.reporef_medium = record['reporef_medium']
         
     
     def get_source_data(self):
@@ -339,8 +341,7 @@ class Source:
         query = """
             MATCH (source:Source)
                 WHERE ID(source)={}
-                RETURN source.stitle AS stitle, 
-                       source.reporef_medium AS reporef_medium
+                RETURN source.stitle AS stitle
             """.format(self.uniq_id)
         return  g.driver.session().run(query)
     
