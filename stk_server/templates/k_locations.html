@@ -4,15 +4,15 @@
 {% block body %}
 {{ super() }}
 
-<h2>Henkilöluettelo</h2>
+<h2>Paikkakuntaluettelo</h2>
 
 	<div class="wrapper" id="nav" role="navigation">
 		<div class="container">
 			<ul class="menu" id="dropmenu">
-				<li class="CurrentSection"><a href="k_persons" title="Henkilöt">Henkilöt</a></li>
+				<li><a href="k_persons" title="Henkilöt">Henkilöt</a></li>
 				<li><a href="#" title="Sukunimet">Sukunimet</a></li>
 				<li><a href="#" title="Perheet">Perheet</a></li>
-                <li><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
+				<li class="CurrentSection"><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
 				<li><a href="#" title="Lähteet">Lähteet</a></li>
 				<li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
 			</ul>
@@ -20,14 +20,13 @@
 	</div>
 	<div class="content" id="Individuals">
 		<p id="description">
-		Tällä sivulla on hakemisto kaikista tietokannan henkilöistä sukunimen 
-mukaan lajiteltuna. Henkilön nimen napsauttaminen vie sinut valitun 
-henkilön sivulle.
+		Tällä sivulla on hakemisto kaikista paikkakunnista ja niiden alla olevista 
+		lähinnä alemman tason paikoista.
 		</p>
 		<div id="alphanav">
 			<ul><li><a href="#logo" title="alkuun">&uarr;</a></li>
 				<!-- li><a href="#%C2%A0" title="Aakkosmenu: '&nbsp;'">&nbsp;</a></li -->
-        {% for p in persons %}{% set ini = p.name[0].surname|list|first %}
+        {% for p in places %}{% set ini = p.pname|list|first %}
             {% if alpha != ini %}{%set alpha = ini %}
                 <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
             {% endif %}
@@ -38,26 +37,30 @@ henkilön sivulle.
 			<thead>
 				<tr>
 					<th></th>
-					<th>Henkilö</th>
-					<th>Tapahtumat</th>
+                    <th>Paikka</th>
+                    <th>Luonne</th>
+					<th>Alemmat paikat</th>
 				</tr>
 			</thead>
 			<tbody>
-	{% if persons %}
-	    {% for p in persons %}{% set ini = p.name[0].surname|list|first %}
+	{% if places %}
+	    {% for p in places %}{% set ini = p.pname|list|first %}
 	            <tr><td class="ColumnAlpha">{% if alpha != ini %}
 		               {%set alpha = ini %}
 		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
 	               {% endif %}</td>
-	                <td class="ColumnPerson"><div>
-	                   <a href="/person/uniq_id={{p.uniq_id}}" class="id">{{p.uniq_id}}</a>
-		               {{p.name[0].firstname}} <b>{{p.name[0].surname}}</b>
-		               {% if p.name[0].refname %}<br><small>referenssinimi: {{p.name[0].refname}}</small>{% endif %}
-	                </div></td>
-	        {% if p.events %}
-		           <td class="ColumnEvent"><ul>{% for e in p.events|sort(attribute='date') %}
-		              <li><i>{{e.type}}</i> {{e.date|pvm}}
-		              {% if e.place %} – {{e.place}}{% endif %}</li>
+                    <td class="ColumnPerson"><div>
+                       <a href="/events/loc={{p.id}}" class="id">{{p.id}}</a>
+                       {{p.pname}}
+                    </div></td>
+                    <td class="ColumnPerson"><div><small>{{p.type}}</small>
+                    </div></td>
+	        {% if p.lowers %}
+		           <td class="ColumnEvent"><ul>{% for e in p.lowers|sort(attribute='pname') %}
+		              <li>
+                       <a href="/events/loc={{p.id}}" class="id">{{e.id}}</a>
+                       {{e.pname}} &nbsp;<small>{{e.type}}</small>
+                      </li>
 		              {% endfor %}
 		           </ul></tr>
 	        {% else %}
@@ -65,8 +68,6 @@ henkilön sivulle.
 	        {% endif %}
 	           </tr>
 	    {% endfor %}
-	{% else %}
-	        <tr><td colspan="3">Ei ketään</td></tr>
 	{% endif %}
 				</tr>
 			</tbody>
