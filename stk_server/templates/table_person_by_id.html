@@ -52,7 +52,7 @@
 
 <h2>Events</h2>
 <table>
-    <tr><th>unique_id</th><th>type</th><th>date</th><th>place</th><th>description</th><th>link</th>
+    <tr><th>unique_id</th><th>type</th><th>date</th><th>place</th><th>description</th><th>link to source data</th>
     </tr>
 {% if events %}
 	{% for event in events %}
@@ -62,7 +62,9 @@
     		<td>{% if event.date %}{{event.date}}{% endif %}</td>
     		<td>{% if event.location %}{{event.location}}{% endif %}</td>
     		<td>{% if event.description %}{{event.description}}{% endif %}</td>
-            <td><a href="/poimi/cite_sour_repo={{event.uniq_id}}">citations</a></td>
+            <td>{% if event.citationref_hlink %}
+            		<a href="/poimi/cite_sour_repo={{event.uniq_id}}">citations</a>
+            	{% endif %}</td>
 		</tr>
 	{% endfor %}
 {% else %}
