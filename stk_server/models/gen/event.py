@@ -59,6 +59,7 @@ MATCH (event:Event)-[r:CITATION]->(c:Citation)
   WHERE ID(event)=$pid
 RETURN ID(c) AS citationref_hlink"""
         return  g.driver.session().run(query, {"pid": pid})
+
     
     @staticmethod       
     def get_cite_sour_repo (uniq_id):
@@ -75,6 +76,25 @@ RETURN ID(c) AS citationref_hlink"""
  RETURN ID(event) AS id, event.type AS type, event.date AS date, 
   COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence,
       ID(source), source.stitle, c.medium, ID(repo), repo.rname, repo.type] ) AS sources
+ ORDER BY event.date""".format(where)
+                
+        return g.driver.session().run(query)
+
+    
+    @staticmethod       
+    def get_event_cite (uniq_id):
+        """ Voidaan lukea tapahtuman tiedot lähdeviittauksineen kannasta
+        """
+
+        if uniq_id:
+            where = "WHERE ID(event)={} ".format(uniq_id)
+        else:
+            where = ''
+        
+        query = """
+ MATCH (event:Event)-[a]->(citation:Citation) {0}
+ RETURN ID(event) AS id, event.type AS type, event.date AS date, 
+  COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence] ) AS sources
  ORDER BY event.date""".format(where)
                 
         return g.driver.session().run(query)

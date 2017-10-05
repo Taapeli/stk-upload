@@ -59,6 +59,21 @@ class Citation:
  """.format(where)
                 
         return g.driver.session().run(query)
+    
+    
+    def get_sourceref_hlink(self):
+        """ Voidaan lukea lähdeviittauksen lähteen uniq_id kannasta
+        """
+        
+        query = """
+ MATCH (citation:Citation)-[r]->(source:Source) WHERE ID(citation)={}
+ RETURN ID(source) AS id
+ """.format(self.uniq_id)
+                
+        result = g.driver.session().run(query)
+        for record in result:
+            if record['id']:
+                self.sourceref_hlink = record['id']
 
     
     @staticmethod       
@@ -68,7 +83,7 @@ class Citation:
         query = """
             MATCH (c:Citation) RETURN COUNT(c)
             """
-        results =  g.driver.session().run(query)
+        results = g.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -164,6 +179,16 @@ class Repository:
         self.url_description = []
         self.sources = []   # For creating display sets
         
+    
+    def get_repo_data(self):
+        """ Luetaan arkiston tiedot """
+                        
+        query = """
+            MATCH (repo:Repository) WHERE ID(repo) = {}
+            RETURN repo.rname AS rname, repo.type AS type
+            """.format(self.uniq_id)
+        return  g.driver.session().run(query)
+    
     
     @staticmethod       
     def get_repositories():
@@ -292,6 +317,33 @@ class Source:
         self.citations = []   # For creating display sets
         self.repos = []   # For creating display sets
         
+    
+    def get_reporef_hlink(self):
+        """ Luetaan lähteen arkiston uniq_id kannasta """
+                        
+        query = """
+            MATCH (source:Source)-[r:REPOSITORY]->(repo:Repository)
+                WHERE ID(source)={}
+                RETURN ID(repo) AS id
+            """.format(self.uniq_id)
+            
+        result = g.driver.session().run(query)
+        for record in result:
+            if record['id']:
+                self.reporef_hlink = record['id']
+        
+    
+    def get_source_data(self):
+        """ Luetaan lähteen tiedot """
+                        
+        query = """
+            MATCH (source:Source)
+                WHERE ID(source)={}
+                RETURN source.stitle AS stitle, 
+                       source.reporef_medium AS reporef_medium
+            """.format(self.uniq_id)
+        return  g.driver.session().run(query)
+    
     
     @staticmethod       
     def get_sources(repository_handle):

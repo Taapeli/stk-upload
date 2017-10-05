@@ -380,36 +380,48 @@ def read_cite_sour_repo(uniq_id=None):
     """
     
     sources = []
-    result = Event.get_cite_sour_repo(uniq_id)
-    for record in result:
-        pid = record['id']
+    result_cite = Event.get_event_cite(uniq_id)
+    for record_cite in result_cite:
+        pid = record_cite['id']
         e = Event()
         e.uniq_id = pid
-        if record['type']:
-            e.type = record['type']
-        if record['date']:
-            e.date = record['date']
+        if record_cite['type']:
+            e.type = record_cite['type']
+        if record_cite['date']:
+            e.date = record_cite['date']
 
-        for source in record['sources']:
- 
+        for source_cite in record_cite['sources']:
             c = Citation()
-            c.uniq_id = source[0]
-            c.dateval = source[1]
-            c.page = source[2]
-            c.confidence = source[3]
-
-            s = Source()
-            s.uniq_id = source[4]
-            s.stitle = source[5]
-            s.reporef_medium = source[6]
-
-            r = Repository()
-            r.uniq_id = source[7]
-            r.rname = source[8]
-            r.type = source[9]
+            c.uniq_id = source_cite[0]
+            c.dateval = source_cite[1]
+            c.page = source_cite[2]
+            c.confidence = source_cite[3]
             
-            s.repos.append(r)
-            c.sources.append(s)
+            c.get_sourceref_hlink()
+            if c.sourceref_hlink != '':
+                s = Source()
+                s.uniq_id = c.sourceref_hlink
+                result_source = s.get_source_data()
+                for record_source in result_source:
+                    if record_source['stitle']:
+                        s.stitle = record_source['stitle']
+                    if record_source['reporef_medium']:
+                        s.reporef_medium = record_source['reporef_medium']
+                        
+                    s.get_reporef_hlink()
+                    if s.reporef_hlink != '':
+
+                        r = Repository()
+                        r.uniq_id = s.reporef_hlink
+                        result_repo = r.get_repo_data()
+                        for record_repo in result_repo:
+                            if record_repo['rname']:
+                                r.rname = record_repo['rname']
+                            if record_repo['type']:
+                                r.type = record_repo['type']
+                        
+                        s.repos.append(r)
+                c.sources.append(s)
             e.citations.append(c)
             
         sources.append(e)
