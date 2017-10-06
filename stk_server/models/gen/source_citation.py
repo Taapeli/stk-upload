@@ -420,6 +420,50 @@ class Source:
         
         return (titles, lists)
     
+    
+    @staticmethod       
+    def get_sources_wo_repository ():
+        """ Voidaan lukea läheitä, joilla ei ole arkistoa kannasta
+        """
+        
+        query = """
+ MATCH (s:Source) WHERE NOT EXISTS((s:Source)-[:REPOSITORY]->(:Repository))
+ RETURN ID(s) AS uniq_id, s
+ ORDER BY s.stitle"""
+                
+        result = g.driver.session().run(query)
+        
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
+        lists = []
+        
+        for record in result:
+            data_line = []
+            if record['uniq_id']:
+                data_line.append(record['uniq_id'])
+            else:
+                data_line.append('-')
+            if record["s"]['gramps_handle']:
+                data_line.append(record["s"]['gramps_handle'])
+            else:
+                data_line.append('-')
+            if record["s"]['change']:
+                data_line.append(record["s"]['change'])
+            else:
+                data_line.append('-')
+            if record["s"]['id']:
+                data_line.append(record["s"]['id'])
+            else:
+                data_line.append('-')
+            if record["s"]['stitle']:
+                data_line.append(record["s"]['stitle'])
+            else:
+                data_line.append('-')
+                
+            lists.append(data_line)
+        
+        return (titles, lists)
+
+    
     @staticmethod       
     def get_total():
         """ Tulostaa lähteiden määrän tietokannassa """
