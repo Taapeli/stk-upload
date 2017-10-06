@@ -90,7 +90,9 @@
                         </td>
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">
-                            <div>{% if e.type == "Death" %}kuolinsyy: {{t_cause_of_death}} {% endif %}</div>
+                            <div>{% if e.type == "Death" %}
+                            	{% if t_cause_of_death %}kuolinsyy: {{t_cause_of_death}} 
+                            	{% endif %}{% endif %}</div>
                         </td>
                         <td class="ColumnSources">
                          {% if e.source %}
