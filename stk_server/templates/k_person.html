@@ -77,6 +77,9 @@
                 <tbody>
         {% for e in events|sort(attribute='date') %}
                     <tr>
+                 	{% if e.type == "Cause Of Death" %}
+                		{% set t_cause_of_death = e.description %}
+            		{% else %}
                         <td class="ColumnEvent">
                             <span class="id">{{e.uniq_id}}</span> {{e.type|transl('evt')}}
                         </td>
@@ -87,13 +90,16 @@
                         </td>
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">
-                            <div></div>
+                            <div>{% if e.type == "Death" %}
+                            	{% if t_cause_of_death %}kuolinsyy: {{t_cause_of_death}} 
+                            	{% endif %}{% endif %}</div>
                         </td>
                         <td class="ColumnSources">
                          {% if e.source %}
                          	<a href="#sref{{e.source}}a">{{e.source}}a</a>
                      	 {% endif %}
                         </td>
+                    {% endif %}
                     </tr>
          {% endfor %}
                  </tbody>

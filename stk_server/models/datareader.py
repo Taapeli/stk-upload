@@ -522,7 +522,7 @@ def read_events_wo_cites():
     titles, events = Event.get_events_wo_citation()
     
     headings.append("Tapahtumaluettelo")
-    headings.append("Näytetään viitteettömät tapahtumat")
+    headings.append("Näytetään tapahtumat, joilla ei ole lähdeviittausta")
 
     return (headings, titles, events)
 
@@ -551,7 +551,7 @@ def read_people_wo_birth():
     titles, people = Person.get_people_wo_birth()
     
     headings.append("Tapahtumaluettelo")
-    headings.append("Näytetään henkilöt ilman syntymätapahtumat")
+    headings.append("Näytetään henkilöt ilman syntymätapahtumaa")
 
     return (headings, titles, people)
 
@@ -599,7 +599,21 @@ def read_sources_wo_cites():
     titles, lists = Source.get_sources_wo_citation()
     
     headings.append("Lähdeluettelo")
-    headings.append("Näytetään viitteettömät lähteet")
+    headings.append("Näytetään lähteet, joilla ei ole yhtään lähdeviittausta")
+
+    return (headings, titles, lists)
+
+
+def read_sources_wo_repository():
+    """ Lukee tietokannasta Source- objektit, joilta puuttuu arkisto näytettäväksi
+
+    """
+    
+    headings = []
+    titles, lists = Source.get_sources_wo_repository()
+    
+    headings.append("Lähdeluettelo")
+    headings.append("Näytetään lähteet, joilla ei ole arkistoa")
 
     return (headings, titles, lists)
 

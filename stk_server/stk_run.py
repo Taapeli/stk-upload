@@ -138,6 +138,10 @@ def nayta_henkilot(subj):
         headings, titles, lists = models.datareader.read_sources_wo_cites()
         return render_template("table_of_data.html", 
                headings=headings, titles=titles, lists=lists)
+    elif subj == 'sources_wo_repository':
+        headings, titles, lists = models.datareader.read_sources_wo_repository()
+        return render_template("table_of_data.html", 
+               headings=headings, titles=titles, lists=lists)
     elif subj == 'places':
         headings, titles, lists = models.datareader.read_places()
         return render_template("table_of_data.html", 
