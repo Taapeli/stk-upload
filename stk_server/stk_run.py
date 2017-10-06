@@ -21,6 +21,8 @@ import models.dataupdater       # Tietojen päivitysmetodit
 import models.cvs_refnames      # Referenssinimien luonti
 import models.gen.user          # Käyttäjien tiedot
 
+""" Application route definitions 
+"""
 
 @app.route('/')
 def index(): 
@@ -134,6 +136,10 @@ def nayta_henkilot(subj):
                                sources=sources)
     elif subj == 'sources_wo_cites':
         headings, titles, lists = models.datareader.read_sources_wo_cites()
+        return render_template("table_of_data.html", 
+               headings=headings, titles=titles, lists=lists)
+    elif subj == 'sources_wo_repository':
+        headings, titles, lists = models.datareader.read_sources_wo_repository()
         return render_template("table_of_data.html", 
                headings=headings, titles=titles, lists=lists)
     elif subj == 'places':
@@ -431,11 +437,11 @@ def stk_harjoitus():
     return render_template("a_home.html")
 
 
+""" Application filter definitions 
+"""
 @app.template_filter('pvm')
 def _jinja2_filter_date(date_str, fmt=None):
     """ ISO-päivämäärä 2017-09-20 suodatetaan suomalaiseksi 20.9.2017 """
-#     if len(date_str) < 4:
-#         return date_str
     try:
         a = date_str.split('-')
         if len(a) == 3:
@@ -458,6 +464,72 @@ def _jinja2_filter_datestamp(time_str, fmt=None):
         return s
     except:
         return time_str
+
+
+@app.template_filter('transl')
+def _jinja2_filter_translate(term, variable, lang="fi"):
+    """ Given term is translated depending of variable name.
+        No language selection yet.
+     """
+    ret = term + '?'
+    if variable == "nt":
+        # Name types
+        tabl = {
+            "Also Known As": "tunnettu myös",
+            "Birth Name": "syntymänimi",
+            "Married Name": "avionimi"
+        }
+    if variable == "evt":
+        # Event types    
+        tabl = {
+            "Residence": "asuinpaikka",
+            "Occupation": "ammatti",
+            "Birth": "syntymä",
+            "Death": "kuolema",
+            "Luottamustoimi": "luottamustoimi",
+            "Graduation": "valmistuminen",
+            "Marriage": "avioliitto",
+            "Baptism": "kaste",
+            "Burial": "hautaus",
+            "Cause Of Death": "kuolinsyy",
+            "Education": "koulutus",
+            "Degree": "oppiarvo",
+            "Christening": "kristillinen kaste",
+            "Military Service": "asepalvelus",
+            "Confirmation": "ripille pääsy",
+            "Ordination": "palkitseminen",
+            "Sota": "sota"
+        }
+    elif variable == "lt":
+        # Location types
+        tabl = {
+            "Alus": "alus",
+            "Borough": "aluehallintoyksikkö",
+            "Building": "rakennus",
+            "City": "kaupunki",
+            "Country": "maa",
+            "District": "lääni",
+            "Farm": "tila",
+            "Hamlet": "talo",
+            "Hautausmaa": "hautausmaa",
+            "Kappeliseurakunta": "kappeliseurakunta",
+            "Kartano": "kartano",
+            "Kuntakeskus": "kuntakeskus",
+            "Linnoitus": "linnoitus",
+            "Locality": "kulmakunta",
+            "Organisaatio": "organisaatio",
+            "Parish": "seurakunta",
+            "Region": "alue",
+            "State": "valtio",
+            "Tontti": "tontti",
+            "Village": "kylä",
+            "srk": "seurakunta"
+        }
+    try:
+        return tabl[term]
+    except:
+        return term + '?'
+
 
 """ ----------------------------- Käynnistys ------------------------------- """
 

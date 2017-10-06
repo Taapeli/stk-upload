@@ -53,13 +53,13 @@
                        <a href="/events/loc={{p.id}}" class="id">{{p.id}}</a>
                        {{p.pname}}
                     </div></td>
-                    <td class="ColumnPerson"><div><small>{{p.type}}</small>
+                    <td class="ColumnPerson"><div><small>{{p.type|transl('lt')}}</small>
                     </div></td>
 	        {% if p.lowers %}
 		           <td class="ColumnEvent"><ul>{% for e in p.lowers|sort(attribute='pname') %}
 		              <li>
                        <a href="/events/loc={{p.id}}" class="id">{{e.id}}</a>
-                       {{e.pname}} &nbsp;<small>{{e.type}}</small>
+                       {{e.pname}} &nbsp;<small>{{e.type|transl('lt')}}</small>
                       </li>
 		              {% endfor %}
 		           </ul></tr>

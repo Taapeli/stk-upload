@@ -11,6 +11,7 @@ h1 {
     background-color:bisque;
     font-size: 11pt;
     width: 100%;
+    padding: 2px;
 }
 img#logo {
     width: 43px;
