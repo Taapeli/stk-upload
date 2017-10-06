@@ -4,7 +4,7 @@
 {% block body %}
 {{ super() }}
 
-<h2>Stk – Paikan tapahtumat</h2>
+<h2>Paikan tapahtumat</h2>
 
     <div class="wrapper" id="nav" role="navigation">
         <div class="container">
@@ -26,10 +26,10 @@
             <ul>{% for p in places %}
                 <li style="margin-left: {{p.level * 2}}em;">
                 {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
-                    <b>{{p.pname}}</b>
+                    <b>{{p.pname|transl("evt")}}</b>
                 {% else %}<a href="/events/loc={{p.id}}"><span class="id">{{p.id}}</span></a>
                     {{p.pname}}
-                {% endif %} <small>&nbsp;{{p.type}}</small></li>
+                {% endif %} <small>&nbsp;{{p.type|transl('lt')}}</small></li>
             {% endfor %}</ul>
         </div>
         <div class="subsection" id="events">
@@ -53,10 +53,10 @@
                             <a href="/person/uniq_id={{e.uid}}" class="id">{{e.uid}}</a>
                         </td>
                         <td>{% for n in e.names|sort %}{{n[1]}} <b>{{n[2]}}</b>
-                         <small>{{n[0]}}</small>
+                         <small>{{n[0]|transl('nt')}}</small>
                          <br />{% endfor %}
                         </td>
-                        <td class="ColumnEvent">{{e.etype}}</td>
+                        <td class="ColumnEvent">{{e.etype|transl('evt')}}</td>
                         <td class="ColumnDate">{{e.edate|pvm}}</td>
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">

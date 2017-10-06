@@ -12,7 +12,7 @@
                 <li class="CurrentSection"><a href="/lista/k_persons" title="Henkilöt">Henkilöt</a></li>
                 <li><a href="#" title="Sukunimet">Sukunimet</a></li>
                 <li><a href="#" title="Perheet">Perheet</a></li>
-                <li><a href="#" title="Paikat"><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
+                <li><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
                 <li><a href="#" title="Lähteet">Lähteet</a></li>
                 <li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
             </ul>
@@ -26,7 +26,7 @@
         </div>{% endif %}
         <h3 style="position:sticky; top:0;">{{person.name[0].firstname}} 
             <i>{{person.name[0].suffix}}</i> <b>{{person.name[0].surname}}</b>
-            <sup><small> <a href="#sref1a">1a</a></small></sup>
+            <!-- sup><small> <a href="#sref1a">1a</a></small></sup -->
         </h3>
 
         <div id="summaryarea">
@@ -78,7 +78,7 @@
         {% for e in events|sort(attribute='date') %}
                     <tr>
                         <td class="ColumnEvent">
-                            <span class="id">{{e.uniq_id}}</span> {{e.type}}
+                            <span class="id">{{e.uniq_id}}</span> {{e.type|transl('evt')}}
                         </td>
                         <td class="ColumnDate">{{e.date|pvm}}</td>
                         <td class="ColumnPlace">
