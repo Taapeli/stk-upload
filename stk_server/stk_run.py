@@ -475,7 +475,8 @@ def _jinja2_filter_translate(term, variable, lang="fi"):
         'evt' = Event types
         'lt'  = Location types
         'lt_in' = Location types, inessive form 
-     """
+    """
+#     print("# {}[{}]".format(variable, term))
     if variable == "nt":
         # Name types
         tabl = {
@@ -504,6 +505,15 @@ def _jinja2_filter_translate(term, variable, lang="fi"):
             "Ordination": "palkitseminen",
             "Sota": "sota"
         }
+    elif variable == "conf":
+        # Confidence levels
+        tabl = {
+            "0":"erittäin matala",
+            "1":"matala",
+            "2":"normaali",
+            "3":"korkea",
+            "4":"erittäin korkea"
+            }
     elif variable == "lt":
         # Location types
         tabl = {
