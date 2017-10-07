@@ -1,8 +1,9 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "k_layout.html" %}
-{% block title %}SS Suomitietokanta{% endblock %}
+{% block title %}henkilön tiedot{% endblock %}
 {% block body %}
 {{ super() }}
+{% set sp = {'M':'mies', 'F':'nainen'} %}
 
 <h2>Henkilön tiedot</h2>
 
@@ -51,7 +52,8 @@
                 </tr>{% endfor %}
                 {% if person.gender %}<tr>
                     <td class="ColumnAttribute">Sukupuoli</td>
-                    <td class="ColumnValue">{{person.gender}}</td>
+                    <td class="ColumnValue">{% if person.gender in sp %}{{sp[person.gender]}}
+                      {% else %}{{person.gender}}{% endif %}</td>
                 </tr>{% endif %}
 <!--            <tr>
                     <td class="ColumnAttribute">Ikä kuollessa</td>

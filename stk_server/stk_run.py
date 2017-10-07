@@ -68,13 +68,13 @@ def show_location_page(locid):
     """
     models.dbutil.connect_db()
     try:
-        places, events = models.datareader.get_place_with_events(locid)
+        locations, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in places:
 #         print ("# {} ".format(p))
     return render_template("k_place_events.html", 
-                           locid=locid, events=events, places=places)
+                           locid=locid, events=events, locations=locations)
 
 
 """ ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------

@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "k_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}paikan tapahtumat{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -19,11 +19,11 @@
         </div>
     </div>
     <div class="content" id="IndividualDetail">
-    {% for p in places %}{% if p.id ~ "" == locid %}
+    {% for p in locations %}{% if p.id ~ "" == locid %}
     <h3 style="position:sticky; top:0;">{{p.pname}}</h3>
     {% endif %}{% endfor %}
         <div id="summaryarea">
-            <ul>{% for p in places %}
+            <ul>{% for p in locations %}
                 <li style="margin-left: {{p.level * 2}}em;">
                 {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
                     <b>{{p.pname|transl("evt")}}</b>
@@ -50,9 +50,11 @@
         {% for e in events|sort(attribute='edate') %}
                     <tr>
                         <td class="ColumnPerson">
-                            <a href="/person/uniq_id={{e.uid}}" class="id">{{e.uid}}</a>
+                            <a href="/person/uniq_id={{e.uid}}" class="id"
+                              title="katso henkilön tiedot">{{e.uid}}</a>
                         </td>
-                        <td>{% for n in e.names|sort %}{{n[1]}} <b>{{n[2]}}</b>
+                        <td>{% for n in e.names|sort %}{{n[1]}} 
+                         {% if n[2] %}<b>{{n[2]}}</b>{% else %}<i>{{n[3]}}</i>{% endif %}
                          <small>{{n[0]|transl('nt')}}</small>
                          <br />{% endfor %}
                         </td>

@@ -261,11 +261,11 @@ RETURN p.type AS type, p.pname AS name
         │"uid"  │"names"                       │"etype"│"edate"     │
         ╞═══════╪══════════════════════════════╪═══════╪════════════╡
         │"23063"│[["Birth Name","Justina Cathar│"Death"│"1789-12-26"│
-        │       │ina","Justander"]]            │       │            │
+        │       │ina","Justander",""]]         │       │            │
         ├───────┼──────────────────────────────┼───────┼────────────┤
         │"23194"│[["Birth Name","Johanna Ulrika│"Death"│"1835-08-05"│
-        │       │","Hedberg"],["Also Known As",│       │            │
-        │       │"","Borg"]]                   │       │            │
+        │       │","Hedberg",""],              │       │            │
+        │       │["Also Known As","","Borg"]]  │       │            │
         └───────┴──────────────────────────────┴───────┴────────────┘
         """
 
@@ -274,7 +274,7 @@ MATCH (p:Person)-->(e:Event)-[:PLACE]->(l:Place)
   WHERE id(l) = {locid}
 MATCH (p) --> (n:Name)
 RETURN id(p) AS uid,
-  COLLECT([n.type, n.firstname, n.surname]) AS names,
+  COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
   e.type AS etype,
   e.date AS edate
 ORDER BY edate"""
