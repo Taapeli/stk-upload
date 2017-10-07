@@ -231,6 +231,8 @@ def lue_henkilot2(uniq_id=None):
             pname.refname = record['refname']
         if record['surname']:
             pname.surname = record['surname']
+        if record['suffix']:
+            pname.patronyme = record['suffix']
         p.name.append(pname)
 
         for event in record['events']:
