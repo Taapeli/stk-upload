@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "k_layout.html" %}
-{% block title %}SS Suomitietokanta{% endblock %}
+{% block title %}henkilöluettelo{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -25,8 +25,7 @@ mukaan lajiteltuna. Henkilön nimen napsauttaminen vie sinut valitun
 henkilön sivulle.
 		</p>
 		<div id="alphanav">
-			<ul><li><a href="#logo" title="alkuun">&uarr;</a></li>
-				<!-- li><a href="#%C2%A0" title="Aakkosmenu: '&nbsp;'">&nbsp;</a></li -->
+			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
         {% for p in persons %}{% set ini = p.name[0].surname|list|first %}
             {% if alpha != ini %}{%set alpha = ini %}
                 <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
