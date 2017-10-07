@@ -84,7 +84,11 @@ def show_location_page(locid):
 def nayta_henkilot(subj):   
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     models.dbutil.connect_db()
-    if subj == "henkilot":
+    if subj == "k_persons":
+        # Kertova-tyyliin
+        persons = models.datareader.lue_henkilot2()
+        return render_template("k_persons.html", persons=persons)
+    elif subj == "henkilot":
         # dburi vain tiedoksi!
         dbloc = g.driver.address
         dburi = ':'.join((dbloc[0],str(dbloc[1])))
@@ -94,10 +98,6 @@ def nayta_henkilot(subj):
     elif subj == "henkilot2":
         persons = models.datareader.lue_henkilot2()
         return render_template("table_persons2.html", persons=persons)
-    elif subj == "k_persons":
-        # Kertova-tyyliin
-        persons = models.datareader.lue_henkilot2()
-        return render_template("k_persons.html", persons=persons)
     elif subj == "surnames":
         surnames = models.gen.person.Name.get_surnames()
         return render_template("table_surnames.html", surnames=surnames)
