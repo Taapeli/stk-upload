@@ -24,8 +24,7 @@
 		lähinnä alemman tason paikoista.
 		</p>
 		<div id="alphanav">
-			<ul><li><a href="#logo" title="alkuun">&uarr;</a></li>
-				<!-- li><a href="#%C2%A0" title="Aakkosmenu: '&nbsp;'">&nbsp;</a></li -->
+			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
         {% for p in places %}{% set ini = p.pname|list|first %}
             {% if alpha != ini %}{%set alpha = ini %}
                 <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
@@ -35,38 +34,37 @@
 		</div>
 		<table class="IndividualList">
 			<thead>
-				<tr>
-					<th></th>
-                    <th>Paikka</th>
-                    <th>Luonne</th>
-					<th>Alemmat paikat</th>
+				<tr><th></th>
+                    <th>Paikka, liittyvät paikat</th>
 				</tr>
 			</thead>
 			<tbody>
 	{% if places %}
 	    {% for p in places %}{% set ini = p.pname|list|first %}
-	            <tr><td class="ColumnAlpha">{% if alpha != ini %}
-		               {%set alpha = ini %}
-		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
-	               {% endif %}</td>
-                    <td class="ColumnPerson"><div>
-                       <a href="/events/loc={{p.id}}" class="id">{{p.id}}</a>
-                       {{p.pname}}
-                    </div></td>
-                    <td class="ColumnPerson"><div><small>{{p.type|transl('lt')}}</small>
-                    </div></td>
-	        {% if p.lowers %}
-		           <td class="ColumnEvent"><ul>{% for e in p.lowers|sort(attribute='pname') %}
-		              <li>
-                       <a href="/events/loc={{p.id}}" class="id">{{e.id}}</a>
-                       {{e.pname}} &nbsp;<small>{{e.type|transl('lt')}}</small>
+            <tr><td class="ColumnAlpha">{% if alpha != ini %}{%set alpha = ini %}
+	               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
+                {% endif %}</td>
+                <td class="ColumnPerson">
+                   <div>
+                      <a href="/events/loc={{p.id}}" class="id" 
+                        id="{{p.id}}">{{p.id}}</a> {{p.pname}}
+                      <small>{{p.type|transl('lt')}}</small>
+			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
+						<small>{{e.type|transl('lt_in')}}</small>
+						<a href="#{{e.id}}" 
+						  title="siirry paikkaan id={{e.id}}">{{e.pname}}</a>
+		        {% endif %}
+                   </div>
+            {% if p.lowers %}
+		           <ul style="margin:0 0 5px 1em;">
+		        {% for e in p.lowers|sort(attribute='pname') %}    <li>
+	                       <a href="#{{p.id}}"
+	                         title="siirry paikkaan id={{e.id}}">{{e.pname}}</a>
+	                       &nbsp;<small>{{e.type|transl('lt')}}</small>
                       </li>
-		              {% endfor %}
-		           </ul></tr>
-	        {% else %}
-	               <td></td>
+		        {% endfor %}
+		           </ul>
 	        {% endif %}
-	           </tr>
 	    {% endfor %}
 	{% endif %}
 				</tr>
