@@ -470,8 +470,12 @@ def _jinja2_filter_datestamp(time_str, fmt=None):
 def _jinja2_filter_translate(term, variable, lang="fi"):
     """ Given term is translated depending of variable name.
         No language selection yet.
+        
+        'nt'  = Name types
+        'evt' = Event types
+        'lt'  = Location types
+        'lt_in' = Location types, inessive form 
      """
-    ret = term + '?'
     if variable == "nt":
         # Name types
         tabl = {
@@ -525,6 +529,36 @@ def _jinja2_filter_translate(term, variable, lang="fi"):
             "Village": "kylä",
             "srk": "seurakunta"
         }
+    elif variable == "lt_in":
+        # Location types, inessive
+        tabl = {
+            "Alus": "aluksessa",
+            "Borough": "aluehallintoyksikössä",
+            "Building": "rakennuksessa",
+            "City": "kaupungissa",
+            "Country": "maassa",
+            "District": "läänissä",
+            "Farm": "tilalla",
+            "Hamlet": "talossa",
+            "Hautausmaa": "hautausmaalla",
+            "Kappeliseurakunta": "kappeliseurakunnassa",
+            "Kartano": "kartanossa",
+            "Kuntakeskus": "kuntakeskuksessa",
+            "Linnoitus": "linnoituksessa",
+            "Locality": "kulmakuntannassa",
+            "Organisaatio": "organisaatiossa",
+            "Parish": "seurakunnnassa",
+            "Region": "alueella",
+            "State": "valtiossa",
+            "Tontti": "tontilla",
+            "Village": "kylässä",
+            "srk": "seurakunnassa"
+        }
+        try:    
+            return tabl[term]
+        except:
+            return term + ":ssa"
+
     try:
         return tabl[term]
     except:

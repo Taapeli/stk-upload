@@ -140,43 +140,50 @@ class Place:
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
             
             Esim.
-        ╒═══════╤═══════════╤══════════╤══════════════════════╕
-        │"id"   │"name"     │"type"    │"lower"               │
-        ╞═══════╪═══════════╪══════════╪══════════════════════╡
-        │"30256"│"Artjärvi" │"City"    │[["30257","Rastula",  │
-        │       │           │          │"Village"],["30515",  │
-        │       │           │          │"Männistö","Village"]]│                            │
-        ├───────┼───────────┼──────────┼──────────────────────┤
-        │"30341"│"Backas"   │"Building"│[[null,null,null]]    │
-        └───────┴───────────┴──────────┴──────────────────────┘
-        """
+╒═══════╤═══════════╤══════════╤════════════════════╤══════════════════════╕
+│"id"   │"name"     │"type"    │"upper"             │"lower"               │
+╞═══════╪═══════════╪══════════╪════════════════════╪══════════════════════╡
+│"30358"│"Alnäs"    │"Building"│[["30344","Lappträsk│[[null,null,null]]    │
+│       │           │          │ Ladugård","Farm"]] │                      │
+├───────┼───────────┼──────────┼────────────────────┼──────────────────────┤
+│"30256"│"Artjärvi" │"City"    │[[null,null,null],  │[["30257","Rastula",  │
+│       │           │          │[null,null,null]]   │"Village"],["30515",  │
+│       │           │          │                    │"Männistö","Village"]]│                            │
+├───────┼───────────┼──────────┼────────────────────┼──────────────────────┤
+│"30341"│"Backas"   │"Building"│[[null,null,null]]  │[[null,null,null]]    │
+└───────┴───────────┴──────────┴────────────────────┴──────────────────────┘
+"""
         
-#         query = """
-# MATCH (a:Place) 
-# OPTIONAL MATCH (a:Place)-->(up:Place) 
-# OPTIONAL MATCH (a:Place)<--(do:Place) 
-# RETURN ID(a) AS id, a.type AS type, a.pname AS name,
-#        COLLECT([ID(up), up.type, up.pname]) AS upper, 
-#        COLLECT([ID(do), do.type, do.pname]) AS lower
-#   ORDER BY name
-# """
         query = """
 MATCH (a:Place) 
+OPTIONAL MATCH (a:Place)-->(up:Place) 
 OPTIONAL MATCH (a:Place)<--(do:Place) 
 RETURN ID(a) AS id, a.type AS type, a.pname AS name,
+       COLLECT([ID(up), up.type, up.pname]) AS upper, 
        COLLECT([ID(do), do.type, do.pname]) AS lower
   ORDER BY name
 """
+#         query = """
+# MATCH (a:Place) 
+# OPTIONAL MATCH (a:Place)<--(do:Place) 
+# RETURN ID(a) AS id, a.type AS type, a.pname AS name,
+#        COLLECT([ID(do), do.type, do.pname]) AS lower
+#   ORDER BY name
+# """
         ret = []
         result = g.driver.session().run(query)
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
             p = Place(record['id'], record['type'], record['name'])
+            p.uppers = []
+            for near in record['upper']:
+                if near[0]:
+                    p.uppers.append(Place(near[0], near[1], near[2]))
             p.lowers = []
-            for lower in record['lower']:
-                if lower[0]:
-                    p.lowers.append(Place(lower[0], lower[1], lower[2]))
+            for near in record['lower']:
+                if near[0]:
+                    p.lowers.append(Place(near[0], near[1], near[2]))
             ret.append(p)
         return ret
 
