@@ -87,7 +87,8 @@
                         </td>
                         <td class="ColumnDate">{{e.date|pvm}}</td>
                         <td class="ColumnPlace">
-                            <a href="/events/loc={{e.locid}}" title="{{e.ltype}}">
+                            <a href="/events/loc={{e.locid}}" 
+                            title="tyyppiä {{e.ltype}}; katso paikan tiedot">
                             {{e.location}}</a>
                         </td>
                         <td class="ColumnDescription">{{e.description}}</td>
@@ -448,9 +449,12 @@
              		{% endfor %}
                      <ol>
                          {% set source_cnt = source_cnt + 1 %}
-                         <li id="sref{{ source_cnt }}a">
+                         <li id="sref{{ source_cnt }}a" title="luotettavuus {{source.confidence}}"
+                           {% if source.confidence and source.confidence < "2" %}
+                             style="color:red"{% endif %}>
                             Sivu: {{source.page}}{% if source.confidence %} &nbsp;
-                            <small>(luotettavuus {{source.confidence}})</small>{% endif %}
+                            <small>({{source.confidence|transl("conf")}}
+                            luotettavuus)</small>{% endif %}
                         </li>
                 	</ol>
                 </li>
