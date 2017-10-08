@@ -21,25 +21,29 @@ import models.dataupdater       # Tietojen päivitysmetodit
 import models.cvs_refnames      # Referenssinimien luonti
 import models.gen.user          # Käyttäjien tiedot
 
-""" Application route definitions 
+
+""" Application route definitions
 """
 
 @app.route('/')
-def index(): 
-    """Aloitussivun piirtäminen"""
-    return render_template("index.html")
+# def index(): 
+#     """Aloitussivun piirtäminen"""
+#     return render_template("index.html")
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'GET':
         return render_template("login/login.html")
     else:
-        from flask import make_response
-        resp = make_response(render_template('login/logged.html', 
-                                             usrname=request.form['usrname']))
-        return resp
-            #render_template("login/logged.html", usrname = usrname)
+        usrname = request.form['usrname']
+        return render_template("login/logged.html", usrname = usrname)
     
+@app.route('/tables')
+def datatables(): 
+    """Aloitussivun piirtäminen"""
+    return render_template("login/datatables.html")
+
+
 
 """ ----------------------------- Kertova-sivut --------------------------------
 """
