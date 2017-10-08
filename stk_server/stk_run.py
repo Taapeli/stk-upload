@@ -509,10 +509,19 @@ def _jinja2_filter_translate(term, variable, lang="fi"):
         # Confidence levels
         tabl = {
             "0":"erittäin matala",
-            "1":"matala",
+            "1":"alhainen",
             "2":"normaali",
             "3":"korkea",
             "4":"erittäin korkea"
+            }
+    elif variable == "conf_star":
+        # Confidence level symbols oo, o, *, **, ***
+        tabl = {
+            "0":"oo",   # fa-exclamation-circle [&#xf06a;]
+            "1":"o",
+            "2":"*",    # fa-star [&#xf005;]
+            "3":"**",
+            "4":"***"
             }
     elif variable == "lt":
         # Location types
