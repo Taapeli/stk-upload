@@ -54,7 +54,8 @@ henkilön sivulle.
 		               {% if p.name[0].surname %} <b>{{p.name[0].surname}}</b>
 		               {% else %}<i>{{p.name[0].patronyme}}</i>{% endif %}
 		               {% if p.name[0].refname %}
-		               <br><small>referenssinimi: {{p.name[0].refname}}</small>
+		               <br><small class="refname" style="margin-left:4em;"
+		                title="referenssinimi">referenssinimi: {{p.name[0].refname}}</small>
 		               {% endif %}
 	                </div></td>
 	              <td class="ColumnEvent">

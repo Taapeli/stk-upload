@@ -25,7 +25,7 @@
 		</p>
 		<div id="alphanav">
 			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
-        {% for p in places %}{% set ini = p.pname|list|first %}
+        {% for p in locations %}{% set ini = p.pname|list|first %}
             {% if alpha != ini %}{%set alpha = ini %}
                 <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
             {% endif %}
@@ -39,8 +39,8 @@
 				</tr>
 			</thead>
 			<tbody>
-	{% if places %}
-	    {% for p in places %}{% set ini = p.pname|list|first %}
+	{% if locations %}
+	    {% for p in locations %}{% set ini = p.pname|list|first %}
             <tr><td class="ColumnAlpha">{% if alpha != ini %}{%set alpha = ini %}
 	               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
                 {% endif %}</td>

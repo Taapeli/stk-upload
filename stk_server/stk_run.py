@@ -72,10 +72,12 @@ def show_location_page(locid):
     """
     models.dbutil.connect_db()
     try:
+        # List 'locatils' has Place objects with 'parent' field pointing to
+        # upper place in hierarcy. Events 
         locations, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in places:
+#     for p in locations:
 #         print ("# {} ".format(p))
     return render_template("k_place_events.html", 
                            locid=locid, events=events, locations=locations)
@@ -164,12 +166,14 @@ def show_locations():
     """
     models.dbutil.connect_db()
     try:
-        places = models.gen.place.Place.get_place_names()
+        # 'locations' has Place objects, which include also the lists of
+        # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
+        locations = models.gen.place.Place.get_place_names()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in places:
+#     for p in locations:
 #         print ("# {} ".format(p))
-    return render_template("k_locations.html", places=places) # TODO template
+    return render_template("k_locations.html", locations=locations)
 
 
 @app.route('/lista/refnimet', defaults={'reftype': None})
@@ -471,24 +475,25 @@ def _jinja2_filter_datestamp(time_str, fmt=None):
 
 
 @app.template_filter('transl')
-def _jinja2_filter_translate(term, variable, lang="fi"):
-    """ Given term is translated depending of variable name.
+def _jinja2_filter_translate(term, var_name, lang="fi"):
+    """ Given term is translated depending of var_name name.
         No language selection yet.
         
         'nt'  = Name types
         'evt' = Event types
+        'role' = Event role
         'lt'  = Location types
-        'lt_in' = Location types, inessive form 
+        'lt_in' = Location types, inessive form
     """
-#     print("# {}[{}]".format(variable, term))
-    if variable == "nt":
+#     print("# {}[{}]".format(var_name, term))
+    if var_name == "nt":
         # Name types
         tabl = {
             "Also Known As": "tunnettu myös",
             "Birth Name": "syntymänimi",
             "Married Name": "avionimi"
         }
-    if variable == "evt":
+    if var_name == "evt":
         # Event types    
         tabl = {
             "Residence": "asuinpaikka",
@@ -509,7 +514,13 @@ def _jinja2_filter_translate(term, variable, lang="fi"):
             "Ordination": "palkitseminen",
             "Sota": "sota"
         }
-    elif variable == "conf":
+    elif var_name == "role":
+        # Name types
+        tabl = {
+            "Kummi": "kummina",
+            "Clergy": "pappina"
+        }
+    elif var_name == "conf":
         # Confidence levels
         tabl = {
             "0":"erittäin matala",
@@ -518,7 +529,7 @@ def _jinja2_filter_translate(term, variable, lang="fi"):
             "3":"korkea",
             "4":"erittäin korkea"
             }
-    elif variable == "conf_star":
+    elif var_name == "conf_star":
         # Confidence level symbols oo, o, *, **, ***
         tabl = {
             "0":"oo",   # fa-exclamation-circle [&#xf06a;]
@@ -527,7 +538,7 @@ def _jinja2_filter_translate(term, variable, lang="fi"):
             "3":"**",
             "4":"***"
             }
-    elif variable == "lt":
+    elif var_name == "lt":
         # Location types
         tabl = {
             "Alus": "alus",
@@ -552,7 +563,7 @@ def _jinja2_filter_translate(term, variable, lang="fi"):
             "Village": "kylä",
             "srk": "seurakunta"
         }
-    elif variable == "lt_in":
+    elif var_name == "lt_in":
         # Location types, inessive
         tabl = {
             "Alus": "aluksessa",
