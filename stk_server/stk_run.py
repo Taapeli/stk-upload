@@ -77,6 +77,19 @@ def show_location_page(locid):
                            locid=locid, events=events, locations=locations)
 
 
+@app.route('/events/source=<sourceid>')
+def show_source_page(sourceid): 
+    """ Lähteen tietojen näyttäminen ruudulla: tapahtumat
+    """
+    models.dbutil.connect_db()
+    try:
+        sources, events = models.datareader.get_source_with_events(sourceid)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_source_events.html", 
+                           sources=sources, events=events)
+
+
 """ ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
 """
 

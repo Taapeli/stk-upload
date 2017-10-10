@@ -11,6 +11,8 @@ from sys import stderr
 import logging
 from flask import g
 import models.dbutil
+from models.gen.event import Event, Event_for_template
+from cryptography.x509.general_name import UniformResourceIdentifier
 
 
 class Citation:
@@ -357,6 +359,33 @@ class Source:
             """.format(repository_handle)
         return  g.driver.session().run(query)
     
+    
+    @staticmethod       
+    def get_events(sourceid):
+        """ Luetaan kaikki lähteen tapahtumat """
+                        
+        query = """
+            MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)
+                WHERE ID(source)={} 
+                RETURN ID(event) AS uniq_id, event,
+                    citation.page AS page, 
+                    citation.confidence AS confidence
+            """.format(sourceid)
+        result = g.driver.session().run(query)
+        
+        ret = []
+        for record in result:
+            e = Event()
+            e.uniq_id = record["uniq_id"]
+            e.type = record["event"]["type"]
+            e.description = record["event"]["description"]
+            e.date = record["event"]["date"]
+            e.cpage = record["page"]
+            e.cconfidence = record["confidence"]
+            
+            ret.append(e)
+        return ret
+                
     
     @staticmethod       
     def get_source_list():
