@@ -35,7 +35,7 @@
                     </tr>
                 </thead>
                 <tbody>
-		        {% for e in events %}
+		        {% for e in events|sort(attribute='date') %}
                     <tr>
                  	{% if e.type == "Cause Of Death" %}
                 		{% set t_cause_of_death = e.description %}

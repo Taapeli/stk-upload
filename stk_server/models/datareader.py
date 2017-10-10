@@ -597,7 +597,6 @@ def get_source_with_events(sourceid):
 
     """
     
-    sources = []
     s = Source()
     s.uniq_id = sourceid
     result = s.get_source_data()
