@@ -95,7 +95,7 @@ img#logo {
     vertical-align: text-top;
 }
 .id { color: sienna; text-align: right; }
-
+.refname { color:gray; text-size: 80%; }
 
 /* General Text
 ----------------------------------------------------- */
@@ -318,7 +318,9 @@ td.ColumnEvent ul {
 	margin: 2px;
 	padding-left: 1em;
 }
-tr:nth-child(even){background-color: #f2f2f2}
+table.IndividualList tr:nth-child(even),
+table.infolist.eventlist tbody tr:nth-child(even)
+    {background-color: #f2f2f2}
 
 /* Places
 ----------------------------------------------------- */

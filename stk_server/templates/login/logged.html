@@ -1,6 +1,6 @@
 {# templates/login/login.html_ #}
 {% extends "layout.html" %}
-{% block title %}Kirjautuminen{% endblock %}
+{% block title %}Kirjautunut käyttäjä{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -8,69 +8,89 @@
   <div>
     <h2>Tervetuloa Suomikantaan, {{usrname}}</h2>
     <div class="row">
-        <div class="startbox">
-            <div style="display: inline-block;"><form method="get"
-              action="/lista/k_persons">
-                <h3>Oma sukupuuni</h3>
-                <p>Katso omaa aineistoasi ja vertaa Suomikantaan</p>
-                <p style="text-align:right;"> 
-                    <button type="submit">Henkilöluettelo</button>
-                </p>
-            </form></div>
-        </div><div class="startbox">
+       <div class="startbox">
+         <div style="display: inline-block;">
+           <form method="get" action="/lista/k_persons">
+             <h3>Oma sukupuuni</h3>
+             <p>Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan</p>
+             <div style="text-align:right;"> 
+                <button type="submit">Henkilöluettelo</button>
+             </div>
+           </form>
+        </div>
+        </div>
+          <div class="startbox">
             <div style="display: inline-block;">
-                <h3>Tietojen lisääminen</h3><form action="/lataa" method="post" 
-                    enctype="multipart/form-data">
-	                <div style="display: inline-block;">
-	                    <input type="hidden" name="aineisto" value="xml_file">
-	                    <p>Valitse Gramps XML-tiedostosi ehdokasaineistoksi</p>
-	                    <input type="file" name="filenm" />
-	                </div>
-	                <div><input type="submit" value="Lataa" style="float: right;"/>
-	                </div>
+               <h3>Tietojen lisääminen</h3>
+                 <form action="/lataa" method="post"  enctype="multipart/form-data">
+	               <div style="display: inline-block;">
+	                 <input type="hidden" name="aineisto" value="xml_file">
+	                 <p>Valitse Gramps XML-tiedostosi ehdokasaineistoksi</p>
+	                 <input type="file" name="filenm" />
+	               </div>
+                   <div style="text-align:right;"> 
+	                 <input type="submit" value="Lataa" />
+	               </div>
                 </form>
             </div>
-        </div><div class="startbox">
-            <div style="display: inline-block;">
-                <h3>Oma Gedcom-aineistoni</h3>
-                <p>Lataa aineistosi Ged-com-muodossa tai muokkaa jä lähetettyä</p>
-                <p style="text-align:right;"> 
+        </div>
+        <div class="startbox">
+           <div style="display: inline-block;">
+              <h3>Oma Gedcom-aineistoni</h3>
+              <p>Lataa aineistosi Ged-com-muodossa tai muokkaa jä lähetettyä</p>
+              <div style="text-align:right;"> 
                     <button type="button"
                      onclick="alert('Toiminto vasta suunnitteilla')">
                      Gedcom-käsittelyt</button>
-                </p>
-            </div>
-        </div><div class="startbox">
-            <div style="display: inline-block;">
-                <h3>Viesti ylläpitoon</h3>
-                <p>Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon</p>
-                <p style="text-align:right;"> 
-                    <button type="button"
-                     onclick="alert('Toiminto vasta suunnitteilla')">
-                     Laadi viesti</button>
-                </p>
-            </div>
+              </div>
+           </div>
         </div>
+
+        <div class="startbox">
+            <h3>Datanäkymiä taulukkoina</h3>
+            <p>Seuraavalla sivulla on erilaisia teknisempiä listauksia
+               ja ongelmanselvitysvälineitä
+            </p>
+            <form method="get" action="/tables">
+               <div style="text-align:right;"> 
+                  <button type="submit">Tutki tietokantaa</button>
+               </div>
+            </form>
+        </div>
+
+        <div class="startbox">
+          <div style="display: inline-block;">
+            <h3>Viesti ylläpitoon</h3>
+            <p>Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon</p>
+            <div style="text-align:right;"> 
+              <button type="button" onclick="alert('Toiminto vasta suunnitteilla')">
+                Laadi viesti</button>
+            </div>
+          </div>
+        </div>
+
         {% if usrname and usrname[0] == "a" %}<div class="startbox admin">
-            <div style="display: inline-block;">
-			    <h3>Ylläpitäjän toiminnot</h3>
-			    <ul>
-			        <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> 
-			             koko kanta <i>(Mitään kysymättä!)</i></li>
-			        <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
-			        <li><a href="/aseta/refnames">Aseta referenssinimet</a></li>
-			    </ul>
-            </div>
-        </div>{% endif %}<div class="startbox">
-                <h3>Kirjaudu ulos</h3>
-                <p>Istunnon lopettaminen<br>&nbsp;</p>
-				<form method="get" action="/login">
-	                <p style="text-align:right;"> 
-						<button type="submit">Poistu sovelluksesta</button>
-	                </p>
-				</form>
-            </div>
+          <div style="display: inline-block;">
+			<h3>Ylläpitäjän toiminnot</h3>
+			<ul>
+			  <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> 
+			    koko kanta <i>(Mitään kysymättä!)</i></li>
+			  <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
+			  <li><a href="/aseta/refnames">Aseta referenssinimet</a></li>
+			</ul>
+          </div>
+        </div>{% endif %}
+
+        <div class="startbox"">
+          <h3>Kirjaudu ulos</h3>
+          <p>Istunnon lopettaminen<br>&nbsp;</p>
+	      <form method="get" action="/login">
+             <div style="text-align:right;"> 
+				<button type="submit" style="color: blue">Poistu sovelluksesta</button>
+             </div>
+		  </form>
         </div>
+
     </div>
   </div>
 	
