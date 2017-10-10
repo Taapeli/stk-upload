@@ -1,0 +1,48 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "k_layout.html" %}
+{% block title %}lähteet{% endblock %}
+{% block body %}
+{{ super() }}
+
+<h2>Lähdeluettelo</h2>
+
+	<div class="wrapper" id="nav" role="navigation">
+		<div class="container">
+			<ul class="menu" id="dropmenu">
+				<li><a href="k_persons" title="Henkilöt">Henkilöt</a></li>
+				<li><a href="#" title="Sukunimet">Sukunimet</a></li>
+				<li><a href="#" title="Perheet">Perheet</a></li>
+				<li><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
+				<li class="CurrentSection"><a href="/lista/k_sources" title="Lähteet">Lähteet</a></li>
+				<li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="content" id="Individuals">
+		<p id="description">
+		Tällä sivulla on hakemisto kaikista lähteistä.
+		</p>
+		<table class="IndividualList">
+			<thead>
+				<tr><th></th>
+                    <th>Lähde</th>
+				</tr>
+			</thead>
+			<tbody>
+	{% if sources %}
+	    {% for s in sources %}
+	    	<tr>
+            <td class="ColumnPerson">
+               <div>
+                  <a href="#" class="id"
+                    title="katso lähteen {{s.id}} tapahtumat"
+                    id="{{s.uniq_id}}">{{s.uniq_id}}</a> {{s.stitle}}
+                </div>
+            </tr>
+	    {% endfor %}
+	{% endif %}
+				</tr>
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

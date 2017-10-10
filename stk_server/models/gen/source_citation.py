@@ -359,6 +359,28 @@ class Source:
     
     
     @staticmethod       
+    def get_source_list():
+        """ Luetaan kaikki lähteet """
+                        
+        query = """
+            MATCH (source:Source)
+                RETURN ID(source) AS uniq_id, 
+                    source.id AS id, 
+                    source.stitle AS stitle
+                ORDER BY source.stitle
+            """
+        ret = []
+        result = g.driver.session().run(query)
+        for record in result:
+            s = Source()
+            s.uniq_id = record['uniq_id']
+            s.stitle = record['stitle']
+            ret.append(s)
+            
+        return ret
+            
+    
+    @staticmethod       
     def get_source_citation (uniq_id):
         """ Voidaan lukea lähteitä viittauksineen kannasta
         """

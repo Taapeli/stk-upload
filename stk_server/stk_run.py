@@ -168,6 +168,18 @@ def show_locations():
     return render_template("k_locations.html", places=places) # TODO template
 
 
+@app.route('/lista/k_sources')
+def show_sources(): 
+    """ Lähdeluettelon näyttäminen ruudulla
+    """
+    models.dbutil.connect_db()
+    try:
+        sources = models.gen.source_citation.Source.get_source_list()
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_sources.html", sources=sources)
+
+
 @app.route('/lista/refnimet', defaults={'reftype': None})
 @app.route('/lista/refnimet/<string:reftype>')
 def nayta_refnimet(reftype): 
