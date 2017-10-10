@@ -41,9 +41,10 @@
                         <th class="ColumnPerson">Nimi</th>
                         <th class="ColumnEvent">Tapahtuma</th>
                         <th class="ColumnDate">Päivämäärä</th>
-                        <th class="ColumnDescription">Kuvaus</th>
+ <!--                   <th class="ColumnDescription">Kuvaus</th>
                         <th class="ColumnNotes">Lisätiedot</th>
                         <th class="ColumnSources">Lähteet</th>
+-->
                     </tr>
                 </thead>
                 <tbody>
@@ -53,20 +54,30 @@
                             <a href="/person/uniq_id={{e.uid}}" class="id"
                               title="katso henkilön tiedot">{{e.uid}}</a>
                         </td>
-                        <td>{% for n in e.names|sort %}{{n[1]}} 
-                         {% if n[2] %}<b>{{n[2]}}</b>{% else %}<i>{{n[3]}}</i>{% endif %}
-                         <small>{{n[0]|transl('nt')}}</small>
+                        <td>{% for n in e.names|sort %} 
+                         {% if n[0] != "Birth Name" %}
+                            <small>{{n[0]|transl('nt')}}:</small>
+                         {% endif %}
+                         {{n[1]}} 
+                         {% if n[2] %}
+                            <b>{{n[2]}}</b>
+                         {% else %}
+                            <i>{{n[3]}}</i>
+                         {% endif %}
                          <br />{% endfor %}
                         </td>
-                        <td class="ColumnEvent">{{e.etype|transl('evt')}}</td>
+                        <td class="ColumnEvent">{{e.etype|transl('evt')}}
+                          {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}</td>
                         <td class="ColumnDate">{{e.edate|pvm}}</td>
+<!--
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">
                             <div></div>
                         </td>
                         <td class="ColumnSources">
-                         <!-- a href="#sref3a">3a</a -->
+                         <!-- generoi href="#sref3a">3a</a>
                         </td>
+-->
                     </tr>
          {% endfor %}
                  </tbody>

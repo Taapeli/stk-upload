@@ -163,13 +163,6 @@ RETURN ID(a) AS id, a.type AS type, a.pname AS name,
        COLLECT([ID(do), do.type, do.pname]) AS lower
   ORDER BY name
 """
-#         query = """
-# MATCH (a:Place) 
-# OPTIONAL MATCH (a:Place)<--(do:Place) 
-# RETURN ID(a) AS id, a.type AS type, a.pname AS name,
-#        COLLECT([ID(do), do.type, do.pname]) AS lower
-#   ORDER BY name
-# """
         ret = []
         result = g.driver.session().run(query)
         for record in result:
@@ -270,10 +263,10 @@ RETURN p.type AS type, p.pname AS name
         """
 
         query = """
-MATCH (p:Person)-->(e:Event)-[:PLACE]->(l:Place)
+MATCH (p:Person)-[r:EVENT]->(e:Event)-[:PLACE]->(l:Place)
   WHERE id(l) = {locid}
 MATCH (p) --> (n:Name)
-RETURN id(p) AS uid,
+RETURN id(p) AS uid, r.role AS role,
   COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
   e.type AS etype,
   e.date AS edate
@@ -286,6 +279,7 @@ ORDER BY edate"""
             p.uid = record["uid"]
             p.etype = record["etype"]
             p.edate = record["edate"]
+            p.role = record["role"]
             p.names = record["names"]   # tuples [name_type, given_name, surname]
             ret.append(p)
         return ret

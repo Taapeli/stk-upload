@@ -4,7 +4,8 @@
 {% block body %}
 {{ super() }}
 {% set sp = {'M':'mies', 'F':'nainen'} %}
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        
 <h2>Henkilön tiedot</h2>
 
     <div class="wrapper" id="nav" role="navigation">
@@ -31,19 +32,20 @@
         </h3>
 
         <div id="summaryarea">
-            <table class="infolist">
+            <table>
                 <tr>
                     <td class="ColumnAttribute">Tunnisteet</td>
                     <td class="ColumnValue"><span class="id">{{person.uniq_id}}</span> / <tt>{{person.id}}</tt></td>
                 </tr>
                 {% for pname in person.name %}<tr>
-                    <td class="ColumnAttribute">{{pname.type}}</td>
+                    <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <span title="etunimi">{{pname.firstname}}</span>
                         <i title="patronyymi">{{pname.suffix}}</i>
                         <b title="sukunimi">{{pname.surname}}</b> <!-- todo: <a href="#sref3a">3a</a> -->
-                        {% if pname.refname %}&nbsp; <tt title="referenssinimi">{{pname.refname}}</tt>{% endif %}
+                        {% if pname.refname %}&nbsp; <tt class="refname" title="referenssinimi">{{pname.refname}}</tt>
+                        {% endif %}
                    <!-- <ul><div class="grampsstylednote">
                             <p>Tähän tulee Note</p>
                         </div></ul>
@@ -449,12 +451,21 @@
              		{% endfor %}
                      <ol>
                          {% set source_cnt = source_cnt + 1 %}
-                         <li id="sref{{ source_cnt }}a" title="luotettavuus {{source.confidence}}"
+                         {% set conf = source.confidence | int %}
+                         <li id="sref{{ source_cnt }}a"
+                          title="{{source.confidence|transl("conf")}} luotettavuus ({{source.confidence}})"
                            {% if source.confidence and source.confidence < "2" %}
                              style="color:red"{% endif %}>
-                            Sivu: {{source.page}}{% if source.confidence %} &nbsp;
-                            <small>({{source.confidence|transl("conf")}}
-                            luotettavuus)</small>{% endif %}
+                            Sivu: {{source.page}} &nbsp;
+                           {% if conf < 2 %}
+                             {% if conf == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
+                             {% else %}<i class='fa fa-exclamation-circle'></i>{% endif %}
+                           {% else %}
+                             {% if conf == 2 %}<i class='fa fa-star-o'></i>
+                             {% elif conf == 3  %}<i class='fa fa-star'></i><i class='fa fa-star'></i>
+                             {% elif conf == 4 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i>
+                             {% endif %}
+                           {% endif %}                           
                         </li>
                 	</ol>
                 </li>
