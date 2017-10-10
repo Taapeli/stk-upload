@@ -603,10 +603,9 @@ def get_source_with_events(sourceid):
     result = s.get_source_data()
     for record in result:
         s.stitle = record["stitle"]
-    sources.append(s)
     events = Source.get_events(sourceid)
     
-    return (sources, events)
+    return (s.stitle, events)
 
 
 def read_sources_wo_cites():
