@@ -12,7 +12,6 @@ import logging
 from flask import g
 import models.dbutil
 from models.gen.event import Event, Event_for_template
-from cryptography.x509.general_name import UniformResourceIdentifier
 
 
 class Citation:
