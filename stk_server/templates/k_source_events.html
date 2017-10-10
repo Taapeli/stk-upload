@@ -24,42 +24,18 @@
     
          <div class="subsection" id="events">
             <h4>Tapahtumat</h4>
-            <table class="infolist eventlist">
-                <thead>
-                    <tr>
-                        <th class="ColumnEvent">Tapahtuma</th>
-                        <th class="ColumnDate">Päivämäärä</th>
-                        <th class="ColumnPlace">Paikka</th>
-                        <th class="ColumnDescription">Kuvaus</th>
-                        <th class="ColumnNotes">Lisätiedot</th>
-                    </tr>
-                </thead>
-                <tbody>
-		        {% for e in events|sort(attribute='date') %}
-                    <tr>
-                 	{% if e.type == "Cause Of Death" %}
-                		{% set t_cause_of_death = e.description %}
-            		{% else %}
-                        <td class="ColumnEvent">
-                            <span class="id">{{e.uniq_id}}</span> {{e.type}}
-                        </td>
-                        <td class="ColumnDate">{{e.date|pvm}}</td>
-                        <td class="ColumnPlace">
-                            <a href="/events/loc={{e.locid}}" 
-                            title="tyyppiä {{e.ltype}}; katso paikan tiedot">
-                            {{e.location}}</a>
-                        </td>
-                        <td class="ColumnDescription">{{e.description}}</td>
-                        <td class="ColumnNotes">
-                            <div>{% if e.type == "Death" %}
-                            	{% if t_cause_of_death %}kuolinsyy: {{t_cause_of_death}} 
-                            	{% endif %}{% endif %}</div>
-                        </td>
-                    {% endif %}
-                    </tr>
-		         {% endfor %}
-                 </tbody>
-            </table>
+            <ol>
+		        {% for e in events|sort(attribute='cpage') %}
+        		<li>
+   					{{e.cpage}}
+               		<ol>
+                   	<li>
+                   		{{e.type}}, {{e.date|pvm}}
+                    </li>
+                    </ol>
+		        {% endfor %}
+         		</li>
+            </ol>
         </div>
 
         <div class="subsection" id="sourcerefs">
