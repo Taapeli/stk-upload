@@ -592,6 +592,21 @@ def read_places():
     return (headings, titles, events)
 
 
+def get_source_with_events(sourceid):
+    """ Lukee tietokannasta Source- objektin tapahtumat näytettäväksi
+
+    """
+    
+    s = Source()
+    s.uniq_id = sourceid
+    result = s.get_source_data()
+    for record in result:
+        s.stitle = record["stitle"]
+    events = Source.get_events(sourceid)
+    
+    return (s.stitle, events)
+
+
 def read_sources_wo_cites():
     """ Lukee tietokannasta Source- objektit, joilta puuttuu viittaus näytettäväksi
 

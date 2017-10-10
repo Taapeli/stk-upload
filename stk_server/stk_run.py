@@ -83,6 +83,19 @@ def show_location_page(locid):
                            locid=locid, events=events, locations=locations)
 
 
+@app.route('/events/source=<sourceid>')
+def show_source_page(sourceid): 
+    """ Lähteen tietojen näyttäminen ruudulla: tapahtumat
+    """
+    models.dbutil.connect_db()
+    try:
+        stitle, events = models.datareader.get_source_with_events(sourceid)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_source_events.html", 
+                           stitle=stitle, events=events)
+
+
 """ ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
 """
 
@@ -174,6 +187,18 @@ def show_locations():
 #     for p in locations:
 #         print ("# {} ".format(p))
     return render_template("k_locations.html", locations=locations)
+
+
+@app.route('/lista/k_sources')
+def show_sources(): 
+    """ Lähdeluettelon näyttäminen ruudulla
+    """
+    models.dbutil.connect_db()
+    try:
+        sources = models.gen.source_citation.Source.get_source_list()
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_sources.html", sources=sources)
 
 
 @app.route('/lista/refnimet', defaults={'reftype': None})

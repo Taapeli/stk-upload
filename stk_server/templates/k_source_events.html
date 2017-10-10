@@ -1,0 +1,47 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "k_layout.html" %}
+{% block title %}lähteen tapahtumat{% endblock %}
+{% block body %}
+{{ super() }}
+
+<h2>Lähteen tapahtumat</h2>
+
+    <div class="wrapper" id="nav" role="navigation">
+        <div class="container">
+            <ul class="menu" id="dropmenu">
+                <li><a href="/lista/k_persons" title="Henkilöt">Henkilöt</a></li>
+                <li><a href="#" title="Sukunimet">Sukunimet</a></li>
+                <li><a href="#" title="Perheet">Perheet</a></li>
+                <li><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
+                <li class="CurrentSection"><a href="/lista/k_sources" title="Lähteet">Lähteet</a></li>
+                <li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="content" id="IndividualDetail">
+    <h3 style="position:sticky; top:0;">{{stitle}}</h3>
+    </div>
+    
+         <div class="subsection" id="events">
+            <h4>Tapahtumat</h4>
+            <ol>
+		        {% for e in events|sort(attribute='cpage') %}
+        		<li>
+   					{{e.cpage}}
+               		<ol>
+                   	<li>
+                   		{{e.type}}, {{e.date|pvm}}
+                    </li>
+                    </ol>
+		        {% endfor %}
+         		</li>
+            </ol>
+        </div>
+
+        <div class="subsection" id="sourcerefs">
+            <h4>Lähdeviitteet</h4>
+            <p>Ei lähdeviitteitä haettuna</p>
+        </div>
+    </div>
+{% endblock %}
+
