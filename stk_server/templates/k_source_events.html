@@ -31,7 +31,15 @@
                		<ol type="a">
                		{% for event in c.events %}
                    	<li>
-                   		{{event.type}}, {{event.date|pvm}}
+                   		{{event.type|transl('evt')}}
+                   		<ol>
+	               		{% for name in event.names %}
+                   			<li>
+                   			<a href="/person/uniq_id={{name.uniq_id}}" class="id"
+	                     title="katso henkilön {{name.uniq_id}} tiedot">{{name.surname}}, {{name.firstname}}</a>
+                   			</li>
+                    	{% endfor %}
+                    	</ol>
                     </li>
                     {% endfor %}
                     </ol>

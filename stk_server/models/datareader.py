@@ -608,13 +608,21 @@ def get_source_with_events(sourceid):
     for record in result:
         c = Citation()
         c.page = record["page"]
+        pid = record["pid"]        
                 
         for event in record["events"]:
             e = Event()
             e.uniq_id = event[0]
             e.type = event[1]
-            e.date = event[2]
-        
+            
+            for name in record["names"]:
+                n = Name()
+                n.uniq_id = pid        
+                n.surname = name[0]        
+                n.firstname = name[1]  
+                    
+                e.names.append(n)
+                      
             c.events.append(e)
             
         event_list.append(c)

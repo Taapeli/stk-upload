@@ -22,6 +22,15 @@
 		<p id="description">
 		Tällä sivulla on hakemisto kaikista lähteistä.
 		</p>
+		<div id="alphanav">
+			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
+        {% for s in sources %}{% set ini = s.stitle|list|first %}
+            {% if alpha != ini %}{%set alpha = ini %}
+                <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
+            {% endif %}
+        {% endfor %}
+			</ul>
+		</div>
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
@@ -30,8 +39,11 @@
 			</thead>
 			<tbody>
 	{% if sources %}
-	    {% for s in sources %}
-	    	<tr>
+	    {% for s in sources %}{% set ini = s.stitle|list|first %}
+	    	<tr><td class="ColumnAlpha">{% if alpha != ini %}
+	               {%set alpha = ini %}
+	               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
+               {% endif %}</td>
             <td class="ColumnPerson">
                <div>
                   <a href="/events/source={{s.uniq_id}}" class="id"
