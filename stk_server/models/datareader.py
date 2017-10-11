@@ -602,9 +602,24 @@ def get_source_with_events(sourceid):
     result = s.get_source_data()
     for record in result:
         s.stitle = record["stitle"]
-    events = Source.get_events(sourceid)
-    
-    return (s.stitle, events)
+    result = Source.get_events(sourceid)
+
+    event_list = []
+    for record in result:
+        c = Citation()
+        c.page = record["page"]
+                
+        for event in record["events"]:
+            e = Event()
+            e.uniq_id = event[0]
+            e.type = event[1]
+            e.date = event[2]
+        
+            c.events.append(e)
+            
+        event_list.append(c)
+
+    return (s.stitle, event_list)
 
 
 def read_sources_wo_cites():
