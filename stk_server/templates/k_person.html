@@ -447,7 +447,8 @@
             			{% for repo in record.repos %}
             				{{repo.rname}}:
              			{% endfor %}
-            			{{record.stitle}}
+             			<a href="/events/source={{record.uniq_id}}" class="id"
+	                     title="katso lähteen {{record.uniq_id}} tiedot">{{record.stitle}}</a>
              		{% endfor %}
                      <ol>
                          {% set source_cnt = source_cnt + 1 %}
