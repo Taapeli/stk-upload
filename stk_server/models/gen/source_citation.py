@@ -364,9 +364,10 @@ class Source:
         """ Luetaan kaikki lähteen tapahtumat """
                         
         query = """
-            MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)
-                WHERE ID(source)={} 
-                RETURN citation.page AS page, COLLECT([ID(event), event.type, event.date]) AS events
+            MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)<--(p:Person)-->(name:Name)
+                WHERE ID(source)={}
+                WITH citation.page AS page, p, name, COLLECT([ID(event), event.type]) AS events
+                RETURN page, events, ID(p) AS pid, COLLECT([name.surname, name.firstname]) AS names
                     
             """.format(sourceid)
         return g.driver.session().run(query)

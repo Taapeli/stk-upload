@@ -37,6 +37,7 @@ class Event:
         self.attr_value = ''
         self.citationref_hlink = ''
         self.citations = []   # For creating display sets
+        self.names = []   # For creating display sets
     
     
     def get_citation_handle(self):
