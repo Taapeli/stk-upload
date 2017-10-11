@@ -32,7 +32,7 @@
                		{% for event in c.events %}
                    	<li>
                    		{{event.type|transl('evt')}}
-                   		<ol>
+                   		<ol type="I">
 	               		{% for name in event.names %}
                    			<li>
                    			<a href="/person/uniq_id={{name.uniq_id}}" class="id"
