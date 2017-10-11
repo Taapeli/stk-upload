@@ -11,7 +11,6 @@ from sys import stderr
 import logging
 from flask import g
 import models.dbutil
-from models.gen.event import Event, Event_for_template
 
 
 class Citation:
@@ -38,6 +37,7 @@ class Citation:
         self.noteref_hlink = ''
         self.sourceref_hlink = ''
         self.sources = []   # For creating display sets
+        self.events = []   # For creating display sets
     
     
     @staticmethod       
@@ -366,25 +366,11 @@ class Source:
         query = """
             MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)
                 WHERE ID(source)={} 
-                RETURN ID(event) AS uniq_id, event,
-                    citation.page AS page, 
-                    citation.confidence AS confidence
+                RETURN citation.page AS page, COLLECT([ID(event), event.type, event.date]) AS events
+                    
             """.format(sourceid)
-        result = g.driver.session().run(query)
-        
-        ret = []
-        for record in result:
-            e = Event()
-            e.uniq_id = record["uniq_id"]
-            e.type = record["event"]["type"]
-            e.description = record["event"]["description"]
-            e.date = record["event"]["date"]
-            e.cpage = record["page"]
-            e.cconfidence = record["confidence"]
-            
-            ret.append(e)
-        return ret
-                
+        return g.driver.session().run(query)
+                        
     
     @staticmethod       
     def get_source_list():

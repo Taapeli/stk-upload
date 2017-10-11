@@ -25,13 +25,15 @@
          <div class="subsection" id="events">
             <h4>Tapahtumat</h4>
             <ol>
-		        {% for e in events|sort(attribute='cpage') %}
+		        {% for c in events|sort(attribute='page') %}
         		<li>
-   					{{e.cpage}}
-               		<ol>
+   					{{c.page}}
+               		<ol type="a">
+               		{% for event in c.events %}
                    	<li>
-                   		{{e.type}}, {{e.date|pvm}}
+                   		{{event.type}}, {{event.date|pvm}}
                     </li>
+                    {% endfor %}
                     </ol>
 		        {% endfor %}
          		</li>
