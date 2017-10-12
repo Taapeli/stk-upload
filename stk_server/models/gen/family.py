@@ -57,17 +57,6 @@ RETURN ID(person) AS children"""
         return  g.driver.session().run(query, {"pid": pid})
     
     
-    def get_event_data(self):
-        """ Luetaan perheen tapahtumien tiedot """
-                        
-        query = """
-            MATCH (family:Family)-[r:EVENT]->(event:Event)
-                WHERE family.gramps_handle='{}'
-                RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink
-            """.format(self.handle)
-        return  g.driver.session().run(query)
-    
-    
     def get_event_data_by_id(self):
         """ Luetaan perheen tapahtumien tiedot """
                         
@@ -77,43 +66,6 @@ MATCH (family:Family)-[r:EVENT]->(event:Event)
   WHERE ID(family)=$pid
 RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink"""
         return  g.driver.session().run(query, {"pid": pid})
-    
-    
-    def get_family_data(self):
-        """ Luetaan perheen tiedot """
-        
-        global session
-                
-        query = """
-            MATCH (family:Family)
-                WHERE family.gramps_handle='{}'
-                RETURN family
-            """.format(self.handle)
-        family_result = g.driver.session().run(query)
-        
-        for family_record in family_result:
-            self.change = family_record["family"]['change']
-            self.id = family_record["family"]['id']
-            self.rel_type = family_record["family"]['rel_type']
-            
-        father_result = self.get_father()
-        for father_record in father_result:            
-            self.father = father_record["father"]
-
-        mother_result = self.get_mother()
-        for mother_record in mother_result:            
-            self.mother = mother_record["mother"]
-
-        event_result = self.get_event_data()
-        for event_record in event_result:            
-            self.eventref_hlink.append(event_record["eventref_hlink"])
-            self.eventref_role.append(event_record["eventref_role"])
-
-        children_result = self.get_children()
-        for children_record in children_result:            
-            self.childref_hlink.append(children_record["children"])
-            
-        return True
     
     
     def get_family_data_by_id(self):
