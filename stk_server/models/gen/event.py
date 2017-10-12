@@ -40,17 +40,6 @@ class Event:
         self.names = []   # For creating display sets
     
     
-    def get_citation_handle(self):
-        """ Luetaan tapahtuman viittauksen handle """
-        
-        query = """
-            MATCH (event:Event)-[r:CITATION]->(c:Citation) 
-                WHERE event.gramps_handle='{}'
-                RETURN c.gramps_handle AS citationref_hlink
-            """.format(self.handle)
-        return  g.driver.session().run(query)
-    
-    
     def get_citation_by_id(self):
         """ Luetaan tapahtuman viittauksen id """
         
@@ -246,19 +235,7 @@ RETURN event"""
                 
             lists.append(data_line)
         
-        return (titles, lists)
-    
-    
-    def get_place_handle(self):
-        """ Luetaan tapahtuman paikan handle """
-        
-        query = """
-            MATCH (event:Event)-[r:PLACE]->(place:Place) 
-                WHERE event.gramps_handle='{}'
-                RETURN place.gramps_handle AS handle
-            """.format(self.handle)
-        return  g.driver.session().run(query)
-    
+        return (titles, lists)    
     
         
     def get_place_by_id(self):

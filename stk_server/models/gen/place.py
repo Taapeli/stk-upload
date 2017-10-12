@@ -45,26 +45,6 @@ class Place:
             lv = ""
         desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, lv)
         return desc
-
-    
-    def get_place_data(self):
-        """ Luetaan kannasta kaikki paikan tiedot """
-                
-        query = """
-            MATCH (place:Place)
-                WHERE place.gramps_handle='{}'
-                RETURN place
-            """.format(self.handle)
-        place_result = g.driver.session().run(query)
-        
-        for place_record in place_result:
-            self.change = place_record["place"]["change"]
-            self.id = place_record["place"]["id"]
-            self.type = place_record["place"]["type"]
-            self.pname = place_record["place"]["pname"]
-            
-        return True
-        self.placeref_hlink = ''
     
     
     def get_place_data_by_id(self):

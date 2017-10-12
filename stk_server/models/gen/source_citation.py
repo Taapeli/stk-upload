@@ -348,18 +348,6 @@ class Source:
     
     
     @staticmethod       
-    def get_sources(repository_handle):
-        """ Luetaan kaikki arkiston lähteet """
-                        
-        query = """
-            MATCH (source:Source)-[r:REPOSITORY]->(repo:Repository) 
-                WHERE repo.gramps_handle='{}' 
-                RETURN r.medium AS medium, source
-            """.format(repository_handle)
-        return  g.driver.session().run(query)
-    
-    
-    @staticmethod       
     def get_events(sourceid):
         """ Luetaan kaikki lähteen tapahtumat """
                         
