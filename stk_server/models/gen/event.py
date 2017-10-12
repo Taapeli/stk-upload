@@ -101,33 +101,6 @@ RETURN ID(c) AS citationref_hlink"""
         return g.driver.session().run(query)
 
 
-    def get_event_data(self):
-        """ Luetaan tapahtuman tiedot """
-
-        query = """
-            MATCH (event:Event)
-                WHERE event.gramps_handle='{}'
-                RETURN event
-            """.format(self.handle)
-        event_result = g.driver.session().run(query)
-
-        for event_record in event_result:
-            self.id = event_record["event"]["id"]
-            self.change = event_record["event"]["change"]
-            self.type = event_record["event"]["type"]
-            self.date = event_record["event"]["date"]
-    
-            event_place_result = self.get_place_handle()
-            for event_place_record in event_place_result:
-                self.place_hlink = event_place_record["handle"]
-    
-            event_citation_result = self.get_citation_handle()
-            for event_citation_record in event_citation_result:
-                self.citationref_hlink = event_citation_record["citationref_hlink"]
-                
-        return True
-
-
     def get_event_data_by_id(self):
         """ Luetaan tapahtuman tiedot """
                         

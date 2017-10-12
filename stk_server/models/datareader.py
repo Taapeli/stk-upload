@@ -662,10 +662,9 @@ def get_people_by_surname(surname):
     people = []
     result = Name.get_people_with_surname(surname)
     for record in result:
-        handle = record['handle']
         p = Person()
-        p.handle = handle
-        p.get_person_and_name_data()
+        p.uniq_id = record['uniq_id']
+        p.get_person_and_name_data_by_id()
         people.append(p)
         
     return (people)
