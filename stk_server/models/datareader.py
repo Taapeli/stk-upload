@@ -682,16 +682,14 @@ def get_person_data_by_id(uniq_id):
     p.uniq_id = uniq_id
     p.get_person_and_name_data_by_id()
     p.get_hlinks_by_id()
-    event = Event()
-    event.handle = p.eventref_hlink
-    event.get_event_data()
     
     events = []
     sources = []
     source_cnt = 0
-    for link in p.eventref_hlink:
+    for i in range(len(p.eventref_hlink)):
         e = Event_for_template()
-        e.uniq_id = link
+        e.uniq_id = p.eventref_hlink[i]
+        e.role = p.eventref_role[i]
         e.get_event_data_by_id()
         
         if e.place_hlink != '':
