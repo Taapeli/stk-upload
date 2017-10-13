@@ -473,6 +473,8 @@
                              {% elif conf == 4 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i>
                              {% endif %}
                            {% endif %}                           
+                           {% if source.notetext %}<br>
+                              <a href="{{source.notetext}}" target="_blank">{{ source.notetext }}</a>{% endif %}                           
                         </li>
                 	</ol>
                 </li>

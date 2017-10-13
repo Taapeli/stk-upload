@@ -759,6 +759,7 @@ def get_person_data_by_id(uniq_id):
                     citation.dateval = record['date']
                     citation.page = record['page']
                     citation.confidence = record['confidence']
+                    citation.notetext = record['notetext']
                     
                     for source in record['sources']:
                         s = Source()

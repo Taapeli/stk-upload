@@ -52,9 +52,10 @@ class Citation:
         
         query = """
  MATCH (citation:Citation)-[r]->(source:Source)-[p]->(repo:Repository) {0}
-   WITH citation, r, source, p, repo ORDER BY citation.page
+ OPTIONAL MATCH (citation)-[n]->(note:Note)
+   WITH citation, r, source, p, repo ORDER BY citation.page, note
  RETURN ID(citation) AS id, citation.dateval AS date, citation.page AS page, 
-     citation.confidence AS confidence, 
+     citation.confidence AS confidence, note.text AS notetext,
    COLLECT([ID(source), source.stitle, p.medium, 
        ID(repo), repo.rname, repo.type]) AS sources
  """.format(where)
