@@ -22,7 +22,9 @@ class Event:
                 place_hlink        str paikan osoite
                 attr_type          str lisätiedon tyyppi
                 attr_value         str lisätiedon arvo
+                noteref_hlink      str lisätiedon osoite
                 citationref_hlink  str viittauksen osoite
+                objref_hlink       str median osoite
      """
 
     def __init__(self, eid='', desc='', handle=''):
@@ -35,7 +37,9 @@ class Event:
         self.place_hlink = ''
         self.attr_type = ''
         self.attr_value = ''
+        self.noteref_hlink = ''
         self.citationref_hlink = ''
+        self.objref_hlink = ''
         self.citations = []   # For creating display sets
         self.names = []   # For creating display sets
     
@@ -95,26 +99,30 @@ RETURN ID(c) AS citationref_hlink"""
                         
         pid = int(self.uniq_id)
         query = """
-MATCH (event:Event)
-  WHERE ID(event)=$pid
+MATCH (event:Event) WHERE ID(event)=$pid
 RETURN event"""
-        event_result = g.driver.session().run(query, {"pid": pid})
+        result = g.driver.session().run(query, {"pid": pid})
 
-        for event_record in event_result:
-            self.id = event_record["event"]["id"]
-            self.change = event_record["event"]["change"]
-            self.type = event_record["event"]["type"]
-            self.date = event_record["event"]["date"]
-            self.description = event_record["event"]["description"]
+        for record in result:
+            self.id = record["event"]["id"]
+            self.change = record["event"]["change"]
+            self.type = record["event"]["type"]
+            self.date = record["event"]["date"]
+            self.description = record["event"]["description"]
     
-            event_place_result = self.get_place_by_id()
-            for event_place_record in event_place_result:
-                self.place_hlink = event_place_record["uniq_id"]
+            place_result = self.get_place_by_id()
+            for place_record in place_result:
+                self.place_hlink = place_record["uniq_id"]
     
-            event_citation_result = self.get_citation_by_id()
-            for event_citation_record in event_citation_result:
-                self.citationref_hlink = event_citation_record["citationref_hlink"]
-                
+            note_result = self.get_note_by_id()
+            for note_record in note_result:
+                self.noteref_hlink = note_record["noteref_hlink"]
+                print("noteref_hlink: " + str(self.noteref_hlink))
+    
+            citation_result = self.get_citation_by_id()
+            for citation_record in citation_result:
+                self.citationref_hlink = citation_record["citationref_hlink"]
+                                
         return True
     
     
@@ -238,6 +246,17 @@ RETURN event"""
         return (titles, lists)    
     
         
+    def get_note_by_id(self):
+        """ Luetaan tapahtuman lisätietojen uniq_id """
+                        
+        pid = int(self.uniq_id)
+        query = """
+MATCH (event:Event)-[r:NOTE]->(note:Note) 
+  WHERE ID(event)=$pid
+RETURN ID(note) AS noteref_hlink"""
+        return  g.driver.session().run(query, {"pid": pid})
+    
+        
     def get_place_by_id(self):
         """ Luetaan tapahtuman paikan uniq_id """
                         
@@ -352,6 +371,19 @@ MERGE (n)-[r:PLACE]->(m)"""
             print("Virhe: {0}".format(err), file=stderr)
 
         try:
+            # Make relation to the Note node
+            if self.noteref_hlink != '':
+                noteref_hlink = self.noteref_hlink
+                query = """
+MATCH (e:Event) WHERE e.gramps_handle=$handle
+MATCH (n:Note) WHERE n.gramps_handle=$noteref_hlink
+MERGE (e)-[r:NOTE]->(n)"""                       
+                tx.run(query, 
+               {"handle": handle, "noteref_hlink": noteref_hlink})
+        except Exception as err:
+            print("Virhe: {0}".format(err), file=stderr)
+
+        try:
             # Make relation to the Citation node
             if self.citationref_hlink != '':
                 citationref_hlink = self.citationref_hlink
@@ -361,6 +393,19 @@ MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
 MERGE (n)-[r:CITATION]->(m)"""                       
                 tx.run(query, 
                {"handle": handle, "citationref_hlink": citationref_hlink})
+        except Exception as err:
+            print("Virhe: {0}".format(err), file=stderr)
+
+        try:
+            # Make relation to the Object node
+            if self.objref_hlink != '':
+                objref_hlink = self.objref_hlink
+                query = """
+MATCH (n:Event) WHERE n.gramps_handle=$handle
+MATCH (m:Object) WHERE m.gramps_handle=$objref_hlink
+MERGE (n)-[r:OBJECT]->(m)"""                       
+                tx.run(query, 
+               {"handle": handle, "objref_hlink": objref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
@@ -388,4 +433,6 @@ class Event_for_template(Event):
         self.place_hlink = ''
         self.attr_type = ''
         self.attr_value = ''
+        self.noteref_hlink = ''
         self.citationref_hlink = ''
+        self.objref_hlink = ''
