@@ -28,6 +28,16 @@ class Note:
         self.type = ''
         
         
+    def get_note(self):
+        """ Lukee huomautuksen tiedot tietokannasta """
+
+        query = """
+            MATCH (note:Note) WHERE ID(note)={} RETURN note
+            """.format(self.uniq_id)
+            
+        return g.driver.session().run(query)
+                
+        
     @staticmethod
     def get_notes(uniq_id):
         """ Lukee kaikki huomautukset tietokannasta """

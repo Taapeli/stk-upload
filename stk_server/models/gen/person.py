@@ -397,12 +397,12 @@ RETURN person, name
         
         query = """
  MATCH (person:Person)-->(name:Name) {0}
- OPTIONAL MATCH (person)-[r]->(event:Event)
- OPTIONAL MATCH (event)-[s]->(place:Place)
+ OPTIONAL MATCH (person)-->(event:Event)
+ OPTIONAL MATCH (event)-->(place:Place)
  RETURN ID(person) AS id, person.confidence AS confidence,
    name.firstname AS firstname, 
    name.refname AS refname, name.surname AS surname, 
-   name.suffix AS suffix, 
+   name.suffix AS suffix,
    COLLECT([ID(event), event.type, event.date, place.pname]) AS events
  ORDER BY name.surname, name.firstname""".format(where)
                 
@@ -671,6 +671,7 @@ SET p.gramps_handle=$handle,
             tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "gender": gender, 
                 "url_href": url_href, "url_type": url_type, "url_description": url_description})
+            
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 

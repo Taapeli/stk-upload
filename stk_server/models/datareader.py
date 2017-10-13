@@ -731,7 +731,15 @@ def get_person_data_by_id(uniq_id):
             e.location = place.pname
             e.locid = place.uniq_id
             e.ltype = place.type
-            
+                    
+        if e.noteref_hlink != '':
+            note = Note()
+            note.uniq_id = e.noteref_hlink
+            result = note.get_note()
+            for record in result:
+                e.notetype = record["note"]["type"]
+                e.notetext = record["note"]["text"]
+                
         events.append(e)
         
         if e.citationref_hlink != '':
@@ -999,12 +1007,26 @@ def handle_events(collection, userid, tx):
         elif len(event.getElementsByTagName('attribute') ) > 1:
             print("Error: More than one attribute tag in an event")
     
+        if len(event.getElementsByTagName('noteref') ) == 1:
+            event_noteref = event.getElementsByTagName('noteref')[0]
+            if event_noteref.hasAttribute("hlink"):
+                e.noteref_hlink = event_noteref.getAttribute("hlink")
+        elif len(event.getElementsByTagName('noteref') ) > 1:
+            print("Error: More than one noteref tag in an event")
+    
         if len(event.getElementsByTagName('citationref') ) == 1:
             event_citationref = event.getElementsByTagName('citationref')[0]
             if event_citationref.hasAttribute("hlink"):
                 e.citationref_hlink = event_citationref.getAttribute("hlink")
         elif len(event.getElementsByTagName('citationref') ) > 1:
             print("Error: More than one citationref tag in an event")
+    
+        if len(event.getElementsByTagName('objref') ) == 1:
+            event_objref = event.getElementsByTagName('objref')[0]
+            if event_objref.hasAttribute("hlink"):
+                e.objref_hlink = event_objref.getAttribute("hlink")
+        elif len(event.getElementsByTagName('objref') ) > 1:
+            print("Error: More than one objref tag in an event")
                 
         e.save(userid, tx)
         counter += 1
