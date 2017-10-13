@@ -224,6 +224,7 @@ def lue_henkilot2(uniq_id=None):
         pid = record['id']
         p = Person()
         p.uniq_id = pid
+        p.confidence = record['confidence']
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
@@ -251,6 +252,37 @@ def lue_henkilot2(uniq_id=None):
     return (persons)
 
 
+def set_confidence_value():
+    """ Asettaa henkilölle laatu arvion
+    """
+    
+    message = []
+    counter = 0
+    
+    tx = User.beginTransaction()
+    
+    result = Person.get_confidence()
+    for record in result:
+        p = Person()
+        p.uniq_id = record["uniq_id"]
+        
+        if len(record["list"]) > 0:
+            sum = 0
+            for ind in record["list"]:
+                sum += int(ind)
+                
+            confidence = sum/len(record["list"])
+            p.confidence = "%0.1f" % confidence # confidence with one decimal
+        p.set_confidence()
+            
+        counter += 1
+            
+    User.endTransaction(tx)
+    text = "Number of confidences set: " + str(counter)
+    message.append(text)
+    return (message)
+    
+    
 def set_refnames():
     """ Asettaa henkilöille refnamet
     """

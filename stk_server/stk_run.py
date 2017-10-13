@@ -338,6 +338,16 @@ def tyhjenna():
     return render_template("talletettu.html", text=msg)
 
 
+@app.route('/aseta/confidence')
+def aseta_confidence(): 
+    """ tietojen laatuarvion asettaminen henkilöille """
+    models.dbutil.connect_db()
+    dburi = models.dbutil.connect_db()
+    
+    message = models.datareader.set_confidence_value()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+
 @app.route('/aseta/refnames')
 def aseta_refnames(): 
     """ referenssinimien asettaminen henkilöille """

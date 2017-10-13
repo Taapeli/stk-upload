@@ -57,6 +57,11 @@
                     <td class="ColumnValue">{% if person.gender in sp %}{{sp[person.gender]}}
                       {% else %}{{person.gender}}{% endif %}</td>
                 </tr>{% endif %}
+                
+                {% if person.confidence %}<tr>
+                    <td class="ColumnAttribute">Tietojen luotettavuus</td>
+                    <td class="ColumnValue">{{person.confidence}}</td>
+                </tr>{% endif %}
 <!--            <tr>
                     <td class="ColumnAttribute">Ikä kuollessa</td>
                     <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>

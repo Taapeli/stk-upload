@@ -36,6 +36,7 @@ class Person:
                 url_description    str url kuvaus
                 parentin_hlink     str vanhempien osoite
                 citationref_hlink  str viittauksen osoite
+                confidence         str tietojen luotettavuus
      """
 
     def __init__(self, pid=''):
@@ -55,6 +56,7 @@ class Person:
         self.url_description = []
         self.parentin_hlink = []
         self.citationref_hlink = []
+        self.confidence = ''
     
     
     def get_citation_id(self):
@@ -165,6 +167,7 @@ RETURN person, name
             self.url_href = person_record["person"]['url_href']
             self.url_type = person_record["person"]['url_type']
             self.url_description = person_record["person"]['url_description']
+            self.confidence = person_record["person"]['confidence']
             
             if len(person_record["name"]) > 0:
                 pname = Name()
@@ -305,6 +308,30 @@ RETURN person, name
 
 
     @staticmethod       
+    def get_confidence ():
+        """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
+        """
+
+        query = """
+ MATCH (person:Person)
+ OPTIONAL MATCH (person)-->(event:Event)-[r]->(c:Citation)
+ RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+                
+        return g.driver.session().run(query)
+
+
+    def set_confidence (self):
+        """ Voidaan asettaa henkilön tietojen luotettavuus arvio kantaan
+        """
+
+        query = """
+ MATCH (person:Person) WHERE ID(person)={}
+ SET person.confidence='{}'""".format(self.uniq_id, self.confidence)
+                
+        return g.driver.session().run(query)
+
+
+    @staticmethod       
     def get_person_events (nmax=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
@@ -372,7 +399,8 @@ RETURN person, name
  MATCH (person:Person)-->(name:Name) {0}
  OPTIONAL MATCH (person)-[r]->(event:Event)
  OPTIONAL MATCH (event)-[s]->(place:Place)
- RETURN ID(person) AS id, name.firstname AS firstname, 
+ RETURN ID(person) AS id, person.confidence AS confidence,
+   name.firstname AS firstname, 
    name.refname AS refname, name.surname AS surname, 
    name.suffix AS suffix, 
    COLLECT([ID(event), event.type, event.date, place.pname]) AS events
