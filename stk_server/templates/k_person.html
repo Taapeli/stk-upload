@@ -474,7 +474,9 @@
                              {% endif %}
                            {% endif %}                           
                            {% if source.notetext %}<br>
-                              <a href="{{source.notetext}}" target="_blank">{{ source.notetext }}</a>{% endif %}                           
+                              <a href="{{source.notetext}}" target="_blank"
+                              {% if source.confidence and source.confidence < "2" %}
+                             style="color:red"{% endif %}>{{ source.notetext }}</a>{% endif %}                           
                         </li>
                 	</ol>
                 </li>
