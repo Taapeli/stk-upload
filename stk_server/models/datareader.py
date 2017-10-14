@@ -651,10 +651,11 @@ def get_source_with_events(sourceid):
     result = Source.get_events(sourceid)
 
     event_list = []
-    for record in result:
+    for record in result:               # Events record
         c = Citation()
         c.page = record["page"]
-        pid = record["pid"]        
+        pid = record["pid"]
+        c.confidence = record["confidence"]
                 
         for event in record["events"]:
             e = Event()
