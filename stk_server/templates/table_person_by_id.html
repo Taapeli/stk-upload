@@ -59,7 +59,7 @@
 		<tr>
     		<td class="id">{{event.uniq_id}}</td>
     		<td>{% if event.type %}{{event.type}}{% endif %}</td>
-    		<td>{% if event.date %}{{event.date}}{% endif %}</td>
+    		<td>{% if event.date %}{{event.date}}{% elif event.daterange %}{{event.daterange}}{% endif %}</td>
     		<td>{% if event.location %}{{event.location}}{% endif %}</td>
     		<td>{% if event.description %}{{event.description}}{% endif %}</td>
             <td>{% if event.citationref_hlink %}

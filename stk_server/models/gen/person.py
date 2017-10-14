@@ -403,7 +403,8 @@ RETURN person, name
    name.firstname AS firstname, 
    name.refname AS refname, name.surname AS surname, 
    name.suffix AS suffix,
-   COLLECT([ID(event), event.type, event.date, place.pname]) AS events
+   COLLECT([ID(event), event.type, event.date, 
+      event.daterange_start, event.daterange_stop, place.pname]) AS events
  ORDER BY name.surname, name.firstname""".format(where)
                 
         return g.driver.session().run(query)

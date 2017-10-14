@@ -19,6 +19,8 @@ class Event:
                 type               esim. "Birth"
                 description        esim. ammatin kuvaus
                 date               str aika
+                daterange_start    str aikavälin alku
+                daterange_stop     str aikavälin loppu
                 place_hlink        str paikan osoite
                 attr_type          str lisätiedon tyyppi
                 attr_value         str lisätiedon arvo
@@ -34,6 +36,8 @@ class Event:
         self.id = eid
         self.description = desc
         self.date = ''
+        self.daterange_start = ''
+        self.daterange_stop = ''
         self.place_hlink = ''
         self.attr_type = ''
         self.attr_value = ''
@@ -68,7 +72,8 @@ RETURN ID(c) AS citationref_hlink"""
         query = """
  MATCH (event:Event)-[a]->(citation:Citation)-[b]->(source:Source)-[c]->(repo:Repository) {0}
  RETURN ID(event) AS id, event.type AS type, event.date AS date, 
-  COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence,
+    event.daterange_start AS daterange_start, event.daterange_stop AS daterange_stop, 
+    COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence,
       ID(source), source.stitle, c.medium, ID(repo), repo.rname, repo.type] ) AS sources
  ORDER BY event.date""".format(where)
                 
@@ -88,7 +93,8 @@ RETURN ID(c) AS citationref_hlink"""
         query = """
  MATCH (event:Event)-[a]->(citation:Citation) {0}
  RETURN ID(event) AS id, event.type AS type, event.date AS date, 
-  COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence] ) AS sources
+    event.daterange_start AS daterange_start, event.daterange_stop AS daterange_stop, 
+    COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence] ) AS sources
  ORDER BY event.date""".format(where)
                 
         return g.driver.session().run(query)
@@ -108,6 +114,8 @@ RETURN event"""
             self.change = record["event"]["change"]
             self.type = record["event"]["type"]
             self.date = record["event"]["date"]
+            self.daterange_start = record["event"]["daterange_start"]
+            self.daterange_stop = record["event"]["daterange_stop"]
             self.description = record["event"]["description"]
     
             place_result = self.get_place_by_id()
@@ -139,7 +147,8 @@ RETURN event"""
         result = g.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
-                  'description', 'date', 'attr_type', 'attr_value']
+                  'description', 'date', 'daterange_start', 
+                  'daterange_stop', 'attr_type', 'attr_value']
         lists = []
         
         for record in result:
@@ -170,6 +179,14 @@ RETURN event"""
                 data_line.append('-')
             if record["e"]['date']:
                 data_line.append(record["e"]['date'])
+            else:
+                data_line.append('-')
+            if record["e"]['daterange_start']:
+                data_line.append(record["e"]['daterange_start'])
+            else:
+                data_line.append('-')
+            if record["e"]['daterange_stop']:
+                data_line.append(record["e"]['daterange_stop'])
             else:
                 data_line.append('-')
             if record["e"]['attr_type']:
@@ -199,7 +216,8 @@ RETURN event"""
         result = g.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
-                  'description', 'date', 'attr_type', 'attr_value']
+                  'description', 'date', 'daterange_start', 
+                  'daterange_stop', 'attr_type', 'attr_value']
         lists = []
         
         for record in result:
@@ -230,6 +248,14 @@ RETURN event"""
                 data_line.append('-')
             if record["e"]['date']:
                 data_line.append(record["e"]['date'])
+            else:
+                data_line.append('-')
+            if record["e"]['daterange_start']:
+                data_line.append(record["e"]['daterange_start'])
+            else:
+                data_line.append('-')
+            if record["e"]['daterange_stop']:
+                data_line.append(record["e"]['daterange_stop'])
             else:
                 data_line.append('-')
             if record["e"]['attr_type']:
@@ -291,6 +317,8 @@ RETURN ID(place) AS uniq_id"""
         print ("Type: " + self.type)
         print ("Description: " + self.description)
         print ("Dateval: " + self.date)
+        print ("Daterange_start: " + self.daterange_start)
+        print ("Daterange_stop: " + self.daterange_stop)
         print ("Place_hlink: " + self.place_hlink)
         print ("Attr_type: " + self.attr_type)
         print ("Attr_value: " + self.attr_value)
@@ -309,6 +337,8 @@ RETURN ID(place) AS uniq_id"""
             print ("Type: " + self.type + " # " + comp_event.type)
             print ("Description: " + self.description + " # " + comp_event.description)
             print ("Dateval: " + self.date + " # " + comp_event.date)
+            print ("Daterange_start: " + self.daterange_start + " # " + comp_event.daterange_start)
+            print ("Daterange_stop: " + self.daterange_stop + " # " + comp_event.daterange_stop)
             print ("Place: " + pname1 + " # " + pname2)
         # Give points if dates match
         if self.date == comp_event.date:
@@ -326,6 +356,8 @@ RETURN ID(place) AS uniq_id"""
         etype = self.type
         description = self.description
         edate = self.date
+        daterange_start = self.daterange_start
+        daterange_stop = self.daterange_stop
         attr_type = self.attr_type
         attr_value = self.attr_value
         try:
@@ -337,12 +369,15 @@ SET e.gramps_handle=$handle,
     e.type=$type, 
     e.description=$description,
     e.date=$date,
+    e.daterange_start=$daterange_start,
+    e.daterange_stop=$daterange_stop,
     e.attr_type=$attr_type,
     e.attr_value=$attr_value"""
             tx.run(query, 
                {"handle": handle, "change": change, "id": eid, 
                 "type": etype, "description": description, "date": edate, 
-                "attr_type": attr_type, "attr_value": attr_value})
+                 "daterange_start": daterange_start, "daterange_stop": daterange_stop,
+                 "attr_type": attr_type, "attr_value": attr_value})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -429,6 +464,8 @@ class Event_for_template(Event):
         self.id = eid
         self.description = desc
         self.date = ''
+        self.daterange_start = ''
+        self.daterange_stop = ''
         self.place = ''
         self.place_hlink = ''
         self.attr_type = ''
