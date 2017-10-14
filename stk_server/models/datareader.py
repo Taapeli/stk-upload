@@ -660,6 +660,7 @@ def get_source_with_events(sourceid):
             e = Event()
             e.uniq_id = event[0]
             e.type = event[1]
+            e.edate = event[2]
             
             for name in record["names"]:
                 n = Name()
