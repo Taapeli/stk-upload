@@ -93,7 +93,9 @@
                             <span class="id">{{e.uniq_id}}</span> {{e.type|transl('evt')}}
                             {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}
                         </td>
-                        <td class="ColumnDate">{{e.date|pvm}}</td>
+                        <td class="ColumnDate">{% if e.date %}{{e.date|pvm}}
+                           {% elif e.daterange %}{{e.daterange}}{% endif %}
+						</td>
                         <td class="ColumnPlace">
                             <a href="/events/loc={{e.locid}}" 
                             title="tyyppiä {{e.ltype}}; katso paikan tiedot">
