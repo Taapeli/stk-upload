@@ -5,7 +5,7 @@
 import csv
 import logging
 
-from models.gen import *  # Tietokannan kaikki luokat
+from models.gen.refname import Refname  # Tietokannan kaikki luokat
 
 def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
     """ Lukee csv-tiedostosta referenssinimet
@@ -53,7 +53,7 @@ def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
                 sp = ''
 
             # Luodaan Refname
-            r = refname.Refname(nimi)
+            r = Refname(nimi)
             if (ref_name != '') and (ref_name != nimi):
                 # Tullaan viittaamaan tähän nimeen
                 #r.mark_reference(ref_name, 'REFFIRST')

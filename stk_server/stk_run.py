@@ -43,6 +43,11 @@ def datatables():
     """Aloitussivun piirtäminen"""
     return render_template("login/datatables.html")
 
+@app.route('/refnames')
+def refnames(): 
+    """Aloitussivun piirtäminen"""
+    return render_template("login/reference.html")
+
 
 
 """ ----------------------------- Kertova-sivut --------------------------------
@@ -311,8 +316,8 @@ def talleta(filename, subj):
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
         elif subj == 'refnimet': # Referenssinimet
-            # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
-            status = models.cvs_refnames.referenssinimet(pathname, maxrows=100)
+            # Tallettaa Refname-objekteja 
+            status = models.cvs_refnames.referenssinimet(pathname)
         elif subj == 'xml_file': # gramps backup xml file to Neo4j db
             status = models.datareader.xml_to_neo4j(pathname)
         elif subj == 'karajat': # TODO: Tekemättä

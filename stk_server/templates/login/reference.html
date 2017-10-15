@@ -1,0 +1,55 @@
+{# templates/login/login.html_ #}
+{% extends "layout.html" %}
+{% block title %}Kirjautunut käyttäjä{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div style="margin-left:50px; padding-bottom: 2em;">
+  <div>
+    <h2>Referenssiaineistojen käsittely</h2>
+    <div class="row">
+
+          <div class="startbox admin">
+            <div style="display: inline-block;">
+               <h3>Tietojen lisääminen</h3>
+                 <form action="/lataa" method="post"  enctype="multipart/form-data">
+	               <div style="display: inline-block;">
+	                 <input type="hidden" name="aineisto" value="refnimet">
+	                 <p>Lataa referenssinimiä</p>
+	                 <input type="file" name="filenm" />
+	               </div>
+                   <div style="text-align:right;"> 
+	                 <input type="submit" value="Lataa" />
+	               </div>
+                </form>
+            </div>
+        </div>
+
+       <div class="startbox admin">
+          <div style="display: inline-block;">
+			<h3>Ylläpitäjän toiminnot</h3>
+			<ul>
+<!--		  <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> 
+			    koko kanta <i>(Mitään kysymättä!)</i></li>
+			  <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
+-->
+              <li><a href="/lista/refnimet">Näytä referenssinimet</a></li>
+			  <li><a href="/aseta/refnames">Aseta referenssinimet</a></li>
+			</ul>
+          </div>
+        </div>
+
+        <div class="startbox"">
+          <h3>Kirjaudu ulos</h3>
+          <p>Istunnon lopettaminen<br>&nbsp;</p>
+	      <form method="get" action="/login">
+             <div style="text-align:right;"> 
+				<button type="submit" style="color: blue">Poistu sovelluksesta</button>
+             </div>
+		  </form>
+        </div>
+
+    </div>
+  </div>
+	
+{% endblock %}
