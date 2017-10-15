@@ -15,7 +15,7 @@
                 <li><a href="#" title="Sukunimet">Sukunimet</a></li>
                 <li><a href="#" title="Perheet">Perheet</a></li>
                 <li><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
-                <li><a href="#" title="Lähteet">Lähteet</a></li>
+                <li><a href="/lista/k_sources" title="Lähteet">Lähteet</a></li>
                 <li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
             </ul>
         </div>
@@ -57,6 +57,11 @@
                     <td class="ColumnValue">{% if person.gender in sp %}{{sp[person.gender]}}
                       {% else %}{{person.gender}}{% endif %}</td>
                 </tr>{% endif %}
+                
+                {% if person.confidence %}<tr>
+                    <td class="ColumnAttribute">Tietojen luotettavuus</td>
+                    <td class="ColumnValue">{{person.confidence}}</td>
+                </tr>{% endif %}
 <!--            <tr>
                     <td class="ColumnAttribute">Ikä kuollessa</td>
                     <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
@@ -86,8 +91,11 @@
             		{% else %}
                         <td class="ColumnEvent">
                             <span class="id">{{e.uniq_id}}</span> {{e.type|transl('evt')}}
+                            {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}
                         </td>
-                        <td class="ColumnDate">{{e.date|pvm}}</td>
+                        <td class="ColumnDate">{% if e.date %}{{e.date|pvm}}
+                           {% elif e.daterange %}{{e.daterange}}{% endif %}
+						</td>
                         <td class="ColumnPlace">
                             <a href="/events/loc={{e.locid}}" 
                             title="tyyppiä {{e.ltype}}; katso paikan tiedot">
@@ -96,8 +104,10 @@
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">
                             <div>{% if e.type == "Death" %}
-                            	{% if t_cause_of_death %}kuolinsyy: {{t_cause_of_death}} 
-                            	{% endif %}{% endif %}</div>
+                            	{% if t_cause_of_death %}kuolinsyy: {{t_cause_of_death}}<br>
+                            	{% endif %}
+                            	{{ e.notetype }}<br>{{ e.notetext }}
+                            	{% endif %}</div>
                         </td>
                         <td class="ColumnSources">
                          {% if e.source %}
@@ -447,7 +457,8 @@
             			{% for repo in record.repos %}
             				{{repo.rname}}:
              			{% endfor %}
-            			{{record.stitle}}
+             			<a href="/events/source={{record.uniq_id}}" class="id"
+	                     title="katso lähteen {{record.uniq_id}} tiedot">{{record.stitle}}</a>
              		{% endfor %}
                      <ol>
                          {% set source_cnt = source_cnt + 1 %}
@@ -466,6 +477,10 @@
                              {% elif conf == 4 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i>
                              {% endif %}
                            {% endif %}                           
+                           {% if source.notetext %}<br>
+                              <a href="{{source.notetext}}" target="_blank"
+                              {% if source.confidence and source.confidence < "2" %}
+                             style="color:red"{% endif %}>{{ source.notetext }}</a>{% endif %}                           
                         </li>
                 	</ol>
                 </li>

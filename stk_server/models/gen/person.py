@@ -36,6 +36,7 @@ class Person:
                 url_description    str url kuvaus
                 parentin_hlink     str vanhempien osoite
                 citationref_hlink  str viittauksen osoite
+                confidence         str tietojen luotettavuus
      """
 
     def __init__(self, pid=''):
@@ -55,27 +56,17 @@ class Person:
         self.url_description = []
         self.parentin_hlink = []
         self.citationref_hlink = []
+        self.confidence = ''
     
     
-    def get_citation_handle(self):
-        """ Luetaan henkilön viittauksen handle """
+    def get_citation_id(self):
+        """ Luetaan henkilön viittauksen id """
         
         query = """
             MATCH (person:Person)-[r:CITATION]->(c:Citation) 
-                WHERE person.gramps_handle='{}'
-                RETURN c.gramps_handle AS citationref_hlink
-            """.format(self.handle)
-        return  g.driver.session().run(query)
-    
-    
-    def get_event_data(self):
-        """ Luetaan henkilön tapahtumien handlet """
-        
-        query = """
-            MATCH (person:Person)-[r:EVENT]->(event:Event) 
-                WHERE person.gramps_handle='{}'
-                RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink
-            """.format(self.handle)
+                WHERE ID(person)={}
+                RETURN ID(c) AS citationref_hlink
+            """.format(self.uniq_id)
         return  g.driver.session().run(query)
     
     
@@ -90,17 +81,6 @@ RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
         return  g.driver.session().run(query, {"pid": pid})
     
     
-    def get_her_families(self):
-        """ Luetaan naisen perheiden handlet """
-        
-        query = """
-            MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
-                WHERE person.gramps_handle='{}'
-                RETURN family.gramps_handle AS handle
-            """.format(self.handle)
-        return  g.driver.session().run(query)
-    
-    
     def get_her_families_by_id(self):
         """ Luetaan naisen perheiden id:t """
         
@@ -112,17 +92,6 @@ RETURN ID(family) AS uniq_id"""
         return  g.driver.session().run(query, {"pid": pid})
     
     
-    def get_his_families(self):
-        """ Luetaan miehen perheiden handlet """
-        
-        query = """
-            MATCH (person:Person)<-[r:FATHER]-(family:Family) 
-                WHERE person.gramps_handle='{}'
-                RETURN family.gramps_handle AS handle
-            """.format(self.handle)
-        return  g.driver.session().run(query)
-    
-    
     def get_his_families_by_id(self):
         """ Luetaan miehen perheiden id:t """
         
@@ -132,25 +101,6 @@ MATCH (person:Person)<-[r:FATHER]-(family:Family)
   WHERE ID(person)=$pid
 RETURN ID(family) AS uniq_id"""
         return  g.driver.session().run(query, {"pid": pid})
-
-    
-    def get_hlinks(self):
-        """ Luetaan henkilön linkit """
-            
-        event_result = self.get_event_data()
-        for event_record in event_result:            
-            self.eventref_hlink.append(event_record["eventref_hlink"])
-            self.eventref_role.append(event_record["eventref_role"])
-
-        family_result = self.get_parentin_handle()
-        for family_record in family_result:            
-            self.parentin_hlink.append(family_record["parentin_hlink"])
-            
-        citation_result = self.get_citation_handle()
-        for citation_record in citation_result:            
-            self.citationref_hlink.append(citation_record["citationref_hlink"])
-            
-        return True
 
     
     def get_hlinks_by_id(self):
@@ -165,11 +115,11 @@ RETURN ID(family) AS uniq_id"""
         for object_record in object_result:            
             self.objref_hlink.append(object_record["objref_hlink"])
 
-        family_result = self.get_parentin_handle()
+        family_result = self.get_parentin_id()
         for family_record in family_result:            
             self.parentin_hlink.append(family_record["parentin_hlink"])
             
-        citation_result = self.get_citation_handle()
+        citation_result = self.get_citation_id()
         for citation_record in citation_result:            
             self.citationref_hlink.append(citation_record["citationref_hlink"])
             
@@ -187,17 +137,6 @@ RETURN ID(family) AS uniq_id"""
         return  g.driver.session().run(query)
     
     
-    def get_parentin_handle(self):
-        """ Luetaan henkilön perheen handle """
-        
-        query = """
-            MATCH (person:Person)-[r:FAMILY]->(family:Family) 
-                WHERE person.gramps_handle='{}'
-                RETURN family.gramps_handle AS parentin_hlink
-            """.format(self.handle)
-        return  g.driver.session().run(query)
-    
-    
     def get_parentin_id(self):
         """ Luetaan henkilön perheen id """
         
@@ -207,34 +146,6 @@ RETURN ID(family) AS uniq_id"""
                 RETURN ID(family) AS parentin_hlink
             """.format(self.uniq_id)
         return  g.driver.session().run(query)
-    
-    
-    def get_person_and_name_data(self):
-        """ Luetaan kaikki henkilön tiedot """
-        
-        query = """
-            MATCH (person:Person)-[r:NAME]-(name:Name) 
-                WHERE person.gramps_handle='{}'
-                RETURN ID(person) AS id, person, name
-                ORDER BY name.alt
-            """.format(self.handle)
-        person_result = g.driver.session().run(query)
-        
-        for person_record in person_result:
-            self.uniq_id = person_record['id']
-            self.change = person_record["person"]['change']
-            self.id = person_record["person"]['id']
-            self.gender = person_record["person"]['gender']
-            
-            if len(person_record["name"]) > 0:
-                pname = Name()
-                pname.alt = person_record["name"]['alt']
-                pname.type = person_record["name"]['type']
-                pname.firstname = person_record["name"]['firstname']
-                pname.refname = person_record["name"]['refname']
-                pname.surname = person_record["name"]['surname']
-                pname.suffix = person_record["name"]['suffix']
-                self.name.append(pname)
     
     
     def get_person_and_name_data_by_id(self):
@@ -256,6 +167,7 @@ RETURN person, name
             self.url_href = person_record["person"]['url_href']
             self.url_type = person_record["person"]['url_type']
             self.url_description = person_record["person"]['url_description']
+            self.confidence = person_record["person"]['confidence']
             
             if len(person_record["name"]) > 0:
                 pname = Name()
@@ -396,6 +308,30 @@ RETURN person, name
 
 
     @staticmethod       
+    def get_confidence ():
+        """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
+        """
+
+        query = """
+ MATCH (person:Person)
+ OPTIONAL MATCH (person)-->(event:Event)-[r]->(c:Citation)
+ RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+                
+        return g.driver.session().run(query)
+
+
+    def set_confidence (self):
+        """ Voidaan asettaa henkilön tietojen luotettavuus arvio kantaan
+        """
+
+        query = """
+ MATCH (person:Person) WHERE ID(person)={}
+ SET person.confidence='{}'""".format(self.uniq_id, self.confidence)
+                
+        return g.driver.session().run(query)
+
+
+    @staticmethod       
     def get_person_events (nmax=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
@@ -461,12 +397,14 @@ RETURN person, name
         
         query = """
  MATCH (person:Person)-->(name:Name) {0}
- OPTIONAL MATCH (person)-[r]->(event:Event)
- OPTIONAL MATCH (event)-[s]->(place:Place)
- RETURN ID(person) AS id, name.firstname AS firstname, 
+ OPTIONAL MATCH (person)-->(event:Event)
+ OPTIONAL MATCH (event)-->(place:Place)
+ RETURN ID(person) AS id, person.confidence AS confidence,
+   name.firstname AS firstname, 
    name.refname AS refname, name.surname AS surname, 
-   name.suffix AS suffix, 
-   COLLECT([ID(event), event.type, event.date, place.pname]) AS events
+   name.suffix AS suffix,
+   COLLECT([ID(event), event.type, event.date, 
+      event.daterange_start, event.daterange_stop, place.pname]) AS events
  ORDER BY name.surname, name.firstname""".format(where)
                 
         return g.driver.session().run(query)
@@ -734,6 +672,7 @@ SET p.gramps_handle=$handle,
             tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "gender": gender, 
                 "url_href": url_href, "url_type": url_type, "url_description": url_description})
+            
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
@@ -905,18 +844,6 @@ class Name:
 
         
     @staticmethod
-    def get_people_with_refname_and_user_given(userid, refname):
-        """ Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
-        
-        query = """
-            MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 
-                WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
-                RETURN p.gramps_handle AS handle
-            """.format(userid, refname)
-        return g.driver.session().run(query)
-
-        
-    @staticmethod
     def get_ids_of_people_with_refname_and_user_given(userid, refname):
         """ Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
         
@@ -933,7 +860,7 @@ class Name:
         
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.surname='{}'
-                RETURN p.gramps_handle AS handle
+                RETURN ID(p) AS uniq_id
             """.format(surname)
         return g.driver.session().run(query)
         

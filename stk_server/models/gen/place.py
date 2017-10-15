@@ -45,26 +45,6 @@ class Place:
             lv = ""
         desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, lv)
         return desc
-
-    
-    def get_place_data(self):
-        """ Luetaan kannasta kaikki paikan tiedot """
-                
-        query = """
-            MATCH (place:Place)
-                WHERE place.gramps_handle='{}'
-                RETURN place
-            """.format(self.handle)
-        place_result = g.driver.session().run(query)
-        
-        for place_record in place_result:
-            self.change = place_record["place"]["change"]
-            self.id = place_record["place"]["id"]
-            self.type = place_record["place"]["type"]
-            self.pname = place_record["place"]["pname"]
-            
-        return True
-        self.placeref_hlink = ''
     
     
     def get_place_data_by_id(self):
@@ -250,16 +230,17 @@ RETURN p.type AS type, p.pname AS name
             osallisen henkilön nimitiedot.
             
         Palauttaa esimerkin mukaiset tiedot:
-        ╒═══════╤══════════════════════════════╤═══════╤════════════╕
-        │"uid"  │"names"                       │"etype"│"edate"     │
-        ╞═══════╪══════════════════════════════╪═══════╪════════════╡
-        │"23063"│[["Birth Name","Justina Cathar│"Death"│"1789-12-26"│
-        │       │ina","Justander",""]]         │       │            │
-        ├───────┼──────────────────────────────┼───────┼────────────┤
-        │"23194"│[["Birth Name","Johanna Ulrika│"Death"│"1835-08-05"│
-        │       │","Hedberg",""],              │       │            │
-        │       │["Also Known As","","Borg"]]  │       │            │
-        └───────┴──────────────────────────────┴───────┴────────────┘
+        ╒═══════╤═════════╤══════════════════════════════╤═════════╤════════════╕
+        │"uid"  │"role"   │"names"                       │"etype"  │"edate"     │
+        ╞═══════╪═════════╪══════════════════════════════╪═════════╪════════════╡
+        │"36151"│"Primary"│[["Also Known As","Anna Katari│"Baptism"│"1738-01-17"│
+        │       │         │na","Florin",""],["Birth Name"│         │            │
+        │       │         │,"Anna Catharina","Florin",""]│         │            │
+        │       │         │]                             │         │            │
+        ├───────┼─────────┼──────────────────────────────┼─────────┼────────────┤
+        │"36314"│"Kummi"  │[["Birth Name","Johan","Mennan│"Baptism"│"1738-01-17"│
+        │       │         │der",""]]                     │         │            │
+        └───────┴─────────┴──────────────────────────────┴─────────┴────────────┘
         """
 
         query = """
@@ -269,7 +250,9 @@ MATCH (p) --> (n:Name)
 RETURN id(p) AS uid, r.role AS role,
   COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
   e.type AS etype,
-  e.date AS edate
+  e.date AS edate,
+  e.daterange_start AS edaterange_start,
+  e.daterange_stop AS edaterange_stop
 ORDER BY edate"""
                 
         result = g.driver.session().run(query, locid=int(loc_id))
@@ -279,6 +262,14 @@ ORDER BY edate"""
             p.uid = record["uid"]
             p.etype = record["etype"]
             p.edate = record["edate"]
+            p.edaterange_start = record["edaterange_start"]
+            p.edaterange_stop = record["edaterange_stop"]
+            if p.edaterange_start != '' and p.edaterange_stop != '':
+                p.edaterange = p.edaterange_start + " - " + p.edaterange_stop
+            elif p.edaterange_start != '':
+                p.edaterange = p.edaterange_start + " - "
+            elif p.edaterange_stop != '':
+                p.edaterange = " - " + p.edaterange_stop
             p.role = record["role"]
             p.names = record["names"]   # tuples [name_type, given_name, surname]
             ret.append(p)

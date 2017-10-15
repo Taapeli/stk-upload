@@ -43,6 +43,11 @@ def datatables():
     """Aloitussivun piirtäminen"""
     return render_template("login/datatables.html")
 
+@app.route('/refnames')
+def refnames(): 
+    """Aloitussivun piirtäminen"""
+    return render_template("login/reference.html")
+
 
 
 """ ----------------------------- Kertova-sivut --------------------------------
@@ -81,6 +86,19 @@ def show_location_page(locid):
 #         print ("# {} ".format(p))
     return render_template("k_place_events.html", 
                            locid=locid, events=events, locations=locations)
+
+
+@app.route('/events/source=<sourceid>')
+def show_source_page(sourceid): 
+    """ Lähteen tietojen näyttäminen ruudulla: tapahtumat
+    """
+    models.dbutil.connect_db()
+    try:
+        stitle, events = models.datareader.get_source_with_events(sourceid)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_source_events.html", 
+                           stitle=stitle, events=events)
 
 
 """ ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
@@ -174,6 +192,18 @@ def show_locations():
 #     for p in locations:
 #         print ("# {} ".format(p))
     return render_template("k_locations.html", locations=locations)
+
+
+@app.route('/lista/k_sources')
+def show_sources(): 
+    """ Lähdeluettelon näyttäminen ruudulla
+    """
+    models.dbutil.connect_db()
+    try:
+        sources = models.gen.source_citation.Source.get_source_list()
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_sources.html", sources=sources)
 
 
 @app.route('/lista/refnimet', defaults={'reftype': None})
@@ -286,8 +316,8 @@ def talleta(filename, subj):
         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
             status = models.datareader.datastorer(pathname)
         elif subj == 'refnimet': # Referenssinimet
-            # Tallettaa Refname-objekteja # TODO Määrärajoitus pois!
-            status = models.cvs_refnames.referenssinimet(pathname, maxrows=100)
+            # Tallettaa Refname-objekteja 
+            status = models.cvs_refnames.referenssinimet(pathname)
         elif subj == 'xml_file': # gramps backup xml file to Neo4j db
             status = models.datareader.xml_to_neo4j(pathname)
         elif subj == 'karajat': # TODO: Tekemättä
@@ -311,6 +341,16 @@ def tyhjenna():
     models.dbutil.connect_db()
     msg = models.dbutil.alusta_kanta()
     return render_template("talletettu.html", text=msg)
+
+
+@app.route('/aseta/confidence')
+def aseta_confidence(): 
+    """ tietojen laatuarvion asettaminen henkilöille """
+    models.dbutil.connect_db()
+    dburi = models.dbutil.connect_db()
+    
+    message = models.datareader.set_confidence_value()
+    return render_template("talletettu.html", text=message, uri=dburi)
 
 
 @app.route('/aseta/refnames')

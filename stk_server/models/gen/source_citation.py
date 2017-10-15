@@ -37,6 +37,7 @@ class Citation:
         self.noteref_hlink = ''
         self.sourceref_hlink = ''
         self.sources = []   # For creating display sets
+        self.events = []   # For creating display sets
     
     
     @staticmethod       
@@ -51,9 +52,10 @@ class Citation:
         
         query = """
  MATCH (citation:Citation)-[r]->(source:Source)-[p]->(repo:Repository) {0}
-   WITH citation, r, source, p, repo ORDER BY citation.page
+ OPTIONAL MATCH (citation)-[n]->(note:Note)
+   WITH citation, r, source, p, repo ORDER BY citation.page, note
  RETURN ID(citation) AS id, citation.dateval AS date, citation.page AS page, 
-     citation.confidence AS confidence, 
+     citation.confidence AS confidence, note.text AS notetext,
    COLLECT([ID(source), source.stitle, p.medium, 
        ID(repo), repo.rname, repo.type]) AS sources
  """.format(where)
@@ -347,16 +349,54 @@ class Source:
     
     
     @staticmethod       
-    def get_sources(repository_handle):
-        """ Luetaan kaikki arkiston lähteet """
+    def get_events(sourceid):
+        """ Luetaan kaikki lähteen tapahtumat 
+
+╒════════════════╤════════════╤══════════════════════════════╤═══════╤════════════════╕
+│"page"          │"confidence"│"events"                      │"pid"  │"names"         │
+├────────────────┴───────┼────┼──────────────────────────────┼───────┼────────────────┤
+│"http://hiski.genealogia│"1" │[["35450","Occupation",""],["3│"36349"│[["Carlstedt",  │
+│.fi/hiski?fi+t4714729"  │    │5449","Death","1809-02-22"]]  │       │"Jonas"]]       │
+├────────────────────────┼────┼──────────────────────────────┼───────┼────────────────┤
+│"http://hiski.genealogia│"1" │[["35790","Death","1839-01-16"│"36834"│[["Kyander",    │
+│.fi/hiski?fi+t4717438"  │    │]]                            │       │"Magnus Johan"]]│
+└────────────────────────┴────┴──────────────────────────────┴───────┴────────────────┘
+        """
+
+        query = """
+MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)
+      <--(p:Person)-->(name:Name)
+WHERE ID(source)={sourceid}
+WITH citation.page AS page, citation.confidence AS confidence,
+     p, name,
+     COLLECT([ID(event), event.type, event.date]) AS events
+RETURN page, confidence, events, ID(p) AS pid,
+       COLLECT([name.surname, name.firstname]) AS names"""
+
+        return g.driver.session().run(query, sourceid=int(sourceid))
+
+
+    @staticmethod       
+    def get_source_list():
+        """ Luetaan kaikki lähteet """
                         
         query = """
-            MATCH (source:Source)-[r:REPOSITORY]->(repo:Repository) 
-                WHERE repo.gramps_handle='{}' 
-                RETURN r.medium AS medium, source
-            """.format(repository_handle)
-        return  g.driver.session().run(query)
-    
+            MATCH (source:Source)
+                RETURN ID(source) AS uniq_id, 
+                    source.id AS id, 
+                    source.stitle AS stitle
+                ORDER BY source.stitle
+            """
+        ret = []
+        result = g.driver.session().run(query)
+        for record in result:
+            s = Source()
+            s.uniq_id = record['uniq_id']
+            s.stitle = record['stitle']
+            ret.append(s)
+            
+        return ret
+            
     
     @staticmethod       
     def get_source_citation (uniq_id):

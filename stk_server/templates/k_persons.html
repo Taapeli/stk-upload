@@ -13,7 +13,7 @@
 				<li><a href="#" title="Sukunimet">Sukunimet</a></li>
 				<li><a href="#" title="Perheet">Perheet</a></li>
                 <li><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
-				<li><a href="#" title="Lähteet">Lähteet</a></li>
+				<li><a href="/lista/k_sources" title="Lähteet">Lähteet</a></li>
 				<li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
 			</ul>
 		</div>
@@ -60,7 +60,8 @@ henkilön sivulle.
 	                </div></td>
 	              <td class="ColumnEvent">
 	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li><i>{{e.type|transl('evt')}}</i> {{e.date|pvm}}
+		              <li><i>{{e.type|transl('evt')}}</i> 
+		              {% if e.date %}{{e.date|pvm}}{% elif e.daterange %}{{e.daterange}}{% endif %}
 		              {% if e.place %} – {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
 	        {% endif %}

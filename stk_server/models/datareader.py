@@ -224,6 +224,7 @@ def lue_henkilot2(uniq_id=None):
         pid = record['id']
         p = Person()
         p.uniq_id = pid
+        p.confidence = record['confidence']
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
@@ -243,7 +244,17 @@ def lue_henkilot2(uniq_id=None):
             if event_type:
                 e.type = event_type
                 e.date = event[2]
-                e.place = event[3]
+                e.daterange_start = event[3]
+                e.daterange_stop = event[4]
+                e.place = event[5]
+        
+                if e.daterange_start != '' and e.daterange_stop != '':
+                    e.daterange = e.daterange_start + " - " + e.daterange_stop
+                elif e.daterange_start != '':
+                    e.daterange = str(e.daterange_start) + "-"
+                elif e.daterange_stop != '':
+                    e.daterange = "-" + str(e.daterange_stop)
+                
                 p.events.append(e)
  
         persons.append(p)
@@ -251,6 +262,37 @@ def lue_henkilot2(uniq_id=None):
     return (persons)
 
 
+def set_confidence_value():
+    """ Asettaa henkilölle laatu arvion
+    """
+    
+    message = []
+    counter = 0
+    
+    tx = User.beginTransaction()
+    
+    result = Person.get_confidence()
+    for record in result:
+        p = Person()
+        p.uniq_id = record["uniq_id"]
+        
+        if len(record["list"]) > 0:
+            sum = 0
+            for ind in record["list"]:
+                sum += int(ind)
+                
+            confidence = sum/len(record["list"])
+            p.confidence = "%0.1f" % confidence # confidence with one decimal
+        p.set_confidence()
+            
+        counter += 1
+            
+    User.endTransaction(tx)
+    text = "Number of confidences set: " + str(counter)
+    message.append(text)
+    return (message)
+    
+    
 def set_refnames():
     """ Asettaa henkilöille refnamet
     """
@@ -391,6 +433,16 @@ def read_cite_sour_repo(uniq_id=None):
             e.type = record_cite['type']
         if record_cite['date']:
             e.date = record_cite['date']
+        if record_cite['daterange_start']:
+            e.daterange_start = record_cite['daterange_start']
+        if record_cite['daterange_stop']:
+            e.daterange_stop = record_cite['daterange_stop']
+        if e.daterange_start != '' and e.daterange_stop != '':
+            e.daterange = e.daterange_start + " - " + e.daterange_stop
+        elif e.daterange_start != '':
+            e.daterange = e.daterange_start + " - "
+        elif e.daterange_stop != '':
+            e.daterange = " - " + e.daterange_stop
 
         for source_cite in record_cite['sources']:
             c = Citation()
@@ -592,6 +644,46 @@ def read_places():
     return (headings, titles, events)
 
 
+def get_source_with_events(sourceid):
+    """ Lukee tietokannasta Source- objektin tapahtumat näytettäväksi
+
+    """
+    
+    s = Source()
+    s.uniq_id = sourceid
+    result = s.get_source_data()
+    for record in result:
+        s.stitle = record["stitle"]
+    result = Source.get_events(sourceid)
+
+    event_list = []
+    for record in result:               # Events record
+        c = Citation()
+        c.page = record["page"]
+        pid = record["pid"]
+        c.confidence = record["confidence"]
+                
+        for event in record["events"]:
+            e = Event()
+            e.uniq_id = event[0]
+            e.type = event[1]
+            e.edate = event[2]
+            
+            for name in record["names"]:
+                n = Name()
+                n.uniq_id = pid        
+                n.surname = name[0]        
+                n.firstname = name[1]  
+                    
+                e.names.append(n)
+                      
+            c.events.append(e)
+            
+        event_list.append(c)
+
+    return (s.stitle, event_list)
+
+
 def read_sources_wo_cites():
     """ Lukee tietokannasta Source- objektit, joilta puuttuu viittaus näytettäväksi
 
@@ -624,10 +716,9 @@ def get_people_by_surname(surname):
     people = []
     result = Name.get_people_with_surname(surname)
     for record in result:
-        handle = record['handle']
         p = Person()
-        p.handle = handle
-        p.get_person_and_name_data()
+        p.uniq_id = record['uniq_id']
+        p.get_person_and_name_data_by_id()
         people.append(p)
         
     return (people)
@@ -644,18 +735,23 @@ def get_person_data_by_id(uniq_id):
     p.uniq_id = uniq_id
     p.get_person_and_name_data_by_id()
     p.get_hlinks_by_id()
-    event = Event()
-    event.handle = p.eventref_hlink
-    event.get_event_data()
     
     events = []
     sources = []
     source_cnt = 0
-    for link in p.eventref_hlink:
+    for i in range(len(p.eventref_hlink)):
         e = Event_for_template()
-        e.uniq_id = link
+        e.uniq_id = p.eventref_hlink[i]
+        e.role = p.eventref_role[i]
         e.get_event_data_by_id()
         
+        if e.daterange_start != '' and e.daterange_stop != '':
+            e.daterange = e.daterange_start + " - " + e.daterange_stop
+        elif e.daterange_start != '':
+            e.daterange = str(e.daterange_start) + "-"
+        elif e.daterange_stop != '':
+            e.daterange = "-" + str(e.daterange_stop)
+            
         if e.place_hlink != '':
             place = Place()
             place.uniq_id = e.place_hlink
@@ -664,7 +760,15 @@ def get_person_data_by_id(uniq_id):
             e.location = place.pname
             e.locid = place.uniq_id
             e.ltype = place.type
-            
+                    
+        if e.noteref_hlink != '':
+            note = Note()
+            note.uniq_id = e.noteref_hlink
+            result = note.get_note()
+            for record in result:
+                e.notetype = record["note"]["type"]
+                e.notetext = record["note"]["text"]
+                
         events.append(e)
         
         if e.citationref_hlink != '':
@@ -692,6 +796,12 @@ def get_person_data_by_id(uniq_id):
                     citation.dateval = record['date']
                     citation.page = record['page']
                     citation.confidence = record['confidence']
+                    if not record['notetext']:
+                        if citation.page[:4] == "http":
+                            citation.notetext = citation.page
+                            citation.page = ''
+                    else: 
+                        citation.notetext = record['notetext']
                     
                     for source in record['sources']:
                         s = Source()
@@ -785,10 +895,11 @@ def get_place_with_events (loc_id):
         parent  isäsolmun id
 
     event_table:
-        uid      person's uniq_id
-        names    list of tuples [name_type, given_name, surname]
-        etype    event type
-        edate    event date
+        uid           person's uniq_id
+        names         list of tuples [name_type, given_name, surname]
+        etype         event type
+        edate         event date
+        edaterange    event daterange
     """
     place_list = Place.get_place_tree(loc_id)
     event_table = Place.get_place_events(loc_id)
@@ -910,6 +1021,15 @@ def handle_events(collection, userid, tx):
         elif len(event.getElementsByTagName('dateval') ) > 1:
             print("Error: More than one dateval tag in an event")
     
+        if len(event.getElementsByTagName('daterange') ) == 1:
+            event_daterange = event.getElementsByTagName('daterange')[0]
+            if event_daterange.hasAttribute("start"):
+                e.daterange_start = event_daterange.getAttribute("start")
+            if event_daterange.hasAttribute("stop"):
+                e.daterange_stop = event_daterange.getAttribute("stop")
+        elif len(event.getElementsByTagName('daterange') ) > 1:
+            print("Error: More than one daterange tag in an event")
+    
         if len(event.getElementsByTagName('place') ) == 1:
             event_place = event.getElementsByTagName('place')[0]
             if event_place.hasAttribute("hlink"):
@@ -926,12 +1046,26 @@ def handle_events(collection, userid, tx):
         elif len(event.getElementsByTagName('attribute') ) > 1:
             print("Error: More than one attribute tag in an event")
     
+        if len(event.getElementsByTagName('noteref') ) == 1:
+            event_noteref = event.getElementsByTagName('noteref')[0]
+            if event_noteref.hasAttribute("hlink"):
+                e.noteref_hlink = event_noteref.getAttribute("hlink")
+        elif len(event.getElementsByTagName('noteref') ) > 1:
+            print("Error: More than one noteref tag in an event")
+    
         if len(event.getElementsByTagName('citationref') ) == 1:
             event_citationref = event.getElementsByTagName('citationref')[0]
             if event_citationref.hasAttribute("hlink"):
                 e.citationref_hlink = event_citationref.getAttribute("hlink")
         elif len(event.getElementsByTagName('citationref') ) > 1:
             print("Error: More than one citationref tag in an event")
+    
+        if len(event.getElementsByTagName('objref') ) == 1:
+            event_objref = event.getElementsByTagName('objref')[0]
+            if event_objref.hasAttribute("hlink"):
+                e.objref_hlink = event_objref.getAttribute("hlink")
+        elif len(event.getElementsByTagName('objref') ) > 1:
+            print("Error: More than one objref tag in an event")
                 
         e.save(userid, tx)
         counter += 1
