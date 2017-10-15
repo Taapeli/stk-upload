@@ -250,7 +250,9 @@ MATCH (p) --> (n:Name)
 RETURN id(p) AS uid, r.role AS role,
   COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
   e.type AS etype,
-  e.date AS edate
+  e.date AS edate,
+  e.daterange_start AS edaterange_start,
+  e.daterange_stop AS edaterange_stop
 ORDER BY edate"""
                 
         result = g.driver.session().run(query, locid=int(loc_id))
@@ -260,6 +262,14 @@ ORDER BY edate"""
             p.uid = record["uid"]
             p.etype = record["etype"]
             p.edate = record["edate"]
+            p.edaterange_start = record["edaterange_start"]
+            p.edaterange_stop = record["edaterange_stop"]
+            if p.edaterange_start != '' and p.edaterange_stop != '':
+                p.edaterange = p.edaterange_start + " - " + p.edaterange_stop
+            elif p.edaterange_start != '':
+                p.edaterange = p.edaterange_start + " - "
+            elif p.edaterange_stop != '':
+                p.edaterange = " - " + p.edaterange_stop
             p.role = record["role"]
             p.names = record["names"]   # tuples [name_type, given_name, surname]
             ret.append(p)

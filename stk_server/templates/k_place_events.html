@@ -68,7 +68,8 @@
                         </td>
                         <td class="ColumnEvent">{{e.etype|transl('evt')}}
                           {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}</td>
-                        <td class="ColumnDate">{{e.edate|pvm}}</td>
+                        <td class="ColumnDate">{% if e.edate %}{{e.edate|pvm}}
+                        	{% elif e.edaterange %}{{e.edaterange}}{% endif %}</td>
 <!--
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">
