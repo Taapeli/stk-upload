@@ -437,6 +437,12 @@ def read_cite_sour_repo(uniq_id=None):
             e.daterange_start = record_cite['daterange_start']
         if record_cite['daterange_stop']:
             e.daterange_stop = record_cite['daterange_stop']
+        if e.daterange_start != '' and e.daterange_stop != '':
+            e.daterange = e.daterange_start + " - " + e.daterange_stop
+        elif e.daterange_start != '':
+            e.daterange = e.daterange_start + " - "
+        elif e.daterange_stop != '':
+            e.daterange = " - " + e.daterange_stop
 
         for source_cite in record_cite['sources']:
             c = Citation()
@@ -651,15 +657,17 @@ def get_source_with_events(sourceid):
     result = Source.get_events(sourceid)
 
     event_list = []
-    for record in result:
+    for record in result:               # Events record
         c = Citation()
         c.page = record["page"]
-        pid = record["pid"]        
+        pid = record["pid"]
+        c.confidence = record["confidence"]
                 
         for event in record["events"]:
             e = Event()
             e.uniq_id = event[0]
             e.type = event[1]
+            e.edate = event[2]
             
             for name in record["names"]:
                 n = Name()
@@ -887,10 +895,11 @@ def get_place_with_events (loc_id):
         parent  isäsolmun id
 
     event_table:
-        uid      person's uniq_id
-        names    list of tuples [name_type, given_name, surname]
-        etype    event type
-        edate    event date
+        uid           person's uniq_id
+        names         list of tuples [name_type, given_name, surname]
+        etype         event type
+        edate         event date
+        edaterange    event daterange
     """
     place_list = Place.get_place_tree(loc_id)
     event_table = Place.get_place_events(loc_id)
