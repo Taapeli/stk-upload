@@ -350,18 +350,32 @@ class Source:
     
     @staticmethod       
     def get_events(sourceid):
-        """ Luetaan kaikki lähteen tapahtumat """
-                        
+        """ Luetaan kaikki lähteen tapahtumat 
+
+╒════════════════╤════════════╤══════════════════════════════╤═══════╤════════════════╕
+│"page"          │"confidence"│"events"                      │"pid"  │"names"         │
+├────────────────┴───────┼────┼──────────────────────────────┼───────┼────────────────┤
+│"http://hiski.genealogia│"1" │[["35450","Occupation",""],["3│"36349"│[["Carlstedt",  │
+│.fi/hiski?fi+t4714729"  │    │5449","Death","1809-02-22"]]  │       │"Jonas"]]       │
+├────────────────────────┼────┼──────────────────────────────┼───────┼────────────────┤
+│"http://hiski.genealogia│"1" │[["35790","Death","1839-01-16"│"36834"│[["Kyander",    │
+│.fi/hiski?fi+t4717438"  │    │]]                            │       │"Magnus Johan"]]│
+└────────────────────────┴────┴──────────────────────────────┴───────┴────────────────┘
+        """
+
         query = """
-            MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)<--(p:Person)-->(name:Name)
-                WHERE ID(source)={}
-                WITH citation.page AS page, p, name, COLLECT([ID(event), event.type]) AS events
-                RETURN page, events, ID(p) AS pid, COLLECT([name.surname, name.firstname]) AS names
-                    
-            """.format(sourceid)
-        return g.driver.session().run(query)
-                        
-    
+MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)
+      <--(p:Person)-->(name:Name)
+WHERE ID(source)={sourceid}
+WITH citation.page AS page, citation.confidence AS confidence,
+     p, name,
+     COLLECT([ID(event), event.type, event.date]) AS events
+RETURN page, confidence, events, ID(p) AS pid,
+       COLLECT([name.surname, name.firstname]) AS names"""
+
+        return g.driver.session().run(query, sourceid=int(sourceid))
+
+
     @staticmethod       
     def get_source_list():
         """ Luetaan kaikki lähteet """

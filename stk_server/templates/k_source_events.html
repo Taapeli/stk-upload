@@ -3,6 +3,7 @@
 {% block title %}lähteen tapahtumat{% endblock %}
 {% block body %}
 {{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <h2>Lähteen tapahtumat</h2>
 
@@ -18,40 +19,48 @@
             </ul>
         </div>
     </div>
-    <div class="content" id="IndividualDetail">
-    <h3 style="position:sticky; top:0;">{{stitle}}</h3>
-    </div>
-    
-         <div class="subsection" id="events">
-            <h4>Tapahtumat</h4>
-            <ol>
-		        {% for c in events|sort(attribute='page') %}
-        		<li>
-   					{{c.page}}
-               		<ol type="a">
-               		{% for event in c.events %}
-                   	<li>
-                   		{{event.type|transl('evt')}}
-                   		<ol type="I">
-	               		{% for name in event.names %}
-                   			<li>
-                   			<a href="/person/uniq_id={{name.uniq_id}}" class="id"
-	                     title="katso henkilön {{name.uniq_id}} tiedot">{{name.surname}}, {{name.firstname}}</a>
-                   			</li>
-                    	{% endfor %}
-                    	</ol>
-                    </li>
-                    {% endfor %}
-                    </ol>
-		        {% endfor %}
-         		</li>
-            </ol>
-        </div>
 
-        <div class="subsection" id="sourcerefs">
-            <h4>Lähdeviitteet</h4>
-            <p>Ei lähdeviitteitä haettuna</p>
-        </div>
-    </div>
+    <div class="content" id="IndividualDetail">
+	    <h3 style="position:sticky; top:0;">{{stitle}}</h3>
+	    <p id="description">Tähän lähteesen liitetyt viittaukset, tapahtumat ja henkilöt</p>
+	        <div class="subsection" id="events">
+	            <h4>Tapahtumat</h4>
+	            <ol>
+			        {% for c in events|sort(attribute='page') %}
+
+	        		<li title="{{c.confidence|transl("conf")}} luotettavuus ({{c.confidence}})"
+                        {% if c.confidence and c.confidence < "2" %}
+                        style="color:red"{% endif %}>
+	   					Sivu {{c.page}}
+                        {% set conf = c.confidence | int %}
+                        {% if conf < 2 %}
+                            {% if conf == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
+                            {% else %}<i class='fa fa-exclamation-circle'></i>{% endif %}
+                        {% else %}
+                            {% if conf == 2 %}<i class='fa fa-star-o'></i>
+                            {% elif conf == 3  %}<i class='fa fa-star'></i><i class='fa fa-star'></i>
+                            {% elif conf == 4 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i>
+                            {% endif %}
+                        {% endif %}
+                        </li>
+
+	               		<ol type="a">
+	               		{% for event in c.events|sort(attribute='edate') %}
+		               		{% for name in event.names %}
+               			    <li>Henkilön
+                   			<a href="/person/uniq_id={{name.uniq_id}}" class="id"
+	                           title="katso henkilön {{name.uniq_id}} tiedot">
+	                               {{name.surname}}, {{name.firstname}}</a>
+	                        {{event.type|transl('evt')}} {{event.edate|pvm}}
+               			    </li>
+	                    	{% endfor %}
+	                    {% endfor %}
+	                    </ol>
+			        {% endfor %}
+	         		</li>
+	            </ol>
+	        </div>
+	    </div>
+	</div>
 {% endblock %}
 
