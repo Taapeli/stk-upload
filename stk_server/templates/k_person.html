@@ -4,6 +4,7 @@
 {% block body %}
 {{ super() }}
 {% set sp = {'M':'mies', 'F':'nainen'} %}
+{% import 'k_display_stars.html' as stars %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         
 <h2>Henkilön tiedot</h2>
@@ -60,7 +61,7 @@
                 
                 {% if person.confidence %}<tr>
                     <td class="ColumnAttribute">Tietojen luotettavuus</td>
-                    <td class="ColumnValue">{{person.confidence}}</td>
+                    <td class="ColumnValue">{{ stars.display(person.confidence|float) }}</td>
                 </tr>{% endif %}
 <!--            <tr>
                     <td class="ColumnAttribute">Ikä kuollessa</td>
@@ -468,15 +469,7 @@
                            {% if source.confidence and source.confidence < "2" %}
                              style="color:red"{% endif %}>
                             Sivu: {{source.page}} &nbsp;
-                           {% if conf < 2 %}
-                             {% if conf == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
-                             {% else %}<i class='fa fa-exclamation-circle'></i>{% endif %}
-                           {% else %}
-                             {% if conf == 2 %}<i class='fa fa-star-o'></i>
-                             {% elif conf == 3  %}<i class='fa fa-star'></i><i class='fa fa-star'></i>
-                             {% elif conf == 4 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i>
-                             {% endif %}
-                           {% endif %}                           
+                            {{ stars.display(conf) }}
                            {% if source.notetext %}<br>
                               <a href="{{source.notetext}}" target="_blank"
                               {% if source.confidence and source.confidence < "2" %}
