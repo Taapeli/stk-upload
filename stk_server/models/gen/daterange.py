@@ -53,7 +53,7 @@ class DateRange():
         except:
             pass
         
-        if type(args[0]) == "int":
+        if isinstance(args[0],type(1)):
             """ Arguments are dtype and 1 or 2 datevalues:
                 DateRange(DATERANGE_TILL, date(2017, 10, 16))
                 DateRange(DATERANGE_TILL, "2017-10-16")
@@ -68,7 +68,7 @@ class DateRange():
             self.date1 = self._to_date(args[1])
             self.date2 = None
             if self.dtype in [DATERANGE_PERIOD, DATERANGE_BETWEEN]:
-                if len(args) > 2:
+                if len(args) == 3:
                     self.date2 = self._to_date(args[2])
                 else:
                     raise ValueError('Two dates excepted for DateRange({}, date, date)'.
@@ -102,12 +102,12 @@ class DateRange():
             - ordinal int value (later than year 1)
             - string value 
         """
-        if type(val) == 'date':
+        if isinstance(val, type(date(1,1,1))):
             return val
-        elif type(val) == "str":
+        elif isinstance(val, type("")):
             return datetime.strptime(val, '%Y-%m-%d').date()
-        elif type(val) == "int" and val > 365:
+        elif isinstance(val, type(1)) and val > 365:
             return date.fromordinal(val)
         else:
-            return None
+            raise ValueError("val={}".format(val))
         
