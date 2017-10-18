@@ -34,7 +34,9 @@
         <li><div class="itemrow">
                 <div class="col1">Tunniste<br />paikka<br />aika</div>
                 <div class="col1"><span class="id">{{e.oid}}</span><br />{{e.name}} 
-                    <br /><span style="font-size:80%; font-style: italic">{{e.date}}</span>
+                    <br /><span style="font-size:80%; font-style: italic">
+                    {% if e.datetype %} {{e.datetype}} {% endif %}
+                    {% if e.date %}{{e.date}}{% elif e.daterange %}{{e.daterange}}</span>
                 {% if e.signum %}<br />Signum:
                 <a href='http://www.narc.fi/Arkistolaitos/tma/kaki/tth/tth1.htm'>
                     {{e.signum}}</a>
