@@ -381,18 +381,29 @@ RETURN page, confidence, events, ID(p) AS pid,
         """ Luetaan kaikki lähteet """
                         
         query = """
-            MATCH (source:Source)
-                RETURN ID(source) AS uniq_id, 
-                    source.id AS id, 
-                    source.stitle AS stitle
-                ORDER BY source.stitle
+MATCH (source:Source)
+    RETURN ID(source) AS uniq_id, 
+        source.id AS id, 
+        source.stitle AS stitle
+    ORDER BY source.stitle
             """
+        source_list_query = """
+MATCH (s:Source)
+OPTIONAL MATCH (s)<-[:SOURCE]-(c:Citation)
+OPTIONAL MATCH (c)<-[:CITATION]-(e:Event)
+RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle, 
+       COUNT(c) AS cit_cnt, COUNT(e) AS eve_cnt
+ORDER BY toUpper(stitle)
+        """
         ret = []
-        result = g.driver.session().run(query)
+        result = g.driver.session().run(source_list_query)
         for record in result:
             s = Source()
             s.uniq_id = record['uniq_id']
+            s.id = record['id']
             s.stitle = record['stitle']
+            s.cit_cnt = record['cit_cnt']
+            s.eve_cnt = record['eve_cnt']
             ret.append(s)
             
         return ret

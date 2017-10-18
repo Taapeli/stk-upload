@@ -481,11 +481,6 @@ def nayta1(filename, fmt):
             return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 
-@app.route('/stk')
-def stk_harjoitus():   
-    return render_template("a_home.html")
-
-
 """ Application filter definitions 
 """
 @app.template_filter('pvt')
