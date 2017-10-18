@@ -17,7 +17,8 @@
         </li>
         <li class="itemrow">
                 <div class="col1">Date</div>
-                <div class="col2">{% if e.date %}{{e.date}}
+                <div class="col2">{% if e.datetype %} {{e.datetype}} {% endif %}
+                	{% if e.date %}{{e.date}}
                 	{% elif e.daterange %}{{e.daterange}}{% endif %}</div>
         </li>
     </ol>

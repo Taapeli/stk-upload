@@ -403,7 +403,7 @@ RETURN person, name
    name.firstname AS firstname, 
    name.refname AS refname, name.surname AS surname, 
    name.suffix AS suffix,
-   COLLECT([ID(event), event.type, event.date, 
+   COLLECT([ID(event), event.type, event.date, event.datetype, 
       event.daterange_start, event.daterange_stop, place.pname]) AS events
  ORDER BY name.surname, name.firstname""".format(where)
                 
