@@ -35,8 +35,8 @@
 			<thead>
 				<tr><th></th>
                     <th>Lähde</th>
-                    <th title="Sitaatteja">Viittauksia</th>
-                    <th title="Tapahtumia, josta viitattu">Tapahtumia</th>
+                    <th title="Sitaatteja">Siteerattu</th>
+                    <th title="Tapahtumia, henkilöitä jne., josta viitattu">Viitattu</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -48,13 +48,13 @@
                {% endif %}</td>
             <td class="ColumnPerson">
                <div>
-                  <a href="/events/source={{s.uniq_id}}" {% if s.eve_cnt == 0 %} class="dimmed" 
-                     title="lähteellä {{s.uniq_id}} ({{s.id}}) ei ole tapahtumia">{% else %}
-                     title="katso lähteen {{s.uniq_id}} ({{s.id}}) tapahtumat">{% endif %}
+                  <a href="/events/source={{s.uniq_id}}" {% if s.ref_cnt == 0 %} class="dimmed" 
+                     title="lähdettä {{s.uniq_id}} ({{s.id}}) ei käytetä">{% else %}
+                     title="katso lähteen {{s.uniq_id}} ({{s.id}}) käyttö">{% endif %}
                      {{s.stitle}}</a>
                 </div></td>
-            <td class="numbers">{{s.cit_cnt}}</td>
-            <td class="numbers">{{s.eve_cnt}}</td>
+            <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
+            <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
             </tr>
 	    {% endfor %}
 	{% endif %}

@@ -380,19 +380,19 @@ RETURN page, confidence, events, ID(p) AS pid,
     def get_source_list():
         """ Luetaan kaikki lähteet """
                         
-        query = """
-MATCH (source:Source)
-    RETURN ID(source) AS uniq_id, 
-        source.id AS id, 
-        source.stitle AS stitle
-    ORDER BY source.stitle
-            """
+#         query = """
+# MATCH (source:Source)
+#     RETURN ID(source) AS uniq_id, 
+#         source.id AS id, 
+#         source.stitle AS stitle
+#     ORDER BY source.stitle
+#             """
         source_list_query = """
 MATCH (s:Source)
 OPTIONAL MATCH (s)<-[:SOURCE]-(c:Citation)
-OPTIONAL MATCH (c)<-[:CITATION]-(e:Event)
+OPTIONAL MATCH (c)<-[:CITATION]-(e)
 RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle, 
-       COUNT(c) AS cit_cnt, COUNT(e) AS eve_cnt
+       COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
 ORDER BY toUpper(stitle)
         """
         ret = []
@@ -403,7 +403,7 @@ ORDER BY toUpper(stitle)
             s.id = record['id']
             s.stitle = record['stitle']
             s.cit_cnt = record['cit_cnt']
-            s.eve_cnt = record['eve_cnt']
+            s.ref_cnt = record['ref_cnt']
             ret.append(s)
             
         return ret
