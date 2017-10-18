@@ -20,6 +20,7 @@ import models.datareader        # Tietojen haku kannasta (tai työtiedostosta)
 import models.dataupdater       # Tietojen päivitysmetodit
 import models.cvs_refnames      # Referenssinimien luonti
 import models.gen.user          # Käyttäjien tiedot
+from models.gen.dates import DateRange  # Aikaväit ym. määreet
 
 
 """ Application route definitions
@@ -487,6 +488,11 @@ def stk_harjoitus():
 
 """ Application filter definitions 
 """
+@app.template_filter('pvt')
+def _jinja2_filter_dates(daterange):
+    """ Aikamääreet suodatetaan suomalaiseksi """
+    return str(DateRange(daterange))
+
 @app.template_filter('pvm')
 def _jinja2_filter_date(date_str, fmt=None):
     """ ISO-päivämäärä 2017-09-20 suodatetaan suomalaiseksi 20.9.2017 """
