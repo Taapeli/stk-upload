@@ -251,6 +251,7 @@ RETURN id(p) AS uid, r.role AS role,
   COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
   e.type AS etype,
   e.date AS edate,
+  e.datetype AS edatetype,
   e.daterange_start AS edaterange_start,
   e.daterange_stop AS edaterange_stop
 ORDER BY edate"""
@@ -262,6 +263,7 @@ ORDER BY edate"""
             p.uid = record["uid"]
             p.etype = record["etype"]
             p.edate = record["edate"]
+            p.edatetype = record["edatetype"]
             p.edaterange_start = record["edaterange_start"]
             p.edaterange_stop = record["edaterange_stop"]
             if p.edaterange_start != '' and p.edaterange_stop != '':
