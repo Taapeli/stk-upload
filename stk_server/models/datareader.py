@@ -244,9 +244,10 @@ def lue_henkilot2(uniq_id=None):
             if event_type:
                 e.type = event_type
                 e.date = event[2]
-                e.daterange_start = event[3]
-                e.daterange_stop = event[4]
-                e.place = event[5]
+                e.datetype = event[3]
+                e.daterange_start = event[4]
+                e.daterange_stop = event[5]
+                e.place = event[6]
         
                 if e.daterange_start != '' and e.daterange_stop != '':
                     e.daterange = e.daterange_start + " - " + e.daterange_stop
@@ -433,6 +434,8 @@ def read_cite_sour_repo(uniq_id=None):
             e.type = record_cite['type']
         if record_cite['date']:
             e.date = record_cite['date']
+        if record_cite['datetype']:
+            e.datetype = record_cite['datetype']
         if record_cite['daterange_start']:
             e.daterange_start = record_cite['daterange_start']
         if record_cite['daterange_stop']:
@@ -899,6 +902,7 @@ def get_place_with_events (loc_id):
         names         list of tuples [name_type, given_name, surname]
         etype         event type
         edate         event date
+        edatetype     event date type
         edaterange    event daterange
     """
     place_list = Place.get_place_tree(loc_id)
@@ -1018,6 +1022,8 @@ def handle_events(collection, userid, tx):
             event_dateval = event.getElementsByTagName('dateval')[0]
             if event_dateval.hasAttribute("val"):
                 e.date = event_dateval.getAttribute("val")
+            if event_dateval.hasAttribute("type"):
+                e.datetype = event_dateval.getAttribute("type")
         elif len(event.getElementsByTagName('dateval') ) > 1:
             print("Error: More than one dateval tag in an event")
     

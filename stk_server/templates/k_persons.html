@@ -61,6 +61,7 @@ henkilön sivulle.
 	              <td class="ColumnEvent">
 	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
 		              <li><i>{{e.type|transl('evt')}}</i> 
+		              {% if e.datetype %} {{e.datetype}} {% endif %}
 		              {% if e.date %}{{e.date|pvm}}{% elif e.daterange %}{{e.daterange}}{% endif %}
 		              {% if e.place %} – {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
