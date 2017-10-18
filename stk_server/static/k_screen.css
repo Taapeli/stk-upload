@@ -96,6 +96,11 @@ img#logo {
 }
 .id { color: sienna; text-align: right; }
 .refname { color:gray; text-size: 80%; }
+.dimmed { color: #555; font-style: italic;  font-size: 80%; }
+td.numbers {
+    text-align: right;
+    padding-right: 2em;
+}
 
 /* General Text
 ----------------------------------------------------- */
