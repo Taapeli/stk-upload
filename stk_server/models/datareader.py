@@ -278,11 +278,11 @@ def set_confidence_value():
         p.uniq_id = record["uniq_id"]
         
         if len(record["list"]) > 0:
-            sum = 0
+            sumc = 0
             for ind in record["list"]:
-                sum += int(ind)
+                sumc += int(ind)
                 
-            confidence = sum/len(record["list"])
+            confidence = sumc/len(record["list"])
             p.confidence = "%0.1f" % confidence # confidence with one decimal
         p.set_confidence()
             
@@ -297,39 +297,57 @@ def set_confidence_value():
 def set_refnames():
     """ Asettaa henkilöille refnamet
     """
-    
-    message = []
-    counter = 0
-    
+    set_count = 0
+    get_count = 0
     tx = User.beginTransaction()
 
-    result = Name.get_all_firstnames()
-    for record1 in result:
-        firstname = record1["firstname"]
-        
-        ref_name = ''
-        names = firstname.split(" ")
-        for name in names:
-            record2 = None # If there is no refname
-            result = Refname.get_refname(name)
-            
-            for record2 in result:
-                bname = record2["bname"]
-                ref_name = ref_name + bname + " "
-                
-            if not record2:
-                ref_name = ref_name + name + " "
-                        
-        n = Name()
-        n.firstname = firstname
-        n.refname = ref_name
-        n.set_refname(tx)
-        counter += 1
-        
+    names = Name.get_all_firstnames()
+    # Process each different first name
+    for rec in names:
+        # ╒═══════╤══════════════════════╤════════════╤════════════════╤═════╕
+        # │"ID"   │"fn"                  │"sn"        │"pn"            │"sex"│
+        # ╞═══════╪══════════════════════╪════════════╪════════════════╪═════╡
+        # │"30281"│"Agata Eufrosine"     │"Tolpo"     │"Gabrielsdotter"│"F"  │
+        # └───────┴──────────────────────┴────────────┴────────────────┴─────┘
+
+        # Build a new refname
+        # 1. first names
+        firstname = rec["fn"]
+        fn_list = []
+        prev=('?', '?')
+        for name in firstname.split(' '):
+            if name == prev[0]:
+                # Same as previous
+                fn_list.append(prev[1])
+            else:
+                nm = None
+                # For each of first names find refname
+                results = Refname.get_refname(name)
+                result = results.single()
+                if result:
+                    nm = result['rname']
+                    get_count += 1
+                else:
+                    nm = name
+                fn_list.append(nm)
+                prev = (name, nm)
+        firstnames = " ".join(fn_list)
+
+        # 2. join "firstnames/surname/suffix"
+        surname = rec["sn"].strip()
+        prefix = rec["pn"]
+        if surname:
+            refname = "".join((firstnames,'/',surname,'/'))
+        else:
+            refname = "".join((firstnames,'//',prefix))
+        # 3. Store it
+        Name.set_refname(tx, rec["ID"], refname)
+        set_count += 1
+
     User.endTransaction(tx)
-    text = "Number of refnames set: " + str(counter)
-    message.append(text)
-    return (message)
+    msg="Löytynyt {}, asetettu {} referenssinimeä".format(get_count, set_count)
+    logging.info(msg)
+    return msg
 
 
 def lue_refnames():

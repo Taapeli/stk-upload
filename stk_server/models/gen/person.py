@@ -867,12 +867,24 @@ class Name:
     
     @staticmethod
     def get_all_firstnames():
-        """ Listaa kaikki etunimet tietokannassa """
+        """ Poimii kaikki henkilöiden Name:t etunimijärjestyksessä 
+╒═══════╤══════════════════════╤════════════╤════════════════╤═════╕
+│"ID"   │"fn"                  │"sn"        │"pn"            │"sex"│
+╞═══════╪══════════════════════╪════════════╪════════════════╪═════╡
+│"30691"│"Abraham"             │"Palander"  │""              │"M"  │
+├───────┼──────────────────────┼────────────┼────────────────┼─────┤
+│"30786"│"Abraham Mathias"     │"Bruncrona" │""              │"M"  │
+├───────┼──────────────────────┼────────────┼────────────────┼─────┤
+│"30281"│"Agata Eufrosine"     │"Tolpo"     │"Gabrielsdotter"│"F"  │
+└───────┴──────────────────────┴────────────┴────────────────┴─────┘
+        TODO: sex-kenttää ei nyt käytetä, keventäisi jättää pois
+        """
         
         query = """
-            MATCH (n:Name) RETURN distinct n.firstname AS firstname
-                ORDER BY n.firstname
-            """
+MATCH (n)<-[r:NAME]-(a) 
+RETURN ID(n) AS ID, n.firstname AS fn, 
+       n.surname AS sn, n.suffix AS pn, a.gender AS sex
+ORDER BY n.firstname"""
         return g.driver.session().run(query)
         
     
@@ -885,12 +897,14 @@ class Name:
                 ORDER BY n.surname
             """
         return g.driver.session().run(query)
-    
-    def set_refname(self, tx):
-        """Asetetaan etunimen referenssinimi """
+
+
+    @staticmethod
+    def set_refname(tx, uniq_id, refname):
+        """Asetetaan etunimen referenssinimi  """
         
         query = """
-            MATCH (n:Name) WHERE n.firstname='{}' 
-            SET n.refname='{}'
-            """.format(self.firstname, self.refname)
-        return tx.run(query)
+MATCH (n:Name) WHERE ID(n)=$id
+SET n.refname=$refname
+            """
+        return tx.run(query, id=uniq_id, refname=refname)
