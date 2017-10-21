@@ -144,18 +144,23 @@ RETURN a.id AS aid, a.name AS aname, b.id AS bid, b.name AS bname;""".format(a_a
 
     @staticmethod   
     def get_refname(name):
-        """ Haetaan nimeä vastaava referenssinimi
+        """ Haetaan nimeä (esim. 'Aaron') vastaava referenssi-etunimi
+        ╒═══════╕
+        │"rname"│
+        ╞═══════╡
+        │"Aaro" │
+        └───────┘
         """
         query="""
-            MATCH (a:Refname)-[r:REFFIRST]->(b:Refname) WHERE a.name='{}'
-            RETURN a.name AS aname, b.name AS bname LIMIT 1;""".format(name)
-            
+MATCH (a:Refname)-[r:REFFIRST]->(b:Refname) WHERE a.name=$nm
+RETURN b.name AS rname
+LIMIT 1"""
         try:
-            return g.driver.session().run(query)
-    
+            return g.driver.session().run(query, nm=name)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             logging.warning('Kannan lukeminen ei onnistunut: {}'.format(err))
+            return None
             
             
     @staticmethod   
@@ -167,7 +172,7 @@ RETURN a.id AS aid, a.name AS aname, b.id AS bid, b.name AS bname;""".format(a_a
             RETURN a.name AS aname, b.name AS bname;""".format(name)
             
         try:
-            return g.driver.session().run(query)
+            return g.driver.session().run(query, name=name)
         
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
@@ -203,7 +208,8 @@ ORDER BY a.name""".format(reftype, reftype)
         query = """
 MATCH (n:Refname)
 OPTIONAL MATCH (n:Refname)-[r]->(m)
-RETURN n,r,m;"""
+RETURN n,r,m
+ORDER BY n.name"""
         try:
             results = g.driver.session().run(query)
             return Refname._triples_to_objects(results)
