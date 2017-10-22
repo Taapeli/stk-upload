@@ -37,7 +37,8 @@ henkilön sivulle.
 			<thead>
 				<tr><th></th>
 					<th>Henkilö</th>
-					<th>Tapahtumat</th>
+                    <th>Henkilön tapahtumat</th>
+                    <th>Perheen tapahtumat</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -48,14 +49,14 @@ henkilön sivulle.
 		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
 	               {% endif %}</td>
 	                <td class="ColumnPerson"><div>
-	                   <a href="/person/uniq_id={{p.uniq_id}}" class="id"
-	                     title="katso henkilön {{p.uniq_id}} tiedot">{{p.uniq_id}}</a>
+	                   <a href="/person/uniq_id={{p.uniq_id}}"
+	                     title="katso henkilön {{p.uniq_id}} tiedot">
 		               {{p.name[0].firstname}} 
 		               {% if p.name[0].surname %} <b>{{p.name[0].surname}}</b>
-		               {% else %}<i>{{p.name[0].patronyme}}</i>{% endif %}
+		               {% else %}<i>{{p.name[0].patronyme}}</i>{% endif %}</a>
 		               {% if p.name[0].refname %}
-		               <br><small class="refname" style="margin-left:4em;"
-		                title="referenssinimi">referenssinimi: {{p.name[0].refname}}</small>
+		               <br><small class="refname" title="referenssinimi">
+		                  referenssinimi: {{p.name[0].refname}}
 		               {% endif %}
 	                </div></td>
 	              <td class="ColumnEvent">
@@ -67,6 +68,8 @@ henkilön sivulle.
 		        {% endfor %}</ul>
 	        {% endif %}
 	              </td>
+                  <td class="ColumnEvent"><!-- Perheen tapahtumat tähän -->
+                  </td>
 	           </tr>
 	    {% endfor %}
 	{% else %}
