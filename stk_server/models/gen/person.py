@@ -868,22 +868,27 @@ class Name:
     @staticmethod
     def get_all_firstnames():
         """ Poimii kaikki henkilöiden Name:t etunimijärjestyksessä 
-╒═══════╤══════════════════════╤════════════╤════════════════╤═════╕
-│"ID"   │"fn"                  │"sn"        │"pn"            │"sex"│
-╞═══════╪══════════════════════╪════════════╪════════════════╪═════╡
-│"30691"│"Abraham"             │"Palander"  │""              │"M"  │
-├───────┼──────────────────────┼────────────┼────────────────┼─────┤
-│"30786"│"Abraham Mathias"     │"Bruncrona" │""              │"M"  │
-├───────┼──────────────────────┼────────────┼────────────────┼─────┤
-│"30281"│"Agata Eufrosine"     │"Tolpo"     │"Gabrielsdotter"│"F"  │
-└───────┴──────────────────────┴────────────┴────────────────┴─────┘
+╒═══════╤══════════════════════╤════════════╤═════════╤══════════════════════════════╤═════╕
+│"ID"   │"fn"                  │"sn"        │"pn"     │"rn"                          │"sex"│
+╞═══════╪══════════════════════╪════════════╪═════════╪══════════════════════════════╪═════╡
+│"30691"│"Abraham"             │"Palander"  │""       │"Aappo/Palander/"             │"M"  │
+├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
+│"30786"│"Abraham Mathias"     │"Bruncrona" │""       │"Aappo Mathias/Bruncrona/"    │"M"  │
+├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
+│"30950"│"Adolf Mathias Israel"│"Sucksdorff"│""       │"Adolf Mathias Israel/Sucksdor│"M"  │
+│       │                      │            │         │ff/"                          │     │
+├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
+│"30281"│"Agata Eufrosine"     │"Tolpo"     │"Gabriels│"Agaata Eufrosine/Tolpo/"     │"F"  │
+│       │                      │            │dotter"  │                              │     │
+└───────┴──────────────────────┴────────────┴─────────┴──────────────────────────────┴─────┘
         TODO: sex-kenttää ei nyt käytetä, keventäisi jättää pois
         """
         
         query = """
 MATCH (n)<-[r:NAME]-(a) 
 RETURN ID(n) AS ID, n.firstname AS fn, 
-       n.surname AS sn, n.suffix AS pn, a.gender AS sex
+       n.surname AS sn, n.suffix AS pn, n.refname as rn,
+       a.gender AS sex
 ORDER BY n.firstname"""
         return g.driver.session().run(query)
         
