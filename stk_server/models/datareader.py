@@ -313,39 +313,46 @@ def set_refnames():
         # Build a new refname
         # 1. first names
         firstname = rec["fn"]
-        fn_list = []
-        prev=('?', '?')
-        for name in firstname.split(' '):
-            if name == prev[0]:
-                # Same as previous
-                fn_list.append(prev[1])
-            else:
-                nm = None
-                # For each of first names find refname
-                results = Refname.get_refname(name)
-                result = results.single()
-                if result:
-                    nm = result['rname']
-                    get_count += 1
+        if firstname == 'N':
+            firstnames = ''
+        else:
+            fn_list = []
+            prev=('?', '?')
+            for name in firstname.split(' '):
+                if name == prev[0]:
+                    # Same as previous
+                    fn_list.append(prev[1])
                 else:
-                    nm = name
-                fn_list.append(nm)
-                prev = (name, nm)
-        firstnames = " ".join(fn_list)
+                    nm = None
+                    # For each of first names find refname
+                    results = Refname.get_refname(name)
+                    result = results.single()
+                    if result:
+                        nm = result['rname']
+                        get_count += 1
+                    else:
+                        nm = name
+                    fn_list.append(nm)
+                    prev = (name, nm)
+            firstnames = " ".join(fn_list)
 
-        # 2. join "firstnames/surname/suffix"
-        surname = rec["sn"].strip()
-        prefix = rec["pn"]
+        # 2. surname and patronyme
+        surname = rec["sn"]     #.strip()
+        if (surname == 'N'):
+            surname = ''
+        suffix = rec["pn"]
+        # 3. join "firstnames/surname/suffix"
         if surname:
             refname = "".join((firstnames,'/',surname,'/'))
         else:
-            refname = "".join((firstnames,'//',prefix))
-        # 3. Store it
-        Name.set_refname(tx, rec["ID"], refname)
-        set_count += 1
+            refname = "".join((firstnames,'//',suffix))
+        # 4. Store it
+        if refname != rec["rn"]:
+            Name.set_refname(tx, rec["ID"], refname)
+            set_count += 1
 
     User.endTransaction(tx)
-    msg="Löytynyt {}, asetettu {} referenssinimeä".format(get_count, set_count)
+    msg="Saatu {}, asetettu {} referenssinimeä".format(get_count, set_count)
     logging.info(msg)
     return msg
 
