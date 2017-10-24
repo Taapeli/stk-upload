@@ -41,13 +41,13 @@ def _poimi_(person_id, event_id, row, url):
 
     p = Person(person_id)
     n = Name(etu, suku)
-    p.name.append(n)
+    p.names.append(n)
     p.name_orig = "{0} /{1}/".format(etu, suku)
     p.occupation = row['Ammatti_vakioitu']
     p.place=row['Paikka_vakioitu']
 
     e = Event(event_id, 'Käräjät')
-    e.name = kpaikka
+    e.names = kpaikka
     e.date = aika
     e.name_orig = row['Käräjät']
 
@@ -168,7 +168,7 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
             etu = rec['k.firstname']
         if rec['k.surname']:
             suku = rec['k.surname']
-        p.name.append(Name(etu,suku))
+        p.names.append(Name(etu,suku))
 #        if rec['n.name_orig']:
 #            p.name_orig = rec['n.name_orig']
 #         if rec['n.occu']:
@@ -234,7 +234,7 @@ def lue_henkilot2(uniq_id=None):
             pname.surname = record['surname']
         if record['suffix']:
             pname.patronyme = record['suffix']
-        p.name.append(pname)
+        p.names.append(pname)
 
         for event in record['events']:
  
@@ -352,7 +352,7 @@ def set_refnames():
             set_count += 1
 
     User.endTransaction(tx)
-    msg="Saatu {}, asetettu {} referenssinimeä".format(get_count, set_count)
+    msg="Sovellettu {} referenssinimeä {} nimeen".format(get_count, set_count)
     logging.info(msg)
     return msg
 
@@ -761,7 +761,8 @@ def get_person_data_by_id(uniq_id):
     """
     p = Person()
     p.uniq_id = uniq_id
-    p.get_person_and_name_data_by_id()
+    #.get_person_and_name_data_by_id()
+    p.get_person_w_names()
     p.get_hlinks_by_id()
     
     events = []
@@ -1299,7 +1300,7 @@ def handle_people(collection, userid, tx):
                 elif len(person_name.getElementsByTagName('suffix') ) > 1:
                     print("Error: More than one suffix in a person")
                     
-                p.name.append(pname)
+                p.names.append(pname)
     
         if len(person.getElementsByTagName('eventref') ) >= 1:
             for i in range(len(person.getElementsByTagName('eventref') )):

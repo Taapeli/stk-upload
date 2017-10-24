@@ -27,8 +27,8 @@
                 <img alt="Kuvassa {{photos[0].description}}" src="{{photos[0].src}}" />
             </div>
         </div>{% endif %}
-        <h3 style="position:sticky; top:0;">{{person.name[0].firstname}} 
-            <i>{{person.name[0].suffix}}</i> <b>{{person.name[0].surname}}</b>
+        <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
+            <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
             <!-- sup><small> <a href="#sref1a">1a</a></small></sup -->
         </h3>
 
@@ -38,7 +38,7 @@
                     <td class="ColumnAttribute">Tunnisteet</td>
                     <td class="ColumnValue"><span class="id">{{person.uniq_id}}</span> / <tt>{{person.id}}</tt></td>
                 </tr>
-                {% for pname in person.name %}<tr>
+                {% for pname in person.names %}<tr>
                     <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}

@@ -21,7 +21,7 @@ class Person:
                 uniq_id            int noden id
                 id                 esim. "I0001"
                 gender             str sukupuoli
-                name:
+                names[]:
                    alt             str muun nimen nro
                    type            str nimen tyyppi
                    firstname       str etunimi
@@ -45,7 +45,7 @@ class Person:
         self.change = ''
         self.uniq_id = 0
         self.id = pid
-        self.name = []
+        self.names = []
         self.gender = ''
         self.events = []                # For creating display sets
         self.eventref_hlink = []        # Gramps event handles
@@ -149,15 +149,82 @@ RETURN ID(family) AS uniq_id"""
     
     
     def get_person_and_name_data_by_id(self):
-        """ Luetaan kaikki henkilön tiedot """
-        
+        """ Luetaan kaikki henkilön tiedot ja nimet
+            ╒══════════════════════════════╤══════════════════════════════╕
+            │"person"                      │"name"                        │
+            ╞══════════════════════════════╪══════════════════════════════╡
+            │{"gender":"F","url_type":[],"c│{"firstname":"Margareta Elisab│
+            │hange":"1507492602","gramps_ha│et","surname":"Enckell","alt":│
+            │ndle":"_d9ea5e7f9a00a0482af","│"","type":"Birth Name","suffix│
+            │id":"I0098","url_href":[],"url│":"","refname":"Margareta Elis│
+            │_description":[]}             │abeth/Enckell/"}              │
+            ├──────────────────────────────┼──────────────────────────────┤
+            │{"gender":"F","url_type":[],"c│{"firstname":"Margareta","surn│
+            │hange":"1507492602","gramps_ha│ame":"Utter","alt":"1","type":│
+            │ndle":"_d9ea5e7f9a00a0482af","│"Married Name","suffix":"","re│
+            │id":"I0098","url_href":[],"url│fname":"Margareta/Utter/"}    │
+            │_description":[]}             │                              │
+            └──────────────────────────────┴──────────────────────────────┘
+        """
         pid = int(self.uniq_id)
         query = """
-MATCH (person:Person)-[r:NAME]-(name:Name) 
+MATCH (person:Person)-[r:NAME]->(name:Name) 
   WHERE ID(person)=$pid
 RETURN person, name
   ORDER BY name.alt"""
         person_result = g.driver.session().run(query, {"pid": pid})
+        self.id = None
+        
+        for person_record in person_result:
+            if self.id == None:
+                self.handle = person_record["person"]['handle']
+                self.change = person_record["person"]['change']
+                self.id = person_record["person"]['id']
+                self.gender = person_record["person"]['gender']
+                self.url_href = person_record["person"]['url_href']
+                self.url_type = person_record["person"]['url_type']
+                self.url_description = person_record["person"]['url_description']
+                self.confidence = person_record["person"]['confidence']
+            
+            if len(person_record["name"]) > 0:
+                pname = Name()
+                pname.alt = person_record["name"]['alt']
+                pname.type = person_record["name"]['type']
+                pname.firstname = person_record["name"]['firstname']
+                pname.refname = person_record["name"]['refname']
+                pname.surname = person_record["name"]['surname']
+                pname.suffix = person_record["name"]['suffix']
+                self.names.append(pname)
+
+
+    def get_person_w_names(self):
+        """ Luetaan kaikki henkilön tiedot ja nimet
+            ╒══════════════════════════════╤══════════════════════════════╕
+            │"person"                      │"names"                       │
+            ╞══════════════════════════════╪══════════════════════════════╡
+            │{"gender":"F","url_type":[],"c│[{"firstname":"Margareta Elisa│
+            │hange":"1507492602","gramps_ha│bet","surname":"Enckell","alt"│
+            │ndle":"_d9ea5e7f9a00a0482af","│:"","type":"Birth Name","suffi│
+            │id":"I0098","url_href":[],"url│x":"","refname":"Margareta Eli│
+            │_description":[]}             │sabeth/Enckell/"},            │
+            │                              │                  {"firstname"│
+            │                              │:"Margareta","surname":"Utter"│
+            │                              │,"alt":"1","type":"Married Nam│
+            │                              │e","suffix":"","refname":"Marg│
+            │                              │areta/Utter/"}]               │
+            └──────────────────────────────┴──────────────────────────────┘        """
+#         query = """
+# MATCH (person:Person)-[r:NAME]-(name:Name) 
+#   WHERE ID(person)=$pid
+# RETURN person, name
+#   ORDER BY name.alt"""
+        query = """
+MATCH (person:Person)-[r:NAME]->(name:Name) 
+  WHERE ID(person)=$pid
+  WITH person, name ORDER BY name.alt
+RETURN person, COLLECT(name) AS names
+        """
+        person_result = g.driver.session().run(query, pid=int(self.uniq_id))
         
         for person_record in person_result:
             self.handle = person_record["person"]['handle']
@@ -169,17 +236,17 @@ RETURN person, name
             self.url_description = person_record["person"]['url_description']
             self.confidence = person_record["person"]['confidence']
             
-            if len(person_record["name"]) > 0:
+            for name in person_record["names"]:
                 pname = Name()
-                pname.alt = person_record["name"]['alt']
-                pname.type = person_record["name"]['type']
-                pname.firstname = person_record["name"]['firstname']
-                pname.refname = person_record["name"]['refname']
-                pname.surname = person_record["name"]['surname']
-                pname.suffix = person_record["name"]['suffix']
-                self.name.append(pname)
-    
-    
+                pname.alt = name['alt']
+                pname.type = name['type']
+                pname.firstname = name['firstname']
+                pname.refname = name['refname']
+                pname.surname = name['surname']
+                pname.suffix = name['suffix']
+                self.names.append(pname)
+
+
     @staticmethod       
     def get_people_wo_birth():
         """ Voidaan lukea henkilöitä ilman syntymätapahtumaa kannasta
@@ -478,7 +545,7 @@ RETURN person, name
             print ("Unique id: " + str(self.uniq_id) + " # " + str(comp_person.uniq_id))
             print ("Id: " + self.id + " # " + comp_person.id)
             print ("Gender: " + self.gender + " # " + comp_person.gender)
-        if len(self.name) > 0:
+        if len(self.names) > 0:
             alt1 = []
             type1 = []
             first1 = []
@@ -492,7 +559,7 @@ RETURN person, name
             surname2 = []
             suffix2 = []
             
-            names = self.name
+            names = self.names
             for pname in names:
                 alt1.append(pname.alt)
                 type1.append(pname.type)
@@ -501,7 +568,7 @@ RETURN person, name
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
             
-            names2 = comp_person.name
+            names2 = comp_person.names
             for pname in names2:
                 alt2.append(pname.alt)
                 type2.append(pname.type)
@@ -549,8 +616,8 @@ RETURN person, name
         print ("Url href: " + self.url_href)
         print ("Url type: " + self.url_type)
         print ("Url description: " + self.url_description)
-        if len(self.name) > 0:
-            names = self.name
+        if len(self.names) > 0:
+            names = self.names
             for pname in names:
                 print ("Alt: " + pname.alt)
                 print ("Type: " + pname.type)
@@ -580,7 +647,7 @@ RETURN person, name
             print ("Change: " + self.change + " # " + comp_person.change)
             print ("Id: " + self.id + " # " + comp_person.id)
             print ("Gender: " + self.gender + " # " + comp_person.gender)
-        if len(self.name) > 0:
+        if len(self.names) > 0:
             alt1 = []
             type1 = []
             first1 = []
@@ -594,7 +661,7 @@ RETURN person, name
             surname2 = []
             suffix2 = []
             
-            names = self.name
+            names = self.names
             for pname in names:
                 alt1.append(pname.alt)
                 type1.append(pname.type)
@@ -603,7 +670,7 @@ RETURN person, name
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
             
-            names2 = comp_person.name
+            names2 = comp_person.names
             for pname in names2:
                 alt2.append(pname.alt)
                 type2.append(pname.type)
@@ -689,9 +756,9 @@ SET r.date=$date"""
             print("Virhe (Person.save:User): {0}".format(err), file=stderr)
             
         # Talleta Name nodet ja linkitä henkilöön
-        if len(self.name) > 0:
+        if len(self.names) > 0:
             try:
-                names = self.name
+                names = self.names
                 for name in names:
                     p_alt = name.alt
                     p_type = name.type
