@@ -11,8 +11,8 @@
     </tr>
 {% if people %}
     {% for person in people %}
-     	{% if person.name %}
-        	{% for pname in person.name %}
+     	{% if person.names %}
+        	{% for pname in person.names %}
         		<tr>
 	        		<td><a href="/lista/person_data/{{person.uniq_id}}">{{person.uniq_id}}</a></td>
 	        		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
