@@ -14,6 +14,7 @@
 {%- endmacro %}
 
 {% macro menu(value) -%}
+    <div class="wrapper" id="nav" role="navigation">
         <div class="container">
             <ul class="menu" id="dropmenu">
                 <li{% if value == 1 %} class="CurrentSection"
@@ -30,5 +31,6 @@
                   {% endif %}><a href="#" title="Pikkukuvat">Kuvat</a></li>
             </ul>
         </div>
+    </div>
 {%- endmacro %}
         
