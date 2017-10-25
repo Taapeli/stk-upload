@@ -25,13 +25,13 @@ palvelimelta <i>{{uri}}</i>
     {% for p in persons %}
         {% set e = p.events[0] %}
         <tr onmouseover="info('{{p.id}}', 
-        	'{{p.name[0].surname}}, {{p.name[0].firstname}}',
+        	'{{p.names[0].surname}}, {{p.names[0].firstname}}',
             '{% if p.occupation %}{{p.occupation}}{% endif %}', 
             '{% if p.place %}{{p.place}}{% endif %}', 
             '{% if e.nimi %}{{e.nimi}}', '{{e.aika}}{% else %}', '{% endif %}', 
             '{% if e.citation %}{{e.citation.id}}{% endif %}')" >
             <td class="id"><a href="/poimi/oid={{p.id}}">{{p.id}}</a></td>
-            <td>{{p.name[0].firstname}} <b> {{p.name[0].surname}}</b></td>
+            <td>{{p.names[0].firstname}} <b> {{p.names[0].surname}}</b></td>
             <td>{% if p.occupation %}{{p.occupation}}{% endif %}</td>
             <td>{% if p.place %}{{p.place}}{% endif %}</td>
             <td>{% if p.events|count %}

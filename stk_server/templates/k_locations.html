@@ -3,21 +3,10 @@
 {% block title %}paikkakunnat{% endblock %}
 {% block body %}
 {{ super() }}
+{% import 'k_macros.html' as macro %}
 
 <h2>Paikkakuntaluettelo</h2>
-
-	<div class="wrapper" id="nav" role="navigation">
-		<div class="container">
-			<ul class="menu" id="dropmenu">
-				<li><a href="k_persons" title="Henkilöt">Henkilöt</a></li>
-				<li><a href="#" title="Sukunimet">Sukunimet</a></li>
-				<li><a href="#" title="Perheet">Perheet</a></li>
-				<li class="CurrentSection"><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
-				<li><a href="/lista/k_sources" title="Lähteet">Lähteet</a></li>
-				<li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
-			</ul>
-		</div>
-	</div>
+{{ macro.menu(4) }}
 	<div class="content" id="Individuals">
 		<p id="description">
 		Tällä sivulla on hakemisto kaikista paikkakunnista ja niiden alla olevista 

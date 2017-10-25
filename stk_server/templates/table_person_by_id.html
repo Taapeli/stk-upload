@@ -27,8 +27,8 @@
     <tr><th>unique_id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th><th>link</th>
     </tr>
 {% if person %}
- 	{% if person.name %}
-    	{% for pname in person.name %}
+ 	{% if person.names %}
+    	{% for pname in person.names %}
 		<tr>
     		<td class="id">{{person.uniq_id}}</td>
     		<td>{% if person.gender %}{{person.gender}}{% endif %}</td>
