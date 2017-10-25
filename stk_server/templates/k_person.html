@@ -4,13 +4,14 @@
 {% block body %}
 {{ super() }}
 {% set sp = {'M':'mies', 'F':'nainen'} %}
-{% import 'k_display_stars.html' as stars %}
+{% import 'k_macros.html' as macro %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         
 <h2>Henkilön tiedot</h2>
 
     <div class="wrapper" id="nav" role="navigation">
-        <div class="container">
+        {{ macro.menu(1) }}
+        <!-- div class="container">
             <ul class="menu" id="dropmenu">
                 <li class="CurrentSection"><a href="/lista/k_persons" title="Henkilöt">Henkilöt</a></li>
                 <li><a href="#" title="Sukunimet">Sukunimet</a></li>
@@ -19,7 +20,7 @@
                 <li><a href="/lista/k_sources" title="Lähteet">Lähteet</a></li>
                 <li><a href="#" title="Pikkukuvat">Pikkukuvat</a></li>
             </ul>
-        </div>
+        </div -->
     </div>
     <div class="content" id="IndividualDetail">
         {% if photos %}<div class="snapshot">
@@ -61,7 +62,7 @@
                 
                 {% if person.confidence %}<tr>
                     <td class="ColumnAttribute">Tietojen luotettavuus</td>
-                    <td class="ColumnValue">{{ stars.display(person.confidence|float) }}</td>
+                    <td class="ColumnValue">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>{% endif %}
 <!--            <tr>
                     <td class="ColumnAttribute">Ikä kuollessa</td>
@@ -470,7 +471,7 @@
                            {% if source.confidence and source.confidence < "2" %}
                              style="color:red"{% endif %}>
                             Sivu: {{source.page}} &nbsp;
-                            {{ stars.display(conf) }}
+                            {{ macro.stars(conf) }}
                            {% if source.notetext %}<br>
                               <a href="{{source.notetext}}" target="_blank"
                               {% if source.confidence and source.confidence < "2" %}
