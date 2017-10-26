@@ -20,6 +20,7 @@ class Person:
                 change
                 uniq_id            int noden id
                 id                 esim. "I0001"
+                priv               str merkitty yksityiseksi
                 gender             str sukupuoli
                 names[]:
                    alt             str muun nimen nro
@@ -46,6 +47,7 @@ class Person:
         self.uniq_id = 0
         self.id = pid
         self.names = []
+        self.priv = ''
         self.gender = ''
         self.events = []                # For creating display sets
         self.eventref_hlink = []        # Gramps event handles
@@ -180,6 +182,7 @@ RETURN person, name
                 self.handle = person_record["person"]['handle']
                 self.change = person_record["person"]['change']
                 self.id = person_record["person"]['id']
+                self.priv = person_record["person"]['priv']
                 self.gender = person_record["person"]['gender']
                 self.url_href = person_record["person"]['url_href']
                 self.url_type = person_record["person"]['url_type']
@@ -230,6 +233,7 @@ RETURN person, COLLECT(name) AS names
             self.handle = person_record["person"]['handle']
             self.change = person_record["person"]['change']
             self.id = person_record["person"]['id']
+            self.priv = person_record["person"]['priv']
             self.gender = person_record["person"]['gender']
             self.url_href = person_record["person"]['url_href']
             self.url_type = person_record["person"]['url_type']
@@ -260,7 +264,7 @@ RETURN person, COLLECT(name) AS names
                 
         result = g.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'gender',
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'priv', 'gender',
                   'firstname', 'surname']
         lists = []
         
@@ -280,6 +284,10 @@ RETURN person, COLLECT(name) AS names
                 data_line.append('-')
             if record["p"]['id']:
                 data_line.append(record["p"]['id'])
+            else:
+                data_line.append('-')
+            if record["p"]['priv']:
+                data_line.append(record["p"]['priv'])
             else:
                 data_line.append('-')
             if record["p"]['gender']:
@@ -544,6 +552,7 @@ RETURN person, COLLECT(name) AS names
             print ("Change: " + self.change + " # " + comp_person.change)
             print ("Unique id: " + str(self.uniq_id) + " # " + str(comp_person.uniq_id))
             print ("Id: " + self.id + " # " + comp_person.id)
+            print ("Priv: " + self.priv + " # " + comp_person.priv)
             print ("Gender: " + self.gender + " # " + comp_person.gender)
         if len(self.names) > 0:
             alt1 = []
@@ -612,6 +621,7 @@ RETURN person, COLLECT(name) AS names
         print ("Handle: " + self.handle)
         print ("Change: " + self.change)
         print ("Id: " + self.id)
+        print ("Priv: " + self.priv)
         print ("Gender: " + self.gender)
         print ("Url href: " + self.url_href)
         print ("Url type: " + self.url_type)
@@ -646,6 +656,7 @@ RETURN person, COLLECT(name) AS names
             print ("Handle: " + self.handle + " # " + comp_person.handle)
             print ("Change: " + self.change + " # " + comp_person.change)
             print ("Id: " + self.id + " # " + comp_person.id)
+            print ("Priv: " + self.priv + " # " + comp_person.priv)
             print ("Gender: " + self.gender + " # " + comp_person.gender)
         if len(self.names) > 0:
             alt1 = []
@@ -723,6 +734,7 @@ RETURN person, COLLECT(name) AS names
             handle = self.handle
             change = self.change
             pid = self.id
+            priv = self.priv
             gender = self.gender
             url_href = self.url_href
             url_type = self.url_type
@@ -732,12 +744,13 @@ CREATE (p:Person)
 SET p.gramps_handle=$handle, 
     p.change=$change, 
     p.id=$id, 
+    p.priv=$priv, 
     p.gender=$gender, 
     p.url_href=$url_href, 
     p.url_type=$url_type, 
     p.url_description=$url_description"""
             tx.run(query, 
-               {"handle": handle, "change": change, "id": pid, "gender": gender, 
+               {"handle": handle, "change": change, "id": pid, "priv": priv, "gender": gender, 
                 "url_href": url_href, "url_type": url_type, "url_description": url_description})
             
         except Exception as err:

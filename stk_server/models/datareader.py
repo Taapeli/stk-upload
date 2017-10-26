@@ -1260,6 +1260,8 @@ def handle_people(collection, userid, tx):
             p.change = person.getAttribute("change")
         if person.hasAttribute("id"):
             p.id = person.getAttribute("id")
+        if person.hasAttribute("priv"):
+            p.priv = person.getAttribute("priv")
     
         if len(person.getElementsByTagName('gender') ) == 1:
             person_gender = person.getElementsByTagName('gender')[0]
