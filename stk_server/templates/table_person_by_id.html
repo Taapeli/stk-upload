@@ -24,13 +24,14 @@
 <section id="lista">
 <table>
     <h2>Names</h2>
-    <tr><th>unique_id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th><th>link</th>
+    <tr><th>unique_id</th><th>salattu</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th><th>link</th>
     </tr>
 {% if person %}
  	{% if person.names %}
     	{% for pname in person.names %}
 		<tr>
     		<td class="id">{{person.uniq_id}}</td>
+    		<td>{% if person.priv %}{{person.priv}}{% endif %}</td>
     		<td>{% if person.gender %}{{person.gender}}{% endif %}</td>
     		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
     		<td>{% if pname.suffix %}{{pname.suffix}}{% endif %}</td>
