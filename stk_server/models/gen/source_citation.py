@@ -365,8 +365,8 @@ class Source:
 
         query = """
 MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)
-      <--(p:Person)-->(name:Name)
 WHERE ID(source)={sourceid}
+OPTIONAL MATCH (event)<-[*1..2]-(p:Person)-->(name:Name)
 WITH citation.page AS page, citation.confidence AS confidence,
      p, name,
      COLLECT([ID(event), event.type, event.date]) AS events
