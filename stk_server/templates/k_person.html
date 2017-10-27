@@ -42,14 +42,13 @@
                    -->
                     </td>
                 </tr>{% endfor %}
-                {% if person.priv %}<tr>
-                    <td class="ColumnAttribute">Salattu</td>
-                    <td class="ColumnValue">{{person.priv}}</td>
-                </tr>{% endif %}
                 {% if person.gender %}<tr>
                     <td class="ColumnAttribute">Sukupuoli</td>
                     <td class="ColumnValue">{% if person.gender in sp %}{{sp[person.gender]}}
                       {% else %}{{person.gender}}{% endif %}</td>
+                </tr>{% endif %}
+                {% if person.priv %}<tr>
+                    <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(person.priv) }}</td>
                 </tr>{% endif %}
                 
                 {% if person.confidence %}<tr>

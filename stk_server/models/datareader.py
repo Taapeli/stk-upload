@@ -795,6 +795,7 @@ def get_person_data_by_id(uniq_id):
             note.uniq_id = e.noteref_hlink
             result = note.get_note()
             for record in result:
+                e.notepriv = record["note"]["priv"]
                 e.notetype = record["note"]["type"]
                 e.notetext = record["note"]["text"]
                 
@@ -1190,6 +1191,8 @@ def handle_notes(collection, tx):
             n.change = note.getAttribute("change")
         if note.hasAttribute("id"):
             n.id = note.getAttribute("id")
+        if note.hasAttribute("priv"):
+            n.priv = note.getAttribute("priv")
         if note.hasAttribute("type"):
             n.type = note.getAttribute("type")
     
