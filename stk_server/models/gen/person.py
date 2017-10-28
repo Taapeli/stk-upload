@@ -32,6 +32,7 @@ class Person:
                 eventref_hlink     str tapahtuman osoite
                 eventref_role      str tapahtuman rooli
                 objref_hlink       str tallenteen osoite
+                url_priv           str url salattu tieto
                 url_href           str url osoite
                 url_type           str url tyyppi
                 url_description    str url kuvaus
@@ -53,6 +54,7 @@ class Person:
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
         self.objref_hlink = []
+        self.url_priv = []
         self.url_href = []
         self.url_type = []
         self.url_description = []
@@ -184,6 +186,7 @@ RETURN person, name
                 self.id = person_record["person"]['id']
                 self.priv = person_record["person"]['priv']
                 self.gender = person_record["person"]['gender']
+                self.url_priv = person_record["person"]['url_priv']
                 self.url_href = person_record["person"]['url_href']
                 self.url_type = person_record["person"]['url_type']
                 self.url_description = person_record["person"]['url_description']
@@ -235,6 +238,7 @@ RETURN person, COLLECT(name) AS names
             self.id = person_record["person"]['id']
             self.priv = person_record["person"]['priv']
             self.gender = person_record["person"]['gender']
+            self.url_priv = person_record["person"]['url_priv']
             self.url_href = person_record["person"]['url_href']
             self.url_type = person_record["person"]['url_type']
             self.url_description = person_record["person"]['url_description']
@@ -623,6 +627,7 @@ RETURN person, COLLECT(name) AS names
         print ("Id: " + self.id)
         print ("Priv: " + self.priv)
         print ("Gender: " + self.gender)
+        print ("Url priv: " + self.url_priv)
         print ("Url href: " + self.url_href)
         print ("Url type: " + self.url_type)
         print ("Url description: " + self.url_description)
@@ -736,6 +741,7 @@ RETURN person, COLLECT(name) AS names
             pid = self.id
             priv = self.priv
             gender = self.gender
+            url_priv = self.url_priv
             url_href = self.url_href
             url_type = self.url_type
             url_description = self.url_description
@@ -746,12 +752,14 @@ SET p.gramps_handle=$handle,
     p.id=$id, 
     p.priv=$priv, 
     p.gender=$gender, 
+    p.url_priv=$url_priv, 
     p.url_href=$url_href, 
     p.url_type=$url_type, 
     p.url_description=$url_description"""
             tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "priv": priv, "gender": gender, 
-                "url_href": url_href, "url_type": url_type, "url_description": url_description})
+                "url_priv": url_priv, "url_href": url_href, "url_type": url_type,
+                "url_description": url_description})
             
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)

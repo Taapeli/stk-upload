@@ -1325,6 +1325,8 @@ def handle_people(collection, userid, tx):
         if len(person.getElementsByTagName('url') ) >= 1:
             for i in range(len(person.getElementsByTagName('url') )):
                 person_url = person.getElementsByTagName('url')[i]
+                if person_url.hasAttribute("priv"):
+                    p.url_priv.append(person_url.getAttribute("priv"))
                 if person_url.hasAttribute("href"):
                     p.url_href.append(person_url.getAttribute("href"))
                 if person_url.hasAttribute("type"):
@@ -1388,6 +1390,26 @@ def handle_places(collection, tx):
                 placeobj_pname = placeobj.getElementsByTagName('pname')[i]
                 if placeobj_pname.hasAttribute("value"):
                     place.pname = placeobj_pname.getAttribute("value")
+    
+        if len(placeobj.getElementsByTagName('coord') ) >= 1:
+            for i in range(len(placeobj.getElementsByTagName('coord') )):
+                placeobj_coord = placeobj.getElementsByTagName('coord')[i]
+                if placeobj_coord.hasAttribute("long"):
+                    place.coord_long = placeobj_coord.getAttribute("long")
+                if placeobj_coord.hasAttribute("lat"):
+                    place.coord_lat = placeobj_coord.getAttribute("lat")
+                    
+        if len(placeobj.getElementsByTagName('url') ) >= 1:
+            for i in range(len(placeobj.getElementsByTagName('url') )):
+                placeobj_url = placeobj.getElementsByTagName('url')[i]
+                if placeobj_url.hasAttribute("priv"):
+                    place.url_priv.append(placeobj_url.getAttribute("priv"))
+                if placeobj_url.hasAttribute("href"):
+                    place.url_href.append(placeobj_url.getAttribute("href"))
+                if placeobj_url.hasAttribute("type"):
+                    place.url_type.append(placeobj_url.getAttribute("type"))
+                if placeobj_url.hasAttribute("description"):
+                    place.url_description.append(placeobj_url.getAttribute("description"))
     
         if len(placeobj.getElementsByTagName('placeref') ) == 1:
             placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
