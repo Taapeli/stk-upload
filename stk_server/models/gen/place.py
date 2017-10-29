@@ -183,6 +183,7 @@ MATCH (a:Place)
 OPTIONAL MATCH (a:Place)-->(up:Place) 
 OPTIONAL MATCH (a:Place)<--(do:Place) 
 RETURN ID(a) AS id, a.type AS type, a.pname AS name,
+       a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
        COLLECT([ID(up), up.type, up.pname]) AS upper, 
        COLLECT([ID(do), do.type, do.pname]) AS lower
   ORDER BY name
@@ -193,6 +194,8 @@ RETURN ID(a) AS id, a.type AS type, a.pname AS name,
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
             p = Place(record['id'], record['type'], record['name'])
+            p.coord_long = record['coord_long']
+            p.coord_lat = record['coord_lat']
             p.uppers = []
             for near in record['upper']:
                 if near[0]:
@@ -378,8 +381,9 @@ ORDER BY edate"""
             pid = self.id
             type = self.type
             pname = self.pname
-            coord_long = self.coord_long
-            coord_lat = self.coord_lat
+            # Replace f.ex 26° 11\' 7,411"I with 26° 11' 7,411"I
+            coord_long = self.coord_long.replace("\\\'", "\'")
+            coord_lat = self.coord_lat.replace("\\\'", "\'")
             url_priv = self.url_priv
             url_href = self.url_href
             url_type = self.url_type

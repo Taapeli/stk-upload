@@ -24,7 +24,7 @@
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-                    <th>Paikka, liittyvät paikat</th>
+                    <th>Paikka, liittyvät paikat</th><th>Pituuspiiri</th><th>Leveyspiiri</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -55,6 +55,8 @@
 		        {% endfor %}
 		           </ul>
 	        {% endif %}
+	        <td>{{p.coord_long}}</td>
+	        <td>{{p.coord_lat}}</td>
 	    {% endfor %}
 	{% endif %}
 				</tr>
