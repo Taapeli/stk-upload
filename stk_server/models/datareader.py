@@ -686,28 +686,29 @@ def get_source_with_events(sourceid):
 
     event_list = []
     for record in result:               # Events record
-        c = Citation()
-        c.page = record["page"]
-        pid = record["pid"]
-        c.confidence = record["confidence"]
                 
-        for event in record["events"]:
-            e = Event()
-            e.uniq_id = event[0]
-            e.type = event[1]
-            e.edate = event[2]
+        for citation in record["citations"]:
+            c = Citation()
+            c.page = citation[0]
+            c.confidence = citation[1]
             
-            for name in record["names"]:
-                n = Name()
-                n.uniq_id = pid        
-                n.surname = name[0]        
-                n.firstname = name[1]  
-                    
-                e.names.append(n)
-                      
-            c.events.append(e)
-            
-        event_list.append(c)
+            for event in citation[2]:
+                e = Event()
+                e.uniq_id = event[0]
+                e.type = event[1]
+                e.edate = event[2]
+                
+                for name in event[3]:
+                    n = Name()
+                    n.uniq_id = name[0]        
+                    n.surname = name[1]        
+                    n.firstname = name[2]  
+                        
+                    e.names.append(n)
+                          
+                c.events.append(e)
+                
+            event_list.append(c)
 
     return (s.stitle, event_list)
 
@@ -795,6 +796,7 @@ def get_person_data_by_id(uniq_id):
             note.uniq_id = e.noteref_hlink
             result = note.get_note()
             for record in result:
+                e.notepriv = record["note"]["priv"]
                 e.notetype = record["note"]["type"]
                 e.notetext = record["note"]["text"]
                 
@@ -1190,6 +1192,8 @@ def handle_notes(collection, tx):
             n.change = note.getAttribute("change")
         if note.hasAttribute("id"):
             n.id = note.getAttribute("id")
+        if note.hasAttribute("priv"):
+            n.priv = note.getAttribute("priv")
         if note.hasAttribute("type"):
             n.type = note.getAttribute("type")
     
@@ -1260,6 +1264,8 @@ def handle_people(collection, userid, tx):
             p.change = person.getAttribute("change")
         if person.hasAttribute("id"):
             p.id = person.getAttribute("id")
+        if person.hasAttribute("priv"):
+            p.priv = person.getAttribute("priv")
     
         if len(person.getElementsByTagName('gender') ) == 1:
             person_gender = person.getElementsByTagName('gender')[0]
@@ -1319,6 +1325,8 @@ def handle_people(collection, userid, tx):
         if len(person.getElementsByTagName('url') ) >= 1:
             for i in range(len(person.getElementsByTagName('url') )):
                 person_url = person.getElementsByTagName('url')[i]
+                if person_url.hasAttribute("priv"):
+                    p.url_priv.append(person_url.getAttribute("priv"))
                 if person_url.hasAttribute("href"):
                     p.url_href.append(person_url.getAttribute("href"))
                 if person_url.hasAttribute("type"):
@@ -1382,6 +1390,26 @@ def handle_places(collection, tx):
                 placeobj_pname = placeobj.getElementsByTagName('pname')[i]
                 if placeobj_pname.hasAttribute("value"):
                     place.pname = placeobj_pname.getAttribute("value")
+    
+        if len(placeobj.getElementsByTagName('coord') ) >= 1:
+            for i in range(len(placeobj.getElementsByTagName('coord') )):
+                placeobj_coord = placeobj.getElementsByTagName('coord')[i]
+                if placeobj_coord.hasAttribute("long"):
+                    place.coord_long = placeobj_coord.getAttribute("long")
+                if placeobj_coord.hasAttribute("lat"):
+                    place.coord_lat = placeobj_coord.getAttribute("lat")
+                    
+        if len(placeobj.getElementsByTagName('url') ) >= 1:
+            for i in range(len(placeobj.getElementsByTagName('url') )):
+                placeobj_url = placeobj.getElementsByTagName('url')[i]
+                if placeobj_url.hasAttribute("priv"):
+                    place.url_priv.append(placeobj_url.getAttribute("priv"))
+                if placeobj_url.hasAttribute("href"):
+                    place.url_href.append(placeobj_url.getAttribute("href"))
+                if placeobj_url.hasAttribute("type"):
+                    place.url_type.append(placeobj_url.getAttribute("type"))
+                if placeobj_url.hasAttribute("description"):
+                    place.url_description.append(placeobj_url.getAttribute("description"))
     
         if len(placeobj.getElementsByTagName('placeref') ) == 1:
             placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]

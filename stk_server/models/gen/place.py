@@ -19,6 +19,12 @@ class Place:
                 id              esim. "P0001"
                 type            str paikan tyyppi
                 pname           str paikan nimi
+                coord_long      str paikan pituuspiiri
+                coord_lat       str paikan leveyspiiri
+                url_priv        str url salattu tieto
+                url_href        str url osoite
+                url_type        str url tyyppi
+                url_description str url kuvaus
                 placeref_hlink  str paikan osoite
      """
 
@@ -35,6 +41,12 @@ class Place:
         # Gramps-tietoja
         self.handle = ''
         self.change = ''
+        self.coord_long = ''
+        self.coord_lat = ''
+        self.url_priv = []
+        self.url_href = []
+        self.url_type = []
+        self.url_description = []
         self.placeref_hlink = ''
     
     
@@ -63,6 +75,12 @@ class Place:
             self.id = place_record["place"]["id"]
             self.type = place_record["place"]["type"]
             self.pname = place_record["place"]["pname"]
+            self.coord_long = place_record["place"]["coord_long"]
+            self.coord_lat = place_record["place"]["coord_lat"]
+            self.url_priv = place_record["place"]["url_priv"]
+            self.url_href = place_record["place"]["url_href"]
+            self.url_type = place_record["place"]["url_type"]
+            self.url_description = place_record["place"]["url_description"]
             
         return True
     
@@ -80,7 +98,9 @@ class Place:
                 
         result = g.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname']
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
+                  'coord_long', 'coord_lat',
+                  'url_priv', 'url_href', 'url_type', 'url_description']
         lists = []
         
         for record in result:
@@ -107,6 +127,30 @@ class Place:
                 data_line.append('-')
             if record["p"]['pname']:
                 data_line.append(record["p"]['pname'])
+            else:
+                data_line.append('-')
+            if record["p"]['coord_long']:
+                data_line.append(record["p"]['coord_long'])
+            else:
+                data_line.append('-')
+            if record["p"]['coord_lat']:
+                data_line.append(record["p"]['coord_lat'])
+            else:
+                data_line.append('-')
+            if record["p"]['url_priv']:
+                data_line.append(record["p"]['url_priv'])
+            else:
+                data_line.append('-')
+            if record["p"]['url_href']:
+                data_line.append(record["p"]['url_href'])
+            else:
+                data_line.append('-')
+            if record["p"]['url_type']:
+                data_line.append(record["p"]['url_type'])
+            else:
+                data_line.append('-')
+            if record["p"]['url_description']:
+                data_line.append(record["p"]['url_description'])
             else:
                 data_line.append('-')
                 
@@ -300,6 +344,18 @@ ORDER BY edate"""
         print ("Type: " + self.type)
         if self.pname != '':
             print ("Pname: " + self.pname)
+        if self.coord_long != '':
+            print ("Coord_long: " + self.coord_long)
+        if self.coord_lat != '':
+            print ("Coord_lat: " + self.coord_lat)
+        if self.url_priv != '':
+            print ("URL_priv: " + self.url_priv)
+        if self.url_href != '':
+            print ("URL_href: " + self.url_href)
+        if self.url_type != '':
+            print ("URL_type: " + self.url_type)
+        if self.url_priv != '':
+            print ("URL_description: " + self.url_description)
         if self.placeref_hlink != '':
             print ("Placeref_hlink: " + self.placeref_hlink)
         return True
@@ -317,16 +373,35 @@ ORDER BY edate"""
             else:
                 p_pname = ''
 
+            handle = self.handle
+            change = self.change
+            pid = self.id
+            type = self.type
+            pname = self.pname
+            coord_long = self.coord_long
+            coord_lat = self.coord_lat
+            url_priv = self.url_priv
+            url_href = self.url_href
+            url_type = self.url_type
+            url_description = self.url_description
             query = """
-                CREATE (p:Place) 
-                SET p.gramps_handle='{}', 
-                    p.change='{}', 
-                    p.id='{}', 
-                    p.type='{}', 
-                    p.pname='{}'
-                """.format(self.handle, self.change, self.id, self.type, p_pname)
-                
-            tx.run(query)
+CREATE (p:Place) 
+SET p.gramps_handle=$handle, 
+    p.change=$change, 
+    p.id=$id, 
+    p.type=$type, 
+    p.pname=$pname, 
+    p.coord_long=$coord_long, 
+    p.coord_lat=$coord_lat, 
+    p.url_priv=$url_priv, 
+    p.url_href=$url_href, 
+    p.url_type=$url_type, 
+    p.url_description=$url_description"""             
+            tx.run(query, 
+               {"handle": handle, "change": change, "id": pid, "type": type, "pname": pname, 
+                "coord_long": coord_long, "coord_lat": coord_lat,
+                "url_priv": url_priv, "url_href": url_href, "url_type": url_type,
+                "url_description": url_description})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 

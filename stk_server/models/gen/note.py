@@ -16,6 +16,7 @@ class Note:
                 handle          
                 change
                 id              esim. "N0001"
+                priv            str salattu tieto
                 type            str huomautuksen tyyppi
                 text            str huomautuksen sisältö
      """
@@ -25,6 +26,7 @@ class Note:
         self.handle = ''
         self.change = ''
         self.id = ''
+        self.priv = ''
         self.type = ''
         
         
@@ -53,7 +55,7 @@ class Note:
             
         result =  g.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'text']
+        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'priv', 'type', 'text']
         notes = []
         
         for record in result:
@@ -72,6 +74,10 @@ class Note:
                 note_line.append('-')
             if record["n"]['id']:
                 note_line.append(record["n"]['id'])
+            else:
+                note_line.append('-')
+            if record["n"]['priv']:
+                note_line.append(record["n"]['priv'])
             else:
                 note_line.append('-')
             if record["n"]['type']:
@@ -108,6 +114,7 @@ class Note:
         print ("Handle: " + self.handle)
         print ("Change: " + self.change)
         print ("Id: " + self.id)
+        print ("Priv: " + self.priv)
         print ("Type: " + self.type)
         print ("Text: " + self.text)
         return True
@@ -122,9 +129,10 @@ class Note:
                 SET n.gramps_handle='{}', 
                     n.change='{}', 
                     n.id='{}', 
+                    n.priv='{}', 
                     n.type='{}', 
                     n.text='{}'
-                """.format(self.handle, self.change, self.id, self.type, self.text)
+                """.format(self.handle, self.change, self.id, self.priv, self.type, self.text)
                 
             return tx.run(query)
         except Exception as err:

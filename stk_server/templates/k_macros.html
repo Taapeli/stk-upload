@@ -1,3 +1,10 @@
+{% macro lock(value) -%}
+	{% if value == '1' %}
+		<i class='fa fa-lock'></i>
+	{% endif %}                           
+{%- endmacro %}
+
+
 {% macro stars(value) -%}
    {% if value < 2 %}
      {% if value == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>

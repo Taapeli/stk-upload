@@ -365,13 +365,13 @@ class Source:
 
         query = """
 MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)
-      <--(p:Person)-->(name:Name)
+    <-[*1..2]-(p:Person)-->(name:Name) 
 WHERE ID(source)={sourceid}
-WITH citation.page AS page, citation.confidence AS confidence,
-     p, name,
-     COLLECT([ID(event), event.type, event.date]) AS events
-RETURN page, confidence, events, ID(p) AS pid,
-       COLLECT([name.surname, name.firstname]) AS names"""
+WITH event, citation,
+    COLLECT([ID(p),name.surname, name.firstname]) AS names
+WITH citation,
+     COLLECT([ID(event), event.type, event.date, names]) AS events
+RETURN COLLECT([citation.page, citation.confidence, events]) AS citations"""
 
         return g.driver.session().run(query, sourceid=int(sourceid))
 

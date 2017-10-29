@@ -47,6 +47,9 @@
                     <td class="ColumnValue">{% if person.gender in sp %}{{sp[person.gender]}}
                       {% else %}{{person.gender}}{% endif %}</td>
                 </tr>{% endif %}
+                {% if person.priv %}<tr>
+                    <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(person.priv) }}</td>
+                </tr>{% endif %}
                 
                 {% if person.confidence %}<tr>
                     <td class="ColumnAttribute">Tietojen luotettavuus</td>
