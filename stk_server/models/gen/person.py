@@ -465,7 +465,7 @@ RETURN person, COLLECT(name) AS names
 
 
     @staticmethod       
-    def get_person_events2 (uniq_id):
+    def get_person_events_k (uniq_id):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta
         """
 

@@ -111,7 +111,7 @@ def nayta_henkilot(subj):
     models.dbutil.connect_db()
     if subj == "k_persons":
         # Kertova-tyyliin
-        persons = models.datareader.lue_henkilot2()
+        persons = models.datareader.lue_henkilot_k()
         return render_template("k_persons.html", persons=persons)
     elif subj == "henkilot":
         # dburi vain tiedoksi!
@@ -121,7 +121,7 @@ def nayta_henkilot(subj):
         persons = models.datareader.lue_henkilot()
         return render_template("table_persons.html", persons=persons, uri=dburi)
     elif subj == "henkilot2":
-        persons = models.datareader.lue_henkilot2()
+        persons = models.datareader.lue_henkilot_k()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "surnames":
         surnames = models.gen.person.Name.get_surnames()
@@ -279,7 +279,7 @@ def nayta_ehdolla(ehto):
             return render_template("source_citations.html", 
                                    sources=sources)
         elif key == 'uniq_id':
-            persons = models.datareader.lue_henkilot2(uniq_id=value)            
+            persons = models.datareader.lue_henkilot_k(uniq_id=value)            
             return render_template("person2.html", persons=persons)
         else:
             raise(KeyError("Vain oid:llä voi hakea"))
