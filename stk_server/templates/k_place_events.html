@@ -12,6 +12,8 @@
         <div id="map"><br>
             Sijainti:<br>(N&nbsp;{{ '{0:0.4f}'.format(place.coord_long|float) }}, 
             E&nbsp;{{ '{0:0.4f}'.format(place.coord_lat|float) }})
+            <a target="_blank" href="https://www.google.fi/maps/@{{place.coord_lat}},{{place.coord_long}},14z?hl=fi">
+            [Klikkaa kartta]</a>
         </div>
     <h3 style="position:sticky; top:0;">{{place.pname}}</h3>
         <div>
