@@ -149,6 +149,37 @@ a[href]:hover, a[href]:active {
     padding-left: 15px;
 }
 
+/* Search form (31.10.2017/JMä)
+----------------------------------------------------- */
+#searchform {
+    background: #999;
+    color: white;
+    margin-left: 3em;
+    margin-bottom: 1em;
+    padding: 3px;
+    max-width: 40em;
+}
+#searching {
+    margin: 1em;
+    border: 1px solid #CCC;
+    padding: 1em;
+    background: white;
+    color: black;
+}
+.flashes {
+    font-size: 80%;
+    color: darkblue;
+    border: solid 2pt #c9ac45;
+    background-color: #f9e9a3;
+    margin: 3em;
+    padding: 1em;
+    max-width: 40em;
+}
+.flash_error { color: red }
+.flash_warning { color: blueviolet }
+.flash_message { color: blue }
+
+
 /* Navigation
 ----------------------------------------------------- */
 div#nav, #subnavigation {
@@ -331,6 +362,18 @@ table.infolist.eventlist tbody tr:nth-child(even)
 ----------------------------------------------------- */
 #Places table.infolist td.ColumnName {
     background-color: #EEE;
+}
+#map {
+    float: right;
+    width: 160px;
+    height: 160px;
+    margin: 2em;
+    padding: 1em;
+    border: 1px solid lightgray;
+    border-right: 4px solid lightgray;
+    border-bottom: 4px solid lightgray;
+    background: LightYellow;
+    font-size: 60%;
 }
 
 /* Events

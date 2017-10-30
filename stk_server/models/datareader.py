@@ -211,7 +211,7 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
     return (persons)
 
 
-def lue_henkilot_k(uniq_id=None):
+def lue_henkilot_k(keys=None):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
         Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
@@ -219,7 +219,7 @@ def lue_henkilot_k(uniq_id=None):
     """
     
     persons = []
-    result = Person.get_person_events_k(uniq_id)
+    result = Person.get_person_events_k(keys)
     for record in result:
         pid = record['id']
         p = Person()

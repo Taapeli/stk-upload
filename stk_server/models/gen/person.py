@@ -465,29 +465,52 @@ RETURN person, COLLECT(name) AS names
 
 
     @staticmethod       
-    def get_person_events_k (uniq_id):
+    def get_person_events_k (keys):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta
+            a) Tietokanta-avaimella valittu henkilö
+            b) nimellä poimittu henkilö
+               rule='all'       kaikki
+               rule='surname'   sukunimen alkuosalla
+               rule='firstname' etunimen alkuosalla
+               rule='suffix'    patronyymin alkuosalla
         """
-
-        if uniq_id:
-            where = "WHERE ID(person)={} ".format(uniq_id)
+        if keys:
+            rule=keys[0]
+            name=keys[1] if len(keys) > 1 else None
+            print("Rajaus {} '{}'".format(rule, name))
         else:
-            where = ''
-        
-        query = """
- MATCH (person:Person)-->(name:Name) {0}
+            rule="all"
+            name=""
+
+        qend="""
  OPTIONAL MATCH (person)-->(event:Event)
  OPTIONAL MATCH (event)-->(place:Place)
- RETURN ID(person) AS id, person.confidence AS confidence,
-   name.firstname AS firstname, 
-   name.refname AS refname, name.surname AS surname, 
-   name.suffix AS suffix,
-   COLLECT([ID(event), event.type, event.date, event.datetype, 
-      event.daterange_start, event.daterange_stop, place.pname]) AS events
- ORDER BY name.surname, name.firstname""".format(where)
-                
-        return g.driver.session().run(query)
+RETURN ID(person) AS id, person.confidence AS confidence,
+    name.firstname AS firstname, 
+    name.refname AS refname, name.surname AS surname, 
+    name.suffix AS suffix,
+    COLLECT([ID(event), event.type, event.date, event.datetype, 
+        event.daterange_start, event.daterange_stop, place.pname]) AS events
+ORDER BY name.surname, name.firstname"""
 
+        if rule == "uniq_id":
+            # Person selected by uniq_id
+            query = "MATCH (person:Person)-->(name:Name) WHERE ID(person)=$id"
+            return g.driver.session().run(query + qend, id=int(name))
+        if rule == 'all':
+            query = "MATCH (person:Person)-->(name:Name)"
+            return g.driver.session().run(query + qend)
+        if rule == "surname":
+            query = "MATCH (person:Person)-->(name:Name) WHERE name.surname STARTS WITH $id"
+        elif rule == "firstname":
+            query = "MATCH (person:Person)-->(name:Name) WHERE name.firstname STARTS WITH $id"
+        elif rule == "suffix":
+            query = "MATCH (person:Person)-->(name:Name) WHERE name.suffix STARTS WITH $id"
+        else:
+            print ("Tätä rajausta ei ole vielä tehty: " + rule)
+            return None
+        # All with string argument
+        return g.driver.session().run(query + qend, id=name)
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"

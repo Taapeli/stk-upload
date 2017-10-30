@@ -1,4 +1,4 @@
-{# _myapp/templates/table1.html_ #}
+{# _myapp/templates/k_persons.html_ #}
 {% extends "k_layout.html" %}
 {% block title %}henkilöluettelo{% endblock %}
 {% block body %}
@@ -9,11 +9,45 @@
 
 {{ macro.menu(1) }}
 	<div class="content" id="Individuals">
-		<p id="description">
-Tällä sivulla on hakemisto kaikista tietokannan henkilöistä sukunimen 
-mukaan lajiteltuna. Henkilön nimen napsauttaminen vie sinut valitun 
-henkilön sivulle.
-		</p>
+        <div id="summaryarea">
+            <p id="description">
+    Tällä sivulla on luettelo {{persons|count}} henkilönimestä mahdollisen 
+    sukunimen mukaan lajiteltuna.<br> 
+    Henkilön nimen napsauttaminen vie sinut valitun henkilön sivulle. 
+    Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.
+            </p>
+			<details id="searchform" {% if not persons|count %} open{% endif %}>
+			  <summary><b>Rajaa</b> näytettävät henkilöt</summary>
+			  <div id="searching">
+			    <form  action="/person/list/" method="post">
+                  <p>Haku tapahtuu annetun sanan alkuosalla, 
+                     esim. "Sib" osuu nimeen "Sibbe".</p>
+                  <label for="snam">Hakusana (alkuosa)&nbsp; </label>
+                    <input type="text" name="name" id="snam" required>
+                    <!--input type="text" name="name" id="snam" required--><br>
+                  <input type="radio" name="rule" id="ssur" value="surname" checked>
+                    <label for="ssur">Sukunimi</label>
+                  <input type="radio" name="rule" id="sfir" value="firstname">
+                    <label for="sfir">Etunimi</label>
+                  <input type="radio" name="rule" id="ssuf" value="suffix">
+                    <label for="ssuf">Patronyymi</label>
+				  <input type="submit" value="Hae">
+			    </form>
+			  <div>		  
+			</details>
+
+	        {% with messages = get_flashed_messages(with_categories=true) %}
+	          {% if messages %}
+	            <ul  class='flashes'>
+	            {% for category, message in messages %}
+	              <li class='flash_{{category}}'>{{ message }}</li>
+	            {% endfor %}
+	            </ul>
+	          {% endif %}
+	        {% endwith %}
+
+        </div>
+
 		<div id="alphanav">
 			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
         {% for p in persons %}{% set ini = p.names[0].surname|list|first %}
@@ -63,7 +97,7 @@ henkilön sivulle.
 	           </tr>
 	    {% endfor %}
 	{% else %}
-	        <tr><td colspan="3">Ei ketään</td></tr>
+	        <tr><td colspan="3">Ketään ei löydetty hakutiedoilla</td></tr>
 	{% endif %}
 				</tr>
 			</tbody>

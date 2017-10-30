@@ -54,9 +54,37 @@ def refnames():
 """ ----------------------------- Kertova-sivut --------------------------------
 """
 
+@app.route('/person/list/<string:selection>')   # <-- Ei käytössä?
+@app.route('/person/list/', methods=['POST', 'GET'])
+def show_person_list(selection=None):   
+    """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
+    models.dbutil.connect_db()
+    if request.method == 'POST':
+        try:
+            # Selection from search form
+            name = request.form['name']
+            rule = request.form['rule']
+            keys = (rule, name)
+            persons = models.datareader.lue_henkilot_k(keys)
+            return render_template("k_persons.html", persons=persons, selection=keys)
+        except Exception:
+            flash("Ei oikeita hakukenttiä", category='warning')
+
+    # the code below is executed if the request method
+    # was GET or the credentials were invalid
+    persons = []
+    if selection:
+        # Use selection filter
+        keys = selection.split('=')
+    else:
+        keys = ('all',)
+    persons = models.datareader.lue_henkilot_k(keys)
+    return render_template("k_persons.html", persons=persons, selection=(keys))
+
+
 @app.route('/person/<string:ehto>')
 def show_person_page(ehto): 
-    """ henkilön tietojen näyttäminen ruudulla 
+    """ Kertova - henkilön tietojen näyttäminen ruudulla 
         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
     """
     models.dbutil.connect_db()
@@ -87,6 +115,18 @@ def show_location_page(locid):
 #         print ("# {} ".format(p))
     return render_template("k_place_events.html", 
                            locid=locid, place=place, events=events, locations=locations)
+
+
+@app.route('/lista/k_sources')
+def show_sources(): 
+    """ Lähdeluettelon näyttäminen ruudulla
+    """
+    models.dbutil.connect_db()
+    try:
+        sources = models.gen.source_citation.Source.get_source_list()
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("k_sources.html", sources=sources)
 
 
 @app.route('/events/source=<sourceid>')
@@ -193,18 +233,6 @@ def show_locations():
 #     for p in locations:
 #         print ("# {} ".format(p))
     return render_template("k_locations.html", locations=locations)
-
-
-@app.route('/lista/k_sources')
-def show_sources(): 
-    """ Lähdeluettelon näyttäminen ruudulla
-    """
-    models.dbutil.connect_db()
-    try:
-        sources = models.gen.source_citation.Source.get_source_list()
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("k_sources.html", sources=sources)
 
 
 @app.route('/lista/refnimet', defaults={'reftype': None})
