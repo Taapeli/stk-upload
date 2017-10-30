@@ -9,12 +9,12 @@
 <h2>Paikan tapahtumat</h2>
 {{ macro.menu(4) }}
     <div class="content" id="IndividualDetail">
-    <h3 style="position:sticky; top:0;">{{place.pname}}</h3>
-        <div id="summaryarea">
-        Pituuspiiri: {{place.coord_long}}<br>
-        Leveyspiiri: {{place.coord_lat}}
+        <div id="map"><br>
+            Sijainti:<br>(N&nbsp;{{ '{0:0.4f}'.format(place.coord_long|float) }}, 
+            E&nbsp;{{ '{0:0.4f}'.format(place.coord_lat|float) }})
         </div>
-        <div id="summaryarea">
+    <h3 style="position:sticky; top:0;">{{place.pname}}</h3>
+        <div>
             <ul>{% for p in locations %}
                 <li style="margin-left: {{p.level * 2}}em;">
                 {% if p.id == locid|int %}<span class="id">{{p.id}}</span>

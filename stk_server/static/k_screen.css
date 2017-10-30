@@ -332,6 +332,18 @@ table.infolist.eventlist tbody tr:nth-child(even)
 #Places table.infolist td.ColumnName {
     background-color: #EEE;
 }
+#map {
+    float: right;
+    width: 160px;
+    height: 160px;
+    margin: 2em;
+    padding: 1em;
+    border: 1px solid lightgray;
+    border-right: 4px solid lightgray;
+    border-bottom: 4px solid lightgray;
+    background: LightYellow;
+    font-size: 60%;
+}
 
 /* Events
 ----------------------------------------------------- */
