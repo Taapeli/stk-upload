@@ -211,7 +211,7 @@ def lue_henkilot(oid=None, names=None, nmax=1000):
     return (persons)
 
 
-def lue_henkilot2(uniq_id=None):
+def lue_henkilot_k(uniq_id=None):
     """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
         
         Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
@@ -219,7 +219,7 @@ def lue_henkilot2(uniq_id=None):
     """
     
     persons = []
-    result = Person.get_person_events2(uniq_id)
+    result = Person.get_person_events_k(uniq_id)
     for record in result:
         pid = record['id']
         p = Person()
@@ -933,9 +933,12 @@ def get_place_with_events (loc_id):
         edatetype     event date type
         edaterange    event daterange
     """
+    place = Place()
+    place.uniq_id = int(loc_id)
+    place.get_place_data_by_id()
     place_list = Place.get_place_tree(loc_id)
     event_table = Place.get_place_events(loc_id)
-    return (place_list, event_table)
+    return (place, place_list, event_table)
 
 
 def get_notes(uniq_id=None):

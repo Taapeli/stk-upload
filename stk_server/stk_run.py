@@ -80,13 +80,13 @@ def show_location_page(locid):
     try:
         # List 'locatils' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events 
-        locations, events = models.datareader.get_place_with_events(locid)
+        place, locations, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
 #         print ("# {} ".format(p))
     return render_template("k_place_events.html", 
-                           locid=locid, events=events, locations=locations)
+                           locid=locid, place=place, events=events, locations=locations)
 
 
 @app.route('/events/source=<sourceid>')
@@ -111,7 +111,7 @@ def nayta_henkilot(subj):
     models.dbutil.connect_db()
     if subj == "k_persons":
         # Kertova-tyyliin
-        persons = models.datareader.lue_henkilot2()
+        persons = models.datareader.lue_henkilot_k()
         return render_template("k_persons.html", persons=persons)
     elif subj == "henkilot":
         # dburi vain tiedoksi!
@@ -121,7 +121,7 @@ def nayta_henkilot(subj):
         persons = models.datareader.lue_henkilot()
         return render_template("table_persons.html", persons=persons, uri=dburi)
     elif subj == "henkilot2":
-        persons = models.datareader.lue_henkilot2()
+        persons = models.datareader.lue_henkilot_k()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "surnames":
         surnames = models.gen.person.Name.get_surnames()
@@ -279,7 +279,7 @@ def nayta_ehdolla(ehto):
             return render_template("source_citations.html", 
                                    sources=sources)
         elif key == 'uniq_id':
-            persons = models.datareader.lue_henkilot2(uniq_id=value)            
+            persons = models.datareader.lue_henkilot_k(uniq_id=value)            
             return render_template("person2.html", persons=persons)
         else:
             raise(KeyError("Vain oid:llä voi hakea"))
