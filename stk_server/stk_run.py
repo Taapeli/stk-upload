@@ -80,13 +80,13 @@ def show_location_page(locid):
     try:
         # List 'locatils' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events 
-        locations, events = models.datareader.get_place_with_events(locid)
+        place, locations, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
 #         print ("# {} ".format(p))
     return render_template("k_place_events.html", 
-                           locid=locid, events=events, locations=locations)
+                           locid=locid, place=place, events=events, locations=locations)
 
 
 @app.route('/events/source=<sourceid>')

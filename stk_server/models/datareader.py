@@ -933,9 +933,12 @@ def get_place_with_events (loc_id):
         edatetype     event date type
         edaterange    event daterange
     """
+    place = Place()
+    place.uniq_id = int(loc_id)
+    place.get_place_data_by_id()
     place_list = Place.get_place_tree(loc_id)
     event_table = Place.get_place_events(loc_id)
-    return (place_list, event_table)
+    return (place, place_list, event_table)
 
 
 def get_notes(uniq_id=None):

@@ -4,13 +4,16 @@
 {% block body %}
 {{ super() }}
 {% import 'k_macros.html' as macro %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <h2>Paikan tapahtumat</h2>
 {{ macro.menu(4) }}
     <div class="content" id="IndividualDetail">
-    {% for p in locations %}{% if p.id ~ "" == locid %}
-    <h3 style="position:sticky; top:0;">{{p.pname}}</h3>
-    {% endif %}{% endfor %}
+    <h3 style="position:sticky; top:0;">{{place.pname}}</h3>
+        <div id="summaryarea">
+        Pituuspiiri: {{place.coord_long}}<br>
+        Leveyspiiri: {{place.coord_lat}}
+        </div>
         <div id="summaryarea">
             <ul>{% for p in locations %}
                 <li style="margin-left: {{p.level * 2}}em;">
@@ -21,6 +24,30 @@
                 {% endif %} <small>&nbsp;{{p.type|transl('lt')}}</small></li>
             {% endfor %}</ul>
         </div>
+        {% if place.url_href|length > 0 %}
+        <div class="subsection" id="events">
+            <h4>Nettisivut</h4>
+            <table class="infolist eventlist">
+                <thead>
+                    <tr>
+                        <th> </th>
+                        <th class="ColumnDescription">Tyyppi</th>
+                        <th class="ColumnDescription">Kuvaus</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for i in range(place.url_href|length) %}
+                    <tr>
+                        <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(place.url_priv[i]) }}</td> 
+                        <td class="ColumnDescription">{{place.url_type[i]}}</td> 
+                        <td class="ColumnDescription">{{place.url_description[i]}}
+                        <a href="{{place.url_href[i]}}">[Klikkaa linkki]</a></td> 
+                    </tr>
+         {% endfor %}
+                 </tbody>
+            </table>
+        </div>
+        {% endif %}
         <div class="subsection" id="events">
             <h4>Tapahtumat</h4>
             <table class="infolist eventlist">
