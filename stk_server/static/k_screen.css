@@ -365,8 +365,8 @@ table.infolist.eventlist tbody tr:nth-child(even)
 }
 #map {
     float: right;
-    width: 160px;
-    height: 160px;
+    width: 250px;
+    height: 300px;
     margin: 2em;
     padding: 1em;
     border: 1px solid lightgray;
