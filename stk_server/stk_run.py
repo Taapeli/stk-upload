@@ -193,7 +193,7 @@ def nayta_henkilot(subj):
                headings=headings, titles=titles, lists=lists)
     elif subj == 'repositories':
         repositories = models.datareader.read_repositories()
-        return render_template("table_repositories.html", 
+        return render_template("ng_table_repositories.html", 
                                repositories=repositories)
     elif subj == 'sources':
         sources = models.datareader.read_sources()
