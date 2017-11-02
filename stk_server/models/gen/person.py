@@ -465,7 +465,7 @@ RETURN person, COLLECT(name) AS names
 
 
     @staticmethod       
-    def get_person_events_k (keys):
+    def get_events_k (keys):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta
             a) Tietokanta-avaimella valittu henkilö
             b) nimellä poimittu henkilö
@@ -482,6 +482,16 @@ RETURN person, COLLECT(name) AS names
             rule="all"
             name=""
 
+# ╒═══════╤══════╤══════╤═════╤═════════╤══════════╤══════════════════════════════╕
+# │"id"   │"confi│"first│"ref │"surname"│"suffix"  │"events"                      │
+# │       │dence"│name" │name"│         │          │                              │
+# ╞═══════╪══════╪══════╪═════╪═════════╪══════════╪══════════════════════════════╡
+# │"27204"│null  │"Henri│""   │"Sibbe"  │"Mattsson"│[["26836","Occupation","","","│
+# │       │      │k"    │     │         │          │","","Cappelby 4 Sibbes"],["26│
+# │       │      │      │     │         │          │255","Birth","1709-01-03","","│
+# │       │      │      │     │         │          │","",null],["26837","Luottamus│
+# │       │      │      │     │         │          │toimi","1760","","","",null]] │
+# ├───────┼──────┼──────┼─────┼─────────┼──────────┼──────────────────────────────┤
         qend="""
  OPTIONAL MATCH (person)-->(event:Event)
  OPTIONAL MATCH (event)-->(place:Place)
@@ -512,11 +522,43 @@ ORDER BY name.surname, name.firstname"""
         # All with string argument
         return g.driver.session().run(query + qend, id=name)
 
+
+    @staticmethod       
+    def get_family_members (uniq_id):
+        """ Read person's families and family members for Person page
+        """
+
+        query="""
+MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-->(n:Name)
+    WHERE ID(p) = $id
+OPTIONAL MATCH (m)-->(birth {type:'Birth'})
+WITH f.id AS family_id, ID(f) AS f_uniq_id, 
+    TYPE(r) AS role, ID(m) AS m_id, ID(m) AS uniq_id, m.gender AS gender,
+    birth.date AS birth_date, 
+    n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx
+ORDER BY n.alt
+RETURN family_id, f_uniq_id, role, m_id, uniq_id, gender, birth_date,
+    COLLECT([alt, ntype, fn, sn, sx]) AS names
+ORDER BY family_id, role, birth_date"""
+
+# ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤════════════╤══════════════════════════════╕
+# │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"│"names"                       │
+# ╞═══════════╪═══════════╪════════╪═══════╪═════════╪════════╪════════════╪══════════════════════════════╡
+# │"F0012"    │"40506"    │"CHILD" │"27044"│"27044"  │"M"     │"1869-03-28"│[["","Birth Name","Christian",│
+# │           │           │        │       │         │        │            │"Sibelius",""],["1","Also Know│
+# │           │           │        │       │         │        │            │n As","Kristian","Sibelius",""│
+# │           │           │        │       │         │        │            │]]                            │
+# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼────────────┼──────────────────────────────┤
+
+        return g.driver.session().run(query, id=int(uniq_id))
+    
+
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
         key = "{}:{}:{}:{}".format(self.name.firstname, self.name.last, 
               self.occupation, self.place)
         return key
+
 
     def join_events(self, events, kind=None):
         """
@@ -543,7 +585,8 @@ ORDER BY name.surname, name.firstname"""
 #                     format(e, persoona, tapahtuma), 'error')
 #                 logging.warning('Lisääminen ei onnistunut: {}'.format(e))
 #         logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), eventList))
-    
+
+
     def join_persons(self, others):
         """
         Päähenkilöön self yhdistetään henkilöiden others tiedot ja tapahtumat
@@ -921,6 +964,20 @@ MERGE (n)-[r:CITATION]->(m)"""
         return
 
 
+class Person_as_member(Person):
+    """ A person as a family member 
+
+        Extra properties:
+            role         str "CHILD", "FATHER" or "MOTHER"
+            birth_date   str (TODO: Should be DateRange)
+     """
+
+    def __init__(self):
+        """ Luo uuden instanssin """
+        Person.__init__(self)
+        self.role = ''
+
+
 class Name:
     """ Nimi
     
@@ -933,14 +990,14 @@ class Name:
                 suffix          str patronyymi
     """
     
-    def __init__(self, givn='', surn=''):
+    def __init__(self, givn='', surn='', suff=''):
         """ Luo uuden name-instanssin """
         self.type = ''
         self.alt = ''
         self.firstname = givn
         self.refname = ''
         self.surname = surn
-        self.suffix = ''
+        self.suffix = suff
         
         
     @staticmethod
