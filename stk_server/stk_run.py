@@ -98,7 +98,7 @@ def show_person_page(ehto):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("k_person.html", 
-                       person=person, events=events, photos=photos, sources=sources)
+        person=person, events=events, photos=photos, sources=sources, families=families)
 
 
 @app.route('/events/loc=<locid>')
