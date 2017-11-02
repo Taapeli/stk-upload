@@ -12,7 +12,7 @@ from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.object import Object
-from models.gen.person import Person, Name
+from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
@@ -219,11 +219,12 @@ def lue_henkilot_k(keys=None):
     """
     
     persons = []
-    result = Person.get_person_events_k(keys)
+    result = Person.get_events_k(keys)
     for record in result:
-        pid = record['id']
+        # Got ["id", "confidence", "firstname", "refname", "surname", "suffix", "events"]
+        uniq_id = record['id']
         p = Person()
-        p.uniq_id = pid
+        p.uniq_id = uniq_id
         p.confidence = record['confidence']
         pname = Name()
         if record['firstname']:
@@ -235,9 +236,10 @@ def lue_henkilot_k(keys=None):
         if record['suffix']:
             pname.patronyme = record['suffix']
         p.names.append(pname)
+    
+        # Events
 
         for event in record['events']:
- 
             e = Event_for_template()
             e.uniq_id = event[0]
             event_type = event[1]
@@ -754,11 +756,12 @@ def get_people_by_surname(surname):
 
 
 def get_person_data_by_id(uniq_id):
-    """ Get 4 data sets:
+    """ Get 5 data sets:
         person: uniq_id and name data
         events list: uniq_id, date, location name and id (?)
         photos
         sources
+        families
     """
     p = Person()
     p.uniq_id = uniq_id
@@ -857,11 +860,61 @@ def get_person_data_by_id(uniq_id):
         o.get_object_data_by_id()
                     
         photos.append(o)
-        
-    return (p, events, photos, sources)
+
+
+    # Families
+
+    # Returning a list of Family objects
+    # - which include a list of members (Person with 'role' attribute)
+    #   - Person includes a list of Name objects
+    families = []
+    fid = ''
+    f = None
+    result = Person.get_family_members(uniq_id)
+    for record in result:
+        # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id",
+        #      "gender", "birth_date", "names"]
+        if fid != record["f_uniq_id"]:
+            fid = record["f_uniq_id"]
+            if f:
+                families.append(f)
+            f = Family_for_template(fid)
+            f.id = record['family_id']
+
+        member = Person_as_member()    # A kind of Person
+        member.role = record["role"]
+        if record["m_id"]:
+            member.id = record["m_id"]
+        member.uniq_id = record["uniq_id"]
+        if record["m_id"]:
+            member.gender = record["gender"]
+        if record["birth_date"]:
+            member.birth = record["birth_date"]
+        if record["names"]:
+            for name in record["names"]:
+                # Got [[alt, ntype, firstname, surname, suffix]
+                n = Name()
+                n.alt = name[0]
+                n.type = name[1]
+                n.firstname = name[2]
+                n.surname = name[3]
+                n.suffix = name[4]
+                member.names.append(n)
+
+        if member.role == "CHILD":
+            f.children_data.append(member)
+        elif member.role == "FATHER":
+            f.father_data = member
+        elif member.role == "MOTHER":
+            f.mother_data = member
+    if f:
+        families.append(f)
+
+    return (p, events, photos, sources, families)
 
 
 def get_families_data_by_id(uniq_id):
+    # Sivua "table_families_by_id.html" varten
     families = []
     
     p = Person()

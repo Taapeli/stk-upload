@@ -1,4 +1,4 @@
-{# _myapp/templates/table1.html_ #}
+{# _myapp/templates/k_person.html_ #}
 {% extends "k_layout.html" %}
 {% block title %}henkilön tiedot{% endblock %}
 {% block body %}
@@ -146,216 +146,32 @@
             </table>
         </div>
 -->
-<!--    <div class="subsection" id="families">
+        <div class="subsection" id="families">
             <h4>Perheet</h4>
-            <table class="infolist fixed_subtables">
-                <tr class="BeginFamily">
-                    <td class="ColumnType">&nbsp</td>
-                    <td class="ColumnAttribute">&nbsp</td>
-                    <td class="ColumnValue"><a href="#" 
-                      title="Airola, Kalle Kustaa ent. Silius ja Serenius, Saimi Alli Zuleima muodostama perhe">Airola, Kalle Kustaa ent. Silius ja Serenius, Saimi Alli Zuleima muodostama perhe</a></td>
-                </tr>
-                <tr class="BeginFamily">
-                    <td class="ColumnType">Avioliitto</td>
-                    <td class="ColumnAttribute">Vaimo</td>
-                    <td class="ColumnValue">
-                        <a href="">Serenius, Saimi Alli Zuleima</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="ColumnType">&nbsp;</td>
-                    <td class="ColumnAttribute">&nbsp;</td>
-                    <td class="ColumnValue">
-                        <table class="infolist eventlist">
-                            <thead>
-                                <tr>
-                                    <th class="ColumnEvent">Tapahtuma</th>
-                                    <th class="ColumnDate">Päivämäärä</th>
-                                    <th class="ColumnPlace">Paikka</th>
-                                    <th class="ColumnDescription">Kuvaus</th>
-                                    <th class="ColumnNotes">Lisätiedot</th>
-                                    <th class="ColumnSources">Lähteet</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="ColumnEvent">
-                                    Avioliitto
-                                    </td>
-                                    <td class="ColumnDate">14.5.1912</td>
-                                    <td class="ColumnPlace">
-                                        <a href="#" title="Helsinki">
-                                        Helsinki
-                                        </a>
-                                    </td>
-                                    <td class="ColumnDescription">&nbsp;</td>
-                                    <td class="ColumnNotes">
-                                        <div>
-                                        </div>
-                                    </td>
-                                    <td class="ColumnSources">
-                                    &nbsp;
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="ColumnEvent">
-                                    Avioero
-                                    </td>
-                                    <td class="ColumnDate">18.2.1926</td>
-                                    <td class="ColumnPlace">
-                                        <a href="#" title="Helsinki">
-                                        Helsinki
-                                        </a>
-                                    </td>
-                                    <td class="ColumnDescription">&nbsp;</td>
-                                    <td class="ColumnNotes">
-                                        <div>
-                                            <i class="NoteType">
-                                            Yleistä
-                                            </i>
-                                            <div class="grampsstylednote">
-                                                <p>
-                                                Tähän Note
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="ColumnSources">
-                                     <a href="#sref3a">3a</a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                    <tr>
-                        <td class="ColumnType">&nbsp;</td>
-                        <td class="ColumnAttribute">Lapset (ei ohjelmoitu!)</td>
-                        <td class="ColumnValue">
-                            <ol>
-                                <li>
-                                    <a href="#">Airola, Maija Kyllikki</a>
-                                </li>
-                            </ol>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ColumnType">&nbsp;</td>
-                        <td class="ColumnAttribute">Ominaisuudet</td>
-                        <td class="ColumnValue">
-                            <table class="infolist attrlist">
-                                <thead>
-                                    <tr>
-                                        <th class="ColumnType">Tyyppi</th>
-                                        <th class="ColumnValue">Arvo</th>
-                                        <th class="ColumnNotes">Lisätiedot</th>
-                                        <th class="ColumnSources">Lähteet</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="ColumnType">Lasten lukumäärä</td>
-                                        <td class="ColumnValue">1</td>
-                                        <td class="ColumnNotes"><div></div></td>
-                                        <td class="ColumnSources">&nbsp;</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tr>
-                <tr class="BeginFamily">
-                    <td class="ColumnType">&nbsp</td>
-                    <td class="ColumnAttribute">&nbsp</td>
-                    <td class="ColumnValue"><a href="#"
-                      title="Airola, Kalle Kustaa ent. Silius ja Airola, Irja Tuulikki os. Kajander muodostama perhe">Airola, Kalle Kustaa ent. Silius ja Airola, Irja Tuulikki os. Kajander muodostama perhe</a></td>
-                </tr>
-                <tr class="BeginFamily">
-                    <td class="ColumnType">Avioliitto</td>
-                    <td class="ColumnAttribute">Vaimo</td>
-                    <td class="ColumnValue">
-                        <a href="#">Airola, Irja Tuulikki os. Kajander</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="ColumnType">&nbsp;</td>
-                    <td class="ColumnAttribute">&nbsp;</td>
-                    <td class="ColumnValue">
-                        <table class="infolist eventlist">
-                            <thead>
-                                <tr>
-                                    <th class="ColumnEvent">Tapahtuma</th>
-                                    <th class="ColumnDate">Päivämäärä</th>
-                                    <th class="ColumnPlace">Paikka</th>
-                                    <th class="ColumnDescription">Kuvaus</th>
-                                    <th class="ColumnNotes">Lisätiedot</th>
-                                    <th class="ColumnSources">Lähteet</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="ColumnEvent">
-                                    Avioliitto
-                                    </td>
-                                    <td class="ColumnDate">&nbsp;</td>
-                                    <td class="ColumnPlace">
-                                        <a href="#" title="Helsinki">
-                                        Helsinki
-                                        </a>
-                                    </td>
-                                    <td class="ColumnDescription">&nbsp;</td>
-                                    <td class="ColumnNotes">
-                                        <div>
-                                        </div>
-                                    </td>
-                                    <td class="ColumnSources">
-                                    &nbsp;
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                    <tr>
-                        <td class="ColumnType">&nbsp;</td>
-                        <td class="ColumnAttribute">Lapset</td>
-                        <td class="ColumnValue">
-                            <ol>
-                                <li>
-                                    <a href="#">Airola, Kalle Eero Ilmari</a>
-                                </li>
-                                <li>
-                                    <a href="#">Airola, Leena Irja Tuulikki</a>
-                                </li>
-                            </ol>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ColumnType">&nbsp;</td>
-                        <td class="ColumnAttribute">Ominaisuudet</td>
-                        <td class="ColumnValue">
-                            <table class="infolist attrlist">
-                                <thead>
-                                    <tr>
-                                        <th class="ColumnType">Tyyppi</th>
-                                        <th class="ColumnValue">Arvo</th>
-                                        <th class="ColumnNotes">Lisätiedot</th>
-                                        <th class="ColumnSources">Lähteet</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="ColumnType">Lasten lukumäärä</td>
-                                        <td class="ColumnValue">2</td>
-                                        <td class="ColumnNotes"><div></div></td>
-                                        <td class="ColumnSources">&nbsp;</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tr>
-            </table>
+            <ol>{% for fam in families %}
+		        <li>perhe<ul>
+		        {% if fam.father_data %}
+                        <li>Isä: {{fam.father_data.names[0].firstname}}  
+                            <i>{{fam.father_data.names[0].suffix}}</i>  
+                            <b>{{fam.father_data.names[0].surname}}</b>
+                            s. {{fam.father_data.birth_date}}</li>
+                {% endif %}{% if fam.mother_data %}
+                        <li>Äiti: {{fam.mother_data.names[0].firstname}}  
+                            <i>{{fam.mother_data.names[0].suffix}}</i>  
+                            <b>{{fam.mother_data.names[0].surname}}</b>
+                            s. {{fam.mother_data.birth_date}}</li>
+                {% endif %}{% if fam.children_data %}
+                        <li>Lapset<ol>{% for ch in fam.children_data %}
+	                        <li>{{ch.names[0].firstname}}  
+	                            <i>{{ch.names[0].suffix}}</i>  
+	                            <b>{{ch.names[0].surname}}</b>
+	                            s. {{ch.birth_date}}</li>
+	                     {% endfor %}</ol></li>
+	            {% endif %}
+			        </ul></li>
+            {% endfor %}</ol>
         </div>
--->
+
         <div class="subsection" id="indivgallery">
             <h4>Media</h4>
         {% for photo in photos %}<div class="thumbnail">
