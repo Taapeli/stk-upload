@@ -40,4 +40,11 @@
         </div>
     </div>
 {%- endmacro %}
+
+{% macro member(ch) -%}
+    <a href="/person/uniq_id={{ch.uniq_id}}" title="katso henkilön {{ch.id}} tiedot">
+      {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> <b>{{ch.names[0].surname}}</b></a>
+      s. {{ch.birth|pvm}}
+{%- endmacro %}
+
         

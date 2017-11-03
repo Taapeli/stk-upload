@@ -121,21 +121,12 @@
             <ol>{% for fam in families %}
 		        <li>perhe {{fam.id}}<ul>
 		        {% if fam.father %}
-                        <li>Isä: {{fam.father.names[0].firstname}}  
-                            <i>{{fam.father.names[0].suffix}}</i>  
-                            <b>{{fam.father.names[0].surname}}</b>
-                            s. {{fam.father.birth_date}}</li>
+                        <li>Isä: {{ macro.member(fam.father) }}</li>
                 {% endif %}{% if fam.mother %}
-                        <li>Äiti: {{fam.mother.names[0].firstname}}  
-                            <i>{{fam.mother.names[0].suffix}}</i>  
-                            <b>{{fam.mother.names[0].surname}}</b>
-                            s. {{fam.mother.birth_date}}</li>
+                        <li>Äiti: {{ macro.member(fam.mother) }}</li>
                 {% endif %}{% if fam.children %}
                         <li>Lapset<ol>{% for ch in fam.children %}
-	                        <li>{{chtype[ch.gender]}}: {{ch.names[0].firstname}}  
-	                            <i>{{ch.names[0].suffix}}</i>  
-	                            <b>{{ch.names[0].surname}}</b>
-	                            s. {{ch.birth_date}}</li>
+	                        <li>{{chtype[ch.gender]}}: {{ macro.member(ch) }}</li>
 	                     {% endfor %}</ol></li>
 	            {% endif %}
 			        </ul></li>

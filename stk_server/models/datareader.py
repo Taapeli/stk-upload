@@ -872,7 +872,7 @@ def get_person_data_by_id(uniq_id):
     f = None
     result = Person.get_family_members(uniq_id)
     for record in result:
-        # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id",
+        # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id", 
         #      "gender", "birth_date", "names"]
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]

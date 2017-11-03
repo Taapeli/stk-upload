@@ -96,7 +96,12 @@ def show_person_page(ehto):
             for f in families:
                 print ("Perhe {} / {}".format(f.uniq_id, f.id))
                 if f.mother:
-                    print("    Äiti: {} / {} s. ()".format(f.mother.uniq_id, f.mother.id))
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} s. {}".format(c.gender, c.uniq_id, c.id, c.birth))
         else:
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
