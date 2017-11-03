@@ -902,11 +902,11 @@ def get_person_data_by_id(uniq_id):
                 member.names.append(n)
 
         if member.role == "CHILD":
-            f.children_data.append(member)
+            f.children.append(member)
         elif member.role == "FATHER":
-            f.father_data = member
+            f.father = member
         elif member.role == "MOTHER":
-            f.mother_data = member
+            f.mother = member
     if f:
         families.append(f)
 
@@ -941,12 +941,12 @@ def get_families_data_by_id(uniq_id):
             father = Person()
             father.uniq_id = pf.father
             father.get_person_and_name_data_by_id()
-            f.father_data = father
+            f.father = father
             
             mother = Person()
             mother.uniq_id = pf.mother
             mother.get_person_and_name_data_by_id()
-            f.mother_data = mother
+            f.mother = mother
         
         spouse = Person()
         if p.gender == 'M':
@@ -954,13 +954,13 @@ def get_families_data_by_id(uniq_id):
         else:
             spouse.uniq_id = f.father
         spouse.get_person_and_name_data_by_id()
-        f.spouse_data = spouse
+        f.spouse = spouse
             
         for child_id in f.childref_hlink:
             child = Person()
             child.uniq_id = child_id
             child.get_person_and_name_data_by_id()
-            f.children_data.append(child)
+            f.children.append(child)
             
         families.append(f)
         

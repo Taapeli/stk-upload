@@ -114,55 +114,25 @@
                  </tbody>
             </table>
         </div>
-<!--    <div class="subsection" id="parents">
-            <h4>Vanhemmat</h4>
-            <table class="infolist">
-                <thead>
-                    <tr>
-                        <th class="ColumnAttribute">Suhde kotihenkilöön</th>
-                        <th class="ColumnValue">Nimi</th>
-                        <th class="ColumnValue">Suhde tähän perheeseen (jollei syntymän kautta)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-                <tr>
-                    <td class="ColumnAttribute">Isä</td>
-                    <td class="ColumnValue">
-                        <a href="#">Silius, Carl Gustaf</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="ColumnAttribute">Äiti</td>
-                    <td class="ColumnValue">
-                        <a href="#">Berttunen, Brita Kristina Eriksdotter</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="ColumnAttribute">&nbsp;&nbsp;&nbsp;&nbsp;Veli</td>
-                    <td class="ColumnValue">&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Silius, Knut</a></td>
-                    <td class="ColumnValue"></td>
-                </tr>
-            </table>
-        </div>
--->
+
         <div class="subsection" id="families">
             <h4>Perheet</h4>
+            {% set chtype = {"F":"tytär", "M":"poika", "":"lapsi"} %}
             <ol>{% for fam in families %}
-		        <li>perhe<ul>
-		        {% if fam.father_data %}
-                        <li>Isä: {{fam.father_data.names[0].firstname}}  
-                            <i>{{fam.father_data.names[0].suffix}}</i>  
-                            <b>{{fam.father_data.names[0].surname}}</b>
-                            s. {{fam.father_data.birth_date}}</li>
-                {% endif %}{% if fam.mother_data %}
-                        <li>Äiti: {{fam.mother_data.names[0].firstname}}  
-                            <i>{{fam.mother_data.names[0].suffix}}</i>  
-                            <b>{{fam.mother_data.names[0].surname}}</b>
-                            s. {{fam.mother_data.birth_date}}</li>
-                {% endif %}{% if fam.children_data %}
-                        <li>Lapset<ol>{% for ch in fam.children_data %}
-	                        <li>{{ch.names[0].firstname}}  
+		        <li>perhe {{fam.id}}<ul>
+		        {% if fam.father %}
+                        <li>Isä: {{fam.father.names[0].firstname}}  
+                            <i>{{fam.father.names[0].suffix}}</i>  
+                            <b>{{fam.father.names[0].surname}}</b>
+                            s. {{fam.father.birth_date}}</li>
+                {% endif %}{% if fam.mother %}
+                        <li>Äiti: {{fam.mother.names[0].firstname}}  
+                            <i>{{fam.mother.names[0].suffix}}</i>  
+                            <b>{{fam.mother.names[0].surname}}</b>
+                            s. {{fam.mother.birth_date}}</li>
+                {% endif %}{% if fam.children %}
+                        <li>Lapset<ol>{% for ch in fam.children %}
+	                        <li>{{chtype[ch.gender]}}: {{ch.names[0].firstname}}  
 	                            <i>{{ch.names[0].suffix}}</i>  
 	                            <b>{{ch.names[0].surname}}</b>
 	                            s. {{ch.birth_date}}</li>
