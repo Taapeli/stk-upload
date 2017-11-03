@@ -529,17 +529,20 @@ ORDER BY name.surname, name.firstname"""
         """
 
         query="""
-MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-->(n:Name)
-    WHERE ID(p) = $id
-OPTIONAL MATCH (m)-->(birth {type:'Birth'})
-WITH f.id AS family_id, ID(f) AS f_uniq_id, 
-    TYPE(r) AS role, ID(m) AS m_id, ID(m) AS uniq_id, m.gender AS gender,
-    birth.date AS birth_date, 
-    n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx
-ORDER BY n.alt
-RETURN family_id, f_uniq_id, role, m_id, uniq_id, gender, birth_date,
-    COLLECT([alt, ntype, fn, sn, sx]) AS names
-ORDER BY family_id, role, birth_date"""
+MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-->(n:Name) WHERE ID(p) = $id
+    OPTIONAL MATCH (m)-->(birth {type:'Birth'})
+    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
+        TYPE(r) AS role, m.id AS m_id, ID(m) AS uniq_id, 
+        m.gender AS gender, birth.date AS birth_date, 
+        n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx
+    ORDER BY n.alt
+    RETURN family_id, f_uniq_id, role, m_id, uniq_id, gender, birth_date,
+        COLLECT([alt, ntype, fn, sn, sx]) AS names
+    ORDER BY family_id, role, birth_date
+UNION 
+MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
+    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(l) AS role, p.id AS m_id, ID(p) AS uniq_id, 
+        p.gender AS gender, "" AS birth_date, [] AS names"""
 
 # ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤════════════╤══════════════════════════════╕
 # │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"│"names"                       │
@@ -976,6 +979,7 @@ class Person_as_member(Person):
         """ Luo uuden instanssin """
         Person.__init__(self)
         self.role = ''
+        self.birth_date = ''
 
 
 class Name:

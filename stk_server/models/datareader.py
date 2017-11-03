@@ -867,19 +867,17 @@ def get_person_data_by_id(uniq_id):
     # Returning a list of Family objects
     # - which include a list of members (Person with 'role' attribute)
     #   - Person includes a list of Name objects
-    families = []
+    families = {}
     fid = ''
-    f = None
     result = Person.get_family_members(uniq_id)
     for record in result:
         # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id", 
         #      "gender", "birth_date", "names"]
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]
-            if f:
-                families.append(f)
-            f = Family_for_template(fid)
-            f.id = record['family_id']
+            if not fid in families:
+                families[fid] = Family_for_template(fid)
+                families[fid].id = record['family_id']
 
         member = Person_as_member()    # A kind of Person
         member.role = record["role"]
@@ -889,7 +887,7 @@ def get_person_data_by_id(uniq_id):
         if record["m_id"]:
             member.gender = record["gender"]
         if record["birth_date"]:
-            member.birth = record["birth_date"]
+            member.birth_date = record["birth_date"]
         if record["names"]:
             for name in record["names"]:
                 # Got [[alt, ntype, firstname, surname, suffix]
@@ -902,15 +900,16 @@ def get_person_data_by_id(uniq_id):
                 member.names.append(n)
 
         if member.role == "CHILD":
-            f.children.append(member)
+            families[fid].children.append(member)
         elif member.role == "FATHER":
-            f.father = member
+            families[fid].father = member
         elif member.role == "MOTHER":
-            f.mother = member
-    if f:
-        families.append(f)
+            families[fid].mother = member
 
-    return (p, events, photos, sources, families)
+    family_list = []
+    for i in families.keys():
+        family_list.append(families[i])
+    return (p, events, photos, sources, family_list)
 
 
 def get_families_data_by_id(uniq_id):

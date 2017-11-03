@@ -95,8 +95,11 @@ img#logo {
     vertical-align: text-top;
 }
 .id { color: sienna; text-align: right; }
+.inlink { color: #000066; background: LemonChiffon; }
+.outlink { text-decoration: underline; }
 .refname { color:gray; text-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
+.myself { color: white; background: #555; font-style: italic; }
 td.numbers {
     text-align: right;
     padding-right: 2em;
