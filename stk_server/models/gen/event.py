@@ -463,29 +463,14 @@ MERGE (n)-[r:OBJECT]->(m)"""
 
 
 
-
 class Event_for_template(Event):
     """ Template-tapahtuma perii Tapahtuma-luokan
             
         Properties:
-                place              str paikka
-                
+                place              str paikan nimi
     """
 
     def __init__(self, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
-        self.handle = handle
-        self.change = ''
-        self.id = eid
-        self.description = desc
-        self.date = ''
-        self.datetype = ''
-        self.daterange_start = ''
-        self.daterange_stop = ''
+        Event.__init__(self, eid, desc, handle)
         self.place = ''
-        self.place_hlink = ''
-        self.attr_type = ''
-        self.attr_value = ''
-        self.noteref_hlink = ''
-        self.citationref_hlink = ''
-        self.objref_hlink = ''

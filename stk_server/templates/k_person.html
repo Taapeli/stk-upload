@@ -20,12 +20,15 @@
             <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
             <!-- sup><small> <a href="#sref1a">1a</a></small></sup -->
         </h3>
-
+        {% set myid = person.uniq_id|int %}
+        {# set mybirth = "" %}{% for e in events %}
+            {% if e.type == "Birth" %}{% set mybirth = e.date %}{% endif %}{% endfor #}
+        
         <div id="summaryarea">
             <table>
                 <tr>
                     <td class="ColumnAttribute">Tunnisteet</td>
-                    <td class="ColumnValue"><span class="id">{{person.uniq_id}}</span> / <tt>{{person.id}}</tt></td>
+                    <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                 </tr>
                 {% for pname in person.names %}<tr>
                     <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
@@ -91,7 +94,7 @@
                            {% elif e.daterange %}{{e.daterange}}{% endif %}
 						</td>
                         <td class="ColumnPlace">
-                            <a href="/events/loc={{e.locid}}" 
+                            <a href="/events/loc={{e.locid}}" class="inlink"
                             title="tyyppiä {{e.ltype}}; katso paikan tiedot">
                             {{e.location}}</a>
                         </td>
@@ -114,59 +117,28 @@
                  </tbody>
             </table>
         </div>
-<!--    <div class="subsection" id="parents">
-            <h4>Vanhemmat</h4>
-            <table class="infolist">
-                <thead>
-                    <tr>
-                        <th class="ColumnAttribute">Suhde kotihenkilöön</th>
-                        <th class="ColumnValue">Nimi</th>
-                        <th class="ColumnValue">Suhde tähän perheeseen (jollei syntymän kautta)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-                <tr>
-                    <td class="ColumnAttribute">Isä</td>
-                    <td class="ColumnValue">
-                        <a href="#">Silius, Carl Gustaf</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="ColumnAttribute">Äiti</td>
-                    <td class="ColumnValue">
-                        <a href="#">Berttunen, Brita Kristina Eriksdotter</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="ColumnAttribute">&nbsp;&nbsp;&nbsp;&nbsp;Veli</td>
-                    <td class="ColumnValue">&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Silius, Knut</a></td>
-                    <td class="ColumnValue"></td>
-                </tr>
-            </table>
-        </div>
--->
+
         <div class="subsection" id="families">
             <h4>Perheet</h4>
+            {% set chtype = {"F":"tytär", "M":"poika", "":"lapsi"} %}
+            <div title="Perheet">
+                <div title="Vanhempien perhe">
+                </div>
+                <div title="Itse">
+                </div>
+                <div title="Omat perheet">
+                </div>
+            </div>
             <ol>{% for fam in families %}
-		        <li>perhe<ul>
-		        {% if fam.father_data %}
-                        <li>Isä: {{fam.father_data.names[0].firstname}}  
-                            <i>{{fam.father_data.names[0].suffix}}</i>  
-                            <b>{{fam.father_data.names[0].surname}}</b>
-                            s. {{fam.father_data.birth_date}}</li>
-                {% endif %}{% if fam.mother_data %}
-                        <li>Äiti: {{fam.mother_data.names[0].firstname}}  
-                            <i>{{fam.mother_data.names[0].suffix}}</i>  
-                            <b>{{fam.mother_data.names[0].surname}}</b>
-                            s. {{fam.mother_data.birth_date}}</li>
-                {% endif %}{% if fam.children_data %}
-                        <li>Lapset<ol>{% for ch in fam.children_data %}
-	                        <li>{{ch.names[0].firstname}}  
-	                            <i>{{ch.names[0].suffix}}</i>  
-	                            <b>{{ch.names[0].surname}}</b>
-	                            s. {{ch.birth_date}}</li>
-	                     {% endfor %}</ol></li>
+		        <li>perhe {{fam.id}}<ul>
+		        {% if fam.father %}
+                        <li>Isä: {{ macro.member(fam.father, myid) }}</li>
+                {% endif %}{% if fam.mother %}
+                        <li>Äiti: {{ macro.member(fam.mother, myid) }}</li>
+                {% endif %}{% if fam.children|count %}
+                        <li>Lapset<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
+	                        <li>{{chtype[ch.gender]}}: {{ macro.member(ch, myid) }}</li>
+	                     {% endfor %}</ul></li>
 	            {% endif %}
 			        </ul></li>
             {% endfor %}</ol>
@@ -267,7 +239,7 @@
             			{% for repo in record.repos %}
             				{{repo.rname}}:
              			{% endfor %}
-             			<a href="/events/source={{record.uniq_id}}" class="id"
+             			<a href="/events/source={{record.uniq_id}}" class="inlink"
 	                     title="katso lähteen {{record.uniq_id}} tiedot">{{record.stitle}}</a>
              		{% endfor %}
                      <ol>
@@ -280,7 +252,7 @@
                             Sivu: {{source.page}} &nbsp;
                             {{ macro.stars(conf) }}
                            {% if source.notetext %}<br>
-                              <a href="{{source.notetext}}" target="_blank"
+                              <a href="{{source.notetext}}" class="outlink" target="_blank"
                               {% if source.confidence and source.confidence < "2" %}
                              style="color:red"{% endif %}>{{ source.notetext }}</a>{% endif %}                           
                         </li>

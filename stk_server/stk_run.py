@@ -92,7 +92,16 @@ def show_person_page(ehto):
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)            
+                models.datareader.get_person_data_by_id(value)
+            for f in families:
+                print ("Perhe {} / {}".format(f.uniq_id, f.id))
+                if f.mother:
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
