@@ -766,7 +766,7 @@ def get_person_data_by_id(uniq_id):
         families
     """
     p = Person()
-    p.uniq_id = uniq_id
+    p.uniq_id = int(uniq_id)
     #.get_person_and_name_data_by_id()
     p.get_person_w_names()
     p.get_hlinks_by_id()
@@ -775,6 +775,9 @@ def get_person_data_by_id(uniq_id):
     sources = []
     source_cnt = 0
     mybirth = ''
+
+    # Events
+
     for i in range(len(p.eventref_hlink)):
         e = Event_for_template()
         e.uniq_id = p.eventref_hlink[i]
@@ -807,11 +810,12 @@ def get_person_data_by_id(uniq_id):
                 e.notetext = record["note"]["text"]
                 
         events.append(e)
-        
+
+        # Citations
+
         if e.citationref_hlink != '':
             citation = Citation()
             citation.uniq_id = e.citationref_hlink
-            
             # If there is already the same citation on the list,
             # use that index
             citation_ind = -1
@@ -819,16 +823,14 @@ def get_person_data_by_id(uniq_id):
                 if sources[i].uniq_id == citation.uniq_id:
                     citation_ind = i + 1
                     break
-                
-            # Citation found
             if citation_ind > 0:
+                # Citation found
                 e.source = citation_ind
             else: # Store the new source to the list
                 source_cnt += 1
                 e.source = source_cnt
-            
+
                 result = citation.get_source_repo(citation.uniq_id)
-                
                 for record in result:
                     citation.dateval = record['date']
                     citation.page = record['page']
@@ -861,9 +863,7 @@ def get_person_data_by_id(uniq_id):
         o = Object()
         o.uniq_id = link
         o.get_object_data_by_id()
-                    
         photos.append(o)
-
 
     # Families
 
@@ -872,7 +872,7 @@ def get_person_data_by_id(uniq_id):
     #   - Person includes a list of Name objects
     families = {}
     fid = ''
-    result = Person.get_family_members(uniq_id)
+    result = Person.get_family_members(p.uniq_id)
     for record in result:
         # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id", 
         #      "gender", "birth_date", "names"]
@@ -887,7 +887,14 @@ def get_person_data_by_id(uniq_id):
         if record["m_id"]:
             member.id = record["m_id"]
         member.uniq_id = record["uniq_id"]
-        if record["m_id"]:
+        if member.uniq_id == p.uniq_id:
+            # What kind of family this is? I am a Child or Parent in family
+            if member.role == "CHILD":
+                families[fid].role = "CHILD"
+            else:
+                families[fid].role = "PARENT"
+
+        if record["gender"]:
             member.gender = record["gender"]
         if record["birth_date"]:
             member.birth_date = record["birth_date"]
@@ -909,9 +916,7 @@ def get_person_data_by_id(uniq_id):
         elif member.role == "MOTHER":
             families[fid].mother = member
 
-    family_list = []
-    for i in families.keys():
-        family_list.append(families[i])
+    family_list = list(families.values())
     return (p, events, photos, sources, family_list)
 
 

@@ -94,7 +94,7 @@ def show_person_page(ehto):
             person, events, photos, sources, families = \
                 models.datareader.get_person_data_by_id(value)
             for f in families:
-                print ("Perhe {} / {}".format(f.uniq_id, f.id))
+                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
                     print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
                 if f.father:
