@@ -238,15 +238,17 @@ class Family_for_template(Family):
         sivua table_families_by_id.html varten
             
         Properties:
-                father     Person isän tiedot
-                mother     Person äidin tiedot
-                spouse     Person puolisoiden tiedot
-                children[] Person lasten tiedot
+                role        str    henkilön rooli perheessä: "Child", "Parent"
+                father      Person isän tiedot
+                mother      Person äidin tiedot
+                spouse      Person puolisoiden tiedot
+                children[]  Person lasten tiedot
      """
 
     def __init__(self, uniq_id=None):
         """ Luo uuden family_for_template-instanssin """
         Family.__init__(self, uniq_id)
+        self.role = ""
         self.father = None
         self.mother = None
         self.spouse = None
