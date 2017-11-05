@@ -11,7 +11,7 @@ from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
-from models.gen.object import Object
+from models.gen.media import Media
 from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
@@ -513,16 +513,16 @@ def read_cite_sour_repo(uniq_id=None):
     return (sources)
 
 
-def read_objects(uniq_id=None):
-    """ Lukee tietokannasta Object- objektit näytettäväksi
+def read_medias(uniq_id=None):
+    """ Lukee tietokannasta Media- objektit näytettäväksi
 
     """
     
-    objects = []
-    result = Object.get_objects(uniq_id)
+    media = []
+    result = Media.get_medias(uniq_id)
     for record in result:
         pid = record['uniq_id']
-        o = Object()
+        o = Media()
         o.uniq_id = pid
         if record['o']['src']:
             o.src = record['o']['src']
@@ -531,9 +531,9 @@ def read_objects(uniq_id=None):
         if record['o']['description']:
             o.description = record['o']['description']
  
-        objects.append(o)
+        media.append(o)
 
-    return (objects)
+    return (media)
 
 
 def read_repositories(uniq_id=None):
@@ -860,9 +860,9 @@ def get_person_data_by_id(uniq_id):
             
     photos = []
     for link in p.objref_hlink:
-        o = Object()
+        o = Media()
         o.uniq_id = link
-        o.get_object_data_by_id()
+        o.get_data()
         photos.append(o)
 
     # Families
@@ -1272,17 +1272,17 @@ def handle_notes(collection, tx):
     return(msg)
 
 
-def handle_objects(collection, tx):
-    # Get all the objects in the collection
-    objects = collection.getElementsByTagName("object")
+def handle_media(collection, tx):
+    # Get all the media in the collection (in Gramps 'object')
+    media = collection.getElementsByTagName("object")
 
-    print ("*****Objects*****")
+    print ("*****Media*****")
     counter = 0
 
-    # Print detail of each object
-    for obj in objects:
+    # Print detail of each media object
+    for obj in media:
         
-        o = Object()
+        o = Media()
 
         if obj.hasAttribute("handle"):
             o.handle = obj.getAttribute("handle")
@@ -1304,7 +1304,7 @@ def handle_objects(collection, tx):
         o.save(tx)
         counter += 1
         
-    msg = "Objects stored: " + str(counter)
+    msg = "Media objects stored: " + str(counter)
         
     return(msg)
 
@@ -1638,7 +1638,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     msg.append(str(result))
     print(str(result))
     tx = user.beginTransaction()
-    result = handle_objects(collection, tx)
+    result = handle_media(collection, tx)
     user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))

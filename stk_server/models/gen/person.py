@@ -115,9 +115,9 @@ RETURN ID(family) AS uniq_id"""
             self.eventref_hlink.append(event_record["eventref_hlink"])
             self.eventref_role.append(event_record["eventref_role"])
 
-        object_result = self.get_object_id()
-        for object_record in object_result:            
-            self.objref_hlink.append(object_record["objref_hlink"])
+        media_result = self.get_media_id()
+        for media_record in media_result:            
+            self.objref_hlink.append(media_record["objref_hlink"])
 
         family_result = self.get_parentin_id()
         for family_record in family_result:            
@@ -130,11 +130,11 @@ RETURN ID(family) AS uniq_id"""
         return True
     
     
-    def get_object_id(self):
+    def get_media_id(self):
         """ Luetaan henkilön tallenteen id """
         
         query = """
-            MATCH (person:Person)-[r:OBJECT]->(obj:Object) 
+            MATCH (person:Person)-[r:MEDIA]->(obj:Media) 
                 WHERE ID(person)={}
                 RETURN ID(obj) AS objref_hlink
             """.format(self.uniq_id)
@@ -923,33 +923,22 @@ SET r.role =$role"""
                 except Exception as err:
                     print("Virhe (Person.save:Event 2): {0}".format(err), file=stderr)
    
-        # Make relations to the Object node
+        # Make relations to the Media node
         if len(self.objref_hlink) > 0:
             for i in range(len(self.objref_hlink)):
                 try:
                     objref_hlink = self.objref_hlink[i]
                     query = """
 MATCH (n:Person)   WHERE n.gramps_handle=$handle
-MATCH (m:Object) WHERE m.gramps_handle=$objref_hlink
-MERGE (n)-[r:OBJECT]->(m)"""
+MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
+MERGE (n)-[r:MEDIA]->(m)"""
                     tx.run(query, 
                            {"handle": handle, "objref_hlink": objref_hlink})
                 except Exception as err:
-                    print("Virhe (Person.save:Object): {0}".format(err), file=stderr)
+                    print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
    
-        # Make relations to the Family node
-        # This is done in Family.save(), because the Family object is not yet created
-#        if len(self.parentin_hlink) > 0:
-#            for i in range(len(self.parentin_hlink)):
-#                try:
-#                    query = """
-#                        MATCH (n:Person) WHERE n.gramps_handle='{}'
-#                        MATCH (m:Family) WHERE m.gramps_handle='{}'
-#                        MERGE (n)-[r:FAMILY]->(m)
-#                        """.format(self.handle, self.parentin_hlink[i])
-#                    g.driver.session().run(query)
-#                except Exception as err:
-#                    print("Virhe: {0}".format(err), file=stderr)
+        # Make relations to the Family node will be done in Family.save(),
+        # because the Family object is not yet created
    
         # Make relations to the Citation node
         if len(self.citationref_hlink) > 0:
