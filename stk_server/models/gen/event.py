@@ -452,8 +452,8 @@ MERGE (n)-[r:CITATION]->(m)"""
                 objref_hlink = self.objref_hlink
                 query = """
 MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Object) WHERE m.gramps_handle=$objref_hlink
-MERGE (n)-[r:OBJECT]->(m)"""                       
+MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
+MERGE (n)-[r:Media]->(m)"""                       
                 tx.run(query, 
                {"handle": handle, "objref_hlink": objref_hlink})
         except Exception as err:

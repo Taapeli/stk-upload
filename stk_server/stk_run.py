@@ -189,10 +189,10 @@ def nayta_henkilot(subj):
         return render_template("table_of_data.html", 
                                headings=("Huomautusluettelo", "Note-kohteet"),
                                titles=titles, lists=lists)
-    elif subj == 'objects':
-        objects = models.datareader.read_objects()
-        return render_template("table_objects.html", 
-                               objects=objects)
+    elif subj == 'media':
+        media = models.datareader.read_medias()
+        return render_template("table_media.html", 
+                               media=media)
     elif subj == 'people_wo_birth':
         headings, titles, lists = models.datareader.read_people_wo_birth()
         return render_template("table_of_data.html", 
