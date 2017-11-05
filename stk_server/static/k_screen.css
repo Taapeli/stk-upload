@@ -154,20 +154,21 @@ a[href]:hover, a[href]:active {
 
 /* Search form (31.10.2017/JMä)
 ----------------------------------------------------- */
-#searchform {
+/*#searchform {
     background: #999;
     color: white;
     margin-left: 3em;
     margin-bottom: 1em;
     padding: 3px;
     max-width: 40em;
-}
+}*/
 #searching {
     margin: 1em;
     border: 1px solid #CCC;
     padding: 1em;
-    background: white;
+    background-color: bisque;
     color: black;
+    max-width: 30em;
 }
 .flashes {
     font-size: 80%;

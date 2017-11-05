@@ -13,18 +13,16 @@
             <p id="description">
     Tällä sivulla on luettelo {{persons|count}} henkilönimestä mahdollisen 
     sukunimen mukaan lajiteltuna.<br> 
-    Henkilön nimen napsauttaminen vie sinut valitun henkilön sivulle. 
+    Nimen napsauttaminen vie sinut valitun henkilön sivulle. 
     Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.
             </p>
-			<details id="searchform" {% if not persons|count %} open{% endif %}>
-			  <summary><b>Rajaa</b> näytettävät henkilöt</summary>
-			  <div id="searching">
+            {% if selection %}<h3>Valitse näytettävät ihmiset</h3>
+			<div id="searching">
 			    <form  action="/person/list/" method="post">
                   <p>Haku tapahtuu annetun sanan alkuosalla, 
                      esim. "Sib" osuu nimeen "Sibbe".</p>
                   <label for="snam">Hakusana (alkuosa)&nbsp; </label>
-                    <input type="text" name="name" id="snam" required>
-                    <!--input type="text" name="name" id="snam" required--><br>
+                    <input type="text" name="name" id="snam" required><br>
                   <input type="radio" name="rule" id="ssur" value="surname" checked>
                     <label for="ssur">Sukunimi</label>
                   <input type="radio" name="rule" id="sfir" value="firstname">
@@ -33,8 +31,8 @@
                     <label for="ssuf">Patronyymi</label>
 				  <input type="submit" value="Hae">
 			    </form>
-			  <div>		  
-			</details>
+			</div>		  
+			{% endif %}
 
 	        {% with messages = get_flashed_messages(with_categories=true) %}
 	          {% if messages %}

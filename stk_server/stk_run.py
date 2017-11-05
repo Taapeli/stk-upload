@@ -57,7 +57,7 @@ def refnames():
 @app.route('/person/list/<string:selection>')   # <-- Ei käytössä?
 @app.route('/person/list/', methods=['POST', 'GET'])
 def show_person_list(selection=None):   
-    """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
+    """ Valittujen tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     models.dbutil.connect_db()
     if request.method == 'POST':
         try:
@@ -78,8 +78,17 @@ def show_person_list(selection=None):
         keys = selection.split('=')
     else:
         keys = ('all',)
+    persons = [] #models.datareader.lue_henkilot_k(keys)
+    return render_template("k_persons.html", persons=persons, selection=keys)
+
+
+@app.route('/person/list_all')
+def show_all_persons_list(selection=None):   
+    """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
+    models.dbutil.connect_db()
+    keys = ('all',)
     persons = models.datareader.lue_henkilot_k(keys)
-    return render_template("k_persons.html", persons=persons, selection=(keys))
+    return render_template("k_persons.html", persons=persons, selection=None)
 
 
 @app.route('/person/<string:ehto>')
@@ -163,11 +172,10 @@ def nayta_henkilot(subj):
         # Kertova-tyyliin
         persons = models.datareader.lue_henkilot_k()
         return render_template("k_persons.html", persons=persons)
-    elif subj == "henkilot":
+    if subj == "henkilot":
         # dburi vain tiedoksi!
         dbloc = g.driver.address
         dburi = ':'.join((dbloc[0],str(dbloc[1])))
-
         persons = models.datareader.lue_henkilot()
         return render_template("table_persons.html", persons=persons, uri=dburi)
     elif subj == "henkilot2":
