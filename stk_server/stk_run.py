@@ -54,7 +54,6 @@ def refnames():
 """ ----------------------------- Kertova-sivut --------------------------------
 """
 
-@app.route('/person/list/<string:selection>')   # <-- Ei käytössä?
 @app.route('/person/list/', methods=['POST', 'GET'])
 def show_person_list(selection=None):   
     """ Valittujen tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
@@ -66,7 +65,7 @@ def show_person_list(selection=None):
             rule = request.form['rule']
             keys = (rule, name)
             persons = models.datareader.lue_henkilot_k(keys)
-            return render_template("k_persons.html", persons=persons, selection=keys)
+            return render_template("k_persons.html", persons=persons, menuno=0)
         except Exception:
             flash("Ei oikeita hakukenttiä", category='warning')
 
@@ -79,7 +78,7 @@ def show_person_list(selection=None):
     else:
         keys = ('all',)
     persons = [] #models.datareader.lue_henkilot_k(keys)
-    return render_template("k_persons.html", persons=persons, selection=keys)
+    return render_template("k_persons.html", persons=persons, menuno=0)
 
 
 @app.route('/person/list_all')
@@ -88,7 +87,7 @@ def show_all_persons_list(selection=None):
     models.dbutil.connect_db()
     keys = ('all',)
     persons = models.datareader.lue_henkilot_k(keys)
-    return render_template("k_persons.html", persons=persons, selection=None)
+    return render_template("k_persons.html", persons=persons, menuno=1)
 
 
 @app.route('/person/<string:ehto>')
