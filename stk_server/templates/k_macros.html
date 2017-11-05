@@ -24,18 +24,20 @@
     <div class="wrapper" id="nav" role="navigation">
         <div class="container">
             <ul class="menu" id="dropmenu">
-                <li{% if value == 1 %} class="CurrentSection"
-                  {% endif %}><a href="/lista/k_persons" title="Henkilöt">Henkilöt</a></li>
+                <li{% if value == 0 %} class="CurrentSection"
+                  {% endif %}><a href="/person/list/" title="Etsi ihmisiä">Haku</a></li>
+                <li{% if value == 1 %}
+                  {% endif %}><a href="/person/list_all" title="Kaikki henkilöt">Ihmiset</a></li>
                 <li{% if value == 2 %} class="CurrentSection"
-                  {% endif %}><a href="#" title="Sukunimet">Nimet</a></li>
+                  {% endif %}><a href="#" class="dimmed" title="Sukunimet">Nimet</a></li>
                 <li{% if value == 3 %} class="CurrentSection"
-                  {% endif %}><a href="#" title="Perheet">Perheet</a></li>
+                  {% endif %}><a href="#" class="dimmed" title="Perheet">Perheet</a></li>
                 <li{% if value == 4 %} class="CurrentSection"
                   {% endif %}><a href="/lista/k_locations" title="Paikat">Paikat</a></li>
                 <li{% if value == 5 %} class="CurrentSection"
                   {% endif %}><a href="/lista/k_sources" title="Lähteet">Lähteet</a></li>
                 <li{% if value == 6 %} class="CurrentSection"
-                  {% endif %}><a href="#" title="Pikkukuvat">Kuvat</a></li>
+                  {% endif %}><a href="#" class="dimmed" title="Pikkukuvat">Kuvat</a></li>
             </ul>
         </div>
     </div>
