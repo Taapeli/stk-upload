@@ -180,8 +180,8 @@ class Place:
         
         query = """
 MATCH (a:Place) 
-OPTIONAL MATCH (a:Place)-->(up:Place) 
-OPTIONAL MATCH (a:Place)<--(do:Place) 
+OPTIONAL MATCH (a:Place)-[:HIERARCY]->(up:Place) 
+OPTIONAL MATCH (a:Place)<-[:HIERARCY]-(do:Place) 
 RETURN ID(a) AS id, a.type AS type, a.pname AS name,
        a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
        COLLECT([ID(up), up.type, up.pname]) AS upper, 
