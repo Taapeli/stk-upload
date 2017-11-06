@@ -72,7 +72,8 @@ RETURN ID(c) AS citationref_hlink"""
             where = ''
         
         query = """
- MATCH (event:Event)-[a]->(citation:Citation)-[b]->(source:Source)-[c]->(repo:Repository) {0}
+ MATCH (event:Event)-[a:CITATION]->(citation:Citation)
+         -[b:SOURCE]->(source:Source)-[c:REPOSITORY]->(repo:Repository) {0}
  RETURN ID(event) AS id, event.type AS type, event.date AS date, event.datetype AS datetype, 
     event.daterange_start AS daterange_start, event.daterange_stop AS daterange_stop, 
     COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence,
@@ -93,7 +94,7 @@ RETURN ID(c) AS citationref_hlink"""
             where = ''
         
         query = """
- MATCH (event:Event)-[a]->(citation:Citation) {0}
+ MATCH (event:Event)-[a:CITATION]->(citation:Citation) {0}
  RETURN ID(event) AS id, event.type AS type, event.date AS date, event.datetype AS datetype, 
     event.daterange_start AS daterange_start, event.daterange_stop AS daterange_stop, 
     COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence] ) AS sources

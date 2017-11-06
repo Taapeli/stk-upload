@@ -393,7 +393,7 @@ RETURN person, COLLECT(name) AS names
 
         query = """
  MATCH (person:Person)
- OPTIONAL MATCH (person)-->(event:Event)-[r]->(c:Citation)
+ OPTIONAL MATCH (person)-[:EVENT]->(event:Event)-[r:CITATION]->(c:Citation)
  RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
                 
         return g.driver.session().run(query)
@@ -455,8 +455,8 @@ RETURN person, COLLECT(name) AS names
 #  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
 
         query = """
- MATCH (n:Person)-->(k:Name) {0}
- OPTIONAL MATCH (n)-[r]->(e) 
+ MATCH (n:Person)-[:NAME]->(k:Name) {0}
+ OPTIONAL MATCH (n)-[r:EVENT]->(e) 
  RETURN n.id, k.firstname, k.surname,
   COLLECT([e.name, e.kind]) AS events
  ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
@@ -493,8 +493,8 @@ RETURN person, COLLECT(name) AS names
 # │       │      │      │     │         │          │toimi","1760","","","",null]] │
 # ├───────┼──────┼──────┼─────┼─────────┼──────────┼──────────────────────────────┤
         qend="""
- OPTIONAL MATCH (person)-->(event:Event)
- OPTIONAL MATCH (event)-->(place:Place)
+ OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
+ OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
 RETURN ID(person) AS id, person.confidence AS confidence,
     name.firstname AS firstname, 
     name.refname AS refname, name.surname AS surname, 
@@ -505,22 +505,22 @@ ORDER BY name.surname, name.firstname"""
 
         if rule == "uniq_id":
             # Person selected by uniq_id
-            query = "MATCH (person:Person)-->(name:Name) WHERE ID(person)=$id"
-            return g.driver.session().run(query + qend, id=int(name))
+            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE ID(person)=$id" + qend
+            return g.driver.session().run(query, id=int(name))
         if rule == 'all':
-            query = "MATCH (person:Person)-->(name:Name)"
-            return g.driver.session().run(query + qend)
+            query = "MATCH (person:Person)-[:NAME]->(name:Name)" + qend
+            return g.driver.session().run(query)
         if rule == "surname":
-            query = "MATCH (person:Person)-->(name:Name) WHERE name.surname STARTS WITH $id"
+            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.surname STARTS WITH $id" + qend
         elif rule == "firstname":
-            query = "MATCH (person:Person)-->(name:Name) WHERE name.firstname STARTS WITH $id"
+            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.firstname STARTS WITH $id" + qend
         elif rule == "suffix":
-            query = "MATCH (person:Person)-->(name:Name) WHERE name.suffix STARTS WITH $id"
+            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.suffix STARTS WITH $id" + qend
         else:
             print ("Tätä rajausta ei ole vielä tehty: " + rule)
             return None
         # All with string argument
-        return g.driver.session().run(query + qend, id=name)
+        return g.driver.session().run(query, id=name)
 
 
     @staticmethod       
@@ -529,8 +529,8 @@ ORDER BY name.surname, name.firstname"""
         """
 
         query="""
-MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-->(n:Name) WHERE ID(p) = $id
-    OPTIONAL MATCH (m)-->(birth {type:'Birth'})
+MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-[:NAME]->(n:Name) WHERE ID(p) = $id
+    OPTIONAL MATCH (m)-[:EVENT]->(birth {type:'Birth'})
     WITH f.id AS family_id, ID(f) AS f_uniq_id, 
         TYPE(r) AS role, m.id AS m_id, ID(m) AS uniq_id, 
         m.gender AS gender, birth.date AS birth_date, 

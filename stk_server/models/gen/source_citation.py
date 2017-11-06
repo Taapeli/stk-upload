@@ -51,8 +51,8 @@ class Citation:
             where = ''
         
         query = """
- MATCH (citation:Citation)-[r]->(source:Source)-[p]->(repo:Repository) {0}
- OPTIONAL MATCH (citation)-[n]->(note:Note)
+ MATCH (citation:Citation)-[r:SOURCE]->(source:Source)-[p:REPOSITORY]->(repo:Repository) {0}
+ OPTIONAL MATCH (citation)-[n:NOTE]->(note:Note)
    WITH citation, r, source, p, repo ORDER BY citation.page, note
  RETURN ID(citation) AS id, citation.dateval AS date, citation.page AS page, 
      citation.confidence AS confidence, note.text AS notetext,
@@ -68,7 +68,7 @@ class Citation:
         """
         
         query = """
- MATCH (citation:Citation)-[r]->(source:Source) WHERE ID(citation)={}
+ MATCH (citation:Citation)-[r:SOURCE]->(source:Source) WHERE ID(citation)={}
  RETURN ID(source) AS id
  """.format(self.uniq_id)
                 
@@ -224,7 +224,7 @@ class Repository:
             where = ''
         
         query = """
- MATCH (repository:Repository)<-[r]-(source:Source) {0}
+ MATCH (repository:Repository)<-[r:REPOSITORY]-(source:Source) {0}
    WITH repository, r, source ORDER BY source.stitle
  RETURN ID(repository) AS id, repository.rname AS rname, 
    repository.type AS type, repository.url_href AS url_href, 
@@ -364,7 +364,7 @@ class Source:
         """
 
         query = """
-MATCH (source:Source)<--(citation:Citation)<-[r:CITATION]-(event:Event)
+MATCH (source:Source)<-[:SOURCE]-(citation:Citation)<-[r:CITATION]-(event:Event)
     <-[*1..2]-(p:Person)-->(name:Name) 
 WHERE ID(source)={sourceid}
 WITH event, citation,
@@ -420,7 +420,7 @@ ORDER BY toUpper(stitle)
             where = ''
         
         query = """
- MATCH (citation:Citation)-[r]->(source:Source) {0}
+ MATCH (citation:Citation)-[r:SOURCE]->(source:Source) {0}
    WITH citation, r, source ORDER BY citation.page
  RETURN ID(source) AS id, source.stitle AS stitle, 
   COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence]) AS citations
