@@ -72,11 +72,11 @@ class DateRange():
         
         if type(args[0]).__name__ == 'int':
             """ Arguments are dtype and 1 or 2 datevalues:
-                DateRange(DATERANGE_TILL, date(2017, 10, 16))
-                DateRange(DATERANGE_TILL, "2017-10-16")
+                DateRange(DR_TILL, date(2017, 10, 16))
+                DateRange(DR_TILL, "2017-10-16")
                 DateRange(1, 736618)
-                DateRange(DATERANGE_BETWEEN, date(1917, 12, 6), date(2017, 10, 16))
-                DateRange(DATERANGE_BETWEEN, "1917-12-06", "2017-10-16")
+                DateRange(DR_BETWEEN, date(1917, 12, 6), date(2017, 10, 16))
+                DateRange(DR_BETWEEN, "1917-12-06", "2017-10-16")
                 DateRange(4, 700144, 736618)
             """
             self.dtype = args[0]
