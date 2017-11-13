@@ -145,7 +145,7 @@ RETURN ID(family) AS uniq_id"""
         """ Luetaan henkilön perheen id """
         
         query = """
-            MATCH (person:Person)-[r:FAMILY]->(family:Family) 
+            MATCH (person:Person)<-[r:CHILD]-(family:Family) 
                 WHERE ID(person)={}
                 RETURN ID(family) AS parentin_hlink
             """.format(self.uniq_id)
