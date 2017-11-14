@@ -53,13 +53,18 @@ class DateRange():
             method, and the components formats are not checked.
         '''
 
-        if len(args) == 1 and type(args[0]).__name__ == 'tuple' \
-                          and len(args[0]) == 3:
-            # The only argument is a tuple like (3, '1918-12', '2017-10-16')
-            self.dtype = args[0][0]
-            self.date1 = args[0][1]
-            self.date2 = args[0][2]
-            return
+        if len(args) == 1:
+            if type(args[0]).__name__ == 'tuple' and len(args[0]) == 3:
+                # The only argument is a tuple like (3, '1918-12', '2017-10-16')
+                self.dtype = args[0][0]
+                self.date1 = args[0][1]
+                self.date2 = args[0][2]
+                return
+            elif type(args[0]).__name__ == 'DateRange':
+                self.dtype = args[0].dtype
+                self.date1 = args[0].date1
+                self.date2 = args[0].date2
+                return
 
         try:
             # First argument is some kind of date
@@ -72,11 +77,11 @@ class DateRange():
         
         if type(args[0]).__name__ == 'int':
             """ Arguments are dtype and 1 or 2 datevalues:
-                DateRange(DATERANGE_TILL, date(2017, 10, 16))
-                DateRange(DATERANGE_TILL, "2017-10-16")
+                DateRange(DR_TILL, date(2017, 10, 16))
+                DateRange(DR_TILL, "2017-10-16")
                 DateRange(1, 736618)
-                DateRange(DATERANGE_BETWEEN, date(1917, 12, 6), date(2017, 10, 16))
-                DateRange(DATERANGE_BETWEEN, "1917-12-06", "2017-10-16")
+                DateRange(DR_BETWEEN, date(1917, 12, 6), date(2017, 10, 16))
+                DateRange(DR_BETWEEN, "1917-12-06", "2017-10-16")
                 DateRange(4, 700144, 736618)
             """
             self.dtype = args[0]
@@ -123,7 +128,81 @@ class DateRange():
             return "arviolta {}".format(dstr1)
         
         return "<Date type={}, {}...{}>".format(self.dtype, dstr1, dstr2)
+
+
+    def __cmp__(self, other):
+        """ The 'other' must be an objct of type DateRange.
+        
+            The return value of self.__cmp__(other) is 0 for equal to, 
+            1 for greater than,  and -1 for less than the compared value.
+        """
+        assert isinstance(other, DateRange), 'Argument of wrong type!'
+
+        if self.dtype < other.dtype:
+            # A is self, B is other
+            selftype=self.dtype
+            othertype=other.dtype
+            A1 = self.date1
+            #A2 = self.date2
+            B1 = other.date1
+            B2 = other.date2
+        else:
+            # A is other, B is self
+            selftype=other.dtype
+            othertype=self.dtype
+            A1 = other.date1
+            #A2 = other.date2
+            B1 = self.date1
+            B2 = self.date2
+
+        if selftype == DateRange.DR_DATE:
+            if othertype == DateRange.DR_DATE:
+                if A1 < B1:
+                    return -1
+                elif A1 > B1:
+                    return 1
+                return 0
+            if othertype == DateRange.DR_TILL:
+                if A1 > B1:
+                    return 1
+                return 0
+            if othertype == DateRange.DR_FROM:
+                if A1 < B1:
+                    return -1
+                return 0
+            if othertype == DateRange.DR_PERIOD:
+                if A1 < B1:
+                    return -1
+                elif A1 > B2:
+                    return 1
+                return 0
+            else:   # DR_ABOUT, DR_CALC, DR_ESTIM
+                # TODO dynaamisesti säätyvä delta tarkkuuden mukaan
+                delta = "0000-00-30"
+                if A1 < DateRange.minus(B1, delta):
+                    return -1
+                if A1 > DateRange.plus(B1, delta):
+                    return 1
+                return 0
+        else:
+            pass
+        return 0
+
+
+    @staticmethod
+    def minus(d1, d2):
+        ''' Returns date d1 - d2 
+        '''
+        #TODO calculate
+        return d1
     
+    @staticmethod
+    def plus(d1, d2):
+        ''' Returns date d1 + d2 
+        '''
+        #TODO calculate
+        return d1
+
 
     def to_tuple(self):
         """ Returns a tuple (int, str, str) for save in database

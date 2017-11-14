@@ -957,9 +957,9 @@ def get_families_data_by_id(uniq_id):
         
         spouse = Person()
         if p.gender == 'M':
-            spouse.uniq_id = f.mother
+            spouse.uniq_id = mother.uniq_id
         else:
-            spouse.uniq_id = f.father
+            spouse.uniq_id = father.uniq_id
         spouse.get_person_and_name_data_by_id()
         f.spouse = spouse
             
