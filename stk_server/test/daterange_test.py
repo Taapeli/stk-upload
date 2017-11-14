@@ -102,6 +102,33 @@ class Test(unittest.TestCase):
 #         d = DateRange(4, 700144, 736618)
 
 
+    def testDate_compare_DR_DATE(self):
+        ''' Compare DR_DATE to other date types '''
+        mydate=DateRange(DateRange.DR_DATE, "1645")
+        
+        self.assertEqual(-1, mydate.__cmp__(DateRange(DateRange.DR_DATE, "1640")))
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_DATE, "1645")))
+        self.assertEqual(1, mydate.__cmp__(DateRange(DateRange.DR_DATE, "1650")))
+
+        self.assertEqual(1, mydate.__cmp__(DateRange(DateRange.DR_TILL, "1640")))
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_TILL, "1645")))
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_TILL, "1650")))
+
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_FROM, "1640")))
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_FROM, "1645")))
+        self.assertEqual(-1, mydate.__cmp__(DateRange(DateRange.DR_FROM, "1650")))
+
+        self.assertEqual(1, mydate.__cmp__(DateRange(DateRange.DR_PERIOD, "1640", "1944")))
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_PERIOD, "1644", "1645")))
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_PERIOD, "1645", "1646")))
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_PERIOD, "1644", "1646")))
+        self.assertEqual(-1, mydate.__cmp__(DateRange(DateRange.DR_PERIOD, "1650", "1656")))
+
+        self.assertEqual(-1, mydate.__cmp__(DateRange(DateRange.DR_ABOUT, "1640")))
+        self.assertEqual(0, mydate.__cmp__(DateRange(DateRange.DR_ABOUT, "1645")))
+        self.assertEqual(1, mydate.__cmp__(DateRange(DateRange.DR_ABOUT, "1650")))
+
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testDateRange']
     unittest.main()
