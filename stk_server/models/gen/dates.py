@@ -5,6 +5,16 @@ Created on 16.10.2017
 '''
 from datetime import date
 
+DR = {'DATE': 0,        # Exact date d1
+    'TILL': 1,          # Date till d1
+    'FROM': 2,          # Date from d1
+    'PERIOD': 3,        # Date period d1-d2
+    'BETWEEN': 4,       # A date between d1 and d2
+    'ABOUT': 5,         # A date near d1
+    'CALCULATED': 6,    # A calculated date near d1
+    'ESTIMATED': 7      # An estimated date at d1
+}
+
 class DateRange():
     '''
     DateRange handles date expressions needed for genealogical data.
@@ -19,16 +29,6 @@ class DateRange():
     https://github.com/FamilySearch/gedcomx/blob/master/specifications/date-format-specification.md
     '''
 
-    DR_DATE = 0          # Exact date d1
-    DR_TILL = 1          # Date till d1
-    DR_FROM = 2          # Date from d1
-    DR_PERIOD = 3        # Date period d1-d2
-    DR_BETWEEN = 4       # A date between d1 and d2
-    DR_ABOUT = 5         # A date near d1
-    DR_CALCULATED = 6    # A calculated date near d1
-    DR_ESTIMATED = 7     # An estimated date at d1
-
-
     def __init__(self, *args):
         '''
         Constructor can be called following ways:
@@ -38,7 +38,7 @@ class DateRange():
             DataRange((int, str1, str2))
 
             The first int argument tells the range type. It is not obligatory, 
-            when the type is DR_DATE (meaning a single exact date).
+            when the type is DR['DATE'] (meaning a single exact date).
 
             Each d1, d2 for date '1917-12-06' can equally be expressed as:
             - a date object date(1917, 12, 6)
@@ -69,7 +69,7 @@ class DateRange():
         try:
             # First argument is some kind of date
             self.date1 = self._to_datestr(args[0])
-            self.dtype = self.DR_DATE
+            self.dtype = DR['DATE']
             self.date2 = ""
             return
         except:
@@ -77,19 +77,19 @@ class DateRange():
         
         if type(args[0]).__name__ == 'int':
             """ Arguments are dtype and 1 or 2 datevalues:
-                DateRange(DR_TILL, date(2017, 10, 16))
-                DateRange(DR_TILL, "2017-10-16")
+                DateRange(DR['TILL'], date(2017, 10, 16))
+                DateRange(DR['TILL'], "2017-10-16")
                 DateRange(1, 736618)
-                DateRange(DR_BETWEEN, date(1917, 12, 6), date(2017, 10, 16))
-                DateRange(DR_BETWEEN, "1917-12-06", "2017-10-16")
+                DateRange(DR['BETWEEN'], date(1917, 12, 6), date(2017, 10, 16))
+                DateRange(DR['BETWEEN'], "1917-12-06", "2017-10-16")
                 DateRange(4, 700144, 736618)
             """
             self.dtype = args[0]
-            if self.dtype < 0 or self.dtype > self.DR_ESTIMATED:
+            if self.dtype < 0 or self.dtype > DR['ESTIMATED']:
                 raise ValueError('Invalid DateRange(type, ...)')
             self.date1 = self._to_datestr(args[1])
             self.date2 = ""
-            if self.dtype in [self.DR_PERIOD, self.DR_BETWEEN]:
+            if self.dtype in [DR['PERIOD'], DR['BETWEEN']]:
                 if len(args) == 3:
                     self.date2 = self._to_datestr(args[2])
                 else:
@@ -110,21 +110,21 @@ class DateRange():
         dstr1 = self._to_local(self.date1)
         dstr2 = self._to_local(self.date2)
         #print ("# dstr {} - {}".format(dstr1, dstr2))
-        if self.dtype == self.DR_DATE: # Exact date d1
+        if self.dtype == DR['DATE']: # Exact date d1
             return dstr1
-        elif self.dtype == self.DR_TILL:  # Date till d1
+        elif self.dtype == DR['TILL']:  # Date till d1
             return "– {}".format(dstr1)
-        elif self.dtype == self.DR_FROM: # Date from d1
+        elif self.dtype == DR['FROM']: # Date from d1
             return "{} –".format(dstr1)
-        elif self.dtype == self.DR_PERIOD: # Date period d1-d2
+        elif self.dtype == DR['PERIOD']: # Date period d1-d2
             return "{} – {}".format(dstr1, dstr2)
-        elif self.dtype == self.DR_BETWEEN: # A date between d1 and d2
+        elif self.dtype == DR['BETWEEN']: # A date between d1 and d2
             return "välillä {} … {}".format(dstr1, dstr2)
-        elif self.dtype == self.DR_ABOUT: # A date near d1
+        elif self.dtype == DR['ABOUT']: # A date near d1
             return "noin {}".format(dstr1)
-        elif self.dtype == self.DR_CALCULATED: # A calculated date near d1
+        elif self.dtype == DR['CALCULATED']: # A calculated date near d1
             return "laskettu {}".format(dstr1)
-        elif self.dtype == self.DR_ESTIMATED: # An estimated date at d1
+        elif self.dtype == DR['ESTIMATED']: # An estimated date at d1
             return "arviolta {}".format(dstr1)
         
         return "<Date type={}, {}...{}>".format(self.dtype, dstr1, dstr2)
@@ -155,28 +155,28 @@ class DateRange():
             B1 = self.date1
             B2 = self.date2
 
-        if selftype == DateRange.DR_DATE:
-            if othertype == DateRange.DR_DATE:
+        if selftype == DR['DATE']:
+            if othertype == DR['DATE']:
                 if A1 < B1:
                     return -1
                 elif A1 > B1:
                     return 1
                 return 0
-            if othertype == DateRange.DR_TILL:
+            if othertype == DR['TILL']:
                 if A1 > B1:
                     return 1
                 return 0
-            if othertype == DateRange.DR_FROM:
+            if othertype == DR['FROM']:
                 if A1 < B1:
                     return -1
                 return 0
-            if othertype == DateRange.DR_PERIOD:
+            if othertype == DR['PERIOD']:
                 if A1 < B1:
                     return -1
                 elif A1 > B2:
                     return 1
                 return 0
-            else:   # DR_ABOUT, DR_CALC, DR_ESTIM
+            else:   # DR['ABOUT'], DR['CALC'], DR['ESTIM']
                 # TODO dynaamisesti säätyvä delta tarkkuuden mukaan
                 delta = "0000-00-30"
                 if A1 < DateRange.minus(B1, delta):
@@ -206,7 +206,7 @@ class DateRange():
 
     def to_tuple(self):
         """ Returns a tuple (int, str, str) for save in database
-            Example: (DR_BETWEEN, "1917", "2017-10-16")
+            Example: (DR['BETWEEN'], "1917", "2017-10-16")
         """
         return (self.dtype, self.date1, self.date2)
 
