@@ -6,10 +6,9 @@ Created on 22.7.2017
 
 from sys import stderr
 from flask import g
-import models.dbutil
 
 
-class Object:
+class Media:
     """ Tallenne
             
         Properties:
@@ -22,33 +21,30 @@ class Object:
      """
 
     def __init__(self):
-        """ Luo uuden object-instanssin """
+        """ Luo uuden media-instanssin """
         self.handle = ''
         self.change = ''
         self.id = ''
         
         
     @staticmethod
-    def get_objects(uniq_id):
+    def get_medias(uniq_id):
         """ Lukee kaikki tallenteet tietokannasta """
                         
         if uniq_id:
-            where = "WHERE ID(object)={} ".format(uniq_id)
+            query = "MATCH (o:Media) WHERE ID(o)=$id RETURN ID(o) AS uniq_id, o"
+            return  g.driver.session().run(query, id=int(uniq_id))
         else:
-            where = ''
-
-        query = """
-            MATCH (o:Object) {0} RETURN ID(o) AS uniq_id, o
-            """.format(where)
+            query = "MATCH (o:Media) RETURN ID(o) AS uniq_id, o"
+            return  g.driver.session().run(query)
             
-        return  g.driver.session().run(query)
 
 
-    def get_object_data_by_id(self):
+    def get_data(self):
         """ Luetaan tallenteen tiedot """
 
         query = """
-            MATCH (obj:Object)
+            MATCH (obj:Media)
                 WHERE ID(obj)={}
                 RETURN obj
             """.format(self.uniq_id)
@@ -69,7 +65,7 @@ class Object:
         """ Tulostaa tallenteiden määrän tietokannassa """
                         
         query = """
-            MATCH (o:Object) RETURN COUNT(o)
+            MATCH (o:Media) RETURN COUNT(o)
             """
             
         results =  g.driver.session().run(query)
@@ -95,7 +91,7 @@ class Object:
 
         try:
             query = """
-                CREATE (o:Object) 
+                CREATE (o:Media) 
                 SET o.gramps_handle='{}', 
                     o.change='{}', 
                     o.id='{}', 

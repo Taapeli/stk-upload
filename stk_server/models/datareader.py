@@ -6,13 +6,14 @@ import csv
 import logging
 import time
 import xml.dom.minidom
+import re
 from operator import itemgetter
 from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
-from models.gen.object import Object
-from models.gen.person import Person, Name
+from models.gen.media import Media
+from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
@@ -219,11 +220,12 @@ def lue_henkilot_k(keys=None):
     """
     
     persons = []
-    result = Person.get_person_events_k(keys)
+    result = Person.get_events_k(keys)
     for record in result:
-        pid = record['id']
+        # Got ["id", "confidence", "firstname", "refname", "surname", "suffix", "events"]
+        uniq_id = record['id']
         p = Person()
-        p.uniq_id = pid
+        p.uniq_id = uniq_id
         p.confidence = record['confidence']
         pname = Name()
         if record['firstname']:
@@ -235,9 +237,12 @@ def lue_henkilot_k(keys=None):
         if record['suffix']:
             pname.patronyme = record['suffix']
         p.names.append(pname)
+    
+        # Events
 
         for event in record['events']:
- 
+            # Got event with place name: [id, type, date,
+            #   datetype, daterange_start, daterange_stop, place.pname]
             e = Event_for_template()
             e.uniq_id = event[0]
             event_type = event[1]
@@ -509,16 +514,16 @@ def read_cite_sour_repo(uniq_id=None):
     return (sources)
 
 
-def read_objects(uniq_id=None):
-    """ Lukee tietokannasta Object- objektit näytettäväksi
+def read_medias(uniq_id=None):
+    """ Lukee tietokannasta Media- objektit näytettäväksi
 
     """
     
-    objects = []
-    result = Object.get_objects(uniq_id)
+    media = []
+    result = Media.get_medias(uniq_id)
     for record in result:
         pid = record['uniq_id']
-        o = Object()
+        o = Media()
         o.uniq_id = pid
         if record['o']['src']:
             o.src = record['o']['src']
@@ -527,9 +532,9 @@ def read_objects(uniq_id=None):
         if record['o']['description']:
             o.description = record['o']['description']
  
-        objects.append(o)
+        media.append(o)
 
-    return (objects)
+    return (media)
 
 
 def read_repositories(uniq_id=None):
@@ -754,14 +759,15 @@ def get_people_by_surname(surname):
 
 
 def get_person_data_by_id(uniq_id):
-    """ Get 4 data sets:
+    """ Get 5 data sets:
         person: uniq_id and name data
         events list: uniq_id, date, location name and id (?)
         photos
         sources
+        families
     """
     p = Person()
-    p.uniq_id = uniq_id
+    p.uniq_id = int(uniq_id)
     #.get_person_and_name_data_by_id()
     p.get_person_w_names()
     p.get_hlinks_by_id()
@@ -769,6 +775,10 @@ def get_person_data_by_id(uniq_id):
     events = []
     sources = []
     source_cnt = 0
+    mybirth = ''
+
+    # Events
+
     for i in range(len(p.eventref_hlink)):
         e = Event_for_template()
         e.uniq_id = p.eventref_hlink[i]
@@ -801,11 +811,12 @@ def get_person_data_by_id(uniq_id):
                 e.notetext = record["note"]["text"]
                 
         events.append(e)
-        
+
+        # Citations
+
         if e.citationref_hlink != '':
             citation = Citation()
             citation.uniq_id = e.citationref_hlink
-            
             # If there is already the same citation on the list,
             # use that index
             citation_ind = -1
@@ -813,16 +824,14 @@ def get_person_data_by_id(uniq_id):
                 if sources[i].uniq_id == citation.uniq_id:
                     citation_ind = i + 1
                     break
-                
-            # Citation found
             if citation_ind > 0:
+                # Citation found
                 e.source = citation_ind
             else: # Store the new source to the list
                 source_cnt += 1
                 e.source = source_cnt
-            
+
                 result = citation.get_source_repo(citation.uniq_id)
-                
                 for record in result:
                     citation.dateval = record['date']
                     citation.page = record['page']
@@ -852,16 +861,68 @@ def get_person_data_by_id(uniq_id):
             
     photos = []
     for link in p.objref_hlink:
-        o = Object()
+        o = Media()
         o.uniq_id = link
-        o.get_object_data_by_id()
-                    
+        o.get_data()
         photos.append(o)
-        
-    return (p, events, photos, sources)
+
+    # Families
+
+    # Returning a list of Family objects
+    # - which include a list of members (Person with 'role' attribute)
+    #   - Person includes a list of Name objects
+    families = {}
+    fid = ''
+    result = Person.get_family_members(p.uniq_id)
+    for record in result:
+        # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id", 
+        #      "gender", "birth_date", "names"]
+        if fid != record["f_uniq_id"]:
+            fid = record["f_uniq_id"]
+            if not fid in families:
+                families[fid] = Family_for_template(fid)
+                families[fid].id = record['family_id']
+
+        member = Person_as_member()    # A kind of Person
+        member.role = record["role"]
+        if record["m_id"]:
+            member.id = record["m_id"]
+        member.uniq_id = record["uniq_id"]
+        if member.uniq_id == p.uniq_id:
+            # What kind of family this is? I am a Child or Parent in family
+            if member.role == "CHILD":
+                families[fid].role = "CHILD"
+            else:
+                families[fid].role = "PARENT"
+
+        if record["gender"]:
+            member.gender = record["gender"]
+        if record["birth_date"]:
+            member.birth_date = record["birth_date"]
+        if record["names"]:
+            for name in record["names"]:
+                # Got [[alt, ntype, firstname, surname, suffix]
+                n = Name()
+                n.alt = name[0]
+                n.type = name[1]
+                n.firstname = name[2]
+                n.surname = name[3]
+                n.suffix = name[4]
+                member.names.append(n)
+
+        if member.role == "CHILD":
+            families[fid].children.append(member)
+        elif member.role == "FATHER":
+            families[fid].father = member
+        elif member.role == "MOTHER":
+            families[fid].mother = member
+
+    family_list = list(families.values())
+    return (p, events, photos, sources, family_list)
 
 
 def get_families_data_by_id(uniq_id):
+    # Sivua "table_families_by_id.html" varten
     families = []
     
     p = Person()
@@ -888,26 +949,26 @@ def get_families_data_by_id(uniq_id):
             father = Person()
             father.uniq_id = pf.father
             father.get_person_and_name_data_by_id()
-            f.father_data = father
+            f.father = father
             
             mother = Person()
             mother.uniq_id = pf.mother
             mother.get_person_and_name_data_by_id()
-            f.mother_data = mother
+            f.mother = mother
         
         spouse = Person()
         if p.gender == 'M':
-            spouse.uniq_id = f.mother
+            spouse.uniq_id = mother.uniq_id
         else:
-            spouse.uniq_id = f.father
+            spouse.uniq_id = father.uniq_id
         spouse.get_person_and_name_data_by_id()
-        f.spouse_data = spouse
+        f.spouse = spouse
             
         for child_id in f.childref_hlink:
             child = Person()
             child.uniq_id = child_id
             child.get_person_and_name_data_by_id()
-            f.children_data.append(child)
+            f.children.append(child)
             
         families.append(f)
         
@@ -1053,6 +1114,7 @@ def handle_events(collection, userid, tx):
             event_dateval = event.getElementsByTagName('dateval')[0]
             if event_dateval.hasAttribute("val"):
                 e.date = event_dateval.getAttribute("val")
+                e.daterange_start = event_dateval.getAttribute("val")
             if event_dateval.hasAttribute("type"):
                 e.datetype = event_dateval.getAttribute("type")
         elif len(event.getElementsByTagName('dateval') ) > 1:
@@ -1212,17 +1274,17 @@ def handle_notes(collection, tx):
     return(msg)
 
 
-def handle_objects(collection, tx):
-    # Get all the objects in the collection
-    objects = collection.getElementsByTagName("object")
+def handle_media(collection, tx):
+    # Get all the media in the collection (in Gramps 'object')
+    media = collection.getElementsByTagName("object")
 
-    print ("*****Objects*****")
+    print ("*****Media*****")
     counter = 0
 
-    # Print detail of each object
-    for obj in objects:
+    # Print detail of each media object
+    for obj in media:
         
-        o = Object()
+        o = Media()
 
         if obj.hasAttribute("handle"):
             o.handle = obj.getAttribute("handle")
@@ -1244,7 +1306,7 @@ def handle_objects(collection, tx):
         o.save(tx)
         counter += 1
         
-    msg = "Objects stored: " + str(counter)
+    msg = "Media objects stored: " + str(counter)
         
     return(msg)
 
@@ -1399,8 +1461,38 @@ def handle_places(collection, tx):
                 placeobj_coord = placeobj.getElementsByTagName('coord')[i]
                 if placeobj_coord.hasAttribute("long"):
                     place.coord_long = placeobj_coord.getAttribute("long")
+                    if place.coord_long.find("°") > 0:
+                        place.coord_long.replace(" ", "")
+                        fc = place.coord_long[:1]
+                        if fc.isalpha():
+                            rc = place.coord_long[1:]
+                            place.coord_long = rc + fc
+                        a = re.split('[°\'′"″]+', place.coord_long)
+                        if len(a) > 2:
+                            a[1].replace("\\", "")
+                            a[2].replace(",", "\.")
+                            if a[0].isdigit() and a[1].isdigit():
+                                place.coord_long = int(a[0]) + int(a[1])/60
+                            if a[2].isdigit():
+                                place.coord_long += float(a[2])/360
+                            place.coord_long = str(place.coord_long)
                 if placeobj_coord.hasAttribute("lat"):
                     place.coord_lat = placeobj_coord.getAttribute("lat")
+                    if place.coord_lat.find("°") > 0:
+                        place.coord_lat.replace(" ", "")
+                        fc = place.coord_lat[:1]
+                        if fc.isalpha():
+                            rc = place.coord_lat[1:]
+                            place.coord_lat = rc + fc
+                        a = re.split('[°\'′"″]+', place.coord_lat)
+                        if len(a) > 2:
+                            a[1].replace("\\", "")
+                            a[2].replace(",", "\.")
+                            if a[0].isdigit() and a[1].isdigit():
+                                place.coord_lat = int(a[0]) + int(a[1])/60
+                            if a[2].isdigit():
+                                place.coord_lat += float(a[2])/360
+                            place.coord_lat = str(place.coord_lat)
                     
         if len(placeobj.getElementsByTagName('url') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('url') )):
@@ -1578,7 +1670,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     msg.append(str(result))
     print(str(result))
     tx = user.beginTransaction()
-    result = handle_objects(collection, tx)
+    result = handle_media(collection, tx)
     user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))

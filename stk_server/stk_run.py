@@ -54,10 +54,9 @@ def refnames():
 """ ----------------------------- Kertova-sivut --------------------------------
 """
 
-@app.route('/person/list/<string:selection>')   # <-- Ei käytössä?
 @app.route('/person/list/', methods=['POST', 'GET'])
 def show_person_list(selection=None):   
-    """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
+    """ Valittujen tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     models.dbutil.connect_db()
     if request.method == 'POST':
         try:
@@ -66,7 +65,7 @@ def show_person_list(selection=None):
             rule = request.form['rule']
             keys = (rule, name)
             persons = models.datareader.lue_henkilot_k(keys)
-            return render_template("k_persons.html", persons=persons, selection=keys)
+            return render_template("k_persons.html", persons=persons, menuno=0)
         except Exception:
             flash("Ei oikeita hakukenttiä", category='warning')
 
@@ -78,8 +77,17 @@ def show_person_list(selection=None):
         keys = selection.split('=')
     else:
         keys = ('all',)
+    persons = [] #models.datareader.lue_henkilot_k(keys)
+    return render_template("k_persons.html", persons=persons, menuno=0)
+
+
+@app.route('/person/list_all')
+def show_all_persons_list(selection=None):   
+    """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
+    models.dbutil.connect_db()
+    keys = ('all',)
     persons = models.datareader.lue_henkilot_k(keys)
-    return render_template("k_persons.html", persons=persons, selection=(keys))
+    return render_template("k_persons.html", persons=persons, menuno=1)
 
 
 @app.route('/person/<string:ehto>')
@@ -91,13 +99,23 @@ def show_person_page(ehto):
     key, value = ehto.split('=')
     try:
         if key == 'uniq_id':
-            person, events, photos, sources = models.datareader.get_person_data_by_id(value)            
+            person, events, photos, sources, families = \
+                models.datareader.get_person_data_by_id(value)
+            for f in families:
+                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                if f.mother:
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("k_person.html", 
-                       person=person, events=events, photos=photos, sources=sources)
+        person=person, events=events, photos=photos, sources=sources, families=families)
 
 
 @app.route('/events/loc=<locid>')
@@ -153,11 +171,10 @@ def nayta_henkilot(subj):
         # Kertova-tyyliin
         persons = models.datareader.lue_henkilot_k()
         return render_template("k_persons.html", persons=persons)
-    elif subj == "henkilot":
+    if subj == "henkilot":
         # dburi vain tiedoksi!
         dbloc = g.driver.address
         dburi = ':'.join((dbloc[0],str(dbloc[1])))
-
         persons = models.datareader.lue_henkilot()
         return render_template("table_persons.html", persons=persons, uri=dburi)
     elif subj == "henkilot2":
@@ -179,10 +196,10 @@ def nayta_henkilot(subj):
         return render_template("table_of_data.html", 
                                headings=("Huomautusluettelo", "Note-kohteet"),
                                titles=titles, lists=lists)
-    elif subj == 'objects':
-        objects = models.datareader.read_objects()
-        return render_template("table_objects.html", 
-                               objects=objects)
+    elif subj == 'media':
+        media = models.datareader.read_medias()
+        return render_template("table_media.html", 
+                               media=media)
     elif subj == 'people_wo_birth':
         headings, titles, lists = models.datareader.read_people_wo_birth()
         return render_template("table_of_data.html", 
@@ -263,11 +280,11 @@ def list_people_by_surname(surname):
 def show_person_data(uniq_id): 
     """ henkilön tietojen näyttäminen ruudulla """
     models.dbutil.connect_db()
-    person, events, photos, sources = models.datareader.get_person_data_by_id(uniq_id)
+    person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
     return render_template("table_person_by_id.html", 
                        person=person, events=events, photos=photos, sources=sources)
 
-    
+
 @app.route('/lista/family_data/<string:uniq_id>')
 def show_family_data(uniq_id): 
     """ henkilön perheen tietojen näyttäminen ruudulla """
@@ -307,7 +324,7 @@ def nayta_ehdolla(ehto):
             return render_template("source_citations.html", 
                                    sources=sources)
         elif key == 'uniq_id':
-            persons = models.datareader.lue_henkilot_k(uniq_id=value)            
+            persons = models.datareader.lue_henkilot_k(("uniq_id",value))            
             return render_template("person2.html", persons=persons)
         else:
             raise(KeyError("Vain oid:llä voi hakea"))

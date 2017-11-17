@@ -7,24 +7,25 @@
 
 <h2>Henkilöluettelo</h2>
 
-{{ macro.menu(1) }}
+{{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
+    {% if menuno > 0 %}
             <p id="description">
     Tällä sivulla on luettelo {{persons|count}} henkilönimestä mahdollisen 
     sukunimen mukaan lajiteltuna.<br> 
-    Henkilön nimen napsauttaminen vie sinut valitun henkilön sivulle. 
+    Nimen napsauttaminen vie sinut valitun henkilön sivulle. 
     Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.
             </p>
-			<details id="searchform" {% if not persons|count %} open{% endif %}>
-			  <summary><b>Rajaa</b> näytettävät henkilöt</summary>
-			  <div id="searching">
+    {% else %}
+            <h3>Valitse näytettävät ihmiset</h3>
+			<div id="searching">
 			    <form  action="/person/list/" method="post">
                   <p>Haku tapahtuu annetun sanan alkuosalla, 
-                     esim. "Sib" osuu nimeen "Sibbe".</p>
+                     esim. "Sib" osuu nimeen "Sibbe".
+                     <i>Huom. Kirjoita nimi isolla alkukirjaimella!</i></p>
                   <label for="snam">Hakusana (alkuosa)&nbsp; </label>
-                    <input type="text" name="name" id="snam" required>
-                    <!--input type="text" name="name" id="snam" required--><br>
+                    <input type="text" name="name" id="snam" required><br>
                   <input type="radio" name="rule" id="ssur" value="surname" checked>
                     <label for="ssur">Sukunimi</label>
                   <input type="radio" name="rule" id="sfir" value="firstname">
@@ -33,8 +34,8 @@
                     <label for="ssuf">Patronyymi</label>
 				  <input type="submit" value="Hae">
 			    </form>
-			  <div>		  
-			</details>
+			</div>
+			{% endif %}
 
 	        {% with messages = get_flashed_messages(with_categories=true) %}
 	          {% if messages %}
@@ -48,6 +49,7 @@
 
         </div>
 
+    {% if persons|count > 0 %}
 		<div id="alphanav">
 			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
         {% for p in persons %}{% set ini = p.names[0].surname|list|first %}
@@ -66,7 +68,6 @@
 				</tr>
 			</thead>
 			<tbody>
-	{% if persons %}
 	    {% for p in persons %}{% set ini = p.names[0].surname|list|first %}
 	            <tr><td class="ColumnAlpha">{% if alpha != ini %}
 		               {%set alpha = ini %}
@@ -96,10 +97,12 @@
                   </td>
 	           </tr>
 	    {% endfor %}
-	{% else %}
-	        <tr><td colspan="3">Ketään ei löydetty hakutiedoilla</td></tr>
-	{% endif %}
 				</tr>
+	{% else %}
+        <table class="IndividualList">
+            <tbody>
+	        <tr><td>Ketään ei löytynyt hakutiedoilla<//td></tr>
+	{% endif %}
 			</tbody>
 		</table>
 	</div>

@@ -6,7 +6,7 @@
 <script src="/static/infobox.js"></script>
 
 <h2>Mediatiedostot</h2>
-<p>Näytetään objects</p>
+<p>Näytetään mediaobjektit</p>
 
 <section id="lista">
 <table>
@@ -16,8 +16,8 @@
         <th>description</th>
         <th>picture</th>
     </tr>
-{% if objects %}
-    {% for obj in objects %}
+{% if media %}
+    {% for obj in media %}
 	    <tr>
 	        <td>{{obj.uniq_id}}</td>
 	        <td>{{obj.src}}</td>

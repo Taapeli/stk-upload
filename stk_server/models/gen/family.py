@@ -3,11 +3,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 @author: jm
 '''
-import datetime
 from sys import stderr
-import logging
 from flask import g
-import models.dbutil
 
 
 class Family:
@@ -25,11 +22,12 @@ class Family:
                 childref_hlink  str lapsen osoite
      """
 
-    def __init__(self):
+    def __init__(self, uniq_id=None):
         """ Luo uuden family-instanssin """
         self.handle = ''
         self.change = ''
         self.id = ''
+        self.uniq_id = uniq_id
         self.eventref_hlink = []
         self.eventref_role = []
         self.childref_hlink = []
@@ -225,37 +223,35 @@ RETURN ID(person) AS mother"""
                         MATCH (n:Family) WHERE n.gramps_handle='{}'
                         MATCH (m:Person) WHERE m.gramps_handle='{}'
                         MERGE (n)-[r:CHILD]->(m)
-                        MERGE (n)<-[s:FAMILY]-(m)
                          """.format(self.handle, self.childref_hlink[i])
-                                 
+
                     tx.run(query)
                 except Exception as err:
                     print("Virhe: {0}".format(err), file=stderr)
-            
+
         return
 
 
 class Family_for_template(Family):
     """ Templaten perhe perii Perhe luokan
+        Käytetään datareader.get_families_data_by_id() metodissa
+        sivua table_families_by_id.html varten
             
         Properties:
-                father_data     str isän tiedot
-                mother_data     str äidin tiedot
-                spouse_data     str puolisoiden tiedot
-                children_data   str lasten tiedot
+                role        str    henkilön rooli perheessä: "Child", "Parent"
+                father      Person isän tiedot
+                mother      Person äidin tiedot
+                spouse      Person puolisoiden tiedot
+                children[]  Person lasten tiedot
      """
 
-    def __init__(self):
+    def __init__(self, uniq_id=None):
         """ Luo uuden family_for_template-instanssin """
-        self.handle = ''
-        self.change = ''
-        self.id = ''
-        self.eventref_hlink = []
-        self.eventref_role = []
-        self.childref_hlink = []
-        self.father_data = ''
-        self.mother_data = ''
-        self.spouse_data = ''
-        self.children_data = []
+        Family.__init__(self, uniq_id)
+        self.role = ""
+        self.father = None
+        self.mother = None
+        self.spouse = None
+        self.children = []
         
 

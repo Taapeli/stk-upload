@@ -95,8 +95,11 @@ img#logo {
     vertical-align: text-top;
 }
 .id { color: sienna; text-align: right; }
+.inlink { color: #000066; background: LemonChiffon; }
+.outlink { text-decoration: underline; }
 .refname { color:gray; text-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
+.myself { color: white; background: #555; font-style: italic; }
 td.numbers {
     text-align: right;
     padding-right: 2em;
@@ -151,20 +154,21 @@ a[href]:hover, a[href]:active {
 
 /* Search form (31.10.2017/JMä)
 ----------------------------------------------------- */
-#searchform {
+/*#searchform {
     background: #999;
     color: white;
     margin-left: 3em;
     margin-bottom: 1em;
     padding: 3px;
     max-width: 40em;
-}
+}*/
 #searching {
     margin: 1em;
     border: 1px solid #CCC;
     padding: 1em;
-    background: white;
+    background-color: bisque;
     color: black;
+    max-width: 30em;
 }
 .flashes {
     font-size: 80%;
@@ -365,8 +369,8 @@ table.infolist.eventlist tbody tr:nth-child(even)
 }
 #map {
     float: right;
-    width: 160px;
-    height: 160px;
+    width: 250px;
+    height: 300px;
     margin: 2em;
     padding: 1em;
     border: 1px solid lightgray;
@@ -521,6 +525,38 @@ div#families table.fixed_subtables table.eventlist th:last-child {
 }
 div#families table.attrlist td.ColumnType {
     color: black;
+}
+/* Stk 4.10.2017 JMä */
+.personbox {border: 1px solid black;
+    align-content: center;
+    border-radius: 10px;
+    background: beige;
+    padding: 10px; 
+    align-self: flex-start;
+    width: 200px;
+    margin: 1em;
+    font-size: 80%;
+}
+.familybox {
+	width: 250px;
+	border: 1px solid gray; 
+    border-radius: 10px;
+    background: bisque;
+    flex-wrap: wrap;
+    align-self: flex-start;
+    font-size: 80%;
+    margin: 10px;
+}
+.familybox p { padding-left: 1em; padding-top: 1em; }
+.groupbox {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin: auto;
+}
+.mainbox {
+    padding-left: 1em;
+    padding-top: 1em;
 }
 
 /* Subsection : Gallery

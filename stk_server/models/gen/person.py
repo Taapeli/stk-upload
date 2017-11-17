@@ -115,9 +115,9 @@ RETURN ID(family) AS uniq_id"""
             self.eventref_hlink.append(event_record["eventref_hlink"])
             self.eventref_role.append(event_record["eventref_role"])
 
-        object_result = self.get_object_id()
-        for object_record in object_result:            
-            self.objref_hlink.append(object_record["objref_hlink"])
+        media_result = self.get_media_id()
+        for media_record in media_result:            
+            self.objref_hlink.append(media_record["objref_hlink"])
 
         family_result = self.get_parentin_id()
         for family_record in family_result:            
@@ -130,11 +130,11 @@ RETURN ID(family) AS uniq_id"""
         return True
     
     
-    def get_object_id(self):
+    def get_media_id(self):
         """ Luetaan henkilön tallenteen id """
         
         query = """
-            MATCH (person:Person)-[r:OBJECT]->(obj:Object) 
+            MATCH (person:Person)-[r:MEDIA]->(obj:Media) 
                 WHERE ID(person)={}
                 RETURN ID(obj) AS objref_hlink
             """.format(self.uniq_id)
@@ -145,7 +145,7 @@ RETURN ID(family) AS uniq_id"""
         """ Luetaan henkilön perheen id """
         
         query = """
-            MATCH (person:Person)-[r:FAMILY]->(family:Family) 
+            MATCH (person:Person)<-[r:CHILD]-(family:Family) 
                 WHERE ID(person)={}
                 RETURN ID(family) AS parentin_hlink
             """.format(self.uniq_id)
@@ -393,7 +393,7 @@ RETURN person, COLLECT(name) AS names
 
         query = """
  MATCH (person:Person)
- OPTIONAL MATCH (person)-->(event:Event)-[r]->(c:Citation)
+ OPTIONAL MATCH (person)-[:EVENT]->(event:Event)-[r:CITATION]->(c:Citation)
  RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
                 
         return g.driver.session().run(query)
@@ -455,8 +455,8 @@ RETURN person, COLLECT(name) AS names
 #  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
 
         query = """
- MATCH (n:Person)-->(k:Name) {0}
- OPTIONAL MATCH (n)-[r]->(e) 
+ MATCH (n:Person)-[:NAME]->(k:Name) {0}
+ OPTIONAL MATCH (n)-[r:EVENT]->(e) 
  RETURN n.id, k.firstname, k.surname,
   COLLECT([e.name, e.kind]) AS events
  ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
@@ -465,7 +465,7 @@ RETURN person, COLLECT(name) AS names
 
 
     @staticmethod       
-    def get_person_events_k (keys):
+    def get_events_k (keys):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta
             a) Tietokanta-avaimella valittu henkilö
             b) nimellä poimittu henkilö
@@ -482,9 +482,19 @@ RETURN person, COLLECT(name) AS names
             rule="all"
             name=""
 
+# ╒═══════╤══════╤══════╤═════╤═════════╤══════════╤══════════════════════════════╕
+# │"id"   │"confi│"first│"ref │"surname"│"suffix"  │"events"                      │
+# │       │dence"│name" │name"│         │          │                              │
+# ╞═══════╪══════╪══════╪═════╪═════════╪══════════╪══════════════════════════════╡
+# │"27204"│null  │"Henri│""   │"Sibbe"  │"Mattsson"│[["26836","Occupation","","","│
+# │       │      │k"    │     │         │          │","","Cappelby 4 Sibbes"],["26│
+# │       │      │      │     │         │          │255","Birth","1709-01-03","","│
+# │       │      │      │     │         │          │","",null],["26837","Luottamus│
+# │       │      │      │     │         │          │toimi","1760","","","",null]] │
+# ├───────┼──────┼──────┼─────┼─────────┼──────────┼──────────────────────────────┤
         qend="""
- OPTIONAL MATCH (person)-->(event:Event)
- OPTIONAL MATCH (event)-->(place:Place)
+ OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
+ OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
 RETURN ID(person) AS id, person.confidence AS confidence,
     name.firstname AS firstname, 
     name.refname AS refname, name.surname AS surname, 
@@ -495,28 +505,63 @@ ORDER BY name.surname, name.firstname"""
 
         if rule == "uniq_id":
             # Person selected by uniq_id
-            query = "MATCH (person:Person)-->(name:Name) WHERE ID(person)=$id"
-            return g.driver.session().run(query + qend, id=int(name))
+            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE ID(person)=$id" + qend
+            return g.driver.session().run(query, id=int(name))
         if rule == 'all':
-            query = "MATCH (person:Person)-->(name:Name)"
-            return g.driver.session().run(query + qend)
+            query = "MATCH (person:Person)-[:NAME]->(name:Name)" + qend
+            return g.driver.session().run(query)
         if rule == "surname":
-            query = "MATCH (person:Person)-->(name:Name) WHERE name.surname STARTS WITH $id"
+            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.surname STARTS WITH $id" + qend
         elif rule == "firstname":
-            query = "MATCH (person:Person)-->(name:Name) WHERE name.firstname STARTS WITH $id"
+            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.firstname STARTS WITH $id" + qend
         elif rule == "suffix":
-            query = "MATCH (person:Person)-->(name:Name) WHERE name.suffix STARTS WITH $id"
+            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.suffix STARTS WITH $id" + qend
         else:
             print ("Tätä rajausta ei ole vielä tehty: " + rule)
             return None
         # All with string argument
-        return g.driver.session().run(query + qend, id=name)
+        return g.driver.session().run(query, id=name)
+
+
+    @staticmethod       
+    def get_family_members (uniq_id):
+        """ Read person's families and family members for Person page
+        """
+
+        query="""
+MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-[:NAME]->(n:Name) WHERE ID(p) = $id
+    OPTIONAL MATCH (m)-[:EVENT]->(birth {type:'Birth'})
+    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
+        TYPE(r) AS role, m.id AS m_id, ID(m) AS uniq_id, 
+        m.gender AS gender, birth.date AS birth_date, 
+        n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx
+    ORDER BY n.alt
+    RETURN family_id, f_uniq_id, role, m_id, uniq_id, gender, birth_date,
+        COLLECT([alt, ntype, fn, sn, sx]) AS names
+    ORDER BY family_id, role, birth_date
+UNION 
+MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
+    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(l) AS role, p.id AS m_id, ID(p) AS uniq_id, 
+        p.gender AS gender, "" AS birth_date, [] AS names"""
+
+# ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤════════════╤══════════════════════════════╕
+# │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"│"names"                       │
+# ╞═══════════╪═══════════╪════════╪═══════╪═════════╪════════╪════════════╪══════════════════════════════╡
+# │"F0012"    │"40506"    │"CHILD" │"27044"│"27044"  │"M"     │"1869-03-28"│[["","Birth Name","Christian",│
+# │           │           │        │       │         │        │            │"Sibelius",""],["1","Also Know│
+# │           │           │        │       │         │        │            │n As","Kristian","Sibelius",""│
+# │           │           │        │       │         │        │            │]]                            │
+# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼────────────┼──────────────────────────────┤
+
+        return g.driver.session().run(query, id=int(uniq_id))
+    
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
         key = "{}:{}:{}:{}".format(self.name.firstname, self.name.last, 
               self.occupation, self.place)
         return key
+
 
     def join_events(self, events, kind=None):
         """
@@ -543,7 +588,8 @@ ORDER BY name.surname, name.firstname"""
 #                     format(e, persoona, tapahtuma), 'error')
 #                 logging.warning('Lisääminen ei onnistunut: {}'.format(e))
 #         logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), eventList))
-    
+
+
     def join_persons(self, others):
         """
         Päähenkilöön self yhdistetään henkilöiden others tiedot ja tapahtumat
@@ -877,33 +923,22 @@ SET r.role =$role"""
                 except Exception as err:
                     print("Virhe (Person.save:Event 2): {0}".format(err), file=stderr)
    
-        # Make relations to the Object node
+        # Make relations to the Media node
         if len(self.objref_hlink) > 0:
             for i in range(len(self.objref_hlink)):
                 try:
                     objref_hlink = self.objref_hlink[i]
                     query = """
 MATCH (n:Person)   WHERE n.gramps_handle=$handle
-MATCH (m:Object) WHERE m.gramps_handle=$objref_hlink
-MERGE (n)-[r:OBJECT]->(m)"""
+MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
+MERGE (n)-[r:MEDIA]->(m)"""
                     tx.run(query, 
                            {"handle": handle, "objref_hlink": objref_hlink})
                 except Exception as err:
-                    print("Virhe (Person.save:Object): {0}".format(err), file=stderr)
+                    print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
    
-        # Make relations to the Family node
-        # This is done in Family.save(), because the Family object is not yet created
-#        if len(self.parentin_hlink) > 0:
-#            for i in range(len(self.parentin_hlink)):
-#                try:
-#                    query = """
-#                        MATCH (n:Person) WHERE n.gramps_handle='{}'
-#                        MATCH (m:Family) WHERE m.gramps_handle='{}'
-#                        MERGE (n)-[r:FAMILY]->(m)
-#                        """.format(self.handle, self.parentin_hlink[i])
-#                    g.driver.session().run(query)
-#                except Exception as err:
-#                    print("Virhe: {0}".format(err), file=stderr)
+        # Make relations to the Family node will be done in Family.save(),
+        # because the Family object is not yet created
    
         # Make relations to the Citation node
         if len(self.citationref_hlink) > 0:
@@ -921,6 +956,21 @@ MERGE (n)-[r:CITATION]->(m)"""
         return
 
 
+class Person_as_member(Person):
+    """ A person as a family member 
+
+        Extra properties:
+            role         str "CHILD", "FATHER" or "MOTHER"
+            birth_date   str (TODO: Should be DateRange)
+     """
+
+    def __init__(self):
+        """ Luo uuden instanssin """
+        Person.__init__(self)
+        self.role = ''
+        self.birth_date = ''
+
+
 class Name:
     """ Nimi
     
@@ -933,14 +983,14 @@ class Name:
                 suffix          str patronyymi
     """
     
-    def __init__(self, givn='', surn=''):
+    def __init__(self, givn='', surn='', suff=''):
         """ Luo uuden name-instanssin """
         self.type = ''
         self.alt = ''
         self.firstname = givn
         self.refname = ''
         self.surname = surn
-        self.suffix = ''
+        self.suffix = suff
         
         
     @staticmethod

@@ -8,13 +8,29 @@
 
 <h2>Paikan tapahtumat</h2>
 {{ macro.menu(4) }}
+
     <div class="content" id="IndividualDetail">
-        <div id="map"><br>
-            Sijainti:<br>(N&nbsp;{{ '{0:0.4f}'.format(place.coord_long|float) }}, 
-            E&nbsp;{{ '{0:0.4f}'.format(place.coord_lat|float) }})
+      {% if place.coord_lat and place.coord_long %}
+        <div id="map">{% if '°' in place.coord_lat %}
+        Virheelliset koordinaatit: {{place.coord_lat}}, {{place.coord_long}}
+        &mdash; pitäisi olla desimaalimuodossa
+        {% else %}{% set r = 0.15 %}
+            {% set y = place.coord_lat|float %}
+            {% set x = place.coord_long|float %}
+            <iframe width="250" height="250" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
+            src="http://www.openstreetmap.org/export/embed.html?bbox={{
+             x - r }}%2C{{ y - r }}%2C{{ x + r  }}%2C{{ y + r 
+             }}&amp;layer=mapnik&amp;marker={{place.coord_lat}}%2C{{place.coord_long}}" 
+            style="border: 1px solid black"></iframe><br/><!--small--><a 
+            href="http://www.openstreetmap.org/?mlat={{place.coord_lat}}&amp;mlon={{
+             place.coord_long}}#map=9/{{place.coord_lat}}/{{place.coord_long}}">
+            - OpenstreetMap isommalla kartalla</a><!--/small--><br>
             <a target="_blank" href="https://www.google.fi/maps/@{{place.coord_lat}},{{place.coord_long}},14z?hl=fi">
-            [Klikkaa kartta]</a>
-        </div>
+            - Google-kartalle</a><br>&nbsp;<br>
+            Sijainti: N&nbsp;{{ '{0:0.4f}'.format(place.coord_lat|float) }}, 
+            E&nbsp;{{ '{0:0.4f}'.format(place.coord_long|float) }}
+        {% endif %}</div>
+      {% endif %}
     <h3 style="position:sticky; top:0;">{{place.pname}}</h3>
         <div>
             <ul>{% for p in locations %}
@@ -27,7 +43,7 @@
             {% endfor %}</ul>
         </div>
         {% if place.url_href|length > 0 %}
-        <div class="subsection" id="events">
+        <div id="events">
             <h4>Nettisivut</h4>
             <table class="infolist eventlist">
                 <thead>
@@ -43,14 +59,14 @@
                         <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(place.url_priv[i]) }}</td> 
                         <td class="ColumnDescription">{{place.url_type[i]}}</td> 
                         <td class="ColumnDescription">{{place.url_description[i]}}
-                        <a href="{{place.url_href[i]}}">[Klikkaa linkki]</a></td> 
+                        <a href="{{place.url_href[i]}}" class="outlink">[Klikkaa linkki]</a></td> 
                     </tr>
          {% endfor %}
                  </tbody>
             </table>
         </div>
         {% endif %}
-        <div class="subsection" id="events">
+        <div id="events"> <!--class="subsection"-->
             <h4>Tapahtumat</h4>
             <table class="infolist eventlist">
                 <thead>

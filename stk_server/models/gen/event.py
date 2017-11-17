@@ -72,7 +72,8 @@ RETURN ID(c) AS citationref_hlink"""
             where = ''
         
         query = """
- MATCH (event:Event)-[a]->(citation:Citation)-[b]->(source:Source)-[c]->(repo:Repository) {0}
+ MATCH (event:Event)-[a:CITATION]->(citation:Citation)
+         -[b:SOURCE]->(source:Source)-[c:REPOSITORY]->(repo:Repository) {0}
  RETURN ID(event) AS id, event.type AS type, event.date AS date, event.datetype AS datetype, 
     event.daterange_start AS daterange_start, event.daterange_stop AS daterange_stop, 
     COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence,
@@ -93,7 +94,7 @@ RETURN ID(c) AS citationref_hlink"""
             where = ''
         
         query = """
- MATCH (event:Event)-[a]->(citation:Citation) {0}
+ MATCH (event:Event)-[a:CITATION]->(citation:Citation) {0}
  RETURN ID(event) AS id, event.type AS type, event.date AS date, event.datetype AS datetype, 
     event.daterange_start AS daterange_start, event.daterange_stop AS daterange_stop, 
     COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence] ) AS sources
@@ -452,8 +453,8 @@ MERGE (n)-[r:CITATION]->(m)"""
                 objref_hlink = self.objref_hlink
                 query = """
 MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Object) WHERE m.gramps_handle=$objref_hlink
-MERGE (n)-[r:OBJECT]->(m)"""                       
+MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
+MERGE (n)-[r:Media]->(m)"""                       
                 tx.run(query, 
                {"handle": handle, "objref_hlink": objref_hlink})
         except Exception as err:
@@ -463,29 +464,14 @@ MERGE (n)-[r:OBJECT]->(m)"""
 
 
 
-
 class Event_for_template(Event):
     """ Template-tapahtuma perii Tapahtuma-luokan
             
         Properties:
-                place              str paikka
-                
+                place              str paikan nimi
     """
 
     def __init__(self, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
-        self.handle = handle
-        self.change = ''
-        self.id = eid
-        self.description = desc
-        self.date = ''
-        self.datetype = ''
-        self.daterange_start = ''
-        self.daterange_stop = ''
+        Event.__init__(self, eid, desc, handle)
         self.place = ''
-        self.place_hlink = ''
-        self.attr_type = ''
-        self.attr_value = ''
-        self.noteref_hlink = ''
-        self.citationref_hlink = ''
-        self.objref_hlink = ''
