@@ -1114,6 +1114,7 @@ def handle_events(collection, userid, tx):
             event_dateval = event.getElementsByTagName('dateval')[0]
             if event_dateval.hasAttribute("val"):
                 e.date = event_dateval.getAttribute("val")
+                e.daterange_start = event_dateval.getAttribute("val")
             if event_dateval.hasAttribute("type"):
                 e.datetype = event_dateval.getAttribute("type")
         elif len(event.getElementsByTagName('dateval') ) > 1:
