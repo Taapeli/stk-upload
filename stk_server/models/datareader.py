@@ -227,6 +227,8 @@ def lue_henkilot_k(keys=None):
         p = Person()
         p.uniq_id = uniq_id
         p.confidence = record['confidence']
+        p.est_birth = record['est_birth']
+        p.est_death = record['est_death']
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
@@ -295,6 +297,19 @@ def set_confidence_value():
             
     User.endTransaction(tx)
     text = "Number of confidences set: " + str(counter)
+    message.append(text)
+    return (message)
+
+
+def set_estimated_dates():
+    """ Asettaa henkilölle arvioidut syntymä- ja kuolinajat
+    """
+    
+    message = []
+        
+    Person.set_estimated_dates()
+                        
+    text = "Estimated birth and death dates set"
     message.append(text)
     return (message)
     

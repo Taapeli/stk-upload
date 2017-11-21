@@ -39,6 +39,8 @@ class Person:
                 parentin_hlink     str vanhempien osoite
                 citationref_hlink  str viittauksen osoite
                 confidence         str tietojen luotettavuus
+                est_birth          str arvioitu syntymäaika
+                est_death          str arvioitu kuolinaika
      """
 
     def __init__(self, pid=''):
@@ -61,6 +63,8 @@ class Person:
         self.parentin_hlink = []
         self.citationref_hlink = []
         self.confidence = ''
+        self.est_birth = ''
+        self.est_death = ''
     
     
     def get_citation_id(self):
@@ -191,6 +195,8 @@ RETURN person, name
                 self.url_type = person_record["person"]['url_type']
                 self.url_description = person_record["person"]['url_description']
                 self.confidence = person_record["person"]['confidence']
+                self.est_birth = person_record["person"]['est_birth']
+                self.est_death = person_record["person"]['est_death']
             
             if len(person_record["name"]) > 0:
                 pname = Name()
@@ -243,6 +249,8 @@ RETURN person, COLLECT(name) AS names
             self.url_type = person_record["person"]['url_type']
             self.url_description = person_record["person"]['url_description']
             self.confidence = person_record["person"]['confidence']
+            self.est_birth = person_record["person"]['est_birth']
+            self.est_death = person_record["person"]['est_death']
             
             for name in person_record["names"]:
                 pname = Name()
@@ -495,7 +503,8 @@ RETURN person, COLLECT(name) AS names
         qend="""
  OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
  OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
-RETURN ID(person) AS id, person.confidence AS confidence,
+RETURN ID(person) AS id, person.confidence AS confidence, 
+    person.est_birth AS est_birth, person.est_death AS est_death,
     name.firstname AS firstname, 
     name.refname AS refname, name.surname AS surname, 
     name.suffix AS suffix,
@@ -687,6 +696,35 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
 
         return points
 
+
+    @staticmethod
+    def set_estimated_dates():
+        # Set est_birth
+        try:
+            type = 'Birth'
+            query = """
+MATCH (n:Person)-[r:EVENT]->(m:Event)
+    WHERE m.type=$type
+SET r.type =$type
+SET n.est_birth = m.daterange_start"""
+            g.driver.session().run(query, 
+               {"type": type})
+        except Exception as err:
+            print("Virhe (Person.save:est_birth): {0}".format(err), file=stderr)
+            
+        # Set est_birth
+        try:
+            type = 'Death'
+            query = """
+MATCH (n:Person)-[r:EVENT]->(m:Event)
+    WHERE m.type=$type
+SET r.type =$type
+SET n.est_death = m.daterange_start"""
+            g.driver.session().run(query, 
+               {"type": type})
+        except Exception as err:
+            print("Virhe (Person.save:est_death): {0}".format(err), file=stderr)
+        
 
     def print_data(self):
         """ Tulostaa tiedot """

@@ -399,6 +399,16 @@ def aseta_confidence():
     return render_template("talletettu.html", text=message, uri=dburi)
 
 
+@app.route('/aseta/estimated_dates')
+def aseta_estimated_dates(): 
+    """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
+    models.dbutil.connect_db()
+    dburi = models.dbutil.connect_db()
+    
+    message = models.datareader.set_estimated_dates()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+
 @app.route('/aseta/refnames')
 def aseta_refnames(): 
     """ referenssinimien asettaminen henkilöille """
