@@ -16,16 +16,22 @@ class Place:
         Properties:
                 handle          
                 change
-                id              esim. "P0001"
-                type            str paikan tyyppi
-                pname           str paikan nimi
-                coord_long      str paikan pituuspiiri
-                coord_lat       str paikan leveyspiiri
-                url_priv        str url salattu tieto
-                url_href        str url osoite
-                url_type        str url tyyppi
-                url_description str url kuvaus
-                placeref_hlink  str paikan osoite
+                id                  esim. "P0001"
+                type                str paikan tyyppi
+                pname               str paikan nimi
+                names[]:
+                   pname            str paikan nimi
+                   lang             str kielikoodi
+                   datetype         str aikavälin tyyppi
+                   daterange_start  str aikavälin alku
+                   daterange_stop   str aikavälin loppu
+                coord_long          str paikan pituuspiiri
+                coord_lat           str paikan leveyspiiri
+                url_priv            str url salattu tieto
+                url_href            str url osoite
+                url_type            str url tyyppi
+                url_description     str url kuvaus
+                placeref_hlink      str paikan osoite
      """
 
     def __init__(self, locid="", ptype="", pname="", level=None):
@@ -41,6 +47,7 @@ class Place:
         # Gramps-tietoja
         self.handle = ''
         self.change = ''
+        self.names = []
         self.coord_long = ''
         self.coord_lat = ''
         self.url_priv = []
@@ -368,14 +375,6 @@ ORDER BY edate"""
         """ Tallettaa sen kantaan """
         
         try:
-            if len(self.pname) >= 1:
-                p_pname = self.pname
-                if len(self.pname) > 1:
-                    print("Warning: More than one pname in a place, " + 
-                          "handle: " + self.handle)
-            else:
-                p_pname = ''
-
             handle = self.handle
             change = self.change
             pid = self.id
@@ -408,7 +407,30 @@ SET p.gramps_handle=$handle,
                 "url_description": url_description})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
-
+            
+        if len(self.names) >= 1:
+            try:
+                for i in range(len(self.names)):
+                    name = self.names[i].name
+                    lang = self.names[i].lang
+                    datetype = self.names[i].datetype
+                    daterange_start = self.names[i].daterange_start
+                    daterange_stop = self.names[i].daterange_stop
+                    query = """
+MATCH (p:Place) WHERE p.gramps_handle=$handle 
+CREATE (n:Place_name)
+MERGE (p)-[r:NAME]->(n)
+SET n.name=$name,
+    n.lang=$lang,
+    n.datetype=$datetype,
+    n.daterange_start=$daterange_start,
+    n.daterange_stop=$daterange_stop"""             
+                    tx.run(query, 
+                           {"handle": handle, "name": name, "lang": lang, "datetype":datetype,
+                            "daterange_start":daterange_start, "daterange_stop":daterange_stop})
+            except Exception as err:
+                print("Virhe: {0}".format(err), file=stderr)
+                
         # Make hierarchy relations to the Place node
         if len(self.placeref_hlink) > 0:
             try:
@@ -423,3 +445,25 @@ SET p.gramps_handle=$handle,
                 print("Virhe: {0}".format(err), file=stderr)
             
         return
+    
+
+class Place_name:
+    """ Paikan nimi
+    
+        Properties:
+                pname            str nimi
+                lang             str kielikoodi
+                datetype         str aikavälin tyyppi
+                daterange_start  str aikavälin alku
+                daterange_stop   str aikavälin loppu
+    """
+    
+    def __init__(self):
+        """ Luo uuden name-instanssin """
+        self.name = ''
+        self.lang = ''
+        self.datetype = ''
+        self.daterange_start = ''
+        self.daterange_stop = ''
+
+
