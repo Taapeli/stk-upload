@@ -14,7 +14,7 @@ from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person import Person, Name, Person_as_member
-from models.gen.place import Place
+from models.gen.place import Place, Place_name
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
@@ -1467,9 +1467,26 @@ def handle_places(collection, tx):
     
         if len(placeobj.getElementsByTagName('pname') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('pname') )):
+                placename = Place_name()
                 placeobj_pname = placeobj.getElementsByTagName('pname')[i]
                 if placeobj_pname.hasAttribute("value"):
                     place.pname = placeobj_pname.getAttribute("value")
+                    placename.name = placeobj_pname.getAttribute("value")
+                if placeobj_pname.hasAttribute("lang"):
+                    placename.lang = placeobj_pname.getAttribute("lang")
+                if len(placeobj_pname.getElementsByTagName('dateval') ) == 1:
+                    placeobj_pname_dateval = placeobj_pname.getElementsByTagName('dateval')[0]
+                    if placeobj_pname_dateval.hasAttribute("val"):
+                        placename.daterange_start = placeobj_pname_dateval.getAttribute("val")
+                    if placeobj_pname_dateval.hasAttribute("type"):
+                        placename.datetype = placeobj_pname_dateval.getAttribute("type")
+                if len(placeobj_pname.getElementsByTagName('daterange') ) == 1:
+                    placeobj_pname_daterange = placeobj_pname.getElementsByTagName('daterange')[0]
+                    if placeobj_pname_daterange.hasAttribute("start"):
+                        placename.daterange_start = placeobj_pname_dateval.getAttribute("start")
+                    if placeobj_pname_daterange.hasAttribute("stop"):
+                        placename.daterange_stop = placeobj_pname_dateval.getAttribute("stop")
+                place.names.append(placename)
     
         if len(placeobj.getElementsByTagName('coord') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('coord') )):
