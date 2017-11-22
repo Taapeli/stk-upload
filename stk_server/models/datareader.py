@@ -307,9 +307,9 @@ def set_estimated_dates():
     
     message = []
         
-    Person.set_estimated_dates()
+    msg = Person.set_estimated_dates()
                         
-    text = "Estimated birth and death dates set"
+    text = "Estimated birth and death dates set. " + msg
     message.append(text)
     return (message)
     

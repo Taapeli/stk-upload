@@ -707,8 +707,10 @@ MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE m.type=$type
 SET r.type =$type
 SET n.est_birth = m.daterange_start"""
-            g.driver.session().run(query, 
+            result = g.driver.session().run(query, 
                {"type": type})
+            counters = result.consume().counters
+            msg = "Muutettu {} est_birth-tietoa".format(counters.properties_set)
         except Exception as err:
             print("Virhe (Person.save:est_birth): {0}".format(err), file=stderr)
             
@@ -720,8 +722,11 @@ MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE m.type=$type
 SET r.type =$type
 SET n.est_death = m.daterange_start"""
-            g.driver.session().run(query, 
+            result = g.driver.session().run(query, 
                {"type": type})
+            counters = result.consume().counters
+            msg = msg + " ja {} est_death-tietoa.".format(counters.properties_set)
+            return msg
         except Exception as err:
             print("Virhe (Person.save:est_death): {0}".format(err), file=stderr)
         
