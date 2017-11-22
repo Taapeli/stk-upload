@@ -20,7 +20,7 @@ class Place:
                 type                str paikan tyyppi
                 pname               str paikan nimi
                 names[]:
-                   pname            str paikan nimi
+                   name             str paikan nimi
                    lang             str kielikoodi
                    datetype         str aikavälin tyyppi
                    daterange_start  str aikavälin alku
@@ -451,7 +451,7 @@ class Place_name:
     """ Paikan nimi
     
         Properties:
-                pname            str nimi
+                name             str nimi
                 lang             str kielikoodi
                 datetype         str aikavälin tyyppi
                 daterange_start  str aikavälin alku
