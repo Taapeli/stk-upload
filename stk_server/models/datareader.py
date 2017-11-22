@@ -13,7 +13,7 @@ from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import Person, Name, Person_as_member
+from models.gen.person import Person, Name, Person_as_member, Weburl
 from models.gen.place import Place, Place_name
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
@@ -1404,15 +1404,17 @@ def handle_people(collection, userid, tx):
                     
         if len(person.getElementsByTagName('url') ) >= 1:
             for i in range(len(person.getElementsByTagName('url') )):
+                weburl = Weburl()
                 person_url = person.getElementsByTagName('url')[i]
                 if person_url.hasAttribute("priv"):
-                    p.url_priv.append(person_url.getAttribute("priv"))
+                    weburl.priv = person_url.getAttribute("priv")
                 if person_url.hasAttribute("href"):
-                    p.url_href.append(person_url.getAttribute("href"))
+                    weburl.href = person_url.getAttribute("href")
                 if person_url.hasAttribute("type"):
-                    p.url_type.append(person_url.getAttribute("type"))
+                    weburl.type = person_url.getAttribute("type")
                 if person_url.hasAttribute("description"):
-                    p.url_description.append(person_url.getAttribute("description"))
+                    weburl.description = person_url.getAttribute("description")
+                p.urls.append(weburl)
                     
         if len(person.getElementsByTagName('parentin') ) >= 1:
             for i in range(len(person.getElementsByTagName('parentin') )):
@@ -1528,15 +1530,17 @@ def handle_places(collection, tx):
                     
         if len(placeobj.getElementsByTagName('url') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('url') )):
+                weburl = Weburl()
                 placeobj_url = placeobj.getElementsByTagName('url')[i]
                 if placeobj_url.hasAttribute("priv"):
-                    place.url_priv.append(placeobj_url.getAttribute("priv"))
+                    weburl.priv = placeobj_url.getAttribute("priv")
                 if placeobj_url.hasAttribute("href"):
-                    place.url_href.append(placeobj_url.getAttribute("href"))
+                    weburl.href = placeobj_url.getAttribute("href")
                 if placeobj_url.hasAttribute("type"):
-                    place.url_type.append(placeobj_url.getAttribute("type"))
+                    weburl.type = placeobj_url.getAttribute("type")
                 if placeobj_url.hasAttribute("description"):
-                    place.url_description.append(placeobj_url.getAttribute("description"))
+                    weburl.description = placeobj_url.getAttribute("description")
+                place.urls.append(weburl)
     
         if len(placeobj.getElementsByTagName('placeref') ) == 1:
             placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]

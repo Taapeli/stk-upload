@@ -8,6 +8,7 @@ from sys import stderr
 #import logging
 from flask import g
 from models.dbtree import DbTree
+from models.gen.person import Weburl
 
 
 class Place:
@@ -27,10 +28,11 @@ class Place:
                    daterange_stop   str aikavälin loppu
                 coord_long          str paikan pituuspiiri
                 coord_lat           str paikan leveyspiiri
-                url_priv            str url salattu tieto
-                url_href            str url osoite
-                url_type            str url tyyppi
-                url_description     str url kuvaus
+                urls[]:
+                    priv            str url salattu tieto
+                    href            str url osoite
+                    type            str url tyyppi
+                    description     str url kuvaus
                 placeref_hlink      str paikan osoite
      """
 
@@ -50,10 +52,7 @@ class Place:
         self.names = []
         self.coord_long = ''
         self.coord_lat = ''
-        self.url_priv = []
-        self.url_href = []
-        self.url_type = []
-        self.url_description = []
+        self.urls = []
         self.placeref_hlink = ''
     
     
@@ -73,7 +72,8 @@ class Place:
         query = """
             MATCH (place:Place)
                 WHERE ID(place)=$place_id
-                RETURN place
+            OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
+                RETURN place, COLLECT (url) AS urls
             """.format(self.uniq_id)
         place_result = g.driver.session().run(query, {"place_id": plid})
         
@@ -84,10 +84,15 @@ class Place:
             self.pname = place_record["place"]["pname"]
             self.coord_long = place_record["place"]["coord_long"]
             self.coord_lat = place_record["place"]["coord_lat"]
-            self.url_priv = place_record["place"]["url_priv"]
-            self.url_href = place_record["place"]["url_href"]
-            self.url_type = place_record["place"]["url_type"]
-            self.url_description = place_record["place"]["url_description"]
+            
+            urls = place_record['urls']
+            for url in urls:
+                weburl = Weburl()
+                weburl.priv = url["priv"]
+                weburl.href = url["href"]
+                weburl.type = url["type"]
+                weburl.description = url["description"]
+                self.urls.append(weburl)
             
         return True
     
@@ -106,8 +111,7 @@ class Place:
         result = g.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
-                  'coord_long', 'coord_lat',
-                  'url_priv', 'url_href', 'url_type', 'url_description']
+                  'coord_long', 'coord_lat']
         lists = []
         
         for record in result:
@@ -142,22 +146,6 @@ class Place:
                 data_line.append('-')
             if record["p"]['coord_lat']:
                 data_line.append(record["p"]['coord_lat'])
-            else:
-                data_line.append('-')
-            if record["p"]['url_priv']:
-                data_line.append(record["p"]['url_priv'])
-            else:
-                data_line.append('-')
-            if record["p"]['url_href']:
-                data_line.append(record["p"]['url_href'])
-            else:
-                data_line.append('-')
-            if record["p"]['url_type']:
-                data_line.append(record["p"]['url_type'])
-            else:
-                data_line.append('-')
-            if record["p"]['url_description']:
-                data_line.append(record["p"]['url_description'])
             else:
                 data_line.append('-')
                 
@@ -358,14 +346,6 @@ ORDER BY edate"""
             print ("Coord_long: " + self.coord_long)
         if self.coord_lat != '':
             print ("Coord_lat: " + self.coord_lat)
-        if self.url_priv != '':
-            print ("URL_priv: " + self.url_priv)
-        if self.url_href != '':
-            print ("URL_href: " + self.url_href)
-        if self.url_type != '':
-            print ("URL_type: " + self.url_type)
-        if self.url_priv != '':
-            print ("URL_description: " + self.url_description)
         if self.placeref_hlink != '':
             print ("Placeref_hlink: " + self.placeref_hlink)
         return True
@@ -383,10 +363,6 @@ ORDER BY edate"""
             # Replace f.ex 26° 11\' 7,411"I with 26° 11' 7,411"I
             coord_long = self.coord_long.replace("\\\'", "\'")
             coord_lat = self.coord_lat.replace("\\\'", "\'")
-            url_priv = self.url_priv
-            url_href = self.url_href
-            url_type = self.url_type
-            url_description = self.url_description
             query = """
 CREATE (p:Place) 
 SET p.gramps_handle=$handle, 
@@ -395,16 +371,10 @@ SET p.gramps_handle=$handle,
     p.type=$type, 
     p.pname=$pname, 
     p.coord_long=$coord_long, 
-    p.coord_lat=$coord_lat, 
-    p.url_priv=$url_priv, 
-    p.url_href=$url_href, 
-    p.url_type=$url_type, 
-    p.url_description=$url_description"""             
+    p.coord_lat=$coord_lat"""             
             tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "type": type, "pname": pname, 
-                "coord_long": coord_long, "coord_lat": coord_lat,
-                "url_priv": url_priv, "url_href": url_href, "url_type": url_type,
-                "url_description": url_description})
+                "coord_long": coord_long, "coord_lat": coord_lat})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
@@ -430,6 +400,25 @@ SET n.name=$name,
                             "daterange_start":daterange_start, "daterange_stop":daterange_stop})
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
+            
+        # Talleta Weburl nodet ja linkitä paikkaan
+        if len(self.urls) > 0:
+            for url in self.urls:
+                url_priv = url.priv
+                url_href = url.href
+                url_type = url.type
+                url_description = url.description
+            query = """
+MATCH (n:Place) WHERE n.gramps_handle=$handle
+CREATE (n)-[wu:WEBURL]->
+      (url:Weburl {priv: {url_priv}, href: {url_href},
+                type: {url_type}, description: {url_description}})"""
+            try:
+                tx.run(query, 
+                           {"handle": handle, "url_priv": url_priv, "url_href": url_href,
+                            "url_type":url_type, "url_description":url_description})
+            except Exception as err:
+                print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
                 
         # Make hierarchy relations to the Place node
         if len(self.placeref_hlink) > 0:
