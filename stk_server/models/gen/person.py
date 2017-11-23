@@ -176,8 +176,7 @@ RETURN ID(family) AS uniq_id"""
         query = """
 MATCH (person:Person)-[r:NAME]->(name:Name) 
   WHERE ID(person)=$pid
-OPTIONAL MATCH (person)-[wu:WEBURL]->(weburl:Weburl)
-RETURN person, name, COLLECT (weburl) AS urls
+RETURN person, name
   ORDER BY name.alt"""
         person_result = g.driver.session().run(query, {"pid": pid})
         self.id = None
@@ -202,16 +201,7 @@ RETURN person, name, COLLECT (weburl) AS urls
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
                 self.names.append(pname)
-            
-            for url in person_record["urls"]:
-                weburl = Weburl()
-                weburl.priv = url['priv']
-                weburl.href = url['href']
-                weburl.type = url['type']
-                weburl.description = url['description']
-                self.urls.append(pname)
                 
-
 
     def get_person_w_names(self):
         """ Luetaan kaikki henkilön tiedot ja nimet
@@ -924,22 +914,19 @@ MERGE (n)-[r:NAME]->(m)"""
         # Talleta Weburl nodet ja linkitä henkilöön
         if len(self.urls) > 0:
             for url in self.urls:
-                priv = url.priv
-                href = url.href
-                type = url.type
-                description = url.description
+                url_priv = url.priv
+                url_href = url.href
+                url_type = url.type
+                url_description = url.description
                 query = """
-CREATE (u:Weburl)
-SET u.priv=$priv,
-    u.href=$href,
-    u.type=$type,
-    u.description=$description
-WITH u
 MATCH (n:Person) WHERE n.gramps_handle=$handle
-MERGE (n)-[r:WEBURL]->(u)"""
+CREATE (n)-[wu:WEBURL]->
+      (url:Weburl {priv: {url_priv}, href: {url_href},
+                type: {url_type}, description: {url_description}})"""
                 try:
-                    tx.run(query, {"priv": priv, "href": href,
-                                    "type": type, "description": description, "handle": handle})
+                    tx.run(query, 
+                           {"handle": handle, "url_priv": url_priv, "url_href": url_href,
+                            "url_type":url_type, "url_description":url_description})
                 except Exception as err:
                     print("Virhe (Person.save:create Weburl): {0}".format(err), file=stderr)
 
