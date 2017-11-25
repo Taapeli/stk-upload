@@ -159,57 +159,82 @@ class Place:
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
             
             Esim.
-╒═══════╤═══════════════╤══════════╤════════════════════╤══════════════════════╕
-│"id"   │"name"         │"type"    │"upper"             │"lower"               │
-╞═══════╪═══════════════╪══════════╪════════════════════╪══════════════════════╡
-│"30358"│["Ahlnäs ()"]  │"Building"│[["30344","Lappträsk│[[null,null,null]]    │
-│       │               │          │ Ladugård","Farm"]] │                      │
-├───────┼───────────────┼──────────┼────────────────────┼──────────────────────┤
-│"30256"│["Artjärvi ()",│"City"    │[[null,null,null],  │[["30257","Rastula",  │
-│       │"Artsjö (sv)"] │          │[null,null,null]]   │"Village"],["30515",  │
-│       │               │          │                    │"Männistö","Village"]]│                            │
-├───────┼───────────────┼──────────┼────────────────────┼──────────────────────┤
-│"30341"│["Backas ()"]  │"Building"│[[null,null,null]]  │[[null,null,null]]    │
-└───────┴───────────────┴──────────┴────────────────────┴──────────────────────┘
+╒═══════╤════════════╤══════════════════════════════╤════════════╤════════════╤═══════════════════════╤═══════════════════════╕
+│"id"   │"type"      │"name"                        │"coord_long"│"coord_lat" │"upper"                │"lower"                │
+╞═══════╪════════════╪══════════════════════════════╪════════════╪════════════╪═══════════════════════╪═══════════════════════╡
+│"28427"│"Building"  │[["Ahlnäs",""]]               │""          │""          │[["28419","Farm",      │[[null,null,null,null]]│
+│       │            │                              │            │            │"Labby 6 Smeds",""]]   │                       │
+├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
+│"28795"│"Hautausmaa"│[["Ahveniston hautausmaa",""]]│"24.4209"   │"60.9895"   │[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
+│"28118"│"Farm"      │[["Ainola",""]]               │"25.0873870"│"60.453655" │[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
+│"28865"│"City"      │[["Akaa",""],["Ackas","sv"]]  │"23.9481353"│"61.1881064"│[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
+│"28354"│"Building"  │[["Alnäs",""]]                │""          │""          │[["28325","Farm","Inger│[[null,null,null,null]]│
+│       │            │                              │            │            │mansby 4 Sjökulla",""],│                       │
+│       │            │                              │            │            │["28325","Farm", "Lappt│                       │
+│       │            │                              │            │            │räsk Ladugård",""]]    │                       │
+└───────┴────────────┴──────────────────────────────┴────────────┴────────────┴───────────────────────┴───────────────────────┘
 """
         
         query = """
-MATCH (a:Place)-[:NAME]->(pn:Place_name) 
-OPTIONAL MATCH (a:Place)-[:HIERARCY]->(up:Place) 
-OPTIONAL MATCH (a:Place)<-[:HIERARCY]-(do:Place) 
+MATCH (a:Place) -[:NAME]-> (pn:Place_name) 
+OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
+OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
 RETURN ID(a) AS id, a.type AS type,
-    COLLECT(DISTINCT [pn.name, pn.lang]) AS name,
+    COLLECT(DISTINCT [pn.name,pn.lang]) AS name,
     a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
-    COLLECT(DISTINCT [ID(up), up.type, up.pname]) AS upper, 
-    COLLECT(DISTINCT [ID(do), do.type, do.pname]) AS lower
+    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper, 
+    COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
 ORDER BY name[0][0]
 """
-        ret = []
-        result = g.driver.session().run(query)
-        for record in result:
-            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
-            # alemmista paikoista
+        def names_w_lang(field):
+            """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit 
+                mainittuna.
+                Jos sarakkeessa field[1] on mainittu kielikoodi
+                se lisätään kunkin nimen field[0] perään suluissa
+            """
             names = []
-            for n in record['name']:
+            for n in field:
                 if n[1]:
                     # Name with langiage code
                     names.append("{} ({})".format(n[0], n[1]))
                 else:
                     names.append(n[0])
-            p = Place(record['id'], record['type'], names)
+            return names
+
+        def combine_places(field):
+            """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City", 
+                "Lovisa", "sv"]].
+                Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
+                Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
+            """
+            namedict = {}
+            for near in field:
+                if near[0]: # id of a lower place
+                    if near[0] in namedict:
+                        # Append name to existing Place
+                        namedict[near[0]].pname.extend(names_w_lang( (near[2:],) ))
+                    else:
+                        # Add a new Place
+                        namedict[near[0]] = \
+                            Place(near[0], near[1], names_w_lang( (near[2:],) ))
+            return list(namedict.values())
+
+        ret = []
+        result = g.driver.session().run(query)
+        for record in result:
+            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
+            # alemmista paikoista
+            p = Place(record['id'], record['type'], names_w_lang(record['name']))
             p.coord_long = record['coord_long']
             p.coord_lat = record['coord_lat']
-            p.uppers = []
-            for near in record['upper']:
-                if near[0]:
-                    p.uppers.append(Place(near[0], near[1], near[2]))
-            p.lowers = []
-            for near in record['lower']:
-                if near[0]:
-                    p.lowers.append(Place(near[0], near[1], near[2]))
+            p.uppers = combine_places(record['upper'])
+            p.lowers = combine_places(record['lower'])
             ret.append(p)
         return ret
-
+                    
 
     @staticmethod       
     def get_place_tree(locid):
