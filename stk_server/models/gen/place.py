@@ -159,36 +159,44 @@ class Place:
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
             
             Esim.
-╒═══════╤═══════════╤══════════╤════════════════════╤══════════════════════╕
-│"id"   │"name"     │"type"    │"upper"             │"lower"               │
-╞═══════╪═══════════╪══════════╪════════════════════╪══════════════════════╡
-│"30358"│"Alnäs"    │"Building"│[["30344","Lappträsk│[[null,null,null]]    │
-│       │           │          │ Ladugård","Farm"]] │                      │
-├───────┼───────────┼──────────┼────────────────────┼──────────────────────┤
-│"30256"│"Artjärvi" │"City"    │[[null,null,null],  │[["30257","Rastula",  │
-│       │           │          │[null,null,null]]   │"Village"],["30515",  │
-│       │           │          │                    │"Männistö","Village"]]│                            │
-├───────┼───────────┼──────────┼────────────────────┼──────────────────────┤
-│"30341"│"Backas"   │"Building"│[[null,null,null]]  │[[null,null,null]]    │
-└───────┴───────────┴──────────┴────────────────────┴──────────────────────┘
+╒═══════╤═══════════════╤══════════╤════════════════════╤══════════════════════╕
+│"id"   │"name"         │"type"    │"upper"             │"lower"               │
+╞═══════╪═══════════════╪══════════╪════════════════════╪══════════════════════╡
+│"30358"│["Ahlnäs ()"]  │"Building"│[["30344","Lappträsk│[[null,null,null]]    │
+│       │               │          │ Ladugård","Farm"]] │                      │
+├───────┼───────────────┼──────────┼────────────────────┼──────────────────────┤
+│"30256"│["Artjärvi ()",│"City"    │[[null,null,null],  │[["30257","Rastula",  │
+│       │"Artsjö (sv)"] │          │[null,null,null]]   │"Village"],["30515",  │
+│       │               │          │                    │"Männistö","Village"]]│                            │
+├───────┼───────────────┼──────────┼────────────────────┼──────────────────────┤
+│"30341"│["Backas ()"]  │"Building"│[[null,null,null]]  │[[null,null,null]]    │
+└───────┴───────────────┴──────────┴────────────────────┴──────────────────────┘
 """
         
         query = """
-MATCH (a:Place) 
+MATCH (a:Place)-[:NAME]->(pn:Place_name) 
 OPTIONAL MATCH (a:Place)-[:HIERARCY]->(up:Place) 
 OPTIONAL MATCH (a:Place)<-[:HIERARCY]-(do:Place) 
-RETURN ID(a) AS id, a.type AS type, a.pname AS name,
-       a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
-       COLLECT([ID(up), up.type, up.pname]) AS upper, 
-       COLLECT([ID(do), do.type, do.pname]) AS lower
-  ORDER BY name
+RETURN ID(a) AS id, a.type AS type,
+    COLLECT(DISTINCT [pn.name, pn.lang]) AS name,
+    a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
+    COLLECT(DISTINCT [ID(up), up.type, up.pname]) AS upper, 
+    COLLECT(DISTINCT [ID(do), do.type, do.pname]) AS lower
+ORDER BY name[0][0]
 """
         ret = []
         result = g.driver.session().run(query)
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
-            p = Place(record['id'], record['type'], record['name'])
+            names = []
+            for n in record['name']:
+                if n[1]:
+                    # Name with langiage code
+                    names.append("{} ({})".format(n[0], n[1]))
+                else:
+                    names.append(n[0])
+            p = Place(record['id'], record['type'], names)
             p.coord_long = record['coord_long']
             p.coord_lat = record['coord_lat']
             p.uppers = []

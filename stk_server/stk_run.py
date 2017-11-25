@@ -247,8 +247,8 @@ def show_locations():
         locations = models.gen.place.Place.get_place_names()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in locations:
-#         print ("# {} ".format(p))
+    for p in locations:
+        print ("# {} : {}".format(p, p.lowers[0] if p.lowers else ""))
     return render_template("k_locations.html", locations=locations)
 
 
