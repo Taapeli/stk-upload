@@ -14,7 +14,7 @@
 		</p>
 		<div id="alphanav">
 			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
-        {% for p in locations %}{% set ini = p.pname|list|first %}
+        {% for p in locations %}{% set ini = p.pname[0]|list|first %}
             {% if alpha != ini %}{%set alpha = ini %}
                 <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
             {% endif %}
@@ -24,12 +24,13 @@
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-                    <th>Paikka, liittyvät paikat</th><th>Pituuspiiri</th><th>Leveyspiiri</th>
+                    <th style="maxwidth:50%">Paikka, liittyvät paikat</th>
+                    <th>Sijainti</th>
 				</tr>
 			</thead>
 			<tbody>
 	{% if locations %}
-	    {% for p in locations %}{% set ini = p.pname|list|first %}
+	    {% for p in locations %}{% set ini = p.pname[0]|list|first %}
             <tr><td class="ColumnAlpha">{% if alpha != ini %}{%set alpha = ini %}
 	               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
                 {% endif %}</td>
@@ -37,26 +38,28 @@
                    <div>
                       <a href="/events/loc={{p.id}}" class="id"
                         title="katso paikan {{p.id}} tapahtumat"
-                        id="{{p.id}}">{{p.id}}</a> {{p.pname}}
+                        id="{{p.id}}">{{p.id}}</a> {{p.pname|join(' • ')}}
                       <small>{{p.type|transl('lt')}}</small>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
 						<small>{{e.type|transl('lt_in')}}</small>
 						<a href="#{{e.id}}" 
-						  title="siirry paikkaan id={{e.id}}">{{e.pname}}</a>
+						  title="siirry paikkaan id={{e.id}}">{{e.pname|join(' • ')}}</a>
 		        {% endif %}
                    </div>
             {% if p.lowers %}
 		           <ul style="margin:0 0 5px 1em;">
 		        {% for e in p.lowers|sort(attribute='pname') %}    <li>
 	                       <a href="#{{p.id}}"
-	                         title="siirry paikkaan id={{e.id}}">{{e.pname}}</a>
+	                         title="siirry paikkaan id={{e.id}}">{{e.pname|join(' • ')}}</a>
 	                       &nbsp;<small>{{e.type|transl('lt')}}</small>
                       </li>
 		        {% endfor %}
 		           </ul>
 	        {% endif %}
-	        <td>{{p.coord_long}}</td>
-	        <td>{{p.coord_lat}}</td>
+	        <td>{% if p.coord_long and not ' ' in p.coord_long %}({{ '{0:0.4f}'.format(p.coord_lat|float) }}, 
+                {{ '{0:0.4f}'.format(p.coord_long|float) }}){% elif p.coord_long %}
+	            <small style="color:red">{{p.coord_lat}}, {{p.coord_long}}</small>
+                {% endif %}</td>
 	    {% endfor %}
 	{% endif %}
 				</tr>

@@ -6,14 +6,15 @@ import csv
 import logging
 import time
 import xml.dom.minidom
+import re
 from operator import itemgetter
 from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import Person, Name, Person_as_member
-from models.gen.place import Place
+from models.gen.person import Person, Name, Person_as_member, Weburl
+from models.gen.place import Place, Place_name
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
@@ -226,6 +227,8 @@ def lue_henkilot_k(keys=None):
         p = Person()
         p.uniq_id = uniq_id
         p.confidence = record['confidence']
+        p.est_birth = record['est_birth']
+        p.est_death = record['est_death']
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
@@ -294,6 +297,19 @@ def set_confidence_value():
             
     User.endTransaction(tx)
     text = "Number of confidences set: " + str(counter)
+    message.append(text)
+    return (message)
+
+
+def set_estimated_dates():
+    """ Asettaa henkilölle arvioidut syntymä- ja kuolinajat
+    """
+    
+    message = []
+        
+    msg = Person.set_estimated_dates()
+                        
+    text = "Estimated birth and death dates set. " + msg
     message.append(text)
     return (message)
     
@@ -1113,6 +1129,7 @@ def handle_events(collection, userid, tx):
             event_dateval = event.getElementsByTagName('dateval')[0]
             if event_dateval.hasAttribute("val"):
                 e.date = event_dateval.getAttribute("val")
+                e.daterange_start = event_dateval.getAttribute("val")
             if event_dateval.hasAttribute("type"):
                 e.datetype = event_dateval.getAttribute("type")
         elif len(event.getElementsByTagName('dateval') ) > 1:
@@ -1387,15 +1404,17 @@ def handle_people(collection, userid, tx):
                     
         if len(person.getElementsByTagName('url') ) >= 1:
             for i in range(len(person.getElementsByTagName('url') )):
+                weburl = Weburl()
                 person_url = person.getElementsByTagName('url')[i]
                 if person_url.hasAttribute("priv"):
-                    p.url_priv.append(person_url.getAttribute("priv"))
+                    weburl.priv = person_url.getAttribute("priv")
                 if person_url.hasAttribute("href"):
-                    p.url_href.append(person_url.getAttribute("href"))
+                    weburl.href = person_url.getAttribute("href")
                 if person_url.hasAttribute("type"):
-                    p.url_type.append(person_url.getAttribute("type"))
+                    weburl.type = person_url.getAttribute("type")
                 if person_url.hasAttribute("description"):
-                    p.url_description.append(person_url.getAttribute("description"))
+                    weburl.description = person_url.getAttribute("description")
+                p.urls.append(weburl)
                     
         if len(person.getElementsByTagName('parentin') ) >= 1:
             for i in range(len(person.getElementsByTagName('parentin') )):
@@ -1450,29 +1469,78 @@ def handle_places(collection, tx):
     
         if len(placeobj.getElementsByTagName('pname') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('pname') )):
+                placename = Place_name()
                 placeobj_pname = placeobj.getElementsByTagName('pname')[i]
                 if placeobj_pname.hasAttribute("value"):
                     place.pname = placeobj_pname.getAttribute("value")
+                    placename.name = placeobj_pname.getAttribute("value")
+                if placeobj_pname.hasAttribute("lang"):
+                    placename.lang = placeobj_pname.getAttribute("lang")
+                if len(placeobj_pname.getElementsByTagName('dateval') ) == 1:
+                    placeobj_pname_dateval = placeobj_pname.getElementsByTagName('dateval')[0]
+                    if placeobj_pname_dateval.hasAttribute("val"):
+                        placename.daterange_start = placeobj_pname_dateval.getAttribute("val")
+                    if placeobj_pname_dateval.hasAttribute("type"):
+                        placename.datetype = placeobj_pname_dateval.getAttribute("type")
+                if len(placeobj_pname.getElementsByTagName('daterange') ) == 1:
+                    placeobj_pname_daterange = placeobj_pname.getElementsByTagName('daterange')[0]
+                    if placeobj_pname_daterange.hasAttribute("start"):
+                        placename.daterange_start = placeobj_pname_dateval.getAttribute("start")
+                    if placeobj_pname_daterange.hasAttribute("stop"):
+                        placename.daterange_stop = placeobj_pname_dateval.getAttribute("stop")
+                place.names.append(placename)
     
         if len(placeobj.getElementsByTagName('coord') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('coord') )):
                 placeobj_coord = placeobj.getElementsByTagName('coord')[i]
                 if placeobj_coord.hasAttribute("long"):
                     place.coord_long = placeobj_coord.getAttribute("long")
+                    if place.coord_long.find("°") > 0:
+                        place.coord_long.replace(" ", "")
+                        fc = place.coord_long[:1]
+                        if fc.isalpha():
+                            rc = place.coord_long[1:]
+                            place.coord_long = rc + fc
+                        a = re.split('[°\'′"″]+', place.coord_long)
+                        if len(a) > 2:
+                            a[1].replace("\\", "")
+                            a[2].replace(",", "\.")
+                            if a[0].isdigit() and a[1].isdigit():
+                                place.coord_long = int(a[0]) + int(a[1])/60
+                            if a[2].isdigit():
+                                place.coord_long += float(a[2])/360
+                            place.coord_long = str(place.coord_long)
                 if placeobj_coord.hasAttribute("lat"):
                     place.coord_lat = placeobj_coord.getAttribute("lat")
+                    if place.coord_lat.find("°") > 0:
+                        place.coord_lat.replace(" ", "")
+                        fc = place.coord_lat[:1]
+                        if fc.isalpha():
+                            rc = place.coord_lat[1:]
+                            place.coord_lat = rc + fc
+                        a = re.split('[°\'′"″]+', place.coord_lat)
+                        if len(a) > 2:
+                            a[1].replace("\\", "")
+                            a[2].replace(",", "\.")
+                            if a[0].isdigit() and a[1].isdigit():
+                                place.coord_lat = int(a[0]) + int(a[1])/60
+                            if a[2].isdigit():
+                                place.coord_lat += float(a[2])/360
+                            place.coord_lat = str(place.coord_lat)
                     
         if len(placeobj.getElementsByTagName('url') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('url') )):
+                weburl = Weburl()
                 placeobj_url = placeobj.getElementsByTagName('url')[i]
                 if placeobj_url.hasAttribute("priv"):
-                    place.url_priv.append(placeobj_url.getAttribute("priv"))
+                    weburl.priv = placeobj_url.getAttribute("priv")
                 if placeobj_url.hasAttribute("href"):
-                    place.url_href.append(placeobj_url.getAttribute("href"))
+                    weburl.href = placeobj_url.getAttribute("href")
                 if placeobj_url.hasAttribute("type"):
-                    place.url_type.append(placeobj_url.getAttribute("type"))
+                    weburl.type = placeobj_url.getAttribute("type")
                 if placeobj_url.hasAttribute("description"):
-                    place.url_description.append(placeobj_url.getAttribute("description"))
+                    weburl.description = placeobj_url.getAttribute("description")
+                place.urls.append(weburl)
     
         if len(placeobj.getElementsByTagName('placeref') ) == 1:
             placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]

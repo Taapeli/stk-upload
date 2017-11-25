@@ -248,7 +248,7 @@ def show_locations():
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
-#         print ("# {} ".format(p))
+#         print ("# {} : {}".format(p, p.uppers[0] if p.uppers else ""))
     return render_template("k_locations.html", locations=locations)
 
 
@@ -396,6 +396,16 @@ def aseta_confidence():
     dburi = models.dbutil.connect_db()
     
     message = models.datareader.set_confidence_value()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+
+@app.route('/aseta/estimated_dates')
+def aseta_estimated_dates(): 
+    """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
+    models.dbutil.connect_db()
+    dburi = models.dbutil.connect_db()
+    
+    message = models.datareader.set_estimated_dates()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 

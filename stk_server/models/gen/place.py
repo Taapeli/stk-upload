@@ -8,6 +8,7 @@ from sys import stderr
 #import logging
 from flask import g
 from models.dbtree import DbTree
+from models.gen.person import Weburl
 
 
 class Place:
@@ -16,16 +17,23 @@ class Place:
         Properties:
                 handle          
                 change
-                id              esim. "P0001"
-                type            str paikan tyyppi
-                pname           str paikan nimi
-                coord_long      str paikan pituuspiiri
-                coord_lat       str paikan leveyspiiri
-                url_priv        str url salattu tieto
-                url_href        str url osoite
-                url_type        str url tyyppi
-                url_description str url kuvaus
-                placeref_hlink  str paikan osoite
+                id                  esim. "P0001"
+                type                str paikan tyyppi
+                pname               str paikan nimi
+                names[]:
+                   name             str paikan nimi
+                   lang             str kielikoodi
+                   datetype         str aikavälin tyyppi
+                   daterange_start  str aikavälin alku
+                   daterange_stop   str aikavälin loppu
+                coord_long          str paikan pituuspiiri
+                coord_lat           str paikan leveyspiiri
+                urls[]:
+                    priv            str url salattu tieto
+                    href            str url osoite
+                    type            str url tyyppi
+                    description     str url kuvaus
+                placeref_hlink      str paikan osoite
      """
 
     def __init__(self, locid="", ptype="", pname="", level=None):
@@ -41,12 +49,10 @@ class Place:
         # Gramps-tietoja
         self.handle = ''
         self.change = ''
+        self.names = []
         self.coord_long = ''
         self.coord_lat = ''
-        self.url_priv = []
-        self.url_href = []
-        self.url_type = []
-        self.url_description = []
+        self.urls = []
         self.placeref_hlink = ''
     
     
@@ -66,7 +72,8 @@ class Place:
         query = """
             MATCH (place:Place)
                 WHERE ID(place)=$place_id
-                RETURN place
+            OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
+                RETURN place, COLLECT (url) AS urls
             """.format(self.uniq_id)
         place_result = g.driver.session().run(query, {"place_id": plid})
         
@@ -77,10 +84,15 @@ class Place:
             self.pname = place_record["place"]["pname"]
             self.coord_long = place_record["place"]["coord_long"]
             self.coord_lat = place_record["place"]["coord_lat"]
-            self.url_priv = place_record["place"]["url_priv"]
-            self.url_href = place_record["place"]["url_href"]
-            self.url_type = place_record["place"]["url_type"]
-            self.url_description = place_record["place"]["url_description"]
+            
+            urls = place_record['urls']
+            for url in urls:
+                weburl = Weburl()
+                weburl.priv = url["priv"]
+                weburl.href = url["href"]
+                weburl.type = url["type"]
+                weburl.description = url["description"]
+                self.urls.append(weburl)
             
         return True
     
@@ -99,8 +111,7 @@ class Place:
         result = g.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
-                  'coord_long', 'coord_lat',
-                  'url_priv', 'url_href', 'url_type', 'url_description']
+                  'coord_long', 'coord_lat']
         lists = []
         
         for record in result:
@@ -137,22 +148,6 @@ class Place:
                 data_line.append(record["p"]['coord_lat'])
             else:
                 data_line.append('-')
-            if record["p"]['url_priv']:
-                data_line.append(record["p"]['url_priv'])
-            else:
-                data_line.append('-')
-            if record["p"]['url_href']:
-                data_line.append(record["p"]['url_href'])
-            else:
-                data_line.append('-')
-            if record["p"]['url_type']:
-                data_line.append(record["p"]['url_type'])
-            else:
-                data_line.append('-')
-            if record["p"]['url_description']:
-                data_line.append(record["p"]['url_description'])
-            else:
-                data_line.append('-')
                 
             lists.append(data_line)
         
@@ -164,49 +159,82 @@ class Place:
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
             
             Esim.
-╒═══════╤═══════════╤══════════╤════════════════════╤══════════════════════╕
-│"id"   │"name"     │"type"    │"upper"             │"lower"               │
-╞═══════╪═══════════╪══════════╪════════════════════╪══════════════════════╡
-│"30358"│"Alnäs"    │"Building"│[["30344","Lappträsk│[[null,null,null]]    │
-│       │           │          │ Ladugård","Farm"]] │                      │
-├───────┼───────────┼──────────┼────────────────────┼──────────────────────┤
-│"30256"│"Artjärvi" │"City"    │[[null,null,null],  │[["30257","Rastula",  │
-│       │           │          │[null,null,null]]   │"Village"],["30515",  │
-│       │           │          │                    │"Männistö","Village"]]│                            │
-├───────┼───────────┼──────────┼────────────────────┼──────────────────────┤
-│"30341"│"Backas"   │"Building"│[[null,null,null]]  │[[null,null,null]]    │
-└───────┴───────────┴──────────┴────────────────────┴──────────────────────┘
+╒═══════╤════════════╤══════════════════════════════╤════════════╤════════════╤═══════════════════════╤═══════════════════════╕
+│"id"   │"type"      │"name"                        │"coord_long"│"coord_lat" │"upper"                │"lower"                │
+╞═══════╪════════════╪══════════════════════════════╪════════════╪════════════╪═══════════════════════╪═══════════════════════╡
+│"28427"│"Building"  │[["Ahlnäs",""]]               │""          │""          │[["28419","Farm",      │[[null,null,null,null]]│
+│       │            │                              │            │            │"Labby 6 Smeds",""]]   │                       │
+├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
+│"28795"│"Hautausmaa"│[["Ahveniston hautausmaa",""]]│"24.4209"   │"60.9895"   │[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
+│"28118"│"Farm"      │[["Ainola",""]]               │"25.0873870"│"60.453655" │[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
+│"28865"│"City"      │[["Akaa",""],["Ackas","sv"]]  │"23.9481353"│"61.1881064"│[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
+│"28354"│"Building"  │[["Alnäs",""]]                │""          │""          │[["28325","Farm","Inger│[[null,null,null,null]]│
+│       │            │                              │            │            │mansby 4 Sjökulla",""],│                       │
+│       │            │                              │            │            │["28325","Farm", "Lappt│                       │
+│       │            │                              │            │            │räsk Ladugård",""]]    │                       │
+└───────┴────────────┴──────────────────────────────┴────────────┴────────────┴───────────────────────┴───────────────────────┘
 """
         
         query = """
-MATCH (a:Place) 
-OPTIONAL MATCH (a:Place)-[:HIERARCY]->(up:Place) 
-OPTIONAL MATCH (a:Place)<-[:HIERARCY]-(do:Place) 
-RETURN ID(a) AS id, a.type AS type, a.pname AS name,
-       a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
-       COLLECT([ID(up), up.type, up.pname]) AS upper, 
-       COLLECT([ID(do), do.type, do.pname]) AS lower
-  ORDER BY name
+MATCH (a:Place) -[:NAME]-> (pn:Place_name) 
+OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
+OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
+RETURN ID(a) AS id, a.type AS type,
+    COLLECT(DISTINCT [pn.name,pn.lang]) AS name,
+    a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
+    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper, 
+    COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
+ORDER BY name[0][0]
 """
+        def names_w_lang(field):
+            """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit 
+                mainittuna.
+                Jos sarakkeessa field[1] on mainittu kielikoodi
+                se lisätään kunkin nimen field[0] perään suluissa
+            """
+            names = []
+            for n in field:
+                if n[1]:
+                    # Name with langiage code
+                    names.append("{} ({})".format(n[0], n[1]))
+                else:
+                    names.append(n[0])
+            return names
+
+        def combine_places(field):
+            """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City", 
+                "Lovisa", "sv"]].
+                Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
+                Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
+            """
+            namedict = {}
+            for near in field:
+                if near[0]: # id of a lower place
+                    if near[0] in namedict:
+                        # Append name to existing Place
+                        namedict[near[0]].pname.extend(names_w_lang( (near[2:],) ))
+                    else:
+                        # Add a new Place
+                        namedict[near[0]] = \
+                            Place(near[0], near[1], names_w_lang( (near[2:],) ))
+            return list(namedict.values())
+
         ret = []
         result = g.driver.session().run(query)
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
-            p = Place(record['id'], record['type'], record['name'])
+            p = Place(record['id'], record['type'], names_w_lang(record['name']))
             p.coord_long = record['coord_long']
             p.coord_lat = record['coord_lat']
-            p.uppers = []
-            for near in record['upper']:
-                if near[0]:
-                    p.uppers.append(Place(near[0], near[1], near[2]))
-            p.lowers = []
-            for near in record['lower']:
-                if near[0]:
-                    p.lowers.append(Place(near[0], near[1], near[2]))
+            p.uppers = combine_places(record['upper'])
+            p.lowers = combine_places(record['lower'])
             ret.append(p)
         return ret
-
+                    
 
     @staticmethod       
     def get_place_tree(locid):
@@ -351,14 +379,6 @@ ORDER BY edate"""
             print ("Coord_long: " + self.coord_long)
         if self.coord_lat != '':
             print ("Coord_lat: " + self.coord_lat)
-        if self.url_priv != '':
-            print ("URL_priv: " + self.url_priv)
-        if self.url_href != '':
-            print ("URL_href: " + self.url_href)
-        if self.url_type != '':
-            print ("URL_type: " + self.url_type)
-        if self.url_priv != '':
-            print ("URL_description: " + self.url_description)
         if self.placeref_hlink != '':
             print ("Placeref_hlink: " + self.placeref_hlink)
         return True
@@ -368,14 +388,6 @@ ORDER BY edate"""
         """ Tallettaa sen kantaan """
         
         try:
-            if len(self.pname) >= 1:
-                p_pname = self.pname
-                if len(self.pname) > 1:
-                    print("Warning: More than one pname in a place, " + 
-                          "handle: " + self.handle)
-            else:
-                p_pname = ''
-
             handle = self.handle
             change = self.change
             pid = self.id
@@ -384,10 +396,6 @@ ORDER BY edate"""
             # Replace f.ex 26° 11\' 7,411"I with 26° 11' 7,411"I
             coord_long = self.coord_long.replace("\\\'", "\'")
             coord_lat = self.coord_lat.replace("\\\'", "\'")
-            url_priv = self.url_priv
-            url_href = self.url_href
-            url_type = self.url_type
-            url_description = self.url_description
             query = """
 CREATE (p:Place) 
 SET p.gramps_handle=$handle, 
@@ -396,19 +404,55 @@ SET p.gramps_handle=$handle,
     p.type=$type, 
     p.pname=$pname, 
     p.coord_long=$coord_long, 
-    p.coord_lat=$coord_lat, 
-    p.url_priv=$url_priv, 
-    p.url_href=$url_href, 
-    p.url_type=$url_type, 
-    p.url_description=$url_description"""             
+    p.coord_lat=$coord_lat"""             
             tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "type": type, "pname": pname, 
-                "coord_long": coord_long, "coord_lat": coord_lat,
-                "url_priv": url_priv, "url_href": url_href, "url_type": url_type,
-                "url_description": url_description})
+                "coord_long": coord_long, "coord_lat": coord_lat})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
-
+            
+        if len(self.names) >= 1:
+            try:
+                for i in range(len(self.names)):
+                    name = self.names[i].name
+                    lang = self.names[i].lang
+                    datetype = self.names[i].datetype
+                    daterange_start = self.names[i].daterange_start
+                    daterange_stop = self.names[i].daterange_stop
+                    query = """
+MATCH (p:Place) WHERE p.gramps_handle=$handle 
+CREATE (n:Place_name)
+MERGE (p)-[r:NAME]->(n)
+SET n.name=$name,
+    n.lang=$lang,
+    n.datetype=$datetype,
+    n.daterange_start=$daterange_start,
+    n.daterange_stop=$daterange_stop"""             
+                    tx.run(query, 
+                           {"handle": handle, "name": name, "lang": lang, "datetype":datetype,
+                            "daterange_start":daterange_start, "daterange_stop":daterange_stop})
+            except Exception as err:
+                print("Virhe: {0}".format(err), file=stderr)
+            
+        # Talleta Weburl nodet ja linkitä paikkaan
+        if len(self.urls) > 0:
+            for url in self.urls:
+                url_priv = url.priv
+                url_href = url.href
+                url_type = url.type
+                url_description = url.description
+            query = """
+MATCH (n:Place) WHERE n.gramps_handle=$handle
+CREATE (n)-[wu:WEBURL]->
+      (url:Weburl {priv: {url_priv}, href: {url_href},
+                type: {url_type}, description: {url_description}})"""
+            try:
+                tx.run(query, 
+                           {"handle": handle, "url_priv": url_priv, "url_href": url_href,
+                            "url_type":url_type, "url_description":url_description})
+            except Exception as err:
+                print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
+                
         # Make hierarchy relations to the Place node
         if len(self.placeref_hlink) > 0:
             try:
@@ -423,3 +467,25 @@ SET p.gramps_handle=$handle,
                 print("Virhe: {0}".format(err), file=stderr)
             
         return
+    
+
+class Place_name:
+    """ Paikan nimi
+    
+        Properties:
+                name             str nimi
+                lang             str kielikoodi
+                datetype         str aikavälin tyyppi
+                daterange_start  str aikavälin alku
+                daterange_stop   str aikavälin loppu
+    """
+    
+    def __init__(self):
+        """ Luo uuden name-instanssin """
+        self.name = ''
+        self.lang = ''
+        self.datetype = ''
+        self.daterange_start = ''
+        self.daterange_stop = ''
+
+

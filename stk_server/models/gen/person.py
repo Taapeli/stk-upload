@@ -32,13 +32,16 @@ class Person:
                 eventref_hlink     str tapahtuman osoite
                 eventref_role      str tapahtuman rooli
                 objref_hlink       str tallenteen osoite
-                url_priv           str url salattu tieto
-                url_href           str url osoite
-                url_type           str url tyyppi
-                url_description    str url kuvaus
+                urls[]:
+                    priv           str url salattu tieto
+                    href           str url osoite
+                    type           str url tyyppi
+                    description    str url kuvaus
                 parentin_hlink     str vanhempien osoite
                 citationref_hlink  str viittauksen osoite
                 confidence         str tietojen luotettavuus
+                est_birth          str arvioitu syntymäaika
+                est_death          str arvioitu kuolinaika
      """
 
     def __init__(self, pid=''):
@@ -54,13 +57,12 @@ class Person:
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
         self.objref_hlink = []
-        self.url_priv = []
-        self.url_href = []
-        self.url_type = []
-        self.url_description = []
+        self.urls = []
         self.parentin_hlink = []
         self.citationref_hlink = []
         self.confidence = ''
+        self.est_birth = ''
+        self.est_death = ''
     
     
     def get_citation_id(self):
@@ -186,11 +188,9 @@ RETURN person, name
                 self.id = person_record["person"]['id']
                 self.priv = person_record["person"]['priv']
                 self.gender = person_record["person"]['gender']
-                self.url_priv = person_record["person"]['url_priv']
-                self.url_href = person_record["person"]['url_href']
-                self.url_type = person_record["person"]['url_type']
-                self.url_description = person_record["person"]['url_description']
                 self.confidence = person_record["person"]['confidence']
+                self.est_birth = person_record["person"]['est_birth']
+                self.est_death = person_record["person"]['est_death']
             
             if len(person_record["name"]) > 0:
                 pname = Name()
@@ -201,7 +201,7 @@ RETURN person, name
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
                 self.names.append(pname)
-
+                
 
     def get_person_w_names(self):
         """ Luetaan kaikki henkilön tiedot ja nimet
@@ -227,8 +227,9 @@ RETURN person, name
         query = """
 MATCH (person:Person)-[r:NAME]->(name:Name) 
   WHERE ID(person)=$pid
-  WITH person, name ORDER BY name.alt
-RETURN person, COLLECT(name) AS names
+OPTIONAL MATCH (person)-[wu:WEBURL]->(weburl:Weburl)
+  WITH person, name, COLLECT (weburl) AS urls ORDER BY name.alt
+RETURN person, urls, COLLECT (name) AS names
         """
         person_result = g.driver.session().run(query, pid=int(self.uniq_id))
         
@@ -238,11 +239,9 @@ RETURN person, COLLECT(name) AS names
             self.id = person_record["person"]['id']
             self.priv = person_record["person"]['priv']
             self.gender = person_record["person"]['gender']
-            self.url_priv = person_record["person"]['url_priv']
-            self.url_href = person_record["person"]['url_href']
-            self.url_type = person_record["person"]['url_type']
-            self.url_description = person_record["person"]['url_description']
             self.confidence = person_record["person"]['confidence']
+            self.est_birth = person_record["person"]['est_birth']
+            self.est_death = person_record["person"]['est_death']
             
             for name in person_record["names"]:
                 pname = Name()
@@ -253,6 +252,14 @@ RETURN person, COLLECT(name) AS names
                 pname.surname = name['surname']
                 pname.suffix = name['suffix']
                 self.names.append(pname)
+            
+            for url in person_record["urls"]:
+                weburl = Weburl()
+                weburl.priv = url['priv']
+                weburl.href = url['href']
+                weburl.type = url['type']
+                weburl.description = url['description']
+                self.urls.append(weburl)
 
 
     @staticmethod       
@@ -495,7 +502,8 @@ RETURN person, COLLECT(name) AS names
         qend="""
  OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
  OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
-RETURN ID(person) AS id, person.confidence AS confidence,
+RETURN ID(person) AS id, person.confidence AS confidence, 
+    person.est_birth AS est_birth, person.est_death AS est_death,
     name.firstname AS firstname, 
     name.refname AS refname, name.surname AS surname, 
     name.suffix AS suffix,
@@ -688,6 +696,40 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
         return points
 
 
+    @staticmethod
+    def set_estimated_dates():
+        # Set est_birth
+        try:
+            type = 'Birth'
+            query = """
+MATCH (n:Person)-[r:EVENT]->(m:Event)
+    WHERE m.type=$type
+SET r.type =$type
+SET n.est_birth = m.daterange_start"""
+            result = g.driver.session().run(query, 
+               {"type": type})
+            counters = result.consume().counters
+            msg = "Muutettu {} est_birth-tietoa".format(counters.properties_set)
+        except Exception as err:
+            print("Virhe (Person.save:est_birth): {0}".format(err), file=stderr)
+            
+        # Set est_birth
+        try:
+            type = 'Death'
+            query = """
+MATCH (n:Person)-[r:EVENT]->(m:Event)
+    WHERE m.type=$type
+SET r.type =$type
+SET n.est_death = m.daterange_start"""
+            result = g.driver.session().run(query, 
+               {"type": type})
+            counters = result.consume().counters
+            msg = msg + " ja {} est_death-tietoa.".format(counters.properties_set)
+            return msg
+        except Exception as err:
+            print("Virhe (Person.save:est_death): {0}".format(err), file=stderr)
+        
+
     def print_data(self):
         """ Tulostaa tiedot """
         print ("*****Person*****")
@@ -696,19 +738,23 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
         print ("Id: " + self.id)
         print ("Priv: " + self.priv)
         print ("Gender: " + self.gender)
-        print ("Url priv: " + self.url_priv)
-        print ("Url href: " + self.url_href)
-        print ("Url type: " + self.url_type)
-        print ("Url description: " + self.url_description)
+
         if len(self.names) > 0:
-            names = self.names
-            for pname in names:
+            for pname in self.names:
                 print ("Alt: " + pname.alt)
                 print ("Type: " + pname.type)
                 print ("First: " + pname.firstname)
                 print ("Refname: " + pname.refname)
                 print ("Surname: " + pname.surname)
                 print ("Suffix: " + pname.suffix)
+            
+        if len(self.urls) > 0:
+            for url in self.urls:
+                print ("Url priv: " + url.priv)
+                print ("Url href: " + url.href)
+                print ("Url type: " + url.type)
+                print ("Url description: " + url.description)
+                
         if len(self.eventref_hlink) > 0:
             for i in range(len(self.eventref_hlink)):
                 print ("Eventref_hlink: " + self.eventref_hlink[i])
@@ -810,25 +856,15 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
             pid = self.id
             priv = self.priv
             gender = self.gender
-            url_priv = self.url_priv
-            url_href = self.url_href
-            url_type = self.url_type
-            url_description = self.url_description
             query = """
 CREATE (p:Person) 
 SET p.gramps_handle=$handle, 
     p.change=$change, 
     p.id=$id, 
     p.priv=$priv, 
-    p.gender=$gender, 
-    p.url_priv=$url_priv, 
-    p.url_href=$url_href, 
-    p.url_type=$url_type, 
-    p.url_description=$url_description"""
+    p.gender=$gender"""
             tx.run(query, 
-               {"handle": handle, "change": change, "id": pid, "priv": priv, "gender": gender, 
-                "url_priv": url_priv, "url_href": url_href, "url_type": url_type,
-                "url_description": url_description})
+               {"handle": handle, "change": change, "id": pid, "priv": priv, "gender": gender})
             
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
@@ -874,6 +910,25 @@ MERGE (n)-[r:NAME]->(m)"""
                         "suffix": p_suffix, "handle": handle})
             except Exception as err:
                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
+            
+        # Talleta Weburl nodet ja linkitä henkilöön
+        if len(self.urls) > 0:
+            for url in self.urls:
+                url_priv = url.priv
+                url_href = url.href
+                url_type = url.type
+                url_description = url.description
+                query = """
+MATCH (n:Person) WHERE n.gramps_handle=$handle
+CREATE (n)-[wu:WEBURL]->
+      (url:Weburl {priv: {url_priv}, href: {url_href},
+                type: {url_type}, description: {url_description}})"""
+                try:
+                    tx.run(query, 
+                           {"handle": handle, "url_priv": url_priv, "url_href": url_href,
+                            "url_type":url_type, "url_description":url_description})
+                except Exception as err:
+                    print("Virhe (Person.save:create Weburl): {0}".format(err), file=stderr)
 
         # Make possible relations to the Event node
         if len(self.events) > 0:
@@ -1074,3 +1129,25 @@ MATCH (n:Name) WHERE ID(n)=$id
 SET n.refname=$refname
             """
         return tx.run(query, id=uniq_id, refname=refname)
+    
+    
+class Weburl:
+    '''
+    Netti URL
+    
+        Properties:
+        
+                url_priv           str url salattu tieto
+                url_href           str url osoite
+                url_type           str url tyyppi
+                url_description    str url kuvaus
+    
+    '''
+    
+    def __init__(self):
+        """ Luo uuden weburl-instanssin """
+        self.priv = ''
+        self.href = ''
+        self.type = ''
+        self.description = ''
+
