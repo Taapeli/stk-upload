@@ -31,7 +31,8 @@
             E&nbsp;{{ '{0:0.4f}'.format(place.coord_long|float) }}
         {% endif %}</div>
       {% endif %}
-    <h3 style="position:sticky; top:0;">{{place.pname}}</h3>
+
+    <h3 style="position:sticky; top:0;">{{place.pname|join('<br>'|safe)}}</h3>
         <div>
             <ul>{% for p in locations %}
                 <li style="margin-left: {{p.level * 2}}em;">

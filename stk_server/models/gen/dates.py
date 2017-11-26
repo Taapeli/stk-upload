@@ -130,63 +130,63 @@ class DateRange():
         return "<Date type={}, {}...{}>".format(self.dtype, dstr1, dstr2)
 
 
-    def __cmp__(self, other):
-        """ The 'other' must be an objct of type DateRange.
-        
-            The return value of self.__cmp__(other) is 0 for equal to, 
-            1 for greater than,  and -1 for less than the compared value.
-        """
-        assert isinstance(other, DateRange), 'Argument of wrong type!'
-
-        if self.dtype < other.dtype:
-            # A is self, B is other
-            selftype=self.dtype
-            othertype=other.dtype
-            A1 = self.date1
-            #A2 = self.date2
-            B1 = other.date1
-            B2 = other.date2
-        else:
-            # A is other, B is self
-            selftype=other.dtype
-            othertype=self.dtype
-            A1 = other.date1
-            #A2 = other.date2
-            B1 = self.date1
-            B2 = self.date2
-
-        if selftype == DR['DATE']:
-            if othertype == DR['DATE']:
-                if A1 < B1:
-                    return -1
-                elif A1 > B1:
-                    return 1
-                return 0
-            if othertype == DR['TILL']:
-                if A1 > B1:
-                    return 1
-                return 0
-            if othertype == DR['FROM']:
-                if A1 < B1:
-                    return -1
-                return 0
-            if othertype == DR['PERIOD']:
-                if A1 < B1:
-                    return -1
-                elif A1 > B2:
-                    return 1
-                return 0
-            else:   # DR['ABOUT'], DR['CALC'], DR['ESTIM']
-                # TODO dynaamisesti säätyvä delta tarkkuuden mukaan
-                delta = "0000-00-30"
-                if A1 < DateRange.minus(B1, delta):
-                    return -1
-                if A1 > DateRange.plus(B1, delta):
-                    return 1
-                return 0
-        else:
-            pass
-        return 0
+#     def __cmp__(self, other):
+#         """ The 'other' must be an objct of type DateRange.
+#         
+#             The return value of self.__cmp__(other) is 0 for equal to, 
+#             1 for greater than,  and -1 for less than the compared value.
+#         """
+#         assert isinstance(other, DateRange), 'Argument of wrong type!'
+# 
+#         if self.dtype < other.dtype:
+#             # A is self, B is other
+#             selftype=self.dtype
+#             othertype=other.dtype
+#             A1 = self.date1
+#             #A2 = self.date2
+#             B1 = other.date1
+#             B2 = other.date2
+#         else:
+#             # A is other, B is self
+#             selftype=other.dtype
+#             othertype=self.dtype
+#             A1 = other.date1
+#             #A2 = other.date2
+#             B1 = self.date1
+#             B2 = self.date2
+# 
+#         if selftype == DR['DATE']:
+#             if othertype == DR['DATE']:
+#                 if A1 < B1:
+#                     return -1
+#                 elif A1 > B1:
+#                     return 1
+#                 return 0
+#             if othertype == DR['TILL']:
+#                 if A1 > B1:
+#                     return 1
+#                 return 0
+#             if othertype == DR['FROM']:
+#                 if A1 < B1:
+#                     return -1
+#                 return 0
+#             if othertype == DR['PERIOD']:
+#                 if A1 < B1:
+#                     return -1
+#                 elif A1 > B2:
+#                     return 1
+#                 return 0
+#             else:   # DR['ABOUT'], DR['CALC'], DR['ESTIM']
+#                 # TODO dynaamisesti säätyvä delta tarkkuuden mukaan
+#                 delta = "0000-00-30"
+#                 if A1 < DateRange.minus(B1, delta):
+#                     return -1
+#                 if A1 > DateRange.plus(B1, delta):
+#                     return 1
+#                 return 0
+#         else:
+#             pass
+#         return 0
 
 
     @staticmethod
