@@ -126,13 +126,15 @@ def show_location_page(locid):
     try:
         # List 'locatils' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events 
-        place, locations, events = models.datareader.get_place_with_events(locid)
+        place, place_list, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in locations:
+#     for p in place_list:
 #         print ("# {} ".format(p))
+#     for u in place.urls:
+#         print ("# {} ".format(u))
     return render_template("k_place_events.html", 
-                           locid=locid, place=place, events=events, locations=locations)
+                           locid=locid, place=place, events=events, locations=place_list)
 
 
 @app.route('/lista/k_sources')
@@ -580,6 +582,7 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
         'role' = Event role
         'lt'  = Location types
         'lt_in' = Location types, inessive form
+        'urlt' = web page type
     """
 #     print("# {}[{}]".format(var_name, term))
     if var_name == "nt":
@@ -688,6 +691,13 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
             return tabl[term]
         except:
             return term + ":ssa"
+    elif var_name == "urlt":
+        # Url types
+        tabl = {
+            "Unknown": "Määrittelemätön",
+            "Web Home": "Kotisivu",
+            "Web Search": "Haku"
+        }
 
     try:
         return tabl[term]

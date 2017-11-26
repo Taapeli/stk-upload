@@ -76,7 +76,8 @@ class Place:
 MATCH (place:Place)-[:NAME]->(n:Place_name)
     WHERE ID(place)=$place_id
 OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
-RETURN place, COLLECT([n.name, n.lang]) AS names, COLLECT (url) AS urls
+RETURN place, COLLECT([n.name, n.lang]) AS names, 
+    COLLECT (DISTINCT url) AS urls
         """
         place_result = g.driver.session().run(query, place_id=plid)
         

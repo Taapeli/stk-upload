@@ -1136,18 +1136,20 @@ class Weburl:
     Netti URL
     
         Properties:
-        
                 url_priv           str url salattu tieto
                 url_href           str url osoite
                 url_type           str url tyyppi
                 url_description    str url kuvaus
-    
     '''
-    
+
     def __init__(self):
         """ Luo uuden weburl-instanssin """
         self.priv = ''
         self.href = ''
         self.type = ''
         self.description = ''
+
+    def __str__(self):
+        desc = "Weburl ({}) '{}'-->'{}'".format(self.type, self.description, self.href)
+        return desc
 
