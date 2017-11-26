@@ -1012,8 +1012,8 @@ def get_place_with_events (loc_id):
     place = Place()
     place.uniq_id = int(loc_id)
     place.get_place_data_by_id()
-    place_list = Place.get_place_tree(loc_id)
-    event_table = Place.get_place_events(loc_id)
+    place_list = Place.get_place_tree(place.uniq_id)
+    event_table = Place.get_place_events(place.uniq_id)
     return (place, place_list, event_table)
 
 
