@@ -66,25 +66,29 @@ class Place:
     
     
     def get_place_data_by_id(self):
-        """ Luetaan kaikki paikan tiedot """
-        
+        """ Luetaan kaikki paikan tiedot ml. nimivariaatiot (tekstinä)
+            Nimivariaatiot talletetaan kenttään pname, 
+            esim. [["Svartholm", "sv"], ["Svartholma", None]]
+            #TODO: Ei hieno, po. Place_name objects!
+        """
         plid = self.uniq_id
         query = """
-            MATCH (place:Place)
-                WHERE ID(place)=$place_id
-            OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
-                RETURN place, COLLECT (url) AS urls
-            """.format(self.uniq_id)
-        place_result = g.driver.session().run(query, {"place_id": plid})
+MATCH (place:Place)-[:NAME]->(n:Place_name)
+    WHERE ID(place)=$place_id
+OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
+RETURN place, COLLECT([n.name, n.lang]) AS names, COLLECT (url) AS urls
+        """
+        place_result = g.driver.session().run(query, place_id=plid)
         
         for place_record in place_result:
             self.change = place_record["place"]["change"]
             self.id = place_record["place"]["id"]
             self.type = place_record["place"]["type"]
-            self.pname = place_record["place"]["pname"]
+            names = place_record["names"]
+            self.pname = Place.namelist_w_lang(names)
             self.coord_long = place_record["place"]["coord_long"]
             self.coord_lat = place_record["place"]["coord_lat"]
-            
+
             urls = place_record['urls']
             for url in urls:
                 weburl = Weburl()
@@ -189,20 +193,6 @@ RETURN ID(a) AS id, a.type AS type,
     COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
 ORDER BY name[0][0]
 """
-        def names_w_lang(field):
-            """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit 
-                mainittuna.
-                Jos sarakkeessa field[1] on mainittu kielikoodi
-                se lisätään kunkin nimen field[0] perään suluissa
-            """
-            names = []
-            for n in field:
-                if n[1]:
-                    # Name with langiage code
-                    names.append("{} ({})".format(n[0], n[1]))
-                else:
-                    names.append(n[0])
-            return names
 
         def combine_places(field):
             """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City", 
@@ -215,11 +205,11 @@ ORDER BY name[0][0]
                 if near[0]: # id of a lower place
                     if near[0] in namedict:
                         # Append name to existing Place
-                        namedict[near[0]].pname.extend(names_w_lang( (near[2:],) ))
+                        namedict[near[0]].pname.extend(Place.namelist_w_lang( (near[2:],) ))
                     else:
                         # Add a new Place
                         namedict[near[0]] = \
-                            Place(near[0], near[1], names_w_lang( (near[2:],) ))
+                            Place(near[0], near[1], Place.namelist_w_lang( (near[2:],) ))
             return list(namedict.values())
 
         ret = []
@@ -227,7 +217,7 @@ ORDER BY name[0][0]
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
-            p = Place(record['id'], record['type'], names_w_lang(record['name']))
+            p = Place(record['id'], record['type'], Place.namelist_w_lang(record['name']))
             p.coord_long = record['coord_long']
             p.coord_lat = record['coord_lat']
             p.uppers = combine_places(record['upper'])
@@ -235,6 +225,22 @@ ORDER BY name[0][0]
             ret.append(p)
         return ret
                     
+    @staticmethod       
+    def namelist_w_lang(field):
+        """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit 
+            mainittuna.
+            Jos sarakkeessa field[1] on mainittu kielikoodi
+            se lisätään kunkin nimen field[0] perään suluissa
+        """
+        names = []
+        for n in field:
+            if n[1]:
+                # Name with langiage code
+                names.append("{} ({})".format(n[0], n[1]))
+            else:
+                names.append(n[0])
+        return names
+
 
     @staticmethod       
     def get_place_tree(locid):
@@ -264,36 +270,53 @@ ORDER BY name[0][0]
                 <0 = alemmat
         """
         
-        query = """
+        # Query for Place hierarcy
+        hier_query = """
 MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
 MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
-        t = DbTree(g.driver, query, 'pname', 'type')
+        # Query for single Place without hierarcy
+        root_query = """
+MATCH (p:Place) WHERE ID(p) = $locid
+RETURN p.type AS type, p.pname AS name
+"""
+        # Query to get names for a Place
+        name_query="""
+MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid 
+RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
+"""
+
+        t = DbTree(g.driver, hier_query, 'pname', 'type')
         t.load_to_tree_struct(locid)
         if t.tree.depth() == 0:
             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
             # Hae oman paikan tiedot ilman yhteyksiä
-            query = """
-MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.pname AS name
-"""
             with g.driver.session() as session:
-                result = session.run(query, locid=int(locid))
+                result = session.run(root_query, locid=int(locid))
                 record = result.single()
                 t.tree.create_node(record["name"], locid, parent=0, 
                                    data={'type': record["type"]})
-# locid="", ptype="", pname="", level=None
         ret = []
         for node in t.tree.expand_tree(mode=t.tree.DEPTH):
-#             print ("{} {} {}".format(t.tree.depth(t.tree[node]), t.tree[node], 
-#                                      t.tree[node].bpointer))
+            print ("{} {} {}".format(t.tree.depth(t.tree[node]), t.tree[node], 
+                                     t.tree[node].bpointer))
             if node != 0:
                 n = t.tree[node]
-                p = Place(locid=node, ptype=n.data['type'], 
-                          pname=n.tag, level=t.tree.depth(n))
+
+                # Get all names
+                with g.driver.session() as session:
+                    result = session.run(name_query, locid=node)
+                    record = result.single()
+                    # Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
+                    # josta tehdään ["Svartholm (sv)","Svartholma"]
+                    names = Place.namelist_w_lang(record['names'])
+
+                p = Place(locid=node, ptype=n.data['type'], \
+                          pname=names, level=t.tree.depth(n))
+                print ("# {}".format(p))
                 p.parent = n.bpointer
                 ret.append(p)
         return ret

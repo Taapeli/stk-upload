@@ -49,7 +49,7 @@
             {% if p.lowers %}
 		           <ul style="margin:0 0 5px 1em;">
 		        {% for e in p.lowers|sort(attribute='pname') %}    <li>
-	                       <a href="#{{p.id}}"
+	                       <a href="#{{e.id}}"
 	                         title="siirry paikkaan id={{e.id}}">{{e.pname|join(' • ')}}</a>
 	                       &nbsp;<small>{{e.type|transl('lt')}}</small>
                       </li>
