@@ -270,36 +270,53 @@ ORDER BY name[0][0]
                 <0 = alemmat
         """
         
-        query = """
+        # Query for Place hierarcy
+        hier_query = """
 MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
 MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
-        t = DbTree(g.driver, query, 'pname', 'type')
+        # Query for single Place without hierarcy
+        root_query = """
+MATCH (p:Place) WHERE ID(p) = $locid
+RETURN p.type AS type, p.pname AS name
+"""
+        # Query to get names for a Place
+        name_query="""
+MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid 
+RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
+"""
+
+        t = DbTree(g.driver, hier_query, 'pname', 'type')
         t.load_to_tree_struct(locid)
         if t.tree.depth() == 0:
             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
             # Hae oman paikan tiedot ilman yhteyksiä
-            query = """
-MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.pname AS name
-"""
             with g.driver.session() as session:
-                result = session.run(query, locid=int(locid))
+                result = session.run(root_query, locid=int(locid))
                 record = result.single()
                 t.tree.create_node(record["name"], locid, parent=0, 
                                    data={'type': record["type"]})
-# locid="", ptype="", pname="", level=None
         ret = []
         for node in t.tree.expand_tree(mode=t.tree.DEPTH):
-#             print ("{} {} {}".format(t.tree.depth(t.tree[node]), t.tree[node], 
-#                                      t.tree[node].bpointer))
+            print ("{} {} {}".format(t.tree.depth(t.tree[node]), t.tree[node], 
+                                     t.tree[node].bpointer))
             if node != 0:
                 n = t.tree[node]
-                p = Place(locid=node, ptype=n.data['type'], 
-                          pname=n.tag, level=t.tree.depth(n))
+
+                # Get all names
+                with g.driver.session() as session:
+                    result = session.run(name_query, locid=node)
+                    record = result.single()
+                    # Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
+                    # josta tehdään ["Svartholm (sv)","Svartholma"]
+                    names = Place.namelist_w_lang(record['names'])
+
+                p = Place(locid=node, ptype=n.data['type'], \
+                          pname=names, level=t.tree.depth(n))
+                print ("# {}".format(p))
                 p.parent = n.bpointer
                 ret.append(p)
         return ret
