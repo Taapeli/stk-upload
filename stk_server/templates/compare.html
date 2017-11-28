@@ -4,8 +4,11 @@
 {% block body %}
 {{ super() }}
 
+	<br><br>
+	<table><tr><td>
+
 {% if photos %}
-	<br><br><table>
+	<table>
 	<tr>
 	{% for photo in photos %}
 		<td><img src="/static/{{photo.src}}" alt="Picture cannot be found" width="300"></td>
@@ -17,13 +20,26 @@
 	{% endfor %}
 	</tr>
 	</table>
+	</td><td>
+	<table>
+	<tr>
+	{% for photo in photos %}
+		<td><img src="/static/{{photo.src}}" alt="Picture cannot be found" width="300"></td>
+	{% endfor %}
+	</tr>
+	<tr>
+	{% for photo in photos %}
+		<td>{{photo.description}}</td>
+	{% endfor %}
+	</tr>
+	</table>
+	</td>
+	</tr></table>
 {% endif %}
 
 <h2>Person data</h2>
-<div>&gt; Kertova-sivu <a href="/person/uniq_id={{person.uniq_id}}">{{person.uniq_id}}</a></div>
-<div>&gt; Vertailu-sivu <a href="/compare/uniq_id={{person.uniq_id}}">{{person.uniq_id}}</a></div>
-<div>&gt; Vertailu-sivu2 <a href="/compare2/uniq_id={{person.uniq_id}}">{{person.uniq_id}}</a></div>
 <section id="lista">
+<table><tr><td>
 <table>
     <h2>Names</h2>
     <tr><th>unique_id</th><th>salattu</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th><th>link</th>
@@ -51,9 +67,39 @@
         <tr><td colspan="1">Ei person tietoja</td></tr>
 {% endif %}
 </table>
+</td><td>
+<table>
+    <h2>Names</h2>
+    <tr><th>unique_id</th><th>salattu</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th><th>link</th>
+    </tr>
+{% if person %}
+ 	{% if person.names %}
+    	{% for pname in person.names %}
+		<tr>
+    		<td class="id">{{person.uniq_id}}</td>
+    		<td>{% if person.priv %}{{person.priv}}{% endif %}</td>
+    		<td>{% if person.gender %}{{person.gender}}{% endif %}</td>
+    		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
+    		<td>{% if pname.suffix %}{{pname.suffix}}{% endif %}</td>
+    		<td>{{pname.surname}}</td>
+            <td><a href="/lista/family_data/{{person.uniq_id}}">family</a></td>
+		</tr>
+		{% endfor %}
+	{% else %}
+		<tr>
+    		<td colspan="5">{{person.uniq_id}}</td>
+            <td><a href="/lista/family_data/{{person.uniq_id}}">family</a></td>
+		</tr>
+	{% endif %}
+{% else %}
+        <tr><td colspan="1">Ei person tietoja</td></tr>
+{% endif %}
+</table>
+</td></tr></table>
 <p>&nbsp;</p>
 
 <h2>Events</h2>
+<table><tr><td>
 <table>
     <tr><th>unique_id</th><th>type</th><th>date</th><th>place</th><th>description</th><th>link to source data</th>
     </tr>
@@ -75,11 +121,35 @@
         <tr><td colspan="1">Ei event tietoja</td></tr>
 {% endif %}
 </table>
+</td><td>
+<table>
+    <tr><th>unique_id</th><th>type</th><th>date</th><th>place</th><th>description</th><th>link to source data</th>
+    </tr>
+{% if events %}
+	{% for event in events %}
+		<tr>
+    		<td class="id">{{event.uniq_id}}</td>
+    		<td>{% if event.type %}{{event.type}}{% endif %}</td>
+    		<td>{% if event.datetype %} {{event.datetype}} {% endif %}
+    		    {% if event.date %}{{event.date}}{% elif event.daterange %}{{event.daterange}}{% endif %}</td>
+    		<td>{% if event.location %}{{event.location}}{% endif %}</td>
+    		<td>{% if event.description %}{{event.description}}{% endif %}</td>
+            <td>{% if event.citationref_hlink %}
+            		<a href="/poimi/cite_sour_repo={{event.uniq_id}}">citations</a>
+            	{% endif %}</td>
+		</tr>
+	{% endfor %}
+{% else %}
+        <tr><td colspan="1">Ei event tietoja</td></tr>
+{% endif %}
+</table>
+</td></tr></table>
 
 <br>
 <br>
 
 <h2>URLs</h2>
+<table><tr><td>
 <table>
     <tr><th>priv</th><th>description</th><th>URL</th>
     </tr>
@@ -96,6 +166,23 @@
 		{% endfor %}
 	{% endif %}
 </table>
+</td><td>
+<table>
+    <tr><th>priv</th><th>description</th><th>URL</th>
+    </tr>
+	{% if person.urls|length == 0 %}
+		<tr><td colspan="2">Ei URL tietoja</td></tr>
+	{% else %}
+		{% for url in person.urls %}
+			<tr>
+	    		<td>{{url.priv}}</a></td>
+	    		<td>{{url.description}}</a></td>
+	    		<td><a href="{{url.href}}">{{url.href}}</a></td>
+			</tr>
+		{% endfor %}
+	{% endif %}
+</table>
+</td></tr></table>
 {% endif %}
 
 <br>
