@@ -311,7 +311,7 @@ def compare_person_page(ehto):
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("compare.html", 
+    return render_template("compare3.html", 
         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
