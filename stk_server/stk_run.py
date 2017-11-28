@@ -287,6 +287,62 @@ def show_person_data(uniq_id):
                        person=person, events=events, photos=photos, sources=sources)
 
 
+@app.route('/compare/<string:ehto>')
+def compare_person_page(ehto): 
+    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
+    try:
+        if key == 'uniq_id':
+            person, events, photos, sources, families = \
+                models.datareader.get_person_data_by_id(value)
+            for f in families:
+                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                if f.mother:
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+        else:
+            raise(KeyError("Väärä hakuavain"))
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("compare.html", 
+        person=person, events=events, photos=photos, sources=sources, families=families)
+
+
+@app.route('/compare2/<string:ehto>')
+def compare_person_page2(ehto): 
+    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
+    try:
+        if key == 'uniq_id':
+            person, events, photos, sources, families = \
+                models.datareader.get_person_data_by_id(value)
+            for f in families:
+                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                if f.mother:
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+        else:
+            raise(KeyError("Väärä hakuavain"))
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("compare2.html", 
+        person=person, events=events, photos=photos, sources=sources, families=families)
+
+
 @app.route('/lista/family_data/<string:uniq_id>')
 def show_family_data(uniq_id): 
     """ henkilön perheen tietojen näyttäminen ruudulla """
