@@ -420,32 +420,86 @@ def compare_person_page2(ehto):
         return redirect(url_for('talleta', filename=infile.filename, subj=aineisto))
     
     
-    @app.route('/talleta/<string:subj>/<string:filename>')
-    def talleta(filename, subj):   
-        """ tietojen tallettaminen kantaan """
-        pathname = models.loadfile.fullname(filename)
-        dburi = models.dbutil.connect_db()
-        try:
-            if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
-                status = models.datareader.datastorer(pathname)
-            elif subj == 'refnimet': # Referenssinimet
-                # Tallettaa Refname-objekteja 
-                status = models.cvs_refnames.referenssinimet(pathname)
-            elif subj == 'xml_file': # gramps backup xml file to Neo4j db
-                status = models.datareader.xml_to_neo4j(pathname)
-            elif subj == 'karajat': # TODO: Tekemättä
-                status = "Käräjätietojen lukua ei ole vielä tehty"
-            else:
-                return redirect(url_for('virhesivu', code=1, text= \
-                    "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
-        except KeyError as e:
-            return render_template("virhe_lataus.html", code=1, \
-                   text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
-        return render_template("talletettu.html", text=status, uri=dburi)
-    
-    
-    """ ----------------------------------------------------------------------------
-        Hallinta- ja harjoitusnäyttöjä
+    #  linkki oli sukunimiluettelosta
+@app.route('/lista/person_data/<string:uniq_id>')
+def show_person_data(uniq_id): 
+    """ henkilön tietojen näyttäminen ruudulla """
+    models.dbutil.connect_db()
+    person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
+    return render_template("table_person_by_id.html", 
+                       person=person, events=events, photos=photos, sources=sources)
+
+
+@app.route('/compare/<string:ehto>')
+def compare_person_page(ehto): 
+    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
+    try:
+        if key == 'uniq_id':
+            person, events, photos, sources, families = \
+                models.datareader.get_person_data_by_id(value)
+            for f in families:
+                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                if f.mother:
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+        else:
+            raise(KeyError("Väärä hakuavain"))
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("compare3.html", 
+        person=person, events=events, photos=photos, sources=sources, families=families)
+
+
+@app.route('/compare2/<string:ehto>')
+def compare_person_page2(ehto): 
+    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
+    try:
+        if key == 'uniq_id':
+            person, events, photos, sources, families = \
+                models.datareader.get_person_data_by_id(value)
+            for f in families:
+                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                if f.mother:
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+        else:
+            raise(KeyError("Väärä hakuavain"))
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("compare2.html", 
+        person=person, events=events, photos=photos, sources=sources, families=families)
+
+
+@app.route('/lista/family_data/<string:uniq_id>')
+def show_family_data(uniq_id): 
+    """ henkilön perheen tietojen näyttäminen ruudulla """
+    models.dbutil.connect_db()
+    person, families = models.datareader.get_families_data_by_id(uniq_id)
+    return render_template("table_families_by_id.html", 
+                           person=person, families=families)
+
+
+@app.route('/poimi/<string:ehto>')
+def nayta_ehdolla(ehto):   
+    """ Nimien listaus tietokannasta ehtolauseella
+        oid=arvo        näyttää nimetyn henkilön
+        names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
     
     @app.route('/tyhjenna/kaikki/kannasta')
