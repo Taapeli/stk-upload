@@ -135,7 +135,7 @@ with app.app_context():
         try:
             # List 'locatils' has Place objects with 'parent' field pointing to
             # upper place in hierarcy. Events 
-        place, place_list, events = models.datareader.get_place_with_events(locid)
+            place, place_list, events = models.datareader.get_place_with_events(locid)
         except KeyError as e:
             return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in place_list:
@@ -296,60 +296,60 @@ with app.app_context():
                            person=person, events=events, photos=photos, sources=sources)
     
     
-@app.route('/compare/<string:ehto>')
-def compare_person_page(ehto): 
-    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
-    """
-    models.dbutil.connect_db()
-    key, value = ehto.split('=')
-    try:
-        if key == 'uniq_id':
-            person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
-            for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
-                if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-                if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
-                if f.children:
-                    for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
-        else:
-            raise(KeyError("Väärä hakuavain"))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("compare3.html", 
-        person=person, events=events, photos=photos, sources=sources, families=families)
-
-
-@app.route('/compare2/<string:ehto>')
-def compare_person_page2(ehto): 
-    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
-    """
-    models.dbutil.connect_db()
-    key, value = ehto.split('=')
-    try:
-        if key == 'uniq_id':
-            person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
-            for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
-                if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-                if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
-                if f.children:
-                    for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
-        else:
-            raise(KeyError("Väärä hakuavain"))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("compare2.html", 
-        person=person, events=events, photos=photos, sources=sources, families=families)
+    @app.route('/compare/<string:ehto>')
+    def compare_person_page(ehto): 
+        """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+            uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+        """
+        models.dbutil.connect_db()
+        key, value = ehto.split('=')
+        try:
+            if key == 'uniq_id':
+                person, events, photos, sources, families = \
+                    models.datareader.get_person_data_by_id(value)
+                for f in families:
+                    print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                    if f.mother:
+                        print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    if f.father:
+                        print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    if f.children:
+                        for c in f.children:
+                            print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+            else:
+                raise(KeyError("Väärä hakuavain"))
+        except KeyError as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
+        return render_template("compare3.html", 
+            person=person, events=events, photos=photos, sources=sources, families=families)
+    
+    
+    @app.route('/compare2/<string:ehto>')
+    def compare_person_page2(ehto): 
+        """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+            uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+        """
+        models.dbutil.connect_db()
+        key, value = ehto.split('=')
+        try:
+            if key == 'uniq_id':
+                person, events, photos, sources, families = \
+                    models.datareader.get_person_data_by_id(value)
+                for f in families:
+                    print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                    if f.mother:
+                        print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    if f.father:
+                        print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    if f.children:
+                        for c in f.children:
+                            print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+            else:
+                raise(KeyError("Väärä hakuavain"))
+        except KeyError as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
+        return render_template("compare2.html", 
+            person=person, events=events, photos=photos, sources=sources, families=families)
 
 
     @app.route('/lista/family_data/<string:uniq_id>')
@@ -421,93 +421,93 @@ def compare_person_page2(ehto):
     
     
     #  linkki oli sukunimiluettelosta
-@app.route('/lista/person_data/<string:uniq_id>')
-def show_person_data(uniq_id): 
-    """ henkilön tietojen näyttäminen ruudulla """
-    models.dbutil.connect_db()
-    person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
-    return render_template("table_person_by_id.html", 
-                       person=person, events=events, photos=photos, sources=sources)
-
-
-@app.route('/compare/<string:ehto>')
-def compare_person_page(ehto): 
-    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
-    """
-    models.dbutil.connect_db()
-    key, value = ehto.split('=')
-    try:
-        if key == 'uniq_id':
-            person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
-            for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
-                if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-                if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
-                if f.children:
-                    for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
-        else:
-            raise(KeyError("Väärä hakuavain"))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("compare3.html", 
-        person=person, events=events, photos=photos, sources=sources, families=families)
-
-
-@app.route('/compare2/<string:ehto>')
-def compare_person_page2(ehto): 
-    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
-        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
-    """
-    models.dbutil.connect_db()
-    key, value = ehto.split('=')
-    try:
-        if key == 'uniq_id':
-            person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
-            for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
-                if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-                if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
-                if f.children:
-                    for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
-        else:
-            raise(KeyError("Väärä hakuavain"))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("compare2.html", 
-        person=person, events=events, photos=photos, sources=sources, families=families)
-
-
-@app.route('/lista/family_data/<string:uniq_id>')
-def show_family_data(uniq_id): 
-    """ henkilön perheen tietojen näyttäminen ruudulla """
-    models.dbutil.connect_db()
-    person, families = models.datareader.get_families_data_by_id(uniq_id)
-    return render_template("table_families_by_id.html", 
-                           person=person, families=families)
-
-
-@app.route('/poimi/<string:ehto>')
-def nayta_ehdolla(ehto):   
-    """ Nimien listaus tietokannasta ehtolauseella
-        oid=arvo        näyttää nimetyn henkilön
-        names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
-    """
-    
-    @app.route('/tyhjenna/kaikki/kannasta')
-    def tyhjenna():   
-        """ tietokannan tyhjentäminen mitään kyselemättä """
+    @app.route('/lista/person_data/<string:uniq_id>')
+    def show_person_data_dbl(uniq_id): 
+        """ henkilön tietojen näyttäminen ruudulla """
         models.dbutil.connect_db()
-        msg = models.dbutil.alusta_kanta()
-        return render_template("talletettu.html", text=msg)
+        person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
+        return render_template("table_person_by_id.html", 
+                           person=person, events=events, photos=photos, sources=sources)
+    
+    
+    @app.route('/compare/<string:ehto>')
+    def compare_person_page_dbl(ehto): 
+        """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+            uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+        """
+        models.dbutil.connect_db()
+        key, value = ehto.split('=')
+        try:
+            if key == 'uniq_id':
+                person, events, photos, sources, families = \
+                    models.datareader.get_person_data_by_id(value)
+                for f in families:
+                    print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                    if f.mother:
+                        print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    if f.father:
+                        print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    if f.children:
+                        for c in f.children:
+                            print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+            else:
+                raise(KeyError("Väärä hakuavain"))
+        except KeyError as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
+        return render_template("compare3.html", 
+            person=person, events=events, photos=photos, sources=sources, families=families)
+    
+    
+    @app.route('/compare2/<string:ehto>')
+    def compare_person_page2_dbl(ehto): 
+        """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+            uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+        """
+        models.dbutil.connect_db()
+        key, value = ehto.split('=')
+        try:
+            if key == 'uniq_id':
+                person, events, photos, sources, families = \
+                    models.datareader.get_person_data_by_id(value)
+                for f in families:
+                    print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                    if f.mother:
+                        print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    if f.father:
+                        print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    if f.children:
+                        for c in f.children:
+                            print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+            else:
+                raise(KeyError("Väärä hakuavain"))
+        except KeyError as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
+        return render_template("compare2.html", 
+            person=person, events=events, photos=photos, sources=sources, families=families)
+    
+    
+    @app.route('/lista/family_data/<string:uniq_id>')
+    def show_family_data_dbl(uniq_id): 
+        """ henkilön perheen tietojen näyttäminen ruudulla """
+        models.dbutil.connect_db()
+        person, families = models.datareader.get_families_data_by_id(uniq_id)
+        return render_template("table_families_by_id.html", 
+                               person=person, families=families)
+    
+    
+    @app.route('/poimi/<string:ehto>')
+    def nayta_ehdolla_dbl(ehto):   
+        """ Nimien listaus tietokannasta ehtolauseella
+            oid=arvo        näyttää nimetyn henkilön
+            names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
+        """
+        
+        @app.route('/tyhjenna/kaikki/kannasta')
+        def tyhjenna():   
+            """ tietokannan tyhjentäminen mitään kyselemättä """
+            models.dbutil.connect_db()
+            msg = models.dbutil.alusta_kanta()
+            return render_template("talletettu.html", text=msg)
     
     
     @app.route('/aseta/confidence')
@@ -520,14 +520,14 @@ def nayta_ehdolla(ehto):
         return render_template("talletettu.html", text=message, uri=dburi)
     
     
-@app.route('/aseta/estimated_dates')
-def aseta_estimated_dates(): 
-    """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    models.dbutil.connect_db()
-    dburi = models.dbutil.connect_db()
-    
-    message = models.datareader.set_estimated_dates()
-    return render_template("talletettu.html", text=message, uri=dburi)
+    @app.route('/aseta/estimated_dates')
+    def aseta_estimated_dates(): 
+        """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
+        models.dbutil.connect_db()
+        dburi = models.dbutil.connect_db()
+        
+        message = models.datareader.set_estimated_dates()
+        return render_template("talletettu.html", text=message, uri=dburi)
 
 
     @app.route('/aseta/refnames')
