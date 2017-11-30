@@ -39,7 +39,7 @@ class Neo4jUserDatastore(UserDatastore):
         if userNode is not None:
             user = self.user_model(**userNode.properties)
             user.id = str(userNode.id)
-            user.roles = [self.role_model(name=rolename, description='', timestamp=datetime.datetime.now()) for rolename in user.roles]
+            user.roles = [self.role_model(name=rolename, description='', timestamp=datetime.datetime.now()) for rolename in list(set(user.roles))]
             if 'confirmed_at' in userNode.properties: 
                 timestamp = float(userNode.properties['confirmed_at'])
                 user.confirmed_at = datetime.datetime.fromtimestamp(timestamp)
@@ -62,7 +62,7 @@ class Neo4jUserDatastore(UserDatastore):
 #        print('_put_user ', user.email, ' ', user.name)
         if not user.id:         # New user
             if len(user.roles) == 0:
-                user.roles.append('user')
+                user.roles = ['user']
             user.confirmed_at = None
             user.is_active = True
             result = tx.run(Cypher.user_register,
@@ -81,10 +81,9 @@ class Neo4jUserDatastore(UserDatastore):
         else:               # Update user
             rolelist = []
             for role in user.roles:
-                if isinstance(role, self.role_model):
-                    rolelist.append(role.name)
-                else: 
-                    rolelist.append(role)
+                roleToAdd = (role.name if isinstance(role, self.role_model) else role)
+                if not roleToAdd in rolelist:
+                    rolelist.append(roleToAdd)
             tx.run(Cypher.user_update, 
                 id=int(user.id), 
                 email=user.email,
@@ -105,7 +104,7 @@ class Neo4jUserDatastore(UserDatastore):
         roleNode = tx.run(Cypher.role_register, name=role.name, 
             description=role.description)
 #        return self.user_model(**roleNode.properties)
-        return self.role_model(**roleNode.items())
+        return self.role_model(**roleNode.properties)
 
     def commit(self):
         pass
@@ -132,7 +131,7 @@ class Neo4jUserDatastore(UserDatastore):
             with self.driver.session() as session:
                 userNodes = session.read_transaction(self._getUsers)
                 if userNodes is not None:
-                    return [self._build_user_from_node(userNode) for userNode in userNodes] 
+                    return [self.user_model(**userNode.properties) for userNode in userNodes] 
                 return []
         except ServiceUnavailable as ex:
             print(ex.format())
@@ -162,12 +161,23 @@ class Neo4jUserDatastore(UserDatastore):
         for record in tx.run(Cypher.id_find, id=rid):
             user = (record['user'])
             return user        
+
+    def find_UserRoles(self, email):
+        try:
+            with self.driver.session() as session:
+                userRoles = session.read_transaction(self._findUserRoles, email) 
+                if len(userRoles) > 0:
+                    return [self.role_model(**roleNode.properties) for roleNode in userRoles] 
+                return None
+        except ServiceUnavailable as ex:
+            print(ex.format())
+            return None
             
     def _findUserRoles (self, tx, pemail):
         roles = []
         for record in tx.run(Cypher.user_roles_find, email=pemail):
             roles.append(record['role'])
-        print ('_findUserRoles ', pemail, roles)    
+#        print ('_findUserRoles ', pemail, roles)    
         return roles
         
     def find_role(self, roleName):

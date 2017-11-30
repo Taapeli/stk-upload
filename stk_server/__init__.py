@@ -1,4 +1,4 @@
-from flask import Flask, current_app, session, render_template, request, g
+from flask import Flask, current_app, session, render_template, request, g 
 from flask_security import Security, UserMixin, RoleMixin, login_required, roles_accepted, roles_required, current_user
 from flask_security.forms import RegisterForm, ConfirmRegisterForm, Required, StringField
 from flask_security.utils import _

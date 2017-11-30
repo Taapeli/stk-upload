@@ -121,7 +121,7 @@ class Cypher():
 	user_roles_find = (
 		'''
 		MATCH (user:User{email:$email})--(role:Role) 
-		RETURN user [role] 
+		RETURN role 
 		'''
 		)
 	
