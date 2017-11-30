@@ -17,14 +17,15 @@
 
 <section id="lista">
 <table>
-    <tr><th>user id</th><th>name</th><th>roles</th>
+    <tr><th>user id</th><th>name</th><th>email</th><th>roles</th>
     </tr>
 {% if users %}
     {% for u in users %}
         <tr>
-            <td>{{u.userid}}</td>
+            <td>{{u.username}}</td>
             <td>{{u.name}}</td>
-            <td> – <!{{u.roles}}!></td>
+            <td>{{u.email}}</td>
+            <td>{{u.roles}}</td>
         </tr>
     {% endfor %}
 {% else %}
