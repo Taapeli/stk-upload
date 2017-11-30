@@ -5,8 +5,8 @@ Created on 22.7.2017
 '''
 
 from sys import stderr
-from flask import g
-
+#from flask import g
+import  shareds
 
 class Media:
     """ Tallenne
@@ -33,10 +33,10 @@ class Media:
                         
         if uniq_id:
             query = "MATCH (o:Media) WHERE ID(o)=$id RETURN ID(o) AS uniq_id, o"
-            return  g.driver.session().run(query, id=int(uniq_id))
+            return  shareds.driver.session().run(query, id=int(uniq_id))
         else:
             query = "MATCH (o:Media) RETURN ID(o) AS uniq_id, o"
-            return  g.driver.session().run(query)
+            return  shareds.driver.session().run(query)
             
 
 
@@ -48,7 +48,7 @@ class Media:
                 WHERE ID(obj)={}
                 RETURN obj
             """.format(self.uniq_id)
-        obj_result = g.driver.session().run(query)
+        obj_result = shareds.driver.session().run(query)
 
         for obj_record in obj_result:
             self.id = obj_record["obj"]["id"]
@@ -68,7 +68,7 @@ class Media:
             MATCH (o:Media) RETURN COUNT(o)
             """
             
-        results =  g.driver.session().run(query)
+        results =  shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])

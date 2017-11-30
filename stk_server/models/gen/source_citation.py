@@ -9,9 +9,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 import datetime
 from sys import stderr
 import logging
-from flask import g
+#from flask import g
 import models.dbutil
-
+import  shareds
 
 class Citation:
     """ Viittaus
@@ -60,7 +60,7 @@ class Citation:
        ID(repo), repo.rname, repo.type]) AS sources
  """.format(where)
                 
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
     
     
     def get_sourceref_hlink(self):
@@ -72,7 +72,7 @@ class Citation:
  RETURN ID(source) AS id
  """.format(self.uniq_id)
                 
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         for record in result:
             if record['id']:
                 self.sourceref_hlink = record['id']
@@ -85,7 +85,7 @@ class Citation:
         query = """
             MATCH (c:Citation) RETURN COUNT(c)
             """
-        results = g.driver.session().run(query)
+        results = shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -189,7 +189,7 @@ class Repository:
             MATCH (repo:Repository) WHERE ID(repo) = {}
             RETURN repo.rname AS rname, repo.type AS type
             """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+        return  shareds.driver.session().run(query)
     
     
     @staticmethod       
@@ -199,7 +199,7 @@ class Repository:
         query = """
             MATCH (repo:Repository) RETURN repo
             """
-        return  g.driver.session().run(query)
+        return  shareds.driver.session().run(query)
     
     
     @staticmethod       
@@ -210,7 +210,7 @@ class Repository:
             MATCH (repo:Repository) WHERE repo.rname='{}'
                 RETURN repo
             """.format(rname)
-        return  g.driver.session().run(query)
+        return  shareds.driver.session().run(query)
     
     
     @staticmethod       
@@ -232,7 +232,7 @@ class Repository:
   COLLECT([ID(source), source.stitle, r.medium]) AS sources
  ORDER BY repository.rname""".format(where)
                 
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
                 
     
     @staticmethod       
@@ -242,7 +242,7 @@ class Repository:
         query = """
             MATCH (r:Repository) RETURN COUNT(r)
             """
-        results =  g.driver.session().run(query)
+        results =  shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -329,7 +329,7 @@ class Source:
                 RETURN ID(repo) AS id, r.medium AS reporef_medium
             """.format(self.uniq_id)
             
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         for record in result:
             if record['id']:
                 self.reporef_hlink = record['id']
@@ -345,7 +345,7 @@ class Source:
                 WHERE ID(source)={}
                 RETURN source.stitle AS stitle
             """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+        return  shareds.driver.session().run(query)
     
     
     @staticmethod       
@@ -373,7 +373,7 @@ WITH citation,
      COLLECT([ID(event), event.type, event.date, names]) AS events
 RETURN COLLECT([citation.page, citation.confidence, events]) AS citations"""
 
-        return g.driver.session().run(query, sourceid=int(sourceid))
+        return shareds.driver.session().run(query, sourceid=int(sourceid))
 
 
     @staticmethod       
@@ -396,7 +396,7 @@ RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle,
 ORDER BY toUpper(stitle)
         """
         ret = []
-        result = g.driver.session().run(source_list_query)
+        result = shareds.driver.session().run(source_list_query)
         for record in result:
             s = Source()
             s.uniq_id = record['uniq_id']
@@ -426,7 +426,7 @@ ORDER BY toUpper(stitle)
   COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence]) AS citations
  ORDER BY source.stitle""".format(where)
                 
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
     
     
     @staticmethod       
@@ -439,7 +439,7 @@ ORDER BY toUpper(stitle)
  RETURN ID(s) AS uniq_id, s
  ORDER BY s.stitle"""
                 
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
         lists = []
@@ -482,7 +482,7 @@ ORDER BY toUpper(stitle)
  RETURN ID(s) AS uniq_id, s
  ORDER BY s.stitle"""
                 
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
         lists = []
@@ -522,7 +522,7 @@ ORDER BY toUpper(stitle)
         query = """
             MATCH (s:Source) RETURN COUNT(s)
             """
-        results =  g.driver.session().run(query)
+        results =  shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])

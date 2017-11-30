@@ -5,9 +5,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
-from flask import g
+#from flask import g
 import models.dbutil
-
+import  shareds
 
 class Note:
     """ Huomautus
@@ -37,7 +37,7 @@ class Note:
             MATCH (note:Note) WHERE ID(note)={} RETURN note
             """.format(self.uniq_id)
             
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
                 
         
     @staticmethod
@@ -53,7 +53,7 @@ class Note:
             MATCH (n:Note) {0} RETURN ID(n) AS uniq_id, n ORDER BY n.type
             """.format(where)
             
-        result =  g.driver.session().run(query)
+        result =  shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'priv', 'type', 'text']
         notes = []
@@ -102,7 +102,7 @@ class Note:
             MATCH (n:Note) RETURN COUNT(n)
             """
             
-        results =  g.driver.session().run(query)
+        results =  shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])
