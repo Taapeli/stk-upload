@@ -669,7 +669,7 @@ def read_old_people_top():
     
     sorted_people = sorted(people, key=itemgetter(7), reverse=True)
     top_of_sorted_people = []
-    for i in range(20):
+    for i in range(20 if len(sorted_people) > 19 else len(sorted_people)):
         top_of_sorted_people.append(sorted_people[i])
     
     headings.append("Tapahtumaluettelo")
