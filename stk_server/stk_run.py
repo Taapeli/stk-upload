@@ -29,14 +29,14 @@ with app.app_context():
     @login_required
     def home():
         role_names = [role.name for role in current_user.roles]
-        print('home ',current_user.name + ' logged in, roles ' + str(role_names))
+        print('stk_runin home ',current_user.name + ' logged in, roles ' + str(role_names))
         return render_template('/mainindex.html')
     
     #===============================================================================
     # @app.route('/login', methods=['POST', 'GET'])
     # def login():
     #     if request.method == 'GET':
-    #         return render_template("login/login.html")
+    #         return render_tempfgtyeutjnmrulate("login/login.html")
     #     else:
     #         usrname = request.form['usrname']
     #         return render_template("login/logged.html", usrname = usrname)
@@ -240,6 +240,7 @@ with app.app_context():
             return render_template("table_of_data.html", 
                    headings=headings, titles=titles, lists=lists)
         elif subj == "users":
+            # Käytetään neo4juserdatastorea
             lista = shareds.user_datastore.get_users()
             return render_template("table_users.html", users=lista)
         else:
