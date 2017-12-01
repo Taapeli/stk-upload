@@ -181,7 +181,7 @@ with app.app_context():
         if subj == "k_persons":
             # Kertova-tyyliin
             persons = models.datareader.lue_henkilot_k()
-            return render_template("k_persons.html", persons=persons)
+            return render_template("k_persons.html", persons=persons, menuno=0)
         if subj == "henkilot":
             # dburi vain tiedoksi!
             dbloc = shareds.driver.address
