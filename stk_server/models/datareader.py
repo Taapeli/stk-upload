@@ -587,6 +587,21 @@ def read_repositories(uniq_id=None):
     return (repositories)
 
 
+def read_same_name(uniq_id=None):
+    """ Lukee tietokannasta Person-objektit, joilla on sama nimi, näytettäväksi
+
+    """
+    
+    ids = []
+    result = Name.get_people_with_same_name()
+    for record in result:
+       new_array = record['ids']
+
+       ids.append(new_array)
+
+    return (ids)
+
+
 def read_sources(uniq_id=None):
     """ Lukee tietokannasta Source- ja Citation- objektit näytettäväksi
 
