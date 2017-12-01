@@ -5,8 +5,8 @@
 
 import logging
 #import builtins
-from flask import Flask, current_app, render_template, request, redirect, url_for, flash 
-from flask_security import Security, login_required, roles_accepted, roles_required, current_user
+from flask import render_template, request, redirect, url_for, flash 
+from flask_security import login_required, roles_accepted, roles_required, current_user
 from datetime import datetime
 import shareds
 #===============================================================================
@@ -17,7 +17,7 @@ with app.app_context():
     import models.loadfile          # Datan lataus käyttäjältä
     import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
     import models.dataupdater       # Tietojen päivitysmetodit
-    import models.cvs_refnames      # Referenssinimien luonti
+    #import models.cvs_refnames      # Referenssinimien luonti
     import models.gen
     #import models.gen.user          # Käyttäjien tiedot
     from models.gen.dates import DateRange  # Aikaväit ym. määreet
@@ -32,15 +32,14 @@ with app.app_context():
         print('stk_runin home ',current_user.name + ' logged in, roles ' + str(role_names))
         return render_template('/mainindex.html')
     
-    #===============================================================================
-    # @app.route('/login', methods=['POST', 'GET'])
-    # def login():
-    #     if request.method == 'GET':
-    #         return render_tempfgtyeutjnmrulate("login/login.html")
-    #     else:
-    #         usrname = request.form['usrname']
-    #         return render_template("login/logged.html", usrname = usrname)
-    #===============================================================================
+# @app.route('/login', methods=['POST', 'GET'])
+# Tämä metodi on nyt ylläoleva home()
+# def login():
+#     if request.method == 'GET':
+#         return render_template("login/login.html")
+#     else:
+#         usrname = request.form['usrname']
+#         return render_template("login/logged.html", usrname = usrname)
         
     @app.route('/tables')
     @login_required
@@ -139,7 +138,7 @@ with app.app_context():
         except KeyError as e:
             return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in place_list:
-    #         print ("# {} ".format(p))
+#         print ("# {} ".format(p))
 #     for u in place.urls:
 #         print ("# {} ".format(u))
         return render_template("k_place_events.html", 
