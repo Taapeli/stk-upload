@@ -214,6 +214,9 @@ def nayta_henkilot(subj):
         repositories = models.datareader.read_repositories()
         return render_template("ng_table_repositories.html", 
                                repositories=repositories)
+    elif subj == 'same_name':
+        ids = models.datareader.read_same_name()
+        return render_template("ng_same_name.html", ids=ids)
     elif subj == 'sources':
         sources = models.datareader.read_sources()
         return render_template("table_sources.html", 
@@ -294,10 +297,13 @@ def compare_person_page(ehto):
     """
     models.dbutil.connect_db()
     key, value = ehto.split('=')
+    value1, value2 = value.split(',')
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
+                models.datareader.get_person_data_by_id(value1)
+            person2, events2, photos2, sources2, families2 = \
+                models.datareader.get_person_data_by_id(value2)
             for f in families:
                 print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
@@ -311,8 +317,9 @@ def compare_person_page(ehto):
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("compare3.html", 
-        person=person, events=events, photos=photos, sources=sources, families=families)
+    return render_template("ng_compare.html", 
+        person=person, events=events, photos=photos, sources=sources, families=families,
+        person2=person2, events2=events2, photos2=photos2, sources2=sources2, families2=families2)
 
 
 @app.route('/compare2/<string:ehto>')
