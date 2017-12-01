@@ -2,6 +2,8 @@
 Created on 26.11.2017
 
 @author: Timo
+
+Arvot asetetaan järjestelmän __init__.py:ssä
 '''
 app = None
 security = None

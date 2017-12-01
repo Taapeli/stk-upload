@@ -36,6 +36,7 @@ class Neo4jUserDatastore(UserDatastore):
         self.role_dict = self.get_roles() 
         
     def _build_user_from_node(self, userNode):
+        ''' Returns a list of role names '''
         if userNode is not None:
             user = self.user_model(**userNode.properties)
             user.id = str(userNode.id)

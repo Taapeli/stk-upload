@@ -1667,8 +1667,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     a = pathname.split(".")
     pathname2 = a[0] + "_pre." + a[1]
     
-    file1 = open(pathname)
-    file2 = open(pathname2, "w")
+    file1 = open(pathname, encoding='utf-8')
+    file2 = open(pathname2, "w", encoding='utf-8')
     
     for line in file1:
         # Already \' in line
@@ -1683,7 +1683,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     file2.close()
 
     
-    DOMTree = xml.dom.minidom.parse(open(pathname2))
+    DOMTree = xml.dom.minidom.parse(open(pathname2, encoding='utf-8'))
     collection = DOMTree.documentElement
     
     msg = []

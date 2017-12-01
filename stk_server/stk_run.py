@@ -418,7 +418,32 @@ with app.app_context():
             return redirect(url_for('virhesivu', code=1, text=str(e)))
     
         return redirect(url_for('talleta', filename=infile.filename, subj=aineisto))
-    
+
+
+@app.route('/talleta/<string:subj>/<string:filename>')
+def talleta(filename, subj):   
+    """ tietojen tallettaminen kantaan """
+    pathname = models.loadfile.fullname(filename)
+    dburi = models.dbutil.connect_db()
+    try:
+        if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
+            status = models.datareader.datastorer(pathname)
+        elif subj == 'refnimet': # Referenssinimet
+            # Tallettaa Refname-objekteja 
+            status = models.cvs_refnames.referenssinimet(pathname)
+        elif subj == 'xml_file': # gramps backup xml file to Neo4j db
+            status = models.datareader.xml_to_neo4j(pathname)
+        elif subj == 'karajat': # TODO: Tekemättä
+            status = "Käräjätietojen lukua ei ole vielä tehty"
+        else:
+            return redirect(url_for('virhesivu', code=1, text= \
+                "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
+    except KeyError as e:
+        return render_template("virhe_lataus.html", code=1, \
+               text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
+    return render_template("talletettu.html", text=status, uri=dburi)
+
+
     
     #  linkki oli sukunimiluettelosta
     @app.route('/lista/person_data/<string:uniq_id>')
@@ -567,29 +592,10 @@ with app.app_context():
     
     #  Käyttäjän lisääminen tapahtuu Flask-securityn metodeilla
     
-    #===============================================================================
     # @app.route('/newuser', methods=['POST'])
     # def new_user(): 
     #     """ Lisää tai päivittää käyttäjätiedon
-    #     """
-    #     try:
-    #         models.dbutil.connect_db()
-    #         userid = request.form['userid']
-    #         if userid:
-    #             u = models.gen.user.User(userid)
-    #             u.name = request.form['name']
-    #             u.save()
-    #         else:
-    #             flash("Anna vähintään käyttäjätunnus", 'warning')
-    #          
-    #     except Exception as e:
-    #         flash("Lisääminen ei onnistunut: {} - {}".\
-    #               format(e.__class__.__name__,str(e)), 'error')
-    #         #return redirect(url_for('virhesivu', code=1, text=str(e)))
-    # 
-    #     return redirect(url_for('nayta_henkilot', subj='users'))
-    #===============================================================================
-    
+      
     
     @app.route('/virhe_lataus/<int:code>/<text>')
     def virhesivu(code, text=''):
