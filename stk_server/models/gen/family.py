@@ -4,8 +4,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 from sys import stderr
-from flask import g
-
+#from flask import g
+import  shareds
 
 class Family:
     """ Perhe
@@ -41,7 +41,7 @@ class Family:
 MATCH (family:Family)-[r:CHILD]->(person:Person)
   WHERE ID(family)=$pid
 RETURN ID(person) AS children"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
     
     
     def get_event_data_by_id(self):
@@ -52,7 +52,7 @@ RETURN ID(person) AS children"""
 MATCH (family:Family)-[r:EVENT]->(event:Event)
   WHERE ID(family)=$pid
 RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
     
     
     def get_family_data_by_id(self):
@@ -63,7 +63,7 @@ RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink"""
 MATCH (family:Family)
   WHERE ID(family)=$pid
 RETURN family"""
-        family_result = g.driver.session().run(query, {"pid": pid})
+        family_result = shareds.driver.session().run(query, {"pid": pid})
         
         for family_record in family_result:
             self.change = family_record["family"]['change']
@@ -98,7 +98,7 @@ RETURN family"""
 MATCH (family:Family)-[r:FATHER]->(person:Person)
   WHERE ID(family)=$pid
 RETURN ID(person) AS father"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
     
     
     def get_mother_by_id(self):
@@ -109,7 +109,7 @@ RETURN ID(person) AS father"""
 MATCH (family:Family)-[r:MOTHER]->(person:Person)
   WHERE ID(family)=$pid
 RETURN ID(person) AS mother"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
         
     
     @staticmethod       
@@ -121,7 +121,7 @@ RETURN ID(person) AS mother"""
         query = """
             MATCH (f:Family) RETURN COUNT(f)
             """
-        results =  g.driver.session().run(query)
+        results =  shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])

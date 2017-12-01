@@ -20,8 +20,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 import sys
 #import logging
 #from neo4j.v1 import GraphDatabase, basic_auth
-from flask import g
+#from flask import g
 #import instance.config as config
+import shareds
 
 
 class User:
@@ -47,7 +48,7 @@ class User:
 #                 MATCH (u:User) WHERE u.userid='{}' RETURN u.userid
 #                 """.format(userid)
 #                 
-#             result = g.driver.session().run(query)
+#             result = shareds.driver.session().run(query)
 #             
 #             for record in result:
 #                 continue
@@ -56,7 +57,7 @@ class User:
                 # User doesn't exist in db, the userid should be stored there
         try:
             query = "MERGE (u:User { userid: {uid} }) SET u.name={name}"
-            g.driver.session().run(query, {"uid": self.userid, "name": self.name})
+            shareds.driver.session().run(query, {"uid": self.userid, "name": self.name})
     
         except Exception as err:
             print("Virhe: {0}".format(err), file=sys.stderr)
@@ -71,7 +72,7 @@ MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name)
 WHERE u.userid='{}'
 RETURN ID(p) AS id, n.refname AS refname
             """.format(self.userid)
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
         
         
     def get_refnames_of_people_of_user(self):
@@ -82,7 +83,7 @@ MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name)
 WHERE u.userid='{}'
 RETURN p.gramps_handle AS handle, n.refname AS refname
             """.format(self.userid)
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
         
         
     def get_revisions_of_the_user(self):
@@ -93,7 +94,7 @@ MATCH (u:User)-[r:REVISION]->()
 WHERE u.userid='{}'
 RETURN distinct r.date AS date ORDER BY r.date
             """.format(self.userid)
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
         
         
     @staticmethod       
@@ -105,7 +106,7 @@ MATCH (u:User)
 RETURN u.userid AS userid, u.name AS name
 ORDER BY u.userid
             """
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
                 
     
@@ -113,7 +114,7 @@ ORDER BY u.userid
     def beginTransaction():
         """ Aloittaa transaction """
                         
-        tx = g.driver.session().begin_transaction()
+        tx = shareds.driver.session().begin_transaction()
 
         return tx
 

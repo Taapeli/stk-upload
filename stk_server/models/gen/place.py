@@ -6,10 +6,10 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 #import logging
-from flask import g
+#from flask import g
 from models.dbtree import DbTree
 from models.gen.person import Weburl
-
+import  shareds
 
 class Place:
     """ Paikka
@@ -79,7 +79,7 @@ OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
 RETURN place, COLLECT([n.name, n.lang]) AS names, 
     COLLECT (DISTINCT url) AS urls
         """
-        place_result = g.driver.session().run(query, place_id=plid)
+        place_result = shareds.driver.session().run(query, place_id=plid)
         
         for place_record in place_result:
             self.change = place_record["place"]["change"]
@@ -113,7 +113,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
  RETURN ID(p) AS uniq_id, p
  ORDER BY p.pname, p.type"""
                 
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
                   'coord_long', 'coord_lat']
@@ -214,7 +214,7 @@ ORDER BY name[0][0]
             return list(namedict.values())
 
         ret = []
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
@@ -290,12 +290,12 @@ MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid
 RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
 """
 
-        t = DbTree(g.driver, hier_query, 'pname', 'type')
+        t = DbTree(shareds.driver, hier_query, 'pname', 'type')
         t.load_to_tree_struct(locid)
         if t.tree.depth() == 0:
             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
             # Hae oman paikan tiedot ilman yhteyksiä
-            with g.driver.session() as session:
+            with shareds.driver.session() as session:
                 result = session.run(root_query, locid=int(locid))
                 record = result.single()
                 t.tree.create_node(record["name"], locid, parent=0, 
@@ -308,7 +308,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                 n = t.tree[node]
 
                 # Get all names
-                with g.driver.session() as session:
+                with shareds.driver.session() as session:
                     result = session.run(name_query, locid=node)
                     record = result.single()
                     # Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
@@ -355,7 +355,7 @@ RETURN id(p) AS uid, r.role AS role,
   e.daterange_stop AS edaterange_stop
 ORDER BY edate"""
                 
-        result = g.driver.session().run(query, locid=int(loc_id))
+        result = shareds.driver.session().run(query, locid=int(loc_id))
         ret = []
         for record in result:
             p = Place()
@@ -384,7 +384,7 @@ ORDER BY edate"""
         query = """
             MATCH (p:Place) RETURN COUNT(p)
             """
-        results =  g.driver.session().run(query)
+        results =  shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])
