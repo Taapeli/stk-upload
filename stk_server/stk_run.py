@@ -32,14 +32,6 @@ with app.app_context():
         print('stk_runin home ',current_user.name + ' logged in, roles ' + str(role_names))
         return render_template('/mainindex.html')
     
-# @app.route('/login', methods=['POST', 'GET'])
-# Tämä metodi on nyt ylläoleva home()
-# def login():
-#     if request.method == 'GET':
-#         return render_template("login/login.html")
-#     else:
-#         usrname = request.form['usrname']
-#         return render_template("login/logged.html", usrname = usrname)
         
     @app.route('/tables')
     @login_required
@@ -47,21 +39,20 @@ with app.app_context():
     def datatables(): 
         """Aloitussivun piirtäminen"""
         return render_template("datatables.html")
+
     
     @app.route('/refnames')
     @login_required
     def refnames(): 
         """Aloitussivun piirtäminen"""
         return render_template("reference.html")
-    
+   
     
     
     """ ----------------------------- Kertova-sivut --------------------------------
     """
     
     @app.route('/person/list/', methods=['POST', 'GET'])
-    @login_required
-    @roles_accepted(['user', 'admin'])
     def show_person_list(selection=None):   
         """ Valittujen tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
         models.dbutil.connect_db()
@@ -99,6 +90,7 @@ with app.app_context():
     
     
     @app.route('/person/<string:ehto>')
+    @login_required    
     def show_person_page(ehto): 
         """ Kertova - henkilön tietojen näyttäminen ruudulla 
             uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan

@@ -5,7 +5,8 @@ from flask_security.utils import _
 from flask_mail import Mail
 from stk_security.models.neo4jengine import Neo4jEngine  
 from stk_security.models.neo4juserdatastore import Neo4jUserDatastore
-import datetime 
+from models.gen.dates import DateRange  # Aikaväit ym. määreet
+from datetime import datetime 
 import shareds
 
 class Role(RoleMixin):
@@ -75,7 +76,56 @@ with app.app_context():
     @security.register_context_processor
     def security_register_processor():
         return {"username": _("Käyttäjänimi"), "name": _("Nimi"), "language": _("Kieli")}
+
+
     
+    """ Application filter definitions 
+    """
+    @app.template_filter('pvt')
+    def _jinja2_filter_dates(daterange):
+        """ Aikamääreet suodatetaan suomalaiseksi """
+        return str(DateRange(daterange))
+
+    
+    @app.template_filter('pvm')
+    def _jinja2_filter_date(date_str, fmt=None):
+        """ ISO-päivämäärä 2017-09-20 suodatetaan suomalaiseksi 20.9.2017 """
+        try:
+            a = date_str.split('-')
+            if len(a) == 3:
+                p = int(a[2])
+                k = int(a[1])
+                return "{}.{}.{}".format(p,k,a[0]) 
+            elif len(a) == 2:
+                k = int(a[1])
+                return "{}.{}".format(k,a[0]) 
+            else:
+                return "{}".format(a[0])
+        except:
+            return date_str
+        
+    @app.template_filter('timestamp')
+    def _jinja2_filter_datestamp(time_str, fmt=None):
+        """ Unix time 1506950049 suodatetaan selväkieliseksi 20.9.2017 """
+        try:
+            s = datetime.fromtimestamp(int(time_str)).strftime('%d.%m.%Y %H:%M:%S')
+            return s
+        except:
+            return time_str
+    
+    
+    @app.template_filter('transl')
+    def _jinja2_filter_translate(term, var_name, lang="fi"):
+        """ Given term is translated depending of var_name name.
+            No language selection yet.
+            
+            'nt'  = Name types
+            'evt' = Event types
+            'role' = Event role
+            'lt'  = Location types
+            'lt_in' = Location types, inessive form
+        'urlt' = web page type
+        """    
     # Create a user to test with
     #===============================================================================
     # @app.before_first_request
