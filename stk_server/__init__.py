@@ -133,45 +133,4 @@ with app.app_context():
     #     user_datastore.create_user(email='xxx@yyyyyyy.fi', password='password')
     #===============================================================================
     
-    # Views
-    
-    #===========================================================================
-    # @app.route('/', methods=['GET', 'POST'])
-    # @login_required
-    # def home():
-    #     role_names = [role.name for role in current_user.roles]
-    #     print('home ',current_user.name + ' logged in, roles ' + str(role_names))
-    #     return render_template('/mainindex.html')
-    #===========================================================================
-     
-    #===============================================================================
-    # @app.route('/index', methods=['GET', 'POST'])
-    # @login_required
-    # def index():
-    #     role_names = [role.name for role in current_user.roles]
-    #     print('index ', current_user.name + ' logged in, roles ' + str(role_names))
-    #     return render_template('/index.html')
-    #===============================================================================
-    
-    #===============================================================================
-    # @app.route('/register', methods=['GET', 'POST'])
-    # def register():
-    #     print('register')
-    #     return render_template('/security/register_user.html')
-    #===============================================================================
-    
-    #===============================================================================
-    # @app.route('/logout', methods=['GET', 'POST'])
-    # @login_required    
-    # def logout():
-    #     print(current_user.name + ' logging out')
-    #     return render_template('/security/login_user.html')
-    #===============================================================================
-    
-    #===============================================================================
-    # @app.route('/forgot_password', methods=['GET', 'POST'])
-    # def forgot_password():
-    #     print(current_user.name + ' forgot password')
-    #     return render_template('/security/forgot_password.html')
-    #===============================================================================
-    
+
