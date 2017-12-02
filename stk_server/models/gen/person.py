@@ -1067,8 +1067,8 @@ class Name:
             MATCH (p1:Person)-[r1:NAME]->(n1:Name)
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<>ID(p2)
                 AND n2.surname = n1.surname AND n2.firstname = n1.firstname
-                RETURN COLLECT ([ID(p1), n1.firstname, n1.surname, 
-                ID(p2), n2.firstname, n2.surname]) AS ids
+                RETURN COLLECT ([ID(p1), p1.est_birth, n1.firstname, n1.surname, 
+                ID(p2), p2.est_birth, n2.firstname, n2.surname]) AS ids
             """.format()
         return g.driver.session().run(query)
 

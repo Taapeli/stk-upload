@@ -38,7 +38,7 @@
 	<tr ng-repeat="event in events">
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
-		<td>{a event.date a}</td>
+		<td>{a event.date | date:'dd.MM.yyyy' a}</td>
 		<td>{a event.location.substr(0,event.location.length-2) a}</td>
 		<td>{a event.description a}</td>
 	</tr>
@@ -92,7 +92,7 @@
 	<tr ng-repeat="event in events2">
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
-		<td>{a event.date a}</td>
+		<td>{a event.date | date:'dd.MM.yyyy' a}</td>
 		<td>{a event.location.substr(0, event.location.length-2) a}</td>
 		<td>{a event.description a}</td>
 	</tr>
