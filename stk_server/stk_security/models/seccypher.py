@@ -34,9 +34,9 @@ class Cypher():
 
 	get_users = (
 		'''
-		MATCH (user:User)--(role:Role)  
-		RETURN DISTINCT user, role
-			ORDER BY user.name
+		MATCH (user:User)-[:HAS_ROLE]->(role:Role)  
+		RETURN DISTINCT user, COLLECT(role) 
+			ORDER BY user.username
 		'''
 		)
 		
