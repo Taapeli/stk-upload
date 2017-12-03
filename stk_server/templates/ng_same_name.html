@@ -31,7 +31,7 @@
 	        <td>{a id_par.surname2 a}</td>
 	        <td>{a id_par.est_birth2 | date:'dd.MM.yyyy' a}</td>
         </tr>
-	</table>
+	</table><br><br>
 
 <script>
 var app = angular.module('myApp', []).controller('namesCtrl', function($scope) {
@@ -49,11 +49,11 @@ var app = angular.module('myApp', []).controller('namesCtrl', function($scope) {
 	{% for record in ids %}
     	{% for id_pair in record %}
         	{uniq_id1:'{{id_pair[0]}}',
-        	 est_birth1:'{{id_pair[1]}}',
+        	 est_birth1:'{{ id_pair[1] if id_pair[1] else '-' }}',
         	 firstname1:'{{id_pair[2]}}',
         	 surname1:'{{id_pair[3]}}',
         	 uniq_id2:'{{id_pair[4]}}',
-        	 est_birth2:'{{id_pair[5]}}',
+        	 est_birth2:'{{ id_pair[5] if id_pair[5] else '-' }}',
         	 firstname2:'{{id_pair[6]}}',
         	 surname2:'{{id_pair[7]}}'},
     	{% endfor %}
