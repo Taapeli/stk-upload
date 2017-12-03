@@ -55,7 +55,7 @@ with app.app_context():
     @app.route('/person/list/', methods=['POST', 'GET'])
     def show_person_list(selection=None):   
         """ Valittujen tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         if request.method == 'POST':
             try:
                 # Selection from search form
@@ -79,23 +79,32 @@ with app.app_context():
         return render_template("k_persons.html", persons=persons, menuno=0)
     
     
-    @app.route('/person/list_all')
-    @login_required    
-    def show_all_persons_list(selection=None):   
+    @app.route('/person/list/restricted')
+    def show_all_persons_restricted(selection=None):   
         """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         keys = ('all',)
         persons = models.datareader.lue_henkilot_k(keys)
         return render_template("k_persons.html", persons=persons, menuno=1)
     
-    
+     
+    @app.route('/person/list_all')
+    @login_required    
+    def show_all_persons_list(selection=None):   
+        """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
+#        models.dbutil.connect_db()
+        keys = ('all',)
+        persons = models.datareader.lue_henkilot_k(keys)
+        return render_template("k_persons.html", persons=persons, menuno=1)
+ 
+       
     @app.route('/person/<string:ehto>')
     @login_required    
     def show_person_page(ehto): 
         """ Kertova - henkilön tietojen näyttäminen ruudulla 
             uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
         """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         key, value = ehto.split('=')
         try:
             if key == 'uniq_id':
@@ -122,7 +131,7 @@ with app.app_context():
     def show_location_page(locid): 
         """ Paikan tietojen näyttäminen ruudulla: hierarkia ja tapahtumat
         """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         try:
             # List 'locatils' has Place objects with 'parent' field pointing to
             # upper place in hierarcy. Events 
@@ -141,7 +150,7 @@ with app.app_context():
     def show_sources(): 
         """ Lähdeluettelon näyttäminen ruudulla
         """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         try:
             sources = models.gen.source_citation.Source.get_source_list()
         except KeyError as e:
@@ -153,7 +162,7 @@ with app.app_context():
     def show_source_page(sourceid): 
         """ Lähteen tietojen näyttäminen ruudulla: tapahtumat
         """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         try:
             stitle, events = models.datareader.get_source_with_events(sourceid)
         except KeyError as e:
@@ -168,7 +177,7 @@ with app.app_context():
     @app.route('/lista/<string:subj>')
     def nayta_henkilot(subj):   
         """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         if subj == "k_persons":
             # Kertova-tyyliin
             persons = models.datareader.lue_henkilot_k()
@@ -243,7 +252,7 @@ with app.app_context():
     def show_locations(): 
         """ Paikkaluettelon näyttäminen ruudulla
         """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         try:
             # 'locations' has Place objects, which include also the lists of
             # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
@@ -259,7 +268,7 @@ with app.app_context():
     @app.route('/lista/refnimet/<string:reftype>')
     def nayta_refnimet(reftype): 
         """ referenssinimien näyttäminen ruudulla """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         if reftype and reftype != "":
             names = models.datareader.lue_typed_refnames(reftype)
             return render_template("table_refnames_1.html", names=names, reftype=reftype)
@@ -272,7 +281,7 @@ with app.app_context():
     @app.route('/lista/people_by_surname/<string:surname>')
     def list_people_by_surname(surname): 
         """ henkilöiden, joilla on sama sukunimi näyttäminen ruudulla """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         people = models.datareader.get_people_by_surname(surname)
         return render_template("table_people_by_surname.html", 
                                surname=surname, people=people)
@@ -282,7 +291,7 @@ with app.app_context():
     @app.route('/lista/person_data/<string:uniq_id>')
     def show_person_data(uniq_id): 
         """ henkilön tietojen näyttäminen ruudulla """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
         return render_template("table_person_by_id.html", 
                            person=person, events=events, photos=photos, sources=sources)
@@ -293,7 +302,7 @@ with app.app_context():
         """ Vertailu - henkilön tietojen näyttäminen ruudulla 
             uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
         """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         key, value = ehto.split('=')
         try:
             if key == 'uniq_id':
@@ -321,7 +330,7 @@ with app.app_context():
         """ Vertailu - henkilön tietojen näyttäminen ruudulla 
             uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
         """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         key, value = ehto.split('=')
         try:
             if key == 'uniq_id':
@@ -347,7 +356,7 @@ with app.app_context():
     @app.route('/lista/family_data/<string:uniq_id>')
     def show_family_data(uniq_id): 
         """ henkilön perheen tietojen näyttäminen ruudulla """
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         person, families = models.datareader.get_families_data_by_id(uniq_id)
         return render_template("table_families_by_id.html", 
                                person=person, families=families)
@@ -360,7 +369,7 @@ with app.app_context():
             names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
         """
         key, value = ehto.split('=')
-        models.dbutil.connect_db()
+#        models.dbutil.connect_db()
         try:
             if key == 'oid':
                 persons = models.datareader.lue_henkilot(oid=value)            
