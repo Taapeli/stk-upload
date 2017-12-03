@@ -260,6 +260,20 @@ RETURN person, urls, COLLECT (name) AS names
                 weburl.type = url['type']
                 weburl.description = url['description']
                 self.urls.append(weburl)
+        
+        
+    @staticmethod
+    def get_people_with_same_birthday():
+        """ Etsi kaikki henkilöt, joiden syntymäaika on sama"""
+        
+        query = """
+            MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_birth<>''
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<>ID(p2) AND
+                p2.est_birth = p1.est_birth
+                RETURN COLLECT ([ID(p1), p1.est_birth, n1.firstname, n1.surname, 
+                ID(p2), p2.est_birth, n2.firstname, n2.surname]) AS ids
+            """.format()
+        return g.driver.session().run(query)
 
 
     @staticmethod       
