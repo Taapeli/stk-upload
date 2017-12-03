@@ -587,6 +587,21 @@ def read_repositories(uniq_id=None):
     return (repositories)
 
 
+def read_same_birthday(uniq_id=None):
+    """ Lukee tietokannasta Person-objektit, joilla on sama syntymäaika, näytettäväksi
+
+    """
+    
+    ids = []
+    result = Person.get_people_with_same_birthday()
+    for record in result:
+       new_array = record['ids']
+
+       ids.append(new_array)
+
+    return (ids)
+
+
 def read_same_name(uniq_id=None):
     """ Lukee tietokannasta Person-objektit, joilla on sama nimi, näytettäväksi
 

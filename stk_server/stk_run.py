@@ -214,6 +214,9 @@ def nayta_henkilot(subj):
         repositories = models.datareader.read_repositories()
         return render_template("ng_table_repositories.html", 
                                repositories=repositories)
+    elif subj == 'same_birthday':
+        ids = models.datareader.read_same_birthday()
+        return render_template("ng_same_birthday.html", ids=ids)
     elif subj == 'same_name':
         ids = models.datareader.read_same_name()
         return render_template("ng_same_name.html", ids=ids)

@@ -35,7 +35,7 @@
     	<th ng-repeat="x in e_columns">{a x.column a}</th>
     </tr>
 
-	<tr ng-repeat="event in events">
+	<tr ng-repeat="event in events | orderBy: 'type'">
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
 		<td>{a event.date | date:'dd.MM.yyyy' a}</td>
@@ -89,7 +89,7 @@
     	<th ng-repeat="x in e_columns">{a x.column a}</th>
     </tr>
 
-	<tr ng-repeat="event in events2">
+	<tr ng-repeat="event in events2 | orderBy: 'type'">
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
 		<td>{a event.date | date:'dd.MM.yyyy' a}</td>
@@ -147,6 +147,7 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
         {uniq_id:'{{event.uniq_id}}',type:'{{event.type}}',
         {% if event.date %}date:'{{event.date}}',
         {% elif event.daterange %}date:'{{event.daterange}}',
+        {% else %}date:'-',
         {% endif %}
 		location:'{% for loc in event.location %}{{loc}} * {% endfor %}',
         description:'{{event.description}}'},
@@ -157,6 +158,7 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
         {uniq_id:'{{event.uniq_id}}',type:'{{event.type}}',
         {% if event.date %}date:'{{event.date}}',
         {% elif event.daterange %}date:'{{event.daterange}}',
+        {% else %}date:'-',
         {% endif %}
 		location:'{% for loc in event.location %}{{loc}} * {% endfor %}',
         description:'{{event.description}}'},
