@@ -80,10 +80,11 @@ with app.app_context():
     
     
     @app.route('/person/list/restricted')
-    def show_all_persons_restricted(selection=None):   
-        """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
+    def show_persons_restricted(selection=None):   
+        """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla mainostarkoituksessa"""
 #        models.dbutil.connect_db()
-        keys = ('all',)
+        if not current_user.is_authenticated:
+                    keys = ('all',)
         persons = models.datareader.lue_henkilot_k(keys)
         return render_template("k_persons.html", persons=persons, menuno=1)
     
