@@ -20,7 +20,7 @@ with app.app_context():
     #import models.cvs_refnames      # Referenssinimien luonti
     import models.gen
     #import models.gen.user          # Käyttäjien tiedot
-    from models.gen.dates import DateRange  # Aikaväit ym. määreet
+#     from models.gen.dates import DateRange  # Aikaväit ym. määreet
     
     """ Application route definitions
     """
@@ -80,7 +80,7 @@ with app.app_context():
     
     
     @app.route('/person/list_all')
-    @login_required    
+#     @login_required    
     def show_all_persons_list(selection=None):   
         """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
         models.dbutil.connect_db()
@@ -90,7 +90,7 @@ with app.app_context():
     
     
     @app.route('/person/<string:ehto>')
-    @login_required    
+#     @login_required    
     def show_person_page(ehto): 
         """ Kertova - henkilön tietojen näyttäminen ruudulla 
             uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
