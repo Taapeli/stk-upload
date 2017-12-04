@@ -14,6 +14,10 @@
 <h2>Names</h2>
 <table>
     <tr>
+    	<th colspan="6"><a target="_blank" href="/person/uniq_id={a names[0].uniq_id a}">
+    	Linkki Kertova-sivulle</a></th>
+    </tr>
+    <tr>
     	<th ng-repeat="x in n_columns">{a x.column a}</th>
     </tr>
 
@@ -38,7 +42,7 @@
 	<tr ng-repeat="event in events | orderBy: 'type'">
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
-		<td>{a event.date | date:'dd.MM.yyyy' a}</td>
+		<td>{a event.date a}</td>
 		<td>{a event.location.substr(0,event.location.length-2) a}</td>
 		<td>{a event.description a}</td>
 	</tr>
@@ -68,6 +72,10 @@
 <table>
     <h2>Names</h2>
     <tr>
+    	<th colspan="6"><a target="_blank" href="/person/uniq_id={a names2[0].uniq_id a}">
+    	Linkki Kertova-sivulle</a></th>
+    </tr>
+    <tr>
     	<th ng-repeat="x in n_columns">{a x.column a}</th>
     </tr>
 
@@ -92,7 +100,7 @@
 	<tr ng-repeat="event in events2 | orderBy: 'type'">
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
-		<td>{a event.date | date:'dd.MM.yyyy' a}</td>
+		<td>{a event.date a}</td>
 		<td>{a event.location.substr(0, event.location.length-2) a}</td>
 		<td>{a event.description a}</td>
 	</tr>
