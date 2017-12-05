@@ -7,7 +7,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <script src="/static/infobox.js"></script>
 
-<h2>Luettelo henkilöistä, joilla sama syntymäaika</h2>
+<h2>Luettelo henkilöistä, joilla sama kuolinaika</h2>
 <p>Näytetään henkilöparit</p>
 <p><small>Klikkaa saraketta lajitellaksesi sen suhteen</small></p>
 
@@ -55,13 +55,13 @@ var app = angular.module('myApp', []).controller('namesCtrl', function($scope) {
 	{% for record in ids %}
     	{% for id_pair in record %}
         	{uniq_id1:'{{id_pair[0]}}',
-        	 est_birth1:'{{id_pair[1]}}',
-        	 est_death1:'{{ id_pair[2] if id_pair[2] else '-' }}',
+        	 est_birth1:'{{ id_pair[1] if id_pair[1] else '-' }}',
+        	 est_death1:'{{id_pair[2]}}',
         	 firstname1:'{{id_pair[3]}}',
         	 surname1:'{{id_pair[4]}}',
         	 uniq_id2:'{{id_pair[5]}}',
-        	 est_birth2:'{{id_pair[6]}}',
-        	 est_death2:'{{ id_pair[7] if id_pair[7] else '-' }}',
+        	 est_birth2:'{{ id_pair[6] if id_pair[6] else '-' }}',
+        	 est_death2:'{{id_pair[7]}}',
         	 firstname2:'{{id_pair[8]}}',
         	 surname2:'{{id_pair[9]}}'},
     	{% endfor %}

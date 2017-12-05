@@ -602,6 +602,21 @@ def read_same_birthday(uniq_id=None):
     return (ids)
 
 
+def read_same_deathday(uniq_id=None):
+    """ Lukee tietokannasta Person-objektit, joilla on sama kuolinaika, näytettäväksi
+
+    """
+    
+    ids = []
+    result = Person.get_people_with_same_deathday()
+    for record in result:
+       new_array = record['ids']
+
+       ids.append(new_array)
+
+    return (ids)
+
+
 def read_same_name(uniq_id=None):
     """ Lukee tietokannasta Person-objektit, joilla on sama nimi, näytettäväksi
 
