@@ -27,6 +27,7 @@ ROLES = ({'level':'0', 'name':'guest', 'description':'Guest user with limited re
 role_create = 'CREATE (role:Role {name : $name, description : $description})' 
 
 #functions
+
 def confirm(question):
     valid = {"yes": True, "y": True, "no": False, "n": False}
     prompt = " [y/n] "
@@ -37,8 +38,9 @@ def confirm(question):
             return valid[choice]
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
-#erase database 
+
 def delete_database(tx):
+    '''erase database'''
     tx.run('MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r')
 
 def create_constraints(tx):
@@ -80,5 +82,4 @@ with driver.session() as session:
         print('Session ', cex)
         
 print ('Complete')
-
 

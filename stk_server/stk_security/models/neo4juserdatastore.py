@@ -14,6 +14,8 @@ import datetime
 driver = None
 
 class Neo4jUserDatastore(UserDatastore):
+    '''    Store and access application User properties and rights
+    '''
  
 #===============================================================================
 #     class Role():
@@ -33,8 +35,9 @@ class Neo4jUserDatastore(UserDatastore):
         self.driver = driver
         self.user_model = user_model
         self.role_model = role_model
-        self.role_dict = self.get_roles() 
-        
+        self.role_dict = self.get_roles()
+
+
     def _build_user_from_node(self, userNode):
         ''' Returns a list of role names '''
         if userNode is not None:
@@ -49,6 +52,7 @@ class Neo4jUserDatastore(UserDatastore):
                        
         
     def put(self, model):
+        ''' Add or update User or Role data '''
         with self.driver.session() as session:
             try:
                 if isinstance(model, self.user_model):
@@ -58,8 +62,8 @@ class Neo4jUserDatastore(UserDatastore):
             except ServiceUnavailable as ex:
                 print(ex.format())            
                 return None
-            
-    def _put_user (self, tx, user):
+
+    def _put_user(self, tx, user):
 #        print('_put_user ', user.email, ' ', user.name)
         if not user.id:         # New user
             if len(user.roles) == 0:
@@ -97,9 +101,8 @@ class Neo4jUserDatastore(UserDatastore):
                 language = user.language )
         tx.commit()            
         return user     
-        
 
-    
+
     def _put_role (self, tx, role):
 #        print('_put_role ', role)
         roleNode = tx.run(Cypher.role_register, name=role.name, 
@@ -110,7 +113,7 @@ class Neo4jUserDatastore(UserDatastore):
     def commit(self):
         pass
 #        self.tx.commit()
-    
+
     def get_user(self, id_or_email):
 #        self.email = id_or_email
         try:
@@ -121,12 +124,12 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             print(ex.format())
             return None
-                        
+
     def _getUser (self, tx, pemail):
         for record in tx.run(Cypher.email_or_id_find, id_or_email=pemail):
             userNode = (record['user'])
             return userNode
-        
+
     def get_users(self):
         try:
             with self.driver.session() as session:
@@ -137,16 +140,15 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             print(ex.format())
             return []                 
-                                                
+
     def _getUsers (self, tx):
         userNodes = []
         for record in tx.run(Cypher.get_users):
             userNodes.append(record['user'])
         return userNodes        
 
-                
     def find_user(self, *args, **kwargs):
-#        print('find_user ', args, ' ', kwargs)
+        print('find_user ', args, ' ', kwargs)
         try:
             with self.driver.session() as session:
                 userNode = session.read_transaction(self._findUser, kwargs['id']) 
@@ -155,13 +157,13 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             print(ex.format())
             return None
-        
+
     def _findUser (self, tx, arg):
         rid = int(arg)
 #        print('rid=', rid)
         for record in tx.run(Cypher.id_find, id=rid):
             user = (record['user'])
-            return user        
+            return user
 
     def find_UserRoles(self, email):
         try:
@@ -173,14 +175,14 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             print(ex.format())
             return None
-            
+
     def _findUserRoles (self, tx, pemail):
         roles = []
         for record in tx.run(Cypher.user_roles_find, email=pemail):
             roles.append(record['role'])
 #        print ('_findUserRoles ', pemail, roles)    
         return roles
-        
+
     def find_role(self, roleName):
         try:
             with self.driver.session() as session:
@@ -193,11 +195,11 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             print(ex.format())
             return None
-        
+
     def _findRole (self, tx, roleName):
         for record in tx.run(Cypher.role_find, name=roleName):
             return (record['role'])                
-                                
+
     def get_role(self, rid):
         self.id = rid
         try:
@@ -212,7 +214,7 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             print(ex.format())
             return None
-                        
+
     def _getRole (self, tx, rid):
         for record in tx.run(Cypher.role_get, id=rid):
             return (record['role'])        
@@ -233,7 +235,7 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             print(ex.format())
             return None
-                                
+
     def _getRoles (self, tx):
         roles = []        
         for record in tx.run(Cypher.roles_get):
@@ -247,7 +249,7 @@ class Neo4jUserDatastore(UserDatastore):
             with session.begin_transaction() as tx:
                 tx.run(Cypher.confirm_email, email=email)
                 tx.commit()
-                
+
 #This is a classmethod and doesn't need username
     @classmethod
     def password_reset(cls, eml, psw):
@@ -256,11 +258,4 @@ class Neo4jUserDatastore(UserDatastore):
                 tx.run(Cypher.password_reset, email=eml, password=psw)
                 tx.commit()
 #                tx.run(Cypher.password_reset, email=email, password=bcrypt.encrypt(password))
-       
-        
-        
-        
-        
-        
-        
         

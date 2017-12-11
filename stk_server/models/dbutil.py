@@ -96,7 +96,9 @@ def alusta_kanta():
 
 
 class Date():
-    """ Päivämäärän muuntofunktioita """
+    """ Päivämäärän muuntofunktioita
+        Käytetty käräjäaineiston aikojen muunnoksiin 2014(?)
+    """
 
     @staticmethod       
     def range_str(aikamaare):
