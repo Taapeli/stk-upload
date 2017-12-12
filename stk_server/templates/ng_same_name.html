@@ -1,0 +1,92 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<script src="/static/infobox.js"></script>
+
+<h2>Luettelo henkilöistä, joilla sama nimi</h2>
+<p>Näytetään henkilöparit</p>
+<p><small>Klikkaa saraketta lajitellaksesi sen suhteen</small></p>
+
+<section id="lista">
+<div ng-app="myApp" ng-controller="namesCtrl">
+	<p><button ng-click = "show_me = !show_me">KAIKKI/Sama syntymäaika</button></p>
+	<table>
+	    <tr>
+	    	<th ng-repeat="x in columns" ng-click="sort(x.column)">{a x.column a}
+			<a ng-show="currentSort.exp == x.column && currentSort.reverse"><i class='fa fa-angle-down'></i></a>
+			<a ng-show="currentSort.exp == x.column && !currentSort.reverse"><i class='fa fa-angle-up'></i></a></th>
+	    </tr>
+	    <tr ng-repeat="id_par in id_pars | orderBy:currentSort.exp: currentSort.reverse"
+	    	ng-show="(id_par.est_birth1 === id_par.est_birth2) || !show_me">
+	        <td><a href="/compare/uniq_id={a id_par.uniq_id1 a},{a id_par.uniq_id2 a}">{a id_par.uniq_id1 a}</a></td>
+	        <td>{a id_par.firstname1 a}</td>
+	        <td>{a id_par.surname1 a}</td>
+	        <td>{a id_par.est_birth1 a}</td>
+	        <td>{a id_par.est_death1 a}</td>
+	        <td>&nbsp;</td>
+	        <td>{a id_par.uniq_id2 a}</td>
+	        <td>{a id_par.firstname2 a}</td>
+	        <td>{a id_par.surname2 a}</td>
+	        <td>{a id_par.est_birth2 a}</td>
+	        <td>{a id_par.est_death2 a}</td>
+        </tr>
+	</table><br><br>
+
+<script>
+var app = angular.module('myApp', []).controller('namesCtrl', function($scope) {
+	$scope.columns = [
+		{column:'uniq_id1'},
+		{column:'firstname1'},
+		{column:'surname1'},
+		{column:'est_birth1'},
+		{column:'est_death1'},
+		{column:' '},
+		{column:'uniq_id2'},
+		{column:'firstname2'},
+		{column:'surname2'},
+		{column:'est_birth2'},
+		{column:'est_death2'}
+	];
+    $scope.id_pars = [
+	{% for record in ids %}
+    	{% for id_pair in record %}
+        	{uniq_id1:'{{id_pair[0]}}',
+        	 est_birth1:'{{ id_pair[1] if id_pair[1] else '-' }}',
+        	 est_death1:'{{ id_pair[2] if id_pair[2] else '-' }}',
+        	 firstname1:'{{id_pair[3]}}',
+        	 surname1:'{{id_pair[4]}}',
+        	 uniq_id2:'{{id_pair[5]}}',
+        	 est_birth2:'{{ id_pair[6] if id_pair[6] else '-' }}',
+        	 est_death2:'{{ id_pair[7] if id_pair[7] else '-' }}',
+        	 firstname2:'{{id_pair[8]}}',
+        	 surname2:'{{id_pair[9]}}'},
+    	{% endfor %}
+    {% endfor %}
+    ];
+    
+    $scope.order = {};
+
+    $scope.sort = function(column) {
+        if ($scope.order[column] == column) {
+            $scope.order[column+'Desc'] = !$scope.order[column+'Desc'];
+
+        } else {
+           $scope.order[column] = column;
+           $scope.order[column+'Desc'] = false;
+        }
+
+        $scope.currentSort = {exp: $scope.order[column], reverse: $scope.order[column+'Desc']};
+    };
+});
+
+app.config(['$interpolateProvider', function($interpolateProvider) {
+  $interpolateProvider.startSymbol('{a');
+  $interpolateProvider.endSymbol('a}');
+}]);
+</script>
+
+{% endblock %}

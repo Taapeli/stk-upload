@@ -79,16 +79,17 @@
 
 <h2>URLs</h2>
 <table>
-    <tr><th>description</th><th>URL</th>
+    <tr><th>priv</th><th>description</th><th>URL</th>
     </tr>
 {% if person %}
-	{% if person.url_href|length == 0 %}
+	{% if person.urls|length == 0 %}
 		<tr><td colspan="2">Ei URL tietoja</td></tr>
 	{% else %}
-		{% for i in range(person.url_href|length) %}
+		{% for url in person.urls %}
 			<tr>
-	    		<td>{{person.url_description[i]}}</a></td>
-	    		<td><a href="{{person.url_href[i]}}">{{person.url_href[i]}}</a></td>
+	    		<td>{{url.priv}}</a></td>
+	    		<td>{{url.description}}</a></td>
+	    		<td><a href="{{url.href}}">{{url.href}}</a></td>
 			</tr>
 		{% endfor %}
 	{% endif %}

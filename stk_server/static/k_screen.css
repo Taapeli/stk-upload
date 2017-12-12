@@ -382,6 +382,11 @@ table.infolist.eventlist tbody tr:nth-child(even)
 
 /* Events
 ----------------------------------------------------- */
+@media only screen and (min-width: 500px) {
+	table.infolist.eventlist {  /* JMä 26.11.2017 */
+        min-width: 500px;
+    }
+}
 #EventList table.infolist tr.BeginType td {
     border-top:dashed 1px #CCC;
 }

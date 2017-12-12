@@ -126,13 +126,15 @@ def show_location_page(locid):
     try:
         # List 'locatils' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events 
-        place, locations, events = models.datareader.get_place_with_events(locid)
+        place, place_list, events = models.datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in locations:
+#     for p in place_list:
 #         print ("# {} ".format(p))
+#     for u in place.urls:
+#         print ("# {} ".format(u))
     return render_template("k_place_events.html", 
-                           locid=locid, place=place, events=events, locations=locations)
+                           locid=locid, place=place, events=events, locations=place_list)
 
 
 @app.route('/lista/k_sources')
@@ -212,6 +214,15 @@ def nayta_henkilot(subj):
         repositories = models.datareader.read_repositories()
         return render_template("ng_table_repositories.html", 
                                repositories=repositories)
+    elif subj == 'same_birthday':
+        ids = models.datareader.read_same_birthday()
+        return render_template("ng_same_birthday.html", ids=ids)
+    elif subj == 'same_deathday':
+        ids = models.datareader.read_same_deathday()
+        return render_template("ng_same_deathday.html", ids=ids)
+    elif subj == 'same_name':
+        ids = models.datareader.read_same_name()
+        return render_template("ng_same_name.html", ids=ids)
     elif subj == 'sources':
         sources = models.datareader.read_sources()
         return render_template("table_sources.html", 
@@ -248,7 +259,7 @@ def show_locations():
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
-#         print ("# {} ".format(p))
+#         print ("# {} : {}".format(p, p.uppers[0] if p.uppers else ""))
     return render_template("k_locations.html", locations=locations)
 
 
@@ -283,6 +294,66 @@ def show_person_data(uniq_id):
     person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
     return render_template("table_person_by_id.html", 
                        person=person, events=events, photos=photos, sources=sources)
+
+
+@app.route('/compare/<string:ehto>')
+def compare_person_page(ehto): 
+    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
+    value1, value2 = value.split(',')
+    try:
+        if key == 'uniq_id':
+            person, events, photos, sources, families = \
+                models.datareader.get_person_data_by_id(value1)
+            person2, events2, photos2, sources2, families2 = \
+                models.datareader.get_person_data_by_id(value2)
+            for f in families:
+                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                if f.mother:
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+        else:
+            raise(KeyError("Väärä hakuavain"))
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("ng_compare.html", 
+        person=person, events=events, photos=photos, sources=sources, families=families,
+        person2=person2, events2=events2, photos2=photos2, sources2=sources2, families2=families2)
+
+
+@app.route('/compare2/<string:ehto>')
+def compare_person_page2(ehto): 
+    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
+        uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
+    """
+    models.dbutil.connect_db()
+    key, value = ehto.split('=')
+    try:
+        if key == 'uniq_id':
+            person, events, photos, sources, families = \
+                models.datareader.get_person_data_by_id(value)
+            for f in families:
+                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                if f.mother:
+                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                if f.father:
+                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                if f.children:
+                    for c in f.children:
+                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+        else:
+            raise(KeyError("Väärä hakuavain"))
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("compare2.html", 
+        person=person, events=events, photos=photos, sources=sources, families=families)
 
 
 @app.route('/lista/family_data/<string:uniq_id>')
@@ -396,6 +467,16 @@ def aseta_confidence():
     dburi = models.dbutil.connect_db()
     
     message = models.datareader.set_confidence_value()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+
+@app.route('/aseta/estimated_dates')
+def aseta_estimated_dates(): 
+    """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
+    models.dbutil.connect_db()
+    dburi = models.dbutil.connect_db()
+    
+    message = models.datareader.set_estimated_dates()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 
@@ -570,6 +651,7 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
         'role' = Event role
         'lt'  = Location types
         'lt_in' = Location types, inessive form
+        'urlt' = web page type
     """
 #     print("# {}[{}]".format(var_name, term))
     if var_name == "nt":
@@ -678,6 +760,13 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
             return tabl[term]
         except:
             return term + ":ssa"
+    elif var_name == "urlt":
+        # Url types
+        tabl = {
+            "Unknown": "Määrittelemätön",
+            "Web Home": "Kotisivu",
+            "Web Search": "Haku"
+        }
 
     try:
         return tabl[term]

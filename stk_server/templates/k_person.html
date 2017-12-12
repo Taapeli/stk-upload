@@ -96,7 +96,7 @@
                         <td class="ColumnPlace">
                             <a href="/events/loc={{e.locid}}" class="inlink"
                             title="tyyppiä {{e.ltype}}; katso paikan tiedot">
-                            {{e.location}}</a>
+                            {{e.location|join(' • ')}}</a>
                         </td>
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">
