@@ -434,15 +434,18 @@ RETURN person, urls, COLLECT (name) AS names
         return g.driver.session().run(query)
 
 
-    def set_confidence (self):
+    def set_confidence (self, tx):
         """ Voidaan asettaa henkilön tietojen luotettavuus arvio kantaan
         """
 
-        query = """
+        try:
+            query = """
  MATCH (person:Person) WHERE ID(person)={}
  SET person.confidence='{}'""".format(self.uniq_id, self.confidence)
                 
-        return g.driver.session().run(query)
+            return tx.run(query)
+        except Exception as err:
+            print("Virhe (Person.set_confidence: {0}".format(err), file=stderr)
 
 
     @staticmethod       
