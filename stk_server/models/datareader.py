@@ -291,7 +291,7 @@ def set_confidence_value():
                 
             confidence = sumc/len(record["list"])
             p.confidence = "%0.1f" % confidence # confidence with one decimal
-        p.set_confidence()
+        p.set_confidence(tx)
             
         counter += 1
             
