@@ -1,5 +1,3 @@
-#!/usr/bin/env pytho
-# -*- coding: utf-8 -*-
 
 import sys
 import os

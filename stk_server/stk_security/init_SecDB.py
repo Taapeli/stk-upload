@@ -1,4 +1,3 @@
-# coding: utf-8  
 '''
 Copy this file to your instance folder where you have the instance config.py 
 and execute it to initialize the started database for flask-security roles
