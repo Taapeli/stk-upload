@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8 
 '''
 Created on 28.9.2017
 
 @author: TimNal
 '''
 
+
 from flask_security.datastore import UserDatastore
 from .seccypher import Cypher  
-from neo4j.exceptions import ServiceUnavailable
-#import copy
+from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
 import datetime
 
 driver = None
@@ -29,9 +29,10 @@ class Neo4jUserDatastore(UserDatastore):
 #         roles = []
 #===============================================================================
     
-    def __init__(self, driver, user_model, role_model):
+    def __init__(self, driver, user_model, user_profile_model, role_model):
         self.driver = driver
         self.user_model = user_model
+        self.user_profile_model = user_profile_model
         self.role_model = role_model
         self.role_dict = self.get_roles() 
         
@@ -58,54 +59,85 @@ class Neo4jUserDatastore(UserDatastore):
             except ServiceUnavailable as ex:
                 print(ex.format())            
                 return None
+            except CypherError as ex:
+#                print(ex.format())            
+                raise
             
     def _put_user (self, tx, user):
 #        print('_put_user ', user.email, ' ', user.name)
         if not user.id:         # New user
             if len(user.roles) == 0:
-                user.roles = ['user']
+                user.roles = ['guest']
             user.confirmed_at = None
             user.is_active = True
-            result = tx.run(Cypher.user_register,
-                email = user.email,
-                password = user.password, 
-                is_active = user.is_active,
-                confirmed_at = user.confirmed_at,            
-                roles = user.roles,
-                username = user.username,
-                name = user.name,
-                language = user.language )
-            for record in result:
-                userNode = (record['user'])
-                user.id = str(userNode.id)
-                return user
+            try:
+                print('_put_user new', user.email, ' ', user.name, ' ', user.roles[0])                
+                result = tx.run(Cypher.user_register,
+                    email = user.email,
+                    password = user.password, 
+                    is_active = user.is_active,
+#                    confirmed_at = user.confirmed_at,            
+                    roles = user.roles,
+                    username = user.username,
+                    name = user.name,
+                    language = user.language )
+ 
+                for record in result:
+                    userNode = (record['user'])
+                    print(userNode)
+                    self._user_profile_add(tx, userNode.id, userNode.properties['username'])
+#                    tx.commit()
+                    return self._build_user_from_node(userNode)
+            except CypherError as ex:
+                print('CypherError: ', ex.message, ' ', ex.code)            
+                raise      
+            except ClientError as ex:
+                print('ClientError: ', ex.message, ' ', ex.code)            
+                raise
+            except Exception as ex:
+                print('Exception: ', ex)            
+                raise
+
         else:               # Update user
             rolelist = []
             for role in user.roles:
                 roleToAdd = (role.name if isinstance(role, self.role_model) else role)
                 if not roleToAdd in rolelist:
                     rolelist.append(roleToAdd)
-            tx.run(Cypher.user_update, 
-                id=int(user.id), 
-                email=user.email,
-                password=user.password, 
-                is_active=user.is_active,
-                confirmed_at=int(user.confirmed_at.timestamp()),            
-                roles=rolelist,
-                username = user.username,
-                name = user.name,
-                language = user.language )
-        tx.commit()            
-        return user     
-        
+            try:
+                print('_put_user update', user.email, ' ', user.name)                         
+                result = tx.run(Cypher.user_update, 
+                    id=int(user.id), 
+                    email=user.email,
+                    password=user.password, 
+                    is_active=user.is_active,
+                    confirmed_at=int(user.confirmed_at.timestamp()),            
+                    roles=rolelist,
+                    username = user.username,
+                    name = user.name,
+                    language = user.language )
+#                tx.commit()
+                for record in result:
+                    userNode = (record['user'])
+                    return self._build_user_from_node(userNode)
+            except CypherError as ex:
+                print(ex.message)            
+                raise ex            
 
-    
+#        tx.commit()            
+#        return user     
+
     def _put_role (self, tx, role):
 #        print('_put_role ', role)
         roleNode = tx.run(Cypher.role_register, name=role.name, 
             description=role.description)
 #        return self.user_model(**roleNode.properties)
         return self.role_model(**roleNode.properties)
+    
+    def _user_profile_add (self, tx, uid, username):
+#        print('_put_role ', role)
+        tx.run(Cypher.user_profile_add, uid=uid, username=username) 
+        return
 
     def commit(self):
         pass
@@ -119,7 +151,7 @@ class Neo4jUserDatastore(UserDatastore):
                 print ('get_user ', id_or_email, ' ', userNode)
                 return(self._build_user_from_node(userNode))
         except ServiceUnavailable as ex:
-            print(ex.format())
+            print(ex.message)
             return None
                         
     def _getUser (self, tx, pemail):
@@ -135,7 +167,7 @@ class Neo4jUserDatastore(UserDatastore):
                     return [self.user_model(**userNode.properties) for userNode in userNodes] 
                 return []
         except ServiceUnavailable as ex:
-            print(ex.format())
+            print(ex.message)
             return []                 
                                                 
     def _getUsers (self, tx):
@@ -153,7 +185,7 @@ class Neo4jUserDatastore(UserDatastore):
 #                print('find_user (node) ', userNode)
                 return(self._build_user_from_node(userNode))
         except ServiceUnavailable as ex:
-            print(ex.format())
+            print(ex.message)
             return None
         
     def _findUser (self, tx, arg):
@@ -171,8 +203,8 @@ class Neo4jUserDatastore(UserDatastore):
                     return [self.role_model(**roleNode.properties) for roleNode in userRoles] 
                 return None
         except ServiceUnavailable as ex:
-            print(ex.format())
-            return None
+            print(ex.message)
+            raise
             
     def _findUserRoles (self, tx, pemail):
         roles = []
@@ -191,7 +223,7 @@ class Neo4jUserDatastore(UserDatastore):
                     return role
                 return None
         except ServiceUnavailable as ex:
-            print(ex.format())
+            print(ex.message)
             return None
         
     def _findRole (self, tx, roleName):
@@ -210,7 +242,7 @@ class Neo4jUserDatastore(UserDatastore):
                     return role
                 return None
         except ServiceUnavailable as ex:
-            print(ex.format())
+            print(ex.message)
             return None
                         
     def _getRole (self, tx, rid):
@@ -231,8 +263,8 @@ class Neo4jUserDatastore(UserDatastore):
                     return roles
                 return None
         except ServiceUnavailable as ex:
-            print(ex.format())
-            return None
+            print(ex.message)
+            raise
                                 
     def _getRoles (self, tx):
         roles = []        
