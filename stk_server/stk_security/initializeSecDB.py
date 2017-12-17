@@ -1,8 +1,4 @@
 # coding: utf-8  
-'''
-Copy this file to your instance folder where you have the instance config.py 
-and execute it to initialize the started database for flask-security roles
-'''
 
 import sys
 import os
@@ -18,11 +14,19 @@ auth = (config.NEO4J_USERNAME, config.NEO4J_PASSWORD)
 driver = GraphDatabase.driver(uri, auth=auth)
 
 #inputs
+ROLES = ({'level':'0', 'name':'guest', 'description':'Kirjautumaton käyttäjä rajoitetuin lukuoikeuksin'},
+         {'level':'1', 'name':'member', 'description':'Seuran jäsen täysin lukuoikeuksin'},
+         {'level':'2', 'name':'research', 'description':'Tutkija, joka voi päivittää omaa tarjokaskantaansa'},
+         {'level':'4', 'name':'audit', 'description':'Valvoja, joka auditoi ja hyväksyy ehdokasaineistoja'},
+         {'level':'8', 'name':'admin', 'description':'Ylläpitäjä kaikin oikeuksin'})
 
-ROLES = ({'level':'0', 'name':'guest', 'description':'Guest user with limited read permissions'},
-         {'level':'1', 'name':'user', 'description':'Basic user with read/write permissions to own trees'},
-         {'level':'4', 'name':'audit', 'description':'Auditor with read permission to everything'},
-         {'level':'8', 'name':'admin', 'description':'Administrator with all permissions'})
+
+#===============================================================================
+# ROLES = ({'level':'0', 'name':'guest', 'description':'Guest user with limited read permissions'},
+#          {'level':'1', 'name':'user', 'description':'Basic user with read/write permissions to own trees'},
+#          {'level':'4', 'name':'audit', 'description':'Auditor with read permission to everything'},
+#          {'level':'8', 'name':'admin', 'description':'Administrator with all permissions'})
+#===============================================================================
 
 role_create = 'CREATE (role:Role {name : $name, description : $description})' 
 
