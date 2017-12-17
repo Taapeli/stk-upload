@@ -4,14 +4,14 @@ from stk_server import app
 import logging
 print('Käynnistys: ' + str(app))
 """ ----------------------------- Käynnistys ------------------------------- """
+logging.basicConfig(level=logging.DEBUG, format=('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger = logging.getLogger('stkserver')
 
 if __name__ == '__main__':
     if True:
         # Ajo paikallisesti
-        logging.basicConfig(level=logging.DEBUG)
         print ("stk-run.__main__ ajetaan DEGUB-moodissa")
         app.run(debug='DEBUG', ssl_context='adhoc')
     else:
         # Julkinen sovellus
-        logging.basicConfig(level=logging.INFO)
         app.run(host='0.0.0.0', port=8000, ssl_context='adhoc')
