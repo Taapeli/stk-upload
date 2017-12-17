@@ -5,8 +5,10 @@ from flask_security.utils import _
 from flask_mail import Mail
 from stk_security.models.neo4jengine import Neo4jEngine  
 from stk_security.models.neo4juserdatastore import Neo4jUserDatastore
-from models.gen.dates import DateRange  # Aikaväit ym. määreet
-from datetime import datetime 
+from models.gen.dates import DateRange  # Aikavälit ym. määreet
+from datetime import datetime
+from neo4j.exceptions import ConstraintError
+import logging 
 import shareds
 
 class Role(RoleMixin):
@@ -40,19 +42,32 @@ class User(UserMixin):
         self.is_active = True
         self.confirmed_at = None
         self.roles = kwargs['roles']
+        
+class UserProfile():
+    uid = ''
+    userName = ''
+    numSessions = 0
+    lastSessionTime = None  
+       
+    def __init__(self, **kwargs):
+        self.numSessions = kwargs['numSessions']
+        self.lastSessionTime = kwargs.get('lastSessionTime')
+        
+    def newSession(self):   
+        self.numSessions += 1
+        self.lastSessionTime = datetime.timestamp() 
 
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
     language = StringField('Language', validators=[Required('Language required')])
 
-
-print('Stk-server init')
 # Create app
 app = Flask(__name__, instance_relative_config=True)
 mail = Mail(app)
 with app.app_context():
     # within this block, current_app points to app.
+    print('Stk-server init')    
     print('Current application: ' + current_app.name)
     print('Application instance path: ' + app.instance_path)
     app.config.from_object('config')
@@ -63,30 +78,72 @@ with app.app_context():
     shareds.mail = mail
     db = Neo4jEngine(app)
     shareds.driver = db.driver
+   
 #  Alusta sovellusosat
     import stk_run 
 
     # Setup Flask-Security
-    user_datastore = Neo4jUserDatastore(db.driver, User, Role)
+    user_datastore = Neo4jUserDatastore(db.driver, User, UserProfile, Role)
     shareds.user_datastore = user_datastore
     security = Security(app, user_datastore,
         confirm_register_form=ExtendedConfirmRegisterForm)
     shareds.security = security
+    
     print('Security set up')
     @security.register_context_processor
     def security_register_processor():
         return {"username": _("Käyttäjänimi"), "name": _("Nimi"), "language": _("Kieli")}
-
-
     
+#  Tarkista roolien olemassaolo
+    results = shareds.driver.session().run('MATCH (a:Role) RETURN COUNT(a)')
+    for result in results:
+        num_of_roles = result[0]
+        break
+    if num_of_roles == 0:
+#    if (shareds.driver.session().run('MATCH (a:Role) RETURN COUNT(a)') == 0):
+        #inputs
+        ROLES = ({'level':'0', 'name':'guest', 'description':'Kirjautumaton käyttäjä rajoitetuin lukuoikeuksin'},
+                 {'level':'1', 'name':'member', 'description':'Seuran jäsen täysin lukuoikeuksin'},
+                 {'level':'2', 'name':'research', 'description':'Tutkija, joka voi päivittää omaa tarjokaskantaansa'},
+                 {'level':'4', 'name':'audit', 'description':'Valvoja, joka auditoi ja hyväksyy ehdokasaineistoja'},
+                 {'level':'8', 'name':'admin', 'description':'Ylläpitäjä kaikin oikeuksin'})
+        
+        role_create = 'CREATE (role:Role {name : $name, description : $description})' 
+        
+        #functions
+        def create_constraints(tx):
+            tx.run('CREATE CONSTRAINT ON (role:Role) ASSERT role.name IS UNIQUE')
+        
+        class Create:
+            def __init__ (self, username):
+                self.username=username        
+            def roles(self, tx, ROLES):
+                for role in ROLES:
+                    try:
+                        tx.run(role_create, 
+                            name=role['name'], 
+                            description=role['description'],
+                            time=str(datetime.now()) )    
+                    except ConstraintError as cex:
+                        print(cex)
+                        continue
+
+        with shareds.driver.session() as session: 
+            session.write_transaction(create_constraints)
+        with shareds.driver.session() as session:
+            try:
+                session.write_transaction(Create('start').roles, ROLES)
+            except ConstraintError as cex:
+                print('Session ', cex)
+        print('Roles initialized')                
+ 
     """ Application filter definitions 
     """
     @app.template_filter('pvt')
     def _jinja2_filter_dates(daterange):
         """ Aikamääreet suodatetaan suomalaiseksi """
         return str(DateRange(daterange))
-
-    
+  
     @app.template_filter('pvm')
     def _jinja2_filter_date(date_str, fmt=None):
         """ ISO-päivämäärä 2017-09-20 suodatetaan suomalaiseksi 20.9.2017 """
