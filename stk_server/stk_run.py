@@ -4,6 +4,7 @@
 # JMä 29.12.2015
 
 import logging
+logger = logging.getLogger('stkserver')
 #import builtins
 from flask import render_template, request, redirect, url_for, flash 
 from flask_security import login_required, roles_accepted, roles_required, current_user
@@ -29,12 +30,12 @@ with app.app_context():
     @login_required
     def home():
         role_names = [role.name for role in current_user.roles]
-        print('stk_runin home ',current_user.name + ' logged in, roles ' + str(role_names))
+        logger.info(current_user.username + ' / ' + current_user.email + ' logged in, roles ' + str(role_names))
         return render_template('/mainindex.html')
     
         
     @app.route('/tables')
-    @login_required
+#    @login_required
     @roles_required('admin')
     def datatables(): 
         """Aloitussivun piirtäminen"""
@@ -84,6 +85,7 @@ with app.app_context():
         """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla mainostarkoituksessa"""
 #        models.dbutil.connect_db()
         if not current_user.is_authenticated:
+            # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit. Vaihtoehtoisesti kutsu toistra metodia.
                     keys = ('all',)
         persons = models.datareader.lue_henkilot_k(keys)
         return render_template("k_persons.html", persons=persons, menuno=1)
