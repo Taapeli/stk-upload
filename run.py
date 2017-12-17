@@ -11,12 +11,7 @@ logger = logging.getLogger('stkserver')
 if __name__ == '__main__':
     if True:
         # Ajo paikallisesti
-<<<<<<< HEAD
-        print ("stk-run.__main__ ajetaan DEGUB-moodissa")
-=======
-        logging.basicConfig(level=logging.DEBUG)
         print ("stk-run.run ajetaan DEGUB-lokitasolla")
->>>>>>> branch 'devel-tn-2' of https://github.com/Taapeli/stk-upload.git
         app.run(debug='DEBUG')
     else:
         # Julkinen sovellus

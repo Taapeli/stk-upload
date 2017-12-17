@@ -10,7 +10,7 @@ logger = logging.getLogger('stkserver')
 if __name__ == '__main__':
     if True:
         # Ajo paikallisesti
-        print ("stk-run.__main__ ajetaan DEGUB-moodissa")
+        print ("stk-run.run ajetaan DEGUB-lokitasolla")
         app.run(debug='DEBUG', ssl_context='adhoc')
     else:
         # Julkinen sovellus
