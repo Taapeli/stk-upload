@@ -50,6 +50,20 @@ class Event:
         self.names = []   # For creating display sets
     
     
+    def get_baptism_data(self):
+        """ Luetaan kastetapahtuman henkilöt"""
+        
+        pid = int(self.uniq_id)
+        query = """
+MATCH (event:Event)<-[r:EVENT]-(p:Person) WHERE ID(event)=$pid
+OPTIONAL MATCH (p)-[:NAME]->(n:Name)
+RETURN ID(event) AS id, event.type AS type, event.date AS date, event.datetype AS datetype, 
+    event.daterange_start AS daterange_start, event.daterange_stop AS daterange_stop,
+    ID(p) AS person_id, r.role AS role, 
+    COLLECT([n.firstname, n.surname]) AS person_names ORDER BY r.role DESC"""
+        return  g.driver.session().run(query, {"pid": pid})
+    
+    
     def get_citation_by_id(self):
         """ Luetaan tapahtuman viittauksen id """
         

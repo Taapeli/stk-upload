@@ -981,6 +981,46 @@ def get_person_data_by_id(uniq_id):
     return (p, events, photos, sources, family_list)
 
 
+def get_baptism_data(uniq_id):
+    
+    persons = []
+    
+    e = Event()
+    e.uniq_id = uniq_id
+    e.get_event_data_by_id()
+    
+    if e.daterange_start != '' and e.daterange_stop != '':
+        e.daterange = e.daterange_start + " - " + e.daterange_stop
+    elif e.daterange_start != '':
+        e.daterange = str(e.daterange_start) + "-"
+    elif e.daterange_stop != '':
+        e.daterange = "-" + str(e.daterange_stop)
+        
+    if e.place_hlink != '':
+        place = Place()
+        place.uniq_id = e.place_hlink
+        place.get_place_data_by_id()
+        # Location / place data
+        e.location = place.pname
+        e.locid = place.uniq_id
+        e.ltype = place.type
+        
+    result = e.get_baptism_data()
+    for record in result:
+        p = Person_as_member()
+        p.uniq_id = record['person_id']
+        p.role = record['role']
+        name = record['person_names'][0]
+        pname = Name()
+        pname.firstname = name[0]
+        pname.surname = name[1]
+        p.names.append(pname)
+        
+        persons.append(p)
+            
+    return (e, persons)
+
+
 def get_families_data_by_id(uniq_id):
     # Sivua "table_families_by_id.html" varten
     families = []
