@@ -86,7 +86,13 @@
                 		{% set t_cause_of_death = e.description %}
             		{% else %}
                         <td class="ColumnEvent">
-                            <span class="id">{{e.uniq_id}}</span> {{e.type|transl('evt')}}
+                            <span class="id">
+                            {% if e.type == "Baptism" %}
+                            	<a href="/lista/baptism_data/{{e.uniq_id}}">{{e.uniq_id}}</a></span>
+                             	{{e.type|transl('evt')}}
+                         	{% else %}
+                         		{{e.uniq_id}}</span> {{e.type|transl('evt')}}
+                         	{% endif %}
                             {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}
                         </td>
                         <td class="ColumnDate">{% if e.datetype %} {{e.datetype}} {% endif %}
