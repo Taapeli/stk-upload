@@ -282,7 +282,7 @@ def list_people_by_surname(surname):
     """ henkilöiden, joilla on sama sukunimi näyttäminen ruudulla """
     models.dbutil.connect_db()
     people = models.datareader.get_people_by_surname(surname)
-    return render_template("table_people_by_surname.html", 
+    return render_template("ng_people_by_surname.html", 
                            surname=surname, people=people)
     
     
