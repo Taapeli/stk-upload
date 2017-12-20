@@ -1121,7 +1121,7 @@ class Name:
         
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.surname='{}'
-                RETURN ID(p) AS uniq_id
+                RETURN DISTINCT ID(p) AS uniq_id
             """.format(surname)
         return g.driver.session().run(query)
         
