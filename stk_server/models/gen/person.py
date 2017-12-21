@@ -268,8 +268,8 @@ RETURN person, urls, COLLECT (name) AS names
         
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_birth<>''
-            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<>ID(p2) AND
-                p2.est_birth = p1.est_birth
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
+                p2.gender = p1.gender AND p2.est_birth = p1.est_birth
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
                 ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
             """.format()
@@ -282,8 +282,8 @@ RETURN person, urls, COLLECT (name) AS names
         
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_death<>''
-            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<>ID(p2) AND
-                p2.est_death = p1.est_death
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
+                p2.gender = p1.gender AND p2.est_death = p1.est_death
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
                 ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
             """.format()
@@ -1096,7 +1096,7 @@ class Name:
         
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name)
-            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<>ID(p2)
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2)
                 AND n2.surname = n1.surname AND n2.firstname = n1.firstname
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
                 ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
