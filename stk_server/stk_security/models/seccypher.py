@@ -63,12 +63,13 @@ class Cypher():
 
     user_register = (
         '''
-        MATCH  (role:Role) WHERE role.name = $roles[0]  
+        MATCH  (role:Role) WHERE role.name IN $roles
         CREATE (user:User 
             {username : $username, 
             password : $password,  
             email : $email, 
-            name : $name, 
+            name : $name,
+            language : $language, 
             is_active : $is_active, 
             roles : $roles}) 
             -[:HAS_ROLE]->(role) 
@@ -84,9 +85,15 @@ class Cypher():
             user.password = $password, 
             user.email = $email, 
             user.name = $name,
+            user.language = $language,
             user.is_active = $is_active,
             user.confirmed_at = $confirmed_at,
-            user.roles = $roles
+            user.roles = $roles,
+            user.last_login_at = $last_login_at,
+            user.current_login_at = $current_login_at,
+            user.last_login_ip = $last_login_ip,
+            user.current_login_ip = $current_login_ip,
+            user.login_count = $login_count 
         RETURN user
         '''
         )
