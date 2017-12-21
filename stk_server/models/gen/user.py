@@ -18,6 +18,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 import sys
+import flask_security
 #import logging
 #from neo4j.v1 import GraphDatabase, basic_auth
 #from flask import g
@@ -34,7 +35,7 @@ class User:
                 roles[]        ?
      """
     def __init__(self, userid):
-        self.userid = userid
+        self.userid = flask_security.current_user.username
         self.name = None
         self.roles = []
 
