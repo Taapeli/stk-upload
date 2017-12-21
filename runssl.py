@@ -3,7 +3,10 @@
 from stk_server import app 
 import logging
 print('Käynnistys: ' + str(app))
-""" ----------------------------- Käynnistys ------------------------------- """
+"""
+ ----------------------------- Käynnistys ------------------------------- 
+ ----------------------------- URL https://127.0.0.1:5000/ --------------  
+"""
 logging.basicConfig(level=logging.DEBUG, format=('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 logger = logging.getLogger('stkserver')
 
