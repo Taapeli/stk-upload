@@ -1,4 +1,4 @@
-# coding=UTF-8
+# coding=UTF-8 
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 12.1.2016
 
@@ -7,6 +7,7 @@ import logging
 import time
 import xml.dom.minidom
 import re
+
 from operator import itemgetter
 from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
@@ -19,6 +20,8 @@ from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
 
+from flask_security import login_required, roles_required, current_user
+import shareds
 
 def _poimi_(person_id, event_id, row, url):
     """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
@@ -1689,55 +1692,55 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     msg = []
     
     # Create User if needed
-    user = User(userid)
-    user.save()
+#    user = shareds.user_datastore.get_user(current_user.id)
+#    user.save()
 
     msg.append("XML file stored to Neo4j database:")
 
     
-    tx = user.beginTransaction()
+    tx = shareds.driver.session().begin_transaction()
     result = handle_notes(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_repositories(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_media(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_places(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_sources(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_citations(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_events(collection, userid, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_people(collection, userid, tx)
-    user.endTransaction(tx)
+#    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_families(collection, tx)
-    user.endTransaction(tx)
+    tx.commit()
     msg.append(str(result))
     print(str(result))
     
