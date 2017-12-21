@@ -8,11 +8,13 @@ from stk_security.models.neo4juserdatastore import Neo4jUserDatastore
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
 from neo4j.exceptions import ConstraintError
-import logging 
+import logging
+logger = logging.getLogger('stkserver') 
 import shareds
 
 class Role(RoleMixin):
     id = ''
+    level = 0
     name = ''
     description = ''
     timestamp = None
@@ -31,7 +33,12 @@ class User(UserMixin):
     password = ''
     is_active = True
     confirmed_at = None
-    roles = [] 
+    roles = []
+    last_login_at = None
+    last_login_ip = ''    
+    current_login_at = None
+    current_login_ip = ''
+    login_count = 0
        
     def __init__(self, **kwargs):
         self.email = kwargs['email']
@@ -40,8 +47,13 @@ class User(UserMixin):
         self.language = kwargs.get('language')   
         self.password = kwargs['password']
         self.is_active = True
-        self.confirmed_at = None
+        self.confirmed_at = kwargs.get('confirmed_at')
         self.roles = kwargs['roles']
+        self.last_login_at = kwargs.get('last_login_at')
+        self.last_login_ip = kwargs.get('last_login_ip')        
+        self.current_login_at = kwargs.get('current_login_at')
+        self.current_login_ip = kwargs.get('current_login_ip')
+        self.login_count = kwargs.get('login_count')        
         
 class UserProfile():
     uid = ''
@@ -108,7 +120,15 @@ with app.app_context():
                  {'level':'4', 'name':'audit', 'description':'Valvoja, joka auditoi ja hyväksyy ehdokasaineistoja'},
                  {'level':'8', 'name':'admin', 'description':'Ylläpitäjä kaikin oikeuksin'})
         
-        role_create = 'CREATE (role:Role {name : $name, description : $description})' 
+        role_create = (
+            '''
+            CREATE (role:Role 
+                {level = $level, 
+                name : $name, 
+                description : $description,
+                timestamp = timestamp()}
+            '''
+            ) 
         
         #functions
         def create_constraints(tx):
@@ -137,8 +157,10 @@ with app.app_context():
                 print('Session ', cex)
         print('Roles initialized')                
  
+ 
     """ Application filter definitions 
     """
+    
     @app.template_filter('pvt')
     def _jinja2_filter_dates(daterange):
         """ Aikamääreet suodatetaan suomalaiseksi """
