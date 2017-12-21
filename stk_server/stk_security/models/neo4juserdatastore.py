@@ -10,23 +10,36 @@ from flask_security.datastore import UserDatastore
 from .seccypher import Cypher  
 from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
 import datetime
+import logging
+logger = logging.getLogger('neo4juserdatastore')
 
 driver = None
 
 class Neo4jUserDatastore(UserDatastore):
  
 #===============================================================================
-#     class Role():
-#         name = ''
-#         description = ''
+#    class Role():
+#        id = ''
+#        level = 0
+#        name = ''
+#        description = ''
+#        timestamp = None
 # 
-#     class User():
-#         email = ''
-# #        self.name = kwargs['email']
-#         password = ''
-#         is_active = True
-#         confirmed_at = ''
-#         roles = []
+#    class User():
+#        id = ''
+#        email = ''
+#        username = ''   
+#        name = ''
+#        language = ''
+#        password = ''
+#        is_active = True
+#        confirmed_at = None
+#        roles = []
+#        last_login_at = None
+#        last_login_ip = ''    
+#        current_login_at = None
+#        current_login_ip = ''
+#        login_count = 0
 #===============================================================================
     
     def __init__(self, driver, user_model, user_profile_model, role_model):
@@ -38,127 +51,192 @@ class Neo4jUserDatastore(UserDatastore):
         
     def _build_user_from_node(self, userNode):
         ''' Returns a list of Role class instances '''
-        if userNode is not None:
-            user = self.user_model(**userNode.properties)
-            user.id = str(userNode.id)
-            user.roles = self.find_UserRoles(user.email)
-#            user.roles = [self.role_model(name=rolename, description='', timestamp=datetime.datetime.now()) for rolename in list(set(user.roles))]
-            if 'confirmed_at' in userNode.properties: 
-                timestamp = float(userNode.properties['confirmed_at'])
-                user.confirmed_at = datetime.datetime.fromtimestamp(timestamp)
-            return user
-        return None   
+        if userNode is None:
+            return None
+        user = self.user_model(**userNode.properties)
+        user.id = str(userNode.id)
+        user.roles = self.find_UserRoles(user.email)
+        if 'confirmed_at' in userNode.properties: 
+            user.confirmed_at = datetime.datetime.fromtimestamp(float(userNode.properties['confirmed_at']))
+        if 'last_login_at' in userNode.properties: 
+            user.last_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['last_login_at']))
+        if 'current_login_at' in userNode.properties: 
+            user.current_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['current_login_at']))                            
+        return user
                        
         
     def put(self, model):
         with self.driver.session() as session:
             try:
                 if isinstance(model, self.user_model):
-                    return session.write_transaction(self._put_user, model)                    
+                    if not model.id: 
+                        return session.write_transaction(self._put_user, model)
+                    else:
+                        return session.write_transaction(self._update_user, model)                                         
                 elif isinstance(model, self.role_model):
                     return session.write_transaction(self._put_role, model)
             except ServiceUnavailable as ex:
-                print(ex.format())            
+                logger.error(ex)            
                 return None
-            except CypherError as ex:
-#                print(ex.format())            
+            except Exception as ex:
+                logger.error(ex)            
                 raise
             
-    def _put_user (self, tx, user):
-#        print('_put_user ', user.email, ' ', user.name)
-        if not user.id:         # New user
-            if len(user.roles) == 0:
-                user.roles = ['guest']
-            user.confirmed_at = None
-            user.is_active = True
-            try:
-                print('_put_user new', user.email, ' ', user.name, ' ', user.roles[0])                
-                result = tx.run(Cypher.user_register,
-                    email = user.email,
-                    password = user.password, 
-                    is_active = user.is_active,
-#                    confirmed_at = user.confirmed_at,            
-                    roles = user.roles,
-                    username = user.username,
-                    name = user.name,
-                    language = user.language )
- 
-                for record in result:
-                    userNode = (record['user'])
-                    print(userNode)
-                    self._user_profile_add(tx, userNode.id, userNode.properties['username'])
-#                    tx.commit()
-                    return self._build_user_from_node(userNode)
-            except CypherError as ex:
-                print('CypherError: ', ex.message, ' ', ex.code)            
-                raise      
-            except ClientError as ex:
-                print('ClientError: ', ex.message, ' ', ex.code)            
-                raise
-            except Exception as ex:
-                print('Exception: ', ex)            
-                raise
+    def _put_user (self, tx, user):    # ============ New user ==============
+#        logger.debug('_put_user ', user.email, ' ', user.name)
 
-        else:               # Update user
+        if len(user.roles) == 0:
+            user.roles = ['guest']
+        user.confirmed_at = None
+        user.is_active = True
+        try:
+            logger.debug('_put_user new', user.email, ' ', user.name, ' ', user.roles[0])                
+            result = tx.run(Cypher.user_register,
+                email = user.email,
+                password = user.password, 
+                is_active = user.is_active,
+#                     confirmed_at = user.confirmed_at,            
+                roles = user.roles,
+                username = user.username,
+                name = user.name,
+                language = user.language,
+                last_login_at = user.last_login_at,
+                current_login_at = user.current_login_at,
+                last_login_ip = user.last_login_ip,
+                current_login_ip = user.current_login_ip,
+                login_count = user.login_count )
+
+            for record in result:
+                userNode = (record['user'])
+                logger.debug(userNode)
+                self._user_profile_add(tx, userNode.id, userNode.properties['username'])
+                tx.commit()
+                return self._build_user_from_node(userNode)
+#            tx.commit()
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+
+    def _update_user (self, tx, user):
+              # Update user
             rolelist = []
             for role in user.roles:
                 roleToAdd = (role.name if isinstance(role, self.role_model) else role)
                 if not roleToAdd in rolelist:
                     rolelist.append(roleToAdd)
             try:
-                print('_put_user update', user.email, ' ', user.name)                         
+                logger.debug('_put_user update' + user.email + ' ' + user.name)
+                confirmtime = None 
+                if user.confirmed_at == None:
+                    confirmtime = datetime.datetime.now()
+                else:     
+                    confirmtime = user.confirmed_at                                    
                 result = tx.run(Cypher.user_update, 
                     id=int(user.id), 
                     email=user.email,
                     password=user.password, 
                     is_active=user.is_active,
-                    confirmed_at=int(user.confirmed_at.timestamp()),            
+                    confirmed_at = confirmtime.timestamp(),            
                     roles=rolelist,
                     username = user.username,
                     name = user.name,
-                    language = user.language )
-#                tx.commit()
+                    language = user.language, 
+                    last_login_at = user.last_login_at.timestamp(),
+                    current_login_at = user.current_login_at.timestamp(),
+                    last_login_ip = user.last_login_ip,
+                    current_login_ip = user.current_login_ip,
+                    login_count = user.login_count )
+
                 for record in result:
                     userNode = (record['user'])
                     return self._build_user_from_node(userNode)
             except CypherError as ex:
-                print(ex.message)            
+                logger.error('CypherError', ex)            
                 raise ex            
-
+            except ClientError as ex:
+                logger.error('ClientError: ', ex)            
+                raise
+            except Exception as ex:
+                logger.error('Exception: ', ex)            
+                raise
+            
 #        tx.commit()            
 #        return user     
 
     def _put_role (self, tx, role):
-#        print('_put_role ', role)
-        roleNode = tx.run(Cypher.role_register, name=role.name, 
-            description=role.description)
-#        return self.user_model(**roleNode.properties)
-        return self.role_model(**roleNode.properties)
-    
+#        logger.debug('_put_role ', role)
+        try:
+            roleNode = tx.run(Cypher.role_register, 
+                              level = role.level, 
+                              name=role.name, 
+                              description=role.description,
+                              timestamp = datetime.datetime.timestamp())
+            return self.role_model(**roleNode.properties)
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise 
+  
+     
     def _user_profile_add (self, tx, uid, username):
-#        print('_put_role ', role)
-        tx.run(Cypher.user_profile_add, uid=uid, username=username) 
-        return
+#        logger.debug('_put_role ', role)
+        try:
+            tx.run(Cypher.user_profile_add, uid=uid, username=username) 
+            return
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+
 
     def commit(self):
         pass
 #        self.tx.commit()
+ 
     
     def get_user(self, id_or_email):
 #        self.email = id_or_email
         try:
             with self.driver.session() as session:
                 userNode = session.read_transaction(self._getUser, id_or_email) 
-                print ('get_user ', id_or_email, ' ', userNode)
+                logger.debug ('get_user ', id_or_email, ' ', userNode)
                 return(self._build_user_from_node(userNode))
         except ServiceUnavailable as ex:
-            print(ex.message)
+            logger.debug(ex.message)
             return None
+ 
                         
     def _getUser (self, tx, pemail):
-        for record in tx.run(Cypher.email_or_id_find, id_or_email=pemail):
-            userNode = (record['user'])
-            return userNode
+            try:
+                for record in tx.run(Cypher.email_or_id_find, id_or_email=pemail):            
+                    userNode = (record['user'])
+                    return userNode
+            except CypherError as ex:
+                logger.error('CypherError: ', ex.message, ' ', ex.code)            
+                raise      
+            except ClientError as ex:
+                logger.error('ClientError: ', ex.message, ' ', ex.code)            
+                raise
+            except Exception as ex:
+                logger.error('Exception: ', ex)            
+                raise
+ 
         
     def get_users(self):
         try:
@@ -168,15 +246,26 @@ class Neo4jUserDatastore(UserDatastore):
                     return [self.user_model(**userNode.properties) for userNode in userNodes] 
                 return []
         except ServiceUnavailable as ex:
-            print(ex.message)
+            logger.debug(ex.message)
             return []                 
-                                                
-    def _getUsers (self, tx):
-        userNodes = []
-        for record in tx.run(Cypher.get_users):
-            userNodes.append(record['user'])
-        return userNodes        
 
+                                               
+    def _getUsers (self, tx):
+        try:
+            userNodes = []
+            for record in tx.run(Cypher.get_users):
+                userNodes.append(record['user'])
+            return userNodes        
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+   
                 
     def find_user(self, *args, **kwargs):
 #        print('find_user ', args, ' ', kwargs)
@@ -186,15 +275,26 @@ class Neo4jUserDatastore(UserDatastore):
 #                print('find_user (node) ', userNode)
                 return(self._build_user_from_node(userNode))
         except ServiceUnavailable as ex:
-            print(ex.message)
+            logger.debug(ex.message)
             return None
         
     def _findUser (self, tx, arg):
-        rid = int(arg)
-#        print('rid=', rid)
-        for record in tx.run(Cypher.id_find, id=rid):
-            user = (record['user'])
-            return user        
+        try:
+            rid = int(arg)
+#            print('rid=', rid)
+            for record in tx.run(Cypher.id_find, id=rid):
+                user = (record['user'])
+                return user        
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+
+            raise
 
     def find_UserRoles(self, email):
         try:
@@ -204,15 +304,26 @@ class Neo4jUserDatastore(UserDatastore):
                     return [self.role_model(**roleNode.properties) for roleNode in userRoles] 
                 return None
         except ServiceUnavailable as ex:
-            print(ex.message)
+            logger.debug(ex.message)
             raise
             
     def _findUserRoles (self, tx, pemail):
-        roles = []
-        for record in tx.run(Cypher.user_roles_find, email=pemail):
-            roles.append(record['role'])
-#        print ('_findUserRoles ', pemail, roles)    
-        return roles
+        try:
+            roles = []
+            for record in tx.run(Cypher.user_roles_find, email=pemail):
+                roles.append(record['role'])
+    #        print ('_findUserRoles ', pemail, roles)    
+            return roles
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+ 
         
     def find_role(self, roleName):
         try:
@@ -224,13 +335,24 @@ class Neo4jUserDatastore(UserDatastore):
                     return role
                 return None
         except ServiceUnavailable as ex:
-            print(ex.message)
+            logger.debug(ex.message)
             return None
         
     def _findRole (self, tx, roleName):
-        for record in tx.run(Cypher.role_find, name=roleName):
-            return (record['role'])                
-                                
+        try:
+            for record in tx.run(Cypher.role_find, name=roleName):
+                return (record['role'])                
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise   
+   
+                                  
     def get_role(self, rid):
         self.id = rid
         try:
@@ -243,12 +365,23 @@ class Neo4jUserDatastore(UserDatastore):
                     return role
                 return None
         except ServiceUnavailable as ex:
-            print(ex.message)
+            logger.debug(ex.message)
             return None
                         
     def _getRole (self, tx, rid):
-        for record in tx.run(Cypher.role_get, id=rid):
-            return (record['role'])        
+        try:
+            for record in tx.run(Cypher.role_get, id=rid):
+                return (record['role'])        
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+
 
     def get_roles(self):
         try:
@@ -264,31 +397,62 @@ class Neo4jUserDatastore(UserDatastore):
                     return roles
                 return None
         except ServiceUnavailable as ex:
-            print(ex.message)
+            logger.debug(ex.message)
             raise
                                 
     def _getRoles (self, tx):
-        roles = []        
-        for record in tx.run(Cypher.roles_get):
-            roles.append(record['role'])
-        return roles        
+        try:
+            roles = []        
+            for record in tx.run(Cypher.roles_get):
+                roles.append(record['role'])
+            return roles        
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+
 
 #This is a classmethod and doesn't need username        
     @classmethod
     def confirm_email(cls, email):
-        with driver.session() as session:
-            with session.begin_transaction() as tx:
-                tx.run(Cypher.confirm_email, email=email)
-                tx.commit()
+        try:
+            with driver.session() as session:
+                with session.begin_transaction() as tx:
+                    tx.run(Cypher.confirm_email, email=email)
+                    tx.commit()
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+
                 
 #This is a classmethod and doesn't need username
     @classmethod
     def password_reset(cls, eml, psw):
-        with driver.session() as session:
-            with session.begin_transaction() as tx:
-                tx.run(Cypher.password_reset, email=eml, password=psw)
-                tx.commit()
-#                tx.run(Cypher.password_reset, email=email, password=bcrypt.encrypt(password))
+        try:
+            with driver.session() as session:
+                with session.begin_transaction() as tx:
+                    tx.run(Cypher.password_reset, email=eml, password=psw)
+                    tx.commit()
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
        
         
         
