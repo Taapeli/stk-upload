@@ -7,7 +7,7 @@ from stk_security.models.neo4jengine import Neo4jEngine
 from stk_security.models.neo4juserdatastore import Neo4jUserDatastore
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from datetime import datetime
-from neo4j.exceptions import ConstraintError
+from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import logging
 logger = logging.getLogger('stkserver') 
 import shareds
@@ -105,14 +105,14 @@ with app.app_context():
     @security.register_context_processor
     def security_register_processor():
         return {"username": _("Käyttäjänimi"), "name": _("Nimi"), "language": _("Kieli")}
-    
+      
 #  Tarkista roolien olemassaolo
+    print('Check the user roles')
     results = shareds.driver.session().run('MATCH (a:Role) RETURN COUNT(a)')
     for result in results:
         num_of_roles = result[0]
         break
     if num_of_roles == 0:
-#    if (shareds.driver.session().run('MATCH (a:Role) RETURN COUNT(a)') == 0):
         #inputs
         ROLES = ({'level':'0', 'name':'guest', 'description':'Kirjautumaton käyttäjä rajoitetuin lukuoikeuksin'},
                  {'level':'1', 'name':'member', 'description':'Seuran jäsen täysin lukuoikeuksin'},
@@ -123,42 +123,58 @@ with app.app_context():
         role_create = (
             '''
             CREATE (role:Role 
-                {level = $level, 
+                {level : $level, 
                 name : $name, 
                 description : $description,
-                timestamp = timestamp()}
+                timestamp : $timestamp})
             '''
             ) 
-        
+#        print(role_create)
         #functions
         def create_constraints(tx):
-            tx.run('CREATE CONSTRAINT ON (role:Role) ASSERT role.name IS UNIQUE')
+            try:
+                tx.run('CREATE CONSTRAINT ON (role:Role) ASSERT role.name IS UNIQUE')
+                tx.commit() 
+            except CypherSyntaxError as cex:
+                print(cex)
         
-        class Create:
-            def __init__ (self, username):
-                self.username=username        
-            def roles(self, tx, ROLES):
-                for role in ROLES:
-                    try:
-                        tx.run(role_create, 
-                            name=role['name'], 
-                            description=role['description'],
-                            time=str(datetime.now()) )    
-                    except ConstraintError as cex:
-                        print(cex)
-                        continue
+        def create_role(tx, role):
+            try:
+                tx.run(role_create,
+                    level=role['level'],    
+                    name=role['name'], 
+                    description=role['description'],
+                    timestamp=str(datetime.now()) ) 
+#                print(role['name'])
+            except CypherSyntaxError as cex:
+                print(cex)
+            except CypherError as cex:
+                print(cex)
+            except ConstraintError as cex:
+                print(cex)
+#            print(role['name'])
 
         with shareds.driver.session() as session: 
             session.write_transaction(create_constraints)
         with shareds.driver.session() as session:
-            try:
-                session.write_transaction(Create('start').roles, ROLES)
-            except ConstraintError as cex:
-                print('Session ', cex)
-        print('Roles initialized')                
+            for role in ROLES:
+                try:    
+                    session.write_transaction(create_role, role)
+                    print(role['name'])
+                except CypherSyntaxError as cex:
+                    print('Session ', cex)
+                    continue
+                except CypherError as cex:
+                    print('Session ', cex)
+                    continue
+                except ConstraintError as cex:
+                    print('Session ', cex)
+                    continue
+            print('Roles initialized')                
+    
  
- 
-    """ Application filter definitions 
+    """ 
+        Application filter definitions 
     """
     
     @app.template_filter('pvt')
