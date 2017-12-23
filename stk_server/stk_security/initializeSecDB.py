@@ -28,7 +28,7 @@ ROLES = ({'level':'0', 'name':'guest', 'description':'Kirjautumaton käyttäjä 
 #          {'level':'8', 'name':'admin', 'description':'Administrator with all permissions'})
 #===============================================================================
 
-role_create = 'CREATE (role:Role {name : $name, description : $description})' 
+role_create = 'CREATE (role:Role {level : $level, name : $name, description : $description, timestamp : $timestamp})' 
 
 #functions
 def confirm(question):
@@ -55,10 +55,11 @@ class Create:
     def roles(self, tx, ROLES):
         for role in ROLES:
             try:
-                tx.run(role_create, 
+                tx.run(role_create,
+                    level=role['level'],    
                     name=role['name'], 
                     description=role['description'],
-                    time=str(datetime.datetime.now()) )    
+                    timestamp=str(datetime.datetime.now()) )    
             except ConstraintError as cex:
                 print(cex)
                 continue
