@@ -8,6 +8,8 @@
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
     <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
+    <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
+       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %}]</p>
     <div class="row">
        <div class="startbox">
          <div style="display: inline-block;">
@@ -47,6 +49,11 @@
            </div>
         </div>
 
+    {% set allow_dt = True %}
+    {% for r in current_user.roles %}
+        {% if r in ['member', 'admin'] %}{% set allow_dt = True %}{% endif %}
+    {% endfor %}
+    {% if allow_dt %}
         <div class="startbox">
             <h3>Datanäkymiä taulukkoina</h3>
             <p>Seuraavalla sivulla on erilaisia teknisempiä listauksia
@@ -58,6 +65,7 @@
                </div>
             </form>
         </div>
+    {% endif %}
 
         <div class="startbox">
           <div style="display: inline-block;">

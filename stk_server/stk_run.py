@@ -21,38 +21,38 @@ with app.app_context():
     #import models.cvs_refnames      # Referenssinimien luonti
     import models.gen
     #import models.gen.user          # Käyttäjien tiedot
-#     from models.gen.dates import DateRange  # Aikaväit ym. määreet
-    
+
     """ Application route definitions
     """
-    
+
     @app.route('/', methods=['GET', 'POST'])
     @login_required
     def home():
+        """ Kirjautuneen käyttäjän kotisivu """
         role_names = [role.name for role in current_user.roles]
-        logger.info(current_user.username + ' / ' + current_user.email + ' logged in, roles ' + str(role_names))
+        logger.info(current_user.username + ' / ' + current_user.email + \
+                    ' logged in, roles ' + str(role_names))
         return render_template('/mainindex.html')
     
         
     @app.route('/tables')
-#    @login_required
-    @roles_required('admin')
+    @roles_required('member')
     def datatables(): 
-        """Aloitussivun piirtäminen"""
+        """ Teknisten datataulukoiden käsittelysivu """
         return render_template("datatables.html")
 
-    
+
     @app.route('/refnames')
-    @login_required
+    @roles_required('admin')
     def refnames(): 
-        """Aloitussivun piirtäminen"""
+        """ Referenssiaineistojen käsittelysivu """
         return render_template("reference.html")
    
-    
-    
+
+
     """ ----------------------------- Kertova-sivut --------------------------------
     """
-    
+
     @app.route('/person/list/', methods=['POST', 'GET'])
     def show_person_list(selection=None):   
         """ Valittujen tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """

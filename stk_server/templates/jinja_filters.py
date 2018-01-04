@@ -18,7 +18,7 @@ def translate(term, var_name, lang="fi"):
         'lt_in' = Location types, inessive form
         'urlt' = web page type
     """
-    print("# {}[{}]".format(var_name, term))
+#     print("# {}[{}]".format(var_name, term))
     if var_name == "nt":
         # Name types
         tabl = {
