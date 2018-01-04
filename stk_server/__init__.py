@@ -11,6 +11,8 @@ from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import logging
 logger = logging.getLogger('stkserver') 
 import shareds
+from templates import jinja_filters
+
 
 class Role(RoleMixin):
     id = ''
@@ -207,20 +209,16 @@ with app.app_context():
             return s
         except:
             return time_str
-    
-    
+
+
     @app.template_filter('transl')
     def _jinja2_filter_translate(term, var_name, lang="fi"):
-        """ Given term is translated depending of var_name name.
-            No language selection yet.
-            
-            'nt'  = Name types
-            'evt' = Event types
-            'role' = Event role
-            'lt'  = Location types
-            'lt_in' = Location types, inessive form
-        'urlt' = web page type
-        """    
+        """ Given term is translated depending of var_name name
+            and language [TODO]
+        """
+        return jinja_filters.translate(term, var_name, lang)
+
+
     # Create a user to test with
     #===============================================================================
     # @app.before_first_request
