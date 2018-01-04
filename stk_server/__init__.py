@@ -13,8 +13,12 @@ logger = logging.getLogger('stkserver')
 import shareds
 from templates import jinja_filters
 
+#===================== Classes to create user session ==========================
 
 class Role(RoleMixin):
+    """ Object describing any application user roles,
+        where each user is linked
+    """
     id = ''
     level = 0
     name = ''
@@ -26,7 +30,9 @@ class Role(RoleMixin):
         self.description = kwargs['description']
 #        self.timestamp = kwargs['timestamp']
 
+
 class User(UserMixin):
+    """ Object describing distinct user security properties """
     id = ''
     email = ''
     username = ''   
@@ -41,7 +47,7 @@ class User(UserMixin):
     current_login_at = None
     current_login_ip = ''
     login_count = 0
-       
+
     def __init__(self, **kwargs):
         self.email = kwargs['email']
         self.username = kwargs.get('username')
@@ -56,25 +62,30 @@ class User(UserMixin):
         self.current_login_at = kwargs.get('current_login_at')
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
-        
+
+
 class UserProfile():
+    """ Object describing dynamic user properties """
     uid = ''
     userName = ''
     numSessions = 0
     lastSessionTime = None  
-       
+
     def __init__(self, **kwargs):
         self.numSessions = kwargs['numSessions']
         self.lastSessionTime = kwargs.get('lastSessionTime')
-        
+
     def newSession(self):   
         self.numSessions += 1
         self.lastSessionTime = datetime.timestamp() 
+
 
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
     language = StringField('Language', validators=[Required('Language required')])
+
+#===============================================================================
 
 # Create app
 app = Flask(__name__, instance_relative_config=True)
@@ -116,11 +127,16 @@ with app.app_context():
         break
     if num_of_roles == 0:
         #inputs
-        ROLES = ({'level':'0', 'name':'guest', 'description':'Kirjautumaton käyttäjä rajoitetuin lukuoikeuksin'},
-                 {'level':'1', 'name':'member', 'description':'Seuran jäsen täysin lukuoikeuksin'},
-                 {'level':'2', 'name':'research', 'description':'Tutkija, joka voi päivittää omaa tarjokaskantaansa'},
-                 {'level':'4', 'name':'audit', 'description':'Valvoja, joka auditoi ja hyväksyy ehdokasaineistoja'},
-                 {'level':'8', 'name':'admin', 'description':'Ylläpitäjä kaikin oikeuksin'})
+        ROLES = ({'level':'0', 'name':'guest', 
+                  'description':'Kirjautumaton käyttäjä rajoitetuin lukuoikeuksin'},
+                 {'level':'1', 'name':'member', 
+                  'description':'Seuran jäsen täysin lukuoikeuksin'},
+                 {'level':'2', 'name':'research', 
+                  'description':'Tutkija, joka voi päivittää omaa tarjokaskantaansa'},
+                 {'level':'4', 'name':'audit', 
+                  'description':'Valvoja, joka auditoi ja hyväksyy ehdokasaineistoja'},
+                 {'level':'8', 'name':'admin', 
+                  'description':'Ylläpitäjä kaikin oikeuksin'})
         
         role_create = (
             '''
@@ -172,13 +188,13 @@ with app.app_context():
                 except ConstraintError as cex:
                     print('Session ', cex)
                     continue
-            print('Roles initialized')                
-    
+            print('Roles initialized')
+
  
     """ 
         Application filter definitions 
     """
-    
+
     @app.template_filter('pvt')
     def _jinja2_filter_dates(daterange):
         """ Aikamääreet suodatetaan suomalaiseksi """
