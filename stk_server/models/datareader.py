@@ -1,4 +1,4 @@
-# coding=UTF-8
+# coding=UTF-8 
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 12.1.2016
 
@@ -7,6 +7,7 @@ import logging
 import time
 import xml.dom.minidom
 import re
+
 from operator import itemgetter
 from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
@@ -19,6 +20,8 @@ from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
 
+from flask_security import login_required, roles_required, current_user
+import shareds
 
 def _poimi_(person_id, event_id, row, url):
     """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
@@ -714,7 +717,7 @@ def read_old_people_top():
     
     sorted_people = sorted(people, key=itemgetter(7), reverse=True)
     top_of_sorted_people = []
-    for i in range(20):
+    for i in range(20 if len(sorted_people) > 19 else len(sorted_people)):
         top_of_sorted_people.append(sorted_people[i])
     
     headings.append("Tapahtumaluettelo")
@@ -1038,7 +1041,8 @@ def get_families_data_by_id(uniq_id):
         f = Family_for_template()
         f.uniq_id = record['uniq_id']
         f.get_family_data_by_id()
-    
+
+        # Person's birth family
         result = p.get_parentin_id()
         for record in result:
             parents_hlink = record["parentin_hlink"]
@@ -1058,12 +1062,12 @@ def get_families_data_by_id(uniq_id):
         
         spouse = Person()
         if p.gender == 'M':
-            spouse.uniq_id = mother.uniq_id
+            spouse.uniq_id = f.mother
         else:
-            spouse.uniq_id = father.uniq_id
+            spouse.uniq_id = f.father
         spouse.get_person_and_name_data_by_id()
         f.spouse = spouse
-            
+
         for child_id in f.childref_hlink:
             child = Person()
             child.uniq_id = child_id
@@ -1752,8 +1756,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     a = pathname.split(".")
     pathname2 = a[0] + "_pre." + a[1]
     
-    file1 = open(pathname)
-    file2 = open(pathname2, "w")
+    file1 = open(pathname, encoding='utf-8')
+    file2 = open(pathname2, "w", encoding='utf-8')
     
     for line in file1:
         # Already \' in line
@@ -1768,61 +1772,61 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     file2.close()
 
     
-    DOMTree = xml.dom.minidom.parse(open(pathname2))
+    DOMTree = xml.dom.minidom.parse(open(pathname2, encoding='utf-8'))
     collection = DOMTree.documentElement
     
     msg = []
     
     # Create User if needed
-    user = User(userid)
-    user.save()
+#    user = shareds.user_datastore.get_user(current_user.id)
+#    user.save()
 
     msg.append("XML file stored to Neo4j database:")
 
     
-    tx = user.beginTransaction()
+    tx = shareds.driver.session().begin_transaction()
     result = handle_notes(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_repositories(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_media(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_places(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_sources(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_citations(collection, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_events(collection, userid, tx)
-    user.endTransaction(tx)
+#    tx.commit()
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_people(collection, userid, tx)
-    user.endTransaction(tx)
+#    user.endTransaction(tx)
     msg.append(str(result))
     print(str(result))
-    tx = user.beginTransaction()
+#    tx = shareds.driver.session().begin_transaction()
     result = handle_families(collection, tx)
-    user.endTransaction(tx)
+    tx.commit()
     msg.append(str(result))
     print(str(result))
     

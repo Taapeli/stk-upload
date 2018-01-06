@@ -83,9 +83,18 @@ body > div {
 /* Stk objects
 ----------------------------------------------------- */
 h1 {
+    position: relative;
     background-color:bisque;
     font-size: 11pt;
     width: 100%;
+}
+.h1_user {
+	position: absolute; 
+	top: 12px; 
+	right: 4px; 
+	text-aligin: right;
+	font-size: 12px;
+	color: blue;
 }
 img#logo {
     width: 43px;

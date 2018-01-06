@@ -6,8 +6,8 @@ Created on 2.5.2017
 '''
 import datetime
 from sys import stderr
-from flask import g
-
+#from flask import g
+import  shareds
 
 class Event:
     """ Tapahtuma
@@ -72,7 +72,7 @@ RETURN ID(event) AS id, event.type AS type, event.date AS date, event.datetype A
 MATCH (event:Event)-[r:CITATION]->(c:Citation) 
   WHERE ID(event)=$pid
 RETURN ID(c) AS citationref_hlink"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
 
     
     @staticmethod       
@@ -94,7 +94,7 @@ RETURN ID(c) AS citationref_hlink"""
       ID(source), source.stitle, c.medium, ID(repo), repo.rname, repo.type] ) AS sources
  ORDER BY event.date""".format(where)
                 
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
     
     @staticmethod       
@@ -114,7 +114,7 @@ RETURN ID(c) AS citationref_hlink"""
     COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence] ) AS sources
  ORDER BY event.date""".format(where)
                 
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
 
     def get_event_data_by_id(self):
@@ -124,7 +124,7 @@ RETURN ID(c) AS citationref_hlink"""
         query = """
 MATCH (event:Event) WHERE ID(event)=$pid
 RETURN event"""
-        result = g.driver.session().run(query, {"pid": pid})
+        result = shareds.driver.session().run(query, {"pid": pid})
 
         for record in result:
             self.id = record["event"]["id"]
@@ -162,7 +162,7 @@ RETURN event"""
  RETURN ID(e) AS uniq_id, e
  ORDER BY e.type, e.date"""
                 
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
                   'description', 'date', 'datetype', 'daterange_start', 
@@ -235,7 +235,7 @@ RETURN event"""
  RETURN ID(e) AS uniq_id, e
  ORDER BY e.type, e.date"""
                 
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
                   'description', 'date', 'datetype', 'daterange_start', 
@@ -306,7 +306,7 @@ RETURN event"""
 MATCH (event:Event)-[r:NOTE]->(note:Note) 
   WHERE ID(event)=$pid
 RETURN ID(note) AS noteref_hlink"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
     
         
     def get_place_by_id(self):
@@ -317,7 +317,7 @@ RETURN ID(note) AS noteref_hlink"""
 MATCH (event:Event)-[r:PLACE]->(place:Place) 
   WHERE ID(event)=$pid
 RETURN ID(place) AS uniq_id"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
 
         
     
@@ -328,7 +328,7 @@ RETURN ID(place) AS uniq_id"""
         query = """
             MATCH (e:Event) RETURN COUNT(e)
             """
-        results =  g.driver.session().run(query)
+        results =  shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])

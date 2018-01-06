@@ -4,9 +4,12 @@ Created on 11.5.2017
 @author: jm
 '''
 import logging
-from neo4j.v1 import GraphDatabase, basic_auth
-from flask import g
-import instance.config as config
+import shareds
+#===============================================================================
+# from neo4j.v1 import GraphDatabase, basic_auth
+# from flask import g
+# import instance.config as config
+#===============================================================================
 
 
 def connect_db():
@@ -16,27 +19,29 @@ def connect_db():
         Ks. https://neo4j.com/docs/developer-manual/current/drivers/client-applications/
     """
 
-    if not hasattr(g, 'driver'):
-        # Create driver for application life time
-        if hasattr(config,'DB_HOST_PORT'):
-            print ("connect_db - server {}".format(config.DB_HOST_PORT))
-            g.driver = GraphDatabase.driver(config.DB_HOST_PORT, \
-                                            auth=basic_auth(config.DB_USER, config.DB_AUTH))
-        else:
-            print ("connect_db - default local")
-            g.driver = GraphDatabase.driver("bolt://localhost", 
-                                            auth=basic_auth("neo4j", "localTaapeli"))
-    else:
-        print('connect_db - ok')
-    # Return True, if no driver can be accessed
-    #return g.driver.pool.closed
+    #===========================================================================
+    # if not hasattr(g, 'driver'):
+    #     # Create driver for application life time
+    #     if hasattr(config,'DB_HOST_PORT'):
+    #         print ("connect_db - server {}".format(config.DB_HOST_PORT))
+    #         shareds.driver = GraphDatabase.driver(config.DB_HOST_PORT, \
+    #                                         auth=basic_auth(config.DB_USER, config.DB_AUTH))
+    #     else:
+    #         print ("connect_db - default local")
+    #         shareds.driver = GraphDatabase.driver("bolt://localhost", 
+    #                                         auth=basic_auth("neo4j", "localTaapeli"))
+    # else:
+    #     print('connect_db - ok')
+    # # Return True, if no driver can be accessed
+    # #return shareds.driver.pool.closed
+    #===========================================================================
 
 
 def get_new_handles(inc=1):
     ''' Create a sequence of new handle keys '''
     ret = []
 
-    with g.driver.session() as session:
+    with shareds.driver.session() as session:
 #         newhand = session.write_transaction(lambda tx: _update_seq_node(tx, inc))
         with session.begin_transaction() as tx:
             for record in tx.run('''
@@ -60,7 +65,7 @@ RETURN a.handle AS handle''', {"inc": inc})
 
 def alusta_kanta():
     """ Koko kanta tyhjennetään """
-    result = g.driver.session().run("MATCH (a) DETACH DELETE a")
+    result = shareds.driver.session().run("MATCH (a) DETACH DELETE a")
     counters = result.consume().counters
     msg = "Poistettu {} solmua, {} relaatiota".\
           format(counters.nodes_deleted, counters.relationships_deleted)
@@ -91,7 +96,9 @@ def alusta_kanta():
 
 
 class Date():
-    """ Päivämäärän muuntofunktioita """
+    """ Päivämäärän muuntofunktioita
+        Käytetty käräjäaineiston aikojen muunnoksiin 2014(?)
+    """
 
     @staticmethod       
     def range_str(aikamaare):

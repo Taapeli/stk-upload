@@ -29,7 +29,7 @@ def hello_world():
     models.dbutil.connect_db()
     
     t = time.strftime('%Y-%m-%d %H:%M:%S')
-    session = g.driver.session()
+    session = shareds.driver.session()
     try:
         session.run("CREATE (a:TestPerson {name: {name}, title: {title}, date: {date}})",
                     {"name": "Arthur", "title": "King", "date": t})

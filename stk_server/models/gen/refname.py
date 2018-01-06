@@ -5,7 +5,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 import logging
 from sys import stderr
-from flask import g
+#from flask import g
+import  shareds
 
 class Refname:
     """
@@ -105,7 +106,7 @@ CREATE UNIQUE (a)-[:REFFIRST]->(b)
 RETURN a.id AS aid, a.name AS aname, b.id AS bid, b.name AS bname;""".format(a_attr, b_attr)
                 
             try:
-                result = g.driver.session().run(query)
+                result = shareds.driver.session().run(query)
         
                 for record in result:
                     a_oid = record["aid"]
@@ -128,7 +129,7 @@ RETURN a.id AS aid, a.name AS aname, b.id AS bid, b.name AS bname;""".format(a_a
                  MERGE (a:Refname {})
                  RETURN a.id AS aid, a.name AS aname;""".format(a_attr)
             try:
-                result = g.driver.session().run(query)
+                result = shareds.driver.session().run(query)
         
                 for record in result:
                     a_oid = record["aid"]
@@ -156,7 +157,7 @@ MATCH (a:Refname)-[r:REFFIRST]->(b:Refname) WHERE a.name=$nm
 RETURN b.name AS rname
 LIMIT 1"""
         try:
-            return g.driver.session().run(query, nm=name)
+            return shareds.driver.session().run(query, nm=name)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             logging.warning('Kannan lukeminen ei onnistunut: {}'.format(err))
@@ -172,7 +173,7 @@ LIMIT 1"""
             RETURN a.name AS aname, b.name AS bname;""".format(name)
             
         try:
-            return g.driver.session().run(query, name=name)
+            return shareds.driver.session().run(query, name=name)
         
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
@@ -195,7 +196,7 @@ RETURN a.id, a.name, a.gender, a.source,
   COLLECT ([n.oid, n.name, n.gender]) AS base,
   COLLECT ([m.oid, m.name, m.gender]) AS other
 ORDER BY a.name""".format(reftype, reftype)
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
 
     @staticmethod
@@ -211,7 +212,7 @@ OPTIONAL MATCH (n:Refname)-[r]->(m)
 RETURN n,r,m
 ORDER BY n.name"""
         try:
-            results = g.driver.session().run(query)
+            results = shareds.driver.session().run(query)
             return Refname._triples_to_objects(results)
         except Exception as err:
             print("Virhe (Refname.getrefnames): {0}".format(err), file=stderr)

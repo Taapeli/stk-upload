@@ -1,2 +1,6 @@
 eclipse.preferences.version=1
-encoding//stk_server/models/dbtree.py=utf-8
+encoding//.settings/org.python.pydev.yaml=UTF-8
+encoding//instance/initializeSecDB.py=utf-8
+encoding//stk_server/stk_security/initializeSecDB.py=utf-8
+encoding//stk_server/stk_security/models/neo4juserdatastore.py=utf-8
+encoding/<project>=UTF-8

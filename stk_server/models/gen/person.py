@@ -9,8 +9,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 import datetime
 from sys import stderr
 import logging
-from flask import g
+#from flask import g
 import models.dbutil
+import  shareds
 
 class Person:
     """ Henkilö
@@ -73,7 +74,7 @@ class Person:
                 WHERE ID(person)={}
                 RETURN ID(c) AS citationref_hlink
             """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+        return  shareds.driver.session().run(query)
     
     
     def get_event_data_by_id(self):
@@ -84,7 +85,7 @@ class Person:
 MATCH (person:Person)-[r:EVENT]->(event:Event) 
   WHERE ID(person)=$pid
 RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
     
     
     def get_her_families_by_id(self):
@@ -95,7 +96,7 @@ RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
 MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
   WHERE ID(person)=$pid
 RETURN ID(family) AS uniq_id"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
     
     
     def get_his_families_by_id(self):
@@ -106,7 +107,7 @@ RETURN ID(family) AS uniq_id"""
 MATCH (person:Person)<-[r:FATHER]-(family:Family) 
   WHERE ID(person)=$pid
 RETURN ID(family) AS uniq_id"""
-        return  g.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": pid})
 
     
     def get_hlinks_by_id(self):
@@ -140,18 +141,18 @@ RETURN ID(family) AS uniq_id"""
                 WHERE ID(person)={}
                 RETURN ID(obj) AS objref_hlink
             """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+        return  shareds.driver.session().run(query)
     
     
     def get_parentin_id(self):
-        """ Luetaan henkilön perheen id """
+        """ Luetaan henkilön syntymäperheen id """
         
         query = """
             MATCH (person:Person)<-[r:CHILD]-(family:Family) 
                 WHERE ID(person)={}
                 RETURN ID(family) AS parentin_hlink
             """.format(self.uniq_id)
-        return  g.driver.session().run(query)
+        return  shareds.driver.session().run(query)
     
     
     def get_person_and_name_data_by_id(self):
@@ -178,7 +179,7 @@ MATCH (person:Person)-[r:NAME]->(name:Name)
   WHERE ID(person)=$pid
 RETURN person, name
   ORDER BY name.alt"""
-        person_result = g.driver.session().run(query, {"pid": pid})
+        person_result = shareds.driver.session().run(query, {"pid": pid})
         self.id = None
         
         for person_record in person_result:
@@ -231,7 +232,7 @@ OPTIONAL MATCH (person)-[wu:WEBURL]->(weburl:Weburl)
   WITH person, name, COLLECT (weburl) AS urls ORDER BY name.alt
 RETURN person, urls, COLLECT (name) AS names
         """
-        person_result = g.driver.session().run(query, pid=int(self.uniq_id))
+        person_result = shareds.driver.session().run(query, pid=int(self.uniq_id))
         
         for person_record in person_result:
             self.handle = person_record["person"]['handle']
@@ -273,7 +274,7 @@ RETURN person, urls, COLLECT (name) AS names
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
                 ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
             """.format()
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
         
         
     @staticmethod
@@ -287,7 +288,7 @@ RETURN person, urls, COLLECT (name) AS names
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
                 ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
             """.format()
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
 
     @staticmethod       
@@ -301,7 +302,7 @@ RETURN person, urls, COLLECT (name) AS names
  MATCH (p)-[:NAME]->(n:Name)
  RETURN ID(p) AS uniq_id, p, n ORDER BY n.surname, n.firstname"""
                 
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'priv', 'gender',
                   'firstname', 'surname']
@@ -360,7 +361,7 @@ RETURN person, urls, COLLECT (name) AS names
  MATCH (p)-[:NAME]->(n:Name)
  RETURN ID(p) AS uniq_id, p, n, a.date AS birth, b.date AS death ORDER BY n.surname, n.firstname"""
                 
-        result = g.driver.session().run(query)
+        result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'firstname', 'surname', 'birth', 'death', 
                   'age (years)', 'age (months)', 'age(12*years + months)']
@@ -399,11 +400,11 @@ RETURN person, urls, COLLECT (name) AS names
                 months = int(death_data[1])-int(birth_data[1])
                 
                 if int(death_data[2]) < int(death_data[2]):
-                   months -= 1
+                    months -= 1
                 
                 if months < 0:
-                   months += 12
-                   years -= 1
+                    months += 12
+                    years -= 1
                 
                 years_months = years * 12 + months
             else:
@@ -431,21 +432,18 @@ RETURN person, urls, COLLECT (name) AS names
  OPTIONAL MATCH (person)-[:EVENT]->(event:Event)-[r:CITATION]->(c:Citation)
  RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
                 
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
 
     def set_confidence (self, tx):
         """ Voidaan asettaa henkilön tietojen luotettavuus arvio kantaan
         """
 
-        try:
-            query = """
+        query = """
  MATCH (person:Person) WHERE ID(person)={}
  SET person.confidence='{}'""".format(self.uniq_id, self.confidence)
                 
-            return tx.run(query)
-        except Exception as err:
-            print("Virhe (Person.set_confidence: {0}".format(err), file=stderr)
+        return shareds.driver.session().run(query)
 
 
     @staticmethod       
@@ -499,7 +497,7 @@ RETURN person, urls, COLLECT (name) AS names
   COLLECT([e.name, e.kind]) AS events
  ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
                 
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
 
     @staticmethod       
@@ -545,10 +543,10 @@ ORDER BY name.surname, name.firstname"""
         if rule == "uniq_id":
             # Person selected by uniq_id
             query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE ID(person)=$id" + qend
-            return g.driver.session().run(query, id=int(name))
+            return shareds.driver.session().run(query, id=int(name))
         if rule == 'all':
             query = "MATCH (person:Person)-[:NAME]->(name:Name)" + qend
-            return g.driver.session().run(query)
+            return shareds.driver.session().run(query)
         if rule == "surname":
             query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.surname STARTS WITH $id" + qend
         elif rule == "firstname":
@@ -559,7 +557,7 @@ ORDER BY name.surname, name.firstname"""
             print ("Tätä rajausta ei ole vielä tehty: " + rule)
             return None
         # All with string argument
-        return g.driver.session().run(query, id=name)
+        return shareds.driver.session().run(query, id=name)
 
 
     @staticmethod       
@@ -592,7 +590,7 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
 # │           │           │        │       │         │        │            │]]                            │
 # ├───────────┼───────────┼────────┼───────┼─────────┼────────┼────────────┼──────────────────────────────┤
 
-        return g.driver.session().run(query, id=int(uniq_id))
+        return shareds.driver.session().run(query, id=int(uniq_id))
     
 
     def key(self):
@@ -649,7 +647,7 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
         query = """
             MATCH (p:Person) RETURN COUNT(p)
             """
-        results =  g.driver.session().run(query)
+        results =  shareds.driver.session().run(query)
         
         for result in results:
             return str(result[0])
@@ -731,14 +729,14 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
     def set_estimated_dates():
         # Set est_birth
         try:
-            type = 'Birth'
+            dtype = 'Birth'
             query = """
 MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE m.type=$type
 SET r.type =$type
 SET n.est_birth = m.daterange_start"""
-            result = g.driver.session().run(query, 
-               {"type": type})
+            result = shareds.driver.session().run(query, 
+               {"type": dtype})
             counters = result.consume().counters
             msg = "Muutettu {} est_birth-tietoa".format(counters.properties_set)
         except Exception as err:
@@ -746,14 +744,14 @@ SET n.est_birth = m.daterange_start"""
             
         # Set est_birth
         try:
-            type = 'Death'
+            dtype = 'Death'
             query = """
 MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE m.type=$type
 SET r.type =$type
 SET n.est_death = m.daterange_start"""
-            result = g.driver.session().run(query, 
-               {"type": type})
+            result = shareds.driver.session().run(query, 
+               {"type": dtype})
             counters = result.consume().counters
             msg = msg + " ja {} est_death-tietoa.".format(counters.properties_set)
             return msg
@@ -1087,7 +1085,7 @@ class Name:
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
                 RETURN p.gramps_handle AS handle
             """.format(refname)
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
         
         
     @staticmethod
@@ -1101,7 +1099,7 @@ class Name:
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
                 ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
             """.format()
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
         
     @staticmethod
@@ -1113,7 +1111,7 @@ class Name:
                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
                 RETURN ID(p) AS id
             """.format(userid, refname)
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
         
     @staticmethod
     def get_people_with_surname(surname):
@@ -1123,7 +1121,7 @@ class Name:
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.surname='{}'
                 RETURN DISTINCT ID(p) AS uniq_id
             """.format(surname)
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
         
     
     @staticmethod
@@ -1151,7 +1149,7 @@ RETURN ID(n) AS ID, n.firstname AS fn,
        n.surname AS sn, n.suffix AS pn, n.refname as rn,
        a.gender AS sex
 ORDER BY n.firstname"""
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
         
     
     @staticmethod
@@ -1162,7 +1160,7 @@ ORDER BY n.firstname"""
             MATCH (n:Name) RETURN distinct n.surname AS surname
                 ORDER BY n.surname
             """
-        return g.driver.session().run(query)
+        return shareds.driver.session().run(query)
 
 
     @staticmethod
