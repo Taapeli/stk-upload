@@ -56,9 +56,9 @@
 		        {% endfor %}
 		           </ul>
 	        {% endif %}
-	        <td>{% if p.coord_long and not ' ' in p.coord_long %}({{ '{0:0.4f}'.format(p.coord_lat|float) }}, 
-                {{ '{0:0.4f}'.format(p.coord_long|float) }}){% elif p.coord_long %}
-	            <small style="color:red">{{p.coord_lat}}, {{p.coord_long}}</small>
+	        <td>{% if p.coord_long and not ' ' in p.coord_long %}({{ '{0:0.4f}'.format(p.coord_long|float) }}, 
+                {{ '{0:0.4f}'.format(p.coord_lat|float) }}){% elif p.coord_long %}
+	            <small style="color:red">{{p.coord_long}}, {{p.coord_lat}}</small>
                 {% endif %}</td>
 	    {% endfor %}
 	{% endif %}
