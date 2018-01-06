@@ -14,6 +14,10 @@
 <h2>Names</h2>
 <table>
     <tr>
+    	<th colspan="6"><a target="_blank" href="/person/uniq_id={a names[0].uniq_id a}">
+    	Linkki Kertova-sivulle</a></th>
+    </tr>
+    <tr>
     	<th ng-repeat="x in n_columns">{a x.column a}</th>
     </tr>
 
@@ -35,7 +39,7 @@
     	<th ng-repeat="x in e_columns">{a x.column a}</th>
     </tr>
 
-	<tr ng-repeat="event in events">
+	<tr ng-repeat="event in events | orderBy: 'type'">
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
 		<td>{a event.date a}</td>
@@ -68,6 +72,10 @@
 <table>
     <h2>Names</h2>
     <tr>
+    	<th colspan="6"><a target="_blank" href="/person/uniq_id={a names2[0].uniq_id a}">
+    	Linkki Kertova-sivulle</a></th>
+    </tr>
+    <tr>
     	<th ng-repeat="x in n_columns">{a x.column a}</th>
     </tr>
 
@@ -89,7 +97,7 @@
     	<th ng-repeat="x in e_columns">{a x.column a}</th>
     </tr>
 
-	<tr ng-repeat="event in events2">
+	<tr ng-repeat="event in events2 | orderBy: 'type'">
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
 		<td>{a event.date a}</td>
@@ -133,8 +141,8 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
     {% endfor %}
     ];
     $scope.names2 = [
-	{% for pname in person.names %}
-        {uniq_id:'{{person.uniq_id}}',priv:'{{person.priv}}',gender:'{{person.gender}}',
+	{% for pname in person2.names %}
+        {uniq_id:'{{person2.uniq_id}}',priv:'{{person2.priv}}',gender:'{{person2.gender}}',
         firstname:'{{pname.firstname}}',suffix:'{{pname.suffix}}',surname:'{{pname.surname}}'},
     {% endfor %}
     ];
@@ -147,16 +155,18 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
         {uniq_id:'{{event.uniq_id}}',type:'{{event.type}}',
         {% if event.date %}date:'{{event.date}}',
         {% elif event.daterange %}date:'{{event.daterange}}',
+        {% else %}date:'-',
         {% endif %}
 		location:'{% for loc in event.location %}{{loc}} * {% endfor %}',
         description:'{{event.description}}'},
     {% endfor %}
     ];
     $scope.events2 = [
-	{% for event in events %}
+	{% for event in events2 %}
         {uniq_id:'{{event.uniq_id}}',type:'{{event.type}}',
         {% if event.date %}date:'{{event.date}}',
         {% elif event.daterange %}date:'{{event.daterange}}',
+        {% else %}date:'-',
         {% endif %}
 		location:'{% for loc in event.location %}{{loc}} * {% endfor %}',
         description:'{{event.description}}'},
@@ -172,7 +182,7 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
     {% endfor %}
     ];
     $scope.urls2 = [
-	{% for url in person.urls %}
+	{% for url in person2.urls %}
         {priv:'{{url.priv}}',description:'{{url.description}}',
         href:'{{url.href}}'},
     {% endfor %}

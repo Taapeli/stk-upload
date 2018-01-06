@@ -294,7 +294,7 @@ def set_confidence_value():
                 
             confidence = sumc/len(record["list"])
             p.confidence = "%0.1f" % confidence # confidence with one decimal
-        p.set_confidence()
+        p.set_confidence(tx)
             
         counter += 1
             
@@ -588,6 +588,51 @@ def read_repositories(uniq_id=None):
         repositories.append(r)
 
     return (repositories)
+
+
+def read_same_birthday(uniq_id=None):
+    """ Lukee tietokannasta Person-objektit, joilla on sama syntymäaika, näytettäväksi
+
+    """
+    
+    ids = []
+    result = Person.get_people_with_same_birthday()
+    for record in result:
+       new_array = record['ids']
+
+       ids.append(new_array)
+
+    return (ids)
+
+
+def read_same_deathday(uniq_id=None):
+    """ Lukee tietokannasta Person-objektit, joilla on sama kuolinaika, näytettäväksi
+
+    """
+    
+    ids = []
+    result = Person.get_people_with_same_deathday()
+    for record in result:
+       new_array = record['ids']
+
+       ids.append(new_array)
+
+    return (ids)
+
+
+def read_same_name(uniq_id=None):
+    """ Lukee tietokannasta Person-objektit, joilla on sama nimi, näytettäväksi
+
+    """
+    
+    ids = []
+    result = Name.get_people_with_same_name()
+    for record in result:
+       new_array = record['ids']
+
+       ids.append(new_array)
+
+    return (ids)
 
 
 def read_sources(uniq_id=None):
@@ -939,6 +984,46 @@ def get_person_data_by_id(uniq_id):
     return (p, events, photos, sources, family_list)
 
 
+def get_baptism_data(uniq_id):
+    
+    persons = []
+    
+    e = Event()
+    e.uniq_id = uniq_id
+    e.get_event_data_by_id()
+    
+    if e.daterange_start != '' and e.daterange_stop != '':
+        e.daterange = e.daterange_start + " - " + e.daterange_stop
+    elif e.daterange_start != '':
+        e.daterange = str(e.daterange_start) + "-"
+    elif e.daterange_stop != '':
+        e.daterange = "-" + str(e.daterange_stop)
+        
+    if e.place_hlink != '':
+        place = Place()
+        place.uniq_id = e.place_hlink
+        place.get_place_data_by_id()
+        # Location / place data
+        e.location = place.pname
+        e.locid = place.uniq_id
+        e.ltype = place.type
+        
+    result = e.get_baptism_data()
+    for record in result:
+        p = Person_as_member()
+        p.uniq_id = record['person_id']
+        p.role = record['role']
+        name = record['person_names'][0]
+        pname = Name()
+        pname.firstname = name[0]
+        pname.surname = name[1]
+        p.names.append(pname)
+        
+        persons.append(p)
+            
+    return (e, persons)
+
+
 def get_families_data_by_id(uniq_id):
     # Sivua "table_families_by_id.html" varten
     families = []
@@ -956,7 +1041,8 @@ def get_families_data_by_id(uniq_id):
         f = Family_for_template()
         f.uniq_id = record['uniq_id']
         f.get_family_data_by_id()
-    
+
+        # Person's birth family
         result = p.get_parentin_id()
         for record in result:
             parents_hlink = record["parentin_hlink"]
@@ -976,12 +1062,12 @@ def get_families_data_by_id(uniq_id):
         
         spouse = Person()
         if p.gender == 'M':
-            spouse.uniq_id = mother.uniq_id
+            spouse.uniq_id = f.mother
         else:
-            spouse.uniq_id = father.uniq_id
+            spouse.uniq_id = f.father
         spouse.get_person_and_name_data_by_id()
         f.spouse = spouse
-            
+
         for child_id in f.childref_hlink:
             child = Person()
             child.uniq_id = child_id

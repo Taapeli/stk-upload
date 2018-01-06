@@ -36,7 +36,8 @@ with app.app_context():
     
         
     @app.route('/tables')
-    @roles_required('member')
+#     @roles_accepted('member', 'admin')
+    @roles_required('admin')
     def datatables(): 
         """ Teknisten datataulukoiden käsittelysivu """
         return render_template("datatables.html")
@@ -447,7 +448,6 @@ def talleta(filename, subj):
                text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
     return render_template("talletettu.html", text=status, uri=dburi)
 
-
     
     #  linkki oli sukunimiluettelosta
     @app.route('/lista/person_data/<string:uniq_id>')
@@ -601,11 +601,11 @@ def talleta(filename, subj):
     #     """ Lisää tai päivittää käyttäjätiedon
       
     
-    @app.route('/virhe_lataus/<int:code>/<text>')
-    def virhesivu(code, text=''):
-        """ Virhesivu näytetään """
-        logging.debug('Virhesivu ' + str(code) )
-        return render_template("virhe_lataus.html", code=code, text=text)
+@app.route('/virhe_lataus/<int:code>/<text>')
+def virhesivu(code, text=''):
+    """ Virhesivu näytetään """
+    logging.debug('Virhesivu ' + str(code) )
+    return render_template("virhe_lataus.html", code=code, text=text)
     
     
     """ ----------------------------------------------------------------------------
@@ -643,31 +643,31 @@ def talleta(filename, subj):
         return redirect(url_for('nayta1', filename=infile.filename, fmt='table'))
     
     
-    @app.route('/lista1/<string:fmt>/<string:filename>')
-    def nayta1(filename, fmt):   
-        """ tiedoston näyttäminen ruudulla """
-        try:
-            pathname = models.loadfile.fullname(filename)
-            with open(pathname, 'r', encoding='UTF-8') as f:
-                read_data = f.read()    
-        except IOError as e:
-            return redirect(url_for('virhesivu', code=1, text=str(e)))
-        except UnicodeDecodeError as e:
-            return redirect(url_for('virhesivu', code=1, \
-                   text="Tiedosto ei ole UTF-8. " + str(e)))  
+@app.route('/lista1/<string:fmt>/<string:filename>')
+def nayta1(filename, fmt):   
+    """ tiedoston näyttäminen ruudulla """
+    try:
+        pathname = models.loadfile.fullname(filename)
+        with open(pathname, 'r', encoding='UTF-8') as f:
+            read_data = f.read()    
+    except IOError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    except UnicodeDecodeError as e:
+        return redirect(url_for('virhesivu', code=1, \
+               text="Tiedosto ei ole UTF-8. " + str(e)))  
+
+    # Vaihtoehto a:
+    if fmt == 'list':   # Tiedosto sellaisenaan
+        return render_template("lista1.html", name=pathname, data=read_data)
     
-        # Vaihtoehto a:
-        if fmt == 'list':   # Tiedosto sellaisenaan
-            return render_template("lista1.html", name=pathname, data=read_data)
-        
-        # Vaihtoehto b: Luetaan tiedot taulukoksi
-        else:
-            try:
-                persons = models.datareader.henkilolista(pathname)
-                return render_template("table_persons.html", name=pathname, \
-                       persons=persons)
-            except Exception as e:
-                return redirect(url_for('virhesivu', code=1, text=str(e)))
+    # Vaihtoehto b: Luetaan tiedot taulukoksi
+    else:
+        try:
+            persons = models.datareader.henkilolista(pathname)
+            return render_template("table_persons.html", name=pathname, \
+                   persons=persons)
+        except Exception as e:
+            return redirect(url_for('virhesivu', code=1, text=str(e)))
     
     
     """ Application filter definitions moved to stk_server.__inits__.py

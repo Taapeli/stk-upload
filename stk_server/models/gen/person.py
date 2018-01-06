@@ -145,7 +145,7 @@ RETURN ID(family) AS uniq_id"""
     
     
     def get_parentin_id(self):
-        """ Luetaan henkilön perheen id """
+        """ Luetaan henkilön syntymäperheen id """
         
         query = """
             MATCH (person:Person)<-[r:CHILD]-(family:Family) 
@@ -261,6 +261,34 @@ RETURN person, urls, COLLECT (name) AS names
                 weburl.type = url['type']
                 weburl.description = url['description']
                 self.urls.append(weburl)
+        
+        
+    @staticmethod
+    def get_people_with_same_birthday():
+        """ Etsi kaikki henkilöt, joiden syntymäaika on sama"""
+        
+        query = """
+            MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_birth<>''
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
+                p2.gender = p1.gender AND p2.est_birth = p1.est_birth
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
+                ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
+            """.format()
+        return shareds.driver.session().run(query)
+        
+        
+    @staticmethod
+    def get_people_with_same_deathday():
+        """ Etsi kaikki henkilöt, joiden kuolinaika on sama"""
+        
+        query = """
+            MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_death<>''
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
+                p2.gender = p1.gender AND p2.est_death = p1.est_death
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
+                ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
+            """.format()
+        return shareds.driver.session().run(query)
 
 
     @staticmethod       
@@ -372,11 +400,11 @@ RETURN person, urls, COLLECT (name) AS names
                 months = int(death_data[1])-int(birth_data[1])
                 
                 if int(death_data[2]) < int(death_data[2]):
-                   months -= 1
+                    months -= 1
                 
                 if months < 0:
-                   months += 12
-                   years -= 1
+                    months += 12
+                    years -= 1
                 
                 years_months = years * 12 + months
             else:
@@ -407,7 +435,7 @@ RETURN person, urls, COLLECT (name) AS names
         return shareds.driver.session().run(query)
 
 
-    def set_confidence (self):
+    def set_confidence (self, tx):
         """ Voidaan asettaa henkilön tietojen luotettavuus arvio kantaan
         """
 
@@ -701,14 +729,14 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
     def set_estimated_dates():
         # Set est_birth
         try:
-            type = 'Birth'
+            dtype = 'Birth'
             query = """
 MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE m.type=$type
 SET r.type =$type
 SET n.est_birth = m.daterange_start"""
             result = shareds.driver.session().run(query, 
-               {"type": type})
+               {"type": dtype})
             counters = result.consume().counters
             msg = "Muutettu {} est_birth-tietoa".format(counters.properties_set)
         except Exception as err:
@@ -716,14 +744,14 @@ SET n.est_birth = m.daterange_start"""
             
         # Set est_birth
         try:
-            type = 'Death'
+            dtype = 'Death'
             query = """
 MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE m.type=$type
 SET r.type =$type
 SET n.est_death = m.daterange_start"""
             result = shareds.driver.session().run(query, 
-               {"type": type})
+               {"type": dtype})
             counters = result.consume().counters
             msg = msg + " ja {} est_death-tietoa.".format(counters.properties_set)
             return msg
@@ -1058,6 +1086,20 @@ class Name:
                 RETURN p.gramps_handle AS handle
             """.format(refname)
         return shareds.driver.session().run(query)
+        
+        
+    @staticmethod
+    def get_people_with_same_name():
+        """ Etsi kaikki henkilöt, joiden nimi on sama"""
+        
+        query = """
+            MATCH (p1:Person)-[r1:NAME]->(n1:Name)
+            MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2)
+                AND n2.surname = n1.surname AND n2.firstname = n1.firstname
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
+                ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
+            """.format()
+        return shareds.driver.session().run(query)
 
         
     @staticmethod
@@ -1077,7 +1119,7 @@ class Name:
         
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.surname='{}'
-                RETURN ID(p) AS uniq_id
+                RETURN DISTINCT ID(p) AS uniq_id
             """.format(surname)
         return shareds.driver.session().run(query)
         

@@ -39,7 +39,7 @@
 		</h3>
 <div style="margin-left:2em;">		
 		{% if family.spouse %}
-			<h3>Spouse</h3>
+			<h3>Spouse <span class="id">{{family.spouce}}</span></h3>
 			<table>
 			    <tr><th>unique id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th><th>family</th>
 			    </tr>
@@ -64,7 +64,7 @@
 		{% endif %}
 		
 		{% if family.father %}
-			<h3>Father</h3>
+			<h3>Father <span class="id">{{family.father}}</span></h3>
 			<table>
 			    <tr><th>unique id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th>
 			    </tr>
@@ -88,7 +88,7 @@
 		{% endif %}
 		
 		{% if family.mother %}
-			<h3>Mother</h3>
+			<h3>Mother <span class="id">{{family.mother}}</span></h3>
 			<table>
 			    <tr><th>unique id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th>
 			    </tr>
@@ -104,7 +104,7 @@
 					{% endfor %}
 				{% else %}
 					<tr>
-			    		<td>{{family.motherdata.uniq_id}}</td>
+			    		<td>{{family.mother.uniq_id}}</td>
 			        	<td>{% if family.mother.gender %}{{family.mother.gender}}{% endif %}</td>
 					</tr>
 				{% endif %}

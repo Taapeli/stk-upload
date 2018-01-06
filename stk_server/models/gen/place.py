@@ -415,7 +415,7 @@ ORDER BY edate"""
             handle = self.handle
             change = self.change
             pid = self.id
-            type = self.type
+            ptype = self.type
             pname = self.pname
             # Replace f.ex 26° 11\' 7,411"I with 26° 11' 7,411"I
             coord_long = self.coord_long.replace("\\\'", "\'")
@@ -430,7 +430,7 @@ SET p.gramps_handle=$handle,
     p.coord_long=$coord_long, 
     p.coord_lat=$coord_lat"""             
             tx.run(query, 
-               {"handle": handle, "change": change, "id": pid, "type": type, "pname": pname, 
+               {"handle": handle, "change": change, "id": pid, "type": ptype, "pname": pname, 
                 "coord_long": coord_long, "coord_lat": coord_lat})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
