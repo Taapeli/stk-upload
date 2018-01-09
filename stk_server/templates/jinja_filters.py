@@ -18,6 +18,7 @@ def translate(term, var_name, lang="fi"):
         'lt_in' = Location types, inessive form
         'urlt' = web page type
         'rept' = repository types
+        'medium' = media types
     """
 #     print("# {}[{}]".format(var_name, term))
     if var_name == "nt":
@@ -81,6 +82,15 @@ def translate(term, var_name, lang="fi"):
             "Library":"kirjasto",
             "Unknown":"tuntematon",
             "Web site":"verkkopalvelu"
+            }
+    elif var_name == "medium":
+        # Madium types
+        tabl = {
+            "Asiakirja":"asiakirja",
+            "Book":"kirja",
+            "Electronic":"sähköinen",
+            "Newspaper":"lehti",
+            "Unknown":"tuntematon",
             }
     elif var_name == "lt":
         # Location types

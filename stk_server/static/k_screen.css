@@ -108,6 +108,7 @@ img#logo {
 .outlink { text-decoration: underline; }
 .refname { color:gray; text-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
+.note  { color: #555; font-size: 80%; }
 .myself { color: white; background: #555; font-style: italic; }
 td.numbers {
     text-align: right;

@@ -379,22 +379,26 @@ RETURN COLLECT([citation.page, citation.confidence, events]) AS citations"""
     @staticmethod       
     def get_source_list():
         """ Luetaan kaikki lähteet """
-                        
-#         query = """
-# MATCH (source:Source)
-#     RETURN ID(source) AS uniq_id, 
-#         source.id AS id, 
-#         source.stitle AS stitle
-#     ORDER BY source.stitle
-#             """
+# ╒═════════╤═════╤════════════════╤════════════════╤═════════╤═════════╤═════════╕
+# │"uniq_id"│"id" │"stitle"        │"repository"    │"medium" │"cit_cnt"│"ref_cnt"│
+# ╞═══════╪═══════╪════════════════╪════════════════╪════════════╪══════╪═════════╡
+# │29442  │"S0253"│"Ansioluetteloko│"Kansallisarkist│"Book"      │1     │1        │
+# │       │       │koelma"         │o"              │            │      │         │
+# ├───────┼───────┼────────────────┼────────────────┼────────────┼──────┼─────────┤
+# │29212  │"S0004"│"Borgåbladet"   │"Kansalliskirjas│"Newspaper" │1     │0        │
+# │       │       │                │ton digitoidut s│            │      │         │
+# │       │       │                │anomalehdet"    │            │      │         │
+# └───────┴───────┴────────────────┴────────────────┴────────────┴──────┴─────────┘
         source_list_query = """
 MATCH (s:Source)
 OPTIONAL MATCH (s)<-[:SOURCE]-(c:Citation)
 OPTIONAL MATCH (c)<-[:CITATION]-(e)
+OPTIONAL MATCH (s)-[r:REPOSITORY]->(a:Repository)
 RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle, 
+       a.rname AS repository, r.medium AS medium,
        COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
 ORDER BY toUpper(stitle)
-        """
+"""
         ret = []
         result = shareds.driver.session().run(source_list_query)
         for record in result:
@@ -402,6 +406,8 @@ ORDER BY toUpper(stitle)
             s.uniq_id = record['uniq_id']
             s.id = record['id']
             s.stitle = record['stitle']
+            s.repo_name = record['repository']
+            s.medium = record['medium']
             s.cit_cnt = record['cit_cnt']
             s.ref_cnt = record['ref_cnt']
             ret.append(s)
