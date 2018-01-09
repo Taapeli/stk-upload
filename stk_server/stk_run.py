@@ -10,6 +10,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import login_required, roles_required, current_user
 #from datetime import datetime
 import shareds
+import templates.jinja_filters
 #===============================================================================
 app = shareds.app 
 with app.app_context():
@@ -225,6 +226,8 @@ with app.app_context():
                    headings=headings, titles=titles, lists=lists)
         elif subj == 'repositories':
             repositories = models.datareader.read_repositories()
+            for r in repositories:
+                r.type = templates.jinja_filters.translate(r.type, 'rept', 'fi')
             return render_template("ng_table_repositories.html", 
                                    repositories=repositories)
         elif subj == 'sources':

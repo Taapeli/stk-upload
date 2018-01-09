@@ -11,12 +11,13 @@ def translate(term, var_name, lang="fi"):
     """ Given term is translated depending of var_name name.
         No language selection yet.
         
-        'nt'  = Name types
-        'evt' = Event types
+        'nt'   = Name types
+        'evt'  = Event types
         'role' = Event role
-        'lt'  = Location types
+        'lt'   = Location types
         'lt_in' = Location types, inessive form
         'urlt' = web page type
+        'rept' = repository types
     """
 #     print("# {}[{}]".format(var_name, term))
     if var_name == "nt":
@@ -70,6 +71,16 @@ def translate(term, var_name, lang="fi"):
             "2":"*",    # fa-star [&#xf005;]
             "3":"**",
             "4":"***"
+            }
+    elif var_name == "rept":
+        # Repository types
+        tabl = {
+            "Album":"albumi",
+            "Archive":"arkisto",
+            "Collection":"kokoelma",
+            "Library":"kirjasto",
+            "Unknown":"tuntematon",
+            "Web site":"verkkopalvelu"
             }
     elif var_name == "lt":
         # Location types
