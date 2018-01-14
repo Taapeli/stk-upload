@@ -86,7 +86,7 @@ class Neo4jUserDatastore(UserDatastore):
 #        logger.debug('_put_user ', user.email, ' ', user.name)
 
         if len(user.roles) == 0:
-            user.roles = ['guest']
+            user.roles = ['member']
         user.confirmed_at = None
         user.is_active = True
         try:
