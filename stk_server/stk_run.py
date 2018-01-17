@@ -358,6 +358,16 @@ with app.app_context():
             return redirect(url_for('virhesivu', code=1, text=str(e)))
         return render_template("compare2.html", 
             person=person, events=events, photos=photos, sources=sources, families=families)
+        
+        
+    @app.route('/lista/baptism_data/<string:uniq_id>')
+    def show_baptism_data(uniq_id): 
+        """ kastetapahtuman tietojen näyttäminen ruudulla """
+        models.dbutil.connect_db()
+        event, persons = models.datareader.get_baptism_data(uniq_id)
+        return render_template("table_baptism_data.html", 
+                               event=event, persons=persons)
+
 
 
     @app.route('/lista/family_data/<string:uniq_id>')
