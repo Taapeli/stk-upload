@@ -19,7 +19,7 @@ with app.app_context():
     import models.loadfile          # Datan lataus käyttäjältä
     import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
     import models.dataupdater       # Tietojen päivitysmetodit
-    #import models.cvs_refnames      # Referenssinimien luonti
+    import models.cvs_refnames      # Referenssinimien luonti
     import models.gen
     #import models.gen.user          # Käyttäjien tiedot
 
@@ -451,8 +451,8 @@ def talleta(filename, subj):
             status = models.cvs_refnames.referenssinimet(pathname)
         elif subj == 'xml_file': # gramps backup xml file to Neo4j db
             status = models.datareader.xml_to_neo4j(pathname)
-        elif subj == 'karajat': # TODO: Tekemättä
-            status = "Käräjätietojen lukua ei ole vielä tehty"
+#         elif subj == 'karajat': # TODO: Tekemättä
+#             status = "Käräjätietojen lukua ei ole vielä tehty"
         else:
             return redirect(url_for('virhesivu', code=1, text= \
                 "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
