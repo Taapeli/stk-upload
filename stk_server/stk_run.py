@@ -271,16 +271,16 @@ with app.app_context():
         return render_template("k_locations.html", locations=locations)
     
     
-    @app.route('/lista/refnimet', defaults={'reftype': None})
-    @app.route('/lista/refnimet/<string:reftype>')
+    @app.route('/list/refnames', defaults={'reftype': None})
+    @app.route('/list/refnames/<string:reftype>')
     def nayta_refnimet(reftype): 
-        """ referenssinimien näyttäminen ruudulla """
+        """ show reference names on the screen """
 #        models.dbutil.connect_db()
         if reftype and reftype != "":
-            names = models.datareader.lue_typed_refnames(reftype)
+            names = models.datareader.read_typed_refnames(reftype)
             return render_template("table_refnames_1.html", names=names, reftype=reftype)
         else:
-            names = models.datareader.lue_refnames()
+            names = models.datareader.read_refnames()
             return render_template("table_refnames.html", names=names)
         
         

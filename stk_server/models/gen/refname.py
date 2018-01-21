@@ -195,7 +195,7 @@ RETURN ID(a) AS aid, a.name AS aname"""
 
     @staticmethod   
     def get_refname(name):
-        """ Haetaan nimeä (esim. 'Aaron') vastaava referenssi-etunimi
+        """ Find a reference name for given name (for ex. 'Aaron')
         ╒═══════╕
         │"rname"│
         ╞═══════╡
@@ -203,7 +203,7 @@ RETURN ID(a) AS aid, a.name AS aname"""
         └───────┘
         """
         query="""
-MATCH (a:Refname)-[r:REFFIRST]->(b:Refname) WHERE a.name=$nm
+MATCH (a:Refname {name:$mn}) -[:BASENAME*]-> (b) 
 RETURN b.name AS rname
 LIMIT 1"""
         try:
@@ -250,16 +250,15 @@ ORDER BY a.name""".format(reftype, reftype)
 
 
     @staticmethod
-    def getrefnames():
-        """ Haetaan kannasta kaikki Refnamet 
-            Palautetaan lista Refname-olioita, johon on haettu myös mahdollisen
-            viitatun referenssinimen nimi ja tyyppi.
-            [Kutsu: datareader.lue_refnames()]
+    def get_refnames():
+        """ Get all Refnames
+            Returns a list of Refname objects, with referenced names and reftypes.
+            [Call: datareader.get_refnames()]
         """
         query = """
 MATCH (n:Refname)
 OPTIONAL MATCH (n:Refname)-[r]->(m)
-RETURN n,r,m
+RETURN ID(n) AS oid, n, r, m
 ORDER BY n.name"""
         try:
             results = shareds.driver.session().run(query)
@@ -274,19 +273,23 @@ ORDER BY n.name"""
         # n = <Node id=17378 labels={'Refname'} 
         #      properties={'name': 'Aabeli', 'source': 'harvinainen'}>
         # r = <Relationship id=259 start=17378 end=17439 type='REFFIRST'
-        #      properties={}>
+        #      properties={use:'firstname'}>
         # m = <Node id=17439 labels={'Refname'} 
         #      properties={'name': 'Aapeli', 'gender': 'M', 
         #                  'source': 'Messu- ja kalenteri'}>
         ret = []
         for result in results:
             rn = Refname(result['n']["name"])
-            rn.rid = result['n'].id
+            rn.oid = result['n'].id
             rn.gender = result['n']["gender"]
             rn.source = result['n']["source"]
             if result['m']:
                 # Referenced name exists
-                rn.reftype = result['r'].type
+                rtype = result['r'].type
+                if rtype == 'BASENAME':
+                    rn.reftype = result['r']['use']
+                else:
+                    rn.reftype = rtype
                 rn.refname = result['m']["name"]
             ret.append(rn)
         return ret
