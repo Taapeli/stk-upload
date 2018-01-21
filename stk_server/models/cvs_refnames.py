@@ -8,14 +8,18 @@ import logging
 from models.gen.refname import Refname  # Tietokannan kaikki luokat
 
 def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
-    """ Lukee csv-tiedostosta referenssinimet
-        Jos colA on määrittelemättä, lataa vain tiedoston alun niin että 
+    """ Lukee csv-tiedostosta referenssinimet. 
+        Ensimmäisellä rivillä pitää olla sarakkeiden nimet 'Nimi', 'RefNimi', 
+        'On_itse_refnimi', 'Lähde', 'Sukupuoli' (halutussa järjestyksessä).
+        Kenttä On_itse_refnimi ei ole käytössä.
+
+        Jos colA on määrittelemättä, lataisi vain tiedoston alun niin että 
         voidaan esittää käyttäjälle sarakkeiden valintasivu
         
-        Syötteen 1. rivi: ['Nimi', 'RefNimi', 'On_itse_refnimi', 'Lähde', 'Sukupuoli']
-                            0       1          2 boolean          3        4 ('M'/'N'/'')
+        Syötteen 1. rivi: ['Nimi', 'RefNimi', 'Reftype', 'Lähde', 'Sukupuoli']
+                            0       1          2          3        4 ('M'/'N'/'')
     """
-    # TODO: colA ja colB käyttöön!
+    # TODO: miksi otettaisiin colA ja colB käyttöön?
     if colA:
         # Luetaan cvs-tiedoston kaikki kentät, maxrows maxrows riviä
         maxrows=50
@@ -26,43 +30,39 @@ def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
     
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
         reader=csv.DictReader(f, dialect='excel')
-        
-#        if row.__len__ != 5 and row[1] != "RefNimi":
-#            raise KeyError('Väärät sarakeotsikot: ' + str(row))
-
         for row in reader:
             row_nro += 1
             if maxrows > 0 and row_nro > maxrows:
                 break
             nimi=row['Nimi'].strip()
-            if nimi.__len__() == 0:
+            if len(nimi) == 0:
                 tyhjia += 1
                 continue # Tyhjä nimi ohitetaan
 
             try:
-                ref_name=row['RefNimi']
+                refname=row['RefNimi']
+                reftype=row['Reftype']
             except KeyError:
                 raise
 
             source=row['Lähde']
-            if row['Sukupuoli'].startswith('m'):
+            if row['Sukupuoli'].lower().startswith('m'):
                 sp = 'M'
-            elif row['Sukupuoli'].startswith('n'):
+            elif row['Sukupuoli'].lower().startswith('n'):
                 sp = 'F'
             else:
                 sp = ''
 
             # Luodaan Refname
             r = Refname(nimi)
-            if (ref_name != '') and (ref_name != nimi):
+            if (refname != '') and (refname != nimi):
                 # Tullaan viittaamaan tähän nimeen
-                #r.mark_reference(ref_name, 'REFFIRST')
+                #r.mark_reference(refname, 'REFFIRST')
                 # Laitetaan muistiin, että self viittaa refname'een
-                reftype = 'REFFIRST'
                 if reftype in r.REFTYPES:
-                    r.refname = ref_name
+                    r.refname = refname
                     r.reftype = reftype
-                    logging.debug("cvs_refnames: {0} --> {1}".format(nimi, ref_name))
+                    logging.debug("cvs_refnames: {0} <-- {1}".format(nimi, refname))
                 else:
                     logging.warning('cvs_refnames: Referenssinimen viittaus {} hylätty. '.format(reftype))
             if sp != '':

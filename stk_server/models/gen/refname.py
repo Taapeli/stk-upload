@@ -1,22 +1,42 @@
 '''
-Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
+Created on 2.5.2017 & 14.1.2018 from Ged-prepare/Bus/classes/genealogy.py
 
 @author: jm
+
+I.  To a Person node there can be different references from Refnames:
+    1) Any First name generates link (example 'Per')
+        (p:Person) <-[l:REFNAME {reftype:'firstname'}]- (r:Refname {name:'Per'})
+
+    2) Any Surname generates link 
+        (p:Person) <-[l:REFNAME {reftype:'surname'}]- (r:Refname)
+
+    3) Any Patronyme name generates link (example 'Persson')
+        (p:Person) <-[l:REFNAME {reftype:'patronyme'}]- (r:Refname {name:'Persson'})
+
+II. Between Refnames there can be different references:
+    4) A link from a name variation to basename
+        (r:Refname {name:'Per'}) -[b:BASENAME]-> (s:Refname {name:'Pekka'})
+        (r:Refname {name:'Persson'}) -[b:BASENAME]-> (s:Refname {name:'Pekanpoika'})
+
+    5) A link from a patronyme to the first name from witch it is derived from
+        (r:Refname {name:'Persson'}) -[b:PATRONAME]-> (s:Refname {name:'Per'})
+
+The I links are created, when new Person nodes are inserted.
+The II links are created, when reference names are added from a cvs file.
 '''
 import logging
 from sys import stderr
-#from flask import g
-import  shareds
+import shareds
 
 class Refname:
     """
-        ( Refname {oid, nimi} ) -[reftype]-> (Refname)
+        ( Refname {rid, nimi} ) -[reftype]-> (Refname)
                    reftype = (etunimi, sukunimi, patronyymi)
         Properties:                                             input source
-            oid     1, 2 ...                                    (created in save())
+            rid     ID() ...                                    (created in save())
             name    1st letter capitalized                      (Nimi)
             refname * the std name referenced, if exists        (RefNimi)
-            reftype * which kind of reference refname points to ('REFFIRST')
+            reftype * which kind of reference refname points to ('firstname')
             gender  gender 'F', 'M' or ''                       (Sukupuoli)
             source  points to Source                            (Lähde)
             
@@ -26,25 +46,43 @@ class Refname:
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
     label = "Refname"
-    REFTYPES = ['REFFIRST', 'REFLAST', 'REFPATRO']
+    REFTYPES = ['basename', 'firstname', 'surname', 'patronyme']
 
-#   Type-property poistettu tarpeettomana. Esim. samasta nimestä "Persson" voisi
-#   olla linkki REFLAST nimeen "Pekanpoika" ja REFPATRO nimeen "Pekka".
-#   Ei tarvita useita soluja.
+#   Samasta nimestä "Persson" voisi olla linkki 'surname' nimeen "Pekanpoika"
+#   ja 'patronyme' nimeen "Pekka".
 #   __REFNAMETYPES = ['undef', 'fname', 'lname', 'patro', 'place', 'occu']
 
+# TODO: Refname.pos tilalle .reftype; .rid tilalle ID(a)
+# MATCH (f:Refname)-[l]->(t:Refname) RETURN f AS basename, TYPE(l) AS base_ref, t AS refname
+# ╒═════════════════════════════╤═══════════╤═════════════════════════════╕
+# │"basename"                   │"base_ref" │"refname"                    │
+# ╞═════════════════════════════╪═══════════╪═════════════════════════════╡
+# │{"name":"Gustav","gender":"M"│"BASENAME" │{"name":"Kustaa","gender":"M"│
+# │,"rid":3,"lang":"sv","pos":"f│           │,"rid":4,"lang":"fi","pos":"f│
+# │irstname"}                   │           │irstname"}                   │
+# ├─────────────────────────────┼───────────┼─────────────────────────────┤
+# │{"name":"Johansson","rid":5,"│"PATRONAME"│{"name":"Juha","gender":"M","│
+# │lang":"sv","pos":"patronym"} │           │lang":"fi","rid":6,"pos":"fir│
+# │                             │           │stname"}                     │
+# ├─────────────────────────────┼───────────┼─────────────────────────────┤
+# │{"name":"Christian","gender":│"BASENAME" │{"name":"Risto","gender":"M",│
+# │"M","rid":1,"lang":"sv","pos"│           │"rid":2,"lang":"fi","pos":"fi│
+# │:"firstname"}                │           │rstname"}                    │
+# └─────────────────────────────┴───────────┴─────────────────────────────┘
+
     def __init__(self, nimi):
-        """ Luodaan referenssinimi
-            Nimi talletetaan alkukirjain isolla, alku- ja loppublankot poistettuna
+        """ Creating reference name
+            The name is saved with first letter capitalized
         """
         if nimi:
             self.name = nimi.strip().title()
         else:
             self.name = None
+        self.rid = None
 
 
     def __eq__(self, other):
-        "Mahdollistaa vertailun 'refname1 == refname2'"
+        "You may compare 'refname1 == refname2'"
         if isinstance(other, self.__class__):
             return self.name() == other.name()
         else:
@@ -52,15 +90,15 @@ class Refname:
 
 
     def __str__(self):
-        s = "(Refname {0}oid={1}, name='{2}'".format('{', self.oid, self.name)
+        s = "(:REFNAME id:{1}, name:'{2}'".format(self.rid, self.name)
         if 'gender' in dir(self):
-            s += ", gender={}".format(self.gender)
+            s += ", gender:{}".format(self.gender)
         if 'refname' in dir(self):
-            s += "{0}) -[{1}]-> (Refname {2}".format('}', self.reftype, '{')
+            s += ") -[{1}]-> (Refname ".format(self.reftype)
             if 'vid' in dir(self):
-                s += "oid={}, ".format(self.vid)
-            s += "name='{}'".format(self.refname)
-        s += "{})".format('}')
+                s += "id:{}, ".format(self.vid)
+            s += "name:'{}'".format(self.refname)
+        s += ")"
         return s
 
 
@@ -70,72 +108,84 @@ class Refname:
             - nimi ja viittaus, (A:{name=name})-->(B:{name=refname})
             Edellytetään, että tälle oliolle on asetettu:
             - name (Nimi)
-            Tunniste luodaan tai käytetään sitä joka löytyi kannasta
-            - oid (int)
+            Tunniste saadaan kannasta
+            - rid (int)
             Lisäksi tallennetaan valinnaiset tiedot:
             - gender (Sukupuoli='M'/'N'/'')
             - source (Lähde merkkijonona)
+            - reftype (in REFTYPES)    # miksei muka tarvittaisi?
             - reference 
-              (a:Refname {nimi='Nimi'}) -[r:Reftype]-> (b:Refname {nimi='RefNimi'})
+              (a:Refname {nimi='Nimi'})
+                   -[r:BASENAME {use:'Reftype'}]-> 
+                   (b:Refname {nimi='RefNimi'})
         """
         # TODO: source pitäisi tallettaa Source-objektina
         
-        
-        # Pakolliset tiedot
+        # Compulsory data
         if not self.name:
-            raise NameError
-        
-        # Asetetaan A:n attribuutit
-        a_attr = "{name:'" + self.name + "'"
+            raise ValueError("No name for Refname")
+
+        # Setting other attributes for A (in addition to name)
+        a_attr = {'name': self.name}
         if hasattr(self, 'gender'):
-            a_attr += ", gender:'{}'".format(self.gender)
+            a_attr['gender'] = self.gender
         if hasattr(self, 'source'):
-            a_attr += ", source:'{}'".format(self.source)
-        a_attr += '}'
+            a_attr['source'] = self.source
 #        a_newoid = get_new_oid()
 
         if hasattr(self, 'refname'):
-            # Luodaan viittaus (A:{name=name})-->(B:{name=refname})
-            # Jos A tai B puuttuvat kannasta, ne luodaan
-            b_attr = "{name:'" + self.refname + "'}"
-#            b_newoid = get_new_oid()
+            # Create a reference (A:{name:name})-->(B:{name:refname})
+            # If any of A or B is missing, they are created, too
             query="""
-MERGE (a:Refname {})
-MERGE (b:Refname {})
-CREATE UNIQUE (a)-[:REFFIRST]->(b)
-RETURN a.id AS aid, a.name AS aname, b.id AS bid, b.name AS bname;""".format(a_attr, b_attr)
+MERGE (a:Refname {name: $a_name}) SET a = $a_attr
+MERGE (b:Refname {name: $b_name})
+MERGE (a)-[l:BASENAME {use:$use}]->(b)
+RETURN ID(a) AS aid, a.name AS aname, l.use AS use, ID(b) AS bid, b.name AS bname"""
                 
             try:
-                result = shareds.driver.session().run(query)
+                with shareds.driver.session() as session:
+                    result = session.run(query, use=self.reftype,
+                                         a_name=self.name, a_attr=a_attr,
+                                         b_name=self.refname)
         
-                for record in result:
-                    a_oid = record["aid"]
-                    a_name = record["aname"]
-                    b_oid = record["bid"]
-                    b_name = record["bname"]
-                    
-                    logging.debug('Luotiin (a {}:{})'.format(a_oid, a_name))
-                    logging.debug('Luotiin (b {}:{})'.format(b_oid, b_name))
-                    logging.debug('Luotiin ({}:{})-->({}:{})'.format(a_oid, a_name, b_oid, b_name))
+                    logging.debug("Created {} nodes and {} relations for {}-->{}".format(\
+                            result.summary().counters.nodes_created, 
+                            result.summary().counters.relationships_created, 
+                            self.name, self.refname))
+#                     for record in result:
+#                         a_oid = record["aid"]
+#                         a_name = record["aname"]
+#                         a_use = record['use']
+#                         b_oid = record["bid"]
+#                         b_name = record["bname"]
+#                         
+#                         logging.debug('a:({}, {})'.format(a_oid, a_name))
+#                         logging.debug('b:({}, {})'.format(b_oid, b_name))
+#                         logging.debug('  ({}, {}) -[{}]-> ({}, {})'.
+#                                       format(a_oid, a_name, a_use, b_oid, b_name))
                     
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
                 logging.warning('Lisääminen (a)-->(b) ei onnistunut: {}'.format(err))
 
         else:
-            # Luodaan (A:{name=name}) ilman viittausta B:hen
-            # Jos A puuttuu kannasta, se luodaan
+            # Create (A:{name:name}) only, if needed
             query="""
-                 MERGE (a:Refname {})
-                 RETURN a.id AS aid, a.name AS aname;""".format(a_attr)
+MERGE (a:Refname {name: $a_name}) SET a = $a_attr
+RETURN ID(a) AS aid, a.name AS aname"""
             try:
-                result = shareds.driver.session().run(query)
-        
-                for record in result:
-                    a_oid = record["aid"]
-                    a_name = record["aname"]
-                    
-                    logging.debug('Luotiin{} ({}:{})'.format(a_attr,  a_oid, a_name))
+                with shareds.driver.session() as session:
+                    result = session.run(query, 
+                                         a_name=self.name, a_attr=a_attr)
+
+                    logging.debug("Created {} nodes for {}".format(\
+                            result.summary().counters.nodes_created, 
+                            self.name))
+#                 for record in result:
+#                     a_oid = record["aid"]
+#                     a_name = record["aname"]
+# 
+#                     logging.debug('a:({}, {})'.format(a_oid, a_name))
                     
             except Exception as err:
                 # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
@@ -165,7 +215,7 @@ LIMIT 1"""
             
             
     @staticmethod   
-    def get_name(name):
+    def get_name_reference(name):
         """ Haetaan referenssinimi
         """
         query="""
@@ -193,8 +243,8 @@ MATCH (a:Refname)
   OPTIONAL MATCH (m:Refname)-[:{0}*]->(a:Refname)
   OPTIONAL MATCH (a:Refname)-[:{1}]->(n:Refname)
 RETURN a.id, a.name, a.gender, a.source,
-  COLLECT ([n.oid, n.name, n.gender]) AS base,
-  COLLECT ([m.oid, m.name, m.gender]) AS other
+  COLLECT ([ID(n), n.name, n.gender]) AS base,
+  COLLECT ([ID(m), m.name, m.gender]) AS other
 ORDER BY a.name""".format(reftype, reftype)
         return shareds.driver.session().run(query)
 
@@ -231,7 +281,7 @@ ORDER BY n.name"""
         ret = []
         for result in results:
             rn = Refname(result['n']["name"])
-            rn.oid = result['n'].id
+            rn.rid = result['n'].id
             rn.gender = result['n']["gender"]
             rn.source = result['n']["source"]
             if result['m']:
