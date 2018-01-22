@@ -450,7 +450,7 @@ def talleta(filename, subj):
             # Tallettaa Refname-objekteja 
             status = models.cvs_refnames.referenssinimet(pathname)
         elif subj == 'xml_file': # gramps backup xml file to Neo4j db
-            status = models.datareader.xml_to_neo4j(pathname)
+            status = models.datareader.xml_to_neo4j(pathname, current_user.username)
 #         elif subj == 'karajat': # TODO: Tekemättä
 #             status = "Käräjätietojen lukua ei ole vielä tehty"
         else:

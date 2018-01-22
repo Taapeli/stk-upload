@@ -868,7 +868,7 @@ SET n.est_death = m.daterange_start"""
         return points
 
 
-    def save(self, userid, tx):
+    def save(self, username, tx):
         """ Tallettaa henkilön sekä mahdollisesti viitatut nimet, tapahtumat 
             ja sitaatit kantaan 
         """
@@ -901,12 +901,12 @@ SET p.gramps_handle=$handle,
         # Linkitä User nodeen
         try:
             query = """
-MATCH (u:User)   WHERE u.userid=$userid
+MATCH (u:User)   WHERE u.username=$username
 MATCH (n:Person) WHERE n.gramps_handle=$handle
 MERGE (u)-[r:REVISION]->(n)
 SET r.date=$date"""
             tx.run(query, 
-               {"userid": userid, "handle": handle, "date": today})
+               {"username": username, "handle": handle, "date": today})
         except Exception as err:
             print("Virhe (Person.save:User): {0}".format(err), file=stderr)
             

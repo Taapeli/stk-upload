@@ -1175,7 +1175,7 @@ def handle_citations(collection, tx):
 
 
 
-def handle_events(collection, userid, tx):
+def handle_events(collection, username, tx):
     # Get all the events in the collection
     events = collection.getElementsByTagName("event")
     
@@ -1270,7 +1270,7 @@ def handle_events(collection, userid, tx):
         elif len(event.getElementsByTagName('objref') ) > 1:
             print("Error: More than one objref tag in an event")
                 
-        e.save(userid, tx)
+        e.save(username, tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
@@ -1415,7 +1415,7 @@ def handle_media(collection, tx):
     return(msg)
 
 
-def handle_people(collection, userid, tx):
+def handle_people(collection, username, tx):
     # Get all the people in the collection
     people = collection.getElementsByTagName("person")
     
@@ -1517,7 +1517,7 @@ def handle_people(collection, userid, tx):
                 if person_citationref.hasAttribute("hlink"):
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     
-        p.save(userid, tx)
+        p.save(username, tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
