@@ -906,7 +906,7 @@ SET p.gramps_handle=$handle,
         # Linkitä User nodeen
         try:
             query = """
-MATCH (u:User)   WHERE u.username=$username
+MATCH (u:UserProfile) WHERE u.userName=$username
 MATCH (n:Person) WHERE n.gramps_handle=$handle
 MERGE (u)-[r:REVISION]->(n)
 SET r.date=$date"""

@@ -413,7 +413,7 @@ SET e.gramps_handle=$handle,
 
         try:
             query = """
-MATCH (u:User) WHERE u.username=$username 
+MATCH (u:UserProfile) WHERE u.userName=$username 
 MATCH (n:Event) WHERE n.gramps_handle=$handle
 MERGE (u)-[r:REVISION]->(n)
 SET r.date=$date"""
