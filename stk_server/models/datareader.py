@@ -1511,6 +1511,12 @@ def handle_people(collection, username, tx):
                 if person_parentin.hasAttribute("hlink"):
                     p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
     
+        if len(person.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(person.getElementsByTagName('noteref') )):
+                person_noteref = person.getElementsByTagName('noteref')[i]
+                if person_noteref.hasAttribute("hlink"):
+                    p.noteref_hlink.append(person_noteref.getAttribute("hlink"))
+    
         if len(person.getElementsByTagName('citationref') ) >= 1:
             for i in range(len(person.getElementsByTagName('citationref') )):
                 person_citationref = person.getElementsByTagName('citationref')[i]
@@ -1637,6 +1643,12 @@ def handle_places(collection, tx):
                 place.placeref_hlink = placeobj_placeref.getAttribute("hlink")
         elif len(placeobj.getElementsByTagName('placeref') ) > 1:
             print("Error: More than one placeref in a place")
+    
+        if len(placeobj.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(placeobj.getElementsByTagName('noteref') )):
+                placeobj_noteref = placeobj.getElementsByTagName('noteref')[i]
+                if placeobj_noteref.hasAttribute("hlink"):
+                    place.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
                 
         place.save(tx)
         counter += 1

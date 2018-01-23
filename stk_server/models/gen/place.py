@@ -34,6 +34,7 @@ class Place:
                     type            str url tyyppi
                     description     str url kuvaus
                 placeref_hlink      str paikan osoite
+                noteref_hlink       str huomautuksen osoite
      """
 
     def __init__(self, locid="", ptype="", pname="", level=None):
@@ -54,6 +55,7 @@ class Place:
         self.coord_lat = ''
         self.urls = []
         self.placeref_hlink = ''
+        self.noteref_hlink = []
     
     
     def __str__(self):
@@ -405,6 +407,9 @@ ORDER BY edate"""
             print ("Coord_lat: " + self.coord_lat)
         if self.placeref_hlink != '':
             print ("Placeref_hlink: " + self.placeref_hlink)
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                print ("Noteref_hlink: " + self.noteref_hlink[i])
         return True
 
 
@@ -489,6 +494,20 @@ CREATE (n)-[wu:WEBURL]->
                 tx.run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
+                
+        # Make place note relations
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                try:
+                    query = """
+                        MATCH (n:Place) WHERE n.gramps_handle='{}'
+                        MATCH (m:Note) WHERE m.gramps_handle='{}'
+                        MERGE (n)-[r:NOTE]->(m)
+                         """.format(self.handle, self.noteref_hlink[i])
+                                     
+                    tx.run(query)
+                except Exception as err:
+                    print("Virhe: {0}".format(err), file=stderr)
             
         return
     

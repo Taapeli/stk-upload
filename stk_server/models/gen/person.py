@@ -39,6 +39,7 @@ class Person:
                     type           str url tyyppi
                     description    str url kuvaus
                 parentin_hlink     str vanhempien osoite
+                noteref_hlink      str huomautuksen osoite
                 citationref_hlink  str viittauksen osoite
                 confidence         str tietojen luotettavuus
                 est_birth          str arvioitu syntymäaika
@@ -60,6 +61,7 @@ class Person:
         self.objref_hlink = []
         self.urls = []
         self.parentin_hlink = []
+        self.noteref_hlink = []
         self.citationref_hlink = []
         self.confidence = ''
         self.est_birth = ''
@@ -791,6 +793,9 @@ SET n.est_death = m.daterange_start"""
         if len(self.parentin_hlink) > 0:
             for i in range(len(self.parentin_hlink)):
                 print ("Parentin_hlink: " + self.parentin_hlink[i])
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                print ("Noteref_hlink: " + self.noteref_hlink[i])
         if len(self.citationref_hlink) > 0:
             for i in range(len(self.citationref_hlink)):
                 print ("Citationref_hlink: " + self.citationref_hlink[i])
@@ -1023,6 +1028,20 @@ MERGE (n)-[r:MEDIA]->(m)"""
    
         # Make relations to the Family node will be done in Family.save(),
         # because the Family object is not yet created
+   
+        # Make relations to the Note node
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                try:
+                    noteref_hlink = self.noteref_hlink[i]
+                    query = """
+MATCH (n:Person)   WHERE n.gramps_handle=$handle
+MATCH (m:Note) WHERE m.gramps_handle=$noteref_hlink
+MERGE (n)-[r:NOTE]->(m)"""
+                    tx.run(query, 
+                           {"handle": handle, "noteref_hlink": noteref_hlink})
+                except Exception as err:
+                    print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
    
         # Make relations to the Citation node
         if len(self.citationref_hlink) > 0:
