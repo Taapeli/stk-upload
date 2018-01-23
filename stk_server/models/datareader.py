@@ -1152,12 +1152,11 @@ def handle_citations(collection, tx):
         elif len(citation.getElementsByTagName('confidence') ) > 1:
             print("Error: More than one confidence tag in a citation")
     
-        if len(citation.getElementsByTagName('noteref') ) == 1:
-            citation_noteref = citation.getElementsByTagName('noteref')[0]
-            if citation_noteref.hasAttribute("hlink"):
-                c.noteref_hlink = citation_noteref.getAttribute("hlink")
-        elif len(citation.getElementsByTagName('noteref') ) > 1:
-            print("Error: More than one noteref tag in a citation")
+        if len(citation.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(citation.getElementsByTagName('noteref') )):
+                citation_noteref = citation.getElementsByTagName('noteref')[i]
+                if citation_noteref.hasAttribute("hlink"):
+                    c.noteref_hlink.append(citation_noteref.getAttribute("hlink"))
     
         if len(citation.getElementsByTagName('sourceref') ) == 1:
             citation_sourceref = citation.getElementsByTagName('sourceref')[0]
