@@ -39,7 +39,7 @@ with app.app_context():
     @app.route('/tables')
 #     @roles_accepted('member', 'admin')
     @roles_required('admin')
-    def datatables(): 
+    def tables(): 
         """ Teknisten datataulukoiden käsittelysivu """
         return render_template("datatables.html")
 
@@ -196,9 +196,9 @@ with app.app_context():
         elif subj == "henkilot2":
             persons = models.datareader.lue_henkilot_k()
             return render_template("table_persons2.html", persons=persons)
-        elif subj == "surnames":
-            surnames = models.gen.person.Name.get_surnames()
-            return render_template("table_surnames.html", surnames=surnames)
+#         elif subj == "surnames":
+#             surnames = models.gen.person.Name.get_surnames()
+#             return render_template("table_surnames.html", surnames=surnames)
         elif subj == 'events_wo_cites':
             headings, titles, lists = models.datareader.read_events_wo_cites()
             return render_template("table_of_data.html", 
