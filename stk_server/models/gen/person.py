@@ -39,6 +39,7 @@ class Person:
                     type           str url tyyppi
                     description    str url kuvaus
                 parentin_hlink     str vanhempien osoite
+                noteref_hlink      str huomautuksen osoite
                 citationref_hlink  str viittauksen osoite
                 confidence         str tietojen luotettavuus
                 est_birth          str arvioitu syntymäaika
@@ -60,6 +61,7 @@ class Person:
         self.objref_hlink = []
         self.urls = []
         self.parentin_hlink = []
+        self.noteref_hlink = []
         self.citationref_hlink = []
         self.confidence = ''
         self.est_birth = ''
@@ -809,6 +811,9 @@ SET n.est_death = m.daterange_start"""
         if len(self.parentin_hlink) > 0:
             for i in range(len(self.parentin_hlink)):
                 print ("Parentin_hlink: " + self.parentin_hlink[i])
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                print ("Noteref_hlink: " + self.noteref_hlink[i])
         if len(self.citationref_hlink) > 0:
             for i in range(len(self.citationref_hlink)):
                 print ("Citationref_hlink: " + self.citationref_hlink[i])
@@ -886,7 +891,7 @@ SET n.est_death = m.daterange_start"""
         return points
 
 
-    def save(self, userid, tx):
+    def save(self, username, tx):
         """ Tallettaa henkilön sekä mahdollisesti viitatut nimet, tapahtumat 
             ja sitaatit kantaan 
         """
@@ -919,12 +924,12 @@ SET p.gramps_handle=$handle,
         # Linkitä User nodeen
         try:
             query = """
-MATCH (u:User)   WHERE u.userid=$userid
+MATCH (u:UserProfile) WHERE u.userName=$username
 MATCH (n:Person) WHERE n.gramps_handle=$handle
 MERGE (u)-[r:REVISION]->(n)
 SET r.date=$date"""
             tx.run(query, 
-               {"userid": userid, "handle": handle, "date": today})
+               {"username": username, "handle": handle, "date": today})
         except Exception as err:
             print("Virhe (Person.save:User): {0}".format(err), file=stderr)
             
@@ -1041,6 +1046,20 @@ MERGE (n)-[r:MEDIA]->(m)"""
    
         # Make relations to the Family node will be done in Family.save(),
         # because the Family object is not yet created
+   
+        # Make relations to the Note node
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                try:
+                    noteref_hlink = self.noteref_hlink[i]
+                    query = """
+MATCH (n:Person)   WHERE n.gramps_handle=$handle
+MATCH (m:Note) WHERE m.gramps_handle=$noteref_hlink
+MERGE (n)-[r:NOTE]->(m)"""
+                    tx.run(query, 
+                           {"handle": handle, "noteref_hlink": noteref_hlink})
+                except Exception as err:
+                    print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
    
         # Make relations to the Citation node
         if len(self.citationref_hlink) > 0:
@@ -1162,6 +1181,17 @@ RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
         return shareds.driver.session().run(query)
         
     
+    @staticmethod
+    def get_surnames():
+        """ Listaa kaikki sukunimet tietokannassa """
+        
+        query = """
+            MATCH (n:Name) RETURN distinct n.surname AS surname
+                ORDER BY n.surname
+            """
+        return shareds.driver.session().run(query)
+
+
     @staticmethod
     def set_refname(tx, uniq_id, refname):
         """Asetetaan etunimen referenssinimi  """

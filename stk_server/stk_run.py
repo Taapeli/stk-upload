@@ -39,9 +39,9 @@ with app.app_context():
     @app.route('/tables')
 #     @roles_accepted('member', 'admin')
     @roles_required('admin')
-    def tables(): 
+    def datatables(): 
         """ Teknisten datataulukoiden käsittelysivu """
-        return render_template("datatables.html")
+        return render_template("tables.html")
 
 
     @app.route('/refnames')
@@ -584,9 +584,9 @@ def set_refnames():
 def nimien_yhdistely():   
     """ Nimien listaus tietokannasta ehtolauseella
         oid=arvo        näyttää nimetyn henkilön
+    names = request.form['names']
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
-    names = request.form['names']
     logging.debug('Poimitaan ' + names )
     return redirect(url_for('nayta_ehdolla', ehto='names='+names))
 

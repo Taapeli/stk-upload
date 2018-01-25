@@ -355,7 +355,6 @@ def set_refnames():
             Refname.link_to_refname(pid, surname, 'surname')
             name_count += 1
 
-        # 3. join "firstnames/surname/suffix"
         if patronyme:
             Refname.link_to_refname(pid, patronyme, 'patronyme')
             name_count += 1
@@ -1156,12 +1155,11 @@ def handle_citations(collection, tx):
         elif len(citation.getElementsByTagName('confidence') ) > 1:
             print("Error: More than one confidence tag in a citation")
     
-        if len(citation.getElementsByTagName('noteref') ) == 1:
-            citation_noteref = citation.getElementsByTagName('noteref')[0]
-            if citation_noteref.hasAttribute("hlink"):
-                c.noteref_hlink = citation_noteref.getAttribute("hlink")
-        elif len(citation.getElementsByTagName('noteref') ) > 1:
-            print("Error: More than one noteref tag in a citation")
+        if len(citation.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(citation.getElementsByTagName('noteref') )):
+                citation_noteref = citation.getElementsByTagName('noteref')[i]
+                if citation_noteref.hasAttribute("hlink"):
+                    c.noteref_hlink.append(citation_noteref.getAttribute("hlink"))
     
         if len(citation.getElementsByTagName('sourceref') ) == 1:
             citation_sourceref = citation.getElementsByTagName('sourceref')[0]
@@ -1179,7 +1177,7 @@ def handle_citations(collection, tx):
 
 
 
-def handle_events(collection, userid, tx):
+def handle_events(collection, username, tx):
     # Get all the events in the collection
     events = collection.getElementsByTagName("event")
     
@@ -1274,7 +1272,7 @@ def handle_events(collection, userid, tx):
         elif len(event.getElementsByTagName('objref') ) > 1:
             print("Error: More than one objref tag in an event")
                 
-        e.save(userid, tx)
+        e.save(username, tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
@@ -1419,7 +1417,7 @@ def handle_media(collection, tx):
     return(msg)
 
 
-def handle_people(collection, userid, tx):
+def handle_people(collection, username, tx):
     # Get all the people in the collection
     people = collection.getElementsByTagName("person")
     
@@ -1515,13 +1513,19 @@ def handle_people(collection, userid, tx):
                 if person_parentin.hasAttribute("hlink"):
                     p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
     
+        if len(person.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(person.getElementsByTagName('noteref') )):
+                person_noteref = person.getElementsByTagName('noteref')[i]
+                if person_noteref.hasAttribute("hlink"):
+                    p.noteref_hlink.append(person_noteref.getAttribute("hlink"))
+    
         if len(person.getElementsByTagName('citationref') ) >= 1:
             for i in range(len(person.getElementsByTagName('citationref') )):
                 person_citationref = person.getElementsByTagName('citationref')[i]
                 if person_citationref.hasAttribute("hlink"):
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     
-        p.save(userid, tx)
+        p.save(username, tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
@@ -1641,6 +1645,12 @@ def handle_places(collection, tx):
                 place.placeref_hlink = placeobj_placeref.getAttribute("hlink")
         elif len(placeobj.getElementsByTagName('placeref') ) > 1:
             print("Error: More than one placeref in a place")
+    
+        if len(placeobj.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(placeobj.getElementsByTagName('noteref') )):
+                placeobj_noteref = placeobj.getElementsByTagName('noteref')[i]
+                if placeobj_noteref.hasAttribute("hlink"):
+                    place.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
                 
         place.save(tx)
         counter += 1
