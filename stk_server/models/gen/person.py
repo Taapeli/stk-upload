@@ -452,7 +452,7 @@ RETURN person, urls, COLLECT (name) AS names
     def get_person_events (nmax=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
-            get_persons(oid=123)        tietty henkilö oid:n mukaan poimittuna
+            get_persons(pid=123)        tietty henkilö oid:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
             - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
             
@@ -594,6 +594,24 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
 
         return shareds.driver.session().run(query, id=int(uniq_id))
     
+
+    @staticmethod
+    def get_refnames(pid):
+        """ List Person's all Refnames with name use"""
+        # ╒══════════════════════════╤═════════════════════╕
+        # │"a"                       │"li"                 │
+        # ╞══════════════════════════╪═════════════════════╡
+        # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
+        # │":"Messu- ja kalenteri"}  │                     │
+        # ├──────────────────────────┼─────────────────────┤
+        # │{"name":"Bert-not-exists"}│[{"use":"firstname"}]│
+        # └──────────────────────────┴─────────────────────┘        
+        query = """
+MATCH (p:Person) WHERE ID(p) = $pid
+MATCH path = (a) -[:USEDNAME*]-> (p)
+RETURN a, [x IN RELATIONSHIPS(path)] AS li
+"""
+        return shareds.driver.session().run(query, pid=pid)
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
@@ -1144,30 +1162,22 @@ class Name:
         
     
     @staticmethod
-    def get_all_firstnames():
-        """ Poimii kaikki henkilöiden Name:t etunimijärjestyksessä 
-╒═══════╤══════════════════════╤════════════╤═════════╤══════════════════════════════╤═════╕
-│"ID"   │"fn"                  │"sn"        │"pn"     │"rn"                          │"sex"│
-╞═══════╪══════════════════════╪════════════╪═════════╪══════════════════════════════╪═════╡
-│"30691"│"Abraham"             │"Palander"  │""       │"Aappo/Palander/"             │"M"  │
-├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
-│"30786"│"Abraham Mathias"     │"Bruncrona" │""       │"Aappo Mathias/Bruncrona/"    │"M"  │
-├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
-│"30950"│"Adolf Mathias Israel"│"Sucksdorff"│""       │"Adolf Mathias Israel/Sucksdor│"M"  │
-│       │                      │            │         │ff/"                          │     │
-├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
-│"30281"│"Agata Eufrosine"     │"Tolpo"     │"Gabriels│"Agaata Eufrosine/Tolpo/"     │"F"  │
-│       │                      │            │dotter"  │                              │     │
-└───────┴──────────────────────┴────────────┴─────────┴──────────────────────────────┴─────┘
-        TODO: sex-kenttää ei nyt käytetä, keventäisi jättää pois
+    def get_all_personnames():
+        """ Picks all Name objects 
+    # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
+    # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
+    # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
+    # │30796│"Björn"             │""        │"Jönsson"     │"M"  │
+    # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
+    # │30858│"Catharina Fredrika"│"Åkerberg"│""            │"F"  │
+    # └─────┴────────────────────┴──────────┴──────────────┴─────┘
+        TODO: sex field is not used currently - Remove?
         """
         
         query = """
-MATCH (n)<-[r:NAME]-(a) 
-RETURN ID(n) AS ID, n.firstname AS fn, 
-       n.surname AS sn, n.suffix AS pn, n.refname as rn,
-       a.gender AS sex
-ORDER BY n.firstname"""
+MATCH (n)<-[r:NAME]-(p:Person) 
+RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
+    p.gender AS sex"""
         return shareds.driver.session().run(query)
         
     
