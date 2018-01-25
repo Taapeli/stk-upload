@@ -12,12 +12,12 @@ import shareds
 #===============================================================================
 
 
-def connect_db():
-    """ Opens a new database connection if there is none yet for the
-        current application context.
-
-        Ks. https://neo4j.com/docs/developer-manual/current/drivers/client-applications/
-    """
+# def connect_db():
+#     """ Opens a new database connection if there is none yet for the
+#         current application context.
+# 
+#         Ks. https://neo4j.com/docs/developer-manual/current/drivers/client-applications/
+#     """
 
     #===========================================================================
     # if not hasattr(g, 'driver'):
@@ -35,6 +35,11 @@ def connect_db():
     # # Return True, if no driver can be accessed
     # #return shareds.driver.pool.closed
     #===========================================================================
+
+def get_server_location():
+    # Returns server as ''
+    dbloc = shareds.driver.address
+    return ':'.join((dbloc[0],str(dbloc[1])))
 
 
 def get_new_handles(inc=1):
@@ -95,28 +100,28 @@ def alusta_kanta():
 #         sch.create_index("Refname", i)
 
 
-class Date():
-    """ Päivämäärän muuntofunktioita
-        Käytetty käräjäaineiston aikojen muunnoksiin 2014(?)
-    """
-
-    @staticmethod       
-    def range_str(aikamaare):
-        """ Karkea aikamäären siivous, palauttaa merkkijonon
-        
-            Aika esim. '1666.02.20-22' muunnetaan muotoon '1666-02-20 … 22':
-            * Tekstin jakaminen sarakkeisiin käyttäen välimerkkiä ”-” 
-              tai ”,” (kentät tekstimuotoiltuna)
-            * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
-              ”.” viivaksi
-         """
-        t = aikamaare.replace('-','|').replace(',','|').replace('.', '-')
-        if '|' in t:
-            osat = t.split('|')
-            # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
-            t = '%s … %s' % (osat[0], osat[-1])
-            if len(osat) > 2:
-                logging.warning('Aika korjattu: {} -> {}'.format(aikamaare, t))
-
-        t = t.replace('.', '-')
-        return t
+# class Date():
+#     """ Päivämäärän muuntofunktioita
+#         Käytetty käräjäaineiston aikojen muunnoksiin 2014(?)
+#     """
+# 
+#     @staticmethod       
+#     def range_str(aikamaare):
+#         """ Karkea aikamäären siivous, palauttaa merkkijonon
+#         
+#             Aika esim. '1666.02.20-22' muunnetaan muotoon '1666-02-20 … 22':
+#             * Tekstin jakaminen sarakkeisiin käyttäen välimerkkiä ”-” 
+#               tai ”,” (kentät tekstimuotoiltuna)
+#             * Päivämäärän muotoilu ISO-muotoon vaihtamalla erottimet 
+#               ”.” viivaksi
+#          """
+#         t = aikamaare.replace('-','|').replace(',','|').replace('.', '-')
+#         if '|' in t:
+#             osat = t.split('|')
+#             # osat[0] olkoon tapahtuman 'virallinen' päivämäärä
+#             t = '%s … %s' % (osat[0], osat[-1])
+#             if len(osat) > 2:
+#                 logging.warning('Aika korjattu: {} -> {}'.format(aikamaare, t))
+# 
+#         t = t.replace('.', '-')
+#         return t

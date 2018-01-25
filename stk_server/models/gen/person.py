@@ -507,7 +507,7 @@ RETURN person, urls, COLLECT (name) AS names
         """ Voidaan lukea henkilöitä tapahtumineen kannasta
             a) Tietokanta-avaimella valittu henkilö
             b) nimellä poimittu henkilö
-               rule='all'       kaikki
+               rule:'all'       kaikki
                rule='surname'   sukunimen alkuosalla
                rule='firstname' etunimen alkuosalla
                rule='suffix'    patronyymin alkuosalla

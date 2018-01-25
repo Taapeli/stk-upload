@@ -9,7 +9,7 @@ import xml.dom.minidom
 import re
 
 from operator import itemgetter
-from models.dbutil import Date
+#from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
@@ -20,199 +20,129 @@ from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
 
-from flask_security import login_required, roles_required, current_user
+#from flask_security import login_required, roles_required, current_user
 import shareds
 
-def _poimi_(person_id, event_id, row, url):
-    """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
-    """
-
-    suku=row['Sukunimi_vakioitu']
-    etu=row['Etunimi_vakioitu']
-
-    """ Käräjät-tieto on yhdessä sarakkeessa muodossa 'Tiurala 1666.02.20-22'
-        Paikka erotetaan ja aika muunnetaan muotoon '1666-02-20 … 22'
-        Päivämäärän korjaus tehdään jos kentässä on väli+numero.
-        - TODO Pelkää vuosiluku käräjäpaikkana pitäisi siirtää alkuajaksi
-     """
-    if ' 1' in row['Käräjät']:
-        kpaikka, aika = row['Käräjät'].split(' 1')
-        aika = Date.range_str('1' + aika)
-    else:
-        kpaikka, aika = (row['Käräjät'], '')
-
-    # Luodaan henkilö ja käräjätapahtuma
-
-    p = Person(person_id)
-    n = Name(etu, suku)
-    p.names.append(n)
-    p.name_orig = "{0} /{1}/".format(etu, suku)
-    p.occupation = row['Ammatti_vakioitu']
-    p.place=row['Paikka_vakioitu']
-
-    e = Event(event_id, 'Käräjät')
-    e.names = kpaikka
-    e.date = aika
-    e.name_orig = row['Käräjät']
-
-    c = Citation()
-    c.tyyppi = 'Signum'
-    c.oid = row['Signum']
-    c.url = url
-    c.name_orig = row['Signum']
-    c.source = Source()
-    c.source.nimi = kpaikka + ' ' + aika
-    e.citation = c
-
-    p.events.append(e)
-    return p
-
-
-def henkilolista(pathname):
-    """ Lukee csv-tiedostosta aineiston, ja luo kustakin 
-        syöttörivistä Person-objektit
-    """
-    persons = []
-    row_nro = 0
-    url = ''
-
-    with open(pathname, 'r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f, dialect='excel')
-
-        for row in reader:
-            if row_nro == 0:
-                logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
-                if not "Käräjät" in reader.fieldnames:
-                    raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
-            row_nro += 2
-            person_id = row_nro
-    
-            # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
-            if row['Käräjät'][:4] == 'http':
-                url = row['Käräjät']
-                #logging.debug('%s: url=%s' % (person_id, url))
-                continue
-
-            # Onko henkilörivi?
-            if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
-                logging.warning('%s: nimikentät tyhjiä!' % person_id)
-                continue
-                            
-            p = _poimi_(row_nro, row_nro+1, row, url)
-            persons.append(p)
-
-    logging.info(u'%s: %d riviä' % (pathname, row_nro))
-    return (persons)
-
-
-def datastorer(pathname):
-    """ Lukee csv-tiedostosta aineiston, ja tallettaa kustakin syöttörivistä
-         Person-objektit sisältäen käräjä-Eventit, Citation-viittaukset ja
-         Place-paikat
-    """
-    row_nro = 0
-    url = ''
-
-    with open(pathname, 'r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f, dialect='excel')
-
-        for row in reader:
-            if row_nro == 0:
-                logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
-                if not "Käräjät" in reader.fieldnames:
-                    raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
-            row_nro += 2
-            person_id = row_nro
-    
-            # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
-            if row['Käräjät'][:4] == 'http':
-                url = row['Käräjät']
-                #logging.debug('%s: url=%s' % (person_id, url))
-                continue
-
-            # Onko henkilörivi?
-            if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
-                logging.warning('%s: nimikentät tyhjiä!' % person_id)
-                continue
-                
-            p = _poimi_(row_nro, row_nro+1, row, url)
-    
-            # Tallettaa Person-olion ja siihen sisältyvät Eventit
-            # (Person)-[OSALLISTUU]->(Event)
-            p.save("User100")
-
-    message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
-    return message
+# def _poimi_(person_id, event_id, row, url):
+#     """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
+#     """
+# 
+#     suku=row['Sukunimi_vakioitu']
+#     etu=row['Etunimi_vakioitu']
+# 
+#     """ Käräjät-tieto on yhdessä sarakkeessa muodossa 'Tiurala 1666.02.20-22'
+#         Paikka erotetaan ja aika muunnetaan muotoon '1666-02-20 … 22'
+#         Päivämäärän korjaus tehdään jos kentässä on väli+numero.
+#         - TODO Pelkää vuosiluku käräjäpaikkana pitäisi siirtää alkuajaksi
+#      """
+#     if ' 1' in row['Käräjät']:
+#         kpaikka, aika = row['Käräjät'].split(' 1')
+#         aika = Date.range_str('1' + aika)
+#     else:
+#         kpaikka, aika = (row['Käräjät'], '')
+# 
+#     # Luodaan henkilö ja käräjätapahtuma
+# 
+#     p = Person(person_id)
+#     n = Name(etu, suku)
+#     p.names.append(n)
+#     p.name_orig = "{0} /{1}/".format(etu, suku)
+#     p.occupation = row['Ammatti_vakioitu']
+#     p.place=row['Paikka_vakioitu']
+# 
+#     e = Event(event_id, 'Käräjät')
+#     e.names = kpaikka
+#     e.date = aika
+#     e.name_orig = row['Käräjät']
+# 
+#     c = Citation()
+#     c.tyyppi = 'Signum'
+#     c.oid = row['Signum']
+#     c.url = url
+#     c.name_orig = row['Signum']
+#     c.source = Source()
+#     c.source.nimi = kpaikka + ' ' + aika
+#     e.citation = c
+# 
+#     p.events.append(e)
+#     return p
+#
+#
+# def henkilolista(pathname):
+#     """ Lukee csv-tiedostosta aineiston, ja luo kustakin 
+#         syöttörivistä Person-objektit
+#     """
+#     persons = []
+#     row_nro = 0
+#     url = ''
+# 
+#     with open(pathname, 'r', newline='', encoding='utf-8') as f:
+#         reader = csv.DictReader(f, dialect='excel')
+# 
+#         for row in reader:
+#             if row_nro == 0:
+#                 logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
+#                 if not "Käräjät" in reader.fieldnames:
+#                     raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
+#             row_nro += 2
+#             person_id = row_nro
+#     
+#             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
+#             if row['Käräjät'][:4] == 'http':
+#                 url = row['Käräjät']
+#                 #logging.debug('%s: url=%s' % (person_id, url))
+#                 continue
+# 
+#             # Onko henkilörivi?
+#             if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
+#                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
+#                 continue
+#                             
+#             p = _poimi_(row_nro, row_nro+1, row, url)
+#             persons.append(p)
+# 
+#     logging.info(u'%s: %d riviä' % (pathname, row_nro))
+#     return (persons)
 
 
-def lue_henkilot(oid=None, names=None, nmax=1000):
-    """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
-        
-        Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
-        käräjätapahtuman muuttujalistoja
-    """
-    
-    persons = []
-    t0 = time.time()
-    recs = Person.get_person_events(nmax=nmax, pid=oid, names=names)
-    nro = 0
-    for rec in recs:
-        nro = nro + 1
-        # Saatu Person ja collection(Event)
-        #Palauttaa riveillä listan muuttujia:
-        #n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
-        #  0      1            2           3       4      5        6
-        # 146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]    
-
-        pid = rec['n.id']
-        p = Person(pid)
-        etu = ""
-        suku = ""
-        if rec['k.firstname']:
-            etu = rec['k.firstname']
-        if rec['k.surname']:
-            suku = rec['k.surname']
-        p.names.append(Name(etu,suku))
-#        if rec['n.name_orig']:
-#            p.name_orig = rec['n.name_orig']
-#         if rec['n.occu']:
-#             p.occupation = rec['n.occu']
-#         if rec['n.place']:
-#             p.place= rec['n.place']
-
-        for ev in rec['events']:
-            # 'events' on lista käräjiä, jonka jäseninä on lista muuttujia:
-            #[[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
-            #    0      1        2        3                4
-            #[[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
-
-            event_id = ev[0]
-            if event_id:
-                e = Event(event_id, ev[1])
-    #             e.name = ev[2]
-    #             e.date = ev[3]
-    #             e.name_orig = ev[4]
-                p.events.append(e)    
-    #            logging.info("lue_henkilot: Tapahtuma {}".format(e))
-
-#            c = Citation()
-#            c.tyyppi = 'Signum'
-#            c.oid = 'Testi3'
-#            c.url = url
-#            c.source = Source()
-#            c.source.nimi = 'Testi3'
-#            e.citation = c
-
-        persons.append(p)
-
-    if nro == 0:
-        logging.warning("lue_henkilot: ei ketään oid={}, names={}".format(oid, names))
-    else:
-        logging.info("lue_henkilot: {} henkiloä".format(nro))
-        #print ("Lue_henkilot:\n", retList[0])
-    logging.debug("TIME lue_henkilot {} sek".format(time.time()-t0))
-
-    return (persons)
+# def datastorer(pathname):
+#     """ Lukee csv-tiedostosta aineiston, ja tallettaa kustakin syöttörivistä
+#          Person-objektit sisältäen käräjä-Eventit, Citation-viittaukset ja
+#          Place-paikat
+#     """
+#     row_nro = 0
+#     url = ''
+# 
+#     with open(pathname, 'r', newline='', encoding='utf-8') as f:
+#         reader = csv.DictReader(f, dialect='excel')
+# 
+#         for row in reader:
+#             if row_nro == 0:
+#                 logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
+#                 if not "Käräjät" in reader.fieldnames:
+#                     raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
+#             row_nro += 2
+#             person_id = row_nro
+#     
+#             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
+#             if row['Käräjät'][:4] == 'http':
+#                 url = row['Käräjät']
+#                 #logging.debug('%s: url=%s' % (person_id, url))
+#                 continue
+# 
+#             # Onko henkilörivi?
+#             if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
+#                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
+#                 continue
+#                 
+#             p = _poimi_(row_nro, row_nro+1, row, url)
+#     
+#             # Tallettaa Person-olion ja siihen sisältyvät Eventit
+#             # (Person)-[OSALLISTUU]->(Event)
+#             p.save("User100")
+# 
+#     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
+#     return message
 
 
 def lue_henkilot_k(keys=None):
@@ -601,9 +531,8 @@ def read_same_birthday(uniq_id=None):
     ids = []
     result = Person.get_people_with_same_birthday()
     for record in result:
-       new_array = record['ids']
-
-       ids.append(new_array)
+        new_array = record['ids']
+        ids.append(new_array)
 
     return (ids)
 
@@ -616,9 +545,8 @@ def read_same_deathday(uniq_id=None):
     ids = []
     result = Person.get_people_with_same_deathday()
     for record in result:
-       new_array = record['ids']
-
-       ids.append(new_array)
+        new_array = record['ids']
+        ids.append(new_array)
 
     return (ids)
 
@@ -631,9 +559,8 @@ def read_same_name(uniq_id=None):
     ids = []
     result = Name.get_people_with_same_name()
     for record in result:
-       new_array = record['ids']
-
-       ids.append(new_array)
+        new_array = record['ids']
+        ids.append(new_array)
 
     return (ids)
 
@@ -834,14 +761,12 @@ def get_person_data_by_id(uniq_id):
     """
     p = Person()
     p.uniq_id = int(uniq_id)
-    #.get_person_and_name_data_by_id()
     p.get_person_w_names()
     p.get_hlinks_by_id()
     
     events = []
     sources = []
     source_cnt = 0
-    mybirth = ''
 
     # Events
 

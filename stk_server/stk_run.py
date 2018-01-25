@@ -112,14 +112,14 @@ def show_person_page(ehto):
             person, events, photos, sources, families = \
                 models.datareader.get_person_data_by_id(value)
             for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    print("  Mother: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
                 if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    print("  Father:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print("    Child ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
@@ -179,12 +179,10 @@ def nayta_henkilot(subj):
         # Kertova-tyyliin
         persons = models.datareader.lue_henkilot_k()
         return render_template("k_persons.html", persons=persons, menuno=0)
-    if subj == "henkilot":
-        # dburi vain tiedoksi!
-        dbloc = shareds.driver.address
-        dburi = ':'.join((dbloc[0],str(dbloc[1])))
-        persons = models.datareader.lue_henkilot()
-        return render_template("table_persons.html", persons=persons, uri=dburi)
+#     if subj == "henkilot":
+#         dburi = models.dbutil.get_server_location()
+#         persons = models.datareader.lue_henkilot()
+#         return render_template("table_persons.html", persons=persons, uri=dburi)
     elif subj == "henkilot2":
         persons = models.datareader.lue_henkilot_k()
         return render_template("table_persons2.html", persons=persons)
@@ -288,6 +286,8 @@ def show_locations():
 def show_person_data(uniq_id):
     """ henkilön tietojen näyttäminen ruudulla """
     person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
+    logger.debug("Got {} persons, {} events, {} photos, {} sources, {} families".\
+                 format(len(person), len(events), len(photos), len(sources), len(families)))
     return render_template("table_person_by_id.html",
                        person=person, events=events, photos=photos, sources=sources)
 
@@ -367,16 +367,16 @@ def show_family_data(uniq_id):
 def nayta_ehdolla(ehto):
     """ Nimien listaus tietokannasta ehtolauseella
         oid=arvo        näyttää nimetyn henkilön
-        names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
+        name=arvo    näyttää henkilöt, joiden nimi alkaa arvolla
     """
     key, value = ehto.split('=')
     try:
-        if key == 'oid':
-            persons = models.datareader.lue_henkilot(oid=value)
-            return render_template("person.html", persons=persons)
-        elif key == 'names':
+#         if key == 'oid':
+#             persons = models.datareader.lue_henkilot(oid=value)
+#             return render_template("person.html", persons=persons)
+        if key == 'name':
             value=value.title()
-            persons = models.datareader.lue_henkilot(names=value)
+            persons = models.datareader.lue_henkilot_k(keys=['surname',value])
             return render_template("join_persons.html",
                                    persons=persons, pattern=value)
         elif key == 'cite_sour_repo':
@@ -425,12 +425,12 @@ def lataa():
 def talleta(filename, subj):
     """ tietojen tallettaminen kantaan """
     pathname = models.loadfile.fullname(filename)
-    dburi = models.dbutil.connect_db()
+    dburi = models.dbutil.get_server_location()
     try:
-        if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
-            status = models.datareader.datastorer(pathname)
-        elif subj == 'refnimet': # Referenssinimet
-            # Tallettaa Refname-objekteja
+#         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
+#             status = models.datareader.datastorer(pathname)
+        if subj == 'refnimet': # Referenssinimet
+            # Stores Refname objects
             status = models.cvs_refnames.referenssinimet(pathname)
         elif subj == 'xml_file': # gramps backup xml file to Neo4j db
             status = models.datareader.xml_to_neo4j(pathname, current_user.username)
@@ -441,7 +441,7 @@ def talleta(filename, subj):
                 "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
-               text="Oikeaa sarakeotsikkoa ei löydy: " + str(e))
+               text="Missing proper column title: " + str(e))
     return render_template("talletettu.html", text=status, uri=dburi)
 
 
@@ -451,6 +451,8 @@ def show_person_data_dbl(uniq_id):
     """ henkilön tietojen näyttäminen ruudulla """
     #models.dbutil.connect_db()
     person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
+    logger.debug("Got {} persons, {} events, {} photos, {} sources, {} families".\
+                 format(len(person), len(events), len(photos), len(sources), len(families)))
     return render_template("table_person_by_id.html",
                        person=person, events=events, photos=photos, sources=sources)
 
@@ -460,7 +462,6 @@ def compare_person_page_dbl(ehto):
     """ Vertailu - henkilön tietojen näyttäminen ruudulla
         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
     """
-    #models.dbutil.connect_db()
     key, value = ehto.split('=')
     try:
         if key == 'uniq_id':
@@ -495,14 +496,14 @@ def compare_person_page2_dbl(ehto):
             person, events, photos, sources, families = \
                 models.datareader.get_person_data_by_id(value)
             for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                print ("{} in the family {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    print("  Mother: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
                 if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    print("  Father:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print("    Clild ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
@@ -538,9 +539,7 @@ def nayta_ehdolla_dbl(ehto):
 @app.route('/aseta/confidence')
 def aseta_confidence():
     """ tietojen laatuarvion asettaminen henkilöille """
-    #models.dbutil.connect_db()
-    dburi = models.dbutil.connect_db()
-
+    dburi = models.dbutil.get_server_location()
     message = models.datareader.set_confidence_value()
     return render_template("talletettu.html", text=message, uri=dburi)
 
@@ -548,9 +547,7 @@ def aseta_confidence():
 @app.route('/aseta/estimated_dates')
 def aseta_estimated_dates():
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    #models.dbutil.connect_db()
-    dburi = models.dbutil.connect_db()
-
+    dburi = models.dbutil.get_server_location()
     message = models.datareader.set_estimated_dates()
     return render_template("talletettu.html", text=message, uri=dburi)
 
@@ -558,7 +555,7 @@ def aseta_estimated_dates():
 @app.route('/set/refnames')
 def set_refnames():
     """ Setting reference names for all persons """
-    dburi = models.dbutil.connect_db()
+    dburi = models.dbutil.get_server_location()
     message = models.datareader.set_refnames()
     return render_template("talletettu.html", text=message, uri=dburi)
 
