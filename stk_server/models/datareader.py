@@ -318,65 +318,69 @@ def set_estimated_dates():
     
     
 def set_refnames():
-    """ Asettaa henkilöille refnamet
+    """ Set Refnames to all Persons
     """
-    set_count = 0
-    get_count = 0
-    tx = User.beginTransaction()
+    pers_count = 0
+    name_count = 0
+    t0 = time.time()
 
-    names = Name.get_all_firstnames()
+    persons = Name.get_all_personnames()
     # Process each different first name
-    for rec in names:
-        # ╒═══════╤══════════════════════╤════════════╤════════════════╤═════╕
-        # │"ID"   │"fn"                  │"sn"        │"pn"            │"sex"│
-        # ╞═══════╪══════════════════════╪════════════╪════════════════╪═════╡
-        # │"30281"│"Agata Eufrosine"     │"Tolpo"     │"Gabrielsdotter"│"F"  │
-        # └───────┴──────────────────────┴────────────┴────────────────┴─────┘
-
-        # Build a new refname
-        # 1. first names
+    for rec in persons:
+        # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
+        # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
+        # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
+        # │30796│"Björn"             │""        │"Jönsson"     │"M"  │
+        # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
+        # │30827│"Johan"             │"Sibbes"  │""            │"M"  │
+        # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
+        # │30844│"Maria Elisabet"    │""        │"Johansdotter"│"F"  │
+        # └─────┴────────────────────┴──────────┴──────────────┴─────┘
+        # Build new refnames
+        pid = rec["ID"]
         firstname = rec["fn"]
-        if firstname == 'N':
-            firstnames = ''
-        else:
-            fn_list = []
-            prev=('?', '?')
+        surname = rec["sn"]
+        patronyme = rec["pn"]
+        #gender = rec["sex"]
+        tx = User.beginTransaction()
+
+        # 1. firstnames
+        if firstname and firstname != 'N':
             for name in firstname.split(' '):
-                if name == prev[0]:
-                    # Same as previous
-                    fn_list.append(prev[1])
-                else:
-                    nm = None
-                    # For each of first names find refname
-                    results = Refname.get_refname(name)
-                    result = results.single()
-                    if result:
-                        nm = result['rname']
-                        get_count += 1
-                    else:
-                        nm = name
-                    fn_list.append(nm)
-                    prev = (name, nm)
-            firstnames = " ".join(fn_list)
+                Refname.link_to_refname(pid, name, 'firstname')
+                name_count += 1
 
         # 2. surname and patronyme
-        surname = rec["sn"]     #.strip()
-        if (surname == 'N'):
-            surname = ''
-        suffix = rec["pn"]
-        # 3. join "firstnames/surname/suffix"
-        if surname:
-            refname = "".join((firstnames,'/',surname,'/'))
-        else:
-            refname = "".join((firstnames,'//',suffix))
-        # 4. Store it
-        if refname != rec["rn"]:
-            Name.set_refname(tx, rec["ID"], refname)
-            set_count += 1
+        if surname and surname != 'N':
+            Refname.link_to_refname(pid, surname, 'surname')
+            name_count += 1
 
-    User.endTransaction(tx)
-    msg="Sovellettu {} referenssinimeä {} nimeen".format(get_count, set_count)
+        # 3. join "firstnames/surname/suffix"
+        if patronyme:
+            Refname.link_to_refname(pid, patronyme, 'patronyme')
+            name_count += 1
+        User.endTransaction(tx)
+        pers_count += 1
+
+        # ===    Report status    ====
+        rnames = []
+        recs = Person.get_refnames(pid)
+        for rec in recs:
+            # ╒══════════════════════════╤═════════════════════╕
+            # │"a"                       │"li"                 │
+            # ╞══════════════════════════╪═════════════════════╡
+            # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
+            # │":"Messu- ja kalenteri"}  │                     │
+            # └──────────────────────────┴─────────────────────┘        
+
+            name = rec['a']
+            link = rec['li'][0]
+            rnames.append("{} ({})".format(name['name'], link['use']))
+        logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
+    
+    msg="Processed {} names of {} persons".format(name_count, pers_count)
     logging.info(msg)
+    logging.debug("TIME lue_henkilot {} sek".format(time.time()-t0))
     return msg
 
 

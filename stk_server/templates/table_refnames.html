@@ -28,6 +28,7 @@
         <th>ref.nimi</th>
         <th>sukupuoli</th>
         <th>lähde</th>
+        <th>henkilöitä</th>
     </tr>
     {% for r in names %}
         <tr>
@@ -38,6 +39,7 @@
             <td>{{r.refname}}</td>
             <td class="center">{% if r.gender %}{{sp[r.gender]}}{% endif %}</td>
             <td>{% if r.source %}{{r.source}}{% endif %}</td>
+            <td class="right">{% if r.usecount %}{{r.usecount}}{% endif %}</td>
         </tr>
     {% endfor %}
 </table>

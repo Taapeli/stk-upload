@@ -193,25 +193,52 @@ RETURN ID(a) AS aid, a.name AS aname"""
                 logging.warning('Lisääminen (a) ei onnistunut: {}'.format(err))
 
 
-    @staticmethod   
-    def get_refname(name):
-        """ Find a reference name for given name (for ex. 'Aaron')
-        ╒═══════╕
-        │"rname"│
-        ╞═══════╡
-        │"Aaro" │
-        └───────┘
-        """
+    @staticmethod
+    def link_to_refname(pid, name, reftype):
+        # Links reference name of type reftype to Person(pid)
+
+        if not name > "":
+            logging.warning("Missing name {} for {} - not added".format(reftype, name))
+            return
+        if not (reftype in Refname.REFTYPES):
+            raise ValueError("Invalid reftype {}".format(reftype))
+
         query="""
-MATCH (a:Refname {name:$mn}) -[:BASENAME*]-> (b) 
-RETURN b.name AS rname
-LIMIT 1"""
+MATCH (p:Person) WHERE ID(p) = $pid
+MERGE (a:Refname {name:$name})
+MERGE (a) -[:USEDNAME {use:$use}]-> (p)
+RETURN ID(a) as rid"""
         try:
-            return shareds.driver.session().run(query, nm=name)
+            with shareds.driver.session() as session:
+                result = session.run(query, pid=pid, name=name, use=reftype)
+
+                logging.debug("Created {} nodes for {}".format(\
+                        result.summary().counters.nodes_created, name))
+
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
-            logging.warning('Kannan lukeminen ei onnistunut: {}'.format(err))
-            return None
+            # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
+            print("Error: {0}".format(err), file=stderr)
+
+
+#     @staticmethod   
+#     def get_refname(name):
+#         """ Find a reference name for given name (for ex. 'Aaron')
+#         ╒═══════╕
+#         │"rname"│
+#         ╞═══════╡
+#         │"Aaro" │
+#         └───────┘
+#         """
+#         query="""
+# MATCH (a:Refname {name:$mn}) -[:BASENAME*]-> (b) 
+# RETURN b.name AS rname
+# LIMIT 1"""
+#         try:
+#             return shareds.driver.session().run(query, nm=name)
+#         except Exception as err:
+#             print("Virhe: {0}".format(err), file=stderr)
+#             logging.warning('Kannan lukeminen ei onnistunut: {}'.format(err))
+#             return None
             
             
     @staticmethod   
@@ -252,44 +279,35 @@ ORDER BY a.name""".format(reftype, reftype)
     @staticmethod
     def get_refnames():
         """ Get all Refnames
-            Returns a list of Refname objects, with referenced names and reftypes.
+            Returns a list of Refname objects, with referenced names, reftypes
+            and count of usages.
             [Call: datareader.get_refnames()]
         """
         query = """
 MATCH (n:Refname)
-OPTIONAL MATCH (n:Refname)-[r]->(m)
-RETURN ID(n) AS oid, n, r, m
-ORDER BY n.name"""
+OPTIONAL MATCH (n)-[r:BASENAME]->(m)
+OPTIONAL MATCH (n)-[l:USEDNAME]->(p)
+RETURN ID(n) AS oid, n, r, m, COUNT(p) AS uses"""
         try:
+            ret = []
             results = shareds.driver.session().run(query)
-            return Refname._triples_to_objects(results)
+            for result in results:
+                rn = Refname(result['n']["name"])
+                rn.rid = result['n'].id
+                rn.gender = result['n']["gender"]
+                rn.source = result['n']["source"]
+                if result['m']:
+                    # Referenced name exists
+                    rtype = result['r'].type
+                    if rtype == 'BASENAME':
+                        rn.reftype = result['r']['use']
+                    else:
+                        rn.reftype = rtype
+                    rn.refname = result['m']["name"]
+                rn.usecount = result["uses"]
+                ret.append(rn)
+
+            return ret
         except Exception as err:
-            print("Virhe (Refname.getrefnames): {0}".format(err), file=stderr)
+            print("Error (Refname.getrefnames): {0}".format(err), file=stderr)
             return []
-
-
-    @staticmethod
-    def _triples_to_objects(results):
-        # n = <Node id=17378 labels={'Refname'} 
-        #      properties={'name': 'Aabeli', 'source': 'harvinainen'}>
-        # r = <Relationship id=259 start=17378 end=17439 type='REFFIRST'
-        #      properties={use:'firstname'}>
-        # m = <Node id=17439 labels={'Refname'} 
-        #      properties={'name': 'Aapeli', 'gender': 'M', 
-        #                  'source': 'Messu- ja kalenteri'}>
-        ret = []
-        for result in results:
-            rn = Refname(result['n']["name"])
-            rn.oid = result['n'].id
-            rn.gender = result['n']["gender"]
-            rn.source = result['n']["source"]
-            if result['m']:
-                # Referenced name exists
-                rtype = result['r'].type
-                if rtype == 'BASENAME':
-                    rn.reftype = result['r']['use']
-                else:
-                    rn.reftype = rtype
-                rn.refname = result['m']["name"]
-            ret.append(rn)
-        return ret
