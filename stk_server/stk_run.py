@@ -57,14 +57,14 @@ with app.app_context():
 
 @app.route('/person/list/', methods=['POST', 'GET'])
 def show_person_list(selection=None):
-    """ Valittujen tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
+    """ Show list of selected Persons """
     if request.method == 'POST':
         try:
             # Selection from search form
             name = request.form['name']
             rule = request.form['rule']
             keys = (rule, name)
-            persons = models.datareader.lue_henkilot_k(keys)
+            persons = models.datareader.read_persons_with_events(keys)
             return render_template("k_persons.html", persons=persons, menuno=0)
         except Exception:
             flash("Ei oikeita hakukenttiä", category='warning')
@@ -77,7 +77,7 @@ def show_person_list(selection=None):
         keys = selection.split('=')
     else:
         keys = ('all',)
-    persons = [] #models.datareader.lue_henkilot_k(keys)
+    persons = [] #models.datareader.read_persons_with_events(keys)
     return render_template("k_persons.html", persons=persons, menuno=0)
 
 
@@ -87,7 +87,7 @@ def show_persons_restricted(selection=None):
     if not current_user.is_authenticated:
         # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit. Vaihtoehtoisesti kutsu toistra metodia.
                 keys = ('all',)
-    persons = models.datareader.lue_henkilot_k(keys)
+    persons = models.datareader.read_persons_with_events(keys)
     return render_template("k_persons.html", persons=persons, menuno=1)
 
 
@@ -96,7 +96,7 @@ def show_persons_restricted(selection=None):
 def show_all_persons_list(selection=None):
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     keys = ('all',)
-    persons = models.datareader.lue_henkilot_k(keys)
+    persons = models.datareader.read_persons_with_events(keys)
     return render_template("k_persons.html", persons=persons, menuno=1)
 
 
@@ -177,14 +177,14 @@ def nayta_henkilot(subj):
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     if subj == "k_persons":
         # Kertova-tyyliin
-        persons = models.datareader.lue_henkilot_k()
+        persons = models.datareader.read_persons_with_events()
         return render_template("k_persons.html", persons=persons, menuno=0)
 #     if subj == "henkilot":
 #         dburi = models.dbutil.get_server_location()
 #         persons = models.datareader.lue_henkilot()
 #         return render_template("table_persons.html", persons=persons, uri=dburi)
     elif subj == "henkilot2":
-        persons = models.datareader.lue_henkilot_k()
+        persons = models.datareader.read_persons_with_events()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "surnames":
         surnames = models.gen.person.Name.get_surnames()
@@ -260,25 +260,25 @@ def show_locations():
     return render_template("k_locations.html", locations=locations)
 
 
-    @app.route('/list/refnames', defaults={'reftype': None})
-    @app.route('/list/refnames/<string:reftype>')
-    def nayta_refnimet(reftype):
-        """ show reference names on the screen """
-        if reftype and reftype != "":
-            names = models.datareader.read_typed_refnames(reftype)  # TODO: Not tested method
-            return render_template("table_refnames_1.html", names=names, reftype=reftype)
-        else:
-            names = models.datareader.read_refnames()
-            return render_template("table_refnames.html", names=names)
+@app.route('/list/refnames', defaults={'reftype': None})
+@app.route('/list/refnames/<string:reftype>')
+def list_refnames(reftype):
+    """ show reference names on the screen """
+    if reftype and reftype != "":
+        names = models.datareader.read_typed_refnames(reftype)  # TODO: Not tested method
+        return render_template("table_refnames_1.html", names=names, reftype=reftype)
+    else:
+        names = models.datareader.read_refnames()
+        return render_template("table_refnames.html", names=names)
 
 
-    @app.route('/lista/people_by_surname/', defaults={'surname': ""})
-    @app.route('/lista/people_by_surname/<string:surname>')
-    def list_people_by_surname(surname):
-        """ henkilöiden, joilla on sama sukunimi näyttäminen ruudulla """
-        people = models.datareader.get_people_by_surname(surname)
-        return render_template("table_people_by_surname.html",
-                               surname=surname, people=people)
+@app.route('/lista/people_by_surname/', defaults={'surname': ""})
+@app.route('/lista/people_by_surname/<string:surname>')
+def list_people_by_surname(surname):
+    """ henkilöiden, joilla on sama sukunimi näyttäminen ruudulla """
+    people = models.datareader.get_people_by_surname(surname)
+    return render_template("table_people_by_surname.html",
+                           surname=surname, people=people)
 
 
     #  linkki oli sukunimiluettelosta
@@ -376,7 +376,7 @@ def nayta_ehdolla(ehto):
 #             return render_template("person.html", persons=persons)
         if key == 'name':
             value=value.title()
-            persons = models.datareader.lue_henkilot_k(keys=['surname',value])
+            persons = models.datareader.read_persons_with_events(keys=['surname',value])
             return render_template("join_persons.html",
                                    persons=persons, pattern=value)
         elif key == 'cite_sour_repo':
@@ -392,7 +392,7 @@ def nayta_ehdolla(ehto):
             return render_template("source_citations.html",
                                    sources=sources)
         elif key == 'uniq_id':
-            persons = models.datareader.lue_henkilot_k(("uniq_id",value))
+            persons = models.datareader.read_persons_with_events(("uniq_id",value))
             return render_template("person2.html", persons=persons)
         else:
             raise(KeyError("Vain oid:llä voi hakea"))
@@ -406,39 +406,39 @@ def nayta_ehdolla(ehto):
 
 @app.route('/lataa', methods=['POST'])
 def lataa():
-    """ Versio 2: Lataa cvs-tiedoston työhakemistoon kantaan talletettavaksi
+    """ Load a cvs file to temp directory for processing in the server
     """
     try:
         infile = request.files['filenm']
-        aineisto = request.form['aineisto']
-        logging.debug('Saatiin ' + aineisto + ", tiedosto: " + infile.filename )
+        material = request.form['material']
+        logging.debug("Got a {} file '{}'".format(material, infile.filename))
 
         models.loadfile.upload_file(infile)
 
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    return redirect(url_for('talleta', filename=infile.filename, subj=aineisto))
+    return redirect(url_for('save_loaded', filename=infile.filename, subj=material))
 
 
 @app.route('/talleta/<string:subj>/<string:filename>')
-def talleta(filename, subj):
-    """ tietojen tallettaminen kantaan """
+def save_loaded(filename, subj):
+    """ Saving loaded reference data to the database """
     pathname = models.loadfile.fullname(filename)
     dburi = models.dbutil.get_server_location()
     try:
 #         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
 #             status = models.datareader.datastorer(pathname)
-        if subj == 'refnimet': # Referenssinimet
+        if subj == 'refnames': # Referenssinimet
             # Stores Refname objects
-            status = models.cvs_refnames.referenssinimet(pathname)
+            status = models.cvs_refnames.load_refnames(pathname)
         elif subj == 'xml_file': # gramps backup xml file to Neo4j db
             status = models.datareader.xml_to_neo4j(pathname, current_user.username)
 #         elif subj == 'karajat': # TODO: Tekemättä
 #             status = "Käräjätietojen lukua ei ole vielä tehty"
         else:
             return redirect(url_for('virhesivu', code=1, text= \
-                "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
+                "Data type '" + subj + "' is still missing"))
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text="Missing proper column title: " + str(e))

@@ -29,7 +29,7 @@ def upload_file(infile):
     try:
         filename = normalized_name(infile.filename)
     except Exception:
-        logging.debug('Tiedostonimen "' + infile.filename + '" normalisointi ei onnaa')
+        logging.debug('Normalizing file name "' + infile.filename + '" fails')
         raise
         
     kokonimi=fullname(filename)

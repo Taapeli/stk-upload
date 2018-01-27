@@ -504,27 +504,27 @@ RETURN person, urls, COLLECT (name) AS names
 
     @staticmethod       
     def get_events_k (keys):
-        """ Voidaan lukea henkilöitä tapahtumineen kannasta
-            a) Tietokanta-avaimella valittu henkilö
-            b) nimellä poimittu henkilö
-               rule:'all'       kaikki
-               rule='surname'   sukunimen alkuosalla
-               rule='firstname' etunimen alkuosalla
-               rule='suffix'    patronyymin alkuosalla
+        """ Read Persons with names, events and reference names
+            a) selected by unique id
+            b) selected by name
+               keys=['all']             kaikki
+               keys=['surname', name]   sukunimen alkuosalla
+               keys=['firstname', name] etunimen alkuosalla
+               keys=['suffix', name]    patronyymin alkuosalla
         """
         if keys:
             rule=keys[0]
             name=keys[1] if len(keys) > 1 else None
-            print("Rajaus {} '{}'".format(rule, name))
+            print("Selected {} '{}'".format(rule, name))
         else:
             rule="all"
             name=""
 
 # ╒═══════╤══════╤══════╤═════╤═════════╤══════════╤══════════════════════════════╕
 # │"id"   │"confi│"first│"ref │"surname"│"suffix"  │"events"                      │
-# │       │dence"│name" │name"│         │          │                              │
+# │       │dence"│name" │names│         │          │                              │
 # ╞═══════╪══════╪══════╪═════╪═════════╪══════════╪══════════════════════════════╡
-# │"27204"│null  │"Henri│""   │"Sibbe"  │"Mattsson"│[["26836","Occupation","","","│
+# │"27204"│null  │"Henri│[]   │"Sibbe"  │"Mattsson"│[["26836","Occupation","","","│
 # │       │      │k"    │     │         │          │","","Cappelby 4 Sibbes"],["26│
 # │       │      │      │     │         │          │255","Birth","1709-01-03","","│
 # │       │      │      │     │         │          │","",null],["26837","Luottamus│
@@ -533,12 +533,13 @@ RETURN person, urls, COLLECT (name) AS names
         qend="""
  OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
  OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
+ OPTIONAL MATCH (person) <-[:USEDNAME]- () -[:BASENAME*0..2]-> (refn:Refname)
 RETURN ID(person) AS id, person.confidence AS confidence, 
     person.est_birth AS est_birth, person.est_death AS est_death,
-    name.firstname AS firstname, 
-    name.refname AS refname, name.surname AS surname, 
-    name.suffix AS suffix,
-    COLLECT([ID(event), event.type, event.date, event.datetype, 
+    name.firstname AS firstname, name.surname AS surname,
+    name.suffix AS suffix, 
+    COLLECT(DISTINCT refn.name) AS refnames,
+    COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype, 
         event.daterange_start, event.daterange_stop, place.pname]) AS events
 ORDER BY name.surname, name.firstname"""
 

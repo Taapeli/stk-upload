@@ -103,29 +103,28 @@ class Refname:
 
 
     def save(self):
-        """ Referenssinimen tallennus kantaan. Kysessä on joko 
-            - nimi ilman viittausta, olkoon (A:{name=name})
-            - nimi ja viittaus, (A:{name=name})-->(B:{name=refname})
-            Edellytetään, että tälle oliolle on asetettu:
-            - name (Nimi)
-            Tunniste saadaan kannasta
+        """ Savinf a Refname to the database. It may be - 
+            - a name without other reference (A:{name:name})
+            - a name with reference to a base name, (A:{name:name})-->(B:{name:refname})
+            This object must have:
+            - name (Name)
+            The identifier is an ID(Refname)
             - rid (int)
-            Lisäksi tallennetaan valinnaiset tiedot:
-            - gender (Sukupuoli='M'/'N'/'')
-            - source (Lähde merkkijonona)
+            Optional arguments:
+            - gender ('M'/'F'/'')
+            - source (str)
             - reftype (in REFTYPES)    # miksei muka tarvittaisi?
             - reference 
-              (a:Refname {nimi='Nimi'})
+              (A:Refname {nimi:'Name'})
                    -[r:BASENAME {use:'Reftype'}]-> 
-                   (b:Refname {nimi='RefNimi'})
+                   (B:Refname {name:'Refname'})
         """
-        # TODO: source pitäisi tallettaa Source-objektina
+        # TODO: the source should be a new Source object
         
-        # Compulsory data
         if not self.name:
             raise ValueError("No name for Refname")
 
-        # Setting other attributes for A (in addition to name)
+        # Setting attributes for 'A'
         a_attr = {'name': self.name}
         if hasattr(self, 'gender'):
             a_attr['gender'] = self.gender
@@ -158,18 +157,15 @@ RETURN ID(a) AS aid, a.name AS aname, l.use AS use, ID(b) AS bid, b.name AS bnam
 #                         a_use = record['use']
 #                         b_oid = record["bid"]
 #                         b_name = record["bname"]
-#                         
-#                         logging.debug('a:({}, {})'.format(a_oid, a_name))
-#                         logging.debug('b:({}, {})'.format(b_oid, b_name))
 #                         logging.debug('  ({}, {}) -[{}]-> ({}, {})'.
 #                                       format(a_oid, a_name, a_use, b_oid, b_name))
                     
             except Exception as err:
-                print("Virhe: {0}".format(err), file=stderr)
-                logging.warning('Lisääminen (a)-->(b) ei onnistunut: {}'.format(err))
+                print("Error: {0}".format(err), file=stderr)
+                logging.warning('Could no store (a)-->(b): {}'.format(err))
 
         else:
-            # Create (A:{name:name}) only, if needed
+            # Create (A:{name:name}) only (if needed)
             query="""
 MERGE (a:Refname {name: $a_name}) SET a = $a_attr
 RETURN ID(a) AS aid, a.name AS aname"""
@@ -184,18 +180,17 @@ RETURN ID(a) AS aid, a.name AS aname"""
 #                 for record in result:
 #                     a_oid = record["aid"]
 #                     a_name = record["aname"]
-# 
-#                     logging.debug('a:({}, {})'.format(a_oid, a_name))
+#                     logging.debug('  ({}, {})'.format(a_oid, a_name))
                     
             except Exception as err:
                 # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
-                print("Virhe: {0}".format(err), file=stderr)
+                print("Error: {0}".format(err), file=stderr)
                 logging.warning('Lisääminen (a) ei onnistunut: {}'.format(err))
 
 
     @staticmethod
     def link_to_refname(pid, name, reftype):
-        # Links reference name of type reftype to Person(pid)
+        # Connects reference name of type reftype to Person(pid)
 
         if not name > "":
             logging.warning("Missing name {} for {} - not added".format(reftype, name))

@@ -145,28 +145,31 @@ import shareds
 #     return message
 
 
-def lue_henkilot_k(keys=None):
-    """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
-        
-        Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
-        tapahtuman muuttujalistoja
+def read_persons_with_events(keys=None):
+    """ Reads Person- and Event- objects for display
+        Returns Person objects, whith included Events
     """
     
     persons = []
     result = Person.get_events_k(keys)
     for record in result:
-        # Got ["id", "confidence", "firstname", "refname", "surname", "suffix", "events"]
+        # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
         uniq_id = record['id']
         p = Person()
         p.uniq_id = uniq_id
         p.confidence = record['confidence']
         p.est_birth = record['est_birth']
         p.est_death = record['est_death']
+        if record['refnames']:
+            try:
+                refnlist = sorted(record['refnames'])
+                p.refnames = ", ".join(refnlist)
+            except Exception as e:
+                logging.debug("ERROR refname list {} / {}".format(record['refnames'], e))
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
-        if record['refname']:
-            pname.refname = record['refname']
+                    
         if record['surname']:
             pname.surname = record['surname']
         if record['suffix']:
