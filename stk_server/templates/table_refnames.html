@@ -32,14 +32,14 @@
     </tr>
     {% for r in names %}
         <tr>
-            <td class="id">{{r.oid}}</td>
+            <td class="id">{{r.rid}}</td>
             <td>{% if not r.refname %}<b>{% endif %}{{r.name}}
                 {% if not r.refname %}</b>{% endif %}</td>
             <td class="typevar">{{rt[r.reftype]}}</td>
             <td>{{r.refname}}</td>
             <td class="center">{% if r.gender %}{{sp[r.gender]}}{% endif %}</td>
             <td>{% if r.source %}{{r.source}}{% endif %}</td>
-            <td class="right">{% if r.usecount %}{{r.usecount}}{% endif %}</td>
+            <td class="center">{% if r.usecount %}{{r.usecount}}{% endif %}</td>
         </tr>
     {% endfor %}
 </table>
