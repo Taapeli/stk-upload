@@ -503,14 +503,16 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_events_k (keys):
-        """ Read Persons with names, events and reference names
-            a) selected by unique id
-            b) selected by name
-               keys=['all']             kaikki
-               keys=['surname', name]   sukunimen alkuosalla
-               keys=['firstname', name] etunimen alkuosalla
-               keys=['suffix', name]    patronyymin alkuosalla
+    def get_events_k (keys, take_refnames=True):
+        """  Read Persons with names, events and reference names
+             a) selected by unique id
+             b) selected by name
+                keys=['all']             kaikki
+                keys=['surname', name]   sukunimen alkuosalla
+                keys=['firstname', name] etunimen alkuosalla
+                keys=['suffix', name]    patronyymin alkuosalla
+
+            #TODO: take_refnames is not functioning
         """
         if keys:
             rule=keys[0]
@@ -520,16 +522,16 @@ RETURN person, urls, COLLECT (name) AS names
             rule="all"
             name=""
 
-# ╒═══════╤══════╤══════╤═════╤═════════╤══════════╤══════════════════════════════╕
-# │"id"   │"confi│"first│"ref │"surname"│"suffix"  │"events"                      │
-# │       │dence"│name" │names│         │          │                              │
-# ╞═══════╪══════╪══════╪═════╪═════════╪══════════╪══════════════════════════════╡
-# │"27204"│null  │"Henri│[]   │"Sibbe"  │"Mattsson"│[["26836","Occupation","","","│
-# │       │      │k"    │     │         │          │","","Cappelby 4 Sibbes"],["26│
-# │       │      │      │     │         │          │255","Birth","1709-01-03","","│
-# │       │      │      │     │         │          │","",null],["26837","Luottamus│
-# │       │      │      │     │         │          │toimi","1760","","","",null]] │
-# ├───────┼──────┼──────┼─────┼─────────┼──────────┼──────────────────────────────┤
+# ╒═════╤════════════════╤═══════════╤════════╤═════════════════╤═════════════════╕
+# │"id" │"firstname"     │"surname"  │"suffix"│"refnames"       │"events"         │
+# ╞═════╪════════════════╪═══════════╪════════╪═════════════════╪═════════════════╡
+# │31844│"August Wilhelm"│"Wallenius"│""      │["August","Wilhel│[[29933,"Baptism"│
+# │     │                │           │        │m","Wallenius"]  │,"1841-09-12","",│
+# │     │                │           │        │                 │"1841-09-12","",n│
+# │     │                │           │        │                 │ull]]            │
+# └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
+# There is also fields confidence, est_birth, est_death, which are empty for now 
+        
         qend="""
  OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
  OPTIONAL MATCH (event)-[:EVENT]->(place:Place)

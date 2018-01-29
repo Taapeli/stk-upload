@@ -161,11 +161,8 @@ def read_persons_with_events(keys=None):
         p.est_birth = record['est_birth']
         p.est_death = record['est_death']
         if record['refnames']:
-            try:
-                refnlist = sorted(record['refnames'])
-                p.refnames = ", ".join(refnlist)
-            except Exception as e:
-                logging.debug("ERROR refname list {} / {}".format(record['refnames'], e))
+            refnlist = sorted(record['refnames'])
+            p.refnames = ", ".join(refnlist)
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
