@@ -203,15 +203,12 @@ def read_persons_with_events(keys=None):
     return (persons)
 
 
-def set_confidence_value():
+def set_confidence_value(tx):
     """ Asettaa henkilölle laatu arvion
     """
     
-    message = []
     counter = 0
-    
-    tx = User.beginTransaction()
-    
+        
     result = Person.get_confidence()
     for record in result:
         p = Person()
@@ -228,10 +225,8 @@ def set_confidence_value():
             
         counter += 1
             
-    User.endTransaction(tx)
     text = "Number of confidences set: " + str(counter)
-    message.append(text)
-    return (message)
+    return (text)
 
 
 def set_estimated_dates():
@@ -1765,6 +1760,12 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     print(str(result))
 #    tx = shareds.driver.session().begin_transaction()
     result = handle_families(collection, tx)
+    tx.commit()
+    msg.append(str(result))
+    print(str(result))
+    
+    tx = shareds.driver.session().begin_transaction()
+    result = set_confidence_value(tx)
     tx.commit()
     msg.append(str(result))
     print(str(result))

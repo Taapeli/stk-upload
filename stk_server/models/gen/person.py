@@ -445,7 +445,7 @@ RETURN person, urls, COLLECT (name) AS names
  MATCH (person:Person) WHERE ID(person)={}
  SET person.confidence='{}'""".format(self.uniq_id, self.confidence)
                 
-        return shareds.driver.session().run(query)
+        return tx.run(query)
 
 
     @staticmethod       
