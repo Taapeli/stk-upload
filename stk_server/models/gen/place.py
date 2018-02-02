@@ -470,17 +470,17 @@ SET n.name=$name,
                 url_href = url.href
                 url_type = url.type
                 url_description = url.description
-            query = """
+                query = """
 MATCH (n:Place) WHERE n.gramps_handle=$handle
 CREATE (n)-[wu:WEBURL]->
       (url:Weburl {priv: {url_priv}, href: {url_href},
                 type: {url_type}, description: {url_description}})"""
-            try:
-                tx.run(query, 
+                try:
+                    tx.run(query, 
                            {"handle": handle, "url_priv": url_priv, "url_href": url_href,
                             "url_type":url_type, "url_description":url_description})
-            except Exception as err:
-                print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
+                except Exception as err:
+                    print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
                 
         # Make hierarchy relations to the Place node
         if len(self.placeref_hlink) > 0:
