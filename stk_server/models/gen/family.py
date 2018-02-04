@@ -20,6 +20,7 @@ class Family:
                 eventref_hlink  str tapahtuman osoite
                 eventref_role   str tapahtuman rooli
                 childref_hlink  str lapsen osoite
+                noteref_hlink   str lisätiedon osoite
      """
 
     def __init__(self, uniq_id=None):
@@ -31,6 +32,7 @@ class Family:
         self.eventref_hlink = []
         self.eventref_role = []
         self.childref_hlink = []
+        self.noteref_hlink = []
     
     
     def get_children_by_id(self):
@@ -224,6 +226,20 @@ RETURN ID(person) AS mother"""
                         MATCH (m:Person) WHERE m.gramps_handle='{}'
                         MERGE (n)-[r:CHILD]->(m)
                          """.format(self.handle, self.childref_hlink[i])
+
+                    tx.run(query)
+                except Exception as err:
+                    print("Virhe: {0}".format(err), file=stderr)
+  
+        # Make relation(s) to the Note node
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                try:
+                    query = """
+                        MATCH (n:Family) WHERE n.gramps_handle='{}'
+                        MATCH (m:Note) WHERE m.gramps_handle='{}'
+                        MERGE (n)-[r:NOTE]->(m)
+                         """.format(self.handle, self.noteref_hlink[i])
 
                     tx.run(query)
                 except Exception as err:

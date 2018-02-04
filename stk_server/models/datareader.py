@@ -1256,6 +1256,12 @@ def handle_families(collection, tx):
                 family_childref = family.getElementsByTagName('childref')[i]
                 if family_childref.hasAttribute("hlink"):
                     f.childref_hlink.append(family_childref.getAttribute("hlink"))
+    
+        if len(family.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(family.getElementsByTagName('noteref') )):
+                family_noteref = family.getElementsByTagName('noteref')[i]
+                if family_noteref.hasAttribute("hlink"):
+                    f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
                     
         f.save(tx)
         counter += 1
