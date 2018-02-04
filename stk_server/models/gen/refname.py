@@ -236,39 +236,40 @@ RETURN ID(a) as rid"""
 #             return None
             
             
-    @staticmethod   
-    def get_name_reference(name):
-        """ Haetaan referenssinimi
-        """
-        query="""
-            MATCH (a:Refname)-[r:REFFIRST]->(b:Refname) WHERE b.name='{}'
-            RETURN a.name AS aname, b.name AS bname;""".format(name)
-            
-        try:
-            return shareds.driver.session().run(query, name=name)
+#     @staticmethod   
+#     def get_name_reference(name):
+#         """ Haetaan referenssinimi
+#         """
+#         query="""
+#             MATCH (a:Refname)-[r:REFFIRST]->(b:Refname) WHERE b.name='{}'
+#             RETURN a.name AS aname, b.name AS bname;""".format(name)
+#             
+#         try:
+#             return shareds.driver.session().run(query, name=name)
+#         
+#         except Exception as err:
+#             print("Virhe: {0}".format(err), file=stderr)
+#             logging.warning('Kannan lukeminen ei onnistunut: {}'.format(err))
         
-        except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
-            logging.warning('Kannan lukeminen ei onnistunut: {}'.format(err))
         
-        
-    @staticmethod
-    def get_typed_refnames(reftype=""):
-        """ Haetaan kannasta kaikki referenssinimet sekä lista nimistä, jotka
-            viittaavat ko refnameen. 
-            Palautetaan referenssinimen attribuutteja sekä lista nimistä, 
-            jotka suoraan tai ketjutetusti viittaavat ko. referenssinimeen
-            [Kutsu: datareader.lue_refnames()]
-        """
-        query="""
-MATCH (a:Refname)
-  OPTIONAL MATCH (m:Refname)-[:{0}*]->(a:Refname)
-  OPTIONAL MATCH (a:Refname)-[:{1}]->(n:Refname)
-RETURN a.id, a.name, a.gender, a.source,
-  COLLECT ([ID(n), n.name, n.gender]) AS base,
-  COLLECT ([ID(m), m.name, m.gender]) AS other
-ORDER BY a.name""".format(reftype, reftype)
-        return shareds.driver.session().run(query)
+#     @staticmethod
+#     def get_typed_refnames(reftype=""):
+#         """ Read all refnames and a list of names, which refer them.
+#             No in use!
+# 
+#             Palautetaan referenssinimen attribuutteja sekä lista nimistä, 
+#             jotka suoraan tai ketjutetusti viittaavat ko. referenssinimeen
+#             [Kutsu: datareader.lue_refnames()]
+#         """
+#         query="""
+# MATCH (a:Refname)
+#   OPTIONAL MATCH (m:Refname)-[:{0}*]->(a:Refname)
+#   OPTIONAL MATCH (a:Refname)-[:{1}]->(n:Refname)
+# RETURN a.id, a.name, a.gender, a.source,
+#   COLLECT ([ID(n), n.name, n.gender]) AS base,
+#   COLLECT ([ID(m), m.name, m.gender]) AS other
+# ORDER BY a.name""".format(reftype, reftype)
+#         return shareds.driver.session().run(query)
 
 
     @staticmethod
@@ -276,33 +277,65 @@ ORDER BY a.name""".format(reftype, reftype)
         """ Get all Refnames
             Returns a list of Refname objects, with referenced names, reftypes
             and count of usages.
-            [Call: datareader.get_refnames()]
+            [Call: datareader.read_refnames()]
+# ╒═══════╤═══════════════════════╤═══════════════════════╤═════════════╤══════╕
+# │"ID(n)"│"n"                    │"r_ref"                │"l_uses"     │"uses"│
+# ╞═══════╪═══════════════════════╪═══════════════════════╪═════════════╪══════╡
+# │32348  │{"gender":"M","name":"A│[[null,null,null]]     │[]           │0     │
+# │       │lex","source":"Pojat 19│                       │             │      │
+# │       │90-luvulla"}           │                       │             │      │
+# ├───────┼───────────────────────┼───────────────────────┼─────────────┼──────┤
+# │32352  │{"gender":"M","name":"A│[["BASENAME","firstname│["firstname"]│3     │
+# │       │lexander","source":"Mes│",{"gender":"M","name":│             │      │
+# │       │su- ja kalenteri"}     │"Aleksi","source":"Mess│             │      │
+# │       │                       │u- ja kalenteri"}]]    │             │      │
+# ├───────┼───────────────────────┼───────────────────────┼─────────────┼──────┤
+# │61368  │{"name":"Persson"}     │[["PATRONAME",null,{"ge│[]           │0     │
+# │       │                       │nder":"M","name":"Pekka│             │      │
+# │       │                       │","source":"Pojat"}],["│             │      │
+# │       │                       │BASENAME",null,{"name":│             │      │
+# │       │                       │"Pekanpoika"}]]        │             │      │
+# └───────┴───────────────────────┴───────────────────────┴─────────────┴──────┘
         """
         query = """
 MATCH (n:Refname)
-OPTIONAL MATCH (n)-[r:BASENAME]->(m)
-OPTIONAL MATCH (n)-[l:USEDNAME]->(p)
-RETURN ID(n) AS oid, n, r, m, COUNT(p) AS uses"""
+OPTIONAL MATCH (n)-[r]->(m:Refname)
+OPTIONAL MATCH (n)-[l:USEDNAME]->(p:Person)
+RETURN n,
+    COLLECT(DISTINCT [type(r), r.use, m]) AS r_ref,
+    COLLECT(DISTINCT l.use) AS l_uses, COUNT(p) AS uses
+ORDER BY n.name"""
         try:
             ret = []
             results = shareds.driver.session().run(query)
             for result in results:
                 rn = Refname(result['n']["name"])
                 rn.rid = result['n'].id
+#                 if rn.rid == 57017:
+#                     rn.rid
                 rn.gender = result['n']["gender"]
                 rn.source = result['n']["source"]
-                if result['m']:
+                reftypes = []
+                refnames = []
+                for r in result['r_ref']:
                     # Referenced name exists
-                    rtype = result['r'].type
-                    if rtype == 'BASENAME':
-                        rn.reftype = result['r']['use']
-                    else:
-                        rn.reftype = rtype
-                    rn.refname = result['m']["name"]
+                    # r[0] = ('BASENAME', 'PATRONAME')
+                    #TODO: Change PATRONAME to 'PARENTNAME', use:'father' 
+                    if r[1]:
+                        reftypes.append(r[1])
+                    if r[2]:
+                        refnames.append(r[2]["name"])
                 rn.usecount = result["uses"]
+                if rn.usecount > 0:
+                    # References from a Person exists
+                    for l in result['l_uses']:
+                        if not l in reftypes:
+                            reftypes.append(l)
+                rn.refname = ", ".join(refnames)
+                rn.reftype = ", ".join(reftypes)
                 ret.append(rn)
-
             return ret
+
         except Exception as err:
-            print("Error (Refname.getrefnames): {0}".format(err), file=stderr)
+            print("Error (Refname.get_refnames): {0}".format(err), file=stderr)
             return []

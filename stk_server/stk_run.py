@@ -261,15 +261,15 @@ def show_locations():
 
 
 @app.route('/list/refnames', defaults={'reftype': None})
-@app.route('/list/refnames/<string:reftype>')
+#@app.route('/list/refnames/<string:reftype>')
 def list_refnames(reftype):
     """ show reference names on the screen """
-    if reftype and reftype != "":
-        names = models.datareader.read_typed_refnames(reftype)  # TODO: Not tested method
-        return render_template("table_refnames_1.html", names=names, reftype=reftype)
-    else:
-        names = models.datareader.read_refnames()
-        return render_template("table_refnames.html", names=names)
+#     if reftype and reftype != "":
+#         names = models.datareader.read_typed_refnames(reftype)  # TODO: Not tested method
+#         return render_template("table_refnames_1.html", names=names, reftype=reftype)
+#     else:
+    names = models.datareader.read_refnames()
+    return render_template("table_refnames.html", names=names)
 
 
 @app.route('/lista/people_by_surname/', defaults={'surname': ""})

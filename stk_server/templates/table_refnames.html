@@ -8,7 +8,7 @@
 {% set sp = {"M": "mies", "N": "nainen", "U": "?"} %}
 {% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", 
              "place":"paikka", "occu":"ammatti"} %}
-{% set rt = {'firstname':'etunimi', 'surname':'sukunimi', 'PATRONAME':'patronyymi'} %}
+{% set rt = {'firstname':'etunimi', 'surname':'sukunimi', 'patronyme':'patronyymi', 'basename':'BASENAME'} %}
 <h2>Referenssinimet</h2>
 <p>Mukana {{names|count}} nimeä</p>
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -24,10 +24,9 @@
 <table style="width:500pt">
     <tr><th>oid</th>
         <th>nimi</th>
-        <th class="center">viittaus</th>
-        <th>ref.nimi</th>
+        <th>tyyppi ~ ref.nimi</th>
         <th>sukupuoli</th>
-        <th>lähde</th>
+        <th>nimilähde</th>
         <th>henkilöitä</th>
     </tr>
     {% for r in names %}
@@ -35,8 +34,8 @@
             <td class="id">{{r.rid}}</td>
             <td>{% if not r.refname %}<b>{% endif %}{{r.name}}
                 {% if not r.refname %}</b>{% endif %}</td>
-            <td class="typevar">{{rt[r.reftype]}}</td>
-            <td>{{r.refname}}</td>
+            <td><span class="typevar">{{rt[r.reftype]}}</span>
+            {% if r.refname %} ~ {{r.refname}}{% endif %}</td>
             <td class="center">{% if r.gender %}{{sp[r.gender]}}{% endif %}</td>
             <td>{% if r.source %}{{r.source}}{% endif %}</td>
             <td class="center">{% if r.usecount %}{{r.usecount}}{% endif %}</td>
