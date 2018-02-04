@@ -16,6 +16,7 @@ def translate(term, var_name, lang="fi"):
         'role' = Event role
         'lt'   = Location types
         'lt_in' = Location types, inessive form
+        'notet' = note type
         'urlt' = web page type
         'rept' = repository types
         'medium' = media types
@@ -72,6 +73,12 @@ def translate(term, var_name, lang="fi"):
             "2":"*",    # fa-star [&#xf005;]
             "3":"**",
             "4":"***"
+            }
+    elif var_name == "notet":
+        # Note types
+        tabl = {
+            "Event Note":"tapahtuman lisätieto",
+            "Place Note":"paikan lisätieto"
             }
     elif var_name == "rept":
         # Repository types

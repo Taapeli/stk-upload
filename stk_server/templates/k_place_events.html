@@ -82,7 +82,7 @@
         {% for n in place.noteref_hlink %}
                     <tr>
                         <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(n.priv) }}</td> 
-                        <td class="ColumnDescription">{{n.type|transl('urlt')}}</td> 
+                        <td class="ColumnDescription">{{n.type|transl('notet')}}</td> 
                         <td class="ColumnDescription">{{n.text}}</td> 
                     </tr>
          {% endfor %}
