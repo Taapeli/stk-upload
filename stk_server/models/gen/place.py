@@ -9,6 +9,7 @@ from sys import stderr
 #from flask import g
 from models.dbtree import DbTree
 from models.gen.person import Weburl
+from models.gen.note import Note
 import  shareds
 
 class Place:
@@ -34,7 +35,7 @@ class Place:
                     type            str url tyyppi
                     description     str url kuvaus
                 placeref_hlink      str paikan osoite
-                noteref_hlink       str huomautuksen osoite
+                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self, locid="", ptype="", pname="", level=None):
@@ -78,8 +79,9 @@ class Place:
 MATCH (place:Place)-[:NAME]->(n:Place_name)
     WHERE ID(place)=$place_id
 OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
+OPTIONAL MATCH (place)-[nr:NOTE]->(note:Note)
 RETURN place, COLLECT([n.name, n.lang]) AS names, 
-    COLLECT (DISTINCT url) AS urls
+    COLLECT (DISTINCT url) AS urls, COLLECT (DISTINCT note) AS notes
         """
         place_result = shareds.driver.session().run(query, place_id=plid)
         
@@ -100,6 +102,14 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
                 weburl.type = url["type"]
                 weburl.description = url["description"]
                 self.urls.append(weburl)
+
+            notes = place_record['notes']
+            for note in notes:
+                n = Note()
+                n.priv = note["priv"]
+                n.type = note["type"]
+                n.text = note["text"]
+                self.noteref_hlink.append(n)
             
         return True
     
