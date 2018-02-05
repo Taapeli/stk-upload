@@ -8,7 +8,8 @@
 {% set sp = {"M": "mies", "N": "nainen", "U": "?"} %}
 {% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", 
              "place":"paikka", "occu":"ammatti"} %}
-{% set rt = {'firstname':'etunimi', 'surname':'sukunimi', 'patronyme':'patronyymi', 'basename':'BASENAME'} %}
+{% set rt = {'firstname':'etunimi', 'surname':'sukunimi', 'patronyme':'patronyymi', 
+             'father':'isän nimi', 'mother':'äidin nimi', 'basename':'BASENAME'} %}
 <h2>Referenssinimet</h2>
 <p>Mukana {{names|count}} nimeä</p>
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -41,6 +42,6 @@
             <td class="center">{% if r.usecount %}{{r.usecount}}{% endif %}</td>
         </tr>
     {% endfor %}
-</table>
+</table><hr>
 </section>
 {% endblock %}

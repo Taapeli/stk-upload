@@ -29,7 +29,7 @@ from sys import stderr
 import shareds
 
 # Global allowed reference types in Refname.reftype field or use attribute in db
-REFTYPES = ['basename', 'firstname', 'surname', 'patronyme']
+REFTYPES = ['basename', 'firstname', 'surname', 'patronyme', 'father', 'mother']
 
 class Refname:
     """
@@ -107,7 +107,10 @@ class Refname:
     def save(self):
         """ Savinf a Refname to the database. It may be - 
             - a name without other reference (A:{name:name})
-            - a name with reference to a base name, (A:{name:name})-->(B:{name:refname})
+            - a name with reference to a base name
+                (A:{name:name}) -[:BASENAME]-> (B:{name:refname})
+            - a name with reference to parent's name
+                (A:{name:name}) -[:PARENTNAME]-> (B:{name:refname})
             This object must have:
             - name (Name)
             The identifier is an ID(Refname)
@@ -115,10 +118,10 @@ class Refname:
             Optional arguments:
             - gender ('M'/'F'/'')
             - source (str)
-            - reftype (in REFTYPES)    # miksei muka tarvittaisi?
+            - reftype (in REFTYPES)
             - reference 
               (A:Refname {nimi:'Name'})
-                   -[r:BASENAME {use:'Reftype'}]-> 
+                   -[r:BASENAME|PARENTNAME {use:'Reftype'}]-> 
                    (B:Refname {name:'Refname'})
         """
         # TODO: the source should be a new Source object
@@ -135,14 +138,17 @@ class Refname:
 #        a_newoid = get_new_oid()
 
         if hasattr(self, 'refname'):
-            # Create a reference (A:{name:name})-->(B:{name:refname})
+            # Create a reference (A:{name:name}) --> (B:{name:refname})
             # If any of A or B is missing, they are created, too
+            if self.reftype in ['father', 'mother']:
+                link_type = "PARENTNAME"
+            else:   # ['firstname', 'surname', 'patronyme']
+                link_type = "BASENAME"
             query="""
 MERGE (a:Refname {name: $a_name}) SET a = $a_attr
 MERGE (b:Refname {name: $b_name})
-MERGE (a)-[l:BASENAME {use:$use}]->(b)
+MERGE (a)-[l:""" + link_type + """ {use:$use}]->(b)
 RETURN ID(a) AS aid, a.name AS aname, l.use AS use, ID(b) AS bid, b.name AS bname"""
-                
             try:
                 with shareds.driver.session() as session:
                     result = session.run(query, use=self.reftype,
@@ -164,7 +170,7 @@ RETURN ID(a) AS aid, a.name AS aname, l.use AS use, ID(b) AS bid, b.name AS bnam
                     
             except Exception as err:
                 print("Error: {0}".format(err), file=stderr)
-                logging.warning('Could no store (a)-->(b): {}'.format(err))
+                logging.warning('Could no store (a) -[:{}]-> (b): {}'.format(link_type, err))
 
         else:
             # Create (A:{name:name}) only (if needed)
@@ -313,8 +319,6 @@ ORDER BY n.name"""
             for result in results:
                 rn = Refname(result['n']["name"])
                 rn.rid = result['n'].id
-#                 if rn.rid == 57017:
-#                     rn.rid
                 rn.gender = result['n']["gender"]
                 rn.source = result['n']["source"]
                 reftypes = []

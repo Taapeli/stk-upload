@@ -13,9 +13,14 @@ def load_refnames(pathname):
         These column names in the row 1 are:
         - Name
         - Refname
-        - Reftype    (surname / firstname / patronyme)
+        - Reftype   (REFTYPES: surname / firstname / patronyme / father / mother)
         - Gender    (M = male, N,F = female, empty = undefined)
         - Source    (source name)
+
+        Example:
+            Name,Refname,Reftype,Source,Gender
+            Carl,Kalle,firstname,Sibelius-aineisto,male
+            Carlsdotter,Carl,father,Sibelius-aineisto,
     """
     row_nro = 0
     empties = 0
@@ -47,9 +52,6 @@ def load_refnames(pathname):
             # Luodaan Refname
             r = Refname(nimi)
             if (refname != '') and (refname != nimi):
-                # Tullaan viittaamaan tähän nimeen
-                #r.mark_reference(refname, 'REFFIRST')
-                # Laitetaan muistiin, että self viittaa refname'een
                 if reftype in REFTYPES:
                     r.refname = refname
                     r.reftype = reftype
