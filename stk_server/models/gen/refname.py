@@ -19,7 +19,7 @@ II. Between Refnames there can be different references:
         (r:Refname {name:'Persson'}) -[b:BASENAME]-> (s:Refname {name:'Pekanpoika'})
 
     5) A link from a patronyme to the first name from witch it is derived from
-        (r:Refname {name:'Persson'}) -[b:PATRONAME]-> (s:Refname {name:'Per'})
+        (r:Refname {name:'Persson'}) -[b:PARENTNAME]-> (s:Refname {name:'Per'})
 
 The I links are created, when new Person nodes are inserted.
 The II links are created, when reference names are added from a cvs file.
@@ -27,6 +27,9 @@ The II links are created, when reference names are added from a cvs file.
 import logging
 from sys import stderr
 import shareds
+
+# Global allowed reference types in Refname.reftype field or use attribute in db
+REFTYPES = ['basename', 'firstname', 'surname', 'patronyme']
 
 class Refname:
     """
@@ -46,7 +49,6 @@ class Refname:
     # TODO: source pitäisi olla viite lähdetietoon, nyt sinne on laitettu lähteen nimi
 
     label = "Refname"
-    REFTYPES = ['basename', 'firstname', 'surname', 'patronyme']
 
 #   Samasta nimestä "Persson" voisi olla linkki 'surname' nimeen "Pekanpoika"
 #   ja 'patronyme' nimeen "Pekka".
@@ -61,8 +63,8 @@ class Refname:
 # │,"rid":3,"lang":"sv","pos":"f│           │,"rid":4,"lang":"fi","pos":"f│
 # │irstname"}                   │           │irstname"}                   │
 # ├─────────────────────────────┼───────────┼─────────────────────────────┤
-# │{"name":"Johansson","rid":5,"│"PATRONAME"│{"name":"Juha","gender":"M","│
-# │lang":"sv","pos":"patronym"} │           │lang":"fi","rid":6,"pos":"fir│
+# │{"name":"Johansson","rid":5,"│"PARENTNAME│{"name":"Juha","gender":"M","│
+# │lang":"sv","pos":"patronym"} │"          │lang":"fi","rid":6,"pos":"fir│
 # │                             │           │stname"}                     │
 # ├─────────────────────────────┼───────────┼─────────────────────────────┤
 # │{"name":"Christian","gender":│"BASENAME" │{"name":"Risto","gender":"M",│
@@ -195,7 +197,7 @@ RETURN ID(a) AS aid, a.name AS aname"""
         if not name > "":
             logging.warning("Missing name {} for {} - not added".format(reftype, name))
             return
-        if not (reftype in Refname.REFTYPES):
+        if not (reftype in REFTYPES):
             raise ValueError("Invalid reftype {}".format(reftype))
 
         query="""
@@ -290,11 +292,11 @@ RETURN ID(a) as rid"""
 # │       │su- ja kalenteri"}     │"Aleksi","source":"Mess│             │      │
 # │       │                       │u- ja kalenteri"}]]    │             │      │
 # ├───────┼───────────────────────┼───────────────────────┼─────────────┼──────┤
-# │61368  │{"name":"Persson"}     │[["PATRONAME",null,{"ge│[]           │0     │
-# │       │                       │nder":"M","name":"Pekka│             │      │
-# │       │                       │","source":"Pojat"}],["│             │      │
-# │       │                       │BASENAME",null,{"name":│             │      │
-# │       │                       │"Pekanpoika"}]]        │             │      │
+# │61368  │{"name":"Persson"}     │[["PARENTNAME","father"│[]           │0     │
+# │       │                       │,{"gender":"M","name":"│             │      │
+# │       │                       │Pekka","source":"Pojat"│             │      │
+# │       │                       │}],["BASENAME",null,{"n│             │      │
+# │       │                       │ame":"Pekanpoika"}]]   │             │      │
 # └───────┴───────────────────────┴───────────────────────┴─────────────┴──────┘
         """
         query = """
@@ -319,8 +321,7 @@ ORDER BY n.name"""
                 refnames = []
                 for r in result['r_ref']:
                     # Referenced name exists
-                    # r[0] = ('BASENAME', 'PATRONAME')
-                    #TODO: Change PATRONAME to 'PARENTNAME', use:'father' 
+                    # r[0] is in ('BASENAME', 'PARENTNAME')
                     if r[1]:
                         reftypes.append(r[1])
                     if r[2]:

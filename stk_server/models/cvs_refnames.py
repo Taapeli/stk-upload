@@ -5,7 +5,7 @@
 import csv
 import logging
 
-from models.gen.refname import Refname  # Tietokannan kaikki luokat
+from models.gen.refname import Refname, REFTYPES
 
 def load_refnames(pathname):
     """ Reads reference names from a local csv file. 
@@ -50,7 +50,7 @@ def load_refnames(pathname):
                 # Tullaan viittaamaan tähän nimeen
                 #r.mark_reference(refname, 'REFFIRST')
                 # Laitetaan muistiin, että self viittaa refname'een
-                if reftype in r.REFTYPES:
+                if reftype in REFTYPES:
                     r.refname = refname
                     r.reftype = reftype
                     logging.debug("cvs_refnames: {0} --> {1}".format(nimi, refname))

@@ -323,76 +323,76 @@ def read_refnames():
     return (namelist)
 
 
-def read_typed_refnames(reftype):
-    """ Reads selected Refname objects for display
-    """
-    namelist = []
-    t0 = time.time()
-    if not (reftype and reftype != ""):
-        raise AttributeError("Please, select desired reftype?")
-    
-    recs = Refname.get_typed_refnames(reftype)
-# Esimerkki:
-# >>> for x in v_names: print(x)
-# <Record a.oid=3 a.name='Aabi' a.gender=None a.source='harvinainen' 
-#         base=[[2, 'Aapeli', None]] other=[[None, None, None]]>
-# <Record a.oid=5 a.name='Aabraham' a.gender='M' a.source='Pojat 1990-luvulla' 
-#         base=[[None, None, None]] other=[[None, None, None]]>
-# <Record a.oid=6 a.name='Aabrahami' a.gender=None a.source='harvinainen' 
-#         base=[[7, 'Aappo', None]] other=[[None, None, None]]>
-# >>> for x in v_names: print(x[1])
-# Aabrahami
-# Aabrami
-# Aaca
-
-#a.oid  a.name  a.gender  a.source   base                 other
-#                                     [oid, name, gender]  [oid, name, gender]
-#-----  ------  --------  --------   ----                 -----
-#3493   Aake	F	  Messu- ja  [[null, null, null], [[3495, Aakke, null],
-#                         kalenteri   [null, null, null],  [3660, Acatius, null],
-#                                     [null, null, null],  [3662, Achat, null],
-#                                     [null, null, null],  [3664, Achatius, M],
-#                                     [null, null, null],  [3973, Akatius, null],
-#                                     [null, null, null],  [3975, Ake, null],
-#                                     [null, null, null]]  [3990, Akke, null]]
-#3495   Aakke   null     harvinainen [[3493, Aake, F]]    [[null, null, null]]
-
-    for rec in recs:
-#        logging.debug("oid={}, name={}, gender={}, source={}, base={}, other={}".\
-#               format( rec[0], rec[1],  rec[2],    rec[3],    rec[4],  rec[5]))
-        # Luodaan nimi
-        r = Refname(rec['a.name'])
-        r.oid = rec['a.id']
-        if rec['a.gender']:
-            r.gender = rec['a.gender']
-        if rec['a.source']:
-            r.source= rec['a.source']
-
-        # Luodaan mahdollinen kantanimi, johon tämä viittaa (yksi?)
-        baselist = []
-        for fld in rec['base']:
-            if fld[0]:
-                b = Refname(fld[1])
-                b.oid = fld[0]
-                if fld[2]:
-                    b.gender = fld[2]
-                baselist.append(b)
-
-        # Luodaan lista muista nimistä, joihin tämä viittaa
-        otherlist = []
-        for fld in rec['other']:
-            if fld[0]:
-                o = Refname(fld[1])
-                o.oid = fld[0]
-                if fld[2]:
-                    o.gender = fld[2]
-                otherlist.append(o)
-
-        namelist.append((r,baselist,otherlist))
-    
-    logging.info("TIME get_named_refnames {} sek".format(time.time()-t0))
-
-    return (namelist)
+# def read_typed_refnames(reftype):
+#     """ Reads selected Refname objects for display
+#     """
+#     namelist = []
+#     t0 = time.time()
+#     if not (reftype and reftype != ""):
+#         raise AttributeError("Please, select desired reftype?")
+#     
+#     recs = Refname.get_typed_refnames(reftype)
+# # Esimerkki:
+# # >>> for x in v_names: print(x)
+# # <Record a.oid=3 a.name='Aabi' a.gender=None a.source='harvinainen' 
+# #         base=[[2, 'Aapeli', None]] other=[[None, None, None]]>
+# # <Record a.oid=5 a.name='Aabraham' a.gender='M' a.source='Pojat 1990-luvulla' 
+# #         base=[[None, None, None]] other=[[None, None, None]]>
+# # <Record a.oid=6 a.name='Aabrahami' a.gender=None a.source='harvinainen' 
+# #         base=[[7, 'Aappo', None]] other=[[None, None, None]]>
+# # >>> for x in v_names: print(x[1])
+# # Aabrahami
+# # Aabrami
+# # Aaca
+# 
+# #a.oid  a.name  a.gender  a.source   base                 other
+# #                                     [oid, name, gender]  [oid, name, gender]
+# #-----  ------  --------  --------   ----                 -----
+# #3493   Aake	F	  Messu- ja  [[null, null, null], [[3495, Aakke, null],
+# #                         kalenteri   [null, null, null],  [3660, Acatius, null],
+# #                                     [null, null, null],  [3662, Achat, null],
+# #                                     [null, null, null],  [3664, Achatius, M],
+# #                                     [null, null, null],  [3973, Akatius, null],
+# #                                     [null, null, null],  [3975, Ake, null],
+# #                                     [null, null, null]]  [3990, Akke, null]]
+# #3495   Aakke   null     harvinainen [[3493, Aake, F]]    [[null, null, null]]
+# 
+#     for rec in recs:
+# #        logging.debug("oid={}, name={}, gender={}, source={}, base={}, other={}".\
+# #               format( rec[0], rec[1],  rec[2],    rec[3],    rec[4],  rec[5]))
+#         # Luodaan nimi
+#         r = Refname(rec['a.name'])
+#         r.oid = rec['a.id']
+#         if rec['a.gender']:
+#             r.gender = rec['a.gender']
+#         if rec['a.source']:
+#             r.source= rec['a.source']
+# 
+#         # Luodaan mahdollinen kantanimi, johon tämä viittaa (yksi?)
+#         baselist = []
+#         for fld in rec['base']:
+#             if fld[0]:
+#                 b = Refname(fld[1])
+#                 b.oid = fld[0]
+#                 if fld[2]:
+#                     b.gender = fld[2]
+#                 baselist.append(b)
+# 
+#         # Luodaan lista muista nimistä, joihin tämä viittaa
+#         otherlist = []
+#         for fld in rec['other']:
+#             if fld[0]:
+#                 o = Refname(fld[1])
+#                 o.oid = fld[0]
+#                 if fld[2]:
+#                     o.gender = fld[2]
+#                 otherlist.append(o)
+# 
+#         namelist.append((r,baselist,otherlist))
+#     
+#     logging.info("TIME get_named_refnames {} sek".format(time.time()-t0))
+# 
+#     return (namelist)
 
 
 def read_cite_sour_repo(uniq_id=None):

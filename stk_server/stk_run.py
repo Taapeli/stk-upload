@@ -404,8 +404,8 @@ def nayta_ehdolla(ehto):
 """ -------------------------- Tietojen talletus ------------------------------
 """
 
-@app.route('/lataa', methods=['POST'])
-def lataa():
+@app.route('/upload', methods=['POST'])
+def upload():
     """ Load a cvs file to temp directory for processing in the server
     """
     try:
@@ -421,7 +421,7 @@ def lataa():
     return redirect(url_for('save_loaded', filename=infile.filename, subj=material))
 
 
-@app.route('/talleta/<string:subj>/<string:filename>')
+@app.route('/save/<string:subj>/<string:filename>')
 def save_loaded(filename, subj):
     """ Saving loaded reference data to the database """
     pathname = models.loadfile.fullname(filename)
@@ -429,10 +429,9 @@ def save_loaded(filename, subj):
     try:
 #         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
 #             status = models.datareader.datastorer(pathname)
-        if subj == 'refnames': # Referenssinimet
-            # Stores Refname objects
+        if subj == 'refnames':    # Stores Refname objects
             status = models.cvs_refnames.load_refnames(pathname)
-        elif subj == 'xml_file': # gramps backup xml file to Neo4j db
+        elif subj == 'xml_file':  # gramps backup xml file to Neo4j db
             status = models.datareader.xml_to_neo4j(pathname, current_user.username)
 #         elif subj == 'karajat': # TODO: Tekemättä
 #             status = "Käräjätietojen lukua ei ole vielä tehty"
