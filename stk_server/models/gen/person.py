@@ -507,16 +507,16 @@ RETURN person, urls, COLLECT (name) AS names
         """  Read Persons with names, events and reference names
              a) selected by unique id
              b) selected by name
-                keys=['all']             kaikki
-                keys=['surname', name]   sukunimen alkuosalla
-                keys=['firstname', name] etunimen alkuosalla
-                keys=['suffix', name]    patronyymin alkuosalla
+                keys=['all']             all
+                keys=['surname', name]   by start of surname
+                keys=['firstname', name] by start of the first of first names
+                keys=['patronyme', name] by start of patronyme name
 
-            #TODO: take_refnames is not functioning
+            #TODO: take_refnames is not operational
         """
         if keys:
             rule=keys[0]
-            name=keys[1] if len(keys) > 1 else None
+            name=keys[1].title() if len(keys) > 1 else None
             print("Selected {} '{}'".format(rule, name))
         else:
             rule="all"
@@ -531,8 +531,8 @@ RETURN person, urls, COLLECT (name) AS names
 # │     │                │           │        │                 │ull]]            │
 # └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
 # There is also fields confidence, est_birth, est_death, which are empty for now 
-        
-        qend="""
+ 
+        query_tail="""
  OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
  OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
  OPTIONAL MATCH (person) <-[:USEDNAME]- () -[:BASENAME*0..2]-> (refn:Refname)
@@ -544,25 +544,18 @@ RETURN ID(person) AS id, person.confidence AS confidence,
     COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype, 
         event.daterange_start, event.daterange_stop, place.pname]) AS events
 ORDER BY name.surname, name.firstname"""
-
-        if rule == "uniq_id":
-            # Person selected by uniq_id
-            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE ID(person)=$id" + qend
-            return shareds.driver.session().run(query, id=int(name))
+        
         if rule == 'all':
-            query = "MATCH (person:Person)-[:NAME]->(name:Name)" + qend
+            query = "MATCH (person:Person)-[:NAME]->(name:Name)" + query_tail
             return shareds.driver.session().run(query)
-        if rule == "surname":
-            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.surname STARTS WITH $id" + qend
-        elif rule == "firstname":
-            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.firstname STARTS WITH $id" + qend
-        elif rule == "suffix":
-            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.suffix STARTS WITH $id" + qend
         else:
-            print ("Tätä rajausta ei ole vielä tehty: " + rule)
-            return None
-        # All with string argument
-        return shareds.driver.session().run(query, id=name)
+            # Selected names and name types
+            query = """
+MATCH (n:Refname) -[r:USEDNAME]-> (person:Person) -[:NAME]-> (name:Name)
+WHERE r.use = $attr.use AND n.name STARTS WITH $attr.name 
+WITH person, name
+""" + query_tail
+            return shareds.driver.session().run(query, attr={'use':rule, 'name':name})
 
 
     @staticmethod       

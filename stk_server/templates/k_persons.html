@@ -21,16 +21,15 @@
             <h3>Valitse näytettävät ihmiset</h3>
 			<div id="searching">
 			    <form  action="/person/list/" method="post">
-                  <p>Haku tapahtuu annetun sanan alkuosalla, 
-                     esim. "Sib" osuu nimeen "Sibbe".
-                     <i>Huom. Kirjoita nimi isolla alkukirjaimella!</i></p>
+                  <p>Haku tapahtuu annetun nimen alkuosalla, 
+                     esim. "Sib" osuu nimeen "Sibbe".</p>
                   <label for="snam">Hakusana (alkuosa)&nbsp; </label>
                     <input type="text" name="name" id="snam" required><br>
                   <input type="radio" name="rule" id="ssur" value="surname" checked>
                     <label for="ssur">Sukunimi</label>
                   <input type="radio" name="rule" id="sfir" value="firstname">
                     <label for="sfir">Etunimi</label>
-                  <input type="radio" name="rule" id="ssuf" value="suffix">
+                  <input type="radio" name="rule" id="ssuf" value="patronyme">
                     <label for="ssuf">Patronyymi</label>
 				  <input type="submit" value="Hae">
 			    </form>
