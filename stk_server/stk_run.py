@@ -65,7 +65,8 @@ def show_person_list(selection=None):
             rule = request.form['rule']
             keys = (rule, name)
             persons = models.datareader.read_persons_with_events(keys)
-            return render_template("k_persons.html", persons=persons, menuno=0)
+            return render_template("k_persons.html", persons=persons, menuno=0,
+                                   name=name, rule=rule)
         except Exception:
             flash("Ei oikeita hakukenttiä", category='warning')
 
