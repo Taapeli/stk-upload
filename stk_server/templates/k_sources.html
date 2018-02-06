@@ -21,12 +21,14 @@
         {% endfor %}
 			</ul>
 		</div>
-		<table class="IndividualList" style="max-width:600px;">
+		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
                     <th>Lähde</th>
-                    <th title="Sitaatteja">Siteerattu</th>
-                    <th title="Tapahtumia, henkilöitä jne., josta viitattu">Viitattu</th>
+                    <th>väline</th>
+                    <th>arkistossa</th>
+                    <th title="Sitaatteja">siteerattu</th>
+                    <th title="Tapahtumia, henkilöitä jne., josta viitattu">viitattu</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -43,6 +45,8 @@
                      title="katso lähteen {{s.uniq_id}} ({{s.id}}) käyttö">{% endif %}
                      {{s.stitle}}</a>
                 </div></td>
+            <td class="note" title='muoto: {{s.medium}}'>{% if s.medium %}{{s.medium|transl('medium')}}{% endif %}</td>
+            <td class="note" title='arkiston nimi'>{% if s.repo_name %}{{s.repo_name}}{% endif %}</td>
             <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
             <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
             </tr>

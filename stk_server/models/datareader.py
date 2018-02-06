@@ -380,13 +380,13 @@ def set_refnames():
     return msg
 
 
-def lue_refnames():
-    """ Lukee tietokannasta Refname- objektit näytettäväksi
+def read_refnames():
+    """ Reads all Refname objects for display
         (n:Refname)-[r]->(m)
     """
     namelist = []
     t0 = time.time()
-    recs = Refname.getrefnames()
+    recs = Refname.get_refnames()
     for rec in recs:
         namelist.append(rec)
 
@@ -395,13 +395,13 @@ def lue_refnames():
     return (namelist)
 
 
-def lue_typed_refnames(reftype):
-    """ Lukee tietokannasta Refname- objektit näytettäväksi
+def read_typed_refnames(reftype):
+    """ Reads selected Refname objects for display
     """
     namelist = []
     t0 = time.time()
     if not (reftype and reftype != ""):
-        raise AttributeError("Mitä referenssityyppiä halutaan?")
+        raise AttributeError("Please, select desired reftype?")
     
     recs = Refname.get_typed_refnames(reftype)
 # Esimerkki:

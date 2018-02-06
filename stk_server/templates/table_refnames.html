@@ -8,7 +8,7 @@
 {% set sp = {"M": "mies", "N": "nainen", "U": "?"} %}
 {% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", 
              "place":"paikka", "occu":"ammatti"} %}
-{% set rt = {'REFFIRST':'etunimi', 'REFLAST':'sukunimi', 'REFPATRO':'patron.'} %}
+{% set rt = {'firstname':'etunimi', 'surname':'sukunimi', 'PATRONAME':'patronyymi'} %}
 <h2>Referenssinimet</h2>
 <p>Mukana {{names|count}} nimeä</p>
 {% with messages = get_flashed_messages(with_categories=true) %}

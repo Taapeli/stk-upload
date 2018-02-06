@@ -31,7 +31,8 @@
 </div>
 
 <script>
-var app = angular.module('myApp', []).controller('namesCtrl', function($scope) {
+var app = angular.module('myApp', []);
+app.controller('namesCtrl', function($scope) {
 	$scope.columns = [
 		{column:'uniq_id'}, {column:'rname'}, {column:'type'}
 	];

@@ -10,6 +10,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import login_required, roles_required, current_user
 #from datetime import datetime
 import shareds
+import templates.jinja_filters
 #===============================================================================
 app = shareds.app 
 with app.app_context():
@@ -18,7 +19,7 @@ with app.app_context():
     import models.loadfile          # Datan lataus käyttäjältä
     import models.datareader        # Tietojen haku kannasta (tai työtiedostosta) 
     import models.dataupdater       # Tietojen päivitysmetodit
-    #import models.cvs_refnames      # Referenssinimien luonti
+    import models.cvs_refnames      # Referenssinimien luonti
     import models.gen
     #import models.gen.user          # Käyttäjien tiedot
 
@@ -225,6 +226,8 @@ with app.app_context():
                    headings=headings, titles=titles, lists=lists)
         elif subj == 'repositories':
             repositories = models.datareader.read_repositories()
+            for r in repositories:
+                r.type = templates.jinja_filters.translate(r.type, 'rept', 'fi')
             return render_template("ng_table_repositories.html", 
                                    repositories=repositories)
         elif subj == 'sources':
@@ -268,16 +271,16 @@ with app.app_context():
         return render_template("k_locations.html", locations=locations)
     
     
-    @app.route('/lista/refnimet', defaults={'reftype': None})
-    @app.route('/lista/refnimet/<string:reftype>')
+    @app.route('/list/refnames', defaults={'reftype': None})
+    @app.route('/list/refnames/<string:reftype>')
     def nayta_refnimet(reftype): 
-        """ referenssinimien näyttäminen ruudulla """
+        """ show reference names on the screen """
 #        models.dbutil.connect_db()
         if reftype and reftype != "":
-            names = models.datareader.lue_typed_refnames(reftype)
+            names = models.datareader.read_typed_refnames(reftype)
             return render_template("table_refnames_1.html", names=names, reftype=reftype)
         else:
-            names = models.datareader.lue_refnames()
+            names = models.datareader.read_refnames()
             return render_template("table_refnames.html", names=names)
         
         
@@ -355,6 +358,16 @@ with app.app_context():
             return redirect(url_for('virhesivu', code=1, text=str(e)))
         return render_template("compare2.html", 
             person=person, events=events, photos=photos, sources=sources, families=families)
+        
+        
+    @app.route('/lista/baptism_data/<string:uniq_id>')
+    def show_baptism_data(uniq_id): 
+        """ kastetapahtuman tietojen näyttäminen ruudulla """
+        models.dbutil.connect_db()
+        event, persons = models.datareader.get_baptism_data(uniq_id)
+        return render_template("table_baptism_data.html", 
+                               event=event, persons=persons)
+
 
 
     @app.route('/lista/family_data/<string:uniq_id>')
@@ -438,8 +451,8 @@ def talleta(filename, subj):
             status = models.cvs_refnames.referenssinimet(pathname)
         elif subj == 'xml_file': # gramps backup xml file to Neo4j db
             status = models.datareader.xml_to_neo4j(pathname)
-        elif subj == 'karajat': # TODO: Tekemättä
-            status = "Käräjätietojen lukua ei ole vielä tehty"
+#         elif subj == 'karajat': # TODO: Tekemättä
+#             status = "Käräjätietojen lukua ei ole vielä tehty"
         else:
             return redirect(url_for('virhesivu', code=1, text= \
                 "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
