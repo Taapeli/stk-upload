@@ -67,6 +67,29 @@
             </table>
         </div>
     {% endif %}
+    {% if place.noteref_hlink %}
+        <div id="notes">
+            <h4>Lisätiedot</h4>
+            <table class="infolist notelist">
+                <thead>
+                    <tr>
+                        <th> </th>
+                        <th class="ColumnDescription">Tyyppi</th>
+                        <th class="ColumnDescription">Lisätieto</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for n in place.noteref_hlink %}
+                    <tr>
+                        <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(n.priv) }}</td> 
+                        <td class="ColumnDescription">{{n.type|transl('notet')}}</td> 
+                        <td class="ColumnDescription">{{n.text}}</td> 
+                    </tr>
+         {% endfor %}
+                 </tbody>
+            </table>
+        </div>
+    {% endif %}
         <div id="events"> <!--class="subsection"-->
             <h4>Tapahtumat</h4>
     {% if events %}

@@ -374,7 +374,7 @@ RETURN ID(place) AS uniq_id"""
         return points
 
 
-    def save(self, userid, tx):
+    def save(self, username, tx):
         """ Tallettaa sen kantaan """
 
         today = str(datetime.date.today())
@@ -413,12 +413,12 @@ SET e.gramps_handle=$handle,
 
         try:
             query = """
-MATCH (u:User) WHERE u.userid=$userid  
+MATCH (u:UserProfile) WHERE u.userName=$username 
 MATCH (n:Event) WHERE n.gramps_handle=$handle
 MERGE (u)-[r:REVISION]->(n)
 SET r.date=$date"""
             tx.run(query, 
-               {"userid": userid, "handle": handle, "date": today})
+               {"username": username, "handle": handle, "date": today})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 

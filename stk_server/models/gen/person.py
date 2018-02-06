@@ -39,6 +39,7 @@ class Person:
                     type           str url tyyppi
                     description    str url kuvaus
                 parentin_hlink     str vanhempien osoite
+                noteref_hlink      str huomautuksen osoite
                 citationref_hlink  str viittauksen osoite
                 confidence         str tietojen luotettavuus
                 est_birth          str arvioitu syntymäaika
@@ -60,6 +61,7 @@ class Person:
         self.objref_hlink = []
         self.urls = []
         self.parentin_hlink = []
+        self.noteref_hlink = []
         self.citationref_hlink = []
         self.confidence = ''
         self.est_birth = ''
@@ -443,14 +445,14 @@ RETURN person, urls, COLLECT (name) AS names
  MATCH (person:Person) WHERE ID(person)={}
  SET person.confidence='{}'""".format(self.uniq_id, self.confidence)
                 
-        return shareds.driver.session().run(query)
+        return tx.run(query)
 
 
     @staticmethod       
     def get_person_events (nmax=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
-            get_persons(oid=123)        tietty henkilö oid:n mukaan poimittuna
+            get_persons(pid=123)        tietty henkilö oid:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
             - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
             
@@ -501,63 +503,59 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_events_k (keys):
-        """ Voidaan lukea henkilöitä tapahtumineen kannasta
-            a) Tietokanta-avaimella valittu henkilö
-            b) nimellä poimittu henkilö
-               rule='all'       kaikki
-               rule='surname'   sukunimen alkuosalla
-               rule='firstname' etunimen alkuosalla
-               rule='suffix'    patronyymin alkuosalla
+    def get_events_k (keys, take_refnames=True):
+        """  Read Persons with names, events and reference names
+             a) selected by unique id
+             b) selected by name
+                keys=['all']             all
+                keys=['surname', name]   by start of surname
+                keys=['firstname', name] by start of the first of first names
+                keys=['patronyme', name] by start of patronyme name
+
+            #TODO: take_refnames is not operational
         """
         if keys:
             rule=keys[0]
-            name=keys[1] if len(keys) > 1 else None
-            print("Rajaus {} '{}'".format(rule, name))
+            name=keys[1].title() if len(keys) > 1 else None
+            print("Selected {} '{}'".format(rule, name))
         else:
             rule="all"
             name=""
 
-# ╒═══════╤══════╤══════╤═════╤═════════╤══════════╤══════════════════════════════╕
-# │"id"   │"confi│"first│"ref │"surname"│"suffix"  │"events"                      │
-# │       │dence"│name" │name"│         │          │                              │
-# ╞═══════╪══════╪══════╪═════╪═════════╪══════════╪══════════════════════════════╡
-# │"27204"│null  │"Henri│""   │"Sibbe"  │"Mattsson"│[["26836","Occupation","","","│
-# │       │      │k"    │     │         │          │","","Cappelby 4 Sibbes"],["26│
-# │       │      │      │     │         │          │255","Birth","1709-01-03","","│
-# │       │      │      │     │         │          │","",null],["26837","Luottamus│
-# │       │      │      │     │         │          │toimi","1760","","","",null]] │
-# ├───────┼──────┼──────┼─────┼─────────┼──────────┼──────────────────────────────┤
-        qend="""
+# ╒═════╤════════════════╤═══════════╤════════╤═════════════════╤═════════════════╕
+# │"id" │"firstname"     │"surname"  │"suffix"│"refnames"       │"events"         │
+# ╞═════╪════════════════╪═══════════╪════════╪═════════════════╪═════════════════╡
+# │31844│"August Wilhelm"│"Wallenius"│""      │["August","Wilhel│[[29933,"Baptism"│
+# │     │                │           │        │m","Wallenius"]  │,"1841-09-12","",│
+# │     │                │           │        │                 │"1841-09-12","",n│
+# │     │                │           │        │                 │ull]]            │
+# └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
+# There is also fields confidence, est_birth, est_death, which are empty for now 
+ 
+        query_tail="""
  OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
  OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
+ OPTIONAL MATCH (person) <-[:USEDNAME]- () -[:BASENAME*0..2]-> (refn:Refname)
 RETURN ID(person) AS id, person.confidence AS confidence, 
     person.est_birth AS est_birth, person.est_death AS est_death,
-    name.firstname AS firstname, 
-    name.refname AS refname, name.surname AS surname, 
-    name.suffix AS suffix,
-    COLLECT([ID(event), event.type, event.date, event.datetype, 
+    name.firstname AS firstname, name.surname AS surname,
+    name.suffix AS suffix, 
+    COLLECT(DISTINCT refn.name) AS refnames,
+    COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype, 
         event.daterange_start, event.daterange_stop, place.pname]) AS events
 ORDER BY name.surname, name.firstname"""
-
-        if rule == "uniq_id":
-            # Person selected by uniq_id
-            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE ID(person)=$id" + qend
-            return shareds.driver.session().run(query, id=int(name))
+        
         if rule == 'all':
-            query = "MATCH (person:Person)-[:NAME]->(name:Name)" + qend
+            query = "MATCH (person:Person)-[:NAME]->(name:Name)" + query_tail
             return shareds.driver.session().run(query)
-        if rule == "surname":
-            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.surname STARTS WITH $id" + qend
-        elif rule == "firstname":
-            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.firstname STARTS WITH $id" + qend
-        elif rule == "suffix":
-            query = "MATCH (person:Person)-[:NAME]->(name:Name) WHERE name.suffix STARTS WITH $id" + qend
         else:
-            print ("Tätä rajausta ei ole vielä tehty: " + rule)
-            return None
-        # All with string argument
-        return shareds.driver.session().run(query, id=name)
+            # Selected names and name types
+            query = """
+MATCH (n:Refname) -[r:USEDNAME]-> (person:Person) -[:NAME]-> (name:Name)
+WHERE r.use = $attr.use AND n.name STARTS WITH $attr.name 
+WITH person, name
+""" + query_tail
+            return shareds.driver.session().run(query, attr={'use':rule, 'name':name})
 
 
     @staticmethod       
@@ -592,6 +590,24 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
 
         return shareds.driver.session().run(query, id=int(uniq_id))
     
+
+    @staticmethod
+    def get_refnames(pid):
+        """ List Person's all Refnames with name use"""
+        # ╒══════════════════════════╤═════════════════════╕
+        # │"a"                       │"li"                 │
+        # ╞══════════════════════════╪═════════════════════╡
+        # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
+        # │":"Messu- ja kalenteri"}  │                     │
+        # ├──────────────────────────┼─────────────────────┤
+        # │{"name":"Bert-not-exists"}│[{"use":"firstname"}]│
+        # └──────────────────────────┴─────────────────────┘        
+        query = """
+MATCH (p:Person) WHERE ID(p) = $pid
+MATCH path = (a) -[:USEDNAME*]-> (p)
+RETURN a, [x IN RELATIONSHIPS(path)] AS li
+"""
+        return shareds.driver.session().run(query, pid=pid)
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
@@ -791,6 +807,9 @@ SET n.est_death = m.daterange_start"""
         if len(self.parentin_hlink) > 0:
             for i in range(len(self.parentin_hlink)):
                 print ("Parentin_hlink: " + self.parentin_hlink[i])
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                print ("Noteref_hlink: " + self.noteref_hlink[i])
         if len(self.citationref_hlink) > 0:
             for i in range(len(self.citationref_hlink)):
                 print ("Citationref_hlink: " + self.citationref_hlink[i])
@@ -868,7 +887,7 @@ SET n.est_death = m.daterange_start"""
         return points
 
 
-    def save(self, userid, tx):
+    def save(self, username, tx):
         """ Tallettaa henkilön sekä mahdollisesti viitatut nimet, tapahtumat 
             ja sitaatit kantaan 
         """
@@ -901,12 +920,12 @@ SET p.gramps_handle=$handle,
         # Linkitä User nodeen
         try:
             query = """
-MATCH (u:User)   WHERE u.userid=$userid
+MATCH (u:UserProfile) WHERE u.userName=$username
 MATCH (n:Person) WHERE n.gramps_handle=$handle
 MERGE (u)-[r:REVISION]->(n)
 SET r.date=$date"""
             tx.run(query, 
-               {"userid": userid, "handle": handle, "date": today})
+               {"username": username, "handle": handle, "date": today})
         except Exception as err:
             print("Virhe (Person.save:User): {0}".format(err), file=stderr)
             
@@ -1024,6 +1043,20 @@ MERGE (n)-[r:MEDIA]->(m)"""
         # Make relations to the Family node will be done in Family.save(),
         # because the Family object is not yet created
    
+        # Make relations to the Note node
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                try:
+                    noteref_hlink = self.noteref_hlink[i]
+                    query = """
+MATCH (n:Person)   WHERE n.gramps_handle=$handle
+MATCH (m:Note) WHERE m.gramps_handle=$noteref_hlink
+MERGE (n)-[r:NOTE]->(m)"""
+                    tx.run(query, 
+                           {"handle": handle, "noteref_hlink": noteref_hlink})
+                except Exception as err:
+                    print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
+   
         # Make relations to the Citation node
         if len(self.citationref_hlink) > 0:
             try:
@@ -1125,30 +1158,22 @@ class Name:
         
     
     @staticmethod
-    def get_all_firstnames():
-        """ Poimii kaikki henkilöiden Name:t etunimijärjestyksessä 
-╒═══════╤══════════════════════╤════════════╤═════════╤══════════════════════════════╤═════╕
-│"ID"   │"fn"                  │"sn"        │"pn"     │"rn"                          │"sex"│
-╞═══════╪══════════════════════╪════════════╪═════════╪══════════════════════════════╪═════╡
-│"30691"│"Abraham"             │"Palander"  │""       │"Aappo/Palander/"             │"M"  │
-├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
-│"30786"│"Abraham Mathias"     │"Bruncrona" │""       │"Aappo Mathias/Bruncrona/"    │"M"  │
-├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
-│"30950"│"Adolf Mathias Israel"│"Sucksdorff"│""       │"Adolf Mathias Israel/Sucksdor│"M"  │
-│       │                      │            │         │ff/"                          │     │
-├───────┼──────────────────────┼────────────┼─────────┼──────────────────────────────┼─────┤
-│"30281"│"Agata Eufrosine"     │"Tolpo"     │"Gabriels│"Agaata Eufrosine/Tolpo/"     │"F"  │
-│       │                      │            │dotter"  │                              │     │
-└───────┴──────────────────────┴────────────┴─────────┴──────────────────────────────┴─────┘
-        TODO: sex-kenttää ei nyt käytetä, keventäisi jättää pois
+    def get_all_personnames():
+        """ Picks all Name objects 
+    # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
+    # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
+    # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
+    # │30796│"Björn"             │""        │"Jönsson"     │"M"  │
+    # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
+    # │30858│"Catharina Fredrika"│"Åkerberg"│""            │"F"  │
+    # └─────┴────────────────────┴──────────┴──────────────┴─────┘
+        TODO: sex field is not used currently - Remove?
         """
         
         query = """
-MATCH (n)<-[r:NAME]-(a) 
-RETURN ID(n) AS ID, n.firstname AS fn, 
-       n.surname AS sn, n.suffix AS pn, n.refname as rn,
-       a.gender AS sex
-ORDER BY n.firstname"""
+MATCH (n)<-[r:NAME]-(p:Person) 
+RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
+    p.gender AS sex"""
         return shareds.driver.session().run(query)
         
     

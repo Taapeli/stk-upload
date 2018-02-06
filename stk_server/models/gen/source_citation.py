@@ -34,7 +34,7 @@ class Citation:
         self.id = ''
         self.dateval = ''
         self.page = ''
-        self.noteref_hlink = ''
+        self.noteref_hlink = []
         self.sourceref_hlink = ''
         self.sources = []   # For creating display sets
         self.events = []   # For creating display sets
@@ -100,8 +100,9 @@ class Citation:
         print ("Dateval: " + self.dateval)
         print ("Page: " + self.page)
         print ("Confidence: " + self.confidence)
-        if self.noteref_hlink != '':
-            print ("Noteref_hlink: " + self.noteref_hlink)
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                print ("Noteref_hlink: " + self.noteref_hlink[i])
         if self.sourceref_hlink != '':
             print ("Sourceref_hlink: " + self.sourceref_hlink)
         return True
@@ -127,18 +128,20 @@ class Citation:
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
-        try:
-            # Make relation to the Note node
-            if self.noteref_hlink != '':
-                query = """
-                    MATCH (n:Citation) WHERE n.gramps_handle='{}'
-                    MATCH (m:Note) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:NOTE]->(m)
-                     """.format(self.handle, self.noteref_hlink)
-                                 
-                tx.run(query)
-        except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+        # Make relations to the Note node
+        if len(self.noteref_hlink) > 0:
+            handle = self.handle
+            for i in range(len(self.noteref_hlink)):
+                try:
+                    noteref_hlink = self.noteref_hlink[i]
+                    query = """
+MATCH (n:Citation)   WHERE n.gramps_handle=$handle
+MATCH (m:Note) WHERE m.gramps_handle=$noteref_hlink
+MERGE (n)-[r:NOTE]->(m)"""
+                    tx.run(query, 
+                           {"handle": handle, "noteref_hlink": noteref_hlink})
+                except Exception as err:
+                    print("Virhe (Citation.save:Note): {0}".format(err), file=stderr)
 
         try:   
             # Make relation to the Source node

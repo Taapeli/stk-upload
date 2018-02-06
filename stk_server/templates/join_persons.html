@@ -44,12 +44,12 @@ function myFunction(oid, fn, ln) {
     <tr>
         <td><center>
             <input type="radio" name="base" value="{{p.oid}}"
-                   onchange="myFunction('{{p.oid}}', '{{p.name.first}}', '{{p.name.last}}')"/>
+                   onchange="myFunction('{{p.oid}}', '{{p.names[0].first}}', '{{p.names[0].last}}')"/>
             <input type="checkbox" name="join" value="{{p.oid}}" />
             </center>
         </td>
         <td><span class="id">{{p.oid}}</span>
-            {{p.name.first}} <b>{{p.name.last}}</b>
+            {{p.names[0].first}} <b>{{p.names[0].last}}</b>
             <i>{% if p.occupation %}{{p.occupation}}{% endif %}</i></td>
         <td>{% if p.events|count %}<ul class="event">
                 {% for e in p.events %}
