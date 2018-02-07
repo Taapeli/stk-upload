@@ -1688,9 +1688,7 @@ def handle_sources(collection, tx):
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
-    """ Lukee xml-tiedostosta aineiston, ja tallettaa kustakin syöttörivistä
-         tiedot Neo4j-kantaan
-    """
+    """ Reads a xml backup file from Gramps, and saves the information to db """
     
     # Make a precheck
     a = pathname.split(".")
@@ -1726,47 +1724,40 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     
     tx = shareds.driver.session().begin_transaction()
     result = handle_notes(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_repositories(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_media(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_places(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_sources(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_citations(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_events(collection, userid, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_people(collection, userid, tx)
-#    user.endTransaction(tx)
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_families(collection, tx)
     tx.commit()
+
     msg.append(str(result))
     print(str(result))
     
