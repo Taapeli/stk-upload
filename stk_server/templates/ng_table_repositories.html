@@ -20,7 +20,7 @@
 	    </tr>
 	{% if repositories %}
 	    <tr ng-repeat="r in repos | orderBy:currentSort.exp: currentSort.reverse">
-	        <td><a href="/poimi/repo_uniq_id={a r.uniq_id a}">{a r.uniq_id a}</a></td>
+	        <td><a href="/pick/repo_uniq_id={a r.uniq_id a}">{a r.uniq_id a}</a></td>
 	        <td>{a r.rname a}</td>
     		<td>{a r.type a}</td>
         </tr>

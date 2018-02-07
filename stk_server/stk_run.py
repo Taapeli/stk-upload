@@ -364,35 +364,36 @@ def show_family_data(uniq_id):
                            person=person, families=families)
 
 
-@app.route('/poimi/<string:ehto>')
+@app.route('/pick/<string:ehto>')
 def nayta_ehdolla(ehto):
-    """ Nimien listaus tietokannasta ehtolauseella
-        oid=arvo        näyttää nimetyn henkilön
-        name=arvo    näyttää henkilöt, joiden nimi alkaa arvolla
+    """ List objects using selection argument
     """
     key, value = ehto.split('=')
     try:
-#         if key == 'oid':
+#         if key == 'oid':              # from table_persons.html as @app.route('/poimi/<string:ehto>')
 #             persons = models.datareader.lue_henkilot(oid=value)
 #             return render_template("person.html", persons=persons)
-        if key == 'name':
+
+        if key == 'name':               # A prototype for later development
             value=value.title()
             persons = models.datareader.read_persons_with_events(keys=['surname',value])
             return render_template("join_persons.html",
                                    persons=persons, pattern=value)
-        elif key == 'cite_sour_repo':
+        elif key == 'cite_sour_repo':   # from table_person_by_id.html
             events = models.datareader.read_cite_sour_repo(uniq_id=value)
             return render_template("cite_sour_repo.html",
                                    events=events)
-        elif key == 'repo_uniq_id':
+        elif key == 'repo_uniq_id':     # from cite_sourc_repo.html, 
+                                        # ng_table_repositories.html,
+                                        # table_repositories.html
             repositories = models.datareader.read_repositories(uniq_id=value)
             return render_template("repo_sources.html",
                                    repositories=repositories)
-        elif key == 'source_uniq_id':
+        elif key == 'source_uniq_id':   # from cite_sourc_repo.html, table_sources.html
             sources = models.datareader.read_sources(uniq_id=value)
             return render_template("source_citations.html",
                                    sources=sources)
-        elif key == 'uniq_id':
+        elif key == 'uniq_id':          # from table_persons2.html
             persons = models.datareader.read_persons_with_events(("uniq_id",value))
             return render_template("person2.html", persons=persons)
         else:
@@ -521,19 +522,12 @@ def show_family_data_dbl(uniq_id):
                            person=person, families=families)
 
 
-@app.route('/poimi/<string:ehto>')
-def nayta_ehdolla_dbl(ehto):
-    """ Nimien listaus tietokannasta ehtolauseella
-        oid=arvo        näyttää nimetyn henkilön
-        names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
-    """
-
-    @app.route('/tyhjenna/kaikki/kannasta')
-    def tyhjenna():
-        """ tietokannan tyhjentäminen mitään kyselemättä """
-        #models.dbutil.connect_db()
-        msg = models.dbutil.alusta_kanta()
-        return render_template("talletettu.html", text=msg)
+@app.route('/tyhjenna/kaikki/kannasta')
+def tyhjenna():
+    """ Clear database - with no confirmation! """
+    #models.dbutil.connect_db()
+    msg = models.dbutil.alusta_kanta()
+    return render_template("talletettu.html", text=msg)
 
 
 @app.route('/aseta/confidence')
@@ -584,12 +578,6 @@ def henkiloiden_yhdistely():
     models.dataupdater.joinpersons(base_id, join_ids)
     flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
     return redirect(url_for('nayta_ehdolla', ehto='names='+names))
-
-#  Käyttäjän lisääminen tapahtuu Flask-securityn metodeilla
-
-# @app.route('/newuser', methods=['POST'])
-# def new_user():
-#     """ Lisää tai päivittää käyttäjätiedon
 
 
 @app.route('/virhe_lataus/<int:code>/<text>')

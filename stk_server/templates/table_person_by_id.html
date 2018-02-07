@@ -69,7 +69,7 @@
     		<td>{% if event.location %}{{event.location |join(' • ')}}{% endif %}</td>
     		<td>{% if event.description %}{{event.description}}{% endif %}</td>
             <td>{% if event.citationref_hlink %}
-            		<a href="/poimi/cite_sour_repo={{event.uniq_id}}">citations</a>
+            		<a href="/pick/cite_sour_repo={{event.uniq_id}}">citations</a>
             	{% endif %}</td>
 		</tr>
 	{% endfor %}
