@@ -221,6 +221,15 @@ def nayta_henkilot(subj):
             r.type = templates.jinja_filters.translate(r.type, 'rept', 'fi')
         return render_template("ng_table_repositories.html",
                                repositories=repositories)
+    elif subj == 'same_birthday':
+        ids = models.datareader.read_same_birthday()
+        return render_template("ng_same_birthday.html", ids=ids)
+    elif subj == 'same_deathday':
+        ids = models.datareader.read_same_deathday()
+        return render_template("ng_same_deathday.html", ids=ids)
+    elif subj == 'same_name':
+        ids = models.datareader.read_same_name()
+        return render_template("ng_same_name.html", ids=ids)
     elif subj == 'sources':
         sources = models.datareader.read_sources()
         return render_template("table_sources.html",
