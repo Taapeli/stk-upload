@@ -503,16 +503,19 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_events_k (keys, take_refnames=True):
+    def get_events_k (keys, currentuser, take_refnames=True):
         """  Read Persons with names, events and reference names
+            called from models.datareader.read_persons_with_events
+
              a) selected by unique id
              b) selected by name
                 keys=['all']             all
                 keys=['surname', name]   by start of surname
                 keys=['firstname', name] by start of the first of first names
                 keys=['patronyme', name] by start of patronyme name
+            If currentuser is defined, select only her Events
 
-            #TODO: take_refnames is not operational
+            #TODO: take_refnames should determine, if refnames are returned, too
         """
         if keys:
             rule=keys[0]
@@ -544,6 +547,19 @@ RETURN ID(person) AS id, person.confidence AS confidence,
     COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype, 
         event.daterange_start, event.daterange_stop, place.pname]) AS events
 ORDER BY name.surname, name.firstname"""
+
+#TODO: filter by owner
+#         if currentuser and currentuser != 'all':
+#             query_user = """
+# MATCH (name:Name) <-- (person:Person) <-[:REVISION]- (up)
+# WHERE up.userName = 'jpek'
+# WITH COLLECT(name) AS names, person, up
+# OPTIONAL MATCH (person) --> (event:Event) <-[:REVISION]- (ue)
+# WHERE ue.userName = 'jpek'
+# RETURN names, person, COLLECT(event), up, ue LIMIT 2
+# """
+#         else:
+#             query_user = ""
         
         if rule == 'all':
             query = "MATCH (person:Person)-[:NAME]->(name:Name)" + query_tail
@@ -551,10 +567,19 @@ ORDER BY name.surname, name.firstname"""
         else:
             # Selected names and name types
             query = """
-MATCH (n:Refname) -[r:USEDNAME]-> (person:Person) -[:NAME]-> (name:Name)
-WHERE r.use = $attr.use AND n.name STARTS WITH $attr.name 
-WITH person, name
-""" + query_tail
+MATCH (search:Refname) <-[rp:BASENAME]- (n:Refname)
+      -[rr:USEDNAME]-> (person:Person)
+WHERE search.name STARTS WITH $attr.name AND
+      rr.use = $attr.use AND rp.use = $attr.use
+WITH search, person
+MATCH (person) -[:NAME]-> (name:Name)
+WITH person, name""" + query_tail
+# Prefious version, without depending refname
+#             query = """
+# MATCH (n:Refname) -[r:USEDNAME]-> (person:Person) -[:NAME]-> (name:Name)
+# WHERE r.use = $attr.use AND n.name STARTS WITH $attr.name 
+# WITH person, name
+# """ + query_tail
             return shareds.driver.session().run(query, attr={'use':rule, 'name':name})
 
 
@@ -1159,7 +1184,7 @@ class Name:
     
     @staticmethod
     def get_all_personnames():
-        """ Picks all Name objects 
+        """ Picks all Name objects of this Person
     # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
     # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
     # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡

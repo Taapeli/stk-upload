@@ -67,8 +67,9 @@ def show_person_list(selection=None):
             persons = models.datareader.read_persons_with_events(keys)
             return render_template("k_persons.html", persons=persons, menuno=0,
                                    name=name, rule=rule)
-        except Exception:
-            flash("Ei oikeita hakukenttiä", category='warning')
+        except Exception as e:
+            logger.debug("Error {} in show_person_list".format(e))
+            flash("Valitse haettava termi", category='warning')
 
     # the code below is executed if the request method
     # was GET or the credentials were invalid
@@ -86,8 +87,9 @@ def show_person_list(selection=None):
 def show_persons_restricted(selection=None):
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla mainostarkoituksessa"""
     if not current_user.is_authenticated:
-        # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit. Vaihtoehtoisesti kutsu toistra metodia.
-                keys = ('all',)
+        # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
+        # Vaihtoehtoisesti kutsu toista metodia.
+        keys = ('all',)
     persons = models.datareader.read_persons_with_events(keys)
     return render_template("k_persons.html", persons=persons, menuno=1)
 
@@ -97,7 +99,11 @@ def show_persons_restricted(selection=None):
 def show_all_persons_list(selection=None):
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     keys = ('all',)
-    persons = models.datareader.read_persons_with_events(keys)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    persons = models.datareader.read_persons_with_events(keys, user=user)
     return render_template("k_persons.html", persons=persons, menuno=1)
 
 
@@ -374,7 +380,7 @@ def show_family_data(uniq_id):
 
 
 @app.route('/pick/<string:ehto>')
-def nayta_ehdolla(ehto):
+def pick_selection(ehto):
     """ List objects using selection argument
     """
     key, value = ehto.split('=')
@@ -571,7 +577,7 @@ def nimien_yhdistely():
     """
     names = request.form['names']
     logging.debug('Poimitaan ' + names )
-    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+    return redirect(url_for('pick_selection', ehto='names='+names))
 
 
 @app.route('/samahenkilo', methods=['POST'])
@@ -586,7 +592,7 @@ def henkiloiden_yhdistely():
     #TODO lisättävä valitut ref.nimet, jahka niitä tulee
     models.dataupdater.joinpersons(base_id, join_ids)
     flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
-    return redirect(url_for('nayta_ehdolla', ehto='names='+names))
+    return redirect(url_for('pick_selection', ehto='names='+names))
 
 
 @app.route('/virhe_lataus/<int:code>/<text>')

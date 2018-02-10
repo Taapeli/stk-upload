@@ -145,13 +145,15 @@ import shareds
 #     return message
 
 
-def read_persons_with_events(keys=None):
-    """ Reads Person- and Event- objects for display
+def read_persons_with_events(keys=None, currentuser=None):
+    """ Reads Person- and Event- objects for display.
+        If currentuser is defined, restrict to her objects.
+
         Returns Person objects, whith included Events
     """
     
     persons = []
-    result = Person.get_events_k(keys)
+    result = Person.get_events_k(keys, currentuser)
     for record in result:
         # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
         uniq_id = record['id']
@@ -250,7 +252,7 @@ def set_refnames():
     t0 = time.time()
 
     persons = Name.get_all_personnames()
-    # Process each different first name
+    # Process each name part (first names, surname, patronyme)
     for rec in persons:
         # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
         # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
