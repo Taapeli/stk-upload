@@ -27,6 +27,7 @@ The II links are created, when reference names are added from a cvs file.
 import logging
 from sys import stderr
 import shareds
+from models.gen.cypher import Cypher
 
 # Global allowed reference types in Refname.reftype field or use attribute in db
 REFTYPES = ['basename', 'firstname', 'surname', 'patronyme', 'father', 'mother']
@@ -105,7 +106,7 @@ class Refname:
 
 
     def save(self):
-        """ Savinf a Refname to the database. It may be - 
+        """ Saving a Refname to the database. It may be - 
             - a name without other reference (A:{name:name})
             - a name with reference to a base name
                 (A:{name:name}) -[:BASENAME]-> (B:{name:refname})
@@ -144,14 +145,10 @@ class Refname:
                 link_type = "PARENTNAME"
             else:   # ['firstname', 'surname', 'patronyme']
                 link_type = "BASENAME"
-            query="""
-MERGE (a:Refname {name: $a_name}) SET a = $a_attr
-MERGE (b:Refname {name: $b_name})
-MERGE (a)-[l:""" + link_type + """ {use:$use}]->(b)
-RETURN ID(a) AS aid, a.name AS aname, l.use AS use, ID(b) AS bid, b.name AS bname"""
             try:
                 with shareds.driver.session() as session:
-                    result = session.run(query, use=self.reftype,
+                    result = session.run(Cypher.refname_save(link_type), 
+                                         use=self.reftype,
                                          a_name=self.name, a_attr=a_attr,
                                          b_name=self.refname)
         
@@ -206,14 +203,10 @@ RETURN ID(a) AS aid, a.name AS aname"""
         if not (reftype in REFTYPES):
             raise ValueError("Invalid reftype {}".format(reftype))
 
-        query="""
-MATCH (p:Person) WHERE ID(p) = $pid
-MERGE (a:Refname {name:$name})
-MERGE (a) -[:BASENAME {use:$use}]-> (p)
-RETURN ID(a) as rid"""
         try:
             with shareds.driver.session() as session:
-                result = session.run(query, pid=pid, name=name, use=reftype)
+                result = session.run(Cypher.refname_link_to, 
+                                     pid=pid, name=name, use=reftype)
 
                 logging.debug("Created {} nodes for {}".format(\
                         result.summary().counters.nodes_created, name))
@@ -305,17 +298,9 @@ RETURN ID(a) as rid"""
 # │       │                       │ame":"Pekanpoika"}]]   │             │      │
 # └───────┴───────────────────────┴───────────────────────┴─────────────┴──────┘
         """
-        query = """
-MATCH (n:Refname)
-OPTIONAL MATCH (n)-[r]->(m:Refname)
-OPTIONAL MATCH (n)-[l:BASENAME]->(p:Person)
-RETURN n,
-    COLLECT(DISTINCT [type(r), r.use, m]) AS r_ref,
-    COLLECT(DISTINCT l.use) AS l_uses, COUNT(p) AS uses
-ORDER BY n.name"""
         try:
             ret = []
-            results = shareds.driver.session().run(query)
+            results = shareds.driver.session().run(Cypher.refnames_get)
             for result in results:
                 rn = Refname(result['n']["name"])
                 rn.rid = result['n'].id

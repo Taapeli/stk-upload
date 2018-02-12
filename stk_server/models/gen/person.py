@@ -12,6 +12,7 @@ import logging
 #from flask import g
 import models.dbutil
 import  shareds
+from models.gen.cypher import Cypher
 
 class Person:
     """ Henkilö
@@ -535,50 +536,15 @@ RETURN person, urls, COLLECT (name) AS names
 # └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
 # There is also fields confidence, est_birth, est_death, which are empty for now 
  
-        query_tail="""
- OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
- OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
- OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-RETURN ID(person) AS id, person.confidence AS confidence, 
-    person.est_birth AS est_birth, person.est_death AS est_death,
-    name.firstname AS firstname, name.surname AS surname,
-    name.suffix AS suffix, 
-    COLLECT(DISTINCT refn.name) AS refnames,
-    COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype, 
-        event.daterange_start, event.daterange_stop, place.pname]) AS events
-ORDER BY name.surname, name.firstname"""
-
 #TODO: filter by owner
-#         if currentuser and currentuser != 'all':
-#             query_user = """
-# MATCH (name:Name) <-- (person:Person) <-[:REVISION]- (up)
-# WHERE up.userName = 'jpek'
-# WITH COLLECT(name) AS names, person, up
-# OPTIONAL MATCH (person) --> (event:Event) <-[:REVISION]- (ue)
-# WHERE ue.userName = 'jpek'
-# RETURN names, person, COLLECT(event), up, ue LIMIT 2
-# """
-#         else:
-#             query_user = ""
-        
-        if rule == 'all':
-            query = "MATCH (person:Person)-[:NAME]->(name:Name)" + query_tail
-            return shareds.driver.session().run(query)
-        else:
-            # Selected names and name types
-            query = """
-MATCH p = (search:Refname) -[:BASENAME*{use:$attr.use}]-> (person:Person)
-WHERE search.name STARTS WITH $attr.name
-WITH search, person
-MATCH (person) -[:NAME]-> (name:Name)
-WITH person, name""" + query_tail
-# Prefious version, without depending refname
-#             query = """
-# MATCH (n:Refname) -[r:BASENAME]-> (person:Person) -[:NAME]-> (name:Name)
-# WHERE r.use = $attr.use AND n.name STARTS WITH $attr.name 
-# WITH person, name
-# """ + query_tail
-            return shareds.driver.session().run(query, attr={'use':rule, 'name':name})
+
+        with shareds.driver.session() as session:
+            if rule == 'all':
+                return session.run(Cypher.person_get_events_all)
+            else:
+                # Selected names and name types
+                return session.run(Cypher.person_get_events_by_refname, 
+                                   attr={'use':rule, 'name':name})
 
 
     @staticmethod       
