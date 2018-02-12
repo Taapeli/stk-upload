@@ -145,7 +145,7 @@ import shareds
 #     return message
 
 
-def read_persons_with_events(keys=None, currentuser=None):
+def read_persons_with_events(keys=None, user=None):
     """ Reads Person- and Event- objects for display.
         If currentuser is defined, restrict to her objects.
 
@@ -153,7 +153,7 @@ def read_persons_with_events(keys=None, currentuser=None):
     """
     
     persons = []
-    result = Person.get_events_k(keys, currentuser)
+    result = Person.get_events_k(keys, user)
     for record in result:
         # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
         uniq_id = record['id']

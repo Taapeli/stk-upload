@@ -538,7 +538,7 @@ RETURN person, urls, COLLECT (name) AS names
         query_tail="""
  OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
  OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
- OPTIONAL MATCH (person) <-[:USEDNAME]- () -[:BASENAME*0..2]-> (refn:Refname)
+ OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
 RETURN ID(person) AS id, person.confidence AS confidence, 
     person.est_birth AS est_birth, person.est_death AS est_death,
     name.firstname AS firstname, name.surname AS surname,
@@ -567,16 +567,14 @@ ORDER BY name.surname, name.firstname"""
         else:
             # Selected names and name types
             query = """
-MATCH (search:Refname) <-[rp:BASENAME]- (n:Refname)
-      -[rr:USEDNAME]-> (person:Person)
-WHERE search.name STARTS WITH $attr.name AND
-      rr.use = $attr.use AND rp.use = $attr.use
+MATCH p = (search:Refname) -[:BASENAME*{use:$attr.use}]-> (person:Person)
+WHERE search.name STARTS WITH $attr.name
 WITH search, person
 MATCH (person) -[:NAME]-> (name:Name)
 WITH person, name""" + query_tail
 # Prefious version, without depending refname
 #             query = """
-# MATCH (n:Refname) -[r:USEDNAME]-> (person:Person) -[:NAME]-> (name:Name)
+# MATCH (n:Refname) -[r:BASENAME]-> (person:Person) -[:NAME]-> (name:Name)
 # WHERE r.use = $attr.use AND n.name STARTS WITH $attr.name 
 # WITH person, name
 # """ + query_tail
@@ -629,7 +627,7 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
         # └──────────────────────────┴─────────────────────┘        
         query = """
 MATCH (p:Person) WHERE ID(p) = $pid
-MATCH path = (a) -[:USEDNAME*]-> (p)
+MATCH path = (a) -[:BASENAME*]-> (p)
 RETURN a, [x IN RELATIONSHIPS(path)] AS li
 """
         return shareds.driver.session().run(query, pid=pid)

@@ -209,7 +209,7 @@ RETURN ID(a) AS aid, a.name AS aname"""
         query="""
 MATCH (p:Person) WHERE ID(p) = $pid
 MERGE (a:Refname {name:$name})
-MERGE (a) -[:USEDNAME {use:$use}]-> (p)
+MERGE (a) -[:BASENAME {use:$use}]-> (p)
 RETURN ID(a) as rid"""
         try:
             with shareds.driver.session() as session:
@@ -308,7 +308,7 @@ RETURN ID(a) as rid"""
         query = """
 MATCH (n:Refname)
 OPTIONAL MATCH (n)-[r]->(m:Refname)
-OPTIONAL MATCH (n)-[l:USEDNAME]->(p:Person)
+OPTIONAL MATCH (n)-[l:BASENAME]->(p:Person)
 RETURN n,
     COLLECT(DISTINCT [type(r), r.use, m]) AS r_ref,
     COLLECT(DISTINCT l.use) AS l_uses, COUNT(p) AS uses
