@@ -244,7 +244,7 @@ def set_estimated_dates():
     return (message)
     
     
-def set_refnames():
+def set_person_refnames():
     """ Set Refnames to all Persons
     """
     pers_count = 0
@@ -304,9 +304,9 @@ def set_refnames():
             rnames.append("{} ({})".format(name['name'], link['use']))
         logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
     
-    msg="Processed {} names of {} persons".format(name_count, pers_count)
+    msg="Processed {} names of {} persons in {} sek".\
+        format(name_count, pers_count,time.time()-t0)
     logging.info(msg)
-    logging.debug("TIME lue_henkilot {} sek".format(time.time()-t0))
     return msg
 
 
@@ -323,6 +323,10 @@ def read_refnames():
     logging.info("TIME get_refnames {} sek".format(time.time()-t0))
 
     return (namelist)
+
+def recreate_refnames():
+    summary = Refname.recreate_refnames()
+    return str(summary)
 
 
 # def read_typed_refnames(reftype):

@@ -56,3 +56,6 @@ RETURN n,
     COLLECT(DISTINCT l.use) AS l_uses, COUNT(p) AS uses
 ORDER BY n.name"""
 
+    refnames_delete_all = "MATCH (n:Refname) DETACH DELETE n"
+    
+    refnames_set_constraint = "CREATE CONSTRAINT ON (r:Refname) ASSERT r.name IS UNIQUE"

@@ -431,6 +431,9 @@ def upload():
         logging.debug("Got a {} file '{}'".format(material, infile.filename))
 
         models.loadfile.upload_file(infile)
+        if 'destroy' in request.form and request.form['destroy'] == 'all':
+            logger.info("*** About deleting all previous Refnames ***")
+            models.datareader.recreate_refnames()
 
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -562,10 +565,10 @@ def aseta_estimated_dates():
 
 
 @app.route('/set/refnames')
-def set_refnames():
+def set_person_refnames():
     """ Setting reference names for all persons """
     dburi = models.dbutil.get_server_location()
-    message = models.datareader.set_refnames()
+    message = models.datareader.set_person_refnames()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 

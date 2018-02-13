@@ -26,6 +26,7 @@ The II links are created, when reference names are added from a cvs file.
 '''
 import logging
 from sys import stderr
+import time
 import shareds
 from models.gen.cypher import Cypher
 
@@ -214,6 +215,32 @@ RETURN ID(a) AS aid, a.name AS aname"""
         except Exception as err:
             # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
             print("Error: {0}".format(err), file=stderr)
+
+
+    @staticmethod
+    def recreate_refnames():
+        # Deletes all refnames and their relations and
+        # defines unique constraint for refnames
+
+        with shareds.driver.session() as session:
+            try:
+                # Remove all Refnames
+                t0 = time.time()
+                result = session.run(Cypher.refnames_delete_all)
+                counters = result.summary().counters
+                logging.info("Deleted all Refnames: {}; {} sek".\
+                              format(counters, time.time()-t0))
+
+                # Create unique constrain for Refnames
+                t0 = time.time()
+                result = session.run(Cypher.refnames_set_constraint)
+                counters = result.summary().counters
+                logging.info("Set unique constraint for Refnames: {}; {} sek".\
+                              format(counters, time.time()-t0))
+
+            except Exception as err:
+                logging.error("Error: {0}".format(err))
+
 
 
 #     @staticmethod   
