@@ -12,6 +12,7 @@ import logging
 #from flask import g
 import models.dbutil
 import  shareds
+from models.gen.cypher import Cypher
 
 class Person:
     """ Henkilö
@@ -503,16 +504,19 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_events_k (keys, take_refnames=True):
+    def get_events_k (keys, currentuser, take_refnames=True):
         """  Read Persons with names, events and reference names
+            called from models.datareader.read_persons_with_events
+
              a) selected by unique id
              b) selected by name
                 keys=['all']             all
                 keys=['surname', name]   by start of surname
                 keys=['firstname', name] by start of the first of first names
                 keys=['patronyme', name] by start of patronyme name
+            If currentuser is defined, select only her Events
 
-            #TODO: take_refnames is not operational
+            #TODO: take_refnames should determine, if refnames are returned, too
         """
         if keys:
             rule=keys[0]
@@ -532,30 +536,15 @@ RETURN person, urls, COLLECT (name) AS names
 # └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
 # There is also fields confidence, est_birth, est_death, which are empty for now 
  
-        query_tail="""
- OPTIONAL MATCH (person)-[:EVENT]->(event:Event)
- OPTIONAL MATCH (event)-[:EVENT]->(place:Place)
- OPTIONAL MATCH (person) <-[:USEDNAME]- () -[:BASENAME*0..2]-> (refn:Refname)
-RETURN ID(person) AS id, person.confidence AS confidence, 
-    person.est_birth AS est_birth, person.est_death AS est_death,
-    name.firstname AS firstname, name.surname AS surname,
-    name.suffix AS suffix, 
-    COLLECT(DISTINCT refn.name) AS refnames,
-    COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype, 
-        event.daterange_start, event.daterange_stop, place.pname]) AS events
-ORDER BY name.surname, name.firstname"""
-        
-        if rule == 'all':
-            query = "MATCH (person:Person)-[:NAME]->(name:Name)" + query_tail
-            return shareds.driver.session().run(query)
-        else:
-            # Selected names and name types
-            query = """
-MATCH (n:Refname) -[r:USEDNAME]-> (person:Person) -[:NAME]-> (name:Name)
-WHERE r.use = $attr.use AND n.name STARTS WITH $attr.name 
-WITH person, name
-""" + query_tail
-            return shareds.driver.session().run(query, attr={'use':rule, 'name':name})
+#TODO: filter by owner
+
+        with shareds.driver.session() as session:
+            if rule == 'all':
+                return session.run(Cypher.person_get_events_all)
+            else:
+                # Selected names and name types
+                return session.run(Cypher.person_get_events_by_refname, 
+                                   attr={'use':rule, 'name':name})
 
 
     @staticmethod       
@@ -604,7 +593,7 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
         # └──────────────────────────┴─────────────────────┘        
         query = """
 MATCH (p:Person) WHERE ID(p) = $pid
-MATCH path = (a) -[:USEDNAME*]-> (p)
+MATCH path = (a) -[:BASENAME*]-> (p)
 RETURN a, [x IN RELATIONSHIPS(path)] AS li
 """
         return shareds.driver.session().run(query, pid=pid)
@@ -1159,7 +1148,7 @@ class Name:
     
     @staticmethod
     def get_all_personnames():
-        """ Picks all Name objects 
+        """ Picks all Name objects of this Person
     # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
     # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
     # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡

@@ -13,7 +13,7 @@ setup (
        author='jm',
        author_email='juha.makelainen@iki.fi',
 
-       #summary = 'Just another Python package for the cheese shop',
+       summary = 'Server program for Suomitietokanta',
        url='',
        license='',
        long_description='Taapeli-palvelinsovellus',
