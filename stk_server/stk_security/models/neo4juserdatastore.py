@@ -42,10 +42,11 @@ class Neo4jUserDatastore(UserDatastore):
 #        login_count = 0
 #===============================================================================
     
-    def __init__(self, driver, user_model, user_profile_model, role_model):
+    def __init__(self, driver, user_model, user_profile_model, role_model, allowed_email_model):
         self.driver = driver
         self.user_model = user_model
         self.user_profile_model = user_profile_model
+        self.allowed_email_model = allowed_email_model        
         self.role_model = role_model
         self.role_dict = self.get_roles() 
         
@@ -417,6 +418,52 @@ class Neo4jUserDatastore(UserDatastore):
             raise
 
 
+    def email_register(self, email, role):
+        try:
+            with self.driver.session() as session:
+                with session.begin_transaction() as tx:
+                    tx.run(Cypher.email_register, email=email, role=role)
+                    tx.commit()
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+
+
+    def get_emails(self):
+        try:
+            with self.driver.session() as session:
+                emailNodes = session.read_transaction(self._getEmails)
+                if emailNodes is not None:
+                    return [self.allowed_email_model(**emailNode.properties) for emailNode in emailNodes] 
+                return []
+        except ServiceUnavailable as ex:
+            logger.debug(ex.message)
+            return []                 
+
+                                              
+    def _getEmails (self, tx):
+        try:
+            emailNodes = []
+            for record in tx.run(Cypher.get_emails):
+                emailNodes.append(record['email'])
+            return emailNodes        
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+
+
 #This is a classmethod and doesn't need username        
     @classmethod
     def confirm_email(cls, email):
@@ -454,10 +501,5 @@ class Neo4jUserDatastore(UserDatastore):
             logger.error('Exception: ', ex)            
             raise
        
-        
-        
-        
-        
-        
         
         
