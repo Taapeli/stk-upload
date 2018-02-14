@@ -1,0 +1,18 @@
+{# _myapp/security/templates/register_email.html_ #}
+{% extends "layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div style="margin-left:50px; padding-bottom: 2em;">
+    <div class="startbox">
+        <h1>{{ _('Rekisteröi uusi Suomitietokannan käyttäjäehdokas') }}</h1>
+        <form action="{{ url_for('register_email') }}" method="POST" name="register_email_form">
+          {{ register_email_form.hidden_tag() }}
+          {{ render_field_with_errors(register_email_form.email) }}
+          {{ render_field_with_errors(register_email_form.default_role) }}      
+          {{ render_field(register_email_form.submit) }}
+        </form>
+    </div>            
+</div>
+{% endblock %}

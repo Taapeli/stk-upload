@@ -181,3 +181,22 @@ class Cypher():
         CREATE (u)-[:HAS_ROLE]->(r)
         '''
         )
+
+
+    email_register = (
+        '''
+        CREATE (email:Allowed_email 
+            {allowed_email : $email,
+            default_role : $role,
+            timestamp : timestamp() })
+        '''
+        )
+    
+    
+    get_emails = (
+        '''
+        MATCH (email:Allowed_email)
+        RETURN DISTINCT email 
+            ORDER BY email.timestamp DESC
+        '''
+        )
