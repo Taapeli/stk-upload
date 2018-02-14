@@ -3,7 +3,7 @@ Created on 26.11.2017
 
 @author: Timo
 
-Arvot asetetaan järjestelmän __init__.py:ssä
+Arvot asetetaan järjestelmän  setups.py:ssä
 '''
 app = None
 security = None
