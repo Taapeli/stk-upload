@@ -9,6 +9,7 @@ from sys import stderr
 #from flask import g
 from models.dbtree import DbTree
 from models.gen.person import Weburl
+from models.gen.note import Note
 import  shareds
 
 class Place:
@@ -34,6 +35,7 @@ class Place:
                     type            str url tyyppi
                     description     str url kuvaus
                 placeref_hlink      str paikan osoite
+                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self, locid="", ptype="", pname="", level=None):
@@ -54,6 +56,7 @@ class Place:
         self.coord_lat = ''
         self.urls = []
         self.placeref_hlink = ''
+        self.noteref_hlink = []
     
     
     def __str__(self):
@@ -76,8 +79,9 @@ class Place:
 MATCH (place:Place)-[:NAME]->(n:Place_name)
     WHERE ID(place)=$place_id
 OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
+OPTIONAL MATCH (place)-[nr:NOTE]->(note:Note)
 RETURN place, COLLECT([n.name, n.lang]) AS names, 
-    COLLECT (DISTINCT url) AS urls
+    COLLECT (DISTINCT url) AS urls, COLLECT (DISTINCT note) AS notes
         """
         place_result = shareds.driver.session().run(query, place_id=plid)
         
@@ -98,6 +102,14 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
                 weburl.type = url["type"]
                 weburl.description = url["description"]
                 self.urls.append(weburl)
+
+            notes = place_record['notes']
+            for note in notes:
+                n = Note()
+                n.priv = note["priv"]
+                n.type = note["type"]
+                n.text = note["text"]
+                self.noteref_hlink.append(n)
             
         return True
     
@@ -405,6 +417,9 @@ ORDER BY edate"""
             print ("Coord_lat: " + self.coord_lat)
         if self.placeref_hlink != '':
             print ("Placeref_hlink: " + self.placeref_hlink)
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                print ("Noteref_hlink: " + self.noteref_hlink[i])
         return True
 
 
@@ -465,17 +480,17 @@ SET n.name=$name,
                 url_href = url.href
                 url_type = url.type
                 url_description = url.description
-            query = """
+                query = """
 MATCH (n:Place) WHERE n.gramps_handle=$handle
 CREATE (n)-[wu:WEBURL]->
       (url:Weburl {priv: {url_priv}, href: {url_href},
                 type: {url_type}, description: {url_description}})"""
-            try:
-                tx.run(query, 
+                try:
+                    tx.run(query, 
                            {"handle": handle, "url_priv": url_priv, "url_href": url_href,
                             "url_type":url_type, "url_description":url_description})
-            except Exception as err:
-                print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
+                except Exception as err:
+                    print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
                 
         # Make hierarchy relations to the Place node
         if len(self.placeref_hlink) > 0:
@@ -489,6 +504,20 @@ CREATE (n)-[wu:WEBURL]->
                 tx.run(query)
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
+                
+        # Make place note relations
+        if len(self.noteref_hlink) > 0:
+            for i in range(len(self.noteref_hlink)):
+                try:
+                    query = """
+                        MATCH (n:Place) WHERE n.gramps_handle='{}'
+                        MATCH (m:Note) WHERE m.gramps_handle='{}'
+                        MERGE (n)-[r:NOTE]->(m)
+                         """.format(self.handle, self.noteref_hlink[i])
+                                     
+                    tx.run(query)
+                except Exception as err:
+                    print("Virhe: {0}".format(err), file=stderr)
             
         return
     

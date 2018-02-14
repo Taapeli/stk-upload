@@ -5,81 +5,72 @@
 import csv
 import logging
 
-from models.gen.refname import Refname  # Tietokannan kaikki luokat
+from models.gen.refname import Refname, REFTYPES
 
-def referenssinimet(pathname, colA=None, colB=None, maxrows=0):
-    """ Lukee csv-tiedostosta referenssinimet. 
-        Ensimmäisellä rivillä pitää olla sarakkeiden nimet 'Nimi', 'RefNimi', 
-        'On_itse_refnimi', 'Lähde', 'Sukupuoli' (halutussa järjestyksessä).
-        Kenttä On_itse_refnimi ei ole käytössä.
+def load_refnames(pathname):
+    """ Reads reference names from a local csv file. 
+        The first row must have the required column names (in any order).
+        These column names in the row 1 are:
+        - Name
+        - Refname
+        - Reftype   (REFTYPES: surname / firstname / patronyme / father / mother)
+        - Gender    (M = male, N,F = female, empty = undefined)
+        - Source    (source name)
 
-        Jos colA on määrittelemättä, lataisi vain tiedoston alun niin että 
-        voidaan esittää käyttäjälle sarakkeiden valintasivu
-        
-        Syötteen 1. rivi: ['Nimi', 'RefNimi', 'Reftype', 'Lähde', 'Sukupuoli']
-                            0       1          2          3        4 ('M'/'N'/'')
+        Example:
+            Name,Refname,Reftype,Source,Gender
+            Carl,Kalle,firstname,Sibelius-aineisto,male
+            Carlsdotter,Carl,father,Sibelius-aineisto,
     """
-    # TODO: miksi otettaisiin colA ja colB käyttöön?
-    if colA:
-        # Luetaan cvs-tiedoston kaikki kentät, maxrows maxrows riviä
-        maxrows=50
-        return list()
-    
     row_nro = 0
-    tyhjia = 0
+    empties = 0
     
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
         reader=csv.DictReader(f, dialect='excel')
         for row in reader:
             row_nro += 1
-            if maxrows > 0 and row_nro > maxrows:
-                break
-            nimi=row['Nimi'].strip()
-            if len(nimi) == 0:
-                tyhjia += 1
-                continue # Tyhjä nimi ohitetaan
-
             try:
-                refname=row['RefNimi']
-                reftype=row['Reftype']
-            except KeyError:
-                raise
+                nimi=row['Name'].strip()
+                if len(nimi) == 0:
+                    empties += 1
+                    continue # Skip a row without name
 
-            source=row['Lähde']
-            if row['Sukupuoli'].lower().startswith('m'):
-                sp = 'M'
-            elif row['Sukupuoli'].lower().startswith('n'):
-                sp = 'F'
+                refname=row['Refname']
+                reftype=row['Reftype']
+                source=row['Source']
+                gd = row['Gender'].lower()
+            except KeyError:
+                raise KeyError('Not valid fields {}'.format(row.keys()))
+
+            if gd.startswith('m'):
+                sex = 'M'
+            elif gd.startswith('n') or  gd.startswith('f'):
+                sex = 'F'
             else:
-                sp = ''
+                sex = ''
 
             # Luodaan Refname
             r = Refname(nimi)
             if (refname != '') and (refname != nimi):
-                # Tullaan viittaamaan tähän nimeen
-                #r.mark_reference(refname, 'REFFIRST')
-                # Laitetaan muistiin, että self viittaa refname'een
-                if reftype in r.REFTYPES:
+                if reftype in REFTYPES:
                     r.refname = refname
                     r.reftype = reftype
-                    logging.debug("cvs_refnames: {0} <-- {1}".format(nimi, refname))
+                    logging.debug("cvs_refnames: {0} --> {1}".format(nimi, refname))
                 else:
-                    logging.warning('cvs_refnames: Referenssinimen viittaus {} hylätty. '.format(reftype))
-            if sp != '':
-                r.gender = sp
+                    logging.warning('cvs_refnames: Invalid reference {} discarded. '.\
+                                    format(reftype))
+            if sex != '':
+                r.gender = sex
             if source != '':
                 r.source = source
 
             """
-            Tallettaa Refname-olion ja mahdollisen yhteyden referenssinimeen:
-            
-            (a:Refname {nimi='Nimi'}) -[r:Reftype]-> (b:Refname {nimi='RefNimi'})
+            Saves a Refname object and possible connection to another reference name:
+            (a:Refname {name:'Name'}) -[r:Reftype]-> (b:Refname {name:'Refname'})
             """
             r.save()
 
-    msg = '{0}: {1} riviä, {2} ohitettu'.format(pathname, row_nro, tyhjia)
-    if maxrows > 0 and row_nro > maxrows:
-        msg = msg + ". KATKAISTU {0} nimen kohdalta".format(maxrows)
+    msg = '{0}: {1} rows, {2} skipped'.format(pathname, row_nro, empties)
     logging.info(msg)
     return (msg)
 

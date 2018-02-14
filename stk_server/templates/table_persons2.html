@@ -22,7 +22,7 @@
         {% set ecnt = p.events|count %}{% if ecnt %}{% else %}{% set ecnt = 1 %}{% endif %}
         {% set tr_tag = "" %}
             <tr>
-                <td rowspan="{{ecnt}}"><a href="/poimi/uniq_id={{p.uniq_id}}">{{p.uniq_id}}</a></td>
+                <td rowspan="{{ecnt}}"><a href="/pick/uniq_id={{p.uniq_id}}">{{p.uniq_id}}</a></td>
                 <td rowspan="{{ecnt}}">{{p.names[0].firstname}} <b>{{p.names[0].surname}}</b></td>
                 <td rowspan="{{ecnt}}">{{p.names[0].refname}}</td>
     	{% if p.events %}

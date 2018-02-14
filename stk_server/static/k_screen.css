@@ -104,6 +104,7 @@ img#logo {
     vertical-align: text-top;
 }
 .id { color: sienna; text-align: right; }
+.idno { color: gray; text-size: 50%; }
 .inlink { color: #000066; background: LemonChiffon; }
 .outlink { text-decoration: underline; }
 .refname { color:gray; text-size: 80%; }
@@ -254,12 +255,13 @@ div#alphanav ul {
 }
 div#alphanav ul li {
     float: left;
-    font-size: larger;
+    /* font-size: larger; / JMä */
     font-weight: bold;
+    background-color: ligthgray;
 }
-div#alphanav ul li:after {
+/* div#alphanav ul li:after {
     content: " |";
-}
+} / JMä */
 div#alphanav ul li a {
     display: block;
     padding: 4px 8px;

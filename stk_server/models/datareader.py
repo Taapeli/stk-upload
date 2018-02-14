@@ -9,7 +9,7 @@ import xml.dom.minidom
 import re
 
 from operator import itemgetter
-from models.dbutil import Date
+#from models.dbutil import Date
 from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
@@ -20,223 +20,155 @@ from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
 
-from flask_security import login_required, roles_required, current_user
+#from flask_security import login_required, roles_required, current_user
 import shareds
 
-def _poimi_(person_id, event_id, row, url):
-    """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
-    """
-
-    suku=row['Sukunimi_vakioitu']
-    etu=row['Etunimi_vakioitu']
-
-    """ Käräjät-tieto on yhdessä sarakkeessa muodossa 'Tiurala 1666.02.20-22'
-        Paikka erotetaan ja aika muunnetaan muotoon '1666-02-20 … 22'
-        Päivämäärän korjaus tehdään jos kentässä on väli+numero.
-        - TODO Pelkää vuosiluku käräjäpaikkana pitäisi siirtää alkuajaksi
-     """
-    if ' 1' in row['Käräjät']:
-        kpaikka, aika = row['Käräjät'].split(' 1')
-        aika = Date.range_str('1' + aika)
-    else:
-        kpaikka, aika = (row['Käräjät'], '')
-
-    # Luodaan henkilö ja käräjätapahtuma
-
-    p = Person(person_id)
-    n = Name(etu, suku)
-    p.names.append(n)
-    p.name_orig = "{0} /{1}/".format(etu, suku)
-    p.occupation = row['Ammatti_vakioitu']
-    p.place=row['Paikka_vakioitu']
-
-    e = Event(event_id, 'Käräjät')
-    e.names = kpaikka
-    e.date = aika
-    e.name_orig = row['Käräjät']
-
-    c = Citation()
-    c.tyyppi = 'Signum'
-    c.oid = row['Signum']
-    c.url = url
-    c.name_orig = row['Signum']
-    c.source = Source()
-    c.source.nimi = kpaikka + ' ' + aika
-    e.citation = c
-
-    p.events.append(e)
-    return p
-
-
-def henkilolista(pathname):
-    """ Lukee csv-tiedostosta aineiston, ja luo kustakin 
-        syöttörivistä Person-objektit
-    """
-    persons = []
-    row_nro = 0
-    url = ''
-
-    with open(pathname, 'r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f, dialect='excel')
-
-        for row in reader:
-            if row_nro == 0:
-                logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
-                if not "Käräjät" in reader.fieldnames:
-                    raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
-            row_nro += 2
-            person_id = row_nro
-    
-            # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
-            if row['Käräjät'][:4] == 'http':
-                url = row['Käräjät']
-                #logging.debug('%s: url=%s' % (person_id, url))
-                continue
-
-            # Onko henkilörivi?
-            if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
-                logging.warning('%s: nimikentät tyhjiä!' % person_id)
-                continue
-                            
-            p = _poimi_(row_nro, row_nro+1, row, url)
-            persons.append(p)
-
-    logging.info(u'%s: %d riviä' % (pathname, row_nro))
-    return (persons)
-
-
-def datastorer(pathname):
-    """ Lukee csv-tiedostosta aineiston, ja tallettaa kustakin syöttörivistä
-         Person-objektit sisältäen käräjä-Eventit, Citation-viittaukset ja
-         Place-paikat
-    """
-    row_nro = 0
-    url = ''
-
-    with open(pathname, 'r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f, dialect='excel')
-
-        for row in reader:
-            if row_nro == 0:
-                logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
-                if not "Käräjät" in reader.fieldnames:
-                    raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
-            row_nro += 2
-            person_id = row_nro
-    
-            # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
-            if row['Käräjät'][:4] == 'http':
-                url = row['Käräjät']
-                #logging.debug('%s: url=%s' % (person_id, url))
-                continue
-
-            # Onko henkilörivi?
-            if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
-                logging.warning('%s: nimikentät tyhjiä!' % person_id)
-                continue
-                
-            p = _poimi_(row_nro, row_nro+1, row, url)
-    
-            # Tallettaa Person-olion ja siihen sisältyvät Eventit
-            # (Person)-[OSALLISTUU]->(Event)
-            p.save("User100")
-
-    message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
-    return message
+# def _poimi_(person_id, event_id, row, url):
+#     """ Poimitaan henkilötiedot riviltä ja palautetaan Person-objektina
+#     """
+# 
+#     suku=row['Sukunimi_vakioitu']
+#     etu=row['Etunimi_vakioitu']
+# 
+#     """ Käräjät-tieto on yhdessä sarakkeessa muodossa 'Tiurala 1666.02.20-22'
+#         Paikka erotetaan ja aika muunnetaan muotoon '1666-02-20 … 22'
+#         Päivämäärän korjaus tehdään jos kentässä on väli+numero.
+#         - TODO Pelkää vuosiluku käräjäpaikkana pitäisi siirtää alkuajaksi
+#      """
+#     if ' 1' in row['Käräjät']:
+#         kpaikka, aika = row['Käräjät'].split(' 1')
+#         aika = Date.range_str('1' + aika)
+#     else:
+#         kpaikka, aika = (row['Käräjät'], '')
+# 
+#     # Luodaan henkilö ja käräjätapahtuma
+# 
+#     p = Person(person_id)
+#     n = Name(etu, suku)
+#     p.names.append(n)
+#     p.name_orig = "{0} /{1}/".format(etu, suku)
+#     p.occupation = row['Ammatti_vakioitu']
+#     p.place=row['Paikka_vakioitu']
+# 
+#     e = Event(event_id, 'Käräjät')
+#     e.names = kpaikka
+#     e.date = aika
+#     e.name_orig = row['Käräjät']
+# 
+#     c = Citation()
+#     c.tyyppi = 'Signum'
+#     c.oid = row['Signum']
+#     c.url = url
+#     c.name_orig = row['Signum']
+#     c.source = Source()
+#     c.source.nimi = kpaikka + ' ' + aika
+#     e.citation = c
+# 
+#     p.events.append(e)
+#     return p
+#
+#
+# def henkilolista(pathname):
+#     """ Lukee csv-tiedostosta aineiston, ja luo kustakin 
+#         syöttörivistä Person-objektit
+#     """
+#     persons = []
+#     row_nro = 0
+#     url = ''
+# 
+#     with open(pathname, 'r', newline='', encoding='utf-8') as f:
+#         reader = csv.DictReader(f, dialect='excel')
+# 
+#         for row in reader:
+#             if row_nro == 0:
+#                 logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
+#                 if not "Käräjät" in reader.fieldnames:
+#                     raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
+#             row_nro += 2
+#             person_id = row_nro
+#     
+#             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
+#             if row['Käräjät'][:4] == 'http':
+#                 url = row['Käräjät']
+#                 #logging.debug('%s: url=%s' % (person_id, url))
+#                 continue
+# 
+#             # Onko henkilörivi?
+#             if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
+#                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
+#                 continue
+#                             
+#             p = _poimi_(row_nro, row_nro+1, row, url)
+#             persons.append(p)
+# 
+#     logging.info(u'%s: %d riviä' % (pathname, row_nro))
+#     return (persons)
 
 
-def lue_henkilot(oid=None, names=None, nmax=1000):
-    """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
-        
-        Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
-        käräjätapahtuman muuttujalistoja
-    """
-    
-    persons = []
-    t0 = time.time()
-    recs = Person.get_person_events(nmax=nmax, pid=oid, names=names)
-    nro = 0
-    for rec in recs:
-        nro = nro + 1
-        # Saatu Person ja collection(Event)
-        #Palauttaa riveillä listan muuttujia:
-        #n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
-        #  0      1            2           3       4      5        6
-        # 146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]    
-
-        pid = rec['n.id']
-        p = Person(pid)
-        etu = ""
-        suku = ""
-        if rec['k.firstname']:
-            etu = rec['k.firstname']
-        if rec['k.surname']:
-            suku = rec['k.surname']
-        p.names.append(Name(etu,suku))
-#        if rec['n.name_orig']:
-#            p.name_orig = rec['n.name_orig']
-#         if rec['n.occu']:
-#             p.occupation = rec['n.occu']
-#         if rec['n.place']:
-#             p.place= rec['n.place']
-
-        for ev in rec['events']:
-            # 'events' on lista käräjiä, jonka jäseninä on lista muuttujia:
-            #[[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
-            #    0      1        2        3                4
-            #[[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
-
-            event_id = ev[0]
-            if event_id:
-                e = Event(event_id, ev[1])
-    #             e.name = ev[2]
-    #             e.date = ev[3]
-    #             e.name_orig = ev[4]
-                p.events.append(e)    
-    #            logging.info("lue_henkilot: Tapahtuma {}".format(e))
-
-#            c = Citation()
-#            c.tyyppi = 'Signum'
-#            c.oid = 'Testi3'
-#            c.url = url
-#            c.source = Source()
-#            c.source.nimi = 'Testi3'
-#            e.citation = c
-
-        persons.append(p)
-
-    if nro == 0:
-        logging.warning("lue_henkilot: ei ketään oid={}, names={}".format(oid, names))
-    else:
-        logging.info("lue_henkilot: {} henkiloä".format(nro))
-        #print ("Lue_henkilot:\n", retList[0])
-    logging.debug("TIME lue_henkilot {} sek".format(time.time()-t0))
-
-    return (persons)
+# def datastorer(pathname):
+#     """ Lukee csv-tiedostosta aineiston, ja tallettaa kustakin syöttörivistä
+#          Person-objektit sisältäen käräjä-Eventit, Citation-viittaukset ja
+#          Place-paikat
+#     """
+#     row_nro = 0
+#     url = ''
+# 
+#     with open(pathname, 'r', newline='', encoding='utf-8') as f:
+#         reader = csv.DictReader(f, dialect='excel')
+# 
+#         for row in reader:
+#             if row_nro == 0:
+#                 logging.debug("Tiedosto " + pathname + ", sarakkeet: " + str(reader.fieldnames))
+#                 if not "Käräjät" in reader.fieldnames:
+#                     raise KeyError('Sarake "Käräjät" puuttuu: ' + str(reader.fieldnames))
+#             row_nro += 2
+#             person_id = row_nro
+#     
+#             # Onko otsikkorivi? Tästä url kaikille seuraaville riveille
+#             if row['Käräjät'][:4] == 'http':
+#                 url = row['Käräjät']
+#                 #logging.debug('%s: url=%s' % (person_id, url))
+#                 continue
+# 
+#             # Onko henkilörivi?
+#             if row['Sukunimi_vakioitu'] == '' and row['Etunimi_vakioitu'] == '':
+#                 logging.warning('%s: nimikentät tyhjiä!' % person_id)
+#                 continue
+#                 
+#             p = _poimi_(row_nro, row_nro+1, row, url)
+#     
+#             # Tallettaa Person-olion ja siihen sisältyvät Eventit
+#             # (Person)-[OSALLISTUU]->(Event)
+#             p.save("User100")
+# 
+#     message ='Talletettu %d riviä tiedostosta %s' % (row_nro, pathname)
+#     return message
 
 
-def lue_henkilot_k(keys=None):
-    """ Lukee tietokannasta Person- ja Event- objektit näytettäväksi
-        
-        Palauttaa riveillä listan muuttujia: henkilön tiedot ja lista
-        tapahtuman muuttujalistoja
+def read_persons_with_events(keys=None, user=None):
+    """ Reads Person- and Event- objects for display.
+        If currentuser is defined, restrict to her objects.
+
+        Returns Person objects, whith included Events
     """
     
     persons = []
-    result = Person.get_events_k(keys)
+    result = Person.get_events_k(keys, user)
     for record in result:
-        # Got ["id", "confidence", "firstname", "refname", "surname", "suffix", "events"]
+        # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
         uniq_id = record['id']
         p = Person()
         p.uniq_id = uniq_id
         p.confidence = record['confidence']
         p.est_birth = record['est_birth']
         p.est_death = record['est_death']
+        if record['refnames']:
+            refnlist = sorted(record['refnames'])
+            p.refnames = ", ".join(refnlist)
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
-        if record['refname']:
-            pname.refname = record['refname']
+                    
         if record['surname']:
             pname.surname = record['surname']
         if record['suffix']:
@@ -273,15 +205,12 @@ def lue_henkilot_k(keys=None):
     return (persons)
 
 
-def set_confidence_value():
+def set_confidence_value(tx):
     """ Asettaa henkilölle laatu arvion
     """
     
-    message = []
     counter = 0
-    
-    tx = User.beginTransaction()
-    
+        
     result = Person.get_confidence()
     for record in result:
         p = Person()
@@ -298,10 +227,8 @@ def set_confidence_value():
             
         counter += 1
             
-    User.endTransaction(tx)
     text = "Number of confidences set: " + str(counter)
-    message.append(text)
-    return (message)
+    return (text)
 
 
 def set_estimated_dates():
@@ -317,65 +244,68 @@ def set_estimated_dates():
     return (message)
     
     
-def set_refnames():
-    """ Asettaa henkilöille refnamet
+def set_person_refnames():
+    """ Set Refnames to all Persons
     """
-    set_count = 0
-    get_count = 0
-    tx = User.beginTransaction()
+    pers_count = 0
+    name_count = 0
+    t0 = time.time()
 
-    names = Name.get_all_firstnames()
-    # Process each different first name
-    for rec in names:
-        # ╒═══════╤══════════════════════╤════════════╤════════════════╤═════╕
-        # │"ID"   │"fn"                  │"sn"        │"pn"            │"sex"│
-        # ╞═══════╪══════════════════════╪════════════╪════════════════╪═════╡
-        # │"30281"│"Agata Eufrosine"     │"Tolpo"     │"Gabrielsdotter"│"F"  │
-        # └───────┴──────────────────────┴────────────┴────────────────┴─────┘
-
-        # Build a new refname
-        # 1. first names
+    persons = Name.get_all_personnames()
+    # Process each name part (first names, surname, patronyme)
+    for rec in persons:
+        # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
+        # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
+        # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
+        # │30796│"Björn"             │""        │"Jönsson"     │"M"  │
+        # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
+        # │30827│"Johan"             │"Sibbes"  │""            │"M"  │
+        # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
+        # │30844│"Maria Elisabet"    │""        │"Johansdotter"│"F"  │
+        # └─────┴────────────────────┴──────────┴──────────────┴─────┘
+        # Build new refnames
+        pid = rec["ID"]
         firstname = rec["fn"]
-        if firstname == 'N':
-            firstnames = ''
-        else:
-            fn_list = []
-            prev=('?', '?')
+        surname = rec["sn"]
+        patronyme = rec["pn"]
+        #gender = rec["sex"]
+        tx = User.beginTransaction()
+
+        # 1. firstnames
+        if firstname and firstname != 'N':
             for name in firstname.split(' '):
-                if name == prev[0]:
-                    # Same as previous
-                    fn_list.append(prev[1])
-                else:
-                    nm = None
-                    # For each of first names find refname
-                    results = Refname.get_refname(name)
-                    result = results.single()
-                    if result:
-                        nm = result['rname']
-                        get_count += 1
-                    else:
-                        nm = name
-                    fn_list.append(nm)
-                    prev = (name, nm)
-            firstnames = " ".join(fn_list)
+                Refname.link_to_refname(pid, name, 'firstname')
+                name_count += 1
 
         # 2. surname and patronyme
-        surname = rec["sn"]     #.strip()
-        if (surname == 'N'):
-            surname = ''
-        suffix = rec["pn"]
-        # 3. join "firstnames/surname/suffix"
-        if surname:
-            refname = "".join((firstnames,'/',surname,'/'))
-        else:
-            refname = "".join((firstnames,'//',suffix))
-        # 4. Store it
-        if refname != rec["rn"]:
-            Name.set_refname(tx, rec["ID"], refname)
-            set_count += 1
+        if surname and surname != 'N':
+            Refname.link_to_refname(pid, surname, 'surname')
+            name_count += 1
 
-    User.endTransaction(tx)
-    msg="Sovellettu {} referenssinimeä {} nimeen".format(get_count, set_count)
+        if patronyme:
+            Refname.link_to_refname(pid, patronyme, 'patronyme')
+            name_count += 1
+        User.endTransaction(tx)
+        pers_count += 1
+
+        # ===    Report status    ====
+        rnames = []
+        recs = Person.get_refnames(pid)
+        for rec in recs:
+            # ╒══════════════════════════╤═════════════════════╕
+            # │"a"                       │"li"                 │
+            # ╞══════════════════════════╪═════════════════════╡
+            # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
+            # │":"Messu- ja kalenteri"}  │                     │
+            # └──────────────────────────┴─────────────────────┘        
+
+            name = rec['a']
+            link = rec['li'][0]
+            rnames.append("{} ({})".format(name['name'], link['use']))
+        logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
+    
+    msg="Processed {} names of {} persons in {} sek".\
+        format(name_count, pers_count,time.time()-t0)
     logging.info(msg)
     return msg
 
@@ -394,77 +324,81 @@ def read_refnames():
 
     return (namelist)
 
+def recreate_refnames():
+    summary = Refname.recreate_refnames()
+    return str(summary)
 
-def read_typed_refnames(reftype):
-    """ Reads selected Refname objects for display
-    """
-    namelist = []
-    t0 = time.time()
-    if not (reftype and reftype != ""):
-        raise AttributeError("Please, select desired reftype?")
-    
-    recs = Refname.get_typed_refnames(reftype)
-# Esimerkki:
-# >>> for x in v_names: print(x)
-# <Record a.oid=3 a.name='Aabi' a.gender=None a.source='harvinainen' 
-#         base=[[2, 'Aapeli', None]] other=[[None, None, None]]>
-# <Record a.oid=5 a.name='Aabraham' a.gender='M' a.source='Pojat 1990-luvulla' 
-#         base=[[None, None, None]] other=[[None, None, None]]>
-# <Record a.oid=6 a.name='Aabrahami' a.gender=None a.source='harvinainen' 
-#         base=[[7, 'Aappo', None]] other=[[None, None, None]]>
-# >>> for x in v_names: print(x[1])
-# Aabrahami
-# Aabrami
-# Aaca
 
-#a.oid  a.name  a.gender  a.source   base                 other
-#                                     [oid, name, gender]  [oid, name, gender]
-#-----  ------  --------  --------   ----                 -----
-#3493   Aake	F	  Messu- ja  [[null, null, null], [[3495, Aakke, null],
-#                         kalenteri   [null, null, null],  [3660, Acatius, null],
-#                                     [null, null, null],  [3662, Achat, null],
-#                                     [null, null, null],  [3664, Achatius, M],
-#                                     [null, null, null],  [3973, Akatius, null],
-#                                     [null, null, null],  [3975, Ake, null],
-#                                     [null, null, null]]  [3990, Akke, null]]
-#3495   Aakke   null     harvinainen [[3493, Aake, F]]    [[null, null, null]]
-
-    for rec in recs:
-#        logging.debug("oid={}, name={}, gender={}, source={}, base={}, other={}".\
-#               format( rec[0], rec[1],  rec[2],    rec[3],    rec[4],  rec[5]))
-        # Luodaan nimi
-        r = Refname(rec['a.name'])
-        r.oid = rec['a.id']
-        if rec['a.gender']:
-            r.gender = rec['a.gender']
-        if rec['a.source']:
-            r.source= rec['a.source']
-
-        # Luodaan mahdollinen kantanimi, johon tämä viittaa (yksi?)
-        baselist = []
-        for fld in rec['base']:
-            if fld[0]:
-                b = Refname(fld[1])
-                b.oid = fld[0]
-                if fld[2]:
-                    b.gender = fld[2]
-                baselist.append(b)
-
-        # Luodaan lista muista nimistä, joihin tämä viittaa
-        otherlist = []
-        for fld in rec['other']:
-            if fld[0]:
-                o = Refname(fld[1])
-                o.oid = fld[0]
-                if fld[2]:
-                    o.gender = fld[2]
-                otherlist.append(o)
-
-        namelist.append((r,baselist,otherlist))
-    
-    logging.info("TIME get_named_refnames {} sek".format(time.time()-t0))
-
-    return (namelist)
+# def read_typed_refnames(reftype):
+#     """ Reads selected Refname objects for display
+#     """
+#     namelist = []
+#     t0 = time.time()
+#     if not (reftype and reftype != ""):
+#         raise AttributeError("Please, select desired reftype?")
+#     
+#     recs = Refname.get_typed_refnames(reftype)
+# # Esimerkki:
+# # >>> for x in v_names: print(x)
+# # <Record a.oid=3 a.name='Aabi' a.gender=None a.source='harvinainen' 
+# #         base=[[2, 'Aapeli', None]] other=[[None, None, None]]>
+# # <Record a.oid=5 a.name='Aabraham' a.gender='M' a.source='Pojat 1990-luvulla' 
+# #         base=[[None, None, None]] other=[[None, None, None]]>
+# # <Record a.oid=6 a.name='Aabrahami' a.gender=None a.source='harvinainen' 
+# #         base=[[7, 'Aappo', None]] other=[[None, None, None]]>
+# # >>> for x in v_names: print(x[1])
+# # Aabrahami
+# # Aabrami
+# # Aaca
+# 
+# #a.oid  a.name  a.gender  a.source   base                 other
+# #                                     [oid, name, gender]  [oid, name, gender]
+# #-----  ------  --------  --------   ----                 -----
+# #3493   Aake	F	  Messu- ja  [[null, null, null], [[3495, Aakke, null],
+# #                         kalenteri   [null, null, null],  [3660, Acatius, null],
+# #                                     [null, null, null],  [3662, Achat, null],
+# #                                     [null, null, null],  [3664, Achatius, M],
+# #                                     [null, null, null],  [3973, Akatius, null],
+# #                                     [null, null, null],  [3975, Ake, null],
+# #                                     [null, null, null]]  [3990, Akke, null]]
+# #3495   Aakke   null     harvinainen [[3493, Aake, F]]    [[null, null, null]]
+# 
+#     for rec in recs:
+# #        logging.debug("oid={}, name={}, gender={}, source={}, base={}, other={}".\
+# #               format( rec[0], rec[1],  rec[2],    rec[3],    rec[4],  rec[5]))
+#         # Luodaan nimi
+#         r = Refname(rec['a.name'])
+#         r.oid = rec['a.id']
+#         if rec['a.gender']:
+#             r.gender = rec['a.gender']
+#         if rec['a.source']:
+#             r.source= rec['a.source']
+# 
+#         # Luodaan mahdollinen kantanimi, johon tämä viittaa (yksi?)
+#         baselist = []
+#         for fld in rec['base']:
+#             if fld[0]:
+#                 b = Refname(fld[1])
+#                 b.oid = fld[0]
+#                 if fld[2]:
+#                     b.gender = fld[2]
+#                 baselist.append(b)
+# 
+#         # Luodaan lista muista nimistä, joihin tämä viittaa
+#         otherlist = []
+#         for fld in rec['other']:
+#             if fld[0]:
+#                 o = Refname(fld[1])
+#                 o.oid = fld[0]
+#                 if fld[2]:
+#                     o.gender = fld[2]
+#                 otherlist.append(o)
+# 
+#         namelist.append((r,baselist,otherlist))
+#     
+#     logging.info("TIME get_named_refnames {} sek".format(time.time()-t0))
+# 
+#     return (namelist)
 
 
 def read_cite_sour_repo(uniq_id=None):
@@ -598,9 +532,8 @@ def read_same_birthday(uniq_id=None):
     ids = []
     result = Person.get_people_with_same_birthday()
     for record in result:
-       new_array = record['ids']
-
-       ids.append(new_array)
+        new_array = record['ids']
+        ids.append(new_array)
 
     return (ids)
 
@@ -613,9 +546,8 @@ def read_same_deathday(uniq_id=None):
     ids = []
     result = Person.get_people_with_same_deathday()
     for record in result:
-       new_array = record['ids']
-
-       ids.append(new_array)
+        new_array = record['ids']
+        ids.append(new_array)
 
     return (ids)
 
@@ -628,9 +560,8 @@ def read_same_name(uniq_id=None):
     ids = []
     result = Name.get_people_with_same_name()
     for record in result:
-       new_array = record['ids']
-
-       ids.append(new_array)
+        new_array = record['ids']
+        ids.append(new_array)
 
     return (ids)
 
@@ -831,14 +762,12 @@ def get_person_data_by_id(uniq_id):
     """
     p = Person()
     p.uniq_id = int(uniq_id)
-    #.get_person_and_name_data_by_id()
     p.get_person_w_names()
     p.get_hlinks_by_id()
     
     events = []
     sources = []
     source_cnt = 0
-    mybirth = ''
 
     # Events
 
@@ -1152,12 +1081,11 @@ def handle_citations(collection, tx):
         elif len(citation.getElementsByTagName('confidence') ) > 1:
             print("Error: More than one confidence tag in a citation")
     
-        if len(citation.getElementsByTagName('noteref') ) == 1:
-            citation_noteref = citation.getElementsByTagName('noteref')[0]
-            if citation_noteref.hasAttribute("hlink"):
-                c.noteref_hlink = citation_noteref.getAttribute("hlink")
-        elif len(citation.getElementsByTagName('noteref') ) > 1:
-            print("Error: More than one noteref tag in a citation")
+        if len(citation.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(citation.getElementsByTagName('noteref') )):
+                citation_noteref = citation.getElementsByTagName('noteref')[i]
+                if citation_noteref.hasAttribute("hlink"):
+                    c.noteref_hlink.append(citation_noteref.getAttribute("hlink"))
     
         if len(citation.getElementsByTagName('sourceref') ) == 1:
             citation_sourceref = citation.getElementsByTagName('sourceref')[0]
@@ -1175,7 +1103,7 @@ def handle_citations(collection, tx):
 
 
 
-def handle_events(collection, userid, tx):
+def handle_events(collection, username, tx):
     # Get all the events in the collection
     events = collection.getElementsByTagName("event")
     
@@ -1270,7 +1198,7 @@ def handle_events(collection, userid, tx):
         elif len(event.getElementsByTagName('objref') ) > 1:
             print("Error: More than one objref tag in an event")
                 
-        e.save(userid, tx)
+        e.save(username, tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
@@ -1334,6 +1262,12 @@ def handle_families(collection, tx):
                 family_childref = family.getElementsByTagName('childref')[i]
                 if family_childref.hasAttribute("hlink"):
                     f.childref_hlink.append(family_childref.getAttribute("hlink"))
+    
+        if len(family.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(family.getElementsByTagName('noteref') )):
+                family_noteref = family.getElementsByTagName('noteref')[i]
+                if family_noteref.hasAttribute("hlink"):
+                    f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
                     
         f.save(tx)
         counter += 1
@@ -1415,7 +1349,7 @@ def handle_media(collection, tx):
     return(msg)
 
 
-def handle_people(collection, userid, tx):
+def handle_people(collection, username, tx):
     # Get all the people in the collection
     people = collection.getElementsByTagName("person")
     
@@ -1511,13 +1445,19 @@ def handle_people(collection, userid, tx):
                 if person_parentin.hasAttribute("hlink"):
                     p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
     
+        if len(person.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(person.getElementsByTagName('noteref') )):
+                person_noteref = person.getElementsByTagName('noteref')[i]
+                if person_noteref.hasAttribute("hlink"):
+                    p.noteref_hlink.append(person_noteref.getAttribute("hlink"))
+    
         if len(person.getElementsByTagName('citationref') ) >= 1:
             for i in range(len(person.getElementsByTagName('citationref') )):
                 person_citationref = person.getElementsByTagName('citationref')[i]
                 if person_citationref.hasAttribute("hlink"):
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     
-        p.save(userid, tx)
+        p.save(username, tx)
         counter += 1
         
         # There can be so many individs to store that Cypher needs a pause
@@ -1637,6 +1577,12 @@ def handle_places(collection, tx):
                 place.placeref_hlink = placeobj_placeref.getAttribute("hlink")
         elif len(placeobj.getElementsByTagName('placeref') ) > 1:
             print("Error: More than one placeref in a place")
+    
+        if len(placeobj.getElementsByTagName('noteref') ) >= 1:
+            for i in range(len(placeobj.getElementsByTagName('noteref') )):
+                placeobj_noteref = placeobj.getElementsByTagName('noteref')[i]
+                if placeobj_noteref.hasAttribute("hlink"):
+                    place.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
                 
         place.save(tx)
         counter += 1
@@ -1748,9 +1694,7 @@ def handle_sources(collection, tx):
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
-    """ Lukee xml-tiedostosta aineiston, ja tallettaa kustakin syöttörivistä
-         tiedot Neo4j-kantaan
-    """
+    """ Reads a xml backup file from Gramps, and saves the information to db """
     
     # Make a precheck
     a = pathname.split(".")
@@ -1786,46 +1730,45 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     
     tx = shareds.driver.session().begin_transaction()
     result = handle_notes(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_repositories(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_media(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_places(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_sources(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_citations(collection, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_events(collection, userid, tx)
-#    tx.commit()
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_people(collection, userid, tx)
-#    user.endTransaction(tx)
+
     msg.append(str(result))
     print(str(result))
-#    tx = shareds.driver.session().begin_transaction()
     result = handle_families(collection, tx)
+    tx.commit()
+
+    msg.append(str(result))
+    print(str(result))
+    
+    tx = shareds.driver.session().begin_transaction()
+    result = set_confidence_value(tx)
     tx.commit()
     msg.append(str(result))
     print(str(result))

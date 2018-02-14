@@ -1,3 +1,6 @@
 *.pyc
 instance/
 .settings/
+RemoteSystemsTempFiles/\.project
+
+\.metadata/
