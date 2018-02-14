@@ -2,6 +2,9 @@
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 27.1.2016
 
+import csv
+import logging
+
 def karajat_loader(pathname):
     """ Lukee csv-tiedostosta referenssinimet
         Syöte: ['Pk-nr','Käräjätyyppi','Käräjäpaikka','Vuosi','Kuid','Jakso']
