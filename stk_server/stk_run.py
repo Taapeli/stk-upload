@@ -13,10 +13,10 @@ import shareds
 import models.gen   
 #from models import gen
 #from models import dbutil
-# from models import loadfile          # Datan lataus käyttäjältä
+from models import loadfile            # Datan lataus käyttäjältä
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from models import dataupdater         # Tietojen päivitysmetodit
-# #import models.cvs_refnames      # Referenssinimien luonti
+from models import cvs_refnames        # Referenssinimien luonti
 # from models.gen.place import Place
 #===============================================================================
 from forms import ListEmailsForm
@@ -352,9 +352,9 @@ def compare_person_page(ehto):
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value1)
+                datareader.get_person_data_by_id(value1)
             person2, events2, photos2, sources2, families2 = \
-                models.datareader.get_person_data_by_id(value2)
+                datareader.get_person_data_by_id(value2)
             for f in families:
                 print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
@@ -369,8 +369,9 @@ def compare_person_page(ehto):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("ng_compare.html", 
-        person=person, events=events, photos=photos, sources=sources, families=families,
-        person2=person2, events2=events2, photos2=photos2, sources2=sources2, families2=families2)
+        person=person, events=events, photos=photos, sources=sources, 
+        families=families, person2=person2, events2=events2, 
+        photos2=photos2, sources2=sources2, families2=families2)
 
 
 @app.route('/compare2/<string:ehto>')
@@ -468,10 +469,10 @@ def upload():
         material = request.form['material']
         logging.debug("Got a {} file '{}'".format(material, infile.filename))
 
-        models.loadfile.upload_file(infile)
+        loadfile.upload_file(infile)
         if 'destroy' in request.form and request.form['destroy'] == 'all':
             logger.info("*** About deleting all previous Refnames ***")
-            models.datareader.recreate_refnames()
+            datareader.recreate_refnames()
 
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -488,7 +489,7 @@ def save_loaded(filename, subj):
 #         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
 #             status = datareader.datastorer(pathname)
         if subj == 'refnames':    # Stores Refname objects
-            status = models.cvs_refnames.load_refnames(pathname)
+            status = cvs_refnames.load_refnames(pathname)
         elif subj == 'xml_file':  # gramps backup xml file to Neo4j db
             status = datareader.xml_to_neo4j(pathname, current_user.username)
 #         elif subj == 'karajat': # TODO: Tekemättä
@@ -507,7 +508,8 @@ def save_loaded(filename, subj):
 def show_person_data_dbl(uniq_id):
     """ henkilön tietojen näyttäminen ruudulla """
     #models.dbutil.connect_db()
-    person, events, photos, sources, families = datareader.get_person_data_by_id(uniq_id)
+    person, events, photos, sources, families = \
+        datareader.get_person_data_by_id(uniq_id)
     logger.debug("Got {} persons, {} events, {} photos, {} sources, {} families".\
                  format(len(person), len(events), len(photos), len(sources), len(families)))
     return render_template("table_person_by_id.html",
@@ -606,7 +608,7 @@ def aseta_estimated_dates():
 def set_person_refnames():
     """ Setting reference names for all persons """
     dburi = models.dbutil.get_server_location()
-    message = models.datareader.set_person_refnames()
+    message = datareader.set_person_refnames()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 
