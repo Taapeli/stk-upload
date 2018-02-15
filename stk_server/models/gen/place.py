@@ -541,4 +541,15 @@ class Place_name:
         self.daterange_start = ''
         self.daterange_stop = ''
 
+class Place_event:
 
+    def __init__(self, uid):
+        self.uid = rid
+        self.etype = None
+        self.edate = None
+        self.edatetype = None
+        self.edaterange_start = None
+        self.edaterange_stop = None
+        self.edaterange = None
+        self.role = None
+        self.names = None   # tuples [name_type, given_name, surname]

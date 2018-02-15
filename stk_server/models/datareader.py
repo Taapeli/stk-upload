@@ -2,15 +2,14 @@
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 12.1.2016
 
-import csv
 import logging
 import time
 import xml.dom.minidom
 import re
 
 from operator import itemgetter
-#from models.dbutil import Datefrom
-from models.gen.event import Event, Event_for_template 
+#from models.dbutil import Date
+from models.gen.event import Event, Event_for_template
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
@@ -19,8 +18,6 @@ from models.gen.place import Place, Place_name
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
-
-#from flask_security import login_required, roles_required, current_user
 import shareds
 
 # def _poimi_(person_id, event_id, row, url):

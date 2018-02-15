@@ -177,7 +177,7 @@ def show_location_page(locid):
     """ Paikan tietojen näyttäminen ruudulla: hierarkia ja tapahtumat
     """
     try:
-        # List 'locatils' has Place objects with 'parent' field pointing to
+        # List 'place_list' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events
         place, place_list, events = datareader.get_place_with_events(locid)
     except KeyError as e:
