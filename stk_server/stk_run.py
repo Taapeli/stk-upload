@@ -10,13 +10,13 @@ from flask_security import login_required, roles_accepted, roles_required, curre
 #from datetime import datetime
 import shareds
 #===============================================================================
-import models.gen   
-#from models import gen
-#from models import dbutil
-# from models import loadfile          # Datan lataus käyttäjältä
+#import models.gen   
+from models import gen
+from models import dbutil
+from models import loadfile          # Datan lataus käyttäjältä
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from models import dataupdater         # Tietojen päivitysmetodit
-# #import models.cvs_refnames      # Referenssinimien luonti
+from models import cvs_refnames      # Referenssinimien luonti
 # from models.gen.place import Place
 #===============================================================================
 from forms import ListEmailsForm
@@ -42,7 +42,7 @@ def home():
     return render_template('/mainindex.html')
 
 
-@app.route('/admin',  methods=['GET', 'POST'])
+@shareds.app.route('/admin',  methods=['GET', 'POST'])
 @login_required
 @roles_required('admin')
 def admin():
@@ -50,7 +50,7 @@ def admin():
     return render_template('/adminindex.html')
 
 
-@app.route('/list_emails',  methods=['GET', 'POST'])
+@shareds.app.route('/list_emails',  methods=['GET', 'POST'])
 #    @login_required
 #    @roles_required('admin')
 def list_emails():
@@ -64,8 +64,7 @@ def list_emails():
         return render_template("/security/list_emails.html", emails=lista, form=form)
 
 
-
-@app.route('/list_users', methods=['GET'])
+@shareds.app.route('/list_users', methods=['GET'])
 # @login_required
 def list_users():
 # Käytetään neo4juserdatastorea
@@ -73,7 +72,7 @@ def list_users():
     return render_template("security/table_users.html", users=lista)  
 
 
-@app.route('/tables')
+@shareds.app.route('/tables')
 #     @roles_accepted('member', 'admin')
 @roles_accepted('member', 'admin')
 def datatables():
@@ -81,7 +80,7 @@ def datatables():
     return render_template("tables.html")
 
 
-@app.route('/refnames')
+@shareds.app.route('/refnames')
 @roles_required('admin')
 def refnames():
     """ Referenssiaineistojen käsittelysivu """
@@ -92,7 +91,7 @@ def refnames():
 """ ----------------------------- Kertova-sivut --------------------------------
 """
 
-@app.route('/person/list/', methods=['POST', 'GET'])
+@shareds.app.route('/person/list/', methods=['POST', 'GET'])
 def show_person_list(selection=None):
     """ Show list of selected Persons """
     if request.method == 'POST':
@@ -118,7 +117,7 @@ def show_person_list(selection=None):
     return render_template("k_persons.html", persons=persons, menuno=0)
 
 
-@app.route('/person/list/restricted')
+@shareds.app.route('/person/list/restricted')
 def show_persons_restricted(selection=None):
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla mainostarkoituksessa"""
     if not current_user.is_authenticated:
@@ -128,7 +127,7 @@ def show_persons_restricted(selection=None):
     return render_template("k_persons.html", persons=persons, menuno=1)
 
 
-@app.route('/person/list_all')
+@shareds.app.route('/person/list_all')
 #     @login_required
 def show_all_persons_list(selection=None):
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
@@ -137,7 +136,7 @@ def show_all_persons_list(selection=None):
     return render_template("k_persons.html", persons=persons, menuno=1)
 
 
-@app.route('/person/<string:ehto>')
+@shareds.app.route('/person/<string:ehto>')
 #     @login_required
 def show_person_page(ehto):
     """ Kertova - henkilön tietojen näyttäminen ruudulla
@@ -165,7 +164,7 @@ def show_person_page(ehto):
         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@app.route('/events/loc=<locid>')
+@shareds.app.route('/events/loc=<locid>')
 def show_location_page(locid):
     """ Paikan tietojen näyttäminen ruudulla: hierarkia ja tapahtumat
     """
@@ -183,18 +182,18 @@ def show_location_page(locid):
                        locid=locid, place=place, events=events, locations=place_list)
 
 
-@app.route('/lista/k_sources')
+@shareds.app.route('/lista/k_sources')
 def show_sources():
     """ Lähdeluettelon näyttäminen ruudulla
     """
     try:
-        sources = models.gen.source_citation.Source.get_source_list()
+        sources = gen.source_citation.Source.get_source_list()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("k_sources.html", sources=sources)
 
 
-@app.route('/events/source=<sourceid>')
+@shareds.app.route('/events/source=<sourceid>')
 def show_source_page(sourceid):
     """ Lähteen tietojen näyttäminen ruudulla: tapahtumat
     """
@@ -209,7 +208,7 @@ def show_source_page(sourceid):
 """ ------ Listaukset (kertova- tai taulukko-muodossa) -------------------------
 """
 
-@app.route('/lista/<string:subj>')
+@shareds.app.route('/lista/<string:subj>')
 def nayta_henkilot(subj):
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     if subj == "k_persons":
@@ -224,7 +223,7 @@ def nayta_henkilot(subj):
         persons = datareader.read_persons_with_events()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "surnames":
-        surnames = models.gen.person.Name.get_surnames()
+        surnames = gen.person.Name.get_surnames()
         return render_template("table_surnames.html", surnames=surnames)
     elif subj == 'events_wo_cites':
         headings, titles, lists = datareader.read_events_wo_cites()
@@ -278,14 +277,14 @@ def nayta_henkilot(subj):
             "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
 
 
-@app.route('/lista/k_locations')
+@shareds.app.route('/lista/k_locations')
 def show_locations():
     """ Paikkaluettelon näyttäminen ruudulla
     """
     try:
         # 'locations' has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        locations = models.gen.place.Place.get_place_names()
+        locations = gen.place.Place.get_place_names()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
@@ -293,8 +292,8 @@ def show_locations():
     return render_template("k_locations.html", locations=locations)
 
 
-@app.route('/list/refnames', defaults={'reftype': None})
-#@app.route('/list/refnames/<string:reftype>')
+@shareds.app.route('/list/refnames', defaults={'reftype': None})
+#@shareds.app.route('/list/refnames/<string:reftype>')
 def list_refnames(reftype):
     """ show reference names on the screen """
 #     if reftype and reftype != "":
@@ -305,8 +304,8 @@ def list_refnames(reftype):
     return render_template("table_refnames.html", names=names)
 
 
-@app.route('/lista/people_by_surname/', defaults={'surname': ""})
-@app.route('/lista/people_by_surname/<string:surname>')
+@shareds.app.route('/lista/people_by_surname/', defaults={'surname': ""})
+@shareds.app.route('/lista/people_by_surname/<string:surname>')
 def list_people_by_surname(surname):
     """ henkilöiden, joilla on sama sukunimi näyttäminen ruudulla """
     people = datareader.get_people_by_surname(surname)
@@ -315,7 +314,7 @@ def list_people_by_surname(surname):
 
 
     #  linkki oli sukunimiluettelosta
-@app.route('/lista/person_data/<string:uniq_id>')
+@shareds.app.route('/lista/person_data/<string:uniq_id>')
 def show_person_data(uniq_id):
     """ henkilön tietojen näyttäminen ruudulla """
     person, events, photos, sources, families = datareader.get_person_data_by_id(uniq_id)
@@ -325,7 +324,7 @@ def show_person_data(uniq_id):
                        person=person, events=events, photos=photos, sources=sources)
 
 
-@app.route('/compare/<string:ehto>')
+@shareds.app.route('/compare/<string:ehto>')
 def compare_person_page(ehto):
     """ Vertailu - henkilön tietojen näyttäminen ruudulla
         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
@@ -352,7 +351,7 @@ def compare_person_page(ehto):
         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@app.route('/compare2/<string:ehto>')
+@shareds.app.route('/compare2/<string:ehto>')
 def compare_person_page2(ehto):
     """ Vertailu - henkilön tietojen näyttäminen ruudulla
         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
@@ -379,7 +378,7 @@ def compare_person_page2(ehto):
         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@app.route('/lista/baptism_data/<string:uniq_id>')
+@shareds.app.route('/lista/baptism_data/<string:uniq_id>')
 def show_baptism_data(uniq_id):
     """ kastetapahtuman tietojen näyttäminen ruudulla """
     event, persons = datareader.get_baptism_data(uniq_id)
@@ -388,7 +387,7 @@ def show_baptism_data(uniq_id):
 
 
 
-@app.route('/lista/family_data/<string:uniq_id>')
+@shareds.app.route('/lista/family_data/<string:uniq_id>')
 def show_family_data(uniq_id):
     """ henkilön perheen tietojen näyttäminen ruudulla """
     person, families = datareader.get_families_data_by_id(uniq_id)
@@ -396,7 +395,7 @@ def show_family_data(uniq_id):
                            person=person, families=families)
 
 
-@app.route('/poimi/<string:ehto>')
+@shareds.app.route('/poimi/<string:ehto>')
 def nayta_ehdolla(ehto):
     """ Nimien listaus tietokannasta ehtolauseella
         oid=arvo        näyttää nimetyn henkilön
@@ -437,7 +436,7 @@ def nayta_ehdolla(ehto):
 """ -------------------------- Tietojen talletus ------------------------------
 """
 
-@app.route('/upload', methods=['POST'])
+@shareds.app.route('/upload', methods=['POST'])
 def upload():
     """ Load a cvs file to temp directory for processing in the server
     """
@@ -446,7 +445,7 @@ def upload():
         material = request.form['material']
         logging.debug("Got a {} file '{}'".format(material, infile.filename))
 
-        models.loadfile.upload_file(infile)
+        loadfile.upload_file(infile)
 
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -454,16 +453,16 @@ def upload():
     return redirect(url_for('save_loaded', filename=infile.filename, subj=material))
 
 
-@app.route('/save/<string:subj>/<string:filename>')
+@shareds.app.route('/save/<string:subj>/<string:filename>')
 def save_loaded(filename, subj):
     """ Saving loaded reference data to the database """
-    pathname = models.loadfile.fullname(filename)
-    dburi = models.dbutil.get_server_location()
+    pathname = loadfile.fullname(filename)
+    dburi = dbutil.get_server_location()
     try:
 #         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
 #             status = datareader.datastorer(pathname)
         if subj == 'refnames':    # Stores Refname objects
-            status = models.cvs_refnames.load_refnames(pathname)
+            status = cvs_refnames.load_refnames(pathname)
         elif subj == 'xml_file':  # gramps backup xml file to Neo4j db
             status = datareader.xml_to_neo4j(pathname, current_user.username)
 #         elif subj == 'karajat': # TODO: Tekemättä
@@ -478,7 +477,7 @@ def save_loaded(filename, subj):
 
 
 #  linkki oli sukunimiluettelosta
-@app.route('/lista/person_data/<string:uniq_id>')
+@shareds.app.route('/lista/person_data/<string:uniq_id>')
 def show_person_data_dbl(uniq_id):
     """ henkilön tietojen näyttäminen ruudulla """
     #models.dbutil.connect_db()
@@ -489,7 +488,7 @@ def show_person_data_dbl(uniq_id):
                        person=person, events=events, photos=photos, sources=sources)
 
 
-@app.route('/compare/<string:ehto>')
+@shareds.app.route('/compare/<string:ehto>')
 def compare_person_page_dbl(ehto):
     """ Vertailu - henkilön tietojen näyttäminen ruudulla
         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
@@ -516,7 +515,7 @@ def compare_person_page_dbl(ehto):
         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@app.route('/compare2/<string:ehto>')
+@shareds.app.route('/compare2/<string:ehto>')
 def compare_person_page2_dbl(ehto):
     """ Vertailu - henkilön tietojen näyttäminen ruudulla
         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
@@ -544,7 +543,7 @@ def compare_person_page2_dbl(ehto):
         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@app.route('/lista/family_data/<string:uniq_id>')
+@shareds.app.route('/lista/family_data/<string:uniq_id>')
 def show_family_data_dbl(uniq_id):
     """ henkilön perheen tietojen näyttäminen ruudulla """
     #models.dbutil.connect_db()
@@ -553,46 +552,46 @@ def show_family_data_dbl(uniq_id):
                            person=person, families=families)
 
 
-@app.route('/poimi/<string:ehto>')
+@shareds.app.route('/poimi/<string:ehto>')
 def nayta_ehdolla_dbl(ehto):
     """ Nimien listaus tietokannasta ehtolauseella
         oid=arvo        näyttää nimetyn henkilön
         names=arvo      näyttää henkilöt, joiden nimi alkaa arvolla
     """
 
-    @app.route('/tyhjenna/kaikki/kannasta')
+    @shareds.app.route('/tyhjenna/kaikki/kannasta')
     def tyhjenna():
         """ tietokannan tyhjentäminen mitään kyselemättä """
         #models.dbutil.connect_db()
-        msg = models.dbutil.alusta_kanta()
+        msg = dbutil.alusta_kanta()
         return render_template("talletettu.html", text=msg)
 
 
-@app.route('/aseta/confidence')
+@shareds.app.route('/aseta/confidence')
 def aseta_confidence():
     """ tietojen laatuarvion asettaminen henkilöille """
-    dburi = models.dbutil.get_server_location()
+    dburi = dbutil.get_server_location()
     message = datareader.set_confidence_value()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 
-@app.route('/aseta/estimated_dates')
+@shareds.app.route('/aseta/estimated_dates')
 def aseta_estimated_dates():
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    dburi = models.dbutil.get_server_location()
+    dburi = dbutil.get_server_location()
     message = datareader.set_estimated_dates()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 
-@app.route('/set/refnames')
+@shareds.app.route('/set/refnames')
 def set_refnames():
     """ Setting reference names for all persons """
-    dburi = models.dbutil.get_server_location()
+    dburi = dbutil.get_server_location()
     message = datareader.set_refnames()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 
-@app.route('/yhdista', methods=['POST'])
+@shareds.app.route('/yhdista', methods=['POST'])
 def nimien_yhdistely():
     """ Nimien listaus tietokannasta ehtolauseella
         oid=arvo        näyttää nimetyn henkilön
@@ -603,7 +602,7 @@ def nimien_yhdistely():
     return redirect(url_for('nayta_ehdolla', ehto='names='+names))
 
 
-@app.route('/samahenkilo', methods=['POST'])
+@shareds.app.route('/samahenkilo', methods=['POST'])
 def henkiloiden_yhdistely():
     """ Yhdistetään base-henkilöön join-henkilöt tapahtumineen,
         minkä jälkeen näytetään muuttunut henkilölista
@@ -619,12 +618,12 @@ def henkiloiden_yhdistely():
 
 #  Käyttäjän lisääminen tapahtuu Flask-securityn metodeilla
 
-# @app.route('/newuser', methods=['POST'])
+# @shareds.app.route('/newuser', methods=['POST'])
 # def new_user():
 #     """ Lisää tai päivittää käyttäjätiedon
 
 
-@app.route('/virhe_lataus/<int:code>/<text>')
+@shareds.app.route('/virhe_lataus/<int:code>/<text>')
 def virhesivu(code, text=''):
     """ Virhesivu näytetään """
     logging.debug('Virhesivu ' + str(code) )
@@ -635,13 +634,13 @@ def virhesivu(code, text=''):
 #     Version 1 vanhoja harjoitussivuja ilman tietokantaa
 # """
 # 
-# @app.route('/vanhat')
+# @shareds.app.route('/vanhat')
 # def index_old():
 #     """Vanhan aloitussivun piirtäminen"""
 #     return render_template("index_1.html")
 # 
 # 
-# @app.route('/lataa1a', methods=['POST'])
+# @shareds.app.route('/lataa1a', methods=['POST'])
 # def lataa1a():
 #     """ Lataa tiedoston ja näyttää sen """
 #     try:
@@ -654,7 +653,7 @@ def virhesivu(code, text=''):
 #     return redirect(url_for('nayta1', filename=infile.filename, fmt='list'))
 # 
 # 
-# @app.route('/lataa1b', methods=['POST'])
+# @shareds.app.route('/lataa1b', methods=['POST'])
 # def lataa1b():
 #     """ Lataa tiedoston ja näyttää sen taulukkona """
 #     infile = request.files['filenm']
@@ -666,7 +665,7 @@ def virhesivu(code, text=''):
 #     return redirect(url_for('nayta1', filename=infile.filename, fmt='table'))
 # 
 # 
-# @app.route('/lista1/<string:fmt>/<string:filename>')
+# @shareds.app.route('/lista1/<string:fmt>/<string:filename>')
 # def nayta1(filename, fmt):
 #     """ tiedoston näyttäminen ruudulla """
 #     try:
