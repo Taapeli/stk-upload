@@ -2,7 +2,6 @@
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 12.1.2016
 
-import csv
 import logging
 import time
 import xml.dom.minidom
@@ -19,8 +18,6 @@ from models.gen.place import Place, Place_name
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
 from models.gen.user import User
-
-#from flask_security import login_required, roles_required, current_user
 import shareds
 
 # def _poimi_(person_id, event_id, row, url):

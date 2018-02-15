@@ -1,7 +1,7 @@
 #!/usr/bin/python
 '''
   Filter methods for _Jinja2 filters
-  Methods are called from stk_server.__init__()
+  Methods are called from stk_server.setups()
 
 Created on 4.1.2018
 @author: jm
@@ -112,7 +112,7 @@ def translate(term, var_name, lang="fi"):
             "Alus": "alus",
             "Borough": "aluehallintoyksikkö",
             "Building": "rakennus tai torppa",  #"rakennus",
-            "City": "paikkakunta",              # "kaupunki",
+            "City": "kaupunki",              # "paikkakunta"?,
             "Country": "maa",
             "District": "lääni",
             "Farm": "tila",
@@ -127,6 +127,7 @@ def translate(term, var_name, lang="fi"):
             "Parish": "seurakunta",
             "Region": "alue",
             "State": "valtio",
+            "Town": "pikkukaupunki",
             "Tontti": "tontti",
             "Village": "kylä",
             "srk": "seurakunta"
@@ -137,7 +138,7 @@ def translate(term, var_name, lang="fi"):
             "Alus": "aluksessa",
             "Borough": "aluehallintoyksikössä",
             "Building": "rakennuksessa tai torpassa",   #"rakennuksessa",
-            "City": "paikassa",                         # "kaupungissa",
+            "City": "kaupungissa",                         # "paikkaunnalla"?,
             "Country": "maassa",
             "District": "läänissä",
             "Farm": "tilalla",
@@ -153,6 +154,7 @@ def translate(term, var_name, lang="fi"):
             "Region": "alueella",
             "State": "valtiossa",
             "Tontti": "tontilla",
+            "Town": "pikkukaupungissa",
             "Village": "kylässä",
             "srk": "seurakunnassa"
         }

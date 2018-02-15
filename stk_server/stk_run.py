@@ -1,54 +1,91 @@
-#!/usr/bin/python
 # coding=UTF-8
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 29.12.2015
 
 import logging
 logger = logging.getLogger('stkserver')
-#import builtins
+
 from flask import render_template, request, redirect, url_for, flash
-from flask_security import login_required, roles_required, current_user
+from flask_security import login_required, roles_accepted, roles_required, current_user
 #from datetime import datetime
 import shareds
-import templates.jinja_filters
+#===============================================================================
+import models.gen   
+#from models import gen
+#from models import dbutil
+# from models import loadfile          # Datan lataus käyttäjältä
+from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
+from models import dataupdater         # Tietojen päivitysmetodit
+# #import models.cvs_refnames      # Referenssinimien luonti
+# from models.gen.place import Place
+#===============================================================================
+from forms import ListEmailsForm
+
+from templates import jinja_filters
 #===============================================================================
 app = shareds.app
-with app.app_context():
+#with app.app_context():
     # within this block, current_app points to app.
-    import models.dbutil
-    import models.loadfile          # Datan lataus käyttäjältä
-    import models.datareader        # Tietojen haku kannasta (tai työtiedostosta)
-    import models.dataupdater       # Tietojen päivitysmetodit
-    import models.cvs_refnames      # Referenssinimien luonti
-    import models.gen
+
     #import models.gen.user          # Käyttäjien tiedot
 
-    """ Application route definitions
-    """
+""" Application route definitions
+"""
 
-    @app.route('/', methods=['GET', 'POST'])
-    @login_required
-    def home():
-        """ Kirjautuneen käyttäjän kotisivu """
-        role_names = [role.name for role in current_user.roles]
-        logger.info(current_user.username + ' / ' + current_user.email + \
-                    ' logged in, roles ' + str(role_names))
-        return render_template('/mainindex.html')
+@shareds.app.route('/', methods=['GET', 'POST'])
+@login_required
+def home():
+    """ Kirjautuneen käyttäjän kotisivu """
+    role_names = [role.name for role in current_user.roles]
+    logger.info(current_user.username + ' / ' + current_user.email + \
+                ' logged in, roles ' + str(role_names))
+    return render_template('/mainindex.html')
 
 
-    @app.route('/tables')
+@app.route('/admin',  methods=['GET', 'POST'])
+@login_required
+@roles_required('admin')
+def admin():
+    """ Kirjautuneen administraattorin kotisivu """    
+    return render_template('/adminindex.html')
+
+
+@app.route('/list_emails',  methods=['GET', 'POST'])
+#    @login_required
+#    @roles_required('admin')
+def list_emails():
+    form = ListEmailsForm()
+    if request.method == 'GET':
+        lista = shareds.user_datastore.get_emails()
+        return render_template("/security/list_emails.html", emails=lista, form=form)
+    elif request.method == 'POST':
+        shareds.user_datastore.email_register(form.allowed_email.data, form.default_role.data)
+        lista = shareds.user_datastore.get_emails()
+        return render_template("/security/list_emails.html", emails=lista, form=form)
+
+
+
+@app.route('/list_users', methods=['GET'])
+# @login_required
+def list_users():
+# Käytetään neo4juserdatastorea
+    lista = shareds.user_datastore.get_users()
+    return render_template("security/table_users.html", users=lista)  
+
+
+@app.route('/tables')
 #     @roles_accepted('member', 'admin')
-    @roles_required('admin')
-    def datatables():
-        """ Teknisten datataulukoiden käsittelysivu """
-        return render_template("tables.html")
+@roles_accepted('member', 'admin')
+def datatables():
+    """ Teknisten datataulukoiden käsittelysivu """
+    return render_template("tables.html")
 
 
-    @app.route('/refnames')
-    @roles_required('admin')
-    def refnames():
-        """ Referenssiaineistojen käsittelysivu """
-        return render_template("reference.html")
+@app.route('/refnames')
+@roles_required('admin')
+def refnames():
+    """ Referenssiaineistojen käsittelysivu """
+    return render_template("reference.html")
 
 
 
@@ -79,7 +116,7 @@ def show_person_list(selection=None):
         keys = selection.split('=')
     else:
         keys = ('all',)
-    persons = [] #models.datareader.read_persons_with_events(keys)
+    persons = [] #datareader.read_persons_with_events(keys)
     return render_template("k_persons.html", persons=persons, menuno=0)
 
 
@@ -117,7 +154,7 @@ def show_person_page(ehto):
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
+                datareader.get_person_data_by_id(value)
             for f in families:
                 print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
@@ -140,9 +177,9 @@ def show_location_page(locid):
     """ Paikan tietojen näyttäminen ruudulla: hierarkia ja tapahtumat
     """
     try:
-        # List 'locatils' has Place objects with 'parent' field pointing to
+        # List 'place_list' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events
-        place, place_list, events = models.datareader.get_place_with_events(locid)
+        place, place_list, events = datareader.get_place_with_events(locid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in place_list:
@@ -169,7 +206,7 @@ def show_source_page(sourceid):
     """ Lähteen tietojen näyttäminen ruudulla: tapahtumat
     """
     try:
-        stitle, events = models.datareader.get_source_with_events(sourceid)
+        stitle, events = datareader.get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("k_source_events.html",
@@ -184,47 +221,47 @@ def nayta_henkilot(subj):
     """ tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla """
     if subj == "k_persons":
         # Kertova-tyyliin
-        persons = models.datareader.read_persons_with_events()
+        persons = datareader.read_persons_with_events()
         return render_template("k_persons.html", persons=persons, menuno=0)
 #     if subj == "henkilot":
 #         dburi = models.dbutil.get_server_location()
-#         persons = models.datareader.lue_henkilot()
+#         persons = datareader.lue_henkilot()
 #         return render_template("table_persons.html", persons=persons, uri=dburi)
     elif subj == "henkilot2":
-        persons = models.datareader.read_persons_with_events()
+        persons = datareader.read_persons_with_events()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "surnames":
         surnames = models.gen.person.Name.get_surnames()
         return render_template("table_surnames.html", surnames=surnames)
     elif subj == 'events_wo_cites':
-        headings, titles, lists = models.datareader.read_events_wo_cites()
+        headings, titles, lists = datareader.read_events_wo_cites()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'events_wo_place':
-        headings, titles, lists = models.datareader.read_events_wo_place()
+        headings, titles, lists = datareader.read_events_wo_place()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'notes':
-        titles, lists = models.datareader.get_notes()
+        titles, lists = datareader.get_notes()
         return render_template("table_of_data.html",
                                headings=("Huomautusluettelo", "Note-kohteet"),
                                titles=titles, lists=lists)
     elif subj == 'media':
-        media = models.datareader.read_medias()
+        media = datareader.read_medias()
         return render_template("table_media.html",
                                media=media)
     elif subj == 'people_wo_birth':
-        headings, titles, lists = models.datareader.read_people_wo_birth()
+        headings, titles, lists = datareader.read_people_wo_birth()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'old_people_top':
-        headings, titles, lists = models.datareader.read_old_people_top()
+        headings, titles, lists = datareader.read_old_people_top()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'repositories':
-        repositories = models.datareader.read_repositories()
+        repositories = datareader.read_repositories()
         for r in repositories:
-            r.type = templates.jinja_filters.translate(r.type, 'rept', 'fi')
+            r.type = jinja_filters.translate(r.type, 'rept', 'fi')
         return render_template("ng_table_repositories.html",
                                repositories=repositories)
     elif subj == 'same_birthday':
@@ -237,25 +274,21 @@ def nayta_henkilot(subj):
         ids = models.datareader.read_same_name()
         return render_template("ng_same_name.html", ids=ids)
     elif subj == 'sources':
-        sources = models.datareader.read_sources()
+        sources = datareader.read_sources()
         return render_template("table_sources.html",
                                sources=sources)
     elif subj == 'sources_wo_cites':
-        headings, titles, lists = models.datareader.read_sources_wo_cites()
+        headings, titles, lists = datareader.read_sources_wo_cites()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'sources_wo_repository':
-        headings, titles, lists = models.datareader.read_sources_wo_repository()
+        headings, titles, lists = datareader.read_sources_wo_repository()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'places':
-        headings, titles, lists = models.datareader.read_places()
+        headings, titles, lists = datareader.read_places()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
-    elif subj == "users":
-        # Käytetään neo4juserdatastorea
-        lista = shareds.user_datastore.get_users()
-        return render_template("table_users.html", users=lista)
     else:
         return redirect(url_for('virhesivu', code=1, text= \
             "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
@@ -281,10 +314,10 @@ def show_locations():
 def list_refnames(reftype):
     """ show reference names on the screen """
 #     if reftype and reftype != "":
-#         names = models.datareader.read_typed_refnames(reftype)  # TODO: Not tested method
+#         names = datareader.read_typed_refnames(reftype)  # TODO: Not tested method
 #         return render_template("table_refnames_1.html", names=names, reftype=reftype)
 #     else:
-    names = models.datareader.read_refnames()
+    names = datareader.read_refnames()
     return render_template("table_refnames.html", names=names)
 
 
@@ -292,7 +325,7 @@ def list_refnames(reftype):
 @app.route('/lista/people_by_surname/<string:surname>')
 def list_people_by_surname(surname):
     """ henkilöiden, joilla on sama sukunimi näyttäminen ruudulla """
-    people = models.datareader.get_people_by_surname(surname)
+    people = datareader.get_people_by_surname(surname)
     return render_template("table_people_by_surname.html",
                            surname=surname, people=people)
 
@@ -301,7 +334,7 @@ def list_people_by_surname(surname):
 @app.route('/lista/person_data/<string:uniq_id>')
 def show_person_data(uniq_id):
     """ henkilön tietojen näyttäminen ruudulla """
-    person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
+    person, events, photos, sources, families = datareader.get_person_data_by_id(uniq_id)
     logger.debug("Got {} persons, {} events, {} photos, {} sources, {} families".\
                  format(len(person), len(events), len(photos), len(sources), len(families)))
     return render_template("table_person_by_id.html",
@@ -309,15 +342,19 @@ def show_person_data(uniq_id):
 
 
 @app.route('/compare/<string:ehto>')
-def compare_person_page(ehto):
-    """ Vertailu - henkilön tietojen näyttäminen ruudulla
+def compare_person_page(ehto): 
+    """ Vertailu - henkilön tietojen näyttäminen ruudulla 
         uniq_id=arvo    näyttää henkilön tietokanta-avaimen mukaan
     """
+    
     key, value = ehto.split('=')
+    value1, value2 = value.split(',')
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
+                models.datareader.get_person_data_by_id(value1)
+            person2, events2, photos2, sources2, families2 = \
+                models.datareader.get_person_data_by_id(value2)
             for f in families:
                 print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
@@ -331,8 +368,9 @@ def compare_person_page(ehto):
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("compare3.html",
-        person=person, events=events, photos=photos, sources=sources, families=families)
+    return render_template("ng_compare.html", 
+        person=person, events=events, photos=photos, sources=sources, families=families,
+        person2=person2, events2=events2, photos2=photos2, sources2=sources2, families2=families2)
 
 
 @app.route('/compare2/<string:ehto>')
@@ -344,7 +382,7 @@ def compare_person_page2(ehto):
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
+                datareader.get_person_data_by_id(value)
             for f in families:
                 print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
@@ -365,7 +403,7 @@ def compare_person_page2(ehto):
 @app.route('/lista/baptism_data/<string:uniq_id>')
 def show_baptism_data(uniq_id):
     """ kastetapahtuman tietojen näyttäminen ruudulla """
-    event, persons = models.datareader.get_baptism_data(uniq_id)
+    event, persons = datareader.get_baptism_data(uniq_id)
     return render_template("table_baptism_data.html",
                            event=event, persons=persons)
 
@@ -374,7 +412,7 @@ def show_baptism_data(uniq_id):
 @app.route('/lista/family_data/<string:uniq_id>')
 def show_family_data(uniq_id):
     """ henkilön perheen tietojen näyttäminen ruudulla """
-    person, families = models.datareader.get_families_data_by_id(uniq_id)
+    person, families = datareader.get_families_data_by_id(uniq_id)
     return render_template("table_families_by_id.html",
                            person=person, families=families)
 
@@ -391,7 +429,7 @@ def pick_selection(ehto):
 
         if key == 'name':               # A prototype for later development
             value=value.title()
-            persons = models.datareader.read_persons_with_events(keys=['surname',value])
+            persons = datareader.read_persons_with_events(keys=['surname',value])
             return render_template("join_persons.html",
                                    persons=persons, pattern=value)
         elif key == 'cite_sour_repo':   # from table_person_by_id.html
@@ -448,11 +486,11 @@ def save_loaded(filename, subj):
     dburi = models.dbutil.get_server_location()
     try:
 #         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
-#             status = models.datareader.datastorer(pathname)
+#             status = datareader.datastorer(pathname)
         if subj == 'refnames':    # Stores Refname objects
             status = models.cvs_refnames.load_refnames(pathname)
         elif subj == 'xml_file':  # gramps backup xml file to Neo4j db
-            status = models.datareader.xml_to_neo4j(pathname, current_user.username)
+            status = datareader.xml_to_neo4j(pathname, current_user.username)
 #         elif subj == 'karajat': # TODO: Tekemättä
 #             status = "Käräjätietojen lukua ei ole vielä tehty"
         else:
@@ -469,7 +507,7 @@ def save_loaded(filename, subj):
 def show_person_data_dbl(uniq_id):
     """ henkilön tietojen näyttäminen ruudulla """
     #models.dbutil.connect_db()
-    person, events, photos, sources, families = models.datareader.get_person_data_by_id(uniq_id)
+    person, events, photos, sources, families = datareader.get_person_data_by_id(uniq_id)
     logger.debug("Got {} persons, {} events, {} photos, {} sources, {} families".\
                  format(len(person), len(events), len(photos), len(sources), len(families)))
     return render_template("table_person_by_id.html",
@@ -485,7 +523,7 @@ def compare_person_page_dbl(ehto):
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
+                datareader.get_person_data_by_id(value)
             for f in families:
                 print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
@@ -513,7 +551,7 @@ def compare_person_page2_dbl(ehto):
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                models.datareader.get_person_data_by_id(value)
+                datareader.get_person_data_by_id(value)
             for f in families:
                 print ("{} in the family {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
@@ -535,7 +573,7 @@ def compare_person_page2_dbl(ehto):
 def show_family_data_dbl(uniq_id):
     """ henkilön perheen tietojen näyttäminen ruudulla """
     #models.dbutil.connect_db()
-    person, families = models.datareader.get_families_data_by_id(uniq_id)
+    person, families = datareader.get_families_data_by_id(uniq_id)
     return render_template("table_families_by_id.html",
                            person=person, families=families)
 
@@ -552,7 +590,7 @@ def tyhjenna():
 def aseta_confidence():
     """ tietojen laatuarvion asettaminen henkilöille """
     dburi = models.dbutil.get_server_location()
-    message = models.datareader.set_confidence_value()
+    message = datareader.set_confidence_value()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 
@@ -560,7 +598,7 @@ def aseta_confidence():
 def aseta_estimated_dates():
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
     dburi = models.dbutil.get_server_location()
-    message = models.datareader.set_estimated_dates()
+    message = datareader.set_estimated_dates()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 
@@ -593,7 +631,7 @@ def henkiloiden_yhdistely():
     base_id = request.form['base']
     join_ids = request.form.getlist('join')
     #TODO lisättävä valitut ref.nimet, jahka niitä tulee
-    models.dataupdater.joinpersons(base_id, join_ids)
+    dataupdater.joinpersons(base_id, join_ids)
     flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
     return redirect(url_for('pick_selection', ehto='names='+names))
 
@@ -660,7 +698,7 @@ def virhesivu(code, text=''):
 #     # Vaihtoehto b: Luetaan tiedot taulukoksi
 #     else:
 #         try:
-#             persons = models.datareader.henkilolista(pathname)
+#             persons = datareader.henkilolista(pathname)
 #             return render_template("table_persons.html", name=pathname, \
 #                    persons=persons)
 #         except Exception as e:
@@ -669,6 +707,8 @@ def virhesivu(code, text=''):
 
 """ ----------------------------- Käynnistys ------------------------------- """
 
-if __name__ == '__main__':
-    print("Käynnistys tehdään ohjelmalta /run.py tai /runssl.py")
+#===============================================================================
+# if __name__ == '__main__':
+#     print("Käynnistys tehdään ohjelmalta /run.py tai /runssl.py")
+#===============================================================================
 
