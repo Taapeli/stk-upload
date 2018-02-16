@@ -1,7 +1,7 @@
 #!/usr/bin/python
 '''
   Filter methods for _Jinja2 filters
-  Methods are called from stk_server.__init__()
+  Methods are called from stk_server.setups()
 
 Created on 4.1.2018
 @author: jm
