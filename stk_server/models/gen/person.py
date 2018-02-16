@@ -429,24 +429,15 @@ RETURN person, urls, COLLECT (name) AS names
     def get_confidence ():
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
-
-        query = """
- MATCH (person:Person)
- OPTIONAL MATCH (person)-[:EVENT]->(event:Event)-[r:CITATION]->(c:Citation)
- RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
-                
-        return shareds.driver.session().run(query)
+        return shareds.driver.session().run(Cypher.person_get_confidence)
 
 
     def set_confidence (self, tx):
-        """ Voidaan asettaa henkilön tietojen luotettavuus arvio kantaan
+        """ Sets a quality rate to this Person
+            Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
         """
-
-        query = """
- MATCH (person:Person) WHERE ID(person)={}
- SET person.confidence='{}'""".format(self.uniq_id, self.confidence)
-                
-        return tx.run(query)
+        return tx.run(Cypher.person_set_confidence,
+                      id=self.uniq_id, confidence=self.confidence)
 
 
     @staticmethod       
