@@ -16,7 +16,7 @@ from models.gen.media import Media
 from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name
 from models.gen.source_citation import Citation, Repository, Source
-from models.datareader import set_confidence_value
+from models.dataupdater import set_confidence_value
 import shareds
 
 

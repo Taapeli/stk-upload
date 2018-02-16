@@ -195,22 +195,22 @@ RETURN ID(a) AS aid, a.name AS aname"""
 
 
     @staticmethod
-    def link_to_refname(pid, name, reftype):
-        # Connects reference name of type reftype to Person(pid)
+    def link_to_refname(tx, pid, name, reftype):
+        # Connects a reference name of type reftype to Person(pid)
 
         if not name > "":
             logging.warning("Missing name {} for {} - not added".format(reftype, name))
             return
         if not (reftype in REFTYPES):
             raise ValueError("Invalid reftype {}".format(reftype))
+            return
 
         try:
-            with shareds.driver.session() as session:
-                result = session.run(Cypher.refname_link_to, 
-                                     pid=pid, name=name, use=reftype)
+            result = tx.run(Cypher.refname_link_to,
+                            pid=pid, name=name, use=reftype)
 
-                logging.debug("Created {} nodes for {}".format(\
-                        result.summary().counters.nodes_created, name))
+            logging.debug("Created {} nodes for {}".format(\
+                    result.summary().counters.nodes_created, name))
 
         except Exception as err:
             # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
