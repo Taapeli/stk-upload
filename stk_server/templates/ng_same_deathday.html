@@ -24,12 +24,14 @@
 	    	ng-show="(id_par.firstname1 === id_par.firstname2) || !show_me">
 	        <td><a href="/compare/uniq_id={a id_par.uniq_id1 a},{a id_par.uniq_id2 a}">{a id_par.uniq_id1 a}</a></td>
 	        <td>{a id_par.firstname1 a}</td>
+	        <td>{a id_par.suffix1 a}</td>
 	        <td>{a id_par.surname1 a}</td>
 	        <td>{a id_par.est_birth1 a}</td>
 	        <td>{a id_par.est_death1 a}</td>
 	        <td bgcolor="#E0E0E0">&nbsp;</td>
 	        <td>{a id_par.uniq_id2 a}</td>
 	        <td>{a id_par.firstname2 a}</td>
+	        <td>{a id_par.suffix2 a}</td>
 	        <td>{a id_par.surname2 a}</td>
 	        <td>{a id_par.est_birth2 a}</td>
 	        <td>{a id_par.est_death2 a}</td>
@@ -43,12 +45,14 @@ var app = angular.module('myApp', []).controller('namesCtrl', function($scope) {
 	$scope.columns = [
 		{column:'uniq_id1'},
 		{column:'firstname1'},
+		{column:'suffix1'},
 		{column:'surname1'},
 		{column:'est_birth1'},
 		{column:'est_death1'},
 		{column:' '},
 		{column:'uniq_id2'},
 		{column:'firstname2'},
+		{column:'suffix2'},
 		{column:'surname2'},
 		{column:'est_birth2'},
 		{column:'est_death2'}
@@ -60,12 +64,14 @@ var app = angular.module('myApp', []).controller('namesCtrl', function($scope) {
         	 est_birth1:'{{ id_pair[1] if id_pair[1] else '-' }}',
         	 est_death1:'{{id_pair[2]}}',
         	 firstname1:'{{id_pair[3]}}',
-        	 surname1:'{{id_pair[4]}}',
-        	 uniq_id2:'{{id_pair[5]}}',
-        	 est_birth2:'{{ id_pair[6] if id_pair[6] else '-' }}',
-        	 est_death2:'{{id_pair[7]}}',
-        	 firstname2:'{{id_pair[8]}}',
-        	 surname2:'{{id_pair[9]}}'},
+        	 suffix1:'{{id_pair[4]}}',
+        	 surname1:'{{id_pair[5]}}',
+        	 uniq_id2:'{{id_pair[6]}}',
+        	 est_birth2:'{{ id_pair[7] if id_pair[7] else '-' }}',
+        	 est_death2:'{{id_pair[8]}}',
+        	 firstname2:'{{id_pair[9]}}',
+        	 suffix2:'{{id_pair[10]}}',
+        	 surname2:'{{id_pair[11]}}'},
     	{% endfor %}
     {% endfor %}
     ];
