@@ -16,6 +16,7 @@ import models.gen
 from models import loadfile            # Datan lataus käyttäjältä
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from models import dataupdater         # Tietojen päivitysmetodit
+from models import gramps_loader       # Loading a gramps xml file
 from models import cvs_refnames        # Referenssinimien luonti
 # from models.gen.place import Place
 #===============================================================================
@@ -486,14 +487,10 @@ def save_loaded(filename, subj):
     pathname = models.loadfile.fullname(filename)
     dburi = models.dbutil.get_server_location()
     try:
-#         if subj == 'henkilot':  # Käräjille osallistuneiden tiedot
-#             status = datareader.datastorer(pathname)
         if subj == 'refnames':    # Stores Refname objects
             status = cvs_refnames.load_refnames(pathname)
         elif subj == 'xml_file':  # gramps backup xml file to Neo4j db
-            status = datareader.xml_to_neo4j(pathname, current_user.username)
-#         elif subj == 'karajat': # TODO: Tekemättä
-#             status = "Käräjätietojen lukua ei ole vielä tehty"
+            status = gramps_loader.xml_to_neo4j(pathname, current_user.username)
         else:
             return redirect(url_for('virhesivu', code=1, text= \
                 "Data type '" + subj + "' is still missing"))
