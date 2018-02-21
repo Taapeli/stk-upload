@@ -73,7 +73,7 @@ def load_refnames(pathname):
 
         tx.commit()
 
-    msg = '{0}: {1} rows, {2} skipped. TIME {} sek'.\
+    msg = '{}: {} rows, {} skipped. TIME {} sek'.\
         format(pathname, row_nro, empties, time.time()-t0)
     logging.info(msg)
     return (msg)
