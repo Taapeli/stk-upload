@@ -106,8 +106,9 @@ class Refname:
         return s
 
 
-    def save(self):
-        """ Saving a Refname to the database. It may be - 
+    def save(self, tx=None):
+        """ Saving a Refname to the database (with optional transaction).
+            Self (a Refname) may be - 
             - a name without other reference (A:{name:name})
             - a name with reference to a base name
                 (A:{name:name}) -[:BASENAME]-> (B:{name:refname})
@@ -131,6 +132,11 @@ class Refname:
         if not self.name:
             raise ValueError("No name for Refname")
 
+        if tx:  # Use transaction
+            session = tx
+        else:   # No transaction
+            session = shareds.driver.session()
+
         # Setting attributes for 'A'
         a_attr = {'name': self.name}
         if hasattr(self, 'gender'):
@@ -147,16 +153,15 @@ class Refname:
             else:   # ['firstname', 'surname', 'patronyme']
                 link_type = "BASENAME"
             try:
-                with shareds.driver.session() as session:
-                    result = session.run(Cypher.refname_save(link_type), 
-                                         use=self.reftype,
-                                         a_name=self.name, a_attr=a_attr,
-                                         b_name=self.refname)
-        
-                    logging.debug("Created {} nodes and {} relations for {}-->{}".format(\
-                            result.summary().counters.nodes_created, 
-                            result.summary().counters.relationships_created, 
-                            self.name, self.refname))
+                result = session.run(Cypher.refname_save_link(link_type), 
+                                     use=self.reftype,
+                                     a_name=self.name, a_attr=a_attr,
+                                     b_name=self.refname)
+    
+                logging.debug("Created {} nodes and {} relations for {}-->{}".format(\
+                        result.summary().counters.nodes_created, 
+                        result.summary().counters.relationships_created, 
+                        self.name, self.refname))
 #                     for record in result:
 #                         a_oid = record["aid"]
 #                         a_name = record["aname"]
@@ -172,17 +177,13 @@ class Refname:
 
         else:
             # Create (A:{name:name}) only (if needed)
-            query="""
-MERGE (a:Refname {name: $a_name}) SET a = $a_attr
-RETURN ID(a) AS aid, a.name AS aname"""
             try:
-                with shareds.driver.session() as session:
-                    result = session.run(query, 
-                                         a_name=self.name, a_attr=a_attr)
+                result = session.run(Cypher.refname_save_single, 
+                                     a_name=self.name, a_attr=a_attr)
 
-                    logging.debug("Created {} nodes for {}".format(\
-                            result.summary().counters.nodes_created, 
-                            self.name))
+                logging.debug("Created {} node for {}".format(\
+                        result.summary().counters.nodes_created, 
+                        self.name))
 #                 for record in result:
 #                     a_oid = record["aid"]
 #                     a_name = record["aname"]
@@ -206,7 +207,7 @@ RETURN ID(a) AS aid, a.name AS aname"""
             return
 
         try:
-            result = tx.run(Cypher.refname_link_to,
+            result = tx.run(Cypher.refname_link_person_to,
                             pid=pid, name=name, use=reftype)
 
             logging.debug("Created {} nodes for {}".format(\
