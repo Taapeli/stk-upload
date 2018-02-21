@@ -1,4 +1,4 @@
-import os
+
 from neo4j.v1 import GraphDatabase
 
 DEBUG = False
