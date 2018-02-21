@@ -21,3 +21,5 @@ SECURITY_POST_LOGOUT_VIEW = 'login'
 #SECURITY_RESET_PASSWORD_TEMPLATE = 'stk_security/reset_password.html'
 #SECURITY_CHANGE_PASSWORD_TEMPLATE = 'stk_security/change_password.html'
 SECURITY_SEND_REGISTER_EMAIL = True
+
+DEFAULT_ROLE='admin'
