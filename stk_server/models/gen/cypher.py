@@ -43,7 +43,7 @@ WITH person, name""" + _person_get_events_tail
 
     person_set_confidence = """
  MATCH (person:Person) WHERE ID(person)=$id
- SET person.confidence='$confidence'"""
+ SET person.confidence=$confidence"""
                 
 
 # --- For Place class ---------------------------------------------------------
