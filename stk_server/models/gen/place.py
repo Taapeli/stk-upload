@@ -51,6 +51,8 @@ class Place:
         self.handle = ''
         self.change = ''
         self.names = []
+        self.coord_lat = ''
+        self.coord_long = ''
         self.coord = []
         self.urls = []
         self.placeref_hlink = ''
@@ -421,11 +423,13 @@ ORDER BY edate"""
             pid = self.id
             ptype = self.type
             pname = self.pname
-            coord_lat_str = self.coord_lat.replace("\\\'", "\'")
-            coord_lat = float(coord_lat_str)
-            coord_long_str = self.coord_long.replace("\\\'", "\'")
-            coord_long = float(coord_long_str)
-            coord = [coord_lat, coord_long]
+            if self.coord_lat != '' and self.coord_long != '':
+                coord_lat_str = self.coord_lat.replace("\\\'", "\'")
+                coord_lat = float(coord_lat_str)
+                coord_long_str = self.coord_long.replace("\\\'", "\'")
+                coord_long = float(coord_long_str)
+                self.coord = [coord_lat, coord_long]
+            coord = self.coord
             query = """
 CREATE (p:Place) 
 SET p.gramps_handle=$handle, 
