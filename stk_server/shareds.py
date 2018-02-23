@@ -11,3 +11,5 @@ mail = None
 db = None
 driver = None
 user_datastore = None
+
+DEFAULT_ROLE = 'member'    # Value overridden with configuration in application setup

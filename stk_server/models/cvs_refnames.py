@@ -4,8 +4,10 @@
 
 import csv
 import logging
+import time
 
 from models.gen.refname import Refname, REFTYPES
+from models.gen.user import User
 
 def load_refnames(pathname):
     """ Reads reference names from a local csv file. 
@@ -17,7 +19,7 @@ def load_refnames(pathname):
         - Gender    (M = male, N,F = female, empty = undefined)
         - Source    (source name)
 
-        Example:
+        Example file:
             Name,Refname,Reftype,Source,Gender
             Carl,Kalle,firstname,Sibelius-aineisto,male
             Carlsdotter,Carl,father,Sibelius-aineisto,
@@ -26,14 +28,16 @@ def load_refnames(pathname):
     empties = 0
     
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
+        tx = User.beginTransaction()
         reader=csv.DictReader(f, dialect='excel')
+        t0 = time.time()
         for row in reader:
             row_nro += 1
             try:
                 nimi=row['Name'].strip()
                 if len(nimi) == 0:
                     empties += 1
-                    continue # Skip a row without name
+                    continue # Skip a row without a name
 
                 refname=row['Refname']
                 reftype=row['Reftype']
@@ -49,7 +53,7 @@ def load_refnames(pathname):
             else:
                 sex = ''
 
-            # Luodaan Refname
+            # Creating Refname
             r = Refname(nimi)
             if (refname != '') and (refname != nimi):
                 if reftype in REFTYPES:
@@ -64,13 +68,13 @@ def load_refnames(pathname):
             if source != '':
                 r.source = source
 
-            """
-            Saves a Refname object and possible connection to another reference name:
-            (a:Refname {name:'Name'}) -[r:Reftype]-> (b:Refname {name:'Refname'})
-            """
-            r.save()
+            # Saves a Refname object and possibly connection to another Refname
+            r.save(tx)
 
-    msg = '{0}: {1} rows, {2} skipped'.format(pathname, row_nro, empties)
+        tx.commit()
+
+    msg = '{}: {} rows, {} skipped. TIME {} sek'.\
+        format(pathname, row_nro, empties, time.time()-t0)
     logging.info(msg)
     return (msg)
 
