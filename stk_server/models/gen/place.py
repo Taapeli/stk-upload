@@ -27,8 +27,7 @@ class Place:
                    datetype         str aikavälin tyyppi
                    daterange_start  str aikavälin alku
                    daterange_stop   str aikavälin loppu
-                coord_long          str paikan pituuspiiri
-                coord_lat           str paikan leveyspiiri
+                coord               str paikan koordinaatit
                 urls[]:
                     priv            str url salattu tieto
                     href            str url osoite
@@ -52,8 +51,7 @@ class Place:
         self.handle = ''
         self.change = ''
         self.names = []
-        self.coord_long = ''
-        self.coord_lat = ''
+        self.coord = []
         self.urls = []
         self.placeref_hlink = ''
         self.noteref_hlink = []
@@ -91,8 +89,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
             self.type = place_record["place"]["type"]
             names = place_record["names"]
             self.pname = Place.namelist_w_lang(names)
-            self.coord_long = place_record["place"]["coord_long"]
-            self.coord_lat = place_record["place"]["coord_lat"]
+            self.coord = place_record["place"]["coord"]
 
             urls = place_record['urls']
             for url in urls:
@@ -128,7 +125,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
         result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
-                  'coord_long', 'coord_lat']
+                  'coord']
         lists = []
         
         for record in result:
@@ -157,12 +154,8 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
                 data_line.append(record["p"]['pname'])
             else:
                 data_line.append('-')
-            if record["p"]['coord_long']:
-                data_line.append(record["p"]['coord_long'])
-            else:
-                data_line.append('-')
-            if record["p"]['coord_lat']:
-                data_line.append(record["p"]['coord_lat'])
+            if record["p"]['coord']:
+                data_line.append(record["p"]['coord'])
             else:
                 data_line.append('-')
                 
@@ -176,23 +169,23 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
             
             Esim.
-╒═══════╤════════════╤══════════════════════════════╤════════════╤════════════╤═══════════════════════╤═══════════════════════╕
-│"id"   │"type"      │"name"                        │"coord_long"│"coord_lat" │"upper"                │"lower"                │
-╞═══════╪════════════╪══════════════════════════════╪════════════╪════════════╪═══════════════════════╪═══════════════════════╡
-│"28427"│"Building"  │[["Ahlnäs",""]]               │""          │""          │[["28419","Farm",      │[[null,null,null,null]]│
-│       │            │                              │            │            │"Labby 6 Smeds",""]]   │                       │
-├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
-│"28795"│"Hautausmaa"│[["Ahveniston hautausmaa",""]]│"24.4209"   │"60.9895"   │[[null,null,null,null]]│[[null,null,null,null]]│
-├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
-│"28118"│"Farm"      │[["Ainola",""]]               │"25.0873870"│"60.453655" │[[null,null,null,null]]│[[null,null,null,null]]│
-├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
-│"28865"│"City"      │[["Akaa",""],["Ackas","sv"]]  │"23.9481353"│"61.1881064"│[[null,null,null,null]]│[[null,null,null,null]]│
-├───────┼────────────┼──────────────────────────────┼────────────┼────────────┼───────────────────────┼───────────────────────┤
-│"28354"│"Building"  │[["Alnäs",""]]                │""          │""          │[["28325","Farm","Inger│[[null,null,null,null]]│
-│       │            │                              │            │            │mansby 4 Sjökulla",""],│                       │
-│       │            │                              │            │            │["28325","Farm", "Lappt│                       │
-│       │            │                              │            │            │räsk Ladugård",""]]    │                       │
-└───────┴────────────┴──────────────────────────────┴────────────┴────────────┴───────────────────────┴───────────────────────┘
+╒═══════╤════════════╤══════════════════════════════╤═════════════════════════╤═══════════════════════╤═══════════════════════╕
+│"id"   │"type"      │"name"                        │"coord"                  │"upper"                │"lower"                │
+╞═══════╪════════════╪══════════════════════════════╪═════════════════════════╪═══════════════════════╪═══════════════════════╡
+│"28427"│"Building"  │[["Ahlnäs",""]]               │""                       │[["28419","Farm",      │[[null,null,null,null]]│
+│       │            │                              │                         │"Labby 6 Smeds",""]]   │                       │
+├───────┼────────────┼──────────────────────────────┼─────────────────────────┼───────────────────────┼───────────────────────┤
+│"28795"│"Hautausmaa"│[["Ahveniston hautausmaa",""]]│"[24.4209, 60.9895]"     │[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼─────────────────────────┼───────────────────────┼───────────────────────┤
+│"28118"│"Farm"      │[["Ainola",""]]               │"25.0873870, 60.453655]" │[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼─────────────────────────┼───────────────────────┼───────────────────────┤
+│"28865"│"City"      │[["Akaa",""],["Ackas","sv"]]  │"23.9481353, 61.1881064]"│[[null,null,null,null]]│[[null,null,null,null]]│
+├───────┼────────────┼──────────────────────────────┼─────────────────────────┼───────────────────────┼───────────────────────┤
+│"28354"│"Building"  │[["Alnäs",""]]                │""                       │[["28325","Farm","Inger│[[null,null,null,null]]│
+│       │            │                              │                         │mansby 4 Sjökulla",""],│                       │
+│       │            │                              │                         │["28325","Farm", "Lappt│                       │
+│       │            │                              │                         │räsk Ladugård",""]]    │                       │
+└───────┴────────────┴──────────────────────────────┴─────────────────────────┴───────────────────────┴───────────────────────┘
 """
         
         query = """
@@ -200,8 +193,7 @@ MATCH (a:Place) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
 OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
 RETURN ID(a) AS id, a.type AS type,
-    COLLECT(DISTINCT [pn.name,pn.lang]) AS name,
-    a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
+    COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord, 
     COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper, 
     COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
 ORDER BY name[0][0]
@@ -231,8 +223,7 @@ ORDER BY name[0][0]
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
             p = Place(record['id'], record['type'], Place.namelist_w_lang(record['name']))
-            p.coord_long = record['coord_long']
-            p.coord_lat = record['coord_lat']
+            p.coord = record['coord']
             p.uppers = combine_places(record['upper'])
             p.lowers = combine_places(record['lower'])
             ret.append(p)
@@ -411,10 +402,8 @@ ORDER BY edate"""
         print ("Type: " + self.type)
         if self.pname != '':
             print ("Pname: " + self.pname)
-        if self.coord_long != '':
-            print ("Coord_long: " + self.coord_long)
-        if self.coord_lat != '':
-            print ("Coord_lat: " + self.coord_lat)
+        if self.coord != '':
+            print ("Coord: " + self.coord)
         if self.placeref_hlink != '':
             print ("Placeref_hlink: " + self.placeref_hlink)
         if len(self.noteref_hlink) > 0:
@@ -432,9 +421,11 @@ ORDER BY edate"""
             pid = self.id
             ptype = self.type
             pname = self.pname
-            # Replace f.ex 26° 11\' 7,411"I with 26° 11' 7,411"I
-            coord_long = self.coord_long.replace("\\\'", "\'")
-            coord_lat = self.coord_lat.replace("\\\'", "\'")
+            coord_lat_str = self.coord_lat.replace("\\\'", "\'")
+            coord_lat = float(coord_lat_str)
+            coord_long_str = self.coord_long.replace("\\\'", "\'")
+            coord_long = float(coord_long_str)
+            coord = [coord_lat, coord_long]
             query = """
 CREATE (p:Place) 
 SET p.gramps_handle=$handle, 
@@ -442,11 +433,10 @@ SET p.gramps_handle=$handle,
     p.id=$id, 
     p.type=$type, 
     p.pname=$pname, 
-    p.coord_long=$coord_long, 
-    p.coord_lat=$coord_lat"""             
+    p.coord=$coord"""             
             tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "type": ptype, "pname": pname, 
-                "coord_long": coord_long, "coord_lat": coord_lat})
+                "coord": coord})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
@@ -520,7 +510,7 @@ CREATE (n)-[wu:WEBURL]->
                     print("Virhe: {0}".format(err), file=stderr)
             
         return
-    
+
 
 class Place_name:
     """ Paikan nimi
@@ -540,5 +530,24 @@ class Place_name:
         self.datetype = ''
         self.daterange_start = ''
         self.daterange_stop = ''
+
+
+class Point:
+    """ Paikan koordinaatit
+    
+        Properties:
+                coord_long          str paikan pituuspiiri
+                coord_lat           str paikan leveyspiiri
+    """
+    
+    def __init__(self,  long,  lat):
+        """ Luo uuden point-instanssin """
+        self.long = long
+        self.lat = lat
+    
+    def get_coordinates(self):
+        """ Kertoo paikan koordinaatitr """
+        coordinates = [self.long,  self.lat]
+        return coordinates
 
 
