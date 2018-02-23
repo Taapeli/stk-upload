@@ -27,7 +27,7 @@ class Place:
                    datetype         str aikavälin tyyppi
                    daterange_start  str aikavälin alku
                    daterange_stop   str aikavälin loppu
-                coord               str paikan koordinaatit
+                coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 urls[]:
                     priv            str url salattu tieto
                     href            str url osoite
@@ -536,18 +536,19 @@ class Point:
     """ Paikan koordinaatit
     
         Properties:
-                coord_long          str paikan pituuspiiri
                 coord_lat           str paikan leveyspiiri
+                coord_long          str paikan pituuspiiri
     """
     
     def __init__(self,  long,  lat):
         """ Luo uuden point-instanssin """
-        self.long = long
         self.lat = lat
+        self.long = long
     
     def get_coordinates(self):
-        """ Kertoo paikan koordinaatitr """
-        coordinates = [self.long,  self.lat]
+        """ Kertoo paikan koordinaatit (leveys- ja pituuspiiri) """
+        coordinates = [self.lat, self.long]
+        
         return coordinates
 
 
