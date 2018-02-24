@@ -10,7 +10,8 @@ from sys import stderr
 from models.dbtree import DbTree
 from models.gen.person import Weburl
 from models.gen.note import Note
-import  shareds
+from models.gen.cypher import Cypher
+import shareds
 
 class Place:
     """ Paikka
@@ -75,15 +76,8 @@ class Place:
             #TODO: Ei hieno, po. Place_name objects!
         """
         plid = self.uniq_id
-        query = """
-MATCH (place:Place)-[:NAME]->(n:Place_name)
-    WHERE ID(place)=$place_id
-OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
-OPTIONAL MATCH (place)-[nr:NOTE]->(note:Note)
-RETURN place, COLLECT([n.name, n.lang]) AS names, 
-    COLLECT (DISTINCT url) AS urls, COLLECT (DISTINCT note) AS notes
-        """
-        place_result = shareds.driver.session().run(query, place_id=plid)
+        place_result = shareds.driver.session().run(Cypher.place_data_by_id,
+                                                    place_id=plid)
         
         for place_record in place_result:
             self.change = place_record["place"]["change"]
@@ -119,18 +113,12 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
         """ Luetaan kaikki paikat kannasta
         #TODO Eikö voisi palauttaa listan Place-olioita?
         """
-        
-        query = """
- MATCH (p:Place)
- RETURN ID(p) AS uniq_id, p
- ORDER BY p.pname, p.type"""
-                
-        result = shareds.driver.session().run(query)
-        
+
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
                   'coord_long', 'coord_lat']
         lists = []
-        
+
+        result = shareds.driver.session().run(Cypher.places_get)
         for record in result:
             data_line = []
             if record['uniq_id']:
@@ -174,7 +162,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
     @staticmethod       
     def get_place_names():
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-            
+
             Esim.
 ╒═══════╤════════════╤══════════════════════════════╤════════════╤════════════╤═══════════════════════╤═══════════════════════╕
 │"id"   │"type"      │"name"                        │"coord_long"│"coord_lat" │"upper"                │"lower"                │
@@ -193,18 +181,6 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 │       │            │                              │            │            │["28325","Farm", "Lappt│                       │
 │       │            │                              │            │            │räsk Ladugård",""]]    │                       │
 └───────┴────────────┴──────────────────────────────┴────────────┴────────────┴───────────────────────┴───────────────────────┘
-"""
-        
-        query = """
-MATCH (a:Place) -[:NAME]-> (pn:Place_name) 
-OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.type AS type,
-    COLLECT(DISTINCT [pn.name,pn.lang]) AS name,
-    a.coord_long AS coord_long, a.coord_lat AS coord_lat, 
-    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper, 
-    COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
-ORDER BY name[0][0]
 """
 
         def combine_places(field):
@@ -226,7 +202,7 @@ ORDER BY name[0][0]
             return list(namedict.values())
 
         ret = []
-        result = shareds.driver.session().run(query)
+        result = shareds.driver.session().run(Cypher.places_get_names)
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
@@ -237,7 +213,7 @@ ORDER BY name[0][0]
             p.lowers = combine_places(record['lower'])
             ret.append(p)
         return ret
-                    
+
     @staticmethod       
     def namelist_w_lang(field):
         """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit 
@@ -283,32 +259,13 @@ ORDER BY name[0][0]
                 <0 = alemmat
         """
         
-        # Query for Place hierarcy
-        hier_query = """
-MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
-    UNION
-MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
-"""
-        # Query for single Place without hierarcy
-        root_query = """
-MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.pname AS name
-"""
-        # Query to get names for a Place
-        name_query="""
-MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid 
-RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
-"""
-
-        t = DbTree(shareds.driver, hier_query, 'pname', 'type')
+        t = DbTree(shareds.driver, Cypher.place_hier_by_id, 'pname', 'type')
         t.load_to_tree_struct(locid)
         if t.tree.depth() == 0:
             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
             # Hae oman paikan tiedot ilman yhteyksiä
             with shareds.driver.session() as session:
-                result = session.run(root_query, locid=int(locid))
+                result = session.run(Cypher.place_root_by_id, locid=int(locid))
                 record = result.single()
                 t.tree.create_node(record["name"], locid, parent=0, 
                                    data={'type': record["type"]})
@@ -321,7 +278,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
 
                 # Get all names
                 with shareds.driver.session() as session:
-                    result = session.run(name_query, locid=node)
+                    result = session.run(Cypher.place_name_by_id, locid=node)
                     record = result.single()
                     # Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
                     # josta tehdään ["Svartholm (sv)","Svartholma"]
@@ -354,20 +311,8 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         └───────┴─────────┴──────────────────────────────┴─────────┴────────────┘
         """
 
-        query = """
-MATCH (p:Person)-[r:EVENT]->(e:Event)-[:PLACE]->(l:Place)
-  WHERE id(l) = {locid}
-MATCH (p) --> (n:Name)
-RETURN id(p) AS uid, r.role AS role,
-  COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
-  e.type AS etype,
-  e.date AS edate,
-  e.datetype AS edatetype,
-  e.daterange_start AS edaterange_start,
-  e.daterange_stop AS edaterange_stop
-ORDER BY edate"""
-                
-        result = shareds.driver.session().run(query, locid=int(loc_id))
+        result = shareds.driver.session().run(Cypher.place_get_events, 
+                                              locid=int(loc_id))
         ret = []
         for record in result:
             p = Place()
@@ -387,16 +332,13 @@ ORDER BY edate"""
             p.names = record["names"]   # tuples [name_type, given_name, surname]
             ret.append(p)
         return ret
-    
+
+
     @staticmethod       
     def get_total():
         """ Tulostaa paikkojen määrän tietokannassa """
-        
-                
-        query = """
-            MATCH (p:Place) RETURN COUNT(p)
-            """
-        results =  shareds.driver.session().run(query)
+
+        results =  shareds.driver.session().run(Cypher.place_count)
         
         for result in results:
             return str(result[0])
@@ -424,7 +366,7 @@ ORDER BY edate"""
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Save Place data in db """
         
         try:
             handle = self.handle
@@ -435,17 +377,9 @@ ORDER BY edate"""
             # Replace f.ex 26° 11\' 7,411"I with 26° 11' 7,411"I
             coord_long = self.coord_long.replace("\\\'", "\'")
             coord_lat = self.coord_lat.replace("\\\'", "\'")
-            query = """
-CREATE (p:Place) 
-SET p.gramps_handle=$handle, 
-    p.change=$change, 
-    p.id=$id, 
-    p.type=$type, 
-    p.pname=$pname, 
-    p.coord_long=$coord_long, 
-    p.coord_lat=$coord_lat"""             
-            tx.run(query, 
-               {"handle": handle, "change": change, "id": pid, "type": ptype, "pname": pname, 
+            tx.run(Cypher.place_save, 
+               {"handle": handle, "change": change, "id": pid, 
+                "type": ptype, "pname": pname, 
                 "coord_long": coord_long, "coord_lat": coord_lat})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
@@ -458,18 +392,11 @@ SET p.gramps_handle=$handle,
                     datetype = self.names[i].datetype
                     daterange_start = self.names[i].daterange_start
                     daterange_stop = self.names[i].daterange_stop
-                    query = """
-MATCH (p:Place) WHERE p.gramps_handle=$handle 
-CREATE (n:Place_name)
-MERGE (p)-[r:NAME]->(n)
-SET n.name=$name,
-    n.lang=$lang,
-    n.datetype=$datetype,
-    n.daterange_start=$daterange_start,
-    n.daterange_stop=$daterange_stop"""             
-                    tx.run(query, 
-                           {"handle": handle, "name": name, "lang": lang, "datetype":datetype,
-                            "daterange_start":daterange_start, "daterange_stop":daterange_stop})
+                    tx.run(Cypher.place_save_name_by_handle, 
+                           {"handle": handle, "name": name, "lang": lang, 
+                            "datetype":datetype,
+                            "daterange_start":daterange_start, 
+                            "daterange_stop":daterange_stop})
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
             
@@ -480,13 +407,8 @@ SET n.name=$name,
                 url_href = url.href
                 url_type = url.type
                 url_description = url.description
-                query = """
-MATCH (n:Place) WHERE n.gramps_handle=$handle
-CREATE (n)-[wu:WEBURL]->
-      (url:Weburl {priv: {url_priv}, href: {url_href},
-                type: {url_type}, description: {url_description}})"""
                 try:
-                    tx.run(query, 
+                    tx.run(Cypher.place_save_weburl_by_handle, 
                            {"handle": handle, "url_priv": url_priv, "url_href": url_href,
                             "url_type":url_type, "url_description":url_description})
                 except Exception as err:
@@ -495,13 +417,8 @@ CREATE (n)-[wu:WEBURL]->
         # Make hierarchy relations to the Place node
         if len(self.placeref_hlink) > 0:
             try:
-                query = """
-                    MATCH (n:Place) WHERE n.gramps_handle='{}'
-                    MATCH (m:Place) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:HIERARCY]->(m)
-                     """.format(self.handle, self.placeref_hlink)
-                                 
-                tx.run(query)
+                tx.run(Cypher.place_save_hier_by_handle, 
+                       {"handle": self.handle, "hlink": self.placeref_hlink})
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
                 
@@ -509,13 +426,8 @@ CREATE (n)-[wu:WEBURL]->
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 try:
-                    query = """
-                        MATCH (n:Place) WHERE n.gramps_handle='{}'
-                        MATCH (m:Note) WHERE m.gramps_handle='{}'
-                        MERGE (n)-[r:NOTE]->(m)
-                         """.format(self.handle, self.noteref_hlink[i])
-                                     
-                    tx.run(query)
+                    tx.run(Cypher.place_save_note_by_handle, 
+                           {"handle": self.handle, "hlink": self.placeref_hlink[i]})
                 except Exception as err:
                     print("Virhe: {0}".format(err), file=stderr)
             
@@ -544,7 +456,7 @@ class Place_name:
 class Place_event:
 
     def __init__(self, uid):
-        self.uid = rid
+        self.uid = uid
         self.etype = None
         self.edate = None
         self.edatetype = None
