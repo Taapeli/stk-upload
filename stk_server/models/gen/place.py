@@ -423,12 +423,14 @@ ORDER BY edate"""
             pid = self.id
             ptype = self.type
             pname = self.pname
-            if self.coord_lat != '' and self.coord_long != '':
-                coord_lat_str = self.coord_lat.replace("\\\'", "\'")
-                coord_lat = float(coord_lat_str)
-                coord_long_str = self.coord_long.replace("\\\'", "\'")
-                coord_long = float(coord_long_str)
-                self.coord = [coord_lat, coord_long]
+            if self.coord_lat != '' and self.coord_long != '': # not empty
+                # converted to a float value
+                if self.coord_lat.find("°") < 0 and self.coord_long.find("°") < 0:
+                    coord_lat_str = self.coord_lat.replace("\\\'", "\'")
+                    coord_lat = float(coord_lat_str)
+                    coord_long_str = self.coord_long.replace("\\\'", "\'")
+                    coord_long = float(coord_long_str)
+                    self.coord = [coord_lat, coord_long]
             coord = self.coord
             query = """
 CREATE (p:Place) 

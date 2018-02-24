@@ -599,23 +599,6 @@ def handle_places(collection, tx):
         if len(placeobj.getElementsByTagName('coord') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('coord') )):
                 placeobj_coord = placeobj.getElementsByTagName('coord')[i]
-                if placeobj_coord.hasAttribute("long"):
-                    place.coord_long = placeobj_coord.getAttribute("long")
-                    if place.coord_long.find("°") > 0:
-                        place.coord_long.replace(" ", "")
-                        fc = place.coord_long[:1]
-                        if fc.isalpha():
-                            rc = place.coord_long[1:]
-                            place.coord_long = rc + fc
-                        a = re.split('[°\'′"″]+', place.coord_long)
-                        if len(a) > 2:
-                            a[1].replace("\\", "")
-                            a[2].replace(",", "\.")
-                            if a[0].isdigit() and a[1].isdigit():
-                                place.coord_long = int(a[0]) + int(a[1])/60
-                            if a[2].isdigit():
-                                place.coord_long += float(a[2])/360
-                            place.coord_long = str(place.coord_long)
                 if placeobj_coord.hasAttribute("lat"):
                     place.coord_lat = placeobj_coord.getAttribute("lat")
                     if place.coord_lat.find("°") > 0:
@@ -633,6 +616,23 @@ def handle_places(collection, tx):
                             if a[2].isdigit():
                                 place.coord_lat += float(a[2])/360
                             place.coord_lat = str(place.coord_lat)
+                if placeobj_coord.hasAttribute("long"):
+                    place.coord_long = placeobj_coord.getAttribute("long")
+                    if place.coord_long.find("°") > 0:
+                        place.coord_long.replace(" ", "")
+                        fc = place.coord_long[:1]
+                        if fc.isalpha():
+                            rc = place.coord_long[1:]
+                            place.coord_long = rc + fc
+                        a = re.split('[°\'′"″]+', place.coord_long)
+                        if len(a) > 2:
+                            a[1].replace("\\", "")
+                            a[2].replace(",", "\.")
+                            if a[0].isdigit() and a[1].isdigit():
+                                place.coord_long = int(a[0]) + int(a[1])/60
+                            if a[2].isdigit():
+                                place.coord_long += float(a[2])/360
+                            place.coord_long = str(place.coord_long)
                     
         if len(placeobj.getElementsByTagName('url') ) >= 1:
             for i in range(len(placeobj.getElementsByTagName('url') )):
