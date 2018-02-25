@@ -56,10 +56,7 @@
 		        {% endfor %}
 		           </ul>
 	        {% endif %}
-	        <td>{% if p.coord %}({{ p.coord }})
-		    {% else %}
-	            <small style="color:red">{{ p.coord }}</small>
-                {% endif %}</td>
+	        <td>{% if p.coord %}({{p.coord[0]|round(4)}}, {{p.coord[1]|round(4)}}){% endif %}</td>
 	    {% endfor %}
 	{% endif %}
 				</tr>

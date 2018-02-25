@@ -51,9 +51,7 @@ class Place:
         self.handle = ''
         self.change = ''
         self.names = []
-        self.coord_lat = ''
-        self.coord_long = ''
-        self.coord = []
+        self.coord = None
         self.urls = []
         self.placeref_hlink = ''
         self.noteref_hlink = []
@@ -404,8 +402,8 @@ ORDER BY edate"""
         print ("Type: " + self.type)
         if self.pname != '':
             print ("Pname: " + self.pname)
-        if self.coord != '':
-            print ("Coord: " + self.coord)
+        if self.coord:
+            print ("Coord: {}".format(self.coord))
         if self.placeref_hlink != '':
             print ("Placeref_hlink: " + self.placeref_hlink)
         if len(self.noteref_hlink) > 0:
@@ -418,20 +416,6 @@ ORDER BY edate"""
         """ Tallettaa sen kantaan """
         
         try:
-            handle = self.handle
-            change = self.change
-            pid = self.id
-            ptype = self.type
-            pname = self.pname
-            if self.coord_lat != '' and self.coord_long != '': # not empty
-                # converted to a float value
-                if self.coord_lat.find("°") < 0 and self.coord_long.find("°") < 0:
-                    coord_lat_str = self.coord_lat.replace("\\\'", "\'")
-                    coord_lat = float(coord_lat_str)
-                    coord_long_str = self.coord_long.replace("\\\'", "\'")
-                    coord_long = float(coord_long_str)
-                    self.coord = [coord_lat, coord_long]
-            coord = self.coord
             query = """
 CREATE (p:Place) 
 SET p.gramps_handle=$handle, 
@@ -439,14 +423,17 @@ SET p.gramps_handle=$handle,
     p.id=$id, 
     p.type=$type, 
     p.pname=$pname, 
-    p.coord=$coord"""             
+    p.coord=$coord"""
+            # If no coordinates, can't use get_coordinates
+            coord = self.coord.get_coordinates() if self.coord else None
             tx.run(query, 
-               {"handle": handle, "change": change, "id": pid, "type": ptype, "pname": pname, 
-                "coord": coord})
+               {"handle": self.handle, "change": self.change, "id": self.id, 
+                "type": self.type, "pname": self.pname, "coord": coord})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
         if len(self.names) >= 1:
+            handle = self.handle
             try:
                 for i in range(len(self.names)):
                     name = self.names[i].name
@@ -542,19 +529,72 @@ class Point:
     """ Paikan koordinaatit
     
         Properties:
-                coord_lat           str paikan leveyspiiri
-                coord_long          str paikan pituuspiiri
+            coord   coordinates of the point as list [lat, lon] 
+                    (north, east directions in degrees)
     """
     
-    def __init__(self,  long,  lat):
-        """ Luo uuden point-instanssin """
-        self.lat = lat
-        self.long = long
-    
+    def __init__(self,  lon,  lat=None):
+        """ Create a new Point instance.
+            Arguments may be:
+            - lon(float), lat(float)    - real coordinates
+            - lon(str), lat(str)        - coordinates to be converted
+            - [lon, lat]                - ready coordinate vector (list of tuple)
+            Returns coordinate vector (if anybody needs it)
+        """
+        self.coord = None
+        try:
+            if isinstance(lon, (list, tuple)):
+                # is (lon, lat) or [lon, lat]
+                if len(lon) >= 2 and \
+                        isinstance(lon[0], float) and isinstance(lon[1], float):
+                    self.coord = list(lon)    # coord = [lat, lon]
+                else:
+                    raise(ValueError, "Point({}) are not two floats".format(lon))
+            else:
+                self.coord = [lon, lat]
+
+            # Now the arguments are in self.coord[0:1]
+            
+            ''' If coordinate value is string, the characters '°′″'"NESWPIEL'
+                and '\' are replaced by space and the comma by dot with this table.
+                (These letters stand for North, East, ... Pohjoinen, Itä ...)
+            '''
+            point_coordinate_tr = str.maketrans(',°′″\\\'"NESWPIEL', '.              ')
+            
+            for i in list(range(len(self.coord))):   # [0,1]
+                # If a coordinate is float, it's ok
+                x = self.coord[i]
+                if not isinstance(x, float):
+                    if isinstance(x, str):
+                        # String conversion to float:
+                        #   example "60° 37' 34,647N" gives ['60', '37', '34.647']
+                        #   and "26° 11\' 7,411"I" gives 
+                        a = x.translate(point_coordinate_tr).split()
+                        degrees = float(a[0])
+                        if len(a) > 1:
+                            if len(a) == 3:     # There are minutes and second
+                                minutes = float(a[1])
+                                seconds = float(a[2])
+                                self.coord[i] = degrees + minutes/60. + seconds/3600.
+                            else:               # There are no seconds
+                                minutes = float(a[1])
+                                self.coord[i] = degrees + minutes/60.
+                        else:                   # Only degrees
+                                self.coord[i] = degrees
+                    else:
+                        raise(ValueError, "Point arg type is {}".format(self.coord[i]))
+        except:
+            raise
+
+    def __str__(self):
+        if self.coord:
+            return "({0:0.4f}, {0:0.4f})".format(self.coord[0], self.coord[1])
+        else:
+            return ""
+
     def get_coordinates(self):
-        """ Kertoo paikan koordinaatit (leveys- ja pituuspiiri) """
-        coordinates = [self.lat, self.long]
+        """ Return the Point coordinates as list (leveys- ja pituuspiiri) """
         
-        return coordinates
+        return self.coord
 
 
