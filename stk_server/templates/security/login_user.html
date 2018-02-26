@@ -1,7 +1,6 @@
 {# templates/security/login_user.html_ #}
 {% extends "layout.html" %}
 {% from "security/_macros.html" import render_field_with_errors, render_field %}
-{% include "security/_messages.html" %} 
 {% block title %}Kirjautuminen{% endblock %}
 {% block body %}
 {{ super() }}
@@ -9,6 +8,7 @@
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
     <h2>Tervetuloa Suomikantaan</h2>
+    <div>{% include "security/_messages.html" %}</div>
     <div>
         <div class="startbox">
             <div>
