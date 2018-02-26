@@ -56,10 +56,7 @@
 		        {% endfor %}
 		           </ul>
 	        {% endif %}
-	        <td>{% if p.coord_long and not ' ' in p.coord_long %}({{ '{0:0.4f}'.format(p.coord_long|float) }}, 
-                {{ '{0:0.4f}'.format(p.coord_lat|float) }}){% elif p.coord_long %}
-	            <small style="color:red">{{p.coord_long}}, {{p.coord_lat}}</small>
-                {% endif %}</td>
+	        <td>{% if p.coord %}({{p.coord[0]|round(4)}}, {{p.coord[1]|round(4)}}){% endif %}</td>
 	    {% endfor %}
 	{% endif %}
 				</tr>

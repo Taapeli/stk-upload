@@ -112,7 +112,7 @@ def translate(term, var_name, lang="fi"):
             "Alus": "alus",
             "Borough": "aluehallintoyksikkö",
             "Building": "rakennus tai torppa",  #"rakennus",
-            "City": "kaupunki",              # "paikkakunta"?,
+            "City": "paikkakunta",              # "kaupunki",
             "Country": "maa",
             "District": "lääni",
             "Farm": "tila",
@@ -127,7 +127,6 @@ def translate(term, var_name, lang="fi"):
             "Parish": "seurakunta",
             "Region": "alue",
             "State": "valtio",
-            "Town": "pikkukaupunki",
             "Tontti": "tontti",
             "Village": "kylä",
             "srk": "seurakunta"
@@ -138,7 +137,7 @@ def translate(term, var_name, lang="fi"):
             "Alus": "aluksessa",
             "Borough": "aluehallintoyksikössä",
             "Building": "rakennuksessa tai torpassa",   #"rakennuksessa",
-            "City": "kaupungissa",                         # "paikkaunnalla"?,
+            "City": "paikassa",                         # "kaupungissa",
             "Country": "maassa",
             "District": "läänissä",
             "Farm": "tilalla",
@@ -154,7 +153,6 @@ def translate(term, var_name, lang="fi"):
             "Region": "alueella",
             "State": "valtiossa",
             "Tontti": "tontilla",
-            "Town": "pikkukaupungissa",
             "Village": "kylässä",
             "srk": "seurakunnassa"
         }
