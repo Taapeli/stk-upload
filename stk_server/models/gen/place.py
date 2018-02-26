@@ -223,7 +223,7 @@ ORDER BY name[0][0]
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
             p = Place(record['id'], record['type'], Place.namelist_w_lang(record['name']))
-            p.coord = record['coord']
+            p.coord = Point(record['coord'])
             p.uppers = combine_places(record['upper'])
             p.lowers = combine_places(record['lower'])
             ret.append(p)
