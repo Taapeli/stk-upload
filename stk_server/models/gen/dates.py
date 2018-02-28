@@ -23,6 +23,11 @@ class DateRange():
 
     This class is designed specially for efficient processing in the database
     and it's user interfaces.
+    
+    The data is stored in vector self.vec, which has following contents:
+    - vec[0]    date type, an integer from DR
+    - vec[1]    1st date, in string format
+    - vec[2]    2nd date, a string or None
 
     Saa also another way of expressing date range values, specially for data
     exchange:
@@ -49,33 +54,29 @@ class DateRange():
             The d2 can also be empty string "".
             
             The last form is used for loading a DataRange from database. The 
-            argument is assumed to be a tuple like the output of DataRange.to_tuple() 
+            argument is assumed to be a tuple like the output of DataRange.to_list() 
             method, and the components formats are not checked.
         '''
 
         if len(args) == 1:
-            if type(args[0]).__name__ == 'tuple' and len(args[0]) == 3:
+            if isinstance(args[0], (list,tuple)) and len(args[0]) == 3:
                 # The only argument is a tuple like (3, '1918-12', '2017-10-16')
-                self.dtype = args[0][0]
-                self.date1 = args[0][1]
-                self.date2 = args[0][2]
+                self.vec = list(args[0])
+                if self.vec[2] == "":
+                    self.vec[2] = None
                 return
-            elif type(args[0]).__name__ == 'DateRange':
-                self.dtype = args[0].dtype
-                self.date1 = args[0].date1
-                self.date2 = args[0].date2
+            elif isinstance(args[0], DateRange):
+                self.vec = args[0].to_list()
                 return
-
-        try:
-            # First argument is some kind of date
-            self.date1 = self._to_datestr(args[0])
-            self.dtype = DR['DATE']
-            self.date2 = ""
-            return
-        except:
-            pass
+            elif isinstance(args[0], (str,date)):
+                try:
+                    # Maybe the only argument is some kind of date string
+                    self.vec = [DR['DATE'], self._to_datestr(args[0]), None]
+                    return
+                except:
+                    raise ValueError("Invalid DateRange({})".format(args[0]))
         
-        if type(args[0]).__name__ == 'int':
+        if isinstance(args[0], int):
             """ Arguments are dtype and 1 or 2 datevalues:
                 DateRange(DR['TILL'], date(2017, 10, 16))
                 DateRange(DR['TILL'], "2017-10-16")
@@ -84,21 +85,20 @@ class DateRange():
                 DateRange(DR['BETWEEN'], "1917-12-06", "2017-10-16")
                 DateRange(4, 700144, 736618)
             """
-            self.dtype = args[0]
-            if self.dtype < 0 or self.dtype > DR['ESTIMATED']:
+            self.vec = [args[0], self._to_datestr(args[1]), None]
+            dtype = self.vec[0]
+            if dtype < 0 or dtype > DR['ESTIMATED']:
                 raise ValueError('Invalid DateRange(type, ...)')
-            self.date1 = self._to_datestr(args[1])
-            self.date2 = ""
-            if self.dtype in [DR['PERIOD'], DR['BETWEEN']]:
+            if dtype in [DR['PERIOD'], DR['BETWEEN']]:
                 if len(args) == 3:
-                    self.date2 = self._to_datestr(args[2])
+                    self.vec[2] = self._to_datestr(args[2])
                 else:
                     raise ValueError('Two dates excepted for DateRange({}, date, date)'.
-                                     format(self.dtype))
+                                     format(dtype))
             else:
                 if len(args) != 2:
                     raise ValueError('Too many arguments for DateRange({}, date)'.
-                                     format(self.dtype))
+                                     format(dtype))
             return
 
         raise ValueError("Invalid 1st argument for DateRange()")
@@ -107,27 +107,28 @@ class DateRange():
     def __str__(self):
         """ Return DateRange in display format 
         """
-        dstr1 = self._to_local(self.date1)
-        dstr2 = self._to_local(self.date2)
+        dtype = self.vec[0]
+        dstr1 = self._to_local(self.vec[1])
+        dstr2 = self._to_local(self.vec[2])
         #print ("# dstr {} - {}".format(dstr1, dstr2))
-        if self.dtype == DR['DATE']: # Exact date d1
+        if dtype == DR['DATE']: # Exact date d1
             return dstr1
-        elif self.dtype == DR['TILL']:  # Date till d1
+        elif dtype == DR['TILL']:  # Date till d1
             return "– {}".format(dstr1)
-        elif self.dtype == DR['FROM']: # Date from d1
+        elif dtype == DR['FROM']: # Date from d1
             return "{} –".format(dstr1)
-        elif self.dtype == DR['PERIOD']: # Date period d1-d2
+        elif dtype == DR['PERIOD']: # Date period d1-d2
             return "{} – {}".format(dstr1, dstr2)
-        elif self.dtype == DR['BETWEEN']: # A date between d1 and d2
+        elif dtype == DR['BETWEEN']: # A date between d1 and d2
             return "välillä {} … {}".format(dstr1, dstr2)
-        elif self.dtype == DR['ABOUT']: # A date near d1
+        elif dtype == DR['ABOUT']: # A date near d1
             return "noin {}".format(dstr1)
-        elif self.dtype == DR['CALCULATED']: # A calculated date near d1
+        elif dtype == DR['CALCULATED']: # A calculated date near d1
             return "laskettu {}".format(dstr1)
-        elif self.dtype == DR['ESTIMATED']: # An estimated date at d1
+        elif dtype == DR['ESTIMATED']: # An estimated date at d1
             return "arviolta {}".format(dstr1)
         
-        return "<Date type={}, {}...{}>".format(self.dtype, dstr1, dstr2)
+        return "<Date type={}, {}...{}>".format(dtype, dstr1, dstr2)
 
 
 #     def __cmp__(self, other):
@@ -138,22 +139,22 @@ class DateRange():
 #         """
 #         assert isinstance(other, DateRange), 'Argument of wrong type!'
 # 
-#         if self.dtype < other.dtype:
+#         if self.vec[0] < other.vec[0]:
 #             # A is self, B is other
-#             selftype=self.dtype
-#             othertype=other.dtype
-#             A1 = self.date1
-#             #A2 = self.date2
-#             B1 = other.date1
-#             B2 = other.date2
+#             selftype=dtype
+#             othertype=other.vec[0]
+#             A1 = self.vec[1]
+#             #A2 = self.vec[2]
+#             B1 = other.vec[1]
+#             B2 = other.vec[2]
 #         else:
 #             # A is other, B is self
-#             selftype=other.dtype
-#             othertype=self.dtype
-#             A1 = other.date1
-#             #A2 = other.date2
-#             B1 = self.date1
-#             B2 = self.date2
+#             selftype=other.vec[0]
+#             othertype=dtype
+#             A1 = other.vec[1]
+#             #A2 = other.vec[2]
+#             B1 = self.vec[1]
+#             B2 = self.vec[2]
 # 
 #         if selftype == DR['DATE']:
 #             if othertype == DR['DATE']:
@@ -204,22 +205,25 @@ class DateRange():
         return d1
 
 
-    def to_tuple(self):
-        """ Returns a tuple (int, str, str) for save in database
-            Example: (DR['BETWEEN'], "1917", "2017-10-16")
+    def to_list(self):
+        """ Returns a list [int, str, str] or [int, str] for saving to database
+            Example: [DR['BETWEEN'], "1917", "2017-10-16"]
         """
-        return (self.dtype, self.date1, self.date2)
+        if self.vec[2]:
+            return self.vec
+        else:
+            return self.vec[0:2]
 
 
     def _to_datestr(self, val):
-        """ Returns a date string '1972-12-06', '1972-12' or '1972', from
+        """ Returns a date-like string '1972-12-06', '1972-12' or '1972', from
             - date object or
             - ordinal int value (later than year 1)
             - string value
         """
-        if type(val).__name__ == 'date':
+        if isinstance(val, date):
             return val.isoformat()
-        elif isinstance(val, type("")):
+        elif isinstance(val, str):
             if len(val) == 10 and val[4] == '-' and val[7] == "-":
                 # exact date '1999-12-31'
                 return val
@@ -229,7 +233,7 @@ class DateRange():
             elif len(val) == 4:
                 # year '1999'
                 return val
-        elif type(val).__name__ == 'int' and val > 365:
+        elif isinstance(val, int) and val > 365:
             return date.fromordinal(val).isoformat()
         
         raise ValueError("val={}".format(val))
