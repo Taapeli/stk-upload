@@ -201,9 +201,9 @@ if num_of_roles == 0:
 """
 
 @shareds.app.template_filter('pvt')
-def _jinja2_filter_dates(daterange):
+def _jinja2_filter_dates(dates):
     """ Aikamääreet suodatetaan suomalaiseksi """
-    return str(DateRange(daterange))
+    return str(DateRange(dates))
 
 @shareds.app.template_filter('pvm')
 def _jinja2_filter_date(date_str, fmt=None):

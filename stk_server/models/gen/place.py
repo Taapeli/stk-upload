@@ -10,6 +10,7 @@ from sys import stderr
 from models.dbtree import DbTree
 from models.gen.person import Weburl
 from models.gen.note import Note
+from models.gen.dates import DateRange
 import  shareds
 
 class Place:
@@ -24,9 +25,7 @@ class Place:
                 names[]:
                    name             str paikan nimi
                    lang             str kielikoodi
-                   datetype         str aikavälin tyyppi
-                   daterange_start  str aikavälin alku
-                   daterange_stop   str aikavälin loppu
+                   dates            DateRange date expression
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 urls[]:
                     priv            str url salattu tieto
@@ -353,9 +352,7 @@ RETURN id(p) AS uid, r.role AS role,
   COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
   e.type AS etype,
   e.date AS edate,
-  e.datetype AS edatetype,
-  e.daterange_start AS edaterange_start,
-  e.daterange_stop AS edaterange_stop
+  e.dates AS edates
 ORDER BY edate"""
                 
         result = shareds.driver.session().run(query, locid=int(loc_id))
@@ -438,21 +435,17 @@ SET p.gramps_handle=$handle,
                 for i in range(len(self.names)):
                     name = self.names[i].name
                     lang = self.names[i].lang
-                    datetype = self.names[i].datetype
-                    daterange_start = self.names[i].daterange_start
-                    daterange_stop = self.names[i].daterange_stop
+                    dates = DateRange(self.names[i].dates)
                     query = """
 MATCH (p:Place) WHERE p.gramps_handle=$handle 
 CREATE (n:Place_name)
 MERGE (p)-[r:NAME]->(n)
 SET n.name=$name,
     n.lang=$lang,
-    n.datetype=$datetype,
-    n.daterange_start=$daterange_start,
-    n.daterange_stop=$daterange_stop"""             
+    n.dates=$dates"""             
                     tx.run(query, 
-                           {"handle": handle, "name": name, "lang": lang, "datetype":datetype,
-                            "daterange_start":daterange_start, "daterange_stop":daterange_stop})
+                           {"handle": handle, "name": name, "lang": lang, 
+                            "dates":dates})
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
             
@@ -511,18 +504,14 @@ class Place_name:
         Properties:
                 name             str nimi
                 lang             str kielikoodi
-                datetype         str aikavälin tyyppi
-                daterange_start  str aikavälin alku
-                daterange_stop   str aikavälin loppu
+                dates            DateRange aikajakso
     """
     
     def __init__(self):
         """ Luo uuden name-instanssin """
         self.name = ''
         self.lang = ''
-        self.datetype = ''
-        self.daterange_start = ''
-        self.daterange_stop = ''
+        self.dates = None
 
 
 class Point:

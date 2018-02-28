@@ -14,6 +14,7 @@ from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name, Point
+from models.gen.dates import DateRange, DR
 from models.gen.source_citation import Citation, Repository, Source
 from models.dataupdater import set_confidence_value
 import shareds
@@ -182,6 +183,9 @@ def handle_events(collection, username, tx):
     for event in events:
 
         e = Event()
+        date_type = DR['DATE']
+        date_start = None
+        date_stop = None
         
         if event.hasAttribute("handle"):
             e.handle = event.getAttribute("handle")
@@ -214,20 +218,22 @@ def handle_events(collection, username, tx):
             event_dateval = event.getElementsByTagName('dateval')[0]
             if event_dateval.hasAttribute("val"):
                 e.date = event_dateval.getAttribute("val")
-                e.daterange_start = event_dateval.getAttribute("val")
+                date_start = event_dateval.getAttribute("val")
             if event_dateval.hasAttribute("type"):
-                e.datetype = event_dateval.getAttribute("type")
+                date_type = event_dateval.getAttribute("type")
         elif len(event.getElementsByTagName('dateval') ) > 1:
             print("Error: More than one dateval tag in an event")
     
         if len(event.getElementsByTagName('daterange') ) == 1:
             event_daterange = event.getElementsByTagName('daterange')[0]
             if event_daterange.hasAttribute("start"):
-                e.daterange_start = event_daterange.getAttribute("start")
+                date_start = event_daterange.getAttribute("start")
             if event_daterange.hasAttribute("stop"):
-                e.daterange_stop = event_daterange.getAttribute("stop")
+                date_stop = event_daterange.getAttribute("stop")
         elif len(event.getElementsByTagName('daterange') ) > 1:
             print("Error: More than one daterange tag in an event")
+
+        e.dates = DateRange(date_type, date_start, date_stop)
     
         if len(event.getElementsByTagName('place') ) == 1:
             event_place = event.getElementsByTagName('place')[0]

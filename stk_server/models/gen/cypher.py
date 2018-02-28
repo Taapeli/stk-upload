@@ -22,9 +22,11 @@ RETURN ID(person) AS id, person.confidence AS confidence,
     name.firstname AS firstname, name.surname AS surname,
     name.suffix AS suffix, 
     COLLECT(DISTINCT refn.name) AS refnames,
-    COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype, 
-        event.daterange_start, event.daterange_stop, place.pname]) AS events
+    COLLECT(DISTINCT [ID(event), event.type, event.date, event.dates,
+                      place.pname]) AS events
 ORDER BY name.surname, name.firstname"""
+#     COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype, 
+#         event.daterange_start, event.daterange_stop, place.pname]) AS events
 
     person_get_events_all = "MATCH (person:Person)-[:NAME]->(name:Name)" + _person_get_events_tail
 
