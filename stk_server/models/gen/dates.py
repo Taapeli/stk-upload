@@ -2,17 +2,47 @@
 Created on 16.10.2017
 
 @author: jm
+
+TODO: estimate() .method
+TODO: All the combinations:
+
+tag       type   quality    attr       DR value      vec[0] text(fi)          estimate
+---       ----   -------    ----       --------     ------- ----              --------
+dateval   None   None       val        DATE         0     0 {val}             val
+dateval   before None       val        BEFORE       1     1 {val} asti        val
+dateval   after  None       val        AFTER        2     2 {val} alkaen      val
+datespan  None   None       start,stop PERIOD       3     3 {start} – {stop}  (stop-start)/2
+daterange None   None       start,stop BETWEEN      4     4 {start} ja {stop} 
+                                                            valillä           (stop-start)/2
+dateval   about  None       val        ABOUT        5     5 noin {val}        val
+                                        
+dateval   None   None       val        CALC_DATE    0+8   8 laskettuna {val}
+dateval   before calculated val        CALC_BEFORE  1+8   9 laskettuna {val} asti
+dateval   after  calculated val        CALC_AFTER   2+8  10 laskettuna {val} alkaen
+datespan  None   calculated start,stop CALC_PERIOD  3+8  11 laskettuna {start} – {stop}
+daterange None   calculated start,stop CALC_BETWEEN 4+8  12 laskettuna {start} ja {stop} valillä
+dateval   about  calculated val        CALC_ABOUT   5+8  13 laskettuna noin {val}
+                                        
+dateval   None   None       val        EST_DATE     0+16 16 arviolta {val}
+dateval   before estimated  val        EST_BEFORE   1+16 17 arviolta {val} asti
+dateval   after  estimated  val        EST_AFTER    2+16 18 arviolta {val} alkaen
+datespan  None   estimated  start,stop EST_PERIOD   3+16 19 arviolta {start} – {stop}
+daterange None   estimated  start,stop EST_BETWEEN  4+16 20 arviolta {start} ja {stop} valillä 
+dateval   about  estimated  val        EST_ABOUT    5+16 21 arviolta noin {val}
+
 '''
+
 from datetime import date
 
+#TODO: DR-arvot ja nimet tarkstettava ja suunniteltava
 DR = {'DATE': 0,        # Exact date d1
     'TILL': 1,          # Date till d1
     'FROM': 2,          # Date from d1
     'PERIOD': 3,        # Date period d1-d2
     'BETWEEN': 4,       # A date between d1 and d2
     'ABOUT': 5,         # A date near d1
-    'CALCULATED': 6,    # A calculated date near d1
-    'ESTIMATED': 7      # An estimated date at d1
+    'CALCULATED': 8,    # A calculated date near d1
+    'ESTIMATED': 16     # An estimated date at d1
 }
 
 class DateRange():
@@ -256,3 +286,41 @@ class DateRange():
         except:
             return date_str
 
+def DateRange_gramps(DateRange):
+    '''
+    Imports Gramps xml fields into a DateRange object.
+    
+    Some Gramps xml examples:
+    <daterange start=$date1 stop=$date2 />
+    <daterange start=$date1 stop=$date2 quality="estimated"/>
+    <datespan start=$date1 stop=$date2 />
+    <datespan start=$date1 stop=$date2 quality="calculated"/>
+    <datespan start=$date1 stop=$date2 quality="estimated"/>
+    <dateval val=$date1 quality="calculated"/>
+    <dateval val=$date1 quality="estimated"/>
+    <dateval val=$date1 type="about"/>
+    <dateval val=$date1 type="after"/>
+    <dateval val=$date1 type="after" quality="estimated"/>
+    <dateval val=$date1 type="before"/>
+    <datestr val=$str />
+
+    A date $date1:
+        dateval   type=$vec[0] quality=$quality val=$vec[1]
+
+    Between $date1 and $date2:
+        daterange type=None    quality=$quality start=$vec[1] stop=$vec[2]
+
+    From $date1 to $date2:
+        datespan  type=None    quality=$quality start=$vec[1] stop=$vec[2]
+
+    Unformal string expression $str (passed?)
+        datestr   type=None    quality=None     val=str
+
+    - where $quality = {calculated|estimated|None}
+    '''
+    
+    def __init__(xml_tag, xml_type, quality, date1, date2=None):
+        """ 
+        Importing a DateRange from Gramps xml structure elements
+        """
+        pass

@@ -14,7 +14,7 @@ from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name, Point
-from models.gen.dates import DateRange, DR
+from models.gen.dates import DateRange_gramps
 from models.gen.source_citation import Citation, Repository, Source
 from models.dataupdater import set_confidence_value
 import shareds
@@ -183,9 +183,6 @@ def handle_events(collection, username, tx):
     for event in events:
 
         e = Event()
-        date_type = DR['DATE']
-        date_start = None
-        date_stop = None
         
         if event.hasAttribute("handle"):
             e.handle = event.getAttribute("handle")
@@ -213,28 +210,36 @@ def handle_events(collection, username, tx):
                 e.description = ''
         elif len(event.getElementsByTagName('description') ) > 1:
             print("Error: More than one description tag in an event")
-    
-        if len(event.getElementsByTagName('dateval') ) == 1:
-            event_dateval = event.getElementsByTagName('dateval')[0]
-            if event_dateval.hasAttribute("val"):
-                e.date = event_dateval.getAttribute("val")
-                date_start = event_dateval.getAttribute("val")
-            if event_dateval.hasAttribute("type"):
-                date_type = event_dateval.getAttribute("type")
-        elif len(event.getElementsByTagName('dateval') ) > 1:
-            print("Error: More than one dateval tag in an event")
-    
-        if len(event.getElementsByTagName('daterange') ) == 1:
-            event_daterange = event.getElementsByTagName('daterange')[0]
-            if event_daterange.hasAttribute("start"):
-                date_start = event_daterange.getAttribute("start")
-            if event_daterange.hasAttribute("stop"):
-                date_stop = event_daterange.getAttribute("stop")
-        elif len(event.getElementsByTagName('daterange') ) > 1:
-            print("Error: More than one daterange tag in an event")
 
-        e.dates = DateRange(date_type, date_start, date_stop)
-    
+        """ Dates:
+            <daterange start="1820" stop="1825" quality="estimated"/>
+            <datespan start="1840-01-01" stop="1850-06-30" quality="calculated"/>      
+            <dateval val="1870" type="about"/>
+        """
+        for tag in ['dateval', 'daterange', 'datespan']:
+            # Note informal date 'datestr' is not processed as all!
+            if len(event.getElementsByTagName(tag) ) == 1:
+                event_date = event.getElementsByTagName(tag)[0]
+                if tag == 'dateval':
+                    if event_date.hasAttribute("val"):
+                        e.date = event_date.getAttribute("val")
+                        date_start = event_date.getAttribute("val")
+                    date_stop = None
+                    if event_date.hasAttribute("type"):
+                        date_type = event_date.getAttribute("type")
+                else:
+                    if event_date.hasAttribute("start"):
+                        date_start = event_date.getAttribute("start")
+                    if event_date.hasAttribute("stop"):
+                        date_stop = event_date.getAttribute("stop")
+                    date_type = None
+                if event_date.hasAttribute("quality"):
+                    date_quality = event_date.getAttribute("quality")
+                e.dates = DateRange_gramps(tag, date_type, date_quality, 
+                                           date_start, date_stop)
+            elif len(event.getElementsByTagName(tag) ) > 1:
+                print("Error: More than one {} tag in an event".format(tag))
+        
         if len(event.getElementsByTagName('place') ) == 1:
             event_place = event.getElementsByTagName('place')[0]
             if event_place.hasAttribute("hlink"):
