@@ -127,8 +127,9 @@ RETURN event"""
             self.id = record["event"]["id"]
             self.change = record["event"]["change"]
             self.type = record["event"]["type"]
-            self.date = record["event"]["date"]
-            self.dates = DateRange(record["event"]["dates"])
+            dates = DateRange(record["event"]["dates"])
+            self.date = dates.estimate()
+            self.dates = str(dates)
             self.description = record["event"]["description"]
     
             place_result = self.get_place_by_id()

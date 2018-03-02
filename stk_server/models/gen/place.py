@@ -332,29 +332,22 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             osallisen henkilön nimitiedot.
             
         Palauttaa esimerkin mukaiset tiedot:
-        ╒═══════╤═════════╤══════════════════════════════╤═════════╤════════════╕
-        │"uid"  │"role"   │"names"                       │"etype"  │"edate"     │
-        ╞═══════╪═════════╪══════════════════════════════╪═════════╪════════════╡
-        │"36151"│"Primary"│[["Also Known As","Anna Katari│"Baptism"│"1738-01-17"│
-        │       │         │na","Florin",""],["Birth Name"│         │            │
-        │       │         │,"Anna Catharina","Florin",""]│         │            │
-        │       │         │]                             │         │            │
-        ├───────┼─────────┼──────────────────────────────┼─────────┼────────────┤
-        │"36314"│"Kummi"  │[["Birth Name","Johan","Mennan│"Baptism"│"1738-01-17"│
-        │       │         │der",""]]                     │         │            │
-        └───────┴─────────┴──────────────────────────────┴─────────┴────────────┘
+        ╒═════╤═════════╤══════════════════╤═══════╤══════════════════╕
+        │"uid"│"role"   │"names"           │"etype"│"edates"          │
+        ╞═════╪═════════╪══════════════════╪═══════╪══════════════════╡
+        │52134│"Primary"│[["Birth Name","Jo│"Death"│["0","1807-11-12"]│
+        │     │         │han","Utter",""]] │       │                  │
+        └─────┴─────────┴──────────────────┴───────┴──────────────────┘
         """
 
         query = """
 MATCH (p:Person)-[r:EVENT]->(e:Event)-[:PLACE]->(l:Place)
-  WHERE id(l) = {locid}
+  WHERE id(l) = $locid
 MATCH (p) --> (n:Name)
 RETURN id(p) AS uid, r.role AS role,
   COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
-  e.type AS etype,
-  e.date AS edate,
-  e.dates AS edates
-ORDER BY edate"""
+  e.type AS etype, e.dates AS edates
+ORDER BY edates[1]"""
                 
         result = shareds.driver.session().run(query, locid=int(loc_id))
         ret = []
@@ -362,16 +355,9 @@ ORDER BY edate"""
             p = Place()
             p.uid = record["uid"]
             p.etype = record["etype"]
-            p.edate = record["edate"]
-            p.edatetype = record["edatetype"]
-            p.edaterange_start = record["edaterange_start"]
-            p.edaterange_stop = record["edaterange_stop"]
-            if p.edaterange_start != '' and p.edaterange_stop != '':
-                p.edaterange = p.edaterange_start + " - " + p.edaterange_stop
-            elif p.edaterange_start != '':
-                p.edaterange = p.edaterange_start + " - "
-            elif p.edaterange_stop != '':
-                p.edaterange = " - " + p.edaterange_stop
+            dates = DateRange(record["edates"])
+            p.edates = str(dates)
+            p.date = dates.estimate()
             p.role = record["role"]
             p.names = record["names"]   # tuples [name_type, given_name, surname]
             ret.append(p)
@@ -446,7 +432,7 @@ SET n.name=$name,
     n.dates=$dates"""             
                     tx.run(query, 
                            {"handle": handle, "name": name, "lang": lang, 
-                            "dates":dates})
+                            "dates":dates.for_db()})
             except Exception as err:
                 print("Virhe: {0}".format(err), file=stderr)
             

@@ -60,9 +60,10 @@ def read_persons_with_events(keys=None, user=None):
             event_type = event[1]
             if event_type:
                 e.type = event_type
-                e.date = event[2]
-                e.dates = DateRange(event[3])
-                e.place = event[4]
+                dates = DateRange(event[2])
+                e.dates = str(dates)
+                e.date = dates.estimate()
+                e.place = event[3]
 #                 if e.daterange_start != '' and e.daterange_stop != '':
 #                     e.daterange = e.daterange_start + " - " + e.daterange_stop
 #                 elif e.daterange_start != '':
@@ -511,7 +512,7 @@ def get_people_by_surname(surname):
 def get_person_data_by_id(uniq_id):
     """ Get 5 data sets:
         person: uniq_id and name data
-        events list: uniq_id, date, location name and id (?)
+        events list: uniq_id, dates, location name and id (?)
         photos
         sources
         families
@@ -765,9 +766,7 @@ def get_place_with_events (loc_id):
         uid           person's uniq_id
         names         list of tuples [name_type, given_name, surname]
         etype         event type
-        edate         event date
-        edatetype     event date type
-        edaterange    event daterange
+        edates        event date
     """
     place = Place()
     place.uniq_id = int(loc_id)

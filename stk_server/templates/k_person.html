@@ -95,10 +95,7 @@
                          	{% endif %}
                             {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}
                         </td>
-                        <td class="ColumnDate">{% if e.datetype %} {{e.datetype}} {% endif %}
-                           {% if e.date %}{{e.date|pvm}}
-                           {% elif e.daterange %}{{e.daterange}}{% endif %}
-						</td>
+                        <td class="ColumnDate">{{e.dates}}</td>
                         <td class="ColumnPlace">
                             <a href="/events/loc={{e.locid}}" class="inlink"
                             title="tyyppiä {{e.ltype}}; katso paikan tiedot">

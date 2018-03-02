@@ -34,13 +34,13 @@
                         </li>
 
 	               		<ol type="a">
-	               		{% for event in c.events|sort(attribute='edate') %}
+	               		{% for event in c.events|sort(attribute='date') %}
 		               		{% for name in event.names %}
                			    <li>Henkilön
                    			<a href="/person/uniq_id={{name.uniq_id}}" class="id"
 	                           title="katso henkilön {{name.uniq_id}} tiedot">
 	                               {{name.surname}}, {{name.firstname}}</a>
-	                        {{event.type|transl('evt')}} {{event.edate|pvm}}
+	                        {{event.type|transl('evt')}} {{event.edates}}
                			    </li>
 	                    	{% endfor %}
 	                    {% endfor %}

@@ -107,7 +107,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events|sort(attribute='edate') %}
+        {% for e in events|sort(attribute='date') %}
                     <tr>
                         <td class="ColumnPerson">
                             <a href="/person/uniq_id={{e.uid}}" class="id"
@@ -127,9 +127,7 @@
                         </td>
                         <td class="ColumnEvent">{{e.etype|transl('evt')}}
                           {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}</td>
-                        <td class="ColumnDate">{% if e.edatetype %} {{e.edatetype}} {% endif %}
-                            {% if e.edate %}{{e.edate|pvm}}
-                        	{% elif e.edaterange %}{{e.edaterange}}{% endif %}</td>
+                        <td class="ColumnDate">{{e.edates}}</td>
 <!--
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">

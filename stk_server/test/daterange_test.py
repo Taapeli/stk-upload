@@ -20,10 +20,12 @@ class Test(unittest.TestCase):
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
         d = DateRange(DR['BETWEEN'], date(1917, 12, 6), date(2017, 10, 16))
         self.assertEqual(d.to_list(), [4, "1917-12-06", "2017-10-16"])
-        d = DateRange(DR['PERIOD'], "1917-12-06", "2017-10-16")
-        self.assertEqual(d.to_list(), [3, "1917-12-06", "2017-10-16"])
         d = DateRange(4, 700144, 736618)
         self.assertEqual(d.to_list(), [4, "1917-12-06", "2017-10-16"])
+        d = DateRange("1", "2017-10-16")
+        self.assertEqual(d.to_list(), [1, "2017-10-16"])
+        d = DateRange(DR['PERIOD'], "1917-12-06", "2017-10-16")
+        self.assertEqual(d.for_db(), ["3", "1917-12-06", "2017-10-16"])
 
 
     def testDateRange_date(self):

@@ -747,6 +747,8 @@ def _extract_daterange(obj):
                 date_stop = None
                 if dateobj.hasAttribute("type"):
                     date_type = dateobj.getAttribute("type")
+                else:
+                    date_type = None
             else:
                 if dateobj.hasAttribute("start"):
                     date_start = dateobj.getAttribute("start")
@@ -757,6 +759,8 @@ def _extract_daterange(obj):
                 date_quality = dateobj.getAttribute("quality")
             else:
                 date_quality = None
+#             logging.debug("Creating {}, date_type={}, quality={}, {} - {}".\
+#                           format(tag, date_type, date_quality, date_start, date_stop))
             return Gramps_DateRange(tag, date_type, date_quality, 
                                     date_start, date_stop)
 

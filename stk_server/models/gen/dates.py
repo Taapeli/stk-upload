@@ -71,34 +71,47 @@ class DateRange():
             method, and the components formats are not checked.
         '''
 
+        if not args[0]:
+            # Creating an empty date
+            self.vec = [0, "", None]
+            return
+
         if len(args) == 1:
-            if isinstance(args[0], (list,tuple)) and len(args[0]) == 3:
+            if isinstance(args[0], (list,tuple)) and len(args[0]) in [2, 3]:
                 # The only argument is a tuple like (3, '1918-12', '2017-10-16')
-                self.vec = list(args[0])
-                if self.vec[2] == "":
-                    self.vec[2] = None
+                vec0 = int(args[0][0])
+                vec1 = args[0][1]
+                if len(args[0]) == 3:
+                    vec2 = args[0][2] if not args[0][2] == "" else None
+                else:
+                    vec2 = None
+                self.vec = [vec0, vec1, vec2]
                 return
             elif isinstance(args[0], (DateRange, Gramps_DateRange)):
+                # The only argument is DataRange
                 self.vec = args[0].to_list()
                 return
             elif isinstance(args[0], (str,date)):
+                # Maybe the only argument is some kind of date string
                 try:
-                    # Maybe the only argument is some kind of date string
                     self.vec = [DR['DATE'], self._to_datestr(args[0]), None]
                     return
                 except:
                     raise ValueError("Invalid DateRange({})".format(args[0]))
         
-        if isinstance(args[0], int):
-            """ Arguments are dtype and there is 1 or 2 datevalues:
-                DateRange(DR['BEFORE'], date(2017, 10, 16))
-                DateRange(DR['BEFORE'], "2017-10-16")
-                DateRange(1, 736618)
-                DateRange(DR['BETWEEN'], date(1917, 12, 6), date(2017, 10, 16))
-                DateRange(DR['BETWEEN'], "1917-12-06", "2017-10-16")
-                DateRange(4, 700144, 736618)
+        if isinstance(args[0], int) or \
+          (isinstance(args[0], str) and args[0].isdigit()):
+            """ Arguments are dtype (int or numeric str) 
+                and there is 1 or 2 date values:
+                    DateRange(DR['BEFORE'], date(2017, 10, 16))
+                    DateRange(DR['BEFORE'], "2017-10-16")
+                    DateRange("1", "2017-10-16")
+                    DateRange(1, 736618)
+                    DateRange(DR['BETWEEN'], date(1917, 12, 6), date(2017, 10, 16))
+                    DateRange(DR['BETWEEN'], "1917-12-06", "2017-10-16")
+                    DateRange(4, 700144, 736618)
             """
-            self.vec = [args[0], self._to_datestr(args[1]), None]
+            self.vec = [int(args[0]), self._to_datestr(args[1]), None]
             dtype = self.vec[0]
             if dtype < 0 or dtype > DR['EST_ABOUT']:
                 raise ValueError('Invalid DateRange(type, ...)')
@@ -229,6 +242,10 @@ class DateRange():
         """ Gives a date estimate """
         return self.vec[1]
     
+    def plain_type(self):
+        """ Gives numeric type code without 'CALC_' or 'EST_' """
+        return self.vec[0] & 7
+    
     def is_calculated(self):
         """ Is this date calculated?
             The type code has bit corresponding 8 set
@@ -301,6 +318,7 @@ class DateRange():
                 return "{}".format(a[0])
         except:
             return date_str
+
 
 class Gramps_DateRange(DateRange):
     '''
