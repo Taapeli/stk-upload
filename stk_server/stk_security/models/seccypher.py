@@ -209,5 +209,3 @@ class Cypher():
             WHERE email.allowed_email = $email
         ''' 
         )
-    
-       

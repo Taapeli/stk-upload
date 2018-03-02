@@ -19,6 +19,7 @@ from models import gramps_loader       # Loading a gramps xml file
 from models import cvs_refnames        # Referenssinimien luonti
 from forms import ListEmailsForm
 from templates import jinja_filters
+from admin.admin import DataAdmin
 
 
 app = shareds.app
@@ -38,13 +39,13 @@ def home():
                 ' logged in, roles ' + str(role_names))
     return render_template('/mainindex.html')
 
-
+#TODO: Tämä ei ole käytössä! Tuntuu, että pitäisi suunnitella oma sivurakenne
 @shareds.app.route('/admin',  methods=['GET', 'POST'])
 @login_required
 @roles_required('admin')
 def admin():
     """ Home page for administraor """    
-    return render_template('/adminindex.html')
+    return render_template('/admin/start.html') # entinen adminindex.html
 
 
 @shareds.app.route('/list_emails',  methods=['GET', 'POST'])
@@ -505,12 +506,6 @@ def save_loaded(filename, subj):
                text="Missing proper column title: " + str(e))
     return render_template("talletettu.html", text=status, uri=dburi)
 
-@shareds.app.route('/tyhjenna/kaikki/kannasta')
-def tyhjenna():
-    """ Clear database - with no confirmation! """
-    msg = dbutil.alusta_kanta()
-    return render_template("talletettu.html", text=msg)
-
 @shareds.app.route('/aseta/confidence')
 def aseta_confidence():
     """ tietojen laatuarvion asettaminen henkilöille """
@@ -538,6 +533,20 @@ def virhesivu(code, text=''):
     logging.debug('Virhesivu ' + str(code) )
     return render_template("virhe_lataus.html", code=code, text=text)
 
+
+""" --------------------- Administrator operations -----------------------------
+"""
+
+
+@shareds.app.route('/admin/clear_db/<string:opt>')
+def clear_db(opt):
+    """ Clear database - with no confirmation! """
+    try:
+        updater = DataAdmin(current_user)
+        msg =  updater.db_reset(opt) # dbutil.alusta_kanta()
+        return render_template("talletettu.html", text=msg)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 
 """ ------------------------ Obsolete operations? ------------------------------

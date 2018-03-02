@@ -34,15 +34,25 @@ dateval   about  estimated  val        EST_ABOUT    5+16 21 arviolta noin {val}
 
 from datetime import date
 
-#TODO: DR-arvot ja nimet tarkstettava ja suunniteltava
-DR = {'DATE': 0,        # Exact date d1
-    'TILL': 1,          # Date till d1
-    'FROM': 2,          # Date from d1
-    'PERIOD': 3,        # Date period d1-d2
-    'BETWEEN': 4,       # A date between d1 and d2
-    'ABOUT': 5,         # A date near d1
-    'CALCULATED': 8,    # A calculated date near d1
-    'ESTIMATED': 16     # An estimated date at d1
+DR = {
+    'DATE':0,           # exact date d1
+    'BEFORE':1,         # date till d1
+    'AFTER':2,          # date from d1
+    'PERIOD':3,         # during the period of d1, d2
+    'BETWEEN':4,        # date between d1, d2
+    'ABOUT':5,          # about d1
+    'CALC_DATE':8,
+    'CALC_BEFORE':9,
+    'CALC_AFTER':10,
+    'CALC_PERIOD':11,
+    'CALC_BETWEEN':12,
+    'CALC_ABOUT':13,
+    'EST_DATE':16,
+    'EST_BEFORE':17,
+    'EST_AFTER':18,
+    'EST_PERIOD':19,
+    'EST_BETWEEN':20,
+    'EST_ABOUT':21
 }
 
 class DateRange():
@@ -107,9 +117,9 @@ class DateRange():
                     raise ValueError("Invalid DateRange({})".format(args[0]))
         
         if isinstance(args[0], int):
-            """ Arguments are dtype and 1 or 2 datevalues:
-                DateRange(DR['TILL'], date(2017, 10, 16))
-                DateRange(DR['TILL'], "2017-10-16")
+            """ Arguments are dtype and there is 1 or 2 datevalues:
+                DateRange(DR['BEFORE'], date(2017, 10, 16))
+                DateRange(DR['BEFORE'], "2017-10-16")
                 DateRange(1, 736618)
                 DateRange(DR['BETWEEN'], date(1917, 12, 6), date(2017, 10, 16))
                 DateRange(DR['BETWEEN'], "1917-12-06", "2017-10-16")
@@ -117,9 +127,11 @@ class DateRange():
             """
             self.vec = [args[0], self._to_datestr(args[1]), None]
             dtype = self.vec[0]
-            if dtype < 0 or dtype > DR['ESTIMATED']:
+            if dtype < 0 or dtype > DR['EST_ABOUT']:
                 raise ValueError('Invalid DateRange(type, ...)')
-            if dtype in [DR['PERIOD'], DR['BETWEEN']]:
+            if dtype in [DR['PERIOD'], DR['BETWEEN'],
+                         DR['CALC_PERIOD'], DR['CALC_BETWEEN'],
+                         DR['EST_PERIOD'], DR['EST_BETWEEN']]:
                 if len(args) == 3:
                     self.vec[2] = self._to_datestr(args[2])
                 else:

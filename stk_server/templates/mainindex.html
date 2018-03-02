@@ -75,12 +75,18 @@
           </div>
         </div>
 
-        {% if current_user.is_authenticated and current_user.has_role('admin') %}<div class="startbox admin">
+        {% if current_user.is_authenticated and current_user.has_role('admin') %}
+        <div class="startbox admin">
           <div style="display: inline-block;">
 			<h3>Ylläpitäjän toiminnot</h3>
 			<ul>
-			  <li><a href="/tyhjenna/kaikki/kannasta"><em>Tyhjennä</em></a> 
-			    koko kanta <i>(Mitään kysymättä!)</i></li>
+              <li><em>Tyhjennä kanta</em>  <i>(Mitään kysymättä!)</i>
+                <ul>
+                  <li><a href="/admin/clear_db/total">Koko kanta</li>
+                  <li><a href="/admin/clear_db/save_users">Säästä käyttäjätunukset</li>
+                  <li><a href="/admin/clear_db/my_own">Omat henkilö- ja 
+                      tapahtumatiedot ({{current_user.username}})</li>
+              </ul></li>
 			  <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
 			  <li><a href="/refnames">Muokkaa referenssinimiä</a></li>
 			  <li><a href="/aseta/estimated_dates">Aseta henkilön arvioidut syntymä- ja kuolinajat</a></li>			</ul>
