@@ -3,33 +3,6 @@ Created on 16.10.2017
 
 @author: jm
 
-TODO: estimate() .method
-TODO: All the combinations:
-
-tag       type   quality    attr       DR value      vec[0] text(fi)          estimate
----       ----   -------    ----       --------     ------- ----              --------
-dateval   None   None       val        DATE         0     0 {val}             val
-dateval   before None       val        BEFORE       1     1 {val} asti        val
-dateval   after  None       val        AFTER        2     2 {val} alkaen      val
-datespan  None   None       start,stop PERIOD       3     3 {start} – {stop}  (stop-start)/2
-daterange None   None       start,stop BETWEEN      4     4 {start} ja {stop} 
-                                                            valillä           (stop-start)/2
-dateval   about  None       val        ABOUT        5     5 noin {val}        val
-                                        
-dateval   None   None       val        CALC_DATE    0+8   8 laskettuna {val}
-dateval   before calculated val        CALC_BEFORE  1+8   9 laskettuna {val} asti
-dateval   after  calculated val        CALC_AFTER   2+8  10 laskettuna {val} alkaen
-datespan  None   calculated start,stop CALC_PERIOD  3+8  11 laskettuna {start} – {stop}
-daterange None   calculated start,stop CALC_BETWEEN 4+8  12 laskettuna {start} ja {stop} valillä
-dateval   about  calculated val        CALC_ABOUT   5+8  13 laskettuna noin {val}
-                                        
-dateval   None   None       val        EST_DATE     0+16 16 arviolta {val}
-dateval   before estimated  val        EST_BEFORE   1+16 17 arviolta {val} asti
-dateval   after  estimated  val        EST_AFTER    2+16 18 arviolta {val} alkaen
-datespan  None   estimated  start,stop EST_PERIOD   3+16 19 arviolta {start} – {stop}
-daterange None   estimated  start,stop EST_BETWEEN  4+16 20 arviolta {start} ja {stop} valillä 
-dateval   about  estimated  val        EST_ABOUT    5+16 21 arviolta noin {val}
-
 '''
 
 from datetime import date
@@ -105,7 +78,7 @@ class DateRange():
                 if self.vec[2] == "":
                     self.vec[2] = None
                 return
-            elif isinstance(args[0], DateRange):
+            elif isinstance(args[0], (DateRange, Gramps_DateRange)):
                 self.vec = args[0].to_list()
                 return
             elif isinstance(args[0], (str,date)):
@@ -149,28 +122,34 @@ class DateRange():
     def __str__(self):
         """ Return DateRange in display format 
         """
-        dtype = self.vec[0]
+        type_e = self.vec[0] & 7        # Lower bits has effective type code
+        type_opt = self.vec[0]-type_e   # Upper bits has options
+        dopt = ''
+        
+        if type_opt == 8:           
+            # Code name starts with 'CALC_'
+            dopt = 'laskettuna '
+        elif type_opt == 16:
+            # Code name starts with 'EST_'
+            dopt = 'arviolta '
+
         dstr1 = self._to_local(self.vec[1])
         dstr2 = self._to_local(self.vec[2])
         #print ("# dstr {} - {}".format(dstr1, dstr2))
-        if dtype == DR['DATE']: # Exact date d1
-            return dstr1
-        elif dtype == DR['TILL']:  # Date till d1
-            return "– {}".format(dstr1)
-        elif dtype == DR['FROM']: # Date from d1
-            return "{} –".format(dstr1)
-        elif dtype == DR['PERIOD']: # Date period d1-d2
-            return "{} – {}".format(dstr1, dstr2)
-        elif dtype == DR['BETWEEN']: # A date between d1 and d2
-            return "välillä {} … {}".format(dstr1, dstr2)
-        elif dtype == DR['ABOUT']: # A date near d1
-            return "noin {}".format(dstr1)
-        elif dtype == DR['CALCULATED']: # A calculated date near d1
-            return "laskettu {}".format(dstr1)
-        elif dtype == DR['ESTIMATED']: # An estimated date at d1
-            return "arviolta {}".format(dstr1)
+        if type_e == DR['DATE']: # Exact date d1
+            return dopt + dstr1
+        elif type_e == DR['BEFORE']:  # Date till d1
+            return "{}{} mennessä".format(dopt, dstr1)
+        elif type_e == DR['AFTER']: # Date from d1
+            return "{}{} alkaen".format(dopt, dstr1)
+        elif type_e == DR['PERIOD']: # Date period d1-d2
+            return "{}{} – {}".format(dopt, dstr1, dstr2)
+        elif type_e == DR['BETWEEN']: # A date between d1 and d2
+            return "{}välillä {} … {}".format(dopt, dstr1, dstr2)
+        elif type_e == DR['ABOUT']: # A date near d1
+            return "{}noin {}".format(dopt, dstr1)
         
-        return "<Date type={}, {}...{}>".format(dtype, dstr1, dstr2)
+        return "<Date type={}, {}...{}>".format(self.vec[0], dstr1, dstr2)
 
 
 #     def __cmp__(self, other):
@@ -183,7 +162,7 @@ class DateRange():
 # 
 #         if self.vec[0] < other.vec[0]:
 #             # A is self, B is other
-#             selftype=dtype
+#             selftype=type_e
 #             othertype=other.vec[0]
 #             A1 = self.vec[1]
 #             #A2 = self.vec[2]
@@ -192,7 +171,7 @@ class DateRange():
 #         else:
 #             # A is other, B is self
 #             selftype=other.vec[0]
-#             othertype=dtype
+#             othertype=type_e
 #             A1 = other.vec[1]
 #             #A2 = other.vec[2]
 #             B1 = self.vec[1]
@@ -246,9 +225,24 @@ class DateRange():
         #TODO calculate
         return d1
 
+    def estimate(self):
+        """ Gives a date estimate """
+        return self.vec[1]
+    
+    def is_calculated(self):
+        """ Is this date calculated?
+            The type code has bit corresponding 8 set
+        """
+        return (self.vec[0] & 8) != 0
+
+    def is_estimated(self):
+        """ Is this date calculated?
+            The type code has bit corresponding 16 set
+        """
+        return (self.vec[0] & 16) != 0
 
     def to_list(self):
-        """ Returns a list [int, str, str] or [int, str] for saving to database
+        """ Returns a list [int, str, str] or [int, str] 
             Example: [DR['BETWEEN'], "1917", "2017-10-16"]
         """
         if self.vec[2]:
@@ -256,6 +250,16 @@ class DateRange():
         else:
             return self.vec[0:2]
 
+    def for_db(self):
+        """ Returns a list like to_list, but type code is converted to string 
+            for saving to database.
+            Example: ["4", "1917", "2017-10-16"]
+        """
+        ret = [str(self.vec[0]), self.vec[1]]
+        if self.vec[2]:
+            ret.append(self.vec[2])
+
+        return ret
 
     def _to_datestr(self, val):
         """ Returns a date-like string '1972-12-06', '1972-12' or '1972', from
@@ -298,7 +302,7 @@ class DateRange():
         except:
             return date_str
 
-def DateRange_gramps(DateRange):
+class Gramps_DateRange(DateRange):
     '''
     Imports Gramps xml fields into a DateRange object.
     
@@ -329,10 +333,54 @@ def DateRange_gramps(DateRange):
         datestr   type=None    quality=None     val=str
 
     - where $quality = {calculated|estimated|None}
-    '''
+
+    TODO: All the combinations:
     
-    def __init__(xml_tag, xml_type, quality, date1, date2=None):
+    tag       type   quality    attr       DR value      vec[0] text(fi)          estimate
+    ---       ----   -------    ----       --------     ------- ----              --------
+    dateval   None   None       val        DATE         0     0 {val}             val
+    dateval   before None       val        BEFORE       1     1 {val} asti        val
+    dateval   after  None       val        AFTER        2     2 {val} alkaen      val
+    datespan  None   None       start,stop PERIOD       3     3 {start} – {stop}  (stop-start)/2
+    daterange None   None       start,stop BETWEEN      4     4 {start} ja {stop} 
+                                                                valillä           (stop-start)/2
+    dateval   about  None       val        ABOUT        5     5 noin {val}        val
+                                            
+    dateval   None   None       val        CALC_DATE    0+8   8 laskettuna {val}
+    dateval   before calculated val        CALC_BEFORE  1+8   9 laskettuna {val} asti
+    dateval   after  calculated val        CALC_AFTER   2+8  10 laskettuna {val} alkaen
+    datespan  None   calculated start,stop CALC_PERIOD  3+8  11 laskettuna {start} – {stop}
+    daterange None   calculated start,stop CALC_BETWEEN 4+8  12 laskettuna {start} ja {stop} valillä
+    dateval   about  calculated val        CALC_ABOUT   5+8  13 laskettuna noin {val}
+                                            
+    dateval   None   None       val        EST_DATE     0+16 16 arviolta {val}
+    dateval   before estimated  val        EST_BEFORE   1+16 17 arviolta {val} asti
+    dateval   after  estimated  val        EST_AFTER    2+16 18 arviolta {val} alkaen
+    datespan  None   estimated  start,stop EST_PERIOD   3+16 19 arviolta {start} – {stop}
+    daterange None   estimated  start,stop EST_BETWEEN  4+16 20 arviolta {start} ja {stop} valillä 
+    dateval   about  estimated  val        EST_ABOUT    5+16 21 arviolta noin {val}
+    '''
+
+    def __init__(self, xml_tag, xml_type, quality, date1, date2=None):
         """ 
         Importing a DateRange from Gramps xml structure elements
         """
-        pass
+        if xml_tag == 'dateval':
+            if xml_type:
+                dr = xml_type.upper()
+            else:
+                dr = 'DATE'
+        elif xml_tag == 'daterange':
+            dr = 'BETWEEN'
+        elif xml_tag == 'datespan':
+            dr = 'PERIOD'
+        else:
+            dr = None
+
+        if quality == 'calculated':
+            dr = 'CALC_' + dr
+        elif quality == 'estimated':
+            dr = 'EST_' + dr
+
+        super(Gramps_DateRange, self).__init__((DR[dr], date1, date2))
+        

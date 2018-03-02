@@ -357,7 +357,7 @@ RETURN ID(place) AS uniq_id"""
         eid = self.id
         etype = self.type
         description = self.description
-        edate = self.date
+#         edate = self.date
         edates = self.dates
         attr_type = self.attr_type
         attr_value = self.attr_value
@@ -369,14 +369,12 @@ SET e.gramps_handle=$handle,
     e.id=$id, 
     e.type=$type, 
     e.description=$description,
-    e.date=$date,
-    e.datetype=$datetype,
     e.dates=$dates,
     e.attr_type=$attr_type,
     e.attr_value=$attr_value"""
             tx.run(query, 
                {"handle": handle, "change": change, "id": eid, "type": etype,
-                "description": description, "date": edate, "dates": edates,
+                "description": description, "dates": edates.for_db(),
                 "attr_type": attr_type, "attr_value": attr_value})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
