@@ -14,6 +14,7 @@ from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name, Point
+from models.gen.dates import Gramps_DateRange
 from models.gen.source_citation import Citation, Repository, Source
 from models.dataupdater import set_confidence_value
 import shareds
@@ -209,26 +210,16 @@ def handle_events(collection, username, tx):
                 e.description = ''
         elif len(event.getElementsByTagName('description') ) > 1:
             print("Error: More than one description tag in an event")
-    
-        if len(event.getElementsByTagName('dateval') ) == 1:
-            event_dateval = event.getElementsByTagName('dateval')[0]
-            if event_dateval.hasAttribute("val"):
-                e.date = event_dateval.getAttribute("val")
-                e.daterange_start = event_dateval.getAttribute("val")
-            if event_dateval.hasAttribute("type"):
-                e.datetype = event_dateval.getAttribute("type")
-        elif len(event.getElementsByTagName('dateval') ) > 1:
-            print("Error: More than one dateval tag in an event")
-    
-        if len(event.getElementsByTagName('daterange') ) == 1:
-            event_daterange = event.getElementsByTagName('daterange')[0]
-            if event_daterange.hasAttribute("start"):
-                e.daterange_start = event_daterange.getAttribute("start")
-            if event_daterange.hasAttribute("stop"):
-                e.daterange_stop = event_daterange.getAttribute("stop")
-        elif len(event.getElementsByTagName('daterange') ) > 1:
-            print("Error: More than one daterange tag in an event")
-    
+
+        """ Dates:
+            <daterange start="1820" stop="1825" quality="estimated"/>
+            <datespan start="1840-01-01" stop="1850-06-30" quality="calculated"/>      
+            <dateval val="1870" type="about"/>
+            <datestr val="1700-luvulla" />    # Not processed!
+        """
+        e.dates = _extract_daterange(event)
+        # e.date = e.dates.estimate() # TODO: remove this, not needed!
+
         if len(event.getElementsByTagName('place') ) == 1:
             event_place = event.getElementsByTagName('place')[0]
             if event_place.hasAttribute("hlink"):
@@ -581,18 +572,8 @@ def handle_places(collection, tx):
                     placename.name = placeobj_pname.getAttribute("value")
                 if placeobj_pname.hasAttribute("lang"):
                     placename.lang = placeobj_pname.getAttribute("lang")
-                if len(placeobj_pname.getElementsByTagName('dateval') ) == 1:
-                    placeobj_pname_dateval = placeobj_pname.getElementsByTagName('dateval')[0]
-                    if placeobj_pname_dateval.hasAttribute("val"):
-                        placename.daterange_start = placeobj_pname_dateval.getAttribute("val")
-                    if placeobj_pname_dateval.hasAttribute("type"):
-                        placename.datetype = placeobj_pname_dateval.getAttribute("type")
-                if len(placeobj_pname.getElementsByTagName('daterange') ) == 1:
-                    placeobj_pname_daterange = placeobj_pname.getElementsByTagName('daterange')[0]
-                    if placeobj_pname_daterange.hasAttribute("start"):
-                        placename.daterange_start = placeobj_pname_dateval.getAttribute("start")
-                    if placeobj_pname_daterange.hasAttribute("stop"):
-                        placename.daterange_stop = placeobj_pname_dateval.getAttribute("stop")
+
+                placename.dates = _extract_daterange(placeobj)
                 place.names.append(placename)
     
         if len(placeobj.getElementsByTagName('coord') ) >= 1:
@@ -744,3 +725,46 @@ def handle_sources(collection, tx):
         
     return(msg)
 
+
+def _extract_daterange(obj):
+    """ Extract a date information from these kind of date formats:
+            <daterange start="1820" stop="1825" quality="estimated"/>
+            <datespan start="1840-01-01" stop="1850-06-30" quality="calculated"/>      
+            <dateval val="1870" type="about"/>
+
+        This is ignored:
+            <datestr val="1700-luvulla" />
+
+        Returns: DateRange object or None
+    """
+    # Note informal dateobj 'datestr' is not processed as all!
+    for tag in ['dateval', 'daterange', 'datespan']:
+        if len(obj.getElementsByTagName(tag) ) == 1:
+            dateobj = obj.getElementsByTagName(tag)[0]
+            if tag == 'dateval':
+                if dateobj.hasAttribute("val"):
+                    date_start = dateobj.getAttribute("val")
+                date_stop = None
+                if dateobj.hasAttribute("type"):
+                    date_type = dateobj.getAttribute("type")
+                else:
+                    date_type = None
+            else:
+                if dateobj.hasAttribute("start"):
+                    date_start = dateobj.getAttribute("start")
+                if dateobj.hasAttribute("stop"):
+                    date_stop = dateobj.getAttribute("stop")
+                date_type = None
+            if dateobj.hasAttribute("quality"):
+                date_quality = dateobj.getAttribute("quality")
+            else:
+                date_quality = None
+#             logging.debug("Creating {}, date_type={}, quality={}, {} - {}".\
+#                           format(tag, date_type, date_quality, date_start, date_stop))
+            return Gramps_DateRange(tag, date_type, date_quality, 
+                                    date_start, date_stop)
+
+        elif len(obj.getElementsByTagName(tag) ) > 1:
+            print("Error: More than one {} tag in an event".format(tag))
+
+    return None

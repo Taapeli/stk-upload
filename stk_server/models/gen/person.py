@@ -525,9 +525,7 @@ RETURN person, urls, COLLECT (name) AS names
 # │"id" │"firstname"     │"surname"  │"suffix"│"refnames"       │"events"         │
 # ╞═════╪════════════════╪═══════════╪════════╪═════════════════╪═════════════════╡
 # │31844│"August Wilhelm"│"Wallenius"│""      │["August","Wilhel│[[29933,"Baptism"│
-# │     │                │           │        │m","Wallenius"]  │,"1841-09-12","",│
-# │     │                │           │        │                 │"1841-09-12","",n│
-# │     │                │           │        │                 │ull]]            │
+# │     │                │           │        │m","Wallenius"]  │, ...            │
 # └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
 # There is also fields confidence, est_birth, est_death, which are empty for now 
  

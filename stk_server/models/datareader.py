@@ -18,7 +18,7 @@ from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
-from models.gen.user import User
+from models.gen.dates import DateRange
 
 
 def read_persons_with_events(keys=None, user=None):
@@ -54,26 +54,22 @@ def read_persons_with_events(keys=None, user=None):
         # Events
 
         for event in record['events']:
-            # Got event with place name: [id, type, date,
-            #   datetype, daterange_start, daterange_stop, place.pname]
+            # Got event with place name: [id, type, date, dates, place.pname]
             e = Event_for_template()
             e.uniq_id = event[0]
             event_type = event[1]
             if event_type:
                 e.type = event_type
-                e.date = event[2]
-                e.datetype = event[3]
-                e.daterange_start = event[4]
-                e.daterange_stop = event[5]
-                e.place = event[6]
-        
-                if e.daterange_start != '' and e.daterange_stop != '':
-                    e.daterange = e.daterange_start + " - " + e.daterange_stop
-                elif e.daterange_start != '':
-                    e.daterange = str(e.daterange_start) + "-"
-                elif e.daterange_stop != '':
-                    e.daterange = "-" + str(e.daterange_stop)
-                
+                dates = DateRange(event[2])
+                e.dates = str(dates)
+                e.date = dates.estimate()
+                e.place = event[3]
+#                 if e.daterange_start != '' and e.daterange_stop != '':
+#                     e.daterange = e.daterange_start + " - " + e.daterange_stop
+#                 elif e.daterange_start != '':
+#                     e.daterange = str(e.daterange_start) + "-"
+#                 elif e.daterange_stop != '':
+#                     e.daterange = "-" + str(e.daterange_stop)
                 p.events.append(e)
  
         persons.append(p)
@@ -187,18 +183,8 @@ def read_cite_sour_repo(uniq_id=None):
             e.type = record_cite['type']
         if record_cite['date']:
             e.date = record_cite['date']
-        if record_cite['datetype']:
-            e.datetype = record_cite['datetype']
-        if record_cite['daterange_start']:
-            e.daterange_start = record_cite['daterange_start']
-        if record_cite['daterange_stop']:
-            e.daterange_stop = record_cite['daterange_stop']
-        if e.daterange_start != '' and e.daterange_stop != '':
-            e.daterange = e.daterange_start + " - " + e.daterange_stop
-        elif e.daterange_start != '':
-            e.daterange = e.daterange_start + " - "
-        elif e.daterange_stop != '':
-            e.daterange = " - " + e.daterange_stop
+        if record_cite['dates']:
+            e.dates = DateRange(record_cite['dates'])
 
         for source_cite in record_cite['sources']:
             c = Citation()
@@ -526,7 +512,7 @@ def get_people_by_surname(surname):
 def get_person_data_by_id(uniq_id):
     """ Get 5 data sets:
         person: uniq_id and name data
-        events list: uniq_id, date, location name and id (?)
+        events list: uniq_id, dates, location name and id (?)
         photos
         sources
         families
@@ -546,14 +532,7 @@ def get_person_data_by_id(uniq_id):
         e = Event_for_template()
         e.uniq_id = p.eventref_hlink[i]
         e.role = p.eventref_role[i]
-        e.get_event_data_by_id()
-        
-        if e.daterange_start != '' and e.daterange_stop != '':
-            e.daterange = e.daterange_start + " - " + e.daterange_stop
-        elif e.daterange_start != '':
-            e.daterange = str(e.daterange_start) + "-"
-        elif e.daterange_stop != '':
-            e.daterange = "-" + str(e.daterange_stop)
+        e.get_event_data_by_id()        # Read data to e
             
         if e.place_hlink != '':
             place = Place()
@@ -692,13 +671,6 @@ def get_baptism_data(uniq_id):
     e.uniq_id = uniq_id
     e.get_event_data_by_id()
     
-    if e.daterange_start != '' and e.daterange_stop != '':
-        e.daterange = e.daterange_start + " - " + e.daterange_stop
-    elif e.daterange_start != '':
-        e.daterange = str(e.daterange_start) + "-"
-    elif e.daterange_stop != '':
-        e.daterange = "-" + str(e.daterange_stop)
-        
     if e.place_hlink != '':
         place = Place()
         place.uniq_id = e.place_hlink
@@ -794,9 +766,7 @@ def get_place_with_events (loc_id):
         uid           person's uniq_id
         names         list of tuples [name_type, given_name, surname]
         etype         event type
-        edate         event date
-        edatetype     event date type
-        edaterange    event daterange
+        edates        event date
     """
     place = Place()
     place.uniq_id = int(loc_id)
