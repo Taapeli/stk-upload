@@ -21,7 +21,7 @@ from models.gen.source_citation import Citation, Repository, Source
 from models.gen.dates import DateRange
 
 
-def read_persons_with_events(keys=None, user=None):
+def read_persons_with_events(keys=None, user=None, take_refnames=False):
     """ Reads Person- and Event- objects for display.
         If currentuser is defined, restrict to her objects.
 
@@ -29,7 +29,7 @@ def read_persons_with_events(keys=None, user=None):
     """
     
     persons = []
-    result = Person.get_events_k(keys, user)
+    result = Person.get_events_k(keys, user, take_refnames=take_refnames)
     for record in result:
         # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
         uniq_id = record['id']
@@ -38,7 +38,7 @@ def read_persons_with_events(keys=None, user=None):
         p.confidence = record['confidence']
         p.est_birth = record['est_birth']
         p.est_death = record['est_death']
-        if record['refnames']:
+        if take_refnames and record['refnames']:
             refnlist = sorted(record['refnames'])
             p.refnames = ", ".join(refnlist)
         pname = Name()

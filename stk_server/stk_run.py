@@ -133,16 +133,18 @@ def show_persons_restricted(selection=None):
     return render_template("k_persons.html", persons=persons, menuno=1)
 
 
-@shareds.app.route('/person/list_all')
+@shareds.app.route('/person/list_all/<string:opt>')
+@shareds.app.route('/person/list_all/')
 #     @login_required
-def show_all_persons_list(selection=None):
+def show_all_persons_list(selection=None, opt=''):
     """ TODO Should have restriction by owner's UserProfile """
     keys = ('all',)
     if current_user.is_authenticated:
         user=current_user.username
     else:
         user=None
-    persons = datareader.read_persons_with_events(keys, user=user)
+    ref = (opt == 'ref')
+    persons = datareader.read_persons_with_events(keys, user=user, take_refnames=ref)
     return render_template("k_persons.html", persons=persons, menuno=1)
 
 
@@ -152,20 +154,24 @@ def show_person_page(cond):
     """ Full homepage for a Person in database
         cond = 'uniq_id=arvo'    selected by db key id(Person)
     """
-    key, value = cond.split('=')
+
     try:
+        key, value = cond.split('=')
         if key == 'uniq_id':
             person, events, photos, sources, families = \
                 datareader.get_person_data_by_id(value)
             for f in families:
                 print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
                 if f.mother:
-                    print("  Mother: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    print("  Mother: {} / {} s. {}".\
+                          format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
                 if f.father:
-                    print("  Father:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    print("  Father:  {} / {} s. {}".\
+                          format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print("    Child ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print("    Child ({}): {} / {} *{}".\
+                              format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
             raise(KeyError("Väärä hakuavain"))
     except KeyError as e:
@@ -238,15 +244,15 @@ def nayta_henkilot(subj):
     """ Person listings
         tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
     """
-    if subj == "k_persons":
-        # Kertova-tyyliin
-        persons = datareader.read_persons_with_events()
-        return render_template("k_persons.html", persons=persons, menuno=0)
+#     if subj == "k_persons":
+#         # Kertova-tyyliin
+#         persons = datareader.read_persons_with_events()
+#         return render_template("k_persons.html", persons=persons, menuno=0)
 #     if subj == "henkilot":
 #         dburi = models.dbutil.get_server_location()
 #         persons = datareader.lue_henkilot()
 #         return render_template("table_persons.html", persons=persons, uri=dburi)
-    elif subj == "henkilot2":
+    if subj == "henkilot2":
         persons = datareader.read_persons_with_events()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "surnames":

@@ -499,7 +499,7 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_events_k (keys, currentuser, take_refnames=True):
+    def get_events_k (keys, currentuser, take_refnames=False):
         """  Read Persons with names, events and reference names
             called from models.datareader.read_persons_with_events
 
