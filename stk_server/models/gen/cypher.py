@@ -38,14 +38,25 @@ MATCH (person) -[:NAME]-> (name:Name)
 WITH person, name""" + _person_get_events_tail
 
     person_get_confidence = """
- MATCH (person:Person)
- OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
- RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+MATCH (person:Person)
+OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
+RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
 
     person_set_confidence = """
- MATCH (person:Person) WHERE ID(person)=$id
- SET person.confidence=$confidence"""
-                
+MATCH (person:Person) WHERE ID(person)=$id
+SET person.confidence=$confidence"""
+               
+    person_get_all_names = """
+MATCH (n)<-[r:NAME]-(p:Person)
+where id(p) = $pid
+RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
+    p.gender AS sex"""
+    
+    persons_get_all_names = """
+MATCH (n)<-[r:NAME]-(p:Person)
+RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
+    p.gender AS sex"""
+ 
 
 # --- For Place class ---------------------------------------------------------
 

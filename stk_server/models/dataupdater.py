@@ -49,17 +49,21 @@ def set_estimated_dates():
     return (message)
 
 
-def set_person_refnames(uniq_id=None):
+def set_person_refnames(got_tx=None, uniq_id=None):
     """ Set Refnames to all or selected Persons
-        TODO: selection by uniq_id
     """
     pers_count = 0
     name_count = 0
     t0 = time.time()
 
-    persons = Name.get_all_personnames()
+    if got_tx:
+        tx = got_tx
+    else:
+        tx = User.beginTransaction()
+    names = Name.get_personnames(tx, uniq_id)
+
     # Process each name part (first names, surname, patronyme) of each Person
-    for rec in persons:
+    for rec in names:
         # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
         # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
         # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
@@ -75,7 +79,6 @@ def set_person_refnames(uniq_id=None):
         surname = rec["sn"]
         patronyme = rec["pn"]
         #gender = rec["sex"]
-        tx = User.beginTransaction()
 
         # 1. firstnames
         if firstname and firstname != 'N':
@@ -91,27 +94,28 @@ def set_person_refnames(uniq_id=None):
         if patronyme:
             Refname.link_to_refname(tx, pid, patronyme, 'patronyme')
             name_count += 1
-        User.endTransaction(tx)
         pers_count += 1
 
-        # ===    Report status    ====
-        rnames = []
-        recs = Person.get_refnames(pid)
-        for rec in recs:
-            # ╒══════════════════════════╤═════════════════════╕
-            # │"a"                       │"li"                 │
-            # ╞══════════════════════════╪═════════════════════╡
-            # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
-            # │":"Messu- ja kalenteri"}  │                     │
-            # └──────────────────────────┴─────────────────────┘        
-
-            name = rec['a']
-            link = rec['li'][0]
-            rnames.append("{} ({})".format(name['name'], link['use']))
-        logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
+#         # ===   [NOT!] Report status for each name    ====
+#         rnames = []
+#         recs = Person.get_refnames(pid)
+#         for rec in recs:
+#             # ╒══════════════════════════╤═════════════════════╕
+#             # │"a"                       │"li"                 │
+#             # ╞══════════════════════════╪═════════════════════╡
+#             # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
+#             # │":"Messu- ja kalenteri"}  │                     │
+#             # └──────────────────────────┴─────────────────────┘        
+# 
+#             name = rec['a']
+#             link = rec['li'][0]
+#             rnames.append("{} ({})".format(name['name'], link['use']))
+#         logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
     
+    if not got_tx:
+        User.endTransaction(tx)
     msg="Processed {} names of {} persons in {} sek".\
-        format(name_count, pers_count,time.time()-t0)
+        format(name_count, pers_count, time.time()-t0)
     logging.info(msg)
     return msg
 

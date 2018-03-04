@@ -527,7 +527,7 @@ def aseta_estimated_dates():
     return render_template("talletettu.html", text=message, uri=dburi)
 
 @shareds.app.route('/set/refnames')
-def set_person_refnames():
+def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
     message = dataupdater.set_person_refnames()

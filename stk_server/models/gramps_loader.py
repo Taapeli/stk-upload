@@ -16,7 +16,7 @@ from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.source_citation import Citation, Repository, Source
-from models.dataupdater import set_confidence_value
+from models.dataupdater import set_confidence_value, set_person_refnames
 import shareds
 
 
@@ -527,6 +527,8 @@ def handle_people(collection, username, tx):
                     
         p.save(username, tx)
         counter += 1
+        # Add links to Refnames
+        set_person_refnames(tx, p.uniq_id)
         
     logging.info("Persons stored: {} TIME {} sek".\
                   format(counter, time.time()-t0))

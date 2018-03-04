@@ -870,8 +870,9 @@ SET n.est_death = m.daterange_start"""
 
 
     def save(self, username, tx):
-        """ Tallettaa henkilön sekä mahdollisesti viitatut nimet, tapahtumat 
-            ja sitaatit kantaan 
+        """ Saves the Person object and possibly the Names, Events ja Citations
+        
+            On return, the self.uniq_id is set
         """
 
         today = str(datetime.date.today())
@@ -892,10 +893,12 @@ SET p.gramps_handle=$handle,
     p.change=$change, 
     p.id=$id, 
     p.priv=$priv, 
-    p.gender=$gender"""
-            tx.run(query, 
+    p.gender=$gender
+RETURN id(p) as uniq_id"""
+            result = tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "priv": priv, "gender": gender})
-            
+            self.uniq_id = result.single()[0]
+
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
@@ -1142,8 +1145,8 @@ class Name:
         
     
     @staticmethod
-    def get_all_personnames():
-        """ Picks all Name objects of this Person
+    def get_personnames(tx, uniq_id=None):
+        """ Picks all Name versions of this Person or all persons
     # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
     # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
     # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
@@ -1151,16 +1154,14 @@ class Name:
     # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
     # │30858│"Catharina Fredrika"│"Åkerberg"│""            │"F"  │
     # └─────┴────────────────────┴──────────┴──────────────┴─────┘
-        TODO: sex field is not used currently - Remove?
+        Sex field is not used currently - Remove?
         """
-        
-        query = """
-MATCH (n)<-[r:NAME]-(p:Person) 
-RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
-    p.gender AS sex"""
-        return shareds.driver.session().run(query)
-        
-    
+        if uniq_id:
+            return tx.run(Cypher.person_get_all_names, pid=uniq_id)
+        else:
+            return tx.run(Cypher.persons_get_all_names)
+
+
     @staticmethod
     def get_surnames():
         """ Listaa kaikki sukunimet tietokannassa """
