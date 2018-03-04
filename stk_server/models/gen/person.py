@@ -274,8 +274,10 @@ RETURN person, urls, COLLECT (name) AS names
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_birth<>''
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
                 p2.gender = p1.gender AND p2.est_birth = p1.est_birth
-                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
-                ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, 
+                n1.firstname, n1.suffix, n1.surname, 
+                ID(p2), p2.est_birth, p2.est_death, 
+                n2.firstname, n2.suffix, n2.surname]) AS ids
             """.format()
         return shareds.driver.session().run(query)
         
@@ -288,8 +290,10 @@ RETURN person, urls, COLLECT (name) AS names
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_death<>''
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
                 p2.gender = p1.gender AND p2.est_death = p1.est_death
-                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
-                ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, 
+                n1.firstname, n1.suffix, n1.surname, 
+                ID(p2), p2.est_birth, p2.est_death, 
+                n2.firstname, n2.suffix, n2.surname]) AS ids
             """.format()
         return shareds.driver.session().run(query)
 
@@ -429,24 +433,15 @@ RETURN person, urls, COLLECT (name) AS names
     def get_confidence ():
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
-
-        query = """
- MATCH (person:Person)
- OPTIONAL MATCH (person)-[:EVENT]->(event:Event)-[r:CITATION]->(c:Citation)
- RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
-                
-        return shareds.driver.session().run(query)
+        return shareds.driver.session().run(Cypher.person_get_confidence)
 
 
     def set_confidence (self, tx):
-        """ Voidaan asettaa henkilön tietojen luotettavuus arvio kantaan
+        """ Sets a quality rate to this Person
+            Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
         """
-
-        query = """
- MATCH (person:Person) WHERE ID(person)={}
- SET person.confidence='{}'""".format(self.uniq_id, self.confidence)
-                
-        return tx.run(query)
+        return tx.run(Cypher.person_set_confidence,
+                      id=self.uniq_id, confidence=self.confidence)
 
 
     @staticmethod       
@@ -504,7 +499,7 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_events_k (keys, currentuser, take_refnames=True):
+    def get_events_k (keys, currentuser, take_refnames=False):
         """  Read Persons with names, events and reference names
             called from models.datareader.read_persons_with_events
 
@@ -530,9 +525,7 @@ RETURN person, urls, COLLECT (name) AS names
 # │"id" │"firstname"     │"surname"  │"suffix"│"refnames"       │"events"         │
 # ╞═════╪════════════════╪═══════════╪════════╪═════════════════╪═════════════════╡
 # │31844│"August Wilhelm"│"Wallenius"│""      │["August","Wilhel│[[29933,"Baptism"│
-# │     │                │           │        │m","Wallenius"]  │,"1841-09-12","",│
-# │     │                │           │        │                 │"1841-09-12","",n│
-# │     │                │           │        │                 │ull]]            │
+# │     │                │           │        │m","Wallenius"]  │, ...            │
 # └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
 # There is also fields confidence, est_birth, est_death, which are empty for now 
  
@@ -877,8 +870,9 @@ SET n.est_death = m.daterange_start"""
 
 
     def save(self, username, tx):
-        """ Tallettaa henkilön sekä mahdollisesti viitatut nimet, tapahtumat 
-            ja sitaatit kantaan 
+        """ Saves the Person object and possibly the Names, Events ja Citations
+        
+            On return, the self.uniq_id is set
         """
 
         today = str(datetime.date.today())
@@ -899,10 +893,12 @@ SET p.gramps_handle=$handle,
     p.change=$change, 
     p.id=$id, 
     p.priv=$priv, 
-    p.gender=$gender"""
-            tx.run(query, 
+    p.gender=$gender
+RETURN id(p) as uniq_id"""
+            result = tx.run(query, 
                {"handle": handle, "change": change, "id": pid, "priv": priv, "gender": gender})
-            
+            self.uniq_id = result.single()[0]
+
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
@@ -1118,8 +1114,10 @@ class Name:
             MATCH (p1:Person)-[r1:NAME]->(n1:Name)
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2)
                 AND n2.surname = n1.surname AND n2.firstname = n1.firstname
-                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, n1.firstname, n1.surname, 
-                ID(p2), p2.est_birth, p2.est_death, n2.firstname, n2.surname]) AS ids
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, 
+                n1.firstname, n1.suffix, n1.surname, 
+                ID(p2), p2.est_birth, p2.est_death, 
+                n2.firstname, n2.suffix, n2.surname]) AS ids
             """.format()
         return shareds.driver.session().run(query)
 
@@ -1147,8 +1145,8 @@ class Name:
         
     
     @staticmethod
-    def get_all_personnames():
-        """ Picks all Name objects of this Person
+    def get_personnames(tx, uniq_id=None):
+        """ Picks all Name versions of this Person or all persons
     # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
     # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
     # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
@@ -1156,16 +1154,14 @@ class Name:
     # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
     # │30858│"Catharina Fredrika"│"Åkerberg"│""            │"F"  │
     # └─────┴────────────────────┴──────────┴──────────────┴─────┘
-        TODO: sex field is not used currently - Remove?
+        Sex field is not used currently - Remove?
         """
-        
-        query = """
-MATCH (n)<-[r:NAME]-(p:Person) 
-RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
-    p.gender AS sex"""
-        return shareds.driver.session().run(query)
-        
-    
+        if uniq_id:
+            return tx.run(Cypher.person_get_all_names, pid=uniq_id)
+        else:
+            return tx.run(Cypher.persons_get_all_names)
+
+
     @staticmethod
     def get_surnames():
         """ Listaa kaikki sukunimet tietokannassa """

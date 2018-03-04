@@ -10,6 +10,7 @@ from flask_security.datastore import UserDatastore
 from .seccypher import Cypher  
 from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
 import datetime
+import shareds
 import logging
 logger = logging.getLogger('neo4juserdatastore')
 
@@ -84,10 +85,10 @@ class Neo4jUserDatastore(UserDatastore):
                 raise
             
     def _put_user (self, tx, user):    # ============ New user ==============
-#        logger.debug('_put_user ', user.email, ' ', user.name)
+
 
         if len(user.roles) == 0:
-            user.roles = ['member']
+            user.roles = [shareds.DEFAULT_ROLE] 
         user.confirmed_at = None
         user.is_active = True
         try:
@@ -125,7 +126,7 @@ class Neo4jUserDatastore(UserDatastore):
             raise
 
     def _update_user (self, tx, user):
-              # Update user
+            # Update user
             rolelist = []
             for role in user.roles:
                 roleToAdd = (role.name if isinstance(role, self.role_model) else role)
@@ -445,7 +446,6 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
             return []                 
-
                                               
     def _getEmails (self, tx):
         try:
@@ -453,6 +453,33 @@ class Neo4jUserDatastore(UserDatastore):
             for record in tx.run(Cypher.get_emails):
                 emailNodes.append(record['email'])
             return emailNodes        
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+
+    def get_eail(self, email):
+        try:
+            with self.driver.session() as session:
+                emailNode = session.read_transaction(self._findEmail, email)
+                if emailNode is not None:
+                    return self.allowed_email_model(**emailNode.properties) 
+                return []
+        except ServiceUnavailable as ex:
+            logger.debug(ex.message)
+            return []                 
+                                              
+    def _getEmail (self, tx, email):
+        try:
+            emailNode = None
+            for record in tx.run(Cypher.find_email(email)):
+                emailNode = record['email']
+                return emailNode        
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      

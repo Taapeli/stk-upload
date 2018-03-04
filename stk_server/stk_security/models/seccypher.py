@@ -200,3 +200,12 @@ class Cypher():
             ORDER BY email.timestamp DESC
         '''
         )
+    
+    
+    find_email = (
+        '''
+        MATCH (email:Allowed_email)
+        RETURN DISTINCT email 
+            WHERE email.allowed_email = $email
+        ''' 
+        )

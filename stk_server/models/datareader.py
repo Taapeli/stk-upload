@@ -18,10 +18,10 @@ from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
 from models.gen.source_citation import Citation, Repository, Source
-from models.gen.user import User
+from models.gen.dates import DateRange
 
 
-def read_persons_with_events(keys=None, user=None):
+def read_persons_with_events(keys=None, user=None, take_refnames=False):
     """ Reads Person- and Event- objects for display.
         If currentuser is defined, restrict to her objects.
 
@@ -29,7 +29,7 @@ def read_persons_with_events(keys=None, user=None):
     """
     
     persons = []
-    result = Person.get_events_k(keys, user)
+    result = Person.get_events_k(keys, user, take_refnames=take_refnames)
     for record in result:
         # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
         uniq_id = record['id']
@@ -38,7 +38,7 @@ def read_persons_with_events(keys=None, user=None):
         p.confidence = record['confidence']
         p.est_birth = record['est_birth']
         p.est_death = record['est_death']
-        if record['refnames']:
+        if take_refnames and record['refnames']:
             refnlist = sorted(record['refnames'])
             p.refnames = ", ".join(refnlist)
         pname = Name()
@@ -54,136 +54,27 @@ def read_persons_with_events(keys=None, user=None):
         # Events
 
         for event in record['events']:
-            # Got event with place name: [id, type, date,
-            #   datetype, daterange_start, daterange_stop, place.pname]
+            # Got event with place name: [id, type, date, dates, place.pname]
             e = Event_for_template()
             e.uniq_id = event[0]
             event_type = event[1]
             if event_type:
                 e.type = event_type
-                e.date = event[2]
-                e.datetype = event[3]
-                e.daterange_start = event[4]
-                e.daterange_stop = event[5]
-                e.place = event[6]
-        
-                if e.daterange_start != '' and e.daterange_stop != '':
-                    e.daterange = e.daterange_start + " - " + e.daterange_stop
-                elif e.daterange_start != '':
-                    e.daterange = str(e.daterange_start) + "-"
-                elif e.daterange_stop != '':
-                    e.daterange = "-" + str(e.daterange_stop)
-                
+                dates = DateRange(event[2])
+                e.dates = str(dates)
+                e.date = dates.estimate()
+                e.place = event[3]
+#                 if e.daterange_start != '' and e.daterange_stop != '':
+#                     e.daterange = e.daterange_start + " - " + e.daterange_stop
+#                 elif e.daterange_start != '':
+#                     e.daterange = str(e.daterange_start) + "-"
+#                 elif e.daterange_stop != '':
+#                     e.daterange = "-" + str(e.daterange_stop)
                 p.events.append(e)
  
         persons.append(p)
 
     return (persons)
-
-
-def set_confidence_value(tx):
-    """ Asettaa henkilölle laatu arvion
-    """
-    
-    counter = 0
-        
-    result = Person.get_confidence()
-    for record in result:
-        p = Person()
-        p.uniq_id = record["uniq_id"]
-        
-        if len(record["list"]) > 0:
-            sumc = 0
-            for ind in record["list"]:
-                sumc += int(ind)
-                
-            confidence = sumc/len(record["list"])
-            p.confidence = "%0.1f" % confidence # confidence with one decimal
-        p.set_confidence(tx)
-            
-        counter += 1
-            
-    text = "Number of confidences set: " + str(counter)
-    return (text)
-
-
-def set_estimated_dates():
-    """ Asettaa henkilölle arvioidut syntymä- ja kuolinajat
-    """
-    
-    message = []
-        
-    msg = Person.set_estimated_dates()
-                        
-    text = "Estimated birth and death dates set. " + msg
-    message.append(text)
-    return (message)
-    
-    
-def set_person_refnames():
-    """ Set Refnames to all Persons
-    """
-    pers_count = 0
-    name_count = 0
-    t0 = time.time()
-
-    persons = Name.get_all_personnames()
-    # Process each name part (first names, surname, patronyme)
-    for rec in persons:
-        # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
-        # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
-        # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
-        # │30796│"Björn"             │""        │"Jönsson"     │"M"  │
-        # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
-        # │30827│"Johan"             │"Sibbes"  │""            │"M"  │
-        # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
-        # │30844│"Maria Elisabet"    │""        │"Johansdotter"│"F"  │
-        # └─────┴────────────────────┴──────────┴──────────────┴─────┘
-        # Build new refnames
-        pid = rec["ID"]
-        firstname = rec["fn"]
-        surname = rec["sn"]
-        patronyme = rec["pn"]
-        #gender = rec["sex"]
-        tx = User.beginTransaction()
-
-        # 1. firstnames
-        if firstname and firstname != 'N':
-            for name in firstname.split(' '):
-                Refname.link_to_refname(pid, name, 'firstname')
-                name_count += 1
-
-        # 2. surname and patronyme
-        if surname and surname != 'N':
-            Refname.link_to_refname(pid, surname, 'surname')
-            name_count += 1
-
-        if patronyme:
-            Refname.link_to_refname(pid, patronyme, 'patronyme')
-            name_count += 1
-        User.endTransaction(tx)
-        pers_count += 1
-
-        # ===    Report status    ====
-        rnames = []
-        recs = Person.get_refnames(pid)
-        for rec in recs:
-            # ╒══════════════════════════╤═════════════════════╕
-            # │"a"                       │"li"                 │
-            # ╞══════════════════════════╪═════════════════════╡
-            # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
-            # │":"Messu- ja kalenteri"}  │                     │
-            # └──────────────────────────┴─────────────────────┘        
-
-            name = rec['a']
-            link = rec['li'][0]
-            rnames.append("{} ({})".format(name['name'], link['use']))
-        logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
-    
-    msg="Processed {} names of {} persons in {} sek".\
-        format(name_count, pers_count,time.time()-t0)
-    logging.info(msg)
-    return msg
 
 
 def read_refnames():
@@ -292,18 +183,8 @@ def read_cite_sour_repo(uniq_id=None):
             e.type = record_cite['type']
         if record_cite['date']:
             e.date = record_cite['date']
-        if record_cite['datetype']:
-            e.datetype = record_cite['datetype']
-        if record_cite['daterange_start']:
-            e.daterange_start = record_cite['daterange_start']
-        if record_cite['daterange_stop']:
-            e.daterange_stop = record_cite['daterange_stop']
-        if e.daterange_start != '' and e.daterange_stop != '':
-            e.daterange = e.daterange_start + " - " + e.daterange_stop
-        elif e.daterange_start != '':
-            e.daterange = e.daterange_start + " - "
-        elif e.daterange_stop != '':
-            e.daterange = " - " + e.daterange_stop
+        if record_cite['dates']:
+            e.dates = DateRange(record_cite['dates'])
 
         for source_cite in record_cite['sources']:
             c = Citation()
@@ -631,7 +512,7 @@ def get_people_by_surname(surname):
 def get_person_data_by_id(uniq_id):
     """ Get 5 data sets:
         person: uniq_id and name data
-        events list: uniq_id, date, location name and id (?)
+        events list: uniq_id, dates, location name and id (?)
         photos
         sources
         families
@@ -651,14 +532,7 @@ def get_person_data_by_id(uniq_id):
         e = Event_for_template()
         e.uniq_id = p.eventref_hlink[i]
         e.role = p.eventref_role[i]
-        e.get_event_data_by_id()
-        
-        if e.daterange_start != '' and e.daterange_stop != '':
-            e.daterange = e.daterange_start + " - " + e.daterange_stop
-        elif e.daterange_start != '':
-            e.daterange = str(e.daterange_start) + "-"
-        elif e.daterange_stop != '':
-            e.daterange = "-" + str(e.daterange_stop)
+        e.get_event_data_by_id()        # Read data to e
             
         if e.place_hlink != '':
             place = Place()
@@ -797,13 +671,6 @@ def get_baptism_data(uniq_id):
     e.uniq_id = uniq_id
     e.get_event_data_by_id()
     
-    if e.daterange_start != '' and e.daterange_stop != '':
-        e.daterange = e.daterange_start + " - " + e.daterange_stop
-    elif e.daterange_start != '':
-        e.daterange = str(e.daterange_start) + "-"
-    elif e.daterange_stop != '':
-        e.daterange = "-" + str(e.daterange_stop)
-        
     if e.place_hlink != '':
         place = Place()
         place.uniq_id = e.place_hlink
@@ -899,9 +766,7 @@ def get_place_with_events (loc_id):
         uid           person's uniq_id
         names         list of tuples [name_type, given_name, surname]
         etype         event type
-        edate         event date
-        edatetype     event date type
-        edaterange    event daterange
+        edates        event date
     """
     place = Place()
     place.uniq_id = int(loc_id)
@@ -917,4 +782,9 @@ def get_notes(uniq_id=None):
     
     titles, notes = Note.get_notes(uniq_id)
     return (titles, notes)
+
+
+def xml_to_neo4j(pathname, userid='Taapeli'):
+    """ See models.gramps_loader """
+    raise RuntimeError("Use the method models.gramps_loader.xml_to_neo4j")
 

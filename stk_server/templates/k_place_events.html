@@ -10,25 +10,25 @@
 {{ macro.menu(4) }}
 
     <div class="content" id="IndividualDetail">
-      {% if place.coord_lat and place.coord_long %}
-        <div id="map">{% if '°' in place.coord_lat %}
-        Virheelliset koordinaatit: {{place.coord_lat}}, {{place.coord_long}}
+      {% if place.coord %}
+        <div id="map">{% if '°' in place.coord %}
+        Virheelliset koordinaatit: {{place.coord}}
         &mdash; pitäisi olla desimaalimuodossa
         {% else %}{% set r = 0.15 %}
-            {% set y = place.coord_lat|float %}
-            {% set x = place.coord_long|float %}
+            {% set y = place.coord[0] %}
+            {% set x = place.coord[1] %}
             <iframe width="250" height="250" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
             src="http://www.openstreetmap.org/export/embed.html?bbox={{
              x - r }}%2C{{ y - r }}%2C{{ x + r  }}%2C{{ y + r 
-             }}&amp;layer=mapnik&amp;marker={{place.coord_lat}}%2C{{place.coord_long}}" 
+             }}&amp;layer=mapnik&amp;marker={{place.coord[0]}}%2C{{place.coord[1]}}" 
             style="border: 1px solid black"></iframe><br/><!--small--><a 
-            href="http://www.openstreetmap.org/?mlat={{place.coord_lat}}&amp;mlon={{
-             place.coord_long}}#map=9/{{place.coord_lat}}/{{place.coord_long}}">
+            href="http://www.openstreetmap.org/?mlat={{place.coord[0]}}&amp;mlon={{
+             place.coord[1]}}#map=9/{{place.coord[0]}}/{{place.coord[1]}}">
             - OpenstreetMap isommalla kartalla</a><!--/small--><br>
-            <a target="_blank" href="https://www.google.fi/maps/@{{place.coord_lat}},{{place.coord_long}},14z?hl=fi">
+            <a target="_blank" href="https://www.google.fi/maps/@{{place.coord[0]}},{{place.coord[1]}},14z?hl=fi">
             - Google-kartalle</a><br>&nbsp;<br>
-            Sijainti: N&nbsp;{{ '{0:0.4f}'.format(place.coord_lat|float) }}, 
-            E&nbsp;{{ '{0:0.4f}'.format(place.coord_long|float) }}
+            Sijainti: N&nbsp;{{ '{0:0.4f}'.format(place.coord[0]) }}, 
+            E&nbsp;{{ '{0:0.4f}'.format(place.coord[1]) }}
         {% endif %}</div>
       {% endif %}
 
@@ -107,7 +107,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events|sort(attribute='edate') %}
+        {% for e in events|sort(attribute='date') %}
                     <tr>
                         <td class="ColumnPerson">
                             <a href="/person/uniq_id={{e.uid}}" class="id"
@@ -127,9 +127,7 @@
                         </td>
                         <td class="ColumnEvent">{{e.etype|transl('evt')}}
                           {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}</td>
-                        <td class="ColumnDate">{% if e.edatetype %} {{e.edatetype}} {% endif %}
-                            {% if e.edate %}{{e.edate|pvm}}
-                        	{% elif e.edaterange %}{{e.edaterange}}{% endif %}</td>
+                        <td class="ColumnDate">{{e.edates}}</td>
 <!--
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">
