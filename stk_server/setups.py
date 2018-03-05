@@ -1,6 +1,7 @@
 from flask import Flask, session
 from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import RegisterForm, ConfirmRegisterForm, Required, StringField
+from wtforms import ValidationError, validators
 from flask_security.utils import _
 from flask_mail import Mail
 from stk_security.models.neo4jengine import Neo4jEngine 
@@ -12,6 +13,9 @@ import logging
 logger = logging.getLogger('stkserver') 
 import shareds
 from templates import jinja_filters 
+
+email_val = "MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN COUNT(a)"
+
 
 #===================== Classes to create user session ==========================
 
@@ -83,17 +87,28 @@ class UserProfile():
 class AllowedEmail():
     allowed_email = ''
     default_role = ''
+    admin_name = ''
     timestamp = None
        
     def __init__(self, **kwargs):
         self.allowed_email = kwargs['allowed_email']
         self.default_role = kwargs.get('default_role')        
-
+        self.admin_name = kwargs.get('admin_name')
 
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
+    email = StringField('Email', validators=[validators.InputRequired()])
+    def validate_email(self, field):
+        for record in shareds.driver.session().run(email_val, email=field.data):
+            return (record['COUNT(a)']) > 0
+#        if not shareds.user_datastore.email_accepted(field.data):
+        raise ValidationError('Email address must be an authorized one')     
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
     language = StringField('Language', validators=[Required('Language required')])
+    
+
+#        utils.do_flash('Email not accepted')
+
 
 #===============================================================================
 
