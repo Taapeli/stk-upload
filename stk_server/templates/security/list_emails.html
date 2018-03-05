@@ -22,18 +22,19 @@
         
         <section id="lista">
         <table>
-            <tr><th>email</th><th>role</th>
+            <tr><th>Email</th><th>Role</th><th>Admin</th>
             </tr>
-        {% if emails %}
-            {% for e in emails %}
-                <tr>
-                    <td>{{e.allowed_email}}</td>
-                    <td>{{e.default_role}}</td>
-                </tr>
-            {% endfor %}
-        {% else %}
-                <tr><td colspan="1">Ei tietoja</td></tr>
-        {% endif %}
+	        {% if emails %}
+	            {% for e in emails %}
+	                <tr>
+	                    <td>{{e.allowed_email}}</td>
+	                    <td>{{e.default_role}}</td>
+	                    <td>{{e.admin_name}}</td>
+	                </tr>
+	            {% endfor %}
+	        {% else %}
+	                <tr><td colspan="1">Ei tietoja</td></tr>
+	        {% endif %}
         </table>
         </section>
     </div>
