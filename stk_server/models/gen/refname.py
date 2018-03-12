@@ -210,7 +210,7 @@ class Refname:
             result = tx.run(Cypher.refname_link_person_to,
                             pid=pid, name=name, use=reftype)
 
-            logging.debug("Created {} nodes for {}".format(\
+            logging.debug("Created Refname {} nodes for {}".format(\
                     result.summary().counters.nodes_created, name))
 
         except Exception as err:

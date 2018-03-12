@@ -16,7 +16,7 @@ from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.source_citation import Citation, Repository, Source
-from models.dataupdater import set_confidence_value, set_person_refnames
+from models.dataupdater import set_person_refnames
 import shareds
 
 
@@ -90,14 +90,19 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     msg.append(str(result))
     print(str(result))
     result = handle_families(collection, tx)
-    tx.commit()
+    try:
+        tx.commit()
+    except Exception as e:
+            error = "Talletus tietokantaan ei onnistunut: {}".format(e)
+            logging.error(error)
+            msg.append(error)
 
     msg.append(str(result))
     print(str(result))
     
-    tx = shareds.driver.session().begin_transaction()
-    result = set_confidence_value(tx)
-    tx.commit()
+#     tx = shareds.driver.session().begin_transaction()
+#     result = set_confidence_value(tx)
+#     tx.commit()
     logging.info("Xml_to_neo4j: Total time {} sek".\
                  format(time.time()-t0))
     msg.append(str(result))
@@ -113,7 +118,7 @@ def handle_citations(collection, tx):
     # Get all the citations in the collection
     citations = collection.getElementsByTagName("citation")
     
-    print ("*****Citations*****")
+    print ("***** {} Citations *****".format(len(citations)))
     t0 = time.time()
     counter = 0
     
@@ -175,7 +180,7 @@ def handle_events(collection, username, tx):
     # Get all the events in the collection
     events = collection.getElementsByTagName("event")
     
-    print ("*****Events*****")
+    print ("***** {} Events *****".format(len(events)))
     t0 = time.time()
     counter = 0
       
@@ -271,7 +276,7 @@ def handle_families(collection, tx):
     # Get all the families in the collection
     families = collection.getElementsByTagName("family")
     
-    print ("*****Families*****")
+    print ("***** {} Families *****".format(len(families)))
     t0 = time.time()
     counter = 0
     
@@ -342,7 +347,7 @@ def handle_notes(collection, tx):
     # Get all the notes in the collection
     notes = collection.getElementsByTagName("note")
 
-    print ("*****Notes*****")
+    print ("***** {} Notes *****".format(len(notes)))
     t0 = time.time()
     counter = 0
 
@@ -380,7 +385,7 @@ def handle_media(collection, tx):
     # Get all the media in the collection (in Gramps 'object')
     media = collection.getElementsByTagName("object")
 
-    print ("*****Media*****")
+    print ("***** 1 Media *****".format(len(media)))
     t0 = time.time()
     counter = 0
 
@@ -420,7 +425,7 @@ def handle_people(collection, username, tx):
     # Get all the people in the collection
     people = collection.getElementsByTagName("person")
     
-    print ("*****People*****")
+    print ("***** {} Persons *****".format(len(people)))
     t0 = time.time()
     counter = 0
     
@@ -541,7 +546,7 @@ def handle_places(collection, tx):
     # Get all the places in the collection
     places = collection.getElementsByTagName("placeobj")
     
-    print ("*****Places*****")
+    print ("***** {} Places *****".format(len(places)))
     t0 = time.time()
     counter = 0
     
@@ -628,7 +633,7 @@ def handle_repositories(collection, tx):
     # Get all the repositories in the collection
     repositories = collection.getElementsByTagName("repository")
     
-    print ("*****Repositories*****")
+    print ("***** {} Repositories *****".format(len(repositories)))
     t0 = time.time()
     counter = 0
     
@@ -680,7 +685,7 @@ def handle_sources(collection, tx):
     # Get all the sources in the collection
     sources = collection.getElementsByTagName("source")
     
-    print ("*****Sources*****")
+    print ("***** {} Sources *****".format(len(sources)))
     t0 = time.time()
     counter = 0
     
