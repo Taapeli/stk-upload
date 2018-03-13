@@ -70,7 +70,7 @@ def list_emails():
 def list_users():
     # Käytetään neo4juserdatastorea
     lista = shareds.user_datastore.get_users()
-    return render_template("security/table_users.html", users=lista)  
+    return render_template("security/list_users.html", users=lista)  
 
 
 @shareds.app.route('/tables')
