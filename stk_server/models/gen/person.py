@@ -430,10 +430,13 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_confidence ():
+    def get_confidence (uniq_id=None):
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
-        return shareds.driver.session().run(Cypher.person_get_confidence)
+        if uniq_id:
+            return shareds.driver.session().run(Cypher.person_get_confidence)
+        else:
+            return shareds.driver.session().run(Cypher.person_get_confidences_all)
 
 
     def set_confidence (self, tx):

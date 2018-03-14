@@ -16,7 +16,7 @@ from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.source_citation import Citation, Repository, Source
-from models.dataupdater import set_person_refnames
+from models.dataupdater import set_confidence_value, set_person_refnames
 import shareds
 
 
@@ -49,7 +49,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler = DOM_handler(DOMTree.documentElement, userid)
     handler.begin_tx(shareds.driver.session())
 
-    handler.put_info("Storing XML file to Neo4j database:")
+    handler.put_message("Storing XML file to Neo4j database:")
 
     handler.handle_notes()
     handler.handle_repositories()
@@ -65,13 +65,15 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     
     handler.commit()
 
-#     tx = shareds.driver.session().begin_transaction()
-#     result = set_confidence_value(self.tx)
-#     tx.commit()
+    # Set person confidence values
+    handler.begin_tx(shareds.driver.session())
+    result_text = set_confidence_value(handler.tx)
+    handler.put_message(result_text)
+    tx.commit()
 
     msg = "Xml_to_neo4j: Total time {} sek".format(time.time()-t0)
-    handler.put_info(msg)
-    return(handler.msg)
+    handler.put_message(msg)
+    return(handler.get_messages())
 
 # -----------------------------------------------------------------------------
 
@@ -102,10 +104,15 @@ class DOM_handler():
                 logging.error(error)
                 self.msg.append(error)
 
-    def put_info(self, msg):
+    def put_message(self, msg, level="INFO"):
         ''' Add info message to messages list '''
-        print(str(msg))
+        #TODO: ehkä myös level pitäisi tallellettaa
+        print("{}: {}".format(level, msg))
         self.msg.append(str(msg))
+
+    def get_messages(self):
+        ''' Return all info messages '''
+        return self.msg
 
     # XML subtree handlers 
 
@@ -167,7 +174,7 @@ class DOM_handler():
         logging.info("Citations stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "Citations stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
 
 
     def handle_events(self):
@@ -262,7 +269,7 @@ class DOM_handler():
         logging.info("Events stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "Events stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
 
 
     def handle_families(self):
@@ -332,7 +339,7 @@ class DOM_handler():
         logging.info("Families stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "Families stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
 
 
     def handle_notes(self):
@@ -369,7 +376,7 @@ class DOM_handler():
         logging.info("Notes stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "Notes stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
 
 
     def handle_media(self):
@@ -408,7 +415,7 @@ class DOM_handler():
         logging.info("Modia objects stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "Media objects stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
 
 
     def handle_people(self):
@@ -522,13 +529,11 @@ class DOM_handler():
 
             p.save(self.username, self.tx)
             counter += 1
-            # Add links to Refnames
-            set_person_refnames(self.tx, p.uniq_id)
 
         logging.info("Persons stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "People stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
 
 
     def handle_places(self):
@@ -614,7 +619,7 @@ class DOM_handler():
         logging.info("Places stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "Places stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
 
 
     def handle_repositories(self):
@@ -665,7 +670,7 @@ class DOM_handler():
         logging.info("Repositories stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "Repositories stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
 
 
     def handle_sources(self):
@@ -716,7 +721,14 @@ class DOM_handler():
         logging.info("Sources stored: {} TIME {} sek".\
                       format(counter, time.time()-t0))
         msg = "Sources stored: " + str(counter)
-        self.put_info(msg)
+        self.put_message(msg)
+
+
+    def set_refnames(self):
+        ''' Add links from each Person to Refnames '''
+        
+        for p_id in self.uniq_ids:
+            set_person_refnames(self.tx, p_id)
 
 
     @staticmethod
