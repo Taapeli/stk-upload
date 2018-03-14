@@ -65,11 +65,13 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     
     handler.commit()
 
-    # Set person confidence values
+    # Set person confidence values (for all persons!)
     handler.begin_tx(shareds.driver.session())
     result_text = set_confidence_value(handler.tx)
     handler.put_message(result_text)
-    tx.commit()
+    # Set Refname links (for imported persons)
+    handler.set_refnames()
+    handler.commit()
 
     msg = "Xml_to_neo4j: Total time {} sek".format(time.time()-t0)
     handler.put_message(msg)
