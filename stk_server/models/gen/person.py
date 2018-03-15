@@ -430,10 +430,13 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_confidence ():
+    def get_confidence (uniq_id=None):
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
-        return shareds.driver.session().run(Cypher.person_get_confidence)
+        if uniq_id:
+            return shareds.driver.session().run(Cypher.person_get_confidence)
+        else:
+            return shareds.driver.session().run(Cypher.person_get_confidences_all)
 
 
     def set_confidence (self, tx):
@@ -499,7 +502,7 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod       
-    def get_events_k (keys, currentuser, take_refnames=True):
+    def get_events_k (keys, currentuser, take_refnames=False):
         """  Read Persons with names, events and reference names
             called from models.datareader.read_persons_with_events
 
@@ -870,8 +873,9 @@ SET n.est_death = m.daterange_start"""
 
 
     def save(self, username, tx):
-        """ Tallettaa henkilön sekä mahdollisesti viitatut nimet, tapahtumat 
-            ja sitaatit kantaan 
+        """ Saves the Person object and possibly the Names, Events ja Citations
+        
+            On return, the self.uniq_id is set
         """
 
         today = str(datetime.date.today())
@@ -879,69 +883,53 @@ SET n.est_death = m.daterange_start"""
             handles = models.dbutil.get_new_handles(3)
             self.handle = handles.pop()
 
-        # Talleta Person node
+        # Save the Person node under UserProfile; all attributes are replaced
         try:
-            handle = self.handle
-            change = self.change
-            pid = self.id
-            priv = self.priv
-            gender = self.gender
+            p_attr = {
+                "gramps_handle": self.handle, 
+                "change": self.change, 
+                "id": self.id, 
+                "priv": self.priv, 
+                "gender": self.gender
+            }
             query = """
-CREATE (p:Person) 
-SET p.gramps_handle=$handle, 
-    p.change=$change, 
-    p.id=$id, 
-    p.priv=$priv, 
-    p.gender=$gender"""
-            tx.run(query, 
-               {"handle": handle, "change": change, "id": pid, "priv": priv, "gender": gender})
-            
+MATCH (u:UserProfile {userName: $username})
+MERGE (p:Person {gramps_handle: $p_attr.gramps_handle}) 
+MERGE (u) -[r:REVISION {date: $date}]-> (p)
+    SET p = $p_attr
+RETURN id(p) as uniq_id"""
+            result = tx.run(query, username=username, p_attr=p_attr, date=today)
+#             self.uniq_id = result.single()[0]
+            for res in result:
+                self.uniq_id = res[0]
+                print("Person {} ".format(self.uniq_id))
+
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
-        # Linkitä User nodeen
-        try:
-            query = """
-MATCH (u:UserProfile) WHERE u.userName=$username
-MATCH (n:Person) WHERE n.gramps_handle=$handle
-MERGE (u)-[r:REVISION]->(n)
-SET r.date=$date"""
-            tx.run(query, 
-               {"username": username, "handle": handle, "date": today})
-        except Exception as err:
-            print("Virhe (Person.save:User): {0}".format(err), file=stderr)
-            
-        # Talleta Name nodet ja linkitä henkilöön
+        # Save Name nodes under the Person node
         if len(self.names) > 0:
             try:
                 names = self.names
                 for name in names:
-                    p_alt = name.alt
-                    p_type = name.type
-                    p_firstname = name.firstname
-                    p_refname = name.refname
-                    p_surname = name.surname
-                    p_suffix = name.suffix
-                    
+                    n_attr = {
+                        "alt": name.alt, 
+                        "type": name.type, 
+                        "firstname": name.firstname, 
+                        "refname": name.refname, 
+                        "surname": name.surname, 
+                        "suffix": name.suffix
+                    }
                     query = """
-CREATE (m:Name) 
-SET m.alt=$alt, 
-    m.type=$type, 
-    m.firstname=$firstname, 
-    m.refname=$refname, 
-    m.surname=$surname, 
-    m.suffix=$suffix
-WITH m
-MATCH (n:Person) WHERE n.gramps_handle=$handle
-MERGE (n)-[r:NAME]->(m)"""
-                    tx.run(query, 
-                       {"alt": p_alt, "type": p_type, "firstname": p_firstname, 
-                        "refname": p_refname, "surname": p_surname, 
-                        "suffix": p_suffix, "handle": handle})
+CREATE (n:Name) SET n = $n_attr
+WITH n
+MATCH (p:Person {gramps_handle:$p_handle})
+MERGE (p)-[r:NAME]->(n)"""
+                    tx.run(query, n_attr=n_attr, p_handle=self.handle)
             except Exception as err:
                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
             
-        # Talleta Weburl nodet ja linkitä henkilöön
+        # Save Weburl nodes under the Person
         if len(self.urls) > 0:
             for url in self.urls:
                 url_priv = url.priv
@@ -955,12 +943,12 @@ CREATE (n)-[wu:WEBURL]->
                 type: {url_type}, description: {url_description}})"""
                 try:
                     tx.run(query, 
-                           {"handle": handle, "url_priv": url_priv, "url_href": url_href,
+                           {"handle": self.handle, "url_priv": url_priv, "url_href": url_href,
                             "url_type":url_type, "url_description":url_description})
                 except Exception as err:
                     print("Virhe (Person.save:create Weburl): {0}".format(err), file=stderr)
 
-        # Make possible relations to the Event node
+        # Make Event relations (if Events were stored in self.events)
         if len(self.events) > 0:
             ''' Create and connect to an Person.event[*] '''
             query = """
@@ -983,31 +971,23 @@ CREATE (n)-[r:EVENT {role: {role}}]->
                 except Exception as err:
                     print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
 
+        # Make Event relations by hlinks (from gramps_loader)
         elif len(self.eventref_hlink) > 0:
-            ''' Connect to an Event loaded form Gramps '''
+            ''' Connect to each Event loaded form Gramps '''
             for i in range(len(self.eventref_hlink)):
                 try:
                     eventref_hlink = self.eventref_hlink[i]
-                    query = """
-MATCH (n:Person) WHERE n.gramps_handle=$handle
-MATCH (m:Event)  WHERE m.gramps_handle=$eventref_hlink
-MERGE (n)-[r:EVENT]->(m)"""
-                    tx.run(query, 
-                       {"handle": handle, "eventref_hlink": eventref_hlink})
-                except Exception as err:
-                    print("Virhe (Person.save:Event 1): {0}".format(err), file=stderr)
-
-                try:
                     role = self.eventref_role[i]
                     query = """
-MATCH (n:Person)-[r:EVENT]->(m:Event)
-    WHERE n.gramps_handle=$handle AND m.gramps_handle=$eventref_hlink
-SET r.role =$role"""
+match (n:Person {gramps_handle:$handle})
+match (m:Event {gramps_handle:$eventref_hlink})
+merge (n) -[r:EVENT {role: $role}]-> (m)
+"""
                     tx.run(query, 
-                       {"handle": handle, "eventref_hlink": eventref_hlink, "role": role})
+                       {"handle": self.handle, "eventref_hlink": eventref_hlink, "role": role})
                 except Exception as err:
-                    print("Virhe (Person.save:Event 2): {0}".format(err), file=stderr)
-   
+                    print("Virhe (Person.save:Event): {0}".format(err), file=stderr)
+
         # Make relations to the Media node
         if len(self.objref_hlink) > 0:
             for i in range(len(self.objref_hlink)):
@@ -1018,7 +998,7 @@ MATCH (n:Person)   WHERE n.gramps_handle=$handle
 MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
 MERGE (n)-[r:MEDIA]->(m)"""
                     tx.run(query, 
-                           {"handle": handle, "objref_hlink": objref_hlink})
+                           {"handle": self.handle, "objref_hlink": objref_hlink})
                 except Exception as err:
                     print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
    
@@ -1035,7 +1015,7 @@ MATCH (n:Person)   WHERE n.gramps_handle=$handle
 MATCH (m:Note) WHERE m.gramps_handle=$noteref_hlink
 MERGE (n)-[r:NOTE]->(m)"""
                     tx.run(query, 
-                           {"handle": handle, "noteref_hlink": noteref_hlink})
+                           {"handle": self.handle, "noteref_hlink": noteref_hlink})
                 except Exception as err:
                     print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
    
@@ -1048,7 +1028,7 @@ MATCH (n:Person)   WHERE n.gramps_handle=$handle
 MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
 MERGE (n)-[r:CITATION]->(m)"""
                 tx.run(query, 
-                       {"handle": handle, "citationref_hlink": citationref_hlink})
+                       {"handle": self.handle, "citationref_hlink": citationref_hlink})
             except Exception as err:
                 print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
 #        session.close()
@@ -1142,8 +1122,8 @@ class Name:
         
     
     @staticmethod
-    def get_all_personnames():
-        """ Picks all Name objects of this Person
+    def get_personnames(tx, uniq_id=None):
+        """ Picks all Name versions of this Person or all persons
     # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
     # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
     # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
@@ -1151,16 +1131,14 @@ class Name:
     # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
     # │30858│"Catharina Fredrika"│"Åkerberg"│""            │"F"  │
     # └─────┴────────────────────┴──────────┴──────────────┴─────┘
-        TODO: sex field is not used currently - Remove?
+        Sex field is not used currently - Remove?
         """
-        
-        query = """
-MATCH (n)<-[r:NAME]-(p:Person) 
-RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
-    p.gender AS sex"""
-        return shareds.driver.session().run(query)
-        
-    
+        if uniq_id:
+            return tx.run(Cypher.person_get_all_names, pid=uniq_id)
+        else:
+            return tx.run(Cypher.persons_get_all_names)
+
+
     @staticmethod
     def get_surnames():
         """ Listaa kaikki sukunimet tietokannassa """

@@ -188,6 +188,7 @@ class Cypher():
         CREATE (email:Allowed_email 
             {allowed_email : $email,
             default_role : $role,
+            admin_name : $admin_name,
             timestamp : timestamp() })
         '''
         )
@@ -202,10 +203,11 @@ class Cypher():
         )
     
     
-    find_email = (
+    email_find = (
         '''
         MATCH (email:Allowed_email)
-        RETURN DISTINCT email 
             WHERE email.allowed_email = $email
+        RETURN email     
         ''' 
         )
+    
