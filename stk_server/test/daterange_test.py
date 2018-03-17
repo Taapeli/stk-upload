@@ -123,6 +123,31 @@ class Test(unittest.TestCase):
         self.assertEqual(d.to_list(), [21, "2017-10-16"])
         self.assertEqual(str(d), "arviolta noin 16.10.2017")
 
+    def testDateRange_digital_format(self):
+        """
+        Convert "2015-03-16" to int and vice versa
+        """
+        s = "2047-01-09"
+        d = DateRange.date_to_int(s)
+        ds = DateRange.int_to_date(d)
+        self.assertEqual(s, ds)
+        
+        s = "1900-12-31"
+        d = DateRange.date_to_int(s)
+        ds = DateRange.int_to_date(d)
+        self.assertEqual(s, ds)
+        
+        s = "1800-09"
+        d = DateRange.date_to_int(s)
+        ds = DateRange.int_to_date(d)
+        self.assertEqual(s + '-00', ds)
+        
+        s = "1700"
+        d = DateRange.date_to_int(s)
+        ds = DateRange.int_to_date(d)
+        self.assertEqual(s + '-00-00', ds)
+        
+
 
 #     def testDate_compare_DR_DATE(self):
 #         ''' Compare DR_DATE to other date types '''

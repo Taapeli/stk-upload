@@ -71,10 +71,10 @@ class DateRange():
             method, and the components formats are not checked.
         '''
 
-        if not args[0]:
-            # Creating an empty date
-            self.vec = [0, "", None]
-            return
+#         if not args[0]:
+#             # Creating an empty date
+#             self.vec = [0, "", None]
+#             return
 
         if len(args) == 1:
             if isinstance(args[0], (list,tuple)) and len(args[0]) in [2, 3]:
@@ -319,6 +319,81 @@ class DateRange():
         except:
             return date_str
 
+    @staticmethod
+    def date_to_int(date_str):
+        """ Converts a date like '2017-09-20' or '2017-09' or '2017'
+            to int value, which can be easily compared.
+
+            The missing day or month value is set in the middle of
+            year or month respectively, as if '6½th month' and '15½th day'.
+
+            'yyyy-mm-dd'            
+            a[0]  a[1]  a[2]   | y       m       d
+            -------------------+-----------------------
+            9999               | a[0]    7       0
+            9999  1..6         | a[0]    a[1]-1  16
+            9999  7..12        | a[0]    a[1]    16
+            9999  99    1..15  | a[0]    *       a[2]-1
+            9999  99    16..31 | a[0]    *       a[2]
+
+            return      (d*32 + m)*32 + y
+
+            date '2047-02-02' gives binary
+                0000 0000 0001 1111 ¤ 1111 1100 0010 0001
+                             y yyyy ¤ yyyy yymm mmmd dddd
+                0....:....1....:....2. ...:. ...3.
+                0000000000011111111111 00001 00001
+                           yyyyyyyyyyy mmmmm ddddd
+                           [0:21]    [22:26] [27:31]
+        """
+        a = date_str.split('-', 2)
+        dy = int(a[0])
+        if len(a) == 1 or a[1] == '00':
+            dm = 7
+            dd = 16
+        else:
+            dm = int(a[1])
+            if dm < 7:
+                dm -= 1
+
+            if len(a) == 2 or a[2] == '00':
+                dd = 16
+            else:
+                dd = int(a[2])
+                if dd < 16:
+                    dd -= 1
+
+        ret = (dy<<10) | (dm<<5) | dd
+        print("{:4d} {:02d} {:02d} = {:07d} / {:032b} internal".\
+              format(dy,dm,dd, ret, ret))
+
+        return ret
+
+    @staticmethod
+    def int_to_date(date_int):
+        """ Converts an int date to ISO date string.
+                0....:....1....:....2. ...:. ...3.
+                0000000000011111111111 00001 00001
+                           yyyyyyyyyyy mmmmm ddddd
+                           [0:21]    [22:26] [27:31]
+        """
+        dy = date_int >> 10
+        dm = (date_int >> 5) & 0x0f
+        dd = date_int & 0x1f
+
+        if dm < 7:
+            dm += 1
+        elif dm == 7:
+            dm = 0
+        
+        if dd < 16:
+            dd += 1
+        elif dd == 16:
+            dd = 0
+
+        s = "{:04d}-{:02d}-{:02d}".format(dy, dm, dd)
+        print (s + " returned")
+        return s
 
 class Gramps_DateRange(DateRange):
     '''
