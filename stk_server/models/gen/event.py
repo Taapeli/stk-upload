@@ -9,6 +9,9 @@ from sys import stderr
 #from flask import g
 from models.gen.dates import DateRange
 import  shareds
+from models.gen.cypher import Cypher
+from models.gramps.cypher_gramps import Cypher_w_handle
+
 
 class Event:
     """ Tapahtuma
@@ -369,13 +372,7 @@ RETURN ID(place) AS uniq_id"""
             "attr_type": self.attr_type, 
             "attr_value": self.attr_value}
         try:
-            query = """
-MATCH (u:UserProfile) WHERE u.userName=$username 
-MERGE (e:Event {gramps_handle: $e_attr.gramps_handle}) 
-    SET e = $e_attr
-MERGE (u) -[r:REVISION {date: $date}]-> (e)
-"""
-            tx.run(query, 
+            tx.run(Cypher_w_handle.event_save, 
                {"username": username, "date": today, "e_attr": e_attr})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
@@ -384,12 +381,8 @@ MERGE (u) -[r:REVISION {date: $date}]-> (e)
             # Make relation to the Place node
             if self.place_hlink != '':
                 place_hlink = self.place_hlink
-                query = """
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Place) WHERE m.gramps_handle=$place_hlink
-MERGE (n)-[r:PLACE]->(m)"""  
-                tx.run(query, 
-               {"handle": self.handle, "place_hlink": place_hlink})
+                tx.run(Cypher_w_handle.event_link_place, 
+                       {"handle": self.handle, "place_hlink": place_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -397,12 +390,8 @@ MERGE (n)-[r:PLACE]->(m)"""
             # Make relation to the Note node
             if self.noteref_hlink != '':
                 noteref_hlink = self.noteref_hlink
-                query = """
-MATCH (e:Event) WHERE e.gramps_handle=$handle
-MATCH (n:Note) WHERE n.gramps_handle=$noteref_hlink
-MERGE (e)-[r:NOTE]->(n)"""                       
-                tx.run(query, 
-               {"handle": self.handle, "noteref_hlink": noteref_hlink})
+                tx.run(Cypher_w_handle.event_link_note, 
+                       {"handle": self.handle, "noteref_hlink": noteref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -410,25 +399,17 @@ MERGE (e)-[r:NOTE]->(n)"""
             # Make relation to the Citation node
             if self.citationref_hlink != '':
                 citationref_hlink = self.citationref_hlink
-                query = """
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
-MERGE (n)-[r:CITATION]->(m)"""                       
-                tx.run(query, 
-               {"handle": self.handle, "citationref_hlink": citationref_hlink})
+                tx.run(Cypher_w_handle.event_link_citation, 
+                       {"handle": self.handle, "citationref_hlink": citationref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
         try:
-            # Make relation to the Object node
+            # Make relation to the Media node
             if self.objref_hlink != '':
                 objref_hlink = self.objref_hlink
-                query = """
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
-MERGE (n)-[r:Media]->(m)"""                       
-                tx.run(query, 
-               {"handle": self.handle, "objref_hlink": objref_hlink})
+                tx.run(Cypher_w_handle.event_link_media, 
+                       {"handle": self.handle, "objref_hlink": objref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             

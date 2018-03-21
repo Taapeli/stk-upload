@@ -785,6 +785,6 @@ def get_notes(uniq_id=None):
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
-    """ See models.gramps_loader """
-    raise RuntimeError("Use the method models.gramps_loader.xml_to_neo4j")
+    """ See models.gramps.gramps_loader """
+    raise RuntimeError("Use the method models.gramps.gramps_loader.xml_to_neo4j")
 

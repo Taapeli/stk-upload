@@ -2,6 +2,11 @@
 # 12.2.2018 / JMä
 
 class Cypher():
+    '''
+    Cypher clauses for reading and updating database.
+    
+    See gramps.cypher_gramps for updates from Gramps xml file
+    '''
 
 # --- For Event class ---------------------------------------------------------
 

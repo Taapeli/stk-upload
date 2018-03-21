@@ -15,8 +15,9 @@ from models import dbutil
 from models import loadfile            # Datan lataus käyttäjältä
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from models import dataupdater         # Tietojen päivitysmetodit
-from models import gramps_loader       # Loading a gramps xml file
 from models import cvs_refnames        # Referenssinimien luonti
+from models.gramps import gramps_loader # Loading a gramps xml file
+
 from forms import ListEmailsForm
 from templates import jinja_filters
 from admin.admin import DataAdmin
