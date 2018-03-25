@@ -49,18 +49,18 @@ def set_estimated_dates():
     return (message)
 
 
-def set_person_refnames(got_tx=None, uniq_id=None):
+def set_person_refnames(tx=None, uniq_id=None):
     """ Set Refnames to all or selected Persons
     """
     pers_count = 0
     name_count = 0
     t0 = time.time()
 
-    if got_tx:
-        tx = got_tx
+    if tx:
+        my_tx = tx
     else:
-        tx = User.beginTransaction()
-    names = Name.get_personnames(tx, uniq_id)
+        my_tx = User.beginTransaction()
+    names = Name.get_personnames(my_tx, uniq_id)
 
     # Process each name part (first names, surname, patronyme) of each Person
     for rec in names:
@@ -74,7 +74,7 @@ def set_person_refnames(got_tx=None, uniq_id=None):
         # │30844│"Maria Elisabet"    │""        │"Johansdotter"│"F"  │
         # └─────┴────────────────────┴──────────┴──────────────┴─────┘
         # Build new refnames
-        pid = rec["ID"]
+        pid = rec["ID"]         # Person id
         firstname = rec["fn"]
         surname = rec["sn"]
         patronyme = rec["pn"]
@@ -83,37 +83,39 @@ def set_person_refnames(got_tx=None, uniq_id=None):
         # 1. firstnames
         if firstname and firstname != 'N':
             for name in firstname.split(' '):
-                Refname.link_to_refname(tx, pid, name, 'firstname')
+                Refname.link_to_refname(my_tx, pid, name, 'firstname')
                 name_count += 1
 
         # 2. surname and patronyme
         if surname and surname != 'N':
-            Refname.link_to_refname(tx, pid, surname, 'surname')
+            Refname.link_to_refname(my_tx, pid, surname, 'surname')
             name_count += 1
 
         if patronyme:
-            Refname.link_to_refname(tx, pid, patronyme, 'patronyme')
+            Refname.link_to_refname(my_tx, pid, patronyme, 'patronyme')
             name_count += 1
         pers_count += 1
 
-#         # ===   [NOT!] Report status for each name    ====
-#         rnames = []
-#         recs = Person.get_refnames(pid)
-#         for rec in recs:
-#             # ╒══════════════════════════╤═════════════════════╕
-#             # │"a"                       │"li"                 │
-#             # ╞══════════════════════════╪═════════════════════╡
-#             # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
-#             # │":"Messu- ja kalenteri"}  │                     │
-#             # └──────────────────────────┴─────────────────────┘        
-# 
-#             name = rec['a']
-#             link = rec['li'][0]
-#             rnames.append("{} ({})".format(name['name'], link['use']))
-#         logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
+        # ===   [NOT!] Report status for each name    ====
+        rnames = []
+        recs = Person.get_refnames(pid)
+        for rec in recs:
+            # ╒══════════════════════════╤═════════════════════╕
+            # │"a"                       │"li"                 │
+            # ╞══════════════════════════╪═════════════════════╡
+            # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
+            # │":"Messu- ja kalenteri"}  │                     │
+            # └──────────────────────────┴─────────────────────┘        
+ 
+            name = rec['a']
+            link = rec['li'][0]
+            rnames.append("{} ({})".format(name['name'], link['use']))
+        logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
     
-    if not got_tx:
-        User.endTransaction(tx)
+    if not tx:
+        # End my own created transformation
+        User.endTransaction(my_tx)
+
     msg="Processed {} names of {} persons in {} sek".\
         format(name_count, pers_count, time.time()-t0)
     logging.info(msg)

@@ -15,8 +15,9 @@ from models import dbutil
 from models import loadfile            # Datan lataus käyttäjältä
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from models import dataupdater         # Tietojen päivitysmetodit
-from models import gramps_loader       # Loading a gramps xml file
 from models import cvs_refnames        # Referenssinimien luonti
+from models.gramps import gramps_loader # Loading a gramps xml file
+
 from forms import ListEmailsForm
 from templates import jinja_filters
 from admin.admin import DataAdmin
@@ -70,7 +71,7 @@ def list_emails():
 def list_users():
     # Käytetään neo4juserdatastorea
     lista = shareds.user_datastore.get_users()
-    return render_template("security/table_users.html", users=lista)  
+    return render_template("security/list_users.html", users=lista)  
 
 
 @shareds.app.route('/tables')

@@ -2,6 +2,11 @@
 # 12.2.2018 / JMä
 
 class Cypher():
+    '''
+    Cypher clauses for reading and updating database.
+    
+    See gramps.cypher_gramps for updates from Gramps xml file
+    '''
 
 # --- For Event class ---------------------------------------------------------
 
@@ -37,8 +42,13 @@ WITH search, person
 MATCH (person) -[:NAME]-> (name:Name)
 WITH person, name""" + _person_get_events_tail
 
-    person_get_confidence = """
+    person_get_confidences_all = """
 MATCH (person:Person)
+OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
+RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+
+    person_get_confidence = """
+MATCH (person:Person) WHERE ID(person)=$id
 OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
 RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
 

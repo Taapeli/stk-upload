@@ -9,6 +9,9 @@ from sys import stderr
 #from flask import g
 from models.gen.dates import DateRange
 import  shareds
+from models.gen.cypher import Cypher
+from models.gramps.cypher_gramps import Cypher_w_handle
+
 
 class Event:
     """ Tapahtuma
@@ -350,44 +353,27 @@ RETURN ID(place) AS uniq_id"""
 
 
     def save(self, username, tx):
-        """ Tallettaa sen kantaan """
+        """ Saves the Event to db including
+            links from UserProfile, Person
+        """
 
         today = str(datetime.date.today())
-        handle = self.handle
-        change = self.change
-        eid = self.id
-        etype = self.type
-        description = self.description
-#         edate = self.date
-        edates = self.dates
-        attr_type = self.attr_type
-        attr_value = self.attr_value
+        if self.dates:
+            dates = self.dates.for_db()
+        else:
+            dates = None
+        e_attr = {
+            "gramps_handle": self.handle,
+            "change": self.change, 
+            "id": self.id, 
+            "type": self.type,
+            "description": self.description, 
+            "dates": dates,
+            "attr_type": self.attr_type, 
+            "attr_value": self.attr_value}
         try:
-            query = """
-CREATE (e:Event) 
-SET e.gramps_handle=$handle, 
-    e.change=$change, 
-    e.id=$id, 
-    e.type=$type, 
-    e.description=$description,
-    e.dates=$dates,
-    e.attr_type=$attr_type,
-    e.attr_value=$attr_value"""
-            tx.run(query, 
-               {"handle": handle, "change": change, "id": eid, "type": etype,
-                "description": description, "dates": edates.for_db(),
-                "attr_type": attr_type, "attr_value": attr_value})
-        except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
-
-        try:
-            query = """
-MATCH (u:UserProfile) WHERE u.userName=$username 
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MERGE (u)-[r:REVISION]->(n)
-SET r.date=$date"""
-            tx.run(query, 
-               {"username": username, "handle": handle, "date": today})
+            tx.run(Cypher_w_handle.event_save, 
+               {"username": username, "date": today, "e_attr": e_attr})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -395,12 +381,8 @@ SET r.date=$date"""
             # Make relation to the Place node
             if self.place_hlink != '':
                 place_hlink = self.place_hlink
-                query = """
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Place) WHERE m.gramps_handle=$place_hlink
-MERGE (n)-[r:PLACE]->(m)"""  
-                tx.run(query, 
-               {"handle": handle, "place_hlink": place_hlink})
+                tx.run(Cypher_w_handle.event_link_place, 
+                       {"handle": self.handle, "place_hlink": place_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -408,12 +390,8 @@ MERGE (n)-[r:PLACE]->(m)"""
             # Make relation to the Note node
             if self.noteref_hlink != '':
                 noteref_hlink = self.noteref_hlink
-                query = """
-MATCH (e:Event) WHERE e.gramps_handle=$handle
-MATCH (n:Note) WHERE n.gramps_handle=$noteref_hlink
-MERGE (e)-[r:NOTE]->(n)"""                       
-                tx.run(query, 
-               {"handle": handle, "noteref_hlink": noteref_hlink})
+                tx.run(Cypher_w_handle.event_link_note, 
+                       {"handle": self.handle, "noteref_hlink": noteref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
@@ -421,25 +399,17 @@ MERGE (e)-[r:NOTE]->(n)"""
             # Make relation to the Citation node
             if self.citationref_hlink != '':
                 citationref_hlink = self.citationref_hlink
-                query = """
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
-MERGE (n)-[r:CITATION]->(m)"""                       
-                tx.run(query, 
-               {"handle": handle, "citationref_hlink": citationref_hlink})
+                tx.run(Cypher_w_handle.event_link_citation, 
+                       {"handle": self.handle, "citationref_hlink": citationref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
 
         try:
-            # Make relation to the Object node
+            # Make relation to the Media node
             if self.objref_hlink != '':
                 objref_hlink = self.objref_hlink
-                query = """
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
-MERGE (n)-[r:Media]->(m)"""                       
-                tx.run(query, 
-               {"handle": handle, "objref_hlink": objref_hlink})
+                tx.run(Cypher_w_handle.event_link_media, 
+                       {"handle": self.handle, "objref_hlink": objref_hlink})
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             

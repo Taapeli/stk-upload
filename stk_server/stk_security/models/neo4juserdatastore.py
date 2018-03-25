@@ -5,8 +5,9 @@ Created on 28.9.2017
 @author: TimNal
 '''
 
-
+from flask_security import current_user
 from flask_security.datastore import UserDatastore
+from flask_security import utils
 from .seccypher import Cypher  
 from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
 import datetime
@@ -41,6 +42,18 @@ class Neo4jUserDatastore(UserDatastore):
 #        current_login_at = None
 #        current_login_ip = ''
 #        login_count = 0
+# 
+#    class UserProfile():      """ Object describing dynamic user properties """
+#        uid = ''
+#        userName = ''
+#        numSessions = 0
+#        lastSessionTime = None  
+# 
+#    class AllowedEmail():     """ Object allowing a prospect user to register """
+#        allowed_email = ''
+#        default_role = ''
+#        admin_name = ''
+#        timestamp = None
 #===============================================================================
     
     def __init__(self, driver, user_model, user_profile_model, role_model, allowed_email_model):
@@ -65,7 +78,11 @@ class Neo4jUserDatastore(UserDatastore):
         if 'current_login_at' in userNode.properties: 
             user.current_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['current_login_at']))                            
         return user
-                       
+ 
+ 
+    def email_accepted(self, proposed_email):
+        return proposed_email == self.find_email(proposed_email)
+                              
         
     def put(self, model):
         with self.driver.session() as session:
@@ -85,7 +102,6 @@ class Neo4jUserDatastore(UserDatastore):
                 raise
             
     def _put_user (self, tx, user):    # ============ New user ==============
-
 
         if len(user.roles) == 0:
             user.roles = [shareds.DEFAULT_ROLE] 
@@ -423,7 +439,7 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             with self.driver.session() as session:
                 with session.begin_transaction() as tx:
-                    tx.run(Cypher.email_register, email=email, role=role)
+                    tx.run(Cypher.email_register, email=email, role=role, admin_name=current_user.name)
                     tx.commit()
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
@@ -463,23 +479,25 @@ class Neo4jUserDatastore(UserDatastore):
             logger.error('Exception: ', ex)            
             raise
 
-    def get_eail(self, email):
+    def find_email(self, email):
         try:
             with self.driver.session() as session:
                 emailNode = session.read_transaction(self._findEmail, email)
                 if emailNode is not None:
                     return self.allowed_email_model(**emailNode.properties) 
-                return []
+                return None
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
-            return []                 
+            return None                 
                                               
-    def _getEmail (self, tx, email):
+    def _findEmail (self, tx, email):
         try:
             emailNode = None
-            for record in tx.run(Cypher.find_email(email)):
-                emailNode = record['email']
-                return emailNode        
+            records = tx.run(Cypher.email_find, email=email)
+            if records:
+                for record in records:
+                    emailNode = record['email']
+                    return emailNode        
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
