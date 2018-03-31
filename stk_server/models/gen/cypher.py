@@ -34,6 +34,10 @@ ORDER BY name.surname, name.firstname"""
 
     person_get_events_all = "MATCH (person:Person)-[:NAME]->(name:Name)" + _person_get_events_tail
 
+    person_get_events_uniq_id = """
+MATCH (person:Person)-[:NAME]->(name:Name)
+WHERE ID(person) = $id""" + _person_get_events_tail
+
     # With attr={'use':rule, 'name':name}
     person_get_events_by_refname = """
 MATCH p = (search:Refname) -[:BASENAME*{use:$attr.use}]-> (person:Person)
