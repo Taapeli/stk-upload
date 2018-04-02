@@ -507,6 +507,7 @@ RETURN person, urls, COLLECT (name) AS names
             called from models.datareader.read_persons_with_events
 
              a) selected by unique id
+                keys=['uniq_id', uid]    by person's uniq_id (for table_person_by_id.html)
              b) selected by name
                 keys=['all']             all
                 keys=['surname', name]   by start of surname
@@ -535,7 +536,9 @@ RETURN person, urls, COLLECT (name) AS names
 #TODO: filter by owner
 
         with shareds.driver.session() as session:
-            if rule == 'all':
+            if rule == 'uniq_id':
+                return session.run(Cypher.person_get_events_uniq_id, id=int(name))
+            elif rule == 'all':
                 return session.run(Cypher.person_get_events_all)
             else:
                 # Selected names and name types

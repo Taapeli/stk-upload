@@ -2,6 +2,11 @@
 # 12.2.2018 / JMä
 
 class Cypher():
+    '''
+    Cypher clauses for reading and updating database.
+    
+    See gramps.cypher_gramps for updates from Gramps xml file
+    '''
 
 # --- For Event class ---------------------------------------------------------
 
@@ -28,6 +33,10 @@ ORDER BY name.surname, name.firstname"""
 #         event.daterange_start, event.daterange_stop, place.pname]) AS events
 
     person_get_events_all = "MATCH (person:Person)-[:NAME]->(name:Name)" + _person_get_events_tail
+
+    person_get_events_uniq_id = """
+MATCH (person:Person)-[:NAME]->(name:Name)
+WHERE ID(person) = $id""" + _person_get_events_tail
 
     # With attr={'use':rule, 'name':name}
     person_get_events_by_refname = """
