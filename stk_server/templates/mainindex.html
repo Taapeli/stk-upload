@@ -80,12 +80,13 @@
           <div style="display: inline-block;">
 			<h3>Ylläpitäjän toiminnot</h3>
 			<ul>
-              <li><em>Tyhjennä kanta</em>  <i>(Mitään kysymättä!)</i>
+              <li><b>Tyhjennä</b> <i>(mitään kysymättä!)</i>
                 <ul>
-                  <li><a href="/admin/clear_db/total">Koko kanta</li>
-                  <li><a href="/admin/clear_db/save_users">Säästä käyttäjätunukset</li>
-                  <li><a href="/admin/clear_db/my_own">Omat henkilö- ja 
-                      tapahtumatiedot ({{current_user.username}})</li>
+                  <li><a href="/admin/clear_db/total">Tyhjennä koko kanta</li>
+                  <li><a href="/admin/clear_db/save_users">Tyhjennä koko kanta,
+                      mutta säästä käyttäjätunukset</li>
+                  <li><a href="/admin/clear_db/my_own">Tyhjennä kaikki lataamani 
+                      henkilö- ja tapahtumatiedot ({{current_user.username}})</li>
               </ul></li>
 			  <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
 			  <li><a href="/refnames">Muokkaa referenssinimiä</a></li>
