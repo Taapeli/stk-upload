@@ -42,8 +42,8 @@ class DateRange():
     - vec[1]    1st date, in string format
     - vec[2]    2nd date, a string or None
 
-    Saa also another way of expressing date range values, specially for data
-    exchange:
+    Saa also discussion of another way of expressing date range values, 
+    specially for data exchange:
     https://github.com/FamilySearch/gedcomx/blob/master/specifications/date-format-specification.md
     '''
 
@@ -137,7 +137,6 @@ class DateRange():
         """
         type_e = self.vec[0] & 7        # Lower bits has effective type code
         type_opt = self.vec[0]-type_e   # Upper bits has options
-        dopt = ''
         
         if type_opt == 8:           
             # Code name starts with 'CALC_'
@@ -145,6 +144,8 @@ class DateRange():
         elif type_opt == 16:
             # Code name starts with 'EST_'
             dopt = 'arviolta '
+        else:
+            dopt = ''
 
         dstr1 = self._to_local(self.vec[1])
         dstr2 = self._to_local(self.vec[2])
@@ -268,20 +269,22 @@ class DateRange():
             return self.vec[0:2]
 
     def for_db(self):
-        """ Returns a list like to_list, but type code is converted to string 
-            for saving to database.
-            Example: ["4", "1917", "2017-10-16"]
+        """ Returns a list like to_list, but
+            - type code is converted to string for saving in database
+            - upper limit date field is always present
+            Examples: ["4", "1917", "2017-10-16"], ["0", "1917", "1917"]
         """
-        ret = [str(self.vec[0]), self.vec[1]]
         if self.vec[2]:
-            ret.append(self.vec[2])
-
+            ret = [str(self.vec[0]), self.vec[1], self.vec[2]]
+        else:
+            ret = [str(self.vec[0]), self.vec[1], self.vec[1]]
         return ret
 
     def _to_datestr(self, val):
-        """ Returns a date-like string '1972-12-06', '1972-12' or '1972', from
+        """ Returns an adapted ISO date string as '1972-12-06', '1972-12' or 
+            '1972' from
             - date object or
-            - ordinal int value (later than year 1)
+            - internal int value in db format (later than year 1)
             - string value
         """
         if isinstance(val, date):
@@ -296,8 +299,9 @@ class DateRange():
             elif len(val) == 4:
                 # year '1999'
                 return val
-        elif isinstance(val, int) and val > 365:
-            return date.fromordinal(val).isoformat()
+        elif isinstance(val, int) and val > 0x400:
+            # Later than year 1
+            return DateRange.int_to_date(val)
         
         raise ValueError("val={}".format(val))
 
@@ -326,21 +330,36 @@ class DateRange():
 
             The missing day or month value is set in the middle of
             year or month respectively, as if '6½th month' and '15½th day'.
+            
+            >>> DateRange.date_to_int("1917-12-15")
+            # 1917 12 14 = 1963406 / 00000000000111011111010110001110 internal
+            1963406
+            >>> DateRange.date_to_int("1917-12")
+            # 1917 12 15 = 1963407 / 00000000000111011111010110001111 internal
+            1963407
+            >>> DateRange.date_to_int("1917-12-16")
+            # 1917 12 16 = 1963408 / 00000000000111011111010110010000 internal
+            1963408
 
-            'yyyy-mm-dd'            
+            So, in integer binary format:
+            - if the day part is 15 --> only year-month are given
+            - if the month part is 6 --> only year is given
+
+            'yyyy- mm - dd'            
             a[0]  a[1]  a[2]   | y       m       d
             -------------------+-----------------------
-            9999               | a[0]    7       0
-            9999  1..6         | a[0]    a[1]-1  16
-            9999  7..12        | a[0]    a[1]    16
+            9999  1..6  -      | a[0]    a[1]-1  15
+            9999  -     -      | a[0]    6       0
+            9999  7..12 -      | a[0]    a[1]    15
             9999  99    1..15  | a[0]    *       a[2]-1
+            9999  99    -      | a[0]    *       15
             9999  99    16..31 | a[0]    *       a[2]
 
             return      (d*32 + m)*32 + y
 
             date '2047-02-02' gives binary
-                0000 0000 0001 1111 ¤ 1111 1100 0010 0001
-                             y yyyy ¤ yyyy yymm mmmd dddd
+                0000 0000 0001 1111  1111 1100 0010 0001
+                             y yyyy  yyyy yymm mmmd dddd
                 0....:....1....:....2. ...:. ...3.
                 0000000000011111111111 00001 00001
                            yyyyyyyyyyy mmmmm ddddd
@@ -349,51 +368,56 @@ class DateRange():
         a = date_str.split('-', 2)
         dy = int(a[0])
         if len(a) == 1 or a[1] == '00':
-            dm = 7
-            dd = 16
+            dm = 6
+            dd = 0
         else:
             dm = int(a[1])
             if dm < 7:
                 dm -= 1
 
             if len(a) == 2 or a[2] == '00':
-                dd = 16
+                dd = 15
             else:
                 dd = int(a[2])
                 if dd < 16:
                     dd -= 1
 
         ret = (dy<<10) | (dm<<5) | dd
-        print("{:4d} {:02d} {:02d} = {:07d} / {:032b} internal".\
+        print("# {:4d} {:02d} {:02d} = {:07d} / {:032b} internal".\
               format(dy,dm,dd, ret, ret))
 
         return ret
 
     @staticmethod
-    def int_to_date(date_int):
+    def int_to_date(date_int, short=False):
         """ Converts an int date to ISO date string.
                 0....:....1....:....2. ...:. ...3.
                 0000000000011111111111 00001 00001
                            yyyyyyyyyyy mmmmm ddddd
                            [0:21]    [22:26] [27:31]
+            Exceptions:
+            - if the day part is 15 --> only year-month are given
+            - if the month part is 6 --> only year is given
         """
         dy = date_int >> 10
         dm = (date_int >> 5) & 0x0f
         dd = date_int & 0x1f
 
-        if dm < 7:
+        if dm < 6:
             dm += 1
-        elif dm == 7:
+        elif dm == 6:
             dm = 0
         
-        if dd < 16:
+        if dd < 15:
             dd += 1
-        elif dd == 16:
+        elif dd == 15:
             dd = 0
 
+        #TODO: Short output without "-00" parts
         s = "{:04d}-{:02d}-{:02d}".format(dy, dm, dd)
         print (s + " returned")
         return s
+
 
 class Gramps_DateRange(DateRange):
     '''
