@@ -31,20 +31,16 @@ DR = {
 class DateRange():
     '''
     DateRange handles date expressions needed for genealogical data.
-    The dates are expressed with range type and one or two string values
-    representing the date limits.
+    The dates are expressed with date range type and one or two string values
+    representing the date limits (from, to).
 
     This class is designed specially for efficient processing in the database
     and it's user interfaces.
     
-    The data is stored in vector self.vec, which has following contents:
-    - vec[0]    date type, an integer from DR
-    - vec[1]    1st date, in string format
-    - vec[2]    2nd date, a string or None
-
-    Saa also discussion of another way of expressing date range values, 
-    specially for data exchange:
-    https://github.com/FamilySearch/gedcomx/blob/master/specifications/date-format-specification.md
+    The data is stored in the following variables:
+    - datetype    int    date type from DR array
+    - datestr1    string 'from' date
+    - datestr2    string 'to' date, a string or None
     '''
 
     def __init__(self, *args):
@@ -73,35 +69,40 @@ class DateRange():
 
 #         if not args[0]:
 #             # Creating an empty date
-#             self.vec = [0, "", None]
+#             self.datetype = 0
+#             self.datestr1 = ""
+#             self.datestr2 = None
 #             return
 
         if len(args) == 1:
             if isinstance(args[0], (list,tuple)) and len(args[0]) in [2, 3]:
                 # The only argument is a tuple like (3, '1918-12', '2017-10-16')
-                vec0 = int(args[0][0])
-                vec1 = args[0][1]
+                self.datetype = int(args[0][0])
+                self.datestr1 = args[0][1]
                 if len(args[0]) == 3:
-                    vec2 = args[0][2] if not args[0][2] == "" else None
+                    self.datestr2 = args[0][2] if not args[0][2] == "" else None
                 else:
-                    vec2 = None
-                self.vec = [vec0, vec1, vec2]
+                    self.datestr2 = None
                 return
             elif isinstance(args[0], (DateRange, Gramps_DateRange)):
-                # The only argument is DataRange
-                self.vec = args[0].to_list()
+                # The only argument is a DataRange
+                self.datetype = args[0].datetype
+                self.datestr1 = args[0].datestr1
+                self.datestr2 = args[0].datestr2
                 return
             elif isinstance(args[0], (str,date)):
                 # Maybe the only argument is some kind of date string
                 try:
-                    self.vec = [DR['DATE'], self._to_datestr(args[0]), None]
+                    self.datetype = DR['DATE']
+                    self.datestr1 = self._to_datestr(args[0])
+                    self.datestr2 = None
                     return
                 except:
                     raise ValueError("Invalid DateRange({})".format(args[0]))
         
         if isinstance(args[0], int) or \
           (isinstance(args[0], str) and args[0].isdigit()):
-            """ Arguments are dtype (int or numeric str) 
+            """ Arguments are datetype (int or numeric str) 
                 and there is 1 or 2 date values:
                     DateRange(DR['BEFORE'], date(2017, 10, 16))
                     DateRange(DR['BEFORE'], "2017-10-16")
@@ -111,22 +112,23 @@ class DateRange():
                     DateRange(DR['BETWEEN'], "1917-12-06", "2017-10-16")
                     DateRange(4, 700144, 736618)
             """
-            self.vec = [int(args[0]), self._to_datestr(args[1]), None]
-            dtype = self.vec[0]
-            if dtype < 0 or dtype > DR['EST_ABOUT']:
+            self.datetype = int(args[0])
+            self.datestr1 = self._to_datestr(args[1])
+            self.datestr2 = None
+            if self.datetype < 0 or self.datetype > DR['EST_ABOUT']:
                 raise ValueError('Invalid DateRange(type, ...)')
-            if dtype in [DR['PERIOD'], DR['BETWEEN'],
-                         DR['CALC_PERIOD'], DR['CALC_BETWEEN'],
-                         DR['EST_PERIOD'], DR['EST_BETWEEN']]:
+            if self.datetype in [DR['PERIOD'], DR['BETWEEN'],
+                                 DR['CALC_PERIOD'], DR['CALC_BETWEEN'],
+                                 DR['EST_PERIOD'], DR['EST_BETWEEN']]:
                 if len(args) == 3:
-                    self.vec[2] = self._to_datestr(args[2])
+                    self.datestr2 = self._to_datestr(args[2])
                 else:
                     raise ValueError('Two dates excepted for DateRange({}, date, date)'.
-                                     format(dtype))
+                                     format(self.datetype))
             else:
                 if len(args) != 2:
                     raise ValueError('Too many arguments for DateRange({}, date)'.
-                                     format(dtype))
+                                     format(self.datetype))
             return
 
         raise ValueError("Invalid 1st argument for DateRange()")
@@ -135,8 +137,8 @@ class DateRange():
     def __str__(self):
         """ Return DateRange in display format 
         """
-        type_e = self.vec[0] & 7        # Lower bits has effective type code
-        type_opt = self.vec[0]-type_e   # Upper bits has options
+        type_e = self.datetype & 7        # Lower bits has effective type code
+        type_opt = self.datetype-type_e   # Upper bits has options
         
         if type_opt == 8:           
             # Code name starts with 'CALC_'
@@ -147,8 +149,8 @@ class DateRange():
         else:
             dopt = ''
 
-        dstr1 = self._to_local(self.vec[1])
-        dstr2 = self._to_local(self.vec[2])
+        dstr1 = self._to_local(self.datestr1)
+        dstr2 = self._to_local(self.datestr2)
         #print ("# dstr {} - {}".format(dstr1, dstr2))
         if type_e == DR['DATE']: # Exact date d1
             return dopt + dstr1
@@ -163,7 +165,7 @@ class DateRange():
         elif type_e == DR['ABOUT']: # A date near d1
             return "{}noin {}".format(dopt, dstr1)
         
-        return "<Date type={}, {}...{}>".format(self.vec[0], dstr1, dstr2)
+        return "<Date type={}, {}...{}>".format(self.datetype, dstr1, dstr2)
 
 
 #     def __cmp__(self, other):
@@ -174,22 +176,22 @@ class DateRange():
 #         """
 #         assert isinstance(other, DateRange), 'Argument of wrong type!'
 # 
-#         if self.vec[0] < other.vec[0]:
+#         if self.datetype < other.datetype:
 #             # A is self, B is other
 #             selftype=type_e
-#             othertype=other.vec[0]
-#             A1 = self.vec[1]
-#             #A2 = self.vec[2]
-#             B1 = other.vec[1]
-#             B2 = other.vec[2]
+#             othertype=other.datetype
+#             A1 = self.datestr1
+#             #A2 = self.datestr2
+#             B1 = other.datestr1
+#             B2 = other.datestr2
 #         else:
 #             # A is other, B is self
-#             selftype=other.vec[0]
+#             selftype=other.datetype
 #             othertype=type_e
-#             A1 = other.vec[1]
-#             #A2 = other.vec[2]
-#             B1 = self.vec[1]
-#             B2 = self.vec[2]
+#             A1 = other.datestr1
+#             #A2 = other.datestr2
+#             B1 = self.datestr1
+#             B2 = self.datestr2
 # 
 #         if selftype == DR['DATE']:
 #             if othertype == DR['DATE']:
@@ -241,32 +243,32 @@ class DateRange():
 
     def estimate(self):
         """ Gives a date estimate """
-        return self.vec[1]
+        return self.datestr1
     
     def plain_type(self):
         """ Gives numeric type code without 'CALC_' or 'EST_' """
-        return self.vec[0] & 7
+        return self.datetype & 7
     
     def is_calculated(self):
         """ Is this date calculated?
             The type code has bit corresponding 8 set
         """
-        return (self.vec[0] & 8) != 0
+        return (self.datetype & 8) != 0
 
     def is_estimated(self):
         """ Is this date calculated?
             The type code has bit corresponding 16 set
         """
-        return (self.vec[0] & 16) != 0
+        return (self.datetype & 16) != 0
 
     def to_list(self):
         """ Returns a list [int, str, str] or [int, str] 
             Example: [DR['BETWEEN'], "1917", "2017-10-16"]
         """
-        if self.vec[2]:
-            return self.vec
+        if self.datestr2:
+            return [self.datetype, self.datestr1, self.datestr2]
         else:
-            return self.vec[0:2]
+            return [self.datetype, self.datestr1]
 
     def for_db(self):
         """ Returns a list like to_list, but
@@ -274,10 +276,10 @@ class DateRange():
             - upper limit date field is always present
             Examples: ["4", "1917", "2017-10-16"], ["0", "1917", "1917"]
         """
-        if self.vec[2]:
-            ret = [str(self.vec[0]), self.vec[1], self.vec[2]]
+        if self.datestr2:
+            ret = [str(self.datetype), self.datestr1, self.datestr2]
         else:
-            ret = [str(self.vec[0]), self.vec[1], self.vec[1]]
+            ret = [str(self.datetype), self.datestr1, self.datestr1]
         return ret
 
     def _to_datestr(self, val):
@@ -326,7 +328,7 @@ class DateRange():
     @staticmethod
     def date_to_int(date_str):
         """ Converts a date like '2017-09-20' or '2017-09' or '2017'
-            to int value, which can be easily compared.
+            to int values, which can be easily compared.
 
             The missing day or month value is set in the middle of
             year or month respectively, as if '6½th month' and '15½th day'.
@@ -389,7 +391,7 @@ class DateRange():
         return ret
 
     @staticmethod
-    def int_to_date(date_int, short=False):
+    def int_to_date(date_int, long=False):
         """ Converts an int date to ISO date string.
                 0....:....1....:....2. ...:. ...3.
                 0000000000011111111111 00001 00001
@@ -413,8 +415,12 @@ class DateRange():
         elif dd == 15:
             dd = 0
 
-        #TODO: Short output without "-00" parts
-        s = "{:04d}-{:02d}-{:02d}".format(dy, dm, dd)
+        if long:
+            s = "{:04d}-{:02d}-{:02d}".format(dy, dm, dd)
+        else:
+            # TODO: Short output without "-00" parts
+            s = "{:04d}-{:02d}-{:02d}".format(dy, dm, dd)
+            
         print (s + " returned")
         return s
 
@@ -438,13 +444,13 @@ class Gramps_DateRange(DateRange):
     <datestr val=$str />
 
     A date $date1:
-        dateval   type=$vec[0] quality=$quality val=$vec[1]
+        dateval   type=$datetype quality=$quality val=$datestr1
 
     Between $date1 and $date2:
-        daterange type=None    quality=$quality start=$vec[1] stop=$vec[2]
+        daterange type=None    quality=$quality start=$datestr1 stop=$datestr2
 
     From $date1 to $date2:
-        datespan  type=None    quality=$quality start=$vec[1] stop=$vec[2]
+        datespan  type=None    quality=$quality start=$datestr1 stop=$datestr2
 
     Unformal string expression $str (passed?)
         datestr   type=None    quality=None     val=str
@@ -453,8 +459,8 @@ class Gramps_DateRange(DateRange):
 
     TODO: All the combinations:
     
-    tag       type   quality    attr       DR value      vec[0] text(fi)          estimate
-    ---       ----   -------    ----       --------     ------- ----              --------
+    tag       type   quality    attr       DR value    datetype text(fi)          estimate
+    ---       ----   -------    ----       --------    -------- ----              --------
     dateval   None   None       val        DATE         0     0 {val}             val
     dateval   before None       val        BEFORE       1     1 {val} asti        val
     dateval   after  None       val        AFTER        2     2 {val} alkaen      val
