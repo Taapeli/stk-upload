@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         '''
         comp = 1963405
         for s in ["1917-12-14", "1917-12-15", "1917-12", "1917-12-16"]:
-            print(" day {}".format(s))
+#             print(" test day {}".format(s))
             val = DateRange.DateInt(s).value()
             self.assertEqual(val, comp, s)
             comp += 1
@@ -27,14 +27,14 @@ class Test(unittest.TestCase):
         '''
         comp = 1963198
         for s in ["1917-06-30", "1917-06-31", "1917"]:
-            print(" month {}".format(s))
+#             print(" tst month {}".format(s))
             val = DateRange.DateInt(s).value()
             self.assertEqual(val, comp, s)
             comp += 1
         # There is a gap bewtween "1917" and "1917-07-01" ~ no problem?
         s = "1917-07-01"
         comp += 31  
-        print(" month {}".format(s))
+#         print(" test month {}".format(s))
         val = DateRange.DateInt(s).value()
         self.assertEqual(val, comp, s)
 

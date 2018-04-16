@@ -151,7 +151,7 @@ class DateRange():
 
 
     def __str__(self):
-        """ Return DateRange in display format 
+        """ Return DateRange in display format like 'välillä 1700 … 9.1800'
         """
         type_e = self.datetype & 7        # Lower bits has effective type code
         type_opt = self.datetype-type_e   # Upper bits has options
@@ -369,11 +369,11 @@ class DateRange():
             """
             if arg0 == None:
                 # No value
-                self.dateint = 0
+                self.intvalue = 0
             elif isinstance(arg0, int):
                 if arg0 > 9999:
                     # Not a year but a ready DateInt value
-                    self.dateint = arg0
+                    self.intvalue = arg0
                 else:
                     # Integer year, month, day values
                     self._set(arg0, month, day)
@@ -406,16 +406,16 @@ class DateRange():
                     if day < 16:
                         day -= 1
     
-            self.dateint = (year<<10) | (month<<5) | day
-            print("# {:4d} {:02d} {:02d} = {:07d} / {:032b} internal".\
-                  format(year,month,day, self.dateint, self.dateint))
+            self.intvalue = (year<<10) | (month<<5) | day
+#             print("# {:4d} {:02d} {:02d} = {:07d} / {:032b} internal".\
+#                   format(year,month,day, self.intvalue, self.intvalue))
 
         def __str__(self):
             return self.long_date()
 
         def value(self):
             ''' Returns the comparable date integer value of DateRange.DateInt '''
-            return self.dateint
+            return self.intvalue
 
         def vector(self):
             """ Splits the DateRange.DateInt value to integer components.
@@ -429,9 +429,9 @@ class DateRange():
                 - if the day part is 15 --> only year-month are returned
                 - if the month part is 6 --> only year is returned
             """
-            dy = self.dateint >> 10
-            dm = (self.dateint >> 5) & 0x0f
-            dd = self.dateint & 0x1f
+            dy = self.intvalue >> 10
+            dm = (self.intvalue >> 5) & 0x0f
+            dd = self.intvalue & 0x1f
 
             if dm == 6:     # = Year only
                 return [dy]
