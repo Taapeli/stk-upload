@@ -10,32 +10,32 @@ from models.gen.dates import DateRange, DR
 
 class Test(unittest.TestCase):
 
-    def testDateRange_int_day(self):
+    def testDateInt_day(self):
         ''' Check mid-month date order 
             Test the adjacent days in range 1917-12-14...16 including missing day
         '''
         comp = 1963405
         for s in ["1917-12-14", "1917-12-15", "1917-12", "1917-12-16"]:
             print(" day {}".format(s))
-            val = DateRange.date_to_int(s)
+            val = DateRange.DateInt(s).value()
             self.assertEqual(val, comp, s)
             comp += 1
 
-    def testDateRange_int_month(self):
+    def testDateInt_month(self):
         ''' Check mid-year date order 
             Test the months in range 5..7 including missing month
         '''
         comp = 1963198
         for s in ["1917-06-30", "1917-06-31", "1917"]:
             print(" month {}".format(s))
-            val = DateRange.date_to_int(s)
+            val = DateRange.DateInt(s).value()
             self.assertEqual(val, comp, s)
             comp += 1
         # There is a gap bewtween "1917" and "1917-07-01" ~ no problem?
         s = "1917-07-01"
         comp += 31  
         print(" month {}".format(s))
-        val = DateRange.date_to_int(s)
+        val = DateRange.DateInt(s).value()
         self.assertEqual(val, comp, s)
 
     def test_create(self):
@@ -53,9 +53,13 @@ class Test(unittest.TestCase):
         d = DateRange("1", "2017-10-16")
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
         d = DateRange(DR['PERIOD'], "1917-12-06", "2017-10-16")
-        self.assertEqual(d.for_db(), ["3", "1917-12-06", "2017-10-16"])
-        d = DateRange(DR['PERIOD'], "1784", "1796")
-        self.assertEqual(d.for_db(), ["3", "1784", "1796"])
+        vec = [3, DateRange.DateInt("1917-12-06").value(), 
+               DateRange.DateInt("2017-10-16").value()]
+        self.assertEqual(d.for_db(), vec)
+        d = DateRange(DR['PERIOD'], "1784", "1796-05")
+        vec = [3, DateRange.DateInt("1784").value(), 
+               DateRange.DateInt("1796-05").value()]
+        self.assertEqual(d.for_db(), vec)
 
     def testDateRange_date(self):
         ''' Single DateRange DR['DATE']
@@ -120,7 +124,7 @@ class Test(unittest.TestCase):
         self.assertEqual(d.to_list(), [3, "1784", "1796"])
         self.assertEqual(str(d), "1784 – 1796")
 
-        d = DateRange(4, 1741040, 1843504)
+        d = DateRange(4, 1740992, 1843503)
         self.assertEqual(d.to_list(), [4, '1700', '1800-09'])
         self.assertEqual(str(d), 'välillä 1700 … 9.1800')
 
@@ -151,29 +155,29 @@ class Test(unittest.TestCase):
         self.assertEqual(d.to_list(), [21, "2017-10-16"])
         self.assertEqual(str(d), "arviolta noin 16.10.2017")
 
-    def testDateRange_digital_format(self):
+    def testDateRange_DateInt(self):
         """
         Converts string format to int and vice versa
         """
         s = "2047-01-09"
-        d = DateRange.date_to_int(s)
-        ds = DateRange.int_to_date(d)
+        d = DateRange.DateInt(s)
+        ds = d.short_date()
         self.assertEqual(s, ds)
         
         s = "1900-12-31"
-        d = DateRange.date_to_int(s)
-        ds = DateRange.int_to_date(d)
+        d = DateRange.DateInt(s)
+        ds = d.short_date()
         self.assertEqual(s, ds)
         
         s = "1800-09"
-        d = DateRange.date_to_int(s)
-        ds = DateRange.int_to_date(d)
+        d = DateRange.DateInt(s)
+        ds = d.long_date()
         self.assertEqual(s + '-00', ds)
         
         s = "1700"
-        d = DateRange.date_to_int(s)
-        ds = DateRange.int_to_date(d)
-        self.assertEqual(s + '-00-01', ds)
+        d = DateRange.DateInt(s)
+        ds = d.long_date()
+        self.assertEqual(s + '-00-00', ds)
         
 
 
