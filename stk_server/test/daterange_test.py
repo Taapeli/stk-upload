@@ -53,13 +53,15 @@ class Test(unittest.TestCase):
         d = DateRange("1", "2017-10-16")
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
         d = DateRange(DR['PERIOD'], "1917-12-06", "2017-10-16")
-        vec = [3, DateRange.DateInt("1917-12-06").value(), 
-               DateRange.DateInt("2017-10-16").value()]
-        self.assertEqual(d.for_db(), vec)
+        dic = {'datetype': 3, 
+               'date1': DateRange.DateInt("1917-12-06").value(), 
+               'date2': DateRange.DateInt("2017-10-16").value() }
+        self.assertEqual(d.for_db(), dic)
         d = DateRange(DR['PERIOD'], "1784", "1796-05")
-        vec = [3, DateRange.DateInt("1784").value(), 
-               DateRange.DateInt("1796-05").value()]
-        self.assertEqual(d.for_db(), vec)
+        dic = {'datetype': 3, 
+               'date1': DateRange.DateInt("1784").value(), 
+               'date2': DateRange.DateInt("1796-05").value() }
+        self.assertEqual(d.for_db(), dic)
 
     def testDateRange_date(self):
         ''' Single DateRange DR['DATE']

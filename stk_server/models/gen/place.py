@@ -11,13 +11,15 @@ from models.dbtree import DbTree
 from models.gen.person import Weburl
 from models.gen.note import Note
 from models.gen.dates import DateRange
+from models.gen.cypher import Cypher
+from models.gramps.cypher_gramps import Cypher_w_handle
 import  shareds
 
 class Place:
     """ Paikka
-            
+
         Properties:
-                handle          
+                handle
                 change
                 id                  esim. "P0001"
                 type                str paikan tyyppi
@@ -37,7 +39,7 @@ class Place:
      """
 
     def __init__(self, locid="", ptype="", pname="", level=None):
-        """ Luo uuden place-instanssin. 
+        """ Luo uuden place-instanssin.
             Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyylin, nimen
             ja (tulossivua varten) mahdollisen hierarkiatason
         """
@@ -52,10 +54,11 @@ class Place:
         self.names = []
         self.coord = None
         self.urls = []
-        self.placeref_hlink = ''
+        # self.placeref_hlink = '' - replaced by surround_ref
+        self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.noteref_hlink = []
-    
-    
+
+
     def __str__(self):
         try:
             lv = self.level
@@ -63,11 +66,11 @@ class Place:
             lv = ""
         desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, lv)
         return desc
-    
-    
+
+
     def get_place_data_by_id(self):
         """ Luetaan kaikki paikan tiedot ml. nimivariaatiot (tekstinä)
-            Nimivariaatiot talletetaan kenttään pname, 
+            Nimivariaatiot talletetaan kenttään pname,
             esim. [["Svartholm", "sv"], ["Svartholma", None]]
             #TODO: Ei hieno, po. Place_name objects!
         """
@@ -77,11 +80,11 @@ MATCH (place:Place)-[:NAME]->(n:Place_name)
     WHERE ID(place)=$place_id
 OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
 OPTIONAL MATCH (place)-[nr:NOTE]->(note:Note)
-RETURN place, COLLECT([n.name, n.lang]) AS names, 
+RETURN place, COLLECT([n.name, n.lang]) AS names,
     COLLECT (DISTINCT url) AS urls, COLLECT (DISTINCT note) AS notes
         """
         place_result = shareds.driver.session().run(query, place_id=plid)
-        
+
         for place_record in place_result:
             self.change = place_record["place"]["change"]
             self.id = place_record["place"]["id"]
@@ -106,27 +109,27 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
                 n.type = note["type"]
                 n.text = note["text"]
                 self.noteref_hlink.append(n)
-            
+
         return True
-    
-    
-    @staticmethod       
+
+
+    @staticmethod
     def get_places():
         """ Luetaan kaikki paikat kannasta
         #TODO Eikö voisi palauttaa listan Place-olioita?
         """
-        
+
         query = """
  MATCH (p:Place)
  RETURN ID(p) AS uniq_id, p
  ORDER BY p.pname, p.type"""
-                
+
         result = shareds.driver.session().run(query)
-        
+
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
                   'coord']
         lists = []
-        
+
         for record in result:
             data_line = []
             if record['uniq_id']:
@@ -157,16 +160,16 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
                 data_line.append(record["p"]['coord'])
             else:
                 data_line.append('-')
-                
+
             lists.append(data_line)
-        
+
         return (titles, lists)
 
 
-    @staticmethod       
+    @staticmethod
     def get_place_names():
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-            
+
             Esim.
 ╒═══════╤════════════╤══════════════════════════════╤═════════════════════════╤═══════════════════════╤═══════════════════════╕
 │"id"   │"type"      │"name"                        │"coord"                  │"upper"                │"lower"                │
@@ -186,20 +189,20 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 │       │            │                              │                         │räsk Ladugård",""]]    │                       │
 └───────┴────────────┴──────────────────────────────┴─────────────────────────┴───────────────────────┴───────────────────────┘
 """
-        
+
         query = """
-MATCH (a:Place) -[:NAME]-> (pn:Place_name) 
+MATCH (a:Place) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
 OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
 RETURN ID(a) AS id, a.type AS type,
-    COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord, 
-    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper, 
+    COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
+    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
     COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
 ORDER BY name[0][0]
 """
 
         def combine_places(field):
-            """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City", 
+            """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
                 "Lovisa", "sv"]].
                 Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
                 Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
@@ -228,10 +231,10 @@ ORDER BY name[0][0]
             p.lowers = combine_places(record['lower'])
             ret.append(p)
         return ret
-                    
-    @staticmethod       
+
+    @staticmethod
     def namelist_w_lang(field):
-        """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit 
+        """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit
             mainittuna.
             Jos sarakkeessa field[1] on mainittu kielikoodi
             se lisätään kunkin nimen field[0] perään suluissa
@@ -246,13 +249,13 @@ ORDER BY name[0][0]
         return names
 
 
-    @staticmethod       
+    @staticmethod
     def get_place_tree(locid):
         """ Haetaan koko paikkojen ketju paikan locid ympärillä
-            Palauttaa listan paikka-olioita ylimmästä alimpaan. 
+            Palauttaa listan paikka-olioita ylimmästä alimpaan.
             Jos hierarkiaa ei ole, listalla on vain oma Place.
-            
-            Esim. Tuutarin hierarkia 
+
+            Esim. Tuutarin hierarkia
                   2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala
                   tulee tietokannasta näin:
             ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
@@ -268,12 +271,12 @@ ORDER BY name[0][0]
                 Place(result[0].id2) # Artjärvi City
                 Place(result[0].id1) # Männistö Village
                 Place(result[1].id1) # Pekkala Farm
-            Muuttuja lv on taso: 
-                >0 = ylemmät, 
-                 0 = tämä, 
+            Muuttuja lv on taso:
+                >0 = ylemmät,
+                 0 = tämä,
                 <0 = alemmat
         """
-        
+
         # Query for Place hierarcy
         hier_query = """
 MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
@@ -289,23 +292,23 @@ RETURN p.type AS type, p.pname AS name
 """
         # Query to get names for a Place
         name_query="""
-MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid 
+MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid
 RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
 """
 
         t = DbTree(shareds.driver, hier_query, 'pname', 'type')
         t.load_to_tree_struct(locid)
         if t.tree.depth() == 0:
-            # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa. 
+            # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
             # Hae oman paikan tiedot ilman yhteyksiä
             with shareds.driver.session() as session:
                 result = session.run(root_query, locid=int(locid))
                 record = result.single()
-                t.tree.create_node(record["name"], locid, parent=0, 
+                t.tree.create_node(record["name"], locid, parent=0,
                                    data={'type': record["type"]})
         ret = []
         for node in t.tree.expand_tree(mode=t.tree.DEPTH):
-            print ("{} {} {}".format(t.tree.depth(t.tree[node]), t.tree[node], 
+            print ("{} {} {}".format(t.tree.depth(t.tree[node]), t.tree[node],
                                      t.tree[node].bpointer))
             if node != 0:
                 n = t.tree[node]
@@ -326,53 +329,46 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         return ret
 
 
-    @staticmethod       
+    @staticmethod
     def get_place_events(loc_id):
         """ Haetaan paikkaan liittyvät tapahtumat sekä
             osallisen henkilön nimitiedot.
-            
-        Palauttaa esimerkin mukaiset tiedot:
-        ╒═════╤═════════╤══════════════════╤═══════╤══════════════════╕
-        │"uid"│"role"   │"names"           │"etype"│"edates"          │
-        ╞═════╪═════════╪══════════════════╪═══════╪══════════════════╡
-        │52134│"Primary"│[["Birth Name","Jo│"Death"│["0","1807-11-12"]│
-        │     │         │han","Utter",""]] │       │                  │
-        └─────┴─────────┴──────────────────┴───────┴──────────────────┘
-        """
 
-        query = """
-MATCH (p:Person)-[r:EVENT]->(e:Event)-[:PLACE]->(l:Place)
-  WHERE id(l) = $locid
-MATCH (p) --> (n:Name)
-RETURN id(p) AS uid, r.role AS role,
-  COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
-  e.type AS etype, e.dates AS edates
-ORDER BY edates[1]"""
-                
-        result = shareds.driver.session().run(query, locid=int(loc_id))
+        Palauttaa esimerkin mukaiset tiedot:
+        ╒═════╤═════════╤═══════════════════╤═══════════╤═══════════════════╕
+        │"uid"│"role"   │"names"            │"etype"    │"edates"           │
+        ╞═════╪═════════╪═══════════════════╪═══════════╪═══════════════════╡
+        │66953│"Primary"│[["Birth Name","Jan│"Residence"│[2,1858752,1858752]│
+        │     │         │ Erik","Mannerheim"│           │                   │
+        │     │         │,"Jansson"]]       │           │                   │
+        └─────┴─────────┴───────────────────┴───────────┴───────────────────┘
+        """
+        result = shareds.driver.session().run(Cypher.place_get_person_events, 
+                                              locid=int(loc_id))
         ret = []
         for record in result:
             p = Place()
             p.uid = record["uid"]
             p.etype = record["etype"]
-            dates = DateRange(record["edates"])
-            p.edates = str(dates)
-            p.date = dates.estimate()
+            if record["edates"][0] == None:
+                dates = None
+                p.edates = ""   # Normal: "24.3.1861"
+                p.date = ""     # Normal: "1861-03-24"
+            else:
+                dates = DateRange(record["edates"])
+                p.edates = str(dates)
+                p.date = dates.estimate()
             p.role = record["role"]
             p.names = record["names"]   # tuples [name_type, given_name, surname]
             ret.append(p)
         return ret
-    
-    @staticmethod       
+
+    @staticmethod
     def get_total():
         """ Tulostaa paikkojen määrän tietokannassa """
-        
-                
-        query = """
-            MATCH (p:Place) RETURN COUNT(p)
-            """
+
+        query = "MATCH (p:Place) RETURN COUNT(p)"
         results =  shareds.driver.session().run(query)
-        
         for result in results:
             return str(result[0])
 
@@ -397,45 +393,34 @@ ORDER BY edates[1]"""
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
-        
+        """ Saves a Place with Place_names and hierarchy links """
+
         try:
-            query = """
-CREATE (p:Place) 
-SET p.gramps_handle=$handle, 
-    p.change=$change, 
-    p.id=$id, 
-    p.type=$type, 
-    p.pname=$pname, 
-    p.coord=$coord"""
-            # If no coordinates, can't use get_coordinates
-            coord = self.coord.get_coordinates() if self.coord else None
-            tx.run(query, 
-               {"handle": self.handle, "change": self.change, "id": self.id, 
-                "type": self.type, "pname": self.pname, "coord": coord})
+            p_attr = {"gramps_handle": self.handle,
+                      "change": self.change,
+                      "id": self.id,
+                      "type": self.type,
+                      "pname": self.pname}
+            if self.coord:
+                # If no coordinates, don't set coord attribute
+                p_attr.update({"coord": self.coord.get_coordinates()})
+            tx.run(Cypher_w_handle.place_create, p_attr=p_attr)
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
-            
+            print("Virhe.place_create: {0}".format(err), file=stderr)
+
         if len(self.names) >= 1:
-            handle = self.handle
             try:
                 for i in range(len(self.names)):
-                    name = self.names[i].name
-                    lang = self.names[i].lang
-                    dates = DateRange(self.names[i].dates)
-                    query = """
-MATCH (p:Place) WHERE p.gramps_handle=$handle 
-CREATE (n:Place_name)
-MERGE (p)-[r:NAME]->(n)
-SET n.name=$name,
-    n.lang=$lang,
-    n.dates=$dates"""             
-                    tx.run(query, 
-                           {"handle": handle, "name": name, "lang": lang, 
-                            "dates":dates.for_db()})
+                    n_attr = {"name": self.names[i].name,
+                              "lang": self.names[i].lang}
+                    if self.names[i].dates:
+                        # If date information, add datetype, date1 and date2
+                        n_attr.update(self.names[i].dates.for_db())
+                    tx.run(Cypher_w_handle.place_add_name,
+                           handle=self.handle, n_attr=n_attr)
             except Exception as err:
-                print("Virhe: {0}".format(err), file=stderr)
-            
+                print("Virhe.place_add_name: {0}".format(err), file=stderr)
+
         # Talleta Weburl nodet ja linkitä paikkaan
         if len(self.urls) > 0:
             for url in self.urls:
@@ -443,72 +428,72 @@ SET n.name=$name,
                 url_href = url.href
                 url_type = url.type
                 url_description = url.description
-                query = """
-MATCH (n:Place) WHERE n.gramps_handle=$handle
-CREATE (n)-[wu:WEBURL]->
-      (url:Weburl {priv: {url_priv}, href: {url_href},
-                type: {url_type}, description: {url_description}})"""
                 try:
-                    tx.run(query, 
-                           {"handle": handle, "url_priv": url_priv, "url_href": url_href,
+                    tx.run(Cypher_w_handle.place_link_weburl,
+                           {"handle": self.handle, 
+                            "url_priv": url_priv, "url_href": url_href,
                             "url_type":url_type, "url_description":url_description})
                 except Exception as err:
                     print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
-                
-        # Make hierarchy relations to the Place node
-        if len(self.placeref_hlink) > 0:
+
+        # Make hierarchy relations to upper Place nodes
+        for upper in self.surround_ref:
             try:
-                query = """
-                    MATCH (n:Place) WHERE n.gramps_handle='{}'
-                    MATCH (m:Place) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:HIERARCY]->(m)
-                     """.format(self.handle, self.placeref_hlink)
-                                 
-                tx.run(query)
+                if 'dates' in upper and upper['dates'] != None:
+                    r_attr = upper['dates'].for_db()
+                else:
+                    r_attr = {}
+                tx.run(Cypher_w_handle.place_link_hier,
+                       handle=self.handle, hlink=upper['hlink'], r_attr=r_attr)
             except Exception as err:
-                print("Virhe: {0}".format(err), file=stderr)
-                
+                print("Virhe.place_link_hier: {0}".format(err), file=stderr)
+
         # Make place note relations
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 try:
-                    query = """
-                        MATCH (n:Place) WHERE n.gramps_handle='{}'
-                        MATCH (m:Note) WHERE m.gramps_handle='{}'
-                        MERGE (n)-[r:NOTE]->(m)
-                         """.format(self.handle, self.noteref_hlink[i])
-                                     
-                    tx.run(query)
+                    tx.run(Cypher_w_handle.place_link_note,
+                           handle=self.handle, hlink=self.noteref_hlink[i])
                 except Exception as err:
-                    print("Virhe: {0}".format(err), file=stderr)
-            
+                    print("Virhe.place_link_note: {0}".format(err), file=stderr)
+
         return
 
 
 class Place_name:
     """ Paikan nimi
-    
+
         Properties:
                 name             str nimi
                 lang             str kielikoodi
                 dates            DateRange aikajakso
     """
-    
+
     def __init__(self):
         """ Luo uuden name-instanssin """
         self.name = ''
         self.lang = ''
         self.dates = None
 
+    def __str__(self):
+        if self.dates:
+            d = "/" + str(self.dates)
+        else:
+            d = ""
+        if self.lang != '':
+            return "{} ({}){}".format(self.name, self.lang, d)
+        else:
+            return "{}{}".format(self.name, d)
+
 
 class Point:
     """ Paikan koordinaatit
-    
+
         Properties:
-            coord   coordinates of the point as list [lat, lon] 
+            coord   coordinates of the point as list [lat, lon]
                     (north, east directions in degrees)
     """
-    
+
     def __init__(self,  lon,  lat=None):
         """ Create a new Point instance.
             Arguments may be:
@@ -530,13 +515,13 @@ class Point:
                 self.coord = [lon, lat]
 
             # Now the arguments are in self.coord[0:1]
-            
+
             ''' If coordinate value is string, the characters '°′″'"NESWPIEL'
                 and '\' are replaced by space and the comma by dot with this table.
                 (These letters stand for North, East, ... Pohjoinen, Itä ...)
             '''
             point_coordinate_tr = str.maketrans(',°′″\\\'"NESWPIEL', '.              ')
-            
+
             for i in list(range(len(self.coord))):   # [0,1]
                 # If a coordinate is float, it's ok
                 x = self.coord[i]
@@ -544,7 +529,7 @@ class Point:
                     if isinstance(x, str):
                         # String conversion to float:
                         #   example "60° 37' 34,647N" gives ['60', '37', '34.647']
-                        #   and "26° 11\' 7,411"I" gives 
+                        #   and "26° 11\' 7,411"I" gives
                         a = x.translate(point_coordinate_tr).split()
                         degrees = float(a[0])
                         if len(a) > 1:
@@ -564,13 +549,13 @@ class Point:
 
     def __str__(self):
         if self.coord:
-            return "({0:0.4f}, {0:0.4f})".format(self.coord[0], self.coord[1])
+            return "({:0.4f}, {:0.4f})".format(self.coord[0], self.coord[1])
         else:
             return ""
 
     def get_coordinates(self):
         """ Return the Point coordinates as list (leveys- ja pituuspiiri) """
-        
+
         return self.coord
 
 

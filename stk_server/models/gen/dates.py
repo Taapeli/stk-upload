@@ -68,7 +68,7 @@ class DateRange():
 
     def __init__(self, *args):
         '''
-        Constructor can be called following ways:
+        DateRange constructor can be called following ways:
             DateRange(d1)
             DateRange(int, d1)
             DateRange(int, d1, d2)
@@ -78,11 +78,11 @@ class DateRange():
             when the type is DR['DATE'] (meaning a single exact date).
 
             Each d1, d2 for date '1917-12-06' can equally be expressed as:
+            - an DateInt value 700144
             - a date object date(1917, 12, 6)
             - a complete date string '1917-12-06'
             - a partial date string '1917-12' for given year and month 
             - a year string '1917'
-            - an DateInt value 700144
             The d2 can also be empty string "".
 
             The last form is used for loading a DataRange from database. The 
@@ -94,8 +94,8 @@ class DateRange():
             if isinstance(args[0], (list, tuple)) and len(args[0]) in [2, 3]:
                 # The only argument is a tuple like (3, '1918-12', '2017-10-16')
                 self.datetype = int(args[0][0])
-                self.date1 = self.DateInt(args[0][1])
-                if len(args[0]) == 3 and args[0][2] != '':
+                self.date1 = DateRange.DateInt(args[0][1])
+                if len(args[0]) == 3 and args[0][2] != None and args[0][2] != '':
                     self.date2 = self.DateInt(args[0][2])
                 else:
                     self.date2 = None
@@ -103,8 +103,8 @@ class DateRange():
             elif isinstance(args[0], (DateRange, Gramps_DateRange)):
                 # The only argument is a DataRange
                 self.datetype = args[0].datetype
-                self.date1 = self.DateInt(args[0].datestr1)
-                self.date2 = self.DateInt(args[0].datestr2)
+                self.date1 = self.DateInt(args[0].date1)
+                self.date2 = self.DateInt(args[0].date2)
                 return
             elif isinstance(args[0], (str, date)):
                 # Maybe the only argument is some kind of date string
@@ -133,18 +133,18 @@ class DateRange():
             self.date2 = None
             if self.datetype < 0 or self.datetype > DR['EST_ABOUT']:
                 raise ValueError('Invalid DateRange(type, ...)')
-            if self.datetype in [DR['PERIOD'], DR['BETWEEN'],
-                                 DR['CALC_PERIOD'], DR['CALC_BETWEEN'],
-                                 DR['EST_PERIOD'], DR['EST_BETWEEN']]:
-                if len(args) == 3:
-                    self.date2 = self.DateInt(args[2])
-                else:
-                    raise ValueError('Two dates excepted for DateRange({}, date, date)'.
-                                     format(self.datetype))
-            else:
-                if len(args) != 2:
-                    raise ValueError('Too many arguments for DateRange({}, date)'.
-                                     format(self.datetype))
+#             if self.datetype in [DR['PERIOD'], DR['BETWEEN'],
+#                                  DR['CALC_PERIOD'], DR['CALC_BETWEEN'],
+#                                  DR['EST_PERIOD'], DR['EST_BETWEEN']]:
+            if len(args) == 3 and args[1] != args[2]:
+                self.date2 = self.DateInt(args[2])
+#             else:
+#                 raise ValueError('Two dates excepted for DateRange({}, date, date)'.
+#                                  format(self.datetype))
+#             else:
+#                 if len(args) != 2:
+#                     raise ValueError('Too many arguments for DateRange({}, date)'.
+#                                      format(self.datetype))
             return
 
         raise ValueError("Invalid 1st argument for DateRange()")
@@ -249,83 +249,14 @@ class DateRange():
             return [self.datetype, self.date1.to_local()]
 
     def for_db(self):
-        """ Returns a list like to_list, but
-            - dates are DateInt integers for saving in database
-            - upper limit date field is always present
+        """ Returns a dictionary consisting of int datetype and 
+            always two dates as intvalues
         """
-        if self.date2 != None:
-            ret = [self.datetype, self.date1.value(), self.date2.value()]
-        else:
-            value = self.date1.value()
-            ret = [self.datetype, value, value]
+        v1 = self.date1.value()
+        v2 = self.date2.value() if self.date2 != None else v1
+        ret = {'datetype': self.datetype, 'date1': v1, 'date2': v2}
         return ret
 
-#     def _to_datestr(self, val):
-#         """ Returns an adapted ISO date string as '1972-12-06', '1972-12' or 
-#             '1972' from
-#             - date object or
-#             - internal int value in db format (later than year 1)
-#             - string value
-#         """
-
-#     @staticmethod
-#     def _to_local(date_str):
-#         """ ISO-päivämäärä 2017-09-20 suodatetaan suomalaiseksi 20.9.2017 """
-
-#     @staticmethod
-#     def date_to_int(date_str):
-#         """ Converts a date like '2017-09-20' or '2017-09' or '2017'
-#             to int values, which can be easily compared.
-# 
-#             The missing day or month value is set in the middle of
-#             year or month respectively, as if '6½th month' and '15½th day'.
-# 
-#             >>> DateRange.date_to_int("1917-12-15")
-#             # 1917 12 14 = 1963406 / 00000000000111011111010110001110 internal
-#             1963406
-#             >>> DateRange.date_to_int("1917-12")
-#             # 1917 12 15 = 1963407 / 00000000000111011111010110001111 internal
-#             1963407
-#             >>> DateRange.date_to_int("1917-12-16")
-#             # 1917 12 16 = 1963408 / 00000000000111011111010110010000 internal
-#             1963408
-# 
-#             So, in integer binary format:
-#             - if the day part is 15 --> only year-month are given
-#             - if the month part is 6 --> only year is given
-# 
-#             'yyyy- mm - dd'
-#             a[0]  a[1]  a[2]   | y       m       d
-#             -------------------+-----------------------
-#             9999  1..6  -      | a[0]    a[1]-1  15
-#             9999  -     -      | a[0]    6       0
-#             9999  7..12 -      | a[0]    a[1]    15
-#             9999  99    1..15  | a[0]    *       a[2]-1
-#             9999  99    -      | a[0]    *       15
-#             9999  99    16..31 | a[0]    *       a[2]
-# 
-#             return      (d*32 + m)*32 + y
-# 
-#             date '2047-02-02' gives binary
-#                 0000 0000 0001 1111  1111 1100 0010 0001
-#                              y yyyy  yyyy yymm mmmd dddd
-#                 0....:....1....:....2. ...:. ...3.
-#                 0000000000011111111111 00001 00001
-#                            yyyyyyyyyyy mmmmm ddddd
-#                            [0:21]    [22:26] [27:31]
-#         """
-
-#     @staticmethod
-#     def int_to_date(date_int, long=False):
-#         """ Converts an int date to ISO date string.
-#                 0....:....1....:....2. ...:. ...3.
-#                 0000000000011111111111 00001 00001
-#                            yyyyyyyyyyy mmmmm ddddd
-#                            [0:21]    [22:26] [27:31]
-#             Special processing:
-#             - if the day part is 15 --> only year-month are given
-#             - if the month part is 6 --> only year is given
-#         """
 
     # ----------------------- DateRange.DateInt class --------------------------
 

@@ -47,8 +47,13 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
 
     ''' Start DOM elements handler transaction '''
     handler = DOM_handler(DOMTree.documentElement, userid)
-    handler.begin_tx(shareds.driver.session())
-
+    
+    use_transaction = True  # Voi testata Falsella
+    if use_transaction:
+        handler.begin_tx(shareds.driver.session())
+    else:
+        handler.tx = shareds.driver.session()
+    
     handler.put_message("Storing XML file to Neo4j database:")
 
     handler.handle_notes()
@@ -62,8 +67,9 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler.handle_events()
     handler.handle_people()
     handler.handle_families()
-    
-    handler.commit()
+
+    if use_transaction:
+        handler.commit()
 
     # Set person confidence values (for all persons!)
     handler.begin_tx(shareds.driver.session())
@@ -116,7 +122,7 @@ class DOM_handler():
         ''' Return all info messages '''
         return self.msg
 
-    # XML subtree handlers 
+    # XML subtree handlers
 
     def handle_citations(self):
         # Get all the citations in the collection
@@ -550,6 +556,9 @@ class DOM_handler():
         for placeobj in places:
 
             place = Place()
+            # List of upper places in hierarchy as {hlink, dates} dictionaries
+            #TODO move in Place and remove Place.placeref_hlink string
+            place.surround_ref = []
 
             if placeobj.hasAttribute("handle"):
                 place.handle = placeobj.getAttribute("handle")
@@ -571,12 +580,12 @@ class DOM_handler():
                     placename = Place_name()
                     placeobj_pname = placeobj.getElementsByTagName('pname')[i]
                     if placeobj_pname.hasAttribute("value"):
-                        place.pname = placeobj_pname.getAttribute("value")
                         placename.name = placeobj_pname.getAttribute("value")
+                        if place.pname == '':
+                            # First name is default name for Place node
+                            place.pname = placename.name
                     if placeobj_pname.hasAttribute("lang"):
                         placename.lang = placeobj_pname.getAttribute("lang")
-
-                    placename.dates = DOM_handler._extract_daterange(placeobj)
                     place.names.append(placename)
 
             if len(placeobj.getElementsByTagName('coord') ) >= 1:
@@ -602,12 +611,20 @@ class DOM_handler():
                         weburl.description = placeobj_url.getAttribute("description")
                     place.urls.append(weburl)
 
-            if len(placeobj.getElementsByTagName('placeref') ) == 1:
-                placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
-                if placeobj_placeref.hasAttribute("hlink"):
-                    place.placeref_hlink = placeobj_placeref.getAttribute("hlink")
-            elif len(placeobj.getElementsByTagName('placeref') ) > 1:
-                print("Error: More than one placeref in a place")
+            for placeobj_placeref in placeobj.getElementsByTagName('placeref'):
+                # Traverse links to surrounding places
+                hlink = placeobj_placeref.getAttribute("hlink")
+                dates = DOM_handler._extract_daterange(placeobj_placeref)
+                place.surround_ref.append({'hlink':hlink, 'dates':dates})
+#             # Piti sallia useita ylempia paikkoja eri päivämäärillä
+#             # Tässä vain 1 sallitaan elikä päivämäärää ole
+#             if len(placeobj.getElementsByTagName('placeref') ) == 1:
+#                 placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
+#                 if placeobj_placeref.hasAttribute("hlink"):
+#                     place.placeref_hlink = placeobj_placeref.getAttribute("hlink")
+#                     place.dates = DOM_handler._extract_daterange(placeobj_placeref)
+#             elif len(placeobj.getElementsByTagName('placeref') ) > 1:
+#                 print("Warning: Ignored 2nd placeref in a place - useita hierarkian yläpuolisia paikkoja")
 
             if len(placeobj.getElementsByTagName('noteref') ) >= 1:
                 for i in range(len(placeobj.getElementsByTagName('noteref') )):
@@ -728,7 +745,7 @@ class DOM_handler():
 
     def set_refnames(self):
         ''' Add links from each Person to Refnames '''
-        
+
         for p_id in self.uniq_ids:
             set_person_refnames(self.tx, p_id)
 
@@ -767,8 +784,8 @@ class DOM_handler():
                     date_quality = dateobj.getAttribute("quality")
                 else:
                     date_quality = None
-    #             logging.debug("Creating {}, date_type={}, quality={}, {} - {}".\
-    #                           format(tag, date_type, date_quality, date_start, date_stop))
+                logging.debug("Creating {}, date_type={}, quality={}, {} - {}".\
+                              format(tag, date_type, date_quality, date_start, date_stop))
                 return Gramps_DateRange(tag, date_type, date_quality,
                                         date_start, date_stop)
 

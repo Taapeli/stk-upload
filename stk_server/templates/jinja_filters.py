@@ -121,13 +121,17 @@ def translate(term, var_name, lang="fi"):
             "Kappeliseurakunta": "kappeliseurakunta",
             "Kartano": "kartano",
             "Kuntakeskus": "kuntakeskus",
+            "Kortteli": "kortteli",
             "Linnoitus": "linnoitus",
             "Locality": "kulmakunta",
             "Organisaatio": "organisaatio",
             "Parish": "seurakunta",
             "Region": "alue",
             "State": "valtio",
+            "Tila": "tila",
             "Tontti": "tontti",
+            "Torppa": "torppa",
+            "Town": "kaupunki",
             "Village": "kylä",
             "srk": "seurakunta"
         }
