@@ -15,10 +15,14 @@
     {% endwith %}
     {% if text is string %}
 	       <p>{{text}}</p>
-	    {% else %}
-	    {% for line in text %}
-	    	<p>{{line}}</p>
-	    {% endfor %}
+	    {% else %}<table>
+	    {% for line in text %} 
+	       {% set fields = line.split(':') %}<tr>
+	       {% if fields|count == 1 %}<p>{{fields[0]}}</p>
+	       {% else %}
+	       {% for f in fields %}<td>{{f}}</td>{% endfor %}
+	       {% endif %}</tr>
+	    {% endfor %}</table>
     {% endif %}
     <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
 {% endblock %}

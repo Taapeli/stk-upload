@@ -13,12 +13,13 @@ import logging
 import models.dbutil
 import  shareds
 from models.gen.cypher import Cypher
+from models.gen.dates import DateRange
 
 class Person:
     """ Henkilö
-            
+
         Properties:
-                handle          
+                handle
                 change
                 uniq_id            int noden id
                 id                 esim. "I0001"
@@ -67,97 +68,97 @@ class Person:
         self.confidence = ''
         self.est_birth = ''
         self.est_death = ''
-    
-    
+
+
     def get_citation_id(self):
         """ Luetaan henkilön viittauksen id """
-        
+
         query = """
-            MATCH (person:Person)-[r:CITATION]->(c:Citation) 
+            MATCH (person:Person)-[r:CITATION]->(c:Citation)
                 WHERE ID(person)={}
                 RETURN ID(c) AS citationref_hlink
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
-    
-    
+
+
     def get_event_data_by_id(self):
         """ Luetaan henkilön tapahtumien id:t """
-        
+
         pid = int(self.uniq_id)
         query = """
-MATCH (person:Person)-[r:EVENT]->(event:Event) 
+MATCH (person:Person)-[r:EVENT]->(event:Event)
   WHERE ID(person)=$pid
 RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
         return  shareds.driver.session().run(query, {"pid": pid})
-    
-    
+
+
     def get_her_families_by_id(self):
         """ Luetaan naisen perheiden id:t """
-        
+
         pid = int(self.uniq_id)
         query = """
-MATCH (person:Person)<-[r:MOTHER]-(family:Family) 
-  WHERE ID(person)=$pid
-RETURN ID(family) AS uniq_id"""
-        return  shareds.driver.session().run(query, {"pid": pid})
-    
-    
-    def get_his_families_by_id(self):
-        """ Luetaan miehen perheiden id:t """
-        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (person:Person)<-[r:FATHER]-(family:Family) 
+MATCH (person:Person)<-[r:MOTHER]-(family:Family)
   WHERE ID(person)=$pid
 RETURN ID(family) AS uniq_id"""
         return  shareds.driver.session().run(query, {"pid": pid})
 
-    
+
+    def get_his_families_by_id(self):
+        """ Luetaan miehen perheiden id:t """
+
+        pid = int(self.uniq_id)
+        query = """
+MATCH (person:Person)<-[r:FATHER]-(family:Family)
+  WHERE ID(person)=$pid
+RETURN ID(family) AS uniq_id"""
+        return  shareds.driver.session().run(query, {"pid": pid})
+
+
     def get_hlinks_by_id(self):
         """ Luetaan henkilön linkit """
-            
+
         event_result = self.get_event_data_by_id()
-        for event_record in event_result:            
+        for event_record in event_result:
             self.eventref_hlink.append(event_record["eventref_hlink"])
             self.eventref_role.append(event_record["eventref_role"])
 
         media_result = self.get_media_id()
-        for media_record in media_result:            
+        for media_record in media_result:
             self.objref_hlink.append(media_record["objref_hlink"])
 
         family_result = self.get_parentin_id()
-        for family_record in family_result:            
+        for family_record in family_result:
             self.parentin_hlink.append(family_record["parentin_hlink"])
-            
+
         citation_result = self.get_citation_id()
-        for citation_record in citation_result:            
+        for citation_record in citation_result:
             self.citationref_hlink.append(citation_record["citationref_hlink"])
-            
+
         return True
-    
-    
+
+
     def get_media_id(self):
         """ Luetaan henkilön tallenteen id """
-        
+
         query = """
-            MATCH (person:Person)-[r:MEDIA]->(obj:Media) 
+            MATCH (person:Person)-[r:MEDIA]->(obj:Media)
                 WHERE ID(person)={}
                 RETURN ID(obj) AS objref_hlink
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
-    
-    
+
+
     def get_parentin_id(self):
         """ Luetaan henkilön syntymäperheen id """
-        
+
         query = """
-            MATCH (person:Person)<-[r:CHILD]-(family:Family) 
+            MATCH (person:Person)<-[r:CHILD]-(family:Family)
                 WHERE ID(person)={}
                 RETURN ID(family) AS parentin_hlink
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
-    
-    
+
+
     def get_person_and_name_data_by_id(self):
         """ Luetaan kaikki henkilön tiedot ja nimet
             ╒══════════════════════════════╤══════════════════════════════╕
@@ -178,13 +179,13 @@ RETURN ID(family) AS uniq_id"""
         """
         pid = int(self.uniq_id)
         query = """
-MATCH (person:Person)-[r:NAME]->(name:Name) 
+MATCH (person:Person)-[r:NAME]->(name:Name)
   WHERE ID(person)=$pid
 RETURN person, name
   ORDER BY name.alt"""
         person_result = shareds.driver.session().run(query, {"pid": pid})
         self.id = None
-        
+
         for person_record in person_result:
             if self.id == None:
                 self.handle = person_record["person"]['handle']
@@ -195,7 +196,7 @@ RETURN person, name
                 self.confidence = person_record["person"]['confidence']
                 self.est_birth = person_record["person"]['est_birth']
                 self.est_death = person_record["person"]['est_death']
-            
+
             if len(person_record["name"]) > 0:
                 pname = Name()
                 pname.alt = person_record["name"]['alt']
@@ -205,7 +206,7 @@ RETURN person, name
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
                 self.names.append(pname)
-                
+
 
     def get_person_w_names(self):
         """ Luetaan kaikki henkilön tiedot ja nimet
@@ -224,19 +225,19 @@ RETURN person, name
             │                              │areta/Utter/"}]               │
             └──────────────────────────────┴──────────────────────────────┘        """
 #         query = """
-# MATCH (person:Person)-[r:NAME]-(name:Name) 
+# MATCH (person:Person)-[r:NAME]-(name:Name)
 #   WHERE ID(person)=$pid
 # RETURN person, name
 #   ORDER BY name.alt"""
         query = """
-MATCH (person:Person)-[r:NAME]->(name:Name) 
+MATCH (person:Person)-[r:NAME]->(name:Name)
   WHERE ID(person)=$pid
 OPTIONAL MATCH (person)-[wu:WEBURL]->(weburl:Weburl)
   WITH person, name, COLLECT (weburl) AS urls ORDER BY name.alt
 RETURN person, urls, COLLECT (name) AS names
         """
         person_result = shareds.driver.session().run(query, pid=int(self.uniq_id))
-        
+
         for person_record in person_result:
             self.handle = person_record["person"]['handle']
             self.change = person_record["person"]['change']
@@ -246,7 +247,7 @@ RETURN person, urls, COLLECT (name) AS names
             self.confidence = person_record["person"]['confidence']
             self.est_birth = person_record["person"]['est_birth']
             self.est_death = person_record["person"]['est_death']
-            
+
             for name in person_record["names"]:
                 pname = Name()
                 pname.alt = name['alt']
@@ -256,7 +257,7 @@ RETURN person, urls, COLLECT (name) AS names
                 pname.surname = name['surname']
                 pname.suffix = name['suffix']
                 self.names.append(pname)
-            
+
             for url in person_record["urls"]:
                 weburl = Weburl()
                 weburl.priv = url['priv']
@@ -264,57 +265,57 @@ RETURN person, urls, COLLECT (name) AS names
                 weburl.type = url['type']
                 weburl.description = url['description']
                 self.urls.append(weburl)
-        
-        
+
+
     @staticmethod
     def get_people_with_same_birthday():
         """ Etsi kaikki henkilöt, joiden syntymäaika on sama"""
-        
+
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_birth<>''
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
                 p2.gender = p1.gender AND p2.est_birth = p1.est_birth
-                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, 
-                n1.firstname, n1.suffix, n1.surname, 
-                ID(p2), p2.est_birth, p2.est_death, 
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death,
+                n1.firstname, n1.suffix, n1.surname,
+                ID(p2), p2.est_birth, p2.est_death,
                 n2.firstname, n2.suffix, n2.surname]) AS ids
             """.format()
         return shareds.driver.session().run(query)
-        
-        
+
+
     @staticmethod
     def get_people_with_same_deathday():
         """ Etsi kaikki henkilöt, joiden kuolinaika on sama"""
-        
+
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_death<>''
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
                 p2.gender = p1.gender AND p2.est_death = p1.est_death
-                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, 
-                n1.firstname, n1.suffix, n1.surname, 
-                ID(p2), p2.est_birth, p2.est_death, 
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death,
+                n1.firstname, n1.suffix, n1.surname,
+                ID(p2), p2.est_birth, p2.est_death,
                 n2.firstname, n2.suffix, n2.surname]) AS ids
             """.format()
         return shareds.driver.session().run(query)
 
 
-    @staticmethod       
+    @staticmethod
     def get_people_wo_birth():
         """ Voidaan lukea henkilöitä ilman syntymätapahtumaa kannasta
         """
-        
+
         query = """
  MATCH (p:Person) WHERE NOT EXISTS ((p)-[:EVENT]->(:Event {type:'Birth'}))
- WITH p 
+ WITH p
  MATCH (p)-[:NAME]->(n:Name)
  RETURN ID(p) AS uniq_id, p, n ORDER BY n.surname, n.firstname"""
-                
+
         result = shareds.driver.session().run(query)
-        
+
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'priv', 'gender',
                   'firstname', 'surname']
         lists = []
-        
+
         for record in result:
             data_line = []
             if record['uniq_id']:
@@ -349,31 +350,36 @@ RETURN person, urls, COLLECT (name) AS names
                 data_line.append(record["n"]['surname'])
             else:
                 data_line.append('-')
-                
+
             lists.append(data_line)
-        
+
         return (titles, lists)
-    
-    
-    @staticmethod       
+
+
+    @staticmethod
     def get_old_people_top():
         """ Voidaan lukea henkilöitä joilla syntymä- ja kuolintapahtumaa kannasta
         """
-        
-        query = """
- MATCH (p:Person)-[:EVENT]->(a:Event) WHERE EXISTS ((p)-[:EVENT]->(a:Event {type:'Birth'}))
+
+        persons_get_oldest = """
+ MATCH (p:Person)-[:EVENT]->(a:Event) 
+     WHERE EXISTS ((p)-[:EVENT]->(a:Event {type:'Birth'}))
  WITH p, a 
- MATCH (p)-[:EVENT]->(b:Event) WHERE EXISTS ((p)-[:EVENT]->(b:Event {type:'Death'}))
+ MATCH (p)-[:EVENT]->(b:Event) 
+     WHERE EXISTS ((p)-[:EVENT]->(b:Event {type:'Death'}))
  WITH p, a, b
  MATCH (p)-[:NAME]->(n:Name)
- RETURN ID(p) AS uniq_id, p, n, a.date AS birth, b.date AS death ORDER BY n.surname, n.firstname"""
+ RETURN ID(p) AS uniq_id, p, n, 
+     [a.datetype, a.date1, a.date2] AS birth, 
+     [b.datetype, b.date1, b.date2] AS death 
+ ORDER BY n.surname, n.firstname"""
                 
-        result = shareds.driver.session().run(query)
-        
-        titles = ['uniq_id', 'firstname', 'surname', 'birth', 'death', 
+        result = shareds.driver.session().run(persons_get_oldest)
+
+        titles = ['uniq_id', 'firstname', 'surname', 'birth', 'death',
                   'age (years)', 'age (months)', 'age(12*years + months)']
         lists = []
-        
+
         for record in result:
             data_line = []
             if record['uniq_id']:
@@ -388,52 +394,60 @@ RETURN person, urls, COLLECT (name) AS names
                 data_line.append(record["n"]['surname'])
             else:
                 data_line.append('-')
-            if record['birth']:
-                birth_str = record['birth']
+            if record['birth'][0] != None:
+                birth = DateRange(record['birth'])
+                birth_str = birth.estimate()
                 birth_data = birth_str.split("-")
-                data_line.append(record['birth'])
+                data_line.append(str(birth))
             else:
                 data_line.append('-')
-            if record['death']:
-                death_str = record['death']
+            if record['death'][0] != None:
+                death = DateRange(record['death'])
+                death_str = death.estimate()
                 death_data = death_str.split("-")
-                data_line.append(record['death'])
+                data_line.append(str(death))
+#                 death_str = record['death']
+#                 death_data = death_str.split("-")
+#                 data_line.append(record['death'])
             else:
                 data_line.append('-')
-                
+
             # Counting the age when the dates are as YYYY-mm-dd
-            if (len(birth_data) > 2) and (len(death_data) > 2):
+            if birth_data[0] != None and death_data[0] != None:
                 years = int(death_data[0])-int(birth_data[0])
                 months = int(death_data[1])-int(birth_data[1])
-                
+
                 if int(death_data[2]) < int(death_data[2]):
                     months -= 1
-                
+
                 if months < 0:
                     months += 12
                     years -= 1
-                
+
                 years_months = years * 12 + months
             else:
                 years = '-'
                 months = '-'
                 years_months = 0
-                
+
             data_line.append(years)
             data_line.append(months)
             data_line.append(years_months)
 
-                
+
             lists.append(data_line)
-        
+
         return (titles, lists)
 
 
-    @staticmethod       
-    def get_confidence ():
+    @staticmethod
+    def get_confidence (uniq_id=None):
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
-        return shareds.driver.session().run(Cypher.person_get_confidence)
+        if uniq_id:
+            return shareds.driver.session().run(Cypher.person_get_confidence)
+        else:
+            return shareds.driver.session().run(Cypher.person_get_confidences_all)
 
 
     def set_confidence (self, tx):
@@ -444,20 +458,20 @@ RETURN person, urls, COLLECT (name) AS names
                       id=self.uniq_id, confidence=self.confidence)
 
 
-    @staticmethod       
+    @staticmethod
     def get_person_events (nmax=0, pid=None, names=None):
         """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
             get_persons()               kaikki
             get_persons(pid=123)        tietty henkilö oid:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
             - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
-            
+
         Palauttaa riveillä listan muuttujia:
         n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
           0      1            2           3       4      5        6
-         146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]    
+         146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]
 
-        jossa 'events' on lista käräjiä, jonka jäseninä on lista ko 
+        jossa 'events' on lista käräjiä, jonka jäseninä on lista ko
         käräjäin muuttujia:
         [[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
             0      1        2        3                4
@@ -470,7 +484,7 @@ RETURN person, urls, COLLECT (name) AS names
         │}                             │   │:"Alexander","refname":""}    │
         ├──────────────────────────────┼───┼──────────────────────────────┤
         """
-        
+
         if nmax > 0:
             qmax = "LIMIT " + str(nmax)
         else:
@@ -483,27 +497,28 @@ RETURN person, urls, COLLECT (name) AS names
             where = ""
 #         query = """
 #  MATCH (n:Person) {0}
-#  OPTIONAL MATCH (n)-[r]->(e) 
-#  RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), 
+#  OPTIONAL MATCH (n)-[r]->(e)
+#  RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r),
 #   COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
 #  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
 
         query = """
  MATCH (n:Person)-[:NAME]->(k:Name) {0}
- OPTIONAL MATCH (n)-[r:EVENT]->(e) 
+ OPTIONAL MATCH (n)-[r:EVENT]->(e)
  RETURN n.id, k.firstname, k.surname,
   COLLECT([e.name, e.kind]) AS events
  ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
-                
+
         return shareds.driver.session().run(query)
 
 
-    @staticmethod       
+    @staticmethod
     def get_events_k (keys, currentuser, take_refnames=False):
         """  Read Persons with names, events and reference names
             called from models.datareader.read_persons_with_events
 
              a) selected by unique id
+                keys=['uniq_id', uid]    by person's uniq_id (for table_person_by_id.html)
              b) selected by name
                 keys=['all']             all
                 keys=['surname', name]   by start of surname
@@ -527,20 +542,22 @@ RETURN person, urls, COLLECT (name) AS names
 # │31844│"August Wilhelm"│"Wallenius"│""      │["August","Wilhel│[[29933,"Baptism"│
 # │     │                │           │        │m","Wallenius"]  │, ...            │
 # └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
-# There is also fields confidence, est_birth, est_death, which are empty for now 
- 
+# There is also fields confidence, est_birth, est_death, which are empty for now
+
 #TODO: filter by owner
 
         with shareds.driver.session() as session:
-            if rule == 'all':
+            if rule == 'uniq_id':
+                return session.run(Cypher.person_get_events_uniq_id, id=int(name))
+            elif rule == 'all':
                 return session.run(Cypher.person_get_events_all)
             else:
                 # Selected names and name types
-                return session.run(Cypher.person_get_events_by_refname, 
+                return session.run(Cypher.person_get_events_by_refname,
                                    attr={'use':rule, 'name':name})
 
 
-    @staticmethod       
+    @staticmethod
     def get_family_members (uniq_id):
         """ Read person's families and family members for Person page
         """
@@ -548,17 +565,17 @@ RETURN person, urls, COLLECT (name) AS names
         query="""
 MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-[:NAME]->(n:Name) WHERE ID(p) = $id
     OPTIONAL MATCH (m)-[:EVENT]->(birth {type:'Birth'})
-    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
-        TYPE(r) AS role, m.id AS m_id, ID(m) AS uniq_id, 
-        m.gender AS gender, birth.date AS birth_date, 
+    WITH f.id AS family_id, ID(f) AS f_uniq_id,
+        TYPE(r) AS role, m.id AS m_id, ID(m) AS uniq_id,
+        m.gender AS gender, birth.date AS birth_date,
         n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx
     ORDER BY n.alt
     RETURN family_id, f_uniq_id, role, m_id, uniq_id, gender, birth_date,
         COLLECT([alt, ntype, fn, sn, sx]) AS names
     ORDER BY family_id, role, birth_date
-UNION 
+UNION
 MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
-    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(l) AS role, p.id AS m_id, ID(p) AS uniq_id, 
+    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(l) AS role, p.id AS m_id, ID(p) AS uniq_id,
         p.gender AS gender, "" AS birth_date, [] AS names"""
 
 # ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤════════════╤══════════════════════════════╕
@@ -571,7 +588,7 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
 # ├───────────┼───────────┼────────┼───────┼─────────┼────────┼────────────┼──────────────────────────────┤
 
         return shareds.driver.session().run(query, id=int(uniq_id))
-    
+
 
     @staticmethod
     def get_refnames(pid):
@@ -583,7 +600,7 @@ MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
         # │":"Messu- ja kalenteri"}  │                     │
         # ├──────────────────────────┼─────────────────────┤
         # │{"name":"Bert-not-exists"}│[{"use":"firstname"}]│
-        # └──────────────────────────┴─────────────────────┘        
+        # └──────────────────────────┴─────────────────────┘
         query = """
 MATCH (p:Person) WHERE ID(p) = $pid
 MATCH path = (a) -[:BASENAME*]-> (p)
@@ -593,7 +610,7 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
-        key = "{}:{}:{}:{}".format(self.name.firstname, self.name.last, 
+        key = "{}:{}:{}:{}".format(self.name.firstname, self.name.last,
               self.occupation, self.place)
         return key
 
@@ -611,7 +628,7 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
 #             for event in self.events:
 #                 if event.__class__ != "Event":
 #                     raise TypeError("Piti olla Event: {}".format(event.__class__))
-# 
+#
 #                 # Tapahtuma-noodi
 #                 tapahtuma = Node(Event.label, oid=event.oid, kind=event.kind, \
 #                         name=event.name, date=event.date)
@@ -635,18 +652,18 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
             othersList.append(str(i) + " ")
         logging.debug("Yhdistetään henkilöön {} henkilöt {}".format(str(self), othersList))
         pass
-    
-                
-                
+
+
+
     @staticmethod
     def get_total():
         """ Tulostaa henkilöiden määrän tietokannassa """
-        
+
         query = """
             MATCH (p:Person) RETURN COUNT(p)
             """
         results =  shareds.driver.session().run(query)
-        
+
         for result in results:
             return str(result[0])
 
@@ -668,14 +685,14 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
             first1 = []
             refname1 = []
             surname1 = []
-            suffix1 = [] 
+            suffix1 = []
             alt2 = []
             type2 = []
             first2 = []
-            refname2 = [] 
+            refname2 = []
             surname2 = []
             suffix2 = []
-            
+
             names = self.names
             for pname in names:
                 alt1.append(pname.alt)
@@ -684,7 +701,7 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
                 refname1.append(pname.refname)
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
-            
+
             names2 = comp_person.names
             for pname in names2:
                 alt2.append(pname.alt)
@@ -693,7 +710,7 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
                 refname2.append(pname.refname)
                 surname2.append(pname.surname)
                 suffix2.append(pname.suffix)
-                
+
             if (len(first2) >= len(first1)):
                 for i in range(len(first1)):
                     # Give points if refnames match
@@ -733,13 +750,13 @@ MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE m.type=$type
 SET r.type =$type
 SET n.est_birth = m.daterange_start"""
-            result = shareds.driver.session().run(query, 
+            result = shareds.driver.session().run(query,
                {"type": dtype})
             counters = result.consume().counters
             msg = "Muutettu {} est_birth-tietoa".format(counters.properties_set)
         except Exception as err:
             print("Virhe (Person.save:est_birth): {0}".format(err), file=stderr)
-            
+
         # Set est_birth
         try:
             dtype = 'Death'
@@ -748,14 +765,14 @@ MATCH (n:Person)-[r:EVENT]->(m:Event)
     WHERE m.type=$type
 SET r.type =$type
 SET n.est_death = m.daterange_start"""
-            result = shareds.driver.session().run(query, 
+            result = shareds.driver.session().run(query,
                {"type": dtype})
             counters = result.consume().counters
             msg = msg + " ja {} est_death-tietoa.".format(counters.properties_set)
             return msg
         except Exception as err:
             print("Virhe (Person.save:est_death): {0}".format(err), file=stderr)
-        
+
 
     def print_data(self):
         """ Tulostaa tiedot """
@@ -774,14 +791,14 @@ SET n.est_death = m.daterange_start"""
                 print ("Refname: " + pname.refname)
                 print ("Surname: " + pname.surname)
                 print ("Suffix: " + pname.suffix)
-            
+
         if len(self.urls) > 0:
             for url in self.urls:
                 print ("Url priv: " + url.priv)
                 print ("Url href: " + url.href)
                 print ("Url type: " + url.type)
                 print ("Url description: " + url.description)
-                
+
         if len(self.eventref_hlink) > 0:
             for i in range(len(self.eventref_hlink)):
                 print ("Eventref_hlink: " + self.eventref_hlink[i])
@@ -814,14 +831,14 @@ SET n.est_death = m.daterange_start"""
             first1 = []
             refname1 = []
             surname1 = []
-            suffix1 = [] 
+            suffix1 = []
             alt2 = []
             type2 = []
             first2 = []
-            refname2 = [] 
+            refname2 = []
             surname2 = []
             suffix2 = []
-            
+
             names = self.names
             for pname in names:
                 alt1.append(pname.alt)
@@ -830,7 +847,7 @@ SET n.est_death = m.daterange_start"""
                 refname1.append(pname.refname)
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
-            
+
             names2 = comp_person.names
             for pname in names2:
                 alt2.append(pname.alt)
@@ -839,7 +856,7 @@ SET n.est_death = m.daterange_start"""
                 refname2.append(pname.refname)
                 surname2.append(pname.surname)
                 suffix2.append(pname.suffix)
-                
+
             if (len(first2) >= len(first1)):
                 for i in range(len(first1)):
                     # Give points if refnames match
@@ -871,7 +888,7 @@ SET n.est_death = m.daterange_start"""
 
     def save(self, username, tx):
         """ Saves the Person object and possibly the Names, Events ja Citations
-        
+
             On return, the self.uniq_id is set
         """
 
@@ -883,15 +900,15 @@ SET n.est_death = m.daterange_start"""
         # Save the Person node under UserProfile; all attributes are replaced
         try:
             p_attr = {
-                "gramps_handle": self.handle, 
-                "change": self.change, 
-                "id": self.id, 
-                "priv": self.priv, 
+                "gramps_handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "priv": self.priv,
                 "gender": self.gender
             }
             query = """
 MATCH (u:UserProfile {userName: $username})
-MERGE (p:Person {gramps_handle: $p_attr.gramps_handle}) 
+MERGE (p:Person {gramps_handle: $p_attr.gramps_handle})
 MERGE (u) -[r:REVISION {date: $date}]-> (p)
     SET p = $p_attr
 RETURN id(p) as uniq_id"""
@@ -910,11 +927,11 @@ RETURN id(p) as uniq_id"""
                 names = self.names
                 for name in names:
                     n_attr = {
-                        "alt": name.alt, 
-                        "type": name.type, 
-                        "firstname": name.firstname, 
-                        "refname": name.refname, 
-                        "surname": name.surname, 
+                        "alt": name.alt,
+                        "type": name.type,
+                        "firstname": name.firstname,
+                        "refname": name.refname,
+                        "surname": name.surname,
                         "suffix": name.suffix
                     }
                     query = """
@@ -925,7 +942,7 @@ MERGE (p)-[r:NAME]->(n)"""
                     tx.run(query, n_attr=n_attr, p_handle=self.handle)
             except Exception as err:
                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
-            
+
         # Save Weburl nodes under the Person
         if len(self.urls) > 0:
             for url in self.urls:
@@ -939,7 +956,7 @@ CREATE (n)-[wu:WEBURL]->
       (url:Weburl {priv: {url_priv}, href: {url_href},
                 type: {url_type}, description: {url_description}})"""
                 try:
-                    tx.run(query, 
+                    tx.run(query,
                            {"handle": self.handle, "url_priv": url_priv, "url_href": url_href,
                             "url_type":url_type, "url_description":url_description})
                 except Exception as err:
@@ -958,7 +975,7 @@ CREATE (n)-[r:EVENT {role: {role}}]->
                     e.handle = handles.pop()
                 values = {"p_handle": self.handle,
                           "role": 'osallistuja',
-                          "e_handle": e.handle, 
+                          "e_handle": e.handle,
                           "e_id": e.id,
                           "e_name": e.name, # "e_type": e.tyyppi,
                           "e_date": e.date,
@@ -980,7 +997,7 @@ match (n:Person {gramps_handle:$handle})
 match (m:Event {gramps_handle:$eventref_hlink})
 merge (n) -[r:EVENT {role: $role}]-> (m)
 """
-                    tx.run(query, 
+                    tx.run(query,
                        {"handle": self.handle, "eventref_hlink": eventref_hlink, "role": role})
                 except Exception as err:
                     print("Virhe (Person.save:Event): {0}".format(err), file=stderr)
@@ -994,14 +1011,14 @@ merge (n) -[r:EVENT {role: $role}]-> (m)
 MATCH (n:Person)   WHERE n.gramps_handle=$handle
 MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
 MERGE (n)-[r:MEDIA]->(m)"""
-                    tx.run(query, 
+                    tx.run(query,
                            {"handle": self.handle, "objref_hlink": objref_hlink})
                 except Exception as err:
                     print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
-   
+
         # Make relations to the Family node will be done in Family.save(),
         # because the Family object is not yet created
-   
+
         # Make relations to the Note node
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
@@ -1011,11 +1028,11 @@ MERGE (n)-[r:MEDIA]->(m)"""
 MATCH (n:Person)   WHERE n.gramps_handle=$handle
 MATCH (m:Note) WHERE m.gramps_handle=$noteref_hlink
 MERGE (n)-[r:NOTE]->(m)"""
-                    tx.run(query, 
+                    tx.run(query,
                            {"handle": self.handle, "noteref_hlink": noteref_hlink})
                 except Exception as err:
                     print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
-   
+
         # Make relations to the Citation node
         if len(self.citationref_hlink) > 0:
             try:
@@ -1024,16 +1041,15 @@ MERGE (n)-[r:NOTE]->(m)"""
 MATCH (n:Person)   WHERE n.gramps_handle=$handle
 MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
 MERGE (n)-[r:CITATION]->(m)"""
-                tx.run(query, 
+                tx.run(query,
                        {"handle": self.handle, "citationref_hlink": citationref_hlink})
             except Exception as err:
                 print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
-#        session.close()
         return
 
 
 class Person_as_member(Person):
-    """ A person as a family member 
+    """ A person as a family member
 
         Extra properties:
             role         str "CHILD", "FATHER" or "MOTHER"
@@ -1049,7 +1065,7 @@ class Person_as_member(Person):
 
 class Name:
     """ Nimi
-    
+
         Properties:
                 type            str nimen tyyppi
                 alt             str muun nimen numero
@@ -1058,7 +1074,7 @@ class Name:
                 surname         str sukunimi
                 suffix          str patronyymi
     """
-    
+
     def __init__(self, givn='', surn='', suff=''):
         """ Luo uuden name-instanssin """
         self.type = ''
@@ -1067,57 +1083,57 @@ class Name:
         self.refname = ''
         self.surname = surn
         self.suffix = suff
-        
-        
+
+
     @staticmethod
     def get_people_with_refname(refname):
         """ Etsi kaikki henkilöt, joiden referenssinimi on annettu"""
-        
+
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
                 RETURN p.gramps_handle AS handle
             """.format(refname)
         return shareds.driver.session().run(query)
-        
-        
+
+
     @staticmethod
     def get_people_with_same_name():
         """ Etsi kaikki henkilöt, joiden nimi on sama"""
-        
+
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name)
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2)
                 AND n2.surname = n1.surname AND n2.firstname = n1.firstname
-                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death, 
-                n1.firstname, n1.suffix, n1.surname, 
-                ID(p2), p2.est_birth, p2.est_death, 
+                RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death,
+                n1.firstname, n1.suffix, n1.surname,
+                ID(p2), p2.est_birth, p2.est_death,
                 n2.firstname, n2.suffix, n2.surname]) AS ids
             """.format()
         return shareds.driver.session().run(query)
 
-        
+
     @staticmethod
     def get_ids_of_people_with_refname_and_user_given(userid, refname):
         """ Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
-        
+
         query = """
-            MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 
+            MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name)
                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
                 RETURN ID(p) AS id
             """.format(userid, refname)
         return shareds.driver.session().run(query)
-        
+
     @staticmethod
     def get_people_with_surname(surname):
         """ Etsi kaikki henkilöt, joiden sukunimi on annettu"""
-        
+
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.surname='{}'
                 RETURN DISTINCT ID(p) AS uniq_id
             """.format(surname)
         return shareds.driver.session().run(query)
-        
-    
+
+
     @staticmethod
     def get_personnames(tx, uniq_id=None):
         """ Picks all Name versions of this Person or all persons
@@ -1139,7 +1155,7 @@ class Name:
     @staticmethod
     def get_surnames():
         """ Listaa kaikki sukunimet tietokannassa """
-        
+
         query = """
             MATCH (n:Name) RETURN distinct n.surname AS surname
                 ORDER BY n.surname
@@ -1150,18 +1166,18 @@ class Name:
     @staticmethod
     def set_refname(tx, uniq_id, refname):
         """Asetetaan etunimen referenssinimi  """
-        
+
         query = """
 MATCH (n:Name) WHERE ID(n)=$id
 SET n.refname=$refname
             """
         return tx.run(query, id=uniq_id, refname=refname)
-    
-    
+
+
 class Weburl:
     '''
     Netti URL
-    
+
         Properties:
                 url_priv           str url salattu tieto
                 url_href           str url osoite

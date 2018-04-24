@@ -60,10 +60,13 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False):
             event_type = event[1]
             if event_type:
                 e.type = event_type
-                dates = DateRange(event[2])
-                e.dates = str(dates)
-                e.date = dates.estimate()
-                e.place = event[3]
+                if event[2] != None:
+                    dates = DateRange(event[2], event[3], event[4])
+                    e.dates = str(dates)
+                    e.date = dates.estimate()
+                else:
+                    e.dates = ""
+                e.place = event[5]
 #                 if e.daterange_start != '' and e.daterange_stop != '':
 #                     e.daterange = e.daterange_start + " - " + e.daterange_stop
 #                 elif e.daterange_start != '':
@@ -785,6 +788,6 @@ def get_notes(uniq_id=None):
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
-    """ See models.gramps_loader """
-    raise RuntimeError("Use the method models.gramps_loader.xml_to_neo4j")
+    """ See models.gramps.gramps_loader """
+    raise RuntimeError("Use the method models.gramps.gramps_loader.xml_to_neo4j")
 
