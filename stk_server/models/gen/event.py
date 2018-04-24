@@ -127,13 +127,19 @@ RETURN event"""
         result = shareds.driver.session().run(query, {"pid": pid})
 
         for record in result:
-            self.id = record["event"]["id"]
-            self.change = record["event"]["change"]
-            self.type = record["event"]["type"]
-            dates = DateRange(record["event"]["dates"])
-            self.date = dates.estimate()
-            self.dates = str(dates)
-            self.description = record["event"]["description"]
+            event = record["event"]
+            self.id = event["id"]
+            self.change = event["change"]
+            self.type = event["type"]
+            if "datetype" in event:
+                #TODO: Talletetaanko DateRange -objekti vai vain str?
+                dates = DateRange(event["datetype"], event["date1"], event["date2"])
+                self.dates = str(dates)
+                self.date = dates.estimate()
+            else:
+                self.dates = ""
+                self.date = ""                
+            self.description = event["description"]
     
             place_result = self.get_place_by_id()
             for place_record in place_result:
@@ -358,24 +364,21 @@ RETURN ID(place) AS uniq_id"""
         """
 
         today = str(datetime.date.today())
-        if self.dates:
-            dates = self.dates.for_db()
-        else:
-            dates = None
         e_attr = {
             "gramps_handle": self.handle,
             "change": self.change, 
             "id": self.id, 
             "type": self.type,
             "description": self.description, 
-            "dates": dates,
             "attr_type": self.attr_type, 
             "attr_value": self.attr_value}
+        if self.dates:
+            e_attr.update(self.dates.for_db())
         try:
             tx.run(Cypher_w_handle.event_save, 
                {"username": username, "date": today, "e_attr": e_attr})
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe.event_save: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Place node
@@ -384,7 +387,7 @@ RETURN ID(place) AS uniq_id"""
                 tx.run(Cypher_w_handle.event_link_place, 
                        {"handle": self.handle, "place_hlink": place_hlink})
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe.event_link_place: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Note node
@@ -393,7 +396,7 @@ RETURN ID(place) AS uniq_id"""
                 tx.run(Cypher_w_handle.event_link_note, 
                        {"handle": self.handle, "noteref_hlink": noteref_hlink})
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe.event_link_note: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Citation node
@@ -402,7 +405,7 @@ RETURN ID(place) AS uniq_id"""
                 tx.run(Cypher_w_handle.event_link_citation, 
                        {"handle": self.handle, "citationref_hlink": citationref_hlink})
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe.event_link_citation: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Media node
@@ -411,7 +414,7 @@ RETURN ID(place) AS uniq_id"""
                 tx.run(Cypher_w_handle.event_link_media, 
                        {"handle": self.handle, "objref_hlink": objref_hlink})
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe.event_link_media: {0}".format(err), file=stderr)
             
         return
 

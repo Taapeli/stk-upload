@@ -47,9 +47,16 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
 
     ''' Start DOM elements handler transaction '''
     handler = DOM_handler(DOMTree.documentElement, userid)
-    handler.begin_tx(shareds.driver.session())
-
-    handler.put_message("Storing XML file to Neo4j database:")
+    
+    use_transaction = True  # Voi testata Falsella
+    if use_transaction:
+        handler.begin_tx(shareds.driver.session())
+    else:
+        handler.tx = shareds.driver.session()
+    
+    handler.put_message("Storing XML file to Neo4j database")
+    # Run report shows columns split by ':' 
+    handler.put_message("Kohteita:kpl:aika / sek")
 
     handler.handle_notes()
     handler.handle_repositories()
@@ -62,18 +69,20 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler.handle_events()
     handler.handle_people()
     handler.handle_families()
-    
-    handler.commit()
+
+    if use_transaction:
+        handler.commit()
 
     # Set person confidence values (for all persons!)
     handler.begin_tx(shareds.driver.session())
     result_text = set_confidence_value(handler.tx)
     handler.put_message(result_text)
     # Set Refname links (for imported persons)
-    handler.set_refnames()
+    result_text = handler.set_refnames()
+    handler.put_message(result_text)
     handler.commit()
 
-    msg = "Xml_to_neo4j: Total time {} sek".format(time.time()-t0)
+    msg = " - Total time:: {:.4f}".format(time.time()-t0)
     handler.put_message(msg)
     return(handler.get_messages())
 
@@ -102,13 +111,18 @@ class DOM_handler():
         try:
             self.tx.commit()
         except Exception as e:
-                error = "Talletus tietokantaan ei onnistunut: {}".format(e)
-                logging.error(error)
-                self.msg.append(error)
+            self.put_message("Talletus tietokantaan ei onnistunut: {}", "ERROR", e)
 
-    def put_message(self, msg, level="INFO"):
+    def put_message(self, msg, level="INFO", oid=""):
         ''' Add info message to messages list '''
-        #TODO: ehkä myös level pitäisi tallellettaa
+        if oid:
+            msg = "{} '{}'".format(msg, oid)
+        if level == "INFO":
+            logging.info(msg)
+        elif level == "WARINING":
+            logging.warning(msg)
+        else:
+            logging.error(msg)
         print("{}: {}".format(level, msg))
         self.msg.append(str(msg))
 
@@ -116,7 +130,8 @@ class DOM_handler():
         ''' Return all info messages '''
         return self.msg
 
-    # XML subtree handlers 
+
+    # XML subtree handlers
 
     def handle_citations(self):
         # Get all the citations in the collection
@@ -143,19 +158,19 @@ class DOM_handler():
                 if citation_dateval.hasAttribute("val"):
                     c.dateval = citation_dateval.getAttribute("val")
             elif len(citation.getElementsByTagName('dateval') ) > 1:
-                print("Error: More than one dateval tag in a citation")
+                self.put_message("More than one dateval tag in a citation", "WARNING", c.id)
 
             if len(citation.getElementsByTagName('page') ) == 1:
                 citation_page = citation.getElementsByTagName('page')[0]
                 c.page = citation_page.childNodes[0].data
             elif len(citation.getElementsByTagName('page') ) > 1:
-                print("Error: More than one page tag in a citation")
+                self.put_message("More than one page tag in a citation", "WARNING", c.id)
 
             if len(citation.getElementsByTagName('confidence') ) == 1:
                 citation_confidence = citation.getElementsByTagName('confidence')[0]
                 c.confidence = citation_confidence.childNodes[0].data
             elif len(citation.getElementsByTagName('confidence') ) > 1:
-                print("Error: More than one confidence tag in a citation")
+                self.put_message("More than one confidence tag in a citation", "WARNING", c.id)
 
             if len(citation.getElementsByTagName('noteref') ) >= 1:
                 for i in range(len(citation.getElementsByTagName('noteref') )):
@@ -168,14 +183,12 @@ class DOM_handler():
                 if citation_sourceref.hasAttribute("hlink"):
                     c.sourceref_hlink = citation_sourceref.getAttribute("hlink")
             elif len(citation.getElementsByTagName('sourceref') ) > 1:
-                print("Error: More than one sourceref tag in a citation")
+                self.put_message("More than one sourceref tag in a citation", "WARNING", c.id)
 
             c.save(self.tx)
             counter += 1
 
-        logging.info("Citations stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "Citations stored: " + str(counter)
+        msg = "Citations: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
@@ -207,7 +220,7 @@ class DOM_handler():
                 else:
                     e.type = ''
             elif len(event.getElementsByTagName('type') ) > 1:
-                print("Error: More than one type tag in an event")
+                self.put_message("More than one type tag in an event", "WARNING", e.id)
 
             if len(event.getElementsByTagName('description') ) == 1:
                 event_description = event.getElementsByTagName('description')[0]
@@ -217,7 +230,7 @@ class DOM_handler():
                 else:
                     e.description = ''
             elif len(event.getElementsByTagName('description') ) > 1:
-                print("Error: More than one description tag in an event")
+                self.put_message("More than one description tag in an event", "WARNING", e.id)
 
             """ Dates:
                 <daterange start="1820" stop="1825" quality="estimated"/>
@@ -225,7 +238,7 @@ class DOM_handler():
                 <dateval val="1870" type="about"/>
                 <datestr val="1700-luvulla" />    # Not processed!
             """
-            e.dates = DOM_handler._extract_daterange(event)
+            e.dates = self._extract_daterange(event)
             # e.date = e.dates.estimate() # TODO: remove this, not needed!
 
             if len(event.getElementsByTagName('place') ) == 1:
@@ -233,7 +246,7 @@ class DOM_handler():
                 if event_place.hasAttribute("hlink"):
                     e.place_hlink = event_place.getAttribute("hlink")
             elif len(event.getElementsByTagName('place') ) > 1:
-                print("Error: More than one place tag in an event")
+                self.put_message("More than one place tag in an event", "WARNING", e.id)
 
             if len(event.getElementsByTagName('attribute') ) == 1:
                 event_attr = event.getElementsByTagName('attribute')[0]
@@ -242,35 +255,33 @@ class DOM_handler():
                 if event_attr.hasAttribute("value"):
                     e.attr_value = event_attr.getAttribute("value")
             elif len(event.getElementsByTagName('attribute') ) > 1:
-                print("Error: More than one attribute tag in an event")
+                self.put_message("More than one attribute tag in an event", "WARNING", e.id)
 
             if len(event.getElementsByTagName('noteref') ) == 1:
                 event_noteref = event.getElementsByTagName('noteref')[0]
                 if event_noteref.hasAttribute("hlink"):
                     e.noteref_hlink = event_noteref.getAttribute("hlink")
             elif len(event.getElementsByTagName('noteref') ) > 1:
-                print("Error: More than one noteref tag in an event")
+                self.put_message("More than one noteref tag in an event", "WARNING", e.id)
 
             if len(event.getElementsByTagName('citationref') ) == 1:
                 event_citationref = event.getElementsByTagName('citationref')[0]
                 if event_citationref.hasAttribute("hlink"):
                     e.citationref_hlink = event_citationref.getAttribute("hlink")
             elif len(event.getElementsByTagName('citationref') ) > 1:
-                print("Error: More than one citationref tag in an event")
+                self.put_message("More than one citationref tag in an event", "WARNING", e.id)
 
             if len(event.getElementsByTagName('objref') ) == 1:
                 event_objref = event.getElementsByTagName('objref')[0]
                 if event_objref.hasAttribute("hlink"):
                     e.objref_hlink = event_objref.getAttribute("hlink")
             elif len(event.getElementsByTagName('objref') ) > 1:
-                print("Error: More than one objref tag in an event")
+                self.put_message("More than one objref tag in an event", "WARNING", e.id)
 
             e.save(self.username, self.tx)
             counter += 1
 
-        logging.info("Events stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "Events stored: " + str(counter)
+        msg = "Events: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
@@ -299,21 +310,21 @@ class DOM_handler():
                 if family_rel.hasAttribute("type"):
                     f.rel_type = family_rel.getAttribute("type")
             elif len(family.getElementsByTagName('rel') ) > 1:
-                print("Error: More than one rel tag in a family")
+                self.put_message("More than one rel tag in a family", "WARNING", f.id)
 
             if len(family.getElementsByTagName('father') ) == 1:
                 family_father = family.getElementsByTagName('father')[0]
                 if family_father.hasAttribute("hlink"):
                     f.father = family_father.getAttribute("hlink")
             elif len(family.getElementsByTagName('father') ) > 1:
-                print("Error: More than one father tag in a family")
+                self.put_message("More than one father tag in a family", "WARNING", f.id)
 
             if len(family.getElementsByTagName('mother') ) == 1:
                 family_mother = family.getElementsByTagName('mother')[0]
                 if family_mother.hasAttribute("hlink"):
                     f.mother = family_mother.getAttribute("hlink")
             elif len(family.getElementsByTagName('mother') ) > 1:
-                print("Error: More than one mother tag in a family")
+                self.put_message("More than one mother tag in a family", "WARNING", f.id)
 
             if len(family.getElementsByTagName('eventref') ) >= 1:
                 for i in range(len(family.getElementsByTagName('eventref') )):
@@ -338,9 +349,7 @@ class DOM_handler():
             f.save(self.tx)
             counter += 1
 
-        logging.info("Families stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "Families stored: " + str(counter)
+        msg = "Families: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
@@ -375,9 +384,7 @@ class DOM_handler():
             n.save(self.tx)
             counter += 1
 
-        logging.info("Notes stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "Notes stored: " + str(counter)
+        msg = "Notes: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
@@ -414,9 +421,7 @@ class DOM_handler():
             o.save(self.tx)
             counter += 1
 
-        logging.info("Modia objects stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "Media objects stored: " + str(counter)
+        msg = "Media objects: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
@@ -446,7 +451,7 @@ class DOM_handler():
                 person_gender = person.getElementsByTagName('gender')[0]
                 p.gender = person_gender.childNodes[0].data
             elif len(person.getElementsByTagName('gender') ) > 1:
-                print("Error: More than one gender tag in a person")
+                self.put_message("More than one gender tag in a person", "WARNING", p.id)
 
             if len(person.getElementsByTagName('name') ) >= 1:
                 for i in range(len(person.getElementsByTagName('name') )):
@@ -462,24 +467,26 @@ class DOM_handler():
                         if len(person_first.childNodes) == 1:
                             pname.firstname = person_first.childNodes[0].data
                         elif len(person_first.childNodes) > 1:
-                            print("Error: More than one child node in a first name of a person")
+                            self.put_message("More than one child node in a first name of a person", 
+                                             "WARNING", p.id)
                     elif len(person_name.getElementsByTagName('first') ) > 1:
-                        print("Error: More than one first name in a person")
+                        self.put_message("More than one first name in a person", "WARNING", p.id)
 
                     if len(person_name.getElementsByTagName('surname') ) == 1:
                         person_surname = person_name.getElementsByTagName('surname')[0]
                         if len(person_surname.childNodes ) == 1:
                             pname.surname = person_surname.childNodes[0].data
                         elif len(person_surname.childNodes) > 1:
-                            print("Error: More than one child node in a surname of a person")
+                            self.put_message("More than one child node in a surname of a person", 
+                                             "WARNING", p.id)
                     elif len(person_name.getElementsByTagName('surname') ) > 1:
-                        print("Error: More than one surname in a person")
+                        self.put_message("More than one surname in a person")
 
                     if len(person_name.getElementsByTagName('suffix') ) == 1:
                         person_suffix = person_name.getElementsByTagName('suffix')[0]
                         pname.suffix = person_suffix.childNodes[0].data
                     elif len(person_name.getElementsByTagName('suffix') ) > 1:
-                        print("Error: More than one suffix in a person")
+                        self.put_message("More than one suffix in a person", "WARNING", p.id)
 
                     p.names.append(pname)
 
@@ -531,10 +538,10 @@ class DOM_handler():
 
             p.save(self.username, self.tx)
             counter += 1
+            # The refnames will be set for these persons 
+            self.uniq_ids.append(p.uniq_id)
 
-        logging.info("Persons stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "People stored: " + str(counter)
+        msg = "Persons: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
@@ -550,77 +557,75 @@ class DOM_handler():
         for placeobj in places:
 
             place = Place()
+            # List of upper places in hierarchy as {hlink, dates} dictionaries
+            #TODO move in Place and remove Place.placeref_hlink string
+            place.surround_ref = []
 
-            if placeobj.hasAttribute("handle"):
-                place.handle = placeobj.getAttribute("handle")
+            place.handle = placeobj.getAttribute("handle")
             if placeobj.hasAttribute("change"):
-                place.change = placeobj.getAttribute("change")
-            if placeobj.hasAttribute("id"):
-                place.id = placeobj.getAttribute("id")
-            if placeobj.hasAttribute("type"):
-                place.type = placeobj.getAttribute("type")
+                place.change = int(placeobj.getAttribute("change"))
+            place.id = placeobj.getAttribute("id")
+            place.type = placeobj.getAttribute("type")
 
             if len(placeobj.getElementsByTagName('ptitle') ) == 1:
                 placeobj_ptitle = placeobj.getElementsByTagName('ptitle')[0]
                 place.ptitle = placeobj_ptitle.childNodes[0].data
             elif len(placeobj.getElementsByTagName('ptitle') ) > 1:
-                print("Error: More than one ptitle in a place")
+                self.put_message("More than one ptitle in a place")
 
-            if len(placeobj.getElementsByTagName('pname') ) >= 1:
-                for i in range(len(placeobj.getElementsByTagName('pname') )):
-                    placename = Place_name()
-                    placeobj_pname = placeobj.getElementsByTagName('pname')[i]
-                    if placeobj_pname.hasAttribute("value"):
-                        place.pname = placeobj_pname.getAttribute("value")
-                        placename.name = placeobj_pname.getAttribute("value")
-                    if placeobj_pname.hasAttribute("lang"):
-                        placename.lang = placeobj_pname.getAttribute("lang")
+            for placeobj_pname in placeobj.getElementsByTagName('pname'):
+                placename = Place_name()
+                if placeobj_pname.hasAttribute("value"):
+                    placename.name = placeobj_pname.getAttribute("value")
+                    if place.pname == '':
+                        # First name is default name for Place node
+                        place.pname = placename.name
+                if placeobj_pname.hasAttribute("lang"):
+                    placename.lang = placeobj_pname.getAttribute("lang")
+                place.names.append(placename)
 
-                    placename.dates = DOM_handler._extract_daterange(placeobj)
-                    place.names.append(placename)
+            for placeobj_coord in placeobj.getElementsByTagName('coord'):
+                if placeobj_coord.hasAttribute("lat") \
+                   and placeobj_coord.hasAttribute("long"):
+                    coord_lat = placeobj_coord.getAttribute("lat")
+                    coord_long = placeobj_coord.getAttribute("long")
+                    place.coord = Point(coord_lat, coord_long)
 
-            if len(placeobj.getElementsByTagName('coord') ) >= 1:
-                for i in range(len(placeobj.getElementsByTagName('coord') )):
-                    placeobj_coord = placeobj.getElementsByTagName('coord')[i]
-                    if placeobj_coord.hasAttribute("lat") \
-                       and placeobj_coord.hasAttribute("long"):
-                        coord_lat = placeobj_coord.getAttribute("lat")
-                        coord_long = placeobj_coord.getAttribute("long")
-                        place.coord = Point(coord_lat, coord_long)
+            for placeobj_url in placeobj.getElementsByTagName('url'):
+                weburl = Weburl()
+                if placeobj_url.hasAttribute("priv"):
+                    weburl.priv = placeobj_url.getAttribute("priv")
+                if placeobj_url.hasAttribute("href"):
+                    weburl.href = placeobj_url.getAttribute("href")
+                if placeobj_url.hasAttribute("type"):
+                    weburl.type = placeobj_url.getAttribute("type")
+                if placeobj_url.hasAttribute("description"):
+                    weburl.description = placeobj_url.getAttribute("description")
+                place.urls.append(weburl)
 
-            if len(placeobj.getElementsByTagName('url') ) >= 1:
-                for i in range(len(placeobj.getElementsByTagName('url') )):
-                    weburl = Weburl()
-                    placeobj_url = placeobj.getElementsByTagName('url')[i]
-                    if placeobj_url.hasAttribute("priv"):
-                        weburl.priv = placeobj_url.getAttribute("priv")
-                    if placeobj_url.hasAttribute("href"):
-                        weburl.href = placeobj_url.getAttribute("href")
-                    if placeobj_url.hasAttribute("type"):
-                        weburl.type = placeobj_url.getAttribute("type")
-                    if placeobj_url.hasAttribute("description"):
-                        weburl.description = placeobj_url.getAttribute("description")
-                    place.urls.append(weburl)
+            for placeobj_placeref in placeobj.getElementsByTagName('placeref'):
+                # Traverse links to surrounding places
+                hlink = placeobj_placeref.getAttribute("hlink")
+                dates = self._extract_daterange(placeobj_placeref)
+                place.surround_ref.append({'hlink':hlink, 'dates':dates})
+#             # Piti sallia useita ylempia paikkoja eri päivämäärillä
+#             # Tässä vain 1 sallitaan elikä päivämäärää ole
+#             if len(placeobj.getElementsByTagName('placeref') ) == 1:
+#                 placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
+#                 if placeobj_placeref.hasAttribute("hlink"):
+#                     place.placeref_hlink = placeobj_placeref.getAttribute("hlink")
+#                     place.dates = self._extract_daterange(placeobj_placeref)
+#             elif len(placeobj.getElementsByTagName('placeref') ) > 1:
+#                 print("Warning: Ignored 2nd placeref in a place - useita hierarkian yläpuolisia paikkoja")
 
-            if len(placeobj.getElementsByTagName('placeref') ) == 1:
-                placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
-                if placeobj_placeref.hasAttribute("hlink"):
-                    place.placeref_hlink = placeobj_placeref.getAttribute("hlink")
-            elif len(placeobj.getElementsByTagName('placeref') ) > 1:
-                print("Error: More than one placeref in a place")
-
-            if len(placeobj.getElementsByTagName('noteref') ) >= 1:
-                for i in range(len(placeobj.getElementsByTagName('noteref') )):
-                    placeobj_noteref = placeobj.getElementsByTagName('noteref')[i]
-                    if placeobj_noteref.hasAttribute("hlink"):
-                        place.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
+            for placeobj_noteref in placeobj.getElementsByTagName('noteref'):
+                if placeobj_noteref.hasAttribute("hlink"):
+                    place.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
 
             place.save(self.tx)
             counter += 1
 
-        logging.info("Places stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "Places stored: " + str(counter)
+        msg = "Places: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
@@ -648,13 +653,13 @@ class DOM_handler():
                 repository_rname = repository.getElementsByTagName('rname')[0]
                 r.rname = repository_rname.childNodes[0].data
             elif len(repository.getElementsByTagName('rname') ) > 1:
-                print("Error: More than one rname in a repository")
+                self.put_message("More than one rname in a repository", "WARNING", r.id)
 
             if len(repository.getElementsByTagName('type') ) == 1:
                 repository_type = repository.getElementsByTagName('type')[0]
                 r.type =  repository_type.childNodes[0].data
             elif len(repository.getElementsByTagName('type') ) > 1:
-                print("Error: More than one type in a repository")
+                self.put_message("More than one type in a repository", "WARNING", r.id)
 
             if len(repository.getElementsByTagName('url') ) >= 1:
                 for i in range(len(repository.getElementsByTagName('url') )):
@@ -669,9 +674,7 @@ class DOM_handler():
             r.save(self.tx)
             counter += 1
 
-        logging.info("Repositories stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "Repositories stored: " + str(counter)
+        msg = "Repositories: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
@@ -699,14 +702,14 @@ class DOM_handler():
                 source_stitle = source.getElementsByTagName('stitle')[0]
                 s.stitle = source_stitle.childNodes[0].data
             elif len(source.getElementsByTagName('stitle') ) > 1:
-                print("Error: More than one stitle in a source")
+                self.put_message("More than one stitle in a source", "WARNING", s.id)
 
             if len(source.getElementsByTagName('noteref') ) == 1:
                 source_noteref = source.getElementsByTagName('noteref')[0]
                 if source_noteref.hasAttribute("hlink"):
                     s.noteref_hlink = source_noteref.getAttribute("hlink")
             elif len(source.getElementsByTagName('noteref') ) > 1:
-                print("Error: More than one noteref in a source")
+                self.put_message("More than one noteref in a source", "WARNING", s.id)
 
             if len(source.getElementsByTagName('reporef') ) == 1:
                 source_reporef = source.getElementsByTagName('reporef')[0]
@@ -715,26 +718,30 @@ class DOM_handler():
                 if source_reporef.hasAttribute("medium"):
                     s.reporef_medium = source_reporef.getAttribute("medium")
             elif len(source.getElementsByTagName('reporef') ) > 1:
-                print("Error: More than one reporef in a source")
+                self.put_message("More than one reporef in a source", "WARNING", s.id)
 
             s.save(self.tx)
             counter += 1
 
-        logging.info("Sources stored: {} TIME {} sek".\
-                      format(counter, time.time()-t0))
-        msg = "Sources stored: " + str(counter)
+        msg = "Sources: {} : {:.4f}".format(counter, time.time()-t0)
         self.put_message(msg)
 
 
     def set_refnames(self):
         ''' Add links from each Person to Refnames '''
-        
+
+        print ("***** {} Refnames *****".format(len(self.uniq_ids)))
+        t0 = time.time()
+        self.namecount = 0
+
         for p_id in self.uniq_ids:
-            set_person_refnames(self.tx, p_id)
+            set_person_refnames(self, p_id)
+
+        msg = "Refname references: {} : {:.4f}".format(self.namecount, time.time()-t0)
+        return msg
 
 
-    @staticmethod
-    def _extract_daterange(obj):
+    def _extract_daterange(self, obj):
         """ Extract a date information from these kind of date formats:
                 <daterange start="1820" stop="1825" quality="estimated"/>
                 <datespan start="1840-01-01" stop="1850-06-30" quality="calculated"/>
@@ -767,12 +774,12 @@ class DOM_handler():
                     date_quality = dateobj.getAttribute("quality")
                 else:
                     date_quality = None
-    #             logging.debug("Creating {}, date_type={}, quality={}, {} - {}".\
-    #                           format(tag, date_type, date_quality, date_start, date_stop))
+                logging.debug("Creating {}, date_type={}, quality={}, {} - {}".\
+                              format(tag, date_type, date_quality, date_start, date_stop))
                 return Gramps_DateRange(tag, date_type, date_quality,
                                         date_start, date_stop)
 
             elif len(obj.getElementsByTagName(tag) ) > 1:
-                print("Error: More than one {} tag in an event".format(tag))
+                self.put_message("More than one {} tag in an event".format(tag), "ERROR")
 
         return None

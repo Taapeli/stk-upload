@@ -9,15 +9,16 @@ from models.gen.person import Person, Name
 from models.gen.refname import Refname
 
 
-def set_confidence_value(tx):
-    """ Sets a quality rate for a Person
+def set_confidence_value(tx, uniq_id=None):
+    """ Sets a quality rate for one or all Persons
         Asettaa henkilölle laatuarvion
         
         Person.confidence is mean of all Citations used for Person's Events
     """
     counter = 0
+    t0 = time.time()
 
-    result = Person.get_confidence()
+    result = Person.get_confidence(uniq_id)
     for record in result:
         p = Person()
         p.uniq_id = record["uniq_id"]
@@ -33,7 +34,7 @@ def set_confidence_value(tx):
             
         counter += 1
             
-    text = "Number of confidences set: " + str(counter)
+    text = "Confidences set: {} : {:.4f}".format(counter, time.time()-t0)
     return (text)
 
 
@@ -49,15 +50,18 @@ def set_estimated_dates():
     return (message)
 
 
-def set_person_refnames(tx=None, uniq_id=None):
-    """ Set Refnames to all or selected Persons
+def set_person_refnames(self=None, uniq_id=None):
+    """ Set Refnames to all or one Persons
+        If self is defined
+        - if there is transaction tx, use it, else create new 
+        - if there is self.namecount, the number of names set is increased
     """
     pers_count = 0
     name_count = 0
     t0 = time.time()
 
-    if tx:
-        my_tx = tx
+    if self and self.tx:
+        my_tx = self.tx
     else:
         my_tx = User.beginTransaction()
     names = Name.get_personnames(my_tx, uniq_id)
@@ -97,28 +101,31 @@ def set_person_refnames(tx=None, uniq_id=None):
         pers_count += 1
 
         # ===   [NOT!] Report status for each name    ====
-        rnames = []
-        recs = Person.get_refnames(pid)
-        for rec in recs:
-            # ╒══════════════════════════╤═════════════════════╕
-            # │"a"                       │"li"                 │
-            # ╞══════════════════════════╪═════════════════════╡
-            # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
-            # │":"Messu- ja kalenteri"}  │                     │
-            # └──────────────────────────┴─────────────────────┘        
+        if False:
+            rnames = []
+            recs = Person.get_refnames(pid)
+            for rec in recs:
+                # ╒══════════════════════════╤═════════════════════╕
+                # │"a"                       │"li"                 │
+                # ╞══════════════════════════╪═════════════════════╡
+                # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
+                # │":"Messu- ja kalenteri"}  │                     │
+                # └──────────────────────────┴─────────────────────┘        
  
-            name = rec['a']
-            link = rec['li'][0]
-            rnames.append("{} ({})".format(name['name'], link['use']))
-        logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
+                name = rec['a']
+                link = rec['li'][0]
+                rnames.append("{} ({})".format(name['name'], link['use']))
+            logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
     
-    if not tx:
+    if self == None or self.tx == None:
         # End my own created transformation
         User.endTransaction(my_tx)
 
-    msg="Processed {} names of {} persons in {} sek".\
-        format(name_count, pers_count, time.time()-t0)
+    msg="Refname references: {} : {}".format(name_count, time.time()-t0)
     logging.info(msg)
+    
+    if self and self.namecount != None:
+        self.namecount += name_count
     return msg
 
 
