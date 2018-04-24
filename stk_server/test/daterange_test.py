@@ -95,7 +95,7 @@ class Test(unittest.TestCase):
         """
         d = DateRange(DR['BEFORE'], date(2017, 10, 16))
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
-        self.assertEqual(str(d), "16.10.2017 mennessä")
+        self.assertEqual(str(d), "16.10.2017 saakka")
 
         d = DateRange(DR['AFTER'], date(2017, 4, 8))
         self.assertEqual(d.to_list(), [2, "2017-04-08"])
@@ -143,7 +143,7 @@ class Test(unittest.TestCase):
         """
         d = DateRange(DR['CALC_BEFORE'], date(2017, 10, 16))
         self.assertEqual(d.to_list(), [9, "2017-10-16"])
-        self.assertEqual(str(d), "laskettuna 16.10.2017 mennessä")
+        self.assertEqual(str(d), "laskettuna 16.10.2017 saakka")
         
         d = DateRange(DR['EST_PERIOD'], date(2017, 4, 8), date(2017, 10, 16))
         self.assertEqual(d.to_list(), [19, "2017-04-08", "2017-10-16"])

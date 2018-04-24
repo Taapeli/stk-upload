@@ -171,7 +171,7 @@ class DateRange():
         if type_e == DR['DATE']: # Exact date d1
             return dopt + dstr1
         elif type_e == DR['BEFORE']:  # Date till d1
-            return "{}{} mennessä".format(dopt, dstr1)
+            return "{}{} saakka".format(dopt, dstr1)
         elif type_e == DR['AFTER']: # Date from d1
             return "{}{} alkaen".format(dopt, dstr1)
         elif type_e == DR['PERIOD']: # Date period d1-d2
