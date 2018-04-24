@@ -60,7 +60,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False):
             event_type = event[1]
             if event_type:
                 e.type = event_type
-                if event[2] != None:
+                if event[2] != None and isinstance(event[2], int):
                     dates = DateRange(event[2], event[3], event[4])
                     e.dates = str(dates)
                     e.date = dates.estimate()
