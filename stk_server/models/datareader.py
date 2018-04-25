@@ -60,10 +60,13 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False):
             event_type = event[1]
             if event_type:
                 e.type = event_type
-                dates = DateRange(event[2])
-                e.dates = str(dates)
-                e.date = dates.estimate()
-                e.place = event[3]
+                if event[2] != None and isinstance(event[2], int):
+                    dates = DateRange(event[2], event[3], event[4])
+                    e.dates = str(dates)
+                    e.date = dates.estimate()
+                else:
+                    e.dates = ""
+                e.place = event[5]
 #                 if e.daterange_start != '' and e.daterange_stop != '':
 #                     e.daterange = e.daterange_start + " - " + e.daterange_stop
 #                 elif e.daterange_start != '':

@@ -10,27 +10,61 @@ from models.gen.dates import DateRange, DR
 
 class Test(unittest.TestCase):
 
+    def testDateInt_day(self):
+        ''' Check mid-month date order 
+            Test the adjacent days in range 1917-12-14...16 including missing day
+        '''
+        comp = 1963405
+        for s in ["1917-12-14", "1917-12-15", "1917-12", "1917-12-16"]:
+#             print(" test day {}".format(s))
+            val = DateRange.DateInt(s).value()
+            self.assertEqual(val, comp, s)
+            comp += 1
+
+    def testDateInt_month(self):
+        ''' Check mid-year date order 
+            Test the months in range 5..7 including missing month
+        '''
+        comp = 1963198
+        for s in ["1917-06-30", "1917-06-31", "1917"]:
+#             print(" tst month {}".format(s))
+            val = DateRange.DateInt(s).value()
+            self.assertEqual(val, comp, s)
+            comp += 1
+        # There is a gap bewtween "1917" and "1917-07-01" ~ no problem?
+        s = "1917-07-01"
+        comp += 31  
+#         print(" test month {}".format(s))
+        val = DateRange.DateInt(s).value()
+        self.assertEqual(val, comp, s)
+
     def test_create(self):
         ''' DateRange creation formats '''
         d = DateRange(DR['DATE'], "2017-11-09")
         self.assertEqual(d.to_list(), [0, "2017-11-09"])
         d = DateRange(DR['BEFORE'], "2017-10-16")
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
-        d = DateRange(1, 736618)
+        d = DateRange(1, 2065744)
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
         d = DateRange(DR['BETWEEN'], date(1917, 12, 6), date(2017, 10, 16))
         self.assertEqual(d.to_list(), [4, "1917-12-06", "2017-10-16"])
-        d = DateRange(4, 700144, 736618)
+        d = DateRange(4, 1963397, 2065744)
         self.assertEqual(d.to_list(), [4, "1917-12-06", "2017-10-16"])
         d = DateRange("1", "2017-10-16")
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
         d = DateRange(DR['PERIOD'], "1917-12-06", "2017-10-16")
-        self.assertEqual(d.for_db(), ["3", "1917-12-06", "2017-10-16"])
-
+        dic = {'datetype': 3, 
+               'date1': DateRange.DateInt("1917-12-06").value(), 
+               'date2': DateRange.DateInt("2017-10-16").value() }
+        self.assertEqual(d.for_db(), dic)
+        d = DateRange(DR['PERIOD'], "1784", "1796-05")
+        dic = {'datetype': 3, 
+               'date1': DateRange.DateInt("1784").value(), 
+               'date2': DateRange.DateInt("1796-05").value() }
+        self.assertEqual(d.for_db(), dic)
 
     def testDateRange_date(self):
         ''' Single DateRange DR['DATE']
-
             DateRange(d1)
             DateRange(int, d1)
             DateRange(int, d1, d2)
@@ -51,9 +85,6 @@ class Test(unittest.TestCase):
         self.assertEqual(d.to_list(), [0, "1820-01-01"])
         self.assertEqual(str(d), "1.1.1820")
 
-#         #Fails
-#         d = DateRange(0, "1820-01-01", "")
-
 
     def testDateRange_before_after(self):
         """
@@ -64,7 +95,7 @@ class Test(unittest.TestCase):
         """
         d = DateRange(DR['BEFORE'], date(2017, 10, 16))
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
-        self.assertEqual(str(d), "16.10.2017 mennessä")
+        self.assertEqual(str(d), "16.10.2017 saakka")
 
         d = DateRange(DR['AFTER'], date(2017, 4, 8))
         self.assertEqual(d.to_list(), [2, "2017-04-08"])
@@ -90,11 +121,14 @@ class Test(unittest.TestCase):
         d = DateRange(DR['BETWEEN'], date(2017, 4, 8), date(2017, 10, 16))
         self.assertEqual(d.to_list(), [4, "2017-04-08", "2017-10-16"])
         self.assertEqual(str(d), "välillä 8.4.2017 … 16.10.2017")
-#         d = DateRange(DR_TILL, "2017-10-16")
-#         d = DateRange(1, 736618)
-#         d = DateRange(DR_BETWEEN, date(1917, 12, 6), date(2017, 10, 16))
-#         d = DateRange(DR_BETWEEN, "1917-12-06", "2017-10-16")
-#         d = DateRange(4, 700144, 736618)
+
+        d = DateRange(DR['PERIOD'], "1784", "1796")
+        self.assertEqual(d.to_list(), [3, "1784", "1796"])
+        self.assertEqual(str(d), "1784 – 1796")
+
+        d = DateRange(4, 1740992, 1843503)
+        self.assertEqual(d.to_list(), [4, '1700', '1800-09'])
+        self.assertEqual(str(d), 'välillä 1700 … 9.1800')
 
     def testDateRange_calc_est(self):
         """
@@ -109,7 +143,7 @@ class Test(unittest.TestCase):
         """
         d = DateRange(DR['CALC_BEFORE'], date(2017, 10, 16))
         self.assertEqual(d.to_list(), [9, "2017-10-16"])
-        self.assertEqual(str(d), "laskettuna 16.10.2017 mennessä")
+        self.assertEqual(str(d), "laskettuna 16.10.2017 saakka")
         
         d = DateRange(DR['EST_PERIOD'], date(2017, 4, 8), date(2017, 10, 16))
         self.assertEqual(d.to_list(), [19, "2017-04-08", "2017-10-16"])
@@ -122,6 +156,31 @@ class Test(unittest.TestCase):
         d = DateRange(DR['EST_ABOUT'], date(2017, 10, 16))
         self.assertEqual(d.to_list(), [21, "2017-10-16"])
         self.assertEqual(str(d), "arviolta noin 16.10.2017")
+
+    def testDateRange_DateInt(self):
+        """
+        Converts string format to int and vice versa
+        """
+        s = "2047-01-09"
+        d = DateRange.DateInt(s)
+        ds = d.short_date()
+        self.assertEqual(s, ds)
+        
+        s = "1900-12-31"
+        d = DateRange.DateInt(s)
+        ds = d.short_date()
+        self.assertEqual(s, ds)
+        
+        s = "1800-09"
+        d = DateRange.DateInt(s)
+        ds = d.long_date()
+        self.assertEqual(s + '-00', ds)
+        
+        s = "1700"
+        d = DateRange.DateInt(s)
+        ds = d.long_date()
+        self.assertEqual(s + '-00-00', ds)
+        
 
 
 #     def testDate_compare_DR_DATE(self):
@@ -150,6 +209,12 @@ class Test(unittest.TestCase):
 #         self.assertEqual(-1, mydate.__cmp__(DateRange(DR['ABOUT'], "1640")))
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['ABOUT'], "1645")))
 #         self.assertEqual(1, mydate.__cmp__(DateRange(DR['ABOUT'], "1650")))
+
+
+class ExpectedFailureTest(unittest.TestCase):
+    @unittest.expectedFailure
+    def testDateRange_tooMenyArguments(self):
+        print(DateRange(0, "1820-01-01", ""))
 
 
 if __name__ == "__main__":

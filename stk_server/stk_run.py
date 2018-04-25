@@ -440,6 +440,7 @@ def pick_selection(cond):
     """
     key, value = cond.split('=')
     try:
+#         # (Vanhoja käräjät-harjoituksia!)
 #         if key == 'oid':              
 #             # from table_persons.html as @shareds.app.route('/poimi/<string:cond>')
 #             persons = models.datareader.lue_henkilot(oid=value)
