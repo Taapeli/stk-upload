@@ -479,7 +479,7 @@ def pick_selection(cond):
 
 @shareds.app.route('/upload', methods=['POST'])
 def upload():
-    """ Load a cvs file to temp directory for processing in the server
+    """ Load a cvs or gramps file to temp directory for processing in the server
     """
     try:
         infile = request.files['filenm']
@@ -498,7 +498,7 @@ def upload():
 
 @shareds.app.route('/save/<string:subj>/<string:filename>')
 def save_loaded(filename, subj):
-    """ Save loaded xml of cvs data to the database """
+    """ Save loaded gramps of cvs data to the database """
     pathname = loadfile.fullname(filename)
     dburi = dbutil.get_server_location()
     try:
