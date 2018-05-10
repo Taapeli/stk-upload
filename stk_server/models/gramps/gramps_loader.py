@@ -6,6 +6,7 @@
 
 import logging
 import time
+import gzip
 import xml.dom.minidom
 
 from models.gen.event import Event
@@ -21,43 +22,44 @@ import shareds
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
-    """ Reads a xml backup file from Gramps, and saves the information to db """
+    """ Reads a Gramps xml file, and saves the information to db """
 
-    # Make a precheck for cleaning problematic delimiters
+    # Decompress file and make a precheck for cleaning problematic delimiters
     a = pathname.split(".")
     pathname2 = a[0] + "_pre." + a[1]
-
-    file1 = open(pathname, encoding='utf-8')
-    file2 = open(pathname2, "w", encoding='utf-8')
-
-    for line in file1:
-        # Already \' in line
-        if not line.find("\\\'") > 0:
-            # Replace ' with \'
-            line = line.replace("\'", "\\\'")
-        file2.write(line)
-
-    file1.close()
-    file2.close()
-
     t0 = time.time()
+
+    with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file1:
+        file2 = open(pathname2, "w", encoding='utf-8')
+
+        for line in file1:
+            # Already \' in line
+            if not line.find("\\\'") > 0:
+                # Replace ' with \'
+                line = line.replace("\'", "\\\'")
+            file2.write(line)
+
+        file2.close()
+    msg = "Cleaned input lines:: {:.4f}".format(time.time()-t0)
 
     ''' Get XML DOM parser '''
     DOMTree = xml.dom.minidom.parse(open(pathname2, encoding='utf-8'))
-
     ''' Start DOM elements handler transaction '''
     handler = DOM_handler(DOMTree.documentElement, userid)
-    
+
+    handler.put_message("Storing '*.gramps' file to Neo4j database")
+    # Run report shows columns split by ':' 
+    handler.put_message("Kohteita:kpl:aika / sek")
+    handler.put_message(msg)
+
+    t0 = time.time()
+
     use_transaction = True  # Voi testata Falsella
     if use_transaction:
         handler.begin_tx(shareds.driver.session())
     else:
         handler.tx = shareds.driver.session()
     
-    handler.put_message("Storing XML file to Neo4j database")
-    # Run report shows columns split by ':' 
-    handler.put_message("Kohteita:kpl:aika / sek")
-
     handler.handle_notes()
     handler.handle_repositories()
     handler.handle_media()

@@ -16,7 +16,7 @@ elif 'TMP' in os.environ:
 else:
     UPLOAD_FOLDER = os.sep + 'tmp'
 
-ALLOWED_EXTENSIONS = set(['txt', 'csv', 'xml'])
+ALLOWED_EXTENSIONS = set(['gramps', 'txt', 'csv', 'xml'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
