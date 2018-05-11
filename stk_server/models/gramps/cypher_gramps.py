@@ -87,6 +87,37 @@ MERGE (n)-[r:Media]->(m)"""
 
 # --- For Family class --------------------------------------------------------
 
+    family_create = """
+MERGE (f:Family {gramps_handle: $f_attr.gramps_handle}) 
+    SET f = $f_attr
+RETURN id(f) as uniq_id"""
+
+    family_link_father = """
+MATCH (n:Family) WHERE n.gramps_handle=$f_handle
+MATCH (m:Person) WHERE m.gramps_handle=$p_handle
+MERGE (n)-[r:FATHER]->(m)"""
+
+    family_link_mother = """
+MATCH (n:Family) WHERE n.gramps_handle=$f_handle
+MATCH (m:Person) WHERE m.gramps_handle=$p_handle
+MERGE (n)-[r:MOTHER]->(m)"""
+
+    family_link_event = """
+MATCH (n:Family) WHERE n.gramps_handle=f_handle
+MATCH (m:Event)  WHERE m.gramps_handle=e_handle
+MERGE (n)-[r:EVENT]->(m)
+    SET r.role = $role"""
+
+    family_link_child = """
+MATCH (n:Family) WHERE n.gramps_handle=$f_handle
+MATCH (m:Person) WHERE m.gramps_handle=$p_handle
+MERGE (n)-[r:CHILD]->(m)"""
+
+    family_link_note = """
+MATCH (n:Family) WHERE n.gramps_handle=$f_handle
+MATCH (m:Note)   WHERE m.gramps_handle=$n_handle
+MERGE (n)-[r:NOTE]->(m)"""
+
 # --- For Media class ---------------------------------------------------------
 
 # --- For Note class ----------------------------------------------------------
