@@ -124,6 +124,49 @@ MERGE (n)-[r:NOTE]->(m)"""
 
 # --- For Person class --------------------------------------------------------
 
+    person_create = """
+MATCH (u:UserProfile {userName: $username})
+MERGE (p:Person {gramps_handle: $p_attr.gramps_handle})
+MERGE (u) -[r:REVISION {date: $date}]-> (p)
+    SET p = $p_attr
+RETURN id(p) as uniq_id"""
+
+    person_link_name = """
+CREATE (n:Name) SET n = $n_attr
+WITH n
+MATCH (p:Person {gramps_handle:$p_handle})
+MERGE (p)-[r:NAME]->(n)"""
+
+    person_link_weburl = """
+MATCH (p:Person {gramps_handle: $handle}) 
+CREATE (p) -[wu:WEBURL]-> (url:Weburl)
+    SET url = $u_attr"""
+
+    person_link_event_embedded = """
+MATCH (p:Person {gramps_handle: $handle}) 
+CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
+    SET e = $e_attr"""
+
+    person_link_event = """
+MATCH (p:Person {gramps_handle:$p_handle})
+MATCH (e:Event  {gramps_handle:$e_handle})
+MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
+
+    person_link_media = """
+MATCH (p:Person {gramps_handle: $p_handle})
+MATCH (m:Media  {gramps_handle: $m_handle})
+MERGE (p) -[r:MEDIA]-> (m)"""
+
+    person_link_note = """
+MATCH (p:Person {gramps_handle: $p_handle})
+MATCH (n:Note   {gramps_handle: $n_handle})
+MERGE (p) -[r:NOTE]-> (n)"""
+
+    person_link_citation = """
+MATCH (p:Person)   {gramps_handle: $p_handle})
+MATCH (c:Citation) {gramps_handle: $c_handle})
+MERGE (p)-[r:CITATION]->(c)"""
+
 # --- For Place class ---------------------------------------------------------
 
     place_create = """
