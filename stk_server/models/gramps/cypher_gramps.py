@@ -6,6 +6,47 @@ Created on 21.3.2018
 @author: jm
 '''
 
+class Cypher_batch(object):
+    '''
+    Cypher clauses for managing Batch when inputting Gramps data
+    '''
+
+    batch_find_id = """
+MATCH (u:UserProfile {username: $user})
+MATCH (b:Batch) 
+    WHERE b.i STARTS WITH $batch_base 
+RETURN b.id AS id
+    ORDER BY b.id DESC 
+    LIMIT 1"""
+
+    batch_create_as_current = """
+MATCH (u:UserProfile {username: $user})
+MERGE (u) -[:HAS_LOADED {status: 'started'}]-> 
+    (b:Batch {id: $batch, file: $file}) -[:COMPLETED]-> 
+    (l:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
+WITH u, b
+    OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
+        DELETE c
+    CREATE (u) -[:CURRENT_LOAD]-> (b)
+"""
+
+    batch_add_log = """
+MATCH (u:UserProfile {username: $user})
+MATCH (u) -[:HAS_LOADED]-> (b:Batch {id:$batch}) -[:COMPLETED*]-> (l0:Log)
+CREATE (l0) -[:COMPLETED]-> 
+    (l1:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
+"""
+
+    batch_log_list = """
+MATCH (u:UserProfile {username: $user}) -[:HAS_LOADED]-> 
+    (b:Batch {id: $batch}) -[:COMPLETED*]-> (l)
+RETURN l.status AS status, l.msg AS msg, l.size AS size, l.elapsed AS elapsed
+"""
+
+#TODO Kaikki lauseet geneologisten tietojen lukemiseen ja päivittämiseen
+
+# ==============================================================================
+
 class Cypher_w_handle(object):
     '''
     Cypher clauses for reading and updating database by data from Gramps xml file
