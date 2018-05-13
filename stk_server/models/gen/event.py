@@ -9,7 +9,6 @@ from sys import stderr
 #from flask import g
 from models.gen.dates import DateRange
 import  shareds
-from models.gen.cypher import Cypher
 from models.gramps.cypher_gramps import Cypher_w_handle
 
 

@@ -7,6 +7,7 @@
 import logging
 import time
 import gzip
+from os.path import basename, splitext
 import xml.dom.minidom
 
 from models.gen.event import Event
@@ -25,12 +26,15 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     """ Reads a Gramps xml file, and saves the information to db """
 
     # Decompress file and make a precheck for cleaning problematic delimiters
-    a = pathname.split(".")
-    pathname2 = a[0] + "_pre." + a[1]
+    # - build 2nd filename 
+    root, ext = splitext(pathname)
+    file_read = root + "_clean" + ext
+    # - filename for display
+    file_displ = basename(pathname)
     t0 = time.time()
 
     with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file1:
-        file2 = open(pathname2, "w", encoding='utf-8')
+        file2 = open(file_read, "w", encoding='utf-8')
 
         for line in file1:
             # Already \' in line
@@ -43,11 +47,11 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     msg = "Cleaned input lines:: {:.4f}".format(time.time()-t0)
 
     ''' Get XML DOM parser '''
-    DOMTree = xml.dom.minidom.parse(open(pathname2, encoding='utf-8'))
+    DOMTree = xml.dom.minidom.parse(open(file_read, encoding='utf-8'))
     ''' Start DOM elements handler transaction '''
     handler = DOM_handler(DOMTree.documentElement, userid)
 
-    handler.put_message("Storing '*.gramps' file to Neo4j database")
+    handler.put_message("Storing '{}' file to Neo4j database".format(file_displ))
     # Run report shows columns split by ':' 
     handler.put_message("Kohteita:kpl:aika / sek")
     handler.put_message(msg)
