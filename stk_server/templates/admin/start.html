@@ -30,23 +30,33 @@
     {% if current_user.is_authenticated and current_user.has_role('admin') %}
     <div class="startbox admin">
       <div style="display: inline-block;">
-		<h3>Ylläpitäjän toiminnot</h3>
-		<ul>
-          <li><em>Tyhjennä kanta</em>  <i>(Mitään kysymättä!)</i>
+        <h3>Tietokannan tyhjennykset</h3>
+            <p>Kanta tai sen osia tyhjennetään <i>(Mitään kysymättä!)</i></p>
             <ul>
-              <li><a href="/admin/clear_db/total">Koko kanta</li>
-              <li><a href="/admin/clear_db/save_users">Säästä käyttäjätunukset</li>
-              <li><a href="/admin/clear_db/my_own">Omat henkilö- ja 
-                  tapahtumatiedot ({{current_user.username}})</li>
-          </ul></li>
-		  <li><a href="/list_users">Näytä käyttäjätunnukset</a></li>
-		  <li><a href="/list_emails">Näytä käyttäjäehdokkaat</a></li>
-		  <li><a href="/refnames">Muokkaa referenssinimiä</a></li>
-		  <li><a href="/aseta/estimated_dates">Aseta henkilön arvioidut syntymä- ja kuolinajat</a></li>			</ul>
+              <li><a href="/admin/clear_db/total">Tyhjennä koko kanta</a></li>
+              <li><a href="/admin/clear_db/save_users">Tyhjennä säästäen
+                  käyttäjätunukset</a></li>
+              <li><a href="/admin/clear_db/my_own">Poista itse tuomani tiedot 
+                  ({{current_user.username}})</a></li>
+            </ul>
       </div>
     </div>{% endif %}
 
-     {% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+    <div class="startbox admin">
+      <div style="display: inline-block;">
+        <h3>Käyttäjien ja referenssinimien hallinta</h3>
+        <ul>
+          <li><a href="/list_users">Näytä käyttäjätunnukset</a></li>
+          <li><a href="/list_emails">Näytä käyttäjäehdokkaat</a></li>
+          <li><a href="/refnames">Muokkaa referenssinimiä</a></li>
+          <li><a href="/aseta/estimated_dates">Aseta henkilön arvioidut 
+              syntymä- ja kuolinajat</a></li>
+        </ul>
+      </div>
+    </div>{% endif %}
+
+<!--     {% if current_user.is_authenticated %}
         <div class="startbox"">
           <h3>Kirjaudu ulos</h3>
           <p>Istunnon lopettaminen<br>&nbsp;</p>
@@ -59,5 +69,7 @@
      {% endif %}
     </div>
   </div>
-	
+-->
+
+    <p>▸ <a href="/">Palaa peruskäyttäjän näkymään</a></p>
 {% endblock %}

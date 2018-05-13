@@ -9,10 +9,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 import datetime
 from sys import stderr
 import logging
-#from flask import g
+
+import shareds
 import models.dbutil
-import  shareds
 from models.gen.cypher import Cypher
+from models.gramps.cypher_gramps import Cypher_w_handle
 from models.gen.dates import DateRange
 
 class Person:
@@ -906,13 +907,8 @@ SET n.est_death = m.daterange_start"""
                 "priv": self.priv,
                 "gender": self.gender
             }
-            query = """
-MATCH (u:UserProfile {userName: $username})
-MERGE (p:Person {gramps_handle: $p_attr.gramps_handle})
-MERGE (u) -[r:REVISION {date: $date}]-> (p)
-    SET p = $p_attr
-RETURN id(p) as uniq_id"""
-            result = tx.run(query, username=username, p_attr=p_attr, date=today)
+            result = tx.run(Cypher_w_handle.person_create, 
+                            username=username, p_attr=p_attr, date=today)
 #             self.uniq_id = result.single()[0]
             for res in result:
                 self.uniq_id = res[0]
@@ -934,54 +930,42 @@ RETURN id(p) as uniq_id"""
                         "surname": name.surname,
                         "suffix": name.suffix
                     }
-                    query = """
-CREATE (n:Name) SET n = $n_attr
-WITH n
-MATCH (p:Person {gramps_handle:$p_handle})
-MERGE (p)-[r:NAME]->(n)"""
-                    tx.run(query, n_attr=n_attr, p_handle=self.handle)
+                    tx.run(Cypher_w_handle.person_link_name, 
+                           n_attr=n_attr, p_handle=self.handle)
             except Exception as err:
                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
 
         # Save Weburl nodes under the Person
         if len(self.urls) > 0:
             for url in self.urls:
-                url_priv = url.priv
-                url_href = url.href
-                url_type = url.type
-                url_description = url.description
-                query = """
-MATCH (n:Person) WHERE n.gramps_handle=$handle
-CREATE (n)-[wu:WEBURL]->
-      (url:Weburl {priv: {url_priv}, href: {url_href},
-                type: {url_type}, description: {url_description}})"""
+                u_attr = {
+                    "priv": url.priv,
+                    "href": url.href,
+                    "type": url.type,
+                    "description": url.description
+                }
                 try:
-                    tx.run(query,
-                           {"handle": self.handle, "url_priv": url_priv, "url_href": url_href,
-                            "url_type":url_type, "url_description":url_description})
+                    tx.run(Cypher_w_handle.person_link_weburl, u_attr=u_attr)
                 except Exception as err:
                     print("Virhe (Person.save:create Weburl): {0}".format(err), file=stderr)
 
-        # Make Event relations (if Events were stored in self.events)
         if len(self.events) > 0:
+            # Make Event relations (if Events were stored in self.events)
+            # TODO: onkohan tämä käytössä?
             ''' Create and connect to an Person.event[*] '''
-            query = """
-MATCH (n:Person) WHERE n.gramps_handle={p_handle}
-CREATE (n)-[r:EVENT {role: {role}}]->
-      (m:Event {gramps_handle: {e_handle}, id: {e_id},
-                name: {e_name}, date: {e_date}, descr: {e_descr}})"""
             for e in self.events:
                 if handles:
                     e.handle = handles.pop()
-                values = {"p_handle": self.handle,
-                          "role": 'osallistuja',
-                          "e_handle": e.handle,
-                          "e_id": e.id,
-                          "e_name": e.name, # "e_type": e.tyyppi,
-                          "e_date": e.date,
-                          "e_descr": e.description}
+                e_attr = {
+                    "gramps_handle": e.handle,
+                    "id": e.id,
+                    "name": e.name, # "e_type": e.tyyppi,
+                    "date": e.date,
+                    "descr": e.description
+                }
                 try:
-                    tx.run(query, values)
+                    tx.run(Cypher_w_handle.person_link_event_embedded, 
+                           p_handle=self.handle, e_attr=e_attr, role="osallistuja")
                 except Exception as err:
                     print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
 
@@ -990,15 +974,10 @@ CREATE (n)-[r:EVENT {role: {role}}]->
             ''' Connect to each Event loaded form Gramps '''
             for i in range(len(self.eventref_hlink)):
                 try:
-                    eventref_hlink = self.eventref_hlink[i]
-                    role = self.eventref_role[i]
-                    query = """
-match (n:Person {gramps_handle:$handle})
-match (m:Event {gramps_handle:$eventref_hlink})
-merge (n) -[r:EVENT {role: $role}]-> (m)
-"""
-                    tx.run(query,
-                       {"handle": self.handle, "eventref_hlink": eventref_hlink, "role": role})
+                    tx.run(Cypher_w_handle.person_link_event, 
+                           p_handle=self.handle, 
+                           e_handle=self.eventref_hlink[i], 
+                           role=self.eventref_role[i])
                 except Exception as err:
                     print("Virhe (Person.save:Event): {0}".format(err), file=stderr)
 
@@ -1006,43 +985,28 @@ merge (n) -[r:EVENT {role: $role}]-> (m)
         if len(self.objref_hlink) > 0:
             for i in range(len(self.objref_hlink)):
                 try:
-                    objref_hlink = self.objref_hlink[i]
-                    query = """
-MATCH (n:Person)   WHERE n.gramps_handle=$handle
-MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
-MERGE (n)-[r:MEDIA]->(m)"""
-                    tx.run(query,
-                           {"handle": self.handle, "objref_hlink": objref_hlink})
+                    tx.run(Cypher_w_handle.person_link_media, 
+                           p_handle=self.handle, m_handle=self.objref_hlink[i])
                 except Exception as err:
                     print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
 
-        # Make relations to the Family node will be done in Family.save(),
+        # The relations to the Family node will be created in Family.save(),
         # because the Family object is not yet created
 
         # Make relations to the Note node
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 try:
-                    noteref_hlink = self.noteref_hlink[i]
-                    query = """
-MATCH (n:Person)   WHERE n.gramps_handle=$handle
-MATCH (m:Note) WHERE m.gramps_handle=$noteref_hlink
-MERGE (n)-[r:NOTE]->(m)"""
-                    tx.run(query,
-                           {"handle": self.handle, "noteref_hlink": noteref_hlink})
+                    tx.run(Cypher_w_handle.person_link_note,
+                           p_handle=self.handle, n_handle=self.noteref_hlink[i])
                 except Exception as err:
                     print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
 
         # Make relations to the Citation node
         if len(self.citationref_hlink) > 0:
             try:
-                citationref_hlink = self.citationref_hlink[0]
-                query = """
-MATCH (n:Person)   WHERE n.gramps_handle=$handle
-MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
-MERGE (n)-[r:CITATION]->(m)"""
-                tx.run(query,
-                       {"handle": self.handle, "citationref_hlink": citationref_hlink})
+                tx.run(Cypher_w_handle.person_link_citation,
+                       p_handle=self.handle, c_handle=self.citationref_hlink[0])
             except Exception as err:
                 print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
         return

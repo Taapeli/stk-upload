@@ -87,7 +87,7 @@ class Media:
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Saves this Media object to db """
 
         try:
             query = """
