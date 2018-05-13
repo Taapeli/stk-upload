@@ -31,11 +31,11 @@
     <div class="startbox admin">
       <div style="display: inline-block;">
         <h3>Tietokannan tyhjennykset</h3>
-            <p>Kanta tai sen osia tyhjennetään <i>(Mitään kysymättä!)</i></p>
+            <p><i>Tiedot tuhotaan mitään kysymättä!</i></p>
             <ul>
               <li><a href="/admin/clear_db/total">Tyhjennä koko kanta</a></li>
               <li><a href="/admin/clear_db/save_users">Tyhjennä säästäen
-                  käyttäjätunukset</a></li>
+                  käyttäjätunnukset</a></li>
               <li><a href="/admin/clear_db/my_own">Poista itse tuomani tiedot 
                   ({{current_user.username}})</a></li>
             </ul>
@@ -45,10 +45,10 @@
     {% if current_user.is_authenticated and current_user.has_role('admin') %}
     <div class="startbox admin">
       <div style="display: inline-block;">
-        <h3>Käyttäjien ja referenssinimien hallinta</h3>
+        <h3>Käyttäjien ja referenssitietojen hallinta</h3>
         <ul>
-          <li><a href="/list_users">Näytä käyttäjätunnukset</a></li>
-          <li><a href="/list_emails">Näytä käyttäjäehdokkaat</a></li>
+          <li><a href="/list_users">Käyttäjätunnukset</a></li>
+          <li><a href="/list_emails">Käyttäjäehdokkaat</a></li>
           <li><a href="/refnames">Muokkaa referenssinimiä</a></li>
           <li><a href="/aseta/estimated_dates">Aseta henkilön arvioidut 
               syntymä- ja kuolinajat</a></li>
