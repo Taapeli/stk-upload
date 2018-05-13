@@ -151,7 +151,9 @@ RETURN ID(person) AS mother"""
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Saves the family node to db and 
+            creates relations to parent, childr and note nodes
+        """
 
         try:
             f_attr = {
@@ -169,11 +171,11 @@ RETURN ID(person) AS mother"""
 
         # Make father and mother relations to Person nodes
         try:
-            if self.father != '':
+            if hasattr(self,'father') and self.father != '':
                 tx.run(Cypher_w_handle.family_link_father, 
                        f_handle=self.handle, p_handle=self.father)
 
-            if self.mother != '':
+            if hasattr(self,'mother') and self.mother != '':
                 tx.run(Cypher_w_handle.family_link_mother,
                        f_handle=self.handle, p_handle=self.mother)
         except Exception as err:
