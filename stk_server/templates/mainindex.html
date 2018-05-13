@@ -79,19 +79,16 @@
         <div class="startbox admin">
           <div style="display: inline-block;">
 			<h3>Ylläpitäjän toiminnot</h3>
-			<ul>
-              <li><b>Tyhjennä</b> <i>(mitään kysymättä!)</i>
-                <ul>
-                  <li><a href="/admin/clear_db/total">Tyhjennä koko kanta</li>
-                  <li><a href="/admin/clear_db/save_users">Tyhjennä koko kanta,
-                      mutta säästä käyttäjätunukset</li>
-                  <li><a href="/admin/clear_db/my_own">Tyhjennä kaikki lataamani 
-                      henkilö- ja tapahtumatiedot ({{current_user.username}})</li>
-              </ul></li>
-			  <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
-			  <li><a href="/refnames">Muokkaa referenssinimiä</a></li>
-			  <li><a href="/aseta/estimated_dates">Aseta henkilön arvioidut syntymä- ja kuolinajat</a></li>			</ul>
-          </div>
+            <p>Järjestelmänhoitajan toiminnot: <br/>
+               Käyttäjien ja referenssitietojen hallinta
+               sekä tietokannan huoltotehtävät
+            </p>
+            <form method="get" action="/admin">
+               <div style="text-align:right;"> 
+                  <button type="submit">Ylläpito</button>
+               </div>
+            </form>
+         </div>
         </div>{% endif %}
      {% if current_user.is_authenticated %}
         <div class="startbox"">
