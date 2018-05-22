@@ -111,13 +111,17 @@ class DOM_handler():
 
     def begin_tx(self, session):
         self.tx = session.begin_transaction()
+        print("Transaction started")
 
     def commit(self):
         """ Commit transaction """
         try:
             self.tx.commit()
+            print("Transaction committed")
         except Exception as e:
-            self.put_message("Talletus tietokantaan ei onnistunut: {}", "ERROR", e)
+            print("Transaction failed")
+            self.put_message("Talletus tietokantaan ei onnistunut:{}: {}".\
+                             format(e.__class__.__name__, e), "ERROR")
 
     def put_message(self, msg, level="INFO", oid=""):
         ''' Add info message to messages list '''
