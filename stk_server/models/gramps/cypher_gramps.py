@@ -43,7 +43,7 @@ MATCH (u:UserProfile {username: $user}) -[:HAS_LOADED]->
 RETURN l.status AS status, l.msg AS msg, l.size AS size, l.elapsed AS elapsed
 """
 
-#TODO Kaikki lauseet geneologisten tietojen lukemiseen ja päivittämiseen
+#TODO Kaikki lauseet geneologisten tietojen lukemiseen ja päivittämiseen Batchin kautta puuttuvat
 
 # ==============================================================================
 
@@ -120,7 +120,16 @@ MERGE (n)-[r:NOTE]->(m)"""
 
 # --- For Media class ---------------------------------------------------------
 
+    media_create = """
+MERGE (m:Media {gramps_handle: $m_attr.gramps_handle}) 
+    SET m = $m_attr"""
+
+
 # --- For Note class ----------------------------------------------------------
+
+    note_create = """
+MERGE (n:Note {gramps_handle: $n_attr.gramps_handle}) 
+    SET n = $n_attr"""
 
 # --- For Person class --------------------------------------------------------
 
@@ -129,7 +138,7 @@ MATCH (u:UserProfile {userName: $username})
 MERGE (p:Person {gramps_handle: $p_attr.gramps_handle})
 MERGE (u) -[r:REVISION {date: $date}]-> (p)
     SET p = $p_attr
-RETURN id(p) as uniq_id"""
+RETURN ID(p) as uniq_id"""
 
     person_link_name = """
 CREATE (n:Name) SET n = $n_attr
@@ -193,11 +202,52 @@ SET r = $r_attr"""
 
     place_link_note = """
 MATCH (n:Place) WHERE n.gramps_handle=$handle
-MATCH (m:Note) WHERE m.gramps_handle=$hlink
+MATCH (m:Note)  WHERE m.gramps_handle=$hlink
 MERGE (n) -[r:NOTE]-> (m)"""
-
 
 
 # --- For Source and Citation classes -----------------------------------------
 
+#TODO: Source, Citation and Repository: sulautettava 
+#      saman omistajan duplikaatit gramps_handlen mukaan
+#      Nyt tulee aina uusi instanssi
 
+
+    source_create = """
+CREATE (s:Source)
+SET s = $s_attr"""
+
+    source_link_note = """
+MATCH (n:Source) WHERE n.gramps_handle=$handle
+MATCH (m:Note)   WHERE m.gramps_handle=$hlink
+MERGE (n) -[r:NOTE]-> (m)"""
+
+    source_link_repository = """
+MATCH (n:Source) WHERE n.gramps_handle=$handle
+MATCH (m:Repository) WHERE m.gramps_handle=$hlink
+MERGE (n) -[r:REPOSITORY]-> (m)"""
+
+    source_set_repository_medium = """
+MATCH (n:Source) -[r:REPOSITORY]-> (m) 
+    WHERE n.gramps_handle=$handle
+SET r.medium=$medium"""
+
+
+    citation_create = """
+CREATE (n:Citation)
+    SET n = $c_attr"""
+
+    citation_link_note = """
+MERGE (n:Citation {gramps_handle: $handle})
+MERGE (m:Note     {gramps_handle: $hlink})
+MERGE (n) -[r:NOTE]-> (m)"""
+
+    citation_link_source = """
+MERGE (n:Citation {gramps_handle: $handle})
+MERGE (m:Source   {gramps_handle: $hlink})
+MERGE (n) -[r:SOURCE]-> (m)"""
+
+
+    repository_create = """
+CREATE (r:Repository)
+SET r = $r_attr"""

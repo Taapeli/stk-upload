@@ -5,9 +5,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
-#from flask import g
-import models.dbutil
-import  shareds
+from models.gramps.cypher_gramps import Cypher_w_handle
+import shareds
 
 class Note:
     """ Huomautus
@@ -16,6 +15,7 @@ class Note:
                 handle          
                 change
                 id              esim. "N0001"
+                uniq_id         int database key
                 priv            str salattu tieto
                 type            str huomautuksen tyyppi
                 text            str huomautuksen sisältö
@@ -23,6 +23,7 @@ class Note:
 
     def __init__(self):
         """ Luo uuden note-instanssin """
+        self.uniq_id = None
         self.handle = ''
         self.change = ''
         self.id = ''
@@ -31,29 +32,32 @@ class Note:
         
         
     def get_note(self):
-        """ Lukee huomautuksen tiedot tietokannasta """
+        """ Lukee huomautuksen tiedot tietokannasta 
+            Called from models.datareader.get_person_data_by_id
+        """
 
-        query = """
-            MATCH (note:Note) WHERE ID(note)={} RETURN note
-            """.format(self.uniq_id)
-            
-        return shareds.driver.session().run(query)
+        note_get = """
+MATCH (note:Note)    WHERE ID(note)=$nid
+RETURN note"""
+        return shareds.driver.session().run(note_get, nid=self.uniq_id)
                 
         
     @staticmethod
     def get_notes(uniq_id):
-        """ Lukee kaikki huomautukset tietokannasta """
+        """ Lukee kaikki huomautukset tietokannasta 
+            Called from models.datareader.get_notes for "table_of_data.html"
+        """
                         
         if uniq_id:
-            where = "WHERE ID(note)={} ".format(uniq_id)
+            query = """
+MATCH (n:Note) WHERE ID(note)=$nid 
+RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
         else:
-            where = ''
-
-        query = """
-            MATCH (n:Note) {0} RETURN ID(n) AS uniq_id, n ORDER BY n.type
-            """.format(where)
+            query = """
+MATCH (n:Note)
+RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
             
-        result =  shareds.driver.session().run(query)
+        result =  shareds.driver.session().run(query, nid=uniq_id)
         
         titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'priv', 'type', 'text']
         notes = []
@@ -121,20 +125,22 @@ class Note:
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Creates or updates this Note object as a Note node 
+            using gramps_handle
+        """
 
         try:
-            query = """
-                CREATE (n:Note) 
-                SET n.gramps_handle='{}', 
-                    n.change='{}', 
-                    n.id='{}', 
-                    n.priv='{}', 
-                    n.type='{}', 
-                    n.text='{}'
-                """.format(self.handle, self.change, self.id, self.priv, self.type, self.text)
-                
-            return tx.run(query)
+            n_attr = {
+                "gramps_handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "priv": self.priv,
+                "type": self.type, 
+                "text": self.text
+            }
+            return tx.run(Cypher_w_handle.note_create, n_attr=n_attr)
+
         except Exception as err:
-            print("Virhe {}: {}".format(err.__class__.__name__, str(err), file=stderr))
+            print("Virhe (Note.save): {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
+            #TODO raise ConnectionError("Note.save: {0}".format(err))
