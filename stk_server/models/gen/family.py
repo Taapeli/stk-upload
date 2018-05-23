@@ -5,7 +5,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 from sys import stderr
 import  shareds
-from models.gramps.cypher_gramps import Cypher_w_handle
+from models.gramps.cypher_gramps import Cypher_family_w_handle
 
 class Family:
     """ Perhe
@@ -14,6 +14,7 @@ class Family:
                 handle          
                 change
                 id              esim. "F0001"
+                uniq_id         int database key
                 rel_type        str suhteen tyyppi
                 father          str isän osoite
                 mother          str äidin osoite
@@ -162,7 +163,7 @@ RETURN ID(person) AS mother"""
                 "id": self.id,
                 "rel_type": self.rel_type
             }
-            result = tx.run(Cypher_w_handle.family_create, f_attr=f_attr)
+            result = tx.run(Cypher_family_w_handle.create, f_attr=f_attr)
             for res in result:
                 self.uniq_id = res[0]
                 print("Family {} ".format(self.uniq_id))
@@ -172,11 +173,11 @@ RETURN ID(person) AS mother"""
         # Make father and mother relations to Person nodes
         try:
             if hasattr(self,'father') and self.father != '':
-                tx.run(Cypher_w_handle.family_link_father, 
+                tx.run(Cypher_family_w_handle.link_father, 
                        f_handle=self.handle, p_handle=self.father)
 
             if hasattr(self,'mother') and self.mother != '':
-                tx.run(Cypher_w_handle.family_link_mother,
+                tx.run(Cypher_family_w_handle.link_mother,
                        f_handle=self.handle, p_handle=self.mother)
         except Exception as err:
             print("Virhe (Family.save:parents): {0}".format(err), file=stderr)
@@ -185,7 +186,7 @@ RETURN ID(person) AS mother"""
         if len(self.eventref_hlink) > 0:
             for i in range(len(self.eventref_hlink)):
                 try:
-                    tx.run(Cypher_w_handle.family_link_event, 
+                    tx.run(Cypher_family_w_handle.link_event, 
                            f_handle=self.handle, e_handle=self.eventref_hlink[i],
                            role=self.eventref_role[i])
                 except Exception as err:
@@ -195,7 +196,7 @@ RETURN ID(person) AS mother"""
         if len(self.childref_hlink) > 0:
             for i in range(len(self.childref_hlink)):
                 try:
-                    tx.run(Cypher_w_handle.family_link_child, 
+                    tx.run(Cypher_family_w_handle.link_child, 
                            f_handle=self.handle, p_handle=self.childref_hlink[i])
                 except Exception as err:
                     print("Virhe (Family.save:Child): {0}".format(err), file=stderr)
@@ -204,7 +205,7 @@ RETURN ID(person) AS mother"""
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 try:
-                    tx.run(Cypher_w_handle.family_link_note,
+                    tx.run(Cypher_family_w_handle.link_note,
                            f_handle=self.handle, n_handle=self.noteref_hlink[i])
                 except Exception as err:
                     print("Virhe (Family.save:Note): {0}".format(err), file=stderr)
@@ -233,5 +234,3 @@ class Family_for_template(Family):
         self.mother = None
         self.spouse = None
         self.children = []
-        
-

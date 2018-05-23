@@ -9,14 +9,13 @@ from sys import stderr
 #from flask import g
 from models.gen.dates import DateRange
 import  shareds
-from models.gramps.cypher_gramps import Cypher_w_handle
-
+from models.gramps.cypher_gramps import Cypher_event_w_handle
 
 class Event:
     """ Tapahtuma
             
         Properties:
-                handle          
+                handle             Gramps handle
                 change
                 id                 esim. "E0001"
                 type               esim. "Birth"
@@ -374,44 +373,40 @@ RETURN ID(place) AS uniq_id"""
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
-            tx.run(Cypher_w_handle.event_save, 
-               {"username": username, "date": today, "e_attr": e_attr})
+            tx.run(Cypher_event_w_handle.create, 
+               username=username, date=today, e_attr=e_attr)
         except Exception as err:
             print("Virhe.event_save: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Place node
             if self.place_hlink != '':
-                place_hlink = self.place_hlink
-                tx.run(Cypher_w_handle.event_link_place, 
-                       {"handle": self.handle, "place_hlink": place_hlink})
+                tx.run(Cypher_event_w_handle.link_place, 
+                       handle=self.handle, place_hlink=self.place_hlink)
         except Exception as err:
             print("Virhe.event_link_place: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Note node
             if self.noteref_hlink != '':
-                noteref_hlink = self.noteref_hlink
-                tx.run(Cypher_w_handle.event_link_note, 
-                       {"handle": self.handle, "noteref_hlink": noteref_hlink})
+                tx.run(Cypher_event_w_handle.link_note,
+                       handle=self.handle, noteref_hlink=self.noteref_hlink)
         except Exception as err:
             print("Virhe.event_link_note: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Citation node
             if self.citationref_hlink != '':
-                citationref_hlink = self.citationref_hlink
-                tx.run(Cypher_w_handle.event_link_citation, 
-                       {"handle": self.handle, "citationref_hlink": citationref_hlink})
+                tx.run(Cypher_event_w_handle.link_citation,
+                       handle=self.handle, citationref_hlink=self.citationref_hlink)
         except Exception as err:
             print("Virhe.event_link_citation: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Media node
             if self.objref_hlink != '':
-                objref_hlink = self.objref_hlink
-                tx.run(Cypher_w_handle.event_link_media, 
-                       {"handle": self.handle, "objref_hlink": objref_hlink})
+                tx.run(Cypher_event_w_handle.link_media, 
+                       handle=self.handle, objref_hlink=self.objref_hlink)
         except Exception as err:
             print("Virhe.event_link_media: {0}".format(err), file=stderr)
             
