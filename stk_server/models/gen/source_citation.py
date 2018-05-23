@@ -7,7 +7,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
-from models.gramps.cypher_gramps import Cypher_w_handle
+from models.gramps.cypher_gramps import Cypher_source_w_handle
+from models.gramps.cypher_gramps import Cypher_citation_w_handle
+from models.gramps.cypher_gramps import Cypher_repository_w_handle
 import shareds
 
 class Citation:
@@ -119,7 +121,7 @@ class Citation:
                 "page": self.page, 
                 "confidence": self.confidence
             }
-            tx.run(Cypher_w_handle.citation_create, c_attr=c_attr)
+            tx.run(Cypher_citation_w_handle.create, c_attr=c_attr)
         except Exception as err:
             print("Virhe (Citation.save): {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
@@ -128,7 +130,7 @@ class Citation:
         # Make relations to the Note nodes
         for hlink in self.noteref_hlink:
             try:
-                tx.run(Cypher_w_handle.citation_link_note, 
+                tx.run(Cypher_citation_w_handle.link_note, 
                        handle=self.handle, hlink=hlink)
             except Exception as err:
                 print("Virhe (Citation.save:Note hlink): {0}".format(err), file=stderr)
@@ -136,7 +138,7 @@ class Citation:
         try:   
             # Make relation to the Source node
             if self.sourceref_hlink != '':
-                tx.run(Cypher_w_handle.citation_link_source,
+                tx.run(Cypher_citation_w_handle.link_source,
                        handle=self.handle, hlink=self.sourceref_hlink)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
@@ -264,7 +266,7 @@ class Repository:
                 "url_type": self.url_type,
                 "url_description": self.url_description
             }
-            tx.run(Cypher_w_handle.repository_create, r_attr=r_attr)
+            tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
         except Exception as err:
             print("Virhe (Repository.save): {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
@@ -539,7 +541,7 @@ ORDER BY toUpper(stitle)
                 "stitle": self.stitle
             }
 
-            tx.run(Cypher_w_handle.source_create, s_attr=s_attr)
+            tx.run(Cypher_source_w_handle.create, s_attr=s_attr)
         except Exception as err:
             print("Virhe (Source.save): {0}".format(err), file=stderr)
             #TODO raise ConnectionError("Source.save: {0}".format(err))
@@ -547,7 +549,7 @@ ORDER BY toUpper(stitle)
         # Make relation to the Note node
         if self.noteref_hlink != '':
             try:
-                tx.run(Cypher_w_handle.source_link_note,
+                tx.run(Cypher_source_w_handle.link_note,
                        handle=self.handle, hlink=self.noteref_hlink)
             except Exception as err:
                 print("Virhe (Source.save:Note): {0}".format(err), file=stderr)
@@ -555,14 +557,14 @@ ORDER BY toUpper(stitle)
         # Make relation to the Repository node
         if self.reporef_hlink != '':
             try:
-                tx.run(Cypher_w_handle.source_link_repository,
+                tx.run(Cypher_source_w_handle.link_repository,
                        handle=self.handle, hlink=self.reporef_hlink)
             except Exception as err:
                 print("Virhe (Source.save:Repository): {0}".format(err), file=stderr)
                 
             # Set the medium data of the Source node
             try:
-                tx.run(Cypher_w_handle.source_set_repository_medium,
+                tx.run(Cypher_source_w_handle.set_repository_medium,
                        handle=self.handle, medium=self.reporef_medium)
             except Exception as err:
                 print("Virhe (Source.save:repository_medium): {0}".format(err), file=stderr)

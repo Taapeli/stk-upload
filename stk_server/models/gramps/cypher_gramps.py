@@ -47,7 +47,6 @@ RETURN l.status AS status, l.msg AS msg, l.size AS size, l.elapsed AS elapsed
 
 # ==============================================================================
 
-class Cypher_w_handle(object):
     '''
     Cypher clauses for reading and updating database by data from Gramps xml file
 
@@ -55,199 +54,218 @@ class Cypher_w_handle(object):
     original items from the user's Gramps database
     '''
 
-# --- For Event class ---------------------------------------------------------
 
-    event_save = """
+class Cypher_event_w_handle():
+    """ For Event class """
+
+    create = """
 MATCH (u:UserProfile) WHERE u.userName=$username
 MERGE (e:Event {gramps_handle: $e_attr.gramps_handle})
     SET e = $e_attr
 MERGE (u) -[r:REVISION {date: $date}]-> (e)
 """
 
-    event_link_place = """
+    link_place = """
 MATCH (n:Event) WHERE n.gramps_handle=$handle
 MATCH (m:Place) WHERE m.gramps_handle=$place_hlink
 MERGE (n)-[r:PLACE]->(m)"""
 
-    event_link_note = """
+    link_note = """
 MATCH (e:Event) WHERE e.gramps_handle=$handle
 MATCH (n:Note)  WHERE n.gramps_handle=$noteref_hlink
 MERGE (e)-[r:NOTE]->(n)"""
 
-    event_link_citation = """
+    link_citation = """
 MATCH (n:Event)    WHERE n.gramps_handle=$handle
 MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
 MERGE (n)-[r:CITATION]->(m)"""
 
-    event_link_media = """
+    link_media = """
 MATCH (n:Event) WHERE n.gramps_handle=$handle
 MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
 MERGE (n)-[r:Media]->(m)"""
 
 
-# --- For Family class --------------------------------------------------------
+class Cypher_family_w_handle():
+    """ For Family class """
 
-    family_create = """
+    create = """
 MERGE (f:Family {gramps_handle: $f_attr.gramps_handle}) 
     SET f = $f_attr
 RETURN id(f) as uniq_id"""
 
-    family_link_father = """
+    link_father = """
 MATCH (n:Family) WHERE n.gramps_handle=$f_handle
 MATCH (m:Person) WHERE m.gramps_handle=$p_handle
 MERGE (n)-[r:FATHER]->(m)"""
 
-    family_link_mother = """
+    link_mother = """
 MATCH (n:Family) WHERE n.gramps_handle=$f_handle
 MATCH (m:Person) WHERE m.gramps_handle=$p_handle
 MERGE (n)-[r:MOTHER]->(m)"""
 
-    family_link_event = """
+    link_event = """
 MATCH (n:Family) WHERE n.gramps_handle=f_handle
 MATCH (m:Event)  WHERE m.gramps_handle=e_handle
 MERGE (n)-[r:EVENT]->(m)
     SET r.role = $role"""
 
-    family_link_child = """
+    link_child = """
 MATCH (n:Family) WHERE n.gramps_handle=$f_handle
 MATCH (m:Person) WHERE m.gramps_handle=$p_handle
 MERGE (n)-[r:CHILD]->(m)"""
 
-    family_link_note = """
+    link_note = """
 MATCH (n:Family) WHERE n.gramps_handle=$f_handle
 MATCH (m:Note)   WHERE m.gramps_handle=$n_handle
 MERGE (n)-[r:NOTE]->(m)"""
 
-# --- For Media class ---------------------------------------------------------
 
-    media_create = """
+class Cypher_media_w_handle():
+    """ For Media class """
+
+    create = """
 MERGE (m:Media {gramps_handle: $m_attr.gramps_handle}) 
     SET m = $m_attr"""
 
 
-# --- For Note class ----------------------------------------------------------
 
-    note_create = """
+class Cypher_note_w_handle():
+    """ For Note class """
+
+    create = """
 MERGE (n:Note {gramps_handle: $n_attr.gramps_handle}) 
     SET n = $n_attr"""
 
-# --- For Person class --------------------------------------------------------
 
-    person_create = """
+class Cypher_person_w_handle():
+    """ For Person class """
+
+    create = """
 MATCH (u:UserProfile {userName: $username})
 MERGE (p:Person {gramps_handle: $p_attr.gramps_handle})
 MERGE (u) -[r:REVISION {date: $date}]-> (p)
     SET p = $p_attr
 RETURN ID(p) as uniq_id"""
 
-    person_link_name = """
+    link_name = """
 CREATE (n:Name) SET n = $n_attr
 WITH n
 MATCH (p:Person {gramps_handle:$p_handle})
 MERGE (p)-[r:NAME]->(n)"""
 
-    person_link_weburl = """
+    link_weburl = """
 MATCH (p:Person {gramps_handle: $handle}) 
 CREATE (p) -[wu:WEBURL]-> (url:Weburl)
     SET url = $u_attr"""
 
-    person_link_event_embedded = """
+    link_event_embedded = """
 MATCH (p:Person {gramps_handle: $handle}) 
 CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
     SET e = $e_attr"""
 
-    person_link_event = """
+    link_event = """
 MATCH (p:Person {gramps_handle:$p_handle})
 MATCH (e:Event  {gramps_handle:$e_handle})
 MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
 
-    person_link_media = """
+    link_media = """
 MATCH (p:Person {gramps_handle: $p_handle})
 MATCH (m:Media  {gramps_handle: $m_handle})
 MERGE (p) -[r:MEDIA]-> (m)"""
 
-    person_link_note = """
+    link_note = """
 MATCH (p:Person {gramps_handle: $p_handle})
 MATCH (n:Note   {gramps_handle: $n_handle})
 MERGE (p) -[r:NOTE]-> (n)"""
 
-    person_link_citation = """
+    link_citation = """
 MATCH (p:Person)   {gramps_handle: $p_handle})
 MATCH (c:Citation) {gramps_handle: $c_handle})
 MERGE (p)-[r:CITATION]->(c)"""
 
-# --- For Place class ---------------------------------------------------------
 
-    place_create = """
+class Cypher_place_w_handle():
+    """ For Place class """
+
+    create = """
 CREATE (p:Place)
 SET p = $p_attr"""
 
-    place_add_name = """
+    add_name = """
 MATCH (p:Place) WHERE p.gramps_handle=$handle
 CREATE (n:Place_name)
 MERGE (p) -[r:NAME]-> (n)
 SET n = $n_attr"""
 
-    place_link_weburl = """
+    link_weburl = """
 MATCH (n:Place) WHERE n.gramps_handle=$handle
 CREATE (n) -[wu:WEBURL]-> (url:Weburl
                 {priv: {url_priv}, href: {url_href},
                  type: {url_type}, description: {url_description}})"""
 
-    place_link_hier = """
+    link_hier = """
 MATCH (n:Place) WHERE n.gramps_handle=$handle
 MATCH (m:Place) WHERE m.gramps_handle=$hlink
 MERGE (n) -[r:HIERARCY]-> (m)
 SET r = $r_attr"""
 
-    place_link_note = """
+    link_note = """
 MATCH (n:Place) WHERE n.gramps_handle=$handle
 MATCH (m:Note)  WHERE m.gramps_handle=$hlink
 MERGE (n) -[r:NOTE]-> (m)"""
 
 
-# --- For Source and Citation classes -----------------------------------------
+
+class Cypher_source_w_handle():
+    """ For Source class """
 
 #TODO: Source, Citation and Repository: sulautettava 
 #      saman omistajan duplikaatit gramps_handlen mukaan
 #      Nyt tulee aina uusi instanssi
 
 
-    source_create = """
+    create = """
 CREATE (s:Source)
 SET s = $s_attr"""
 
-    source_link_note = """
+    link_note = """
 MATCH (n:Source) WHERE n.gramps_handle=$handle
 MATCH (m:Note)   WHERE m.gramps_handle=$hlink
 MERGE (n) -[r:NOTE]-> (m)"""
 
-    source_link_repository = """
+    link_repository = """
 MATCH (n:Source) WHERE n.gramps_handle=$handle
 MATCH (m:Repository) WHERE m.gramps_handle=$hlink
 MERGE (n) -[r:REPOSITORY]-> (m)"""
 
-    source_set_repository_medium = """
+    set_repository_medium = """
 MATCH (n:Source) -[r:REPOSITORY]-> (m) 
     WHERE n.gramps_handle=$handle
 SET r.medium=$medium"""
 
 
-    citation_create = """
+class Cypher_citation_w_handle():
+    """ For Citation class """
+
+    create = """
 CREATE (n:Citation)
     SET n = $c_attr"""
 
-    citation_link_note = """
+    link_note = """
 MERGE (n:Citation {gramps_handle: $handle})
 MERGE (m:Note     {gramps_handle: $hlink})
 MERGE (n) -[r:NOTE]-> (m)"""
 
-    citation_link_source = """
+    link_source = """
 MERGE (n:Citation {gramps_handle: $handle})
 MERGE (m:Source   {gramps_handle: $hlink})
 MERGE (n) -[r:SOURCE]-> (m)"""
 
 
-    repository_create = """
+class Cypher_repository_w_handle():
+    """ For Repository class """
+
+    create = """
 CREATE (r:Repository)
 SET r = $r_attr"""

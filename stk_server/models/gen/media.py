@@ -5,7 +5,7 @@ Created on 22.7.2017
 '''
 
 from sys import stderr
-from models.gramps.cypher_gramps import Cypher_w_handle
+from models.gramps.cypher_gramps import Cypher_media_w_handle
 import shareds
 
 class Media:
@@ -100,7 +100,7 @@ class Media:
                 "mime": self.mime,
                 "description": self.description
             }
-            return tx.run(Cypher_w_handle.media_create, m_attr=m_attr)
+            return tx.run(Cypher_media_w_handle.create, m_attr=m_attr)
 
         except Exception as err:
             print("Virhe (Media.save): {0}".format(err), file=stderr)

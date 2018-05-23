@@ -5,7 +5,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
-from models.gramps.cypher_gramps import Cypher_w_handle
+from models.gramps.cypher_gramps import Cypher_note_w_handle
 import shareds
 
 class Note:
@@ -138,7 +138,7 @@ RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
                 "type": self.type, 
                 "text": self.text
             }
-            return tx.run(Cypher_w_handle.note_create, n_attr=n_attr)
+            return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)
 
         except Exception as err:
             print("Virhe (Note.save): {0}".format(err), file=stderr)

@@ -13,7 +13,7 @@ import logging
 import shareds
 import models.dbutil
 from models.gen.cypher import Cypher
-from models.gramps.cypher_gramps import Cypher_w_handle
+from models.gramps.cypher_gramps import Cypher_person_w_handle
 from models.gen.dates import DateRange
 
 class Person:
@@ -22,7 +22,7 @@ class Person:
         Properties:
                 handle
                 change
-                uniq_id            int noden id
+                uniq_id            int database key
                 id                 esim. "I0001"
                 priv               str merkitty yksityiseksi
                 gender             str sukupuoli
@@ -49,12 +49,12 @@ class Person:
                 est_death          str arvioitu kuolinaika
      """
 
-    def __init__(self, pid=''):
+    def __init__(self):
         """ Luo uuden person-instanssin """
         self.handle = ''
         self.change = ''
-        self.uniq_id = 0
-        self.id = pid
+        self.uniq_id = None
+        self.id = ''
         self.names = []
         self.priv = ''
         self.gender = ''
@@ -907,7 +907,7 @@ SET n.est_death = m.daterange_start"""
                 "priv": self.priv,
                 "gender": self.gender
             }
-            result = tx.run(Cypher_w_handle.person_create, 
+            result = tx.run(Cypher_person_w_handle.create, 
                             username=username, p_attr=p_attr, date=today)
 #             self.uniq_id = result.single()[0]
             for res in result:
@@ -930,7 +930,7 @@ SET n.est_death = m.daterange_start"""
                         "surname": name.surname,
                         "suffix": name.suffix
                     }
-                    tx.run(Cypher_w_handle.person_link_name, 
+                    tx.run(Cypher_person_w_handle.link_name, 
                            n_attr=n_attr, p_handle=self.handle)
             except Exception as err:
                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
@@ -945,7 +945,7 @@ SET n.est_death = m.daterange_start"""
                     "description": url.description
                 }
                 try:
-                    tx.run(Cypher_w_handle.person_link_weburl, u_attr=u_attr)
+                    tx.run(Cypher_person_w_handle.link_weburl, u_attr=u_attr)
                 except Exception as err:
                     print("Virhe (Person.save:create Weburl): {0}".format(err), file=stderr)
 
@@ -964,7 +964,7 @@ SET n.est_death = m.daterange_start"""
                     "descr": e.description
                 }
                 try:
-                    tx.run(Cypher_w_handle.person_link_event_embedded, 
+                    tx.run(Cypher_person_w_handle.link_event_embedded, 
                            p_handle=self.handle, e_attr=e_attr, role="osallistuja")
                 except Exception as err:
                     print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
@@ -974,7 +974,7 @@ SET n.est_death = m.daterange_start"""
             ''' Connect to each Event loaded form Gramps '''
             for i in range(len(self.eventref_hlink)):
                 try:
-                    tx.run(Cypher_w_handle.person_link_event, 
+                    tx.run(Cypher_person_w_handle.link_event, 
                            p_handle=self.handle, 
                            e_handle=self.eventref_hlink[i], 
                            role=self.eventref_role[i])
@@ -985,7 +985,7 @@ SET n.est_death = m.daterange_start"""
         if len(self.objref_hlink) > 0:
             for i in range(len(self.objref_hlink)):
                 try:
-                    tx.run(Cypher_w_handle.person_link_media, 
+                    tx.run(Cypher_person_w_handle.link_media, 
                            p_handle=self.handle, m_handle=self.objref_hlink[i])
                 except Exception as err:
                     print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
@@ -997,7 +997,7 @@ SET n.est_death = m.daterange_start"""
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 try:
-                    tx.run(Cypher_w_handle.person_link_note,
+                    tx.run(Cypher_person_w_handle.link_note,
                            p_handle=self.handle, n_handle=self.noteref_hlink[i])
                 except Exception as err:
                     print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
@@ -1005,7 +1005,7 @@ SET n.est_death = m.daterange_start"""
         # Make relations to the Citation node
         if len(self.citationref_hlink) > 0:
             try:
-                tx.run(Cypher_w_handle.person_link_citation,
+                tx.run(Cypher_person_w_handle.link_citation,
                        p_handle=self.handle, c_handle=self.citationref_hlink[0])
             except Exception as err:
                 print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
