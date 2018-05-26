@@ -82,13 +82,6 @@ def datatables():
     return render_template("tables.html")
 
 
-@shareds.app.route('/refnames')
-@roles_required('admin')
-def refnames():
-    """ Operations for reference names """
-    return render_template("reference.html")
-
-
 """ --------------------- Narrative Kertova-sivut ------------------------------
     Modules k_* uses the Kertova layout 
     (derived from the Gramps Narrative report)
@@ -320,7 +313,6 @@ def nayta_henkilot(subj):
 
 
 @shareds.app.route('/list/refnames', defaults={'reftype': None})
-#@app.route('/list/refnames/<string:reftype>')
 def list_refnames(reftype):
     """ Table of reference names """
 #     if reftype and reftype != "":
@@ -332,7 +324,6 @@ def list_refnames(reftype):
 
 
 @shareds.app.route('/lista/people_by_surname/', defaults={'surname': ""})
-#@shareds.app.route('/lista/people_by_surname/<string:surname>')
 def list_people_by_surname(surname):
     """ Table of Persons with identical surname
         henkilöiden, joilla on sama sukunimi näyttäminen ruudulla 
@@ -477,9 +468,43 @@ def pick_selection(cond):
 """ -------------------------- Tietojen talletus ------------------------------
 """
 
-@shareds.app.route('/upload', methods=['POST'])
-def upload():
-    """ Load a cvs or gramps file to temp directory for processing in the server
+@shareds.app.route('/upload_gramps', methods=['POST'])
+@login_required
+@roles_accepted('member', 'admin')
+def upload_gramps():
+    """ Load a gramps xml file to temp directory for processing in the server
+    """
+    try:
+        infile = request.files['filenm']
+        material = request.form['material']
+        logging.debug("Got a {} file '{}'".format(material, infile.filename))
+
+        loadfile.upload_file(infile)
+
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('save_loaded_gramps', filename=infile.filename))
+
+@shareds.app.route('/save/xml_file/<string:filename>')
+@roles_accepted('member', 'admin')
+def save_loaded_gramps(filename):
+    """ Save loaded gramps data to the database """
+    pathname = loadfile.fullname(filename)
+    dburi = dbutil.get_server_location()
+    try:
+        # gramps backup xml file to Neo4j db
+        status = gramps_loader.xml_to_neo4j(pathname, current_user.username)
+    except KeyError as e:
+        return render_template("virhe_lataus.html", code=1, \
+               text="Missing proper column title: " + str(e))
+    return render_template("talletettu.html", text=status, uri=dburi)
+
+
+@shareds.app.route('/upload_csv', methods=['POST'])
+@roles_required('admin')
+def upload_csv():
+    """ Load a cvs file to temp directory for processing in the server
     """
     try:
         infile = request.files['filenm']
@@ -494,18 +519,17 @@ def upload():
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    return redirect(url_for('save_loaded', filename=infile.filename, subj=material))
+    return redirect(url_for('save_loaded_csv', filename=infile.filename, subj=material))
 
 @shareds.app.route('/save/<string:subj>/<string:filename>')
-def save_loaded(filename, subj):
-    """ Save loaded gramps of cvs data to the database """
+@roles_required('admin')
+def save_loaded_csv(filename, subj):
+    """ Save loaded cvs data to the database """
     pathname = loadfile.fullname(filename)
     dburi = dbutil.get_server_location()
     try:
         if subj == 'refnames':    # Stores Refname objects
             status = cvs_refnames.load_refnames(pathname)
-        elif subj == 'xml_file':  # gramps backup xml file to Neo4j db
-            status = gramps_loader.xml_to_neo4j(pathname, current_user.username)
         else:
             return redirect(url_for('virhesivu', code=1, text= \
                 "Data type '" + subj + "' is still missing"))
@@ -514,25 +538,13 @@ def save_loaded(filename, subj):
                text="Missing proper column title: " + str(e))
     return render_template("talletettu.html", text=status, uri=dburi)
 
+
 @shareds.app.route('/aseta/confidence')
+@roles_required('admin')
 def aseta_confidence():
     """ tietojen laatuarvion asettaminen henkilöille """
     dburi = dbutil.get_server_location()
     message = dataupdater.set_confidence_value()
-    return render_template("talletettu.html", text=message, uri=dburi)
-
-@shareds.app.route('/aseta/estimated_dates')
-def aseta_estimated_dates():
-    """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    dburi = dbutil.get_server_location()
-    message = dataupdater.set_estimated_dates()
-    return render_template("talletettu.html", text=message, uri=dburi)
-
-@shareds.app.route('/set/refnames')
-def set_all_person_refnames():
-    """ Setting reference names for all persons """
-    dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_refnames()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 @shareds.app.route('/virhe_lataus/<int:code>/<text>')
@@ -547,6 +559,7 @@ def virhesivu(code, text=''):
 
 
 @shareds.app.route('/admin/clear_db/<string:opt>')
+@roles_required('admin')
 def clear_db(opt):
     """ Clear database - with no confirmation! """
     try:
@@ -555,6 +568,29 @@ def clear_db(opt):
         return render_template("talletettu.html", text=msg)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+@shareds.app.route('/aseta/estimated_dates')
+@roles_required('admin')
+def aseta_estimated_dates():
+    """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
+    dburi = dbutil.get_server_location()
+    message = dataupdater.set_estimated_dates()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+@shareds.app.route('/refnames')
+@roles_required('admin')
+def refnames():
+    """ Operations for reference names """
+    return render_template("admin/reference.html")
+
+@shareds.app.route('/set/refnames')
+@roles_accepted('member', 'admin')
+def set_all_person_refnames():
+    """ Setting reference names for all persons """
+    dburi = dbutil.get_server_location()
+    message = dataupdater.set_person_refnames()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
 
 
 """ ------------------------ Obsolete operations? ------------------------------

@@ -33,18 +33,31 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     file_displ = basename(pathname)
     t0 = time.time()
 
-    with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file1:
-        file2 = open(file_read, "w", encoding='utf-8')
+    with open(file_read, "w", encoding='utf-8') as file_out:
+        # Creates the ouput file and closes it
+        try:
+            # Read a gzipped file
+            with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
+                print("A gzipped file")
+                for line in file_in:
+                    # Already \' in line
+                    if not line.find("\\\'") > 0:
+                        # Replace ' with \'
+                        line = line.replace("\'", "\\\'")
+                    file_out.write(line)
+            msg = "Cleaned gzipped input lines:: {:.4f}".format(time.time()-t0)
+        except OSError:
+            # Not gzipped; Read an ordinary file
+            with open(pathname, mode='rt', encoding='utf-8') as file_in:
+                print("Not a gzipped file")
+                for line in file_in:
+                    # Already \' in line
+                    if not line.find("\\\'") > 0:
+                        # Replace ' with \'
+                        line = line.replace("\'", "\\\'")
+                    file_out.write(line)
+            msg = "Cleaned input lines:: {:.4f}".format(time.time()-t0)
 
-        for line in file1:
-            # Already \' in line
-            if not line.find("\\\'") > 0:
-                # Replace ' with \'
-                line = line.replace("\'", "\\\'")
-            file2.write(line)
-
-        file2.close()
-    msg = "Cleaned input lines:: {:.4f}".format(time.time()-t0)
 
     ''' Get XML DOM parser '''
     DOMTree = xml.dom.minidom.parse(open(file_read, encoding='utf-8'))
