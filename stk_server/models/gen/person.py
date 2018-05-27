@@ -446,7 +446,8 @@ RETURN person, urls, COLLECT (name) AS names
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
         if uniq_id:
-            return shareds.driver.session().run(Cypher.person_get_confidence)
+            return shareds.driver.session().run(Cypher.person_get_confidence,
+                                                id=uniq_id)
         else:
             return shareds.driver.session().run(Cypher.person_get_confidences_all)
 
