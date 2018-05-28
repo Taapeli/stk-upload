@@ -105,6 +105,13 @@ li.itemrow {
     border: solid 2pt darkblue; 
     background-color:#eef
 }
-.flash_error { color: red }
-.flash_warning { color: blueviolet }
+.flash_error .msg_ERROR { color: red; font-style: bold }
+.flash_warning .msg_WARNING { color: blueviolet }
 .flash_message { color: blue }
+.msg_INFO {color: black }
+.msg_TITLE {color: black; line-height: 1.8; font-size: 120% }
+
+.right {
+	margin-left: auto;
+	text-align: right;
+	}

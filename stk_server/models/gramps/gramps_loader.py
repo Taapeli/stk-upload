@@ -66,7 +66,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     ''' Start DOM elements handler transaction '''
     handler = DOM_handler(DOMTree.documentElement, userid)
 
-    handler.log(BatchEvent("Storing '{}' file to Neo4j database".format(file_displ)))
+    handler.log(BatchEvent("Storing '{}' file to Neo4j database".\
+                           format(file_displ), level="TITLE"))
     handler.log(BatchEvent(msg, elapsed=tdiff))
 
     t0 = time.time()
@@ -99,8 +100,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler.set_refnames()
     handler.commit()
 
-    handler.log(BatchEvent("Total time", elapsed=time.time()-t0))
-    return(handler.batch_logger.str_list())
+    handler.log(BatchEvent("Total time", elapsed=time.time()-t0, level="TITLE"))
+    return handler.batch_logger.list()
 
 # -----------------------------------------------------------------------------
 
