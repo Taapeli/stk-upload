@@ -82,7 +82,7 @@ RETURN ID(p) AS id, n.refname AS refname
         query = """
 MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 
 WHERE u.userid='{}'
-RETURN p.gramps_handle AS handle, n.refname AS refname
+RETURN p.handle AS handle, n.refname AS refname
             """.format(self.userid)
         return shareds.driver.session().run(query)
         

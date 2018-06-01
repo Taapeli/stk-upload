@@ -167,7 +167,7 @@ RETURN event"""
                 
         result = shareds.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
+        titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
                   'description', 'date', 'dates', 
                   'attr_type', 'attr_value']
         lists = []
@@ -178,8 +178,8 @@ RETURN event"""
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["e"]['gramps_handle']:
-                data_line.append(record["e"]['gramps_handle'])
+            if record["e"]['handle']:
+                data_line.append(record["e"]['handle'])
             else:
                 data_line.append('-')
             if record["e"]['change']:
@@ -232,7 +232,7 @@ RETURN event"""
                 
         result = shareds.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 
+        titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
                   'description', 'date', 'dates', 'attr_type', 'attr_value']
         lists = []
         
@@ -242,8 +242,8 @@ RETURN event"""
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["e"]['gramps_handle']:
-                data_line.append(record["e"]['gramps_handle'])
+            if record["e"]['handle']:
+                data_line.append(record["e"]['handle'])
             else:
                 data_line.append('-')
             if record["e"]['change']:
@@ -363,7 +363,7 @@ RETURN ID(place) AS uniq_id"""
 
         today = str(datetime.date.today())
         e_attr = {
-            "gramps_handle": self.handle,
+            "handle": self.handle,
             "change": self.change, 
             "id": self.id, 
             "type": self.type,
