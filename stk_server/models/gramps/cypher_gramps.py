@@ -60,29 +60,29 @@ class Cypher_event_w_handle():
 
     create = """
 MATCH (u:UserProfile) WHERE u.userName=$username
-MERGE (e:Event {gramps_handle: $e_attr.gramps_handle})
+MERGE (e:Event {handle: $e_attr.handle})
     SET e = $e_attr
 MERGE (u) -[r:REVISION {date: $date}]-> (e)
 """
 
     link_place = """
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Place) WHERE m.gramps_handle=$place_hlink
+MATCH (n:Event) WHERE n.handle=$handle
+MATCH (m:Place) WHERE m.handle=$place_hlink
 MERGE (n)-[r:PLACE]->(m)"""
 
     link_note = """
-MATCH (e:Event) WHERE e.gramps_handle=$handle
-MATCH (n:Note)  WHERE n.gramps_handle=$noteref_hlink
+MATCH (e:Event) WHERE e.handle=$handle
+MATCH (n:Note)  WHERE n.handle=$noteref_hlink
 MERGE (e)-[r:NOTE]->(n)"""
 
     link_citation = """
-MATCH (n:Event)    WHERE n.gramps_handle=$handle
-MATCH (m:Citation) WHERE m.gramps_handle=$citationref_hlink
+MATCH (n:Event)    WHERE n.handle=$handle
+MATCH (m:Citation) WHERE m.handle=$citationref_hlink
 MERGE (n)-[r:CITATION]->(m)"""
 
     link_media = """
-MATCH (n:Event) WHERE n.gramps_handle=$handle
-MATCH (m:Media) WHERE m.gramps_handle=$objref_hlink
+MATCH (n:Event) WHERE n.handle=$handle
+MATCH (m:Media) WHERE m.handle=$objref_hlink
 MERGE (n)-[r:Media]->(m)"""
 
 
@@ -90,34 +90,34 @@ class Cypher_family_w_handle():
     """ For Family class """
 
     create = """
-MERGE (f:Family {gramps_handle: $f_attr.gramps_handle}) 
+MERGE (f:Family {handle: $f_attr.handle}) 
     SET f = $f_attr
 RETURN id(f) as uniq_id"""
 
     link_father = """
-MATCH (n:Family) WHERE n.gramps_handle=$f_handle
-MATCH (m:Person) WHERE m.gramps_handle=$p_handle
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Person) WHERE m.handle=$p_handle
 MERGE (n)-[r:FATHER]->(m)"""
 
     link_mother = """
-MATCH (n:Family) WHERE n.gramps_handle=$f_handle
-MATCH (m:Person) WHERE m.gramps_handle=$p_handle
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Person) WHERE m.handle=$p_handle
 MERGE (n)-[r:MOTHER]->(m)"""
 
     link_event = """
-MATCH (n:Family) WHERE n.gramps_handle=f_handle
-MATCH (m:Event)  WHERE m.gramps_handle=e_handle
+MATCH (n:Family) WHERE n.handle=f_handle
+MATCH (m:Event)  WHERE m.handle=e_handle
 MERGE (n)-[r:EVENT]->(m)
     SET r.role = $role"""
 
     link_child = """
-MATCH (n:Family) WHERE n.gramps_handle=$f_handle
-MATCH (m:Person) WHERE m.gramps_handle=$p_handle
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Person) WHERE m.handle=$p_handle
 MERGE (n)-[r:CHILD]->(m)"""
 
     link_note = """
-MATCH (n:Family) WHERE n.gramps_handle=$f_handle
-MATCH (m:Note)   WHERE m.gramps_handle=$n_handle
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Note)   WHERE m.handle=$n_handle
 MERGE (n)-[r:NOTE]->(m)"""
 
 
@@ -125,7 +125,7 @@ class Cypher_media_w_handle():
     """ For Media class """
 
     create = """
-MERGE (m:Media {gramps_handle: $m_attr.gramps_handle}) 
+MERGE (m:Media {handle: $m_attr.handle}) 
     SET m = $m_attr"""
 
 
@@ -134,7 +134,7 @@ class Cypher_note_w_handle():
     """ For Note class """
 
     create = """
-MERGE (n:Note {gramps_handle: $n_attr.gramps_handle}) 
+MERGE (n:Note {handle: $n_attr.handle}) 
     SET n = $n_attr"""
 
 
@@ -143,7 +143,7 @@ class Cypher_person_w_handle():
 
     create = """
 MATCH (u:UserProfile {userName: $username})
-MERGE (p:Person {gramps_handle: $p_attr.gramps_handle})
+MERGE (p:Person {handle: $p_attr.handle})
 MERGE (u) -[r:REVISION {date: $date}]-> (p)
     SET p = $p_attr
 RETURN ID(p) as uniq_id"""
@@ -151,37 +151,37 @@ RETURN ID(p) as uniq_id"""
     link_name = """
 CREATE (n:Name) SET n = $n_attr
 WITH n
-MATCH (p:Person {gramps_handle:$p_handle})
+MATCH (p:Person {handle:$p_handle})
 MERGE (p)-[r:NAME]->(n)"""
 
     link_weburl = """
-MATCH (p:Person {gramps_handle: $handle}) 
+MATCH (p:Person {handle: $handle}) 
 CREATE (p) -[wu:WEBURL]-> (url:Weburl)
     SET url = $u_attr"""
 
     link_event_embedded = """
-MATCH (p:Person {gramps_handle: $handle}) 
+MATCH (p:Person {handle: $handle}) 
 CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
     SET e = $e_attr"""
 
     link_event = """
-MATCH (p:Person {gramps_handle:$p_handle})
-MATCH (e:Event  {gramps_handle:$e_handle})
+MATCH (p:Person {handle:$p_handle})
+MATCH (e:Event  {handle:$e_handle})
 MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
 
     link_media = """
-MATCH (p:Person {gramps_handle: $p_handle})
-MATCH (m:Media  {gramps_handle: $m_handle})
+MATCH (p:Person {handle: $p_handle})
+MATCH (m:Media  {handle: $m_handle})
 MERGE (p) -[r:MEDIA]-> (m)"""
 
     link_note = """
-MATCH (p:Person {gramps_handle: $p_handle})
-MATCH (n:Note   {gramps_handle: $n_handle})
+MATCH (p:Person {handle: $p_handle})
+MATCH (n:Note   {handle: $n_handle})
 MERGE (p) -[r:NOTE]-> (n)"""
 
     link_citation = """
-MATCH (p:Person)   {gramps_handle: $p_handle})
-MATCH (c:Citation) {gramps_handle: $c_handle})
+MATCH (p:Person)   {handle: $p_handle})
+MATCH (c:Citation) {handle: $c_handle})
 MERGE (p)-[r:CITATION]->(c)"""
 
 
@@ -193,26 +193,26 @@ CREATE (p:Place)
 SET p = $p_attr"""
 
     add_name = """
-MATCH (p:Place) WHERE p.gramps_handle=$handle
+MATCH (p:Place) WHERE p.handle=$handle
 CREATE (n:Place_name)
 MERGE (p) -[r:NAME]-> (n)
 SET n = $n_attr"""
 
     link_weburl = """
-MATCH (n:Place) WHERE n.gramps_handle=$handle
+MATCH (n:Place) WHERE n.handle=$handle
 CREATE (n) -[wu:WEBURL]-> (url:Weburl
                 {priv: {url_priv}, href: {url_href},
                  type: {url_type}, description: {url_description}})"""
 
     link_hier = """
-MATCH (n:Place) WHERE n.gramps_handle=$handle
-MATCH (m:Place) WHERE m.gramps_handle=$hlink
+MATCH (n:Place) WHERE n.handle=$handle
+MATCH (m:Place) WHERE m.handle=$hlink
 MERGE (n) -[r:HIERARCY]-> (m)
 SET r = $r_attr"""
 
     link_note = """
-MATCH (n:Place) WHERE n.gramps_handle=$handle
-MATCH (m:Note)  WHERE m.gramps_handle=$hlink
+MATCH (n:Place) WHERE n.handle=$handle
+MATCH (m:Note)  WHERE m.handle=$hlink
 MERGE (n) -[r:NOTE]-> (m)"""
 
 
@@ -230,18 +230,18 @@ CREATE (s:Source)
 SET s = $s_attr"""
 
     link_note = """
-MATCH (n:Source) WHERE n.gramps_handle=$handle
-MATCH (m:Note)   WHERE m.gramps_handle=$hlink
+MATCH (n:Source) WHERE n.handle=$handle
+MATCH (m:Note)   WHERE m.handle=$hlink
 MERGE (n) -[r:NOTE]-> (m)"""
 
     link_repository = """
-MATCH (n:Source) WHERE n.gramps_handle=$handle
-MATCH (m:Repository) WHERE m.gramps_handle=$hlink
+MATCH (n:Source) WHERE n.handle=$handle
+MATCH (m:Repository) WHERE m.handle=$hlink
 MERGE (n) -[r:REPOSITORY]-> (m)"""
 
     set_repository_medium = """
 MATCH (n:Source) -[r:REPOSITORY]-> (m) 
-    WHERE n.gramps_handle=$handle
+    WHERE n.handle=$handle
 SET r.medium=$medium"""
 
 
@@ -253,13 +253,13 @@ CREATE (n:Citation)
     SET n = $c_attr"""
 
     link_note = """
-MERGE (n:Citation {gramps_handle: $handle})
-MERGE (m:Note     {gramps_handle: $hlink})
+MERGE (n:Citation {handle: $handle})
+MERGE (m:Note     {handle: $hlink})
 MERGE (n) -[r:NOTE]-> (m)"""
 
     link_source = """
-MERGE (n:Citation {gramps_handle: $handle})
-MERGE (m:Source   {gramps_handle: $hlink})
+MERGE (n:Citation {handle: $handle})
+MERGE (m:Source   {handle: $hlink})
 MERGE (n) -[r:SOURCE]-> (m)"""
 
 

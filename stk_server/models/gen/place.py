@@ -126,7 +126,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
         result = shareds.driver.session().run(query)
 
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
+        titles = ['uniq_id', 'handle', 'change', 'id', 'type', 'pname',
                   'coord']
         lists = []
 
@@ -136,8 +136,8 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["p"]['gramps_handle']:
-                data_line.append(record["p"]['gramps_handle'])
+            if record["p"]['handle']:
+                data_line.append(record["p"]['handle'])
             else:
                 data_line.append('-')
             if record["p"]['change']:
@@ -396,7 +396,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         """ Saves a Place with Place_names and hierarchy links """
 
         try:
-            p_attr = {"gramps_handle": self.handle,
+            p_attr = {"handle": self.handle,
                       "change": self.change,
                       "id": self.id,
                       "type": self.type,

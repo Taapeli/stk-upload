@@ -59,7 +59,7 @@ RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
             
         result =  shareds.driver.session().run(query, nid=uniq_id)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'priv', 'type', 'text']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text']
         notes = []
         
         for record in result:
@@ -68,8 +68,8 @@ RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
                 note_line.append(record['uniq_id'])
             else:
                 note_line.append('-')
-            if record["n"]['gramps_handle']:
-                note_line.append(record["n"]['gramps_handle'])
+            if record["n"]['handle']:
+                note_line.append(record["n"]['handle'])
             else:
                 note_line.append('-')
             if record["n"]['change']:
@@ -126,12 +126,12 @@ RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
 
     def save(self, tx):
         """ Creates or updates this Note object as a Note node 
-            using gramps_handle
+            using handle
         """
 
         try:
             n_attr = {
-                "gramps_handle": self.handle,
+                "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,

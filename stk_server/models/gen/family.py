@@ -54,7 +54,7 @@ RETURN ID(person) AS children"""
         query = """
 MATCH (family:Family)-[r:EVENT]->(event:Event)
   WHERE ID(family)=$pid
-RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink"""
+RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
         return  shareds.driver.session().run(query, {"pid": pid})
     
     
@@ -158,7 +158,7 @@ RETURN ID(person) AS mother"""
 
         try:
             f_attr = {
-                "gramps_handle": self.handle,
+                "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
                 "rel_type": self.rel_type

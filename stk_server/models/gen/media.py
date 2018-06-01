@@ -93,7 +93,7 @@ class Media:
 
         try:
             m_attr = {
-                "gramps_handle": self.handle,
+                "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
                 "src": self.src,

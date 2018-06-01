@@ -313,7 +313,7 @@ RETURN person, urls, COLLECT (name) AS names
 
         result = shareds.driver.session().run(query)
 
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'priv', 'gender',
+        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'gender',
                   'firstname', 'surname']
         lists = []
 
@@ -323,8 +323,8 @@ RETURN person, urls, COLLECT (name) AS names
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["p"]['gramps_handle']:
-                data_line.append(record["p"]['gramps_handle'])
+            if record["p"]['handle']:
+                data_line.append(record["p"]['handle'])
             else:
                 data_line.append('-')
             if record["p"]['change']:
@@ -446,7 +446,8 @@ RETURN person, urls, COLLECT (name) AS names
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
         if uniq_id:
-            return shareds.driver.session().run(Cypher.person_get_confidence)
+            return shareds.driver.session().run(Cypher.person_get_confidence,
+                                                id=uniq_id)
         else:
             return shareds.driver.session().run(Cypher.person_get_confidences_all)
 
@@ -480,7 +481,7 @@ RETURN person, urls, COLLECT (name) AS names
 
         │ Person                       │   │ Name                         │
         ├──────────────────────────────┼───┼──────────────────────────────┤
-        │{"gender":"","gramps_handle":"│{} │{"surname":"Andersen","alt":""│
+        │{"gender":"","handle":"│{} │{"surname":"Andersen","alt":""│
         │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","firstname"│
         │}                             │   │:"Alexander","refname":""}    │
         ├──────────────────────────────┼───┼──────────────────────────────┤
@@ -901,7 +902,7 @@ SET n.est_death = m.daterange_start"""
         # Save the Person node under UserProfile; all attributes are replaced
         try:
             p_attr = {
-                "gramps_handle": self.handle,
+                "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
@@ -957,7 +958,7 @@ SET n.est_death = m.daterange_start"""
                 if handles:
                     e.handle = handles.pop()
                 e_attr = {
-                    "gramps_handle": e.handle,
+                    "handle": e.handle,
                     "id": e.id,
                     "name": e.name, # "e_type": e.tyyppi,
                     "date": e.date,
@@ -1055,7 +1056,7 @@ class Name:
 
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
-                RETURN p.gramps_handle AS handle
+                RETURN p.handle AS handle
             """.format(refname)
         return shareds.driver.session().run(query)
 

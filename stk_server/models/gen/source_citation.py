@@ -114,7 +114,7 @@ class Citation:
             # Create a new Citation node
                 
             c_attr = {
-                "gramps_handle": self.handle,
+                "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
                 "dateval": self.dateval, 
@@ -257,7 +257,7 @@ class Repository:
 
         try:
             r_attr = {
-                "gramps_handle": self.handle,
+                "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
                 "rname": self.rname,
@@ -428,7 +428,7 @@ ORDER BY toUpper(stitle)
                 
         result = shareds.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'stitle']
         lists = []
         
         for record in result:
@@ -437,8 +437,8 @@ ORDER BY toUpper(stitle)
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["s"]['gramps_handle']:
-                data_line.append(record["s"]['gramps_handle'])
+            if record["s"]['handle']:
+                data_line.append(record["s"]['handle'])
             else:
                 data_line.append('-')
             if record["s"]['change']:
@@ -471,7 +471,7 @@ ORDER BY toUpper(stitle)
                 
         result = shareds.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'stitle']
         lists = []
         
         for record in result:
@@ -480,8 +480,8 @@ ORDER BY toUpper(stitle)
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["s"]['gramps_handle']:
-                data_line.append(record["s"]['gramps_handle'])
+            if record["s"]['handle']:
+                data_line.append(record["s"]['handle'])
             else:
                 data_line.append('-')
             if record["s"]['change']:
@@ -535,7 +535,7 @@ ORDER BY toUpper(stitle)
 
         try:
             s_attr = {
-                "gramps_handle": self.handle,
+                "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
                 "stitle": self.stitle

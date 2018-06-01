@@ -494,11 +494,11 @@ def save_loaded_gramps(filename):
     dburi = dbutil.get_server_location()
     try:
         # gramps backup xml file to Neo4j db
-        status = gramps_loader.xml_to_neo4j(pathname, current_user.username)
+        result_list = gramps_loader.xml_to_neo4j(pathname, current_user.username)
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
                text="Missing proper column title: " + str(e))
-    return render_template("talletettu.html", text=status, uri=dburi)
+    return render_template("gr_result.html", batch_events=result_list, uri=dburi)
 
 
 @shareds.app.route('/upload_csv', methods=['POST'])
