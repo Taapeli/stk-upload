@@ -24,7 +24,45 @@ import shareds
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
-    """ Reads a Gramps xml file, and saves the information to db """
+    """ 
+    Reads a Gramps xml file, and saves the information to db 
+    
+    Metacode for batch log creation UserProfile --> Batch --> Log:
+    
+    # Start a Batch 
+        stk_run.upload_gramps / models.loadfile.upload_file >
+            match (p:UserProfile {username:"jussi"}); 
+            create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"}) 
+            return b
+    # Lataa tiedosto (in stk_run.save_loaded_gramps)
+        models.loadfile.upload_file > 
+            create (b) -[:HAS_STEP]-> (l:Log {status:"started"}) 
+            return l.id as lid0
+        # Siivoa välimerkit
+        file clean > 
+            match (l) where ID(l) = lid0; set l.status = "loaded"; 
+            lid = lid0
+    # Käsittele tietoryhmä 1
+        models.gramps.gramps_loader.xml_to_neo4j > 
+            match (l) whereID(l) = lid; 
+            create (l) -[:HAS_STEP]-> (l1:Log {status:"done"})
+            return l1.id as lid
+    # Käsittele tietoryhmä 2 ...
+        models.gramps.gramps_loader.xml_to_neo4j > 
+            match (l) whereID(l) = lid; 
+            create (l) -[:HAS_STEP]-> (l1:Log {status:"done"})
+            return l1.id as lid
+    # ...
+    # Viimeistele data
+        models.gramps.gramps_loader.xml_to_neo4j > 
+            match (l) whereID(l) = lid; 
+            create (l) -[:HAS_STEP]-> (l1:Log {status:"done"})
+            return l1.id as lid
+    # Merkitse valmiiksi
+        match (b) set b.status="completed"; match (p:UserProfile {username:"jussi"}); 
+        create (p) -[:CURRENT_LOAD]-> (b)
+
+    """
 
     # Decompress file and make a precheck for cleaning problematic delimiters
     # - build 2nd filename 
@@ -44,9 +82,9 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
                     # Already \' in line
                     if not line.find("\\\'") > 0:
                         # Replace ' with \'
-                        line = line.replace("\'", "\\\'")
+                        line = line.replace("\'", "&apos;") 
                     file_out.write(line)
-            msg = "Cleaned gzipped input lines"
+            msg = "Cleaned packed input lines"
         except OSError:
             # Not gzipped; Read an ordinary file
             with open(pathname, mode='rt', encoding='utf-8') as file_in:
@@ -55,7 +93,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
                     # Already \' in line
                     if not line.find("\\\'") > 0:
                         # Replace ' with \'
-                        line = line.replace("\'", "\\\'")
+                        line = line.replace("\'", "&apos;") 
+                        # "\\\'" vai esim "ʼ" tai "&apos;" tai acute accent "´"
                     file_out.write(line)
             msg = "Cleaned input lines"
         tdiff = time.time()-t0
@@ -66,8 +105,11 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     ''' Start DOM elements handler transaction '''
     handler = DOM_handler(DOMTree.documentElement, userid)
 
-    handler.log(BatchEvent("Storing '{}' file to Neo4j database".\
-                           format(file_displ), level="TITLE"))
+    # Initialize Run report 
+    handler.batch_logger = BatchLog()
+    handler.log(BatchEvent("Storing Gramps data to Neo4j database", level="TITLE"))
+    handler.log(BatchEvent("Loaded file '{}'".format(file_displ),
+                           elapsed=shareds.tdiff))
     handler.log(BatchEvent(msg, elapsed=tdiff))
 
     t0 = time.time()
@@ -117,8 +159,6 @@ class DOM_handler():
 
         self.uniq_ids = []                  # List of processed Person node
                                             # unique id's
-        # Initialize Run report 
-        self.batch_logger = BatchLog()
 
     def begin_tx(self, session):
         self.tx = session.begin_transaction()
