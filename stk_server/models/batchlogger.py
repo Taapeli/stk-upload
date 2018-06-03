@@ -122,7 +122,10 @@ class BatchEvent(object):
 
 
     def __str__(self):
-        c = self.count      if self.count   else ""
+        if self.count == None:
+            c = ''
+        else:
+            c = self.count
         if self.elapsed:
             e = "{:.4f}".format(self.elapsed)
         else:

@@ -67,41 +67,30 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     # Decompress file and make a precheck for cleaning problematic delimiters
     # - build 2nd filename 
     root, ext = splitext(pathname)
-    file_read = root + "_clean" + ext
+    file_cleaned = root + "_clean" + ext
     # - filename for display
     file_displ = basename(pathname)
     t0 = time.time()
 
-    with open(file_read, "w", encoding='utf-8') as file_out:
+    with open(file_cleaned, "w", encoding='utf-8') as file_out:
         # Creates the ouput file and closes it
         try:
-            # Read a gzipped file
+            # Try to read a gzipped file
             with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
                 print("A gzipped file")
-                for line in file_in:
-                    # Already \' in line
-                    if not line.find("\\\'") > 0:
-                        # Replace ' with \'
-                        line = line.replace("\'", "&apos;") 
-                    file_out.write(line)
+                counter = _clean_apostrophes(file_in, file_out)
             msg = "Cleaned packed input lines"
         except OSError:
-            # Not gzipped; Read an ordinary file
+            # Not gzipped; Read as an ordinary file
             with open(pathname, mode='rt', encoding='utf-8') as file_in:
                 print("Not a gzipped file")
-                for line in file_in:
-                    # Already \' in line
-                    if not line.find("\\\'") > 0:
-                        # Replace ' with \'
-                        line = line.replace("\'", "&apos;") 
-                        # "\\\'" vai esim "ʼ" tai "&apos;" tai acute accent "´"
-                    file_out.write(line)
+                counter = _clean_apostrophes(file_in, file_out)
             msg = "Cleaned input lines"
         tdiff = time.time()-t0
 
 
     ''' Get XML DOM parser '''
-    DOMTree = xml.dom.minidom.parse(open(file_read, encoding='utf-8'))
+    DOMTree = xml.dom.minidom.parse(open(file_cleaned, encoding='utf-8'))
     ''' Start DOM elements handler transaction '''
     handler = DOM_handler(DOMTree.documentElement, userid)
 
@@ -110,7 +99,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler.log(BatchEvent("Storing Gramps data to Neo4j database", level="TITLE"))
     handler.log(BatchEvent("Loaded file '{}'".format(file_displ),
                            elapsed=shareds.tdiff))
-    handler.log(BatchEvent(msg, elapsed=tdiff))
+    handler.log(BatchEvent(msg, count=counter, elapsed=tdiff))
 
     t0 = time.time()
 
@@ -145,6 +134,20 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler.log(BatchEvent("Total time", elapsed=time.time()-t0, level="TITLE"))
     return handler.batch_logger.list()
 
+
+def _clean_apostrophes(file_in, file_out):
+    '''
+    Replace each "'" with corresponding entity.
+    Returns the count of changed lines
+    '''
+    n = 0
+    for line in file_in:
+        if "\'" in line: 
+            line = line.replace("\'", "&apos;")
+            n += 1
+        file_out.write(line)
+    return n
+
 # -----------------------------------------------------------------------------
 
 class DOM_handler():
@@ -177,24 +180,6 @@ class DOM_handler():
     def log(self, batch_event):
         # Add a models.batchlogger.BatchEvent to Batch log
         self.batch_logger.add(batch_event)
-
-#     def put_message(self, msg, level="INFO", oid=""):
-#         ''' Add info message to messages list '''
-#         if oid:
-#             msg = "{} '{}'".format(msg, oid)
-#         if level == "INFO":
-#             logging.info(msg)
-#         elif level == "WARINING":
-#             logging.warning(msg)
-#         else:
-#             logging.error(msg)
-#         print("{}: {}".format(level, msg))
-#         self.msg.append(str(msg))
-# 
-#     def get_messages(self):
-#         ''' Return all info messages '''
-#         return self.msg
-
 
     # XML subtree handlers
 
