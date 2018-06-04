@@ -7,7 +7,7 @@ import time
 from models.gen.user import User
 from models.gen.person import Person, Name
 from models.gen.refname import Refname
-from models.batchlogger import BatchLog, BatchEvent
+from models.batchlogger import Batch, Log
 
 
 def set_confidence_value(tx, uniq_id=None, batch_logger=None):
@@ -35,8 +35,8 @@ def set_confidence_value(tx, uniq_id=None, batch_logger=None):
             
         counter += 1
 
-    if isinstance(batch_logger, BatchLog):
-        batch_logger.add(BatchEvent(title="Confidences set", 
+    if isinstance(batch_logger, Batch):
+        batch_logger.add(Log(title="Confidences set", 
                                     count=counter, elapsed=time.time()-t0))
     return
 
@@ -48,8 +48,8 @@ def set_estimated_dates(batch_logger=None):
         
     msg = Person.set_estimated_dates()
                         
-    if isinstance(batch_logger, BatchLog):
-        batch_logger.add(BatchEvent(title="Estimated birth and death dates set. " + msg, 
+    if isinstance(batch_logger, Batch):
+        batch_logger.add(Log(title="Estimated birth and death dates set. " + msg, 
                                     elapsed=time.time()-t0))
     return
 
@@ -128,8 +128,8 @@ def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
     if self and self.namecount != None:
         self.namecount += name_count
 
-    if isinstance(batch_logger, BatchLog):
-        batch_logger.add(BatchEvent(title="Refname references", 
+    if isinstance(batch_logger, Batch):
+        batch_logger.add(Log(title="Refname references", 
                                     count=name_count, elapsed=time.time()-t0))
     return
 
