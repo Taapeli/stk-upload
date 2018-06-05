@@ -12,7 +12,7 @@ import logging
 
 import shareds
 import models.dbutil
-from models.gen.cypher import Cypher
+from models.gen.cypher import Cypher_person
 from models.gramps.cypher_gramps import Cypher_person_w_handle
 from models.gen.dates import DateRange
 
@@ -446,17 +446,17 @@ RETURN person, urls, COLLECT (name) AS names
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
         """
         if uniq_id:
-            return shareds.driver.session().run(Cypher.person_get_confidence,
+            return shareds.driver.session().run(Cypher_person.get_confidence,
                                                 id=uniq_id)
         else:
-            return shareds.driver.session().run(Cypher.person_get_confidences_all)
+            return shareds.driver.session().run(Cypher_person.get_confidences_all)
 
 
     def set_confidence (self, tx):
         """ Sets a quality rate to this Person
             Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
         """
-        return tx.run(Cypher.person_set_confidence,
+        return tx.run(Cypher_person.set_confidence,
                       id=self.uniq_id, confidence=self.confidence)
 
 
@@ -481,12 +481,13 @@ RETURN person, urls, COLLECT (name) AS names
 
         │ Person                       │   │ Name                         │
         ├──────────────────────────────┼───┼──────────────────────────────┤
-        │{"gender":"","handle":"│{} │{"surname":"Andersen","alt":""│
+        │{"gender":"","handle":"       │{} │{"surname":"Andersen","alt":""│
         │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","firstname"│
         │}                             │   │:"Alexander","refname":""}    │
         ├──────────────────────────────┼───┼──────────────────────────────┤
         """
 
+        #TODO nmax now not available
         if nmax > 0:
             qmax = "LIMIT " + str(nmax)
         else:
@@ -550,12 +551,12 @@ RETURN person, urls, COLLECT (name) AS names
 
         with shareds.driver.session() as session:
             if rule == 'uniq_id':
-                return session.run(Cypher.person_get_events_uniq_id, id=int(name))
+                return session.run(Cypher_person.get_events_uniq_id, id=int(name))
             elif rule == 'all':
-                return session.run(Cypher.person_get_events_all)
+                return session.run(Cypher_person.get_events_all)
             else:
                 # Selected names and name types
-                return session.run(Cypher.person_get_events_by_refname,
+                return session.run(Cypher_person.get_events_by_refname,
                                    attr={'use':rule, 'name':name})
 
 
@@ -1112,9 +1113,9 @@ class Name:
         Sex field is not used currently - Remove?
         """
         if uniq_id:
-            return tx.run(Cypher.person_get_all_names, pid=uniq_id)
+            return tx.run(Cypher_person.get_names, pid=uniq_id)
         else:
-            return tx.run(Cypher.persons_get_all_names)
+            return tx.run(Cypher_person.get_all_persons_names)
 
 
     @staticmethod

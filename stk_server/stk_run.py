@@ -4,6 +4,7 @@
 # JMä 29.12.2015
 
 import logging
+import time
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, flash
@@ -479,7 +480,9 @@ def upload_gramps():
         material = request.form['material']
         logging.debug("Got a {} file '{}'".format(material, infile.filename))
 
+        t0 = time.time()
         loadfile.upload_file(infile)
+        shareds.tdiff = time.time()-t0
 
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
@@ -490,6 +493,7 @@ def upload_gramps():
 @roles_accepted('member', 'admin')
 def save_loaded_gramps(filename):
     """ Save loaded gramps data to the database """
+    #TODO: Latauksen onnistuttua perusta uusi Batch-erä (suoritusaika shareds.tdiff)
     pathname = loadfile.fullname(filename)
     dburi = dbutil.get_server_location()
     try:

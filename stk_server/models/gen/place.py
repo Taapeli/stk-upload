@@ -11,7 +11,7 @@ from models.dbtree import DbTree
 from models.gen.person import Weburl
 from models.gen.note import Note
 from models.gen.dates import DateRange
-from models.gen.cypher import Cypher
+from models.gen.cypher import Cypher_place
 from models.gramps.cypher_gramps import Cypher_place_w_handle
 import  shareds
 
@@ -343,7 +343,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         │     │         │,"Jansson"]]       │           │                   │
         └─────┴─────────┴───────────────────┴───────────┴───────────────────┘
         """
-        result = shareds.driver.session().run(Cypher.place_get_person_events, 
+        result = shareds.driver.session().run(Cypher_place.get_person_events, 
                                               locid=int(loc_id))
         ret = []
         for record in result:

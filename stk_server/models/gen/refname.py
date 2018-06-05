@@ -28,7 +28,7 @@ import logging
 from sys import stderr
 import time
 import shareds
-from models.gen.cypher import Cypher
+from models.gen.cypher import Cypher_refname
 
 # Global allowed reference types in Refname.reftype field or use attribute in db
 REFTYPES = ['basename', 'firstname', 'surname', 'patronyme', 'father', 'mother']
@@ -153,7 +153,7 @@ class Refname:
             else:   # ['firstname', 'surname', 'patronyme']
                 link_type = "BASENAME"
             try:
-                result = session.run(Cypher.refname_save_link(link_type), 
+                result = session.run(Cypher_refname.save_link(link_type), 
                                      use=self.reftype,
                                      a_name=self.name, a_attr=a_attr,
                                      b_name=self.refname)
@@ -178,7 +178,7 @@ class Refname:
         else:
             # Create (A:{name:name}) only (if needed)
             try:
-                result = session.run(Cypher.refname_save_single, 
+                result = session.run(Cypher_refname.save_single, 
                                      a_name=self.name, a_attr=a_attr)
 
                 logging.debug("Created {} node for {}".format(\
@@ -207,7 +207,7 @@ class Refname:
             return
 
         try:
-            result = tx.run(Cypher.refname_link_person_to,
+            result = tx.run(Cypher_refname.link_person_to,
                             pid=pid, name=name, use=reftype)
 
             logging.debug("Created Refname {} nodes for {}".format(\
@@ -227,14 +227,14 @@ class Refname:
             try:
                 # Remove all Refnames
                 t0 = time.time()
-                result = session.run(Cypher.refnames_delete_all)
+                result = session.run(Cypher_refname.delete_all)
                 counters = result.summary().counters
                 logging.info("Deleted all Refnames: {}; {} sek".\
                               format(counters, time.time()-t0))
 
                 # Create unique constrain for Refnames
                 t0 = time.time()
-                result = session.run(Cypher.refnames_set_constraint)
+                result = session.run(Cypher_refname.set_constraint)
                 counters = result.summary().counters
                 logging.info("Set unique constraint for Refnames: {}; {} sek".\
                               format(counters, time.time()-t0))
@@ -328,7 +328,7 @@ class Refname:
         """
         try:
             ret = []
-            results = shareds.driver.session().run(Cypher.refnames_get)
+            results = shareds.driver.session().run(Cypher_refname.get_all)
             for result in results:
                 rn = Refname(result['n']["name"])
                 rn.rid = result['n'].id
