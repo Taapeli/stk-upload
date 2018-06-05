@@ -3,7 +3,7 @@ Cumulates Batch steps and stores them as a Log node
 
     After a series of logical run steps, Batch has a chain of step Logs
     and it has a link to each data node (Person, Event, ...) created.
-    The UserProfile has also relation type CURRENT_LOAD to most currnet Batch
+    The UserProfile has also relation CURRENT_LOAD to most current Batch.
 
     (u:UserProfile) -[:CURRENT_LOAD]-> (b:Batch)
     (u:UserProfile) -[:HAS_LOADED]-> (b:Batch)
@@ -34,25 +34,12 @@ Created on 26.5.2018
 #         self.file = file
 #         # Creates the Batch node? #TODO
 #         return
-# 
-#     def _create_id(self):
-#         '''
-#         Returns a new Batch id, which is 
-#         - a date '2018-06-01' or
-#         - a date followed by an ordinal number '2018-06-01.01'
-#         '''
-#         # 1. Find the latest Batch id of today from the db
-#         pass
-#         # 2. Form a new batch id
-#         pass
-#         # Return the uniq_id of the created node
-#         return None
 
 
 class Batch(object):
     '''
     Creates a log of user bach steps.
-    add()  Adds a log event to log
+    append()  Adds a log event to log
     save() Stores the log to database #TODO
     list() Gets the log contenst objects 
     '''
@@ -67,8 +54,7 @@ class Batch(object):
         self.steps = []
         self.totaltime = 0.0    # Sum of Log.elapsed
 
-
-    def add(self, obj):
+    def append(self, obj):
         '''
         The argument object (a Log) is added to batch Log list
         '''
@@ -100,6 +86,19 @@ class Batch(object):
         for e in self.steps:
             li.append(str(e))
         return li
+
+    def _create_id(self):
+        '''
+        Returns a new Batch id, which is 
+        - a date '2018-06-01' or
+        - a date followed by an ordinal number '2018-06-01.01'
+        '''
+        # 1. Find the latest Batch id of today from the db
+        pass
+        # 2. Form a new batch id
+        pass
+        # Return the uniq_id of the created node
+        return None
 
 
 class Log(object):

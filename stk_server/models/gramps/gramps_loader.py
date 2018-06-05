@@ -188,7 +188,7 @@ class DOM_handler():
 
     def log(self, batch_event):
         # Add a models.batchlogger.Log to Batch log
-        self.batch_logger.add(batch_event)
+        self.batch_logger.append(batch_event)
 
     # XML subtree handlers
 
@@ -303,7 +303,6 @@ class DOM_handler():
                 <datestr val="1700-luvulla" />    # Not processed!
             """
             e.dates = self._extract_daterange(event)
-            # e.date = e.dates.estimate() # TODO: remove this, not needed!
 
             if len(event.getElementsByTagName('place') ) == 1:
                 event_place = event.getElementsByTagName('place')[0]
