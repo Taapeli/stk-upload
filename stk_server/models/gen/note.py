@@ -141,6 +141,6 @@ RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
             return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)
 
         except Exception as err:
-            print("Virhe (Note.save): {0}".format(err), file=stderr)
-            raise SystemExit("Stopped due to errors")    # Stop processing
-            #TODO raise ConnectionError("Note.save: {0}".format(err))
+            #print("Virhe (Note.save): {0}".format(err), file=stderr)
+            # raise SystemExit("Stopped due to errors")    # Stop processing
+            raise ConnectionError("Note.save: {}".format(err))
