@@ -101,8 +101,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
 
     except ConnectionError as err:
         print("Virhe {0}".format(err))
-        handler.log(Log("Talletus tietokantaan ei onnistunut {} {}".format(err), 
-                     level="ERROR"))
+        handler.log(Log("Talletus tietokantaan ei onnistunut {} {}".\
+                        format(err.message, err.code), level="ERROR"))
         # raise SystemExit("Stopped due to errors")    # Stop processing
         raise
 
@@ -184,13 +184,16 @@ class DOM_handler():
 
     def commit(self):
         """ Commit transaction """
-        try:
-            self.tx.commit()
-            print("Transaction committed")
-        except Exception as e:
-            print("Transaction failed")
-            self.log(Log("Talletus tietokantaan ei onnistunut {} {}".\
-                          format(e.__class__.__name__, e), level="ERROR"))
+        if self.tx.closed():
+            print("Transaction already closed!")
+        else:
+            try:
+                self.tx.commit()
+                print("Transaction committed")
+            except Exception as e:
+                print("Transaction failed")
+                self.log(Log("Talletus tietokantaan ei onnistunut {} {}".\
+                              format(e.__class__.__name__, e), level="ERROR"))
 
     def log(self, batch_event):
         # Add a models.batchlogger.Log to Batch log

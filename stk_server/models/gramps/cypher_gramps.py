@@ -173,7 +173,7 @@ MATCH (p:Person {handle:$p_handle})
 MERGE (p)-[r:NAME]->(n)"""
 
     link_weburl = """
-MATCH (p:Person {handle: $handle}) 
+MATCH (p:Person {handle: $p_handle}) 
 CREATE (p) -[wu:WEBURL]-> (url:Weburl)
     SET url = $u_attr"""
 
@@ -198,8 +198,8 @@ MATCH (n:Note   {handle: $n_handle})
 MERGE (p) -[r:NOTE]-> (n)"""
 
     link_citation = """
-MATCH (p:Person)   {handle: $p_handle})
-MATCH (c:Citation) {handle: $c_handle})
+MATCH (p:Person   {handle: $p_handle})
+MATCH (c:Citation {handle: $c_handle})
 MERGE (p)-[r:CITATION]->(c)"""
 
 
