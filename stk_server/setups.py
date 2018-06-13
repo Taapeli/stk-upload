@@ -111,8 +111,8 @@ shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
 print('Stk-server init') 
 
-#  Alusta sovellusosat
-import stk_run  
+#  Alusta sovellusosat (on käytössä vaikka varoitus "unused import")
+import stk_run
 
 # Setup Flask-Security
 shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role, AllowedEmail)

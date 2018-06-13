@@ -4,15 +4,14 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 
-from sys import stderr
 from models.gramps.cypher_gramps import Cypher_note_w_handle
 import shareds
 
 class Note:
     """ Huomautus
-            
+
         Properties:
-                handle          
+                handle
                 change
                 id              esim. "N0001"
                 uniq_id         int database key
@@ -29,88 +28,78 @@ class Note:
         self.id = ''
         self.priv = ''
         self.type = ''
-        
-        
+
+
     def get_note(self):
-        """ Lukee huomautuksen tiedot tietokannasta 
+        """ Reads Note node data by self.uniq_id
+
             Called from models.datareader.get_person_data_by_id
         """
 
-        note_get = """
+        with shareds.driver.session() as session:
+            note_get = """
 MATCH (note:Note)    WHERE ID(note)=$nid
 RETURN note"""
-        return shareds.driver.session().run(note_get, nid=self.uniq_id)
-                
-        
+            return session.run(note_get, nid=self.uniq_id)
+
+
     @staticmethod
     def get_notes(uniq_id):
-        """ Lukee kaikki huomautukset tietokannasta 
+        """ Reads all Note nodes or selected Note node from db
+
             Called from models.datareader.get_notes for "table_of_data.html"
         """
-                        
-        if uniq_id:
-            query = """
-MATCH (n:Note) WHERE ID(note)=$nid 
+
+        result = None
+        with shareds.driver.session() as session:
+            if uniq_id:
+                query = """
+MATCH (n:Note) WHERE ID(note)=$nid
 RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
-        else:
-            query = """
+                result =  session.run(query, nid=uniq_id)
+            else:
+                query = """
 MATCH (n:Note)
 RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
-            
-        result =  shareds.driver.session().run(query, nid=uniq_id)
-        
+                result =  session.run(query)
+
         titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text']
         notes = []
-        
+
         for record in result:
-            note_line = []
+            # Fill with hyphen for missing information
+            note_line = ['-'] * len(titles)
             if record['uniq_id']:
-                note_line.append(record['uniq_id'])
-            else:
-                note_line.append('-')
-            if record["n"]['handle']:
-                note_line.append(record["n"]['handle'])
-            else:
-                note_line.append('-')
-            if record["n"]['change']:
-                note_line.append(record["n"]['change'])
-            else:
-                note_line.append('-')
-            if record["n"]['id']:
-                note_line.append(record["n"]['id'])
-            else:
-                note_line.append('-')
-            if record["n"]['priv']:
-                note_line.append(record["n"]['priv'])
-            else:
-                note_line.append('-')
-            if record["n"]['type']:
-                note_line.append(record["n"]['type'])
-            else:
-                note_line.append('-')
-            if record["n"]['text']:
-                note_line.append(record["n"]['text'])
-            else:
-                note_line.append('-')
-                                
+                note_line[0] = record['uniq_id']
+            record_n = record['n']
+            if record_n['handle']:
+                note_line[1] = record_n['handle']
+            if record_n['change']:
+                note_line[2] = record_n['change']
+            if record_n['id']:
+                note_line[3] = record_n['id']
+            if record_n['priv']:
+                note_line[4] = record_n['priv']
+            if record_n['type']:
+                note_line[5] = record_n['type']
+            if record_n['text']:
+                note_line[5] = record_n['text']
+
             notes.append(note_line)
-                
+
         return (titles, notes)
-        
-        
+
+
     @staticmethod
     def get_total():
         """ Tulostaa huomautusten määrän tietokannassa """
-                        
-        query = """
-            MATCH (n:Note) RETURN COUNT(n)
-            """
-            
-        results =  shareds.driver.session().run(query)
-        
-        for result in results:
-            return str(result[0])
 
+        with shareds.driver.session() as session:
+            results =  session.run("MATCH (n:Note) RETURN COUNT(n)")
+            for result in results:
+                return str(result[0])
+
+        return '0'
 
     def print_data(self):
         """ Tulostaa tiedot """
@@ -125,7 +114,7 @@ RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
 
 
     def save(self, tx):
-        """ Creates or updates this Note object as a Note node 
+        """ Creates or updates this Note object as a Note node
             using handle
         """
 
@@ -135,7 +124,7 @@ RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
-                "type": self.type, 
+                "type": self.type,
                 "text": self.text
             }
             return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)

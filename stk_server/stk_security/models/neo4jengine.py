@@ -1,4 +1,9 @@
-import os
+'''
+    A class for creating Neo4j database connection for `stk_security` module
+    and executing Cypher commands
+
+@author: TimNal - Timo Nallikari 2017
+'''
 from neo4j.v1 import GraphDatabase
 
 DEBUG = False
@@ -24,12 +29,11 @@ class Neo4jEngine():
             connection_timeout = 15)
    
     def close(self):
-        self._driver.close()
+        self.driver.close()
 
     def execute(self, cypher, **kwargs):
-        pass
-        with self._driver.session() as session:
-            greeting = session.write_transaction(self._execute, cypher, kwargs)
+        with self.driver.session() as session:
+            session.write_transaction(self._execute, cypher, kwargs)
         
     @staticmethod
     def _execute(tx, cypher, **kwargs):
