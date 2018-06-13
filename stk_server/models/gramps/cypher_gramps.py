@@ -123,8 +123,8 @@ MATCH (m:Person) WHERE m.handle=$p_handle
 MERGE (n)-[r:MOTHER]->(m)"""
 
     link_event = """
-MATCH (n:Family) WHERE n.handle=f_handle
-MATCH (m:Event)  WHERE m.handle=e_handle
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Event)  WHERE m.handle=$e_handle
 MERGE (n)-[r:EVENT]->(m)
     SET r.role = $role"""
 

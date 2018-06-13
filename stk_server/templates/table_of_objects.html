@@ -1,0 +1,38 @@
+{# _myapp/templates/table_of_objects.html_ #}
+{% extends "layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+<script src="/static/infobox.js"></script>
+
+{% if headings %}
+	<h2>{{headings[0]}}</h2>
+	<p>{{headings[1]}}</p>
+{% endif %}
+
+<section id="lista">
+<table>
+{% if titles %}
+	<tr>{% set w = titles.__len__() %}
+    {% for title in titles %}<th>{{title}}</th>{% endfor %}
+    </tr>
+	{% if objs %}
+	    {% for obj in objs %}
+		    <tr>
+	    	{% for k in titles %}
+	    	  {% if k in ["date", "birth", "death"] %}<td>{{obj[k]|d('')|pvm}}</td>
+              {% elif  k == "change" %}<td><small>{{obj[k]|d('-')|timestamp}}</small></td>
+              {% elif  k == "handle" %}<td><small>{{obj[k]|d('-')}}</small></td>
+              {% else %}<td>{{obj[k]|d('-')}}</td>
+		      {% endif %}
+	    	{% endfor %}
+	        </tr>
+	    {% endfor %}
+	{% else %}
+        <tr><td colspan="{{w}}">Ei tietoja</td></tr>
+	{% endif %}
+{% else %}
+        <tr><td colspan="{{w}}">Ei tietoja</td></tr>
+{% endif %}
+</table>
+{% endblock %}
