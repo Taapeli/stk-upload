@@ -117,3 +117,9 @@ li.itemrow {
 	margin-left: auto;
 	text-align: right;
 	}
+
+#footer {
+	color: gray;
+	background: #eee;
+	text-align: right;
+}

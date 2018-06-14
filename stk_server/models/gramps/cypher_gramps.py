@@ -8,20 +8,38 @@ Created on 21.3.2018
 
 class Cypher_batch(object):
     '''
-    Cypher clauses for managing Batch when inputting Gramps data
+    Cypher clauses for managing Batch and Log nodes
     '''
 
     batch_find_id = """
-MATCH (u:UserProfile {username: $user})
-MATCH (b:Batch) 
-    WHERE b.i STARTS WITH $batch_base 
-RETURN b.id AS id
-    ORDER BY b.id DESC 
+MATCH (u:UserProfile {userName: $user})
+MATCH (u) -[:HAS_LOADED]-> (b:Batch) 
+    WHERE b.id STARTS WITH $batch_base 
+RETURN b.id AS bid
+    ORDER BY b.bid DESC 
     LIMIT 1"""
 
-    batch_create_as_current = """
-MATCH (u:UserProfile {username: $user})
-MERGE (u) -[:HAS_LOADED {status: 'started'}]-> 
+    batch_create = """
+MATCH (u:UserProfile {userName: $b_attr.user})
+MERGE (u) -[:HAS_LOADED {status: $b_attr.status}]-> (b:Batch {id: $b_attr.id})
+    SET b = $b_attr"""
+
+    batch_complete = """
+MATCH (u:UserProfile {userName: $user})
+MATCH (u) -[r1:HAS_LOADED]-> (b:Batch {id: $bid})
+    SET r1.status="completed"
+    SET b.status="completed"
+WITH u, b
+CREATE (b) -[r:COMPLETED]-> (l:Log)
+    SET l = l_attr // {status: $status, msg: $msg, size: $size, elapsed: $elapsed}
+WITH u, b
+    OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
+        DELETE c
+    CREATE (u) -[:CURRENT_LOAD]-> (b)
+"""
+    batch_x = """
+MATCH (u:UserProfile {userName: $user})
+MERGE (u) -[:HAS_LOADED {status: $status}]-> 
     (b:Batch {id: $batch, file: $file}) -[:COMPLETED]-> 
     (l:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
 WITH u, b
@@ -31,14 +49,14 @@ WITH u, b
 """
 
     batch_add_log = """
-MATCH (u:UserProfile {username: $user})
+MATCH (u:UserProfile {userName: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch {id:$batch}) -[:COMPLETED*]-> (l0:Log)
 CREATE (l0) -[:COMPLETED]-> 
     (l1:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
 """
 
     batch_log_list = """
-MATCH (u:UserProfile {username: $user}) -[:HAS_LOADED]-> 
+MATCH (u:UserProfile {userName: $user}) -[:HAS_LOADED]-> 
     (b:Batch {id: $batch}) -[:COMPLETED*]-> (l)
 RETURN l.status AS status, l.msg AS msg, l.size AS size, l.elapsed AS elapsed
 """
@@ -92,7 +110,7 @@ class Cypher_family_w_handle():
     create = """
 MERGE (f:Family {handle: $f_attr.handle}) 
     SET f = $f_attr
-RETURN id(f) as uniq_id"""
+RETURN ID(f) as uniq_id"""
 
     link_father = """
 MATCH (n:Family) WHERE n.handle=$f_handle
@@ -105,8 +123,8 @@ MATCH (m:Person) WHERE m.handle=$p_handle
 MERGE (n)-[r:MOTHER]->(m)"""
 
     link_event = """
-MATCH (n:Family) WHERE n.handle=f_handle
-MATCH (m:Event)  WHERE m.handle=e_handle
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Event)  WHERE m.handle=$e_handle
 MERGE (n)-[r:EVENT]->(m)
     SET r.role = $role"""
 
@@ -155,7 +173,7 @@ MATCH (p:Person {handle:$p_handle})
 MERGE (p)-[r:NAME]->(n)"""
 
     link_weburl = """
-MATCH (p:Person {handle: $handle}) 
+MATCH (p:Person {handle: $p_handle}) 
 CREATE (p) -[wu:WEBURL]-> (url:Weburl)
     SET url = $u_attr"""
 
@@ -180,8 +198,8 @@ MATCH (n:Note   {handle: $n_handle})
 MERGE (p) -[r:NOTE]-> (n)"""
 
     link_citation = """
-MATCH (p:Person)   {handle: $p_handle})
-MATCH (c:Citation) {handle: $c_handle})
+MATCH (p:Person   {handle: $p_handle})
+MATCH (c:Citation {handle: $c_handle})
 MERGE (p)-[r:CITATION]->(c)"""
 
 
@@ -269,3 +287,12 @@ class Cypher_repository_w_handle():
     create = """
 CREATE (r:Repository)
 SET r = $r_attr"""
+
+
+class Cypher_x():
+    """ For Batch and Log classes """
+
+    batch_create = '''
+MATCH (p:UserProfile {userName:$user}); 
+CREATE (p) -[:HAS_LOADED]-> (b:Batch {id:$bid, status:$status}) 
+RETURN ID(b) AS uniq_id'''

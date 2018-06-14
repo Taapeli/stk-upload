@@ -262,10 +262,10 @@ def nayta_henkilot(subj):
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'notes':
-        titles, lists = datareader.get_notes()
-        return render_template("table_of_data.html",
+        titles, objs = datareader.get_notes()
+        return render_template("table_of_objects.html",
                                headings=("Huomautusluettelo", "Note-kohteet"),
-                               titles=titles, lists=lists)
+                               titles=titles, objs=objs)
     elif subj == 'media':
         media = datareader.read_medias()
         return render_template("table_media.html",

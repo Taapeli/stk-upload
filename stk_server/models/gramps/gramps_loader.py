@@ -32,6 +32,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     
     # Start a Batch 
         stk_run.upload_gramps / models.loadfile.upload_file >
+            # Create id / models.batchlogger.Batch._create_id
             match (p:UserProfile {username:"jussi"}); 
             create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"}) 
             return b
@@ -66,40 +67,44 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     """
 
     ''' Uncompress and hide apostrophes for DOM handler '''
-    file_cleaned, file_displ, clean_log = file_clean(pathname)
+    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
     handler = DOM_handler(file_cleaned, userid)
 
     # Initialize Run report 
-    handler.batch_logger = Batch()
+    handler.batch_logger = Batch(userid)
     handler.log(Log("Storing data from Gramps", level="TITLE"))
     handler.log(Log("Loaded file '{}'".format(file_displ),
                            elapsed=shareds.tdiff))
-    handler.log(clean_log)
+    handler.log(cleaning_log)
     t0 = time.time()
+    handler.batch_logger.begin(None, file_cleaned)
 
-    ''' Start DOM transaction '''
-    use_transaction = True  # Voi testata Falsella
-    if use_transaction:
+    try:
+        ''' Start DOM transaction '''
         handler.begin_tx(shareds.driver.session())
-    else:
-        handler.tx = shareds.driver.session()
+
+        handler.handle_notes()
+        handler.handle_repositories()
+        handler.handle_media()
     
-    handler.handle_notes()
-    handler.handle_repositories()
-    handler.handle_media()
+        handler.handle_places()
+        handler.handle_sources()
+        handler.handle_citations()
+    
+        handler.handle_events()
+        handler.handle_people()
+        handler.handle_families()
 
-    handler.handle_places()
-    handler.handle_sources()
-    handler.handle_citations()
-
-    handler.handle_events()
-    handler.handle_people()
-    handler.handle_families()
-
-    if use_transaction:
         handler.commit()
+
+    except ConnectionError as err:
+        print("Virhe {0}".format(err))
+        handler.log(Log("Talletus tietokantaan ei onnistunut {} {}".\
+                        format(err.message, err.code), level="ERROR"))
+        # raise SystemExit("Stopped due to errors")    # Stop processing
+        raise
 
     # Set person confidence values (for all persons!)
     handler.begin_tx(shareds.driver.session())
@@ -144,12 +149,12 @@ def file_clean(pathname):
             with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
                 print("A gzipped file")
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned packed input lines" # Try to read a gzipped file
+            msg = "Cleaned apostrophes from packed input lines" # Try to read a gzipped file
         except OSError: # Not gzipped; Read as an ordinary file
             with open(pathname, mode='rt', encoding='utf-8') as file_in:
                 print("Not a gzipped file")
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned input lines"
+            msg = "Cleaned apostrophes from input lines"
         event = Log(msg, count=counter, elapsed=time.time()-t0)
 
     return (file_cleaned, file_displ, event)
@@ -171,6 +176,7 @@ class DOM_handler():
 
         self.uniq_ids = []                  # List of processed Person node
                                             # unique id's
+        self.tx = None                      # Transaction not opened
 
     def begin_tx(self, session):
         self.tx = session.begin_transaction()
@@ -178,13 +184,16 @@ class DOM_handler():
 
     def commit(self):
         """ Commit transaction """
-        try:
-            self.tx.commit()
-            print("Transaction committed")
-        except Exception as e:
-            print("Transaction failed")
-            self.log(Log("Talletus tietokantaan ei onnistunut {} {}".\
-                                format(e.__class__.__name__, e), level="ERROR"))
+        if self.tx.closed():
+            print("Transaction already closed!")
+        else:
+            try:
+                self.tx.commit()
+                print("Transaction committed")
+            except Exception as e:
+                print("Transaction failed")
+                self.log(Log("Talletus tietokantaan ei onnistunut {} {}".\
+                              format(e.__class__.__name__, e), level="ERROR"))
 
     def log(self, batch_event):
         # Add a models.batchlogger.Log to Batch log

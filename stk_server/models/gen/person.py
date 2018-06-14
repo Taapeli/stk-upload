@@ -947,7 +947,8 @@ SET n.est_death = m.daterange_start"""
                     "description": url.description
                 }
                 try:
-                    tx.run(Cypher_person_w_handle.link_weburl, u_attr=u_attr)
+                    tx.run(Cypher_person_w_handle.link_weburl, 
+                           p_handle=self.handle, u_attr=u_attr)
                 except Exception as err:
                     print("Virhe (Person.save:create Weburl): {0}".format(err), file=stderr)
 

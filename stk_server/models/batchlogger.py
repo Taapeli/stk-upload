@@ -14,45 +14,91 @@ Created on 26.5.2018
 
 @author: jm
 '''
-
-# class Batch():
-#     '''
-#     Represents the user's import (etc) batch
-#     - The Batch has relation chain to each batch step result node Log
-#     - The Batch has relations to each data node
-#     ''' 
-#     def __init__(self, username, status, file):
-#         '''
-#         Creates a new Batch node and connects it to UserProfile
-#         
-#         (u:UserProfile {username:"Jussi"}) -[:HAS_LOADED {status:'started'}]-> 
-#         (b:Batch {id:"2018-05-10.1", file:"/tmp/abo.xml"})
-#         '''
-#         self.bid = self._create_id()
-#         self.username = username
-#         self.status = status
-#         self.file = file
-#         # Creates the Batch node? #TODO
-#         return
+from datetime import date
+import shareds
+from models.gramps.cypher_gramps import Cypher_batch
 
 
 class Batch(object):
     '''
-    Creates a log of user bach steps.
+    Creates a log of userid bach steps.
     append()  Adds a log event to log
     save() Stores the log to database #TODO
     list() Gets the log contenst objects 
     '''
 
-    def __init__(self, params=None):
+    def __init__(self, userid):
         '''
-        Creates a log of a batch step
-        
-        #TODO The params may be: ...?
-        
+        Creates a Batch object
         '''
+        if userid == None:
+            raise AttributeError("Batch.userid must be defined")
+
+        self.bid = None
+        self.userid = userid
+        self.status = 'started'
+        self.file = None
+            
+        # Runtime variables for batch steps
         self.steps = []
         self.totaltime = 0.0    # Sum of Log.elapsed
+
+
+    def begin(self, tx, infile):
+        '''
+        Creates a new Batch node with 
+        - id      a date followed by an ordinal number '2018-06-05.001'
+        - status  'started'
+        - file    input filename
+        
+        You may give an existing trasnaction tx, 
+        else a new transaction is created and committed
+        '''
+
+        # 0. Create transaction, if not given
+        local_tx = False
+        with shareds.driver.session() as session:
+            if tx == None:
+                tx = session.begin_transaction()
+                local_tx = True
+            
+            # 1. Find the latest Batch id of today from the db
+            base = str(date.today())
+            try:
+                batch_id = tx.run(Cypher_batch.batch_find_id, 
+                                  user=self.userid, batch_base=base).single().value()
+                print("# Edellinen batch_id={}".format(batch_id))
+                i = batch_id.rfind('.')
+                ext = batch_id[i+1:]
+            except AttributeError as e:
+                # print ("Ei vanhaa arvoa {}".format(e))
+                ext = 0
+            except Exception as e:
+                print ("Poikkeus {}".format(e))
+                ext = 0
+    
+            # 2. Form a new batch id
+            self.bid = "{}.{:03d}".format(base, int(ext) + 1)
+            print("# Uusi batch_id='{}'".format(self.bid))
+    
+            # 3. Create a new Batch node
+            b_attr = {
+                'user': self.userid,
+                'id': self.bid,
+                'status': 'started',
+                'file': infile
+                }
+            tx.run(Cypher_batch.batch_create, file=infile, b_attr=b_attr)
+            if local_tx:
+                tx.commit()
+
+        return self.bid
+
+
+    def complete(self, tx, status='completed'):
+        #TODO: argumentteja puuttuu
+        return tx.run(Cypher_batch.batch_complete, user=self.userid, bid=self.bid)
+
 
     def append(self, obj):
         '''
@@ -86,19 +132,6 @@ class Batch(object):
         for e in self.steps:
             li.append(str(e))
         return li
-
-    def _create_id(self):
-        '''
-        Returns a new Batch id, which is 
-        - a date '2018-06-01' or
-        - a date followed by an ordinal number '2018-06-01.01'
-        '''
-        # 1. Find the latest Batch id of today from the db
-        pass
-        # 2. Form a new batch id
-        pass
-        # Return the uniq_id of the created node
-        return None
 
 
 class Log(object):

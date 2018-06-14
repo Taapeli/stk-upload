@@ -153,7 +153,7 @@ RETURN ID(person) AS mother"""
 
     def save(self, tx):
         """ Saves the family node to db and 
-            creates relations to parent, childr and note nodes
+            creates relations to parent, child and note nodes
         """
 
         try:

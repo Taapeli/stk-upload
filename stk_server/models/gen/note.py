@@ -1,19 +1,20 @@
 '''
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
+Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
+
 @author: jm
 '''
 
-from sys import stderr
 from models.gramps.cypher_gramps import Cypher_note_w_handle
 import shareds
 
 class Note:
-    """ Huomautus
-            
+    """ Note / Huomautus
+
         Properties:
-                handle          
-                change
+                handle          str stats with '_' if comes from Gramps
+                change          int timestamp from Gramps
                 id              esim. "N0001"
                 uniq_id         int database key
                 priv            str salattu tieto
@@ -22,110 +23,117 @@ class Note:
      """
 
     def __init__(self):
-        """ Luo uuden note-instanssin """
+        """ Creates a Noteinstance in memory 
+        """
         self.uniq_id = None
-        self.handle = ''
-        self.change = ''
         self.id = ''
-        self.priv = ''
         self.type = ''
-        
-        
-    def get_note(self):
-        """ Lukee huomautuksen tiedot tietokannasta 
+        self.handle = ''
+        self.change = 0
+        self.priv = ''
+
+    @staticmethod
+    def _to_self(record):
+        '''
+        Transforms a record from db to an object of type Note
+        '''
+        n = Note()
+        if record['uniq_id']:
+            n.uniq_id = int(record['uniq_id'])
+        record_n = record['n']
+        if record_n['handle']:
+            n.handle = record_n['handle']
+        if record_n['change']:
+            n.change = int(record_n['change'])
+        if record_n['id']:
+            n.id = record_n['id']
+        if record_n['priv']:
+            n.priv = record_n['priv']
+        if record_n['type']:
+            n.type = record_n['type']
+        if record_n['text']:
+            n.text = record_n['text']
+        return n
+
+    @staticmethod
+    def get_note(uniq_id):
+        """ Reads Note node data from db using self.uniq_id
+
             Called from models.datareader.get_person_data_by_id
         """
 
-        note_get = """
-MATCH (note:Note)    WHERE ID(note)=$nid
-RETURN note"""
-        return shareds.driver.session().run(note_get, nid=self.uniq_id)
-                
-        
+        with shareds.driver.session() as session:
+            note_get = """
+MATCH (n:Note)    WHERE ID(n)=$nid
+RETURN ID(n) AS uniq_id, n"""
+            result = session.run(note_get, nid=uniq_id)
+            for record in result:
+                # Create a Note object from record
+                n = Note._to_self(record)
+                return n
+
+        return None
+
     @staticmethod
     def get_notes(uniq_id):
-        """ Lukee kaikki huomautukset tietokannasta 
-            Called from models.datareader.get_notes for "table_of_data.html"
+        """ Reads all Note nodes or selected Note node from db
+
+            Called only from models.datareader.get_notes for "table_of_data.html"
         """
-                        
-        if uniq_id:
-            query = """
-MATCH (n:Note) WHERE ID(note)=$nid 
-RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
-        else:
-            query = """
+
+        result = None
+        with shareds.driver.session() as session:
+            if uniq_id:
+                query = """
+MATCH (n:Note) WHERE ID(note)=$nid
+RETURN ID(n) AS uniq_id, n 
+ORDER BY n.type"""
+                result =  session.run(query, nid=uniq_id)
+            else:
+                query = """
 MATCH (n:Note)
-RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
-            
-        result =  shareds.driver.session().run(query, nid=uniq_id)
-        
+RETURN ID(n) AS uniq_id, n 
+ORDER BY n.type"""
+                result =  session.run(query)
+
         titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text']
         notes = []
-        
+
         for record in result:
-            note_line = []
-            if record['uniq_id']:
-                note_line.append(record['uniq_id'])
-            else:
-                note_line.append('-')
-            if record["n"]['handle']:
-                note_line.append(record["n"]['handle'])
-            else:
-                note_line.append('-')
-            if record["n"]['change']:
-                note_line.append(record["n"]['change'])
-            else:
-                note_line.append('-')
-            if record["n"]['id']:
-                note_line.append(record["n"]['id'])
-            else:
-                note_line.append('-')
-            if record["n"]['priv']:
-                note_line.append(record["n"]['priv'])
-            else:
-                note_line.append('-')
-            if record["n"]['type']:
-                note_line.append(record["n"]['type'])
-            else:
-                note_line.append('-')
-            if record["n"]['text']:
-                note_line.append(record["n"]['text'])
-            else:
-                note_line.append('-')
-                                
-            notes.append(note_line)
-                
+            # Create a Note object from record
+            n = Note._to_self(record)
+            notes.append(n)
+
         return (titles, notes)
-        
-        
+
+
     @staticmethod
     def get_total():
         """ Tulostaa huomautusten määrän tietokannassa """
-                        
-        query = """
-            MATCH (n:Note) RETURN COUNT(n)
-            """
-            
-        results =  shareds.driver.session().run(query)
-        
-        for result in results:
-            return str(result[0])
 
+        with shareds.driver.session() as session:
+            results =  session.run("MATCH (n:Note) RETURN COUNT(n)")
+            for result in results:
+                return str(result[0])
 
-    def print_data(self):
+        return '0'
+
+    def __str__(self):
         """ Tulostaa tiedot """
-        print ("*****Note*****")
-        print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
-        print ("Id: " + self.id)
-        print ("Priv: " + self.priv)
-        print ("Type: " + self.type)
-        print ("Text: " + self.text)
-        return True
+#         print ("*** Note ***")
+#         print ("Handle: " + self.handle)
+#         print ("Change: " + self.change)
+#         #print ("Id: " + self.id)
+#         #print ("Priv: " + self.priv)
+#         #print ("Type: " + self.type)
+#         #print ("Text: " + self.text)
+        t = self.text if len(self.text) < 41 else self.text[:37] + '...'
+        return ("Note id={}, type={}, priv={} '{}'".\
+                format(self.id, self.type, self.priv, t))
 
 
     def save(self, tx):
-        """ Creates or updates this Note object as a Note node 
+        """ Creates or updates this Note object as a Note node
             using handle
         """
 
@@ -135,12 +143,12 @@ RETURN ID(n) AS uniq_id, n ORDER BY n.type"""
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
-                "type": self.type, 
+                "type": self.type,
                 "text": self.text
             }
             return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)
 
         except Exception as err:
-            print("Virhe (Note.save): {0}".format(err), file=stderr)
-            raise SystemExit("Stopped due to errors")    # Stop processing
-            #TODO raise ConnectionError("Note.save: {0}".format(err))
+            #print("Virhe (Note.save): {0}".format(err), file=stderr)
+            # raise SystemExit("Stopped due to errors")    # Stop processing
+            raise ConnectionError("Note.save: {}".format(err))
