@@ -1,0 +1,45 @@
+<script>
+    $(document).ready( function() {
+        $("#transform").click(function() {
+            $.post("/gedcom/transform/{{ gedcom }}/{{ transform }}", $("#form").serialize(), function(rsp) {
+                $("#output").text(rsp);
+            });
+            return false;
+        });
+    });
+</script>
+
+<link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
+<link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
+<style>
+.help { font-size: smaller; }
+</style>
+
+<h4>{{ _("Muunnosparametrit") }} ({{ transform }}):</h4>
+
+<form id="form">
+<input type=hidden name=transform value='{{ transform }}'>
+<table>
+<tr><th>{{ _("Nimi") }}<th>{{ _("Arvo") }}<th>{{ _("Kuvaus") }}<th>{{ _("Oletusarvo") }}
+
+{% for row in rows %}
+    <tr>
+    <td>{{ row.name }}
+    <td><input type='{{ row.type }}' name='{{ row.name }}' {{ row.checked }}>
+        {% if row.action == 'append' %}
+            <input type=button value='{{ _("Lisää") }}'>
+        {% endif %}
+    <td class=help>{{ row.help }}
+    <td class=default>{{ row.default }}
+    </tr>
+{% endfor %}
+</table>
+<br><input type=submit id=transform value='{{ _("Muunna") }}'>
+</form>
+
+<h4>{{ _("Muunnoksen tulostus") }}</h4>
+<pre>
+	<div id="output">
+	</div>
+</pre>
+

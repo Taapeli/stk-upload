@@ -1,0 +1,25 @@
+{# templates/gedcoms.html_ #}
+{% extends "k_layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}Kirjautunut käyttäjä{% endblock %}
+{% block body %}
+{{ super() }}
+
+<b>{{ _("Ladatut gedcomit:") }}</b>
+<p>
+    {% for name in names %}
+    <a href="/gedcom/info/{{ name|escape }}">{{ name }}</a><br>
+    {% endfor %}
+    <p>
+    {{ kpl }} {{ _("kpl") }}
+    <p>
+    <h1>{{ _("Lataa uusi GEDCOM") }}</h1>
+    <form method="post" enctype="multipart/form-data" action="/gedcom/upload">
+      <input type="file" name="file" accept="{{ allowed_extensions }}">
+      <input type="submit" value="{{ _('Lataa') }}">
+    </form>
+    <p>
+    <a href="/">{{ _("Paluu") }}</a>
+{% endblock %}
+
+
