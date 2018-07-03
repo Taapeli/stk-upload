@@ -760,7 +760,6 @@ def get_transforms():
 @shareds.app.route('/gedcom/list', methods=['GET'])
 @login_required
 def gedcom_list():
-    username = current_user.username 
     gedcom_folder = get_gedcom_folder()
     try:
         names = sorted([name for name in os.listdir(gedcom_folder) if name.endswith(".ged")])
@@ -774,7 +773,6 @@ def gedcom_list():
 @shareds.app.route('/gedcom/versions/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_versions(gedcom):
-    username = current_user.username 
     gedcom_folder = get_gedcom_folder()
     versions = sorted([name for name in os.listdir(gedcom_folder) if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
     print( jsonify(versions).data)
@@ -811,7 +809,6 @@ def gedcom_upload():
 @shareds.app.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_info(gedcom):
-    username = current_user.username 
     gedcom_folder = get_gedcom_folder()
     filename = os.path.join(gedcom_folder,gedcom)
     num_individuals = 666
