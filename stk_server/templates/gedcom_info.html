@@ -47,68 +47,51 @@
     });
 </script>
 
-<div style="margin-left:50px; padding-bottom: 2em;">
-  <div>
-    <h2>Gedcom-käsittelyt</h2>
-    <div class="row">
-       <div class="startbox">
-         <div style="display: inline-block;">
-			<h3>{{ _("GEDCOM") }} "{{gedcom}}" tiedot</h3>
-			<p>&lt;not implemented!&gt;</p>
-			<table>
-			    <tr><td>{{ _("Ladattu") }}</td>
-			        <td>2018-06-06</td></tr>
-			    <tr><td>{{ _("Henkilöiden lukumäärä") }}</td>
-			        <td class="right">{{ num_individuals }}</td></tr>
-                <tr><td>{{ _("Sallin neuvontapalvelun katselumahdollisuuden") }}</td>
-                    <td><input type="checkbox" id="view_permission"></td></tr>
-		    </table>
-          </div>
-       </div>
-
-      <div class="startbox">
-        <div style="display: inline-block;">
-
-			<h3>Valinnat</h3>
-			<div>
-			    <input type="submit" id="transforms" value='{{ _("Muunnokset") }}'>
-			    <input type="submit" id="versions" value='{{ _("Versiot") }}'>
-			</div>
-			<div>
-			    <a href="#" id="delete" data="/gedcom/delete">{{ _("Poista GEDCOM") }}</a>
-			    <br>
-			    <a href="/gedcom/list">{{ _("Paluu") }}</a>
-			</div>
-        </div>
-      </div>
-
-      <div id="div_transforms" class="startbox">
-        <div style="display: inline-block;">
-
-	        <h3>{{ _("Muunnokset") }}:</h3>
-	        <ul>
-	        {% for transform in transforms %}
-	            <li><a href="#" class="transform" 
-	                 data-transform="{{ transform.name }}">{{ transform.name }}</a>
-	            {{ transform.docline }}</li>
-	        {% endfor %}
-	        </ul>
-	    </div>
-      </div>
-       
-      <div id="div_versions" class="startbox">
-        <div style="display: inline-block;">
-
-	        <h4>{{ _("Versiot") }}:</h4>
-	        (vasta suunnitteilla)
-	        <ul id="versions_list"></ul>
-	    </div>
-	  </div>
-        
-      <div id="div_transform_params" class="gedcom" class="startbox">
-        <div style="display: inline-block;">
-        </div>
-      </div>
+<h2>{{ _("GEDCOM") }} {{gedcom}}</h2>
+<div>
+	<h3>Tiedot</h3>
+	<p>&lt;not implemented!&gt;</p>
+<div>
+	<ul>
+    <li><b>{{ _("Ladattu") }}</b>: 2018-06-06
+    <li><b>{{ _("Henkilöiden lukumäärä") }}</b>: {{ num_individuals }}
+    </ul>
+    <div><input type="checkbox" id="view_permission"> 
+        <b>{{ _("Sallin neuvontapalvelun katselumahdollisuuden") }}</b> 
+    </div>
+</div>
+</div>
+<div>
+<h3>Valinnat</h3>
+<div>
+    <input type="submit" id="transforms" value='{{ _("Muunnokset") }}'>
+    <input type="submit" id="versions" value='{{ _("Versiot") }}'>
+</div>
+<div>
+    <a href="#" id="delete" data="/gedcom/delete">{{ _("Poista GEDCOM") }}</a>
+    <br>
+    <a href="/gedcom/list">{{ _("Paluu") }}</a>
+</div>
+<div id="div_transforms" class="gedcom">
+        <h4>{{ _("Muunnokset") }}:</h4>
+        <table>
+        {% for transform in transforms %}
+            <tr>
+            <td><a href="#" class="transform" data-transform="{{ transform.name }}">{{ transform.name }}</a></td>
+            <td>{{ transform.docline }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+</div>
+<div id="div_versions" class="gedcom">
+        <h4>{{ _("Versiot") }}:</h4>
+        (vasta suunnitteilla)
+        <ul id="versions_list">
+        </ul>
+</div>
+</div>
+    <div id="div_transform_params" class="gedcom">
+    </div>
 
 <div>
 	<h3>Tulokset</h3>
