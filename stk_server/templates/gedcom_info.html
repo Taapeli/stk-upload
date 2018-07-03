@@ -1,5 +1,5 @@
 {# templates/gedcoms.html_ #}
-{% extends "k_layout.html" %}
+{% extends "layout.html" %}
 {% include "security/_messages.html" %}
 {% block title %}Kirjautunut käyttäjä{% endblock %}
 {% block body %}
@@ -76,43 +76,55 @@ body.loading .modal {
     });
 </script>
 
-<h1>{{ _("GEDCOM") }} {{gedcom}}</h1>
-	&lt;not implemented&gt;
+<h2>{{ _("GEDCOM") }} {{gedcom}}</h2>
+<div>
+	<h3>Tiedot</h3>
+	<p>&lt;not implemented!&gt;</p>
+<div>
 	<ul>
     <li><b>{{ _("Ladattu") }}</b>: 2018-06-06
     <li><b>{{ _("Henkilöiden lukumäärä") }}</b>: {{ num_individuals }}
-    <li><b>{{ _("Sallin neuvontapalvelun katselumahdollisuuden") }}</b> <input type="checkbox" id="view_permission">
-	</ul>
-	&lt;/not implemented&gt;
-    <br>
-    <br>
+    </ul>
+    <div><input type="checkbox" id="view_permission"> 
+        <b>{{ _("Sallin neuvontapalvelun katselumahdollisuuden") }}</b> 
+    </div>
+</div>
+</div>
+<div>
+<h3>Valinnat</h3>
+<div>
     <input type="submit" id="transforms" value='{{ _("Muunnokset") }}'>
     <input type="submit" id="versions" value='{{ _("Versiot") }}'>
-    <br>
-    <br>
+</div>
+<div>
     <a href="#" id="delete" data="/gedcom/delete">{{ _("Poista GEDCOM") }}</a>
-    <p>
+    <br>
     <a href="/gedcom/list">{{ _("Paluu") }}</a>
-
-    <div id="div_transforms" class="gedcom">
+</div>
+<div id="div_transforms" class="gedcom">
         <h4>{{ _("Muunnokset") }}:</h4>
         <table>
         {% for transform in transforms %}
-            <tr><td><a href="#" class="transform" data-transform="{{ transform.name }}">{{ transform.name }}</a><td>{{ transform.docline }}
+            <tr>
+            <td><a href="#" class="transform" data-transform="{{ transform.name }}">{{ transform.name }}</a></td>
+            <td>{{ transform.docline }}</td>
+            </tr>
         {% endfor %}
         </table>
-    </div>
-    <div id="div_versions" class="gedcom">
+</div>
+<div id="div_versions" class="gedcom">
         <h4>{{ _("Versiot") }}:</h4>
         (vasta suunnitteilla)
         <ul id="versions_list">
         </ul>
-    </div>
+</div>
+</div>
     <div id="div_transform_params" class="gedcom">
     </div>
 
-<div class="modal"></div>
+<div>
+	<h3>Tulokset</h3>
+	<div class="modal"></div>
+</div>
     
 {% endblock %}
-
-
