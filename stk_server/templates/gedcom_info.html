@@ -39,7 +39,7 @@
 	            $("#div_transform_params").show();
             });
         });
-        $("#download").click(function() {
+        $("#xdownload").click(function() {
         	$.get("/gedcom/download/{{ gedcom }}", function(data) {
 	        	console.log("Downloaded " + data.length +  " bytes x");
     
@@ -85,7 +85,7 @@
     <input type="submit" id="versions" value='{{ _("Versiot") }}'>
 </div>
 <div>
-    <a href="#" id="download">{{ _("Lataa GEDCOM") }}</a>
+    <a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Lataa GEDCOM") }}</a>
     <a href="#" id="delete">{{ _("Poista GEDCOM") }}</a>
     <br>
     <a href="/gedcom/list">{{ _("Paluu") }}</a>
