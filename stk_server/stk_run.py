@@ -13,6 +13,7 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
+from flask import send_from_directory
 
 import shareds
 from models import gen
@@ -805,7 +806,16 @@ def gedcom_upload():
         file.save(os.path.join(gedcom_folder, filename))
         return redirect(url_for('gedcom_list'))
   
-  
+@shareds.app.route('/gedcom/download/<gedcom>')
+@login_required
+def gedcom_download(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = os.path.abspath(gedcom_folder)
+    logging.info(gedcom_folder)
+    filename = os.path.join(gedcom_folder, gedcom)
+    logging.info(filename)
+    return send_from_directory(directory=gedcom_folder, filename=gedcom) 
+ 
 @shareds.app.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_info(gedcom):
@@ -819,7 +829,7 @@ def gedcom_info(gedcom):
         transforms=transforms,
     )
 
-
+ 
 @shareds.app.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
 @login_required
 def gedcom_transform(gedcom,transform):
