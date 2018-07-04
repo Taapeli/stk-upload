@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-06-30 16:16+0300\n"
+"POT-Creation-Date: 2018-07-04 17:11+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Käyttäjänimi"
 msgstr ""
 
-#: setups.py:125 templates/gedcom_transform_params.html:23
+#: setups.py:125 templates/gedcom_transform_params.html:26
 msgid "Nimi"
 msgstr "Name"
 
@@ -30,7 +30,7 @@ msgstr "Name"
 msgid "Kieli"
 msgstr ""
 
-#: stk_run.py:732
+#: stk_run.py:733
 msgid "Temp"
 msgstr ""
 
@@ -38,91 +38,95 @@ msgstr ""
 msgid "Gedcomit"
 msgstr "Gedcoms"
 
-#: stk_run.py:796 stk_run.py:802
+#: stk_run.py:795 stk_run.py:801
 msgid "Valitse ladattava gedcom-tiedosto"
 msgstr "Please select a Gedcom file to upload"
 
-#: templates/gedcom_info.html:72
+#: templates/gedcom_info.html:60
 msgid "Toiminto vasta suunnitteilla"
 msgstr "Not implemented yet"
 
-#: templates/gedcom_info.html:73
+#: templates/gedcom_info.html:61
 msgid "Oletko varma?"
 msgstr "Are you sure that you want to delete this Gedcom?"
 
-#: templates/gedcom_info.html:79
+#: templates/gedcom_info.html:67
 msgid "GEDCOM"
 msgstr "GEDCOM"
 
-#: templates/gedcom_info.html:82
+#: templates/gedcom_info.html:73
 msgid "Ladattu"
 msgstr "Uploaded"
 
-#: templates/gedcom_info.html:83
+#: templates/gedcom_info.html:74
 msgid "Henkilöiden lukumäärä"
 msgstr "Number on individuals"
 
-#: templates/gedcom_info.html:84
+#: templates/gedcom_info.html:77
 msgid "Sallin neuvontapalvelun katselumahdollisuuden"
 msgstr "Allow admins to view data"
 
-#: templates/gedcom_info.html:89 templates/gedcom_info.html:98
+#: templates/gedcom_info.html:84 templates/gedcom_info.html:94
 msgid "Muunnokset"
 msgstr "Transformations"
 
-#: templates/gedcom_info.html:90 templates/gedcom_info.html:106
+#: templates/gedcom_info.html:85 templates/gedcom_info.html:105
 msgid "Versiot"
 msgstr "Versions"
 
-#: templates/gedcom_info.html:93
+#: templates/gedcom_info.html:88
+msgid "Lataa GEDCOM"
+msgstr ""
+
+#: templates/gedcom_info.html:89
 msgid "Poista GEDCOM"
 msgstr "Delete GEDCOM"
 
-#: templates/gedcom_info.html:95 templates/gedcom_list.html:22
+#: templates/gedcom_info.html:91 templates/gedcom_list.html:24
 msgid "Paluu"
 msgstr "Return"
 
 #: templates/gedcom_list.html:8
-msgid "Ladatut gedcomit:"
-msgstr "Uploaded GEDCOMs:"
+msgid "Ladatut gedcomit"
+msgstr ""
 
 #: templates/gedcom_list.html:14
 msgid "kpl"
 msgstr "Gedcoms"
 
-#: templates/gedcom_list.html:16
-msgid "Lataa uusi GEDCOM"
-msgstr "Upload a new GEDCOM"
+#: templates/gedcom_list.html:17
+msgid "Lataa uusi Gedcom-tiedosto"
+msgstr ""
 
-#: templates/gedcom_list.html:19
+#: templates/gedcom_list.html:21
 msgid "Lataa"
 msgstr "Upload"
 
-#: templates/gedcom_transform_params.html:18
+#: templates/gedcom_transform_params.html:21
 msgid "Muunnosparametrit"
 msgstr "Transformation parameters"
 
-#: templates/gedcom_transform_params.html:23
+#: templates/gedcom_transform_params.html:26
 msgid "Arvo"
 msgstr "Value"
 
-#: templates/gedcom_transform_params.html:23
+#: templates/gedcom_transform_params.html:26
 msgid "Kuvaus"
 msgstr "Description"
 
-#: templates/gedcom_transform_params.html:23
+#: templates/gedcom_transform_params.html:26
 msgid "Oletusarvo"
 msgstr "Default value"
 
-#: templates/gedcom_transform_params.html:30
+#: templates/gedcom_transform_params.html:34
 msgid "Lisää"
 msgstr "Add"
 
-#: templates/gedcom_transform_params.html:37
+#: templates/gedcom_transform_params.html:41
 msgid "Muunna"
 msgstr "Transform"
 
-#: templates/gedcom_transform_params.html:39
+#: templates/gedcom_transform_params.html:45
 msgid "Muunnoksen tulostus"
 msgstr "Transformation output"
 
@@ -144,4 +148,10 @@ msgstr ""
 
 #~ msgid "No file part"
 #~ msgstr ""
+
+#~ msgid "Ladatut gedcomit:"
+#~ msgstr "Uploaded GEDCOMs:"
+
+#~ msgid "Lataa uusi GEDCOM"
+#~ msgstr "Upload a new GEDCOM"
 

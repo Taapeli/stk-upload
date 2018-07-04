@@ -1,0 +1,144 @@
+# Swedish translations for PROJECT.
+# Copyright (C) 2018 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2018-07-04 17:11+0300\n"
+"PO-Revision-Date: 2018-07-04 17:11+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: sv\n"
+"Language-Team: sv <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+
+#: setups.py:125
+msgid "Kieli"
+msgstr "Språk"
+
+#: setups.py:125 templates/gedcom_transform_params.html:23
+msgid "Nimi"
+msgstr "Namn"
+
+#: setups.py:125
+msgid "Kieli"
+msgstr "Språk"
+
+#: stk_run.py:732
+msgid "Temp"
+msgstr "Temp"
+
+#: stk_run.py:770
+msgid "Gedcomit"
+msgstr "Gedcom filer"
+
+#: stk_run.py:796 stk_run.py:802
+msgid "Valitse ladattava gedcom-tiedosto"
+msgstr "Välj en gedcom fil att överföras"
+
+#: templates/gedcom_info.html:72
+msgid "Toiminto vasta suunnitteilla"
+msgstr "Funktion planeras tillsvidare"
+
+#: templates/gedcom_info.html:73
+msgid "Oletko varma?"
+msgstr "Vill Du såkert ta bort filen?"
+
+#: templates/gedcom_info.html:79
+msgid "GEDCOM"
+msgstr "GEDCOM"
+
+#: templates/gedcom_info.html:82
+msgid "Ladattu"
+msgstr "Mottagen"
+
+#: templates/gedcom_info.html:83
+msgid "Henkilöiden lukumäärä"
+msgstr "Antal av individer"
+
+#: templates/gedcom_info.html:84
+msgid "Sallin neuvontapalvelun katselumahdollisuuden"
+msgstr "Stödfunktionärer får titta på mitt data"
+
+#: templates/gedcom_info.html:89 templates/gedcom_info.html:98
+msgid "Muunnokset"
+msgstr "transformationer"
+
+#: templates/gedcom_info.html:90 templates/gedcom_info.html:106
+msgid "Versiot"
+msgstr "Versioner"
+
+#: templates/gedcom_info.html:93
+msgid "Poista GEDCOM"
+msgstr "Ta bort GEDCOM"
+
+#: templates/gedcom_info.html:95 templates/gedcom_list.html:22
+msgid "Paluu"
+msgstr "Retur"
+
+#: templates/gedcom_list.html:8
+msgid "Ladatut gedcomit:"
+msgstr "Mottagna gedcom filer:"
+
+#: templates/gedcom_list.html:14
+msgid "kpl"
+msgstr "st."
+
+#: templates/gedcom_list.html:16
+msgid "Lataa uusi GEDCOM"
+msgstr "Överför ny GEDCOM"
+
+#: templates/gedcom_list.html:19
+msgid "Lataa"
+msgstr "Överför"
+
+#: templates/gedcom_transform_params.html:18
+msgid "Muunnosparametrit"
+msgstr "Argumenter för transformation"
+
+#: templates/gedcom_transform_params.html:23
+msgid "Oletusarvo"
+msgstr "Förvalt värde"
+
+#: templates/gedcom_transform_params.html:23
+msgid "Oletusarvo"
+msgstr "Förvalt värde"
+
+#: templates/gedcom_transform_params.html:23
+msgid "Oletusarvo"
+msgstr "Förvalt värde"
+
+#: templates/gedcom_transform_params.html:30
+msgid "Lisää"
+msgstr "Foga in"
+
+#: templates/gedcom_transform_params.html:37
+msgid "Muunna"
+msgstr "Transformera"
+
+#: templates/gedcom_transform_params.html:39
+msgid "Muunnoksen tulostus"
+msgstr "utskrift av transformation"
+
+#: templates/security/forgot_password.html:11
+msgid "Lähetä salasanan elvyttämislinkki"
+msgstr "Skicka länk för uppdatering av lösenord"
+
+#: templates/security/register_email.html:9
+msgid "Rekisteröi uusi Suomitietokannan käyttäjäehdokas"
+msgstr "Registrera ny kandidat användare av Suomi-tietokanta"
+
+#: templates/security/register_user.html:15
+msgid "Rekisteröidy Suomitietokannan käyttäjäksi"
+msgstr "Registrera ny användare av Suomi-tietokanta"
+
+#: templates/security/send_confirmation.html:11
+msgid "Lähetä vahvistamislinkki"
+msgstr "Skicka länk av bekräftelse"

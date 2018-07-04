@@ -7,4 +7,8 @@ if ! test -e translations/en
 then
    pybabel init -i messages.pot -d translations -l en
 fi
+if ! test -e translations/sv
+then
+   pybabel init -i messages.pot -d translations -l sv
+fi
 pybabel update -i messages.pot -d translations
