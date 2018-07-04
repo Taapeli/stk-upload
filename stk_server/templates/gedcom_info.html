@@ -39,23 +39,6 @@
 	            $("#div_transform_params").show();
             });
         });
-        $("#xdownload").click(function() {
-        	$.get("/gedcom/download/{{ gedcom }}", function(data) {
-	        	console.log("Downloaded " + data.length +  " bytes x");
-    
-			    // from http://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
-			    var a = window.document.createElement('a');
-			    a.href = window.URL.createObjectURL(new Blob([data], {type: 'application/x-gedcom'}));
-			    a.download = "{{ gedcom }}";
-			
-			    // Append anchor to body.
-			    document.body.appendChild(a)
-			    a.click();
-			
-			    // Remove anchor from body
-			    document.body.removeChild(a)        	
-    		});
-        });
         $("#delete").click(function() {
         	alert("{{ _('Toiminto vasta suunnitteilla') }}");
             //var ok = confirm('{{ _("Oletko varma?") }}');
@@ -85,7 +68,7 @@
     <input type="submit" id="versions" value='{{ _("Versiot") }}'>
 </div>
 <div>
-    <a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Lataa GEDCOM") }}</a>
+    <a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Hae GEDCOM") }}</a>
     <a href="#" id="delete">{{ _("Poista GEDCOM") }}</a>
     <br>
     <a href="/gedcom/list">{{ _("Paluu") }}</a>
