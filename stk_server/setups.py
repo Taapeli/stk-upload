@@ -1,6 +1,7 @@
 from flask import Flask, session
 from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import RegisterForm, ConfirmRegisterForm, Required, StringField
+from wtforms import SelectField
 from flask_security.utils import _
 from flask_mail import Mail
 from stk_security.models.neo4jengine import Neo4jEngine 
@@ -93,8 +94,14 @@ class AllowedEmail():
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
-    language = StringField('Language', validators=[Required('Language required')])
-
+    #language = StringField('Language', validators=[Required('Language required')])
+    language = SelectField('Language', 
+                           choices=[
+                               ("fi","suomi"),
+                               ("sv","ruotsi"),
+                               ("en","englanti"),
+                            ],
+                           validators=[Required('Language required')])
 #===============================================================================
 
 # Create app
