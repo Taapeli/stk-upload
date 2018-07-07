@@ -47,7 +47,7 @@ def normalized_name(in_name):
            in_name.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
     if not ok_name:
         raise ValueError('Tiedostopääte nimessä "' + in_name + \
-              '" pitää olla .csv .txt tai .xml ')
+              '" pitää olla .gramps .csv .txt tai .xml ')
     # Palautetaan nimi ilman ylimääräisiä hakemistotasoja
     return secure_filename(in_name)
 
