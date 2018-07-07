@@ -126,10 +126,11 @@ def security_register_processor():
   
 #  Tarkista roolien olemassaolo
 print('Check the user roles')
+num_of_roles = 0
 results = shareds.driver.session().run('MATCH (a:Role) RETURN COUNT(a)')
 for result in results:
     num_of_roles = result[0]
-    break
+
 if num_of_roles == 0:
     #inputs
     ROLES = ({'level':'0', 'name':'guest', 
@@ -152,9 +153,11 @@ if num_of_roles == 0:
             timestamp : $timestamp})
         '''
         ) 
-#        print(role_create)
+
+
+    
     #functions
-    def create_constraints(tx):
+    def create_role_constraints(tx):
         try:
             tx.run('CREATE CONSTRAINT ON (role:Role) ASSERT role.name IS UNIQUE')
             tx.commit() 
@@ -168,6 +171,7 @@ if num_of_roles == 0:
                 name=role['name'], 
                 description=role['description'],
                 timestamp=str(datetime.now()) ) 
+            tx.commit()            
 #                print(role['name'])
         except CypherSyntaxError as cex:
             print(cex)
@@ -178,7 +182,7 @@ if num_of_roles == 0:
 #            print(role['name'])
 
     with shareds.driver.session() as session: 
-        session.write_transaction(create_constraints)
+        session.write_transaction(create_role_constraints)
     with shareds.driver.session() as session:
         for role in ROLES:
             try:    
@@ -195,7 +199,94 @@ if num_of_roles == 0:
                 continue
         print('Roles initialized')
 
+print('Check the admin user')
+num_of_admins = 0  
+results =  shareds.driver.session().run("MATCH  (user:User) WHERE user.username = 'admin' RETURN COUNT(user)")
+for result in results:
+    num_of_admins = result[0]
 
+if num_of_admins == 0:
+    ADMIN = {'username': 'master', 
+             'password': 'taapeli',  
+             'email': 'stk.sukututkimusseura@gmail.com', 
+             'name': 'Stk-kannan pääkäyttäjä',
+             'language': 'fi',  
+             'is_active': True,
+             'confirmed_at': datetime.now().timestamp(), 
+             'roles': ['admin'],
+             'last_login_at': datetime.now().timestamp(),
+             'current_login_at': datetime.now().timestamp(),
+             'last_login_ip': '127.0.0.1',
+             'current_login_ip': '127.0.0.1',
+             'login_count': 0            
+             }
+     
+    admin_create = ('''
+        MATCH  (role:Role) WHERE role.name = 'admin'
+        CREATE (user:User 
+            {username : $username, 
+            password : $password,  
+            email : $email, 
+            name : $name,
+            language : $language, 
+            is_active : $is_active,
+            confirmed_at : $confirmed_at, 
+            roles : $roles,
+            last_login_at : $last_login_at,
+            current_login_at : $current_login_at,
+            last_login_ip : $last_login_ip,
+            current_login_ip : $current_login_ip,
+            login_count : $login_count} )           
+            -[:HAS_ROLE]->(role)
+        ''' ) 
+       
+    def create_user_constraints(tx):
+        try:
+            tx.run('CREATE CONSTRAINT ON (user:User) ASSERT user.username IS UNIQUE')
+            tx.commit() 
+        except CypherSyntaxError as cex:
+            print(cex) 
+            
+    def create_admin(tx, user):
+        try:
+            tx.run(admin_create,
+                username = user['username'], 
+                password = user['password'],  
+                email = user['email'],
+                name = user['name'],
+                language = user['language'],  
+                is_active = True,
+                confirmed_at = user['confirmed_at'], 
+                roles = user['roles'],
+                last_login_at = user['last_login_at'],
+                current_login_at = user['current_login_at'],
+                last_login_ip = user['last_login_ip'],
+                current_login_ip = user['current_login_ip'],
+                login_count = user['login_count']         
+                ) 
+#                timestamp=str(datetime.now()) ) 
+            tx.commit()            
+#                print(role['name'])
+        except CypherSyntaxError as cex:
+            print(cex)
+        except CypherError as cex:
+            print(cex)
+        except ConstraintError as cex:
+            print(cex)               
+    print('Create the admin user')
+    with shareds.driver.session() as session: 
+        session.write_transaction(create_user_constraints)
+
+    with shareds.driver.session() as session:
+        try: 
+            session.write_transaction(create_admin, ADMIN)
+           
+        except CypherSyntaxError as cex:
+            print('Session ', cex)
+        except CypherError as cex:
+            print('Session ', cex)
+        except ConstraintError as cex:
+            print('Session ', cex)
 """ 
     Application filter definitions 
 """
