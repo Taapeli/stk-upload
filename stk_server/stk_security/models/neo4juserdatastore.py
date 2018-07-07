@@ -7,7 +7,6 @@ Created on 28.9.2017
 
 from flask_security import current_user
 from flask_security.datastore import UserDatastore
-from flask_security import utils
 from .seccypher import Cypher  
 from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
 import datetime
