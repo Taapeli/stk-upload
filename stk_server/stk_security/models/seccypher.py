@@ -22,7 +22,7 @@ class Cypher():
         '''
         MATCH (user:User) 
             WHERE user.email = $id_or_email 
-               OR id(user) = $id_or_email   
+               OR user.username = $id_or_email   
         RETURN user 
         '''
         )
