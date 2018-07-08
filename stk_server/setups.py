@@ -216,7 +216,7 @@ if num_of_admins == 0:
     ADMIN = {'username': 'master', 
              'password': 'taapeli',  
              'email': 'stk.sukututkimusseura@gmail.com', 
-             'name': 'Stk-kannan p��k�ytt�j�',
+             'name': 'Stk-kannan pääkäyttäjä',
              'language': 'fi',  
              'is_active': True,
              'confirmed_at': datetime.now().timestamp(), 
