@@ -12,7 +12,7 @@ from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import logging
 logger = logging.getLogger('stkserver') 
 import shareds
-from templates import jinja_filters 
+from templates import jinja_filters
 
 #===================== Classes to create user session ==========================
 
@@ -216,7 +216,7 @@ if num_of_admins == 0:
     ADMIN = {'username': 'master', 
              'password': 'taapeli',  
              'email': 'stk.sukututkimusseura@gmail.com', 
-             'name': 'Stk-kannan pääkäyttäjä',
+             'name': 'Stk-kannan pï¿½ï¿½kï¿½yttï¿½jï¿½',
              'language': 'fi',  
              'is_active': True,
              'confirmed_at': datetime.now().timestamp(), 
