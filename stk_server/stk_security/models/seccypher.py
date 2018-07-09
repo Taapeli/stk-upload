@@ -183,7 +183,7 @@ class Cypher():
         )
 
 
-    email_register = (
+    allowed_email_register = (
         '''
         CREATE (email:Allowed_email 
             {allowed_email : $email,
@@ -194,7 +194,7 @@ class Cypher():
         )
     
     
-    get_emails = (
+    get_allowed_emails = (
         '''
         MATCH (email:Allowed_email)
         RETURN DISTINCT email 
@@ -203,7 +203,7 @@ class Cypher():
         )
     
     
-    email_find = (
+    allowed_email_find = (
         '''
         MATCH (email:Allowed_email)
             WHERE email.allowed_email = $email

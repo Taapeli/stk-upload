@@ -103,7 +103,11 @@ class Neo4jUserDatastore(UserDatastore):
     def _put_user (self, tx, user):    # ============ New user ==============
 
         if len(user.roles) == 0:
-            user.roles = [shareds.DEFAULT_ROLE] 
+            allowed_email = self.find_allowed_email(user.email)
+            if allowed_email == None:
+                user.roles = [shareds.DEFAULT_ROLE]
+            else:
+                user.roles = [allowed_email.default_role]     
         user.confirmed_at = None
         user.is_active = True
         try:
@@ -434,11 +438,11 @@ class Neo4jUserDatastore(UserDatastore):
             raise
 
 
-    def email_register(self, email, role):
+    def allowed_email_register(self, email, role):
         try:
             with self.driver.session() as session:
                 with session.begin_transaction() as tx:
-                    tx.run(Cypher.email_register, email=email, role=role, admin_name=current_user.name)
+                    tx.run(Cypher.allowed_email_register, email=email, role=role, admin_name=current_user.name)
                     tx.commit()
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
@@ -451,10 +455,10 @@ class Neo4jUserDatastore(UserDatastore):
             raise
 
 
-    def get_emails(self):
+    def get_allowed_emails(self):
         try:
             with self.driver.session() as session:
-                emailNodes = session.read_transaction(self._getEmails)
+                emailNodes = session.read_transaction(self._getAllowedEmails)
                 if emailNodes is not None:
                     return [self.allowed_email_model(**emailNode.properties) for emailNode in emailNodes] 
                 return []
@@ -462,10 +466,10 @@ class Neo4jUserDatastore(UserDatastore):
             logger.debug(ex.message)
             return []                 
                                               
-    def _getEmails (self, tx):
+    def _getAllowedEmails (self, tx):
         try:
             emailNodes = []
-            for record in tx.run(Cypher.get_emails):
+            for record in tx.run(Cypher.get_allowed_emails):
                 emailNodes.append(record['email'])
             return emailNodes        
         except CypherError as ex:
@@ -478,10 +482,10 @@ class Neo4jUserDatastore(UserDatastore):
             logger.error('Exception: ', ex)            
             raise
 
-    def find_email(self, email):
+    def find_allowed_email(self, email):
         try:
             with self.driver.session() as session:
-                emailNode = session.read_transaction(self._findEmail, email)
+                emailNode = session.read_transaction(self._findAllowedEmail, email)
                 if emailNode is not None:
                     return self.allowed_email_model(**emailNode.properties) 
                 return None
@@ -489,10 +493,10 @@ class Neo4jUserDatastore(UserDatastore):
             logger.debug(ex.message)
             return None                 
                                               
-    def _findEmail (self, tx, email):
+    def _findAllowedEmail (self, tx, email):
         try:
             emailNode = None
-            records = tx.run(Cypher.email_find, email=email)
+            records = tx.run(Cypher.allowed_email_find, email=email)
             if records:
                 for record in records:
                     emailNode = record['email']

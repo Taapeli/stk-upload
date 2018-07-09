@@ -61,13 +61,13 @@ def admin():
 def list_emails():
     form = ListEmailsForm()
     if request.method == 'GET':
-        lista = shareds.user_datastore.get_emails()
-        return render_template("/security/list_emails.html", emails=lista, 
+        lista = shareds.user_datastore.get_allowed_emails()
+        return render_template("/security/list_allowed_emails.html", emails=lista, 
                                form=form)
     elif request.method == 'POST':
         shareds.user_datastore.email_register(form.allowed_email.data, 
                                               form.default_role.data)
-        lista = shareds.user_datastore.get_emails()
+        lista = shareds.user_datastore.get_allowed_emails()
         return render_template("/security/list_emails.html", emails=lista, 
                                form=form)
 
