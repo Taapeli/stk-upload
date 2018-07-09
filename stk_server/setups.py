@@ -12,7 +12,7 @@ from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import logging
 logger = logging.getLogger('stkserver') 
 import shareds
-from templates import jinja_filters 
+from templates import jinja_filters
 
 #===================== Classes to create user session ==========================
 
