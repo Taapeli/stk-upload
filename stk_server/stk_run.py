@@ -65,10 +65,10 @@ def list_emails():
         return render_template("/security/list_allowed_emails.html", emails=lista, 
                                form=form)
     elif request.method == 'POST':
-        shareds.user_datastore.email_register(form.allowed_email.data, 
+        shareds.user_datastore.allowed_email_register(form.allowed_email.data, 
                                               form.default_role.data)
         lista = shareds.user_datastore.get_allowed_emails()
-        return render_template("/security/list_emails.html", emails=lista, 
+        return render_template("/security/list_allowed_emails.html", emails=lista, 
                                form=form)
 
 
