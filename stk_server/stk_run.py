@@ -843,7 +843,7 @@ def gedcom_transform(gedcom,transform):
         return parser.generate_html()
     else:
         cmd = transform[:-3] + " " + parser.build_command(request.form.to_dict())
-        f = os.popen("""cd "%s";python3 gedcom_transform.py %s""" % (GEDDER,cmd))
+        f = os.popen("""cd "%s";python gedcom_transform.py %s""" % (GEDDER,cmd))
         s = f.read()
         logfile = os.path.join(GEDDER,"transform.log")
         log = open(logfile).read()
