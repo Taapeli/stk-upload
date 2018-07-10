@@ -1,5 +1,5 @@
 {# templates/mainindex.html_ #}
-{% extends "layout.html" %}
+{% extends "a_layout.html" %}
 {% include "security/_messages.html" %}
 {% block title %}Kirjautunut käyttäjä{% endblock %}
 {% block body %}
@@ -25,10 +25,10 @@
           <div class="startbox">
             <div style="display: inline-block;">
                <h3>Tietojen lisääminen</h3>
-                 <form action="/upload" method="post"  enctype="multipart/form-data">
+                 <form action="/upload_gramps" method="post"  enctype="multipart/form-data">
 	               <div style="display: inline-block;">
 	                 <input type="hidden" name="material" value="xml_file">
-	                 <p>Valitse Gramps XML-tiedostosi ehdokasaineistoksi</p>
+	                 <p>Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi</p>
 	                 <input type="file" name="filenm" />
 	               </div>
                    <div style="text-align:right;"> 
@@ -39,13 +39,18 @@
         </div>
         <div class="startbox">
            <div style="display: inline-block;">
+           <form method="get" action="/gedcom/list">
               <h3>Oma Gedcom-aineistoni</h3>
-              <p>Lataa aineistosi Gedcom-muodossa tai muokkaa jä lähetettyä</p>
-              <div style="text-align:right;"> 
+              <p>Lataa aineistosi Gedcom-muodossa tai muokkaa jo lähetettyä</p>
+             <div style="text-align:right;"> 
+                <button type="submit">Gedcom-käsittelyt</button>
+             </div>
+           </form>
+              <!-- div style="text-align:right;"> 
                     <button type="button"
                      onclick="alert('Toiminto vasta suunnitteilla')">
                      Gedcom-käsittelyt</button>
-              </div>
+              </div -->
            </div>
         </div>
 
@@ -79,19 +84,16 @@
         <div class="startbox admin">
           <div style="display: inline-block;">
 			<h3>Ylläpitäjän toiminnot</h3>
-			<ul>
-              <li><b>Tyhjennä</b> <i>(mitään kysymättä!)</i>
-                <ul>
-                  <li><a href="/admin/clear_db/total">Tyhjennä koko kanta</li>
-                  <li><a href="/admin/clear_db/save_users">Tyhjennä koko kanta,
-                      mutta säästä käyttäjätunukset</li>
-                  <li><a href="/admin/clear_db/my_own">Tyhjennä kaikki lataamani 
-                      henkilö- ja tapahtumatiedot ({{current_user.username}})</li>
-              </ul></li>
-			  <li><a href="/lista/users">Näytä käyttäjätunnukset</a></li>
-			  <li><a href="/refnames">Muokkaa referenssinimiä</a></li>
-			  <li><a href="/aseta/estimated_dates">Aseta henkilön arvioidut syntymä- ja kuolinajat</a></li>			</ul>
-          </div>
+            <p>Järjestelmänhoitajan toiminnot: <br/>
+               Käyttäjien ja referenssitietojen hallinta
+               sekä tietokannan huoltotehtävät
+            </p>
+            <form method="get" action="/admin">
+               <div style="text-align:right;"> 
+                  <button type="submit">Ylläpito</button>
+               </div>
+            </form>
+         </div>
         </div>{% endif %}
      {% if current_user.is_authenticated %}
         <div class="startbox"">

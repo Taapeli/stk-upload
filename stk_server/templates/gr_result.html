@@ -1,0 +1,31 @@
+{# _myapp/templates/gr_result.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}Tiedot talletettu{% endblock %}
+{% block body %}
+    {{ super() }}
+    <h2>Tietojen talletus kantaan{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+        <table>
+           <tr><th>Vaihe</th>
+               <th>Määrä</th>
+               <th>Aika / sek</th>
+           </tr>
+	    {% for e in batch_events %}
+	       <tr><td class="msg_{{e.level}}">{{e.title}}</td>
+               <td class="right">{% if e.count %} {{e.count}} {% endif %}</td>
+               <td class="right">{% if e.elapsed %} {{'%.4f'| format(e.elapsed|float)}} {% endif %}</td>
+	       </tr>
+	    {% endfor %}</table>
+    <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
+{% endblock %}
+</body>
+</html>
+

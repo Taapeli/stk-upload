@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     if True:
         # Ajo paikallisesti
-        print ("stk_server ajetaan DEGUB-lokitasolla")
+        print ("stk_server ajetaan DEBUG-lokitasolla")
         app.run(debug='DEBUG')
     else:
         # Julkinen sovellus

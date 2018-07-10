@@ -547,13 +547,12 @@ def get_person_data_by_id(uniq_id):
             e.ltype = place.type
                     
         if e.noteref_hlink != '':
-            note = Note()
-            note.uniq_id = e.noteref_hlink
-            result = note.get_note()
-            for record in result:
-                e.notepriv = record["note"]["priv"]
-                e.notetype = record["note"]["type"]
-                e.notetext = record["note"]["text"]
+            # Read the Note object from db and store it as a member of Event
+            e.note = Note.get_note(e.noteref_hlink)
+#             for record in result:
+#                 e.notepriv = record["note"]["priv"]
+#                 e.notetype = record["note"]["type"]
+#                 e.notetext = record["note"]["text"]
                 
         events.append(e)
 

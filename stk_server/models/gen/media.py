@@ -5,8 +5,8 @@ Created on 22.7.2017
 '''
 
 from sys import stderr
-#from flask import g
-import  shareds
+from models.gramps.cypher_gramps import Cypher_media_w_handle
+import shareds
 
 class Media:
     """ Tallenne
@@ -15,6 +15,7 @@ class Media:
                 handle          
                 change
                 id              esim. "O0001"
+                uniq_id         int database key
                 src             str tallenteen polku
                 mime            str tallenteen tyyppi
                 description     str tallenteen kuvaus
@@ -22,6 +23,7 @@ class Media:
 
     def __init__(self):
         """ Luo uuden media-instanssin """
+        self.uniq_id = None
         self.handle = ''
         self.change = ''
         self.id = ''
@@ -87,21 +89,20 @@ class Media:
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Saves this Media object to db """
 
         try:
-            query = """
-                CREATE (o:Media) 
-                SET o.gramps_handle='{}', 
-                    o.change='{}', 
-                    o.id='{}', 
-                    o.src='{}', 
-                    o.mime='{}', 
-                    o.description='{}'
-                """.format(self.handle, self.change, self.id, 
-                           self.src, self.mime, self.description)
-                
-            return tx.run(query)
+            m_attr = {
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "src": self.src,
+                "mime": self.mime,
+                "description": self.description
+            }
+            return tx.run(Cypher_media_w_handle.create, m_attr=m_attr)
+
         except Exception as err:
-            print("Virhe {}: {}".format(err.__class__.__name__, str(err), file=stderr))
+            print("Virhe (Media.save): {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
+            #TODO raise ConnectionError("Media.save: {0}".format(err))

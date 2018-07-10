@@ -6,12 +6,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
-import datetime
 from sys import stderr
-import logging
-#from flask import g
-import models.dbutil
-import  shareds
+from models.gramps.cypher_gramps import Cypher_source_w_handle
+from models.gramps.cypher_gramps import Cypher_citation_w_handle
+from models.gramps.cypher_gramps import Cypher_repository_w_handle
+import shareds
 
 class Citation:
     """ Viittaus
@@ -109,50 +108,38 @@ class Citation:
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Saves this Citation and connects it to it's Notes and Sources"""
 
         try:
             # Create a new Citation node
-            query = """
-                CREATE (n:Citation) 
-                SET n.gramps_handle='{}', 
-                    n.change='{}', 
-                    n.id='{}', 
-                    n.dateval='{}', 
-                    n.page='{}', 
-                    n.confidence='{}'
-                """.format(self.handle, self.change, self.id, self.dateval, 
-                           self.page, self.confidence)
                 
-            tx.run(query)
+            c_attr = {
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "dateval": self.dateval, 
+                "page": self.page, 
+                "confidence": self.confidence
+            }
+            tx.run(Cypher_citation_w_handle.create, c_attr=c_attr)
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe (Citation.save): {0}".format(err), file=stderr)
+            raise SystemExit("Stopped due to errors")    # Stop processing
+            #TODO raise ConnectionError("Citation.save: {0}".format(err))
 
-        # Make relations to the Note node
-        if len(self.noteref_hlink) > 0:
-            handle = self.handle
-            for i in range(len(self.noteref_hlink)):
-                try:
-                    noteref_hlink = self.noteref_hlink[i]
-                    query = """
-MATCH (n:Citation)   WHERE n.gramps_handle=$handle
-MATCH (m:Note) WHERE m.gramps_handle=$noteref_hlink
-MERGE (n)-[r:NOTE]->(m)"""
-                    tx.run(query, 
-                           {"handle": handle, "noteref_hlink": noteref_hlink})
-                except Exception as err:
-                    print("Virhe (Citation.save:Note): {0}".format(err), file=stderr)
+        # Make relations to the Note nodes
+        for hlink in self.noteref_hlink:
+            try:
+                tx.run(Cypher_citation_w_handle.link_note, 
+                       handle=self.handle, hlink=hlink)
+            except Exception as err:
+                print("Virhe (Citation.save:Note hlink): {0}".format(err), file=stderr)
 
         try:   
             # Make relation to the Source node
             if self.sourceref_hlink != '':
-                query = """
-                    MATCH (n:Citation) WHERE n.gramps_handle='{}'
-                    MATCH (m:Source) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:SOURCE]->(m)
-                     """.format(self.handle, self.sourceref_hlink)
-                                 
-                tx.run(query)
+                tx.run(Cypher_citation_w_handle.link_source,
+                       handle=self.handle, hlink=self.sourceref_hlink)
         except Exception as err:
             print("Virhe: {0}".format(err), file=stderr)
             
@@ -266,34 +253,25 @@ class Repository:
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Saves this Repository to db"""
 
         try:
-            handle = self.handle
-            change = self.change
-            pid = self.id
-            rname = self.rname
-            type = self.type
-            url_href = self.url_href
-            url_type = self.url_type
-            url_description = self.url_description
-            query = """
-CREATE (r:Repository) 
-SET r.gramps_handle=$handle, 
-    r.change=$change, 
-    r.id=$id, 
-    r.rname=$rname, 
-    r.type=$type,
-    r.url_href=$url_href,
-    r.url_type=$url_type,
-    r.url_description=$url_description"""
-            tx.run(query, 
-               {"handle": handle, "change": change, "id": pid, "rname": rname, "type": type, 
-                "url_href": url_href, "url_type": url_type, "url_description": url_description})
+            r_attr = {
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "rname": self.rname,
+                "type": self.type,
+                "url_href": self.url_href,
+                "url_type": self.url_type,
+                "url_description": self.url_description
+            }
+            tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
-            
-            
+            print("Virhe (Repository.save): {0}".format(err), file=stderr)
+            raise SystemExit("Stopped due to errors")    # Stop processing
+            #TODO raise ConnectionError("Repository.save: {0}".format(err))
+
         return
 
 
@@ -450,7 +428,7 @@ ORDER BY toUpper(stitle)
                 
         result = shareds.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'stitle']
         lists = []
         
         for record in result:
@@ -459,8 +437,8 @@ ORDER BY toUpper(stitle)
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["s"]['gramps_handle']:
-                data_line.append(record["s"]['gramps_handle'])
+            if record["s"]['handle']:
+                data_line.append(record["s"]['handle'])
             else:
                 data_line.append('-')
             if record["s"]['change']:
@@ -493,7 +471,7 @@ ORDER BY toUpper(stitle)
                 
         result = shareds.driver.session().run(query)
         
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'stitle']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'stitle']
         lists = []
         
         for record in result:
@@ -502,8 +480,8 @@ ORDER BY toUpper(stitle)
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["s"]['gramps_handle']:
-                data_line.append(record["s"]['gramps_handle'])
+            if record["s"]['handle']:
+                data_line.append(record["s"]['handle'])
             else:
                 data_line.append('-')
             if record["s"]['change']:
@@ -553,58 +531,43 @@ ORDER BY toUpper(stitle)
         
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Saves this Source and connects it to Notes and Repositories """
 
         try:
-            query = """
-                CREATE (s:Source) 
-                SET s.gramps_handle='{}', 
-                    s.change='{}', 
-                    s.id='{}', 
-                    s.stitle='{}'
-                """.format(self.handle, self.change, self.id, self.stitle)
-                
-            tx.run(query)
+            s_attr = {
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "stitle": self.stitle
+            }
+
+            tx.run(Cypher_source_w_handle.create, s_attr=s_attr)
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
- 
+            print("Virhe (Source.save): {0}".format(err), file=stderr)
+            #TODO raise ConnectionError("Source.save: {0}".format(err))
+
         # Make relation to the Note node
         if self.noteref_hlink != '':
             try:
-                query = """
-                    MATCH (n:Source) WHERE n.gramps_handle='{}'
-                    MATCH (m:Note) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:NOTE]->(m)
-                     """.format(self.handle, self.noteref_hlink)
-                                 
-                tx.run(query)
+                tx.run(Cypher_source_w_handle.link_note,
+                       handle=self.handle, hlink=self.noteref_hlink)
             except Exception as err:
-                print("Virhe: {0}".format(err), file=stderr)
-   
+                print("Virhe (Source.save:Note): {0}".format(err), file=stderr)
+
         # Make relation to the Repository node
         if self.reporef_hlink != '':
             try:
-                query = """
-                    MATCH (n:Source) WHERE n.gramps_handle='{}'
-                    MATCH (m:Repository) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:REPOSITORY]->(m)
-                     """.format(self.handle, self.reporef_hlink)
-                                 
-                tx.run(query)
+                tx.run(Cypher_source_w_handle.link_repository,
+                       handle=self.handle, hlink=self.reporef_hlink)
             except Exception as err:
-                print("Virhe: {0}".format(err), file=stderr)
+                print("Virhe (Source.save:Repository): {0}".format(err), file=stderr)
                 
             # Set the medium data of the Source node
             try:
-                query = """
-                    MATCH (n:Source)-[r:REPOSITORY]->(m) 
-                        WHERE n.gramps_handle='{}'
-                    SET r.medium='{}'
-                     """.format(self.handle, self.reporef_medium)
-                                 
-                tx.run(query)
+                tx.run(Cypher_source_w_handle.set_repository_medium,
+                       handle=self.handle, medium=self.reporef_medium)
             except Exception as err:
-                print("Virhe: {0}".format(err), file=stderr)
-                
+                print("Virhe (Source.save:repository_medium): {0}".format(err), file=stderr)
+
         return
 

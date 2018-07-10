@@ -1,0 +1,46 @@
+<script>
+    $(document).ready( function() {
+        $("#transform").click(function() {
+            $.post("/gedcom/transform/{{ gedcom }}/{{ transform }}", $("#form").serialize(), function(rsp) {
+                $("#output").text(rsp);
+            });
+            return false;
+        });
+    });
+</script>
+
+<!--
+<link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
+<link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
+-->
+
+<div style="display: inline-block;">
+    <h3>{{ transform[:-3] }} {{ _("muunnosparametrit") }}</h3>
+
+	<div>
+		<form id="form">
+		<input type=hidden name=transform value='{{ transform }}'>
+		<table>
+		    <tr><th>{{ _("Asetus") }}</th>
+		        <th>{{ _("Arvo") }}</th>
+		    </tr>
+		
+		{% for row in rows %}
+		    <tr>
+		    <td>{{ row.name }} {% if row.help %}
+		      <span style="font-size: smaller;">{{ row.help }}</span>{% endif %}</td>
+		    <td><input type='{{ row.type }}' name='{{ row.name }}' 
+		          style="width: 10em" {{ row.checked }}>
+		        {% if row.action == 'append' %}
+		            <input type=button value='{{ _("Lisää") }}'>
+		        {% endif %}
+		        {% if row.default %}<br />{{ _("Oletusarvo") }} {{ row.default }}
+		        {% endif %}
+		    </td>
+		    </tr>
+		{% endfor %}
+		</table><div align="right" style="margin-top:1em">
+		<input type=submit id=transform value='{{ _("Muunna") }}'>
+        </form>
+    </div>
+</div>

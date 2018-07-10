@@ -20,7 +20,7 @@
             <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
             <!-- sup><small> <a href="#sref1a">1a</a></small></sup -->
         </h3>
-        {% set myid = person.uniq_id|int %}
+        {% set myid = person.uniq_id %}
         {# set mybirth = "" %}{% for e in events %}
             {% if e.type == "Birth" %}{% set mybirth = e.date %}{% endif %}{% endfor #}
         
@@ -104,9 +104,9 @@
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">
                             <div>{% if e.type == "Death" %}
-                            	{% if t_cause_of_death %}kuolinsyy: {{t_cause_of_death}}<br>
+                            	{% if t_cause_of_death %}<i>kuolinsyy:</i> {{t_cause_of_death}}<br>
                             	{% endif %}{% endif %}
-                            	{{ e.notetype }}<br>{{ e.notetext }}
+                            	{% if e.note %}<i>{{ e.note.type }}</i> {{ e.note.text }}{% endif %}
                             	</div>
                         </td>
                         <td class="ColumnSources">
@@ -271,12 +271,12 @@
                 {% set source_cnt = 0 %}
                 {% for source in sources %}
                 <li>
-            		{% for record in source.sources %}
-            			{% for repo in record.repos %}
+            		{% for source in source.sources %}
+            			{% for repo in source.repos %}
             				{{repo.rname}}:
              			{% endfor %}
-             			<a href="/events/source={{record.uniq_id}}" class="inlink"
-	                     title="katso lähteen {{record.uniq_id}} tiedot">{{record.stitle}}</a>
+             			<a href="/events/source={{source.uniq_id}}" class="inlink"
+	                     title="katso lähteen {{source.uniq_id}} tiedot">{{source.stitle}}</a>
              		{% endfor %}
                      <ol>
                          {% set source_cnt = source_cnt + 1 %}

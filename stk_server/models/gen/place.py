@@ -11,8 +11,8 @@ from models.dbtree import DbTree
 from models.gen.person import Weburl
 from models.gen.note import Note
 from models.gen.dates import DateRange
-from models.gen.cypher import Cypher
-from models.gramps.cypher_gramps import Cypher_w_handle
+from models.gen.cypher import Cypher_place
+from models.gramps.cypher_gramps import Cypher_place_w_handle
 import  shareds
 
 class Place:
@@ -126,7 +126,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
         result = shareds.driver.session().run(query)
 
-        titles = ['uniq_id', 'gramps_handle', 'change', 'id', 'type', 'pname',
+        titles = ['uniq_id', 'handle', 'change', 'id', 'type', 'pname',
                   'coord']
         lists = []
 
@@ -136,8 +136,8 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
                 data_line.append(record['uniq_id'])
             else:
                 data_line.append('-')
-            if record["p"]['gramps_handle']:
-                data_line.append(record["p"]['gramps_handle'])
+            if record["p"]['handle']:
+                data_line.append(record["p"]['handle'])
             else:
                 data_line.append('-')
             if record["p"]['change']:
@@ -343,7 +343,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         │     │         │,"Jansson"]]       │           │                   │
         └─────┴─────────┴───────────────────┴───────────┴───────────────────┘
         """
-        result = shareds.driver.session().run(Cypher.place_get_person_events, 
+        result = shareds.driver.session().run(Cypher_place.get_person_events, 
                                               locid=int(loc_id))
         ret = []
         for record in result:
@@ -396,7 +396,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         """ Saves a Place with Place_names and hierarchy links """
 
         try:
-            p_attr = {"gramps_handle": self.handle,
+            p_attr = {"handle": self.handle,
                       "change": self.change,
                       "id": self.id,
                       "type": self.type,
@@ -404,9 +404,9 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             if self.coord:
                 # If no coordinates, don't set coord attribute
                 p_attr.update({"coord": self.coord.get_coordinates()})
-            tx.run(Cypher_w_handle.place_create, p_attr=p_attr)
+            tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
         except Exception as err:
-            print("Virhe.place_create: {0}".format(err), file=stderr)
+            print("Virhe Place.create: {0}".format(err), file=stderr)
 
         if len(self.names) >= 1:
             try:
@@ -416,23 +416,19 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                     if self.names[i].dates:
                         # If date information, add datetype, date1 and date2
                         n_attr.update(self.names[i].dates.for_db())
-                    tx.run(Cypher_w_handle.place_add_name,
+                    tx.run(Cypher_place_w_handle.add_name,
                            handle=self.handle, n_attr=n_attr)
             except Exception as err:
-                print("Virhe.place_add_name: {0}".format(err), file=stderr)
+                print("Virhe Place.add_name: {0}".format(err), file=stderr)
 
         # Talleta Weburl nodet ja linkitä paikkaan
         if len(self.urls) > 0:
             for url in self.urls:
-                url_priv = url.priv
-                url_href = url.href
-                url_type = url.type
-                url_description = url.description
                 try:
-                    tx.run(Cypher_w_handle.place_link_weburl,
-                           {"handle": self.handle, 
-                            "url_priv": url_priv, "url_href": url_href,
-                            "url_type":url_type, "url_description":url_description})
+                    tx.run(Cypher_place_w_handle.link_weburl,
+                           handle=self.handle, 
+                           url_priv=url.priv, url_href=url.href,
+                           url_type=url.type, url_description=url.description)
                 except Exception as err:
                     print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
 
@@ -443,19 +439,19 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                     r_attr = upper['dates'].for_db()
                 else:
                     r_attr = {}
-                tx.run(Cypher_w_handle.place_link_hier,
+                tx.run(Cypher_place_w_handle.link_hier,
                        handle=self.handle, hlink=upper['hlink'], r_attr=r_attr)
             except Exception as err:
-                print("Virhe.place_link_hier: {0}".format(err), file=stderr)
+                print("Virhe Place.link_hier: {0}".format(err), file=stderr)
 
         # Make place note relations
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 try:
-                    tx.run(Cypher_w_handle.place_link_note,
+                    tx.run(Cypher_place_w_handle.link_note,
                            handle=self.handle, hlink=self.noteref_hlink[i])
                 except Exception as err:
-                    print("Virhe.place_link_note: {0}".format(err), file=stderr)
+                    print("Virhe Place.link_note: {0}".format(err), file=stderr)
 
         return
 

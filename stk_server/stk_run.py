@@ -3,11 +3,17 @@
 # @ Sss 2016
 # JMä 29.12.2015
 
-import logging
+import sys
+import os
+import importlib
+
+import logging 
+import time
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
+from flask import send_from_directory
 
 import shareds
 from models import gen
@@ -29,7 +35,7 @@ if not app:
 
 
 """ Application route definitions
-"""
+""" 
 
 @shareds.app.route('/', methods=['GET', 'POST'])
 @login_required
@@ -55,14 +61,14 @@ def admin():
 def list_emails():
     form = ListEmailsForm()
     if request.method == 'GET':
-        lista = shareds.user_datastore.get_emails()
-        return render_template("/security/list_emails.html", emails=lista, 
+        lista = shareds.user_datastore.get_allowed_emails()
+        return render_template("/security/list_allowed_emails.html", emails=lista, 
                                form=form)
     elif request.method == 'POST':
-        shareds.user_datastore.email_register(form.allowed_email.data, 
+        shareds.user_datastore.allowed_email_register(form.allowed_email.data, 
                                               form.default_role.data)
-        lista = shareds.user_datastore.get_emails()
-        return render_template("/security/list_emails.html", emails=lista, 
+        lista = shareds.user_datastore.get_allowed_emails()
+        return render_template("/security/list_allowed_emails.html", emails=lista, 
                                form=form)
 
 
@@ -80,13 +86,6 @@ def list_users():
 def datatables():
     """ Technical table format listings """
     return render_template("tables.html")
-
-
-@shareds.app.route('/refnames')
-@roles_required('admin')
-def refnames():
-    """ Operations for reference names """
-    return render_template("reference.html")
 
 
 """ --------------------- Narrative Kertova-sivut ------------------------------
@@ -268,10 +267,10 @@ def nayta_henkilot(subj):
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'notes':
-        titles, lists = datareader.get_notes()
-        return render_template("table_of_data.html",
+        titles, objs = datareader.get_notes()
+        return render_template("table_of_objects.html",
                                headings=("Huomautusluettelo", "Note-kohteet"),
-                               titles=titles, lists=lists)
+                               titles=titles, objs=objs)
     elif subj == 'media':
         media = datareader.read_medias()
         return render_template("table_media.html",
@@ -320,7 +319,6 @@ def nayta_henkilot(subj):
 
 
 @shareds.app.route('/list/refnames', defaults={'reftype': None})
-#@app.route('/list/refnames/<string:reftype>')
 def list_refnames(reftype):
     """ Table of reference names """
 #     if reftype and reftype != "":
@@ -332,7 +330,6 @@ def list_refnames(reftype):
 
 
 @shareds.app.route('/lista/people_by_surname/', defaults={'surname': ""})
-#@shareds.app.route('/lista/people_by_surname/<string:surname>')
 def list_people_by_surname(surname):
     """ Table of Persons with identical surname
         henkilöiden, joilla on sama sukunimi näyttäminen ruudulla 
@@ -477,8 +474,45 @@ def pick_selection(cond):
 """ -------------------------- Tietojen talletus ------------------------------
 """
 
-@shareds.app.route('/upload', methods=['POST'])
-def upload():
+@shareds.app.route('/upload_gramps', methods=['POST'])
+@login_required
+@roles_accepted('member', 'admin')
+def upload_gramps():
+    """ Load a gramps xml file to temp directory for processing in the server
+    """
+    try:
+        infile = request.files['filenm']
+        material = request.form['material']
+        logging.debug("Got a {} file '{}'".format(material, infile.filename))
+
+        t0 = time.time()
+        loadfile.upload_file(infile)
+        shareds.tdiff = time.time()-t0
+
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('save_loaded_gramps', filename=infile.filename))
+
+@shareds.app.route('/save/xml_file/<string:filename>')
+@roles_accepted('member', 'admin')
+def save_loaded_gramps(filename):
+    """ Save loaded gramps data to the database """
+    #TODO: Latauksen onnistuttua perusta uusi Batch-erä (suoritusaika shareds.tdiff)
+    pathname = loadfile.fullname(filename)
+    dburi = dbutil.get_server_location()
+    try:
+        # gramps backup xml file to Neo4j db
+        result_list = gramps_loader.xml_to_neo4j(pathname, current_user.username)
+    except KeyError as e:
+        return render_template("virhe_lataus.html", code=1, \
+               text="Missing proper column title: " + str(e))
+    return render_template("gr_result.html", batch_events=result_list, uri=dburi)
+
+
+@shareds.app.route('/upload_csv', methods=['POST'])
+@roles_required('admin')
+def upload_csv():
     """ Load a cvs file to temp directory for processing in the server
     """
     try:
@@ -494,18 +528,17 @@ def upload():
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    return redirect(url_for('save_loaded', filename=infile.filename, subj=material))
+    return redirect(url_for('save_loaded_csv', filename=infile.filename, subj=material))
 
 @shareds.app.route('/save/<string:subj>/<string:filename>')
-def save_loaded(filename, subj):
-    """ Save loaded xml of cvs data to the database """
+@roles_required('admin')
+def save_loaded_csv(filename, subj):
+    """ Save loaded cvs data to the database """
     pathname = loadfile.fullname(filename)
     dburi = dbutil.get_server_location()
     try:
         if subj == 'refnames':    # Stores Refname objects
             status = cvs_refnames.load_refnames(pathname)
-        elif subj == 'xml_file':  # gramps backup xml file to Neo4j db
-            status = gramps_loader.xml_to_neo4j(pathname, current_user.username)
         else:
             return redirect(url_for('virhesivu', code=1, text= \
                 "Data type '" + subj + "' is still missing"))
@@ -514,25 +547,13 @@ def save_loaded(filename, subj):
                text="Missing proper column title: " + str(e))
     return render_template("talletettu.html", text=status, uri=dburi)
 
+
 @shareds.app.route('/aseta/confidence')
+@roles_required('admin')
 def aseta_confidence():
     """ tietojen laatuarvion asettaminen henkilöille """
     dburi = dbutil.get_server_location()
     message = dataupdater.set_confidence_value()
-    return render_template("talletettu.html", text=message, uri=dburi)
-
-@shareds.app.route('/aseta/estimated_dates')
-def aseta_estimated_dates():
-    """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    dburi = dbutil.get_server_location()
-    message = dataupdater.set_estimated_dates()
-    return render_template("talletettu.html", text=message, uri=dburi)
-
-@shareds.app.route('/set/refnames')
-def set_all_person_refnames():
-    """ Setting reference names for all persons """
-    dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_refnames()
     return render_template("talletettu.html", text=message, uri=dburi)
 
 @shareds.app.route('/virhe_lataus/<int:code>/<text>')
@@ -547,6 +568,7 @@ def virhesivu(code, text=''):
 
 
 @shareds.app.route('/admin/clear_db/<string:opt>')
+@roles_required('admin')
 def clear_db(opt):
     """ Clear database - with no confirmation! """
     try:
@@ -556,11 +578,33 @@ def clear_db(opt):
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
+@shareds.app.route('/aseta/estimated_dates')
+@roles_required('admin')
+def aseta_estimated_dates():
+    """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
+    dburi = dbutil.get_server_location()
+    message = dataupdater.set_estimated_dates()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+@shareds.app.route('/refnames')
+@roles_required('admin')
+def refnames():
+    """ Operations for reference names """
+    return render_template("admin/reference.html")
+
+@shareds.app.route('/set/refnames')
+@roles_accepted('member', 'admin')
+def set_all_person_refnames():
+    """ Setting reference names for all persons """
+    dburi = dbutil.get_server_location()
+    message = dataupdater.set_person_refnames()
+    return render_template("talletettu.html", text=message, uri=dburi)
+
+
 
 """ ------------------------ Obsolete operations? ------------------------------
-"""
-
-
+""" 
+ 
 @shareds.app.route('/lista/person_data/<string:uniq_id>')
 def show_person_data_dbl(uniq_id):
     """ Table of Person data
@@ -661,3 +705,232 @@ def henkiloiden_yhdistely():
     dataupdater.joinpersons(base_id, join_ids)
     flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
     return redirect(url_for('pick_selection', ehto='names='+names))
+    
+    
+# --------------------- GEDCOM functions ------------------------
+
+GEDCOM_FOLDER="gedcoms"    
+ALLOWED_EXTENSIONS = {"ged"}    
+GEDDER="../stk-gedcom/gedder"
+
+# i18n: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n-legacy
+from flask_babelex import Babel
+from flask_babelex import _
+
+babel = Babel(app)
+
+@babel.localeselector
+def get_locale():
+    try:
+        print(current_user)
+        return current_user.language
+    except:
+        pass
+    return "fi"
+    #return "en"
+    #return request.accept_languages.best_match(LANGUAGES)
+
+TEMP=_("Temp")
+
+def get_gedcom_folder():
+    return os.path.join(GEDCOM_FOLDER,current_user.username)
+
+def get_transforms():
+    class Transform: pass
+    names = sorted([name for name in os.listdir(GEDDER+"/transforms") if name.endswith(".py") and not name.startswith("_")])
+    for name in names:
+        t = Transform()
+        t.name = name
+        modname = name[0:-3]
+        t.modname = modname
+        saved_path = sys.path[:]
+        sys.path.append(GEDDER)
+        transformer = importlib.import_module("transforms."+modname)
+        sys.path = saved_path
+        doc = transformer.__doc__
+        if doc:
+            t.doc = doc
+            t.docline = doc.strip().splitlines()[0]
+        else:
+            t.doc = ""
+            t.docline = ""
+        t.version = getattr(transformer,"version","")
+        yield t
+
+
+@shareds.app.route('/gedcom/list', methods=['GET'])
+@login_required
+def gedcom_list():
+    gedcom_folder = get_gedcom_folder()
+    try:
+        names = sorted([name for name in os.listdir(gedcom_folder) if name.endswith(".ged")])
+    except:
+        names = []
+    allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
+    return render_template('gedcom_list.html', title=_("Gedcomit"), 
+                           names=names, kpl=len(names),
+                           allowed_extensions=allowed_extensions )
+    
+@shareds.app.route('/gedcom/versions/<gedcom>', methods=['GET'])
+@login_required
+def gedcom_versions(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    versions = sorted([name for name in os.listdir(gedcom_folder) if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
+    print( jsonify(versions).data)
+    return jsonify(versions)
+    #return render_template('gedcom_versions.html', versions=versions )
+
+@shareds.app.route('/gedcom/upload', methods=['POST'])
+@login_required
+def gedcom_upload():
+    # code from: http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
+    from werkzeug.utils import secure_filename
+    def allowed_file(filename):
+        return '.' in filename and \
+               filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    
+    gedcom_folder = get_gedcom_folder()
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        flash(_('Valitse ladattava gedcom-tiedosto'))
+        return redirect(request.url)
+    file = request.files['file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        flash(_('Valitse ladattava gedcom-tiedosto'))
+        return redirect(url_for('gedcom_list'))
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        os.makedirs(gedcom_folder, exist_ok=True)
+        file.save(os.path.join(gedcom_folder, filename))
+        return redirect(url_for('gedcom_list'))
+  
+@shareds.app.route('/gedcom/download/<gedcom>')
+@login_required
+def gedcom_download(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = os.path.abspath(gedcom_folder)
+    logging.info(gedcom_folder)
+    filename = os.path.join(gedcom_folder, gedcom)
+    logging.info(filename)
+    return send_from_directory(directory=gedcom_folder, filename=gedcom) 
+ 
+@shareds.app.route('/gedcom/info/<gedcom>', methods=['GET'])
+@login_required
+def gedcom_info(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    filename = os.path.join(gedcom_folder,gedcom)
+    num_individuals = 666
+    transforms = get_transforms()
+    return render_template('gedcom_info.html', 
+        gedcom=gedcom, filename=filename, 
+        num_individuals=num_individuals, 
+        transforms=transforms,
+    )
+
+ 
+@shareds.app.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
+@login_required
+def gedcom_transform(gedcom,transform):
+    username = current_user.username 
+    gedcom_folder = get_gedcom_folder()
+    gedcom_filename = os.path.join(gedcom_folder,gedcom)
+    gedcom_filename = os.path.abspath(gedcom_filename)
+    transform_filename = os.path.join(GEDDER,transform)
+    parser = build_parser(transform,gedcom,gedcom_filename)
+    if request.method == 'GET':
+        return parser.generate_html()
+    else:
+        cmd = transform[:-3] + " " + parser.build_command(request.form.to_dict())
+        f = os.popen("""cd "%s";python3 gedcom_transform.py %s""" % (GEDDER,cmd))
+        s = f.read()
+        logfile = os.path.join(GEDDER,"transform.log")
+        log = open(logfile).read()
+        time.sleep(1)  # for testing...
+        return cmd + "\n\n" + log + "\n\n" + s
+
+   
+def build_parser(filename,gedcom,gedcom_filename):
+    modname = filename[:-3]
+    saved_path = sys.path[:]
+    sys.path.append(GEDDER)
+    transformer = importlib.import_module("transforms."+modname)
+    sys.path = saved_path
+
+    class Arg:
+        def __init__(self,name,name2,action,type,default,help):
+            self.name = name
+            self.name2 = name2
+            self.action = action
+            self.type = type
+            self.default = default
+            self.help = help
+
+    class Parser:
+        def __init__(self):
+            self.args = []
+        def add_argument(self,name,name2=None,action='store',type=str,default=None,help=None,nargs=0):
+            self.args.append(Arg(name,name2,action,type,default,help))
+             
+        def generate_html(self):
+            rows = []
+            class Row: pass
+            for arg in self.args:
+                row = Row()
+                argname = arg.name
+                row.name = arg.name
+                row.action = arg.action
+                row.help = arg.help
+                row.checked = ""
+                if arg.action == 'store_true':
+                    row.type = "checkbox"
+                    if row.name == "--dryrun": row.checked = "checked"
+                    if row.name == "--display-changes": row.checked = "checked"
+                elif arg.action == 'store_false':
+                    row.type = "checkbox"
+                elif arg.action == 'store_const':
+                    row.type = "checkbox"
+                elif arg.action == 'store' or arg.action is None:
+                    row.type = 'text'
+                    if arg.type == int:
+                        row.type = 'number'
+                elif arg.action == 'append':
+                    row.type = 'text'
+                elif arg.type == str:
+                    row.type = 'text'
+                elif arg.type == int:
+                    row.type = 'number'
+                else:
+                    raise RuntimeError("Unsupported type: ", arg.type )
+                rows.append(row)
+            return render_template('gedcom_transform_params.html', gedcom=gedcom, transform=filename, rows=rows )
+
+        def build_command(self,argdict):
+            args = ""
+            for arg in self.args:
+                if arg.name in argdict:
+                    value = argdict[arg.name].strip()
+                    if not value: value = arg.default
+                    if value: 
+                        if arg.action in {'store_true','store_false'} and value == "on": value = ""
+                        if arg.name[0] == "-":
+                            args += " %s %s" % (arg.name,value)
+                        else:
+                            args += ' "%s"' % value
+            return args
+            
+    parser = Parser()
+    parser.add_argument('gedcom-filename', default=gedcom_filename)
+    parser.add_argument('--display-changes', action='store_true',
+                        help='Display changed rows')
+    parser.add_argument('--dryrun', action='store_true',
+                        help='Do not produce an output file')
+    parser.add_argument('--nolog', action='store_true',
+                        help='Do not produce a log in the output file')
+    parser.add_argument('--encoding', type=str, default="utf-8",
+                        help="e.g, UTF-8, ISO8859-1")
+    transformer.add_args(parser)
+
+    return parser
+

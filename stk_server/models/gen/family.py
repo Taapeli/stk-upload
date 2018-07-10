@@ -4,8 +4,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 from sys import stderr
-#from flask import g
 import  shareds
+from models.gramps.cypher_gramps import Cypher_family_w_handle
 
 class Family:
     """ Perhe
@@ -14,6 +14,7 @@ class Family:
                 handle          
                 change
                 id              esim. "F0001"
+                uniq_id         int database key
                 rel_type        str suhteen tyyppi
                 father          str isän osoite
                 mother          str äidin osoite
@@ -53,7 +54,7 @@ RETURN ID(person) AS children"""
         query = """
 MATCH (family:Family)-[r:EVENT]->(event:Event)
   WHERE ID(family)=$pid
-RETURN r.role AS eventref_role, event.gramps_handle AS eventref_hlink"""
+RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
         return  shareds.driver.session().run(query, {"pid": pid})
     
     
@@ -151,99 +152,63 @@ RETURN ID(person) AS mother"""
 
 
     def save(self, tx):
-        """ Tallettaa sen kantaan """
+        """ Saves the family node to db and 
+            creates relations to parent, child and note nodes
+        """
 
         try:
-            query = """
-                CREATE (n:Family) 
-                SET n.gramps_handle='{}', 
-                    n.change='{}', 
-                    n.id='{}', 
-                    n.rel_type='{}'
-                """.format(self.handle, self.change, self.id, self.rel_type)
-                
-            tx.run(query)
+            f_attr = {
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "rel_type": self.rel_type
+            }
+            result = tx.run(Cypher_family_w_handle.create, f_attr=f_attr)
+            for res in result:
+                self.uniq_id = res[0]
+                print("Family {} ".format(self.uniq_id))
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe (Family.save:Family): {0}".format(err), file=stderr)
 
+        # Make father and mother relations to Person nodes
         try:
-            # Make relation to the Person node
-            if self.father != '':
-                query = """
-                    MATCH (n:Family) WHERE n.gramps_handle='{}'
-                    MATCH (m:Person) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:FATHER]->(m)
-                     """.format(self.handle, self.father)
-                                 
-                tx.run(query)
-        except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            if hasattr(self,'father') and self.father != '':
+                tx.run(Cypher_family_w_handle.link_father, 
+                       f_handle=self.handle, p_handle=self.father)
 
-        try:
-            # Make relation to the Person node
-            if self.mother != '':
-                query = """
-                    MATCH (n:Family) WHERE n.gramps_handle='{}'
-                    MATCH (m:Person) WHERE m.gramps_handle='{}'
-                    MERGE (n)-[r:MOTHER]->(m)
-                     """.format(self.handle, self.mother)
-                                 
-                tx.run(query)
+            if hasattr(self,'mother') and self.mother != '':
+                tx.run(Cypher_family_w_handle.link_mother,
+                       f_handle=self.handle, p_handle=self.mother)
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Virhe (Family.save:parents): {0}".format(err), file=stderr)
 
-        # Make relation(s) to the Event node
+        # Make relations to Event nodes
         if len(self.eventref_hlink) > 0:
             for i in range(len(self.eventref_hlink)):
                 try:
-                    query = """
-                        MATCH (n:Family) WHERE n.gramps_handle='{}'
-                        MATCH (m:Event) WHERE m.gramps_handle='{}'
-                        MERGE (n)-[r:EVENT]->(m)
-                         """.format(self.handle, self.eventref_hlink[i])
-                                 
-                    tx.run(query)
+                    tx.run(Cypher_family_w_handle.link_event, 
+                           f_handle=self.handle, e_handle=self.eventref_hlink[i],
+                           role=self.eventref_role[i])
                 except Exception as err:
-                    print("Virhe: {0}".format(err), file=stderr)
-                
-                try:
-                    query = """
-                        MATCH (n:Family)-[r:EVENT]->(m:Event)
-                            WHERE n.gramps_handle='{}' AND m.gramps_handle='{}'
-                        SET r.role ='{}'
-                         """.format(self.handle, self.eventref_hlink[i], self.eventref_role[i])
-                                 
-                    tx.run(query)
-                except Exception as err:
-                    print("Virhe: {0}".format(err), file=stderr)
+                    print("Virhe (Family.save:Event): {0}".format(err), file=stderr)
   
-        # Make relation(s) to the Person node
+        # Make child relations to Person nodes
         if len(self.childref_hlink) > 0:
             for i in range(len(self.childref_hlink)):
                 try:
-                    query = """
-                        MATCH (n:Family) WHERE n.gramps_handle='{}'
-                        MATCH (m:Person) WHERE m.gramps_handle='{}'
-                        MERGE (n)-[r:CHILD]->(m)
-                         """.format(self.handle, self.childref_hlink[i])
-
-                    tx.run(query)
+                    tx.run(Cypher_family_w_handle.link_child, 
+                           f_handle=self.handle, p_handle=self.childref_hlink[i])
                 except Exception as err:
-                    print("Virhe: {0}".format(err), file=stderr)
+                    print("Virhe (Family.save:Child): {0}".format(err), file=stderr)
   
         # Make relation(s) to the Note node
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 try:
-                    query = """
-                        MATCH (n:Family) WHERE n.gramps_handle='{}'
-                        MATCH (m:Note) WHERE m.gramps_handle='{}'
-                        MERGE (n)-[r:NOTE]->(m)
-                         """.format(self.handle, self.noteref_hlink[i])
-
-                    tx.run(query)
+                    tx.run(Cypher_family_w_handle.link_note,
+                           f_handle=self.handle, n_handle=self.noteref_hlink[i])
                 except Exception as err:
-                    print("Virhe: {0}".format(err), file=stderr)
+                    print("Virhe (Family.save:Note): {0}".format(err), file=stderr)
 
         return
 
@@ -269,5 +234,3 @@ class Family_for_template(Family):
         self.mother = None
         self.spouse = None
         self.children = []
-        
-

@@ -7,9 +7,10 @@ import time
 from models.gen.user import User
 from models.gen.person import Person, Name
 from models.gen.refname import Refname
+from models.batchlogger import Batch, Log
 
 
-def set_confidence_value(tx, uniq_id=None):
+def set_confidence_value(tx, uniq_id=None, batch_logger=None):
     """ Sets a quality rate for one or all Persons
         Asettaa henkilölle laatuarvion
         
@@ -33,24 +34,27 @@ def set_confidence_value(tx, uniq_id=None):
         p.set_confidence(tx)
             
         counter += 1
-            
-    text = "Confidences set: {} : {:.4f}".format(counter, time.time()-t0)
-    return (text)
+
+    if isinstance(batch_logger, Batch):
+        batch_logger.append(Log(title="Confidences set", 
+                                    count=counter, elapsed=time.time()-t0))
+    return
 
 
-def set_estimated_dates():
+def set_estimated_dates(batch_logger=None):
     """ Asettaa henkilölle arvioidut syntymä- ja kuolinajat
     """
-    message = []
+    t0 = time.time()
         
     msg = Person.set_estimated_dates()
                         
-    text = "Estimated birth and death dates set. " + msg
-    message.append(text)
-    return (message)
+    if isinstance(batch_logger, Batch):
+        batch_logger.append(Log(title="Estimated birth and death dates set. " + msg, 
+                                    elapsed=time.time()-t0))
+    return
 
 
-def set_person_refnames(self=None, uniq_id=None):
+def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
     """ Set Refnames to all or one Persons
         If self is defined
         - if there is transaction tx, use it, else create new 
@@ -121,12 +125,13 @@ def set_person_refnames(self=None, uniq_id=None):
         # End my own created transformation
         User.endTransaction(my_tx)
 
-    msg="Refname references: {} : {}".format(name_count, time.time()-t0)
-    logging.info(msg)
-    
     if self and self.namecount != None:
         self.namecount += name_count
-    return msg
+
+    if isinstance(batch_logger, Batch):
+        batch_logger.append(Log(title="Refname references", 
+                                    count=name_count, elapsed=time.time()-t0))
+    return
 
 
 
