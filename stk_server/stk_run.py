@@ -866,7 +866,7 @@ def build_parser(filename,gedcom,gedcom_filename):
             self.type = type
             self.default = default
             self.help = help
-
+ 
     class Parser:
         def __init__(self):
             self.args = []
