@@ -208,7 +208,7 @@ if num_of_roles == 0:
 
 print('Check the admin user')
 num_of_admins = 0  
-results =  shareds.driver.session().run("MATCH  (user:User) WHERE user.username = 'admin' RETURN COUNT(user)")
+results =  shareds.driver.session().run("MATCH  (user:User) WHERE user.username = 'master' RETURN COUNT(user)")
 for result in results:
     num_of_admins = result[0]
 
