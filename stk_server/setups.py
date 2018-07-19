@@ -206,14 +206,14 @@ if num_of_roles == 0:
                 continue
         print('Roles initialized')
 
-print('Check the admin user')
-num_of_admins = 0  
+print('Check the master user')
+num_of_masters = 0  
 results =  shareds.driver.session().run("MATCH  (user:User) WHERE user.username = 'master' RETURN COUNT(user)")
 for result in results:
-    num_of_admins = result[0]
+    num_of_masters = result[0]
 
-if num_of_admins == 0:
-    ADMIN = {'username': 'master', 
+if num_of_masters == 0:
+    MASTER = {'username': 'master', 
              'password': 'taapeli',  
              'email': 'stk.sukututkimusseura@gmail.com', 
              'name': 'Stk-kannan pääkäyttäjä',
@@ -228,7 +228,7 @@ if num_of_admins == 0:
              'login_count': 0            
              }
      
-    admin_create = ('''
+    master_create = ('''
         MATCH  (role:Role) WHERE role.name = 'admin'
         CREATE (user:User 
             {username : $username, 
@@ -254,9 +254,9 @@ if num_of_admins == 0:
         except CypherSyntaxError as cex:
             print(cex) 
             
-    def create_admin(tx, user):
+    def create_master(tx, user):
         try:
-            tx.run(admin_create,
+            tx.run(master_create,
                 username = user['username'], 
                 password = user['password'],  
                 email = user['email'],
@@ -280,13 +280,13 @@ if num_of_admins == 0:
             print(cex)
         except ConstraintError as cex:
             print(cex)               
-    print('Create the admin user')
+    print('Create the master user')
     with shareds.driver.session() as session: 
         session.write_transaction(create_user_constraints)
 
     with shareds.driver.session() as session:
         try: 
-            session.write_transaction(create_admin, ADMIN)
+            session.write_transaction(create_master, MASTER)
            
         except CypherSyntaxError as cex:
             print('Session ', cex)
