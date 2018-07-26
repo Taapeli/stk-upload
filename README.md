@@ -1,7 +1,7 @@
 # Stk-upload
 Skeleton for creating Suomitietokanta server for genealogical data upload and browsing.
 
-Tämän pitäisi käynnistyä näin:
+Tämän pitäisi käynnistyä näin (lienee vanha ohje):
 
      cd src
      python3 stk-server.py
