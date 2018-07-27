@@ -17,44 +17,10 @@ logger = logging.getLogger('neo4juserdatastore')
 driver = None
 
 class Neo4jUserDatastore(UserDatastore):
- 
-#===============================================================================
-#    class Role():
-#        id = ''
-#        level = 0
-#        name = ''
-#        description = ''
-#        timestamp = None
-# 
-#    class User():
-#        id = ''
-#        email = ''
-#        username = ''   
-#        name = ''
-#        language = ''
-#        password = ''
-#        is_active = True
-#        confirmed_at = None
-#        roles = []
-#        last_login_at = None
-#        last_login_ip = ''    
-#        current_login_at = None
-#        current_login_ip = ''
-#        login_count = 0
-# 
-#    class UserProfile():      """ Object describing dynamic user properties """
-#        uid = ''
-#        userName = ''
-#        numSessions = 0
-#        lastSessionTime = None  
-# 
-#    class AllowedEmail():     """ Object allowing a prospect user to register """
-#        allowed_email = ''
-#        default_role = ''
-#        admin_name = ''
-#        timestamp = None
-#===============================================================================
-    
+    """ User info database """
+
+    # Uses classes Role, User, UserProfile, AllowedEmail from setups.py
+
     def __init__(self, driver, user_model, user_profile_model, role_model, allowed_email_model):
         self.driver = driver
         self.user_model = user_model

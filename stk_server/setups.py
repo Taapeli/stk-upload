@@ -1,6 +1,6 @@
-from flask import Flask, session
+from flask import session
 from flask_security import Security, UserMixin, RoleMixin
-from flask_security.forms import RegisterForm, ConfirmRegisterForm, Required, StringField
+from flask_security.forms import ConfirmRegisterForm, Required, StringField
 from wtforms import SelectField
 from flask_security.utils import _
 from flask_mail import Mail
@@ -16,6 +16,35 @@ from templates import jinja_filters
 
 #===================== Classes to create user session ==========================
 
+class SetupCypher():
+    """ Cypher clases for setup """
+
+    set_user_constraint = '''
+        CREATE CONSTRAINT ON (user:User) 
+        ASSERT user.username IS UNIQUE'''
+    
+    role_create = '''
+        CREATE (role:Role {level: $level, name: $name, 
+                           description: $description, timestamp: $timestamp})'''
+
+    master_check_existence = """
+        MATCH  (user:User) 
+        WHERE user.username = 'master' 
+        RETURN COUNT(user)"""
+
+    master_create = '''
+        MERGE (u:User) -[:HAS_ROLE]-> (r:Role {name:'master'})
+        ON CREATE 
+            SET u = { username: $username, password: $password, 
+                      email: $email, name: $name, language: $language,
+                      is_active: $is_active, confirmed_at: $confirmed_at,
+                      roles: $roles, last_login_at: $last_login_at,
+                      current_login_at: $current_login_at,
+                      last_login_ip: $last_login_ip, 
+                      current_login_ip: $current_login_ip,
+                      login_count: $login_count }'''
+
+       
 class Role(RoleMixin):
     """ Object describing any application user roles,
         where each user is linked
@@ -82,6 +111,7 @@ class UserProfile():
 
      
 class AllowedEmail():
+    """ Object for storing an allowed user to register in """
     allowed_email = ''
     default_role = ''
     timestamp = None
@@ -130,7 +160,7 @@ print('Security set up')
 @shareds.security.register_context_processor
 def security_register_processor():
     return {"username": _("Käyttäjänimi"), "name": _("Nimi"), "language": _("Kieli")}
-  
+
 #  Tarkista roolien olemassaolo
 print('Check the user roles')
 num_of_roles = 0
@@ -151,17 +181,6 @@ if num_of_roles == 0:
              {'level':'8', 'name':'admin', 
               'description':'Ylläpitäjä kaikin oikeuksin'})
     
-    role_create = (
-        '''
-        CREATE (role:Role 
-            {level : $level, 
-            name : $name, 
-            description : $description,
-            timestamp : $timestamp})
-        '''
-        ) 
-
-
     
     #functions
     def create_role_constraints(tx):
@@ -173,7 +192,7 @@ if num_of_roles == 0:
     
     def create_role(tx, role):
         try:
-            tx.run(role_create,
+            tx.run(SetupCypher.role_create,
                 level=role['level'],    
                 name=role['name'], 
                 description=role['description'],
@@ -208,12 +227,12 @@ if num_of_roles == 0:
 
 print('Check the master user')
 num_of_masters = 0  
-results =  shareds.driver.session().run("MATCH  (user:User) WHERE user.username = 'master' RETURN COUNT(user)")
+results =  shareds.driver.session().run(SetupCypher.master_check_existence)
 for result in results:
     num_of_masters = result[0]
 
 if num_of_masters == 0:
-    MASTER = {'username': 'master', 
+    default_master_params = {'username': 'master', 
              'password': 'taapeli',  
              'email': 'stk.sukututkimusseura@gmail.com', 
              'name': 'Stk-kannan pääkäyttäjä',
@@ -228,49 +247,32 @@ if num_of_masters == 0:
              'login_count': 0            
              }
      
-    master_create = ('''
-        MATCH  (role:Role) WHERE role.name = 'admin'
-        CREATE (user:User 
-            {username : $username, 
-            password : $password,  
-            email : $email, 
-            name : $name,
-            language : $language, 
-            is_active : $is_active,
-            confirmed_at : $confirmed_at, 
-            roles : $roles,
-            last_login_at : $last_login_at,
-            current_login_at : $current_login_at,
-            last_login_ip : $last_login_ip,
-            current_login_ip : $current_login_ip,
-            login_count : $login_count} )           
-            -[:HAS_ROLE]->(role)
-        ''' ) 
-       
+
     def create_user_constraints(tx):
         try:
-            tx.run('CREATE CONSTRAINT ON (user:User) ASSERT user.username IS UNIQUE')
+            tx.run(SetupCypher.set_user_constraint)
             tx.commit() 
         except CypherSyntaxError as cex:
             print(cex) 
             
     def create_master(tx, user):
         try:
-            tx.run(master_create,
-                username = user['username'], 
-                password = user['password'],  
-                email = user['email'],
-                name = user['name'],
-                language = user['language'],  
-                is_active = True,
-                confirmed_at = user['confirmed_at'], 
-                roles = user['roles'],
-                last_login_at = user['last_login_at'],
-                current_login_at = user['current_login_at'],
-                last_login_ip = user['last_login_ip'],
-                current_login_ip = user['current_login_ip'],
-                login_count = user['login_count']         
-                ) 
+            master_params = {
+                'username': user['username'], 
+                'password': user['password'],  
+                'email': user['email'],
+                'name': user['name'],
+                'language': user['language'],  
+                'is_active': True,
+                'confirmed_at': user['confirmed_at'], 
+                'roles': user['roles'],
+                'last_login_at': user['last_login_at'],
+                'current_login_at': user['current_login_at'],
+                'last_login_ip': user['last_login_ip'],
+                'current_login_ip': user['current_login_ip'],
+                'login_count': user['login_count']
+            }
+            tx.run(SetupCypher.master_create, master_params) 
 #                timestamp=str(datetime.now()) ) 
             tx.commit()            
 #                print(role['name'])
@@ -279,14 +281,17 @@ if num_of_masters == 0:
         except CypherError as cex:
             print(cex)
         except ConstraintError as cex:
-            print(cex)               
-    print('Create the master user')
+            print(cex)
+
+     
+    print('Set the constains and master user')
     with shareds.driver.session() as session: 
         session.write_transaction(create_user_constraints)
 
     with shareds.driver.session() as session:
         try: 
-            session.write_transaction(create_master, MASTER)
+            session.write_transaction(create_master, default_master_params)
+            print('Admin user created')
            
         except CypherSyntaxError as cex:
             print('Session ', cex)
@@ -294,6 +299,8 @@ if num_of_masters == 0:
             print('Session ', cex)
         except ConstraintError as cex:
             print('Session ', cex)
+
+
 """ 
     Application filter definitions 
 """
