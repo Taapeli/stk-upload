@@ -32,17 +32,36 @@ class SetupCypher():
         WHERE user.username = 'master' 
         RETURN COUNT(user)"""
 
-    master_create = '''
-        MERGE (u:User) -[:HAS_ROLE]-> (r:Role {name:'master'})
-        ON CREATE 
-            SET u = { username: $username, password: $password, 
-                      email: $email, name: $name, language: $language,
-                      is_active: $is_active, confirmed_at: $confirmed_at,
-                      roles: $roles, last_login_at: $last_login_at,
-                      current_login_at: $current_login_at,
-                      last_login_ip: $last_login_ip, 
-                      current_login_ip: $current_login_ip,
-                      login_count: $login_count }'''
+    master_create = ('''
+        MATCH  (role:Role) WHERE role.name = 'admin'
+        CREATE (user:User 
+            {username : $username, 
+            password : $password,  
+            email : $email, 
+            name : $name,
+            language : $language, 
+            is_active : $is_active,
+            confirmed_at : $confirmed_at, 
+            roles : $roles,
+            last_login_at : $last_login_at,
+            current_login_at : $current_login_at,
+            last_login_ip : $last_login_ip,
+            current_login_ip : $current_login_ip,
+            login_count : $login_count} )           
+            -[:HAS_ROLE]->(role)
+        ''' ) 
+
+#     master_create = '''
+#         MERGE (u:User) -[:HAS_ROLE]-> (r:Role {name:'master'})
+#         ON CREATE 
+#             SET u = { username: $username, password: $password, 
+#                       email: $email, name: $name, language: $language,
+#                       is_active: $is_active, confirmed_at: $confirmed_at,
+#                       roles: $roles, last_login_at: $last_login_at,
+#                       current_login_at: $current_login_at,
+#                       last_login_ip: $last_login_ip, 
+#                       current_login_ip: $current_login_ip,
+#                       login_count: $login_count }'''
 
        
 class Role(RoleMixin):
@@ -284,14 +303,14 @@ if num_of_masters == 0:
             print(cex)
 
      
-    print('Set the constains and master user')
+    print('Set the constraints and master user')
     with shareds.driver.session() as session: 
         session.write_transaction(create_user_constraints)
 
     with shareds.driver.session() as session:
         try: 
             session.write_transaction(create_master, default_master_params)
-            print('Admin user created')
+            print('Master user created')
            
         except CypherSyntaxError as cex:
             print('Session ', cex)
