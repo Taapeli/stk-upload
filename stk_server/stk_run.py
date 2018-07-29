@@ -711,7 +711,7 @@ def henkiloiden_yhdistely():
 
 GEDCOM_FOLDER="gedcoms"    
 ALLOWED_EXTENSIONS = {"ged"}    
-GEDDER="../stk-gedcom/gedder"
+GEDDER="stk_server"
 
 # i18n: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n-legacy
 from flask_babelex import Babel
@@ -845,6 +845,7 @@ def gedcom_transform(gedcom,transform):
         cmd = transform[:-3] + " " + parser.build_command(request.form.to_dict())
         f = os.popen("""cd "%s";python gedcom_transform.py %s""" % (GEDDER,cmd))
         s = f.read()
+        print(s)
         logfile = os.path.join(GEDDER,"transform.log")
         log = open(logfile).read()
         time.sleep(1)  # for testing...

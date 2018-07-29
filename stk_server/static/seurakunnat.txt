@@ -1,0 +1,523 @@
+0706  3. Oulun ruotujakoinen tarkk'ampuja
+0704  5. Mikkelin ruotujakoinen tarkk'amp
+0707  7. Porin ruotujakoinen tarkk'ampuja
+0001  Ahlainen
+0003  Akaa
+0004  Alahärmä
+0005  Alajärvi
+0006  Alastaro
+0007  Alatornio - Nedertorneå
+0008  Alaveteli - Nedervetil
+0009  Alavieska
+0010  Alavus
+0011  Angelniemi
+0012  Anjala
+0013  Antrea - S:t Andreae
+0014  Anttola
+0015  Artjärvi - Artsjö
+0016  Asikkala
+0017  Askainen - Villnäs
+0018  Askola
+0019  Aura
+0020  Bergö
+0022  Bromarv
+0023  Brändö
+0025  Degerby
+0026  Dragsfjärd
+0027  Eckerö
+0029  Elimäki
+0030  Eno
+0032  Enontekiö - Enontekis
+0033  Ensimmäinen Suomen meriekipaasi - F
+0034  Eräjärvi
+0035  Espoo - Esbo
+0036  Eura
+0038  Eurajoki - Euraåminne
+0039  Evijärvi
+0040  Fagervik
+0042  Finström
+0045  Föglö
+0047  Geta
+0048  Haapajärvi
+0050  Haapavesi
+0051  Hailuoto - Karlö
+0052  Halikko
+0053  Halsua
+0691  Hamiltonin rykmentti - Hamiltonska 
+0054  Hamina ja Vehkalahti - Fredrikshamn
+0056  Hammarland
+0693  Hangon linnaseurakunta - Hangö slot
+0058  Hankasalmi
+0059  Harjavalta
+0060  Harju
+0062  Hartola - Gustav Adolfs
+0063  Hattula
+0064  Hauho
+0065  Haukipudas
+0066  Haukivuori
+0067  Hausjärvi
+0068  Heinjoki
+0069  Heinolan kaupunkisrk - Heinola stad
+0070  Heinolan msrk - Heinola lf
+0071  Heinävesi
+0088  Helsingin pitäjä - Helsinge
+0085  Helsingin saksalainen srk - Helsing
+0084  Helsinki - Helsingfors
+6004  Hietamäki
+0092  Hiitola
+0091  Hiittinen - Hitis
+0093  Himanka - Himango
+0094  Hinnerjoki
+0095  Hirvensalmi
+0096  Hollola
+0097  Honkajoki
+0098  Honkilahti
+0099  Houtskari - Houtskär
+0100  Huittinen
+0101  Humppila
+0103  Hyrynsalmi
+0232  Hämeenkoski
+0105  Hämeenkyrö - Tavastkyro
+0106  Hämeenlinna - Tavastehus
+0110  Ii
+0112  Iisalmen msrk - Idensalmi lf
+0113  Iitti
+0114  Ikaalinen - Ikalis
+0115  Ilmajoki
+0116  Ilmee
+0117  Ilomantsi - Ilomants
+0119  Impilahti
+0120  Inari - Enare
+0121  Iniö
+0123  Inkoo - Ingå
+0124  Isojoki - Storå
+0125  Isokyrö - Storkyro
+0126  Jaakkima
+0127  Jaala
+0128  Jalasjärvi
+0129  Janakkala
+0130  Jepua - Jeppo
+0132  Johannes - S:t Johannes
+0133  Jokioinen - Jockis
+0697  Jokioisten tehdas - Jockis bruk
+0134  Jomala
+0136  Joroinen - Jorois
+0138  Joutseno
+0141  Jurva
+0142  Juuka
+0144  Juva - Jockas
+0145  Jyväskylän ksrk - Jyväskylä stadsfö
+0146  Jyväskylän msrk - Jyväskylä lf
+0690  Jägerhornin rykmentti - Jägerhornsk
+0147  Jämijärvi
+0148  Jämsä
+0152  Jääski
+0153  Kaarina - S:t Karins
+0154  Kaavi
+0155  Kajaani - Kajana - Kajaanin mlk
+0156  Kakskerta
+0157  Kalajoki
+0591  Kalanti
+0158  Kalvola
+0159  Kangasala
+0161  Kangasniemi
+0162  Kankaanpää
+0165  Kannus
+0166  Karijoki - Bötom
+0168  Karjaa - Karis
+0169  Karjala
+0170  Karjalohja - Karislojo
+0426  Karkkila (ent. Pyhäjärvi Ul) - Högf
+0171  Karkku
+0173  Karstula
+0174  Karttula
+0175  Karuna
+0176  Karunki
+0177  Karvia
+0178  Kaskinen - Kaskö
+0180  Kauhajoki
+0181  Kauhava
+0182  Kaukola
+0183  Kaustinen - Kaustby
+0187  Kellokoski - Mariefors
+0188  Kemijärvi
+0190  Kemin maaseurakunta - Kemi landsför
+0191  Kemiö - Kimito
+0192  Kempele
+0193  Kerimäki
+0196  Kesälahti
+0197  Keuruu
+0199  Kiihtelysvaara
+0200  Kiikala
+0201  Kiikka
+0203  Kiiminki
+0688  Kirjakkala
+0205  Kirkkonummi - Kyrkslätt
+0206  Kirvu
+0207  Kisko
+0208  Kitee - Kides
+0209  Kittilä
+0210  Kiukainen
+0211  Kiuruvesi
+0212  Kivennapa - Kivinebb
+0213  Kivijärvi - Kivijärv
+0685  Kodisjoki
+0215  Koivisto - Björkö
+0216  Koivulahti - Kvevlax
+0217  Kokemäki - Kumo
+0218  Kokkola - Gamlakarleby
+0172  Kokkolan msrk/emäsrk - Karleby lf/m
+0222  Kontiolahti
+0224  Korpilahti
+1020  Korpiselän ortodoksinen srk - Korpi
+0226  Korppoo - Korpo
+0228  Korsnäs
+0229  Kortesjärvi
+0231  Kosken tehdas - Koskis bruk
+0233  Koski Tl - Koskis Åbo l
+0236  Kristiinankaupungin ksrk - Kristine
+0686  Kristiinankaupungin msrk - Kristine
+0237  Kruunupyy - Kronoby
+0238  Kuhmalahti
+0239  Kuhmo
+0240  Kuhmoinen
+0241  Kuivaniemi
+0242  Kullaa
+0243  Kumlinge
+0245  Kuolemajärvi
+0246  Kuopion ksrk - Kuopio stadsförs
+0248  Kuopion msrk - Kuopio lf
+0249  Kuorevesi
+0250  Kuortane
+0251  Kurikka
+0252  Kurkijoki - Kronoborg
+0253  Kuru
+0254  Kustavi - Gustavs
+0255  Kuusamo
+0257  Kuusisto - Kustö
+0260  Kylmäkoski
+0261  Kymi - Kymmene
+0729  Käkisalmen garnisonisrk - Kexholms 
+0263  Käkisalmen msrk - Kexholms lf
+1026  Käkisalmen ortodoksinen srk - Kexho
+0264  Käkisalmi - Kexholm
+0265  Kälviä - Kelviå
+0266  Kärkölä
+0267  Kärsämäki
+0268  Kökar
+0269  Köyliö - Kjulo
+0271  Laihia - Laihela
+0272  Laitila - Letala
+0273  Lammi
+0281  Lapinjärvi - Lappträsk
+0275  Lapinlahti
+0276  Lappajärvi
+0277  Lappee - Lappvesi
+0278  Lappeenrannan kehruuhuone - Villman
+0280  Lappi
+0282  Lapua - Lappo
+0283  Lapväärtti - Lappfjärd
+0284  Laukaa
+0285  Lavansaari
+0286  Lavia
+0287  Lehtimäki
+0289  Lemi
+0290  Lemland
+0291  Lempäälä
+0292  Lemu
+0293  Leppälahti
+0294  Leppävirta
+0295  Lestijärvi
+0296  Lieto - Lundo
+0297  Liljendal
+0298  Liminka - Limingo
+0299  Liperi
+0300  Lohja - Lojo
+0301  Lohtaja - Lochteå
+0302  Loimaa
+0304  Lokalahti
+0305  Loppi
+0306  Loviisa - Lovisa
+0701  Loviisan tykistöseurakunta - Lovisa
+0307  Luhanka
+0310  Lumparland
+0311  Luopioinen
+0312  Luoto - Larsmo
+0313  Luumäki
+0314  Luvia
+0315  Längelmäki
+0316  Maalahti - Malax
+0317  Maaninka
+0318  Maaria - S:t Marie
+0319  Maarianhamina - Mariehamn
+0320  Maksamaa - Maxmo
+1032  Mantsinsaaren ortodoksinen srk - Ma
+0321  Marttila - S:t Mårtens
+0322  Masku
+0324  Merijärvi
+0325  Merikarvia - Sastmola
+0326  Merimasku
+0329  Metsäpirtti
+0330  Miehikkälä
+0331  Mietoinen
+0332  Mikkeli - S:t Michel
+0335  Mouhijärvi
+0336  Muhos
+0337  Multia
+0338  Munsala
+0339  Muolaa
+0340  Muonio
+0227  Mustasaari - Korsholm
+0341  Mustio - Svartå
+0345  Mynämäki - Virmo
+0346  Myrskylä - Mörskom
+0347  Mäntsälä
+0349  Mäntyharju
+0350  Naantali - Nådendal
+0351  Nakkila
+0352  Nastola
+0353  Nauvo - Nagu
+0354  Nilsiä
+0355  Nivala
+0357  Noormarkku - Norrmark
+0358  Nousiainen - Nousis
+0360  Nummi
+0361  Nurmes
+0362  Nurmijärvi
+0363  Nurmo
+0531  Nyby
+0364  Närpiö - Närpes
+0365  Oravainen - Oravais
+0366  Orimattila
+0367  Oripää
+0368  Orismala - Orisberg
+0369  Orivesi
+0370  Oulainen
+0371  Oulun tuomiokirkkoseurakunta - Uleåborg - Oulu
+0375  Oulunsalo
+0376  Paattinen
+0377  Paavola
+0378  Padasjoki
+0379  Paimio - Pemar
+1036  Palkealan ortodoksinen srk - Palkea
+0380  Paltamo
+0381  Parainen - Pargas
+0382  Parikkala
+0383  Parkano
+0399  Pedersöre
+4100  Pendleton, Umatilla Co, Oregon, USA
+0386  Perho
+0387  Pernaja - Pernå
+0388  Perniö - Bjärnå
+0389  Pertteli - S:t Bertils
+0390  Peräseinäjoki
+0391  Petolahti - Petalax
+1037  Petsamon ortodoksinen srk - Petsamo
+0393  Petäjävesi
+0394  Pieksämäen maaseurakunta - Pieksämä
+0395  Pielavesi
+0397  Pielisjärvi
+4867  Pietarin suomalainen Marian srk - S
+0398  Pietarsaari - Jakobstad
+0400  Pihlajavesi
+0401  Pihtipudas
+0402  Piikkiö - Pikis
+0403  Piippola
+0404  Pirkkala - Birkala
+0405  Pirttikylä - Pörtom
+0407  Pohja - Pojo
+0409  Pomarkku - Påmark
+0410  Pori - Björneborg
+0411  Pornainen - Borgnäs
+0412  Porvoo - Borgå
+0414  Pudasjärvi
+0415  Pukkila
+0416  Pulkkila
+0418  Punkalaidun
+0419  Puolanka
+0420  Purmo
+0421  Pusula
+0422  Puumala
+0423  Pyhtää - Pyttis
+0424  Pyhäjoki
+0425  Pyhäjärvi
+0427  Pyhäjärvi Vpl - Pyhäjärvi Vib l
+0428  Pyhämaa
+0430  Pyhäranta
+0433  Pälkjärvi
+0434  Pälkäne
+0436  Pöytyä
+0437  Raahe - Brahestad
+0439  Raippaluoto - Replot
+0440  Raisio - Reso
+1042  Raivolan ortodoksinen srk - Raivola
+0441  Rantasalmi
+0442  Rantsila
+0444  Rauma - Raumo
+0445  Rautalampi
+0448  Rautjärvi
+0449  Rautu
+0450  Reisjärvi
+0451  Renko
+0453  Revonlahti
+0455  Ristiina - Kristina
+0456  Ristijärvi
+0457  Rovaniemi
+0458  Ruokolahti
+0459  Ruotsinpyhtää - Strömfors
+0460  Ruovesi
+0461  Ruskeala
+0462  Rusko
+0463  Rymättylä - Rimito
+0464  Räisälä
+0465  Rääkkylä
+0467  Saarijärvi
+0468  Sahalahti
+0469  Saimaan kanava - Saima kanal
+0470  Sakkola
+0244  Salla
+0471  Salmi
+1048  Salmin ortodoksinen srk - Salmi ort
+0472  Salo
+0473  Saloinen
+0475  Saltvik
+0476  Sammatti
+0477  Sauvo - Sagu
+0483  Seili - Själö
+0484  Seinäjoki
+0485  Seiskari - Seitskär
+0486  Sievi
+0487  Siikainen
+0488  Siikajoki
+0490  Siipyy - Sideby
+0491  Simo
+0493  Sipoo - Sibbo
+0494  Sippola
+0495  Siuntio - Sjundeå
+0496  Skarpans
+0497  Snappertuna
+0498  Soanlahti
+0499  Sodankylä
+0500  Soini
+0501  Somerniemi
+0502  Somero
+0503  Sonkajärvi
+0507  Sortavalan kaupunkisrk - Sordavala 
+0504  Sortavalan maaseurakunta - Sordaval
+1051  Sortavalan ortodoksinen srk - Sorda
+0508  Sotkamo
+0509  Sottunga
+0511  Sulkava
+0512  Sulva - Solf
+0513  Sumiainen
+0514  Sund
+0515  Suodenniemi
+0518  Suomen kaaderiekipaasi - Finska kad
+0712  Suomen kaarti - Finska gardet
+0055  Suomen kadettikoulu - Finska kadett
+0713  Suomen tarkk'ampujapataljoona - Fin
+0519  Suomenniemi
+0520  Suomusjärvi
+0521  Suomussalmi
+0522  Suonenjoki
+0523  Suoniemi
+0524  Suursaari - Hogland
+0687  Svalskulla
+0525  Svartholm
+0526  Sysmä
+0527  Säkkijärvi
+0528  Säkylä
+0041  Särkisalo - Finby
+0529  Säräisniemi
+0533  Sääksmäki
+0534  Sääminki
+0535  Taipalsaari
+0537  Taivassalo - Tövsala
+0538  Tammela
+0028  Tammisaari - Ekenäs
+0543  Tampereen tuomiokirkkoseurakunta - Tampere
+0037  Tarvasjoki
+0550  Teerijärvi - Terjärv
+0545  Teijon tehdas - Tykö bruk
+0546  Teisko
+0547  Temmes
+0548  Tenhola - Tenala
+1056  Terijoen ortodoksinen srk - Terijok
+0549  Terijoki
+0552  Tervola
+0553  Teuva - Östermark
+1057  Tiurulan ortodoksinen srk - Tiurula
+0554  Tohmajärvi
+0555  Toholampi
+0558  Tornio - Torneå
+0559  Tottijärvi
+4883  Tukholman suomalainen srk - Stockho
+0561  Turtola
+0566  Turun linnan srk - Åbo slottsförs
+0567  Turun linnan vankila - Åbo slotts f
+0568  Turun ruotsalainen seurakunta - Åbo - Turku
+0569  Turun suomalainen srk - Åbo finska 
+0572  Tuulos
+0574  Tuusniemi
+0575  Tuusula - Tusby
+6040  Tuutari - Duderhof
+0576  Tyrnävä
+0577  Tyrväntö
+0578  Tyrvää
+0579  Tytärsaari - Tyterskär
+0580  Töysä
+0581  Ullava
+0582  Ulvila - Ulvsby
+0583  Urjala
+0584  Uskela
+0585  Utajärvi
+0586  Utsjoki
+1061  Uudenkirkon ortodoksinen srk - Nyky
+0587  Uukuniemi
+0588  Uurainen
+0589  Uusikaarlepyy - Nykarleby
+0590  Uusikaupunki - Nystad
+0592  Uusikirkko Vpl - Nykyrka
+0593  Vaasa - Vasa
+0596  Vahto
+0599  Valkeala
+0600  Valkjärvi
+0602  Vampula
+0603  Vanaja - Vånå
+0607  Vehkalahti - Veckelax
+0608  Vehmaa - Vemo
+0609  Vehmalainen
+0611  Velkua
+0613  Vesilahti
+0614  Veteli - Vetil
+0615  Viaporin linnoitussrk - Sveaborg
+0715  Viaporin tykistöseurakunta - Artill
+0621  Vihanti
+0622  Vihti - Vichtis
+0627  Viipurin msrk - Viborgs lf
+1064  Viipurin ortodoksinen srk - Viborgs
+0716  Viipurin pataljoona - Viborgs batal
+0617  Viipurin ruotsalainen srk - Viborgs
+0618  Viipurin saksalainen srk - Viborgs 
+0625  Viipurin tuomiokirkkoseurakunta - Viipuri
+0628  Viitasaari
+0629  Viljakkala
+0631  Vimpeli
+0632  Virolahti - Vederlax
+0633  Virolais-lättiläinen sotilassrk - 
+0634  Virrat - Virdois
+0640  Vähäkyrö - Lillkyro
+0642  Västanfjärd
+0639  Vårdö
+0643  Vöyri - Vörå
+0644  Ylihärmä
+0645  Ylikiiminki
+0647  Ylistaro
+0648  Ylitornio - Övertorneå
+0649  Ylivieska
+0652  Yläne
+0653  Ylöjärvi
+0654  Ypäjä
+0658  Ähtäri - Etseri
+0659  Ähtävä - Esse
+
