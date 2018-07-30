@@ -140,10 +140,13 @@ def gedcom_transform(gedcom,transform):
     if request.method == 'GET':
         return parser.generate_html()
     else:
-        logfile = os.path.abspath(os.path.join(GEDDER,"transform.log"))
+        #logfile = os.path.abspath(os.path.join(GEDDER,"transform.log"))
+        logfile = gedcom_filename + ".log"
+        #logfile = os.path.abspath(os.path.join(gedcom_folder,logname))
         print("logfile:",logfile)
         removefile(logfile)
-        cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,parser.build_command(request.form.to_dict()),"--logfile", logfile)
+        args = parser.build_command(request.form.to_dict())
+        cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
         f = os.popen("""cd "%s";python gedcom_transform.py %s""" % (GEDDER,cmd))
         s = f.read()
         log = open(logfile).read()

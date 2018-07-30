@@ -226,7 +226,7 @@ def main():
         print(transformer.show_info(run_args, transformer, task_name))
     else:
         # Process file
-        print("Lokitiedot: {!r}".format(_LOGFILE))
+        print("Lokitiedot: {!r}".format(run_args['logfile']))
         init_log(run_args['logfile'])
         process_gedcom(run_args, transformer, task_name)
 
