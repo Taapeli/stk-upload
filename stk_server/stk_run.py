@@ -845,7 +845,6 @@ def gedcom_transform(gedcom,transform):
         cmd = transform[:-3] + " " + parser.build_command(request.form.to_dict())
         f = os.popen("""cd "%s";python gedcom_transform.py %s""" % (GEDDER,cmd))
         s = f.read()
-        print(s)
         logfile = os.path.join(GEDDER,"transform.log")
         log = open(logfile).read()
         time.sleep(1)  # for testing...

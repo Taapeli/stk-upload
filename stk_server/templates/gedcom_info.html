@@ -5,6 +5,14 @@
 {% block body %}
 {{ super() }}
 
+<style>
+#errors {
+	font-size: 24px;
+	color: white;
+	background-color: red; 
+}
+</style>
+
 <script>
 	
     function hide_all() {
@@ -16,7 +24,8 @@
 
         $(document).on({
             ajaxStart: function() { $("body").addClass("loading");  },
-            ajaxStop: function() { $("body").removeClass("loading"); }    
+            ajaxStop: function() { $("body").removeClass("loading"); },    
+            ajaxError: function() { $("#errors").text("Palvelinvirhe").show(); }    
         });
         
         $("#transforms").click(function() {
@@ -43,6 +52,9 @@
         	alert("{{ _('Toiminto vasta suunnitteilla') }}");
             //var ok = confirm('{{ _("Oletko varma?") }}');
         });
+        $("input,a").click(function() {
+        	 $("#errors").hide();
+        });
         hide_all();
     });
 </script>
@@ -50,6 +62,7 @@
 <div style="margin-left:50px; padding-bottom: 2em;">
     <div>
 	    <h2>Gedcom-käsittelyt</h2>
+	    <div id="errors"></div>
 	    <div class="row">
 	       <div class="startbox">
 	         <div style="display: inline-block;">
