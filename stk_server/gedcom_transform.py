@@ -9,7 +9,7 @@ The transforms are specified by separate Python modules ("plugins") in the subdi
 Parameters of main():
  1. The name of the plugin. This can be the name of the Python file ("module.py")
     or just the name of the module ("module").
-    In both case the .py file must be in the current directory or on the PYTHONPATH.
+    In both case the .py file must be in the subdirectory "transforms".
 
  2. The name of the input GEDCOM file. This is also the name of the output file.
 
@@ -172,20 +172,21 @@ def find_transform(prefix):
     return False
 
 
-def init_log():
+def init_log(logfile):
     ''' Define log file and save one previous log '''
     try:
-        if os.open(_LOGFILE, os.O_RDONLY):
-            os.rename(_LOGFILE, _LOGFILE + '~')
+        if os.open(logfile, os.O_RDONLY):
+            os.rename(logfile, logfile + '~')
     except:
         pass
-    logging.basicConfig(filename=_LOGFILE,level=logging.INFO, format='%(levelname)s:%(message)s')
+    logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('transform', help="Name of the transform (Python module)")
     parser.add_argument('input_gedcom', help="Name of the input GEDCOM file")
+    parser.add_argument('--logfile', help="Name of the log file", default=_LOGFILE )
     parser.add_argument('--output_gedcom', help="Name of the output GEDCOM file; this file will be created/overwritten" )
     parser.add_argument('--display-changes', action='store_true',
                         help='Display changed rows')
@@ -226,7 +227,7 @@ def main():
     else:
         # Process file
         print("Lokitiedot: {!r}".format(_LOGFILE))
-        init_log()
+        init_log(run_args['logfile'])
         process_gedcom(run_args, transformer, task_name)
 
 if __name__ == "__main__":
