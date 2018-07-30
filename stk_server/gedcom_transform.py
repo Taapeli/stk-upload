@@ -132,6 +132,7 @@ def process_gedcom(run_args, transformer, task_name=''):
                     f.original_line = ""
                     transformer.phase4(run_args, f)
                 f.original_line = gedline.line.strip()
+                f.saved_line = ""
                 transformer.phase3(run_args, gedline, f)
     except FileNotFoundError as err:
         LOG.error("Ohjelma päättyi virheeseen {}: {}".format(type(err).__name__, str(err)))

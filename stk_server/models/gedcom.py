@@ -9,11 +9,9 @@ import importlib
 
 import logging 
 import time
-from models.gen import refname
-logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, flash, jsonify
-from flask_security import login_required, roles_accepted, roles_required, current_user
+from flask_security import login_required, current_user
 from flask import send_from_directory
 
 import shareds
@@ -147,7 +145,7 @@ def gedcom_transform(gedcom,transform):
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
         cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
-        f = os.popen("""cd "%s";python gedcom_transform.py %s""" % (GEDDER,cmd))
+        f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
         s = f.read()
         log = open(logfile).read()
         time.sleep(1)  # for testing...
