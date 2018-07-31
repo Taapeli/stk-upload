@@ -68,6 +68,9 @@
 	         <div style="display: inline-block;">
 				<h3>{{ _("GEDCOM") }} "{{gedcom}}" tiedot</h3>
 				<p>(Näennäistiedot, ei aineistosta)</p>
+				{{ _("Kuvaus") }}:<br>
+			    <input name="desc" value='{{ metadata.desc }}'>
+			    <input type="button" id="update_desc" value='{{ _("Päivitä") }}'>
 				<table>
 				    <tr><td>{{ _("Ladattu") }}</td>
 				        <td class="right">2018-06-06</td></tr>
@@ -75,6 +78,12 @@
 				        <td class="right">{{ num_individuals }}</td></tr>
 	                <tr><td>{{ _("Sallin neuvontapalvelun katselumahdollisuuden") }}</td>
 	                    <td class="right"><input type="checkbox" id="view_permission"></td></tr>
+                    {% for meta in metadata.items() %}
+                    <!--
+                    <tr><td>{{ meta.0 }}
+                        <td>{{ meta.1 }}
+                    -->
+                    {% endfor %}
 			    </table>
 	          </div>
 	       </div>

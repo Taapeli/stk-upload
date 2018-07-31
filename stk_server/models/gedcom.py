@@ -27,6 +27,14 @@ GEDDER="stk_server"
 def get_gedcom_folder():
     return os.path.join(GEDCOM_FOLDER,current_user.username)
 
+def get_metadata(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    try:
+        metaname = os.path.join(gedcom_folder, gedcom + "-meta")
+        return eval(open(metaname).read())
+    except FileNotFoundError:
+        return {}
+    
 def get_transforms():
     class Transform: pass
     names = sorted([name for name in os.listdir(GEDDER+"/transforms") if name.endswith(".py") and not name.startswith("_")])
@@ -64,12 +72,7 @@ def gedcom_list():
     for name in names:
         f = File()
         f.name = name
-        try:
-            metaname = os.path.join(gedcom_folder,name+"-meta")
-            metadata = eval(open(metaname).read())
-            f.metadata = metadata
-        except FileNotFoundError: 
-            f.metadata = ""
+        f.metadata = get_metadata(name)
         files.append(f)
     return render_template('gedcom_list.html', title=_("Gedcomit"), 
                            files=files, kpl=len(names),
@@ -130,12 +133,15 @@ def gedcom_download(gedcom):
 def gedcom_info(gedcom):
     gedcom_folder = get_gedcom_folder()
     filename = os.path.join(gedcom_folder,gedcom)
+    metaname = os.path.join(gedcom_folder, gedcom + "-meta")
+    metadata = get_metadata(gedcom)
     num_individuals = 666
     transforms = get_transforms()
     return render_template('gedcom_info.html', 
         gedcom=gedcom, filename=filename, 
         num_individuals=num_individuals, 
         transforms=transforms,
+        metadata=metadata,
     )
 
 
