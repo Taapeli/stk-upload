@@ -724,4 +724,4 @@ def get_locale():
     #return "en"
     #return request.accept_languages.best_match(LANGUAGES)
 
-from models.gedcom import *
+#from models.gedcom import *

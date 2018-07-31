@@ -16,10 +16,11 @@ from flask import send_from_directory
 
 from flask_babelex import _
 
-import shareds
+from . import bp
     
 # --------------------- GEDCOM functions ------------------------
 
+# TODO: move these to config.py
 GEDCOM_FOLDER="gedcoms"    
 ALLOWED_EXTENSIONS = {"ged"}    
 GEDDER="stk_server"
@@ -63,7 +64,7 @@ def get_transforms():
         yield t
 
 
-@shareds.app.route('/gedcom/list', methods=['GET'])
+@bp.route('/gedcom/list', methods=['GET'])
 @login_required
 def gedcom_list():
     gedcom_folder = get_gedcom_folder()
@@ -83,16 +84,14 @@ def gedcom_list():
                            files=files, kpl=len(names),
                            allowed_extensions=allowed_extensions )
     
-@shareds.app.route('/gedcom/versions/<gedcom>', methods=['GET'])
+@bp.route('/gedcom/versions/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
     versions = sorted([name for name in os.listdir(gedcom_folder) if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
-    print( jsonify(versions).data)
     return jsonify(versions)
-    #return render_template('gedcom_versions.html', versions=versions )
 
-@shareds.app.route('/gedcom/upload', methods=['POST'])
+@bp.route('/gedcom/upload', methods=['POST'])
 @login_required
 def gedcom_upload():
     # code from: http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
@@ -122,7 +121,7 @@ def gedcom_upload():
         save_metadata(file.filename, metadata)
         return redirect(url_for('gedcom_list'))
   
-@shareds.app.route('/gedcom/download/<gedcom>')
+@bp.route('/gedcom/download/<gedcom>')
 @login_required
 def gedcom_download(gedcom):
     gedcom_folder = get_gedcom_folder()
@@ -132,7 +131,7 @@ def gedcom_download(gedcom):
     logging.info(filename)
     return send_from_directory(directory=gedcom_folder, filename=gedcom) 
  
-@shareds.app.route('/gedcom/info/<gedcom>', methods=['GET'])
+@bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_info(gedcom):
     gedcom_folder = get_gedcom_folder()
@@ -148,7 +147,7 @@ def gedcom_info(gedcom):
     )
 
 
-@shareds.app.route('/gedcom/update_desc/<gedcom>', methods=['POST'])
+@bp.route('/gedcom/update_desc/<gedcom>', methods=['POST'])
 @login_required
 def gedcom_update_desc(gedcom):
     metadata = get_metadata(gedcom)
@@ -165,7 +164,7 @@ def removefile(fname):
     except FileNotFoundError:
         pass
      
-@shareds.app.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
+@bp.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
 @login_required
 def gedcom_transform(gedcom,transform):
     gedcom_folder = get_gedcom_folder()
