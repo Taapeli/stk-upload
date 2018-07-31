@@ -52,6 +52,11 @@
         	alert("{{ _('Toiminto vasta suunnitteilla') }}");
             //var ok = confirm('{{ _("Oletko varma?") }}');
         });
+        $("#update_desc").click(function() {
+            $.post("/gedcom/update_desc/{{ gedcom }}", {desc:$("#desc").val()},function(rsp) {
+            	console.log(rsp);
+        	});
+        });
         $("input,a").click(function() {
         	 $("#errors").hide();
         });
@@ -67,10 +72,10 @@
 	       <div class="startbox">
 	         <div style="display: inline-block;">
 				<h3>{{ _("GEDCOM") }} "{{gedcom}}" tiedot</h3>
-				<p>(Näennäistiedot, ei aineistosta)</p>
 				{{ _("Kuvaus") }}:<br>
-			    <input name="desc" value='{{ metadata.desc }}'>
+			    <input id="desc" value='{{ metadata.desc }}'>
 			    <input type="button" id="update_desc" value='{{ _("Päivitä") }}'>
+				<p>(Näennäistiedot, ei aineistosta)</p>
 				<table>
 				    <tr><td>{{ _("Ladattu") }}</td>
 				        <td class="right">2018-06-06</td></tr>

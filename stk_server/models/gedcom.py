@@ -34,6 +34,11 @@ def get_metadata(gedcom):
         return eval(open(metaname).read())
     except FileNotFoundError:
         return {}
+
+def save_metadata(gedcom,metadata):
+    gedcom_folder = get_gedcom_folder()
+    metaname = os.path.join(gedcom_folder, gedcom + "-meta")
+    open(metaname,"w").write(repr(metadata))
     
 def get_transforms():
     class Transform: pass
@@ -113,9 +118,8 @@ def gedcom_upload():
         file.save(os.path.join(gedcom_folder, filename))
 
         desc = request.form['desc']
-        metaname = os.path.join(gedcom_folder, filename + "-meta")
-        values = {'desc':desc}
-        open(metaname,"w").write(repr(values))
+        metadata = {'desc':desc}
+        save_metadata(gedcom, metadata)
         return redirect(url_for('gedcom_list'))
   
 @shareds.app.route('/gedcom/download/<gedcom>')
@@ -143,6 +147,18 @@ def gedcom_info(gedcom):
         transforms=transforms,
         metadata=metadata,
     )
+
+
+@shareds.app.route('/gedcom/update_desc/<gedcom>', methods=['POST'])
+@login_required
+def gedcom_update_desc(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    metadata = get_metadata(gedcom)
+    desc = request.form['desc']
+    metadata['desc'] = desc
+    save_metadata(gedcom,metadata)
+    return "ok"
+    return redirect(url_for('gedcom_info'))
 
 
 def removefile(fname):

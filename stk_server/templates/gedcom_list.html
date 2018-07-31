@@ -16,8 +16,10 @@
 				    <ul>
 					    {% for file in files %}
 						    <li>
+						    <b>{{ file.metadata.desc|escape }}</b>
+						    <br>
 						    <a href="/gedcom/info/{{ file.name|escape }}">{{ file.name }}</a>
-						    <br>- {{ file.metadata.desc|escape }}
+						    <p>
 						    </li>
 					    {% endfor %}
 				    <p>{{ kpl }} {{ _("kpl") }}</p>
