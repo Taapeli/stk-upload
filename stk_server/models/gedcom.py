@@ -119,7 +119,7 @@ def gedcom_upload():
 
         desc = request.form['desc']
         metadata = {'desc':desc}
-        save_metadata(gedcom, metadata)
+        save_metadata(file.filename, metadata)
         return redirect(url_for('gedcom_list'))
   
 @shareds.app.route('/gedcom/download/<gedcom>')
@@ -137,7 +137,6 @@ def gedcom_download(gedcom):
 def gedcom_info(gedcom):
     gedcom_folder = get_gedcom_folder()
     filename = os.path.join(gedcom_folder,gedcom)
-    metaname = os.path.join(gedcom_folder, gedcom + "-meta")
     metadata = get_metadata(gedcom)
     num_individuals = 666
     transforms = get_transforms()
@@ -152,7 +151,6 @@ def gedcom_info(gedcom):
 @shareds.app.route('/gedcom/update_desc/<gedcom>', methods=['POST'])
 @login_required
 def gedcom_update_desc(gedcom):
-    gedcom_folder = get_gedcom_folder()
     metadata = get_metadata(gedcom)
     desc = request.form['desc']
     metadata['desc'] = desc
@@ -170,11 +168,9 @@ def removefile(fname):
 @shareds.app.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
 @login_required
 def gedcom_transform(gedcom,transform):
-    username = current_user.username 
     gedcom_folder = get_gedcom_folder()
     gedcom_filename = os.path.join(gedcom_folder,gedcom)
     gedcom_filename = os.path.abspath(gedcom_filename)
-    transform_filename = os.path.join(GEDDER,transform)
     parser = build_parser(transform,gedcom,gedcom_filename)
     if request.method == 'GET':
         return parser.generate_html()
@@ -220,7 +216,6 @@ def build_parser(filename,gedcom,gedcom_filename):
             class Row: pass
             for arg in self.args:
                 row = Row()
-                argname = arg.name
                 row.name = arg.name
                 row.action = arg.action
                 row.help = arg.help
