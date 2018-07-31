@@ -14,6 +14,8 @@ from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_security import login_required, current_user
 from flask import send_from_directory
 
+from flask_babelex import _
+
 import shareds
     
 # --------------------- GEDCOM functions ------------------------
@@ -57,8 +59,20 @@ def gedcom_list():
     except:
         names = []
     allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
+    files = []
+    class File: pass
+    for name in names:
+        f = File()
+        f.name = name
+        try:
+            metaname = os.path.join(gedcom_folder,name+"-meta")
+            metadata = eval(open(metaname).read())
+            f.metadata = metadata
+        except FileNotFoundError: 
+            f.metadata = ""
+        files.append(f)
     return render_template('gedcom_list.html', title=_("Gedcomit"), 
-                           names=names, kpl=len(names),
+                           files=files, kpl=len(names),
                            allowed_extensions=allowed_extensions )
     
 @shareds.app.route('/gedcom/versions/<gedcom>', methods=['GET'])
@@ -94,6 +108,11 @@ def gedcom_upload():
         filename = secure_filename(file.filename)
         os.makedirs(gedcom_folder, exist_ok=True)
         file.save(os.path.join(gedcom_folder, filename))
+
+        desc = request.form['desc']
+        metaname = os.path.join(gedcom_folder, filename + "-meta")
+        values = {'desc':desc}
+        open(metaname,"w").write(repr(values))
         return redirect(url_for('gedcom_list'))
   
 @shareds.app.route('/gedcom/download/<gedcom>')
@@ -139,7 +158,7 @@ def gedcom_transform(gedcom,transform):
         return parser.generate_html()
     else:
         #logfile = os.path.abspath(os.path.join(GEDDER,"transform.log"))
-        logfile = gedcom_filename + ".log"
+        logfile = gedcom_filename + "-log"
         #logfile = os.path.abspath(os.path.join(gedcom_folder,logname))
         print("logfile:",logfile)
         removefile(logfile)

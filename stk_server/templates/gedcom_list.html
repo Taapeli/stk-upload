@@ -14,8 +14,11 @@
 	            <h3>{{ _("Ladatut gedcomit") }}</h3>
 				<div>
 				    <ul>
-					    {% for name in names %}<li>
-					    <a href="/gedcom/info/{{ name|escape }}">{{ name }}</a></li>
+					    {% for file in files %}
+						    <li>
+						    <a href="/gedcom/info/{{ file.name|escape }}">{{ file.name }}</a>
+						    {{ file.metadata.desc|escape }}
+						    </li>
 					    {% endfor %}
 				    <p>{{ kpl }} {{ _("kpl") }}</p>
 				</div>
@@ -27,7 +30,10 @@
 	            <h3>{{ _("Lataa uusi Gedcom-tiedosto") }}</h3>
 				<div>
 				    <form method="post" enctype="multipart/form-data" action="/gedcom/upload">
+				      {{ _("Kuvaus") }}: <input name="desc">
+				      <p>
 				      <input type="file" name="file" accept="{{ allowed_extensions }}">
+				      <br>
 				      <input type="submit" value="{{ _('Lataa') }}">
 				    </form>
 				    <ul><li><a href="/">{{ _("Paluu") }}</a></li></ul>
