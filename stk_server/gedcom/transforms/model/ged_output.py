@@ -50,6 +50,7 @@ class Output:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.f.close()
         if 'dryrun' in self.run_args and self.run_args['dryrun']:
+            os.remove(self.temp_name)
             return
         self.save()
 
