@@ -44,7 +44,7 @@
         });
         $("a.transform").click(function(e) {
             $.get("/gedcom/transform/{{ gedcom }}/" + $(e.target).attr("data-transform"), function(rsp) {
-                $("#div_transform_params").html(rsp);
+                $("#div_transform_params1").html(rsp);
 	            $("#div_transform_params").show();
             });
         });
@@ -134,7 +134,13 @@
 		  </div>
 	        
 	      <div class="startbox gedcom" id="div_transform_params">
+			<form id="form">
+		      <div id="div_transform_params1">
+		      </div>
+			  <input type=submit id=transform value='{{ _("Muunna") }}'>
+	        </form>
 	      </div>
+	      
 	   </div>
    </div>
    <div>

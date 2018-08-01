@@ -1,8 +1,9 @@
 <script>
     $(document).ready( function() {
         $("#transform").click(function() {
+        	$("#output").hide();
             $.post("/gedcom/transform/{{ gedcom }}/{{ transform }}", $("#form").serialize(), function(rsp) {
-                $("#output").text(rsp);
+                $("#output").text(rsp).show();
             });
             return false;
         });
@@ -18,7 +19,6 @@
     <h3>{{ transform[:-3] }} {{ _("muunnosparametrit") }}</h3>
 
 	<div>
-		<form id="form">
 		<input type=hidden name=transform value='{{ transform }}'>
 		<table>
 		    <tr><th>{{ _("Asetus") }}</th>
@@ -40,7 +40,5 @@
 		    </tr>
 		{% endfor %}
 		</table><div align="right" style="margin-top:1em">
-		<input type=submit id=transform value='{{ _("Muunna") }}'>
-        </form>
     </div>
 </div>
