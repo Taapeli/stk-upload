@@ -197,7 +197,7 @@ def main():
                         help='Do not produce a log in the output file')
     #parser.add_argument('--display-nonchanges', action='store_true',
     #                    help='Display unchanged places')
-    parser.add_argument('--encoding', type=str, default="utf-8",
+    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "ISO8859-1"],
                         help="e.g, UTF-8, ISO8859-1")
     parser.add_argument('-l', '--list', action='store_true', help="List transforms")
 

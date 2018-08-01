@@ -196,19 +196,20 @@ def build_parser(filename,gedcom,gedcom_filename):
     sys.path = saved_path
 
     class Arg:
-        def __init__(self,name,name2,action,type,default,help):
+        def __init__(self,name,name2,action,type,choices,default,help):
             self.name = name
             self.name2 = name2
             self.action = action
             self.type = type
+            self.choices = choices
             self.default = default
             self.help = help
 
     class Parser:
         def __init__(self):
             self.args = []
-        def add_argument(self,name,name2=None,action='store',type=str,default=None,help=None,nargs=0):
-            self.args.append(Arg(name,name2,action,type,default,help))
+        def add_argument(self,name,name2=None,action='store',type=str,default=None,help=None,nargs=0,choices=None):
+            self.args.append(Arg(name,name2,action,type,choices,default,help))
              
         def generate_html(self):
             rows = []
@@ -227,6 +228,9 @@ def build_parser(filename,gedcom,gedcom_filename):
                     row.type = "checkbox"
                 elif arg.action == 'store_const':
                     row.type = "checkbox"
+                elif arg.choices:
+                    row.type = "select"
+                    row.choices = arg.choices
                 elif arg.action == 'store' or arg.action is None:
                     row.type = 'text'
                     if arg.type == int:
@@ -264,7 +268,7 @@ def build_parser(filename,gedcom,gedcom_filename):
                         help='Do not produce an output file')
     parser.add_argument('--nolog', action='store_true',
                         help='Do not produce a log in the output file')
-    parser.add_argument('--encoding', type=str, default="utf-8",
+    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "ISO8859-1"],
                         help="e.g, UTF-8, ISO8859-1")
     transformer.add_args(parser)
 

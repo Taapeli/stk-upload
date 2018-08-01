@@ -29,13 +29,22 @@
 		    <tr>
 		    <td>{{ row.name }} {% if row.help %}
 		      <span style="font-size: smaller;">{{ row.help }}</span>{% endif %}</td>
-		    <td><input type='{{ row.type }}' name='{{ row.name }}' 
+		    <td>
+		    {% if row.type == "select" %}
+		    <select>
+		       {% for choice in row.choices %}
+				   <option>{{ choice }}
+		       {% endfor %}
+		    </select>
+	        {% else %}
+		    <input type='{{ row.type }}' name='{{ row.name }}' 
 		          style="width: 10em" {{ row.checked }}>
 		        {% if row.action == 'append' %}
 		            <input type=button value='{{ _("Lisää") }}'>
 		        {% endif %}
 		        {% if row.default %}<br />{{ _("Oletusarvo") }} {{ row.default }}
 		        {% endif %}
+	       {% endif %}
 		    </td>
 		    </tr>
 		{% endfor %}
