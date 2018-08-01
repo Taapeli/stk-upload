@@ -1,6 +1,6 @@
 from flask import session
 from flask_security import Security, UserMixin, RoleMixin
-from flask_security.forms import ConfirmRegisterForm, Required, StringField
+from flask_security.forms import ConfirmRegisterForm, Required, StringField, ValidationError
 from wtforms import SelectField
 from flask_security.utils import _
 from flask_mail import Mail
