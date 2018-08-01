@@ -17,11 +17,12 @@ from templates import jinja_filters
 #===================== Classes to create user session ==========================
 
 class SetupCypher():
-    """ Cypher clases for setup """
+    """ Cypher classes for setup """
 
     set_user_constraint = '''
         CREATE CONSTRAINT ON (user:User) 
-        ASSERT user.username IS UNIQUE'''
+        ASSERT user.username IS UNIQUE
+        ASSERT user.email IS UNIQUE'''
     
     role_create = '''
         CREATE (role:Role {level: $level, name: $name, 
@@ -31,7 +32,10 @@ class SetupCypher():
         MATCH  (user:User) 
         WHERE user.username = 'master' 
         RETURN COUNT(user)"""
-
+        
+    email_val = """
+        MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN COUNT(a)"""
+        
     master_create = ('''
         MATCH  (role:Role) WHERE role.name = 'admin'
         CREATE (user:User 
@@ -141,6 +145,18 @@ class AllowedEmail():
 
 
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
+
+    email = StringField('Email Address', validators=[Required('Email required') ])
+#    email = StringField('Email', validators=[validators.InputRequired()])
+    def validate_email(self, field):
+        for result in shareds.driver.session().run(SetupCypher.email_val, email=field.data):
+            num_of_emails = result[0]
+        if num_of_emails == 0:
+#        if not shareds.user_datastore.email_accepted(field.data):
+            raise ValidationError('Email address must be an authorized one') 
+        else:
+            return True    
+        
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
     #language = StringField('Language', validators=[Required('Language required')])
