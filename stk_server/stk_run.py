@@ -3,19 +3,14 @@
 # @ Sss 2016
 # JMä 29.12.2015
 
-
-import sys
-import os
-import importlib
 import urllib
 
 import logging 
 import time
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, flash #, jsonify
+from flask import render_template, request, redirect, url_for, flash 
 from flask_security import login_required, roles_accepted, roles_required, current_user
-# from flask import send_from_directory
 
 import shareds
 from models import gen
