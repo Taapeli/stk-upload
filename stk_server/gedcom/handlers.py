@@ -181,7 +181,7 @@ def gedcom_transform(gedcom,transform):
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
         cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
-        f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
+        f = os.popen("""cd "{}";{} gedcom/gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
         s = f.read()
         log = open(logfile).read()
         time.sleep(1)  # for testing...
