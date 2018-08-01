@@ -104,13 +104,14 @@ def gedcom_upload():
     # check if the post request has the file part
     if 'file' not in request.files:
         flash(_('Valitse ladattava gedcom-tiedosto'))
-        return redirect(request.url)
+        return redirect(url_for('.gedcom_list'))
     file = request.files['file']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
         flash(_('Valitse ladattava gedcom-tiedosto'))
-        return redirect(url_for('gedcom_list'))
+        return redirect(url_for('.gedcom_info',gedcom='xxx'))
+        return redirect(url_for('.gedcom_list'))
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         os.makedirs(gedcom_folder, exist_ok=True)
@@ -119,7 +120,7 @@ def gedcom_upload():
         desc = request.form['desc']
         metadata = {'desc':desc}
         save_metadata(file.filename, metadata)
-        return redirect(url_for('gedcom_list'))
+        return redirect(url_for('.gedcom_list'))
   
 @bp.route('/gedcom/download/<gedcom>')
 @login_required
@@ -136,6 +137,9 @@ def gedcom_download(gedcom):
 def gedcom_info(gedcom):
     gedcom_folder = get_gedcom_folder()
     filename = os.path.join(gedcom_folder,gedcom)
+    if not os.path.exists(filename):
+        flash("Tiedostoa ei ole")
+        return redirect(url_for('.gedcom_list'))
     metadata = get_metadata(gedcom)
     num_individuals = 666
     transforms = get_transforms()
@@ -155,7 +159,6 @@ def gedcom_update_desc(gedcom):
     metadata['desc'] = desc
     save_metadata(gedcom,metadata)
     return "ok"
-    return redirect(url_for('gedcom_info'))
 
 
 def removefile(fname):
@@ -174,9 +177,7 @@ def gedcom_transform(gedcom,transform):
     if request.method == 'GET':
         return parser.generate_html()
     else:
-        #logfile = os.path.abspath(os.path.join(GEDDER,"transform.log"))
         logfile = gedcom_filename + "-log"
-        #logfile = os.path.abspath(os.path.join(gedcom_folder,logname))
         print("logfile:",logfile)
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
