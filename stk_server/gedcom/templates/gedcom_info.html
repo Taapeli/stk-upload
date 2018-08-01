@@ -49,8 +49,13 @@
             });
         });
         $("#delete").click(function() {
-        	alert("{{ _('Toiminto vasta suunnitteilla') }}");
-            //var ok = confirm('{{ _("Oletko varma?") }}');
+        	//alert("{{ _('Toiminto vasta suunnitteilla') }}");
+            var ok = confirm('{{ _("Oletko varma?") }}');
+            if (ok) {
+            	$.get("/gedcom/delete/{{ gedcom }}",function() {
+            		window.location.replace("/gedcom/list");
+            	});
+            }
         });
         $("#update_desc").click(function() {
             $.post("/gedcom/update_desc/{{ gedcom }}", {desc:$("#desc").val()},function(rsp) {
