@@ -40,8 +40,11 @@ class GedcomLine(object):
         self.level = int(tkns[0])
         self.tag = tkns[1]
         if len(tkns) > 2:
-            i = line.find(" %s " % self.tag)
-            self.value = line[i+len(self.tag)+2:] # preserve leading blanks 
+            if type(line) == str:
+                i = line.find(" %s " % self.tag)
+                self.value = line[i+len(self.tag)+2:] # preserve leading blanks
+            else:
+                self.value = tkns[2] 
         else:
             self.value = ""
             self.line = str(self)
