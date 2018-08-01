@@ -103,14 +103,13 @@ def gedcom_upload():
     gedcom_folder = get_gedcom_folder()
     # check if the post request has the file part
     if 'file' not in request.files:
-        flash(_('Valitse ladattava gedcom-tiedosto'))
+        flash(_('Valitse ladattava gedcom-tiedosto'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     file = request.files['file']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        flash(_('Valitse ladattava gedcom-tiedosto'))
-        return redirect(url_for('.gedcom_info',gedcom='xxx'))
+        flash(_('Valitse ladattava gedcom-tiedosto'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -138,7 +137,7 @@ def gedcom_info(gedcom):
     gedcom_folder = get_gedcom_folder()
     filename = os.path.join(gedcom_folder,gedcom)
     if not os.path.exists(filename):
-        flash("Tiedostoa ei ole")
+        flash(_("Tiedostoa ei ole"), category='flash_error')
         return redirect(url_for('.gedcom_list'))
     metadata = get_metadata(gedcom)
     num_individuals = 666
