@@ -11,14 +11,20 @@
  <!--link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
     <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
  -->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="/static/ohjeet.js?123245678911234511"></script>
   </head>
   <body>
     {% block body %}
     <h1><a href="/"><img id="logo" src="/static/hlo.png" alt="Palaa alkuun" title="Palaa alkuun"
              onmouseover="this.src='/static/hlo1.png';" 
              onmouseout="this.src='/static/hlo.png';"/></a>
-        <i>Suomen Sukututkimusseuran Suomi-tietokanta</i></h1>
+        <i>Suomen Sukututkimusseuran Suomi-tietokanta</i> <a href="#" id="ohjeet">Ohjeet</a></h1>
+           
+        
     {% endblock %}
 
     <div class="fullclear"></div>
@@ -26,5 +32,8 @@
         <p id="createdate">
         Stk-server &nbsp; <small style="font-size: 6pt">versio 10.7.2018</small></p>
     <div class="fullclear"></div>
+
+<div id="ohjeikkuna" title="Ohjeita">
+</div>
 
 </body></html>

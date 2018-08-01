@@ -6,6 +6,7 @@
 import sys
 import os
 import importlib
+import urllib
 
 import logging 
 import time
@@ -724,4 +725,11 @@ def get_locale():
     #return "en"
     #return request.accept_languages.best_match(LANGUAGES)
 
-#from models.gedcom import *
+@shareds.app.route('/help')
+@login_required
+def help():
+    url = request.args.get("url")
+    path = urllib.parse.urlparse(url)
+    return "Help for {}".format(path.path)
+
+ 
