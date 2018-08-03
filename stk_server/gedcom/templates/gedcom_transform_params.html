@@ -31,7 +31,7 @@
 		      <span style="font-size: smaller;">{{ row.help }}</span>{% endif %}</td>
 		    <td>
 		    {% if row.type == "select" %}
-		    <select>
+		    <select name='{{ row.name }}'>
 		       {% for choice in row.choices %}
 				   <option>{{ choice }}
 		       {% endfor %}
