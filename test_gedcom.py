@@ -49,14 +49,12 @@ def xtest_nologon(client):
 def test_login_logout(client):
     """Make sure login and logout works."""
 
-    rv = login(client)
-    assert b'Oma sukupuuni' in rv.data
-
     rv = logout(client)
-    assert b'Kirjaudu tunnuksillasi' in rv.data
+    data = rv.data.decode("utf-8")
+    assert 'Kirjaudu tunnuksillasi' in data
 
     rv = login(client, "aaa", "bbb")
-    assert b'Kirjaudu tunnuksillasi' in rv.data
+    assert 'Kirjaudu tunnuksillasi' in data
 
     try:
         os.remove(test_gedcom_fname)
@@ -64,52 +62,47 @@ def test_login_logout(client):
         pass
     
 def test_gedcom_upload(client):
-    rv = login(client)
     assert not os.path.exists(test_gedcom_fname)
 
-    args = dict(file=(io.BytesIO(b"aaa"),"aaa.ged"),desc="Description")
+    args = dict(file=(io.BytesIO(b"aaa"),test_gedcom),desc="Description")
     rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
-    assert b'Ladatut gedcomit' in rv.data
-    assert b'aaa.ged' in rv.data
-    assert b'Description' in rv.data
+    data = rv.data.decode("utf-8")
     assert os.path.exists(test_gedcom_fname)
+    assert 'Ladatut gedcomit' in data
+    assert test_gedcom in data
+    assert 'Description' in data
         
 def test_gedcom_list(client):
-    rv = login(client)
-
     rv = client.get('/gedcom/list')
-    assert b'Ladatut gedcomit' in rv.data
+    data = rv.data.decode("utf-8")
+    assert 'Ladatut gedcomit' in data
     
     for name in os.listdir(gedcom_dir):
         if not name.endswith(".ged"): continue
-        assert name in rv.data.decode("utf-8")
+        assert name in data
 
 def test_gedcom_info(client):
-    rv = login(client)
-
     rv = client.get('/gedcom/info/'+test_gedcom)
-    assert b'Muunnokset' in rv.data
+    data = rv.data.decode("utf-8")
+    assert 'Muunnokset' in data
 
 def test_gedcom_versions(client):
-    rv = login(client)
-
     rv = client.get('/gedcom/versions/'+test_gedcom)
-    assert b'[]' in rv.data
+    data = rv.data.decode("utf-8")
+    assert '[]' in data
 
 def test_gedcom_transform_params(client):
-    rv = login(client)
-
     rv = client.get('/gedcom/transform/'+test_gedcom+"/kasteet.py")
-    assert b'kasteet muunnosparametrit' in rv.data
+    data = rv.data.decode("utf-8")
+    assert 'kasteet muunnosparametrit' in data
     
 def test_gedcom_transform(client):
-    rv = login(client)
-
     args = {
         "--dryrun":"on",
         "--display-changes":"on",   
     }
     rv = client.post('/gedcom/transform/'+test_gedcom+"/kasteet.py",data=args)
-    assert b'Lokitiedot' in rv.data
+    data = rv.data.decode("utf-8")
+    assert 'Lokitiedot' in data
     
         
