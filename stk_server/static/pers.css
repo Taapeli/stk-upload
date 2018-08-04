@@ -8,6 +8,7 @@ body {
     font-size: 10pt;
 }
 h1 {
+    position: relative;
     background-color:bisque;
     font-size: 11pt;
     width: 100%;
@@ -20,6 +21,23 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
+a#ohjeet {
+    position: absolute;
+    top: 7px;
+    right: 4px;
+    /*position: absolute;
+    top: -18pt;
+    right: 0;*/
+    display: inline-block;
+    font-weight: normal;
+    font-size: 9pt;
+    text-decoration: none;
+    background: #fcfec3; 
+    color: black;
+    border:1px solid gray;
+    border-radius: 4pt;
+    padding: 0 5pt 0 5pt;
+    margin: 5pt;}
 
 .startbox {
     display: inline-block;

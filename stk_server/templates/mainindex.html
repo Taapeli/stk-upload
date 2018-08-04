@@ -5,7 +5,7 @@
 {% block body %}
 {{ super() }}
 
-<div style="margin-left:50px; padding-bottom: 2em;">
+<div style="margin-left:50px">
   <div>
     <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
     <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
@@ -96,7 +96,7 @@
          </div>
         </div>{% endif %}
      {% if current_user.is_authenticated %}
-        <div class="startbox"">
+        <div class="startbox">
           <h3>Kirjaudu ulos</h3>
           <p>Istunnon lopettaminen<br>&nbsp;</p>
 	      <form method="get" action="/logout">
@@ -108,5 +108,5 @@
      {% endif %}
     </div>
   </div>
-	
+</div>
 {% endblock %}
