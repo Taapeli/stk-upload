@@ -6,8 +6,8 @@ import io
 
 import pytest
 
-sys.path.append("stk_server")
-from stk_server import app
+sys.path.append("app")
+from app import app
 
 #logging.basicConfig(level=logging.DEBUG, filename="test.log")
 logging.basicConfig(level=logging.INFO)
