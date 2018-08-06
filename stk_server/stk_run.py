@@ -281,11 +281,12 @@ def nayta_henkilot(subj):
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists)
     elif subj == 'repositories':
-        repositories = datareader.read_repositories()
-        for r in repositories:
-            r.type = jinja_filters.translate(r.type, 'rept', 'fi')
-        return render_template("ng_table_repositories.html",
-                               repositories=repositories)
+        titles, obj = datareader.get_repositories()
+#         for r in obj:
+#             r.type = jinja_filters.translate(r.type, 'rept', 'fi')
+        return render_template("table_of_objects.html",
+                               headings=("Arkistot", "Arkistotiedot (repository)"),
+                               titles=titles, objs=obj)
     elif subj == 'same_birthday':
         ids = datareader.read_same_birthday()
         return render_template("ng_same_birthday.html", ids=ids)
@@ -600,8 +601,9 @@ def set_all_person_refnames():
 
 
 """ ------------------------ Obsolete operations? ------------------------------
-""" 
- 
+"""
+
+
 @shareds.app.route('/lista/person_data/<string:uniq_id>')
 def show_person_data_dbl(uniq_id):
     """ Table of Person data

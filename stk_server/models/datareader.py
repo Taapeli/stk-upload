@@ -17,7 +17,7 @@ from models.gen.media import Media
 from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
-from models.gen.source_citation import Citation, Repository, Source
+from models.gen.source_citation import Citation, Repository, Source, Weburl
 from models.gen.dates import DateRange
 
 
@@ -249,11 +249,14 @@ def read_medias(uniq_id=None):
     return (media)
 
 
-def read_repositories(uniq_id=None):
+def get_repositories(uniq_id=None):
     """ Lukee tietokannasta Repository- ja Source- objektit näytettäväksi
 
+        (Korvaa read_repositories()
     """
     
+    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 
+              'url_refs']
     repositories = []
     result = Repository.get_repository_source(uniq_id)
     for record in result:
@@ -265,14 +268,15 @@ def read_repositories(uniq_id=None):
         if record['type']:
             r.type = record['type']
         if record['url_href']:
-            r.url_href.append(record['url_href'])
-        if record['url_type']:
-            r.url_type.append(record['url_type'])
-        if record['url_description']:
-            r.url_description.append(record['url_description'])
+            url = Weburl()
+            url.url_href = record['url_href']
+            if record['url_type']:
+                url.url_type = record['url_type']
+            if record['url_description']:
+                url.url_description = record['url_description']
+            r.url_refs.append(url)
 
         for source in record['sources']:
- 
             s = Source()
             s.uniq_id = source[0]
             s.stitle = source[1]
@@ -281,7 +285,7 @@ def read_repositories(uniq_id=None):
  
         repositories.append(r)
 
-    return (repositories)
+    return (titles, repositories)
 
 
 def read_same_birthday(uniq_id=None):

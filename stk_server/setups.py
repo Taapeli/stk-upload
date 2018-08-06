@@ -379,6 +379,11 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
     """
     return jinja_filters.translate(term, var_name, lang)
 
+@shareds.app.template_filter('is_list')
+def _is_list(value):
+    return isinstance(value, list)
+
+
 
 # Create a user to test with
 #===============================================================================

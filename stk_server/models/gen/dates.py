@@ -314,10 +314,13 @@ class DateRange():
             elif isinstance(arg0, str):
                 # A date string
                 a = arg0.split('-', 2)
-                year = int(a[0])
-                month = int(a[1]) if len(a) > 1 else None
-                day  =  int(a[2]) if len(a) > 2 else None
-                self._set(year, month, day)
+                try:
+                    year = int(a[0])
+                    month = int(a[1]) if len(a) > 1 else None
+                    day  =  int(a[2]) if len(a) > 2 else None
+                    self._set(year, month, day)
+                except ValueError as e:
+                    raise ValueError('DateInt({})'.format(arg0))
             else:
                 raise TypeError('DateInt({})'.format(arg0))
             return
