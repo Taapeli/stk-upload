@@ -18,7 +18,7 @@ gedcom_dir = "gedcoms/" + test_username
 test_gedcom = "aaa.ged"
 test_gedcom_fname = os.path.join(gedcom_dir,test_gedcom)
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def client():
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
@@ -60,6 +60,8 @@ def test_login_logout(client):
         os.remove(test_gedcom_fname)
     except FileNotFoundError:
         pass
+
+    rv = login(client)
     
 def test_gedcom_upload(client):
     assert not os.path.exists(test_gedcom_fname)
