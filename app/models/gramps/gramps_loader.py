@@ -31,12 +31,12 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     Metacode for batch log creation UserProfile --> Batch --> Log:
     
     # Start a Batch 
-        stk_run.upload_gramps / models.loadfile.upload_file >
+        routes.upload_gramps / models.loadfile.upload_file >
             # Create id / models.batchlogger.Batch._create_id
             match (p:UserProfile {username:"jussi"}); 
             create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"}) 
             return b
-    # Load the file (in stk_run.save_loaded_gramps) and create the first Log
+    # Load the file (in routes.save_loaded_gramps) and create the first Log
         models.loadfile.upload_file > 
             create (b) -[:HAS_STEP]-> (l:Log {status:"started"}) 
             return l.id as lid0
