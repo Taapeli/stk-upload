@@ -86,8 +86,7 @@ RETURN ID(n) AS uniq_id, n"""
             if uniq_id:
                 query = """
 MATCH (n:Note) WHERE ID(note)=$nid
-RETURN ID(n) AS uniq_id, n 
-ORDER BY n.type"""
+RETURN ID(n) AS uniq_id, n"""
                 result =  session.run(query, nid=uniq_id)
             else:
                 query = """

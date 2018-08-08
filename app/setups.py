@@ -181,10 +181,7 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 shareds.mail = Mail(shareds.app)
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
-print('Stk-server init') 
-
-#  Alusta sovellusosat (on käytössä vaikka varoitus "unused import")
-import stk_run
+print('Stk server setups') 
 
 # Setup Flask-Security
 shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role, AllowedEmail)
@@ -379,12 +376,12 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
     """
     return jinja_filters.translate(term, var_name, lang)
 
-
-# Create a user to test with
-#===============================================================================
-# @app.before_first_request
-# def create_user():
-#     user_datastore.create_user(email='xxx@yyyyyyy.fi', password='password')
-#===============================================================================
+@shareds.app.template_filter('is_list')
+def _is_list(value):
+    return isinstance(value, list)
 
 
+#------------------------  Load Flask routes file ------------------------------
+# (ON käytössä vaikka varoitus "unused import")
+
+import routes

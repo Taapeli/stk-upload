@@ -1,6 +1,6 @@
 # coding=UTF-8
 
-from stk_server import app 
+from app import app 
 import logging
 print('Käynnistys: ' + str(app))
 """

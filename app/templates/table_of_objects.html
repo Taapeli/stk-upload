@@ -23,6 +23,8 @@
 	    	  {% if k in ["date", "birth", "death"] %}<td>{{obj[k]|d('')|pvm}}</td>
               {% elif  k == "change" %}<td><small>{{obj[k]|d('-')|timestamp}}</small></td>
               {% elif  k == "handle" %}<td><small>{{obj[k]|d('-')}}</small></td>
+              {% elif  obj[k]|is_list %}<td><ul>
+                {% for i in obj[k] %}<li>{{i|d('-')}}</li>{% endfor %}</ul></td>
               {% else %}<td>{{obj[k]|d('-')}}</td>
 		      {% endif %}
 	    	{% endfor %}

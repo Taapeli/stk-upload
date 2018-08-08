@@ -147,31 +147,57 @@ class Citation:
     
 
 class Repository:
-    """ Arkisto
+    """ Repository / Arkisto
             
         Properties:
-                handle          
-                change
-                id              esim. "R0001"
-                rname           str arkiston nimi
-                type            str arkiston tyyppi
-                url_href        str url osoite
-                url_type        str url tyyppi
-                url_description str url kuvaus
+            uniq_id         int    db native key or None
+            handle          str    Gramps handle
+            change          int    timestamp
+            id              str    esim. "R0001"
+            rname           str    arkiston nimi
+            type            str    arkiston tyyppi
+            url_refs        Weburl(url_href, url_type, url_description)[]
+#                 url_href        str url osoite
+#                 url_type        str url tyyppi
+#                 url_description str url kuvaus
 
      """
 
     def __init__(self):
         """ Luo uuden repository-instanssin """
+        self.uniq_id = None
         self.handle = ''
         self.change = ''
         self.id = ''
-        self.url_href = []
-        self.url_type = []
-        self.url_description = []
+        self.url_refs = []
         self.sources = []   # For creating display sets
         
     
+    @staticmethod
+    def _to_self(record):
+        '''
+        Transforms a db record to an object of type Repository
+        #TODO muodosta url_refs Weburl:in komponenteista
+        '''
+        n = Repository()
+        if record['uniq_id']:
+            n.uniq_id = int(record['uniq_id'])
+        record_n = record['r']
+        if record_n['handle']:
+            n.handle = record_n['handle']
+        if record_n['change']:
+            n.change = int(record_n['change'])
+        if record_n['id']:
+            n.id = record_n['id']
+        if record_n['priv']:
+            n.priv = record_n['priv']
+        if record_n['type']:
+            n.type = record_n['type']
+        if record_n['text']:
+            n.text = record_n['text']
+        return n
+
+
     def get_repo_data(self):
         """ Luetaan arkiston tiedot """
                         
@@ -182,14 +208,46 @@ class Repository:
         return  shareds.driver.session().run(query)
     
     
-    @staticmethod       
-    def get_repositories():
-        """ Luetaan kaikki arkistot """
-                        
-        query = """
-            MATCH (repo:Repository) RETURN repo
-            """
-        return  shareds.driver.session().run(query)
+    @staticmethod
+    def get_repositories(uniq_id):
+        """ Reads all Repository nodes or selected Repository node from db
+
+            Now called only from models.datareader.get_repositories for 
+            "table_of_objects.html"
+        """
+
+        result = None
+        with shareds.driver.session() as session:
+            if uniq_id:
+                repository_get = """
+MATCH (r:Repository)
+WHERE ID(r) == $rid
+RETURN ID(n) AS uniq_id, r"""
+                result =  session.run(repository_get, nid=uniq_id)
+            else:
+                repository_get_all = """
+MATCH (r:Repository)
+RETURN ID(n) AS uniq_id, r 
+ORDER BY r.type"""
+                result =  session.run(repository_get_all)
+
+        titles = ['uniq_id', 'handle', 'change', 'id', 'type', 'name']
+        repositories = []
+
+        for record in result:
+            # Create a Note object from record
+            n = Repository._to_self(record)
+            repositories.append(n)
+
+        return (titles, repositories)
+
+
+#     @staticmethod       
+#     def get_repositories():
+#         """ Luetaan kaikki arkistot """
+#                         
+#         query = "MATCH (repo:Repository) RETURN repo"
+#         return  shareds.driver.session().run(query)
     
     
     @staticmethod       
@@ -214,13 +272,13 @@ class Repository:
             where = ''
         
         query = """
- MATCH (repository:Repository)<-[r:REPOSITORY]-(source:Source) {0}
-   WITH repository, r, source ORDER BY source.stitle
- RETURN ID(repository) AS id, repository.rname AS rname, 
-   repository.type AS type, repository.url_href AS url_href, 
-   repository.url_type AS url_type, repository.url_description AS url_description,
-  COLLECT([ID(source), source.stitle, r.medium]) AS sources
- ORDER BY repository.rname""".format(where)
+MATCH (repository:Repository) <-[r:REPOSITORY]- (source:Source) {0}
+    WITH repository, r, source ORDER BY source.stitle
+RETURN ID(repository) AS id, repository.rname AS rname, 
+    repository.type AS type, repository.url_href AS url_href, 
+    repository.url_type AS url_type, repository.url_description AS url_description,
+    COLLECT([ID(source), source.stitle, r.medium]) AS sources
+ORDER BY repository.rname""".format(where)
                 
         return shareds.driver.session().run(query)
                 
@@ -262,10 +320,13 @@ class Repository:
                 "id": self.id,
                 "rname": self.rname,
                 "type": self.type,
-                "url_href": self.url_href,
-                "url_type": self.url_type,
-                "url_description": self.url_description
             }
+            if len(self.url_refs) > 0:
+                with self.url_refs[0] as url:
+                    r_attr['url_href'] = url.url_href
+                    r_attr['url_type'] = url.url_type
+                    r_attr['url_description'] = url.url_description
+                
             tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
         except Exception as err:
             print("Virhe (Repository.save): {0}".format(err), file=stderr)
@@ -570,4 +631,14 @@ ORDER BY toUpper(stitle)
                 print("Virhe (Source.save:repository_medium): {0}".format(err), file=stderr)
 
         return
+
+
+class Weburl():
+    """ A web reference 
+    """
+
+    def __init__(self, href=None, rtype=None, description=""):
+        self.url_href = href
+        self.url_type = rtype
+        self.url_description = description
 

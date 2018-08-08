@@ -31,12 +31,12 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     Metacode for batch log creation UserProfile --> Batch --> Log:
     
     # Start a Batch 
-        stk_run.upload_gramps / models.loadfile.upload_file >
+        routes.upload_gramps / models.loadfile.upload_file >
             # Create id / models.batchlogger.Batch._create_id
             match (p:UserProfile {username:"jussi"}); 
             create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"}) 
             return b
-    # Load the file (in stk_run.save_loaded_gramps) and create the first Log
+    # Load the file (in routes.save_loaded_gramps) and create the first Log
         models.loadfile.upload_file > 
             create (b) -[:HAS_STEP]-> (l:Log {status:"started"}) 
             return l.id as lid0
@@ -311,7 +311,10 @@ class DOM_handler():
                 <dateval val="1870" type="about"/>
                 <datestr val="1700-luvulla" />    # Not processed!
             """
-            e.dates = self._extract_daterange(event)
+            try:
+                e.dates = self._extract_daterange(event)
+            except:
+                e.dates = None
 
             if len(event.getElementsByTagName('place') ) == 1:
                 event_place = event.getElementsByTagName('place')[0]
@@ -742,15 +745,16 @@ class DOM_handler():
                 self.log(Log("More than one type in a repository",
                                     level="WARNING", count=r.id))
 
-            if len(repository.getElementsByTagName('url') ) >= 1:
-                for i in range(len(repository.getElementsByTagName('url') )):
-                    repository_url = repository.getElementsByTagName('url')[i]
-                    if repository_url.hasAttribute("href"):
-                        r.url_href.append(repository_url.getAttribute("href"))
-                    if repository_url.hasAttribute("type"):
-                        r.url_type.append(repository_url.getAttribute("type"))
-                    if repository_url.hasAttribute("description"):
-                        r.url_description.append(repository_url.getAttribute("description"))
+#TODO: Tämä ei toimi
+#             if len(repository.getElementsByTagName('url') ) >= 1:
+#                 for i in range(len(repository.getElementsByTagName('url') )):
+#                     repository_url = repository.getElementsByTagName('url')[i]
+#                     if repository_url.hasAttribute("href"):
+#                         r.url_href.append(repository_url.getAttribute("href"))
+#                     if repository_url.hasAttribute("type"):
+#                         r.url_type.append(repository_url.getAttribute("type"))
+#                     if repository_url.hasAttribute("description"):
+#                         r.url_description.append(repository_url.getAttribute("description"))
 
             r.save(self.tx)
             counter += 1
