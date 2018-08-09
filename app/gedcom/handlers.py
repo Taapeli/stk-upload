@@ -23,7 +23,7 @@ from . import bp
 # TODO: move these to config.py
 GEDCOM_FOLDER="gedcoms"    
 ALLOWED_EXTENSIONS = {"ged"}    
-GEDDER="stk_server/gedcom"
+GEDDER="app/gedcom"
 
 def get_gedcom_folder():
     return os.path.join(GEDCOM_FOLDER,current_user.username)

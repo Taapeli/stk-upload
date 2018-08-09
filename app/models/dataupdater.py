@@ -51,7 +51,7 @@ def set_estimated_dates(batch_logger=None):
     if isinstance(batch_logger, Batch):
         batch_logger.append(Log(title="Estimated birth and death dates set. " + msg, 
                                     elapsed=time.time()-t0))
-    return
+    return msg
 
 
 def set_person_refnames(self=None, uniq_id=None, batch_logger=None):

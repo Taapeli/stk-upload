@@ -2,15 +2,27 @@
 Created on 2.3.2018
 
 @author: jm
+
+    Administrator model methods
+
+    stk_upload/
+        admin/
+            templates/
+                admin/
+                    index.html
+            __init__.py
+            form.py
+            models.py
+            routes.py
 '''
 import shareds
 import logging
 
+
 class DataAdmin():
     '''
-    Methods for database maintain
+    Methods for database maintaining
     '''
-
 
     def __init__(self, user):
         '''
