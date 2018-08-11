@@ -20,7 +20,6 @@ from models import datareader          # Tietojen haku kannasta (tai työtiedost
 from models import dataupdater         # Tietojen päivitysmetodit
 from models import cvs_refnames        # Referenssinimien luonti
 from models.gramps import gramps_loader # Loading a gramps xml file
-from admin.models import DataAdmin
 
 
 app = shareds.app
@@ -47,6 +46,14 @@ def home():
 def datatables():
     """ Technical table format listings """
     return render_template("tables.html")
+
+# Admin-alkusivu
+@shareds.app.route('/admin',  methods=['GET', 'POST'])
+@login_required
+@roles_required('admin')
+def admin():
+    """ Home page for administraor """    
+    return render_template('/admin/admin.html') # entinen adminindex.html
 
 
 """ --------------------- Narrative Kertova-sivut ------------------------------
@@ -414,12 +421,12 @@ def pick_selection(cond):
             events = datareader.read_cite_sour_repo(uniq_id=value)
             return render_template("cite_sour_repo.html",
                                    events=events)
-        elif key == 'repo_uniq_id':     # from cite_sourc_repo.html, 
-                                        # ng_table_repositories.html,
-                                        # table_repositories.html
-            repositories = datareader.read_repositories(uniq_id=value)
-            return render_template("repo_sources.html",
-                                   repositories=repositories)
+#         elif key == 'repo_uniq_id':     # from cite_sourc_repo.html, 
+#                                         # ng_table_repositories.html,
+#                                         # table_repositories.html
+#             repositories = datareader.read_repositories(uniq_id=value)
+#             return render_template("repo_sources.html",
+#                                    repositories=repositories)
         elif key == 'source_uniq_id':   # from cite_sourc_repo.html, table_sources.html
             sources = datareader.read_sources(uniq_id=value)
             return render_template("source_citations.html",
@@ -658,4 +665,3 @@ def app_help():
 
 # ------------------------------ Filters ---------------------------------------
 from templates import jinja_filters
-from admin import routes

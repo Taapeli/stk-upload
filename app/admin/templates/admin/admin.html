@@ -1,5 +1,5 @@
 {# templates/admin/start.html_ #}
-{% extends "a_layout.html" %}
+{% extends "/admin/layout.html" %}
 {% include "security/_messages.html" %}
 {% block title %}Pääkäyttäjä{% endblock %}
 {% block body %}
@@ -47,10 +47,10 @@
       <div style="display: inline-block;">
         <h3>Käyttäjien ja referenssitietojen hallinta</h3>
         <ul>
-          <li><a href="/list_users">Käyttäjätunnukset</a></li>
-          <li><a href="/list_emails">Käyttäjäehdokkaat</a></li>
-          <li><a href="/refnames">Muokkaa referenssinimiä</a></li>
-          <li><a href="/aseta/estimated_dates">Aseta henkilön arvioidut 
+          <li><a href="/admin/list_users">Käyttäjätunnukset</a></li>
+          <li><a href="/admin/list_emails">Käyttäjäehdokkaat</a></li>
+          <li><a href="/admin/refnames">Muokkaa referenssinimiä</a></li>
+          <li><a href="/admin/aseta/estimated_dates">Aseta henkilön arvioidut 
               syntymä- ja kuolinajat</a></li>
         </ul>
       </div>

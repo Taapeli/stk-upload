@@ -8,7 +8,7 @@ print('Application instance path: ' + shareds.app.instance_path)
 from gedcom import bp as gedcom_bp
 app.register_blueprint(gedcom_bp)
 
-from admin import admin_pages as admin_bp
+from admin import bp as admin_bp
 app.register_blueprint(admin_bp)
 
 app.config.from_object('config')
