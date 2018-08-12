@@ -1,4 +1,5 @@
 from flask import Blueprint
-from . import routes
 
-bp = Blueprint('admin', __name__, template_folder='templates')
+bp = Blueprint('narrative', __name__, template_folder='templates')
+
+from . import routes

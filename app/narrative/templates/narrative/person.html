@@ -1,10 +1,10 @@
-{# _myapp/templates/k_person.html_ #}
-{% extends "k_layout.html" %}
+{# _templates/narrative/person.html_ #}
+{% extends "/narrative/layout.html" %}
 {% block title %}henkilön tiedot{% endblock %}
 {% block body %}
 {{ super() }}
 {% set sp = {'M':'mies', 'F':'nainen'} %}
-{% import 'k_macros.html' as macro %}
+{% import '/narrative/macros.html' as macro %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         
 <h2>Henkilön tiedot</h2>
@@ -18,7 +18,6 @@
         </div>{% endif %}
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
-            <!-- sup><small> <a href="#sref1a">1a</a></small></sup -->
         </h3>
         {% set myid = person.uniq_id %}
         {# set mybirth = "" %}{% for e in events %}
@@ -36,11 +35,13 @@
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <span title="etunimi">{{pname.firstname}}</span>
                         <i title="patronyymi">{{pname.suffix}}</i>
-                        <b title="sukunimi">{{pname.surname}}</b> <!-- todo: <a href="#sref3a">3a</a> -->
-                        {% if pname.refname %}&nbsp; <tt class="refname" title="referenssinimi">{{pname.refname}}</tt>
+                        <b title="sukunimi">{{pname.surname}}</b>
+                        <!-- todo: <a href="#sref3a">3a</a> -->
+                        <!-- {% if pname.refname %}&nbsp; 
+                          <tt class="refname" title="referenssinimi">{{pname.refname}}</tt -->
                         {% endif %}
                    <!-- <ul><div class="grampsstylednote">
-                            <p>Tähän tulee Note</p>
+                            <p>Tähän tulee Person Note</p>
                         </div></ul>
                    -->
                     </td>
@@ -97,7 +98,7 @@
                         </td>
                         <td class="ColumnDate">{{e.dates}}</td>
                         <td class="ColumnPlace">
-                            <a href="/events/loc={{e.locid}}" class="inlink"
+                            <a href="/narrative/location={{e.locid}}" class="inlink"
                             title="tyyppiä {{e.ltype}}; katso paikan tiedot">
                             {{e.location|join(' • ')}}</a>
                         </td>
@@ -275,7 +276,7 @@
             			{% for repo in source.repos %}
             				{{repo.rname}}:
              			{% endfor %}
-             			<a href="/events/source={{source.uniq_id}}" class="inlink"
+             			<a href="/narrative/source={{source.uniq_id}}" class="inlink"
 	                     title="katso lähteen {{source.uniq_id}} tiedot">{{source.stitle}}</a>
              		{% endfor %}
                      <ol>

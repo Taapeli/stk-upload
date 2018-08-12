@@ -1,10 +1,10 @@
 {# _myapp/templates/table1.html_ #}
-{% extends "k_layout.html" %}
+{% extends "/narrative/layout.html" %}
 {% block title %}lähteen tapahtumat{% endblock %}
 {% block body %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-{% import 'k_macros.html' as macro %}
+{% import '/narrative/macros.html' as macro %}
 
 <h2>Lähteen tapahtumat</h2>
 
@@ -37,7 +37,7 @@
 	               		{% for event in c.events|sort(attribute='date') %}
 		               		{% for name in event.names %}
                			    <li>Henkilön
-                   			<a href="/person/uniq_id={{name.uniq_id}}" class="id"
+                   			<a href="/narrative/person/uniq_id={{name.uniq_id}}" class="id"
 	                           title="katso henkilön {{name.uniq_id}} tiedot">
 	                               {{name.surname}}, {{name.firstname}}</a>
 	                        {{event.type|transl('evt')}} {{event.edates}}

@@ -1,9 +1,9 @@
 {# _myapp/templates/k_persons.html_ #}
-{% extends "k_layout.html" %}
+{% extends "/narrative/layout.html" %}
 {% block title %}henkilöluettelo{% endblock %}
 {% block body %}
 {{ super() }}
-{% import 'k_macros.html' as macro %}
+{% import '/narrative/macros.html' as macro %}
 
 <h2>Henkilöluettelo</h2>
 
@@ -21,7 +21,7 @@
             <h3>Näytetään {{persons|count}} henkilönimeä</h3>{% else %}
             <h3>Valitse näytettävät ihmiset</h3>{% endif %}
 			<div id="searching">
-			    <form  action="/person/list/" method="post">
+			    <form  action="/narrative/persons" method="post">
                   <p>Haku tapahtuu annetun nimen alkuosalla, esim. "Sib" osuu nimeen "Sibbe".</p>
                   <label for="snam">Hakusana (alkuosa)&nbsp; </label>
                     <input type="text" name="name" id="snam" 
@@ -77,7 +77,7 @@
 		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
 	               {% endif %}</td>
 	                <td class="ColumnPerson"><div>
-	                   <a href="/person/uniq_id={{p.uniq_id}}"
+	                   <a href="/narrative/person={{p.uniq_id}}"
 	                     title="katso henkilön {{p.uniq_id}} tiedot">
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>

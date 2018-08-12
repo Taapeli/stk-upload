@@ -1,9 +1,9 @@
 {# _myapp/templates/k_place_events.html_ #}
-{% extends "k_layout.html" %}
+{% extends "/narrative/layout.html" %}
 {% block title %}paikan tapahtumat{% endblock %}
 {% block body %}
 {{ super() }}
-{% import 'k_macros.html' as macro %}
+{% import '/narrative/macros.html' as macro %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <h2>Paikan tapahtumat</h2>
@@ -110,7 +110,7 @@
         {% for e in events|sort(attribute='date') %}
                     <tr>
                         <td class="ColumnPerson">
-                            <a href="/person/uniq_id={{e.uid}}" class="id"
+                            <a href="/narrative/person={{e.uid}}" class="id"
                               title="katso henkilön tiedot">{{e.uid}}</a>
                         </td>
                         <td>{% for n in e.names|sort %} 

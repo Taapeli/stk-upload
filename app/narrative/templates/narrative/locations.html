@@ -1,9 +1,9 @@
-{# _myapp/templates/table1.html_ #}
-{% extends "k_layout.html" %}
+{# _templates/narrative/locations.html_ #}
+{% extends "/narrative/layout.html" %}
 {% block title %}paikkakunnat{% endblock %}
 {% block body %}
 {{ super() }}
-{% import 'k_macros.html' as macro %}
+{% import '/narrative/macros.html' as macro %}
 
 <h2>Paikkakuntaluettelo</h2>
 {{ macro.menu(4) }}
@@ -36,7 +36,7 @@
                 {% endif %}</td>
                 <td class="ColumnPerson">
                    <div>
-                      <a href="/events/loc={{p.id}}" class="id"
+                      <a href="/narrative/location={{p.id}}" class="id"
                         title="katso paikan {{p.id}} tapahtumat"
                         id="{{p.id}}">{{p.id}}</a> {{p.pname|join(' • ')}}
                       <small>{{p.type|transl('lt')}}</small>

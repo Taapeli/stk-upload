@@ -1,9 +1,9 @@
 {# _myapp/templates/table1.html_ #}
-{% extends "k_layout.html" %}
+{% extends "/narrative/layout.html" %}
 {% block title %}lähteet{% endblock %}
 {% block body %}
 {{ super() }}
-{% import 'k_macros.html' as macro %}
+{% import '/narrative/macros.html' as macro %}
 
 <h2>Lähdeluettelo</h2>
 
@@ -40,7 +40,7 @@
                {% endif %}</td>
             <td class="ColumnPerson">
                <div>
-                  <a href="/events/source={{s.uniq_id}}" {% if s.ref_cnt == 0 %} class="dimmed" 
+                  <a href="/narrative/source={{s.uniq_id}}" {% if s.ref_cnt == 0 %} class="dimmed" 
                      title="lähdettä {{s.uniq_id}} ({{s.id}}) ei käytetä">{% else %}
                      title="katso lähteen {{s.uniq_id}} ({{s.id}}) käyttö">{% endif %}
                      {{s.stitle}}</a>
