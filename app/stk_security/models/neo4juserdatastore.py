@@ -10,7 +10,7 @@ from flask_security.datastore import UserDatastore
 from .seccypher import Cypher  
 from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
 import datetime
-import shareds
+#import shareds
 import logging
 #from wtforms.validators import ValidationError
 logger = logging.getLogger('neo4juserdatastore')

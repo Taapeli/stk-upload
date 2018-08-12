@@ -9,8 +9,8 @@ Created on 8.8.2018
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, flash 
-from flask_security import login_required, roles_accepted, roles_required, current_user
+from flask import render_template, request, redirect, url_for 
+from flask_security import roles_accepted, roles_required, current_user
 
 import shareds
 from models import dbutil, dataupdater
@@ -18,7 +18,7 @@ from .models import DataAdmin
 from .forms import ListEmailsForm
 from . import bp
 
-# # Admin-alkusivulle siirtyminen. Onko käytössä?
+# # Go to admin start page in app/routes.py 
 # @bp.route('/admin',  methods=['GET', 'POST'])
 # @login_required
 # @roles_required('admin')
