@@ -13,8 +13,9 @@ from flask import render_template, request, redirect, url_for
 from flask_security import roles_accepted, roles_required, current_user
 
 import shareds
-from models import dbutil, dataupdater
+from models import dbutil, dataupdater, loadfile, datareader
 from .models import DataAdmin
+from .cvs_refnames import load_refnames
 from .forms import ListEmailsForm
 from . import bp
 
@@ -60,6 +61,51 @@ def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
     message = dataupdater.set_person_refnames()
+    return render_template("/admin/talletettu.html", text=message, uri=dburi)
+
+@shareds.app.route('/upload_csv', methods=['POST'])
+@roles_required('admin')
+def upload_csv():
+    """ Load a cvs file to temp directory for processing in the server
+    """
+    try:
+        infile = request.files['filenm']
+        material = request.form['material']
+        logging.debug("Got a {} file '{}'".format(material, infile.filename))
+
+        loadfile.upload_file(infile)
+        if 'destroy' in request.form and request.form['destroy'] == 'all':
+            logger.info("*** About deleting all previous Refnames ***")
+            datareader.recreate_refnames()
+
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    return redirect(url_for('save_loaded_csv', filename=infile.filename, subj=material))
+
+@shareds.app.route('/save/<string:subj>/<string:filename>')
+@roles_required('admin')
+def save_loaded_csv(filename, subj):
+    """ Save loaded cvs data to the database """
+    pathname = loadfile.fullname(filename)
+    dburi = dbutil.get_server_location()
+    try:
+        if subj == 'refnames':    # Stores Refname objects
+            status = load_refnames(pathname)
+        else:
+            return redirect(url_for('virhesivu', code=1, text= \
+                "Data type '" + subj + "' is not supported"))
+    except KeyError as e:
+        return render_template("virhe_lataus.html", code=1, \
+               text="Missing proper column title: " + str(e))
+    return render_template("/admin/talletettu.html", text=status, uri=dburi)
+
+@shareds.app.route('/aseta/confidence')
+@roles_required('admin')
+def aseta_confidence():
+    """ tietojen laatuarvion asettaminen henkilöille """
+    dburi = dbutil.get_server_location()
+    message = dataupdater.set_confidence_value()
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 #TODO Kuuluisiko kokonaisuuteen security??
