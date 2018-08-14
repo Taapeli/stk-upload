@@ -1,10 +1,10 @@
-{# _templates/narrative/person.html_ #}
-{% extends "/narrative/layout.html" %}
+{# _templates/scene/person.html_ #}
+{% extends "/scene/layout.html" %}
 {% block title %}henkilön tiedot{% endblock %}
 {% block body %}
 {{ super() }}
 {% set sp = {'M':'mies', 'F':'nainen'} %}
-{% import '/narrative/macros.html' as macro %}
+{% import '/scene/macros.html' as macro %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         
 <h2>Henkilön tiedot</h2>
@@ -98,7 +98,7 @@
                         </td>
                         <td class="ColumnDate">{{e.dates}}</td>
                         <td class="ColumnPlace">
-                            <a href="/narrative/location={{e.locid}}" class="inlink"
+                            <a href="/scene/location={{e.locid}}" class="inlink"
                             title="tyyppiä {{e.ltype}}; katso paikan tiedot">
                             {{e.location|join(' • ')}}</a>
                         </td>
@@ -191,7 +191,7 @@
             <div class="fullclear"></div>
         </div>
 <!--
-        <div class="subsection narrative">
+        <div class="subsection scene">
             <h4>Kerrottua</h4>
             <div class="grampsstylednote">
                 <p>
@@ -276,7 +276,7 @@
             			{% for repo in source.repos %}
             				{{repo.rname}}:
              			{% endfor %}
-             			<a href="/narrative/source={{source.uniq_id}}" class="inlink"
+             			<a href="/scene/source={{source.uniq_id}}" class="inlink"
 	                     title="katso lähteen {{source.uniq_id}} tiedot">{{source.stitle}}</a>
              		{% endfor %}
                      <ol>

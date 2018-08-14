@@ -18,7 +18,7 @@ from models.gen.place import Place
 from models.gen.source_citation import Source
 
 
-@bp.route('/narrative/persons', methods=['POST', 'GET'])
+@bp.route('/scene/persons', methods=['POST', 'GET'])
 def show_person_list(selection=None):
     """ Show list of selected Persons """
     if request.method == 'POST':
@@ -28,7 +28,7 @@ def show_person_list(selection=None):
             rule = request.form['rule']
             keys = (rule, name)
             persons = read_persons_with_events(keys)
-            return render_template("/narrative/persons.html", persons=persons, menuno=0,
+            return render_template("/scene/persons.html", persons=persons, menuno=0,
                                    name=name, rule=rule)
         except Exception as e:
             logger.debug("Error {} in show_person_list".format(e))
@@ -43,10 +43,10 @@ def show_person_list(selection=None):
     else:
         keys = ('all',)
     persons = [] #datareader.read_persons_with_events(keys)
-    return render_template("/narrative/persons.html", persons=persons, menuno=0)
+    return render_template("/scene/persons.html", persons=persons, menuno=0)
 
 
-@bp.route('/narrative/persons/restricted')
+@bp.route('/scene/persons/restricted')
 def show_persons_restricted(selection=None):
     """ Show list of selected Persons, limited information 
         for non-logged users from login_user.html """
@@ -55,11 +55,11 @@ def show_persons_restricted(selection=None):
         # Vaihtoehtoisesti kutsu toista metodia.
         keys = ('all',)
     persons = read_persons_with_events(keys)
-    return render_template("/narrative/persons.html", persons=persons, menuno=1)
+    return render_template("/scene/persons.html", persons=persons, menuno=1)
 
 
-@bp.route('/narrative/persons/all/<string:opt>')
-@bp.route('/narrative/persons/all/')
+@bp.route('/scene/persons/all/<string:opt>')
+@bp.route('/scene/persons/all/')
 #     @login_required
 def show_all_persons_list(selection=None, opt=''):
     """ TODO Should have restriction by owner's UserProfile """
@@ -70,10 +70,10 @@ def show_all_persons_list(selection=None, opt=''):
         user=None
     ref = (opt == 'ref')
     persons = read_persons_with_events(keys, user=user, take_refnames=ref)
-    return render_template("/narrative/persons.html", persons=persons, menuno=1)
+    return render_template("/scene/persons.html", persons=persons, menuno=1)
 
 
-@bp.route('/narrative/person=<string:uniq_id>')
+@bp.route('/scene/person=<string:uniq_id>')
 #     @login_required
 def show_person_page(uniq_id):
     """ Full homepage for a Person in database
@@ -96,11 +96,11 @@ def show_person_page(uniq_id):
                           format(c.gender, c.uniq_id, c.id, c.birth_date))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("/narrative/person.html", person=person, events=events, 
+    return render_template("/scene/person.html", person=person, events=events, 
                            photos=photos, sources=sources, families=families)
 
 
-@bp.route('/narrative/locations')
+@bp.route('/scene/locations')
 def show_locations():
     """ List of Places
     """
@@ -112,10 +112,10 @@ def show_locations():
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
 #         print ("# {} ".format(p))
-    return render_template("/narrative/locations.html", locations=locations)
+    return render_template("/scene/locations.html", locations=locations)
 
 
-@bp.route('/narrative/location=<locid>')
+@bp.route('/scene/location=<locid>')
 def show_location_page(locid):
     """ Home page for a Place, shows events and place hierarchy
         locid = id(Place)
@@ -130,10 +130,10 @@ def show_location_page(locid):
 #         print ("# {} ".format(p))
 #     for u in place.urls:
 #         print ("# {} ".format(u))
-    return render_template("/narrative/place_events.html", locid=locid, place=place, 
+    return render_template("/scene/place_events.html", locid=locid, place=place, 
                            events=events, locations=place_list)
 
-@bp.route('/narrative/sources')
+@bp.route('/scene/sources')
 def show_sources():
     """ Lähdeluettelon näyttäminen ruudulla
     """
@@ -141,10 +141,10 @@ def show_sources():
         sources = Source.get_source_list()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("/narrative/sources.html", sources=sources)
+    return render_template("/scene/sources.html", sources=sources)
 
 
-@bp.route('/narrative/source=<sourceid>')
+@bp.route('/scene/source=<sourceid>')
 def show_source_page(sourceid):
     """ Home page for a Source with events
     """
@@ -152,6 +152,6 @@ def show_source_page(sourceid):
         stitle, events = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("/narrative/source_events.html",
+    return render_template("/scene/source_events.html",
                            stitle=stitle, events=events)
 

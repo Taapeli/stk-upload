@@ -8,7 +8,7 @@ print('Application instance path: ' + shareds.app.instance_path)
 from gedcom import bp as gedcom_bp
 app.register_blueprint(gedcom_bp)
 
-from narrative import bp as narrative_bp
+from scene import bp as narrative_bp
 app.register_blueprint(narrative_bp)
 
 from admin import bp as admin_bp

@@ -56,10 +56,10 @@ def admin():
     return render_template('/admin/admin.html')
 
 # Narrative start page
-@shareds.app.route('/narrative',  methods=['GET', 'POST'])
-def narrative():
-    """ Home page for narrative pages """    
-    return render_template('/narrative/persons.html')
+@shareds.app.route('/scene',  methods=['GET', 'POST'])
+def scene():
+    """ Home page for scene narrative pages ('kertova') """    
+    return render_template('/scene/persons.html')
 
 
 """ ---------- Other listings (Narrative or table format) ----------------------------

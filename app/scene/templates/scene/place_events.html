@@ -1,9 +1,9 @@
 {# _myapp/templates/k_place_events.html_ #}
-{% extends "/narrative/layout.html" %}
+{% extends "/scene/layout.html" %}
 {% block title %}paikan tapahtumat{% endblock %}
 {% block body %}
 {{ super() }}
-{% import '/narrative/macros.html' as macro %}
+{% import '/scene/macros.html' as macro %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <h2>Paikan tapahtumat</h2>
@@ -38,7 +38,7 @@
                 <li style="margin-left: {{p.level * 2}}em;">
                 {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
                     <b>{{p.pname|join(' • ')}}</b>
-                {% else %}<a href="/events/loc={{p.id}}"><span class="id">{{p.id}}</span></a>
+                {% else %}<a href="/scene/location={{p.id}}"><span class="id">{{p.id}}</span></a>
                     {{p.pname|join(' • ')}}
                 {% endif %} <small>&nbsp;{{p.type|transl('lt')}}</small></li>
             {% endfor %}</ul>
@@ -110,7 +110,7 @@
         {% for e in events|sort(attribute='date') %}
                     <tr>
                         <td class="ColumnPerson">
-                            <a href="/narrative/person={{e.uid}}" class="id"
+                            <a href="/scene/person={{e.uid}}" class="id"
                               title="katso henkilön tiedot">{{e.uid}}</a>
                         </td>
                         <td>{% for n in e.names|sort %} 
