@@ -40,7 +40,7 @@ def clear_db(opt):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
-@bp.route('/admin/aseta/estimated_dates')
+@bp.route('/admin/set/estimated_dates')
 @roles_required('admin')
 def aseta_estimated_dates():
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
@@ -60,10 +60,10 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_refnames()
+    message = dataupdater.set_person_refnames() or "Tehty"
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
-@shareds.app.route('/upload_csv', methods=['POST'])
+@bp.route('/admin/upload_csv', methods=['POST'])
 @roles_required('admin')
 def upload_csv():
     """ Load a cvs file to temp directory for processing in the server
@@ -81,9 +81,9 @@ def upload_csv():
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    return redirect(url_for('save_loaded_csv', filename=infile.filename, subj=material))
+    return redirect(url_for('admin.save_loaded_csv', filename=infile.filename, subj=material))
 
-@shareds.app.route('/save/<string:subj>/<string:filename>')
+@bp.route('/admin/save/<string:subj>/<string:filename>')
 @roles_required('admin')
 def save_loaded_csv(filename, subj):
     """ Save loaded cvs data to the database """
@@ -100,13 +100,15 @@ def save_loaded_csv(filename, subj):
                text="Missing proper column title: " + str(e))
     return render_template("/admin/talletettu.html", text=status, uri=dburi)
 
-@shareds.app.route('/aseta/confidence')
-@roles_required('admin')
-def aseta_confidence():
-    """ tietojen laatuarvion asettaminen henkilöille """
-    dburi = dbutil.get_server_location()
-    message = dataupdater.set_confidence_value()
-    return render_template("/admin/talletettu.html", text=message, uri=dburi)
+# # Ei ilmeisesti käytössä
+# @bp.route('/admin/aseta/confidence')
+# @roles_required('admin')
+# def aseta_confidence():
+#     """ tietojen laatuarvion asettaminen henkilöille """
+#     dburi = dbutil.get_server_location()
+#     message = dataupdater.set_confidence_value()
+#     return render_template("/admin/talletettu.html", text=message, uri=dburi)
+
 
 #TODO Kuuluisiko kokonaisuuteen security??
 @bp.route('/admin/list_emails',  methods=['GET', 'POST'])
