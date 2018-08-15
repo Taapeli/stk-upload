@@ -5,4 +5,4 @@ RemoteSystemsTempFiles/\.project
 \.metadata/
 \.pytest_cache
 /gedcoms/
-.pydevproject
+.pydevproject 
