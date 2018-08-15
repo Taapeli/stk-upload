@@ -13,7 +13,7 @@ import logging
 import shareds
 import models.dbutil
 from models.gen.cypher import Cypher_person
-from models.gramps.cypher_gramps import Cypher_person_w_handle
+from models.cypher_gramps import Cypher_person_w_handle
 from models.gen.dates import DateRange
 
 class Person:

@@ -5,7 +5,7 @@ Created on 22.7.2017
 '''
 
 from sys import stderr
-from models.gramps.cypher_gramps import Cypher_media_w_handle
+from models.cypher_gramps import Cypher_media_w_handle
 import shareds
 
 class Media:

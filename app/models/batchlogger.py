@@ -16,7 +16,7 @@ Created on 26.5.2018
 '''
 from datetime import date
 import shareds
-from models.gramps.cypher_gramps import Cypher_batch
+from models.cypher_gramps import Cypher_batch
 
 
 class Batch(object):
