@@ -2,7 +2,7 @@
 
 """
 Generic GEDCOM transformer 
-Kari Kujansuu, 2016. yyy
+Kari Kujansuu, 2016.
 
 The transforms are specified by separate Python modules ("plugins") in the subdirectory "transforms".
 
@@ -66,6 +66,7 @@ The parameters of each phases:
 - "output_file" is a file-like object containing the method emit(string) 
                 that is used to produce the output
 """
+import traceback
 _VERSION="0.3"
 _LOGFILE="transform.log"
 
@@ -102,6 +103,7 @@ def read_gedcom(run_args):
     except Exception as err:
         LOG.error(type(err))
         LOG.error("Virhe: {0}".format(err))
+        LOG.error(traceback.format_exc())
 
 
 def process_gedcom(run_args, transformer, task_name=''):
@@ -124,26 +126,32 @@ def process_gedcom(run_args, transformer, task_name=''):
     
         do_phase4 = hasattr(transformer,"phase4")
     
-        # 2nd traverse "phase3"
-        with Output(run_args) as f:
-            f.display_changes = run_args['display_changes']
-            for gedline in read_gedcom(run_args):
-                if do_phase4 and gedline.tag == "TRLR":
-                    f.original_line = ""
-                    transformer.phase4(run_args, f)
-                f.original_line = gedline.line.strip()
-                f.saved_line = ""
-                transformer.phase3(run_args, gedline, f)
+        if hasattr(transformer,"phase3"):
+            # 2nd traverse "phase3"
+            with Output(run_args) as f:
+                f.display_changes = run_args['display_changes']
+                for gedline in read_gedcom(run_args):
+                    if do_phase4 and gedline.tag == "TRLR":
+                        f.original_line = ""
+                        transformer.phase4(run_args, f)
+                    f.original_line = gedline.line.strip()
+                    f.saved_line = ""
+                    transformer.phase3(run_args, gedline, f)
+
+        if hasattr(transformer,"output"):
+            with Output(run_args) as f:
+                transformer.output(run_args, f)
+
     except FileNotFoundError as err:
         LOG.error("Ohjelma päättyi virheeseen {}: {}".format(type(err).__name__, str(err)))
-
+        
     LOG.info("------ Ajo '%s' päättyi %s ------", \
              task_name, \
              datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
 
 
 
-def get_transforms():
+def get_transforms(): 
     # all transform modules should be .py files in the package/subdirectory "transforms"
     for name in os.listdir("transforms"):
         if name.endswith(".py") and name != "__init__.py": 
