@@ -91,7 +91,7 @@ def read_gedcom(run_args):
         for linenum, line in enumerate(open(run_args['input_gedcom'], encoding=run_args['encoding'])):
             # Clean the line
             line = line[:-1]
-            if line[0] == "\ufeff": 
+            if line and line[0] == "\ufeff":  # UTF-8 BOM (should use utf-8-sig encoding...) 
                 line = line[1:]
             # Return a gedcom line object
             gedline = GedcomLine(line, linenum)
@@ -114,36 +114,37 @@ def process_gedcom(run_args, transformer, task_name=''):
 
     transformer.initialize(run_args)
 
-    try:
-        # 1st traverse
-        if hasattr(transformer,"phase1"):
-            for gedline in read_gedcom(run_args):
-                transformer.phase1(run_args, gedline)
-    
-        # Intermediate processing of collected data
-        if hasattr(transformer,"phase2"):
-            transformer.phase2(run_args)
-    
-        do_phase4 = hasattr(transformer,"phase4")
-    
-        if hasattr(transformer,"phase3"):
-            # 2nd traverse "phase3"
-            with Output(run_args) as f:
-                f.display_changes = run_args['display_changes']
+    if hasattr(transformer,"process"):
+        with Output(run_args) as f:
+            transformer.process(run_args, f)
+    else:
+        try:
+            # 1st traverse
+            if hasattr(transformer,"phase1"):
                 for gedline in read_gedcom(run_args):
-                    if do_phase4 and gedline.tag == "TRLR":
-                        f.original_line = ""
-                        transformer.phase4(run_args, f)
-                    f.original_line = gedline.line.strip()
-                    f.saved_line = ""
-                    transformer.phase3(run_args, gedline, f)
-
-        if hasattr(transformer,"output"):
-            with Output(run_args) as f:
-                transformer.output(run_args, f)
-
-    except FileNotFoundError as err:
-        LOG.error("Ohjelma päättyi virheeseen {}: {}".format(type(err).__name__, str(err)))
+                    transformer.phase1(run_args, gedline)
+        
+            # Intermediate processing of collected data
+            if hasattr(transformer,"phase2"):
+                transformer.phase2(run_args)
+        
+            do_phase4 = hasattr(transformer,"phase4")
+        
+            if hasattr(transformer,"phase3"):
+                # 2nd traverse "phase3"
+                with Output(run_args) as f:
+                    f.display_changes = run_args['display_changes']
+                    for gedline in read_gedcom(run_args):
+                        if do_phase4 and gedline.tag == "TRLR":
+                            f.original_line = ""
+                            transformer.phase4(run_args, f)
+                        f.original_line = gedline.line.strip()
+                        f.saved_line = ""
+                        transformer.phase3(run_args, gedline, f)
+    
+    
+        except FileNotFoundError as err:
+            LOG.error("Ohjelma päättyi virheeseen {}: {}".format(type(err).__name__, str(err)))
         
     LOG.info("------ Ajo '%s' päättyi %s ------", \
              task_name, \
@@ -205,8 +206,8 @@ def main():
                         help='Do not produce a log in the output file')
     #parser.add_argument('--display-nonchanges', action='store_true',
     #                    help='Display unchanged places')
-    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "ISO8859-1"],
-                        help="e.g, UTF-8, ISO8859-1")
+    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
+                        help="Input encoding")
     parser.add_argument('-l', '--list', action='store_true', help="List transforms")
 
     if len(sys.argv) > 1 and sys.argv[1] in ("-l","--list"):

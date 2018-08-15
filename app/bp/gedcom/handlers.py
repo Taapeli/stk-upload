@@ -282,8 +282,8 @@ def build_parser(filename,gedcom,gedcom_filename):
                         help='Do not produce an output file')
     parser.add_argument('--nolog', action='store_true',
                         help='Do not produce a log in the output file')
-    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "ISO8859-1"],
-                        help="e.g, UTF-8, ISO8859-1")
+    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
+                        help="Input encoding")
     transformer.add_args(parser)
 
     return parser
