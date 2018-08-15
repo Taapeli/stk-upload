@@ -2,7 +2,7 @@
 
 """
 Generic GEDCOM transformer 
-Kari Kujansuu, 2016.
+Kari Kujansuu, 2016. 
 
 The transforms are specified by separate Python modules ("plugins") in the subdirectory "transforms".
 
