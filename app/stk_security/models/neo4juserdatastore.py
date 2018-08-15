@@ -10,8 +10,9 @@ from flask_security.datastore import UserDatastore
 from .seccypher import Cypher  
 from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
 import datetime
-import shareds
+#import shareds
 import logging
+#from wtforms.validators import ValidationError
 logger = logging.getLogger('neo4juserdatastore')
 
 driver = None
@@ -44,10 +45,10 @@ class Neo4jUserDatastore(UserDatastore):
             user.current_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['current_login_at']))                            
         return user
  
- 
-    def email_accepted(self, proposed_email):
-        return proposed_email == self.find_email(proposed_email)
-                              
+#  
+#     def email_accepted(self, proposed_email):
+#         return proposed_email == self.find_allowed_email(proposed_email)
+#                               
         
     def put(self, model):
         with self.driver.session() as session:
@@ -68,12 +69,12 @@ class Neo4jUserDatastore(UserDatastore):
             
     def _put_user (self, tx, user):    # ============ New user ==============
 
+        allowed_email = self.find_allowed_email(user.email)
+        if allowed_email == None:
+            return(None)
+#            raise(ValidationError("Email address not accepted"))
         if len(user.roles) == 0:
-            allowed_email = self.find_allowed_email(user.email)
-            if allowed_email == None:
-                user.roles = [shareds.DEFAULT_ROLE]
-            else:
-                user.roles = [allowed_email.default_role]     
+            user.roles = [allowed_email.default_role]     
         user.confirmed_at = None
         user.is_active = True
         try:
@@ -458,7 +459,8 @@ class Neo4jUserDatastore(UserDatastore):
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
             return None                 
-                                              
+
+    @classmethod                                              
     def _findAllowedEmail (self, tx, email):
         try:
             emailNode = None

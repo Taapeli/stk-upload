@@ -5,10 +5,13 @@ app = Flask(__name__, instance_relative_config=True)
 shareds.app = app
 print('Application instance path: ' + shareds.app.instance_path)
 
-from gedcom import bp as gedcom_bp
+from bp.gedcom import bp as gedcom_bp
 app.register_blueprint(gedcom_bp)
 
-from admin import admin_pages as admin_bp
+from bp.scene import bp as scene_bp
+app.register_blueprint(scene_bp)
+
+from bp.admin import bp as admin_bp
 app.register_blueprint(admin_bp)
 
 app.config.from_object('config')
