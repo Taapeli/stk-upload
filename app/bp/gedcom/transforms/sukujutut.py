@@ -317,7 +317,7 @@ def process(options,output):
     output.original_line = None
     g.print_items(output)
     print("Done")
-    return os.path.basename(output.new_name)
+    return output.new_name
         
 if __name__ == "__main__":
     fname = sys.argv[1]

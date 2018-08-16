@@ -104,6 +104,7 @@ def gedcom_list():
 def gedcom_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
     versions = sorted([name for name in os.listdir(gedcom_folder) if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
+    versions.append(gedcom)
     return jsonify(versions)
 
 @bp.route('/gedcom/upload', methods=['POST'])
@@ -227,10 +228,10 @@ def process_gedcom(cmd, transformer):
         saved_stderr = sys.stdout
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
-        new_name = "" 
+        old_name = "" 
         try:
-            new_name = transformer.process(args, f)
-            if args.dryrun: new_name = ""
+            old_name = transformer.process(args, f)
+            if args.dryrun: old_name = ""
         except:
             traceback.print_exc()
         finally:
@@ -238,8 +239,19 @@ def process_gedcom(cmd, transformer):
             s2 = sys.stderr.getvalue()
             sys.stdout = saved_stdout
             sys.stderr = saved_stderr
-            rsp = dict(stdout=s1,stderr=s2,newname=new_name,logfile=args.logfile)
-            return jsonify(rsp)
+    if old_name:
+        old_basename = os.path.basename(old_name)
+    else:
+        old_basename = ""
+    difftable = ""
+    if False and old_name:
+        import difflib
+        lines1 = open(old_name).readlines()
+        lines2 = open(args.input_gedcom).readlines()
+        difftable = difflib.HtmlDiff().make_table(lines1,lines2,context=True)
+    rsp = dict(stdout=s1,stderr=s2,oldname=old_basename,logfile=args.logfile,
+               diff=difftable)
+    return jsonify(rsp)
             
                  
 @bp.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])

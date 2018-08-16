@@ -37,7 +37,13 @@
             $.get("/gedcom/versions/{{ gedcom }}", function(versions) {
                 $("#versions_list").empty();
                 $.each(versions, function(i,version) {
-                	$("#versions_list").append("<li>"+version+"</li>");
+                	//$("#versions_list").append("<li>"+version+"</li>");
+                	var row = $("<tr><td>" +
+                	"<input type=radio name=v1>" +
+                	"<input type=radio name=v2>" +
+                	"<td><a href=#>"+version+"</a></tr>");
+                	row.data("version",version);
+                	$("#versions_list").append(row);
                 });
 	            $("#div_versions").show();
             });
@@ -138,7 +144,9 @@
 	
 		        <h4>{{ _("Versiot") }}:</h4>
 		        (vasta suunnitteilla)
-		        <ul id="versions_list"></ul>
+		        <br>
+		        <button id="compare">{{ _("Vertaa versioita") }}</button>
+		        <table id="versions_list"></table>
 		    </div>
 		  </div>
 	        
@@ -163,7 +171,8 @@
 		  </div>
 		  <div id="error_log" class="errors">
 		  </div>
-	  	</pre>	
+	  	</pre>
+	  	<div id="diff"></div>	
       </div>
    </div>
 </div>

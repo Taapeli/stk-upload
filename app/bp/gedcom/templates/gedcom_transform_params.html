@@ -9,12 +9,13 @@
                 $("#output_log").text(rsp.stdout);
                 if (rsp.stderr) 
                 	$("#error_log").text("{{ _('Errors:') }}" + "\n" + rsp.stderr);
-                if (rsp.newname) {
-                	$("#oldname").text(rsp.newname);
+                if (rsp.oldname) {
+                	$("#oldname").text(rsp.oldname);
                 	$("#div_oldname").show();
             	}
             	else
                 	$("#div_oldname").hide();
+                $("#diff").html(rsp.diff);
                 $("#output").show();
             });
             return false;
