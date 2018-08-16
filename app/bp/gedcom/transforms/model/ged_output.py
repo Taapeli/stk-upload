@@ -37,14 +37,15 @@ class Output:
         self.new_name = None
 
     def __enter__(self):
+        encoding = "UTF-8" # force utf-8 encoding on output
         if self.out_name:
-            self.f = open(self.out_name, "w", encoding=self.encoding)
+            self.f = open(self.out_name, "w", encoding=encoding)
         else:
             # create tempfile in the same directory so you can rename it later
             tempfile.tempdir = os.path.dirname(self.in_name) 
             self.temp_name = tempfile.mktemp()
             self.new_name = self.generate_name(self.in_name)
-            self.f = open(self.temp_name, "w", encoding=self.encoding)
+            self.f = open(self.temp_name, "w", encoding=encoding)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -67,6 +68,7 @@ class Output:
             else:
                 self.saved_line = self.original_line
             self.original_line = ""
+        if line.startswith("1 CHAR"): line = "1 CHAR UTF-8" # force utf-8 encoding on output
         self.f.write(line+"\n")
 
         if self.log:
