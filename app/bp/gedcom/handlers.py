@@ -227,8 +227,10 @@ def process_gedcom(cmd, transformer):
         saved_stderr = sys.stdout
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
+        new_name = "" 
         try:
-            transformer.process(args, f)
+            new_name = transformer.process(args, f)
+            if args.dryrun: new_name = ""
         except:
             traceback.print_exc()
         finally:
@@ -236,9 +238,8 @@ def process_gedcom(cmd, transformer):
             s2 = sys.stderr.getvalue()
             sys.stdout = saved_stdout
             sys.stderr = saved_stderr
-            if s2 == "": s2 = _("None")
-            s = "Logfile: " + args.logfile + "\nErrors:\n" + s2 + "\n\n" + s1 
-            return s
+            rsp = dict(stdout=s1,stderr=s2,newname=new_name,logfile=args.logfile)
+            return jsonify(rsp)
             
                  
 @bp.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])

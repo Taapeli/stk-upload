@@ -2,9 +2,20 @@
     $(document).ready( function() {
         $("#transform").off("click");
         $("#transform").click(function() {
-        	$("#output").empty().hide();
+        	$("#output").hide();
+        	$("#output_log").empty();
+        	$("#error_log").empty();
             $.post("/gedcom/transform/{{ gedcom }}/{{ transform }}", $("#form").serialize(), function(rsp) {
-                $("#output").text(rsp).show();
+                $("#output_log").text(rsp.stdout);
+                if (rsp.stderr) 
+                	$("#error_log").text("{{ _('Errors:') }}" + "\n" + rsp.stderr);
+                if (rsp.newname) {
+                	$("#oldname").text(rsp.newname);
+                	$("#div_oldname").show();
+            	}
+            	else
+                	$("#div_oldname").hide();
+                $("#output").show();
             });
             return false;
         });

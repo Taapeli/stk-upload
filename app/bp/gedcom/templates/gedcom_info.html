@@ -6,7 +6,7 @@
 {{ super() }}
 
 <style>
-#errors {
+.errors {
 	font-size: 24px;
 	color: white;
 	background-color: red; 
@@ -65,6 +65,9 @@
         $("input,a").click(function() {
         	 $("#errors").hide();
         });
+        $("#palauta").click(function() {
+        	 alert('{{ _("Palautustoimintoa ei vielä ole toteutettu") }}');
+        });
         hide_all();
     });
 </script>
@@ -72,7 +75,7 @@
 <div style="margin-left:50px; padding-bottom: 2em;">
     <div>
 	    <h2>Gedcom-käsittelyt</h2>
-	    <div id="errors"></div>
+	    <div id="errors" class="errors"></div>
 	    <div class="row">
 	       <div class="startbox">
 	         <div style="display: inline-block;">
@@ -150,10 +153,18 @@
 	   </div>
    </div>
    <div>
-	  <h3>{{ _("Tulokset") }}</h3>
-	  <pre>
-	  <div id="output"></div>
-	  </pre>	
+	  <div id="output" class="gedcom">
+		<h3>{{ _("Tulokset") }}</h3>
+		<div id="div_oldname">
+		<h3>{{ _("Vanha versio talletettu nimelle") }} <span id="oldname"></span> (<a id="palauta" href="#">{{ _("Palauta") }}</a>)</h3>
+		</div>
+		<pre>
+		  <div id="output_log">
+		  </div>
+		  <div id="error_log" class="errors">
+		  </div>
+	  	</pre>	
+      </div>
    </div>
 </div>
 

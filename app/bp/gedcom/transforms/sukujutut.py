@@ -4,6 +4,7 @@ Sukujutut-muunnos
 Kari Kujansuu <kari.kujansuu@gmail.com>
 """
 import sys
+import os
 
 input_encoding="ISO8859-1"
 input_encoding="UTF-8"
@@ -299,7 +300,7 @@ def add_args(parser):
     parser.add_argument('--fix_events_kaksonen', action='store_true',
                         help='Change event types "Kaksonen" and "Kolmonen" to NOTEs')
     parser.add_argument('--remove_multiple_blanks', action='store_true',
-                        help='Remove _multiple consecutive spaces in person and place names')
+                        help='Remove trailing and multiple consecutive spaces in person and place names')
      
 def initialize(run_args):
     pass
@@ -316,6 +317,7 @@ def process(options,output):
     output.original_line = None
     g.print_items(output)
     print("Done")
+    return os.path.basename(output.new_name)
         
 if __name__ == "__main__":
     fname = sys.argv[1]
