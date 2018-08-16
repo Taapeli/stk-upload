@@ -231,9 +231,9 @@ def transform(item,options):
             for c in item.children:
                 if c.tag == "ADR1":
                     return True # no change, ADR1 already exists
-            item.children.insert(0,Item("2 ADR1 " + item.text))
+            item.children.insert(0,Item("%s ADR1 %s" % (item.level+1,item.text)))
             item.text = ""
-            item.line = "1 ADDR"
+            item.line = "%s ADDR" % item.level
             return item
 
     if options.fix_events: # 5.1.4
