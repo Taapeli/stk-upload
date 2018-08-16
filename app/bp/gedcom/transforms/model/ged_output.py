@@ -88,7 +88,8 @@ class Output:
             self.emit("2 CONT _DATE {} {}".format(user, datestring))
             if self.new_name:
                 self.emit("2 CONT _SAVEDFILE " + self.new_name)
-
+    write = emit
+    
     def save(self):
         if self.out_name:
             msg = "Tulostiedosto '{}'".format(self.out_name)

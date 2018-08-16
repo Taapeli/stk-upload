@@ -1,7 +1,8 @@
 <script>
     $(document).ready( function() {
+        $("#transform").off("click");
         $("#transform").click(function() {
-        	$("#output").hide();
+        	$("#output").empty().hide();
             $.post("/gedcom/transform/{{ gedcom }}/{{ transform }}", $("#form").serialize(), function(rsp) {
                 $("#output").text(rsp).show();
             });

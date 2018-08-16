@@ -11,7 +11,10 @@ output_encoding="UTF-8"
 
 
 def write(out,s):
-    out.emit(s)
+    if out == sys.stdout:
+        print(s)
+    else:
+        out.emit(s)
     #out.write(s.encode(output_encoding))
     
 def print_lines(lines):
@@ -28,29 +31,16 @@ class Item:
     def __init__(self,line,children=None):
         if children is None: children = []
         temp = line.split(None,2)
+        if len(temp) < 2: raise RuntimeError("Invalid line: " + line)
         self.level= int(temp[0])
-        if len(temp) == 1: # 1.1.1
-            self.tag = "_DUMMY"
-            line = "%s %s" % (self.level,self.tag)
-        else:
-            self.tag = temp[1]
+        self.tag = temp[1]
         self.line = line
+        self.children = children
         i = line.find(" " + self.tag + " ")
         if i > 0:
             self.text = line[i+len(self.tag)+2:] # preserves leading and trailing spaces
         else:
             self.text = ""
-        self.children = children
-        while 0 and "options.concatenate_lines" and len(children) > 0 and children[0].tag in ('CONT','CONC'):
-            c = children[0]
-            if c.tag == 'CONT':
-                x = "\n"
-            else:
-                x = ""
-            x += c.text
-            self.text += x
-            self.line += x
-            del children[0]
             
     def __repr__(self):
         return self.line #+"."+repr(self.children)
@@ -66,14 +56,13 @@ class Item:
         for item in self.children:
             item.print_items(out)
 
-def parse1(lines,level,options):
-    linenums = [] # list of line numbers having the specified level 
+def fixlines(lines,options):
     prevlevel = -1
     for i,line in enumerate(lines):
         #line = line.strip()
         tkns = line.split(None,1)
         
-        if not tkns[0].isdigit(): # 1.1.2
+        if not tkns[0].isdigit() and options.add_cont_if_no_level_number: # 1.1.2
             # assume this is a continuation line
             line2 = "%s CONT %s" % (prevlevel+1,line)
             tkns = line2.split(None,1)
@@ -84,7 +73,7 @@ def parse1(lines,level,options):
                 print(line)
                 print("With:")
                 print(line2)
-        elif len(tkns) == 1:
+        elif len(tkns) == 1 and options.insert_dummy_tags: # 1.1.1
             if options.display_changes:
                 print("-----------------------")
                 print("Replaced:")
@@ -93,13 +82,17 @@ def parse1(lines,level,options):
                 print(tkns[0] + " _DUMMY")
             line = tkns[0] + " _DUMMY"
             tkns = line.split(None,1)
-        
+            lines[i] = line
+        prevlevel = int(tkns[0])
+
+def parse1(lines,level,options):
+    linenums = [] # list of line numbers having the specified level 
+    for i,line in enumerate(lines):
+        tkns = line.split(None,1)
         if int(tkns[0]) == level:
             linenums.append(i)
-        prevlevel = int(tkns[0])
     
     items = []
-    #if len(linenums) == 0: return []
     for i,j in zip(linenums,linenums[1:]+[None]):
         # i and j are line numbers of lines having specified level so that all lines in between have higher line numbers;
         # i.e. they form a substructure
@@ -134,15 +127,6 @@ def parse1(lines,level,options):
             items.append(item)
         
     return items
-
-def parse_gedcom(f):
-    g = Gedcom([])
-    lines = [line[:-1] for line in f.readlines()]
-    g.items = parse1(lines,level=0)
-    return g
-
-def parse_gedcom_from_file(gedcom_fname,encoding="UTF-8"):
-    return parse_gedcom(open(gedcom_fname,encoding=encoding))
 
 def allempty(items):
     for item in items:
@@ -213,7 +197,7 @@ def transform(item,options):
             if changed:
                 return item
             else:
-                return True # no change
+                pass # fall thru
 
     if options.insert_dummy_tags:
         if item.tag == "_DUMMY" and len(item.children) == 0: return None
@@ -285,6 +269,11 @@ def transform(item,options):
 def add_args(parser):
     #parser.add_argument('--concatenate_lines', action='store_true',
     #                    help='Combine all CONT and CONC lines')
+    
+    parser.add_argument('--add_cont_if_no_level_number', action='store_true',
+                        help='Add a CONT line if there is no level number')
+    parser.add_argument('--insert_dummy_tags', action='store_true',
+                        help='Insert s _DUMMY tag if a tag is missing')
     parser.add_argument('--remove_empty_dates', action='store_true',
                         help='Remove invalid DATE tags')
     parser.add_argument('--remove_empty_notes', action='store_true',
@@ -293,8 +282,6 @@ def add_args(parser):
                         help='Remove DATE AVOLIITTO tags')
     parser.add_argument('--remove_invalid_divorce_dates', action='store_true',
                         help='Remove invalid DATEs for DIV tags')
-    parser.add_argument('--insert_dummy_tags', action='store_true',
-                        help='Insert s _DUMMY tag if a tag is missing')
     parser.add_argument('--remove_empty_nameparts', action='store_true',
                         help='Remove empty GIVN and SURN tags')
     parser.add_argument('--remove_duplicate_sources', action='store_true',
@@ -321,12 +308,12 @@ def process(run_args,output):
     class Options: pass
     options = Options()
     options.__dict__= run_args
-
     lines = []
     input_gedcom = options.input_gedcom
     input_encoding = options.encoding
     lines = open(input_gedcom,encoding=input_encoding).readlines()
     lines = [line[:-1] for line in lines]
+    fixlines(lines,options)
     items = parse1(lines,level=0,options=options)
     g = Gedcom(items)
     output.original_line = None
