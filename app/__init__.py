@@ -11,6 +11,9 @@ app.register_blueprint(gedcom_bp)
 from bp.scene import bp as scene_bp
 app.register_blueprint(scene_bp)
 
+from bp.gramps import bp as gramps_bp
+app.register_blueprint(gramps_bp)
+
 from bp.admin import bp as admin_bp
 app.register_blueprint(admin_bp)
 

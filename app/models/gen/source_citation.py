@@ -7,9 +7,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
-from models.gramps.cypher_gramps import Cypher_source_w_handle
-from models.gramps.cypher_gramps import Cypher_citation_w_handle
-from models.gramps.cypher_gramps import Cypher_repository_w_handle
+from models.cypher_gramps import Cypher_source_w_handle
+from models.cypher_gramps import Cypher_citation_w_handle
+from models.cypher_gramps import Cypher_repository_w_handle
 import shareds
 
 class Citation:

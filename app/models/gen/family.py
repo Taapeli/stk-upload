@@ -5,7 +5,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 from sys import stderr
 import  shareds
-from models.gramps.cypher_gramps import Cypher_family_w_handle
+from models.cypher_gramps import Cypher_family_w_handle
 
 class Family:
     """ Perhe

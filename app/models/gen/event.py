@@ -9,7 +9,7 @@ from sys import stderr
 #from flask import g
 from models.gen.dates import DateRange
 import  shareds
-from models.gramps.cypher_gramps import Cypher_event_w_handle
+from models.cypher_gramps import Cypher_event_w_handle
 
 class Event:
     """ Tapahtuma
@@ -411,7 +411,6 @@ RETURN ID(place) AS uniq_id"""
             print("Virhe.event_link_media: {0}".format(err), file=stderr)
             
         return
-
 
 
 class Event_for_template(Event):

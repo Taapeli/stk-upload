@@ -12,7 +12,7 @@ from models.gen.person import Weburl
 from models.gen.note import Note
 from models.gen.dates import DateRange
 from models.gen.cypher import Cypher_place
-from models.gramps.cypher_gramps import Cypher_place_w_handle
+from models.cypher_gramps import Cypher_place_w_handle
 import  shareds
 
 class Place:

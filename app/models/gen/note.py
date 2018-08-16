@@ -6,7 +6,7 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 @author: jm
 '''
 
-from models.gramps.cypher_gramps import Cypher_note_w_handle
+from models.cypher_gramps import Cypher_note_w_handle
 import shareds
 
 class Note:
