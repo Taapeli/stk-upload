@@ -107,6 +107,21 @@ def gedcom_versions(gedcom):
     versions.append(gedcom)
     return jsonify(versions)
 
+@bp.route('/gedcom/compare/<gedcom1>/<gedcom2>', methods=['GET'])
+@login_required
+def gedcom_compare(gedcom1,gedcom2):
+    import difflib
+    gedcom_folder = get_gedcom_folder()
+    filename1 = os.path.join(gedcom_folder,gedcom1)
+    filename2 = os.path.join(gedcom_folder,gedcom2)
+    lines1 = open(filename1).readlines()
+    lines2 = open(filename2).readlines()
+    difftable = difflib.HtmlDiff().make_table(lines1,lines2,context=True,numlines=2,
+                                              fromdesc=gedcom1,todesc=gedcom2
+                                              )
+    rsp = dict(diff=difftable)
+    return jsonify(rsp)
+
 @bp.route('/gedcom/upload', methods=['POST'])
 @login_required
 def gedcom_upload():

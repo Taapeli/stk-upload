@@ -11,6 +11,12 @@
 	color: white;
 	background-color: red; 
 }
+.diff_sub {
+	background-color: bisque; 
+}
+.diff_add {
+	background-color: lightgreen; 
+}
 </style>
 
 <script>
@@ -45,6 +51,8 @@
                 	row.data("version",version);
                 	$("#versions_list").append(row);
                 });
+                $("#versions_list tr:nth-last-child(2) input[name=v1]").prop("checked",true);
+                $("#versions_list tr:nth-last-child(1) input[name=v2]").prop("checked",true);
 	            $("#div_versions").show();
             });
         });
@@ -73,6 +81,16 @@
         });
         $("#palauta").click(function() {
         	 alert('{{ _("Palautustoimintoa ei vielä ole toteutettu") }}');
+        });
+        $("#compare").click(function() {
+        	var row1 = $("input[name=v1]:checked").parent().parent();
+        	var gedcom1 = row1.data("version");
+        	var row2 = $("input[name=v2]:checked").parent().parent();
+        	var gedcom2 = row2.data("version");
+        	$.get("/gedcom/compare/" + gedcom1 + "/" + gedcom2,function(rsp) {
+            	$("#difftable").html(rsp.diff);
+            	$("#div_compare").show();
+        	});
         });
         hide_all();
     });
@@ -143,13 +161,18 @@
 	        <div style="display: inline-block;">
 	
 		        <h4>{{ _("Versiot") }}:</h4>
-		        (vasta suunnitteilla)
-		        <br>
 		        <button id="compare">{{ _("Vertaa versioita") }}</button>
+		        <p>
 		        <table id="versions_list"></table>
 		    </div>
 		  </div>
 	        
+	      <div class="xstartbox gedcom" id="div_compare">
+	        <h4>{{ _("GEDCOM-vertailu") }}:</h4>
+	        <div id="difftable">
+		    </div>
+		  </div>
+
 	      <div class="startbox gedcom" id="div_transform_params">
 			<form id="form">
 		      <div id="div_transform_params1">
