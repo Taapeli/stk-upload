@@ -304,10 +304,7 @@ def add_args(parser):
 def initialize(run_args):
     pass
 
-def process(run_args,output):
-    class Options: pass
-    options = Options()
-    options.__dict__= run_args
+def process(options,output):
     lines = []
     input_gedcom = options.input_gedcom
     input_encoding = options.encoding
@@ -318,12 +315,11 @@ def process(run_args,output):
     g = Gedcom(items)
     output.original_line = None
     g.print_items(output)
+    print("Done")
         
 if __name__ == "__main__":
     fname = sys.argv[1]
     g = parse_gedcom_from_file(fname,encoding=input_encoding)
-    #out = open("liisa","wb")
-    #g.print_items(out)
     g.print_items(sys.stdout)
 
 

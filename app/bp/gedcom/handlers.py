@@ -18,13 +18,27 @@ from flask_babelex import _
 
 from . import bp
 import subprocess
-    
+
+from .transforms.model.ged_output import Output
+
+import datetime
+import logging
+LOG = logging.getLogger(__name__)    
 # --------------------- GEDCOM functions ------------------------
 
 # TODO: move these to config.py
 GEDCOM_FOLDER="gedcoms"    
 ALLOWED_EXTENSIONS = {"ged"}    
 GEDDER="app/bp/gedcom"
+
+def init_log(logfile):
+    ''' Define log file and save one previous log '''
+    try:
+        if os.open(logfile, os.O_RDONLY):
+            os.rename(logfile, logfile + '~')
+    except:
+        pass
+    logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
 
 def get_gedcom_folder():
     return os.path.join(GEDCOM_FOLDER,current_user.username)
@@ -180,14 +194,60 @@ def removefile(fname):
         os.remove(fname)
     except FileNotFoundError:
         pass
-     
+
+def process_gedcom(cmd, transformer):
+
+
+    LOG.info("------ Ajo '%s'   alkoi %s ------", \
+             transformer.__name__, \
+             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+
+    import argparse
+    import io
+    import traceback
+    parser = argparse.ArgumentParser()
+#    parser.add_argument('transform', help="Name of the transform (Python module)")
+    parser.add_argument('input_gedcom', help="Name of the input GEDCOM file")
+    parser.add_argument('--logfile', help="Name of the log file", default="_LOGFILE" )
+#    parser.add_argument('--output_gedcom', help="Name of the output GEDCOM file; this file will be created/overwritten" )
+    parser.add_argument('--display-changes', action='store_true',
+                        help='Display changed rows') 
+    parser.add_argument('--dryrun', action='store_true',
+                        help='Do not produce an output file')
+    parser.add_argument('--nolog', action='store_true',
+                        help='Do not produce a log in the output file')
+    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
+                        help="Input encoding")
+    transformer.add_args(parser)
+    args = parser.parse_args(cmd.split())
+    run_args = vars(args)
+    transformer.initialize(args)
+    with Output(run_args) as f:
+        saved_stdout = sys.stdout
+        saved_stderr = sys.stdout
+        sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
+        try:
+            transformer.process(args, f)
+        except:
+            traceback.print_exc()
+        finally:
+            s1 = sys.stdout.getvalue()
+            s2 = sys.stderr.getvalue()
+            sys.stdout = saved_stdout
+            sys.stderr = saved_stderr
+            if s2 == "": s2 = _("None")
+            s = "Logfile: " + args.logfile + "\nErrors:\n" + s2 + "\n\n" + s1 
+            return s
+            
+                 
 @bp.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
 @login_required
 def gedcom_transform(gedcom,transform):
     gedcom_folder = get_gedcom_folder()
     gedcom_filename = os.path.join(gedcom_folder,gedcom)
     gedcom_filename = os.path.abspath(gedcom_filename)
-    parser = build_parser(transform,gedcom,gedcom_filename)
+    transformer,parser = build_parser(transform,gedcom,gedcom_filename)
     if request.method == 'GET':
         return parser.generate_html()
     else:
@@ -195,6 +255,15 @@ def gedcom_transform(gedcom,transform):
         print("logfile:",logfile)
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
+
+        #logging.info(cmd)
+        #init_log(run_args['logfile'])
+        
+        if hasattr(transformer,"process"):
+            cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
+            s = process_gedcom(cmd, transformer)
+            return s
+
         cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
         cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd)
         cmd3 = """{} gedcom_transform.py {}""".format(sys.executable,cmd)
@@ -297,5 +366,5 @@ def build_parser(filename,gedcom,gedcom_filename):
                         help="Input encoding")
     transformer.add_args(parser)
 
-    return parser
+    return transformer,parser
 
