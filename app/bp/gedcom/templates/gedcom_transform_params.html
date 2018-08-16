@@ -1,7 +1,8 @@
 <script>
     $(document).ready( function() {
+        $("#transform").off("click");
         $("#transform").click(function() {
-        	$("#output").hide();
+        	$("#output").empty().hide();
             $.post("/gedcom/transform/{{ gedcom }}/{{ transform }}", $("#form").serialize(), function(rsp) {
                 $("#output").text(rsp).show();
             });
@@ -27,7 +28,7 @@
 		
 		{% for row in rows %}
 		    <tr>
-		    <td>{{ row.name }} {% if row.help %}
+		    <td>{{ row.xxxname }} {% if row.help %}
 		      <span style="font-size: smaller;">{{ row.help }}</span>{% endif %}</td>
 		    <td>
 		    {% if row.type == "select" %}

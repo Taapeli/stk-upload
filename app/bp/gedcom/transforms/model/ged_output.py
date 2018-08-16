@@ -57,7 +57,7 @@ class Output:
     def emit(self, line):
         ''' Process an input line '''
         #if self.display_changes and self.original_line and \
-        if self.display_changes:
+        if self.display_changes and self.original_line is not None:
             if self.original_line == "" and self.saved_line != "":
                 print('{:>36} --> {}'.format(self.saved_line, self.saved_line))
                 print('{:>36} --> {}'.format(self.original_line, line))
@@ -88,7 +88,8 @@ class Output:
             self.emit("2 CONT _DATE {} {}".format(user, datestring))
             if self.new_name:
                 self.emit("2 CONT _SAVEDFILE " + self.new_name)
-
+    write = emit
+    
     def save(self):
         if self.out_name:
             msg = "Tulostiedosto '{}'".format(self.out_name)

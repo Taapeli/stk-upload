@@ -17,6 +17,7 @@ from flask import send_from_directory
 from flask_babelex import _
 
 from . import bp
+import subprocess
     
 # --------------------- GEDCOM functions ------------------------
 
@@ -195,9 +196,19 @@ def gedcom_transform(gedcom,transform):
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
         cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
-        f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
-        s = f.read()
-        log = open(logfile).read()
+        cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd)
+        cmd3 = """{} gedcom_transform.py {}""".format(sys.executable,cmd)
+        #f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
+        #s = f.read()
+        import subprocess
+        p = subprocess.Popen(cmd3,shell=True,cwd=GEDDER,
+                             stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        s1 = p.stdout.read().decode('UTF-8')
+        s2 = p.stderr.read().decode('UTF-8')
+        p.wait()
+        if s2 == "": s2 = "None"
+        s = "\nErrors:\n" + s2 + "\n\n" + s1
+        log = open(logfile).read() 
         time.sleep(1)  # for testing...
         return cmd + "\n\n" + log + "\n\n" + s
 
@@ -282,8 +293,8 @@ def build_parser(filename,gedcom,gedcom_filename):
                         help='Do not produce an output file')
     parser.add_argument('--nolog', action='store_true',
                         help='Do not produce a log in the output file')
-    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "ISO8859-1"],
-                        help="e.g, UTF-8, ISO8859-1")
+    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
+                        help="Input encoding")
     transformer.add_args(parser)
 
     return parser

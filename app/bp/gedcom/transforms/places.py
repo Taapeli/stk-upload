@@ -60,8 +60,8 @@ def add_args(parser):
                         help='Replace changed PLAC tags with PLAC-X')
                         
 def initialize(run_args):
-    read_parishes("static/seurakunnat.txt")
-    read_villages("static/kylat.txt")
+    read_parishes("../../static/seurakunnat.txt")
+    read_villages("../../static/kylat.txt")
 
 
 def phase2(run_args):
