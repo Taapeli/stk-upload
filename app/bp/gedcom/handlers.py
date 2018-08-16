@@ -40,6 +40,14 @@ def init_log(logfile):
         pass
     logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
 
+def generate_name(name):
+    i = 0
+    while True:
+        newname = "{}.{}".format(name,i)
+        if not os.path.exists(newname): 
+            return newname
+        i += 1
+
 def get_gedcom_folder():
     return os.path.join(GEDCOM_FOLDER,current_user.username)
 
@@ -120,6 +128,20 @@ def gedcom_compare(gedcom1,gedcom2):
                                               fromdesc=gedcom1,todesc=gedcom2
                                               )
     rsp = dict(diff=difftable)
+    return jsonify(rsp)
+
+@bp.route('/gedcom/revert/<gedcom>/<version>', methods=['GET'])
+@login_required
+def gedcom_revert(gedcom,version):
+    gedcom_folder = get_gedcom_folder()
+    filename1 = os.path.join(gedcom_folder,gedcom)
+    filename2 = os.path.join(gedcom_folder,version)
+    lines1 = open(filename1).readlines()
+    lines2 = open(filename2).readlines()
+    newname = generate_name(filename1)
+    os.rename(filename1,newname)
+    os.rename(filename2,filename1)
+    rsp = dict(newname=newname)
     return jsonify(rsp)
 
 @bp.route('/gedcom/upload', methods=['POST'])

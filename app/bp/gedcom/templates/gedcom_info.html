@@ -80,7 +80,14 @@
         	 $("#errors").hide();
         });
         $("#palauta").click(function() {
-        	 alert('{{ _("Palautustoimintoa ei vielä ole toteutettu") }}');
+			//alert('{{ _("Palautustoimintoa ei vielä ole toteutettu") }}');
+			var gedcom = "{{ gedcom }}";
+			var version = $("#oldname").text();
+            $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
+                alert(gedcom + " renamed to " + rsp.newname + "\n" +
+                	  version + " renamed to " + gedcom);
+            });
+        	 
         });
         $("#compare").click(function() {
         	var row1 = $("input[name=v1]:checked").parent().parent();
