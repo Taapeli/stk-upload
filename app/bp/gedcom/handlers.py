@@ -31,7 +31,7 @@ GEDCOM_FOLDER="gedcoms"
 ALLOWED_EXTENSIONS = {"ged"}    
 GEDDER="app/bp/gedcom"
 
-def init_log(logfile):
+def init_log(logfile): 
     ''' Define log file and save one previous log '''
     try:
         if os.open(logfile, os.O_RDONLY):
@@ -39,6 +39,12 @@ def init_log(logfile):
     except:
         pass
     logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
+
+def read_gedcom(filename):
+    try:
+        return open(filename).readlines()
+    except UnicodeDecodeError:
+        return open(filename,encoding="ISO8859-1").readlines()
 
 def generate_name(name):
     i = 0
@@ -122,8 +128,8 @@ def gedcom_compare(gedcom1,gedcom2):
     gedcom_folder = get_gedcom_folder()
     filename1 = os.path.join(gedcom_folder,gedcom1)
     filename2 = os.path.join(gedcom_folder,gedcom2)
-    lines1 = open(filename1).readlines()
-    lines2 = open(filename2).readlines()
+    lines1 = read_gedcom(filename1)
+    lines2 = read_gedcom(filename2)
     difftable = difflib.HtmlDiff().make_file(lines1,lines2,context=True,numlines=2,
                                               fromdesc=gedcom1,todesc=gedcom2
                                               )
@@ -171,7 +177,7 @@ def gedcom_upload():
 
         desc = request.form['desc']
         metadata = {'desc':desc}
-        save_metadata(file.filename, metadata)
+        save_metadata(filename, metadata)
         return redirect(url_for('.gedcom_list'))
   
 @bp.route('/gedcom/download/<gedcom>')
