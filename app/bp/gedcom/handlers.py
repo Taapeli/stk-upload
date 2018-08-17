@@ -124,7 +124,7 @@ def gedcom_compare(gedcom1,gedcom2):
     filename2 = os.path.join(gedcom_folder,gedcom2)
     lines1 = open(filename1).readlines()
     lines2 = open(filename2).readlines()
-    difftable = difflib.HtmlDiff().make_table(lines1,lines2,context=True,numlines=2,
+    difftable = difflib.HtmlDiff().make_file(lines1,lines2,context=True,numlines=2,
                                               fromdesc=gedcom1,todesc=gedcom2
                                               )
     rsp = dict(diff=difftable)
