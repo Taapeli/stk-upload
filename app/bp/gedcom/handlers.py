@@ -325,10 +325,14 @@ def gedcom_transform(gedcom,transform):
         s1 = p.stdout.read().decode('UTF-8')
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
-        if s2 == "": s2 = "None"
+        #if s2 == "": s2 = "None"
         s = "\nErrors:\n" + s2 + "\n\n" + s1
         log = open(logfile).read() 
         time.sleep(1)  # for testing...
+        rsp = dict(stdout=log + "\n" + s1,stderr=s2,oldname="",logfile=logfile,
+           diff="")
+        return jsonify(rsp)
+
         return cmd + "\n\n" + log + "\n\n" + s
 
    
