@@ -263,6 +263,12 @@ def transform(item,options):
                 item.line = "%s %s %s" % (item.level,item.tag,item.text)
                 return item
 
+    if options.emig_to_resi: # 5.1.3
+        if item.line.strip() == "1 EMIG":
+            item.tag = "RESI"
+            item.line = "%s %s %s" % (item.level,item.tag,item.text)
+            return item
+
     return True # no change
     
     
@@ -301,6 +307,8 @@ def add_args(parser):
                         help='Change event types "Kaksonen" and "Kolmonen" to NOTEs')
     parser.add_argument('--remove_multiple_blanks', action='store_true',
                         help='Remove trailing and multiple consecutive spaces in person and place names')
+    parser.add_argument('--emig_to_resi', action='store_true',
+                        help='Change EMIG to RESI')
      
 def initialize(run_args):
     pass
@@ -319,9 +327,5 @@ def process(options,output):
     print("Done")
     return output.new_name
         
-if __name__ == "__main__":
-    fname = sys.argv[1]
-    g = parse_gedcom_from_file(fname,encoding=input_encoding)
-    g.print_items(sys.stdout)
 
 
