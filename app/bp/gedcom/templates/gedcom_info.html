@@ -53,6 +53,9 @@
                 });
                 $("#versions_list tr:nth-last-child(2) input[name=v1]").prop("checked",true);
                 $("#versions_list tr:nth-last-child(1) input[name=v2]").prop("checked",true);
+                $("#versions_list a").click(function() {
+                	alert("Tästä ei tapahdu vielä mitään");
+                });
 	            $("#div_versions").show();
             });
         });
@@ -96,9 +99,23 @@
         	var gedcom2 = row2.data("version");
         	$.get("/gedcom/compare/" + gedcom1 + "/" + gedcom2,function(rsp) {
             	$("#difftable").html(rsp.diff);
+            	$("button.palauta_button").hide();
+            	$("#palauta1").text("{{ _('Palauta') }} " + gedcom1).data("gedcom",gedcom1);
+            	$("#palauta2").text("{{ _('Palauta') }} " + gedcom2).data("gedcom",gedcom2);
+            	if (!gedcom1.match(/\.ged$/)) $("#palauta1").show();
+            	if (!gedcom2.match(/\.ged$/)) $("#palauta2").show();
             	$("#div_compare").show();
         	});
         });
+    	$("button.palauta_button").click(function(rsp) {
+			var gedcom = "{{ gedcom }}";
+			var version = $(this).data("gedcom");
+            $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
+		        $("#versions").click(); 
+                alert(gedcom + " renamed to " + rsp.newname + "\n" +
+                	  version + " renamed to " + gedcom);
+            });
+    	});
         hide_all();
     });
 </script>
@@ -167,7 +184,7 @@
 	      <div class="startbox gedcom" id="div_versions">
 	        <div style="display: inline-block;">
 	
-		        <h4>{{ _("Versiot") }}:</h4>
+		        <h3>{{ _("Versiot") }}:</h3>
 		        <button id="compare">{{ _("Vertaa versioita") }}</button>
 		        <p>
 		        <table id="versions_list"></table>
@@ -175,7 +192,10 @@
 		  </div>
 	        
 	      <div class="xstartbox gedcom" id="div_compare">
-	        <h4>{{ _("GEDCOM-vertailu") }}:</h4>
+	        <h3>{{ _("GEDCOM-vertailu") }}:</h3>
+	        <button id="palauta1" class="palauta_button"></button>
+	        <button id="palauta2" class="palauta_button"></button>
+	        <p>
 	        <div id="difftable">
 		    </div>
 		  </div>
