@@ -1,0 +1,156 @@
+{# _myapp/templates/k_place_events.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}paikan tapahtumat{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<h2>Paikan tapahtumat</h2>
+{{ macro.menu(4) }}
+
+    <div class="content" id="IndividualDetail">
+      {% if place.coord %}
+        <div id="map">{% if '°' in place.coord %}
+        Virheelliset koordinaatit: {{place.coord}}
+        &mdash; pitäisi olla desimaalimuodossa
+        {% else %}{% set r = 0.15 %}
+            {% set y = place.coord[0] %}
+            {% set x = place.coord[1] %}
+            <iframe width="250" height="250" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
+            src="http://www.openstreetmap.org/export/embed.html?bbox={{
+             x - r }}%2C{{ y - r }}%2C{{ x + r  }}%2C{{ y + r 
+             }}&amp;layer=mapnik&amp;marker={{place.coord[0]}}%2C{{place.coord[1]}}" 
+            style="border: 1px solid black"></iframe><br/><!--small--><a 
+            href="http://www.openstreetmap.org/?mlat={{place.coord[0]}}&amp;mlon={{
+             place.coord[1]}}#map=9/{{place.coord[0]}}/{{place.coord[1]}}">
+            - OpenstreetMap isommalla kartalla</a><!--/small--><br>
+            <a target="_blank" href="https://www.google.fi/maps/@{{place.coord[0]}},{{place.coord[1]}},14z?hl=fi">
+            - Google-kartalle</a><br>&nbsp;<br>
+            Sijainti: N&nbsp;{{ '{0:0.4f}'.format(place.coord[0]) }}, 
+            E&nbsp;{{ '{0:0.4f}'.format(place.coord[1]) }}
+        {% endif %}</div>
+      {% endif %}
+
+    <h3 style="position:sticky; top:0;">{{place.pname|join('<br>'|safe)}}</h3>
+        <div>
+            <ul>{% for p in locations %}
+                <li style="margin-left: {{p.level * 2}}em;">
+                {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
+                    <b>{{p.pname|join(' • ')}}</b>
+                {% else %}<a href="/scene/location={{p.id}}"><span class="id">{{p.id}}</span></a>
+                    {{p.pname|join(' • ')}}
+                {% endif %} <small>&nbsp;{{p.type|transl('lt')}}</small></li>
+            {% endfor %}</ul>
+        </div>
+    {% if place.urls %}
+        <div id="events">
+            <h4>Verkkosivut</h4>
+            <table class="infolist eventlist">
+                <thead>
+                    <tr>
+                        <th> </th>
+                        <th class="ColumnDescription">Tyyppi</th>
+                        <th class="ColumnDescription">Viite</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for u in place.urls %}
+                    <tr>
+                        <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(u.priv) }}</td> 
+                        <td class="ColumnDescription">{{u.type|transl('urlt')}}</td> 
+                        <td class="ColumnDescription">
+                            <a href="{{u.href}}" class="outlink">{{u.description}}</a></td> 
+                    </tr>
+         {% endfor %}
+                 </tbody>
+            </table>
+        </div>
+    {% endif %}
+    {% if place.noteref_hlink %}
+        <div id="notes">
+            <h4>Lisätiedot</h4>
+            <table class="infolist notelist">
+                <thead>
+                    <tr>
+                        <th> </th>
+                        <th class="ColumnDescription">Tyyppi</th>
+                        <th class="ColumnDescription">Lisätieto</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for n in place.noteref_hlink %}
+                    <tr>
+                        <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(n.priv) }}</td> 
+                        <td class="ColumnDescription">{{n.type|transl('notet')}}</td> 
+                        <td class="ColumnDescription">{{n.text}}</td> 
+                    </tr>
+         {% endfor %}
+                 </tbody>
+            </table>
+        </div>
+    {% endif %}
+        <div id="events"> <!--class="subsection"-->
+            <h4>Tapahtumat</h4>
+    {% if events %}
+            <table class="infolist eventlist">
+                <thead>
+                    <tr>
+                        <th class="ColumnId">Henkilö</th>
+                        <th class="ColumnPerson">Nimi</th>
+                        <th class="ColumnEvent">Tapahtuma</th>
+                        <th class="ColumnDate">Päivämäärä</th>
+ <!--                   <th class="ColumnDescription">Kuvaus</th>
+                        <th class="ColumnNotes">Lisätiedot</th>
+                        <th class="ColumnSources">Lähteet</th>
+-->
+                    </tr>
+                </thead>
+                <tbody>
+        {% for e in events|sort(attribute='date') %}
+                    <tr>
+                        <td class="ColumnPerson">
+                            <a href="/scene/person={{e.uid}}" class="id"
+                              title="katso henkilön tiedot">{{e.uid}}</a>
+                        </td>
+                        <td>{% for n in e.names|sort %} 
+                         {% if n[0] != "Birth Name" %}
+                            <small>{{n[0]|transl('nt')}}:</small>
+                         {% endif %}
+                         {{n[1]}} 
+                         {% if n[2] %}
+                            <b>{{n[2]}}</b>
+                         {% else %}
+                            <i>{{n[3]}}</i>
+                         {% endif %}
+                         <br />{% endfor %}
+                        </td>
+                        <td class="ColumnEvent">{{e.etype|transl('evt')}}
+                          {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}</td>
+                        <td class="ColumnDate">{{e.edates}}</td>
+<!--
+                        <td class="ColumnDescription">&nbsp;</td>
+                        <td class="ColumnNotes">
+                            <div></div>
+                        </td>
+                        <td class="ColumnSources">
+                         <!-- generoi href="#sref3a">3a</a>
+                        </td>
+-->
+                    </tr>
+         {% endfor %}
+                 </tbody>
+            </table>
+    {% else %}
+        <p>Ei tapahtumia</p>
+    {% endif %}
+        </div>
+
+<!--    <div class="subsection" id="sourcerefs">
+            <h4>Lähdeviitteet</h4>
+            <p>Ei lähdeviitteitä haettuna</p>
+        </div>
+-->
+    </div>
+{% endblock %}
+

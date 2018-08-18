@@ -9,12 +9,12 @@ logger = logging.getLogger('stkserver')
 """
 
 if __name__ == '__main__':
-    from stk_server import app
+    from app import app
     print('Käynnistys: ' + str(app))
 
     if True:
         # Ajo paikallisesti
-        print ("stk_server ajetaan DEBUG-lokitasolla")
+        print ("Stk server ajetaan DEBUG-lokitasolla")
         app.run(debug='DEBUG')
     else:
         # Julkinen sovellus

@@ -1,0 +1,57 @@
+{# templates/login/reference.html_ #}
+{% extends "/admin/layout.html" %}
+{% block title %}Kirjautunut käyttäjä{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div style="margin-left:50px; padding-bottom: 2em;">
+  <div>
+    <h2>Referenssiaineistojen käsittely</h2>
+    <div class="row">
+
+          <div class="startbox admin">
+            <div style="display: inline-block;">
+               <h3>Tietojen lisääminen</h3>
+                 <form action="/admin/upload_csv" method="post"  enctype="multipart/form-data">
+	               <div style="display: inline-block;">
+	                 <input type="hidden" name="material" value="refnames">
+	                 <p>Lataa referenssinimiä</p>
+	                 <input type="file" name="filenm"><br>
+	                 <input type="checkbox" name="destroy" value="all">
+	                  <u>Tuhotaan</u> kaikki entiset</u> ja luodaan yksikäsitteinen indeksi
+	               </div>
+                   <div style="text-align:right;"> 
+	                 <input type="submit" value="Lataa" />
+	               </div>
+                </form>
+            </div>
+        </div>
+
+       <div class="startbox admin">
+          <div style="display: inline-block;">
+			<h3>Referenssinimienkäsittely</h3>
+			<ul><li>Listaukset</li><ul>
+	              <li><a href="/list/refnames">Listaa referenssinimet</a></li>
+	              <li><a href="/scene/persons/all/ref">Katso ihmiset referenssinimineen</a></li>
+              </ul>
+			  <li><a href="/admin/set/refnames">Aseta muuttuneet referenssinimet
+			     kaikille ihmisille</a></li>
+			</ul>
+          </div>
+        </div>
+
+        <div class="startbox"">
+          <h3>Kirjaudu ulos</h3>
+          <p>Istunnon lopettaminen<br>&nbsp;</p>
+	      <form method="get" action="/login">
+             <div style="text-align:right;"> 
+				<button type="submit" style="color: blue">Poistu sovelluksesta</button>
+             </div>
+		  </form>
+        </div>
+
+    </div>
+    <p>> <a href="javascript:history.back()">Paluu alkuun</a></p>
+  </div>
+	
+{% endblock %}
