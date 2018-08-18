@@ -6,7 +6,7 @@ Created on 17.11.2017
 Sovelluksen toiminnallisuutta ohjaavat tiedot  
 '''
   
-print('Luetaan sovelluksen config.py')
+print('Reading application config.py')
 DEBUG = False
 SECURITY_REGISTERABLE = True
 SECURITY_CONFIRMABLE = True

@@ -1,4 +1,4 @@
-{# _myapp/templates/table1.html_ #}
+{# _myapp/templates/list_allowed_emails.html_ #}
 {% from "security/_macros.html" import render_field_with_errors, render_field %}
 {% include "security/_messages.html" %}
 {% extends "a_layout.html" %}
@@ -19,21 +19,37 @@
   {% endif %}
 {% endwith %}
  
-<div class="row">
+<div>
   <div>
     <h2>Käyttäjäehdokkaat</h2>
 
     <div class="startbox">
+   	  <h3>Luo uusi käyttäjäehdokas</h3>
+	    <div style="display: inline-block;">    
+	        <form action="{{ url_for('admin.list_allowed_emails') }}" method="POST">
+	          {{ form.hidden_tag() }}
+	          {{ render_field_with_errors(form.allowed_email) }}
+	          {{ render_field_with_errors(form.default_role) }}      
+	          {{ render_field(form.submit) }}
+	
+	        </form>
+	    </div>
+	</div>
+    <div>
       <h3>Odottavat käyttäjäehdokkaat</h3>
         <section id="lista">
-	        <table style="background: ivory;">
-	            <tr><th>email</th><th>role</th>
+	        <table style="background: ivory;" >
+	            <tr><th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>
 	            </tr>
 	        {% if emails %}
 	            {% for e in emails %}
 	                <tr>
 	                    <td>{{e.allowed_email}}</td>
 	                    <td>{{e.default_role}}</td>
+	                    <td>{{e.creator}}</td>
+
+	                    <td>{{e.created_at}}</td>
+	                    <td>{{e.registered}}</td>
 	                </tr>
 	            {% endfor %}
 	        {% else %}
@@ -43,18 +59,7 @@
         </section>
     </div>
 
-    <div class="startbox">
-   	  <h3>Luo uusi käyttäjäehdokas</h3>
-	    <div style="display: inline-block;">    
-	        <form action="{{ url_for('list_emails') }}" method="POST">
-	          {{ form.hidden_tag() }}
-	          {{ render_field_with_errors(form.allowed_email) }}
-	          {{ render_field_with_errors(form.default_role) }}      
-	          {{ render_field(form.submit) }}
-	
-	        </form>
-	    </div>
-	</div>
+
   </div>             
 </div>
 

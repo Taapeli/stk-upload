@@ -10,13 +10,13 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for 
-from flask_security import roles_accepted, roles_required, current_user
+from flask_security import login_required, roles_accepted, roles_required, current_user
 
 import shareds
 from models import dbutil, dataupdater, loadfile, datareader
-from .models import DataAdmin
+from .models import DataAdmin, UserAdmin
 from .cvs_refnames import load_refnames
-from .forms import ListEmailsForm
+from .forms import ListAllowedEmailsForm
 from . import bp
 
 # # Go to admin start page in app/routes.py 
@@ -110,27 +110,28 @@ def save_loaded_csv(filename, subj):
 #     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 
-#TODO Kuuluisiko kokonaisuuteen security??
-@bp.route('/admin/list_emails',  methods=['GET', 'POST'])
-#    @login_required
-#    @roles_required('admin')
-def list_emails():
-    form = ListEmailsForm()
+# Siirretty security--> admin
+@bp.route('/admin/list_allowed_emails',  methods=['GET', 'POST'])
+@login_required
+@roles_required('admin')
+def list_allowed_emails():
+    form = ListAllowedEmailsForm()
     if request.method == 'POST':
         # Register a new email
-        shareds.user_datastore.allowed_email_register(form.allowed_email.data,
-                                                      form.default_role.data)
+        UserAdmin.allowed_email_register(form.allowed_email.data,
+                                            form.default_role.data)
         
-    lista = shareds.user_datastore.get_allowed_emails()
-    return render_template("/security/list_allowed_emails.html", emails=lista, 
-                           form=form)
+    lista = UserAdmin.get_allowed_emails()
+    return render_template("/admin/list_allowed_emails.html", emails=lista, 
+                            form=form)
 
 
-#TODO Kuuluisiko kokonaisuuteen security??
+# Siirretty security--> admin
 @bp.route('/admin/list_users', methods=['GET'])
-# @login_required
+@login_required
+@roles_accepted('admin', 'audit')
 def list_users():
     # Käytetään neo4juserdatastorea
     lista = shareds.user_datastore.get_users()
-    return render_template("/security/list_users.html", users=lista)  
+    return render_template("/admin/list_users.html", users=lista)  
 
