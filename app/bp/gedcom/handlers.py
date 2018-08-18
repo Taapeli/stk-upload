@@ -22,7 +22,6 @@ import subprocess
 from .transforms.model.ged_output import Output
 
 import datetime
-import logging
 from config import APP_ROOT_DIRECTORY
 LOG = logging.getLogger(__name__)    
 
@@ -30,9 +29,10 @@ from . import util
 # --------------------- GEDCOM functions ------------------------
 
 # TODO: move these to config.py
-GEDCOM_FOLDER="gedcoms"    
+GEDCOM_FOLDER=os.path.join(APP_ROOT_DIRECTORY, "gedcoms")    
 ALLOWED_EXTENSIONS = {"ged"}    
 GEDDER=os.path.join(APP_ROOT_DIRECTORY, "app/bp/gedcom")
+print ("Directories Gedder={}, gedcom={}".format(GEDDER, GEDCOM_FOLDER))
 
 def init_log(logfile): 
     ''' Define log file and save one previous log '''
@@ -67,7 +67,8 @@ def save_metadata(gedcom,metadata):
     
 def get_transforms():
     class Transform: pass
-    names = sorted([name for name in os.listdir(GEDDER+"/transforms") \
+    transdir = os.path.join(GEDDER, "transforms")
+    names = sorted([name for name in os.listdir(transdir) \
                     if name.endswith(".py") and not name.startswith("_")])
     for name in names:
         t = Transform()
@@ -321,11 +322,10 @@ def gedcom_transform(gedcom,transform):
             return s
 
         cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
-        cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd)
+#       cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd)
         cmd3 = """{} gedcom_transform.py {}""".format(sys.executable,cmd)
         #f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
         #s = f.read()
-        import subprocess
         p = subprocess.Popen(cmd3,shell=True,cwd=GEDDER,
                              stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         s1 = p.stdout.read().decode('UTF-8')
