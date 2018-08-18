@@ -324,7 +324,6 @@ def process(options,output):
     g = Gedcom(items)
     output.original_line = None
     g.print_items(output)
-    print("Done")
     return output.new_name
         
 

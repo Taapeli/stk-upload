@@ -238,6 +238,7 @@ def process_gedcom(cmd, transformer):
              transformer.__name__, \
              datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
 
+
     import argparse
     import io
     import traceback
@@ -263,6 +264,10 @@ def process_gedcom(cmd, transformer):
         saved_stderr = sys.stdout
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
+        print("------ Ajo '%s'   alkoi   %s ------" % (
+                 transformer.__name__, 
+                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+
         if args.dryrun: 
             old_name = ""
         else:
@@ -272,6 +277,9 @@ def process_gedcom(cmd, transformer):
         except:
             traceback.print_exc()
         finally:
+            print("------ Ajo '%s'   päättyi %s ------" % (
+                     transformer.__name__, 
+                     datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
             output = sys.stdout.getvalue()
             errors = sys.stderr.getvalue()
             sys.stdout = saved_stdout
