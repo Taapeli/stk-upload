@@ -302,8 +302,8 @@ def process_gedcom(cmd, transformer):
 @login_required
 def gedcom_transform(gedcom,transform):
     gedcom_folder = get_gedcom_folder()
-    gedcom_filename = os.path.join(gedcom_folder,gedcom)
-    gedcom_filename = os.path.abspath(gedcom_filename)
+    gedcom_filename = os.path.join(gedcom_folder, gedcom)
+#   gedcom_filename = os.path.abspath(gedcom_filename)
     transformer,parser = build_parser(transform,gedcom,gedcom_filename)
     if request.method == 'GET':
         return parser.generate_html()
@@ -313,19 +313,18 @@ def gedcom_transform(gedcom,transform):
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
 
-        #logging.info(cmd)
-        #init_log(run_args['logfile'])
-        
         if hasattr(transformer,"process"):
             cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
+            print("Starting process " + cmd)
             s = process_gedcom(cmd, transformer)
             return s
 
         cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
 #       cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd)
-        cmd3 = """{} gedcom_transform.py {}""".format(sys.executable,cmd)
+        cmd3 = 'cd "{}"; {} gedcom_transform.py {}'.format(GEDDER, sys.executable, cmd)
         #f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
         #s = f.read()
+        print("Starting " + cmd3)
         p = subprocess.Popen(cmd3,shell=True,cwd=GEDDER,
                              stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         s1 = p.stdout.read().decode('UTF-8')
