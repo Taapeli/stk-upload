@@ -11,6 +11,9 @@ import tempfile
 import logging
 LOG = logging.getLogger(__name__)
 
+sys.path.append("app/bp/gedcom") # otherwise pytest does not work??? 
+import util
+
 class Output:
     def __init__(self, run_args):
         self.run_args = run_args
@@ -44,7 +47,7 @@ class Output:
             # create tempfile in the same directory so you can rename it later
             tempfile.tempdir = os.path.dirname(self.in_name) 
             self.temp_name = tempfile.mktemp()
-            self.new_name = self.generate_name(self.in_name)
+            self.new_name = util.generate_name(self.in_name)
             self.f = open(self.temp_name, "w", encoding=encoding)
         return self
 
@@ -108,7 +111,7 @@ class Output:
                     LOG.info("Luettu     %s", self.new_name)
                     LOG.info("Tulostettu %s", self.in_name)
 
-    def generate_name(self,name):
+    def xxxgenerate_name(self,name):
         i = 0
         while True:
             newname = "{}.{}".format(name,i)

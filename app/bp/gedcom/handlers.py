@@ -24,6 +24,8 @@ from .transforms.model.ged_output import Output
 import datetime
 import logging
 LOG = logging.getLogger(__name__)    
+
+from . import util
 # --------------------- GEDCOM functions ------------------------
 
 # TODO: move these to config.py
@@ -45,14 +47,6 @@ def read_gedcom(filename):
         return open(filename).readlines()
     except UnicodeDecodeError:
         return open(filename,encoding="ISO8859-1").readlines()
-
-def generate_name(name):
-    i = 0
-    while True:
-        newname = "{}.{}".format(name,i)
-        if not os.path.exists(newname): 
-            return newname
-        i += 1
 
 def get_gedcom_folder():
     return os.path.join(GEDCOM_FOLDER,current_user.username)
@@ -142,12 +136,10 @@ def gedcom_revert(gedcom,version):
     gedcom_folder = get_gedcom_folder()
     filename1 = os.path.join(gedcom_folder,gedcom)
     filename2 = os.path.join(gedcom_folder,version)
-    lines1 = open(filename1).readlines()
-    lines2 = open(filename2).readlines()
-    newname = generate_name(filename1)
+    newname = util.generate_name(filename1)
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
-    rsp = dict(newname=newname)
+    rsp = dict(newname=os.path.basename(newname))
     return jsonify(rsp)
 
 @bp.route('/gedcom/upload', methods=['POST'])
@@ -286,14 +278,7 @@ def process_gedcom(cmd, transformer):
         old_basename = os.path.basename(old_name)
     else:
         old_basename = ""
-    difftable = ""
-    if False and old_name:
-        import difflib
-        lines1 = open(old_name).readlines()
-        lines2 = open(args.input_gedcom).readlines()
-        difftable = difflib.HtmlDiff().make_table(lines1,lines2,context=True)
-    rsp = dict(stdout=s1,stderr=s2,oldname=old_basename,logfile=args.logfile,
-               diff=difftable)
+    rsp = dict(stdout=s1,stderr=s2,oldname=old_basename,logfile=args.logfile)
     return jsonify(rsp)
             
                  
@@ -333,7 +318,10 @@ def gedcom_transform(gedcom,transform):
         p.wait()
         #if s2 == "": s2 = "None"
         s = "\nErrors:\n" + s2 + "\n\n" + s1
-        log = open(logfile).read() 
+        try:
+            log = open(logfile).read()
+        except FileNotFoundError:
+            log = "" 
         time.sleep(1)  # for testing...
         rsp = dict(stdout=log + "\n" + s1,stderr=s2,oldname="",logfile=logfile,
            diff="")

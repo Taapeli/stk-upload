@@ -63,7 +63,7 @@ def fixlines(lines,options):
         #line = line.strip()
         tkns = line.split(None,1)
         
-        if not tkns[0].isdigit() and options.add_cont_if_no_level_number: # 1.1.2
+        if (len(tkns) == 0 or not tkns[0].isdigit()) and options.add_cont_if_no_level_number: # 1.1.2
             # assume this is a continuation line
             line2 = "%s CONT %s" % (prevlevel+1,line)
             tkns = line2.split(None,1)
