@@ -263,22 +263,27 @@ def process_gedcom(cmd, transformer):
         saved_stderr = sys.stdout
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
-        old_name = "" 
+        if args.dryrun: 
+            old_name = ""
+        else:
+            old_name = f.new_name
         try:
-            old_name = transformer.process(args, f)
-            if args.dryrun: old_name = ""
+            transformer.process(args, f)
         except:
             traceback.print_exc()
         finally:
-            s1 = sys.stdout.getvalue()
-            s2 = sys.stderr.getvalue()
+            output = sys.stdout.getvalue()
+            errors = sys.stderr.getvalue()
             sys.stdout = saved_stdout
             sys.stderr = saved_stderr
     if old_name:
         old_basename = os.path.basename(old_name)
     else:
         old_basename = ""
-    rsp = dict(stdout=s1,stderr=s2,oldname=old_basename,logfile=args.logfile)
+    if errors and old_basename:
+        os.rename(old_name,args.input_gedcom)
+        old_basename = ""
+    rsp = dict(stdout=output,stderr=errors,oldname=old_basename,logfile=args.logfile)
     return jsonify(rsp)
             
                  
