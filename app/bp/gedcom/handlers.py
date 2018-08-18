@@ -23,6 +23,7 @@ from .transforms.model.ged_output import Output
 
 import datetime
 import logging
+from config import APP_ROOT_DIRECTORY
 LOG = logging.getLogger(__name__)    
 
 from . import util
@@ -31,7 +32,7 @@ from . import util
 # TODO: move these to config.py
 GEDCOM_FOLDER="gedcoms"    
 ALLOWED_EXTENSIONS = {"ged"}    
-GEDDER="app/bp/gedcom"
+GEDDER=os.path.join(APP_ROOT_DIRECTORY, "app/bp/gedcom")
 
 def init_log(logfile): 
     ''' Define log file and save one previous log '''
@@ -66,7 +67,8 @@ def save_metadata(gedcom,metadata):
     
 def get_transforms():
     class Transform: pass
-    names = sorted([name for name in os.listdir(GEDDER+"/transforms") if name.endswith(".py") and not name.startswith("_")])
+    names = sorted([name for name in os.listdir(GEDDER+"/transforms") \
+                    if name.endswith(".py") and not name.startswith("_")])
     for name in names:
         t = Transform()
         t.name = name
@@ -111,7 +113,8 @@ def gedcom_list():
 @login_required
 def gedcom_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
-    versions = sorted([name for name in os.listdir(gedcom_folder) if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
+    versions = sorted([name for name in os.listdir(gedcom_folder) \
+                       if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
     versions.append(gedcom)
     return jsonify(versions)
 
@@ -124,9 +127,8 @@ def gedcom_compare(gedcom1,gedcom2):
     filename2 = os.path.join(gedcom_folder,gedcom2)
     lines1 = read_gedcom(filename1)
     lines2 = read_gedcom(filename2)
-    difftable = difflib.HtmlDiff().make_file(lines1,lines2,context=True,numlines=2,
-                                              fromdesc=gedcom1,todesc=gedcom2
-                                              )
+    difftable = difflib.HtmlDiff().make_file(lines1, lines2, context=True, numlines=2,
+                                             fromdesc=gedcom1, todesc=gedcom2)
     rsp = dict(diff=difftable)
     return jsonify(rsp)
 
