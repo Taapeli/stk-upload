@@ -8,11 +8,10 @@ bp = Blueprint('gedcom',__name__,template_folder='templates')
 
 # Directories
 from config import APP_ROOT
-GEDCOMS_DIR=os.path.join(APP_ROOT, "gedcoms")   # Absolute path 
-# GEDDER_PATH=os.path.join(APP_ROOT, "app/bp/gedcom")
-GEDDER_PATH="app/bp/gedcom"                     # Relative to APP_ROOT
+GEDCOM_DATA=os.path.join(APP_ROOT, "gedcoms") 
+GEDCOM_APP=os.path.join(APP_ROOT, "app/bp/gedcom")
   
-print("Gedcom directories Gedder={}, gedcom={}".format(GEDDER_PATH, GEDCOMS_DIR))
+print("gedcom.init APP={}, DATA={}".format(GEDCOM_APP, GEDCOM_DATA))
 
 ALLOWED_EXTENSIONS = {"ged"}  
 

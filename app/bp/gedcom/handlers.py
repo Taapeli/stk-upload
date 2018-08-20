@@ -19,7 +19,7 @@ import logging
 LOG = logging.getLogger(__name__)    
 
 from . import bp
-from bp.gedcom import APP_ROOT, GEDCOMS_DIR, GEDDER_PATH, ALLOWED_EXTENSIONS
+from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
 from .transforms.model.ged_output import Output
 from . import util
 
@@ -41,7 +41,7 @@ def read_gedcom(filename):
         return open(filename,encoding="ISO8859-1").readlines()
 
 def get_gedcom_folder():
-    return os.path.join(GEDCOMS_DIR,current_user.username)
+    return os.path.join(GEDCOM_DATA, current_user.username)
 
 def get_metadata(gedcom):
     gedcom_folder = get_gedcom_folder()
@@ -58,7 +58,7 @@ def save_metadata(gedcom,metadata):
     
 def get_transforms():
     class Transform: pass
-    trans_dir = os.path.join(GEDDER_PATH, "transforms")
+    trans_dir = os.path.join(GEDCOM_APP, "transforms")
     names = sorted([name for name in os.listdir(trans_dir) \
                     if name.endswith(".py") and not name.startswith("_")])
     for name in names:
@@ -66,7 +66,7 @@ def get_transforms():
         t.name = name
         t.modname = name[0:-3]
         saved_path = sys.path[:]
-        sys.path.append(os.path.join(APP_ROOT, GEDDER_PATH))
+        sys.path.append(os.path.join(APP_ROOT, GEDCOM_APP))
         transformer = importlib.import_module("bp.gedcom.transforms."+t.modname)
         sys.path = saved_path
         doc = transformer.__doc__
@@ -293,38 +293,41 @@ def process_gedcom(cmd, transformer):
 def gedcom_transform(gedcom,transform):
     gedcom_folder = get_gedcom_folder()
     gedcom_filename = os.path.join(gedcom_folder, gedcom)
-#   gedcom_filename = os.path.abspath(gedcom_filename)
-    transformer,parser = build_parser(transform,gedcom,gedcom_filename)
+    # gedcom_filename = os.path.abspath(gedcom_filename)
+    transformer,parser = build_parser(transform, gedcom, gedcom_filename)
     if request.method == 'GET':
         return parser.generate_html()
     else:
         logfile = gedcom_filename + "-log"
-        print("logfile:",logfile)
+#         print("#logfile:",logfile)
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
 
         if hasattr(transformer,"process"):
             cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
-            print("Starting process " + cmd)
+            print("#Doing process " + cmd)
             s = process_gedcom(cmd, transformer)
             return s
 
         #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
         python_exe = sys.executable or "/opt/repo/virtenv/bin/python3"
-        gedder_dir = os.path.join(APP_ROOT, GEDDER_PATH)
-        transform_py = os.path.join(GEDDER_PATH, "gedcom_transform.py")
-        tr_cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
-#       cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER_PATH,sys.executable,cmd)
-        cmd3 = "cd '{}'; {} {} {}".format(APP_ROOT, python_exe, transform_py, tr_cmd)
-        #f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER_PATH,sys.executable,cmd))
-        #s = f.read()
-        print("Starting " + cmd3)
-        p = subprocess.Popen(cmd3, shell=True, cwd=gedder_dir,
+        python_path = ':'.join([os.path.join(APP_ROOT, 'app'), GEDCOM_APP])
+        gedcom_app = GEDCOM_APP
+        transform_py = os.path.join(GEDCOM_APP, "gedcom_transform.py")
+        tr_args = "{} {} {} {} {}".\
+                format(transform[:-3], gedcom_filename, args, "--logfile", logfile)
+        cmd3 = "cd '{}'; PYTHONPATH='{}' {} {} {}".\
+                format(gedcom_app, python_path, python_exe, transform_py, tr_args)
+#         cmd3 = "PYTHONPATH='{}' {} {} {}".\
+#                 format(python_path, python_exe, transform_py, tr_args)
+
+        print("#Doing " + cmd3)
+        p = subprocess.Popen(cmd3, shell=True, cwd=gedcom_app,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         s1 = p.stdout.read().decode('UTF-8')
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
-        #if s2 == "": s2 = "None"
+#         if s2: print("=== Subprocess errors ===\n" + s2) 
         s = "\nErrors:\n" + s2 + "\n\n" + s1
         try:
             log = open(logfile).read()
@@ -341,7 +344,7 @@ def gedcom_transform(gedcom,transform):
 def build_parser(filename,gedcom,gedcom_filename):
     modname = filename[:-3]
     saved_path = sys.path[:]
-    sys.path.append(os.path.join(APP_ROOT, GEDDER_PATH))
+    sys.path.append(os.path.join(APP_ROOT, GEDCOM_APP))
     transformer = importlib.import_module("bp.gedcom.transforms."+modname)
     sys.path = saved_path
 

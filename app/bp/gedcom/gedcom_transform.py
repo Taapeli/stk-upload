@@ -78,9 +78,9 @@ import datetime
 import logging
 LOG = logging.getLogger(__name__)
 
-from bp.gedcom.transforms.model.gedcom_line import GedcomLine
-from bp.gedcom.transforms.model.ged_output import Output
-from bp.gedcom import GEDDER_PATH
+# These work, when program is run in app.bp.gedcom directory!
+from transforms.model.gedcom_line import GedcomLine
+from transforms.model.ged_output import Output
 
 def numeric(s):
     return s.replace(".","").isdigit()
@@ -155,7 +155,7 @@ def process_gedcom(run_args, transformer, task_name=''):
 
 def get_transforms(): 
     # all transform modules should be .py files in the package/subdirectory "transforms"
-    for name in os.listdir(os.path.join(GEDDER_PATH, "transforms")):
+    for name in os.listdir("transforms"):
         if name.endswith(".py") and name != "__init__.py": 
             modname = name[0:-3]
             transformer = importlib.import_module("transforms."+modname)
