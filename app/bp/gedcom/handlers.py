@@ -6,33 +6,24 @@
 import sys
 import os
 import importlib
-
-import logging 
+import datetime
 import time
+import subprocess
 
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_security import login_required, current_user
 from flask import send_from_directory
-
 from flask_babelex import _
 
-from . import bp
-import subprocess
-
-from .transforms.model.ged_output import Output
-
-import datetime
-from config import APP_ROOT_DIRECTORY
+import logging 
 LOG = logging.getLogger(__name__)    
 
+from . import bp
+from bp.gedcom import APP_ROOT, GEDCOMS_DIR, GEDDER_PATH, ALLOWED_EXTENSIONS
+from .transforms.model.ged_output import Output
 from . import util
-# --------------------- GEDCOM functions ------------------------
 
-# TODO: move these to config.py
-GEDCOM_FOLDER=os.path.join(APP_ROOT_DIRECTORY, "gedcoms")    
-ALLOWED_EXTENSIONS = {"ged"}    
-GEDDER=os.path.join(APP_ROOT_DIRECTORY, "app/bp/gedcom")
-print ("Directories Gedder={}, gedcom={}".format(GEDDER, GEDCOM_FOLDER))
+# --------------------- GEDCOM functions ------------------------
 
 def init_log(logfile): 
     ''' Define log file and save one previous log '''
@@ -50,7 +41,7 @@ def read_gedcom(filename):
         return open(filename,encoding="ISO8859-1").readlines()
 
 def get_gedcom_folder():
-    return os.path.join(GEDCOM_FOLDER,current_user.username)
+    return os.path.join(GEDCOMS_DIR,current_user.username)
 
 def get_metadata(gedcom):
     gedcom_folder = get_gedcom_folder()
@@ -67,17 +58,16 @@ def save_metadata(gedcom,metadata):
     
 def get_transforms():
     class Transform: pass
-    transdir = os.path.join(GEDDER, "transforms")
-    names = sorted([name for name in os.listdir(transdir) \
+    trans_dir = os.path.join(GEDDER_PATH, "transforms")
+    names = sorted([name for name in os.listdir(trans_dir) \
                     if name.endswith(".py") and not name.startswith("_")])
     for name in names:
         t = Transform()
         t.name = name
-        modname = name[0:-3]
-        t.modname = modname
+        t.modname = name[0:-3]
         saved_path = sys.path[:]
-        sys.path.append(GEDDER)
-        transformer = importlib.import_module("transforms."+modname)
+        sys.path.append(os.path.join(APP_ROOT, GEDDER_PATH))
+        transformer = importlib.import_module("bp.gedcom.transforms."+t.modname)
         sys.path = saved_path
         doc = transformer.__doc__
         if doc:
@@ -319,14 +309,18 @@ def gedcom_transform(gedcom,transform):
             s = process_gedcom(cmd, transformer)
             return s
 
-        cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
-#       cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd)
-        cmd3 = 'cd "{}"; {} gedcom_transform.py {}'.format(GEDDER, sys.executable, cmd)
-        #f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
+        #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
+        python_exe = sys.executable or "/opt/repo/virtenv/bin/python3"
+        gedder_dir = os.path.join(APP_ROOT, GEDDER_PATH)
+        transform_py = os.path.join(GEDDER_PATH, "gedcom_transform.py")
+        tr_cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
+#       cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER_PATH,sys.executable,cmd)
+        cmd3 = "cd '{}'; {} {} {}".format(APP_ROOT, python_exe, transform_py, tr_cmd)
+        #f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER_PATH,sys.executable,cmd))
         #s = f.read()
         print("Starting " + cmd3)
-        p = subprocess.Popen(cmd3,shell=True,cwd=GEDDER,
-                             stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        p = subprocess.Popen(cmd3, shell=True, cwd=gedder_dir,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         s1 = p.stdout.read().decode('UTF-8')
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
@@ -347,8 +341,8 @@ def gedcom_transform(gedcom,transform):
 def build_parser(filename,gedcom,gedcom_filename):
     modname = filename[:-3]
     saved_path = sys.path[:]
-    sys.path.append(GEDDER)
-    transformer = importlib.import_module("transforms."+modname)
+    sys.path.append(os.path.join(APP_ROOT, GEDDER_PATH))
+    transformer = importlib.import_module("bp.gedcom.transforms."+modname)
     sys.path = saved_path
 
     class Arg:

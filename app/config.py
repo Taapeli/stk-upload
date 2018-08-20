@@ -6,7 +6,7 @@ Created on 17.11.2017
 Sovelluksen toiminnallisuutta ohjaavat tiedot  
 '''
   
-print('Luetaan sovelluksen config.py')
+#print('Luetaan sovelluksen config.py')
 DEBUG = False
 SECURITY_REGISTERABLE = True
 SECURITY_CONFIRMABLE = True
@@ -25,5 +25,5 @@ SECURITY_SEND_REGISTER_EMAIL = True
 DEFAULT_ROLE='admin'
 EXPLAIN_TEMPLATE_LOADING=False   # True: explain Flask, if you like
 from os import getcwd
-APP_ROOT_DIRECTORY = getcwd() or ''
-print('Application root "{}"'.format(APP_ROOT_DIRECTORY))
+APP_ROOT = getcwd() or 'None'
+print('app.config: APP_ROOT "{}"'.format(APP_ROOT))

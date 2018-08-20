@@ -7,7 +7,7 @@
 
 <style>
 .errors {
-	font-size: 24px;
+	font-size: 18px;
 	color: white;
 	background-color: red; 
 }
@@ -127,9 +127,11 @@ table.diff td {
 	       <div class="startbox">
 	         <div style="display: inline-block;">
 				<h3>{{ _("GEDCOM") }} "{{gedcom}}" tiedot</h3>
-				{{ _("Kuvaus") }}:<br>
-			    <input id="desc" value='{{ metadata.desc }}'>
-			    <input type="button" id="update_desc" value='{{ _("Päivitä") }}'>
+				<label for="desc">{{ _("Kuvaus") }}</label>
+			    <input id="desc" value='{{ metadata.desc }}' style="width: 14em">
+                <div class="submit">
+			         <input type="button" id="update_desc" value='{{ _("Päivitä") }}'>
+			    </div>
 				<p>(Näennäistiedot, ei aineistosta)</p>
 				<table>
 				    <tr><td>{{ _("Ladattu") }}</td>
@@ -160,7 +162,7 @@ table.diff td {
 				        <li><a href="#" id="delete" data="/gedcom/delete">
 	                        {{ _("Poista tämä tiedosto") }}</a></li>
 	                </ul><ul>
-				        <li><a href="/gedcom/list">{{ _("Paluu alkusivulle") }}</a></li>
+				        <li>&rtrif; <a href="/gedcom/list">{{ _("Omat aineistoni") }}</a></li>
 				    </ul>
 				</div>
 	        </div>

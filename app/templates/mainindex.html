@@ -16,7 +16,7 @@
            <form method="get" action="/scene/persons">
              <h3>Oma sukupuuni</h3>
              <p>Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan</p>
-             <div style="text-align:right;"> 
+             <div class="submit"> 
                 <button type="submit">Henkilöluettelo</button>
              </div>
            </form>
@@ -31,7 +31,7 @@
 	                 <p>Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi</p>
 	                 <input type="file" name="filenm" />
 	               </div>
-                   <div style="text-align:right;"> 
+                   <div class="submit"> 
 	                 <input type="submit" value="Lataa" />
 	               </div>
                 </form>
@@ -42,7 +42,7 @@
            <form method="get" action="/gedcom/list">
               <h3>Oma Gedcom-aineistoni</h3>
               <p>Lataa aineistosi Gedcom-muodossa tai muokkaa jo lähetettyä</p>
-             <div style="text-align:right;"> 
+             <div class="submit"> 
                 <button type="submit">Gedcom-käsittelyt</button>
              </div>
            </form>
@@ -62,7 +62,7 @@
                ja ongelmanselvitysvälineitä
             </p>
             <form method="get" action="/tables">
-               <div style="text-align:right;"> 
+               <div class="submit"> 
                   <button type="submit">Tutki tietokantaa</button>
                </div>
             </form>
@@ -73,7 +73,7 @@
           <div style="display: inline-block;">
             <h3>Viesti ylläpitoon</h3>
             <p>Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon</p>
-            <div style="text-align:right;"> 
+            <div class="submit"> 
               <button type="button" onclick="alert('Toiminto vasta suunnitteilla')">
                 Laadi viesti</button>
             </div>
@@ -89,7 +89,7 @@
                sekä tietokannan huoltotehtävät
             </p>
             <form method="get" action="/admin">
-               <div style="text-align:right;"> 
+               <div class="submit"> 
                   <button type="submit">Ylläpito</button>
                </div>
             </form>
@@ -100,7 +100,7 @@
           <h3>Kirjaudu ulos</h3>
           <p>Istunnon lopettaminen<br>&nbsp;</p>
 	      <form method="get" action="/logout">
-             <div style="text-align:right;"> 
+             <div class="submit"> 
 				<button type="submit" style="color: blue">Poistu sovelluksesta</button>
              </div>
 		  </form>
