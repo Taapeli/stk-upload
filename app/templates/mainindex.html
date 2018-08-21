@@ -5,7 +5,7 @@
 {% block body %}
 {{ super() }}
 
-<div style="margin-left:50px">
+<div id="startdiv">
   <div>
     <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
     <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;

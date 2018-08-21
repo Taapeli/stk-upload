@@ -1,10 +1,11 @@
 {# _myapp/templates/table1.html_ #}
-{% extends "a_layout.html" %}
+{% extends "/admin/layout.html" %}
 {% block title %}Tiedot kannasta{% endblock %}
 {% block body %}
 {{ super() }}
 
-<div>
+<div id="startdiv">
+  <div class="startbox2">
     <h2>Käyttäjät</h2>
     <div>
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -17,8 +18,7 @@
           {% endif %}
         {% endwith %}
         
-        <section id="lista">
-        <table>
+        <table class="table100">
             <tr><th>user id</th><th>name</th><th>email</th><th>roles</th>
             </tr>
         {% if users %}
@@ -34,8 +34,7 @@
                 <tr><td colspan="1">Ei tietoja</td></tr>
         {% endif %}
         </table>
-        </section>
     </div>
-
-
+  </div>
+</div>
 {% endblock %}

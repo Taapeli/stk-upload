@@ -39,6 +39,9 @@ a#ohjeet {
     padding: 0 5pt 0 5pt;
     margin: 5pt;}
 
+#startdiv {
+	margin-left:50px;
+}
 .startbox, .startbox2 {
     display: inline-block;
     vertical-align:top;
@@ -67,6 +70,10 @@ table, th, td {
     padding: 2px;
     text-align: left;
 /*  vertical-align: text-top; poistettu 3.7.2018/JMä */
+}
+.table100 { 
+	background: ivory; 
+	width: 100%;
 }
 .id { color: sienna; text-align: right; }
 .typevar { font-size: 80%; font-style: italic;
