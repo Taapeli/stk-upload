@@ -8,7 +8,7 @@ from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import InputRequired, Email, Length
 from flask_wtf import FlaskForm
     
-class ListEmailsForm(FlaskForm):
+class ListAllowedEmailsForm(FlaskForm):
 #    id = "register_email_form"
     strip_filter = lambda x: x.strip() if x else None
     allowed_email = StringField('Email Address:', [InputRequired(), Email(), Length(min=1, 

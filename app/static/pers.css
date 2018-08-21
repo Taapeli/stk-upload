@@ -39,14 +39,17 @@ a#ohjeet {
     padding: 0 5pt 0 5pt;
     margin: 5pt;}
 
-.startbox {
+.startbox, .startbox2 {
     display: inline-block;
     vertical-align:top;
     margin: 0 1em 1em 0;
-	padding: 1em; 
-	background-color: bisque;
-	width: 280px;
-	min-height: 150px;
+    padding: 1em; 
+    background-color: bisque;
+    width: 280px;
+    min-height: 150px;
+}
+.startbox2 {
+    width: 575px;
 }
 .admin {background-color: pink;}
 .startbox h3 { margin-top: 5px; margin-bottom: 5px; }

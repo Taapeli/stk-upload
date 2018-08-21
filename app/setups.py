@@ -137,7 +137,9 @@ class AllowedEmail():
     """ Object for storing an allowed user to register in """
     allowed_email = ''
     default_role = ''
-    timestamp = None
+    creator = ''
+    created_at = ''
+    registered_at = ''
        
     def __init__(self, **kwargs):
         self.allowed_email = kwargs['allowed_email']
@@ -184,7 +186,8 @@ shareds.driver  = shareds.db.driver
 print('Stk server setups') 
 
 # Setup Flask-Security
-shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role, AllowedEmail)
+shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)
+shareds.allowed_email_model = AllowedEmail
 shareds.security = Security(shareds.app, shareds.user_datastore,
     confirm_register_form=ExtendedConfirmRegisterForm)
 

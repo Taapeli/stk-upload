@@ -22,11 +22,11 @@ class Neo4jUserDatastore(UserDatastore):
 
     # Uses classes Role, User, UserProfile, AllowedEmail from setups.py
 
-    def __init__(self, driver, user_model, user_profile_model, role_model, allowed_email_model):
+    def __init__(self, driver, user_model, user_profile_model, role_model):
         self.driver = driver
         self.user_model = user_model
         self.user_profile_model = user_profile_model
-        self.allowed_email_model = allowed_email_model        
+#        self.allowed_email_model = allowed_email_model        
         self.role_model = role_model
         self.role_dict = self.get_roles() 
         
@@ -405,79 +405,6 @@ class Neo4jUserDatastore(UserDatastore):
             raise
 
 
-    def allowed_email_register(self, email, role):
-        try:
-            with self.driver.session() as session:
-                with session.begin_transaction() as tx:
-                    tx.run(Cypher.allowed_email_register, email=email, role=role, admin_name=current_user.name)
-                    tx.commit()
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
-            raise
-
-
-    def get_allowed_emails(self):
-        try:
-            with self.driver.session() as session:
-                emailNodes = session.read_transaction(self._getAllowedEmails)
-                if emailNodes is not None:
-                    return [self.allowed_email_model(**emailNode.properties) for emailNode in emailNodes] 
-                return []
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
-            return []                 
-                                              
-    def _getAllowedEmails (self, tx):
-        try:
-            emailNodes = []
-            for record in tx.run(Cypher.get_allowed_emails):
-                emailNodes.append(record['email'])
-            return emailNodes        
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
-            raise
-
-    def find_allowed_email(self, email):
-        try:
-            with self.driver.session() as session:
-                emailNode = session.read_transaction(self._findAllowedEmail, email)
-                if emailNode is not None:
-                    return self.allowed_email_model(**emailNode.properties) 
-                return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
-            return None                 
-
-    @classmethod                                              
-    def _findAllowedEmail (self, tx, email):
-        try:
-            emailNode = None
-            records = tx.run(Cypher.allowed_email_find, email=email)
-            if records:
-                for record in records:
-                    emailNode = record['email']
-                    return emailNode        
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
-            raise
 
 
 #This is a classmethod and doesn't need username        
