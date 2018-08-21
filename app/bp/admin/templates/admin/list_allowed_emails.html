@@ -1,7 +1,7 @@
 {# _myapp/templates/list_allowed_emails.html_ #}
 {% from "security/_macros.html" import render_field_with_errors, render_field %}
 {% include "security/_messages.html" %}
-{% extends "a_layout.html" %}
+{% extends "/admin/layout.html" %}
 {% block title %}Käyttäjäehdokkaat kannasta{% endblock %}
 {% block body %}
 {{ super() }}
@@ -19,7 +19,7 @@
   {% endif %}
 {% endwith %}
  
-<div>
+<div id="startdiv">
   <div>
     <h2>Käyttäjäehdokkaat</h2>
 
@@ -35,10 +35,10 @@
 	        </form>
 	    </div>
 	</div>
-    <div>
+    <div class="startbox2">
       <h3>Odottavat käyttäjäehdokkaat</h3>
-        <section id="lista">
-	        <table style="background: ivory;" >
+        <!--section id="lista" -->
+	        <table class="table100">
 	            <tr><th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>
 	            </tr>
 	        {% if emails %}
@@ -56,10 +56,8 @@
 	                <tr><td colspan="1">Ei tietoja</td></tr>
 	        {% endif %}
 	        </table>
-        </section>
+        <!-- /section -->
     </div>
-
-
   </div>             
 </div>
 

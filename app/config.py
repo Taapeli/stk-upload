@@ -23,4 +23,7 @@ SECURITY_POST_LOGOUT_VIEW = 'login'
 SECURITY_SEND_REGISTER_EMAIL = True
 
 DEFAULT_ROLE='admin'
-EXPLAIN_TEMPLATE_LOADING=False   # Explain Flask, if you like
+EXPLAIN_TEMPLATE_LOADING=False   # True: explain Flask, if you like
+from os import getcwd
+APP_ROOT = getcwd() or 'None'
+print('app.config: APP_ROOT "{}"'.format(APP_ROOT))

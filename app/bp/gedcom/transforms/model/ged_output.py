@@ -12,7 +12,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 sys.path.append("app/bp/gedcom") # otherwise pytest does not work??? 
-import util
+from bp.gedcom import util
 
 class Output:
     def __init__(self, run_args):
