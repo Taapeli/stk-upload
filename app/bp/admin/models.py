@@ -86,8 +86,10 @@ class UserAdmin():
         email = shareds.allowed_email_model(**emailNode.properties)
         email.allowed_email = emailNode.properties['allowed_email']
         email.default_role = emailNode.properties['default_role']
-        email.creator = emailNode.properties['creator']
-        email.created_at = datetime.fromtimestamp(emailNode.properties['created_at']/1000)
+        if 'creator' in emailNode.properties:
+            email.creator = emailNode.properties['creator']
+        if 'created_at' in emailNode.properties:
+            email.created_at = datetime.fromtimestamp(emailNode.properties['created_at']/1000)
         if 'registered_at' in emailNode.properties:
             email.registered_at = datetime.fromtimestamp(emailNode.properties['registered_at']/1000)        
        
@@ -174,39 +176,32 @@ class UserAdmin():
 class Cypher_adm():
     ' Cypher clauses for admin purposes'
     
-    remove_all_nodes = """
-MATCH (a) DETACH DELETE a
-"""
+    remove_all_nodes = "MATCH (a) DETACH DELETE a"
 
     remove_data_nodes = """
 MATCH (a) 
 where not ( 'UserProfile' IN labels(a)
     OR 'User' IN labels(a)
     OR 'Role' IN labels(a) )
-DETACH DELETE a
-"""
+DETACH DELETE a"""
 
     remove_my_nodes = """
 MATCH (a)<-[r:REVISION]-(u:UserProfile {userName:$user})
-DETACH DELETE a
-"""
+DETACH DELETE a"""
 
     allowed_email_register = """
-CREATE email:Allowed_email {
+CREATE (email:Allowed_email {
     allowed_email: $email,
     default_role: $role,
     admin_name: $admin_name,
-    timestamp: timestamp() }
-"""
+    timestamp: timestamp() } )"""
     
     get_allowed_emails = """
 MATCH (email:Allowed_email)
 RETURN DISTINCT email 
-    ORDER BY email.timestamp DESC
-"""    
+    ORDER BY email.timestamp DESC"""    
     
     allowed_email_find = """
 MATCH (email:Allowed_email)
     WHERE email.allowed_email = $email
-RETURN email
-"""
+RETURN email"""
