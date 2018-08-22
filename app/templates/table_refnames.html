@@ -21,7 +21,8 @@
     </ol>
   {% endif %}
 {% endwith %}
-<section id="lista">
+<div>
+<!--section id="lista"-->
 <table style="width:500pt">
     <tr><th>oid</th>
         <th>nimi</th>
@@ -42,6 +43,7 @@
             <td class="center">{% if r.usecount %}{{r.usecount}}{% endif %}</td>
         </tr>
     {% endfor %}
-</table><hr>
-</section>
+</table>
+<!--/section-->
+</div>
 {% endblock %}

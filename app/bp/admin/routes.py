@@ -111,7 +111,7 @@ def save_loaded_csv(filename, subj):
 
 
 # Siirretty security--> admin
-@bp.route('/admin/list_allowed_emails',  methods=['GET', 'POST'])
+@bp.route('/admin/allowed_emails',  methods=['GET', 'POST'])
 @login_required
 @roles_required('admin')
 def list_allowed_emails():
@@ -122,7 +122,7 @@ def list_allowed_emails():
                                             form.default_role.data)
         
     lista = UserAdmin.get_allowed_emails()
-    return render_template("/admin/list_allowed_emails.html", emails=lista, 
+    return render_template("/admin/allowed_emails.html", emails=lista, 
                             form=form)
 
 

@@ -1,4 +1,4 @@
-{# _myapp/templates/list_allowed_emails.html_ #}
+{# _myapp/templates/allowed_emails.html_ #}
 {% from "security/_macros.html" import render_field_with_errors, render_field %}
 {% include "security/_messages.html" %}
 {% extends "/admin/layout.html" %}
@@ -47,7 +47,6 @@
 	                    <td>{{e.allowed_email}}</td>
 	                    <td>{{e.default_role}}</td>
 	                    <td>{{e.creator}}</td>
-
 	                    <td>{{e.created_at}}</td>
 	                    <td>{{e.registered}}</td>
 	                </tr>
