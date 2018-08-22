@@ -119,7 +119,7 @@ table.diff td {
     });
 </script>
 
-<div style="margin-left:50px; padding-bottom: 2em;">
+<div class="startdiv">
     <div>
 	    <h2>Gedcom-käsittelyt</h2>
 	    <div id="errors" class="errors"></div>
@@ -155,22 +155,23 @@ table.diff td {
 	
 				<h3>Valinnat</h3>
 				<div>
-				    <input type="submit" id="transforms" value='{{ _("Valitse muunnos") }}'>
-				    <input type="submit" id="versions" value='{{ _("Näytä versiot") }}'>
 				    <ul>
 				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Hae tämä tiedosto") }}</a></li>
 				        <li><a href="#" id="delete" data="/gedcom/delete">
 	                        {{ _("Poista tämä tiedosto") }}</a></li>
-	                </ul><ul>
-				        <li>&rtrif; <a href="/gedcom/list">{{ _("Omat aineistoni") }}</a></li>
-				    </ul>
+	                </ul>
+				    <input type="submit" id="transforms" value='{{ _("Valitse muunnos") }}'>
+				    <input type="submit" id="versions" value='{{ _("Näytä versiot") }}'>
+				    <ul>
+                        <li>&rtrif; <a href="/gedcom/list">{{ _("Vaihda toiseen aineistoon") }}</a></li>
+                    </ul>
 				</div>
 	        </div>
 	      </div>
 	
-	      <div class="startbox gedcom" id="div_transforms">
+	      <div class="startbox2 gedcom" id="div_transforms">
 	        <div style="display: inline-block;">
-	
+
 		        <h3>{{ _("Muunnokset") }}</h3>
 		        <ul>
 		        {% for transform in transforms %}
@@ -185,10 +186,11 @@ table.diff td {
 	      <div class="startbox gedcom" id="div_versions">
 	        <div style="display: inline-block;">
 	
-		        <h3>{{ _("Versiot") }}:</h3>
-		        <button id="compare">{{ _("Vertaa versioita") }}</button>
-		        <p>
+		        <h3>{{ _("Versiot") }}</h3>
 		        <table id="versions_list"></table>
+                <div class="submit">
+		          <button id="compare">{{ _("Vertaa versioita") }}</button>
+		        </div>
 		    </div>
 		  </div>
 	        
