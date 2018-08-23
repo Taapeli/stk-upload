@@ -62,15 +62,21 @@ def show_persons_restricted(selection=None):
 @bp.route('/scene/persons/all/')
 #     @login_required
 def show_all_persons_list(selection=None, opt=''):
-    """ TODO Should have restriction by owner's UserProfile """
+    """ The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
+        with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
+        TODO Should have restriction by owner's UserProfile 
+    """
     keys = ('all',)
     if current_user.is_authenticated:
         user=current_user.username
     else:
         user=None
-    ref = (opt == 'ref')
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref)
-    return render_template("/scene/persons.html", persons=persons, menuno=1)
+    ref = ('ref' in opt)
+    if 'fn' in opt: order = 1   # firstname
+    elif 'pn' in opt: order = 2 # firstname
+    else: order = 0             # surname
+    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    return render_template("/scene/persons.html", persons=persons, menuno=1, order=order)
 
 
 @bp.route('/scene/person=<string:uniq_id>')

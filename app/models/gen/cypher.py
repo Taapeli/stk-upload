@@ -41,12 +41,24 @@ RETURN ID(person) AS id, person.confidence AS confidence,
     name.suffix AS suffix,
     COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [ID(event), event.type,
-        event.datetype, event.date1, event.date2, place.pname]) AS events
-ORDER BY name.surname, name.firstname"""
+        event.datetype, event.date1, event.date2, place.pname]) AS events"""
+    _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
+    ORDER BY TOUPPER(name.surname), name.firstname"""
+    _get_events_firstname = """, LEFT(name.firstname,1) as initial 
+    ORDER BY TOUPPER(name.firstname), name.surname, name.suffix"""
+    _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
+    ORDER BY TOUPPER(name.suffix), name.surname, name.firstname"""
 #     COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype,
 #         event.daterange_start, event.daterange_stop, place.pname]) AS events
 
-    get_events_all = "MATCH (person:Person)-[:NAME]->(name:Name)" + _get_events_tail
+    get_events_all = "MATCH (person:Person)-[:NAME]->(name:Name)" \
+        + _get_events_tail + _get_events_surname
+
+    get_events_all_firstname = "MATCH (person:Person)-[:NAME]->(name:Name)" \
+        + _get_events_tail + _get_events_firstname
+
+    get_events_all_patronyme = "MATCH (person:Person)-[:NAME]->(name:Name)" \
+        + _get_events_tail + _get_events_patronyme
 
     get_events_uniq_id = """
 MATCH (person:Person)-[:NAME]->(name:Name)
