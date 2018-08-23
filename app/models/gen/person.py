@@ -516,7 +516,7 @@ RETURN person, urls, COLLECT (name) AS names
 
 
     @staticmethod
-    def get_events_k (keys, currentuser, take_refnames=False):
+    def get_events_k (keys, currentuser, take_refnames=False, order=0):
         """  Read Persons with names, events and reference names
             called from models.datareader.read_persons_with_events
 
@@ -553,7 +553,12 @@ RETURN person, urls, COLLECT (name) AS names
             if rule == 'uniq_id':
                 return session.run(Cypher_person.get_events_uniq_id, id=int(name))
             elif rule == 'all':
-                return session.run(Cypher_person.get_events_all)
+                if order == 1:      # order by first name
+                    return session.run(Cypher_person.get_events_all_firstname)
+                elif order == 2:    # order by patroname
+                    return session.run(Cypher_person.get_events_all_patronyme)
+                else:
+                    return session.run(Cypher_person.get_events_all)
             else:
                 # Selected names and name types
                 return session.run(Cypher_person.get_events_by_refname,
