@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, flash
-from flask_security import current_user
+from flask_security import current_user, login_required
 
 from . import bp
 from models.datareader import read_persons_with_events
@@ -16,6 +16,19 @@ from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.gen.place import Place
 from models.gen.source_citation import Source
+
+
+@bp.route('/scene/persons/restricted')
+def show_persons_restricted(selection=None):
+    """ Show list of selected Persons, limited information 
+        for non-logged users from login_user.html """
+    if not current_user.is_authenticated:
+        # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
+        # Vaihtoehtoisesti kutsu toista metodia.
+        keys = ('all',)
+    persons = read_persons_with_events(keys)
+    return render_template("/scene/persons.html", persons=persons, 
+                           menuno=1, rule=keys)
 
 
 @bp.route('/scene/persons', methods=['POST', 'GET'])
@@ -41,21 +54,10 @@ def show_person_list(selection=None):
         # Use selection filter
         keys = selection.split('=')
     else:
-        keys = ('all',)
+        keys = ('select',)
     persons = [] #datareader.read_persons_with_events(keys)
-    return render_template("/scene/persons.html", persons=persons, menuno=0)
-
-
-@bp.route('/scene/persons/restricted')
-def show_persons_restricted(selection=None):
-    """ Show list of selected Persons, limited information 
-        for non-logged users from login_user.html """
-    if not current_user.is_authenticated:
-        # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
-        # Vaihtoehtoisesti kutsu toista metodia.
-        keys = ('all',)
-    persons = read_persons_with_events(keys)
-    return render_template("/scene/persons.html", persons=persons, menuno=1)
+    return render_template("/scene/persons.html", persons=persons,
+                           menuno=0, rule=keys)
 
 
 @bp.route('/scene/persons/all/<string:opt>')
@@ -76,7 +78,26 @@ def show_all_persons_list(selection=None, opt=''):
     elif 'pn' in opt: order = 2 # firstname
     else: order = 0             # surname
     persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
-    return render_template("/scene/persons.html", persons=persons, menuno=1, order=order)
+    return render_template("/scene/persons.html", persons=persons, menuno=1, 
+                           order=order,rule=keys)
+
+
+@bp.route('/scene/persons/ref=<string:refname>')
+@bp.route('/scene/persons/ref=<string:refname>/<opt>')
+@login_required
+def show_persons_by_refname(refname, opt=""):
+    """ List persons by refname
+    """
+    keys = ('refname', refname)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    ref = ('ref' in opt)
+    order = 0
+    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    return render_template("/scene/persons.html", persons=persons, menuno=1, 
+                           order=order, rule=keys)
 
 
 @bp.route('/scene/person=<string:uniq_id>')

@@ -5,7 +5,11 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
 {% set ordname = ['sukunimen', 'etunimen', 'patronyymin'] %}
-<h2>Henkilöt {{ ordname[order] }} mukaan</h2>
+
+{% if rule[0] == 'all' %}<h2>Henkilöt {{ ordname[order] }} mukaan</h2>
+{% elif rule[0] == 'refname' %}<h2>Henkilöt nimeltä {{ rule[1] }}</h2>
+{% else %}<H2>Henkilöt</h2>
+{% endif %}
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
@@ -15,15 +19,16 @@
     Tällä sivulla on luettelo {{persons|count}} henkilönimestä mahdollisen 
     {{ ordname[order] }} mukaan lajiteltuna.<br> 
     Nimen napsauttaminen vie sinut valitun henkilön sivulle. 
-    Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.<br>
+    Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.
+      {% if rule[0] == 'all' %}<br>
     &rtrif; Vaihda järjestys: 
         {% if order != 0 %}<a href="/scene/persons/all/" 
             class="outlink">sukunimen</a> /{% endif %}
         {% if order != 1 %}<a href="/scene/persons/all/fn" 
             class="outlink">etunimen</a> /{% endif %}
         {% if order != 2 %}<a href="/scene/persons/all/pn" 
-            class="outlink">patronyymin tai matronyymiin</a>{% endif %}
-    mukaan.
+            class="outlink">patronyymin tai matronyymiin</a>{% endif %} mukaan.
+      {% endif %}
             </p>
     {% else %}{% if persons|count %}
             <h3>Näytetään {{persons|count}} henkilönimeä</h3>{% else %}
