@@ -5,9 +5,11 @@ import logging
 logging.basicConfig(level=logging.INFO, format=('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 
 logging.basicConfig(stream=sys.stderr)
-sys.path.insert(0,"/opt/repo/ROOT/stk_server")
+print("Start directory {}".format(os.getcwd()))
+sys.path.insert(0, os.path.join(os.getcwd(),"app")) #"/opt/repo/ROOT/app"
 #print('Polku: ' + str(sys.path))
-os.chdir("/opt/repo/ROOT/stk_server")
+#os.chdir("/opt/repo/ROOT/app")
+print("Active directory {}".format(os.getcwd()))
 
-from stk_server import app as application
-application.secret_key = 'Add your secret key'
+from app import app as application
+application.secret_key = 'You don\'n know OUR secret key'

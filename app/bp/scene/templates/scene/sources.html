@@ -1,0 +1,59 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}lähteet{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro %}
+
+<h2>Lähdeluettelo</h2>
+
+{{ macro.menu(5) }}
+	<div class="content" id="Individuals">
+		<p id="description">
+		Tällä sivulla on hakemisto kaikista lähteistä.
+		</p>
+		<div id="alphanav">
+			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
+        {% for s in sources %}{% set ini = s.stitle|list|first|upper %}
+            {% if alpha != ini %}{%set alpha = ini %}
+                <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
+            {% endif %}
+        {% endfor %}
+			</ul>
+		</div>
+		<table class="IndividualList">
+			<thead>
+				<tr><th></th>
+                    <th>Lähde</th>
+                    <th>väline</th>
+                    <th>arkistossa</th>
+                    <th title="Sitaatteja">siteerattu</th>
+                    <th title="Tapahtumia, henkilöitä jne., josta viitattu">viitattu</th>
+				</tr>
+			</thead>
+			<tbody>
+	{% if sources %}
+	    {% for s in sources %}{% set ini = s.stitle|list|first|upper %}
+	    	<tr><td class="ColumnAlpha">{% if alpha|upper != ini %}
+	               {%set alpha = ini %}
+	               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
+               {% endif %}</td>
+            <td class="ColumnPerson">
+               <div>
+                  <a href="/scene/source={{s.uniq_id}}" {% if s.ref_cnt == 0 %} class="dimmed" 
+                     title="lähdettä {{s.uniq_id}} ({{s.id}}) ei käytetä">{% else %}
+                     title="katso lähteen {{s.uniq_id}} ({{s.id}}) käyttö">{% endif %}
+                     {{s.stitle}}</a>
+                </div></td>
+            <td class="note" title='muoto: {{s.medium}}'>{% if s.medium %}{{s.medium|transl('medium')}}{% endif %}</td>
+            <td class="note" title='arkiston nimi'>{% if s.repo_name %}{{s.repo_name}}{% endif %}</td>
+            <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
+            <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
+            </tr>
+	    {% endfor %}
+	{% endif %}
+				</tr>
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

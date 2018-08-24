@@ -1,0 +1,65 @@
+<script>
+    $(document).ready( function() {
+        $("#transform").off("click");
+        $("#transform").click(function() {
+        	$("#output").hide();
+        	$("#output_log").empty();
+        	$("#error_log").empty();
+            $.post("/gedcom/transform/{{ gedcom }}/{{ transform }}", $("#form").serialize(), function(rsp) {
+                $("#output_log").text(rsp.stdout);
+                if (rsp.stderr) 
+                	$("#error_log").text("{{ _('Errors:') }}" + "\n" + rsp.stderr);
+                if (rsp.oldname) {
+                	$("#oldname").text(rsp.oldname);
+                	$("#div_oldname").show();
+            	}
+            	else
+                	$("#div_oldname").hide();
+                $("#output").show();
+            });
+            return false;
+        });
+    });
+</script>
+
+<!--
+<link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
+<link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
+-->
+
+<div style="display: inline-block;">
+    <h3>{{ transform[:-3] }} {{ _("muunnosparametrit") }}</h3>
+
+	<div>
+		<input type=hidden name=transform value='{{ transform }}'>
+		<table>
+		    <tr><th>{{ _("Asetus") }}</th>
+		        <th>{{ _("Arvo") }}</th>
+		    </tr>
+		
+		{% for row in rows %}
+		    <tr>
+		    <td>{{ row.xxxname }} {% if row.help %}
+		      <span style="font-size: smaller;">{{ row.help }}</span>{% endif %}</td>
+		    <td>
+		    {% if row.type == "select" %}
+		    <select name='{{ row.name }}'>
+		       {% for choice in row.choices %}
+				   <option>{{ choice }}
+		       {% endfor %}
+		    </select>
+	        {% else %}
+		    <input type='{{ row.type }}' name='{{ row.name }}' 
+		          style="width: 10em" {{ row.checked }}>
+		        {% if row.action == 'append' %}
+		            <input type=button value='{{ _("Lisää") }}'>
+		        {% endif %}
+		        {% if row.default %}<br />{{ _("Oletusarvo") }} {{ row.default }}
+		        {% endif %}
+	       {% endif %}
+		    </td>
+		    </tr>
+		{% endfor %}
+		</table><div align="right" style="margin-top:1em">
+    </div>
+</div>

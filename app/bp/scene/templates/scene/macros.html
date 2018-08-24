@@ -1,0 +1,59 @@
+{% macro lock(value) -%}
+	{% if value == '1' %}
+		<i class='fa fa-lock'></i>
+	{% endif %}                           
+{%- endmacro %}
+
+
+{% macro stars(value) -%}
+   {% if value < 2 %}
+     {% if value == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
+     {% else %}<i class='fa fa-exclamation-circle'></i>{% endif %}
+   {% else %}
+     {% if   value < 2.25 %}<i class='fa fa-star-o'></i>
+     {% elif value < 2.75 %}<i class='fa fa-star-o'></i><i class='fa fa-star-half-o'></i>
+     {% elif value < 3.25 %}<i class='fa fa-star'></i><i class='fa fa-star'></i>
+     {% elif value < 3.75 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star-half'></i>
+     {% elif value < 4.25 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i>
+     {% elif value < 4.75 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star-half'></i>
+     {% endif %}
+   {% endif %}                           
+{%- endmacro %}
+
+{% macro menu(value) -%}
+    <div class="wrapper" id="nav" role="navigation">
+        <div class="container">
+            <ul class="menu" id="dropmenu">
+                <li{% if value == 0 %} class="CurrentSection"
+                  {% endif %}><a href="/scene/persons" title="Etsi ihmisiä">Haku</a></li>
+                <li{% if value == 1 %} class="CurrentSection"
+                  {% endif %}><a href="/scene/persons/all" title="Kaikki henkilöt">Ihmiset</a></li>
+                <li{% if value == 2 %} class="CurrentSection"
+                  {% endif %}><a href="#" class="dimmed" title="Sukunimet">Nimet</a></li>
+                <li{% if value == 3 %} class="CurrentSection"
+                  {% endif %}><a href="#" class="dimmed" title="Perheet">Perheet</a></li>
+                <li{% if value == 4 %} class="CurrentSection"
+                  {% endif %}><a href="/scene/locations" title="Paikat">Paikat</a></li>
+                <li{% if value == 5 %} class="CurrentSection"
+                  {% endif %}><a href="/scene/sources" title="Lähteet">Lähteet</a></li>
+                <li{% if value == 6 %} class="CurrentSection"
+                  {% endif %}><a href="#" class="dimmed" title="Pikkukuvat">Kuvat</a></li>
+            </ul>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro member(ch, uniq_id) -%}
+    {% if ch.uniq_id == uniq_id %}
+    <span class="myself">&nbsp;(itse)&nbsp;</span>
+    {% else %}
+    <a href="/scene/person={{ch.uniq_id}}" class="inlink" title="katso henkilön {{ch.id}} tiedot">
+        {% if ch.names|length %}
+        {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> <b>{{ch.names[0].surname}}</b></a>
+        {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
+        {% else %}nimetön
+        {% endif %}
+    {% endif %}
+{%- endmacro %}
+
+        

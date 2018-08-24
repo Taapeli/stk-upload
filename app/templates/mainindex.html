@@ -1,0 +1,112 @@
+{# templates/mainindex.html_ #}
+{% extends "a_layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}Kirjautunut käyttäjä{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div id="startdiv">
+  <div>
+    <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
+    <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
+       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]</p>
+    <div class="row">
+       <div class="startbox">
+         <div style="display: inline-block;">
+           <form method="get" action="/scene/persons">
+             <h3>Oma sukupuuni</h3>
+             <p>Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan</p>
+             <div class="submit"> 
+                <button type="submit">Henkilöluettelo</button>
+             </div>
+           </form>
+        </div>
+        </div>
+          <div class="startbox">
+            <div style="display: inline-block;">
+               <h3>Tietojen lisääminen</h3>
+                 <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
+	               <div style="display: inline-block;">
+	                 <input type="hidden" name="material" value="xml_file">
+	                 <p>Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi</p>
+	                 <input type="file" name="filenm" />
+	               </div>
+                   <div class="submit"> 
+	                 <input type="submit" value="Lataa" />
+	               </div>
+                </form>
+            </div>
+        </div>
+        <div class="startbox">
+           <div style="display: inline-block;">
+           <form method="get" action="/gedcom/list">
+              <h3>Oma Gedcom-aineistoni</h3>
+              <p>Lataa aineistosi Gedcom-muodossa tai muokkaa jo lähetettyä</p>
+             <div class="submit"> 
+                <button type="submit">Gedcom-käsittelyt</button>
+             </div>
+           </form>
+              <!-- div style="text-align:right;"> 
+                    <button type="button"
+                     onclick="alert('Toiminto vasta suunnitteilla')">
+                     Gedcom-käsittelyt</button>
+              </div -->
+           </div>
+        </div>
+
+    {% if current_user.is_authenticated and 
+        ( current_user.has_role('member') or current_user.has_role('admin') ) %}
+        <div class="startbox">
+            <h3>Datanäkymiä taulukkoina</h3>
+            <p>Seuraavalla sivulla on erilaisia teknisempiä listauksia
+               ja ongelmanselvitysvälineitä
+            </p>
+            <form method="get" action="/tables">
+               <div class="submit"> 
+                  <button type="submit">Tutki tietokantaa</button>
+               </div>
+            </form>
+        </div>
+    {% endif %}
+
+        <div class="startbox">
+          <div style="display: inline-block;">
+            <h3>Viesti ylläpitoon</h3>
+            <p>Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon</p>
+            <div class="submit"> 
+              <button type="button" onclick="alert('Toiminto vasta suunnitteilla')">
+                Laadi viesti</button>
+            </div>
+          </div>
+        </div>
+
+        {% if current_user.is_authenticated and current_user.has_role('admin') %}
+        <div class="startbox admin">
+          <div style="display: inline-block;">
+			<h3>Ylläpitäjän toiminnot</h3>
+            <p>Järjestelmänhoitajan toiminnot: <br/>
+               Käyttäjien ja referenssitietojen hallinta
+               sekä tietokannan huoltotehtävät
+            </p>
+            <form method="get" action="/admin">
+               <div class="submit"> 
+                  <button type="submit">Ylläpito</button>
+               </div>
+            </form>
+         </div>
+        </div>{% endif %}
+     {% if current_user.is_authenticated %}
+        <div class="startbox">
+          <h3>Kirjaudu ulos</h3>
+          <p>Istunnon lopettaminen<br>&nbsp;</p>
+	      <form method="get" action="/logout">
+             <div class="submit"> 
+				<button type="submit" style="color: blue">Poistu sovelluksesta</button>
+             </div>
+		  </form>
+        </div>
+     {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

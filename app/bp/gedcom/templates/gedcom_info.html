@@ -1,0 +1,235 @@
+{# templates/gedcoms.html_ #}
+{% extends "a_layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}Kirjautunut käyttäjä{% endblock %}
+{% block body %}
+{{ super() }}
+
+<style>
+.errors {
+	font-size: 9pt;
+	color: white;
+	background-color: red; 
+}
+
+table.diff td {
+	width: 600px;
+	overflow: hidden; 
+}
+</style>
+
+<script>
+	
+    function hide_all() {
+        $("div.gedcom").hide();
+    }
+    
+    $(document).ready( function() {
+        console.log("ready");
+
+        $(document).on({
+            ajaxStart: function() { $("body").addClass("loading");  },
+            ajaxStop: function() { $("body").removeClass("loading"); },    
+            ajaxError: function() { $("#errors").text("Palvelinvirhe").show(); }    
+        });
+        
+        $("#transforms").click(function() {
+            hide_all();
+            $("#div_transforms").show();
+        });
+        $("#versions").click(function() {
+            hide_all();
+            $.get("/gedcom/versions/{{ gedcom }}", function(versions) {
+                $("#versions_list").empty();
+                $.each(versions, function(i,version) {
+                	//$("#versions_list").append("<li>"+version+"</li>");
+                	var row = $("<tr><td>" +
+                	"<input type=radio name=v1>" +
+                	"<input type=radio name=v2>" +
+                	"<td><a href=#>"+version+"</a></tr>");
+                	row.data("version",version);
+                	$("#versions_list").append(row);
+                });
+                $("#versions_list tr:nth-last-child(2) input[name=v1]").prop("checked",true);
+                $("#versions_list tr:nth-last-child(1) input[name=v2]").prop("checked",true);
+                $("#versions_list a").click(function() {
+                	alert("Tästä ei tapahdu vielä mitään");
+                });
+	            $("#div_versions").show();
+            });
+        });
+        $("a.transform").click(function(e) {
+            $.get("/gedcom/transform/{{ gedcom }}/" + $(e.target).attr("data-transform"), function(rsp) {
+                $("#div_transform_params1").html(rsp);
+	            $("#div_transform_params").show();
+            });
+        });
+        $("#delete").click(function() {
+        	//alert("{{ _('Toiminto vasta suunnitteilla') }}");
+            var ok = confirm('{{ _("Oletko varma?") }}');
+            if (ok) {
+            	$.get("/gedcom/delete/{{ gedcom }}",function() {
+            		window.location.replace("/gedcom/list");
+            	});
+            }
+        });
+        $("#update_desc").click(function() {
+            $.post("/gedcom/update_desc/{{ gedcom }}", {desc:$("#desc").val()},function(rsp) {
+            	console.log(rsp);
+        	});
+        });
+        $("input,a").click(function() {
+        	 $("#errors").hide();
+        });
+        $("#palauta").click(function() {
+			//alert('{{ _("Palautustoimintoa ei vielä ole toteutettu") }}');
+			var gedcom = "{{ gedcom }}";
+			var version = $("#oldname").text();
+            $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
+                alert(gedcom + " renamed to " + rsp.newname + "\n" +
+                	  version + " renamed to " + gedcom);
+            });
+        	 
+        });
+        $("#compare").click(function() {
+        	var row1 = $("input[name=v1]:checked").parent().parent();
+        	var gedcom1 = row1.data("version");
+        	var row2 = $("input[name=v2]:checked").parent().parent();
+        	var gedcom2 = row2.data("version");
+        	$.get("/gedcom/compare/" + gedcom1 + "/" + gedcom2,function(rsp) {
+            	$("#difftable").html(rsp.diff);
+            	$("button.palauta_button").hide();
+            	$("#palauta1").text("{{ _('Palauta') }} " + gedcom1).data("gedcom",gedcom1);
+            	$("#palauta2").text("{{ _('Palauta') }} " + gedcom2).data("gedcom",gedcom2);
+            	if (!gedcom1.match(/\.ged$/)) $("#palauta1").show();
+            	if (!gedcom2.match(/\.ged$/)) $("#palauta2").show();
+            	$("#div_compare").show();
+        	});
+        });
+    	$("button.palauta_button").click(function(rsp) {
+			var gedcom = "{{ gedcom }}";
+			var version = $(this).data("gedcom");
+            $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
+		        $("#versions").click(); 
+                alert(gedcom + " renamed to " + rsp.newname + "\n" +
+                	  version + " renamed to " + gedcom);
+            });
+    	});
+        hide_all();
+    });
+</script>
+
+<div class="startdiv">
+    <div>
+	    <h2>Gedcom-käsittelyt</h2>
+	    <div id="errors" class="errors"></div>
+	    <div class="row">
+	       <div class="startbox">
+	         <div style="display: inline-block;">
+				<h3>{{ _("GEDCOM") }} "{{gedcom}}" tiedot</h3>
+				<label for="desc">{{ _("Kuvaus") }}</label>
+			    <input id="desc" value='{{ metadata.desc }}' style="width: 14em">
+                <div class="submit">
+			         <input type="button" id="update_desc" value='{{ _("Päivitä") }}'>
+			    </div>
+				<p>(Näennäistiedot, ei aineistosta)</p>
+				<table>
+				    <tr><td>{{ _("Ladattu") }}</td>
+				        <td class="right">2018-06-06</td></tr>
+				    <tr><td>{{ _("Henkilöiden lukumäärä") }}</td>
+				        <td class="right">{{ num_individuals }}</td></tr>
+	                <tr><td>{{ _("Sallin neuvontapalvelun katselumahdollisuuden") }}</td>
+	                    <td class="right"><input type="checkbox" id="view_permission"></td></tr>
+                    {% for meta in metadata.items() %}
+                    <!--
+                    <tr><td>{{ meta.0 }}
+                        <td>{{ meta.1 }}
+                    -->
+                    {% endfor %}
+			    </table>
+	          </div>
+	       </div>
+	
+	      <div class="startbox">
+	        <div style="display: inline-block;">
+	
+				<h3>Valinnat</h3>
+				<div>
+				    <ul>
+				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Hae tämä tiedosto") }}</a></li>
+				        <li><a href="#" id="delete" data="/gedcom/delete">
+	                        {{ _("Poista tämä tiedosto") }}</a></li>
+	                </ul>
+				    <input type="submit" id="transforms" value='{{ _("Valitse muunnos") }}'>
+				    <input type="submit" id="versions" value='{{ _("Näytä versiot") }}'>
+				    <ul>
+                        <li>&rtrif; <a href="/gedcom/list">{{ _("Vaihda toiseen aineistoon") }}</a></li>
+                    </ul>
+				</div>
+	        </div>
+	      </div>
+	
+	      <div class="startbox2 gedcom" id="div_transforms">
+	        <div style="display: inline-block;">
+
+		        <h3>{{ _("Muunnokset") }}</h3>
+		        <ul>
+		        {% for transform in transforms %}
+		            <li><a href="#" class="transform" 
+		                 data-transform="{{ transform.name }}">{{ transform.name[:-3] }}</a>
+		            {{ transform.docline }}</li>
+		        {% endfor %}
+		        </ul>
+		    </div>
+	      </div>
+	       
+	      <div class="startbox gedcom" id="div_versions">
+	        <div style="display: inline-block;">
+	
+		        <h3>{{ _("Versiot") }}</h3>
+		        <table id="versions_list"></table>
+                <div class="submit">
+		          <button id="compare">{{ _("Vertaa versioita") }}</button>
+		        </div>
+		    </div>
+		  </div>
+	        
+	      <div class="xstartbox gedcom" id="div_compare">
+	        <h3>{{ _("GEDCOM-vertailu") }}:</h3>
+	        <button id="palauta1" class="palauta_button"></button>
+	        <button id="palauta2" class="palauta_button"></button>
+	        <p>
+	        <div id="difftable">
+		    </div>
+		  </div>
+
+	      <div class="startbox gedcom" id="div_transform_params">
+			<form id="form">
+		      <div id="div_transform_params1">
+		      </div>
+			  <input type=submit id=transform value='{{ _("Muunna") }}'>
+	        </form>
+	      </div>
+	      
+	   </div>
+   </div> 
+   <div>
+	  <div id="output" class="gedcom">
+		<h3>{{ _("Tulokset") }}</h3>
+		<div id="div_oldname">
+		<h3>{{ _("Vanha versio talletettu nimelle") }} <span id="oldname"></span> (<a id="palauta" href="#">{{ _("Palauta") }}</a>)</h3>
+		</div>
+		<pre>
+		  <div id="output_log">
+		  </div>
+		  <div id="error_log" class="errors">
+		  </div>
+	  	</pre>
+	  	<div id="diff"></div>	
+      </div>
+   </div>
+</div>
+
+<div id="waiter" class="modal"></div>	
+    
+{% endblock %}

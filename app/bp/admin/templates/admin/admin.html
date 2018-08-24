@@ -1,0 +1,59 @@
+{# templates/admin/start.html_ #}
+{% extends "/admin/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}Pääkäyttäjä{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div style="margin-left:50px; padding-bottom: 2em;">
+  <div>
+    <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
+    <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
+       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]</p>
+    <div class="row">
+       
+    {% if current_user.is_authenticated and 
+        ( current_user.has_role('member') or current_user.has_role('admin') ) %}
+        <div class="startbox">
+            <h3>Datanäkymiä taulukkoina</h3>
+            <p>Seuraavalla sivulla on erilaisia teknisempiä listauksia
+               ja ongelmanselvitysvälineitä
+            </p>
+            <form method="get" action="/tables">
+               <div class="submit"> 
+                  <button type="submit">Tutki tietokantaa</button>
+               </div>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+    <div class="startbox admin">
+      <div style="display: inline-block;">
+        <h3>Tietokannan tyhjennykset</h3>
+            <p><i>Tiedot tuhotaan mitään kysymättä!</i></p>
+            <ul>
+              <li><a href="/admin/clear_db/total">Tyhjennä koko kanta</a></li>
+              <li><a href="/admin/clear_db/save_users">Tyhjennä säästäen
+                  käyttäjätunnukset</a></li>
+              <li><a href="/admin/clear_db/my_own">Poista itse tuomani tiedot 
+                  ({{current_user.username}})</a></li>
+            </ul>
+      </div>
+    </div>{% endif %}
+
+    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+    <div class="startbox admin">
+      <div style="display: inline-block;">
+        <h3>Käyttäjien ja referenssitietojen hallinta</h3>
+        <ul>
+          <li><a href="/admin/list_users">Käyttäjätunnukset</a></li>
+          <li><a href="/admin/allowed_emails">Käyttäjäehdokkaat</a></li>
+          <li><a href="/admin/refnames">Referenssinimet</a></li>
+          <li><a href="/admin/set/estimated_dates">Aseta henkilön arvioidut 
+              syntymä- ja kuolinajat</a></li>
+        </ul>
+      </div>
+    </div>{% endif %}
+
+{% endblock %}

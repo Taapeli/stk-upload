@@ -1,0 +1,44 @@
+{# _myapp/templates/table1.html_ #}
+{% extends "/admin/layout.html" %}
+{% block title %}Tiedot kannasta{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div id="startdiv">
+    <div>
+        <h2>Käyttäjät</h2>
+         {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul  class='flashes'>
+            {% for category, message in messages %}
+              <li class='flash_{{category}}}'>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+       <div id="errors" class="errors"></div>
+        <div class="row">
+           <div class="startbox2">
+             <div style="display: inline-block;">
+                <h3>Voimassaolevat käyttäjätunnukset</h3>
+		        <table class="table100">
+		            <tr><th>user id</th><th>name</th><th>email</th><th>roles</th></tr>
+		        {% if users %}
+		            {% for u in users %}
+		                <tr>
+		                    <td>{{u.username}}</td>
+		                    <td>{{u.name}}</td>
+		                    <td>{{u.email}}</td>
+		                    <td>{{u.roles}}</td>
+		                </tr>
+		            {% endfor %}
+		        {% else %}
+		                <tr><td colspan="1">Ei tietoja</td></tr>
+		        {% endif %}
+		        </table>
+	        </div>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

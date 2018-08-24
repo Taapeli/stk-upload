@@ -1,0 +1,53 @@
+{# templates/gedcoms.html_ #}
+{% extends "a_layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}Gedcom-aineistot{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div style="margin-left:50px; padding-bottom: 2em;">
+  <div>
+    <h2>Gedcom-aineistosi</h2>
+    <div class="row">
+        <div class="startbox">
+	        <div style="display: inline-block;">
+	            <h3>{{ _("Ladatut gedcomit") }}</h3>
+				<div>
+				    <ul>
+					    {% for file in files %}
+						    <li>
+						    <b>{{ file.metadata.desc|escape }}</b>
+						    <br>
+						    <a href="/gedcom/info/{{ file.name|escape }}">{{ file.name }}</a>
+						    <p>
+						    </li>
+					    {% endfor %}
+				    <p>{{ kpl }} {{ _("kpl") }}</p>
+				</div>
+			</div>
+		</div>
+
+	    <div class="startbox">
+	        <div style="display: inline-block;">
+	            <h3>{{ _("Lataa uusi Gedcom-tiedosto") }}</h3>
+				<div>
+				    <form method="post" enctype="multipart/form-data" action="/gedcom/upload">
+				      <div>
+				        <input type="file" name="file" accept="{{ allowed_extensions }}">
+				      </div>
+				      <div><label for="desc">{{ _("Kuvaus") }}</label>
+				           <input name="desc" style="width: 14em"></div>
+				      <div class="submit">
+				        <input type="submit" value="{{ _('Lataa') }}">
+				      </div>
+				    </form>
+				    <div>&rtrif; <a href="/">{{ _("Paluu alkusivulle") }}</a></div>
+				</div>
+			 </div>
+	    </div>
+	</div>
+  </div>
+</div>
+{% endblock %}
+
+
