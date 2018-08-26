@@ -22,11 +22,11 @@ class Neo4jUserDatastore(UserDatastore):
 
     # Uses classes Role, User, UserProfile, AllowedEmail from setups.py
 
-    def __init__(self, driver, user_model, user_profile_model, role_model, allowed_email_model):
+    def __init__(self, driver, user_model, user_profile_model, role_model):
         self.driver = driver
         self.user_model = user_model
         self.user_profile_model = user_profile_model
-        self.allowed_email_model = allowed_email_model        
+#        self.allowed_email_model = allowed_email_model        
         self.role_model = role_model
         self.role_dict = self.get_roles() 
         
@@ -273,15 +273,14 @@ class Neo4jUserDatastore(UserDatastore):
             for record in tx.run(Cypher.id_find, id=rid):
                 user = (record['user'])
                 return user        
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
-
+#         except CypherError as e:
+#             logger.error('_findUser: {} {}'.format(e.__class__.__name__, e))       
+#             raise      
+#         except ClientError as e:
+#             logger.error('_findUser: {} {}'.format(e.__class__.__name__, e))      
+#             raise
+        except Exception as e:
+            logger.error('_findUser: {} {}'.format(e.__class__.__name__, e))         
             raise
 
     def find_UserRoles(self, email):
@@ -291,8 +290,8 @@ class Neo4jUserDatastore(UserDatastore):
                 if len(userRoles) > 0:
                     return [self.role_model(**roleNode.properties) for roleNode in userRoles] 
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logger.debug('findUserRoles: {} {}'.format(e.__class__.__name__, e))
             raise
             
     def _findUserRoles (self, tx, pemail):
@@ -302,14 +301,14 @@ class Neo4jUserDatastore(UserDatastore):
                 roles.append(record['role'])
     #        print ('_findUserRoles ', pemail, roles)    
             return roles
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
+#         except CypherError as ex:
+#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
+#             raise      
+#         except ClientError as ex:
+#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
+#             raise
+        except Exception as e:
+            logger.error('_findUserRoles: {} {}'.format(e.__class__.__name__, e))            
             raise
  
         
@@ -330,14 +329,14 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             for record in tx.run(Cypher.role_find, name=roleName):
                 return (record['role'])                
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
+#         except CypherError as ex:
+#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
+#             raise      
+#         except ClientError as ex:
+#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
+#             raise
+        except Exception as e:
+            logger.error('_findRole: {} {}'.format(e.__class__.__name__, e))            
             raise   
    
                                   
@@ -352,22 +351,22 @@ class Neo4jUserDatastore(UserDatastore):
                     role.id = str(roleNode.id)
                     return role
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logger.debug('get_role: {} {}'.format(e.__class__.__name__, e))
             return None
                         
     def _getRole (self, tx, rid):
         try:
             for record in tx.run(Cypher.role_get, id=rid):
                 return (record['role'])        
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
+#         except CypherError as ex:
+#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
+#             raise      
+#         except ClientError as ex:
+#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
+#             raise
+        except Exception as e:
+            logger.error('_getRole: {} {}'.format(e.__class__.__name__, e))            
             raise
 
 
@@ -384,8 +383,8 @@ class Neo4jUserDatastore(UserDatastore):
                         roles[role.name]=role
                     return roles
                 return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
+        except ServiceUnavailable as e:
+            logger.debug('get_roles: {} {}'.format(e.__class__.__name__, e))
             raise
                                 
     def _getRoles (self, tx):
@@ -394,90 +393,17 @@ class Neo4jUserDatastore(UserDatastore):
             for record in tx.run(Cypher.roles_get):
                 roles.append(record['role'])
             return roles        
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
-            raise
-
-
-    def allowed_email_register(self, email, role):
-        try:
-            with self.driver.session() as session:
-                with session.begin_transaction() as tx:
-                    tx.run(Cypher.allowed_email_register, email=email, role=role, admin_name=current_user.name)
-                    tx.commit()
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
+#         except CypherError as ex:
+#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
+#             raise      
+#         except ClientError as ex:
+#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
+#             raise
+        except Exception as e:
+            logger.error('_getRoles: {} {}'.format(e.__class__.__name__, e))            
             raise
 
 
-    def get_allowed_emails(self):
-        try:
-            with self.driver.session() as session:
-                emailNodes = session.read_transaction(self._getAllowedEmails)
-                if emailNodes is not None:
-                    return [self.allowed_email_model(**emailNode.properties) for emailNode in emailNodes] 
-                return []
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
-            return []                 
-                                              
-    def _getAllowedEmails (self, tx):
-        try:
-            emailNodes = []
-            for record in tx.run(Cypher.get_allowed_emails):
-                emailNodes.append(record['email'])
-            return emailNodes        
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
-            raise
-
-    def find_allowed_email(self, email):
-        try:
-            with self.driver.session() as session:
-                emailNode = session.read_transaction(self._findAllowedEmail, email)
-                if emailNode is not None:
-                    return self.allowed_email_model(**emailNode.properties) 
-                return None
-        except ServiceUnavailable as ex:
-            logger.debug(ex.message)
-            return None                 
-
-    @classmethod                                              
-    def _findAllowedEmail (self, tx, email):
-        try:
-            emailNode = None
-            records = tx.run(Cypher.allowed_email_find, email=email)
-            if records:
-                for record in records:
-                    emailNode = record['email']
-                    return emailNode        
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
-            raise
 
 
 #This is a classmethod and doesn't need username        
@@ -488,14 +414,14 @@ class Neo4jUserDatastore(UserDatastore):
                 with session.begin_transaction() as tx:
                     tx.run(Cypher.confirm_email, email=email)
                     tx.commit()
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
-            raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
+#         except CypherError as ex:
+#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
+#             raise      
+#         except ClientError as ex:
+#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
+#             raise
+        except Exception as e:
+            logger.error('confirm_email: {} {}'.format(e.__class__.__name__, e))            
             raise
 
                 
@@ -507,15 +433,12 @@ class Neo4jUserDatastore(UserDatastore):
                 with session.begin_transaction() as tx:
                     tx.run(Cypher.password_reset, email=eml, password=psw)
                     tx.commit()
-        except CypherError as ex:
-            logger.error('CypherError: ', ex.message, ' ', ex.code)            
-            raise      
-        except ClientError as ex:
-            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+#         except CypherError as ex:
+#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
+#             raise      
+#         except ClientError as ex:
+#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
+#             raise
+        except Exception as e:
+            logger.error('password_reset: {} {}'.format(e.__class__.__name__, e))            
             raise
-        except Exception as ex:
-            logger.error('Exception: ', ex)            
-            raise
-       
-        
-        

@@ -9,9 +9,10 @@
   <div>
     <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
     <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
-       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]</p>
+       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+       Git-sovellusversio <i>{{ ''|git_date }}</i></p>
+    
     <div class="row">
-       
     {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
         <div class="startbox">
@@ -20,7 +21,7 @@
                ja ongelmanselvitysvälineitä
             </p>
             <form method="get" action="/tables">
-               <div style="text-align:right;"> 
+               <div class="submit"> 
                   <button type="submit">Tutki tietokantaa</button>
                </div>
             </form>
@@ -48,7 +49,7 @@
         <h3>Käyttäjien ja referenssitietojen hallinta</h3>
         <ul>
           <li><a href="/admin/list_users">Käyttäjätunnukset</a></li>
-          <li><a href="/admin/list_emails">Käyttäjäehdokkaat</a></li>
+          <li><a href="/admin/allowed_emails">Käyttäjäehdokkaat</a></li>
           <li><a href="/admin/refnames">Referenssinimet</a></li>
           <li><a href="/admin/set/estimated_dates">Aseta henkilön arvioidut 
               syntymä- ja kuolinajat</a></li>
@@ -56,5 +57,4 @@
       </div>
     </div>{% endif %}
 
-    <p>▸ <a href="/">Palaa peruskäyttäjän näkymään</a></p>
 {% endblock %}

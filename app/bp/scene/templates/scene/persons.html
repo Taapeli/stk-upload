@@ -4,8 +4,12 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
+{% set ordname = ['sukunimen', 'etunimen', 'patronyymin'] %}
 
-<h2>Henkilöluettelo</h2>
+{% if rule[0] == 'all' %}<h2>Henkilöt {{ ordname[order] }} mukaan</h2>
+{% elif rule[0] == 'refname' %}<h2>Henkilöt nimeltä {{ rule[1] }}</h2>
+{% else %}<H2>Henkilöt</h2>
+{% endif %}
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
@@ -13,9 +17,18 @@
     {% if menuno > 0 %}
             <p id="description">
     Tällä sivulla on luettelo {{persons|count}} henkilönimestä mahdollisen 
-    sukunimen mukaan lajiteltuna.<br> 
+    {{ ordname[order] }} mukaan lajiteltuna.<br> 
     Nimen napsauttaminen vie sinut valitun henkilön sivulle. 
     Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.
+      {% if rule[0] == 'all' %}<br>
+    &rtrif; Vaihda järjestys: 
+        {% if order != 0 %}<a href="/scene/persons/all/" 
+            class="outlink">sukunimen</a> /{% endif %}
+        {% if order != 1 %}<a href="/scene/persons/all/fn" 
+            class="outlink">etunimen</a> /{% endif %}
+        {% if order != 2 %}<a href="/scene/persons/all/pn" 
+            class="outlink">patronyymin tai matronyymiin</a>{% endif %} mukaan.
+      {% endif %}
             </p>
     {% else %}{% if persons|count %}
             <h3>Näytetään {{persons|count}} henkilönimeä</h3>{% else %}
@@ -53,13 +66,12 @@
         </div>
 
     {% if persons|count > 0 %}
-		<div id="alphanav">
+		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
-        {% for p in persons %}{% set ini = p.names[0].surname|list|first %}
+        {% for p in persons %}{% set ini = p.names[0].initial|upper %}
             {% if alpha != ini %}{%set alpha = ini %}
                 <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
-            {% endif %}
-        {% endfor %}
+            {% endif %}{% endfor %}
 			</ul>
 		</div>
 		<table class="IndividualList">
@@ -71,9 +83,9 @@
 				</tr>
 			</thead>
 			<tbody>
-	    {% for p in persons %}{% set ini = p.names[0].surname|list|first %}
-	            <tr><td class="ColumnAlpha">{% if alpha != ini %}
-		               {%set alpha = ini %}
+	    {% for p in persons %}
+	            <tr><td class="ColumnAlpha">{% set ini = p.names[0].initial|upper %}
+	               {% if alpha != ini %}{%set alpha = ini %}
 		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
 	               {% endif %}</td>
 	                <td class="ColumnPerson"><div>

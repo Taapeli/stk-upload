@@ -4,15 +4,18 @@ from flask_security.forms import ConfirmRegisterForm, Required, StringField, Val
 from wtforms import SelectField
 from flask_security.utils import _
 from flask_mail import Mail
+
 from stk_security.models.neo4jengine import Neo4jEngine 
 from stk_security.models.neo4juserdatastore import Neo4jUserDatastore
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
+import shareds
+from templates import jinja_filters
+
+import os
 from datetime import datetime
 from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import logging
 logger = logging.getLogger('stkserver') 
-import shareds
-from templates import jinja_filters
 
 #===================== Classes to create user session ==========================
 
@@ -137,7 +140,9 @@ class AllowedEmail():
     """ Object for storing an allowed user to register in """
     allowed_email = ''
     default_role = ''
-    timestamp = None
+    creator = ''
+    created_at = ''
+    registered_at = ''
        
     def __init__(self, **kwargs):
         self.allowed_email = kwargs['allowed_email']
@@ -184,7 +189,8 @@ shareds.driver  = shareds.db.driver
 print('Stk server setups') 
 
 # Setup Flask-Security
-shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role, AllowedEmail)
+shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)
+shareds.allowed_email_model = AllowedEmail
 shareds.security = Security(shareds.app, shareds.user_datastore,
     confirm_register_form=ExtendedConfirmRegisterForm)
 
@@ -380,6 +386,10 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
 def _is_list(value):
     return isinstance(value, list)
 
+@shareds.app.template_filter('git_date')
+def _git_date(value):
+    return datetime.fromtimestamp(os.stat(".git/FETCH_HEAD").st_mtime).\
+        strftime('%H:%M %d.%m.%Y')
 
 #------------------------  Load Flask routes file ------------------------------
 # (ON käytössä vaikka varoitus "unused import")

@@ -17,6 +17,6 @@ app.register_blueprint(gramps_bp)
 from bp.admin import bp as admin_bp
 app.register_blueprint(admin_bp)
 
-app.config.from_object('config')
-app.config.from_pyfile('config.py')
-import setups
+app.config.from_object('config')    # app/config
+app.config.from_pyfile('config.py') # instance/config
+import setups                       # app/setups for security session
