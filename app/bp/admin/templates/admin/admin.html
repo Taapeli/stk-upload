@@ -9,9 +9,10 @@
   <div>
     <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
     <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
-       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]</p>
+       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+       Git-sovellusversio <i>{{ ''|git_date }}</i></p>
+    
     <div class="row">
-       
     {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
         <div class="startbox">
