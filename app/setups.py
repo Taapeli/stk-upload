@@ -7,12 +7,14 @@ from flask_mail import Mail
 from database.models.neo4jengine import Neo4jEngine 
 from database.models.neo4juserdatastore import Neo4jUserDatastore
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
+import shareds
+from templates import jinja_filters
+
+import os
 from datetime import datetime
 from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import logging
 logger = logging.getLogger('stkserver') 
-import shareds
-from templates import jinja_filters
 
 #===================== Classes to create user session ==========================
 
@@ -375,6 +377,12 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
 def _is_list(value):
     return isinstance(value, list)
 
+@shareds.app.template_filter('git_date')
+def _git_date(value):
+    from chkdate import revision_info
+    return revision_info(".", None)
+#     return datetime.fromtimestamp(os.stat(".git/FETCH_HEAD").st_mtime).\
+#         strftime('%d.%m.%Y %H:%M')
 
 #------------------------  Load Flask routes file ------------------------------
 # (ON käytössä vaikka varoitus "unused import")
