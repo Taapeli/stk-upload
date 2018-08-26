@@ -5,11 +5,14 @@
 {% block body %}
 {{ super() }}
 
+
 <div id="startdiv">
   <div>
     <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
     <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
-       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]</p>
+       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+       <span style="font-size:8pt; color:gray">Git-sovellusversio 
+          <i>{{ ''|git_date }}</i></span></p>
     <div class="row">
        <div class="startbox">
          <div style="display: inline-block;">

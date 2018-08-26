@@ -1,5 +1,5 @@
 '''
-    A class for creating Neo4j database connection for `stk_security` module
+    A class for creating Neo4j database connection for `database` module
     and executing Cypher commands
 
 @author: TimNal - Timo Nallikari 2017
