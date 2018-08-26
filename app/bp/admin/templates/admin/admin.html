@@ -10,7 +10,8 @@
     <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
     <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
-       Git-sovellusversio <i>{{ ''|git_date }}</i></p>
+       <span style="font-size:8pt; color:gray">Git-sovellusversio 
+          <i>{{ ''|git_date }}</i></span>
     
     <div class="row">
     {% if current_user.is_authenticated and 

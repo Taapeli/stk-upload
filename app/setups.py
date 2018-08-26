@@ -388,8 +388,10 @@ def _is_list(value):
 
 @shareds.app.template_filter('git_date')
 def _git_date(value):
-    return datetime.fromtimestamp(os.stat(".git/FETCH_HEAD").st_mtime).\
-        strftime('%H:%M %d.%m.%Y')
+    from chkdate import revision_info
+    return revision_info(".", None)
+#     return datetime.fromtimestamp(os.stat(".git/FETCH_HEAD").st_mtime).\
+#         strftime('%d.%m.%Y %H:%M')
 
 #------------------------  Load Flask routes file ------------------------------
 # (ON käytössä vaikka varoitus "unused import")
