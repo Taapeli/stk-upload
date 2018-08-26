@@ -21,7 +21,7 @@ from models.gen.source_citation import Citation, Repository, Source, Weburl
 from models.gen.dates import DateRange
 
 
-def read_persons_with_events(keys=None, user=None, take_refnames=False):
+def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
     """ Reads Person- and Event- objects for display.
         If currentuser is defined, restrict to her objects.
 
@@ -29,7 +29,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False):
     """
     
     persons = []
-    result = Person.get_events_k(keys, user, take_refnames=take_refnames)
+    result = Person.get_events_k(keys, user, take_refnames=take_refnames, order=order)
     for record in result:
         # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
         uniq_id = record['id']
@@ -49,6 +49,8 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False):
             pname.surname = record['surname']
         if record['suffix']:
             pname.patronyme = record['suffix']
+        if record['initial']:
+            pname.initial = record['initial']
         p.names.append(pname)
     
         # Events

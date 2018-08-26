@@ -32,13 +32,16 @@
 	            <h3>{{ _("Lataa uusi Gedcom-tiedosto") }}</h3>
 				<div>
 				    <form method="post" enctype="multipart/form-data" action="/gedcom/upload">
-				      {{ _("Kuvaus") }}: <input name="desc">
-				      <p>
-				      <input type="file" name="file" accept="{{ allowed_extensions }}">
-				      <br>
-				      <input type="submit" value="{{ _('Lataa') }}">
+				      <div>
+				        <input type="file" name="file" accept="{{ allowed_extensions }}">
+				      </div>
+				      <div><label for="desc">{{ _("Kuvaus") }}</label>
+				           <input name="desc" style="width: 14em"></div>
+				      <div class="submit">
+				        <input type="submit" value="{{ _('Lataa') }}">
+				      </div>
 				    </form>
-				    <ul><li><a href="/">{{ _("Paluu") }}</a></li></ul>
+				    <div>&rtrif; <a href="/">{{ _("Paluu alkusivulle") }}</a></div>
 				</div>
 			 </div>
 	    </div>

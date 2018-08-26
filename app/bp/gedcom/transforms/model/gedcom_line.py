@@ -3,6 +3,10 @@ Created on 16.1.2017
 
 @author: jm
 '''
+import logging
+from fileinput import lineno
+LOG = logging.getLogger(__name__)
+
 
 class GedcomLine(object):
     '''
@@ -37,7 +41,17 @@ class GedcomLine(object):
             self.line = line
         else:
             tkns = tuple(line)
-        self.level = int(tkns[0])
+        try:
+            self.level = int(tkns[0])
+        except ValueError as e:
+            msg = "{} Rivi {} '{}' ei ala kunnon tasonumerolla".\
+                        format(self.path, self.linenum, line)
+            LOG.error("{}{}".format(self.path, msg))
+            self.level = 0
+            self.tag = "NOTE"
+            self.value = "VIRHE: " + msg
+            return
+            
         self.tag = tkns[1]
         if len(tkns) > 2:
             if type(line) == str:

@@ -21,7 +21,8 @@
     </ol>
   {% endif %}
 {% endwith %}
-<section id="lista">
+<div>
+<!--section id="lista"-->
 <table style="width:500pt">
     <tr><th>oid</th>
         <th>nimi</th>
@@ -39,9 +40,11 @@
             {% if r.refname %} ~ {{r.refname}}{% endif %}</td>
             <td class="center">{% if r.gender %}{{sp[r.gender]}}{% endif %}</td>
             <td>{% if r.source %}{{r.source}}{% endif %}</td>
-            <td class="center">{% if r.usecount %}{{r.usecount}}{% endif %}</td>
+            <td class="center">{% if r.usecount %}
+            <a href="/scene/persons/ref={{r.name}}">{{r.usecount}}</a>{% endif %}</td>
         </tr>
     {% endfor %}
-</table><hr>
-</section>
+</table>
+<!--/section-->
+</div>
 {% endblock %}
