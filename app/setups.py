@@ -4,9 +4,8 @@ from flask_security.forms import ConfirmRegisterForm, Required, StringField, Val
 from wtforms import SelectField
 from flask_security.utils import _
 from flask_mail import Mail
-
-from stk_security.models.neo4jengine import Neo4jEngine 
-from stk_security.models.neo4juserdatastore import Neo4jUserDatastore
+from database.models.neo4jengine import Neo4jEngine 
+from database.models.neo4juserdatastore import Neo4jUserDatastore
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 import shareds
 from templates import jinja_filters
@@ -172,16 +171,6 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
                                ("en","englanti"),
                             ],
                            validators=[Required('Language required')])
-#===============================================================================
-
-# Create app
-#===============================================================================
-# app = Flask(__name__, instance_relative_config=True)
-# shareds.app = app
-# print('Application instance path: ' + shareds.app.instance_path)
-# app.config.from_object('config')
-# app.config.from_pyfile('config.py')
-#===============================================================================
 
 shareds.mail = Mail(shareds.app)
 shareds.db = Neo4jEngine(shareds.app)
@@ -217,7 +206,9 @@ if num_of_roles == 0:
              {'level':'4', 'name':'audit', 
               'description':'Valvoja, joka auditoi ja hyväksyy ehdokasaineistoja'},
              {'level':'8', 'name':'admin', 
-              'description':'Ylläpitäjä kaikin oikeuksin'})
+              'description':'Ylläpitäjä kaikin oikeuksin'},
+             {'level':'16', 'name':'master', 
+              'description':'Tietokannan pääkäyttäjä ilman sovellusoikeuksia'})
     
     
     #functions
