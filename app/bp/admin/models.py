@@ -84,8 +84,8 @@ class UserAdmin():
         if emailNode is None:
             return None
         email = shareds.allowed_email_model(**emailNode.properties)
-        email.allowed_email = emailNode.properties['allowed_email']
-        email.default_role = emailNode.properties['default_role']
+#        email.allowed_email = emailNode.properties['allowed_email']
+#        email.default_role = emailNode.properties['default_role']
         if 'creator' in emailNode.properties:
             email.creator = emailNode.properties['creator']
         if 'created_at' in emailNode.properties:
@@ -100,7 +100,7 @@ class UserAdmin():
         try:
             with shareds.driver.session() as session:
                 with session.begin_transaction() as tx:
-                    tx.run(Cypher_adm.allowed_email_register, email=email, role=role, admin_name=current_user.name)
+                    tx.run(Cypher_adm.allowed_email_register, email=email, role=role, admin_name=current_user.username)
                     tx.commit()
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
@@ -193,13 +193,13 @@ DETACH DELETE a"""
 CREATE (email:Allowed_email {
     allowed_email: $email,
     default_role: $role,
-    admin_name: $admin_name,
-    timestamp: timestamp() } )"""
+    creator: $admin_name,
+    created_at: timestamp() } )"""
     
     get_allowed_emails = """
 MATCH (email:Allowed_email)
 RETURN DISTINCT email 
-    ORDER BY email.timestamp DESC"""    
+    ORDER BY email.created_at DESC"""    
     
     allowed_email_find = """
 MATCH (email:Allowed_email)
