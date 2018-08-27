@@ -29,4 +29,4 @@ def revision_info(src_path, store_dir=None):
             text_file.write('{}\n'.format(moment))
     return moment
 
-revision_info(".", "app")
+# revision_info(".", "app")
