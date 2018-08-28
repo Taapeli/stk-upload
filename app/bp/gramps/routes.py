@@ -46,14 +46,14 @@ def save_loaded_gramps(filename):
     """ Save loaded gramps data to the database """
     #TODO: Latauksen onnistuttua perusta uusi Batch-erä (suoritusaika shareds.tdiff)
     pathname = loadfile.fullname(filename)
-    dburi = dbutil.get_server_location()
+#     dburi = dbutil.get_server_location()
     try:
         # gramps backup xml file to Neo4j db
         result_list = xml_to_neo4j(pathname, current_user.username)
     except KeyError as e:
         return redirect(url_for('gramps.error_page', code=1, \
                                 text="Missing proper column title: " + str(e)))
-    return render_template("/gramps/result.html", batch_events=result_list, uri=dburi)
+    return render_template("/gramps/result.html", batch_events=result_list)
 
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')

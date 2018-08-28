@@ -360,7 +360,9 @@ class Source:
         self.reporef_medium = ''
         self.citations = []   # For creating display sets
         self.repos = []   # For creating display sets
-        
+
+    def __str__(self):
+        return "{} {}".format(self.id, self.stitle)
     
     def get_reporef_hlink(self):
         """ Luetaan lähteen arkiston uniq_id kannasta """

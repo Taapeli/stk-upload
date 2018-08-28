@@ -13,8 +13,8 @@ from flask_security import login_required, roles_accepted, roles_required, curre
 
 import shareds
 from models import gen
-from models import dbutil
-from models import loadfile            # Datan lataus käyttäjältä
+# from models import dbutil
+# from models import loadfile            # Datan lataus käyttäjältä
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from models import dataupdater         # Tietojen päivitysmetodit
 
@@ -295,8 +295,15 @@ def pick_selection(cond):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
 
-""" -------------------------- Tietojen talletus ------------------------------
+""" -------------------------- Yleinen virhesivu ------------------------------
 """
+
+#TODO Pitäisi korvata jollain ilmoituskentällä ...
+@app.route('/virhe_lataus/<int:code>/<text>')
+def virhesivu(code, text=''):
+    """ Virhesivu näytetään """
+    logging.debug('Virhesivu ' + str(code) )
+    return render_template("virhe_lataus.html", code=code, text=text)
 
 
 

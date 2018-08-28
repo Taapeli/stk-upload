@@ -4,10 +4,11 @@
 
 import logging
 import time
+
+from bp.gramps.batchlogger import Batch, Log
 from models.gen.user import User
 from models.gen.person import Person, Name
 from models.gen.refname import Refname
-from models.batchlogger import Batch, Log
 
 
 def set_confidence_value(tx, uniq_id=None, batch_logger=None):
