@@ -1,7 +1,39 @@
 '''
 
-Created on 2.5.2017
+    Event hierarkiasuunnitelma 23.8.2018/JMä
 
+    class gen.event.*Event*(): 
+       vain Event-noden parametrit (uniq_id, tyyppi, handle, päivämäärät)
+
+    class *Event_compound*(Event): 
+        - __init__()
+        - get_person_events()
+        - get_baptism_data()
+        - get_cite_sour_repo() static <-- get_citation_path()?
+        - get_event_cite()
+       Event, lähteet, huomautukset, henkilön uniq_id
+
+    2. *Event_w_person*: 
+       Event ja ja siihen liittyvät Person-nodet ja roolit (ehkä myös nimet?)
+    3. *Event_w_place*: 
+       Event ja liittyvät paikat (pyydettäessä myös paikannimet?)
+
+    Nämä siis periytyvät Event-luokasta ja sisältävät tarpeen mukaan 
+    tietokantametodit _read(), get()_ ja _save()_ (_read_ hakukenttien avulla, 
+    _get_ uniq_id:n avulla). L
+    
+    isäksi on kätevä olla metodi __str__(), joka antaa lyhyen sanalliseen muodon
+    "syntynyt välillä 1.3.1840...31.3.1840 Hauho".
+    
+    Ehkä _save()_-metodi koskee vain Event-nodea, ei liittyvä nodeja? 
+    Ehkä yhteydet myös?
+    
+    Prosessointiin ja näyttöihin tehdään tarpeen mukaan bisnes-luokkia, 
+    jotka sisältävät esim. poiminta-, yhdistely- ja muokkaussääntöjä ja 
+    siellä ehkä hoidetaan isompien kokonaisuuksien talletus 
+    (kuten henkilö + nimet ja lähteet).
+
+Created on 2.5.2017
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 import datetime
@@ -11,7 +43,9 @@ from models.gen.dates import DateRange
 import  shareds
 from models.cypher_gramps import Cypher_event_w_handle
 
-class Event:
+#-------------------------------------------------------------------------------
+
+class Event():
     """ Tapahtuma
             
         Properties:
@@ -48,113 +82,8 @@ class Event:
         self.names = []   # For creating display sets
     
     
-    def get_baptism_data(self):
-        """ Luetaan kastetapahtuman henkilöt"""
-        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (event:Event)<-[r:EVENT]-(p:Person) WHERE ID(event)=$pid
-OPTIONAL MATCH (p)-[:NAME]->(n:Name)
-RETURN ID(event) AS id, event.type AS type, event.date AS date, 
-    event.dates AS dates, ID(p) AS person_id, r.role AS role, 
-    COLLECT([n.firstname, n.surname]) AS person_names ORDER BY r.role DESC"""
-        return  shareds.driver.session().run(query, {"pid": pid})
-    
-    
-    def get_citation_by_id(self):
-        """ Luetaan tapahtuman viittauksen id """
-        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (event:Event)-[r:CITATION]->(c:Citation) 
-  WHERE ID(event)=$pid
-RETURN ID(c) AS citationref_hlink"""
-        return  shareds.driver.session().run(query, {"pid": pid})
-
-    
-    @staticmethod       
-    def get_cite_sour_repo (uniq_id):
-        """ Voidaan lukea läheitä viittauksineen kannasta
-        """
-
-        if uniq_id:
-            where = "WHERE ID(event)={} ".format(uniq_id)
-        else:
-            where = ''
-        
-        query = """
- MATCH (event:Event)-[a:CITATION]->(citation:Citation)
-         -[b:SOURCE]->(source:Source)-[c:REPOSITORY]->(repo:Repository) {0}
- RETURN ID(event) AS id, event.type AS type, 
-        event.date AS date, event.dates AS dates, 
-        COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence,
-        ID(source), source.stitle, c.medium, ID(repo), repo.rname, repo.type] ) AS sources
- ORDER BY event.date""".format(where)
-                
-        return shareds.driver.session().run(query)
-
-    
-    @staticmethod       
-    def get_event_cite (uniq_id):
-        """ Voidaan lukea tapahtuman tiedot lähdeviittauksineen kannasta
-        """
-
-        if uniq_id:
-            where = "WHERE ID(event)={} ".format(uniq_id)
-        else:
-            where = ''
-        
-        query = """
- MATCH (event:Event)-[a:CITATION]->(citation:Citation) {0}
- RETURN ID(event) AS id, event.type AS type, 
-        event.date AS date, event.dates AS dates, 
-        COLLECT([ID(citation), citation.dateval, citation.page,
-                 citation.confidence] ) AS sources
- ORDER BY event.date""".format(where)
-                
-        return shareds.driver.session().run(query)
 
 
-    def get_event_data_by_id(self):
-        """ Luetaan tapahtuman tiedot """
-                        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (event:Event) WHERE ID(event)=$pid
-RETURN event"""
-        result = shareds.driver.session().run(query, {"pid": pid})
-
-        for record in result:
-            event = record["event"]
-            self.id = event["id"]
-            self.change = event["change"]
-            self.type = event["type"]
-            if "datetype" in event:
-                #TODO: Talletetaanko DateRange -objekti vai vain str?
-                dates = DateRange(event["datetype"], event["date1"], event["date2"])
-                self.dates = str(dates)
-                self.date = dates.estimate()
-            else:
-                self.dates = ""
-                self.date = ""                
-            self.description = event["description"]
-    
-            place_result = self.get_place_by_id()
-            for place_record in place_result:
-                self.place_hlink = place_record["uniq_id"]
-    
-            note_result = self.get_note_by_id()
-            for note_record in note_result:
-                self.noteref_hlink = note_record["noteref_hlink"]
-                print("noteref_hlink: " + str(self.noteref_hlink))
-    
-            citation_result = self.get_citation_by_id()
-            for citation_record in citation_result:
-                self.citationref_hlink = citation_record["citationref_hlink"]
-                                
-        return True
-    
-    
     @staticmethod       
     def get_events_wo_citation():
         """ Voidaan lukea viittauksettomia tapahtumia kannasta
@@ -412,15 +341,15 @@ RETURN ID(place) AS uniq_id"""
             
         return
 
-
-class Event_for_template(Event):
-    """ Template-tapahtuma perii Tapahtuma-luokan
-            
-        Properties:
-                place              str paikan nimi
-    """
-
-    def __init__(self, eid='', desc='', handle=''):
-        """ Luo uuden event-instanssin """
-        Event.__init__(self, eid, desc, handle)
-        self.place = ''
+# class Event_for_template(Event):
+''' Tämä on korvattu luokalla Event_combo'''
+#     """ Template-tapahtuma perii Tapahtuma-luokan
+#             
+#         Properties:
+#                 place              str paikan nimi
+#     """
+# 
+#     def __init__(self, eid='', desc='', handle=''):
+#         """ Luo uuden event-instanssin """
+#         Event.__init__(self, eid, desc, handle)
+#         self.place = ''

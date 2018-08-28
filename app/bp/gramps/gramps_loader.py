@@ -1,8 +1,8 @@
-# coding=UTF-8
-#
-# Methods to import all data from Gramps xml file
-#
-# @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
+'''
+    Methods to import all data from Gramps xml file
+
+@author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
+'''
 
 import logging
 import time
@@ -19,7 +19,7 @@ from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.source_citation import Citation, Repository, Source
 from models.dataupdater import set_confidence_value, set_person_refnames
-from models.batchlogger import Batch, Log
+from .batchlogger import Batch, Log
 import shareds
 
 
@@ -32,7 +32,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     
     # Start a Batch 
         routes.upload_gramps / models.loadfile.upload_file >
-            # Create id / models.batchlogger.Batch._create_id
+            # Create id / bp.gramps.batchlogger.Batch._create_id
             match (p:UserProfile {username:"jussi"}); 
             create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"}) 
             return b
@@ -196,7 +196,7 @@ class DOM_handler():
                               format(e.__class__.__name__, e), level="ERROR"))
 
     def log(self, batch_event):
-        # Add a models.batchlogger.Log to Batch log
+        # Add a bp.gramps.batchlogger.Log to Batch log
         self.batch_logger.append(batch_event)
 
     # XML subtree handlers

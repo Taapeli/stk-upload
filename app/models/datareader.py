@@ -10,7 +10,8 @@ import time
 
 from operator import itemgetter
 #from models.dbutil import Datefrom
-from models.gen.event import Event, Event_for_template 
+from models.gen.event import Event
+from models.gen.event_combo import Event_combo
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
@@ -44,12 +45,11 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
         pname = Name()
         if record['firstname']:
             pname.firstname = record['firstname']
-                    
         if record['surname']:
             pname.surname = record['surname']
         if record['suffix']:
             pname.patronyme = record['suffix']
-        if record['initial']:
+        if 'initial' in record and record['initial']:
             pname.initial = record['initial']
         p.names.append(pname)
     
@@ -57,7 +57,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
 
         for event in record['events']:
             # Got event with place name: [id, type, date, dates, place.pname]
-            e = Event_for_template()
+            e = Event_combo()
             e.uniq_id = event[0]
             event_type = event[1]
             if event_type:
@@ -179,7 +179,7 @@ def read_cite_sour_repo(uniq_id=None):
     """
     
     sources = []
-    result_cite = Event.get_event_cite(uniq_id)
+    result_cite = Event_combo.get_event_cite(uniq_id)
     for record_cite in result_cite:
         pid = record_cite['id']
         e = Event()
@@ -538,10 +538,10 @@ def get_person_data_by_id(uniq_id):
     # Events
 
     for i in range(len(p.eventref_hlink)):
-        e = Event_for_template()
+        e = Event_combo() # Event_for_template()
         e.uniq_id = p.eventref_hlink[i]
         e.role = p.eventref_role[i]
-        e.get_event_data_by_id()        # Read data to e
+        e.get_person_events()        # Read data to e
             
         if e.place_hlink != '':
             place = Place()
@@ -675,9 +675,9 @@ def get_baptism_data(uniq_id):
     
     persons = []
     
-    e = Event()
+    e = Event_combo()
     e.uniq_id = uniq_id
-    e.get_event_data_by_id()
+    e.get_person_events()
     
     if e.place_hlink != '':
         place = Place()
