@@ -57,13 +57,18 @@ class Event_gramps(Event):
                 description        esim. ammatin kuvaus
                 date               str aika
                 dates              DateRange date expression
+            Planned for Gramps:
+                place_handle[]     str paikan handle (ent. place_hlink)
+                note_handle[]      str lisätiedon handle (ent. noteref_hlink)
+                citation_handle[]  str viittauksen handle (ent. citationref_hlink)
+                media_handle[]     str median handle (ent. objref_hlink)
         Properties from Gramps:
-                place_hlink        str paikan osoite
                 attr_type          str lisätiedon tyyppi
                 attr_value         str lisätiedon arvo
-                noteref_hlink      str lisätiedon osoite
-                citationref_hlink  str viittauksen osoite
-                objref_hlink       str median osoite
+                place_hlink        str paikan handle
+                noteref_hlink      str lisätiedon handle
+                citationref_hlink  str viittauksen handle
+                objref_hlink       str median handle
      """
 
     def __init__(self, eid='', desc='', handle=''):
@@ -83,186 +88,6 @@ class Event_gramps(Event):
         self.objref_hlink = ''
         self.citations = []   # For creating display sets
         self.names = []   # For creating display sets
-    
-    
-
-
-    @staticmethod       
-    def get_events_wo_citation():
-        """ Voidaan lukea viittauksettomia tapahtumia kannasta
-        """
-        
-        query = """
- MATCH (e:Event) WHERE NOT EXISTS((:Citation)<-[:CITATION]-(e:Event))
- RETURN ID(e) AS uniq_id, e
- ORDER BY e.type, e.date"""
-                
-        result = shareds.driver.session().run(query)
-        
-        titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
-                  'description', 'date', 'dates', 
-                  'attr_type', 'attr_value']
-        lists = []
-        
-        for record in result:
-            data_line = []
-            if record['uniq_id']:
-                data_line.append(record['uniq_id'])
-            else:
-                data_line.append('-')
-            if record["e"]['handle']:
-                data_line.append(record["e"]['handle'])
-            else:
-                data_line.append('-')
-            if record["e"]['change']:
-                data_line.append(record["e"]['change'])
-            else:
-                data_line.append('-')
-            if record["e"]['id']:
-                data_line.append(record["e"]['id'])
-            else:
-                data_line.append('-')
-            if record["e"]['type']:
-                data_line.append(record["e"]['type'])
-            else:
-                data_line.append('-')
-            if record["e"]['description']:
-                data_line.append(record["e"]['description'])
-            else:
-                data_line.append('-')
-            if record["e"]['date']:
-                data_line.append(record["e"]['date'])
-            else:
-                data_line.append('-')
-            if record["e"]['dates']:
-                data_line.append(str(DateRange(record["e"]['dates'])))
-            else:
-                data_line.append('-')
-            if record["e"]['attr_type']:
-                data_line.append(record["e"]['attr_type'])
-            else:
-                data_line.append('-')
-            if record["e"]['attr_value']:
-                data_line.append(record["e"]['attr_value'])
-            else:
-                data_line.append('-')
-                
-            lists.append(data_line)
-        
-        return (titles, lists)
-    
-    
-    @staticmethod       
-    def get_events_wo_place():
-        """ Voidaan lukea paikattomia tapahtumia kannasta
-        """
-        
-        query = """
- MATCH (e:Event) WHERE NOT EXISTS((:Place)<-[:PLACE]-(e:Event))
- RETURN ID(e) AS uniq_id, e
- ORDER BY e.type, e.date"""
-                
-        result = shareds.driver.session().run(query)
-        
-        titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
-                  'description', 'date', 'dates', 'attr_type', 'attr_value']
-        lists = []
-        
-        for record in result:
-            data_line = []
-            if record['uniq_id']:
-                data_line.append(record['uniq_id'])
-            else:
-                data_line.append('-')
-            if record["e"]['handle']:
-                data_line.append(record["e"]['handle'])
-            else:
-                data_line.append('-')
-            if record["e"]['change']:
-                data_line.append(record["e"]['change'])
-            else:
-                data_line.append('-')
-            if record["e"]['id']:
-                data_line.append(record["e"]['id'])
-            else:
-                data_line.append('-')
-            if record["e"]['type']:
-                data_line.append(record["e"]['type'])
-            else:
-                data_line.append('-')
-            if record["e"]['description']:
-                data_line.append(record["e"]['description'])
-            else:
-                data_line.append('-')
-            if record["e"]['date']:
-                data_line.append(record["e"]['date'])
-            else:
-                data_line.append('-')
-            if record["e"]['dates']:
-                data_line.append(str(DateRange(record["e"]['dates'])))
-            else:
-                data_line.append('-')
-            if record["e"]['attr_type']:
-                data_line.append(record["e"]['attr_type'])
-            else:
-                data_line.append('-')
-            if record["e"]['attr_value']:
-                data_line.append(record["e"]['attr_value'])
-            else:
-                data_line.append('-')
-                
-            lists.append(data_line)
-        
-        return (titles, lists)    
-        
-
-    @staticmethod        
-    def get_total():
-        """ Tulostaa tapahtumien määrän tietokannassa """
-        
-        query = """
-            MATCH (e:Event) RETURN COUNT(e)
-            """
-        results =  shareds.driver.session().run(query)
-        
-        for result in results:
-            return str(result[0])
-
-
-    def print_data(self):
-        """ Tulostaa tiedot """
-        print ("*****Event*****")
-        print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
-        print ("Id: " + self.id)
-        print ("Type: " + self.type)
-        print ("Description: " + self.description)
-        print ("Dateval: " + self.date)
-        print ("Dates: " + str(self.dates))
-        print ("Place_hlink: " + self.place_hlink)
-        print ("Attr_type: " + self.attr_type)
-        print ("Attr_value: " + self.attr_value)
-        print ("Citationref_hlink: " + self.citationref_hlink)
-        return True
-
-
-    def print_compared_data(self, comp_event, pname1, pname2, print_out=True):
-        points = 0
-        """ Tulostaa pää- ja vertailtavan tapahtuman tiedot """
-        print ("*****Events*****")
-        if print_out:
-            print ("Handle: " + self.handle + " # " + comp_event.handle)
-            print ("Change: " + self.change + " # " + comp_event.change)
-            print ("Id: " + self.id + " # " + comp_event.id)
-            print ("Type: " + self.type + " # " + comp_event.type)
-            print ("Description: " + self.description + " # " + comp_event.description)
-            print ("Dateval: " + self.date + " # " + comp_event.date)
-            print ("Dates: " + str(self.dates) + " # " + str(comp_event.dates))
-            print ("Place: " + pname1 + " # " + pname2)
-        # Give points if dates match
-        if self.date == comp_event.date:
-            points += 1
-        return points
 
 
     def save(self, username, tx):

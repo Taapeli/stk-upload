@@ -46,7 +46,10 @@ class Event_combo(Event):
         Luo uuden Event-instanssin
         '''
         Event.__init__(self, eid, desc, handle)
-        self.place = ''
+        self.citations = []     # For creating display sets
+        self.names = []         # For creating display sets
+        self.place = ''     # TODO Change to places[]
+
 
 #     def read(self, keys):
 #         ''' Access a set of Event complexes using different search fields

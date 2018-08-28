@@ -13,6 +13,9 @@
         - get_event_cite()
        Event, lähteet, huomautukset, henkilön uniq_id
 
+    class *Event_gramps*()
+        - save() # with relations to UserProfile, Person, Place, Note, Citation, Media
+
     2. *Event_w_person*: 
        Event ja ja siihen liittyvät Person-nodet ja roolit (ehkä myös nimet?)
     3. *Event_w_place*: 
@@ -49,19 +52,26 @@ class Event():
     """ Tapahtuma
             
         Properties:
-                handle             Gramps handle
-                change
+                handle             Unique constant handle (mostly from Gramps)
+                change             Original timestamp like 1502552858
                 id                 esim. "E0001"
                 type               esim. "Birth"
                 description        esim. ammatin kuvaus
                 date               str aika
                 dates              DateRange date expression
-                place_hlink        str paikan osoite
                 attr_type          str lisätiedon tyyppi
                 attr_value         str lisätiedon arvo
-                noteref_hlink      str lisätiedon osoite
-                citationref_hlink  str viittauksen osoite
-                objref_hlink       str median osoite
+            Planned from Gramps:
+                place_handle[]     str paikan handle (ent. place_hlink)
+                note_handle[]      str lisätiedon handle (ent. noteref_hlink)
+                citation_handle[]  str viittauksen handle (ent. citationref_hlink)
+                media_handle[]     str median handle (ent. objref_hlink)
+                #place_hlink       str paikan handle
+                #citationref_hlink str viittauksen handle
+                #objref_hlink      str median handle
+        Event_combo properties:
+                citations = []     Citations attached
+                names = []         Names attached
      """
 
     def __init__(self, eid='', desc='', handle=''):
@@ -72,14 +82,16 @@ class Event():
         self.description = desc
         self.date = ''
         self.dates = None
-        self.place_hlink = ''
-        self.attr_type = ''
-        self.attr_value = ''
-        self.noteref_hlink = ''
-        self.citationref_hlink = ''
-        self.objref_hlink = ''
-        self.citations = []   # For creating display sets
-        self.names = []   # For creating display sets
+        # Only in Event_gramps
+        #    self.attr_type = ''
+        #    self.attr_value = ''
+        #    self.place_hlink = ''
+        #    self.noteref_hlink = ''
+        #    self.citationref_hlink = ''
+        #    self.objref_hlink = ''
+        # Only in Event_combo
+        #    self.citations = []   # For creating display sets
+        #    self.names = []   # For creating display sets
     
     
 
@@ -213,26 +225,26 @@ class Event():
         return (titles, lists)    
     
         
-    def get_note_by_id(self):
-        """ Luetaan tapahtuman lisätietojen uniq_id """
-                        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (event:Event)-[r:NOTE]->(note:Note) 
-  WHERE ID(event)=$pid
-RETURN ID(note) AS noteref_hlink"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+#     def get_note_by_id(self):
+#         """ Luetaan tapahtuman lisätietojen uniq_id """
+#                         
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (event:Event)-[r:NOTE]->(note:Note) 
+#   WHERE ID(event)=$pid
+# RETURN ID(note) AS noteref_hlink"""
+#         return  shareds.driver.session().run(query, {"pid": pid})
     
         
-    def get_place_by_id(self):
-        """ Luetaan tapahtuman paikan uniq_id """
-                        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (event:Event)-[r:PLACE]->(place:Place) 
-  WHERE ID(event)=$pid
-RETURN ID(place) AS uniq_id"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+#     def get_place_by_id(self):
+#         """ Luetaan tapahtuman paikan uniq_id """
+#                         
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (event:Event)-[r:PLACE]->(place:Place) 
+#   WHERE ID(event)=$pid
+# RETURN ID(place) AS uniq_id"""
+#         return  shareds.driver.session().run(query, {"pid": pid})
 
         
     
@@ -284,62 +296,11 @@ RETURN ID(place) AS uniq_id"""
             points += 1
         return points
 
-
-    def save(self, username, tx):
-        """ Saves the Event to db including
-            links from UserProfile, Person
-        """
-
-        today = str(datetime.date.today())
-        e_attr = {
-            "handle": self.handle,
-            "change": self.change, 
-            "id": self.id, 
-            "type": self.type,
-            "description": self.description, 
-            "attr_type": self.attr_type, 
-            "attr_value": self.attr_value}
-        if self.dates:
-            e_attr.update(self.dates.for_db())
-        try:
-            tx.run(Cypher_event_w_handle.create, 
-               username=username, date=today, e_attr=e_attr)
-        except Exception as err:
-            print("Virhe.event_save: {0}".format(err), file=stderr)
-
-        try:
-            # Make relation to the Place node
-            if self.place_hlink != '':
-                tx.run(Cypher_event_w_handle.link_place, 
-                       handle=self.handle, place_hlink=self.place_hlink)
-        except Exception as err:
-            print("Virhe.event_link_place: {0}".format(err), file=stderr)
-
-        try:
-            # Make relation to the Note node
-            if self.noteref_hlink != '':
-                tx.run(Cypher_event_w_handle.link_note,
-                       handle=self.handle, noteref_hlink=self.noteref_hlink)
-        except Exception as err:
-            print("Virhe.event_link_note: {0}".format(err), file=stderr)
-
-        try:
-            # Make relation to the Citation node
-            if self.citationref_hlink != '':
-                tx.run(Cypher_event_w_handle.link_citation,
-                       handle=self.handle, citationref_hlink=self.citationref_hlink)
-        except Exception as err:
-            print("Virhe.event_link_citation: {0}".format(err), file=stderr)
-
-        try:
-            # Make relation to the Media node
-            if self.objref_hlink != '':
-                tx.run(Cypher_event_w_handle.link_media, 
-                       handle=self.handle, objref_hlink=self.objref_hlink)
-        except Exception as err:
-            print("Virhe.event_link_media: {0}".format(err), file=stderr)
-            
-        return
+''' Method now Event_gramps.save() '''
+#     def save(self, username, tx):
+#         """ Saves the Event to db including
+#             links from UserProfile, Person
+#         """
 
 # class Event_for_template(Event):
 ''' Tämä on korvattu luokalla Event_combo'''
