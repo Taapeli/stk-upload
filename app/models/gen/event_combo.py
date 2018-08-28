@@ -45,7 +45,6 @@ class Event_combo(Event):
         
         Luo uuden Event-instanssin
         '''
-        """  """
         Event.__init__(self, eid, desc, handle)
         self.place = ''
 
