@@ -46,6 +46,9 @@ class Event_combo(Event):
         Luo uuden Event-instanssin
         '''
         Event.__init__(self, eid, desc, handle)
+        self.note_handles = []      # Note handles (previous noteref_hlink had
+                                    # only the first one)
+
         self.citations = []     # For creating display sets
         self.names = []         # For creating display sets
         self.place = ''     # TODO Change to places[]
@@ -87,7 +90,7 @@ match (e:Event) where ID(e)=97913
 return e as event, 
     collect(id(p)) as place_ref, 
     collect(id(c)) as citation_ref, 
-    collect(id(n)) as note_ref'''
+    collect(id(n)) as note_handles'''
         result = shareds.driver.session().run(place_get_w_place_note_citation, 
                                               pid=self.uniq_id)
 
@@ -107,12 +110,12 @@ return e as event,
                 self.date = ""                
             self.description = event["description"]
             # Related data
+            for ref in record["note_handles"]:
+                self.note_handles.append(ref) # noteref_hlink = ref
             for ref in record["place_ref"]:
                 self.place_hlink = ref
             for ref in record["citation_ref"]:
                 self.citationref_hlink = ref
-            for ref in record["note_ref"]:
-                self.noteref_hlink = ref
 
 #             # Place
 #             place_result = self.get_place_by_id()

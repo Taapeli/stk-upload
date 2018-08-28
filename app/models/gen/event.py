@@ -39,12 +39,12 @@
 Created on 2.5.2017
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
-import datetime
-from sys import stderr
+# import datetime
+# from sys import stderr
 #from flask import g
 from models.gen.dates import DateRange
 import  shareds
-from models.cypher_gramps import Cypher_event_w_handle
+# from models.cypher_gramps import Cypher_event_w_handle
 
 #-------------------------------------------------------------------------------
 
@@ -61,11 +61,12 @@ class Event():
                 dates              DateRange date expression
                 attr_type          str lisätiedon tyyppi
                 attr_value         str lisätiedon arvo
-            Planned from Gramps:
-                place_handle[]     str paikan handle (ent. place_hlink)
-                note_handle[]      str lisätiedon handle (ent. noteref_hlink)
-                citation_handle[]  str viittauksen handle (ent. citationref_hlink)
-                media_handle[]     str median handle (ent. objref_hlink)
+            For gramps_loader:
+                note_handles[]     str lisätiedon handle (ent. noteref_hlink)
+            Planned from gramps_loader:
+                place_handles[]    str paikan handle (ent. place_hlink)
+                citation_handles[] str viittauksen handle (ent. citationref_hlink)
+                media_handles[]    str median handle (ent. objref_hlink)
                 #place_hlink       str paikan handle
                 #citationref_hlink str viittauksen handle
                 #objref_hlink      str median handle
@@ -86,7 +87,7 @@ class Event():
         #    self.attr_type = ''
         #    self.attr_value = ''
         #    self.place_hlink = ''
-        #    self.noteref_hlink = ''
+        #    self.noteref_hlink = ''    # <-- self.note_handles = []
         #    self.citationref_hlink = ''
         #    self.objref_hlink = ''
         # Only in Event_combo
@@ -223,30 +224,12 @@ class Event():
             lists.append(data_line)
         
         return (titles, lists)    
-    
-        
+
 #     def get_note_by_id(self):
 #         """ Luetaan tapahtuman lisätietojen uniq_id """
-#                         
-#         pid = int(self.uniq_id)
-#         query = """
-# MATCH (event:Event)-[r:NOTE]->(note:Note) 
-#   WHERE ID(event)=$pid
-# RETURN ID(note) AS noteref_hlink"""
-#         return  shareds.driver.session().run(query, {"pid": pid})
-    
-        
+
 #     def get_place_by_id(self):
 #         """ Luetaan tapahtuman paikan uniq_id """
-#                         
-#         pid = int(self.uniq_id)
-#         query = """
-# MATCH (event:Event)-[r:PLACE]->(place:Place) 
-#   WHERE ID(event)=$pid
-# RETURN ID(place) AS uniq_id"""
-#         return  shareds.driver.session().run(query, {"pid": pid})
-
-        
     
     @staticmethod        
     def get_total():

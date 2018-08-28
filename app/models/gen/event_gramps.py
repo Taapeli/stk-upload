@@ -39,7 +39,7 @@ Created on 2.5.2017
 import datetime
 from sys import stderr
 
-from models.gen.dates import DateRange
+#from models.gen.dates import DateRange
 from .event import Event
 from models.cypher_gramps import Cypher_event_w_handle
 
@@ -49,24 +49,17 @@ class Event_gramps(Event):
     """ An Event from Gramps xml file
         Tapahtuma grampsista tuotuna
             
-        Event properties:
-                handle             Gramps handle
-                change
-                id                 esim. "E0001"
-                type               esim. "Birth"
-                description        esim. ammatin kuvaus
-                date               str aika
-                dates              DateRange date expression
-            Planned for Gramps:
-                place_handle[]     str paikan handle (ent. place_hlink)
-                note_handle[]      str lisätiedon handle (ent. noteref_hlink)
-                citation_handle[]  str viittauksen handle (ent. citationref_hlink)
-                media_handle[]     str median handle (ent. objref_hlink)
-        Properties from Gramps:
+        Event properties for gramps_loader:
+                note_handles[]     str lisätiedon handle (ent. noteref_hlink)
+            Planned from gramps_loader:
+                place_handles[]    str paikan handle (ent. place_hlink)
+                citation_handles[] str viittauksen handle (ent. citationref_hlink)
+                media_handles[]    str median handle (ent. objref_hlink)
+            Properties from Gramps:
                 attr_type          str lisätiedon tyyppi
                 attr_value         str lisätiedon arvo
+            Obsolete:
                 place_hlink        str paikan handle
-                noteref_hlink      str lisätiedon handle
                 citationref_hlink  str viittauksen handle
                 objref_hlink       str median handle
      """
@@ -83,9 +76,11 @@ class Event_gramps(Event):
         self.attr_type = ''
         self.attr_value = ''
         self.place_hlink = ''
-        self.noteref_hlink = ''
+        self.note_handles = []      # Note handles (previous noteref_hlink had
+                                    # only the first one)
         self.citationref_hlink = ''
         self.objref_hlink = ''
+
         self.citations = []   # For creating display sets
         self.names = []   # For creating display sets
 
@@ -124,11 +119,14 @@ class Event_gramps(Event):
 
         try:
             # Make relation to the Note node
-            if self.noteref_hlink != '':
-                tx.run(Cypher_event_w_handle.link_note,
-                       handle=self.handle, noteref_hlink=self.noteref_hlink)
+            if len(self.note_handles) > 0:
+                result = tx.run(Cypher_event_w_handle.link_notes,
+                                handle=self.handle,
+                                note_handles=self.note_handles)
+                cnt = result.single()["cnt"]
+                print ("Luotiin {} Note-yhteyttä".format(cnt))
         except Exception as err:
-            print("Virhe.event_link_note: {0}".format(err), file=stderr)
+            print("Virhe.event_link_notes: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Citation node

@@ -335,13 +335,9 @@ class DOM_handler():
                 self.log(Log("More than one attribute tag in an event",
                                     level="WARNING", count=e.id))
 
-            if len(event.getElementsByTagName('noteref') ) == 1:
-                event_noteref = event.getElementsByTagName('noteref')[0]
-                if event_noteref.hasAttribute("hlink"):
-                    e.noteref_hlink = event_noteref.getAttribute("hlink")
-            elif len(event.getElementsByTagName('noteref') ) > 1:
-                self.log(Log("More than one noteref tag in an event",
-                                    level="WARNING", count=e.id))
+            for ref in event.getElementsByTagName('noteref'):
+                if ref.hasAttribute("hlink"):
+                    e.note_handles.append(ref.getAttribute("hlink"))
 
             if len(event.getElementsByTagName('citationref') ) == 1:
                 event_citationref = event.getElementsByTagName('citationref')[0]
