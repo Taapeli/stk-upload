@@ -46,15 +46,12 @@ table.diff td {
                 	var row = $("<tr><td>" +
                 	"<input type=radio name=v1>" +
                 	"<input type=radio name=v2>" +
-                	"<td><a href=#>"+version+"</a></tr>");
+                	"<td><a href=/gedcom/download/"+version+">"+version+"</a></tr>");
                 	row.data("version",version);
                 	$("#versions_list").append(row);
                 });
                 $("#versions_list tr:nth-last-child(2) input[name=v1]").prop("checked",true);
                 $("#versions_list tr:nth-last-child(1) input[name=v2]").prop("checked",true);
-                $("#versions_list a").click(function() {
-                	alert("Tästä ei tapahdu vielä mitään");
-                });
 	            $("#div_versions").show();
             });
         });
