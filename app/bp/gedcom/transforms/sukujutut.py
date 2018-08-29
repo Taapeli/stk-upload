@@ -6,56 +6,10 @@ Kari Kujansuu <kari.kujansuu@gmail.com>
 import sys
 import os
 
-input_encoding="ISO8859-1"
-input_encoding="UTF-8"
-output_encoding="UTF-8"
+from transformer import Item
 
-
-def write(out,s):
-    if out == sys.stdout:
-        print(s)
-    else:
-        out.emit(s)
-    #out.write(s.encode(output_encoding))
-    
-def print_lines(lines):
-    for line in lines: print(line)
-        
-class Gedcom: 
-    def __init__(self,items):
-        self.items = items
-    def print_items(self,out):
-        for item in self.items:
-            item.print_items(out) 
-    
-class Item:
-    def __init__(self,line,children=None):
-        if children is None: children = []
-        temp = line.split(None,2)
-        if len(temp) < 2: raise RuntimeError("Invalid line: " + line)
-        self.level= int(temp[0])
-        self.tag = temp[1]
-        self.line = line
-        self.children = children
-        i = line.find(" " + self.tag + " ")
-        if i > 0:
-            self.text = line[i+len(self.tag)+2:] # preserves leading and trailing spaces
-        else:
-            self.text = ""
-            
-    def __repr__(self):
-        return self.line #+"."+repr(self.children)
-    def print_items(self,out):
-        #if options.remove_empty_notes and self.tag == "NOTE" and self.children == [] and self.text.strip() == "": return  # drop empty note
-        prefix = "%s %s " % (self.level,self.tag)
-        if self.text == "":
-            write(out,self.line)
-        else:
-            for line in self.text.splitlines():
-                write(out,prefix+line)
-                prefix = "%s CONT " % (self.level+1)
-        for item in self.children:
-            item.print_items(out)
+def initialize(run_args):
+    pass
 
 def fixlines(lines,options):
     prevlevel = -1
@@ -86,52 +40,10 @@ def fixlines(lines,options):
             lines[i] = line
         prevlevel = int(tkns[0])
 
-def parse1(lines,level,options):
-    linenums = [] # list of line numbers having the specified level 
-    for i,line in enumerate(lines):
-        tkns = line.split(None,1)
-        if int(tkns[0]) == level:
-            linenums.append(i)
-    
-    items = []
-    for i,j in zip(linenums,linenums[1:]+[None]):
-        # i and j are line numbers of lines having specified level so that all lines in between have higher line numbers;
-        # i.e. they form a substructure
-        firstline = lines[i] #.strip()
-        item = Item(firstline,parse1(lines[i:j],level+1,options))
-        newitem = transform(item,options)
-        if newitem == True: # no change
-            items.append(item)
-            continue
-        item = newitem
-        if options.display_changes:
-            print("-----------------------")
-            if item is None: 
-                print("Deleted:")
-                print_lines(lines[i:j])
-            else:
-                print("Replaced:")
-                print_lines(lines[i:j])
-                print("With:")
-                if type(item) == list:
-                    for it in item:
-                        it.print_items(sys.stdout)
-                else:
-                    item.print_items(sys.stdout)
-            print()
-            
-        if item is None: continue # deleted
-        if type(item) == list:
-            for it in item:
-                items.append(it)
-        else:
-            items.append(item)
-        
-    return items
 
 def allempty(items):
     for item in items:
-        if item.tag not in ('CONT','CONC') or item.text.strip() != "": return False
+        if item.tag not in ('CONT','CONC') or item.value.strip() != "": return False
     return True
 
 def remove_multiple_blanks(text):
@@ -204,10 +116,10 @@ def transform(item,options):
         if item.tag == "_DUMMY" and len(item.children) == 0: return None
 
     if options.remove_empty_notes: # 2.1.1
-        if item.tag == "NOTE" and item.text.strip() == "" and allempty(item.children): return None
+        if item.tag == "NOTE" and item.value.strip() == "" and allempty(item.children): return None
 
     if options.remove_empty_dates: # 2.2.4
-        if item.tag == "DATE" and item.text.strip() in ('','.','?'): return None
+        if item.tag == "DATE" and item.value.strip() in ('','.','?'): return None
 
     if options.remove_refn: # 2.1.4
         if item.tag == "REFN": return None
@@ -219,54 +131,48 @@ def transform(item,options):
         if item.level == 2 and item.tag == 'PLAC' and len(item.children) == 1 and item.children[0].tag == "NOTE":
             # move NOTE from level 3 to level 2 (including possible CONT/CONC lines)
             # 2 PLAC %1#3 NOTE %2 => 2 PLAC %1#2 NOTE %2
-            item2 = Item("2 NOTE %s" % item.children[0].text)
+            item2 = Item("2 NOTE %s" % item.children[0].value)
             for c in item.children[0].children:
                 c.level -= 1
-                c.line = "%s %s %s" % (c.level,c.tag,c.text)
                 item2.children.append(c)
             item.children = []
             return [item,item2]
 
     if options.fix_addr: # 5.1.2
-        if item.tag == "ADDR" and item.text.strip() != "":
+        if item.tag == "ADDR" and item.value.strip() != "":
             for c in item.children:
                 if c.tag == "ADR1":
                     return True # no change, ADR1 already exists
-            item.children.insert(0,Item("%s ADR1 %s" % (item.level+1,item.text)))
-            item.text = ""
-            item.line = "%s ADDR" % item.level
+            item.children.insert(0,Item("%s ADR1 %s" % (item.level+1,item.value)))
+            item.value = ""
             return item
 
     if options.fix_events: # 5.1.4
         if (item.tag == "EVEN" and len(item.children) == 2):
             c1 = item.children[0]
             c2 = item.children[1]
-            if c1.tag == "TYPE" and c1.text in ('Ei_julkaista','Kummit','Tutkijan omat') and c2.tag == 'PLAC':
+            if c1.tag == "TYPE" and c1.value in ('Ei_julkaista','Kummit','Tutkijan omat') and c2.tag == 'PLAC':
                 c2.tag = "NOTE"
-                if c1.text == "Kummit": c2.text = "Description: " + c2.text
-                c2.line = "%s %s %s" % (c2.level,c2.tag,c2.text)
+                if c1.value == "Kummit": c2.value = "Description: " + c2.value
                 return item
 
     if options.fix_events_kaksonen: # 5.1.5
         if (item.tag == "EVEN" and len(item.children) == 1):
             c1 = item.children[0]
-            if c1.tag == "TYPE" and c1.text in ('Kaksonen','Kolmonen'):
+            if c1.tag == "TYPE" and c1.value in ('Kaksonen','Kolmonen'):
                 c1.tag = "NOTE"
-                c1.line = "%s %s %s" % (c1.level,c1.tag,c1.text)
                 return item
 
     if options.remove_multiple_blanks: # 2.2.3
         if item.tag in ('NAME','PLAC'):
-            newtext = remove_multiple_blanks(item.text)
-            if newtext != item.text:
-                item.text = newtext
-                item.line = "%s %s %s" % (item.level,item.tag,item.text)
+            newtext = remove_multiple_blanks(item.value)
+            if newtext != item.value:
+                item.value = newtext
                 return item
 
     if options.emig_to_resi: # 5.1.3
         if item.line.strip() == "1 EMIG":
             item.tag = "RESI"
-            item.line = "%s %s %s" % (item.level,item.tag,item.text)
             return item
 
     return True # no change
@@ -310,8 +216,6 @@ def add_args(parser):
     parser.add_argument('--emig_to_resi', action='store_true',
                         help='Change EMIG to RESI')
      
-def initialize(run_args):
-    pass
 
 def process(options,output):
     lines = []

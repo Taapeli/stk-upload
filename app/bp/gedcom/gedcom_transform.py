@@ -106,41 +106,41 @@ def read_gedcom(run_args):
         LOG.error(traceback.format_exc())
 
 
-def process_gedcom(run_args, transformer, task_name=''):
+def process_gedcom(run_args, transform_module, task_name=''):
 
     LOG.info("------ Ajo '%s'   alkoi %s ------", \
              task_name, \
              datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
 
-    transformer.initialize(run_args)
+    transform_module.initialize(run_args)
 
-    if hasattr(transformer,"process"):
+    if hasattr(transform_module,"process"):
         with Output(run_args) as f:
-            transformer.process(run_args, f)
+            transform_module.process(run_args, f)
     else:
         try:
             # 1st traverse
-            if hasattr(transformer,"phase1"):
+            if hasattr(transform_module,"phase1"):
                 for gedline in read_gedcom(run_args):
-                    transformer.phase1(run_args, gedline)
+                    transform_module.phase1(run_args, gedline)
         
             # Intermediate processing of collected data
-            if hasattr(transformer,"phase2"):
-                transformer.phase2(run_args)
+            if hasattr(transform_module,"phase2"):
+                transform_module.phase2(run_args)
         
-            do_phase4 = hasattr(transformer,"phase4")
+            do_phase4 = hasattr(transform_module,"phase4")
         
-            if hasattr(transformer,"phase3"):
+            if hasattr(transform_module,"phase3"):
                 # 2nd traverse "phase3"
                 with Output(run_args) as f:
                     f.display_changes = run_args['display_changes']
                     for gedline in read_gedcom(run_args):
                         if do_phase4 and gedline.tag == "TRLR":
                             f.original_line = ""
-                            transformer.phase4(run_args, f)
+                            transform_module.phase4(run_args, f)
                         f.original_line = gedline.line.strip()
                         f.saved_line = ""
-                        transformer.phase3(run_args, gedline, f)
+                        transform_module.phase3(run_args, gedline, f)
     
     
         except FileNotFoundError as err:

@@ -9,6 +9,8 @@ import importlib
 
 import logging 
 import time
+import datetime
+import subprocess
 
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_security import login_required, current_user
@@ -17,15 +19,14 @@ from flask import send_from_directory
 from flask_babelex import _
 
 from . import bp
-import subprocess
 
 from .transforms.model.ged_output import Output
 
-import datetime
-import logging
 LOG = logging.getLogger(__name__)    
 
 from . import util
+from . import transformer
+
 # --------------------- GEDCOM functions ------------------------
 
 # TODO: move these to config.py
@@ -231,11 +232,24 @@ def removefile(fname):
     except FileNotFoundError:
         pass
 
-def process_gedcom(cmd, transformer):
+def display_changes(lines,item):
+    class Out:
+        def emit(self,s):
+            print(s)
+
+    print("-----------------------")
+    print("Replaced:")
+    for line in lines:
+        print(line)
+    print("With:")
+    item.print_items(Out())
+    print()
+        
+def process_gedcom(cmd, transform_module):
 
 
     LOG.info("------ Ajo '%s'   alkoi %s ------", \
-             transformer.__name__, \
+             transform_module.__name__, \
              datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
 
 
@@ -255,35 +269,41 @@ def process_gedcom(cmd, transformer):
                         help='Do not produce a log in the output file')
     parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
                         help="Input encoding")
-    transformer.add_args(parser)
+    transform_module.add_args(parser)
     args = parser.parse_args(cmd.split())
     run_args = vars(args)
-    transformer.initialize(args)
-    with Output(run_args) as f:
-        saved_stdout = sys.stdout
-        saved_stderr = sys.stdout
-        sys.stdout = io.StringIO()
-        sys.stderr = io.StringIO()
-        print("------ Ajo '%s'   alkoi   %s ------" % (
-                 transformer.__name__, 
-                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+    try:
+        init_log(args.logfile)
+        transform_module.initialize(args)
+        with Output(run_args) as out:
+            out.original_line = None
+            saved_stdout = sys.stdout
+            saved_stderr = sys.stdout
+            sys.stdout = io.StringIO()
+            sys.stderr = io.StringIO()
+            if args.dryrun:
+                old_name = ""
+            else:
+                old_name = out.new_name
 
-        if args.dryrun: 
-            old_name = ""
-        else:
-            old_name = f.new_name
-        try:
-            transformer.process(args, f)
-        except:
-            traceback.print_exc()
-        finally:
-            print("------ Ajo '%s'   päättyi %s ------" % (
-                     transformer.__name__, 
+            print("------ Ajo '%s'   alkoi   %s ------" % (
+                     transform_module.__name__, 
                      datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
-            output = sys.stdout.getvalue()
-            errors = sys.stderr.getvalue()
-            sys.stdout = saved_stdout
-            sys.stderr = saved_stderr
+            t = transformer.Transformer(transform_callback=transform_module.transform,
+                                        display_callback=display_changes,
+                                        options=args)
+            g = t.transform_file(args.input_gedcom) 
+            g.print_items(out)
+    except:
+        traceback.print_exc()
+    finally:
+        print("------ Ajo '%s'   päättyi %s ------" % (
+                 transform_module.__name__, 
+                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+        output = sys.stdout.getvalue()
+        errors = sys.stderr.getvalue()
+        sys.stdout = saved_stdout
+        sys.stderr = saved_stderr
     if old_name:
         old_basename = os.path.basename(old_name)
     else:
@@ -301,7 +321,7 @@ def gedcom_transform(gedcom,transform):
     gedcom_folder = get_gedcom_folder()
     gedcom_filename = os.path.join(gedcom_folder,gedcom)
     gedcom_filename = os.path.abspath(gedcom_filename)
-    transformer,parser = build_parser(transform,gedcom,gedcom_filename)
+    transform_module,parser = build_parser(transform,gedcom,gedcom_filename)
     if request.method == 'GET':
         return parser.generate_html()
     else:
@@ -310,20 +330,15 @@ def gedcom_transform(gedcom,transform):
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
 
-        #logging.info(cmd)
-        #init_log(run_args['logfile'])
-        
-        if hasattr(transformer,"process"):
+        if hasattr(transform_module,"transform"):
             cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
-            s = process_gedcom(cmd, transformer)
-            return s
+            return process_gedcom(cmd, transform_module)
 
         cmd = "{} {} {} {} {}".format(transform[:-3],gedcom_filename,args,"--logfile", logfile)
         cmd2 = """cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd)
         cmd3 = """{} gedcom_transform.py {}""".format(sys.executable,cmd)
         #f = os.popen("""cd "{}";{} gedcom_transform.py {}""".format(GEDDER,sys.executable,cmd))
         #s = f.read()
-        import subprocess
         p = subprocess.Popen(cmd3,shell=True,cwd=GEDDER,
                              stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         s1 = p.stdout.read().decode('UTF-8')
@@ -347,7 +362,7 @@ def build_parser(filename,gedcom,gedcom_filename):
     modname = filename[:-3]
     saved_path = sys.path[:]
     sys.path.append(GEDDER)
-    transformer = importlib.import_module("transforms."+modname)
+    transform_module = importlib.import_module("transforms."+modname)
     sys.path = saved_path
 
     class Arg:
@@ -425,7 +440,7 @@ def build_parser(filename,gedcom,gedcom_filename):
                         help='Do not produce a log in the output file')
     parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
                         help="Input encoding")
-    transformer.add_args(parser)
+    transform_module.add_args(parser)
 
-    return transformer,parser
+    return transform_module,parser
 
