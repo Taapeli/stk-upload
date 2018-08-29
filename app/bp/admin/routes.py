@@ -16,7 +16,7 @@ import shareds
 from models import dbutil, dataupdater, loadfile, datareader
 from .models import DataAdmin, UserAdmin
 from .cvs_refnames import load_refnames
-from .forms import ListAllowedEmailsForm
+from .forms import AllowedEmailForm
 from . import bp
 
 # # Go to admin start page in app/routes.py 
@@ -115,12 +115,12 @@ def save_loaded_csv(filename, subj):
 @login_required
 @roles_required('admin')
 def list_allowed_emails():
-    form = ListAllowedEmailsForm()
+    form = AllowedEmailForm()
     if request.method == 'POST':
         # Register a new email
         UserAdmin.allowed_email_register(form.allowed_email.data,
-                                            form.default_role.data)
-        
+                                         form.default_role.data)
+ 
     lista = UserAdmin.get_allowed_emails()
     return render_template("/admin/allowed_emails.html", emails=lista, 
                             form=form)
