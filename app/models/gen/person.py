@@ -527,6 +527,7 @@ RETURN person, urls, COLLECT (name) AS names
                 keys=['surname', name]   by start of surname
                 keys=['firstname', name] by start of the first of first names
                 keys=['patronyme', name] by start of patronyme name
+                keys=['refname', name]   by exact refname
             If currentuser is defined, select only her Events
 
             #TODO: take_refnames should determine, if refnames are returned, too
@@ -552,6 +553,8 @@ RETURN person, urls, COLLECT (name) AS names
         with shareds.driver.session() as session:
             if rule == 'uniq_id':
                 return session.run(Cypher_person.get_events_uniq_id, id=int(name))
+            elif rule == 'refname':
+                return session.run(Cypher_person.get_events_by_refname, name=name)
             elif rule == 'all':
                 if order == 1:      # order by first name
                     return session.run(Cypher_person.get_events_all_firstname)
@@ -560,8 +563,8 @@ RETURN person, urls, COLLECT (name) AS names
                 else:
                     return session.run(Cypher_person.get_events_all)
             else:
-                # Selected names and name types
-                return session.run(Cypher_person.get_events_by_refname,
+                # Selected names and name types (untested?)
+                return session.run(Cypher_person.get_events_by_refname_use,
                                    attr={'use':rule, 'name':name})
 
 
@@ -569,7 +572,6 @@ RETURN person, urls, COLLECT (name) AS names
     def get_family_members (uniq_id):
         """ Read person's families and family members for Person page
         """
-
         query="""
 MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-[:NAME]->(n:Name) WHERE ID(p) = $id
     OPTIONAL MATCH (m)-[:EVENT]->(birth {type:'Birth'})

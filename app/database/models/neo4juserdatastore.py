@@ -273,14 +273,15 @@ class Neo4jUserDatastore(UserDatastore):
             for record in tx.run(Cypher.id_find, id=rid):
                 user = (record['user'])
                 return user        
-#         except CypherError as e:
-#             logger.error('_findUser: {} {}'.format(e.__class__.__name__, e))       
-#             raise      
-#         except ClientError as e:
-#             logger.error('_findUser: {} {}'.format(e.__class__.__name__, e))      
-#             raise
-        except Exception as e:
-            logger.error('_findUser: {} {}'.format(e.__class__.__name__, e))         
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+
             raise
 
     def find_UserRoles(self, email):
@@ -290,8 +291,8 @@ class Neo4jUserDatastore(UserDatastore):
                 if len(userRoles) > 0:
                     return [self.role_model(**roleNode.properties) for roleNode in userRoles] 
                 return None
-        except ServiceUnavailable as e:
-            logger.debug('findUserRoles: {} {}'.format(e.__class__.__name__, e))
+        except ServiceUnavailable as ex:
+            logger.debug(ex.message)
             raise
             
     def _findUserRoles (self, tx, pemail):
@@ -301,14 +302,14 @@ class Neo4jUserDatastore(UserDatastore):
                 roles.append(record['role'])
     #        print ('_findUserRoles ', pemail, roles)    
             return roles
-#         except CypherError as ex:
-#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
-#             raise      
-#         except ClientError as ex:
-#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
-#             raise
-        except Exception as e:
-            logger.error('_findUserRoles: {} {}'.format(e.__class__.__name__, e))            
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
             raise
  
         
@@ -329,14 +330,14 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             for record in tx.run(Cypher.role_find, name=roleName):
                 return (record['role'])                
-#         except CypherError as ex:
-#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
-#             raise      
-#         except ClientError as ex:
-#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
-#             raise
-        except Exception as e:
-            logger.error('_findRole: {} {}'.format(e.__class__.__name__, e))            
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
             raise   
    
                                   
@@ -351,22 +352,22 @@ class Neo4jUserDatastore(UserDatastore):
                     role.id = str(roleNode.id)
                     return role
                 return None
-        except ServiceUnavailable as e:
-            logger.debug('get_role: {} {}'.format(e.__class__.__name__, e))
+        except ServiceUnavailable as ex:
+            logger.debug(ex.message)
             return None
                         
     def _getRole (self, tx, rid):
         try:
             for record in tx.run(Cypher.role_get, id=rid):
                 return (record['role'])        
-#         except CypherError as ex:
-#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
-#             raise      
-#         except ClientError as ex:
-#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
-#             raise
-        except Exception as e:
-            logger.error('_getRole: {} {}'.format(e.__class__.__name__, e))            
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
             raise
 
 
@@ -383,8 +384,8 @@ class Neo4jUserDatastore(UserDatastore):
                         roles[role.name]=role
                     return roles
                 return None
-        except ServiceUnavailable as e:
-            logger.debug('get_roles: {} {}'.format(e.__class__.__name__, e))
+        except ServiceUnavailable as ex:
+            logger.debug(ex.message)
             raise
                                 
     def _getRoles (self, tx):
@@ -393,14 +394,14 @@ class Neo4jUserDatastore(UserDatastore):
             for record in tx.run(Cypher.roles_get):
                 roles.append(record['role'])
             return roles        
-#         except CypherError as ex:
-#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
-#             raise      
-#         except ClientError as ex:
-#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
-#             raise
-        except Exception as e:
-            logger.error('_getRoles: {} {}'.format(e.__class__.__name__, e))            
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
             raise
 
 
@@ -414,14 +415,14 @@ class Neo4jUserDatastore(UserDatastore):
                 with session.begin_transaction() as tx:
                     tx.run(Cypher.confirm_email, email=email)
                     tx.commit()
-#         except CypherError as ex:
-#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
-#             raise      
-#         except ClientError as ex:
-#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
-#             raise
-        except Exception as e:
-            logger.error('confirm_email: {} {}'.format(e.__class__.__name__, e))            
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
             raise
 
                 
@@ -433,12 +434,15 @@ class Neo4jUserDatastore(UserDatastore):
                 with session.begin_transaction() as tx:
                     tx.run(Cypher.password_reset, email=eml, password=psw)
                     tx.commit()
-#         except CypherError as ex:
-#             logger.error('CypherError: ', ex.message, ' ', ex.code)            
-#             raise      
-#         except ClientError as ex:
-#             logger.error('ClientError: ', ex.message, ' ', ex.code)            
-#             raise
-        except Exception as e:
-            logger.error('password_reset: {} {}'.format(e.__class__.__name__, e))            
+        except CypherError as ex:
+            logger.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logger.error('ClientError: ', ex.message, ' ', ex.code)            
             raise
+        except Exception as ex:
+            logger.error('Exception: ', ex)            
+            raise
+       
+        
+        

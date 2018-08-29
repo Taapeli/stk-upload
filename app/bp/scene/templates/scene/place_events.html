@@ -40,7 +40,7 @@
                     <b>{{p.pname|join(' • ')}}</b>
                 {% else %}<a href="/scene/location={{p.id}}"><span class="id">{{p.id}}</span></a>
                     {{p.pname|join(' • ')}}
-                {% endif %} <small>&nbsp;{{p.type|transl('lt')}}</small></li>
+                {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
             {% endfor %}</ul>
         </div>
     {% if place.urls %}
@@ -115,7 +115,7 @@
                         </td>
                         <td>{% for n in e.names|sort %} 
                          {% if n[0] != "Birth Name" %}
-                            <small>{{n[0]|transl('nt')}}:</small>
+                            <span class="typedesc">{{n[0]|transl('nt')}}:</span>
                          {% endif %}
                          {{n[1]}} 
                          {% if n[2] %}
@@ -126,7 +126,7 @@
                          <br />{% endfor %}
                         </td>
                         <td class="ColumnEvent">{{e.etype|transl('evt')}}
-                          {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}</td>
+                          {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
                         <td class="ColumnDate">{{e.edates}}</td>
 <!--
                         <td class="ColumnDescription">&nbsp;</td>

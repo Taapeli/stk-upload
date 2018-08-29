@@ -56,26 +56,26 @@ class Note:
         return n
 
     @staticmethod
-    def get_note(uniq_id):
-        """ Reads Note node data from db using self.uniq_id
+    def get_notes(uniq_ids):
+        """ Reads Note nodes data from db using given uniq_ids
 
             Called from models.datareader.get_person_data_by_id
         """
 
+        notes = []
         with shareds.driver.session() as session:
-            note_get = """
-MATCH (n:Note)    WHERE ID(n)=$nid
+            notes_get = """
+MATCH (n:Note)    WHERE ID(n) in $nid
 RETURN ID(n) AS uniq_id, n"""
-            result = session.run(note_get, nid=uniq_id)
+            result = session.run(notes_get, nid=uniq_ids)
             for record in result:
                 # Create a Note object from record
-                n = Note._to_self(record)
-                return n
+                notes.append(Note._to_self(record))
 
-        return None
+        return notes
 
     @staticmethod
-    def get_notes(uniq_id):
+    def get_note_list(uniq_id):
         """ Reads all Note nodes or selected Note node from db
 
             Called only from models.datareader.get_notes for "table_of_data.html"
