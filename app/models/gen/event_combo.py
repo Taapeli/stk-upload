@@ -46,11 +46,15 @@ class Event_combo(Event):
         Luo uuden Event-instanssin
         '''
         Event.__init__(self, eid, desc, handle)
-        self.note_handles = []      # Note handles (previous noteref_hlink had
-                                    # only the first one)
+        self.note_ref = []      # Note uniq_ids (previous noteref_hlink had
+                                # only the first one)
+        self.place_hlink = ''
+        self.citationref_hlink = ''
+        self.objref_hlink = ''
 
         self.citations = []     # For creating display sets
         self.names = []         # For creating display sets
+        self.notes = []         # For creating display sets
         self.place = ''     # TODO Change to places[]
 
 
@@ -83,14 +87,14 @@ class Event_combo(Event):
 # MATCH (event:Event) WHERE ID(event)=$pid
 # RETURN event"""
         place_get_w_place_note_citation = '''
-match (e:Event) where ID(e)=97913
+match (e:Event) where ID(e)=$pid
     optional match (e) -[:PLACE]-> (p:Place)
     optional match (e) -[:CITATION]-> (c:Citation)
     optional match (e) -[:NOTE]-> (n:Note)
 return e as event, 
     collect(id(p)) as place_ref, 
     collect(id(c)) as citation_ref, 
-    collect(id(n)) as note_handles'''
+    collect(id(n)) as note_ref'''
         result = shareds.driver.session().run(place_get_w_place_note_citation, 
                                               pid=self.uniq_id)
 
@@ -110,8 +114,8 @@ return e as event,
                 self.date = ""                
             self.description = event["description"]
             # Related data
-            for ref in record["note_handles"]:
-                self.note_handles.append(ref) # noteref_hlink = ref
+            for ref in record["note_ref"]:
+                self.note_ref.append(ref) # List of uniq_ids # prev. noteref_hlink
             for ref in record["place_ref"]:
                 self.place_hlink = ref
             for ref in record["citation_ref"]:

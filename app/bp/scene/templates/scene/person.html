@@ -94,7 +94,8 @@
                          	{% else %}
                          		{{e.uniq_id}}</span> {{e.type|transl('evt')}}
                          	{% endif %}
-                            {% if e.role != "Primary" %}<small>({{e.role|transl('role')}})</small>{% endif %}
+                            {% if e.role != "Primary" %}<span 
+                                class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
                         <td class="ColumnDate">{{e.dates}}</td>
                         <td class="ColumnPlace">
@@ -105,9 +106,13 @@
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">
                             <div>{% if e.type == "Death" %}
-                            	{% if t_cause_of_death %}<i>kuolinsyy:</i> {{t_cause_of_death}}<br>
+                            	{% if t_cause_of_death %}<span
+                            	   class="typedesc">kuolinsyy</span> {{t_cause_of_death}}<br>
                             	{% endif %}{% endif %}
-                            	{% if e.note %}<i>{{ e.note.type }}</i> {{ e.note.text }}{% endif %}
+                            	{% if e.notes %}{% set first = True %}{% for note in e.notes %}
+                            	   {% if first %}{% set first = False %}{% else %}<br>{% endif %}
+                            	   <span class="typedesc">{{ note.type }}</span>
+                            	       {{ note.text }}{% endfor %}{% endif %}
                             	</div>
                         </td>
                         <td class="ColumnSources">

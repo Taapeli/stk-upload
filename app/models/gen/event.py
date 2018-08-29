@@ -80,17 +80,18 @@ class Event():
         self.handle = handle
         self.change = ''
         self.id = eid
+        self.type = ''
         self.description = desc
         self.date = ''
         self.dates = None
         # Only in Event_gramps
         #    self.attr_type = ''
         #    self.attr_value = ''
+        # Only in Event_combo
+        #    self.note_ref = []    # prev. noteref_hlink
         #    self.place_hlink = ''
-        #    self.noteref_hlink = ''    # <-- self.note_handles = []
         #    self.citationref_hlink = ''
         #    self.objref_hlink = ''
-        # Only in Event_combo
         #    self.citations = []   # For creating display sets
         #    self.names = []   # For creating display sets
     
