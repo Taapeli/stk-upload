@@ -412,7 +412,7 @@ MATCH (source:Source)<-[:SOURCE]-(citation:Citation)<-[r:CITATION]-(event:Event)
     <-[*1..2]-(p:Person)-->(name:Name) 
 WHERE ID(source)={sourceid}
 WITH event, citation,
-    COLLECT([ID(p),name.surname, name.firstname]) AS names
+    COLLECT([ID(p),name.surname, name.firstname, name.suffix]) AS names
 WITH citation,
      COLLECT([ID(event), event.type, event.date, names]) AS events
 RETURN COLLECT([citation.page, citation.confidence, events]) AS citations"""

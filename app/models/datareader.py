@@ -458,7 +458,7 @@ def get_source_with_events(sourceid):
             c.confidence = citation[1]
             
             for event in citation[2]:
-                e = Event()
+                e = Event_combo()
                 e.uniq_id = event[0]
                 e.type = event[1]
                 e.edate = event[2]
@@ -468,6 +468,7 @@ def get_source_with_events(sourceid):
                     n.uniq_id = name[0]        
                     n.surname = name[1]        
                     n.firstname = name[2]  
+                    n.suffix = name[3]  
                         
                     e.names.append(n)
                           
@@ -552,13 +553,9 @@ def get_person_data_by_id(uniq_id):
             e.locid = place.uniq_id
             e.ltype = place.type
                     
-        if e.noteref_hlink != '':
-            # Read the Note object from db and store it as a member of Event
-            e.note = Note.get_note(e.noteref_hlink)
-#             for record in result:
-#                 e.notepriv = record["note"]["priv"]
-#                 e.notetype = record["note"]["type"]
-#                 e.notetext = record["note"]["text"]
+        if e.note_ref: # A list of uniq_ids; prev. e.noteref_hlink != '':
+            # Read the Note objects from db and store them as a member of Event
+            e.notes = Note.get_notes(e.note_ref)
                 
         events.append(e)
 
@@ -784,11 +781,10 @@ def get_place_with_events (loc_id):
     return (place, place_list, event_table)
 
 
-def get_notes(uniq_id=None):
+def get_note_list(uniq_id=None):
     """ Lukee tietokannasta Note- objektit näytettäväksi
     """
-    
-    titles, notes = Note.get_notes(uniq_id)
+    titles, notes = Note.get_note_list(uniq_id)
     return (titles, notes)
 
 

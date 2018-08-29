@@ -10,7 +10,7 @@ import gzip
 from os.path import basename, splitext
 import xml.dom.minidom
 
-from models.gen.event import Event
+from models.gen.event_gramps import Event_gramps
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
@@ -273,8 +273,8 @@ class DOM_handler():
 
         # Print detail of each event
         for event in events:
-
-            e = Event()
+            # Create an event with Gramps attributes
+            e = Event_gramps()
 
             if event.hasAttribute("handle"):
                 e.handle = event.getAttribute("handle")
@@ -312,6 +312,7 @@ class DOM_handler():
                 <datestr val="1700-luvulla" />    # Not processed!
             """
             try:
+                # type Gramps_DateRange
                 e.dates = self._extract_daterange(event)
             except:
                 e.dates = None
@@ -334,13 +335,9 @@ class DOM_handler():
                 self.log(Log("More than one attribute tag in an event",
                                     level="WARNING", count=e.id))
 
-            if len(event.getElementsByTagName('noteref') ) == 1:
-                event_noteref = event.getElementsByTagName('noteref')[0]
-                if event_noteref.hasAttribute("hlink"):
-                    e.noteref_hlink = event_noteref.getAttribute("hlink")
-            elif len(event.getElementsByTagName('noteref') ) > 1:
-                self.log(Log("More than one noteref tag in an event",
-                                    level="WARNING", count=e.id))
+            for ref in event.getElementsByTagName('noteref'):
+                if ref.hasAttribute("hlink"):
+                    e.note_handles.append(ref.getAttribute("hlink"))
 
             if len(event.getElementsByTagName('citationref') ) == 1:
                 event_citationref = event.getElementsByTagName('citationref')[0]

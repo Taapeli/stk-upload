@@ -45,9 +45,18 @@ class Event_combo(Event):
         
         Luo uuden Event-instanssin
         '''
-        """  """
         Event.__init__(self, eid, desc, handle)
-        self.place = ''
+        self.note_ref = []      # Note uniq_ids (previous noteref_hlink had
+                                # only the first one)
+        self.place_hlink = ''
+        self.citationref_hlink = ''
+        self.objref_hlink = ''
+
+        self.citations = []     # For creating display sets
+        self.names = []         # For creating display sets
+        self.notes = []         # For creating display sets
+        self.place = ''     # TODO Change to places[]
+
 
 #     def read(self, keys):
 #         ''' Access a set of Event complexes using different search fields
@@ -78,7 +87,7 @@ class Event_combo(Event):
 # MATCH (event:Event) WHERE ID(event)=$pid
 # RETURN event"""
         place_get_w_place_note_citation = '''
-match (e:Event) where ID(e)=97913
+match (e:Event) where ID(e)=$pid
     optional match (e) -[:PLACE]-> (p:Place)
     optional match (e) -[:CITATION]-> (c:Citation)
     optional match (e) -[:NOTE]-> (n:Note)
@@ -105,12 +114,12 @@ return e as event,
                 self.date = ""                
             self.description = event["description"]
             # Related data
+            for ref in record["note_ref"]:
+                self.note_ref.append(ref) # List of uniq_ids # prev. noteref_hlink
             for ref in record["place_ref"]:
                 self.place_hlink = ref
             for ref in record["citation_ref"]:
                 self.citationref_hlink = ref
-            for ref in record["note_ref"]:
-                self.noteref_hlink = ref
 
 #             # Place
 #             place_result = self.get_place_by_id()

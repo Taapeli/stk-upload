@@ -39,9 +39,9 @@
                       <a href="/scene/location={{p.id}}" class="id"
                         title="katso paikan {{p.id}} tapahtumat"
                         id="{{p.id}}">{{p.id}}</a> {{p.pname|join(' • ')}}
-                      <small>{{p.type|transl('lt')}}</small>
+                      <span class="typedesc">{{p.type|transl('lt')}}</span>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
-						<small>{{e.type|transl('lt_in')}}</small>
+						<span class="typedesc">{{e.type|transl('lt_in')}}</span>
 						<a href="#{{e.id}}" 
 						  title="siirry paikkaan id={{e.id}}">{{e.pname|join(' • ')}}</a>
 		        {% endif %}
@@ -51,7 +51,7 @@
 		        {% for e in p.lowers|sort(attribute='pname') %}    <li>
 	                       <a href="#{{e.id}}"
 	                         title="siirry paikkaan id={{e.id}}">{{e.pname|join(' • ')}}</a>
-	                       &nbsp;<small>{{e.type|transl('lt')}}</small>
+	                       &nbsp;<span class="typedesc">{{e.type|transl('lt')}}</span>
                       </li>
 		        {% endfor %}
 		           </ul>

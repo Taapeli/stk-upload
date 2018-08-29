@@ -115,6 +115,12 @@ td.numbers {
     text-align: right;
     padding-right: 2em;
 }
+.typedesc {
+	font-variant: small-caps;
+	text-transform: uppercase;
+	font-size: 84%;
+/* 	color: darkslategray; */
+}
 
 /* General Text
 ----------------------------------------------------- */
