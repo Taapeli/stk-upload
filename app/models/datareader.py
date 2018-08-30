@@ -7,6 +7,7 @@
 
 import logging
 import time
+from sys import stderr
 
 from operator import itemgetter
 #from models.dbutil import Datefrom
@@ -182,7 +183,7 @@ def read_cite_sour_repo(uniq_id=None):
     result_cite = Event_combo.get_event_cite(uniq_id)
     for record_cite in result_cite:
         pid = record_cite['id']
-        e = Event()
+        e = Event_combo()
         e.uniq_id = pid
         if record_cite['type']:
             e.type = record_cite['type']
@@ -338,24 +339,25 @@ def read_sources(uniq_id=None):
     """
     
     sources = []
-    result = Source.get_source_citation(uniq_id)
-    for record in result:
-        pid = record['id']
-        s = Source()
-        s.uniq_id = pid
-        if record['stitle']:
-            s.stitle = record['stitle']
+    try:
+        result = Source.get_source_citation(uniq_id)
+        for record in result:
+            pid = record['id']
+            s = Source()
+            s.uniq_id = pid
+            if record['stitle']:
+                s.stitle = record['stitle']
+            for citation in record['citations']:
+                c = Citation()
+                c.uniq_id = citation[0]
+                c.dateval = citation[1]
+                c.page = citation[2]
+                c.confidence = citation[3]
+                s.citations.append(c)
+            sources.append(s)
+    except Exception as err:
+        print("Virhe-read_sources: {1} {0}".format(err, uniq_id), file=stderr)
 
-        for citation in record['citations']:
- 
-            c = Citation()
-            c.uniq_id = citation[0]
-            c.dateval = citation[1]
-            c.page = citation[2]
-            c.confidence = citation[3]
-            s.citations.append(c)
- 
-        sources.append(s)
 
     return (sources)
 
@@ -542,7 +544,7 @@ def get_person_data_by_id(uniq_id):
         e = Event_combo() # Event_for_template()
         e.uniq_id = p.eventref_hlink[i]
         e.role = p.eventref_role[i]
-        e.get_person_events()        # Read data to e
+        e.get_event_combo()        # Read data to e
             
         if e.place_hlink != '':
             place = Place()
@@ -674,7 +676,7 @@ def get_baptism_data(uniq_id):
     
     e = Event_combo()
     e.uniq_id = uniq_id
-    e.get_person_events()
+    e.get_event_combo()
     
     if e.place_hlink != '':
         place = Place()

@@ -550,22 +550,25 @@ RETURN person, urls, COLLECT (name) AS names
 
 #TODO: filter by owner
 
-        with shareds.driver.session() as session:
-            if rule == 'uniq_id':
-                return session.run(Cypher_person.get_events_uniq_id, id=int(name))
-            elif rule == 'refname':
-                return session.run(Cypher_person.get_events_by_refname, name=name)
-            elif rule == 'all':
-                if order == 1:      # order by first name
-                    return session.run(Cypher_person.get_events_all_firstname)
-                elif order == 2:    # order by patroname
-                    return session.run(Cypher_person.get_events_all_patronyme)
+        try:
+            with shareds.driver.session() as session:
+                if rule == 'uniq_id':
+                    return session.run(Cypher_person.get_events_uniq_id, id=int(name))
+                elif rule == 'refname':
+                    return session.run(Cypher_person.get_events_by_refname, name=name)
+                elif rule == 'all':
+                    if order == 1:      # order by first name
+                        return session.run(Cypher_person.get_events_all_firstname)
+                    elif order == 2:    # order by patroname
+                        return session.run(Cypher_person.get_events_all_patronyme)
+                    else:
+                        return session.run(Cypher_person.get_events_all)
                 else:
-                    return session.run(Cypher_person.get_events_all)
-            else:
-                # Selected names and name types (untested?)
-                return session.run(Cypher_person.get_events_by_refname_use,
-                                   attr={'use':rule, 'name':name})
+                    # Selected names and name types (untested?)
+                    return session.run(Cypher_person.get_events_by_refname_use,
+                                       attr={'use':rule, 'name':name})
+        except Exception as err:
+            print("Virhe-get_events_k: {1} {0}".format(err, keys), file=stderr)
 
 
     @staticmethod
