@@ -2,13 +2,16 @@
 Sukujutut-muunnos
 
 Kari Kujansuu <kari.kujansuu@gmail.com>
+
+The notation "# 1.1.2" etc. refer to notation in the discussion about this transformation in August 2018. 
+The numbering was originally based on Diedrich Hesmer's Gedcom Coneversion program.
 """
 import sys
 import os
 
 from transformer import Item
 
-def initialize(run_args):
+def initialize(args):
     pass
 
 def fixlines(lines,options):
@@ -57,6 +60,11 @@ def transform(item,options):
     - None: remove the item
     - item: use this item as a replacement (can be the same object as input if the contents have been changed)
     - list of items ([item1,item2,...]): replace the original item with these
+    
+    This is called for every line in the Gedcom so that the "innermost" items are processed first.
+    
+    Note: If you change the item in this function but still return True, then the changes
+    are applied to the Gedcom but they are not displayed with the --display-changes option.
     """
     if options.remove_invalid_marriage_dates:
         if item.line.strip() == "1 MARR":
@@ -82,7 +90,7 @@ def transform(item,options):
                 return Item("1 DIV Y")  # this is not valid GEDCOM but Gramps will fix it
 
     if options.remove_empty_nameparts: # 2.1.3
-        if item.line.strip() in ("2 GIVN","2 SURN"):
+        if item.line.strip() in {"2 GIVN","2 SURN"}:
             # replace
             #     2 GIVN
             #     3 SOUR xxx
@@ -90,7 +98,7 @@ def transform(item,options):
             #     2 SOUR xxx
             # (same with NOTE instead of SOUR)
             if len(item.children) == 0: return None
-            if len(item.children) == 1 and item.children[0].tag in ('SOUR','NOTE'):
+            if len(item.children) == 1 and item.children[0].tag in {'SOUR','NOTE'}:
                 sourline = item.children[0].line
                 return Item("2" + sourline[1:])
             return None # empty GIVN/SURN and no subordinate lines => delete
@@ -217,18 +225,7 @@ def add_args(parser):
                         help='Change EMIG to RESI')
      
 
-def process(options,output):
-    lines = []
-    input_gedcom = options.input_gedcom
-    input_encoding = options.encoding
-    lines = open(input_gedcom,encoding=input_encoding).readlines()
-    lines = [line[:-1] for line in lines]
-    fixlines(lines,options)
-    items = parse1(lines,level=0,options=options)
-    g = Gedcom(items)
-    output.original_line = None
-    g.print_items(output)
-    return output.new_name
+
         
 
 

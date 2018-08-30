@@ -63,9 +63,9 @@ class Item:
             item.print_items(out)
 
 class Transformer:
-    def __init__(self,options,transform_callback,display_callback):
+    def __init__(self,options,transform_module,display_callback):
         self.options = options
-        self.transform_callback = transform_callback
+        self.transform_module = transform_module
         self.display_callback = display_callback
 
 
@@ -87,10 +87,10 @@ class Transformer:
             # i.e. they form a substructure
             firstline = lines[i] 
             item = Item(firstline,self.transform1(lines[i+1:j],level+1))
-            if self.transform_callback is None: 
+            if self.transform_module.transform is None: 
                 items.append(item)
                 continue
-            newitem = self.transform_callback(item,self.options)
+            newitem = self.transform_module.transform(item,self.options)
             if newitem == True: # no change
                 items.append(item)
                 continue
@@ -107,6 +107,7 @@ class Transformer:
         
     
     def transform_lines(self,lines):    
+        self.transform_module.fixlines(lines,self.options)
         items = self.transform1(lines,level=0)
         return Gedcom(items)
     

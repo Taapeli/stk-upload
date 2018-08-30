@@ -239,6 +239,16 @@ def display_changes(lines,item):
     print()
         
 def process_gedcom(cmd, transform_module):
+    """Implements another mechanism for Gedcom transforms:
+
+    The transform_module is assumed to contain the following methods:
+    - initialize
+    - transform: implements the actual transformation for a single line block ("item")
+    - fixlines: preprocesses the Gedcom contents (list of lines/strings)
+    - add_args: adds the transform-specific arguments (ArgumentParser style)
+
+    See sukujutut.py as an example
+    """
 
 
     LOG.info("------ Ajo '%s'   alkoi %s ------", \
@@ -282,7 +292,7 @@ def process_gedcom(cmd, transform_module):
             print("------ Ajo '%s'   alkoi   %s ------" % (
                      transform_module.__name__, 
                      datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
-            t = transformer.Transformer(transform_callback=transform_module.transform,
+            t = transformer.Transformer(transform_module=transform_module,
                                         display_callback=display_changes,
                                         options=args)
             g = t.transform_file(args.input_gedcom) 
@@ -290,6 +300,7 @@ def process_gedcom(cmd, transform_module):
     except:
         traceback.print_exc()
     finally:
+        time.sleep(1)  # for testing...
         print("------ Ajo '%s'   päättyi %s ------" % (
                  transform_module.__name__, 
                  datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
@@ -325,6 +336,7 @@ def gedcom_transform(gedcom,transform):
         if hasattr(transform_module,"transform"):
             cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
             return process_gedcom(cmd, transform_module)
+        
         #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
         python_exe = sys.executable or "/opt/repo/virtenv/bin/python3"
         python_path = ':'.join([os.path.join(APP_ROOT, 'app'), GEDCOM_APP])
