@@ -22,6 +22,7 @@ from . import bp
 from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
 from .transforms.model.ged_output import Output
 from . import util
+from . import transformer
 
 # --------------------- GEDCOM functions ------------------------
 
@@ -224,11 +225,34 @@ def removefile(fname):
     except FileNotFoundError:
         pass
 
-def process_gedcom(cmd, transformer):
+def display_changes(lines,item):
+    class Out:
+        def emit(self,s):
+            print(s)
+
+    print("-----------------------")
+    print("Replaced:")
+    for line in lines:
+        print(line)
+    print("With:")
+    item.print_items(Out())
+    print()
+        
+def process_gedcom(cmd, transform_module):
+    """Implements another mechanism for Gedcom transforms:
+
+    The transform_module is assumed to contain the following methods:
+    - initialize
+    - transform: implements the actual transformation for a single line block ("item")
+    - fixlines: preprocesses the Gedcom contents (list of lines/strings)
+    - add_args: adds the transform-specific arguments (ArgumentParser style)
+
+    See sukujutut.py as an example
+    """
 
 
     LOG.info("------ Ajo '%s'   alkoi %s ------", \
-             transformer.__name__, \
+             transform_module.__name__, \
              datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
 
 
@@ -248,35 +272,42 @@ def process_gedcom(cmd, transformer):
                         help='Do not produce a log in the output file')
     parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
                         help="Input encoding")
-    transformer.add_args(parser)
+    transform_module.add_args(parser)
     args = parser.parse_args(cmd.split())
     run_args = vars(args)
-    transformer.initialize(args)
-    with Output(run_args) as f:
-        saved_stdout = sys.stdout
-        saved_stderr = sys.stdout
-        sys.stdout = io.StringIO()
-        sys.stderr = io.StringIO()
-        print("------ Ajo '%s'   alkoi   %s ------" % (
-                 transformer.__name__, 
-                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+    try:
+        init_log(args.logfile)
+        transform_module.initialize(args)
+        with Output(run_args) as out:
+            out.original_line = None
+            saved_stdout = sys.stdout
+            saved_stderr = sys.stdout
+            sys.stdout = io.StringIO()
+            sys.stderr = io.StringIO()
+            if args.dryrun:
+                old_name = ""
+            else:
+                old_name = out.new_name
 
-        if args.dryrun: 
-            old_name = ""
-        else:
-            old_name = f.new_name
-        try:
-            transformer.process(args, f)
-        except:
-            traceback.print_exc()
-        finally:
-            print("------ Ajo '%s'   päättyi %s ------" % (
-                     transformer.__name__, 
+            print("------ Ajo '%s'   alkoi   %s ------" % (
+                     transform_module.__name__, 
                      datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
-            output = sys.stdout.getvalue()
-            errors = sys.stderr.getvalue()
-            sys.stdout = saved_stdout
-            sys.stderr = saved_stderr
+            t = transformer.Transformer(transform_module=transform_module,
+                                        display_callback=display_changes,
+                                        options=args)
+            g = t.transform_file(args.input_gedcom) 
+            g.print_items(out)
+    except:
+        traceback.print_exc()
+    finally:
+        time.sleep(1)  # for testing...
+        print("------ Ajo '%s'   päättyi %s ------" % (
+                 transform_module.__name__, 
+                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+        output = sys.stdout.getvalue()
+        errors = sys.stderr.getvalue()
+        sys.stdout = saved_stdout
+        sys.stderr = saved_stderr
     if old_name:
         old_basename = os.path.basename(old_name)
     else:
@@ -293,8 +324,7 @@ def process_gedcom(cmd, transformer):
 def gedcom_transform(gedcom,transform):
     gedcom_folder = get_gedcom_folder()
     gedcom_filename = os.path.join(gedcom_folder, gedcom)
-    # gedcom_filename = os.path.abspath(gedcom_filename)
-    transformer,parser = build_parser(transform, gedcom, gedcom_filename)
+    transform_module,parser = build_parser(transform, gedcom, gedcom_filename)
     if request.method == 'GET':
         return parser.generate_html()
     else:
@@ -303,12 +333,10 @@ def gedcom_transform(gedcom,transform):
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
 
-        if hasattr(transformer,"process"):
+        if hasattr(transform_module,"transform"):
             cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
-            print("#Doing process " + cmd)
-            s = process_gedcom(cmd, transformer)
-            return s
-
+            return process_gedcom(cmd, transform_module)
+        
         #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
         python_exe = sys.executable or "/opt/repo/virtenv/bin/python3"
         python_path = ':'.join([os.path.join(APP_ROOT, 'app'), GEDCOM_APP])
@@ -345,7 +373,7 @@ def build_parser(filename,gedcom,gedcom_filename):
     modname = filename[:-3]
     saved_path = sys.path[:]
     sys.path.append(os.path.join(APP_ROOT, GEDCOM_APP))
-    transformer = importlib.import_module("bp.gedcom.transforms."+modname)
+    transform_module = importlib.import_module("bp.gedcom.transforms."+modname)
     sys.path = saved_path
 
     class Arg:
@@ -423,7 +451,7 @@ def build_parser(filename,gedcom,gedcom_filename):
                         help='Do not produce a log in the output file')
     parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
                         help="Input encoding")
-    transformer.add_args(parser)
+    transform_module.add_args(parser)
 
-    return transformer,parser
+    return transform_module,parser
 

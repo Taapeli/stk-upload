@@ -17,6 +17,8 @@ logger = logging.getLogger('neo4juserdatastore')
 
 driver = None
 
+from bp.admin.models import UserAdmin as usradm
+
 class Neo4jUserDatastore(UserDatastore):
     """ User info database """
 
@@ -69,7 +71,7 @@ class Neo4jUserDatastore(UserDatastore):
             
     def _put_user (self, tx, user):    # ============ New user ==============
 
-        allowed_email = self.find_allowed_email(user.email)
+        allowed_email = usradm.find_allowed_email(user.email)
         if allowed_email == None:
             return(None)
 #            raise(ValidationError("Email address not accepted"))
