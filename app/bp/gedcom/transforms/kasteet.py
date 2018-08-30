@@ -28,6 +28,7 @@ Pekka
 """
 
 version = "1.0"
+doclink = "http://taapeli.referata.com/wiki/Gedcom-Kasteet-ohjelma"
 
 ids = set()
 

@@ -4,6 +4,7 @@ Tries to recognize place names and order them correctly
 """
 
 version = "1.0"
+doclink = "http://taapeli.referata.com/wiki/Gedcom-Places-ohjelma"
 
 from collections import defaultdict 
 
