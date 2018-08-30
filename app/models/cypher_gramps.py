@@ -88,10 +88,12 @@ MATCH (n:Event) WHERE n.handle=$handle
 MATCH (m:Place) WHERE m.handle=$place_hlink
 MERGE (n)-[r:PLACE]->(m)"""
 
-    link_note = """
-MATCH (e:Event) WHERE e.handle=$handle
-MATCH (n:Note)  WHERE n.handle=$noteref_hlink
-MERGE (e)-[r:NOTE]->(n)"""
+    link_notes = """
+match (n:Note)  where n.handle in $note_handles
+with n
+    match (e:Event)  where e.handle=$handle
+    merge (e) -[r:NOTE]-> (n)
+return count(r) as cnt"""
 
     link_citation = """
 MATCH (n:Event)    WHERE n.handle=$handle

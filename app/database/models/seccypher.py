@@ -134,21 +134,3 @@ class Cypher():
                (u:User) WHERE id(u) = &id 
         SET u.roles = u.roles + r.name 
         CREATE (u) -[:HAS_ROLE]-> (r)'''
-
-    allowed_email_register = '''
-        CREATE (email:Allowed_email {
-                allowed_email: $email,
-                default_role: $role,
-                admin_name: $admin_name,
-                timestamp: timestamp() 
-            })'''
-    
-    get_allowed_emails = '''
-        MATCH (email:Allowed_email)
-        RETURN DISTINCT email 
-            ORDER BY email.timestamp DESC'''    
-    
-    allowed_email_find = '''
-        MATCH (email:Allowed_email)
-            WHERE email.allowed_email = $email
-        RETURN email'''

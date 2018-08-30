@@ -47,7 +47,7 @@ RETURN ID(person) AS children"""
         return  shareds.driver.session().run(query, {"pid": pid})
     
     
-    def get_event_data_by_id(self):
+    def get_family_events(self):
         """ Luetaan perheen tapahtumien tiedot """
                         
         pid = int(self.uniq_id)
@@ -81,7 +81,7 @@ RETURN family"""
         for mother_record in mother_result:            
             self.mother = mother_record["mother"]
 
-        event_result = self.get_event_data_by_id()
+        event_result = self.get_family_events()
         for event_record in event_result:            
             self.eventref_hlink.append(event_record["eventref_hlink"])
             self.eventref_role.append(event_record["eventref_role"])

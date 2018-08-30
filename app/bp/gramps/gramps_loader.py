@@ -1,8 +1,8 @@
-# coding=UTF-8
-#
-# Methods to import all data from Gramps xml file
-#
-# @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
+'''
+    Methods to import all data from Gramps xml file
+
+@author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
+'''
 
 import logging
 import time
@@ -10,7 +10,7 @@ import gzip
 from os.path import basename, splitext
 import xml.dom.minidom
 
-from models.gen.event import Event
+from models.gen.event_gramps import Event_gramps
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
@@ -19,7 +19,7 @@ from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.source_citation import Citation, Repository, Source
 from models.dataupdater import set_confidence_value, set_person_refnames
-from models.batchlogger import Batch, Log
+from .batchlogger import Batch, Log
 import shareds
 
 
@@ -32,7 +32,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     
     # Start a Batch 
         routes.upload_gramps / models.loadfile.upload_file >
-            # Create id / models.batchlogger.Batch._create_id
+            # Create id / bp.gramps.batchlogger.Batch._create_id
             match (p:UserProfile {username:"jussi"}); 
             create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"}) 
             return b
@@ -196,7 +196,7 @@ class DOM_handler():
                               format(e.__class__.__name__, e), level="ERROR"))
 
     def log(self, batch_event):
-        # Add a models.batchlogger.Log to Batch log
+        # Add a bp.gramps.batchlogger.Log to Batch log
         self.batch_logger.append(batch_event)
 
     # XML subtree handlers
@@ -273,8 +273,8 @@ class DOM_handler():
 
         # Print detail of each event
         for event in events:
-
-            e = Event()
+            # Create an event with Gramps attributes
+            e = Event_gramps()
 
             if event.hasAttribute("handle"):
                 e.handle = event.getAttribute("handle")
@@ -312,6 +312,7 @@ class DOM_handler():
                 <datestr val="1700-luvulla" />    # Not processed!
             """
             try:
+                # type Gramps_DateRange
                 e.dates = self._extract_daterange(event)
             except:
                 e.dates = None
@@ -334,13 +335,9 @@ class DOM_handler():
                 self.log(Log("More than one attribute tag in an event",
                                     level="WARNING", count=e.id))
 
-            if len(event.getElementsByTagName('noteref') ) == 1:
-                event_noteref = event.getElementsByTagName('noteref')[0]
-                if event_noteref.hasAttribute("hlink"):
-                    e.noteref_hlink = event_noteref.getAttribute("hlink")
-            elif len(event.getElementsByTagName('noteref') ) > 1:
-                self.log(Log("More than one noteref tag in an event",
-                                    level="WARNING", count=e.id))
+            for ref in event.getElementsByTagName('noteref'):
+                if ref.hasAttribute("hlink"):
+                    e.note_handles.append(ref.getAttribute("hlink"))
 
             if len(event.getElementsByTagName('citationref') ) == 1:
                 event_citationref = event.getElementsByTagName('citationref')[0]

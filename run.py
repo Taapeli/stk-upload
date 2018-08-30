@@ -18,4 +18,4 @@ if __name__ == '__main__':
         app.run(debug='DEBUG')
     else:
         # Julkinen sovellus
-        shareds.app.run(host='0.0.0.0', port=8000)
+        app.run(host='0.0.0.0', port=8000)

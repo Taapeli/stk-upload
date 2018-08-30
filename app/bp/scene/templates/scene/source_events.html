@@ -39,7 +39,7 @@
                			    <li>Henkilön
                    			<a href="/scene/person={{name.uniq_id}}" class="id"
 	                           title="katso henkilön {{name.uniq_id}} tiedot">
-	                               {{name.surname}}, {{name.firstname}}</a>
+	                               {{name.firstname}} <i>{{name.suffix}}</i> <b>{{name.surname}}</b></a>
 	                        {{event.type|transl('evt')}} {{event.edates}}
                			    </li>
 	                    	{% endfor %}

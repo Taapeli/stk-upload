@@ -21,7 +21,7 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
-a#ohjeet {
+a#ohjeet, div#paluu {
     position: absolute;
     top: 7px;
     right: 4px;
@@ -35,27 +35,46 @@ a#ohjeet {
     background: #fcfec3; 
     color: black;
     border:1px solid gray;
+    border-style: outset;
     border-radius: 4pt;
     padding: 0 5pt 0 5pt;
-    margin: 5pt;}
+    margin: 5pt;
+}
+div#paluu {
+    top: 3em;
+    right: 4px;
+    background: #f6f6f6; 
+    padding: 2pt;
+}
+#paluu a { 
+	text-decoration: none; 
+    color: black;
+}
 
-.startbox {
+#startdiv {
+	margin-left:50px;
+}
+.startbox, .startbox2 {
     display: inline-block;
     vertical-align:top;
     margin: 0 1em 1em 0;
-	padding: 1em; 
-	background-color: bisque;
-	width: 280px;
-	min-height: 150px;
+    padding: 1em; 
+    background-color: bisque;
+    width: 280px;
+    min-height: 150px;
+}
+.startbox2 {
+    width: 603px;
 }
 .admin {background-color: pink;}
-.startbox h3 { margin-top: 5px; margin-bottom: 5px; }
-.startbox div { display: inline-block; width: 100%; }
-.startbox ul { display: inline-block; width: 100%; 
+.startbox h3, .startbox2 h3 { margin-top: 5px; margin-bottom: 5px; }
+.startbox div, .startbox2 div { display: inline-block; width: 100%; }
+.startbox ul, .startbox2 ul { display: inline-block; width: 100%; 
     list-style-type: none; margin-left: -24pt; }
 .inp {display: inline; }
 .inp label { display: inline-block; width: 100px; }
 .inp input { width: 120px;  margin-left: 1em; }
+.submit { text-align:right; }       /* 20.8.2018 / JMä */
 
 table, th, td {
     border: 1px solid silver;
@@ -63,6 +82,10 @@ table, th, td {
     padding: 2px;
     text-align: left;
 /*  vertical-align: text-top; poistettu 3.7.2018/JMä */
+}
+.table100 { 
+	background: ivory; 
+	width: 100%;
 }
 .id { color: sienna; text-align: right; }
 .typevar { font-size: 80%; font-style: italic;

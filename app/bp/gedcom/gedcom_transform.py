@@ -78,6 +78,7 @@ import datetime
 import logging
 LOG = logging.getLogger(__name__)
 
+# These work, when program is run in app.bp.gedcom directory!
 from transforms.model.gedcom_line import GedcomLine
 from transforms.model.ged_output import Output
 
