@@ -25,36 +25,85 @@ def translate(term, var_name, lang="fi"):
     if var_name == "nt":
         # Name types
         tabl = {
-            "Also Known As": "tunnettu myös",
             "Birth Name": "syntymänimi",
-            "Married Name": "avionimi"
+            "Also Known As": "tunnettu myös",
+            "Married Name": "avionimi",
+            "Unknown": "määrittämätön",
+            "Aateloitu nimi": "Aateloitu nimi",
+            "Aatelointinimi" : "Aatelointinimi"
+#             "Also Known As": "tunnettu myös",
+#             "Birth Name": "syntymänimi",
+#             "Married Name": "avionimi"
         }
     if var_name == "evt":
         # Event types    
         tabl = {
-            "Residence": "asuinpaikka",
-            "Occupation": "ammatti",
             "Birth": "syntymä",
             "Death": "kuolema",
-            "Luottamustoimi": "luottamustoimi",
-            "Graduation": "valmistuminen",
-            "Marriage": "avioliitto",
+            "Occupation": "ammatti",
             "Baptism": "kaste",
             "Burial": "hautaus",
+            "Marriage": "avioliitto",
+            "Residence": "syntymä",
             "Cause Of Death": "kuolinsyy",
-            "Education": "koulutus",
+            "Luottamustoimi": "luottamustoimi",
+            "Lähtömuutto": "lähtömuutto",
+            "Tulomuutto": "tulomuutto",
+            "Graduation": "valmistuminen",
             "Degree": "oppiarvo",
-            "Christening": "kristillinen kaste",
-            "Military Service": "asepalvelus",
-            "Confirmation": "ripille pääsy",
             "Ordination": "palkitseminen",
-            "Sota": "sota"
-        }
+            "Property": "omaisuus",
+            "Education": "koulutus",
+            "Sota": "sota",
+            "Confirmation": "ripille pääsy",
+            "First Communion": "ensimmäinen ehtoollinen",
+            "Military Service": "asepalvelus",
+            "Käräjöinti": "käräjöinti",
+            "Christening": "kristillinen kaste",
+            "Marriage Banns": "kuulutus avioliittoon",
+            "Retirement": "eläkkeelle siirtyminen",
+            "Nobility Title": "aatelointi",
+            "Engagement": "kihlajaiset",
+            "Immigration": "maahanmuutto",
+            "Ehtoollinen": "ehtoollinen"      
+#             "Residence": "asuinpaikka",
+#             "Occupation": "ammatti",
+#             "Birth": "syntymä",
+#             "Death": "kuolema",
+#             "Luottamustoimi": "luottamustoimi",
+#             "Graduation": "valmistuminen",
+#             "Marriage": "avioliitto",
+#             "Baptism": "kaste",
+#             "Burial": "hautaus",
+#             "Cause Of Death": "kuolinsyy",
+#             "Education": "koulutus",
+#             "Degree": "oppiarvo",
+#             "Christening": "kristillinen kaste",
+#             "Military Service": "asepalvelus",
+#             "Confirmation": "ripille pääsy",
+#             "Ordination": "palkitseminen",
+#             "Sota": "sota",
+    }
     elif var_name == "role":
         # Name types
         tabl = {
+
+            "Primary": "pääosallisena",
+            "Family": "perheenä",
             "Kummi": "kummina",
-            "Clergy": "pappina"
+            "Perillinen": "perillisenä",
+            "kummi": "kummina",
+            "Clergy": "pappina",
+            "Osallinen": "osallisena",
+            "Ostaja": "ostajana",
+            "Perinnönjättäjä": "perinnönjättäjänä",
+            "Vihkijä": "vihkijänä",
+            "Pääosallinen": "pääosallisena",
+            "Edunsaaja": "edunsaajana",
+            "Myyjä": "myyjänä",
+            "Unknown": "määräämätön"
+#             "Kummi": "kummina",
+#             "Clergy": "pappina",
         }
     elif var_name == "conf":
         # Confidence levels
@@ -77,15 +126,29 @@ def translate(term, var_name, lang="fi"):
     elif var_name == "notet":
         # Note types
         tabl = {
-            "Citation":"viitteen lisätieto",
-            "Event Note":"tapahtuman lisätieto",
-            "Family Note":"perheen lisätieto",
-            "Name Note":"nimen lisätieto",
-            "Person Note":"henkilön lisätieto",
-            "Place Note":"paikan lisätieto",
-            "Repository Note":"arkiston lisätieto",
-            "Source Note":"lähteen lisätieto",
-            "To Do":"työlistalla"
+            "Citation":"viite",
+            "Event Note":"tapahtuma",
+            "Source Note":"lähde",
+            "Person Note":"henkilö",
+            "Place Note":"paikka",
+            "Research":"tutkimus",
+            "Name Note":"nimitieto",
+            "To Do":"tehtävä",
+            "Family Note":"perhe",
+            "Repository Note":"arkisto",
+            "Media Reference Note":"mediaviite",
+            "Media Note":"media",
+            "General":"yleistä",
+            "Html code":"html-koodi"
+#             "Citation":"viitteen lisätieto",
+#             "Event Note":"tapahtuman lisätieto",
+#             "Family Note":"perheen lisätieto",
+#             "Name Note":"nimen lisätieto",
+#             "Person Note":"henkilön lisätieto",
+#             "Place Note":"paikan lisätieto",
+#             "Repository Note":"arkiston lisätieto",
+#             "Source Note":"lähteen lisätieto",
+#             "To Do":"työlistalla",
             }
     elif var_name == "rept":
         # Repository types
@@ -168,4 +231,4 @@ def translate(term, var_name, lang="fi"):
     try:
         return tabl[term]
     except:
-        return term + '?'
+        return "'" + term + "'"

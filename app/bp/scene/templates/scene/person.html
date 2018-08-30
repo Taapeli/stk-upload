@@ -111,7 +111,7 @@
                             	{% endif %}{% endif %}
                             	{% if e.notes %}{% set first = True %}{% for note in e.notes %}
                             	   {% if first %}{% set first = False %}{% else %}<br>{% endif %}
-                            	   <span class="typedesc">{{ note.type }}</span>
+                            	   <span class="typedesc">{{ note.type|transl('notet') }}</span>
                             	       {{ note.text }}{% endfor %}{% endif %}
                             	</div>
                         </td>

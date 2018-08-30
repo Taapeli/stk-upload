@@ -7,7 +7,7 @@
 
     class *Event_compound*(Event): 
         - __init__()
-        - get_person_events()
+        - get_event_combo()
         - get_baptism_data()
         - get_cite_sour_repo() static <-- get_citation_path()?
         - get_event_cite()
@@ -44,9 +44,7 @@ Created on 2.5.2017
 #from flask import g
 from models.gen.dates import DateRange
 import  shareds
-# from models.cypher_gramps import Cypher_event_w_handle
 
-#-------------------------------------------------------------------------------
 
 class Event():
     """ Tapahtuma
@@ -255,10 +253,10 @@ class Event():
         print ("Description: " + self.description)
         print ("Dateval: " + self.date)
         print ("Dates: " + str(self.dates))
-        print ("Place_hlink: " + self.place_hlink)
+        #print ("Place_hlink: " + self.place_hlink)
         print ("Attr_type: " + self.attr_type)
         print ("Attr_value: " + self.attr_value)
-        print ("Citationref_hlink: " + self.citationref_hlink)
+        #print ("Citationref_hlink: " + self.citationref_hlink)
         return True
 
 

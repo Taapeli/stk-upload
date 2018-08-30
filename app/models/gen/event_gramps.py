@@ -7,7 +7,7 @@
 
     class *Event_compound*(Event): 
         - __init__()
-        - get_person_events()
+        - get_event_combo()
         - get_baptism_data()
         - get_cite_sour_repo() static <-- get_citation_path()?
         - get_event_cite()
@@ -39,11 +39,9 @@ Created on 2.5.2017
 import datetime
 from sys import stderr
 
-#from models.gen.dates import DateRange
 from .event import Event
 from models.cypher_gramps import Cypher_event_w_handle
 
-#-------------------------------------------------------------------------------
 
 class Event_gramps(Event):
     """ An Event from Gramps xml file
@@ -75,10 +73,11 @@ class Event_gramps(Event):
         # self.dates = None
         self.attr_type = ''
         self.attr_value = ''
-        self.place_hlink = ''
         self.note_handles = []      # Note handles (previous noteref_hlink had
                                     # only the first one)
-        self.citationref_hlink = ''
+        self.citation_handles = []  # (previous citationref_hlink)
+
+        self.place_hlink = ''
         self.objref_hlink = ''
 
         self.citations = []   # For creating display sets
@@ -118,23 +117,23 @@ class Event_gramps(Event):
             print("Virhe.event_link_place: {0}".format(err), file=stderr)
 
         try:
-            # Make relation to the Note node
+            # Make relations to the Note nodes
             if len(self.note_handles) > 0:
-                result = tx.run(Cypher_event_w_handle.link_notes,
-                                handle=self.handle,
-                                note_handles=self.note_handles)
-                cnt = result.single()["cnt"]
-                print ("Luotiin {} Note-yhteyttä".format(cnt))
+                #result = 
+                tx.run(Cypher_event_w_handle.link_notes, handle=self.handle,
+                       note_handles=self.note_handles)
+#                 cnt = result.single()["cnt"]
+#                 print ("Luotiin {} Note-yhteyttä".format(cnt))
         except Exception as err:
             print("Virhe.event_link_notes: {0}".format(err), file=stderr)
 
         try:
-            # Make relation to the Citation node
-            if self.citationref_hlink != '':
-                tx.run(Cypher_event_w_handle.link_citation,
-                       handle=self.handle, citationref_hlink=self.citationref_hlink)
+            # Make relations to the Citation nodes
+            if len(self.citation_handles) > 0: #  citationref_hlink != '':
+                tx.run(Cypher_event_w_handle.link_citations,
+                       handle=self.handle, citation_handles=self.citation_handles)
         except Exception as err:
-            print("Virhe.event_link_citation: {0}".format(err), file=stderr)
+            print("Virhe.event_link_citations: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Media node
@@ -145,16 +144,3 @@ class Event_gramps(Event):
             print("Virhe.event_link_media: {0}".format(err), file=stderr)
             
         return
-
-# class Event_for_template(Event):
-''' Tämä on korvattu luokalla Event_combo'''
-#     """ Template-tapahtuma perii Tapahtuma-luokan
-#             
-#         Properties:
-#                 place              str paikan nimi
-#     """
-# 
-#     def __init__(self, eid='', desc='', handle=''):
-#         """ Luo uuden event-instanssin """
-#         Event.__init__(self, eid, desc, handle)
-#         self.place = ''
