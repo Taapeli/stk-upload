@@ -15,7 +15,7 @@ from models.datareader import get_person_data_by_id
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.gen.place import Place
-from models.gen.source_citation import Source
+from models.gen.source import Source
 
 
 @bp.route('/scene/persons/restricted')
