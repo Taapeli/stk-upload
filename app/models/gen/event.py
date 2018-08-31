@@ -1,11 +1,11 @@
 '''
 
-    Event hierarkiasuunnitelma 23.8.2018/JMä
+    Event hierarkiasuunnitelma 31.8.2018/JMä
 
-    class gen.event.*Event*(): 
+    class gen.event.Event(): 
        vain Event-noden parametrit (uniq_id, tyyppi, handle, päivämäärät)
 
-    class *Event_compound*(Event): 
+    class gen.event.Event_combo(Event): 
         - __init__()
         - get_event_combo()
         - get_baptism_data()
@@ -13,25 +13,26 @@
         - get_event_cite()
        Event, lähteet, huomautukset, henkilön uniq_id
 
-    class *Event_gramps*()
+    class bp.gramps.models.event_gramps.Event_gramps(Event)
+        - __init__()
         - save() # with relations to UserProfile, Person, Place, Note, Citation, Media
 
-    2. *Event_w_person*: 
+    ? *Event_w_person*: 
        Event ja ja siihen liittyvät Person-nodet ja roolit (ehkä myös nimet?)
-    3. *Event_w_place*: 
+    ? *Event_w_place*: 
        Event ja liittyvät paikat (pyydettäessä myös paikannimet?)
 
-    Nämä siis periytyvät Event-luokasta ja sisältävät tarpeen mukaan 
+    Nämä Event-luokasta periytyvät luokat sisältävät tarpeen mukaan 
     tietokantametodit _read(), get()_ ja _save()_ (_read_ hakukenttien avulla, 
-    _get_ uniq_id:n avulla). L
+    _get_ uniq_id:n avulla). 
     
-    isäksi on kätevä olla metodi __str__(), joka antaa lyhyen sanalliseen muodon
+    Lisäksi on kätevä olla metodi __str__(), joka antaa lyhyen sanalliseen muodon
     "syntynyt välillä 1.3.1840...31.3.1840 Hauho".
     
     Ehkä _save()_-metodi koskee vain Event-nodea, ei liittyvä nodeja? 
     Ehkä yhteydet myös?
     
-    Prosessointiin ja näyttöihin tehdään tarpeen mukaan bisnes-luokkia, 
+    Prosessointiin ja näyttöihin voidaan tehdä tarpeen mukaan bisnes-luokkia, 
     jotka sisältävät esim. poiminta-, yhdistely- ja muokkaussääntöjä ja 
     siellä ehkä hoidetaan isompien kokonaisuuksien talletus 
     (kuten henkilö + nimet ja lähteet).

@@ -10,7 +10,7 @@ import gzip
 from os.path import basename, splitext
 import xml.dom.minidom
 
-from models.gen.event_gramps import Event_gramps
+from .models.event_gramps import Event_gramps
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media

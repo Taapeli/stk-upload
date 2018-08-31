@@ -39,7 +39,7 @@ Created on 2.5.2017
 import datetime
 from sys import stderr
 
-from .event import Event
+from models.gen.event import Event
 from models.cypher_gramps import Cypher_event_w_handle
 
 
