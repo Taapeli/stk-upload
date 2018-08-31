@@ -744,11 +744,11 @@ class DOM_handler():
 #                 for i in range(len(repository.getElementsByTagName('url') )):
 #                     repository_url = repository.getElementsByTagName('url')[i]
 #                     if repository_url.hasAttribute("href"):
-#                         r.url_href.append(repository_url.getAttribute("href"))
+#                         r.href.append(repository_url.getAttribute("href"))
 #                     if repository_url.hasAttribute("type"):
-#                         r.url_type.append(repository_url.getAttribute("type"))
+#                         r.type.append(repository_url.getAttribute("type"))
 #                     if repository_url.hasAttribute("description"):
-#                         r.url_description.append(repository_url.getAttribute("description"))
+#                         r.description.append(repository_url.getAttribute("description"))
 
             r.save(self.tx)
             counter += 1

@@ -19,7 +19,8 @@ from models.gen.media import Media
 from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
-from models.gen.source_citation import Citation, Repository, Source, Weburl
+from models.gen.source_citation import Citation, Repository, Source
+from models.gen.weburl import Weburl
 from models.gen.dates import DateRange
 
 
@@ -272,11 +273,11 @@ def get_repositories(uniq_id=None):
             r.type = record['type']
         if record['url_href']:
             url = Weburl()
-            url.url_href = record['url_href']
+            url.href = record['url_href']
             if record['url_type']:
-                url.url_type = record['url_type']
+                url.type = record['url_type']
             if record['url_description']:
-                url.url_description = record['url_description']
+                url.description = record['url_description']
             r.url_refs.append(url)
 
         for source in record['sources']:

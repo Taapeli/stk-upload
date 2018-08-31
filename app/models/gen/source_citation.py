@@ -7,9 +7,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
+
 from models.cypher_gramps import Cypher_source_w_handle
 from models.cypher_gramps import Cypher_citation_w_handle
 from models.cypher_gramps import Cypher_repository_w_handle
+from models.gen.weburl import Weburl
 import shareds
 
 class Citation:
@@ -170,10 +172,11 @@ class Repository:
             rname           str    arkiston nimi
             type            str    arkiston tyyppi
             url_refs        Weburl(url_href, url_type, url_description)[]
-#                 url_href        str url osoite
-#                 url_type        str url tyyppi
-#                 url_description str url kuvaus
+#                 href        str url osoite
+#                 type        str url tyyppi
+#                 description str url kuvaus
 
+    #TODO: url_refs[] --> urls[] list should contain Weburl instances
      """
 
     def __init__(self):
@@ -336,9 +339,9 @@ ORDER BY repository.rname""".format(where)
             }
             if len(self.url_refs) > 0:
                 with self.url_refs[0] as url:
-                    r_attr['url_href'] = url.url_href
-                    r_attr['url_type'] = url.url_type
-                    r_attr['url_description'] = url.url_description
+                    r_attr['url_href'] = url.href
+                    r_attr['url_type'] = url.type
+                    r_attr['url_description'] = url.description
                 
             tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
         except Exception as err:
@@ -648,12 +651,12 @@ ORDER BY toUpper(stitle)
         return
 
 
-class Weburl():
-    """ A web reference 
-    """
-
-    def __init__(self, href=None, rtype=None, description=""):
-        self.url_href = href
-        self.url_type = rtype
-        self.url_description = description
+# class Weburl():
+#     """ A web reference 
+#     """
+# 
+#     def __init__(self, href=None, rtype=None, description=""):
+#         self.url_href = href
+#         self.url_type = rtype
+#         self.url_description = description
 

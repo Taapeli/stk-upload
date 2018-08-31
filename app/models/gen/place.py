@@ -8,7 +8,7 @@ from sys import stderr
 #import logging
 #from flask import g
 from models.dbtree import DbTree
-from models.gen.person import Weburl
+from models.gen.weburl import Weburl
 from models.gen.note import Note
 from models.gen.dates import DateRange
 from models.gen.cypher import Cypher_place
@@ -36,6 +36,7 @@ class Place:
                     description     str url kuvaus
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
+    #TODO: urls[] list should contain Weburl instances
      """
 
     def __init__(self, locid="", ptype="", pname="", level=None):

@@ -15,6 +15,7 @@ import models.dbutil
 from models.gen.cypher import Cypher_person
 from models.cypher_gramps import Cypher_person_w_handle
 from models.gen.dates import DateRange
+from models.gen.weburl import Weburl
 
 class Person:
     """ Henkilö
@@ -47,6 +48,8 @@ class Person:
                 confidence         str tietojen luotettavuus
                 est_birth          str arvioitu syntymäaika
                 est_death          str arvioitu kuolinaika
+
+    #TODO: urls[] list should contain Weburl instances
      """
 
     def __init__(self):
@@ -1149,27 +1152,4 @@ MATCH (n:Name) WHERE ID(n)=$id
 SET n.refname=$refname
             """
         return tx.run(query, id=uniq_id, refname=refname)
-
-
-class Weburl:
-    '''
-    Netti URL
-
-        Properties:
-                url_priv           str url salattu tieto
-                url_href           str url osoite
-                url_type           str url tyyppi
-                url_description    str url kuvaus
-    '''
-
-    def __init__(self):
-        """ Luo uuden weburl-instanssin """
-        self.priv = ''
-        self.href = ''
-        self.type = ''
-        self.description = ''
-
-    def __str__(self):
-        desc = "Weburl ({}) '{}'-->'{}'".format(self.type, self.description, self.href)
-        return desc
 
