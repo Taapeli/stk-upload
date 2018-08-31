@@ -17,7 +17,8 @@ from models.gen.media import Media
 from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
-from models.gen.source_citation import Citation, Repository, Source
+from models.gen.source_citation import Citation, Source
+from models.gen.repository import Repository
 from models.dataupdater import set_confidence_value, set_person_refnames
 from .batchlogger import Batch, Log
 import shareds

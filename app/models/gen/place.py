@@ -54,8 +54,8 @@ class Place:
         self.change = ''
         self.names = []
         self.coord = None
-        self.urls = []
-        # self.placeref_hlink = '' - replaced by surround_ref
+        self.urls = []          # Weburl instance list
+
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.noteref_hlink = []
 
@@ -97,9 +97,9 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
             urls = place_record['urls']
             for url in urls:
                 weburl = Weburl()
-                weburl.priv = url["priv"]
                 weburl.href = url["href"]
                 weburl.type = url["type"]
+                weburl.priv = url["priv"]
                 weburl.description = url["description"]
                 self.urls.append(weburl)
 

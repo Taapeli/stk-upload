@@ -19,7 +19,8 @@ from models.gen.media import Media
 from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
-from models.gen.source_citation import Citation, Repository, Source
+from models.gen.source_citation import Citation, Source
+from models.gen.repository import Repository
 from models.gen.weburl import Weburl
 from models.gen.dates import DateRange
 
