@@ -523,8 +523,8 @@ def get_people_by_surname(surname):
 
 def get_person_data_by_id(uniq_id):
     """ Get 5 data sets:
-        person: uniq_id and name data
-        events list: uniq_id, dates, location name and id (?)
+        person: Person object with name data
+        events: list of Event_combo object with location name and id (?)
         photos
         sources
         families
@@ -563,34 +563,36 @@ def get_person_data_by_id(uniq_id):
 
         # Citations
 
-        if e.citationref_hlink != '':
-            citation = Citation()
-            citation.uniq_id = e.citationref_hlink
-            # If there is already the same citation on the list,
+        for ref in e.citation_ref:  # citationref_hlink != '':
+            c = Citation()
+            c.uniq_id = ref
+            # If there is already the same citation on the list of sources,
             # use that index
             citation_ind = -1
             for i in range(len(sources)):
-                if sources[i].uniq_id == citation.uniq_id:
+                if sources[i].uniq_id == c.uniq_id:
                     citation_ind = i + 1
                     break
             if citation_ind > 0:
-                # Citation found
+                # Citation found; Event_combo.source = jonkinlainen indeksi
                 e.source = citation_ind
             else: # Store the new source to the list
                 source_cnt += 1
                 e.source = source_cnt
 
-                result = citation.get_source_repo(citation.uniq_id)
+                result = c.get_source_repo(c.uniq_id)
                 for record in result:
-                    citation.dateval = record['date']
-                    citation.page = record['page']
-                    citation.confidence = record['confidence']
+                    # record contains some Citation data + list of
+                    # Source, Repository and Note data
+                    c.dateval = record['date']
+                    c.page = record['page']
+                    c.confidence = record['confidence']
                     if not record['notetext']:
-                        if citation.page[:4] == "http":
-                            citation.notetext = citation.page
-                            citation.page = ''
+                        if c.page[:4] == "http":
+                            c.notetext = c.page
+                            c.page = ''
                     else: 
-                        citation.notetext = record['notetext']
+                        c.notetext = record['notetext']
                     
                     for source in record['sources']:
                         s = Source()
@@ -604,9 +606,9 @@ def get_person_data_by_id(uniq_id):
                         r.type = source[5]
                         
                         s.repos.append(r)
-                        citation.sources.append(s)
+                        c.sources.append(s)
                         
-                    sources.append(citation)
+                    sources.append(c)
             
     photos = []
     for link in p.objref_hlink:

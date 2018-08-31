@@ -41,22 +41,35 @@ class Citation:
     
     @staticmethod       
     def get_source_repo (uniq_id=None):
-        """ Voidaan lukea viittauksen lähde ja arkisto kannasta
+        """ Read Citation -> Source -> Repository chain
+            and optionally Notes.            
+            Citation has all data but c.handle
+
+            Voidaan lukea viittauksen lähde ja arkisto kannasta
         """
 
         if uniq_id:
-            where = "WHERE ID(citation)={} ".format(uniq_id)
+            where = "WHERE ID(c)={} ".format(uniq_id)
         else:
             where = ''
         
         query = """
- MATCH (citation:Citation)-[r:SOURCE]->(source:Source)-[p:REPOSITORY]->(repo:Repository) {0}
- OPTIONAL MATCH (citation)-[n:NOTE]->(note:Note)
-   WITH citation, r, source, p, repo ORDER BY citation.page, note
- RETURN ID(citation) AS id, citation.dateval AS date, citation.page AS page, 
-     citation.confidence AS confidence, note.text AS notetext,
-   COLLECT([ID(source), source.stitle, p.medium, 
-       ID(repo), repo.rname, repo.type]) AS sources
+ MATCH (c:Citation) -[r:SOURCE]-> (source:Source) 
+    -[p:REPOSITORY]-> (repo:Repository) {0}
+ OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
+   WITH c, r, source, p, repo 
+   ORDER BY c.page, note
+ RETURN ID(c) AS id, 
+    c.dateval AS date,
+    c.page AS page,
+    c.confidence AS confidence, 
+    note.text AS notetext,
+    COLLECT(DISTINCT [ID(source), 
+             source.stitle, 
+             p.medium, 
+             ID(repo), 
+             repo.rname, 
+             repo.type]) AS sources
  """.format(where)
                 
         return shareds.driver.session().run(query)

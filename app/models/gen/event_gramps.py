@@ -58,19 +58,12 @@ class Event_gramps(Event):
                 attr_value         str lisätiedon arvo
             Obsolete:
                 place_hlink        str paikan handle
-                citationref_hlink  str viittauksen handle
                 objref_hlink       str median handle
      """
 
     def __init__(self, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
         Event.__init__(self, eid, desc, handle)
-        # self.handle = handle
-        # self.change = ''
-        # self.id = eid
-        # self.description = desc
-        # self.date = ''
-        # self.dates = None
         self.attr_type = ''
         self.attr_value = ''
         self.note_handles = []      # Note handles (previous noteref_hlink had

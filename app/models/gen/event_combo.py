@@ -34,21 +34,16 @@ class Event_combo(Event):
 
     Lisäksi on kätevä olla metodi __str__(), joka antaa lyhyen sanalliseen muodon
     "syntynyt välillä 1.3.1840...31.3.1840 Hauho".
-    
-    Ehkä _save()_-metodi koskee vain Event-nodea, ei liittyvä nodeja? 
-    Ehkä yhteydet myös?
     '''
 
     def __init__(self, eid='', desc='', handle=''):
         '''
-        Constructor
-        
-        Luo uuden Event-instanssin
+        Constructor Luo uuden Event_combo -instanssin
         '''
         Event.__init__(self, eid, desc, handle)
         self.note_ref = []      # Note uniq_ids (previous noteref_hlink had
                                 # only the first one)
-        self.citation_handles = []  # (previous citationref_hlink = '')
+        self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
         self.place_hlink = ''
         self.objref_hlink = ''
 
@@ -92,9 +87,9 @@ match (e:Event) where ID(e)=$pid
     optional match (e) -[:CITATION]-> (c:Citation)
     optional match (e) -[:NOTE]-> (n:Note)
 return e as event, 
-    collect(id(p)) as place_ref, 
-    collect(id(c)) as citation_ref, 
-    collect(id(n)) as note_ref'''
+    collect(distinct id(p)) as place_ref, 
+    collect(distinct id(c)) as citation_ref, 
+    collect(distinct id(n)) as note_ref'''
         result = shareds.driver.session().run(place_get_w_place_note_citation, 
                                               pid=self.uniq_id)
 
@@ -117,6 +112,7 @@ return e as event,
             for ref in record["note_ref"]:
                 self.note_ref.append(ref) # List of uniq_ids # prev. noteref_hlink
             for ref in record["citation_ref"]:
+                # uniq_ids of connected Citations
                 self.citation_ref.append(ref)   # prev. citationref_hlink = ref
             for ref in record["place_ref"]:
                 self.place_hlink = ref

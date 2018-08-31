@@ -147,7 +147,7 @@ def file_clean(pathname):
         # Creates the ouput file and closes it
         try:
             with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
-                print("A gzipped file")
+                # print("A gzipped file")
                 counter = _clean_apostrophes(file_in, file_out)
             msg = "Cleaned apostrophes from packed input lines" # Try to read a gzipped file
         except OSError: # Not gzipped; Read as an ordinary file
@@ -783,6 +783,8 @@ class DOM_handler():
                 self.log(Log("More than one stitle in a source",
                                     level="WARNING", count=s.id))
 
+#TODO More than one noteref in a source     S0041, S0002
+# Vaihdetaan s.noteref_hlink --> s.note_handles[]
             if len(source.getElementsByTagName('noteref') ) == 1:
                 source_noteref = source.getElementsByTagName('noteref')[0]
                 if source_noteref.hasAttribute("hlink"):

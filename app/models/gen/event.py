@@ -92,15 +92,16 @@ class Event():
         #    self.objref_hlink = ''
         #    self.citations = []   # For creating display sets
         #    self.names = []   # For creating display sets
-    
-    
+
+
+    def __str__(self):
+        return "{} {}".format(self.type, self.dates or "")
 
 
     @staticmethod       
     def get_events_wo_citation():
         """ Voidaan lukea viittauksettomia tapahtumia kannasta
         """
-        
         query = """
  MATCH (e:Event) WHERE NOT EXISTS((:Citation)<-[:CITATION]-(e:Event))
  RETURN ID(e) AS uniq_id, e
