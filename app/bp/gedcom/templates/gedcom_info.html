@@ -170,13 +170,16 @@ table.diff td {
 	        <div style="display: inline-block;">
 
 		        <h3>{{ _("Muunnokset") }}</h3>
-		        <ul>
+		        <table>
 		        {% for transform in transforms %}
-		            <li><a href="#" class="transform" 
+		            <tr><td><a href="#" class="transform" 
 		                 data-transform="{{ transform.name }}">{{ transform.name[:-3] }}</a>
-		            {{ transform.docline }}</li>
+		            <td>{{ transform.docline }}
+		            <td>{% if transform.doclink %}
+		            	<a href="{{ transform.doclink }}" target="doc">{{ _("Kuvaus") }}
+		            	{% endif %}
 		        {% endfor %}
-		        </ul>
+		        </table>
 		    </div>
 	      </div>
 	       

@@ -77,6 +77,11 @@ def get_transforms():
         else:
             t.doc = ""
             t.docline = ""
+        if hasattr(transformer,"doclink"):
+            t.doclink = transformer.doclink
+        else:
+            t.doclink = ""
+            
         t.version = getattr(transformer,"version","")
         yield t
 
@@ -219,7 +224,7 @@ def gedcom_delete(gedcom):
             logging.info("Deleted:"+filename)
     return redirect(url_for('.gedcom_list'))
 
-def removefile(fname):
+def removefile(fname): 
     try:
         os.remove(fname)
     except FileNotFoundError:

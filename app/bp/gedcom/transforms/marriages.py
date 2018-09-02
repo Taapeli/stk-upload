@@ -39,7 +39,7 @@ Näillä ideoilla pyhäinpäivän keskellä
 """
 
 version = "1.0"
-
+doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
 
 from collections import defaultdict 
 import re
