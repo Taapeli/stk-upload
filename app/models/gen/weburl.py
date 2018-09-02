@@ -29,6 +29,6 @@ class Weburl():
 #         self.url_description = description
 
     def __str__(self):
-        desc = "Weburl ({}) '{}'-->'{}'".format(self.type, self.description, self.href)
+        desc = "Weburl ({}) '{}' > '{}'".format(self.type, self.description, self.href)
         return desc
 

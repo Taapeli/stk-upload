@@ -239,6 +239,7 @@ ORDER BY name[0][0]
             mainittuna.
             Jos sarakkeessa field[1] on mainittu kielikoodi
             se lisätään kunkin nimen field[0] perään suluissa
+        #TODO Lajiteltava kielen mukaan jotenkin
         """
         names = []
         for n in field:

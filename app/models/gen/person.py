@@ -213,7 +213,9 @@ RETURN person, name
 
 
     def get_person_w_names(self):
-        """ Luetaan kaikki henkilön tiedot ja nimet
+        """ Returns Person with Names and Weburls included
+
+            Luetaan kaikki henkilön tiedot ja nimet
             ╒══════════════════════════════╤══════════════════════════════╕
             │"person"                      │"names"                       │
             ╞══════════════════════════════╪══════════════════════════════╡
@@ -485,8 +487,8 @@ RETURN person, urls, COLLECT (name) AS names
         │ Person                       │   │ Name                         │
         ├──────────────────────────────┼───┼──────────────────────────────┤
         │{"gender":"","handle":"       │{} │{"surname":"Andersen","alt":""│
-        │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","firstname"│
-        │}                             │   │:"Alexander","refname":""}    │
+        │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","firstn│
+        │}                             │   │ame":"Alexander","refname":""}│
         ├──────────────────────────────┼───┼──────────────────────────────┤
         """
 
@@ -509,11 +511,11 @@ RETURN person, urls, COLLECT (name) AS names
 #  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
 
         query = """
- MATCH (n:Person)-[:NAME]->(k:Name) {0}
- OPTIONAL MATCH (n)-[r:EVENT]->(e)
- RETURN n.id, k.firstname, k.surname,
-  COLLECT([e.name, e.kind]) AS events
- ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
+MATCH (n:Person) -[:NAME]->( k:Name) {0}
+    OPTIONAL MATCH (n) -[r:EVENT]-> (e)
+RETURN n.id, k.firstname, k.surname,
+       COLLECT([e.name, e.kind]) AS events
+    ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
 
         return shareds.driver.session().run(query)
 
@@ -933,37 +935,35 @@ SET n.est_death = m.daterange_start"""
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
         # Save Name nodes under the Person node
-        if len(self.names) > 0:
-            try:
-                names = self.names
-                for name in names:
-                    n_attr = {
-                        "alt": name.alt,
-                        "type": name.type,
-                        "firstname": name.firstname,
-                        "refname": name.refname,
-                        "surname": name.surname,
-                        "suffix": name.suffix
-                    }
-                    tx.run(Cypher_person_w_handle.link_name, 
-                           n_attr=n_attr, p_handle=self.handle)
-            except Exception as err:
-                print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
+        try:
+            for name in self.names:
+                n_attr = {
+                    "alt": name.alt,
+                    "type": name.type,
+                    "firstname": name.firstname,
+                    "refname": name.refname,
+                    "surname": name.surname,
+                    "suffix": name.suffix
+                }
+                tx.run(Cypher_person_w_handle.link_name, 
+                       n_attr=n_attr, p_handle=self.handle)
+        except Exception as err:
+            print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
 
         # Save Weburl nodes under the Person
-        if len(self.urls) > 0:
-            for url in self.urls:
-                u_attr = {
-                    "priv": url.priv,
-                    "href": url.href,
-                    "type": url.type,
-                    "description": url.description
-                }
-                try:
-                    tx.run(Cypher_person_w_handle.link_weburl, 
-                           p_handle=self.handle, u_attr=u_attr)
-                except Exception as err:
-                    print("Virhe (Person.save:create Weburl): {0}".format(err), file=stderr)
+        for url in self.urls:
+            u_attr = {
+                "priv": url.priv,
+                "href": url.href,
+                "type": url.type,
+                "description": url.description
+            }
+            try:
+                tx.run(Cypher_person_w_handle.link_weburl, 
+                       p_handle=self.handle, u_attr=u_attr)
+            except Exception as err:
+                print("Virhe (Person.save: {} create Weburl): {0}".\
+                      format(self.id, err), file=stderr)
 
         if len(self.events) > 0:
             # Make Event relations (if Events were stored in self.events)

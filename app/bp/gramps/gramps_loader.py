@@ -582,19 +582,17 @@ class DOM_handler():
                     if person_objref.hasAttribute("hlink"):
                         p.objref_hlink.append(person_objref.getAttribute("hlink"))
 
-            if len(person.getElementsByTagName('url') ) >= 1:
-                for i in range(len(person.getElementsByTagName('url') )):
-                    weburl = Weburl()
-                    person_url = person.getElementsByTagName('url')[i]
-                    if person_url.hasAttribute("priv"):
-                        weburl.priv = person_url.getAttribute("priv")
-                    if person_url.hasAttribute("href"):
-                        weburl.href = person_url.getAttribute("href")
-                    if person_url.hasAttribute("type"):
-                        weburl.type = person_url.getAttribute("type")
-                    if person_url.hasAttribute("description"):
-                        weburl.description = person_url.getAttribute("description")
-                    p.urls.append(weburl)
+            for person_url in person.getElementsByTagName('url'):
+                weburl = Weburl()
+                if person_url.hasAttribute("priv"):
+                    weburl.priv = person_url.getAttribute("priv")
+                if person_url.hasAttribute("href"):
+                    weburl.href = person_url.getAttribute("href")
+                if person_url.hasAttribute("type"):
+                    weburl.type = person_url.getAttribute("type")
+                if person_url.hasAttribute("description"):
+                    weburl.description = person_url.getAttribute("description")
+                p.urls.append(weburl)
 
             if len(person.getElementsByTagName('parentin') ) >= 1:
                 for i in range(len(person.getElementsByTagName('parentin') )):
