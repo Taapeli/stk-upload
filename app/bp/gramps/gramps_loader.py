@@ -739,16 +739,13 @@ class DOM_handler():
                 self.log(Log("More than one type in a repository",
                                     level="WARNING", count=r.id))
 
-#TODO: Tämä ei toimi
-#             if len(repository.getElementsByTagName('url') ) >= 1:
-#                 for i in range(len(repository.getElementsByTagName('url') )):
-#                     repository_url = repository.getElementsByTagName('url')[i]
-#                     if repository_url.hasAttribute("href"):
-#                         r.href.append(repository_url.getAttribute("href"))
-#                     if repository_url.hasAttribute("type"):
-#                         r.type.append(repository_url.getAttribute("type"))
-#                     if repository_url.hasAttribute("description"):
-#                         r.description.append(repository_url.getAttribute("description"))
+            for repository_url in repository.getElementsByTagName('url'):
+                webref = Weburl()
+                webref.href = repository_url.getAttribute("href")
+                webref.type = repository_url.getAttribute("type")
+                webref.description = repository_url.getAttribute("description")
+                if webref.href > "":
+                    r.urls.append(webref)
 
             r.save(self.tx)
             counter += 1

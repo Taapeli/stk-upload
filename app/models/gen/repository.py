@@ -9,6 +9,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from sys import stderr
 
 from models.cypher_gramps import Cypher_repository_w_handle
+from models.gen.cypher import Cypher_repository
 from models.gen.weburl import Weburl
 import shareds
    
@@ -23,12 +24,7 @@ class Repository:
             id              str    esim. "R0001"
             rname           str    arkiston nimi
             type            str    arkiston tyyppi
-            url_refs        Weburl(url_href, url_type, url_description)[]
-#                 href        str url osoite
-#                 type        str url tyyppi
-#                 description str url kuvaus
-
-    #TODO: url_refs[] --> urls[] list should contain Weburl instances
+            urls            Weburl[]
      """
 
     def __init__(self):
@@ -37,15 +33,15 @@ class Repository:
         self.handle = ''
         self.change = ''
         self.id = ''
-        self.url_refs = []
-        self.sources = []   # For creating display sets
+        self.urls = []      # contains Weburl instances (prev. url_refs = [])
+
+        self.sources = []   # For creating display sets (Not used??)
         
     
     @staticmethod
-    def _to_self(record):
+    def from_record(record):
         '''
-        Transforms a db record to an object of type Repository
-        #TODO muodosta url_refs Weburl:in komponenteista
+        Transforms a db record to Repository object
         '''
         n = Repository()
         if record['uniq_id']:
@@ -66,16 +62,22 @@ class Repository:
         return n
 
 
-    def get_repo_data(self):
-        """ Luetaan arkiston tiedot """
+    def get_repo_w_urls(self):
+        """ Luetaan arkiston tiedot
+            Get Repository with linked Weburls
+
+            returns:
+            - repo: {"handle":"_de18a0b2d546e222251e549f2bd",
+                     "id":"R0000","rname":"Haminan kaupunginarkisto",
+                     "type":"Library",
+                     "change":"1526233479"}
+            - webref: collect(w.href, wr.type, wr.description, wr.priv)
+        """
                         
-        query = """
-            MATCH (repo:Repository) WHERE ID(repo) = {}
-            RETURN repo.rname AS rname, repo.type AS type
-            """.format(self.uniq_id)
-        return  shareds.driver.session().run(query)
-    
-    
+        with shareds.driver.session() as session:
+            return session.run(Cypher_repository.get_w_urls, rid=self.uniq_id)
+
+
     @staticmethod
     def get_repositories(uniq_id):
         """ Reads all Repository nodes or selected Repository node from db
@@ -87,24 +89,16 @@ class Repository:
         result = None
         with shareds.driver.session() as session:
             if uniq_id:
-                repository_get = """
-MATCH (r:Repository)
-WHERE ID(r) == $rid
-RETURN ID(n) AS uniq_id, r"""
-                result =  session.run(repository_get, nid=uniq_id)
+                result =  session.run(Cypher_repository.get_one, rid=uniq_id)
             else:
-                repository_get_all = """
-MATCH (r:Repository)
-RETURN ID(n) AS uniq_id, r 
-ORDER BY r.type"""
-                result =  session.run(repository_get_all)
+                result =  session.run(Cypher_repository.get_all)
 
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 'name']
         repositories = []
 
         for record in result:
             # Create a Note object from record
-            n = Repository._to_self(record)
+            n = Repository.from_record(record)
             repositories.append(n)
 
         return (titles, repositories)
@@ -118,37 +112,27 @@ ORDER BY r.type"""
 #         return  shareds.driver.session().run(query)
     
     
-    @staticmethod       
-    def get_repository(rname):
-        """ Luetaan arkiston handle """
-                        
-        query = """
-            MATCH (repo:Repository) WHERE repo.rname='{}'
-                RETURN repo
-            """.format(rname)
-        return  shareds.driver.session().run(query)
+#     @staticmethod       
+#     def get_repository(rname):
+#         """ Luetaan arkiston handle """
+#                         
+#         query = """
+#             MATCH (repo:Repository) WHERE repo.rname='{}'
+#                 RETURN repo
+#             """.format(rname)
+#         return  shareds.driver.session().run(query)
     
     
     @staticmethod       
-    def get_repository_source (uniq_id):
+    def get_w_source (uniq_id):
         """ Voidaan lukea repositoreja sourceneen kannasta
         """
 
-        if uniq_id:
-            where = "WHERE ID(repository)={} ".format(uniq_id)
-        else:
-            where = ''
-        
-        query = """
-MATCH (repository:Repository) <-[r:REPOSITORY]- (source:Source) {0}
-    WITH repository, r, source ORDER BY source.stitle
-RETURN ID(repository) AS id, repository.rname AS rname, 
-    repository.type AS type, repository.url_href AS url_href, 
-    repository.url_type AS url_type, repository.url_description AS url_description,
-    COLLECT([ID(source), source.stitle, r.medium]) AS sources
-ORDER BY repository.rname""".format(where)
-                
-        return shareds.driver.session().run(query)
+        with shareds.driver.session() as session:
+            if uniq_id:
+                return session.run(Cypher_repository.get_w_sources, rid=uniq_id)
+            else:
+                return session.run(Cypher_repository.get_w_sources_all)
                 
     
     @staticmethod       
@@ -189,16 +173,18 @@ ORDER BY repository.rname""".format(where)
                 "rname": self.rname,
                 "type": self.type,
             }
-            #TODO: usr_refs[] -> urls[] list should contain Weburl instances
-            if len(self.url_refs) > 0:
-                with self.url_refs[0] as url:
-                    r_attr['url_href'] = url.href
-                    r_attr['url_type'] = url.type
-                    r_attr['url_description'] = url.description
-                
-            tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
+            result = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
+            self.uniq_id = result.single()[0]
         except Exception as err:
-            print("Virhe (Repository.save): {0}".format(err), file=stderr)
+            print("Error Repository.save: {0}".format(err), file=stderr)
+            raise SystemExit("Stopped due to errors")    # Stop processing
+            #TODO raise ConnectionError("Repository.save: {0}".format(err))
+
+        try:
+            for weburl in self.urls:
+                weburl.save(tx, self.uniq_id)
+        except Exception as err:
+            print("Error Repository.save weburl: {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
             #TODO raise ConnectionError("Repository.save: {0}".format(err))
 

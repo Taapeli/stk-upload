@@ -216,14 +216,16 @@ def read_cite_sour_repo(uniq_id=None):
 
                         r = Repository()
                         r.uniq_id = s.reporef_hlink
-                        result_repo = r.get_repo_data()
+                        result_repo = r.get_repo_w_urls()
                         for record_repo in result_repo:
                             if record_repo['rname']:
                                 r.rname = record_repo['rname']
                             if record_repo['type']:
                                 r.type = record_repo['type']
-                        
+                            if record_repo['webref']:
+                                r.urls.append(Weburl(record_repo))
                         s.repos.append(r)
+
                 c.sources.append(s)
             e.citations.append(c)
             
@@ -259,28 +261,41 @@ def get_repositories(uniq_id=None):
     """ Lukee tietokannasta Repository- ja Source- objektit näytettäväksi
 
         (Korvaa read_repositories()
-    """
-    
-    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 
-              'url_refs']
+    ╒════════╤════════╤════════╤════════╤════════╤═══════╤════════╤════════╕
+    │"uniq_id│"rname" │"type"  │"change"│"handle"│"id"   │"sources│"webref"│
+    │"       │        │        │        │        │       │"       │        │
+    ╞════════╪════════╪════════╪════════╪════════╪═══════╪════════╪════════╡
+    │25979   │"Haminan│"Library│"1526233│"_de18a0│"R0000"│[[25992,│[[null,n│
+    │        │ kaupung│"       │479"    │b2d546e2│       │"Haminan│ull,null│
+    │        │inarkist│        │        │22251e54│       │ asukasl│,null]] │
+    │        │o"      │        │        │9f2bd"  │       │uettelo │        │
+    │        │        │        │        │        │       │1800-182│        │
+    │        │        │        │        │        │       │0","Book│        │
+    │        │        │        │        │        │       │"]]     │        │
+    └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
+    """    
+    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'urls']
     repositories = []
-    result = Repository.get_repository_source(uniq_id)
+    result = Repository.get_w_source(uniq_id)
     for record in result:
-        pid = record['id']
         r = Repository()
-        r.uniq_id = pid
+        r.uniq_id = record['uniq_id']
         if record['rname']:
             r.rname = record['rname']
+        if record['change']:
+            r.change = record['change']
+        if record['handle']:
+            r.handle = record['handle']
         if record['type']:
             r.type = record['type']
-        if record['url_href']:
-            url = Weburl()
-            url.href = record['url_href']
-            if record['url_type']:
-                url.type = record['url_type']
-            if record['url_description']:
-                url.description = record['url_description']
-            r.url_refs.append(url)
+        if record['id']:
+            r.id = record['id']
+        if 'webref' in record:
+            for webref in record['webref']:
+                # collect([w.href, wr.type, wr.description, wr.priv]) as webref
+                wurl = Weburl.from_record(webref)
+                if wurl:
+                    r.urls.append(wurl)
 
         for source in record['sources']:
             s = Source()
