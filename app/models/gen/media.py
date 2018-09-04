@@ -25,7 +25,7 @@ class Media:
         """ Luo uuden media-instanssin """
         self.uniq_id = None
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.id = ''
         
         
@@ -80,7 +80,7 @@ class Media:
         """ Tulostaa tiedot """
         print ("*****Note*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Src: " + self.src)
         print ("Mime: " + self.mime)

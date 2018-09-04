@@ -28,7 +28,7 @@ class Citation:
     def __init__(self):
         """ Luo uuden citation-instanssin """
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.id = ''
         self.dateval = ''
         self.page = ''
@@ -106,7 +106,7 @@ class Citation:
         """ Tulostaa tiedot """
         print ("*****Citation*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Dateval: " + self.dateval)
         print ("Page: " + self.page)

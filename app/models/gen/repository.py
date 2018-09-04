@@ -31,7 +31,7 @@ class Repository:
         """ Luo uuden repository-instanssin """
         self.uniq_id = None
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.id = ''
         self.urls = []      # contains Weburl instances (prev. url_refs = [])
 
@@ -70,7 +70,7 @@ class Repository:
             - repo: {"handle":"_de18a0b2d546e222251e549f2bd",
                      "id":"R0000","rname":"Haminan kaupunginarkisto",
                      "type":"Library",
-                     "change":"1526233479"}
+                     "change":1526233479}
             - webref: collect(w.href, wr.type, wr.description, wr.priv)
         """
                         
@@ -152,7 +152,7 @@ class Repository:
         """ Tulostaa tiedot """
         print ("*****Repository*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Rname: " + self.rname)
         print ("Type: " + self.type)

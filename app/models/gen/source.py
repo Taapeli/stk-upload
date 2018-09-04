@@ -28,7 +28,7 @@ class Source:
     def __init__(self):
         """ Luo uuden source-instanssin """
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.id = ''
         self.stitle = ''
         self.noteref_hlink = ''
@@ -258,7 +258,7 @@ ORDER BY toUpper(stitle)
         """ Tulostaa tiedot """
         print ("*****Source*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         if self.stitle != '':
             print ("Stitle: " + self.stitle)

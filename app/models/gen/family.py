@@ -27,7 +27,7 @@ class Family:
     def __init__(self, uniq_id=None):
         """ Luo uuden family-instanssin """
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.id = ''
         self.uniq_id = uniq_id
         self.eventref_hlink = []
@@ -134,7 +134,7 @@ RETURN ID(person) AS mother"""
         """ Tulostaa tiedot """
         print ("*****Family*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Rel: " + self.rel_type)
         print ("Father: " + self.father)

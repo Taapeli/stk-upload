@@ -51,7 +51,7 @@ class Place:
             self.level = level
         # Gramps-tietoja
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.names = []
         self.coord = None
         self.urls = []          # Weburl instance list
@@ -379,7 +379,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         """ Tulostaa tiedot """
         print ("*****Placeobj*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Type: " + self.type)
         if self.pname != '':

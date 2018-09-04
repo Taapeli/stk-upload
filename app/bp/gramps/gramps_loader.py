@@ -219,7 +219,7 @@ class DOM_handler():
             if citation.hasAttribute("handle"):
                 c.handle = citation.getAttribute("handle")
             if citation.hasAttribute("change"):
-                c.change = citation.getAttribute("change")
+                c.change = int(citation.getAttribute("change"))
             if citation.hasAttribute("id"):
                 c.id = citation.getAttribute("id")
 
@@ -281,7 +281,7 @@ class DOM_handler():
             if event.hasAttribute("handle"):
                 e.handle = event.getAttribute("handle")
             if event.hasAttribute("change"):
-                e.change = event.getAttribute("change")
+                e.change = int(event.getAttribute("change"))
             if event.hasAttribute("id"):
                 e.id = event.getAttribute("id")
 
@@ -375,7 +375,7 @@ class DOM_handler():
             if family.hasAttribute("handle"):
                 f.handle = family.getAttribute("handle")
             if family.hasAttribute("change"):
-                f.change = family.getAttribute("change")
+                f.change = int(family.getAttribute("change"))
             if family.hasAttribute("id"):
                 f.id = family.getAttribute("id")
 
@@ -445,7 +445,7 @@ class DOM_handler():
             if note.hasAttribute("handle"):
                 n.handle = note.getAttribute("handle")
             if note.hasAttribute("change"):
-                n.change = note.getAttribute("change")
+                n.change = int(note.getAttribute("change"))
             if note.hasAttribute("id"):
                 n.id = note.getAttribute("id")
             if note.hasAttribute("priv"):
@@ -479,7 +479,7 @@ class DOM_handler():
             if obj.hasAttribute("handle"):
                 o.handle = obj.getAttribute("handle")
             if obj.hasAttribute("change"):
-                o.change = obj.getAttribute("change")
+                o.change = int(obj.getAttribute("change"))
             if obj.hasAttribute("id"):
                 o.id = obj.getAttribute("id")
 
@@ -515,7 +515,7 @@ class DOM_handler():
             if person.hasAttribute("handle"):
                 p.handle = person.getAttribute("handle")
             if person.hasAttribute("change"):
-                p.change = person.getAttribute("change")
+                p.change = int(person.getAttribute("change"))
             if person.hasAttribute("id"):
                 p.id = person.getAttribute("id")
             if person.hasAttribute("priv"):

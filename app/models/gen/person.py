@@ -55,7 +55,7 @@ class Person:
     def __init__(self):
         """ Luo uuden person-instanssin """
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.uniq_id = None
         self.id = ''
         self.names = []
@@ -487,8 +487,8 @@ RETURN person, urls, COLLECT (name) AS names
         │ Person                       │   │ Name                         │
         ├──────────────────────────────┼───┼──────────────────────────────┤
         │{"gender":"","handle":"       │{} │{"surname":"Andersen","alt":""│
-        │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","firstn│
-        │}                             │   │ame":"Alexander","refname":""}│
+        │handle_6","change":0,"id":"6"}│   │,"type":"","suffix":"","firstn│
+        │                              │   │ame":"Alexander","refname":""}│
         ├──────────────────────────────┼───┼──────────────────────────────┤
         """
 
@@ -692,7 +692,7 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
         print ("*****Person*****")
         if (print_out):
             print ("Handle: " + self.handle + " # " + comp_person.handle)
-            print ("Change: " + self.change + " # " + comp_person.change)
+            print ("Change: {} # {}".format(self.change, comp_person.change))
             print ("Unique id: " + str(self.uniq_id) + " # " + str(comp_person.uniq_id))
             print ("Id: " + self.id + " # " + comp_person.id)
             print ("Priv: " + self.priv + " # " + comp_person.priv)
@@ -796,7 +796,7 @@ SET n.est_death = m.daterange_start"""
         """ Tulostaa tiedot """
         print ("*****Person*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Priv: " + self.priv)
         print ("Gender: " + self.gender)
@@ -839,7 +839,7 @@ SET n.est_death = m.daterange_start"""
         print ("*****Person*****")
         if (print_out):
             print ("Handle: " + self.handle + " # " + comp_person.handle)
-            print ("Change: " + self.change + " # " + comp_person.change)
+            print ("Change: {} # {}".format(self.change, comp_person.change))
             print ("Id: " + self.id + " # " + comp_person.id)
             print ("Priv: " + self.priv + " # " + comp_person.priv)
             print ("Gender: " + self.gender + " # " + comp_person.gender)

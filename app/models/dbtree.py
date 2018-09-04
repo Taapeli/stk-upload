@@ -42,34 +42,34 @@ class DbTree():
             ╒══════════════════════════════╤════╤═══════╕
             │"nodes"                       │"lv"│"r"    │
             ╞══════════════════════════════╪════╪═══════╡
-            │[{"pname":"Inkeri","change":"1│"1" │[{}]   │ 2 nodea ja
-            │496429798","handle":"_d│    │       │ 1 yhteys
+            │[{"pname":"Inkeri","change":14│"1" │[{}]   │ 2 nodea ja
+            │96429798,"handle":"_d         │    │       │ 1 yhteys
             │9c25aa5af17a80cc1af6a8533b","i│    │       │
             │d":"P0054","type":"State"},{"p│    │       │
-            │name":"Tuutari","change":"1496│    │       │
-            │431999","handle":"_d9c2│    │       │
+            │name":"Tuutari","change":1496 │    │       │
+            │431999,"handle":"_d9c2│    │       │
             │5abb00881f87b8bdbda5eb","id":"│    │       │
             │P0055","type":"Region"}]      │    │       │
             ├──────────────────────────────┼────┼───────┤
-            │[{"pname":"Inkeri","change":"1│"2" │[{},{}]│ 3 nodea ja
-            │496429798","handle":"_d│    │       │ 2 yhteyttä
+            │[{"pname":"Inkeri","change":14│"2" │[{},{}]│ 3 nodea ja
+            │96429798,"handle":"_d         │    │       │ 2 yhteyttä
             │9c25aa5af17a80cc1af6a8533b","i│    │       │
             │d":"P0054","type":"State"},{"p│    │       │
-            │name":"Tuutari","change":"1496│    │       │
-            │431999","handle":"_d9c2│    │       │
+            │name":"Tuutari","change":1496 │    │       │
+            │431999","handle":"_d9c2       │    │       │
             │5abb00881f87b8bdbda5eb","id":"│    │       │
             │P0055","type":"Region"},{"pnam│    │       │
-            │e":"Nurkkala","change":"150030│    │       │
-            │0897","handle":"_d9c26f│    │       │
+            │e":"Nurkkala","change":150030 │    │       │
+            │0897,"handle":"_d9c26f        │    │       │
             │b0acf5873995a02ac6efe","id":"P│    │       │
             │0056","type":"Village"}]      │    │       │
             ├──────────────────────────────┼────┼───────┤
-            │[{"pname":"Inkeri","change":"1│"-1"│[{}]   │ 2 nodea ja
-            │496429798","handle":"_d│    │       │ 1 yhteys
+            │[{"pname":"Inkeri","change":1 │"-1"│[{}]   │ 2 nodea ja
+            │496429798,"handle":"_d        │    │       │ 1 yhteys
             │9c25aa5af17a80cc1af6a8533b","i│    │       │
             │d":"P0054","type":"State"},{"p│    │       │
-            │name":"Venäjä","change":"14996│    │       │
-            │85324","handle":"_d7917│    │       │
+            │name":"Venäjä","change":14996 │    │       │
+            │85324,"handle":"_d7917        │    │       │
             │3305b956899544","id":"P0024","│    │       │
             │type":"Country"}]             │    │       │
             └──────────────────────────────┴────┴───────┘

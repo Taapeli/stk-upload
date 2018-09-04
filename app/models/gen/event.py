@@ -77,7 +77,7 @@ class Event():
     def __init__(self, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
         self.handle = handle
-        self.change = ''
+        self.change = 0
         self.id = eid
         self.type = ''
         self.description = desc
@@ -249,7 +249,7 @@ class Event():
         """ Tulostaa tiedot """
         print ("*****Event*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Type: " + self.type)
         print ("Description: " + self.description)
@@ -268,7 +268,7 @@ class Event():
         print ("*****Events*****")
         if print_out:
             print ("Handle: " + self.handle + " # " + comp_event.handle)
-            print ("Change: " + self.change + " # " + comp_event.change)
+            print ("Change: {} # {}".format(self.change, comp_event.change))
             print ("Id: " + self.id + " # " + comp_event.id)
             print ("Type: " + self.type + " # " + comp_event.type)
             print ("Description: " + self.description + " # " + comp_event.description)
