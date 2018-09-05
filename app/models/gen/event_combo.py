@@ -48,8 +48,8 @@ class Event_combo(Event):
         Event.__init__(self, eid, desc, handle)
         self.note_ref = []      # Note uniq_ids (previous noteref_hlink had
                                 # only the first one)
+        self.citation_handles = []  # (previous citationref_hlink = '')
         self.place_hlink = ''
-        self.citationref_hlink = ''
         self.objref_hlink = ''
 
         self.citations = []     # For creating display sets
@@ -75,7 +75,7 @@ class Event_combo(Event):
 #         pass
 
     # Entinen get_event_data_by_id()
-    def get_person_events(self):
+    def get_event_combo(self):
         """ Read this event with uniq_id's of related Place, Note, and Citation
             nodes.
 
@@ -116,10 +116,10 @@ return e as event,
             # Related data
             for ref in record["note_ref"]:
                 self.note_ref.append(ref) # List of uniq_ids # prev. noteref_hlink
+            for ref in record["citation_ref"]:
+                self.citation_ref.append(ref)   # prev. citationref_hlink = ref
             for ref in record["place_ref"]:
                 self.place_hlink = ref
-            for ref in record["citation_ref"]:
-                self.citationref_hlink = ref
 
 #             # Place
 #             place_result = self.get_place_by_id()

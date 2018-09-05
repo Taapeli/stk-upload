@@ -32,7 +32,7 @@ class Family:
         self.uniq_id = uniq_id
         self.eventref_hlink = []
         self.eventref_role = []
-        self.childref_hlink = []
+        self.childref_hlink = []    # handles
         self.noteref_hlink = []
     
     

@@ -92,13 +92,14 @@ MERGE (n)-[r:PLACE]->(m)"""
 match (n:Note)  where n.handle in $note_handles
 with n
     match (e:Event)  where e.handle=$handle
-    merge (e) -[r:NOTE]-> (n)
-return count(r) as cnt"""
+    merge (e) -[r:NOTE]-> (n)"""
+#return count(r) as cnt"""
 
-    link_citation = """
-MATCH (n:Event)    WHERE n.handle=$handle
-MATCH (m:Citation) WHERE m.handle=$citationref_hlink
-MERGE (n)-[r:CITATION]->(m)"""
+    link_citations = """
+match (c:Citation) where c.handle in $citation_handles
+with c
+    match (e:Event)  where e.handle=$handle
+    merge (e) -[r:CITATION]-> (c)"""
 
     link_media = """
 MATCH (n:Event) WHERE n.handle=$handle

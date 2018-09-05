@@ -106,9 +106,9 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
         # raise SystemExit("Stopped due to errors")    # Stop processing
         raise
 
-    # Set person confidence values (for all persons!)
     handler.begin_tx(shareds.driver.session())
-    set_confidence_value(handler.tx)
+    # Set person confidence values (for all persons!)
+    set_confidence_value(handler.tx, batch_logger=handler.batch_logger)
     # Set Refname links (for imported persons)
     handler.set_refnames()
     handler.commit()
@@ -299,8 +299,8 @@ class DOM_handler():
                 # If there are description tags, but no description data
                 if (len(event_description.childNodes) > 0):
                     e.description = event_description.childNodes[0].data
-                else:
-                    e.description = ''
+#                 else:
+#                     e.description = ''
             elif len(event.getElementsByTagName('description') ) > 1:
                 self.log(Log("More than one description tag in an event",
                                     level="WARNING", count=e.id))
@@ -339,13 +339,9 @@ class DOM_handler():
                 if ref.hasAttribute("hlink"):
                     e.note_handles.append(ref.getAttribute("hlink"))
 
-            if len(event.getElementsByTagName('citationref') ) == 1:
-                event_citationref = event.getElementsByTagName('citationref')[0]
-                if event_citationref.hasAttribute("hlink"):
-                    e.citationref_hlink = event_citationref.getAttribute("hlink")
-            elif len(event.getElementsByTagName('citationref') ) > 1:
-                self.log(Log("More than one citationref tag in an event",
-                                    level="WARNING", count=e.id))
+            for ref in event.getElementsByTagName('citationref'):
+                if ref.hasAttribute("hlink"):
+                    e.citation_handles.append(ref.getAttribute("hlink"))
 
             if len(event.getElementsByTagName('objref') ) == 1:
                 event_objref = event.getElementsByTagName('objref')[0]
@@ -603,7 +599,8 @@ class DOM_handler():
                     person_parentin = person.getElementsByTagName('parentin')[i]
                     if person_parentin.hasAttribute("hlink"):
                         p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
-
+                        
+#TODO Aikanaan noteref_hlink ja citationref_hlink korvattava ..._handles[]?
             if len(person.getElementsByTagName('noteref') ) >= 1:
                 for i in range(len(person.getElementsByTagName('noteref') )):
                     person_noteref = person.getElementsByTagName('noteref')[i]
