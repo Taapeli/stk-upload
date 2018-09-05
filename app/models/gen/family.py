@@ -69,7 +69,7 @@ RETURN family"""
         family_result = shareds.driver.session().run(query, {"pid": pid})
         
         for family_record in family_result:
-            self.change = family_record["family"]['change']
+            self.change = int(family_record["family"]['change'])  #TODO only temporary int()
             self.id = family_record["family"]['id']
             self.rel_type = family_record["family"]['rel_type']
             

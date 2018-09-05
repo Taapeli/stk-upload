@@ -193,7 +193,7 @@ RETURN person, name
         for person_record in person_result:
             if self.id == None:
                 self.handle = person_record["person"]['handle']
-                self.change = person_record["person"]['change']
+                self.change = int(person_record["person"]['change'])  #TODO only temporary int()
                 self.id = person_record["person"]['id']
                 self.priv = person_record["person"]['priv']
                 self.gender = person_record["person"]['gender']
@@ -246,7 +246,7 @@ RETURN person, urls, COLLECT (name) AS names
 
         for person_record in person_result:
             self.handle = person_record["person"]['handle']
-            self.change = person_record["person"]['change']
+            self.change = int(person_record["person"]['change'])  #TODO only temporary int()
             self.id = person_record["person"]['id']
             self.priv = person_record["person"]['priv']
             self.gender = person_record["person"]['gender']
@@ -333,7 +333,7 @@ RETURN person, urls, COLLECT (name) AS names
             else:
                 data_line.append('-')
             if record["p"]['change']:
-                data_line.append(record["p"]['change'])
+                data_line.append(int(record["p"]['change']))  #TODO only temporary int()
             else:
                 data_line.append('-')
             if record["p"]['id']:

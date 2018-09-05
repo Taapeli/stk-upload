@@ -283,7 +283,7 @@ def get_repositories(uniq_id=None):
         if record['rname']:
             r.rname = record['rname']
         if record['change']:
-            r.change = record['change']
+            r.change = int(record['change'])  #TODO only temporary int()
         if record['handle']:
             r.handle = record['handle']
         if record['type']:

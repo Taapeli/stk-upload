@@ -87,7 +87,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
         place_result = shareds.driver.session().run(query, place_id=plid)
 
         for place_record in place_result:
-            self.change = place_record["place"]["change"]
+            self.change = int(place_record["place"]["change"])  #TODO only temporary int()
             self.id = place_record["place"]["id"]
             self.type = place_record["place"]["type"]
             names = place_record["names"]
@@ -142,7 +142,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
             else:
                 data_line.append('-')
             if record["p"]['change']:
-                data_line.append(record["p"]['change'])
+                data_line.append(int(record["p"]['change']))  #TODO only temporary int()
             else:
                 data_line.append('-')
             if record["p"]['id']:

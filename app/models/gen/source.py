@@ -181,7 +181,7 @@ ORDER BY toUpper(stitle)
             else:
                 data_line.append('-')
             if record["s"]['change']:
-                data_line.append(record["s"]['change'])
+                data_line.append(int(record["s"]['change']))  #TODO only temporary int()
             else:
                 data_line.append('-')
             if record["s"]['id']:
@@ -224,7 +224,7 @@ ORDER BY toUpper(stitle)
             else:
                 data_line.append('-')
             if record["s"]['change']:
-                data_line.append(record["s"]['change'])
+                data_line.append(int(record["s"]['change']))  #TODO only temporary int()
             else:
                 data_line.append('-')
             if record["s"]['id']:

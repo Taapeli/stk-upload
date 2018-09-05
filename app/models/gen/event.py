@@ -190,7 +190,7 @@ class Event():
             else:
                 data_line.append('-')
             if record["e"]['change']:
-                data_line.append(record["e"]['change'])
+                data_line.append(int(record["e"]['change']))  #TODO only temporary int()
             else:
                 data_line.append('-')
             if record["e"]['id']:

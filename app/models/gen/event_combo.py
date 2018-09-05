@@ -97,7 +97,7 @@ return e as event,
             # Event data
             event = record["event"]
             self.id = event["id"]
-            self.change = event["change"]
+            self.change = int(event["change"])  #TODO only temporary int()
             self.type = event["type"]
             if "datetype" in event:
                 #TODO: Talletetaanko DateRange -objekti vai vain str?

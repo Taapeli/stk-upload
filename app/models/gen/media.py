@@ -54,7 +54,7 @@ class Media:
 
         for obj_record in obj_result:
             self.id = obj_record["obj"]["id"]
-            self.change = obj_record["obj"]["change"]
+            self.change = int(obj_record["obj"]["change"])  #TODO only temporary int()
             self.src = obj_record["obj"]["src"]
             self.mime = obj_record["obj"]["mime"]
             self.description = obj_record["obj"]["description"]
