@@ -5,7 +5,7 @@ blinker==1.4
 cffi==1.11.2
 click==6.7
 cryptography==2.3
-Flask==0.12.3 
+Flask==0.12.4 
 Flask-BabelEx==0.9.3
 Flask-Login==0.4.0
 Flask-Mail==0.9.1
