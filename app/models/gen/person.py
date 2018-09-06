@@ -25,7 +25,7 @@ class Person:
                 change
                 uniq_id            int database key
                 id                 esim. "I0001"
-                priv               str merkitty yksityiseksi
+                priv               str "1" = merkitty yksityiseksi
                 gender             str sukupuoli
                 names[]:
                    alt             str muun nimen nro
@@ -34,20 +34,23 @@ class Person:
                    refname         str referenssinimi
                    surname         str sukunimi
                    suffix          str patronyymi
-                eventref_hlink     str tapahtuman osoite
-                eventref_role      str tapahtuman rooli
-                objref_hlink       str tallenteen osoite
-                urls[]:
-                    priv           str url salattu tieto
-                    href           str url osoite
-                    type           str url tyyppi
-                    description    str url kuvaus
-                parentin_hlink     str vanhempien osoite
-                noteref_hlink      str huomautuksen osoite
-                citationref_hlink  str viittauksen osoite
                 confidence         str tietojen luotettavuus
                 est_birth          str arvioitu syntymäaika
                 est_death          str arvioitu kuolinaika
+
+            The indexes of referred objects are in variables:
+                eventref_hlink[]   int tapahtuman uniq_id, rooli 
+                - eventref_role[]  str edellisen rooli
+                objref_hlink[]     int median uniq_id
+                urls[]             list of Weburl nodes
+                    priv           str 1 = salattu tieto
+                    href           str osoite
+                    type           str tyyppi
+                    description    str kuvaus
+                parentin_hlink[]   int vanhempien uniq_id
+                noteref_hlink[]    int huomautuksen uniq_id
+                citationref_hlink[] int viittauksen uniq_id            
+
 
     #TODO: urls[] list should contain Weburl instances
      """
@@ -578,23 +581,29 @@ RETURN n.id, k.firstname, k.surname,
 
     @staticmethod
     def get_family_members (uniq_id):
-        """ Read person's families and family members for Person page
+        """ Read the Names, Families and Events connected to this Person.
+            for '/scene/person=<string:uniq_id>'
         """
         query="""
-MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-[:NAME]->(n:Name) WHERE ID(p) = $id
-    OPTIONAL MATCH (m)-[:EVENT]->(birth {type:'Birth'})
-    WITH f.id AS family_id, ID(f) AS f_uniq_id,
-        TYPE(r) AS role, m.id AS m_id, ID(m) AS uniq_id,
-        m.gender AS gender, birth.date AS birth_date,
-        n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx
+MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name) 
+    WHERE ID(p) = $id
+OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
+    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
+         TYPE(r1) AS role,
+         m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
+         n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx,
+         birth.date AS birth_date
     ORDER BY n.alt
-    RETURN family_id, f_uniq_id, role, m_id, uniq_id, gender, birth_date,
-        COLLECT([alt, ntype, fn, sn, sx]) AS names
+    RETURN family_id, f_uniq_id, role, 
+           m_id, uniq_id, gender, birth_date,
+           COLLECT([alt, ntype, fn, sn, sx]) AS names
     ORDER BY family_id, role, birth_date
 UNION
-MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
-    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(l) AS role, p.id AS m_id, ID(p) AS uniq_id,
-        p.gender AS gender, "" AS birth_date, [] AS names"""
+MATCH (p:Person) <-[r2]- (f:Family) 
+    WHERE id(p) = $id
+    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
+           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, "" AS birth_date,
+           [] AS names"""
 
 # ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤════════════╤══════════════════════════════╕
 # │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"│"names"                       │
@@ -625,6 +634,30 @@ MATCH path = (a) -[:BASENAME*]-> (p)
 RETURN a, [x IN RELATIONSHIPS(path)] AS li
 """
         return shareds.driver.session().run(query, pid=pid)
+
+
+    @staticmethod
+    def get_ref_weburls(keylist):
+        """ Get all weburls referenced from list of uniq_ids
+            #TODO Mitä tietoja halutaan?
+        """
+#       Example
+#                 match (x) 
+#                 where id(x) in [72529, 72515, 72528]
+#                 with distinct x
+#                   match (x) -[r:CITATION|SOURCE|NOTE|WEBURL]-> (y) 
+#                   return x.id, type(r), id(y), labels(y)[0] as label, 
+#                          y.id as id order by id, x.id
+
+        query="""match (x) where id(x) in $pids
+with distinct x
+  match (x) -[r:CITATION|SOURCE|NOTE|WEBURL]-> (y) 
+  return id(x) as parent, x.id as parent_id, type(r) as rtype, 
+         id(y) as target, labels(y)[0] as label, y.id as id 
+  order by parent, id"""
+
+        return shareds.driver.session().run(query, pids=keylist)
+
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"

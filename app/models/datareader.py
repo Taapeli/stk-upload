@@ -542,6 +542,17 @@ def get_people_by_surname(surname):
 def get_person_data_by_id(uniq_id):
     """ Get 5 data sets:
         person: Person object with name data
+            The indexes of referred objects are in variables 
+                eventref_hlink[]      str tapahtuman uniq_id, rooli eventref_role[]
+                objref_hlink[]        str tallenteen uniq_id
+                urls[]                list of Weburl nodes
+                    priv           str 1 = salattu tieto
+                    href           str osoite
+                    type           str tyyppi
+                    description    str kuvaus
+                parentin_hlink[]      str vanhempien uniq_id
+                noteref_hlink[]       str huomautuksen uniq_id
+                citationref_hlink[]   str viittauksen uniq_id            
         events: list of Event_combo object with location name and id (?)
         photos
         sources
@@ -552,8 +563,11 @@ def get_person_data_by_id(uniq_id):
     p.get_person_w_names()
     p.get_hlinks_by_id()
     
+    # Person_display(Person)
     events = []
     sources = []
+    photos = []
+    family_list = []
     source_cnt = 0
 
     # Events
@@ -628,7 +642,6 @@ def get_person_data_by_id(uniq_id):
                         
                     sources.append(c)
             
-    photos = []
     for link in p.objref_hlink:
         o = Media()
         o.uniq_id = link
@@ -687,6 +700,30 @@ def get_person_data_by_id(uniq_id):
             families[fid].mother = member
 
     family_list = list(families.values())
+
+    # Find all referenced for the nodes found so far
+
+    nodes = {p.uniq_id:p}
+    for e in events:
+        nodes[e.uniq_id] = e
+    for e in photos:
+        nodes[e.uniq_id] = e
+    for e in sources:
+        nodes[e.uniq_id] = e
+    for e in family_list:
+        nodes[e.uniq_id] = e
+    print ("Unique Nodes: {}".format(nodes))
+    result = Person.get_ref_weburls(list(nodes.keys()))
+    for wu in result:
+        print("({} {}) -[{}]-> ({} ({} {}))".\
+              format(wu["parent"] or '?', wu["parent_id"] or '?',
+                     wu["rtype"] or '?', wu["label"],
+                     wu["target"] or '?', wu["id"] or '?'))
+        #TODO Talleta Note- ja Citation objektit oikeisiin objekteihin
+        #     Perusta objektien kantaluokka Node, jossa muuttujat jäsenten 
+        #     tallettamiseen.
+        # - Onko talletettava jäsenet vai viitteet niihin? Ei kai ole niin paljon toistoa?
+
     return (p, events, photos, sources, family_list)
 
 
