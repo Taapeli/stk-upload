@@ -98,30 +98,25 @@ def test_gedcom_transform_params(client):
     data = rv.data.decode("utf-8")
     assert 'kasteet muunnosparametrit' in data
     
-def test_gedcom_transform(client):
+def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     args = {
         "--dryrun":"on",
         "--display-changes":"on",   
     }
-    rv = client.post('/gedcom/transform/'+test_gedcom+"/kasteet.py",data=args)
+    args.update({"--"+option:value for option,value in options.items()})
+    rv = client.post('/gedcom/transform/'+test_gedcom+"/"+transform,data=args)
     data = eval(rv.data.decode("utf-8"))
-    print(data)
     assert data["stderr"] == ""
-    #assert 'Lokitiedot' in data
+    assert expected in data['stdout']
+
+def test_gedcom_transform_kasteet(client):
+    dotest_gedcom_transform(client,"kasteet-1.ged","kasteet.py","PLAC p1")
     
-def test_gedcom_transform2(client):
-    args = {
-#        "--dryrun":"on",
-        "--display-changes":"on",   
-        "--encoding":"ISO8859-1",   
-        "--add_cont_if_no_level_number":"on",   
-    }
-    test_gedcom = "AK20140516.ged"
-    test_transform = "sukujutut.py"
-    rv = client.post('/gedcom/transform/'+test_gedcom+"/" + test_transform,data=args)
-    data = eval(rv.data.decode("utf-8"))
-    open("err.log","w").write(data["stderr"])
-    open("out.log","w").write(data["stdout"])
-    assert data["stderr"] == ""
-    
+def test_gedcom_transform_sukujutut(client):
+    dotest_gedcom_transform(client,"sukujutut-1.ged","sukujutut.py","2 CONT zzz",
+        add_cont_if_no_level_number="on",
+        insert_dummy_tags="on",
+    )
+
+
         
