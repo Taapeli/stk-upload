@@ -10,14 +10,16 @@ import gzip
 from os.path import basename, splitext
 import xml.dom.minidom
 
-from models.gen.event_gramps import Event_gramps
+from .models.event_gramps import Event_gramps
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person import Person, Name, Weburl
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
-from models.gen.source_citation import Citation, Repository, Source
+from models.gen.citation import Citation
+from models.gen.source import Source
+from models.gen.repository import Repository
 from models.dataupdater import set_confidence_value, set_person_refnames
 from .batchlogger import Batch, Log
 import shareds
@@ -147,7 +149,7 @@ def file_clean(pathname):
         # Creates the ouput file and closes it
         try:
             with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
-                print("A gzipped file")
+                # print("A gzipped file")
                 counter = _clean_apostrophes(file_in, file_out)
             msg = "Cleaned apostrophes from packed input lines" # Try to read a gzipped file
         except OSError: # Not gzipped; Read as an ordinary file
@@ -217,7 +219,7 @@ class DOM_handler():
             if citation.hasAttribute("handle"):
                 c.handle = citation.getAttribute("handle")
             if citation.hasAttribute("change"):
-                c.change = citation.getAttribute("change")
+                c.change = int(citation.getAttribute("change"))
             if citation.hasAttribute("id"):
                 c.id = citation.getAttribute("id")
 
@@ -279,7 +281,7 @@ class DOM_handler():
             if event.hasAttribute("handle"):
                 e.handle = event.getAttribute("handle")
             if event.hasAttribute("change"):
-                e.change = event.getAttribute("change")
+                e.change = int(event.getAttribute("change"))
             if event.hasAttribute("id"):
                 e.id = event.getAttribute("id")
 
@@ -373,7 +375,7 @@ class DOM_handler():
             if family.hasAttribute("handle"):
                 f.handle = family.getAttribute("handle")
             if family.hasAttribute("change"):
-                f.change = family.getAttribute("change")
+                f.change = int(family.getAttribute("change"))
             if family.hasAttribute("id"):
                 f.id = family.getAttribute("id")
 
@@ -443,7 +445,7 @@ class DOM_handler():
             if note.hasAttribute("handle"):
                 n.handle = note.getAttribute("handle")
             if note.hasAttribute("change"):
-                n.change = note.getAttribute("change")
+                n.change = int(note.getAttribute("change"))
             if note.hasAttribute("id"):
                 n.id = note.getAttribute("id")
             if note.hasAttribute("priv"):
@@ -477,7 +479,7 @@ class DOM_handler():
             if obj.hasAttribute("handle"):
                 o.handle = obj.getAttribute("handle")
             if obj.hasAttribute("change"):
-                o.change = obj.getAttribute("change")
+                o.change = int(obj.getAttribute("change"))
             if obj.hasAttribute("id"):
                 o.id = obj.getAttribute("id")
 
@@ -513,7 +515,7 @@ class DOM_handler():
             if person.hasAttribute("handle"):
                 p.handle = person.getAttribute("handle")
             if person.hasAttribute("change"):
-                p.change = person.getAttribute("change")
+                p.change = int(person.getAttribute("change"))
             if person.hasAttribute("id"):
                 p.id = person.getAttribute("id")
             if person.hasAttribute("priv"):
@@ -580,19 +582,17 @@ class DOM_handler():
                     if person_objref.hasAttribute("hlink"):
                         p.objref_hlink.append(person_objref.getAttribute("hlink"))
 
-            if len(person.getElementsByTagName('url') ) >= 1:
-                for i in range(len(person.getElementsByTagName('url') )):
-                    weburl = Weburl()
-                    person_url = person.getElementsByTagName('url')[i]
-                    if person_url.hasAttribute("priv"):
-                        weburl.priv = person_url.getAttribute("priv")
-                    if person_url.hasAttribute("href"):
-                        weburl.href = person_url.getAttribute("href")
-                    if person_url.hasAttribute("type"):
-                        weburl.type = person_url.getAttribute("type")
-                    if person_url.hasAttribute("description"):
-                        weburl.description = person_url.getAttribute("description")
-                    p.urls.append(weburl)
+            for person_url in person.getElementsByTagName('url'):
+                weburl = Weburl()
+                if person_url.hasAttribute("priv"):
+                    weburl.priv = person_url.getAttribute("priv")
+                if person_url.hasAttribute("href"):
+                    weburl.href = person_url.getAttribute("href")
+                if person_url.hasAttribute("type"):
+                    weburl.type = person_url.getAttribute("type")
+                if person_url.hasAttribute("description"):
+                    weburl.description = person_url.getAttribute("description")
+                p.urls.append(weburl)
 
             if len(person.getElementsByTagName('parentin') ) >= 1:
                 for i in range(len(person.getElementsByTagName('parentin') )):
@@ -739,16 +739,13 @@ class DOM_handler():
                 self.log(Log("More than one type in a repository",
                                     level="WARNING", count=r.id))
 
-#TODO: Tämä ei toimi
-#             if len(repository.getElementsByTagName('url') ) >= 1:
-#                 for i in range(len(repository.getElementsByTagName('url') )):
-#                     repository_url = repository.getElementsByTagName('url')[i]
-#                     if repository_url.hasAttribute("href"):
-#                         r.url_href.append(repository_url.getAttribute("href"))
-#                     if repository_url.hasAttribute("type"):
-#                         r.url_type.append(repository_url.getAttribute("type"))
-#                     if repository_url.hasAttribute("description"):
-#                         r.url_description.append(repository_url.getAttribute("description"))
+            for repository_url in repository.getElementsByTagName('url'):
+                webref = Weburl()
+                webref.href = repository_url.getAttribute("href")
+                webref.type = repository_url.getAttribute("type")
+                webref.description = repository_url.getAttribute("description")
+                if webref.href > "":
+                    r.urls.append(webref)
 
             r.save(self.tx)
             counter += 1
@@ -783,6 +780,8 @@ class DOM_handler():
                 self.log(Log("More than one stitle in a source",
                                     level="WARNING", count=s.id))
 
+#TODO More than one noteref in a source     S0041, S0002
+# Vaihdetaan s.noteref_hlink --> s.note_handles[]
             if len(source.getElementsByTagName('noteref') ) == 1:
                 source_noteref = source.getElementsByTagName('noteref')[0]
                 if source_noteref.hasAttribute("hlink"):

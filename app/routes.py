@@ -63,14 +63,10 @@ def scene():
 """
 
 @shareds.app.route('/lista/<string:subj>')
-def nayta_henkilot(subj):
+def show_table_data(subj):
     """ Person listings
         tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
     """
-#     if subj == "k_persons":
-#         # Kertova-tyyliin
-#         persons = datareader.read_persons_with_events()
-#         return render_template("k_persons.html", persons=persons, menuno=0)
 #     if subj == "henkilot":
 #         dburi = models.dbutil.get_server_location()
 #         persons = datareader.lue_henkilot()

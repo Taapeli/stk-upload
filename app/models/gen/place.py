@@ -8,7 +8,7 @@ from sys import stderr
 #import logging
 #from flask import g
 from models.dbtree import DbTree
-from models.gen.person import Weburl
+from models.gen.weburl import Weburl
 from models.gen.note import Note
 from models.gen.dates import DateRange
 from models.gen.cypher import Cypher_place
@@ -50,26 +50,25 @@ class Place:
             self.level = level
         # Gramps-tietoja
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.names = []
         self.coord = None
-        self.urls = []
-        # self.placeref_hlink = '' - replaced by surround_ref
+        self.urls = []          # Weburl instance list
+
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.noteref_hlink = []
 
 
     def __str__(self):
-        try:
-            lv = self.level
-        except:
-            lv = ""
+        lv = self.level or ""
         desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, lv)
         return desc
 
 
     def get_place_data_by_id(self):
         """ Luetaan kaikki paikan tiedot ml. nimivariaatiot (tekstinä)
+            #TODO: Luetaan Weburl, Notes ja Citations vasta get_persondata_by_id() lopuksi
+
             Nimivariaatiot talletetaan kenttään pname,
             esim. [["Svartholm", "sv"], ["Svartholma", None]]
             #TODO: Ei hieno, po. Place_name objects!
@@ -86,19 +85,18 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
         place_result = shareds.driver.session().run(query, place_id=plid)
 
         for place_record in place_result:
-            self.change = place_record["place"]["change"]
+            self.change = int(place_record["place"]["change"])  #TODO only temporary int()
             self.id = place_record["place"]["id"]
             self.type = place_record["place"]["type"]
-            names = place_record["names"]
-            self.pname = Place.namelist_w_lang(names)
             self.coord = place_record["place"]["coord"]
+            self.pname = Place.namelist_w_lang(place_record["names"])
 
             urls = place_record['urls']
             for url in urls:
                 weburl = Weburl()
-                weburl.priv = url["priv"]
                 weburl.href = url["href"]
                 weburl.type = url["type"]
+                weburl.priv = url["priv"]
                 weburl.description = url["description"]
                 self.urls.append(weburl)
 
@@ -141,7 +139,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
             else:
                 data_line.append('-')
             if record["p"]['change']:
-                data_line.append(record["p"]['change'])
+                data_line.append(int(record["p"]['change']))  #TODO only temporary int()
             else:
                 data_line.append('-')
             if record["p"]['id']:
@@ -238,6 +236,7 @@ ORDER BY name[0][0]
             mainittuna.
             Jos sarakkeessa field[1] on mainittu kielikoodi
             se lisätään kunkin nimen field[0] perään suluissa
+        #TODO Lajiteltava kielen mukaan jotenkin
         """
         names = []
         for n in field:
@@ -377,7 +376,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         """ Tulostaa tiedot """
         print ("*****Placeobj*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Type: " + self.type)
         if self.pname != '':

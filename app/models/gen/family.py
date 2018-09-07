@@ -27,7 +27,7 @@ class Family:
     def __init__(self, uniq_id=None):
         """ Luo uuden family-instanssin """
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.id = ''
         self.uniq_id = uniq_id
         self.eventref_hlink = []
@@ -69,7 +69,7 @@ RETURN family"""
         family_result = shareds.driver.session().run(query, {"pid": pid})
         
         for family_record in family_result:
-            self.change = family_record["family"]['change']
+            self.change = int(family_record["family"]['change'])  #TODO only temporary int()
             self.id = family_record["family"]['id']
             self.rel_type = family_record["family"]['rel_type']
             
@@ -134,7 +134,7 @@ RETURN ID(person) AS mother"""
         """ Tulostaa tiedot """
         print ("*****Family*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Rel: " + self.rel_type)
         print ("Father: " + self.father)

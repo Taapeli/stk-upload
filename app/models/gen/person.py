@@ -15,6 +15,7 @@ import models.dbutil
 from models.gen.cypher import Cypher_person
 from models.cypher_gramps import Cypher_person_w_handle
 from models.gen.dates import DateRange
+from models.gen.weburl import Weburl
 
 class Person:
     """ Henkilö
@@ -24,7 +25,7 @@ class Person:
                 change
                 uniq_id            int database key
                 id                 esim. "I0001"
-                priv               str merkitty yksityiseksi
+                priv               str "1" = merkitty yksityiseksi
                 gender             str sukupuoli
                 names[]:
                    alt             str muun nimen nro
@@ -33,26 +34,31 @@ class Person:
                    refname         str referenssinimi
                    surname         str sukunimi
                    suffix          str patronyymi
-                eventref_hlink     str tapahtuman osoite
-                eventref_role      str tapahtuman rooli
-                objref_hlink       str tallenteen osoite
-                urls[]:
-                    priv           str url salattu tieto
-                    href           str url osoite
-                    type           str url tyyppi
-                    description    str url kuvaus
-                parentin_hlink     str vanhempien osoite
-                noteref_hlink      str huomautuksen osoite
-                citationref_hlink  str viittauksen osoite
                 confidence         str tietojen luotettavuus
                 est_birth          str arvioitu syntymäaika
                 est_death          str arvioitu kuolinaika
+
+            The indexes of referred objects are in variables:
+                eventref_hlink[]   int tapahtuman uniq_id, rooli 
+                - eventref_role[]  str edellisen rooli
+                objref_hlink[]     int median uniq_id
+                urls[]             list of Weburl nodes
+                    priv           str 1 = salattu tieto
+                    href           str osoite
+                    type           str tyyppi
+                    description    str kuvaus
+                parentin_hlink[]   int vanhempien uniq_id
+                noteref_hlink[]    int huomautuksen uniq_id
+                citationref_hlink[] int viittauksen uniq_id            
+
+
+    #TODO: urls[] list should contain Weburl instances
      """
 
     def __init__(self):
         """ Luo uuden person-instanssin """
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.uniq_id = None
         self.id = ''
         self.names = []
@@ -85,12 +91,12 @@ class Person:
     def get_event_data_by_id(self):
         """ Luetaan henkilön tapahtumien id:t """
 
-        pid = int(self.uniq_id)
+        root = int(self.uniq_id)
         query = """
 MATCH (person:Person)-[r:EVENT]->(event:Event)
   WHERE ID(person)=$pid
 RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": root})
 
 
     def get_her_families_by_id(self):
@@ -190,7 +196,7 @@ RETURN person, name
         for person_record in person_result:
             if self.id == None:
                 self.handle = person_record["person"]['handle']
-                self.change = person_record["person"]['change']
+                self.change = int(person_record["person"]['change'])  #TODO only temporary int()
                 self.id = person_record["person"]['id']
                 self.priv = person_record["person"]['priv']
                 self.gender = person_record["person"]['gender']
@@ -210,7 +216,9 @@ RETURN person, name
 
 
     def get_person_w_names(self):
-        """ Luetaan kaikki henkilön tiedot ja nimet
+        """ Returns Person with Names and Weburls included
+
+            Luetaan kaikki henkilön tiedot ja nimet
             ╒══════════════════════════════╤══════════════════════════════╕
             │"person"                      │"names"                       │
             ╞══════════════════════════════╪══════════════════════════════╡
@@ -241,7 +249,7 @@ RETURN person, urls, COLLECT (name) AS names
 
         for person_record in person_result:
             self.handle = person_record["person"]['handle']
-            self.change = person_record["person"]['change']
+            self.change = int(person_record["person"]['change'])  #TODO only temporary int()
             self.id = person_record["person"]['id']
             self.priv = person_record["person"]['priv']
             self.gender = person_record["person"]['gender']
@@ -328,7 +336,7 @@ RETURN person, urls, COLLECT (name) AS names
             else:
                 data_line.append('-')
             if record["p"]['change']:
-                data_line.append(record["p"]['change'])
+                data_line.append(int(record["p"]['change']))  #TODO only temporary int()
             else:
                 data_line.append('-')
             if record["p"]['id']:
@@ -482,8 +490,8 @@ RETURN person, urls, COLLECT (name) AS names
         │ Person                       │   │ Name                         │
         ├──────────────────────────────┼───┼──────────────────────────────┤
         │{"gender":"","handle":"       │{} │{"surname":"Andersen","alt":""│
-        │handle_6","change":"","id":"6"│   │,"type":"","suffix":"","firstname"│
-        │}                             │   │:"Alexander","refname":""}    │
+        │handle_6","change":0,"id":"6"}│   │,"type":"","suffix":"","firstn│
+        │                              │   │ame":"Alexander","refname":""}│
         ├──────────────────────────────┼───┼──────────────────────────────┤
         """
 
@@ -506,18 +514,18 @@ RETURN person, urls, COLLECT (name) AS names
 #  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
 
         query = """
- MATCH (n:Person)-[:NAME]->(k:Name) {0}
- OPTIONAL MATCH (n)-[r:EVENT]->(e)
- RETURN n.id, k.firstname, k.surname,
-  COLLECT([e.name, e.kind]) AS events
- ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
+MATCH (n:Person) -[:NAME]->( k:Name) {0}
+    OPTIONAL MATCH (n) -[r:EVENT]-> (e)
+RETURN n.id, k.firstname, k.surname,
+       COLLECT([e.name, e.kind]) AS events
+    ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
 
         return shareds.driver.session().run(query)
 
 
     @staticmethod
     def get_events_k (keys, currentuser, take_refnames=False, order=0):
-        """  Read Persons with names, events and reference names
+        """  Read Persons with Names, Events and Refnames (reference names)
             called from models.datareader.read_persons_with_events
 
              a) selected by unique id
@@ -573,23 +581,29 @@ RETURN person, urls, COLLECT (name) AS names
 
     @staticmethod
     def get_family_members (uniq_id):
-        """ Read person's families and family members for Person page
+        """ Read the Names, Families and Events connected to this Person.
+            for '/scene/person=<string:uniq_id>'
         """
         query="""
-MATCH (p:Person)<--(f:Family)-[r]->(m:Person)-[:NAME]->(n:Name) WHERE ID(p) = $id
-    OPTIONAL MATCH (m)-[:EVENT]->(birth {type:'Birth'})
-    WITH f.id AS family_id, ID(f) AS f_uniq_id,
-        TYPE(r) AS role, m.id AS m_id, ID(m) AS uniq_id,
-        m.gender AS gender, birth.date AS birth_date,
-        n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx
+MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name) 
+    WHERE ID(p) = $id
+OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
+    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
+         TYPE(r1) AS role,
+         m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
+         n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx,
+         birth.date AS birth_date
     ORDER BY n.alt
-    RETURN family_id, f_uniq_id, role, m_id, uniq_id, gender, birth_date,
-        COLLECT([alt, ntype, fn, sn, sx]) AS names
+    RETURN family_id, f_uniq_id, role, 
+           m_id, uniq_id, gender, birth_date,
+           COLLECT([alt, ntype, fn, sn, sx]) AS names
     ORDER BY family_id, role, birth_date
 UNION
-MATCH (p:Person)<-[l]-(f:Family) WHERE id(p) = $id
-    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(l) AS role, p.id AS m_id, ID(p) AS uniq_id,
-        p.gender AS gender, "" AS birth_date, [] AS names"""
+MATCH (p:Person) <-[r2]- (f:Family) 
+    WHERE id(p) = $id
+    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
+           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, "" AS birth_date,
+           [] AS names"""
 
 # ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤════════════╤══════════════════════════════╕
 # │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"│"names"                       │
@@ -620,6 +634,30 @@ MATCH path = (a) -[:BASENAME*]-> (p)
 RETURN a, [x IN RELATIONSHIPS(path)] AS li
 """
         return shareds.driver.session().run(query, pid=pid)
+
+
+    @staticmethod
+    def get_ref_weburls(keylist):
+        """ Get all weburls referenced from list of uniq_ids
+            #TODO Mitä tietoja halutaan?
+        """
+#       Example
+#                 match (x) 
+#                 where id(x) in [72529, 72515, 72528]
+#                 with distinct x
+#                   match (x) -[r:CITATION|SOURCE|NOTE|WEBURL]-> (y) 
+#                   return x.id, type(r), id(y), labels(y)[0] as label, 
+#                          y.id as id order by id, x.id
+
+        query="""match (x) where id(x) in $pids
+with distinct x
+  match (x) -[r:CITATION|SOURCE|NOTE|WEBURL]-> (y) 
+  return id(x) as root, x.id as root_id, type(r) as rtype, 
+         id(y) as target, labels(y)[0] as label, y.id as id 
+  order by root, id"""
+
+        return shareds.driver.session().run(query, pids=keylist)
+
 
     def key(self):
         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
@@ -687,7 +725,7 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
         print ("*****Person*****")
         if (print_out):
             print ("Handle: " + self.handle + " # " + comp_person.handle)
-            print ("Change: " + self.change + " # " + comp_person.change)
+            print ("Change: {} # {}".format(self.change, comp_person.change))
             print ("Unique id: " + str(self.uniq_id) + " # " + str(comp_person.uniq_id))
             print ("Id: " + self.id + " # " + comp_person.id)
             print ("Priv: " + self.priv + " # " + comp_person.priv)
@@ -791,7 +829,7 @@ SET n.est_death = m.daterange_start"""
         """ Tulostaa tiedot """
         print ("*****Person*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Priv: " + self.priv)
         print ("Gender: " + self.gender)
@@ -834,7 +872,7 @@ SET n.est_death = m.daterange_start"""
         print ("*****Person*****")
         if (print_out):
             print ("Handle: " + self.handle + " # " + comp_person.handle)
-            print ("Change: " + self.change + " # " + comp_person.change)
+            print ("Change: {} # {}".format(self.change, comp_person.change))
             print ("Id: " + self.id + " # " + comp_person.id)
             print ("Priv: " + self.priv + " # " + comp_person.priv)
             print ("Gender: " + self.gender + " # " + comp_person.gender)
@@ -930,37 +968,35 @@ SET n.est_death = m.daterange_start"""
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
         # Save Name nodes under the Person node
-        if len(self.names) > 0:
-            try:
-                names = self.names
-                for name in names:
-                    n_attr = {
-                        "alt": name.alt,
-                        "type": name.type,
-                        "firstname": name.firstname,
-                        "refname": name.refname,
-                        "surname": name.surname,
-                        "suffix": name.suffix
-                    }
-                    tx.run(Cypher_person_w_handle.link_name, 
-                           n_attr=n_attr, p_handle=self.handle)
-            except Exception as err:
-                print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
+        try:
+            for name in self.names:
+                n_attr = {
+                    "alt": name.alt,
+                    "type": name.type,
+                    "firstname": name.firstname,
+                    "refname": name.refname,
+                    "surname": name.surname,
+                    "suffix": name.suffix
+                }
+                tx.run(Cypher_person_w_handle.link_name, 
+                       n_attr=n_attr, p_handle=self.handle)
+        except Exception as err:
+            print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
 
         # Save Weburl nodes under the Person
-        if len(self.urls) > 0:
-            for url in self.urls:
-                u_attr = {
-                    "priv": url.priv,
-                    "href": url.href,
-                    "type": url.type,
-                    "description": url.description
-                }
-                try:
-                    tx.run(Cypher_person_w_handle.link_weburl, 
-                           p_handle=self.handle, u_attr=u_attr)
-                except Exception as err:
-                    print("Virhe (Person.save:create Weburl): {0}".format(err), file=stderr)
+        for url in self.urls:
+            u_attr = {
+                "priv": url.priv,
+                "href": url.href,
+                "type": url.type,
+                "description": url.description
+            }
+            try:
+                tx.run(Cypher_person_w_handle.link_weburl, 
+                       p_handle=self.handle, u_attr=u_attr)
+            except Exception as err:
+                print("Virhe (Person.save: {} create Weburl): {0}".\
+                      format(self.id, err), file=stderr)
 
         if len(self.events) > 0:
             # Make Event relations (if Events were stored in self.events)
@@ -1149,27 +1185,4 @@ MATCH (n:Name) WHERE ID(n)=$id
 SET n.refname=$refname
             """
         return tx.run(query, id=uniq_id, refname=refname)
-
-
-class Weburl:
-    '''
-    Netti URL
-
-        Properties:
-                url_priv           str url salattu tieto
-                url_href           str url osoite
-                url_type           str url tyyppi
-                url_description    str url kuvaus
-    '''
-
-    def __init__(self):
-        """ Luo uuden weburl-instanssin """
-        self.priv = ''
-        self.href = ''
-        self.type = ''
-        self.description = ''
-
-    def __str__(self):
-        desc = "Weburl ({}) '{}'-->'{}'".format(self.type, self.description, self.href)
-        return desc
 
