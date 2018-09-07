@@ -36,7 +36,6 @@ class Place:
                     description     str url kuvaus
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
-    #TODO: urls[] list should contain Weburl instances
      """
 
     def __init__(self, locid="", ptype="", pname="", level=None):
@@ -61,16 +60,15 @@ class Place:
 
 
     def __str__(self):
-        try:
-            lv = self.level
-        except:
-            lv = ""
+        lv = self.level or ""
         desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, lv)
         return desc
 
 
     def get_place_data_by_id(self):
         """ Luetaan kaikki paikan tiedot ml. nimivariaatiot (tekstinä)
+            #TODO: Luetaan Weburl, Notes ja Citations vasta get_persondata_by_id() lopuksi
+
             Nimivariaatiot talletetaan kenttään pname,
             esim. [["Svartholm", "sv"], ["Svartholma", None]]
             #TODO: Ei hieno, po. Place_name objects!
@@ -90,9 +88,8 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
             self.change = int(place_record["place"]["change"])  #TODO only temporary int()
             self.id = place_record["place"]["id"]
             self.type = place_record["place"]["type"]
-            names = place_record["names"]
-            self.pname = Place.namelist_w_lang(names)
             self.coord = place_record["place"]["coord"]
+            self.pname = Place.namelist_w_lang(place_record["names"])
 
             urls = place_record['urls']
             for url in urls:

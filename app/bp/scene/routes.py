@@ -63,7 +63,7 @@ def show_person_list(selection=None):
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')
 #     @login_required
-def show_all_persons_list(selection=None, opt=''):
+def show_all_persons_list(opt=''):
     """ The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
         with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
         TODO Should have restriction by owner's UserProfile 
@@ -80,6 +80,33 @@ def show_all_persons_list(selection=None, opt=''):
     persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order,rule=keys)
+
+
+@bp.route('/scene/person/<string:uid>/<string:opt>')
+#     @login_required
+def show_a_person(uid=0):
+    """ One Person with connected Events, Families etc
+
+        @TODO Toiminnot on kokonaan ohjelmoimatta
+    """
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
+
+    keys = ('uniq_id', uid)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    # Get Person objects, whith included Events and Names (Refnames no needed!)
+    persons = read_persons_with_events(keys, user=user)
+    persons.get_places()
+    persons.get_citation_source()
+    persons.get_notes()
+    persons.get_media()
+    persons.get_refnames()
+    
+    return render_template("/scene/person_pg.html", persons=persons, menuno=1, 
+                           order=0,rule=keys)
 
 
 @bp.route('/scene/persons/ref=<string:refname>')

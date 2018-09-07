@@ -27,10 +27,11 @@ from models.gen.dates import DateRange
 
 
 def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
-    """ Reads Person- and Event- objects for display.
+    """ Reads Person Name and Event objects for display.
         If currentuser is defined, restrict to her objects.
 
-        Returns Person objects, whith included Events
+        Returns Person objects, whith included Events and Names 
+                and optionally Refnames
     """
     
     persons = []
@@ -560,29 +561,34 @@ def get_person_data_by_id(uniq_id):
     """
     p = Person()
     p.uniq_id = int(uniq_id)
+    # Get Person and her Name properties, also Weburl properties 
     p.get_person_w_names()
+    # Get reference (uniq_id) and role for Events
+    # Get references to Media, Citation objects
+    # Get Persons birth family reference and role
     p.get_hlinks_by_id()
     
     # Person_display(Person)
     events = []
     sources = []
     photos = []
-    family_list = []
     source_cnt = 0
 
     # Events
 
     for i in range(len(p.eventref_hlink)):
+        # Store Event data
         e = Event_combo() # Event_for_template()
         e.uniq_id = p.eventref_hlink[i]
         e.role = p.eventref_role[i]
+        # Read event with uniq_id's of related Place (Note, and Citation?)
         e.get_event_combo()        # Read data to e
             
         if e.place_hlink != '':
             place = Place()
             place.uniq_id = e.place_hlink
             place.get_place_data_by_id()
-            # Location / place data
+            # Location / place name, type and reference
             e.location = place.pname
             e.locid = place.uniq_id
             e.ltype = place.type
@@ -716,9 +722,10 @@ def get_person_data_by_id(uniq_id):
     result = Person.get_ref_weburls(list(nodes.keys()))
     for wu in result:
         print("({} {}) -[{}]-> ({} ({} {}))".\
-              format(wu["parent"] or '?', wu["parent_id"] or '?',
+              format(wu["root"] or '?', wu["root_id"] or '?',
                      wu["rtype"] or '?', wu["label"],
                      wu["target"] or '?', wu["id"] or '?'))
+    print("")
         #TODO Talleta Note- ja Citation objektit oikeisiin objekteihin
         #     Perusta objektien kantaluokka Node, jossa muuttujat jäsenten 
         #     tallettamiseen.

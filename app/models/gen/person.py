@@ -91,12 +91,12 @@ class Person:
     def get_event_data_by_id(self):
         """ Luetaan henkilön tapahtumien id:t """
 
-        pid = int(self.uniq_id)
+        root = int(self.uniq_id)
         query = """
 MATCH (person:Person)-[r:EVENT]->(event:Event)
   WHERE ID(person)=$pid
 RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, {"pid": root})
 
 
     def get_her_families_by_id(self):
@@ -525,7 +525,7 @@ RETURN n.id, k.firstname, k.surname,
 
     @staticmethod
     def get_events_k (keys, currentuser, take_refnames=False, order=0):
-        """  Read Persons with names, events and reference names
+        """  Read Persons with Names, Events and Refnames (reference names)
             called from models.datareader.read_persons_with_events
 
              a) selected by unique id
@@ -652,9 +652,9 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
         query="""match (x) where id(x) in $pids
 with distinct x
   match (x) -[r:CITATION|SOURCE|NOTE|WEBURL]-> (y) 
-  return id(x) as parent, x.id as parent_id, type(r) as rtype, 
+  return id(x) as root, x.id as root_id, type(r) as rtype, 
          id(y) as target, labels(y)[0] as label, y.id as id 
-  order by parent, id"""
+  order by root, id"""
 
         return shareds.driver.session().run(query, pids=keylist)
 

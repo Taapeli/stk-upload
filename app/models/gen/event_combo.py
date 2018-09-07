@@ -73,6 +73,7 @@ class Event_combo(Event):
     def get_event_combo(self):
         """ Read this event with uniq_id's of related Place, Note, and Citation
             nodes.
+            #TODO: Luetaan Notes ja Citations vasta get_persondata_by_id() lopuksi
 
             Luetaan tapahtuman tiedot 
         """
@@ -81,7 +82,7 @@ class Event_combo(Event):
 #         query = """
 # MATCH (event:Event) WHERE ID(event)=$pid
 # RETURN event"""
-        place_get_w_place_note_citation = '''
+        event_get_w_place_note_citation = '''
 match (e:Event) where ID(e)=$pid
     optional match (e) -[:PLACE]-> (p:Place)
     optional match (e) -[:CITATION]-> (c:Citation)
@@ -90,7 +91,7 @@ return e as event,
     collect(distinct id(p)) as place_ref, 
     collect(distinct id(c)) as citation_ref, 
     collect(distinct id(n)) as note_ref'''
-        result = shareds.driver.session().run(place_get_w_place_note_citation, 
+        result = shareds.driver.session().run(event_get_w_place_note_citation, 
                                               pid=self.uniq_id)
 
         for record in result:
@@ -99,15 +100,16 @@ return e as event,
             self.id = event["id"]
             self.change = int(event["change"])  #TODO only temporary int()
             self.type = event["type"]
+            self.description = event["description"]
             if "datetype" in event:
                 #TODO: Talletetaanko DateRange -objekti vai vain str?
                 dates = DateRange(event["datetype"], event["date1"], event["date2"])
                 self.dates = str(dates)
                 self.date = dates.estimate()
             else:
-                self.dates = ""
-                self.date = ""                
-            self.description = event["description"]
+                self.dates = None
+                self.date = ""
+
             # Related data
             for ref in record["note_ref"]:
                 self.note_ref.append(ref) # List of uniq_ids # prev. noteref_hlink
@@ -130,9 +132,6 @@ return e as event,
 #             citation_result = self.get_citation_by_id()
 #             for citation_record in citation_result:
 #                 self.citationref_hlink = citation_record["citationref_hlink"]
-                                
-        return True
-    
     
 
     def get_baptism_data(self):
