@@ -47,7 +47,7 @@
     {% if ch.uniq_id == uniq_id %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
     {% else %}
-    <a href="/scene/person={{ch.uniq_id}}" class="inlink" title="katso henkilön {{ch.id}} tiedot">
+    <a href="/scene/person/{{ch.uniq_id}}" class="inlink" title="katso henkilön {{ch.id}} tiedot">
         {% if ch.names|length %}
         {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> <b>{{ch.names[0].surname}}</b></a>
         {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}

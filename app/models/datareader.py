@@ -35,6 +35,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
     """
     
     persons = []
+    p = None
     result = Person.get_events_k(keys, user, take_refnames=take_refnames, order=order)
     for record in result:
         # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
@@ -62,6 +63,9 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
 
         for event in record['events']:
             # Got event with place name: [id, type, date, dates, place.pname]
+            # COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
+            #                   event.date1, event.date2, place.pname, 
+            #                   event.role]) AS events
             e = Event_combo()
             e.uniq_id = event[0]
             event_type = event[1]
@@ -74,12 +78,8 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
                 else:
                     e.dates = ""
                 e.place = event[5]
-#                 if e.daterange_start != '' and e.daterange_stop != '':
-#                     e.daterange = e.daterange_start + " - " + e.daterange_stop
-#                 elif e.daterange_start != '':
-#                     e.daterange = str(e.daterange_start) + "-"
-#                 elif e.daterange_stop != '':
-#                     e.daterange = "-" + str(e.daterange_stop)
+                e.role = event[6] or ""
+
                 p.events.append(e)
  
         persons.append(p)

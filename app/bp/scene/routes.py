@@ -14,6 +14,7 @@ from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
+from models.gen.family import Family_for_template
 from models.gen.place import Place
 from models.gen.source import Source
 
@@ -82,9 +83,9 @@ def show_all_persons_list(opt=''):
                            order=order,rule=keys)
 
 
-@bp.route('/scene/person/<string:uid>/<string:opt>')
+@bp.route('/scene/person/<string:uid>')
 #     @login_required
-def show_a_person(uid=0):
+def show_a_person(uid=""):
     """ One Person with connected Events, Families etc
 
         @TODO Toiminnot on kokonaan ohjelmoimatta
@@ -99,14 +100,15 @@ def show_a_person(uid=0):
         user=None
     # Get Person objects, whith included Events and Names (Refnames no needed!)
     persons = read_persons_with_events(keys, user=user)
-    persons.get_places()
-    persons.get_citation_source()
-    persons.get_notes()
-    persons.get_media()
-    persons.get_refnames()
+    person = persons[0]
+    person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
+#     person.get_places()
+#     person.get_all_citation_source()
+#     person.get_all_notes()
+#     person.get_media()
+#     person.get_refnames()
     
-    return render_template("/scene/person_pg.html", persons=persons, menuno=1, 
-                           order=0,rule=keys)
+    return render_template("/scene/person_pg.html", person=person, menuno=1)
 
 
 @bp.route('/scene/persons/ref=<string:refname>')

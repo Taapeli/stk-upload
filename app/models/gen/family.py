@@ -6,6 +6,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from sys import stderr
 import  shareds
 from models.cypher_gramps import Cypher_family_w_handle
+from models.gen.person import Person_as_member
 
 class Family:
     """ Perhe
@@ -16,8 +17,10 @@ class Family:
                 id              esim. "F0001"
                 uniq_id         int database key
                 rel_type        str suhteen tyyppi
-                father          str isän osoite
-                mother          str äidin osoite
+                father          Person isä (isän osoite?)
+                mother          Person äiti (äidin osoite?)
+                children[]      [Person,] lapset (lasten osoitteet?)
+            #TODO: Obsolete properties?
                 eventref_hlink  str tapahtuman osoite
                 eventref_role   str tapahtuman rooli
                 childref_hlink  str lapsen osoite
@@ -30,12 +33,17 @@ class Family:
         self.change = 0
         self.id = ''
         self.uniq_id = uniq_id
+        self.father = None
+        self.mother = None
+        self.children = []      # int lasten osoitteet
+        #TODO Obsolete parameters???
         self.eventref_hlink = []
         self.eventref_role = []
         self.childref_hlink = []    # handles
         self.noteref_hlink = []
-    
-    
+
+
+
     def get_children_by_id(self):
         """ Luetaan perheen lasten tiedot """
                         
@@ -234,3 +242,73 @@ class Family_for_template(Family):
         self.mother = None
         self.spouse = None
         self.children = []
+
+    @staticmethod       
+    def get_person_families_w_members(uid):
+        ''' Finds all Families, where Person uid belongs to
+            and return them in Families list
+            
+            #TODO Find person Names for members, too
+    
+╒════════╤═══════╤══════════╤══════════════════════════════════════╕
+│"myrole"│"f_id" │"rel_type"│"members"                             │
+╞════════╪═══════╪══════════╪══════════════════════════════════════╡
+│"FATHER"│"F0001"│"Married" │[[72610,"MOTHER",                     │
+│        │       │          │{"handle":"_df908d402                 │
+│        │       │          │906150f6ac6e0cdc93","id":"I0004","priv│
+│        │       │          │":"","gender":"F","confidence":"","cha│
+│        │       │          │nge":1536324696}]]                    │
+└────────┴───────┴──────────┴──────────────────────────────────────┘        '''
+        get_family_members = '''
+match (x) <-[r0]- (f:Family) where id(x) = $pid
+with x, r0, f
+match (f) -[r:FATHER|MOTHER|CHILD]-> (p:Person)
+    where id(x) <> id(p)
+return type(r0) as myrole, 
+    f.id as f_id, f.rel_type as rel_type, 
+    collect([id(p), type(r), p]) as members'''
+
+        families = []
+        result = shareds.driver.session().run(get_family_members, pid=uid)
+        for record in result:
+            # Family properties
+#                 handle          
+#                 change
+#                 id              esim. "F0001"
+#                 uniq_id         int database key
+#                 rel_type        str suhteen tyyppi
+#                 father          int isän osoite
+#                 mother          int äidin osoite
+#                 children[]      int lasten osoitteet
+
+            f = Family_for_template()
+            f.id = record['f_id']
+            f.rel_type = record['rel_type']
+            # Family members
+            for member in record['members']:
+                # [ id(node), role, <Person node> ]
+                p = Person_as_member()
+                p.uniq_id = member[0]
+                p.role = member[1]
+                rec = member[2]
+                # rec = {"handle":"_df908d402906150f6ac6e0cdc93",
+                #  "id":"I0004","priv":"","gender":"F","confidence":"",
+                #  "change":1536324696}
+                p.handle = rec['handle']
+                p.id = rec['id']
+                p.priv = rec['priv']
+                p.gender = rec['gender']
+                p.confidence = rec['confidence']
+                p.change = rec['change']
+                if p.role == 'CHILD':
+                    f.children.append(p)
+                elif p.role == 'FATHER':
+                    f.father = p
+                elif p.role == 'MOTHER':
+                    f.mother = p
+                else:
+                    raise LookupError("Invalid Family member role {}".format(member.role))
+
+            families.append(f)
+
+        return families

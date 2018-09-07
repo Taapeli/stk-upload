@@ -11,11 +11,14 @@
 
 {{ macro.menu(1) }}
     <div class="content" id="IndividualDetail">
-        {% if photos %}<div class="snapshot">
+
+        {% if person.photos %}<div class="snapshot">
             <div class="thumbnail">
-                <img alt="Kuvassa {{photos[0].description}}" src="{{photos[0].src}}" />
+                <img alt="Kuvassa {{person.photos[0].description}}" 
+                     src="{{person.photos[0].src}}" />
             </div>
         </div>{% endif %}
+
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
         </h3>
@@ -81,7 +84,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events|sort(attribute='date') %}
+        {% for e in person.events|sort(attribute='date') %}
                     <tr>
                  	{% if e.type == "Cause Of Death" %}
                 		{% set t_cause_of_death = e.description %}
@@ -94,7 +97,7 @@
                          	{% else %}
                          		{{e.uniq_id}}</span> {{e.type|transl('evt')}}
                          	{% endif %}
-                            {% if e.role != "Primary" %}<span 
+                            {% if e.role and e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
@@ -132,7 +135,7 @@
             {% set chtype = {"F":"tytär", "M":"poika", "":"lapsi"} %}
             <div class="mainbox" title="Perheet">
                 <p>Vanhempien perhe</p>
-            {% for fam in families %}{% if fam.role == "CHILD" %}
+            {% for fam in person.families %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="perhe {{fam.id}}">
 	                    <p>perhe {{fam.id}}</p>
@@ -166,7 +169,7 @@
             <div class="mainbox" title="Omat perheet">
                 <p>Perheessä vanhempana</p>
 	            <div class="groupbox">
-		            {% for fam in families %}{% if fam.role != "CHILD" %}
+		            {% for fam in person.families %}{% if fam.role != "CHILD" %}
 		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
 		                <p>perhe {{fam.id}}</p>
 		                <ul>{% if fam.father %}
@@ -188,7 +191,7 @@
 
         <div class="subsection" id="indivgallery">
             <h4>Media</h4>
-        {% for photo in photos %}<div class="thumbnail">
+        {% for photo in person.photos %}<div class="thumbnail">
                 <img alt="kuva" src="{{photo.src}}" />
                     <p>{{photo.description}}</p>
             </div>
@@ -275,7 +278,7 @@
             <h4>Lähdeviitteet</h4>
             <ol>
                 {% set source_cnt = 0 %}
-                {% for source in sources %}
+                {% for source in person.sources %}
                 <li>
             		{% for source in source.sources %}
             			{% for repo in source.repos %}

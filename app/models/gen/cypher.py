@@ -32,7 +32,7 @@ class Cypher_person():
     '''
 
     _get_events_tail = """
- OPTIONAL MATCH (person) -[:EVENT]-> (event:Event)
+ OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:EVENT]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
 RETURN ID(person) AS id, person.confidence AS confidence,
@@ -40,8 +40,8 @@ RETURN ID(person) AS id, person.confidence AS confidence,
     name.firstname AS firstname, name.surname AS surname,
     name.suffix AS suffix,
     COLLECT(DISTINCT refn.name) AS refnames,
-    COLLECT(DISTINCT [ID(event), event.type,
-        event.datetype, event.date1, event.date2, place.pname]) AS events"""
+    COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
+        event.date1, event.date2, place.pname, event.role]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
     ORDER BY TOUPPER(name.surname), name.firstname"""
     _get_events_firstname = """, LEFT(name.firstname,1) as initial 

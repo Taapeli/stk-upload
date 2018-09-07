@@ -579,6 +579,30 @@ RETURN n.id, k.firstname, k.surname,
             print("Virhe-get_events_k: {1} {0}".format(err, keys), file=stderr)
 
 
+    def get_places(self):
+        ''' Finds all Place objects with their Place_names
+            which are connected to any Personal Events
+            and stores them in self.places list
+        '''
+        pass
+
+
+    def get_all_citation_source(self):
+        ''' Finds all Citions ans Sources which are connected to
+            this Person, Events and Families
+            and stores them in self.citations list
+        '''
+        pass
+
+
+    def get_all_notes(self):
+        ''' Finds all Note and Weburl
+            which are connected to Person, Events or Families
+            and stores them in self.notes and self.Weburl lists
+        '''
+        pass
+
+
     @staticmethod
     def get_family_members (uniq_id):
         """ Read the Names, Families and Events connected to this Person.
