@@ -14,7 +14,6 @@ which contains a list of top level (level 0) Gedcom records (as Items).
 import sys
 import os
 from subprocess import call
-from pip._internal.utils.misc import display_path
 
 def write(out,s):
     out.emit(s)        
