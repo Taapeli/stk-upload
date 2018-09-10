@@ -7,7 +7,8 @@ from sys import stderr
 import  shareds
 from models.cypher_gramps import Cypher_family_w_handle
 from .cypher import Cypher_family
-from .person import Person_as_member, Name
+from .person_combo import Person_as_member
+from .person_name import Name
 
 class Family:
     """ Perhe
@@ -247,7 +248,7 @@ class Family_for_template(Family):
     @staticmethod       
     def get_person_families_w_members(uid):
         ''' Finds all Families, where Person uid belongs to
-            and return them in Families list
+            and return them as a Families list
         '''
 # ╒═══════╤══════════╤════════╤═════════════════════╤═════════════════════╕
 # │"f_id" │"rel_type"│"myrole"│"members"            │"names"              │

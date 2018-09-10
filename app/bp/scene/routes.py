@@ -103,7 +103,7 @@ def show_a_person(uid=""):
     persons = read_persons_with_events(keys, user=user)
     person = persons[0]
     person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-#     person.get_places()
+    person.get_places()
 #     person.get_all_citation_source()
 #     person.get_all_notes()
 #     person.get_media()

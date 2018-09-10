@@ -63,7 +63,7 @@ MATCH (person:Person) -[:NAME]-> (name:Name)
 WHERE ID(person) = $id""" + _get_events_tail
 
     get_events_by_refname = """
-MATCH (r:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:Name) 
+MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:Name) 
 """ + _get_events_tail + _get_events_surname
 
     # With attr={'use':rule, 'name':name}

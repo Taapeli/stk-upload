@@ -16,7 +16,9 @@ from models.gen.event_combo import Event_combo
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import Person, Name, Person_as_member
+from models.gen.person import Person
+from models.gen.person_combo import Person_combo, Person_as_member, Person_combo
+from models.gen.person_name import Name
 from models.gen.place import Place
 from models.gen.refname import Refname
 from models.gen.citation import Citation
@@ -36,11 +38,11 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
     
     persons = []
     p = None
-    result = Person.get_events_k(keys, user, take_refnames=take_refnames, order=order)
+    result = Person_combo.get_events_k(keys, user, take_refnames=take_refnames, order=order)
     for record in result:
         # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
         uniq_id = record['id']
-        p = Person()
+        p = Person_combo()
         p.uniq_id = uniq_id
         p.confidence = record['confidence']
         p.est_birth = record['est_birth']
@@ -318,7 +320,7 @@ def read_same_birthday(uniq_id=None):
     """
     
     ids = []
-    result = Person.get_people_with_same_birthday()
+    result = Person_combo.get_people_with_same_birthday()
     for record in result:
         new_array = record['ids']
         ids.append(new_array)
@@ -332,7 +334,7 @@ def read_same_deathday(uniq_id=None):
     """
     
     ids = []
-    result = Person.get_people_with_same_deathday()
+    result = Person_combo.get_people_with_same_deathday()
     for record in result:
         new_array = record['ids']
         ids.append(new_array)
@@ -418,7 +420,7 @@ def read_people_wo_birth():
     """
     
     headings = []
-    titles, people = Person.get_people_wo_birth()
+    titles, people = Person_combo.get_people_wo_birth()
     
     headings.append("Tapahtumaluettelo")
     headings.append("Näytetään henkilöt ilman syntymätapahtumaa")
@@ -433,7 +435,7 @@ def read_old_people_top():
     """
     
     headings = []
-    titles, people = Person.get_old_people_top()
+    titles, people = Person_combo.get_old_people_top()
     
     sorted_people = sorted(people, key=itemgetter(7), reverse=True)
     top_of_sorted_people = []
@@ -663,7 +665,7 @@ def get_person_data_by_id(uniq_id):
     #   - Person includes a list of Name objects
     families = {}
     fid = ''
-    result = Person.get_family_members(p.uniq_id)
+    result = Person_combo.get_family_members(p.uniq_id)
     for record in result:
         # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id", 
         #      "gender", "birth_date", "names"]
@@ -721,7 +723,7 @@ def get_person_data_by_id(uniq_id):
     for e in family_list:
         nodes[e.uniq_id] = e
     print ("Unique Nodes: {}".format(nodes))
-    result = Person.get_ref_weburls(list(nodes.keys()))
+    result = Person_combo.get_ref_weburls(list(nodes.keys()))
     for wu in result:
         print("({} {}) -[{}]-> ({} ({} {}))".\
               format(wu["root"] or '?', wu["root_id"] or '?',
