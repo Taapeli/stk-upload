@@ -16,8 +16,8 @@ from models.gen.event_combo import Event_combo
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import Person
-from models.gen.person_combo import Person_combo, Person_as_member, Person_combo
+#from models.gen.person import Person
+from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.place import Place
 from models.gen.refname import Refname
@@ -41,6 +41,9 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
     result = Person_combo.get_events_k(keys, user, take_refnames=take_refnames, order=order)
     for record in result:
         # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
+    
+        # Person
+
         uniq_id = record['id']
         p = Person_combo()
         p.uniq_id = uniq_id
@@ -75,13 +78,15 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
             event_type = event[1]
             if event_type:
                 e.type = event_type
+                # DateRange in events[2..4]?
                 if event[2] != None and isinstance(event[2], int):
                     dates = DateRange(event[2], event[3], event[4])
                     e.dates = str(dates)
                     e.date = dates.estimate()
                 else:
-                    e.dates = ""
-                e.place = event[5]
+                    e.dates = None
+                # TODO Tässä pitäisi olla Place object, tai oikeastaan se saadaan myöhemmin
+                e.place = event[5]  
                 e.role = event[6] or ""
 
                 p.events.append(e)
@@ -454,7 +459,7 @@ def read_places():
     """
     
     headings = []
-    titles, events = Place.get_places()
+    titles, events = Place.get_my_places()
     
     headings.append("Paikkaluettelo")
     headings.append("Näytetään paikat")
@@ -536,7 +541,7 @@ def get_people_by_surname(surname):
     people = []
     result = Name.get_people_with_surname(surname)
     for record in result:
-        p = Person()
+        p = Person_combo()
         p.uniq_id = record['uniq_id']
         p.get_person_and_name_data_by_id()
         people.append(p)
@@ -563,7 +568,7 @@ def get_person_data_by_id(uniq_id):
         sources
         families
     """
-    p = Person()
+    p = Person_combo()
     p.uniq_id = int(uniq_id)
     # Get Person and her Name properties, also Weburl properties 
     p.get_person_w_names()
@@ -775,7 +780,7 @@ def get_families_data_by_id(uniq_id):
     # Sivua "table_families_by_id.html" varten
     families = []
     
-    p = Person()
+    p = Person_combo()
     p.uniq_id = uniq_id
     p.get_person_and_name_data_by_id()
         
@@ -797,17 +802,17 @@ def get_families_data_by_id(uniq_id):
             pf.uniq_id = parents_hlink
             pf.get_family_data_by_id()
             
-            father = Person()
+            father = Person_combo()
             father.uniq_id = pf.father
             father.get_person_and_name_data_by_id()
             f.father = father
             
-            mother = Person()
+            mother = Person_combo()
             mother.uniq_id = pf.mother
             mother.get_person_and_name_data_by_id()
             f.mother = mother
         
-        spouse = Person()
+        spouse = Person_combo()
         if p.gender == 'M':
             spouse.uniq_id = f.mother
         else:
@@ -816,7 +821,7 @@ def get_families_data_by_id(uniq_id):
         f.spouse = spouse
 
         for child_id in f.childref_hlink:
-            child = Person()
+            child = Person_combo()
             child.uniq_id = child_id
             child.get_person_and_name_data_by_id()
             f.children.append(child)

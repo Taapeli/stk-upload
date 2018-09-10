@@ -101,10 +101,10 @@
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
-                        <td class="ColumnPlace">
-                            <a href="/scene/location={{e.locid}}" class="inlink"
-                            title="tyyppiä {{e.ltype}}; katso paikan tiedot">
-                            {{e.location|join(' • ')}}</a>
+                        <td class="ColumnPlace">{% if e.place %}
+                            <a href="/scene/location={{e.place.uniq_id}}" class="inlink"
+                            title="tyyppiä {{e.place.type}}; katso paikan tiedot">
+                            {{e.clearnames|join(' • ')}}</a>{% endif %}
                         </td>
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">
