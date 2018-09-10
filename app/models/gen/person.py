@@ -37,13 +37,19 @@
         - save(self, username, tx)      Tallettaa Person, Names, Events ja Citations
 
     Not in use or obsolete:
-        - get_citation_id(self)         Luetaan henkilöön liittyvän viittauksen id
+    - from models.datareader.get_person_data_by_id 
+      (returns list: person, events, photos, sources, families)
+        - get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)
         - get_event_data_by_id(self)    Luetaan henkilön tapahtumien id:t
+        - get_media_id(self)            Luetaan henkilön tallenteen id
+    - from models.datareader.get_families_data_by_id and Person_combo.get_hlinks_by_id
         - get_her_families_by_id(self)  Luetaan naisen perheiden id:t
         - get_his_families_by_id(self)  Luetaan miehen perheiden id:t
-        - get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)
-        - get_media_id(self)            Luetaan henkilön tallenteen id
         - get_parentin_id(self)         Luetaan henkilön syntymäperheen id
+    - from Person_combo.get_hlinks_by_id
+        - get_citation_id(self)         Luetaan henkilöön liittyvän viittauksen id
+
+    - table-näyttöjä varten
         - get_person_and_name_data_by_id(self)
                                         Luetaan kaikki henkilön tiedot ja nimet
         - get_points_for_compared_data(self, comp_person, print_out=True)
@@ -51,8 +57,6 @@
         - print_compared_data(self, comp_person, print_out=True) 
                                         Tulostaa kahden henkilön tiedot vieretysten
 
-#     class bp.gramps.models.event_gramps.Event_gramps(Event)
-#         - __init__()
 
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 

@@ -130,6 +130,16 @@ RETURN id(p) AS uid, r.role AS role,
   e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
 ORDER BY edates[1]"""
 
+    get_name_hierarcy = """
+MATCH (a:Place) -[:NAME]-> (pn:Place_name)
+OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
+OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
+RETURN ID(a) AS id, a.type AS type,
+    COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
+    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
+    COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
+ORDER BY name[0][0]
+"""
 
 class Cypher_refname():
     '''

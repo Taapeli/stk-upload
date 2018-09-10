@@ -16,7 +16,7 @@
                                         Luetaan henkilöitä tapahtumineen
         - get_events_k (keys, currentuser, take_refnames=False, order=0):
                                         Read Persons with Names, Events and Refnames
-        - get_places(self)              Tallettaa liittyvät Paikat henkilöön
+        - get_my_places(self)              Tallettaa liittyvät Paikat henkilöön
         - get_all_citation_source(self) Tallettaa liittyvät Cition ja Source
         - get_all_notes(self)           Tallettaa liittyvät Note ja Weburl
         - get_family_members (uniq_id)  Luetaan liittyvät Names, Families and Events
@@ -53,12 +53,15 @@ from sys import stderr
 
 import shareds
 import models.dbutil
+
 from .person import Person
 from .person_name import Name
-from models.gen.cypher import Cypher_person
+from .cypher import Cypher_person
+from .place import Place, Place_name
+from .dates import DateRange
+from .weburl import Weburl
+
 from models.cypher_gramps import Cypher_person_w_handle
-from models.gen.dates import DateRange
-from models.gen.weburl import Weburl
 
 class Person_combo(Person):
     """ Henkilö
@@ -622,12 +625,92 @@ RETURN n.id, k.firstname, k.surname,
             print("Virhe-get_events_k: {1} {0}".format(err, keys), file=stderr)
 
 
-    def get_places(self):
-        ''' Finds all Place objects with their Place_names
-            which are connected to any Personal Events
+    def set_my_places(self, cleartext_list=False):
+        ''' Finds all Places with their Place_names
+            which are connected to any personal Events
             and stores them in self.places list
         '''
-        pass
+
+        get_places_w_names = """
+match (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (pl:Place)
+    where id(p)=$pid
+with r, e, pl
+    optional match (pl) -[:NAME]-> (pname:Place_name)
+    return r.role as r_role, id(e) as e_id, 
+        id(pl) as pl_id, pl as place,
+        collect(pname) as pnames"""
+    
+# ╒═════════╤══════╤═══════╤════════════════════════════════╤════════════════════════════════╕
+# │"r_role" │"e_id"│"pl_id"│"place"                         │"pnames"                        │
+# ╞═════════╪══════╪═══════╪════════════════════════════════╪════════════════════════════════╡
+# │"Primary"│72501 │72486  │{"coord":[60.5,27.2],"handle":"_│[{"name":"Hamina","lang":""}]   │
+# │         │      │       │de189e6c36c3f1e676c22ed6559","id│                                │
+# │         │      │       │":"P0004","type":"Town","pname":│                                │
+# │         │      │       │"Hamina","change":1536051348}   │                                │
+# ├─────────┼──────┼───────┼────────────────────────────────┼────────────────────────────────┤
+# │"Primary"│72500 │25976  │{"handle":"_ddd39c4088f165882c16│[{"name":"Kaivopuisto","lang":""│
+# │         │      │       │0493e88","id":"P0001","type":"Bo│},{"name":"Brunspark","lang":"sv│
+# │         │      │       │rough","pname":"Kaivopuisto","ch│"}]                             │
+# │         │      │       │ange":1536051387}               │                                │
+# └─────────┴──────┴───────┴────────────────────────────────┴────────────────────────────────┘
+
+        result = shareds.driver.session().run(get_places_w_names, pid=self.uniq_id)
+        for record in result:
+            ''' <Record r_role='Primary' e_id=72501 pl_id=72486 
+                    place=<Node id=72486 labels={'Place'} 
+                        properties={'handle': '_de189e6c36c3f1e676c22ed6559', 
+                        'change': 1536051348, 'id': 'P0004', 'type': 'Town', 
+                        'pname': 'Hamina', 'coord': [60.5, 27.2]}> 
+                    pnames=[<Node id=72487 labels={'Place_name'} 
+                        properties={'lang': '', 'name': 'Hamina'}>]>
+            '''
+            # Fill Place properties:
+            #     handle
+            #     change
+            #     id                  esim. "P0001"
+            #     type                str paikan tyyppi
+            #     pname               str paikan nimi
+            #     names[]:
+            #        name             str paikan nimi
+            #        lang             str kielikoodi
+            #        dates            DateRange date expression
+
+            e_id = record['e_id']
+            
+            for my_e in self.events:
+                if e_id == my_e.uniq_id:
+                    # Found current event, create a Place there
+                    placerec = record['place']
+                    print("event {}: {} <- place {}: {}".\
+                          format(my_e.uniq_id, my_e, placerec.id, placerec['pname']))
+                    # Get Place data
+                    pl = Place()
+                    pl.uniq_id = placerec.id
+                    pl.type = placerec['type']
+                    pl.pname = placerec['pname']
+                    pl.id = placerec['id']
+                    pl.handle = placerec['handle']
+                    pl.change = placerec['change']
+                    # Get the Place_names
+                    for pname in record['pnames']:
+                        pn = Place_name()
+                        pn.uniq_id = pname.id
+                        pn.name = pname['name']
+                        pn.lang = pname['lang']
+                        #pname.dates = ...
+                        pl.names.append(pn)
+
+                    if cleartext_list:
+                        my_e.clearnames = my_e.clearnames + pl.show_names_list()
+                    my_e.place = pl
+
+#         for e in self.events:
+#             print("event {}: {}".format(e.uniq_id, e))
+#             if e.place == None:
+#                 print("- no place")
+#             else:
+#                 for n in e.place.names:
+#                     print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
 
 
     def get_all_citation_source(self):

@@ -87,9 +87,9 @@ def show_all_persons_list(opt=''):
 #     @login_required
 def show_a_person(uid=""):
     """ One Person with connected Events, Families etc
-        Tulee korvaamaan metodin show_person_page()
+        Korvaamaan metodin show_person_page()
 
-        @TODO Toiminnot on kokonaan ohjelmoimatta
+        @TODO Monet osat on ohjelmoimatta
     """
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
@@ -103,11 +103,18 @@ def show_a_person(uid=""):
     persons = read_persons_with_events(keys, user=user)
     person = persons[0]
     person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-    person.get_places()
+    person.set_my_places(True)
 #     person.get_all_citation_source()
 #     person.get_all_notes()
 #     person.get_media()
 #     person.get_refnames()
+    for e in person.events:
+        print("Person event {}: {}".format(e.uniq_id, e))
+        if e.place == None:
+            print("- no place")
+        else:
+            for n in e.place.names:
+                print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
     
     return render_template("/scene/person_pg.html", person=person, menuno=1)
 
