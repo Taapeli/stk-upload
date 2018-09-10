@@ -6,7 +6,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from sys import stderr
 import  shareds
 from models.cypher_gramps import Cypher_family_w_handle
-from models.gen.person import Person_as_member
+from .cypher import Cypher_family
+from .person import Person_as_member, Name
 
 class Family:
     """ Perhe
@@ -247,31 +248,26 @@ class Family_for_template(Family):
     def get_person_families_w_members(uid):
         ''' Finds all Families, where Person uid belongs to
             and return them in Families list
-            
-            #TODO Find person Names for members, too
-    
-╒════════╤═══════╤══════════╤══════════════════════════════════════╕
-│"myrole"│"f_id" │"rel_type"│"members"                             │
-╞════════╪═══════╪══════════╪══════════════════════════════════════╡
-│"FATHER"│"F0001"│"Married" │[[72610,"MOTHER",                     │
-│        │       │          │{"handle":"_df908d402                 │
-│        │       │          │906150f6ac6e0cdc93","id":"I0004","priv│
-│        │       │          │":"","gender":"F","confidence":"","cha│
-│        │       │          │nge":1536324696}]]                    │
-└────────┴───────┴──────────┴──────────────────────────────────────┘        '''
-        get_family_members = '''
-match (x) <-[r0]- (f:Family) where id(x) = $pid
-with x, r0, f
-match (f) -[r:FATHER|MOTHER|CHILD]-> (p:Person)
-    where id(x) <> id(p)
-return type(r0) as myrole, 
-    f.id as f_id, f.rel_type as rel_type, 
-    collect([id(p), type(r), p]) as members'''
+        '''
+# ╒═══════╤══════════╤════════╤═════════════════════╤═════════════════════╕
+# │"f_id" │"rel_type"│"myrole"│"members"            │"names"              │
+# ╞═══════╪══════════╪════════╪═════════════════════╪═════════════════════╡
+# │"F0000"│"Unknown" │"FATHER"│[[72533,"CHILD",     │[[72533,             │
+# │       │          │        │  "CHILD",{"han      │  {"alt":"","fi      │
+# │       │          │        │dle":"_dd2c613026e752│rstname":"Jan Erik","│
+# │       │          │        │8c1a21f78da8a","id":"│type":"Birth Name","s│
+# │       │          │        │I0000","priv":"","gen│uffix":"Jansson","sur│
+# │       │          │        │der":"M","confidence"│name":"Mannerheim","r│
+# │       │          │        │:"2.0","change":15363│efname":""},{}],     │
+# │       │          │        │24580}],             │ [72537,             │
+# │       │          │        │ [72537,"MOTHER",    │{"alt":"1","firstname│
+# │       │          │        │{"handle":...        │":"Liisa Maija",...  │
+# └───────┴──────────┴────────┴─────────────────────┴─────────────────────┘
 
         families = []
-        result = shareds.driver.session().run(get_family_members, pid=uid)
+        result = shareds.driver.session().run(Cypher_family.get_members, pid=uid)
         for record in result:
-            # Family properties
+            # Fill Family properties
 #                 handle          
 #                 change
 #                 id              esim. "F0001"
@@ -300,6 +296,22 @@ return type(r0) as myrole,
                 p.gender = rec['gender']
                 p.confidence = rec['confidence']
                 p.change = rec['change']
+                # Names
+                order = ""
+                for persid, namerec, namerel in record['names']:
+                    if persid == p.uniq_id and not namerec['alt'] > order:
+                        # A name of this family member,
+                        # preferring the one with lowest alt value
+                        n = Name()
+                        n.type = namerec['type']
+                        n.firstname = namerec['firstname']
+                        n.surname = namerec['surname']
+                        n.suffix = namerec['suffix']
+                        n.alt = namerec['alt']
+                        order = n.alt
+                        p.names.append(n)
+                        
+                # Members role
                 if p.role == 'CHILD':
                     f.children.append(p)
                 elif p.role == 'FATHER':

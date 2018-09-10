@@ -6,3 +6,4 @@ RemoteSystemsTempFiles/\.project
 \.pytest_cache
 /gedcoms/
 .pydevproject 
+/__pycache__/

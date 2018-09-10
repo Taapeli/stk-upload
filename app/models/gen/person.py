@@ -542,11 +542,11 @@ RETURN n.id, k.firstname, k.surname,
         """
         if keys:
             rule=keys[0]
-            name=keys[1].title() if len(keys) > 1 else None
-            print("Selected {} '{}'".format(rule, name))
+            key=keys[1].title() if len(keys) > 1 else None
+            print("Selected {} '{}'".format(rule, key))
         else:
             rule="all"
-            name=""
+            key=""
 
 # ╒═════╤════════════════╤═══════════╤════════╤═════════════════╤═════════════════╕
 # │"id" │"firstname"     │"surname"  │"suffix"│"refnames"       │"events"         │
@@ -561,9 +561,9 @@ RETURN n.id, k.firstname, k.surname,
         try:
             with shareds.driver.session() as session:
                 if rule == 'uniq_id':
-                    return session.run(Cypher_person.get_events_uniq_id, id=int(name))
+                    return session.run(Cypher_person.get_events_uniq_id, id=int(key))
                 elif rule == 'refname':
-                    return session.run(Cypher_person.get_events_by_refname, name=name)
+                    return session.run(Cypher_person.get_events_by_refname, name=key)
                 elif rule == 'all':
                     if order == 1:      # order by first name
                         return session.run(Cypher_person.get_events_all_firstname)
@@ -574,7 +574,7 @@ RETURN n.id, k.firstname, k.surname,
                 else:
                     # Selected names and name types (untested?)
                     return session.run(Cypher_person.get_events_by_refname_use,
-                                       attr={'use':rule, 'name':name})
+                                       attr={'use':rule, 'name':key})
         except Exception as err:
             print("Virhe-get_events_k: {1} {0}".format(err, keys), file=stderr)
 
@@ -1107,7 +1107,6 @@ class Name:
                 type            str nimen tyyppi
                 alt             str muun nimen numero
                 firstname       str etunimi
-                refname         str reference name
                 surname         str sukunimi
                 suffix          str patronyymi
     """
@@ -1117,7 +1116,6 @@ class Name:
         self.type = ''
         self.alt = ''
         self.firstname = givn
-        self.refname = ''
         self.surname = surn
         self.suffix = suff
 

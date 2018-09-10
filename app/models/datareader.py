@@ -53,8 +53,10 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
             pname.firstname = record['firstname']
         if record['surname']:
             pname.surname = record['surname']
-        if record['suffix']:
-            pname.patronyme = record['suffix']
+        if record['suffix']:    # patronyme
+            pname.suffix = record['suffix']
+        if record['ntype']:
+            pname.type = record['ntype']
         if 'initial' in record and record['initial']:
             pname.initial = record['initial']
         p.names.append(pname)

@@ -38,7 +38,7 @@ class Cypher_person():
 RETURN ID(person) AS id, person.confidence AS confidence,
     person.est_birth AS est_birth, person.est_death AS est_death,
     name.firstname AS firstname, name.surname AS surname,
-    name.suffix AS suffix,
+    name.suffix AS suffix, name.type as ntype,
     COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
         event.date1, event.date2, place.pname, event.role]) AS events"""
@@ -48,8 +48,6 @@ RETURN ID(person) AS id, person.confidence AS confidence,
     ORDER BY TOUPPER(name.firstname), name.surname, name.suffix"""
     _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
     ORDER BY TOUPPER(name.suffix), name.surname, name.firstname"""
-#     COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype,
-#         event.daterange_start, event.daterange_stop, place.pname]) AS events
 
     get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
         + _get_events_tail + _get_events_surname
@@ -101,6 +99,22 @@ MATCH (n)<-[r:NAME]-(p:Person)
 RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
     p.gender AS sex"""
 
+
+class Cypher_family():
+    '''
+    Cypher clases for creating and accessing Families
+    '''
+
+    get_members = '''
+match (x) <-[r0]- (f:Family) where id(x) = $pid
+with x, r0, f
+match (f) -[r:FATHER|MOTHER|CHILD]-> (p:Person)
+    where id(x) <> id(p)
+with x, r0, f, r, p
+match (p) -[rn:NAME]-> (n:Name)
+return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
+    collect([id(p), type(r), p]) as members,
+    collect([id(p), n, rn]) as names'''
 
 class Cypher_place():
     '''
@@ -161,7 +175,6 @@ ORDER BY n.name"""
 
     set_constraint = "CREATE CONSTRAINT ON (r:Refname) ASSERT r.name IS UNIQUE"
 
-# --- For Source and Citation classes -----------------------------------------
 
 # class Cypher_citation():
 #     '''

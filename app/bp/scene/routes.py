@@ -87,6 +87,7 @@ def show_all_persons_list(opt=''):
 #     @login_required
 def show_a_person(uid=""):
     """ One Person with connected Events, Families etc
+        Tulee korvaamaan metodin show_person_page()
 
         @TODO Toiminnot on kokonaan ohjelmoimatta
     """
