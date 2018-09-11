@@ -26,7 +26,7 @@ class Gedcom:
             item.print_items(out) 
     
 class Item:
-    def __init__(self,line,children=None):
+    def __init__(self,line,children=None,lines=None):
         if children is None: children = []
         temp = line.split(None,2)
         if len(temp) < 2: raise RuntimeError("Invalid line: " + line)
@@ -34,6 +34,7 @@ class Item:
         self.tag = temp[1]
         self._line = line
         self.children = children
+        self.lines = lines
         i = line.find(" " + self.tag + " ")
         if i > 0:
             self.value = line[i+len(self.tag)+2:] # preserves leading and trailing spaces
@@ -85,24 +86,21 @@ class Transformer:
             # i and j are line numbers of lines having specified level so that all lines in between have higher line numbers;
             # i.e. they form a substructure
             firstline = lines[i] 
-            item = Item(firstline,self.build_items(lines[i+1:j],level+1))
+            item = Item(firstline,children=self.build_items(lines[i+1:j],level+1),lines=lines[i:j])
             items.append(item)
             
         return items
     
     def transform_items(self,items):
+        if self.transform_module.transform is None: return items 
         newitems = []
         for item in items:
             item.children = self.transform_items(item.children)
-            if self.transform_module.transform is None: 
-                newitems.append(item)
-                continue
             newitem = self.transform_module.transform(item,self.options)
             if newitem == True: # no change
                 newitems.append(item)
                 continue
-            #if self.options.display_changes: self.display_callback(lines[i:j],newitem)
-            if self.options.display_changes: self.display_callback([],newitem)
+            if self.options.display_changes: self.display_callback(item.lines,newitem)
             if newitem is None: continue # delete item
             if type(newitem) == list:
                 for it in newitem:
