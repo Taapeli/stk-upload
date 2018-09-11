@@ -32,7 +32,8 @@ class Name:
 
     @staticmethod
     def get_people_with_refname(refname):
-        """ Etsi kaikki henkilöt, joiden referenssinimi on annettu"""
+        """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+            Etsi kaikki henkilöt, joiden referenssinimi on annettu"""
 
         query = """
             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
@@ -59,7 +60,8 @@ class Name:
 
     @staticmethod
     def get_ids_of_people_with_refname_and_user_given(userid, refname):
-        """ Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
+        """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+            Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
 
         query = """
             MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name)
@@ -110,7 +112,8 @@ class Name:
 
     @staticmethod
     def set_refname(tx, uniq_id, refname):
-        """Asetetaan etunimen referenssinimi  """
+        """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+            Asetetaan etunimen referenssinimi  """
 
         query = """
 MATCH (n:Name) WHERE ID(n)=$id

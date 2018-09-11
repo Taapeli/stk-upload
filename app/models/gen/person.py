@@ -149,7 +149,7 @@ class Person:
                 print ("Alt: " + pname.alt)
                 print ("Type: " + pname.type)
                 print ("First: " + pname.firstname)
-                print ("Refname: " + pname.refname)
+#                 print ("Refname: " + pname.refname)
                 print ("Surname: " + pname.surname)
                 print ("Suffix: " + pname.suffix)
 

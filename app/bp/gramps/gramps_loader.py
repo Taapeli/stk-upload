@@ -14,7 +14,7 @@ from .models.event_gramps import Event_gramps
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import Person
+from models.gen.person_combo import Person_combo
 from models.gen.person_name import Name
 from models.gen.weburl import Weburl
 from models.gen.place import Place, Place_name, Point
@@ -512,7 +512,7 @@ class DOM_handler():
         # Print detail of each person
         for person in people:
 
-            p = Person()
+            p = Person_combo()
 
             if person.hasAttribute("handle"):
                 p.handle = person.getAttribute("handle")
