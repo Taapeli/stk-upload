@@ -112,6 +112,9 @@ def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
 def test_gedcom_transform_kasteet(client):
     dotest_gedcom_transform(client,"kasteet-1.ged","kasteet.py","PLAC p1")
     
+def test_gedcom_transform_kasteet2(client):
+    dotest_gedcom_transform(client,"kasteet-1.ged","kasteet2.py","PLAC p1")
+
 def test_gedcom_transform_sukujutut(client):
     dotest_gedcom_transform(client,"sukujutut-1.ged","sukujutut.py","2 CONT zzz",
         add_cont_if_no_level_number="on",
