@@ -4,12 +4,14 @@ Sukujutut-muunnos
 Kari Kujansuu <kari.kujansuu@gmail.com>
 
 The notation "# 1.1.2" etc. refer to notation in the discussion about this transformation in August 2018. 
-The numbering was originally based on Diedrich Hesmer's Gedcom Coneversion program.
+The numbering was originally based on Diedrich Hesmer's Gedcom Conversion program.
 """
 import sys
 import os
 
 from transformer import Item
+
+doclink = "http://taapeli.referata.com/wiki/Sukujutut-muunnos"
 
 def initialize(args):
     pass
