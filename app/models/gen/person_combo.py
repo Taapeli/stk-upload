@@ -74,7 +74,7 @@ class Person_combo(Person):
                alt             str muun nimen nro
                type            str nimen tyyppi
                firstname       str etunimi
-               refname         str referenssinimi
+               #refname        str referenssinimi (entinen toteutus)
                surname         str sukunimi
                suffix          str patronyymi
             confidence         str tietojen luotettavuus
@@ -255,7 +255,7 @@ RETURN person, name
                 pname.alt = person_record["name"]['alt']
                 pname.type = person_record["name"]['type']
                 pname.firstname = person_record["name"]['firstname']
-                pname.refname = person_record["name"]['refname']
+#                 pname.refname = person_record["name"]['refname']
                 pname.surname = person_record["name"]['surname']
                 pname.suffix = person_record["name"]['suffix']
                 self.names.append(pname)
@@ -308,7 +308,7 @@ RETURN person, urls, COLLECT (name) AS names
                 pname.alt = name['alt']
                 pname.type = name['type']
                 pname.firstname = name['firstname']
-                pname.refname = name['refname']
+#                 pname.refname = name['refname']
                 pname.surname = name['surname']
                 pname.suffix = name['suffix']
                 self.names.append(pname)
@@ -883,7 +883,7 @@ with distinct x
                 alt1.append(pname.alt)
                 type1.append(pname.type)
                 first1.append(pname.firstname)
-                refname1.append(pname.refname)
+#                 refname1.append(pname.refname)
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
 
@@ -892,7 +892,7 @@ with distinct x
                 alt2.append(pname.alt)
                 type2.append(pname.type)
                 first2.append(pname.firstname)
-                refname2.append(pname.refname)
+#                 refname2.append(pname.refname)
                 surname2.append(pname.surname)
                 suffix2.append(pname.suffix)
 
@@ -973,7 +973,7 @@ SET n.est_death = m.daterange_start"""
                 print ("Alt: " + pname.alt)
                 print ("Type: " + pname.type)
                 print ("First: " + pname.firstname)
-                print ("Refname: " + pname.refname)
+#                 print ("Refname: " + pname.refname)
                 print ("Surname: " + pname.surname)
                 print ("Suffix: " + pname.suffix)
 
@@ -1029,7 +1029,7 @@ SET n.est_death = m.daterange_start"""
                 alt1.append(pname.alt)
                 type1.append(pname.type)
                 first1.append(pname.firstname)
-                refname1.append(pname.refname)
+#                 refname1.append(pname.refname)
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
 
@@ -1038,7 +1038,7 @@ SET n.est_death = m.daterange_start"""
                 alt2.append(pname.alt)
                 type2.append(pname.type)
                 first2.append(pname.firstname)
-                refname2.append(pname.refname)
+#                 refname2.append(pname.refname)
                 surname2.append(pname.surname)
                 suffix2.append(pname.suffix)
 
@@ -1052,7 +1052,7 @@ SET n.est_death = m.daterange_start"""
                         print ("Alt: " + alt1[i] + " # " + alt2[i])
                         print ("Type: " + type1[i] + " # " + type2[i])
                         print ("First: " + first1[i] + " # " + first2[i])
-                        print ("Refname: " + refname1[i] + " # " + refname2[i])
+#                         print ("Refname: " + refname1[i] + " # " + refname2[i])
                         print ("Surname: " + surname1[i] + " # " + surname2[i])
                         print ("Suffix: " + suffix1[i] + " # " + suffix2[i])
             else:
@@ -1108,7 +1108,7 @@ SET n.est_death = m.daterange_start"""
                     "alt": name.alt,
                     "type": name.type,
                     "firstname": name.firstname,
-                    "refname": name.refname,
+#                     "refname": name.refname,
                     "surname": name.surname,
                     "suffix": name.suffix
                 }
