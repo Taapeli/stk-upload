@@ -115,6 +115,8 @@ class Transformer:
         self.transform_module.fixlines(lines,self.options)
         items = self.build_items(lines,level=0)
         items = self.transform_items(items)
+        if hasattr(self.transform_module, "twophases") and self.transform_module.twophases:
+            items = self.transform_items(items)
         return Gedcom(items)
     
     def transform_file(self,fname):
