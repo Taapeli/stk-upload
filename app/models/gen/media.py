@@ -25,7 +25,7 @@ class Media:
         """ Luo uuden media-instanssin """
         self.uniq_id = None
         self.handle = ''
-        self.change = ''
+        self.change = 0
         self.id = ''
         
         
@@ -54,7 +54,7 @@ class Media:
 
         for obj_record in obj_result:
             self.id = obj_record["obj"]["id"]
-            self.change = obj_record["obj"]["change"]
+            self.change = int(obj_record["obj"]["change"])  #TODO only temporary int()
             self.src = obj_record["obj"]["src"]
             self.mime = obj_record["obj"]["mime"]
             self.description = obj_record["obj"]["description"]
@@ -80,7 +80,7 @@ class Media:
         """ Tulostaa tiedot """
         print ("*****Note*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Src: " + self.src)
         print ("Mime: " + self.mime)

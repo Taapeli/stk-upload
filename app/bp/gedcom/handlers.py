@@ -236,11 +236,21 @@ def display_changes(lines,item):
             print(s)
 
     print("-----------------------")
+    if not item: 
+        print("Deleted:")
+        for line in lines:
+            print(line)
+        print()
+        return
     print("Replaced:")
     for line in lines:
         print(line)
     print("With:")
-    item.print_items(Out())
+    if isinstance(item, list):
+        for it in item:
+            it.print_items(Out())
+    else:
+        item.print_items(Out())
     print()
         
 def process_gedcom(cmd, transform_module):

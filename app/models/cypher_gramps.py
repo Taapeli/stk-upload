@@ -289,7 +289,8 @@ class Cypher_repository_w_handle():
 
     create = """
 CREATE (r:Repository)
-SET r = $r_attr"""
+SET r = $r_attr
+return id(r) as uniq_id"""
 
 
 class Cypher_x():

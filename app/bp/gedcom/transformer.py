@@ -14,7 +14,6 @@ which contains a list of top level (level 0) Gedcom records (as Items).
 import sys
 import os
 from subprocess import call
-from pip._internal.utils.misc import display_path
 
 def write(out,s):
     out.emit(s)        
@@ -27,7 +26,7 @@ class Gedcom:
             item.print_items(out) 
     
 class Item:
-    def __init__(self,line,children=None):
+    def __init__(self,line,children=None,lines=None):
         if children is None: children = []
         temp = line.split(None,2)
         if len(temp) < 2: raise RuntimeError("Invalid line: " + line)
@@ -35,6 +34,7 @@ class Item:
         self.tag = temp[1]
         self._line = line
         self.children = children
+        self.lines = lines
         i = line.find(" " + self.tag + " ")
         if i > 0:
             self.value = line[i+len(self.tag)+2:] # preserves leading and trailing spaces
@@ -69,7 +69,7 @@ class Transformer:
         self.display_callback = display_callback
 
 
-    def transform1(self,lines,level):
+    def build_items(self,lines,level):
         if len(lines) == 0: return []
         linenums = [] # list of line numbers having the specified level 
         for i,line in enumerate(lines):
@@ -86,29 +86,37 @@ class Transformer:
             # i and j are line numbers of lines having specified level so that all lines in between have higher line numbers;
             # i.e. they form a substructure
             firstline = lines[i] 
-            item = Item(firstline,self.transform1(lines[i+1:j],level+1))
-            if self.transform_module.transform is None: 
-                items.append(item)
-                continue
-            newitem = self.transform_module.transform(item,self.options)
-            if newitem == True: # no change
-                items.append(item)
-                continue
-            if self.options.display_changes: self.display_callback(lines[i:j],newitem)
-            if newitem is None: continue # delete item
-            if type(newitem) == list:
-                for it in newitem:
-                    items.append(it)
-            else:
-                items.append(newitem)
+            item = Item(firstline,children=self.build_items(lines[i+1:j],level+1),lines=lines[i:j])
+            items.append(item)
             
         return items
     
+    def transform_items(self,items):
+        if self.transform_module.transform is None: return items 
+        newitems = []
+        for item in items:
+            item.children = self.transform_items(item.children)
+            newitem = self.transform_module.transform(item,self.options)
+            if newitem == True: # no change
+                newitems.append(item)
+                continue
+            if self.options.display_changes: self.display_callback(item.lines,newitem)
+            if newitem is None: continue # delete item
+            if type(newitem) == list:
+                for it in newitem:
+                    newitems.append(it)
+            else:
+                newitems.append(newitem)
+            
+        return newitems
         
     
     def transform_lines(self,lines):    
         self.transform_module.fixlines(lines,self.options)
-        items = self.transform1(lines,level=0)
+        items = self.build_items(lines,level=0)
+        items = self.transform_items(items)
+        if hasattr(self.transform_module, "twophases") and self.transform_module.twophases:
+            items = self.transform_items(items)
         return Gedcom(items)
     
     def transform_file(self,fname):

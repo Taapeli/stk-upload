@@ -1,11 +1,11 @@
 '''
 
-    Event hierarkiasuunnitelma 23.8.2018/JMä
+    Event hierarkiasuunnitelma 31.8.2018/JMä
 
-    class gen.event.*Event*(): 
+    class gen.event.Event(): 
        vain Event-noden parametrit (uniq_id, tyyppi, handle, päivämäärät)
 
-    class *Event_compound*(Event): 
+    class gen.event.Event_combo(Event): 
         - __init__()
         - get_event_combo()
         - get_baptism_data()
@@ -13,25 +13,26 @@
         - get_event_cite()
        Event, lähteet, huomautukset, henkilön uniq_id
 
-    class *Event_gramps*()
+    class bp.gramps.models.event_gramps.Event_gramps(Event)
+        - __init__()
         - save() # with relations to UserProfile, Person, Place, Note, Citation, Media
 
-    2. *Event_w_person*: 
+    ? *Event_w_person*: 
        Event ja ja siihen liittyvät Person-nodet ja roolit (ehkä myös nimet?)
-    3. *Event_w_place*: 
+    ? *Event_w_place*: 
        Event ja liittyvät paikat (pyydettäessä myös paikannimet?)
 
-    Nämä siis periytyvät Event-luokasta ja sisältävät tarpeen mukaan 
+    Nämä Event-luokasta periytyvät luokat sisältävät tarpeen mukaan 
     tietokantametodit _read(), get()_ ja _save()_ (_read_ hakukenttien avulla, 
-    _get_ uniq_id:n avulla). L
+    _get_ uniq_id:n avulla). 
     
-    isäksi on kätevä olla metodi __str__(), joka antaa lyhyen sanalliseen muodon
+    Lisäksi on kätevä olla metodi __str__(), joka antaa lyhyen sanalliseen muodon
     "syntynyt välillä 1.3.1840...31.3.1840 Hauho".
     
     Ehkä _save()_-metodi koskee vain Event-nodea, ei liittyvä nodeja? 
     Ehkä yhteydet myös?
     
-    Prosessointiin ja näyttöihin tehdään tarpeen mukaan bisnes-luokkia, 
+    Prosessointiin ja näyttöihin voidaan tehdä tarpeen mukaan bisnes-luokkia, 
     jotka sisältävät esim. poiminta-, yhdistely- ja muokkaussääntöjä ja 
     siellä ehkä hoidetaan isompien kokonaisuuksien talletus 
     (kuten henkilö + nimet ja lähteet).
@@ -76,7 +77,7 @@ class Event():
     def __init__(self, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
         self.handle = handle
-        self.change = ''
+        self.change = 0
         self.id = eid
         self.type = ''
         self.description = desc
@@ -92,15 +93,16 @@ class Event():
         #    self.objref_hlink = ''
         #    self.citations = []   # For creating display sets
         #    self.names = []   # For creating display sets
-    
-    
+
+
+    def __str__(self):
+        return "{} {}".format(self.type, self.dates or "")
 
 
     @staticmethod       
     def get_events_wo_citation():
         """ Voidaan lukea viittauksettomia tapahtumia kannasta
         """
-        
         query = """
  MATCH (e:Event) WHERE NOT EXISTS((:Citation)<-[:CITATION]-(e:Event))
  RETURN ID(e) AS uniq_id, e
@@ -188,7 +190,7 @@ class Event():
             else:
                 data_line.append('-')
             if record["e"]['change']:
-                data_line.append(record["e"]['change'])
+                data_line.append(int(record["e"]['change']))  #TODO only temporary int()
             else:
                 data_line.append('-')
             if record["e"]['id']:
@@ -247,7 +249,7 @@ class Event():
         """ Tulostaa tiedot """
         print ("*****Event*****")
         print ("Handle: " + self.handle)
-        print ("Change: " + self.change)
+        print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Type: " + self.type)
         print ("Description: " + self.description)
@@ -266,7 +268,7 @@ class Event():
         print ("*****Events*****")
         if print_out:
             print ("Handle: " + self.handle + " # " + comp_event.handle)
-            print ("Change: " + self.change + " # " + comp_event.change)
+            print ("Change: {} # {}".format(self.change, comp_event.change))
             print ("Id: " + self.id + " # " + comp_event.id)
             print ("Type: " + self.type + " # " + comp_event.type)
             print ("Description: " + self.description + " # " + comp_event.description)

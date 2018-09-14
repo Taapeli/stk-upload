@@ -33,7 +33,7 @@ class Note:
         self.priv = ''
 
     @staticmethod
-    def _to_self(record):
+    def from_record(record):
         '''
         Transforms a record from db to an object of type Note
         '''
@@ -70,7 +70,7 @@ RETURN ID(n) AS uniq_id, n"""
             result = session.run(notes_get, nid=uniq_ids)
             for record in result:
                 # Create a Note object from record
-                notes.append(Note._to_self(record))
+                notes.append(Note.from_record(record))
 
         return notes
 
@@ -100,7 +100,7 @@ ORDER BY n.type"""
 
         for record in result:
             # Create a Note object from record
-            n = Note._to_self(record)
+            n = Note.from_record(record)
             notes.append(n)
 
         return (titles, notes)

@@ -19,15 +19,19 @@ from models.gen.media import Media
 from models.gen.person import Person, Name, Person_as_member
 from models.gen.place import Place
 from models.gen.refname import Refname
-from models.gen.source_citation import Citation, Repository, Source, Weburl
+from models.gen.citation import Citation
+from models.gen.source import Source
+from models.gen.repository import Repository
+from models.gen.weburl import Weburl
 from models.gen.dates import DateRange
 
 
 def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
-    """ Reads Person- and Event- objects for display.
+    """ Reads Person Name and Event objects for display.
         If currentuser is defined, restrict to her objects.
 
-        Returns Person objects, whith included Events
+        Returns Person objects, whith included Events and Names 
+                and optionally Refnames
     """
     
     persons = []
@@ -213,14 +217,16 @@ def read_cite_sour_repo(uniq_id=None):
 
                         r = Repository()
                         r.uniq_id = s.reporef_hlink
-                        result_repo = r.get_repo_data()
+                        result_repo = r.get_repo_w_urls()
                         for record_repo in result_repo:
                             if record_repo['rname']:
                                 r.rname = record_repo['rname']
                             if record_repo['type']:
                                 r.type = record_repo['type']
-                        
+                            if record_repo['webref']:
+                                r.urls.append(Weburl(record_repo))
                         s.repos.append(r)
+
                 c.sources.append(s)
             e.citations.append(c)
             
@@ -256,28 +262,41 @@ def get_repositories(uniq_id=None):
     """ Lukee tietokannasta Repository- ja Source- objektit näytettäväksi
 
         (Korvaa read_repositories()
-    """
-    
-    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 
-              'url_refs']
+    ╒════════╤════════╤════════╤════════╤════════╤═══════╤════════╤════════╕
+    │"uniq_id│"rname" │"type"  │"change"│"handle"│"id"   │"sources│"webref"│
+    │"       │        │        │        │        │       │"       │        │
+    ╞════════╪════════╪════════╪════════╪════════╪═══════╪════════╪════════╡
+    │25979   │"Haminan│"Library│"1526233│"_de18a0│"R0000"│[[25992,│[[null,n│
+    │        │ kaupung│"       │479"    │b2d546e2│       │"Haminan│ull,null│
+    │        │inarkist│        │        │22251e54│       │ asukasl│,null]] │
+    │        │o"      │        │        │9f2bd"  │       │uettelo │        │
+    │        │        │        │        │        │       │1800-182│        │
+    │        │        │        │        │        │       │0","Book│        │
+    │        │        │        │        │        │       │"]]     │        │
+    └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
+    """    
+    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'urls']
     repositories = []
-    result = Repository.get_repository_source(uniq_id)
+    result = Repository.get_w_source(uniq_id)
     for record in result:
-        pid = record['id']
         r = Repository()
-        r.uniq_id = pid
+        r.uniq_id = record['uniq_id']
         if record['rname']:
             r.rname = record['rname']
+        if record['change']:
+            r.change = int(record['change'])  #TODO only temporary int()
+        if record['handle']:
+            r.handle = record['handle']
         if record['type']:
             r.type = record['type']
-        if record['url_href']:
-            url = Weburl()
-            url.url_href = record['url_href']
-            if record['url_type']:
-                url.url_type = record['url_type']
-            if record['url_description']:
-                url.url_description = record['url_description']
-            r.url_refs.append(url)
+        if record['id']:
+            r.id = record['id']
+        if 'webref' in record:
+            for webref in record['webref']:
+                # collect([w.href, wr.type, wr.description, wr.priv]) as webref
+                wurl = Weburl.from_record(webref)
+                if wurl:
+                    r.urls.append(wurl)
 
         for source in record['sources']:
             s = Source()
@@ -523,34 +542,53 @@ def get_people_by_surname(surname):
 
 def get_person_data_by_id(uniq_id):
     """ Get 5 data sets:
-        person: uniq_id and name data
-        events list: uniq_id, dates, location name and id (?)
+        person: Person object with name data
+            The indexes of referred objects are in variables 
+                eventref_hlink[]      str tapahtuman uniq_id, rooli eventref_role[]
+                objref_hlink[]        str tallenteen uniq_id
+                urls[]                list of Weburl nodes
+                    priv           str 1 = salattu tieto
+                    href           str osoite
+                    type           str tyyppi
+                    description    str kuvaus
+                parentin_hlink[]      str vanhempien uniq_id
+                noteref_hlink[]       str huomautuksen uniq_id
+                citationref_hlink[]   str viittauksen uniq_id            
+        events: list of Event_combo object with location name and id (?)
         photos
         sources
         families
     """
     p = Person()
     p.uniq_id = int(uniq_id)
+    # Get Person and her Name properties, also Weburl properties 
     p.get_person_w_names()
+    # Get reference (uniq_id) and role for Events
+    # Get references to Media, Citation objects
+    # Get Persons birth family reference and role
     p.get_hlinks_by_id()
     
+    # Person_display(Person)
     events = []
     sources = []
+    photos = []
     source_cnt = 0
 
     # Events
 
     for i in range(len(p.eventref_hlink)):
+        # Store Event data
         e = Event_combo() # Event_for_template()
         e.uniq_id = p.eventref_hlink[i]
         e.role = p.eventref_role[i]
+        # Read event with uniq_id's of related Place (Note, and Citation?)
         e.get_event_combo()        # Read data to e
             
         if e.place_hlink != '':
             place = Place()
             place.uniq_id = e.place_hlink
             place.get_place_data_by_id()
-            # Location / place data
+            # Location / place name, type and reference
             e.location = place.pname
             e.locid = place.uniq_id
             e.ltype = place.type
@@ -563,34 +601,36 @@ def get_person_data_by_id(uniq_id):
 
         # Citations
 
-        if e.citationref_hlink != '':
-            citation = Citation()
-            citation.uniq_id = e.citationref_hlink
-            # If there is already the same citation on the list,
+        for ref in e.citation_ref:  # citationref_hlink != '':
+            c = Citation()
+            c.uniq_id = ref
+            # If there is already the same citation on the list of sources,
             # use that index
             citation_ind = -1
             for i in range(len(sources)):
-                if sources[i].uniq_id == citation.uniq_id:
+                if sources[i].uniq_id == c.uniq_id:
                     citation_ind = i + 1
                     break
             if citation_ind > 0:
-                # Citation found
+                # Citation found; Event_combo.source = jonkinlainen indeksi
                 e.source = citation_ind
             else: # Store the new source to the list
                 source_cnt += 1
                 e.source = source_cnt
 
-                result = citation.get_source_repo(citation.uniq_id)
+                result = c.get_source_repo(c.uniq_id)
                 for record in result:
-                    citation.dateval = record['date']
-                    citation.page = record['page']
-                    citation.confidence = record['confidence']
+                    # record contains some Citation data + list of
+                    # Source, Repository and Note data
+                    c.dateval = record['date']
+                    c.page = record['page']
+                    c.confidence = record['confidence']
                     if not record['notetext']:
-                        if citation.page[:4] == "http":
-                            citation.notetext = citation.page
-                            citation.page = ''
+                        if c.page[:4] == "http":
+                            c.notetext = c.page
+                            c.page = ''
                     else: 
-                        citation.notetext = record['notetext']
+                        c.notetext = record['notetext']
                     
                     for source in record['sources']:
                         s = Source()
@@ -604,11 +644,10 @@ def get_person_data_by_id(uniq_id):
                         r.type = source[5]
                         
                         s.repos.append(r)
-                        citation.sources.append(s)
+                        c.sources.append(s)
                         
-                    sources.append(citation)
+                    sources.append(c)
             
-    photos = []
     for link in p.objref_hlink:
         o = Media()
         o.uniq_id = link
@@ -667,6 +706,31 @@ def get_person_data_by_id(uniq_id):
             families[fid].mother = member
 
     family_list = list(families.values())
+
+    # Find all referenced for the nodes found so far
+
+    nodes = {p.uniq_id:p}
+    for e in events:
+        nodes[e.uniq_id] = e
+    for e in photos:
+        nodes[e.uniq_id] = e
+    for e in sources:
+        nodes[e.uniq_id] = e
+    for e in family_list:
+        nodes[e.uniq_id] = e
+    print ("Unique Nodes: {}".format(nodes))
+    result = Person.get_ref_weburls(list(nodes.keys()))
+    for wu in result:
+        print("({} {}) -[{}]-> ({} ({} {}))".\
+              format(wu["root"] or '?', wu["root_id"] or '?',
+                     wu["rtype"] or '?', wu["label"],
+                     wu["target"] or '?', wu["id"] or '?'))
+    print("")
+        #TODO Talleta Note- ja Citation objektit oikeisiin objekteihin
+        #     Perusta objektien kantaluokka Node, jossa muuttujat jäsenten 
+        #     tallettamiseen.
+        # - Onko talletettava jäsenet vai viitteet niihin? Ei kai ole niin paljon toistoa?
+
     return (p, events, photos, sources, family_list)
 
 

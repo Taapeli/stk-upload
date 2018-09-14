@@ -163,5 +163,75 @@ ORDER BY n.name"""
 
 # --- For Source and Citation classes -----------------------------------------
 
+# class Cypher_citation():
+#     '''
+#     Cypher clases for creating and accessing Citations
+#     '''
+# class Cypher_source():
+#     '''
+#     Cypher clases for creating and accessing Sources
+#     '''
+
+class Cypher_repository():
+    '''
+    Cypher clases for creating and accessing Repositories
+    '''
+    _get_all = "match (r:Repository) <-[rr:REPOSITORY]- (s:Source)"
+    _get_one = _get_all + " where id(repository)=$rid"
+    _get_tail = """
+    with r, rr, s 
+    order by s.stitle
+    optional match (r) -[wr:WEBREF]-> (w:Weburl)
+return id(r) AS uniq_id, 
+    r.rname AS rname,
+    r.type AS type, 
+    r.change as change,
+    r.handle as handle,
+    r.id as id,
+    collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
+    collect([w.href, wr.type, wr.description, wr.priv]) as webref
+order by r.rname"""
+
+    get_w_sources_all = _get_all + _get_tail 
+    get_w_sources =  _get_one + _get_tail
+
+    get_w_urls = """
+match (repo:Repository) where ID(repo) = $rid
+    optional match (repo) -[wr:WEBURL]-> (w:Weburl)
+return repo, collect([w.href, wr.type, wr.description, wr.priv]) as webref"""
+
+    get_one = """
+match (r:Repository) where ID(r) == $rid
+return ID(n) AS uniq_id, r"""
+
+    get_all = """
+match (r:Repository)
+return ID(n) AS uniq_id, r order by r.type"""
+
+class Cypher_weburl():
+    '''
+    Cypher clases for creating and accessing Weburls
+    '''
+    link_to_weburl = """
+merge (w:Weburl {href: $href})
+with w
+    match (x) where ID(x) = $parent_id
+    with w, x
+        merge (x) -[r:WEBREF]-> (w)
+            set r.type = $type
+            set r.desc = $desc
+            set r.priv = $priv
+return id(r) as ref_id, id(w) as weburl_id"""
+    link_to_weburl_X = """
+match (x) where ID(x) = $parent_id
+    optional match (w:Weburl) where w.href = $href
+with x, w
+    merge (x) -[r:WEBREF]-> (w)
+        set w.href = $href
+        set r.type = $type
+        set r.desc = $desc
+        set r.priv = $priv
+return id(r) as ref_id, id(w) as weburl_id"""
+
 # --- For User class ----------------------------------------------------------
 
