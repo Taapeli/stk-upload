@@ -139,7 +139,7 @@ def gedcom_revert(gedcom,version):
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
     rsp = dict(newname=os.path.basename(newname))
-    return jsonify(rsp)
+    return jsonify(rsp) 
 
 @bp.route('/gedcom/upload', methods=['POST'])
 @login_required
@@ -153,13 +153,13 @@ def gedcom_upload():
     gedcom_folder = get_gedcom_folder()
     # check if the post request has the file part
     if 'file' not in request.files:
-        flash(_('Choose e GEDCOM file to upload'), category='flash_warning')
+        flash(_('Choose a GEDCOM file to upload'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     file = request.files['file']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        flash(_('Choose e GEDCOM file to upload'), category='flash_warning')
+        flash(_('Choose a  GEDCOM file to upload'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -266,10 +266,10 @@ def process_gedcom(cmd, transform_module):
     """
 
 
-    LOG.info(_("------ Transform '{}'  started {} ------").format(
-             transform_module.__name__, \
+    msg = _("Transform '{}' started {}").format(
+             transform_module.__name__, 
              datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
-
+    LOG.info("------ {} ------").format(msg)
 
     import argparse
     import io
@@ -304,9 +304,7 @@ def process_gedcom(cmd, transform_module):
             else:
                 old_name = out.new_name
 
-            print(_("------ Transform '{}'  started  {} ------").format(
-                     transform_module.__name__, 
-                     datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+            print("------ {} ------").format(msg))
             t = transformer.Transformer(transform_module=transform_module,
                                         display_callback=display_changes,
                                         options=args)
@@ -316,9 +314,10 @@ def process_gedcom(cmd, transform_module):
         traceback.print_exc()
     finally:
         time.sleep(1)  # for testing...
-        print(_("------ Transform '{}'  ended    {} ------").format (
+        msg = _("Transform '{}' ended {}").format(
                  transform_module.__name__, 
                  datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+        print("------ {} ------").format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()
         sys.stdout = saved_stdout
