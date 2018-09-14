@@ -119,7 +119,7 @@ def test_gedcom_transform_marriages(client):
     dotest_gedcom_transform(client,"marriages-1.ged","marriages.py","PLAC p3, p1")
 
 def test_gedcom_transform_marriages2(client):
-    dotest_gedcom_transform(client,"marriages-1.ged","marriages2.py","PLAC p3, zz")
+    dotest_gedcom_transform(client,"marriages-1.ged","marriages2.py","PLAC p3, p1")
 
 def test_gedcom_transform_sukujutut(client):
     dotest_gedcom_transform(client,"sukujutut-1.ged","sukujutut.py","2 CONT zzz",
