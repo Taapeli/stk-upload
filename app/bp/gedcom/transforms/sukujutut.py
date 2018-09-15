@@ -10,8 +10,10 @@ import sys
 import os
 
 from transformer import Item
+from flask_babelex import _
 
 doclink = "http://taapeli.referata.com/wiki/Sukujutut-muunnos"
+docline = _("Sukujutut transformations")
 
 def initialize(args):
     pass
@@ -29,16 +31,16 @@ def fixlines(lines,options):
             lines[i] = line2
             if options.display_changes:
                 print("-----------------------")
-                print("Replaced:")
+                print(_("Replaced:"))
                 print(line)
-                print("With:")
+                print(_("With:"))
                 print(line2)
         elif len(tkns) == 1 and options.insert_dummy_tags: # 1.1.1
             if options.display_changes:
                 print("-----------------------")
-                print("Replaced:")
+                print(_("Replaced:"))
                 print(tkns[0])
-                print("With:")
+                print(_("With:"))
                 print(tkns[0] + " _DUMMY")
             line = tkns[0] + " _DUMMY"
             tkns = line.split(None,1)
@@ -191,40 +193,40 @@ def transform(item,options):
 
 def add_args(parser):
     #parser.add_argument('--concatenate_lines', action='store_true',
-    #                    help='Combine all CONT and CONC lines')
+    #                    help=_('Combine all CONT and CONC lines'))
     
     parser.add_argument('--add_cont_if_no_level_number', action='store_true',
-                        help='Add a CONT line if there is no level number')
+                        help=_('Add a CONT line if there is no level number'))
     parser.add_argument('--insert_dummy_tags', action='store_true',
-                        help='Insert s _DUMMY tag if a tag is missing')
+                        help=_('Insert s _DUMMY tag if a tag is missing'))
     parser.add_argument('--remove_empty_dates', action='store_true',
-                        help='Remove invalid DATE tags')
+                        help=_('Remove invalid DATE tags'))
     parser.add_argument('--remove_empty_notes', action='store_true',
-                        help='Remove empty NOTE tags')
+                        help=_('Remove empty NOTE tags'))
     parser.add_argument('--remove_invalid_marriage_dates', action='store_true',
-                        help='Remove DATE AVOLIITTO tags')
+                        help=_('Remove DATE AVOLIITTO tags'))
     parser.add_argument('--remove_invalid_divorce_dates', action='store_true',
-                        help='Remove invalid DATEs for DIV tags')
+                        help=_('Remove invalid DATEs for DIV tags'))
     parser.add_argument('--remove_empty_nameparts', action='store_true',
-                        help='Remove empty GIVN and SURN tags')
+                        help=_('Remove empty GIVN and SURN tags'))
     parser.add_argument('--remove_duplicate_sources', action='store_true',
-                        help='Remove duplicate SOUR lines under NAME')
+                        help=_('Remove duplicate SOUR lines under NAME'))
     parser.add_argument('--remove_refn', action='store_true',
-                        help='Remove REFN tags')
+                        help=_('Remove REFN tags'))
     parser.add_argument('--remove_stat', action='store_true',
-                        help='Remove STAT tags')
+                        help=_('Remove STAT tags'))
     parser.add_argument('--save_level_3_notes', action='store_true',
-                        help='Move level 3 NOTEs to level 2 to save them')
+                        help=_('Move level 3 NOTEs to level 2 to save them'))
     parser.add_argument('--fix_addr', action='store_true',
-                        help='Insert ADR1 tags under ADDR')
+                        help=_('Insert ADR1 tags under ADDR'))
     parser.add_argument('--fix_events', action='store_true',
-                        help='Change PLAC tags to NOTEs under certain events')
+                        help=_('Change PLAC tags to NOTEs under certain events'))
     parser.add_argument('--fix_events_kaksonen', action='store_true',
-                        help='Change event types "Kaksonen" and "Kolmonen" to NOTEs')
+                        help=_('Change event types "Kaksonen" and "Kolmonen" to NOTEs'))
     parser.add_argument('--remove_multiple_blanks', action='store_true',
-                        help='Remove trailing and multiple consecutive spaces in person and place names')
+                        help=_('Remove trailing and multiple consecutive spaces in person and place names'))
     parser.add_argument('--emig_to_resi', action='store_true',
-                        help='Change EMIG to RESI')
+                        help=_('Change EMIG to RESI'))
      
 
 
