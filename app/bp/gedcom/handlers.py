@@ -74,9 +74,12 @@ def get_transforms():
         if doc:
             t.doc = doc
             t.docline = doc.strip().splitlines()[0]
+            t.docline = _(t.docline)
         else:
             t.doc = ""
             t.docline = ""
+        if hasattr(transformer,"docline"):
+            t.docline = transformer.docline
         if hasattr(transformer,"doclink"):
             t.doclink = transformer.doclink
         else:
@@ -268,8 +271,8 @@ def process_gedcom(cmd, transform_module):
 
     msg = _("Transform '{}' started {}").format(
              transform_module.__name__, 
-             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
-    LOG.info("------ {} ------").format(msg)
+             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+    LOG.info("------ {} ------".format(msg))
 
     import argparse
     import io
@@ -304,7 +307,7 @@ def process_gedcom(cmd, transform_module):
             else:
                 old_name = out.new_name
 
-            print("------ {} ------").format(msg))
+            print("------ {} ------".format(msg))
             t = transformer.Transformer(transform_module=transform_module,
                                         display_callback=display_changes,
                                         options=args)
@@ -316,8 +319,8 @@ def process_gedcom(cmd, transform_module):
         time.sleep(1)  # for testing...
         msg = _("Transform '{}' ended {}").format(
                  transform_module.__name__, 
-                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
-        print("------ {} ------").format(msg))
+                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+        print("------ {} ------".format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()
         sys.stdout = saved_stdout
@@ -328,7 +331,7 @@ def process_gedcom(cmd, transform_module):
         old_basename = ""
     if errors and old_basename:
         os.rename(old_name,args.input_gedcom)
-        old_basename = ""
+        old_basename = "" 
     rsp = dict(stdout=output,stderr=errors,oldname=old_basename,logfile=args.logfile)
     return jsonify(rsp)
             
