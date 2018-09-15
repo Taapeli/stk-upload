@@ -33,6 +33,8 @@ Mallia sorsapohjaksi löytynee Data Entry Grampletista, jonka kautta voi syött�
 
 
 """
+from flask_babelex import _
+docline = _("Avio-PLAC:n hajoittaminen")
 
 version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
