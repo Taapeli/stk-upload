@@ -176,6 +176,7 @@ def uploads():
             upload = Upload()
             upload.xmlname = xmlname
             upload.status = status
+            upload.done = (status == _("DONE"))
             upload.starttime = int(starttime)
             upload.starttime_s = time.strftime("%Y-%m-%d %H.%M.%S",time.localtime(upload.starttime))
             uploads.append(upload)
