@@ -29,6 +29,8 @@ class Name:
         self.surname = surn
         self.suffix = suff
 
+    def __str__(self):
+        return "{}/{}/{}".format(self.firstname, self.surname, self.suffix)
 
     @staticmethod
     def get_people_with_refname(refname):
@@ -82,7 +84,21 @@ class Name:
 
 
     @staticmethod
-    def get_personnames(tx, uniq_id=None):
+    def get_clearnames(uniq_id=None):
+        """ Lists all Name versions of this Person as cleartext
+        """
+        result = Name.get_personnames(None, uniq_id)
+        names = []
+        for record in result:
+            fn = record['fn']
+            sn = record['sn']
+            pn = record['pn']
+            names.append("{} {} {}".format(fn, pn, sn))
+        return ' / '.join(names)
+
+
+    @staticmethod
+    def get_personnames(tx=None, uniq_id=None):
         """ Picks all Name versions of this Person or all persons
     # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
     # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
@@ -93,6 +109,9 @@ class Name:
     # └─────┴────────────────────┴──────────┴──────────────┴─────┘
         Sex field is not used currently - Remove?
         """
+        if not tx:
+            tx = shareds.driver.session()
+
         if uniq_id:
             return tx.run(Cypher_person.get_names, pid=uniq_id)
         else:

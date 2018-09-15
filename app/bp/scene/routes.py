@@ -210,7 +210,7 @@ def show_sources():
 
 @bp.route('/scene/source=<sourceid>')
 def show_source_page(sourceid):
-    """ Home page for a Source with events
+    """ Home page for a Source with referring Event and Person data
     """
     try:
         stitle, citations = get_source_with_events(sourceid)

@@ -190,10 +190,32 @@ ORDER BY n.name"""
 #     '''
 #     Cypher clases for creating and accessing Citations
 #     '''
-# class Cypher_source():
-#     '''
-#     Cypher clases for creating and accessing Sources
-#     '''
+
+class Cypher_source():
+    '''
+    Cypher clases for creating and accessing Sources
+    '''
+    source_list = """
+MATCH (s:Source)
+OPTIONAL MATCH (s)<-[:SOURCE]-(c:Citation)
+OPTIONAL MATCH (c)<-[:CITATION]-(e)
+OPTIONAL MATCH (s)-[r:REPOSITORY]->(a:Repository)
+RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle, 
+       a.rname AS repository, r.medium AS medium,
+       COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
+ORDER BY toUpper(stitle)
+"""
+
+    get_citators_of_source = """
+match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
+with c
+    match (c) <-[:CITATION]- (x)
+    optional match (x) <-[:EVENT]- (p)
+    return id(c) as c_id, c, 
+           id(x) as x_id, labels(x)[0] as label, x, 
+           coalesce(id(p), id(x))  as p_id
+    order by c_id, p_id"""
+
 
 class Cypher_repository():
     '''

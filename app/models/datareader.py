@@ -16,12 +16,11 @@ from models.gen.event_combo import Event_combo
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
-#from models.gen.person import Person
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.place import Place
 from models.gen.refname import Refname
-from models.gen.citation import Citation
+from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.weburl import Weburl
@@ -469,7 +468,6 @@ def read_places():
 
 def get_source_with_events(sourceid):
     """ Lukee tietokannasta Source- objektin tapahtumat näytettäväksi
-
     """
     
     s = Source()
@@ -477,39 +475,66 @@ def get_source_with_events(sourceid):
     result = s.get_source_data()
     for record in result:
         s.stitle = record["stitle"]
-    result = Source.get_citating_events(sourceid)
+    result = Source.get_citating_nodes(sourceid)
 
-    event_list = []
-    for record in result:               # Events record
-        # <Record uniq_id=89502 id='C1506' page='1872 döde 32. vainaja' conf='2' 
-        # events=[[84474, 'Burial', None, [[72121, 'Bruun', 'Henrietta Catharina', ''], 
-        #         [72121, 'Naht', 'Henrietta', '']]], ... ]>
-        c = Citation()
-        c.uniq_id = record['uniq_id']
-        c.id = record['id']
-        c.page = record['page']
-        c.confidence = record['conf']
+    citations = {}
+    persons = {}    # {uniq_id, clearname}
+    
+    for record in result:               # Nodes record
+        # Example: Person directly linked to Citation
+        # <Record c_id=89359 
+        #         c=<Node id=89359 labels={'Citation'} 
+        #            properties={'id': 'C1361', 'confidence': '2', 
+        #                        'page': '1891 Syyskuu 22', 
+        #                        'handle': '_dd7686926d946cd18c5642e61e2', 
+        #                        'dateval': '', 'change': 1521882215} > 
+        #        x_id=72104 label='Person' 
+        #        x=<Node id=72104 labels={'Person'} 
+        #           properties={'gender': 'F', 'confidence': '2.0', 'id': 'I1069', 
+        #                       'handle': '_dd76810c8e6763f7ea816742a59', 
+        #                       'priv': '', 'change': 1521883281}> 
+        #        p_id=72104 >
+        
+        c_id = record['c_id']
+        if c_id not in citations.keys():
+            # A new citation
+            c = Citation()
+            c.uniq_id = c_id
+            citations[c_id] = c
+        else:
+            # Use previous
+            c = citations[c_id]
 
-        for event in record['events']:
-            e = Event_combo()
-            e.uniq_id = event[0]
-            e.type = event[1]
-            e.edate = event[2]
-            
-            for name in event[3]:
-                n = Name()
-                n.uniq_id = name[0]        
-                n.surname = name[1]        
-                n.firstname = name[2]  
-                n.suffix = name[3]  
+        citation = record['c']
+        c.id = citation['id']
+        c.page = citation['page']
+        c.confidence = citation['confidence']
+        
+        uniq_id = record['p_id']
+        x_node = record['x']
+        node = NodeRef()
+        # Referring Person
+        node.uniq_id = uniq_id      # 72104
+        node.id = x_node['id']  # 'I1069' or 'E2821'
+        if uniq_id not in persons.keys():
+            node.clearname = Name.get_clearnames(uniq_id)
+            persons[uniq_id] = node.clearname
+        else:
+            node.clearname = persons[uniq_id]
 
-                e.names.append(n)
+        if 'Person' in x_node.labels:
+            # node: "Person <clearname>"
+            node.label = 'Person'
+        else:
+            # node: "Event <event_type> <person uniq_id>"
+            node.label = 'Event'
+            node.eventtype = x_node['type']
+            if x_node['date1']:
+                node.edates = DateRange(x_node['datetype'], x_node['date1'], x_node['date2'])
+                node.date = node.edates.estimate()
+        c.citators.append(node)
 
-            c.events.append(e)
-
-        event_list.append(c)
-
-    return (s.stitle, event_list)
+    return (s.stitle, list(citations.values()))
 
 
 def read_sources_wo_cites():

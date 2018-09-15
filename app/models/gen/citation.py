@@ -24,7 +24,6 @@ class Citation:
                 noteref_hlink    str huomautuksen osoite
                 sourceref_hlink  str lähteen osoite
      """
-
     def __init__(self):
         """ Luo uuden citation-instanssin """
         self.handle = ''
@@ -35,7 +34,7 @@ class Citation:
         self.noteref_hlink = []
         self.sourceref_hlink = ''
         self.sources = []   # For creating display sets
-        self.events = []   # For creating display sets
+        self.citators = []  # For creating display sets
     
     
     @staticmethod       
@@ -156,3 +155,20 @@ class Citation:
             print("Virhe: {0}".format(err), file=stderr)
             
         return
+
+class NodeRef():
+    ''' Carries data of citating nodes
+            label            str Person or Event
+            uniq_id          int Persons uniq_id
+            clearname        str Persons display name
+            eventtype        str type for Event
+            edates           DateRange date expression for Event
+            date             str date for Event
+    '''
+    def __init__(self):
+        self.label = ''
+        self.uniq_id = ''
+        self.clearname = ''
+        self.eventtype = ''
+        self.edates = None
+        self.date = ''

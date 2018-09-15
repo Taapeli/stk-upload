@@ -481,6 +481,16 @@ div#SourceDetail {
     margin: 0 auto;
 }
 
+/*    Citations
+------------------------------------------------------ */
+td.CitationId { 
+	width: 4em;
+	padding-top: 5pt; 
+    color: gray;
+    font-size: 75%;
+}
+td.Citation { padding:4px; }
+
 /* Contact
 ----------------------------------------------------- */
 #Contact {
