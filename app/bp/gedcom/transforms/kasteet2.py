@@ -31,7 +31,7 @@ version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Kasteet-ohjelma"
 
 def add_args(parser):
-    parser.add_argument("--testiparametri")
+    pass
 
 def initialize(run_args):
     pass
