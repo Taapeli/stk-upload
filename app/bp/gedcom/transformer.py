@@ -29,7 +29,7 @@ class Item:
     def __init__(self,line,children=None,lines=None):
         if children is None: children = []
         temp = line.split(None,2)
-        if len(temp) < 2: raise RuntimeError("Invalid line: " + line)
+        if len(temp) < 2: raise RuntimeError(_("Invalid line: ") + line)
         self.level= int(temp[0])
         self.tag = temp[1]
         self._line = line
@@ -77,7 +77,7 @@ class Transformer:
             if int(tkns[0]) == level:
                 linenums.append(i)
             elif int(tkns[0]) < level:
-                raise RuntimeError("Invalid GEDCOM at line: %s" % line)
+                raise RuntimeError(_("Invalid GEDCOM at line: {}").format(line))
     
         if len(linenums) == 0:    
             raise RuntimeError("Invalid GEDCOM; no level %s lines" % level)
