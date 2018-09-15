@@ -9,6 +9,7 @@ from flask_babelex import _
 
 version = "1.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Places-ohjelma"
+docline = _("Tries to recognize place names and order them correctly")
 
 from collections import defaultdict 
 
@@ -42,27 +43,27 @@ las
 
 def add_args(parser):
     parser.add_argument('--reverse', action='store_true',
-                        help='Reverse the order of places')
+                        help=_('Reverse the order of places'))
     parser.add_argument('--add-commas', action='store_true',
-                        help='Replace spaces with commas')
+                        help=_('Replace spaces with commas'))
     parser.add_argument('--ignore-lowercase', action='store_true',
-                        help='Ignore lowercase words')
+                        help=_('Ignore lowercase words'))
     parser.add_argument('--ignore-digits', action='store_true',
-                        help='Ignore numeric words')
+                        help=_('Ignore numeric words'))
     parser.add_argument('--minlen', type=int, default=0,
-                        help="Ignore words shorter that minlen")
+                        help=_("Ignore words shorter that minlen"))
     parser.add_argument('--auto-order', action='store_true',
-                        help='Try to discover correct order...')
+                        help=_('Try to discover correct order...'))
     parser.add_argument('--auto-combine', action='store_true',
-                        help='Try to combine certain names...')
+                        help=_('Try to combine certain names...'))
     parser.add_argument('--match', type=str, action='append',
-                        help='Only process places containing any match string')
+                        help=_('Only process places containing any match string'))
     parser.add_argument('--display-nonchanges', action='store_true',
-                        help='Display unchanged places')
+                        help=_('Display unchanged places'))
     parser.add_argument('--display-ignored', action='store_true',
-                        help='Display ignored places')
+                        help=_('Display ignored places'))
     parser.add_argument('--mark-changes', action='store_true',
-                        help='Replace changed PLAC tags with PLAC-X')
+                        help=_('Replace changed PLAC tags with PLAC-X'))
                         
 def initialize(options):
     read_parishes("app/static/seurakunnat.txt")
@@ -86,7 +87,7 @@ def transform(item,options):
         if options.display_nonchanges:
             print(_("Not changed: '{}'").format(place))
         return True
-    raise RuntimeError("Internal error")
+    raise RuntimeError(_("Internal error"))
 
 ignored = [name.strip() for name in ignored_text.splitlines() if name.strip() != ""]
 
@@ -214,7 +215,7 @@ def process_place(options, place):
         names = place.split()
         if ignore(options, names): 
             if options.display_ignored:
-                print("ignored: " + orig_place)
+                print(_("ignored: ") + orig_place)
             return orig_place
         names = talonumerot(names)
         place = ", ".join(names)
