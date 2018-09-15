@@ -36,9 +36,9 @@
                 {% endif %}</td>
                 <td class="ColumnPerson">
                    <div>
-                      <a href="/scene/location={{p.id}}" class="id"
-                        title="katso paikan {{p.id}} tapahtumat"
-                        id="{{p.id}}">{{p.id}}</a> {{p.pname|join(' • ')}}
+                      <a href="/scene/location={{p.uniq_id}}" class="id"
+                        title="katso paikan {{p.uniq_id}} tapahtumat"
+                        id="{{p.uniq_id}}">{{p.uniq_id}}</a> {{p.pname|join(' • ')}}
                       <span class="typedesc">{{p.type|transl('lt')}}</span>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
 						<span class="typedesc">{{e.type|transl('lt_in')}}</span>

@@ -171,7 +171,7 @@ def show_locations():
     try:
         # 'locations' has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        locations = Place.get_place_names()
+        locations = Place.get_place_w_names()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
@@ -213,9 +213,9 @@ def show_source_page(sourceid):
     """ Home page for a Source with events
     """
     try:
-        stitle, events = get_source_with_events(sourceid)
+        stitle, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/source_events.html",
-                           stitle=stitle, events=events)
+                           stitle=stitle, citations=citations)
 

@@ -12,15 +12,15 @@
     <div class="content" id="IndividualDetail">
 	    <h3 style="position:sticky; top:0;">{{stitle}}</h3>
 	    <p id="description">Tähän lähteesen liitetyt viittaukset, tapahtumat ja henkilöt</p>
-	        <div class="subsection" id="events">
-	            <h4>Tapahtumat</h4>
+	        <div class="subsection" id="citations">
+	            <h4>Lähteet ja viitatut tapahtumat</h4>
 	            <ol>
-			        {% for c in events|sort(attribute='page') %}
+			        {% for c in citations|sort(attribute='page') %}
 
 	        		<li title="{{c.confidence|transl("conf")}} luotettavuus ({{c.confidence}})"
                         {% if c.confidence and c.confidence < "2" %}
                         style="color:red"{% endif %}>
-	   					Sivu {{c.page}}
+	   					<small class="id" title="sitaatti {{c.id}}">{{c.uniq_id}}</small> Sivu {{c.page}}
                         {% set conf = c.confidence | int %}
                         {% if conf < 2 %}
                             {% if conf == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>

@@ -69,31 +69,58 @@ class Source:
     
     
     @staticmethod       
-    def get_events(sourceid):
-        """ Luetaan kaikki lähteen tapahtumat 
-
-╒════════════════╤════════════╤══════════════════════════════╤═══════╤════════════════╕
-│"page"          │"confidence"│"events"                      │"pid"  │"names"         │
-├────────────────┴───────┼────┼──────────────────────────────┼───────┼────────────────┤
-│"http://hiski.genealogia│"1" │[["35450","Occupation",""],["3│"36349"│[["Carlstedt",  │
-│.fi/hiski?fi+t4714729"  │    │5449","Death","1809-02-22"]]  │       │"Jonas"]]       │
-├────────────────────────┼────┼──────────────────────────────┼───────┼────────────────┤
-│"http://hiski.genealogia│"1" │[["35790","Death","1839-01-16"│"36834"│[["Kyander",    │
-│.fi/hiski?fi+t4717438"  │    │]]                            │       │"Magnus Johan"]]│
-└────────────────────────┴────┴──────────────────────────────┴───────┴────────────────┘
+    def get_citating_events(sourceid):
+        """ Read events citating this Source
+            Luetaan tapahtumat, jotka siteeraavat tätä lähdettä
+╒═════════╤═══════╤═══════════════════════╤══════╤════════════════════════════════╕
+│"uniq_id"│"id"   │"page"                 │"conf"│"events"                        │
+╞═════════╪═══════╪═══════════════════════╪══════╪════════════════════════════════╡
+│89502    │"C1506"│"1872 döde 32. vainaja"│"2"   │         *)                     │
+├─────────┼───────┼───────────────────────┼──────┼────────────────────────────────┤
+│90862    │"C0047"│"1857 9 15 Enka"       │"2"   │[[87478,"Death",null,[[63483,"El│
+│         │       │                       │      │fwengren","Anna",""]]]]         │
+└─────────┴───────┴───────────────────────┴──────┴────────────────────────────────┘
+  *) Events structure example:
+    [[84474, "Burial", null, [ [72121, "Bruun", "Henrietta Catharina", ""], 
+                               [72121, "Naht", "Henrietta", ""] ] ], 
+     [84465, "Death", null, [ [72121, "Bruun", "Henrietta Catharina", ""], 
+                              [72121, "Naht", "Henrietta", ""] ] ]
+    ]
         """
 
-        query = """
-MATCH (source:Source)<-[:SOURCE]-(citation:Citation)<-[r:CITATION]-(event:Event)
-    <-[*1..2]-(p:Person)-->(name:Name) 
-WHERE ID(source)={sourceid}
+# ╒════════════════╤════════════╤══════════════════════════════╤═══════╤════════════════╕
+# │"page"          │"confidence"│"events"                      │"pid"  │"names"         │
+# ├────────────────┴───────┼────┼──────────────────────────────┼───────┼────────────────┤
+# │"http://hiski.genealogia│"1" │[["35450","Occupation",""],["3│"36349"│[["Carlstedt",  │
+# │.fi/hiski?fi+t4714729"  │    │5449","Death","1809-02-22"]]  │       │"Jonas"]]       │
+# ├────────────────────────┼────┼──────────────────────────────┼───────┼────────────────┤
+# │"http://hiski.genealogia│"1" │[["35790","Death","1839-01-16"│"36834"│[["Kyander",    │
+# │.fi/hiski?fi+t4717438"  │    │]]                            │       │"Magnus Johan"]]│
+# └────────────────────────┴────┴──────────────────────────────┴───────┴────────────────┘
+#         query = """
+# MATCH (source:Source) <-[:SOURCE]- (citation:Citation)
+#       <-[r:CITATION]- (event:Event)
+#       <-[*1..2]- (p:Person) --> (name:Name) 
+# WHERE ID(source)={sourceid}
+# WITH event, citation,
+#     COLLECT([ID(p),name.surname, name.firstname, name.suffix]) AS names
+# WITH citation,
+#      COLLECT([ID(event), event.type, event.date, names]) AS events
+# RETURN COLLECT([citation.page, citation.confidence, events]) AS citations"""
+        get_events_of_source = """
+MATCH (source:Source) <-[:SOURCE]- (citation:Citation)
+      <-[r:CITATION]- (event:Event)
+      <-[*1..2]- (p:Person) --> (name:Name) 
+WHERE ID(source)=$sid
 WITH event, citation,
-    COLLECT([ID(p),name.surname, name.firstname, name.suffix]) AS names
+    COLLECT([ID(p), name.surname, name.firstname, name.suffix]) AS names
 WITH citation,
      COLLECT([ID(event), event.type, event.date, names]) AS events
-RETURN COLLECT([citation.page, citation.confidence, events]) AS citations"""
+RETURN id(citation) as uniq_id, citation.id as id, citation.page as page, 
+       citation.confidence as conf, events        """
 
-        return shareds.driver.session().run(query, sourceid=int(sourceid))
+        return shareds.driver.session().run(get_events_of_source, 
+                                            sid=int(sourceid))
 
 
     @staticmethod       

@@ -473,38 +473,41 @@ def get_source_with_events(sourceid):
     """
     
     s = Source()
-    s.uniq_id = sourceid
+    s.uniq_id = int(sourceid)
     result = s.get_source_data()
     for record in result:
         s.stitle = record["stitle"]
-    result = Source.get_events(sourceid)
+    result = Source.get_citating_events(sourceid)
 
     event_list = []
     for record in result:               # Events record
-                
-        for citation in record["citations"]:
-            c = Citation()
-            c.page = citation[0]
-            c.confidence = citation[1]
+        # <Record uniq_id=89502 id='C1506' page='1872 döde 32. vainaja' conf='2' 
+        # events=[[84474, 'Burial', None, [[72121, 'Bruun', 'Henrietta Catharina', ''], 
+        #         [72121, 'Naht', 'Henrietta', '']]], ... ]>
+        c = Citation()
+        c.uniq_id = record['uniq_id']
+        c.id = record['id']
+        c.page = record['page']
+        c.confidence = record['conf']
+
+        for event in record['events']:
+            e = Event_combo()
+            e.uniq_id = event[0]
+            e.type = event[1]
+            e.edate = event[2]
             
-            for event in citation[2]:
-                e = Event_combo()
-                e.uniq_id = event[0]
-                e.type = event[1]
-                e.edate = event[2]
-                
-                for name in event[3]:
-                    n = Name()
-                    n.uniq_id = name[0]        
-                    n.surname = name[1]        
-                    n.firstname = name[2]  
-                    n.suffix = name[3]  
-                        
-                    e.names.append(n)
-                          
-                c.events.append(e)
-                
-            event_list.append(c)
+            for name in event[3]:
+                n = Name()
+                n.uniq_id = name[0]        
+                n.surname = name[1]        
+                n.firstname = name[2]  
+                n.suffix = name[3]  
+
+                e.names.append(n)
+
+            c.events.append(e)
+
+        event_list.append(c)
 
     return (s.stitle, event_list)
 

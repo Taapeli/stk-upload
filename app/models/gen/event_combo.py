@@ -50,7 +50,7 @@ class Event_combo(Event):
         self.objref_hlink = ''
 
         self.citations = []     # For creating display sets
-#         self.names = []         # For creating display sets
+        self.names = []         # Person names connected; for creating display
         self.notes = []         # For creating display sets
         self.place = ''     # TODO Change to places[]
 

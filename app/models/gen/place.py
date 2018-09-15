@@ -183,7 +183,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
 
     @staticmethod
-    def get_place_names():
+    def get_place_w_names():
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
 
             Esim.
