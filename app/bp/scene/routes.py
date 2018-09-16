@@ -17,6 +17,7 @@ from models.datareader import get_source_with_events
 from models.gen.family import Family_for_template
 from models.gen.place import Place
 from models.gen.source import Source
+from models.gen.citation import Citation
 
 
 @bp.route('/scene/persons/restricted')
@@ -104,17 +105,24 @@ def show_a_person(uid=""):
     person = persons[0]
     person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
     person.set_my_places(True)
-#     person.get_all_citation_source()
+    person.citations = Citation.get_persons_citations(person.uniq_id)
+    #TODO: Etsi sitaateille lähteet
+
 #     person.get_all_notes()
 #     person.get_media()
 #     person.get_refnames()
-    for e in person.events:
-        print("Person event {}: {}".format(e.uniq_id, e))
-        if e.place == None:
-            print("- no place")
+    for c in person.citations:
+        if len(c.citators):
+            print ("Sitaatit {} ({})".format(c, c.citators[0]))
         else:
-            for n in e.place.names:
-                print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
+            print ("Sitaatit {}".format(c))
+#     for e in person.events:
+#         print("Person event {}: {}".format(e.uniq_id, e))
+#         if e.place == None:
+#             print("- no place")
+#         else:
+#             for n in e.place.names:
+#                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
     
     return render_template("/scene/person_pg.html", person=person, menuno=1)
 

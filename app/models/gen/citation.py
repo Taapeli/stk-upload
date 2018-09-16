@@ -1,5 +1,5 @@
 '''
-    Archive, Repository, Source and Citation classes
+    Citation class for handling Citation nodes and relations
 
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
@@ -10,6 +10,7 @@ from sys import stderr
 
 from models.cypher_gramps import Cypher_citation_w_handle
 import shareds
+from models.gen.event import Event
 
 class Citation:
     """ Viittaus
@@ -35,15 +36,87 @@ class Citation:
         self.sourceref_hlink = ''
         self.sources = []   # For creating display sets
         self.citators = []  # For creating display sets
+
+    def __str__(self):
+        return "{} '{}'".format(self.id, self.page)
     
-    
+    @staticmethod       
+    def get_persons_citations (uniq_id):
+        """ Read 'Person -> Event -> Citation' and 'Person -> Citation' paths
+
+            Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
+        """
+        get_persons_citation_paths = """
+match path = (p) -[*]-> (c:Citation) where id(p) = $pid 
+with relationships(path) as rel, c
+return extract(x IN rel | x.role) as role, 
+       extract(x IN rel | endnode(x)) as end"""
+
+#TODO: Roolia ei tarvita?
+# ╒════════════════╤════════════════════════════════════════════════════════╕
+# │"role"          │"end"                                                   │
+# ╞════════════════╪════════════════════════════════════════════════════════╡
+# │["Primary",null]│[{"datetype":0,"change":1521882912,"description":"","han│
+# │                │dle":"_dd768e76e66620bbff00d54bc8","attr_type":"","id":"│
+# │                │E2823","date2":1869087,"type":"Baptism","date1":1869087,│
+# │                │"attr_value":""},                                       │
+# │                │                 {"handle":"_dd768dca3a62654475a5726dfcd│
+# │                │","page":"s. 336 1825 Augusti 29 kaste 27","id":"C1362",│
+# │                │"dateval":"","confidence":"2","change":1521882911}]     │
+# ├────────────────┼────────────────────────────────────────────────────────┤
+# │[null]          │[{"handle":"_dd7686926d946cd18c5642e61e2","id":"C1361","│
+# │                │page":"1891 Syyskuu 22","dateval":"","change":1521882215│
+# │                │,"confidence":"2"}]                                     │
+# └────────────────┴────────────────────────────────────────────────────────┘
+        
+        result = shareds.driver.session().run(get_persons_citation_paths, 
+                                            pid=uniq_id)
+        citations = []
+        for record in result:
+            roles = record['role']
+            nodes = record['end']
+            c = Citation()
+            if len(nodes) == 1:
+                # Direct link (:Person) --> (:Citation)
+                # Nodes[0] ~ Citation
+                # <Node id=89360 labels={'Citation'} 
+                #       properties={'change': 1521882911, 
+                #                   'handle': '_dd768dca3a62654475a5726dfcd', 
+                #                   'page': 's. 336 1825 Augusti 29 kaste 27', 
+                #                   'id': 'C1362', 'confidence': '2', 'dateval': ''
+                #                  }>
+
+                cit = nodes[0]
+            else:
+                # Longer path (:Person) -> (x) -> (:Citation)
+                # Nodes[0] ~ Event (or something else)
+                # Nodes[1] ~ Citation
+                eve = nodes[0]
+                cit = nodes[1]
+                e = NodeRef()
+                e.uniq_id = eve.id
+                e.eventtype = eve['type']
+                e.eventrole = roles[0]
+                c.citators.append(e)
+
+            c.id = cit.id
+            c.label = cit.labels.pop()
+            c.uniq_id = cit.id
+            c.page = cit['page']
+            c.confidence = cit['confidence']
+
+            citations.append(c)
+
+        return citations
+
+
     @staticmethod       
     def get_source_repo (uniq_id=None):
         """ Read Citation -> Source -> Repository chain
             and optionally Notes.            
             Citation has all data but c.handle
 
-            Voidaan lukea viittauksen lähde ja arkisto kannasta
+            Voidaan lukea annetun Citationin lähde ja arkisto kannasta
         """
 
         if uniq_id:
@@ -156,6 +229,7 @@ class Citation:
             
         return
 
+
 class NodeRef():
     ''' Carries data of citating nodes
             label            str Person or Event
@@ -172,3 +246,6 @@ class NodeRef():
         self.eventtype = ''
         self.edates = None
         self.date = ''
+
+    def __str__(self):
+        return "{} {} '{}'".format(self.uniq_id, self.eventtype, self.clearname)

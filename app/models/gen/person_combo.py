@@ -713,14 +713,6 @@ with r, e, pl
 #                     print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
 
 
-    def get_all_citation_source(self):
-        ''' Finds all Citions ans Sources which are connected to
-            this Person, Events and Families
-            and stores them in self.citations list
-        '''
-        pass
-
-
     def get_all_notes(self):
         ''' Finds all Note and Weburl
             which are connected to Person, Events or Families
