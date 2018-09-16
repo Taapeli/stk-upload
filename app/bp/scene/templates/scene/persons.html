@@ -104,11 +104,12 @@
 	                </div></td>
 	              <td class="ColumnEvent">
 	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li><i>{{e.type|transl('evt')}}</i> {{e.dates}}
+		              <li><i>{{e.type|transl('evt')}}</i>
+		              {% if e.dates %}{{e.dates}} {% endif %}
 		              {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
 	        {% endif %}
-	              </td><!-- Perheen tapahtumat tähän
+	              </td><!-- Perheen tapahtumat tähän?
                   <td class="ColumnEvent">
                   </td> -->
 	           </tr>

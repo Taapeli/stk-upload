@@ -5,8 +5,9 @@
 {{ super() }}
 {% set sp = {'M':'mies', 'F':'nainen'} %}
 {% import '/scene/macros.html' as macro %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        
+<!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" 
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 <h2>Henkilön tiedot</h2>
 
 {{ macro.menu(1) }}
@@ -296,7 +297,8 @@
                            {% if source.notetext %}<br>
                               <a href="{{source.notetext}}" class="outlink" target="_blank"
                               {% if source.confidence and source.confidence < "2" %}
-                             style="color:red"{% endif %}>{{ source.notetext }}</a>{% endif %}                           
+                             style="color:red"{% endif %}>
+                                {{ source.notetext }}</a>{% endif %}                           
                         </li>
                 	</ol>
                 </li>

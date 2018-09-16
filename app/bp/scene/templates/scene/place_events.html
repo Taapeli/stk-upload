@@ -36,9 +36,9 @@
         <div>
             <ul>{% for p in locations %}
                 <li style="margin-left: {{p.level * 2}}em;">
-                {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
+                {% if p.uniq_id == locid|int %}<span class="id">{{p.uniq_id}}</span>
                     <b>{{p.pname|join(' • ')}}</b>
-                {% else %}<a href="/scene/location={{p.id}}"><span class="id">{{p.id}}</span></a>
+                {% else %}<a href="/scene/location={{p.uniq_id}}"><span class="id">{{p.uniq_id}}</span></a>
                     {{p.pname|join(' • ')}}
                 {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
             {% endfor %}</ul>

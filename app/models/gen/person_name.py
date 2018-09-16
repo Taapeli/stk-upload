@@ -94,7 +94,7 @@ class Name:
             sn = record['sn']
             pn = record['pn']
             names.append("{} {} {}".format(fn, pn, sn))
-        return ' / '.join(names)
+        return ' • '.join(names)
 
 
     @staticmethod
