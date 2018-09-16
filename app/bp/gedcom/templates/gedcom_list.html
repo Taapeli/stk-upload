@@ -7,11 +7,11 @@
 
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
-    <h2>Gedcom-aineistosi</h2>
+    <h2>{{ _("GEDCOM Management") }}</h2>
     <div class="row">
         <div class="startbox">
 	        <div style="display: inline-block;">
-	            <h3>{{ _("Ladatut gedcomit") }}</h3>
+	            <h3>{{ _("Uploaded GEDCOMs") }}</h3>
 				<div>
 				    <ul>
 					    {% for file in files %}
@@ -22,26 +22,26 @@
 						    <p>
 						    </li>
 					    {% endfor %}
-				    <p>{{ kpl }} {{ _("kpl") }}</p>
+				    <p>{{ kpl }} {{ _("files") }}</p>
 				</div>
 			</div>
 		</div>
 
 	    <div class="startbox">
 	        <div style="display: inline-block;">
-	            <h3>{{ _("Lataa uusi Gedcom-tiedosto") }}</h3>
+	            <h3>{{ _("Upload a new GEDCOM file") }}</h3>
 				<div>
 				    <form method="post" enctype="multipart/form-data" action="/gedcom/upload">
 				      <div>
 				        <input type="file" name="file" accept="{{ allowed_extensions }}">
 				      </div>
-				      <div><label for="desc">{{ _("Kuvaus") }}</label>
+				      <div><label for="desc">{{ _("Description") }}</label>
 				           <input name="desc" style="width: 14em"></div>
 				      <div class="submit">
-				        <input type="submit" value="{{ _('Lataa') }}">
+				        <input type="submit" value="{{ _('Upload') }}">
 				      </div>
 				    </form>
-				    <div>&rtrif; <a href="/">{{ _("Paluu alkusivulle") }}</a></div>
+				    <div>&rtrif; <a href="/">{{ _("Return to main page") }}</a></div>
 				</div>
 			 </div>
 	    </div>

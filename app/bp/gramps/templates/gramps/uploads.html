@@ -1,0 +1,40 @@
+{# _myapp/templates/gr_result.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}{{ _("Uploads") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+    <meta http-equiv="refresh" content="30">
+    <h2>{{ _("Uploads") }}</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+        <table>
+           <tr>
+                <th>{{ _("Start time") }}</th>
+                <th>{{ _("XML file") }}</th>
+                <th>{{ _("Status") }}</th>
+           </tr>
+	    {% for upload in uploads %}
+	       <tr>
+	           <td class="msg_INFO">{{upload.starttime_s}}</td>
+	           <td class="msg_INFO">
+	               {% if upload.done %}
+        	           <a href=/gramps/upload_info/{{upload.starttime}}.{{upload.xmlname}}>{{upload.xmlname}}</a>
+    	           {% else %}
+        	           {{upload.xmlname}}
+    	           {% endif %}
+	           </td>
+	           <td class="msg_INFO">{{upload.status}}</td>
+	       </tr>
+	    {% endfor %}</table>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
+{% endblock %}
+</body>
+</html>
+

@@ -70,14 +70,14 @@ def test_gedcom_upload(client):
     rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
     data = rv.data.decode("utf-8")
     assert os.path.exists(test_gedcom_fname)
-    assert 'Ladatut gedcomit' in data
+    assert 'Uploaded GEDCOMs' in data
     assert test_gedcom in data
     assert 'Description' in data
         
 def test_gedcom_list(client):
     rv = client.get('/gedcom/list')
     data = rv.data.decode("utf-8")
-    assert 'Ladatut gedcomit' in data
+    assert 'Uploaded GEDCOMs' in data
     
     for name in os.listdir(gedcom_dir):
         if not name.endswith(".ged"): continue
@@ -86,7 +86,7 @@ def test_gedcom_list(client):
 def test_gedcom_info(client):
     rv = client.get('/gedcom/info/'+test_gedcom)
     data = rv.data.decode("utf-8")
-    assert 'Muunnokset' in data
+    assert 'Transformations' in data
 
 def test_gedcom_versions(client):
     rv = client.get('/gedcom/versions/'+test_gedcom)
@@ -96,32 +96,36 @@ def test_gedcom_versions(client):
 def test_gedcom_transform_params(client):
     rv = client.get('/gedcom/transform/'+test_gedcom+"/kasteet.py")
     data = rv.data.decode("utf-8")
-    assert 'kasteet muunnosparametrit' in data
+    assert 'kasteet transformation options' in data
     
-def test_gedcom_transform(client):
+def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     args = {
         "--dryrun":"on",
         "--display-changes":"on",   
     }
-    rv = client.post('/gedcom/transform/'+test_gedcom+"/kasteet.py",data=args)
+    args.update({"--"+option:value for option,value in options.items()})
+    rv = client.post('/gedcom/transform/'+test_gedcom+"/"+transform,data=args)
     data = eval(rv.data.decode("utf-8"))
-    print(data)
     assert data["stderr"] == ""
-    #assert 'Lokitiedot' in data
+    assert expected in data['stdout']
+
+def test_gedcom_transform_kasteet(client):
+    dotest_gedcom_transform(client,"kasteet-1.ged","kasteet.py","PLAC p1")
     
-def test_gedcom_transform2(client):
-    args = {
-#        "--dryrun":"on",
-        "--display-changes":"on",   
-        "--encoding":"ISO8859-1",   
-        "--add_cont_if_no_level_number":"on",   
-    }
-    test_gedcom = "AK20140516.ged"
-    test_transform = "sukujutut.py"
-    rv = client.post('/gedcom/transform/'+test_gedcom+"/" + test_transform,data=args)
-    data = eval(rv.data.decode("utf-8"))
-    open("err.log","w").write(data["stderr"])
-    open("out.log","w").write(data["stdout"])
-    assert data["stderr"] == ""
-    
+def test_gedcom_transform_kasteet2(client):
+    dotest_gedcom_transform(client,"kasteet-1.ged","kasteet2.py","PLAC p1")
+
+def test_gedcom_transform_marriages(client):
+    dotest_gedcom_transform(client,"marriages-1.ged","marriages.py","PLAC p3, p1")
+
+def test_gedcom_transform_marriages2(client):
+    dotest_gedcom_transform(client,"marriages-1.ged","marriages2.py","PLAC p3, p1")
+
+def test_gedcom_transform_sukujutut(client):
+    dotest_gedcom_transform(client,"sukujutut-1.ged","sukujutut.py","2 CONT zzz",
+        add_cont_if_no_level_number="on",
+        insert_dummy_tags="on",
+    )
+
+
         

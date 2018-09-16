@@ -74,9 +74,12 @@ def get_transforms():
         if doc:
             t.doc = doc
             t.docline = doc.strip().splitlines()[0]
+            t.docline = _(t.docline)
         else:
             t.doc = ""
             t.docline = ""
+        if hasattr(transformer,"docline"):
+            t.docline = transformer.docline
         if hasattr(transformer,"doclink"):
             t.doclink = transformer.doclink
         else:
@@ -102,7 +105,7 @@ def gedcom_list():
         f.name = name
         f.metadata = get_metadata(name)
         files.append(f)
-    return render_template('gedcom_list.html', title=_("Gedcomit"), 
+    return render_template('gedcom_list.html', title=_("Gedcoms"), 
                            files=files, kpl=len(names),
                            allowed_extensions=allowed_extensions )
     
@@ -139,7 +142,7 @@ def gedcom_revert(gedcom,version):
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
     rsp = dict(newname=os.path.basename(newname))
-    return jsonify(rsp)
+    return jsonify(rsp) 
 
 @bp.route('/gedcom/upload', methods=['POST'])
 @login_required
@@ -153,13 +156,13 @@ def gedcom_upload():
     gedcom_folder = get_gedcom_folder()
     # check if the post request has the file part
     if 'file' not in request.files:
-        flash(_('Valitse ladattava gedcom-tiedosto'), category='flash_warning')
+        flash(_('Choose a GEDCOM file to upload'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     file = request.files['file']
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        flash(_('Valitse ladattava gedcom-tiedosto'), category='flash_warning')
+        flash(_('Choose a  GEDCOM file to upload'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -187,7 +190,7 @@ def gedcom_info(gedcom):
     gedcom_folder = get_gedcom_folder()
     filename = os.path.join(gedcom_folder,gedcom)
     if not os.path.exists(filename):
-        flash(_("Tiedostoa ei ole"), category='flash_error')
+        flash(_("That GEDCOM file does not exist on the server"), category='flash_error')
         return redirect(url_for('.gedcom_list'))
     metadata = get_metadata(gedcom)
     num_individuals = 666
@@ -236,11 +239,21 @@ def display_changes(lines,item):
             print(s)
 
     print("-----------------------")
-    print("Replaced:")
+    if not item: 
+        print(_("Deleted:"))
+        for line in lines:
+            print(line)
+        print()
+        return
+    print(_("Replaced:"))
     for line in lines:
         print(line)
-    print("With:")
-    item.print_items(Out())
+    print(_("With:"))
+    if isinstance(item, list):
+        for it in item:
+            it.print_items(Out())
+    else:
+        item.print_items(Out())
     print()
         
 def process_gedcom(cmd, transform_module):
@@ -256,27 +269,27 @@ def process_gedcom(cmd, transform_module):
     """
 
 
-    LOG.info("------ Ajo '%s'   alkoi %s ------", \
-             transform_module.__name__, \
+    msg = _("Transform '{}' started {}").format(
+             transform_module.__name__, 
              datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
-
+    LOG.info("------ {} ------".format(msg))
 
     import argparse
     import io
     import traceback
     parser = argparse.ArgumentParser()
 #    parser.add_argument('transform', help="Name of the transform (Python module)")
-    parser.add_argument('input_gedcom', help="Name of the input GEDCOM file")
-    parser.add_argument('--logfile', help="Name of the log file", default="_LOGFILE" )
+    parser.add_argument('input_gedcom', help=_("Name of the input GEDCOM file"))
+    parser.add_argument('--logfile', help=_("Name of the log file"), default="_LOGFILE" )
 #    parser.add_argument('--output_gedcom', help="Name of the output GEDCOM file; this file will be created/overwritten" )
     parser.add_argument('--display-changes', action='store_true',
-                        help='Display changed rows') 
+                        help=_('Display changed rows'))
     parser.add_argument('--dryrun', action='store_true',
-                        help='Do not produce an output file')
+                        help=_('Do not produce an output file'))
     parser.add_argument('--nolog', action='store_true',
-                        help='Do not produce a log in the output file')
+                        help=_('Do not produce a log in the output file'))
     parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
-                        help="Input encoding")
+                        help=_("Encoding of the input GEDCOM"))
     transform_module.add_args(parser)
     args = parser.parse_args(cmd.split())
     run_args = vars(args)
@@ -294,9 +307,7 @@ def process_gedcom(cmd, transform_module):
             else:
                 old_name = out.new_name
 
-            print("------ Ajo '%s'   alkoi   %s ------" % (
-                     transform_module.__name__, 
-                     datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+            print("------ {} ------".format(msg))
             t = transformer.Transformer(transform_module=transform_module,
                                         display_callback=display_changes,
                                         options=args)
@@ -306,9 +317,10 @@ def process_gedcom(cmd, transform_module):
         traceback.print_exc()
     finally:
         time.sleep(1)  # for testing...
-        print("------ Ajo '%s'   päättyi %s ------" % (
+        msg = _("Transform '{}' ended {}").format(
                  transform_module.__name__, 
-                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')))
+                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+        print("------ {} ------".format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()
         sys.stdout = saved_stdout
@@ -319,7 +331,7 @@ def process_gedcom(cmd, transform_module):
         old_basename = ""
     if errors and old_basename:
         os.rename(old_name,args.input_gedcom)
-        old_basename = ""
+        old_basename = "" 
     rsp = dict(stdout=output,stderr=errors,oldname=old_basename,logfile=args.logfile)
     return jsonify(rsp)
             
@@ -361,7 +373,7 @@ def gedcom_transform(gedcom,transform):
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
 #         if s2: print("=== Subprocess errors ===\n" + s2) 
-        s = "\nErrors:\n" + s2 + "\n\n" + s1
+        s = "\n" + _("Errors:") + "\n" + s2 + "\n\n" + s1
         try:
             log = open(logfile).read()
         except FileNotFoundError:
@@ -428,7 +440,7 @@ def build_parser(filename,gedcom,gedcom_filename):
                 elif arg.type == int:
                     row.type = 'number'
                 else:
-                    raise RuntimeError("Unsupported type: ", arg.type )
+                    raise RuntimeError(_("Unsupported type: "), arg.type )
                 rows.append(row)
             return render_template('gedcom_transform_params.html', gedcom=gedcom, transform=filename, rows=rows )
 

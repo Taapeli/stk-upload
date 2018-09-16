@@ -5,5 +5,7 @@ RemoteSystemsTempFiles/\.project
 \.metadata/
 \.pytest_cache
 /gedcoms/
+/uploads/
 .pydevproject 
+/env.sh
 /__pycache__/
