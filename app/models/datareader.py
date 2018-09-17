@@ -212,9 +212,9 @@ def read_cite_sour_repo(uniq_id=None):
             c.confidence = source_cite[3]
             
             c.get_sourceref_hlink()
-            if c.sourceref_hlink != '':
+            if c.source_handle != '':
                 s = Source()
-                s.uniq_id = c.sourceref_hlink
+                s.uniq_id = c.source_handle
                 result_source = s.get_source_data()
                 for record_source in result_source:
                     if record_source['stitle']:

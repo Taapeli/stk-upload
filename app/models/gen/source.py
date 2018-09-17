@@ -38,9 +38,36 @@ class Source:
         self.citations = []   # For creating display sets
         self.repos = []   # For creating display sets
 
+
     def __str__(self):
         return "{} {}".format(self.id, self.stitle)
-    
+
+
+    @staticmethod       
+    def get_sources_by_idlist(uniq_ids):
+        ''' Read source data from db for given uniq_ids.
+        
+            returns a dictionary of { uniq_id: Source }
+        '''
+        source_load_data = '''
+match (s:Source) where id(s) in $ids
+return id(s) as uniq_is, s'''
+        sources = {}
+        result = shareds.driver.session().run(source_load_data, ids=uniq_ids)
+        for record in result:
+            s = Source()
+            snode = record['s']
+            # {"handle":"_dd162a3bcb7533c6d1779e039c6","id":"S0409",
+            #  "stitle":"Askainen syntyneet 1783-1825","change":"1519858899"}
+            s.id = snode.id
+            s.uniq_id = snode['uniq_id']
+            s.handle = snode['handle']
+            s.stitle = snode['stitle']
+            s.change = snode['change']
+            sources[s.id] = s
+        return sources
+
+
     def get_reporef_hlink(self):
         """ Luetaan lähteen arkiston uniq_id kannasta """
                         

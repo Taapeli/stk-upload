@@ -256,7 +256,7 @@ class DOM_handler():
             if len(citation.getElementsByTagName('sourceref') ) == 1:
                 citation_sourceref = citation.getElementsByTagName('sourceref')[0]
                 if citation_sourceref.hasAttribute("hlink"):
-                    c.sourceref_hlink = citation_sourceref.getAttribute("hlink")
+                    c.source_handle = citation_sourceref.getAttribute("hlink")
             elif len(citation.getElementsByTagName('sourceref') ) > 1:
                 self.log(Log("More than one sourceref tag in a citation",
                                     level="WARNING",count= c.id))

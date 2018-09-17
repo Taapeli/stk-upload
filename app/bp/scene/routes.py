@@ -105,17 +105,17 @@ def show_a_person(uid=""):
     person = persons[0]
     person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
     person.set_my_places(True)
-    person.citations = Citation.get_persons_citations(person.uniq_id)
+    person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
+    sources = Source.get_sources_by_idlist(source_ids)
     #TODO: Etsi sitaateille lähteet
 
 #     person.get_all_notes()
 #     person.get_media()
 #     person.get_refnames()
     for c in person.citations:
-        if len(c.citators):
-            print ("Sitaatit {} ({})".format(c, c.citators[0]))
-        else:
-            print ("Sitaatit {}".format(c))
+        print ("Sitaatit {} {}".format(c.uniq_id, c))
+        for ci in c.citators:
+            print (" <- {}".format(ci))
 #     for e in person.events:
 #         print("Person event {}: {}".format(e.uniq_id, e))
 #         if e.place == None:
@@ -124,7 +124,8 @@ def show_a_person(uid=""):
 #             for n in e.place.names:
 #                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
     
-    return render_template("/scene/person_pg.html", person=person, menuno=1)
+    return render_template("/scene/person_pg.html", 
+                           person=person, sources=sources, menuno=1)
 
 
 @bp.route('/scene/persons/ref=<string:refname>')
