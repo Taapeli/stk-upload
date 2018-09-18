@@ -2,10 +2,8 @@
 
 """
 Avio-PLAC:n hajoittaminen
-pekka.valta@kolumbus.fi
 5.11.2016 16.48 
 	
--> minä, Juha
 Moi,
 vilkaisin gedcomista, miltä näyttää avioliitto, jossa on paikan nimeen lykätty myös sulhasen ja morsiamen kotipaikat. Tämä tapahan on itse asiassa hyvin tehokas ja ainoa mahdollinen, jos sukututkimusohjelma ei tue asuinpaikka-tapahtumia. Sen voisi jopa antaa suosituksena, jos näin kirjattu tieto kyettäisiin purkamaan.
 
@@ -33,104 +31,69 @@ Jos oikein hienostelisi, niin ottaisi huomioon lisätapaukset, jossa on kylän l
 
 Mallia sorsapohjaksi löytynee Data Entry Grampletista, jonka kautta voi syöttää syntymä/kuolintapahtumia.
 
-Näillä ideoilla pyhäinpäivän keskellä
-
 
 """
 
-version = "1.0"
+version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
+
+from flask_babelex import _
+docline = _("Avio-PLAC:n hajoittaminen")
+
+from .. import transformer
+from transformer import Item
 
 from collections import defaultdict 
 import re
-#from PIL.SpiderImagePlugin import outfile
-
-class FamInfo:
-    husb = None
-    wife = None
-    date = None
-    place = ""
-   
-class Place:
-    def __init__(self,place,date):
-        self.place = place
-        self.date = date
-    def __repr__(self):
-        pass
-
-resi = defaultdict(list) # key=@individ-id@ value=[(place,date),...]
-fams = defaultdict(FamInfo) # key=@fam@, value=FamInfo
-fixedfams = {} # key=@fam@ value=place
 
 def add_args(parser):
     pass
 
-def initialize(run_args):
-    pass
+def initialize(options):
+    return Marriages()
 
-def phase1(run_args, gedline):
-    '''
-		1st traverse: finding all families
-    '''
-    path = gedline.path
-    value = gedline.value
+class Marriages(transformer.Transformation):
+    twophases = True
     
-    if path.endswith(".HUSB"):  # @fam@.HUSB @husb@
-        parts = path.split(".")
-        fam = parts[0]
-        #husbands[fam] = value
-        fams[fam].husb = value
-    if path.endswith(".WIFE"):  # @fam@.WIFE @wife@
-        parts = path.split(".")
-        fam = parts[0]
-        #wives[fam] = value
-        fams[fam].wife = value
-    if path.endswith(".MARR.DATE"):  # @fam@.MARR.DATE date
-        parts = path.split(".")
-        fam = parts[0]
-        #dates[fam] = value
-        fams[fam].date = value
-    if path.endswith(".MARR.PLAC"):  # @fam@.MARR.PLAC place
-        parts = path.split(".")
-        fam = parts[0]
-        #place = value
-        fams[fam].place = value
-
-def phase2(run_args):
-    '''
-        Parse multiple places mentioned as marriage location: "loc1, (loc2, loc3)"
-    '''
-    for fam,faminfo in fams.items():
-        m = re.match(r"([^,]+), \(([^/]+)/([^/]+)\)",faminfo.place)
-        if m:
-            husb_place = m.group(2)+", "+m.group(1)
-            wife_place = m.group(3)+", "+m.group(1)
-            resi[faminfo.husb].append((husb_place,faminfo.date))
-            resi[faminfo.wife].append((wife_place,faminfo.date))
-            fixedfams[fam] = m.group(1)
-
-def phase3(run_args, gedline, f):
-    '''
-        2nd traverse: creating the new GEDCOM file
-    '''
-    if gedline.value == "INDI":  # 0 @Ixxx@ INDI
-        key = gedline.tag
-        if key in resi:
-            gedline.emit(f)
-            for place,date in resi[key]:
-                f.emit("1 RESI")
-                f.emit("2 TYPE marriage")
-                if date: f.emit("2 DATE " + date)
-                f.emit("2 PLAC " + place)
-            return
-    if gedline.path.endswith(".MARR.PLAC"):  # @fam@.MARR.PLAC place
-        parts = gedline.path.split(".")
-        fam = parts[0]
-        if fam in fixedfams:
-            gedline.tag = "PLAC"
-            gedline.value = fixedfams[fam]
-        gedline.emit(f)
-        return
-    gedline.emit(f)
-                       
-
+    def __init__(self):
+        self.resi = defaultdict(list) # key=@individ-id@ value=[(place,date),...]
+    
+    def transform(self,item,options):
+        # phase 1
+        if item.value == "FAM":
+            fam = item.tag #  @Fxxx@
+            place = ""
+            date = None
+            for c1 in item.children:
+                if c1.tag == "MARR":
+                    for c2 in c1.children:
+                        if c2.tag == "PLAC":
+                            place = c2.value
+                            place_item = c2
+                        if c2.tag == "DATE":
+                            date = c2.value
+                if c1.tag == "HUSB":  
+                    husb = c1.value
+                if c1.tag == "WIFE":  
+                    wife = c1.value
+            m = re.match(r"([^,]+), \(([^/]+)/([^/]+)\)",place)
+            if m:
+                husb_place = m.group(2)+", "+m.group(1)
+                wife_place = m.group(3)+", "+m.group(1)
+                self.resi[husb].append((husb_place,date))
+                self.resi[wife].append((wife_place,date))
+                place_item.value = m.group(1)
+                return item
+        # phase 2
+        if item.value == "INDI" and item.tag in self.resi:
+            for place,date in self.resi[item.tag]:
+                c1 = Item("1 RESI")
+                c1.children.append(Item("2 TYPE marriage"))
+                c1.children.append(Item("2 PLAC " + place))
+                if date:
+                    c1.children.append(Item("2 DATE " + date))
+                item.children.append(c1)
+            return item
+        return True
+    
+    

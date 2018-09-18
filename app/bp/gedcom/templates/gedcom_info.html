@@ -96,8 +96,8 @@ table.diff td {
         	$.get("/gedcom/compare/" + gedcom1 + "/" + gedcom2,function(rsp) {
             	$("#difftable").html(rsp.diff);
             	$("button.palauta_button").hide();
-            	$("#palauta1").text("{{ _('Palauta') }} " + gedcom1).data("gedcom",gedcom1);
-            	$("#palauta2").text("{{ _('Palauta') }} " + gedcom2).data("gedcom",gedcom2);
+            	$("#palauta1").text("{{ _('Revert to') }} " + gedcom1).data("gedcom",gedcom1);
+            	$("#palauta2").text("{{ _('Revert to') }} " + gedcom2).data("gedcom",gedcom2);
             	if (!gedcom1.match(/\.ged$/)) $("#palauta1").show();
             	if (!gedcom2.match(/\.ged$/)) $("#palauta2").show();
             	$("#div_compare").show();
@@ -108,8 +108,8 @@ table.diff td {
 			var version = $(this).data("gedcom");
             $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
 		        $("#versions").click(); 
-                alert(gedcom + " renamed to " + rsp.newname + "\n" +
-                	  version + " renamed to " + gedcom);
+                alert(gedcom + "{{ _('renamed to') }} " + rsp.newname + "\n" +
+                	  version + "{{ _('renamed to') }} " + gedcom);
             });
     	});
         hide_all();
@@ -118,24 +118,24 @@ table.diff td {
 
 <div class="startdiv">
     <div>
-	    <h2>Gedcom-käsittelyt</h2>
+	    <h2>{{ _("Gedcom transformations") }}</h2>
 	    <div id="errors" class="errors"></div>
 	    <div class="row">
 	       <div class="startbox">
 	         <div style="display: inline-block;">
-				<h3>{{ _("GEDCOM") }} "{{gedcom}}" tiedot</h3>
-				<label for="desc">{{ _("Kuvaus") }}</label>
+				<h3>{{ _("GEDCOM") }} "{{gedcom}}"</h3>
+				<label for="desc">{{ _("Description") }}</label>
 			    <input id="desc" value='{{ metadata.desc }}' style="width: 14em">
                 <div class="submit">
-			         <input type="button" id="update_desc" value='{{ _("Päivitä") }}'>
+			         <input type="button" id="update_desc" value='{{ _("Update") }}'>
 			    </div>
 				<p>(Näennäistiedot, ei aineistosta)</p>
 				<table>
-				    <tr><td>{{ _("Ladattu") }}</td>
+				    <tr><td>{{ _("Upload time") }}</td>
 				        <td class="right">2018-06-06</td></tr>
-				    <tr><td>{{ _("Henkilöiden lukumäärä") }}</td>
+				    <tr><td>{{ _("Number of individuals") }}</td>
 				        <td class="right">{{ num_individuals }}</td></tr>
-	                <tr><td>{{ _("Sallin neuvontapalvelun katselumahdollisuuden") }}</td>
+	                <tr><td>{{ _("Allow help desk to view data") }}</td>
 	                    <td class="right"><input type="checkbox" id="view_permission"></td></tr>
                     {% for meta in metadata.items() %}
                     <!--
@@ -150,17 +150,17 @@ table.diff td {
 	      <div class="startbox">
 	        <div style="display: inline-block;">
 	
-				<h3>Valinnat</h3>
+				<h3>{{ _("Options") }}</h3>
 				<div>
 				    <ul>
-				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Hae tämä tiedosto") }}</a></li>
+				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Fetch this GEDCOM") }}</a></li>
 				        <li><a href="#" id="delete" data="/gedcom/delete">
-	                        {{ _("Poista tämä tiedosto") }}</a></li>
+	                        {{ _("Remove this GEDCOM") }}</a></li>
 	                </ul>
-				    <input type="submit" id="transforms" value='{{ _("Valitse muunnos") }}'>
-				    <input type="submit" id="versions" value='{{ _("Näytä versiot") }}'>
+				    <input type="submit" id="transforms" value='{{ _("Choose a transformation") }}'>
+				    <input type="submit" id="versions" value='{{ _("Display versions") }}'>
 				    <ul>
-                        <li>&rtrif; <a href="/gedcom/list">{{ _("Vaihda toiseen aineistoon") }}</a></li>
+                        <li>&rtrif; <a href="/gedcom/list">{{ _("Switch to another GEDCOM") }}</a></li>
                     </ul>
 				</div>
 	        </div>
@@ -169,14 +169,14 @@ table.diff td {
 	      <div class="startbox2 gedcom" id="div_transforms">
 	        <div style="display: inline-block;">
 
-		        <h3>{{ _("Muunnokset") }}</h3>
+		        <h3>{{ _("Transformations") }}</h3>
 		        <table>
 		        {% for transform in transforms %}
 		            <tr><td><a href="#" class="transform" 
 		                 data-transform="{{ transform.name }}">{{ transform.name[:-3] }}</a>
 		            <td>{{ transform.docline }}
 		            <td>{% if transform.doclink %}
-		            	<a href="{{ transform.doclink }}" target="doc">{{ _("Kuvaus") }}
+		            	<a href="{{ transform.doclink }}" target="doc">{{ _("Description") }}
 		            	{% endif %}
 		        {% endfor %}
 		        </table>
@@ -186,16 +186,16 @@ table.diff td {
 	      <div class="startbox gedcom" id="div_versions">
 	        <div style="display: inline-block;">
 	
-		        <h3>{{ _("Versiot") }}</h3>
+		        <h3>{{ _("Versions") }}</h3>
 		        <table id="versions_list"></table>
                 <div class="submit">
-		          <button id="compare">{{ _("Vertaa versioita") }}</button>
+		          <button id="compare">{{ _("Compare versions") }}</button>
 		        </div>
 		    </div>
 		  </div>
 	        
 	      <div class="xstartbox gedcom" id="div_compare">
-	        <h3>{{ _("GEDCOM-vertailu") }}:</h3>
+	        <h3>{{ _("GEDCOM comparison") }}:</h3>
 	        <button id="palauta1" class="palauta_button"></button>
 	        <button id="palauta2" class="palauta_button"></button>
 	        <p>
@@ -207,7 +207,7 @@ table.diff td {
 			<form id="form">
 		      <div id="div_transform_params1">
 		      </div>
-			  <input type=submit id=transform value='{{ _("Muunna") }}'>
+			  <input type=submit id=transform value='{{ _("Perform transformation") }}'>
 	        </form>
 	      </div>
 	      
@@ -215,9 +215,9 @@ table.diff td {
    </div> 
    <div>
 	  <div id="output" class="gedcom">
-		<h3>{{ _("Tulokset") }}</h3>
+		<h3>{{ _("Transformation results") }}</h3>
 		<div id="div_oldname">
-		<h3>{{ _("Vanha versio talletettu nimelle") }} <span id="oldname"></span> (<a id="palauta" href="#">{{ _("Palauta") }}</a>)</h3>
+		<h3>{{ _("Old version is saved as") }} <span id="oldname"></span> (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h3>
 		</div>
 		<pre>
 		  <div id="output_log">

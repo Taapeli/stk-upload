@@ -22,6 +22,7 @@ from flask_babelex import _
 
 import shareds
 from models import dbutil, loadfile
+#from models import email
 from . import bp
 from .gramps_loader import xml_to_neo4j
 from .batchlogger import Log
@@ -104,6 +105,12 @@ def background_load_to_neo4j(pathname,userid,logname):
             print(step)
         Pickler(open(logname,"wb")).dump(steps)
         os.rename(logname,logname+".done")
+#        msg = "User {} loaded the file {}".format(userid,pathname)
+#        msg += "\nLog file: {}".format(logname+".done")
+#        email.email("kku@kku.com",
+#                    "kari.kujansuu@gmail.com", 
+#                    "Stk: Gramps XML file loaded",
+#                    msg )
     except:
         traceback.print_exc()
         res = traceback.format_exc()
@@ -176,6 +183,7 @@ def uploads():
             upload = Upload()
             upload.xmlname = xmlname
             upload.status = status
+            upload.done = (status == _("DONE"))
             upload.starttime = int(starttime)
             upload.starttime_s = time.strftime("%Y-%m-%d %H.%M.%S",time.localtime(upload.starttime))
             uploads.append(upload)

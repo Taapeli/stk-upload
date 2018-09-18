@@ -3,6 +3,10 @@ pip install setuptools==34.00
 
 mkdir translations
 pybabel extract -F babel.cfg -k _l -o messages.pot .
+if ! test -e translations/fi
+then
+   pybabel init -i messages.pot -d translations -l fi
+fi
 if ! test -e translations/en 
 then
    pybabel init -i messages.pot -d translations -l en

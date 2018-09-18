@@ -26,35 +26,37 @@ t.
 Pekka
 
 """
+from .. import transformer
 
-version = "1.0"
+version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Kasteet-ohjelma"
 
-ids = set()
-
 def add_args(parser):
-    parser.add_argument("--testiparametri")
-
-def initialize(run_args):
     pass
 
-def phase1(run_args, gedline):
-    if gedline.path.endswith(".BIRT.PLAC") and gedline.value.startswith("(kastettu)"):
-        # @id@.BIRT.PLACE (kastettu) xxx
-        parts = gedline.path.split(".")
-        indi_id = parts[0]
-        ids.add(indi_id)
+def initialize(options):
+    return Kasteet()
 
-def phase2(run_args):
-    pass
-
-def phase3(run_args, gedline,f):
-    parts = gedline.path.split(".")
-    indi_id = parts[0]
-    if indi_id in ids:
-        if gedline.tag == "BIRT": gedline.tag = "CHR"
-        if gedline.tag == "PLAC" and gedline.value.startswith("(kastettu)"): 
-            gedline.value = " ".join(gedline.value.split()[1:])
-    gedline.emit(f)
-
+class Kasteet(transformer.Transformation):
+    def transform(self,item,options):
+        """
+        Performs a transformation for the given Gedcom "item" (i.e. "line block")
+        Returns one of
+        - True: keep this item without changes
+        - None: remove the item
+        - item: use this item as a replacement (can be the same object as input if the contents have been changed)
+        - list of items ([item1,item2,...]): replace the original item with these
+        
+        This is called for every line in the Gedcom so that the "innermost" items are processed first.
+        
+        Note: If you change the item in this function but still return True, then the changes
+        are applied to the Gedcom but they are not displayed with the --display-changes option.
+        """
+        if item.tag == "BIRT":
+            for c in item.children:
+                if c.tag == "PLAC" and c.value.startswith("(kastettu)"):
+                    item.tag = "CHR"
+                    c.value = " ".join(c.value.split()[1:])
+                    return item
+        return True
 

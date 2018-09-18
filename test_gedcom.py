@@ -70,14 +70,14 @@ def test_gedcom_upload(client):
     rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
     data = rv.data.decode("utf-8")
     assert os.path.exists(test_gedcom_fname)
-    assert 'Ladatut gedcomit' in data
+    assert 'Uploaded GEDCOMs' in data
     assert test_gedcom in data
     assert 'Description' in data
         
 def test_gedcom_list(client):
     rv = client.get('/gedcom/list')
     data = rv.data.decode("utf-8")
-    assert 'Ladatut gedcomit' in data
+    assert 'Uploaded GEDCOMs' in data
     
     for name in os.listdir(gedcom_dir):
         if not name.endswith(".ged"): continue
@@ -86,7 +86,7 @@ def test_gedcom_list(client):
 def test_gedcom_info(client):
     rv = client.get('/gedcom/info/'+test_gedcom)
     data = rv.data.decode("utf-8")
-    assert 'Muunnokset' in data
+    assert 'Transformations' in data
 
 def test_gedcom_versions(client):
     rv = client.get('/gedcom/versions/'+test_gedcom)
@@ -96,7 +96,7 @@ def test_gedcom_versions(client):
 def test_gedcom_transform_params(client):
     rv = client.get('/gedcom/transform/'+test_gedcom+"/kasteet.py")
     data = rv.data.decode("utf-8")
-    assert 'kasteet muunnosparametrit' in data
+    assert 'kasteet transformation options' in data
     
 def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     args = {
@@ -112,14 +112,12 @@ def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
 def test_gedcom_transform_kasteet(client):
     dotest_gedcom_transform(client,"kasteet-1.ged","kasteet.py","PLAC p1")
     
-def test_gedcom_transform_kasteet2(client):
-    dotest_gedcom_transform(client,"kasteet-1.ged","kasteet2.py","PLAC p1")
-
 def test_gedcom_transform_marriages(client):
     dotest_gedcom_transform(client,"marriages-1.ged","marriages.py","PLAC p3, p1")
 
-def test_gedcom_transform_marriages2(client):
-    dotest_gedcom_transform(client,"marriages-1.ged","marriages2.py","PLAC p3, zz")
+def test_gedcom_transform_places(client):
+    dotest_gedcom_transform(client,"paikat-1.ged","places.py","2 PLAC Finland, Loviisa, a",
+                            reverse="on")
 
 def test_gedcom_transform_sukujutut(client):
     dotest_gedcom_transform(client,"sukujutut-1.ged","sukujutut.py","2 CONT zzz",
@@ -127,5 +125,6 @@ def test_gedcom_transform_sukujutut(client):
         insert_dummy_tags="on",
     )
 
-
+def test_gedcom_transform_unmark(client):
+    dotest_gedcom_transform(client,"unmark-1.ged","unmark.py","PLAC-X a,Loviisa, Finland")
         

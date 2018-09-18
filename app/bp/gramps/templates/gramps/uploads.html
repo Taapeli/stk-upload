@@ -16,15 +16,15 @@
     {% endwith %}
         <table>
            <tr>
-                <th>Start time</th>
-                <th>XML file</th>
-                <th>Status</th>
+                <th>{{ _("Start time") }}</th>
+                <th>{{ _("XML file") }}</th>
+                <th>{{ _("Status") }}</th>
            </tr>
 	    {% for upload in uploads %}
 	       <tr>
 	           <td class="msg_INFO">{{upload.starttime_s}}</td>
 	           <td class="msg_INFO">
-	               {% if upload.status == "DONE" %}
+	               {% if upload.done %}
         	           <a href=/gramps/upload_info/{{upload.starttime}}.{{upload.xmlname}}>{{upload.xmlname}}</a>
     	           {% else %}
         	           {{upload.xmlname}}
@@ -33,7 +33,7 @@
 	           <td class="msg_INFO">{{upload.status}}</td>
 	       </tr>
 	    {% endfor %}</table>
-    <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
 {% endblock %}
 </body>
 </html>
