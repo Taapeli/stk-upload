@@ -1,4 +1,4 @@
-# English translations for PROJECT.
+# Finnish translations for PROJECT.
 # Copyright (C) 2018 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
@@ -8,10 +8,10 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-09-15 20:16+0300\n"
-"PO-Revision-Date: 2018-06-30 15:37+0300\n"
+"PO-Revision-Date: 2018-09-14 20:46+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: en\n"
-"Language-Team: en <LL@li.org>\n"
+"Language: fi\n"
+"Language-Team: fi <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -24,7 +24,7 @@ msgstr ""
 
 #: setups.py:189
 msgid "Nimi"
-msgstr "Name"
+msgstr ""
 
 #: setups.py:189
 msgid "Kieli"
@@ -62,7 +62,7 @@ msgstr ""
 
 #: bp/gedcom/handlers.py:272
 msgid "Transform '{}' started {}"
-msgstr ""
+msgstr "Muunnos '{}' alkoi {}"
 
 #: bp/gedcom/handlers.py:282
 msgid "Name of the input GEDCOM file"
@@ -263,7 +263,7 @@ msgstr ""
 
 #: bp/gedcom/transforms/marriages2.py:37
 msgid "Avio-PLAC:n hajoittaminen"
-msgstr ""
+msgstr "xxx"
 
 #: bp/gedcom/transforms/places2.py:12
 msgid "Tries to recognize place names and order them correctly"
@@ -467,26 +467,14 @@ msgstr ""
 msgid "List uploads"
 msgstr ""
 
-#~ msgid "No file part"
+#~ msgid "Palauta"
 #~ msgstr ""
 
-#~ msgid "Ladatut gedcomit:"
-#~ msgstr "Uploaded GEDCOMs:"
-
-#~ msgid "Lataa uusi GEDCOM"
-#~ msgstr "Upload a new GEDCOM"
-
-#~ msgid "Temp"
+#~ msgid "Kuvaus"
 #~ msgstr ""
 
-#~ msgid "Toiminto vasta suunnitteilla"
-#~ msgstr "Not implemented yet"
-
-#~ msgid "Oletko varma?"
-#~ msgstr "Are you sure that you want to delete this Gedcom?"
-
-#~ msgid "GEDCOM"
-#~ msgstr "GEDCOM"
+#~ msgid "Päivitä"
+#~ msgstr ""
 
 #~ msgid "Ladattu"
 #~ msgstr ""
@@ -495,93 +483,6 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Sallin neuvontapalvelun katselumahdollisuuden"
-#~ msgstr ""
-
-#~ msgid "Muunnokset"
-#~ msgstr ""
-
-#~ msgid "Versiot"
-#~ msgstr ""
-
-#~ msgid "Lataa GEDCOM"
-#~ msgstr ""
-
-#~ msgid "Poista GEDCOM"
-#~ msgstr "Delete GEDCOM"
-
-#~ msgid "Paluu"
-#~ msgstr "Return"
-
-#~ msgid "Ladatut gedcomit"
-#~ msgstr ""
-
-#~ msgid "kpl"
-#~ msgstr ""
-
-#~ msgid "Lataa uusi Gedcom-tiedosto"
-#~ msgstr ""
-
-#~ msgid "Lataa"
-#~ msgstr ""
-
-#~ msgid "Muunnosparametrit"
-#~ msgstr "Transformation parameters"
-
-#~ msgid "Arvo"
-#~ msgstr ""
-
-#~ msgid "Kuvaus"
-#~ msgstr ""
-
-#~ msgid "Oletusarvo"
-#~ msgstr "Default value"
-
-#~ msgid "Lisää"
-#~ msgstr "Add"
-
-#~ msgid "Muunna"
-#~ msgstr ""
-
-#~ msgid "Muunnoksen tulostus"
-#~ msgstr "Transformation output"
-
-#~ msgid "Lähetä salasanan elvyttämislinkki"
-#~ msgstr ""
-
-#~ msgid "Rekisteröi uusi Suomitietokannan käyttäjäehdokas"
-#~ msgstr ""
-
-#~ msgid "Rekisteröidy Suomitietokannan käyttäjäksi"
-#~ msgstr ""
-
-#~ msgid "Lähetä vahvistamislinkki"
-#~ msgstr ""
-
-#~ msgid "Gedcomit"
-#~ msgstr "Gedcoms"
-
-#~ msgid "Valitse ladattava gedcom-tiedosto"
-#~ msgstr "Please select a Gedcom file to upload"
-
-#~ msgid "Tiedostoa ei ole"
-#~ msgstr ""
-
-#~ msgid "Choose e GEDCOM file to upload"
-#~ msgstr ""
-
-#~ msgid "------ Transform '{}'  started {} ------"
-#~ msgstr ""
-
-#~ msgid "------ Transform '{}'  started  {} ------"
-#~ msgstr ""
-
-#~ msgid "------ Transform '{}'  ended    {} ------"
-#~ msgstr ""
-
-#~ msgid "Palauta"
-#~ msgstr ""
-
-#~ msgid "Päivitä"
 #~ msgstr ""
 
 #~ msgid "Hae tämä tiedosto"
@@ -599,16 +500,37 @@ msgstr ""
 #~ msgid "Vaihda toiseen aineistoon"
 #~ msgstr ""
 
+#~ msgid "Muunnokset"
+#~ msgstr ""
+
+#~ msgid "Versiot"
+#~ msgstr ""
+
 #~ msgid "Vertaa versioita"
 #~ msgstr ""
 
 #~ msgid "GEDCOM-vertailu"
 #~ msgstr ""
 
+#~ msgid "Muunna"
+#~ msgstr ""
+
 #~ msgid "Tulokset"
 #~ msgstr ""
 
 #~ msgid "Vanha versio talletettu nimelle"
+#~ msgstr ""
+
+#~ msgid "Ladatut gedcomit"
+#~ msgstr ""
+
+#~ msgid "kpl"
+#~ msgstr ""
+
+#~ msgid "Lataa uusi Gedcom-tiedosto"
+#~ msgstr ""
+
+#~ msgid "Lataa"
 #~ msgstr ""
 
 #~ msgid "Paluu alkusivulle"
@@ -618,5 +540,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Asetus"
+#~ msgstr ""
+
+#~ msgid "Arvo"
 #~ msgstr ""
 
