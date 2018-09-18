@@ -112,14 +112,9 @@ def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
 def test_gedcom_transform_kasteet(client):
     dotest_gedcom_transform(client,"kasteet-1.ged","kasteet.py","PLAC p1")
     
-def test_gedcom_transform_kasteet2(client):
-    dotest_gedcom_transform(client,"kasteet-1.ged","kasteet2.py","PLAC p1")
-
 def test_gedcom_transform_marriages(client):
     dotest_gedcom_transform(client,"marriages-1.ged","marriages.py","PLAC p3, p1")
 
-def test_gedcom_transform_marriages2(client):
-    dotest_gedcom_transform(client,"marriages-1.ged","marriages2.py","PLAC p3, p1")
 
 def test_gedcom_transform_sukujutut(client):
     dotest_gedcom_transform(client,"sukujutut-1.ged","sukujutut.py","2 CONT zzz",
