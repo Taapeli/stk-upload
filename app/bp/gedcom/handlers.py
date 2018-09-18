@@ -459,15 +459,16 @@ def build_parser(filename,gedcom,gedcom_filename):
             return args
             
     parser = Parser()
-    #parser.add_argument('gedcom-filename', default=gedcom_filename)
+
     parser.add_argument('--display-changes', action='store_true',
-                        help='Display changed rows')
+                        help=_('Display changed rows'))
     parser.add_argument('--dryrun', action='store_true',
-                        help='Do not produce an output file')
+                        help=_('Do not produce an output file'))
     parser.add_argument('--nolog', action='store_true',
-                        help='Do not produce a log in the output file')
+                        help=_('Do not produce a log in the output file'))
     parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
-                        help="Input encoding")
+                        help=_("Encoding of the input GEDCOM"))
+    
     transform_module.add_args(parser)
 
     return transform_module,parser
