@@ -9,7 +9,8 @@ Each transformation module should implement:
 2. Function add_args
     Adds the transformation specific arguments (Argparse style)
 
-The Transformation object should implement the method transform.    
+The Transformation object should implement the method transform. Optionally
+it can implement the initializer (__init__) and the method finish.    
     
 Class Transformer parses a file or a list of lines into a hierarchical structure of "Item" objects. 
 For each item the method 'transform' is called and its return value can replace the original
@@ -55,11 +56,16 @@ def fixlines(lines,options):
             tkns = line.split(None,1)
             lines[i] = line
         prevlevel = int(tkns[0])
+    if line.strip() != "0 TRLR":
+        lines.append("0 TRLR")
 
 class Transformation:
     twophases = False
     
     def transform(self,item,options):
+        pass
+
+    def finish(self,options):
         pass
         
 class Gedcom: 
@@ -160,6 +166,7 @@ class Transformer:
         items = self.transform_items(items)
         if self.transformation.twophases:
             items = self.transform_items(items)
+        self.transformation.finish(self.options)
         return Gedcom(items)
     
     def transform_file(self,fname):
