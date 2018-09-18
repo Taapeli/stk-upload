@@ -22,6 +22,7 @@ from flask_babelex import _
 
 import shareds
 from models import dbutil, loadfile
+#from models import email
 from . import bp
 from .gramps_loader import xml_to_neo4j
 from .batchlogger import Log
@@ -104,6 +105,12 @@ def background_load_to_neo4j(pathname,userid,logname):
             print(step)
         Pickler(open(logname,"wb")).dump(steps)
         os.rename(logname,logname+".done")
+#        msg = "User {} loaded the file {}".format(userid,pathname)
+#        msg += "\nLog file: {}".format(logname+".done")
+#        email.email("kku@kku.com",
+#                    "kari.kujansuu@gmail.com", 
+#                    "Stk: Gramps XML file loaded",
+#                    msg )
     except:
         traceback.print_exc()
         res = traceback.format_exc()
