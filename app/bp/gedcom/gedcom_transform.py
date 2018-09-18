@@ -158,7 +158,10 @@ def get_transforms():
     for name in os.listdir("transforms"):
         if name.endswith(".py") and name != "__init__.py": 
             modname = name[0:-3]
-            transformer = importlib.import_module("transforms."+modname)
+            try:
+                transformer = importlib.import_module("transforms."+modname)
+            except:
+                continue
             doc = transformer.__doc__
             if doc:
                 docline = doc.strip().splitlines()[0]

@@ -26,6 +26,7 @@ t.
 Pekka
 
 """
+from .. import transformer
 
 version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Kasteet-ohjelma"
@@ -33,31 +34,29 @@ doclink = "http://taapeli.referata.com/wiki/Gedcom-Kasteet-ohjelma"
 def add_args(parser):
     pass
 
-def initialize(run_args):
-    pass
+def initialize(options):
+    return Kasteet()
 
-def fixlines(lines,options):
-    pass
-
-def transform(item,options):
-    """
-    Performs a transformation for the given Gedcom "item" (i.e. "line block")
-    Returns one of
-    - True: keep this item without changes
-    - None: remove the item
-    - item: use this item as a replacement (can be the same object as input if the contents have been changed)
-    - list of items ([item1,item2,...]): replace the original item with these
-    
-    This is called for every line in the Gedcom so that the "innermost" items are processed first.
-    
-    Note: If you change the item in this function but still return True, then the changes
-    are applied to the Gedcom but they are not displayed with the --display-changes option.
-    """
-    if item.tag == "BIRT":
-        for c in item.children:
-            if c.tag == "PLAC" and c.value.startswith("(kastettu)"):
-                item.tag = "CHR"
-                c.value = " ".join(c.value.split()[1:])
-                return item
-    return True
+class Kasteet(transformer.Transformation):
+    def transform(self,item,options):
+        """
+        Performs a transformation for the given Gedcom "item" (i.e. "line block")
+        Returns one of
+        - True: keep this item without changes
+        - None: remove the item
+        - item: use this item as a replacement (can be the same object as input if the contents have been changed)
+        - list of items ([item1,item2,...]): replace the original item with these
+        
+        This is called for every line in the Gedcom so that the "innermost" items are processed first.
+        
+        Note: If you change the item in this function but still return True, then the changes
+        are applied to the Gedcom but they are not displayed with the --display-changes option.
+        """
+        if item.tag == "BIRT":
+            for c in item.children:
+                if c.tag == "PLAC" and c.value.startswith("(kastettu)"):
+                    item.tag = "CHR"
+                    c.value = " ".join(c.value.split()[1:])
+                    return item
+        return True
 

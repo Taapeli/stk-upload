@@ -33,81 +33,67 @@ Mallia sorsapohjaksi löytynee Data Entry Grampletista, jonka kautta voi syött�
 
 
 """
-from flask_babelex import _
-docline = _("Avio-PLAC:n hajoittaminen")
 
 version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
 
-from collections import defaultdict 
-import re
+from flask_babelex import _
+docline = _("Avio-PLAC:n hajoittaminen")
 
+from .. import transformer
 from transformer import Item
 
-class FamInfo:
-    husb = None
-    wife = None
-    date = None
-    place = ""
-   
-class Place:
-    def __init__(self,place,date):
-        self.place = place
-        self.date = date
-    def __repr__(self):
-        pass
-
-twophases = True
+from collections import defaultdict 
+import re
 
 def add_args(parser):
     pass
 
 def initialize(options):
-    options.resi = defaultdict(list) # key=@individ-id@ value=[(place,date),...]
-    options.fams = defaultdict(FamInfo) # key=@fam@, value=FamInfo
-    options.fixedfams = {} # key=@fam@ value=place
+    return Marriages()
 
-def fixlines(lines,options):
-    pass
-
-def transform(item,options):
-    # phase 1
-    if item.value == "FAM":
-        fam = item.tag #  @Fxxx@
-        faminfo = FamInfo()
-        for c1 in item.children:
-            if c1.tag == "MARR":
-                for c2 in c1.children:
-                    if c2.tag == "PLAC":
-                        faminfo.place = c2.value
-                        place_item = c2
-                    if c2.tag == "DATE":
-                        faminfo.date = c2.value
-            if c1.tag == "HUSB":  
-                husb = c1.value
-                faminfo.husb = c1.value
-            if c1.tag == "WIFE":  
-                husb = c1.value
-                faminfo.wife = c1.value
-        m = re.match(r"([^,]+), \(([^/]+)/([^/]+)\)",faminfo.place)
-        if m:
-            options.fams[fam] = faminfo
-            husb_place = m.group(2)+", "+m.group(1)
-            wife_place = m.group(3)+", "+m.group(1)
-            options.resi[faminfo.husb].append((husb_place,faminfo.date))
-            options.resi[faminfo.wife].append((wife_place,faminfo.date))
-            place_item.value = m.group(1)
+class Marriages(transformer.Transformation):
+    twophases = True
+    
+    def __init__(self):
+        self.resi = defaultdict(list) # key=@individ-id@ value=[(place,date),...]
+    
+    def transform(self,item,options):
+        # phase 1
+        if item.value == "FAM":
+            fam = item.tag #  @Fxxx@
+            place = ""
+            date = None
+            for c1 in item.children:
+                if c1.tag == "MARR":
+                    for c2 in c1.children:
+                        if c2.tag == "PLAC":
+                            place = c2.value
+                            place_item = c2
+                        if c2.tag == "DATE":
+                            date = c2.value
+                if c1.tag == "HUSB":  
+                    husb = c1.value
+                if c1.tag == "WIFE":  
+                    wife = c1.value
+            m = re.match(r"([^,]+), \(([^/]+)/([^/]+)\)",place)
+            if m:
+                husb_place = m.group(2)+", "+m.group(1)
+                wife_place = m.group(3)+", "+m.group(1)
+                self.resi[husb].append((husb_place,date))
+                self.resi[wife].append((wife_place,date))
+                place_item.value = m.group(1)
+                return item
+        # phase 2
+        if item.value == "INDI" and item.tag in self.resi:
+            for place,date in self.resi[item.tag]:
+                c1 = Item("1 RESI")
+                c1.children.append(Item("2 TYPE marriage"))
+                c1.children.append(Item("2 PLAC " + place))
+                if date:
+                    c1.children.append(Item("2 DATE " + date))
+                item.children.append(c1)
             return item
-    # phase 2
-    if item.value == "INDI" and item.tag in options.resi:
-        for place,date in options.resi[item.tag]:
-            c1 = Item("1 RESI")
-            c1.children.append(Item("2 TYPE marriage"))
-            c1.children.append(Item("2 PLAC " + place))
-            if date:
-                c1.children.append(Item("2 DATE " + date))
-            item.children.append(c1)
-        return item
-    return True
-
-
+        return True
+    
+    

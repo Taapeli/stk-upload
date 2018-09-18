@@ -295,7 +295,6 @@ def process_gedcom(cmd, transform_module):
     run_args = vars(args)
     try:
         init_log(args.logfile)
-        transform_module.initialize(args)
         with Output(run_args) as out:
             out.original_line = None
             saved_stdout = sys.stdout
@@ -350,7 +349,7 @@ def gedcom_transform(gedcom,transform):
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
 
-        if hasattr(transform_module,"transform"):
+        if hasattr(transform_module,"transformer"):
             cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
             return process_gedcom(cmd, transform_module)
         

@@ -12,6 +12,7 @@ doclink = "http://taapeli.referata.com/wiki/Gedcom-Places-ohjelma"
 docline = _("Tries to recognize place names and order them correctly")
 
 from collections import defaultdict 
+from .. import transformer
 
 ignored_text = """
 mlk
@@ -68,26 +69,25 @@ def add_args(parser):
 def initialize(options):
     read_parishes("app/static/seurakunnat.txt")
     read_villages("app/static/kylat.txt")
+    return Places()
 
+class Places(transformer.Transformation):
 
-def fixlines(lines,options):
-    pass
-
-def transform(item,options):
-    if item.tag != "PLAC":  return True
-    if not item.value: return True
-    place = item.value
-    newplace = process_place(options, place)
-    if newplace != place: 
-        item.value = newplace  
-        if options.mark_changes:
-            item.tag = "PLAC-X"
-        return item
-    else:
-        if options.display_nonchanges:
-            print(_("Not changed: '{}'").format(place))
-        return True
-    raise RuntimeError(_("Internal error"))
+    def transform(self,item,options):
+        if item.tag != "PLAC":  return True
+        if not item.value: return True
+        place = item.value
+        newplace = process_place(options, place)
+        if newplace != place: 
+            item.value = newplace  
+            if options.mark_changes:
+                item.tag = "PLAC-X"
+            return item
+        else:
+            if options.display_nonchanges:
+                print(_("Not changed: '{}'").format(place))
+            return True
+        raise RuntimeError(_("Internal error"))
 
 ignored = [name.strip() for name in ignored_text.splitlines() if name.strip() != ""]
 
