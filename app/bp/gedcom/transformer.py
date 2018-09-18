@@ -1,10 +1,18 @@
 """
-Gedcom-transformer
+Gedcom transformer
 
 Kari Kujansuu <kari.kujansuu@gmail.com>
 
+Each transformation module should implement:
+1. Function initialize
+    Returns an instance of the class Transformation
+2. Function add_args
+    Adds the transformation specific arguments (Argparse style)
+
+The Transformation object should implement the method transform.    
+    
 Class Transformer parses a file or a list of lines into a hierarchical structure of "Item" objects. 
-For each item the function 'callback' is called and its return value can replace the original
+For each item the method 'transform' is called and its return value can replace the original
 value.
 
 Finally the top level object is returned: this is a Gedcom object 
@@ -14,10 +22,46 @@ which contains a list of top level (level 0) Gedcom records (as Items).
 import sys
 import os
 from subprocess import call
+from flask_babelex import _
 
 def write(out,s):
     out.emit(s)        
 
+def fixlines(lines,options):
+    prevlevel = -1
+    for i,line in enumerate(lines):
+        #line = line.strip()
+        tkns = line.split(None,1)
+        
+        if (len(tkns) == 0 or not tkns[0].isdigit()):
+            # assume this is a continuation line
+            line2 = "%s CONT %s" % (prevlevel+1,line)
+            tkns = line2.split(None,1)
+            lines[i] = line2
+            if options.display_changes:
+                print("-----------------------")
+                print(_("Replaced:"))
+                print(line)
+                print(_("With:"))
+                print(line2)
+        elif len(tkns) == 1:
+            if options.display_changes:
+                print("-----------------------")
+                print(_("Replaced:"))
+                print(tkns[0])
+                print(_("With:"))
+                print(tkns[0] + " _DUMMY")
+            line = tkns[0] + " _DUMMY"
+            tkns = line.split(None,1)
+            lines[i] = line
+        prevlevel = int(tkns[0])
+
+class Transformation:
+    twophases = False
+    
+    def transform(self,item,options):
+        pass
+        
 class Gedcom: 
     def __init__(self,items):
         self.items = items
@@ -67,7 +111,7 @@ class Transformer:
         self.options = options
         self.transform_module = transform_module
         self.display_callback = display_callback
-
+        self.transformation = transform_module.initialize(options)
 
     def build_items(self,lines,level):
         if len(lines) == 0: return []
@@ -92,11 +136,10 @@ class Transformer:
         return items
     
     def transform_items(self,items):
-        if self.transform_module.transform is None: return items 
         newitems = []
         for item in items:
             item.children = self.transform_items(item.children)
-            newitem = self.transform_module.transform(item,self.options)
+            newitem = self.transformation.transform(item,self.options)
             if newitem == True: # no change
                 newitems.append(item)
                 continue
@@ -112,10 +155,10 @@ class Transformer:
         
     
     def transform_lines(self,lines):    
-        self.transform_module.fixlines(lines,self.options)
+        fixlines(lines,self.options)
         items = self.build_items(lines,level=0)
         items = self.transform_items(items)
-        if hasattr(self.transform_module, "twophases") and self.transform_module.twophases:
+        if self.transformation.twophases:
             items = self.transform_items(items)
         return Gedcom(items)
     
