@@ -1,34 +1,38 @@
 """    Find out, when last commit was done
 """
 from subprocess import Popen, PIPE
-from os import path
 
-def revision_info(src_path, store_dir=None):
+class Chkdate():
+    ''' Methods to find app version dates '''
 
-    # Get git log info
-
-    moment = "Unknown"
-    
     month_dict = {"Jan":1,"Feb":2,"Mar":3,"Apr":4, "May":5, "Jun":6,
                   "Jul":7,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
 
-    gitproc = Popen(['git', 'log', '-1'], stdout = PIPE, cwd=src_path)
-    (stdout, _) = gitproc.communicate()
-    git_out = stdout.strip().decode("utf-8")
-#     print (git_out)
-    for line in git_out.splitlines():
-        if line.startswith("Date:"):
-            # Date:   Sun Aug 26 10:54:26 2018 +0300
-            a = line.split()
-            moment = "{}.{}.{} {}".format(a[3], month_dict[a[2]], a[5], a[4])
-    
-    print("Git version {}".format(moment))
-    
-    if store_dir:
-        # Store a text file in the log directory
-        rev_info_filename = path.join(store_dir, 'revision_info.txt')
-        with open(rev_info_filename, "w") as text_file:
-            text_file.write('{}\n'.format(moment))
-    return moment
+    def __init__(self):
+        self.moment_long = 'Unidefined'
+        self.moment_short = self.moment_long
 
-# revision_info(".", "app")
+        # Get git log info
+        gitproc = Popen(['git', 'log', '-1'], stdout = PIPE)    #, cwd=src_path)
+        (stdout, _) = gitproc.communicate()
+        git_out = stdout.strip().decode("utf-8")
+
+        for line in git_out.splitlines():
+            if line.startswith("Date:"):
+                # Date:   Sun Aug 26 10:54:26 2018 +0300
+                a = line.split()
+                self.moment_short = "{}.{}.{}".format(a[3], Chkdate.month_dict[a[2]], a[5])
+                self.moment_long = "{} {}".format(self.moment_short, a[4])
+        
+        print("Git version {}".format(self.moment_long))
+
+
+    def revision_time(self):
+        ''' Returns the git commit date and time "18.9.2018 13:19:23" '''
+        return self.moment_long
+
+
+    def revision_date(self):
+        ''' Returns the git commit date "18.9.2018" '''
+        return self.moment_short
+
