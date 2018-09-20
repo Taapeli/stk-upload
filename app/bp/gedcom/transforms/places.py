@@ -2,11 +2,17 @@
 """
 Tries to recognize place names and order them correctly
 """
+import sys
+import os
+
+from flask_babelex import _
 
 version = "1.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Places-ohjelma"
+docline = _("Tries to recognize place names and order them correctly")
 
 from collections import defaultdict 
+from .. import transformer
 
 ignored_text = """
 mlk
@@ -38,68 +44,65 @@ las
 
 def add_args(parser):
     parser.add_argument('--reverse', action='store_true',
-                        help='Reverse the order of places')
+                        help=_('Reverse the order of places'))
     parser.add_argument('--add-commas', action='store_true',
-                        help='Replace spaces with commas')
+                        help=_('Replace spaces with commas'))
     parser.add_argument('--ignore-lowercase', action='store_true',
-                        help='Ignore lowercase words')
+                        help=_('Ignore lowercase words'))
     parser.add_argument('--ignore-digits', action='store_true',
-                        help='Ignore numeric words')
+                        help=_('Ignore numeric words'))
     parser.add_argument('--minlen', type=int, default=0,
-                        help="Ignore words shorter that minlen")
+                        help=_("Ignore words shorter that minlen"))
     parser.add_argument('--auto-order', action='store_true',
-                        help='Try to discover correct order...')
+                        help=_('Try to discover correct order...'))
     parser.add_argument('--auto-combine', action='store_true',
-                        help='Try to combine certain names...')
+                        help=_('Try to combine certain names...'))
     parser.add_argument('--match', type=str, action='append',
-                        help='Only process places containing any match string')
+                        help=_('Only process places containing any match string'))
     parser.add_argument('--display-nonchanges', action='store_true',
-                        help='Display unchanged places')
+                        help=_('Display unchanged places'))
     parser.add_argument('--display-ignored', action='store_true',
-                        help='Display ignored places')
+                        help=_('Display ignored places'))
     parser.add_argument('--mark-changes', action='store_true',
-                        help='Replace changed PLAC tags with PLAC-X')
+                        help=_('Replace changed PLAC tags with PLAC-X'))
                         
-def initialize(run_args):
-    read_parishes("../../static/seurakunnat.txt")
-    read_villages("../../static/kylat.txt")
+def initialize(options):
+    read_parishes("app/static/seurakunnat.txt")
+    read_villages("app/static/kylat.txt")
+    return Places()
 
+class Places(transformer.Transformation):
 
-def phase2(run_args):
-    pass
-
-def phase3(run_args,gedline,f):
-    if gedline.tag == "PLAC":
-        if not gedline.value: 
-            return
-        place = gedline.value
-        newplace = process_place(run_args, place)
+    def transform(self,item,options):
+        if item.tag != "PLAC":  return True
+        if not item.value: return True
+        place = item.value
+        newplace = process_place(options, place)
         if newplace != place: 
-            #if run_args['display_changes']:
-            #    print("'{}' -> '{}'".format(place,newplace))
-            gedline.value = newplace  
-            if run_args['mark_changes']:
-                gedline.tag = "PLAC-X"
+            item.value = newplace  
+            if options.mark_changes:
+                item.tag = "PLAC-X"
+            return item
         else:
-            if run_args['display_nonchanges']:
-                print("Not changed: '{}'".format(place))
-    gedline.emit(f)
-            
+            if options.display_nonchanges:
+                print(_("Not changed: '{}'").format(place))
+            return True
+        raise RuntimeError(_("Internal error"))
+
 ignored = [name.strip() for name in ignored_text.splitlines() if name.strip() != ""]
 
 parishes = set()
 
 countries = {
-    "Finland",
-    "Suomi",
-    "USA",
-    "Kanada",
-    "Yhdysvallat",
-    "Alankomaat",
-    "Ruotsi",
+    "Finland","Suomi",
+    "Kanada","Canada",
+    "Yhdysvallat","USA","United States",
+    "Alankomaat","Hollanti","Netherlands"
+    "Ruotsi","Sverige","Sweden",
     "Australia",
-    "Venäjä",
-    "Eesti","Viro",
+    "Venäjä","Russia",
+    "Eesti","Viro","Estland",
+    "Norja","Norge","Norway",
 }
 
 villages = defaultdict(set)
@@ -127,15 +130,15 @@ def read_villages(villagefile):
         village = village.strip().lower()
         villages[auto_combine(parish)].add(village)
 
-def ignore(run_args, names):
+def ignore(options, names):
     for name in names:
-        if len(name) < run_args['minlen']:
+        if len(name) < options.minlen:
             return True
         if name.lower() in ignored:
             return True
-        if run_args['ignore_digits'] and numeric(name):
+        if options.ignore_digits and numeric(name):
             return True
-        if run_args['ignore_lowercase'] and name.islower(): 
+        if options.ignore_lowercase and name.islower(): 
             return True
     return False
 
@@ -160,6 +163,7 @@ def talonumerot(names):
     Yritetään hoitaa seuraavanlaiset tapaukset niin että talonnumero tulee yhdistettyä kylän nimeen, esim.
         Kuopio Vehmasmäki 8 -> Kuopio, Vehmasmäki, Vehmasmäki 8
         Maaninka Kurolanlahti 6 Viemäki -> Maaninka, Kurolanlahti, Kurolanlahti 6 Viemäki
+        Maaninka Kurolanlahti N:o 6 Viemäki -> Maaninka, Kurolanlahti, Kurolanlahti N:o 6 Viemäki
     Tässä inputtina kuitenkin jo listaksi hajotettu paikka esim.
         ["Kuopio","Vehmasmäki","8"] -> ["Kuopio", "Vehmasmäki", "Vehmasmäki 8"]
         ["Maaninka","Kurolanlahti","6","Viemäki"] -> ["Maaninka", "Kurolanlahti", "Kurolanlahti 6 Viemäki"]
@@ -171,6 +175,10 @@ def talonumerot(names):
     i = find_digit(names)
     if i is None: return names
     if i == 0: return names
+    if i > 1 and names[i-1].lower() == "n:o": # yhdistetaan ["n:o","9"] -> ["n:o 9"]
+        names[i-1] = "%s %s" % (names[i-1],names[i])
+        del names[i]
+        i = i-1
     numero = names[i]
     kyla = names[i-1]
     if i < len(names)-1:
@@ -197,28 +205,28 @@ def stringmatch(place,matches):
         if place.find(match) >= 0: return True
     return False
     
-def process_place(run_args, place): 
+def process_place(options, place): 
     orig_place = place
-    if run_args['match'] and not stringmatch(place,run_args['match']):
+    if options.match and not stringmatch(place,options.match):
         return place
-    if run_args['add_commas'] and "," not in place:
-        if run_args['auto_combine']:
+    if options.add_commas and "," not in place:
+        if options.auto_combine:
             place = auto_combine(place)
         names = place.split()
-        if ignore(run_args, names): 
-            if run_args['display_ignored']:
-                print("ignored: " + orig_place)
+        if ignore(options, names): 
+            if options.display_ignored:
+                print(_("ignored: ") + orig_place)
             return orig_place
         names = talonumerot(names)
         place = ", ".join(names)
     if "," in place:
         names = [name.strip() for name in place.split(",") if name.strip() != ""]
         if len(names) == 1: 
-            if run_args['auto_combine']:
+            if options.auto_combine:
                 place = revert_auto_combine(place)
             return place
         do_reverse = False
-        if run_args['auto_order']:
+        if options.auto_order:
             #print(sorted(parishes))
             #print(sorted(villages["helsingin-pitäjä"]))
             #print(names)
@@ -226,36 +234,36 @@ def process_place(run_args, place):
                 do_reverse = True
             if names[0] in countries:
                 do_reverse = True
-        if run_args['reverse'] or do_reverse:
+        if options.reverse or do_reverse:
             names.reverse()
             place = ", ".join(names)
-    if run_args['auto_combine']:
+    if options.auto_combine:
         place = revert_auto_combine(place)
     return place
  
 
 
-def check(in_file, expected_output, reverse=False, add_commas=False, 
-          ignore_lowercase=False, ignore_digits=False):
-    class Args: pass
-    run_args = {'reverse': reverse,
-                'add_commas': add_commas,
-                'ignore_lowercase': ignore_lowercase,
-                'ignore_digits': ignore_digits,
-                'display_ignored': False,
-                'auto_order': True,
-                'auto_combine': True,
-                'min_len': 0,
-                'match': None
-                }
- 
-    newplace = process_place(run_args, in_file)
+def check(in_file, expected_output, **kwargs):
+    class Options: pass
+    options = Options()
+    options.reverse = False
+    options.add_commas = False
+    options.ignore_lowercase = False
+    options.ignore_digits = False
+    options.display_ignored = False
+    options.auto_order = True
+    options.auto_combine = True
+    options.minlen = 0
+    options.match = None
+    options.__dict__.update(kwargs)
+    
+    newplace = process_place(options, in_file)
     if newplace != expected_output:
-        print("{}: expecting '{}', got '{}'".format(in_file, expected_output, newplace))
+        print("{}: expecting '{}', got '{}'".format(in_file, expected_output, newplace),file=sys.stderr)
         
 
 def test():
-    check("Helsingin pitäjä Herttoniemi","Herttoniemi, Helsingin pitäjä",add_commas=True,reverse=False)
+    check("Helsingin pitäjä Herttoniemi","Herttoniemi, Helsingin pitäjä",add_commas=True,reverse=True)
     check("Rättölä, Heinjoki","Heinjoki, Rättölä",reverse=True)
     check("Rättölä Heinjoki","Rättölä, Heinjoki",add_commas=True)
     check("Rättölä Heinjoki","Heinjoki, Rättölä",add_commas=True,reverse=True)
@@ -276,10 +284,10 @@ def test():
     check("Stratford upon Avon","Stratford, upon, Avon",add_commas=True,ignore_lowercase=False)
     check("Stratford upon Avon","Stratford upon Avon",add_commas=True,ignore_lowercase=True)
     
-    check("Äyräpää Vuosalmi N:o 4", "Äyräpää, Vuosalmi, N:o, 4",add_commas=True,ignore_digits=False)
+    check("Äyräpää Vuosalmi N:o 4", "Äyräpää, Vuosalmi, Vuosalmi N:o 4",add_commas=True,ignore_digits=False)
     check("Äyräpää Vuosalmi N:o 4", "Äyräpää Vuosalmi N:o 4",add_commas=True,ignore_digits=True)
-    check("Kuopio Vehmasmäki 8", "Kuopio, Vehmasmäki, Vehmasmäki 8 ",add_commas=True,ignore_digits=False)
-    check("Maaninka Kurolanlahti 6 Viemäki ", "ÄMaaninka, Kurolanlahti, Kurolanlahti 6 Viemäki",add_commas=True,ignore_digits=False)
+    check("Kuopio Vehmasmäki 8", "Kuopio, Vehmasmäki, Vehmasmäki 8",add_commas=True,ignore_digits=False)
+    check("Maaninka Kurolanlahti 6 Viemäki ", "Maaninka, Kurolanlahti, Kurolanlahti 6 Viemäki",add_commas=True,ignore_digits=False)
 
 
     
