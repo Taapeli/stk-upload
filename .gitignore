@@ -8,3 +8,4 @@ RemoteSystemsTempFiles/\.project
 /uploads/
 .pydevproject 
 /env.sh
+/__pycache__/
