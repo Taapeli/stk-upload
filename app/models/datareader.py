@@ -494,7 +494,21 @@ def get_source_with_events(sourceid):
         #                       'handle': '_dd76810c8e6763f7ea816742a59', 
         #                       'priv': '', 'change': 1521883281}> 
         #        p_id=72104 >
-        
+
+        # Example: Person or Family Event linked to Citation
+        # <Record c_id=89824 
+        #         c=<Node id=89824 labels={'Citation'} 
+        #            properties={'confidence': '2', 'dateval': '', 'change': 1526840499, 
+        #                          'handle': '_de2f3ce67264ec83c7136ea12a', 'id': 'C1812', 
+        #                          'page': 'Födda 1771 58. kaste'}> 
+        #           x_id=81210 label='Event' 
+        #           x=<Node id=81210 labels=set() 
+        #              properties={'date1': 1813643, 'description': '', 'date2': 1813643, 
+        #                          'change': 1527261385, 'attr_type': '', 
+        #                          'handle': '_de2f3ce910e6008cd0bbdc05b6d', 'id': 'E3557', 
+        #                          'type': 'Birth', 'attr_value': '', 'datetype': 0}>
+        #           p_id=73543>
+
         c_id = record['c_id']
         if c_id not in citations.keys():
             # A new citation
@@ -510,28 +524,39 @@ def get_source_with_events(sourceid):
         c.page = citation['page']
         c.confidence = citation['confidence']
         
-        uniq_id = record['p_id']
+        p_uid = record['p_id']
         x_node = record['x']
+        x_uid = x_node.id
         node = NodeRef()
-        # Referring Person
-        node.uniq_id = uniq_id      # 72104
+        # Referring Person or Family
+        node.uniq_id = p_uid      # 72104
         node.id = x_node['id']  # 'I1069' or 'E2821'
-        if uniq_id not in persons.keys():
-            node.clearname = Name.get_clearnames(uniq_id)
-            persons[uniq_id] = node.clearname
-        else:
-            node.clearname = persons[uniq_id]
+        node.label = x_node.labels.pop()
+        event_role = record['role']
+        
+        print('Citation {} {} {} {} {}'.format(c.uniq_id, event_role, 
+                                               node.label, node.uniq_id, node.id))
 
-        if 'Person' in x_node.labels:
-            # node: "Person <clearname>"
-            node.label = 'Person'
-        else:
-            # node: "Event <event_type> <person uniq_id>"
-            node.label = 'Event'
+        if event_role == 'Family':  # Family event
+            node.label = 'Family Event'
+            couple = Family.get_marriage_parent_names(x_uid)
+            node.clearname = " <> ".join(list(couple.values()))
+        else:                       # Person event
+            if p_uid not in persons.keys():
+                node.clearname = Name.get_clearnames(node.uniq_id)
+                persons[node.uniq_id] = node.clearname
+            else:
+                node.clearname = persons[p_uid]
+
+        if 'Event' in node.label:
+            # node: "Event <event_type> <person p_uid>"
             node.eventtype = x_node['type']
             if x_node['date1']:
                 node.edates = DateRange(x_node['datetype'], x_node['date1'], x_node['date2'])
                 node.date = node.edates.estimate()
+#         if node.label == 'Person':
+#             # node: "Person <clearname>"
+#             node.label = 'Person'
         c.citators.append(node)
 
     return (s.stitle, list(citations.values()))

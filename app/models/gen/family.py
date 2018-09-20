@@ -103,6 +103,42 @@ RETURN family"""
         return True
     
     
+    @staticmethod       
+    def get_marriage_parent_names(event_uniq_id):
+        """ Find the parents and all their names
+        
+            Returns a dictionary like 
+            {'FATHER': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
+
+╒════════╤═════╤═══════════════════════════════════════════════════╕
+│"frole" │"pid"│"names"                                            │
+╞════════╪═════╪═══════════════════════════════════════════════════╡
+│"FATHER"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
+│        │     │suffix":"","surname":"Forstén"}]                   │
+├────────┼─────┼───────────────────────────────────────────────────┤
+│"MOTHER"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
+│        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
+│        │     │alt":"1","firstname":"Catharina Margareta","type":"│
+│        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
+└────────┴─────┴───────────────────────────────────────────────────┘
+        """
+                        
+        result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
+                                              eid=event_uniq_id)
+        namedict = {}
+        for record in result:
+            role = record['frole']
+#             pid = record['pid']
+            names = []
+            for name in record['names']:
+                fn = name['firstname']
+                sn = name['surname']
+                pn = name['suffix']
+                names.append("{} {} {}".format(fn, pn, sn))
+            namedict[role] = ' • '.join(names)
+        return namedict
+
+    
     def get_father_by_id(self):
         """ Luetaan perheen isän tiedot """
                         

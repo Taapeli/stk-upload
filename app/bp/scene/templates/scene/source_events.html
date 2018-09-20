@@ -48,6 +48,9 @@
                             <a href="/scene/person={{cite.uniq_id}}" class="id"
                                title="katso henkilön {{cite.id}} tiedot">
                                    {{cite.clearname}}</a>
+	                        {% elif cite.label == 'Family Event' %}Perheen
+                                <em>{{cite.clearname}}</em> {{cite.eventtype|transl('evt')}} 
+                                {% if cite.edates %}{{cite.edates}}{% endif %}
 	                        {% else %}Henkilön
                             <a href="/scene/person={{cite.uniq_id}}" class="id"
                                title="katso henkilön {{cite.id}} tiedot">

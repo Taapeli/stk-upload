@@ -116,6 +116,11 @@ return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
     collect([id(p), type(r), p]) as members,
     collect([id(p), n, rn]) as names'''
 
+    get_wedding_couple_names = """
+match (e:Event) <-- (:Family) -[r:FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)
+    where ID(e)=$eid
+return type(r) as frole, id(p) as pid, collect(n) as names"""
+
 class Cypher_place():
     '''
     Cypher clases for creating and accessing Places
@@ -210,8 +215,8 @@ ORDER BY toUpper(stitle)
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
 with c
     match (c) <-[:CITATION]- (x)
-    optional match (x) <-[:EVENT]- (p)
-    return id(c) as c_id, c, 
+    optional match (x) <-[re:EVENT]- (p)
+    return id(c) as c_id, c, re.role as role,
            id(x) as x_id, labels(x)[0] as label, x, 
            coalesce(id(p), id(x))  as p_id
     order by c_id, p_id"""
