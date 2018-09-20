@@ -94,7 +94,9 @@
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
 		               {% else %}<i>{{p.names[0].patronyme}}</i>{% endif %}
-		               <small class="idno">[{{p.uniq_id}}]</small></a>
+		               <small class="idno">[{{p.uniq_id}}</small></a><small class="idno"><a 
+		                href="/scene/person/{{p.uniq_id}}">]</a></small>
+		               {# TODO Remove test link at ']' #}
 		               {% if p.refnames %}
 		               <br><small class="refname" title="referenssinimet">
 		                  hakusanat: {{p.refnames}}
@@ -102,11 +104,12 @@
 	                </div></td>
 	              <td class="ColumnEvent">
 	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li><i>{{e.type|transl('evt')}}</i> {{e.dates}}
+		              <li><i>{{e.type|transl('evt')}}</i>
+		              {% if e.dates %}{{e.dates}} {% endif %}
 		              {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
 	        {% endif %}
-	              </td><!-- Perheen tapahtumat tähän
+	              </td><!-- Perheen tapahtumat tähän?
                   <td class="ColumnEvent">
                   </td> -->
 	           </tr>
