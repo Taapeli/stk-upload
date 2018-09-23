@@ -41,6 +41,8 @@ class Event_combo(Event):
         Constructor Luo uuden Event_combo -instanssin
         '''
         Event.__init__(self, eid, desc, handle)
+        self.clearnames = []    # filled by models.gen.place.Place.show_names_list
+                                # to show names list 
         self.note_ref = []      # Note uniq_ids (previous noteref_hlink had
                                 # only the first one)
         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
@@ -48,9 +50,9 @@ class Event_combo(Event):
         self.objref_hlink = ''
 
         self.citations = []     # For creating display sets
-        self.names = []         # For creating display sets
+        self.personnames = []   # Person names connected; for creating display
         self.notes = []         # For creating display sets
-        self.place = ''     # TODO Change to places[]
+        self.place = ''         # TODO Change to places[]
 
 
 #     def read(self, keys):

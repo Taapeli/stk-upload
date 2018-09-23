@@ -8,13 +8,14 @@ from database.models.neo4jengine import Neo4jEngine
 from database.models.neo4juserdatastore import Neo4jUserDatastore
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 import shareds
+from chkdate import Chkdate
 from templates import jinja_filters
 
-import os
 from datetime import datetime
 from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import logging
 logger = logging.getLogger('stkserver') 
+
 
 #===================== Classes to create user session ==========================
 
@@ -56,18 +57,6 @@ class SetupCypher():
             login_count : $login_count} )           
             -[:HAS_ROLE]->(role)
         ''' ) 
-
-#     master_create = '''
-#         MERGE (u:User) -[:HAS_ROLE]-> (r:Role {name:'master'})
-#         ON CREATE 
-#             SET u = { username: $username, password: $password, 
-#                       email: $email, name: $name, language: $language,
-#                       is_active: $is_active, confirmed_at: $confirmed_at,
-#                       roles: $roles, last_login_at: $last_login_at,
-#                       current_login_at: $current_login_at,
-#                       last_login_ip: $last_login_ip, 
-#                       current_login_ip: $current_login_ip,
-#                       login_count: $login_count }'''
 
        
 class Role(RoleMixin):
@@ -172,10 +161,15 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
                             ],
                            validators=[Required('Language required')])
 
+
+#============================== Start here ====================================
+
 shareds.mail = Mail(shareds.app)
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
+
 print('Stk server setups') 
+sysversion = Chkdate()  # Last application commit date or "Unknown"
 
 # Setup Flask-Security
 shareds.user_datastore = Neo4jUserDatastore(shareds.driver, User, UserProfile, Role)
@@ -377,14 +371,16 @@ def _jinja2_filter_translate(term, var_name, lang="fi"):
 def _is_list(value):
     return isinstance(value, list)
 
-@shareds.app.template_filter('git_date')
-def _git_date(value):
-    from chkdate import revision_info
-    return revision_info(".", None)
-#     return datetime.fromtimestamp(os.stat(".git/FETCH_HEAD").st_mtime).\
-#         strftime('%d.%m.%Y %H:%M')
+@shareds.app.template_filter('app_date')
+def app_date(value):
+    if value == 'git':
+        return sysversion.revision_time()
+    elif value == 'app':
+        # Set the value in the beginning of this file
+        return sysversion.revision_date()
+    return 'Not defined'
 
 #------------------------  Load Flask routes file ------------------------------
-# (ON käytössä vaikka varoitus "unused import")
+# DO NOT REMOVE (ON käytössä vaikka varoitus "unused import")
 
 import routes

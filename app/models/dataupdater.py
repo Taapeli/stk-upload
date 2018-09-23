@@ -7,8 +7,10 @@ import time
 
 from bp.gramps.batchlogger import Batch, Log
 from models.gen.user import User
-from models.gen.person import Person, Name
+from models.gen.person import Person
+from models.gen.person_name import Name
 from models.gen.refname import Refname
+from models.gen.person_combo import Person_combo
 
 
 def set_confidence_value(tx, uniq_id=None, batch_logger=None):
@@ -47,7 +49,7 @@ def set_estimated_dates(batch_logger=None):
     """
     t0 = time.time()
         
-    msg = Person.set_estimated_dates()
+    msg = Person_combo.set_estimated_dates()
                         
     if isinstance(batch_logger, Batch):
         batch_logger.append(Log(title="Estimated birth and death dates set. " + msg, 
@@ -108,7 +110,7 @@ def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
         # ===   [NOT!] Report status for each name    ====
         if False:
             rnames = []
-            recs = Person.get_refnames(pid)
+            recs = Person_combo.get_refnames(pid)
             for rec in recs:
                 # ╒══════════════════════════╤═════════════════════╕
                 # │"a"                       │"li"                 │

@@ -12,7 +12,6 @@
 <table>
     <tr><th>uniq_id</th>
         <th>name</th>
-        <th>refname</th>
         <th>type</th>
         <th>date</th>
         <th>place</th>
@@ -24,7 +23,6 @@
             <tr>
                 <td rowspan="{{ecnt}}"><a href="/pick/uniq_id={{p.uniq_id}}">{{p.uniq_id}}</a></td>
                 <td rowspan="{{ecnt}}">{{p.names[0].firstname}} <b>{{p.names[0].surname}}</b></td>
-                <td rowspan="{{ecnt}}">{{p.names[0].refname}}</td>
     	{% if p.events %}
         	{% for event in p.events %} {{tr_tag|safe}} {% set tr_tag="<tr>" %}
 	    		<td style="align:right;">{{event.type}}</td>
