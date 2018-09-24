@@ -10,14 +10,15 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
 
 from . import bp
+from .models import get_person_for_display
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
-from models.gen.family import Family_for_template
+#from models.gen.family import Family_for_template
 from models.gen.place import Place
 from models.gen.source import Source
-from models.gen.citation import Citation
+#from models.gen.citation import Citation
 
 
 @bp.route('/scene/persons/restricted')
@@ -89,8 +90,6 @@ def show_all_persons_list(opt=''):
 def show_a_person(uid=""):
     """ One Person with connected Events, Families etc
         Korvaamaan metodin show_person_page()
-
-        @TODO Monet osat on ohjelmoimatta
     """
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
@@ -100,30 +99,8 @@ def show_a_person(uid=""):
         user=current_user.username
     else:
         user=None
-    # Get Person objects, whith included Events and Names (Refnames no needed!)
-    persons = read_persons_with_events(keys, user=user)
-    person = persons[0]
-    person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-    person.set_my_places(True)
-    person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
-    sources = Source.get_sources_by_idlist(source_ids)
-    #TODO: Etsi sitaateille lähteet
-
-#     person.get_all_notes()
-#     person.get_media()
-#     person.get_refnames()
-    for c in person.citations:
-        print ("Sitaatit {} {}".format(c.uniq_id, c))
-        for ci in c.citators:
-            print (" <- {}".format(ci))
-#     for e in person.events:
-#         print("Person event {}: {}".format(e.uniq_id, e))
-#         if e.place == None:
-#             print("- no place")
-#         else:
-#             for n in e.place.names:
-#                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
     
+    person, sources = get_person_for_display(keys, user)
     return render_template("/scene/person_pg.html", 
                            person=person, sources=sources, menuno=1)
 

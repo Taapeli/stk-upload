@@ -11,6 +11,7 @@ from sys import stderr
 
 from .source import Source
 from models.cypher_gramps import Cypher_citation_w_handle
+from models.gen.cypher import Cypher_citation
 import shareds
 
 
@@ -55,13 +56,6 @@ class Citation:
             
             Returns list of Citations and list of Source ids
         """
-        get_persons_citation_paths = """
-match path = (p) -[*]-> (c:Citation) -[:SOURCE]-> (s:Source)
-    where id(p) = 72104 
-    with relationships(path) as rel, c, id(s) as source_id
-return extract(x IN rel | endnode(x))  as end, source_id
-    order by source_id, size(end)"""
-
 # ╒══════════════════════════════════════════════════════════════════════╤═══════════╕
 # │"end"                                                                 │"source_id"│
 # ╞══════════════════════════════════════════════════════════════════════╪═══════════╡
@@ -89,7 +83,7 @@ return extract(x IN rel | endnode(x))  as end, source_id
 # │0351255"}]                                                            │           │
 # └──────────────────────────────────────────────────────────────────────┴───────────┘
         
-        result = shareds.driver.session().run(get_persons_citation_paths, 
+        result = shareds.driver.session().run(Cypher_citation.get_persons_citation_paths, 
                                               pid=uniq_id)
         citations = []
         source_ids = []

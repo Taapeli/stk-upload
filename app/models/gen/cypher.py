@@ -21,10 +21,17 @@
 #     Cypher clases for creating and accessing Media objects
 #     '''
 
-# class Cypher_note():
-#     '''
-#     Cypher clases for creating and accessing Notes
-#     '''
+class Cypher_note():
+    '''
+    Cypher clases for creating and accessing Notes
+    '''
+
+    get_person_notes = '''match (p) -[:NOTE]-> (n:Note) where id(p) = $pid 
+    return id(p) as p_id, null as e_id, id(n) as n_id, n
+union
+match (p) -[:EVENT]-> (e:Event) -[:NOTE]-> (n:Note) where id(p) = $pid 
+    return id(p) as p_id, id(e) as e_id, id(n) as n_id, n'''
+
 
 class Cypher_person():
     '''
@@ -35,7 +42,7 @@ class Cypher_person():
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:EVENT]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-RETURN ID(person) AS id, person.confidence AS confidence,
+RETURN ID(person) AS uniq_id, person.id as id, person.confidence AS confidence,
     person.est_birth AS est_birth, person.est_death AS est_death,
     name.firstname AS firstname, name.surname AS surname,
     name.suffix AS suffix, name.type as ntype,
@@ -121,6 +128,7 @@ match (e:Event) <-- (:Family) -[r:FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name
     where ID(e)=$eid
 return type(r) as frole, id(p) as pid, collect(n) as names"""
 
+
 class Cypher_place():
     '''
     Cypher clases for creating and accessing Places
@@ -191,10 +199,17 @@ ORDER BY n.name"""
     set_constraint = "CREATE CONSTRAINT ON (r:Refname) ASSERT r.name IS UNIQUE"
 
 
-# class Cypher_citation():
-#     '''
-#     Cypher clases for creating and accessing Citations
-#     '''
+class Cypher_citation():
+    '''
+    Cypher clases for creating and accessing Citations
+    '''
+    get_persons_citation_paths = """
+match path = (p) -[*]-> (c:Citation) -[:SOURCE]-> (s:Source)
+    where id(p) = $pid 
+    with relationships(path) as rel, c, id(s) as source_id
+return extract(x IN rel | endnode(x))  as end, source_id
+    order by source_id, size(end)"""
+
 
 class Cypher_source():
     '''

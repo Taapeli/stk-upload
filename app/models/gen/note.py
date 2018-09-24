@@ -7,6 +7,7 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 '''
 
 from models.cypher_gramps import Cypher_note_w_handle
+from models.gen.cypher import Cypher_note
 import shareds
 
 class Note:
@@ -55,6 +56,34 @@ class Note:
             n.text = record_n['text']
         return n
 
+    @staticmethod       
+    def get_persons_notes (uniq_id):
+        """ Read 'Person -> Event -> Note' and 'Person -> Note' paths
+
+            Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
+            
+            Returns list of Citations and list of Source ids
+        ╒══════╤══════╤══════╤════════════════════════════════════════════════╕
+        │"p_id"│"e_id"│"n_id"│"n"                                             │
+        ╞══════╪══════╪══════╪════════════════════════════════════════════════╡
+        │99833 │81393 │78943 │{"handle":"_dea2effe2b579e6d11c157b268c","text":│
+        │      │      │      │"Tornion tuomiokunnan tuomari","id":"N0089","pri│
+        │      │      │      │v":"","type":"Event Note","change":1529946203}  │
+        ├──────┼──────┼──────┼────────────────────────────────────────────────┤
+        │99833 │81409 │78936 │{"handle":"_dea5b1e04a32efc4f77eb368d87","text":│
+        │      │      │      │"Kuopion tuomiokunnan 1822","id":"N2057","priv":│
+        │      │      │      │"","type":"Event Note","change":1530020220}     │
+        └──────┴──────┴──────┴────────────────────────────────────────────────┘
+        """
+        
+        result = shareds.driver.session().run(Cypher_note.get_person_notes, 
+                                              pid=uniq_id)
+        notes = []
+        for record in result:
+            pass
+
+        return notes
+ 
     @staticmethod
     def get_notes(uniq_ids):
         """ Reads Note nodes data from db using given uniq_ids

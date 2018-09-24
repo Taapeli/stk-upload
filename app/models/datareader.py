@@ -32,20 +32,26 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
         If currentuser is defined, restrict to her objects.
 
         Returns Person objects, whith included Events and Names 
-                and optionally Refnames
+        and optionally Refnames
+
+        NOTE. Actually called only with keys = ('uniq_id', uid)
     """
-    
+
     persons = []
     p = None
     result = Person_combo.get_events_k(keys, user, take_refnames=take_refnames, order=order)
     for record in result:
-        # Got ["id", "confidence", "firstname", "refnames", "surname", "suffix", "events"]
-    
+        # <Record uniq_id=99833 id='I1235' confidence='2.0' est_birth=None est_death=None 
+        #    firstname='Erik Berndt' surname='Konow' suffix='' ntype='Birth Name' 
+        #    refnames=['Konow', 'Berndt', 'Eerik', 'Eerikki', 'Eeric', 'Erik'] 
+        #    events=[[81397, 'Tulomuutto', 0, 1863988, 1863988, None, None], ...
+        #        ]>
+
         # Person
 
-        uniq_id = record['id']
         p = Person_combo()
-        p.uniq_id = uniq_id
+        p.uniq_id = record['uniq_id']
+        p.id = record['id']
         p.confidence = record['confidence']
         p.est_birth = record['est_birth']
         p.est_death = record['est_death']
@@ -64,7 +70,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
         if 'initial' in record and record['initial']:
             pname.initial = record['initial']
         p.names.append(pname)
-    
+
         # Events
 
         for event in record['events']:
