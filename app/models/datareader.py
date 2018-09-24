@@ -537,16 +537,16 @@ def get_source_with_events(sourceid):
         print('Citation {} {} {} {} {}'.format(c.uniq_id, event_role, 
                                                node.label, node.uniq_id, node.id))
 
-        if event_role == 'Family':  # Family event
+        if event_role == 'Family':  # Family event witch is cdirectply connected to a Person Event
             node.label = 'Family Event'
-            couple = Family.get_marriage_parent_names(x_uid)
-            node.clearname = " <> ".join(list(couple.values()))
-        else:                       # Person event
-            if p_uid not in persons.keys():
-                node.clearname = Name.get_clearnames(node.uniq_id)
-                persons[node.uniq_id] = node.clearname
-            else:
-                node.clearname = persons[p_uid]
+#             couple = Family.get_marriage_parent_names(x_uid)
+#             node.clearname = " <> ".join(list(couple.values()))
+#         else:                       # Person event
+        if p_uid not in persons.keys():
+            node.clearname = Name.get_clearnames(node.uniq_id)
+            persons[node.uniq_id] = node.clearname
+        else:
+            node.clearname = persons[p_uid]
 
         if 'Event' in node.label:
             # node: "Event <event_type> <person p_uid>"
