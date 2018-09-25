@@ -43,6 +43,7 @@ class Event_combo(Event):
         Event.__init__(self, eid, desc, handle)
         self.clearnames = []    # filled by models.gen.place.Place.show_names_list
                                 # to show names list 
+        self.role = ''          # role of event from EVENT relation, if available
         self.note_ref = []      # Note uniq_ids (previous noteref_hlink had
                                 # only the first one)
         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
@@ -70,6 +71,41 @@ class Event_combo(Event):
 #         ''' Store this Event and the included related objects
 #         '''
 #         pass
+
+    @staticmethod
+    def from_node(node):
+        '''
+        Transforms a node from db node to an object of type Event
+        
+        <Node id=88532 labels={'Event'} 
+            properties={'type': 'Birth', 'change': 1500907890, 
+                'handle': '_da692d0fb975c8e8ae9c4986d23', 'attr_value': '', 
+                'id': 'E0161', 'attr_type': '', 'description': ''
+                'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
+        '''
+        e = Event_combo()
+        e.uniq_id = uniq_id
+        e.id = node.id
+        e.uniq_id = node['id']
+        e.type = node['type']
+        e.handle = node['handle']
+        e.change = node['change']
+        if "datetype" in node:
+            #TODO: Talletetaanko DateRange -objekti vai vain str?
+            dates = DateRange(node["datetype"], node["date1"], node["date2"])
+            e.dates = str(dates)
+            e.date = dates.estimate()
+        else:
+            e.dates = None
+            e.date = ""
+        if node['description']:
+            e.text = node['description']
+        if node['attr_type']:
+            e.priv = node['attr_type']
+        if node['attr_value']:
+            e.type = node['attr_value']
+        return e
+
 
     # Entinen get_event_data_by_id()
     def get_event_combo(self):
@@ -135,6 +171,53 @@ return e as event,
 #             for citation_record in citation_result:
 #                 self.citationref_hlink = citation_record["citationref_hlink"]
     
+    @staticmethod       
+    def get_connected_events_w_links(uniq_id):
+        """ Read all Events referred from given node (Person or Family)
+            with links to connected Places, Notes, Citations, Media
+            Luetaan henkilön tapahtumat
+
+            Korvaamaan models.gen.person_combo.Person_combo.get_event_data_by_id etc
+
+╒═════════╤═══════════════════════════════════════════════════╤═══════╤══════════╤═══════╕
+│"role"   │"event"                                            │"x_uid"│"label"   │"x_id" │
+╞═════════╪═══════════════════════════════════════════════════╪═══════╪══════════╪═══════╡
+│"Primary"│{"datetype":0,"change":1500907890,"description":"",│null   │null      │null   │
+│         │"handle":"_da692d0fb975c8e8ae9c4986d23","attr_type"│       │          │       │
+│         │:"","id":"E0161","date2":1754183,"type":"Birth","da│       │          │       │
+│         │te1":1754183,"attr_value":""}                      │       │          │       │
+├─────────┼───────────────────────────────────────────────────┼───────┼──────────┼───────┤
+│"Kummi"  │{"datetype":0,"change":1504295227,"description":"An│90106  │"Citation"│"C0046"│
+│         │na Florinin kaste","handle":"_da68e18032c6cbd294a41│       │          │       │
+│         │be46ff","attr_type":"","id":"E0076","date2":1779729│       │          │       │
+│         │,"type":"Baptism","date1":1779729,"attr_value":""} │       │          │       │
+├─────────┼───────────────────────────────────────────────────┼───────┼──────────┼───────┤
+│"Kummi"  │{"datetype":0,"change":1504295227,"description":"An│78279  │"Place"   │"P0002"│
+│         │na Florinin kaste","handle":"_da68e18032c6cbd294a41│       │          │       │
+│         │be46ff","attr_type":"","id":"E0076","date2":1779729│       │          │       │
+│         │,"type":"Baptism","date1":1779729,"attr_value":""} │       │          │       │
+├─────────┼───────────────────────────────────────────────────┼───────┼──────────┼───────┤
+│"Primary"│{"datetype":0,"change":1507204555,"description":"",│90343  │"Citation"│"C0462"│
+│         │"handle":"_da692d5233a6fc0d5bc142579ce","attr_type"│       │          │       │
+│         │:"","id":"E0166","date2":1789257,"type":"Death","da│       │          │       │
+│         │te1":1789257,"attr_value":""}                      │       │          │       │
+└─────────┴───────────────────────────────────────────────────┴───────┴──────────┴───────┘
+        """
+
+        get_events_w_links = """
+match (root) -[r:EVENT]-> (e:Event) where id(root)=$root
+optional match (e) -[rx]-> (x)
+return r.role as role, e as event, 
+       id(x) as x_uid, labels(x)[0] as label, x.id as x_id"""
+        result = shareds.driver.session().run(get_events_w_links, root=uniq_id)
+        events = []
+        for record in result:
+            node = record['event']
+            e = Event_combo.from_node(node)
+            e.role = record['role']
+            events.append(e)
+        return events
+
 
     def get_baptism_data(self):
         """ Read the persons related to this babtism Event.

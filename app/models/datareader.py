@@ -308,7 +308,7 @@ def get_repositories(uniq_id=None):
         if 'webref' in record:
             for webref in record['webref']:
                 # collect([w.href, wr.type, wr.description, wr.priv]) as webref
-                wurl = Weburl.from_record(webref)
+                wurl = Weburl.from_node(webref)
                 if wurl:
                     r.urls.append(wurl)
 
@@ -609,7 +609,7 @@ def get_people_by_surname(surname):
 
 
 def get_person_data_by_id(uniq_id):
-    """ Get 5 data sets:
+    """ Get 5 data sets:                    ---- vanhempi versio ----
         person: Person object with name data
             The indexes of referred objects are in variables 
                 eventref_hlink[]      str tapahtuman uniq_id, rooli eventref_role[]

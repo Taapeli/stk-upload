@@ -10,9 +10,9 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
 
 from . import bp
-from .models import get_person_for_display
+from .models import get_person_for_display, get_person_data_by_id
 from models.datareader import read_persons_with_events
-from models.datareader import get_person_data_by_id
+#from models.datareader import get_person_data_by_id
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 #from models.gen.family import Family_for_template
@@ -33,10 +33,11 @@ def show_persons_restricted(selection=None):
     return render_template("/scene/persons.html", persons=persons, 
                            menuno=1, rule=keys)
 
+# ------------------------- Menu 0: Person search ------------------------------
 
 @bp.route('/scene/persons', methods=['POST', 'GET'])
 def show_person_list(selection=None):
-    """ Show list of selected Persons """
+    """ Show list of selected Persons for menu(0) """
     if request.method == 'POST':
         try:
             # Selection from search form
@@ -62,12 +63,31 @@ def show_person_list(selection=None):
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys)
 
+@bp.route('/scene/persons/ref=<string:refname>')
+@bp.route('/scene/persons/ref=<string:refname>/<opt>')
+@login_required
+def show_persons_by_refname(refname, opt=""):
+    """ List persons by refname
+    """
+    keys = ('refname', refname)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    ref = ('ref' in opt)
+    order = 0
+    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    return render_template("/scene/persons.html", persons=persons, menuno=1, 
+                           order=order, rule=keys)
+
+# ------------------------------ Menu 1 Persons --------------------------------
 
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')
 #     @login_required
 def show_all_persons_list(opt=''):
-    """ The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
+    """ List all persons for menu(1)
+        The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
         with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
         TODO Should have restriction by owner's UserProfile 
     """
@@ -105,28 +125,10 @@ def show_a_person(uid=""):
                            person=person, sources=sources, menuno=1)
 
 
-@bp.route('/scene/persons/ref=<string:refname>')
-@bp.route('/scene/persons/ref=<string:refname>/<opt>')
-@login_required
-def show_persons_by_refname(refname, opt=""):
-    """ List persons by refname
-    """
-    keys = ('refname', refname)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    ref = ('ref' in opt)
-    order = 0
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
-    return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           order=order, rule=keys)
-
-
-@bp.route('/scene/person=<string:uniq_id>')
+@bp.route('/scene/person=<int:uniq_id>')
 #     @login_required
 def show_person_page(uniq_id):
-    """ Full homepage for a Person in database
+    """ Full homepage for a Person in database (vanhempi versio)
     """
 
     try:
@@ -149,10 +151,11 @@ def show_person_page(uniq_id):
     return render_template("/scene/person.html", person=person, events=events, 
                            photos=photos, sources=sources, families=families)
 
+# ------------------------------ Menu 4: Places --------------------------------
 
 @bp.route('/scene/locations')
 def show_locations():
-    """ List of Places
+    """ List of Places for menu(4)
     """
     try:
         # 'locations' has Place objects, which include also the lists of
@@ -183,9 +186,11 @@ def show_location_page(locid):
     return render_template("/scene/place_events.html", locid=locid, place=place, 
                            events=events, locations=place_list)
 
+# ------------------------------ Menu 5: Sources --------------------------------
+
 @bp.route('/scene/sources')
 def show_sources():
-    """ Lähdeluettelon näyttäminen ruudulla
+    """ Lähdeluettelon näyttäminen ruudulla for menu(5)
     """
     try:
         sources = Source.get_source_list()

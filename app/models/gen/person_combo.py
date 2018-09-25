@@ -135,7 +135,9 @@ class Person_combo(Person):
 
 
     def get_event_data_by_id(self):
-        """ Luetaan henkilön tapahtumien id:t """
+        """ Luetaan henkilön tapahtumien id:t 
+            Korvaava versio models.gen.event_combo.Event_combo.get_connected_events_w_links
+        """
 
         root = int(self.uniq_id)
         query = """

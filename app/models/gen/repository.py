@@ -39,14 +39,14 @@ class Repository:
         
     
     @staticmethod
-    def from_record(record):
+    def from_node(node):
         '''
-        Transforms a db record to Repository object
+        Transforms a db node to Repository object
         '''
         n = Repository()
-        if record['uniq_id']:
-            n.uniq_id = int(record['uniq_id'])
-        record_n = record['r']
+        if node['uniq_id']:
+            n.uniq_id = int(node['uniq_id'])
+        record_n = node['r']
         if record_n['handle']:
             n.handle = record_n['handle']
         if record_n['change']:
@@ -98,7 +98,7 @@ class Repository:
 
         for record in result:
             # Create a Note object from record
-            n = Repository.from_record(record)
+            n = Repository.from_node(record)
             repositories.append(n)
 
         return (titles, repositories)
