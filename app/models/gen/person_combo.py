@@ -86,7 +86,7 @@ class Person_combo(Person):
             - eventref_role[]  str edellisen rooli
             objref_hlink[]     int median uniq_id
             urls[]             list of Weburl nodes
-                priv           str 1 = salattu tieto
+                priv           int 1 = salattu tieto
                 href           str osoite
                 type           str tyyppi
                 description    str kuvaus
@@ -108,7 +108,7 @@ class Person_combo(Person):
         self.uniq_id = None
         self.id = ''
         self.names = []
-        self.priv = ''
+        self.priv = 0
         self.gender = ''
         self.events = []                # For creating display sets
         self.eventref_hlink = []        # Gramps event handles

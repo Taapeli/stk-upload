@@ -18,7 +18,7 @@ class Note:
                 change          int timestamp from Gramps
                 id              esim. "N0001"
                 uniq_id         int database key
-                priv            str salattu tieto
+                priv            int >0 salattu tieto
                 type            str huomautuksen tyyppi
                 text            str huomautuksen sisältö
      """
@@ -31,7 +31,7 @@ class Note:
         self.type = ''
         self.handle = ''
         self.change = 0
-        self.priv = ''
+        self.priv = 0
 
 
     @staticmethod

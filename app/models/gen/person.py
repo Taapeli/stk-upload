@@ -74,7 +74,7 @@ class Person:
          - Node properties: {
             handle                str "_dd2c613026e7528c1a21f78da8a"
             id                    str "I0000"
-            priv                  str "1" = merkitty yksityiseksi
+            priv                  int 1 = merkitty yksityiseksi
             gender                str "M", "N", "" sukupuoli
             confidence            float "2.0" tietojen luotettavuus
             change                int 1536324580
@@ -88,7 +88,7 @@ class Person:
         self.uniq_id = None
         self.id = ''
         self.names = []
-        self.priv = ''
+        self.priv = 0
         self.gender = ''
         self.events = []                # For creating display sets
         self.eventref_hlink = []        # Gramps event handles

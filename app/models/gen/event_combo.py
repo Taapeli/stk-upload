@@ -84,9 +84,8 @@ class Event_combo(Event):
                 'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
         '''
         e = Event_combo()
-        e.uniq_id = uniq_id
+        e.uniq_id = node.id
         e.id = node.id
-        e.uniq_id = node['id']
         e.type = node['type']
         e.handle = node['handle']
         e.change = node['change']
@@ -98,12 +97,10 @@ class Event_combo(Event):
         else:
             e.dates = None
             e.date = ""
-        if node['description']:
-            e.text = node['description']
-        if node['attr_type']:
-            e.priv = node['attr_type']
-        if node['attr_value']:
-            e.type = node['attr_value']
+        e.text = node['description'] or ''
+        e.attr = node['attr'] or dict()
+#         e.attr_type = node['attr_type'] or ''
+#         e.attr_value = node['attr_value'] or ''
         return e
 
 

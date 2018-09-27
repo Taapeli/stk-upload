@@ -65,4 +65,14 @@
     {% endif %}
 {%- endmacro %}
 
+{% macro url_link(weburl) -%}
+    {#  Creates an active link from Weburl object. 
+    #}
+    {% if weburl %}
+	    <a href={{weburl.href}} class="outlink" title="{{weburl.type}}">{{weburl.description}}</a>
+	        {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
+	        {% else %}nimetön
+	        {% endif %}
+    {% endif %}
+{%- endmacro %}
         

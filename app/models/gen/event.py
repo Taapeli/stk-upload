@@ -58,8 +58,9 @@ class Event():
                 description        esim. ammatin kuvaus
                 date               str aika
                 dates              DateRange date expression
-                attr_type          str lisätiedon tyyppi
-                attr_value         str lisätiedon arvo
+                attr[]             dict lisätiedot {attr_type: attr_value}
+#                 attr_type          str lisätiedon tyyppi
+#                 attr_value         str lisätiedon arvo
             For gramps_loader:
                 note_handles[]     str lisätiedon handle (ent. noteref_hlink)
             Planned from gramps_loader:
@@ -83,9 +84,8 @@ class Event():
         self.description = desc
         self.date = ''
         self.dates = None
-        # Only in Event_gramps
-        #    self.attr_type = ''
-        #    self.attr_value = ''
+        # NOT Only in Event_gramps
+        self.attr = dict()         # prev. attr_type, attr_value
         # Only in Event_combo
         #    self.note_ref = []    # prev. noteref_hlink
         #    self.place_hlink = ''
@@ -111,8 +111,7 @@ class Event():
         result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
-                  'description', 'date', 'dates', 
-                  'attr_type', 'attr_value']
+                  'description', 'date', 'dates', 'attr']
         lists = []
         
         for record in result:
@@ -149,12 +148,8 @@ class Event():
                 data_line.append(str(DateRange(record["e"]['dates'])))
             else:
                 data_line.append('-')
-            if record["e"]['attr_type']:
-                data_line.append(record["e"]['attr_type'])
-            else:
-                data_line.append('-')
-            if record["e"]['attr_value']:
-                data_line.append(record["e"]['attr_value'])
+            if len(record["e"]['attr']) > 0:
+                data_line.append(str(record["e"]['attr'])[1:-1])
             else:
                 data_line.append('-')
                 
@@ -176,7 +171,7 @@ class Event():
         result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
-                  'description', 'date', 'dates', 'attr_type', 'attr_value']
+                  'description', 'date', 'dates', 'attr']
         lists = []
         
         for record in result:
@@ -213,8 +208,8 @@ class Event():
                 data_line.append(str(DateRange(record["e"]['dates'])))
             else:
                 data_line.append('-')
-            if record["e"]['attr_type']:
-                data_line.append(record["e"]['attr_type'])
+            if len(record["e"]['attr']) > 0:
+                data_line.append(str(record["e"]['attr'])[1:-1])
             else:
                 data_line.append('-')
             if record["e"]['attr_value']:
@@ -256,8 +251,7 @@ class Event():
         print ("Dateval: " + self.date)
         print ("Dates: " + str(self.dates))
         #print ("Place_hlink: " + self.place_hlink)
-        print ("Attr_type: " + self.attr_type)
-        print ("Attr_value: " + self.attr_value)
+        print ("Attr: " + str(self.attr))
         #print ("Citationref_hlink: " + self.citationref_hlink)
         return True
 

@@ -44,21 +44,13 @@ class Repository:
         Transforms a db node to Repository object
         '''
         n = Repository()
-        if node['uniq_id']:
-            n.uniq_id = int(node['uniq_id'])
-        record_n = node['r']
-        if record_n['handle']:
-            n.handle = record_n['handle']
-        if record_n['change']:
-            n.change = int(record_n['change'])
-        if record_n['id']:
-            n.id = record_n['id']
-        if record_n['priv']:
-            n.priv = record_n['priv']
-        if record_n['type']:
-            n.type = record_n['type']
-        if record_n['text']:
-            n.text = record_n['text']
+        n.uniq_id = node.id
+        n.handle = node['handle']
+        n.change = node['change'] or 0
+        n.id = node['id'] or ''
+        n.priv = node['priv'] or 0
+        n.type = node['type'] or ''
+        n.text = node['text'] or ''
         return n
 
 

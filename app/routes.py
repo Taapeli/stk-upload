@@ -75,7 +75,7 @@ def show_table_data(subj):
         persons = datareader.read_persons_with_events()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "surnames":
-        surnames = gen.person.Name.get_surnames()
+        surnames = gen.person_name.Name.get_surnames()
         return render_template("table_surnames.html", surnames=surnames)
     elif subj == 'events_wo_cites':
         headings, titles, lists = datareader.read_events_wo_cites()

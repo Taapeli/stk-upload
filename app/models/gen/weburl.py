@@ -12,9 +12,6 @@ Created on 3.8.2018
 
 from sys import stderr
 
-from .cypher import Cypher_weburl
-from models.gen.cypher import Cypher_weburl
-
 class Weburl():
     """ A web reference 
 
@@ -31,11 +28,15 @@ class Weburl():
         self.href = None
         self.type = None
         self.description = ""
-        self.priv = ""
+        self.priv = 0
 
 
     def __str__(self):
         return "{} '{}' <{}>".format(self.type, self.description, self.href)
+
+
+    def tuple(self):
+        return (self.type, self.description, self.href)
 
 
     @staticmethod
@@ -51,7 +52,7 @@ class Weburl():
         n = Weburl()
         n.uniq_id = node.id
         n.href = node['href'] or ''
-        n.priv = node['priv'] or ''
+        n.priv = node['priv'] or 0
         n.type = node['type'] or ''
         n.description = node['description'] or ''
         return n

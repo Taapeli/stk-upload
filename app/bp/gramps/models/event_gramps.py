@@ -53,9 +53,9 @@ class Event_gramps(Event):
                 place_handles[]    str paikan handle (ent. place_hlink)
                 citation_handles[] str viittauksen handle (ent. citationref_hlink)
                 media_handles[]    str median handle (ent. objref_hlink)
-            Properties from Gramps:
-                attr_type          str lisätiedon tyyppi
-                attr_value         str lisätiedon arvo
+#             Properties from Gramps:
+#                 attr_type          str lisätiedon tyyppi
+#                 attr_value         str lisätiedon arvo
             Obsolete:
                 place_hlink        str paikan handle
                 objref_hlink       str median handle
@@ -64,8 +64,6 @@ class Event_gramps(Event):
     def __init__(self, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
         Event.__init__(self, eid, desc, handle)
-        self.attr_type = ''
-        self.attr_value = ''
         self.note_handles = []      # Note handles (previous noteref_hlink had
                                     # only the first one)
         self.citation_handles = []  # (previous citationref_hlink)
@@ -91,8 +89,7 @@ class Event_gramps(Event):
             "id": self.id, 
             "type": self.type,
             "description": self.description, 
-            "attr_type": self.attr_type, 
-            "attr_value": self.attr_value}
+            "attr": self.attr}
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
