@@ -97,8 +97,9 @@ class Repository:
         repositories = []
 
         for record in result:
-            # Create a Note object from record
-            n = Repository.from_node(record)
+            # Create a Note object from db Node
+            node = record['r']
+            n = Repository.from_node(node)
             repositories.append(n)
 
         return (titles, repositories)

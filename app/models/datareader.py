@@ -280,14 +280,15 @@ def get_repositories(uniq_id=None):
     │"uniq_id│"rname" │"type"  │"change"│"handle"│"id"   │"sources│"webref"│
     │"       │        │        │        │        │       │"       │        │
     ╞════════╪════════╪════════╪════════╪════════╪═══════╪════════╪════════╡
-    │25979   │"Haminan│"Library│"1526233│"_de18a0│"R0000"│[[25992,│[[null,n│
-    │        │ kaupung│"       │479"    │b2d546e2│       │"Haminan│ull,null│
-    │        │inarkist│        │        │22251e54│       │ asukasl│,null]] │
+    │25979   │"Haminan│"Library│"1526233│"_de18a0│"R0000"│[[25992,│[[...], │
+    │        │ kaupung│"       │479"    │b2d546e2│       │"Haminan│]       │
+    │        │inarkist│        │        │22251e54│       │ asukasl│        │
     │        │o"      │        │        │9f2bd"  │       │uettelo │        │
     │        │        │        │        │        │       │1800-182│        │
     │        │        │        │        │        │       │0","Book│        │
     │        │        │        │        │        │       │"]]     │        │
     └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
+    where "webref" is 
     """    
     titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'urls']
     repositories = []
@@ -295,22 +296,15 @@ def get_repositories(uniq_id=None):
     for record in result:
         r = Repository()
         r.uniq_id = record['uniq_id']
-        if record['rname']:
-            r.rname = record['rname']
-        if record['change']:
-            r.change = int(record['change'])  #TODO only temporary int()
-        if record['handle']:
-            r.handle = record['handle']
-        if record['type']:
-            r.type = record['type']
-        if record['id']:
-            r.id = record['id']
-        if 'webref' in record:
-            for webref in record['webref']:
-                # collect([w.href, wr.type, wr.description, wr.priv]) as webref
-                wurl = Weburl.from_node(webref)
-                if wurl:
-                    r.urls.append(wurl)
+        r.rname = record['rname'] or ''
+        r.change = record['change']
+        r.handle = record['handle']
+        r.type = record['type'] or ''
+        r.id = record['id'] or ''
+        for webref in record['webref']:
+            wurl = Weburl.from_node(webref)
+            if wurl:
+                r.urls.append(wurl)
 
         for source in record['sources']:
             s = Source()
