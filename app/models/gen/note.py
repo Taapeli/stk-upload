@@ -32,29 +32,51 @@ class Note:
         self.change = 0
         self.priv = ''
 
+
     @staticmethod
-    def from_record(record):
+    def from_node(node):
         '''
-        Transforms a record from db to an object of type Note
+        Transforms a db node to an object of type Note.
         '''
         n = Note()
-        if record['uniq_id']:
-            n.uniq_id = int(record['uniq_id'])
-        record_n = record['n']
-        if record_n['handle']:
-            n.handle = record_n['handle']
-        if record_n['change']:
-            n.change = int(record_n['change'])
-        if record_n['id']:
-            n.id = record_n['id']
-        if record_n['priv']:
-            n.priv = record_n['priv']
-        if record_n['type']:
-            n.type = record_n['type']
-        if record_n['text']:
-            n.text = record_n['text']
+        n.uniq_id = node.id
+        n.handle = node['handle']
+        n.change = node['change']
+        n.id = node['id'] or ''
+        n.priv = node['priv'] or ''
+        n.type = node['type'] or ''
+        n.text = node['text'] or ''
         return n
 
+
+    @staticmethod       
+    def get_persons_notes (uniq_id):
+        """ Read 'Person -> Event -> Note' and 'Person -> Note' paths
+
+            Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
+            
+            Returns list of Citations and list of Source ids
+        ╒══════╤══════╤══════╤════════════════════════════════════════════════╕
+        │"p_id"│"e_id"│"n_id"│"n"                                             │
+        ╞══════╪══════╪══════╪════════════════════════════════════════════════╡
+        │99833 │81393 │78943 │{"handle":"_dea2effe2b579e6d11c157b268c","text":│
+        │      │      │      │"Tornion tuomiokunnan tuomari","id":"N0089","pri│
+        │      │      │      │v":"","type":"Event Note","change":1529946203}  │
+        ├──────┼──────┼──────┼────────────────────────────────────────────────┤
+        │99833 │81409 │78936 │{"handle":"_dea5b1e04a32efc4f77eb368d87","text":│
+        │      │      │      │"Kuopion tuomiokunnan 1822","id":"N2057","priv":│
+        │      │      │      │"","type":"Event Note","change":1530020220}     │
+        └──────┴──────┴──────┴────────────────────────────────────────────────┘
+        """
+        
+        result = shareds.driver.session().run(Cypher_note.get_person_notes, 
+                                              pid=uniq_id)
+        notes = []
+        for record in result:
+            pass
+
+        return notes
+ 
     @staticmethod
     def get_notes(uniq_ids):
         """ Reads Note nodes data from db using given uniq_ids
@@ -70,7 +92,9 @@ RETURN ID(n) AS uniq_id, n"""
             result = session.run(notes_get, nid=uniq_ids)
             for record in result:
                 # Create a Note object from record
-                notes.append(Note.from_record(record))
+                node = record['n']
+                n = Note.from_node(node)
+                notes.append(n)
 
         return notes
 
@@ -100,7 +124,8 @@ ORDER BY n.type"""
 
         for record in result:
             # Create a Note object from record
-            n = Note.from_record(record)
+            node = record['n']
+            n = Note.from_node(node)
             notes.append(n)
 
         return (titles, notes)
