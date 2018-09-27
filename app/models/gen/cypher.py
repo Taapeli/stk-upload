@@ -37,18 +37,24 @@ class Cypher_person():
     '''
     Cypher clases for creating and accessing Places
     '''
-
     _get_events_tail = """
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
- OPTIONAL MATCH (event) -[:EVENT]-> (place:Place)
+ OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-RETURN ID(person) AS uniq_id, person.id as id, person.confidence AS confidence,
-    person.est_birth AS est_birth, person.est_death AS est_death,
-    name.firstname AS firstname, name.surname AS surname,
-    name.suffix AS suffix, name.type as ntype,
+RETURN person, name,
     COLLECT(DISTINCT refn.name) AS refnames,
-    COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
-        event.date1, event.date2, place.pname, event.role]) AS events"""
+    COLLECT(DISTINCT [r.role, event, place.pname]) AS events"""
+#     _get_events_tail = """
+#  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
+#  OPTIONAL MATCH (event) -[:EVENT]-> (place:Place)
+#  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
+# RETURN ID(person) AS uniq_id, person.id as id, person.confidence AS confidence,
+#     person.est_birth AS est_birth, person.est_death AS est_death,
+#     name.firstname AS firstname, name.surname AS surname,
+#     name.suffix AS suffix, name.type as ntype,
+#     COLLECT(DISTINCT refn.name) AS refnames,
+#     COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
+#         event.date1, event.date2, place.pname, event.role]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
     ORDER BY TOUPPER(name.surname), name.firstname"""
     _get_events_firstname = """, LEFT(name.firstname,1) as initial 

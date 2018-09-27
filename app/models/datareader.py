@@ -39,63 +39,61 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
 
     persons = []
     p = None
-    result = Person_combo.get_events_k(keys, user, take_refnames=take_refnames, order=order)
+    p_uniq_id = None
+    result = Person_combo.get_person_combos(keys, user, take_refnames=take_refnames, order=order)
     for record in result:
-        # <Record uniq_id=99833 id='I1235' confidence='2.0' est_birth=None est_death=None 
-        #    firstname='Erik Berndt' surname='Konow' suffix='' ntype='Birth Name' 
-        #    refnames=['Konow', 'Berndt', 'Eerik', 'Eerikki', 'Eeric', 'Erik'] 
-        #    events=[[81397, 'Tulomuutto', 0, 1863988, 1863988, None, None], ...
-        #        ]>
-
+        '''
+        # <Record 
+            person=<Node id=80307 labels={'Person'} 
+                properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F', 
+                     'change': 1507492602, 'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}> 
+            name=<Node id=80308 labels={'Name'} 
+                properties={'type': 'Birth Name', 'suffix': '', 'alt': '', 
+                    'surname': 'Klick', 'firstname': 'Brita Helena'}> 
+            refnames=['Helena', 'Brita', 'Klick'] 
+            events=[['Primary', <Node id=88532 labels={'Event'} 
+                properties={'date1': 1754183, 'id': 'E0161', 'attr_type': '', 
+                    'date2': 1754183, 'attr_value': '', 'description': '', 
+                    'datetype': 0, 'change': 1500907890, 
+                    'handle': '_da692d0fb975c8e8ae9c4986d23', 'type': 'Birth'}>,
+                'Kangasalan srk'], ...] 
+            initial='K'>
+        '''
         # Person
 
-        p = Person_combo()
-        p.uniq_id = record['uniq_id']
-        p.id = record['id']
-        p.confidence = record['confidence']
-        p.est_birth = record['est_birth']
-        p.est_death = record['est_death']
-        if take_refnames and record['refnames']:
-            refnlist = sorted(record['refnames'])
-            p.refnames = ", ".join(refnlist)
-        pname = Name()
-        if record['firstname']:
-            pname.firstname = record['firstname']
-        if record['surname']:
-            pname.surname = record['surname']
-        if record['suffix']:    # patronyme
-            pname.suffix = record['suffix']
-        if record['ntype']:
-            pname.type = record['ntype']
+        node = record['person']
+        if node.id != p_uniq_id:
+            # The same person is not created again
+            p = Person_combo.from_node(node)
+            p_uniq_id = p.uniq_id
+            if take_refnames and record['refnames']:
+                refnlist = sorted(record['refnames'])
+                p.refnames = ", ".join(refnlist)
+        node = record['name']
+        pname = Name.from_node(node)
         if 'initial' in record and record['initial']:
             pname.initial = record['initial']
         p.names.append(pname)
 
         # Events
 
-        for event in record['events']:
-            # Got event with place name: [id, type, date, dates, place.pname]
-            # COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
-            #                   event.date1, event.date2, place.pname, 
-            #                   event.role]) AS events
-            e = Event_combo()
-            e.uniq_id = event[0]
-            event_type = event[1]
-            if event_type:
-                e.type = event_type
-                # DateRange in events[2..4]?
-                if event[2] != None and isinstance(event[2], int):
-                    dates = DateRange(event[2], event[3], event[4])
-                    e.dates = str(dates)
-                    e.date = dates.estimate()
-                else:
-                    e.dates = None
-                # TODO Tässä pitäisi olla Place object, tai oikeastaan se saadaan myöhemmin
-                e.place = event[5]  
-                e.role = event[6] or ""
+        for role, event, place in record['events']:
+            # role = 'Primary', 
+            # event = <Node id=88532 labels={'Event'} 
+            #        properties={'attr_value': '', 'description': '', 'attr_type': '', 
+            #        'datetype': 0, 'date2': 1754183, 'type': 'Birth', 'change': 1500907890, 
+            #        'handle': '_da692d0fb975c8e8ae9c4986d23', 'id': 'E0161', 'date1': 1754183}>, 
+            # place = None
 
+            if event:
+                e = Event_combo.from_node(event)
+                e.place = place or ""  
+                e.role = role or ""
                 p.events.append(e)
- 
+
+#TODO:    p.est_birth = record['est_birth']
+#         p.est_death = record['est_death']
+
         persons.append(p)
 
     return (persons)
@@ -478,7 +476,7 @@ def get_source_with_events(sourceid):
     result = Source.get_citating_nodes(sourceid)
 
     citations = {}
-    persons = {}    # {uniq_id, clearname}
+    persons = dict()    # {uniq_id: clearname}
     
     for record in result:               # Nodes record
         # Example: Person directly linked to Citation
@@ -527,37 +525,37 @@ def get_source_with_events(sourceid):
         p_uid = record['p_id']
         x_node = record['x']
         x_uid = x_node.id
-        node = NodeRef()
+        noderef = NodeRef()
         # Referring Person or Family
-        node.uniq_id = p_uid      # 72104
-        node.id = x_node['id']  # 'I1069' or 'E2821'
-        node.label = x_node.labels.pop()
+        noderef.uniq_id = p_uid      # 72104
+        noderef.id = x_node['id']  # 'I1069' or 'E2821'
+        noderef.label = x_node.labels.pop()
         event_role = record['role']
         
         print('Citation {} {} {} {} {}'.format(c.uniq_id, event_role, 
-                                               node.label, node.uniq_id, node.id))
+                                               noderef.label, noderef.uniq_id, noderef.id))
 
         if event_role == 'Family':  # Family event witch is cdirectply connected to a Person Event
-            node.label = 'Family Event'
+            noderef.label = 'Family Event'
 #             couple = Family.get_marriage_parent_names(x_uid)
-#             node.clearname = " <> ".join(list(couple.values()))
+#             noderef.clearname = " <> ".join(list(couple.values()))
 #         else:                       # Person event
         if p_uid not in persons.keys():
-            node.clearname = Name.get_clearnames(node.uniq_id)
-            persons[node.uniq_id] = node.clearname
+            noderef.clearname = Name.get_clearname(noderef.uniq_id)
+            persons[noderef.uniq_id] = noderef.clearname
         else:
-            node.clearname = persons[p_uid]
+            noderef.clearname = persons[p_uid]
 
-        if 'Event' in node.label:
-            # node: "Event <event_type> <person p_uid>"
-            node.eventtype = x_node['type']
+        if 'Event' in noderef.label:
+            # noderef: "Event <event_type> <person p_uid>"
+            noderef.eventtype = x_node['type']
             if x_node['date1']:
-                node.edates = DateRange(x_node['datetype'], x_node['date1'], x_node['date2'])
-                node.date = node.edates.estimate()
-#         if node.label == 'Person':
-#             # node: "Person <clearname>"
-#             node.label = 'Person'
-        c.citators.append(node)
+                noderef.edates = DateRange(x_node['datetype'], x_node['date1'], x_node['date2'])
+                noderef.date = noderef.edates.estimate()
+#         if noderef.label == 'Person':
+#             # noderef: "Person <clearname>"
+#             noderef.label = 'Person'
+        c.citators.append(noderef)
 
     return (s.stitle, list(citations.values()))
 

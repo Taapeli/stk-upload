@@ -19,15 +19,16 @@ class Citation:
     """ Viittaus
             
         Properties:
-                handle          
-                change
+                handle           str
+                change           int
                 id               esim. "C0001"
                 dateval          str date
-                page             str page
-                confidence       str confidence
+                page             str page description
+                confidence       str confidence 0.0 - 5.0 (?)
                 noteref_hlink    str huomautuksen osoite
                 source_handle    str handle of source   _or_
                 source_id        int uniq_id of source
+                citators         NodeRef nodes referring this citation
      """
 
     def __init__(self):

@@ -25,7 +25,7 @@
         - set_confidence (self, tx)     Asetetaan henkilön tietojen luotettavuusarvio
         - get_person_events (nmax=0, pid=None, names=None)
                                         Luetaan henkilöitä tapahtumineen
-        - get_events_k (keys, currentuser, take_refnames=False, order=0):
+        - get_person_combos (keys, currentuser, take_refnames=False, order=0):
                                         Read Persons with Names, Events and Refnames
         - get_places(self)              Tallettaa liittyvät Paikat henkilöön
         - get_all_citation_source(self) Tallettaa liittyvät Cition ja Source

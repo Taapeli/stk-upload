@@ -33,6 +33,26 @@ class Name:
         return "{}/{}/{}".format(self.firstname, self.surname, self.suffix)
 
     @staticmethod
+    def from_node(node):
+        '''
+        Transforms a db node to an object of type Name
+        
+        <Node id=80308 labels={'Name'} 
+            properties={'firstname': 'Brita Helena', 'suffix': '', 'alt': '', 
+                'surname': 'Klick', '': 'Birth Name'}>
+        '''
+        n = Name()
+        n.uniq_id = node.id
+        n.id = node.id
+        n.type = node['type']
+        n.firstname = node['firstname']
+        n.suffix = node['suffix']
+        n.surname = node['surname']
+        n.alt = node['alt']
+        return n
+
+
+    @staticmethod
     def get_people_with_refname(refname):
         """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
             Etsi kaikki henkilöt, joiden referenssinimi on annettu"""
@@ -84,8 +104,8 @@ class Name:
 
 
     @staticmethod
-    def get_clearnames(uniq_id=None):
-        """ Lists all Name versions of this Person as cleartext
+    def get_clearname(uniq_id=None):
+        """ Lists all Name versions of this Person as single cleartext
         """
         result = Name.get_personnames(None, uniq_id)
         names = []

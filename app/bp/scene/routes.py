@@ -46,7 +46,7 @@ def show_person_list(selection=None):
             keys = (rule, name)
             persons = read_persons_with_events(keys)
             return render_template("/scene/persons.html", persons=persons, menuno=0,
-                                   name=name, rule=rule)
+                                   name=name, rule=keys)
         except Exception as e:
             logger.debug("Error {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
@@ -160,7 +160,7 @@ def show_locations():
     try:
         # 'locations' has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        locations = Place.get_place_w_names()
+        locations = Place.get_place_hierarchy()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:

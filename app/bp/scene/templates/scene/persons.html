@@ -5,6 +5,7 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
 {% set ordname = ['sukunimen', 'etunimen', 'patronyymin'] %}
+{% if order == '' %}{% set order=0 %}{% endif %}
 
 {% if rule[0] == 'all' %}<h2>Henkilöt {{ ordname[order] }} mukaan</h2>
 {% elif rule[0] == 'refname' %}<h2>Henkilöt nimeltä {{ rule[1] }}</h2>

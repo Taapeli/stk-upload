@@ -85,7 +85,7 @@ class Event_combo(Event):
         '''
         e = Event_combo()
         e.uniq_id = node.id
-        e.id = node.id
+        e.id = node['id']
         e.type = node['type']
         e.handle = node['handle']
         e.change = node['change']
@@ -212,6 +212,15 @@ return r.role as role, e as event,
             node = record['event']
             e = Event_combo.from_node(node)
             e.role = record['role']
+            # Links
+            linked = record['label']
+            if linked == 'Citation':
+                e.citation_ref.append(record['x_uid'])
+            elif linked == 'Place':
+                e.place_hlink = record['x_uid']
+            elif linked:
+                print ("*** Ohitettu linkki {}".format(linked))
+                    
             events.append(e)
         return events
 

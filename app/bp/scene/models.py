@@ -48,7 +48,8 @@ def get_person_for_display(keys, user):
     return person, sources
 
 def get_person_data_by_id(uniq_id):
-    """ Get 5 data sets:
+    """ VANHEMPI VERSIO
+    Get 5 data sets:
         person: Person object with name data
             The indexes of referred objects are in variables 
                 eventref_hlink[]      str tapahtuman uniq_id, rooli eventref_role[]
@@ -81,7 +82,7 @@ def get_person_data_by_id(uniq_id):
     photos = []
     source_cnt = 0
 
-    # Events
+    # Read objects connected to Events
 
     for i in range(len(p.eventref_hlink)):
         # Store Event data
