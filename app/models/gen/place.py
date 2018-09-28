@@ -38,12 +38,12 @@ class Place:
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
-    def __init__(self, locid="", ptype="", pname="", level=None):
+    def __init__(self, uniq_id=None, ptype="", pname="", level=None):
         """ Luo uuden place-instanssin.
             Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyylin, nimen
             ja (tulossivua varten) mahdollisen hierarkiatason
         """
-        self.id = locid
+        self.uniq_id = uniq_id
         self.type = ptype
         self.pname = pname
         if level != None:
@@ -60,9 +60,27 @@ class Place:
 
 
     def __str__(self):
-        lv = self.level or ""
-        desc = "Place {}: {} ({}) {}".format(self.id, self.pname, self.type, lv)
+        if hasattr(self, 'level'):
+            lv = self.level
+        else:
+            lv = ""
+        desc = "{} {} ({}) {}".format(self.uniq_id, self.pname, self.type, lv)
         return desc
+
+
+    def show_names_list(self):
+        # Returns list of referred Place_names for this place
+        # If none, return pname
+        name_list = []
+        for nm in self.names:
+            if nm.lang:
+                name_list.append("{} ({})".format(nm.name, nm.lang))
+            else:
+                name_list.append(nm.name)
+        if name_list:
+            return name_list
+        else:
+            return self.pname
 
 
     def get_place_data_by_id(self):
@@ -112,7 +130,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
 
     @staticmethod
-    def get_places():
+    def get_my_places():
         """ Luetaan kaikki paikat kannasta
         #TODO Eikö voisi palauttaa listan Place-olioita?
         """
@@ -165,39 +183,36 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
 
     @staticmethod
-    def get_place_names():
+    def get_place_w_names():
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+            Place list with upper and lower places in herarchy
 
             Esim.
-╒═══════╤════════════╤══════════════════════════════╤═════════════════════════╤═══════════════════════╤═══════════════════════╕
-│"id"   │"type"      │"name"                        │"coord"                  │"upper"                │"lower"                │
-╞═══════╪════════════╪══════════════════════════════╪═════════════════════════╪═══════════════════════╪═══════════════════════╡
-│"28427"│"Building"  │[["Ahlnäs",""]]               │""                       │[["28419","Farm",      │[[null,null,null,null]]│
-│       │            │                              │                         │"Labby 6 Smeds",""]]   │                       │
-├───────┼────────────┼──────────────────────────────┼─────────────────────────┼───────────────────────┼───────────────────────┤
-│"28795"│"Hautausmaa"│[["Ahveniston hautausmaa",""]]│"[24.4209, 60.9895]"     │[[null,null,null,null]]│[[null,null,null,null]]│
-├───────┼────────────┼──────────────────────────────┼─────────────────────────┼───────────────────────┼───────────────────────┤
-│"28118"│"Farm"      │[["Ainola",""]]               │"25.0873870, 60.453655]" │[[null,null,null,null]]│[[null,null,null,null]]│
-├───────┼────────────┼──────────────────────────────┼─────────────────────────┼───────────────────────┼───────────────────────┤
-│"28865"│"City"      │[["Akaa",""],["Ackas","sv"]]  │"23.9481353, 61.1881064]"│[[null,null,null,null]]│[[null,null,null,null]]│
-├───────┼────────────┼──────────────────────────────┼─────────────────────────┼───────────────────────┼───────────────────────┤
-│"28354"│"Building"  │[["Alnäs",""]]                │""                       │[["28325","Farm","Inger│[[null,null,null,null]]│
-│       │            │                              │                         │mansby 4 Sjökulla",""],│                       │
-│       │            │                              │                         │["28325","Farm", "Lappt│                       │
-│       │            │                              │                         │räsk Ladugård",""]]    │                       │
-└───────┴────────────┴──────────────────────────────┴─────────────────────────┴───────────────────────┴───────────────────────┘
+╒═════╤══════════╤═══════════════════╤═══════╤═══════════════════╤═══════════════════╕
+│"id" │"type"    │"name"             │"coord"│"upper"            │"lower"            │
+╞═════╪══════════╪═══════════════════╪═══════╪═══════════════════╪═══════════════════╡
+│91225│"Tontti"  │[["1. Kortteli Nro │null   │[[78239,"City","Bor│[[null,null,null,nu│
+│     │          │8",""]]            │       │gå","sv"],[78239,"C│ll]]               │
+│     │          │                   │       │ity","Porvoo",""]] │                   │
+├─────┼──────────┼───────────────────┼───────┼───────────────────┼───────────────────┤
+│78068│"Tontti"  │[["2. Kortteli 2. T│null   │[[null,null,null,nu│[[null,null,null,nu│
+│     │          │ontti",""]]        │       │ll]]               │ll]]               │
+├─────┼──────────┼───────────────────┼───────┼───────────────────┼───────────────────┤
+│92425│"Kortteli"│[["2. quarter",""]]│[60.122│[[78213,"City","Fre│[[92510,"Tontti","T│
+│     │          │                   │7857,24│drikshamn","sv"],[7│ontti 39",""]]     │
+│     │          │                   │.440669│8213,"City","Hamina│                   │
+│     │          │                   │4]     │",""]]             │                   │
+├─────┼──────────┼───────────────────┼───────┼───────────────────┼───────────────────┤
+│92457│"Tontti"  │[["3. Kortteli 3. t│null   │[[92339,"City","Lov│[[null,null,null,nu│
+│     │          │ontti",""]]        │       │iisa",""],[92339,"C│ll]]               │
+│     │          │                   │       │ity","Degerby",""]]│                   │
+├─────┼──────────┼───────────────────┼───────┼───────────────────┼───────────────────┤
+│92455│"Tontti"  │[["3. Kortteli 8. t│null   │[[92339,"City","Lov│[[null,null,null,nu│
+│     │          │ontti",""]]        │       │iisa",""],[92339,"C│ll]]               │
+│     │          │                   │       │ity","Degerby",""]]│                   │
+└─────┴──────────┴───────────────────┴───────┴───────────────────┴───────────────────┘
 """
 
-        query = """
-MATCH (a:Place) -[:NAME]-> (pn:Place_name)
-OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.type AS type,
-    COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
-ORDER BY name[0][0]
-"""
 
         def combine_places(field):
             """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
@@ -218,7 +233,7 @@ ORDER BY name[0][0]
             return list(namedict.values())
 
         ret = []
-        result = shareds.driver.session().run(query)
+        result = shareds.driver.session().run(Cypher_place.get_name_hierarcy)
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
@@ -320,7 +335,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                     # josta tehdään ["Svartholm (sv)","Svartholma"]
                     names = Place.namelist_w_lang(record['names'])
 
-                p = Place(locid=node, ptype=n.data['type'], \
+                p = Place(uniq_id=node, ptype=n.data['type'], \
                           pname=names, level=t.tree.depth(n))
                 print ("# {}".format(p))
                 p.parent = n.bpointer

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-07-04 17:11+0300\n"
+"POT-Creation-Date: 2018-09-15 20:16+0300\n"
 "PO-Revision-Date: 2018-07-04 17:11+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: sv\n"
@@ -18,127 +18,599 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
+#: setups.py:189
+msgid "Käyttäjänimi"
+msgstr ""
 
-#: setups.py:125
-msgid "Kieli"
-msgstr "Språk"
-
-#: setups.py:125 templates/gedcom_transform_params.html:23
+#: setups.py:189
 msgid "Nimi"
 msgstr "Namn"
 
-#: setups.py:125
+#: setups.py:189
 msgid "Kieli"
 msgstr "Språk"
 
-#: stk_run.py:732
-msgid "Temp"
-msgstr "Temp"
+#: bp/gedcom/handlers.py:108
+msgid "Gedcoms"
+msgstr ""
 
-#: stk_run.py:770
-msgid "Gedcomit"
-msgstr "Gedcom filer"
+#: bp/gedcom/handlers.py:159
+msgid "Choose a GEDCOM file to upload"
+msgstr ""
 
-#: stk_run.py:796 stk_run.py:802
-msgid "Valitse ladattava gedcom-tiedosto"
-msgstr "Välj en gedcom fil att överföras"
+#: bp/gedcom/handlers.py:165
+msgid "Choose a  GEDCOM file to upload"
+msgstr ""
 
-#: templates/gedcom_info.html:72
+#: bp/gedcom/handlers.py:193
+msgid "That GEDCOM file does not exist on the server"
+msgstr ""
+
+#: bp/gedcom/handlers.py:243
+msgid "Deleted:"
+msgstr ""
+
+#: bp/gedcom/handlers.py:248 bp/gedcom/transforms/sukujutut.py:34
+#: bp/gedcom/transforms/sukujutut.py:41
+msgid "Replaced:"
+msgstr ""
+
+#: bp/gedcom/handlers.py:251 bp/gedcom/transforms/sukujutut.py:36
+#: bp/gedcom/transforms/sukujutut.py:43
+msgid "With:"
+msgstr ""
+
+#: bp/gedcom/handlers.py:272
+msgid "Transform '{}' started {}"
+msgstr ""
+
+#: bp/gedcom/handlers.py:282
+msgid "Name of the input GEDCOM file"
+msgstr ""
+
+#: bp/gedcom/handlers.py:283
+msgid "Name of the log file"
+msgstr ""
+
+#: bp/gedcom/handlers.py:286
+msgid "Display changed rows"
+msgstr ""
+
+#: bp/gedcom/handlers.py:288
+msgid "Do not produce an output file"
+msgstr ""
+
+#: bp/gedcom/handlers.py:290
+msgid "Do not produce a log in the output file"
+msgstr ""
+
+#: bp/gedcom/handlers.py:292
+msgid "Encoding of the input GEDCOM"
+msgstr ""
+
+#: bp/gedcom/handlers.py:320
+msgid "Transform '{}' ended {}"
+msgstr ""
+
+#: bp/gedcom/handlers.py:376
+#: bp/gedcom/templates/gedcom_transform_params.html:11
+msgid "Errors:"
+msgstr ""
+
+#: bp/gedcom/handlers.py:443
+msgid "Unsupported type: "
+msgstr ""
+
+#: bp/gedcom/transformer.py:32
+msgid "Invalid line: "
+msgstr ""
+
+#: bp/gedcom/transformer.py:80
+msgid "Invalid GEDCOM at line: {}"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:65
 msgid "Toiminto vasta suunnitteilla"
-msgstr "Funktion planeras tillsvidare"
+msgstr ""
 
-#: templates/gedcom_info.html:73
+#: bp/gedcom/templates/gedcom_info.html:66
 msgid "Oletko varma?"
-msgstr "Vill Du såkert ta bort filen?"
+msgstr ""
 
-#: templates/gedcom_info.html:79
+#: bp/gedcom/templates/gedcom_info.html:82
+msgid "Palautustoimintoa ei vielä ole toteutettu"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:99
+#: bp/gedcom/templates/gedcom_info.html:100
+msgid "Revert to"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:111
+#: bp/gedcom/templates/gedcom_info.html:112
+msgid "renamed to"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:121
+msgid "Gedcom transformations"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:126
 msgid "GEDCOM"
-msgstr "GEDCOM"
+msgstr ""
 
-#: templates/gedcom_info.html:82
-msgid "Ladattu"
-msgstr "Mottagen"
+#: bp/gedcom/templates/gedcom_info.html:127
+#: bp/gedcom/templates/gedcom_info.html:179
+#: bp/gedcom/templates/gedcom_list.html:38
+msgid "Description"
+msgstr ""
 
-#: templates/gedcom_info.html:83
-msgid "Henkilöiden lukumäärä"
-msgstr "Antal av individer"
+#: bp/gedcom/templates/gedcom_info.html:130
+msgid "Update"
+msgstr ""
 
-#: templates/gedcom_info.html:84
-msgid "Sallin neuvontapalvelun katselumahdollisuuden"
-msgstr "Stödfunktionärer får titta på mitt data"
+#: bp/gedcom/templates/gedcom_info.html:134
+msgid "Upload time"
+msgstr ""
 
-#: templates/gedcom_info.html:89 templates/gedcom_info.html:98
-msgid "Muunnokset"
-msgstr "transformationer"
+#: bp/gedcom/templates/gedcom_info.html:136
+msgid "Number of individuals"
+msgstr ""
 
-#: templates/gedcom_info.html:90 templates/gedcom_info.html:106
-msgid "Versiot"
-msgstr "Versioner"
+#: bp/gedcom/templates/gedcom_info.html:138
+msgid "Allow help desk to view data"
+msgstr ""
 
-#: templates/gedcom_info.html:93
-msgid "Poista GEDCOM"
-msgstr "Ta bort GEDCOM"
+#: bp/gedcom/templates/gedcom_info.html:153
+msgid "Options"
+msgstr ""
 
-#: templates/gedcom_info.html:95 templates/gedcom_list.html:22
-msgid "Paluu"
-msgstr "Retur"
+#: bp/gedcom/templates/gedcom_info.html:156
+msgid "Fetch this GEDCOM"
+msgstr ""
 
-#: templates/gedcom_list.html:8
-msgid "Ladatut gedcomit:"
-msgstr "Mottagna gedcom filer:"
+#: bp/gedcom/templates/gedcom_info.html:158
+msgid "Remove this GEDCOM"
+msgstr ""
 
-#: templates/gedcom_list.html:14
-msgid "kpl"
-msgstr "st."
+#: bp/gedcom/templates/gedcom_info.html:160
+msgid "Choose a transformation"
+msgstr ""
 
-#: templates/gedcom_list.html:16
-msgid "Lataa uusi GEDCOM"
-msgstr "Överför ny GEDCOM"
+#: bp/gedcom/templates/gedcom_info.html:161
+msgid "Display versions"
+msgstr ""
 
-#: templates/gedcom_list.html:19
-msgid "Lataa"
-msgstr "Överför"
+#: bp/gedcom/templates/gedcom_info.html:163
+msgid "Switch to another GEDCOM"
+msgstr ""
 
-#: templates/gedcom_transform_params.html:18
-msgid "Muunnosparametrit"
-msgstr "Argumenter för transformation"
+#: bp/gedcom/templates/gedcom_info.html:172
+msgid "Transformations"
+msgstr ""
 
-#: templates/gedcom_transform_params.html:23
-msgid "Oletusarvo"
-msgstr "Förvalt värde"
+#: bp/gedcom/templates/gedcom_info.html:189
+msgid "Versions"
+msgstr ""
 
-#: templates/gedcom_transform_params.html:23
-msgid "Oletusarvo"
-msgstr "Förvalt värde"
+#: bp/gedcom/templates/gedcom_info.html:192
+msgid "Compare versions"
+msgstr ""
 
-#: templates/gedcom_transform_params.html:23
-msgid "Oletusarvo"
-msgstr "Förvalt värde"
+#: bp/gedcom/templates/gedcom_info.html:198
+msgid "GEDCOM comparison"
+msgstr ""
 
-#: templates/gedcom_transform_params.html:30
+#: bp/gedcom/templates/gedcom_info.html:210
+msgid "Perform transformation"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:218
+msgid "Transformation results"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:220
+msgid "Old version is saved as"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:220
+msgid "Revert to old version"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_list.html:10
+msgid "GEDCOM Management"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_list.html:14
+msgid "Uploaded GEDCOMs"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_list.html:25
+msgid "files"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_list.html:32
+msgid "Upload a new GEDCOM file"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_list.html:41
+msgid "Upload"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_list.html:44
+msgid "Return to main page"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_transform_params.html:31
+msgid "transformation options"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_transform_params.html:36
+msgid "Setting"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_transform_params.html:37
+msgid "Value"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_transform_params.html:55
 msgid "Lisää"
-msgstr "Foga in"
+msgstr ""
 
-#: templates/gedcom_transform_params.html:37
-msgid "Muunna"
-msgstr "Transformera"
+#: bp/gedcom/templates/gedcom_transform_params.html:57
+msgid "Oletusarvo"
+msgstr ""
 
-#: templates/gedcom_transform_params.html:39
-msgid "Muunnoksen tulostus"
-msgstr "utskrift av transformation"
+#: bp/gedcom/transforms/marriages2.py:37
+msgid "Avio-PLAC:n hajoittaminen"
+msgstr ""
 
-#: templates/security/forgot_password.html:11
+#: bp/gedcom/transforms/places2.py:12
+msgid "Tries to recognize place names and order them correctly"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:46
+msgid "Reverse the order of places"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:48
+msgid "Replace spaces with commas"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:50
+msgid "Ignore lowercase words"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:52
+msgid "Ignore numeric words"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:54
+msgid "Ignore words shorter that minlen"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:56
+msgid "Try to discover correct order..."
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:58
+msgid "Try to combine certain names..."
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:60
+msgid "Only process places containing any match string"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:62
+msgid "Display unchanged places"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:64
+msgid "Display ignored places"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:66
+msgid "Replace changed PLAC tags with PLAC-X"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:88
+msgid "Not changed: '{}'"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:90
+msgid "Internal error"
+msgstr ""
+
+#: bp/gedcom/transforms/places2.py:218
+msgid "ignored: "
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:16
+msgid "Sukujutut transformations"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:199
+msgid "Add a CONT line if there is no level number"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:201
+msgid "Insert s _DUMMY tag if a tag is missing"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:203
+msgid "Remove invalid DATE tags"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:205
+msgid "Remove empty NOTE tags"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:207
+msgid "Remove DATE AVOLIITTO tags"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:209
+msgid "Remove invalid DATEs for DIV tags"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:211
+msgid "Remove empty GIVN and SURN tags"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:213
+msgid "Remove duplicate SOUR lines under NAME"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:215
+msgid "Remove REFN tags"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:217
+msgid "Remove STAT tags"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:219
+msgid "Move level 3 NOTEs to level 2 to save them"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:221
+msgid "Insert ADR1 tags under ADDR"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:223
+msgid "Change PLAC tags to NOTEs under certain events"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:225
+msgid "Change event types \"Kaksonen\" and \"Kolmonen\" to NOTEs"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:227
+msgid "Remove trailing and multiple consecutive spaces in person and place names"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:229
+msgid "Change EMIG to RESI"
+msgstr ""
+
+#: bp/gramps/routes.py:172
+msgid "ERROR"
+msgstr ""
+
+#: bp/gramps/routes.py:174
+msgid "LOADING"
+msgstr ""
+
+#: bp/gramps/routes.py:177 bp/gramps/routes.py:185
+msgid "DONE"
+msgstr ""
+
+#: bp/gramps/routes.py:180
+msgid "FAILED"
+msgstr ""
+
+#: bp/gramps/templates/gramps/result.html:3
+msgid "Gramps to Neo5j log"
+msgstr ""
+
+#: bp/gramps/templates/gramps/result.html:6
+msgid "Log of storing Gramps XML into database"
+msgstr ""
+
+#: bp/gramps/templates/gramps/result.html:17
+msgid "Operation"
+msgstr ""
+
+#: bp/gramps/templates/gramps/result.html:18
+msgid "Count"
+msgstr ""
+
+#: bp/gramps/templates/gramps/result.html:19
+msgid "Time / sec"
+msgstr ""
+
+#: bp/gramps/templates/gramps/result.html:27
+#: bp/gramps/templates/gramps/uploads.html:36
+msgid "Return"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:3
+#: bp/gramps/templates/gramps/uploads.html:7
+msgid "Uploads"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:19
+msgid "Start time"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:20
+msgid "XML file"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:21
+msgid "Status"
+msgstr ""
+
+#: bp/stk_security/templates/security/forgot_password.html:11
 msgid "Lähetä salasanan elvyttämislinkki"
-msgstr "Skicka länk för uppdatering av lösenord"
+msgstr ""
 
-#: templates/security/register_email.html:9
-msgid "Rekisteröi uusi Suomitietokannan käyttäjäehdokas"
-msgstr "Registrera ny kandidat användare av Suomi-tietokanta"
-
-#: templates/security/register_user.html:15
+#: bp/stk_security/templates/security/register_user.html:15
 msgid "Rekisteröidy Suomitietokannan käyttäjäksi"
-msgstr "Registrera ny användare av Suomi-tietokanta"
+msgstr ""
 
-#: templates/security/send_confirmation.html:11
+#: bp/stk_security/templates/security/send_confirmation.html:11
 msgid "Lähetä vahvistamislinkki"
-msgstr "Skicka länk av bekräftelse"
+msgstr ""
+
+#: templates/mainindex.html:41
+msgid "List uploads"
+msgstr ""
+
+#~ msgid "Temp"
+#~ msgstr "Temp"
+
+#~ msgid "Toiminto vasta suunnitteilla"
+#~ msgstr "Funktion planeras tillsvidare"
+
+#~ msgid "Oletko varma?"
+#~ msgstr "Vill Du såkert ta bort filen?"
+
+#~ msgid "GEDCOM"
+#~ msgstr "GEDCOM"
+
+#~ msgid "Ladattu"
+#~ msgstr ""
+
+#~ msgid "Henkilöiden lukumäärä"
+#~ msgstr ""
+
+#~ msgid "Sallin neuvontapalvelun katselumahdollisuuden"
+#~ msgstr ""
+
+#~ msgid "Muunnokset"
+#~ msgstr ""
+
+#~ msgid "Versiot"
+#~ msgstr ""
+
+#~ msgid "Poista GEDCOM"
+#~ msgstr "Ta bort GEDCOM"
+
+#~ msgid "Paluu"
+#~ msgstr "Retur"
+
+#~ msgid "Ladatut gedcomit:"
+#~ msgstr "Mottagna gedcom filer:"
+
+#~ msgid "kpl"
+#~ msgstr ""
+
+#~ msgid "Lataa uusi GEDCOM"
+#~ msgstr "Överför ny GEDCOM"
+
+#~ msgid "Lataa"
+#~ msgstr ""
+
+#~ msgid "Muunnosparametrit"
+#~ msgstr "Argumenter för transformation"
+
+#~ msgid "Oletusarvo"
+#~ msgstr "Förvalt värde"
+
+#~ msgid "Lisää"
+#~ msgstr "Foga in"
+
+#~ msgid "Muunna"
+#~ msgstr ""
+
+#~ msgid "Muunnoksen tulostus"
+#~ msgstr "utskrift av transformation"
+
+#~ msgid "Lähetä salasanan elvyttämislinkki"
+#~ msgstr "Skicka länk för uppdatering av lösenord"
+
+#~ msgid "Rekisteröi uusi Suomitietokannan käyttäjäehdokas"
+#~ msgstr "Registrera ny kandidat användare av Suomi-tietokanta"
+
+#~ msgid "Rekisteröidy Suomitietokannan käyttäjäksi"
+#~ msgstr "Registrera ny användare av Suomi-tietokanta"
+
+#~ msgid "Lähetä vahvistamislinkki"
+#~ msgstr "Skicka länk av bekräftelse"
+
+#~ msgid "Gedcomit"
+#~ msgstr "Gedcom filer"
+
+#~ msgid "Valitse ladattava gedcom-tiedosto"
+#~ msgstr "Välj en gedcom fil att överföras"
+
+#~ msgid "Tiedostoa ei ole"
+#~ msgstr ""
+
+#~ msgid "Choose e GEDCOM file to upload"
+#~ msgstr ""
+
+#~ msgid "------ Transform '{}'  started {} ------"
+#~ msgstr ""
+
+#~ msgid "------ Transform '{}'  started  {} ------"
+#~ msgstr ""
+
+#~ msgid "------ Transform '{}'  ended    {} ------"
+#~ msgstr ""
+
+#~ msgid "Palauta"
+#~ msgstr ""
+
+#~ msgid "Kuvaus"
+#~ msgstr ""
+
+#~ msgid "Päivitä"
+#~ msgstr ""
+
+#~ msgid "Hae tämä tiedosto"
+#~ msgstr ""
+
+#~ msgid "Poista tämä tiedosto"
+#~ msgstr ""
+
+#~ msgid "Valitse muunnos"
+#~ msgstr ""
+
+#~ msgid "Näytä versiot"
+#~ msgstr ""
+
+#~ msgid "Vaihda toiseen aineistoon"
+#~ msgstr ""
+
+#~ msgid "Vertaa versioita"
+#~ msgstr ""
+
+#~ msgid "GEDCOM-vertailu"
+#~ msgstr ""
+
+#~ msgid "Tulokset"
+#~ msgstr ""
+
+#~ msgid "Vanha versio talletettu nimelle"
+#~ msgstr ""
+
+#~ msgid "Ladatut gedcomit"
+#~ msgstr ""
+
+#~ msgid "Lataa uusi Gedcom-tiedosto"
+#~ msgstr ""
+
+#~ msgid "Paluu alkusivulle"
+#~ msgstr ""
+
+#~ msgid "muunnosparametrit"
+#~ msgstr ""
+
+#~ msgid "Asetus"
+#~ msgstr ""
+
+#~ msgid "Arvo"
+#~ msgstr ""
+

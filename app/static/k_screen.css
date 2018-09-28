@@ -106,7 +106,7 @@ img#logo {
 .id { color: sienna; text-align: right; }
 .idno { color: gray; text-size: 50%; }
 .inlink { color: #000066; background: LemonChiffon; }
-.outlink { text-decoration: underline; }
+.outlink { text-decoration: underline; color:gray}
 .refname { color:gray; text-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
 .note  { color: #555; font-size: 80%; }
@@ -120,6 +120,19 @@ td.numbers {
 	text-transform: uppercase;
 	font-size: 84%;
 /* 	color: darkslategray; */
+}
+
+/* Styles with icon  */
+
+.icon::before {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+.outlink::before {
+    font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f35d";
 }
 
 /* General Text
@@ -480,6 +493,16 @@ table.infolist.eventlist tbody tr:nth-child(even)
 div#SourceDetail {
     margin: 0 auto;
 }
+
+/*    Citations
+------------------------------------------------------ */
+td.CitationId { 
+	width: 4em;
+	padding-top: 5pt; 
+    color: gray;
+    font-size: 75%;
+}
+td.Citation { padding:4px; }
 
 /* Contact
 ----------------------------------------------------- */

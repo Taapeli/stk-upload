@@ -66,7 +66,8 @@ class User:
             
         
     def get_ids_and_refnames_of_people_of_user(self):
-        """ Etsi kaikki käyttäjän henkilöt"""
+        """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+            Etsi kaikki käyttäjän henkilöt"""
         
         query = """
 MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 
@@ -77,7 +78,8 @@ RETURN ID(p) AS id, n.refname AS refname
         
         
     def get_refnames_of_people_of_user(self):
-        """ Etsi kaikki käyttäjän henkilöt"""
+        """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+            Etsi kaikki käyttäjän henkilöt"""
         
         query = """
 MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name) 

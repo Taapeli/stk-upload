@@ -10,14 +10,22 @@
 
 {{ macro.menu(5) }}
     <div class="content" id="IndividualDetail">
-	    <h3 style="position:sticky; top:0;">{{stitle}}</h3>
-	    <p id="description">Tähän lähteesen liitetyt viittaukset, tapahtumat ja henkilöt</p>
-	        <div class="subsection" id="events">
-	            <h4>Tapahtumat</h4>
-	            <ol>
-			        {% for c in events|sort(attribute='page') %}
+	    <h3 style="position:sticky; top:0;" title="Lähde">{{stitle}}</h3>
+	        <div class="subsection" id="citations">
+	            <h4>Lähdeviiteet ja tapahtumat</h4>
+	            <table class="infolist eventlist" width="100%">
+	                <!-- thead>
+	                    <tr>
+	                        <th class="ColumnId"></th>
+	                        <th class="ColumnEvent">Lähde ja viittaukset</th>
+	                    </tr>
+	                </thead -->
+	                <tbody>
 
-	        		<li title="{{c.confidence|transl("conf")}} luotettavuus ({{c.confidence}})"
+			        {% for c in citations|sort(attribute='page') %}
+	        		<tr>
+	        		    <td class="CitationId"><span title="sitaatti {{c.uniq_id}}">{{c.id}}</span> </td>
+	        		    <td class="Citation"><div title="{{c.confidence|transl("conf")}} luotettavuus ({{c.confidence}})"
                         {% if c.confidence and c.confidence < "2" %}
                         style="color:red"{% endif %}>
 	   					Sivu {{c.page}}
@@ -31,25 +39,31 @@
                             {% elif conf == 4 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i>
                             {% endif %}
                         {% endif %}
-                        </li>
+                        <!-- /li -->
 
 	               		<ol type="a">
-	               		{% for event in c.events|sort(attribute='date') %}
-		               		{% for name in event.names %}
-               			    <li>Henkilön
-                   			<a href="/scene/person={{name.uniq_id}}" class="id"
-	                           title="katso henkilön {{name.uniq_id}} tiedot">
-	                               {{name.firstname}} <i>{{name.suffix}}</i> <b>{{name.surname}}</b></a>
-	                        {{event.type|transl('evt')}} {{event.edates}}
+	               		{% for cite in c.citators|sort(attribute='date') %}
+		               		<li><!-- {# if cite.label == 'Person' #}
+                            <a href="/scene/person={{cite.uniq_id}}" class="id"
+                               title="katso henkilön {{cite.id}} tiedot">
+                                   {{cite.clearname}}</a>
+	                        {# elif cite.label == 'Family Event' #}Perheenjäsenen
+                                <em>{{cite.clearname}}</em> {{cite.eventtype|transl('evt')}} 
+                                {# if cite.edates #}{{cite.edates}}{# endif #}
+	                        {# else #} -->Henkilön
+                            <a href="/scene/person={{cite.uniq_id}}" class="id"
+                               title="katso henkilön {{cite.id}} tiedot">
+                                   {{cite.clearname}}</a>
+	                           {{cite.eventtype|transl('evt')}} 
+	                           {% if cite.edates %}{{cite.edates}}{% endif %}
+	                        {# endif #}
                			    </li>
-	                    	{% endfor %}
 	                    {% endfor %}
 	                    </ol>
-			        {% endfor %}
-	         		</li>
-	            </ol>
+	         		</div></td></tr>
+                    {% endfor %}
+                    </tbody></table>
 	        </div>
 	    </div>
-	</div>
 {% endblock %}
 

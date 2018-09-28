@@ -4,7 +4,9 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" 
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
 <h2>Paikan tapahtumat</h2>
 {{ macro.menu(4) }}
@@ -36,9 +38,9 @@
         <div>
             <ul>{% for p in locations %}
                 <li style="margin-left: {{p.level * 2}}em;">
-                {% if p.id == locid|int %}<span class="id">{{p.id}}</span>
+                {% if p.uniq_id == locid|int %}<span class="id">{{p.uniq_id}}</span>
                     <b>{{p.pname|join(' • ')}}</b>
-                {% else %}<a href="/scene/location={{p.id}}"><span class="id">{{p.id}}</span></a>
+                {% else %}<a href="/scene/location={{p.uniq_id}}"><span class="id">{{p.uniq_id}}</span></a>
                     {{p.pname|join(' • ')}}
                 {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
             {% endfor %}</ul>

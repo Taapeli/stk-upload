@@ -3,17 +3,24 @@
 Restores marked tags: <tag>-X -> <tag>
 """
 
-_VERSION = "1.0"
-#from transforms.model.gedcom_line import GedcomLine
+version = "2.0"
+#doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
+
+from flask_babelex import _
+docline = _("Restores marked tags: <tag>-X -> <tag>")
+
+from .. import transformer
 
 def add_args(parser):
     pass
 
-def initialize(run_args):
-    pass
+def initialize(options):
+    return Unmark()
 
-def phase3(run_args, gedline, f):
-    if gedline.tag.endswith("-X"):
-        gedline.tag = gedline.tag[:-2]
-#       line = "{} {} {}".format(gedline.level, gedline.tag, gedline.value)
-    f.emit(gedline.get_line())
+class Unmark(transformer.Transformation):
+    def transform(self,item,options):
+        # phase 1
+        if item.tag.endswith("-X"):
+            item.tag = item.tag[0:-2]
+            return item
+        return True

@@ -32,24 +32,22 @@ class Cypher_person():
     '''
 
     _get_events_tail = """
- OPTIONAL MATCH (person) -[:EVENT]-> (event:Event)
+ OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:EVENT]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
 RETURN ID(person) AS id, person.confidence AS confidence,
     person.est_birth AS est_birth, person.est_death AS est_death,
     name.firstname AS firstname, name.surname AS surname,
-    name.suffix AS suffix,
+    name.suffix AS suffix, name.type as ntype,
     COLLECT(DISTINCT refn.name) AS refnames,
-    COLLECT(DISTINCT [ID(event), event.type,
-        event.datetype, event.date1, event.date2, place.pname]) AS events"""
+    COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
+        event.date1, event.date2, place.pname, event.role]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
     ORDER BY TOUPPER(name.surname), name.firstname"""
     _get_events_firstname = """, LEFT(name.firstname,1) as initial 
     ORDER BY TOUPPER(name.firstname), name.surname, name.suffix"""
     _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
     ORDER BY TOUPPER(name.suffix), name.surname, name.firstname"""
-#     COLLECT(DISTINCT [ID(event), event.type, event.date, event.datetype,
-#         event.daterange_start, event.daterange_stop, place.pname]) AS events
 
     get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
         + _get_events_tail + _get_events_surname
@@ -65,7 +63,7 @@ MATCH (person:Person) -[:NAME]-> (name:Name)
 WHERE ID(person) = $id""" + _get_events_tail
 
     get_events_by_refname = """
-MATCH (r:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:Name) 
+MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:Name) 
 """ + _get_events_tail + _get_events_surname
 
     # With attr={'use':rule, 'name':name}
@@ -102,6 +100,27 @@ RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
     p.gender AS sex"""
 
 
+class Cypher_family():
+    '''
+    Cypher clases for creating and accessing Families
+    '''
+
+    get_members = '''
+match (x) <-[r0]- (f:Family) where id(x) = $pid
+with x, r0, f
+match (f) -[r:FATHER|MOTHER|CHILD]-> (p:Person)
+    where id(x) <> id(p)
+with x, r0, f, r, p
+match (p) -[rn:NAME]-> (n:Name)
+return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
+    collect([id(p), type(r), p]) as members,
+    collect([id(p), n, rn]) as names'''
+
+    get_wedding_couple_names = """
+match (e:Event) <-- (:Family) -[r:FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)
+    where ID(e)=$eid
+return type(r) as frole, id(p) as pid, collect(n) as names"""
+
 class Cypher_place():
     '''
     Cypher clases for creating and accessing Places
@@ -116,6 +135,16 @@ RETURN id(p) AS uid, r.role AS role,
   e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
 ORDER BY edates[1]"""
 
+    get_name_hierarcy = """
+MATCH (a:Place) -[:NAME]-> (pn:Place_name)
+OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
+OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
+RETURN ID(a) AS id, a.type AS type,
+    COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
+    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
+    COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
+ORDER BY name[0][0]
+"""
 
 class Cypher_refname():
     '''
@@ -161,16 +190,37 @@ ORDER BY n.name"""
 
     set_constraint = "CREATE CONSTRAINT ON (r:Refname) ASSERT r.name IS UNIQUE"
 
-# --- For Source and Citation classes -----------------------------------------
 
 # class Cypher_citation():
 #     '''
 #     Cypher clases for creating and accessing Citations
 #     '''
-# class Cypher_source():
-#     '''
-#     Cypher clases for creating and accessing Sources
-#     '''
+
+class Cypher_source():
+    '''
+    Cypher clases for creating and accessing Sources
+    '''
+    source_list = """
+MATCH (s:Source)
+OPTIONAL MATCH (s)<-[:SOURCE]-(c:Citation)
+OPTIONAL MATCH (c)<-[:CITATION]-(e)
+OPTIONAL MATCH (s)-[r:REPOSITORY]->(a:Repository)
+RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle, 
+       a.rname AS repository, r.medium AS medium,
+       COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
+ORDER BY toUpper(stitle)
+"""
+
+    get_citators_of_source = """
+match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
+with c
+    match (c) <-[:CITATION]- (x)
+    optional match (x) <-[re:EVENT]- (p)
+    return id(c) as c_id, c, re.role as role,
+           id(x) as x_id, labels(x)[0] as label, x, 
+           coalesce(id(p), id(x))  as p_id
+    order by c_id, p_id"""
+
 
 class Cypher_repository():
     '''
@@ -189,7 +239,7 @@ return id(r) AS uniq_id,
     r.handle as handle,
     r.id as id,
     collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
-    collect([w.href, wr.type, wr.description, wr.priv]) as webref
+    collect(w) as webref
 order by r.rname"""
 
     get_w_sources_all = _get_all + _get_tail 
@@ -198,15 +248,15 @@ order by r.rname"""
     get_w_urls = """
 match (repo:Repository) where ID(repo) = $rid
     optional match (repo) -[wr:WEBURL]-> (w:Weburl)
-return repo, collect([w.href, wr.type, wr.description, wr.priv]) as webref"""
+return repo, collect(w) as webref"""
 
     get_one = """
 match (r:Repository) where ID(r) == $rid
-return ID(n) AS uniq_id, r"""
+return r"""
 
     get_all = """
 match (r:Repository)
-return ID(n) AS uniq_id, r order by r.type"""
+return r order by r.type"""
 
 class Cypher_weburl():
     '''

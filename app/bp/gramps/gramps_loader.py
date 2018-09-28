@@ -14,7 +14,9 @@ from .models.event_gramps import Event_gramps
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import Person, Name, Weburl
+from models.gen.person_combo import Person_combo
+from models.gen.person_name import Name
+from models.gen.weburl import Weburl
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.citation import Citation
@@ -254,7 +256,7 @@ class DOM_handler():
             if len(citation.getElementsByTagName('sourceref') ) == 1:
                 citation_sourceref = citation.getElementsByTagName('sourceref')[0]
                 if citation_sourceref.hasAttribute("hlink"):
-                    c.sourceref_hlink = citation_sourceref.getAttribute("hlink")
+                    c.source_handle = citation_sourceref.getAttribute("hlink")
             elif len(citation.getElementsByTagName('sourceref') ) > 1:
                 self.log(Log("More than one sourceref tag in a citation",
                                     level="WARNING",count= c.id))
@@ -510,7 +512,7 @@ class DOM_handler():
         # Print detail of each person
         for person in people:
 
-            p = Person()
+            p = Person_combo()
 
             if person.hasAttribute("handle"):
                 p.handle = person.getAttribute("handle")
