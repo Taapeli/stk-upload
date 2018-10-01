@@ -34,6 +34,7 @@ class Note:
         self.priv = 0
 
 
+
     @staticmethod
     def from_node(node):
         '''

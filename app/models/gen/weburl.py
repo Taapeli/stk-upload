@@ -12,6 +12,8 @@ Created on 3.8.2018
 
 from sys import stderr
 
+from .cypher import Cypher_weburl
+
 class Weburl():
     """ A web reference 
 
