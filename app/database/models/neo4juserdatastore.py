@@ -30,7 +30,7 @@ class Neo4jUserDatastore(UserDatastore):
         self.user_profile_model = user_profile_model
 #        self.allowed_email_model = allowed_email_model        
         self.role_model = role_model
-        self.role_dict = self.get_roles() 
+#       self.role_dict = self.get_roles() 
         
     def _build_user_from_node(self, userNode):
         ''' Returns a list of Role class instances '''
