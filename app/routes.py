@@ -47,7 +47,7 @@ def datatables():
 # Admin start page
 @shareds.app.route('/admin',  methods=['GET', 'POST'])
 @login_required
-@roles_required('admin')
+@roles_accepted('admin', 'master')
 def admin():
     """ Home page for administrator """    
     return render_template('/admin/admin.html')
