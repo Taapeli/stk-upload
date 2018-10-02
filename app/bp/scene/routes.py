@@ -10,9 +10,9 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
 
 from . import bp
-from .models import get_person_for_display, get_person_data_by_id
+from .models import get_person_for_display #, get_person_data_by_id
 from models.datareader import read_persons_with_events
-#from models.datareader import get_person_data_by_id
+from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 #from models.gen.family import Family_for_template
