@@ -10,7 +10,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
 
 from . import bp
-from .models import get_person_for_display #, get_person_data_by_id
+from .models import get_a_person_for_display # get_person_for_display #, get_person_data_by_id
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
@@ -105,22 +105,21 @@ def show_all_persons_list(opt=''):
                            order=order,rule=keys)
 
 
-@bp.route('/scene/person/<string:uid>')
+@bp.route('/scene/person/<int:uid>')
 #     @login_required
-def show_a_person(uid=""):
+def show_a_person(uid):
     """ One Person with connected Events, Families etc
         Korvaamaan metodin show_person_page()
     """
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
 
-    keys = ('uniq_id', uid)
     if current_user.is_authenticated:
         user=current_user.username
     else:
         user=None
     
-    person, sources = get_person_for_display(keys, user)
+    person, sources = get_a_person_for_display(uid, user)
     return render_template("/scene/person_pg.html", 
                            person=person, sources=sources, menuno=1)
 

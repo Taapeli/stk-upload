@@ -18,13 +18,29 @@ from models.gen.note import Note
 from models.gen.media import Media
 
 
-def get_person_for_display(keys, user):
-    """ Get one Person with connected Events, Families etc --- keskeneräinen ---
+def get_a_person_for_display(uniq_id, user):
+    """ Get a Person with all connected nodes --- keskeneräinen ---
 
         @TODO Monet osat on ohjelmoimatta
     """
-    # Get Person objects, whith included Events and Names (Refnames no needed!)
-    persons = read_persons_with_events(keys, user=user)
+    # 1. Read person p and paths for all nodes connected to p
+    paths = Person_combo.get_person_paths(uniq_id)
+    
+    for path in paths:
+        s_node = path['path'].start
+        # <Node id=80307 labels=set() 
+        #    properties={'handle': '_da692a09bac110d27fa326f0a7', 'id': 'I0119', 
+        #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
+        e_node = path['path'].end
+        s_label = s_node.labels.pop()
+        e_label = e_node.labels.pop()
+        print("start ({} id:{}) --> ({} id:{})".\
+              format(s_label, s_node['id'], e_label, e_node['id']))
+        person = None
+
+    return person
+
+    persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
     person = persons[0]
     person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
     person.set_my_places(True)

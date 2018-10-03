@@ -126,6 +126,16 @@ class Person_combo(Person):
         self.est_death = ''
 
 
+    @staticmethod
+    def get_person_paths(uniq_id):
+        ''' Read a person and paths for all connected nodes
+        '''
+        query = """
+match path = (p) -[*]-> (c:Citation) -[:SOURCE]-> (s:Source)
+    where id(p) = $pid 
+return path"""
+        return  shareds.driver.session().run(query, pid=uniq_id)
+
     def get_citation_id(self):
         """ Luetaan henkilön viittauksen id """
 
