@@ -54,6 +54,7 @@ class Citation:
         """ Read 'Person -> Event -> Citation' and 'Person -> Citation' paths
 
             Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
+            ja talleta niihin viittaaja (citator Event tai Person)
             
             Returns list of Citations and list of Source ids
         """
@@ -86,6 +87,19 @@ class Citation:
         
         result = shareds.driver.session().run(Cypher_citation.get_persons_citation_paths, 
                                               pid=uniq_id)
+        # Esimerkki:
+        # ╒══════╤═════════════════════════════════════════════════╤═══════════╕
+        # │"id_p"│"end"                                            │"source_id"│
+        # ╞══════╪═════════════════════════════════════════════════╪═══════════╡
+        # │80307 │[[88523,"E0076"],[90106,"C0046"],[91394,"S0078"]]│91394      │
+        # ├──────┼─────────────────────────────────────────────────┼───────────┤
+        # │80307 │[[90209,"C0038"],[91454,"S0003"]]                │91454      │
+        # ├──────┼─────────────────────────────────────────────────┼───────────┤
+        # │80307 │[[88533,"E0166"],[90343,"C0462"],[91528,"S0257"]]│91528      │
+        # └──────┴─────────────────────────────────────────────────┴───────────┘
+        # -liitä Event "E0076" -> "C0046", "C0046" -> "S0078"
+        # -liitä Person  80307 -> "C0038", "C0038" -> "S0003"
+        # -liitä Event "E0166" -> "C0462", "C0462" ->"S0257"
         citations = []
         source_ids = []
         for record in result:
@@ -250,7 +264,7 @@ class Citation:
 
 class NodeRef():
     ''' Carries data of citating nodes
-            label            str Person or Event
+            label            str (optional) Person or Event
             uniq_id          int Persons uniq_id
             source_id        int The uniq_id of the Source citated
             clearname        str Persons display name
@@ -268,4 +282,4 @@ class NodeRef():
         self.date = ''
 
     def __str__(self):
-        return "{} {} '{}'".format(self.uniq_id, self.eventtype, self.clearname)
+        return "{} {}: {} {} '{}'".format(self.label, self.uniq_id, self.source_id or '-', self.eventtype, self.clearname)

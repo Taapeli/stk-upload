@@ -35,6 +35,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
         and optionally Refnames
 
         NOTE. Actually called only with keys = ('uniq_id', uid)
+              from bp.scene.models
     """
 
     persons = []
