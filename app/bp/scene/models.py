@@ -1,4 +1,6 @@
 '''
+    bp.scene.models – Database operations concerning multiple gen classes
+
 Created on 24.9.2018
 
 @author: jm
@@ -34,9 +36,9 @@ def get_person_for_display(keys, user):
 #     person.get_media()
 #     person.get_refnames()
     for c in person.citations:
-        print ("Sitaatit {} / {}".format(c.uniq_id, c))
+        print ("Sitaatit ({} {})".format(c.uniq_id, c))
         for ci in c.citators:
-            print ("  {} <- {} / {}".format(c, ci.uniq_id, ci))
+            print ("  ({}) <- ({})".format(c, ci))
 #     for e in person.events:
 #         print("Person event {}: {}".format(e.uniq_id, e))
 #         if e.place == None:
@@ -226,7 +228,7 @@ def get_person_data_by_id(uniq_id):
         nodes[e.uniq_id] = e
     for e in family_list:
         nodes[e.uniq_id] = e
-    print ("Unique Nodes: {}".format(nodes))
+    #print ("Unique Nodes: {}".format(nodes))
     result = Person_combo.get_ref_weburls(list(nodes.keys()))
     for wu in result:
         print("({} {}) -[{}]-> ({} ({} {}))".\

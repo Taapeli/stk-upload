@@ -102,6 +102,27 @@ class Person:
         self.est_birth = ''
         self.est_death = ''
 
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Person.
+        
+        Youc can create a Person or Person_node instance. (cls is the class 
+        where we are, either Person or Person_combo)
+        
+        <Node id=80307 labels={'Person'} 
+            properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F', 'change': 1507492602, 
+            'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
+        '''
+        p = cls()
+        p.uniq_id = node.id
+        p.id = node.id
+        p.gender = node['gender']
+        p.handle = node['handle']
+        p.change = node['change']
+        p.confidence = node['confidence']
+        p.priv = node['priv']
+        return p
 
     @staticmethod
     def get_confidence (uniq_id=None):

@@ -33,14 +33,12 @@ class Note:
         self.change = 0
         self.priv = 0
 
-
-
-    @staticmethod
-    def from_node(node):
+    @classmethod
+    def from_node(cls, node):
         '''
         Transforms a db node to an object of type Note.
         '''
-        n = Note()
+        n = cls()
         n.uniq_id = node.id
         n.handle = node['handle']
         n.change = node['change']
@@ -49,7 +47,6 @@ class Note:
         n.type = node['type'] or ''
         n.text = node['text'] or ''
         return n
-
 
     @staticmethod       
     def get_persons_notes (uniq_id):

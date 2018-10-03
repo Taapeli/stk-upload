@@ -32,8 +32,8 @@ class Name:
     def __str__(self):
         return "{}/{}/{}".format(self.firstname, self.surname, self.suffix)
 
-    @staticmethod
-    def from_node(node):
+    @classmethod
+    def from_node(cls, node):
         '''
         Transforms a db node to an object of type Name
         
@@ -41,7 +41,7 @@ class Name:
             properties={'firstname': 'Brita Helena', 'suffix': '', 'alt': '', 
                 'surname': 'Klick', '': 'Birth Name'}>
         '''
-        n = Name()
+        n = cls()
         n.uniq_id = node.id
         n.id = node.id
         n.type = node['type']

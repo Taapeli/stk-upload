@@ -43,8 +43,8 @@ class Source:
         return "{} {}".format(self.id, self.stitle)
 
 
-    @staticmethod
-    def from_node(node):
+    @classmethod
+    def from_node(cls, node):
         '''
         Transforms a db node to an object of type Source.
         
@@ -52,7 +52,7 @@ class Source:
             properties={'handle': '_d9edc4e4a9a6defc258', 'id': 'S0078', 
                 'stitle': 'Kangasala syntyneet 1721-1778', 'change': '1507149115'}>
         '''
-        s = Source()
+        s = cls()   # create a new Source
         s.id = node.id
         s.uniq_id = node['uniq_id']
         s.handle = node['handle']

@@ -68,8 +68,8 @@ class Place:
         return desc
 
 
-    @staticmethod
-    def from_node(node):
+    @classmethod
+    def from_node(cls, node):
         ''' models.gen.place.Place.from_node
         Transforms a db node to an object of type Place.
         
@@ -78,7 +78,7 @@ class Place:
                 'change': 1500899931, 'pname': 'Kangasalan srk', 'type': 'Parish'}>
 
         '''
-        p = Place()
+        p = cls()
         p.uniq_id = node.id
         p.handle = node['handle']
         p.change = node['change']
@@ -553,15 +553,15 @@ class Place_name:
         else:
             return "{}{}".format(self.name, d)
 
-    @staticmethod
-    def from_node(node):
+    @classmethod
+    def from_node(cls, node):
         ''' models.gen.place.Place_name.from_node
         Transforms a db node to an object of type Place_name.
         
         <Node id=78278 labels={'Place_name'} 
             properties={'lang': '', 'name': 'Kangasalan srk'}>
         '''
-        pn = Place_name()
+        pn = cls()  # Place_name()
         pn.uniq_id = node.id
         pn.name = node['name']
         pn.lang = node['lang'] or ''

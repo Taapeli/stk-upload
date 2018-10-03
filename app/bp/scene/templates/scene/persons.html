@@ -24,11 +24,11 @@
       {% if rule[0] == 'all' %}<br>
     &rtrif; Vaihda järjestys: 
         {% if order != 0 %}<a href="/scene/persons/all/" 
-            class="outlink">sukunimen</a> /{% endif %}
+            class="inlink">sukunimen</a> /{% endif %}
         {% if order != 1 %}<a href="/scene/persons/all/fn" 
-            class="outlink">etunimen</a> /{% endif %}
+            class="inlink">etunimen</a> /{% endif %}
         {% if order != 2 %}<a href="/scene/persons/all/pn" 
-            class="outlink">patronyymin tai matronyymiin</a>{% endif %} mukaan.
+            class="inlink">patronyymin tai matronyymiin</a>{% endif %} mukaan.
       {% endif %}
             </p>
     {% else %}{% if persons|count %}

@@ -38,12 +38,12 @@ class Repository:
         self.sources = []   # For creating display sets (Not used??)
         
     
-    @staticmethod
-    def from_node(node):
+    @classmethod
+    def from_node(cls, node):
         '''
         Transforms a db node to Repository object
         '''
-        n = Repository()
+        n = cls()   # Repository
         n.uniq_id = node.id
         n.handle = node['handle']
         n.change = node['change'] or 0

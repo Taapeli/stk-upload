@@ -41,8 +41,8 @@ class Weburl():
         return (self.type, self.description, self.href)
 
 
-    @staticmethod
-    def from_node(node):
+    @classmethod
+    def from_node(cls, node):
         '''
         Transforms a db node to an object of type Weburl.
         
@@ -51,7 +51,7 @@ class Weburl():
             priv:"",
             type:"Web Search"}
         '''
-        n = Weburl()
+        n = cls()
         n.uniq_id = node.id
         n.href = node['href'] or ''
         n.priv = node['priv'] or 0

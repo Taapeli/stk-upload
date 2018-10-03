@@ -72,37 +72,6 @@ class Event_combo(Event):
 #         '''
 #         pass
 
-    @staticmethod
-    def from_node(node):
-        '''
-        Transforms a node from db node to an object of type Event
-        
-        <Node id=88532 labels={'Event'} 
-            properties={'type': 'Birth', 'change': 1500907890, 
-                'handle': '_da692d0fb975c8e8ae9c4986d23', 'attr_value': '', 
-                'id': 'E0161', 'attr_type': '', 'description': ''
-                'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
-        '''
-        e = Event_combo()
-        e.uniq_id = node.id
-        e.id = node['id']
-        e.type = node['type']
-        e.handle = node['handle']
-        e.change = node['change']
-        if "datetype" in node:
-            #TODO: Talletetaanko DateRange -objekti vai vain str?
-            dates = DateRange(node["datetype"], node["date1"], node["date2"])
-            e.dates = str(dates)
-            e.date = dates.estimate()
-        else:
-            e.dates = None
-            e.date = ""
-        e.text = node['description'] or ''
-        e.attr = node['attr'] or dict()
-#         e.attr_type = node['attr_type'] or ''
-#         e.attr_value = node['attr_value'] or ''
-        return e
-
 
     # Entinen get_event_data_by_id()
     def get_event_combo(self):

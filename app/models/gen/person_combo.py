@@ -2,6 +2,9 @@
     Person compound includes operations for accessing
     - Person and her Names
     - related Events and Places
+    
+    Note. Use Person_combo.from_node(node) to create a Person_combo instance
+          ( defined as classmethod Person.from_node() )
 
     class gen.person_combo.Person_combo(Person): 
         - __init__()
@@ -121,26 +124,6 @@ class Person_combo(Person):
         self.confidence = ''
         self.est_birth = ''
         self.est_death = ''
-
-
-    @staticmethod
-    def from_node(node):
-        '''
-        Transforms a db node to an object of type Person
-        
-        <Node id=80307 labels={'Person'} 
-            properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F', 'change': 1507492602, 
-            'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
-        '''
-        p = Person_combo()
-        p.uniq_id = node.id
-        p.id = node.id
-        p.gender = node['gender']
-        p.handle = node['handle']
-        p.change = node['change']
-        p.confidence = node['confidence']
-        p.priv = node['priv']
-        return p
 
 
     def get_citation_id(self):
