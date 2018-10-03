@@ -9,3 +9,4 @@ RemoteSystemsTempFiles/\.project
 .pydevproject 
 /env.sh
 /__pycache__/
+/venv/
