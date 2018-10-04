@@ -30,7 +30,7 @@ class Neo4jUserDatastore(UserDatastore):
         self.user_profile_model = user_profile_model
 #        self.allowed_email_model = allowed_email_model        
         self.role_model = role_model
-        self.role_dict = self.get_roles() 
+#       self.role_dict = self.get_roles() 
         
     def _build_user_from_node(self, userNode):
         ''' Returns a list of Role class instances '''
@@ -379,7 +379,7 @@ class Neo4jUserDatastore(UserDatastore):
                 roles = {}
                 roleNodes = session.read_transaction(self._getRoles) 
 #                print ('get_role ', rid, ' ', roleNode)
-                if roleNodes is not None:
+                if len(roleNodes) > 0:
                     for roleNode in roleNodes:
                         role =  self.role_model(**roleNode.properties)
                         role.id = str(roleNode.id)
@@ -392,10 +392,10 @@ class Neo4jUserDatastore(UserDatastore):
                                 
     def _getRoles (self, tx):
         try:
-            roles = []        
+            roleNodes = []        
             for record in tx.run(Cypher.roles_get):
-                roles.append(record['role'])
-            return roles        
+                roleNodes.append(record['role'])
+            return roleNodes        
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      

@@ -274,14 +274,15 @@ def get_repositories(uniq_id=None):
     │"uniq_id│"rname" │"type"  │"change"│"handle"│"id"   │"sources│"webref"│
     │"       │        │        │        │        │       │"       │        │
     ╞════════╪════════╪════════╪════════╪════════╪═══════╪════════╪════════╡
-    │25979   │"Haminan│"Library│"1526233│"_de18a0│"R0000"│[[25992,│[[null,n│
-    │        │ kaupung│"       │479"    │b2d546e2│       │"Haminan│ull,null│
-    │        │inarkist│        │        │22251e54│       │ asukasl│,null]] │
+    │25979   │"Haminan│"Library│"1526233│"_de18a0│"R0000"│[[25992,│[[...], │
+    │        │ kaupung│"       │479"    │b2d546e2│       │"Haminan│]       │
+    │        │inarkist│        │        │22251e54│       │ asukasl│        │
     │        │o"      │        │        │9f2bd"  │       │uettelo │        │
     │        │        │        │        │        │       │1800-182│        │
     │        │        │        │        │        │       │0","Book│        │
     │        │        │        │        │        │       │"]]     │        │
     └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
+    where "webref" is 
     """    
     titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'urls']
     repositories = []
@@ -289,22 +290,15 @@ def get_repositories(uniq_id=None):
     for record in result:
         r = Repository()
         r.uniq_id = record['uniq_id']
-        if record['rname']:
-            r.rname = record['rname']
-        if record['change']:
-            r.change = int(record['change'])  #TODO only temporary int()
-        if record['handle']:
-            r.handle = record['handle']
-        if record['type']:
-            r.type = record['type']
-        if record['id']:
-            r.id = record['id']
-        if 'webref' in record:
-            for webref in record['webref']:
-                # collect([w.href, wr.type, wr.description, wr.priv]) as webref
-                wurl = Weburl.from_record(webref)
-                if wurl:
-                    r.urls.append(wurl)
+        r.rname = record['rname'] or ''
+        r.change = record['change']
+        r.handle = record['handle']
+        r.type = record['type'] or ''
+        r.id = record['id'] or ''
+        for webref in record['webref']:
+            wurl = Weburl.from_node(webref)
+            if wurl:
+                r.urls.append(wurl)
 
         for source in record['sources']:
             s = Source()
@@ -537,16 +531,16 @@ def get_source_with_events(sourceid):
         print('Citation {} {} {} {} {}'.format(c.uniq_id, event_role, 
                                                node.label, node.uniq_id, node.id))
 
-        if event_role == 'Family':  # Family event
+        if event_role == 'Family':  # Family event witch is cdirectply connected to a Person Event
             node.label = 'Family Event'
-            couple = Family.get_marriage_parent_names(x_uid)
-            node.clearname = " <> ".join(list(couple.values()))
-        else:                       # Person event
-            if p_uid not in persons.keys():
-                node.clearname = Name.get_clearnames(node.uniq_id)
-                persons[node.uniq_id] = node.clearname
-            else:
-                node.clearname = persons[p_uid]
+#             couple = Family.get_marriage_parent_names(x_uid)
+#             node.clearname = " <> ".join(list(couple.values()))
+#         else:                       # Person event
+        if p_uid not in persons.keys():
+            node.clearname = Name.get_clearnames(node.uniq_id)
+            persons[node.uniq_id] = node.clearname
+        else:
+            node.clearname = persons[p_uid]
 
         if 'Event' in node.label:
             # node: "Event <event_type> <person p_uid>"

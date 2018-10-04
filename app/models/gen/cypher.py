@@ -239,7 +239,7 @@ return id(r) AS uniq_id,
     r.handle as handle,
     r.id as id,
     collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
-    collect([w.href, wr.type, wr.description, wr.priv]) as webref
+    collect(w) as webref
 order by r.rname"""
 
     get_w_sources_all = _get_all + _get_tail 
@@ -248,15 +248,15 @@ order by r.rname"""
     get_w_urls = """
 match (repo:Repository) where ID(repo) = $rid
     optional match (repo) -[wr:WEBURL]-> (w:Weburl)
-return repo, collect([w.href, wr.type, wr.description, wr.priv]) as webref"""
+return repo, collect(w) as webref"""
 
     get_one = """
 match (r:Repository) where ID(r) == $rid
-return ID(n) AS uniq_id, r"""
+return r"""
 
     get_all = """
 match (r:Repository)
-return ID(n) AS uniq_id, r order by r.type"""
+return r order by r.type"""
 
 class Cypher_weburl():
     '''
