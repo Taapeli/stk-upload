@@ -11,7 +11,7 @@ version = "1.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Places-ohjelma"
 docline = _("Tries to recognize place names and order them correctly")
 
-from collections import defaultdict 
+from collections import defaultdict, Counter 
 from .. import transformer
 
 ignored_text = """
@@ -72,7 +72,9 @@ def initialize(options):
     return Places()
 
 class Places(transformer.Transformation):
-
+    def __init__(self):
+        self.nonchanged = Counter()
+        
     def transform(self,item,options):
         if item.tag != "PLAC":  return True
         if not item.value: return True
@@ -85,9 +87,17 @@ class Places(transformer.Transformation):
             return item
         else:
             if options.display_nonchanges:
-                print(_("Not changed: '{}'").format(place))
+                #print(_("Not changed: '{}'").format(place))
+                self.nonchanged[place] += 1
             return True
         raise RuntimeError(_("Internal error"))
+
+    def finish(self,options):
+        if options.display_nonchanges:
+            print("--------------------")
+            print(_("Place names not changed:")) 
+            for place,count in self.nonchanged.most_common():
+                print(count,place)
 
 ignored = [name.strip() for name in ignored_text.splitlines() if name.strip() != ""]
 

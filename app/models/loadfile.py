@@ -22,9 +22,9 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def upload_file(infile):
+def upload_file(infile,folder):
     """ Save file 'infile' in the upload folder 
-        and return a list of row dictionaries 
+        and return the final full name of the file 
     """
     try:
         filename = normalized_name(infile.filename)
@@ -32,10 +32,10 @@ def upload_file(infile):
         logging.debug('Normalizing file name "' + infile.filename + '" fails')
         raise
         
-    kokonimi=fullname(filename)
-    infile.save(kokonimi)
-    logging.debug('Tiedosto "' + kokonimi + '" talletettu')
-    return (kokonimi)
+    fullname =  os.path.join(folder, secure_filename(filename))
+    infile.save(fullname)
+    logging.debug('Tiedosto "' + fullname + '" talletettu')
+    return fullname
 
 def normalized_name(in_name):
     """ Tarkastetaan tiedostonimi ja palautetaan täysi polkunimi """
