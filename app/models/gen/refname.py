@@ -28,7 +28,7 @@ import logging
 from sys import stderr
 import time
 import shareds
-from models.gen.cypher import Cypher_refname
+from .cypher import Cypher_refname
 
 # Global allowed reference types in Refname.reftype field or use attribute in db
 REFTYPES = ['basename', 'firstname', 'surname', 'patronyme', 'father', 'mother']

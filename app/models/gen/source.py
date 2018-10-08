@@ -8,9 +8,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 
-from models.cypher_gramps import Cypher_source_w_handle
-from .cypher import Cypher_source
 import shareds
+from .cypher import Cypher_source
+from models.cypher_gramps import Cypher_source_w_handle
 
 
 class Source:

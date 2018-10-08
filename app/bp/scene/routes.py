@@ -10,7 +10,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
 
 from . import bp
-from .models import get_a_person_for_display # get_person_for_display #, get_person_data_by_id
+from .models import get_a_person_for_display, get_a_person_for_display_apoc # get_person_for_display #, get_person_data_by_id
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
@@ -120,6 +120,25 @@ def show_a_person(uid):
         user=None
     
     person, sources = get_a_person_for_display(uid, user)
+    return render_template("/scene/person_pg.html", 
+                           person=person, sources=sources, menuno=1)
+
+
+@bp.route('/scene/person/a=<int:uid>')
+#     @login_required
+def show_a_person_w_apoc(uid):
+    """ One Person with all connected nodes
+        Korvaamaan metodin show_person_page()
+    """
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
+
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    
+    person, sources = get_a_person_for_display_apoc(uid, user)
     return render_template("/scene/person_pg.html", 
                            person=person, sources=sources, menuno=1)
 

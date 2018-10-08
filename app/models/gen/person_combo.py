@@ -106,14 +106,9 @@ class Person_combo(Person):
         
         """
         Person.__init__(self)
-        self.handle = ''
-        self.change = 0
-        self.uniq_id = None
-        self.id = ''
-        self.names = []
-        self.priv = 0
-        self.gender = ''
+
         self.events = []                # For creating display sets
+        self.citations = []
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
         self.objref_hlink = []
@@ -121,7 +116,6 @@ class Person_combo(Person):
         self.parentin_hlink = []
         self.noteref_hlink = []
         self.citationref_hlink = []
-        self.confidence = ''
         self.est_birth = ''
         self.est_death = ''
 
@@ -131,10 +125,29 @@ class Person_combo(Person):
         ''' Read a person and paths for all connected nodes
         '''
         query = """
-match path = (p) -[*]-> (c:Citation) -[:SOURCE]-> (s:Source)
+match path = (p) -[*]-> (x)
     where id(p) = $pid 
 return path"""
+#         query2="""
+# match path = (p) -[*]-> () where id(p) = $pid 
+#     with p, relationships(path) as rel
+# return extract(x IN rel | [id(startnode(x)), type(x), x.role, endnode(x)]) as relations"""
         return  shareds.driver.session().run(query, pid=uniq_id)
+
+    @staticmethod
+    def get_person_paths_apoc(uniq_id):
+        ''' Read a person and paths for all connected nodes
+        '''
+        all_nodes_query_w_apoc="""
+MATCH (p:Person) WHERE id(p) = $pid
+CALL apoc.path.subgraphAll(p, {maxLevel:4, 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|<CHILD|<FATHER|<MOTHER'}) 
+    YIELD nodes, relationships
+RETURN extract(x IN relationships | 
+        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
+        extract(x in nodes | x) as nodelist"""
+        return  shareds.driver.session().run(all_nodes_query_w_apoc, pid=uniq_id)
+
 
     def get_citation_id(self):
         """ Luetaan henkilön viittauksen id """

@@ -8,7 +8,7 @@ Created on 10.9.2018
 '''
 
 import shareds
-from models.gen.cypher import Cypher_person
+from .cypher import Cypher_person
 
 class Name:
     """ Nimi

@@ -5,15 +5,14 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
-#import logging
-#from flask import g
-from models.dbtree import DbTree
-from models.gen.weburl import Weburl
-from models.gen.note import Note
-from models.gen.dates import DateRange
-from models.gen.cypher import Cypher_place
-from models.cypher_gramps import Cypher_place_w_handle
+
 import  shareds
+from .weburl import Weburl
+from .note import Note
+from .dates import DateRange
+from .cypher import Cypher_place
+from models.dbtree import DbTree
+from models.cypher_gramps import Cypher_place_w_handle
 
 class Place:
     """ Paikka

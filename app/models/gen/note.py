@@ -6,8 +6,8 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 @author: jm
 '''
 
+from .cypher import Cypher_note
 from models.cypher_gramps import Cypher_note_w_handle
-from models.gen.cypher import Cypher_note
 import shareds
 
 class Note:

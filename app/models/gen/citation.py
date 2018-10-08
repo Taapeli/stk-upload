@@ -9,10 +9,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 
-from .source import Source
-from models.cypher_gramps import Cypher_citation_w_handle
-from models.gen.cypher import Cypher_citation
 import shareds
+from .cypher import Cypher_citation
+from models.cypher_gramps import Cypher_citation_w_handle
 
 
 class Citation:
@@ -48,6 +47,21 @@ class Citation:
     def __str__(self):
         return "{} '{}'".format(self.id, self.page)
 
+
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Citation.
+        '''
+        n = cls()
+        n.uniq_id = node.id
+        n.handle = node['handle']
+        n.change = node['change']
+        n.id = node['id'] or ''
+        n.confidence = node['confidence'] or ''
+        n.dateval = node['dateva'] or None
+        n.page = node['page'] or ''
+        return n
 
     @staticmethod       
     def get_persons_citations (uniq_id):

@@ -6,6 +6,7 @@ Created on 24.9.2018
 @author: jm
 '''
 from models.datareader import read_persons_with_events
+from models.gen.from_node import get_object_from_node
 from models.gen.family import Family_for_template
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
@@ -18,6 +19,171 @@ from models.gen.note import Note
 from models.gen.media import Media
 
 
+def get_a_person_for_display_apoc(uniq_id, user):
+    """ Get a Person with all connected nodes --- keskeneräinen ---
+
+        @TODO Monet osat on ohjelmoimatta
+    """
+
+    def connect_objects(src, target):
+        ''' Subroutine to save target object in appropiate place in the object src
+        
+  src \ dst  Person combo    Name    Refname    Media    Note    Event combo
+             ------------    ----    -------    -----    ----    -----------
+Person combo                 names[]    x         x     notes[]   events[]
+Name                                                      x
+Refname
+Media                                                     x
+Note 
+Event combo                                             notes[]
+Place                                                     x
+Family    father, mother,                         x       x       eventref
+           children[]                                             hlink[]
+Citation                                                noteref
+                                                        hlink[]
+Source
+Repository
+
+...cont...
+src \ dst        Place    Family    Citation    Source    Repository
+                 -----    ------    --------    ------    ----------
+Person combo            families[] citations[]
+Name                                    x
+Refname
+Media                                   x
+Note                                    x
+Event combo      place             citations[]
+Place          surround                 x
+                ref[]
+Family                                  x
+Citation                                       sources[]
+Source                                                     repos[]
+Repository
+        '''
+        src_class = src.__class__.__name__
+        target_class = target.__class__.__name__
+        if src_class == 'Person_combo':
+            if target_class == 'Name':
+                src.names.append(target)
+                return src.names[-1]
+            elif target_class == 'Event_combo':
+                src.events.append(target)
+                return src.events[-1]
+            elif target_class == 'Family':
+                src.families.append(target)
+                return src.families[-1]
+            elif target_class == 'Citation':
+                src.citations.append(target)
+                return src.citations[-1]
+            elif target_class == 'Notes':
+                src.notes.append(target)
+                return src.notes[-1]
+
+        elif src_class == 'Event_combo':
+            if target_class == 'Place':
+                src.place = target
+                return src.place
+            elif target_class == 'Citation':
+                src.citations.append(target)
+                return src.citations[-1]
+            elif target_class == 'Notes':
+                src.notes.append(target)
+                return src.notes[-1]
+
+        return None
+    
+    # 1. Read person p and paths for all nodes connected to p
+    results = Person_combo.get_person_paths_apoc(uniq_id)
+
+    for result in results:
+        relations = result['relations']
+        nodelist = result['nodelist']
+        
+        # Create gen objects tree: Person with all connected objects
+        #
+        # 1. Create the Person instance, in which all objects shall be stored
+        person = Person_combo.from_node(nodelist[0])
+        # Store a pointer to this object
+        objs = {person.uniq_id: person}
+
+        # 2. Create a directory of nodes which are envolved
+        nodes = {}
+        for node in nodelist:
+            # <Node id=80234 labels={'Person'} 
+            #    properties={'handle': '_da3b305b54b1481e72a4ac505c5', 'id': 'I17296', 
+            #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
+            nodes[node.id] = node
+
+        # 3. Store each gen object from nodes of relations
+        #    as leafs of Person object tree. 
+        #    Also create a directory of all of those objects
+        for relation in relations:
+            # [source uniq_id, relation type, relation role, target uniq_id]
+            # [80234, 'EVENT', 'Primary', 88208]
+            src_node = nodes[relation[0]]
+            src_label = list(src_node.labels)[0]
+            if not src_node.id in objs:
+                # Create new object
+                try:
+                    src_obj = get_object_from_node(src_node)
+                    print("created ({} {})".format(src_obj.uniq_id, src_label))
+                except Exception as e:
+                    print("{}: Could not create {}".format(e, src_obj))
+
+            else:
+                # Use exsisting object
+                src_obj = objs[src_node.id]
+
+            target_node = nodes[relation[3]]
+            target_label = list(target_node.labels)[0]
+
+            if relation[2]: r = ' '.join(relation[1:3])
+            else:           r = relation[1]
+            print("relation ({} {}) -[{}]-> ({} {})".format(src_node.id, src_label, r, target_node.id, target_label))
+            # Source object, for ex. Person_combo
+            if src_node.id in objs:
+                src_obj = objs[src_node.id]
+                target_obj = get_object_from_node(target_node)
+                if not target_obj:  # Not implemented yet!
+                    continue
+                target_link = connect_objects(src_obj, target_obj)
+                o = None
+                if o and not target_obj.uniq_id in objs:
+                    objs[target_obj.uniq_id] = o
+                    print("obj[{}] <- {}".\
+                          format(target_obj.uniq_id, o))
+            else:
+                print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
+
+    # Return Person with included objects and list of sources/citations(?)
+    return (person, None)
+
+    persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
+    person = persons[0]
+    person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
+    person.set_my_places(True)
+    person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
+    sources = Source.get_sources_by_idlist(source_ids)
+    #TODO: Etsi sitaateille lähteet
+
+#     person.get_all_notes()
+#     person.get_media()
+#     person.get_refnames()
+    for c in person.citations:
+        print ("Sitaatit ({} {})".format(c.uniq_id, c))
+        for ci in c.citators:
+            print ("  ({}) <- ({})".format(c, ci))
+#     for e in person.events:
+#         print("Person event {}: {}".format(e.uniq_id, e))
+#         if e.place == None:
+#             print("- no place")
+#         else:
+#             for n in e.place.names:
+#                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
+
+    return person, sources
+
+
 def get_a_person_for_display(uniq_id, user):
     """ Get a Person with all connected nodes --- keskeneräinen ---
 
@@ -27,15 +193,21 @@ def get_a_person_for_display(uniq_id, user):
     paths = Person_combo.get_person_paths(uniq_id)
     
     for path in paths:
-        s_node = path['path'].start
-        # <Node id=80307 labels=set() 
-        #    properties={'handle': '_da692a09bac110d27fa326f0a7', 'id': 'I0119', 
-        #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
-        e_node = path['path'].end
-        s_label = s_node.labels.pop()
-        e_label = e_node.labels.pop()
-        print("start ({} id:{}) --> ({} id:{})".\
-              format(s_label, s_node['id'], e_label, e_node['id']))
+#         s_node = path['path'].start
+#         # <Node id=80307 labels=set() 
+#         #    properties={'handle': '_da692a09bac110d27fa326f0a7', 'id': 'I0119', 
+#         #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
+#         e_node = path['path'].end
+#         s_label = s_node.labels.pop()
+#         e_label = e_node.labels.pop()
+#         print("path ({} id:{}) -[{}]-> ({} id:{})".\
+#               format(s_label, s_node['id'], path[0].__len__(), e_label, e_node['id']))
+        nodelist = []
+        for n in path[0].nodes:
+            if n.labels:    lab = n.labels.pop() + ' '
+            else:           lab = ''
+            nodelist.append("{}:({}{})".format(n.id, lab, n['id']))
+        print("nodes {}".format(" --> ".join(nodelist)))
         person = None
 
     return person

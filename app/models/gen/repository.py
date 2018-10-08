@@ -9,8 +9,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from sys import stderr
 
 from models.cypher_gramps import Cypher_repository_w_handle
-from models.gen.cypher import Cypher_repository
-from models.gen.weburl import Weburl
+from .cypher import Cypher_repository
 import shareds
    
 

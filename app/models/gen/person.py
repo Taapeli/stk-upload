@@ -90,6 +90,8 @@ class Person:
         self.names = []
         self.priv = 0
         self.gender = ''
+        self.confidence = ''
+        # Todo: Poista: Nämä vain Person_combossa
         self.events = []                # For creating display sets
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
@@ -98,7 +100,6 @@ class Person:
         self.parentin_hlink = []
         self.noteref_hlink = []
         self.citationref_hlink = []
-        self.confidence = ''
         self.est_birth = ''
         self.est_death = ''
 

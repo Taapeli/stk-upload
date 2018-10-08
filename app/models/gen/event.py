@@ -40,14 +40,12 @@
 Created on 2.5.2017
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
-# import datetime
-# from sys import stderr
-#from flask import g
-from models.gen.dates import DateRange
+
+from .dates import DateRange
 import  shareds
 
 
-class Event():
+class Event:
     """ Tapahtuma
             
         Properties:
