@@ -8,9 +8,9 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 
-from models.cypher_gramps import Cypher_source_w_handle
-from .cypher import Cypher_source
 import shareds
+from .cypher import Cypher_source
+from models.cypher_gramps import Cypher_source_w_handle
 
 
 class Source:
@@ -43,6 +43,23 @@ class Source:
         return "{} {}".format(self.id, self.stitle)
 
 
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Source.
+        
+        <Node id=91394 labels={'Source'} 
+            properties={'handle': '_d9edc4e4a9a6defc258', 'id': 'S0078', 
+                'stitle': 'Kangasala syntyneet 1721-1778', 'change': '1507149115'}>
+        '''
+        s = cls()   # create a new Source
+        s.id = node.id
+        s.uniq_id = node['uniq_id']
+        s.handle = node['handle']
+        s.stitle = node['stitle']
+        s.change = node['change']
+        return s
+
     @staticmethod       
     def get_sources_by_idlist(uniq_ids):
         ''' Read source data from db for given uniq_ids.
@@ -51,19 +68,12 @@ class Source:
         '''
         source_load_data = '''
 match (s:Source) where id(s) in $ids
-return id(s) as uniq_is, s'''
+return s'''
         sources = {}
         result = shareds.driver.session().run(source_load_data, ids=uniq_ids)
         for record in result:
-            s = Source()
             snode = record['s']
-            # {"handle":"_dd162a3bcb7533c6d1779e039c6","id":"S0409",
-            #  "stitle":"Askainen syntyneet 1783-1825","change":"1519858899"}
-            s.id = snode.id
-            s.uniq_id = snode['uniq_id']
-            s.handle = snode['handle']
-            s.stitle = snode['stitle']
-            s.change = snode['change']
+            s = Source.from_node(snode)
             sources[s.id] = s
         return sources
 

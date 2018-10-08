@@ -58,6 +58,10 @@ def fixlines(lines,options):
         prevlevel = int(tkns[0])
     if line.strip() != "0 TRLR":
         lines.append("0 TRLR")
+        if options.display_changes:
+            print("-----------------------")
+            print(_("Added:"))
+            print("0 TRLR")
 
 class Transformation:
     twophases = False

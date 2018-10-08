@@ -9,8 +9,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from sys import stderr
 
 from models.cypher_gramps import Cypher_repository_w_handle
-from models.gen.cypher import Cypher_repository
-from models.gen.weburl import Weburl
+from .cypher import Cypher_repository
 import shareds
    
 
@@ -38,27 +37,19 @@ class Repository:
         self.sources = []   # For creating display sets (Not used??)
         
     
-    @staticmethod
-    def from_record(record):
+    @classmethod
+    def from_node(cls, node):
         '''
-        Transforms a db record to Repository object
+        Transforms a db node to Repository object
         '''
-        n = Repository()
-        if record['uniq_id']:
-            n.uniq_id = int(record['uniq_id'])
-        record_n = record['r']
-        if record_n['handle']:
-            n.handle = record_n['handle']
-        if record_n['change']:
-            n.change = int(record_n['change'])
-        if record_n['id']:
-            n.id = record_n['id']
-        if record_n['priv']:
-            n.priv = record_n['priv']
-        if record_n['type']:
-            n.type = record_n['type']
-        if record_n['text']:
-            n.text = record_n['text']
+        n = cls()   # Repository
+        n.uniq_id = node.id
+        n.handle = node['handle']
+        n.change = node['change'] or 0
+        n.id = node['id'] or ''
+        n.priv = node['priv'] or 0
+        n.type = node['type'] or ''
+        n.text = node['text'] or ''
         return n
 
 

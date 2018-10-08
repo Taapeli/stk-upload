@@ -329,15 +329,10 @@ class DOM_handler():
                 self.log(Log("More than one place tag in an event",
                                     level="WARNING", count=e.id))
 
-            if len(event.getElementsByTagName('attribute') ) == 1:
-                event_attr = event.getElementsByTagName('attribute')[0]
-                if event_attr.hasAttribute("type"):
-                    e.attr_type = event_attr.getAttribute("type")
-                if event_attr.hasAttribute("value"):
-                    e.attr_value = event_attr.getAttribute("value")
-            elif len(event.getElementsByTagName('attribute') ) > 1:
-                self.log(Log("More than one attribute tag in an event",
-                                    level="WARNING", count=e.id))
+            e.attr = dict()
+            for attr in event.getElementsByTagName('attribute'):
+                if attr.hasAttribute("type"):
+                    e.attr[attr.getAttribute("type")] = attr.getAttribute("value")
 
             for ref in event.getElementsByTagName('noteref'):
                 if ref.hasAttribute("hlink"):
@@ -587,7 +582,7 @@ class DOM_handler():
             for person_url in person.getElementsByTagName('url'):
                 weburl = Weburl()
                 if person_url.hasAttribute("priv"):
-                    weburl.priv = person_url.getAttribute("priv")
+                    weburl.priv = int(person_url.getAttribute("priv"))
                 if person_url.hasAttribute("href"):
                     weburl.href = person_url.getAttribute("href")
                 if person_url.hasAttribute("type"):
@@ -673,7 +668,7 @@ class DOM_handler():
             for placeobj_url in placeobj.getElementsByTagName('url'):
                 weburl = Weburl()
                 if placeobj_url.hasAttribute("priv"):
-                    weburl.priv = placeobj_url.getAttribute("priv")
+                    weburl.priv = int(placeobj_url.getAttribute("priv"))
                 if placeobj_url.hasAttribute("href"):
                     weburl.href = placeobj_url.getAttribute("href")
                 if placeobj_url.hasAttribute("type"):

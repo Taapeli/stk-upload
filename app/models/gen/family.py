@@ -5,10 +5,12 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 from sys import stderr
 import  shareds
-from models.cypher_gramps import Cypher_family_w_handle
+
 from .cypher import Cypher_family
 from .person_combo import Person_as_member
 from .person_name import Name
+from models.cypher_gramps import Cypher_family_w_handle
+
 
 class Family:
     """ Perhe
@@ -44,7 +46,18 @@ class Family:
         self.childref_hlink = []    # handles
         self.noteref_hlink = []
 
-
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Family.
+        '''
+        n = cls()
+        n.uniq_id = node.id
+        n.handle = node['handle']
+        n.change = node['change']
+        n.id = node['id'] or ''
+        n.rel_type = node['rel_type'] or ''
+        return n
 
     def get_children_by_id(self):
         """ Luetaan perheen lasten tiedot """

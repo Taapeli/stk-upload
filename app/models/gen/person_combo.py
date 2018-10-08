@@ -2,6 +2,9 @@
     Person compound includes operations for accessing
     - Person and her Names
     - related Events and Places
+    
+    Note. Use Person_combo.from_node(node) to create a Person_combo instance
+          ( defined as classmethod Person.from_node() )
 
     class gen.person_combo.Person_combo(Person): 
         - __init__()
@@ -14,7 +17,7 @@
         - set_confidence (self, tx)     Asetetaan henkilön tietojen luotettavuusarvio
         - get_person_events (nmax=0, pid=None, names=None)
                                         Luetaan henkilöitä tapahtumineen
-        - get_events_k (keys, currentuser, take_refnames=False, order=0):
+        - get_person_combos (keys, currentuser, take_refnames=False, order=0):
                                         Read Persons with Names, Events and Refnames
         - get_my_places(self)              Tallettaa liittyvät Paikat henkilöön
         - get_all_citation_source(self) Tallettaa liittyvät Cition ja Source
@@ -86,7 +89,7 @@ class Person_combo(Person):
             - eventref_role[]  str edellisen rooli
             objref_hlink[]     int median uniq_id
             urls[]             list of Weburl nodes
-                priv           str 1 = salattu tieto
+                priv           int 1 = salattu tieto
                 href           str osoite
                 type           str tyyppi
                 description    str kuvaus
@@ -103,14 +106,9 @@ class Person_combo(Person):
         
         """
         Person.__init__(self)
-        self.handle = ''
-        self.change = 0
-        self.uniq_id = None
-        self.id = ''
-        self.names = []
-        self.priv = ''
-        self.gender = ''
+
         self.events = []                # For creating display sets
+        self.citations = []
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
         self.objref_hlink = []
@@ -118,9 +116,37 @@ class Person_combo(Person):
         self.parentin_hlink = []
         self.noteref_hlink = []
         self.citationref_hlink = []
-        self.confidence = ''
         self.est_birth = ''
         self.est_death = ''
+
+
+    @staticmethod
+    def get_person_paths(uniq_id):
+        ''' Read a person and paths for all connected nodes
+        '''
+        query = """
+match path = (p) -[*]-> (x)
+    where id(p) = $pid 
+return path"""
+#         query2="""
+# match path = (p) -[*]-> () where id(p) = $pid 
+#     with p, relationships(path) as rel
+# return extract(x IN rel | [id(startnode(x)), type(x), x.role, endnode(x)]) as relations"""
+        return  shareds.driver.session().run(query, pid=uniq_id)
+
+    @staticmethod
+    def get_person_paths_apoc(uniq_id):
+        ''' Read a person and paths for all connected nodes
+        '''
+        all_nodes_query_w_apoc="""
+MATCH (p:Person) WHERE id(p) = $pid
+CALL apoc.path.subgraphAll(p, {maxLevel:4, 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|<CHILD|<FATHER|<MOTHER'}) 
+    YIELD nodes, relationships
+RETURN extract(x IN relationships | 
+        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
+        extract(x in nodes | x) as nodelist"""
+        return  shareds.driver.session().run(all_nodes_query_w_apoc, pid=uniq_id)
 
 
     def get_citation_id(self):
@@ -135,7 +161,9 @@ class Person_combo(Person):
 
 
     def get_event_data_by_id(self):
-        """ Luetaan henkilön tapahtumien id:t """
+        """ Luetaan henkilön tapahtumien id:t 
+            Korvaava versio models.gen.event_combo.Event_combo.get_connected_events_w_links
+        """
 
         root = int(self.uniq_id)
         query = """
@@ -570,8 +598,74 @@ RETURN n.id, k.firstname, k.surname,
 
 
     @staticmethod
+    def get_person_combos (keys, currentuser, take_refnames=False, order=0):
+        """ Read Persons with Names, Events, Refnames (reference names) and Places
+            called from models.datareader.read_persons_with_events
+            
+            UUSI KORVAAMAAN get_events_k:n
+
+             a) selected by unique id
+                keys=['uniq_id', uid]    by person's uniq_id (for table_person_by_id.html)
+             b) selected by name
+                keys=['all']             all
+                keys=['surname', name]   by start of surname
+                keys=['firstname', name] by start of the first of first names
+                keys=['patronyme', name] by start of patronyme name
+                keys=['refname', name]   by exact refname
+            If currentuser is defined, select only her Events
+
+            #TODO: take_refnames should determine, if refnames are returned, too
+            #TODO: filter by owner
+        """
+        if keys:
+            rule=keys[0]
+            key=keys[1].title() if len(keys) > 1 else None
+            print("Selected {} '{}'".format(rule, key))
+        else:
+            rule="all"
+            key=""
+# ╒════════════════════╤════════════════════╤════════════════════╤════════════════════╤═════════╕
+# │"person"            │"name"              │"refnames"          │"events"            │"initial"│
+# ╞════════════════════╪════════════════════╪════════════════════╪════════════════════╪═════════╡
+# │{"handle":"_da692a09│{"alt":"","firstname│["Helena","Brita","K│[["Primary",{"datety│"K"      │
+# │bac110d27fa326f0a7",│":"Brita Helena","ty│lick"]              │pe":0,"change":15009│         │
+# │"id":"I0119","priv":│pe":"Birth Name","su│                    │07890,"description":│         │
+# │"","gender":"F","con│ffix":"","surname":"│                    │"","handle":"_da692d│         │
+# │fidence":"2.5","chan│Klick"}             │                    │0fb975c8e8ae9c4986d2│         │
+# │ge":1507492602}     │                    │                    │3","attr_type":"","i│         │
+# │                    │                    │                    │d":"E0161","date2":1│         │
+# │                    │                    │                    │754183,"type":"Birth│         │
+# │                    │                    │                    │","date1":1754183,"a│         │
+# │                    │                    │                    │ttr_value":""},null]│         │
+# │                    │                    │                    │,...]               │         │
+# └────────────────────┴────────────────────┴────────────────────┴────────────────────┴─────────┘
+
+        try:
+            with shareds.driver.session() as session:
+                if rule == 'uniq_id':
+                    return session.run(Cypher_person.get_events_uniq_id, id=int(key))
+                elif rule == 'refname':
+                    return session.run(Cypher_person.get_events_by_refname, name=key)
+                elif rule == 'all':
+                    if order == 1:      # order by first name
+                        return session.run(Cypher_person.get_events_all_firstname)
+                    elif order == 2:    # order by patroname
+                        return session.run(Cypher_person.get_events_all_patronyme)
+                    else:
+                        return session.run(Cypher_person.get_events_all)
+                else:
+                    # Selected names and name types (untested?)
+                    return session.run(Cypher_person.get_events_by_refname_use,
+                                       attr={'use':rule, 'name':key})
+        except Exception as err:
+            print("Virhe-get_person_combos: {1} {0}".format(err, keys), file=stderr)
+
+
+    @staticmethod
     def get_events_k (keys, currentuser, take_refnames=False, order=0):
-        """  Read Persons with Names, Events and Refnames (reference names)
+        """ OBSOLETE - tilalle tulee Person_combo.get_person_combos
+
+            Read Persons with Names, Events and Refnames (reference names)
             called from models.datareader.read_persons_with_events
 
              a) selected by unique id
@@ -637,22 +731,21 @@ match (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (pl:Place)
 with r, e, pl
     optional match (pl) -[:NAME]-> (pname:Place_name)
     return r.role as r_role, id(e) as e_id, 
-        id(pl) as pl_id, pl as place,
-        collect(pname) as pnames"""
+        pl as place, collect(pname) as pnames"""
     
-# ╒═════════╤══════╤═══════╤════════════════════════════════╤════════════════════════════════╕
-# │"r_role" │"e_id"│"pl_id"│"place"                         │"pnames"                        │
-# ╞═════════╪══════╪═══════╪════════════════════════════════╪════════════════════════════════╡
-# │"Primary"│72501 │72486  │{"coord":[60.5,27.2],"handle":"_│[{"name":"Hamina","lang":""}]   │
-# │         │      │       │de189e6c36c3f1e676c22ed6559","id│                                │
-# │         │      │       │":"P0004","type":"Town","pname":│                                │
-# │         │      │       │"Hamina","change":1536051348}   │                                │
-# ├─────────┼──────┼───────┼────────────────────────────────┼────────────────────────────────┤
-# │"Primary"│72500 │25976  │{"handle":"_ddd39c4088f165882c16│[{"name":"Kaivopuisto","lang":""│
-# │         │      │       │0493e88","id":"P0001","type":"Bo│},{"name":"Brunspark","lang":"sv│
-# │         │      │       │rough","pname":"Kaivopuisto","ch│"}]                             │
-# │         │      │       │ange":1536051387}               │                                │
-# └─────────┴──────┴───────┴────────────────────────────────┴────────────────────────────────┘
+# ╒═════════╤══════╤════════════════════════════════╤════════════════════════════════╕
+# │"r_role" │"e_id"│"place"                         │"pnames"                        │
+# ╞═════════╪══════╪════════════════════════════════╪════════════════════════════════╡
+# │"Primary"│72501 │{"coord":[60.5,27.2],"handle":"_│[{"name":"Hamina","lang":""}]   │
+# │         │      │de189e6c36c3f1e676c22ed6559","id│                                │
+# │         │      │":"P0004","type":"Town","pname":│                                │
+# │         │      │"Hamina","change":1536051348}   │                                │
+# ├─────────┼──────┼────────────────────────────────┼────────────────────────────────┤
+# │"Primary"│72500 │{"handle":"_ddd39c4088f165882c16│[{"name":"Kaivopuisto","lang":""│
+# │         │      │0493e88","id":"P0001","type":"Bo│},{"name":"Brunspark","lang":"sv│
+# │         │      │rough","pname":"Kaivopuisto","ch│"}]                             │
+# │         │      │ange":1536051387}               │                                │
+# └─────────┴──────┴────────────────────────────────┴────────────────────────────────┘
 
         result = shareds.driver.session().run(get_places_w_names, pid=self.uniq_id)
         for record in result:
@@ -692,12 +785,8 @@ with r, e, pl
                     pl.handle = placerec['handle']
                     pl.change = placerec['change']
                     # Get the Place_names
-                    for pname in record['pnames']:
-                        pn = Place_name()
-                        pn.uniq_id = pname.id
-                        pn.name = pname['name']
-                        pn.lang = pname['lang']
-                        #pname.dates = ...
+                    for node in record['pnames']:
+                        pn = Place_name.from_node(node)
                         pl.names.append(pn)
 
                     if cleartext_list:

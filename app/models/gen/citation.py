@@ -9,24 +9,25 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 
-from .source import Source
-from models.cypher_gramps import Cypher_citation_w_handle
 import shareds
+from .cypher import Cypher_citation
+from models.cypher_gramps import Cypher_citation_w_handle
 
 
 class Citation:
     """ Viittaus
             
         Properties:
-                handle          
-                change
+                handle           str
+                change           int
                 id               esim. "C0001"
                 dateval          str date
-                page             str page
-                confidence       str confidence
+                page             str page description
+                confidence       str confidence 0.0 - 5.0 (?)
                 noteref_hlink    str huomautuksen osoite
                 source_handle    str handle of source   _or_
                 source_id        int uniq_id of source
+                citators         NodeRef nodes referring this citation
      """
 
     def __init__(self):
@@ -47,21 +48,30 @@ class Citation:
         return "{} '{}'".format(self.id, self.page)
 
 
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Citation.
+        '''
+        n = cls()
+        n.uniq_id = node.id
+        n.handle = node['handle']
+        n.change = node['change']
+        n.id = node['id'] or ''
+        n.confidence = node['confidence'] or ''
+        n.dateval = node['dateva'] or None
+        n.page = node['page'] or ''
+        return n
+
     @staticmethod       
     def get_persons_citations (uniq_id):
         """ Read 'Person -> Event -> Citation' and 'Person -> Citation' paths
 
             Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
+            ja talleta niihin viittaaja (citator Event tai Person)
             
             Returns list of Citations and list of Source ids
         """
-        get_persons_citation_paths = """
-match path = (p) -[*]-> (c:Citation) -[:SOURCE]-> (s:Source)
-    where id(p) = 72104 
-    with relationships(path) as rel, c, id(s) as source_id
-return extract(x IN rel | endnode(x))  as end, source_id
-    order by source_id, size(end)"""
-
 # ╒══════════════════════════════════════════════════════════════════════╤═══════════╕
 # │"end"                                                                 │"source_id"│
 # ╞══════════════════════════════════════════════════════════════════════╪═══════════╡
@@ -89,8 +99,21 @@ return extract(x IN rel | endnode(x))  as end, source_id
 # │0351255"}]                                                            │           │
 # └──────────────────────────────────────────────────────────────────────┴───────────┘
         
-        result = shareds.driver.session().run(get_persons_citation_paths, 
+        result = shareds.driver.session().run(Cypher_citation.get_persons_citation_paths, 
                                               pid=uniq_id)
+        # Esimerkki:
+        # ╒══════╤═════════════════════════════════════════════════╤═══════════╕
+        # │"id_p"│"end"                                            │"source_id"│
+        # ╞══════╪═════════════════════════════════════════════════╪═══════════╡
+        # │80307 │[[88523,"E0076"],[90106,"C0046"],[91394,"S0078"]]│91394      │
+        # ├──────┼─────────────────────────────────────────────────┼───────────┤
+        # │80307 │[[90209,"C0038"],[91454,"S0003"]]                │91454      │
+        # ├──────┼─────────────────────────────────────────────────┼───────────┤
+        # │80307 │[[88533,"E0166"],[90343,"C0462"],[91528,"S0257"]]│91528      │
+        # └──────┴─────────────────────────────────────────────────┴───────────┘
+        # -liitä Event "E0076" -> "C0046", "C0046" -> "S0078"
+        # -liitä Person  80307 -> "C0038", "C0038" -> "S0003"
+        # -liitä Event "E0166" -> "C0462", "C0462" ->"S0257"
         citations = []
         source_ids = []
         for record in result:
@@ -255,7 +278,7 @@ return extract(x IN rel | endnode(x))  as end, source_id
 
 class NodeRef():
     ''' Carries data of citating nodes
-            label            str Person or Event
+            label            str (optional) Person or Event
             uniq_id          int Persons uniq_id
             source_id        int The uniq_id of the Source citated
             clearname        str Persons display name
@@ -273,4 +296,4 @@ class NodeRef():
         self.date = ''
 
     def __str__(self):
-        return "{} {} '{}'".format(self.uniq_id, self.eventtype, self.clearname)
+        return "{} {}: {} {} '{}'".format(self.label, self.uniq_id, self.source_id or '-', self.eventtype, self.clearname)
