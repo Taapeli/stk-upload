@@ -25,7 +25,7 @@
         - set_confidence (self, tx)     Asetetaan henkilön tietojen luotettavuusarvio
         - get_person_events (nmax=0, pid=None, names=None)
                                         Luetaan henkilöitä tapahtumineen
-        - get_events_k (keys, currentuser, take_refnames=False, order=0):
+        - get_person_combos (keys, currentuser, take_refnames=False, order=0):
                                         Read Persons with Names, Events and Refnames
         - get_places(self)              Tallettaa liittyvät Paikat henkilöön
         - get_all_citation_source(self) Tallettaa liittyvät Cition ja Source
@@ -74,7 +74,7 @@ class Person:
          - Node properties: {
             handle                str "_dd2c613026e7528c1a21f78da8a"
             id                    str "I0000"
-            priv                  str "1" = merkitty yksityiseksi
+            priv                  int 1 = merkitty yksityiseksi
             gender                str "M", "N", "" sukupuoli
             confidence            float "2.0" tietojen luotettavuus
             change                int 1536324580
@@ -88,8 +88,10 @@ class Person:
         self.uniq_id = None
         self.id = ''
         self.names = []
-        self.priv = ''
+        self.priv = 0
         self.gender = ''
+        self.confidence = ''
+        # Todo: Poista: Nämä vain Person_combossa
         self.events = []                # For creating display sets
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
@@ -98,10 +100,30 @@ class Person:
         self.parentin_hlink = []
         self.noteref_hlink = []
         self.citationref_hlink = []
-        self.confidence = ''
         self.est_birth = ''
         self.est_death = ''
 
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Person.
+        
+        Youc can create a Person or Person_node instance. (cls is the class 
+        where we are, either Person or Person_combo)
+        
+        <Node id=80307 labels={'Person'} 
+            properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F', 'change': 1507492602, 
+            'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
+        '''
+        p = cls()
+        p.uniq_id = node.id
+        p.id = node.id
+        p.gender = node['gender']
+        p.handle = node['handle']
+        p.change = node['change']
+        p.confidence = node['confidence']
+        p.priv = node['priv']
+        return p
 
     @staticmethod
     def get_confidence (uniq_id=None):

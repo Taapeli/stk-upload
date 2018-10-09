@@ -6,6 +6,7 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 @author: jm
 '''
 
+from .cypher import Cypher_note
 from models.cypher_gramps import Cypher_note_w_handle
 import shareds
 
@@ -17,7 +18,7 @@ class Note:
                 change          int timestamp from Gramps
                 id              esim. "N0001"
                 uniq_id         int database key
-                priv            str salattu tieto
+                priv            int >0 salattu tieto
                 type            str huomautuksen tyyppi
                 text            str huomautuksen sisältö
      """
@@ -30,15 +31,14 @@ class Note:
         self.type = ''
         self.handle = ''
         self.change = 0
-        self.priv = ''
+        self.priv = 0
 
-
-    @staticmethod
-    def from_node(node):
+    @classmethod
+    def from_node(cls, node):
         '''
         Transforms a db node to an object of type Note.
         '''
-        n = Note()
+        n = cls()
         n.uniq_id = node.id
         n.handle = node['handle']
         n.change = node['change']
@@ -47,7 +47,6 @@ class Note:
         n.type = node['type'] or ''
         n.text = node['text'] or ''
         return n
-
 
     @staticmethod       
     def get_persons_notes (uniq_id):

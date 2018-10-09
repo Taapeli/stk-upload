@@ -5,15 +5,14 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
-#import logging
-#from flask import g
-from models.dbtree import DbTree
-from models.gen.weburl import Weburl
-from models.gen.note import Note
-from models.gen.dates import DateRange
-from models.gen.cypher import Cypher_place
-from models.cypher_gramps import Cypher_place_w_handle
+
 import  shareds
+from .weburl import Weburl
+from .note import Note
+from .dates import DateRange
+from .cypher import Cypher_place
+from models.dbtree import DbTree
+from models.cypher_gramps import Cypher_place_w_handle
 
 class Place:
     """ Paikka
@@ -68,6 +67,26 @@ class Place:
         return desc
 
 
+    @classmethod
+    def from_node(cls, node):
+        ''' models.gen.place.Place.from_node
+        Transforms a db node to an object of type Place.
+        
+        <Node id=78279 labels={'Place'} 
+            properties={'handle': '_da68e12a415d936f1f6722d57a', 'id': 'P0002', 
+                'change': 1500899931, 'pname': 'Kangasalan srk', 'type': 'Parish'}>
+
+        '''
+        p = cls()
+        p.uniq_id = node.id
+        p.handle = node['handle']
+        p.change = node['change']
+        p.id = node['id'] or ''
+        p.type = node['type'] or ''
+        p.pname = node['pname'] or ''
+        return p
+
+
     def show_names_list(self):
         # Returns list of referred Place_names for this place
         # If none, return pname
@@ -81,6 +100,44 @@ class Place:
             return name_list
         else:
             return self.pname
+
+
+    @staticmethod
+    def read_place_w_names(uniq_id):
+        """ Reads Place nodes or selected Place node with Place_name objects
+            and clearname
+        """
+        result = None
+        with shareds.driver.session() as session:
+            if uniq_id:
+                place_get_one = """
+match (p:Place) where ID(p)=$pid
+optional match (p) -[:NAME]-> (n:Place_name)
+return p, collect(n) as names"""
+                result = session.run(place_get_one, pid=uniq_id)
+            else:
+                place_get_all = """
+MATCH (p:Place) 
+RETURN p ORDER BY p.pname"""
+                result = session.run(place_get_all)
+
+        places = []
+
+        for record in result:
+            # Create a Place object from record
+            node = record['p']
+            pl = Place.from_node(node)
+            names = []
+            for node in record['names']:
+                # <Node id=78278 labels={'Place_name'} properties={'lang': '', 
+                #    'name': 'Kangasalan srk'}>
+                plname = Place_name.from_node(node)
+                names.append(str(plname))
+                pl.names.append(plname)
+            pl.clearname = ' • '.join(names)
+            places.append(pl)
+
+        return places
 
 
     def get_place_data_by_id(self):
@@ -183,7 +240,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
 
     @staticmethod
-    def get_place_w_names():
+    def get_place_hierarchy():
         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
             Place list with upper and lower places in herarchy
 
@@ -494,6 +551,21 @@ class Place_name:
             return "{} ({}){}".format(self.name, self.lang, d)
         else:
             return "{}{}".format(self.name, d)
+
+    @classmethod
+    def from_node(cls, node):
+        ''' models.gen.place.Place_name.from_node
+        Transforms a db node to an object of type Place_name.
+        
+        <Node id=78278 labels={'Place_name'} 
+            properties={'lang': '', 'name': 'Kangasalan srk'}>
+        '''
+        pn = cls()  # Place_name()
+        pn.uniq_id = node.id
+        pn.name = node['name']
+        pn.lang = node['lang'] or ''
+        pn.dates = node['dates'] or None
+        return pn
 
 
 class Point:

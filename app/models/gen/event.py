@@ -40,14 +40,12 @@
 Created on 2.5.2017
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
-# import datetime
-# from sys import stderr
-#from flask import g
-from models.gen.dates import DateRange
+
+from .dates import DateRange
 import  shareds
 
 
-class Event():
+class Event:
     """ Tapahtuma
             
         Properties:
@@ -58,8 +56,9 @@ class Event():
                 description        esim. ammatin kuvaus
                 date               str aika
                 dates              DateRange date expression
-                attr_type          str lisätiedon tyyppi
-                attr_value         str lisätiedon arvo
+                attr[]             dict lisätiedot {attr_type: attr_value}
+#                 attr_type          str lisätiedon tyyppi
+#                 attr_value         str lisätiedon arvo
             For gramps_loader:
                 note_handles[]     str lisätiedon handle (ent. noteref_hlink)
             Planned from gramps_loader:
@@ -83,9 +82,8 @@ class Event():
         self.description = desc
         self.date = ''
         self.dates = None
-        # Only in Event_gramps
-        #    self.attr_type = ''
-        #    self.attr_value = ''
+        # NOT Only in Event_gramps
+        self.attr = dict()         # prev. attr_type, attr_value
         # Only in Event_combo
         #    self.note_ref = []    # prev. noteref_hlink
         #    self.place_hlink = ''
@@ -97,6 +95,37 @@ class Event():
 
     def __str__(self):
         return "{} {}".format(self.type, self.dates or "")
+
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a node from db node to an object of type Event
+        
+        <Node id=88532 labels={'Event'} 
+            properties={'type': 'Birth', 'change': 1500907890, 
+                'handle': '_da692d0fb975c8e8ae9c4986d23', 'attr_value': '', 
+                'id': 'E0161', 'attr_type': '', 'description': ''
+                'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
+        '''
+        e = cls()
+        e.uniq_id = node.id
+        e.id = node['id']
+        e.type = node['type']
+        e.handle = node['handle']
+        e.change = node['change']
+        if "datetype" in node:
+            #TODO: Talletetaanko DateRange -objekti vai vain str?
+            dates = DateRange(node["datetype"], node["date1"], node["date2"])
+            e.dates = str(dates)
+            e.date = dates.estimate()
+        else:
+            e.dates = None
+            e.date = ""
+        e.text = node['description'] or ''
+        e.attr = node['attr'] or dict()
+#         e.attr_type = node['attr_type'] or ''
+#         e.attr_value = node['attr_value'] or ''
+        return e
 
 
     @staticmethod       
@@ -111,8 +140,7 @@ class Event():
         result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
-                  'description', 'date', 'dates', 
-                  'attr_type', 'attr_value']
+                  'description', 'date', 'dates', 'attr']
         lists = []
         
         for record in result:
@@ -149,12 +177,8 @@ class Event():
                 data_line.append(str(DateRange(record["e"]['dates'])))
             else:
                 data_line.append('-')
-            if record["e"]['attr_type']:
-                data_line.append(record["e"]['attr_type'])
-            else:
-                data_line.append('-')
-            if record["e"]['attr_value']:
-                data_line.append(record["e"]['attr_value'])
+            if len(record["e"]['attr']) > 0:
+                data_line.append(str(record["e"]['attr'])[1:-1])
             else:
                 data_line.append('-')
                 
@@ -176,7 +200,7 @@ class Event():
         result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
-                  'description', 'date', 'dates', 'attr_type', 'attr_value']
+                  'description', 'date', 'dates', 'attr']
         lists = []
         
         for record in result:
@@ -213,8 +237,8 @@ class Event():
                 data_line.append(str(DateRange(record["e"]['dates'])))
             else:
                 data_line.append('-')
-            if record["e"]['attr_type']:
-                data_line.append(record["e"]['attr_type'])
+            if len(record["e"]['attr']) > 0:
+                data_line.append(str(record["e"]['attr'])[1:-1])
             else:
                 data_line.append('-')
             if record["e"]['attr_value']:
@@ -256,8 +280,7 @@ class Event():
         print ("Dateval: " + self.date)
         print ("Dates: " + str(self.dates))
         #print ("Place_hlink: " + self.place_hlink)
-        print ("Attr_type: " + self.attr_type)
-        print ("Attr_value: " + self.attr_value)
+        print ("Attr: " + str(self.attr))
         #print ("Citationref_hlink: " + self.citationref_hlink)
         return True
 

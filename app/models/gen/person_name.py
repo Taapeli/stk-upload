@@ -8,7 +8,7 @@ Created on 10.9.2018
 '''
 
 import shareds
-from models.gen.cypher import Cypher_person
+from .cypher import Cypher_person
 
 class Name:
     """ Nimi
@@ -31,6 +31,26 @@ class Name:
 
     def __str__(self):
         return "{}/{}/{}".format(self.firstname, self.surname, self.suffix)
+
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Name
+        
+        <Node id=80308 labels={'Name'} 
+            properties={'firstname': 'Brita Helena', 'suffix': '', 'alt': '', 
+                'surname': 'Klick', '': 'Birth Name'}>
+        '''
+        n = cls()
+        n.uniq_id = node.id
+        n.id = node.id
+        n.type = node['type']
+        n.firstname = node['firstname']
+        n.suffix = node['suffix']
+        n.surname = node['surname']
+        n.alt = node['alt']
+        return n
+
 
     @staticmethod
     def get_people_with_refname(refname):
@@ -84,8 +104,8 @@ class Name:
 
 
     @staticmethod
-    def get_clearnames(uniq_id=None):
-        """ Lists all Name versions of this Person as cleartext
+    def get_clearname(uniq_id=None):
+        """ Lists all Name versions of this Person as single cleartext
         """
         result = Name.get_personnames(None, uniq_id)
         names = []
