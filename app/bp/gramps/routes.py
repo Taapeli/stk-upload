@@ -93,8 +93,14 @@ def save_loaded_gramps(filename):
 
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')
+@roles_accepted('member', 'admin')
 def error_page(code, text=''):
     """ Virhesivu näytetään """
     logging.debug('Virhesivu ' + str(code) )
     return render_template("virhe_lataus.html", code=code, text=text)
 
+@bp.route('/gramps/delete_upload/<xmlfile>')
+@roles_accepted('member', 'admin')
+def xml_delete(xmlfile):
+    uploads.delete_files(current_user.username,xmlfile)
+    return redirect(url_for('gramps.list_uploads'))
