@@ -188,10 +188,10 @@ def xml_download(username,xmlfile):
 def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(current_user.username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
-    result_list = Unpickler(open(fname,"rb")).load()
-    return render_template("/admin/load_result.html", batch_events=result_list)
-
-
+    #result_list = Unpickler(open(fname,"rb")).load()
+    msg = open(fname).read()
+    #return render_template("/admin/load_result.html", batch_events=result_list)
+    return render_template("/admin/load_result.html", msg=msg)
 
 
 @bp.route('/admin/xml_delete/<username>/<xmlfile>')

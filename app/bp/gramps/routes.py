@@ -55,13 +55,14 @@ def upload_gramps():
         os.makedirs(upload_folder, exist_ok=True)
 
         pathname = loadfile.upload_file(infile,upload_folder)
-        
         shareds.tdiff = time.time()-t0
 
+        logname = pathname + ".log"
         uploads.set_meta(current_user.username,infile.filename,
                         status="uploaded",
                         upload_time=time.time())
         msg = "User {} uploaded the file {}".format(current_user.username,pathname)
+        open(logname,"w").write(msg)
         email.email_admin(
                     "Stk: Gramps XML file uploaded",
                     msg )
