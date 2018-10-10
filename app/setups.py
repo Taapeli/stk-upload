@@ -139,17 +139,16 @@ class AllowedEmail():
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     email = StringField('Email Address', validators=[Required('Email required') ])
-    submit = SubmitField('Agree and register')
+    submit = SubmitField(_('Accept and register'))
 
 #    email = StringField('Email', validators=[validators.InputRequired()])
     def validate_email(self, field):
         for result in shareds.driver.session().run(SetupCypher.email_val, email=field.data):
             num_of_emails = result[0]
-        if num_of_emails == 0:
-#        if not shareds.user_datastore.email_accepted(field.data):
-            raise ValidationError('Email address must be an authorized one') 
-        else:
-            return True    
+            if num_of_emails == 0:
+                raise ValidationError(_('Email address must be an authorized one')) 
+            else:
+                return True 
         
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])

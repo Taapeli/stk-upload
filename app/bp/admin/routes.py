@@ -125,7 +125,7 @@ def list_allowed_emails():
     form = AllowedEmailForm()
     if request.method == 'POST': 
         # Register a new email
-        UserAdmin.allowed_email_register(form.allowed_email.data,
+        UserAdmin.register_allowed_email(form.allowed_email.data,
                                          form.default_role.data)
  
     lista = UserAdmin.get_allowed_emails()

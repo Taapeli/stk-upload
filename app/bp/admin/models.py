@@ -71,10 +71,11 @@ class UserAdmin():
         '''
         Constructor
         #TODO: Get better error code?
+        #TODO: This class is not for admin user activities but for administering users outside the flash_security scope and for now has classmethods only.
         '''
-        self.username = user.username
-        self.roles = user.roles
-        if user.has_role('admin'):
+#        self.username = user.username
+#        self.roles = user.roles
+        if current_user.has_role('admin'):
                 return
         raise ValueError("User {} has not admin privileges".format(self.username))
 
@@ -96,12 +97,27 @@ class UserAdmin():
         return email
     
     @classmethod
-    def allowed_email_register(self, email, role):
+    def register_allowed_email(cls, email, role):
         try:
             with shareds.driver.session() as session:
                 with session.begin_transaction() as tx:
                     tx.run(Cypher_adm.allowed_email_register, email=email, role=role, admin_name=current_user.username)
                     tx.commit()
+        except CypherError as ex:
+            logging.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logging.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logging.error('Exception: ', ex)            
+            raise  
+          
+    @classmethod
+    def confirm_allowed_email(cls, tx, email):
+        try:
+            for record in tx.run(Cypher_adm.allowed_email_confirm, email=email):
+                return(record['email'])
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -154,7 +170,7 @@ class UserAdmin():
             return None                 
 
     @classmethod                                              
-    def _findAllowedEmail (self, tx, email):
+    def _findAllowedEmail (cls, tx, email):
         try:
             emailNode = None
             records = tx.run(Cypher_adm.allowed_email_find, email=email)
@@ -172,7 +188,22 @@ class UserAdmin():
             logging.error('Exception: ', ex)            
             raise
 
-
+    @classmethod
+    def user_profile_add(cls, tx, email, username):
+#        logger.debug('_put_role ', role)
+        try:
+            tx.run(Cypher_adm.user_profile_add, email=email, username=username) 
+            return
+        except CypherError as ex:
+            logging.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logging.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logging.error('Exception: ', ex)            
+            raise
+    
 class Cypher_adm():
     ' Cypher clauses for admin purposes'
     
@@ -197,7 +228,21 @@ CREATE (email:Allowed_email {
     creator: $admin_name,
     created_at: timestamp() } )"""
     
-    get_allowed_emails = """
+    allowed_email_confirm = """
+MATCH (email:Allowed_email)
+  WHERE email.allowed_email = $email 
+SET email.confirmed_at = timestamp()
+RETURN email """
+             
+    allowed_email_update = """
+UPDATE (email:Allowed_email {
+    allowed_email: $email,
+    default_role: $role,
+    creator: $admin_name,
+    created_at: $created_at,     
+    confirmed_at: $confirmed_at } )"""
+        
+    allowed_email_get = """
 MATCH (email:Allowed_email)
 RETURN DISTINCT email 
     ORDER BY email.created_at DESC"""    
@@ -206,3 +251,12 @@ RETURN DISTINCT email
 MATCH (email:Allowed_email)
     WHERE email.allowed_email = $email
 RETURN email"""
+
+    user_profile_add = '''         
+MATCH (u:User) 
+    WHERE u.email = $email
+CREATE (up:UserProfile {
+        userName: $username,
+        numSessions: 0,
+        lastSessionTime: timestamp() }
+    ) <-[:SUPPLEMENTED]- (u)'''
