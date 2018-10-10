@@ -144,7 +144,7 @@ class UserAdmin():
     def _getAllowedEmails (cls, tx):
         try:
             emailNodes = []
-            for record in tx.run(Cypher_adm.get_allowed_emails):
+            for record in tx.run(Cypher_adm.allowed_emails_get):
                 emailNodes.append(record['email'])
             return emailNodes        
         except CypherError as ex:
@@ -242,7 +242,7 @@ UPDATE (email:Allowed_email {
     created_at: $created_at,     
     confirmed_at: $confirmed_at } )"""
         
-    allowed_email_get = """
+    allowed_emails_get = """
 MATCH (email:Allowed_email)
 RETURN DISTINCT email 
     ORDER BY email.created_at DESC"""    
