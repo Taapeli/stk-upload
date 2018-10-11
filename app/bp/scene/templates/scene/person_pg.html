@@ -81,7 +81,7 @@
                         <th class="ColumnDate">Päivämäärä</th>
                         <th class="ColumnPlace">Paikka</th>
                         <th class="ColumnDescription">Kuvaus</th>
-                        <th class="ColumnNotes">Lisätiedot</th>
+<!--                    <th class="ColumnNotes">Lisätiedot</th> -->
                         <th class="ColumnSources">Lähteet</th>
                     </tr>
                 </thead>
@@ -108,9 +108,9 @@
                             title="tyyppiä {{e.place.type}}; katso paikan tiedot">
                             {{e.clearnames|join(' • ')}}</a>{% endif %}
                         </td>
-                        <td class="ColumnDescription">{{e.description}}</td>
-                        <td class="ColumnNotes">
-                            <div>{% if e.type == "Death" %}
+                        <td class="ColumnDescription"><div>{{e.description}}<br></div><!-- </td> -->
+                        <!-- <td class="ColumnNotes"> -->
+                            <div class="note">{% if e.type == "Death" %}
                             	{% if t_cause_of_death %}<span
                             	   class="typedesc">kuolinsyy</span> {{t_cause_of_death}}<br>
                             	{% endif %}{% endif %}
@@ -118,7 +118,7 @@
                             	   {% if first %}{% set first = False %}{% else %}<br>{% endif %}
                             	   <span class="typedesc">{{ note.type|transl('notet') }}</span>
                             	       {{ note.text }}{% endfor %}{% endif %}
-                            	</div>
+                            </div>
                         </td>
                         <td class="ColumnSources">
                          {% if e.source %}
@@ -140,7 +140,7 @@
             {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="perhe {{fam.id}}">
-	                    <p>perhe {{fam.id}}</p>
+	                    <p>perhe {{fam}}</p>
 	                    <ul>{% if fam.father %}
 	                        <li>Isä: {{ macro.member(fam.father, myid) }}</li>
 	                {% endif %}{% if fam.mother %}
@@ -173,7 +173,7 @@
 	            <div class="groupbox">
 		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
 		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-		                <p>perhe {{fam.id}}</p>
+		                <p>perhe {{fam}}</p>
 		                <ul>{% if fam.father %}
 		                        <li>Isä: {{ macro.member(fam.father, myid) }}</li>
 		                {% endif %}{% if fam.mother %}

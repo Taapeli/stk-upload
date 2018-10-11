@@ -80,7 +80,7 @@ Repository
             elif target_class == 'Citation':
                 src.citations.append(target)
                 return src.citations[-1]
-            elif target_class == 'Notes':
+            if target_class == 'Note':
                 src.notes.append(target)
                 return src.notes[-1]
 
@@ -91,7 +91,7 @@ Repository
             elif target_class == 'Citation':
                 src.citations.append(target)
                 return src.citations[-1]
-            elif target_class == 'Notes':
+            elif target_class == 'Note':
                 src.notes.append(target)
                 return src.notes[-1]
 
@@ -107,6 +107,12 @@ Repository
             if target_class == 'Place_name':
                 src.names.append(target)
                 return src.names[-1]
+            if target_class == 'Place':
+                src.uppers.append(target)
+                return src.uppers[-1]
+            if target_class == 'Note':
+                src.notes.append(target)
+                return src.notes[-1]
 
         elif src_class == 'Family':
             if target_class == 'Event_combo':
@@ -283,7 +289,7 @@ def get_a_person_for_display(uniq_id, user):
         print("nodes {}".format(" --> ".join(nodelist)))
         person = None
 
-    return person
+    return person, None
 
     persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
     person = persons[0]

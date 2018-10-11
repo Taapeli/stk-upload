@@ -107,23 +107,21 @@ def show_all_persons_list(opt=''):
 
 @bp.route('/scene/person/<int:uid>')
 #     @login_required
-def show_a_person(uid):
-    """ One Person with connected Events, Families etc
-        Korvaamaan metodin show_person_page()
-    """
-    if not uid:
-        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
-
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    
-    person, sources = get_a_person_for_display(uid, user)
-    return render_template("/scene/person_pg.html", 
-                           person=person, sources=sources, menuno=1)
-
-
+# def show_a_person(uid):
+#     """ One Person with connected Events, Families etc
+#         Korvaamaan metodin show_person_page()
+#     """
+#     if not uid:
+#         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
+# 
+#     if current_user.is_authenticated:
+#         user=current_user.username
+#     else:
+#         user=None
+#     
+#     person, sources = get_a_person_for_display(uid, user)
+#     return render_template("/scene/person_pg.html", 
+#                            person=person, sources=sources, menuno=1)
 @bp.route('/scene/person/a=<int:uid>')
 #     @login_required
 def show_a_person_w_apoc(uid):

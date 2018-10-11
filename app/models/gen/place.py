@@ -52,6 +52,8 @@ class Place:
         self.change = 0
         self.names = []
         self.coord = None
+        self.uppers = []        # Upper place objects for display
+        self.notes = []         # Upper place objects for display
         self.urls = []          # Weburl instance list
 
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
@@ -95,11 +97,12 @@ class Place:
             if nm.lang:
                 name_list.append("{} ({})".format(nm.name, nm.lang))
             else:
-                name_list.append(nm.name)
+                # Put first the name with no lang
+                name_list = [nm.name] + name_list
         if name_list:
             return name_list
         else:
-            return self.pname
+            return [self.pname]
 
 
     @staticmethod
