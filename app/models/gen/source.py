@@ -37,7 +37,7 @@ class Source:
         self.reporef_medium = ''
         self.citations = []   # For creating display sets
         self.repos = []   # For creating display sets
-
+        self.notes = []
 
     def __str__(self):
         return "{} {}".format(self.id, self.stitle)

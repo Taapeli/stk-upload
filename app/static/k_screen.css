@@ -392,7 +392,11 @@ td.ColumnEvent ul {
 table.IndividualList tr:nth-child(even),
 table.infolist.eventlist tbody tr:nth-child(even)
     {background-color: #f2f2f2}
-
+ul.eventnotes { 
+	list-style-position: outside;
+	padding-left: 1em;
+	margin: 0.2em; 
+}
 /* Places
 ----------------------------------------------------- */
 #Places table.infolist td.ColumnName {
