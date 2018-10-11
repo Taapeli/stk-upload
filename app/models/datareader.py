@@ -673,16 +673,28 @@ def get_person_data_by_id(uniq_id):
                     citation_ind = i + 1
                     break
             if citation_ind > 0:
-                # Citation found; Event_combo.source = jonkinlainen indeksi
+                # Citation found; Event_combo.source = sitaatin numero
                 e.source = citation_ind
-            else: # Store the new source to the list
+            else: 
+                # Store the new source to the list
+                # source = lähteen numero samassa listassa
                 source_cnt += 1
                 e.source = source_cnt
 
                 result = c.get_source_repo(c.uniq_id)
                 for record in result:
-                    # record contains some Citation data + list of
-                    # Source, Repository and Note data
+                    # Citation data & list of Source, Repository and Note data
+                    #
+                    # <Record id=92127 date='2017-01-25' page='1785 Novembr 3. kaste' 
+                    #    confidence='3' notetext='http://www.sukuhistoria.fi/...' 
+                    #    sources=[
+                    #        [91360, 
+                    #         'Lapinjärvi syntyneet 1773-1787 vol  es346', 
+                    #         'Book', 
+                    #         100272, 
+                    #         'Lapinjärven seurakunnan arkisto', 
+                    #         'Archive']
+                    #    ]>
                     c.dateval = record['date']
                     c.page = record['page']
                     c.confidence = record['confidence']
@@ -706,7 +718,9 @@ def get_person_data_by_id(uniq_id):
                         
                         s.repos.append(r)
                         c.sources.append(s)
-                        
+        
+                    print("Eve:{} {} > Cit:{} {} > Sour:{} {} > Repo:{} {}".\
+                          format(e.uniq_id, e.id, c.uniq_id, c.page, s.uniq_id, s.stitle, r.uniq_id, r.rname))
                     sources.append(c)
             
     for link in p.objref_hlink:
@@ -721,11 +735,13 @@ def get_person_data_by_id(uniq_id):
     # - which include a list of members (Person with 'role' attribute)
     #   - Person includes a list of Name objects
     families = {}
-    fid = ''
+    fid = 0
     result = Person_combo.get_family_members(p.uniq_id)
     for record in result:
-        # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id", 
-        #      "gender", "birth_date", "names"]
+        # <Record family_id='F0031' f_uniq_id=99991 role='FATHER' 
+        #    m_id='I0120' uniq_id=80309 gender='M' birth_date=None 
+        #    names=[['', 'Birth Name', 'Bengt', 'Motte', '']]>
+
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]
             if not fid in families:

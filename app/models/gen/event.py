@@ -121,7 +121,7 @@ class Event:
         else:
             e.dates = None
             e.date = ""
-        e.text = node['description'] or ''
+        e.description = node['description'] or ''
         e.attr = node['attr'] or dict()
 #         e.attr_type = node['attr_type'] or ''
 #         e.attr_value = node['attr_value'] or ''

@@ -109,6 +109,8 @@ class Person_combo(Person):
 
         self.events = []                # For creating display sets
         self.citations = []
+        self.families_as_child = []     # Propably one only
+        self.families_as_parent =[]
         self.eventref_hlink = []        # Gramps event handles
         self.eventref_role = []
         self.objref_hlink = []
@@ -141,7 +143,7 @@ return path"""
         all_nodes_query_w_apoc="""
 MATCH (p:Person) WHERE id(p) = $pid
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 
-        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|<CHILD|<FATHER|<MOTHER'}) 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|NOTE>|<CHILD|<FATHER|<MOTHER'}) 
     YIELD nodes, relationships
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,

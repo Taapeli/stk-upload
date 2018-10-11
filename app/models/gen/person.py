@@ -103,6 +103,13 @@ class Person:
         self.est_birth = ''
         self.est_death = ''
 
+    def __str__(self):
+        # Person_combo 79584 I1234
+        if self.gender == 'M':  sex = 'male'
+        elif self.gender == 'F':  sex = 'female'
+        else: sex = 'unknown'
+        return "{} {}".format(sex, self.id)
+
     @classmethod
     def from_node(cls, node):
         '''
@@ -117,7 +124,7 @@ class Person:
         '''
         p = cls()
         p.uniq_id = node.id
-        p.id = node.id
+        p.id = node['id']
         p.gender = node['gender']
         p.handle = node['handle']
         p.change = node['change']

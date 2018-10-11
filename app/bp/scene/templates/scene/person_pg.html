@@ -137,7 +137,7 @@
             {% set chtype = {"F":"tytär", "M":"poika", "":"lapsi"} %}
             <div class="mainbox" title="Perheet">
                 <p>Vanhempien perhe</p>
-            {% for fam in person.families %}{% if fam.role == "CHILD" %}
+            {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="perhe {{fam.id}}">
 	                    <p>perhe {{fam.id}}</p>
@@ -171,7 +171,7 @@
             <div class="mainbox" title="Omat perheet">
                 <p>Perheessä vanhempana</p>
 	            <div class="groupbox">
-		            {% for fam in person.families %}{% if fam.role != "CHILD" %}
+		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
 		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
 		                <p>perhe {{fam.id}}</p>
 		                <ul>{% if fam.father %}

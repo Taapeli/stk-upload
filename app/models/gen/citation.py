@@ -40,8 +40,9 @@ class Citation:
         self.noteref_hlink = []
         self.source_handle = ''
         self.source_id = None
-        self.sources = []   # For creating display sets
-        self.citators = []  # For creating display sets
+        self.sources = []   # objects for creating display sets
+        self.citators = []
+        self.notes = []
 
 
     def __str__(self):
@@ -172,23 +173,16 @@ class Citation:
         
         query = """
  MATCH (c:Citation) -[r:SOURCE]-> (source:Source) 
-    -[p:REPOSITORY]-> (repo:Repository) {0}
+        -[p:REPOSITORY]-> (repo:Repository) {0}
  OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
    WITH c, r, source, p, repo 
    ORDER BY c.page, note
- RETURN ID(c) AS id, 
-    c.dateval AS date,
-    c.page AS page,
-    c.confidence AS confidence, 
+ RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidence, 
     note.text AS notetext,
-    COLLECT(DISTINCT [ID(source), 
-             source.stitle, 
-             p.medium, 
-             ID(repo), 
-             repo.rname, 
-             repo.type]) AS sources
+    COLLECT(DISTINCT [ID(source), source.stitle, 
+                      p.medium, 
+                      ID(repo), repo.rname, repo.type]) AS sources
  """.format(where)
-                
         return shareds.driver.session().run(query)
     
     

@@ -25,7 +25,7 @@ def get_a_person_for_display_apoc(uniq_id, user):
         @TODO Monet osat on ohjelmoimatta
     """
 
-    def connect_objects(src, target):
+    def connect_object_as_leaf(src, target, rel_type=None):
         ''' Subroutine to save target object in appropiate place in the object src
         
   src \ dst  Person combo    Name    Refname    Media    Note    Event combo
@@ -62,6 +62,7 @@ Repository
         '''
         src_class = src.__class__.__name__
         target_class = target.__class__.__name__
+
         if src_class == 'Person_combo':
             if target_class == 'Name':
                 src.names.append(target)
@@ -70,8 +71,12 @@ Repository
                 src.events.append(target)
                 return src.events[-1]
             elif target_class == 'Family':
-                src.families.append(target)
-                return src.families[-1]
+                if rel_type == 'CHILD':
+                    src.families_as_child.append(target)
+                    return src.families_as_child[-1]
+                if rel_type == 'MOTHER' or rel_type == 'FATHER':
+                    src.families_as_parent.append(target)
+                    return src.families_as_parent[-1]
             elif target_class == 'Citation':
                 src.citations.append(target)
                 return src.citations[-1]
@@ -90,6 +95,51 @@ Repository
                 src.notes.append(target)
                 return src.notes[-1]
 
+        elif src_class == 'Citation':
+            if target_class == 'Source':
+                src.sources.append(target)
+                return src.sources[-1]
+            if target_class == 'Note':
+                src.notes.append(target)
+                return src.notes[-1]
+
+        elif src_class == 'Place':
+            if target_class == 'Place_name':
+                src.names.append(target)
+                return src.names[-1]
+
+        elif src_class == 'Family':
+            if target_class == 'Event_combo':
+                src.events.append(target)
+                return src.events[-1]
+#             if target_class == 'Person_combo':
+#                 # Note. Relation (99991 Family) -[MOTHER]-> (80307 Person)
+#                 #       is stored reverse, as target is the root person
+#                 #
+#                 return connect_object_as_leaf(target, src, rel_type)
+#             
+#                 if rel_type == 'CHILD':
+#                     src.children.append(target)
+#                     return src.children[-1]
+#                 elif rel_type == 'MOTHER':
+#                     src.mother = target
+#                     return src.mother
+#                 elif rel_type == 'FATHER':
+#                     src.father = target
+#                     return src.father
+            if target_class == 'Note':
+                src.notes.append(target)
+                return src.notes[-1]
+
+        elif src_class == 'Source':
+            if target_class == 'Repository':
+                src.repos.append(target)
+                return src.repos[-1]
+            if target_class == 'Note':
+                src.notes.append(target)
+                return src.notes[-1]
+
+        print('Ei toteutettu {} --> {}'.format(src_class, target_class))
         return None
     
     # 1. Read person p and paths for all nodes connected to p
@@ -114,74 +164,97 @@ Repository
             #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
             nodes[node.id] = node
 
-        # 3. Store each gen object from nodes of relations
-        #    as leafs of Person object tree. 
+        # 3. Store each gen object from nodes of relations as leafs
+        #    of Person object tree. 
         #    Also create a directory of all of those objects
         for relation in relations:
             # [source uniq_id, relation type, relation role, target uniq_id]
             # [80234, 'EVENT', 'Primary', 88208]
-            src_node = nodes[relation[0]]
+            if relation[3] != person.uniq_id:
+                # Going to add a new node under src node
+                node_id1 = relation[0]
+                node_id2 = relation[3]
+            else:
+                # Reverse connection (Family)-->(Person): add src under target node
+                node_id1 = relation[3]
+                node_id2 = relation[0]
+            src_node = nodes[node_id1]
             src_label = list(src_node.labels)[0]
+            target_node = nodes[node_id2]
+            target_label = list(target_node.labels)[0]
+
             if not src_node.id in objs:
                 # Create new object
                 try:
                     src_obj = get_object_from_node(src_node)
-                    print("created ({} {})".format(src_obj.uniq_id, src_label))
+                    print("  new obj[{}] <- {} {}".\
+                          format(src_obj.uniq_id, src_label, src_obj))
+                    objs[src_obj.uniq_id] = src_obj
                 except Exception as e:
                     print("{}: Could not create {}".format(e, src_obj))
-
             else:
                 # Use exsisting object
                 src_obj = objs[src_node.id]
 
-            target_node = nodes[relation[3]]
-            target_label = list(target_node.labels)[0]
-
-            if relation[2]: r = ' '.join(relation[1:3])
-            else:           r = relation[1]
+            rel_type = relation[1]
+            role = relation[2]
+            if role:    r = ' '.join(relation[1:3])
+            else:       r = relation[1]
             print("relation ({} {}) -[{}]-> ({} {})".format(src_node.id, src_label, r, target_node.id, target_label))
             # Source object, for ex. Person_combo
             if src_node.id in objs:
                 src_obj = objs[src_node.id]
                 target_obj = get_object_from_node(target_node)
-                if not target_obj:  # Not implemented yet!
+                if not target_obj:  
+                    print("Not implemented yet! {}".format(target_obj))
                     continue
-                target_link = connect_objects(src_obj, target_obj)
-                o = None
-                if o and not target_obj.uniq_id in objs:
-                    objs[target_obj.uniq_id] = o
-                    print("obj[{}] <- {}".\
-                          format(target_obj.uniq_id, o))
+                if role:
+                    target_obj.role = role
+                # Store target object of the relation as a leaf object in src_obj
+                target_link = connect_object_as_leaf(src_obj, target_obj, rel_type)
+                # Target_link point to that leaf. 
+                # Put it also in objs directory for possible re-use
+                if not target_link.uniq_id in objs:
+                    objs[target_link.uniq_id] = target_link
+                    print("  obj[{}] <- {}".\
+                          format(target_link.uniq_id, target_link))
+                    cits = target_link
             else:
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
 
+    # 4. Generate clear names for event places
+
+    for e in person.events:
+        if e.place:
+            e.clearnames = e.clearnames + e.place.show_names_list()
+    
     # Return Person with included objects and list of sources/citations(?)
     return (person, None)
-
-    persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
-    person = persons[0]
-    person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-    person.set_my_places(True)
-    person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
-    sources = Source.get_sources_by_idlist(source_ids)
-    #TODO: Etsi sitaateille lähteet
-
-#     person.get_all_notes()
-#     person.get_media()
-#     person.get_refnames()
-    for c in person.citations:
-        print ("Sitaatit ({} {})".format(c.uniq_id, c))
-        for ci in c.citators:
-            print ("  ({}) <- ({})".format(c, ci))
-#     for e in person.events:
-#         print("Person event {}: {}".format(e.uniq_id, e))
-#         if e.place == None:
-#             print("- no place")
-#         else:
-#             for n in e.place.names:
-#                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
-
-    return person, sources
+ 
+#     persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
+#     person = persons[0]
+#     person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
+#     person.set_my_places(True)
+#     person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
+#     sources = Source.get_sources_by_idlist(source_ids)
+#     #TODO: Etsi sitaateille lähteet
+# 
+# #     person.get_all_notes()
+# #     person.get_media()
+# #     person.get_refnames()
+#     for c in person.citations:
+#         print ("Sitaatit ({} {})".format(c.uniq_id, c))
+#         for ci in c.citators:
+#             print ("  ({}) <- ({})".format(c, ci))
+# #     for e in person.events:
+# #         print("Person event {}: {}".format(e.uniq_id, e))
+# #         if e.place == None:
+# #             print("- no place")
+# #         else:
+# #             for n in e.place.names:
+# #                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
+# 
+#     return person, sources
 
 
 def get_a_person_for_display(uniq_id, user):

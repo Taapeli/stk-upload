@@ -37,25 +37,38 @@ class Family:
         self.change = 0
         self.id = ''
         self.uniq_id = uniq_id
+        self.rel_type = ''
         self.father = None
         self.mother = None
-        self.children = []      # int lasten osoitteet
+        self.children = []      # Child object
+        self.events = []        # Event objects
+        self.duration = [None, None]    # Marriage and divorce dates
         #TODO Obsolete parameters???
         self.eventref_hlink = []
         self.eventref_role = []
         self.childref_hlink = []    # handles
         self.noteref_hlink = []
 
+    def __str__(self):
+        if self.rel_type:   rel = self.rel_type
+        else:               rel = 'undefined relation'
+        return "{} {}".format(self.id, rel)
+
+    
     @classmethod
     def from_node(cls, node):
         '''
         Transforms a db node to an object of type Family.
+        
+        <Node id=99991 labels={'Family'} 
+            properties={'rel_type': 'Married', 'handle': '_da692e4ca604cf37ac7973d7778', 
+            'id': 'F0031', 'change': 1507492602}>
         '''
         n = cls()
         n.uniq_id = node.id
+        n.id = node['id'] or ''
         n.handle = node['handle']
         n.change = node['change']
-        n.id = node['id'] or ''
         n.rel_type = node['rel_type'] or ''
         return n
 

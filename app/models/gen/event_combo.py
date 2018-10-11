@@ -56,6 +56,9 @@ class Event_combo(Event):
         self.place = ''         # TODO Change to places[]
 
 
+# @classmethod from_node(cls, node): see evetn.from_node
+
+# Open ideas:
 #     def read(self, keys):
 #         ''' Access a set of Event complexes using different search fields
 #             like key = {'User_id': 1234}

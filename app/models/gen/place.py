@@ -548,9 +548,9 @@ class Place_name:
         else:
             d = ""
         if self.lang != '':
-            return "{} ({}){}".format(self.name, self.lang, d)
+            return "'{}' ({}){}".format(self.name, self.lang, d)
         else:
-            return "{}{}".format(self.name, d)
+            return "'{}'{}".format(self.name, d)
 
     @classmethod
     def from_node(cls, node):

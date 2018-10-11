@@ -53,8 +53,8 @@ class Source:
                 'stitle': 'Kangasala syntyneet 1721-1778', 'change': '1507149115'}>
         '''
         s = cls()   # create a new Source
-        s.id = node.id
-        s.uniq_id = node['uniq_id']
+        s.uniq_id = node.id
+        s.id = node['id']
         s.handle = node['handle']
         s.stitle = node['stitle']
         s.change = node['change']
