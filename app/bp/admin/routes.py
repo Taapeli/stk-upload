@@ -6,11 +6,16 @@ Created on 8.8.2018
  Administrator operations page urls
  
 '''
+
+import os
+
 import logging 
+from _pickle import Unpickler
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for 
+from flask import render_template, request, redirect, url_for, send_from_directory
 from flask_security import login_required, roles_accepted, roles_required, current_user
+from flask_babelex import _
 
 import shareds
 from models import dbutil, dataupdater, loadfile, datareader
@@ -18,6 +23,8 @@ from .models import DataAdmin, UserAdmin
 from .cvs_refnames import load_refnames
 from .forms import AllowedEmailForm
 from . import bp
+from . import uploads
+
 
 # # Go to admin start page in app/routes.py 
 # @bp.route('/admin',  methods=['GET', 'POST'])
@@ -116,9 +123,9 @@ def save_loaded_csv(filename, subj):
 @roles_required('admin')
 def list_allowed_emails():
     form = AllowedEmailForm()
-    if request.method == 'POST':
+    if request.method == 'POST': 
         # Register a new email
-        UserAdmin.allowed_email_register(form.allowed_email.data,
+        UserAdmin.register_allowed_email(form.allowed_email.data,
                                          form.default_role.data)
  
     lista = UserAdmin.get_allowed_emails()
@@ -134,4 +141,63 @@ def list_users():
     # Käytetään neo4juserdatastorea
     lista = shareds.user_datastore.get_users()
     return render_template("/admin/list_users.html", users=lista)  
+
+@bp.route('/admin/list_uploads/<username>', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_uploads(username):
+    upload_list = uploads.list_uploads(username) 
+    return render_template("/admin/uploads.html", uploads=upload_list, user=username)
+
+@bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'audit')
+def start_load_to_neo4j(username,xmlname):
+    upload_list = uploads.initiate_background_load_to_neo4j(username,xmlname) 
+    return redirect(url_for('admin.list_uploads', username=username))
+
+@bp.route('/admin/list_threads', methods=['GET'])
+@roles_accepted('admin', 'audit')
+def list_threads():
+    import threading
+    s = "<pre>\n"
+    s += "Threads:\n"
+    for t in threading.enumerate():
+        s += "  " + t.name + "\n"
+    s += "-----------\n"
+    s += "Current thread: " + threading.current_thread().name
+    s += "</pre>"
+    return s
+
+
+@bp.route('/admin/xml_download/<username>/<xmlfile>')
+@login_required
+@roles_accepted('admin', 'audit')
+def xml_download(username,xmlfile):
+    xml_folder = uploads.get_upload_folder(username)
+    xml_folder = os.path.abspath(xml_folder)
+    logging.info(xml_folder)
+    logging.info(xmlfile)
+    return send_from_directory(directory=xml_folder, filename=xmlfile, 
+                               mimetype="application/gzip",
+                               as_attachment=True)
+                               #attachment_filename=xmlfile+".gz") 
+
+@bp.route('/admin/show_upload_log/<username>/<xmlfile>')
+@roles_accepted('member', 'admin')
+def show_upload_log(username,xmlfile):
+    upload_folder = uploads.get_upload_folder(current_user.username)
+    fname = os.path.join(upload_folder,xmlfile + ".log")
+    #result_list = Unpickler(open(fname,"rb")).load()
+    msg = open(fname).read()
+    #return render_template("/admin/load_result.html", batch_events=result_list)
+    return render_template("/admin/load_result.html", msg=msg)
+
+
+@bp.route('/admin/xml_delete/<username>/<xmlfile>')
+@login_required
+@roles_accepted('admin', 'audit')
+def xml_delete(username,xmlfile):
+    uploads.delete_files(username,xmlfile)
+    return redirect(url_for('admin.list_uploads', username=username))
 

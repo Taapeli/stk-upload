@@ -12,19 +12,23 @@ class Chkdate():
         self.moment_long = 'Unidefined'
         self.moment_short = self.moment_long
 
+        try:
         # Get git log info
-        gitproc = Popen(['git', 'log', '-1'], stdout = PIPE)    #, cwd=src_path)
-        (stdout, _) = gitproc.communicate()
-        git_out = stdout.strip().decode("utf-8")
-
-        for line in git_out.splitlines():
-            if line.startswith("Date:"):
-                # Date:   Sun Aug 26 10:54:26 2018 +0300
-                a = line.split()
-                self.moment_short = "{}.{}.{}".format(a[3], Chkdate.month_dict[a[2]], a[5])
-                self.moment_long = "{} {}".format(self.moment_short, a[4])
-        
-        print("Git version {}".format(self.moment_long))
+            gitproc = Popen(['git', 'log', '-1'], stdout = PIPE)    #, cwd=src_path)
+            (stdout, _) = gitproc.communicate()
+            git_out = stdout.strip().decode("utf-8")
+    
+            for line in git_out.splitlines():
+                if line.startswith("Date:"):
+                    # Date:   Sun Aug 26 10:54:26 2018 +0300
+                    a = line.split()
+                    self.moment_short = "{}.{}.{}".format(a[3], Chkdate.month_dict[a[2]], a[5])
+                    self.moment_long = "{} {}".format(self.moment_short, a[4])
+            
+            print("Git version {}".format(self.moment_long))
+        except FileNotFoundError as ex:
+            print(ex.__traceback__)
+            print("Git version not found (error)")     
 
 
     def revision_time(self):

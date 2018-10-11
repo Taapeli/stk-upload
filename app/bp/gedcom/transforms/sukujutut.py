@@ -10,7 +10,7 @@ import sys
 import os
 
 from .. import transformer
-from transformer import Item
+from ..transformer import Item
 from flask_babelex import _
 
 doclink = "http://taapeli.referata.com/wiki/Sukujutut-muunnos"

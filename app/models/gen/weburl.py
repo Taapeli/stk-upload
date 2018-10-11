@@ -30,24 +30,34 @@ class Weburl():
         self.href = None
         self.type = None
         self.description = ""
-        self.priv = ""
+        self.priv = 0
 
-    @staticmethod
-    def from_record(record):
-        ''' Create Weburl from a collection in Neo4j result
-        # collect([w.href, wr.type, wr.description, wr.priv]) as webref
-        '''
-        if record[0] != None:   # Must have href
-            return None
-        url = Weburl()
-        url.href = record[0]
-        url.type = record[1]
-        url.description = record[2]
-        url.priv = record[3]
-        return url
 
     def __str__(self):
         return "{} '{}' <{}>".format(self.type, self.description, self.href)
+
+
+    def tuple(self):
+        return (self.type, self.description, self.href)
+
+
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Weburl.
+        
+        node = {description:"Jacob Tesche BlF:ssa",
+            href:"http://blf.fi/artikel.php?id=9511",
+            priv:"",
+            type:"Web Search"}
+        '''
+        n = cls()
+        n.uniq_id = node.id
+        n.href = node['href'] or ''
+        n.priv = node['priv'] or 0
+        n.type = node['type'] or ''
+        n.description = node['description'] or ''
+        return n
 
 
     def save(self, tx, parent_id=None):

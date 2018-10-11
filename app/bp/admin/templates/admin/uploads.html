@@ -4,7 +4,7 @@
 {% block body %}
     {{ super() }}
     <meta http-equiv="refresh" content="30">
-    <h2>{{ _("Uploads") }}</h2>
+    <h2>{{ _("Uploads for user") }} '{{ user }}'</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -19,17 +19,24 @@
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("XML file") }}</th>
                 <th>{{ _("Status") }}</th>
+                <th>{{ _("Load to neo4j") }}</th>
+                <th>{{ _("Log") }}</th>
                 <th>{{ _("Delete") }}</th>
-   			</tr>
+           </tr>
 	    {% for upload in uploads %}
 	       <tr>
 	           <td class="msg_INFO">{{upload.upload_time_s}}</td>
 	           <td class="msg_INFO">
-    	           <a href=/gramps/xml_download/{{upload.xmlname}}>{{upload.xmlname}}</a>
+    	           <a href=/admin/xml_download/{{user}}/{{upload.xmlname}}>{{upload.xmlname}}</a>
 	           </td>
-	           <td class="msg_INFO">{{upload.status}}</td>
 	           <td class="msg_INFO">
-	           		<a href=/gramps/xml_delete/{{upload.xmlname}}>Delete</a></td>
+    	           {{upload.status}}
+	           <td class="msg_INFO">
+	           		<a href=/admin/start_upload/{{user}}/{{upload.xmlname}}>Start load to neo4j</a></td>
+	           <td class="msg_INFO">
+	           		<a href=/admin/show_upload_log/{{user}}/{{upload.xmlname}}>Show log</a></td>
+	           <td class="msg_INFO">
+	           		<a href=/admin/xml_delete/{{user}}/{{upload.xmlname}}>Delete</a></td>
 	       </tr>
 	    {% endfor %}</table>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>

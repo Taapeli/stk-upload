@@ -1,7 +1,7 @@
 from flask import session
 from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import ConfirmRegisterForm, Required, StringField, ValidationError
-from wtforms import SelectField
+from wtforms import SelectField, SubmitField
 from flask_security.utils import _
 from flask_mail import Mail
 from database.models.neo4jengine import Neo4jEngine 
@@ -24,8 +24,7 @@ class SetupCypher():
 
     set_user_constraint = '''
         CREATE CONSTRAINT ON (user:User) 
-        ASSERT user.username IS UNIQUE
-        ASSERT user.email IS UNIQUE'''
+            ASSERT user.username IS UNIQUE'''
     
     role_create = '''
         CREATE (role:Role {level: $level, name: $name, 
@@ -140,15 +139,16 @@ class AllowedEmail():
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     email = StringField('Email Address', validators=[Required('Email required') ])
+    submit = SubmitField(_('Accept and register'))
+
 #    email = StringField('Email', validators=[validators.InputRequired()])
     def validate_email(self, field):
         for result in shareds.driver.session().run(SetupCypher.email_val, email=field.data):
             num_of_emails = result[0]
-        if num_of_emails == 0:
-#        if not shareds.user_datastore.email_accepted(field.data):
-            raise ValidationError('Email address must be an authorized one') 
-        else:
-            return True    
+            if num_of_emails == 0:
+                raise ValidationError(_('Email address must be an authorized one')) 
+            else:
+                return True 
         
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])

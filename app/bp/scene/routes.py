@@ -10,14 +10,15 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
 
 from . import bp
+from .models import get_a_person_for_display, get_a_person_for_display_apoc # get_person_for_display #, get_person_data_by_id
 from models.datareader import read_persons_with_events
-from models.datareader import get_person_data_by_id
+from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
-from models.gen.family import Family_for_template
+#from models.gen.family import Family_for_template
 from models.gen.place import Place
 from models.gen.source import Source
-from models.gen.citation import Citation
+#from models.gen.citation import Citation
 
 
 @bp.route('/scene/persons/restricted')
@@ -32,10 +33,11 @@ def show_persons_restricted(selection=None):
     return render_template("/scene/persons.html", persons=persons, 
                            menuno=1, rule=keys)
 
+# ------------------------- Menu 0: Person search ------------------------------
 
 @bp.route('/scene/persons', methods=['POST', 'GET'])
 def show_person_list(selection=None):
-    """ Show list of selected Persons """
+    """ Show list of selected Persons for menu(0) """
     if request.method == 'POST':
         try:
             # Selection from search form
@@ -44,7 +46,7 @@ def show_person_list(selection=None):
             keys = (rule, name)
             persons = read_persons_with_events(keys)
             return render_template("/scene/persons.html", persons=persons, menuno=0,
-                                   name=name, rule=rule)
+                                   name=name, rule=keys)
         except Exception as e:
             logger.debug("Error {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
@@ -60,73 +62,6 @@ def show_person_list(selection=None):
     persons = [] #datareader.read_persons_with_events(keys)
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys)
-
-
-@bp.route('/scene/persons/all/<string:opt>')
-@bp.route('/scene/persons/all/')
-#     @login_required
-def show_all_persons_list(opt=''):
-    """ The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
-        with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
-        TODO Should have restriction by owner's UserProfile 
-    """
-    keys = ('all',)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    ref = ('ref' in opt)
-    if 'fn' in opt: order = 1   # firstname
-    elif 'pn' in opt: order = 2 # firstname
-    else: order = 0             # surname
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
-    return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           order=order,rule=keys)
-
-
-@bp.route('/scene/person/<string:uid>')
-#     @login_required
-def show_a_person(uid=""):
-    """ One Person with connected Events, Families etc
-        Korvaamaan metodin show_person_page()
-
-        @TODO Monet osat on ohjelmoimatta
-    """
-    if not uid:
-        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
-
-    keys = ('uniq_id', uid)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    # Get Person objects, whith included Events and Names (Refnames no needed!)
-    persons = read_persons_with_events(keys, user=user)
-    person = persons[0]
-    person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-    person.set_my_places(True)
-    person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
-    sources = Source.get_sources_by_idlist(source_ids)
-    #TODO: Etsi sitaateille lähteet
-
-#     person.get_all_notes()
-#     person.get_media()
-#     person.get_refnames()
-    for c in person.citations:
-        print ("Sitaatit {} {}".format(c.uniq_id, c))
-        for ci in c.citators:
-            print (" <- {}".format(ci))
-#     for e in person.events:
-#         print("Person event {}: {}".format(e.uniq_id, e))
-#         if e.place == None:
-#             print("- no place")
-#         else:
-#             for n in e.place.names:
-#                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
-    
-    return render_template("/scene/person_pg.html", 
-                           person=person, sources=sources, menuno=1)
-
 
 @bp.route('/scene/persons/ref=<string:refname>')
 @bp.route('/scene/persons/ref=<string:refname>/<opt>')
@@ -145,11 +80,73 @@ def show_persons_by_refname(refname, opt=""):
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order, rule=keys)
 
+# ------------------------------ Menu 1 Persons --------------------------------
 
-@bp.route('/scene/person=<string:uniq_id>')
+@bp.route('/scene/persons/all/<string:opt>')
+@bp.route('/scene/persons/all/')
+#     @login_required
+def show_all_persons_list(opt=''):
+    """ List all persons for menu(1)
+        The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
+        with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
+        TODO Should have restriction by owner's UserProfile 
+    """
+    keys = ('all',)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    ref = ('ref' in opt)
+    if 'fn' in opt: order = 1   # firstname
+    elif 'pn' in opt: order = 2 # firstname
+    else: order = 0             # surname
+    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    return render_template("/scene/persons.html", persons=persons, menuno=1, 
+                           order=order,rule=keys)
+
+
+@bp.route('/scene/person/<int:uid>')
+#     @login_required
+def show_a_person(uid):
+    """ One Person with connected Events, Families etc
+        Korvaamaan metodin show_person_page()
+    """
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
+
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    
+    person, sources = get_a_person_for_display(uid, user)
+    return render_template("/scene/person_pg.html", 
+                           person=person, sources=sources, menuno=1)
+
+
+@bp.route('/scene/person/a=<int:uid>')
+#     @login_required
+def show_a_person_w_apoc(uid):
+    """ One Person with all connected nodes
+        Korvaamaan metodin show_person_page()
+    """
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
+
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    
+    person, sources = get_a_person_for_display_apoc(uid, user)
+    return render_template("/scene/person_pg.html", 
+                           person=person, sources=sources, menuno=1)
+
+
+@bp.route('/scene/person=<int:uniq_id>')
 #     @login_required
 def show_person_page(uniq_id):
-    """ Full homepage for a Person in database
+    """ Full homepage for a Person in database (vanhempi versio)
     """
 
     try:
@@ -172,15 +169,16 @@ def show_person_page(uniq_id):
     return render_template("/scene/person.html", person=person, events=events, 
                            photos=photos, sources=sources, families=families)
 
+# ------------------------------ Menu 4: Places --------------------------------
 
 @bp.route('/scene/locations')
 def show_locations():
-    """ List of Places
+    """ List of Places for menu(4)
     """
     try:
         # 'locations' has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        locations = Place.get_place_w_names()
+        locations = Place.get_place_hierarchy()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
@@ -206,9 +204,11 @@ def show_location_page(locid):
     return render_template("/scene/place_events.html", locid=locid, place=place, 
                            events=events, locations=place_list)
 
+# ------------------------------ Menu 5: Sources --------------------------------
+
 @bp.route('/scene/sources')
 def show_sources():
-    """ Lähdeluettelon näyttäminen ruudulla
+    """ Lähdeluettelon näyttäminen ruudulla for menu(5)
     """
     try:
         sources = Source.get_source_list()
