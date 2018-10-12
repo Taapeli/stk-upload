@@ -717,7 +717,7 @@ def get_person_data_by_id(uniq_id):
                         r.type = source[5]
                         
                         s.repos.append(r)
-                        c.sources.append(s)
+                        c.source = s
         
                     print("Eve:{} {} > Cit:{} {} > Sour:{} {} > Repo:{} {}".\
                           format(e.uniq_id, e.id, c.uniq_id, c.page, s.uniq_id, s.stitle, r.uniq_id, r.rname))

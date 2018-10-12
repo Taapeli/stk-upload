@@ -1,5 +1,5 @@
 '''
-    bp.scene.models – Database operations concerning multiple gen classes
+    bp.scene.models – Database operations for multiple gen classes
 
 Created on 24.9.2018
 
@@ -97,8 +97,8 @@ Repository
 
         elif src_class == 'Citation':
             if target_class == 'Source':
-                src.sources.append(target)
-                return src.sources[-1]
+                src.source = target
+                return src.source
             if target_class == 'Note':
                 src.notes.append(target)
                 return src.notes[-1]
@@ -149,7 +149,12 @@ Repository
         return None
     
     # 1. Read person p and paths for all nodes connected to p
-    results = Person_combo.get_person_paths_apoc(uniq_id)
+    try:
+        results = Person_combo.get_person_paths_apoc(uniq_id)
+    except Exception as e:
+        print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
+        return [None, None]
+
 
     for result in results:
         relations = result['relations']
@@ -233,6 +238,12 @@ Repository
     for e in person.events:
         if e.place:
             e.clearnames = e.clearnames + e.place.show_names_list()
+        for cit in e.citations:
+            if cit.source:
+                sl = "{} '{}'".format(cit.source.uniq_id, cit.source.stitle)
+            else:
+                sl = 'no source'
+            print("{}: lähde {} / {} '{}'".format(e.id, sl, cit.uniq_id, cit.page))
     
     # Return Person with included objects and list of sources/citations(?)
     return (person, None)

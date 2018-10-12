@@ -33,6 +33,9 @@
                 <tr>
                     <td class="ColumnAttribute">Tunnisteet</td>
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
+                    <td class="ColumnValue" rowspan="2">lähde: <small><a href="#sref3a">
+                        {% for cit in person.citations %}
+                        {{cit.source.stitle}} – {{cit.page}}</a></small>{% endfor %}</td>
                 </tr>
                 {% for pname in person.names %}<tr>
                     <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
@@ -41,14 +44,13 @@
                         <span title="etunimi">{{pname.firstname}}</span>
                         <i title="patronyymi">{{pname.suffix}}</i>
                         <b title="sukunimi">{{pname.surname}}</b>
-                        <!-- todo: <a href="#sref3a">3a</a> -->
                         <!-- {% if pname.refname %}&nbsp; 
                           <tt class="refname" title="referenssinimi">{{pname.refname}}</tt> -->
                         {% endif %}
-                   <!-- <ul><div class="grampsstylednote">
+                   <ul><div class="grampsstylednote">
                             <p>Tähän tulee Person Note</p>
                         </div></ul>
-                   -->
+                   
                     </td>
                 </tr>{% endfor %}
                 {% if person.gender %}<tr>
@@ -89,9 +91,9 @@
         {% for e in person.events|sort(attribute='date') %}
                     <tr>
                         <td class="ColumnSources">
-                         {% if e.source %}
-                            <a href="#sref{{e.source}}a">{{e.source}}a</a>
-                         {% endif %}
+                        {% for cit in e.citations %}<small><a href="#sref3a">
+	                        {{cit.source.stitle}}<br> – {{cit.page}}</a>
+	                        </small>{% endfor %}
                         </td>
                  	{% if e.type == "Cause Of Death" %}
                 		{% set t_cause_of_death = e.description %}
@@ -99,10 +101,9 @@
                         <td class="ColumnEvent">
                             <span class="id">
                             {% if e.type == "Baptism" %}
-                            	<a href="/lista/baptism_data/{{e.uniq_id}}">{{e.uniq_id}}</a></span>
-                             	{{e.type|transl('evt')}}
+                            	<a href="/lista/baptism_data/{{e.uniq_id}}">{{e.uniq_id}}</a></span>&nbsp;{{e.type|transl('evt')}}
                          	{% else %}
-                         		{{e.uniq_id}}</span> {{e.type|transl('evt')}}
+                         		{{e.uniq_id}}</span>&nbsp;{{e.type|transl('evt')}}
                          	{% endif %}
                             {% if e.role and e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}

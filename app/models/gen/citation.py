@@ -40,8 +40,8 @@ class Citation:
         self.noteref_hlink = []
         self.source_handle = ''
         self.source_id = None
-        self.sources = []   # objects for creating display sets
-        self.citators = []
+        self.citators = []  # Lähde-sivulle
+        self.source = None   # objects for creating display sets
         self.notes = []
 
 

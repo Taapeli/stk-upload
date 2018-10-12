@@ -137,6 +137,9 @@ def show_a_person_w_apoc(uid):
         user=None
     
     person, sources = get_a_person_for_display_apoc(uid, user)
+    if person == None:
+        return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
+
     return render_template("/scene/person_pg.html", 
                            person=person, sources=sources, menuno=1)
 

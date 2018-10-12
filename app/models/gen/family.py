@@ -73,6 +73,20 @@ class Family:
         n.rel_type = node['rel_type'] or ''
         return n
 
+    @staticmethod
+    def get_family_paths_apoc(uniq_id):
+        ''' Read a person and paths for all connected nodes
+        '''
+        all_nodes_query_w_apoc="""
+MATCH (f:Family) WHERE id(f) = $fid
+CALL apoc.path.subgraphAll(f, {maxLevel:2, relationshipFilter: 
+        'CHILD>|FATHER>|MOTHER>|EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|NOTE>|HIERARCHY>'}) YIELD nodes, relationships
+RETURN extract(x IN relationships | 
+        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
+        extract(x in nodes | x) as nodelist"""
+        return  shareds.driver.session().run(all_nodes_query_w_apoc, fid=uniq_id)
+
+
     def get_children_by_id(self):
         """ Luetaan perheen lasten tiedot """
                         
