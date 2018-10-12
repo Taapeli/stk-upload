@@ -28,6 +28,10 @@ def get_a_person_for_display_apoc(uniq_id, user):
     def connect_object_as_leaf(src, target, rel_type=None):
         ''' Subroutine to save target object in appropiate place in the object src
         
+            * Citations are stored as uniq_id in the list citation_ref
+            * Families: #TODO
+            * all other objects are stored as whole objects
+        
   src \ dst  Person combo    Name    Refname    Media    Note    Event combo
              ------------    ----    -------    -----    ----    -----------
 Person combo                 names[]    x         x     notes[]   events[]
@@ -47,16 +51,16 @@ Repository
 ...cont...
 src \ dst        Place    Family    Citation    Source    Repository
                  -----    ------    --------    ------    ----------
-Person combo            families[] citations[]
+Person combo            families[] citation_ref[]
 Name                                    x
 Refname
 Media                                   x
 Note                                    x
-Event combo      place             citations[]
+Event combo      place             citation_ref[]
 Place          surround                 x
                 ref[]
 Family                                  x
-Citation                                       sources[]
+Citation                                       source
 Source                                                     repos[]
 Repository
         '''
@@ -79,6 +83,7 @@ Repository
                     return src.families_as_parent[-1]
             elif target_class == 'Citation':
                 src.citations.append(target)
+                src.citation_ref.append(target.uniq_id)
                 return src.citations[-1]
             if target_class == 'Note':
                 src.notes.append(target)
@@ -89,7 +94,8 @@ Repository
                 src.place = target
                 return src.place
             elif target_class == 'Citation':
-                src.citations.append(target)
+                src.citations.append(target) 
+                src.citation_ref.append(target.uniq_id)
                 return src.citations[-1]
             elif target_class == 'Note':
                 src.notes.append(target)
@@ -168,7 +174,8 @@ Repository
         objs = {person.uniq_id: person}
 
         # 2. Create a directory of nodes which are envolved
-        nodes = {}
+        nodes = {}  # uniq_id : node
+        cits = {}   # uniq_id : Citation (with Source)
         for node in nodelist:
             # <Node id=80234 labels={'Person'} 
             #    properties={'handle': '_da3b305b54b1481e72a4ac505c5', 'id': 'I17296', 
@@ -202,7 +209,7 @@ Repository
                           format(src_obj.uniq_id, src_label, src_obj))
                     objs[src_obj.uniq_id] = src_obj
                 except Exception as e:
-                    print("{}: Could not create {}".format(e, src_obj))
+                    print("{}: Could not set {}".format(e, src_obj))
             else:
                 # Use exsisting object
                 src_obj = objs[src_node.id]
@@ -227,9 +234,9 @@ Repository
                 # Put it also in objs directory for possible re-use
                 if not target_link.uniq_id in objs:
                     objs[target_link.uniq_id] = target_link
-                    print("  obj[{}] <- {}".\
-                          format(target_link.uniq_id, target_link))
-                    cits = target_link
+                    print("  obj[{}] <- {}".format(target_link.uniq_id, target_link))
+                if rel_type == 'CITATION':
+                    cits[target_link.uniq_id] = target_link
             else:
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
 
@@ -245,34 +252,9 @@ Repository
                 sl = 'no source'
             print("{}: lähde {} / {} '{}'".format(e.id, sl, cit.uniq_id, cit.page))
     
-    # Return Person with included objects and list of sources/citations(?)
-    return (person, None)
+    # Return Person with included objects and list of source+citations(?)
+    return (person, cits)
  
-#     persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
-#     person = persons[0]
-#     person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-#     person.set_my_places(True)
-#     person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
-#     sources = Source.get_sources_by_idlist(source_ids)
-#     #TODO: Etsi sitaateille lähteet
-# 
-# #     person.get_all_notes()
-# #     person.get_media()
-# #     person.get_refnames()
-#     for c in person.citations:
-#         print ("Sitaatit ({} {})".format(c.uniq_id, c))
-#         for ci in c.citators:
-#             print ("  ({}) <- ({})".format(c, ci))
-# #     for e in person.events:
-# #         print("Person event {}: {}".format(e.uniq_id, e))
-# #         if e.place == None:
-# #             print("- no place")
-# #         else:
-# #             for n in e.place.names:
-# #                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
-# 
-#     return person, sources
-
 
 def get_a_person_for_display(uniq_id, user):
     """ Get a Person with all connected nodes --- keskeneräinen ---
@@ -341,7 +323,7 @@ def get_person_data_by_id(uniq_id):
                     description    str kuvaus
                 parentin_hlink[]      str vanhempien uniq_id
                 noteref_hlink[]       str huomautuksen uniq_id
-                citationref_hlink[]   str viittauksen uniq_id            
+                citation_ref[]     str viittauksen uniq_id            
         events: list of Event_combo object with location name and id (?)
         photos
         sources
@@ -432,7 +414,7 @@ def get_person_data_by_id(uniq_id):
                         r.type = source[5]
                         
                         s.repos.append(r)
-                        c.sources.append(s)
+                        c.source = s    #s.append(s)
                         
                     sources.append(c)
             

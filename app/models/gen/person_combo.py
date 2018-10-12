@@ -95,8 +95,7 @@ class Person_combo(Person):
                 description    str kuvaus
             parentin_hlink[]   int vanhempien uniq_id
             noteref_hlink[]    int huomautuksen uniq_id
-            citationref_hlink[] int viittauksen uniq_id            
-
+            citation_ref[]     int viittauksen uniq_id    (ent.citationref_hlink)
 
     #TODO: urls[] list should contain Weburl instances
      """
@@ -118,7 +117,7 @@ class Person_combo(Person):
         self.urls = []
         self.parentin_hlink = []
         self.noteref_hlink = []
-        self.citationref_hlink = []
+        self.citation_ref = []
         self.est_birth = ''
         self.est_death = ''
 
@@ -216,7 +215,7 @@ RETURN ID(family) AS uniq_id"""
 
         citation_result = self.get_citation_id()
         for citation_record in citation_result:
-            self.citationref_hlink.append(citation_record["citationref_hlink"])
+            self.citation_ref.append(citation_record["citationref_hlink"])
 
         return True
 
@@ -1078,9 +1077,8 @@ SET n.est_death = m.daterange_start"""
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 print ("Noteref_hlink: " + self.noteref_hlink[i])
-        if len(self.citationref_hlink) > 0:
-            for i in range(len(self.citationref_hlink)):
-                print ("Citationref_hlink: " + self.citationref_hlink[i])
+        for i in range(len(self.citation_ref)):
+            print ("Citation_ref: " + self.citation_ref[i])
         return True
 
 
@@ -1270,10 +1268,10 @@ SET n.est_death = m.daterange_start"""
                     print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
 
         # Make relations to the Citation node
-        if len(self.citationref_hlink) > 0:
+        if len(self.citation_ref) > 0:
             try:
                 tx.run(Cypher_person_w_handle.link_citation,
-                       p_handle=self.handle, c_handle=self.citationref_hlink[0])
+                       p_handle=self.handle, c_handle=self.citation_ref[0])
             except Exception as err:
                 print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
         return

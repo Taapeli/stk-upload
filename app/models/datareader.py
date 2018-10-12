@@ -240,7 +240,7 @@ def read_cite_sour_repo(uniq_id=None):
                                 r.urls.append(Weburl(record_repo))
                         s.repos.append(r)
 
-                c.sources.append(s)
+                c.source = s    # s.append(s)
             e.citations.append(c)
             
         sources.append(e)
@@ -367,6 +367,7 @@ def read_sources(uniq_id=None):
     sources = []
     try:
         result = Source.get_source_citation(uniq_id)
+        # One Source, many Citations
         for record in result:
             pid = record['id']
             s = Source()
@@ -383,7 +384,6 @@ def read_sources(uniq_id=None):
             sources.append(s)
     except Exception as err:
         print("Virhe-read_sources: {1} {0}".format(err, uniq_id), file=stderr)
-
 
     return (sources)
 

@@ -91,17 +91,17 @@ class Person:
         self.priv = 0
         self.gender = ''
         self.confidence = ''
-        # Todo: Poista: Nämä vain Person_combossa
-        self.events = []                # For creating display sets
-        self.eventref_hlink = []        # Gramps event handles
-        self.eventref_role = []
-        self.objref_hlink = []
-        self.urls = []
-        self.parentin_hlink = []
-        self.noteref_hlink = []
-        self.citationref_hlink = []
-        self.est_birth = ''
-        self.est_death = ''
+#         # Todo: Poista: Nämä vain Person_combossa
+#         self.events = []                # For creating display sets
+#         self.eventref_hlink = []        # Gramps event handles
+#         self.eventref_role = []
+#         self.objref_hlink = []
+#         self.urls = []
+#         self.parentin_hlink = []
+#         self.noteref_hlink = []
+#         self.citationref_hlink = []
+#         self.est_birth = ''
+#         self.est_death = ''
 
     def __str__(self):
         # Person_combo 79584 I1234
@@ -199,7 +199,6 @@ class Person:
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 print ("Noteref_hlink: " + self.noteref_hlink[i])
-        if len(self.citationref_hlink) > 0:
-            for i in range(len(self.citationref_hlink)):
-                print ("Citationref_hlink: " + self.citationref_hlink[i])
+        for i in range(len(self.citation_ref)):
+            print ("Citationref_hlink: " + self.citation_ref[i])
         return True

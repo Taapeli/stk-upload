@@ -597,7 +597,7 @@ class DOM_handler():
                     if person_parentin.hasAttribute("hlink"):
                         p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
                         
-#TODO Aikanaan noteref_hlink ja citationref_hlink korvattava ..._handles[]?
+#TODO Aikanaan noteref_hlink ja citation_ref korvattava ..._handles[]?
             if len(person.getElementsByTagName('noteref') ) >= 1:
                 for i in range(len(person.getElementsByTagName('noteref') )):
                     person_noteref = person.getElementsByTagName('noteref')[i]
@@ -608,7 +608,7 @@ class DOM_handler():
                 for i in range(len(person.getElementsByTagName('citationref') )):
                     person_citationref = person.getElementsByTagName('citationref')[i]
                     if person_citationref.hasAttribute("hlink"):
-                        p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
+                        p.citation_ref.append(person_citationref.getAttribute("hlink"))
 
             p.save(self.username, self.tx)
             counter += 1

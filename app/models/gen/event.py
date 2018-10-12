@@ -66,7 +66,7 @@ class Event:
                 citation_handles[] str viittauksen handle (ent. citationref_hlink)
                 media_handles[]    str median handle (ent. objref_hlink)
                 #place_hlink       str paikan handle
-                #citationref_hlink str viittauksen handle
+                #citation_ref      str viittauksen handle
                 #objref_hlink      str median handle
         Event_combo properties:
                 citations = []     Citations attached
@@ -82,7 +82,6 @@ class Event:
         self.description = desc
         self.date = ''
         self.dates = None
-        # NOT Only in Event_gramps
         self.attr = dict()         # prev. attr_type, attr_value
         # Only in Event_combo
         #    self.note_ref = []    # prev. noteref_hlink
@@ -177,8 +176,12 @@ class Event:
                 data_line.append(str(DateRange(record["e"]['dates'])))
             else:
                 data_line.append('-')
-            if len(record["e"]['attr']) > 0:
-                data_line.append(str(record["e"]['attr'])[1:-1])
+            if 'attr' in record['e']:
+                if  len(record["e"]['attr']) > 0:
+                    data_line.append(str(record["e"]['attr'])[1:-1])
+            elif len(record["e"]['attr_value']) > 0:
+                #Todo remove Obsolete variable
+                data_line.append("({})".format(record["e"]['attr_value'])[1:-1])
             else:
                 data_line.append('-')
                 
