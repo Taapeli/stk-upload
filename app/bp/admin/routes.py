@@ -120,15 +120,18 @@ def save_loaded_csv(filename, subj):
 # Siirretty security--> admin
 @bp.route('/admin/allowed_emails',  methods=['GET', 'POST'])
 @login_required
-@roles_required('admin')
+@roles_accepted('admin', 'master') 
 def list_allowed_emails():
     form = AllowedEmailForm()
-    if request.method == 'POST': 
+#    if request.method == 'POST':
+    lista = UserAdmin.get_allowed_emails()
+    if form.validate_on_submit(): 
         # Register a new email
+        lista = UserAdmin.get_allowed_emails()
         UserAdmin.register_allowed_email(form.allowed_email.data,
                                          form.default_role.data)
- 
-    lista = UserAdmin.get_allowed_emails()
+        return redirect(url_for('admin.list_allowed_emails'))
+
     return render_template("/admin/allowed_emails.html", emails=lista, 
                             form=form)
 
@@ -136,7 +139,7 @@ def list_allowed_emails():
 # Siirretty security--> admin
 @bp.route('/admin/list_users', methods=['GET'])
 @login_required
-@roles_accepted('admin', 'audit')
+@roles_accepted('admin', 'audit', 'master')
 def list_users():
     # Käytetään neo4juserdatastorea
     lista = shareds.user_datastore.get_users()

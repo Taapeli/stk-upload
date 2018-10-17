@@ -21,7 +21,59 @@ driver = None
 from bp.admin.models import UserAdmin
 
 class Neo4jUserDatastore(UserDatastore):
-    """ User info database """
+    """ User info database designed after a Flask-security UserDatastore and observed Flask-security behavior:
+    
+    class flask_security.datastore.UserDatastore(user_model, role_model)
+        Abstracted user datastore.
+        Parameters
+           • user_model – A user model class definition
+           • role_model – A role model class definition
+           
+        activate_user(user)
+           Activates a specified user. Returns True if a change was made.
+           Parameters user – The user to activate
+           
+        add_role_to_user(user, role)
+           Adds a role to a user.
+           Parameters
+              • user – The user to manipulate
+              • role – The role to add to the user
+
+        create_role(**kwargs)
+           Creates and returns a new role from the given parameters.
+           
+        create_user(**kwargs)
+           Creates and returns a new user from the given parameters.
+           
+        deactivate_user(user)
+           Deactivates a specified user. Returns True if a change was made.
+           Parameters user – The user to deactivate
+           
+        delete_user(user)
+           Deletes the specified user.
+           Parameters user – The user to delete
+           
+        find_or_create_role(name, **kwargs)
+           Returns a role matching the given name or creates it with any additionally provided parameters.
+           
+        find_role(*args, **kwargs)
+           Returns a role matching the provided name.
+           
+        find_user(*args, **kwargs)
+           Returns a user matching the provided parameters.
+           
+        get_user(id_or_email)
+           Returns a user matching the specified ID or email address.
+           
+        remove_role_from_user(user, role)
+           Removes a role from a user.
+           Parameters
+              • user – The user to manipulate
+              • role – The role to remove from the user
+              
+        toggle_active(user)
+           Toggles a user’s active status. Always returns True.
+    """
 
     # Uses classes Role, User, UserProfile, AllowedEmail from setups.py
 

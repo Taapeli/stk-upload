@@ -91,8 +91,8 @@ class UserAdmin():
             email.creator = emailNode.properties['creator']
         if 'created_at' in emailNode.properties:
             email.created_at = datetime.fromtimestamp(emailNode.properties['created_at']/1000)
-        if 'registered_at' in emailNode.properties:
-            email.registered_at = datetime.fromtimestamp(emailNode.properties['registered_at']/1000)        
+        if 'confirmed_at' in emailNode.properties:
+            email.confirmed_at = datetime.fromtimestamp(emailNode.properties['confirmed_at']/1000)        
        
         return email
     
