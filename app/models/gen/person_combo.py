@@ -98,6 +98,7 @@ class Person_combo(Person):
             citation_ref[]     int viittauksen uniq_id    (ent.citationref_hlink)
 
     #TODO: urls[] list should contain Weburl instances
+    
      """
 
     def __init__(self):
@@ -106,20 +107,33 @@ class Person_combo(Person):
         """
         Person.__init__(self)
 
-        self.events = []                # For creating display sets
-        self.citations = []
-        self.notes = []
-        self.families_as_child = []     # - Propably one only
-        self.families_as_parent =[]
-        self.eventref_hlink = []        # Gramps event handles
-        self.eventref_role = []
-        self.objref_hlink = []
+        # For emadded or referenced child objects, displaying Person page
+        # @see Plan bp.scene.models.connect_object_as_leaf
+
+        self.names = []                 # models.gen.person_name.Name
+
+        self.events = []                # models.gen.event_combo.Event_combo
+        self.event_ref = []             # Event uniq_ids # Gramps event handles (?)
+        self.eventref_role = []         # ... and roles
+
+        self.citation_ref = []          # models.gen.citation.Citation
+        #remove: self.citations = []
+        self.note_ref = []              # uniq_id of models.gen.note.Note
+        #remove: self.notes = []
+        #remove: self.noteref_hlink = []
+
+        self.media_ref = []             # uniq_id of models.gen.media.Media
+        #remove: self.objref_hlink = []
+
+        # Other variables ???
+
         self.urls = []
-        self.parentin_hlink = []
-        self.noteref_hlink = []
-        self.citation_ref = []
         self.est_birth = ''
         self.est_death = ''
+
+        self.families_as_child = []     # - Propably one only
+        self.families_as_parent =[]
+        self.parentin_hlink = []
 
 
     @staticmethod
@@ -157,7 +171,7 @@ RETURN extract(x IN relationships |
         query = """
             MATCH (person:Person)-[r:CITATION]->(c:Citation)
                 WHERE ID(person)={}
-                RETURN ID(c) AS citationref_hlink
+                RETURN ID(c) AS citation_ref
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
 
@@ -171,7 +185,7 @@ RETURN extract(x IN relationships |
         query = """
 MATCH (person:Person)-[r:EVENT]->(event:Event)
   WHERE ID(person)=$pid
-RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
+RETURN r.role AS eventref_role, ID(event) AS event_ref"""
         return  shareds.driver.session().run(query, {"pid": root})
 
 
@@ -202,22 +216,22 @@ RETURN ID(family) AS uniq_id"""
 
         event_result = self.get_event_data_by_id()
         for event_record in event_result:
-            self.eventref_hlink.append(event_record["eventref_hlink"])
+            self.event_ref.append(event_record["event_ref"])
             self.eventref_role.append(event_record["eventref_role"])
 
         media_result = self.get_media_id()
         for media_record in media_result:
-            self.objref_hlink.append(media_record["objref_hlink"])
+            self.media_ref.append(media_record["objref_hlink"])
 
         family_result = self.get_parentin_id()
         for family_record in family_result:
-            self.parentin_hlink.append(family_record["parentin_hlink"])
+            self.families_as_parent.append(family_record["family_ref"])
 
         citation_result = self.get_citation_id()
         for citation_record in citation_result:
-            self.citation_ref.append(citation_record["citationref_hlink"])
+            self.citation_ref.append(citation_record["citation_ref"])
 
-        return True
+        return
 
 
     def get_media_id(self):
@@ -226,7 +240,7 @@ RETURN ID(family) AS uniq_id"""
         query = """
             MATCH (person:Person)-[r:MEDIA]->(obj:Media)
                 WHERE ID(person)={}
-                RETURN ID(obj) AS objref_hlink
+                RETURN ID(obj) AS media_ref
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
 
@@ -237,7 +251,7 @@ RETURN ID(family) AS uniq_id"""
         query = """
             MATCH (person:Person)<-[r:CHILD]-(family:Family)
                 WHERE ID(person)={}
-                RETURN ID(family) AS parentin_hlink
+                RETURN ID(family) AS family_ref
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
 
@@ -321,34 +335,29 @@ OPTIONAL MATCH (person)-[wu:WEBURL]->(weburl:Weburl)
   WITH person, name, COLLECT (weburl) AS urls ORDER BY name.alt
 RETURN person, urls, COLLECT (name) AS names
         """
-        person_result = shareds.driver.session().run(query, pid=int(self.uniq_id))
+        result = shareds.driver.session().run(query, pid=int(self.uniq_id))
 
-        for person_record in person_result:
-            self.handle = person_record["person"]['handle']
-            self.change = int(person_record["person"]['change'])  #TODO only temporary int()
-            self.id = person_record["person"]['id']
-            self.priv = person_record["person"]['priv']
-            self.gender = person_record["person"]['gender']
-            self.confidence = person_record["person"]['confidence']
-            self.est_birth = person_record["person"]['est_birth']
-            self.est_death = person_record["person"]['est_death']
+        for record in result:
+            # <Record person=<Node id=72087 labels={'Person'} 
+            #    properties={'handle': '_dd4a3c371f72257f442c1c42759', 'id': 'I1054', 
+            #        'priv': '', 'gender': 'M', 'confidence': '2.0', 'change': 1523278690}> 
+            #    urls=[] 
+            #    names=[<Node id=72088 labels={'Name'} 
+            #            properties={'alt': '', 'firstname': 'Anthon', 'type': 'Also Known As', 
+            #                'suffix': 'jun.', 'surname': 'Naht'}>, 
+            #        <Node id=72089 labels={'Name'} 
+            #            properties={'alt': '1', 'firstname': 'Anthonius', 'type': 'Birth Name', 
+            #                'suffix': '', 'surname': 'Naht'}>]
+            # >
+            node = record['person']
+            self.from_node(node, obj=self)
 
-            for name in person_record["names"]:
-                pname = Name()
-                pname.alt = name['alt']
-                pname.type = name['type']
-                pname.firstname = name['firstname']
-#                 pname.refname = name['refname']
-                pname.surname = name['surname']
-                pname.suffix = name['suffix']
+            for node in record["names"]:
+                pname = Name.from_node(node)
                 self.names.append(pname)
 
-            for url in person_record["urls"]:
-                weburl = Weburl()
-                weburl.priv = url['priv']
-                weburl.href = url['href']
-                weburl.type = url['type']
-                weburl.description = url['description']
+            for node in record["urls"]:
+                weburl = Weburl.from_node(node)
                 self.urls.append(weburl)
 
 
@@ -820,12 +829,12 @@ with r, e, pl
         query="""
 MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name) 
     WHERE ID(p) = $id
-OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
+  OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
     WITH f.id AS family_id, ID(f) AS f_uniq_id, 
          TYPE(r1) AS role,
          m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
          n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx,
-         birth.date AS birth_date
+         [birth.datetype, birth.date1, birth.date2] AS birth_date
     ORDER BY n.alt
     RETURN family_id, f_uniq_id, role, 
            m_id, uniq_id, gender, birth_date,
@@ -834,18 +843,29 @@ OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
 UNION
 MATCH (p:Person) <-[r2]- (f:Family) 
     WHERE id(p) = $id
+  OPTIONAL MATCH (p) -[:EVENT]-> (birth {type:'Birth'})
     RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
-           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, "" AS birth_date,
+           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, 
+           [birth.datetype, birth.date1, birth.date2] AS birth_date,
            [] AS names"""
 
-# ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤════════════╤══════════════════════════════╕
-# │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"│"names"                       │
-# ╞═══════════╪═══════════╪════════╪═══════╪═════════╪════════╪════════════╪══════════════════════════════╡
-# │"F0012"    │"40506"    │"CHILD" │"27044"│"27044"  │"M"     │"1869-03-28"│[["","Birth Name","Christian",│
-# │           │           │        │       │         │        │            │"Sibelius",""],["1","Also Know│
-# │           │           │        │       │         │        │            │n As","Kristian","Sibelius",""│
-# │           │           │        │       │         │        │            │]]                            │
-# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼────────────┼──────────────────────────────┤
+# ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤═══════════════╤═══════════════╕
+# │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"   │"names"        │
+# ╞═══════════╪═══════════╪════════╪═══════╪═════════╪════════╪═══════════════╪═══════════════╡
+# │"F0281"    │100163     │"FATHER"│"I0769"│77654    │"M"     │[0,1836070,1836│[["","Also Know│
+# │           │           │        │       │         │        │070]           │n As","Matts","│
+# │           │           │        │       │         │        │               │Lindlöf",""],["│
+# │           │           │        │       │         │        │               │1","Birth Name"│
+# │           │           │        │       │         │        │               │,"Mattias","","│
+# │           │           │        │       │         │        │               │Abrahamsson"]] │
+# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼───────────────┼───────────────┤
+# │"F0281"    │100163     │"MOTHER"│"I0775"│76526    │"F"     │[0,1846276,1846│[["","Birth Nam│
+# │           │           │        │       │         │        │276]           │e","Anna Stina"│
+# │           │           │        │       │         │        │               │,"","Jacobsdott│
+# │           │           │        │       │         │        │               │er"]]          │
+# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼───────────────┼───────────────┤
+# │"F0281"    │100163     │"CHILD" │"I1069"│72104    │"F"     │""             │[]             │
+# └───────────┴───────────┴────────┴───────┴─────────┴────────┴───────────────┴───────────────┘
 
         return shareds.driver.session().run(query, id=int(uniq_id))
 
@@ -1282,7 +1302,8 @@ class Person_as_member(Person):
 
         Extra properties:
             role         str "CHILD", "FATHER" or "MOTHER"
-            birth_date   str (TODO: Should be DateRange)
+            birth_date   str '1749-11-02'
+            names[]      Name
      """
 
     def __init__(self):
@@ -1290,4 +1311,5 @@ class Person_as_member(Person):
         Person.__init__(self)
         self.role = ''
         self.birth_date = ''
+        self.names = []
 

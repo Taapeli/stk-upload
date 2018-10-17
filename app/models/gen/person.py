@@ -87,7 +87,6 @@ class Person:
         self.change = 0
         self.uniq_id = None
         self.id = ''
-        self.names = []
         self.priv = 0
         self.gender = ''
         self.confidence = ''
@@ -111,7 +110,7 @@ class Person:
         return "{} {}".format(sex, self.id)
 
     @classmethod
-    def from_node(cls, node):
+    def from_node(cls, node, obj=None):
         '''
         Transforms a db node to an object of type Person.
         
@@ -122,15 +121,16 @@ class Person:
             properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F', 'change': 1507492602, 
             'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
         '''
-        p = cls()
-        p.uniq_id = node.id
-        p.id = node['id']
-        p.gender = node['gender']
-        p.handle = node['handle']
-        p.change = node['change']
-        p.confidence = node['confidence']
-        p.priv = node['priv']
-        return p
+        if not obj:
+            obj = cls()
+        obj.uniq_id = node.id
+        obj.id = node['id']
+        obj.gender = node['gender']
+        obj.handle = node['handle']
+        obj.change = node['change']
+        obj.confidence = node['confidence']
+        obj.priv = node['priv']
+        return obj
 
     @staticmethod
     def get_confidence (uniq_id=None):

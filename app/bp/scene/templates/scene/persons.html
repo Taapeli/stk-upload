@@ -6,18 +6,20 @@
 {% import '/scene/macros.html' as macro %}
 {% set ordname = ['sukunimen', 'etunimen', 'patronyymin'] %}
 {% if order == '' %}{% set order=0 %}{% endif %}
+{% set cnt = persons | count %}
 
 {% if rule[0] == 'all' %}<h2>Henkilöt {{ ordname[order] }} mukaan</h2>
 {% elif rule[0] == 'refname' %}<h2>Henkilöt nimeltä {{ rule[1] }}</h2>
 {% else %}<H2>Henkilöt</h2>
 {% endif %}
+<!-- Rule = {{rule}} for {{cnt}} persons -->
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
     {% if menuno > 0 %}
             <p id="description">
-    Tällä sivulla on luettelo {{persons|count}} henkilönimestä mahdollisen 
+    Tällä sivulla on luettelo {{cnt}} henkilönimestä mahdollisen 
     {{ ordname[order] }} mukaan lajiteltuna.<br> 
     Nimen napsauttaminen vie sinut valitun henkilön sivulle. 
     Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.
@@ -31,26 +33,31 @@
             class="inlink">patronyymin tai matronyymiin</a>{% endif %} mukaan.
       {% endif %}
             </p>
-    {% else %}{% if persons|count %}
-            <h3>Näytetään {{persons|count}} henkilönimeä</h3>{% else %}
+    {% else %}{% if cnt %}
+            <h3>Näytetään {{cnt}} henkilönimeä</h3>{% else %}
             <h3>Valitse näytettävät ihmiset</h3>{% endif %}
 			<div id="searching">
+				{% if rule[0] %}{% set selection = rule[0] %}
+				{% else %}{% set selection = "surname" %}{% endif %}
+
 			    <form  action="/scene/persons" method="post">
                   <p>Haku tapahtuu annetun nimen alkuosalla, esim. "Sib" osuu nimeen "Sibbe".</p>
                   <label for="snam">Hakusana (alkuosa)&nbsp; </label>
                     <input type="text" name="name" id="snam" 
-                     {% if name %}value="{{name}}"{% endif %} required><br>
+                     {% if name %}value="{{name}}"{% endif %} required>
+                     <br>
                   <input type="radio" name="rule" id="ssur" value="surname"
-                   {% if rule and rule == "surname" %}checked{% endif %}>
+                   {% if selection == "surname" %}checked{% endif %}>
                     <label for="ssur">Sukunimi</label>
                   <input type="radio" name="rule" id="sfir" value="firstname"
-                   {% if rule and rule == "firstname" %}checked{% endif %}>
+                   {% if selection == "firstname" %}checked{% endif %}>
                     <label for="sfir">Etunimi</label>
                   <input type="radio" name="rule" id="ssuf" value="patronyme"
-                   {% if rule and rule == "patronyme" %}checked{% endif %}>
+                   {% if selection == "patronyme" %}checked{% endif %}>
                     <label for="ssuf">Patronyymi</label>
 				  <input type="submit" value="Hae">
 			    </form>
+
 			</div>
 			{% endif %}
 

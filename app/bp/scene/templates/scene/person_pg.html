@@ -33,9 +33,9 @@
                 <tr>
                     <td class="ColumnAttribute">Tunnisteet</td>
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
-                    <td class="ColumnValue" rowspan="2">lähde: <small><a href="#sref3a">
+                    {% if person.citations %}<td class="ColumnValue" rowspan="2">lähde: <small><a href="#sref3a">
                         {% for cit in person.citations %}
-                        {{cit.source.stitle}} – {{cit.page}}</a></small>{% endfor %}</td>
+                        {{cit.source.stitle}} – {{cit.page}}</a></small>{% endfor %}</td>{% endif %}
                 </tr>
                 {% for pname in person.names %}<tr>
                     <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>

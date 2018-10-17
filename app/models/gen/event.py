@@ -96,9 +96,9 @@ class Event:
         return "{} {}".format(self.type, self.dates or "")
 
     @classmethod
-    def from_node(cls, node):
+    def from_node(cls, node, obj=None):
         '''
-        Transforms a node from db node to an object of type Event
+        Transforms a node from db node to an object of type Event or Event_combo
         
         <Node id=88532 labels={'Event'} 
             properties={'type': 'Birth', 'change': 1500907890, 
@@ -106,25 +106,25 @@ class Event:
                 'id': 'E0161', 'attr_type': '', 'description': ''
                 'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
         '''
-        e = cls()
-        e.uniq_id = node.id
-        e.id = node['id']
-        e.type = node['type']
-        e.handle = node['handle']
-        e.change = node['change']
+        if not obj:
+            obj = cls()
+        obj.uniq_id = node.id
+        obj.id = node['id']
+        obj.type = node['type']
+        obj.handle = node['handle']
+        obj.change = node['change']
         if "datetype" in node:
             #TODO: Talletetaanko DateRange -objekti vai vain str?
-            dates = DateRange(node["datetype"], node["date1"], node["date2"])
-            e.dates = str(dates)
-            e.date = dates.estimate()
+            obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
+            obj.date = obj.dates.estimate()
         else:
-            e.dates = None
-            e.date = ""
-        e.description = node['description'] or ''
-        e.attr = node['attr'] or dict()
-#         e.attr_type = node['attr_type'] or ''
-#         e.attr_value = node['attr_value'] or ''
-        return e
+            obj.dates = None
+            obj.date = ""
+        obj.description = node['description'] or ''
+        obj.attr = node['attr'] or dict()
+#         obj.attr_type = node['attr_type'] or ''
+#         obj.attr_value = node['attr_value'] or ''
+        return obj
 
 
     @staticmethod       

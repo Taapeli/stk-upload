@@ -58,7 +58,7 @@ def show_person_list(selection=None):
         # Use selection filter
         keys = selection.split('=')
     else:
-        keys = ('select',)
+        keys = ('surname',)
     persons = [] #datareader.read_persons_with_events(keys)
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys)
@@ -113,12 +113,10 @@ def show_all_persons_list(opt=''):
 #     """
 #     if not uid:
 #         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
-# 
 #     if current_user.is_authenticated:
 #         user=current_user.username
 #     else:
 #         user=None
-#     
 #     person, sources = get_a_person_for_display(uid, user)
 #     return render_template("/scene/person_pg.html", 
 #                            person=person, sources=sources, menuno=1)
@@ -140,6 +138,7 @@ def show_a_person_w_apoc(uid):
     if person == None:
         return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
 
+    #TODO Tähän sitaatit sourcen tilalle?
     return render_template("/scene/person_pg.html", 
                            person=person, sources=sources, menuno=1)
 
@@ -149,7 +148,6 @@ def show_a_person_w_apoc(uid):
 def show_person_page(uniq_id):
     """ Full homepage for a Person in database (vanhempi versio)
     """
-
     try:
         person, events, photos, sources, families = \
             get_person_data_by_id(uniq_id)
