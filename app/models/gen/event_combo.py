@@ -18,7 +18,7 @@ Created on 27.8.2018
 @author: jm
 '''
 import shareds
-from models.gen.dates import DateRange
+#from models.gen.dates import DateRange
 
 from .event import Event
 
@@ -49,11 +49,12 @@ class Event_combo(Event):
         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
         self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
-
+        self.note_ref = []      # uniq_ids (previously note[])
+        
         self.citations = []     # For creating display sets
         self.personnames = []   # Person names connected; for creating display
-        self.notes = []         # For creating display sets
-        self.place = ''         # TODO Change to places[]
+        #self.notes = []         # For creating display sets
+        #self.place = ''         # TODO Change to places[]
 
 
 # @classmethod from_node(cls, node): see evetn.from_node

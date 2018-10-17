@@ -87,7 +87,7 @@ class Person_combo(Person):
         The indexes of referred objects are in variables:
             eventref_hlink[]   int tapahtuman uniq_id, rooli 
             - eventref_role[]  str edellisen rooli
-            objref_hlink[]     int median uniq_id
+            media_ref[]        int median uniq_id (previous objref_hlink[])
             urls[]             list of Weburl nodes
                 priv           int 1 = salattu tieto
                 href           str osoite
@@ -123,7 +123,7 @@ class Person_combo(Person):
         #remove: self.noteref_hlink = []
 
         self.media_ref = []             # uniq_id of models.gen.media.Media
-        #remove: self.objref_hlink = []
+                                        # (previous self.objref_hlink[])
 
         # Other variables ???
 
@@ -157,7 +157,7 @@ return path"""
         all_nodes_query_w_apoc="""
 MATCH (p:Person) WHERE id(p) = $pid
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 
-        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|NOTE>|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
     YIELD nodes, relationships
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
@@ -1267,11 +1267,11 @@ SET n.est_death = m.daterange_start"""
                     print("Virhe (Person.save:Event): {0}".format(err), file=stderr)
 
         # Make relations to the Media node
-        if len(self.objref_hlink) > 0:
-            for i in range(len(self.objref_hlink)):
+        if len(self.media_ref) > 0:
+            for ref in self.media_ref:
                 try:
                     tx.run(Cypher_person_w_handle.link_media, 
-                           p_handle=self.handle, m_handle=self.objref_hlink[i])
+                           p_handle=self.handle, m_handle=ref)
                 except Exception as err:
                     print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
 

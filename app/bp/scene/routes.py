@@ -10,7 +10,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
 
 from . import bp
-from .models import get_a_person_for_display, get_a_person_for_display_apoc # get_person_for_display #, get_person_data_by_id
+from .models import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
@@ -134,13 +134,13 @@ def show_a_person_w_apoc(uid):
     else:
         user=None
     
-    person, sources = get_a_person_for_display_apoc(uid, user)
+    person, references = get_a_person_for_display_apoc(uid, user)
     if person == None:
         return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
 
     #TODO Tähän sitaatit sourcen tilalle?
     return render_template("/scene/person_pg.html", 
-                           person=person, sources=sources, menuno=1)
+                           person=person, references=references, menuno=1)
 
 
 @bp.route('/scene/person=<int:uniq_id>')

@@ -59,7 +59,7 @@ def scene():
     return render_template('/scene/persons.html')
 
 
-""" ---------- Other listings (Narrative or table format) ----------------------------
+""" ---------------- Other listings (Table format) ----------------------------
 """
 
 @shareds.app.route('/lista/<string:subj>')

@@ -44,6 +44,8 @@ class Family:
         self.events = []        # Event objects
         self.notes = []
         self.duration = [None, None]    # TODO: Marriage and divorce dates
+        self.note_ref = []
+
         #TODO Obsolete parameters???
         self.eventref_hlink = []
         self.eventref_role = []

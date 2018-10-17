@@ -35,6 +35,14 @@ class Source:
         self.noteref_hlink = ''
         self.reporef_hlink = ''
         self.reporef_medium = ''
+
+        self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
+        self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
+        self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
+        self.note_ref = []      # uniq_ids (previously note[])
+        self.repo_ref = []
+
+        #Todo: Obsolete?
         self.citations = []   # For creating display sets
         self.repos = []   # For creating display sets
         self.notes = []

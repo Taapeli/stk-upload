@@ -15,7 +15,7 @@ from models.cypher_gramps import Cypher_citation_w_handle
 
 
 class Citation:
-    """ Viittaus
+    """ Lähdeviittaus
             
         Properties:
                 handle           str
@@ -24,7 +24,7 @@ class Citation:
                 dateval          str date
                 page             str page description
                 confidence       str confidence 0.0 - 5.0 (?)
-                noteref_hlink    str huomautuksen osoite
+                note_ref         int huomautuksen osoite (ent. noteref_hlink str)
                 source_handle    str handle of source   _or_
                 source_id        int uniq_id of source
                 citators         NodeRef nodes referring this citation
@@ -42,7 +42,7 @@ class Citation:
         self.source_id = None
         self.citators = []  # Lähde-sivulle
         self.source = None   # objects for creating display sets
-        self.notes = []
+        self.note_ref = []
 
 
     def __str__(self):

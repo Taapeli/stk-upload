@@ -33,9 +33,10 @@
                 <tr>
                     <td class="ColumnAttribute">Tunnisteet</td>
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
-                    {% if person.citations %}<td class="ColumnValue" rowspan="2">lähde: <small><a href="#sref3a">
-                        {% for cit in person.citations %}
-                        {{cit.source.stitle}} – {{cit.page}}</a></small>{% endfor %}</td>{% endif %}
+                    {% if person.citation_ref %}<td class="ColumnValue" 
+                        rowspan="2"><small>lähde:
+                        </small>{{ macro.link_cite(person.citation_ref, references) }}
+                    </td>{% endif %}
                 </tr>
                 {% for pname in person.names %}<tr>
                     <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
@@ -90,18 +91,17 @@
                 <tbody>
         {% for e in person.events|sort(attribute='date') %}
                     <tr>
+                    {% if e.type == "Cause Of Death" %}
+                        {% set t_cause_of_death = e.description %}
+                    {% else %}
                         <td class="ColumnSources">
-                        {% for cit in e.citations %}<small><a href="#sref3a">
-	                        {{cit.source.stitle}}<br> – {{cit.page}}</a>
-	                        </small>{% endfor %}
+                        {{ macro.link_cite(e.citation_ref, references) }}
                         </td>
-                 	{% if e.type == "Cause Of Death" %}
-                		{% set t_cause_of_death = e.description %}
-            		{% else %}
                         <td class="ColumnEvent">
                             <span class="id">
                             {% if e.type == "Baptism" %}
-                            	<a href="/lista/baptism_data/{{e.uniq_id}}">{{e.uniq_id}}</a></span>&nbsp;{{e.type|transl('evt')}}
+                            	<a href="/lista/baptism_data/{{e.uniq_id}}"
+                            	 >{{e.uniq_id}}</a></span>&nbsp;{{e.type|transl('evt')}}
                          	{% else %}
                          		{{e.uniq_id}}</span>&nbsp;{{e.type|transl('evt')}}
                          	{% endif %}
@@ -109,18 +109,18 @@
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
-                        <td class="ColumnPlace">{% if e.place %}
-                            <a href="/scene/location={{e.place.uniq_id}}" class="inlink"
-                            title="tyyppiä {{e.place.type}}; katso paikan tiedot">
-                            {{e.clearnames|join(' • ')}}</a>{% endif %}
+                        <td class="ColumnPlace">{% for ref in e.place_ref %}
+                            <a href="/scene/location={{references[ref].uniq_id}}" class="inlink"
+                            title="tyyppiä {{references[ref].type}}; katso paikan tiedot">
+                            {{e.clearnames|join(' • ')}}</a>{% endfor %}
                         </td>
                         <td class="ColumnDescription"><div>{{e.description}}</div>
                             <div>{% if e.type == "Death" and t_cause_of_death %}<span 
                                     class="typedesc">kuolinsyy</span> {{t_cause_of_death}}<br>
                             	{% endif %}
-                            	{% if e.notes %}<ul class="eventnotes">{% for note in e.notes %}
-                            	   <li><span class="typedesc">{{ note.type|transl('notet') }}</span>
-                            	       {{ note.text }}</li>{% endfor %}
+                            	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
+                            	   <li><span class="typedesc">{{ references[ref].type|transl('notet') }}</span>
+                            	       {{ references[ref].text }}</li>{% endfor %}
                             	   </ul>{% endif %}
                             </div>
                         </td>
