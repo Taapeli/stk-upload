@@ -57,8 +57,8 @@ def add_args(parser):
                         help=_('Try to discover correct order...'))
     parser.add_argument('--auto-combine', action='store_true',
                         help=_('Try to combine certain names...'))
-    parser.add_argument('--match', type=str, action='append',
-                        help=_('Only process places containing any match string'))
+    parser.add_argument('--match', type=str, 
+                        help=_('Only process places containing this string'))
     parser.add_argument('--display-nonchanges', action='store_true',
                         help=_('Display unchanged places'))
     parser.add_argument('--display-ignored', action='store_true',
@@ -210,10 +210,8 @@ def revert_auto_combine(place):
         place = place.replace(s.replace(" ","-"),s)
     return place
 
-def stringmatch(place,matches):
-    for match in matches:
-        if place.find(match) >= 0: return True
-    return False
+def stringmatch(place,match):
+    return place.find(match) >= 0
     
 def process_place(options, place): 
     orig_place = place
