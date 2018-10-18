@@ -80,7 +80,7 @@ class Places(transformer.Transformation):
         self.changed = Counter()
         self.nonchanged = Counter()
         
-    def transform(self,item,options):
+    def transform(self,item,options,phase):
         if item.tag != "PLAC":  return True
         if not item.value: return True
         place = item.value

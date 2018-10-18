@@ -145,11 +145,11 @@ class Transformer:
             
         return items
     
-    def transform_items(self,items):
+    def transform_items(self,items,phase=1):
         newitems = []
         for item in items:
             item.children = self.transform_items(item.children)
-            newitem = self.transformation.transform(item,self.options)
+            newitem = self.transformation.transform(item,self.options,phase)
             if newitem == True: # no change
                 newitems.append(item)
                 continue
@@ -169,7 +169,7 @@ class Transformer:
         items = self.build_items(lines,level=0)
         items = self.transform_items(items)
         if self.transformation.twophases:
-            items = self.transform_items(items)
+            items = self.transform_items(items,phase=2)
         self.transformation.finish(self.options)
         return Gedcom(items)
     
