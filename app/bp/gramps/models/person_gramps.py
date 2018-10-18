@@ -112,6 +112,8 @@ class Person_gramps(Person):
             for res in result:
                 self.uniq_id = res[0]
                 print("Person {} ".format(self.uniq_id))
+            if self.uniq_id == None:
+                print("Person <MISSING uniq_id> {}".format(p_attr))
 
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
