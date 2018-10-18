@@ -18,8 +18,10 @@ Created on 2.3.2018
 import shareds
 import logging
 from datetime import datetime
+from flask import flash
 from flask_security import current_user
-from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
+from flask_babelex import _
+from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, ConstraintError
 
 
 class DataAdmin():
@@ -81,7 +83,7 @@ class UserAdmin():
 
     @classmethod
     def _build_email_from_node(cls, emailNode):
-        ''' Returns an AllowedEmail class instance '''
+        ''' Returns an Allowed_email class instance '''
         if emailNode is None:
             return None
         email = shareds.allowed_email_model(**emailNode.properties)
@@ -103,6 +105,9 @@ class UserAdmin():
                 with session.begin_transaction() as tx:
                     tx.run(Cypher_adm.allowed_email_register, email=email, role=role, admin_name=current_user.username)
                     tx.commit()
+        except ConstraintError as ex:
+            logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
+            flash(_("Given allowed email address already exists"))                            
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
