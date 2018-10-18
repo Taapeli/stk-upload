@@ -112,6 +112,8 @@ class Person_gramps(Person):
             for res in result:
                 self.uniq_id = res[0]
                 print("Person {} ".format(self.uniq_id))
+            if self.uniq_id == None:
+                print("Person <MISSING uniq_id> {}".format(p_attr))
 
         except Exception as err:
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
@@ -201,7 +203,7 @@ class Person_gramps(Person):
                     print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
 
         # Make relations to the Citation node
-        if len(self.citationref_hlink) > 0:
+        if len(self.citationref_hlink) > 0: #TODO Many citations!
             try:
                 tx.run(Cypher_person_w_handle.link_citation,
                        p_handle=self.handle, c_handle=self.citationref_hlink[0])

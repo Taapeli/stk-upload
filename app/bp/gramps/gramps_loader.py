@@ -101,6 +101,10 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
         handler.handle_people()
         handler.handle_families()
 
+        # Set person confidence values (for all persons!)
+        set_confidence_value(handler.tx, batch_logger=handler.batch_logger)
+        # Set Refname links (for imported persons)
+        handler.set_refnames()
         handler.commit()
 
     except ConnectionError as err:
@@ -109,13 +113,6 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
                         format(err.message, err.code), level="ERROR"))
         # raise SystemExit("Stopped due to errors")    # Stop processing
         raise
-
-    handler.begin_tx(shareds.driver.session())
-    # Set person confidence values (for all persons!)
-    set_confidence_value(handler.tx, batch_logger=handler.batch_logger)
-    # Set Refname links (for imported persons)
-    handler.set_refnames()
-    handler.commit()
 
     handler.log(Log("Total time", elapsed=time.time()-t0, level="TITLE"))
     return handler.batch_logger.list()
@@ -810,7 +807,8 @@ class DOM_handler():
         self.namecount = 0
 
         for p_id in self.uniq_ids:
-            set_person_refnames(self, p_id)
+            if p_id != None:
+                set_person_refnames(self, p_id)
 
         self.log(Log("Created Refname references",
                             count=self.namecount, elapsed=time.time()-t0))

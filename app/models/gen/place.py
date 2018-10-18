@@ -486,7 +486,8 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             if self.coord:
                 # If no coordinates, don't set coord attribute
                 p_attr.update({"coord": self.coord.get_coordinates()})
-            tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
+            result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
+            self.uniq_id = result.single()[0]
         except Exception as err:
             print("Virhe Place.create: {0}".format(err), file=stderr)
 
@@ -517,7 +518,8 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         # Make hierarchy relations to upper Place nodes
         for upper in self.surround_ref:
             try:
-                if 'dates' in upper and upper['dates'] != None:
+                print("upper {} -> {}".format(self, upper))
+                if 'dates' in upper and isinstance(upper['dates'], DateRange):
                     r_attr = upper['dates'].for_db()
                 else:
                     r_attr = {}

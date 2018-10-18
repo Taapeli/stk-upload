@@ -177,8 +177,9 @@ class Event:
             else:
                 data_line.append('-')
             if 'attr' in record['e']:
-                if  len(record["e"]['attr']) > 0:
-                    data_line.append(str(record["e"]['attr'])[1:-1])
+                attr_list = record["e"]['attr']
+                if attr_list != None and attr_list.__len__() >= 2:
+                    data_line.append("{}: {}".format(attr_list[0], attr_list[1]))
             elif len(record["e"]['attr_value']) > 0:
                 #Todo remove Obsolete variable
                 data_line.append("({})".format(record["e"]['attr_value'])[1:-1])
@@ -241,7 +242,8 @@ class Event:
             else:
                 data_line.append('-')
             if len(record["e"]['attr']) > 0:
-                data_line.append(str(record["e"]['attr'])[1:-1])
+                if record["e"]['attr'] != None and record["e"]['attr'].__len__() >= 2:
+                    data_line.append("{}: {}".format(record["e"]['attr'][0], record["e"]['attr'][1]))
             else:
                 data_line.append('-')
             if record["e"]['attr_value']:
