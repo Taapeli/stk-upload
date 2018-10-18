@@ -4,9 +4,10 @@
 {% block body %}
 {{ super() }}
 
+<style>form { display: inline-block; }</style>
 <div id="startdiv">
     <div>
-        <h2>Käyttäjät</h2>
+        <h2>{{ _("Our Users") }}</h2>
          {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <ul  class='flashes'>
@@ -20,9 +21,10 @@
         <div class="row">
            <div class="startbox2">
              <div style="display: inline-block;">
-                <h3>Voimassaolevat käyttäjätunnukset</h3>
+                <h3>{{ _("User names in use") }}</h3>
 		        <table class="table100">
-		            <tr><th>user id</th><th>name</th><th>email</th><th>roles</th></tr>
+		            <tr><th>{{ _("User name") }}</th><th>{{ _("Name") }}</th><th>{{ _("mail") }}</th>
+		            <th>{{ _("Roles") }}</th><th>{{ _("Operations") }}</th></tr>
 		        {% if users %}
 		            {% for u in users %}
 		                <tr>
@@ -30,11 +32,14 @@
 		                    <td>{{u.name}}</td>
 		                    <td>{{u.email}}</td>
 		                    <td>{{u.roles}}</td>
-		                    <td><a href=list_uploads/{{u.username}}>{{ _("Uploads") }}</a></td>
+		                    <td><form action="list_uploads/{{u.username}}">
+                                    <input type="submit" value="{{ _("Uploads") }}" />
+                                </form>
+                            </td>
 		                </tr>
 		            {% endfor %}
 		        {% else %}
-		                <tr><td colspan="1">Ei tietoja</td></tr>
+		                <tr><td colspan="1">{{ _("No users") }}</td></tr>
 		        {% endif %}
 		        </table>
 	        </div>
