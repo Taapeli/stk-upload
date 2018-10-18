@@ -59,6 +59,8 @@ def add_args(parser):
                         help=_('Try to combine certain names...'))
     parser.add_argument('--match', type=str, 
                         help=_('Only process places containing this string'))
+    parser.add_argument('--addname', type=str, 
+                        help=_('Add this name at the end'))
     parser.add_argument('--display-nonchanges', action='store_true',
                         help=_('Display unchanged places'))
     parser.add_argument('--display-ignored', action='store_true',
@@ -247,6 +249,8 @@ def process_place(options, place):
             place = ", ".join(names)
     if options.auto_combine:
         place = revert_auto_combine(place)
+    if options.addname:
+        place += ", " + options.addname
     return place
  
 
