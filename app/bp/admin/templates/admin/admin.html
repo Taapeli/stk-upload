@@ -14,8 +14,8 @@
           <i>{{ 'git'|app_date }}</i></span>
     
     <div class="row">
-    {% if current_user.is_authenticated and 
-        ( current_user.has_role('member') or current_user.has_role('admin') ) %}
+    {% if current_user.is_authenticated
+        and ( current_user.has_role('member') or current_user.has_role('admin') or current_user.has_role('master')) %}
         <div class="startbox">
             <h3>Datanäkymiä taulukkoina</h3>
             <p>Seuraavalla sivulla on erilaisia teknisempiä listauksia
@@ -29,7 +29,8 @@
         </div>
     {% endif %}
 
-    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+    {% if current_user.is_authenticated 
+        and (current_user.has_role('admin') or current_user.has_role('master'))  %}
     <div class="startbox admin">
       <div style="display: inline-block;">
         <h3>Tietokannan tyhjennykset</h3>
@@ -44,7 +45,8 @@
       </div>
     </div>{% endif %}
 
-    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+    {% if current_user.is_authenticated 
+        and (current_user.has_role('admin') or current_user.has_role('master')) %}
     <div class="startbox admin">
       <div style="display: inline-block;">
         <h3>Käyttäjien ja referenssitietojen hallinta</h3>

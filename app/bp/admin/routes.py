@@ -120,15 +120,18 @@ def save_loaded_csv(filename, subj):
 # Siirretty security--> admin
 @bp.route('/admin/allowed_emails',  methods=['GET', 'POST'])
 @login_required
-@roles_required('admin')
+@roles_accepted('admin', 'master') 
 def list_allowed_emails():
     form = AllowedEmailForm()
-    if request.method == 'POST': 
-        # Register a new email
-        UserAdmin.allowed_email_register(form.allowed_email.data,
-                                         form.default_role.data)
- 
+#    if request.method == 'POST':
     lista = UserAdmin.get_allowed_emails()
+    if form.validate_on_submit(): 
+        # Register a new email
+        lista = UserAdmin.get_allowed_emails()
+        UserAdmin.register_allowed_email(form.allowed_email.data,
+                                         form.default_role.data)
+        return redirect(url_for('admin.list_allowed_emails'))
+
     return render_template("/admin/allowed_emails.html", emails=lista, 
                             form=form)
 
@@ -136,7 +139,7 @@ def list_allowed_emails():
 # Siirretty security--> admin
 @bp.route('/admin/list_users', methods=['GET'])
 @login_required
-@roles_accepted('admin', 'audit')
+@roles_accepted('admin', 'audit', 'master')
 def list_users():
     # Käytetään neo4juserdatastorea
     lista = shareds.user_datastore.get_users()
@@ -188,10 +191,10 @@ def xml_download(username,xmlfile):
 def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(current_user.username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
-    result_list = Unpickler(open(fname,"rb")).load()
-    return render_template("/admin/load_result.html", batch_events=result_list)
-
-
+    #result_list = Unpickler(open(fname,"rb")).load()
+    msg = open(fname).read()
+    #return render_template("/admin/load_result.html", batch_events=result_list)
+    return render_template("/admin/load_result.html", msg=msg)
 
 
 @bp.route('/admin/xml_delete/<username>/<xmlfile>')

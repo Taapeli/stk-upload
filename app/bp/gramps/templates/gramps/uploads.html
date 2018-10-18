@@ -19,17 +19,17 @@
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("XML file") }}</th>
                 <th>{{ _("Status") }}</th>
-                   <th>{{ _("Delete") }}</th>
+                <th>{{ _("Delete") }}</th>
    			</tr>
 	    {% for upload in uploads %}
 	       <tr>
 	           <td class="msg_INFO">{{upload.upload_time_s}}</td>
 	           <td class="msg_INFO">
-    	           <a href=/gramps/upload_download/{{upload.xmlname}}>{{upload.xmlname}}</a>
+    	           <a href=/gramps/xml_download/{{upload.xmlname}}>{{upload.xmlname}}</a>
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}</td>
 	           <td class="msg_INFO">
-	           		<a href=/gramps/delete_upload/{{upload.xmlname}}>Delete</a></td>
+	           		<a href=/gramps/xml_delete/{{upload.xmlname}}>Delete</a></td>
 	       </tr>
 	    {% endfor %}</table>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>

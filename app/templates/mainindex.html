@@ -84,7 +84,8 @@
           </div>
         </div>
 
-        {% if current_user.is_authenticated and current_user.has_role('admin') %}
+        {% if current_user.is_authenticated and 
+            (current_user.has_role('admin')  or current_user.has_role('master') ) %}
         <div class="startbox admin">
           <div style="display: inline-block;">
 			<h3>Ylläpitäjän toiminnot</h3>

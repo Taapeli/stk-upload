@@ -12,7 +12,7 @@ import time
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for 
+from flask import render_template, request, redirect, url_for, send_from_directory
 from flask_security import roles_accepted, current_user
 from flask_babelex import _
 
@@ -55,13 +55,14 @@ def upload_gramps():
         os.makedirs(upload_folder, exist_ok=True)
 
         pathname = loadfile.upload_file(infile,upload_folder)
-        
         shareds.tdiff = time.time()-t0
 
+        logname = pathname + ".log"
         uploads.set_meta(current_user.username,infile.filename,
                         status="uploaded",
                         upload_time=time.time())
         msg = "User {} uploaded the file {}".format(current_user.username,pathname)
+        open(logname,"w").write(msg)
         email.email_admin(
                     "Stk: Gramps XML file uploaded",
                     msg )
@@ -93,8 +94,24 @@ def save_loaded_gramps(filename):
 
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')
+@roles_accepted('member', 'admin')
 def error_page(code, text=''):
     """ Virhesivu näytetään """
     logging.debug('Virhesivu ' + str(code) )
     return render_template("virhe_lataus.html", code=code, text=text)
 
+@bp.route('/gramps/xml_delete/<xmlfile>')
+@roles_accepted('member', 'admin')
+def xml_delete(xmlfile):
+    uploads.delete_files(current_user.username,xmlfile)
+    return redirect(url_for('gramps.list_uploads'))
+
+@bp.route('/gramps/xml_download/<xmlfile>')
+@roles_accepted('admin', 'audit')
+def xml_download(xmlfile):
+    xml_folder = uploads.get_upload_folder(current_user.username)
+    xml_folder = os.path.abspath(xml_folder)
+    return send_from_directory(directory=xml_folder, filename=xmlfile, 
+                               mimetype="application/gzip",
+                               as_attachment=True)
+                               #attachment_filename=xmlfile+".gz") 

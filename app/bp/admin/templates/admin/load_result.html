@@ -13,17 +13,9 @@
         </ol>
       {% endif %}
     {% endwith %}
-        <table>
-           <tr><th>{{ _("Operation") }}</th>
-               <th>{{ _("Count") }}</th>
-               <th>{{ _("Time / sec") }}</th>
-           </tr>
-	    {% for e in batch_events %}
-	       <tr><td class="msg_{{e.level}}">{{e.title}}</td>
-               <td class="right">{% if e.count %} {{e.count}} {% endif %}</td>
-               <td class="right">{% if e.elapsed %} {{'%.4f'| format(e.elapsed|float)}} {% endif %}</td>
-	       </tr>
-	    {% endfor %}</table>
+    <pre>
+    {{ msg }}
+    </pre>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
 {% endblock %}
 </body>

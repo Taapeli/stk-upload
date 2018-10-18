@@ -117,10 +117,10 @@ def i_am_alive(metaname,parent_thread):
         time.sleep(10)
 
 def background_load_to_neo4j(username,filename):
-    pathname = loadfile.fullname(filename)
     upload_folder = get_upload_folder(username) 
-    metaname = os.path.join(upload_folder,filename+".meta")
-    logname = os.path.join(upload_folder,filename+".log")
+    pathname = os.path.join(upload_folder,filename)
+    metaname = pathname+".meta"
+    logname =  pathname+".log"
     try:
         os.makedirs(upload_folder, exist_ok=True)
         set_meta(username,filename,status="loading")
@@ -129,18 +129,27 @@ def background_load_to_neo4j(username,filename):
         steps = gramps_loader.xml_to_neo4j(pathname,username)
         for step in steps:
             print(step)
-        Pickler(open(logname,"wb")).dump(steps)
         set_meta(username,filename,status="done")
-        msg = "Loaded the file {} from user {} to neo4j".format(username,pathname)
+        msg = "Loaded the file {} from user {} to neo4j".format(pathname,username)
         msg += "\nLog file: {}".format(logname)
+        msg += "\n"
+        for step in steps:
+            msg += "\n{}".format(step)
+        open(logname,"w").write(msg)
         email.email_admin(
                     "Stk: Gramps XML file loaded",
                     msg )
     except:
         traceback.print_exc()
         res = traceback.format_exc()
-        open(logname,"w").write(res)
-        os.rename(logname,logname+".failed")
+        set_meta(username,filename,status="failed")
+        msg = "Loading of file {} from user {} to neo4j FAILED".format(pathname,username)
+        msg += "\nLog file: {}".format(logname)
+        msg += "\n" + res
+        open(logname,"w").write(msg)
+        email.email_admin(
+                    "Stk: Gramps XML file load FAILED",
+                    msg )
 
 
 def initiate_background_load_to_neo4j(userid,filename):
