@@ -13,8 +13,6 @@
         - get_people_with_same_deathday() Etsi henkilöt, joiden kuolinaika on sama
         - get_people_wo_birth()         Luetaan henkilöt ilman syntymätapahtumaa
         - get_old_people_top()          Henkilöt joilla syntymä- ja kuolintapahtuma
-        - get_confidence (uniq_id=None) Henkilön tapahtumien luotettavuustiedot
-        - set_confidence (self, tx)     Asetetaan henkilön tietojen luotettavuusarvio
         - get_person_events (nmax=0, pid=None, names=None)
                                         Luetaan henkilöitä tapahtumineen
         - get_person_combos (keys, currentuser, take_refnames=False, order=0):
@@ -26,7 +24,7 @@
         - get_refnames(pid)             Luetaan liittyvät Refnames
         - get_ref_weburls(pid_list)     Luetaan mainittuihin nodeihin liittyvät Weburlit
         - set_estimated_dates()         Aseta est_birth ja est_death
-        - save(self, username, tx)      Tallettaa Person, Names, Events ja Citations
+        # save(self, username, tx)      see: bp.gramps.models.person_gramps.Person_gramps.save
 
     Not in use or obsolete:
         - get_citation_id(self)         Luetaan henkilöön liittyvän viittauksen id
@@ -43,19 +41,18 @@
         - print_compared_data(self, comp_person, print_out=True) 
                                         Tulostaa kahden henkilön tiedot vieretysten
 
-
-        - save() # with relations to UserProfile, Person, Place, Note, Citation, Media
+        - save()  see: bp.gramps.models.person_gramps.Person_gramps.save
 
 
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi> & Juha Mäkeläinen
 '''
 
-import datetime
+#import datetime
 from sys import stderr
 #import logging
 
 import shareds
-import models.dbutil
+#import models.dbutil
 
 from .person import Person
 from .person_name import Name
@@ -64,7 +61,7 @@ from .place import Place, Place_name
 from .dates import DateRange
 from .weburl import Weburl
 
-from models.cypher_gramps import Cypher_person_w_handle
+#from models.cypher_gramps import Cypher_person_w_handle
 
 class Person_combo(Person):
     """ Henkilö
@@ -96,9 +93,6 @@ class Person_combo(Person):
             parentin_hlink[]   int vanhempien uniq_id
             noteref_hlink[]    int huomautuksen uniq_id
             citation_ref[]     int viittauksen uniq_id    (ent.citationref_hlink)
-
-    #TODO: urls[] list should contain Weburl instances
-    
      """
 
     def __init__(self):
@@ -532,25 +526,6 @@ RETURN person, urls, COLLECT (name) AS names
             lists.append(data_line)
 
         return (titles, lists)
-
-
-    @staticmethod
-    def get_confidence (uniq_id=None):
-        """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
-        """
-        if uniq_id:
-            return shareds.driver.session().run(Cypher_person.get_confidence,
-                                                id=uniq_id)
-        else:
-            return shareds.driver.session().run(Cypher_person.get_confidences_all)
-
-
-    def set_confidence (self, tx):
-        """ Sets a quality rate to this Person
-            Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
-        """
-        return tx.run(Cypher_person.set_confidence,
-                      id=self.uniq_id, confidence=self.confidence)
 
 
     @staticmethod
@@ -1169,7 +1144,6 @@ SET n.est_death = m.daterange_start"""
                         print ("Refname: " + refname1[i] + " # " + refname2[i])
                         print ("Surname: " + surname1[i] + " # " + surname2[i])
                         print ("Suffix: " + suffix1[i] + " # " + suffix2[i])
-
         return points
 
 
@@ -1178,123 +1152,8 @@ SET n.est_death = m.daterange_start"""
 
             On return, the self.uniq_id is set
         """
+        raise NotImplementedError("Person_combo.save() ei toteutettu, ks. Person_gramps.save()")
 
-        today = str(datetime.date.today())
-        if not self.handle:
-            handles = models.dbutil.get_new_handles(3)
-            self.handle = handles.pop()
-
-        # Save the Person node under UserProfile; all attributes are replaced
-        try:
-            p_attr = {
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "priv": self.priv,
-                "gender": self.gender
-            }
-            result = tx.run(Cypher_person_w_handle.create, 
-                            username=username, p_attr=p_attr, date=today)
-#             self.uniq_id = result.single()[0]
-            for res in result:
-                self.uniq_id = res[0]
-                print("Person {} ".format(self.uniq_id))
-
-        except Exception as err:
-            print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
-
-        # Save Name nodes under the Person node
-        try:
-            for name in self.names:
-                n_attr = {
-                    "alt": name.alt,
-                    "type": name.type,
-                    "firstname": name.firstname,
-#                     "refname": name.refname,
-                    "surname": name.surname,
-                    "suffix": name.suffix
-                }
-                tx.run(Cypher_person_w_handle.link_name, 
-                       n_attr=n_attr, p_handle=self.handle)
-        except Exception as err:
-            print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
-
-        # Save Weburl nodes under the Person
-        for url in self.urls:
-            u_attr = {
-                "priv": url.priv,
-                "href": url.href,
-                "type": url.type,
-                "description": url.description
-            }
-            try:
-                tx.run(Cypher_person_w_handle.link_weburl, 
-                       p_handle=self.handle, u_attr=u_attr)
-            except Exception as err:
-                print("Virhe (Person.save: {} create Weburl): {0}".\
-                      format(self.id, err), file=stderr)
-
-        if len(self.events) > 0:
-            # Make Event relations (if Events were stored in self.events)
-            # TODO: onkohan tämä käytössä?
-            ''' Create and connect to an Person.event[*] '''
-            for e in self.events:
-                if handles:
-                    e.handle = handles.pop()
-                e_attr = {
-                    "handle": e.handle,
-                    "id": e.id,
-                    "name": e.name, # "e_type": e.tyyppi,
-                    "date": e.date,
-                    "descr": e.description
-                }
-                try:
-                    tx.run(Cypher_person_w_handle.link_event_embedded, 
-                           p_handle=self.handle, e_attr=e_attr, role="osallistuja")
-                except Exception as err:
-                    print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
-
-        # Make Event relations by hlinks (from gramps_loader)
-        elif len(self.eventref_hlink) > 0:
-            ''' Connect to each Event loaded form Gramps '''
-            for i in range(len(self.eventref_hlink)):
-                try:
-                    tx.run(Cypher_person_w_handle.link_event, 
-                           p_handle=self.handle, 
-                           e_handle=self.eventref_hlink[i], 
-                           role=self.eventref_role[i])
-                except Exception as err:
-                    print("Virhe (Person.save:Event): {0}".format(err), file=stderr)
-
-        # Make relations to the Media node
-        if len(self.media_ref) > 0:
-            for ref in self.media_ref:
-                try:
-                    tx.run(Cypher_person_w_handle.link_media, 
-                           p_handle=self.handle, m_handle=ref)
-                except Exception as err:
-                    print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
-
-        # The relations to the Family node will be created in Family.save(),
-        # because the Family object is not yet created
-
-        # Make relations to the Note node
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                try:
-                    tx.run(Cypher_person_w_handle.link_note,
-                           p_handle=self.handle, n_handle=self.noteref_hlink[i])
-                except Exception as err:
-                    print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
-
-        # Make relations to the Citation node
-        if len(self.citation_ref) > 0:
-            try:
-                tx.run(Cypher_person_w_handle.link_citation,
-                       p_handle=self.handle, c_handle=self.citation_ref[0])
-            except Exception as err:
-                print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
-        return
 
 
 class Person_as_member(Person):

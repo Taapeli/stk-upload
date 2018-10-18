@@ -10,11 +10,13 @@ import gzip
 from os.path import basename, splitext
 import xml.dom.minidom
 
+from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
+from .batchlogger import Batch, Log
+
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person_combo import Person_combo
 from models.gen.person_name import Name
 from models.gen.weburl import Weburl
 from models.gen.place import Place, Place_name, Point
@@ -23,9 +25,7 @@ from models.gen.citation import Citation
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.dataupdater import set_confidence_value, set_person_refnames
-from .batchlogger import Batch, Log
 import shareds
-
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
@@ -507,7 +507,7 @@ class DOM_handler():
         # Print detail of each person
         for person in people:
 
-            p = Person_combo()
+            p = Person_gramps()
 
             if person.hasAttribute("handle"):
                 p.handle = person.getAttribute("handle")
@@ -597,7 +597,6 @@ class DOM_handler():
                     if person_parentin.hasAttribute("hlink"):
                         p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
                         
-#TODO Aikanaan noteref_hlink ja citation_ref korvattava ..._handles[]?
             if len(person.getElementsByTagName('noteref') ) >= 1:
                 for i in range(len(person.getElementsByTagName('noteref') )):
                     person_noteref = person.getElementsByTagName('noteref')[i]
@@ -608,7 +607,7 @@ class DOM_handler():
                 for i in range(len(person.getElementsByTagName('citationref') )):
                     person_citationref = person.getElementsByTagName('citationref')[i]
                     if person_citationref.hasAttribute("hlink"):
-                        p.citation_ref.append(person_citationref.getAttribute("hlink"))
+                        p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
 
             p.save(self.username, self.tx)
             counter += 1

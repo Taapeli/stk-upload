@@ -109,10 +109,11 @@
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
-                        <td class="ColumnPlace">{% for ref in e.place_ref %}
-                            <a href="/scene/location={{references[ref].uniq_id}}" class="inlink"
-                            title="tyyppiä {{references[ref].type}}; katso paikan tiedot">
-                            {{e.clearnames|join(' • ')}}</a>{% endfor %}
+                        <td class="ColumnPlace">{% for pref in e.place_ref %}
+                            <a href="/scene/location={{references[pref].uniq_id}}" class="inlink"
+                            title="tyyppiä {{references[pref].type}}; katso paikan tiedot">
+                            {{e.clearnames|join(' • ')}}</a> 
+                            {% endfor %}
                         </td>
                         <td class="ColumnDescription"><div>{{e.description}}</div>
                             <div>{% if e.type == "Death" and t_cause_of_death %}<span 
@@ -122,6 +123,11 @@
                             	   <li><span class="typedesc">{{ references[ref].type|transl('notet') }}</span>
                             	       {{ references[ref].text }}</li>{% endfor %}
                             	   </ul>{% endif %}
+                                {% if e.place_ref %}<ul class="eventnotes">{% for pref in e.place_ref %}
+	                                {% for nref in references[pref].note_ref %}
+                                   <li><span class="typedesc">{{ references[nref].type }}</span>
+	                                   {{references[nref].text}}</li>{% endfor %}{% endfor %}	 
+                                </ul>{% endif %}
                             </div>
                         </td>
                     {% endif %}
@@ -207,71 +213,6 @@
                 Note
                 </p>
             </div>
-        </div>
--->
-<!--
-        <div class="subsection" id="pedigree">
-            <h4>Esipolvien taulu</h4>
-            <ol class="pedigreegen">
-                <li>
-                    <a href="../../../ppl/8/a/ce373c19c2f1a78cda8.html">Silius, Carl Gustaf</a>
-                    <ol>
-                        <li class="spouse">
-                            <a href="../../../ppl/8/a/ce373c19c692ce8a5a8.html">Berttunen, Brita Kristina Eriksdotter</a>
-                            <ol>
-                                <li>
-                                    <a href="../../../ppl/4/b/ce373c19c935b19acb4.html">Silius, Knut</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/9/8/ce373c19cba64453b89.html">Silius, Karl Aleksander</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/3/a/d62cce4aee65110a2a3.html">Silius, Knut Theodor nuor.</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/1/5/ce373c19ce0245e8851.html">Silius, Aina Alina</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/2/a/ce373c19da6166834a2.html">Airola ent. Silius, Knut Theodor</a>
-                                </li>
-                                <li class="thisperson">
-                                Airola, Kalle Kustaa ent. Silius
-                                    <ol class="spouselist">
-                                        <li class="spouse">
-                                            <a href="../../../ppl/d/3/ce373c1949b5af12e3d.html">Serenius, Saimi Alli Zuleima</a>
-                                            <ol>
-                                                <li>
-                                                    <a href="../../../ppl/f/d/ce373c18ffb7fb981df.html">Airola, Maija Kyllikki</a>
-                                                </li>
-                                            </ol>
-                                        </li>
-                                        <li class="spouse">
-                                            <a href="../../../ppl/1/e/ce373c195ac3fcc8ce1.html">Airola, Irja Tuulikki os. Kajander</a>
-                                            <ol>
-                                                <li>
-                                                    <a href="../../../ppl/f/e/ce373c195dc54f0c8ef.html">Airola, Kalle Eero Ilmari</a>
-                                                </li>
-                                                <li>
-                                                    <a href="../../../ppl/f/2/ce373c1984203db7f2f.html">Airola, Leena Irja Tuulikki</a>
-                                                </li>
-                                            </ol>
-                                        </li>
-                                    </ol>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/2/1/ce373c19d7f6d6f7412.html">Silius, Hilja Kristina</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/3/1/ce373c19de07cf7a113.html">Airola, Saima Adele ent. Silius</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/8/5/ce373c19e4557f46258.html">Airola, Elsa Elina</a>
-                                </li>
-                            </ol>
-                        </li>
-                    </ol>
-                </li>
-            </ol>
         </div>
 -->
         <!-- div class="subsection" id="tree"><h4>Esivanhemmat -->

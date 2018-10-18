@@ -5,7 +5,7 @@ Created on 24.9.2018
 
 @author: jm
 '''
-from models.datareader import read_persons_with_events
+#from models.datareader import read_persons_with_events
 from models.gen.from_node import get_object_from_node
 from models.gen.family import Family_for_template
 from models.gen.person_combo import Person_combo, Person_as_member
@@ -118,65 +118,22 @@ def get_a_person_for_display_apoc(uniq_id, user):
     # 4. Generate clear names for event places
 
     for e in person.events:
-        for ref in e.place_ref:
-            e.clearnames = e.clearnames + objs[ref].show_names_list()
-        for ref in e.citation_ref:
-            if ref in objs:
-                cit = objs[ref]
-                sl = "{} '{}'".format(cit.source.uniq_id, cit.source.stitle)
-                print("{}: lähde {} / {} '{}'".format(e.id, sl, cit.uniq_id, cit.page))
-            else:
-                sl = 'no source'
-                print("{}: no source / {}".format(e.id, sl, ref))
+        for pref in e.place_ref:
+            e.clearnames = e.clearnames + objs[pref].show_names_list()
+            for nref in objs[pref].note_ref:
+                note = objs[nref]
+                print ("  place {} note {}".format(objs[pref].id, note))
+#         for ref in e.citation_ref:
+#             if ref in objs:
+#                 cit = objs[ref]
+#                 sl = "{} '{}'".format(cit.source.uniq_id, cit.source.stitle)
+#                 print("{}: lähde {} / {} '{}'".format(e.id, sl, cit.uniq_id, cit.page))
+#             else:
+#                 sl = 'no source'
+#                 print("{}: no source / {}".format(e.id, sl, ref))
 
     # Return Person with included objects and list of note, citation etc. objects
     return (person, objs)
-
-
-# def get_a_person_for_display(uniq_id, user):
-#     """ Get a Person with all connected nodes --- keskeneräinen ---
-# 
-#         @TODO Monet osat on ohjelmoimatta
-#     """
-#     # 1. Read person p and paths for all nodes connected to p
-#     paths = Person_combo.get_person_paths(uniq_id)
-#     
-#     for path in paths:
-# #         s_node = path['path'].start
-# #         # <Node id=80307 labels=set() 
-# #         #    properties={'handle': '_da692a09bac110d27fa326f0a7', 'id': 'I0119', 
-# #         #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
-# #         e_node = path['path'].end
-# #         s_label = s_node.labels.pop()
-# #         e_label = e_node.labels.pop()
-# #         print("path ({} id:{}) -[{}]-> ({} id:{})".\
-# #               format(s_label, s_node['id'], path[0].__len__(), e_label, e_node['id']))
-#         nodelist = []
-#         for n in path[0].nodes:
-#             if n.labels:    lab = n.labels.pop() + ' '
-#             else:           lab = ''
-#             nodelist.append("{}:({}{})".format(n.id, lab, n['id']))
-#         print("nodes {}".format(" --> ".join(nodelist)))
-#         person = None
-# 
-#     return person, None
-# 
-#     persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
-#     person = persons[0]
-#     person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-#     person.set_my_places(True)
-#     person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
-#     sources = Source.get_sources_by_idlist(source_ids)
-#     #TODO: Etsi sitaateille lähteet
-# 
-# #     person.get_all_notes()
-# #     person.get_media()
-# #     person.get_refnames()
-#     for c in person.citations:
-#         print ("Sitaatit ({} {})".format(c.uniq_id, c))
-#         for ci in c.citators:
-#             print ("  ({}) <- ({})".format(c, ci))
-#     return person, sources
 
 def connect_object_as_leaf(src, target, rel_type=None):
     ''' Subroutine for Person page display
@@ -229,7 +186,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
             .place_ref[]
             .note_ref[]
         Place 
-            .surrounding[]
+            .place_ref[]
             .note_ref[]
             .citation_ref[]
         Family

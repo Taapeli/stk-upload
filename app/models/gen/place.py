@@ -33,6 +33,10 @@ class Place:
                     href            str url osoite
                     type            str url tyyppi
                     description     str url kuvaus
+                surrounding[]       int uniq_ids of upper
+                surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
+                note_ref[]          int uniq_ids of Notes
+                citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
@@ -52,10 +56,12 @@ class Place:
         self.change = 0
         self.names = []
         self.coord = None
-        self.uppers = []        # Upper place objects for display
-        self.notes = []         # Upper place objects for display
+        
+        self.uppers = []        # Upper place objects for hirearchy display
+        self.notes = []         # Upper place objects for hierarchy display
         self.urls = []          # Weburl instance list
 
+        self.note_ref = []      # uniq_ids of Notes
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.noteref_hlink = []
 
@@ -275,7 +281,9 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
 
         def combine_places(field):
-            """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
+            """ Returns a list of cleartext names got from Place_name objects
+            
+                Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
                 "Lovisa", "sv"]].
                 Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
                 Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
