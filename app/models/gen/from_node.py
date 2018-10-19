@@ -49,7 +49,7 @@ def get_object_from_node(node):
         return Note.from_node(node)
     elif label == "Family":
         return Family.from_node(node)
-#     elif label == "Media":
-#         return Media.from_node(node)
+    elif label == "Media":
+        return Media.from_node(node)
     else: return None
 

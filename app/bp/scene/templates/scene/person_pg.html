@@ -14,10 +14,10 @@
 {{ macro.menu(1) }}
     <div class="content" id="IndividualDetail">
 
-        {% if person.photos %}<div class="snapshot">
+        {% if person.media_ref %}<div class="snapshot">
             <div class="thumbnail">
-                <img alt="Kuvassa {{person.photos[0].description}}" 
-                     src="{{person.photos[0].src}}" />
+                <img alt="Kuvassa {{references[person.media_ref[0]].description}}" 
+                     src="{{references[person.media_ref[0]].src}}" />
             </div>
         </div>{% endif %}
 
@@ -38,6 +38,7 @@
                         </small>{{ macro.link_cite(person.citation_ref, references) }}
                     </td>{% endif %}
                 </tr>
+
                 {% for pname in person.names %}<tr>
                     <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
@@ -45,15 +46,9 @@
                         <span title="etunimi">{{pname.firstname}}</span>
                         <i title="patronyymi">{{pname.suffix}}</i>
                         <b title="sukunimi">{{pname.surname}}</b>
-                        <!-- {% if pname.refname %}&nbsp; 
-                          <tt class="refname" title="referenssinimi">{{pname.refname}}</tt> -->
-                        {% endif %}
-                   <ul><div class="grampsstylednote">
-                            <p>Tähän tulee Person Note</p>
-                        </div></ul>
-                   
                     </td>
                 </tr>{% endfor %}
+                   
                 {% if person.gender %}<tr>
                     <td class="ColumnAttribute">Sukupuoli</td>
                     <td class="ColumnValue">{% if person.gender in sp %}{{sp[person.gender]}}
@@ -63,7 +58,7 @@
                     <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(person.priv) }}</td>
                 </tr>{% endif %}
                 
-                {% if person.confidence %}<tr>
+                {% if person.confidence > '' %}<tr>
                     <td class="ColumnAttribute">Tietojen luotettavuus</td>
                     <td class="ColumnValue">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>{% endif %}
@@ -73,7 +68,13 @@
                 </tr>
 -->
             </table>
-        </div -->
+        </div>
+
+        {% if person.note_ref %}<ul>
+        {% for ref in person.note_ref %}<div class="grampsstylednote">
+         <p><span class="typedesc">{{ references[ref].type|transl('notet') }}</span>
+            {{references[ref].text}}</p>
+        </div>{% endfor %}</ul>{% endif %}
 
         <div class="subsection" id="events">
             <h4>Tapahtumat</h4>
@@ -209,9 +210,9 @@
 
         <div class="subsection" id="indivgallery">
             <h4>Media</h4>
-        {% for photo in person.photos %}<div class="thumbnail">
-                <img alt="kuva" src="{{photo.src}}" />
-                    <p>{{photo.description}}</p>
+        {% for ref in person.media_ref %}<div class="thumbnail">
+                <img alt="kuva" src="{{references[ref].src}}" />
+                    <p>{{references[ref].description}}</p>
             </div>
         {% endfor %}
             <div class="fullclear"></div>

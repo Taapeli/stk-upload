@@ -119,7 +119,7 @@ class Person_combo(Person):
         self.media_ref = []             # uniq_id of models.gen.media.Media
                                         # (previous self.objref_hlink[])
 
-        # Other variables ???
+        # Other variables
 
         self.urls = []
         self.est_birth = ''
@@ -151,7 +151,7 @@ return path"""
         all_nodes_query_w_apoc="""
 MATCH (p:Person) WHERE id(p) = $pid
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 
-        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
     YIELD nodes, relationships
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,

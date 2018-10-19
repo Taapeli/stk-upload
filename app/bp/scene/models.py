@@ -20,9 +20,7 @@ from models.gen.media import Media
 
 
 def get_a_person_for_display_apoc(uniq_id, user):
-    """ Get a Person with all connected nodes --- keskeneräinen ---
-
-        @TODO Monet osat on ohjelmoimatta
+    """ Get a Person with all connected nodes 
     """
 
     # 1. Read person p and paths for all nodes connected to p
@@ -88,8 +86,6 @@ def get_a_person_for_display_apoc(uniq_id, user):
             if role:    r = ' '.join(relation[1:3])
             else:       r = relation[1]
             print("relation ({} {}) -[{}]-> ({} {})".format(src_node.id, src_label, r, target_node.id, target_label))
-            if target_label in ['Source']:
-                print ("  --> {}".format(target_label))
             # Source object, for ex. Person_combo
             if src_node.id in objs:
                 src_obj = objs[src_node.id]
@@ -152,7 +148,6 @@ def connect_object_as_leaf(src, target, rel_type=None):
         -[:FATHER]-> (:Family)   to .father
         -[:MOTHER]-> (:Family)   to .mother
         -[:HIERARCHY]-> (:Place) to .place
-        -[:MEDIA]-> (:Media)     to .media[]
 
     The following relation targets are stored as object references (uniq_id) 
     in root object variable. The actual referenced target objects are stored to 
@@ -162,13 +157,14 @@ def connect_object_as_leaf(src, target, rel_type=None):
         -[:REPOSITORY]-> (:Repository) to .repo_ref[]
         -[:NOTE]-> (:Note)             to .note_ref[]
         -[:PLACE]-> (:Place)           to .place_ref[]
+        -[:MEDIA]-> (:Media)           to .media_ref[]
     
     Object to object connection variables:
     
         Person combo 
             .names[]
             .events[]
-            .media[]
+            .media_ref[]
             .families[]
             .note_ref[]
             .citation_ref[]
@@ -225,6 +221,9 @@ def connect_object_as_leaf(src, target, rel_type=None):
             return None
         if target_class == 'Note':
             src.note_ref.append(target.uniq_id)
+            return None
+        if target_class == 'Media':
+            src.media_ref.append(target.uniq_id)
             return None
 
     elif src_class == 'Event_combo':
