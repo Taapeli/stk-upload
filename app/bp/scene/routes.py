@@ -138,7 +138,6 @@ def show_a_person_w_apoc(uid):
     if person == None:
         return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
 
-    #TODO Tähän sitaatit sourcen tilalle?
     return render_template("/scene/person_pg.html", 
                            person=person, references=references, menuno=1)
 

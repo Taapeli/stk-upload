@@ -85,7 +85,6 @@
                         <th class="ColumnDate">Päivämäärä</th>
                         <th class="ColumnPlace">Paikka</th>
                         <th class="ColumnDescription">Kuvaus ja huomautukset</th>
-<!--                    <th class="ColumnNotes">Lisätiedot</th> -->
                     </tr>
                 </thead>
                 <tbody>
@@ -94,9 +93,11 @@
                     {% if e.type == "Cause Of Death" %}
                         {% set t_cause_of_death = e.description %}
                     {% else %}
+
                         <td class="ColumnSources">
                         {{ macro.link_cite(e.citation_ref, references) }}
                         </td>
+
                         <td class="ColumnEvent">
                             <span class="id">
                             {% if e.type == "Baptism" %}
@@ -108,29 +109,38 @@
                             {% if e.role and e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
+
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
+
                         <td class="ColumnPlace">{% for pref in e.place_ref %}
                             <a href="/scene/location={{references[pref].uniq_id}}" class="inlink"
                             title="tyyppiä {{references[pref].type}}; katso paikan tiedot">
                             {{e.clearnames|join(' • ')}}</a> 
                             {% endfor %}
                         </td>
+
                         <td class="ColumnDescription"><div>{{e.description}}</div>
                             <div>{% if e.type == "Death" and t_cause_of_death %}<span 
                                     class="typedesc">kuolinsyy</span> {{t_cause_of_death}}<br>
                             	{% endif %}
                             	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
                             	   <li><span class="typedesc">{{ references[ref].type|transl('notet') }}</span>
-                            	       {{ references[ref].text }}</li>{% endfor %}
-                            	   </ul>{% endif %}
+                            	       {{ references[ref].text }}</li>
+                            	   {% endfor %}</ul>{% endif %}
                                 {% if e.place_ref %}<ul class="eventnotes">{% for pref in e.place_ref %}
-	                                {% for nref in references[pref].note_ref %}
-                                   <li><span class="typedesc">{{ references[nref].type }}</span>
-	                                   {{references[nref].text}}</li>{% endfor %}{% endfor %}	 
-                                </ul>{% endif %}
+                                    {% for nref in references[pref].note_ref %}
+                                   <li><span class="typedesc">{{ references[nref].type}} note</span>
+                                       {{references[nref].text}}</li>{% endfor %}
+                                    {% endfor %}</ul>{% endif %}
+                                {% if e.citation_ref %}<ul class="eventnotes">{% for cref in e.citation_ref %}
+                                    {% for nref in references[cref].note_ref %}
+                                   <li><span class="typedesc">{{references[nref].type}} note</span>
+                                       {{references[nref].text}}</li>{% endfor %}
+                                   {% endfor %}</ul>{% endif %}
                             </div>
                         </td>
                     {% endif %}
+
                     </tr>
          {% endfor %}
                  </tbody>
