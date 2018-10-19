@@ -928,7 +928,7 @@ def get_place_with_events (loc_id):
         edates        event date
     """
     place = Place()
-    place.uniq_id = int(loc_id)
+    place.uniq_id = loc_id
     place.get_place_data_by_id()
     place_list = Place.get_place_tree(place.uniq_id)
     event_table = Place.get_place_events(place.uniq_id)

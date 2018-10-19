@@ -112,7 +112,8 @@
 
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
 
-                        <td class="ColumnPlace">{% for pref in e.place_ref %}
+                        <td class="ColumnPlace">{% set br=0 %}{% for pref in e.place_ref %}
+                            {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/scene/location={{references[pref].uniq_id}}" class="inlink"
                             title="tyyppiä {{references[pref].type}}; katso paikan tiedot">
                             {{e.clearnames|join(' • ')}}</a> 
@@ -129,12 +130,12 @@
                             	   {% endfor %}</ul>{% endif %}
                                 {% if e.place_ref %}<ul class="eventnotes">{% for pref in e.place_ref %}
                                     {% for nref in references[pref].note_ref %}
-                                   <li><span class="typedesc">{{ references[nref].type}} note</span>
+                                   <li><span class="typedesc">{{ references[nref].type|transl('notet') }}</span>
                                        {{references[nref].text}}</li>{% endfor %}
                                     {% endfor %}</ul>{% endif %}
                                 {% if e.citation_ref %}<ul class="eventnotes">{% for cref in e.citation_ref %}
                                     {% for nref in references[cref].note_ref %}
-                                   <li><span class="typedesc">{{references[nref].type}} note</span>
+                                   <li><span class="typedesc">{{references[nref].type|transl('notet') }}</span>
                                        {{references[nref].text}}</li>{% endfor %}
                                    {% endfor %}</ul>{% endif %}
                             </div>
