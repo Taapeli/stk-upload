@@ -185,16 +185,29 @@ class DateRange():
 
 
 #     def __cmp__(self, other):
-#         """ The 'other' must be an objct of type DateRange.
-# 
+#         """ Obosolete on Python 3.0!
+#             The 'other' must be an objct of type DateRange.
+#  
 #             The return value of self.__cmp__(other) is 0 for equal to, 
 #             1 for greater than,  and -1 for less than the compared value.
 #         """
-#         assert isinstance(other, DateRange), 'Argument of wrong type!'
-# 
-#          # ... etc ...
-#         return 0
 
+    '''
+        Date comparisons
+        #TODO Compare all fields, not only date1!
+    '''
+    def __lt__(self, other):
+        return self.date1 < other.date1
+    def __gt__(self, other):
+        return self.date1 > other.date1
+    def __eq__(self, other):
+        return self.date1 == other.date1
+    def __le__(self, other):
+        return self.date1 <= other.date1
+    def __ge__(self, other):
+        return self.date1 >= other.date1
+    def __ne__(self, other):
+        return self.date1 != other.date1
 
     @staticmethod
     def minus(d1, d2):

@@ -18,7 +18,7 @@ Created on 27.8.2018
 @author: jm
 '''
 import shareds
-from models.gen.dates import DateRange
+#from models.gen.dates import DateRange
 
 from .event import Event
 
@@ -47,15 +47,19 @@ class Event_combo(Event):
         self.note_ref = []      # Note uniq_ids (previous noteref_hlink had
                                 # only the first one)
         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
-        self.place_hlink = ''
-        self.objref_hlink = ''
-
+        self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
+        self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
+        self.note_ref = []      # uniq_ids (previously note[])
+        
         self.citations = []     # For creating display sets
         self.personnames = []   # Person names connected; for creating display
-        self.notes = []         # For creating display sets
-        self.place = ''         # TODO Change to places[]
+        #self.notes = []         # For creating display sets
+        #self.place = ''         # TODO Change to places[]
 
 
+# @classmethod from_node(cls, node): see evetn.from_node
+
+# Open ideas:
 #     def read(self, keys):
 #         ''' Access a set of Event complexes using different search fields
 #             like key = {'User_id': 1234}
@@ -100,19 +104,9 @@ return e as event,
 
         for record in result:
             # Event data
-            event = record["event"]
-            self.id = event["id"]
-            self.change = int(event["change"])  #TODO only temporary int()
-            self.type = event["type"]
-            self.description = event["description"]
-            if "datetype" in event:
-                #TODO: Talletetaanko DateRange -objekti vai vain str?
-                dates = DateRange(event["datetype"], event["date1"], event["date2"])
-                self.dates = str(dates)
-                self.date = dates.estimate()
-            else:
-                self.dates = None
-                self.date = ""
+            node = record["event"]
+            # Marshall self from the Node from db
+            self.from_node(node, self)
 
             # Related data
             for ref in record["note_ref"]:
@@ -121,7 +115,7 @@ return e as event,
                 # uniq_ids of connected Citations
                 self.citation_ref.append(ref)   # prev. citationref_hlink = ref
             for ref in record["place_ref"]:
-                self.place_hlink = ref
+                self.place_ref.append(ref)
 
 #             # Place
 #             place_result = self.get_place_by_id()

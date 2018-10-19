@@ -37,27 +37,57 @@ class Family:
         self.change = 0
         self.id = ''
         self.uniq_id = uniq_id
+        self.rel_type = ''
         self.father = None
         self.mother = None
-        self.children = []      # int lasten osoitteet
+        self.children = []      # Child object
+        self.events = []        # Event objects
+        self.notes = []
+        self.duration = [None, None]    # TODO: Marriage and divorce dates
+        self.note_ref = []
+
         #TODO Obsolete parameters???
         self.eventref_hlink = []
         self.eventref_role = []
         self.childref_hlink = []    # handles
         self.noteref_hlink = []
 
+    def __str__(self):
+        if self.rel_type:   rel = self.rel_type
+        else:               rel = 'undefined relation'
+        return "{} {}".format(self.id, rel)
+
+    
     @classmethod
     def from_node(cls, node):
         '''
         Transforms a db node to an object of type Family.
+        
+        <Node id=99991 labels={'Family'} 
+            properties={'rel_type': 'Married', 'handle': '_da692e4ca604cf37ac7973d7778', 
+            'id': 'F0031', 'change': 1507492602}>
         '''
         n = cls()
         n.uniq_id = node.id
+        n.id = node['id'] or ''
         n.handle = node['handle']
         n.change = node['change']
-        n.id = node['id'] or ''
         n.rel_type = node['rel_type'] or ''
         return n
+
+    @staticmethod
+    def get_family_paths_apoc(uniq_id):
+        ''' Read a person and paths for all connected nodes
+        '''
+        all_nodes_query_w_apoc="""
+MATCH (f:Family) WHERE id(f) = $fid
+CALL apoc.path.subgraphAll(f, {maxLevel:2, relationshipFilter: 
+        'CHILD>|FATHER>|MOTHER>|EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|NOTE>|HIERARCHY>'}) YIELD nodes, relationships
+RETURN extract(x IN relationships | 
+        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
+        extract(x in nodes | x) as nodelist"""
+        return  shareds.driver.session().run(all_nodes_query_w_apoc, fid=uniq_id)
+
 
     def get_children_by_id(self):
         """ Luetaan perheen lasten tiedot """

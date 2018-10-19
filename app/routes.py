@@ -59,7 +59,7 @@ def scene():
     return render_template('/scene/persons.html')
 
 
-""" ---------- Other listings (Narrative or table format) ----------------------------
+""" ---------------- Other listings (Table format) ----------------------------
 """
 
 @shareds.app.route('/lista/<string:subj>')
@@ -268,7 +268,7 @@ def pick_selection(cond):
             persons = datareader.read_persons_with_events(keys=['surname',value])
             return render_template("join_persons.html",
                                    persons=persons, pattern=value)
-        elif key == 'cite_sour_repo':   # from table_person_by_id.html
+        elif key == 'cite_sour_repo':   # from table_person_by_id.html Ei käytössä
             events = datareader.read_cite_sour_repo(uniq_id=value)
             return render_template("cite_sour_repo.html",
                                    events=events)

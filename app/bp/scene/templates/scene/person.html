@@ -276,29 +276,30 @@
             <h4>Lähdeviitteet</h4>
             <ol>
                 {% set source_cnt = 0 %}
-                {% for source in sources %}
+{#- 
+>>> sour = sources[0] = <models.gen.citation.Citation object>
+>>> sources[0].source = <models.gen.source.Source object>
+>>> sources[0].source.stitle = 'Kangasala syntyneet 1721-1778'
+>>> sources[0].source.repos[0].rname = 'Kangasalan seurakunnan arkisto'
+#}
+                {% for sour in sources %}
                 <li>
-            		{% for source in source.sources %}
-            			{% for repo in source.repos %}
-            				{{repo.rname}}:
-             			{% endfor %}
-             			<a href="/scene/source={{source.uniq_id}}" class="inlink"
-	                     title="katso lähteen {{source.uniq_id}} tiedot">{{source.stitle}}</a>
-             		{% endfor %}
+            		{% for repo in sour.source.repos %}{{repo.rname}}: {% endfor %}
+             			<a href="/scene/source={{sour.uniq_id}}" class="inlink"
+	                     title="katso lähteen {{sour.uniq_id}} tiedot">{{sour.source.stitle}}</a>
                      <ol>
                          {% set source_cnt = source_cnt + 1 %}
-                         {% set conf = source.confidence | int %}
+                         {% set conf = sour.confidence | int %}
                          <li id="sref{{ source_cnt }}a"
-                          title="{{source.confidence|transl("conf")}} luotettavuus ({{source.confidence}})"
-                           {% if source.confidence and source.confidence < "2" %}
+                          title="{{sour.confidence|transl("conf")}} luotettavuus ({{sour.confidence}})"
+                           {% if sour.confidence and sour.confidence < "2" %}
                              style="color:red"{% endif %}>
-                            Sivu: {{source.page}} &nbsp;
-                            {{ macro.stars(conf) }}
-                           {% if source.notetext %}<br>
-                              <a href="{{source.notetext}}" class="outlink" target="_blank"
-                              {% if source.confidence and source.confidence < "2" %}
+                            Sivu: {{sour.page}} &nbsp; {{ macro.stars(conf) }}
+                           {% if sour.notetext %}<br>
+                              <a href="{{sour.notetext}}" class="outlink" target="_blank"
+                              {% if sour.confidence and sour.confidence < "2" %}
                              style="color:red"{% endif %}>
-                                {{ source.notetext }}</a>{% endif %}                           
+                                {{ sour.notetext }}</a>{% endif %}                           
                         </li>
                 	</ol>
                 </li>

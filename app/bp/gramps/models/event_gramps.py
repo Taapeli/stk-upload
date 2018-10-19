@@ -88,8 +88,13 @@ class Event_gramps(Event):
             "change": self.change, 
             "id": self.id, 
             "type": self.type,
-            "description": self.description, 
-            "attr": self.attr}
+            "description": self.description}
+        if self.attr:
+            # Convert dict to list for db
+            a = []
+            for key, value in self.attr.items(): 
+                a = a + [key, value]
+                e_attr.update({'attr': a})
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:

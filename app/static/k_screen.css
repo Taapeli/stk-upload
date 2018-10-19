@@ -109,7 +109,7 @@ img#logo {
 .outlink { text-decoration: underline; color:gray}
 .refname { color:gray; text-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
-.note  { color: #555; font-size: 80%; }
+.note  { font-style: italic; /* font-size: 85%; margin:0.5em; */ }
 .myself { color: white; background: #555; font-style: italic; }
 td.numbers {
     text-align: right;
@@ -392,7 +392,11 @@ td.ColumnEvent ul {
 table.IndividualList tr:nth-child(even),
 table.infolist.eventlist tbody tr:nth-child(even)
     {background-color: #f2f2f2}
-
+ul.eventnotes { 
+	list-style-position: outside;
+	padding-left: 1em;
+	margin: 0.2em; 
+}
 /* Places
 ----------------------------------------------------- */
 #Places table.infolist td.ColumnName {

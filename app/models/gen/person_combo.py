@@ -13,8 +13,6 @@
         - get_people_with_same_deathday() Etsi henkilöt, joiden kuolinaika on sama
         - get_people_wo_birth()         Luetaan henkilöt ilman syntymätapahtumaa
         - get_old_people_top()          Henkilöt joilla syntymä- ja kuolintapahtuma
-        - get_confidence (uniq_id=None) Henkilön tapahtumien luotettavuustiedot
-        - set_confidence (self, tx)     Asetetaan henkilön tietojen luotettavuusarvio
         - get_person_events (nmax=0, pid=None, names=None)
                                         Luetaan henkilöitä tapahtumineen
         - get_person_combos (keys, currentuser, take_refnames=False, order=0):
@@ -26,7 +24,7 @@
         - get_refnames(pid)             Luetaan liittyvät Refnames
         - get_ref_weburls(pid_list)     Luetaan mainittuihin nodeihin liittyvät Weburlit
         - set_estimated_dates()         Aseta est_birth ja est_death
-        - save(self, username, tx)      Tallettaa Person, Names, Events ja Citations
+        # save(self, username, tx)      see: bp.gramps.models.person_gramps.Person_gramps.save
 
     Not in use or obsolete:
         - get_citation_id(self)         Luetaan henkilöön liittyvän viittauksen id
@@ -43,19 +41,18 @@
         - print_compared_data(self, comp_person, print_out=True) 
                                         Tulostaa kahden henkilön tiedot vieretysten
 
-
-        - save() # with relations to UserProfile, Person, Place, Note, Citation, Media
+        - save()  see: bp.gramps.models.person_gramps.Person_gramps.save
 
 
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi> & Juha Mäkeläinen
 '''
 
-import datetime
+#import datetime
 from sys import stderr
 #import logging
 
 import shareds
-import models.dbutil
+#import models.dbutil
 
 from .person import Person
 from .person_name import Name
@@ -64,7 +61,7 @@ from .place import Place, Place_name
 from .dates import DateRange
 from .weburl import Weburl
 
-from models.cypher_gramps import Cypher_person_w_handle
+#from models.cypher_gramps import Cypher_person_w_handle
 
 class Person_combo(Person):
     """ Henkilö
@@ -87,7 +84,7 @@ class Person_combo(Person):
         The indexes of referred objects are in variables:
             eventref_hlink[]   int tapahtuman uniq_id, rooli 
             - eventref_role[]  str edellisen rooli
-            objref_hlink[]     int median uniq_id
+            media_ref[]        int median uniq_id (previous objref_hlink[])
             urls[]             list of Weburl nodes
                 priv           int 1 = salattu tieto
                 href           str osoite
@@ -95,10 +92,7 @@ class Person_combo(Person):
                 description    str kuvaus
             parentin_hlink[]   int vanhempien uniq_id
             noteref_hlink[]    int huomautuksen uniq_id
-            citationref_hlink[] int viittauksen uniq_id            
-
-
-    #TODO: urls[] list should contain Weburl instances
+            citation_ref[]     int viittauksen uniq_id    (ent.citationref_hlink)
      """
 
     def __init__(self):
@@ -107,17 +101,33 @@ class Person_combo(Person):
         """
         Person.__init__(self)
 
-        self.events = []                # For creating display sets
-        self.citations = []
-        self.eventref_hlink = []        # Gramps event handles
-        self.eventref_role = []
-        self.objref_hlink = []
+        # For emadded or referenced child objects, displaying Person page
+        # @see Plan bp.scene.models.connect_object_as_leaf
+
+        self.names = []                 # models.gen.person_name.Name
+
+        self.events = []                # models.gen.event_combo.Event_combo
+        self.event_ref = []             # Event uniq_ids # Gramps event handles (?)
+        self.eventref_role = []         # ... and roles
+
+        self.citation_ref = []          # models.gen.citation.Citation
+        #remove: self.citations = []
+        self.note_ref = []              # uniq_id of models.gen.note.Note
+        #remove: self.notes = []
+        #remove: self.noteref_hlink = []
+
+        self.media_ref = []             # uniq_id of models.gen.media.Media
+                                        # (previous self.objref_hlink[])
+
+        # Other variables ???
+
         self.urls = []
-        self.parentin_hlink = []
-        self.noteref_hlink = []
-        self.citationref_hlink = []
         self.est_birth = ''
         self.est_death = ''
+
+        self.families_as_child = []     # - Propably one only
+        self.families_as_parent =[]
+        self.parentin_hlink = []
 
 
     @staticmethod
@@ -141,7 +151,7 @@ return path"""
         all_nodes_query_w_apoc="""
 MATCH (p:Person) WHERE id(p) = $pid
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 
-        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|<CHILD|<FATHER|<MOTHER'}) 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
     YIELD nodes, relationships
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
@@ -155,7 +165,7 @@ RETURN extract(x IN relationships |
         query = """
             MATCH (person:Person)-[r:CITATION]->(c:Citation)
                 WHERE ID(person)={}
-                RETURN ID(c) AS citationref_hlink
+                RETURN ID(c) AS citation_ref
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
 
@@ -169,7 +179,7 @@ RETURN extract(x IN relationships |
         query = """
 MATCH (person:Person)-[r:EVENT]->(event:Event)
   WHERE ID(person)=$pid
-RETURN r.role AS eventref_role, ID(event) AS eventref_hlink"""
+RETURN r.role AS eventref_role, ID(event) AS event_ref"""
         return  shareds.driver.session().run(query, {"pid": root})
 
 
@@ -200,22 +210,22 @@ RETURN ID(family) AS uniq_id"""
 
         event_result = self.get_event_data_by_id()
         for event_record in event_result:
-            self.eventref_hlink.append(event_record["eventref_hlink"])
+            self.event_ref.append(event_record["event_ref"])
             self.eventref_role.append(event_record["eventref_role"])
 
         media_result = self.get_media_id()
         for media_record in media_result:
-            self.objref_hlink.append(media_record["objref_hlink"])
+            self.media_ref.append(media_record["objref_hlink"])
 
         family_result = self.get_parentin_id()
         for family_record in family_result:
-            self.parentin_hlink.append(family_record["parentin_hlink"])
+            self.families_as_parent.append(family_record["family_ref"])
 
         citation_result = self.get_citation_id()
         for citation_record in citation_result:
-            self.citationref_hlink.append(citation_record["citationref_hlink"])
+            self.citation_ref.append(citation_record["citation_ref"])
 
-        return True
+        return
 
 
     def get_media_id(self):
@@ -224,7 +234,7 @@ RETURN ID(family) AS uniq_id"""
         query = """
             MATCH (person:Person)-[r:MEDIA]->(obj:Media)
                 WHERE ID(person)={}
-                RETURN ID(obj) AS objref_hlink
+                RETURN ID(obj) AS media_ref
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
 
@@ -235,7 +245,7 @@ RETURN ID(family) AS uniq_id"""
         query = """
             MATCH (person:Person)<-[r:CHILD]-(family:Family)
                 WHERE ID(person)={}
-                RETURN ID(family) AS parentin_hlink
+                RETURN ID(family) AS family_ref
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
 
@@ -319,34 +329,29 @@ OPTIONAL MATCH (person)-[wu:WEBURL]->(weburl:Weburl)
   WITH person, name, COLLECT (weburl) AS urls ORDER BY name.alt
 RETURN person, urls, COLLECT (name) AS names
         """
-        person_result = shareds.driver.session().run(query, pid=int(self.uniq_id))
+        result = shareds.driver.session().run(query, pid=int(self.uniq_id))
 
-        for person_record in person_result:
-            self.handle = person_record["person"]['handle']
-            self.change = int(person_record["person"]['change'])  #TODO only temporary int()
-            self.id = person_record["person"]['id']
-            self.priv = person_record["person"]['priv']
-            self.gender = person_record["person"]['gender']
-            self.confidence = person_record["person"]['confidence']
-            self.est_birth = person_record["person"]['est_birth']
-            self.est_death = person_record["person"]['est_death']
+        for record in result:
+            # <Record person=<Node id=72087 labels={'Person'} 
+            #    properties={'handle': '_dd4a3c371f72257f442c1c42759', 'id': 'I1054', 
+            #        'priv': '', 'gender': 'M', 'confidence': '2.0', 'change': 1523278690}> 
+            #    urls=[] 
+            #    names=[<Node id=72088 labels={'Name'} 
+            #            properties={'alt': '', 'firstname': 'Anthon', 'type': 'Also Known As', 
+            #                'suffix': 'jun.', 'surname': 'Naht'}>, 
+            #        <Node id=72089 labels={'Name'} 
+            #            properties={'alt': '1', 'firstname': 'Anthonius', 'type': 'Birth Name', 
+            #                'suffix': '', 'surname': 'Naht'}>]
+            # >
+            node = record['person']
+            self.from_node(node, obj=self)
 
-            for name in person_record["names"]:
-                pname = Name()
-                pname.alt = name['alt']
-                pname.type = name['type']
-                pname.firstname = name['firstname']
-#                 pname.refname = name['refname']
-                pname.surname = name['surname']
-                pname.suffix = name['suffix']
+            for node in record["names"]:
+                pname = Name.from_node(node)
                 self.names.append(pname)
 
-            for url in person_record["urls"]:
-                weburl = Weburl()
-                weburl.priv = url['priv']
-                weburl.href = url['href']
-                weburl.type = url['type']
-                weburl.description = url['description']
+            for node in record["urls"]:
+                weburl = Weburl.from_node(node)
                 self.urls.append(weburl)
 
 
@@ -521,25 +526,6 @@ RETURN person, urls, COLLECT (name) AS names
             lists.append(data_line)
 
         return (titles, lists)
-
-
-    @staticmethod
-    def get_confidence (uniq_id=None):
-        """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
-        """
-        if uniq_id:
-            return shareds.driver.session().run(Cypher_person.get_confidence,
-                                                id=uniq_id)
-        else:
-            return shareds.driver.session().run(Cypher_person.get_confidences_all)
-
-
-    def set_confidence (self, tx):
-        """ Sets a quality rate to this Person
-            Voidaan asettaa henkilön tietojen luotettavuusarvio kantaan
-        """
-        return tx.run(Cypher_person.set_confidence,
-                      id=self.uniq_id, confidence=self.confidence)
 
 
     @staticmethod
@@ -818,12 +804,12 @@ with r, e, pl
         query="""
 MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name) 
     WHERE ID(p) = $id
-OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
+  OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
     WITH f.id AS family_id, ID(f) AS f_uniq_id, 
          TYPE(r1) AS role,
          m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
          n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx,
-         birth.date AS birth_date
+         [birth.datetype, birth.date1, birth.date2] AS birth_date
     ORDER BY n.alt
     RETURN family_id, f_uniq_id, role, 
            m_id, uniq_id, gender, birth_date,
@@ -832,18 +818,29 @@ OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
 UNION
 MATCH (p:Person) <-[r2]- (f:Family) 
     WHERE id(p) = $id
+  OPTIONAL MATCH (p) -[:EVENT]-> (birth {type:'Birth'})
     RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
-           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, "" AS birth_date,
+           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, 
+           [birth.datetype, birth.date1, birth.date2] AS birth_date,
            [] AS names"""
 
-# ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤════════════╤══════════════════════════════╕
-# │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"│"names"                       │
-# ╞═══════════╪═══════════╪════════╪═══════╪═════════╪════════╪════════════╪══════════════════════════════╡
-# │"F0012"    │"40506"    │"CHILD" │"27044"│"27044"  │"M"     │"1869-03-28"│[["","Birth Name","Christian",│
-# │           │           │        │       │         │        │            │"Sibelius",""],["1","Also Know│
-# │           │           │        │       │         │        │            │n As","Kristian","Sibelius",""│
-# │           │           │        │       │         │        │            │]]                            │
-# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼────────────┼──────────────────────────────┤
+# ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤═══════════════╤═══════════════╕
+# │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"   │"names"        │
+# ╞═══════════╪═══════════╪════════╪═══════╪═════════╪════════╪═══════════════╪═══════════════╡
+# │"F0281"    │100163     │"FATHER"│"I0769"│77654    │"M"     │[0,1836070,1836│[["","Also Know│
+# │           │           │        │       │         │        │070]           │n As","Matts","│
+# │           │           │        │       │         │        │               │Lindlöf",""],["│
+# │           │           │        │       │         │        │               │1","Birth Name"│
+# │           │           │        │       │         │        │               │,"Mattias","","│
+# │           │           │        │       │         │        │               │Abrahamsson"]] │
+# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼───────────────┼───────────────┤
+# │"F0281"    │100163     │"MOTHER"│"I0775"│76526    │"F"     │[0,1846276,1846│[["","Birth Nam│
+# │           │           │        │       │         │        │276]           │e","Anna Stina"│
+# │           │           │        │       │         │        │               │,"","Jacobsdott│
+# │           │           │        │       │         │        │               │er"]]          │
+# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼───────────────┼───────────────┤
+# │"F0281"    │100163     │"CHILD" │"I1069"│72104    │"F"     │""             │[]             │
+# └───────────┴───────────┴────────┴───────┴─────────┴────────┴───────────────┴───────────────┘
 
         return shareds.driver.session().run(query, id=int(uniq_id))
 
@@ -1075,9 +1072,8 @@ SET n.est_death = m.daterange_start"""
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 print ("Noteref_hlink: " + self.noteref_hlink[i])
-        if len(self.citationref_hlink) > 0:
-            for i in range(len(self.citationref_hlink)):
-                print ("Citationref_hlink: " + self.citationref_hlink[i])
+        for i in range(len(self.citation_ref)):
+            print ("Citation_ref: " + self.citation_ref[i])
         return True
 
 
@@ -1148,7 +1144,6 @@ SET n.est_death = m.daterange_start"""
                         print ("Refname: " + refname1[i] + " # " + refname2[i])
                         print ("Surname: " + surname1[i] + " # " + surname2[i])
                         print ("Suffix: " + suffix1[i] + " # " + suffix2[i])
-
         return points
 
 
@@ -1157,123 +1152,8 @@ SET n.est_death = m.daterange_start"""
 
             On return, the self.uniq_id is set
         """
+        raise NotImplementedError("Person_combo.save() ei toteutettu, ks. Person_gramps.save()")
 
-        today = str(datetime.date.today())
-        if not self.handle:
-            handles = models.dbutil.get_new_handles(3)
-            self.handle = handles.pop()
-
-        # Save the Person node under UserProfile; all attributes are replaced
-        try:
-            p_attr = {
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "priv": self.priv,
-                "gender": self.gender
-            }
-            result = tx.run(Cypher_person_w_handle.create, 
-                            username=username, p_attr=p_attr, date=today)
-#             self.uniq_id = result.single()[0]
-            for res in result:
-                self.uniq_id = res[0]
-                print("Person {} ".format(self.uniq_id))
-
-        except Exception as err:
-            print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
-
-        # Save Name nodes under the Person node
-        try:
-            for name in self.names:
-                n_attr = {
-                    "alt": name.alt,
-                    "type": name.type,
-                    "firstname": name.firstname,
-#                     "refname": name.refname,
-                    "surname": name.surname,
-                    "suffix": name.suffix
-                }
-                tx.run(Cypher_person_w_handle.link_name, 
-                       n_attr=n_attr, p_handle=self.handle)
-        except Exception as err:
-            print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
-
-        # Save Weburl nodes under the Person
-        for url in self.urls:
-            u_attr = {
-                "priv": url.priv,
-                "href": url.href,
-                "type": url.type,
-                "description": url.description
-            }
-            try:
-                tx.run(Cypher_person_w_handle.link_weburl, 
-                       p_handle=self.handle, u_attr=u_attr)
-            except Exception as err:
-                print("Virhe (Person.save: {} create Weburl): {0}".\
-                      format(self.id, err), file=stderr)
-
-        if len(self.events) > 0:
-            # Make Event relations (if Events were stored in self.events)
-            # TODO: onkohan tämä käytössä?
-            ''' Create and connect to an Person.event[*] '''
-            for e in self.events:
-                if handles:
-                    e.handle = handles.pop()
-                e_attr = {
-                    "handle": e.handle,
-                    "id": e.id,
-                    "name": e.name, # "e_type": e.tyyppi,
-                    "date": e.date,
-                    "descr": e.description
-                }
-                try:
-                    tx.run(Cypher_person_w_handle.link_event_embedded, 
-                           p_handle=self.handle, e_attr=e_attr, role="osallistuja")
-                except Exception as err:
-                    print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
-
-        # Make Event relations by hlinks (from gramps_loader)
-        elif len(self.eventref_hlink) > 0:
-            ''' Connect to each Event loaded form Gramps '''
-            for i in range(len(self.eventref_hlink)):
-                try:
-                    tx.run(Cypher_person_w_handle.link_event, 
-                           p_handle=self.handle, 
-                           e_handle=self.eventref_hlink[i], 
-                           role=self.eventref_role[i])
-                except Exception as err:
-                    print("Virhe (Person.save:Event): {0}".format(err), file=stderr)
-
-        # Make relations to the Media node
-        if len(self.objref_hlink) > 0:
-            for i in range(len(self.objref_hlink)):
-                try:
-                    tx.run(Cypher_person_w_handle.link_media, 
-                           p_handle=self.handle, m_handle=self.objref_hlink[i])
-                except Exception as err:
-                    print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
-
-        # The relations to the Family node will be created in Family.save(),
-        # because the Family object is not yet created
-
-        # Make relations to the Note node
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                try:
-                    tx.run(Cypher_person_w_handle.link_note,
-                           p_handle=self.handle, n_handle=self.noteref_hlink[i])
-                except Exception as err:
-                    print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
-
-        # Make relations to the Citation node
-        if len(self.citationref_hlink) > 0:
-            try:
-                tx.run(Cypher_person_w_handle.link_citation,
-                       p_handle=self.handle, c_handle=self.citationref_hlink[0])
-            except Exception as err:
-                print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
-        return
 
 
 class Person_as_member(Person):
@@ -1281,7 +1161,8 @@ class Person_as_member(Person):
 
         Extra properties:
             role         str "CHILD", "FATHER" or "MOTHER"
-            birth_date   str (TODO: Should be DateRange)
+            birth_date   str '1749-11-02'
+            names[]      Name
      """
 
     def __init__(self):
@@ -1289,4 +1170,5 @@ class Person_as_member(Person):
         Person.__init__(self)
         self.role = ''
         self.birth_date = ''
+        self.names = []
 
