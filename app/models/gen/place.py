@@ -13,6 +13,7 @@ from .dates import DateRange
 from .cypher import Cypher_place
 from models.dbtree import DbTree
 from models.cypher_gramps import Cypher_place_w_handle
+from models.gen.event_combo import Event_combo
 
 class Place:
     """ Paikka
@@ -157,7 +158,7 @@ RETURN p ORDER BY p.pname"""
             esim. [["Svartholm", "sv"], ["Svartholma", None]]
             #TODO: Ei hieno, po. Place_name objects!
         """
-        plid = self.uniq_id
+        #plid = self.uniq_id
         query = """
 MATCH (place:Place)-[:NAME]->(n:Place_name)
     WHERE ID(place)=$place_id
@@ -166,7 +167,7 @@ OPTIONAL MATCH (place)-[nr:NOTE]->(note:Note)
 RETURN place, COLLECT([n.name, n.lang]) AS names,
     COLLECT (DISTINCT url) AS urls, COLLECT (DISTINCT note) AS notes
         """
-        place_result = shareds.driver.session().run(query, place_id=plid)
+        place_result = shareds.driver.session().run(query, place_id=self.uniq_id)
 
         for place_record in place_result:
             self.change = int(place_record["place"]["change"])  #TODO only temporary int()
@@ -322,7 +323,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
         #TODO Lajiteltava kielen mukaan jotenkin
         """
         names = []
-        for n in field:
+        for n in sorted(field, key=lambda x:x[1]):
             if n[1]:
                 # Name with langiage code
                 names.append("{} ({})".format(n[0], n[1]))
@@ -429,20 +430,17 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                                               locid=int(loc_id))
         ret = []
         for record in result:
-            p = Place()
-            p.uid = record["uid"]
-            p.etype = record["etype"]
-            if record["edates"][0] == None:
-                dates = None
-                p.edates = ""   # Normal: "24.3.1861"
-                p.date = ""     # Normal: "1861-03-24"
-            else:
+            e = Event_combo()
+            # Fields uid (person uniq_id) and names are on standard in Event_combo
+            e.uid = record["uid"]
+            e.type = record["etype"]
+            if record["edates"][0] != None:
                 dates = DateRange(record["edates"])
-                p.edates = str(dates)
-                p.date = dates.estimate()
-            p.role = record["role"]
-            p.names = record["names"]   # tuples [name_type, given_name, surname]
-            ret.append(p)
+                e.dates = str(dates)
+                e.date = dates.estimate()
+            e.role = record["role"]
+            e.names = record["names"]   # tuples [name_type, given_name, surname]
+            ret.append(e)
         return ret
 
     @staticmethod

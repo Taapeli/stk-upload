@@ -16,9 +16,9 @@ class Media:
                 change
                 id              esim. "O0001"
                 uniq_id         int database key
-                src             str tallenteen polku
-                mime            str tallenteen tyyppi
-                description     str tallenteen kuvaus
+                src             str file path
+                mime            str mime type
+                description     str description
      """
 
     def __init__(self):
@@ -27,8 +27,27 @@ class Media:
         self.handle = ''
         self.change = 0
         self.id = ''
+
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Media.
         
-        
+        <Node id=100441 labels={'Media'} 
+            properties={'description': 'Katarina Borg (1812-1892)', 'handle': '_d78f9fb8e4f180c1212', 
+            'id': 'O0005', 'src': 'Sukututkimusdata/Sibelius/katarina_borg.gif', 
+            'mime': 'image/gif', 'change': 1524411014}>
+        '''
+        n = cls()
+        n.uniq_id = node.id
+        n.id = node['id']
+        n.handle = node['handle']
+        n.change = node['change']
+        n.description = node['description'] or ''
+        n.src = node['src'] or ''
+        n.mime = node['mime'] or ''
+        return n
+
     @staticmethod
     def get_medias(uniq_id):
         """ Lukee kaikki tallenteet tietokannasta """

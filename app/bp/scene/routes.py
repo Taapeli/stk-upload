@@ -134,13 +134,11 @@ def show_a_person_w_apoc(uid):
     else:
         user=None
     
-    person, references = get_a_person_for_display_apoc(uid, user)
+    person, objs = get_a_person_for_display_apoc(uid, user)
     if person == None:
         return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
 
-    #TODO Tähän sitaatit sourcen tilalle?
-    return render_template("/scene/person_pg.html", 
-                           person=person, references=references, menuno=1)
+    return render_template("/scene/person_pg.html", person=person, obj=objs, menuno=1)
 
 
 @bp.route('/scene/person=<int:uniq_id>')
