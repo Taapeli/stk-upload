@@ -57,8 +57,12 @@ def add_args(parser):
                         help=_('Try to discover correct order...'))
     parser.add_argument('--auto-combine', action='store_true',
                         help=_('Try to combine certain names...'))
-    parser.add_argument('--match', type=str, action='append',
-                        help=_('Only process places containing any match string'))
+    parser.add_argument('--match', type=str, 
+                        help=_('Only process places containing this string'))
+    parser.add_argument('--addname', type=str, 
+                        help=_('Add this name at the end'))
+    parser.add_argument('--display_unique_changes', action='store_true',
+                        help=_('Display unique changed places'))
     parser.add_argument('--display-nonchanges', action='store_true',
                         help=_('Display unchanged places'))
     parser.add_argument('--display-ignored', action='store_true',
@@ -73,6 +77,7 @@ def initialize(options):
 
 class Places(transformer.Transformation):
     def __init__(self):
+        self.changed = Counter()
         self.nonchanged = Counter()
         
     def transform(self,item,options):
@@ -84,6 +89,7 @@ class Places(transformer.Transformation):
             item.value = newplace  
             if options.mark_changes:
                 item.tag = "PLAC-X"
+            self.changed[(place,newplace)] += 1
             return item
         else:
             if options.display_nonchanges:
@@ -93,6 +99,12 @@ class Places(transformer.Transformation):
         raise RuntimeError(_("Internal error"))
 
     def finish(self,options):
+        if options.display_unique_changes:
+            print("--------------------")
+            print(_("Place names changed:")) 
+            for (place,newname),count in self.changed.most_common():
+                print(count,place,"->",newname)
+                
         if options.display_nonchanges:
             print("--------------------")
             print(_("Place names not changed:")) 
@@ -210,10 +222,8 @@ def revert_auto_combine(place):
         place = place.replace(s.replace(" ","-"),s)
     return place
 
-def stringmatch(place,matches):
-    for match in matches:
-        if place.find(match) >= 0: return True
-    return False
+def stringmatch(place,match):
+    return place.find(match) >= 0
     
 def process_place(options, place): 
     orig_place = place
@@ -249,6 +259,8 @@ def process_place(options, place):
             place = ", ".join(names)
     if options.auto_combine:
         place = revert_auto_combine(place)
+    if options.addname:
+        place += ", " + options.addname
     return place
  
 

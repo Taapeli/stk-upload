@@ -16,8 +16,8 @@
 
         {% if person.media_ref %}<div class="snapshot">
             <div class="thumbnail">
-                <img alt="Kuvassa {{references[person.media_ref[0]].description}}" 
-                     src="{{references[person.media_ref[0]].src}}" />
+                <img alt="Kuvassa {{obj[person.media_ref[0]].description}}" 
+                     src="{{obj[person.media_ref[0]].src}}" />
             </div>
         </div>{% endif %}
 
@@ -35,7 +35,7 @@
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                     {% if person.citation_ref %}<td class="ColumnValue" 
                         rowspan="2"><small>lähde:
-                        </small>{{ macro.link_cite(person.citation_ref, references) }}
+                        </small>{{ macro.link_cite(person.citation_ref, obj) }}
                     </td>{% endif %}
                 </tr>
 
@@ -72,8 +72,8 @@
 
         {% if person.note_ref %}<ul>
         {% for ref in person.note_ref %}<div class="grampsstylednote">
-         <p><span class="typedesc">{{ references[ref].type|transl('notet') }}</span>
-            {{references[ref].text}}</p>
+         <p><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+            {{obj[ref].text}}</p>
         </div>{% endfor %}</ul>{% endif %}
 
         <div class="subsection" id="events">
@@ -96,7 +96,7 @@
                     {% else %}
 
                         <td class="ColumnSources">
-                        {{ macro.link_cite(e.citation_ref, references) }}
+                        {{ macro.link_cite(e.citation_ref, obj) }}
                         </td>
 
                         <td class="ColumnEvent">
@@ -115,8 +115,8 @@
 
                         <td class="ColumnPlace">{% set br=0 %}{% for pref in e.place_ref %}
                             {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
-                            <a href="/scene/location={{references[pref].uniq_id}}" class="inlink"
-                            title="tyyppiä {{references[pref].type}}; katso paikan tiedot">
+                            <a href="/scene/location={{obj[pref].uniq_id}}" class="inlink"
+                            title="tyyppiä {{obj[pref].type}}; katso paikan tiedot">
                             {{e.clearnames|join(' • ')}}</a> 
                             {% endfor %}
                         </td>
@@ -126,18 +126,18 @@
                                     class="typedesc">kuolinsyy</span> {{t_cause_of_death}}<br>
                             	{% endif %}
                             	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
-                            	   <li><span class="typedesc">{{ references[ref].type|transl('notet') }}</span>
-                            	       {{ references[ref].text }}</li>
+                            	   <li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+                            	       {{ obj[ref].text }}</li>
                             	   {% endfor %}</ul>{% endif %}
                                 {% if e.place_ref %}<ul class="eventnotes">{% for pref in e.place_ref %}
-                                    {% for nref in references[pref].note_ref %}
-                                   <li><span class="typedesc">{{ references[nref].type|transl('notet') }}</span>
-                                       {{references[nref].text}}</li>{% endfor %}
+                                    {% for nref in obj[pref].note_ref %}
+                                   <li><span class="typedesc">{{ obj[nref].type|transl('notet') }}</span>
+                                       {{obj[nref].text}}</li>{% endfor %}
                                     {% endfor %}</ul>{% endif %}
                                 {% if e.citation_ref %}<ul class="eventnotes">{% for cref in e.citation_ref %}
-                                    {% for nref in references[cref].note_ref %}
-                                   <li><span class="typedesc">{{references[nref].type|transl('notet') }}</span>
-                                       {{references[nref].text}}</li>{% endfor %}
+                                    {% for nref in obj[cref].note_ref %}
+                                   <li><span class="typedesc">{{obj[nref].type|transl('notet') }}</span>
+                                       {{obj[nref].text}}</li>{% endfor %}
                                    {% endfor %}</ul>{% endif %}
                             </div>
                         </td>
@@ -211,8 +211,8 @@
         <div class="subsection" id="indivgallery">
             <h4>Media</h4>
         {% for ref in person.media_ref %}<div class="thumbnail">
-                <img alt="kuva" src="{{references[ref].src}}" />
-                    <p>{{references[ref].description}}</p>
+                <img alt="kuva" src="{{obj[ref].src}}" />
+                    <p>{{obj[ref].description}}</p>
             </div>
         {% endfor %}
             <div class="fullclear"></div>
