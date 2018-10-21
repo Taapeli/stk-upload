@@ -33,6 +33,10 @@
                 <tr>
                     <td class="ColumnAttribute">Tunnisteet</td>
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
+                    {% if person.citation_ref %}<td class="ColumnValue" 
+                        rowspan="2"><small>lähde:
+                        </small>{{ macro.link_cite(person.citation_ref, references) }}
+                    </td>{% endif %}
                 </tr>
                 {% for pname in person.names %}<tr>
                     <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
@@ -41,14 +45,13 @@
                         <span title="etunimi">{{pname.firstname}}</span>
                         <i title="patronyymi">{{pname.suffix}}</i>
                         <b title="sukunimi">{{pname.surname}}</b>
-                        <!-- todo: <a href="#sref3a">3a</a> -->
                         <!-- {% if pname.refname %}&nbsp; 
                           <tt class="refname" title="referenssinimi">{{pname.refname}}</tt> -->
                         {% endif %}
-                   <!-- <ul><div class="grampsstylednote">
+                   <ul><div class="grampsstylednote">
                             <p>Tähän tulee Person Note</p>
                         </div></ul>
-                   -->
+                   
                     </td>
                 </tr>{% endfor %}
                 {% if person.gender %}<tr>
@@ -77,53 +80,55 @@
             <table class="infolist eventlist">
                 <thead>
                     <tr>
+                        <th class="ColumnSources">Lähde</th>
                         <th class="ColumnEvent">Tapahtuma</th>
                         <th class="ColumnDate">Päivämäärä</th>
                         <th class="ColumnPlace">Paikka</th>
-                        <th class="ColumnDescription">Kuvaus</th>
-                        <th class="ColumnNotes">Lisätiedot</th>
-                        <th class="ColumnSources">Lähteet</th>
+                        <th class="ColumnDescription">Kuvaus ja huomautukset</th>
+<!--                    <th class="ColumnNotes">Lisätiedot</th> -->
                     </tr>
                 </thead>
                 <tbody>
         {% for e in person.events|sort(attribute='date') %}
                     <tr>
-                 	{% if e.type == "Cause Of Death" %}
-                		{% set t_cause_of_death = e.description %}
-            		{% else %}
+                    {% if e.type == "Cause Of Death" %}
+                        {% set t_cause_of_death = e.description %}
+                    {% else %}
+                        <td class="ColumnSources">
+                        {{ macro.link_cite(e.citation_ref, references) }}
+                        </td>
                         <td class="ColumnEvent">
                             <span class="id">
                             {% if e.type == "Baptism" %}
-                            	<a href="/lista/baptism_data/{{e.uniq_id}}">{{e.uniq_id}}</a></span>
-                             	{{e.type|transl('evt')}}
+                            	<a href="/lista/baptism_data/{{e.uniq_id}}"
+                            	 >{{e.uniq_id}}</a></span>&nbsp;{{e.type|transl('evt')}}
                          	{% else %}
-                         		{{e.uniq_id}}</span> {{e.type|transl('evt')}}
+                         		{{e.uniq_id}}</span>&nbsp;{{e.type|transl('evt')}}
                          	{% endif %}
                             {% if e.role and e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
-                        <td class="ColumnPlace">{% if e.place %}
-                            <a href="/scene/location={{e.place.uniq_id}}" class="inlink"
-                            title="tyyppiä {{e.place.type}}; katso paikan tiedot">
-                            {{e.clearnames|join(' • ')}}</a>{% endif %}
+                        <td class="ColumnPlace">{% for pref in e.place_ref %}
+                            <a href="/scene/location={{references[pref].uniq_id}}" class="inlink"
+                            title="tyyppiä {{references[pref].type}}; katso paikan tiedot">
+                            {{e.clearnames|join(' • ')}}</a> 
+                            {% endfor %}
                         </td>
-                        <td class="ColumnDescription">{{e.description}}</td>
-                        <td class="ColumnNotes">
-                            <div>{% if e.type == "Death" %}
-                            	{% if t_cause_of_death %}<span
-                            	   class="typedesc">kuolinsyy</span> {{t_cause_of_death}}<br>
-                            	{% endif %}{% endif %}
-                            	{% if e.notes %}{% set first = True %}{% for note in e.notes %}
-                            	   {% if first %}{% set first = False %}{% else %}<br>{% endif %}
-                            	   <span class="typedesc">{{ note.type|transl('notet') }}</span>
-                            	       {{ note.text }}{% endfor %}{% endif %}
-                            	</div>
-                        </td>
-                        <td class="ColumnSources">
-                         {% if e.source %}
-                         	<a href="#sref{{e.source}}a">{{e.source}}a</a>
-                     	 {% endif %}
+                        <td class="ColumnDescription"><div>{{e.description}}</div>
+                            <div>{% if e.type == "Death" and t_cause_of_death %}<span 
+                                    class="typedesc">kuolinsyy</span> {{t_cause_of_death}}<br>
+                            	{% endif %}
+                            	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
+                            	   <li><span class="typedesc">{{ references[ref].type|transl('notet') }}</span>
+                            	       {{ references[ref].text }}</li>{% endfor %}
+                            	   </ul>{% endif %}
+                                {% if e.place_ref %}<ul class="eventnotes">{% for pref in e.place_ref %}
+	                                {% for nref in references[pref].note_ref %}
+                                   <li><span class="typedesc">{{ references[nref].type }}</span>
+	                                   {{references[nref].text}}</li>{% endfor %}{% endfor %}	 
+                                </ul>{% endif %}
+                            </div>
                         </td>
                     {% endif %}
                     </tr>
@@ -137,10 +142,10 @@
             {% set chtype = {"F":"tytär", "M":"poika", "":"lapsi"} %}
             <div class="mainbox" title="Perheet">
                 <p>Vanhempien perhe</p>
-            {% for fam in person.families %}{% if fam.role == "CHILD" %}
+            {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="perhe {{fam.id}}">
-	                    <p>perhe {{fam.id}}</p>
+	                    <p>perhe {{fam}}</p>
 	                    <ul>{% if fam.father %}
 	                        <li>Isä: {{ macro.member(fam.father, myid) }}</li>
 	                {% endif %}{% if fam.mother %}
@@ -171,9 +176,9 @@
             <div class="mainbox" title="Omat perheet">
                 <p>Perheessä vanhempana</p>
 	            <div class="groupbox">
-		            {% for fam in person.families %}{% if fam.role != "CHILD" %}
+		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
 		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-		                <p>perhe {{fam.id}}</p>
+		                <p>perhe {{fam}}</p>
 		                <ul>{% if fam.father %}
 		                        <li>Isä: {{ macro.member(fam.father, myid) }}</li>
 		                {% endif %}{% if fam.mother %}
@@ -208,71 +213,6 @@
                 Note
                 </p>
             </div>
-        </div>
--->
-<!--
-        <div class="subsection" id="pedigree">
-            <h4>Esipolvien taulu</h4>
-            <ol class="pedigreegen">
-                <li>
-                    <a href="../../../ppl/8/a/ce373c19c2f1a78cda8.html">Silius, Carl Gustaf</a>
-                    <ol>
-                        <li class="spouse">
-                            <a href="../../../ppl/8/a/ce373c19c692ce8a5a8.html">Berttunen, Brita Kristina Eriksdotter</a>
-                            <ol>
-                                <li>
-                                    <a href="../../../ppl/4/b/ce373c19c935b19acb4.html">Silius, Knut</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/9/8/ce373c19cba64453b89.html">Silius, Karl Aleksander</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/3/a/d62cce4aee65110a2a3.html">Silius, Knut Theodor nuor.</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/1/5/ce373c19ce0245e8851.html">Silius, Aina Alina</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/2/a/ce373c19da6166834a2.html">Airola ent. Silius, Knut Theodor</a>
-                                </li>
-                                <li class="thisperson">
-                                Airola, Kalle Kustaa ent. Silius
-                                    <ol class="spouselist">
-                                        <li class="spouse">
-                                            <a href="../../../ppl/d/3/ce373c1949b5af12e3d.html">Serenius, Saimi Alli Zuleima</a>
-                                            <ol>
-                                                <li>
-                                                    <a href="../../../ppl/f/d/ce373c18ffb7fb981df.html">Airola, Maija Kyllikki</a>
-                                                </li>
-                                            </ol>
-                                        </li>
-                                        <li class="spouse">
-                                            <a href="../../../ppl/1/e/ce373c195ac3fcc8ce1.html">Airola, Irja Tuulikki os. Kajander</a>
-                                            <ol>
-                                                <li>
-                                                    <a href="../../../ppl/f/e/ce373c195dc54f0c8ef.html">Airola, Kalle Eero Ilmari</a>
-                                                </li>
-                                                <li>
-                                                    <a href="../../../ppl/f/2/ce373c1984203db7f2f.html">Airola, Leena Irja Tuulikki</a>
-                                                </li>
-                                            </ol>
-                                        </li>
-                                    </ol>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/2/1/ce373c19d7f6d6f7412.html">Silius, Hilja Kristina</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/3/1/ce373c19de07cf7a113.html">Airola, Saima Adele ent. Silius</a>
-                                </li>
-                                <li>
-                                    <a href="../../../ppl/8/5/ce373c19e4557f46258.html">Airola, Elsa Elina</a>
-                                </li>
-                            </ol>
-                        </li>
-                    </ol>
-                </li>
-            </ol>
         </div>
 -->
         <!-- div class="subsection" id="tree"><h4>Esivanhemmat -->

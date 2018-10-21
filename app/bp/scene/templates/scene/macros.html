@@ -1,4 +1,5 @@
 {% macro lock(value) -%}
+    {# Draws a lock icon, is value is '1' #}
 	{% if value == '1' %}
 		<i class='fa fa-lock'></i>
 	{% endif %}                           
@@ -10,17 +11,27 @@
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
           crossorigin="anonymous">
+      Open star, regular Style (far)      f005 <i class="far fa-star"></i>
+      Open half star, regular Style (far) f089 <i class="far fa-star-half"></i>
+      Half-closed star, solid Style (fas) f5c0 <i class="fas fa-star-half-alt"></i>
+      Closed star, solid Style (fas)      f005 <i class="fas fa-star"></i>
    #}
    {% if value < 2 %}
      {% if value == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
      {% else %}<i class='fa fa-exclamation-circle'></i>{% endif %}
    {% else %}
-     {% if   value < 2.25 %}<i class="far fa-star"></i>
-     {% elif value < 2.75 %}<i class="far fa-star"></i></i><i class="fas fa-star-half-alt"></i>
-     {% elif value < 3.25 %}<i class="fas fa-star"></i><i class='fas fa-star'></i>
-     {% elif value < 3.75 %}<i class='fas fa-star'></i><i class='fas fa-star'></i><i class="fas fa-star-half-alt"></i>
-     {% elif value < 4.25 %}<i class='fas fa-star'></i><i class='fas fa-star'></i><i class='fas fa-star'></i>
-     {% elif value < 4.75 %}<i class='fas fa-star'></i><i class='fas fa-star'></i><i class='fas fa-star'></i><i class="fas fa-star-half-alt"></i>
+     {% if   value < 2.25 %}
+     <i class="far fa-star"></i><i class="far fa-star"></i>
+     {% elif value < 2.75 %}
+     <i class="far fa-star"></i></i><i class="far fa-star-half"></i>
+     {% elif value < 3.25 %}
+     <i class="far fa-star"></i><i class='far fa-star'></i>
+     {% elif value < 3.75 %}
+     <i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i>
+     {% elif value < 4.25 %}
+     <i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i>
+     {% elif value < 4.75 %}
+     <i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i>
      {% endif %}
    {% endif %}                           
 {%- endmacro %}
@@ -64,3 +75,21 @@
         {% endif %}
     {% endif %}
 {%- endmacro %}
+
+{% macro link_cite(citation_ref, ref_dict) -%}
+    {#
+        Creates a Citation link (for Person page). 
+        Field ref is a list of uniq_ids, which point to Citation objects 
+        in ref_dict dictionary.
+    #}
+    <!-- {{ citation_ref|length }} lähdeviitettä, {{ ref_dict|length }} objektia -->
+    {% if citation_ref %}{% set br = 0 %}
+        <small>{% for ref in citation_ref %}{% if br %}<br>{% endif %}{% set br = 1 %}
+          * {% if ref_dict[ref].source.repo_ref %}<i>{{ref_dict[ref].source.repo_ref[0].rname}}</i> 
+            {% endif %}<a href="#sref{{ ref }}">
+           {{ ref_dict[ref].source.stitle }}<br>&nbsp;&ndash; {{ ref_dict[ref].page }}</a>
+        {% endfor %}</small>
+    {% endif %}
+{%- endmacro %}
+                    
+                        

@@ -211,7 +211,8 @@ class Cypher_place_w_handle():
 
     create = """
 CREATE (p:Place)
-SET p = $p_attr"""
+    SET p = $p_attr
+RETURN id(p) AS uniq_id"""
 
     add_name = """
 MATCH (p:Place) WHERE p.handle=$handle

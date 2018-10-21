@@ -33,6 +33,10 @@ class Place:
                     href            str url osoite
                     type            str url tyyppi
                     description     str url kuvaus
+                surrounding[]       int uniq_ids of upper
+                surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
+                note_ref[]          int uniq_ids of Notes
+                citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
@@ -52,8 +56,12 @@ class Place:
         self.change = 0
         self.names = []
         self.coord = None
+        
+        self.uppers = []        # Upper place objects for hirearchy display
+        self.notes = []         # Upper place objects for hierarchy display
         self.urls = []          # Weburl instance list
 
+        self.note_ref = []      # uniq_ids of Notes
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.noteref_hlink = []
 
@@ -95,11 +103,12 @@ class Place:
             if nm.lang:
                 name_list.append("{} ({})".format(nm.name, nm.lang))
             else:
-                name_list.append(nm.name)
+                # Put first the name with no lang
+                name_list = [nm.name] + name_list
         if name_list:
             return name_list
         else:
-            return self.pname
+            return [self.pname]
 
 
     @staticmethod
@@ -272,7 +281,9 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
 
         def combine_places(field):
-            """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
+            """ Returns a list of cleartext names got from Place_name objects
+            
+                Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
                 "Lovisa", "sv"]].
                 Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
                 Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
@@ -475,7 +486,8 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             if self.coord:
                 # If no coordinates, don't set coord attribute
                 p_attr.update({"coord": self.coord.get_coordinates()})
-            tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
+            result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
+            self.uniq_id = result.single()[0]
         except Exception as err:
             print("Virhe Place.create: {0}".format(err), file=stderr)
 
@@ -506,7 +518,8 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         # Make hierarchy relations to upper Place nodes
         for upper in self.surround_ref:
             try:
-                if 'dates' in upper and upper['dates'] != None:
+                print("upper {} -> {}".format(self, upper))
+                if 'dates' in upper and isinstance(upper['dates'], DateRange):
                     r_attr = upper['dates'].for_db()
                 else:
                     r_attr = {}
@@ -548,9 +561,9 @@ class Place_name:
         else:
             d = ""
         if self.lang != '':
-            return "{} ({}){}".format(self.name, self.lang, d)
+            return "'{}' ({}){}".format(self.name, self.lang, d)
         else:
-            return "{}{}".format(self.name, d)
+            return "'{}'{}".format(self.name, d)
 
     @classmethod
     def from_node(cls, node):

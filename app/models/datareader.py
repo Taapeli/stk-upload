@@ -34,8 +34,14 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
         Returns Person objects, whith included Events and Names 
         and optionally Refnames
 
-        NOTE. Actually called only with keys = ('uniq_id', uid)
-              from bp.scene.models
+        NOTE. Called with 
+            keys = ('uniq_id', uid)     in bp.scene.routes.show_person_list
+            keys = ('refname', refname) in bp.scene.routes.show_persons_by_refname
+            keys = ('all',)             in bp.scene.routes.show_all_persons_list
+            
+            keys = None                 in routes.show_table_data
+            keys = ['surname',value]    in routes.pick_selection
+            keys = ("uniq_id",value)    in routes.pick_selection
     """
 
     persons = []
@@ -240,7 +246,7 @@ def read_cite_sour_repo(uniq_id=None):
                                 r.urls.append(Weburl(record_repo))
                         s.repos.append(r)
 
-                c.sources.append(s)
+                c.source = s    # s.append(s)
             e.citations.append(c)
             
         sources.append(e)
@@ -367,6 +373,7 @@ def read_sources(uniq_id=None):
     sources = []
     try:
         result = Source.get_source_citation(uniq_id)
+        # One Source, many Citations
         for record in result:
             pid = record['id']
             s = Source()
@@ -383,7 +390,6 @@ def read_sources(uniq_id=None):
             sources.append(s)
     except Exception as err:
         print("Virhe-read_sources: {1} {0}".format(err, uniq_id), file=stderr)
-
 
     return (sources)
 
@@ -605,17 +611,17 @@ def get_person_data_by_id(uniq_id):
     """ Get 5 data sets:                    ---- vanhempi versio ----
         person: Person object with name data
             The indexes of referred objects are in variables 
-                eventref_hlink[]      str tapahtuman uniq_id, rooli eventref_role[]
-                objref_hlink[]        str tallenteen uniq_id
+                event_ref[]        str tapahtuman uniq_id, rooli eventref_role[]
+                media_ref[]        str tallenteen uniq_id
                 urls[]                list of Weburl nodes
                     priv           str 1 = salattu tieto
                     href           str osoite
                     type           str tyyppi
                     description    str kuvaus
-                parentin_hlink[]      str vanhempien uniq_id
-                noteref_hlink[]       str huomautuksen uniq_id
-                citationref_hlink[]   str viittauksen uniq_id            
-        events: list of Event_combo object with location name and id (?)
+                parentin_hlink[]   str vanhempien uniq_id
+                note_ref[]         str huomautuksen uniq_id
+                citation_ref[]     str viittauksen uniq_id            
+        events[]         Event_combo  with location name and id (?)
         photos
         sources
         families
@@ -634,20 +640,23 @@ def get_person_data_by_id(uniq_id):
     sources = []
     photos = []
     source_cnt = 0
+    my_birth_date = ''
 
     # Events
 
-    for i in range(len(p.eventref_hlink)):
+    for i in range(len(p.event_ref)):
         # Store Event data
         e = Event_combo() # Event_for_template()
-        e.uniq_id = p.eventref_hlink[i]
+        e.uniq_id = p.event_ref[i]
         e.role = p.eventref_role[i]
         # Read event with uniq_id's of related Place (Note, and Citation?)
         e.get_event_combo()        # Read data to e
+        if e.type == "Birth":
+            my_birth_date = e.date
             
-        if e.place_hlink != '':
+        for ref in e.place_ref:
             place = Place()
-            place.uniq_id = e.place_hlink
+            place.uniq_id = ref
             place.get_place_data_by_id()
             # Location / place name, type and reference
             e.location = place.pname
@@ -673,16 +682,28 @@ def get_person_data_by_id(uniq_id):
                     citation_ind = i + 1
                     break
             if citation_ind > 0:
-                # Citation found; Event_combo.source = jonkinlainen indeksi
+                # Citation found; Event_combo.source = sitaatin numero
                 e.source = citation_ind
-            else: # Store the new source to the list
+            else: 
+                # Store the new source to the list
+                # source = lähteen numero samassa listassa
                 source_cnt += 1
                 e.source = source_cnt
 
                 result = c.get_source_repo(c.uniq_id)
                 for record in result:
-                    # record contains some Citation data + list of
-                    # Source, Repository and Note data
+                    # Citation data & list of Source, Repository and Note data
+                    #
+                    # <Record id=92127 date='2017-01-25' page='1785 Novembr 3. kaste' 
+                    #    confidence='3' notetext='http://www.sukuhistoria.fi/...' 
+                    #    sources=[
+                    #        [91360, 
+                    #         'Lapinjärvi syntyneet 1773-1787 vol  es346', 
+                    #         'Book', 
+                    #         100272, 
+                    #         'Lapinjärven seurakunnan arkisto', 
+                    #         'Archive']
+                    #    ]>
                     c.dateval = record['date']
                     c.page = record['page']
                     c.confidence = record['confidence']
@@ -705,11 +726,13 @@ def get_person_data_by_id(uniq_id):
                         r.type = source[5]
                         
                         s.repos.append(r)
-                        c.sources.append(s)
-                        
+                        c.source = s
+        
+                    print("Eve:{} {} > Cit:{} '{}' > Sour:{} '{}' > Repo:{} '{}'".\
+                          format(e.uniq_id, e.id, c.uniq_id, c.page, s.uniq_id, s.stitle, r.uniq_id, r.rname))
                     sources.append(c)
             
-    for link in p.objref_hlink:
+    for link in p.media_ref:
         o = Media()
         o.uniq_id = link
         o.get_data()
@@ -721,11 +744,13 @@ def get_person_data_by_id(uniq_id):
     # - which include a list of members (Person with 'role' attribute)
     #   - Person includes a list of Name objects
     families = {}
-    fid = ''
+    fid = 0
     result = Person_combo.get_family_members(p.uniq_id)
     for record in result:
-        # Got ["family_id", "f_uniq_id", "role", "m_id", "uniq_id", 
-        #      "gender", "birth_date", "names"]
+        # <Record family_id='F0296' f_uniq_id=100197 role='CHILD' m_id='I0798' 
+        #    uniq_id=63423 gender='M' birth_date=[0, 1769543, 1769543] 
+        #    names=[['', 'Birth Name', 'Claës', 'Heidenstrauch', '']]>
+
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]
             if not fid in families:
@@ -734,8 +759,7 @@ def get_person_data_by_id(uniq_id):
 
         member = Person_as_member()    # A kind of Person
         member.role = record["role"]
-        if record["m_id"]:
-            member.id = record["m_id"]
+        member.id = record["m_id"]
         member.uniq_id = record["uniq_id"]
         if member.uniq_id == p.uniq_id:
             # What kind of family this is? I am a Child or Parent in family
@@ -743,11 +767,15 @@ def get_person_data_by_id(uniq_id):
                 families[fid].role = "CHILD"
             else:
                 families[fid].role = "PARENT"
+            if my_birth_date:
+                member.birth_date = my_birth_date
 
         if record["gender"]:
             member.gender = record["gender"]
         if record["birth_date"]:
-            member.birth_date = record["birth_date"]
+            datetype, date1, date2 = record["birth_date"]
+            if datetype != None:
+                member.birth_date = DateRange(datetype, date1, date2).estimate()
         if record["names"]:
             for name in record["names"]:
                 # Got [[alt, ntype, firstname, surname, suffix]
@@ -779,7 +807,7 @@ def get_person_data_by_id(uniq_id):
         nodes[e.uniq_id] = e
     for e in family_list:
         nodes[e.uniq_id] = e
-    print ("Unique Nodes: {}".format(nodes))
+    #print ("Unique Nodes: {}".format(nodes))
     result = Person_combo.get_ref_weburls(list(nodes.keys()))
     for wu in result:
         print("({} {}) -[{}]-> ({} ({} {}))".\
@@ -803,9 +831,9 @@ def get_baptism_data(uniq_id):
     e.uniq_id = uniq_id
     e.get_event_combo()
     
-    if e.place_hlink != '':
+    if e.place_ref:
         place = Place()
-        place.uniq_id = e.place_hlink
+        place.uniq_id = e.place_ref[0]
         place.get_place_data_by_id()
         # Location / place data
         e.location = place.pname
@@ -849,9 +877,8 @@ def get_families_data_by_id(uniq_id):
         # Person's birth family
         result = p.get_parentin_id()
         for record in result:
-            parents_hlink = record["parentin_hlink"]
             pf = Family()
-            pf.uniq_id = parents_hlink
+            pf.uniq_id = record["family_ref"]
             pf.get_family_data_by_id()
             
             father = Person_combo()

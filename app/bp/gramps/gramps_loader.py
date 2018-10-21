@@ -10,11 +10,13 @@ import gzip
 from os.path import basename, splitext
 import xml.dom.minidom
 
+from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
+from .batchlogger import Batch, Log
+
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person_combo import Person_combo
 from models.gen.person_name import Name
 from models.gen.weburl import Weburl
 from models.gen.place import Place, Place_name, Point
@@ -23,9 +25,7 @@ from models.gen.citation import Citation
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.dataupdater import set_confidence_value, set_person_refnames
-from .batchlogger import Batch, Log
 import shareds
-
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
@@ -101,6 +101,10 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
         handler.handle_people()
         handler.handle_families()
 
+        # Set person confidence values (for all persons!)
+        set_confidence_value(handler.tx, batch_logger=handler.batch_logger)
+        # Set Refname links (for imported persons)
+        handler.set_refnames()
         handler.commit()
 
     except ConnectionError as err:
@@ -109,13 +113,6 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
                         format(err.message, err.code), level="ERROR"))
         # raise SystemExit("Stopped due to errors")    # Stop processing
         raise
-
-    handler.begin_tx(shareds.driver.session())
-    # Set person confidence values (for all persons!)
-    set_confidence_value(handler.tx, batch_logger=handler.batch_logger)
-    # Set Refname links (for imported persons)
-    handler.set_refnames()
-    handler.commit()
 
     handler.log(Log("Total time", elapsed=time.time()-t0, level="TITLE"))
     return handler.batch_logger.list()
@@ -507,7 +504,7 @@ class DOM_handler():
         # Print detail of each person
         for person in people:
 
-            p = Person_combo()
+            p = Person_gramps()
 
             if person.hasAttribute("handle"):
                 p.handle = person.getAttribute("handle")
@@ -597,7 +594,6 @@ class DOM_handler():
                     if person_parentin.hasAttribute("hlink"):
                         p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
                         
-#TODO Aikanaan noteref_hlink ja citationref_hlink korvattava ..._handles[]?
             if len(person.getElementsByTagName('noteref') ) >= 1:
                 for i in range(len(person.getElementsByTagName('noteref') )):
                     person_noteref = person.getElementsByTagName('noteref')[i]
@@ -811,7 +807,8 @@ class DOM_handler():
         self.namecount = 0
 
         for p_id in self.uniq_ids:
-            set_person_refnames(self, p_id)
+            if p_id != None:
+                set_person_refnames(self, p_id)
 
         self.log(Log("Created Refname references",
                             count=self.namecount, elapsed=time.time()-t0))
