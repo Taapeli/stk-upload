@@ -111,12 +111,3 @@ class Output:
                     LOG.info("Luettu     %s", self.new_name)
                     LOG.info("Tulostettu %s", self.in_name)
 
-    def xxxgenerate_name(self,name):
-        i = 0
-        while True:
-            newname = "{}.{}".format(name,i)
-            if not os.path.exists(newname): 
-                return newname
-            i += 1
-
-
