@@ -139,16 +139,16 @@ def translate(term, var_name, lang="fi"):
             "Media Reference Note":"mediaviite",
             "Media Note":"media",
             "General":"yleistä",
-            "Html code":"html-koodi"
-#             "Citation":"viitteen lisätieto",
-#             "Event Note":"tapahtuman lisätieto",
-#             "Family Note":"perheen lisätieto",
-#             "Name Note":"nimen lisätieto",
-#             "Person Note":"henkilön lisätieto",
-#             "Place Note":"paikan lisätieto",
-#             "Repository Note":"arkiston lisätieto",
-#             "Source Note":"lähteen lisätieto",
-#             "To Do":"työlistalla",
+            "Html code":"html-koodi",
+            "Citation":"lähteen lisätieto",
+            "Event Note":"tapahtuman lisätieto",
+            "Family Note":"perheen lisätieto",
+            "Name Note":"nimen lisätieto",
+            "Person Note":"henkilön lisätieto",
+            "Place Note":"paikan lisätieto",
+            "Repository Note":"arkiston lisätieto",
+            "Source Note":"lähteen lisätieto",
+            "To Do":"työlistalla",
             }
     elif var_name == "rept":
         # Repository types

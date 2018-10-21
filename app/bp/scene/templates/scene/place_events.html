@@ -117,7 +117,7 @@
                         </td>
                         <td>{% for n in e.names|sort %} 
                          {% if n[0] != "Birth Name" %}
-                            <span class="typedesc">{{n[0]|transl('nt')}}:</span>
+                            <span class="typedesc">{{n[0]|transl('nt')}}</span>
                          {% endif %}
                          {{n[1]}} 
                          {% if n[2] %}
@@ -127,9 +127,9 @@
                          {% endif %}
                          <br />{% endfor %}
                         </td>
-                        <td class="ColumnEvent">{{e.etype|transl('evt')}}
+                        <td class="ColumnEvent">{{e.type|transl('evt')}}
                           {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
-                        <td class="ColumnDate">{{e.edates}}</td>
+                        <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
 <!--
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">

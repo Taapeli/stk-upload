@@ -30,6 +30,7 @@ class Note:
         self.id = ''
         self.type = ''
         self.handle = ''
+        self.text = ''
         self.change = 0
         self.priv = 0
 

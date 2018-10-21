@@ -96,6 +96,7 @@
 	               {% if alpha != ini %}{%set alpha = ini %}
 		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
 	               {% endif %}</td>
+
 	                <td class="ColumnPerson"><div>
 	                   <a href="/scene/person={{p.uniq_id}}"
 	                     title="katso henkilön {{p.uniq_id}} tiedot">
@@ -104,15 +105,16 @@
 		               {% else %}<i>{{p.names[0].patronyme}}</i>{% endif %}
 		               <small class="idno">[{{p.uniq_id}}</small></a><small class="idno"><a 
 		                href="/scene/person/{{p.uniq_id}}">]</a></small>
-		               {# TODO Remove test link at ']' #}
+		               {# TODO Remove later test link at ']' #}
 		               {% if p.refnames %}
 		               <br><small class="refname" title="referenssinimet">
 		                  hakusanat: {{p.refnames}}
 		               {% endif %}
 	                </div></td>
+
 	              <td class="ColumnEvent">
 	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li><i>{{e.type|transl('evt')}}</i>
+		              <li><i>{{e.type|transl('evt')}} {{e.description}}</i>
 		              {% if e.dates %}{{e.dates}} {% endif %}
 		              {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>

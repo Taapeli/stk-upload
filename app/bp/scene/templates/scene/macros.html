@@ -7,7 +7,7 @@
 
 
 {% macro stars(value) -%}
-   {# Uses version 5 of fontawesome.com.  Remember to add following to your htmlpage!
+   {# Uses version 5 of fontawesome.com.  Remember to add following to your html page!
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
           crossorigin="anonymous">
@@ -16,8 +16,8 @@
       Half-closed star, solid Style (fas) f5c0 <i class="fas fa-star-half-alt"></i>
       Closed star, solid Style (fas)      f005 <i class="fas fa-star"></i>
    #}
-   {% if value < 2 %}
-     {% if value == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
+   {% if value < 2.0 %}
+     {% if value == 0.0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
      {% else %}<i class='fa fa-exclamation-circle'></i>{% endif %}
    {% else %}
      {% if   value < 2.25 %}
