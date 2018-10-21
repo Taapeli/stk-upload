@@ -364,10 +364,10 @@ def process_gedcom(cmd, transform_module):
                         help=_("Encoding of the input GEDCOM"))
     transform_module.add_args(parser)
     args = parser.parse_args(cmd.split())
-    run_args = vars(args)
+    args.output_gedcom = None
     try:
         init_log(args.logfile)
-        with Output(run_args) as out:
+        with Output(args) as out:
             out.original_line = None
             saved_stdout = sys.stdout
             saved_stderr = sys.stdout
