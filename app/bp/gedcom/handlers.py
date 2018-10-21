@@ -195,6 +195,21 @@ def gedcom_revert(gedcom,version):
     filename1 = os.path.join(gedcom_folder,gedcom)
     filename2 = os.path.join(gedcom_folder,version)
     newname = util.generate_name(filename1)
+    if os.path.exists(filename1) and os.path.exists(filename2):
+        os.rename(filename1,newname)
+        os.rename(filename2,filename1)
+        rsp = dict(newname=os.path.basename(newname))
+    else:
+        rsp = dict(status="Error")
+    return jsonify(rsp) 
+
+@bp.route('/gedcom/save/<gedcom>', methods=['GET'])
+@login_required
+def gedcom_save(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    filename1 = os.path.join(gedcom_folder,gedcom)
+    filename2 = os.path.join(gedcom_folder,gedcom) + "-temp"
+    newname = util.generate_name(filename1)
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
     rsp = dict(newname=os.path.basename(newname))

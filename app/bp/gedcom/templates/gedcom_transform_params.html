@@ -12,9 +12,12 @@
                 if (rsp.oldname) {
                 	$("#oldname").text(rsp.oldname);
                 	$("#div_oldname").show();
+                	$("#div_save").hide();
             	}
-            	else
+            	else {
                 	$("#div_oldname").hide();
+                	$("#div_save").show();
+            	}
                 $("#output").show();
             });
             return false;

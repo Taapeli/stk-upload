@@ -45,8 +45,9 @@ class Output:
             self.f = open(self.out_name, "w", encoding=encoding)
         else:
             # create tempfile in the same directory so you can rename it later
-            tempfile.tempdir = os.path.dirname(self.in_name) 
-            self.temp_name = tempfile.mktemp()
+            #tempfile.tempdir = os.path.dirname(self.in_name) 
+            #self.temp_name = tempfile.mktemp()
+            self.temp_name = self.in_name + "-temp"
             self.new_name = util.generate_name(self.in_name)
             self.f = open(self.temp_name, "w", encoding=encoding)
         return self
@@ -54,7 +55,7 @@ class Output:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.f.close()
         if 'dryrun' in self.run_args and self.run_args['dryrun']:
-            os.remove(self.temp_name) 
+            #os.remove(self.temp_name) 
             return
         self.save()
 
