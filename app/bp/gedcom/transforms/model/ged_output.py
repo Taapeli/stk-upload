@@ -12,7 +12,7 @@ import logging
 LOG = logging.getLogger(__name__)
 
 sys.path.append("app/bp/gedcom") # otherwise pytest does not work??? 
-from bp.gedcom import util
+from models import util
 
 class Output:
     def __init__(self, run_args):
@@ -88,8 +88,7 @@ class Output:
             user = getpass.getuser()
             if not user:
                 user = "Unnamed"
-            datestring = time.strftime("%d %b %Y %H:%M:%S", 
-                                       time.localtime(time.time()))
+            datestring = util.format_timestamp()
             self.emit("2 CONT _DATE {} {}".format(user, datestring))
             if self.new_name:
                 self.emit("2 CONT _SAVEDFILE " + self.new_name)

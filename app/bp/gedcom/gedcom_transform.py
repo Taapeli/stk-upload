@@ -81,6 +81,7 @@ LOG = logging.getLogger(__name__)
 # These work, when program is run in app.bp.gedcom directory!
 from transforms.model.gedcom_line import GedcomLine
 from transforms.model.ged_output import Output
+from models import util
 
 def numeric(s):
     return s.replace(".","").isdigit()
@@ -109,9 +110,9 @@ def read_gedcom(run_args):
 
 def process_gedcom(run_args, transform_module, task_name=''):
 
-    LOG.info("------ Ajo '%s'   alkoi %s ------", \
-             task_name, \
-             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+    LOG.info("------ Ajo '%s'   alkoi %s ------", 
+             task_name, 
+             util.format_timestamp())
 
     transform_module.initialize(run_args)
 
@@ -147,9 +148,9 @@ def process_gedcom(run_args, transform_module, task_name=''):
         except FileNotFoundError as err:
             LOG.error("Ohjelma päättyi virheeseen {}: {}".format(type(err).__name__, str(err)))
         
-    LOG.info("------ Ajo '%s' päättyi %s ------", \
-             task_name, \
-             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+    LOG.info("------ Ajo '%s' päättyi %s ------", 
+             task_name, 
+             util.format_timestamp())
 
 
 

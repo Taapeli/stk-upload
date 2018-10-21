@@ -6,7 +6,6 @@
 import sys
 import os
 import importlib
-import datetime
 import time
 import subprocess
 
@@ -21,10 +20,11 @@ from flask_babelex import _
 import logging 
 LOG = logging.getLogger(__name__)    
 
+from models import util
+
 from . import bp
 from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
 from .transforms.model.ged_output import Output
-from . import util
 from . import transformer
 
 # --------------------- GEDCOM functions ------------------------
@@ -328,7 +328,7 @@ def process_gedcom(cmd, transform_module):
 
     msg = _("Transform '{}' started {}").format(
              transform_module.__name__, 
-             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+             util.format_timestamp())
     LOG.info("------ {} ------".format(msg))
 
     import argparse
@@ -375,7 +375,7 @@ def process_gedcom(cmd, transform_module):
         time.sleep(1)  # for testing...
         msg = _("Transform '{}' ended {}").format(
                  transform_module.__name__, 
-                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+                 util.format_timestamp())
         print("------ {} ------".format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()

@@ -21,8 +21,7 @@ from flask_babelex import _
 
 from models import loadfile
 from ..gramps import gramps_loader
-from models import email
-
+from models import email, util
 
 #===============================================================================
 # Background loading of a Gramps XML file
@@ -205,7 +204,7 @@ def list_uploads(username):
                 upload.uploaded = (status_text == _("UPLOADED"))
                 upload.loading = (status_text == _("LOADING"))
                 upload.upload_time = meta["upload_time"]
-                upload.upload_time_s = time.strftime("%Y-%m-%d %H.%M.%S",time.localtime(upload.upload_time))
+                upload.upload_time_s = util.format_timestamp(upload.upload_time)
                 uploads.append(upload)
     return sorted(uploads,key=lambda x: x.upload_time)
 

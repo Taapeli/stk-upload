@@ -1,4 +1,5 @@
 import os
+import time
 
 def generate_name(name):
     """
@@ -19,3 +20,8 @@ def generate_name(name):
             if num > maxnum: maxnum = num
     newname = "{}.{}".format(gedcomname,maxnum+1)
     return os.path.join(dirname,newname)
+
+def format_timestamp(ts=None):
+    if ts is None: ts = time.time()
+    return time.strftime("%a %Y-%m-%d %H:%M:%S", 
+                               time.localtime(ts))
