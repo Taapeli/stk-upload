@@ -1,22 +1,22 @@
 {# _myapp/templates/virhe_lataus.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Lataus epäonnistui{% endblock %}
+{% block title %}{{ _("Lataus epäonnistui") }}{% endblock %}
 {% block body %}
     {{ super() }}
     <h2>
     {% if code == 1 %}
-        Virheellinen syöttötiedosto
+        {{ _("Virheellinen syöttötiedosto") }}
     {% else %}
         {% if code == 415 %}
-        Tiedoston lataaminen ei onnistu
+        {{ _("Tiedoston lataaminen ei onnistu") }}
         {% else %}
-        Tiedoston lataus ei onnistu, koodi={{code}}
+        {{ _("Tiedoston lataus ei onnistu, koodi=") }}{{code}}
         {% endif %}
     {% endif %}
     </h2>
     {% if text %}
     <p>{{text}}</p>
     {% endif %}
-    <p>&gt; <a href="/">Palaa alkuun</a>
+    <p>&gt; <a href="/">{{ _("Palaa alkuun") }}</a>
 {% endblock %}
 

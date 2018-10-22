@@ -1,25 +1,25 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-<h2>Henkilöluettelo</h2>
-<p>Näytetään {{persons|count}} henkilöä 
+<h2>{{ _("Henkilöluettelo") }}</h2>
+<p>{{ _("Näytetään") }} {{persons|count}} {{ _("henkilöä") }} 
 {% if name %}
-tiedostosta [<i>{{name}}</i>] 
+{{ _("tiedostosta") }} [<i>{{name}}</i>] 
 {% endif %}{% if uri %}
-palvelimelta <i>{{uri}}</i>
+{{ _("palvelimelta") }} <i>{{uri}}</i>
 {% endif %}</p>
 
 <section id="lista">
 <table>
-    <tr><th>oid</th>
-        <th>nimi</th>
-        <th>ammatti</th>
-        <th>paikka</th>
-        <th>käräjät</th>
+    <tr><th>{{ _("oid") }}</th>
+        <th>{{ _("nimi") }}</th>
+        <th>{{ _("ammatti") }}</th>
+        <th>{{ _("paikka") }}</th>
+        <th>{{ _("käräjät") }}</th>
     </tr>
 {% if persons %}
     {% for p in persons %}
@@ -49,9 +49,9 @@ palvelimelta <i>{{uri}}</i>
         </tr>
     {% endfor %}
 {% else %}
-        <tr><td colspan="5">Ei tietoja</td></tr>
+        <tr><td colspan="5">{{ _("Ei tietoja") }}</td></tr>
 {% endif %}
 </table>
 </section>
-<section id="tiedot"><p>Solmut ja yhteydet</p></section>
+<section id="tiedot"><p>{{ _("Solmut ja yhteydet") }}</p></section>
 {% endblock %}

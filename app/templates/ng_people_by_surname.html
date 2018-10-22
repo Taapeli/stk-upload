@@ -1,14 +1,14 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <script src="/static/infobox.js"></script>
 
-<h2>People who has the surname: {{surname}}</h2>
-<p><small>Klikkaa saraketta lajitellaksesi sen suhteen</small></p>
+<h2>{{ _("People who has the surname") }}: {{surname}}</h2>
+<p><small>{{ _("Klikkaa saraketta lajitellaksesi sen suhteen") }}</small></p>
 <section id="lista">
 <div ng-app="myApp" ng-controller="namesCtrl">
 	<table>

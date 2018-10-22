@@ -1,20 +1,20 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-<h2>Henkilöluettelo</h2>
-<p>Näytetään {{persons|count}} henkilöä</p>
+<h2>{{ _("Henkilöluettelo") }}</h2>
+<p>{{ _("Näytetään")}} {{persons|count}} {{ _("henkilöä") }}</p>
 
 <section id="lista">
 <table>
-    <tr><th>uniq_id</th>
-        <th>name</th>
-        <th>type</th>
-        <th>date</th>
-        <th>place</th>
+    <tr><th>{{ _("uniq_id") }}</th>
+        <th>{{ _("name") }}</th>
+        <th>{{ _("type") }}</th>
+        <th>{{ _("date") }}</th>
+        <th>{{ _("place") }}</th>
     </tr>
 {% if persons %}
     {% for p in persons %}
@@ -35,7 +35,7 @@
 		{% endif %}
     {% endfor %}
 {% else %}
-        <tr><td colspan="5">Ei henkilöitä</td></tr>
+        <tr><td colspan="5">{{ _("Ei henkilöitä") }}</td></tr>
 {% endif %}
 </table>
 {% endblock %}

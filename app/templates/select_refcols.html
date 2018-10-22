@@ -1,6 +1,6 @@
 {# _myapp/templates/select_refcols.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Referenssinimet kannasta{% endblock %}
+{% block title %}{{ _("Referenssinimet kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
@@ -8,80 +8,80 @@
 {% set sp = {"M": "mies", "N": "nainen", "U": "?"} %}
 {% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", "place":"paikka", "occu":"ammatti"} %}
 {% set rt = {'REFFIRST':'etunimi', 'REFLAST':'sukunimi', 'REFPATRO':'patron.'} %}
-<h2>Referenssitietojen valinta (#TODO, tässä staattinen sisältö!)</h2>
+<h2>{{ _("Referenssitietojen valinta") }} (#TODO, tässä staattinen sisältö!)</h2>
 <form action="/talleta/valitut/refnimet" method="post">
     
-<p>Valitse talletettava yhteystyyppi:
+<p>{{ _("Valitse talletettava yhteystyyppi:") }}
   <select name="refcl">
-    <option value="None">-- valitse referenssiyhteys --</option>
-    <option value="fname">Etunimi A on normalisoitu etunimi B</option>
-    <option value="lname">Sukunimi A on normalisoitu sukunimi B</option>
-    <option value="patro">Patronyyminen nimi A viittaa etunimeen B</option>
-    <option value="place">Paikannimi A on normalisoitu paikannimi B</option>
-    <option value="occu">Ammattinimike A on normalisoitu nimike B</option>
+    <option value="None">{{ _("-- valitse referenssiyhteys --") }}</option>
+    <option value="fname">{{ _("Etunimi A on normalisoitu etunimi B") }}</option>
+    <option value="lname">{{ _("Sukunimi A on normalisoitu sukunimi B") }}</option>
+    <option value="patro">{{ _("Patronyyminen nimi A viittaa etunimeen B") }}</option>
+    <option value="place">{{ _("Paikannimi A on normalisoitu paikannimi B") }}</option>
+    <option value="occu">{{ _("Ammattinimike A on normalisoitu nimike B") }}</option>
   </select></p>
 
 <section id="lista">
     <table border="2">
     <tr>
-        <th>Nimi A<br />
+        <th>{{ _("Nimi A") }}<br />
             <select name="A">
-              <option value="None">-- valitse sarake --</option>
-              <option value="Etunimi">Etunimi</option>
-              <option value="Etunimi_vakioitu">Etunimi_vakioitu</option>
-              <option value="Patronyymi">Patronyymi</option>
-              <option value="PatroRef">PatroRef</option>
-              <option value="Sukunimi_vakioitu">Sukunimi_vakioitu</option>
-              <option value="Ammatti">Ammatti</option>
-              <option value="Ammatti_vakioitu">Ammatti_vakioitu</option>
-              <option value="Paikka">Paikka</option>
-              <option value="Paikka_vakioitu">Paikka_vakioitu</option>
-              <option value="Kommentti">Kommentti</option>
-              <option value="Käräjät">Käräjät</option>
-              <option value="Käräjäpaikka">Käräjäpaikka</option>
-              <option value="Alkuaika">Alkuaika</option>
-              <option value="Loppuaika">Loppuaika</option>
-              <option value="Signum">Signum</option>
+              <option value="None">{{ _("-- valitse sarake --") }}</option>
+              <option value="Etunimi">{{ _("Etunimi") }}</option>
+              <option value="Etunimi_vakioitu">{{ _("Etunimi_vakioitu") }}</option>
+              <option value="Patronyymi">{{ _("Patronyymi") }}</option>
+              <option value="PatroRef">{{ _("PatroRef") }}</option>
+              <option value="Sukunimi_vakioitu">{{ _("Sukunimi_vakioitu") }}</option>
+              <option value="Ammatti">{{ _("Ammatti") }}</option>
+              <option value="Ammatti_vakioitu">{{ _("Ammatti_vakioitu") }}</option>
+              <option value="Paikka">{{ _("Paikka") }}</option>
+              <option value="Paikka_vakioitu">{{ _("Paikka_vakioitu") }}</option>
+              <option value="Kommentti">{{ _("Kommentti") }}</option>
+              <option value="Käräjät">{{ _("Käräjät") }}</option>
+              <option value="Käräjäpaikka">{{ _("Käräjäpaikka") }}</option>
+              <option value="Alkuaika">{{ _("Alkuaika") }}</option>
+              <option value="Loppuaika">{{ _("Loppuaika") }}</option>
+              <option value="Signum">{{ _("Signum") }}</option>
             </select><br/>
             <select name="A_kieli">
-              <option value="None">Määrittämätön kieli</option>
-              <option value="fi">suomi</option>
-              <option value="se">ruotsi</option>
-              <option value="ru">venäjä</option>
-              <option value="fi-ka">karjala</option>
-              <option value="la">latina</option>
+              <option value="None">{{ _("Määrittämätön kieli") }}</option>
+              <option value="fi">{{ _("suomi") }}</option>
+              <option value="se">{{ _("ruotsi") }}</option>
+              <option value="ru">{{ _("venäjä") }}</option>
+              <option value="fi-ka">{{ _("karjala") }}</option>
+              <option value="la">{{ _("latina") }}</option>
             </select>
         </th>
         <th>nimi B<br/>
             <select name="A">
-              <option value="None">-- valitse sarake --</option>
-              <option value="Etunimi">Etunimi</option>
-              <option value="Etunimi_vakioitu">Etunimi_vakioitu</option>
-              <option value="Patronyymi">Patronyymi</option>
-              <option value="PatroRef">PatroRef</option>
-              <option value="Sukunimi_vakioitu">Sukunimi_vakioitu</option>
-              <option value="Ammatti">Ammatti</option>
-              <option value="Ammatti_vakioitu">Ammatti_vakioitu</option>
-              <option value="Paikka">Paikka</option>
-              <option value="Paikka_vakioitu">Paikka_vakioitu</option>
-              <option value="Kommentti">Kommentti</option>
-              <option value="Käräjät">Käräjät</option>
-              <option value="Käräjäpaikka">Käräjäpaikka</option>
-              <option value="Alkuaika">Alkuaika</option>
-              <option value="Loppuaika">Loppuaika</option>
-              <option value="Signum">Signum</option>
+              <option value="None">{{ _("-- valitse sarake --") }}</option>
+              <option value="Etunimi">{{ _("Etunimi") }}</option>
+              <option value="Etunimi_vakioitu">{{ _("Etunimi_vakioitu") }}</option>
+              <option value="Patronyymi">{{ _("Patronyymi") }}</option>
+              <option value="PatroRef">{{ _("PatroRef") }}</option>
+              <option value="Sukunimi_vakioitu">{{ _("Sukunimi_vakioitu") }}</option>
+              <option value="Ammatti">{{ _("Ammatti") }}</option>
+              <option value="Ammatti_vakioitu">{{ _("Ammatti_vakioitu") }}</option>
+              <option value="Paikka">{{ _("Paikka") }}</option>
+              <option value="Paikka_vakioitu">{{ _("Paikka_vakioitu") }}</option>
+              <option value="Kommentti">{{ _("Kommentti") }}</option>
+              <option value="Käräjät">{{ _("Käräjät") }}</option>
+              <option value="Käräjäpaikka">{{ _("Käräjäpaikka") }}</option>
+              <option value="Alkuaika">{{ _("Alkuaika") }}</option>
+              <option value="Loppuaika">{{ _("Loppuaika") }}</option>
+              <option value="Signum">{{ _("Signum") }}</option>
             </select><br/>
             <select name="A_kieli">
-              <option value="None">Määrittämätön kieli</option>
-              <option value="fi">suomi</option>
-              <option value="se">ruotsi</option>
-              <option value="ru">venäjä</option>
-              <option value="fi-ka">karjala</option>
-              <option value="la">latina</option>
+              <option value="None">{{ _("Määrittämätön kieli") }}</option>
+              <option value="fi">{{ _("suomi") }}</option>
+              <option value="se">{{ _("ruotsi") }}</option>
+              <option value="ru">{{ _("venäjä") }}</option>
+              <option value="fi-ka">{{ _("karjala") }}</option>
+              <option value="la">{{ _("latina") }}</option>
             </select>
         </th>
-        <th style="text-align: left">Talleta valittujen sarakkeiden tiedot<br/>referenssiniminä<br/>
-            <input type="submit" value="   Hyväksy   " style="width: 180pt;" />
+        <th style="text-align: left">{{ _("Talleta valittujen sarakkeiden tiedot<br/>referenssiniminä") }}<br/>
+            <input type="submit" value="{{ _('   Hyväksy   ') }}" style="width: 180pt;" />
         </th>
     </tr>
     <tbody id="rows">
