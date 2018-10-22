@@ -79,12 +79,13 @@ table.diff td {
         	 $("#errors").hide();
         });
         $("#palauta").click(function() {
-			//alert('{{ _("Palautustoimintoa ei vielä ole toteutettu") }}');
 			var gedcom = "{{ gedcom }}";
 			var version = $("#oldname").text();
             $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
-                alert(gedcom + " renamed to " + rsp.newname + "\n" +
-                	  version + " renamed to " + gedcom);
+//                alert(gedcom + " renamed to " + rsp.newname + "\n" +
+//                	  version + " renamed to " + gedcom);
+                	$("#div_oldname").hide();
+//                	$("#div_save").show();
             });
         	 
         });
@@ -110,6 +111,15 @@ table.diff td {
 		        $("#versions").click(); 
                 alert(gedcom + "{{ _('renamed to') }} " + rsp.newname + "\n" +
                 	  version + "{{ _('renamed to') }} " + gedcom);
+            });
+    	});
+    	$("#save_result").click(function(rsp) {
+			var gedcom = "{{ gedcom }}";
+            $.get("/gedcom/save/{{ gedcom }}", function(rsp) {
+		        var msg  = gedcom + " renamed to " + rsp.newname; 
+            	$("#oldname").text(rsp.newname);
+            	$("#div_oldname").show();
+            	$("#div_save").hide();
             });
     	});
         hide_all();
@@ -221,6 +231,10 @@ table.diff td {
 		<h3>{{ _("Transformation results") }}</h3>
 		<div id="div_oldname">
 		<h3>{{ _("Old version is saved as") }} <span id="oldname"></span> (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h3>
+		</div>
+		<div id="div_save">
+		{{ _("Not saved yet") }}
+		<h3><button id="save_result">{{ _("Save result") }}</button></h3>
 		</div>
 		<pre>
 		  <div id="output_log">

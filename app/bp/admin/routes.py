@@ -172,7 +172,6 @@ def list_threads():
     s += "</pre>"
     return s
 
-
 @bp.route('/admin/xml_download/<username>/<xmlfile>')
 @login_required
 @roles_accepted('admin', 'audit')
@@ -189,7 +188,7 @@ def xml_download(username,xmlfile):
 @bp.route('/admin/show_upload_log/<username>/<xmlfile>')
 @roles_accepted('member', 'admin')
 def show_upload_log(username,xmlfile):
-    upload_folder = uploads.get_upload_folder(current_user.username)
+    upload_folder = uploads.get_upload_folder(username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
     #result_list = Unpickler(open(fname,"rb")).load()
     msg = open(fname).read()

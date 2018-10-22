@@ -58,7 +58,7 @@ class Marriages(transformer.Transformation):
     def __init__(self):
         self.resi = defaultdict(list) # key=@individ-id@ value=[(place,date),...]
     
-    def transform(self,item,options):
+    def transform(self,item,options,phase):
         # phase 1
         if item.value == "FAM":
             fam = item.tag #  @Fxxx@

@@ -1,9 +1,9 @@
 {# _myapp/templates/gr_result.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Gramps to Neo5j log") }}{% endblock %}
+{% block title %}{{ _("Gramps to Neo4j log") }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <h2>{{ _("Log of storing Gramps XML into database") }}{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
+    <h2>{{ _("Log of Gramps XML upload") }}{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -13,9 +13,9 @@
         </ol>
       {% endif %}
     {% endwith %}
-    <pre>
-    {{ msg }}
-    </pre>
+<pre>
+{{ msg }}
+</pre>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
 {% endblock %}
 </body>

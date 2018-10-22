@@ -18,7 +18,7 @@ def initialize(options):
     return Unmark()
 
 class Unmark(transformer.Transformation):
-    def transform(self,item,options):
+    def transform(self,item,options,phase):
         # phase 1
         if item.tag.endswith("-X"):
             item.tag = item.tag[0:-2]

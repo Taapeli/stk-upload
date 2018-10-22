@@ -80,7 +80,7 @@ class Places(transformer.Transformation):
         self.changed = Counter()
         self.nonchanged = Counter()
         
-    def transform(self,item,options):
+    def transform(self,item,options,phase):
         if item.tag != "PLAC":  return True
         if not item.value: return True
         place = item.value
@@ -102,14 +102,21 @@ class Places(transformer.Transformation):
         if options.display_unique_changes:
             print("--------------------")
             print(_("Place names changed:")) 
+            w1 = 5
+            w2 = 60
+            print("{:{w1}.{w1}}   {:<{w2}.{w2}} {:<{w2}.{w2}}".format(_("Count"),_("Old name"),_("New name"),
+                                                                    w1=w1,w2=w2)) 
             for (place,newname),count in self.changed.most_common():
-                print(count,place,"->",newname)
+                print("{:{w1}}   {:<{w2}.{w2}} {:<{w2}.{w2}}".format(count,place,newname,
+                                                                    w1=w1,w2=w2))
+            print() 
                 
         if options.display_nonchanges:
             print("--------------------")
             print(_("Place names not changed:")) 
             for place,count in self.nonchanged.most_common():
                 print(count,place)
+            print() 
 
 ignored = [name.strip() for name in ignored_text.splitlines() if name.strip() != ""]
 
