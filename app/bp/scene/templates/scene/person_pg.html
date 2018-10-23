@@ -24,6 +24,29 @@
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
         </h3>
+        {% set cits = [] %}{#
+
+            Sivulla esiintyvät sitaatit kootaan listaan cits kutsulla
+                macro.link_cite(person.citation_ref, obj, cits)
+            Makron tulee
+                1) muodostaa viite_src "1a", "1b", "2a" ... jossa parit
+                   (Repository_id, Source_id) vastavat numeroita ja 
+                   Citation_id:t kirjaimia
+                   - jos viite on jo taulukossa cits, käytetään sitä
+                   - muuten luodaan uusi:
+                2) tallettaa listaan cits[] tuplet 
+                   esim. cits[0] = ((100269,91355), ("1a", 92125))
+                   - avain i = (Repository_id, Source_id)
+                   - arvo j = (viite_str, Citation_id)
+                3) palauttaa sivun esiintymispaikkaan linkin
+                    <a href="viite_str" title="Source_name">viite_str</a>
+
+            Lähteet-osiossa kelataan viitteet läpi ja muodostetaan 2-tasoinen
+            lista (linkkeineen ym.)
+
+                1. Source.stitle, Repository.rname
+                    a. Citation.page
+        #}
         {% set myid = person.uniq_id %}
         {# set mybirth = "" %}{% for e in events %}
             {% if e.type == "Birth" %}{% set mybirth = e.date %}{% endif %}{% endfor #}
@@ -35,7 +58,7 @@
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                     {% if person.citation_ref %}<td class="ColumnValue" 
                         rowspan="2"><small>lähde:
-                        </small>{{ macro.link_cite(person.citation_ref, obj) }}
+                        </small>{{ macro.link_cite(person.citation_ref, obj, cits) }}
                     </td>{% endif %}
                 </tr>
 
@@ -96,7 +119,7 @@
                     {% else %}
 
                         <td class="ColumnSources">
-                        {{ macro.link_cite(e.citation_ref, obj) }}
+                        {{ macro.link_cite(e.citation_ref, obj, cits) }}
                         </td>
 
                         <td class="ColumnEvent">

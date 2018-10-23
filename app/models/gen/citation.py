@@ -32,6 +32,7 @@ class Citation:
 
     def __init__(self):
         """ Luo uuden citation-instanssin """
+        self.uniq_id = None
         self.handle = ''
         self.change = 0
         self.id = ''
