@@ -53,16 +53,16 @@ def show_info(input_gedcom, enc):
                 if ln[:6] in ['2 VERS', '1 NAME', '1 CHAR']:
                     msg.append(ln[2:])
                 if ln.startswith('1 SOUR'):
-                    msg.append('Source ' + ln[7:-1] + ' ')
+                    msg.append(_('Source ') + ln[7:-1] + ' ')
                 if ln.startswith('1 GEDC'):
-                    msg.append('Gedcom ')
+                    msg.append(_('Gedcom '))
                 if ln.startswith('2 CONT _COMMAND'):
                     #print('"' + ln)
                     msg.append('– ' + ln[16:-1])
                 if ln.startswith('2 CONT _DATE'):
                     msg.append(ln[12:])
                 if match('0.*SUBM', ln):
-                    msg.append('Submitter ')
+                    msg.append(_('Submitter '))
                 if match('0.*INDI', ln):
                     cnt['INDI'] = 1
                     break
@@ -80,12 +80,12 @@ def show_info(input_gedcom, enc):
     except OSError:     # End of file
         pass
     except UnicodeDecodeError as e:
-        msg.append("Väärä merkistö, lisää esim. '--encoding ISO8859-1'")
+        msg.append(_("Väärä merkistö, lisää esim. '--encoding ISO8859-1'"))
     except Exception as e:
         msg.append( type(e).__name__ + str(e))
 
     if cnt:
-        msg.append('        count\n')
+        msg.append(_('        count\n'))
     for i in OrderedDict(sorted(cnt.items())):
         msg.append('{:4} {:8}\n'.format(i, cnt[i]))
         

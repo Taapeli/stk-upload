@@ -1,7 +1,7 @@
 {# templates/gedcoms.html_ #}
 {% extends "a_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}Kirjautunut käyttäjä{% endblock %}
+{% block title %}{{ _("Kirjautunut käyttäjä") }}{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -30,7 +30,7 @@ table.diff td {
         $(document).on({
             ajaxStart: function() { $("body").addClass("loading");  },
             ajaxStop: function() { $("body").removeClass("loading"); },    
-            ajaxError: function() { $("#errors").text("Palvelinvirhe").show(); }    
+            ajaxError: function() { $("#errors").text("{{ _('Palvelinvirhe') }}").show(); }    
         });
         
         $("#transforms").click(function() {
@@ -82,10 +82,7 @@ table.diff td {
 			var gedcom = "{{ gedcom }}";
 			var version = $("#oldname").text();
             $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
-//                alert(gedcom + " renamed to " + rsp.newname + "\n" +
-//                	  version + " renamed to " + gedcom);
                 	$("#div_oldname").hide();
-//                	$("#div_save").show();
             });
         	 
         });
@@ -116,7 +113,7 @@ table.diff td {
     	$("#save_result").click(function(rsp) {
 			var gedcom = "{{ gedcom }}";
             $.get("/gedcom/save/{{ gedcom }}", function(rsp) {
-		        var msg  = gedcom + " renamed to " + rsp.newname; 
+		        var msg  = gedcom + "{{ _(' renamed to ') }}" + rsp.newname; 
             	$("#oldname").text(rsp.newname);
             	$("#div_oldname").show();
             	$("#div_save").hide();
@@ -139,7 +136,7 @@ table.diff td {
                 <div class="submit">
 			         <input type="button" id="update_desc" value='{{ _("Update") }}'>
 			    </div>
-				<p>(Näennäistiedot, ei aineistosta)</p>
+				<p>({{ _("Näennäistiedot, ei aineistosta") }})</p>
 				<table>
 				    <tr><td>{{ _("Upload time") }}</td>
 				        <td class="right">2018-06-06</td></tr>
