@@ -34,7 +34,7 @@
 
 {% if families %}
 	{% for family in families %}
-		<h3>Family <span class="id">{{family.uniq_id}}</span>{% if family.rel_type %},
+		<h3>{{ _("Family") }} <span class="id">{{family.uniq_id}}</span>{% if family.rel_type %},
 		  {{family.rel_type}}{% endif %}
 		</h3>
 <div style="margin-left:2em;">		
@@ -51,7 +51,7 @@
 			        		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
 			        		<td>{% if pname.suffix %}{{pname.suffix}}{% endif %}</td>
 			        		<td>{{pname.surname}}</td>
-                            <td><a href="/lista/family_data/{{family.spouse.uniq_id}}">family</a></td>
+                            <td><a href="/lista/family_data/{{family.spouse.uniq_id}}">{{ _("family") }}</a></td>
 			    		</tr>
 					{% endfor %}
 				{% else %}
