@@ -19,7 +19,7 @@
   </head>
   <body>
     {% block body %}
-    <h1><a href="/"><img id="logo" src="/static/hlo.png" alt="Palaa alkuun" title="Palaa alkuun"
+    <h1><a href="/"><img id="logo" src="/static/hlo.png" alt="{{ _('Palaa alkuun') }}" title="{{ _('Palaa alkuun') }}"
              onmouseover="this.src='/static/hlo1.png';" 
              onmouseout="this.src='/static/hlo.png';"/></a>
         <i>{{ _("Suomen Sukututkimusseuran Suomi-tietokanta") }}</i></h1>

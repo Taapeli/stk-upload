@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html xml:lang="fi-FI" xmlns="http://www.w3.org/1999/xhtml" lang="fi-FI"><head lang="fi-FI">
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Stk – {% block title %}{% endblock %}</title>
+    <title>{{ _("Stk") }} – {% block title %}{% endblock %}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,10 +20,10 @@
 <body>
 {% block body %}
     <h1><a href="/"><img id="logo" src="/static/hlo.png" 
-             alt="Palaa alkuun" title="Palaa alkuun"
+             alt="{{ _('Palaa alkuun') }}" title="{{ _('Palaa alkuun') }}"
              onmouseover="this.src='/static/hlo1.png';" 
              onmouseout="this.src='/static/hlo.png';"/></a>
-        <i>Suomen Sukututkimusseuran Suomi-tietokanta</i></h1>
+        <i>{{ _("Suomen Sukututkimusseuran Suomi-tietokanta") }}</i></h1>
     {% if current_user.is_authenticated %}
     <div class="h1_user">{{current_user.roles[0].name}}: {{current_user.username}}</div>
     {% endif %}
@@ -36,7 +36,7 @@
         <small style="font-size: 6pt">versio {{ 'app'|app_date }}</small>
         </p>
         <p id="copyright">
-        © 2018 Suomen Sukututkimusseura ry
+        © 2018 {{ _("Suomen Sukututkimusseura ry") }}
         </p>
     </div>
 
