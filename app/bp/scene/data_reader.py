@@ -19,6 +19,7 @@ from models.gen.note import Note
 from models.gen.media import Media
 
 
+
 def get_a_person_for_display_apoc(uniq_id, user):
     """ Get a Person with all connected nodes 
     """
@@ -119,17 +120,21 @@ def get_a_person_for_display_apoc(uniq_id, user):
             for nref in objs[pref].note_ref:
                 note = objs[nref]
                 print ("  place {} note {}".format(objs[pref].id, note))
-#         for ref in e.citation_ref:
-#             if ref in objs:
-#                 cit = objs[ref]
-#                 sl = "{} '{}'".format(cit.source.uniq_id, cit.source.stitle)
-#                 print("{}: lähde {} / {} '{}'".format(e.id, sl, cit.uniq_id, cit.page))
-#             else:
-#                 sl = 'no source'
-#                 print("{}: no source / {}".format(e.id, sl, ref))
+        for ref in e.citation_ref:
+            set_citations(e, ref, objs)
 
     # Return Person with included objects and list of note, citation etc. objects
     return (person, objs)
+
+def set_citations(e, ref, objs):
+    ''' Create citation references person_pg for foot notes '''
+    if ref in objs:
+        cit = objs[ref]     # Remove this?
+        sl = "{} '{}'".format(cit.source.uniq_id, cit.source.stitle)
+        print("{}: lähde {} / {} '{}'".format(e.id, sl, cit.uniq_id, cit.page))
+    else:
+        sl = 'no source'
+        print("{}: no source / {}".format(e.id, sl, ref))
 
 def connect_object_as_leaf(src, target, rel_type=None):
     ''' Subroutine for Person page display
