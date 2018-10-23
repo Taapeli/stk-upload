@@ -75,7 +75,7 @@ class Neo4jUserDatastore(UserDatastore):
            Toggles a user’s active status. Always returns True.
     """
 
-    # Uses classes Role, User, UserProfile, AllowedEmail from setups.py
+    # Uses classes Role, User, UserProfile, Allowed_email from setups.py
 
     def __init__(self, driver, user_model, user_profile_model, role_model):
         self.driver = driver
@@ -93,11 +93,11 @@ class Neo4jUserDatastore(UserDatastore):
         user.id = str(userNode.id)
         user.roles = self.find_UserRoles(user.email)
         if 'confirmed_at' in userNode.properties: 
-            user.confirmed_at = datetime.datetime.fromtimestamp(float(userNode.properties['confirmed_at']))
+            user.confirmed_at = datetime.datetime.fromtimestamp(float(userNode.properties['confirmed_at'])/1000)
         if 'last_login_at' in userNode.properties: 
-            user.last_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['last_login_at']))
+            user.last_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['last_login_at'])/1000)
         if 'current_login_at' in userNode.properties: 
-            user.current_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['current_login_at']))                            
+            user.current_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['current_login_at'])/1000)                            
         return user
  
 #  
@@ -180,9 +180,9 @@ class Neo4jUserDatastore(UserDatastore):
             logger.debug('_put_user update' + user.email + ' ' + user.name)
             confirmtime = None 
             if user.confirmed_at == None:
-                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email).properties['confirmed_at'] / 1000.0
+                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email).properties['confirmed_at']
             else:     
-                confirmtime = user.confirmed_at.timestamp()                                    
+                confirmtime = int(user.confirmed_at.timestamp() * 1000)                                   
             result = tx.run(Cypher.user_update, 
                 id=int(user.id), 
                 email=user.email,
@@ -193,8 +193,8 @@ class Neo4jUserDatastore(UserDatastore):
                 username = user.username,
                 name = user.name,
                 language = user.language, 
-                last_login_at = user.last_login_at.timestamp(),
-                current_login_at = user.current_login_at.timestamp(),
+                last_login_at = int(user.last_login_at.timestamp() * 1000),
+                current_login_at = int(user.current_login_at.timestamp() * 1000),
                 last_login_ip = user.last_login_ip,
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
@@ -221,8 +221,8 @@ class Neo4jUserDatastore(UserDatastore):
             roleNode = tx.run(Cypher.role_register, 
                               level = role.level, 
                               name=role.name, 
-                              description=role.description,
-                              timestamp = datetime.datetime.timestamp())
+                              description=role.description)
+        #                      timestamp = datetime.datetime.timestamp())
             return self.role_model(**roleNode.properties)
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
