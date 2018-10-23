@@ -1,6 +1,7 @@
 """    Find out, when last commit was done
 """
 from subprocess import Popen, PIPE
+from flask_babelex import _
 
 class Chkdate():
     ''' Methods to find app version dates '''
@@ -9,13 +10,13 @@ class Chkdate():
                   "Jul":7,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
 
     def __init__(self):
-        self.moment_long = 'Unidefined'
+        self.moment_long = _('Undefined')
         self.moment_short = self.moment_long
 
         try:
         # Get git log info
             gitproc = Popen(['git', 'log', '-1'], stdout = PIPE)    #, cwd=src_path)
-            (stdout, _) = gitproc.communicate()
+            (stdout, dummy) = gitproc.communicate()
             git_out = stdout.strip().decode("utf-8")
     
             for line in git_out.splitlines():
