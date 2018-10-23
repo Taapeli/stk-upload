@@ -44,7 +44,7 @@ def load_refnames(pathname):
                 source=row['Source']
                 gd = row['Gender'].lower()
             except KeyError:
-                raise KeyError('Not valid field names "Name,Refname,Reftype,Source,Gender" {}'.\
+                raise KeyError(_('Not valid field names "Name,Refname,Reftype,Source,Gender" {}').\
                                format(row.keys()))
 
             if gd.startswith('m'):
