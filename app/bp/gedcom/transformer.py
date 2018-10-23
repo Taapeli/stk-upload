@@ -134,7 +134,7 @@ class Transformer:
                 raise RuntimeError(_("Invalid GEDCOM at line: {}").format(line))
     
         if len(linenums) == 0:    
-            raise RuntimeError("Invalid GEDCOM; no level %s lines" % level)
+            raise RuntimeError(_("Invalid GEDCOM; no level %s lines") % level)
         items = []
         for i,j in zip(linenums,linenums[1:]+[None]):
             # i and j are line numbers of lines having specified level so that all lines in between have higher line numbers;

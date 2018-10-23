@@ -1,14 +1,14 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 
-<h2>Families data</h2>
+<h2>{{ _("Families data") }}</h2>
 <section id="lista">
-<h3>Main person</h3>
+<h3>{{ _("Main person") }}</h3>
 <table>
-    <tr><th>unique id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th>
+    <tr><th>{{ _("unique id") }}</th><th>{{ _("gender") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th>
     </tr>
 {% if person %}
  	{% if person.names %}
@@ -27,21 +27,21 @@
 		</tr>
 	{% endif %}
 {% else %}
-        <tr><td colspan="1">Ei person tietoja</td></tr>
+        <tr><td colspan="1">{{ _("Ei person tietoja") }}</td></tr>
 {% endif %}
 </table>
 <p>&nbsp;</p>
 
 {% if families %}
 	{% for family in families %}
-		<h3>Family <span class="id">{{family.uniq_id}}</span>{% if family.rel_type %},
+		<h3>{{ _("Family") }} <span class="id">{{family.uniq_id}}</span>{% if family.rel_type %},
 		  {{family.rel_type}}{% endif %}
 		</h3>
 <div style="margin-left:2em;">		
 		{% if family.spouse %}
-			<h3>Spouse <span class="id">{{family.spouce}}</span></h3>
+			<h3>{{ _("Spouse") }} <span class="id">{{family.spouce}}</span></h3>
 			<table>
-			    <tr><th>unique id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th><th>family</th>
+			    <tr><th>{{ _("unique id") }}</th><th>{{ _("gender") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th><th>{{ _("family") }}</th>
 			    </tr>
 			 	{% if family.spouse.names %}
 			    	{% for pname in family.spouse.names %}
@@ -51,7 +51,7 @@
 			        		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
 			        		<td>{% if pname.suffix %}{{pname.suffix}}{% endif %}</td>
 			        		<td>{{pname.surname}}</td>
-                            <td><a href="/lista/family_data/{{family.spouse.uniq_id}}">family</a></td>
+                            <td><a href="/lista/family_data/{{family.spouse.uniq_id}}">{{ _("family") }}</a></td>
 			    		</tr>
 					{% endfor %}
 				{% else %}
@@ -64,9 +64,9 @@
 		{% endif %}
 		
 		{% if family.father %}
-			<h3>Father <span class="id">{{family.father}}</span></h3>
+			<h3>{{ _("Father") }} <span class="id">{{family.father}}</span></h3>
 			<table>
-			    <tr><th>unique id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th>
+			    <tr><th>{{ _("unique id") }}</th><th>{{ _("gender") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th>
 			    </tr>
 			 	{% if family.father.names %}
 			    	{% for pname in family.father.names %}
@@ -88,9 +88,9 @@
 		{% endif %}
 		
 		{% if family.mother %}
-			<h3>Mother <span class="id">{{family.mother}}</span></h3>
+			<h3>{{ _("Mother") }} <span class="id">{{family.mother}}</span></h3>
 			<table>
-			    <tr><th>unique id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th>
+			    <tr><th>{{ _("unique id") }}</th><th>{{ _("gender") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th>
 			    </tr>
 			 	{% if family.mother.names %}
 			    	{% for pname in family.mother.names %}
@@ -112,9 +112,9 @@
 		{% endif %}
 
 		{% if family.children %}
-			<h3>Children</h3>
+			<h3>{{ _("Children") }}</h3>
 			<table>
-			    <tr><th>unique id</th><th>gender</th><th>firstname</th><th>suffix</th><th>surname</th>
+			    <tr><th>{{ _("unique id") }}</th><{{ _("gender") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th>
 			    </tr>
 				{% for child in family.children %}
 				 	{% if child.names %}
@@ -139,7 +139,7 @@
 </div>
 	{% endfor %}
 {% else %}
-        <tr><td colspan="1">Ei family tietoja</td></tr>
+        <tr><td colspan="1">{{ _("Ei family tietoja") }}</td></tr>
 {% endif %}
 </table>
 

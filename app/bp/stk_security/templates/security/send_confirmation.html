@@ -2,7 +2,7 @@
 {% extends "a_layout.html" %}
 {% from "security/_macros.html" import render_field_with_errors, render_field %} 
 {% include "security/_messages.html" %}
-{% block title %}Rekisteröitymisen vahvistaminen{% endblock %}
+{% block title %}{{ _('Rekisteröitymisen vahvistaminen') }}{% endblock %}
 {% block body %}
 {{ super() }} 
 

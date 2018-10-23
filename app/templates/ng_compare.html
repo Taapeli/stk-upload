@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
@@ -9,13 +9,13 @@
 	<div ng-app="myApp" ng-controller="compareCtrl">
 	<table><tr><td>
 
-<h2>Person data</h2>
+<h2>{{ _("Person data") }}</h2>
 <section id="lista">
-<h2>Names</h2>
+<h2>{{ _("Names") }}</h2>
 <table>
     <tr>
     	<th colspan="6"><a target="_blank" href="/scene/person={a names[0].uniq_id a}">
-    	Linkki Kertova-sivulle</a></th>
+    	{{ _("Linkki Kertova-sivulle") }}</a></th>
     </tr>
     <tr>
     	<th ng-repeat="x in n_columns">{a x.column a}</th>
@@ -33,7 +33,7 @@
 
 <p>&nbsp;</p>
 
-<h2>Events</h2>
+<h2>{{ _("Events") }}</h2>
 <table>
     <tr>
     	<th ng-repeat="x in e_columns">{a x.column a}</th>
@@ -51,7 +51,7 @@
 <br>
 <br>
 
-<h2>URLs</h2>
+<h2>{{ _("URLs") }}</h2>
 <table>
     <tr>
     	<th ng-repeat="x in u_columns">{a x.column a}</th>
@@ -67,13 +67,13 @@
 
 </td><td>
 
-<h2>Person data</h2>
+<h2>{{ _("Person data") }}</h2>
 <section id="lista">
 <table>
-    <h2>Names</h2>
+    <h2>{{ _("Names") }}</h2>
     <tr>
     	<th colspan="6"><a target="_blank" href="/scene/person={a names2[0].uniq_id a}">
-    	Linkki Kertova-sivulle</a></th>
+    	{{ _("Linkki Kertova-sivulle") }}</a></th>
     </tr>
     <tr>
     	<th ng-repeat="x in n_columns">{a x.column a}</th>
@@ -91,7 +91,7 @@
 
 <p>&nbsp;</p>
 
-<h2>Events</h2>
+<h2>{{ _("Events") }}</h2>
 <table>
     <tr>
     	<th ng-repeat="x in e_columns">{a x.column a}</th>
@@ -109,7 +109,7 @@
 <br>
 <br>
 
-<h2>URLs</h2>
+<h2>{{ _("URLs") }}</h2>
 <table>
     <tr>
     	<th ng-repeat="x in u_columns">{a x.column a}</th>

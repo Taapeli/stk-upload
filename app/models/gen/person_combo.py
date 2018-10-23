@@ -156,8 +156,12 @@ CALL apoc.path.subgraphAll(p, {maxLevel:4,
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
         extract(x in nodes | x) as nodelist"""
-        return  shareds.driver.session().run(all_nodes_query_w_apoc, pid=uniq_id)
-
+        try:
+            return  shareds.driver.session().run(all_nodes_query_w_apoc, pid=uniq_id)
+        except Exception as e:
+            print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
+            return None
+                
 
     def get_citation_id(self):
         """ Luetaan henkilön viittauksen id """

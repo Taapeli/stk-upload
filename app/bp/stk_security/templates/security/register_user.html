@@ -1,14 +1,14 @@
 {# templates/security/register_user.html_ #}
 {% extends "a_layout.html" %}
 {% from "security/_macros.html" import render_field_with_errors, render_field %} 
-{% block title %}Rekisteröityminen{% endblock %}
+{% block title %}{{ _('Rekisteröityminen') }}{% endblock %}
 {% block body %}
 {{ super() }} 
  
 	
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
-    <h2>Täytä käyttäjätietolomake Suomikantaan</h2>
+    <h2>{{ _('Täytä käyttäjätietolomake Suomikantaan') }}</h2>
     <div>{% include "security/_messages.html" %}</div>
     <div class="row">
        <div class="startbox2">
@@ -27,7 +27,7 @@
 				  {{ render_field_with_errors(register_user_form.language) }}
                   <p>
                   {# {{ render_field(register_user_form.agreement) }} #}
-                  Lue ja hyväksy <a href="static/conditionsOfUse.html">Käyttöehdot</a> 
+                  {{ _('Lue ja hyväksy <a href="static/conditionsOfUse.html">Käyttöehdot') }}</a> 
 				  </p>
 				  {{ render_field(register_user_form.submit) }}
 		     </form>
@@ -35,7 +35,7 @@
 
         <div class="startbox">
             <div style="display: inline-block;">
-                <h3>Hyväksytyn käyttäjän toiminnot</h3>
+                <h3>{{ _('Hyväksytyn käyttäjän toiminnot') }}</h3>
                 {% include "security/_menu.html" %}
             </div>
         </div>

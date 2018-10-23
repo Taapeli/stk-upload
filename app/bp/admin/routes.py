@@ -67,7 +67,7 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_refnames() or "Tehty"
+    message = dataupdater.set_person_refnames() or _("Tehty")
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 @bp.route('/admin/upload_csv', methods=['POST'])
@@ -101,10 +101,10 @@ def save_loaded_csv(filename, subj):
             status = load_refnames(pathname)
         else:
             return redirect(url_for('virhesivu', code=1, text= \
-                "Data type '" + subj + "' is not supported"))
+                _("Data type '{}' is not supported").format(subj)))
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
-               text="Missing proper column title: " + str(e))
+               text=_("Missing proper column title: ") + str(e))
     return render_template("/admin/talletettu.html", text=status, uri=dburi)
 
 # # Ei ilmeisesti käytössä
@@ -161,7 +161,7 @@ def start_load_to_neo4j(username,xmlname):
 
 @bp.route('/admin/list_threads', methods=['GET'])
 @roles_accepted('admin', 'audit')
-def list_threads():
+def list_threads(): # for debugging
     import threading
     s = "<pre>\n"
     s += "Threads:\n"

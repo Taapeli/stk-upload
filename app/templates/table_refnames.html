@@ -1,6 +1,6 @@
 {# _myapp/templates/lista2.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Referenssinimet kannasta{% endblock %}
+{% block title %}{{ _("Referenssinimet kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
@@ -10,8 +10,8 @@
              "place":"paikka", "occu":"ammatti"} %}
 {% set rt = {'firstname':'etunimi', 'surname':'sukunimi', 'patronyme':'patronyymi', 
              'father':'isän nimi', 'mother':'äidin nimi', 'basename':'BASENAME'} %}
-<h2>Referenssinimet</h2>
-<p>Mukana {{names|count}} nimeä</p>
+<h2>{{ _("Referenssinimet") }}</h2>
+<p>{{ _("Mukana") }} {{names|count}} {{ _("nimeä") }}</p>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ol  class='flashes'>
@@ -24,12 +24,12 @@
 <div>
 <!--section id="lista"-->
 <table style="width:500pt">
-    <tr><th>oid</th>
-        <th>nimi</th>
-        <th>tyyppi ~ ref.nimi</th>
-        <th>sukupuoli</th>
-        <th>nimilähde</th>
-        <th>henkilöitä</th>
+    <tr><th>{{ _("oid") }}</th>
+        <th>{{ _("nimi") }}</th>
+        <th>{{ _("tyyppi ~ ref.nimi") }}</th>
+        <th>{{ _("sukupuoli") }}</th>
+        <th>{{ _("nimilähde") }}</th>
+        <th>{{ _("henkilöitä") }}</th>
     </tr>
     {% for r in names %}
         <tr>

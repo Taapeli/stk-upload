@@ -1,11 +1,11 @@
 {# _myapp/templates/lista2.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% if name %}
-<p>Luettu tiedosto [<i>{{name}}</i>]</p>
-<p>Näytettäisiin tilastoa</p>
+<p>{{ _("Luettu tiedosto") }} [<i>{{name}}</i>]</p>
+<p>{{ _("Näytettäisiin tilastoa") }}</p>
 {% endif %}
-<p>&gt; <a href="/">Palaa alkuun</a></p>
+<p>&gt; <a href="/">{{ _("Palaa alkuun") }}</a></p>
 {% endblock %}

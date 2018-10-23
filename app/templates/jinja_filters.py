@@ -44,7 +44,7 @@ def translate(term, var_name, lang="fi"):
             "Baptism": "kaste",
             "Burial": "hautaus",
             "Marriage": "avioliitto",
-            "Residence": "syntymä",
+            "Residence": "asuinpaikka",
             "Cause Of Death": "kuolinsyy",
             "Luottamustoimi": "luottamustoimi",
             "Lähtömuutto": "lähtömuutto",

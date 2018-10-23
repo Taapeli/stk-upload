@@ -1,41 +1,41 @@
 {# templates/mainindex.html_ #}
 {% extends "a_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}Kirjautunut käyttäjä{% endblock %}
+{% block title %}{{ _("Kirjautunut käyttäjä") }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 
 <div id="startdiv">
   <div>
-    <h2>Tervetuloa Suomikantaan, {{current_user.username}}</h2>
-    <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
+    <h2>{{ _("Tervetuloa Suomikantaan") }}, {{current_user.username}}</h2>
+    <p>{{ _("Käyttäjä") }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
-       <span style="font-size:8pt; color:gray">Git-sovellusversio 
+       <span style="font-size:8pt; color:gray">{{ _("Git-sovellusversio" ) }} 
           <i>{{ 'git'|app_date }}</i></span></p>
     <div class="row">
        <div class="startbox">
          <div style="display: inline-block;">
            <form method="get" action="/scene/persons">
-             <h3>Oma sukupuuni</h3>
-             <p>Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan</p>
+             <h3>{{ _("Oma sukupuuni") }}</h3>
+             <p>{{ _("Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan") }}</p>
              <div class="submit"> 
-                <button type="submit">Henkilöluettelo</button>
+                <button type="submit">{{ _("Henkilöluettelo") }}</button>
              </div>
            </form>
         </div>
         </div>
           <div class="startbox">
             <div style="display: inline-block;">
-               <h3>Tietojen lisääminen</h3>
+               <h3>{{ _("Tietojen lisääminen") }}</h3>
                  <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
 	               <div style="display: inline-block;">
 	                 <input type="hidden" name="material" value="xml_file">
-	                 <p>Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi</p>
+	                 <p>{{ _("Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi") }}</p>
 	                 <input type="file" name="filenm" />
 	               </div>
                    <div class="submit"> 
-	                 <input type="submit" value="Lataa" />
+	                 <input type="submit" value="{{ _('Lataa') }}" />
 	               </div>
                 </form>
                 ▸ <a href=/gramps/uploads>{{ _("List uploads") }}</a>
@@ -44,30 +44,24 @@
         <div class="startbox">
            <div style="display: inline-block;">
            <form method="get" action="/gedcom/list">
-              <h3>Oma Gedcom-aineistoni</h3>
-              <p>Lataa aineistosi Gedcom-muodossa tai muokkaa jo lähetettyä</p>
+              <h3>{{ _("Oma Gedcom-aineistoni") }}</h3>
+              <p>{{ _("Lataa aineistosi Gedcom-muodossa tai muokkaa jo lähetettyä") }}</p>
              <div class="submit"> 
-                <button type="submit">Gedcom-käsittelyt</button>
+                <button type="submit">{{ _("Gedcom-käsittelyt") }}</button>
              </div>
            </form>
-              <!-- div style="text-align:right;"> 
-                    <button type="button"
-                     onclick="alert('Toiminto vasta suunnitteilla')">
-                     Gedcom-käsittelyt</button>
-              </div -->
            </div>
         </div>
 
     {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
         <div class="startbox">
-            <h3>Datanäkymiä taulukkoina</h3>
-            <p>Seuraavalla sivulla on erilaisia teknisempiä listauksia
-               ja ongelmanselvitysvälineitä
+            <h3>{{ _("Datanäkymiä taulukkoina") }}</h3>
+            <p>{{ _("Seuraavalla sivulla on erilaisia teknisempiä listauksia ja ongelmanselvitysvälineitä") }}
             </p>
             <form method="get" action="/tables">
                <div class="submit"> 
-                  <button type="submit">Tutki tietokantaa</button>
+                  <button type="submit">{{ _("Tutki tietokantaa") }}</button>
                </div>
             </form>
         </div>
@@ -75,11 +69,11 @@
 
         <div class="startbox">
           <div style="display: inline-block;">
-            <h3>Viesti ylläpitoon</h3>
-            <p>Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon</p>
+            <h3>{{ _("Viesti ylläpitoon") }}</h3>
+            <p>{{ _("Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon") }}</p>
+            {{ _("Toiminto vasta suunnitteilla") }}
             <div class="submit"> 
-              <button type="button" onclick="alert('Toiminto vasta suunnitteilla')">
-                Laadi viesti</button>
+              <button type="button" disabled>{{ _("Laadi viesti") }}</button>
             </div>
           </div>
         </div>
@@ -88,25 +82,24 @@
             (current_user.has_role('admin')  or current_user.has_role('master') ) %}
         <div class="startbox admin">
           <div style="display: inline-block;">
-			<h3>Ylläpitäjän toiminnot</h3>
-            <p>Järjestelmänhoitajan toiminnot: <br/>
-               Käyttäjien ja referenssitietojen hallinta
-               sekä tietokannan huoltotehtävät
+			<h3>{{ _("Ylläpitäjän toiminnot") }}</h3>
+            <p>{{ _("Järjestelmänhoitajan toiminnot") }}: <br/>
+               {{ _("Käyttäjien ja referenssitietojen hallinta sekä tietokannan huoltotehtävät") }}
             </p>
             <form method="get" action="/admin">
                <div class="submit"> 
-                  <button type="submit">Ylläpito</button>
+                  <button type="submit">{{ _("Ylläpito") }}</button>
                </div>
             </form>
          </div>
         </div>{% endif %}
      {% if current_user.is_authenticated %}
         <div class="startbox">
-          <h3>Kirjaudu ulos</h3>
-          <p>Istunnon lopettaminen<br>&nbsp;</p>
+          <h3>{{ _("Kirjaudu ulos") }}</h3>
+          <p>{{ _("Istunnon lopettaminen") }}<br>&nbsp;</p>
 	      <form method="get" action="/logout">
              <div class="submit"> 
-				<button type="submit" style="color: blue">Poistu sovelluksesta</button>
+				<button type="submit" style="color: blue">{{ _("Poistu sovelluksesta") }}</button>
              </div>
 		  </form>
         </div>

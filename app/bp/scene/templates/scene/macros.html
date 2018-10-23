@@ -41,19 +41,19 @@
         <div class="container">
             <ul class="menu" id="dropmenu">
                 <li{% if value == 0 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons" title="Etsi ihmisiä">Haku</a></li>
+                  {% endif %}><a href="/scene/persons" title="Etsi ihmisiä">{{ _("Haku") }}</a></li>
                 <li{% if value == 1 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons/all" title="Kaikki henkilöt">Ihmiset</a></li>
+                  {% endif %}><a href="/scene/persons/all" title="Kaikki henkilöt">{{ _("Ihmiset") }}</a></li>
                 <li{% if value == 2 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed" title="Sukunimet">Nimet</a></li>
+                  {% endif %}><a href="#" class="dimmed" title="Sukunimet">{{ _("Nimet") }}</a></li>
                 <li{% if value == 3 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed" title="Perheet">Perheet</a></li>
+                  {% endif %}><a href="#" class="dimmed" title="Perheet">{{ _("Perheet") }}</a></li>
                 <li{% if value == 4 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/locations" title="Paikat">Paikat</a></li>
+                  {% endif %}><a href="/scene/locations" title="Paikat">{{ _("Paikat") }}</a></li>
                 <li{% if value == 5 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/sources" title="Lähteet">Lähteet</a></li>
+                  {% endif %}><a href="/scene/sources" title="Lähteet">{{ _("Lähteet") }}</a></li>
                 <li{% if value == 6 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed" title="Pikkukuvat">Kuvat</a></li>
+                  {% endif %}><a href="#" class="dimmed" title="Pikkukuvat">{{ _("Kuvat") }}</a></li>
             </ul>
         </div>
     </div>
@@ -67,11 +67,11 @@
     {% if ch.uniq_id == uniq_id %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
     {% else %}
-    <a href="/scene/person{{delim}}{{ch.uniq_id}}" class="inlink" title="katso henkilön {{ch.id}} tiedot">
+    <a href="/scene/person{{delim}}{{ch.uniq_id}}" class="inlink" title="{{ _('katso henkilön') }} {{ch.id}} {{ _('tiedot') }}">
         {% if ch.names|length %}
         {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> <b>{{ch.names[0].surname}}</b></a>
         {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
-        {% else %}nimetön
+        {% else %}{{ _("nimetön") }}
         {% endif %}
     {% endif %}
 {%- endmacro %}

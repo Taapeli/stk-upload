@@ -38,21 +38,21 @@ class DataAdmin():
         self.roles = user.roles
         if user.has_role('admin'):
                 return
-        raise ValueError("User {} has not admin privileges".format(self.username))
+        raise ValueError(_("User {} has not admin privileges").format(self.username))
 
 
     def db_reset(self, opt=None):
         if opt == "total":
             """ Koko kanta tyhjennetään """
-            msg = "All data is deleted. "
+            msg = _("All data is deleted. ")
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_all_nodes)
         elif opt == "save_users":
-            msg = "All data but users and roles are removed."
+            msg = _("All data but users and roles are removed.")
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_data_nodes)
         elif opt == "my_own":
-            msg = "All persons and event by {} are removed. ".format(self.username)
+            msg = _("All persons and event by {} are removed. ").format(self.username)
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
                                                   user=self.username)
@@ -79,7 +79,7 @@ class UserAdmin():
 #        self.roles = user.roles
         if current_user.has_role('admin'):
                 return
-        raise ValueError("User {} has not admin privileges".format(self.username))
+        raise ValueError(_("User {} has not admin privileges").format(self.username))
 
     @classmethod
     def _build_email_from_node(cls, emailNode):
@@ -92,9 +92,9 @@ class UserAdmin():
         if 'creator' in emailNode.properties:
             email.creator = emailNode.properties['creator']
         if 'created_at' in emailNode.properties:
-            email.created_at = datetime.fromtimestamp(emailNode.properties['created_at']/1000)
+            email.created_at = datetime.fromtimestamp(int(emailNode.properties['created_at']/1000))
         if 'confirmed_at' in emailNode.properties:
-            email.confirmed_at = datetime.fromtimestamp(emailNode.properties['confirmed_at']/1000)        
+            email.confirmed_at = datetime.fromtimestamp(int(emailNode.properties['confirmed_at']/1000))        
        
         return email
     

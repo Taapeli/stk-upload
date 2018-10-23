@@ -1,12 +1,12 @@
 {# _myapp/templates/db_test.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Käsittelyn tulos{% endblock %}
+{% block title %}{{ _("Käsittelyn tulos") }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <h2>Tietokantakäsittelyn onnistuminen</h2>
+    <h2>{{ _("Tietokantakäsittelyn onnistuminen") }}</h2>
     <pre>
 {{text}}
     </pre>
-    <p>&rtrif; <a href="javascript:history.back()">Palaa takaisin</a></p>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Palaa takaisin") }}</a></p>
 {% endblock %}
 

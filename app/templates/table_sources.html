@@ -1,17 +1,17 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-<h2>Lähdeluettelo</h2>
-<p>Näytetään lähteet</p>
+<h2>{{ _("Lähdeluettelo") }}</h2>
+<p>{{ _("Näytetään lähteet") }}</p>
 
 <section id="lista">
 <table>
-    <tr><th>uniq_id</th>
-        <th>stitle</th>
+    <tr><th>{{ _("uniq_id") }}</th>
+        <th>{{ _("stitle") }}</th>
     </tr>
 {% if sources %}
     {% for s in sources %}
@@ -21,7 +21,7 @@
         </tr>
     {% endfor %}
 {% else %}
-        <tr><td colspan="5">Ei tietoja</td></tr>
+        <tr><td colspan="5">{{ _("Ei tietoja") }}</td></tr>
 {% endif %}
 </table>
 {% endblock %}

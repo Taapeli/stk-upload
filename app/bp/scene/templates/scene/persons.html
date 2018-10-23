@@ -1,16 +1,16 @@
 {# _myapp/templates/k_persons.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}henkilöluettelo{% endblock %}
+{% block title %}{{ _('henkilöluettelo') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
-{% set ordname = ['sukunimen', 'etunimen', 'patronyymin'] %}
+{% set ordname = ["{{ _('sukunimen') }}", "{{ _('etunimen') }}", "{{ _('patronyymin') }}"] %}
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
 
-{% if rule[0] == 'all' %}<h2>Henkilöt {{ ordname[order] }} mukaan</h2>
-{% elif rule[0] == 'refname' %}<h2>Henkilöt nimeltä {{ rule[1] }}</h2>
-{% else %}<H2>Henkilöt</h2>
+{% if rule[0] == 'all' %}<h2>{{ _('Henkilöt') }} {{ ordname[order] }} {{ _('mukaan') }}</h2>
+{% elif rule[0] == 'refname' %}<h2>{{ _('Henkilöt nimeltä') }} {{ rule[1] }}</h2>
+{% else %}<H2>{{ _('Henkilöt') }}</h2>
 {% endif %}
 <!-- Rule = {{rule}} for {{cnt}} persons -->
 
@@ -19,42 +19,42 @@
         <div id="summaryarea">
     {% if menuno > 0 %}
             <p id="description">
-    Tällä sivulla on luettelo {{cnt}} henkilönimestä mahdollisen 
-    {{ ordname[order] }} mukaan lajiteltuna.<br> 
-    Nimen napsauttaminen vie sinut valitun henkilön sivulle. 
-    Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.
+    {{ _('Tällä sivulla on luettelo {{cnt}} henkilönimestä mahdollisen') }} 
+    {{ ordname[order] }} {{ _('mukaan lajiteltuna.') }}<br> 
+    {{ _('Nimen napsauttaminen vie sinut valitun henkilön sivulle.')}} 
+    {{ _('Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.') }}
       {% if rule[0] == 'all' %}<br>
-    &rtrif; Vaihda järjestys: 
+    &rtrif; {{ _('Vaihda järjestys:') }} 
         {% if order != 0 %}<a href="/scene/persons/all/" 
-            class="inlink">sukunimen</a> /{% endif %}
+            class="inlink">{{ _('sukunimen') }}</a> /{% endif %}
         {% if order != 1 %}<a href="/scene/persons/all/fn" 
-            class="inlink">etunimen</a> /{% endif %}
+            class="inlink">{{ _('etunimen') }}</a> /{% endif %}
         {% if order != 2 %}<a href="/scene/persons/all/pn" 
-            class="inlink">patronyymin tai matronyymiin</a>{% endif %} mukaan.
+            class="inlink">{{ _('patronyymin tai matronyymin') }}</a>{% endif %} {{ _('mukaan') }}.
       {% endif %}
             </p>
     {% else %}{% if cnt %}
-            <h3>Näytetään {{cnt}} henkilönimeä</h3>{% else %}
-            <h3>Valitse näytettävät ihmiset</h3>{% endif %}
+            <h3>{{ _('Näytetään') }} {{cnt}} {{ _('henkilönimeä') }}</h3>{% else %}
+            <h3>{{ _('Valitse näytettävät ihmiset') }}</h3>{% endif %}
 			<div id="searching">
 				{% if rule[0] %}{% set selection = rule[0] %}
 				{% else %}{% set selection = "surname" %}{% endif %}
 
 			    <form  action="/scene/persons" method="post">
-                  <p>Haku tapahtuu annetun nimen alkuosalla, esim. "Sib" osuu nimeen "Sibbe".</p>
-                  <label for="snam">Hakusana (alkuosa)&nbsp; </label>
+                  <p>{{ _('Haku tapahtuu annetun nimen alkuosalla, esim. "Sib" osuu nimeen "Sibbe".') }}</p>
+                  <label for="snam">{{ _('Hakusana (alkuosa)') }}&nbsp; </label>
                     <input type="text" name="name" id="snam" 
                      {% if name %}value="{{name}}"{% endif %} required>
                      <br>
                   <input type="radio" name="rule" id="ssur" value="surname"
                    {% if selection == "surname" %}checked{% endif %}>
-                    <label for="ssur">Sukunimi</label>
+                    <label for="ssur">{{ _('Sukunimi') }}</label>
                   <input type="radio" name="rule" id="sfir" value="firstname"
                    {% if selection == "firstname" %}checked{% endif %}>
-                    <label for="sfir">Etunimi</label>
+                    <label for="sfir">{{ _('Etunimi') }}</label>
                   <input type="radio" name="rule" id="ssuf" value="patronyme"
                    {% if selection == "patronyme" %}checked{% endif %}>
-                    <label for="ssuf">Patronyymi</label>
+                    <label for="ssuf">{{ _('Patronyymi') }}</label>
 				  <input type="submit" value="Hae">
 			    </form>
 
@@ -75,31 +75,31 @@
 
     {% if persons|count > 0 %}
 		<div id="alphanav">{% set alpha = "¤" %}
-			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
+			<ul><li><a href="#" title="{{ _('alkuun') }}">&uarr;</a></li>
         {% for p in persons %}{% set ini = p.names[0].initial|upper %}
             {% if alpha != ini %}{%set alpha = ini %}
-                <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
+                <li><a href="#{{alpha}}" title="{{ _('Aakkosmenu') }}: {{alpha}}">{{alpha}}</a></li>
             {% endif %}{% endfor %}
 			</ul>
 		</div>
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-					<th>Henkilö</th>
-                    <th>Henkilön tapahtumat</th>
-                    <!-- th>Perheen tapahtumat</th -->
+					<th>{{ _('Henkilö') }}</th>
+                    <th>{{ _('Henkilön tapahtumat') }}</th>
+                    <!-- th>{{ _('Perheen tapahtumat') }}</th -->
 				</tr>
 			</thead>
 			<tbody>
 	    {% for p in persons %}
 	            <tr><td class="ColumnAlpha">{% set ini = p.names[0].initial|upper %}
 	               {% if alpha != ini %}{%set alpha = ini %}
-		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
+		               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Palaa alkuun') }}" href="#">{{alpha}}</a>
 	               {% endif %}</td>
 
 	                <td class="ColumnPerson"><div>
 	                   <a href="/scene/person={{p.uniq_id}}"
-	                     title="katso henkilön {{p.uniq_id}} tiedot">
+	                     title="{{ _('katso henkilön') }} {{p.uniq_id}} {{ _('tiedot') }}">
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
 		               {% else %}<i>{{p.names[0].patronyme}}</i>{% endif %}
@@ -107,8 +107,8 @@
 		                href="/scene/person/{{p.uniq_id}}">]</a></small>
 		               {# TODO Remove later test link at ']' #}
 		               {% if p.refnames %}
-		               <br><small class="refname" title="referenssinimet">
-		                  hakusanat: {{p.refnames}}
+		               <br><small class="refname" title="{{ _('referenssinimet') }}">
+		                  {{ _('hakusanat') }}: {{p.refnames}}
 		               {% endif %}
 	                </div></td>
 
@@ -128,7 +128,7 @@
 	{% else %}
         <table class="IndividualList">
             <tbody>
-	        <tr><td>Ketään ei löytynyt hakutiedoilla<//td></tr>
+	        <tr><td>{{ _('Ketään ei löytynyt hakutiedoilla') }}<//td></tr>
 	{% endif %}
 			</tbody>
 		</table>
