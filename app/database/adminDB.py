@@ -50,7 +50,12 @@ class SetupCypher():
     CREATE CONSTRAINT ON (user:User) 
     ASSERT user.username IS UNIQUE
     """
-            
+    
+    set_allowed_email_constraint = """ 
+    CREATE CONSTRAINT ON (email:Allowed_email) 
+    ASSERT email.allowed_email IS UNIQUE
+    """  
+    
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'
     CREATE (user:User 
@@ -176,6 +181,22 @@ def create_user_constraints():
     with shareds.driver.session() as session: 
         try:  
             session.run(SetupCypher.set_user_constraint)  
+        except CypherSyntaxError as cex:
+            logger.error('ConstraintError in create_user_constraints ' + cex)
+            return
+        except CypherError as cex:
+            logger.error('ConstraintError in create_user_constraints ' + cex)
+            return
+        except ConstraintError as cex:
+            logger.error('ConstraintError in create_user_constraints ' + cex)
+            return
+    logger.info('User constraints initialized')
+    
+
+def create_allowed_email_constraints():
+    with shareds.driver.session() as session: 
+        try:  
+            session.run(SetupCypher.set_allowed_email_constraint)  
         except CypherSyntaxError as cex:
             logger.error('ConstraintError in create_user_constraints ' + cex)
             return
