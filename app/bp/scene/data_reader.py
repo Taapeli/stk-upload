@@ -6,6 +6,7 @@ Created on 24.9.2018
 @author: jm
 '''
 #from models.datareader import read_persons_with_events
+from .models.footnote import Footnotes, SourceFootnote
 from models.gen.from_node import get_object_from_node
 from models.gen.family import Family_for_template
 from models.gen.person_combo import Person_combo, Person_as_member
@@ -126,11 +127,13 @@ def get_a_person_for_display_apoc(uniq_id, user):
     # Return Person with included objects and list of note, citation etc. objects
     return (person, objs)
 
+
 def set_citations(e, ref, objs):
     ''' Create citation references person_pg for foot notes '''
     if ref in objs:
         cit = objs[ref]     # Remove this?
-        sl = "{} '{}'".format(cit.source.uniq_id, cit.source.stitle)
+        sou = objs[cit.source_id]
+        sl = "{} '{}'".format(sou.uniq_id, sou.stitle)
         print("{}: lähde {} / {} '{}'".format(e.id, sl, cit.uniq_id, cit.page))
     else:
         sl = 'no source'
@@ -158,7 +161,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
     in root object variable. The actual referenced target objects are stored to 
     separate 'obj_dict' variable:
         -[:CITATION]-> (:Citation)     to .citation_ref[]
-        -[:SOURCE]-> (:Source)         to .source_ref[]
+        -[:SOURCE]-> (:Source)         to .source_id
         -[:REPOSITORY]-> (:Repository) to .repo_ref[]
         -[:NOTE]-> (:Note)             to .note_ref[]
         -[:PLACE]-> (:Place)           to .place_ref[]
@@ -245,8 +248,8 @@ def connect_object_as_leaf(src, target, rel_type=None):
 
     elif src_class == 'Citation':
         if target_class == 'Source':
-            src.source = target
-            return src.source
+            src.source_id = target.uniq_id
+            return None
         if target_class == 'Note':
             src.note_ref.append(target.uniq_id)
             return None
@@ -272,7 +275,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
 
     elif src_class == 'Source':
         if target_class == 'Repository':
-            src.repo_ref.append(target)
+            src.repocitory_id = target.uniq_id
             return None
         if target_class == 'Note':
             src.note_ref.append(target.uniq_id)
@@ -387,7 +390,7 @@ def get_person_data_by_id(uniq_id):
                         r.rname = source[4]
                         r.type = source[5]
                         
-                        s.repos.append(r)
+                        s.repocitory.append(r)
                         c.source = s    #s.append(s)
                         
                     sources.append(c)

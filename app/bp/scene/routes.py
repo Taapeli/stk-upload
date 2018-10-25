@@ -147,8 +147,7 @@ def show_person_page(uniq_id):
     """ Full homepage for a Person in database (vanhempi versio)
     """
     try:
-        person, events, photos, sources, families = \
-            get_person_data_by_id(uniq_id)
+        person, events, photos, citations, families = get_person_data_by_id(uniq_id)
         for f in families:
             print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
             if f.mother:
@@ -164,7 +163,7 @@ def show_person_page(uniq_id):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/person.html", person=person, events=events, 
-                           photos=photos, sources=sources, families=families)
+                           photos=photos, citations=citations, families=families)
 
 # ------------------------------ Menu 4: Places --------------------------------
 

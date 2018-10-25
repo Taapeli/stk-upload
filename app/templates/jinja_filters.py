@@ -227,6 +227,11 @@ def translate(term, var_name, lang="fi"):
             return tabl[term]
         except:
             return term + ":ssa"
+    elif var_name == "handle":
+        # Shows handle '_dd3d7f7206c3ca3408c9daf6c58' in short format '_d…f6c58'"
+        if len(term) > 8:
+            return term[:2] + '…' + term[-5:]
+        return term
 
     try:
         return tabl[term]

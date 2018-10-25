@@ -58,7 +58,7 @@
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                     {% if person.citation_ref %}<td class="ColumnValue" 
                         rowspan="2"><small>{{ _("lähde:") }}
-                        </small>{{ macro.link_cite(person.citation_ref, obj) }}
+                        </small>{{ macro.link_cite(person.citation_ref, obj, cits) }}
                     </td>{% endif %}
                 </tr>
 
@@ -258,8 +258,8 @@
                 {% for source in person.sources %}
                 <li>
             		{% for source in source.sources %}
-            			{% for repo in source.repos %}
-            				{{repo.rname}}:
+            			{% for rref in source.repo_ref %}
+            				{{obj[rref].rname}}:
              			{% endfor %}
              			<a href="/scene/source={{source.uniq_id}}" class="inlink"
 	                     title="{{ _('katso lähteen') }} {{source.uniq_id}} {{ _('tiedot') }}">{{source.stitle}}</a>

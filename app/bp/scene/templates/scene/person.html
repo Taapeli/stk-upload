@@ -277,30 +277,30 @@
             <ol>
                 {% set source_cnt = 0 %}
 {#- 
->>> sour = sources[0] = <models.gen.citation.Citation object>
->>> sources[0].source = <models.gen.source.Source object>
->>> sources[0].source.stitle = 'Kangasala syntyneet 1721-1778'
->>> sources[0].source.repos[0].rname = 'Kangasalan seurakunnan arkisto'
+>>> cita = citations[0] = <models.gen.citation.Citation object>
+>>> citations[0].source = <models.gen.source.Source object>
+>>> citations[0].source.stitle = 'Kangasala syntyneet 1721-1778'
+>>> citations[0].source.repocitory.rname = 'Kangasalan seurakunnan arkisto'
 #}
-                {% for sour in sources %}
+                {% for cita in citations %}
                 <li>
-            		{% for repo in sour.source.repos %}{{repo.rname}}: {% endfor %}
-             			<a href="/scene/source={{sour.uniq_id}}" class="inlink"
-	                     title="{{ _('katso lähteen') }} {{sour.uniq_id}} {{ _('tiedot') }}">{{sour.source.stitle}}</a>
-                     <ol>
+            		{{cita.source.repocitory.rname}}:
+            		<a href="/scene/source={{cita.source.uniq_id}}" class="inlink"
+                       title="{{ _('katso lähteen') }} {{cita.source.uniq_id}} {{ _('tiedot') }}"
+                       >{{cita.source.stitle}}</a>
+                    <ol>
                          {% set source_cnt = source_cnt + 1 %}
-                         {% set conf = sour.confidence | int %}
+                         {% set conf = cita.confidence | int %}
                          <li id="sref{{ source_cnt }}a"
-                          title="{{sour.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{sour.confidence}})"
-                           {% if sour.confidence and sour.confidence < "2" %}
+                          title="{{cita.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{cita.confidence}})"
+                           {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
-                            {{ _('Sivu') }}: {{sour.page}} &nbsp; {{ macro.stars(conf) }}
-                           {% if sour.notetext %}<br>
-                              <a href="{{sour.notetext}}" class="outlink" target="_blank"
-                              {% if sour.confidence and sour.confidence < "2" %}
-                             style="color:red"{% endif %}>
-                                {{ sour.notetext }}</a>{% endif %}                           
-                        </li>
+                            {{ _('Sivu') }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+                           {% if cita.notetext %}<br>
+                              <a href="{{cita.notetext}}" class="outlink" target="_blank"
+                              {% if cita.confidence and cita.confidence < "2" %}
+                             style="color:red"{% endif %}>{{ cita.notetext }}</a>{% endif %}                           
+                         </li>
                 	</ol>
                 </li>
 				{% endfor %}
