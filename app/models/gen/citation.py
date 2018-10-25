@@ -26,12 +26,13 @@ class Citation:
                 confidence       str confidence 0.0 - 5.0 (?)
                 note_ref         int huomautuksen osoite (ent. noteref_hlink str)
                 source_handle    str handle of source   _or_
-                source_id        int uniq_id of source
+                source_id        int uniq_id of a Source object
                 citators         NodeRef nodes referring this citation
      """
 
     def __init__(self):
         """ Luo uuden citation-instanssin """
+        self.uniq_id = None
         self.handle = ''
         self.change = 0
         self.id = ''
@@ -39,9 +40,8 @@ class Citation:
         self.page = ''
         self.noteref_hlink = []
         self.source_handle = ''
-        self.source_id = None
-        self.citators = []  # Lähde-sivulle
-        self.source = None   # objects for creating display sets
+        self.source_id = None # uniq_ids of Source objects, for creating display sets
+        self.citators = []     # Lähde-sivulle
         self.note_ref = []
 
 

@@ -65,7 +65,7 @@ class Person_gramps(Person):
         Person.__init__(self)
 
         # For emadded or referenced child objects, displaying Person page
-        # @see Plan bp.scene.models.connect_object_as_leaf
+        # @see Plan bp.scene.data_reader.connect_object_as_leaf
 
         self.names = []                 # models.gen.person_name.Name
         # Gramps handles (and roles)
