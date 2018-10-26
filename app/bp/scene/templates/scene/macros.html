@@ -41,19 +41,19 @@
         <div class="container">
             <ul class="menu" id="dropmenu">
                 <li{% if value == 0 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons" title="Etsi ihmisiä">{{ _("Haku") }}</a></li>
+                  {% endif %}><a href="/scene/persons" title="Etsi ihmisiä">{{ _('Search') }}</a></li>
                 <li{% if value == 1 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons/all" title="Kaikki henkilöt">{{ _("Ihmiset") }}</a></li>
+                  {% endif %}><a href="/scene/persons/all" title="Kaikki henkilöt">{{ _('People') }}</a></li>
                 <li{% if value == 2 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed" title="Sukunimet">{{ _("Nimet") }}</a></li>
+                  {% endif %}><a href="#" class="dimmed" title="Sukunimet">{{ _('Names') }}</a></li>
                 <li{% if value == 3 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed" title="Perheet">{{ _("Perheet") }}</a></li>
+                  {% endif %}><a href="#" class="dimmed" title='Families'>{{ _('Families') }}</a></li>
                 <li{% if value == 4 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/locations" title="Paikat">{{ _("Paikat") }}</a></li>
+                  {% endif %}><a href="/scene/locations" title='Places'>{{ _('Places') }}</a></li>
                 <li{% if value == 5 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/sources" title="Lähteet">{{ _("Lähteet") }}</a></li>
+                  {% endif %}><a href="/scene/sources" title='Sources'>{{ _('Sources') }}</a></li>
                 <li{% if value == 6 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed" title="Pikkukuvat">{{ _("Kuvat") }}</a></li>
+                  {% endif %}><a href="#" class="dimmed" title="Pikkukuvat">{{ _('Pictures and other Media') }}</a></li>
             </ul>
         </div>
     </div>
@@ -71,7 +71,7 @@
         {% if ch.names|length %}
         {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> <b>{{ch.names[0].surname}}</b></a>
         {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
-        {% else %}{{ _("nimetön") }}
+        {% else %}{{ _('Anonymous') }}
         {% endif %}
     {% endif %}
 {%- endmacro %}

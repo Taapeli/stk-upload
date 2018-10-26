@@ -1,12 +1,12 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-<h2>{{ _("Henkilöluettelo") }}</h2>
-<p>{{ _("Näytetään")}} {{persons|count}} {{ _("henkilöä") }}</p>
+<h2>{{ _('List of Persons') }}</h2>
+<p>{{ _('Person name is shown')}} {{persons|count}} {{ _('Persons') }}</p>
 
 <section id="lista">
 <table>
@@ -35,7 +35,7 @@
 		{% endif %}
     {% endfor %}
 {% else %}
-        <tr><td colspan="5">{{ _("Ei henkilöitä") }}</td></tr>
+        <tr><td colspan="5">{{ _('No persons') }}</td></tr>
 {% endif %}
 </table>
 {% endblock %}

@@ -1,9 +1,9 @@
 {# _templates/admin/talletettu.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _('Tiedot talletettu') }}{% endblock %}
+{% block title %}{{ _('Data stored') }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <h2>{{ _('Tietojen talletus kantaan') }}{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
+    <h2>{{ _('Store to Database') }}{% if uri %} <i>{{uri}}</i>{% endif %}</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -24,6 +24,6 @@
 	       {% endif %}</tr>
 	    {% endfor %}</table>
     {% endif %}
-    <p>&rtrif; <a href="javascript:history.back()">{{ _('Palaa takaisin') }}</a></p>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _('Go back') }}</a></p>
 {% endblock %}
 

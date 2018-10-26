@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -26,7 +26,7 @@
 		{% endif %}
     {% endfor %}
 {% else %}
-        <tr><td colspan="1">{{ _("Ei tietoja") }}</td></tr>
+        <tr><td colspan="1">{{ _('No data') }}</td></tr>
 {% endif %}
 </table>
 </section>

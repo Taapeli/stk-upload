@@ -2,13 +2,13 @@
 {% from "security/_macros.html" import render_field_with_errors, render_field %}
 {% include "security/_messages.html" %}
 {% extends "/admin/layout.html" %}
-{% block title %}{{ _('Käyttäjäehdokkaat kannasta') }}{% endblock %}
+{% block title %}{{ _('User candidates from database') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-  <h3>{{ _('Ilmoitukset') }}</h3>
+  <h3>{{ _('Notifications') }}</h3>
   <div>
     <ul  class='flashes'>
     {% for category, message in messages %}
@@ -21,10 +21,10 @@
  
 <div id="startdiv">
   <div>
-    <h2>{{ _('Käyttäjäehdokkaat') }}</h2>
+    <h2>{{ _('User candidates') }}</h2>
 
     <div class="startbox">
-   	  <h3>{{ _('Luo uusi käyttäjäehdokas') }}</h3>
+   	  <h3>{{ _('Create a new user candidate') }}</h3>
 	    <div style="display: inline-block;">    
 	        <form action="{{ url_for('admin.list_allowed_emails') }}" method="POST">
 	          {{ form.hidden_tag() }}
@@ -36,7 +36,7 @@
 	    </div>
 	</div>
     <div class="startbox2">
-      <h3>{{ _('Odottavat käyttäjäehdokkaat') }}</h3>
+      <h3>{{ _('Pending user candidates') }}</h3>
         <!--section id="lista" -->
 	        <table class="table100">
 	            <tr>{{ _('<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>') }}
@@ -52,7 +52,7 @@
 	                </tr>
 	            {% endfor %}
 	        {% else %}
-	                <tr><td colspan="1">{{ _('Ei tietoja') }}</td></tr>
+	                <tr><td colspan="1">{{ _('No data') }}</td></tr>
 	        {% endif %}
 	        </table>
         <!-- /section -->

@@ -67,7 +67,7 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_refnames() or _("Tehty")
+    message = dataupdater.set_person_refnames() or _('Made')
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 @bp.route('/admin/upload_csv', methods=['POST'])

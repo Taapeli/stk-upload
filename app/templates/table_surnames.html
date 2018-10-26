@@ -1,26 +1,26 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
-<h2>{{ _("Kaikki sukunimet") }}</h2>
+<h2>{{ _('All surnames') }}</h2>
 <section id="lista">
 <table>
-    <tr><th>{{ _("sukunimi") }}</th>
+    <tr><th>{{ _('Surname') }}</th>
     </tr>
 {% if surnames %}
     {% for name in surnames %}
         <tr>
             <td><a href="/lista/people_by_surname/{{name.surname}}">
             {% if name.surname %}{{name.surname}}
-            {% else %}<small>{{ _("(ei nimeä)") }}</small>
+            {% else %}<small>{{ _('(No Name)') }}</small>
             {% endif %}
             </a></td>
         </tr>
     {% endfor %}
 {% else %}
-        <tr><td colspan="1">{{ _("Ei tietoja") }}</td></tr>
+        <tr><td colspan="1">{{ _('No data') }}</td></tr>
 {% endif %}
 </table>
 </section>

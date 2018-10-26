@@ -1,28 +1,28 @@
 {# templates/admin/start.html_ #}
 {% extends "/admin/layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _('Pääkäyttäjä') }}{% endblock %}
+{% block title %}{{ _('Administrator') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
-    <h2>{{ _('Tervetuloa Suomikantaan') }}, {{current_user.username}}</h2>
+    <h2>{{ _('Welcome to Finland Database') }}, {{current_user.username}}</h2>
     <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
-       <span style="font-size:8pt; color:gray">{{ _('Git-sovellusversio') }} 
+       <span style="font-size:8pt; color:gray">{{ _('Git Application Version') }} 
           <i>{{ 'git'|app_date }}</i></span>
     
     <div class="row">
     {% if current_user.is_authenticated
         and ( current_user.has_role('member') or current_user.has_role('admin') or current_user.has_role('master')) %}
         <div class="startbox">
-            <h3>{{ _('Datanäkymiä taulukkoina') }}</h3>
-            <p>{{ _('Seuraavalla sivulla on erilaisia teknisempiä listauksia ja ongelmanselvitysvälineitä') }}
+            <h3>{{ _('Data Views as tables') }}</h3>
+            <p>{{ _('On the next page there are a variety of more technical listings and problem solving tools') }}
             </p>
             <form method="get" action="/tables">
                <div class="submit"> 
-                  <button type="submit">{{ _('Tutki tietokantaa') }}</button>
+                  <button type="submit">{{ _('Explore the database') }}</button>
                </div>
             </form>
         </div>
@@ -32,12 +32,12 @@
         and (current_user.has_role('admin') or current_user.has_role('master'))  %}
     <div class="startbox admin">
       <div style="display: inline-block;">
-        <h3>{{ _('Tietokannan tyhjennykset') }}</h3>
-            <p><i>{{ _('Tiedot tuhotaan mitään kysymättä!') }}</i></p>
+        <h3>{{ _('Database Emptyings') }}</h3>
+            <p><i>{{ _('The information is deleted without further asking!') }}</i></p>
             <ul>
-              <li><a href="/admin/clear_db/total">{{ _('Tyhjennä koko kanta') }}</a></li>
-              <li><a href="/admin/clear_db/save_users">{{ _('Tyhjennä säästäen käyttäjätunnukset') }}</a></li>
-              <li><a href="/admin/clear_db/my_own">{{ _('Poista itse tuomani tiedot') }} 
+              <li><a href="/admin/clear_db/total">{{ _('Clear entire database') }}</a></li>
+              <li><a href="/admin/clear_db/save_users">{{ _('Clear entire database but saving user IDs') }}</a></li>
+              <li><a href="/admin/clear_db/my_own">{{ _('Delete my imported data') }} 
                   ({{current_user.username}})</a></li>
             </ul>
       </div>
@@ -47,12 +47,12 @@
         and (current_user.has_role('admin') or current_user.has_role('master')) %}
     <div class="startbox admin">
       <div style="display: inline-block;">
-        <h3>{{ _('Käyttäjien ja referenssitietojen hallinta') }}</h3>
+        <h3>{{ _('User and reference information management') }}</h3>
         <ul>
-          <li><a href="/admin/list_users">{{ _('Käyttäjätunnukset ja ladatut aineistot') }}</a></li>
-          <li><a href="/admin/allowed_emails">{{ _('Käyttäjäehdokkaat') }}</a></li>
-          <li><a href="/admin/refnames">{{ _('Referenssinimet') }}</a></li>
-          <li><a href="/admin/set/estimated_dates">{{ _('Aseta henkilön arvioidut syntymä- ja kuolinajat') }}</a></li>
+          <li><a href="/admin/list_users">{{ _('Usernames and downloaded materials') }}</a></li>
+          <li><a href="/admin/allowed_emails">{{ _('User candidates') }}</a></li>
+          <li><a href="/admin/refnames">{{ _('Reference names') }}</a></li>
+          <li><a href="/admin/set/estimated_dates">{{ _('Set the estimated birth and death dates of a person') }}</a></li>
         </ul>
       </div>
     </div>{% endif %}

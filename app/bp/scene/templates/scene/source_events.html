@@ -1,23 +1,23 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}{{ _('lähteen tapahtumat') }}{% endblock %}
+{% block title %}{{ _('Events of a Source') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% import '/scene/macros.html' as macro %}
 
-<h2>{{ _('Lähteen tapahtumat') }}</h2>
+<h2>{{ _('Events of a Source') }}</h2>
 
 {{ macro.menu(5) }}
     <div class="content" id="IndividualDetail">
 	    <h3 style="position:sticky; top:0;" title="Lähde">{{stitle}}</h3>
 	        <div class="subsection" id="citations">
-	            <h4>{{ _('Lähdeviitteet ja tapahtumat') }}</h4>
+	            <h4>{{ _('Source References and Events') }}</h4>
 	            <table class="infolist eventlist" width="100%">
 	                <!-- thead>
 	                    <tr>
 	                        <th class="ColumnId"></th>
-	                        <th class="ColumnEvent">{{ _('Lähde ja viittaukset') }}</th>
+	                        <th class="ColumnEvent">{{ _('Source and references') }}</th>
 	                    </tr>
 	                </thead -->
 	                <tbody>
@@ -47,7 +47,7 @@
                             <a href="/scene/person={{cite.uniq_id}}" class="id"
                                title="{{ _('katso henkilön') }} {{cite.id}} {{ _('tiedot') }}">
                                    {{cite.clearname}}</a>
-	                        {# elif cite.label == 'Family Event' #}{{ _('Perheenjäsenen') }}
+	                        {# elif cite.label == 'Family Event' #}{{ _("Family Member's") }}
                                 <em>{{cite.clearname}}</em> {{cite.eventtype|transl('evt')}} 
                                 {# if cite.edates #}{{cite.edates}}{# endif #}
 	                        {# else #} -->{{ _('Henkilön') }}

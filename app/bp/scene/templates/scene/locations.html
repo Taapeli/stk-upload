@@ -1,21 +1,21 @@
 {# _templates/scene/locations.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}{{ _("paikkakunnat") }}{% endblock %}
+{% block title %}{{ _('Places') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
 
-<h2>{{ _("Paikkakuntaluettelo") }}</h2>
+<h2>{{ _('Places List') }}</h2>
 {{ macro.menu(4) }}
 	<div class="content" id="Individuals">
 		<p id="description">
-		{{ _("Tällä sivulla on hakemisto kaikista paikkakunnista ja niiden alla olevista lähinnä alemman tason paikoista.") }}
+		{{ _('This page contains a directory of all the places and the closest lower-level locations beneath them.') }}
 		</p>
 		<div id="alphanav">
-			<ul><li><a href="#" title="{{ _('alkuun') }}">&uarr;</a></li>
+			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
         {% for p in locations %}{% set ini = p.pname[0]|list|first %}
             {% if alpha != ini %}{%set alpha = ini %}
-                <li><a href="#{{alpha}}" title="{{ _("Aakkosmenu") }}: {{alpha}}">{{alpha}}</a></li>
+                <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
             {% endif %}
         {% endfor %}
 			</ul>
@@ -23,15 +23,15 @@
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-                    <th style="maxwidth:50%">{{ _("Paikka, liittyvät paikat") }}</th>
-                    <th>{{ _("Sijainti") }}</th>
+                    <th style="maxwidth:50%">{{ _('Location, related places') }}</th>
+                    <th>{{ _('Location') }}</th>
 				</tr>
 			</thead>
 			<tbody>
 	{% if locations %}
 	    {% for p in locations %}{% set ini = p.pname[0]|list|first %}
             <tr><td class="ColumnAlpha">{% if alpha != ini %}{%set alpha = ini %}
-	               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Palaa alkuun') }}" href="#">{{alpha}}</a>
+	               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
                 {% endif %}</td>
                 <td class="ColumnPerson">
                    <div>
@@ -42,14 +42,14 @@
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
 						<span class="typedesc">{{e.type|transl('lt_in')}}</span>
 						<a href="#{{e.uniq_id}}" 
-						  title="{{ _('siirry paikkaan') }} id={{e.uniq_id}}">{{e.pname|join(' • ')}}</a> 
+						  title="{{ _('Go to location') }} id={{e.uniq_id}}">{{e.pname|join(' • ')}}</a> 
 		        {% endif %}
                    </div>
             {% if p.lowers %}
 		           <ul style="margin:0 0 5px 1em;">
 		        {% for e in p.lowers|sort(attribute='pname') %}    <li>
 	                       <a href="#{{e.uniq_id}}"
-	                         title="{{ _('siirry paikkaan') }} id={{e.uniq_id}}">{{e.pname|join(' • ')}}</a>
+	                         title="{{ _('Go to location') }} id={{e.uniq_id}}">{{e.pname|join(' • ')}}</a>
 	                       &nbsp;<span class="typedesc">{{e.type|transl('lt')}}</span>
                       </li>
 		        {% endfor %}

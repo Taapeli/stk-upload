@@ -1,6 +1,6 @@
 {# _myapp/templates/person.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Henkilöiden yhdistäminen") }}{% endblock %}
+{% block title %}{{ _('Merging people') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script>
@@ -14,7 +14,7 @@ function myFunction(oid, fn, ln) {
         "<li><input type='radio' name='rsuku' value='Antinpoika:p' /> Demo-Antinpoika (patronyymi)</li>" +
     "</ul>";
 }</script>
-<h2>{{ _("Henkilöiden yhdistely") }}</h2>
+<h2>{{ _('Merging people') }}</h2>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul  class='flashes'>
@@ -26,17 +26,17 @@ function myFunction(oid, fn, ln) {
 {% endwith %}
 <form action="/samahenkilo" method="post" enctype="multipart/form-data">
 <div id="lista">
-    <p>{{ _("Henkilöt, joiden nimi alkaa") }} '{{pattern}}'</p>
+    <p>{{ _('People whose name begins with') }} '{{pattern}}'</p>
        <input type="text" name="names" value="{{pattern}}" readonly hidden>
     <ol style='border: solid 1pt gray; background-color: lightgoldenrodyellow'>
-        <li> {{ _("Merkitse päähenkilö (1. valintasarake) ja yhdistettävät henkilöt (2. sarake)") }}
-        <li> {{ _("Poimi tarvittaessa referenssinimet vierestä <i>(ei vielä käytössä)") }}</i>
-        <li> <input type="submit" value="{{ _('Yhdistä valittuun päähenkilöön') }}" />
+        <li> {{ _('Mark the central person (1st selection column) and the people to be merged (2nd column)') }}
+        <li> {{ _('If necessary, pick up nearby reference names <i> (not already in use)') }}</i>
+        <li> <input type="submit" value="{{ _('Merge to selected Central Person') }}" />
     </ol>
 <table width="100%">
-    <tr><th><center>{{ _("liitä") }} o&Larr;x</center></th>
+    <tr><th><center>{{ _('Relate Person') }} o&Larr;x</center></th>
         <th>{{ _("henkilö") }}</th>
-        <th>{{ _("käräjät, signum") }}</th>
+        <th>{{ _('Court, Signum') }}</th>
     </tr>
 
 {% for p in persons %}
@@ -67,7 +67,7 @@ function myFunction(oid, fn, ln) {
 </table>
 </div>
 <div id="tiedot">
-    <h3>{{ _("Referenssinimiä") }}</h3>
+    <h3>{{ _('Reference names') }}</h3>
     <p>&nbsp;</p>
 </div>
 </form>

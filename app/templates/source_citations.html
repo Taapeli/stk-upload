@@ -1,27 +1,27 @@
 {# _myapp/templates/person.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Lähteen tiedot") }}{% endblock %}
+{% block title %}{{ _('Source Details') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 {% for s in sources %}
-    <h2>{{ _("Lähde") }}</h2>
+    <h2>{{ _('Source') }}</h2>
     <ol id="itemlist">
         <li class="itemrow">
-                <div class="col1">{{ _("Tunniste") }}</div>
+                <div class="col1">{{ _('Identifier') }}</div>
                 <div class="col2">{{s.uniq_id}}</div>
         </li>
         <li class="itemrow">
-                <div class="col1">{{ _("Otsikko") }}</div>
+                <div class="col1">{{ _('Title') }}</div>
                 <div class="col2">{{s.stitle}}</div>
         </li>
      </ol>
     {% if s.citations %}
-    <h4>{{ _("Viittaukset") }}</h4>
+    <h4>{{ _('References') }}</h4>
     <ol class="num">
         {% for c in s.citations %}
         <li><div class="itemrow">
-                <div class="col1">{{ _("Tunniste<br />Date<br />Page<br />Confidence") }}<br /><br /></div>
+                <div class="col1">{{ _('Identifier<br />Date<br />Page<br />Confidence') }}<br /><br /></div>
                 <div class="col3"><span class="id">{{c.uniq_id}}</span><br />
                 	{{c.dateval}}<br />
                 	{{c.page}}<br />
@@ -32,6 +32,6 @@
     </ol>
     {% endif %}
 {% endfor %}
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Palaa takaisin") }}</a></p>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _('Go back') }}</a></p>
 
 {% endblock %}

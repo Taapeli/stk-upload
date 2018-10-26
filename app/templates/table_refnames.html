@@ -1,6 +1,6 @@
 {# _myapp/templates/lista2.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Referenssinimet kannasta") }}{% endblock %}
+{% block title %}{{ _('Reference names from Database') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
@@ -10,8 +10,8 @@
              "place":"paikka", "occu":"ammatti"} %}
 {% set rt = {'firstname':'etunimi', 'surname':'sukunimi', 'patronyme':'patronyymi', 
              'father':'isän nimi', 'mother':'äidin nimi', 'basename':'BASENAME'} %}
-<h2>{{ _("Referenssinimet") }}</h2>
-<p>{{ _("Mukana") }} {{names|count}} {{ _("nimeä") }}</p>
+<h2>{{ _('Reference names') }}</h2>
+<p>{{ _('Included') }} {{names|count}} {{ _('name') }}</p>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ol  class='flashes'>
@@ -24,12 +24,12 @@
 <div>
 <!--section id="lista"-->
 <table style="width:500pt">
-    <tr><th>{{ _("oid") }}</th>
-        <th>{{ _("nimi") }}</th>
-        <th>{{ _("tyyppi ~ ref.nimi") }}</th>
-        <th>{{ _("sukupuoli") }}</th>
-        <th>{{ _("nimilähde") }}</th>
-        <th>{{ _("henkilöitä") }}</th>
+    <tr><th>{{ _('Oid') }}</th>
+        <th>{{ _('Name') }}</th>
+        <th>{{ _('Type ~ Ref. name') }}</th>
+        <th>{{ _('Gender') }}</th>
+        <th>{{ _('Name Source') }}</th>
+        <th>{{ _('Persons') }}</th>
     </tr>
     {% for r in names %}
         <tr>
