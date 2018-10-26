@@ -4,11 +4,11 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
-{% set ordname = ["{{ _('sukunimen') }}", "{{ _('etunimen') }}", "{{ _('patronyymin') }}"] %}
+{% set ordname = [_('sukunimi'), _('etunimi'), _('patronyymi')] %}
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
 
-{% if rule[0] == 'all' %}<h2>{{ _('Persons') }} {{ ordname[order] }} {{ _('Including') }}</h2>
+{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
 {% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
 {% else %}<H2>{{ _('Persons') }}</h2>
 {% endif %}
@@ -19,8 +19,10 @@
         <div id="summaryarea">
     {% if menuno > 0 %}
             <p id="description">
-    {{ _('Tällä sivulla on luettelo {{cnt}} henkilönimestä mahdollisen') }} 
-    {{ ordname[order] }} {{ _('mukaan lajiteltuna.') }}<br> 
+    {{ _('This page contains a list of person names.') }}
+    {{ _('Number of people:') }} {{cnt}};
+    {{ _('Sort order:') }} {{ ordname[order] }}.
+    <br> 
     {{ _("Clicking a name will take you to the selected person's page.")}} 
     {{ _('If the person has many names, they will appear in the list under each name.') }}
       {% if rule[0] == 'all' %}<br>
@@ -30,7 +32,7 @@
         {% if order != 1 %}<a href="/scene/persons/all/fn" 
             class="inlink">{{ _('First Name') }}</a> /{% endif %}
         {% if order != 2 %}<a href="/scene/persons/all/pn" 
-            class="inlink">{{ _('Patronymic or Matronymic') }}</a>{% endif %} {{ _('Including') }}.
+            class="inlink">{{ _('Patronymic or Matronymic') }}</a>{% endif %}.
       {% endif %}
             </p>
     {% else %}{% if cnt %}
@@ -99,7 +101,7 @@
 
 	                <td class="ColumnPerson"><div>
 	                   <a href="/scene/person={{p.uniq_id}}"
-	                     title="{{ _('katso henkilön') }} {{p.uniq_id}} {{ _('tiedot') }}">
+	                     title="{{ _('see details of person') }} {{p.uniq_id}}">
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
 		               {% else %}<i>{{p.names[0].patronyme}}</i>{% endif %}

@@ -6,7 +6,7 @@
 <script src="/static/infobox.js"></script>
 
 <h2>{{ _('List of Persons') }}</h2>
-<p>{{ _('Person name is shown') }} {{persons|count}} {{ _('Persons') }} 
+<p>{{ _('Number of persons:') }} {{persons|count}}  
 {% if name %}
 {{ _('from the File') }} [<i>{{name}}</i>] 
 {% endif %}{% if uri %}

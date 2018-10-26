@@ -45,14 +45,14 @@
 	               		{% for cite in c.citators|sort(attribute='date') %}
 		               		<li><!-- {# if cite.label == 'Person' #}
                             <a href="/scene/person={{cite.uniq_id}}" class="id"
-                               title="{{ _('katso henkilön') }} {{cite.id}} {{ _('tiedot') }}">
+                               title="{{ _('see details of person') }} {{ cite.id }}">
                                    {{cite.clearname}}</a>
 	                        {# elif cite.label == 'Family Event' #}{{ _("Family Member's") }}
                                 <em>{{cite.clearname}}</em> {{cite.eventtype|transl('evt')}} 
                                 {# if cite.edates #}{{cite.edates}}{# endif #}
 	                        {# else #} -->{{ _('Henkilön') }}
                             <a href="/scene/person={{cite.uniq_id}}" class="id"
-                               title="{{ _('katso henkilön') }} {{cite.id}} {{ _('tiedot') }}">
+                               title="{{ _('see details of person') }} {{ cite.id }}">
                                    {{cite.clearname}}</a>
 	                           {{cite.eventtype|transl('evt')}} 
 	                           {% if cite.edates %}{{cite.edates}}{% endif %}

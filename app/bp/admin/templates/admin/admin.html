@@ -8,8 +8,8 @@
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
     <h2>{{ _('Welcome to Finland Database') }}, {{current_user.username}}</h2>
-    <p>Käyttäjä <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
-       roolit: [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+    <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
+       {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version') }} 
           <i>{{ 'git'|app_date }}</i></span>
     

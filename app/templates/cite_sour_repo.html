@@ -55,7 +55,7 @@
 		    <h4>{{ _('Repositories') }}</h4>
 		    <ol class="num">
 		        <li><div class="itemrow">
-		                <div class="col1">{{ _("Tunniste") }}<br />{{ _("Rname") }}<br />{{ _("Type") }}<br /><br /></div>
+		                <div class="col1">{{ _('Identifier') }}<br />{{ _('Rname') }}<br />{{ _("Type") }}<br /><br /></div>
 		                <div class="col3"><span class="id">
 		                	<a href="/pick/repo_uniq_id={{s.repocitory.uniq_id}}">{{s.repocitory.uniq_id}}</a></span><br />
 		                	{{s.repocitory.rname}}<br />
@@ -70,6 +70,6 @@
         {% endfor %}
     {% endif %}
 {% endfor %}
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Palaa takaisin") }}</a></p>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _('Go back') }}</a></p>
 
 {% endblock %}
