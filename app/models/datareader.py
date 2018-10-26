@@ -244,7 +244,7 @@ def read_cite_sour_repo(uniq_id=None):
                                 r.type = record_repo['type']
                             if record_repo['webref']:
                                 r.urls.append(Weburl(record_repo))
-                        s.repos.append(r)
+                        s.repocitory = r
 
                 c.source = s    # s.append(s)
             e.citations.append(c)
@@ -623,7 +623,7 @@ def get_person_data_by_id(uniq_id):
                 citation_ref[]     str viittauksen uniq_id            
         events[]         Event_combo  with location name and id (?)
         photos
-        sources
+        citations
         families
     """
     p = Person_combo()
@@ -637,7 +637,7 @@ def get_person_data_by_id(uniq_id):
     
     # Person_display(Person)
     events = []
-    sources = []
+    citations = []
     photos = []
     source_cnt = 0
     my_birth_date = ''
@@ -674,11 +674,11 @@ def get_person_data_by_id(uniq_id):
         for ref in e.citation_ref:  # citationref_hlink != '':
             c = Citation()
             c.uniq_id = ref
-            # If there is already the same citation on the list of sources,
+            # If there is already the same citation on the list of citations,
             # use that index
             citation_ind = -1
-            for i in range(len(sources)):
-                if sources[i].uniq_id == c.uniq_id:
+            for i in range(len(citations)):
+                if citations[i].uniq_id == c.uniq_id:
                     citation_ind = i + 1
                     break
             if citation_ind > 0:
@@ -725,12 +725,12 @@ def get_person_data_by_id(uniq_id):
                         r.rname = source[4]
                         r.type = source[5]
                         
-                        s.repos.append(r)
+                        s.repocitory = r
                         c.source = s
         
                     print("Eve:{} {} > Cit:{} '{}' > Sour:{} '{}' > Repo:{} '{}'".\
                           format(e.uniq_id, e.id, c.uniq_id, c.page, s.uniq_id, s.stitle, r.uniq_id, r.rname))
-                    sources.append(c)
+                    citations.append(c)
             
     for link in p.media_ref:
         o = Media()
@@ -803,7 +803,7 @@ def get_person_data_by_id(uniq_id):
         nodes[e.uniq_id] = e
     for e in photos:
         nodes[e.uniq_id] = e
-    for e in sources:
+    for e in citations:
         nodes[e.uniq_id] = e
     for e in family_list:
         nodes[e.uniq_id] = e
@@ -820,7 +820,7 @@ def get_person_data_by_id(uniq_id):
         #     tallettamiseen.
         # - Onko talletettava jäsenet vai viitteet niihin? Ei kai ole niin paljon toistoa?
 
-    return (p, events, photos, sources, family_list)
+    return (p, events, photos, citations, family_list)
 
 
 def get_baptism_data(uniq_id):

@@ -28,6 +28,7 @@ class Source:
 
     def __init__(self):
         """ Luo uuden source-instanssin """
+        self.uniq_id = None
         self.handle = ''
         self.change = 0
         self.id = ''
@@ -40,11 +41,11 @@ class Source:
         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
         self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
         self.note_ref = []      # uniq_ids (previously note[])
-        self.repo_ref = []
+        self.repocitory_id = None # uniq_id of Repocitory
+        self.repocitory = None  # Repocitory object For creating display sets (vanhempi)
 
         #Todo: Obsolete?
         self.citations = []   # For creating display sets
-        self.repos = []   # For creating display sets
         self.notes = []
 
     def __str__(self):
