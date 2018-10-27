@@ -232,7 +232,7 @@ def compare_person_page2(cond):
         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@shareds.app.route('/lista/baptism_data/<string:uniq_id>')
+@shareds.app.route('/lista/baptism_data/<int:uniq_id>')
 def show_baptism_data(uniq_id):
     """ Table of a baptism Event selected by id(Event)
         kastetapahtuman tietojen näyttäminen ruudulla 

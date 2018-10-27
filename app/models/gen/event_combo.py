@@ -18,7 +18,7 @@ Created on 27.8.2018
 @author: jm
 '''
 import shareds
-#from models.gen.dates import DateRange
+from sys import stderr
 
 from .event import Event
 
@@ -99,23 +99,31 @@ return e as event,
     collect(distinct id(p)) as place_ref, 
     collect(distinct id(c)) as citation_ref, 
     collect(distinct id(n)) as note_ref'''
-        result = shareds.driver.session().run(event_get_w_place_note_citation, 
-                                              pid=self.uniq_id)
+        try:
+            result = shareds.driver.session().run(event_get_w_place_note_citation, 
+                                                  pid=self.uniq_id)
 
-        for record in result:
-            # Event data
-            node = record["event"]
-            # Marshall self from the Node from db
-            self.from_node(node, self)
-
-            # Related data
-            for ref in record["note_ref"]:
-                self.note_ref.append(ref) # List of uniq_ids # prev. noteref_hlink
-            for ref in record["citation_ref"]:
-                # uniq_ids of connected Citations
-                self.citation_ref.append(ref)   # prev. citationref_hlink = ref
-            for ref in record["place_ref"]:
-                self.place_ref.append(ref)
+            for record in result:
+                # <Record event=<Node id=84467 labels={'Event'} 
+                #    properties={'datetype': 0, 'change': 1522422810, 'description': '', 
+                #    'handle': '_dd8aab5481c7c18befdd4baa628', 'attr_type': '', 
+                #    'id': 'E2965', 'date2': 1829189, 'type': 'Baptism', 
+                #    'date1': 1829189, 'attr_value': ''}> place_ref=[78213] 
+                #    citation_ref=[] note_ref=[]>
+                node = record["event"]
+                # Marshall self from the Node from db
+                self.from_node(node, self)
+    
+                # Related data
+                for ref in record["note_ref"]:
+                    self.note_ref.append(ref) # List of uniq_ids # prev. noteref_hlink
+                for ref in record["citation_ref"]:
+                    # uniq_ids of connected Citations
+                    self.citation_ref.append(ref)   # prev. citationref_hlink = ref
+                for ref in record["place_ref"]:
+                    self.place_ref.append(ref)
+        except Exception as err:
+            print("Virhe-get_event_combo: {1} {0}".format(err, self.uniq_id), file=stderr)
 
 #             # Place
 #             place_result = self.get_place_by_id()
