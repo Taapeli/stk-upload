@@ -4,7 +4,7 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
-{% set ordname = [_('sukunimi'), _('etunimi'), _('patronyymi')] %}
+{% set ordname = [_('surname'), _('first name'), _('patronymic')] %}
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
 
@@ -19,9 +19,12 @@
         <div id="summaryarea">
     {% if menuno > 0 %}
             <p id="description">
-    {{ _('This page contains a list of person names.') }}
-    {{ _('Number of people:') }} {{cnt}};
-    {{ _('Sort order:') }} {{ ordname[order] }}.
+    {{ ngettext(
+    	'This page contains %(num)s person in %(order)s order.', 
+    	'This page contains %(num)s persons in %(order)s order.', 
+    	cnt, order=ordname[order] ) 
+    }}
+    <br> 
     <br> 
     {{ _("Clicking a name will take you to the selected person's page.")}} 
     {{ _('If the person has many names, they will appear in the list under each name.') }}
