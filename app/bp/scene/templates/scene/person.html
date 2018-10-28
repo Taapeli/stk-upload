@@ -42,7 +42,7 @@
                           <tt class="refname" title="{{ _('Reference name') }}">{{pname.refname}}</tt -->
                         {% endif %}
                    <!-- <ul><div class="grampsstylednote">
-                            <p>{{ _('Tähän tulee Person Note') }}</p>
+                            <p>{{ _('This will contain a Person Note') }}</p>
                         </div></ul>
                    -->
                     </td>
@@ -295,7 +295,7 @@
                           title="{{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})"
                            {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
-                            {{ _('Sivu') }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+                            {{ _('Page') }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
                            {% if cita.notetext %}<br>
                               <a href="{{cita.notetext}}" class="outlink" target="_blank"
                               {% if cita.confidence and cita.confidence < "2" %}
