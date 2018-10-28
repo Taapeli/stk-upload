@@ -36,7 +36,7 @@
                 <td class="ColumnPerson">
                    <div>
                       <a href="/scene/location={{p.uniq_id}}" class="id"
-                        title="{{ _('see details of place') }} {{p.uniq_id}}"
+                        title="{{ _('see details of place %(id)s', id=p.uniq_id) }}"
                         id="{{p.uniq_id}}">{{p.uniq_id}}</a> <b>{{p.pname|join(' • ')}}</b>
                       <span class="typedesc">{{p.type|transl('lt')}}</span>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}

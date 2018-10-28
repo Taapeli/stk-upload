@@ -57,10 +57,10 @@ u { color: DarkKhaki; text-decoration: none; }
         <div id="summaryarea">
             <table>
                 <tr>
-                    <td class="ColumnAttribute">{{ _("Tunnisteet") }}</td>
+                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                     {% if person.citation_ref %}<td class="ColumnValue" 
-                        rowspan="2"><small>{{ _("lähde:") }}
+                        rowspan="2"><small>{{ _("source:") }}
                         </small>{{ macro.link_cite(person.citation_ref, obj, cits) }}
                     </td>{% endif %}
                 </tr>
@@ -69,9 +69,9 @@ u { color: DarkKhaki; text-decoration: none; }
                     <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
-                        <span title="{{ _('etunimi') }}">{{pname.firstname}}</span>
-                        <i title="{{ _('patronyymi') }}">{{pname.suffix}}</i>
-                        <b title="{{ _('sukunimi') }}">{{pname.surname}}</b>
+                        <span title="{{ _('first name') }}">{{pname.firstname}}</span>
+                        <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
+                        <b title="{{ _('surname') }}">{{pname.surname}}</b>
                     </td>
                 </tr>{% endfor %}
                    
@@ -81,15 +81,15 @@ u { color: DarkKhaki; text-decoration: none; }
                       {% else %}{{person.gender}}{% endif %}</td>
                 </tr>{% endif %}
                 {% if person.priv %}<tr>
-                    <td class="ColumnValue" title="{{ _('Salattu tieto') }}">{{ macro.lock(person.priv) }}</td>
+                    <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
                 </tr>{% endif %}
                 
                 {% if person.confidence > '' %}<tr>
-                    <td class="ColumnAttribute">{{ _("Tietojen luotettavuus") }}</td>
+                    <td class="ColumnAttribute">{{ _("Confidence of data") }}</td>
                     <td class="ColumnValue">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>{% endif %}
 <!--            <tr>
-                    <td class="ColumnAttribute">{{ _("Ikä kuollessa") }}</td>
+                    <td class="ColumnAttribute">{{ _(""Age at death") }}</td>
                     <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
                 </tr>
 -->
@@ -103,15 +103,15 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>{% endfor %}</ul>{% endif %}
 
         <div class="subsection" id="events">
-            <h4>{{ _("Tapahtumat") }}</h4>
+            <h4>{{ _("Events") }}</h4>
             <table class="infolist eventlist">
                 <thead>
                     <tr>
-                        <th class="ColumnSources">{{ _("Lähde") }}</th>
-                        <th class="ColumnEvent">{{ _("Tapahtuma") }}</th>
-                        <th class="ColumnDate">{{ _("Päivämäärä") }}</th>
-                        <th class="ColumnPlace">{{ _("Paikka") }}</th>
-                        <th class="ColumnDescription">{{ _("Kuvaus ja huomautukset") }}</th>
+                        <th class="ColumnSources">{{ _("Source") }}</th>
+                        <th class="ColumnEvent">{{ _("Event") }}</th>
+                        <th class="ColumnDate">{{ _("Date") }}</th>
+                        <th class="ColumnPlace">{{ _("Place") }}</th>
+                        <th class="ColumnDescription">{{ _("Description and notes") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -142,14 +142,14 @@ u { color: DarkKhaki; text-decoration: none; }
                         <td class="ColumnPlace">{% set br=0 %}{% for pref in e.place_ref %}
                             {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/scene/location={{obj[pref].uniq_id}}" class="inlink"
-                            title="{{ _('tyyppiä') }} {{obj[pref].type}}; {{ _('katso paikan tiedot') }}">
+                            title="{{ _('of type') }} {{obj[pref].type}}; {{ _('see details of place') }}">
                             {{e.clearnames|join(' • ')}}</a> 
                             {% endfor %}
                         </td>
 
                         <td class="ColumnDescription"><div>{{e.description}}</div>
                             <div>{% if e.type == "Death" and t_cause_of_death %}<span 
-                                    class="typedesc">{{ _("kuolinsyy") }}</span> {{t_cause_of_death}}<br>
+                                    class="typedesc">{{ _("cause of death") }}</span> {{t_cause_of_death}}<br>
                             	{% endif %}
                             	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
                             	   <li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
@@ -157,12 +157,12 @@ u { color: DarkKhaki; text-decoration: none; }
                             	   {% endfor %}</ul>{% endif %}
                                 {% if e.place_ref %}<ul class="eventnotes">{% for pref in e.place_ref %}
                                     {% for nref in obj[pref].note_ref %}
-                                   <li><span class="typedesc">{{ obj[nref].type|transl('notet') }}</span>
+                                   <li><span class="typedesc">{{ obj[nref].type|transl('notes') }}</span>
                                        {{obj[nref].text}}</li>{% endfor %}
                                     {% endfor %}</ul>{% endif %}
                                 {% if e.citation_ref %}<ul class="eventnotes">{% for cref in e.citation_ref %}
                                     {% for nref in obj[cref].note_ref %}
-                                   <li><span class="typedesc">{{obj[nref].type|transl('notet') }}</span>
+                                   <li><span class="typedesc">{{obj[nref].type|transl('notes') }}</span>
                                        {{obj[nref].text}}</li>{% endfor %}
                                    {% endfor %}</ul>{% endif %}
                             </div>
@@ -176,20 +176,20 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>
 
         <div class="subsection" id="families">
-            <h4>{{ _("Perheet") }}</h4>
-            {% set chtype = {"F":"tytär", "M":"poika", "":"lapsi"} %}
-            <div class="mainbox" title="{{ _('Perheet') }}">
-                <p>Vanhempien perhe</p>
+            <h4>{{ _("Families") }}</h4>
+            {% set chtype = {"F":"{{ _('daughter') }}", "M":"{{ _('son') }}", "":"{{ _('child') }}"} %}
+            <div class="mainbox" title="{{ _('Families') }}">
+                <p>Parents' family</p>
             {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
-	                <div class="familybox" title="{{ _('perhe') }} {{fam.id}}">
-	                    <p>{{ _("perhe") }} {{fam}}</p>
+	                <div class="familybox" title="{{ _('family') }} {{fam.id}}">
+	                    <p>{{ _("family") }} {{fam}}</p>
 	                    <ul>{% if fam.father %}
-	                        <li>{{ _("Isä") }}: {{ macro.member(fam.father, myid) }}</li>
+	                        <li>{{ _("Father") }}: {{ macro.member(fam.father, myid) }}</li>
 	                {% endif %}{% if fam.mother %}
-	                        <li>{{ _("Äiti") }}: {{ macro.member(fam.mother, myid) }}</li>
+	                        <li>{{ _("Mother") }}: {{ macro.member(fam.mother, myid) }}</li>
 	                {% endif %}{% if fam.children|count %}
-	                        <li>{{ _("Lapset") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
+	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
 	                            <li>{{chtype[ch.gender]}}: {{ macro.member(ch, myid) }}</li>{% endfor %}
 	                        </ul></li>
 	                {% endif %}
@@ -199,30 +199,30 @@ u { color: DarkKhaki; text-decoration: none; }
             </div>
             {% endif %}{% endfor %}
 
-            <div class="mainbox" title="{{ _('Päähenkilö') }}">
-	            <p>{{person.names[0].firstname}} {{ _("itse") }}</p>
+            <div class="mainbox" title="{{ _('Central person') }}">
+	            <p>{{person.names[0].firstname}} {{ _("self") }}</p>
 	            <div class="groupbox">
-		            <div class="personbox" title="{{ _('Itse') }}">
-		                <span title="{{ _('etunimi') }}">{{person.names[0].firstname}}</span>
-		                {% if not person.names[0].surname %}<i title="{{ _('patronyymi') }}">{{person.names[0].suffix}}</i>
-		                {% else %}<b title="{{ _('sukunimi') }}">{{person.names[0].surname}}</b>
+		            <div class="personbox" title="{{ _('Self') }}">
+		                <span title="{{ _('first name') }}">{{person.names[0].firstname}}</span>
+		                {% if not person.names[0].surname %}<i title="{{ _('patronymic') }}">{{person.names[0].suffix}}</i>
+		                {% else %}<b title="{{ _('surname') }}">{{person.names[0].surname}}</b>
 		                {% endif %}
 		            </div>
 	            </div>
 	        </div>
 
-            <div class="mainbox" title="{{ _('Omat perheet') }}">
-                <p>{{ _("Perheessä vanhempana") }}</p>
+            <div class="mainbox" title="{{ _('Own families') }}">
+                <p>{{ _("As Parent in Family") }}</p>
 	            <div class="groupbox">
 		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
 		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-		                <p>{{ _("perhe") }} {{fam}}</p>
+		                <p>{{ _("family") }} {{fam}}</p>
 		                <ul>{% if fam.father %}
-		                        <li>{{ _("Isä") }}: {{ macro.member(fam.father, myid) }}</li>
+		                        <li>{{ _("Father") }}: {{ macro.member(fam.father, myid) }}</li>
 		                {% endif %}{% if fam.mother %}
-		                        <li>{{ _("Äiti") }}: {{ macro.member(fam.mother, myid) }}</li>
+		                        <li>{{ _("Mother") }}: {{ macro.member(fam.mother, myid) }}</li>
 		                {% endif %}{% if fam.children|count %}
-		                        <li>{{ _("Lapset") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
+		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
 		                            <li>{{chtype[ch.gender]}}: {{ macro.member(ch, myid) }}</li>
 		                         {% endfor %}</ul></li>
 		                {% endif %}
@@ -245,7 +245,7 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>
 <!--
         <div class="subsection scene">
-            <h4>{{ _("Kerrottua") }}</h4>
+            <h4>{{ _("Narrated") }}</h4>
             <div class="grampsstylednote">
                 <p>
                 {{ _("Note") }}
@@ -255,7 +255,7 @@ u { color: DarkKhaki; text-decoration: none; }
 -->
         <!-- div class="subsection" id="tree"><h4>Esivanhemmat -->
         <div class="subsection" id="sourcerefs">
-            <h4>{{ _("Lähdeviitteet") }}</h4>
+            <h4>{{ _("Source citations") }}</h4>
             <ol>
                 {% set source_cnt = 0 %}
                 {% for source in person.sources %}
@@ -265,16 +265,16 @@ u { color: DarkKhaki; text-decoration: none; }
             				{{obj[rref].rname}}:
              			{% endfor %}
              			<a href="/scene/source={{source.uniq_id}}" class="inlink"
-	                     title="{{ _('katso lähteen') }} {{source.uniq_id}} {{ _('tiedot') }}">{{source.stitle}}</a>
+	                     title="{{ _('see details of source %(id)s', id=source.uniq_id) }}">{{source.stitle}}</a>
              		{% endfor %}
                      <ol>
                          {% set source_cnt = source_cnt + 1 %}
                          {% set conf = source.confidence | int %}
                          <li id="sref{{ source_cnt }}a"
-                          title="{{source.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{source.confidence}})"
+                          title="{{source.confidence|transl("conf")}} {{ _('confidence') }} ({{source.confidence}})"
                            {% if source.confidence and source.confidence < "2" %}
                              style="color:red"{% endif %}>
-                            {{ _("Sivu") }}: {{source.page}} &nbsp;
+                            {{ _("Page") }}: {{source.page}} &nbsp;
                             {{ macro.stars(conf) }}
                            {% if source.notetext %}<br>
                               <a href="{{source.notetext}}" class="outlink" target="_blank"

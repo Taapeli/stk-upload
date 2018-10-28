@@ -39,7 +39,14 @@
       {% endif %}
             </p>
     {% else %}{% if cnt %}
-            <h3>{{ _('Person name is shown') }} {{cnt}} {{ _('henkilönimeä') }}</h3>{% else %}
+            <h3>
+		    {{ ngettext(
+		    	'Showing %(num)s person name', 
+		    	'Showing %(num)s person names', 
+		    	cnt ) 
+		    }}
+            </h3>
+            {% else %}
             <h3>{{ _('Select people to display') }}</h3>{% endif %}
 			<div id="searching">
 				{% if rule[0] %}{% set selection = rule[0] %}
@@ -104,7 +111,7 @@
 
 	                <td class="ColumnPerson"><div>
 	                   <a href="/scene/person={{p.uniq_id}}"
-	                     title="{{ _('see details of person') }} {{p.uniq_id}}">
+	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
 		               {% else %}<i>{{p.names[0].patronyme}}</i>{% endif %}

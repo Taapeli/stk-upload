@@ -286,13 +286,13 @@
                 <li>
             		{{cita.source.repocitory.rname}}:
             		<a href="/scene/source={{cita.source.uniq_id}}" class="inlink"
-                       title="{{ _('katso lähteen') }} {{cita.source.uniq_id}} {{ _('tiedot') }}"
+                       title="{{ _('see details of source %(id)s', id=cita.source.uniq_id) }}"
                        >{{cita.source.stitle}}</a>
                     <ol>
                          {% set source_cnt = source_cnt + 1 %}
                          {% set conf = cita.confidence | int %}
                          <li id="sref{{ source_cnt }}a"
-                          title="{{cita.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{cita.confidence}})"
+                          title="{{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})"
                            {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
                             {{ _('Sivu') }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
