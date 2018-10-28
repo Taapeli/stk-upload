@@ -49,7 +49,7 @@ class Source:
         self.notes = []
 
     def __str__(self):
-        return "{} {}".format(self.id, self.stitle)
+        return "{} '{}'".format(self.id, self.stitle)
 
 
     @classmethod

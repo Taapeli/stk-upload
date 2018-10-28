@@ -38,6 +38,8 @@ class Citation:
         self.id = ''
         self.dateval = ''
         self.page = ''
+        self.confidence = ''
+        self.mark = ''
         self.noteref_hlink = []
         self.source_handle = ''
         self.source_id = None # uniq_ids of Source objects, for creating display sets

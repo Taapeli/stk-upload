@@ -62,18 +62,26 @@ class Footnotes():
                 # Found matcing Repocitory & Source key
                 if o.ind[2] == new.ind[2]:
                     # Found matching Citation, too
-                    return (o.keystr(), i)
+                    return (o.mark_id, i)
                 else:
-                    # Add to fnotes and incement 2nd part of key
-                    new.key[0] = o.key[0]
-                    new.key[1] = o.key[1] + 1
+                    # Add to fnotes and incement 2nd part of mark
+                    new.setmark(o.mark[0], o.mark[1] + 1)
                     self.fnotes.append(new)
-                    return (new.keystr(), i + 1)
+                    return (new.mark_id, i + 1)
 
-        # A new item to fnotes list. Wirdt key number is incremented,
-        # The letter numbering is started from begin
-        new.key[0] = self.fnotes[-1].key[0] + 1
-        return (new.keystr(), len(self.fnotes) - 1)
+        # A new item to fnotes list. 
+        # Default number and letter are (0,0) ~ "1a"
+        if self.fnotes:
+            # Next number, default letter
+            new.setmark(self.fnotes[-1].mark[0] + 1, 0)
+        self.fnotes.append(new)
+        return (new.mark_id, len(self.fnotes) - 1)
+
+    def getNotes(self):
+        lst = []
+        for n in self.fnotes:
+            lst.append([n.mark_id] + n.ind)
+        return lst
 
 
 class SourceFootnote():
@@ -85,11 +93,16 @@ class SourceFootnote():
         '''
         Constructor
         '''
-        self.cit = None         # Citation object
+        self.cite = None        # Citation object
         self.source = None      # Source object
         self.repo = None        # Repocitory object
         self.ind = [0,0,0]      # key = uniq_ids of Repocitory, Source, Citation
-        self.key = [0, 0]       # corrsponding "0a"
+        self.mark = [0, 0]       # corrsponding "0a"
+        self.mark_id = '1a'
+
+    def __str__(self):
+        return "{}: {} / {} / {}".format(self.mark_id, self.repo, self.source, self.cite)
+
 
     @classmethod
     def from_citation_objs(cls, cit, objs):
@@ -104,26 +117,31 @@ class SourceFootnote():
             repo                Repocitory object ~ from objs[source.repocitory_id]
             - repo.rname        str     Repocitory name"
         '''
-        if not ( isinstance(cit, Citation) and isinstance(objs, list) ):
+        if not ( isinstance(cit, Citation) and isinstance(objs, dict) ):
             raise TypeError("SourceFootnote: Invalid arguments {}".format(cit))
 
         n = cls()
         n.cite = cit
-        n.source = objs[n.cite.source]
-        n.repo = objs[n.source.repocitory_id]
-        n.ind = [n.cite.uniq_id, n.source.uniq_id, n.repo.uniq_id]
+        if n.cite.source_id in objs:
+            n.source = objs[n.cite.source_id]
+            s_id = n.source.uniq_id
+        else:
+            s_id = -1
+        if n.source.repocitory_id in objs:
+            n.repo = objs[n.source.repocitory_id]
+            r_id = n.repo.uniq_id
+        else:
+            r_id = -1
+        n.ind = [n.cite.uniq_id, s_id, r_id]
+        #print("- ind={}".format(n.ind))
         return n
 
-
-    def keystr(self):
-        # Returns key as a string "1a"
+    def setmark(self, mark1, mark2):
+        # Sets mark[] indexes and mark_id as a string "1a"
         letters = "abcdefghijklmnopqrstuvxyzåäö*"
-        letterno = self.key[1]
+        self.mark[0] = mark1
+        self.mark[1] = mark2
+        letterno = self.mark[1]
         if letterno >= len(letters):
             letterno = len(letters) - 1
-        return "{}{}".format(self.key[0], letters[len(letters)-1])
-
-
-#         ''' Create citation references for foot notes '''
-#         sl = "{} '{}'".format(source.uniq_id, source.stitle)
-#         print("lähde {} / {} '{}'".format(sl, cit.uniq_id, cit.page))
+        self.mark_id = "{}{}".format(self.mark[0] + 1, letters[letterno])

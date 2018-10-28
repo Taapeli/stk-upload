@@ -36,8 +36,11 @@ class Repository:
         self.urls = []      # contains Weburl instances (prev. url_refs = [])
 
         self.sources = []   # For creating display sets (Not used??)
-        
-    
+
+    def __str__(self):
+        return "{} '{}'".format(self.id, self.rname)
+
+
     @classmethod
     def from_node(cls, node):
         '''

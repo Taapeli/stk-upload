@@ -75,27 +75,5 @@
         {% endif %}
     {% endif %}
 {%- endmacro %}
-
-{% macro link_cite(citation_ref, objs, unused) -%}
-    {#
-        Creates a Citation link (for Person page). 
-        Argument citation_ref is a list of uniq_ids, which point to Citation objects 
-        in objs dictionary.
-    #}
-    <!-- {{ citation_ref|length }} lähdeviitettä, {{ objs|length }} objektia -->
-    {% if citation_ref %}{% set br = 0 %}
-        <small>{% for cref in citation_ref %}{% if br %}<br>{% endif %}
-          {% set br = 1 %}
-          {% set source = objs[objs[cref].source_id] %}
-          * {% if source.repocitory_id %}{% set repo = objs[source.repocitory_id] %}
-            <i><u>{{ repo.handle|transl('handle')}}</u> {{repo.rname}}</i> 
-            {% endif %}<a href="#sref{{ ref }}">
-           <u>{{ source.handle|transl('handle')}}</u>
-           {{ source.stitle }}<br>&nbsp;&ndash; 
-           <u>{{ objs[cref].handle|transl('handle')}}</u>
-           {{ objs[cref].page }}</a>
-        {% endfor %}</small>
-    {% endif %}
-{%- endmacro %}
                     
                         
