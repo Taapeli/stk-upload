@@ -94,7 +94,7 @@ u { color: DarkKhaki; text-decoration: none; }
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in person.events|sort(attribute='date') %}
+        {% for e in person.events %}
                     <tr>
                     {% if e.type == "Cause Of Death" %}
                         {% set t_cause_of_death = e.description %}

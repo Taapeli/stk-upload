@@ -113,6 +113,9 @@ def get_a_person_for_display_apoc(uniq_id, user):
             else:
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
 
+    # Sort events by date
+    person.events.sort(key=lambda event: event.date)
+
     # 4. Generate clear names for event places
 
     fns = Footnotes()
@@ -137,7 +140,7 @@ def set_citations(refs, fns, objs):
             cit = objs[ref]
             fn = SourceFootnote.from_citation_objs(cit, objs)
             cit.mark = fn
-            sl = fns.add(fn)
+            sl = fns.merge(fn)
 #             print("- lähde {} / {} {} '{}'".format(sl, cit.uniq_id, cit.id, cit.page))
         else:
             print("- no source / {}".format(ref))

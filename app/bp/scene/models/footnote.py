@@ -4,7 +4,7 @@
     
     Use case plan:
         ref = Foornotes()
-        ref.add(SourceFootNote.from_citation_objs(citation, objs))
+        ref.merge(SourceFootNote.from_citation_objs(citation, objs))
 
     Sivulla person_pg esiintyvät sitaatit kootaan listaan cits kutsulla
 
@@ -46,7 +46,7 @@ class Footnotes():
         '''
         self.fnotes = []
 
-    def add(self, new):
+    def merge(self, new):
         ''' Adds the new SourceFootnote to Sources list. 
             Returns the matching reference id like "1a" and 
             an index to fnotes list
