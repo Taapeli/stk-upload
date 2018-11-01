@@ -219,7 +219,7 @@ RETURN ID(family) AS uniq_id"""
 
         media_result = self.get_media_id()
         for media_record in media_result:
-            self.media_ref.append(media_record["objref_hlink"])
+            self.media_ref.append(media_record["media_ref"])
 
         family_result = self.get_parentin_id()
         for family_record in family_result:

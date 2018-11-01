@@ -134,14 +134,14 @@ def get_a_person_for_display_apoc(uniq_id, user):
 
 
 def set_citations(refs, fns, objs):
-    ''' Create citation references person_pg for foot notes '''
+    ''' Create person_pg citation references for foot notes '''
     for ref in refs:
         if ref in objs:
             cit = objs[ref]
             fn = SourceFootnote.from_citation_objs(cit, objs)
-            cit.mark = fn
+            cit.mark = fn.mark
             sl = fns.merge(fn)
-#             print("- lähde {} / {} {} '{}'".format(sl, cit.uniq_id, cit.id, cit.page))
+            print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
         else:
             print("- no source / {}".format(ref))
 
