@@ -1,32 +1,32 @@
 {# _myapp/templates/person.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Henkilön tiedot") }}{% endblock %}
+{% block title %}{{ _("Person's details") }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 {% for p in persons %}
-    <h2>{{ _("Henkilö") }}</h2>
+    <h2>{{ _('Person') }}</h2>
     <ol id="itemlist">
         <li class="itemrow">
-                <div class="col1">{{ _("Tunniste") }}</div>
+                <div class="col1">{{ _('Identifier') }}</div>
                 <div class="col2">{{p.uniq_id}}</div>
         </li>
         <li class="itemrow">
-                <div class="col1">{{ _("Nimi") }}</div>
+                <div class="col1">{{ _('Name') }}</div>
                 <div class="col2">{{p.names[0].firstname}} <b>{{p.names[0].surname}}</b></div>
         </li>
         <li class="itemrow">
-                <div class="col1">{{ _("Referenssinimi") }}</div>
+                <div class="col1">{{ _('Reference name') }}</div>
                 <!-- TODO Korjaa: refname-kenttää ei ole -->
                 <div class="col2">{{p.names[0].refname}}</div>
         </li>
      </ol>
     {% if p.events %}
-    <h4>{{ _("Tapahtumat") }}</h4>
+    <h4>{{ _('Events') }}</h4>
     <ol class="num">
         {% for e in p.events %}
         <li><div class="itemrow">
-                <div class="col1">{{ _("Tunniste<br />tyyppi<br />aika</div>") }}
+                <div class="col1">{{ _('Identifier < br/> Type < br/> Date </div>') }}
                 <div class="col1"><span class="id">{{e.uniq_id}}</span><br />{{e.type}} 
                     <br /><span style="font-size:80%; font-style: italic">{{e.date}}</span>
             </div>
@@ -35,6 +35,6 @@
     </ol>
     {% endif %}
 {% endfor %}
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Palaa takaisin") }}</a></p>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _('Go back') }}</a></p>
 
 {% endblock %}

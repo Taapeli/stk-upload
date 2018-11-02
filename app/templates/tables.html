@@ -1,48 +1,48 @@
 {# templates/login/login.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tietonäkymiä") }}{% endblock %}
+{% block title %}{{ _('Data Views') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
-    <h2>{{ _("Teknisiä näkymiä") }}</h2>
+    <h2>{{ _('Technical views') }}</h2>
     <div class="row">
         <div class="startbox">
-	        <h3>{{ _("Datanäkymiä taulukkoina") }}</h3>
+	        <h3>{{ _('Data Views as tables') }}</h3>
 	        <ul>
-	            <li><a href="/lista/henkilot2">{{ _("Näytä henkilöt") }}</a></li>
-	            <!-- li><a href="/lista/surnames">{{ _("Luettelo sukunimistä") }}</a></li -->
-	            <li><a href="/lista/media">{{ _("Luettelo mediatiedostoista eli tallenteista") }}</a></li>
-	            <li><a href="/lista/repositories">{{ _("Luettelo arkistoista") }}</a> 
-	                {{ _("(arkistosivulla arkiston lähteet)") }}</li>
-	            <li><a href="/lista/sources">{{ _("Luettelo lähteistä (lähdesivulla viittaukset)") }}</a></li>
-				<li><a href="/lista/same_name">{{ _("Etsi samannimiset henkilöt") }}</a></li>
-				<li><a href="/lista/same_birthday">{{ _("Etsi henkilöt, joilla sama syntymäaika") }}</a></li>
-				<li><a href="/lista/same_deathday">{{ _("Etsi henkilöt, joilla sama kuolinaika") }}</a></li>
-	            <li><a href="/lista/notes">{{ _("Huomautukset") }}</a></li>
-	            <li><a href="/lista/places">{{ _("Paikat") }}</a></li>
-                <li><a href="/list/refnames">{{ _("Listaa referenssinimet") }}</a></li>
+	            <li><a href="/lista/henkilot2">{{ _('Show people') }}</a></li>
+	            <!-- li><a href="/lista/surnames">{{ _('List of surnames') }}</a></li -->
+	            <li><a href="/lista/media">{{ _('List of media files, called recordings') }}</a></li>
+	            <li><a href="/lista/repositories">{{ _('List of repositories') }}</a> 
+	                {{ _('(on Repository page sources in Repository)') }}</li>
+	            <li><a href="/lista/sources">{{ _('List of sources (references on the source page)') }}</a></li>
+				<li><a href="/lista/same_name">{{ _('Find people with the same name') }}</a></li>
+				<li><a href="/lista/same_birthday">{{ _('Find people with the same birth date') }}</a></li>
+				<li><a href="/lista/same_deathday">{{ _('Find people with the same date of death') }}</a></li>
+	            <li><a href="/lista/notes">{{ _('Comments') }}</a></li>
+	            <li><a href="/lista/places">{{ _('Places') }}</a></li>
+                <li><a href="/list/refnames">{{ _('List reference names') }}</a></li>
 	        </ul>
         </div>
         <div class="startbox">
-            <h3>{{ _("Ongelmanselvitysvälineitä") }}</h3>
+            <h3>{{ _('Problem Solving Tools') }}</h3>
             <ul>
-                <li><a href="/lista/people_wo_birth">{{ _("Henkilöt ilman syntymätapahtumaa") }}</a></li>
-                <li><a href="/lista/old_people_top">{{ _("Ikäihmiset, top twenty") }}</a></li>
-                <li><a href="/lista/events_wo_place">{{ _("Paikattomat tapahtumat") }}</a></li>
-                <li><a href="/lista/sources_wo_cites">{{ _("Viittauksettomat lähteet") }}</a></li>
-                <li><a href="/lista/sources_wo_repository">{{ _("Lähteet ilman arkistoa") }}</a></li>
-                <li><a href="/lista/events_wo_cites">{{ _("Viittauksettomat tapahtumat") }}</a></li>
+                <li><a href="/lista/people_wo_birth">{{ _('Persons without birth event') }}</a></li>
+                <li><a href="/lista/old_people_top">{{ _('Senior Citizens, Top twenty') }}</a></li>
+                <li><a href="/lista/events_wo_place">{{ _('Events without place information') }}</a></li>
+                <li><a href="/lista/sources_wo_cites">{{ _('Unreferenced sources') }}</a></li>
+                <li><a href="/lista/sources_wo_repository">{{ _('Sources without a repository') }}</a></li>
+                <li><a href="/lista/events_wo_cites">{{ _('Unreferenced Events') }}</a></li>
             </ul>
         </div>
 
         <div class="startbox">
-          <h3>{{ _("Poistuminen") }}</h3>
-          <p><a href="/login">{{ _("Palaa alkuun") }}</a> {{ _("tai <br />lopeta istunto") }}</p>
+          <h3>{{ _('Exit') }}</h3>
+          <p><a href="/login">{{ _('Back to Top') }}</a> <br> {{ _('or end session') }}</p>
           <form method="get" action="/login">
              <div style="text-align:right;"> 
-                <button type="submit" style="color: blue">{{ _("Poistu sovelluksesta") }}</button>
+                <button type="submit" style="color: blue">{{ _('Exit the Application') }}</button>
              </div>
           </form>
         </div>

@@ -1,7 +1,7 @@
 {# templates/gedcoms.html_ #}
 {% extends "a_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _("Kirjautunut käyttäjä") }}{% endblock %}
+{% block title %}{{ _('Logged on user') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -30,7 +30,7 @@ table.diff td {
         $(document).on({
             ajaxStart: function() { $("body").addClass("loading");  },
             ajaxStop: function() { $("body").removeClass("loading"); },    
-            ajaxError: function() { $("#errors").text("{{ _('Palvelinvirhe') }}").show(); }    
+            ajaxError: function() { $("#errors").text("{{ _('Server error') }}").show(); }    
         });
         
         $("#transforms").click(function() {
@@ -62,8 +62,8 @@ table.diff td {
             });
         });
         $("#delete").click(function() {
-        	//alert("{{ _('Toiminto vasta suunnitteilla') }}");
-            var ok = confirm('{{ _("Oletko varma?") }}');
+        	//alert("{{ _('Function still planned') }}");
+            var ok = confirm('{{ _('Are you sure?') }}');
             if (ok) {
             	$.get("/gedcom/delete/{{ gedcom }}",function() {
             		window.location.replace("/gedcom/list");
@@ -136,7 +136,7 @@ table.diff td {
                 <div class="submit">
 			         <input type="button" id="update_desc" value='{{ _("Update") }}'>
 			    </div>
-				<p>({{ _("Näennäistiedot, ei aineistosta") }})</p>
+				<p>({{ _('Visualisation data, not based on material') }})</p>
 				<table>
 				    <tr><td>{{ _("Upload time") }}</td>
 				        <td class="right">2018-06-06</td></tr>

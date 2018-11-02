@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
@@ -15,7 +15,7 @@
 <table>
     <tr>
     	<th colspan="6"><a target="_blank" href="/scene/person={a names[0].uniq_id a}">
-    	{{ _("Linkki Kertova-sivulle") }}</a></th>
+    	{{ _('Link to Narrated Page') }}</a></th>
     </tr>
     <tr>
     	<th ng-repeat="x in n_columns">{a x.column a}</th>
@@ -73,7 +73,7 @@
     <h2>{{ _("Names") }}</h2>
     <tr>
     	<th colspan="6"><a target="_blank" href="/scene/person={a names2[0].uniq_id a}">
-    	{{ _("Linkki Kertova-sivulle") }}</a></th>
+    	{{ _('Link to Narrated Page') }}</a></th>
     </tr>
     <tr>
     	<th ng-repeat="x in n_columns">{a x.column a}</th>

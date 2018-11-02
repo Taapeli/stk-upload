@@ -189,7 +189,7 @@ print('Security set up')
 
 @shareds.security.register_context_processor
 def security_register_processor():
-    return {"username": _("Käyttäjänimi"), "name": _("Nimi"), "language": _("Kieli")}
+    return {"username": _('User name'), "name": _('Name'), "language": _('Language')}
 
 adminDB.initialize_db() 
 

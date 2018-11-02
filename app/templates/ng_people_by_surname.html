@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -8,7 +8,7 @@
 <script src="/static/infobox.js"></script>
 
 <h2>{{ _("People who has the surname") }}: {{surname}}</h2>
-<p><small>{{ _("Klikkaa saraketta lajitellaksesi sen suhteen") }}</small></p>
+<p><small>{{ _('Click on the column header to sort column') }}</small></p>
 <section id="lista">
 <div ng-app="myApp" ng-controller="namesCtrl">
 	<table>

@@ -9,6 +9,8 @@ import logging
 import time
 from sys import stderr
 
+from flask_babelex import _
+
 from operator import itemgetter
 #from models.dbutil import Datefrom
 from models.gen.event import Event
@@ -393,8 +395,8 @@ def read_events_wo_cites():
     headings = []
     titles, events = Event.get_events_wo_citation()
 
-    headings.append("Tapahtumaluettelo")
-    headings.append("Näytetään tapahtumat, joilla ei ole lähdeviittausta")
+    headings.append(_("Event list"))
+    headings.append(_("Showing events without source citation"))
 
     return (headings, titles, events)
 
@@ -405,9 +407,9 @@ def read_events_wo_place():
 
     headings = []
     titles, events = Event.get_events_wo_place()
-
-    headings.append("Tapahtumaluettelo")
-    headings.append("Näytetään paikattomat tapahtumat")
+    
+    headings.append(_("Event list"))
+    headings.append(_("Showing events without places"))
 
     return (headings, titles, events)
 
@@ -419,9 +421,9 @@ def read_people_wo_birth():
 
     headings = []
     titles, people = Person_combo.get_people_wo_birth()
-
-    headings.append("Tapahtumaluettelo")
-    headings.append("Näytetään henkilöt, joilta puuttuu syntymätapahtuma")
+    
+    headings.append(_("Event list"))
+    headings.append(_("Showing persons without a birth event"))
 
     return (headings, titles, people)
 
@@ -438,9 +440,9 @@ def read_old_people_top():
     top_of_sorted_people = []
     for i in range(20 if len(sorted_people) > 19 else len(sorted_people)):
         top_of_sorted_people.append(sorted_people[i])
-
-    headings.append("Tapahtumaluettelo")
-    headings.append("Näytetään vanhimmat henkilöt ikätietoineen")
+    
+    headings.append(_("Event list"))
+    headings.append(_("Showing oldest persons and their age"))
 
     return (headings, titles, top_of_sorted_people)
 
@@ -452,9 +454,9 @@ def read_places():
 
     headings = []
     titles, events = Place.get_my_places()
-
-    headings.append("Paikkaluettelo")
-    headings.append("Näytetään paikat")
+    
+    headings.append(_("List of places"))
+    headings.append(_("Showing places"))
 
     return (headings, titles, events)
 
@@ -561,9 +563,9 @@ def read_sources_wo_cites():
 
     headings = []
     titles, lists = Source.get_sources_wo_citation()
-
-    headings.append("Lähdeluettelo")
-    headings.append("Näytetään lähteet, joihin ei viitata")
+    
+    headings.append(_("Source list"))
+    headings.append(_("Showing sources without source citations"))
 
     return (headings, titles, lists)
 
@@ -574,9 +576,9 @@ def read_sources_wo_repository():
 
     headings = []
     titles, lists = Source.get_sources_wo_repository()
-
-    headings.append("Lähdeluettelo")
-    headings.append("Näytetään lähteet, joilla ei ole arkistoa")
+    
+    headings.append(_("Source list"))
+    headings.append(_("Showing sources without a repository"))
 
     return (headings, titles, lists)
 

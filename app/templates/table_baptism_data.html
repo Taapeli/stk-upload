@@ -1,19 +1,19 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 <h2>{{ _("Baptism data") }}</h2>
 
 {% if event %}
-	<h4>{{ _("Tunniste") }}: {{event.uniq_id}}</h4>
-	{% if event.type %}<h4>{{ _("Tyyppi") }}: {{event.type}}</h4>{% endif %}
-    {% if event.date %}<h4>{{ _("Päiväys") }}: {{event.date}}</h4>
-	{% elif event.daterange %}<h3>{{ _("Päiväys") }}: {{event.daterange}}</h4>
+	<h4>{{ _('Identifier') }}: {{event.uniq_id}}</h4>
+	{% if event.type %}<h4>{{ _('Type') }}: {{event.type}}</h4>{% endif %}
+    {% if event.date %}<h4>{{ _('Date') }}: {{event.date}}</h4>
+	{% elif event.daterange %}<h3>{{ _('Date') }}: {{event.daterange}}</h4>
 	{% endif %}
-	{% if event.location %}<h4>{{ _("Paikka") }}: {{event.location |join(' • ')}}</h4>{% endif %}
-	{% if event.description %}<h4>{{ _("Kuvaus") }}: {{event.description}}</h4>{% endif %}
+	{% if event.location %}<h4>{{ _('Place') }}: {{event.location |join(' • ')}}</h4>{% endif %}
+	{% if event.description %}<h4>{{ _('Description') }}: {{event.description}}</h4>{% endif %}
 {% endif %}
 
 <section id="lista">
@@ -36,7 +36,7 @@
 		{% endif %}
 	{% endfor %}
 	{% else %}
-	        <tr><td colspan="1">{{ _("Ei person tietoja") }}</td></tr>
+	        <tr><td colspan="1">{{ _('No person information') }}</td></tr>
 	{% endif %}
 </table>
 <p>&nbsp;</p>

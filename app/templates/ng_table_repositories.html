@@ -1,14 +1,14 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <script src="/static/infobox.js"></script>
 
-<h2>{{ _("Repositoryluettelo") }}</h2>
-<p>{{ _("Näytetään repositories") }}</p>
+<h2>{{ _('List of Repositories') }}</h2>
+<p>{{ _('Showing repositories') }}</p>
 
 <section id="lista">
 <div ng-app="myApp" ng-controller="namesCtrl">
@@ -25,7 +25,7 @@
     		<td>{a r.type a}</td>
         </tr>
 	{% else %}
-	        <tr><td colspan="5">{{ _("Ei tietoja") }}</td></tr>
+	        <tr><td colspan="5">{{ _('No data') }}</td></tr>
 	{% endif %}
 	</table>
 </div>

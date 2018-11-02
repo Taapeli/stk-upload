@@ -25,4 +25,4 @@ class AllowedEmailForm(FlaskForm):
                        ("admin",_("Admin")),
                     ],
                 description = _('Enter the default role'))  
-    submit = SubmitField(_('Lisää käyttäjäehdokas'))
+    submit = SubmitField(_('Add user candidate'))

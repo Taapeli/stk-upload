@@ -1,6 +1,6 @@
 {# _myapp/templates/select_refcols.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Referenssinimet kannasta") }}{% endblock %}
+{% block title %}{{ _('Reference names from Database') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
@@ -8,80 +8,80 @@
 {% set sp = {"M": "mies", "N": "nainen", "U": "?"} %}
 {% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", "place":"paikka", "occu":"ammatti"} %}
 {% set rt = {'REFFIRST':'etunimi', 'REFLAST':'sukunimi', 'REFPATRO':'patron.'} %}
-<h2>{{ _("Referenssitietojen valinta") }} (#TODO, tässä staattinen sisältö!)</h2>
+<h2>{{ _('Selecting Reference Data') }} (#TODO, tässä staattinen sisältö!)</h2>
 <form action="/talleta/valitut/refnimet" method="post">
     
-<p>{{ _("Valitse talletettava yhteystyyppi:") }}
+<p>{{ _('Select the type of connection to be stored:') }}
   <select name="refcl">
-    <option value="None">{{ _("-- valitse referenssiyhteys --") }}</option>
-    <option value="fname">{{ _("Etunimi A on normalisoitu etunimi B") }}</option>
-    <option value="lname">{{ _("Sukunimi A on normalisoitu sukunimi B") }}</option>
-    <option value="patro">{{ _("Patronyyminen nimi A viittaa etunimeen B") }}</option>
-    <option value="place">{{ _("Paikannimi A on normalisoitu paikannimi B") }}</option>
-    <option value="occu">{{ _("Ammattinimike A on normalisoitu nimike B") }}</option>
+    <option value="None">{{ _('--Select the reference connection--') }}</option>
+    <option value="fname">{{ _('Given name A is normalized as Given name B') }}</option>
+    <option value="lname">{{ _('Surname A is a normalized as Surname B') }}</option>
+    <option value="patro">{{ _('Patronymic name A refers to the Given name B') }}</option>
+    <option value="place">{{ _('Place name A is the normalized as Place name B') }}</option>
+    <option value="occu">{{ _('Occupation title A is normalized to title B') }}</option>
   </select></p>
 
 <section id="lista">
     <table border="2">
     <tr>
-        <th>{{ _("Nimi A") }}<br />
+        <th>{{ _("Name A") }}<br />
             <select name="A">
-              <option value="None">{{ _("-- valitse sarake --") }}</option>
-              <option value="Etunimi">{{ _("Etunimi") }}</option>
-              <option value="Etunimi_vakioitu">{{ _("Etunimi_vakioitu") }}</option>
-              <option value="Patronyymi">{{ _("Patronyymi") }}</option>
+              <option value="None">{{ _('--Select a column--') }}</option>
+              <option value='Firstname'>{{ _('Firstname') }}</option>
+              <option value='Given name_normalized'>{{ _('Given name_normalized') }}</option>
+              <option value='Patronymic'>{{ _('Patronymic') }}</option>
               <option value="PatroRef">{{ _("PatroRef") }}</option>
-              <option value="Sukunimi_vakioitu">{{ _("Sukunimi_vakioitu") }}</option>
-              <option value="Ammatti">{{ _("Ammatti") }}</option>
-              <option value="Ammatti_vakioitu">{{ _("Ammatti_vakioitu") }}</option>
-              <option value="Paikka">{{ _("Paikka") }}</option>
-              <option value="Paikka_vakioitu">{{ _("Paikka_vakioitu") }}</option>
-              <option value="Kommentti">{{ _("Kommentti") }}</option>
-              <option value="Käräjät">{{ _("Käräjät") }}</option>
-              <option value="Käräjäpaikka">{{ _("Käräjäpaikka") }}</option>
-              <option value="Alkuaika">{{ _("Alkuaika") }}</option>
-              <option value="Loppuaika">{{ _("Loppuaika") }}</option>
-              <option value="Signum">{{ _("Signum") }}</option>
+              <option value='Surname_normalized'>{{ _('Surname_normalized') }}</option>
+              <option value='Occupation'>{{ _('Occupation') }}</option>
+              <option value='Occupation_normalized'>{{ _('Occupation_normalized') }}</option>
+              <option value='Place'>{{ _('Place') }}</option>
+              <option value='Place_normalized'>{{ _('Place_normalized') }}</option>
+              <option value='Comment'>{{ _('Comment') }}</option>
+              <option value='Court'>{{ _('Court') }}</option>
+              <option value='Place of Court'>{{ _('Place of Court') }}</option>
+              <option value='Start date'>{{ _('Start date') }}</option>
+              <option value='End date'>{{ _('End date') }}</option>
+              <option value='Signum'>{{ _('Signum') }}</option>
             </select><br/>
             <select name="A_kieli">
-              <option value="None">{{ _("Määrittämätön kieli") }}</option>
-              <option value="fi">{{ _("suomi") }}</option>
-              <option value="se">{{ _("ruotsi") }}</option>
-              <option value="ru">{{ _("venäjä") }}</option>
-              <option value="fi-ka">{{ _("karjala") }}</option>
-              <option value="la">{{ _("latina") }}</option>
+              <option value="None">{{ _('Undefined language') }}</option>
+              <option value="fi">{{ _('Finnish') }}</option>
+              <option value="se">{{ _('Swedish') }}</option>
+              <option value="ru">{{ _('Russian') }}</option>
+              <option value="fi-ka">{{ _('Karelian') }}</option>
+              <option value="la">{{ _('Latin') }}</option>
             </select>
         </th>
-        <th>nimi B<br/>
+        <th>{{ _('Name B') }}<br/>
             <select name="A">
-              <option value="None">{{ _("-- valitse sarake --") }}</option>
-              <option value="Etunimi">{{ _("Etunimi") }}</option>
-              <option value="Etunimi_vakioitu">{{ _("Etunimi_vakioitu") }}</option>
-              <option value="Patronyymi">{{ _("Patronyymi") }}</option>
+              <option value="None">{{ _('--Select a column--') }}</option>
+              <option value='Firstname'>{{ _('Firstname') }}</option>
+              <option value='Given name_normalized'>{{ _('Given name_normalized') }}</option>
+              <option value='Patronymic'>{{ _('Patronymic') }}</option>
               <option value="PatroRef">{{ _("PatroRef") }}</option>
-              <option value="Sukunimi_vakioitu">{{ _("Sukunimi_vakioitu") }}</option>
-              <option value="Ammatti">{{ _("Ammatti") }}</option>
-              <option value="Ammatti_vakioitu">{{ _("Ammatti_vakioitu") }}</option>
-              <option value="Paikka">{{ _("Paikka") }}</option>
-              <option value="Paikka_vakioitu">{{ _("Paikka_vakioitu") }}</option>
-              <option value="Kommentti">{{ _("Kommentti") }}</option>
-              <option value="Käräjät">{{ _("Käräjät") }}</option>
-              <option value="Käräjäpaikka">{{ _("Käräjäpaikka") }}</option>
-              <option value="Alkuaika">{{ _("Alkuaika") }}</option>
-              <option value="Loppuaika">{{ _("Loppuaika") }}</option>
-              <option value="Signum">{{ _("Signum") }}</option>
+              <option value='Surname_normalized'>{{ _('Surname_normalized') }}</option>
+              <option value='Occupation'>{{ _('Occupation') }}</option>
+              <option value='Occupation_normalized'>{{ _('Occupation_normalized') }}</option>
+              <option value='Place'>{{ _('Place') }}</option>
+              <option value='Place_normalized'>{{ _('Place_normalized') }}</option>
+              <option value='Comment'>{{ _('Comment') }}</option>
+              <option value='Court'>{{ _('Court') }}</option>
+              <option value='Place of Court'>{{ _('Place of Court') }}</option>
+              <option value='Start date'>{{ _('Start date') }}</option>
+              <option value='End date'>{{ _('End date') }}</option>
+              <option value='Signum'>{{ _('Signum') }}</option>
             </select><br/>
             <select name="A_kieli">
-              <option value="None">{{ _("Määrittämätön kieli") }}</option>
-              <option value="fi">{{ _("suomi") }}</option>
-              <option value="se">{{ _("ruotsi") }}</option>
-              <option value="ru">{{ _("venäjä") }}</option>
-              <option value="fi-ka">{{ _("karjala") }}</option>
-              <option value="la">{{ _("latina") }}</option>
+              <option value="None">{{ _('Undefined language') }}</option>
+              <option value="fi">{{ _('Finnish') }}</option>
+              <option value="se">{{ _('Swedish') }}</option>
+              <option value="ru">{{ _('Russian') }}</option>
+              <option value="fi-ka">{{ _('Karelian') }}</option>
+              <option value="la">{{ _('Latin') }}</option>
             </select>
         </th>
-        <th style="text-align: left">{{ _("Talleta valittujen sarakkeiden tiedot<br/>referenssiniminä") }}<br/>
-            <input type="submit" value="{{ _('   Hyväksy   ') }}" style="width: 180pt;" />
+        <th style="text-align: left">{{ _('Save data in Selected columns as <br/> reference names') }}<br/>
+            <input type="submit" value="{{ _('Accept') }}" style="width: 180pt;" />
         </th>
     </tr>
     <tbody id="rows">

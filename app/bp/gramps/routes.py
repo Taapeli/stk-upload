@@ -25,6 +25,7 @@ from bp.admin.uploads import initiate_background_load_to_neo4j
 from .batchlogger import Log
 from pickle import Unpickler
 
+from bp.admin.uploads import initiate_background_load_to_neo4j
 from ..admin import uploads
 
 @bp.route('/gramps/upload_info/<upload>')

@@ -80,7 +80,7 @@ def show_info(input_gedcom, enc):
     except OSError:     # End of file
         pass
     except UnicodeDecodeError as e:
-        msg.append(_("Väärä merkistö, lisää esim. '--encoding ISO8859-1'"))
+        msg.append(_("Wrong character set, add eg. '--Encoding ISO8859-1 '"))
     except Exception as e:
         msg.append( type(e).__name__ + str(e))
 

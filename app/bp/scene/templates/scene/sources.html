@@ -5,18 +5,18 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
 
-<h2>{{ _('Lähdeluettelo') }}</h2>
+<h2>{{ _('List of Sources') }}</h2>
 
 {{ macro.menu(5) }}
 	<div class="content" id="Individuals">
 		<p id="description">
-		{{ _('Tällä sivulla on hakemisto kaikista lähteistä.') }}
+		{{ _('This page contains a directory of all sources.') }}
 		</p>
 		<div id="alphanav">
-			<ul><li><a href="#" title="{{ _('alkuun') }}">&uarr;</a></li>
+			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
         {% for s in sources %}{% set ini = s.stitle|list|first|upper %}
             {% if alpha != ini %}{%set alpha = ini %}
-                <li><a href="#{{alpha}}" title="{{ _('Aakkosmenu') }}: {{alpha}}">{{alpha}}</a></li>
+                <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
             {% endif %}
         {% endfor %}
 			</ul>
@@ -24,11 +24,11 @@
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-                    <th>{{ _('Lähde') }}</th>
-                    <th>{{ _('väline') }}</th>
-                    <th>{{ _('arkistossa') }}</th>
-                    <th title="{{ _('Sitaatteja') }}">{{ _('siteerattu') }}</th>
-                    <th title="{{ _('Tapahtumia, henkilöitä jne., josta viitattu">viitattu') }}</th>
+                    <th>{{ _('Source') }}</th>
+                    <th>{{ _('Tool') }}</th>
+                    <th>{{ _('In the repository') }}</th>
+                    <th title="{{ _('Citations') }}">{{ _('citated') }}</th>
+                    <th title="{{ _('events, persons, etc., referred to as "> referenced') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -36,17 +36,17 @@
 	    {% for s in sources %}{% set ini = s.stitle|list|first|upper %}
 	    	<tr><td class="ColumnAlpha">{% if alpha|upper != ini %}
 	               {%set alpha = ini %}
-	               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Palaa alkuun') }}" href="#">{{alpha}}</a>
+	               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
                {% endif %}</td>
             <td class="ColumnPerson">
                <div>
                   <a href="/scene/source={{s.uniq_id}}" {% if s.ref_cnt == 0 %} class="dimmed" 
-                     title="{{ _('lähdettä') }} {{s.uniq_id}} ({{s.id}}) {{ _('ei käytetä') }}">{% else %}
-                     title="{{ _('katso lähteen') }} {{s.uniq_id}} ({{s.id}}) {{ _('käyttö') }}">{% endif %}
+                     title="{{ _('Source') }} {{s.uniq_id}} ({{s.id}}) {{ _('unused') }}">{% else %}
+                     title="{{ _('see details of source') }} {{s.uniq_id}} ({{s.id}}) {{ _('used') }}">{% endif %}
                      {{s.stitle}}</a>
                 </div></td>
-            <td class="note" title="{{ _('muoto') }}: {{s.medium}}">{% if s.medium %}{{s.medium|transl('medium')}}{% endif %}</td>
-            <td class="note" title="{{ _('arkiston nimi') }}">{% if s.repo_name %}{{s.repo_name}}{% endif %}</td>
+            <td class="note" title="{{ _('Format') }}: {{s.medium}}">{% if s.medium %}{{s.medium|transl('medium')}}{% endif %}</td>
+            <td class="note" title="{{ _('Repository Name') }}">{% if s.repo_name %}{{s.repo_name}}{% endif %}</td>
             <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
             <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
             </tr>

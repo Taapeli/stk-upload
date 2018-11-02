@@ -1,10 +1,10 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
-<h2>{{ _("Käyttäjät") }}</h2>
+<h2>{{ _('Users') }}</h2>
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <ul  class='flashes'>
@@ -29,16 +29,16 @@
         </tr>
     {% endfor %}
 {% else %}
-        <tr><td colspan="1">{{ _("Ei tietoja") }}</td></tr>
+        <tr><td colspan="1">{{ _('No data') }}</td></tr>
 {% endif %}
 </table>
 
 <div>
-	<h3>{{ _("Luo käyttäjätunnus") }}</h3>
+	<h3>{{ _('Create Username') }}</h3>
 	<form action="/newuser" method="post">
-	    <p>{{ _("Käyttäjätunnus") }} <input type="text" name="userid" size="10"></p>
-	    <p>{{ _("Nimi") }} <input type="text" name="name"></p>
-	    <p><input type="submit" value="{{ _('Luo uusi käyttäjä tai päivitä vanha') }}"/></p>
+	    <p>{{ _('Username') }} <input type="text" name="userid" size="10"></p>
+	    <p>{{ _('Name') }} <input type="text" name="name"></p>
+	    <p><input type="submit" value="{{ _('Create a new user or update the old one') }}"/></p>
     </form>
 </div>
 </section>

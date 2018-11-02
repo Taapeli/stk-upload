@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -20,11 +20,11 @@
 {% endif %}
 
 <h2>{{ _("Person data") }}</h2>
-<div>&gt; {{ _("Kertova-sivu") }} <a href="/person/uniq_id={{person.uniq_id}}">{{person.uniq_id}}</a></div>
+<div>&gt; {{ _('Narrative Page') }} <a href="/person/uniq_id={{person.uniq_id}}">{{person.uniq_id}}</a></div>
 <section id="lista">
 <table>
     <h2>{{ _("Names") }}</h2>
-    <tr><th>{{ _("unique_id") }}</th><th>{{ _("salattu") }}</th><th>{{ _("gender") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th><th>{{ _("link") }}</th>
+    <tr><th>{{ _("unique_id") }}</th><th>{{ _('private') }}</th><th>{{ _("gender") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th><th>{{ _("link") }}</th>
     </tr>
 {% if person %}
  	{% if person.names %}
@@ -46,7 +46,7 @@
 		</tr>
 	{% endif %}
 {% else %}
-        <tr><td colspan="1">{{ _("Ei person tietoja") }}</td></tr>
+        <tr><td colspan="1">{{ _('No person information') }}</td></tr>
 {% endif %}
 </table>
 <p>&nbsp;</p>
@@ -74,7 +74,7 @@
 		</tr>
 	{% endfor %}
 {% else %}
-        <tr><td colspan="1">{{ _("Ei event tietoja") }}</td></tr>
+        <tr><td colspan="1">{{ _('No event information') }}</td></tr>
 {% endif %}
 </table>
 
@@ -87,7 +87,7 @@
     </tr>
 {% if person %}
 	{% if person.urls|length == 0 %}
-		<tr><td colspan="2">{{ _("Ei URL tietoja") }}</td></tr>
+		<tr><td colspan="2">{{ _('No URL information') }}</td></tr>
 	{% else %}
 		{% for url in person.urls %}
 			<tr>

@@ -1,12 +1,12 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-<h2>{{ _("Lähdeluettelo") }}</h2>
-<p>{{ _("Näytetään lähteet") }}</p>
+<h2>{{ _('List of Sources') }}</h2>
+<p>{{ _('Showing sources') }}</p>
 
 <section id="lista">
 <table>
@@ -21,7 +21,7 @@
         </tr>
     {% endfor %}
 {% else %}
-        <tr><td colspan="5">{{ _("Ei tietoja") }}</td></tr>
+        <tr><td colspan="5">{{ _('No data') }}</td></tr>
 {% endif %}
 </table>
 {% endblock %}

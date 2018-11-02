@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
@@ -31,10 +31,10 @@
 	        </tr>
 	    {% endfor %}
 	{% else %}
-        <tr><td colspan="5">{{ _("Ei tietoja") }}</td></tr>
+        <tr><td colspan="5">{{ _('No data') }}</td></tr>
 	{% endif %}
 {% else %}
-        <tr><td colspan="5">{{ _("Ei tietoja") }}</td></tr>
+        <tr><td colspan="5">{{ _('No data') }}</td></tr>
 {% endif %}
 </table>
 {% endblock %}

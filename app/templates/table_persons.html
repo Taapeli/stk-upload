@@ -1,25 +1,25 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-<h2>{{ _("Henkilöluettelo") }}</h2>
-<p>{{ _("Näytetään") }} {{persons|count}} {{ _("henkilöä") }} 
+<h2>{{ _('List of Persons') }}</h2>
+<p>{{ _('Number of persons:') }} {{persons|count}}  
 {% if name %}
-{{ _("tiedostosta") }} [<i>{{name}}</i>] 
+{{ _('from the File') }} [<i>{{name}}</i>] 
 {% endif %}{% if uri %}
-{{ _("palvelimelta") }} <i>{{uri}}</i>
+{{ _('from Server') }} <i>{{uri}}</i>
 {% endif %}</p>
 
 <section id="lista">
 <table>
-    <tr><th>{{ _("oid") }}</th>
-        <th>{{ _("nimi") }}</th>
-        <th>{{ _("ammatti") }}</th>
-        <th>{{ _("paikka") }}</th>
-        <th>{{ _("käräjät") }}</th>
+    <tr><th>{{ _('Oid') }}</th>
+        <th>{{ _('Name') }}</th>
+        <th>{{ _('Occupation') }}</th>
+        <th>{{ _('Place') }}</th>
+        <th>{{ _('Court') }}</th>
     </tr>
 {% if persons %}
     {% for p in persons %}
@@ -49,9 +49,9 @@
         </tr>
     {% endfor %}
 {% else %}
-        <tr><td colspan="5">{{ _("Ei tietoja") }}</td></tr>
+        <tr><td colspan="5">{{ _('No data') }}</td></tr>
 {% endif %}
 </table>
 </section>
-<section id="tiedot"><p>{{ _("Solmut ja yhteydet") }}</p></section>
+<section id="tiedot"><p>{{ _('Nodes and connections') }}</p></section>
 {% endblock %}

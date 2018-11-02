@@ -1,19 +1,19 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Tiedot kannasta") }}{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <script src="/static/infobox.js"></script>
 
-<h2>{{ _("Luettelo henkilöistä, joilla sama nimi") }}</h2>
-<p>{{ _("Näytetään henkilöparit") }}</p>
-<p><small>{{ _("Klikkaa saraketta lajitellaksesi sen suhteen") }}</small></p>
+<h2>{{ _('List of persons with the same name') }}</h2>
+<p>{{ _('Showing person pairs') }}</p>
+<p><small>{{ _('Click on the column header to sort column') }}</small></p>
 
 <section id="lista">
 <div ng-app="myApp" ng-controller="namesCtrl">
-	<p><button ng-click = "show_me = !show_me">{{ _("KAIKKI/Sama syntymäaika") }}</button></p>
+	<p><button ng-click = "show_me = !show_me">{{ _('All/Same Birth date') }}</button></p>
 	<table>
 	    <tr>
 	    	<th ng-repeat="x in columns" ng-click="sort(x.column)">{a x.column a}

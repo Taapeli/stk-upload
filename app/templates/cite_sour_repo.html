@@ -1,14 +1,14 @@
 {# _myapp/templates/person.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _("Lähteen tiedot") }}{% endblock %}
+{% block title %}{{ _('Source Details') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 {% for e in events %}
-    <h2>{{ _("Tapahtuma") }}</h2>
+    <h2>{{ _('Event') }}</h2>
     <ol id="itemlist">
         <li class="itemrow">
-                <div class="col1">{{ _("Tunniste") }}</div>
+                <div class="col1">{{ _('Identifier') }}</div>
                 <div class="col2">{{e.uniq_id}}</div>
         </li>
         <li class="itemrow">
@@ -24,11 +24,11 @@
     </ol>
     
     {% if e.citations %}
-    <h4>{{ _("Viittaukset") }}</h4>
+    <h4>{{ _('References') }}</h4>
     <ol class="num">
         {% for c in e.citations %}
         <li><div class="itemrow">
-                <div class="col1">{{ _("Tunniste") }}<br />{{ _("Date") }}<br />{{ _("Page") }}<br />{{ _("Confidence") }}<br /><br /></div>
+                <div class="col1">{{ _('Identifier') }}<br />{{ _("Date") }}<br />{{ _("Page") }}<br />{{ _("Confidence") }}<br /><br /></div>
                 <div class="col3"><span class="id">{{c.uniq_id}}</span><br />
                 	{{c.dateval}}<br />
                 	{{c.page}}<br />
@@ -38,11 +38,11 @@
     </ol>
     
 	    {% if c.sources %}
-	    <h4>{{ _("Lähteet") }}</h4>
+	    <h4>{{ _('Sources') }}</h4>
 	    <ol class="num">
 	        {% for s in c.sources %}
 	        <li><div class="itemrow">
-	                <div class="col1">{{ _("Tunniste") }}<br />{{ _("Stitle") }}<br />{{ _("Medium") }}<br /></div>
+	                <div class="col1">{{ _('Identifier') }}<br />{{ _("Stitle") }}<br />{{ _("Medium") }}<br /></div>
 	                <div class="col3"><span class="id">
 	                	<a href="/pick/source_uniq_id={{s.uniq_id}}">{{s.uniq_id}}</a></span><br />
 	                	{{s.stitle}}<br />
@@ -52,10 +52,10 @@
 	    </ol>
     
 		    {% if s.repocitory %}
-		    <h4>{{ _("Arkistot") }}</h4>
+		    <h4>{{ _('Repositories') }}</h4>
 		    <ol class="num">
 		        <li><div class="itemrow">
-		                <div class="col1">{{ _("Tunniste") }}<br />{{ _("Rname") }}<br />{{ _("Type") }}<br /><br /></div>
+		                <div class="col1">{{ _('Identifier') }}<br />{{ _('Rname') }}<br />{{ _("Type") }}<br /><br /></div>
 		                <div class="col3"><span class="id">
 		                	<a href="/pick/repo_uniq_id={{s.repocitory.uniq_id}}">{{s.repocitory.uniq_id}}</a></span><br />
 		                	{{s.repocitory.rname}}<br />
@@ -70,6 +70,6 @@
         {% endfor %}
     {% endif %}
 {% endfor %}
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Palaa takaisin") }}</a></p>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _('Go back') }}</a></p>
 
 {% endblock %}
