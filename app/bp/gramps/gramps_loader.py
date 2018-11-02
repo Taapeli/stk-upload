@@ -347,7 +347,7 @@ class DOM_handler():
                 self.log(Log("More than one objref tag in an event",
                                     level="WARNING", count=e.id))
 
-            e.save(self.username, self.tx)
+            e.save(self.tx)
             counter += 1
 
         self.log(Log("Events", count=counter, elapsed=time.time()-t0))

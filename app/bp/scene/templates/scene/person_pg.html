@@ -243,27 +243,30 @@ u { color: DarkKhaki; text-decoration: none; }
 		    source.stitle               = 'Akaa rippikirja 1774-1779'
 		    obj[mark_obj.r_id]          = <models.gen.repository.Repository object at 0x7f1374e1ae48>
 		    obj[mark_obj.r_id].rname    = 'Akaan seurakunnan arkisto'
-#}
-<ol>
+#}<!-- {% for m in marks %}
+     {{m}}{% endfor %}
+ -->
+<ul>
 {% for s_id, mark_list in marks|groupby('s_id') %}
     <li><!-- Source -->{% if s_id > 0 %}{% set source = obj[s_id] %}
                     <a href="/scene/source={{source.uniq_id}}" class="inlink"
-                     title="{{ _('katso lähteen') }} {{source.id}} {{ _('tiedot') }}"
+                     title="[{{s_id}}] {{ _('See source %(name)s details', name=source.id) }}"
                      >{{source.stitle}}</a>
-            {% else %}<b title="{{mark_list}}">Lähdetieto puuttuu!</b>{% endif %}
+            {% else %}<b title="{{mark_list}}">{{ _("No source information!") }}</b>{% endif %}
             <!-- Repocitory -->
             {% if mark_list[0].r_id > 0 %}<i>{{obj[mark_list[0].r_id].rname}}</i>
-            {% else %}<b title="{{mark_list}}">Arkistotieto puuttuu!</b>{% endif %}
-        <ol>
+            {% else %}<b title="{{mark_list}}">{{ _("No archive information!") }}</b>{% endif %}
+        <ul>
     {% for mark_obj in mark_list %}
         <!-- Citation -->
             {% if mark_obj.c_id > 0 %}{% set cita = obj[mark_obj.c_id] %}
                 {% set conf = cita.confidence | int %}
-                         <li id="sref{{ mark_obj[0] }}"
-                          title="{{cita.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{cita.confidence}})"
+                         <li id="sref{{ mark_obj.mark }}"
                 {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
-                             {{ _("Sivu") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+                         <span title="[{{mark_obj.c_id}}] {{cita.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{cita.confidence}})">
+                             {{ mark_obj.mark }} {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+                         </span>
                    {% if cita.notetext %}<br>
                               <a href="{{cita.notetext}}" class="outlink" target="_blank"
                                   {% if cita.confidence and cita.confidence < "2" %}
@@ -276,10 +279,10 @@ u { color: DarkKhaki; text-decoration: none; }
                         </li>
             {% endif %}
         </li>
-    {% endfor %}</ol>
+    {% endfor %}</ul>
     </li>
 {% endfor %}
-</ol>
+</ul>
 
         </div>
     </div>
