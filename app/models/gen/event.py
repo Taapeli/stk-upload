@@ -126,7 +126,6 @@ class Event:
 #         obj.attr_value = node['attr_value'] or ''
         return obj
 
-
     @staticmethod       
     def get_events_wo_citation():
         """ Voidaan lukea viittauksettomia tapahtumia kannasta
@@ -143,54 +142,10 @@ class Event:
         lists = []
         
         for record in result:
-            data_line = []
-            if record['uniq_id']:
-                data_line.append(record['uniq_id'])
-            else:
-                data_line.append('-')
-            if record["e"]['handle']:
-                data_line.append(record["e"]['handle'])
-            else:
-                data_line.append('-')
-            if record["e"]['change']:
-                data_line.append(record["e"]['change'])
-            else:
-                data_line.append('-')
-            if record["e"]['id']:
-                data_line.append(record["e"]['id'])
-            else:
-                data_line.append('-')
-            if record["e"]['type']:
-                data_line.append(record["e"]['type'])
-            else:
-                data_line.append('-')
-            if record["e"]['description']:
-                data_line.append(record["e"]['description'])
-            else:
-                data_line.append('-')
-            if record["e"]['date']:
-                data_line.append(record["e"]['date'])
-            else:
-                data_line.append('-')
-            if record["e"]['dates']:
-                data_line.append(str(DateRange(record["e"]['dates'])))
-            else:
-                data_line.append('-')
-            if 'attr' in record['e']:
-                attr_list = record["e"]['attr']
-                if attr_list != None and attr_list.__len__() >= 2:
-                    data_line.append("{}: {}".format(attr_list[0], attr_list[1]))
-            elif len(record["e"]['attr_value']) > 0:
-                #Todo remove Obsolete variable
-                data_line.append("({})".format(record["e"]['attr_value'])[1:-1])
-            else:
-                data_line.append('-')
-                
-            lists.append(data_line)
+            lists.append(Event._event_listing(record))
         
         return (titles, lists)
-    
-    
+
     @staticmethod       
     def get_events_wo_place():
         """ Voidaan lukea paikattomia tapahtumia kannasta
@@ -208,59 +163,58 @@ class Event:
         lists = []
         
         for record in result:
-            data_line = []
-            if record['uniq_id']:
-                data_line.append(record['uniq_id'])
-            else:
-                data_line.append('-')
-            if record["e"]['handle']:
-                data_line.append(record["e"]['handle'])
-            else:
-                data_line.append('-')
-            if record["e"]['change']:
-                data_line.append(int(record["e"]['change']))  #TODO only temporary int()
-            else:
-                data_line.append('-')
-            if record["e"]['id']:
-                data_line.append(record["e"]['id'])
-            else:
-                data_line.append('-')
-            if record["e"]['type']:
-                data_line.append(record["e"]['type'])
-            else:
-                data_line.append('-')
-            if record["e"]['description']:
-                data_line.append(record["e"]['description'])
-            else:
-                data_line.append('-')
-            if record["e"]['date']:
-                data_line.append(record["e"]['date'])
-            else:
-                data_line.append('-')
-            if record["e"]['dates']:
-                data_line.append(str(DateRange(record["e"]['dates'])))
-            else:
-                data_line.append('-')
-            if len(record["e"]['attr']) > 0:
-                if record["e"]['attr'] != None and record["e"]['attr'].__len__() >= 2:
-                    data_line.append("{}: {}".format(record["e"]['attr'][0], record["e"]['attr'][1]))
-            else:
-                data_line.append('-')
-            if record["e"]['attr_value']:
-                data_line.append(record["e"]['attr_value'])
-            else:
-                data_line.append('-')
-                
-            lists.append(data_line)
-        
+            lists.append(Event._event_listing(record))
+
         return (titles, lists)    
-
-#     def get_note_by_id(self):
-#         """ Luetaan tapahtuman lisätietojen uniq_id """
-
-#     def get_place_by_id(self):
-#         """ Luetaan tapahtuman paikan uniq_id """
     
+    @staticmethod       
+    def _event_listing(record):
+        ''' Forms a list of data field values as strings 
+        '''
+        data_line = []
+        if record['uniq_id']:
+            data_line.append(record['uniq_id'])
+        else:
+            data_line.append('-')
+        ev = record["e"]
+        if ev['handle']:
+            data_line.append(ev['handle'])
+        else:
+            data_line.append('-')
+        if ev['change']:
+            data_line.append(ev['change'])
+        else:
+            data_line.append('-')
+        if ev['id']:
+            data_line.append(ev['id'])
+        else:
+            data_line.append('-')
+        if ev['type']:
+            data_line.append(ev['type'])
+        else:
+            data_line.append('-')
+        if ev['description']:
+            data_line.append(ev['description'])
+        else:
+            data_line.append('-')
+        if ev['date']:
+            data_line.append(ev['date'])
+        else:
+            data_line.append('-')
+        if ev['dates']:
+            data_line.append(str(DateRange(ev['dates'])))
+        else:
+            data_line.append('-')
+        if 'attr' in record['e']:
+            attr_list = ev['attr']
+            if attr_list != None and attr_list.__len__() >= 2:
+                data_line.append("{}: {}".format(attr_list[0], attr_list[1]))
+        elif 'attr_value' in ev and len(ev['attr_value']) > 0: #Todo remove Obsolete variable
+            data_line.append("({})".format(ev['attr_value'])[1:-1])
+        else:
+            data_line.append('-')
+        return data_line
+
     @staticmethod        
     def get_total():
         """ Tulostaa tapahtumien määrän tietokannassa """

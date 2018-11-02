@@ -125,6 +125,8 @@ class Person:
         obj.handle = node['handle']
         obj.change = node['change']
         obj.confidence = node['confidence']
+        if obj.confidence == None:
+            obj.confidence = ''
         obj.priv = node['priv']
         return obj
 

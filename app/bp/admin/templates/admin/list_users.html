@@ -19,7 +19,7 @@
         {% endwith %}
        <div id="errors" class="errors"></div>
         <div class="row">
-           <div class="startbox2">
+
              <div style="display: inline-block;">
                 <h3>{{ _("User names in use") }}</h3>
 		        <table class="table100">
@@ -32,8 +32,7 @@
 		                    <td>{{u.name}}</td>
 		                    <td>{{u.email}}</td>
 		                    <td>{{u.roles}}</td>
-		                    <td><form action="list_uploads/{{u.username}}">
-                                    <input type="submit" value="{{ _("Uploads") }}" />
+		                    <td><a href="list_uploads/{{u.username}}">{{ _("Uploaded files") }}</a>
                                 </form>
                             </td>
 		                </tr>
@@ -43,7 +42,7 @@
 		        {% endif %}
 		        </table>
 	        </div>
-        </div>
+
     </div>
   </div>
 </div>

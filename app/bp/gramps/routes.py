@@ -21,6 +21,7 @@ from models import dbutil, loadfile, email, util
 #from models import email
 from . import bp
 from .gramps_loader import xml_to_neo4j
+from bp.admin.uploads import initiate_background_load_to_neo4j
 from .batchlogger import Log
 from pickle import Unpickler
 

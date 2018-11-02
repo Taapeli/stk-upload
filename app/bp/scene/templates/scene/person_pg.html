@@ -27,29 +27,7 @@ u { color: DarkKhaki; text-decoration: none; }
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
         </h3>
-        {% set cits = [] %}{#
 
-            Sivulla esiintyvät sitaatit kootaan listaan cits kutsulla
-                macro.link_cite(person.citation_ref, obj, cits)
-            Makron tulee
-                1) muodostaa viite_src "1a", "1b", "2a" ... jossa parit
-                   (Repository_id, Source_id) vastavat numeroita ja 
-                   Citation_id:t kirjaimia
-                   - jos viite on jo taulukossa cits, käytetään sitä
-                   - muuten luodaan uusi:
-                2) tallettaa listaan cits[] tuplet 
-                   esim. cits[0] = ((100269,91355), ("1a", 92125))
-                   - avain i = (Repository_id, Source_id)
-                   - arvo j = (viite_str, Citation_id)
-                3) palauttaa sivun esiintymispaikkaan linkin
-                    <a href="viite_str" title="Source_name">viite_str</a>
-
-            Lähteet-osiossa kelataan viitteet läpi ja muodostetaan 2-tasoinen
-            lista (linkkeineen ym.)
-
-                1. Source.stitle, Repository.rname
-                    a. Citation.page
-        #}
         {% set myid = person.uniq_id %}
         {# set mybirth = "" %}{% for e in events %}
             {% if e.type == "Birth" %}{% set mybirth = e.date %}{% endif %}{% endfor #}
@@ -60,8 +38,10 @@ u { color: DarkKhaki; text-decoration: none; }
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                     {% if person.citation_ref %}<td class="ColumnValue" 
-                        rowspan="2"><small>{{ _("source:") }}
-                        </small>{{ macro.link_cite(person.citation_ref, obj, cits) }}
+                        rowspan="2"><small>{{ _("Source") }}:
+                        {% for cr in person.citation_ref %}
+                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                        {% endfor %}</small>
                     </td>{% endif %}
                 </tr>
 
@@ -76,7 +56,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 </tr>{% endfor %}
                    
                 {% if person.gender %}<tr>
-                    <td class="ColumnAttribute">{{ _("Sukupuoli") }}</td>
+                    <td class="ColumnAttribute">{{ _("Gender") }}</td>
                     <td class="ColumnValue">{% if person.gender in sp %}{{sp[person.gender]}}
                       {% else %}{{person.gender}}{% endif %}</td>
                 </tr>{% endif %}
@@ -89,7 +69,7 @@ u { color: DarkKhaki; text-decoration: none; }
                     <td class="ColumnValue">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>{% endif %}
 <!--            <tr>
-                    <td class="ColumnAttribute">{{ _(""Age at death") }}</td>
+                    <td class="ColumnAttribute">{{ _("Age at death") }}</td>
                     <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
                 </tr>
 -->
@@ -115,15 +95,18 @@ u { color: DarkKhaki; text-decoration: none; }
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in person.events|sort(attribute='date') %}
+        {% for e in person.events %}
                     <tr>
                     {% if e.type == "Cause Of Death" %}
                         {% set t_cause_of_death = e.description %}
                     {% else %}
-
-                        <td class="ColumnSources">
-                        {{ macro.link_cite(e.citation_ref, obj, cits) }}
-                        </td>
+{#  person.events[0].citation_ref[0] = 90323
+    objs[person.events[0].citation_ref[0]] = <models.gen.citation.Citation object at 0x7f0a24696ac8> = cr
+    objs[person.events[0].citation_ref[0]].mark = '1a'
+#}
+                        <td class="ColumnSources">{% for cr in e.citation_ref %}
+                           <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                        {% endfor %}</td>
 
                         <td class="ColumnEvent">
                             <span class="id">
@@ -160,11 +143,6 @@ u { color: DarkKhaki; text-decoration: none; }
                                    <li><span class="typedesc">{{ obj[nref].type|transl('notes') }}</span>
                                        {{obj[nref].text}}</li>{% endfor %}
                                     {% endfor %}</ul>{% endif %}
-                                {% if e.citation_ref %}<ul class="eventnotes">{% for cref in e.citation_ref %}
-                                    {% for nref in obj[cref].note_ref %}
-                                   <li><span class="typedesc">{{obj[nref].type|transl('notes') }}</span>
-                                       {{obj[nref].text}}</li>{% endfor %}
-                                   {% endfor %}</ul>{% endif %}
                             </div>
                         </td>
                     {% endif %}
@@ -254,38 +232,58 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>
 -->
         <!-- div class="subsection" id="tree"><h4>Esivanhemmat -->
+
         <div class="subsection" id="sourcerefs">
-            <h4>{{ _("Source citations") }}</h4>
-            <ol>
-                {% set source_cnt = 0 %}
-                {% for source in person.sources %}
-                <li>
-            		{% for source in source.sources %}
-            			{% for rref in source.repo_ref %}
-            				{{obj[rref].rname}}:
-             			{% endfor %}
-             			<a href="/scene/source={{source.uniq_id}}" class="inlink"
-	                     title="{{ _('see details of source %(id)s', id=source.uniq_id) }}">{{source.stitle}}</a>
-             		{% endfor %}
-                     <ol>
-                         {% set source_cnt = source_cnt + 1 %}
-                         {% set conf = source.confidence | int %}
-                         <li id="sref{{ source_cnt }}a"
-                          title="{{source.confidence|transl("conf")}} {{ _('confidence') }} ({{source.confidence}})"
-                           {% if source.confidence and source.confidence < "2" %}
+            <h4>{{ _("Source references") }}</h4>
+{#
+		    mark_obj.mark               = '1a'
+		    cita = obj[mark_obj.c_id]   = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
+		    cita.page                   = 'Wiala'
+		    source = obj[mark_obj.s_id] = <models.gen.source.Source object at 0x7f1374e1a978>
+		    source.stitle               = 'Akaa rippikirja 1774-1779'
+		    obj[mark_obj.r_id]          = <models.gen.repository.Repository object at 0x7f1374e1ae48>
+		    obj[mark_obj.r_id].rname    = 'Akaan seurakunnan arkisto'
+#}<!-- {% for m in marks %}
+     {{m}}{% endfor %}
+ -->
+<ul>
+{% for s_id, mark_list in marks|groupby('s_id') %}
+    <li><!-- Source -->{% if s_id > 0 %}{% set source = obj[s_id] %}
+                    <a href="/scene/source={{source.uniq_id}}" class="inlink"
+                     title="[{{s_id}}] {{ _('See source %(name)s details', name=source.id) }}"
+                     >{{source.stitle}}</a>
+            {% else %}<b title="{{mark_list}}">{{ _("No source information!") }}</b>{% endif %}
+            <!-- Repocitory -->
+            {% if mark_list[0].r_id > 0 %}<i>{{obj[mark_list[0].r_id].rname}}</i>
+            {% else %}<b title="{{mark_list}}">{{ _("No archive information!") }}</b>{% endif %}
+        <ul>
+    {% for mark_obj in mark_list %}
+        <!-- Citation -->
+            {% if mark_obj.c_id > 0 %}{% set cita = obj[mark_obj.c_id] %}
+                {% set conf = cita.confidence | int %}
+                         <li id="sref{{ mark_obj.mark }}"
+                {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
-                            {{ _("Page") }}: {{source.page}} &nbsp;
-                            {{ macro.stars(conf) }}
-                           {% if source.notetext %}<br>
-                              <a href="{{source.notetext}}" class="outlink" target="_blank"
-                              {% if source.confidence and source.confidence < "2" %}
-                             style="color:red"{% endif %}>
-                                {{ source.notetext }}</a>{% endif %}                           
+                         <span title="[{{mark_obj.c_id}}] {{cita.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{cita.confidence}})">
+                             {{ mark_obj.mark }} {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+                         </span>
+                   {% if cita.notetext %}<br>
+                              <a href="{{cita.notetext}}" class="outlink" target="_blank"
+                                  {% if cita.confidence and cita.confidence < "2" %}
+                                 style="color:red"{% endif %}>
+                                {{ cita.notetext }}</a>{% endif %}                           
+                   {% if cita.note_ref %}{% for nref in cita.note_ref %} &gt;
+                              <a href="{{obj[nref].text}}" class="outlink" 
+                               target="_blank">{{obj[nref].text|transl('urldomain')}}</a>
+                   {% endfor %}{% endif %}
                         </li>
-                	</ol>
-                </li>
-				{% endfor %}
-            </ol>
+            {% endif %}
+        </li>
+    {% endfor %}</ul>
+    </li>
+{% endfor %}
+</ul>
+
         </div>
     </div>
 {% endblock %}

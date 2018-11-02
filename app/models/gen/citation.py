@@ -38,10 +38,12 @@ class Citation:
         self.id = ''
         self.dateval = ''
         self.page = ''
+        self.confidence = ''
+        self.mark = ''          # citation mark like '1a', if defined
         self.noteref_hlink = []
         self.source_handle = ''
-        self.source_id = None # uniq_ids of Source objects, for creating display sets
-        self.citators = []     # Lähde-sivulle
+        self.source_id = None   # uniq_ids of Source objects, for creating display sets
+        self.citators = []      # Lähde-sivulle
         self.note_ref = []
 
 

@@ -106,38 +106,45 @@ def get_a_person_for_display_apoc(uniq_id, user):
                     objs[target_obj.uniq_id] = target_obj
                 elif not target_link.uniq_id in objs:
                     objs[target_link.uniq_id] = target_link
-                    print("  obj[{}] <- {}".format(target_link.uniq_id, target_link))
-                if rel_type == 'CITATION':
-                    # cits[target_link.uniq_id] = target_link
-                    print("  citation[{}] <- {}".format(target_obj.uniq_id, target_obj))
+#                     print("  obj[{}] <- {}".format(target_link.uniq_id, target_link))
+#                 if rel_type == 'CITATION':
+#                     # cits[target_link.uniq_id] = target_link
+#                     print("  citation[{}] <- {}".format(target_obj.uniq_id, target_obj))
             else:
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
 
+    # Sort events by date
+    person.events.sort(key=lambda event: event.date)
+
     # 4. Generate clear names for event places
 
+    fns = Footnotes()
+    set_citations(person.citation_ref, fns, objs)
     for e in person.events:
         for pref in e.place_ref:
             e.clearnames = e.clearnames + objs[pref].show_names_list()
             for nref in objs[pref].note_ref:
                 note = objs[nref]
                 print ("  place {} note {}".format(objs[pref].id, note))
-        for ref in e.citation_ref:
-            set_citations(e, ref, objs)
+        set_citations(e.citation_ref, fns, objs)
 
-    # Return Person with included objects and list of note, citation etc. objects
-    return (person, objs)
+    # Return Person with included objects, list of note, citation etc. objects
+    # and footnotes
+    return (person, objs, fns.getNotes())
 
 
-def set_citations(e, ref, objs):
-    ''' Create citation references person_pg for foot notes '''
-    if ref in objs:
-        cit = objs[ref]     # Remove this?
-        sou = objs[cit.source_id]
-        sl = "{} '{}'".format(sou.uniq_id, sou.stitle)
-        print("{}: lähde {} / {} '{}'".format(e.id, sl, cit.uniq_id, cit.page))
-    else:
-        sl = 'no source'
-        print("{}: no source / {}".format(e.id, sl, ref))
+def set_citations(refs, fns, objs):
+    ''' Create person_pg citation references for foot notes '''
+    for ref in refs:
+        if ref in objs:
+            cit = objs[ref]
+            fn = SourceFootnote.from_citation_objs(cit, objs)
+            cit.mark = fn.mark
+            sl = fns.merge(fn)
+            print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
+        else:
+            print("- no source / {}".format(ref))
+
 
 def connect_object_as_leaf(src, target, rel_type=None):
     ''' Subroutine for Person page display
