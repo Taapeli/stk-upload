@@ -13,9 +13,10 @@ if __name__ == '__main__':
     print('Käynnistys: ' + str(app))
 
     if True:
+        loglevel = 'DEBUG'
         # Ajo paikallisesti
-        print ("Stk server ajetaan DEBUG-lokitasolla")
-        app.run(debug='DEBUG')
+        print ("Stk server ajetaan {}-lokitasolla".format(loglevel))
+        app.run(debug=loglevel)
     else:
         # Julkinen sovellus
         app.run(host='0.0.0.0', port=8000)

@@ -119,7 +119,10 @@ MATCH (user:User{email:$email}) -- (role:Role)
 RETURN role'''
 
     user_role_add = '''         
-MATCH  (r:Role {name: &name}), 
-       (u:User) WHERE id(u) = &id 
-SET u.roles = u.roles + r.name 
+MATCH  (r:Role) WHERE r.name = $name
+MATCH  (u:User) WHERE u.email = $email
 CREATE (u) -[:HAS_ROLE]-> (r)'''
+
+    user_role_delete = '''
+MATCH (u:User {email: $email}) -[c:HAS_ROLE]-> (r:Role {name: $name})
+DELETE c'''

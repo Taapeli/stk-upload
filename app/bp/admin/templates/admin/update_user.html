@@ -1,0 +1,42 @@
+{# _myapp/templates/update_user.html_ #}
+{% extends "/admin/layout.html" %}
+{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% block title %}{{ _("Update user") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <h2>{{ _("Update user") }} '{{ username }}'</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('admin.update_user', username=form.username) }}"  method="POST">
+	      {{ form.hidden_tag() }}
+	      <p> {{ form.email.label }}  {{ form.email(readonly=true) }} </p>
+          <p> {{ form.username.label }}  {{ form.username(readonly=true) }} </p>
+   	      {{ render_field_with_errors(form.name) }}
+   	      {{ render_field_with_errors(form.language) }}	
+    	  {{ render_field_with_errors(form.is_active) }}
+   	      {{ render_field_with_errors(form.roles) }}	    	  
+  	      {{ render_field_with_errors(form.confirmed_at) }}
+   	      {{ render_field_with_errors(form.last_login_at) }}	
+    	  {{ render_field_with_errors(form.last_login_ip) }}
+   	      {{ render_field_with_errors(form.current_login_at) }}	   	      
+   	      {{ render_field_with_errors(form.current_login_ip) }}	
+   	      {{ render_field_with_errors(form.login_count) }} 
+   	      
+   	      {{ render_field(form.submit) }}  	    	      
+  	      		  
+    </form>
+    
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
+{% endblock %}
+</body>
+</html>
+

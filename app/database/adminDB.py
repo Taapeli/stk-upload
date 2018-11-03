@@ -217,3 +217,4 @@ def initialize_db():
     if not master_exists():
         create_user_constraints()
         create_master(build_master_user())
+        create_allowed_email_constraints()

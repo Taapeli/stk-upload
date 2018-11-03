@@ -93,11 +93,13 @@ class User(UserMixin):
     login_count = 0
 
     def __init__(self, **kwargs):
+        if 'id' in kwargs:
+            self.id = kwargs['id']
         self.email = kwargs['email']
         self.username = kwargs.get('username')
         self.name = kwargs.get('name')
         self.language = kwargs.get('language')   
-        self.password = kwargs['password']
+        self.password = kwargs.get('password')
         self.is_active = True
         self.confirmed_at = kwargs.get('confirmed_at')
         self.roles = kwargs['roles']
