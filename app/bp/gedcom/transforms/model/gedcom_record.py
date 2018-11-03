@@ -8,6 +8,7 @@ import logging
 import datetime
 LOG = logging.getLogger(__name__)
 
+from models import util
 from transforms.model.gedcom_line import GedcomLine
 from transforms.model.person_name import PersonName
 
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     from transforms.model.ged_output import Output
 
     logging.basicConfig(filename='example.log', level=logging.DEBUG, format='%(levelname)s:%(message)s')
-    LOG.info("------ Ajo '%s' alkoi %s", "Testi", datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S') + " ------")
+    LOG.info("------ Ajo '%s' alkoi %s", "Testi", util.format_timestamp() + " ------")
 
     # One person with two NAME lines
     my_record_1 = GedcomRecord(GedcomLine('0 @I1@ INDI'))
@@ -141,5 +142,5 @@ if __name__ == '__main__':
         my_record_4.emit(f)
         GedcomLine("0 TRLR").emit(f)
 
-    LOG.info("------ Ajo '%s' päättyi %s", "Testi", datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S') + " ------")
+    LOG.info("------ Ajo '%s' päättyi %s", "Testi", util.format_timestamp() + " ------")
 

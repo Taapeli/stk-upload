@@ -6,7 +6,6 @@
 import sys
 import os
 import importlib
-import datetime
 import time
 import subprocess
 
@@ -21,10 +20,11 @@ from flask_babelex import _
 import logging 
 LOG = logging.getLogger(__name__)    
 
+from models import util
+
 from . import bp
 from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
 from .transforms.model.ged_output import Output
-from . import util
 from . import transformer
 
 # --------------------- GEDCOM functions ------------------------
@@ -53,16 +53,16 @@ def show_info(input_gedcom, enc):
                 if ln[:6] in ['2 VERS', '1 NAME', '1 CHAR']:
                     msg.append(ln[2:])
                 if ln.startswith('1 SOUR'):
-                    msg.append('Source ' + ln[7:-1] + ' ')
+                    msg.append(_('Source ') + ln[7:-1] + ' ')
                 if ln.startswith('1 GEDC'):
-                    msg.append('Gedcom ')
+                    msg.append(_('Gedcom '))
                 if ln.startswith('2 CONT _COMMAND'):
                     #print('"' + ln)
                     msg.append('– ' + ln[16:-1])
                 if ln.startswith('2 CONT _DATE'):
                     msg.append(ln[12:])
                 if match('0.*SUBM', ln):
-                    msg.append('Submitter ')
+                    msg.append(_('Submitter '))
                 if match('0.*INDI', ln):
                     cnt['INDI'] = 1
                     break
@@ -80,12 +80,12 @@ def show_info(input_gedcom, enc):
     except OSError:     # End of file
         pass
     except UnicodeDecodeError as e:
-        msg.append("Väärä merkistö, lisää esim. '--encoding ISO8859-1'")
+        msg.append(_("Wrong character set, add eg. '--Encoding ISO8859-1 '"))
     except Exception as e:
         msg.append( type(e).__name__ + str(e))
 
     if cnt:
-        msg.append('        count\n')
+        msg.append(_('        count\n'))
     for i in OrderedDict(sorted(cnt.items())):
         msg.append('{:4} {:8}\n'.format(i, cnt[i]))
         
@@ -195,6 +195,21 @@ def gedcom_revert(gedcom,version):
     filename1 = os.path.join(gedcom_folder,gedcom)
     filename2 = os.path.join(gedcom_folder,version)
     newname = util.generate_name(filename1)
+    if os.path.exists(filename1) and os.path.exists(filename2):
+        os.rename(filename1,newname)
+        os.rename(filename2,filename1)
+        rsp = dict(newname=os.path.basename(newname))
+    else:
+        rsp = dict(status="Error")
+    return jsonify(rsp) 
+
+@bp.route('/gedcom/save/<gedcom>', methods=['GET'])
+@login_required
+def gedcom_save(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    filename1 = os.path.join(gedcom_folder,gedcom)
+    filename2 = os.path.join(gedcom_folder,gedcom) + "-temp"
+    newname = util.generate_name(filename1)
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
     rsp = dict(newname=os.path.basename(newname))
@@ -256,7 +271,8 @@ def gedcom_info(gedcom):
         num_individuals=num_individuals, 
         transforms=transforms,
         metadata=metadata,
-        info=show_info(filename,"utf-8"),
+        #info=show_info(filename,"utf-8"),  # removed temporararily
+        info="no info...",
     )
 
 
@@ -328,7 +344,7 @@ def process_gedcom(cmd, transform_module):
 
     msg = _("Transform '{}' started {}").format(
              transform_module.__name__, 
-             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+             util.format_timestamp())
     LOG.info("------ {} ------".format(msg))
 
     import argparse
@@ -349,10 +365,10 @@ def process_gedcom(cmd, transform_module):
                         help=_("Encoding of the input GEDCOM"))
     transform_module.add_args(parser)
     args = parser.parse_args(cmd.split())
-    run_args = vars(args)
+    args.output_gedcom = None
     try:
         init_log(args.logfile)
-        with Output(run_args) as out:
+        with Output(args) as out:
             out.original_line = None
             saved_stdout = sys.stdout
             saved_stderr = sys.stdout
@@ -375,7 +391,7 @@ def process_gedcom(cmd, transform_module):
         time.sleep(1)  # for testing...
         msg = _("Transform '{}' ended {}").format(
                  transform_module.__name__, 
-                 datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+                 util.format_timestamp())
         print("------ {} ------".format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()

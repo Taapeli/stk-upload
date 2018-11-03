@@ -29,15 +29,15 @@ end of the program.
 A plugin may contain the following functions:
 
 - add_args(parser)
-- initialize(run_args)                              # Called once in the beginning of the transformation
-- phase1(run_args,line,level,path,tag,value)        # [optional] called once per GEDCOM line
-- phase2(run_args)                                  # [optional] called between phase1 and phase2
-- phase3(run_args,line,level,path,tag,value,output_file)
+- initialize(args)                              # Called once in the beginning of the transformation
+- phase1(args,line,level,path,tag,value)        # [optional] called once per GEDCOM line
+- phase2(args)                                  # [optional] called between phase1 and phase2
+- phase3(args,line,level,path,tag,value,output_file)
                                                 # [optional] called once per GEDCOM line
 
 The function "add_args" is called in the beginning of the program and it allows
 the plugin to add its own arguments for the program. The values of the arguments
-are stored in the "run_args" dictionary that is passed to the other functions.
+are stored in the "args" object that is passed to the other functions.
 
 Function "initialize" is called in the beginning of the transformation.
 
@@ -54,8 +54,7 @@ If an input line is not modified then emit should be called with the original li
 as it's parameter.
 
 The parameters of each phases:
-- "run_args"    a dict object from the object returned by ArgumentParser.parse_args 
-                or from gedder.py options.
+- "args"        an object returned by ArgumentParser.parse_args 
 - "gedline",    a GedcomLine() object, which includes
     - "line",   the original line in the input GEDCOM (unicode string)
     - "level",  the level number of the line (integer)
@@ -81,15 +80,16 @@ LOG = logging.getLogger(__name__)
 # These work, when program is run in app.bp.gedcom directory!
 from transforms.model.gedcom_line import GedcomLine
 from transforms.model.ged_output import Output
+from models import util
 
 def numeric(s):
     return s.replace(".","").isdigit()
 
 
-def read_gedcom(run_args):
+def read_gedcom(args):
     
     try:
-        for linenum, line in enumerate(open(run_args['input_gedcom'], encoding=run_args['encoding'])):
+        for linenum, line in enumerate(open(args.input_gedcom, encoding=args.encoding)):
             # Clean the line
             line = line[:-1]
             if line and line[0] == "\ufeff":  # UTF-8 BOM (should use utf-8-sig encoding...) 
@@ -99,7 +99,7 @@ def read_gedcom(run_args):
             yield gedline
 
     except FileNotFoundError:
-        LOG.error("Tiedostoa '{}' ei ole!".format(run_args['input_gedcom']))
+        LOG.error("Tiedostoa '{}' ei ole!".format(args.input_gedcom))
         raise
     except Exception as err:
         LOG.error(type(err))
@@ -107,49 +107,49 @@ def read_gedcom(run_args):
         LOG.error(traceback.format_exc())
 
 
-def process_gedcom(run_args, transform_module, task_name=''):
+def process_gedcom(args, transform_module, task_name=''):
 
-    LOG.info("------ Ajo '%s'   alkoi %s ------", \
-             task_name, \
-             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+    LOG.info("------ Ajo '%s'   alkoi %s ------", 
+             task_name, 
+             util.format_timestamp())
 
-    transform_module.initialize(run_args)
+    transform_module.initialize(args)
 
     if hasattr(transform_module,"process"):
-        with Output(run_args) as f:
-            transform_module.process(run_args, f)
+        with Output(args) as f:
+            transform_module.process(args, f)
     else:
         try:
             # 1st traverse
             if hasattr(transform_module,"phase1"):
-                for gedline in read_gedcom(run_args):
-                    transform_module.phase1(run_args, gedline)
+                for gedline in read_gedcom(args):
+                    transform_module.phase1(args, gedline)
         
             # Intermediate processing of collected data
             if hasattr(transform_module,"phase2"):
-                transform_module.phase2(run_args)
+                transform_module.phase2(args)
         
             do_phase4 = hasattr(transform_module,"phase4")
         
             if hasattr(transform_module,"phase3"):
                 # 2nd traverse "phase3"
-                with Output(run_args) as f:
-                    f.display_changes = run_args['display_changes']
-                    for gedline in read_gedcom(run_args):
+                with Output(args) as f:
+                    f.display_changes = args.display_changes
+                    for gedline in read_gedcom(args):
                         if do_phase4 and gedline.tag == "TRLR":
                             f.original_line = ""
-                            transform_module.phase4(run_args, f)
+                            transform_module.phase4(args, f)
                         f.original_line = gedline.line.strip()
                         f.saved_line = ""
-                        transform_module.phase3(run_args, gedline, f)
+                        transform_module.phase3(args, gedline, f)
     
     
         except FileNotFoundError as err:
             LOG.error("Ohjelma päättyi virheeseen {}: {}".format(type(err).__name__, str(err)))
         
-    LOG.info("------ Ajo '%s' päättyi %s ------", \
-             task_name, \
-             datetime.datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'))
+    LOG.info("------ Ajo '%s' päättyi %s ------", 
+             task_name, 
+             util.format_timestamp())
 
 
 
@@ -233,16 +233,16 @@ def main():
             return
         transformer.add_args(parser)
 
-    run_args = vars(parser.parse_args())
+    args = parser.parse_args()
 
     if task_name == "info":
         # No file output or log
-        print(transformer.show_info(run_args, transformer, task_name))
+        print(transformer.show_info(args, transformer, task_name))
     else:
         # Process file
-        print("Lokitiedot: {!r}".format(run_args['logfile']))
-        init_log(run_args['logfile'])
-        process_gedcom(run_args, transformer, task_name)
+        print("Lokitiedot: {!r}".format(args.logfile))
+        init_log(args.logfile)
+        process_gedcom(args, transformer, task_name)
 
 if __name__ == "__main__":
     main()

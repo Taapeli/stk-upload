@@ -5,6 +5,9 @@ shareds.app = Flask(__name__, instance_relative_config=True)
 app = shareds.app 
 print('Application instance path: ' + shareds.app.instance_path)
 
+shareds.app.config.from_object('config')
+shareds.app.config.from_pyfile('config.py')
+
 from bp.gedcom import bp as gedcom_bp
 shareds.app.register_blueprint(gedcom_bp)
 
@@ -20,6 +23,4 @@ shareds.app.register_blueprint(admin_bp)
 from bp.stk_security import bp as security_bp
 shareds.app.register_blueprint(security_bp)
 
-shareds.app.config.from_object('config')
-shareds.app.config.from_pyfile('config.py')
 import setups

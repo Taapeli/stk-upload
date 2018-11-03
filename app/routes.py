@@ -10,6 +10,7 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, flash 
 from flask_security import login_required, roles_accepted, roles_required, current_user
+from flask_babelex import _
 
 import shareds
 from models import gen
@@ -59,7 +60,7 @@ def scene():
     return render_template('/scene/persons.html')
 
 
-""" ---------- Other listings (Narrative or table format) ----------------------------
+""" ---------------- Other listings (Table format) ----------------------------
 """
 
 @shareds.app.route('/lista/<string:subj>')
@@ -88,7 +89,7 @@ def show_table_data(subj):
     elif subj == 'notes':
         titles, objs = datareader.get_note_list()
         return render_template("table_of_objects.html",
-                               headings=("Huomautusluettelo", "Note-kohteet"),
+                               headings=(_('Note List'), _('Note Items')),
                                titles=titles, objs=objs)
     elif subj == 'media':
         media = datareader.read_medias()
@@ -107,7 +108,7 @@ def show_table_data(subj):
 #         for r in obj:
 #             r.type = jinja_filters.translate(r.type, 'rept', 'fi')
         return render_template("table_of_objects.html",
-                               headings=("Arkistot", "Arkistotiedot (repository)"),
+                               headings=(_('Repositories'), _('Repository data')),
                                titles=titles, objs=obj)
     elif subj == 'same_birthday':
         ids = datareader.read_same_birthday()
@@ -135,7 +136,7 @@ def show_table_data(subj):
                                titles=titles, lists=lists)
     else:
         return redirect(url_for('virhesivu', code=1, text= \
-            "Aineistotyypin '" + subj + "' käsittely puuttuu vielä"))
+            _('Material type') + " '" + subj + "' "+ _('processing still missing')))
 
 
 @shareds.app.route('/list/refnames', defaults={'reftype': None})
@@ -186,16 +187,16 @@ def compare_person_page(cond):
             person2, events2, photos2, sources2, families2 = \
                 datareader.get_person_data_by_id(uniq_id_2)
             for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                print (_('{} in Family {}/{}').format(f.role, f.uniq_id, f.id))
                 if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    print(_(' Mother: {}/{} p. {}').format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
                 if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    print(_(' Father: {}/{} p. {}').format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print(_(' Child ({}): {}/{} * {}').format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
-            raise(KeyError("Väärä hakuavain"))
+            raise(KeyError(_('Wrong Search key')))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("ng_compare.html", person=person, events=events, 
@@ -215,23 +216,23 @@ def compare_person_page2(cond):
             person, events, photos, sources, families = \
                 datareader.get_person_data_by_id(value)
             for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                print (_('{} in Family {}/{}').format(f.role, f.uniq_id, f.id))
                 if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    print(_(' Mother: {}/{} p. {}').format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
                 if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    print(_(' Father: {}/{} p. {}').format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print(_(' Child ({}): {}/{} * {}').format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
-            raise(KeyError("Väärä hakuavain"))
+            raise(KeyError(_('Wrong Search key')))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("compare2.html",
         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
-@shareds.app.route('/lista/baptism_data/<string:uniq_id>')
+@shareds.app.route('/lista/baptism_data/<int:uniq_id>')
 def show_baptism_data(uniq_id):
     """ Table of a baptism Event selected by id(Event)
         kastetapahtuman tietojen näyttäminen ruudulla 
@@ -268,7 +269,7 @@ def pick_selection(cond):
             persons = datareader.read_persons_with_events(keys=['surname',value])
             return render_template("join_persons.html",
                                    persons=persons, pattern=value)
-        elif key == 'cite_sour_repo':   # from table_person_by_id.html
+        elif key == 'cite_sour_repo':   # from table_person_by_id.html Ei käytössä
             events = datareader.read_cite_sour_repo(uniq_id=value)
             return render_template("cite_sour_repo.html",
                                    events=events)
@@ -286,7 +287,7 @@ def pick_selection(cond):
             persons = datareader.read_persons_with_events(("uniq_id",value))
             return render_template("person2.html", persons=persons)
         else:
-            raise(KeyError("Vain oid:llä voi hakea"))
+            raise(KeyError(_('Only the OID can retrieve')))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
@@ -332,16 +333,16 @@ def compare_person_page_dbl(cond):
             person, events, photos, sources, families = \
                 datareader.get_person_data_by_id(value)
             for f in families:
-                print ("{} perheessä {} / {}".format(f.role, f.uniq_id, f.id))
+                print (_('{} in Family {}/{}').format(f.role, f.uniq_id, f.id))
                 if f.mother:
-                    print("  Äiti: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    print(_(' Mother: {}/{} p. {}').format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
                 if f.father:
-                    print("  Isä:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    print(_(' Father: {}/{} p. {}').format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print("    Lapsi ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print(_(' Child ({}): {}/{} * {}').format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
-            raise(KeyError("Väärä hakuavain"))
+            raise(KeyError(_('Wrong Search key')))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("compare3.html",
@@ -359,16 +360,16 @@ def compare_person_page2_dbl(cond):
             person, events, photos, sources, families = \
                 datareader.get_person_data_by_id(value)
             for f in families:
-                print ("{} in the family {} / {}".format(f.role, f.uniq_id, f.id))
+                print (_("{} in the family {} / {}").format(f.role, f.uniq_id, f.id))
                 if f.mother:
-                    print("  Mother: {} / {} s. {}".format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+                    print(_("  Mother: {} / {} s. {}").format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
                 if f.father:
-                    print("  Father:  {} / {} s. {}".format(f.father.uniq_id, f.father.id, f.father.birth_date))
+                    print(_("  Father:  {} / {} s. {}").format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print("    Clild ({}): {} / {} *{}".format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print(_("    Child ({}): {} / {} *{}").format(c.gender, c.uniq_id, c.id, c.birth_date))
         else:
-            raise(KeyError("Väärä hakuavain"))
+            raise(KeyError(_('Wrong Search key')))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("compare2.html", person=person, events=events, 

@@ -6,6 +6,7 @@
 Created on 4.1.2018
 @author: jm
 '''
+from urllib.parse import urlparse
 
 def translate(term, var_name, lang="fi"):
     """ Given term is translated depending of var_name name.
@@ -44,7 +45,7 @@ def translate(term, var_name, lang="fi"):
             "Baptism": "kaste",
             "Burial": "hautaus",
             "Marriage": "avioliitto",
-            "Residence": "syntymä",
+            "Residence": "asuinpaikka",
             "Cause Of Death": "kuolinsyy",
             "Luottamustoimi": "luottamustoimi",
             "Lähtömuutto": "lähtömuutto",
@@ -139,16 +140,16 @@ def translate(term, var_name, lang="fi"):
             "Media Reference Note":"mediaviite",
             "Media Note":"media",
             "General":"yleistä",
-            "Html code":"html-koodi"
-#             "Citation":"viitteen lisätieto",
-#             "Event Note":"tapahtuman lisätieto",
-#             "Family Note":"perheen lisätieto",
-#             "Name Note":"nimen lisätieto",
-#             "Person Note":"henkilön lisätieto",
-#             "Place Note":"paikan lisätieto",
-#             "Repository Note":"arkiston lisätieto",
-#             "Source Note":"lähteen lisätieto",
-#             "To Do":"työlistalla",
+            "Html code":"html-koodi",
+            "Citation":"lähteen lisätieto",
+            "Event Note":"tapahtuman lisätieto",
+            "Family Note":"perheen lisätieto",
+            "Name Note":"nimen lisätieto",
+            "Person Note":"henkilön lisätieto",
+            "Place Note":"paikan lisätieto",
+            "Repository Note":"arkiston lisätieto",
+            "Source Note":"lähteen lisätieto",
+            "To Do":"työlistalla",
             }
     elif var_name == "rept":
         # Repository types
@@ -227,6 +228,15 @@ def translate(term, var_name, lang="fi"):
             return tabl[term]
         except:
             return term + ":ssa"
+
+    elif var_name == "handle":
+        # Shows handle '_dd3d7f7206c3ca3408c9daf6c58' in short format '_d…f6c58'"
+        if len(term) > 8:
+            return term[:2] + '…' + term[-5:]
+        return term
+    elif var_name == "urldomain":
+        # Pick domain part of url 
+        return urlparse(term).hostname
 
     try:
         return tabl[term]

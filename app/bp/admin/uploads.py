@@ -19,10 +19,9 @@ logger = logging.getLogger('stkserver')
 
 from flask_babelex import _
 
-from models import loadfile
-from ..gramps import gramps_loader
-from models import email
+from models import loadfile, email, util
 
+from ..gramps import gramps_loader
 
 #===============================================================================
 # Background loading of a Gramps XML file
@@ -130,7 +129,7 @@ def background_load_to_neo4j(username,filename):
         for step in steps:
             print(step)
         set_meta(username,filename,status="done")
-        msg = "Loaded the file {} from user {} to neo4j".format(pathname,username)
+        msg = "{}:\nLoaded the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
         msg += "\nLog file: {}".format(logname)
         msg += "\n"
         for step in steps:
@@ -143,7 +142,7 @@ def background_load_to_neo4j(username,filename):
         traceback.print_exc()
         res = traceback.format_exc()
         set_meta(username,filename,status="failed")
-        msg = "Loading of file {} from user {} to neo4j FAILED".format(pathname,username)
+        msg = "{}:\nLoading of file {} from user {} to neo4j FAILED".format(util.format_timestamp(),pathname,username)
         msg += "\nLog file: {}".format(logname)
         msg += "\n" + res
         open(logname,"w").write(msg)
@@ -205,7 +204,7 @@ def list_uploads(username):
                 upload.uploaded = (status_text == _("UPLOADED"))
                 upload.loading = (status_text == _("LOADING"))
                 upload.upload_time = meta["upload_time"]
-                upload.upload_time_s = time.strftime("%Y-%m-%d %H.%M.%S",time.localtime(upload.upload_time))
+                upload.upload_time_s = util.format_timestamp(upload.upload_time)
                 uploads.append(upload)
     return sorted(uploads,key=lambda x: x.upload_time)
 

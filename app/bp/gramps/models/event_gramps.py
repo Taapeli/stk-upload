@@ -75,10 +75,10 @@ class Event_gramps(Event):
         self.names = []   # For creating display sets
 
 
-    def save(self, username, tx):
+    def save(self, tx):
         """ Saves event to database:
             - Creates a new db node for this Event
-            - links it to UserProfile, Person
+            - Does not link it to UserProfile, Person
             - links to existing Place, Note, Citation, Media objects
         """
 
@@ -88,13 +88,18 @@ class Event_gramps(Event):
             "change": self.change, 
             "id": self.id, 
             "type": self.type,
-            "description": self.description, 
-            "attr": self.attr}
+            "description": self.description}
+        if self.attr:
+            # Convert dict to list for db
+            a = []
+            for key, value in self.attr.items(): 
+                a = a + [key, value]
+                e_attr.update({'attr': a})
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
             tx.run(Cypher_event_w_handle.create, 
-                   username=username, date=today, e_attr=e_attr)
+                   date=today, e_attr=e_attr)
         except Exception as err:
             print("Virhe.event_save: {0}".format(err), file=stderr)
 

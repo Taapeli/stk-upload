@@ -1,20 +1,20 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}Tiedot kannasta{% endblock %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-<h2>Mediatiedostot</h2>
-<p>Näytetään mediaobjektit</p>
+<h2>{{ _('Media files') }}</h2>
+<p>{{ _('Displaying Media objects') }}</p>
 
 <section id="lista">
 <table>
-    <tr><th>uniq_id</th>
-        <th>src</th>
-        <th>mime</th>
-        <th>description</th>
-        <th>picture</th>
+    <tr><th>{{ _("uniq_id") }}</th>
+        <th>{{ _("src") }}</th>
+        <th>{{ _("mime") }}</th>
+        <th>{{ _("description") }}</th>
+        <th>{{ _("picture") }}</th
     </tr>
 {% if media %}
     {% for obj in media %}
@@ -23,11 +23,11 @@
 	        <td>{{obj.src}}</td>
     		<td>{{obj.mime}}</td>
     		<td>{{obj.description}}</td>
-    		<td><img src="/static/{{obj.src}}" alt="Picture cannot be found"></td>
+    		<td><img src="/static/{{obj.src}}" alt="{{ _('Picture cannot be found') }}"></td>
         </tr>
     {% endfor %}
 {% else %}
-        <tr><td colspan="5">Ei tietoja</td></tr>
+        <tr><td colspan="5">{{ _('No data') }}</td></tr>
 {% endif %}
 </table>
 {% endblock %}

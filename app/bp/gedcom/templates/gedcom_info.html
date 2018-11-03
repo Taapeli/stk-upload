@@ -1,7 +1,7 @@
 {# templates/gedcoms.html_ #}
 {% extends "a_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}Kirjautunut käyttäjä{% endblock %}
+{% block title %}{{ _('Logged on user') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
@@ -30,7 +30,7 @@ table.diff td {
         $(document).on({
             ajaxStart: function() { $("body").addClass("loading");  },
             ajaxStop: function() { $("body").removeClass("loading"); },    
-            ajaxError: function() { $("#errors").text("Palvelinvirhe").show(); }    
+            ajaxError: function() { $("#errors").text("{{ _('Server error') }}").show(); }    
         });
         
         $("#transforms").click(function() {
@@ -62,8 +62,8 @@ table.diff td {
             });
         });
         $("#delete").click(function() {
-        	//alert("{{ _('Toiminto vasta suunnitteilla') }}");
-            var ok = confirm('{{ _("Oletko varma?") }}');
+        	//alert("{{ _('Function still planned') }}");
+            var ok = confirm('{{ _('Are you sure?') }}');
             if (ok) {
             	$.get("/gedcom/delete/{{ gedcom }}",function() {
             		window.location.replace("/gedcom/list");
@@ -79,12 +79,10 @@ table.diff td {
         	 $("#errors").hide();
         });
         $("#palauta").click(function() {
-			//alert('{{ _("Palautustoimintoa ei vielä ole toteutettu") }}');
 			var gedcom = "{{ gedcom }}";
 			var version = $("#oldname").text();
             $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
-                alert(gedcom + " renamed to " + rsp.newname + "\n" +
-                	  version + " renamed to " + gedcom);
+                	$("#div_oldname").hide();
             });
         	 
         });
@@ -112,6 +110,15 @@ table.diff td {
                 	  version + "{{ _('renamed to') }} " + gedcom);
             });
     	});
+    	$("#save_result").click(function(rsp) {
+			var gedcom = "{{ gedcom }}";
+            $.get("/gedcom/save/{{ gedcom }}", function(rsp) {
+		        var msg  = gedcom + "{{ _(' renamed to ') }}" + rsp.newname; 
+            	$("#oldname").text(rsp.newname);
+            	$("#div_oldname").show();
+            	$("#div_save").hide();
+            });
+    	});
         hide_all();
     });
 </script>
@@ -129,7 +136,7 @@ table.diff td {
                 <div class="submit">
 			         <input type="button" id="update_desc" value='{{ _("Update") }}'>
 			    </div>
-				<p>(Näennäistiedot, ei aineistosta)</p>
+				<p>({{ _('Visualisation data, not based on material') }})</p>
 				<table>
 				    <tr><td>{{ _("Upload time") }}</td>
 				        <td class="right">2018-06-06</td></tr>
@@ -221,6 +228,10 @@ table.diff td {
 		<h3>{{ _("Transformation results") }}</h3>
 		<div id="div_oldname">
 		<h3>{{ _("Old version is saved as") }} <span id="oldname"></span> (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h3>
+		</div>
+		<div id="div_save">
+		{{ _("Not saved yet") }}
+		<h3><button id="save_result">{{ _("Save result") }}</button></h3>
 		</div>
 		<pre>
 		  <div id="output_log">

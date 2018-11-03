@@ -19,7 +19,7 @@
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("XML file") }}</th>
                 <th>{{ _("Status") }}</th>
-                <th>{{ _("Delete") }}</th>
+                <th>{{ _("Operations") }}</th>
    			</tr>
 	    {% for upload in uploads %}
 	       <tr>
@@ -29,9 +29,14 @@
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}</td>
 	           <td class="msg_INFO">
-	           		<a href=/gramps/xml_delete/{{upload.xmlname}}>Delete</a></td>
+	           		<a href=/gramps/xml_delete/{{upload.xmlname}}>{{ _("Delete") }}</a></td>
 	       </tr>
 	    {% endfor %}</table>
+    <p>{{ _("Now the administrator can load your file to database as yor new candadate material set") }}
+	    {% if current_user.is_authenticated and current_user.has_role('admin') %}
+            <a href="/admin/list_users">{{ _('on this page') }}</a>
+        {% endif %}
+    </p>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
 {% endblock %}
 </body>

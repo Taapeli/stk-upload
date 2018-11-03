@@ -21,9 +21,61 @@ driver = None
 from bp.admin.models import UserAdmin
 
 class Neo4jUserDatastore(UserDatastore):
-    """ User info database """
+    """ User info database designed after a Flask-security UserDatastore and observed Flask-security behavior:
+    
+    class flask_security.datastore.UserDatastore(user_model, role_model)
+        Abstracted user datastore.
+        Parameters
+           • user_model – A user model class definition
+           • role_model – A role model class definition
+           
+        activate_user(user)
+           Activates a specified user. Returns True if a change was made.
+           Parameters user – The user to activate
+           
+        add_role_to_user(user, role)
+           Adds a role to a user.
+           Parameters
+              • user – The user to manipulate
+              • role – The role to add to the user
 
-    # Uses classes Role, User, UserProfile, AllowedEmail from setups.py
+        create_role(**kwargs)
+           Creates and returns a new role from the given parameters.
+           
+        create_user(**kwargs)
+           Creates and returns a new user from the given parameters.
+           
+        deactivate_user(user)
+           Deactivates a specified user. Returns True if a change was made.
+           Parameters user – The user to deactivate
+           
+        delete_user(user)
+           Deletes the specified user.
+           Parameters user – The user to delete
+           
+        find_or_create_role(name, **kwargs)
+           Returns a role matching the given name or creates it with any additionally provided parameters.
+           
+        find_role(*args, **kwargs)
+           Returns a role matching the provided name.
+           
+        find_user(*args, **kwargs)
+           Returns a user matching the provided parameters.
+           
+        get_user(id_or_email)
+           Returns a user matching the specified ID or email address.
+           
+        remove_role_from_user(user, role)
+           Removes a role from a user.
+           Parameters
+              • user – The user to manipulate
+              • role – The role to remove from the user
+              
+        toggle_active(user)
+           Toggles a user’s active status. Always returns True.
+    """
+
+    # Uses classes Role, User, UserProfile, Allowed_email from setups.py
 
     def __init__(self, driver, user_model, user_profile_model, role_model):
         self.driver = driver
@@ -41,11 +93,11 @@ class Neo4jUserDatastore(UserDatastore):
         user.id = str(userNode.id)
         user.roles = self.find_UserRoles(user.email)
         if 'confirmed_at' in userNode.properties: 
-            user.confirmed_at = datetime.datetime.fromtimestamp(float(userNode.properties['confirmed_at']))
+            user.confirmed_at = datetime.datetime.fromtimestamp(float(userNode.properties['confirmed_at'])/1000)
         if 'last_login_at' in userNode.properties: 
-            user.last_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['last_login_at']))
+            user.last_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['last_login_at'])/1000)
         if 'current_login_at' in userNode.properties: 
-            user.current_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['current_login_at']))                            
+            user.current_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['current_login_at'])/1000)                            
         return user
  
 #  
@@ -128,9 +180,9 @@ class Neo4jUserDatastore(UserDatastore):
             logger.debug('_put_user update' + user.email + ' ' + user.name)
             confirmtime = None 
             if user.confirmed_at == None:
-                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email).properties['confirmed_at'] / 1000.0
+                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email).properties['confirmed_at']
             else:     
-                confirmtime = user.confirmed_at.timestamp()                                    
+                confirmtime = int(user.confirmed_at.timestamp() * 1000)                                   
             result = tx.run(Cypher.user_update, 
                 id=int(user.id), 
                 email=user.email,
@@ -141,8 +193,8 @@ class Neo4jUserDatastore(UserDatastore):
                 username = user.username,
                 name = user.name,
                 language = user.language, 
-                last_login_at = user.last_login_at.timestamp(),
-                current_login_at = user.current_login_at.timestamp(),
+                last_login_at = int(user.last_login_at.timestamp() * 1000),
+                current_login_at = int(user.current_login_at.timestamp() * 1000),
                 last_login_ip = user.last_login_ip,
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
@@ -169,8 +221,8 @@ class Neo4jUserDatastore(UserDatastore):
             roleNode = tx.run(Cypher.role_register, 
                               level = role.level, 
                               name=role.name, 
-                              description=role.description,
-                              timestamp = datetime.datetime.timestamp())
+                              description=role.description)
+        #                      timestamp = datetime.datetime.timestamp())
             return self.role_model(**roleNode.properties)
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            

@@ -19,10 +19,6 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 import sys
 import flask_security
-#import logging
-#from neo4j.v1 import GraphDatabase, basic_auth
-#from flask import g
-#import instance.config as config
 import shareds
 
 
@@ -39,23 +35,12 @@ class User:
         self.name = None
         self.roles = []
 
+    def __str__(self):
+        return "{}: {} {}".format(self.user_id, self.name, self.roles)
 
     def save(self):
         """ Käyttäjä tallennetaan kantaan, jos hän ei jo ole siellä"""
 
-#         try:
-#             record = None
-#             query = """
-#                 MATCH (u:User) WHERE u.userid='{}' RETURN u.userid
-#                 """.format(userid)
-#                 
-#             result = shareds.driver.session().run(query)
-#             
-#             for record in result:
-#                 continue
-#             
-#             if not record:
-                # User doesn't exist in db, the userid should be stored there
         try:
             query = "MERGE (u:User { userid: {uid} }) SET u.name={name}"
             shareds.driver.session().run(query, {"uid": self.userid, "name": self.name})

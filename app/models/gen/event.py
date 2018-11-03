@@ -66,7 +66,7 @@ class Event:
                 citation_handles[] str viittauksen handle (ent. citationref_hlink)
                 media_handles[]    str median handle (ent. objref_hlink)
                 #place_hlink       str paikan handle
-                #citationref_hlink str viittauksen handle
+                #citation_ref      str viittauksen handle
                 #objref_hlink      str median handle
         Event_combo properties:
                 citations = []     Citations attached
@@ -82,7 +82,6 @@ class Event:
         self.description = desc
         self.date = ''
         self.dates = None
-        # NOT Only in Event_gramps
         self.attr = dict()         # prev. attr_type, attr_value
         # Only in Event_combo
         #    self.note_ref = []    # prev. noteref_hlink
@@ -97,9 +96,9 @@ class Event:
         return "{} {}".format(self.type, self.dates or "")
 
     @classmethod
-    def from_node(cls, node):
+    def from_node(cls, node, obj=None):
         '''
-        Transforms a node from db node to an object of type Event
+        Transforms a node from db node to an object of type Event or Event_combo
         
         <Node id=88532 labels={'Event'} 
             properties={'type': 'Birth', 'change': 1500907890, 
@@ -107,26 +106,25 @@ class Event:
                 'id': 'E0161', 'attr_type': '', 'description': ''
                 'datetype': 0, 'date1': 1754183, 'date2': 1754183}>
         '''
-        e = cls()
-        e.uniq_id = node.id
-        e.id = node['id']
-        e.type = node['type']
-        e.handle = node['handle']
-        e.change = node['change']
+        if not obj:
+            obj = cls()
+        obj.uniq_id = node.id
+        obj.id = node['id']
+        obj.type = node['type']
+        obj.handle = node['handle']
+        obj.change = node['change']
         if "datetype" in node:
             #TODO: Talletetaanko DateRange -objekti vai vain str?
-            dates = DateRange(node["datetype"], node["date1"], node["date2"])
-            e.dates = str(dates)
-            e.date = dates.estimate()
+            obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
+            obj.date = obj.dates.estimate()
         else:
-            e.dates = None
-            e.date = ""
-        e.text = node['description'] or ''
-        e.attr = node['attr'] or dict()
-#         e.attr_type = node['attr_type'] or ''
-#         e.attr_value = node['attr_value'] or ''
-        return e
-
+            obj.dates = None
+            obj.date = ""
+        obj.description = node['description'] or ''
+        obj.attr = node['attr'] or dict()
+#         obj.attr_type = node['attr_type'] or ''
+#         obj.attr_value = node['attr_value'] or ''
+        return obj
 
     @staticmethod       
     def get_events_wo_citation():
@@ -144,49 +142,10 @@ class Event:
         lists = []
         
         for record in result:
-            data_line = []
-            if record['uniq_id']:
-                data_line.append(record['uniq_id'])
-            else:
-                data_line.append('-')
-            if record["e"]['handle']:
-                data_line.append(record["e"]['handle'])
-            else:
-                data_line.append('-')
-            if record["e"]['change']:
-                data_line.append(record["e"]['change'])
-            else:
-                data_line.append('-')
-            if record["e"]['id']:
-                data_line.append(record["e"]['id'])
-            else:
-                data_line.append('-')
-            if record["e"]['type']:
-                data_line.append(record["e"]['type'])
-            else:
-                data_line.append('-')
-            if record["e"]['description']:
-                data_line.append(record["e"]['description'])
-            else:
-                data_line.append('-')
-            if record["e"]['date']:
-                data_line.append(record["e"]['date'])
-            else:
-                data_line.append('-')
-            if record["e"]['dates']:
-                data_line.append(str(DateRange(record["e"]['dates'])))
-            else:
-                data_line.append('-')
-            if len(record["e"]['attr']) > 0:
-                data_line.append(str(record["e"]['attr'])[1:-1])
-            else:
-                data_line.append('-')
-                
-            lists.append(data_line)
+            lists.append(Event._event_listing(record))
         
         return (titles, lists)
-    
-    
+
     @staticmethod       
     def get_events_wo_place():
         """ Voidaan lukea paikattomia tapahtumia kannasta
@@ -204,58 +163,58 @@ class Event:
         lists = []
         
         for record in result:
-            data_line = []
-            if record['uniq_id']:
-                data_line.append(record['uniq_id'])
-            else:
-                data_line.append('-')
-            if record["e"]['handle']:
-                data_line.append(record["e"]['handle'])
-            else:
-                data_line.append('-')
-            if record["e"]['change']:
-                data_line.append(int(record["e"]['change']))  #TODO only temporary int()
-            else:
-                data_line.append('-')
-            if record["e"]['id']:
-                data_line.append(record["e"]['id'])
-            else:
-                data_line.append('-')
-            if record["e"]['type']:
-                data_line.append(record["e"]['type'])
-            else:
-                data_line.append('-')
-            if record["e"]['description']:
-                data_line.append(record["e"]['description'])
-            else:
-                data_line.append('-')
-            if record["e"]['date']:
-                data_line.append(record["e"]['date'])
-            else:
-                data_line.append('-')
-            if record["e"]['dates']:
-                data_line.append(str(DateRange(record["e"]['dates'])))
-            else:
-                data_line.append('-')
-            if len(record["e"]['attr']) > 0:
-                data_line.append(str(record["e"]['attr'])[1:-1])
-            else:
-                data_line.append('-')
-            if record["e"]['attr_value']:
-                data_line.append(record["e"]['attr_value'])
-            else:
-                data_line.append('-')
-                
-            lists.append(data_line)
-        
+            lists.append(Event._event_listing(record))
+
         return (titles, lists)    
-
-#     def get_note_by_id(self):
-#         """ Luetaan tapahtuman lisätietojen uniq_id """
-
-#     def get_place_by_id(self):
-#         """ Luetaan tapahtuman paikan uniq_id """
     
+    @staticmethod       
+    def _event_listing(record):
+        ''' Forms a list of data field values as strings 
+        '''
+        data_line = []
+        if record['uniq_id']:
+            data_line.append(record['uniq_id'])
+        else:
+            data_line.append('-')
+        ev = record["e"]
+        if ev['handle']:
+            data_line.append(ev['handle'])
+        else:
+            data_line.append('-')
+        if ev['change']:
+            data_line.append(ev['change'])
+        else:
+            data_line.append('-')
+        if ev['id']:
+            data_line.append(ev['id'])
+        else:
+            data_line.append('-')
+        if ev['type']:
+            data_line.append(ev['type'])
+        else:
+            data_line.append('-')
+        if ev['description']:
+            data_line.append(ev['description'])
+        else:
+            data_line.append('-')
+        if ev['date']:
+            data_line.append(ev['date'])
+        else:
+            data_line.append('-')
+        if ev['dates']:
+            data_line.append(str(DateRange(ev['dates'])))
+        else:
+            data_line.append('-')
+        if 'attr' in record['e']:
+            attr_list = ev['attr']
+            if attr_list != None and attr_list.__len__() >= 2:
+                data_line.append("{}: {}".format(attr_list[0], attr_list[1]))
+        elif 'attr_value' in ev and len(ev['attr_value']) > 0: #Todo remove Obsolete variable
+            data_line.append("({})".format(ev['attr_value'])[1:-1])
+        else:
+            data_line.append('-')
+        return data_line
+
     @staticmethod        
     def get_total():
         """ Tulostaa tapahtumien määrän tietokannassa """

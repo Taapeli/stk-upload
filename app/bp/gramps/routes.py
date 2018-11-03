@@ -17,13 +17,15 @@ from flask_security import roles_accepted, current_user
 from flask_babelex import _
 
 import shareds
-from models import dbutil, loadfile, email
+from models import dbutil, loadfile, email, util
 #from models import email
 from . import bp
 from .gramps_loader import xml_to_neo4j
+from bp.admin.uploads import initiate_background_load_to_neo4j
 from .batchlogger import Log
 from pickle import Unpickler
 
+from bp.admin.uploads import initiate_background_load_to_neo4j
 from ..admin import uploads
 
 @bp.route('/gramps/upload_info/<upload>')
@@ -61,7 +63,8 @@ def upload_gramps():
         uploads.set_meta(current_user.username,infile.filename,
                         status="uploaded",
                         upload_time=time.time())
-        msg = "User {} uploaded the file {}".format(current_user.username,pathname)
+        msg = "{}: User {} uploaded the file {}".format(
+            util.format_timestamp(),current_user.username,pathname)
         open(logname,"w").write(msg)
         email.email_admin(
                     "Stk: Gramps XML file uploaded",

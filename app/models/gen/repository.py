@@ -32,24 +32,32 @@ class Repository:
         self.handle = ''
         self.change = 0
         self.id = ''
+        self.rname = ''
         self.urls = []      # contains Weburl instances (prev. url_refs = [])
 
         self.sources = []   # For creating display sets (Not used??)
-        
-    
+
+    def __str__(self):
+        return "{} '{}'".format(self.id, self.rname)
+
+
     @classmethod
     def from_node(cls, node):
         '''
         Transforms a db node to Repository object
+        
+        <Node id=100269 labels={'Repository'} 
+            properties={'handle': '_d7910c4dfa419204848', 'id': 'R0000', 
+                'rname': 'Hämeenlinnan kaupunkiseurakunnan arkisto', 
+                'type': 'Archive', 'change': '1522861211'}>
         '''
         n = cls()   # Repository
         n.uniq_id = node.id
+        n.id = node['id'] or ''
         n.handle = node['handle']
         n.change = node['change'] or 0
-        n.id = node['id'] or ''
-        n.priv = node['priv'] or 0
+        n.rname = node['rname'] or ''
         n.type = node['type'] or ''
-        n.text = node['text'] or ''
         return n
 
 

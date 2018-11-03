@@ -77,11 +77,15 @@ class Cypher_event_w_handle():
     """ For Event class """
 
     create = """
-MATCH (u:UserProfile) WHERE u.userName=$username
 MERGE (e:Event {handle: $e_attr.handle})
     SET e = $e_attr
-MERGE (u) -[r:REVISION {date: $date}]-> (e)
 """
+#     create = """
+# MATCH (u:UserProfile) WHERE u.userName=$username
+# MERGE (e:Event {handle: $e_attr.handle})
+#     SET e = $e_attr
+# MERGE (u) -[r:REVISION {date: $date}]-> (e)
+# """
 
     link_place = """
 MATCH (n:Event) WHERE n.handle=$handle
@@ -211,7 +215,8 @@ class Cypher_place_w_handle():
 
     create = """
 CREATE (p:Place)
-SET p = $p_attr"""
+    SET p = $p_attr
+RETURN id(p) AS uniq_id"""
 
     add_name = """
 MATCH (p:Place) WHERE p.handle=$handle

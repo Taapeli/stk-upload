@@ -28,6 +28,7 @@ class Source:
 
     def __init__(self):
         """ Luo uuden source-instanssin """
+        self.uniq_id = None
         self.handle = ''
         self.change = 0
         self.id = ''
@@ -35,12 +36,20 @@ class Source:
         self.noteref_hlink = ''
         self.reporef_hlink = ''
         self.reporef_medium = ''
-        self.citations = []   # For creating display sets
-        self.repos = []   # For creating display sets
 
+        self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
+        self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
+        self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
+        self.note_ref = []      # uniq_ids (previously note[])
+        self.repocitory_id = None # uniq_id of Repocitory
+        self.repocitory = None  # Repocitory object For creating display sets (vanhempi)
+
+        #Todo: Obsolete?
+        self.citations = []   # For creating display sets
+        self.notes = []
 
     def __str__(self):
-        return "{} {}".format(self.id, self.stitle)
+        return "{} '{}'".format(self.id, self.stitle)
 
 
     @classmethod
@@ -53,8 +62,8 @@ class Source:
                 'stitle': 'Kangasala syntyneet 1721-1778', 'change': '1507149115'}>
         '''
         s = cls()   # create a new Source
-        s.id = node.id
-        s.uniq_id = node['uniq_id']
+        s.uniq_id = node.id
+        s.id = node['id']
         s.handle = node['handle']
         s.stitle = node['stitle']
         s.change = node['change']

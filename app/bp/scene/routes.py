@@ -10,7 +10,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
 
 from . import bp
-from .models import get_a_person_for_display, get_a_person_for_display_apoc # get_person_for_display #, get_person_data_by_id
+from bp.scene.data_reader import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
@@ -58,7 +58,7 @@ def show_person_list(selection=None):
         # Use selection filter
         keys = selection.split('=')
     else:
-        keys = ('select',)
+        keys = ('surname',)
     persons = [] #datareader.read_persons_with_events(keys)
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys)
@@ -107,23 +107,19 @@ def show_all_persons_list(opt=''):
 
 @bp.route('/scene/person/<int:uid>')
 #     @login_required
-def show_a_person(uid):
-    """ One Person with connected Events, Families etc
-        Korvaamaan metodin show_person_page()
-    """
-    if not uid:
-        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
-
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    
-    person, sources = get_a_person_for_display(uid, user)
-    return render_template("/scene/person_pg.html", 
-                           person=person, sources=sources, menuno=1)
-
-
+# def show_a_person(uid):
+#     """ One Person with connected Events, Families etc
+#         Korvaamaan metodin show_person_page()
+#     """
+#     if not uid:
+#         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
+#     if current_user.is_authenticated:
+#         user=current_user.username
+#     else:
+#         user=None
+#     person, sources = get_a_person_for_display(uid, user)
+#     return render_template("/scene/person_pg.html", 
+#                            person=person, sources=sources, menuno=1)
 @bp.route('/scene/person/a=<int:uid>')
 #     @login_required
 def show_a_person_w_apoc(uid):
@@ -138,9 +134,14 @@ def show_a_person_w_apoc(uid):
     else:
         user=None
     
-    person, sources = get_a_person_for_display_apoc(uid, user)
+    person, objs, marks = get_a_person_for_display_apoc(uid, user)
+    if person == None:
+        return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
+    for m in marks:
+        print("Citation mark {}".format(m))
+
     return render_template("/scene/person_pg.html", 
-                           person=person, sources=sources, menuno=1)
+                           person=person, obj=objs, marks=marks, menuno=1)
 
 
 @bp.route('/scene/person=<int:uniq_id>')
@@ -148,10 +149,8 @@ def show_a_person_w_apoc(uid):
 def show_person_page(uniq_id):
     """ Full homepage for a Person in database (vanhempi versio)
     """
-
     try:
-        person, events, photos, sources, families = \
-            get_person_data_by_id(uniq_id)
+        person, events, photos, citations, families = get_person_data_by_id(uniq_id)
         for f in families:
             print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
             if f.mother:
@@ -167,7 +166,7 @@ def show_person_page(uniq_id):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/person.html", person=person, events=events, 
-                           photos=photos, sources=sources, families=families)
+                           photos=photos, citations=citations, families=families)
 
 # ------------------------------ Menu 4: Places --------------------------------
 

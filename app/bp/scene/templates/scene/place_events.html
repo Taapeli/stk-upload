@@ -1,6 +1,6 @@
 {# _myapp/templates/k_place_events.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}paikan tapahtumat{% endblock %}
+{% block title %}{{ _('Place events') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
@@ -8,14 +8,14 @@
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" 
     integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
-<h2>Paikan tapahtumat</h2>
+<h2>{{ _('Place events') }}</h2>
 {{ macro.menu(4) }}
 
     <div class="content" id="IndividualDetail">
       {% if place.coord %}
         <div id="map">{% if '°' in place.coord %}
-        Virheelliset koordinaatit: {{place.coord}}
-        &mdash; pitäisi olla desimaalimuodossa
+        {{ _('Invalid coordinates') }}: {{place.coord}}
+        &mdash; {{ _('should be in decimal format') }}
         {% else %}{% set r = 0.15 %}
             {% set y = place.coord[0] %}
             {% set x = place.coord[1] %}
@@ -26,10 +26,10 @@
             style="border: 1px solid black"></iframe><br/><!--small--><a 
             href="http://www.openstreetmap.org/?mlat={{place.coord[0]}}&amp;mlon={{
              place.coord[1]}}#map=9/{{place.coord[0]}}/{{place.coord[1]}}">
-            - OpenstreetMap isommalla kartalla</a><!--/small--><br>
+            - {{ _('OpenStreetMap on a larger scale') }}</a><!--/small--><br>
             <a target="_blank" href="https://www.google.fi/maps/@{{place.coord[0]}},{{place.coord[1]}},14z?hl=fi">
-            - Google-kartalle</a><br>&nbsp;<br>
-            Sijainti: N&nbsp;{{ '{0:0.4f}'.format(place.coord[0]) }}, 
+            - {{ _('on Google Map') }}</a><br>&nbsp;<br>
+            {{ _('Location') }}: N&nbsp;{{ '{0:0.4f}'.format(place.coord[0]) }}, 
             E&nbsp;{{ '{0:0.4f}'.format(place.coord[1]) }}
         {% endif %}</div>
       {% endif %}
@@ -47,19 +47,19 @@
         </div>
     {% if place.urls %}
         <div id="events">
-            <h4>Verkkosivut</h4>
+            <h4>{{ _('Website') }}</h4>
             <table class="infolist eventlist">
                 <thead>
                     <tr>
                         <th> </th>
-                        <th class="ColumnDescription">Tyyppi</th>
-                        <th class="ColumnDescription">Viite</th>
+                        <th class="ColumnDescription">{{ _('Type') }}</th>
+                        <th class="ColumnDescription">{{ _('Reference') }}</th>
                     </tr>
                 </thead>
                 <tbody>
         {% for u in place.urls %}
                     <tr>
-                        <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(u.priv) }}</td> 
+                        <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(u.priv) }}</td> 
                         <td class="ColumnDescription">{{u.type|transl('urlt')}}</td> 
                         <td class="ColumnDescription">
                             <a href="{{u.href}}" class="outlink">{{u.description}}</a></td> 
@@ -71,19 +71,19 @@
     {% endif %}
     {% if place.noteref_hlink %}
         <div id="notes">
-            <h4>Lisätiedot</h4>
+            <h4>{{ _('Note') }}</h4>
             <table class="infolist notelist">
                 <thead>
                     <tr>
                         <th> </th>
-                        <th class="ColumnDescription">Tyyppi</th>
-                        <th class="ColumnDescription">Lisätieto</th>
+                        <th class="ColumnDescription">{{ _('Type') }}</th>
+                        <th class="ColumnDescription">{{ _('Additional Information') }}</th>
                     </tr>
                 </thead>
                 <tbody>
         {% for n in place.noteref_hlink %}
                     <tr>
-                        <td class="ColumnValue" title="Salattu tieto">{{ macro.lock(n.priv) }}</td> 
+                        <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(n.priv) }}</td> 
                         <td class="ColumnDescription">{{n.type|transl('notet')}}</td> 
                         <td class="ColumnDescription">{{n.text}}</td> 
                     </tr>
@@ -93,18 +93,18 @@
         </div>
     {% endif %}
         <div id="events"> <!--class="subsection"-->
-            <h4>Tapahtumat</h4>
+            <h4>{{ _('Events') }}</h4>
     {% if events %}
             <table class="infolist eventlist">
                 <thead>
                     <tr>
-                        <th class="ColumnId">Henkilö</th>
-                        <th class="ColumnPerson">Nimi</th>
-                        <th class="ColumnEvent">Tapahtuma</th>
-                        <th class="ColumnDate">Päivämäärä</th>
- <!--                   <th class="ColumnDescription">Kuvaus</th>
-                        <th class="ColumnNotes">Lisätiedot</th>
-                        <th class="ColumnSources">Lähteet</th>
+                        <th class="ColumnId">{{ _('Person') }}</th>
+                        <th class="ColumnPerson">{{ _('Name') }}</th>
+                        <th class="ColumnEvent">{{ _('Event') }}</th>
+                        <th class="ColumnDate">{{ _('Date') }}</th>
+ <!--                   <th class="ColumnDescription">{{ _('Description') }}</th>
+                        <th class="ColumnNotes">{{ _('Note') }}</th>
+                        <th class="ColumnSources">{{ _('Sources') }}</th>
 -->
                     </tr>
                 </thead>
@@ -113,11 +113,11 @@
                     <tr>
                         <td class="ColumnPerson">
                             <a href="/scene/person={{e.uid}}" class="id"
-                              title="katso henkilön tiedot">{{e.uid}}</a>
+                              title="{{ _("See Person's Details") }}">{{e.uid}}</a>
                         </td>
                         <td>{% for n in e.names|sort %} 
                          {% if n[0] != "Birth Name" %}
-                            <span class="typedesc">{{n[0]|transl('nt')}}:</span>
+                            <span class="typedesc">{{n[0]|transl('nt')}}</span>
                          {% endif %}
                          {{n[1]}} 
                          {% if n[2] %}
@@ -127,9 +127,9 @@
                          {% endif %}
                          <br />{% endfor %}
                         </td>
-                        <td class="ColumnEvent">{{e.etype|transl('evt')}}
+                        <td class="ColumnEvent">{{e.type|transl('evt')}}
                           {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
-                        <td class="ColumnDate">{{e.edates}}</td>
+                        <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
 <!--
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">
@@ -144,13 +144,13 @@
                  </tbody>
             </table>
     {% else %}
-        <p>Ei tapahtumia</p>
+        <p>{{ _('No events') }}</p>
     {% endif %}
         </div>
 
 <!--    <div class="subsection" id="sourcerefs">
-            <h4>Lähdeviitteet</h4>
-            <p>Ei lähdeviitteitä haettuna</p>
+            <h4>{{ _('Source References') }}</h4>
+            <p>{{ _('No source pointers found') }}</p>
         </div>
 -->
     </div>

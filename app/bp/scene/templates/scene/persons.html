@@ -1,56 +1,75 @@
 {# _myapp/templates/k_persons.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}henkilöluettelo{% endblock %}
+{% block title %}{{ _('List of persons') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
-{% set ordname = ['sukunimen', 'etunimen', 'patronyymin'] %}
+{% set ordname = [_('surname'), _('first name'), _('patronymic')] %}
 {% if order == '' %}{% set order=0 %}{% endif %}
+{% set cnt = persons | count %}
 
-{% if rule[0] == 'all' %}<h2>Henkilöt {{ ordname[order] }} mukaan</h2>
-{% elif rule[0] == 'refname' %}<h2>Henkilöt nimeltä {{ rule[1] }}</h2>
-{% else %}<H2>Henkilöt</h2>
+{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
+{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
+{% else %}<H2>{{ _('Persons') }}</h2>
 {% endif %}
+<!-- Rule = {{rule}} for {{cnt}} persons -->
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
     {% if menuno > 0 %}
             <p id="description">
-    Tällä sivulla on luettelo {{persons|count}} henkilönimestä mahdollisen 
-    {{ ordname[order] }} mukaan lajiteltuna.<br> 
-    Nimen napsauttaminen vie sinut valitun henkilön sivulle. 
-    Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä.
+    {{ ngettext(
+    	'This page contains %(num)s person in %(order)s order.', 
+    	'This page contains %(num)s persons in %(order)s order.', 
+    	cnt, order=ordname[order] ) 
+    }}
+    <br> 
+    <br> 
+    {{ _("Clicking a name will take you to the selected person's page.")}} 
+    {{ _('If the person has many names, they will appear in the list under each name.') }}
       {% if rule[0] == 'all' %}<br>
-    &rtrif; Vaihda järjestys: 
+    &rtrif; {{ _('Change Order:') }} 
         {% if order != 0 %}<a href="/scene/persons/all/" 
-            class="inlink">sukunimen</a> /{% endif %}
+            class="inlink">{{ _('Surname') }}</a> /{% endif %}
         {% if order != 1 %}<a href="/scene/persons/all/fn" 
-            class="inlink">etunimen</a> /{% endif %}
+            class="inlink">{{ _('First Name') }}</a> /{% endif %}
         {% if order != 2 %}<a href="/scene/persons/all/pn" 
-            class="inlink">patronyymin tai matronyymiin</a>{% endif %} mukaan.
+            class="inlink">{{ _('Patronymic or Matronymic') }}</a>{% endif %}.
       {% endif %}
             </p>
-    {% else %}{% if persons|count %}
-            <h3>Näytetään {{persons|count}} henkilönimeä</h3>{% else %}
-            <h3>Valitse näytettävät ihmiset</h3>{% endif %}
+    {% else %}{% if cnt %}
+            <h3>
+		    {{ ngettext(
+		    	'Showing %(num)s person name', 
+		    	'Showing %(num)s person names', 
+		    	cnt ) 
+		    }}
+            </h3>
+            {% else %}
+            <h3>{{ _('Select people to display') }}</h3>{% endif %}
 			<div id="searching">
+				{% if rule[0] %}{% set selection = rule[0] %}
+				{% else %}{% set selection = "surname" %}{% endif %}
+
 			    <form  action="/scene/persons" method="post">
-                  <p>Haku tapahtuu annetun nimen alkuosalla, esim. "Sib" osuu nimeen "Sibbe".</p>
-                  <label for="snam">Hakusana (alkuosa)&nbsp; </label>
+                  <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p>
+                  <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
                     <input type="text" name="name" id="snam" 
-                     {% if name %}value="{{name}}"{% endif %} required><br>
+                     {% if name %}value="{{name}}"{% endif %} required>
+                     <br>
                   <input type="radio" name="rule" id="ssur" value="surname"
-                   {% if rule and rule == "surname" %}checked{% endif %}>
-                    <label for="ssur">Sukunimi</label>
+                   {% if selection == "surname" %}checked{% endif %}>
+                    <label for="ssur">{{ _('Surname') }}</label>
                   <input type="radio" name="rule" id="sfir" value="firstname"
-                   {% if rule and rule == "firstname" %}checked{% endif %}>
-                    <label for="sfir">Etunimi</label>
+                   {% if selection == "firstname" %}checked{% endif %}>
+                    <label for="sfir">{{ _('Firstname') }}</label>
                   <input type="radio" name="rule" id="ssuf" value="patronyme"
-                   {% if rule and rule == "patronyme" %}checked{% endif %}>
-                    <label for="ssuf">Patronyymi</label>
+                   {% if selection == "patronyme" %}checked{% endif %}>
+                    <label for="ssuf">{{ _('Patronymic') }}</label>
 				  <input type="submit" value="Hae">
 			    </form>
+
 			</div>
 			{% endif %}
 
@@ -68,44 +87,46 @@
 
     {% if persons|count > 0 %}
 		<div id="alphanav">{% set alpha = "¤" %}
-			<ul><li><a href="#" title="alkuun">&uarr;</a></li>
+			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
         {% for p in persons %}{% set ini = p.names[0].initial|upper %}
             {% if alpha != ini %}{%set alpha = ini %}
-                <li><a href="#{{alpha}}" title="Aakkosmenu: {{alpha}}">{{alpha}}</a></li>
+                <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
             {% endif %}{% endfor %}
 			</ul>
 		</div>
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-					<th>Henkilö</th>
-                    <th>Henkilön tapahtumat</th>
-                    <!-- th>Perheen tapahtumat</th -->
+					<th>{{ _('Person') }}</th>
+                    <th>{{ _("Person's events") }}</th>
+                    <!-- th>{{ _('Family Events') }}</th -->
 				</tr>
 			</thead>
 			<tbody>
 	    {% for p in persons %}
 	            <tr><td class="ColumnAlpha">{% set ini = p.names[0].initial|upper %}
 	               {% if alpha != ini %}{%set alpha = ini %}
-		               <a id="{{alpha}}" name="{{alpha}}" title="Palaa alkuun" href="#">{{alpha}}</a>
+		               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
 	               {% endif %}</td>
+
 	                <td class="ColumnPerson"><div>
 	                   <a href="/scene/person={{p.uniq_id}}"
-	                     title="katso henkilön {{p.uniq_id}} tiedot">
+	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
 		               {% else %}<i>{{p.names[0].patronyme}}</i>{% endif %}
 		               <small class="idno">[{{p.uniq_id}}</small></a><small class="idno"><a 
 		                href="/scene/person/{{p.uniq_id}}">]</a></small>
-		               {# TODO Remove test link at ']' #}
+		               {# TODO Remove later test link at ']' #}
 		               {% if p.refnames %}
-		               <br><small class="refname" title="referenssinimet">
-		                  hakusanat: {{p.refnames}}
+		               <br><small class="refname" title="{{ _('Reference names') }}">
+		                  {{ _('Keywords') }}: {{p.refnames}}
 		               {% endif %}
 	                </div></td>
+
 	              <td class="ColumnEvent">
 	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li><i>{{e.type|transl('evt')}}</i>
+		              <li><i>{{e.type|transl('evt')}} {{e.description}}</i>
 		              {% if e.dates %}{{e.dates}} {% endif %}
 		              {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
@@ -119,7 +140,7 @@
 	{% else %}
         <table class="IndividualList">
             <tbody>
-	        <tr><td>Ketään ei löytynyt hakutiedoilla<//td></tr>
+	        <tr><td>{{ _('No one found with search keys') }}<//td></tr>
 	{% endif %}
 			</tbody>
 		</table>

@@ -38,7 +38,7 @@ version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
 
 from flask_babelex import _
-docline = _("Avio-PLAC:n hajoittaminen")
+docline = _('Splitting of data in PLAC of MARR')
 
 from .. import transformer
 from transformer import Item
@@ -58,7 +58,7 @@ class Marriages(transformer.Transformation):
     def __init__(self):
         self.resi = defaultdict(list) # key=@individ-id@ value=[(place,date),...]
     
-    def transform(self,item,options):
+    def transform(self,item,options,phase):
         # phase 1
         if item.value == "FAM":
             fam = item.tag #  @Fxxx@

@@ -67,7 +67,7 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_refnames() or "Tehty"
+    message = dataupdater.set_person_refnames() or _('Made')
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 @bp.route('/admin/upload_csv', methods=['POST'])
@@ -101,10 +101,10 @@ def save_loaded_csv(filename, subj):
             status = load_refnames(pathname)
         else:
             return redirect(url_for('virhesivu', code=1, text= \
-                "Data type '" + subj + "' is not supported"))
+                _("Data type '{}' is not supported").format(subj)))
     except KeyError as e:
         return render_template("virhe_lataus.html", code=1, \
-               text="Missing proper column title: " + str(e))
+               text=_("Missing proper column title: ") + str(e))
     return render_template("/admin/talletettu.html", text=status, uri=dburi)
 
 # # Ei ilmeisesti käytössä
@@ -120,15 +120,18 @@ def save_loaded_csv(filename, subj):
 # Siirretty security--> admin
 @bp.route('/admin/allowed_emails',  methods=['GET', 'POST'])
 @login_required
-@roles_required('admin')
+@roles_accepted('admin', 'master') 
 def list_allowed_emails():
     form = AllowedEmailForm()
-    if request.method == 'POST': 
+#    if request.method == 'POST':
+    lista = UserAdmin.get_allowed_emails()
+    if form.validate_on_submit(): 
         # Register a new email
+        lista = UserAdmin.get_allowed_emails()
         UserAdmin.register_allowed_email(form.allowed_email.data,
                                          form.default_role.data)
- 
-    lista = UserAdmin.get_allowed_emails()
+        return redirect(url_for('admin.list_allowed_emails'))
+
     return render_template("/admin/allowed_emails.html", emails=lista, 
                             form=form)
 
@@ -136,7 +139,7 @@ def list_allowed_emails():
 # Siirretty security--> admin
 @bp.route('/admin/list_users', methods=['GET'])
 @login_required
-@roles_accepted('admin', 'audit')
+@roles_accepted('admin', 'audit', 'master')
 def list_users():
     # Käytetään neo4juserdatastorea
     lista = shareds.user_datastore.get_users()
@@ -158,7 +161,7 @@ def start_load_to_neo4j(username,xmlname):
 
 @bp.route('/admin/list_threads', methods=['GET'])
 @roles_accepted('admin', 'audit')
-def list_threads():
+def list_threads(): # for debugging
     import threading
     s = "<pre>\n"
     s += "Threads:\n"
@@ -168,7 +171,6 @@ def list_threads():
     s += "Current thread: " + threading.current_thread().name
     s += "</pre>"
     return s
-
 
 @bp.route('/admin/xml_download/<username>/<xmlfile>')
 @login_required
@@ -186,7 +188,7 @@ def xml_download(username,xmlfile):
 @bp.route('/admin/show_upload_log/<username>/<xmlfile>')
 @roles_accepted('member', 'admin')
 def show_upload_log(username,xmlfile):
-    upload_folder = uploads.get_upload_folder(current_user.username)
+    upload_folder = uploads.get_upload_folder(username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
     #result_list = Unpickler(open(fname,"rb")).load()
     msg = open(fname).read()

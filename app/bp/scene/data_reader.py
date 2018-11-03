@@ -1,11 +1,12 @@
 '''
-    bp.scene.models – Database operations concerning multiple gen classes
+    bp.scene.models – Database operations for multiple gen classes
 
 Created on 24.9.2018
 
 @author: jm
 '''
-from models.datareader import read_persons_with_events
+#from models.datareader import read_persons_with_events
+from .models.footnote import Footnotes, SourceFootnote
 from models.gen.from_node import get_object_from_node
 from models.gen.family import Family_for_template
 from models.gen.person_combo import Person_combo, Person_as_member
@@ -19,239 +20,294 @@ from models.gen.note import Note
 from models.gen.media import Media
 
 
-def get_a_person_for_display_apoc(uniq_id, user):
-    """ Get a Person with all connected nodes --- keskeneräinen ---
 
-        @TODO Monet osat on ohjelmoimatta
+def get_a_person_for_display_apoc(uniq_id, user):
+    """ Get a Person with all connected nodes 
     """
 
-    def connect_objects(src, target):
-        ''' Subroutine to save target object in appropiate place in the object src
-        
-  src \ dst  Person combo    Name    Refname    Media    Note    Event combo
-             ------------    ----    -------    -----    ----    -----------
-Person combo                 names[]    x         x     notes[]   events[]
-Name                                                      x
-Refname
-Media                                                     x
-Note 
-Event combo                                             notes[]
-Place                                                     x
-Family    father, mother,                         x       x       eventref
-           children[]                                             hlink[]
-Citation                                                noteref
-                                                        hlink[]
-Source
-Repository
-
-...cont...
-src \ dst        Place    Family    Citation    Source    Repository
-                 -----    ------    --------    ------    ----------
-Person combo            families[] citations[]
-Name                                    x
-Refname
-Media                                   x
-Note                                    x
-Event combo      place             citations[]
-Place          surround                 x
-                ref[]
-Family                                  x
-Citation                                       sources[]
-Source                                                     repos[]
-Repository
-        '''
-        src_class = src.__class__.__name__
-        target_class = target.__class__.__name__
-        if src_class == 'Person_combo':
-            if target_class == 'Name':
-                src.names.append(target)
-                return src.names[-1]
-            elif target_class == 'Event_combo':
-                src.events.append(target)
-                return src.events[-1]
-            elif target_class == 'Family':
-                src.families.append(target)
-                return src.families[-1]
-            elif target_class == 'Citation':
-                src.citations.append(target)
-                return src.citations[-1]
-            elif target_class == 'Notes':
-                src.notes.append(target)
-                return src.notes[-1]
-
-        elif src_class == 'Event_combo':
-            if target_class == 'Place':
-                src.place = target
-                return src.place
-            elif target_class == 'Citation':
-                src.citations.append(target)
-                return src.citations[-1]
-            elif target_class == 'Notes':
-                src.notes.append(target)
-                return src.notes[-1]
-
-        return None
-    
     # 1. Read person p and paths for all nodes connected to p
-    results = Person_combo.get_person_paths_apoc(uniq_id)
+    try:
+        results = Person_combo.get_person_paths_apoc(uniq_id)
+    except Exception as e:
+        print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
+        return [None, None]
 
     for result in results:
         relations = result['relations']
         nodelist = result['nodelist']
         
         # Create gen objects tree: Person with all connected objects
-        #
+
         # 1. Create the Person instance, in which all objects shall be stored
         person = Person_combo.from_node(nodelist[0])
         # Store a pointer to this object
         objs = {person.uniq_id: person}
 
         # 2. Create a directory of nodes which are envolved
-        nodes = {}
+        nodes = {}  # uniq_id : node
         for node in nodelist:
             # <Node id=80234 labels={'Person'} 
             #    properties={'handle': '_da3b305b54b1481e72a4ac505c5', 'id': 'I17296', 
             #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
             nodes[node.id] = node
 
-        # 3. Store each gen object from nodes of relations
-        #    as leafs of Person object tree. 
+        # 3. Store each gen object from nodes of relations as leafs
+        #    of Person object tree. 
         #    Also create a directory of all of those objects
         for relation in relations:
             # [source uniq_id, relation type, relation role, target uniq_id]
             # [80234, 'EVENT', 'Primary', 88208]
-            src_node = nodes[relation[0]]
+            if relation[3] != person.uniq_id:
+                # Going to add a new node under src node
+                node_id1 = relation[0]
+                node_id2 = relation[3]
+            else:
+                # Reverse connection (Family)-->(Person): add src under target node
+                node_id1 = relation[3]
+                node_id2 = relation[0]
+            src_node = nodes[node_id1]
             src_label = list(src_node.labels)[0]
+            target_node = nodes[node_id2]
+            target_label = list(target_node.labels)[0]
+
             if not src_node.id in objs:
                 # Create new object
                 try:
                     src_obj = get_object_from_node(src_node)
-                    print("created ({} {})".format(src_obj.uniq_id, src_label))
+                    print("  new obj[{}] <- {} {}".\
+                          format(src_obj.uniq_id, src_label, src_obj))
+                    objs[src_obj.uniq_id] = src_obj
                 except Exception as e:
-                    print("{}: Could not create {}".format(e, src_obj))
-
+                    print("{}: Could not set {}".format(e, src_obj))
             else:
                 # Use exsisting object
                 src_obj = objs[src_node.id]
 
-            target_node = nodes[relation[3]]
-            target_label = list(target_node.labels)[0]
-
-            if relation[2]: r = ' '.join(relation[1:3])
-            else:           r = relation[1]
+            rel_type = relation[1]
+            role = relation[2]
+            if role:    r = ' '.join(relation[1:3])
+            else:       r = relation[1]
             print("relation ({} {}) -[{}]-> ({} {})".format(src_node.id, src_label, r, target_node.id, target_label))
             # Source object, for ex. Person_combo
             if src_node.id in objs:
                 src_obj = objs[src_node.id]
                 target_obj = get_object_from_node(target_node)
-                if not target_obj:  # Not implemented yet!
+                if not target_obj:  
+                    print("Not implemented yet! {}".format(target_obj))
                     continue
-                target_link = connect_objects(src_obj, target_obj)
-                o = None
-                if o and not target_obj.uniq_id in objs:
-                    objs[target_obj.uniq_id] = o
-                    print("obj[{}] <- {}".\
-                          format(target_obj.uniq_id, o))
+                if role:    # Relation attribute 'role'
+                    target_obj.role = role
+                # Store target object of the relation as a leaf object in src_obj
+                target_link = connect_object_as_leaf(src_obj, target_obj, rel_type)
+                # Target_link point to that leaf. 
+                # Put it also in objs and cits directories for possible re-use
+                if target_link == None:
+                    #TODO mitä tehdään, eikö joku muu lista?
+                    objs[target_obj.uniq_id] = target_obj
+                elif not target_link.uniq_id in objs:
+                    objs[target_link.uniq_id] = target_link
+#                     print("  obj[{}] <- {}".format(target_link.uniq_id, target_link))
+#                 if rel_type == 'CITATION':
+#                     # cits[target_link.uniq_id] = target_link
+#                     print("  citation[{}] <- {}".format(target_obj.uniq_id, target_obj))
             else:
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
 
-    # Return Person with included objects and list of sources/citations(?)
-    return (person, None)
+    # Sort events by date
+    person.events.sort(key=lambda event: event.date)
 
-    persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
-    person = persons[0]
-    person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-    person.set_my_places(True)
-    person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
-    sources = Source.get_sources_by_idlist(source_ids)
-    #TODO: Etsi sitaateille lähteet
+    # 4. Generate clear names for event places
 
-#     person.get_all_notes()
-#     person.get_media()
-#     person.get_refnames()
-    for c in person.citations:
-        print ("Sitaatit ({} {})".format(c.uniq_id, c))
-        for ci in c.citators:
-            print ("  ({}) <- ({})".format(c, ci))
-#     for e in person.events:
-#         print("Person event {}: {}".format(e.uniq_id, e))
-#         if e.place == None:
-#             print("- no place")
-#         else:
-#             for n in e.place.names:
-#                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
+    fns = Footnotes()
+    set_citations(person.citation_ref, fns, objs)
+    for e in person.events:
+        for pref in e.place_ref:
+            e.clearnames = e.clearnames + objs[pref].show_names_list()
+            for nref in objs[pref].note_ref:
+                note = objs[nref]
+                print ("  place {} note {}".format(objs[pref].id, note))
+        set_citations(e.citation_ref, fns, objs)
 
-    return person, sources
+    # Return Person with included objects, list of note, citation etc. objects
+    # and footnotes
+    return (person, objs, fns.getNotes())
 
 
-def get_a_person_for_display(uniq_id, user):
-    """ Get a Person with all connected nodes --- keskeneräinen ---
+def set_citations(refs, fns, objs):
+    ''' Create person_pg citation references for foot notes '''
+    for ref in refs:
+        if ref in objs:
+            cit = objs[ref]
+            fn = SourceFootnote.from_citation_objs(cit, objs)
+            cit.mark = fn.mark
+            sl = fns.merge(fn)
+            print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
+        else:
+            print("- no source / {}".format(ref))
 
-        @TODO Monet osat on ohjelmoimatta
-    """
-    # 1. Read person p and paths for all nodes connected to p
-    paths = Person_combo.get_person_paths(uniq_id)
+
+def connect_object_as_leaf(src, target, rel_type=None):
+    ''' Subroutine for Person page display
+        Saves target object in appropiate place in the src object 
+        (Person, Event etc).
+        Returns saved target object or None, if target was not saved here.
     
-    for path in paths:
-#         s_node = path['path'].start
-#         # <Node id=80307 labels=set() 
-#         #    properties={'handle': '_da692a09bac110d27fa326f0a7', 'id': 'I0119', 
-#         #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
-#         e_node = path['path'].end
-#         s_label = s_node.labels.pop()
-#         e_label = e_node.labels.pop()
-#         print("path ({} id:{}) -[{}]-> ({} id:{})".\
-#               format(s_label, s_node['id'], path[0].__len__(), e_label, e_node['id']))
-        nodelist = []
-        for n in path[0].nodes:
-            if n.labels:    lab = n.labels.pop() + ' '
-            else:           lab = ''
-            nodelist.append("{}:({}{})".format(n.id, lab, n['id']))
-        print("nodes {}".format(" --> ".join(nodelist)))
-        person = None
+    Plan 17 Sep 2018 / JMä
 
-    return person
+    The following relation targets are stored as instances in root object 
+    'src_obj' variable:
+        (:Person)                not linked to self
+        -[:NAME]-> (:Name)       to .names[]
+        -[:EVENT]-> (:Event)     to .events[]
+        -[:CHILD]-> (:Family)    to .child[]
+        -[:FATHER]-> (:Family)   to .father
+        -[:MOTHER]-> (:Family)   to .mother
+        -[:HIERARCHY]-> (:Place) to .place
 
-    persons = read_persons_with_events(('uniq_id', uniq_id), user=user)
-    person = persons[0]
-    person.families = Family_for_template.get_person_families_w_members(person.uniq_id)
-    person.set_my_places(True)
-    person.citations, source_ids = Citation.get_persons_citations(person.uniq_id)
-    sources = Source.get_sources_by_idlist(source_ids)
-    #TODO: Etsi sitaateille lähteet
+    The following relation targets are stored as object references (uniq_id) 
+    in root object variable. The actual referenced target objects are stored to 
+    separate 'obj_dict' variable:
+        -[:CITATION]-> (:Citation)     to .citation_ref[]
+        -[:SOURCE]-> (:Source)         to .source_id
+        -[:REPOSITORY]-> (:Repository) to .repo_ref[]
+        -[:NOTE]-> (:Note)             to .note_ref[]
+        -[:PLACE]-> (:Place)           to .place_ref[]
+        -[:MEDIA]-> (:Media)           to .media_ref[]
+    
+    Object to object connection variables:
+    
+        Person combo 
+            .names[]
+            .events[]
+            .media_ref[]
+            .families[]
+            .note_ref[]
+            .citation_ref[]
+        Name 
+            .note_ref[]
+            .citation_ref[]
+        Refname
+            -
+        Media
+            .note_ref[]
+            .citation_ref[]
+        Note 
+            .citation_ref[]
+        Event combo
+            .place_ref[]
+            .note_ref[]
+        Place 
+            .place_ref[]
+            .note_ref[]
+            .citation_ref[]
+        Family
+             children[]
+            .father, .mother, .children[]
+            .events[]
+            .note_ref[]
+            .citation_ref[]
+        Citation
+            .note_ref[]
+        Source
+            .repo_ref[]
+        Repository
+            -
+    '''
 
-#     person.get_all_notes()
-#     person.get_media()
-#     person.get_refnames()
-    for c in person.citations:
-        print ("Sitaatit ({} {})".format(c.uniq_id, c))
-        for ci in c.citators:
-            print ("  ({}) <- ({})".format(c, ci))
-#     for e in person.events:
-#         print("Person event {}: {}".format(e.uniq_id, e))
-#         if e.place == None:
-#             print("- no place")
-#         else:
-#             for n in e.place.names:
-#                 print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
+    src_class = src.__class__.__name__
+    target_class = target.__class__.__name__
+    
+    if src_class == 'Person_combo':
+        if target_class == 'Name':
+            src.names.append(target)
+            return src.names[-1]
+        elif target_class == 'Event_combo':
+            src.events.append(target)
+            return src.events[-1]
+        elif target_class == 'Family':
+            if rel_type == 'CHILD':
+                src.families_as_child.append(target)
+                return src.families_as_child[-1]
+            if rel_type == 'MOTHER' or rel_type == 'FATHER':
+                src.families_as_parent.append(target)
+                return src.families_as_parent[-1]
+        elif target_class == 'Citation':
+            src.citation_ref.append(target.uniq_id)
+            return None
+        if target_class == 'Note':
+            src.note_ref.append(target.uniq_id)
+            return None
+        if target_class == 'Media':
+            src.media_ref.append(target.uniq_id)
+            return None
 
-    return person, sources
+    elif src_class == 'Event_combo':
+        if target_class == 'Place':
+            src.place_ref.append(target.uniq_id)
+            return None
+        elif target_class == 'Citation':
+            #src.citations.append(target) 
+            src.citation_ref.append(target.uniq_id)
+            return None
+        elif target_class == 'Note':
+            src.note_ref.append(target.uniq_id)
+            return None
 
+    elif src_class == 'Citation':
+        if target_class == 'Source':
+            src.source_id = target.uniq_id
+            return None
+        if target_class == 'Note':
+            src.note_ref.append(target.uniq_id)
+            return None
+
+    elif src_class == 'Place':
+        if target_class == 'Place_name':
+            src.names.append(target)
+            return src.names[-1]
+        if target_class == 'Place':
+            src.uppers.append(target)
+            return src.uppers[-1]
+        if target_class == 'Note':
+            src.note_ref.append(target.uniq_id)
+            return None
+
+    elif src_class == 'Family':
+        if target_class == 'Event_combo':
+            src.events.append(target)
+            return src.events[-1]
+        if target_class == 'Note':
+            src.note_ref.append(target.uniq_id)
+            return None
+
+    elif src_class == 'Source':
+        if target_class == 'Repository':
+            src.repocitory_id = target.uniq_id
+            return None
+        if target_class == 'Note':
+            src.note_ref.append(target.uniq_id)
+            return None
+
+    print('Ei toteutettu {} --> {}'.format(src_class, target_class))
+    return None
+
+ 
 def get_person_data_by_id(uniq_id):
     """ VANHEMPI VERSIO
     Get 5 data sets:
         person: Person object with name data
             The indexes of referred objects are in variables 
-                eventref_hlink[]      str tapahtuman uniq_id, rooli eventref_role[]
-                objref_hlink[]        str tallenteen uniq_id
-                urls[]                list of Weburl nodes
+                eventref_hlink[]   str tapahtuman uniq_id 
+                eventref_role[]    str rooli
+                media_ref[]        int tallenteen uniq_id
+                urls[]             Weburl nodes
                     priv           str 1 = salattu tieto
                     href           str osoite
                     type           str tyyppi
                     description    str kuvaus
                 parentin_hlink[]      str vanhempien uniq_id
                 noteref_hlink[]       str huomautuksen uniq_id
-                citationref_hlink[]   str viittauksen uniq_id            
+                citation_ref[]     str viittauksen uniq_id            
         events: list of Event_combo object with location name and id (?)
         photos
         sources
@@ -341,12 +397,12 @@ def get_person_data_by_id(uniq_id):
                         r.rname = source[4]
                         r.type = source[5]
                         
-                        s.repos.append(r)
-                        c.sources.append(s)
+                        s.repocitory.append(r)
+                        c.source = s    #s.append(s)
                         
                     sources.append(c)
             
-    for link in p.objref_hlink:
+    for link in p.media_ref:
         o = Media()
         o.uniq_id = link
         o.get_data()

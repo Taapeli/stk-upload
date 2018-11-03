@@ -1,23 +1,23 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}lähteen tapahtumat{% endblock %}
+{% block title %}{{ _('Events of a Source') }}{% endblock %}
 {% block body %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% import '/scene/macros.html' as macro %}
 
-<h2>Lähteen tapahtumat</h2>
+<h2>{{ _('Events of a Source') }}</h2>
 
 {{ macro.menu(5) }}
     <div class="content" id="IndividualDetail">
-	    <h3 style="position:sticky; top:0;" title="Lähde">{{stitle}}</h3>
+	    <h3 style="position:sticky; top:0;" title="{{ _('Source') }}">{{stitle}}</h3>
 	        <div class="subsection" id="citations">
-	            <h4>Lähdeviiteet ja tapahtumat</h4>
+	            <h4>{{ _('Source References and Events') }}</h4>
 	            <table class="infolist eventlist" width="100%">
 	                <!-- thead>
 	                    <tr>
 	                        <th class="ColumnId"></th>
-	                        <th class="ColumnEvent">Lähde ja viittaukset</th>
+	                        <th class="ColumnEvent">{{ _('Source and references') }}</th>
 	                    </tr>
 	                </thead -->
 	                <tbody>
@@ -25,7 +25,7 @@
 			        {% for c in citations|sort(attribute='page') %}
 	        		<tr>
 	        		    <td class="CitationId"><span title="sitaatti {{c.uniq_id}}">{{c.id}}</span> </td>
-	        		    <td class="Citation"><div title="{{c.confidence|transl("conf")}} luotettavuus ({{c.confidence}})"
+	        		    <td class="Citation"><div title="{{c.confidence|transl("conf")}} {{ _('confidence') }} ({{c.confidence}})"
                         {% if c.confidence and c.confidence < "2" %}
                         style="color:red"{% endif %}>
 	   					Sivu {{c.page}}
@@ -45,14 +45,14 @@
 	               		{% for cite in c.citators|sort(attribute='date') %}
 		               		<li><!-- {# if cite.label == 'Person' #}
                             <a href="/scene/person={{cite.uniq_id}}" class="id"
-                               title="katso henkilön {{cite.id}} tiedot">
+                               title="{{ _('see details of person %(id)s', id=cite.id) }}">
                                    {{cite.clearname}}</a>
-	                        {# elif cite.label == 'Family Event' #}Perheenjäsenen
+	                        {# elif cite.label == 'Family Event' #}{{ _("Family Member's") }}
                                 <em>{{cite.clearname}}</em> {{cite.eventtype|transl('evt')}} 
                                 {# if cite.edates #}{{cite.edates}}{# endif #}
-	                        {# else #} -->Henkilön
+	                        {# else #} -->{{ _('Of person') }}
                             <a href="/scene/person={{cite.uniq_id}}" class="id"
-                               title="katso henkilön {{cite.id}} tiedot">
+                               title="{{ _('see details of person %(id)s', id=cite.id) }}">
                                    {{cite.clearname}}</a>
 	                           {{cite.eventtype|transl('evt')}} 
 	                           {% if cite.edates %}{{cite.edates}}{% endif %}

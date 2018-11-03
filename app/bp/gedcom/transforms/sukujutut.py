@@ -28,7 +28,7 @@ def remove_multiple_blanks(text):
     return " ".join(text.split())
 
 class Sukujutut(transformer.Transformation):
-    def transform(self,item,options):
+    def transform(self,item,options,phase):
         """
         Performs a transformation for the given Gedcom "item" (i.e. "line block")
         Returns one of

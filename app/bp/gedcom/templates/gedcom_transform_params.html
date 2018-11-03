@@ -12,9 +12,12 @@
                 if (rsp.oldname) {
                 	$("#oldname").text(rsp.oldname);
                 	$("#div_oldname").show();
+                	$("#div_save").hide();
             	}
-            	else
+            	else {
                 	$("#div_oldname").hide();
+                	$("#div_save").show();
+            	}
                 $("#output").show();
             });
             return false;
@@ -52,9 +55,9 @@
 		    <input type='{{ row.type }}' name='{{ row.name }}' 
 		          style="width: 10em" {{ row.checked }}>
 		        {% if row.action == 'append' %}
-		            <input type=button value='{{ _("Lisää") }}'>
+		            <input type=button value="{{ _('Add') }}">
 		        {% endif %}
-		        {% if row.default %}<br />{{ _("Oletusarvo") }} {{ row.default }}
+		        {% if row.default %}<br />{{ _('Default') }} {{ row.default }}
 		        {% endif %}
 	       {% endif %}
 		    </td>

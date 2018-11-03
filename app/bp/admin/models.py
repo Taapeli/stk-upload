@@ -18,8 +18,10 @@ Created on 2.3.2018
 import shareds
 import logging
 from datetime import datetime
+from flask import flash
 from flask_security import current_user
-from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError
+from flask_babelex import _
+from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, ConstraintError
 
 
 class DataAdmin():
@@ -36,21 +38,21 @@ class DataAdmin():
         self.roles = user.roles
         if user.has_role('admin'):
                 return
-        raise ValueError("User {} has not admin privileges".format(self.username))
+        raise ValueError(_("User {} has not admin privileges").format(self.username))
 
 
     def db_reset(self, opt=None):
         if opt == "total":
             """ Koko kanta tyhjennetään """
-            msg = "All data is deleted. "
+            msg = _("All data is deleted. ")
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_all_nodes)
         elif opt == "save_users":
-            msg = "All data but users and roles are removed."
+            msg = _("All data but users and roles are removed.")
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_data_nodes)
         elif opt == "my_own":
-            msg = "All persons and event by {} are removed. ".format(self.username)
+            msg = _("All persons and event by {} are removed. ").format(self.username)
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
                                                   user=self.username)
@@ -77,11 +79,11 @@ class UserAdmin():
 #        self.roles = user.roles
         if current_user.has_role('admin'):
                 return
-        raise ValueError("User {} has not admin privileges".format(self.username))
+        raise ValueError(_("User {} has not admin privileges").format(self.username))
 
     @classmethod
     def _build_email_from_node(cls, emailNode):
-        ''' Returns an AllowedEmail class instance '''
+        ''' Returns an Allowed_email class instance '''
         if emailNode is None:
             return None
         email = shareds.allowed_email_model(**emailNode.properties)
@@ -90,9 +92,9 @@ class UserAdmin():
         if 'creator' in emailNode.properties:
             email.creator = emailNode.properties['creator']
         if 'created_at' in emailNode.properties:
-            email.created_at = datetime.fromtimestamp(emailNode.properties['created_at']/1000)
-        if 'registered_at' in emailNode.properties:
-            email.registered_at = datetime.fromtimestamp(emailNode.properties['registered_at']/1000)        
+            email.created_at = datetime.fromtimestamp(int(emailNode.properties['created_at']/1000))
+        if 'confirmed_at' in emailNode.properties:
+            email.confirmed_at = datetime.fromtimestamp(int(emailNode.properties['confirmed_at']/1000))        
        
         return email
     
@@ -103,6 +105,9 @@ class UserAdmin():
                 with session.begin_transaction() as tx:
                     tx.run(Cypher_adm.allowed_email_register, email=email, role=role, admin_name=current_user.username)
                     tx.commit()
+        except ConstraintError as ex:
+            logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
+            flash(_("Given allowed email address already exists"))                            
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      

@@ -30,8 +30,12 @@ class Note:
         self.id = ''
         self.type = ''
         self.handle = ''
+        self.text = ''
         self.change = 0
         self.priv = 0
+
+    def __str__(self):
+        return "{} {} '{} ...'".format(self.id, self.type, self.text[:16])
 
     @classmethod
     def from_node(cls, node):
@@ -40,9 +44,9 @@ class Note:
         '''
         n = cls()
         n.uniq_id = node.id
+        n.id = node['id'] or ''
         n.handle = node['handle']
         n.change = node['change']
-        n.id = node['id'] or ''
         n.priv = node['priv'] or ''
         n.type = node['type'] or ''
         n.text = node['text'] or ''
@@ -141,18 +145,18 @@ ORDER BY n.type"""
 
         return '0'
 
-    def __str__(self):
-        """ Tulostaa tiedot """
-#         print ("*** Note ***")
-#         print ("Handle: " + self.handle)
-#         print ("Change: " + self.change)
-#         #print ("Id: " + self.id)
-#         #print ("Priv: " + self.priv)
-#         #print ("Type: " + self.type)
-#         #print ("Text: " + self.text)
-        t = self.text if len(self.text) < 41 else self.text[:37] + '...'
-        return ("Note id={}, type={}, priv={} '{}'".\
-                format(self.id, self.type, self.priv, t))
+#     def __str__(self):
+#         """ Tulostaa tiedot """
+# #         print ("*** Note ***")
+# #         print ("Handle: " + self.handle)
+# #         print ("Change: " + self.change)
+# #         #print ("Id: " + self.id)
+# #         #print ("Priv: " + self.priv)
+# #         #print ("Type: " + self.type)
+# #         #print ("Text: " + self.text)
+#         t = self.text if len(self.text) < 41 else self.text[:37] + '...'
+#         return ("Note id={}, type={}, priv={} '{}'".\
+#                 format(self.id, self.type, self.priv, t))
 
 
     def save(self, tx):

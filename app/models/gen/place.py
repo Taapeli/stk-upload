@@ -13,6 +13,7 @@ from .dates import DateRange
 from .cypher import Cypher_place
 from models.dbtree import DbTree
 from models.cypher_gramps import Cypher_place_w_handle
+from models.gen.event_combo import Event_combo
 
 class Place:
     """ Paikka
@@ -33,6 +34,10 @@ class Place:
                     href            str url osoite
                     type            str url tyyppi
                     description     str url kuvaus
+                surrounding[]       int uniq_ids of upper
+                surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
+                note_ref[]          int uniq_ids of Notes
+                citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
@@ -52,8 +57,12 @@ class Place:
         self.change = 0
         self.names = []
         self.coord = None
+        
+        self.uppers = []        # Upper place objects for hirearchy display
+        self.notes = []         # Upper place objects for hierarchy display
         self.urls = []          # Weburl instance list
 
+        self.note_ref = []      # uniq_ids of Notes
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.noteref_hlink = []
 
@@ -95,11 +104,12 @@ class Place:
             if nm.lang:
                 name_list.append("{} ({})".format(nm.name, nm.lang))
             else:
-                name_list.append(nm.name)
+                # Put first the name with no lang
+                name_list = [nm.name] + name_list
         if name_list:
             return name_list
         else:
-            return self.pname
+            return [self.pname]
 
 
     @staticmethod
@@ -148,7 +158,7 @@ RETURN p ORDER BY p.pname"""
             esim. [["Svartholm", "sv"], ["Svartholma", None]]
             #TODO: Ei hieno, po. Place_name objects!
         """
-        plid = self.uniq_id
+        #plid = self.uniq_id
         query = """
 MATCH (place:Place)-[:NAME]->(n:Place_name)
     WHERE ID(place)=$place_id
@@ -157,7 +167,7 @@ OPTIONAL MATCH (place)-[nr:NOTE]->(note:Note)
 RETURN place, COLLECT([n.name, n.lang]) AS names,
     COLLECT (DISTINCT url) AS urls, COLLECT (DISTINCT note) AS notes
         """
-        place_result = shareds.driver.session().run(query, place_id=plid)
+        place_result = shareds.driver.session().run(query, place_id=self.uniq_id)
 
         for place_record in place_result:
             self.change = int(place_record["place"]["change"])  #TODO only temporary int()
@@ -272,7 +282,9 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
 
 
         def combine_places(field):
-            """ Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
+            """ Returns a list of cleartext names got from Place_name objects
+            
+                Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
                 "Lovisa", "sv"]].
                 Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
                 Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
@@ -311,7 +323,7 @@ RETURN place, COLLECT([n.name, n.lang]) AS names,
         #TODO Lajiteltava kielen mukaan jotenkin
         """
         names = []
-        for n in field:
+        for n in sorted(field, key=lambda x:x[1]):
             if n[1]:
                 # Name with langiage code
                 names.append("{} ({})".format(n[0], n[1]))
@@ -418,20 +430,17 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                                               locid=int(loc_id))
         ret = []
         for record in result:
-            p = Place()
-            p.uid = record["uid"]
-            p.etype = record["etype"]
-            if record["edates"][0] == None:
-                dates = None
-                p.edates = ""   # Normal: "24.3.1861"
-                p.date = ""     # Normal: "1861-03-24"
-            else:
+            e = Event_combo()
+            # Fields uid (person uniq_id) and names are on standard in Event_combo
+            e.uid = record["uid"]
+            e.type = record["etype"]
+            if record["edates"][0] != None:
                 dates = DateRange(record["edates"])
-                p.edates = str(dates)
-                p.date = dates.estimate()
-            p.role = record["role"]
-            p.names = record["names"]   # tuples [name_type, given_name, surname]
-            ret.append(p)
+                e.dates = str(dates)
+                e.date = dates.estimate()
+            e.role = record["role"]
+            e.names = record["names"]   # tuples [name_type, given_name, surname]
+            ret.append(e)
         return ret
 
     @staticmethod
@@ -475,7 +484,8 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             if self.coord:
                 # If no coordinates, don't set coord attribute
                 p_attr.update({"coord": self.coord.get_coordinates()})
-            tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
+            result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
+            self.uniq_id = result.single()[0]
         except Exception as err:
             print("Virhe Place.create: {0}".format(err), file=stderr)
 
@@ -506,7 +516,8 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         # Make hierarchy relations to upper Place nodes
         for upper in self.surround_ref:
             try:
-                if 'dates' in upper and upper['dates'] != None:
+                print("upper {} -> {}".format(self, upper))
+                if 'dates' in upper and isinstance(upper['dates'], DateRange):
                     r_attr = upper['dates'].for_db()
                 else:
                     r_attr = {}
@@ -548,9 +559,9 @@ class Place_name:
         else:
             d = ""
         if self.lang != '':
-            return "{} ({}){}".format(self.name, self.lang, d)
+            return "'{}' ({}){}".format(self.name, self.lang, d)
         else:
-            return "{}{}".format(self.name, d)
+            return "'{}'{}".format(self.name, d)
 
     @classmethod
     def from_node(cls, node):
