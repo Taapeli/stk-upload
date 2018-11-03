@@ -271,7 +271,8 @@ def gedcom_info(gedcom):
         num_individuals=num_individuals, 
         transforms=transforms,
         metadata=metadata,
-        info=show_info(filename,"utf-8"),
+        #info=show_info(filename,"utf-8"),  # removed temporararily
+        info="no info...",
     )
 
 

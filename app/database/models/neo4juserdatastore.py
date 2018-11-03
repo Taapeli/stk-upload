@@ -12,7 +12,7 @@ from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, Const
 import datetime
 #import shareds
 import logging
-from flask_security.views import confirm_email
+#from flask_security.views import confirm_email
 #from wtforms.validators import ValidationError
 logger = logging.getLogger('neo4juserdatastore')
 
@@ -172,17 +172,20 @@ class Neo4jUserDatastore(UserDatastore):
 
     def _update_user (self, tx, user):         # ============ User update ==============
         rolelist = []
+#   Build a list of updated user role names        
         for role in user.roles:
             roleToAdd = (role.name if isinstance(role, self.role_model) else role)
             if not roleToAdd in rolelist:
                 rolelist.append(roleToAdd)
         try:
             logger.debug('_put_user update' + user.email + ' ' + user.name)
+#   Confirm time is copied from allowed email if not in the user aregument        
             confirmtime = None 
             if user.confirmed_at == None:
                 confirmtime = UserAdmin.confirm_allowed_email(tx, user.email).properties['confirmed_at']
             else:     
-                confirmtime = int(user.confirmed_at.timestamp() * 1000)                                   
+                confirmtime = int(user.confirmed_at.timestamp() * 1000)
+                                                   
             result = tx.run(Cypher.user_update, 
                 id=int(user.id), 
                 email=user.email,
@@ -198,7 +201,21 @@ class Neo4jUserDatastore(UserDatastore):
                 last_login_ip = user.last_login_ip,
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
-
+#   Find list of previous user -> role connections
+            prev_roles = [rolenode.name for rolenode in self.find_UserRoles(user.email)]
+#   Delete connections that are not in edited connection list            
+            for rolename in prev_roles:
+                if not rolename in rolelist:
+                    tx.run(Cypher.user_role_delete,
+                           email = user.email,
+                           name = rolename) 
+#   Add connections that are not in previous connection list                    
+            for rolename in rolelist:
+                if not rolename in prev_roles:
+                    tx.run(Cypher.user_role_add, 
+                           email = user.email,
+                           name = rolename)        
+          
             for record in result:
                 userNode = (record['user'])
                 logger.info('User with email address {} updated'.format(user.email)) 
