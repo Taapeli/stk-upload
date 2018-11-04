@@ -22,10 +22,12 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def upload_file(infile,folder):
+def upload_file(infile,folder=None):
     """ Save file 'infile' in the upload folder 
         and return the final full name of the file 
     """
+    if not folder:
+        folder = app.config['UPLOAD_FOLDER']
     try:
         filename = normalized_name(infile.filename)
     except Exception:
