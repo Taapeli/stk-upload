@@ -1,7 +1,7 @@
 from flask import session
 from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, ValidationError
-from wtforms import SelectField, SubmitField
+from wtforms import SelectField, SubmitField, BooleanField
 from flask_security.utils import _
 from flask_mail import Mail
 from database.models.neo4jengine import Neo4jEngine 
@@ -147,9 +147,16 @@ class ExtendedLoginForm(LoginForm):
 
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
-    email = StringField('Email Address', validators=[Required('Email required') ])
+    email = StringField(_('Email Address'), validators=[Required('Email required') ])
+    agree = BooleanField(_('I have read and agree to the Terms and Conditions of use'))
+    terms = SubmitField(_('See the terms of use'))
     submit = SubmitField(_('Accept and register'))
-
+ 
+    def validate_agree(self, field):
+        if not field.data:
+            raise ValidationError(_('Please indicate that you have read and agree to the Terms and Conditions')) 
+        else:
+            return True 
 #    email = StringField('Email', validators=[validators.InputRequired()])
     def validate_email(self, field):
         for result in shareds.driver.session().run(SetupCypher.email_val, email=field.data):
@@ -158,17 +165,17 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
                 raise ValidationError(_('Email address must be an authorized one')) 
             else:
                 return True 
+
         
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
     #language = StringField('Language', validators=[Required('Language required')])
     language = SelectField('Language', 
-                           choices=[
-                               ("fi","suomi"),
-                               ("sv","ruotsi"),
-                               ("en","englanti"),
-                            ],
-                           validators=[Required('Language required')])
+                choices=[
+                    ("fi",_("Finnish")),
+                    ("sv",_("Swedish")),
+                    ("en",_("English"))],
+                validators=[Required('Language required')])
 
 
 #============================== Start here ====================================
@@ -176,6 +183,9 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 shareds.mail = Mail(shareds.app)
 shareds.db = Neo4jEngine(shareds.app)
 shareds.driver  = shareds.db.driver
+
+shareds.user_model = User
+shareds.role_model = Role
 
 print('Stk server setups') 
 sysversion = Chkdate()  # Last application commit date or "Unknown"
