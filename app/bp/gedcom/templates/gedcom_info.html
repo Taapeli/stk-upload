@@ -106,14 +106,14 @@ table.diff td {
 			var version = $(this).data("gedcom");
             $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
 		        $("#versions").click(); 
-                alert(gedcom + "{{ _('renamed to') }} " + rsp.newname + "\n" +
-                	  version + "{{ _('renamed to') }} " + gedcom);
+                alert(gedcom + " {{ _('renamed to') }} " + rsp.newname + "\n" +
+                	  version + " {{ _('renamed to') }} " + gedcom);
             });
     	});
     	$("#save_result").click(function(rsp) {
 			var gedcom = "{{ gedcom }}";
             $.get("/gedcom/save/{{ gedcom }}", function(rsp) {
-		        var msg  = gedcom + "{{ _(' renamed to ') }}" + rsp.newname; 
+		        var msg  = gedcom + " {{ _('renamed to') }} " + rsp.newname; 
             	$("#oldname").text(rsp.newname);
             	$("#div_oldname").show();
             	$("#div_save").hide();

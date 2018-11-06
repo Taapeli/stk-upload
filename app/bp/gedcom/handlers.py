@@ -233,7 +233,7 @@ def gedcom_upload():
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        flash(_('Choose a  GEDCOM file to upload'), category='flash_warning')
+        flash(_('Choose a GEDCOM file to upload'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -342,7 +342,7 @@ def process_gedcom(cmd, transform_module):
     """
 
 
-    msg = _("Transform '{}' started {}").format(
+    msg = _("Transform '{}' started at {}").format(
              transform_module.__name__, 
              util.format_timestamp())
     LOG.info("------ {} ------".format(msg))
@@ -389,7 +389,7 @@ def process_gedcom(cmd, transform_module):
         traceback.print_exc()
     finally:
         time.sleep(1)  # for testing...
-        msg = _("Transform '{}' ended {}").format(
+        msg = _("Transform '{}' ended at {}").format(
                  transform_module.__name__, 
                  util.format_timestamp())
         print("------ {} ------".format(msg))
