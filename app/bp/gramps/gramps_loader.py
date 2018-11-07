@@ -24,6 +24,8 @@ from models.gen.dates import Gramps_DateRange
 from models.gen.citation import Citation
 from models.gen.source import Source
 from models.gen.repository import Repository
+
+from models.loadfile import status_update
 from models.dataupdater import set_confidence_value, set_person_refnames
 import shareds
 
@@ -32,58 +34,59 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     """ 
     Reads a Gramps xml file, and saves the information to db 
     
-    Metacode for batch log creation UserProfile --> Batch --> Log:
+Todo: There are beforehand estimated progress persentage values 1..100 for each
+    upload step. The are stored in *.meta file and may be queried from the UI.
     
+    Metacode for batch log creation UserProfile --> Batch.
+
     # Start a Batch 
         routes.upload_gramps / models.loadfile.upload_file >
             # Create id / bp.gramps.batchlogger.Batch._create_id
             match (p:UserProfile {username:"jussi"}); 
             create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"}) 
             return b
-    # Load the file (in routes.save_loaded_gramps) and create the first Log
+    # Load the file (in routes.save_loaded_gramps) 
         models.loadfile.upload_file > 
-            create (b) -[:HAS_STEP]-> (l:Log {status:"started"}) 
-            return l.id as lid0
+            models.loadfile.status_update({status:"started", percent:1}) 
         # Clean apostrophes
         file clean > 
-            match (l) where ID(l) = lid0; set l.status = "loaded"; 
-            lid = lid0
+            models.loadfile.status_update({status:"loading", percent:2}) 
     # Käsittele tietoryhmä 1
         models.gramps.gramps_loader.xml_to_neo4j > 
-            match (l) whereID(l) = lid; 
-            create (l) -[:HAS_STEP]-> (l1:Log {status:"done"})
-            return l1.id as lid
+            models.loadfile.status_update({status:"storing", percent:3}) 
     # Käsittele tietoryhmä 2 ...
-        models.gramps.gramps_loader.xml_to_neo4j > 
-            match (l) whereID(l) = lid; 
-            create (l) -[:HAS_STEP]-> (l1:Log {status:"done"})
-            return l1.id as lid
     # ...
+    # Käsittele henkilöt
+        models.gramps.gramps_loader.xml_to_neo4j >
+            # (Henkilömäärä / 64) kertaa kasvatetaan prosenttilukua x yhdellä
+            models.loadfile.status_update({status:"storing", percent:x}) 
     # Viimeistele data
         models.gramps.gramps_loader.xml_to_neo4j > 
-            match (l) whereID(l) = lid; 
-            create (l) -[:HAS_STEP]-> (l1:Log {status:"done"})
-            return l1.id as lid
+            models.loadfile.status_update({status:"storing", percent:95}) 
     # Merkitse valmiiksi
-        match (b) set b.status="completed"; match (p:UserProfile {username:"jussi"}); 
+        models.loadfile.status_update({status:"done", percent:100}) 
+
+        match (p:UserProfile {username:"jussi"}); 
         match (p) -[r:CURRENT_LOAD]-> () delete r
         create (p) -[:CURRENT_LOAD]-> (b)
     """
 
-    ''' Uncompress and hide apostrophes for DOM handler '''
+    ''' Uncompress and hide apostrophes for DOM handler (and save log)
+    '''
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
     handler = DOM_handler(file_cleaned, userid)
 
     # Initialize Run report 
-    handler.batch_logger = Batch(userid)
-    handler.log(Log("Storing data from Gramps", level="TITLE"))
-    handler.log(Log("Loaded file '{}'".format(file_displ),
-                           elapsed=shareds.tdiff))
-    handler.log(cleaning_log)
+    handler.blog = Batch(userid)
+    handler.blog.log_event({'title':"Storing data from Gramps", 'level':"TITLE"})
+    handler.blog.log_event({'title':"Loaded file '{}'".format(file_displ),
+                            'elapsed':shareds.tdiff})
+    handler.blog.log(cleaning_log)
     t0 = time.time()
-    handler.batch_logger.begin(None, file_cleaned)
+    handler.blog.begin(None, file_cleaned)
+    status_update({'percent':1})
 
     try:
         ''' Start DOM transaction '''
@@ -102,20 +105,21 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
         handler.handle_families()
 
         # Set person confidence values (for all persons!)
-        set_confidence_value(handler.tx, batch_logger=handler.batch_logger)
+        set_confidence_value(handler.tx, batch_logger=handler.blog)
         # Set Refname links (for imported persons)
         handler.set_refnames()
         handler.commit()
 
     except ConnectionError as err:
         print("Virhe {0}".format(err))
-        handler.log(Log("Talletus tietokantaan ei onnistunut {} {}".\
-                        format(err.message, err.code), level="ERROR"))
-        # raise SystemExit("Stopped due to errors")    # Stop processing
-        raise
+        handler.blog.log_event({'title':"Talletus tietokantaan ei onnistunut {} {}".\
+                                format(err.message, err.code), 'level':"ERROR"})
+        raise SystemExit("Stopped due to ConnectionError")    # Stop processing?
+        #raise
 
-    handler.log(Log("Total time", elapsed=time.time()-t0, level="TITLE"))
-    return handler.batch_logger.list()
+    handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
+                            'elapsed':time.time()-t0, 'percent':100})
+    return handler.blog.list()
 
 
 def file_clean(pathname):
@@ -156,8 +160,8 @@ def file_clean(pathname):
                 print("Not a gzipped file")
                 counter = _clean_apostrophes(file_in, file_out)
             msg = "Cleaned apostrophes from input lines"
-        event = Log(msg, count=counter, elapsed=time.time()-t0)
-
+        event = Log({'title':msg, 'count':counter, 
+                     'elapsed':time.time()-t0, 'percent':1})
     return (file_cleaned, file_displ, event)
 
 
@@ -193,12 +197,9 @@ class DOM_handler():
                 print("Transaction committed")
             except Exception as e:
                 print("Transaction failed")
-                self.log(Log("Talletus tietokantaan ei onnistunut {} {}".\
-                              format(e.__class__.__name__, e), level="ERROR"))
+                self.blog.log_event({'title':"Talletus tietokantaan ei onnistunut {} {}".\
+                                     format(e.__class__.__name__, e), 'level':"ERROR"})
 
-    def log(self, batch_event):
-        # Add a bp.gramps.batchlogger.Log to Batch log
-        self.batch_logger.append(batch_event)
 
     # XML subtree handlers
 
@@ -227,22 +228,22 @@ class DOM_handler():
                 if citation_dateval.hasAttribute("val"):
                     c.dateval = citation_dateval.getAttribute("val")
             elif len(citation.getElementsByTagName('dateval') ) > 1:
-                self.log(Log("More than one dateval tag in a citation",
-                                    level="WARNING", count=c.id))
+                self.blog.log_event({'title':"More than one dateval tag in a citation",
+                                     'level':"WARNING", 'count':c.id})
 
             if len(citation.getElementsByTagName('page') ) == 1:
                 citation_page = citation.getElementsByTagName('page')[0]
                 c.page = citation_page.childNodes[0].data
             elif len(citation.getElementsByTagName('page') ) > 1:
-                self.log(Log("More than one page tag in a citation",
-                                    level="WARNING", count=c.id))
+                self.blog.log_event({'title':"More than one page tag in a citation",
+                                     'level':"WARNING", 'count':c.id})
 
             if len(citation.getElementsByTagName('confidence') ) == 1:
                 citation_confidence = citation.getElementsByTagName('confidence')[0]
                 c.confidence = citation_confidence.childNodes[0].data
             elif len(citation.getElementsByTagName('confidence') ) > 1:
-                self.log(Log("More than one confidence tag in a citation",
-                                    level="WARNING", count=c.id))
+                self.blog.log_event({'title':"More than one confidence tag in a citation",
+                                     'level':"WARNING", 'count':c.id})
 
             if len(citation.getElementsByTagName('noteref') ) >= 1:
                 for i in range(len(citation.getElementsByTagName('noteref') )):
@@ -255,13 +256,14 @@ class DOM_handler():
                 if citation_sourceref.hasAttribute("hlink"):
                     c.source_handle = citation_sourceref.getAttribute("hlink")
             elif len(citation.getElementsByTagName('sourceref') ) > 1:
-                self.log(Log("More than one sourceref tag in a citation",
-                                    level="WARNING",count= c.id))
+                self.blog.log_event({'title':"More than one sourceref tag in a citation",
+                                     'level':"WARNING",'count':c.id})
 
             c.save(self.tx)
             counter += 1
 
-        self.log(Log("Citations", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Citations", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def handle_events(self):
@@ -292,19 +294,17 @@ class DOM_handler():
                 else:
                     e.type = ''
             elif len(event.getElementsByTagName('type') ) > 1:
-                self.log(Log("More than one type tag in an event",
-                                    level="WARNING", count=e.id))
+                self.blog.log_event({'title':"More than one type tag in an event",
+                                     'level':"WARNING", 'count':e.id})
 
             if len(event.getElementsByTagName('description') ) == 1:
                 event_description = event.getElementsByTagName('description')[0]
                 # If there are description tags, but no description data
                 if (len(event_description.childNodes) > 0):
                     e.description = event_description.childNodes[0].data
-#                 else:
-#                     e.description = ''
             elif len(event.getElementsByTagName('description') ) > 1:
-                self.log(Log("More than one description tag in an event",
-                                    level="WARNING", count=e.id))
+                self.blog.log_event({'title':"More than one description tag in an event",
+                                     'level':"WARNING", 'count':e.id})
 
             """ Dates:
                 <daterange start="1820" stop="1825" quality="estimated"/>
@@ -323,8 +323,8 @@ class DOM_handler():
                 if event_place.hasAttribute("hlink"):
                     e.place_hlink = event_place.getAttribute("hlink")
             elif len(event.getElementsByTagName('place') ) > 1:
-                self.log(Log("More than one place tag in an event",
-                                    level="WARNING", count=e.id))
+                self.blog.log_event({'title':"More than one place tag in an event",
+                                     'level':"WARNING", 'count':e.id})
 
             e.attr = dict()
             for attr in event.getElementsByTagName('attribute'):
@@ -344,13 +344,14 @@ class DOM_handler():
                 if event_objref.hasAttribute("hlink"):
                     e.objref_hlink = event_objref.getAttribute("hlink")
             elif len(event.getElementsByTagName('objref') ) > 1:
-                self.log(Log("More than one objref tag in an event",
-                                    level="WARNING", count=e.id))
+                self.blog.log_event({'title':"More than one objref tag in an event",
+                                     'level':"WARNING", 'count':e.id})
 
             e.save(self.tx)
             counter += 1
 
-        self.log(Log("Events", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Events", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def handle_families(self):
@@ -378,24 +379,24 @@ class DOM_handler():
                 if family_rel.hasAttribute("type"):
                     f.rel_type = family_rel.getAttribute("type")
             elif len(family.getElementsByTagName('rel') ) > 1:
-                self.log(Log("More than one rel tag in a family",
-                                    level="WARNING", count=f.id))
+                self.blog.log_event({'title':"More than one rel tag in a family",
+                                     'level':"WARNING", 'count':f.id})
 
             if len(family.getElementsByTagName('father') ) == 1:
                 family_father = family.getElementsByTagName('father')[0]
                 if family_father.hasAttribute("hlink"):
                     f.father = family_father.getAttribute("hlink")
             elif len(family.getElementsByTagName('father') ) > 1:
-                self.log(Log("More than one father tag in a family",
-                                    level="WARNING", count=f.id))
+                self.blog.log_event({'title':"More than one father tag in a family",
+                                     'level':"WARNING", 'count':f.id})
 
             if len(family.getElementsByTagName('mother') ) == 1:
                 family_mother = family.getElementsByTagName('mother')[0]
                 if family_mother.hasAttribute("hlink"):
                     f.mother = family_mother.getAttribute("hlink")
             elif len(family.getElementsByTagName('mother') ) > 1:
-                self.log(Log("More than one mother tag in a family",
-                                    level="WARNING", count=f.id))
+                self.blog.log_event({'title':"More than one mother tag in a family",
+                                     'level':"WARNING", 'count':f.id})
 
             if len(family.getElementsByTagName('eventref') ) >= 1:
                 for i in range(len(family.getElementsByTagName('eventref') )):
@@ -420,7 +421,8 @@ class DOM_handler():
             f.save(self.tx)
             counter += 1
 
-        self.log(Log("Families", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Families", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def handle_notes(self):
@@ -454,7 +456,8 @@ class DOM_handler():
             n.save(self.tx)
             counter += 1
 
-        self.log(Log("Notes", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Notes", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def handle_media(self):
@@ -490,7 +493,8 @@ class DOM_handler():
             o.save(self.tx)
             counter += 1
 
-        self.log(Log("Media objects", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Media objects", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def handle_people(self):
@@ -519,8 +523,8 @@ class DOM_handler():
                 person_gender = person.getElementsByTagName('gender')[0]
                 p.gender = person_gender.childNodes[0].data
             elif len(person.getElementsByTagName('gender') ) > 1:
-                self.log(Log("More than one gender tag in a person",
-                                    level="WARNING", count=p.id))
+                self.blog.log_event({'title':"More than one gender in a person",
+                                     'level':"WARNING", 'count':p.id})
 
             if len(person.getElementsByTagName('name') ) >= 1:
                 for i in range(len(person.getElementsByTagName('name') )):
@@ -536,29 +540,29 @@ class DOM_handler():
                         if len(person_first.childNodes) == 1:
                             pname.firstname = person_first.childNodes[0].data
                         elif len(person_first.childNodes) > 1:
-                            self.log(Log("More than one child node in a first name of a person",
-                                                level="WARNING", count=p.id))
+                            self.blog.log_event({'title':"More than one child node in a first name of a person",
+                                                'level':"WARNING", 'count':p.id})
                     elif len(person_name.getElementsByTagName('first') ) > 1:
-                        self.log(Log("More than one first name in a person",
-                                            level="WARNING", count=p.id))
+                        self.blog.log_event({'title':"More than one first name in a person",
+                                             'level':"WARNING", 'count':p.id))
 
                     if len(person_name.getElementsByTagName('surname') ) == 1:
                         person_surname = person_name.getElementsByTagName('surname')[0]
                         if len(person_surname.childNodes ) == 1:
                             pname.surname = person_surname.childNodes[0].data
                         elif len(person_surname.childNodes) > 1:
-                            self.log(Log("More than one child node in a surname of a person",
-                                                level="WARNING", count=p.id))
+                            self.blog.log_event({'title':"More than one child node in a surname of a person",
+                                                 'level':"WARNING", 'count':p.id})
                     elif len(person_name.getElementsByTagName('surname') ) > 1:
-                        self.log(Log("More than one surname in a person",
-                                            level="WARNING", count=p.id))
+                        self.blog.log_event({'title':"More than one surname in a person",
+                                             'level':"WARNING", 'count':p.id})
 
                     if len(person_name.getElementsByTagName('suffix') ) == 1:
                         person_suffix = person_name.getElementsByTagName('suffix')[0]
                         pname.suffix = person_suffix.childNodes[0].data
                     elif len(person_name.getElementsByTagName('suffix') ) > 1:
-                        self.log(Log("More than one suffix in a person",
-                                            level="WARNING", count=p.id))
+                        self.blog.log_event({'title':"More than one suffix in a person",
+                                             'level':"WARNING", 'count':p.id})
 
                     p.names.append(pname)
 
@@ -611,7 +615,8 @@ class DOM_handler():
             # The refnames will be set for these persons 
             self.uniq_ids.append(p.uniq_id)
 
-        self.log(Log("Persons", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Persons", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def handle_places(self):
@@ -640,8 +645,8 @@ class DOM_handler():
                 placeobj_ptitle = placeobj.getElementsByTagName('ptitle')[0]
                 place.ptitle = placeobj_ptitle.childNodes[0].data
             elif len(placeobj.getElementsByTagName('ptitle') ) > 1:
-                self.log(Log("More than one ptitle in a place",
-                                    level="WARNING", count=place.id))
+                self.blog.log_event({'title':"More than one ptitle in a place",
+                                     'level':"WARNING", 'count':place.id})
 
             for placeobj_pname in placeobj.getElementsByTagName('pname'):
                 placename = Place_name()
@@ -695,7 +700,8 @@ class DOM_handler():
             place.save(self.tx)
             counter += 1
 
-        self.log(Log("Places", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Places", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def handle_repositories(self):
@@ -722,15 +728,15 @@ class DOM_handler():
                 repository_rname = repository.getElementsByTagName('rname')[0]
                 r.rname = repository_rname.childNodes[0].data
             elif len(repository.getElementsByTagName('rname') ) > 1:
-                self.log(Log("More than one rname in a repository",
-                                    level="WARNING", count=r.id))
+                self.blog.log_event({'title':"More than one rname in a repocitory",
+                                     'level':"WARNING", 'count':r.id})
 
             if len(repository.getElementsByTagName('type') ) == 1:
                 repository_type = repository.getElementsByTagName('type')[0]
                 r.type =  repository_type.childNodes[0].data
             elif len(repository.getElementsByTagName('type') ) > 1:
-                self.log(Log("More than one type in a repository",
-                                    level="WARNING", count=r.id))
+                self.blog.log_event({'title':"More than one type in a repocitory",
+                                     'level':"WARNING", 'count':r.id})
 
             for repository_url in repository.getElementsByTagName('url'):
                 webref = Weburl()
@@ -743,7 +749,8 @@ class DOM_handler():
             r.save(self.tx)
             counter += 1
 
-        self.log(Log("Repositories", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Repositories", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def handle_sources(self):
@@ -770,8 +777,8 @@ class DOM_handler():
                 source_stitle = source.getElementsByTagName('stitle')[0]
                 s.stitle = source_stitle.childNodes[0].data
             elif len(source.getElementsByTagName('stitle') ) > 1:
-                self.log(Log("More than one stitle in a source",
-                                    level="WARNING", count=s.id))
+                self.blog.log_event({'title':"More than one stitle in a source",
+                                     'level':"WARNING", 'count':s.id})
 
 #TODO More than one noteref in a source     S0041, S0002
 # Vaihdetaan s.noteref_hlink --> s.note_handles[]
@@ -780,8 +787,8 @@ class DOM_handler():
                 if source_noteref.hasAttribute("hlink"):
                     s.noteref_hlink = source_noteref.getAttribute("hlink")
             elif len(source.getElementsByTagName('noteref') ) > 1:
-                self.log(Log("More than one noteref in a source",
-                                    level="WARNING", count=s.id))
+                self.blog.log_event({'title':"More than one noteref in a source",
+                                     'level':"WARNING", 'count':s.id})
 
             if len(source.getElementsByTagName('reporef') ) == 1:
                 source_reporef = source.getElementsByTagName('reporef')[0]
@@ -790,13 +797,14 @@ class DOM_handler():
                 if source_reporef.hasAttribute("medium"):
                     s.reporef_medium = source_reporef.getAttribute("medium")
             elif len(source.getElementsByTagName('reporef') ) > 1:
-                self.log(Log("More than one reporef in a source",
-                                    level="WARNING", count=s.id))
+                self.blog.log_event({'title':"More than one reporef in a source",
+                                     'level':"WARNING", 'count':s.id})
 
             s.save(self.tx)
             counter += 1
 
-        self.log(Log("Sources", count=counter, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Sources", 'count':counter, 
+                             'elapsed':time.time()-t0, 'percent':1})
 
 
     def set_refnames(self):
@@ -810,8 +818,9 @@ class DOM_handler():
             if p_id != None:
                 set_person_refnames(self, p_id)
 
-        self.log(Log("Created Refname references",
-                            count=self.namecount, elapsed=time.time()-t0))
+        self.blog.log_event({'title':"Created Refname references", 
+                             'count':self.namecount, 'elapsed':time.time()-t0,
+                             'percent':1})
 
 
     def _extract_daterange(self, obj):

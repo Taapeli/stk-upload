@@ -42,6 +42,7 @@ class Batch(object):
         # Runtime variables for batch steps
         self.steps = []
         self.totaltime = 0.0    # Sum of Log.elapsed
+        self.totalpercent = 0   # Sum of Log.percent
 
 
     def begin(self, tx, infile):
@@ -67,9 +68,9 @@ class Batch(object):
             try:
                 batch_id = tx.run(Cypher_batch.batch_find_id, 
                                   user=self.userid, batch_base=base).single().value()
-                print("# Edellinen batch_id={}".format(batch_id))
+                print("# Pervious batch_id={}".format(batch_id))
                 i = batch_id.rfind('.')
-                ext = batch_id[i+1:]
+                ext = int(batch_id[i+1:])
             except AttributeError as e:
                 # print ("Ei vanhaa arvoa {}".format(e))
                 ext = 0
@@ -78,8 +79,8 @@ class Batch(object):
                 ext = 0
     
             # 2. Form a new batch id
-            self.bid = "{}.{:03d}".format(base, int(ext) + 1)
-            print("# Uusi batch_id='{}'".format(self.bid))
+            self.bid = "{}.{:03d}".format(base, ext + 1)
+            print("# New batch_id='{}'".format(self.bid))
     
             # 3. Create a new Batch node
             b_attr = {
@@ -95,31 +96,32 @@ class Batch(object):
         return self.bid
 
 
-    def complete(self, tx, status='completed'):
+    def complete(self, tx):
         #TODO: argumentteja puuttuu
         return tx.run(Cypher_batch.batch_complete, user=self.userid, bid=self.bid)
+
+    def log_event(self, event_dict):
+        # Add a and event dictionary as a new Log to Batch log
+        batch_event = Log(event_dict)
+        self.log(batch_event)
+
+    def log(self, batch_event):
+        # Add a bp.gramps.batchlogger.Log to Batch log
+        self.append(batch_event)
 
 
     def append(self, obj):
         '''
         The argument object (a Log) is added to batch Log list
         '''
+        if not isinstance(obj, Log):
+            raise AttributeError("Batch.append need a Log instance")
+
         self.steps.append(obj)
         if isinstance(obj, Log) and not obj.elapsed == None:
             self.totaltime += obj.elapsed
             print("# " + str(obj))
             print('# BatchLogger totaltime={:.6f}'.format(obj.elapsed))
-
-        ''' 
-        Store the Log in the db to the end of Log node list
-        
-        (u:UserProfile {username:"Jussi"}) -[:HAS_LOADED]-> 
-        (b:Batch {id:"2018-05-10.1"}) -[:HAS_STEP*]-> 
-        (l0:Log) -[:HAS_STEP]-> (l1:Log {status: "1_notes", msg:"Notes", 
-                                          size:86, elapsed:0.02})
-        '''
-        pass
-        # Return the uniq_id of the created node
         return None
 
     def list(self):
@@ -134,24 +136,25 @@ class Batch(object):
         return li
 
 
-class Log(object):
+class Log():
     '''
     Creates an object for storing batch event information:
         level    str    log level: INFO, WARNING, ERROR, FATAL
         title    str    logged text message
         count    int    count of processed things in this event
         elapsed  float  time elapsed in seconds
+        percent  int    process progress grade 1..100
     '''
 
-    def __init__(self, title='', count=None, elapsed=None, level='INFO'):
+    def __init__(self, ev):
         '''
         Constructor
         '''
-        self.level = level
-        self.title = title
-        self.count = count
-        self.elapsed = elapsed
-
+        self.level = ev['level']        if 'level' in ev    else 'INFO'
+        self.title = ev['title']        if 'title' in ev    else ''
+        self.count = ev['count']        if 'count' in ev    else None
+        self.elapsed = ev['elapsed']    if 'elapsed' in ev  else None
+        self.percent = ev['percent']    if 'percent' in ev  else None
 
     def __str__(self):
         if self.count == None:
