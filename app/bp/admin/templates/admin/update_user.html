@@ -4,6 +4,9 @@
 {% block title %}{{ _("Update user") }}{% endblock %}
 {% block body %}
     {{ super() }}
+<style>
+label { display: inline-block; width:140pt; }
+</style>
 
     <h2>{{ _("Update user") }} '{{ username }}'</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
