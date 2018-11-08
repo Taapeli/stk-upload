@@ -39,7 +39,7 @@ def init_log(logfile):
     logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
 
 
-def show_info(input_gedcom, enc):
+def get_info(input_gedcom, enc):
     ''' Read gedgom HEAD info and count level 0 items
         Returns a list of descriptive lines
      '''
@@ -48,7 +48,7 @@ def show_info(input_gedcom, enc):
     #msg.append(os.path.basename(input_gedcom) + '\n')
     try:
         with open(input_gedcom, 'r', encoding=enc) as f:
-            for _ in range(100):
+            for i_ in range(100):
                 ln = f.readline()
                 if ln[:6] in ['2 VERS', '1 NAME', '1 CHAR']:
                     msg.append(ln[2:])
@@ -79,17 +79,17 @@ def show_info(input_gedcom, enc):
 
     except OSError:     # End of file
         pass
-    except UnicodeDecodeError as e:
-        msg.append(_("Wrong character set, add eg. '--Encoding ISO8859-1 '"))
-    except Exception as e:
-        msg.append( type(e).__name__ + str(e))
+    #except UnicodeDecodeError as e:
+    #    msg.append(_("Wrong character set, add eg. '--Encoding ISO8859-1 '"))
+    #except Exception as e:
+    #    msg.append( type(e).__name__ + str(e))
 
     if cnt:
         msg.append(_('        count\n'))
     for i in OrderedDict(sorted(cnt.items())):
         msg.append('{:4} {:8}\n'.format(i, cnt[i]))
-        
-    return ''.join(msg)
+    logging.info(msg)    
+    return cnt
 
 def read_gedcom(filename):
     try:
@@ -238,10 +238,16 @@ def gedcom_upload():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         os.makedirs(gedcom_folder, exist_ok=True)
-        file.save(os.path.join(gedcom_folder, filename))
+        fullname = os.path.join(gedcom_folder, filename)
+        file.save(fullname)
 
         desc = request.form['desc']
-        metadata = {'desc':desc}
+        encoding = util.guess_encoding(fullname)
+        metadata = {
+            'desc':desc,
+            'encoding':encoding,
+            'upload_time':util.format_timestamp(),
+        }
         save_metadata(filename, metadata)
         return redirect(url_for('.gedcom_list'))
   
@@ -264,17 +270,16 @@ def gedcom_info(gedcom):
         flash(_("That GEDCOM file does not exist on the server"), category='flash_error')
         return redirect(url_for('.gedcom_list'))
     metadata = get_metadata(gedcom)
-    num_individuals = 666
     transforms = get_transforms()
+    encoding = metadata.get('encoding','utf-8')
+    info = get_info(filename,encoding) 
+    num_individuals = info['INDI']
     return render_template('gedcom_info.html', 
         gedcom=gedcom, filename=filename, 
         num_individuals=num_individuals, 
         transforms=transforms,
         metadata=metadata,
-        #info=show_info(filename,"utf-8"),  # removed temporararily
-        info="no info...",
     )
-
 
 @bp.route('/gedcom/update_desc/<gedcom>', methods=['POST'])
 @login_required

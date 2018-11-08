@@ -138,21 +138,14 @@ table.diff td {
 			    </div>
 				<p>({{ _('Visualisation data, not based on material') }})</p>
 				<table>
-				    <tr><td>{{ _("Upload time") }}</td>
-				        <td class="right">2018-06-06</td></tr>
 				    <tr><td>{{ _("Number of individuals") }}</td>
 				        <td class="right">{{ num_individuals }}</td></tr>
 	                <tr><td>{{ _("Allow help desk to view data") }}</td>
 	                    <td class="right"><input type="checkbox" id="view_permission"></td></tr>
                     {% for meta in metadata.items() %}
-                    <!--
                     <tr><td>{{ meta.0 }}
                         <td>{{ meta.1 }}
-                    -->
                     {% endfor %}
-                    <pre>
-                    {{ info }}
-                    </pre>
 			    </table>
 	          </div>
 	       </div>
