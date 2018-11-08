@@ -62,5 +62,5 @@ def status_update(status):
     ''' STUB: Store process progress status 0..100 in metadata for display
         For ex. status = {status:"started", percent:1}
     '''
-    print("Progress {}".format(status))
+    print(" - models.loadfile.status_update: Progress {}".format(status))
     #Todo Store status info to *.meta file

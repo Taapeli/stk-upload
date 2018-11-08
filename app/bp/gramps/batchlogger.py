@@ -1,14 +1,13 @@
 '''
 Cumulates Batch steps and stores them as a Log node
 
-    After a series of logical run steps, Batch has a chain of step Logs
-    and it has a link to each data node (Person, Event, ...) created.
+    After a series of logical run steps, Batch has a link to each data node with
+    label Person or Family.
     The UserProfile has also relation CURRENT_LOAD to most current Batch.
 
     (u:UserProfile) -[:CURRENT_LOAD]-> (b:Batch)
     (u:UserProfile) -[:HAS_LOADED]-> (b:Batch)
-    (u:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:HAS_STEP*]-> (log:Log)
-    (b:Batch) -[:IN_BATCH]-> (anydata_node)
+    (b:Batch) -[:BATCH_MEMBER]-> (:Person|Family)
 
 Created on 26.5.2018
 
@@ -45,15 +44,15 @@ class Batch(object):
         self.totalpercent = 0   # Sum of Log.percent
 
 
-    def begin(self, tx, infile):
+    def start_batch(self, tx, infile):
         '''
         Creates a new Batch node with 
         - id      a date followed by an ordinal number '2018-06-05.001'
         - status  'started'
         - file    input filename
         
-        You may give an existing trasnaction tx, 
-        else a new transaction is created and committed
+        You may give an existing transaction tx, 
+        otherwise a new transaction is created and committed
         '''
 
         # 0. Create transaction, if not given
@@ -96,9 +95,19 @@ class Batch(object):
         return self.bid
 
 
-    def complete(self, tx):
-        #TODO: argumentteja puuttuu
+    def complete(self, tx=None):
+        ''' Mark this data batch completed '''
+        # 0. Create transaction, if not given
+        local_tx = False
+        with shareds.driver.session() as session:
+            if tx == None:
+                tx = session.begin_transaction()
+                local_tx = True
+            
         return tx.run(Cypher_batch.batch_complete, user=self.userid, bid=self.bid)
+        if local_tx:
+            tx.commit()
+
 
     def log_event(self, event_dict):
         # Add a and event dictionary as a new Log to Batch log

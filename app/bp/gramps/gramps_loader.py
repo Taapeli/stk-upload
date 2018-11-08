@@ -78,19 +78,20 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
     ''' Get XML DOM parser and start DOM elements handler transaction '''
     handler = DOM_handler(file_cleaned, userid)
 
-    # Initialize Run report 
+    # Initialize Run report
     handler.blog = Batch(userid)
     handler.blog.log_event({'title':"Storing data from Gramps", 'level':"TITLE"})
     handler.blog.log_event({'title':"Loaded file '{}'".format(file_displ),
                             'elapsed':shareds.tdiff})
     handler.blog.log(cleaning_log)
     t0 = time.time()
-    handler.blog.begin(None, file_cleaned)
-    status_update({'percent':1})
 
     try:
         ''' Start DOM transaction '''
         handler.begin_tx(shareds.driver.session())
+        # Create new Batch node and start
+        handler.batch_id = handler.blog.start_batch(None, file_cleaned)
+        status_update({'percent':1})
 
         handler.handle_notes()
         handler.handle_repositories()
@@ -104,18 +105,20 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
         handler.handle_people()
         handler.handle_families()
 
-        # Set person confidence values (for all persons!)
+        # Set person confidence values 
+        #TODO: Only for imported persons (now for all persons!)
         set_confidence_value(handler.tx, batch_logger=handler.blog)
         # Set Refname links (for imported persons)
         handler.set_refnames()
+        
+        handler.blog.complete(handler.tx)
         handler.commit()
 
     except ConnectionError as err:
-        print("Virhe {0}".format(err))
-        handler.blog.log_event({'title':"Talletus tietokantaan ei onnistunut {} {}".\
-                                format(err.message, err.code), 'level':"ERROR"})
+        print("Virhe ConnectionError {0}".format(err))
+        handler.blog.log_event(title="Talletus tietokantaan ei onnistunut {} {}".\
+                                     format(err.message, err.code), level="ERROR")
         raise SystemExit("Stopped due to ConnectionError")    # Stop processing?
-        #raise
 
     handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
                             'elapsed':time.time()-t0, 'percent':100})
@@ -169,8 +172,9 @@ def file_clean(pathname):
 
 class DOM_handler():
     """ XML DOM elements handler
-
-        Can create transaction and collect status log
+        - creates transaction
+        - processes different data groups from given xml file to database
+        - collects status log
     """
     def __init__(self, infile, current_user):
         """ Set DOM collection and username """
@@ -418,7 +422,7 @@ class DOM_handler():
                     if family_noteref.hasAttribute("hlink"):
                         f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
 
-            f.save(self.tx)
+            f.save(self.tx, self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Families", 'count':counter, 
@@ -452,6 +456,13 @@ class DOM_handler():
             if len(note.getElementsByTagName('text') ) == 1:
                 note_text = note.getElementsByTagName('text')[0]
                 n.text = note_text.childNodes[0].data
+
+            #TODO: 17.10.2018 Viime palaverissa mm. suunniteltiin, että kuolinsyyt 
+            # konvertoitaisiin heti Note-nodeiksi sopivalla node-tyypillä
+            print("Note type={}, text={}...".format(n.type, n.text[:16]))
+
+            #TODO: Uuden Weburl-luokan ja noden yhdistäminen Noteen siten, 
+            # että siinä olisi aina kaksi kenttää: description ja url.
 
             n.save(self.tx)
             counter += 1
@@ -501,7 +512,8 @@ class DOM_handler():
         # Get all the people in the collection
         people = self.collection.getElementsByTagName("person")
 
-        print ("***** {} Persons *****".format(len(people)))
+        person_count = len(people)
+        print ("***** {} Persons *****".format(person_count))
         t0 = time.time()
         counter = 0
 
@@ -544,7 +556,7 @@ class DOM_handler():
                                                 'level':"WARNING", 'count':p.id})
                     elif len(person_name.getElementsByTagName('first') ) > 1:
                         self.blog.log_event({'title':"More than one first name in a person",
-                                             'level':"WARNING", 'count':p.id))
+                                             'level':"WARNING", 'count':p.id})
 
                     if len(person_name.getElementsByTagName('surname') ) == 1:
                         person_surname = person_name.getElementsByTagName('surname')[0]
@@ -610,7 +622,7 @@ class DOM_handler():
                     if person_citationref.hasAttribute("hlink"):
                         p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
 
-            p.save(self.username, self.tx)
+            p.save(self.tx, self.batch_id)
             counter += 1
             # The refnames will be set for these persons 
             self.uniq_ids.append(p.uniq_id)

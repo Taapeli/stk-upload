@@ -30,36 +30,21 @@ MATCH (u) -[r1:HAS_LOADED]-> (b:Batch {id: $bid})
     SET r1.status="completed"
     SET b.status="completed"
 WITH u, b
-CREATE (b) -[r:COMPLETED]-> (l:Log)
-    SET l = l_attr // {status: $status, msg: $msg, size: $size, elapsed: $elapsed}
-WITH u, b
     OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
         DELETE c
-    CREATE (u) -[:CURRENT_LOAD]-> (b)
+    MERGE (u) -[:CURRENT_LOAD]-> (b)
 """
-    batch_x = """
-MATCH (u:UserProfile {userName: $user})
-MERGE (u) -[:HAS_LOADED {status: $status}]-> 
-    (b:Batch {id: $batch, file: $file}) -[:COMPLETED]-> 
-    (l:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
-WITH u, b
-    OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
-        DELETE c
-    CREATE (u) -[:CURRENT_LOAD]-> (b)
-"""
+#     batch_x = """
+# MATCH (u:UserProfile {userName: $user})
+# MERGE (u) -[:HAS_LOADED {status: $status}]-> 
+#     (b:Batch {id: $batch, file: $file}) -[:COMPLETED]-> 
+#     (l:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
+# WITH u, b
+#     OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
+#         DELETE c
+#     CREATE (u) -[:CURRENT_LOAD]-> (b)
+# """
 
-    batch_add_log = """
-MATCH (u:UserProfile {userName: $user})
-MATCH (u) -[:HAS_LOADED]-> (b:Batch {id:$batch}) -[:COMPLETED*]-> (l0:Log)
-CREATE (l0) -[:COMPLETED]-> 
-    (l1:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
-"""
-
-    batch_log_list = """
-MATCH (u:UserProfile {userName: $user}) -[:HAS_LOADED]-> 
-    (b:Batch {id: $batch}) -[:COMPLETED*]-> (l)
-RETURN l.status AS status, l.msg AS msg, l.size AS size, l.elapsed AS elapsed
-"""
 
 #TODO Kaikki lauseet geneologisten tietojen lukemiseen ja päivittämiseen Batchin kautta puuttuvat
 
@@ -80,12 +65,6 @@ class Cypher_event_w_handle():
 MERGE (e:Event {handle: $e_attr.handle})
     SET e = $e_attr
 """
-#     create = """
-# MATCH (u:UserProfile) WHERE u.userName=$username
-# MERGE (e:Event {handle: $e_attr.handle})
-#     SET e = $e_attr
-# MERGE (u) -[r:REVISION {date: $date}]-> (e)
-# """
 
     link_place = """
 MATCH (n:Event) WHERE n.handle=$handle
@@ -114,10 +93,16 @@ MERGE (n)-[r:Media]->(m)"""
 class Cypher_family_w_handle():
     """ For Family class """
 
-    create = """
-MERGE (f:Family {handle: $f_attr.handle}) 
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:BATCH_MEMBER]-> (f:Family {handle: $f_attr.handle}) 
     SET f = $f_attr
 RETURN ID(f) as uniq_id"""
+
+#    create = """
+#MERGE (f:Family {handle: $f_attr.handle}) 
+#    SET f = $f_attr
+#RETURN ID(f) as uniq_id"""
 
     link_father = """
 MATCH (n:Family) WHERE n.handle=$f_handle
@@ -166,12 +151,19 @@ MERGE (n:Note {handle: $n_attr.handle})
 class Cypher_person_w_handle():
     """ For Person class """
 
-    create = """
-MATCH (u:UserProfile {userName: $username})
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
 MERGE (p:Person {handle: $p_attr.handle})
-MERGE (u) -[r:REVISION {date: $date}]-> (p)
+MERGE (b) -[r:BATCH_MEMBER]-> (p)
     SET p = $p_attr
 RETURN ID(p) as uniq_id"""
+
+#    create = """
+#MATCH (u:UserProfile {userName: $username})
+#MERGE (p:Person {handle: $p_attr.handle})
+#MERGE (u) -[r:REVISION {date: $date}]-> (p)
+#    SET p = $p_attr
+#RETURN ID(p) as uniq_id"""
 
     link_name = """
 CREATE (n:Name) SET n = $n_attr

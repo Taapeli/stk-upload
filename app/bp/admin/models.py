@@ -52,10 +52,11 @@ class DataAdmin():
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_data_nodes)
         elif opt == "my_own":
-            msg = _("All persons and event by {} are removed. ").format(self.username)
-            logging.info(msg)
-            result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
-                                                  user=self.username)
+            return "NOT COMPLETED! Todo: Can not remove user's data nodes"
+#             msg = _("All persons and event by {} are removed. ").format(self.username)
+#             logging.info(msg)
+#             result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
+#                                                   user=self.username)
             
         counters = result.consume().counters
         msg2 = "Poistettu {} solmua, {} relaatiota".\
@@ -223,7 +224,7 @@ where not ( 'UserProfile' IN labels(a)
 DETACH DELETE a"""
 
     remove_my_nodes = """
-MATCH (a)<-[r:REVISION]-(u:UserProfile {userName:$user})
+MATCH (a)<-[r:REVISION|HAS_LOADED]-(u:UserProfile {userName:$user})
 DETACH DELETE a"""
 
     allowed_email_register = """
