@@ -39,8 +39,8 @@ def set_confidence_value(tx, uniq_id=None, batch_logger=None):
         counter += 1
 
     if isinstance(batch_logger, Batch):
-        batch_logger.append(Log(title="Confidences set", 
-                                    count=counter, elapsed=time.time()-t0))
+        batch_logger.log_event({'title':"Confidences set", 
+                                'count':counter, 'elapsed':time.time()-t0})
     return
 
 
@@ -52,8 +52,8 @@ def set_estimated_dates(batch_logger=None):
     msg = Person_combo.set_estimated_dates()
                         
     if isinstance(batch_logger, Batch):
-        batch_logger.append(Log(title="Estimated birth and death dates set. " + msg, 
-                                    elapsed=time.time()-t0))
+        batch_logger.log_event({'title':"Estimated birth and death dates set. " + msg, 
+                                'elapsed':time.time()-t0})
     return msg
 
 
@@ -132,8 +132,8 @@ def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
         self.namecount += name_count
 
     if isinstance(batch_logger, Batch):
-        batch_logger.append(Log(title="Refname references", 
-                                    count=name_count, elapsed=time.time()-t0))
+        batch_logger.log_event({'title':"Refname references", 
+                                'count':name_count, 'elapsed':time.time()-t0})
     return
 
 

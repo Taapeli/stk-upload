@@ -86,7 +86,7 @@ class Person_gramps(Person):
         self.est_death = ''
 
 
-    def save(self, username, tx):
+    def save(self, tx, batch_id):
         """ Saves the Person object and possibly the Names, Events ja Citations
 
             On return, the self.uniq_id is set
@@ -106,8 +106,8 @@ class Person_gramps(Person):
                 "priv": self.priv,
                 "gender": self.gender
             }
-            result = tx.run(Cypher_person_w_handle.create, 
-                            username=username, p_attr=p_attr, date=today)
+            result = tx.run(Cypher_person_w_handle.create_to_batch, 
+                            batch_id=batch_id, p_attr=p_attr, date=today)
 #             self.uniq_id = result.single()[0]
             for res in result:
                 self.uniq_id = res[0]

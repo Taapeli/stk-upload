@@ -10,8 +10,8 @@ Created on 8.8.2018
 import os
 
 import logging 
-import datetime
-from _pickle import Unpickler
+#import datetime
+#from _pickle import Unpickler
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory, flash
@@ -19,7 +19,7 @@ from flask_security import login_required, roles_accepted, roles_required, curre
 from flask_babelex import _
 
 import shareds
-from setups import User, Role
+from setups import User #, Role
 from models import dbutil, dataupdater, loadfile, datareader
 from .models import DataAdmin, UserAdmin
 from .cvs_refnames import load_refnames
@@ -27,6 +27,9 @@ from .forms import AllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
 
+
+# Admin start page in app/routes.py:
+#@shareds.app.route('/admin',  methods=['GET', 'POST'])
 
 # # Go to admin start page in app/routes.py 
 # @bp.route('/admin',  methods=['GET', 'POST'])
