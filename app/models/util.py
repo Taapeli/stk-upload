@@ -25,3 +25,18 @@ def format_timestamp(ts=None):
     if ts is None: ts = time.time()
     return time.strftime("%a %Y-%m-%d %H:%M:%S", 
                                time.localtime(ts))
+
+
+def guess_encoding(fname):
+    encodings = [
+        "UTF-8-SIG",
+        "UTF-8",
+        "ISO8859-1",
+    ]
+    for encoding in encodings:
+        try:
+            s = open(fname,encoding=encoding).read()
+            return encoding
+        except UnicodeDecodeError:
+            pass
+    return None

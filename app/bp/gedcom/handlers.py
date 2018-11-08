@@ -361,7 +361,7 @@ def process_gedcom(cmd, transform_module):
                         help=_('Do not produce an output file'))
     parser.add_argument('--nolog', action='store_true',
                         help=_('Do not produce a log in the output file'))
-    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
+    parser.add_argument('--encoding', type=str, default="UTF-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
                         help=_("Encoding of the input GEDCOM"))
     transform_module.add_args(parser)
     args = parser.parse_args(cmd.split())
@@ -421,7 +421,9 @@ def gedcom_transform(gedcom,transform):
 #         print("#logfile:",logfile)
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
-
+        encoding = util.guess_encoding(gedcom_filename)
+        logging.info("Guessed encoding {} for {}".format(encoding,gedcom_filename))
+        args += " --encoding {}".format(encoding)
         if hasattr(transform_module,"transformer"):
             cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
             return process_gedcom(cmd, transform_module)
@@ -538,8 +540,8 @@ def build_parser(filename,gedcom,gedcom_filename):
                         help=_('Do not produce an output file'))
     parser.add_argument('--nolog', action='store_true',
                         help=_('Do not produce a log in the output file'))
-    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
-                        help=_("Encoding of the input GEDCOM"))
+#    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
+#                        help=_("Encoding of the input GEDCOM"))
     
     transform_module.add_args(parser)
 
