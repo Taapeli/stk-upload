@@ -1,14 +1,13 @@
 '''
 Cumulates Batch steps and stores them as a Log node
 
-    After a series of logical run steps, Batch has a chain of step Logs
-    and it has a link to each data node (Person, Event, ...) created.
+    After a series of logical run steps, Batch has a link to each data node with
+    label Person or Family.
     The UserProfile has also relation CURRENT_LOAD to most current Batch.
 
     (u:UserProfile) -[:CURRENT_LOAD]-> (b:Batch)
     (u:UserProfile) -[:HAS_LOADED]-> (b:Batch)
-    (u:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:HAS_STEP*]-> (log:Log)
-    (b:Batch) -[:IN_BATCH]-> (anydata_node)
+    (b:Batch) -[:BATCH_MEMBER]-> (:Person|Family)
 
 Created on 26.5.2018
 
@@ -42,17 +41,18 @@ class Batch(object):
         # Runtime variables for batch steps
         self.steps = []
         self.totaltime = 0.0    # Sum of Log.elapsed
+        self.totalpercent = 0   # Sum of Log.percent
 
 
-    def begin(self, tx, infile):
+    def start_batch(self, tx, infile):
         '''
         Creates a new Batch node with 
         - id      a date followed by an ordinal number '2018-06-05.001'
         - status  'started'
         - file    input filename
         
-        You may give an existing trasnaction tx, 
-        else a new transaction is created and committed
+        You may give an existing transaction tx, 
+        otherwise a new transaction is created and committed
         '''
 
         # 0. Create transaction, if not given
@@ -67,9 +67,9 @@ class Batch(object):
             try:
                 batch_id = tx.run(Cypher_batch.batch_find_id, 
                                   user=self.userid, batch_base=base).single().value()
-                print("# Edellinen batch_id={}".format(batch_id))
+                print("# Pervious batch_id={}".format(batch_id))
                 i = batch_id.rfind('.')
-                ext = batch_id[i+1:]
+                ext = int(batch_id[i+1:])
             except AttributeError as e:
                 # print ("Ei vanhaa arvoa {}".format(e))
                 ext = 0
@@ -78,8 +78,8 @@ class Batch(object):
                 ext = 0
     
             # 2. Form a new batch id
-            self.bid = "{}.{:03d}".format(base, int(ext) + 1)
-            print("# Uusi batch_id='{}'".format(self.bid))
+            self.bid = "{}.{:03d}".format(base, ext + 1)
+            print("# New batch_id='{}'".format(self.bid))
     
             # 3. Create a new Batch node
             b_attr = {
@@ -95,31 +95,42 @@ class Batch(object):
         return self.bid
 
 
-    def complete(self, tx, status='completed'):
-        #TODO: argumentteja puuttuu
+    def complete(self, tx=None):
+        ''' Mark this data batch completed '''
+        # 0. Create transaction, if not given
+        local_tx = False
+        with shareds.driver.session() as session:
+            if tx == None:
+                tx = session.begin_transaction()
+                local_tx = True
+            
         return tx.run(Cypher_batch.batch_complete, user=self.userid, bid=self.bid)
+        if local_tx:
+            tx.commit()
+
+
+    def log_event(self, event_dict):
+        # Add a and event dictionary as a new Log to Batch log
+        batch_event = Log(event_dict)
+        self.log(batch_event)
+
+    def log(self, batch_event):
+        # Add a bp.gramps.batchlogger.Log to Batch log
+        self.append(batch_event)
 
 
     def append(self, obj):
         '''
         The argument object (a Log) is added to batch Log list
         '''
+        if not isinstance(obj, Log):
+            raise AttributeError("Batch.append need a Log instance")
+
         self.steps.append(obj)
         if isinstance(obj, Log) and not obj.elapsed == None:
             self.totaltime += obj.elapsed
             print("# " + str(obj))
             print('# BatchLogger totaltime={:.6f}'.format(obj.elapsed))
-
-        ''' 
-        Store the Log in the db to the end of Log node list
-        
-        (u:UserProfile {username:"Jussi"}) -[:HAS_LOADED]-> 
-        (b:Batch {id:"2018-05-10.1"}) -[:HAS_STEP*]-> 
-        (l0:Log) -[:HAS_STEP]-> (l1:Log {status: "1_notes", msg:"Notes", 
-                                          size:86, elapsed:0.02})
-        '''
-        pass
-        # Return the uniq_id of the created node
         return None
 
     def list(self):
@@ -134,24 +145,25 @@ class Batch(object):
         return li
 
 
-class Log(object):
+class Log():
     '''
     Creates an object for storing batch event information:
         level    str    log level: INFO, WARNING, ERROR, FATAL
         title    str    logged text message
         count    int    count of processed things in this event
         elapsed  float  time elapsed in seconds
+        percent  int    process progress grade 1..100
     '''
 
-    def __init__(self, title='', count=None, elapsed=None, level='INFO'):
+    def __init__(self, ev):
         '''
         Constructor
         '''
-        self.level = level
-        self.title = title
-        self.count = count
-        self.elapsed = elapsed
-
+        self.level = ev['level']        if 'level' in ev    else 'INFO'
+        self.title = ev['title']        if 'title' in ev    else ''
+        self.count = ev['count']        if 'count' in ev    else None
+        self.elapsed = ev['elapsed']    if 'elapsed' in ev  else None
+        self.percent = ev['percent']    if 'percent' in ev  else None
 
     def __str__(self):
         if self.count == None:

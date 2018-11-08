@@ -30,7 +30,7 @@
     {% if current_user.is_authenticated and current_user.has_role('member') %}
        <div class="startbox">
          <div style="display: inline-block;">
-            <h3>{{ _('Adding data') }}</h3>
+            <h3>{{ _('Send data to server') }}</h3>
               <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
              <div style="display: inline-block;">
                <input type="hidden" name="material" value="xml_file">
@@ -38,7 +38,7 @@
                <input type="file" name="filenm" />
              </div>
                 <div class="submit"> 
-               <input type="submit" value="{{ _('Download') }}" />
+               <input type="submit" value="{{ _('Upload') }}" />
              </div>
              </form>
              ▸ <a href=/gramps/uploads>{{ _("List uploads") }}</a>
