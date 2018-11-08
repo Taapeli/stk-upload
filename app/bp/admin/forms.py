@@ -34,8 +34,6 @@ class UpdateUserForm(FlaskForm):
     email = StringField(_('Email Address:'), 
         filters = [strip_filter],
         description = _('Email address'))
-#    password = HiddenField(_('Password'),
-#        description = _('Encrypted password'))
     username = StringField(_('Username:'), 
         description = _('User name'))  
     name = StringField(_('Name:'), 
@@ -51,7 +49,7 @@ class UpdateUserForm(FlaskForm):
         description = _('Active / passive user)')) 
     roles = SelectMultipleField(_('Roles'), 
                 choices=[
-                   ("guest",_("Guest")),
+#                   ("guest",_("Guest")),
                    ("member",_("Member")),
                    ("research",_("Research")),
                    ("audit",_("Audit")),                      
@@ -89,3 +87,7 @@ class AllowedEmailForm(FlaskForm):
                     ],
                 description = _('Enter the default role'))  
     submit = SubmitField(_('Add user candidate'))
+ 
+class TermsOfUseForm(FlaskForm):
+
+    submit = SubmitField(_('Return'))    
