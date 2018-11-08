@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}{{ _('lähteet') }}{% endblock %}
+{% block title %}{{ _('Sources') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
@@ -40,9 +40,12 @@
                {% endif %}</td>
             <td class="ColumnPerson">
                <div>
+                 {% set uniq_id = s.uniq_id %}
+                 {% set id = s.id %}
+               
                   <a href="/scene/source={{s.uniq_id}}" {% if s.ref_cnt == 0 %} class="dimmed" 
                      title="{{ _('Source') }} {{s.uniq_id}} ({{s.id}}) {{ _('unused') }}">{% else %}
-                     title="{{ _('see details of source') }} {{s.uniq_id}} ({{s.id}}) {{ _('used') }}">{% endif %}
+                     title="{{ _('see details of source %(uniq_id)s (%(id)s)', uniq_id=uniq_id, id=id) }} {{ _('used') }}">{% endif %}
                      {{s.stitle}}</a>
                 </div></td>
             <td class="note" title="{{ _('Format') }}: {{s.medium}}">{% if s.medium %}{{s.medium|transl('medium')}}{% endif %}</td>
