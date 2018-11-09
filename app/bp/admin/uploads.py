@@ -11,7 +11,7 @@ import pprint
 import time
 import threading
 from pathlib import Path
-from pickle import Pickler
+#from pickle import Pickler
 import traceback
 
 import logging 
@@ -19,7 +19,7 @@ logger = logging.getLogger('stkserver')
 
 from flask_babelex import _
 
-from models import loadfile, email, util
+from models import email, util    # loadfile, 
 
 from ..gramps import gramps_loader
 
@@ -41,45 +41,31 @@ from ..gramps import gramps_loader
 #    The thread executes the function "background_load_to_neo4j" which calls the actual logic in
 #    "gramps_loader.xml_to_neo4j"
 #    
-#    For each user there is the folder "uploads/<userid>" that contains "log files" for the loads
-#    performed by the user. These log files are also used to keep track of the loading progress
-#    as described below.
-#    
-#    The function "initiate_background_load_to_neo4j" generates a unique file name for the log file.
-#    This file in the upload folder serves as a marker while the load is running and finally contains the log
-#    data for the load. The file name consists of three parts:
-# 
-#    <timestamp>.<xml-file>.<state>
-#    
-#    <timestamp> is the time when the load started (as seconds returned by the time.time() function - only
-#    the integer part is retained).
-#    
+#    For each user there is the folder "uploads/<userid>" that contains the uploaded data
+#    file "<xml-file>" versions, log files "<xml-file>.log" and a meta file "<xml-file>.meta" 
+#    for status information. 
+#
+#    The function "initiate_background_load_to_neo4j" generates a unique file name for the files.
 #    <xml-file> is the name of the file being loaded to the database (.xml or .gramps).
-#    
-#    The suffix <state> is one of
-#    
-#    - loading
-#    - loading.done
-#    - loading.failed
-#    
-#    The suffix is initially "loading" and remains so while the Neo4j load is being processed. If the load 
+#
+#    The status is initially "loading" and remains so while the Neo4j load is being processed. If the load 
 #    completes successfully then ".done" is appended to the file name (i.e. the file is renamed). 
 #    If there is an error (an exception is thrown) then ".failed" is appended.
 #    
 # 4. It is conceivable that the thread doing the load is somehow stopped without being able to rename the file
-#    to indicate a completion or failure. Then the file name suffix remains ".loading" indefinitely. 
+#    to indicate a completion or failure. Then the status remains "loading" indefinitely. 
 #    This situation is noticed by the "i_am_alive" thread whose only purpose is to update the timestamp of
 #    ("touch") the log file as long as the loading thread is running. This update will happen every 10 seconds.
-#    
+#
 #    This enables the user interface to notice that the load has failed. The load will be marked as "in error"
 #    if the log file is not updated (touched) for a minute.
-#    
-# 5. If the load completes successfully then the file is renamed with a ".done" suffix as explained above.
-#    The result of the load is also stored in the file. The result is returned by the "xml_to_neo4j" function
-#    as a list of Log recerds. This list is serialized using the "pickle" module and stored in the file.
+#
+# 5. If the load completes successfully then the status is set to "done". The result of the load is 
+#    stored in the log file and returned by the "xml_to_neo4j" function as a list of Log recerds. 
+#    This list is serialized using the "pickle" module and stored in the file.
 #    THe user interface is then able to retrieve the Log records and display them to the user (in function
 #    upload_info).
-#    
+#
 # 6. The "uploads" function displays a list of the load operations performed by the user. This function 
 #    will display the state of the file according to the file name suffix and also indicates an error if the
 #    file is "loading" but has not been updated for minute. The list is automatically updated every 30 seconds.

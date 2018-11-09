@@ -39,7 +39,7 @@ def init_log(logfile):
     logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
 
 
-def show_info(input_gedcom, enc):
+def get_info(input_gedcom, enc):
     ''' Read gedgom HEAD info and count level 0 items
         Returns a list of descriptive lines
      '''
@@ -48,7 +48,7 @@ def show_info(input_gedcom, enc):
     #msg.append(os.path.basename(input_gedcom) + '\n')
     try:
         with open(input_gedcom, 'r', encoding=enc) as f:
-            for _ in range(100):
+            for i_ in range(100):
                 ln = f.readline()
                 if ln[:6] in ['2 VERS', '1 NAME', '1 CHAR']:
                     msg.append(ln[2:])
@@ -79,17 +79,17 @@ def show_info(input_gedcom, enc):
 
     except OSError:     # End of file
         pass
-    except UnicodeDecodeError as e:
-        msg.append(_("Wrong character set, add eg. '--Encoding ISO8859-1 '"))
-    except Exception as e:
-        msg.append( type(e).__name__ + str(e))
+    #except UnicodeDecodeError as e:
+    #    msg.append(_("Wrong character set, add eg. '--Encoding ISO8859-1 '"))
+    #except Exception as e:
+    #    msg.append( type(e).__name__ + str(e))
 
     if cnt:
         msg.append(_('        count\n'))
     for i in OrderedDict(sorted(cnt.items())):
         msg.append('{:4} {:8}\n'.format(i, cnt[i]))
-        
-    return ''.join(msg)
+    logging.info(msg)    
+    return cnt
 
 def read_gedcom(filename):
     try:
@@ -233,15 +233,21 @@ def gedcom_upload():
     # if user does not select file, browser also
     # submit an empty part without filename
     if file.filename == '':
-        flash(_('Choose a  GEDCOM file to upload'), category='flash_warning')
+        flash(_('Choose a GEDCOM file to upload'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         os.makedirs(gedcom_folder, exist_ok=True)
-        file.save(os.path.join(gedcom_folder, filename))
+        fullname = os.path.join(gedcom_folder, filename)
+        file.save(fullname)
 
         desc = request.form['desc']
-        metadata = {'desc':desc}
+        encoding = util.guess_encoding(fullname)
+        metadata = {
+            'desc':desc,
+            'encoding':encoding,
+            'upload_time':util.format_timestamp(),
+        }
         save_metadata(filename, metadata)
         return redirect(url_for('.gedcom_list'))
   
@@ -264,17 +270,16 @@ def gedcom_info(gedcom):
         flash(_("That GEDCOM file does not exist on the server"), category='flash_error')
         return redirect(url_for('.gedcom_list'))
     metadata = get_metadata(gedcom)
-    num_individuals = 666
     transforms = get_transforms()
+    encoding = metadata.get('encoding','utf-8')
+    info = get_info(filename,encoding) 
+    num_individuals = info['INDI']
     return render_template('gedcom_info.html', 
         gedcom=gedcom, filename=filename, 
         num_individuals=num_individuals, 
         transforms=transforms,
         metadata=metadata,
-        #info=show_info(filename,"utf-8"),  # removed temporararily
-        info="no info...",
     )
-
 
 @bp.route('/gedcom/update_desc/<gedcom>', methods=['POST'])
 @login_required
@@ -342,7 +347,7 @@ def process_gedcom(cmd, transform_module):
     """
 
 
-    msg = _("Transform '{}' started {}").format(
+    msg = _("Transform '{}' started at {}").format(
              transform_module.__name__, 
              util.format_timestamp())
     LOG.info("------ {} ------".format(msg))
@@ -361,7 +366,7 @@ def process_gedcom(cmd, transform_module):
                         help=_('Do not produce an output file'))
     parser.add_argument('--nolog', action='store_true',
                         help=_('Do not produce a log in the output file'))
-    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
+    parser.add_argument('--encoding', type=str, default="UTF-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
                         help=_("Encoding of the input GEDCOM"))
     transform_module.add_args(parser)
     args = parser.parse_args(cmd.split())
@@ -389,7 +394,7 @@ def process_gedcom(cmd, transform_module):
         traceback.print_exc()
     finally:
         time.sleep(1)  # for testing...
-        msg = _("Transform '{}' ended {}").format(
+        msg = _("Transform '{}' ended at {}").format(
                  transform_module.__name__, 
                  util.format_timestamp())
         print("------ {} ------".format(msg))
@@ -421,7 +426,9 @@ def gedcom_transform(gedcom,transform):
 #         print("#logfile:",logfile)
         removefile(logfile)
         args = parser.build_command(request.form.to_dict())
-
+        encoding = util.guess_encoding(gedcom_filename)
+        logging.info("Guessed encoding {} for {}".format(encoding,gedcom_filename))
+        args += " --encoding {}".format(encoding)
         if hasattr(transform_module,"transformer"):
             cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
             return process_gedcom(cmd, transform_module)
@@ -538,8 +545,8 @@ def build_parser(filename,gedcom,gedcom_filename):
                         help=_('Do not produce an output file'))
     parser.add_argument('--nolog', action='store_true',
                         help=_('Do not produce a log in the output file'))
-    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
-                        help=_("Encoding of the input GEDCOM"))
+#    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
+#                        help=_("Encoding of the input GEDCOM"))
     
     transform_module.add_args(parser)
 

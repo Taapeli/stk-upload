@@ -23,16 +23,20 @@ class Output:
         self.new_name = None
 
     def __enter__(self):
-        encoding = "UTF-8" # force utf-8 encoding on output
+        input_encoding = self.args.encoding
+        if input_encoding in {"UTF-8","UTF-8-SIG"}:
+            self.output_encoding = "UTF-8"
+        elif input_encoding == "ISO8859-1":
+            self.output_encoding = input_encoding
+        else:
+            self.output_encoding = input_encoding
         if self.out_name:
-            self.f = open(self.out_name, "w", encoding=encoding)
+            self.f = open(self.out_name, "w", encoding=self.output_encoding)
         else:
             # create tempfile in the same directory so you can rename it later
-            #tempfile.tempdir = os.path.dirname(self.in_name) 
-            #self.temp_name = tempfile.mktemp()
             self.temp_name = self.in_name + "-temp"
             self.new_name = util.generate_name(self.in_name)
-            self.f = open(self.temp_name, "w", encoding=encoding)
+            self.f = open(self.temp_name, "w", encoding=self.output_encoding)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -55,7 +59,15 @@ class Output:
             else:
                 self.saved_line = self.original_line
             self.original_line = ""
-        if line.startswith("1 CHAR"): line = "1 CHAR UTF-8" # force utf-8 encoding on output
+        if line.startswith("1 CHAR"): 
+            # this is probably unnecessary because the result should always be 
+            # the same as in the input file, i.e. the line is not modified
+            if self.output_encoding == "UTF-8":
+                line = "1 CHAR UTF-8"
+            elif self.output_encoding == "ISO8859-1":
+                line = "1 CHAR ANSI"
+            else:
+                line = "1 CHAR {}".format(self.output_encoding)
         self.f.write(line+"\n")
 
         if self.log:

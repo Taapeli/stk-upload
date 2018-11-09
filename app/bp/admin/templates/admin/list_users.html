@@ -19,9 +19,8 @@
         {% endwith %}
        <div id="errors" class="errors"></div>
         <div class="row">
-
              <div style="display: inline-block;">
-                <h3>{{ _("User names in use") }}</h3>
+                <h3>{{ _("Active User names") }}</h3>
 		        <table class="table100">
 		            <tr><th>{{ _("User name") }}</th><th>{{ _("Name") }}</th><th>{{ _("mail") }}</th>
 		            <th>{{ _("Roles") }}</th><th>{{ _("Operations") }}</th></tr>
@@ -33,7 +32,7 @@
 		                    <td>{{u.email}}</td>
 		                    <td>{{u.roles}}</td>
 		                    <td><a href="list_uploads/{{u.username}}">{{ _("Uploaded files") }}</a>
-                                </form>
+                              | <a href="update_user/{{u.username}}">{{ _("Edit profile") }}</a>
                             </td>
 		                </tr>
 		            {% endfor %}
@@ -42,8 +41,7 @@
 		        {% endif %}
 		        </table>
 	        </div>
-
-    </div>
+    </div> 
   </div>
 </div>
 {% endblock %}

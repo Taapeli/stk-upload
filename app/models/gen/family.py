@@ -240,7 +240,7 @@ RETURN ID(person) AS mother"""
         return True
 
 
-    def save(self, tx):
+    def save(self, tx, batch_id):
         """ Saves the family node to db and 
             creates relations to parent, child and note nodes
         """
@@ -252,7 +252,8 @@ RETURN ID(person) AS mother"""
                 "id": self.id,
                 "rel_type": self.rel_type
             }
-            result = tx.run(Cypher_family_w_handle.create, f_attr=f_attr)
+            result = tx.run(Cypher_family_w_handle.create_to_batch, 
+                            batch_id=batch_id, f_attr=f_attr)
             for res in result:
                 self.uniq_id = res[0]
                 print("Family {} ".format(self.uniq_id))

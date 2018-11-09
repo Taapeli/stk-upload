@@ -10,21 +10,26 @@ Created on 8.8.2018
 import os
 
 import logging 
-from _pickle import Unpickler
+#import datetime
+#from _pickle import Unpickler
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, send_from_directory
+from flask import render_template, request, redirect, url_for, send_from_directory, flash
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _
 
 import shareds
+from setups import User #, Role
 from models import dbutil, dataupdater, loadfile, datareader
 from .models import DataAdmin, UserAdmin
 from .cvs_refnames import load_refnames
-from .forms import AllowedEmailForm
+from .forms import AllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
 
+
+# Admin start page in app/routes.py:
+#@shareds.app.route('/admin',  methods=['GET', 'POST'])
 
 # # Go to admin start page in app/routes.py 
 # @bp.route('/admin',  methods=['GET', 'POST'])
@@ -141,9 +146,54 @@ def list_allowed_emails():
 @login_required
 @roles_accepted('admin', 'audit', 'master')
 def list_users():
-    # Käytetään neo4juserdatastorea
     lista = shareds.user_datastore.get_users()
     return render_template("/admin/list_users.html", users=lista)  
+
+@bp.route('/admin/update_user/<username>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'master')
+def update_user(username):
+    
+    form = UpdateUserForm()
+    if form.validate_on_submit(): 
+        user = User(id = form.id.data,
+                email = form.email.data,
+#                    password = form.password.data,
+                username = form.username.data,
+                name = form.name.data,
+                language = form.language.data,
+                is_active = form.is_active.data,
+                roles = form.roles.data,
+#                    confirmed_at = datetime.datetime.strptime(form.confirmed_at.data, '%Y-%m-%d %H:%M:%S'),
+                confirmed_at = form.confirmed_at.data,
+#                    last_login_at = datetime.datetime.strptime(form.last_login_at.data, '%Y-%m-%d %H:%M:%S'),
+                last_login_at = form.last_login_at.data, 
+                last_login_ip = form.last_login_ip.data,                    
+#                    current_login_at = datetime.datetime.strptime(form.current_login_at.data, '%Y-%m-%d %H:%M:%S'),
+                current_login_at = form.current_login_at.data,  
+                current_login_ip = form.current_login_ip.data,
+                login_count = form.login_count.data)        
+        updated_user = shareds.user_datastore.put(user)
+        flash(_("User updated"))
+        return redirect(url_for("admin.update_user",username=updated_user.username))
+
+    user = shareds.user_datastore.get_user(username) 
+    form.id.data = user.id  
+    form.email.data = user.email
+#    form.password.data = user.password    
+    form.username.data = user.username
+    form.name.data = user.name 
+    form.language.data = user.language
+    form.is_active.data = user.is_active
+    form.roles.data = [role.name for role in user.roles]
+    form.confirmed_at.data = user.confirmed_at 
+    form.last_login_at.data = user.last_login_at  
+    form.last_login_ip.data = user.last_login_ip
+    form.current_login_at.data = user.current_login_at
+    form.current_login_ip.data = user.current_login_ip
+    form.login_count.data = int(user.login_count)
+        
+    return render_template("/admin/update_user.html", username=user.username, form=form)  
 
 @bp.route('/admin/list_uploads/<username>', methods=['GET'])
 @login_required
@@ -183,7 +233,7 @@ def xml_download(username,xmlfile):
     return send_from_directory(directory=xml_folder, filename=xmlfile, 
                                mimetype="application/gzip",
                                as_attachment=True)
-                               #attachment_filename=xmlfile+".gz") 
+    #attachment_filename=xmlfile+".gz") 
 
 @bp.route('/admin/show_upload_log/<username>/<xmlfile>')
 @roles_accepted('member', 'admin')

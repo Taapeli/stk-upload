@@ -1,0 +1,60 @@
+{# templates/security/login_user.html_ #}
+{% extends "a_layout.html" %}
+{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% block title %}{{ _('Login') }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<div style="margin-left:50px; padding-bottom: 2em;">
+  <div>
+    <h2>{{ _('Welcome to Finland Database') }}</h2>
+    <div style="font-size:8pt; color:gray">{{ _('Git Application Version') }} <i>{{ 'git'|app_date }}</i></div>    
+    <div>{% include "security/_messages.html" %}</div>
+    <div>
+        <div class="startbox">
+            <div>
+                <div style="display: inline-block;">
+                    <h3>{{ _('Discover materials in Suomi Database Service') }}</h3>
+                    <p>{{ _('View our materials with limited rights') }}</p>
+                    <form method="get" action="/scene/persons/restricted">
+                    <p style="text-align:right;">
+                        <button type="submit">{{ _('Persons') }}</button></p>
+                    </form>
+                    <form method="get" action="/register">
+                    <h4>{{ _('Enroll as user candidate in Suomi tietokanta Service') }}</h4>
+                        <p style="text-align:right;">
+                          <button type="button" onclick="alert('Toiminto vasta suunnitteilla')">
+                          {{ _('Enroll') }}</button>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="startbox">
+            <div style="display: inline-block;">
+	            <h3>{{ _('Login with your credentialst (email or username)') }} </h3>
+	            <div>
+					<form action="{{ url_for_security('login') }}" 
+					      method="POST" name="login_user_form">
+						{{ login_user_form.hidden_tag() }}
+						{{ render_field_with_errors(login_user_form.email) }} 
+						{{ render_field_with_errors(login_user_form.password) }} 
+						{{ render_field_with_errors(login_user_form.remember) }} 
+						{{ render_field(login_user_form.next) }} 
+						{{ render_field(login_user_form.submit) }} 
+					</form>
+		        </div>
+	        </div>
+        </div>
+
+        <div class="startbox">
+            <div style="display: inline-block;">
+                <h3>{{ _("Approved user's actions") }}</h3>
+	            {% include "security/_menu.html" %}
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

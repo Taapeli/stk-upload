@@ -52,10 +52,11 @@ class DataAdmin():
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_data_nodes)
         elif opt == "my_own":
-            msg = _("All persons and event by {} are removed. ").format(self.username)
-            logging.info(msg)
-            result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
-                                                  user=self.username)
+            return "NOT COMPLETED! Todo: Can not remove user's data nodes"
+#             msg = _("All persons and event by {} are removed. ").format(self.username)
+#             logging.info(msg)
+#             result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
+#                                                   user=self.username)
             
         counters = result.consume().counters
         msg2 = "Poistettu {} solmua, {} relaatiota".\
@@ -97,7 +98,24 @@ class UserAdmin():
             email.confirmed_at = datetime.fromtimestamp(int(emailNode.properties['confirmed_at']/1000))        
        
         return email
-    
+
+    @classmethod         
+    def _build_user_from_node(self, userNode):
+        ''' Returns a User instance based on a user node '''
+        if userNode is None:
+            return None
+        user = shareds.user_model(**userNode.properties) 
+        user.id = str(userNode.id)
+        user.password = ""
+        user.roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
+        if 'confirmed_at' in userNode.properties: 
+            user.confirmed_at = datetime.fromtimestamp(float(userNode.properties['confirmed_at'])/1000)
+        if 'last_login_at' in userNode.properties: 
+            user.last_login_at = datetime.fromtimestamp(float(userNode.properties['last_login_at'])/1000)
+        if 'current_login_at' in userNode.properties: 
+            user.current_login_at = datetime.fromtimestamp(float(userNode.properties['current_login_at'])/1000)                            
+        return user
+       
     @classmethod
     def register_allowed_email(cls, email, role):
         try:
@@ -195,7 +213,7 @@ class UserAdmin():
 
     @classmethod
     def user_profile_add(cls, tx, email, username):
-#        logger.debug('_put_role ', role)
+#        logging.debug('_put_role ', role)
         try:
             tx.run(Cypher_adm.user_profile_add, email=email, username=username) 
             return
@@ -208,6 +226,74 @@ class UserAdmin():
         except Exception as ex:
             logging.error('Exception: ', ex)            
             raise
+ 
+    @classmethod 
+    def update_user(cls, user):
+        try:
+            with shareds.driver.session() as session:
+                updated_user = session.write_transaction(cls._update_user, user)
+                if updated_user is not None:
+                    return cls._build_user_from_node(updated_user) 
+                return None
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+
+    @classmethod                                              
+    def _update_user (cls, tx, user):    
+
+        try:
+            logging.debug('_put_user update' + user.email + ' ' + user.name)
+#   Confirm time is copied from allowed email if not in the user aregument        
+            confirmtime = None 
+            if user.confirmed_at == None:
+                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email).properties['confirmed_at']
+            else:     
+                confirmtime = int(user.confirmed_at.timestamp() * 1000)
+                                                   
+            result = tx.run(Cypher_adm.user_update, 
+                id=int(user.id), 
+                email=user.email,
+                is_active=user.is_active,
+                confirmed_at = confirmtime,            
+                roles=user.roles,
+                username = user.username,
+                name = user.name,
+                language = user.language, 
+                last_login_at = int(user.last_login_at.timestamp() * 1000),
+                current_login_at = int(user.current_login_at.timestamp() * 1000),
+                last_login_ip = user.last_login_ip,
+                current_login_ip = user.current_login_ip,
+                login_count = user.login_count )
+#   Find list of previous user -> role connections
+            prev_roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
+#   Delete connections that are not in edited connection list            
+            for rolename in prev_roles:
+                if not rolename in user.roles:
+                    tx.run(Cypher_adm.user_role_delete,
+                           email = user.email,
+                           name = rolename) 
+#   Add connections that are not in previous connection list                    
+            for rolename in user.roles:
+                if not rolename in prev_roles:
+                    tx.run(Cypher_adm.user_role_add, 
+                           email = user.email,
+                           name = rolename)        
+          
+            for record in result:
+                userNode = (record['user'])
+                logging.info('User with email address {} updated'.format(user.email)) 
+                return(userNode)
+        except CypherError as ex:
+            logging.error('CypherError', ex)            
+            raise ex            
+        except ClientError as ex:
+            logging.error('ClientError: ', ex)            
+            raise
+        except Exception as ex:
+            logging.error('Exception: ', ex)            
+            raise
+
     
 class Cypher_adm():
     ' Cypher clauses for admin purposes'
@@ -223,7 +309,7 @@ where not ( 'UserProfile' IN labels(a)
 DETACH DELETE a"""
 
     remove_my_nodes = """
-MATCH (a)<-[r:REVISION]-(u:UserProfile {userName:$user})
+MATCH (a)<-[r:REVISION|HAS_LOADED]-(u:UserProfile {userName:$user})
 DETACH DELETE a"""
 
     allowed_email_register = """
@@ -265,3 +351,29 @@ CREATE (up:UserProfile {
         numSessions: 0,
         lastSessionTime: timestamp() }
     ) <-[:SUPPLEMENTED]- (u)'''
+
+    user_update = '''
+MATCH (user:User)
+    WHERE user.email = $email
+SET user.username = $username,
+    user.name = $name,
+    user.language = $language,
+    user.is_active = $is_active,
+    user.confirmed_at = $confirmed_at,
+    user.roles = $roles,
+    user.last_login_at = $last_login_at,
+    user.current_login_at = $current_login_at,
+    user.last_login_ip = $last_login_ip,
+    user.current_login_ip = $current_login_ip,
+    user.login_count = $login_count 
+RETURN user'''
+
+
+    user_role_add = '''         
+MATCH  (r:Role) WHERE r.name = $name
+MATCH  (u:User) WHERE u.email = $email
+CREATE (u) -[:HAS_ROLE]-> (r)'''
+
+    user_role_delete = '''
+MATCH (u:User {email: $email}) -[c:HAS_ROLE]-> (r:Role {name: $name})
+DELETE c'''

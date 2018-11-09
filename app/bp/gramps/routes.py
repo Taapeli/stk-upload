@@ -14,15 +14,15 @@ logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory
 from flask_security import roles_accepted, current_user
-from flask_babelex import _
+#from flask_babelex import _
 
 import shareds
-from models import dbutil, loadfile, email, util
+from models import loadfile, email, util    # dbutil, 
 #from models import email
 from . import bp
-from .gramps_loader import xml_to_neo4j
-from bp.admin.uploads import initiate_background_load_to_neo4j
-from .batchlogger import Log
+#from .gramps_loader import xml_to_neo4j
+#from bp.admin.uploads import initiate_background_load_to_neo4j
+#from .batchlogger import Log
 from pickle import Unpickler
 
 from bp.admin.uploads import initiate_background_load_to_neo4j
@@ -76,24 +76,23 @@ def upload_gramps():
     #return redirect(url_for('gramps.save_loaded_gramps', filename=infile.filename))
 
 
-
-@bp.route('/gramps/save/xml_file/<string:filename>')
-@roles_accepted('member', 'admin')
-def save_loaded_gramps(filename):
-    """ Save loaded gramps data to the database """
-    #TODO: Latauksen onnistuttua perusta uusi Batch-erä (suoritusaika shareds.tdiff)
-    pathname = loadfile.fullname(filename)
-    result_list = []
-#     dburi = dbutil.get_server_location()
-    try:
-        # gramps backup xml file to Neo4j db
-        #result_list = xml_to_neo4j(pathname, current_user.username)
-        initiate_background_load_to_neo4j(filename, current_user.username)
-        return redirect(url_for('gramps.uploads'))
-    except KeyError as e:
-        return redirect(url_for('gramps.error_page', code=1, \
-                                text="Missing proper column title: " + str(e)))
-    return render_template("/gramps/result.html", batch_events=result_list)
+# @bp.route('/gramps/save/xml_file/<string:filename>')
+# @roles_accepted('member', 'admin')
+# def save_loaded_gramps(filename):
+#     """ Save loaded gramps data to the database """
+#     #TODO: Latauksen onnistuttua perusta uusi Batch-erä (suoritusaika shareds.tdiff)
+# #    pathname = loadfile.fullname(filename)
+#     result_list = []
+# #     dburi = dbutil.get_server_location()
+#     try:
+#         # gramps backup xml file to Neo4j db
+#         #result_list = xml_to_neo4j(pathname, current_user.username)
+#         initiate_background_load_to_neo4j(filename, current_user.username)
+#         return redirect(url_for('gramps.uploads'))
+#     except KeyError as e:
+#         return redirect(url_for('gramps.error_page', code=1, \
+#                                 text="Missing proper column title: " + str(e)))
+#     return render_template("/gramps/result.html", batch_events=result_list)
 
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')
