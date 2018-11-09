@@ -9,6 +9,7 @@ import time
 import gzip
 from os.path import basename, splitext
 import xml.dom.minidom
+import re
 
 from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
@@ -167,6 +168,38 @@ def file_clean(pathname):
                      'elapsed':time.time()-t0, 'percent':1})
     return (file_cleaned, file_displ, event)
 
+
+def pick_url(src):
+    ''' Check, if there is an url on the text src.
+    
+        Returns (text, url), where the url is removed from text
+    '''
+    #TODO: Jos url päättyy merkkeihin '").,' ne tulee poistaa ja siirrää end-tekstiin
+    #TODO: Pitäsikö varautua siihen että teksti sisältää monta url:ia?
+
+    match = re.search("(?P<url>https?://[^\s'\"]+)", src)
+    url = None
+    text = src
+    if match is not None:
+        url = match.group("url")
+        start = match.start()
+        end = match.end()
+#         if start == 0:
+#             start = ''
+#         if end == len(src) - 1:
+#             end = ''
+#         print("[{}:{}] url='{}'".format(start, end, url))
+        text = ''
+        if start:
+            text = src[:start]
+        if end < len(src):
+            text = "{}{}".format(text, src[end:])
+#         if text:
+#             print("    '{}'".format(text.rstrip()))
+#     elif len(src) > 0 and not src.isspace():
+#         print("{} ...".format(src[:72].rstrip()))
+
+    return (text.rstrip(), url)
 
 # -----------------------------------------------------------------------------
 
@@ -453,14 +486,18 @@ class DOM_handler():
             if note.hasAttribute("type"):
                 n.type = note.getAttribute("type")
 
+            url = ''
             if len(note.getElementsByTagName('text') ) == 1:
                 note_text = note.getElementsByTagName('text')[0]
                 n.text = note_text.childNodes[0].data
+                # Pick possible url
+                n.text, url = pick_url(n.text)
+#                 if url:
+#                     u = Weburl(url)
 
             #TODO: 17.10.2018 Viime palaverissa mm. suunniteltiin, että kuolinsyyt 
             # konvertoitaisiin heti Note-nodeiksi sopivalla node-tyypillä
-            print("Note type={}, text={}...".format(n.type, n.text[:16]))
-
+            print("Note type={}, text={}... url={}".format(n.type, n.text[:16], url))
             #TODO: Uuden Weburl-luokan ja noden yhdistäminen Noteen siten, 
             # että siinä olisi aina kaksi kenttää: description ja url.
 
@@ -676,7 +713,12 @@ class DOM_handler():
                    and placeobj_coord.hasAttribute("long"):
                     coord_lat = placeobj_coord.getAttribute("lat")
                     coord_long = placeobj_coord.getAttribute("long")
-                    place.coord = Point(coord_lat, coord_long)
+                    try:
+                        place.coord = Point(coord_lat, coord_long)
+                    except Exception as e:
+                        self.blog.log_event({
+                            'title':"Invalid coordinates - {}".format(e),
+                            'level':"WARNING", 'count':place.id})
 
             for placeobj_url in placeobj.getElementsByTagName('url'):
                 weburl = Weburl()

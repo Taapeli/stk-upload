@@ -48,8 +48,8 @@
                      title="{{ _('see details of source %(uniq_id)s (%(id)s)', uniq_id=uniq_id, id=id) }} {{ _('used') }}">{% endif %}
                      {{s.stitle}}</a>
                 </div></td>
-            <td class="note" title="{{ _('Format') }}: {{s.medium}}">{% if s.medium %}{{s.medium|transl('medium')}}{% endif %}</td>
-            <td class="note" title="{{ _('Repository Name') }}">{% if s.repo_name %}{{s.repo_name}}{% endif %}</td>
+            <td title="{{ _('Format') }}: {{s.medium}}">{% if s.medium %}{{s.medium|transl('medium')}}{% endif %}</td>
+            <td title="{{ _('Repository Name') }}">{% if s.repo_name %}{{s.repo_name}}{% endif %}</td>
             <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
             <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
             </tr>
