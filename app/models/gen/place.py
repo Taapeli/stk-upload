@@ -619,11 +619,15 @@ class Point:
                 # If a coordinate is float, it's ok
                 x = self.coord[i]
                 if not isinstance(x, float):
+                    if not x:
+                        raise ValueError("Point arg empty ({})".format(self.coord))
                     if isinstance(x, str):
                         # String conversion to float:
                         #   example "60° 37' 34,647N" gives ['60', '37', '34.647']
                         #   and "26° 11\' 7,411"I" gives
                         a = x.translate(point_coordinate_tr).split()
+                        if not a:
+                            raise ValueError("Point arg error {}".format(self.coord))
                         degrees = float(a[0])
                         if len(a) > 1:
                             if len(a) == 3:     # There are minutes and second
@@ -636,7 +640,7 @@ class Point:
                         else:                   # Only degrees
                                 self.coord[i] = degrees
                     else:
-                        raise(ValueError, "Point arg type is {}".format(self.coord[i]))
+                        raise ValueError("Point arg type is {}".format(self.coord[i]))
         except:
             raise
 
