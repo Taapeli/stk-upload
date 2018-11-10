@@ -359,13 +359,4 @@ return s'''
 
         return
 
-
-# class Weburl():
-#     """ A web reference 
-#     """
-# 
-#     def __init__(self, href=None, rtype=None, description=""):
-#         self.url_href = href
-#         self.url_type = rtype
-#         self.url_description = description
-
+# class Weburl(): @see models.gen.weburl.Weburl

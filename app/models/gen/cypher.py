@@ -26,11 +26,16 @@ class Cypher_note():
     Cypher clases for creating and accessing Notes
     '''
 
-    get_person_notes = '''match (p) -[:NOTE]-> (n:Note) where id(p) = $pid 
+    get_person_notes = '''
+match (p) -[:NOTE]-> (n:Note) where id(p) = $pid 
     return id(p) as p_id, null as e_id, id(n) as n_id, n
 union
 match (p) -[:EVENT]-> (e:Event) -[:NOTE]-> (n:Note) where id(p) = $pid 
     return id(p) as p_id, id(e) as e_id, id(n) as n_id, n'''
+
+    get_by_ids = """
+MATCH (n:Note)    WHERE ID(n) in $nid
+RETURN ID(n) AS uniq_id, n"""
 
 
 class Cypher_person():
@@ -101,6 +106,13 @@ RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
 MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
+    get_w_names_urls = """
+MATCH (person:Person) -[r:NAME]-> (name:Name)
+  WHERE ID(person)=$pid
+OPTIONAL MATCH (person) -[wu:WEBURL]->( weburl:Weburl)
+  WITH person, name, COLLECT (weburl) AS urls ORDER BY name.alt
+RETURN person, urls, COLLECT (name) AS names"""
+
     get_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
 where id(p) = $pid
@@ -111,6 +123,22 @@ RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
 MATCH (n)<-[r:NAME]-(p:Person)
 RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
     p.gender AS sex"""
+
+
+class Cypher_event():
+    '''
+    Cypher clases for creating and accessing Events
+    '''
+
+    get_w_place_note_citation = '''
+match (e:Event) where ID(e)=$pid
+    optional match (e) -[:PLACE]-> (p:Place)
+    optional match (e) -[:CITATION]-> (c:Citation)
+    optional match (e) -[:NOTE]-> (n:Note)
+return e as event, 
+    collect(distinct id(p)) as place_ref, 
+    collect(distinct id(c)) as citation_ref, 
+    collect(distinct id(n)) as note_ref'''
 
 
 class Cypher_family():
@@ -157,8 +185,27 @@ RETURN ID(a) AS id, a.type AS type,
     COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
     COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
     COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
-ORDER BY name[0][0]
-"""
+ORDER BY name[0][0]"""
+
+    get_w_names_urls_notes = """
+MATCH (place:Place) -[:NAME]-> (n:Place_name)
+    WHERE ID(place)=$place_id
+OPTIONAL MATCH (place) -[wu:WEBURL]-> (url:Weburl)
+OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
+RETURN place, 
+    COLLECT([n.name, n.lang]) AS names,
+    COLLECT (DISTINCT url) AS urls, 
+    COLLECT (DISTINCT note) AS notes"""
+
+    place_get_one = """
+match (p:Place) where ID(p)=$pid
+optional match (p) -[:NAME]-> (n:Place_name)
+return p, collect(n) as names"""
+
+    place_get_all = """
+MATCH (p:Place) 
+RETURN p ORDER BY p.pname"""
+
 
 class Cypher_refname():
     '''
@@ -215,6 +262,26 @@ match path = (p) -[*]-> (c:Citation) -[:SOURCE]-> (s:Source)
     with relationships(path) as rel, c, id(s) as source_id
 return extract(x IN rel | endnode(x))  as end, source_id
     order by source_id, size(end)"""
+
+    _cita_sour_repo_tail = """
+RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidence, 
+   note.text AS notetext,
+   COLLECT(DISTINCT [ID(source), source.stitle, 
+                     rr.medium, 
+                     ID(repo), repo.rname, repo.type]) AS sources"""
+
+    get_cita_sour_repo_all = """
+MATCH (c:Citation) -[rs:SOURCE]-> (source:Source) -[rr:REPOSITORY]-> (repo:Repository)
+OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
+  WITH c, rs, source, rr, repo 
+  ORDER BY c.page, note""" + _cita_sour_repo_tail
+
+    get_cita_sour_repo = """
+MATCH (c:Citation) -[rs:SOURCE]-> (source:Source) -[rr:REPOSITORY]-> (repo:Repository)
+    WHERE ID(c)=$uid
+OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
+  WITH c, rs, source, rr, repo 
+  ORDER BY c.page, note""" + _cita_sour_repo_tail
 
 
 class Cypher_source():
@@ -303,6 +370,4 @@ with x, w
         set r.desc = $desc
         set r.priv = $priv
 return id(r) as ref_id, id(w) as weburl_id"""
-
-# --- For User class ----------------------------------------------------------
 

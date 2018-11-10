@@ -97,7 +97,7 @@ class Media:
 
     def print_data(self):
         """ Tulostaa tiedot """
-        print ("*****Note*****")
+        print ("***** Media *****")
         print ("Handle: " + self.handle)
         print ("Change: {}".format(self.change))
         print ("Id: " + self.id)

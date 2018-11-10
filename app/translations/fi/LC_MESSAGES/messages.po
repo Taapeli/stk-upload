@@ -1167,7 +1167,7 @@ msgstr "tyyppiä"
 
 #: bp/scene/templates/scene/person.html:104
 msgid "See Place details"
-msgstr "katso paikan tiedot"
+msgstr "Katso paikan tiedot"
 
 #: bp/scene/templates/scene/person.html:111
 msgid "Death cause"
@@ -1351,7 +1351,7 @@ msgstr "Ketään ei löytynyt hakutiedoilla"
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:11
 msgid "Place events"
-msgstr "paikan tapahtumat"
+msgstr "Paikan tapahtumat"
 
 #: bp/scene/templates/scene/place_events.html:17
 msgid "Invalid coordinates"

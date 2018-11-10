@@ -120,16 +120,9 @@ class Place:
         result = None
         with shareds.driver.session() as session:
             if uniq_id:
-                place_get_one = """
-match (p:Place) where ID(p)=$pid
-optional match (p) -[:NAME]-> (n:Place_name)
-return p, collect(n) as names"""
-                result = session.run(place_get_one, pid=uniq_id)
+                result = session.run(Cypher_place.place_get_one, pid=uniq_id)
             else:
-                place_get_all = """
-MATCH (p:Place) 
-RETURN p ORDER BY p.pname"""
-                result = session.run(place_get_all)
+                result = session.run(Cypher_place.place_get_all)
 
         places = []
 
@@ -150,50 +143,33 @@ RETURN p ORDER BY p.pname"""
         return places
 
 
-    def get_place_data_by_id(self):
+    def read_w_urls_notes(self):
         """ Luetaan kaikki paikan tiedot ml. nimivariaatiot (tekstinä)
             #TODO: Luetaan Weburl, Notes ja Citations vasta get_persondata_by_id() lopuksi
 
             Nimivariaatiot talletetaan kenttään pname,
             esim. [["Svartholm", "sv"], ["Svartholma", None]]
-            #TODO: Ei hieno, po. Place_name objects!
+            #TODO: Ei hieno, pitäisi palauttaa Place_name objects!
         """
-        #plid = self.uniq_id
-        query = """
-MATCH (place:Place)-[:NAME]->(n:Place_name)
-    WHERE ID(place)=$place_id
-OPTIONAL MATCH (place)-[wu:WEBURL]->(url:Weburl)
-OPTIONAL MATCH (place)-[nr:NOTE]->(note:Note)
-RETURN place, COLLECT([n.name, n.lang]) AS names,
-    COLLECT (DISTINCT url) AS urls, COLLECT (DISTINCT note) AS notes
-        """
-        place_result = shareds.driver.session().run(query, place_id=self.uniq_id)
+        with shareds.driver.session() as session:
+            place_result = session.run(Cypher_place.get_w_names_urls_notes, 
+                                       place_id=self.uniq_id)
 
-        for place_record in place_result:
-            self.change = int(place_record["place"]["change"])  #TODO only temporary int()
-            self.id = place_record["place"]["id"]
-            self.type = place_record["place"]["type"]
-            self.coord = place_record["place"]["coord"]
-            self.pname = Place.namelist_w_lang(place_record["names"])
+            for place_record in place_result:
+                self.change = int(place_record["place"]["change"])  #TODO only temporary int()
+                self.id = place_record["place"]["id"]
+                self.type = place_record["place"]["type"]
+                self.coord = place_record["place"]["coord"]
+                self.pname = Place.namelist_w_lang(place_record["names"])
 
-            urls = place_record['urls']
-            for url in urls:
-                weburl = Weburl()
-                weburl.href = url["href"]
-                weburl.type = url["type"]
-                weburl.priv = url["priv"]
-                weburl.description = url["description"]
-                self.urls.append(weburl)
-
-            notes = place_record['notes']
-            for note in notes:
-                n = Note()
-                n.priv = note["priv"]
-                n.type = note["type"]
-                n.text = note["text"]
-                self.noteref_hlink.append(n)
-
-        return True
+                for node in place_record['urls']:
+                    weburl = Weburl.from_node(node)
+                    self.urls.append(weburl)
+    
+                for node in place_record['notes']:
+                    n = Note.from_node(node)
+                    self.notes.append(n)
+        return
 
 
     @staticmethod
@@ -489,29 +465,27 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         except Exception as err:
             print("Virhe Place.create: {0}".format(err), file=stderr)
 
-        if len(self.names) >= 1:
-            try:
-                for i in range(len(self.names)):
-                    n_attr = {"name": self.names[i].name,
-                              "lang": self.names[i].lang}
-                    if self.names[i].dates:
-                        # If date information, add datetype, date1 and date2
-                        n_attr.update(self.names[i].dates.for_db())
-                    tx.run(Cypher_place_w_handle.add_name,
-                           handle=self.handle, n_attr=n_attr)
-            except Exception as err:
-                print("Virhe Place.add_name: {0}".format(err), file=stderr)
+        try:
+            for i in range(len(self.names)):
+                n_attr = {"name": self.names[i].name,
+                          "lang": self.names[i].lang}
+                if self.names[i].dates:
+                    # If date information, add datetype, date1 and date2
+                    n_attr.update(self.names[i].dates.for_db())
+                tx.run(Cypher_place_w_handle.add_name,
+                       handle=self.handle, n_attr=n_attr)
+        except Exception as err:
+            print("Virhe Place.add_name: {0}".format(err), file=stderr)
 
         # Talleta Weburl nodet ja linkitä paikkaan
-        if len(self.urls) > 0:
-            for url in self.urls:
-                try:
-                    tx.run(Cypher_place_w_handle.link_weburl,
-                           handle=self.handle, 
-                           url_priv=url.priv, url_href=url.href,
-                           url_type=url.type, url_description=url.description)
-                except Exception as err:
-                    print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
+        for url in self.urls:
+            try:
+                tx.run(Cypher_place_w_handle.link_weburl,
+                       handle=self.handle, 
+                       url_priv=url.priv, url_href=url.href,
+                       url_type=url.type, url_description=url.description)
+            except Exception as err:
+                print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
 
         # Make hierarchy relations to upper Place nodes
         for upper in self.surround_ref:

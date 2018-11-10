@@ -167,26 +167,14 @@ class Citation:
 
             Voidaan lukea annetun Citationin lähde ja arkisto kannasta
         """
-
-        if uniq_id:
-            where = "WHERE ID(c)={} ".format(uniq_id)
-        else:
-            where = ''
+        with shareds.driver.session() as session:
+            if uniq_id:
+                return session.run(Cypher_citation.get_cita_sour_repo, 
+                                   uid=uniq_id)
+            else:
+                return session.run(Cypher_citation.get_cita_sour_repo_all)
+            
         
-        query = """
- MATCH (c:Citation) -[r:SOURCE]-> (source:Source) 
-        -[p:REPOSITORY]-> (repo:Repository) {0}
- OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
-   WITH c, r, source, p, repo 
-   ORDER BY c.page, note
- RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidence, 
-    note.text AS notetext,
-    COLLECT(DISTINCT [ID(source), source.stitle, 
-                      p.medium, 
-                      ID(repo), repo.rname, repo.type]) AS sources
- """.format(where)
-        return shareds.driver.session().run(query)
-    
     
     def get_sourceref_hlink(self):
         """ Voidaan lukea lähdeviittauksen lähteen uniq_id kannasta

@@ -201,7 +201,7 @@ def pick_url(src):
 
     return (text.rstrip(), url)
 
-# -----------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
 class DOM_handler():
     """ XML DOM elements handler
@@ -679,34 +679,34 @@ class DOM_handler():
         # Print detail of each placeobj
         for placeobj in places:
 
-            place = Place()
+            pl = Place()
             # List of upper places in hierarchy as {hlink, dates} dictionaries
             #TODO move in Place and remove Place.placeref_hlink string
-            place.surround_ref = []
+            pl.surround_ref = []
 
-            place.handle = placeobj.getAttribute("handle")
+            pl.handle = placeobj.getAttribute("handle")
             if placeobj.hasAttribute("change"):
-                place.change = int(placeobj.getAttribute("change"))
-            place.id = placeobj.getAttribute("id")
-            place.type = placeobj.getAttribute("type")
+                pl.change = int(placeobj.getAttribute("change"))
+            pl.id = placeobj.getAttribute("id")
+            pl.type = placeobj.getAttribute("type")
 
             if len(placeobj.getElementsByTagName('ptitle') ) == 1:
                 placeobj_ptitle = placeobj.getElementsByTagName('ptitle')[0]
-                place.ptitle = placeobj_ptitle.childNodes[0].data
+                pl.ptitle = placeobj_ptitle.childNodes[0].data
             elif len(placeobj.getElementsByTagName('ptitle') ) > 1:
                 self.blog.log_event({'title':"More than one ptitle in a place",
-                                     'level':"WARNING", 'count':place.id})
+                                     'level':"WARNING", 'count':pl.id})
 
             for placeobj_pname in placeobj.getElementsByTagName('pname'):
                 placename = Place_name()
                 if placeobj_pname.hasAttribute("value"):
                     placename.name = placeobj_pname.getAttribute("value")
-                    if place.pname == '':
+                    if pl.pname == '':
                         # First name is default name for Place node
-                        place.pname = placename.name
+                        pl.pname = placename.name
                 if placeobj_pname.hasAttribute("lang"):
                     placename.lang = placeobj_pname.getAttribute("lang")
-                place.names.append(placename)
+                pl.names.append(placename)
 
             for placeobj_coord in placeobj.getElementsByTagName('coord'):
                 if placeobj_coord.hasAttribute("lat") \
@@ -714,11 +714,11 @@ class DOM_handler():
                     coord_lat = placeobj_coord.getAttribute("lat")
                     coord_long = placeobj_coord.getAttribute("long")
                     try:
-                        place.coord = Point(coord_lat, coord_long)
+                        pl.coord = Point(coord_lat, coord_long)
                     except Exception as e:
                         self.blog.log_event({
                             'title':"Invalid coordinates - {}".format(e),
-                            'level':"WARNING", 'count':place.id})
+                            'level':"WARNING", 'count':pl.id})
 
             for placeobj_url in placeobj.getElementsByTagName('url'):
                 weburl = Weburl()
@@ -730,28 +730,28 @@ class DOM_handler():
                     weburl.type = placeobj_url.getAttribute("type")
                 if placeobj_url.hasAttribute("description"):
                     weburl.description = placeobj_url.getAttribute("description")
-                place.urls.append(weburl)
+                pl.urls.append(weburl)
 
             for placeobj_placeref in placeobj.getElementsByTagName('placeref'):
                 # Traverse links to surrounding places
                 hlink = placeobj_placeref.getAttribute("hlink")
                 dates = self._extract_daterange(placeobj_placeref)
-                place.surround_ref.append({'hlink':hlink, 'dates':dates})
+                pl.surround_ref.append({'hlink':hlink, 'dates':dates})
 #             # Piti sallia useita ylempia paikkoja eri päivämäärillä
 #             # Tässä vain 1 sallitaan elikä päivämäärää ole
 #             if len(placeobj.getElementsByTagName('placeref') ) == 1:
 #                 placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
 #                 if placeobj_placeref.hasAttribute("hlink"):
-#                     place.placeref_hlink = placeobj_placeref.getAttribute("hlink")
-#                     place.dates = self._extract_daterange(placeobj_placeref)
+#                     pl.placeref_hlink = placeobj_placeref.getAttribute("hlink")
+#                     pl.dates = self._extract_daterange(placeobj_placeref)
 #             elif len(placeobj.getElementsByTagName('placeref') ) > 1:
-#                 print("Warning: Ignored 2nd placeref in a place - useita hierarkian yläpuolisia paikkoja")
+#                 print("Warning: Ignored 2nd placeref in a pl - useita hierarkian yläpuolisia paikkoja")
 
             for placeobj_noteref in placeobj.getElementsByTagName('noteref'):
                 if placeobj_noteref.hasAttribute("hlink"):
-                    place.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
+                    pl.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
 
-            place.save(self.tx)
+            pl.save(self.tx)
             counter += 1
 
         self.blog.log_event({'title':"Places", 'count':counter, 

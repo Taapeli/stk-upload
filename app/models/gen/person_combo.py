@@ -306,34 +306,10 @@ RETURN person, name
     def get_person_w_names(self):
         """ Returns Person with Names and Weburls included
 
-            Luetaan kaikki henkilön tiedot ja nimet
-            ╒══════════════════════════════╤══════════════════════════════╕
-            │"person"                      │"names"                       │
-            ╞══════════════════════════════╪══════════════════════════════╡
-            │{"gender":"F","url_type":[],"c│[{"firstname":"Margareta Elisa│
-            │hange":"1507492602","gramps_ha│bet","surname":"Enckell","alt"│
-            │ndle":"_d9ea5e7f9a00a0482af","│:"","type":"Birth Name","suffi│
-            │id":"I0098","url_href":[],"url│x":"","refname":"Margareta Eli│
-            │_description":[]}             │sabeth/Enckell/"},            │
-            │                              │                  {"firstname"│
-            │                              │:"Margareta","surname":"Utter"│
-            │                              │,"alt":"1","type":"Married Nam│
-            │                              │e","suffix":"","refname":"Marg│
-            │                              │areta/Utter/"}]               │
-            └──────────────────────────────┴──────────────────────────────┘        """
-#         query = """
-# MATCH (person:Person)-[r:NAME]-(name:Name)
-#   WHERE ID(person)=$pid
-# RETURN person, name
-#   ORDER BY name.alt"""
-        query = """
-MATCH (person:Person)-[r:NAME]->(name:Name)
-  WHERE ID(person)=$pid
-OPTIONAL MATCH (person)-[wu:WEBURL]->(weburl:Weburl)
-  WITH person, name, COLLECT (weburl) AS urls ORDER BY name.alt
-RETURN person, urls, COLLECT (name) AS names
+            Luetaan kaikki henkilön tiedot ja nimet, urlit
         """
-        result = shareds.driver.session().run(query, pid=int(self.uniq_id))
+        result = shareds.driver.session().run(Cypher_person.get_w_names_urls, 
+                                              pid=int(self.uniq_id))
 
         for record in result:
             # <Record person=<Node id=72087 labels={'Person'} 
@@ -792,12 +768,13 @@ with r, e, pl
 #                     print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
 
 
-    def get_all_notes(self):
-        ''' Finds all Note and Weburl
-            which are connected to Person, Events or Families
-            and stores them in self.notes and self.Weburl lists
-        '''
-        pass
+#     def get_all_notes(self):
+#         ''' Finds all Note and Weburl
+#             which are connected to Person, Events or Families
+#             and stores them in self.notes and self.Weburl lists
+#         '''
+#         #TODO Mihin tarvitaan?
+#         pass
 
 
     @staticmethod
@@ -873,15 +850,8 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
         """ Get all weburls referenced from list of uniq_ids
             #TODO Mitä tietoja halutaan?
         """
-#       Example
-#                 match (x) 
-#                 where id(x) in [72529, 72515, 72528]
-#                 with distinct x
-#                   match (x) -[r:CITATION|SOURCE|NOTE|WEBURL]-> (y) 
-#                   return x.id, type(r), id(y), labels(y)[0] as label, 
-#                          y.id as id order by id, x.id
-
-        query="""match (x) where id(x) in $pids
+        query="""
+match (x) where id(x) in $pids
 with distinct x
   match (x) -[r:CITATION|SOURCE|NOTE|WEBURL]-> (y) 
   return id(x) as root, x.id as root_id, type(r) as rtype, 
@@ -1039,46 +1009,6 @@ SET n.est_death = m.daterange_start"""
             return msg
         except Exception as err:
             print("Virhe (Person.save:est_death): {0}".format(err), file=stderr)
-
-
-    def print_data(self):
-        """ Tulostaa tiedot """
-        print ("*****Person*****")
-        print ("Handle: " + self.handle)
-        print ("Change: {}".format(self.change))
-        print ("Id: " + self.id)
-        print ("Priv: " + self.priv)
-        print ("Gender: " + self.gender)
-
-        if len(self.names) > 0:
-            for pname in self.names:
-                print ("Alt: " + pname.alt)
-                print ("Type: " + pname.type)
-                print ("First: " + pname.firstname)
-#                 print ("Refname: " + pname.refname)
-                print ("Surname: " + pname.surname)
-                print ("Suffix: " + pname.suffix)
-
-        if len(self.urls) > 0:
-            for url in self.urls:
-                print ("Url priv: " + url.priv)
-                print ("Url href: " + url.href)
-                print ("Url type: " + url.type)
-                print ("Url description: " + url.description)
-
-        if len(self.eventref_hlink) > 0:
-            for i in range(len(self.eventref_hlink)):
-                print ("Eventref_hlink: " + self.eventref_hlink[i])
-                print ("Eventref_role: " + self.eventref_role[i])
-        if len(self.parentin_hlink) > 0:
-            for i in range(len(self.parentin_hlink)):
-                print ("Parentin_hlink: " + self.parentin_hlink[i])
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                print ("Noteref_hlink: " + self.noteref_hlink[i])
-        for i in range(len(self.citation_ref)):
-            print ("Citation_ref: " + self.citation_ref[i])
-        return True
 
 
     def print_compared_data(self, comp_person, print_out=True):
