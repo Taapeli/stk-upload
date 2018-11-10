@@ -185,7 +185,7 @@ def show_locations():
     return render_template("/scene/locations.html", locations=locations)
 
 
-@bp.route('/scene/location=<locid>')
+@bp.route('/scene/location=<int:locid>')
 def show_location_page(locid):
     """ Home page for a Place, shows events and place hierarchy
         locid = id(Place)
@@ -216,7 +216,7 @@ def show_sources():
     return render_template("/scene/sources.html", sources=sources)
 
 
-@bp.route('/scene/source=<sourceid>')
+@bp.route('/scene/source=<int:sourceid>')
 def show_source_page(sourceid):
     """ Home page for a Source with referring Event and Person data
     """
