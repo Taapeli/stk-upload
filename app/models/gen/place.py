@@ -256,17 +256,16 @@ class Place:
 └─────┴──────────┴───────────────────┴───────┴───────────────────┴───────────────────┘
 """
 
-
-        def combine_places(field):
+        def combine_places(pl_tuple):
             """ Returns a list of cleartext names got from Place_name objects
             
-                Kenttä field sisältää Places-tietoja tuplena [[28101, "City",
+                Kenttä pl_tuple sisältää Places-tietoja tuplena [[28101, "City",
                 "Lovisa", "sv"]].
                 Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
                 Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
             """
             namedict = {}
-            for near in field:
+            for near in pl_tuple:
                 if near[0]: # id of a lower place
                     if near[0] in namedict:
                         # Append name to existing Place
@@ -280,6 +279,11 @@ class Place:
         ret = []
         result = shareds.driver.session().run(Cypher_place.get_name_hierarcy)
         for record in result:
+            # Record: <Record id=140843 type='Tontti' 
+            #    name=[['1. Kortteli Nro 37', ''], ['Elias Unoniuksen kauppaliike', '']] 
+            #    coord=None upper=[[140824, 'City', 'Degerby', ''], [140824, 'City', 'Loviisa', '']] 
+            #    lower=[[None, None, None, None]]>
+
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
             p = Place(record['id'], record['type'], Place.namelist_w_lang(record['name']))
@@ -288,7 +292,8 @@ class Place:
             p.uppers = combine_places(record['upper'])
             p.lowers = combine_places(record['lower'])
             ret.append(p)
-        return ret
+        # REturn sorted by first name in the list p.pname
+        return sorted(ret, key=lambda x:x.pname[0])
 
     @staticmethod
     def namelist_w_lang(field):

@@ -193,7 +193,7 @@ MATCH (place:Place) -[:NAME]-> (n:Place_name)
 OPTIONAL MATCH (place) -[wu:WEBURL]-> (url:Weburl)
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
 RETURN place, 
-    COLLECT([n.name, n.lang]) AS names,
+    COLLECT(DISTINCT [n.name, n.lang]) AS names,
     COLLECT (DISTINCT url) AS urls, 
     COLLECT (DISTINCT note) AS notes"""
 
