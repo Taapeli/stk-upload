@@ -163,6 +163,9 @@ li.itemrow {
 	text-align: right;
 	}
 
+div.fullclear {
+    clear: both;
+}
 #footer {
 	color: gray;
 	background: #eee;

@@ -13,11 +13,11 @@
 <h2>{{ _('List of persons with the same date of death') }}</h2>
 {% endif %}
 <p>{{ _('Showing person pairs') }}</p>
-<p><small>{{ _('Click on the column header to sort column') }}</small></p>
+<p><button ng-click = "show_me = !show_me">{{ _('All/same Given name') }}</button>
+   <small>{{ _('Click on the column header to sort column') }}</small></p>
 
-<section id="lista">
+<section id="lista" style="display: block;">
 <div ng-app="myApp" ng-controller="namesCtrl">
-	<p><button ng-click = "show_me = !show_me">{{ _('All/same Given name') }}</button></p>
 	<table>
 	    <tr>
 	    	<th ng-repeat="x in columns" ng-click="sort(x.column)">{a x.column a}

@@ -88,7 +88,6 @@ def translate(term, var_name, lang="fi"):
     elif var_name == "role":
         # Name types
         tabl = {
-
             "Primary": "pääosallisena",
             "Family": "perheenä",
             "Kummi": "kummina",
@@ -239,6 +238,9 @@ def translate(term, var_name, lang="fi"):
         return urlparse(term).hostname
 
     try:
-        return tabl[term]
+        if term:
+            return tabl[term]
+        else:
+            return ''
     except:
         return "'" + term + "'"
