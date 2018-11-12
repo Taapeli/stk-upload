@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-10-28 21:38+0200\n"
-"PO-Revision-Date: 2018-11-07 21:30+0200\n"
+"PO-Revision-Date: 2018-11-12 09:41+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -244,11 +244,8 @@ msgid "Data Views as tables"
 msgstr "Datanäkymiä taulukkoina"
 
 #: bp/admin/templates/admin/admin.html:21 templates/mainindex.html:60
-msgid ""
-"On the next page there are a variety of more technical listings and problem solving "
-"tools"
-msgstr ""
-"Seuraavalla sivulla on erilaisia teknisempiä listauksia ja ongelmanselvitysvälineitä"
+msgid "On the next page there are a variety of more technical listings and problem solving tools"
+msgstr "Seuraavalla sivulla on erilaisia teknisempiä listauksia ja ongelmanselvitysvälineitä"
 
 #: bp/admin/templates/admin/admin.html:25 templates/mainindex.html:64
 msgid "Explore the database"
@@ -314,8 +311,7 @@ msgstr "Odottavat käyttäjäehdokkaat"
 
 #: bp/admin/templates/admin/allowed_emails.html:42
 msgid "<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>"
-msgstr ""
-"<th>sähköposti</th><th>rooli</th><th>luoja</th><th>luotu</th><th>rekisteröity</th>"
+msgstr "<th>sähköposti</th><th>rooli</th><th>luoja</th><th>luotu</th><th>rekisteröity</th>"
 
 #: bp/admin/templates/admin/allowed_emails.html:55 templates/del_table_users.html:32
 #: templates/ng_table_repositories.html:28 templates/table_media.html:30
@@ -539,7 +535,9 @@ msgstr "Väärä merkistö, lisää esim. '--encoding ISO8859-1'"
 
 #: bp/gedcom/handlers.py:88
 msgid "        count\n"
+""
 msgstr "lukumäärä\n"
+""
 
 #: bp/gedcom/handlers.py:164
 msgid "Gedcoms"
@@ -987,12 +985,8 @@ msgid "Places List"
 msgstr "Paikat-lista"
 
 #: bp/scene/templates/scene/locations.html:12
-msgid ""
-"This page contains a directory of all the places and the closest lower-level "
-"locations beneath them."
-msgstr ""
-"Tällä sivulla on hakemisto kaikista paikoista ja niiden alla lähinnä olevista  "
-"alemman tason paikoista."
+msgid "This page contains a directory of all the places and the closest lower-level locations beneath them."
+msgstr "Tällä sivulla on hakemisto kaikista paikoista ja niiden alla lähinnä olevista  alemman tason paikoista."
 
 #: bp/scene/templates/scene/locations.html:15 bp/scene/templates/scene/persons.html:90
 #: bp/scene/templates/scene/sources.html:16
@@ -1243,10 +1237,6 @@ msgstr "Katso lähteen %(id)s tiedot"
 msgid "confidence"
 msgstr "luottamustaso"
 
-#: bp/scene/templates/scene/person.html:298
-msgid "Page"
-msgstr "Sivu"
-
 #: bp/scene/templates/scene/persons.html:3
 msgid "List of persons"
 msgstr "henkilöluettelo"
@@ -1318,9 +1308,7 @@ msgid "Select people to display"
 msgstr "Valitse näytettävät ihmiset"
 
 #: bp/scene/templates/scene/persons.html:56
-msgid ""
-"Search takes place from beginning of selected name part, e.g. in Surname \"Sib\" "
-"coincides with the name \"Sibbe\"."
+msgid "Search takes place from beginning of selected name part, e.g. in Surname \"Sib\" coincides with the name \"Sibbe\"."
 msgstr "Haku tapahtuu annetun nimen alkuosalla, esim. \"Sib\" osuu nimeen \"Sibbe\"."
 
 #: bp/scene/templates/scene/persons.html:57
@@ -1426,10 +1414,6 @@ msgstr "Perheenjäsenen"
 #: bp/scene/templates/scene/source_events.html:53
 msgid "Of person"
 msgstr "henkilön"
-
-#: bp/scene/templates/scene/sources.html:3
-msgid "Sources"
-msgstr "Lähteet"
 
 #: bp/scene/templates/scene/sources.html:8 templates/table_sources.html:8
 msgid "List of Sources"
@@ -1618,7 +1602,7 @@ msgstr "Viittaukset"
 
 #: templates/cite_sour_repo.html:31
 msgid "Page"
-msgstr "Sivu"
+msgstr ""
 
 #: templates/cite_sour_repo.html:31
 msgid "Confidence"
@@ -1626,7 +1610,7 @@ msgstr "luottamustaso"
 
 #: templates/cite_sour_repo.html:45
 msgid "Stitle"
-msgstr "Lnimi"
+msgstr "Otsikko"
 
 #: templates/cite_sour_repo.html:45
 msgid "Medium"
@@ -1634,7 +1618,7 @@ msgstr "Keskiarvo"
 
 #: templates/cite_sour_repo.html:58
 msgid "Rname"
-msgstr "Animi"
+msgstr "Otsikko"
 
 #: templates/db_test.html:3
 msgid "Result of processing"
@@ -1686,9 +1670,7 @@ msgid "People whose name begins with"
 msgstr "Henkilöt, joiden nimi alkaa"
 
 #: templates/join_persons.html:32
-msgid ""
-"Mark the central person (1st selection column) and the people to be merged (2nd "
-"column)"
+msgid "Mark the central person (1st selection column) and the people to be merged (2nd column)"
 msgstr "Merkitse päähenkilö (1. valintasarake) ja yhdistettävät henkilöt (2. sarake)"
 
 #: templates/join_persons.html:33
@@ -2074,7 +2056,7 @@ msgstr "Näytetään mediatiedostot"
 #: templates/table_media.html:13 templates/table_persons2.html:13
 #: templates/table_sources.html:13
 msgid "uniq_id"
-msgstr "uniikki tunnus"
+msgstr "avain"
 
 #: templates/table_media.html:14
 msgid "src"
@@ -2196,7 +2178,7 @@ msgstr "Näytetään lähteet"
 
 #: templates/table_sources.html:14
 msgid "stitle"
-msgstr "lnimi"
+msgstr "otsikko"
 
 #: templates/table_surnames.html:7
 msgid "All surnames"
@@ -2305,3 +2287,4 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
+
