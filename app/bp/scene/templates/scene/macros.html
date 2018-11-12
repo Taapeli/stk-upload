@@ -68,13 +68,20 @@
     <span class="myself">&nbsp;(itse)&nbsp;</span>
     {% else %}
     <a href="/scene/person{{delim}}{{ch.uniq_id}}" class="inlink" 
-    	title="{{ _('see details of person %(id)s', id=ch.id) }}">
+        title="{{ _('see details of person %(id)s', id=ch.id) }}">
         {% if ch.names|length %}
         {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> <b>{{ch.names[0].surname}}</b></a>
         {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
         {% else %}{{ _('Anonymous') }}
         {% endif %}
     {% endif %}
+{%- endmacro %}
+                    
+{% macro notelink(note) -%}
+    {#  Displays a Note text and link out #}
+    {{note.text}}{% if note.url %}
+    <a href="{{note.text}}" class="outlink" 
+       target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}
 {%- endmacro %}
                     
                         

@@ -19,7 +19,7 @@ from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person_name import Name
-from models.gen.weburl import Weburl
+#from models.gen.weburl import Weburl
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.citation import Citation
@@ -184,10 +184,8 @@ def pick_url(src):
         url = match.group("url")
         start = match.start()
         end = match.end()
-#         if start == 0:
-#             start = ''
-#         if end == len(src) - 1:
-#             end = ''
+#         start = ''   if start == 0
+#         end = ''     if end == len(src) - 1:
 #         print("[{}:{}] url='{}'".format(start, end, url))
         text = ''
         if start:
@@ -470,9 +468,7 @@ class DOM_handler():
         t0 = time.time()
         counter = 0
 
-        # Print detail of each note
         for note in notes:
-
             n = Note()
 
             if note.hasAttribute("handle"):
@@ -486,20 +482,15 @@ class DOM_handler():
             if note.hasAttribute("type"):
                 n.type = note.getAttribute("type")
 
-            url = ''
             if len(note.getElementsByTagName('text') ) == 1:
                 note_text = note.getElementsByTagName('text')[0]
                 n.text = note_text.childNodes[0].data
                 # Pick possible url
-                n.text, url = pick_url(n.text)
-#                 if url:
-#                     u = Weburl(url)
+                n.text, n.url = pick_url(n.text)
 
             #TODO: 17.10.2018 Viime palaverissa mm. suunniteltiin, että kuolinsyyt 
             # konvertoitaisiin heti Note-nodeiksi sopivalla node-tyypillä
-            print("Note type={}, text={}... url={}".format(n.type, n.text[:16], url))
-            #TODO: Uuden Weburl-luokan ja noden yhdistäminen Noteen siten, 
-            # että siinä olisi aina kaksi kenttää: description ja url.
+            print(n)
 
             n.save(self.tx)
             counter += 1
@@ -630,16 +621,17 @@ class DOM_handler():
                         p.objref_hlink.append(person_objref.getAttribute("hlink"))
 
             for person_url in person.getElementsByTagName('url'):
-                weburl = Weburl()
+                n = Note()
                 if person_url.hasAttribute("priv"):
-                    weburl.priv = int(person_url.getAttribute("priv"))
+                    n.priv = int(person_url.getAttribute("priv"))
                 if person_url.hasAttribute("href"):
-                    weburl.href = person_url.getAttribute("href")
+                    n.url = person_url.getAttribute("href")
                 if person_url.hasAttribute("type"):
-                    weburl.type = person_url.getAttribute("type")
+                    n.type = person_url.getAttribute("type")
                 if person_url.hasAttribute("description"):
-                    weburl.description = person_url.getAttribute("description")
-                p.urls.append(weburl)
+                    n.text = person_url.getAttribute("description")
+                if n.url:
+                    p.notes.append(n)
 
             if len(person.getElementsByTagName('parentin') ) >= 1:
                 for i in range(len(person.getElementsByTagName('parentin') )):
@@ -721,16 +713,17 @@ class DOM_handler():
                             'level':"WARNING", 'count':pl.id})
 
             for placeobj_url in placeobj.getElementsByTagName('url'):
-                weburl = Weburl()
+                n = Note()
                 if placeobj_url.hasAttribute("priv"):
-                    weburl.priv = int(placeobj_url.getAttribute("priv"))
+                    n.priv = int(placeobj_url.getAttribute("priv"))
                 if placeobj_url.hasAttribute("href"):
-                    weburl.href = placeobj_url.getAttribute("href")
+                    n.url = placeobj_url.getAttribute("href")
                 if placeobj_url.hasAttribute("type"):
-                    weburl.type = placeobj_url.getAttribute("type")
+                    n.type = placeobj_url.getAttribute("type")
                 if placeobj_url.hasAttribute("description"):
-                    weburl.description = placeobj_url.getAttribute("description")
-                pl.urls.append(weburl)
+                    n.text = placeobj_url.getAttribute("description")
+                if n.url:
+                    pl.urls.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName('placeref'):
                 # Traverse links to surrounding places
@@ -793,12 +786,12 @@ class DOM_handler():
                                      'level':"WARNING", 'count':r.id})
 
             for repository_url in repository.getElementsByTagName('url'):
-                webref = Weburl()
-                webref.href = repository_url.getAttribute("href")
-                webref.type = repository_url.getAttribute("type")
-                webref.description = repository_url.getAttribute("description")
-                if webref.href > "":
-                    r.urls.append(webref)
+                n = Note()
+                n.url = repository_url.getAttribute("href")
+                n.type = repository_url.getAttribute("type")
+                n.text = repository_url.getAttribute("description")
+                if n.url:
+                    r.notes.append(n)
 
             r.save(self.tx)
             counter += 1
@@ -835,7 +828,6 @@ class DOM_handler():
                                      'level':"WARNING", 'count':s.id})
 
 #TODO More than one noteref in a source     S0041, S0002
-# Vaihdetaan s.noteref_hlink --> s.note_handles[]
             if len(source.getElementsByTagName('noteref') ) == 1:
                 source_noteref = source.getElementsByTagName('noteref')[0]
                 if source_noteref.hasAttribute("hlink"):

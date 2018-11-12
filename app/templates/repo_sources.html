@@ -19,18 +19,18 @@
                 <div class="col1">{{ _("Type") }}</div>
                 <div class="col2">{{r.type}}</div>
         </li>
-        {% for i in range(r.url_href|length) %}
+        {% for note in r.notes %}
 	        <li class="itemrow">
 	                <div class="col1">{{ _("URL href") }}</div>
-	                <div class="col2">{{r.url_href[i]}}</div>
+	                <div class="col2">{{note.url}}</div>
 	        </li>
 	        <li class="itemrow">
 	                <div class="col1">{{ _("URL type") }}</div>
-	                <div class="col2">{{r.url_type[i]}}</div>
+	                <div class="col2">{{note.type}}</div>
 	        </li>
 	        <li class="itemrow">
 	                <div class="col1">{{ _("URL description") }}</div>
-	                <div class="col2">{{r.url_description[i]}}</div>
+	                <div class="col2">{{note.text}}</div>
 	        </li>
 	     {% endfor %}
      </ol>

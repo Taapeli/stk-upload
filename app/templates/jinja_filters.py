@@ -18,7 +18,7 @@ def translate(term, var_name, lang="fi"):
         'lt'   = Location types
         'lt_in' = Location types, inessive form
         'notet' = note type
-        'urlt' = web page type
+        #'urlt' = web page type
         'rept' = repository types
         'medium' = media types
     """
@@ -126,6 +126,7 @@ def translate(term, var_name, lang="fi"):
     elif var_name == "notet":
         # Note types
         tabl = {
+            "Link":"ks.",
             "Citation":"viite",
             "Event Note":"tapahtuma",
             "Source Note":"lähde",

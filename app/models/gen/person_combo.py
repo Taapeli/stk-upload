@@ -19,10 +19,9 @@
                                         Read Persons with Names, Events and Refnames
         - get_my_places(self)              Tallettaa liittyvät Paikat henkilöön
         - get_all_citation_source(self) Tallettaa liittyvät Cition ja Source
-        - get_all_notes(self)           Tallettaa liittyvät Note ja Weburl
+        - get_all_notes(self)           Tallettaa liittyvät Notes (ja web-viittaukset)
         - get_family_members (uniq_id)  Luetaan liittyvät Names, Families and Events
         - get_refnames(pid)             Luetaan liittyvät Refnames
-        - get_ref_weburls(pid_list)     Luetaan mainittuihin nodeihin liittyvät Weburlit
         - set_estimated_dates()         Aseta est_birth ja est_death
         # save(self, username, tx)      see: bp.gramps.models.person_gramps.Person_gramps.save
 
@@ -59,8 +58,8 @@ from .person_name import Name
 from .cypher import Cypher_person
 from .place import Place, Place_name
 from .dates import DateRange
-from .weburl import Weburl
-
+from .note import Note
+#from .weburl import Weburl
 #from models.cypher_gramps import Cypher_person_w_handle
 
 class Person_combo(Person):
@@ -85,23 +84,17 @@ class Person_combo(Person):
             eventref_hlink[]   int tapahtuman uniq_id, rooli 
             - eventref_role[]  str edellisen rooli
             media_ref[]        int median uniq_id (previous objref_hlink[])
-            urls[]             list of Weburl nodes
-                priv           int 1 = salattu tieto
-                href           str osoite
-                type           str tyyppi
-                description    str kuvaus
             parentin_hlink[]   int vanhempien uniq_id
-            noteref_hlink[]    int huomautuksen uniq_id
+            noteref_hlink[]    int huomautuksen uniq_id tai handle?
             citation_ref[]     int viittauksen uniq_id    (ent.citationref_hlink)
      """
 
     def __init__(self):
         """ Luo uuden person-instanssin
-        
         """
         Person.__init__(self)
 
-        # For emadded or referenced child objects, displaying Person page
+        # For embadded or referenced child objects, displaying Person page
         # @see Plan bp.scene.data_reader.connect_object_as_leaf
 
         self.names = []                 # models.gen.person_name.Name
@@ -113,7 +106,7 @@ class Person_combo(Person):
         self.citation_ref = []          # models.gen.citation.Citation
         #remove: self.citations = []
         self.note_ref = []              # uniq_id of models.gen.note.Note
-        #remove: self.notes = []
+        self.notes = []                 # 
         #remove: self.noteref_hlink = []
 
         self.media_ref = []             # uniq_id of models.gen.media.Media
@@ -121,7 +114,7 @@ class Person_combo(Person):
 
         # Other variables
 
-        self.urls = []
+        #self.urls = []                # REMOVED: Now use note_ref[]
         self.est_birth = ''
         self.est_death = ''
 
@@ -256,21 +249,6 @@ RETURN ID(family) AS uniq_id"""
 
     def get_person_and_name_data_by_id(self):
         """ Luetaan kaikki henkilön tiedot ja nimet
-            ╒══════════════════════════════╤══════════════════════════════╕
-            │"person"                      │"name"                        │
-            ╞══════════════════════════════╪══════════════════════════════╡
-            │{"gender":"F","url_type":[],"c│{"firstname":"Margareta Elisab│
-            │hange":"1507492602","gramps_ha│et","surname":"Enckell","alt":│
-            │ndle":"_d9ea5e7f9a00a0482af","│"","type":"Birth Name","suffix│
-            │id":"I0098","url_href":[],"url│":"","refname":"Margareta Elis│
-            │_description":[]}             │abeth/Enckell/"}              │
-            ├──────────────────────────────┼──────────────────────────────┤
-            │{"gender":"F","url_type":[],"c│{"firstname":"Margareta","surn│
-            │hange":"1507492602","gramps_ha│ame":"Utter","alt":"1","type":│
-            │ndle":"_d9ea5e7f9a00a0482af","│"Married Name","suffix":"","re│
-            │id":"I0098","url_href":[],"url│fname":"Margareta/Utter/"}    │
-            │_description":[]}             │                              │
-            └──────────────────────────────┴──────────────────────────────┘
         """
         pid = int(self.uniq_id)
         query = """
@@ -304,18 +282,18 @@ RETURN person, name
 
 
     def get_person_w_names(self):
-        """ Returns Person with Names and Weburls included
+        """ Returns Person with Names and Notes included
 
-            Luetaan kaikki henkilön tiedot ja nimet, urlit
+            Luetaan kaikki henkilön tiedot ja nimet, huomautukset
         """
-        result = shareds.driver.session().run(Cypher_person.get_w_names_urls, 
+        result = shareds.driver.session().run(Cypher_person.get_w_names_notes, 
                                               pid=int(self.uniq_id))
 
         for record in result:
             # <Record person=<Node id=72087 labels={'Person'} 
             #    properties={'handle': '_dd4a3c371f72257f442c1c42759', 'id': 'I1054', 
             #        'priv': '', 'gender': 'M', 'confidence': '2.0', 'change': 1523278690}> 
-            #    urls=[] 
+            #    notes=[] 
             #    names=[<Node id=72088 labels={'Name'} 
             #            properties={'alt': '', 'firstname': 'Anthon', 'type': 'Also Known As', 
             #                'suffix': 'jun.', 'surname': 'Naht'}>, 
@@ -330,9 +308,8 @@ RETURN person, name
                 pname = Name.from_node(node)
                 self.names.append(pname)
 
-            for node in record["urls"]:
-                weburl = Weburl.from_node(node)
-                self.urls.append(weburl)
+            for note_id in record["notes"]:
+                self.note_ref.append(note_id)
 
 
     @staticmethod
@@ -844,7 +821,7 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
 """
         return shareds.driver.session().run(query, pid=pid)
 
-
+ 
     @staticmethod
     def get_ref_weburls(pid_list):
         """ Get all weburls referenced from list of uniq_ids
@@ -853,11 +830,11 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
         query="""
 match (x) where id(x) in $pids
 with distinct x
-  match (x) -[r:CITATION|SOURCE|NOTE|WEBURL]-> (y) 
+  match (x) -[r:CITATION|SOURCE|NOTE]-> (y) 
   return id(x) as root, x.id as root_id, type(r) as rtype, 
          id(y) as target, labels(y)[0] as label, y.id as id 
   order by root, id"""
-
+ 
         return shareds.driver.session().run(query, pids=pid_list)
 
 # Unused methods:

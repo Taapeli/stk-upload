@@ -6,9 +6,11 @@ Created on 10.9.2018
 
 @author: jpek@iki.fi
 '''
+from sys import stderr
 
 import shareds
 from .cypher import Cypher_person
+from .cypher import Cypher_name
 
 class Name:
     """ Nimi
@@ -50,6 +52,26 @@ class Name:
         n.surname = node['surname']
         n.alt = node['alt']
         return n
+
+    def save(self, tx, parent_id=None):
+        """ Creates or updates this Name node. (There is no handle)
+            If parent_id is given, a link (parent) -[:NAME]-> (Name) is created 
+        """
+        try:
+            n_attr = {
+                "alt": self.alt,
+                "type": self.type,
+                "firstname": self.firstname,
+                "surname": self.surname,
+                "suffix": self.suffix
+            }
+            tx.run(Cypher_name.create_as_leaf,
+                   n_attr=n_attr, parent_id=self.uniq_id)
+        except ConnectionError as err:
+            raise SystemExit("Stopped in Name.save: {}".format(err))
+        except Exception as err:
+            print("Virhe (Name.save): {0}".format(err), file=stderr)
+
 
 
     @staticmethod
@@ -149,13 +171,13 @@ class Name:
         return shareds.driver.session().run(query)
 
 
-    @staticmethod
-    def set_refname(tx, uniq_id, refname):
-        """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
-            Asetetaan etunimen referenssinimi  """
-
-        query = """
-MATCH (n:Name) WHERE ID(n)=$id
-SET n.refname=$refname
-            """
-        return tx.run(query, id=uniq_id, refname=refname)
+#     @staticmethod
+#     def set_refname(tx, uniq_id, refname):
+#         """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+#             Asetetaan etunimen referenssinimi  """
+# 
+#         query = """
+# MATCH (n:Name) WHERE ID(n)=$id
+# SET n.refname=$refname
+#             """
+#         return tx.run(query, id=uniq_id, refname=refname)

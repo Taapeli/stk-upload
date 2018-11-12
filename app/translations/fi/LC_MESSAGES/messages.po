@@ -109,8 +109,15 @@ msgstr "Käyttäjänimi"
 #: templates/del_table_users.html:40 templates/person2.html:15
 #: templates/repo_sources.html:15 templates/table_persons.html:19
 #: templates/table_refnames.html:28
+
+msgid "Uniq_id"
+msgstr "Avain"
+
 msgid "Name"
 msgstr "Nimi"
+
+msgid "Event type"
+msgstr "Tapahtuman tyyppi"
 
 #: setups.py:192
 msgid "Language"
@@ -394,17 +401,25 @@ msgstr "Toimenpiteet"
 msgid "Uploads"
 msgstr "Lataukset"
 
+#: bp/gramps/templates/gramps/uploads.html:33
+msgid "Now the administrator can load your file to database as yor new candadate material set"
+msgstr "Nyt ylläpitäjä voi tallettaa ehdokasaineistosi tietokantaan"
+
+#: bp/gramps/templates/gramps/uploads.html:35
+msgid "on this page"
+msgstr "tällä sivulla"
+
 #: bp/admin/templates/admin/list_users.html:42
 msgid "No users"
 msgstr "Ei käyttäjiä"
 
 #: bp/admin/templates/admin/load_result.html:3
 msgid "Gramps to Neo4j log"
-msgstr "Loki Gramps Neo4j siirrosta"
+msgstr "Lokitiedot siirrosta Grampsista tietokantaan"
 
 #: bp/admin/templates/admin/load_result.html:6
 msgid "Log of Gramps XML upload"
-msgstr "Loki Gramps XML latauksesta"
+msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
 #: bp/admin/templates/admin/load_result.html:19
 #: bp/admin/templates/admin/uploads.html:43 bp/gramps/templates/gramps/result.html:27
@@ -430,15 +445,15 @@ msgid "Download reference names"
 msgstr "Lataa referenssinimiä"
 
 #: bp/admin/templates/admin/reference.html:21
-msgid "Destroying </u> all former </u> and creating a unique index"
-msgstr "Tuhotaan</u> kaikki entiset</u> ja luodaan yksikäsitteinen indeksi"
+msgid "Destroying <u>all former</u> and creating a unique index"
+msgstr "Tuhotaan <u>kaikki entiset</u> ja luodaan yksikäsitteinen indeksi"
 
 #: bp/admin/templates/admin/reference.html:24 templates/mainindex.html:38
 msgid "Download"
 msgstr "Lataa"
 
 #: bp/admin/templates/admin/reference.html:32
-msgid "Handling reference Names"
+msgid "Handling reference names"
 msgstr "Referenssinimien käsittely"
 
 #: bp/admin/templates/admin/reference.html:33
@@ -504,6 +519,10 @@ msgstr "XML tiedosto"
 #: bp/admin/templates/admin/uploads.html:22 bp/gramps/templates/gramps/uploads.html:21
 msgid "Status"
 msgstr "Tila"
+
+#: bp/admin/templates/admin/uploads.html:29
+msgid "Download to your computer"
+msgstr "Lataa omalle koneelle"
 
 #: bp/admin/templates/admin/uploads.html:35
 msgid "Store to database"
@@ -1154,6 +1173,9 @@ msgstr "Paikka"
 #: bp/scene/templates/scene/place_events.html:106
 msgid "Note"
 msgstr "Lisätiedot"
+
+msgid "see:"
+msgstr "ks."
 
 #: bp/scene/templates/scene/person.html:104
 msgid "of Type"

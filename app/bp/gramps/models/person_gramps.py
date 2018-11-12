@@ -50,13 +50,6 @@ class Person_gramps(Person):
             parentin_hlink[]    str vanhempien uniq_id
             noteref_hlink[]     str huomautuksen uniq_id
             citationref_hlink[] str viittauksen uniq_id    (ent.citationref_hlink)
-
-            urls[]              list of Weburl nodes
-                priv           int 1 = salattu tieto
-                href           str osoite
-                type           str tyyppi
-                description    str kuvaus
-    
      """
 
     def __init__(self):
@@ -74,14 +67,14 @@ class Person_gramps(Person):
         self.objref_hlink = []          # handles of Media
         self.parentin_hlink = []        # handle for parent family
         self.noteref_hlink = []         # 
-        self.citationref_hlink = []          # models.gen.citation.Citation
+        self.citationref_hlink = []     # models.gen.citation.Citation
         
         # Program objects
-        self.urls = []
         self.events = []                # models.gen.event_combo.Event_combo
+        self.notes = []                 # models.gen.note.Note, used for
+                                        # generated objects which have no hlink
 
         # Other variables ???
-
         self.est_birth = ''
         self.est_death = ''
 
@@ -119,35 +112,24 @@ class Person_gramps(Person):
             print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
 
         # Save Name nodes under the Person node
-        try:
-            for name in self.names:
+        for name in self.names:
+            name.save(tx, self.uniq_id)
+            try:
                 n_attr = {
                     "alt": name.alt,
                     "type": name.type,
                     "firstname": name.firstname,
-#                     "refname": name.refname,
                     "surname": name.surname,
                     "suffix": name.suffix
                 }
                 tx.run(Cypher_person_w_handle.link_name, 
                        n_attr=n_attr, p_handle=self.handle)
-        except Exception as err:
-            print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
-
-        # Save Weburl nodes under the Person
-        for url in self.urls:
-            u_attr = {
-                "priv": url.priv,
-                "href": url.href,
-                "type": url.type,
-                "description": url.description
-            }
-            try:
-                tx.run(Cypher_person_w_handle.link_weburl, 
-                       p_handle=self.handle, u_attr=u_attr)
             except Exception as err:
-                print("Virhe (Person.save: {} create Weburl): {0}".\
-                      format(self.id, err), file=stderr)
+                print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
+
+        # Save web urls as Note nodes connected under the Person
+        for note in self.notes:
+            note.save(tx, self.uniq_id)
 
         if len(self.events) > 0:
             # Make Event relations (if Events were stored in self.events)
@@ -171,7 +153,7 @@ class Person_gramps(Person):
 
         # Make Event relations by hlinks (from gramps_loader)
         elif len(self.eventref_hlink) > 0:
-            ''' Connect to each Event loaded form Gramps '''
+            ''' Connect to each Event loaded from Gramps '''
             for i in range(len(self.eventref_hlink)):
                 try:
                     tx.run(Cypher_person_w_handle.link_event, 
@@ -181,7 +163,7 @@ class Person_gramps(Person):
                 except Exception as err:
                     print("Virhe (Person.save:Event): {0}".format(err), file=stderr)
 
-        # Make relations to the Media node
+        # Make relations to the Media nodes
         if len(self.objref_hlink) > 0:
             for ref in self.objref_hlink:
                 try:

@@ -6,25 +6,29 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 @author: jm
 '''
 
-from .cypher import Cypher_note
+from sys import stderr
+
+from models.gen.cypher import Cypher_note
 from models.cypher_gramps import Cypher_note_w_handle
 import shareds
 
 class Note:
     """ Note / Huomautus
+        including eventual web link
 
         Properties:
                 handle          str stats with '_' if comes from Gramps
                 change          int timestamp from Gramps
                 id              esim. "N0001"
                 uniq_id         int database key
-                priv            int >0 salattu tieto
-                type            str huomautuksen tyyppi
-                text            str huomautuksen sisältö
+                priv            int >0 non-public information
+                type            str note type
+                text            str note description
+                url             str web link
      """
 
     def __init__(self):
-        """ Creates a Noteinstance in memory 
+        """ Creates a Note instance in memory 
         """
         self.uniq_id = None
         self.id = ''
@@ -33,9 +37,11 @@ class Note:
         self.text = ''
         self.change = 0
         self.priv = 0
+        self.url = ''
 
     def __str__(self):
-        return "{} {} '{} ...'".format(self.id, self.type, self.text[:16])
+        desc = self.text if len(self.text) < 17 else self.text[:16] + "..."
+        return "{} {} '{} ...' {}".format(self.id, self.type, desc, self.url)
 
     @classmethod
     def from_node(cls, node):
@@ -50,6 +56,7 @@ class Note:
         n.priv = node['priv'] or ''
         n.type = node['type'] or ''
         n.text = node['text'] or ''
+        n.url = node['url'] or ''
         return n
 
 #     @staticmethod       
@@ -82,7 +89,7 @@ class Note:
  
     @staticmethod
     def get_notes(uniq_ids):
-        """ Reads Note nodes data from db using given uniq_ids
+        """ Reads Note nodes data from db using given Note uniq_ids
 
             Called from models.datareader.get_person_data_by_id
         """
@@ -119,7 +126,7 @@ RETURN ID(n) AS uniq_id, n
 ORDER BY n.type"""
                 result =  session.run(query)
 
-        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text', 'url']
         notes = []
 
         for record in result:
@@ -139,11 +146,12 @@ ORDER BY n.type"""
             results =  session.run("MATCH (n:Note) RETURN COUNT(n)")
             for result in results:
                 return str(result[0])
-
         return '0'
 
-    def save(self, tx):
+
+    def save(self, tx, parent_id=None):
         """ Creates or updates this Note object as a Note node using handle
+            If parent_id is given, a link (parent) --> (Note) is created 
         """
         try:
             n_attr = {
@@ -152,10 +160,22 @@ ORDER BY n.type"""
                 "id": self.id,
                 "priv": self.priv,
                 "type": self.type,
-                "text": self.text
+                "text": self.text,
+                "url": self.url
             }
-            return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)
+            if parent_id:
+                if self.handle:
+                    return tx.run(Cypher_note_w_handle.merge_as_leaf, 
+                                  parent_id=parent_id, n_attr=n_attr)
+                else:
+                    return tx.run(Cypher_note_w_handle.create_as_leaf, 
+                                  parent_id=parent_id, n_attr=n_attr)
+            elif self.handle:
+                return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)
+            else:
+                print("Note.save: No handle or parent node")
 
+        except ConnectionError as err:
+            raise SystemExit("Stopped in Note.save: {}".format(err))
         except Exception as err:
-            # raise SystemExit("Stopped due to errors")    # Stop processing
-            raise ConnectionError("Note.save: {}".format(err))
+            print("Virhe (Note.save): {0}".format(err), file=stderr)

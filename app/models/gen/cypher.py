@@ -106,12 +106,12 @@ RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
 MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
-    get_w_names_urls = """
+    get_w_names_notes = """
 MATCH (person:Person) -[r:NAME]-> (name:Name)
   WHERE ID(person)=$pid
-OPTIONAL MATCH (person) -[wu:WEBURL]->( weburl:Weburl)
-  WITH person, name, COLLECT (weburl) AS urls ORDER BY name.alt
-RETURN person, urls, COLLECT (name) AS names"""
+OPTIONAL MATCH (person) -[:NOTE]-> (n:Note)
+  WITH person, name, COLLECT (n) AS notes ORDER BY name.alt
+RETURN person, notes, COLLECT (name) AS names"""
 
     get_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
@@ -123,6 +123,18 @@ RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
 MATCH (n)<-[r:NAME]-(p:Person)
 RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
     p.gender AS sex"""
+
+
+class Cypher_name():
+    """ 
+        For Person Name class 
+    """
+
+    create_as_leaf = """
+CREATE (n:Name) SET n = $n_attr
+WITH n
+MATCH (p:Person)    WHERE ID(p) = $parent_id
+MERGE (p)-[r:NAME]->(n)"""
 
 
 class Cypher_event():
@@ -187,14 +199,12 @@ RETURN ID(a) AS id, a.type AS type,
     COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
 ORDER BY name[0][0]"""
 
-    get_w_names_urls_notes = """
+    get_w_names_notes = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE ID(place)=$place_id
-OPTIONAL MATCH (place) -[wu:WEBURL]-> (url:Weburl)
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
 RETURN place, 
     COLLECT(DISTINCT [n.name, n.lang]) AS names,
-    COLLECT (DISTINCT url) AS urls, 
     COLLECT (DISTINCT note) AS notes"""
 
     place_get_one = """
@@ -319,7 +329,7 @@ class Cypher_repository():
     _get_tail = """
     with r, rr, s 
     order by s.stitle
-    optional match (r) -[wr:WEBREF]-> (w:Weburl)
+    optional match (r) -[:NOTE]-> (w:Note)
 return id(r) AS uniq_id, 
     r.rname AS rname,
     r.type AS type, 
@@ -327,16 +337,16 @@ return id(r) AS uniq_id,
     r.handle as handle,
     r.id as id,
     collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
-    collect(w) as webref
+    collect(w) as notes
 order by r.rname"""
 
     get_w_sources_all = _get_all + _get_tail 
     get_w_sources =  _get_one + _get_tail
 
-    get_w_urls = """
+    get_w_notes = """
 match (repo:Repository) where ID(repo) = $rid
-    optional match (repo) -[wr:WEBURL]-> (w:Weburl)
-return repo, collect(w) as webref"""
+    optional match (repo) -[:NOTE]-> (w:Note)
+return repo, collect(w) as notes"""
 
     get_one = """
 match (r:Repository) where ID(r) == $rid
@@ -346,28 +356,28 @@ return r"""
 match (r:Repository)
 return r order by r.type"""
 
-class Cypher_weburl():
-    '''
-    Cypher clases for creating and accessing Weburls
-    '''
-    link_to_weburl = """
-merge (w:Weburl {href: $href})
-with w
-    match (x) where ID(x) = $parent_id
-    with w, x
-        merge (x) -[r:WEBREF]-> (w)
-            set r.type = $type
-            set r.desc = $desc
-            set r.priv = $priv
-return id(r) as ref_id, id(w) as weburl_id"""
-    link_to_weburl_X = """
-match (x) where ID(x) = $parent_id
-    optional match (w:Weburl) where w.href = $href
-with x, w
-    merge (x) -[r:WEBREF]-> (w)
-        set w.href = $href
-        set r.type = $type
-        set r.desc = $desc
-        set r.priv = $priv
-return id(r) as ref_id, id(w) as weburl_id"""
+# class Cypher_weburl():
+#     '''
+#     Cypher clases for creating and accessing Weburls
+#     '''
+#     link_to_weburl = """
+# merge (w:Weburl {href: $href})
+# with w
+#     match (x) where ID(x) = $parent_id
+#     with w, x
+#         merge (x) -[r:WEBREF]-> (w)
+#             set r.type = $type
+#             set r.desc = $desc
+#             set r.priv = $priv
+# return id(r) as ref_id, id(w) as weburl_id"""
+#     link_to_weburl_X = """
+# match (x) where ID(x) = $parent_id
+#     optional match (w:Weburl) where w.href = $href
+# with x, w
+#     merge (x) -[r:WEBREF]-> (w)
+#         set w.href = $href
+#         set r.type = $type
+#         set r.desc = $desc
+#         set r.priv = $priv
+# return id(r) as ref_id, id(w) as weburl_id"""
 

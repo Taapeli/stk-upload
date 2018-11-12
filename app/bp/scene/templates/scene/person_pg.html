@@ -135,13 +135,14 @@ u { color: DarkKhaki; text-decoration: none; }
                                     class="typedesc">{{ _("cause of death") }}</span> {{t_cause_of_death}}<br>
                             	{% endif %}
                             	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
-                            	   <li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
-                            	       {{ obj[ref].text }}</li>
-                            	   {% endfor %}</ul>{% endif %}
-                                {% if e.place_ref %}<ul class="eventnotes">{% for pref in e.place_ref %}
-                                    {% for nref in obj[pref].note_ref %}
-                                   <li><span class="typedesc">{{ obj[nref].type|transl('notes') }}</span>
-                                       {{obj[nref].text}}</li>{% endfor %}
+	                            	<li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+	                            	  {{ macro.notelink(obj[ref]) }}</li>
+	                            	{% endfor %}</ul>{% endif %}
+                                {% if e.place_ref %}<ul class="eventnotes">
+                                    {% for pref in e.place_ref %}
+                                        {% for ref in obj[pref].note_ref %}
+                                   <li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+                                        {{ macro.notelink(obj[ref]) }}</li>{% endfor %}
                                     {% endfor %}</ul>{% endif %}
                             </div>
                         </td>
@@ -272,9 +273,8 @@ u { color: DarkKhaki; text-decoration: none; }
                                   {% if cita.confidence and cita.confidence < "2" %}
                                  style="color:red"{% endif %}>
                                 {{ cita.notetext }}</a>{% endif %}                           
-                   {% if cita.note_ref %}{% for nref in cita.note_ref %} &gt;
-                              <a href="{{obj[nref].text}}" class="outlink" 
-                               target="_blank">{{obj[nref].text|transl('urldomain')}}</a>
+                   {% if cita.note_ref %}{% for ref in cita.note_ref %} – <i>{{ _("see:") }}</i>
+                               {{ macro.notelink(obj[ref]) }}
                    {% endfor %}{% endif %}
                         </li>
             {% endif %}

@@ -7,7 +7,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from sys import stderr
 
 import  shareds
-from .weburl import Weburl
+#from .weburl import Weburl
 from .note import Note
 from .dates import DateRange
 from .cypher import Cypher_place
@@ -29,11 +29,6 @@ class Place:
                    lang             str kielikoodi
                    dates            DateRange date expression
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
-                urls[]:
-                    priv            str url salattu tieto
-                    href            str url osoite
-                    type            str url tyyppi
-                    description     str url kuvaus
                 surrounding[]       int uniq_ids of upper
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 note_ref[]          int uniq_ids of Notes
@@ -60,7 +55,7 @@ class Place:
         
         self.uppers = []        # Upper place objects for hirearchy display
         self.notes = []         # Upper place objects for hierarchy display
-        self.urls = []          # Weburl instance list
+#         self.urls = []          # Weburl poistettu, käytössä notes[]
 
         self.note_ref = []      # uniq_ids of Notes
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
@@ -143,16 +138,16 @@ class Place:
         return places
 
 
-    def read_w_urls_notes(self):
+    def read_w_notes(self):
         """ Luetaan kaikki paikan tiedot ml. nimivariaatiot (tekstinä)
-            #TODO: Luetaan Weburl, Notes ja Citations vasta get_persondata_by_id() lopuksi
+            #TODO: Luetaan Notes ja Citations vasta get_persondata_by_id() lopuksi
 
             Nimivariaatiot talletetaan kenttään pname,
             esim. [["Svartholm", "sv"], ["Svartholma", None]]
             #TODO: Ei hieno, pitäisi palauttaa Place_name objects!
         """
         with shareds.driver.session() as session:
-            place_result = session.run(Cypher_place.get_w_names_urls_notes, 
+            place_result = session.run(Cypher_place.get_w_names_notes, 
                                        place_id=self.uniq_id)
 
             for place_record in place_result:
@@ -162,10 +157,6 @@ class Place:
                 self.coord = place_record["place"]["coord"]
                 self.pname = Place.namelist_w_lang(place_record["names"])
 
-                for node in place_record['urls']:
-                    weburl = Weburl.from_node(node)
-                    self.urls.append(weburl)
-    
                 for node in place_record['notes']:
                     n = Note.from_node(node)
                     self.notes.append(n)
@@ -481,16 +472,6 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                        handle=self.handle, n_attr=n_attr)
         except Exception as err:
             print("Virhe Place.add_name: {0}".format(err), file=stderr)
-
-        # Talleta Weburl nodet ja linkitä paikkaan
-        for url in self.urls:
-            try:
-                tx.run(Cypher_place_w_handle.link_weburl,
-                       handle=self.handle, 
-                       url_priv=url.priv, url_href=url.href,
-                       url_type=url.type, url_description=url.description)
-            except Exception as err:
-                print("Virhe (Place.save:create Weburl): {0}".format(err), file=stderr)
 
         # Make hierarchy relations to upper Place nodes
         for upper in self.surround_ref:

@@ -13,9 +13,9 @@ from flask_security import login_required, roles_accepted, current_user # ,roles
 from flask_babelex import _
 
 import shareds
-from models import gen
+from models.gen.person_name import Name
 # from models import dbutil
-# from models import loadfile            # Datan lataus käyttäjältä
+# from models import loadfile          # Datan lataus käyttäjältä
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from models import dataupdater         # Tietojen päivitysmetodit
 
@@ -76,7 +76,7 @@ def show_table_data(subj):
         persons = datareader.read_persons_with_events()
         return render_template("table_persons2.html", persons=persons)
     elif subj == "surnames":
-        surnames = gen.person_name.Name.get_surnames()
+        surnames = Name.get_surnames()
         return render_template("table_surnames.html", surnames=surnames)
     elif subj == 'events_wo_cites':
         headings, titles, lists = datareader.read_events_wo_cites()

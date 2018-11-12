@@ -358,5 +358,3 @@ return s'''
                 print("Virhe (Source.save:repository_medium): {0}".format(err), file=stderr)
 
         return
-
-# class Weburl(): @see models.gen.weburl.Weburl

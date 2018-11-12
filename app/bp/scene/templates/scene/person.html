@@ -113,7 +113,7 @@
                             	{% if e.notes %}{% set first = True %}{% for note in e.notes %}
                             	   {% if first %}{% set first = False %}{% else %}<br>{% endif %}
                             	   <span class="typedesc">{{ note.type|transl('notet') }}</span>
-                            	       {{ note.text }}{% endfor %}{% endif %}
+                            	       {{ macro.notelink(note) }}{% endfor %}{% endif %}
                             	</div>
                         </td>
                         <td class="ColumnSources">
@@ -296,10 +296,10 @@
                            {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
                             {{ _('Page') }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
-                           {% if cita.notetext %}<br>
-                              <a href="{{cita.notetext}}" class="outlink" target="_blank"
-                              {% if cita.confidence and cita.confidence < "2" %}
-                             style="color:red"{% endif %}>{{ cita.notetext }}</a>{% endif %}                           
+
+                   {% if cita.notetext %}<br>
+                              <i {% if cita.confidence and cita.confidence < "2" %}
+                             style="color:red"{% endif %}>{{ cita.notetext }}</i>{% endif %}                           
                          </li>
                 	</ol>
                 </li>

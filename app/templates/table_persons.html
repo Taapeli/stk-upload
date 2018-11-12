@@ -38,10 +38,10 @@
                 <ul class="event">{% for e in p.events %}
                 <li><span class="id">{{e.oid}}</span> {{e.name}}
                 <span style="font-size:80%; font-style: italic">{{e.date}}</span> 
-                {% if e.citation %}({% if e.citation.url %}signum
-                <a href='{{e.citation.url}}'>{{e.citation.oid}}</a>)
-                {% else %}{{e.citation.oid}})
-                {% endif %}{% endif %}
+                {% if e.citation %}({% for note in e.citation.notes %}signum
+                {% if note.url %}<a href='{{note.url}}'>{{note.text}}</a>
+                {% else %}{{note.text}}){% endif %})
+                {% endfor %}
                 </li>{% endfor %}</ul>
             {% endif %}
             </td>
