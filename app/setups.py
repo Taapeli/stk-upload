@@ -148,9 +148,10 @@ class ExtendedLoginForm(LoginForm):
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
     email = StringField(_('Email Address'), validators=[Required('Email required') ])
-    agree = BooleanField(_('I have read and agree to the Terms and Conditions of use'))
-    terms = SubmitField(_('See the terms of use'))
-    submit = SubmitField(_('Accept and register'))
+    agree = BooleanField( _('I have read and agree the ') + "<a href='static/termsofuse.html' >" +  _('Terms of use') + " </a>")
+#    agree = BooleanField(_('I have read and agree to the Terms and Conditions of use'))
+#    terms = SubmitField(_('See the terms of use'))
+    submit = SubmitField(_('Register'))
  
     def validate_agree(self, field):
         if not field.data:
