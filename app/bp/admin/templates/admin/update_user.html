@@ -19,20 +19,20 @@ label { display: inline-block; width:140pt; }
       {% endif %}
     {% endwith %}
 
-    <form action="{{ url_for('admin.update_user', username=form.username) }}"  method="POST">
+    <form action="{{ url_for('admin.update_user', username=form.username.data) }}"  method="POST">
 	      {{ form.hidden_tag() }}
 	      <p> {{ form.email.label }}  {{ form.email(readonly=true) }} </p>
           <p> {{ form.username.label }}  {{ form.username(readonly=true) }} </p>
    	      {{ render_field_with_errors(form.name) }}
    	      {{ render_field_with_errors(form.language) }}	
     	  {{ render_field_with_errors(form.is_active) }}
-   	      {{ render_field_with_errors(form.roles) }}	    	  
-  	      {{ render_field_with_errors(form.confirmed_at) }}
-   	      {{ render_field_with_errors(form.last_login_at) }}	
-    	  {{ render_field_with_errors(form.last_login_ip) }}
-   	      {{ render_field_with_errors(form.current_login_at) }}	   	      
-   	      {{ render_field_with_errors(form.current_login_ip) }}	
-   	      {{ render_field_with_errors(form.login_count) }} 
+   	      {{ render_field_with_errors(form.roles) }}
+	      <p> {{ form.confirmed_at.label }}  {{ form.confirmed_at(readonly=true) }} </p>   	      
+   	      <p> {{ form.last_login_at.label }}  {{ form.last_login_at(readonly=true) }} </p>
+    	  <p> {{ form.last_login_ip.label }}  {{ form.last_login_ip(readonly=true) }} </p>
+    	  <p> {{ form.current_login_at.label }}  {{ form.current_login_at(readonly=true) }} </p>	   	      
+ 	      <p> {{ form.current_login_ip.label }}  {{ form.current_login_ip(readonly=true) }} </p>  	      
+   	      <p> {{ form.login_count.label }}  {{ form.login_count(readonly=true) }} </p>		
    	      
    	      {{ render_field(form.submit) }}  	    	      
   	      		  

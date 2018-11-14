@@ -232,9 +232,10 @@ class UserAdmin():
         try:
             with shareds.driver.session() as session:
                 updated_user = session.write_transaction(cls._update_user, user)
-                if updated_user is not None:
-                    return cls._build_user_from_node(updated_user) 
-                return None
+                if updated_user is None:
+                    return None
+                return cls._build_user_from_node(updated_user) 
+
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
             return None                 
@@ -243,28 +244,23 @@ class UserAdmin():
     def _update_user (cls, tx, user):    
 
         try:
-            logging.debug('_put_user update' + user.email + ' ' + user.name)
-#   Confirm time is copied from allowed email if not in the user aregument        
-            confirmtime = None 
-            if user.confirmed_at == None:
-                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email).properties['confirmed_at']
-            else:     
-                confirmtime = int(user.confirmed_at.timestamp() * 1000)
-                                                   
+            logging.debug('user update' + user.email + ' ' + user.name)
+#   Commented identifier and history fields are not to be updated
             result = tx.run(Cypher_adm.user_update, 
-                id=int(user.id), 
+ #               id=int(user.id), 
                 email=user.email,
+ #               username = user.username,
+                name = user.name, 
+                language = user.language,              
                 is_active=user.is_active,
-                confirmed_at = confirmtime,            
-                roles=user.roles,
-                username = user.username,
-                name = user.name,
-                language = user.language, 
-                last_login_at = int(user.last_login_at.timestamp() * 1000),
-                current_login_at = int(user.current_login_at.timestamp() * 1000),
-                last_login_ip = user.last_login_ip,
-                current_login_ip = user.current_login_ip,
-                login_count = user.login_count )
+                roles=user.roles)
+#                confirmed_at = user.confirmed_at, 
+#                last_login_at = int(user.last_login_at.timestamp() * 1000),
+#                current_login_at = int(user.current_login_at.timestamp() * 1000),
+#                last_login_ip = user.last_login_ip,
+#                current_login_ip = user.current_login_ip,
+#                login_count = user.login_count )
+
 #   Find list of previous user -> role connections
             prev_roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
 #   Delete connections that are not in edited connection list            
@@ -355,17 +351,10 @@ CREATE (up:UserProfile {
     user_update = '''
 MATCH (user:User)
     WHERE user.email = $email
-SET user.username = $username,
-    user.name = $name,
+SET user.name = $name,
     user.language = $language,
     user.is_active = $is_active,
-    user.confirmed_at = $confirmed_at,
-    user.roles = $roles,
-    user.last_login_at = $last_login_at,
-    user.current_login_at = $current_login_at,
-    user.last_login_ip = $last_login_ip,
-    user.current_login_ip = $current_login_ip,
-    user.login_count = $login_count 
+    user.roles = $roles
 RETURN user'''
 
 

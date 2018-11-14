@@ -55,17 +55,17 @@ class UpdateUserForm(FlaskForm):
                    ("audit",_("Audit")),                      
                    ("admin",_("Admin")) ],
                 description = _('Assigned roles')) 
-    confirmed_at = DateTimeField(_('Email confirmed time'),
+    confirmed_at = DateTimeField(_('Email confirmed time'), [Optional()],
         description = _('Time of email confirmation'))        
-    last_login_at = DateTimeField(_('Last login time'),
+    last_login_at = DateTimeField(_('Last login time'), [Optional()],
         description = _('Time of last login'))   
-    last_login_ip = StringField(_('Last login IP address'),
+    last_login_ip = StringField(_('Last login IP address'), [Optional()],
         description = _('IP address of last login'))    
-    current_login_at = DateTimeField(_('Current login time'),
+    current_login_at = DateTimeField(_('Current login time'), [Optional()],
         description = _('Time of current login'))   
-    current_login_ip = StringField(_('Current login IP address'),
+    current_login_ip = StringField(_('Current login IP address'), [Optional()],
         description = _('IP address of current login'))
-    login_count = IntegerField(_('Login count'),
+    login_count = IntegerField(_('Login count'), [Optional()],
         description = _('Count of logins'))
 
     submit = SubmitField(_('Update user'))
@@ -87,7 +87,3 @@ class AllowedEmailForm(FlaskForm):
                     ],
                 description = _('Enter the default role'))  
     submit = SubmitField(_('Add user candidate'))
- 
-class TermsOfUseForm(FlaskForm):
-
-    submit = SubmitField(_('Return'))    
