@@ -57,6 +57,9 @@ class Name:
         """ Creates or updates this Name node. (There is no handle)
             If parent_id is given, a link (parent) -[:NAME]-> (Name) is created 
         """
+        if not parent_id:
+            raise ValueError("Name.save: no base person defined")
+
         try:
             n_attr = {
                 "alt": self.alt,
@@ -66,12 +69,11 @@ class Name:
                 "suffix": self.suffix
             }
             tx.run(Cypher_name.create_as_leaf,
-                   n_attr=n_attr, parent_id=self.uniq_id)
+                   n_attr=n_attr, parent_id=parent_id)
         except ConnectionError as err:
             raise SystemExit("Stopped in Name.save: {}".format(err))
         except Exception as err:
             print("Virhe (Name.save): {0}".format(err), file=stderr)
-
 
 
     @staticmethod

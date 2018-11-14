@@ -114,18 +114,18 @@ class Person_gramps(Person):
         # Save Name nodes under the Person node
         for name in self.names:
             name.save(tx, self.uniq_id)
-            try:
-                n_attr = {
-                    "alt": name.alt,
-                    "type": name.type,
-                    "firstname": name.firstname,
-                    "surname": name.surname,
-                    "suffix": name.suffix
-                }
-                tx.run(Cypher_person_w_handle.link_name, 
-                       n_attr=n_attr, p_handle=self.handle)
-            except Exception as err:
-                print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
+#             try:
+#                 n_attr = {
+#                     "alt": name.alt,
+#                     "type": name.type,
+#                     "firstname": name.firstname,
+#                     "surname": name.surname,
+#                     "suffix": name.suffix
+#                 }
+#                 tx.run(Cypher_person_w_handle.link_name, 
+#                        n_attr=n_attr, p_handle=self.handle)
+#             except Exception as err:
+#                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
 
         # Save web urls as Note nodes connected under the Person
         for note in self.notes:
@@ -133,7 +133,7 @@ class Person_gramps(Person):
 
         if len(self.events) > 0:
             # Make Event relations (if Events were stored in self.events)
-            # TODO: onkohan tämä käytössä?
+            # TODO: onkohan tämä käytössä? Ei ainakaan gramps-latauksessa
             ''' Create and connect to an Person.event[*] '''
             for e in self.events:
                 if handles:
@@ -175,7 +175,7 @@ class Person_gramps(Person):
         # The relations to the Family node will be created in Family.save(),
         # because the Family object is not yet created
 
-        # Make relations to the Note node
+        # Make relations to the Note nodes
         if len(self.noteref_hlink) > 0:
             for i in range(len(self.noteref_hlink)):
                 try:

@@ -41,7 +41,7 @@ class Note:
 
     def __str__(self):
         desc = self.text if len(self.text) < 17 else self.text[:16] + "..."
-        return "{} {} '{} ...' {}".format(self.id, self.type, desc, self.url)
+        return "{} {} {!r} {}".format(self.id, self.type, desc, self.url)
 
     @classmethod
     def from_node(cls, node):

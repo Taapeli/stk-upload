@@ -723,7 +723,7 @@ class DOM_handler():
                 if placeobj_url.hasAttribute("description"):
                     n.text = placeobj_url.getAttribute("description")
                 if n.url:
-                    pl.urls.append(n)
+                    pl.notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName('placeref'):
                 # Traverse links to surrounding places
