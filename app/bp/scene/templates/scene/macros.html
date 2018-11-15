@@ -80,7 +80,7 @@
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
     {{note.text}}{% if note.url %}
-    <a href="{{note.text}}" class="outlink" 
+    <a href="{{note.url}}" class="outlink" 
        target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}
 {%- endmacro %}
                     

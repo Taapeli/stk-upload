@@ -91,7 +91,7 @@ u { color: DarkKhaki; text-decoration: none; }
                         <th class="ColumnEvent">{{ _("Event") }}</th>
                         <th class="ColumnDate">{{ _("Date") }}</th>
                         <th class="ColumnPlace">{{ _("Place") }}</th>
-                        <th class="ColumnDescription">{{ _("Description and notes") }}</th>
+                        <th class="ColumnDescription">{{ _("Description and Notes") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -132,7 +132,7 @@ u { color: DarkKhaki; text-decoration: none; }
 
                         <td class="ColumnDescription"><div>{{e.description}}</div>
                             <div>{% if e.type == "Death" and t_cause_of_death %}<span 
-                                    class="typedesc">{{ _("cause of death") }}</span> {{t_cause_of_death}}<br>
+                                    class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span> {{t_cause_of_death}}<br>
                             	{% endif %}
                             	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
 	                            	<li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
@@ -255,28 +255,19 @@ u { color: DarkKhaki; text-decoration: none; }
                      >{{source.stitle}}</a>
             {% else %}<b title="{{mark_list}}">{{ _("No source information!") }}</b>{% endif %}
             <!-- Repocitory -->
-            {% if mark_list[0].r_id > 0 %}<i>{{obj[mark_list[0].r_id].rname}}</i>
+            {% if mark_list[0].r_id > 0 %} – {{obj[mark_list[0].r_id].rname}}
             {% else %}<b title="{{mark_list}}">{{ _("No archive information!") }}</b>{% endif %}
         <ul>
     {% for mark_obj in mark_list %}
         <!-- Citation -->
-            {% if mark_obj.c_id > 0 %}{% set cita = obj[mark_obj.c_id] %}
-                {% set conf = cita.confidence | int %}
-                         <li id="sref{{ mark_obj.mark }}"
-                {% if cita.confidence and cita.confidence < "2" %}
-                             style="color:red"{% endif %}>
-                         <span title="[{{mark_obj.c_id}}] {{cita.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{cita.confidence}})">
-                             {{ mark_obj.mark }} {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
-                         </span>
-                   {% if cita.notetext %}<br>
-                              <a href="{{cita.notetext}}" class="outlink" target="_blank"
-                                  {% if cita.confidence and cita.confidence < "2" %}
-                                 style="color:red"{% endif %}>
-                                {{ cita.notetext }}</a>{% endif %}                           
-                   {% if cita.note_ref %}{% for ref in cita.note_ref %} – <i>{{ _("see:") }}</i>
-                               {{ macro.notelink(obj[ref]) }}
-                   {% endfor %}{% endif %}
-                        </li>
+            {% if mark_obj.c_id > 0 %}
+                {% set cita = obj[mark_obj.c_id] %}{% set conf = cita.confidence | int %}
+             <li id="sref{{ mark_obj.mark }}" {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %} >
+                  <span title="[{{mark_obj.c_id}}] {{cita.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{cita.confidence}})">
+                      {{ mark_obj.mark }} {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+                  </span> {{ cita.noteref }}
+                {% for nref in cita.note_ref %}&nbsp; – <i>{{ _("see:") }}&nbsp;</i> {{ macro.notelink(obj[nref]) }}{% endfor %}
+             </li>
             {% endif %}
         </li>
     {% endfor %}</ul>

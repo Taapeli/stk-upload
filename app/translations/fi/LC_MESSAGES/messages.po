@@ -1068,6 +1068,12 @@ msgstr "Perheet"
 msgid "Sources"
 msgstr "Lähteet"
 
+msgid "see:"
+msgstr "ks."
+
+msgid "Description and Notes"
+msgstr "Lisätietoja"
+
 #: bp/scene/templates/scene/macros.html:56
 msgid "Thumbnails"
 msgstr "Pikkukuvat"
@@ -1190,7 +1196,7 @@ msgid "Death cause"
 msgstr "kuolinsyy"
 
 #: bp/scene/templates/scene/person.html:135
-msgid "Parents ' family"
+msgid "Parents' family"
 msgstr "Vanhempien perhe"
 
 #: bp/scene/templates/scene/person.html:138 bp/scene/templates/scene/person.html:139
@@ -1736,17 +1742,17 @@ msgstr "Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan"
 msgid "List of Persons"
 msgstr "Henkilöluettelo"
 
+#: templates/mainindex.html:33
+msgid "Send data to server"
+msgstr "Aineiston lähettäminen"
+
 #: templates/mainindex.html:34
 msgid "Select Gramps XML File (*. gramps) to become candidate material"
 msgstr "Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi"
 
-#: templates/mainindex.html:41
+#: templates/mainindex.html:44
 msgid "List uploads"
-msgstr "Listaa lataukset"
-
-#: templates/mainindex.html:47
-msgid "My gedcom material"
-msgstr "Oma Gedcom-aineistoni"
+msgstr "Näytä lähettämäni aineistot"
 
 #: templates/mainindex.html:48
 msgid "Download your material in gedcom format or edit an already stored"
