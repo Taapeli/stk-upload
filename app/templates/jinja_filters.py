@@ -127,6 +127,7 @@ def translate(term, var_name, lang="fi"):
         # Note types
         tabl = {
             "Link":"ks.",
+            "Cause Of Death":"kuolinsyy",
             "Citation":"viite",
             "Event Note":"tapahtuma",
             "Source Note":"lähde",
@@ -149,7 +150,7 @@ def translate(term, var_name, lang="fi"):
             "Place Note":"paikan lisätieto",
             "Repository Note":"arkiston lisätieto",
             "Source Note":"lähteen lisätieto",
-            "To Do":"työlistalla",
+            "To Do":"työlistalla"
             }
     elif var_name == "rept":
         # Repository types

@@ -132,7 +132,7 @@
             <h4>{{ _('Families') }}</h4>
             {% set chtype = {"F":"tytär", "M":"poika", "":"lapsi"} %}
             <div class="mainbox" title="{{ _('Families') }}">
-                <p>{{ _("Parents ' family") }}</p>
+                <p>{{ _("Parents' family") }}</p>
             {% for fam in families %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="{{ _('Family') }} {{fam.id}}">
