@@ -46,11 +46,16 @@ class SetupCypher():
     MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN COUNT(a)
     """
 
-    set_user_constraint = """
+    set_user_constraint1 = """
     CREATE CONSTRAINT ON (user:User) 
-    ASSERT user.username IS UNIQUE
+        ASSERT (user.email) IS UNIQUE;
     """
-    
+ 
+    set_user_constraint2 = """
+    CREATE CONSTRAINT ON (user:User) 
+        ASSERT (user.username) IS UNIQUE;
+    """  
+     
     set_allowed_email_constraint = """ 
     CREATE CONSTRAINT ON (email:Allowed_email) 
     ASSERT email.allowed_email IS UNIQUE
@@ -180,7 +185,8 @@ def create_role_constraints():
 def create_user_constraints():
     with shareds.driver.session() as session: 
         try:  
-            session.run(SetupCypher.set_user_constraint)  
+            session.run(SetupCypher.set_user_constraint1)
+            session.run(SetupCypher.set_user_constraint2)  
         except CypherSyntaxError as cex:
             logger.error('ConstraintError in create_user_constraints ' + cex)
             return

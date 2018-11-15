@@ -158,29 +158,24 @@ def update_user(username):
     if form.validate_on_submit(): 
         user = User(id = form.id.data,
                 email = form.email.data,
-#                    password = form.password.data,
                 username = form.username.data,
                 name = form.name.data,
                 language = form.language.data,
                 is_active = form.is_active.data,
                 roles = form.roles.data,
-#                    confirmed_at = datetime.datetime.strptime(form.confirmed_at.data, '%Y-%m-%d %H:%M:%S'),
                 confirmed_at = form.confirmed_at.data,
-#                    last_login_at = datetime.datetime.strptime(form.last_login_at.data, '%Y-%m-%d %H:%M:%S'),
                 last_login_at = form.last_login_at.data, 
                 last_login_ip = form.last_login_ip.data,                    
-#                    current_login_at = datetime.datetime.strptime(form.current_login_at.data, '%Y-%m-%d %H:%M:%S'),
                 current_login_at = form.current_login_at.data,  
                 current_login_ip = form.current_login_ip.data,
                 login_count = form.login_count.data)        
-        updated_user = shareds.user_datastore.put(user)
+        updated_user = UserAdmin.update_user(user)
         flash(_("User updated"))
         return redirect(url_for("admin.update_user",username=updated_user.username))
 
     user = shareds.user_datastore.get_user(username) 
     form.id.data = user.id  
     form.email.data = user.email
-#    form.password.data = user.password    
     form.username.data = user.username
     form.name.data = user.name 
     form.language.data = user.language
@@ -191,7 +186,7 @@ def update_user(username):
     form.last_login_ip.data = user.last_login_ip
     form.current_login_at.data = user.current_login_at
     form.current_login_ip.data = user.current_login_ip
-    form.login_count.data = int(user.login_count)
+    form.login_count.data = user.login_count
         
     return render_template("/admin/update_user.html", username=user.username, form=form)  
 
