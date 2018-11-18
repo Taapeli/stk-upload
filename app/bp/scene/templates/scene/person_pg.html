@@ -98,7 +98,7 @@ u { color: DarkKhaki; text-decoration: none; }
         {% for e in person.events %}
                     <tr>
                     {% if e.type == "Cause Of Death" %}
-                        {% set t_cause_of_death = e.description %}
+                        {% set t_cause_of_death = e %}
                     {% else %}
 {#  person.events[0].citation_ref[0] = 90323
     objs[person.events[0].citation_ref[0]] = <models.gen.citation.Citation object at 0x7f0a24696ac8> = cr
@@ -132,7 +132,10 @@ u { color: DarkKhaki; text-decoration: none; }
 
                         <td class="ColumnDescription"><div>{{e.description}}</div>
                             <div>{% if e.type == "Death" and t_cause_of_death %}<span 
-                                    class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span> {{t_cause_of_death}}<br>
+                                    class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span>
+                                        {{t_cause_of_death.description}}
+                                        {% if t_cause_of_death.dates %}{{t_cause_of_death.dates}}{% endif %}
+                                        {{t_cause_of_death.clearnames|join(' • ')}}<br>
                             	{% endif %}
                             	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
 	                            	<li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>

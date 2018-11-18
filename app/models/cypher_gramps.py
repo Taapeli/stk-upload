@@ -64,7 +64,7 @@ class Cypher_event_w_handle():
     create = """
 MERGE (e:Event {handle: $e_attr.handle})
     SET e = $e_attr
-"""
+RETURN ID(e) as uniq_id"""
 
     link_place = """
 MATCH (n:Event) WHERE n.handle=$handle

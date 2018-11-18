@@ -78,8 +78,10 @@ class Event_gramps(Event):
     def save(self, tx):
         """ Saves event to database:
             - Creates a new db node for this Event
-            - Does not link it to UserProfile, Person
+            - Sets self.uniq_id
+
             - links to existing Place, Note, Citation, Media objects
+            - Does not link it from UserProfile or Person
         """
 
         today = str(datetime.date.today())
@@ -98,8 +100,8 @@ class Event_gramps(Event):
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
-            tx.run(Cypher_event_w_handle.create, 
-                   date=today, e_attr=e_attr)
+            self.uniq_id = tx.run(Cypher_event_w_handle.create, 
+                                  date=today, e_attr=e_attr).single()[0]
         except Exception as err:
             print("Virhe.event_save: {0}".format(err), file=stderr)
 

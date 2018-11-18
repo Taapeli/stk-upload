@@ -85,7 +85,7 @@
         {% for e in events|sort(attribute='date') %}
                     <tr>
                  	{% if e.type == "Cause Of Death" %}
-                		{% set t_cause_of_death = e.description %}
+                		{% set t_cause_of_death = e %}
             		{% else %}
                         <td class="ColumnEvent">
                             <span class="id">
@@ -108,7 +108,10 @@
                         <td class="ColumnNotes">
                             <div>{% if e.type == "Death" %}
                             	{% if t_cause_of_death %}<span
-                            	   class="typedesc">{{ _('Death cause') }}</span> {{t_cause_of_death}}<br>
+                            	   class="typedesc">{{ _('Cause Of Death') }}</span> 
+                            	       {{t_cause_of_death.description}}
+                                       {{t_cause_of_death.dates}}
+                                       {{t_cause_of_death.clearnames|join(' • ')}}<br>
                             	{% endif %}{% endif %}
                             	{% if e.notes %}{% set first = True %}{% for note in e.notes %}
                             	   {% if first %}{% set first = False %}{% else %}<br>{% endif %}
