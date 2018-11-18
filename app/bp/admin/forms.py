@@ -46,7 +46,7 @@ class UpdateUserForm(FlaskForm):
             default=2,
             description = _('Language')) 
     is_active = BooleanField(_('Is active'), [Optional()],
-        description = _('Active / passive user)')) 
+        description = _('Active / passive user')) 
     roles = SelectMultipleField(_('Roles'), 
                 choices=[
 #                   ("guest",_("Guest")),

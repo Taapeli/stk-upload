@@ -383,6 +383,9 @@ class DOM_handler():
                                      'level':"WARNING", 'count':e.id})
 
             e.save(self.tx)
+            if e.type == "Death" or e.type == "Cause Of Death":
+                print ("- {} event {} / {}".format(e.type, e.uniq_id, e.id))
+                #TODO: Don't know how to link them!
             counter += 1
 
         self.blog.log_event({'title':"Events", 'count':counter, 
