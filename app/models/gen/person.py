@@ -30,12 +30,11 @@
                                         Luetaan henkilöitä tapahtumineen
         - get_person_combos (keys, currentuser, take_refnames=False, order=0):
                                         Read Persons with Names, Events and Refnames
-        - get_places(self)              Tallettaa liittyvät Paikat henkilöön
-        - get_all_citation_source(self) Tallettaa liittyvät Cition ja Source
-        - get_all_notes(self)           Tallettaa liittyvät Note ja Weburl
-        - get_family_members (uniq_id)  Luetaan liittyvät Names, Families and Events
+        - get_places(self)              Hakee liittyvät Paikat henkilöön
+        - get_all_citation_source(self) Hakee liittyvät Cition ja Source
+        - get_all_notes(self)           Hakee liittyvät Notet ja web linkit
+        - get_family_members(uniq_id)   Luetaan liittyvät Names, Families and Events
         - get_refnames(pid)             Luetaan liittyvät Refnames
-        - get_ref_weburls(pid_list)     Luetaan mainittuihin nodeihin liittyvät Weburlit
         - set_estimated_dates()         Aseta est_birth ja est_death
 
     class bp.gramps.models.person_gramps.Person_gramps(Person):
@@ -179,13 +178,6 @@ class Person:
 #                 print ("Refname: " + pname.refname)
                 print ("Surname: " + pname.surname)
                 print ("Suffix: " + pname.suffix)
-
-        if len(self.urls) > 0:
-            for url in self.urls:
-                print ("Url priv: " + url.priv)
-                print ("Url href: " + url.href)
-                print ("Url type: " + url.type)
-                print ("Url description: " + url.description)
 
         if len(self.eventref_hlink) > 0:
             for i in range(len(self.eventref_hlink)):

@@ -55,7 +55,9 @@ function myFunction(oid, fn, ln) {
                 {% for e in p.events %}
                 <li><span class="id">{{e.oid}}</span>
                     {{e.name}} {{e.date}} {% if e.citation %}
-                ({% if e.citation.url %}<a href='{{e.citation.url}}'>{{e.citation.oid}}</a>)
+                    {% for note in e.citation.notes %}
+                        ({% if note.url %}<a href='{{note.url}}'>{{note.text}}</a>
+                         {% else %}{{note.text}}{% endif %})
                 {% else %}{{e.citation.oid}})
                 {% endif %}{% endif %}
                 </li>{% endfor %}</ul>

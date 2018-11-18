@@ -23,13 +23,11 @@
    			</tr>
 	    {% for upload in uploads %}
 	       <tr>
-	           <td class="msg_INFO">{{upload.upload_time_s}}</td>
-	           <td class="msg_INFO">
-    	           <a href=/gramps/xml_download/{{upload.xmlname}}>{{upload.xmlname}}</a>
-	           </td>
-	           <td class="msg_INFO">{{upload.status}}</td>
-	           <td class="msg_INFO">
-	           		<a href=/gramps/xml_delete/{{upload.xmlname}}>{{ _("Delete") }}</a></td>
+	           <td>{{upload.upload_time_s}}</td>
+	           <td>{{upload.xmlname}}</td>
+	           <td>{{upload.status}}</td>
+	           <td><a href=/gramps/xml_download/{{upload.xmlname}}>{{ _("Download to your computer") }}</a> |
+	           	   <a href=/gramps/xml_delete/{{upload.xmlname}}>{{ _("Delete") }}</a></td>
 	       </tr>
 	    {% endfor %}</table>
     <p>{{ _("Now the administrator can load your file to database as yor new candadate material set") }}

@@ -85,7 +85,7 @@
         {% for e in events|sort(attribute='date') %}
                     <tr>
                  	{% if e.type == "Cause Of Death" %}
-                		{% set t_cause_of_death = e.description %}
+                		{% set t_cause_of_death = e %}
             		{% else %}
                         <td class="ColumnEvent">
                             <span class="id">
@@ -108,12 +108,15 @@
                         <td class="ColumnNotes">
                             <div>{% if e.type == "Death" %}
                             	{% if t_cause_of_death %}<span
-                            	   class="typedesc">{{ _('Death cause') }}</span> {{t_cause_of_death}}<br>
+                            	   class="typedesc">{{ _('Cause Of Death') }}</span> 
+                            	       {{t_cause_of_death.description}}
+                                       {{t_cause_of_death.dates}}
+                                       {{t_cause_of_death.clearnames|join(' • ')}}<br>
                             	{% endif %}{% endif %}
                             	{% if e.notes %}{% set first = True %}{% for note in e.notes %}
                             	   {% if first %}{% set first = False %}{% else %}<br>{% endif %}
                             	   <span class="typedesc">{{ note.type|transl('notet') }}</span>
-                            	       {{ note.text }}{% endfor %}{% endif %}
+                            	       {{ macro.notelink(note) }}{% endfor %}{% endif %}
                             	</div>
                         </td>
                         <td class="ColumnSources">
@@ -132,7 +135,7 @@
             <h4>{{ _('Families') }}</h4>
             {% set chtype = {"F":"tytär", "M":"poika", "":"lapsi"} %}
             <div class="mainbox" title="{{ _('Families') }}">
-                <p>{{ _("Parents ' family") }}</p>
+                <p>{{ _("Parents' family") }}</p>
             {% for fam in families %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="{{ _('Family') }} {{fam.id}}">
@@ -296,10 +299,10 @@
                            {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
                             {{ _('Page') }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
-                           {% if cita.notetext %}<br>
-                              <a href="{{cita.notetext}}" class="outlink" target="_blank"
-                              {% if cita.confidence and cita.confidence < "2" %}
-                             style="color:red"{% endif %}>{{ cita.notetext }}</a>{% endif %}                           
+
+                   {% if cita.notetext %}<br>
+                              <i {% if cita.confidence and cita.confidence < "2" %}
+                             style="color:red"{% endif %}>{{ cita.notetext }}</i>{% endif %}                           
                          </li>
                 	</ol>
                 </li>

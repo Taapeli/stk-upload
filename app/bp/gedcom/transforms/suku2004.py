@@ -26,6 +26,8 @@ def add_args(parser):
                         help=_('Change _PHOTO tags to OBJEs'))
     parser.add_argument('--change_marr_to_marb', action='store_true',
                         help=_('Change MARR to MARB if TYPE=Kuulutus'))
+    parser.add_argument('--compress_sours', action='store_true',
+                        help=_('Remove empty CONT lines under SOUR'))
 
 def initialize(options):
     return Suku2004()
@@ -72,5 +74,24 @@ class Suku2004(transformer.Transformation):
                 ):
                     item.tag = "MARB"
                     return item
+
+        if options.compress_sours:
+            if item.tag == "SOUR" and item.value == "" and len(item.children) > 0:
+                newitems = []
+                # 2 SOUR 
+                # 3 CONT 
+                # 3 CONT 
+                # 3 CONT 
+                # 3 CONT VA SSS 5, Vehkalahden syntyneet 1794-1800, sivu 196
+                # 3 CONT 
+                # 3 CONT VA SSS 10, Vehkalahden kuolleet 1790-1804, sivu 488
+                for c in item.children:
+                    if c.tag == "CONT" and c.value != "":
+                        newline = "{} SOUR {}".format(item.level,c.value)
+                        newitem = Item(newline)
+                        newitems.append(newitem)
+                    if c.tag == "CONC":
+                        newitem.value += c.value
+                return newitems
 
         return True

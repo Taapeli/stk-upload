@@ -26,11 +26,16 @@ class Cypher_note():
     Cypher clases for creating and accessing Notes
     '''
 
-    get_person_notes = '''match (p) -[:NOTE]-> (n:Note) where id(p) = $pid 
+    get_person_notes = '''
+match (p) -[:NOTE]-> (n:Note) where id(p) = $pid 
     return id(p) as p_id, null as e_id, id(n) as n_id, n
 union
 match (p) -[:EVENT]-> (e:Event) -[:NOTE]-> (n:Note) where id(p) = $pid 
     return id(p) as p_id, id(e) as e_id, id(n) as n_id, n'''
+
+    get_by_ids = """
+MATCH (n:Note)    WHERE ID(n) in $nid
+RETURN ID(n) AS uniq_id, n"""
 
 
 class Cypher_person():
@@ -101,6 +106,13 @@ RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
 MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
+    get_w_names_notes = """
+MATCH (person:Person) -[r:NAME]-> (name:Name)
+  WHERE ID(person)=$pid
+OPTIONAL MATCH (person) -[:NOTE]-> (n:Note)
+  WITH person, name, COLLECT (n) AS notes ORDER BY name.alt
+RETURN person, notes, COLLECT (name) AS names"""
+
     get_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
 where id(p) = $pid
@@ -111,6 +123,34 @@ RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
 MATCH (n)<-[r:NAME]-(p:Person)
 RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
     p.gender AS sex"""
+
+
+class Cypher_name():
+    """ 
+        For Person Name class 
+    """
+
+    create_as_leaf = """
+CREATE (n:Name) SET n = $n_attr
+WITH n
+MATCH (p:Person)    WHERE ID(p) = $parent_id
+MERGE (p)-[r:NAME]->(n)"""
+
+
+class Cypher_event():
+    '''
+    Cypher clases for creating and accessing Events
+    '''
+
+    get_w_place_note_citation = '''
+match (e:Event) where ID(e)=$pid
+    optional match (e) -[:PLACE]-> (p:Place)
+    optional match (e) -[:CITATION]-> (c:Citation)
+    optional match (e) -[:NOTE]-> (n:Note)
+return e as event, 
+    collect(distinct id(p)) as place_ref, 
+    collect(distinct id(c)) as citation_ref, 
+    collect(distinct id(n)) as note_ref'''
 
 
 class Cypher_family():
@@ -157,8 +197,25 @@ RETURN ID(a) AS id, a.type AS type,
     COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
     COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
     COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
-ORDER BY name[0][0]
-"""
+ORDER BY name[0][0]"""
+
+    get_w_names_notes = """
+MATCH (place:Place) -[:NAME]-> (n:Place_name)
+    WHERE ID(place)=$place_id
+OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
+RETURN place, 
+    COLLECT(DISTINCT [n.name, n.lang]) AS names,
+    COLLECT (DISTINCT note) AS notes"""
+
+    place_get_one = """
+match (p:Place) where ID(p)=$pid
+optional match (p) -[:NAME]-> (n:Place_name)
+return p, collect(n) as names"""
+
+    place_get_all = """
+MATCH (p:Place) 
+RETURN p ORDER BY p.pname"""
+
 
 class Cypher_refname():
     '''
@@ -216,6 +273,26 @@ match path = (p) -[*]-> (c:Citation) -[:SOURCE]-> (s:Source)
 return extract(x IN rel | endnode(x))  as end, source_id
     order by source_id, size(end)"""
 
+    _cita_sour_repo_tail = """
+RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidence, 
+   note.text AS notetext,
+   COLLECT(DISTINCT [ID(source), source.stitle, 
+                     rr.medium, 
+                     ID(repo), repo.rname, repo.type]) AS sources"""
+
+    get_cita_sour_repo_all = """
+MATCH (c:Citation) -[rs:SOURCE]-> (source:Source) -[rr:REPOSITORY]-> (repo:Repository)
+OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
+  WITH c, rs, source, rr, repo 
+  ORDER BY c.page, note""" + _cita_sour_repo_tail
+
+    get_cita_sour_repo = """
+MATCH (c:Citation) -[rs:SOURCE]-> (source:Source) -[rr:REPOSITORY]-> (repo:Repository)
+    WHERE ID(c)=$uid
+OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
+  WITH c, rs, source, rr, repo 
+  ORDER BY c.page, note""" + _cita_sour_repo_tail
+
 
 class Cypher_source():
     '''
@@ -252,7 +329,7 @@ class Cypher_repository():
     _get_tail = """
     with r, rr, s 
     order by s.stitle
-    optional match (r) -[wr:WEBREF]-> (w:Weburl)
+    optional match (r) -[:NOTE]-> (w:Note)
 return id(r) AS uniq_id, 
     r.rname AS rname,
     r.type AS type, 
@@ -260,16 +337,16 @@ return id(r) AS uniq_id,
     r.handle as handle,
     r.id as id,
     collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
-    collect(w) as webref
+    collect(w) as notes
 order by r.rname"""
 
     get_w_sources_all = _get_all + _get_tail 
     get_w_sources =  _get_one + _get_tail
 
-    get_w_urls = """
+    get_w_notes = """
 match (repo:Repository) where ID(repo) = $rid
-    optional match (repo) -[wr:WEBURL]-> (w:Weburl)
-return repo, collect(w) as webref"""
+    optional match (repo) -[:NOTE]-> (w:Note)
+return repo, collect(w) as notes"""
 
     get_one = """
 match (r:Repository) where ID(r) == $rid
@@ -279,30 +356,28 @@ return r"""
 match (r:Repository)
 return r order by r.type"""
 
-class Cypher_weburl():
-    '''
-    Cypher clases for creating and accessing Weburls
-    '''
-    link_to_weburl = """
-merge (w:Weburl {href: $href})
-with w
-    match (x) where ID(x) = $parent_id
-    with w, x
-        merge (x) -[r:WEBREF]-> (w)
-            set r.type = $type
-            set r.desc = $desc
-            set r.priv = $priv
-return id(r) as ref_id, id(w) as weburl_id"""
-    link_to_weburl_X = """
-match (x) where ID(x) = $parent_id
-    optional match (w:Weburl) where w.href = $href
-with x, w
-    merge (x) -[r:WEBREF]-> (w)
-        set w.href = $href
-        set r.type = $type
-        set r.desc = $desc
-        set r.priv = $priv
-return id(r) as ref_id, id(w) as weburl_id"""
-
-# --- For User class ----------------------------------------------------------
+# class Cypher_weburl():
+#     '''
+#     Cypher clases for creating and accessing Weburls
+#     '''
+#     link_to_weburl = """
+# merge (w:Weburl {href: $href})
+# with w
+#     match (x) where ID(x) = $parent_id
+#     with w, x
+#         merge (x) -[r:WEBREF]-> (w)
+#             set r.type = $type
+#             set r.desc = $desc
+#             set r.priv = $priv
+# return id(r) as ref_id, id(w) as weburl_id"""
+#     link_to_weburl_X = """
+# match (x) where ID(x) = $parent_id
+#     optional match (w:Weburl) where w.href = $href
+# with x, w
+#     merge (x) -[r:WEBREF]-> (w)
+#         set w.href = $href
+#         set r.type = $type
+#         set r.desc = $desc
+#         set r.priv = $priv
+# return id(r) as ref_id, id(w) as weburl_id"""
 

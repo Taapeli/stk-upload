@@ -51,16 +51,16 @@
 <br>
 <br>
 
-<h2>{{ _("URLs") }}</h2>
+<h2>{{ _("Notes") }}</h2>
 <table>
     <tr>
     	<th ng-repeat="x in u_columns">{a x.column a}</th>
     </tr>
 
-	<tr ng-repeat="url in urls">
-		<td>{a url.priv a}</td>
-		<td>{a url.description a}</td>
-		<td>{a url.href a}</td>
+	<tr ng-repeat="note in notes">
+		<td>{a note.priv a}</td>
+		<td>{a note.text a}</td>
+		<td>{a note.url a}</td>
 	</tr>
 </table>
 </section>
@@ -109,16 +109,16 @@
 <br>
 <br>
 
-<h2>{{ _("URLs") }}</h2>
+<h2>{{ _("Notes") }}</h2>
 <table>
     <tr>
     	<th ng-repeat="x in u_columns">{a x.column a}</th>
     </tr>
 
-	<tr ng-repeat="url in urls2">
-		<td>{a url.priv a}</td>
-		<td>{a url.description a}</td>
-		<td>{a url.href a}</td>
+	<tr ng-repeat="note in notes2">
+		<td>{a note.priv a}</td>
+		<td>{a note.text a}</td>
+		<td>{a note.url a}</td>
 	</tr>
 </table>
 </section>
@@ -175,16 +175,16 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
 	$scope.u_columns = [
 		{column:'priv'}, {column:'description'}, {column:'href'}
 	];
-    $scope.urls = [
-	{% for url in person.urls %}
-        {priv:'{{url.priv}}',description:'{{url.description}}',
-        href:'{{url.href}}'},
+    $scope.notes = [
+	{% for note in person.notes %}
+        {priv:'{{note.priv}}',description:'{{note.text}}',
+        url:'{{note.url}}'},
     {% endfor %}
     ];
-    $scope.urls2 = [
-	{% for url in person2.urls %}
-        {priv:'{{url.priv}}',description:'{{url.description}}',
-        href:'{{url.href}}'},
+    $scope.notes2 = [
+	{% for note in person2.notes %}
+        {priv:'{{note.priv}}',description:'{{note.text}}',
+        href:'{{note.url}}'},
     {% endfor %}
     ];
 });

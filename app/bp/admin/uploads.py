@@ -76,9 +76,11 @@ from ..gramps import gramps_loader
    
 
 def get_upload_folder(username): 
+    ''' Returns upload directory for given user'''
     return os.path.join("uploads", username)
 
 def set_meta(username,filename,**kwargs):
+    ''' Stores status information in .meta file '''
     upload_folder = get_upload_folder(username) 
     name = "{}.meta".format(filename)
     metaname = os.path.join(upload_folder,name)
@@ -90,6 +92,7 @@ def set_meta(username,filename,**kwargs):
     open(metaname,"w").write(pprint.pformat(meta))
 
 def get_meta(metaname):
+    ''' Reads status information from .meta file '''
     try:
         meta = eval(open(metaname).read())
     except FileNotFoundError:
@@ -97,11 +100,13 @@ def get_meta(metaname):
     return meta
 
 def i_am_alive(metaname,parent_thread):
+    ''' Checks, if backgroud thread is still alive '''
     while os.path.exists(metaname) and parent_thread.is_alive():
         Path(metaname).touch()
         time.sleep(10)
 
 def background_load_to_neo4j(username,filename):
+    ''' Imports gramps xml data to database '''
     upload_folder = get_upload_folder(username) 
     pathname = os.path.join(upload_folder,filename)
     metaname = pathname+".meta"
@@ -138,6 +143,7 @@ def background_load_to_neo4j(username,filename):
 
 
 def initiate_background_load_to_neo4j(userid,filename):
+    ''' Starts gramps xml data import to database '''
     #===========================================================================
     # subprocess.Popen("PYTHONPATH=app python runload.py " 
     #                  + pathname + " " 
@@ -156,6 +162,7 @@ def initiate_background_load_to_neo4j(userid,filename):
     return False
 
 def list_uploads(username):
+    ''' Gets a list of uploaded files and their process status '''
     upload_folder = get_upload_folder(username)
     try:
         names = sorted([name for name in os.listdir(upload_folder)]) 
@@ -196,17 +203,16 @@ def list_uploads(username):
 
 
 def removefile(fname): 
+    ''' Removing a file '''
     try:
         os.remove(fname)
     except FileNotFoundError:
         pass
 
 
-
 def delete_files(username, xmlfile):
+    ''' Removing uploaded file with associated .meta and .log '''
     upload_folder = get_upload_folder(username)
     removefile(os.path.join(upload_folder,xmlfile))
     removefile(os.path.join(upload_folder,xmlfile+".meta"))
     removefile(os.path.join(upload_folder,xmlfile+".log"))
-
-

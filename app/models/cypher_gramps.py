@@ -64,7 +64,7 @@ class Cypher_event_w_handle():
     create = """
 MERGE (e:Event {handle: $e_attr.handle})
     SET e = $e_attr
-"""
+RETURN ID(e) as uniq_id"""
 
     link_place = """
 MATCH (n:Event) WHERE n.handle=$handle
@@ -145,7 +145,20 @@ class Cypher_note_w_handle():
 
     create = """
 MERGE (n:Note {handle: $n_attr.handle}) 
-    SET n = $n_attr"""
+    SET n = $n_attr
+RETURN ID(n)"""
+
+    create_as_leaf = """
+MATCH (a) WHERE ID(a) = $parent_id
+MERGE (a) -[:NOTE]-> (n:Note) 
+    SET n = $n_attr
+RETURN ID(n)"""
+
+    merge_as_leaf = """
+MATCH (a) WHERE ID(a) = $parent_id
+MERGE (a) -[:NOTE]-> (n:Note {handle: $n_attr.handle}) 
+    SET n = $n_attr
+RETURN ID(n)"""
 
 
 class Cypher_person_w_handle():
@@ -171,11 +184,6 @@ WITH n
 MATCH (p:Person {handle:$p_handle})
 MERGE (p)-[r:NAME]->(n)"""
 
-    link_weburl = """
-MATCH (p:Person {handle: $p_handle}) 
-CREATE (p) -[wu:WEBURL]-> (url:Weburl)
-    SET url = $u_attr"""
-
     link_event_embedded = """
 MATCH (p:Person {handle: $handle}) 
 CREATE (p) -[r:EVENT {role: $role}]-> (e:Event)
@@ -191,15 +199,18 @@ MATCH (p:Person {handle: $p_handle})
 MATCH (m:Media  {handle: $m_handle})
 MERGE (p) -[r:MEDIA]-> (m)"""
 
-    link_note = """
-MATCH (p:Person {handle: $p_handle})
-MATCH (n:Note   {handle: $n_handle})
-MERGE (p) -[r:NOTE]-> (n)"""
+# use models.gen.cypher.Cypher_name (there is no handle)
 
     link_citation = """
 MATCH (p:Person   {handle: $p_handle})
 MATCH (c:Citation {handle: $c_handle})
 MERGE (p)-[r:CITATION]->(c)"""
+
+    link_note = """
+MATCH (n) WHERE n.handle=$p_handle
+MATCH (m:Note)   WHERE m.handle=$n_handle
+MERGE (n)-[r:NOTE]->(m)"""
+
 
 
 class Cypher_place_w_handle():
@@ -216,11 +227,11 @@ CREATE (n:Place_name)
 MERGE (p) -[r:NAME]-> (n)
 SET n = $n_attr"""
 
-    link_weburl = """
-MATCH (n:Place) WHERE n.handle=$handle
-CREATE (n) -[wu:WEBURL]-> (url:Weburl
-                {priv: {url_priv}, href: {url_href},
-                 type: {url_type}, description: {url_description}})"""
+#     link_weburl = """
+# MATCH (n:Place) WHERE n.handle=$handle
+# CREATE (n) -[wu:WEBURL]-> (url:Weburl
+#                 {priv: {url_priv}, href: {url_href},
+#                  type: {url_type}, description: {url_description}})"""
 
     link_hier = """
 MATCH (n:Place) WHERE n.handle=$handle

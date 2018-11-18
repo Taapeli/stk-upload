@@ -23,7 +23,7 @@ class Repository:
             id              str    esim. "R0001"
             rname           str    arkiston nimi
             type            str    arkiston tyyppi
-            urls            Weburl[]
+            notes           Note[]
      """
 
     def __init__(self):
@@ -33,7 +33,7 @@ class Repository:
         self.change = 0
         self.id = ''
         self.rname = ''
-        self.urls = []      # contains Weburl instances (prev. url_refs = [])
+        self.notes = []     # contains Note instances (prev. url_refs = [])
 
         self.sources = []   # For creating display sets (Not used??)
 
@@ -61,20 +61,15 @@ class Repository:
         return n
 
 
-    def get_repo_w_urls(self):
+    def get_repo_w_notes(self):
         """ Luetaan arkiston tiedot
-            Get Repository with linked Weburls
+            Get Repository with linked Notes
 
-            returns:
-            - repo: {"handle":"_de18a0b2d546e222251e549f2bd",
-                     "id":"R0000","rname":"Haminan kaupunginarkisto",
-                     "type":"Library",
-                     "change":1526233479}
-            - webref: collect(w.href, wr.type, wr.description, wr.priv)
+            returns: repo, collect(w) as notes
         """
                         
         with shareds.driver.session() as session:
-            return session.run(Cypher_repository.get_w_urls, rid=self.uniq_id)
+            return session.run(Cypher_repository.get_w_notes, rid=self.uniq_id)
 
 
     @staticmethod
@@ -156,9 +151,9 @@ class Repository:
         print ("Id: " + self.id)
         print ("Rname: " + self.rname)
         print ("Type: " + self.type)
-        print ("Url href: " + self.url_href)
-        print ("Url type: " + self.url_type)
-        print ("Url description: " + self.url_description)
+#         print ("Url href: " + self.url_href)
+#         print ("Url type: " + self.url_type)
+#         print ("Url description: " + self.url_description)
         return True
 
 
@@ -181,10 +176,10 @@ class Repository:
             #TODO raise ConnectionError("Repository.save: {0}".format(err))
 
         try:
-            for weburl in self.urls:
-                weburl.save(tx, self.uniq_id)
+            for note in self.notes:
+                note.save(tx, self.uniq_id)
         except Exception as err:
-            print("Error Repository.save weburl: {0}".format(err), file=stderr)
+            print("Error Repository.save note: {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
             #TODO raise ConnectionError("Repository.save: {0}".format(err))
 

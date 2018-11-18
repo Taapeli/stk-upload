@@ -6,25 +6,29 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 @author: jm
 '''
 
-from .cypher import Cypher_note
+from sys import stderr
+
+from models.gen.cypher import Cypher_note
 from models.cypher_gramps import Cypher_note_w_handle
 import shareds
 
 class Note:
     """ Note / Huomautus
+        including eventual web link
 
         Properties:
                 handle          str stats with '_' if comes from Gramps
                 change          int timestamp from Gramps
                 id              esim. "N0001"
                 uniq_id         int database key
-                priv            int >0 salattu tieto
-                type            str huomautuksen tyyppi
-                text            str huomautuksen sisältö
+                priv            int >0 non-public information
+                type            str note type
+                text            str note description
+                url             str web link
      """
 
     def __init__(self):
-        """ Creates a Noteinstance in memory 
+        """ Creates a Note instance in memory 
         """
         self.uniq_id = None
         self.id = ''
@@ -33,9 +37,11 @@ class Note:
         self.text = ''
         self.change = 0
         self.priv = 0
+        self.url = ''
 
     def __str__(self):
-        return "{} {} '{} ...'".format(self.id, self.type, self.text[:16])
+        desc = self.text if len(self.text) < 17 else self.text[:16] + "..."
+        return "{} {} {!r} {}".format(self.id, self.type, desc, self.url)
 
     @classmethod
     def from_node(cls, node):
@@ -50,49 +56,47 @@ class Note:
         n.priv = node['priv'] or ''
         n.type = node['type'] or ''
         n.text = node['text'] or ''
+        n.url = node['url'] or ''
         return n
 
-    @staticmethod       
-    def get_persons_notes (uniq_id):
-        """ Read 'Person -> Event -> Note' and 'Person -> Note' paths
-
-            Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
-            
-            Returns list of Citations and list of Source ids
-        ╒══════╤══════╤══════╤════════════════════════════════════════════════╕
-        │"p_id"│"e_id"│"n_id"│"n"                                             │
-        ╞══════╪══════╪══════╪════════════════════════════════════════════════╡
-        │99833 │81393 │78943 │{"handle":"_dea2effe2b579e6d11c157b268c","text":│
-        │      │      │      │"Tornion tuomiokunnan tuomari","id":"N0089","pri│
-        │      │      │      │v":"","type":"Event Note","change":1529946203}  │
-        ├──────┼──────┼──────┼────────────────────────────────────────────────┤
-        │99833 │81409 │78936 │{"handle":"_dea5b1e04a32efc4f77eb368d87","text":│
-        │      │      │      │"Kuopion tuomiokunnan 1822","id":"N2057","priv":│
-        │      │      │      │"","type":"Event Note","change":1530020220}     │
-        └──────┴──────┴──────┴────────────────────────────────────────────────┘
-        """
-        
-        result = shareds.driver.session().run(Cypher_note.get_person_notes, 
-                                              pid=uniq_id)
-        notes = []
-        for record in result:
-            pass
-
-        return notes
+#     @staticmethod       
+#     def get_persons_notes(uniq_id):
+#         """ Read 'Person -> Event -> Note' and 'Person -> Note' paths
+# 
+#             Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
+#             
+#             Returns list of Citations and list of Source ids
+#         ╒══════╤══════╤══════╤════════════════════════════════════════════════╕
+#         │"p_id"│"e_id"│"n_id"│"n"                                             │
+#         ╞══════╪══════╪══════╪════════════════════════════════════════════════╡
+#         │99833 │81393 │78943 │{"handle":"_dea2effe2b579e6d11c157b268c","text":│
+#         │      │      │      │"Tornion tuomiokunnan tuomari","id":"N0089","pri│
+#         │      │      │      │v":"","type":"Event Note","change":1529946203}  │
+#         ├──────┼──────┼──────┼────────────────────────────────────────────────┤
+#         │99833 │81409 │78936 │{"handle":"_dea5b1e04a32efc4f77eb368d87","text":│
+#         │      │      │      │"Kuopion tuomiokunnan 1822","id":"N2057","priv":│
+#         │      │      │      │"","type":"Event Note","change":1530020220}     │
+#         └──────┴──────┴──────┴────────────────────────────────────────────────┘
+#         """
+#         
+#         result = shareds.driver.session().run(Cypher_note.get_person_notes, 
+#                                               pid=uniq_id)
+#         notes = []
+#         for record in result:
+#             pass
+# 
+#         return notes
  
     @staticmethod
     def get_notes(uniq_ids):
-        """ Reads Note nodes data from db using given uniq_ids
+        """ Reads Note nodes data from db using given Note uniq_ids
 
             Called from models.datareader.get_person_data_by_id
         """
 
         notes = []
         with shareds.driver.session() as session:
-            notes_get = """
-MATCH (n:Note)    WHERE ID(n) in $nid
-RETURN ID(n) AS uniq_id, n"""
-            result = session.run(notes_get, nid=uniq_ids)
+            result = session.run(Cypher_note.get_by_ids, nid=uniq_ids)
             for record in result:
                 # Create a Note object from record
                 node = record['n']
@@ -122,7 +126,7 @@ RETURN ID(n) AS uniq_id, n
 ORDER BY n.type"""
                 result =  session.run(query)
 
-        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text', 'url']
         notes = []
 
         for record in result:
@@ -142,28 +146,13 @@ ORDER BY n.type"""
             results =  session.run("MATCH (n:Note) RETURN COUNT(n)")
             for result in results:
                 return str(result[0])
-
         return '0'
 
-#     def __str__(self):
-#         """ Tulostaa tiedot """
-# #         print ("*** Note ***")
-# #         print ("Handle: " + self.handle)
-# #         print ("Change: " + self.change)
-# #         #print ("Id: " + self.id)
-# #         #print ("Priv: " + self.priv)
-# #         #print ("Type: " + self.type)
-# #         #print ("Text: " + self.text)
-#         t = self.text if len(self.text) < 41 else self.text[:37] + '...'
-#         return ("Note id={}, type={}, priv={} '{}'".\
-#                 format(self.id, self.type, self.priv, t))
 
-
-    def save(self, tx):
-        """ Creates or updates this Note object as a Note node
-            using handle
+    def save(self, tx, parent_id=None):
+        """ Creates or updates this Note object as a Note node using handle
+            If parent_id is given, a link (parent) --> (Note) is created 
         """
-
         try:
             n_attr = {
                 "handle": self.handle,
@@ -171,11 +160,22 @@ ORDER BY n.type"""
                 "id": self.id,
                 "priv": self.priv,
                 "type": self.type,
-                "text": self.text
+                "text": self.text,
+                "url": self.url
             }
-            return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)
+            if parent_id:
+                if self.handle:
+                    return tx.run(Cypher_note_w_handle.merge_as_leaf, 
+                                  parent_id=parent_id, n_attr=n_attr)
+                else:
+                    return tx.run(Cypher_note_w_handle.create_as_leaf, 
+                                  parent_id=parent_id, n_attr=n_attr)
+            elif self.handle:
+                return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)
+            else:
+                print("Note.save: No handle or parent node")
 
+        except ConnectionError as err:
+            raise SystemExit("Stopped in Note.save: {}".format(err))
         except Exception as err:
-            #print("Virhe (Note.save): {0}".format(err), file=stderr)
-            # raise SystemExit("Stopped due to errors")    # Stop processing
-            raise ConnectionError("Note.save: {}".format(err))
+            print("Virhe (Note.save): {0}".format(err), file=stderr)

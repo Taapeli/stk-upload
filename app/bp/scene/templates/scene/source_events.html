@@ -50,11 +50,12 @@
 	                        {# elif cite.label == 'Family Event' #}{{ _("Family Member's") }}
                                 <em>{{cite.clearname}}</em> {{cite.eventtype|transl('evt')}} 
                                 {# if cite.edates #}{{cite.edates}}{# endif #}
-	                        {# else #} -->{{ _('Of person') }}
+	                        {# else #} -->
+	                        {% if cite.eventtype %}{{ _('Of person') }}{% else %}{{ _('Person') }}{% endif %}
                             <a href="/scene/person={{cite.uniq_id}}" class="id"
                                title="{{ _('see details of person %(id)s', id=cite.id) }}">
                                    {{cite.clearname}}</a>
-	                           {{cite.eventtype|transl('evt')}} 
+	                           {{cite.eventtype|transl('evt')}}
 	                           {% if cite.edates %}{{cite.edates}}{% endif %}
 	                        {# endif #}
                			    </li>

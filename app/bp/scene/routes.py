@@ -137,8 +137,11 @@ def show_a_person_w_apoc(uid):
     person, objs, marks = get_a_person_for_display_apoc(uid, user)
     if person == None:
         return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
-    for m in marks:
-        print("Citation mark {}".format(m))
+#     for m in marks:
+#         print("Citation mark {}".format(m))
+#     for e in person.events:
+#         for ni in e.note_ref:
+#             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
     return render_template("/scene/person_pg.html", 
                            person=person, obj=objs, marks=marks, menuno=1)
@@ -198,7 +201,7 @@ def show_location_page(locid):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in place_list:
 #         print ("# {} ".format(p))
-#     for u in place.urls:
+#     for u in place.notes:
 #         print ("# {} ".format(u))
     return render_template("/scene/place_events.html", locid=locid, place=place, 
                            events=events, locations=place_list)

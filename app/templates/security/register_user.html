@@ -14,7 +14,7 @@
        <div class="startbox2">
 		  <h1>{{ _('Register  as a database user of Suomi tietokanta Service') }}</h1>
 		     <form action="{{ url_for_security('register') }}"
-		           method="POST" name="register_user_form"
+		           method="POST" name="register_user_form">
 		           
 				  {{ register_user_form.hidden_tag() }}
 				  {{ render_field_with_errors(register_user_form.email) }}
@@ -26,7 +26,8 @@
 				  {{ render_field_with_errors(register_user_form.username) }}
 				  {{ render_field_with_errors(register_user_form.name) }}
 				  {{ render_field_with_errors(register_user_form.language) }}
-				  {{ render_field(register_user_form.terms) }}
+				  {# render_field(register_user_form.terms) #}
+
                   {{ render_field_with_errors(register_user_form.agree) }}
 				  {{ render_field(register_user_form.submit) }}
 		     </form>
