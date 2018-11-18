@@ -21,6 +21,7 @@ import shareds
 from sys import stderr
 
 from .event import Event
+from models.gen.cypher import Cypher_event
 
 
 class Event_combo(Event):
@@ -59,23 +60,6 @@ class Event_combo(Event):
 
 # @classmethod from_node(cls, node): see evetn.from_node
 
-# Open ideas:
-#     def read(self, keys):
-#         ''' Access a set of Event complexes using different search fields
-#             like key = {'User_id': 1234}
-#         '''
-#         pass
-#     
-#     def get(self, uniq_id=None, handle=None):
-#         ''' Access an Event complex using one of uniq_id or handle 
-#         '''
-#         pass
-# 
-#     def save(self):
-#         ''' Store this Event and the included related objects
-#         '''
-#         pass
-
 
     # Entinen get_event_data_by_id()
     def get_event_combo(self):
@@ -85,60 +69,36 @@ class Event_combo(Event):
 
             Luetaan tapahtuman tiedot 
         """
-        #TODO change name to get_w_relations()
-              
-#         query = """
-# MATCH (event:Event) WHERE ID(event)=$pid
-# RETURN event"""
-        event_get_w_place_note_citation = '''
-match (e:Event) where ID(e)=$pid
-    optional match (e) -[:PLACE]-> (p:Place)
-    optional match (e) -[:CITATION]-> (c:Citation)
-    optional match (e) -[:NOTE]-> (n:Note)
-return e as event, 
-    collect(distinct id(p)) as place_ref, 
-    collect(distinct id(c)) as citation_ref, 
-    collect(distinct id(n)) as note_ref'''
-        try:
-            result = shareds.driver.session().run(event_get_w_place_note_citation, 
-                                                  pid=self.uniq_id)
-
-            for record in result:
-                # <Record event=<Node id=84467 labels={'Event'} 
-                #    properties={'datetype': 0, 'change': 1522422810, 'description': '', 
-                #    'handle': '_dd8aab5481c7c18befdd4baa628', 'attr_type': '', 
-                #    'id': 'E2965', 'date2': 1829189, 'type': 'Baptism', 
-                #    'date1': 1829189, 'attr_value': ''}> place_ref=[78213] 
-                #    citation_ref=[] note_ref=[]>
-                node = record["event"]
-                # Marshall self from the Node from db
-                self.from_node(node, self)
+        with shareds.driver.session() as session:
+            try:
+                result = session.run(Cypher_event.get_w_place_note_citation, 
+                                     pid=self.uniq_id)
     
-                # Related data
-                for ref in record["note_ref"]:
-                    self.note_ref.append(ref) # List of uniq_ids # prev. noteref_hlink
-                for ref in record["citation_ref"]:
-                    # uniq_ids of connected Citations
-                    self.citation_ref.append(ref)   # prev. citationref_hlink = ref
-                for ref in record["place_ref"]:
-                    self.place_ref.append(ref)
-        except Exception as err:
-            print("Virhe-get_event_combo: {1} {0}".format(err, self.uniq_id), file=stderr)
+                for record in result:
+                    # <Record 
+                    #    event=<Node id=84467 labels={'Event'} 
+                    #    properties={'datetype': 0, 'change': 1522422810, 'description': '', 
+                    #        'handle': '_dd8aab5481c7c18befdd4baa628', 'attr_type': '', 
+                    #        'id': 'E2965', 'date2': 1829189, 'type': 'Baptism', 
+                    #        'date1': 1829189, 'attr_value': ''}> 
+                    #        place_ref=[78213] 
+                    #    citation_ref=[] 
+                    #    note_ref=[]>
+                    node = record["event"]
+                    # Marshall self from the Node from db
+                    self.from_node(node, self)
+        
+                    # Related data
+                    for ref in record["note_ref"]:
+                        self.note_ref.append(ref) # List of uniq_ids
+                    for ref in record["citation_ref"]:
+                        # uniq_ids of connected Citations
+                        self.citation_ref.append(ref)
+                    for ref in record["place_ref"]:
+                        self.place_ref.append(ref)
+            except Exception as err:
+                print("Virhe-get_event_combo: {1} {0}".format(err, self.uniq_id), file=stderr)
 
-#             # Place
-#             place_result = self.get_place_by_id()
-#             for place_record in place_result:
-#                 self.place_hlink = place_record["uniq_id"]
-#             # Note
-#             note_result = self.get_note_by_id()
-#             for note_record in note_result:
-#                 self.noteref_hlink = note_record["noteref_hlink"]
-#                 print("noteref_hlink: " + str(self.noteref_hlink))
-#             # Citation
-#             citation_result = self.get_citation_by_id()
-#             for citation_record in citation_result:
-#                 self.citationref_hlink = citation_record["citationref_hlink"]
-    
     @staticmethod       
     def get_connected_events_w_links(uniq_id):
         """ Read all Events referred from given node (Person or Family)

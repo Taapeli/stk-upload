@@ -358,14 +358,3 @@ return s'''
                 print("Virhe (Source.save:repository_medium): {0}".format(err), file=stderr)
 
         return
-
-
-# class Weburl():
-#     """ A web reference 
-#     """
-# 
-#     def __init__(self, href=None, rtype=None, description=""):
-#         self.url_href = href
-#         self.url_type = rtype
-#         self.url_description = description
-

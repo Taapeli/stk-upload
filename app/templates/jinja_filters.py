@@ -18,7 +18,7 @@ def translate(term, var_name, lang="fi"):
         'lt'   = Location types
         'lt_in' = Location types, inessive form
         'notet' = note type
-        'urlt' = web page type
+        #'urlt' = web page type
         'rept' = repository types
         'medium' = media types
     """
@@ -88,7 +88,6 @@ def translate(term, var_name, lang="fi"):
     elif var_name == "role":
         # Name types
         tabl = {
-
             "Primary": "pääosallisena",
             "Family": "perheenä",
             "Kummi": "kummina",
@@ -127,6 +126,8 @@ def translate(term, var_name, lang="fi"):
     elif var_name == "notet":
         # Note types
         tabl = {
+            "Link":"ks.",
+            "Cause Of Death":"kuolinsyy",
             "Citation":"viite",
             "Event Note":"tapahtuma",
             "Source Note":"lähde",
@@ -149,7 +150,7 @@ def translate(term, var_name, lang="fi"):
             "Place Note":"paikan lisätieto",
             "Repository Note":"arkiston lisätieto",
             "Source Note":"lähteen lisätieto",
-            "To Do":"työlistalla",
+            "To Do":"työlistalla"
             }
     elif var_name == "rept":
         # Repository types
@@ -239,6 +240,9 @@ def translate(term, var_name, lang="fi"):
         return urlparse(term).hostname
 
     try:
-        return tabl[term]
+        if term:
+            return tabl[term]
+        else:
+            return ''
     except:
         return "'" + term + "'"

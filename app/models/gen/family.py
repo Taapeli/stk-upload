@@ -43,7 +43,7 @@ class Family:
         self.children = []      # Child object
         self.events = []        # Event objects
         self.notes = []
-        self.duration = [None, None]    # TODO: Marriage and divorce dates
+        self.dates = None       #TODO DateRange marriage .. divorce
         self.note_ref = []
 
         #TODO Obsolete parameters???

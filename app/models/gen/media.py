@@ -97,7 +97,7 @@ class Media:
 
     def print_data(self):
         """ Tulostaa tiedot """
-        print ("*****Note*****")
+        print ("***** Media *****")
         print ("Handle: " + self.handle)
         print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
@@ -123,5 +123,5 @@ class Media:
 
         except Exception as err:
             print("Virhe (Media.save): {0}".format(err), file=stderr)
-            raise SystemExit("Stopped due to errors")    # Stop processing
+            raise SystemExit("Stopped due to error in Media.save")    # Stop processing
             #TODO raise ConnectionError("Media.save: {0}".format(err))

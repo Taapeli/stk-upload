@@ -25,7 +25,7 @@ from models.gen.refname import Refname
 from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
-from models.gen.weburl import Weburl
+#from models.gen.weburl import Weburl
 from models.gen.dates import DateRange
 
 
@@ -237,14 +237,15 @@ def read_cite_sour_repo(uniq_id=None):
 
                         r = Repository()
                         r.uniq_id = s.reporef_hlink
-                        result_repo = r.get_repo_w_urls()
+                        result_repo = r.get_repo_w_notes()
                         for record_repo in result_repo:
                             if record_repo['rname']:
                                 r.rname = record_repo['rname']
                             if record_repo['type']:
                                 r.type = record_repo['type']
-                            if record_repo['webref']:
-                                r.urls.append(Weburl(record_repo))
+                            for node in record_repo['notes']:
+                                wu = Note.from_node(node)
+                                r.notes.append(wu)
                         s.repocitory = r
 
                 c.source = s    # s.append(s)
@@ -282,7 +283,7 @@ def get_repositories(uniq_id=None):
 
         (Korvaa read_repositories()
     ╒════════╤════════╤════════╤════════╤════════╤═══════╤════════╤════════╕
-    │"uniq_id│"rname" │"type"  │"change"│"handle"│"id"   │"sources│"webref"│
+    │"uniq_id│"rname" │"type"  │"change"│"handle"│"id"   │"sources│"notes" │
     │"       │        │        │        │        │       │"       │        │
     ╞════════╪════════╪════════╪════════╪════════╪═══════╪════════╪════════╡
     │25979   │"Haminan│"Library│"1526233│"_de18a0│"R0000"│[[25992,│[[...], │
@@ -293,12 +294,15 @@ def get_repositories(uniq_id=None):
     │        │        │        │        │        │       │0","Book│        │
     │        │        │        │        │        │       │"]]     │        │
     └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
-    where "webref" is
     """
     titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'urls']
     repositories = []
     result = Repository.get_w_source(uniq_id)
     for record in result:
+        # <Record uniq_id=138741 rname='8. Suomenmaalaisen sotilasseurakunnan arkisto' 
+        #    type='Library' change='1541271759' handle='_e048d8ea78c7afc76c452682e16' id='R0215' 
+        #    sources=[[142172, '8. M metrikka 1908-1908 (I C:1)', 'Book']] 
+        #    webref=[]>
         r = Repository()
         r.uniq_id = record['uniq_id']
         r.rname = record['rname'] or ''
@@ -306,16 +310,15 @@ def get_repositories(uniq_id=None):
         r.handle = record['handle']
         r.type = record['type'] or ''
         r.id = record['id'] or ''
-        for webref in record['webref']:
-            wurl = Weburl.from_node(webref)
-            if wurl:
-                r.urls.append(wurl)
+        for node in record['notes']:
+            n = Note.from_node(node)
+            r.notes.append(n)
 
-        for source in record['sources']:
+        for node in record['sources']:
             s = Source()
-            s.uniq_id = source[0]
-            s.stitle = source[1]
-            s.reporef_medium = source[2]
+            s.uniq_id = node[0]
+            s.stitle = node[1]
+            s.reporef_medium = node[2]
             r.sources.append(s)
 
         repositories.append(r)
@@ -601,11 +604,6 @@ def get_person_data_by_id(uniq_id):
             The indexes of referred objects are in variables
                 event_ref[]        str tapahtuman uniq_id, rooli eventref_role[]
                 media_ref[]        str tallenteen uniq_id
-                urls[]                list of Weburl nodes
-                    priv           str 1 = salattu tieto
-                    href           str osoite
-                    type           str tyyppi
-                    description    str kuvaus
                 parentin_hlink[]   str vanhempien uniq_id
                 note_ref[]         str huomautuksen uniq_id
                 citation_ref[]     str viittauksen uniq_id
@@ -616,7 +614,7 @@ def get_person_data_by_id(uniq_id):
     """
     p = Person_combo()
     p.uniq_id = int(uniq_id)
-    # Get Person and her Name properties, also Weburl properties
+    # Get Person and her Name properties, also Note properties
     p.get_person_w_names()
     # Get reference (uniq_id) and role for Events
     # Get references to Media, Citation objects
@@ -645,7 +643,7 @@ def get_person_data_by_id(uniq_id):
         for ref in e.place_ref:
             place = Place()
             place.uniq_id = ref
-            place.get_place_data_by_id()
+            place.read_w_notes()
             # Location / place name, type and reference
             e.location = place.pname
             e.locid = place.uniq_id
@@ -795,14 +793,14 @@ def get_person_data_by_id(uniq_id):
         nodes[e.uniq_id] = e
     for e in family_list:
         nodes[e.uniq_id] = e
-    #print ("Unique Nodes: {}".format(nodes))
-    result = Person_combo.get_ref_weburls(list(nodes.keys()))
-    for wu in result:
-        print("({} {}) -[{}]-> ({} ({} {}))".\
-              format(wu["root"] or '?', wu["root_id"] or '?',
-                     wu["rtype"] or '?', wu["label"],
-                     wu["target"] or '?', wu["id"] or '?'))
-    print("")
+#     if True:        # Näitä ei tarvita?
+#         result = Person_combo.get_ref_weburls(list(nodes.keys()))
+#         for wu in result:
+#             print("({} {}) -[{}]-> ({} ({} {}))".\
+#                   format(wu["root"] or '?', wu["root_id"] or '?',
+#                          wu["rtype"] or '?', wu["label"],
+#                          wu["target"] or '?', wu["id"] or '?'))
+#     print("")
         #TODO Talleta Note- ja Citation objektit oikeisiin objekteihin
         #     Perusta objektien kantaluokka Node, jossa muuttujat jäsenten
         #     tallettamiseen.
@@ -822,7 +820,7 @@ def get_baptism_data(uniq_id):
     if e.place_ref:
         place = Place()
         place.uniq_id = e.place_ref[0]
-        place.get_place_data_by_id()
+        place.read_w_notes()
         # Location / place data
         e.location = place.pname
         e.locid = place.uniq_id
@@ -917,7 +915,7 @@ def get_place_with_events (loc_id):
     """
     place = Place()
     place.uniq_id = loc_id
-    place.get_place_data_by_id()
+    place.read_w_notes()
     place_list = Place.get_place_tree(place.uniq_id)
     event_table = Place.get_place_events(place.uniq_id)
     return (place, place_list, event_table)

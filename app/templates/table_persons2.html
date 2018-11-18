@@ -1,4 +1,4 @@
-{# _myapp/templates/table1.html_ #}
+{# _myapp/templates/table_persons_2.html_ #}
 {% extends "a_layout.html" %}
 {% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
@@ -10,11 +10,11 @@
 
 <section id="lista">
 <table>
-    <tr><th>{{ _("uniq_id") }}</th>
-        <th>{{ _("name") }}</th>
-        <th>{{ _("type") }}</th>
-        <th>{{ _("date") }}</th>
-        <th>{{ _("place") }}</th>
+    <tr><th>{{ _("Uniq_id") }}</th>
+        <th>{{ _("Name") }}</th>
+        <th>{{ _("Event type") }}</th>
+        <th>{{ _("Date") }}</th>
+        <th>{{ _("Place") }}</th>
     </tr>
 {% if persons %}
     {% for p in persons %}

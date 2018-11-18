@@ -7,12 +7,16 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <script src="/static/infobox.js"></script>
 
-<h2>{{ _('List of persons with the same name') }}</h2>
+{% if subj == 'same_birthday' %}
+<h2>{{ _('List of persons with the same birth date') }}</h2>
+{% else %}
+<h2>{{ _('List of persons with the same date of death') }}</h2>
+{% endif %}
 <p>{{ _('Showing person pairs') }}</p>
-<p><button ng-click = "show_me = !show_me">{{ _('All/Same Birth date') }}</button>
+<p><button ng-click = "show_me = !show_me">{{ _('All/same Given name') }}</button>
    <small>{{ _('Click on the column header to sort column') }}</small></p>
 
-<section id="lista">
+<section id="lista" style="display: block;">
 <div ng-app="myApp" ng-controller="namesCtrl">
 	<table>
 	    <tr>
@@ -21,7 +25,7 @@
 			<a ng-show="currentSort.exp == x.column && !currentSort.reverse"><i class='fa fa-angle-up'></i></a></th>
 	    </tr>
 	    <tr ng-repeat="id_par in id_pars | orderBy:currentSort.exp: currentSort.reverse"
-	    	ng-show="(id_par.est_birth1 === id_par.est_birth2) || !show_me">
+	    	ng-show="(id_par.firstname1 === id_par.firstname2) || !show_me">
 	        <td><a href="/compare/uniq_id={a id_par.uniq_id1 a},{a id_par.uniq_id2 a}">{a id_par.uniq_id1 a}</a></td>
 	        <td>{a id_par.firstname1 a}</td>
 	        <td>{a id_par.suffix1 a}</td>
@@ -61,14 +65,21 @@ var app = angular.module('myApp', []).controller('namesCtrl', function($scope) {
 	{% for record in ids %}
     	{% for id_pair in record %}
         	{uniq_id1:'{{id_pair[0]}}',
-        	 est_birth1:'{{ id_pair[1] if id_pair[1] else '-' }}',
+        	 {% if subj == 'same_birthday' %}
+        	 est_birth1:'{{id_pair[1]}}',
         	 est_death1:'{{ id_pair[2] if id_pair[2] else '-' }}',
+             est_birth2:'{{id_pair[7]}}',
+             est_death2:'{{ id_pair[8] if id_pair[8] else '-' }}',
+        	 {% else %}
+        	 est_birth1:'{{ id_pair[1] if id_pair[1] else '-' }}',
+        	 est_death1:'{{id_pair[2]}}',
+             est_birth2:'{{ id_pair[7] if id_pair[7] else '-' }}',
+             est_death2:'{{id_pair[8]}}',
+        	 {% endif %}
         	 firstname1:'{{id_pair[3]}}',
         	 suffix1:'{{id_pair[4]}}',
         	 surname1:'{{id_pair[5]}}',
         	 uniq_id2:'{{id_pair[6]}}',
-        	 est_birth2:'{{ id_pair[7] if id_pair[7] else '-' }}',
-        	 est_death2:'{{ id_pair[8] if id_pair[8] else '-' }}',
         	 firstname2:'{{id_pair[9]}}',
         	 suffix2:'{{id_pair[10]}}',
         	 surname2:'{{id_pair[11]}}'},

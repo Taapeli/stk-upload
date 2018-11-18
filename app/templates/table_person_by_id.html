@@ -86,14 +86,14 @@
     <tr><th>{{ _("priv") }}</th><th>{{ _("description") }}</th><th>{{ _("URL") }}</th>
     </tr>
 {% if person %}
-	{% if person.urls|length == 0 %}
+	{% if not person.notes %}
 		<tr><td colspan="2">{{ _('No URL information') }}</td></tr>
 	{% else %}
-		{% for url in person.urls %}
+		{% for note in person.notes %}
 			<tr>
-	    		<td>{{url.priv}}</a></td>
-	    		<td>{{url.description}}</a></td>
-	    		<td><a href="{{url.href}}">{{url.href}}</a></td>
+	    		<td>{{note.priv}}</a></td>
+	    		<td>{{note.text}}</a></td>
+	    		<td><a href="{{note.url}}">{{note.url}}</a></td>
 			</tr>
 		{% endfor %}
 	{% endif %}

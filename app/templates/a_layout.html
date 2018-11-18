@@ -5,8 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %} - Alkusivut</title>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"></link>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pers.css') }}"></link>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pers.css') }}">
 
  <!--link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
     <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
@@ -28,8 +28,8 @@
 
     <div class="fullclear"></div>
     <div id="footer">
-        <p id="createdate">
-        {{ _("Stk-server") }} &nbsp; <small style="font-size: 6pt">{{ _('Version') }} {{ 'app'|app_date }}</small></p>
+        <span id="createdate">{{ _("Stk-server") }} &nbsp;
+        <small style="font-size: 6pt">{{ _('Version') }} {{ 'app'|app_date }}</small></span>
     <div class="fullclear"></div>
 
 <div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>
