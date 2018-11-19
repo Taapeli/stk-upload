@@ -6,7 +6,6 @@ import logging
 logger = logging.getLogger('stkserver') 
 from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 
-#neo4j config
 import shareds
 
 #inputs
@@ -137,21 +136,23 @@ def master_exists():
     return(num_of_masters > 0)    
 
 def build_master_user():
-    return( 
-        {'username': 'master', 
-         'password': 'taapeli',  
-         'email': 'stk.sukututkimusseura@gmail.com', 
-         'name': 'Stk-kannan pääkäyttäjä',
-         'language': 'fi',  
-         'is_active': True,
-         'confirmed_at': datetime.now().timestamp()/1000, 
-         'roles': ['master'],
-         'last_login_at': datetime.now().timestamp()/1000,
-         'current_login_at': datetime.now().timestamp()/1000,
-         'last_login_ip': '127.0.0.1',
-         'current_login_ip': '127.0.0.1',
-         'login_count': 0            
-         } )
+    from flask_security import utils as sec_utils
+    with shareds.app.app_context():
+        return( 
+            {'username': 'master', 
+             'password': sec_utils.hash_password('taapeli'),  
+             'email': 'stk.sukututkimusseura@gmail.com', 
+             'name': 'Stk-kannan pääkäyttäjä',
+             'language': 'fi',  
+             'is_active': True,
+             'confirmed_at': datetime.now().timestamp()/1000, 
+             'roles': ['master'],
+             'last_login_at': datetime.now().timestamp()/1000,
+             'current_login_at': datetime.now().timestamp()/1000,
+             'last_login_ip': '127.0.0.1',
+             'current_login_ip': '127.0.0.1',
+             'login_count': 0            
+             } )
             
 def create_master(master_user):
     with shareds.driver.session() as session: 
