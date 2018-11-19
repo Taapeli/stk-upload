@@ -19,7 +19,7 @@ from flask_security import login_required, roles_accepted, roles_required, curre
 from flask_babelex import _
 
 import shareds
-from setups import User #, Role
+from setups import User, Role
 from models import dbutil, dataupdater, loadfile, datareader
 from .models import DataAdmin, UserAdmin
 from .cvs_refnames import load_refnames

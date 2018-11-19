@@ -12,7 +12,7 @@
     <div>{% include "security/_messages.html" %}</div>
     <div class="row">
        <div class="startbox2">
-		  <h1>{{ _('Register  as a database user of Suomi tietokanta Service') }}</h1>
+		  <h1>{{ _('Register  as a database user of Finland database Service') }}</h1>
 		     <form action="{{ url_for_security('register') }}"
 		           method="POST" name="register_user_form">
 				  {{ register_user_form.hidden_tag() }}
@@ -27,7 +27,7 @@
 				  {{ render_field_with_errors(register_user_form.language) }}
                   <p>
                   {# {{ render_field(register_user_form.agreement) }} #}
-                  {{ _('Read and accept < a href = "static/Conditionsofuse. html" > Terms of use') }}</a> 
+                  {{ _('Read and accept <a href = "static/Conditionsofuse. html" > Terms of use') }}</a> 
 				  </p>
 				  {{ render_field(register_user_form.submit) }}
 		     </form>
