@@ -733,10 +733,11 @@ def get_person_data_by_id(uniq_id):
     fid = 0
     result = Person_combo.get_family_members(p.uniq_id)
     for record in result:
-        # <Record family_id='F0296' f_uniq_id=100197 role='CHILD' m_id='I0798'
-        #    uniq_id=63423 gender='M' birth_date=[0, 1769543, 1769543]
-        #    names=[['', 'Birth Name', 'Claës', 'Heidenstrauch', '']]>
-
+        # <Record family_id='F0461' f_uniq_id=208845 role='CHILD' m_id='I1235' 
+        #    uniq_id=207392 gender='M' birth_date=[0, 1818646, 1818646] 
+        #    names=[<Node id=207393 labels={'Name'} 
+        #           properties={'alt': '', 'firstname': 'Erik Berndt', 'type': 'Birth Name', 
+        #               'suffix': '', 'surname': 'Konow'}> ] >
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]
             if not fid in families:
@@ -763,14 +764,8 @@ def get_person_data_by_id(uniq_id):
             if datetype != None:
                 member.birth_date = DateRange(datetype, date1, date2).estimate()
         if record["names"]:
-            for name in record["names"]:
-                # Got [[alt, ntype, firstname, surname, suffix]
-                n = Name()
-                n.alt = name[0]
-                n.type = name[1]
-                n.firstname = name[2]
-                n.surname = name[3]
-                n.suffix = name[4]
+            for node in record["names"]:
+                n = Name.from_node(node)
                 member.names.append(n)
 
         if member.role == "CHILD":

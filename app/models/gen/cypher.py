@@ -158,6 +158,31 @@ class Cypher_family():
     Cypher clases for creating and accessing Families
     '''
 
+    # from models.gen.person_combo.Person_combo.get_family_members 
+    get_persons_family_members = """
+MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name) 
+    WHERE ID(p) = $pid
+  OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
+    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
+         TYPE(r1) AS role,
+         m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
+         n, [birth.datetype, birth.date1, birth.date2] AS birth_date
+    ORDER BY n.alt
+    RETURN family_id, f_uniq_id, role, 
+           m_id, uniq_id, gender, birth_date,
+           COLLECT(n) AS names
+    ORDER BY family_id, role, birth_date
+UNION
+MATCH (p:Person) <-[r2]- (f:Family) 
+    WHERE id(p) = $pid
+  OPTIONAL MATCH (p) -[:EVENT]-> (birth {type:'Birth'})
+    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
+           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, 
+           [birth.datetype, birth.date1, birth.date2] AS birth_date,
+           [] AS names"""
+
+    # from models.gen.family.Family_for_template.get_person_families_w_members
+    # NOT IN USE
     get_members = '''
 match (x) <-[r0]- (f:Family) where id(x) = $pid
 with x, r0, f
@@ -166,8 +191,8 @@ match (f) -[r:FATHER|MOTHER|CHILD]-> (p:Person)
 with x, r0, f, r, p
 match (p) -[rn:NAME]-> (n:Name)
 return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
-    collect([id(p), type(r), p]) as members,
-    collect([id(p), n, rn]) as names'''
+    collect(distinct [id(p), type(r), p]) as members,
+    collect(distinct [id(p), n, rn]) as names'''
 
     get_wedding_couple_names = """
 match (e:Event) <-- (:Family) -[r:FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)

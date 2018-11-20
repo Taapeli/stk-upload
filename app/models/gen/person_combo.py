@@ -55,7 +55,7 @@ import shareds
 
 from .person import Person
 from .person_name import Name
-from .cypher import Cypher_person
+from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
 from .note import Note
@@ -756,51 +756,12 @@ with r, e, pl
 
     @staticmethod
     def get_family_members (uniq_id):
-        """ Read the Names, Families and Events connected to this Person.
+        """ Read the Families and member names connected to given Person
             for '/scene/person=<string:uniq_id>'
         """
-        query="""
-MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name) 
-    WHERE ID(p) = $id
-  OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
-    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
-         TYPE(r1) AS role,
-         m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
-         n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx,
-         [birth.datetype, birth.date1, birth.date2] AS birth_date
-    ORDER BY n.alt
-    RETURN family_id, f_uniq_id, role, 
-           m_id, uniq_id, gender, birth_date,
-           COLLECT([alt, ntype, fn, sn, sx]) AS names
-    ORDER BY family_id, role, birth_date
-UNION
-MATCH (p:Person) <-[r2]- (f:Family) 
-    WHERE id(p) = $id
-  OPTIONAL MATCH (p) -[:EVENT]-> (birth {type:'Birth'})
-    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
-           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, 
-           [birth.datetype, birth.date1, birth.date2] AS birth_date,
-           [] AS names"""
 
-# ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤═══════════════╤═══════════════╕
-# │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"   │"names"        │
-# ╞═══════════╪═══════════╪════════╪═══════╪═════════╪════════╪═══════════════╪═══════════════╡
-# │"F0281"    │100163     │"FATHER"│"I0769"│77654    │"M"     │[0,1836070,1836│[["","Also Know│
-# │           │           │        │       │         │        │070]           │n As","Matts","│
-# │           │           │        │       │         │        │               │Lindlöf",""],["│
-# │           │           │        │       │         │        │               │1","Birth Name"│
-# │           │           │        │       │         │        │               │,"Mattias","","│
-# │           │           │        │       │         │        │               │Abrahamsson"]] │
-# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼───────────────┼───────────────┤
-# │"F0281"    │100163     │"MOTHER"│"I0775"│76526    │"F"     │[0,1846276,1846│[["","Birth Nam│
-# │           │           │        │       │         │        │276]           │e","Anna Stina"│
-# │           │           │        │       │         │        │               │,"","Jacobsdott│
-# │           │           │        │       │         │        │               │er"]]          │
-# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼───────────────┼───────────────┤
-# │"F0281"    │100163     │"CHILD" │"I1069"│72104    │"F"     │""             │[]             │
-# └───────────┴───────────┴────────┴───────┴─────────┴────────┴───────────────┴───────────────┘
-
-        return shareds.driver.session().run(query, id=int(uniq_id))
+        return shareds.driver.session().run(Cypher_family.get_persons_family_members, 
+                                            pid=int(uniq_id))
 
 
     @staticmethod
@@ -838,12 +799,6 @@ with distinct x
         return shareds.driver.session().run(query, pids=pid_list)
 
 # Unused methods:
-#     def key(self):
-#         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
-#         key = "{}:{}:{}:{}".format(self.name.firstname, self.name.last,
-#               self.occupation, self.place)
-#         return key
-#
 #     def join_events(self, events, kind=None):
 #         """
 #         Päähenkilöön self yhdistetään tapahtumat listalta events.

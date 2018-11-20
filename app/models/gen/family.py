@@ -327,13 +327,14 @@ class Family_for_template(Family):
 
     @staticmethod       
     def get_person_families_w_members(uid):
-        ''' Finds all Families, where Person uid belongs to
+        ''' NOT IN USE!
+            Finds all Families, where Person uid belongs to
             and return them as a Families list
         '''
 # ╒═══════╤══════════╤════════╤═════════════════════╤═════════════════════╕
 # │"f_id" │"rel_type"│"myrole"│"members"            │"names"              │
 # ╞═══════╪══════════╪════════╪═════════════════════╪═════════════════════╡
-# │"F0000"│"Unknown" │"FATHER"│[[72533,"CHILD",     │[[72533,             │
+# │"F0000"│"Married" │"FATHER"│[[72533,"CHILD",     │[[72533,             │
 # │       │          │        │  "CHILD",{"han      │  {"alt":"","fi      │
 # │       │          │        │dle":"_dd2c613026e752│rstname":"Jan Erik","│
 # │       │          │        │8c1a21f78da8a","id":"│type":"Birth Name","s│
