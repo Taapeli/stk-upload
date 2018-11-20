@@ -57,7 +57,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
                 properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F',
                      'change': 1507492602, 'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
             name=<Node id=80308 labels={'Name'}
-                properties={'type': 'Birth Name', 'suffix': '', 'alt': '',
+                properties={'type': 'Birth Name', 'suffix': '', 'order': 0,
                     'surname': 'Klick', 'firstname': 'Brita Helena'}>
             refnames=['Helena', 'Brita', 'Klick']
             events=[['Primary', <Node id=88532 labels={'Event'}
@@ -736,7 +736,7 @@ def get_person_data_by_id(uniq_id):
         # <Record family_id='F0461' f_uniq_id=208845 role='CHILD' m_id='I1235' 
         #    uniq_id=207392 gender='M' birth_date=[0, 1818646, 1818646] 
         #    names=[<Node id=207393 labels={'Name'} 
-        #           properties={'alt': '', 'firstname': 'Erik Berndt', 'type': 'Birth Name', 
+        #           properties={'order': 0, 'firstname': 'Erik Berndt', 'type': 'Birth Name', 
         #               'suffix': '', 'surname': 'Konow'}> ] >
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]

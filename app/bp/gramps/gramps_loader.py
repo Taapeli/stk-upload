@@ -548,10 +548,11 @@ class DOM_handler():
         t0 = time.time()
         counter = 0
 
-        # Print detail of each person
+        # Get details of each person
         for person in people:
 
             p = Person_gramps()
+            name_order = 0
 
             if person.hasAttribute("handle"):
                 p.handle = person.getAttribute("handle")
@@ -573,6 +574,9 @@ class DOM_handler():
                 for i in range(len(person.getElementsByTagName('name') )):
                     person_name = person.getElementsByTagName('name')[i]
                     pname = Name()
+                    pname.order = name_order
+                    name_order += 1
+
                     if person_name.hasAttribute("alt"):
                         pname.alt = person_name.getAttribute("alt")
                     if person_name.hasAttribute("type"):
@@ -857,7 +861,8 @@ class DOM_handler():
 
 
     def set_refnames(self):
-        ''' Add links from each Person to Refnames '''
+        ''' Add links from each Person to Refnames and set self.sortname
+        '''
 
         print ("***** {} Refnames *****".format(len(self.uniq_ids)))
         t0 = time.time()

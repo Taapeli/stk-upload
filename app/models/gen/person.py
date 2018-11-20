@@ -9,8 +9,9 @@
          - properties { handle:"_dd2c613026e7528c1a21f78da8a",
                         id:"I0000",
                         priv:"",
-                        gender:"M",
+                        gender:"N",
                         confidence:"2.0",
+                        sortname:"Floor#Hans-Johansdotter#Katarina",
                         change:1536324580}
         - __init__()
         - __str__()
@@ -82,6 +83,7 @@ class Person:
             priv                  int 1 = merkitty yksityiseksi
             gender                str "M", "N", "" sukupuoli
             confidence            float "2.0" tietojen luotettavuus
+            sortname              str default name as "surname#suffix#firstname"
             change                int 1536324580
            }
      """
@@ -95,6 +97,7 @@ class Person:
         self.priv = 0
         self.gender = ''
         self.confidence = ''
+        self.sortname = ''
 
 
     def __str__(self):
@@ -126,9 +129,21 @@ class Person:
         obj.confidence = node['confidence']
         if obj.confidence == None:
             obj.confidence = ''
+        obj.sortname = node['sortname']
         obj.priv = node['priv']
         return obj
 
+
+    @staticmethod
+    def set_sortname(tx, uniq_id, namenode):
+        """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
+            using given default Name node
+        """
+        # Person.set_sortname(name.key_surname())
+        key = namenode.key_surname()
+        return tx.run(Cypher_person.set_sortname,
+                      id=uniq_id, key=key)
+        
     @staticmethod
     def get_confidence (uniq_id=None):
         """ Voidaan lukea henkilön tapahtumien luotettavuustiedot kannasta
@@ -169,10 +184,11 @@ class Person:
         print ("Id: " + self.id)
         print ("Priv: " + self.priv)
         print ("Gender: " + self.gender)
+        print ("Sort name: " + self.sortname)
 
         if len(self.names) > 0:
             for pname in self.names:
-                print ("Alt: " + pname.alt)
+                print ("Order: " + pname.order)
                 print ("Type: " + pname.type)
                 print ("First: " + pname.firstname)
 #                 print ("Refname: " + pname.refname)

@@ -58,7 +58,8 @@ def set_estimated_dates(batch_logger=None):
 
 
 def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
-    """ Set Refnames to all or one Persons
+    """ Set Refnames to all or one Persons; 
+        also set Person.sortname using default name
         If self is defined
         - if there is transaction tx, use it, else create new 
         - if there is self.namecount, the number of names set is increased
@@ -71,40 +72,38 @@ def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
         my_tx = self.tx
     else:
         my_tx = User.beginTransaction()
-    names = Name.get_personnames(my_tx, uniq_id)
+    result = Name.get_personnames(my_tx, uniq_id)
 
     # Process each name part (first names, surname, patronyme) of each Person
-    for rec in names:
-        # ╒═════╤════════════════════╤══════════╤══════════════╤═════╕
-        # │"ID" │"fn"                │"sn"      │"pn"          │"sex"│
-        # ╞═════╪════════════════════╪══════════╪══════════════╪═════╡
-        # │30796│"Björn"             │""        │"Jönsson"     │"M"  │
-        # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
-        # │30827│"Johan"             │"Sibbes"  │""            │"M"  │
-        # ├─────┼────────────────────┼──────────┼──────────────┼─────┤
-        # │30844│"Maria Elisabet"    │""        │"Johansdotter"│"F"  │
-        # └─────┴────────────────────┴──────────┴──────────────┴─────┘
+    for record in result:
+        # <Record name=<Node id=185239 labels={'Name'} 
+        #    properties={'firstname': 'Jan Erik', 'suffix': 'Jansson', 
+        #        'type': 'Birth Name', 'surname': 'Mannerheim', 'order': 0}
+        # >  >
+
+        pid = record['pid']
+        node = record['name']
         # Build new refnames
-        pid = rec["ID"]         # Person id
-        firstname = rec["fn"]
-        surname = rec["sn"]
-        patronyme = rec["pn"]
-        #gender = rec["sex"]
+        name = Name.from_node(node)
 
         # 1. firstnames
-        if firstname and firstname != 'N':
-            for name in firstname.split(' '):
-                Refname.link_to_refname(my_tx, pid, name, 'firstname')
+        if name.firstname and name.firstname != 'N':
+            for nm in name.firstname.split(' '):
+                Refname.link_to_refname(my_tx, pid, nm, 'firstname')
                 name_count += 1
 
         # 2. surname and patronyme
-        if surname and surname != 'N':
-            Refname.link_to_refname(my_tx, pid, surname, 'surname')
+        if name.surname and name.surname != 'N':
+            Refname.link_to_refname(my_tx, pid, name.surname, 'surname')
             name_count += 1
 
-        if patronyme:
-            Refname.link_to_refname(my_tx, pid, patronyme, 'patronyme')
+        if name.suffix:
+            Refname.link_to_refname(my_tx, pid, name.suffix, 'patronyme')
             name_count += 1
+        
+        if name.order == 0:
+            # If default name, store sortname key to Person node
+            Person.set_sortname(my_tx, uniq_id, name)
         pers_count += 1
 
         # ===   [NOT!] Report status for each name    ====

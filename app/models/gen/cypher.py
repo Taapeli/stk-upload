@@ -106,23 +106,28 @@ RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
 MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
+    set_sortname = """
+MATCH (person:Person) WHERE ID(person)=$id
+SET person.sortname=$key"""
+
     get_w_names_notes = """
 MATCH (person:Person) -[r:NAME]-> (name:Name)
   WHERE ID(person)=$pid
 OPTIONAL MATCH (person) -[:NOTE]-> (n:Note)
-  WITH person, name, COLLECT (n) AS notes ORDER BY name.alt
+  WITH person, name, COLLECT (n) AS notes ORDER BY name.order
 RETURN person, notes, COLLECT (name) AS names"""
 
     get_names = """
-MATCH (n)<-[r:NAME]-(p:Person)
-where id(p) = $pid
-RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
-    p.gender AS sex"""
+MATCH (n) <-[r:NAME]- (p:Person)
+    where id(p) = $pid
+RETURN id(p) as pid, n as name
+ORDER BY name.order"""
 
     get_all_persons_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
 RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
-    p.gender AS sex"""
+    p.gender AS sex
+ORDER BY n.order"""
 
 
 class Cypher_name():
@@ -167,7 +172,7 @@ MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name)
          TYPE(r1) AS role,
          m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
          n, [birth.datetype, birth.date1, birth.date2] AS birth_date
-    ORDER BY n.alt
+    ORDER BY n.order
     RETURN family_id, f_uniq_id, role, 
            m_id, uniq_id, gender, birth_date,
            COLLECT(n) AS names

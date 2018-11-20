@@ -381,16 +381,16 @@ class Family_for_template(Family):
                 # Names
                 order = ""
                 for persid, namerec, namerel in record['names']:
-                    if persid == p.uniq_id and not namerec['alt'] > order:
+                    if persid == p.uniq_id and not namerec['order'] > order:
                         # A name of this family member,
-                        # preferring the one with lowest alt value
+                        # preferring the one with lowest order value
                         n = Name()
                         n.type = namerec['type']
                         n.firstname = namerec['firstname']
                         n.surname = namerec['surname']
                         n.suffix = namerec['suffix']
-                        n.alt = namerec['alt']
-                        order = n.alt
+                        n.order = namerec['order']
+                        order = n.order
                         p.names.append(n)
                         
                 # Members role

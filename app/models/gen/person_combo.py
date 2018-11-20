@@ -70,7 +70,8 @@ class Person_combo(Person):
 
         Other properties:
             names[]:
-               alt             str muun nimen nro
+               order           int index of name variations; number 0 is default name
+               #alt            str muun nimen nro
                type            str nimen tyyppi
                firstname       str etunimi
                #refname        str referenssinimi (entinen toteutus)
@@ -255,7 +256,7 @@ RETURN ID(family) AS uniq_id"""
 MATCH (person:Person)-[r:NAME]->(name:Name)
   WHERE ID(person)=$pid
 RETURN person, name
-  ORDER BY name.alt"""
+  ORDER BY name.order"""
         person_result = shareds.driver.session().run(query, {"pid": pid})
         self.id = None
 
@@ -272,7 +273,7 @@ RETURN person, name
 
             if len(person_record["name"]) > 0:
                 pname = Name()
-                pname.alt = person_record["name"]['alt']
+                pname.order = person_record["name"]['order']
                 pname.type = person_record["name"]['type']
                 pname.firstname = person_record["name"]['firstname']
 #                 pname.refname = person_record["name"]['refname']
@@ -864,7 +865,7 @@ with distinct x
 
             names = self.names
             for pname in names:
-                alt1.append(pname.alt)
+                alt1.append(pname.order)
                 type1.append(pname.type)
                 first1.append(pname.firstname)
 #                 refname1.append(pname.refname)
@@ -873,7 +874,7 @@ with distinct x
 
             names2 = comp_person.names
             for pname in names2:
-                alt2.append(pname.alt)
+                alt2.append(pname.order)
                 type2.append(pname.type)
                 first2.append(pname.firstname)
 #                 refname2.append(pname.refname)
@@ -969,7 +970,7 @@ SET n.est_death = m.daterange_start"""
 
             names = self.names
             for pname in names:
-                alt1.append(pname.alt)
+                alt1.append(pname.order)
                 type1.append(pname.type)
                 first1.append(pname.firstname)
 #                 refname1.append(pname.refname)
@@ -978,7 +979,7 @@ SET n.est_death = m.daterange_start"""
 
             names2 = comp_person.names
             for pname in names2:
-                alt2.append(pname.alt)
+                alt2.append(pname.order)
                 type2.append(pname.type)
                 first2.append(pname.firstname)
 #                 refname2.append(pname.refname)
