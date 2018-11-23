@@ -236,7 +236,7 @@ def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
     #result_list = Unpickler(open(fname,"rb")).load()
-    msg = open(fname).read()
+    msg = open(fname, encoding="utf-8").read()
     #return render_template("/admin/load_result.html", batch_events=result_list)
     return render_template("/admin/load_result.html", msg=msg)
 
