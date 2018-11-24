@@ -3,8 +3,9 @@
     - Person and her Names
     - related Events and Places
     
-    Note. Use Person_combo.from_node(node) to create a Person_combo instance
-          ( defined as classmethod Person.from_node() )
+    Note. Use classmethod models.gen.person.Person.from_node(node) to create 
+        a Person_combo instance from a db node
+        or models.gen.person_combo.Person_combo.__init__() for empty instance
 
     class gen.person_combo.Person_combo(Person): 
         - __init__()
@@ -22,7 +23,6 @@
         - get_all_notes(self)           Tallettaa liittyvät Notes (ja web-viittaukset)
         - get_family_members (uniq_id)  Luetaan liittyvät Names, Families and Events
         - get_refnames(pid)             Luetaan liittyvät Refnames
-        - set_estimated_dates()         Aseta est_birth ja est_death
         # save(self, username, tx)      see: bp.gramps.models.person_gramps.Person_gramps.save
 
     Not in use or obsolete:
@@ -40,6 +40,7 @@
         - print_compared_data(self, comp_person, print_out=True) 
                                         Tulostaa kahden henkilön tiedot vieretysten
 
+        # set_estimated_dates()         Aseta est_birth ja est_death
         - save()  see: bp.gramps.models.person_gramps.Person_gramps.save
 
 
@@ -58,7 +59,7 @@ from .person_name import Name
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
-from .note import Note
+#from .note import Note
 #from .weburl import Weburl
 #from models.cypher_gramps import Cypher_person_w_handle
 
@@ -66,7 +67,8 @@ class Person_combo(Person):
     """ Henkilö
     
         From Person.__init__(): 
-            uniq_id, handle, id, priv, gender, confidence, change
+            uniq_id, handle, id, priv, gender, confidence, lifetime, change
+            Obsolete: #est_birth, #est_death
 
         Other properties:
             names[]:
@@ -74,12 +76,9 @@ class Person_combo(Person):
                #alt            str muun nimen nro
                type            str nimen tyyppi
                firstname       str etunimi
-               #refname        str referenssinimi (entinen toteutus)
                surname         str sukunimi
                suffix          str patronyymi
             confidence         str tietojen luotettavuus
-            est_birth          str arvioitu syntymäaika
-            est_death          str arvioitu kuolinaika
 
         The indexes of referred objects are in variables:
             eventref_hlink[]   int tapahtuman uniq_id, rooli 
@@ -912,6 +911,10 @@ with distinct x
 
     @staticmethod
     def set_estimated_dates():
+        #TODO: Do not use: these fields do not exsist any more
+        print("Virhe (Person.save:Person_combo.set_estimated_dates): not done", 
+              file=stderr)
+        return "No dates set"
         # Set est_birth
         try:
             dtype = 'Birth'

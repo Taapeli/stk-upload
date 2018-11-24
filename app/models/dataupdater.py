@@ -5,7 +5,7 @@
 import logging
 import time
 
-from bp.gramps.batchlogger import Batch, Log
+from bp.gramps.batchlogger import Batch
 from models.gen.user import User
 from models.gen.person import Person
 from models.gen.person_name import Name
@@ -57,24 +57,29 @@ def set_estimated_dates(batch_logger=None):
     return msg
 
 
-def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
+def calculate_person_properties(handler=None, uniq_id=None, ops=['refname'], batch_logger=None):
     """ Set Refnames to all or one Persons; 
         also set Person.sortname using default name
-        If self is defined
+
+        If handler is defined
         - if there is transaction tx, use it, else create new 
-        - if there is self.namecount, the number of names set is increased
+        - if there is handler.namecount, the number of names set is increased
     """
-    pers_count = 0
-    name_count = 0
+    sortname_count = 0
+    refname_count = 0
+#     confidence_count = 0
+#     do_confidence = 'confidence' in ops
+    do_refnames = 'refname' in ops
+    do_sortname = 'sortname' in ops
     t0 = time.time()
 
-    if self and self.tx:
-        my_tx = self.tx
+    if handler and handler.tx:
+        my_tx = handler.tx
     else:
         my_tx = User.beginTransaction()
-    result = Name.get_personnames(my_tx, uniq_id)
 
-    # Process each name part (first names, surname, patronyme) of each Person
+    # Process each name 
+    result = Name.get_personnames(my_tx, uniq_id)
     for record in result:
         # <Record name=<Node id=185239 labels={'Name'} 
         #    properties={'firstname': 'Jan Erik', 'suffix': 'Jansson', 
@@ -83,28 +88,30 @@ def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
 
         pid = record['pid']
         node = record['name']
-        # Build new refnames
         name = Name.from_node(node)
-
-        # 1. firstnames
-        if name.firstname and name.firstname != 'N':
-            for nm in name.firstname.split(' '):
-                Refname.link_to_refname(my_tx, pid, nm, 'firstname')
-                name_count += 1
-
-        # 2. surname and patronyme
-        if name.surname and name.surname != 'N':
-            Refname.link_to_refname(my_tx, pid, name.surname, 'surname')
-            name_count += 1
-
-        if name.suffix:
-            Refname.link_to_refname(my_tx, pid, name.suffix, 'patronyme')
-            name_count += 1
         
-        if name.order == 0:
+        if do_refnames:
+            # Build new refnames
+    
+            # 1. firstnames
+            if name.firstname and name.firstname != 'N':
+                for nm in name.firstname.split(' '):
+                    Refname.link_to_refname(my_tx, pid, nm, 'firstname')
+                    refname_count += 1
+    
+            # 2. surname and patronyme
+            if name.surname and name.surname != 'N':
+                Refname.link_to_refname(my_tx, pid, name.surname, 'surname')
+                refname_count += 1
+    
+            if name.suffix:
+                Refname.link_to_refname(my_tx, pid, name.suffix, 'patronyme')
+                refname_count += 1
+        
+        if do_sortname and name.order == 0:
             # If default name, store sortname key to Person node
             Person.set_sortname(my_tx, uniq_id, name)
-        pers_count += 1
+            sortname_count += 1
 
         # ===   [NOT!] Report status for each name    ====
         if False:
@@ -123,16 +130,26 @@ def set_person_refnames(self=None, uniq_id=None, batch_logger=None):
                 rnames.append("{} ({})".format(name['name'], link['use']))
             logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
     
-    if self == None or self.tx == None:
+    if handler == None or handler.tx == None:
         # End my own created transformation
         User.endTransaction(my_tx)
 
-    if self and self.namecount != None:
-        self.namecount += name_count
+    if handler and handler.namecount != None:
+        handler.namecount += refname_count
 
     if isinstance(batch_logger, Batch):
-        batch_logger.log_event({'title':"Refname references", 
-                                'count':name_count, 'elapsed':time.time()-t0})
+        t = time.time()-t0
+        if do_refnames: 
+            batch_logger.log_event({'title':"Refname references", 
+                                    'count':refname_count, 'elapsed':t})
+            t=''
+        if do_sortname: 
+            batch_logger.log_event({'title':"Sort names", 
+                                    'count':sortname_count, 'elapsed':t})
+            t=''
+#         if do_confidence:
+#             batch_logger.log_event({'title':"Confidence values", 
+#                                     'count':confidence_count, 'elapsed':t})
     return
 
 

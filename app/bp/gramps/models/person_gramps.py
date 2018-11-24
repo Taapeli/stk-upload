@@ -98,8 +98,13 @@ class Person_gramps(Person):
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
-                "gender": self.gender
+                "gender": self.gender,
+                "confidence":self.confidence,
+                "sortname":self.sortname
             }
+            if self.lifetime:
+                p_attr.update(self.lifetime.for_db())
+
             result = tx.run(Cypher_person_w_handle.create_to_batch, 
                             batch_id=batch_id, p_attr=p_attr, date=today)
 #             self.uniq_id = result.single()[0]

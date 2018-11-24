@@ -12,7 +12,9 @@
                         gender:"N",
                         confidence:"2.0",
                         sortname:"Floor#Hans-Johansdotter#Katarina",
+                        datetype:20, date1:1863872, date2:1868992,
                         change:1536324580}
+
         - __init__()
         - __str__()
         - from_node(cls, node, obj=None) Creates/updates Person object from 
@@ -36,13 +38,14 @@
         - get_all_notes(self)           Hakee liittyvät Notet ja web linkit
         - get_family_members(uniq_id)   Luetaan liittyvät Names, Families and Events
         - get_refnames(pid)             Luetaan liittyvät Refnames
-        - set_estimated_dates()         Aseta est_birth ja est_death
 
     class bp.gramps.models.person_gramps.Person_gramps(Person):
         - __init__()
         - save(self, username, tx)      Tallettaa Person, Names, Events ja Citations
 
     Not in use or obsolete:
+    - from models.gen.person_combo.Person_combo(Person)
+        - set_estimated_dates()         Aseta est_birth ja est_death - Obsolete
     - from models.datareader.get_person_data_by_id 
       (returns list: person, events, photos, sources, families)
         - get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)
@@ -71,7 +74,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 import shareds
 from .cypher import Cypher_person
-
+from .dates import DateRange
 
 class Person:
     """ Henkilö
@@ -84,6 +87,7 @@ class Person:
             gender                str "M", "N", "" sukupuoli
             confidence            float "2.0" tietojen luotettavuus
             sortname              str default name as "surname#suffix#firstname"
+            datetype,date1,date2  DateRange lifetime # estimated life time
             change                int 1536324580
            }
      """
@@ -98,14 +102,15 @@ class Person:
         self.gender = ''
         self.confidence = ''
         self.sortname = ''
-
+        self.lifetime = None    # Daterange: Estimated datetype, date1, date2
 
     def __str__(self):
         # Person_combo 79584 I1234
         if self.gender == 'M':  sex = 'male'
         elif self.gender == 'F':  sex = 'female'
         else: sex = 'unknown'
-        return "{} {}".format(sex, self.id)
+        dates = self.lifetime if self.lifetime else ''
+        return "{} {} {}".format(sex, self.id, dates)
 
     @classmethod
     def from_node(cls, node, obj=None):
@@ -131,6 +136,8 @@ class Person:
             obj.confidence = ''
         obj.sortname = node['sortname']
         obj.priv = node['priv']
+        if "datetype" in node:
+            obj.lifetime = DateRange(node["datetype"], node["date1"], node["date2"])
         return obj
 
 

@@ -921,9 +921,3 @@ def get_note_list(uniq_id=None):
     """
     titles, notes = Note.get_note_list(uniq_id)
     return (titles, notes)
-
-
-def xml_to_neo4j(pathname, userid='Taapeli'):
-    """ See models.gramps.gramps_loader """
-    raise RuntimeError("Use the method models.gramps.gramps_loader.xml_to_neo4j")
-
