@@ -295,7 +295,7 @@ def get_repositories(uniq_id=None):
     │        │        │        │        │        │       │"]]     │        │
     └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
     """
-    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'urls']
+    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'notes']
     repositories = []
     result = Repository.get_w_source(uniq_id)
     for record in result:

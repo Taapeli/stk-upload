@@ -142,9 +142,13 @@ class Name:
         result = Name.get_personnames(None, uniq_id)
         names = []
         for record in result:
-            fn = record['fn']
-            sn = record['sn']
-            pn = record['pn']
+            # <Node id=210189 labels={'Name'} 
+            #    properties={'firstname': 'Jan Erik', 'type': 'Birth Name', 
+            #        'suffix': 'Jansson', 'surname': 'Mannerheim', 'order': 0}>
+            node = record['name']
+            fn = node['firstname']
+            sn = node['surname']
+            pn = node['suffix']
             names.append("{} {} {}".format(fn, pn, sn))
         return ' • '.join(names)
 
