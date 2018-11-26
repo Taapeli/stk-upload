@@ -27,7 +27,7 @@ from models.gen.source import Source
 from models.gen.repository import Repository
 
 from models.loadfile import status_update
-from models.dataupdater import set_confidence_value, set_person_refnames
+from models.dataupdater import set_confidence_value, calculate_person_properties
 import shareds
 
 
@@ -109,7 +109,10 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
         # Set person confidence values 
         #TODO: Only for imported persons (now for all persons!)
         set_confidence_value(handler.tx, batch_logger=handler.blog)
-        # Set Refname links (for imported persons)
+        # Set properties (for imported persons)
+        #    - Refname links
+        #    - Person lifetime
+        #    - Confidence values
         handler.set_refnames()
         
         handler.blog.complete(handler.tx)
@@ -175,7 +178,7 @@ def pick_url(src):
         Returns (text, url), where the url is removed from text
     '''
     #TODO: Jos url päättyy merkkeihin '").,' ne tulee poistaa ja siirrää end-tekstiin
-    #TODO: Pitäsikö varautua siihen että teksti sisältää monta url:ia?
+    #TODO: Pitäsikö varautua siihen että tekstikenttä sisältää monta url:ia?
 
     match = re.search("(?P<url>https?://[^\s'\"]+)", src)
     url = None
@@ -548,10 +551,11 @@ class DOM_handler():
         t0 = time.time()
         counter = 0
 
-        # Print detail of each person
+        # Get details of each person
         for person in people:
 
             p = Person_gramps()
+            name_order = 0
 
             if person.hasAttribute("handle"):
                 p.handle = person.getAttribute("handle")
@@ -573,6 +577,9 @@ class DOM_handler():
                 for i in range(len(person.getElementsByTagName('name') )):
                     person_name = person.getElementsByTagName('name')[i]
                     pname = Name()
+                    pname.order = name_order
+                    name_order += 1
+
                     if person_name.hasAttribute("alt"):
                         pname.alt = person_name.getAttribute("alt")
                     if person_name.hasAttribute("type"):
@@ -857,7 +864,10 @@ class DOM_handler():
 
 
     def set_refnames(self):
-        ''' Add links from each Person to Refnames '''
+        ''' * Add links from each Person to Refnames 
+            #TODO Set Person.sortname
+            #TODO Set estimated lifetime to Person
+        '''
 
         print ("***** {} Refnames *****".format(len(self.uniq_ids)))
         t0 = time.time()
@@ -865,7 +875,7 @@ class DOM_handler():
 
         for p_id in self.uniq_ids:
             if p_id != None:
-                set_person_refnames(self, p_id)
+                calculate_person_properties(self, p_id, ops=['refname'])
 
         self.blog.log_event({'title':"Created Refname references", 
                              'count':self.namecount, 'elapsed':time.time()-t0,

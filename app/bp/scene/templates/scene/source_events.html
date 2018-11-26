@@ -3,7 +3,9 @@
 {% block title %}{{ _('Events of a Source') }}{% endblock %}
 {% block body %}
 {{ super() }}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+    crossorigin="anonymous">
 {% import '/scene/macros.html' as macro %}
 
 <h2>{{ _('Events of a Source') }}</h2>
@@ -28,20 +30,11 @@
 	        		    <td class="Citation"><div title="{{c.confidence|transl("conf")}} {{ _('confidence') }} ({{c.confidence}})"
                         {% if c.confidence and c.confidence < "2" %}
                         style="color:red"{% endif %}>
-	   					Sivu {{c.page}}
-                        {% set conf = c.confidence | int %}
-                        {% if conf < 2 %}
-                            {% if conf == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
-                            {% else %}<i class='fa fa-exclamation-circle'></i>{% endif %}
-                        {% else %}
-                            {% if conf == 2 %}<i class='fa fa-star-o'></i>
-                            {% elif conf == 3  %}<i class='fa fa-star'></i><i class='fa fa-star'></i>
-                            {% elif conf == 4 %}<i class='fa fa-star'></i><i class='fa fa-star'></i><i class='fa fa-star'></i>
-                            {% endif %}
-                        {% endif %}
+	   					Sivu {{c.page}} {{ macro.stars(c.confidence|float) }}
+                        {% set conf = c.confidence | int %} 
                         <!-- /li -->
 
-	               		<ol type="a">
+	               		<ol type="a" style="color:black">
 	               		{% for cite in c.citators|sort(attribute='date') %}
 		               		<li><!-- {# if cite.label == 'Person' #}
                             <a href="/scene/person={{cite.uniq_id}}" class="id"

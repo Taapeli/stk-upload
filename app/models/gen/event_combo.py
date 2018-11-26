@@ -65,7 +65,7 @@ class Event_combo(Event):
     def get_event_combo(self):
         """ Read this event with uniq_id's of related Place, Note, and Citation
             nodes.
-            #TODO: Luetaan Notes ja Citations vasta get_persondata_by_id() lopuksi
+            #TODO: Tulisi lukea Notes ja Citations vasta get_persondata_by_id() lopuksi
 
             Luetaan tapahtuman tiedot 
         """

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-11-18 18:38+0200\n"
+"POT-Creation-Date: 2018-11-26 16:01+0200\n"
 "PO-Revision-Date: 2018-07-04 17:11+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: sv\n"
@@ -86,10 +86,8 @@ msgstr ""
 msgid "    Child ({}): {} / {} *{}"
 msgstr ""
 
-#: bp/stk_security/templates/login_user.html:4
 #: bp/stk_security/templates/security/_menu.html:10
 #: bp/stk_security/templates/security/login_user.html:4 setups.py:146
-#: templates/security/_menu.html:10 templates/security/login_user.html:4
 msgid "Login"
 msgstr ""
 
@@ -106,7 +104,6 @@ msgid "Terms of use"
 msgstr ""
 
 #: bp/stk_security/templates/security/_menu.html:5 setups.py:154
-#: templates/security/_menu.html:5
 msgid "Register"
 msgstr ""
 
@@ -347,9 +344,8 @@ msgid "Administrator"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:10
-#: bp/stk_security/templates/login_user.html:10
 #: bp/stk_security/templates/security/login_user.html:10
-#: templates/mainindex.html:11 templates/security/login_user.html:10
+#: templates/mainindex.html:11
 msgid "Welcome to Finland Database"
 msgstr ""
 
@@ -362,9 +358,8 @@ msgid "roles:"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:13
-#: bp/stk_security/templates/login_user.html:11
 #: bp/stk_security/templates/security/login_user.html:11
-#: templates/mainindex.html:14 templates/security/login_user.html:11
+#: templates/mainindex.html:14
 msgid "Git Application Version"
 msgstr ""
 
@@ -446,7 +441,7 @@ msgid "<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered
 msgstr ""
 
 #: bp/admin/templates/admin/allowed_emails.html:55
-#: templates/del_table_users.html:32 templates/ng_table_repositories.html:28
+#: templates/_ng_table_repositories.html:28 templates/del_table_users.html:32
 #: templates/table_media.html:30 templates/table_of_data.html:34
 #: templates/table_of_data.html:37 templates/table_of_objects.html:34
 #: templates/table_of_objects.html:37 templates/table_people_by_surname.html:29
@@ -463,7 +458,7 @@ msgstr ""
 #: bp/scene/templates/scene/locations.html:34
 #: bp/scene/templates/scene/persons.html:109
 #: bp/scene/templates/scene/sources.html:39 templates/a_layout.html:22
-#: templates/ladattu2.html:10 templates/tables.html:42
+#: templates/ladattu2.html:10 templates/tables.html:47
 #: templates/virhe_lataus.html:20
 msgid "Back to Top"
 msgstr ""
@@ -485,16 +480,17 @@ msgstr ""
 msgid "Admin-Start Page"
 msgstr ""
 
-#: bp/admin/templates/admin/list_users.html:3 templates/del_table_users.html:3
+#: bp/admin/templates/admin/list_users.html:3
+#: templates/_ng_table_repositories.html:3 templates/del_table_users.html:3
 #: templates/ladattu2.html:3 templates/ng_compare.html:3
 #: templates/ng_people_by_surname.html:3 templates/ng_same_birthday.html:3
 #: templates/ng_same_deathday.html:3 templates/ng_same_name.html:3
-#: templates/ng_same_person.html:3 templates/ng_table_repositories.html:3
-#: templates/table_baptism_data.html:3 templates/table_families_by_id.html:3
-#: templates/table_media.html:3 templates/table_of_data.html:3
-#: templates/table_of_objects.html:3 templates/table_people_by_surname.html:3
-#: templates/table_person_by_id.html:3 templates/table_persons2.html:3
-#: templates/table_sources.html:3 templates/table_surnames.html:3
+#: templates/ng_same_person.html:3 templates/table_baptism_data.html:3
+#: templates/table_families_by_id.html:3 templates/table_media.html:3
+#: templates/table_of_data.html:3 templates/table_of_objects.html:3
+#: templates/table_people_by_surname.html:3 templates/table_person_by_id.html:3
+#: templates/table_persons2.html:3 templates/table_sources.html:3
+#: templates/table_surnames.html:3
 msgid "Database Information"
 msgstr ""
 
@@ -578,7 +574,7 @@ msgstr ""
 msgid "Listings"
 msgstr ""
 
-#: bp/admin/templates/admin/reference.html:34 templates/tables.html:25
+#: bp/admin/templates/admin/reference.html:34 templates/tables.html:22
 msgid "List reference names"
 msgstr ""
 
@@ -603,7 +599,7 @@ msgid "Ending the session"
 msgstr ""
 
 #: bp/admin/templates/admin/reference.html:47 templates/mainindex.html:107
-#: templates/tables.html:45
+#: templates/tables.html:50
 msgid "Exit the Application"
 msgstr ""
 
@@ -1145,7 +1141,7 @@ msgid "The Genealogical Society of Finland"
 msgstr ""
 
 #: bp/scene/templates/scene/locations.html:3
-#: bp/scene/templates/scene/macros.html:52 templates/tables.html:24
+#: bp/scene/templates/scene/macros.html:52 templates/tables.html:21
 msgid "Places"
 msgstr ""
 
@@ -1238,8 +1234,8 @@ msgstr ""
 
 #: bp/scene/templates/scene/macros.html:71
 #: bp/scene/templates/scene/persons.html:114
-#: bp/scene/templates/scene/source_events.html:48
-#: bp/scene/templates/scene/source_events.html:56
+#: bp/scene/templates/scene/source_events.html:41
+#: bp/scene/templates/scene/source_events.html:49
 #, python-format
 msgid "see details of person %(id)s"
 msgstr ""
@@ -1452,7 +1448,7 @@ msgid "see details of source %(id)s"
 msgstr ""
 
 #: bp/scene/templates/scene/person.html:298
-#: bp/scene/templates/scene/source_events.html:28
+#: bp/scene/templates/scene/source_events.html:30
 msgid "confidence"
 msgstr ""
 
@@ -1467,7 +1463,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/person_pg.html:41
 #: bp/scene/templates/scene/person_pg.html:90
-#: bp/scene/templates/scene/source_events.html:13
+#: bp/scene/templates/scene/source_events.html:15
 #: bp/scene/templates/scene/sources.html:27
 #: bp/scene/templates/scene/sources.html:47 templates/source_citations.html:8
 #: templates/table_refnames_1.html:28
@@ -1570,9 +1566,8 @@ msgid "Persons carrying a Name"
 msgstr ""
 
 #: bp/scene/templates/scene/persons.html:13
-#: bp/stk_security/templates/login_user.html:21
 #: bp/stk_security/templates/security/login_user.html:21
-#: templates/security/login_user.html:21 templates/table_refnames.html:32
+#: templates/table_refnames.html:32
 msgid "Persons"
 msgstr ""
 
@@ -1628,7 +1623,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/persons.html:100
 #: bp/scene/templates/scene/place_events.html:107
-#: bp/scene/templates/scene/source_events.html:54 templates/person2.html:8
+#: bp/scene/templates/scene/source_events.html:47 templates/person2.html:8
 msgid "Person"
 msgstr ""
 
@@ -1702,23 +1697,23 @@ msgid "No source pointers found"
 msgstr ""
 
 #: bp/scene/templates/scene/source_events.html:3
-#: bp/scene/templates/scene/source_events.html:9
+#: bp/scene/templates/scene/source_events.html:11
 msgid "Events of a Source"
 msgstr ""
 
-#: bp/scene/templates/scene/source_events.html:15
+#: bp/scene/templates/scene/source_events.html:17
 msgid "Source References and Events"
 msgstr ""
 
-#: bp/scene/templates/scene/source_events.html:20
+#: bp/scene/templates/scene/source_events.html:22
 msgid "Source and references"
 msgstr ""
 
-#: bp/scene/templates/scene/source_events.html:50
+#: bp/scene/templates/scene/source_events.html:43
 msgid "Family Member's"
 msgstr ""
 
-#: bp/scene/templates/scene/source_events.html:54
+#: bp/scene/templates/scene/source_events.html:47
 msgid "Of person"
 msgstr ""
 
@@ -1767,101 +1762,75 @@ msgstr ""
 msgid "Repository Name"
 msgstr ""
 
-#: bp/stk_security/templates/login_user.html:17
-#: bp/stk_security/templates/security/login_user.html:17
-#: templates/security/login_user.html:17
-msgid "Discover materials in Suomi Database Service"
-msgstr ""
-
-#: bp/stk_security/templates/login_user.html:18
-#: bp/stk_security/templates/security/login_user.html:18
-#: templates/security/login_user.html:18
-msgid "View our materials with limited rights"
-msgstr ""
-
-#: bp/stk_security/templates/login_user.html:24
-#: bp/stk_security/templates/security/login_user.html:24
-#: templates/security/login_user.html:24
-msgid "Enroll as user candidate in Suomi tietokanta Service"
-msgstr ""
-
-#: bp/stk_security/templates/login_user.html:27
-#: bp/stk_security/templates/security/login_user.html:27
-#: templates/security/login_user.html:27
-msgid "Enroll"
-msgstr ""
-
-#: bp/stk_security/templates/login_user.html:36
-msgid "Login with your credentials (email or username)"
-msgstr ""
-
-#: bp/stk_security/templates/login_user.html:53
-#: templates/security/login_user.html:53
-#: templates/security/register_user.html:38
-msgid "Approved user's actions"
-msgstr ""
-
 #: bp/stk_security/templates/security/_menu.html:2
-#: templates/security/_menu.html:2
 msgid "Menu"
 msgstr ""
 
 #: bp/stk_security/templates/security/_menu.html:8
-#: templates/security/_menu.html:8
 msgid "Confirm account"
 msgstr ""
 
 #: bp/stk_security/templates/security/_menu.html:12
-#: templates/security/_menu.html:12
 msgid "Forgot password"
 msgstr ""
 
 #: bp/stk_security/templates/security/forgot_password.html:5
-#: templates/security/forgot_password.html:5
 msgid "Reset of Password"
 msgstr ""
 
 #: bp/stk_security/templates/security/forgot_password.html:11
-#: templates/security/forgot_password.html:11
 msgid "Send password recovery link"
 msgstr ""
 
+#: bp/stk_security/templates/security/login_user.html:17
+msgid "Discover materials in Suomi Database Service"
+msgstr ""
+
+#: bp/stk_security/templates/security/login_user.html:18
+msgid "View our materials with limited rights"
+msgstr ""
+
+#: bp/stk_security/templates/security/login_user.html:24
+msgid "Enroll as user candidate in Suomi tietokanta Service"
+msgstr ""
+
+#: bp/stk_security/templates/security/login_user.html:27
+msgid "Enroll"
+msgstr ""
+
 #: bp/stk_security/templates/security/login_user.html:36
-#: templates/security/login_user.html:36
 msgid "Login with your credentialst (email or username)"
 msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:53
-#: bp/stk_security/templates/security/register_user.html:38
-msgid "I approve user actions"
+msgid "Approved user's actions"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:4
-#: templates/security/register_user.html:4
 msgid "Registration"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:11
-#: templates/security/register_user.html:11
 msgid "Fill in the User Information Form of Finland database Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:15
-#: templates/security/register_user.html:15
-msgid "Register  as a database user of Suomi tietokanta Service"
+msgid "Register  as a database user of Finland database Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:30
-msgid "Read and accept < a href = \"static/Conditionsofuse. html\" > Terms of use"
+msgid "Read and accept <a href = \"static/Conditionsofuse. html\" > Terms of use"
+msgstr ""
+
+#: bp/stk_security/templates/security/register_user.html:38
+msgid "I approve user actions"
 msgstr ""
 
 #: bp/stk_security/templates/security/send_confirmation.html:5
-#: templates/security/send_confirmation.html:5
 msgid "Verifying registration"
 msgstr ""
 
 #: bp/stk_security/templates/security/send_confirmation.html:11
-#: templates/security/send_confirmation.html:11
 msgid "Submit Validation Link"
 msgstr ""
 
@@ -1904,6 +1873,14 @@ msgstr ""
 
 #: models/datareader.py:584
 msgid "Showing sources without a repository"
+msgstr ""
+
+#: templates/_ng_table_repositories.html:10
+msgid "List of Repositories"
+msgstr ""
+
+#: templates/_ng_table_repositories.html:11
+msgid "Showing repositories"
 msgstr ""
 
 #: templates/a_layout.html:32
@@ -2104,14 +2081,6 @@ msgstr ""
 
 #: templates/ng_same_name.html:12
 msgid "All/Same Birth date"
-msgstr ""
-
-#: templates/ng_table_repositories.html:10
-msgid "List of Repositories"
-msgstr ""
-
-#: templates/ng_table_repositories.html:11
-msgid "Showing repositories"
 msgstr ""
 
 #: templates/person2.html:29
@@ -2514,54 +2483,58 @@ msgid "List of sources (references on the source page)"
 msgstr ""
 
 #: templates/tables.html:20
-msgid "Find people with the same name"
-msgstr ""
-
-#: templates/tables.html:21
-msgid "Find people with the same birth date"
-msgstr ""
-
-#: templates/tables.html:22
-msgid "Find people with the same date of death"
-msgstr ""
-
-#: templates/tables.html:23
 msgid "Comments"
 msgstr ""
 
+#: templates/tables.html:26
+msgid "Find possible doubles"
+msgstr ""
+
+#: templates/tables.html:28
+msgid "Find people with the same name"
+msgstr ""
+
 #: templates/tables.html:29
-msgid "Problem Solving Tools"
+msgid "Find people with the same birth date"
 msgstr ""
 
-#: templates/tables.html:31
-msgid "Persons without birth event"
-msgstr ""
-
-#: templates/tables.html:32
-msgid "Senior Citizens, Top twenty"
-msgstr ""
-
-#: templates/tables.html:33
-msgid "Events without place information"
+#: templates/tables.html:30
+msgid "Find people with the same date of death"
 msgstr ""
 
 #: templates/tables.html:34
-msgid "Unreferenced sources"
-msgstr ""
-
-#: templates/tables.html:35
-msgid "Sources without a repository"
+msgid "Problem Solving Tools"
 msgstr ""
 
 #: templates/tables.html:36
-msgid "Unreferenced Events"
+msgid "Persons without birth event"
+msgstr ""
+
+#: templates/tables.html:37
+msgid "Senior Citizens, Top twenty"
+msgstr ""
+
+#: templates/tables.html:38
+msgid "Events without place information"
+msgstr ""
+
+#: templates/tables.html:39
+msgid "Unreferenced sources"
+msgstr ""
+
+#: templates/tables.html:40
+msgid "Sources without a repository"
 msgstr ""
 
 #: templates/tables.html:41
+msgid "Unreferenced Events"
+msgstr ""
+
+#: templates/tables.html:46
 msgid "Exit"
 msgstr ""
 
-#: templates/tables.html:42
+#: templates/tables.html:47
 msgid "or end session"
 msgstr ""
 
@@ -2777,5 +2750,17 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Download your material in gedcom format or edit an already stored"
+#~ msgstr ""
+
+#~ msgid "Login with your credentials (email or username)"
+#~ msgstr ""
+
+#~ msgid "Register  as a database user of Suomi tietokanta Service"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Read and accept < a href = "
+#~ "\"static/Conditionsofuse. html\" > Terms of"
+#~ " use"
 #~ msgstr ""
 

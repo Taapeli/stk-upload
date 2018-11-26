@@ -3,8 +3,9 @@
     - Person and her Names
     - related Events and Places
     
-    Note. Use Person_combo.from_node(node) to create a Person_combo instance
-          ( defined as classmethod Person.from_node() )
+    Note. Use classmethod models.gen.person.Person.from_node(node) to create 
+        a Person_combo instance from a db node
+        or models.gen.person_combo.Person_combo.__init__() for empty instance
 
     class gen.person_combo.Person_combo(Person): 
         - __init__()
@@ -22,7 +23,6 @@
         - get_all_notes(self)           Tallettaa liittyvät Notes (ja web-viittaukset)
         - get_family_members (uniq_id)  Luetaan liittyvät Names, Families and Events
         - get_refnames(pid)             Luetaan liittyvät Refnames
-        - set_estimated_dates()         Aseta est_birth ja est_death
         # save(self, username, tx)      see: bp.gramps.models.person_gramps.Person_gramps.save
 
     Not in use or obsolete:
@@ -40,6 +40,7 @@
         - print_compared_data(self, comp_person, print_out=True) 
                                         Tulostaa kahden henkilön tiedot vieretysten
 
+        # set_estimated_dates()         Aseta est_birth ja est_death
         - save()  see: bp.gramps.models.person_gramps.Person_gramps.save
 
 
@@ -55,10 +56,10 @@ import shareds
 
 from .person import Person
 from .person_name import Name
-from .cypher import Cypher_person
+from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
-from .note import Note
+#from .note import Note
 #from .weburl import Weburl
 #from models.cypher_gramps import Cypher_person_w_handle
 
@@ -66,19 +67,18 @@ class Person_combo(Person):
     """ Henkilö
     
         From Person.__init__(): 
-            uniq_id, handle, id, priv, gender, confidence, change
+            uniq_id, handle, id, priv, gender, confidence, lifetime, change
+            Obsolete: #est_birth, #est_death
 
         Other properties:
             names[]:
-               alt             str muun nimen nro
+               order           int index of name variations; number 0 is default name
+               #alt            str muun nimen nro
                type            str nimen tyyppi
                firstname       str etunimi
-               #refname        str referenssinimi (entinen toteutus)
                surname         str sukunimi
                suffix          str patronyymi
             confidence         str tietojen luotettavuus
-            est_birth          str arvioitu syntymäaika
-            est_death          str arvioitu kuolinaika
 
         The indexes of referred objects are in variables:
             eventref_hlink[]   int tapahtuman uniq_id, rooli 
@@ -255,7 +255,7 @@ RETURN ID(family) AS uniq_id"""
 MATCH (person:Person)-[r:NAME]->(name:Name)
   WHERE ID(person)=$pid
 RETURN person, name
-  ORDER BY name.alt"""
+  ORDER BY name.order"""
         person_result = shareds.driver.session().run(query, {"pid": pid})
         self.id = None
 
@@ -272,7 +272,7 @@ RETURN person, name
 
             if len(person_record["name"]) > 0:
                 pname = Name()
-                pname.alt = person_record["name"]['alt']
+                pname.order = person_record["name"]['order']
                 pname.type = person_record["name"]['type']
                 pname.firstname = person_record["name"]['firstname']
 #                 pname.refname = person_record["name"]['refname']
@@ -756,51 +756,12 @@ with r, e, pl
 
     @staticmethod
     def get_family_members (uniq_id):
-        """ Read the Names, Families and Events connected to this Person.
+        """ Read the Families and member names connected to given Person
             for '/scene/person=<string:uniq_id>'
         """
-        query="""
-MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name) 
-    WHERE ID(p) = $id
-  OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
-    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
-         TYPE(r1) AS role,
-         m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
-         n.alt AS alt, n.type AS ntype, n.firstname AS fn, n.surname AS sn, n.suffix AS sx,
-         [birth.datetype, birth.date1, birth.date2] AS birth_date
-    ORDER BY n.alt
-    RETURN family_id, f_uniq_id, role, 
-           m_id, uniq_id, gender, birth_date,
-           COLLECT([alt, ntype, fn, sn, sx]) AS names
-    ORDER BY family_id, role, birth_date
-UNION
-MATCH (p:Person) <-[r2]- (f:Family) 
-    WHERE id(p) = $id
-  OPTIONAL MATCH (p) -[:EVENT]-> (birth {type:'Birth'})
-    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
-           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, 
-           [birth.datetype, birth.date1, birth.date2] AS birth_date,
-           [] AS names"""
 
-# ╒═══════════╤═══════════╤════════╤═══════╤═════════╤════════╤═══════════════╤═══════════════╕
-# │"family_id"│"f_uniq_id"│"role"  │"m_id" │"uniq_id"│"gender"│"birth_date"   │"names"        │
-# ╞═══════════╪═══════════╪════════╪═══════╪═════════╪════════╪═══════════════╪═══════════════╡
-# │"F0281"    │100163     │"FATHER"│"I0769"│77654    │"M"     │[0,1836070,1836│[["","Also Know│
-# │           │           │        │       │         │        │070]           │n As","Matts","│
-# │           │           │        │       │         │        │               │Lindlöf",""],["│
-# │           │           │        │       │         │        │               │1","Birth Name"│
-# │           │           │        │       │         │        │               │,"Mattias","","│
-# │           │           │        │       │         │        │               │Abrahamsson"]] │
-# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼───────────────┼───────────────┤
-# │"F0281"    │100163     │"MOTHER"│"I0775"│76526    │"F"     │[0,1846276,1846│[["","Birth Nam│
-# │           │           │        │       │         │        │276]           │e","Anna Stina"│
-# │           │           │        │       │         │        │               │,"","Jacobsdott│
-# │           │           │        │       │         │        │               │er"]]          │
-# ├───────────┼───────────┼────────┼───────┼─────────┼────────┼───────────────┼───────────────┤
-# │"F0281"    │100163     │"CHILD" │"I1069"│72104    │"F"     │""             │[]             │
-# └───────────┴───────────┴────────┴───────┴─────────┴────────┴───────────────┴───────────────┘
-
-        return shareds.driver.session().run(query, id=int(uniq_id))
+        return shareds.driver.session().run(Cypher_family.get_persons_family_members, 
+                                            pid=int(uniq_id))
 
 
     @staticmethod
@@ -838,12 +799,6 @@ with distinct x
         return shareds.driver.session().run(query, pids=pid_list)
 
 # Unused methods:
-#     def key(self):
-#         "Hakuavain tuplahenkilöiden löytämiseksi sisäänluvussa"
-#         key = "{}:{}:{}:{}".format(self.name.firstname, self.name.last,
-#               self.occupation, self.place)
-#         return key
-#
 #     def join_events(self, events, kind=None):
 #         """
 #         Päähenkilöön self yhdistetään tapahtumat listalta events.
@@ -909,7 +864,7 @@ with distinct x
 
             names = self.names
             for pname in names:
-                alt1.append(pname.alt)
+                alt1.append(pname.order)
                 type1.append(pname.type)
                 first1.append(pname.firstname)
 #                 refname1.append(pname.refname)
@@ -918,7 +873,7 @@ with distinct x
 
             names2 = comp_person.names
             for pname in names2:
-                alt2.append(pname.alt)
+                alt2.append(pname.order)
                 type2.append(pname.type)
                 first2.append(pname.firstname)
 #                 refname2.append(pname.refname)
@@ -956,6 +911,10 @@ with distinct x
 
     @staticmethod
     def set_estimated_dates():
+        #TODO: Do not use: these fields do not exsist any more
+        print("Virhe (Person.save:Person_combo.set_estimated_dates): not done", 
+              file=stderr)
+        return "No dates set"
         # Set est_birth
         try:
             dtype = 'Birth'
@@ -1014,7 +973,7 @@ SET n.est_death = m.daterange_start"""
 
             names = self.names
             for pname in names:
-                alt1.append(pname.alt)
+                alt1.append(pname.order)
                 type1.append(pname.type)
                 first1.append(pname.firstname)
 #                 refname1.append(pname.refname)
@@ -1023,7 +982,7 @@ SET n.est_death = m.daterange_start"""
 
             names2 = comp_person.names
             for pname in names2:
-                alt2.append(pname.alt)
+                alt2.append(pname.order)
                 type2.append(pname.type)
                 first2.append(pname.firstname)
 #                 refname2.append(pname.refname)
