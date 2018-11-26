@@ -125,7 +125,7 @@ def background_load_to_neo4j(username,filename):
         msg += "\n"
         for step in steps:
             msg += "\n{}".format(step)
-        open(logname,"w").write(msg)
+        open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
                     "Stk: Gramps XML file loaded",
                     msg )
@@ -136,7 +136,7 @@ def background_load_to_neo4j(username,filename):
         msg = "{}:\nLoading of file {} from user {} to neo4j FAILED".format(util.format_timestamp(),pathname,username)
         msg += "\nLog file: {}".format(logname)
         msg += "\n" + res
-        open(logname,"w").write(msg)
+        open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
                     "Stk: Gramps XML file load FAILED",
                     msg )

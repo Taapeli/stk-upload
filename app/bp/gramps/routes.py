@@ -65,7 +65,7 @@ def upload_gramps():
                         upload_time=time.time())
         msg = "{}: User {} uploaded the file {}".format(
             util.format_timestamp(),current_user.username,pathname)
-        open(logname,"w").write(msg)
+        open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
                     "Stk: Gramps XML file uploaded",
                     msg )
