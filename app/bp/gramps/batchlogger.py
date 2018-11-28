@@ -22,7 +22,6 @@ class Batch(object):
     '''
     Creates a log of userid bach steps.
     append()  Adds a log event to log
-    save() Stores the log to database #TODO
     list() Gets the log contenst objects 
     '''
 

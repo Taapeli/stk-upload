@@ -45,7 +45,7 @@
 
     Not in use or obsolete:
     - from models.gen.person_combo.Person_combo(Person)
-        - set_estimated_dates()         Aseta est_birth ja est_death - Obsolete
+        - set_estimated_life()          Aseta est_birth ja est_death - Obsolete
     - from models.datareader.get_person_data_by_id 
       (returns list: person, events, photos, sources, families)
         - get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)

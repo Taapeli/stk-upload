@@ -40,7 +40,7 @@
         - print_compared_data(self, comp_person, print_out=True) 
                                         Tulostaa kahden henkilön tiedot vieretysten
 
-        # set_estimated_dates()         Aseta est_birth ja est_death
+        # set_estimated_life()          Aseta est_birth ja est_death
         - save()  see: bp.gramps.models.person_gramps.Person_gramps.save
 
 
@@ -910,41 +910,30 @@ with distinct x
 
 
     @staticmethod
-    def set_estimated_dates():
-        #TODO: Do not use: these fields do not exsist any more
-        print("Virhe (Person.save:Person_combo.set_estimated_dates): not done", 
-              file=stderr)
-        return "No dates set"
-        # Set est_birth
-        try:
-            dtype = 'Birth'
-            query = """
-MATCH (n:Person)-[r:EVENT]->(m:Event)
-    WHERE m.type=$type
-SET r.type =$type
-SET n.est_birth = m.daterange_start"""
-            result = shareds.driver.session().run(query,
-               {"type": dtype})
-            counters = result.consume().counters
-            msg = "Muutettu {} est_birth-tietoa".format(counters.properties_set)
-        except Exception as err:
-            print("Virhe (Person.save:est_birth): {0}".format(err), file=stderr)
+    def set_estimated_lives(uids=[]):
+        """ Sets an estimated lifietime in Person.lifetime
+            (in Person node properties: datetype, date1, and date2)
 
-        # Set est_birth
+            The argument 'uids' is a list of uniq_ids of Person nodes.
+
+            Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+        """
         try:
-            dtype = 'Death'
-            query = """
-MATCH (n:Person)-[r:EVENT]->(m:Event)
-    WHERE m.type=$type
-SET r.type =$type
-SET n.est_death = m.daterange_start"""
-            result = shareds.driver.session().run(query,
-               {"type": dtype})
-            counters = result.consume().counters
-            msg = msg + " ja {} est_death-tietoa.".format(counters.properties_set)
-            return msg
+            if not uids:
+                result = shareds.driver.session().run(Cypher_person.set_est_lifetimes_all)
+            else:
+                if isinstance(uids, int):
+                    uids = [uids]
+                result = shareds.driver.session().run(Cypher_person.set_est_lifetimes, 
+                                                      idlist=uids)
         except Exception as err:
-            print("Virhe (Person.save:est_death): {0}".format(err), file=stderr)
+            print("Virhe (Person_combo.save:set_estimated_lives): {0}".format(err), file=stderr)
+            return 0
+
+        counters = result.consume().counters
+        pers_count = int(counters.properties_set/3)
+        print("Estimated lifetime for {} persons".format(pers_count))
+        return pers_count
 
 
     def print_compared_data(self, comp_person, print_out=True):

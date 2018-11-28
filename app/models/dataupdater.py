@@ -4,6 +4,7 @@
 
 import logging
 import time
+from flask_babelex import _
 
 from bp.gramps.batchlogger import Batch
 from models.gen.user import User
@@ -44,16 +45,22 @@ def set_confidence_value(tx, uniq_id=None, batch_logger=None):
     return
 
 
-def set_estimated_dates(batch_logger=None):
-    """ Asettaa henkilölle arvioidut syntymä- ja kuolinajat
+def set_estimated_dates(uid=None, batch_logger=None):
+    """ Sets an estimated lifietime in Person.lifetime
+        (in Person node properties datetype, date1, and date2)
+        Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
     """
     t0 = time.time()
         
-    msg = Person_combo.set_estimated_dates()
+    cnt = Person_combo.set_estimated_lives(uid)
+    msg = _("Estimated {} person lifetimes").format(cnt)
                         
     if isinstance(batch_logger, Batch):
-        batch_logger.log_event({'title':"Estimated birth and death dates set. " + msg, 
+        batch_logger.log_event({'title':_("Estimated person lifetimes"), "count":cnt, 
                                 'elapsed':time.time()-t0})
+    else:
+        print(msg)
+
     return msg
 
 
@@ -69,6 +76,7 @@ def calculate_person_properties(handler=None, uniq_id=None, ops=['refname'], bat
     refname_count = 0
 #     confidence_count = 0
 #     do_confidence = 'confidence' in ops
+#     do_lifetime = 'lifetime' in ops
     do_refnames = 'refname' in ops
     do_sortname = 'sortname' in ops
     t0 = time.time()

@@ -53,12 +53,13 @@ def clear_db(opt):
 
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
 @bp.route('/admin/set/estimated_dates')
+@bp.route('/admin/set/estimated_dates/<int:uid>')
 @roles_required('admin')
-def aseta_estimated_dates():
+def set_estimated_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    dburi = dbutil.get_server_location()
-    message = dataupdater.set_estimated_dates()
-    return render_template("/admin/talletettu.html", text=message, uri=dburi)
+    message = dataupdater.set_estimated_dates(uid)
+    ext = _("estimated lifetime")
+    return render_template("/admin/talletettu.html", text=message, info=ext)
 
 # Refnames homa page
 @bp.route('/admin/refnames')

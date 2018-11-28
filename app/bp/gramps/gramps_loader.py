@@ -19,7 +19,8 @@ from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person_name import Name
-#from models.gen.weburl import Weburl
+from models.gen.person_combo import Person_combo
+
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.citation import Citation
@@ -110,11 +111,13 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
         #TODO: Only for imported persons (now for all persons!)
         set_confidence_value(handler.tx, batch_logger=handler.blog)
         # Set properties (for imported persons)
-        #    - Refname links
+        #    + Refname links
+        #    ? Person sortname
         #    - Person lifetime
         #    - Confidence values
         handler.set_refnames()
-        
+        handler.set_estimated_dates()
+
         handler.blog.complete(handler.tx)
         handler.commit()
 
@@ -866,7 +869,6 @@ class DOM_handler():
     def set_refnames(self):
         ''' * Add links from each Person to Refnames 
             #TODO Set Person.sortname
-            #TODO Set estimated lifetime to Person
         '''
 
         print ("***** {} Refnames *****".format(len(self.uniq_ids)))
@@ -879,6 +881,19 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Created Refname references", 
                              'count':self.namecount, 'elapsed':time.time()-t0,
+                             'percent':1})
+
+
+    def set_estimated_dates(self):
+        ''' Sets estimated lifetime for each Person processed in handle_people
+        '''
+        print ("***** {} Estimated lifetimes *****".format(len(self.uniq_ids)))
+        t0 = time.time()
+
+        cnt = Person_combo.set_estimated_lives(self.uniq_ids)
+                            
+        self.blog.log_event({'title':"Estimated person lifetimes", 
+                             'count':cnt, 'elapsed':time.time()-t0,
                              'percent':1})
 
 

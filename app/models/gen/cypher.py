@@ -110,7 +110,6 @@ SET person.confidence=$confidence"""
 MATCH (person:Person) WHERE ID(person) IN $idlist
 SET person.sortname=$key"""
 
-# Todo: not in use
     set_est_lifetimes = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event)
     WHERE id(p) IN $idlist
@@ -118,7 +117,15 @@ WITH p, collect(e) AS events,
     max(e.date2) AS dmax, min(e.date1) AS dmin
 WHERE NOT (dmax IS NULL OR dmin IS NULL)
     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
-RETURN p, events"""
+RETURN null"""
+
+    set_est_lifetimes_all = """
+MATCH (p:Person) -[r:EVENT]-> (e:Event)
+WITH p, collect(e) AS events, 
+    max(e.date2) AS dmax, min(e.date1) AS dmin
+WHERE NOT (dmax IS NULL OR dmin IS NULL)
+    SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
+RETURN null"""
 
     get_w_names_notes = """
 MATCH (person:Person) -[r:NAME]-> (name:Name)
