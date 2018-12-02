@@ -44,23 +44,23 @@ def set_confidence_value(tx, uniq_id=None, batch_logger=None):
                                 'count':counter, 'elapsed':time.time()-t0})
     return
 
-
-def set_estimated_dates(uid=None, batch_logger=None):
+def set_estimated_dates(uids=None):
     """ Sets an estimated lifietime in Person.lifetime
-        (in Person node properties datetype, date1, and date2)
-        Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
-    """
-    t0 = time.time()
-        
-    cnt = Person_combo.set_estimated_lives(uid)
-    msg = _("Estimated {} person lifetimes").format(cnt)
-                        
-    if isinstance(batch_logger, Batch):
-        batch_logger.log_event({'title':_("Estimated person lifetimes"), "count":cnt, 
-                                'elapsed':time.time()-t0})
-    else:
-        print(msg)
+        (the properties in Person node are datetype, date1, and date2)
 
+        With transaction, see gramps_loader.DOM_handler.set_estimated_dates_tr
+
+        Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+
+        Called from bp.admin.routes.estimate_dates
+    """
+    my_tx = User.beginTransaction()
+
+    cnt = Person_combo.estimate_lifetimes(my_tx, uids)
+
+    msg = _("Estimated {} person lifetimes").format(cnt)
+    User.endTransaction(my_tx)
+    
     return msg
 
 
@@ -93,7 +93,6 @@ def calculate_person_properties(handler=None, uniq_id=None, ops=['refname'], bat
         #    properties={'firstname': 'Jan Erik', 'suffix': 'Jansson', 
         #        'type': 'Birth Name', 'surname': 'Mannerheim', 'order': 0}
         # >  >
-
         pid = record['pid']
         node = record['name']
         name = Name.from_node(node)
@@ -121,22 +120,22 @@ def calculate_person_properties(handler=None, uniq_id=None, ops=['refname'], bat
             Person.set_sortname(my_tx, uniq_id, name)
             sortname_count += 1
 
-        # ===   [NOT!] Report status for each name    ====
-        if False:
-            rnames = []
-            recs = Person_combo.get_refnames(pid)
-            for rec in recs:
-                # ╒══════════════════════════╤═════════════════════╕
-                # │"a"                       │"li"                 │
-                # ╞══════════════════════════╪═════════════════════╡
-                # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
-                # │":"Messu- ja kalenteri"}  │                     │
-                # └──────────────────────────┴─────────────────────┘        
- 
-                name = rec['a']
-                link = rec['li'][0]
-                rnames.append("{} ({})".format(name['name'], link['use']))
-            logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
+#         # ===   [NOT!] Report status for each name    ====
+#         if False:
+#             rnames = []
+#             recs = Person_combo.get_refnames(pid)
+#             for rec in recs:
+#                 # ╒══════════════════════════╤═════════════════════╕
+#                 # │"a"                       │"li"                 │
+#                 # ╞══════════════════════════╪═════════════════════╡
+#                 # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
+#                 # │":"Messu- ja kalenteri"}  │                     │
+#                 # └──────────────────────────┴─────────────────────┘        
+#  
+#                 name = rec['a']
+#                 link = rec['li'][0]
+#                 rnames.append("{} ({})".format(name['name'], link['use']))
+#             logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
     
     if handler == None or handler.tx == None:
         # End my own created transformation

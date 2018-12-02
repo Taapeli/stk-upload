@@ -7,11 +7,12 @@ class Cypher():
         #TODO add submission time for all SUBMITTED with ON MATCH SET and ON CREATE SET
     """
 
-    user_find = '''
-MATCH (user:User) 
-    WHERE user.username = $username_or_email
-       OR user.email = $username_or_email 
-RETURN user'''
+# Not in use
+#     user_find = '''
+# MATCH (user:User) 
+#     WHERE user.username = $username_or_email
+#        OR user.email = $username_or_email 
+# RETURN user'''
 
     username_find = '''
 MATCH (user:User)

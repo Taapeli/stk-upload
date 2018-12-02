@@ -910,24 +910,26 @@ with distinct x
 
 
     @staticmethod
-    def set_estimated_lives(uids=[]):
+    def estimate_lifetimes(tx, uids=[]):
         """ Sets an estimated lifietime in Person.lifetime
             (in Person node properties: datetype, date1, and date2)
 
             The argument 'uids' is a list of uniq_ids of Person nodes.
 
             Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+            
+            Called from bp.gramps.gramps_loader.DOM_handler.set_estimated_dates_tr
+            and models.dataupdater.set_estimated_dates
         """
         try:
             if not uids:
-                result = shareds.driver.session().run(Cypher_person.set_est_lifetimes_all)
+                result = tx.run(Cypher_person.set_est_lifetimes_all)
             else:
                 if isinstance(uids, int):
                     uids = [uids]
-                result = shareds.driver.session().run(Cypher_person.set_est_lifetimes, 
-                                                      idlist=uids)
+                result = tx.run(Cypher_person.set_est_lifetimes, idlist=uids)
         except Exception as err:
-            print("Virhe (Person_combo.save:set_estimated_lives): {0}".format(err), file=stderr)
+            print("Virhe (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
             return 0
 
         counters = result.consume().counters

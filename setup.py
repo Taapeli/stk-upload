@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup (
        name='stk_server',
-       version='0.1',
+       version='0.2',
        packages=find_packages(),
 
        # Declare your packages' dependencies here, for eg:

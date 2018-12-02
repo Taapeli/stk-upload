@@ -55,9 +55,9 @@ def clear_db(opt):
 @bp.route('/admin/set/estimated_dates')
 @bp.route('/admin/set/estimated_dates/<int:uid>')
 @roles_required('admin')
-def set_estimated_dates(uid=None):
+def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    message = dataupdater.set_estimated_dates(uid)
+    message = dataupdater.set_estimated_dates(list(uid))
     ext = _("estimated lifetime")
     return render_template("/admin/talletettu.html", text=message, info=ext)
 
@@ -202,7 +202,8 @@ def list_uploads(username):
 @login_required
 @roles_accepted('admin', 'audit')
 def start_load_to_neo4j(username,xmlname):
-    upload_list = uploads.initiate_background_load_to_neo4j(username,xmlname) 
+    uploads.initiate_background_load_to_neo4j(username,xmlname)
+    flash(_('Data import from {} to database has been started.'.format(xmlname)), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
 @bp.route('/admin/list_threads', methods=['GET'])
