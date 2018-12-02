@@ -11,7 +11,7 @@ from os.path import basename, splitext
 from .xml_dom_handler import DOM_handler
 from .batchlogger import Batch, Log
 from models.loadfile import status_update
-from models.dataupdater import set_confidence_value
+from models.dataupdater import set_confidence_values
 import shareds
 
 
@@ -92,14 +92,14 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
 
         # Set person confidence values 
         #TODO: Only for imported persons (now for all persons!)
-        set_confidence_value(handler.tx, batch_logger=handler.blog)
+        set_confidence_values(handler.tx, batch_logger=handler.blog)
         # Set properties (for imported persons)
         #    + Refname links
         #    ? Person sortname
-        #    - Person lifetime
+        #    + Person lifetime
         #    - Confidence values
-        handler.set_refnames()
-        handler.set_estimated_dates_tr()
+        handler.set_sortname_refnames()
+        handler.set_estimated_dates()
 
         handler.blog.complete(handler.tx)
         handler.commit()

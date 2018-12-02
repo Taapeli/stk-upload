@@ -84,6 +84,9 @@ class Person_gramps(Person):
         """ Saves the Person object and possibly the Names, Events ja Citations
 
             On return, the self.uniq_id is set
+            
+            @todo: Remove those referenced person names, which are not among
+                   new names (:Person) --> (:Name) 
         """
 
         today = str(datetime.date.today())

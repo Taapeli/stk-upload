@@ -9,16 +9,21 @@
     <ol id="itemlist">
         <li class="itemrow">
                 <div class="col1">{{ _('Identifier') }}</div>
-                <div class="col2">{{p.uniq_id}}</div>
+                <div class="col2"><span class="id">{{p.uniq_id}}</span></div>
+        </li>
+    {% for name in p.names|sort(attribute='order') %}
+        <li class="itemrow">
+                <div class="col1">{{ _('Name') }} {{name.order}}</div>
+                <div class="col2">{{name.firstname}} <b>{{name.surname}}</b></div>
+        </li>
+    {% endfor %}
+        <li class="itemrow">
+                <div class="col1">{{ _('Sort name') }}</div>
+                <div class="col2"><span class="id">{{p.sortname}}</span></div>
         </li>
         <li class="itemrow">
-                <div class="col1">{{ _('Name') }}</div>
-                <div class="col2">{{p.names[0].firstname}} <b>{{p.names[0].surname}}</b></div>
-        </li>
-        <li class="itemrow">
-                <div class="col1">{{ _('Reference name') }}</div>
-                <!-- TODO Korjaa: refname-kenttää ei ole -->
-                <div class="col2">{{p.names[0].refname}}</div>
+                <div class="col1">{{ _('Db handle') }}</div>
+                <div class="col2"><span class="handle">{{p.handle}}</span></div>
         </li>
      </ol>
     {% if p.events %}
@@ -27,8 +32,8 @@
         {% for e in p.events %}
         <li><div class="itemrow">
                 <div class="col1">{{ _('Identifier < br/> Type < br/> Date </div>') }}
-                <div class="col1"><span class="id">{{e.uniq_id}}</span><br />{{e.type}} 
-                    <br /><span style="font-size:80%; font-style: italic">{{e.date}}</span>
+                <div class="col1"><span class="id">{{e.uniq_id}}</span><br>{{e.type}} 
+                    <br><small>{{e.dates}}</small>
             </div>
         </li>
         {% endfor %}

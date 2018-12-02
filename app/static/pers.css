@@ -88,6 +88,11 @@ table, th, td {
 	width: 100%;
 }
 .id { color: sienna; text-align: right; }
+.handle {
+	font-family: Courier, monospace;
+    font-size: 80%;
+    color: sienna;
+ }
 .typevar { font-size: 80%; font-style: italic;
     text-align: center;
 }

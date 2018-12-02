@@ -46,26 +46,16 @@ class Cypher_person():
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-RETURN person, name,
+RETURN person, COLLECT(DISTINCT name) as names,
     COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [r.role, event, place.pname]) AS events"""
-#     _get_events_tail = """
-#  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
-#  OPTIONAL MATCH (event) -[:EVENT]-> (place:Place)
-#  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-# RETURN ID(person) AS uniq_id, person.id as id, person.confidence AS confidence,
-#     person.est_birth AS est_birth, person.est_death AS est_death,
-#     name.firstname AS firstname, name.surname AS surname,
-#     name.suffix AS suffix, name.type as ntype,
-#     COLLECT(DISTINCT refn.name) AS refnames,
-#     COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
-#         event.date1, event.date2, place.pname, event.role]) AS events"""
+#  2.12.2018 20.47 (14:48)
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
-    ORDER BY TOUPPER(name.surname), name.firstname"""
+    ORDER BY TOUPPER(names[0].surname), names[0].firstname"""
     _get_events_firstname = """, LEFT(name.firstname,1) as initial 
-    ORDER BY TOUPPER(name.firstname), name.surname, name.suffix"""
+    ORDER BY TOUPPER(names[0].firstname), names[0].surname, names[0].suffix"""
     _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
-    ORDER BY TOUPPER(name.suffix), name.surname, name.firstname"""
+    ORDER BY TOUPPER(names[0].suffix), names[0].surname, names[0].firstname"""
 
     get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
         + _get_events_tail + _get_events_surname
@@ -107,7 +97,7 @@ MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
     set_sortname = """
-MATCH (person:Person) WHERE ID(person) IN $idlist
+MATCH (person:Person) WHERE ID(person) = $id
 SET person.sortname=$key"""
 
     set_est_lifetimes = """

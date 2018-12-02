@@ -146,10 +146,9 @@ class Person:
         """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
             using given default Name node
         """
-        # Person.set_sortname(name.key_surname())
+
         key = namenode.key_surname()
-        return tx.run(Cypher_person.set_sortname,
-                      id=uniq_id, key=key)
+        return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
         
     @staticmethod
     def get_confidence (uniq_id=None):

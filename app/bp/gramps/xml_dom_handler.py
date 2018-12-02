@@ -27,7 +27,7 @@ from models.gen.citation import Citation
 from models.gen.source import Source
 from models.gen.repository import Repository
 
-from models.dataupdater import calculate_person_properties  #  set_confidence_value
+from models.dataupdater import set_person_name_properties
 
 
 def pick_url(src):
@@ -718,27 +718,31 @@ class DOM_handler():
                              'elapsed':time.time()-t0, 'percent':1})
 
 
-    def set_refnames(self):
-        ''' * Add links from each Person to Refnames 
-            #TODO Set Person.sortname
+    def set_sortname_refnames(self):
+        ''' Add links from each Person to Refnames and set Person.sortname
         '''
 
-        print ("***** {} Refnames *****".format(len(self.uniq_ids)))
+        print ("***** {} Refnames & sortnames *****".format(len(self.uniq_ids)))
         t0 = time.time()
-        self.namecount = 0
+        refname_count = 0
+        sortname_count = 0
 
         for p_id in self.uniq_ids:
             if p_id != None:
-                calculate_person_properties(handler=self, uniq_id=p_id, ops=['refname'])
+                rc, sc = set_person_name_properties(tx=self.tx, uniq_id=p_id)
+                refname_count += rc
+                sortname_count += sc
 
-        self.blog.log_event({'title':"Created Refname references", 
-                             'count':self.namecount, 'elapsed':time.time()-t0,
-                             'percent':1})
+        self.blog.log_event({'title':"Refname references", 
+                                'count':refname_count, 'elapsed':time.time()-t0})
+        self.blog.log_event({'title':"Sorting names", 'count':sortname_count})
 
 
-    def set_estimated_dates_tr(self):
+    def set_estimated_dates(self):
         ''' Sets estimated lifetime for each Person processed in handle_people
             in transaction
+            
+            Called from bp.gramps.gramps_loader.xml_to_neo4j
         '''
         print ("***** {} Estimated lifetimes *****".format(len(self.uniq_ids)))
         t0 = time.time()

@@ -47,21 +47,15 @@
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi> & Juha Mäkeläinen
 '''
 
-#import datetime
 from sys import stderr
-#import logging
 
 import shareds
-#import models.dbutil
-
 from .person import Person
 from .person_name import Name
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
-#from .note import Note
-#from .weburl import Weburl
-#from models.cypher_gramps import Cypher_person_w_handle
+
 
 class Person_combo(Person):
     """ Henkilö
@@ -662,7 +656,8 @@ RETURN n.id, k.firstname, k.surname,
             print("Virhe-get_events_k: {1} {0}".format(err, keys), file=stderr)
 
 
-    def set_my_places(self, cleartext_list=False):
+    # Not in use!
+    def get_my_places(self, cleartext_list=False):
         ''' Finds all Places with their Place_names
             which are connected to any personal Events
             and stores them in self.places list
@@ -911,14 +906,15 @@ with distinct x
 
     @staticmethod
     def estimate_lifetimes(tx, uids=[]):
-        """ Sets an estimated lifietime in Person.lifetime
-            (in Person node properties: datetype, date1, and date2)
+        """ Sets an estimated lifietime to Person.lifetime
+            and store it as Person properties: datetype, date1, and date2
 
-            The argument 'uids' is a list of uniq_ids of Person nodes.
+            The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
+            sets all lifetimes.
 
             Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
             
-            Called from bp.gramps.gramps_loader.DOM_handler.set_estimated_dates_tr
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
             and models.dataupdater.set_estimated_dates
         """
         try:

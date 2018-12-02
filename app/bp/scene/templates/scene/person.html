@@ -30,8 +30,8 @@
                     <td class="ColumnAttribute">{{ _('Tags') }}</td>
                     <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                 </tr>
-                {% for pname in person.names %}<tr>
-                    <td class="ColumnAttribute">{{pname.type|transl('nt')}}</td>
+                {% for pname in person.names|sort(attribute='order')  %}<tr>
+                    <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <span title="{{ _('Firstname') }}">{{pname.firstname}}</span>
