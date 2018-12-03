@@ -13,8 +13,8 @@
         </li>
     {% for name in p.names|sort(attribute='order') %}
         <li class="itemrow">
-                <div class="col1">{{ _('Name') }} {{name.order}}</div>
-                <div class="col2">{{name.firstname}} <b>{{name.surname}}</b></div>
+                <div class="col1">{{ _('Name') }} {{name.order + 1}}</div>
+                <div class="col2">{{name.firstname}} <i>{{name.prefix}}</i> <b>{{name.surname}}</b></div>
         </li>
     {% endfor %}
         <li class="itemrow">

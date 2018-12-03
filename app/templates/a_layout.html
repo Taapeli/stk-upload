@@ -29,6 +29,9 @@
     <div class="fullclear"></div>
     <div id="footer">
         <span id="createdate">{{ _("Stk-server") }} &nbsp;
+        {% if elapsed %}
+        <tt style="font-size:8pt;color:maroon;">time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
         <small style="font-size: 6pt">{{ _('Version') }} {{ 'app'|app_date }}</small></span>
     <div class="fullclear"></div>
 

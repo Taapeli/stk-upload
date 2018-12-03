@@ -5,6 +5,7 @@ Created on 12.8.2018
 '''
 import logging 
 logger = logging.getLogger('stkserver')
+import time
 
 from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
@@ -38,6 +39,7 @@ def show_persons_restricted(selection=None):
 @bp.route('/scene/persons', methods=['POST', 'GET'])
 def show_person_list(selection=None):
     """ Show list of selected Persons for menu(0) """
+    t0 = time.time()
     if request.method == 'POST':
         try:
             # Selection from search form
@@ -46,7 +48,7 @@ def show_person_list(selection=None):
             keys = (rule, name)
             persons = read_persons_with_events(keys)
             return render_template("/scene/persons.html", persons=persons, menuno=0,
-                                   name=name, rule=keys)
+                                   name=name, rule=keys, elapsed=time.time()-t0)
         except Exception as e:
             logger.debug("Error {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
@@ -61,7 +63,7 @@ def show_person_list(selection=None):
         keys = ('surname',)
     persons = [] #datareader.read_persons_with_events(keys)
     return render_template("/scene/persons.html", persons=persons,
-                           menuno=0, rule=keys)
+                           menuno=0, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons/ref=<string:refname>')
 @bp.route('/scene/persons/ref=<string:refname>/<opt>')
@@ -91,6 +93,7 @@ def show_all_persons_list(opt=''):
         with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
         TODO Should have restriction by owner's UserProfile 
     """
+    t0 = time.time()
     keys = ('all',)
     if current_user.is_authenticated:
         user=current_user.username
@@ -102,7 +105,7 @@ def show_all_persons_list(opt=''):
     else: order = 0             # surname
     persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           order=order,rule=keys)
+                           order=order,rule=keys, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/<int:uid>')
@@ -126,6 +129,7 @@ def show_a_person_w_apoc(uid):
     """ One Person with all connected nodes
         Korvaamaan metodin show_person_page()
     """
+    t0 = time.time()
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
 
@@ -143,8 +147,8 @@ def show_a_person_w_apoc(uid):
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
-    return render_template("/scene/person_pg.html", 
-                           person=person, obj=objs, marks=marks, menuno=1)
+    return render_template("/scene/person_pg.html", person=person, obj=objs, 
+                           marks=marks, menuno=1, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person=<int:uniq_id>')
@@ -152,6 +156,7 @@ def show_a_person_w_apoc(uid):
 def show_person_page(uniq_id):
     """ Full homepage for a Person in database (vanhempi versio)
     """
+    t0 = time.time()
     try:
         person, events, photos, citations, families = get_person_data_by_id(uniq_id)
         for f in families:
@@ -169,7 +174,8 @@ def show_person_page(uniq_id):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/person.html", person=person, events=events, 
-                           photos=photos, citations=citations, families=families)
+                           photos=photos, citations=citations, families=families, 
+                           elapsed=time.time()-t0)
 
 # ------------------------------ Menu 4: Places --------------------------------
 
@@ -177,6 +183,7 @@ def show_person_page(uniq_id):
 def show_locations():
     """ List of Places for menu(4)
     """
+    t0 = time.time()
     try:
         # 'locations' has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
@@ -185,7 +192,8 @@ def show_locations():
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
 #         print ("# {} ".format(p))
-    return render_template("/scene/locations.html", locations=locations)
+    return render_template("/scene/locations.html", locations=locations, 
+                           elapsed=time.time()-t0)
 
 
 @bp.route('/scene/location=<int:locid>')

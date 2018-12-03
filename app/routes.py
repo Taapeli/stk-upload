@@ -7,6 +7,7 @@ import urllib
 
 import logging 
 logger = logging.getLogger('stkserver')
+import time
 
 from flask import render_template, request, redirect, url_for, flash 
 from flask_security import login_required, roles_accepted, current_user # ,roles_required
@@ -68,72 +69,73 @@ def show_table_data(subj):
     """ Person listings
         tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
     """
+    t0 = time.time()
 #     if subj == "henkilot":
 #         dburi = models.dbutil.get_server_location()
 #         persons = datareader.lue_henkilot()
 #         return render_template("table_persons.html", persons=persons, uri=dburi)
     if subj == "henkilot2":
         persons = datareader.read_persons_with_events()
-        return render_template("table_persons2.html", persons=persons)
+        return render_template("table_persons2.html", persons=persons, elapsed=time.time()-t0)
     elif subj == "surnames":
         surnames = Name.get_surnames()
-        return render_template("table_surnames.html", surnames=surnames)
+        return render_template("table_surnames.html", surnames=surnames, elapsed=time.time()-t0)
     elif subj == 'events_wo_cites':
         headings, titles, lists = datareader.read_events_wo_cites()
         return render_template("table_of_data.html",
-               headings=headings, titles=titles, lists=lists)
+               headings=headings, titles=titles, lists=lists, elapsed=time.time()-t0)
     elif subj == 'events_wo_place':
         headings, titles, lists = datareader.read_events_wo_place()
         return render_template("table_of_data.html",
-               headings=headings, titles=titles, lists=lists)
+               headings=headings, titles=titles, lists=lists, elapsed=time.time()-t0)
     elif subj == 'notes':
         titles, objs = datareader.get_note_list()
         return render_template("table_of_objects.html",
                                headings=(_('Note List'), _('Note Items')),
-                               titles=titles, objs=objs)
+                               titles=titles, objs=objs, elapsed=time.time()-t0)
     elif subj == 'media':
         media = datareader.read_medias()
         return render_template("table_media.html",
-                               media=media)
+                               media=media, elapsed=time.time()-t0)
     elif subj == 'people_wo_birth':
         headings, titles, lists = datareader.read_people_wo_birth()
         return render_template("table_of_data.html",
-               headings=headings, titles=titles, lists=lists)
+               headings=headings, titles=titles, lists=lists, elapsed=time.time()-t0)
     elif subj == 'old_people_top':
         headings, titles, lists = datareader.read_old_people_top()
         return render_template("table_of_data.html",
-               headings=headings, titles=titles, lists=lists)
+               headings=headings, titles=titles, lists=lists, elapsed=time.time()-t0)
     elif subj == 'repositories':
         titles, obj = datareader.get_repositories()
 #         for r in obj:
 #             r.type = jinja_filters.translate(r.type, 'rept', 'fi')
         return render_template("table_of_objects.html",
                                headings=(_('Repositories'), _('Repository data')),
-                               titles=titles, objs=obj)
+                               titles=titles, objs=obj, elapsed=time.time()-t0)
     elif subj == 'same_birthday':
         ids = datareader.read_same_birthday()
-        return render_template("ng_same_person.html", subj=subj, ids=ids)
+        return render_template("ng_same_person.html", subj=subj, ids=ids, elapsed=time.time()-t0)
     elif subj == 'same_deathday':
         ids = datareader.read_same_deathday()
-        return render_template("ng_same_person.html", subj=subj, ids=ids)
+        return render_template("ng_same_person.html", subj=subj, ids=ids, elapsed=time.time()-t0)
     elif subj == 'same_name':
         ids = datareader.read_same_name()
-        return render_template("ng_same_name.html", ids=ids)
+        return render_template("ng_same_name.html", ids=ids, elapsed=time.time()-t0)
     elif subj == 'sources':
         sources = datareader.read_sources()
-        return render_template("table_sources.html", sources=sources)
+        return render_template("table_sources.html", sources=sources, elapsed=time.time()-t0)
     elif subj == 'sources_wo_cites':
         headings, titles, lists = datareader.read_sources_wo_cites()
         return render_template("table_of_data.html", headings=headings,
-                               titles=titles, lists=lists)
+                               titles=titles, lists=lists, elapsed=time.time()-t0)
     elif subj == 'sources_wo_repository':
         headings, titles, lists = datareader.read_sources_wo_repository()
         return render_template("table_of_data.html",
-               headings=headings, titles=titles, lists=lists)
+               headings=headings, titles=titles, lists=lists, elapsed=time.time()-t0)
     elif subj == 'places':
         headings, titles, lists = datareader.read_places()
         return render_template("table_of_data.html", headings=headings,
-                               titles=titles, lists=lists)
+                               titles=titles, lists=lists, elapsed=time.time()-t0)
     else:
         return redirect(url_for('virhesivu', code=1, text= \
             _('Material type') + " '" + subj + "' "+ _('processing still missing')))

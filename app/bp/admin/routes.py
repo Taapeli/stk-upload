@@ -203,7 +203,7 @@ def list_uploads(username):
 @roles_accepted('admin', 'audit')
 def start_load_to_neo4j(username,xmlname):
     uploads.initiate_background_load_to_neo4j(username,xmlname)
-    flash(_('Data import from {} to database has been started.'.format(xmlname)), 'info')
+    flash(_('Data import from {!r} to database has been started.'.format(xmlname)), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
 @bp.route('/admin/list_threads', methods=['GET'])
