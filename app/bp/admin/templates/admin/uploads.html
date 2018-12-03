@@ -4,7 +4,6 @@
 {% block body %}
     {{ super() }}
     <meta http-equiv="refresh" content="30">
-
     <h2>{{ _("Uploads for user") }} '{{ user }}'</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -26,16 +25,16 @@
 	       <tr>
 	           <td class="msg_INFO">{{upload.upload_time_s}}</td>
 	           <td class="msg_INFO">
-    	           <a href=/admin/xml_download/{{user}}/{{upload.xmlname}}>
-    	               {{upload.xmlname}}</a>
+    	           <a href=/admin/xml_download/{{user}}/{{upload.xmlname | urlencode}}>
+    	               {{upload.xmlname}}</a> 
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}</td>
 	           <td class="msg_INFO">
-	           		<a href=/admin/start_upload/{{user}}/{{upload.xmlname}}>
+	           		<a href=/admin/start_upload/{{user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
-	           		<a href=/admin/show_upload_log/{{user}}/{{upload.xmlname}}>
+	           		<a href=/admin/show_upload_log/{{user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a> |
-	           		<a href=/admin/xml_delete/{{user}}/{{upload.xmlname}}>
+	           		<a href=/admin/xml_delete/{{user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Delete file") }}</a> &nbsp;
 	           	</td>
 	       </tr>
