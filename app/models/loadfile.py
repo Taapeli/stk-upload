@@ -22,7 +22,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def upload_file(infile,folder=None):
+def upload_file(infile,folder=None, secure=False):
     """ Save file 'infile' in the upload folder 
         and return the final full name of the file 
     """
@@ -33,13 +33,15 @@ def upload_file(infile,folder=None):
     except Exception:
         logging.debug('Normalizing file name "' + infile.filename + '" fails')
         raise
-        
-    fullname =  os.path.join(folder, secure_filename(filename))
+    if secure:    
+        fullname =  os.path.join(folder, secure_filename(filename))
+    else:    
+        fullname =  os.path.join(folder, filename)
     infile.save(fullname)
     logging.debug('Tiedosto "' + fullname + '" talletettu')
     return fullname
 
-def normalized_name(in_name):
+def normalized_name(in_name, secure=False):
     """ Tarkastetaan tiedostonimi ja palautetaan täysi polkunimi """
     # Tiedostonimi saatu?
     if not in_name:
@@ -51,14 +53,17 @@ def normalized_name(in_name):
         raise ValueError('Tiedostopääte nimessä "' + in_name + \
               '" pitää olla .gramps .csv .txt tai .xml ')
     # Palautetaan nimi ilman ylimääräisiä hakemistotasoja
-    return secure_filename(in_name)
+    if secure:
+        return secure_filename(in_name)
+    return in_name
 
-def fullname(name):
+def fullname(name, secure=False):
     """ Palauttaa täyden polkunimen """
     if not name:
         return ''
-    else:
+    elif secure:
         return os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(name))
+    return os.path.join(app.config['UPLOAD_FOLDER'], name)
 
 def status_update(status):
     ''' STUB: Store process progress status 0..100 in metadata for display
