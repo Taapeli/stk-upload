@@ -55,7 +55,7 @@ class Event_combo(Event):
         self.citations = []     # For creating display sets
         self.personnames = []   # Person names connected; for creating display
         #self.notes = []         # For creating display sets
-        #self.place = ''         # TODO Change to places[]
+        #self.places = []        # Places of the event (for person list)
 
 
 # @classmethod from_node(cls, node): see evetn.from_node

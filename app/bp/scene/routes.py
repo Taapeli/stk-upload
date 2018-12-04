@@ -4,6 +4,7 @@ Created on 12.8.2018
 @author: jm
 '''
 import logging 
+from models.gen.person_combo import Person_combo
 logger = logging.getLogger('stkserver')
 import time
 
@@ -84,9 +85,10 @@ def show_persons_by_refname(refname, opt=""):
 
 # ------------------------------ Menu 1 Persons --------------------------------
 
+@bp.route('/scene/persons_own/<string:start>')
 @bp.route('/scene/persons_own/')
-#     @login_required
-def show_my_persons(opt=''):
+@login_required
+def show_my_persons(start=''):
     """ List all persons for menu(11)
         Restriction by owner's UserProfile 
     """
@@ -96,8 +98,7 @@ def show_my_persons(opt=''):
         user=current_user.username
     else:
         user=None
-    ref = ('ref' in opt)
-    persons = read_persons_with_events(keys, user=user)
+    persons = Person_combo.read_my_persons_list(user, start, 100)
     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
                            rule=keys, elapsed=time.time()-t0)
 
@@ -113,7 +114,6 @@ def show_my_persons_all(opt=''):
         user=current_user.username
     else:
         user=None
-    ref = ('ref' in opt)
 #     if 'fn' in opt: order = 1   # firstname
 #     elif 'pn' in opt: order = 2 # firstname
 #     else: order = 0             # surname

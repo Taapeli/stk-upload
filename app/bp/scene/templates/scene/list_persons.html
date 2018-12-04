@@ -13,7 +13,7 @@
 
 <!-- Rule = {{rule}} for {{cnt}} persons -->
 
-{{ macro.menu(menuno) }}
+{{ macro.menu(menuno) }}e
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <p id="description">{{ ngettext(
@@ -38,7 +38,7 @@
     {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-        {% for p in persons %}{% set ini = p.names[0].initial|upper %}
+        {% for p in persons %}{% set ini = p.sortname[0]|upper %}
             {% if alpha != ini %}{%set alpha = ini %}
                 <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
             {% endif %}{% endfor %}
@@ -53,7 +53,7 @@
 			</thead>
 			<tbody>
 	    {% for p in persons %}
-	            <tr><td class="ColumnAlpha">{% set ini = p.names[0].initial|upper %}
+	            <tr><td class="ColumnAlpha">{% set ini = p.sortname[0] %}
 	               {% if alpha != ini %}{%set alpha = ini %}
 		               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
 	               {% endif %}</td>
@@ -67,10 +67,8 @@
 		               <small class="idno">[{{p.uniq_id}}</small></a><small class="idno"><a 
 		                href="/scene/person/{{p.uniq_id}}">]</a></small>
 		               {# TODO Remove later test link at ']' #}
-		               {% if p.refnames %}
-		               <br><small class="refname" title="{{ _('Reference names') }}">
-		                  {{ _('Keywords') }}: {{p.refnames}}
-		               {% endif %}
+		               <br><small class="refname" title="{{ _('Sorting name') }}">
+		                  {{p.sortname}}</small>
 	                </div></td>
 
 	              <td class="ColumnEvent">

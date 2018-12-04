@@ -52,6 +52,7 @@ from sys import stderr
 import shareds
 from .person import Person
 from .person_name import Name
+from .event_combo import Event_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
@@ -135,20 +136,78 @@ return path"""
     def get_person_paths_apoc(uniq_id):
         ''' Read a person and paths for all connected nodes
         '''
-        all_nodes_query_w_apoc="""
-MATCH (p:Person) WHERE id(p) = $pid
-CALL apoc.path.subgraphAll(p, {maxLevel:4, 
-        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
-    YIELD nodes, relationships
-RETURN extract(x IN relationships | 
-        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
-        extract(x in nodes | x) as nodelist"""
         try:
-            return  shareds.driver.session().run(all_nodes_query_w_apoc, pid=uniq_id)
+            return  shareds.driver.session().run(Cypher_person.all_nodes_query_w_apoc, 
+                                                 pid=uniq_id)
         except Exception as e:
             print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
             return None
-                
+
+    @staticmethod
+    def read_my_persons_list(user=None, start_name="", limit=100):
+        """ Reads Person Name and Event objects for display.
+            By default, 100 names are got beginning from start_name 
+
+            Returns Person objects, with included Events and Names
+            ordered by Person.sortname
+        """
+        def _read_person_list(user, start_name, limit):
+            """ Read Person data from given start_name 
+            """
+            try:
+                with shareds.driver.session() as session:
+                    result = session.run(Cypher_person.read_my_persons_with_events_from_name,
+                                         user=user, start_name=start_name, limit=limit)
+                    return result        
+            except Exception as e:
+                print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
+                raise      
+
+
+        persons = []
+        result = _read_person_list(user, start_name, limit)
+        for record in result:
+            ''' <Record 
+                    person=<Node id=163281 labels={'Person'} 
+                      properties={'sortname': 'Ahonius##Knut Hjalmar',  
+                        'gender': 'M', 'confidence': '', 'change': 1540719036, 
+                        'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
+                        'priv': 0,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
+                    names=[<Node id=163282 labels={'Name'} 
+                      properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
+                        'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
+                    events=[[
+                        <Node id=169494 labels={'Event'} 
+                            properties={'datetype': 0, 'change': 1540587380, 
+                            'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
+                            'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
+                         None
+                         ]]>
+            '''
+            node = record['person']
+            # The same person is not created again
+            p = Person_combo.from_node(node)
+#             if take_refnames and record['refnames']:
+#                 refnlist = sorted(record['refnames'])
+#                 p.refnames = ", ".join(refnlist)
+            for nnode in record['names']:
+                pname = Name.from_node(nnode)
+                p.names.append(pname)
+    
+            # Events
+    
+            for enode, pname, role in record['events']:
+                if enode:
+                    e = Event_combo.from_node(enode)
+                    e.place = pname or ""
+                    if role and role != "Primary":
+                        e.role = role
+                    p.events.append(e)
+
+            persons.append(p)
+    
+        return (persons)
+
 
     def get_citation_id(self):
         """ Luetaan henkilön viittauksen id """
@@ -536,7 +595,8 @@ RETURN n.id, k.firstname, k.surname,
 
     @staticmethod
     def get_person_combos (keys, currentuser, take_refnames=False, order=0):
-        """ Read Persons with Names, Events, Refnames (reference names) and Places
+        """ Version 0.1
+            Read Persons with Names, Events, Refnames (reference names) and Places
             called from models.datareader.read_persons_with_events
             
             UUSI KORVAAMAAN get_events_k:n
