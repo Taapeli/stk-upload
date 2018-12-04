@@ -4,74 +4,25 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
-{% set ordname = [_('surname'), _('first name'), _('patronymic')] %}
-{% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
 
-{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
+{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }}</h2>
 {% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
 {% else %}<H2>{{ _('Persons') }}</h2>
 {% endif %}
+
 <!-- Rule = {{rule}} for {{cnt}} persons -->
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
-    {% if menuno > 0 %}
-            <p id="description">
-    {{ ngettext(
-    	'Displaying %(num)s person in %(order)s order.', 
-    	'Displaying %(num)s persons in %(order)s order.', 
-    	cnt, order=ordname[order] ) 
-    }}
-    {{ _('If the person has many names, they will appear in the list under each name.') }}
-    <br> 
-    <br> 
-    {{ _("Clicking a name will take you to the selected person's page.")}} 
-      {% if rule[0] == 'all' %}<br>
-    &rtrif; {{ _('Change Order:') }} 
-        {% if order != 0 %}<a href="/scene/persons/all/" 
-            class="inlink">{{ _('Surname') }}</a> /{% endif %}
-        {% if order != 1 %}<a href="/scene/persons/all/fn" 
-            class="inlink">{{ _('First Name') }}</a> /{% endif %}
-        {% if order != 2 %}<a href="/scene/persons/all/pn" 
-            class="inlink">{{ _('Patronymic or Matronymic') }}</a>{% endif %}.
-      {% endif %}
-            </p>
-    {% else %}{% if cnt %}
-            <h3>
-		    {{ ngettext(
-		    	'Showing %(num)s person name', 
-		    	'Showing %(num)s person names', 
-		    	cnt ) 
-		    }}
-            </h3>
-            {% else %}
-            <h3>{{ _('Select people to display') }}</h3>{% endif %}
-			<div id="searching">
-				{% if rule[0] %}{% set selection = rule[0] %}
-				{% else %}{% set selection = "surname" %}{% endif %}
-
-			    <form  action="/scene/persons" method="post">
-                  <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p>
-                  <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
-                    <input type="text" name="name" id="snam" 
-                     {% if name %}value="{{name}}"{% endif %} required>
-                     <br>
-                  <input type="radio" name="rule" id="ssur" value="surname"
-                   {% if selection == "surname" %}checked{% endif %}>
-                    <label for="ssur">{{ _('Surname') }}</label>
-                  <input type="radio" name="rule" id="sfir" value="firstname"
-                   {% if selection == "firstname" %}checked{% endif %}>
-                    <label for="sfir">{{ _('Firstname') }}</label>
-                  <input type="radio" name="rule" id="ssuf" value="patronyme"
-                   {% if selection == "patronyme" %}checked{% endif %}>
-                    <label for="ssuf">{{ _('Patronymic') }}</label>
-				  <input type="submit" value="Hae">
-			    </form>
-
-			</div>
-			{% endif %}
+            <p id="description">{{ ngettext(
+    			'Displaying %(num)s person names.', 
+    			'Displaying %(num)s person names.', cnt) }}
+              {{ _('If the person has alternative names, they will appear in the list under each name.') }}
+    		  <br>&nbsp;<br>
+	   		  {{ _("Clicking a name will take you to the selected person's page.") }} 
+    		</p>
 
 	        {% with messages = get_flashed_messages(with_categories=true) %}
 	          {% if messages %}
@@ -82,10 +33,9 @@
 	            </ul>
 	          {% endif %}
 	        {% endwith %}
-
         </div>
 
-    {% if persons|count > 0 %}
+    {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
         {% for p in persons %}{% set ini = p.names[0].initial|upper %}
@@ -99,7 +49,6 @@
 				<tr><th></th>
 					<th>{{ _('Person') }}</th>
                     <th>{{ _("Person's events") }}</th>
-                    <!-- th>{{ _('Family Events') }}</th -->
 				</tr>
 			</thead>
 			<tbody>
@@ -125,15 +74,13 @@
 	                </div></td>
 
 	              <td class="ColumnEvent">
-	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
+	        {% if p.events is iterable %}<ul>{% for e in p.events|sort(attribute='date') %}
 		              <li><i>{{e.type|transl('evt')}} {{e.description}}</i>
 		              {% if e.dates %}{{e.dates}} {% endif %}
 		              {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
+		    {% else %}<u>See person {{p.events}}</u>
 	        {% endif %}
-	              </td><!-- Perheen tapahtumat tähän?
-                  <td class="ColumnEvent">
-                  </td> -->
 	           </tr>
 	    {% endfor %}
 				</tr>

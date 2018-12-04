@@ -84,11 +84,48 @@ def show_persons_by_refname(refname, opt=""):
 
 # ------------------------------ Menu 1 Persons --------------------------------
 
+@bp.route('/scene/persons_own/')
+#     @login_required
+def show_my_persons(opt=''):
+    """ List all persons for menu(11)
+        Restriction by owner's UserProfile 
+    """
+    t0 = time.time()
+    keys = ('all',)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    ref = ('ref' in opt)
+    persons = read_persons_with_events(keys, user=user)
+    return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
+                           rule=keys, elapsed=time.time()-t0)
+
+@bp.route('/scene/persons_all/')
+#     @login_required
+def show_my_persons_all(opt=''):
+    """ List all persons for menu(12)
+        Both owners and other persons 
+    """
+    t0 = time.time()
+    keys = ('all',)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    ref = ('ref' in opt)
+#     if 'fn' in opt: order = 1   # firstname
+#     elif 'pn' in opt: order = 2 # firstname
+#     else: order = 0             # surname
+    persons = read_persons_with_events(keys, user=user)
+    return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
+                           rule=keys, elapsed=time.time()-t0)
+
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')
 #     @login_required
 def show_all_persons_list(opt=''):
-    """ List all persons for menu(1)
+    """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
         The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
         with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
         TODO Should have restriction by owner's UserProfile 
