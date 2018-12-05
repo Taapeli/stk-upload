@@ -48,7 +48,7 @@ def get_a_person_for_display_apoc(uniq_id, user):
         for node in nodelist:
             # <Node id=80234 labels={'Person'} 
             #    properties={'handle': '_da3b305b54b1481e72a4ac505c5', 'id': 'I17296', 
-            #    'priv': '', 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
+            #    'priv': 1, 'gender': 'F', 'confidence': '2.5', 'change': 1507492602}>
             nodes[node.id] = node
 
         # 3. Store each gen object from nodes of relations as leafs

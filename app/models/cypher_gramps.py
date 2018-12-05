@@ -227,12 +227,6 @@ CREATE (n:Place_name)
 MERGE (p) -[r:NAME]-> (n)
 SET n = $n_attr"""
 
-#     link_weburl = """
-# MATCH (n:Place) WHERE n.handle=$handle
-# CREATE (n) -[wu:WEBURL]-> (url:Weburl
-#                 {priv: {url_priv}, href: {url_href},
-#                  type: {url_type}, description: {url_description}})"""
-
     link_hier = """
 MATCH (n:Place) WHERE n.handle=$handle
 MATCH (m:Place) WHERE m.handle=$hlink

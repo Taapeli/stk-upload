@@ -36,7 +36,7 @@ class Note:
         self.handle = ''
         self.text = ''
         self.change = 0
-        self.priv = 0
+        self.priv = None
         self.url = ''
 
     def __str__(self):
@@ -53,7 +53,8 @@ class Note:
         n.id = node['id'] or ''
         n.handle = node['handle']
         n.change = node['change']
-        n.priv = node['priv'] or ''
+        if 'priv' in node:
+            n.priv = node['priv']
         n.type = node['type'] or ''
         n.text = node['text'] or ''
         n.url = node['url'] or ''

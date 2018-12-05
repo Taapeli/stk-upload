@@ -60,6 +60,15 @@ def pick_url(src):
 
     return (text.rstrip(), url)
 
+def get_priv(dom_obj):
+    ''' Gives priv property value as int, if it is not '0'
+    '''
+    if dom_obj.hasAttribute("priv"):
+        priv = int(dom_obj.getAttribute("priv"))
+        if priv:
+            return priv
+    return None
+
 
 class DOM_handler():
     """ XML DOM elements handler
@@ -67,6 +76,7 @@ class DOM_handler():
         - processes different data groups from given xml file to database
         - collects status log
     """
+
     def __init__(self, infile, current_user):
         """ Set DOM collection and username """
         DOMTree = xml.dom.minidom.parse(open(infile, encoding='utf-8'))
@@ -338,8 +348,7 @@ class DOM_handler():
                 n.change = int(note.getAttribute("change"))
             if note.hasAttribute("id"):
                 n.id = note.getAttribute("id")
-            if note.hasAttribute("priv"):
-                n.priv = note.getAttribute("priv")
+            self.priv = get_priv(note)
             if note.hasAttribute("type"):
                 n.type = note.getAttribute("type")
 
@@ -418,8 +427,7 @@ class DOM_handler():
                 p.change = int(person.getAttribute("change"))
             if person.hasAttribute("id"):
                 p.id = person.getAttribute("id")
-            if person.hasAttribute("priv"):
-                p.priv = person.getAttribute("priv")
+            self.priv = get_priv(person)
 
             if len(person.getElementsByTagName('gender') ) == 1:
                 person_gender = person.getElementsByTagName('gender')[0]
@@ -487,8 +495,7 @@ class DOM_handler():
 
             for person_url in person.getElementsByTagName('url'):
                 n = Note()
-                if person_url.hasAttribute("priv"):
-                    n.priv = int(person_url.getAttribute("priv"))
+                n.priv = get_priv(person_url)
                 if person_url.hasAttribute("href"):
                     n.url = person_url.getAttribute("href")
                 if person_url.hasAttribute("type"):
@@ -579,8 +586,7 @@ class DOM_handler():
 
             for placeobj_url in placeobj.getElementsByTagName('url'):
                 n = Note()
-                if placeobj_url.hasAttribute("priv"):
-                    n.priv = int(placeobj_url.getAttribute("priv"))
+                n.priv = get_priv(placeobj_url)
                 if placeobj_url.hasAttribute("href"):
                     n.url = placeobj_url.getAttribute("href")
                 if placeobj_url.hasAttribute("type"):

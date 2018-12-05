@@ -172,7 +172,7 @@ return path"""
                       properties={'sortname': 'Ahonius##Knut Hjalmar',  
                         'gender': 'M', 'confidence': '', 'change': 1540719036, 
                         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
-                        'priv': 0,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
+                        'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
                     names=[<Node id=163282 labels={'Name'} 
                       properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
                         'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
@@ -315,7 +315,7 @@ RETURN person, name
         for person_record in person_result:
             if self.id == None:
                 self.handle = person_record["person"]['handle']
-                self.change = int(person_record["person"]['change'])  #TODO only temporary int()
+                self.change = person_record["person"]['change']
                 self.id = person_record["person"]['id']
                 self.priv = person_record["person"]['priv']
                 self.gender = person_record["person"]['gender']
@@ -345,7 +345,7 @@ RETURN person, name
         for record in result:
             # <Record person=<Node id=72087 labels={'Person'} 
             #    properties={'handle': '_dd4a3c371f72257f442c1c42759', 'id': 'I1054', 
-            #        'priv': '', 'gender': 'M', 'confidence': '2.0', 'change': 1523278690}> 
+            #        'priv': 1, 'gender': 'M', 'confidence': '2.0', 'change': 1523278690}> 
             #    notes=[] 
             #    names=[<Node id=72088 labels={'Name'} 
             #            properties={'alt': '', 'firstname': 'Anthon', 'type': 'Also Known As', 

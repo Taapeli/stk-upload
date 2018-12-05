@@ -8,7 +8,7 @@
          - uniq_id
          - properties { handle:"_dd2c613026e7528c1a21f78da8a",
                         id:"I0000",
-                        priv:"",
+                        priv:None,
                         gender:"N",
                         confidence:"2.0",
                         sortname:"Floor#Hans-Johansdotter#Katarina",
@@ -98,7 +98,7 @@ class Person:
         self.change = 0
         self.uniq_id = None
         self.id = ''
-        self.priv = 0
+        self.priv = None
         self.gender = ''
         self.confidence = ''
         self.sortname = ''
@@ -122,7 +122,7 @@ class Person:
 
         <Node id=80307 labels={'Person'} 
             properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F', 'change': 1507492602, 
-            'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
+            'handle': '_da692a09bac110d27fa326f0a7', 'priv': 1}>
         '''
         if not obj:
             obj = cls()

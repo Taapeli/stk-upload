@@ -374,7 +374,8 @@ class Family_for_template(Family):
                 #  "change":1536324696}
                 p.handle = rec['handle']
                 p.id = rec['id']
-                p.priv = rec['priv']
+                if 'priv' in rec:
+                    p.priv = rec['priv']
                 p.gender = rec['gender']
                 p.confidence = rec['confidence']
                 p.change = rec['change']
