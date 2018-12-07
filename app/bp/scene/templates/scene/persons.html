@@ -20,14 +20,14 @@
     {% if menuno > 0 %}
             <p id="description">
     {{ ngettext(
-    	'This page contains %(num)s person in %(order)s order.', 
-    	'This page contains %(num)s persons in %(order)s order.', 
+    	'Displaying %(num)s person in %(order)s order.', 
+    	'Displaying %(num)s persons in %(order)s order.', 
     	cnt, order=ordname[order] ) 
     }}
+    {{ _('If the person has many names, they will appear in the list under each name.') }}
     <br> 
     <br> 
     {{ _("Clicking a name will take you to the selected person's page.")}} 
-    {{ _('If the person has many names, they will appear in the list under each name.') }}
       {% if rule[0] == 'all' %}<br>
     &rtrif; {{ _('Change Order:') }} 
         {% if order != 0 %}<a href="/scene/persons/all/" 

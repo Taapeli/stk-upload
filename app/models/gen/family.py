@@ -327,13 +327,14 @@ class Family_for_template(Family):
 
     @staticmethod       
     def get_person_families_w_members(uid):
-        ''' Finds all Families, where Person uid belongs to
+        ''' NOT IN USE!
+            Finds all Families, where Person uid belongs to
             and return them as a Families list
         '''
 # ╒═══════╤══════════╤════════╤═════════════════════╤═════════════════════╕
 # │"f_id" │"rel_type"│"myrole"│"members"            │"names"              │
 # ╞═══════╪══════════╪════════╪═════════════════════╪═════════════════════╡
-# │"F0000"│"Unknown" │"FATHER"│[[72533,"CHILD",     │[[72533,             │
+# │"F0000"│"Married" │"FATHER"│[[72533,"CHILD",     │[[72533,             │
 # │       │          │        │  "CHILD",{"han      │  {"alt":"","fi      │
 # │       │          │        │dle":"_dd2c613026e752│rstname":"Jan Erik","│
 # │       │          │        │8c1a21f78da8a","id":"│type":"Birth Name","s│
@@ -373,23 +374,24 @@ class Family_for_template(Family):
                 #  "change":1536324696}
                 p.handle = rec['handle']
                 p.id = rec['id']
-                p.priv = rec['priv']
+                if 'priv' in rec:
+                    p.priv = rec['priv']
                 p.gender = rec['gender']
                 p.confidence = rec['confidence']
                 p.change = rec['change']
                 # Names
                 order = ""
                 for persid, namerec, namerel in record['names']:
-                    if persid == p.uniq_id and not namerec['alt'] > order:
+                    if persid == p.uniq_id and not namerec['order'] > order:
                         # A name of this family member,
-                        # preferring the one with lowest alt value
+                        # preferring the one with lowest order value
                         n = Name()
                         n.type = namerec['type']
                         n.firstname = namerec['firstname']
                         n.surname = namerec['surname']
                         n.suffix = namerec['suffix']
-                        n.alt = namerec['alt']
-                        order = n.alt
+                        n.order = namerec['order']
+                        order = n.order
                         p.names.append(n)
                         
                 # Members role

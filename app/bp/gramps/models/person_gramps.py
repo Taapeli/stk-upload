@@ -33,7 +33,8 @@ class Person_gramps(Person):
 
         Other properties:
             names[]:
-               alt             str muun nimen nro
+               order           int index of name variations; number 0 is default name
+               #alt            str muun nimen nro
                type            str nimen tyyppi
                firstname       str etunimi
                #refname        str referenssinimi (entinen toteutus)
@@ -83,6 +84,9 @@ class Person_gramps(Person):
         """ Saves the Person object and possibly the Names, Events ja Citations
 
             On return, the self.uniq_id is set
+            
+            @todo: Remove those referenced person names, which are not among
+                   new names (:Person) --> (:Name) 
         """
 
         today = str(datetime.date.today())
@@ -97,8 +101,13 @@ class Person_gramps(Person):
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
-                "gender": self.gender
+                "gender": self.gender,
+                "confidence":self.confidence,
+                "sortname":self.sortname
             }
+            if self.lifetime:
+                p_attr.update(self.lifetime.for_db())
+
             result = tx.run(Cypher_person_w_handle.create_to_batch, 
                             batch_id=batch_id, p_attr=p_attr, date=today)
 #             self.uniq_id = result.single()[0]
@@ -114,18 +123,6 @@ class Person_gramps(Person):
         # Save Name nodes under the Person node
         for name in self.names:
             name.save(tx, self.uniq_id)
-#             try:
-#                 n_attr = {
-#                     "alt": name.alt,
-#                     "type": name.type,
-#                     "firstname": name.firstname,
-#                     "surname": name.surname,
-#                     "suffix": name.suffix
-#                 }
-#                 tx.run(Cypher_person_w_handle.link_name, 
-#                        n_attr=n_attr, p_handle=self.handle)
-#             except Exception as err:
-#                 print("Virhe (Person.save:Name): {0}".format(err), file=stderr)
 
         # Save web urls as Note nodes connected under the Person
         for note in self.notes:

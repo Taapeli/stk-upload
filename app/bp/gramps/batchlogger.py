@@ -22,7 +22,6 @@ class Batch(object):
     '''
     Creates a log of userid bach steps.
     append()  Adds a log event to log
-    save() Stores the log to database #TODO
     list() Gets the log contenst objects 
     '''
 
@@ -127,7 +126,7 @@ class Batch(object):
             raise AttributeError("Batch.append need a Log instance")
 
         self.steps.append(obj)
-        if isinstance(obj, Log) and not obj.elapsed == None:
+        if isinstance(obj, Log) and isinstance(obj.elapsed, float):
             self.totaltime += obj.elapsed
             print("# " + str(obj))
             print('# BatchLogger totaltime={:.6f}'.format(obj.elapsed))

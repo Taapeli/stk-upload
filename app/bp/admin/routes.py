@@ -19,7 +19,7 @@ from flask_security import login_required, roles_accepted, roles_required, curre
 from flask_babelex import _
 
 import shareds
-from setups import User #, Role
+from setups import User, Role
 from models import dbutil, dataupdater, loadfile, datareader
 from .models import DataAdmin, UserAdmin
 from .cvs_refnames import load_refnames
@@ -53,12 +53,13 @@ def clear_db(opt):
 
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
 @bp.route('/admin/set/estimated_dates')
+@bp.route('/admin/set/estimated_dates/<int:uid>')
 @roles_required('admin')
-def aseta_estimated_dates():
+def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    dburi = dbutil.get_server_location()
-    message = dataupdater.set_estimated_dates()
-    return render_template("/admin/talletettu.html", text=message, uri=dburi)
+    message = dataupdater.set_estimated_dates(list(uid))
+    ext = _("estimated lifetime")
+    return render_template("/admin/talletettu.html", text=message, info=ext)
 
 # Refnames homa page
 @bp.route('/admin/refnames')
@@ -72,7 +73,7 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_refnames() or _('Made')
+    message = dataupdater.set_person_name_properties(ops=['refname']) or _('Made')
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 @bp.route('/admin/upload_csv', methods=['POST'])
@@ -201,7 +202,8 @@ def list_uploads(username):
 @login_required
 @roles_accepted('admin', 'audit')
 def start_load_to_neo4j(username,xmlname):
-    upload_list = uploads.initiate_background_load_to_neo4j(username,xmlname) 
+    uploads.initiate_background_load_to_neo4j(username,xmlname)
+    flash(_('Data import from {!r} to database has been started.'.format(xmlname)), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
 @bp.route('/admin/list_threads', methods=['GET'])
@@ -236,7 +238,7 @@ def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
     #result_list = Unpickler(open(fname,"rb")).load()
-    msg = open(fname).read()
+    msg = open(fname, encoding="utf-8").read()
     #return render_template("/admin/load_result.html", batch_events=result_list)
     return render_template("/admin/load_result.html", msg=msg)
 

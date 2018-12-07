@@ -17,6 +17,7 @@ class Name:
 
         Properties:
                 type            str nimen tyyppi
+                order           int name order of Person etc. (from Gramps xml)
                 alt             str muun nimen numero
                 firstname       str etunimi
                 surname         str sukunimi
@@ -26,13 +27,19 @@ class Name:
     def __init__(self, givn='', surn='', suff=''):
         """ Luo uuden name-instanssin """
         self.type = ''
-        self.alt = ''
+        self.alt = ''   #Todo: Should be removed?
+        self.order = None
         self.firstname = givn
         self.surname = surn
         self.suffix = suff
 
     def __str__(self):
+        # Gedcom style key
         return "{}/{}/{}".format(self.firstname, self.surname, self.suffix)
+
+    def key_surname(self):
+        # Standard sort order key "Klick#Jönsdotter#Brita Helena"
+        return "{}#{}#{}".format(self.surname, self.suffix, self.firstname)
 
     @classmethod
     def from_node(cls, node):
@@ -40,7 +47,7 @@ class Name:
         Transforms a db node to an object of type Name
         
         <Node id=80308 labels={'Name'} 
-            properties={'firstname': 'Brita Helena', 'suffix': '', 'alt': '', 
+            properties={'firstname': 'Brita Helena', 'suffix': '', 'order': 0, 
                 'surname': 'Klick', '': 'Birth Name'}>
         '''
         n = cls()
@@ -50,7 +57,7 @@ class Name:
         n.firstname = node['firstname']
         n.suffix = node['suffix']
         n.surname = node['surname']
-        n.alt = node['alt']
+        n.order = node['order']
         return n
 
     def save(self, tx, parent_id=None):
@@ -62,7 +69,7 @@ class Name:
 
         try:
             n_attr = {
-                "alt": self.alt,
+                "order": self.order,
                 "type": self.type,
                 "firstname": self.firstname,
                 "surname": self.surname,
@@ -116,6 +123,7 @@ class Name:
             """.format(userid, refname)
         return shareds.driver.session().run(query)
 
+
     @staticmethod
     def get_people_with_surname(surname):
         """ Etsi kaikki henkilöt, joiden sukunimi on annettu"""
@@ -134,9 +142,13 @@ class Name:
         result = Name.get_personnames(None, uniq_id)
         names = []
         for record in result:
-            fn = record['fn']
-            sn = record['sn']
-            pn = record['pn']
+            # <Node id=210189 labels={'Name'} 
+            #    properties={'firstname': 'Jan Erik', 'type': 'Birth Name', 
+            #        'suffix': 'Jansson', 'surname': 'Mannerheim', 'order': 0}>
+            node = record['name']
+            fn = node['firstname']
+            sn = node['surname']
+            pn = node['suffix']
             names.append("{} {} {}".format(fn, pn, sn))
         return ' • '.join(names)
 

@@ -8,6 +8,9 @@ print('Application instance path: ' + shareds.app.instance_path)
 shareds.app.config.from_object('config')
 shareds.app.config.from_pyfile('config.py')
 
+from bp.stk_security import bp as stk_security_bp
+shareds.app.register_blueprint(stk_security_bp)
+
 from bp.gedcom import bp as gedcom_bp
 shareds.app.register_blueprint(gedcom_bp)
 
@@ -19,8 +22,5 @@ shareds.app.register_blueprint(gramps_bp)
 
 from bp.admin import bp as admin_bp
 shareds.app.register_blueprint(admin_bp)
-
-from bp.stk_security import bp as security_bp
-shareds.app.register_blueprint(security_bp)
 
 import setups

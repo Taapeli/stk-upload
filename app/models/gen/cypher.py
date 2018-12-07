@@ -42,30 +42,75 @@ class Cypher_person():
     '''
     Cypher clases for creating and accessing Places
     '''
+    all_nodes_query_w_apoc="""
+MATCH (p:Person) WHERE id(p) = $pid
+CALL apoc.path.subgraphAll(p, {maxLevel:4, 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
+    YIELD nodes, relationships
+RETURN extract(x IN relationships | 
+        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
+        extract(x in nodes | x) as nodelist"""
+
+# Ver 0.2 Person lists with names and events
+    read_my_persons_with_events_from_name = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
+    WHERE prof.userName = $user AND p.sortname >= $start_name
+WITH p ORDER BY p.sortname LIMIT $limit
+  MATCH (p:Person) -[:NAME]-> (n:Name)
+  WITH p, n ORDER BY p.sortname, n.order
+    OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
+    OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
+RETURN p as person, 
+        collect(distinct n) as names, 
+    collect(distinct [e, pl.pname, rn.role]) as events
+ORDER BY p.sortname"""
+
+#TODO ei säädetty
+    read_all_persons_with_events_from_name = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
+    WHERE prof.userName = $user AND p.sortname >= $start_name
+WITH p ORDER BY p.sortname LIMIT $limit
+  MATCH (p:Person) -[:NAME]-> (n:Name)
+  WITH p, n ORDER BY p.sortname, n.order
+    OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
+    OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
+RETURN p as person, 
+        collect(distinct n) as names, 
+    collect(distinct [e, pl.pname, rn.role]) as events
+ORDER BY p.sortname"""
+
+    read_persons_list_by_refn = """
+MATCH p = (search:Refname) -[:BASENAME*1..3 {use:'surname'}]-> (person:Person)
+WHERE search.name STARTS WITH 'Kottu'
+WITH search, person
+MATCH (person) -[:NAME]-> (name:Name)
+OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
+WITH name, person, COLLECT(DISTINCT refn.name) AS refnames, 
+    TOUPPER(LEFT(name.surname,1)) as initial
+OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
+OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
+RETURN CASE WHEN name.order = 0 THEN id(person) END as id, 
+    name, initial, 
+    person, refnames,
+    CASE WHEN name.order = 0 THEN COLLECT(DISTINCT [r.role, event.id, place.pname])
+    ELSE id(person)
+    END AS events
+ORDER BY TOUPPER(name.surname), name.firstname limit 20"""
+
+# Ver 0.1 different person lists
     _get_events_tail = """
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-RETURN person, name,
+RETURN person, COLLECT(DISTINCT name) as names,
     COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [r.role, event, place.pname]) AS events"""
-#     _get_events_tail = """
-#  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
-#  OPTIONAL MATCH (event) -[:EVENT]-> (place:Place)
-#  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-# RETURN ID(person) AS uniq_id, person.id as id, person.confidence AS confidence,
-#     person.est_birth AS est_birth, person.est_death AS est_death,
-#     name.firstname AS firstname, name.surname AS surname,
-#     name.suffix AS suffix, name.type as ntype,
-#     COLLECT(DISTINCT refn.name) AS refnames,
-#     COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
-#         event.date1, event.date2, place.pname, event.role]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
-    ORDER BY TOUPPER(name.surname), name.firstname"""
+    ORDER BY TOUPPER(names[0].surname), names[0].firstname"""
     _get_events_firstname = """, LEFT(name.firstname,1) as initial 
-    ORDER BY TOUPPER(name.firstname), name.surname, name.suffix"""
+    ORDER BY TOUPPER(names[0].firstname), names[0].surname, names[0].suffix"""
     _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
-    ORDER BY TOUPPER(name.suffix), name.surname, name.firstname"""
+    ORDER BY TOUPPER(names[0].suffix), names[0].surname, names[0].firstname"""
 
     get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
         + _get_events_tail + _get_events_surname
@@ -106,23 +151,45 @@ RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
 MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
+    set_sortname = """
+MATCH (person:Person) WHERE ID(person) = $id
+SET person.sortname=$key"""
+
+    set_est_lifetimes = """
+MATCH (p:Person) -[r:EVENT]-> (e:Event)
+    WHERE id(p) IN $idlist
+WITH p, collect(e) AS events, 
+    max(e.date2) AS dmax, min(e.date1) AS dmin
+WHERE NOT (dmax IS NULL OR dmin IS NULL)
+    SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
+RETURN null"""
+
+    set_est_lifetimes_all = """
+MATCH (p:Person) -[r:EVENT]-> (e:Event)
+WITH p, collect(e) AS events, 
+    max(e.date2) AS dmax, min(e.date1) AS dmin
+WHERE NOT (dmax IS NULL OR dmin IS NULL)
+    SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
+RETURN null"""
+
     get_w_names_notes = """
 MATCH (person:Person) -[r:NAME]-> (name:Name)
   WHERE ID(person)=$pid
 OPTIONAL MATCH (person) -[:NOTE]-> (n:Note)
-  WITH person, name, COLLECT (n) AS notes ORDER BY name.alt
+  WITH person, name, COLLECT (n) AS notes ORDER BY name.order
 RETURN person, notes, COLLECT (name) AS names"""
 
     get_names = """
-MATCH (n)<-[r:NAME]-(p:Person)
-where id(p) = $pid
-RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
-    p.gender AS sex"""
+MATCH (n) <-[r:NAME]- (p:Person)
+    where id(p) = $pid
+RETURN id(p) as pid, n as name
+ORDER BY name.order"""
 
     get_all_persons_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
 RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
-    p.gender AS sex"""
+    p.gender AS sex
+ORDER BY n.order"""
 
 
 class Cypher_name():
@@ -158,6 +225,31 @@ class Cypher_family():
     Cypher clases for creating and accessing Families
     '''
 
+    # from models.gen.person_combo.Person_combo.get_family_members 
+    get_persons_family_members = """
+MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name) 
+    WHERE ID(p) = $pid
+  OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
+    WITH f.id AS family_id, ID(f) AS f_uniq_id, 
+         TYPE(r1) AS role,
+         m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
+         n, [birth.datetype, birth.date1, birth.date2] AS birth_date
+    ORDER BY n.order
+    RETURN family_id, f_uniq_id, role, 
+           m_id, uniq_id, gender, birth_date,
+           COLLECT(n) AS names
+    ORDER BY family_id, role, birth_date
+UNION
+MATCH (p:Person) <-[r2]- (f:Family) 
+    WHERE id(p) = $pid
+  OPTIONAL MATCH (p) -[:EVENT]-> (birth {type:'Birth'})
+    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
+           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, 
+           [birth.datetype, birth.date1, birth.date2] AS birth_date,
+           [] AS names"""
+
+    # from models.gen.family.Family_for_template.get_person_families_w_members
+    # NOT IN USE
     get_members = '''
 match (x) <-[r0]- (f:Family) where id(x) = $pid
 with x, r0, f
@@ -166,8 +258,8 @@ match (f) -[r:FATHER|MOTHER|CHILD]-> (p:Person)
 with x, r0, f, r, p
 match (p) -[rn:NAME]-> (n:Name)
 return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
-    collect([id(p), type(r), p]) as members,
-    collect([id(p), n, rn]) as names'''
+    collect(distinct [id(p), type(r), p]) as members,
+    collect(distinct [id(p), n, rn]) as names'''
 
     get_wedding_couple_names = """
 match (e:Event) <-- (:Family) -[r:FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)

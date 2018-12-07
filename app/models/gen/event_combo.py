@@ -55,7 +55,7 @@ class Event_combo(Event):
         self.citations = []     # For creating display sets
         self.personnames = []   # Person names connected; for creating display
         #self.notes = []         # For creating display sets
-        #self.place = ''         # TODO Change to places[]
+        #self.places = []        # Places of the event (for person list)
 
 
 # @classmethod from_node(cls, node): see evetn.from_node
@@ -65,7 +65,7 @@ class Event_combo(Event):
     def get_event_combo(self):
         """ Read this event with uniq_id's of related Place, Note, and Citation
             nodes.
-            #TODO: Luetaan Notes ja Citations vasta get_persondata_by_id() lopuksi
+            #TODO: Tulisi lukea Notes ja Citations vasta get_persondata_by_id() lopuksi
 
             Luetaan tapahtuman tiedot 
         """
