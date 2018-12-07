@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-04 20:58+0200\n"
+"POT-Creation-Date: 2018-12-07 11:45+0200\n"
 "PO-Revision-Date: 2018-07-04 17:11+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: sv\n"
@@ -420,7 +420,6 @@ msgid "User candidates"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:54
-#: bp/scene/templates/scene/list_persons.html:71
 #: bp/scene/templates/scene/persons.html:122 templates/table_refnames.html:13
 msgid "Reference names"
 msgstr ""
@@ -517,7 +516,7 @@ msgid "mail"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:26
-#: bp/admin/templates/admin/uploads.html:23
+#: bp/admin/templates/admin/uploads.html:22
 #: bp/gramps/templates/gramps/uploads.html:22
 msgid "Operations"
 msgstr ""
@@ -544,7 +543,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/load_result.html:19
 #: bp/admin/templates/admin/update_user.html:41
-#: bp/admin/templates/admin/uploads.html:43
+#: bp/admin/templates/admin/uploads.html:42
 #: bp/gramps/templates/gramps/result.html:27
 #: bp/gramps/templates/gramps/uploads.html:38
 msgid "Return"
@@ -633,34 +632,34 @@ msgstr ""
 msgid "Uploads"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:8
+#: bp/admin/templates/admin/uploads.html:7
 msgid "Uploads for user"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:20
+#: bp/admin/templates/admin/uploads.html:19
 #: bp/gramps/templates/gramps/uploads.html:19
 msgid "Upload time"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:21
+#: bp/admin/templates/admin/uploads.html:20
 #: bp/gramps/templates/gramps/uploads.html:20
 msgid "XML file"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:22
+#: bp/admin/templates/admin/uploads.html:21
 #: bp/gramps/templates/gramps/uploads.html:21
 msgid "Status"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:35
+#: bp/admin/templates/admin/uploads.html:34
 msgid "Store to database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:37
+#: bp/admin/templates/admin/uploads.html:36
 msgid "Show log"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39
+#: bp/admin/templates/admin/uploads.html:38
 msgid "Delete file"
 msgstr ""
 
@@ -1225,12 +1224,11 @@ msgstr ""
 msgid "see details of person %(id)s"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:72
-#: bp/scene/templates/scene/persons.html:123
-msgid "Keywords"
+#: bp/scene/templates/scene/list_persons.html:70
+msgid "Sorting name"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:90
+#: bp/scene/templates/scene/list_persons.html:88
 #: bp/scene/templates/scene/persons.html:143
 msgid "No one found with search keys"
 msgstr ""
@@ -1683,6 +1681,10 @@ msgstr ""
 msgid "Family Events"
 msgstr ""
 
+#: bp/scene/templates/scene/persons.html:123
+msgid "Keywords"
+msgstr ""
+
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:11
 msgid "Place events"
@@ -1859,7 +1861,7 @@ msgid "Register  as a database user of Finland database Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:30
-msgid "Read and accept <a href = \"static/Conditionsofuse. html\" > Terms of use"
+msgid "Read and accept <a href=\"static/termsofuse.html\"> Terms of use</a>"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:38
@@ -2834,4 +2836,10 @@ msgstr ""
 #~ msgid_plural "This page contains %(num)s persons in %(order)s order."
 #~ msgstr[0] ""
 #~ msgstr[1] ""
+
+#~ msgid ""
+#~ "Read and accept <a href = "
+#~ "\"static/Conditionsofuse. html\" > Terms of"
+#~ " use"
+#~ msgstr ""
 

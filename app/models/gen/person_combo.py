@@ -144,7 +144,7 @@ return path"""
             return None
 
     @staticmethod
-    def read_my_persons_list(user=None, start_name="", limit=100):
+    def read_my_persons_list(user=None, show="my", start_name="", limit=100):
         """ Reads Person Name and Event objects for display.
             By default, 100 names are got beginning from start_name 
 
@@ -156,8 +156,12 @@ return path"""
             """
             try:
                 with shareds.driver.session() as session:
-                    result = session.run(Cypher_person.read_my_persons_with_events_from_name,
-                                         user=user, start_name=start_name, limit=limit)
+                    if show == "my":
+                        result = session.run(Cypher_person.read_my_persons_with_events_from_name,
+                                             user=user, start_name=start_name, limit=limit)
+                    elif show == "all":
+                        result = session.run(Cypher_person.read_all_persons_with_events_from_name,
+                                             user=user, start_name=start_name, limit=limit)
                     return result        
             except Exception as e:
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            

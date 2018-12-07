@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-04 20:58+0200\n"
+"POT-Creation-Date: 2018-12-07 11:45+0200\n"
 "PO-Revision-Date: 2018-11-12 09:41+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -422,7 +422,6 @@ msgid "User candidates"
 msgstr "Käyttäjäehdokkaat"
 
 #: bp/admin/templates/admin/admin.html:54
-#: bp/scene/templates/scene/list_persons.html:71
 #: bp/scene/templates/scene/persons.html:122 templates/table_refnames.html:13
 msgid "Reference names"
 msgstr "Referenssinimet"
@@ -519,7 +518,7 @@ msgid "mail"
 msgstr "sähköposti"
 
 #: bp/admin/templates/admin/list_users.html:26
-#: bp/admin/templates/admin/uploads.html:23
+#: bp/admin/templates/admin/uploads.html:22
 #: bp/gramps/templates/gramps/uploads.html:22
 msgid "Operations"
 msgstr "Toimenpiteet"
@@ -546,7 +545,7 @@ msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
 #: bp/admin/templates/admin/load_result.html:19
 #: bp/admin/templates/admin/update_user.html:41
-#: bp/admin/templates/admin/uploads.html:43
+#: bp/admin/templates/admin/uploads.html:42
 #: bp/gramps/templates/gramps/result.html:27
 #: bp/gramps/templates/gramps/uploads.html:38
 msgid "Return"
@@ -635,34 +634,34 @@ msgstr "Palaa takaisin"
 msgid "Uploads"
 msgstr "Lataukset"
 
-#: bp/admin/templates/admin/uploads.html:8
+#: bp/admin/templates/admin/uploads.html:7
 msgid "Uploads for user"
 msgstr "Lataukset käyttäjältä"
 
-#: bp/admin/templates/admin/uploads.html:20
+#: bp/admin/templates/admin/uploads.html:19
 #: bp/gramps/templates/gramps/uploads.html:19
 msgid "Upload time"
 msgstr "Latausaika"
 
-#: bp/admin/templates/admin/uploads.html:21
+#: bp/admin/templates/admin/uploads.html:20
 #: bp/gramps/templates/gramps/uploads.html:20
 msgid "XML file"
 msgstr "XML tiedosto"
 
-#: bp/admin/templates/admin/uploads.html:22
+#: bp/admin/templates/admin/uploads.html:21
 #: bp/gramps/templates/gramps/uploads.html:21
 msgid "Status"
 msgstr "Tila"
 
-#: bp/admin/templates/admin/uploads.html:35
+#: bp/admin/templates/admin/uploads.html:34
 msgid "Store to database"
 msgstr "Tallenna tietokantaan"
 
-#: bp/admin/templates/admin/uploads.html:37
+#: bp/admin/templates/admin/uploads.html:36
 msgid "Show log"
 msgstr "Näytä loki"
 
-#: bp/admin/templates/admin/uploads.html:39
+#: bp/admin/templates/admin/uploads.html:38
 msgid "Delete file"
 msgstr "Poista tiedosto"
 
@@ -1130,7 +1129,7 @@ msgstr "Poista"
 msgid ""
 "The administrator can load your file to database as yor new candadate "
 "material set"
-msgstr "Tlläpitäjä voi tallettaa ehdokasaineistosi tietokantaan"
+msgstr "Ylläpitäjä voi tallettaa ehdokasaineistosi tietokantaan"
 
 #: bp/gramps/templates/gramps/uploads.html:35
 msgid "on this page"
@@ -1229,12 +1228,11 @@ msgstr "Henkilön tapahtumat"
 msgid "see details of person %(id)s"
 msgstr "Katso henkilön %(id)s tiedot"
 
-#: bp/scene/templates/scene/list_persons.html:72
-#: bp/scene/templates/scene/persons.html:123
-msgid "Keywords"
-msgstr "hakusanat"
+#: bp/scene/templates/scene/list_persons.html:70
+msgid "Sorting name"
+msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:90
+#: bp/scene/templates/scene/list_persons.html:88
 #: bp/scene/templates/scene/persons.html:143
 msgid "No one found with search keys"
 msgstr "Ketään ei löytynyt hakutiedoilla"
@@ -1691,6 +1689,10 @@ msgstr "Hakusana (alkuosa)"
 msgid "Family Events"
 msgstr "Perheen tapahtumat"
 
+#: bp/scene/templates/scene/persons.html:123
+msgid "Keywords"
+msgstr "hakusanat"
+
 #: bp/scene/templates/scene/place_events.html:3
 #: bp/scene/templates/scene/place_events.html:11
 msgid "Place events"
@@ -1867,8 +1869,8 @@ msgid "Register  as a database user of Finland database Service"
 msgstr "Rekisteröidy Suomitietokannan käyttäjäksi"
 
 #: bp/stk_security/templates/security/register_user.html:30
-msgid "Read and accept <a href = \"static/Conditionsofuse. html\" > Terms of use"
-msgstr "Lue ja hyväksy <a href=\"static/conditionsOfUse.html\">Käyttöehdot"
+msgid "Read and accept <a href=\"static/termsofuse.html\"> Terms of use</a>"
+msgstr "Lue ja hyväksy <a href=\"static/termsofuse.html\"> käyttöehdot</a>"
 
 #: bp/stk_security/templates/security/register_user.html:38
 msgid "I approve user actions"
@@ -2613,9 +2615,3 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
-
-#~ msgid "This page contains %(num)s person in %(order)s order."
-#~ msgid_plural "This page contains %(num)s persons in %(order)s order."
-#~ msgstr[0] "Näytetään on %(num)s henkilön nimi."
-#~ msgstr[1] "Näytetään on %(num)s henkilönimeä %(order)s mukaisessa järjestyksessä."
-

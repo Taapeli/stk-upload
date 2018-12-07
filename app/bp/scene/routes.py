@@ -98,13 +98,13 @@ def show_my_persons(start=''):
         user=current_user.username
     else:
         user=None
-    persons = Person_combo.read_my_persons_list(user, start, 100)
+    persons = Person_combo.read_my_persons_list(user, show="my", start_name=start, limit=100)
     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
                            rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons_all/')
 #     @login_required
-def show_my_persons_all(opt=''):
+def show_my_persons_all(start=''):
     """ List all persons for menu(12)
         Both owners and other persons 
     """
@@ -117,7 +117,8 @@ def show_my_persons_all(opt=''):
 #     if 'fn' in opt: order = 1   # firstname
 #     elif 'pn' in opt: order = 2 # firstname
 #     else: order = 0             # surname
-    persons = read_persons_with_events(keys, user=user)
+    persons = Person_combo.read_my_persons_list(user, show="all", start_name=start, limit=100)
+#     persons = read_persons_with_events(keys, user=user)
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
                            rule=keys, elapsed=time.time()-t0)
 
