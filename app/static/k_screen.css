@@ -104,10 +104,16 @@ img#logo {
     vertical-align: text-top;
 }
 .id { color: sienna; text-align: right; }
-.idno { color: gray; text-size: 50%; }
+.idno { color: gray; font-size: 70%; text-align:center; }
+.owner { color: white; 
+    font-size: 70%; 
+    background: RoyalBlue;
+    border-radius: 5px;
+}
+.notmy { color:blue;}
 .inlink { color: #000066; background: LemonChiffon; }
 .outlink { text-decoration: underline; color:gray}
-.refname { color:gray; text-size: 80%; }
+.refname { color:gray; font-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
 .note  { font-style: italic; /* font-size: 85%; margin:0.5em; */ }
 .myself { color: white; background: #555; font-style: italic; }

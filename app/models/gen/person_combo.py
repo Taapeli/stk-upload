@@ -198,6 +198,10 @@ return path"""
                 pname = Name.from_node(nnode)
                 p.names.append(pname)
     
+            # Owner, if present
+            if 'user' in record:
+                p.owner = record['user']
+
             # Events
     
             for enode, pname, role in record['events']:

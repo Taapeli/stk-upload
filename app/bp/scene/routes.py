@@ -85,10 +85,11 @@ def show_persons_by_refname(refname, opt=""):
 
 # ------------------------------ Menu 1 Persons --------------------------------
 
-@bp.route('/scene/persons_own/<string:start>')
 @bp.route('/scene/persons_own/')
+@bp.route('/scene/persons_own/<string:start>')
+@bp.route('/scene/persons_all/<string:start>/<int:count>')
 @login_required
-def show_my_persons(start=''):
+def show_my_persons(start='', count=100):
     """ List all persons for menu(11)
         Restriction by owner's UserProfile 
     """
@@ -98,13 +99,16 @@ def show_my_persons(start=''):
         user=current_user.username
     else:
         user=None
-    persons = Person_combo.read_my_persons_list(user, show="my", start_name=start, limit=100)
+    persons = Person_combo.read_my_persons_list(user, show="my", 
+                                                start_name=start, limit=count)
     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
-                           rule=keys, elapsed=time.time()-t0)
+                           pick=None, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons_all/')
+@bp.route('/scene/persons_all/<string:start>')
+@bp.route('/scene/persons_all/<string:start>/<int:count>')
 #     @login_required
-def show_my_persons_all(start=''):
+def show_my_persons_all(start='', count=100):
     """ List all persons for menu(12)
         Both owners and other persons 
     """
@@ -117,10 +121,11 @@ def show_my_persons_all(start=''):
 #     if 'fn' in opt: order = 1   # firstname
 #     elif 'pn' in opt: order = 2 # firstname
 #     else: order = 0             # surname
-    persons = Person_combo.read_my_persons_list(user, show="all", start_name=start, limit=100)
+    persons = Person_combo.read_my_persons_list(user, show="all", 
+                                                start_name=start, limit=count)
 #     persons = read_persons_with_events(keys, user=user)
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
-                           rule=keys, elapsed=time.time()-t0)
+                           pick=user, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')

@@ -11,7 +11,7 @@
 {% else %}<H2>{{ _('Persons') }}</h2>
 {% endif %}
 
-<!-- Rule = {{rule}} for {{cnt}} persons -->
+<!-- Rule = {{rule}} for {{cnt}} persons, pick {{pick}} -->
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
@@ -19,8 +19,6 @@
             <p id="description">{{ ngettext(
     			'Displaying %(num)s person names.', 
     			'Displaying %(num)s person names.', cnt) }}
-              {{ _('If the person has alternative names, they will appear in the list under each name.') }}
-    		  <br>&nbsp;<br>
 	   		  {{ _("Clicking a name will take you to the selected person's page.") }} 
     		</p>
 
@@ -52,13 +50,20 @@
 				</tr>
 			</thead>
 			<tbody>
+
 	    {% for p in persons %}
+	       {% if pick %}
+	           {% if p.owner == pick %}{% set notMine = 0 %}{% else %}{% set notMine = 1 %}{% endif %}
+	       {% else %}{% set notMine = 0 %}
+	       {% endif %}
 	            <tr><td class="ColumnAlpha">{% set ini = p.sortname[0] %}
 	               {% if alpha != ini %}{%set alpha = ini %}
 		               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
 	               {% endif %}</td>
 
 	                <td class="ColumnPerson"><div>
+	                   {% if pick and notMine %}<span class="owner">&nbsp;{{p.owner}}&nbsp;</span>
+	                   {% else %}&#9899;{% endif %}
 	                   <a href="/scene/person={{p.uniq_id}}"
 	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
 		               {{p.names[0].firstname}} 
@@ -67,8 +72,21 @@
 		               <small class="idno">[{{p.uniq_id}}</small></a><small class="idno"><a 
 		                href="/scene/person/{{p.uniq_id}}">]</a></small>
 		               {# TODO Remove later test link at ']' #}
-		               <br><small class="refname" title="{{ _('Sorting name') }}">
-		                  {{p.sortname}}</small>
+
+		               {%set eka = 1 %}
+		               {% for name in p.names %}
+		                  {% if eka == 1 %}{% set eka = 0 %}{% else %}<br><small>
+		                      <span class="typedesc">{{name.type|transl('nt')}}</span> 
+		                      {{name.firstname}} 
+                            {% if name.surname %} <b>{{name.surname}}</b>
+                            {% else %}<i>{{name.patronyme}}</i>{% endif %}</small>
+                          {% endif %}
+                       {% endfor %}
+
+                       <br><small class="refname" title="{{ _('Original ID') }}">
+                          {{p.id}}</small>
+                       <small class="refname" title="{{ _('Sorting name') }}">
+                          {{p.sortname}}</small>
 	                </div></td>
 
 	              <td class="ColumnEvent">

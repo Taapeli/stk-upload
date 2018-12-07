@@ -61,23 +61,25 @@ WITH p ORDER BY p.sortname LIMIT $limit
     OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
     OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
 RETURN p as person, 
-        collect(distinct n) as names, 
+    collect(distinct n) as names, 
     collect(distinct [e, pl.pname, rn.role]) as events
 ORDER BY p.sortname"""
 
-#TODO ei säädetty
     read_all_persons_with_events_from_name = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
-    WHERE prof.userName = $user AND p.sortname >= $start_name
-WITH p ORDER BY p.sortname LIMIT $limit
+MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
+    WHERE p.sortname >= $start_name
+WITH p, b.user as user ORDER BY p.sortname LIMIT $limit
   MATCH (p:Person) -[:NAME]-> (n:Name)
-  WITH p, n ORDER BY p.sortname, n.order
+  WITH p, n ORDER BY p.sortname, n.order, user
     OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
     OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
 RETURN p as person, 
-        collect(distinct n) as names, 
-    collect(distinct [e, pl.pname, rn.role]) as events
+    collect(distinct n) as names, 
+    collect(distinct [e, pl.pname, rn.role]) as events,
+    user
 ORDER BY p.sortname"""
+
+
 
     read_persons_list_by_refn = """
 MATCH p = (search:Refname) -[:BASENAME*1..3 {use:'surname'}]-> (person:Person)
