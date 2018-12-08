@@ -1,0 +1,111 @@
+{# _myapp/templates/k_persons.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}{{ _('List of persons') }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro %}
+{% set cnt = persons | count %}
+
+{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }}</h2>
+{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
+{% else %}<H2>{{ _('Persons') }}</h2>
+{% endif %}
+
+<!-- Rule = {{rule}} for {{cnt}} persons, pick {{pick}} -->
+
+{{ macro.menu(menuno) }}
+	<div class="content" id="Individuals">
+        <div id="summaryarea">
+            <p id="description">{{ ngettext(
+    			'Displaying %(num)s person names.', 
+    			'Displaying %(num)s person names.', cnt) }}
+	   		  {{ _("Clicking a name will take you to the selected person's page.") }} 
+    		</p>
+
+	        {% with messages = get_flashed_messages(with_categories=true) %}
+	          {% if messages %}
+	            <ul  class='flashes'>
+	            {% for category, message in messages %}
+	              <li class='flash_{{category}}'>{{ message }}</li>
+	            {% endfor %}
+	            </ul>
+	          {% endif %}
+	        {% endwith %}
+        </div>
+
+    {% if cnt %}
+		<div id="alphanav">{% set alpha = "¤" %}
+			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
+        {% for p in persons %}{% set ini = p.sortname[0]|upper %}
+            {% if alpha != ini %}{%set alpha = ini %}
+                <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
+            {% endif %}{% endfor %}
+			</ul>
+		</div>
+		<table class="IndividualList">
+			<thead>
+				<tr><th></th>
+					<th>{{ _('Person') }}</th>
+                    <th>{{ _("Person's events") }}</th>
+				</tr>
+			</thead>
+			<tbody>
+
+	    {% for p in persons %}
+	       {% if pick %}
+	           {% if p.owner == pick %}{% set notMine = 0 %}{% else %}{% set notMine = 1 %}{% endif %}
+	       {% else %}{% set notMine = 0 %}
+	       {% endif %}
+	            <tr><td class="ColumnAlpha">{% set ini = p.sortname[0] %}
+	               {% if alpha != ini %}{%set alpha = ini %}
+		               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
+	               {% endif %}</td>
+
+	                <td class="ColumnPerson"><div>
+	                   {% if pick and notMine %}<span class="owner">&nbsp;{{p.owner}}&nbsp;</span>
+	                   {% else %}&#9899;{% endif %}
+	                   <a href="/scene/person={{p.uniq_id}}"
+	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
+		               {{p.names[0].firstname}} 
+		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
+		               {% else %}<i>{{p.names[0].patronyme}}</i>{% endif %}
+		               <small class="idno">[{{p.uniq_id}}</small></a><small class="idno"><a 
+		                href="/scene/person/{{p.uniq_id}}">]</a></small>
+		               {# TODO Remove later test link at ']' #}
+
+		               {%set eka = 1 %}
+		               {% for name in p.names %}
+		                  {% if eka == 1 %}{% set eka = 0 %}{% else %}<br><small>
+		                      <span class="typedesc">{{name.type|transl('nt')}}</span> 
+		                      {{name.firstname}} 
+                            {% if name.surname %} <b>{{name.surname}}</b>
+                            {% else %}<i>{{name.patronyme}}</i>{% endif %}</small>
+                          {% endif %}
+                       {% endfor %}
+
+                       <br><small class="refname" title="{{ _('Original ID') }}">
+                          {{p.id}}</small>
+                       <small class="refname" title="{{ _('Sorting name') }}">
+                          {{p.sortname}}</small>
+	                </div></td>
+
+	              <td class="ColumnEvent">
+	        {% if p.events is iterable %}<ul>{% for e in p.events|sort(attribute='date') %}
+		              <li><i>{{e.type|transl('evt')}} {{e.description}}</i>
+		              {% if e.dates %}{{e.dates}} {% endif %}
+		              {% if e.place %} | {{e.place}}{% endif %}</li>
+		        {% endfor %}</ul>
+		    {% else %}<u>See person {{p.events}}</u>
+	        {% endif %}
+	           </tr>
+	    {% endfor %}
+				</tr>
+	{% else %}
+        <table class="IndividualList">
+            <tbody>
+	        <tr><td>{{ _('No one found with search keys') }}<//td></tr>
+	{% endif %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

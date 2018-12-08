@@ -8,7 +8,7 @@
          - uniq_id
          - properties { handle:"_dd2c613026e7528c1a21f78da8a",
                         id:"I0000",
-                        priv:"",
+                        priv:None,
                         gender:"N",
                         confidence:"2.0",
                         sortname:"Floor#Hans-Johansdotter#Katarina",
@@ -45,7 +45,7 @@
 
     Not in use or obsolete:
     - from models.gen.person_combo.Person_combo(Person)
-        - set_estimated_dates()         Aseta est_birth ja est_death - Obsolete
+        - set_estimated_life()          Aseta est_birth ja est_death - Obsolete
     - from models.datareader.get_person_data_by_id 
       (returns list: person, events, photos, sources, families)
         - get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)
@@ -98,7 +98,7 @@ class Person:
         self.change = 0
         self.uniq_id = None
         self.id = ''
-        self.priv = 0
+        self.priv = None
         self.gender = ''
         self.confidence = ''
         self.sortname = ''
@@ -122,7 +122,7 @@ class Person:
 
         <Node id=80307 labels={'Person'} 
             properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F', 'change': 1507492602, 
-            'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
+            'handle': '_da692a09bac110d27fa326f0a7', 'priv': 1}>
         '''
         if not obj:
             obj = cls()
@@ -146,10 +146,9 @@ class Person:
         """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
             using given default Name node
         """
-        # Person.set_sortname(name.key_surname())
+
         key = namenode.key_surname()
-        return tx.run(Cypher_person.set_sortname,
-                      id=uniq_id, key=key)
+        return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
         
     @staticmethod
     def get_confidence (uniq_id=None):

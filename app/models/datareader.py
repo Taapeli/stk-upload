@@ -78,11 +78,11 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
             if take_refnames and record['refnames']:
                 refnlist = sorted(record['refnames'])
                 p.refnames = ", ".join(refnlist)
-        node = record['name']
-        pname = Name.from_node(node)
-        if 'initial' in record and record['initial']:
-            pname.initial = record['initial']
-        p.names.append(pname)
+            for nnode in record['names']:
+                pname = Name.from_node(nnode)
+                if 'initial' in record and record['initial']:
+                    pname.initial = record['initial']
+                p.names.append(pname)
 
         # Events
 
@@ -99,9 +99,6 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
                 e.place = place or ""
                 e.role = role or ""
                 p.events.append(e)
-
-#TODO:    p.est_birth = record['est_birth']
-#         p.est_death = record['est_death']
 
         persons.append(p)
 

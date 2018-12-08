@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %} - Alkusivut</title>
+    <title>{% block title %}{% endblock %} - Suomi-tietokanta</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pers.css') }}">
 
@@ -29,6 +29,9 @@
     <div class="fullclear"></div>
     <div id="footer">
         <span id="createdate">{{ _("Stk-server") }} &nbsp;
+        {% if elapsed %}
+        <tt style="font-size:8pt;color:maroon;">time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
         <small style="font-size: 6pt">{{ _('Version') }} {{ 'app'|app_date }}</small></span>
     <div class="fullclear"></div>
 

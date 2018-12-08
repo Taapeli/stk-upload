@@ -30,7 +30,7 @@
 	           	   <a href=/gramps/xml_delete/{{upload.xmlname | urlencode}}>{{ _("Delete") }}</a></td>
 	       </tr>
 	    {% endfor %}</table>
-    <p>{{ _("Now the administrator can load your file to database as yor new candadate material set") }}
+    <p>{{ _("The administrator can load your file to database as yor new candadate material set") }}
 	    {% if current_user.is_authenticated and current_user.has_role('admin') %}
             <a href="/admin/list_users">{{ _('on this page') }}</a>
         {% endif %}

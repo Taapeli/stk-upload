@@ -8,7 +8,6 @@ Created on 15.8.2018
 
 import os
 import time
-
 import logging 
 logger = logging.getLogger('stkserver')
 
@@ -20,12 +19,7 @@ import shareds
 from models import loadfile, email, util    # dbutil, 
 #from models import email
 from . import bp
-#from .gramps_loader import xml_to_neo4j
-#from bp.admin.uploads import initiate_background_load_to_neo4j
-#from .batchlogger import Log
 from pickle import Unpickler
-
-#from bp.admin.uploads import initiate_background_load_to_neo4j
 from ..admin import uploads
 
 @bp.route('/gramps/upload_info/<upload>')
@@ -79,21 +73,7 @@ def upload_gramps():
 # @bp.route('/gramps/save/xml_file/<string:filename>')
 # @roles_accepted('member', 'admin')
 # def save_loaded_gramps(filename):
-#     """ Save loaded gramps data to the database """
-#     #TODO: Latauksen onnistuttua perusta uusi Batch-erä (suoritusaika shareds.tdiff)
-# #    pathname = loadfile.fullname(filename)
-#     result_list = []
-# #     dburi = dbutil.get_server_location()
-#     try:
-#         # gramps backup xml file to Neo4j db
-#         #result_list = xml_to_neo4j(pathname, current_user.username)
-#         initiate_background_load_to_neo4j(filename, current_user.username)
-#         return redirect(url_for('gramps.uploads'))
-#     except KeyError as e:
-#         return redirect(url_for('gramps.error_page', code=1, \
-#                                 text="Missing proper column title: " + str(e)))
-#     return render_template("/gramps/result.html", batch_events=result_list)
-
+#     """ Save loaded gramps data to the database (synchronous, no batch) """
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')
 @roles_accepted('member', 'admin')

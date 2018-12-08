@@ -40,28 +40,23 @@
         - print_compared_data(self, comp_person, print_out=True) 
                                         Tulostaa kahden henkilön tiedot vieretysten
 
-        # set_estimated_dates()         Aseta est_birth ja est_death
+        # set_estimated_life()          Aseta est_birth ja est_death
         - save()  see: bp.gramps.models.person_gramps.Person_gramps.save
 
 
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi> & Juha Mäkeläinen
 '''
 
-#import datetime
 from sys import stderr
-#import logging
 
 import shareds
-#import models.dbutil
-
 from .person import Person
 from .person_name import Name
+from .event_combo import Event_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
-#from .note import Note
-#from .weburl import Weburl
-#from models.cypher_gramps import Cypher_person_w_handle
+
 
 class Person_combo(Person):
     """ Henkilö
@@ -141,20 +136,86 @@ return path"""
     def get_person_paths_apoc(uniq_id):
         ''' Read a person and paths for all connected nodes
         '''
-        all_nodes_query_w_apoc="""
-MATCH (p:Person) WHERE id(p) = $pid
-CALL apoc.path.subgraphAll(p, {maxLevel:4, 
-        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
-    YIELD nodes, relationships
-RETURN extract(x IN relationships | 
-        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
-        extract(x in nodes | x) as nodelist"""
         try:
-            return  shareds.driver.session().run(all_nodes_query_w_apoc, pid=uniq_id)
+            return  shareds.driver.session().run(Cypher_person.all_nodes_query_w_apoc, 
+                                                 pid=uniq_id)
         except Exception as e:
             print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
             return None
-                
+
+    @staticmethod
+    def read_my_persons_list(user=None, show="my", start_name="", limit=100):
+        """ Reads Person Name and Event objects for display.
+            By default, 100 names are got beginning from start_name 
+
+            Returns Person objects, with included Events and Names
+            ordered by Person.sortname
+        """
+        def _read_person_list(user, start_name, limit):
+            """ Read Person data from given start_name 
+            """
+            try:
+                with shareds.driver.session() as session:
+                    if show == "my":
+                        result = session.run(Cypher_person.read_my_persons_with_events_from_name,
+                                             user=user, start_name=start_name, limit=limit)
+                    elif show == "all":
+                        result = session.run(Cypher_person.read_all_persons_with_events_from_name,
+                                             user=user, start_name=start_name, limit=limit)
+                    return result        
+            except Exception as e:
+                print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
+                raise      
+
+
+        persons = []
+        result = _read_person_list(user, start_name, limit)
+        for record in result:
+            ''' <Record 
+                    person=<Node id=163281 labels={'Person'} 
+                      properties={'sortname': 'Ahonius##Knut Hjalmar',  
+                        'gender': 'M', 'confidence': '', 'change': 1540719036, 
+                        'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
+                        'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
+                    names=[<Node id=163282 labels={'Name'} 
+                      properties={'firstname': 'Knut Hjalmar', 'type': 'Birth Name', 
+                        'suffix': '', 'surname': 'Ahonius', 'order': 0}>] 
+                    events=[[
+                        <Node id=169494 labels={'Event'} 
+                            properties={'datetype': 0, 'change': 1540587380, 
+                            'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
+                            'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
+                         None
+                         ]]>
+            '''
+            node = record['person']
+            # The same person is not created again
+            p = Person_combo.from_node(node)
+#             if take_refnames and record['refnames']:
+#                 refnlist = sorted(record['refnames'])
+#                 p.refnames = ", ".join(refnlist)
+            for nnode in record['names']:
+                pname = Name.from_node(nnode)
+                p.names.append(pname)
+    
+            # Owner, if present
+            if 'user' in record:
+                p.owner = record['user']
+
+            # Events
+    
+            for enode, pname, role in record['events']:
+                if enode:
+                    e = Event_combo.from_node(enode)
+                    e.place = pname or ""
+                    if role and role != "Primary":
+                        e.role = role
+                    p.events.append(e)
+
+            persons.append(p)
+    
+        return (persons)
+
 
     def get_citation_id(self):
         """ Luetaan henkilön viittauksen id """
@@ -262,7 +323,7 @@ RETURN person, name
         for person_record in person_result:
             if self.id == None:
                 self.handle = person_record["person"]['handle']
-                self.change = int(person_record["person"]['change'])  #TODO only temporary int()
+                self.change = person_record["person"]['change']
                 self.id = person_record["person"]['id']
                 self.priv = person_record["person"]['priv']
                 self.gender = person_record["person"]['gender']
@@ -292,7 +353,7 @@ RETURN person, name
         for record in result:
             # <Record person=<Node id=72087 labels={'Person'} 
             #    properties={'handle': '_dd4a3c371f72257f442c1c42759', 'id': 'I1054', 
-            #        'priv': '', 'gender': 'M', 'confidence': '2.0', 'change': 1523278690}> 
+            #        'priv': 1, 'gender': 'M', 'confidence': '2.0', 'change': 1523278690}> 
             #    notes=[] 
             #    names=[<Node id=72088 labels={'Name'} 
             #            properties={'alt': '', 'firstname': 'Anthon', 'type': 'Also Known As', 
@@ -542,7 +603,8 @@ RETURN n.id, k.firstname, k.surname,
 
     @staticmethod
     def get_person_combos (keys, currentuser, take_refnames=False, order=0):
-        """ Read Persons with Names, Events, Refnames (reference names) and Places
+        """ Version 0.1
+            Read Persons with Names, Events, Refnames (reference names) and Places
             called from models.datareader.read_persons_with_events
             
             UUSI KORVAAMAAN get_events_k:n
@@ -662,7 +724,8 @@ RETURN n.id, k.firstname, k.surname,
             print("Virhe-get_events_k: {1} {0}".format(err, keys), file=stderr)
 
 
-    def set_my_places(self, cleartext_list=False):
+    # Not in use!
+    def get_my_places(self, cleartext_list=False):
         ''' Finds all Places with their Place_names
             which are connected to any personal Events
             and stores them in self.places list
@@ -910,41 +973,33 @@ with distinct x
 
 
     @staticmethod
-    def set_estimated_dates():
-        #TODO: Do not use: these fields do not exsist any more
-        print("Virhe (Person.save:Person_combo.set_estimated_dates): not done", 
-              file=stderr)
-        return "No dates set"
-        # Set est_birth
-        try:
-            dtype = 'Birth'
-            query = """
-MATCH (n:Person)-[r:EVENT]->(m:Event)
-    WHERE m.type=$type
-SET r.type =$type
-SET n.est_birth = m.daterange_start"""
-            result = shareds.driver.session().run(query,
-               {"type": dtype})
-            counters = result.consume().counters
-            msg = "Muutettu {} est_birth-tietoa".format(counters.properties_set)
-        except Exception as err:
-            print("Virhe (Person.save:est_birth): {0}".format(err), file=stderr)
+    def estimate_lifetimes(tx, uids=[]):
+        """ Sets an estimated lifietime to Person.lifetime
+            and store it as Person properties: datetype, date1, and date2
 
-        # Set est_birth
+            The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
+            sets all lifetimes.
+
+            Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+            
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
+            and models.dataupdater.set_estimated_dates
+        """
         try:
-            dtype = 'Death'
-            query = """
-MATCH (n:Person)-[r:EVENT]->(m:Event)
-    WHERE m.type=$type
-SET r.type =$type
-SET n.est_death = m.daterange_start"""
-            result = shareds.driver.session().run(query,
-               {"type": dtype})
-            counters = result.consume().counters
-            msg = msg + " ja {} est_death-tietoa.".format(counters.properties_set)
-            return msg
+            if not uids:
+                result = tx.run(Cypher_person.set_est_lifetimes_all)
+            else:
+                if isinstance(uids, int):
+                    uids = [uids]
+                result = tx.run(Cypher_person.set_est_lifetimes, idlist=uids)
         except Exception as err:
-            print("Virhe (Person.save:est_death): {0}".format(err), file=stderr)
+            print("Virhe (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
+            return 0
+
+        counters = result.consume().counters
+        pers_count = int(counters.properties_set/3)
+        print("Estimated lifetime for {} persons".format(pers_count))
+        return pers_count
 
 
     def print_compared_data(self, comp_person, print_out=True):

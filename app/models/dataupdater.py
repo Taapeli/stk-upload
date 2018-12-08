@@ -4,6 +4,7 @@
 
 import logging
 import time
+from flask_babelex import _
 
 from bp.gramps.batchlogger import Batch
 from models.gen.user import User
@@ -13,7 +14,7 @@ from models.gen.refname import Refname
 from models.gen.person_combo import Person_combo
 
 
-def set_confidence_value(tx, uniq_id=None, batch_logger=None):
+def set_confidence_values(tx, uniq_id=None, batch_logger=None):
     """ Sets a quality rate for one or all Persons
         Asettaa henkilölle laatuarvion
         
@@ -44,37 +45,40 @@ def set_confidence_value(tx, uniq_id=None, batch_logger=None):
     return
 
 
-def set_estimated_dates(batch_logger=None):
-    """ Asettaa henkilölle arvioidut syntymä- ja kuolinajat
+def set_estimated_dates(uids=None):
+    """ Sets an estimated lifietime in Person.lifetime
+        (the properties in Person node are datetype, date1, and date2)
+
+        With transaction, see gramps_loader.DOM_handler.set_estimated_dates_tr
+
+        Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+
+        Called from bp.admin.routes.estimate_dates
     """
-    t0 = time.time()
-        
-    msg = Person_combo.set_estimated_dates()
-                        
-    if isinstance(batch_logger, Batch):
-        batch_logger.log_event({'title':"Estimated birth and death dates set. " + msg, 
-                                'elapsed':time.time()-t0})
+    my_tx = User.beginTransaction()
+
+    cnt = Person_combo.estimate_lifetimes(my_tx, uids)
+
+    msg = _("Estimated {} person lifetimes").format(cnt)
+    User.endTransaction(my_tx)
+    
     return msg
 
 
-def calculate_person_properties(handler=None, uniq_id=None, ops=['refname'], batch_logger=None):
-    """ Set Refnames to all or one Persons; 
-        also set Person.sortname using default name
+def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname']):
+    """ Set Refnames to all Persons or one Person with given uniq_id; 
+        also sets Person.sortname using the default name
 
         If handler is defined
-        - if there is transaction tx, use it, else create new 
-        - if there is handler.namecount, the number of names set is increased
+        - if there is transaction tx, use it, else create a new 
     """
     sortname_count = 0
     refname_count = 0
-#     confidence_count = 0
-#     do_confidence = 'confidence' in ops
     do_refnames = 'refname' in ops
     do_sortname = 'sortname' in ops
-    t0 = time.time()
 
-    if handler and handler.tx:
-        my_tx = handler.tx
+    if tx:
+        my_tx = tx
     else:
         my_tx = User.beginTransaction()
 
@@ -83,9 +87,8 @@ def calculate_person_properties(handler=None, uniq_id=None, ops=['refname'], bat
     for record in result:
         # <Record name=<Node id=185239 labels={'Name'} 
         #    properties={'firstname': 'Jan Erik', 'suffix': 'Jansson', 
-        #        'type': 'Birth Name', 'surname': 'Mannerheim', 'order': 0}
-        # >  >
-
+        #        'type': 'Birth Name', 'surname': 'Mannerquist', 'order': 0}
+        # > >
         pid = record['pid']
         node = record['name']
         name = Name.from_node(node)
@@ -109,48 +112,16 @@ def calculate_person_properties(handler=None, uniq_id=None, ops=['refname'], bat
                 refname_count += 1
         
         if do_sortname and name.order == 0:
+
             # If default name, store sortname key to Person node
             Person.set_sortname(my_tx, uniq_id, name)
             sortname_count += 1
-
-        # ===   [NOT!] Report status for each name    ====
-        if False:
-            rnames = []
-            recs = Person_combo.get_refnames(pid)
-            for rec in recs:
-                # ╒══════════════════════════╤═════════════════════╕
-                # │"a"                       │"li"                 │
-                # ╞══════════════════════════╪═════════════════════╡
-                # │{"name":"Alfonsus","source│[{"use":"firstname"}]│
-                # │":"Messu- ja kalenteri"}  │                     │
-                # └──────────────────────────┴─────────────────────┘        
- 
-                name = rec['a']
-                link = rec['li'][0]
-                rnames.append("{} ({})".format(name['name'], link['use']))
-            logging.debug("Set Refnames for {} - {}".format(pid, ', '.join(rnames)))
     
-    if handler == None or handler.tx == None:
-        # End my own created transformation
+    if not tx:
+        # Close my own created transaction
         User.endTransaction(my_tx)
 
-    if handler and handler.namecount != None:
-        handler.namecount += refname_count
-
-    if isinstance(batch_logger, Batch):
-        t = time.time()-t0
-        if do_refnames: 
-            batch_logger.log_event({'title':"Refname references", 
-                                    'count':refname_count, 'elapsed':t})
-            t=''
-        if do_sortname: 
-            batch_logger.log_event({'title':"Sort names", 
-                                    'count':sortname_count, 'elapsed':t})
-            t=''
-#         if do_confidence:
-#             batch_logger.log_event({'title':"Confidence values", 
-#                                     'count':confidence_count, 'elapsed':t})
-    return
+    return (refname_count, sortname_count)
 
 
 

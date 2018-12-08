@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-11-26 16:01+0200\n"
+"POT-Creation-Date: 2018-12-07 11:45+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -22,67 +22,67 @@ msgstr ""
 msgid "Undefined"
 msgstr ""
 
-#: routes.py:92
+#: routes.py:94
 msgid "Note List"
 msgstr ""
 
-#: routes.py:92
+#: routes.py:94
 msgid "Note Items"
 msgstr ""
 
-#: routes.py:111 templates/cite_sour_repo.html:55
+#: routes.py:113 templates/cite_sour_repo.html:55
 msgid "Repositories"
 msgstr ""
 
-#: routes.py:111
+#: routes.py:113
 msgid "Repository data"
 msgstr ""
 
-#: routes.py:139
+#: routes.py:141
 msgid "Material type"
 msgstr ""
 
-#: routes.py:139
+#: routes.py:141
 msgid "processing still missing"
 msgstr ""
 
-#: routes.py:190 routes.py:336
+#: routes.py:192 routes.py:338
 msgid "{} in Family {}/{}"
 msgstr ""
 
-#: routes.py:192 routes.py:338
+#: routes.py:194 routes.py:340
 msgid " Mother: {}/{} p. {}"
 msgstr ""
 
-#: routes.py:194 routes.py:340
+#: routes.py:196 routes.py:342
 msgid " Father: {}/{} p. {}"
 msgstr ""
 
-#: routes.py:197 routes.py:343
+#: routes.py:199 routes.py:345
 msgid " Child ({}): {}/{} * {}"
 msgstr ""
 
-#: routes.py:199 routes.py:345 routes.py:372
+#: routes.py:201 routes.py:347 routes.py:374
 msgid "Wrong Search key"
 msgstr ""
 
-#: routes.py:290
+#: routes.py:292
 msgid "Only the OID can retrieve"
 msgstr ""
 
-#: routes.py:363
+#: routes.py:365
 msgid "{} in the family {} / {}"
 msgstr ""
 
-#: routes.py:365
+#: routes.py:367
 msgid "  Mother: {} / {} s. {}"
 msgstr ""
 
-#: routes.py:367
+#: routes.py:369
 msgid "  Father:  {} / {} s. {}"
 msgstr ""
 
-#: routes.py:370
+#: routes.py:372
 msgid "    Child ({}): {} / {} *{}"
 msgstr ""
 
@@ -136,7 +136,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:25
 #: bp/scene/templates/scene/place_events.html:108 setups.py:205
-#: templates/del_table_users.html:40 templates/person2.html:15
+#: templates/del_table_users.html:40 templates/person2.html:16
 #: templates/repo_sources.html:15 templates/table_persons2.html:14
 #: templates/table_refnames.html:28
 msgid "Name"
@@ -303,20 +303,28 @@ msgstr ""
 msgid "Given allowed email address already exists"
 msgstr ""
 
-#: bp/admin/routes.py:75
+#: bp/admin/routes.py:61
+msgid "estimated lifetime"
+msgstr ""
+
+#: bp/admin/routes.py:76
 msgid "Made"
 msgstr ""
 
-#: bp/admin/routes.py:109
+#: bp/admin/routes.py:110
 msgid "Data type '{}' is not supported"
 msgstr ""
 
-#: bp/admin/routes.py:112
+#: bp/admin/routes.py:113
 msgid "Missing proper column title: "
 msgstr ""
 
-#: bp/admin/routes.py:173
+#: bp/admin/routes.py:174
 msgid "User updated"
+msgstr ""
+
+#: bp/admin/routes.py:206
+msgid "Data import from {!r} to database has been started."
 msgstr ""
 
 #: bp/admin/uploads.py:182 bp/admin/uploads.py:197
@@ -455,6 +463,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/layout.html:14
 #: bp/scene/templates/scene/layout.html:23
+#: bp/scene/templates/scene/list_persons.html:58
 #: bp/scene/templates/scene/locations.html:34
 #: bp/scene/templates/scene/persons.html:109
 #: bp/scene/templates/scene/sources.html:39 templates/a_layout.html:22
@@ -507,7 +516,7 @@ msgid "mail"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:26
-#: bp/admin/templates/admin/uploads.html:23
+#: bp/admin/templates/admin/uploads.html:22
 #: bp/gramps/templates/gramps/uploads.html:22
 msgid "Operations"
 msgstr ""
@@ -534,7 +543,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/load_result.html:19
 #: bp/admin/templates/admin/update_user.html:41
-#: bp/admin/templates/admin/uploads.html:43
+#: bp/admin/templates/admin/uploads.html:42
 #: bp/gramps/templates/gramps/result.html:27
 #: bp/gramps/templates/gramps/uploads.html:38
 msgid "Return"
@@ -612,7 +621,7 @@ msgid "Store to Database"
 msgstr ""
 
 #: bp/admin/templates/admin/talletettu.html:27 templates/cite_sour_repo.html:73
-#: templates/db_test.html:10 templates/person2.html:38
+#: templates/db_test.html:10 templates/person2.html:43
 #: templates/repo_sources.html:52 templates/source_citations.html:35
 msgid "Go back"
 msgstr ""
@@ -623,34 +632,34 @@ msgstr ""
 msgid "Uploads"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:8
+#: bp/admin/templates/admin/uploads.html:7
 msgid "Uploads for user"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:20
+#: bp/admin/templates/admin/uploads.html:19
 #: bp/gramps/templates/gramps/uploads.html:19
 msgid "Upload time"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:21
+#: bp/admin/templates/admin/uploads.html:20
 #: bp/gramps/templates/gramps/uploads.html:20
 msgid "XML file"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:22
+#: bp/admin/templates/admin/uploads.html:21
 #: bp/gramps/templates/gramps/uploads.html:21
 msgid "Status"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:35
+#: bp/admin/templates/admin/uploads.html:34
 msgid "Store to database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:37
+#: bp/admin/templates/admin/uploads.html:36
 msgid "Show log"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39
+#: bp/admin/templates/admin/uploads.html:38
 msgid "Delete file"
 msgstr ""
 
@@ -1116,8 +1125,8 @@ msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:33
 msgid ""
-"Now the administrator can load your file to database as yor new candadate"
-" material set"
+"The administrator can load your file to database as yor new candadate "
+"material set"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:35
@@ -1132,16 +1141,100 @@ msgstr ""
 msgid "Stk-server"
 msgstr ""
 
-#: bp/scene/templates/scene/layout.html:36
+#: bp/scene/templates/scene/layout.html:39
 msgid "version"
 msgstr ""
 
-#: bp/scene/templates/scene/layout.html:39
+#: bp/scene/templates/scene/layout.html:42
 msgid "The Genealogical Society of Finland"
 msgstr ""
 
+#: bp/scene/templates/scene/list_persons.html:3
+#: bp/scene/templates/scene/persons.html:3
+msgid "List of persons"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:9
+#: bp/scene/templates/scene/persons.html:11
+msgid "Persons ordered by"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:10
+#: bp/scene/templates/scene/persons.html:12
+msgid "Persons carrying a Name"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:11
+#: bp/scene/templates/scene/persons.html:13
+#: bp/stk_security/templates/security/login_user.html:21
+#: templates/table_refnames.html:32
+msgid "Persons"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:19
+#, python-format
+msgid "Displaying %(num)s person names."
+msgid_plural "Displaying %(num)s person names."
+msgstr[0] ""
+msgstr[1] ""
+
+#: bp/scene/templates/scene/list_persons.html:22
+msgid ""
+"If the person has alternative names, they will appear in the list under "
+"each name."
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:24
+#: bp/scene/templates/scene/persons.html:30
+msgid "Clicking a name will take you to the selected person's page."
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:40
+#: bp/scene/templates/scene/locations.html:15
+#: bp/scene/templates/scene/persons.html:90
+#: bp/scene/templates/scene/sources.html:16
+msgid "Top"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:43
+#: bp/scene/templates/scene/locations.html:18
+#: bp/scene/templates/scene/persons.html:93
+#: bp/scene/templates/scene/sources.html:19
+msgid "Alphabetical Menu"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:50
+#: bp/scene/templates/scene/persons.html:100
+#: bp/scene/templates/scene/place_events.html:107
+#: bp/scene/templates/scene/source_events.html:47 templates/person2.html:8
+msgid "Person"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:51
+#: bp/scene/templates/scene/persons.html:101
+msgid "Person's events"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:63
+#: bp/scene/templates/scene/macros.html:78
+#: bp/scene/templates/scene/persons.html:114
+#: bp/scene/templates/scene/source_events.html:41
+#: bp/scene/templates/scene/source_events.html:49
+#, python-format
+msgid "see details of person %(id)s"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:70
+msgid "Sorting name"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:88
+#: bp/scene/templates/scene/persons.html:143
+msgid "No one found with search keys"
+msgstr ""
+
 #: bp/scene/templates/scene/locations.html:3
-#: bp/scene/templates/scene/macros.html:52 templates/tables.html:21
+#: bp/scene/templates/scene/macros.html:59 templates/tables.html:21
 msgid "Places"
 msgstr ""
 
@@ -1153,18 +1246,6 @@ msgstr ""
 msgid ""
 "This page contains a directory of all the places and the closest lower-"
 "level locations beneath them."
-msgstr ""
-
-#: bp/scene/templates/scene/locations.html:15
-#: bp/scene/templates/scene/persons.html:90
-#: bp/scene/templates/scene/sources.html:16
-msgid "Top"
-msgstr ""
-
-#: bp/scene/templates/scene/locations.html:18
-#: bp/scene/templates/scene/persons.html:93
-#: bp/scene/templates/scene/sources.html:19
-msgid "Alphabetical Menu"
 msgstr ""
 
 #: bp/scene/templates/scene/locations.html:26
@@ -1195,20 +1276,25 @@ msgid "Search"
 msgstr ""
 
 #: bp/scene/templates/scene/macros.html:46
+#: bp/scene/templates/scene/macros.html:51
 msgid "All persons"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:46
-msgid "People"
-msgstr ""
-
-#: bp/scene/templates/scene/macros.html:48 templates/ng_compare.html:14
+#: bp/scene/templates/scene/macros.html:46 templates/ng_compare.html:14
 #: templates/ng_compare.html:73 templates/table_baptism_data.html:21
 #: templates/table_person_by_id.html:26
 msgid "Names"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:50
+#: bp/scene/templates/scene/macros.html:49
+msgid "My persons"
+msgstr ""
+
+#: bp/scene/templates/scene/macros.html:51
+msgid "Compare persons"
+msgstr ""
+
+#: bp/scene/templates/scene/macros.html:57
 #: bp/scene/templates/scene/person.html:135
 #: bp/scene/templates/scene/person.html:137
 #: bp/scene/templates/scene/person_pg.html:161
@@ -1216,7 +1302,7 @@ msgstr ""
 msgid "Families"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:54
+#: bp/scene/templates/scene/macros.html:61
 #: bp/scene/templates/scene/person.html:81
 #: bp/scene/templates/scene/place_events.html:113
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:41
@@ -1224,23 +1310,15 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:56
+#: bp/scene/templates/scene/macros.html:63
 msgid "Thumbnails"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:56
+#: bp/scene/templates/scene/macros.html:63
 msgid "Pictures and other Media"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:71
-#: bp/scene/templates/scene/persons.html:114
-#: bp/scene/templates/scene/source_events.html:41
-#: bp/scene/templates/scene/source_events.html:49
-#, python-format
-msgid "see details of person %(id)s"
-msgstr ""
-
-#: bp/scene/templates/scene/macros.html:75
+#: bp/scene/templates/scene/macros.html:82
 msgid "Anonymous"
 msgstr ""
 
@@ -1281,7 +1359,7 @@ msgstr ""
 msgid "Surname"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:42 templates/person2.html:19
+#: bp/scene/templates/scene/person.html:42
 msgid "Reference name"
 msgstr ""
 
@@ -1314,7 +1392,7 @@ msgstr ""
 #: bp/scene/templates/scene/person.html:72
 #: bp/scene/templates/scene/person_pg.html:86
 #: bp/scene/templates/scene/place_events.html:102 templates/ng_compare.html:36
-#: templates/ng_compare.html:94 templates/person2.html:25
+#: templates/ng_compare.html:94 templates/person2.html:30
 #: templates/table_person_by_id.html:54
 msgid "Events"
 msgstr ""
@@ -1553,36 +1631,14 @@ msgstr ""
 msgid "see:"
 msgstr ""
 
-#: bp/scene/templates/scene/persons.html:3
-msgid "List of persons"
-msgstr ""
-
-#: bp/scene/templates/scene/persons.html:11
-msgid "Persons ordered by"
-msgstr ""
-
-#: bp/scene/templates/scene/persons.html:12
-msgid "Persons carrying a Name"
-msgstr ""
-
-#: bp/scene/templates/scene/persons.html:13
-#: bp/stk_security/templates/security/login_user.html:21
-#: templates/table_refnames.html:32
-msgid "Persons"
-msgstr ""
-
 #: bp/scene/templates/scene/persons.html:22
 #, python-format
-msgid "This page contains %(num)s person in %(order)s order."
-msgid_plural "This page contains %(num)s persons in %(order)s order."
+msgid "Displaying %(num)s person in %(order)s order."
+msgid_plural "Displaying %(num)s persons in %(order)s order."
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/scene/templates/scene/persons.html:29
-msgid "Clicking a name will take you to the selected person's page."
-msgstr ""
-
-#: bp/scene/templates/scene/persons.html:30
+#: bp/scene/templates/scene/persons.html:27
 msgid ""
 "If the person has many names, they will appear in the list under each "
 "name."
@@ -1621,26 +1677,12 @@ msgstr ""
 msgid "Search word (beginning part)"
 msgstr ""
 
-#: bp/scene/templates/scene/persons.html:100
-#: bp/scene/templates/scene/place_events.html:107
-#: bp/scene/templates/scene/source_events.html:47 templates/person2.html:8
-msgid "Person"
-msgstr ""
-
-#: bp/scene/templates/scene/persons.html:101
-msgid "Person's events"
-msgstr ""
-
 #: bp/scene/templates/scene/persons.html:102
 msgid "Family Events"
 msgstr ""
 
 #: bp/scene/templates/scene/persons.html:123
 msgid "Keywords"
-msgstr ""
-
-#: bp/scene/templates/scene/persons.html:143
-msgid "No one found with search keys"
 msgstr ""
 
 #: bp/scene/templates/scene/place_events.html:3
@@ -1819,7 +1861,7 @@ msgid "Register  as a database user of Finland database Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:30
-msgid "Read and accept <a href = \"static/Conditionsofuse. html\" > Terms of use"
+msgid "Read and accept <a href=\"static/termsofuse.html\"> Terms of use</a>"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:38
@@ -1834,45 +1876,49 @@ msgstr ""
 msgid "Submit Validation Link"
 msgstr ""
 
-#: models/datareader.py:401 models/datareader.py:414 models/datareader.py:428
-#: models/datareader.py:447
+#: models/datareader.py:398 models/datareader.py:411 models/datareader.py:425
+#: models/datareader.py:444
 msgid "Event list"
 msgstr ""
 
-#: models/datareader.py:402
+#: models/datareader.py:399
 msgid "Showing events without source citation"
 msgstr ""
 
-#: models/datareader.py:415
+#: models/datareader.py:412
 msgid "Showing events without places"
 msgstr ""
 
-#: models/datareader.py:429
+#: models/datareader.py:426
 msgid "Showing persons without a birth event"
 msgstr ""
 
-#: models/datareader.py:448
+#: models/datareader.py:445
 msgid "Showing oldest persons and their age"
 msgstr ""
 
-#: models/datareader.py:461
+#: models/datareader.py:458
 msgid "List of places"
 msgstr ""
 
-#: models/datareader.py:462
+#: models/datareader.py:459
 msgid "Showing places"
 msgstr ""
 
-#: models/datareader.py:570 models/datareader.py:583
+#: models/datareader.py:567 models/datareader.py:580
 msgid "Source list"
 msgstr ""
 
-#: models/datareader.py:571
+#: models/datareader.py:568
 msgid "Showing sources without source citations"
 msgstr ""
 
-#: models/datareader.py:584
+#: models/datareader.py:581
 msgid "Showing sources without a repository"
+msgstr ""
+
+#: models/dataupdater.py:62
+msgid "Estimated {} person lifetimes"
 msgstr ""
 
 #: templates/_ng_table_repositories.html:10
@@ -1883,11 +1929,11 @@ msgstr ""
 msgid "Showing repositories"
 msgstr ""
 
-#: templates/a_layout.html:32
+#: templates/a_layout.html:35
 msgid "Version"
 msgstr ""
 
-#: templates/a_layout.html:35
+#: templates/a_layout.html:38
 msgid "Instructions"
 msgstr ""
 
@@ -2083,7 +2129,15 @@ msgstr ""
 msgid "All/Same Birth date"
 msgstr ""
 
-#: templates/person2.html:29
+#: templates/person2.html:21
+msgid "Sort name"
+msgstr ""
+
+#: templates/person2.html:25
+msgid "Db handle"
+msgstr ""
+
+#: templates/person2.html:34
 msgid "Identifier < br/> Type < br/> Date </div>"
 msgstr ""
 
@@ -2406,7 +2460,7 @@ msgstr ""
 msgid "Event type"
 msgstr ""
 
-#: templates/table_persons2.html:38
+#: templates/table_persons2.html:39
 msgid "No persons"
 msgstr ""
 
@@ -2766,6 +2820,31 @@ msgstr ""
 
 #~ msgid ""
 #~ "Read and accept < a href = "
+#~ "\"static/Conditionsofuse. html\" > Terms of"
+#~ " use"
+#~ msgstr ""
+
+#~ msgid "People"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Now the administrator can load your "
+#~ "file to database as yor new "
+#~ "candadate material set"
+#~ msgstr ""
+
+#~ msgid "This page contains %(num)s person."
+#~ msgid_plural "This page contains %(num)s person names."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "This page contains %(num)s person in %(order)s order."
+#~ msgid_plural "This page contains %(num)s persons in %(order)s order."
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid ""
+#~ "Read and accept <a href = "
 #~ "\"static/Conditionsofuse. html\" > Terms of"
 #~ " use"
 #~ msgstr ""

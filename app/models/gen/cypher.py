@@ -42,30 +42,77 @@ class Cypher_person():
     '''
     Cypher clases for creating and accessing Places
     '''
+    all_nodes_query_w_apoc="""
+MATCH (p:Person) WHERE id(p) = $pid
+CALL apoc.path.subgraphAll(p, {maxLevel:4, 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
+    YIELD nodes, relationships
+RETURN extract(x IN relationships | 
+        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
+        extract(x in nodes | x) as nodelist"""
+
+# Ver 0.2 Person lists with names and events
+    read_my_persons_with_events_from_name = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
+    WHERE prof.userName = $user AND p.sortname >= $start_name
+WITH p ORDER BY p.sortname LIMIT $limit
+  MATCH (p:Person) -[:NAME]-> (n:Name)
+  WITH p, n ORDER BY p.sortname, n.order
+    OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
+    OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
+RETURN p as person, 
+    collect(distinct n) as names, 
+    collect(distinct [e, pl.pname, rn.role]) as events
+ORDER BY p.sortname"""
+
+    read_all_persons_with_events_from_name = """
+MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
+    WHERE p.sortname >= $start_name
+WITH p, b.user as user ORDER BY p.sortname LIMIT $limit
+  MATCH (p:Person) -[:NAME]-> (n:Name)
+  WITH p, n ORDER BY p.sortname, n.order, user
+    OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
+    OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
+RETURN p as person, 
+    collect(distinct n) as names, 
+    collect(distinct [e, pl.pname, rn.role]) as events,
+    user
+ORDER BY p.sortname"""
+
+
+
+    read_persons_list_by_refn = """
+MATCH p = (search:Refname) -[:BASENAME*1..3 {use:'surname'}]-> (person:Person)
+WHERE search.name STARTS WITH 'Kottu'
+WITH search, person
+MATCH (person) -[:NAME]-> (name:Name)
+OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
+WITH name, person, COLLECT(DISTINCT refn.name) AS refnames, 
+    TOUPPER(LEFT(name.surname,1)) as initial
+OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
+OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
+RETURN CASE WHEN name.order = 0 THEN id(person) END as id, 
+    name, initial, 
+    person, refnames,
+    CASE WHEN name.order = 0 THEN COLLECT(DISTINCT [r.role, event.id, place.pname])
+    ELSE id(person)
+    END AS events
+ORDER BY TOUPPER(name.surname), name.firstname limit 20"""
+
+# Ver 0.1 different person lists
     _get_events_tail = """
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-RETURN person, name,
+RETURN person, COLLECT(DISTINCT name) as names,
     COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [r.role, event, place.pname]) AS events"""
-#     _get_events_tail = """
-#  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
-#  OPTIONAL MATCH (event) -[:EVENT]-> (place:Place)
-#  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-# RETURN ID(person) AS uniq_id, person.id as id, person.confidence AS confidence,
-#     person.est_birth AS est_birth, person.est_death AS est_death,
-#     name.firstname AS firstname, name.surname AS surname,
-#     name.suffix AS suffix, name.type as ntype,
-#     COLLECT(DISTINCT refn.name) AS refnames,
-#     COLLECT(DISTINCT [ID(event), event.type, event.datetype, 
-#         event.date1, event.date2, place.pname, event.role]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
-    ORDER BY TOUPPER(name.surname), name.firstname"""
+    ORDER BY TOUPPER(names[0].surname), names[0].firstname"""
     _get_events_firstname = """, LEFT(name.firstname,1) as initial 
-    ORDER BY TOUPPER(name.firstname), name.surname, name.suffix"""
+    ORDER BY TOUPPER(names[0].firstname), names[0].surname, names[0].suffix"""
     _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
-    ORDER BY TOUPPER(name.suffix), name.surname, name.firstname"""
+    ORDER BY TOUPPER(names[0].suffix), names[0].surname, names[0].firstname"""
 
     get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
         + _get_events_tail + _get_events_surname
@@ -107,10 +154,9 @@ MATCH (person:Person) WHERE ID(person)=$id
 SET person.confidence=$confidence"""
 
     set_sortname = """
-MATCH (person:Person) WHERE ID(person) IN $idlist
+MATCH (person:Person) WHERE ID(person) = $id
 SET person.sortname=$key"""
 
-# Todo: not in use
     set_est_lifetimes = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event)
     WHERE id(p) IN $idlist
@@ -118,7 +164,15 @@ WITH p, collect(e) AS events,
     max(e.date2) AS dmax, min(e.date1) AS dmin
 WHERE NOT (dmax IS NULL OR dmin IS NULL)
     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
-RETURN p, events"""
+RETURN null"""
+
+    set_est_lifetimes_all = """
+MATCH (p:Person) -[r:EVENT]-> (e:Event)
+WITH p, collect(e) AS events, 
+    max(e.date2) AS dmax, min(e.date1) AS dmin
+WHERE NOT (dmax IS NULL OR dmin IS NULL)
+    SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
+RETURN null"""
 
     get_w_names_notes = """
 MATCH (person:Person) -[r:NAME]-> (name:Name)

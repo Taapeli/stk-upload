@@ -22,7 +22,8 @@
         {% set tr_tag = "" %}
             <tr>
                 <td rowspan="{{ecnt}}"><a href="/pick/uniq_id={{p.uniq_id}}">{{p.uniq_id}}</a></td>
-                <td rowspan="{{ecnt}}">{{p.names[0].firstname}} <b>{{p.names[0].surname}}</b></td>
+                <td rowspan="{{ecnt}}">{{p.names[0].firstname}} <b>{{p.names[0].surname}}</b>
+                    <br><small class="id">{{p.sortname}}</small></td>
     	{% if p.events %}
         	{% for event in p.events %} {{tr_tag|safe}} {% set tr_tag="<tr>" %}
 	    		<td style="align:right;">{{event.type}}</td>
