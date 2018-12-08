@@ -205,7 +205,7 @@ return path"""
             # Events
     
             for enode, pname, role in record['events']:
-                if enode:
+                if enode != None:
                     e = Event_combo.from_node(enode)
                     e.place = pname or ""
                     if role and role != "Primary":
