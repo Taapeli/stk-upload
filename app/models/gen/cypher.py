@@ -56,16 +56,48 @@ RETURN extract(x IN relationships |
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
     WHERE prof.userName = $user AND p.sortname >= $start_name
 WITH p ORDER BY p.sortname LIMIT $limit
-  MATCH (p:Person) -[:NAME]-> (n:Name)
-  WITH p, n ORDER BY p.sortname, n.order
-    OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
-    OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
+    MATCH (p:Person) -[:NAME]-> (n:Name)
+    OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
+    OPTIONAL MATCH (p) <-[:MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
+WITH p, n, re.role as role, e, f.rel_type as rel, fe  ORDER BY p.sortname, n.order
+    OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
+    OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
 RETURN p as person, 
-    collect(distinct n) as names, 
-    collect(distinct [e, pl.pname, rn.role]) as events
-ORDER BY p.sortname"""
+    COLLECT(distinct n) AS names,
+    COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events 
+    ORDER BY person.sortname"""
+#     xxxx_my_persons_with_events_from_name = """
+# MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
+#     WHERE prof.userName = $user AND p.sortname >= $start_name
+# WITH p ORDER BY p.sortname LIMIT $limit
+#   MATCH (p:Person) -[:NAME]-> (n:Name)
+# WITH p, n ORDER BY p.sortname, n.order
+#     OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
+#     OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
+# RETURN p as person, 
+#     collect(distinct n) as names, 
+#     collect(distinct [e, pl.pname, rn.role]) as events
+# ORDER BY p.sortname"""
 
     read_all_persons_with_events_from_name = """
+MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
+    WHERE p.sortname >= $start_name
+WITH p, b.user as user
+ORDER BY p.sortname LIMIT $limit
+    MATCH (p:Person) -[:NAME]-> (n:Name)
+    OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
+    OPTIONAL MATCH (p) <-[:MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
+WITH p, n, re.role as role, e, f.rel_type as rel, fe, user
+ORDER BY p.sortname, n.order
+    OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
+    OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
+RETURN p as person, 
+    COLLECT(distinct n) as names, 
+    COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events,
+    user
+ORDER BY person.sortname"""
+
+    xxxx_all_persons_with_events_from_name = """
 MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
     WHERE p.sortname >= $start_name
 WITH p, b.user as user ORDER BY p.sortname LIMIT $limit
