@@ -127,6 +127,29 @@ td.numbers {
 	font-size: 84%;
 /* 	color: darkslategray; */
 }
+/* Button style link (Next - Previous) */
+.navbar { text-align: center; 
+  background-color: #EEE;
+}
+.navlink, a.navlink:link, a.navlink:visited {
+  background-color: lightgray;
+  border: 1pt solid black;
+  border-radius: 10px;
+  color: black;
+  padding: 2px 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin-left:4px;
+}
+a.navlink:hover, a.navlink:active {
+  background-color: gray;
+}
+.navlink {
+  background-color: white;
+  color: gray;
+  border-color: gray;
+}
 
 /* Styles with icon  */
 

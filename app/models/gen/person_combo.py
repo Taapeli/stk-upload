@@ -144,24 +144,24 @@ return path"""
             return None
 
     @staticmethod
-    def read_my_persons_list(user=None, show="my", start_name="", limit=100):
+    def read_my_persons_list(user=None, show="own", fw_from="", bw_from="Not used yet", limit=100):
         """ Reads Person Name and Event objects for display.
-            By default, 100 names are got beginning from start_name 
+            By default, 100 names are got beginning from fw_from 
 
             Returns Person objects, with included Events and Names
             ordered by Person.sortname
         """
-        def _read_person_list(user, start_name, limit):
-            """ Read Person data from given start_name 
+        def _read_person_list(user, fw_from, limit):
+            """ Read Person data from given fw_from 
             """
             try:
                 with shareds.driver.session() as session:
-                    if show == "my":
+                    if show == "own":
                         result = session.run(Cypher_person.read_my_persons_with_events_from_name,
-                                             user=user, start_name=start_name, limit=limit)
+                                             user=user, start_name=fw_from, limit=limit)
                     elif show == "all":
                         result = session.run(Cypher_person.read_all_persons_with_events_from_name,
-                                             user=user, start_name=start_name, limit=limit)
+                                             user=user, start_name=fw_from, limit=limit)
                     return result        
             except Exception as e:
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
@@ -169,7 +169,7 @@ return path"""
 
 
         persons = []
-        result = _read_person_list(user, start_name, limit)
+        result = _read_person_list(user, fw_from, limit)
         for record in result:
             ''' <Record 
                     person=<Node id=163281 labels={'Person'} 

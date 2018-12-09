@@ -10,6 +10,7 @@ import time
 
 from flask import render_template, request, redirect, url_for, flash
 from flask_security import current_user, login_required
+from urllib.parse import urlencode, quote_plus
 
 from . import bp
 from bp.scene.data_reader import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id
@@ -86,46 +87,62 @@ def show_persons_by_refname(refname, opt=""):
 # ------------------------------ Menu 1 Persons --------------------------------
 
 @bp.route('/scene/persons_own/')
-@bp.route('/scene/persons_own/<string:start>')
-@bp.route('/scene/persons_all/<string:start>/<int:count>')
+# @bp.route('/scene/persons_own/<string:start>')
+# @bp.route('/scene/persons_all/<string:start>/<int:count>')
 @login_required
-def show_my_persons(start='', count=100):
+def show_my_persons():
     """ List all persons for menu(11)
         Restriction by owner's UserProfile 
     """
+    fw_from = request.args.get('f', '')
+    bw_from = request.args.get('b', '')
+    count = request.args.get('c', 100, type=int)
     t0 = time.time()
-    keys = ('all',)
+    
+    keys = ('own',)
     if current_user.is_authenticated:
         user=current_user.username
     else:
         user=None
-    persons = Person_combo.read_my_persons_list(user, show="my", 
-                                                start_name=start, limit=count)
+    persons = Person_combo.read_my_persons_list(user, show="own", limit=count,
+                                                fw_from=fw_from, bw_from=bw_from)
+    next_links = dict()
+    if persons:
+        if fw_from:
+            next_links['bw'] = quote_plus(persons[0].sortname)
+        next_links['fw'] = quote_plus(persons[-1].sortname)
+
     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
-                           pick=None, rule=keys, elapsed=time.time()-t0)
+                           pick=None, next=next_links, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons_all/')
-@bp.route('/scene/persons_all/<string:start>')
-@bp.route('/scene/persons_all/<string:start>/<int:count>')
+# @bp.route('/scene/persons_all/<string:start>')
+# @bp.route('/scene/persons_all/<string:start>/<int:count>')
 #     @login_required
-def show_my_persons_all(start='', count=100):
+def show_my_persons_all():
     """ List all persons for menu(12)
         Both owners and other persons 
     """
     t0 = time.time()
+    fw_from = request.args.get('f', '')
+    bw_from = request.args.get('b', '')
+    count = request.args.get('c', 100, int)
+
     keys = ('all',)
     if current_user.is_authenticated:
         user=current_user.username
     else:
         user=None
-#     if 'fn' in opt: order = 1   # firstname
-#     elif 'pn' in opt: order = 2 # firstname
-#     else: order = 0             # surname
-    persons = Person_combo.read_my_persons_list(user, show="all", 
-                                                start_name=start, limit=count)
-#     persons = read_persons_with_events(keys, user=user)
+    persons = Person_combo.read_my_persons_list(user, show="all", limit=count,
+                                                fw_from=fw_from, bw_from=bw_from)
+    next_links = dict()
+    if persons:
+        if fw_from:
+            next_links['bw'] = quote_plus(persons[0].sortname)
+        next_links['fw'] = quote_plus(persons[-1].sortname)
+
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
-                           pick=user, rule=keys, elapsed=time.time()-t0)
+                           pick=user, next=next_links, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')
