@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-07 11:45+0200\n"
+"POT-Creation-Date: 2018-12-09 20:57+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -463,7 +463,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/layout.html:14
 #: bp/scene/templates/scene/layout.html:23
-#: bp/scene/templates/scene/list_persons.html:58
+#: bp/scene/templates/scene/list_persons.html:78
 #: bp/scene/templates/scene/locations.html:34
 #: bp/scene/templates/scene/persons.html:109
 #: bp/scene/templates/scene/sources.html:39 templates/a_layout.html:22
@@ -1171,51 +1171,52 @@ msgstr ""
 msgid "Persons"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:19
+#: bp/scene/templates/scene/list_persons.html:21
 #, python-format
 msgid "Displaying %(num)s person names."
 msgid_plural "Displaying %(num)s person names."
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/scene/templates/scene/list_persons.html:22
-msgid ""
-"If the person has alternative names, they will appear in the list under "
-"each name."
+#: bp/scene/templates/scene/list_persons.html:30
+msgid "Go to"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:24
-#: bp/scene/templates/scene/persons.html:30
-msgid "Clicking a name will take you to the selected person's page."
+#: bp/scene/templates/scene/list_persons.html:31
+#: bp/scene/templates/scene/person.html:39
+#: bp/scene/templates/scene/person.html:164
+#: bp/scene/templates/scene/persons.html:34
+#: bp/scene/templates/scene/persons.html:63 templates/table_surnames.html:10
+msgid "Surname"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:40
+#: bp/scene/templates/scene/list_persons.html:54
 #: bp/scene/templates/scene/locations.html:15
 #: bp/scene/templates/scene/persons.html:90
 #: bp/scene/templates/scene/sources.html:16
 msgid "Top"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:43
+#: bp/scene/templates/scene/list_persons.html:57
 #: bp/scene/templates/scene/locations.html:18
 #: bp/scene/templates/scene/persons.html:93
 #: bp/scene/templates/scene/sources.html:19
 msgid "Alphabetical Menu"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:50
+#: bp/scene/templates/scene/list_persons.html:65
 #: bp/scene/templates/scene/persons.html:100
 #: bp/scene/templates/scene/place_events.html:107
 #: bp/scene/templates/scene/source_events.html:47 templates/person2.html:8
 msgid "Person"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:51
+#: bp/scene/templates/scene/list_persons.html:66
 #: bp/scene/templates/scene/persons.html:101
 msgid "Person's events"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:63
+#: bp/scene/templates/scene/list_persons.html:85
 #: bp/scene/templates/scene/macros.html:78
 #: bp/scene/templates/scene/persons.html:114
 #: bp/scene/templates/scene/source_events.html:41
@@ -1224,11 +1225,15 @@ msgstr ""
 msgid "see details of person %(id)s"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:70
+#: bp/scene/templates/scene/list_persons.html:103
+msgid "Original ID"
+msgstr ""
+
+#: bp/scene/templates/scene/list_persons.html:105
 msgid "Sorting name"
 msgstr ""
 
-#: bp/scene/templates/scene/list_persons.html:88
+#: bp/scene/templates/scene/list_persons.html:123
 #: bp/scene/templates/scene/persons.html:143
 msgid "No one found with search keys"
 msgstr ""
@@ -1350,13 +1355,6 @@ msgstr ""
 #: bp/scene/templates/scene/persons.html:69 templates/select_refcols.html:32
 #: templates/select_refcols.html:60
 msgid "Patronymic"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:39
-#: bp/scene/templates/scene/person.html:164
-#: bp/scene/templates/scene/persons.html:34
-#: bp/scene/templates/scene/persons.html:63 templates/table_surnames.html:10
-msgid "Surname"
 msgstr ""
 
 #: bp/scene/templates/scene/person.html:42
@@ -1644,6 +1642,10 @@ msgid ""
 "name."
 msgstr ""
 
+#: bp/scene/templates/scene/persons.html:30
+msgid "Clicking a name will take you to the selected person's page."
+msgstr ""
+
 #: bp/scene/templates/scene/persons.html:32
 msgid "Change Order:"
 msgstr ""
@@ -1845,6 +1847,7 @@ msgid "Login with your credentialst (email or username)"
 msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:53
+#: bp/stk_security/templates/security/register_user.html:38
 msgid "Approved user's actions"
 msgstr ""
 
@@ -1857,15 +1860,7 @@ msgid "Fill in the User Information Form of Finland database Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:15
-msgid "Register  as a database user of Finland database Service"
-msgstr ""
-
-#: bp/stk_security/templates/security/register_user.html:30
-msgid "Read and accept <a href=\"static/termsofuse.html\"> Terms of use</a>"
-msgstr ""
-
-#: bp/stk_security/templates/security/register_user.html:38
-msgid "I approve user actions"
+msgid "Register  as a database user of Suomi tietokanta Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/send_confirmation.html:5
@@ -2847,5 +2842,20 @@ msgstr ""
 #~ "Read and accept <a href = "
 #~ "\"static/Conditionsofuse. html\" > Terms of"
 #~ " use"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the person has alternative names, "
+#~ "they will appear in the list under"
+#~ " each name."
+#~ msgstr ""
+
+#~ msgid "Register  as a database user of Finland database Service"
+#~ msgstr ""
+
+#~ msgid "Read and accept <a href=\"static/termsofuse.html\"> Terms of use</a>"
+#~ msgstr ""
+
+#~ msgid "I approve user actions"
 #~ msgstr ""
 

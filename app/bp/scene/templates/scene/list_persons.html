@@ -16,11 +16,24 @@
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
-            <p id="description">{{ ngettext(
-    			'Displaying %(num)s person names.', 
-    			'Displaying %(num)s person names.', cnt) }}
-	   		  {{ _("Clicking a name will take you to the selected person's page.") }} 
-    		</p>
+            <div class="flex-container">
+	           <div>
+	            <p id="description">{{ ngettext(
+	                'Displaying %(num)s person names.', 
+	                'Displaying %(num)s person names.', cnt) }}
+	            </p>
+	           </div>
+	           <div>
+	               <form action="/scene/persons_{{rule[0]}}/">
+	                 <fieldset>
+	                    <input type="hidden" name="c" value="10" >
+	                    <label for="f">{{ _('Go to') }}</label>
+	                    <input type="text" name="f" size="8" placeholder="{{ _('Surname') }}">
+	                    <input type="submit" value=" > ">
+	                 </fieldset>
+	               </form>
+	           </div>
+            </div>
 	        {% with messages = get_flashed_messages(with_categories=true) %}
 	          {% if messages %}
 	            <ul  class='flashes'>

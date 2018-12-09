@@ -151,6 +151,19 @@ a.navlink:hover, a.navlink:active {
   border-color: gray;
 }
 
+/* Flexbox boxes floats next to each other */
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.flex-container > div {
+  background-color: ivory;
+  width: 300px;
+  /*border: 1px solid lightgray;*/
+  margin: 1em;
+}
+
 /* Styles with icon  */
 
 .icon::before {
