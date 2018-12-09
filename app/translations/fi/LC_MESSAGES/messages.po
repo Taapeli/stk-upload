@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-07 11:45+0200\n"
+"POT-Creation-Date: 2018-12-09 20:57+0200\n"
 "PO-Revision-Date: 2018-11-12 09:41+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -465,7 +465,7 @@ msgstr "Ylläpitäjän sivut"
 
 #: bp/admin/templates/admin/layout.html:14
 #: bp/scene/templates/scene/layout.html:23
-#: bp/scene/templates/scene/list_persons.html:58
+#: bp/scene/templates/scene/list_persons.html:78
 #: bp/scene/templates/scene/locations.html:34
 #: bp/scene/templates/scene/persons.html:109
 #: bp/scene/templates/scene/sources.html:39 templates/a_layout.html:22
@@ -1173,53 +1173,52 @@ msgstr "Henkilöt, joilla on nimi"
 msgid "Persons"
 msgstr "Henkilöt"
 
-#: bp/scene/templates/scene/list_persons.html:19
+#: bp/scene/templates/scene/list_persons.html:21
 #, python-format
 msgid "Displaying %(num)s person names."
 msgid_plural "Displaying %(num)s person names."
 msgstr[0] "Näytetään %(num)s henkilö."
 msgstr[1] "Näytetään %(num)s henkilöä."
 
-#: bp/scene/templates/scene/list_persons.html:22
-msgid ""
-"If the person has alternative names, they will appear in the list under "
-"each name."
-msgstr ""
-"Jos henkilöllä on vaihtoehtoisia nimiä, hän on listalla toistuvasti, "
-"kullakin nimellä."
+#: bp/scene/templates/scene/list_persons.html:30
+msgid "Go to"
+msgstr "Siirry"
 
-#: bp/scene/templates/scene/list_persons.html:24
-#: bp/scene/templates/scene/persons.html:30
-msgid "Clicking a name will take you to the selected person's page."
-msgstr "Nimen napsauttaminen vie sinut valitun henkilön sivulle."
+#: bp/scene/templates/scene/list_persons.html:31
+#: bp/scene/templates/scene/person.html:39
+#: bp/scene/templates/scene/person.html:164
+#: bp/scene/templates/scene/persons.html:34
+#: bp/scene/templates/scene/persons.html:63 templates/table_surnames.html:10
+msgid "Surname"
+msgstr "sukunimi"
 
-#: bp/scene/templates/scene/list_persons.html:40
+#: bp/scene/templates/scene/list_persons.html:54
 #: bp/scene/templates/scene/locations.html:15
 #: bp/scene/templates/scene/persons.html:90
 #: bp/scene/templates/scene/sources.html:16
 msgid "Top"
 msgstr "Alkuun"
 
-#: bp/scene/templates/scene/list_persons.html:43
+#: bp/scene/templates/scene/list_persons.html:57
 #: bp/scene/templates/scene/locations.html:18
 #: bp/scene/templates/scene/persons.html:93
 #: bp/scene/templates/scene/sources.html:19
 msgid "Alphabetical Menu"
 msgstr "Aakkosmenu"
 
-#: bp/scene/templates/scene/list_persons.html:50
+#: bp/scene/templates/scene/list_persons.html:65
 #: bp/scene/templates/scene/persons.html:100
 #: bp/scene/templates/scene/place_events.html:107
 #: bp/scene/templates/scene/source_events.html:47 templates/person2.html:8
 msgid "Person"
 msgstr "Henkilö"
 
-#: bp/scene/templates/scene/list_persons.html:51
+#: bp/scene/templates/scene/list_persons.html:66
 #: bp/scene/templates/scene/persons.html:101
 msgid "Person's events"
 msgstr "Henkilön tapahtumat"
 
-#: bp/scene/templates/scene/list_persons.html:63
+#: bp/scene/templates/scene/list_persons.html:85
 #: bp/scene/templates/scene/macros.html:78
 #: bp/scene/templates/scene/persons.html:114
 #: bp/scene/templates/scene/source_events.html:41
@@ -1228,11 +1227,15 @@ msgstr "Henkilön tapahtumat"
 msgid "see details of person %(id)s"
 msgstr "Katso henkilön %(id)s tiedot"
 
-#: bp/scene/templates/scene/list_persons.html:70
-msgid "Sorting name"
-msgstr ""
+#: bp/scene/templates/scene/list_persons.html:103
+msgid "Original ID"
+msgstr "Alkuperäinen tunniste"
 
-#: bp/scene/templates/scene/list_persons.html:88
+#: bp/scene/templates/scene/list_persons.html:105
+msgid "Sorting name"
+msgstr "Lajitteluavain"
+
+#: bp/scene/templates/scene/list_persons.html:123
 #: bp/scene/templates/scene/persons.html:143
 msgid "No one found with search keys"
 msgstr "Ketään ei löytynyt hakutiedoilla"
@@ -1357,13 +1360,6 @@ msgstr "etunimi"
 #: templates/select_refcols.html:60
 msgid "Patronymic"
 msgstr "patronyymi"
-
-#: bp/scene/templates/scene/person.html:39
-#: bp/scene/templates/scene/person.html:164
-#: bp/scene/templates/scene/persons.html:34
-#: bp/scene/templates/scene/persons.html:63 templates/table_surnames.html:10
-msgid "Surname"
-msgstr "sukunimi"
 
 #: bp/scene/templates/scene/person.html:42
 msgid "Reference name"
@@ -1650,6 +1646,10 @@ msgid ""
 "name."
 msgstr "Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä."
 
+#: bp/scene/templates/scene/persons.html:30
+msgid "Clicking a name will take you to the selected person's page."
+msgstr "Nimen napsauttaminen vie sinut valitun henkilön sivulle."
+
 #: bp/scene/templates/scene/persons.html:32
 msgid "Change Order:"
 msgstr "Vaihda järjestys:"
@@ -1853,6 +1853,7 @@ msgid "Login with your credentialst (email or username)"
 msgstr "Kirjaudu tunnuksillasi (sähköposti tai käyttäjätunnus)"
 
 #: bp/stk_security/templates/security/login_user.html:53
+#: bp/stk_security/templates/security/register_user.html:38
 msgid "Approved user's actions"
 msgstr "Kirjautuneen käyttäjän toimintoja"
 
@@ -1865,16 +1866,8 @@ msgid "Fill in the User Information Form of Finland database Service"
 msgstr "Täytä käyttäjätietolomake Suomikantaan"
 
 #: bp/stk_security/templates/security/register_user.html:15
-msgid "Register  as a database user of Finland database Service"
+msgid "Register  as a database user of Suomi tietokanta Service"
 msgstr "Rekisteröidy Suomitietokannan käyttäjäksi"
-
-#: bp/stk_security/templates/security/register_user.html:30
-msgid "Read and accept <a href=\"static/termsofuse.html\"> Terms of use</a>"
-msgstr "Lue ja hyväksy <a href=\"static/termsofuse.html\"> käyttöehdot</a>"
-
-#: bp/stk_security/templates/security/register_user.html:38
-msgid "I approve user actions"
-msgstr "Hyväksyn käyttöehdot"
 
 #: bp/stk_security/templates/security/send_confirmation.html:5
 msgid "Verifying registration"
