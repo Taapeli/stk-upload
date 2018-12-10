@@ -169,6 +169,7 @@ return path"""
 
 
         persons = []
+        print("Show {} {} persons for user {} starting from {!r}".format(limit, show, user, fw_from))
         result = _read_person_list(user, fw_from, limit)
         for record in result:
             ''' <Record 

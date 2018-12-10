@@ -7,7 +7,7 @@
 
 
 {% macro stars(value) -%}
-   {# Uses version 5 of fontawesome.com.  Remember to add following to your htmlpage!
+   {# EI ENÄÄ: Uses version 5 of fontawesome.com.  Remember to add following to your htmlpage!
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
           crossorigin="anonymous">
@@ -16,22 +16,30 @@
       Half-closed star, solid Style (fas) f5c0 <i class="fas fa-star-half-alt"></i>
       Closed star, solid Style (fas)      f005 <i class="fas fa-star"></i>
    #}
+   {# Also possible: https://www.w3schools.com/charsets/ref_utf_symbols.asp
+      filled BLACK STAR &#9733;   open WHITE STAR &#9734; 
+      WHITE FROWNING FACE &#9785; BLACK FLAG &#9873;
+      SOUTH EAST ARROW TO CORNER &#8690; (outlink)
+   #}
    {% if value < 2 %}
-     {% if value == 0 %}<i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i>
-     {% else %}<i class='fa fa-exclamation-circle'></i>{% endif %}
+     {% if value == 0 %}&#9873;&#9873;
+     <!-- i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i -->
+     {% else %}&#9873;
+     <!-- i class='fa fa-exclamation-circle'></i -->
+     {% endif %}
    {% else %}
-     {% if   value < 2.25 %}
-     <i class="far fa-star"></i><i class="far fa-star"></i>
-     {% elif value < 2.75 %}
-     <i class="far fa-star"></i></i><i class="far fa-star-half"></i>
-     {% elif value < 3.25 %}
-     <i class="far fa-star"></i><i class='far fa-star'></i>
-     {% elif value < 3.75 %}
-     <i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i>
-     {% elif value < 4.25 %}
-     <i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i>
-     {% elif value < 4.75 %}
-     <i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i>
+     {% if   value < 2.25 %}&#9733;&#9733;
+     <!-- i class="far fa-star"></i><i class="far fa-star"></i -->
+     {% elif value < 2.75 %}&#9733;&#9734;
+     <!-- i class="far fa-star"></i></i><i class="far fa-star-half"></i -->
+     {% elif value < 3.25 %}&#9733;&#9733;
+     <!-- i class="far fa-star"></i><i class='far fa-star'></i -->
+     {% elif value < 3.75 %}&#9733;&#9733;&#9734;
+     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i -->
+     {% elif value < 4.25 %}&#9733;&#9733;&#9733;
+     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i -->
+     {% elif value < 4.75 %}&#9733;&#9733;&#9733;&#9734;
+     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i -->
      {% endif %}
    {% endif %}                           
 {%- endmacro %}
