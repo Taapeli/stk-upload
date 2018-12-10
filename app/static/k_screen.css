@@ -177,10 +177,12 @@ a.navlink:hover, a.navlink:active {
     text-decoration: none;
     color: maroon;
     background: bisque;
-}.outlink::before {
-	margin-right: 5px;
+    padding-right: 5px;
+    padding-left: 5px;
+}
+.outlink::before {
     /* font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f360"; */
-    content: "\21D2";   /*  SOUTH EAST ARROW TO CORNER */
+    content: "\21D2";   /* RIGHTWARDS DOUBLE ARROW / SOUTH EAST ARROW TO CORNER? */
 }
 
 /* General Text
