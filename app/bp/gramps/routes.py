@@ -89,7 +89,7 @@ def xml_delete(xmlfile):
     return redirect(url_for('gramps.list_uploads'))
 
 @bp.route('/gramps/xml_download/<xmlfile>')
-@roles_accepted('admin', 'audit')
+@roles_accepted('member', 'admin')
 def xml_download(xmlfile):
     xml_folder = uploads.get_upload_folder(current_user.username)
     xml_folder = os.path.abspath(xml_folder)
