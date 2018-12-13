@@ -375,6 +375,7 @@ def process_gedcom(cmd, transform_module):
         init_log(args.logfile)
         with Output(args) as out:
             out.original_line = None
+            out.transform_name = transform_module.__name__
             saved_stdout = sys.stdout
             saved_stderr = sys.stdout
             sys.stdout = io.StringIO()

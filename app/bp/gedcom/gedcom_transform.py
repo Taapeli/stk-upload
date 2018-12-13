@@ -134,6 +134,7 @@ def process_gedcom(args, transform_module, task_name=''):
             if hasattr(transform_module,"phase3"):
                 # 2nd traverse "phase3"
                 with Output(args) as f:
+                    f.transform_name = transform_module.__name__
                     f.display_changes = args.display_changes
                     for gedline in read_gedcom(args):
                         if do_phase4 and gedline.tag == "TRLR":
