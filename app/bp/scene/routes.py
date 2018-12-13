@@ -9,7 +9,7 @@ logger = logging.getLogger('stkserver')
 import time
 
 from flask import render_template, request, redirect, url_for, flash
-from flask_security import current_user, login_required
+from flask_security import current_user, login_required, roles_accepted
 from urllib.parse import urlencode, quote_plus
 
 from . import bp
@@ -87,9 +87,10 @@ def show_persons_by_refname(refname, opt=""):
 # ------------------------------ Menu 1 Persons --------------------------------
 
 @bp.route('/scene/persons_own/')
-# @bp.route('/scene/persons_own/<string:start>')
-# @bp.route('/scene/persons_all/<string:start>/<int:count>')
 @login_required
+#Todo: The roles should be forwarded to macros.html: should not show  menu(11)
+#
+#@roles_accepted('member', 'admin', "research", "audit")
 def show_my_persons():
     """ List all persons for menu(11)
         Restriction by owner's UserProfile 
@@ -116,8 +117,6 @@ def show_my_persons():
                            pick=None, next=next_links, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons_all/')
-# @bp.route('/scene/persons_all/<string:start>')
-# @bp.route('/scene/persons_all/<string:start>/<int:count>')
 #     @login_required
 def show_my_persons_all():
     """ List all persons for menu(12)

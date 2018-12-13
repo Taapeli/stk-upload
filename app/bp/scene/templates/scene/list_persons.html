@@ -28,7 +28,9 @@
 	                 <fieldset>
 	                    <input type="hidden" name="c" value="10" >
 	                    <label for="f">{{ _('Go to') }}</label>
-	                    <input type="text" name="f" size="8" placeholder="{{ _('Surname') }}">
+	                    <input type="text" name="f" size="8" 
+	                     title="{{ _('Starting letters of surname') }}" 
+	                     placeholder="{{ _('Surname') }}">
 	                    <input type="submit" value=" > ">
 	                 </fieldset>
 	               </form>
@@ -47,16 +49,18 @@
 
     {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
-			<ul><li>{% if next['bw'] %}<a href="/scene/persons_{{rule[0]}}/" class="navlink">|&lt;</a>
+			<ul><li>{% if next['bw'] %}<a href="/scene/persons_{{rule[0]}}/" title="alkuun" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
-                <li><span class="navlink"> &lt; </span></li>
+                <li><span class="navlink" title="edellinen sivu"> &lt; </span></li>
                 <li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
         {% for p in persons %}{% set ini = p.sortname[0]|upper %}
-            {% if alpha != ini %}{%set alpha = ini %}
-                <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
+            {% if alpha != ini %}
+                {% set alpha = ini %}
+                {% if alpha == "#" %}{% set symbol = '_' %}{% else %}{% set symbol = ini %}{% endif %}
+                <li><a href="#{{symbol}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{symbol}}</a></li>
             {% endif %}{% endfor %}
-            <li><a href="/scene/persons_{{rule[0]}}/?f={{next['fw']}}" class="navlink"> &gt; </a></li>
+            <li><a href="/scene/persons_{{rule[0]}}/?f={{next['fw']}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
 			</ul>
 		</div>
 		<table class="IndividualList">
@@ -74,8 +78,10 @@
 	       {% else %}{% set notMine = 0 %}
 	       {% endif %}
 	            <tr><td class="ColumnAlpha">{% set ini = p.sortname[0] %}
-	               {% if alpha != ini %}{%set alpha = ini %}
-		               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
+		           {% if alpha != ini %}
+		              {% set alpha = ini %}
+		               {% if alpha == "#" %}{% set symbol = '_' %}{% else %}{% set symbol = ini %}{% endif %}
+		               <a id="{{symbol}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{symbol}}</a>
 	               {% endif %}</td>
 
 	                <td class="ColumnPerson"><div>

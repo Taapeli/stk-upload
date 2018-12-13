@@ -6,6 +6,7 @@ from flask_babelex import _
 
 from .. import transformer
 from ..transformer import Item
+from _collections import defaultdict
 
 version = "1.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Suku2004-ohjelma"
@@ -28,9 +29,19 @@ def add_args(parser):
                         help=_('Change MARR to MARB if TYPE=Kuulutus'))
     parser.add_argument('--compress_sours', action='store_true',
                         help=_('Remove empty CONT lines under SOUR'))
+    parser.add_argument('--combine_plac_and_addr', action='store_true',
+                        help=_('Combine PLAC and ADDR'))
 
 def initialize(options):
     return Suku2004()
+
+
+def count_tags(items):
+    res = defaultdict(int)
+    for item in items:
+        res[item.tag] += 1
+    return res
+
 
 class Suku2004(transformer.Transformation):
     def transform(self,item,options,phase):
@@ -93,5 +104,33 @@ class Suku2004(transformer.Transformation):
                     if c.tag == "CONC":
                         newitem.value += c.value
                 return newitems
+
+        if options.combine_plac_and_addr:
+            if item.tag in {"BIRT","DEAT"}:
+                counts = count_tags(item.children)
+                if counts["PLAC"] == 1 and counts["ADDR"] == 1:
+                    newitems = []
+                    # 1 BIRT
+                    # 2 DATE 7 MAY 1998
+                    # 2 PLAC California
+                    # 2 ADDR San Jose
+                    # 3 CONT USA 
+                    # ->
+                    # 1 BIRT
+                    # 2 DATE 7 MAY 1998
+                    # 2 PLAC California
+                    # 3 CONC , San Jose
+                    # 3 CONC , USA 
+    
+                    for c in item.children:
+                        if c.tag == "ADDR":
+                            c.tag = "CONC"
+                            c.value = ", " + c.value
+                            c.level += 1
+                            for c2 in c.children:
+                                if c2.tag == "CONT":
+                                    c2.tag = "CONC"
+                                    c2.value = ", " + c2.value
+                    return item
 
         return True
