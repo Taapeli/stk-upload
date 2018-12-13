@@ -182,7 +182,7 @@ a.navlink:hover, a.navlink:active {
 }
 .outlink::before {
     /* font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f360"; */
-    content: "\21D2";   /* RIGHTWARDS DOUBLE ARROW / SOUTH EAST ARROW TO CORNER? */
+    content: "\260D";   /* RIGHTWARDS DOUBLE ARROW / SOUTH EAST ARROW TO CORNER? */
 }
 
 /* General Text

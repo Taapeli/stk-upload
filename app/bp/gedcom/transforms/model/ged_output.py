@@ -78,14 +78,18 @@ class Output:
                 v = " v." + _VERSION
             except NameError:
                 v = ""
-            self.emit("1 NOTE _TRANSFORM{} {}".format(v, sys.argv[0]))
+            self.emit("1 NOTE _TRANSFORM{} {}".format(v, self.transform_name))
+            self.emit("2 CONT args:")
+            for name,value in vars(self.args).items():
+                self.emit("1 CONT - {}={}".format(name,value))
             self.emit("2 CONT _COMMAND {} {}".\
                       format(os.path.basename(sys.argv[0]), " ".join(args)))
             user = getpass.getuser()
             if not user:
                 user = "Unnamed"
             datestring = util.format_timestamp()
-            self.emit("2 CONT _DATE {} {}".format(user, datestring))
+            self.emit("2 CONT _USER {}".format(user))
+            self.emit("2 CONT _DATE {}".format(datestring))
             if self.new_name:
                 self.emit("2 CONT _SAVEDFILE " + self.new_name)
     write = emit
