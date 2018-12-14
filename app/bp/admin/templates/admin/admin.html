@@ -5,6 +5,27 @@
 {% block body %}
 {{ super() }}
 
+<script>
+function confirm_clear(url) {
+	var msg = "{{ _('Are you sure you want to clear the database?') }}";
+	var ok = confirm(msg);
+	if (!ok) {
+		return false;
+	}
+	location.href = url;
+	return true;
+}
+function confirm_delete(url) {
+	var msg = "{{ _('Are you sure you want to delete your data?') }}";
+	var ok = confirm(msg);
+	if (!ok) {
+		return false;
+	}
+	location.href = url;
+	return true;
+}
+</script>
+
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
     <h2>{{ _('Welcome to Finland Database') }}, {{current_user.username}}</h2>
@@ -35,9 +56,9 @@
         <h3>{{ _('Database Emptyings') }}</h3>
             <p><i>{{ _('The information is deleted without further asking!') }}</i></p>
             <ul>
-              <li><a href="/admin/clear_db/total">{{ _('Clear entire database') }}</a></li>
-              <li><a href="/admin/clear_db/save_users">{{ _('Clear entire database but saving user IDs') }}</a></li>
-              <li><a href="/admin/clear_db/my_own">{{ _('Delete my imported data') }} 
+              <li><a href="#" onclick="confirm_clear('/admin/clear_db/total')">{{ _('Clear entire database') }}</a></li>
+              <li><a href="#" onclick="confirm_clear('/admin/clear_db/save_users')">{{ _('Clear entire database but saving user IDs') }}</a></li>
+              <li><a href="#" onclick="confirm_delete('/admin/clear_db/my_own')">{{ _('Delete my imported data') }} 
                   ({{current_user.username}})</a></li>
             </ul>
       </div>
