@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger('stkserver')
 import time
 
-from flask import render_template, request, redirect, url_for, flash 
+from flask import render_template, request, redirect, url_for, flash, g
 from flask_security import login_required, roles_accepted, current_user # ,roles_required
 from flask_babelex import _
 
@@ -421,7 +421,7 @@ babel = Babel(app)
 @babel.localeselector
 def get_locale():
     try:
-        print(current_user)
+        g.locale = current_user.language 
         return current_user.language
     except:
         pass
