@@ -1,5 +1,5 @@
 var gt = new Gettext({domain: 'gedcom_transformations'});
-var _ = function(msgid) { return gt.gettext(msgid); };
+var _ = function(msgid,args) { return gt.strargs(gt.gettext(msgid),args); };
 var ngettext = function(msgid, msgid_plural, n) { return gt.ngettext(msgid, msgid_plural, n); };
 	
 function hide_all() {
@@ -74,8 +74,8 @@ $(document).ready( function() {
     	$.get("/gedcom/compare/" + gedcom1 + "/" + gedcom2,function(rsp) {
         	$("#difftable").html(rsp.diff);
         	$("button.palauta_button").hide();
-        	$("#palauta1").text(_('Revert to %(gedcom)s', gedcom1)).data("gedcom",gedcom1);
-        	$("#palauta2").text(_('Revert to %(gedcom)s', gedcom2)).data("gedcom",gedcom2);
+        	$("#palauta1").text(_('Revert to %1', [gedcom1])).data("gedcom",gedcom1);
+        	$("#palauta2").text(_('Revert to %1', [gedcom2])).data("gedcom",gedcom2);
         	if (!gedcom1.match(/\.ged$/)) $("#palauta1").show();
         	if (!gedcom2.match(/\.ged$/)) $("#palauta2").show();
         	$("#div_compare").show();
@@ -85,14 +85,14 @@ $(document).ready( function() {
 		var version = $(this).data("gedcom");
         $.get("/gedcom/revert/" + gedcom + "/" + version, function(rsp) {
 	        $("#versions").click(); 
-            alert(_('%(gedcom)s renamed to %(newname)s', gedcom, rsp.newname ) + "\n" +
-            	  _('%(version)s renamed to %(gedcom)s', version, gedcom ));
+            alert(_('%1 renamed to %2', [gedcom, rsp.newname] ) + "\n" +
+            	  _('%1 renamed to %2', [version, gedcom] ));
         });
 	});
 	$("#save_result").click(function(rsp) {
 		var gedcom = "" + gedcom ;
         $.get("/gedcom/save/" + gedcom , function(rsp) {
-	        var msg  = _('%(gedcom)s renamed to %(newname)s', gedcom, rsp.newname ); 
+	        var msg  = _('%1 renamed to %2', [gedcom, rsp.newname] ); 
         	$("#oldname").text(rsp.newname);
         	$("#div_oldname").show();
         	$("#div_save").hide();
