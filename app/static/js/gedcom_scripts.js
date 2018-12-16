@@ -90,7 +90,6 @@ $(document).ready( function() {
         });
 	});
 	$("#save_result").click(function(rsp) {
-		var gedcom = "" + gedcom ;
         $.get("/gedcom/save/" + gedcom , function(rsp) {
 	        var msg  = _('%1 renamed to %2', [gedcom, rsp.newname] ); 
         	$("#oldname").text(rsp.newname);

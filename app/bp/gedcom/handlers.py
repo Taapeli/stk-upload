@@ -10,7 +10,7 @@ import time
 import subprocess
 
 from re import match
-from collections import OrderedDict
+from collections import defaultdict
 
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_security import login_required, current_user
@@ -38,59 +38,28 @@ def init_log(logfile):
         pass
     logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
 
-
 def get_info(input_gedcom, enc):
-    ''' Read gedgom HEAD info and count level 0 items
-        Returns a list of descriptive lines
-     '''
-    msg = []
-    cnt = {}
-    #msg.append(os.path.basename(input_gedcom) + '\n')
-    try:
-        with open(input_gedcom, 'r', encoding=enc) as f:
-            for i_ in range(100):
-                ln = f.readline()
-                if ln[:6] in ['2 VERS', '1 NAME', '1 CHAR']:
-                    msg.append(ln[2:])
-                if ln.startswith('1 SOUR'):
-                    msg.append(_('Source ') + ln[7:-1] + ' ')
-                if ln.startswith('1 GEDC'):
-                    msg.append(_('Gedcom '))
-                if ln.startswith('2 CONT _COMMAND'):
-                    #print('"' + ln)
-                    msg.append('– ' + ln[16:-1])
-                if ln.startswith('2 CONT _DATE'):
-                    msg.append(ln[12:])
-                if match('0.*SUBM', ln):
-                    msg.append(_('Submitter '))
-                if match('0.*INDI', ln):
-                    cnt['INDI'] = 1
-                    break
-            ln = '-'
-            while ln:
-                ln = f.readline()[:-1]
-                if ln.startswith('0'):
-                    flds = ln.split(maxsplit=2)
-                    key = flds[-1][:4]
-                    if key in cnt:
-                        cnt[key] = cnt[key] + 1
-                    elif key != 'TRLR':
-                        cnt[key] = 1
+    ''' 
+    Read gedcom HEAD info and count level 0 items.
+    Uses the transformation framework.
+    '''
+    class Options:
+        display_changes = False
+        encoding = enc
 
-    except OSError:     # End of file
+    class Nullinfo:
         pass
-    #except UnicodeDecodeError as e:
-    #    msg.append(_("Wrong character set, add eg. '--Encoding ISO8859-1 '"))
-    #except Exception as e:
-    #    msg.append( type(e).__name__ + str(e))
-
-    if cnt:
-        msg.append(_('        count\n'))
-    for i in OrderedDict(sorted(cnt.items())):
-        msg.append('{:4} {:8}\n'.format(i, cnt[i]))
-    logging.info(msg)    
-    return cnt
-
+        
+    import gedcom_info_parser
+    try:
+        t = transformer.Transformer(transform_module=gedcom_info_parser,
+                                    display_callback=display_changes,
+                                    options=Options())
+        t.transform_file(input_gedcom)
+        return t.transformation.info 
+    except:
+        return Nullinfo()
+    
 def read_gedcom(filename):
     try:
         return open(filename).readlines()
@@ -249,7 +218,7 @@ def gedcom_upload():
             'upload_time':util.format_timestamp(),
         }
         save_metadata(filename, metadata)
-        return redirect(url_for('.gedcom_list'))
+        return redirect(url_for('.gedcom_info',gedcom=filename))
   
 @bp.route('/gedcom/download/<gedcom>')
 @login_required
@@ -272,11 +241,16 @@ def gedcom_info(gedcom):
     metadata = get_metadata(gedcom)
     transforms = get_transforms()
     encoding = metadata.get('encoding','utf-8')
-    info = get_info(filename,encoding) 
-    num_individuals = info['INDI']
+    info = metadata.get('info')
+    if info: 
+        info = eval(info)
+    else:
+        info = get_info(filename,encoding)
+        metadata['info'] = repr(info.__dict__)
+        save_metadata(gedcom,metadata) 
     return render_template('gedcom_info.html', 
         gedcom=gedcom, filename=filename, 
-        num_individuals=num_individuals, 
+        info=info,
         transforms=transforms,
         metadata=metadata,
     )
@@ -394,7 +368,6 @@ def process_gedcom(cmd, transform_module):
     except:
         traceback.print_exc()
     finally:
-        time.sleep(1)  # for testing...
         msg = _("Transform '{}' ended at {}").format(
                  transform_module.__name__, 
                  util.format_timestamp())
