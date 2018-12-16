@@ -16,3 +16,7 @@ then
    pybabel init -i messages.pot -d translations -l sv
 fi
 pybabel update -i messages.pot -d translations
+
+cp -p translations/fi/LC_MESSAGES/messages.po static/translations/fi.po
+cp -p translations/sv/LC_MESSAGES/messages.po static/translations/sv.po
+cp -p translations/en/LC_MESSAGES/messages.po static/translations/en.po
