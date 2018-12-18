@@ -38,12 +38,13 @@
 	               <p>{{ _('Select Gramps XML File (*. gramps) to become candidate material') }}</p>
 	               <input type="file" name="filenm" />
 	             </div>
-	                <div class="submit"> 
-	               <input type="submit" value="{{ _('Upload') }}" />
+	             <div class="submit"> 
+	                <input type="submit" value="{{ _('Upload') }}" />
 	             </div>
 	             </form>
 	             ▸ <a href=/gramps/uploads>{{ _("List uploads") }}</a>
 	         </div>
+	     </div>
 	
 	     <div class="startbox">
 	        <div style="display: inline-block;">
@@ -57,7 +58,7 @@
 	        </div>
 	     </div>
      
-     </div>{% endif %}
+     {% endif %}
 
     {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}

@@ -184,27 +184,27 @@ def list_uploads(username):
                 if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
                     status_text = _("ERROR")
                 else:
-                    status_text = _("LOADING") 
+                    status_text = _("STORING") 
             elif status == "done":
-                status_text = _("DONE")
+                status_text = _("STORED")
             elif status == "failed":
                 status_text = _("FAILED")
             if status_text:
                 upload = Upload()
                 upload.xmlname = xmlname
                 upload.status = status_text
-                upload.done = (status_text == _("DONE"))
+                upload.done = (status_text == _("STORED"))
                 upload.uploaded = (status_text == _("UPLOADED"))
-                upload.loading = (status_text == _("LOADING"))
+                upload.loading = (status_text == _("STORING"))
                 upload.upload_time = meta["upload_time"]
                 upload.upload_time_s = util.format_timestamp(upload.upload_time)
+                upload.user = username
                 uploads.append(upload)
     return sorted(uploads,key=lambda x: x.upload_time)
 
 def list_uploads_all(users):
     for user in users:
         for upload in list_uploads(user.name):
-            upload.user = user.name
             yield upload 
 
 
