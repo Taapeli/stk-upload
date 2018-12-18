@@ -38,6 +38,23 @@ def init_log(logfile):
         pass
     logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
 
+def history_init(gedcom_fname):
+    history_file_name = gedcom_fname + "-history"
+    open(history_file_name,"w").write("{}: Uploaded {}\n".format(util.format_timestamp(),gedcom_fname))
+    
+def history_append(gedcom_fname,line):
+    history_file_name = gedcom_fname + "-history"
+    #open(history_file_name,"a").write("{}: {}\n".format(util.format_timestamp(),line))
+    open(history_file_name,"a").write("{}\n".format(line))
+
+def history_append_args(args):
+    history_file_name = args.input_gedcom + "-history"
+    with open(history_file_name,"a") as f:
+        for name,value in sorted(vars(args).items()):
+            f.write("- {}={}\n".format(name,value))
+        f.write("- User={}\n".format(current_user.username))
+
+
 def get_info(input_gedcom, enc):
     ''' 
     Read gedcom HEAD info and count level 0 items.
@@ -143,6 +160,13 @@ def gedcom_versions(gedcom):
     versions.append(gedcom)
     return jsonify(versions)
 
+@bp.route('/gedcom/history/<gedcom>', methods=['GET'])
+@login_required
+def gedcom_history(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    history_filename = os.path.join(gedcom_folder,gedcom) + "-history"
+    return open(history_filename).read()
+
 @bp.route('/gedcom/compare/<gedcom1>/<gedcom2>', methods=['GET'])
 @login_required
 def gedcom_compare(gedcom1,gedcom2):
@@ -167,6 +191,9 @@ def gedcom_revert(gedcom,version):
     if os.path.exists(filename1) and os.path.exists(filename2):
         os.rename(filename1,newname)
         os.rename(filename2,filename1)
+        history_append(filename1,_("\n{}:").format(util.format_timestamp()))
+        history_append(filename1,_("File {} saved as {}").format(filename1,newname))
+        history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
         rsp = dict(newname=os.path.basename(newname))
     else:
         rsp = dict(status="Error")
@@ -181,6 +208,9 @@ def gedcom_save(gedcom):
     newname = util.generate_name(filename1)
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
+    history_append(filename1,"\n{}:".format(util.format_timestamp()))
+    history_append(filename1,_("File {} saved as {}").format(filename1,newname))
+    history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
     rsp = dict(newname=os.path.basename(newname))
     return jsonify(rsp) 
 
@@ -209,7 +239,7 @@ def gedcom_upload():
         os.makedirs(gedcom_folder, exist_ok=True)
         fullname = os.path.join(gedcom_folder, filename)
         if os.path.exists(fullname):
-            flash(_('This GEDCOM file already exists'), category='flash_warning')
+            flash(_('This GEDCOM file already exists'), category='flash_error')
             return redirect(url_for('.gedcom_list'))
             
         file.save(fullname)
@@ -222,6 +252,7 @@ def gedcom_upload():
             'upload_time':util.format_timestamp(),
         }
         save_metadata(filename, metadata)
+        history_init(fullname)
         return redirect(url_for('.gedcom_info',gedcom=filename))
   
 @bp.route('/gedcom/download/<gedcom>')
@@ -349,6 +380,9 @@ def process_gedcom(cmd, transform_module):
     transform_module.add_args(parser)
     args = parser.parse_args(cmd.split())
     args.output_gedcom = None
+    args.nolog = True # replaced by history file
+    history_append(args.input_gedcom,"\n"+msg)
+    history_append_args(args)
     try:
         init_log(args.logfile)
         with Output(args) as out:
@@ -372,9 +406,16 @@ def process_gedcom(cmd, transform_module):
     except:
         traceback.print_exc()
     finally:
+        if old_name: 
+            history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom))
+            history_append(args.input_gedcom,_("Old file saved as {}").format(old_name))
+        else:
+            #history_append(args.input_gedcom,_("File was not saved"))
+            history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom+"-temp"))
         msg = _("Transform '{}' ended at {}").format(
                  transform_module.__name__, 
                  util.format_timestamp())
+        history_append(args.input_gedcom,msg)
         print("------ {} ------".format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()

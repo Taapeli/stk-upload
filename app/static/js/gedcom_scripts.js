@@ -19,6 +19,7 @@ $(document).ready( function() {
         hide_all();
         $("#div_transforms").show();
     });
+
     $("#versions").click(function() {
         hide_all();
         $.get("/gedcom/versions/" + gedcom , function(versions) {
@@ -37,12 +38,14 @@ $(document).ready( function() {
             $("#div_versions").show();
         });
     });
+
     $("a.transform").click(function(e) {
         $.get("/gedcom/transform/" + gedcom + "/" + $(e.target).attr("data-transform"), function(rsp) {
             $("#div_transform_params1").html(rsp);
             $("#div_transform_params").show();
         });
     });
+
     $("#delete").click(function() {
         var ok = confirm(_('Are you sure?'));
         if (ok) {
@@ -51,14 +54,26 @@ $(document).ready( function() {
         	});
         }
     });
+
+    $("#show_history").click(function() {
+        hide_all();
+    	$("#difftable").empty();
+        $.get("/gedcom/history/" + gedcom , function(rsp) {
+            $("#history").text(rsp);
+            $("#div_history").show();
+        });
+    });
+
     $("#update_desc").click(function() {
         $.post("/gedcom/update_desc/" + gedcom , {desc:$("#desc").val()},function(rsp) {
         	console.log(rsp);
     	});
     });
+
     $("input,a").click(function() {
     	 $("#errors").hide();
     });
+
     $("#palauta").click(function() {
 		var version = $("#oldname").text();
         $.get("/gedcom/revert/" + gedcom + "/" + version, function(rsp) {
@@ -66,6 +81,7 @@ $(document).ready( function() {
         });
     	 
     });
+
     $("#compare").click(function() {
     	var row1 = $("input[name=v1]:checked").parent().parent();
     	var gedcom1 = row1.data("version");
@@ -81,6 +97,7 @@ $(document).ready( function() {
         	$("#div_compare").show();
     	});
     });
+
 	$("button.palauta_button").click(function(rsp) {
 		var version = $(this).data("gedcom");
         $.get("/gedcom/revert/" + gedcom + "/" + version, function(rsp) {
@@ -89,6 +106,7 @@ $(document).ready( function() {
             	  _('%1 renamed to %2', [version, gedcom] ));
         });
 	});
+
 	$("#save_result").click(function(rsp) {
         $.get("/gedcom/save/" + gedcom , function(rsp) {
 	        var msg  = _('%1 renamed to %2', [gedcom, rsp.newname] ); 
@@ -97,9 +115,11 @@ $(document).ready( function() {
         	$("#div_save").hide();
         });
 	});
+
     hide_all();
 
     $("#transform").off("click");
+
     $("#transform").click(function() {
     	$("#output").hide();
     	$("#output_log").empty();

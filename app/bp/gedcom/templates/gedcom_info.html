@@ -18,7 +18,7 @@ table.diff td {
 }
 </style>
 
-<script src="/static/js/gedcom_scripts.js?9"></script>
+<script src="/static/js/gedcom_scripts.js?13"></script>
 
 <script>
 var gedcom = "{{ gedcom }}";
@@ -96,8 +96,11 @@ var gedcom = "{{ gedcom }}";
 				<h3>{{ _("Options") }}</h3>
 				<div>
 				    <ul>
-				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Fetch this GEDCOM") }}</a></li>
-				        <li><a href="#" id="delete" data="/gedcom/delete">
+				        <li><a href="#" id="show_history">
+	                        {{ _("Show transformation history") }}</a></li>
+				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">
+				        	{{ _("Fetch this GEDCOM") }}</a></li>
+				        <li><a href="#" id="delete">
 	                        {{ _("Remove this GEDCOM") }}</a></li>
 	                </ul>
 				    <input type="submit" id="transforms" value='{{ _("Choose a transformation") }}'>
@@ -137,6 +140,17 @@ var gedcom = "{{ gedcom }}";
 		    </div>
 		  </div>
 	        
+	      <div class="gedcom" id="div_history">
+	        <div style="display: inline-block;">
+	
+		        <h3>{{ _("Transformation history") }}</h3>
+		        <pre>
+					<div id="history">
+					</div>
+	        	</pre>
+		    </div>
+		  </div>
+
 	      <div class="xstartbox gedcom" id="div_compare">
 	        <h3>{{ _("GEDCOM comparison") }}:</h3>
 	        <button id="palauta1" class="palauta_button"></button>
