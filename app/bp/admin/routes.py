@@ -198,6 +198,14 @@ def list_uploads(username):
     upload_list = uploads.list_uploads(username) 
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
 
+@bp.route('/admin/list_uploads_all', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_uploads_all():
+    users = shareds.user_datastore.get_users()
+    upload_list = uploads.list_uploads_all(users) 
+    return render_template("/admin/uploads.html", uploads=upload_list)
+
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit')

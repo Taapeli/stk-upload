@@ -4,7 +4,12 @@
 {% block body %}
     {{ super() }}
     <meta http-equiv="refresh" content="30">
-    <h2>{{ _("Uploads for user") }} '{{ user }}'</h2>
+    {% if user %}
+	    <h2>{{ _("Uploads for user") }} '{{ user }}'</h2>
+    {% else %}
+    	<h2>{{ _("Uploads for all users") }}</h2>
+    {% endif %}
+    
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -16,6 +21,9 @@
     {% endwith %}
         <table>
            <tr>
+			    {% if not user %}
+	                <th>{{ _("User id") }}</th>
+			    {% endif %}
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("XML file") }}</th>
                 <th>{{ _("Status") }}</th>
@@ -23,6 +31,9 @@
            </tr>
 	    {% for upload in uploads %}
 	       <tr>
+			    {% if not user %}
+	                <td>{{ upload.user }}</td>
+			    {% endif %}
 	           <td class="msg_INFO">{{upload.upload_time_s}}</td>
 	           <td class="msg_INFO">
     	           <a href=/admin/xml_download/{{user}}/{{upload.xmlname | urlencode}}>

@@ -201,6 +201,12 @@ def list_uploads(username):
                 uploads.append(upload)
     return sorted(uploads,key=lambda x: x.upload_time)
 
+def list_uploads_all(users):
+    for user in users:
+        for upload in list_uploads(user.name):
+            upload.user = user.name
+            yield upload 
+
 
 def removefile(fname): 
     ''' Removing a file '''
