@@ -208,6 +208,10 @@ def gedcom_upload():
         filename = secure_filename(file.filename)
         os.makedirs(gedcom_folder, exist_ok=True)
         fullname = os.path.join(gedcom_folder, filename)
+        if os.path.exists(fullname):
+            flash(_('This GEDCOM file already exists'), category='flash_warning')
+            return redirect(url_for('.gedcom_list'))
+            
         file.save(fullname)
 
         desc = request.form['desc']
