@@ -3,7 +3,7 @@ import transformer
 def initialize(options):
     return InfoParser()
 
-class Info:
+class Info: 
     gedcom_version = None
     submitter = None
     charset = None
@@ -11,14 +11,17 @@ class Info:
     source_program_version = None
     num_individuals = 0
     num_families = 0
+    num_places = 0
     num_notes = 0
     num_sources = 0
+    num_citations = 0
     num_repos = 0
     num_multimedia = 0
         
 class InfoParser(transformer.Transformation):
     def __init__(self):
         self.info = Info()
+        self.places = set()
     def transform(self,item,options,phase):
         #print(item.path,item.value)
         if item.level == 0:
@@ -35,6 +38,13 @@ class InfoParser(transformer.Transformation):
             if item.value == "OBJE":
                 self.info.num_multimedia += 1
             return None
+        if item.tag == "NOTE":
+            self.info.num_notes += 1
+        if item.tag == "SOUR":
+            self.info.num_citations += 1
+        if item.tag == "PLAC":
+            self.places.add(item.value)
+            self.info.num_places = len(self.places)
         if item.path == "HEAD.CHAR":
             self.info.charset = item.value
         if item.path == "HEAD.GEDC.VERS":
