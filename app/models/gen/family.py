@@ -145,6 +145,45 @@ RETURN family"""
             
         return True
     
+    @staticmethod       
+    def get_families():
+        """ Find all families from the database """
+                        
+        query = """
+MATCH (f:Family)-[h:FATHER]-(ph:Person) 
+WITH f, COLLECT([ID(ph), ph.sortname]) AS father
+MATCH (f)-[w:MOTHER]-(pw:Person) 
+WITH f, father, COLLECT([ID(pw), pw.sortname]) AS mother 
+MATCH (f)-[c:CHILD]-(pc:Person) 
+WITH f, father, mother, COUNT(pc) AS child
+RETURN ID(f) AS uniq_id, f.rel_type AS type, father, mother, child"""
+        result = shareds.driver.session().run(query)
+                
+        families = []
+        for record in result:
+            f = Family()
+            if record['uniq_id']:
+                f.uniq_id = record['uniq_id']
+            if record['father']:
+                f.father = record['father']
+            else:
+                f.father = "-"
+            if record['mother']:
+                f.mother = record['mother']
+            else:
+                f.mother = "-"
+            if record['type']:
+                f.type = record['type']
+            else:
+                f.type = "-"
+            if record['child']:
+                f.child = record['child']
+            else:
+                f.child = "-"
+            families.append(f)
+        
+        return (families)
+        
     
     @staticmethod       
     def get_marriage_parent_names(event_uniq_id):

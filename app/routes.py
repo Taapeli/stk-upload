@@ -88,6 +88,10 @@ def show_table_data(subj):
         headings, titles, lists = datareader.read_events_wo_place()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists, elapsed=time.time()-t0)
+    elif subj == 'families':
+        families = datareader.read_families()
+        return render_template("table_families.html", 
+        families=families, elapsed=time.time()-t0)
     elif subj == 'notes':
         titles, objs = datareader.get_note_list()
         return render_template("table_of_objects.html",

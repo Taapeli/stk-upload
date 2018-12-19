@@ -1,0 +1,33 @@
+{# _myapp/templates/table_families.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
+{% block body %}
+{{ super() }}
+<script src="/static/infobox.js"></script>
+
+<h2>{{ _('List of Families') }}</h2>
+<p>{{ _('Number of families:') }} {{families|count}}  
+
+<section id="lista">
+<table>
+    <tr><th>{{ _("Uniq_id") }}</th>
+        <th>{{ _("Father") }}</th>
+        <th>{{ _("Mother") }}</th>
+        <th>{{ _("Type") }}</th>
+        <th>{{ _("Child") }}</th>
+    </tr>
+{% if families %}
+    {% for f in families %}
+            <tr>
+                <td>{{f.uniq_id}}</a></td>
+                <td><a href="/scene/person={{f.father[0][0]}}">{{f.father[0][1]}}</td>
+                <td><a href="/scene/person={{f.mother[0][0]}}">{{f.mother[0][1]}}</td>
+                <td>{{f.type}}</td>
+                <td>{{f.child}}</td>
+            </tr>
+    {% endfor %}
+{% else %}
+        <tr><td colspan="5">{{ _('No persons') }}</td></tr>
+{% endif %}
+</table>
+{% endblock %}
