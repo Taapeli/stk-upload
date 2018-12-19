@@ -34,7 +34,7 @@ class InfoParser(transformer.Transformation):
                 self.info.num_repos += 1
             if item.value == "OBJE":
                 self.info.num_multimedia += 1
-            return True
+            return None
         if item.path == "HEAD.CHAR":
             self.info.charset = item.value
         if item.path == "HEAD.GEDC.VERS":
@@ -46,5 +46,5 @@ class InfoParser(transformer.Transformation):
         if item.path.endswith(".SUBM.NAME"):
             self.info.submitter = item.value
             
-        return True
+        return None
 
