@@ -18,13 +18,13 @@
     </tr>
 {% if families %}
     {% for f in families %}
-            <tr>
-                <td>{{f.uniq_id}}</a></td>
-                <td><a href="/scene/person={{f.father[0][0]}}">{{f.father[0][1]}}</td>
-                <td><a href="/scene/person={{f.mother[0][0]}}">{{f.mother[0][1]}}</td>
-                <td>{{f.type}}</td>
-                <td>{{f.child}}</td>
-            </tr>
+        <tr>
+                <td>{{f[0][0]}}</td>
+                <td><a href="/scene/person={{f[1][0]}}">{{f[1][3]}} {{f[1][2]}} {{f[1][1]}}</a></td>
+                <td><a href="/scene/person={{f[2][0]}}">{{f[2][3]}} {{f[2][2]}} {{f[2][1]}}</a></td>
+                <td>{{f[0][1]}}</td>
+                 <td>{{f[0][2]}}</td>
+        </tr>
     {% endfor %}
 {% else %}
         <tr><td colspan="5">{{ _('No persons') }}</td></tr>

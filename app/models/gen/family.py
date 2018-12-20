@@ -150,37 +150,71 @@ RETURN family"""
         """ Find all families from the database """
                         
         query = """
-MATCH (f:Family)-[h:FATHER]-(ph:Person) 
-WITH f, COLLECT([ID(ph), ph.sortname]) AS father
-MATCH (f)-[w:MOTHER]-(pw:Person) 
-WITH f, father, COLLECT([ID(pw), pw.sortname]) AS mother 
+MATCH (f:Family)-[h:FATHER]->(ph:Person)-[:NAME]->(nh:Name)  
+MATCH (f)-[w:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
 MATCH (f)-[c:CHILD]-(pc:Person) 
-WITH f, father, mother, COUNT(pc) AS child
-RETURN ID(f) AS uniq_id, f.rel_type AS type, father, mother, child"""
+WITH f, pc, pw, nw.surname AS wsn, nw.suffix AS wx, nw.firstname AS wfn, 
+   ph, nh.surname AS hsn, nh.firstname AS hfn, nh.suffix AS hx 
+RETURN ID(f) AS uniq_id, f.rel_type AS type, 
+   ID(ph) AS hid, hsn, hx, hfn, 
+   ID(pw) AS wid, wsn, wx, wfn, 
+   COUNT(pc) AS child ORDER BY hsn, hfn"""
         result = shareds.driver.session().run(query)
                 
         families = []
         for record in result:
-            f = Family()
+            family = []
+            data = []
             if record['uniq_id']:
-                f.uniq_id = record['uniq_id']
-            if record['father']:
-                f.father = record['father']
-            else:
-                f.father = "-"
-            if record['mother']:
-                f.mother = record['mother']
-            else:
-                f.mother = "-"
+                data.append(record['uniq_id'])
             if record['type']:
-                f.type = record['type']
+                data.append(record['type'])
             else:
-                f.type = "-"
+                data.append("-")
             if record['child']:
-                f.child = record['child']
+                data.append(record['child'])
             else:
-                f.child = "-"
-            families.append(f)
+                data.append("-")
+            family.append(data)
+            
+            father = []
+            if record['hid']:
+                father.append(record['hid'])
+            else:
+                father.append("-")
+            if record['hsn']:
+                father.append(record['hsn'])
+            else:
+                father.append("-")
+            if record['hx']:
+                father.append(record['hx'])
+            else:
+                father.append("-")
+            if record['hfn']:
+                father.append(record['hfn'])
+            else:
+                father.append("-")
+            family.append(father)
+            
+            mother = []
+            if record['wid']:
+                mother.append(record['wid'])
+            else:
+                mother.append("-")
+            if record['wsn']:
+                mother.append(record['wsn'])
+            else:
+                mother.append("-")
+            if record['wx']:
+                mother.append(record['wx'])
+            else:
+                mother.append("-")
+            if record['wfn']:
+                mother.append(record['wfn'])
+            else:
+                mother.append("-")
+            family.append(mother)
+            families.append(family)
         
         return (families)
         
