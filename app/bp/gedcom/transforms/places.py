@@ -57,8 +57,6 @@ def add_args(parser):
                         help=_('Try to discover correct order...'))
     parser.add_argument('--auto-combine', action='store_true',
                         help=_('Try to combine certain names...'))
-    parser.add_argument('--match', type=str, 
-                        help=_('Only process places containing this string'))
     parser.add_argument('--addname', type=str, 
                         help=_('Add this name at the end'))
     parser.add_argument('--display_unique_changes', action='store_true',
@@ -67,8 +65,12 @@ def add_args(parser):
                         help=_('Display unchanged places'))
     parser.add_argument('--display-ignored', action='store_true',
                         help=_('Display ignored places'))
+    parser.add_argument('--match', type=str, 
+                        help=_('Only process places containing this string'))
     parser.add_argument('--mark-changes', action='store_true',
                         help=_('Replace changed PLAC tags with PLAC-X'))
+    parser.add_argument('--mark-all-matching', action='store_true',
+                        help=_('Replace all matching PLAC tags with PLAC-X'))
                         
 def initialize(options):
     read_parishes("app/static/seurakunnat.txt")
@@ -84,10 +86,12 @@ class Places(transformer.Transformation):
         if item.tag != "PLAC":  return True
         if not item.value: return True
         place = item.value
+        if options.match and not stringmatch(place,options.match):
+            return True
         newplace = process_place(options, place)
-        if newplace != place: 
+        if newplace != place or options.mark_all_matching:
             item.value = newplace  
-            if options.mark_changes:
+            if options.mark_changes or options.mark_all_matching:
                 item.tag = "PLAC-X"
             self.changed[(place,newplace)] += 1
             return item
@@ -234,8 +238,6 @@ def stringmatch(place,match):
     
 def process_place(options, place): 
     orig_place = place
-    if options.match and not stringmatch(place,options.match):
-        return place
     if options.add_commas and "," not in place:
         if options.auto_combine:
             place = auto_combine(place)
