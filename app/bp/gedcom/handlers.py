@@ -126,6 +126,11 @@ def get_transforms():
             t.doclink = transformer.doclink
         else:
             t.doclink = ""
+
+        if hasattr(transformer,"name"):
+            t.displayname = transformer.name
+        else:
+            t.displayname = t.modname
             
         t.version = getattr(transformer,"version","")
         yield t

@@ -42,6 +42,10 @@ Ohjelman toiminta:
 
 #!/usr/bin/python
 
+from flask_babelex import _
+
+name = _("Citations")
+
 version = "0.9" 
 
 import re
