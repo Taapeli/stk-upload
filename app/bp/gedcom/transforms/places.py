@@ -89,16 +89,18 @@ class Places(transformer.Transformation):
         if options.match and not stringmatch(place,options.match):
             return True
         newplace = process_place(options, place)
-        if newplace != place or options.mark_all_matching:
+        if newplace != place:
             item.value = newplace  
+            self.changed[(place,newplace)] += 1
             if options.mark_changes or options.mark_all_matching:
                 item.tag = "PLAC-X"
-            self.changed[(place,newplace)] += 1
             return item
         else:
             if options.display_nonchanges:
-                #print(_("Not changed: '{}'").format(place))
                 self.nonchanged[place] += 1
+            if options.mark_all_matching:                
+                item.tag = "PLAC-X"
+                return item
             return True
         raise RuntimeError(_("Internal error"))
 
