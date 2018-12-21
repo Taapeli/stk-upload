@@ -343,7 +343,7 @@ def display_changes(lines,item):
         item.print_items(Out())
     print()
         
-def process_gedcom(cmd, transform_module):
+def process_gedcom(arglist, transform_module):
     """Implements another mechanism for Gedcom transforms:
 
     The transform_module is assumed to contain the following methods:
@@ -354,7 +354,6 @@ def process_gedcom(cmd, transform_module):
 
     See sukujutut.py as an example
     """
-
 
     msg = _("Transform '{}' started at {}").format(
              transform_module.__name__, 
@@ -378,7 +377,7 @@ def process_gedcom(cmd, transform_module):
     parser.add_argument('--encoding', type=str, default="UTF-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
                         help=_("Encoding of the input GEDCOM"))
     transform_module.add_args(parser)
-    args = parser.parse_args(cmd.split())
+    args = parser.parse_args(arglist)
     args.output_gedcom = None
     args.nolog = True # replaced by history file
     history_append(args.input_gedcom,"\n"+msg)
@@ -449,8 +448,11 @@ def gedcom_transform(gedcom,transform):
         logging.info("Guessed encoding {} for {}".format(encoding,gedcom_filename))
         args += " --encoding {}".format(encoding)
         if hasattr(transform_module,"transformer"):
-            cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
-            return process_gedcom(cmd, transform_module)
+            command_args = parser.build_command_args(request.form.to_dict())
+            arglist = [gedcom_filename] + command_args 
+            arglist += ["--logfile",logfile]
+            arglist += ["--encoding",encoding]
+            return process_gedcom(arglist, transform_module)
         
         #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
         python_exe = sys.executable or "/opt/repo/virtenv/bin/python3"
@@ -556,6 +558,21 @@ def build_parser(filename,gedcom,gedcom_filename):
                             args += ' "%s"' % value
             return args
             
+        def build_command_args(self,argdict):
+            args = []
+            for arg in self.args:
+                if arg.name in argdict:
+                    value = argdict[arg.name].rstrip()
+                    if not value: value = arg.default
+                    if value: 
+                        if arg.action in {'store_true','store_false'} and value == "on": value = ""
+                        if arg.name[0] == "-":
+                            args.append(arg.name)
+                            if value: args.append(value)
+                        else:
+                            args.append(value)
+            return args
+
     parser = Parser()
 
     parser.add_argument('--display-changes', action='store_true',
