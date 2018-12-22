@@ -8,6 +8,7 @@ import os
 import importlib
 import time
 import subprocess
+import traceback
 
 from re import match
 from collections import defaultdict
@@ -75,6 +76,7 @@ def get_info(input_gedcom, enc):
         t.transform_file(input_gedcom)
         return t.transformation.info 
     except:
+        traceback.print_exc()
         return Nullinfo()
     
 def read_gedcom(filename):
