@@ -43,9 +43,9 @@ var gedcom = "{{ gedcom }}";
 	                        <td class="right">{{metadata.upload_time}}
                     {% endif %}
 
-                    {% if metadata.encoding %}
-	                    <tr><td>{{ _('Encoding') }}
-	                        <td class="right">{{metadata.encoding}}
+                    {% if 1  or info.date %}
+	                    <tr><td>{{ _('Gedcom date') }}
+	                        <td class="right">{{info.date}} {{info.time}}
                     {% endif %}
 
                     {% if info.submitter %}
@@ -58,6 +58,11 @@ var gedcom = "{{ gedcom }}";
 					        <td class="right">{{ info.gedcom_version }}</td></tr>
                     {% endif %}
                     
+                    {% if metadata.encoding %}
+	                    <tr><td>{{ _('Encoding') }}
+	                        <td class="right">{{metadata.encoding}}
+                    {% endif %}
+
                     {% if info.charset %}
 					    <tr><td>{{ _("Gedcom charset") }}</td>
 					        <td class="right">{{ info.charset }}</td></tr>
@@ -65,7 +70,7 @@ var gedcom = "{{ gedcom }}";
 
                     {% if info.source_program %}
 					    <tr><td>{{ _("Source program") }}</td>
-					        <td class="right">{{ info.source_program }}
+					        <td class="right">{{ info.source_program_name }}
 		                    {% if info.source_program_version %}
 			                    {{ info.source_program_version }}
 		                    {% endif %}

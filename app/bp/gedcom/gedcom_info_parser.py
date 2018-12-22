@@ -7,8 +7,10 @@ class Info:
     gedcom_version = None
     submitter = None
     charset = None
+    date = ""
+    time = ""
     source_program = None
-    source_program_version = None
+    source_program_version = None 
     num_individuals = 0
     num_families = 0
     num_places = 0
@@ -47,12 +49,18 @@ class InfoParser(transformer.Transformation):
             self.info.num_places = len(self.places)
         if item.path == "HEAD.CHAR":
             self.info.charset = item.value
+        if item.path == "HEAD.DATE":
+            self.info.date = item.value
+        if item.path == "HEAD.DATE.TIME":
+            self.info.time = item.value
         if item.path == "HEAD.GEDC.VERS":
             self.info.gedcom_version = item.value
         if item.path == "HEAD.SOUR":
             self.info.source_program = item.value
         if item.path == "HEAD.SOUR.VERS":
             self.info.source_program_version = item.value
+        if item.path == "HEAD.SOUR.NAME":
+            self.info.source_program_name = item.value
         if item.path.endswith(".SUBM.NAME"):
             self.info.submitter = item.value
             
