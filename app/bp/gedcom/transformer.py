@@ -8,8 +8,12 @@ Each transformation module should implement:
     Returns an instance of the class Transformation
 2. Function add_args
     Adds the transformation specific arguments (Argparse style)
+3. Attribute name
+4. Attribute docline
+5. Attribute doclink
+6. Attribute twophases
 
-The Transformation object should implement the method transform. Optionally
+The Transformation object should implement the methods transform and finish. Optionally
 it can implement the initializer (__init__) and the method finish.    
     
 Class Transformer parses a file or a list of lines into a hierarchical structure of "Item" objects. 
