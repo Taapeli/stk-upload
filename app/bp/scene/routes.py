@@ -240,6 +240,7 @@ def show_person_page(uniq_id):
 # ------------------------------ Menu 3: Families --------------------------------
 
 @bp.route('/scene/families')
+@login_required
 def show_own_families():
     """ List of Families for menu(3)
     """
