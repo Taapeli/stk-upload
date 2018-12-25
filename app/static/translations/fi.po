@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-16 10:06+0200\n"
+"POT-Creation-Date: 2018-12-25 13:51+0200\n"
 "PO-Revision-Date: 2018-12-15 21:24+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -319,7 +319,7 @@ msgstr "Kelvollinen sarakeotsikko puuttuu:"
 msgid "User updated"
 msgstr "Käyttäjätiedot päivitetty"
 
-#: bp/admin/routes.py:206
+#: bp/admin/routes.py:214
 msgid "Data import from {!r} to database has been started."
 msgstr "Tietojen talletus tiedostosta {!r} on käynnistetty."
 
@@ -332,12 +332,12 @@ msgid "ERROR"
 msgstr "VIRHE"
 
 #: bp/admin/uploads.py:187 bp/admin/uploads.py:198
-msgid "LOADING"
-msgstr "LADATAAN"
+msgid "STORING"
+msgstr ""
 
 #: bp/admin/uploads.py:189 bp/admin/uploads.py:196
-msgid "DONE"
-msgstr "TEHTY"
+msgid "STORED"
+msgstr ""
 
 #: bp/admin/uploads.py:191
 msgid "FAILED"
@@ -375,12 +375,12 @@ msgstr "roolit:"
 msgid "Git Application Version"
 msgstr "Git-sovellusversio"
 
-#: bp/admin/templates/admin/admin.html:41 templates/mainindex.html:63
+#: bp/admin/templates/admin/admin.html:41 templates/mainindex.html:66
 #: templates/tables.html:12
 msgid "Data Views as tables"
 msgstr "Datanäkymiä taulukkoina"
 
-#: bp/admin/templates/admin/admin.html:42 templates/mainindex.html:64
+#: bp/admin/templates/admin/admin.html:42 templates/mainindex.html:67
 msgid ""
 "On the next page there are a variety of more technical listings and "
 "problem solving tools"
@@ -388,7 +388,7 @@ msgstr ""
 "Seuraavalla sivulla on erilaisia teknisempiä listauksia ja "
 "ongelmanselvitysvälineitä"
 
-#: bp/admin/templates/admin/admin.html:46 templates/mainindex.html:68
+#: bp/admin/templates/admin/admin.html:46 templates/mainindex.html:71
 msgid "Explore the database"
 msgstr "Tutki tietokantaa"
 
@@ -484,7 +484,7 @@ msgid "Destroying <u>all former</u> and creating a unique index"
 msgstr "Tuhotaan <u>kaikki entiset</u> ja luodaan yksikäsitteinen indeksi"
 
 #: bp/admin/templates/admin/reference.html:24
-#: bp/gedcom/templates/gedcom_list.html:41 templates/mainindex.html:41
+#: bp/gedcom/templates/gedcom_list.html:41 templates/mainindex.html:42
 msgid "Upload"
 msgstr "Lähetä"
 
@@ -512,98 +512,105 @@ msgstr "Aseta muuttuneet referenssinimet kaikille ihmisille"
 msgid "Do not use"
 msgstr "Älä käytä"
 
-#: bp/admin/templates/admin/reference.html:43 templates/mainindex.html:103
+#: bp/admin/templates/admin/reference.html:43 templates/mainindex.html:106
 msgid "Log out"
 msgstr "Kirjaudu ulos"
 
-#: bp/admin/templates/admin/reference.html:44 templates/mainindex.html:104
+#: bp/admin/templates/admin/reference.html:44 templates/mainindex.html:107
 msgid "Ending the session"
 msgstr "Istunnon lopettaminen"
 
-#: bp/admin/templates/admin/reference.html:47 templates/mainindex.html:107
+#: bp/admin/templates/admin/reference.html:47 templates/mainindex.html:110
 #: templates/tables.html:50
 msgid "Exit the Application"
 msgstr "Poistu sovelluksesta"
 
-#: bp/gedcom/handlers.py:56
-msgid "Source "
-msgstr "Lähde"
-
-#: bp/gedcom/handlers.py:58
-msgid "Gedcom "
-msgstr "gedcom"
-
-#: bp/gedcom/handlers.py:65
-msgid "Submitter "
-msgstr "Lataaja"
-
-#: bp/gedcom/handlers.py:88
-msgid "        count\n"
-msgstr "lukumäärä\n"
-
-#: bp/gedcom/handlers.py:164
+#: bp/gedcom/handlers.py:150
 msgid "Gedcoms"
 msgstr "gedcomit"
 
-#: bp/gedcom/handlers.py:230 bp/gedcom/handlers.py:236
+#: bp/gedcom/handlers.py:194
+msgid ""
+"\n"
+"{}:"
+msgstr ""
+
+#: bp/gedcom/handlers.py:195 bp/gedcom/handlers.py:196
+#: bp/gedcom/handlers.py:212 bp/gedcom/handlers.py:213
+msgid "File {} saved as {}"
+msgstr ""
+
+#: bp/gedcom/handlers.py:229 bp/gedcom/handlers.py:235
 msgid "Choose a GEDCOM file to upload"
 msgstr "Valitse ladattava gedcom tiedosto"
 
-#: bp/gedcom/handlers.py:270
+#: bp/gedcom/handlers.py:242
+msgid "This GEDCOM file already exists"
+msgstr ""
+
+#: bp/gedcom/handlers.py:274
 msgid "That GEDCOM file does not exist on the server"
 msgstr "Että GEDCOM tiedosto ei ole palvelimella"
 
-#: bp/gedcom/handlers.py:321
+#: bp/gedcom/handlers.py:330
 msgid "Deleted:"
 msgstr "Poistettu:"
 
-#: bp/gedcom/handlers.py:326 bp/gedcom/transformer.py:44
+#: bp/gedcom/handlers.py:335 bp/gedcom/transformer.py:44
 #: bp/gedcom/transformer.py:51
 msgid "Replaced:"
 msgstr "Korvattu:"
 
-#: bp/gedcom/handlers.py:329 bp/gedcom/transformer.py:46
+#: bp/gedcom/handlers.py:338 bp/gedcom/transformer.py:46
 #: bp/gedcom/transformer.py:53
 msgid "With:"
 msgstr "tällä: "
 
-#: bp/gedcom/handlers.py:350
+#: bp/gedcom/handlers.py:359
 msgid "Transform '{}' started at {}"
 msgstr "Muunnos {} käynnistettiin {}"
 
-#: bp/gedcom/handlers.py:360
+#: bp/gedcom/handlers.py:369
 msgid "Name of the input GEDCOM file"
 msgstr "GEDCOM-syötteen nimi"
 
-#: bp/gedcom/handlers.py:361
+#: bp/gedcom/handlers.py:370
 msgid "Name of the log file"
 msgstr "Loki tiedoston nimi"
 
-#: bp/gedcom/handlers.py:364 bp/gedcom/handlers.py:544
+#: bp/gedcom/handlers.py:373 bp/gedcom/handlers.py:562
 msgid "Display changed rows"
 msgstr "Näytä muutetut rivit"
 
-#: bp/gedcom/handlers.py:366 bp/gedcom/handlers.py:546
+#: bp/gedcom/handlers.py:375 bp/gedcom/handlers.py:564
 msgid "Do not produce an output file"
 msgstr "Älä tuota tulostiedostoa"
 
-#: bp/gedcom/handlers.py:368 bp/gedcom/handlers.py:548
+#: bp/gedcom/handlers.py:377 bp/gedcom/handlers.py:566
 msgid "Do not produce a log in the output file"
 msgstr "Älä tuota lokia tulostiedostoon"
 
-#: bp/gedcom/handlers.py:370
+#: bp/gedcom/handlers.py:379
 msgid "Encoding of the input GEDCOM"
 msgstr "GEDCOM syötteen koodaus "
 
-#: bp/gedcom/handlers.py:398
+#: bp/gedcom/handlers.py:410 bp/gedcom/handlers.py:414
+msgid "File saved as {}"
+msgstr ""
+
+#: bp/gedcom/handlers.py:411
+msgid "Old file saved as {}"
+msgstr ""
+
+#: bp/gedcom/handlers.py:415
 msgid "Transform '{}' ended at {}"
 msgstr "Muunnos ' {} ' päättyi {}"
 
-#: bp/gedcom/handlers.py:456 static/js/gedcom_scripts.js:111
+#: bp/gedcom/handlers.py:474 static/js/gedcom_scripts.js:130
 msgid "Errors:"
 msgstr "Virheitä:"
 
-#: bp/gedcom/handlers.py:523
+#: bp/gedcom/handlers.py:541
 msgid "Unsupported type: "
 msgstr "Tyyppiä ei tueta:"
 
@@ -633,7 +640,7 @@ msgid "GEDCOM"
 msgstr "gedcom"
 
 #: bp/gedcom/templates/gedcom_info.html:35
-#: bp/gedcom/templates/gedcom_info.html:83
+#: bp/gedcom/templates/gedcom_info.html:129
 #: bp/gedcom/templates/gedcom_list.html:38
 #: bp/scene/templates/scene/person.html:79
 #: bp/scene/templates/scene/place_events.html:111
@@ -645,79 +652,135 @@ msgstr "Kuvaus"
 msgid "Update"
 msgstr "Päivitä"
 
-#: bp/gedcom/templates/gedcom_info.html:40
-msgid "Visualisation data, not based on material"
-msgstr "Näennäistiedot, ei aineistosta"
-
 #: bp/gedcom/templates/gedcom_info.html:42
+msgid "Upload time"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:47
+msgid "Encoding"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:52
+msgid "Submitter"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:57
+msgid "Gedcom version"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:62
+msgid "Gedcom charset"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:67
+msgid "Source program"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:75
 msgid "Number of individuals"
 msgstr "Henkilöiden lukumäärä"
 
-#: bp/gedcom/templates/gedcom_info.html:44
+#: bp/gedcom/templates/gedcom_info.html:77
+msgid "Number of families"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:79
+msgid "Number of unique places"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:81
+msgid "Number of notes"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:83
+msgid "Number of citations"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:85
+msgid "Number of sources"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:87
+msgid "Number of repositories"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:89
+msgid "Number of multimedia objects"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:91
 msgid "Allow help desk to view data"
 msgstr "Salli Tukitoiminnon tarkastella tietoja"
 
-#: bp/gedcom/templates/gedcom_info.html:57
+#: bp/gedcom/templates/gedcom_info.html:100
 msgid "Options"
 msgstr "Lisävalinnat"
 
-#: bp/gedcom/templates/gedcom_info.html:60
+#: bp/gedcom/templates/gedcom_info.html:104
+msgid "Show transformation history"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:106
 msgid "Fetch this GEDCOM"
 msgstr "Nouda tämä gedcom"
 
-#: bp/gedcom/templates/gedcom_info.html:62
+#: bp/gedcom/templates/gedcom_info.html:108
 msgid "Remove this GEDCOM"
 msgstr "Poista tämä gedcom"
 
-#: bp/gedcom/templates/gedcom_info.html:64
+#: bp/gedcom/templates/gedcom_info.html:110
 msgid "Choose a transformation"
 msgstr "Valitse muunnos"
 
-#: bp/gedcom/templates/gedcom_info.html:65
+#: bp/gedcom/templates/gedcom_info.html:111
 msgid "Display versions"
 msgstr "Näytä versiot"
 
-#: bp/gedcom/templates/gedcom_info.html:67
+#: bp/gedcom/templates/gedcom_info.html:113
 msgid "Switch to another GEDCOM"
 msgstr "Vaihda toiseen gedcomiin"
 
-#: bp/gedcom/templates/gedcom_info.html:76
+#: bp/gedcom/templates/gedcom_info.html:122
 msgid "Transformations"
 msgstr "Muunnokset"
 
-#: bp/gedcom/templates/gedcom_info.html:93
+#: bp/gedcom/templates/gedcom_info.html:139
 msgid "Versions"
 msgstr "Versiot"
 
-#: bp/gedcom/templates/gedcom_info.html:96
+#: bp/gedcom/templates/gedcom_info.html:142
 msgid "Compare versions"
 msgstr "Vertaile versioita"
 
-#: bp/gedcom/templates/gedcom_info.html:102
+#: bp/gedcom/templates/gedcom_info.html:150
+msgid "Transformation history"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:159
 msgid "GEDCOM comparison"
 msgstr "gedcom vertailu"
 
-#: bp/gedcom/templates/gedcom_info.html:114
+#: bp/gedcom/templates/gedcom_info.html:171
 msgid "Perform transformation"
 msgstr "Suorita muunnos"
 
-#: bp/gedcom/templates/gedcom_info.html:122
+#: bp/gedcom/templates/gedcom_info.html:179
 msgid "Transformation results"
 msgstr "Muunnoksen tulokset"
 
-#: bp/gedcom/templates/gedcom_info.html:124
+#: bp/gedcom/templates/gedcom_info.html:181
 msgid "Old version is saved as"
 msgstr "Vanha versio tallennetaan nimellä"
 
-#: bp/gedcom/templates/gedcom_info.html:124
+#: bp/gedcom/templates/gedcom_info.html:181
 msgid "Revert to old version"
 msgstr "Palauta vanha versio"
 
-#: bp/gedcom/templates/gedcom_info.html:127
+#: bp/gedcom/templates/gedcom_info.html:184
 msgid "Not saved yet"
 msgstr "Ei vielä tallennettu"
 
-#: bp/gedcom/templates/gedcom_info.html:128
+#: bp/gedcom/templates/gedcom_info.html:185
 msgid "Save result"
 msgstr "Tallenna tulos"
 
@@ -1607,16 +1670,16 @@ msgstr ""
 msgid "Server error"
 msgstr "Palvelinvirhe"
 
-#: static/js/gedcom_scripts.js:47
+#: static/js/gedcom_scripts.js:50
 msgid "Are you sure?"
 msgstr "Oletko varma?"
 
-#: static/js/gedcom_scripts.js:77 static/js/gedcom_scripts.js:78
+#: static/js/gedcom_scripts.js:93 static/js/gedcom_scripts.js:94
 msgid "Revert to %1"
 msgstr "Palauta %1"
 
-#: static/js/gedcom_scripts.js:88 static/js/gedcom_scripts.js:89
-#: static/js/gedcom_scripts.js:95
+#: static/js/gedcom_scripts.js:105 static/js/gedcom_scripts.js:106
+#: static/js/gedcom_scripts.js:112
 msgid "%1 renamed to %2"
 msgstr "%1: nimeksi vaihdettu %2"
 
@@ -1709,69 +1772,69 @@ msgstr "Luettu tiedosto"
 msgid "Would display  statistics"
 msgstr "Näytettäisiin tilastoa"
 
-#: templates/mainindex.html:21
+#: templates/mainindex.html:23
 msgid "My Family Tree"
 msgstr "Oma sukupuuni"
 
-#: templates/mainindex.html:22
+#: templates/mainindex.html:24
 msgid ""
 "View your own candidate material and compare with Suomi tietokanta "
 "database"
 msgstr "Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan"
 
-#: templates/mainindex.html:24 templates/table_persons2.html:8
+#: templates/mainindex.html:26 templates/table_persons2.html:8
 msgid "List of Persons"
 msgstr "Henkilöluettelo"
 
-#: templates/mainindex.html:33
+#: templates/mainindex.html:34
 msgid "Send data to server"
 msgstr "Aineiston lähettäminen"
 
-#: templates/mainindex.html:37
+#: templates/mainindex.html:38
 msgid "Select Gramps XML File (*. gramps) to become candidate material"
 msgstr "Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi"
 
-#: templates/mainindex.html:44
+#: templates/mainindex.html:45
 msgid "List uploads"
 msgstr "Näytä lähettämäni aineistot"
 
-#: templates/mainindex.html:51
+#: templates/mainindex.html:52
 msgid "My gedcom material"
 msgstr "Gedcom-tiedostoni"
 
-#: templates/mainindex.html:52
+#: templates/mainindex.html:53
 msgid "Upload your material in gedcom format or edit an already stored"
 msgstr "Muokkaa uutta tai jo talletettua gedcom-aineistoasi"
 
-#: templates/mainindex.html:54
+#: templates/mainindex.html:55
 msgid "Gedcom handlings"
 msgstr "Gedcom-käsittelyt"
 
-#: templates/mainindex.html:76
+#: templates/mainindex.html:79
 msgid "Message to Maintenance"
 msgstr "Viesti ylläpitoon"
 
-#: templates/mainindex.html:77
+#: templates/mainindex.html:80
 msgid "Request a researcher's rights or send another message to the maintenance"
 msgstr "Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon"
 
-#: templates/mainindex.html:78
+#: templates/mainindex.html:81
 msgid "Function still planned"
 msgstr "Toiminto vasta suunnitteilla"
 
-#: templates/mainindex.html:80
+#: templates/mainindex.html:83
 msgid "Compose a message"
 msgstr "Laadi viesti"
 
-#: templates/mainindex.html:89 templates/mainindex.html:90
+#: templates/mainindex.html:92 templates/mainindex.html:93
 msgid "Admin function"
 msgstr "Ylläpitäjän toiminnot"
 
-#: templates/mainindex.html:91
+#: templates/mainindex.html:94
 msgid "User and reference information management and database service tasks"
 msgstr "Käyttäjien ja referenssitietojen hallinta sekä tietokannan huoltotehtävät"
 
-#: templates/mainindex.html:95
+#: templates/mainindex.html:98
 msgid "Maintenance"
 msgstr "Ylläpito"
 
@@ -2500,4 +2563,25 @@ msgstr "Tiedoston lataus ei onnistu, koodi="
 
 #~ msgid "Ref. Name"
 #~ msgstr "ref.nimi"
+
+#~ msgid "LOADING"
+#~ msgstr "LADATAAN"
+
+#~ msgid "DONE"
+#~ msgstr "TEHTY"
+
+#~ msgid "Source "
+#~ msgstr "Lähde"
+
+#~ msgid "Gedcom "
+#~ msgstr "gedcom"
+
+#~ msgid "Submitter "
+#~ msgstr "Lataaja"
+
+#~ msgid "        count\n"
+#~ msgstr "lukumäärä\n"
+
+#~ msgid "Visualisation data, not based on material"
+#~ msgstr "Näennäistiedot, ei aineistosta"
 
