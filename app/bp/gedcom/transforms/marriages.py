@@ -38,6 +38,7 @@ version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
 
 from flask_babelex import _
+name = _("Marriages") 
 docline = _('Splitting of data in PLAC of MARR')
 
 from .. import transformer

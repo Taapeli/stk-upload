@@ -18,7 +18,7 @@ table.diff td {
 }
 </style>
 
-<script src="/static/js/gedcom_scripts.js?13"></script>
+<script src="/static/js/gedcom_scripts.js?14"></script>
 
 <script>
 var gedcom = "{{ gedcom }}";
@@ -123,7 +123,7 @@ var gedcom = "{{ gedcom }}";
 		        <table>
 		        {% for transform in transforms %}
 		            <tr><td><a href="#" class="transform" 
-		                 data-transform="{{ transform.name }}">{{ transform.name[:-3] }}</a>
+		                 data-transform="{{ transform.name }}">{{ transform.displayname }}</a>
 		            <td>{{ transform.docline }}
 		            <td>{% if transform.doclink %}
 		            	<a href="{{ transform.doclink }}" target="doc">{{ _("Description") }}
@@ -140,6 +140,7 @@ var gedcom = "{{ gedcom }}";
 		        <table id="versions_list"></table>
                 <div class="submit">
 		          <button id="compare">{{ _("Compare versions") }}</button>
+		          <button id="delete_versions">{{ _("Delete old versions") }}</button>
 		        </div>
 		    </div>
 		  </div>

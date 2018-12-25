@@ -7,6 +7,7 @@ version = "2.0"
 #doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
 
 from flask_babelex import _
+name = _("Unmark")
 docline = _("Restores marked tags: <tag>-X -> <tag>")
 
 from .. import transformer

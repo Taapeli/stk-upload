@@ -414,6 +414,15 @@ def read_events_wo_place():
     return (headings, titles, events)
 
 
+def read_families():
+    """ Lukee tietokannasta Family- objektit näytettäväksi
+    """
+
+    families = Family.get_families()
+    
+    return (families)
+
+
 def read_people_wo_birth():
     """ Lukee tietokannasta Person- objektit, joilta puuttuu syntymätapahtuma
         näytettäväksi

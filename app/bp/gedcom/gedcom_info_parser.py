@@ -3,7 +3,7 @@ import transformer
 def initialize(options):
     return InfoParser()
 
-class Info:
+class Info: 
     gedcom_version = None
     submitter = None
     charset = None

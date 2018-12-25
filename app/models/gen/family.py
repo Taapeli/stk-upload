@@ -145,6 +145,154 @@ RETURN family"""
             
         return True
     
+    @staticmethod       
+    def get_families():
+        """ Find all families from the database """
+        
+        query = """
+MATCH (f:Family)
+OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name)  
+OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+WITH f, pc, pw, nw.surname AS wsn, nw.suffix AS wx, nw.firstname AS wfn, 
+   ph, nh.surname AS hsn, nh.firstname AS hfn, nh.suffix AS hx 
+RETURN ID(f) AS uniq_id, f.rel_type AS type, 
+   ID(ph) AS hid, hsn, hx, hfn, 
+   ID(pw) AS wid, wsn, wx, wfn, 
+   COUNT(pc) AS child ORDER BY hsn, hfn"""
+        result = shareds.driver.session().run(query)
+                
+        families = []
+        for record in result:
+            family = []
+            data = []
+            if record['uniq_id']:
+                data.append(record['uniq_id'])
+            if record['type']:
+                data.append(record['type'])
+            else:
+                data.append("-")
+            if record['child']:
+                data.append(record['child'])
+            else:
+                data.append("-")
+            family.append(data)
+            
+            father = []
+            if record['hid']:
+                father.append(record['hid'])
+            else:
+                father.append("-")
+            if record['hsn']:
+                father.append(record['hsn'])
+            else:
+                father.append("-")
+            if record['hx']:
+                father.append(record['hx'])
+            else:
+                father.append("-")
+            if record['hfn']:
+                father.append(record['hfn'])
+            else:
+                father.append("-")
+            family.append(father)
+            
+            mother = []
+            if record['wid']:
+                mother.append(record['wid'])
+            else:
+                mother.append("-")
+            if record['wsn']:
+                mother.append(record['wsn'])
+            else:
+                mother.append("-")
+            if record['wx']:
+                mother.append(record['wx'])
+            else:
+                mother.append("-")
+            if record['wfn']:
+                mother.append(record['wfn'])
+            else:
+                mother.append("-")
+            family.append(mother)
+            families.append(family)
+        
+        return (families)
+    
+    @staticmethod       
+    def get_own_families(user=None):
+        """ Find all families from the database """
+        
+        query = """
+MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:BATCH_MEMBER]->(f:Family) WHERE prof.userName=$user 
+OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name)  
+OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+WITH f, pc, pw, nw.surname AS wsn, nw.suffix AS wx, nw.firstname AS wfn, 
+   ph, nh.surname AS hsn, nh.firstname AS hfn, nh.suffix AS hx 
+RETURN ID(f) AS uniq_id, f.rel_type AS type, 
+   ID(ph) AS hid, hsn, hx, hfn, 
+   ID(pw) AS wid, wsn, wx, wfn, 
+   COUNT(pc) AS child ORDER BY hsn, hfn"""
+        result = shareds.driver.session().run(query, {"user":user})
+                
+        families = []
+        for record in result:
+            family = []
+            data = []
+            if record['uniq_id']:
+                data.append(record['uniq_id'])
+            if record['type']:
+                data.append(record['type'])
+            else:
+                data.append("-")
+            if record['child']:
+                data.append(record['child'])
+            else:
+                data.append("-")
+            family.append(data)
+            
+            father = []
+            if record['hid']:
+                father.append(record['hid'])
+            else:
+                father.append("-")
+            if record['hsn']:
+                father.append(record['hsn'])
+            else:
+                father.append("-")
+            if record['hx']:
+                father.append(record['hx'])
+            else:
+                father.append("-")
+            if record['hfn']:
+                father.append(record['hfn'])
+            else:
+                father.append("-")
+            family.append(father)
+            
+            mother = []
+            if record['wid']:
+                mother.append(record['wid'])
+            else:
+                mother.append("-")
+            if record['wsn']:
+                mother.append(record['wsn'])
+            else:
+                mother.append("-")
+            if record['wx']:
+                mother.append(record['wx'])
+            else:
+                mother.append("-")
+            if record['wfn']:
+                mother.append(record['wfn'])
+            else:
+                mother.append("-")
+            family.append(mother)
+            families.append(family)
+        
+        return (families)
+        
     
     @staticmethod       
     def get_marriage_parent_names(event_uniq_id):

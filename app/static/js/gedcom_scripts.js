@@ -35,6 +35,11 @@ $(document).ready( function() {
             });
             $("#versions_list tr:nth-last-child(2) input[name=v1]").prop("checked",true);
             $("#versions_list tr:nth-last-child(1) input[name=v2]").prop("checked",true);
+            if (versions.length < 2) {
+                $("#compare").prop('disabled', true);
+            } else {
+                $("#compare").prop('disabled', false);
+            }
             $("#div_versions").show();
         });
     });
