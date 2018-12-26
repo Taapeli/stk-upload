@@ -240,20 +240,14 @@ def show_person_page(uniq_id):
 # ------------------------------ Menu 3: Families --------------------------------
 
 @bp.route('/scene/families')
-@login_required
 def show_own_families():
     """ List of Families for menu(3)
     """
     t0 = time.time()
-    
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
         
     try:
         # 'families' has Family objects
-        families = Family.get_own_families(user)
+        families = Family.get_families()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/families.html", families=families, 
