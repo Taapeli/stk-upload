@@ -240,14 +240,17 @@ def show_person_page(uniq_id):
 # ------------------------------ Menu 3: Families --------------------------------
 
 @bp.route('/scene/families')
-def show_own_families():
+def show_families():
     """ List of Families for menu(3)
     """
+    fw_from = request.args.get('f', 0, type=int)
+    bw_from = request.args.get('b', 0, type=int)
+    count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
     try:
         # 'families' has Family objects
-        families = Family.get_families()
+        families = Family.get_families(fw_from,  bw_from,  count)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/families.html", families=families, 

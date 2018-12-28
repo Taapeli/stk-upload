@@ -1,4 +1,4 @@
-{# _myapp/templates/families.html_ #}
+{# /scene/templates/scene/families.html_ #}
 {% extends "a_layout.html" %}
 {% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
@@ -9,6 +9,14 @@
 <p>{{ _('Number of families:') }} {{families|count}}  
 
 <section id="lista">
+
+{% if families %}
+        {% set last = families|last %}
+{% endif %}
+
+<a href="/scene/families" title="alkuun">Alkuun</a> 
+<a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu">Seuraava</a>
+
 <table id="families">
     <tr><th>{{ _("Uniq_id") }}</th>
         <th>{{ _("id of Father") }}</th>
@@ -42,5 +50,6 @@
         <tr><td colspan="5">{{ _('No persons') }}</td></tr>
 {% endif %}
 </table>
+<br>
 
 {% endblock %}

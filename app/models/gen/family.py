@@ -146,7 +146,52 @@ RETURN family"""
         return True
     
     @staticmethod       
-    def get_families():
+    def get_families(fw=0, bw=0, limit=100):
+        """ Find families from the database """
+        
+        query = """
+MATCH (f:Family) WHERE ID(f)>=$fw
+OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
+OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f) LIMIT $limit"""
+        result = shareds.driver.session().run(query, {"fw":fw, "limit":limit})
+                
+        families = []
+        for record in result:
+            if record['f']:
+                f = record['f']
+                family = Family_for_template(f.id)
+                family.type = f['rel_type']
+            
+                if record['ph']:
+                    husband = record['ph']
+                    ph = Person_as_member()
+                    ph.uniq_id = husband.id
+                    
+                    if record['nh']:
+                        hname = record['nh']
+                        ph.names.append(hname)
+                    family.father = ph
+                
+                if record['pw']:
+                    wife = record['pw']
+                    pw = Person_as_member()
+                    pw.uniq_id = wife.id
+                    
+                    if record['nw']:
+                        wname = record['nw']
+                        pw.names.append(wname)
+                    family.mother = pw
+                
+                if record['child']:
+                    c = record['child']
+                    family.no_of_children = c
+                families.append(family)
+        return (families)
+    
+    @staticmethod       
+    def get_all_families():
         """ Find all families from the database """
         
         query = """
