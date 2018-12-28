@@ -71,7 +71,7 @@ def test_gedcom_upload(client):
     rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
     data = rv.data.decode("utf-8")
     assert os.path.exists(temp_gedcom_fname)
-    assert 'Ladatut gedcomit' in data
+    assert 'Lisävalinnat' in data
     assert temp_gedcom in data
     #os.remove(temp_gedcom_fname)
         
