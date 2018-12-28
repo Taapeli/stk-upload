@@ -59,7 +59,8 @@ def fixlines(lines,options):
             line = tkns[0] + " _DUMMY"
             tkns = line.split(None,1)
             lines[i] = line
-        prevlevel = int(tkns[0])
+        tag = lines[i].split()[1]
+        if tag not in {"CONT","CONC"}: prevlevel = int(tkns[0])
     if line.strip() != "0 TRLR":
         lines.append("0 TRLR")
         if options.display_changes:
@@ -67,7 +68,7 @@ def fixlines(lines,options):
             print(_("Added:"))
             print("0 TRLR")
 
-class Transformation:
+class Transformation:   
     twophases = False
     
     def transform(self,item,options):
@@ -86,10 +87,15 @@ class Gedcom:
 class Item:
     def __init__(self,line,children=None,lines=None):
         if children is None: children = []
-        temp = line.split(None,2)
+        temp = line.split()
         if len(temp) < 2: raise RuntimeError(_("Invalid line: ") + line)
-        self.level= int(temp[0])
-        self.tag = temp[1]
+        self.level = int(temp[0])
+        if self.level == 0 and temp[1][0] == '@':
+            self.xref = temp[1]
+            self.tag = temp[2]
+        else:
+            self.xref = ""
+            self.tag = temp[1]
         self._line = line
         self.children = children
         self.lines = lines
@@ -101,6 +107,8 @@ class Item:
 
     @property
     def line(self):
+        if self.xref:
+            return "{} {} {} {}".format(self.level,self.xref, self.tag, self.value)
         if self.value == "":
             return "{} {}".format(self.level,self.tag)
         else:
@@ -157,8 +165,8 @@ class Transformer:
         for item in items:
             if path: 
                 item.path = path + "." + item.tag
-            elif item.value:
-                item.path = item.tag + "." + item.value
+            elif item.xref:
+                item.path = item.xref + "." + item.tag
             else:
                 item.path = item.tag
             item.children = self.transform_items(item.children,path=item.path,phase=phase)
