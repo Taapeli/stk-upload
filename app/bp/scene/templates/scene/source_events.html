@@ -27,31 +27,22 @@
 			        {% for c in citations|sort(attribute='page') %}
 	        		<tr>
 	        		    <td class="CitationId"><span title="sitaatti {{c.uniq_id}}">{{c.id}}</span> </td>
-	        		    <td class="Citation"><div title="{{c.confidence|transl("conf")}} {{ _('confidence') }} ({{c.confidence}})"
+	        		    <td class="Citation"><div 
+	        		        title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
                         {% if c.confidence and c.confidence < "2" %}
                         style="color:red"{% endif %}>
 	   					Sivu {{c.page}} {{ macro.stars(c.confidence|float) }}
                         {% set conf = c.confidence | int %} 
-                        <!-- /li -->
 
 	               		<ol type="a" style="color:black">
 	               		{% for cite in c.citators|sort(attribute='date') %}
-		               		<li><!-- {# if cite.label == 'Person' #}
-                            <a href="/scene/person={{cite.uniq_id}}" class="id"
-                               title="{{ _('see details of person %(id)s', id=cite.id) }}">
-                                   {{cite.clearname}}</a>
-	                        {# elif cite.label == 'Family Event' #}{{ _("Family Member's") }}
-                                <em>{{cite.clearname}}</em> {{cite.eventtype|transl('evt')}} 
-                                {# if cite.edates #}{{cite.edates}}{# endif #}
-	                        {# else #} -->
 	                        {% if cite.eventtype %}{{ _('Of person') }}{% else %}{{ _('Person') }}{% endif %}
-                            <a href="/scene/person={{cite.uniq_id}}" class="id"
+                            <a href="/scene/person={{cite.uniq_id}}" class="inlink"
                                title="{{ _('see details of person %(id)s', id=cite.id) }}">
                                    {{cite.clearname}}</a>
 	                           {{cite.eventtype|transl('evt')}}
 	                           {% if cite.edates %}{{cite.edates}}{% endif %}
 	                        {# endif #}
-               			    </li>
 	                    {% endfor %}
 	                    </ol>
 	         		</div></td></tr>

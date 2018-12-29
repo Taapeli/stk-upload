@@ -508,6 +508,7 @@ RETURN person, name
                 data_line.append(str(birth))
             else:
                 data_line.append('-')
+                birth_data = [None, None, None]
             if record['death'][0] != None:
                 death = DateRange(record['death'])
                 death_str = death.estimate()
@@ -518,6 +519,8 @@ RETURN person, name
 #                 data_line.append(record['death'])
             else:
                 data_line.append('-')
+                death_data = [None, None, None]
+
 
             # Counting the age when the dates are as YYYY-mm-dd
             if birth_data[0] != None and death_data[0] != None:

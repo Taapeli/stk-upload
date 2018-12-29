@@ -49,11 +49,11 @@
 
     {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
-			<ul><li>{% if next['bw'] %}<a href="/scene/persons_{{rule[0]}}/" title="alkuun" class="navlink">|&lt;</a>
+			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
+			    <li>{% if next['bw'] %}<a href="/scene/persons_{{rule[0]}}/" title="alkuun" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu"> &lt; </span></li>
-                <li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
         {% for p in persons %}{% set ini = p.sortname[0]|upper %}
             {% if alpha != ini %}
                 {% set alpha = ini %}
@@ -91,10 +91,7 @@
 	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
-		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}
-		               <small class="idno">[{{p.uniq_id}}</small></a><small class="idno"><a 
-		                href="/scene/person/{{p.uniq_id}}">]</a></small>
-		               {# TODO Remove later test link at ']' #}
+		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}</a>
 
 		               {%set eka = 1 %}
 		               {% for name in p.names %}
@@ -106,10 +103,11 @@
                           {% endif %}
                        {% endfor %}
 
-                       <br><small class="id" title="{{ _('Original ID') }}">
-                          {{p.id}}</small>
-                       <small class="refname" title="{{ _('Sorting name') }}">
-                          {{p.sortname}}</small>
+                       <br>
+                       <a href="/scene/person/{{p.uniq_id}}" class="idno">ID: {{p.uniq_id}} /</a>
+                               {# TODO Remove the test link at ']' #}
+                       <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
+                       <span class="refname" title="{{ _('Sorting name') }}">{{p.sortname}}</span>
 	                </div></td>
 
 	              <td class="ColumnEvent">

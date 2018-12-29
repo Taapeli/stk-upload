@@ -4,7 +4,12 @@
 {% block body %}
     {{ super() }}
     <meta http-equiv="refresh" content="30">
-    <h2>{{ _("Uploads for user") }} '{{ user }}'</h2>
+    {% if user %}
+	    <h2>{{ _("Uploads for user") }} '{{ user }}'</h2>
+    {% else %}
+    	<h2>{{ _("Uploads for all users") }}</h2>
+    {% endif %}
+    
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -14,8 +19,21 @@
         </ol>
       {% endif %}
     {% endwith %}
+    <div class="helptext">
+    <pre>
+    	{{ _("Status for differents steps in XML file upload:") }}
+    	
+    	{{ _("1. UPLOADING - the file is being uploaded to server") }}
+    	{{ _("2. UPLOADED  - the file has been uploaded to server") }}
+    	{{ _("3. STORING   - the file content is being stored to the database") }}
+    	{{ _("4. STORED    - the file content has been stored to the database") }}
+	</pre>
+    </div>
         <table>
            <tr>
+			    {% if not user %}
+	                <th>{{ _("User id") }}</th>
+			    {% endif %}
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("XML file") }}</th>
                 <th>{{ _("Status") }}</th>
@@ -23,18 +41,21 @@
            </tr>
 	    {% for upload in uploads %}
 	       <tr>
+			    {% if not user %}
+	                <td>{{ upload.user }}</td>
+			    {% endif %}
 	           <td class="msg_INFO">{{upload.upload_time_s}}</td>
 	           <td class="msg_INFO">
-    	           <a href=/admin/xml_download/{{user}}/{{upload.xmlname | urlencode}}>
+    	           <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}>
     	               {{upload.xmlname}}</a> 
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}</td>
 	           <td class="msg_INFO">
-	           		<a href=/admin/start_upload/{{user}}/{{upload.xmlname | urlencode}}>
+	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
-	           		<a href=/admin/show_upload_log/{{user}}/{{upload.xmlname | urlencode}}>
+	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a> |
-	           		<a href=/admin/xml_delete/{{user}}/{{upload.xmlname | urlencode}}>
+	           		<a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Delete file") }}</a> &nbsp;
 	           	</td>
 	       </tr>

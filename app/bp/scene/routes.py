@@ -18,6 +18,7 @@ from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
+from models.gen.family import Family
 #from models.gen.family import Family_for_template
 from models.gen.place import Place
 from models.gen.source import Source
@@ -234,6 +235,25 @@ def show_person_page(uniq_id):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/person.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 
+                           elapsed=time.time()-t0)
+
+# ------------------------------ Menu 3: Families --------------------------------
+
+@bp.route('/scene/families')
+def show_families():
+    """ List of Families for menu(3)
+    """
+    fw_from = request.args.get('f', 0, type=int)
+    bw_from = request.args.get('b', 0, type=int)
+    count = request.args.get('c', 100, type=int)
+    t0 = time.time()
+        
+    try:
+        # 'families' has Family objects
+        families = Family.get_families(fw_from,  bw_from,  count)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("/scene/families.html", families=families, 
                            elapsed=time.time()-t0)
 
 # ------------------------------ Menu 4: Places --------------------------------

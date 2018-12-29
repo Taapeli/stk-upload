@@ -409,15 +409,15 @@ RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidenc
     get_cita_sour_repo_all = """
 MATCH (c:Citation) -[rs:SOURCE]-> (source:Source) -[rr:REPOSITORY]-> (repo:Repository)
 OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
-  WITH c, rs, source, rr, repo 
-  ORDER BY c.page, note""" + _cita_sour_repo_tail
+  WITH c, rs, source, rr, repo, note 
+  ORDER BY c.page, note.text""" + _cita_sour_repo_tail
 
     get_cita_sour_repo = """
 MATCH (c:Citation) -[rs:SOURCE]-> (source:Source) -[rr:REPOSITORY]-> (repo:Repository)
     WHERE ID(c)=$uid
 OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
-  WITH c, rs, source, rr, repo 
-  ORDER BY c.page, note""" + _cita_sour_repo_tail
+  WITH c, rs, source, rr, repo, note 
+  ORDER BY c.page, note.text""" + _cita_sour_repo_tail
 
 
 class Cypher_source():

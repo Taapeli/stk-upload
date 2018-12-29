@@ -13,6 +13,7 @@ from .. import transformer
 from ..transformer import Item
 from flask_babelex import _
 
+name = _("Sukujutut")
 doclink = "http://taapeli.referata.com/wiki/Sukujutut-muunnos"
 docline = _("Sukujutut transformations")
 

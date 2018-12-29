@@ -8,8 +8,12 @@ Each transformation module should implement:
     Returns an instance of the class Transformation
 2. Function add_args
     Adds the transformation specific arguments (Argparse style)
+3. Attribute name
+4. Attribute docline
+5. Attribute doclink
+6. Attribute twophases
 
-The Transformation object should implement the method transform. Optionally
+The Transformation object should implement the methods transform and finish. Optionally
 it can implement the initializer (__init__) and the method finish.    
     
 Class Transformer parses a file or a list of lines into a hierarchical structure of "Item" objects. 
@@ -140,15 +144,24 @@ class Transformer:
             # i and j are line numbers of lines having specified level so that all lines in between have higher line numbers;
             # i.e. they form a substructure
             firstline = lines[i] 
-            item = Item(firstline,children=self.build_items(lines[i+1:j],level+1),lines=lines[i:j])
+            item = Item(firstline,
+                        children=self.build_items(lines[i+1:j],level+1),
+                        lines=lines[i:j],
+                        )
             items.append(item)
             
         return items
     
-    def transform_items(self,items,phase=1):
+    def transform_items(self,items,path="",phase=1):
         newitems = []
         for item in items:
-            item.children = self.transform_items(item.children)
+            if path: 
+                item.path = path + "." + item.tag
+            elif item.value:
+                item.path = item.tag + "." + item.value
+            else:
+                item.path = item.tag
+            item.children = self.transform_items(item.children,path=item.path,phase=phase)
             newitem = self.transformation.transform(item,self.options,phase)
             if newitem == True: # no change
                 newitems.append(item)

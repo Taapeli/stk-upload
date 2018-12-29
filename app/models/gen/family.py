@@ -145,6 +145,170 @@ RETURN family"""
             
         return True
     
+    @staticmethod       
+    def get_families(fw=0, bw=0, limit=100):
+        """ Find families from the database """
+        
+        query = """
+MATCH (f:Family) WHERE ID(f)>=$fw
+OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
+OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f) LIMIT $limit"""
+        result = shareds.driver.session().run(query, {"fw":fw, "limit":limit})
+                
+        families = []
+        for record in result:
+            if record['f']:
+                f = record['f']
+                family = Family_for_template(f.id)
+                family.type = f['rel_type']
+            
+                if record['ph']:
+                    husband = record['ph']
+                    ph = Person_as_member()
+                    ph.uniq_id = husband.id
+                    
+                    if record['nh']:
+                        hname = record['nh']
+                        ph.names.append(hname)
+                    family.father = ph
+                
+                if record['pw']:
+                    wife = record['pw']
+                    pw = Person_as_member()
+                    pw.uniq_id = wife.id
+                    
+                    if record['nw']:
+                        wname = record['nw']
+                        pw.names.append(wname)
+                    family.mother = pw
+                
+                if record['child']:
+                    c = record['child']
+                    family.no_of_children = c
+                families.append(family)
+        return (families)
+    
+    @staticmethod       
+    def get_all_families():
+        """ Find all families from the database """
+        
+        query = """
+MATCH (f:Family)
+OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
+OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f)"""
+        result = shareds.driver.session().run(query)
+                
+        families = []
+        for record in result:
+            if record['f']:
+                f = record['f']
+                family = Family_for_template(f.id)
+                family.type = f['rel_type']
+            
+                if record['ph']:
+                    husband = record['ph']
+                    ph = Person_as_member()
+                    ph.uniq_id = husband.id
+                    
+                    if record['nh']:
+                        hname = record['nh']
+                        ph.names.append(hname)
+                    family.father = ph
+                
+                if record['pw']:
+                    wife = record['pw']
+                    pw = Person_as_member()
+                    pw.uniq_id = wife.id
+                    
+                    if record['nw']:
+                        wname = record['nw']
+                        pw.names.append(wname)
+                    family.mother = pw
+                
+                if record['child']:
+                    c = record['child']
+                    family.no_of_children = c
+                families.append(family)
+        return (families)
+    
+    @staticmethod       
+    def get_own_families(user=None):
+        """ Find all families from the database """
+        
+        query = """
+MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:BATCH_MEMBER]->(f:Family) WHERE prof.userName=$user 
+OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name)  
+OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+WITH f, pc, pw, nw.surname AS wsn, nw.suffix AS wx, nw.firstname AS wfn, 
+   ph, nh.surname AS hsn, nh.firstname AS hfn, nh.suffix AS hx 
+RETURN ID(f) AS uniq_id, f.rel_type AS type, 
+   ID(ph) AS hid, hsn, hx, hfn, 
+   ID(pw) AS wid, wsn, wx, wfn, 
+   COUNT(pc) AS child ORDER BY hsn, hfn"""
+        result = shareds.driver.session().run(query, {"user":user})
+                
+        families = []
+        for record in result:
+            family = []
+            data = []
+            if record['uniq_id']:
+                data.append(record['uniq_id'])
+            if record['type']:
+                data.append(record['type'])
+            else:
+                data.append("-")
+            if record['child']:
+                data.append(record['child'])
+            else:
+                data.append("-")
+            family.append(data)
+            
+            father = []
+            if record['hid']:
+                father.append(record['hid'])
+            else:
+                father.append("-")
+            if record['hsn']:
+                father.append(record['hsn'])
+            else:
+                father.append("-")
+            if record['hx']:
+                father.append(record['hx'])
+            else:
+                father.append("-")
+            if record['hfn']:
+                father.append(record['hfn'])
+            else:
+                father.append("-")
+            family.append(father)
+            
+            mother = []
+            if record['wid']:
+                mother.append(record['wid'])
+            else:
+                mother.append("-")
+            if record['wsn']:
+                mother.append(record['wsn'])
+            else:
+                mother.append("-")
+            if record['wx']:
+                mother.append(record['wx'])
+            else:
+                mother.append("-")
+            if record['wfn']:
+                mother.append(record['wfn'])
+            else:
+                mother.append("-")
+            family.append(mother)
+            families.append(family)
+        
+        return (families)
+        
     
     @staticmethod       
     def get_marriage_parent_names(event_uniq_id):
@@ -357,6 +521,7 @@ class Family_for_template(Family):
 #                 rel_type        str suhteen tyyppi
 #                 father          int isän osoite
 #                 mother          int äidin osoite
+#                 no_of_children  int lasten lukumäärä
 #                 children[]      int lasten osoitteet
 
             f = Family_for_template()
