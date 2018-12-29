@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-29 13:13+0200\n"
+"POT-Creation-Date: 2018-12-29 21:04+0200\n"
 "PO-Revision-Date: 2018-12-27 20:25+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -101,7 +101,7 @@ msgstr "Olen lukenut ja hyväksynyt"
 
 #: setups.py:151
 msgid "Terms of use"
-msgstr "k"
+msgstr "Käyttöehdot"
 
 #: bp/stk_security/templates/security/_menu.html:5 setups.py:154
 msgid "Register"
@@ -131,7 +131,7 @@ msgstr ""
 
 #: bp/admin/forms.py:38 setups.py:205
 msgid "User name"
-msgstr "Käyttäjänimi"
+msgstr "Käyttäjätunnus"
 
 #: bp/scene/templates/scene/place_events.html:108 setups.py:205
 #: templates/person2.html:16 templates/repo_sources.html:15
@@ -145,7 +145,7 @@ msgstr "Kieli"
 
 #: bp/admin/cvs_refnames.py:47
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
-msgstr "Kelpaamattomia kenttänimiä \"Nimi,Refnimi,Reftyyppi,Lähde,Sukupuoli\" {}"
+msgstr "Kelpaamattomia kenttänimiä \"Name,Refname,Reftype,Source,Gender\" {}"
 
 #: bp/admin/forms.py:32
 msgid "id:"
@@ -157,7 +157,7 @@ msgstr "Käyttäjän id"
 
 #: bp/admin/forms.py:34 bp/admin/forms.py:76
 msgid "Email Address:"
-msgstr "Söhköpostiosoite:"
+msgstr "Sähköpostiosoite:"
 
 #: bp/admin/forms.py:36
 msgid "Email address"
@@ -181,7 +181,7 @@ msgstr "aktiivinen"
 
 #: bp/admin/forms.py:49
 msgid "Active / passive user"
-msgstr ""
+msgstr "Käyttäjä on nyt aktiivinen / passivinen"
 
 #: bp/admin/forms.py:50
 msgid "Roles"
@@ -293,7 +293,7 @@ msgstr "Kaikki tiedot poistettu."
 
 #: bp/admin/models.py:51
 msgid "All data but users and roles are removed."
-msgstr "Kaikki tiedot poistettu paitsi käyttäjiä ja rooleja."
+msgstr "Kaikki tiedot poistettu paitsi käyttät rooleineen."
 
 #: bp/admin/models.py:128
 msgid "Given allowed email address already exists"
@@ -304,7 +304,7 @@ msgid "estimated lifetime"
 msgstr "arvioitu elinaika"
 
 #: bp/admin/routes.py:76
-msgid "Made"
+msgid "Done"
 msgstr "Tehty"
 
 #: bp/admin/routes.py:110
@@ -349,11 +349,11 @@ msgstr "Pääkäyttäjä"
 
 #: bp/admin/templates/admin/admin.html:10
 msgid "Are you sure you want to clear the database?"
-msgstr "Oletko varma että haluat tyhjentää tietokannan?"
+msgstr "Haluatko todella tyhjentää tietokannan?"
 
 #: bp/admin/templates/admin/admin.html:19
 msgid "Are you sure you want to delete your data?"
-msgstr "Oletko varman että haluat poistaa tuomasi tiedot?"
+msgstr "haluatko todella poistaa tuomasi tiedot?"
 
 #: bp/admin/templates/admin/admin.html:31
 #: bp/stk_security/templates/security/login_user.html:10
@@ -373,7 +373,7 @@ msgstr "roolit:"
 #: bp/stk_security/templates/security/login_user.html:11
 #: templates/mainindex.html:14
 msgid "Git Application Version"
-msgstr "Git-sovellusversio"
+msgstr "Sovellusversio"
 
 #: bp/admin/templates/admin/admin.html:41 templates/mainindex.html:66
 #: templates/tables.html:12
@@ -397,8 +397,8 @@ msgid "Database Emptyings"
 msgstr "Tietokannan tyhjennykset"
 
 #: bp/admin/templates/admin/admin.html:57
-msgid "The information is deleted without further asking!"
-msgstr "Tiedot tuhotaan mitään kysymättä!"
+msgid "Dangerous operations, which can not be undone!"
+msgstr "Vaarallisia toimintoja, joita ei voi perua!"
 
 #: bp/admin/templates/admin/admin.html:59
 msgid "Clear entire database"
@@ -1079,29 +1079,29 @@ msgstr "Avain"
 
 #: bp/scene/templates/scene/families.html:22 templates/table_families.html:14
 msgid "id of Father"
-msgstr ""
+msgstr "id"
 
 #: bp/scene/templates/scene/families.html:23
 #: bp/scene/templates/scene/person.html:144
 #: bp/scene/templates/scene/person.html:177
-#: bp/scene/templates/scene/person_pg.html:170
-#: bp/scene/templates/scene/person_pg.html:203 templates/table_families.html:15
+#: bp/scene/templates/scene/person_pg.html:167
+#: bp/scene/templates/scene/person_pg.html:200 templates/table_families.html:15
 #: templates/table_families_by_id.html:67
 msgid "Father"
-msgstr "Isä"
+msgstr "Mies"
 
 #: bp/scene/templates/scene/families.html:24 templates/table_families.html:16
 msgid "id of Mother"
-msgstr ""
+msgstr "id"
 
 #: bp/scene/templates/scene/families.html:25
 #: bp/scene/templates/scene/person.html:146
 #: bp/scene/templates/scene/person.html:179
-#: bp/scene/templates/scene/person_pg.html:172
-#: bp/scene/templates/scene/person_pg.html:205 templates/table_families.html:17
+#: bp/scene/templates/scene/person_pg.html:169
+#: bp/scene/templates/scene/person_pg.html:202 templates/table_families.html:17
 #: templates/table_families_by_id.html:91
 msgid "Mother"
-msgstr "Äiti"
+msgstr "Vaimo"
 
 #: bp/scene/templates/scene/families.html:26
 #: bp/scene/templates/scene/place_events.html:55
@@ -1114,7 +1114,7 @@ msgstr "Tyyppi"
 
 #: bp/scene/templates/scene/families.html:27 templates/table_families.html:19
 msgid "Child"
-msgstr ""
+msgstr "Lapsia"
 
 #: bp/scene/templates/scene/families.html:50 templates/table_families.html:42
 #: templates/table_persons2.html:39
@@ -1139,7 +1139,7 @@ msgstr "Suomen Sukututkimusseura"
 
 #: bp/scene/templates/scene/locations.html:8
 msgid "Places List"
-msgstr "Paikat-lista"
+msgstr "Paikat"
 
 #: bp/scene/templates/scene/locations.html:12
 msgid ""
@@ -1157,7 +1157,7 @@ msgstr "Alkuun"
 #: bp/scene/templates/scene/locations.html:18
 #: bp/scene/templates/scene/sources.html:19
 msgid "Alphabetical Menu"
-msgstr "Aakkosmenu"
+msgstr "Aakkosvalikko"
 
 #: bp/scene/templates/scene/locations.html:26
 msgid "Location, related places"
@@ -1176,7 +1176,7 @@ msgstr "Katso paikan %(id)s tiedot"
 #: bp/scene/templates/scene/locations.html:45
 #: bp/scene/templates/scene/locations.html:52
 msgid "Go to location"
-msgstr "siirry paikkaan"
+msgstr "Siirry paikkaan"
 
 #: bp/scene/templates/scene/macros.html:52
 msgid "Search for people"
@@ -1208,8 +1208,8 @@ msgstr "Katso yhdessä sekä omat että muiden henkilöt"
 #: bp/scene/templates/scene/macros.html:65
 #: bp/scene/templates/scene/person.html:135
 #: bp/scene/templates/scene/person.html:137
-#: bp/scene/templates/scene/person_pg.html:161
-#: bp/scene/templates/scene/person_pg.html:163
+#: bp/scene/templates/scene/person_pg.html:158
+#: bp/scene/templates/scene/person_pg.html:160
 msgid "Families"
 msgstr "Perheet"
 
@@ -1223,15 +1223,14 @@ msgstr "Lähteet"
 
 #: bp/scene/templates/scene/macros.html:71
 msgid "Thumbnails"
-msgstr "Pikkukuvat"
+msgstr "Pienoiskuvat"
 
 #: bp/scene/templates/scene/macros.html:71
 msgid "Pictures and other Media"
 msgstr "Kuvat ja muu media"
 
 #: bp/scene/templates/scene/macros.html:86
-#: bp/scene/templates/scene/source_events.html:41
-#: bp/scene/templates/scene/source_events.html:49
+#: bp/scene/templates/scene/source_events.html:44
 #, python-format
 msgid "see details of person %(id)s"
 msgstr "Katso henkilön %(id)s tiedot"
@@ -1253,7 +1252,8 @@ msgid "in Photo"
 msgstr "Kuvassa"
 
 #: bp/scene/templates/scene/person.html:30
-msgid "Tags"
+#: bp/scene/templates/scene/person_pg.html:38
+msgid "Identifiers"
 msgstr "Tunnisteet"
 
 #: bp/scene/templates/scene/person.html:37
@@ -1291,7 +1291,7 @@ msgstr "Sukupuoli"
 #: bp/scene/templates/scene/place_events.html:63
 #: bp/scene/templates/scene/place_events.html:88
 msgid "Private data"
-msgstr "Salattu tieto"
+msgstr "Yksityinen tieto"
 
 #: bp/scene/templates/scene/person.html:60
 #: bp/scene/templates/scene/person_pg.html:68
@@ -1336,7 +1336,7 @@ msgstr "Paikka"
 
 #: bp/scene/templates/scene/person.html:80
 #: bp/scene/templates/scene/person.html:207
-#: bp/scene/templates/scene/person_pg.html:233
+#: bp/scene/templates/scene/person_pg.html:230
 #: bp/scene/templates/scene/place_events.html:57
 #: bp/scene/templates/scene/place_events.html:76
 #: bp/scene/templates/scene/place_events.html:112
@@ -1357,7 +1357,7 @@ msgid "Cause Of Death"
 msgstr "Kuolinsyy"
 
 #: bp/scene/templates/scene/person.html:138
-#: bp/scene/templates/scene/person_pg.html:164
+#: bp/scene/templates/scene/person_pg.html:161
 msgid "Parents' family"
 msgstr "Vanhempien perhe"
 
@@ -1370,8 +1370,8 @@ msgstr "perhe"
 
 #: bp/scene/templates/scene/person.html:148
 #: bp/scene/templates/scene/person.html:181
-#: bp/scene/templates/scene/person_pg.html:174
-#: bp/scene/templates/scene/person_pg.html:207
+#: bp/scene/templates/scene/person_pg.html:171
+#: bp/scene/templates/scene/person_pg.html:204
 #: templates/table_families_by_id.html:115
 msgid "Children"
 msgstr "Lapset"
@@ -1382,22 +1382,22 @@ msgstr "Päähenkilö"
 
 #: bp/scene/templates/scene/person.html:159
 #: bp/scene/templates/scene/person.html:161
-#: bp/scene/templates/scene/person_pg.html:185
+#: bp/scene/templates/scene/person_pg.html:182
 msgid "self"
 msgstr "itse"
 
 #: bp/scene/templates/scene/person.html:170
-#: bp/scene/templates/scene/person_pg.html:196
+#: bp/scene/templates/scene/person_pg.html:193
 msgid "Own families"
 msgstr "Omat perheet"
 
 #: bp/scene/templates/scene/person.html:171
-#: bp/scene/templates/scene/person_pg.html:197
+#: bp/scene/templates/scene/person_pg.html:194
 msgid "As Parent in Family"
 msgstr "Perheessä vanhempana"
 
 #: bp/scene/templates/scene/person.html:194
-#: bp/scene/templates/scene/person_pg.html:220
+#: bp/scene/templates/scene/person_pg.html:217
 msgid "Media"
 msgstr "Media"
 
@@ -1406,7 +1406,7 @@ msgid "Picture"
 msgstr "kuva"
 
 #: bp/scene/templates/scene/person.html:204
-#: bp/scene/templates/scene/person_pg.html:230
+#: bp/scene/templates/scene/person_pg.html:227
 msgid "Narrated"
 msgstr "Kerrottua"
 
@@ -1425,19 +1425,17 @@ msgid "see details of source %(id)s"
 msgstr "Katso lähteen %(id)s tiedot"
 
 #: bp/scene/templates/scene/person.html:298
-#: bp/scene/templates/scene/person_pg.html:269
-#: bp/scene/templates/scene/source_events.html:30
+#: bp/scene/templates/scene/person_pg.html:266
+#: bp/scene/templates/scene/source_events.html:31
 msgid "confidence"
 msgstr "luottamustaso"
 
 #: bp/scene/templates/scene/person.html:301
-#: bp/scene/templates/scene/person_pg.html:270 templates/cite_sour_repo.html:31
+#: bp/scene/templates/scene/person_pg.html:267
+#: bp/scene/templates/scene/source_events.html:33
+#: templates/cite_sour_repo.html:31
 msgid "Page"
 msgstr "Sivu"
-
-#: bp/scene/templates/scene/person_pg.html:38
-msgid "Identifiers"
-msgstr "Tunnisteet"
 
 #: bp/scene/templates/scene/person_pg.html:41
 #: bp/scene/templates/scene/person_pg.html:90
@@ -1448,17 +1446,17 @@ msgid "Source"
 msgstr "Lähde"
 
 #: bp/scene/templates/scene/person_pg.html:52
-#: bp/scene/templates/scene/person_pg.html:188
+#: bp/scene/templates/scene/person_pg.html:185
 msgid "first name"
 msgstr "etunimi"
 
 #: bp/scene/templates/scene/person_pg.html:53
-#: bp/scene/templates/scene/person_pg.html:189
+#: bp/scene/templates/scene/person_pg.html:186
 msgid "patronymic"
 msgstr "patronyymi"
 
 #: bp/scene/templates/scene/person_pg.html:54
-#: bp/scene/templates/scene/person_pg.html:190
+#: bp/scene/templates/scene/person_pg.html:187
 #: templates/table_baptism_data.html:22 templates/table_families_by_id.html:11
 #: templates/table_families_by_id.html:44
 #: templates/table_families_by_id.html:69
@@ -1473,53 +1471,53 @@ msgstr "sukunimi"
 msgid "Description and Notes"
 msgstr "Lisätietoja"
 
-#: bp/scene/templates/scene/person_pg.html:128
+#: bp/scene/templates/scene/person_pg.html:125
 msgid "of type"
 msgstr "Tyyppi"
 
-#: bp/scene/templates/scene/person_pg.html:128
+#: bp/scene/templates/scene/person_pg.html:125
 msgid "see details of place"
 msgstr "Katso paikan tiedot"
 
-#: bp/scene/templates/scene/person_pg.html:167
-#: bp/scene/templates/scene/person_pg.html:168
-#: bp/scene/templates/scene/person_pg.html:201
+#: bp/scene/templates/scene/person_pg.html:164
+#: bp/scene/templates/scene/person_pg.html:165
+#: bp/scene/templates/scene/person_pg.html:198
 #: templates/table_families_by_id.html:44
 #: templates/table_families_by_id.html:54 templates/table_person_by_id.html:39
 #: templates/table_person_by_id.html:45
 msgid "family"
 msgstr "perhe"
 
-#: bp/scene/templates/scene/person_pg.html:184
+#: bp/scene/templates/scene/person_pg.html:181
 msgid "Central person"
 msgstr "Keskushenkilö"
 
-#: bp/scene/templates/scene/person_pg.html:187
+#: bp/scene/templates/scene/person_pg.html:184
 msgid "Self"
 msgstr "Itse"
 
-#: bp/scene/templates/scene/person_pg.html:222
+#: bp/scene/templates/scene/person_pg.html:219
 msgid "image"
-msgstr ""
+msgstr "kuva"
 
-#: bp/scene/templates/scene/person_pg.html:241
+#: bp/scene/templates/scene/person_pg.html:238
 msgid "Source references"
 msgstr "Lähdeviitteet"
 
-#: bp/scene/templates/scene/person_pg.html:257
+#: bp/scene/templates/scene/person_pg.html:254
 #, python-format
 msgid "See source %(name)s details"
 msgstr "Lähteen %(name)s tiedot"
 
-#: bp/scene/templates/scene/person_pg.html:259
+#: bp/scene/templates/scene/person_pg.html:256
 msgid "No source information!"
 msgstr "Lähdetieto puuttuu!"
 
-#: bp/scene/templates/scene/person_pg.html:262
+#: bp/scene/templates/scene/person_pg.html:259
 msgid "No archive information!"
 msgstr "Arkistotieto puuttuu!"
 
-#: bp/scene/templates/scene/person_pg.html:272
+#: bp/scene/templates/scene/person_pg.html:269
 msgid "see:"
 msgstr "ks."
 
@@ -1556,8 +1554,7 @@ msgstr "Viite"
 msgid "Additional Information"
 msgstr "Lisätieto"
 
-#: bp/scene/templates/scene/place_events.html:107
-#: bp/scene/templates/scene/source_events.html:47 templates/person2.html:8
+#: bp/scene/templates/scene/place_events.html:107 templates/person2.html:8
 msgid "Person"
 msgstr "Henkilö"
 
@@ -1586,13 +1583,9 @@ msgstr "Lähdeviitteet ja tapahtumat"
 msgid "Source and references"
 msgstr "Lähde ja viittaukset"
 
-#: bp/scene/templates/scene/source_events.html:43
-msgid "Family Member's"
-msgstr "Perheenjäsenen"
-
-#: bp/scene/templates/scene/source_events.html:47
-msgid "Of person"
-msgstr "Henkilön"
+#: bp/scene/templates/scene/source_events.html:41
+msgid "The person"
+msgstr "Henkilö"
 
 #: bp/scene/templates/scene/sources.html:8 templates/table_sources.html:8
 msgid "List of Sources"
@@ -1825,7 +1818,7 @@ msgstr "Otsikko"
 #: templates/person2.html:43 templates/repo_sources.html:52
 #: templates/source_citations.html:35
 msgid "Go back"
-msgstr "Palaa takaisin"
+msgstr "Paluu"
 
 #: templates/db_test.html:3
 msgid "Result of processing"
@@ -1837,19 +1830,19 @@ msgstr "Tietokantakäsittelyn onnistuminen"
 
 #: templates/jinja_filters.py:30
 msgid "Birth Name"
-msgstr ""
+msgstr "syntymänimi"
 
 #: templates/jinja_filters.py:31
 msgid "Also Known As"
-msgstr ""
+msgstr "tunnettu myös"
 
 #: templates/jinja_filters.py:32
 msgid "Married Name"
-msgstr ""
+msgstr "avionimi"
 
 #: templates/jinja_filters.py:33 templates/jinja_filters.py:140
 msgid "Unknown type"
-msgstr ""
+msgstr "tuntematon tyyppi"
 
 #: templates/jinja_filters.py:34
 msgid "Aateloitu nimi"
@@ -1861,80 +1854,80 @@ msgstr ""
 
 #: templates/jinja_filters.py:40
 msgid "Birth"
-msgstr ""
+msgstr "syntymä"
 
 #: templates/jinja_filters.py:41
 msgid "Death"
-msgstr ""
+msgstr "kuolema"
 
 #: templates/jinja_filters.py:42 templates/select_refcols.html:35
 #: templates/select_refcols.html:63
 msgid "Occupation"
-msgstr "Ammatti"
+msgstr "ammatti"
 
 #: templates/jinja_filters.py:43
 msgid "Baptism"
-msgstr ""
+msgstr "kaste"
 
 #: templates/jinja_filters.py:44
 msgid "Burial"
-msgstr ""
+msgstr "hautaus"
 
 #: templates/jinja_filters.py:45
 msgid "Marriage"
-msgstr ""
+msgstr "avioliitto"
 
 #: templates/jinja_filters.py:46
 msgid "Residence"
-msgstr ""
+msgstr "asuinpaikka"
 
 #: templates/jinja_filters.py:48
 msgid "Luottamustoimi"
 msgstr ""
 
 #: templates/jinja_filters.py:49
-msgid "Moved out from"
-msgstr ""
+msgid "Moved out"
+msgstr "poismuutto"
 
 #: templates/jinja_filters.py:50
 msgid "Moved to"
-msgstr ""
+msgstr "tulomuutto"
 
 #: templates/jinja_filters.py:51
 msgid "Graduation"
-msgstr ""
+msgstr "valmistuminen"
 
 #: templates/jinja_filters.py:52
 msgid "Degree"
-msgstr ""
+msgstr "oppiarvo"
 
 #: templates/jinja_filters.py:53
 msgid "Ordination"
-msgstr ""
+msgstr "palkitseminen"
 
 #: templates/jinja_filters.py:54
 msgid "Property"
-msgstr ""
+msgstr "omaisuus"
 
 #: templates/jinja_filters.py:55
 msgid "Education"
-msgstr ""
+msgstr "koulutus"
 
 #: templates/jinja_filters.py:56
 msgid "War"
-msgstr ""
+msgstr "sota"
 
 #: templates/jinja_filters.py:57
 msgid "Confirmation"
-msgstr ""
+msgstr "ripille pääsy"
 
 #: templates/jinja_filters.py:58
 msgid "First Communion"
-msgstr ""
+msgstr "ensimmäinen ehtoollinen"
 
 #: templates/jinja_filters.py:59
 msgid "Military Service"
-msgstr ""
+msgstr "asepalvelus"
 
 #: templates/jinja_filters.py:60
 msgid "Käräjöinti"
@@ -1942,235 +1935,235 @@ msgstr ""
 
 #: templates/jinja_filters.py:61
 msgid "Christening"
-msgstr ""
+msgstr "kristillinen kaste"
 
 #: templates/jinja_filters.py:62
 msgid "Marriage Banns"
-msgstr ""
+msgstr "kuulutus avioliittoon"
 
 #: templates/jinja_filters.py:63
 msgid "Retirement"
-msgstr ""
+msgstr "eläkkeelle siirtyminen"
 
 #: templates/jinja_filters.py:64
 msgid "Nobility Title"
-msgstr ""
+msgstr "aatelointi"
 
 #: templates/jinja_filters.py:65
 msgid "Engagement"
-msgstr ""
+msgstr "kihlautuminen"
 
 #: templates/jinja_filters.py:66
 msgid "Immigration"
-msgstr ""
+msgstr "maahanmuutto"
 
 #: templates/jinja_filters.py:67
 msgid "Holy Communion"
-msgstr ""
+msgstr "ehtoollinen"
 
 #: templates/jinja_filters.py:72
 msgid "Primary"
-msgstr ""
+msgstr "pääosallisena"
 
 #: templates/jinja_filters.py:74
 msgid "Kummi"
-msgstr ""
+msgstr "kummina"
 
 #: templates/jinja_filters.py:75
 msgid "Perillinen"
-msgstr ""
+msgstr "perillisenä"
 
 #: templates/jinja_filters.py:76
 msgid "kummi"
-msgstr ""
+msgstr "kummina"
 
 #: templates/jinja_filters.py:77
 msgid "Clergy"
-msgstr ""
+msgstr "pappina"
 
 #: templates/jinja_filters.py:78
 msgid "Osallinen"
-msgstr ""
+msgstr "osallisena"
 
 #: templates/jinja_filters.py:79
 msgid "Ostaja"
-msgstr ""
+msgstr "ostajana"
 
 #: templates/jinja_filters.py:80
 msgid "Perinnönjättäjä"
-msgstr ""
+msgstr "perinnönjättäjänä"
 
 #: templates/jinja_filters.py:81
 msgid "Vihkijä"
-msgstr ""
+msgstr "vihkijänä"
 
 #: templates/jinja_filters.py:82
 msgid "Pääosallinen"
-msgstr ""
+msgstr "pääosallisena"
 
 #: templates/jinja_filters.py:83
 msgid "Edunsaaja"
-msgstr ""
+msgstr "edunsaajana"
 
 #: templates/jinja_filters.py:84
 msgid "Myyjä"
-msgstr ""
+msgstr "myyjänä"
 
 #: templates/jinja_filters.py:85
 msgid "Unknown role"
-msgstr ""
+msgstr "määräämätön rooli"
 
 #: templates/jinja_filters.py:90
 msgid "confidence 0/4"
-msgstr ""
+msgstr "erittäin matala"
 
 #: templates/jinja_filters.py:91
 msgid "confidence 1/4"
-msgstr ""
+msgstr "alhainen"
 
 #: templates/jinja_filters.py:92
 msgid "confidence 2/4"
-msgstr ""
+msgstr "normaali"
 
 #: templates/jinja_filters.py:93
 msgid "confidence 3/4"
-msgstr ""
+msgstr "korkea"
 
 #: templates/jinja_filters.py:94
 msgid "confidence 4/4"
-msgstr ""
+msgstr "erittäin korkea"
 
 #: templates/jinja_filters.py:108
 msgid "See"
-msgstr ""
+msgstr "ks."
 
 #: templates/jinja_filters.py:110 templates/jinja_filters.py:124
 msgid "Citation"
-msgstr ""
+msgstr "viite"
 
 #: templates/jinja_filters.py:111 templates/jinja_filters.py:125
 msgid "Event Note"
-msgstr ""
+msgstr "tapahtuma"
 
 #: templates/jinja_filters.py:112 templates/jinja_filters.py:131
 msgid "Source Note"
-msgstr ""
+msgstr "lähde"
 
 #: templates/jinja_filters.py:113 templates/jinja_filters.py:128
 msgid "Person Note"
-msgstr ""
+msgstr "henkilö"
 
 #: templates/jinja_filters.py:114 templates/jinja_filters.py:129
 msgid "Place Note"
-msgstr ""
+msgstr "paikka"
 
 #: templates/jinja_filters.py:116 templates/jinja_filters.py:127
 msgid "Name Note"
-msgstr ""
+msgstr "nimi"
 
 #: templates/jinja_filters.py:117
 msgid "To Do"
-msgstr ""
+msgstr "työlistalla"
 
 #: templates/jinja_filters.py:118 templates/jinja_filters.py:126
 msgid "Family Note"
-msgstr ""
+msgstr "perhe"
 
 #: templates/jinja_filters.py:119 templates/jinja_filters.py:130
 msgid "Repository Note"
-msgstr ""
+msgstr "arkisto"
 
 #: templates/jinja_filters.py:120
 msgid "Media Reference Note"
-msgstr ""
+msgstr "mediaviite"
 
 #: templates/jinja_filters.py:121
 msgid "Media Note"
-msgstr ""
+msgstr "media"
 
 #: templates/jinja_filters.py:122
 msgid "General"
-msgstr ""
+msgstr "yleistä"
 
 #: templates/jinja_filters.py:123
 msgid "Html code"
-msgstr ""
+msgstr "html-koodi"
 
 #: templates/jinja_filters.py:136
 msgid "Album"
-msgstr ""
+msgstr "albumi"
 
 #: templates/jinja_filters.py:137
 msgid "Archive"
-msgstr ""
+msgstr "arkisto"
 
 #: templates/jinja_filters.py:138
 msgid "Collection"
-msgstr ""
+msgstr "kokoelma"
 
 #: templates/jinja_filters.py:139
 msgid "Library"
-msgstr ""
+msgstr "kirjasto"
 
 #: templates/jinja_filters.py:141
 msgid "Web site"
-msgstr ""
+msgstr "nettisivu"
 
 #: templates/jinja_filters.py:146
 msgid "Document"
-msgstr ""
+msgstr "asiakirja"
 
 #: templates/jinja_filters.py:147
 msgid "Book"
-msgstr ""
+msgstr "kirja"
 
 #: templates/jinja_filters.py:148
 msgid "Electronic"
-msgstr ""
+msgstr "sähköinen"
 
 #: templates/jinja_filters.py:149
 msgid "Newspaper"
-msgstr ""
+msgstr "lehti"
 
 #: templates/jinja_filters.py:150
 msgid "Unknown"
-msgstr ""
+msgstr "tuntematon"
 
 #: templates/jinja_filters.py:155
 msgid "Vessel"
-msgstr ""
+msgstr "alus"
 
 #: templates/jinja_filters.py:156
 msgid "Borough"
-msgstr ""
+msgstr "aluehallintoyksikkö"
 
 #: templates/jinja_filters.py:157
 msgid "Building"
-msgstr ""
+msgstr "rakennus"
 
 #: templates/jinja_filters.py:158
 msgid "City"
-msgstr ""
+msgstr "paikkakunta"
 
 #: templates/jinja_filters.py:159
 msgid "Country"
-msgstr ""
+msgstr "maa"
 
 #: templates/jinja_filters.py:160
 msgid "District"
-msgstr ""
+msgstr "lääni"
 
 #: templates/jinja_filters.py:161 templates/jinja_filters.py:174
 msgid "Farm"
-msgstr ""
+msgstr "tila"
 
 #: templates/jinja_filters.py:162
 msgid "Hamlet"
-msgstr ""
+msgstr "mökki"
 
 #: templates/jinja_filters.py:163
 msgid "Cemetery"
-msgstr ""
+msgstr "kautausmaa"
 
 #: templates/jinja_filters.py:164
 msgid "Kappeliseurakunta"
@@ -2178,7 +2171,7 @@ msgstr ""
 
 #: templates/jinja_filters.py:165
 msgid "Mansion"
-msgstr ""
+msgstr "kartano"
 
 #: templates/jinja_filters.py:166
 msgid "Kuntakeskus"
@@ -2190,75 +2183,75 @@ msgstr ""
 
 #: templates/jinja_filters.py:168
 msgid "Fortress"
-msgstr ""
+msgstr "linnoitus"
 
 #: templates/jinja_filters.py:169
 msgid "Locality"
-msgstr ""
+msgstr "kulmakunta"
 
 #: templates/jinja_filters.py:170
 msgid "Organisation"
-msgstr ""
+msgstr "organisaatio"
 
 #: templates/jinja_filters.py:171 templates/jinja_filters.py:179
 msgid "Parish"
-msgstr ""
+msgstr "srk"
 
 #: templates/jinja_filters.py:172
 msgid "Region"
-msgstr ""
+msgstr "alue"
 
 #: templates/jinja_filters.py:173
 msgid "State"
-msgstr ""
+msgstr "valtio"
 
 #: templates/jinja_filters.py:175
 msgid "Tontti"
-msgstr ""
+msgstr "tontti"
 
 #: templates/jinja_filters.py:176
 msgid "Torppa"
-msgstr ""
+msgstr "torppa"
 
 #: templates/jinja_filters.py:177
 msgid "Town"
-msgstr ""
+msgstr "kaupunki"
 
 #: templates/jinja_filters.py:178
 msgid "Village"
-msgstr ""
+msgstr "kylä"
 
 #: templates/jinja_filters.py:184
 msgid "on vessel"
-msgstr ""
+msgstr "aluksella"
 
 #: templates/jinja_filters.py:185
 msgid "in the borough of"
-msgstr ""
+msgstr "aluehallintoyksikössä"
 
 #: templates/jinja_filters.py:186
 msgid "in the building of"
-msgstr ""
+msgstr "rakennuksessa"
 
 #: templates/jinja_filters.py:187
 msgid "in the City"
-msgstr ""
+msgstr "kaupungissa"
 
 #: templates/jinja_filters.py:188
 msgid "in the country of"
-msgstr ""
+msgstr "maassa"
 
 #: templates/jinja_filters.py:189
 msgid "in the district of"
-msgstr ""
+msgstr "läänissä"
 
 #: templates/jinja_filters.py:190
 msgid "in the farm of"
-msgstr ""
+msgstr "tilalla"
 
 #: templates/jinja_filters.py:191
 msgid "in the hamlet of"
-msgstr ""
+msgstr "mökissä"
 
 #: templates/jinja_filters.py:192
 msgid "Hautausmaalla"
@@ -2269,36 +2262,36 @@ msgid "Kappeliseurakunnassa"
 msgstr ""
 
 #: templates/jinja_filters.py:194
-msgid "Kartanossa"
-msgstr ""
+msgid "in the mansion of"
+msgstr "kartanossa"
 
 #: templates/jinja_filters.py:195
 msgid "Kuntakeskuksessa"
 msgstr ""
 
 #: templates/jinja_filters.py:196
-msgid "Linnoituksessa"
-msgstr ""
+msgid "in the fortress"
+msgstr "linnoituksessa"
 
 #: templates/jinja_filters.py:197
 msgid "at locality of"
-msgstr ""
+msgstr "kulmakuntannalla"
 
 #: templates/jinja_filters.py:198
 msgid "in the organisation of"
-msgstr ""
+msgstr "organisaatiossa"
 
 #: templates/jinja_filters.py:199
 msgid "in the parish"
-msgstr ""
+msgstr "seurakunnassa"
 
 #: templates/jinja_filters.py:200
 msgid "in the region"
-msgstr ""
+msgstr "alueella"
 
 #: templates/jinja_filters.py:201
-msgid "Sin the state"
-msgstr ""
+msgid "Sn the state"
+msgstr "valtiossa"
 
 #: templates/jinja_filters.py:202
 msgid "Tontilla"
@@ -2306,11 +2299,11 @@ msgstr ""
 
 #: templates/jinja_filters.py:203
 msgid "in the village of"
-msgstr ""
+msgstr "kylässä"
 
 #: templates/jinja_filters.py:204
-msgid "in the parsish of"
-msgstr ""
+msgid "in the parish of"
+msgstr "seurakunnassa"
 
 #: templates/ladattu2.html:7
 msgid "Loaded file"
@@ -2393,7 +2386,7 @@ msgstr "Henkilön tiedot"
 
 #: templates/ng_compare.html:18 templates/ng_compare.html:76
 msgid "Link to Narrated Page"
-msgstr "Linkki Kertova-sivulle"
+msgstr "Linkki henkilösivulle"
 
 #: templates/ng_compare.html:54 templates/ng_compare.html:112
 msgid "Notes"
@@ -2603,7 +2596,7 @@ msgstr "Kasteen aikatieto"
 #: templates/table_baptism_data.html:22 templates/table_person_by_id.html:27
 #: templates/table_person_by_id.html:56
 msgid "unique_id"
-msgstr "uniikki tunnus"
+msgstr "avain"
 
 #: templates/table_baptism_data.html:22
 msgid "role"
@@ -2622,7 +2615,7 @@ msgstr "etunimi"
 #: templates/table_baptism_data.html:39 templates/table_families_by_id.html:30
 #: templates/table_person_by_id.html:49
 msgid "No person information"
-msgstr "Ei person tietoja"
+msgstr "Ei henkilötietoja"
 
 #: templates/table_families_by_id.html:7
 msgid "Families data"
@@ -2639,7 +2632,7 @@ msgstr "Keskushenkilö"
 #: templates/table_families_by_id.html:117
 #: templates/table_people_by_surname.html:10
 msgid "unique id"
-msgstr "uniikki tunnus"
+msgstr "avain"
 
 #: templates/table_families_by_id.html:11
 #: templates/table_families_by_id.html:44
@@ -2663,11 +2656,11 @@ msgstr "Puoliso"
 
 #: templates/table_families_by_id.html:142
 msgid "No family information"
-msgstr "Ei perhettä koskevia tietoja"
+msgstr "Ei perhetietoja"
 
 #: templates/table_media.html:8
 msgid "Media files"
-msgstr "Media tiedostot"
+msgstr "Mediatiedostot"
 
 #: templates/table_media.html:9
 msgid "Displaying Media objects"
@@ -2700,11 +2693,11 @@ msgstr "Kuvaa ei löydy"
 
 #: templates/table_person_by_id.html:23
 msgid "Narrative Page"
-msgstr "Kertova-sivu"
+msgstr "Henkilösivu"
 
 #: templates/table_person_by_id.html:27
 msgid "private"
-msgstr "salattu"
+msgstr "ei julkinen"
 
 #: templates/table_person_by_id.html:27
 msgid "link"
@@ -2724,7 +2717,7 @@ msgstr "paikka"
 
 #: templates/table_person_by_id.html:56
 msgid "link to source data"
-msgstr "linkki alkuperäiseen dataan"
+msgstr "linkki alkuperäiseen tietoon"
 
 #: templates/table_person_by_id.html:72
 msgid "citations"
@@ -2732,7 +2725,7 @@ msgstr "lainaukset"
 
 #: templates/table_person_by_id.html:77
 msgid "No event information"
-msgstr "Ei event tietoja"
+msgstr "Ei tapahtumatietoja"
 
 #: templates/table_person_by_id.html:84
 msgid "URLs"
@@ -2740,7 +2733,7 @@ msgstr "nettiosoitteet"
 
 #: templates/table_person_by_id.html:86
 msgid "priv"
-msgstr "salattu"
+msgstr "ei julkinen"
 
 #: templates/table_person_by_id.html:86
 msgid "URL"
@@ -2748,11 +2741,11 @@ msgstr "Verkko-osoite"
 
 #: templates/table_person_by_id.html:90
 msgid "No URL information"
-msgstr "Ei tietoa verkko-osoitteesta"
+msgstr "Ei verkko-osoitetta"
 
 #: templates/table_persons2.html:9
 msgid "Number of persons:"
-msgstr "Henkilö määrä:"
+msgstr "Henkilömäärä:"
 
 #: templates/table_persons2.html:15
 msgid "Event type"
@@ -2772,11 +2765,11 @@ msgstr "Kaikki sukunimet"
 
 #: templates/table_surnames.html:17
 msgid "(No Name)"
-msgstr "(ei nimeä)"
+msgstr "(nimetön)"
 
 #: templates/tables.html:3
 msgid "Data Views"
-msgstr "Tietonäkymiä"
+msgstr "Taulukkonäkymiä"
 
 #: templates/tables.html:9
 msgid "Technical views"
@@ -2788,7 +2781,7 @@ msgstr "Näytä henkilöt"
 
 #: templates/tables.html:15
 msgid "Show families"
-msgstr ""
+msgstr "Näytä perheet"
 
 #: templates/tables.html:16
 msgid "List of surnames"
@@ -2840,7 +2833,7 @@ msgstr "Henkilöt ilman syntymätapahtumaa"
 
 #: templates/tables.html:38
 msgid "Senior Citizens, Top twenty"
-msgstr "Ikäihmiset, top twenty"
+msgstr "20 vanhinta henkilöä"
 
 #: templates/tables.html:39
 msgid "Events without place information"

@@ -8,7 +8,7 @@
 
 {% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }}</h2>
 {% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
-{% else %}<H2>{{ _('Persons') }}</h2>
+{% else %}<h2>{{ _('Persons') }}</h2>
 {% endif %}
 
 <!-- Rule = {{rule}} for {{cnt}} persons, pick {{pick}}, next {{next}} -->
@@ -18,10 +18,7 @@
         <div id="summaryarea">
             <div class="flex-container">
 	           <div>
-	            <p id="description">{{ ngettext(
-	                'Displaying %(num)s person names.', 
-	                'Displaying %(num)s person names.', cnt) }}
-	            </p>
+	            <p id="description">{{ _('Displaying %(num)s persons', num=cnt) }}.</p>
 	           </div>
 	           <div>
 	               <form action="/scene/persons_{{rule[0]}}/">
@@ -67,7 +64,7 @@
 			<thead>
 				<tr><th></th>
 					<th>{{ _('Person') }}</th>
-                    <th>{{ _("Person's events") }}</th>
+                    <th>{{ _("Events") }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -112,21 +109,24 @@
 
 	              <td class="ColumnEvent">
 	        {% if p.events is iterable %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li><i>{{e.type|transl('evt')}} {{e.description}}</i>
-		              {% if e.dates %}{{e.dates}} {% endif %}
-		              {% if e.place %} | {{e.place}}{% endif %}</li>
+		              <li{% if e.type != "Birth" and e.type != "Death" %} class="minor"{% endif %}>
+		                  <i>{{e.type|transl('evt')}} {{e.description}}</i>
+		                  {% if e.dates %}{{e.dates}} {% endif %}
+		                  {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
-		    {% else %}<u>See person {{p.events}}</u>
+		    {% else %}<u>See person {{p.events}}</u></td>
 	        {% endif %}
 	           </tr>
 	    {% endfor %}
 				</tr>
+            </tbody>
+        </table>
 	{% else %}
         <table class="IndividualList">
             <tbody>
-	        <tr><td>{{ _('No one found with search keys') }}<//td></tr>
+	        <tr><td>{{ _('No one found with search keys') }}</td></tr>
+            </tbody>
+        </table>
 	{% endif %}
-			</tbody>
-		</table>
-	</div>
+    </div>
 {% endblock %}
