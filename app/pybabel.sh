@@ -1,7 +1,7 @@
 # bug workaround; https://github.com/pypa/setuptools/issues/523
 pip install setuptools==34.00
 
-mkdir translations
+mkdir translations || echo "translations directory ok"
 pybabel extract -F babel.cfg -k _l -o messages.pot .
 if ! test -e translations/fi
 then

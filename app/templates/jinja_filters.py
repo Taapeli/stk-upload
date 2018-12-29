@@ -7,11 +7,12 @@ Created on 4.1.2018
 @author: jm
 '''
 from urllib.parse import urlparse
+from flask_babelex import _
 
 def translate(term, var_name, lang="fi"):
     """ Given term is translated depending of var_name name.
-        No language selection yet.
-        
+        The lang parameter is not used
+
         'nt'   = Name types
         'evt'  = Event types
         'role' = Event role
@@ -26,204 +27,181 @@ def translate(term, var_name, lang="fi"):
     if var_name == "nt":
         # Name types
         tabl = {
-            "Birth Name": "syntymänimi",
-            "Also Known As": "tunnettu myös",
-            "Married Name": "avionimi",
-            "Unknown": "määrittämätön",
-            "Aateloitu nimi": "Aateloitu nimi",
-            "Aatelointinimi" : "Aatelointinimi"
-#             "Also Known As": "tunnettu myös",
-#             "Birth Name": "syntymänimi",
-#             "Married Name": "avionimi"
+            "Birth Name": _("Birth Name"), #"syntymänimi"
+            "Also Known As": _("Also Known As"), #"tunnettu myös"
+            "Married Name": _("Married Name"), #"avionimi"
+            "Unknown": _("Unknown type"), #"määrittämätön"
+            "Aateloitu nimi": _("Aateloitu nimi"), #"Aateloitu nimi"
+            "Aatelointinimi" : _("Aatelointinimi ") #"Aatelointinimi"
         }
     if var_name == "evt":
         # Event types    
         tabl = {
-            "Birth": "syntymä",
-            "Death": "kuolema",
-            "Occupation": "ammatti",
-            "Baptism": "kaste",
-            "Burial": "hautaus",
-            "Marriage": "avioliitto",
-            "Residence": "asuinpaikka",
-            "Cause Of Death": "kuolinsyy",
-            "Luottamustoimi": "luottamustoimi",
-            "Lähtömuutto": "lähtömuutto",
-            "Tulomuutto": "tulomuutto",
-            "Graduation": "valmistuminen",
-            "Degree": "oppiarvo",
-            "Ordination": "palkitseminen",
-            "Property": "omaisuus",
-            "Education": "koulutus",
-            "Sota": "sota",
-            "Confirmation": "ripille pääsy",
-            "First Communion": "ensimmäinen ehtoollinen",
-            "Military Service": "asepalvelus",
-            "Käräjöinti": "käräjöinti",
-            "Christening": "kristillinen kaste",
-            "Marriage Banns": "kuulutus avioliittoon",
-            "Retirement": "eläkkeelle siirtyminen",
-            "Nobility Title": "aatelointi",
-            "Engagement": "kihlajaiset",
-            "Immigration": "maahanmuutto",
-            "Ehtoollinen": "ehtoollinen"      
-#             "Residence": "asuinpaikka",
-#             "Occupation": "ammatti",
-#             "Birth": "syntymä",
-#             "Death": "kuolema",
-#             "Luottamustoimi": "luottamustoimi",
-#             "Graduation": "valmistuminen",
-#             "Marriage": "avioliitto",
-#             "Baptism": "kaste",
-#             "Burial": "hautaus",
-#             "Cause Of Death": "kuolinsyy",
-#             "Education": "koulutus",
-#             "Degree": "oppiarvo",
-#             "Christening": "kristillinen kaste",
-#             "Military Service": "asepalvelus",
-#             "Confirmation": "ripille pääsy",
-#             "Ordination": "palkitseminen",
-#             "Sota": "sota",
+            "Birth": _("Birth"), #"syntymä"
+            "Death": _("Death"), #"kuolema"
+            "Occupation": _("Occupation"), #"ammatti"
+            "Baptism": _("Baptism"), #"kaste"
+            "Burial": _("Burial"), #"hautaus"
+            "Marriage": _("Marriage"), #"avioliitto"
+            "Residence": _("Residence"), #"asuinpaikka"
+            "Cause Of Death": _("Cause Of Death"), #"kuolinsyy"
+            "Luottamustoimi": _("Luottamustoimi"), #"luottamustoimi"
+            "Lähtömuutto": _("Moved out"), #"lähtömuutto"
+            "Tulomuutto": _("Moved to"), #"tulomuutto"
+            "Graduation": _("Graduation"), #"valmistuminen"
+            "Degree": _("Degree"), #"oppiarvo"
+            "Ordination": _("Ordination"), #"palkitseminen"
+            "Property": _("Property"), #"omaisuus"
+            "Education": _("Education"), #"koulutus"
+            "Sota": _("War"), #"sota"
+            "Confirmation": _("Confirmation"), #"ripille pääsy"
+            "First Communion": _("First Communion"), #"ensimmäinen ehtoollinen"
+            "Military Service": _("Military Service"), #"asepalvelus"
+            "Käräjöinti": _("Käräjöinti"), #"käräjöinti"
+            "Christening": _("Christening"), #"kristillinen kaste"
+            "Marriage Banns": _("Marriage Banns"), #"kuulutus avioliittoon"
+            "Retirement": _("Retirement"), #"eläkkeelle siirtyminen"
+            "Nobility Title": _("Nobility Title"), #"aatelointi"
+            "Engagement": _("Engagement"), #"kihlajaiset"
+            "Immigration": _("Immigration"), #"maahanmuutto"
+            "Ehtoollinen": _("Holy Communion") #"ehtoollinen"      
     }
     elif var_name == "role":
         # Name types
         tabl = {
-            "Primary": "pääosallisena",
-            "Family": "perheenä",
-            "Kummi": "kummina",
-            "Perillinen": "perillisenä",
-            "kummi": "kummina",
-            "Clergy": "pappina",
-            "Osallinen": "osallisena",
-            "Ostaja": "ostajana",
-            "Perinnönjättäjä": "perinnönjättäjänä",
-            "Vihkijä": "vihkijänä",
-            "Pääosallinen": "pääosallisena",
-            "Edunsaaja": "edunsaajana",
-            "Myyjä": "myyjänä",
-            "Unknown": "määräämätön"
-#             "Kummi": "kummina",
-#             "Clergy": "pappina",
+            "Primary": _("Primary"), #"pääosallisena"
+            "Family": _("Family"), #"perheenä"
+            "Kummi": _("Kummi"), #"kummina"
+            "Perillinen": _("Perillinen"), #"perillisenä"
+            "kummi": _("kummi"), #"kummina"
+            "Clergy": _("Clergy"), #"pappina"
+            "Osallinen": _("Osallinen"), #"osallisena"
+            "Ostaja": _("Ostaja"), #"ostajana"
+            "Perinnönjättäjä": _("Perinnönjättäjä"), #"perinnönjättäjänä"
+            "Vihkijä": _("Vihkijä"), #"vihkijänä"
+            "Pääosallinen": _("Pääosallinen"), #"pääosallisena"
+            "Edunsaaja": _("Edunsaaja"), #"edunsaajana"
+            "Myyjä": _("Myyjä"), #"myyjänä"
+            "Unknown": _("Unknown role") #"määräämätön"
         }
     elif var_name == "conf":
         # Confidence levels
         tabl = {
-            "0":"erittäin matala",
-            "1":"alhainen",
-            "2":"normaali",
-            "3":"korkea",
-            "4":"erittäin korkea"
+            "0": _("confidence 0/4"), #"erittäin matala"
+            "1": _("confidence 1/4"), #"alhainen"
+            "2": _("confidence 2/4"), #"normaali"
+            "3": _("confidence 3/4"), #"korkea"
+            "4": _("confidence 4/4")  #"erittäin korkea"
             }
     elif var_name == "conf_star":
         # Confidence level symbols oo, o, *, **, ***
         tabl = {
-            "0":"oo",   # fa-exclamation-circle [&#xf06a;]
-            "1":"o",
-            "2":"*",    # fa-star [&#xf005;]
-            "3":"**",
-            "4":"***"
+            "0": "oo",   # fa-exclamation-circle [&#xf06a;]
+            "1": "o",
+            "2": "*",    # fa-star [&#xf005;]
+            "3": "**",
+            "4": "***"
             }
     elif var_name == "notet":
         # Note types
         tabl = {
-            "Link":"ks.",
-            "Cause Of Death":"kuolinsyy",
-            "Citation":"viite",
-            "Event Note":"tapahtuma",
-            "Source Note":"lähde",
-            "Person Note":"henkilö",
-            "Place Note":"paikka",
-            "Research":"tutkimus",
-            "Name Note":"nimitieto",
-            "To Do":"tehtävä",
-            "Family Note":"perhe",
-            "Repository Note":"arkisto",
-            "Media Reference Note":"mediaviite",
-            "Media Note":"media",
-            "General":"yleistä",
-            "Html code":"html-koodi",
-            "Citation":"lähteen lisätieto",
-            "Event Note":"tapahtuman lisätieto",
-            "Family Note":"perheen lisätieto",
-            "Name Note":"nimen lisätieto",
-            "Person Note":"henkilön lisätieto",
-            "Place Note":"paikan lisätieto",
-            "Repository Note":"arkiston lisätieto",
-            "Source Note":"lähteen lisätieto",
-            "To Do":"työlistalla"
+            "Link": _("See"), #"ks."
+            "Cause Of Death": _("Cause Of Death"), #"kuolinsyy"
+            "Citation": _("Citation"), #"viite"
+            "Event Note": _("Event Note"), #"tapahtuma"
+            "Source Note": _("Source Note"), #"lähde"
+            "Person Note": _("Person Note"), #"henkilö"
+            "Place Note": _("Place Note"), #"paikka"
+            "Research": _("Research"), #"tutkimus"
+            "Name Note": _("Name Note"), #"nimitieto"
+            "To Do": _("To Do"), #"tehtävä/työlistalla"
+            "Family Note": _("Family Note"), #"perhe"
+            "Repository Note": _("Repository Note"), #"arkisto"
+            "Media Reference Note": _("Media Reference Note"), #"mediaviite"
+            "Media Note": _("Media Note"), #"media"
+            "General": _("General"), #"yleistä"
+            "Html code": _("Html code"), #"html-koodi"
+            "Citation": _("Citation"), #"lähteen lisätieto"
+            "Event Note": _("Event Note"), #"tapahtuman lisätieto"
+            "Family Note": _("Family Note"), #"perheen lisätieto"
+            "Name Note": _("Name Note"), #"nimen lisätieto"
+            "Person Note": _("Person Note"), #"henkilön lisätieto"
+            "Place Note": _("Place Note"), #"paikan lisätieto"
+            "Repository Note": _("Repository Note"), #"arkiston lisätieto"
+            "Source Note": _("Source Note") #"lähteen lisätieto"
             }
     elif var_name == "rept":
         # Repository types
         tabl = {
-            "Album":"albumi",
-            "Archive":"arkisto",
-            "Collection":"kokoelma",
-            "Library":"kirjasto",
-            "Unknown":"tuntematon",
-            "Web site":"verkkopalvelu"
+            "Album": _("Album"), #"albumi"
+            "Archive": _("Archive"), #"arkisto"
+            "Collection": _("Collection"), #"kokoelma"
+            "Library": _("Library"), #"kirjasto"
+            "Unknown": _("Unknown type"), #"tuntematon"
+            "Web site": _("Web site") #"verkkopalvelu"
             }
     elif var_name == "medium":
         # Madium types
         tabl = {
-            "Asiakirja":"asiakirja",
-            "Book":"kirja",
-            "Electronic":"sähköinen",
-            "Newspaper":"lehti",
-            "Unknown":"tuntematon",
+            "Asiakirja": _("Document"), #"asiakirja"
+            "Book": _("Book"), #"kirja"
+            "Electronic": _("Electronic"), #"sähköinen"
+            "Newspaper": _("Newspaper"), #"lehti"
+            "Unknown": _("Unknown"), #"tuntematon"
             }
     elif var_name == "lt":
         # Location types
         tabl = {
-            "Alus": "alus",
-            "Borough": "aluehallintoyksikkö",
-            "Building": "rakennus tai torppa",  #"rakennus",
-            "City": "paikkakunta",              # "kaupunki",
-            "Country": "maa",
-            "District": "lääni",
-            "Farm": "tila",
-            "Hamlet": "talo",
-            "Hautausmaa": "hautausmaa",
-            "Kappeliseurakunta": "kappeliseurakunta",
-            "Kartano": "kartano",
-            "Kuntakeskus": "kuntakeskus",
-            "Kortteli": "kortteli",
-            "Linnoitus": "linnoitus",
-            "Locality": "kulmakunta",
-            "Organisaatio": "organisaatio",
-            "Parish": "seurakunta",
-            "Region": "alue",
-            "State": "valtio",
-            "Tila": "tila",
-            "Tontti": "tontti",
-            "Torppa": "torppa",
-            "Town": "kaupunki",
-            "Village": "kylä",
-            "srk": "seurakunta"
+            "Alus": _("Vessel"), #"alus"
+            "Borough": _("Borough"), #"aluehallintoyksikkö"
+            "Building": _("Building"), #"rakennus tai torppa"
+            "City": _("City"), #"paikkakunta"
+            "Country": _("Country"), #"maa"
+            "District": _("District"), #"lääni"
+            "Farm": _("Farm"), #"tila"
+            "Hamlet": _("Hamlet"), #"talo"
+            "Hautausmaa": _("Cemetery"), #"hautausmaa"
+            "Kappeliseurakunta": _("Kappeliseurakunta"), #"kappeliseurakunta"
+            "Kartano": _("Mansion"), #"kartano"
+            "Kuntakeskus": _("Kuntakeskus"), #"kuntakeskus"
+            "Kortteli": _("Kortteli"), #"kortteli"
+            "Linnoitus": _("Fortress"), #"linnoitus"
+            "Locality": _("Locality"), #"kulmakunta"
+            "Organisaatio": _("Organisation"), #"organisaatio"
+            "Parish": _("Parish"), #"seurakunta"
+            "Region": _("Region"), #"alue"
+            "State": _("State"), #"valtio"
+            "Tila": _("Farm"), #"tila"
+            "Tontti": _("Tontti"), #"tontti"
+            "Torppa": _("Torppa"), #"torppa"
+            "Town": _("Town"), #"kaupunki"
+            "Village": _("Village"), #"kylä"
+            "srk": _("Parish") #"seurakunta"
         }
     elif var_name == "lt_in":
         # Location types, inessive
         tabl = {
-            "Alus": "aluksessa",
-            "Borough": "aluehallintoyksikössä",
-            "Building": "rakennuksessa tai torpassa",   #"rakennuksessa",
-            "City": "paikassa",                         # "kaupungissa",
-            "Country": "maassa",
-            "District": "läänissä",
-            "Farm": "tilalla",
-            "Hamlet": "talossa",
-            "Hautausmaa": "hautausmaalla",
-            "Kappeliseurakunta": "kappeliseurakunnassa",
-            "Kartano": "kartanossa",
-            "Kuntakeskus": "kuntakeskuksessa",
-            "Linnoitus": "linnoituksessa",
-            "Locality": "kulmakuntannassa",
-            "Organisaatio": "organisaatiossa",
-            "Parish": "seurakunnassa",
-            "Region": "alueella",
-            "State": "valtiossa",
-            "Tontti": "tontilla",
-            "Village": "kylässä",
-            "srk": "seurakunnassa"
+            "Alus": _("on vessel"), #"aluksessa"
+            "Borough": _("in the borough of"), #"aluehallintoyksikössä"
+            "Building": _("in the building of"), #"rakennuksessa tai torpassa"
+            "City": _("in the City"), #"paikassa"
+            "Country": _("in the country of"), #"maassa"
+            "District": _("in the district of"), #"läänissä"
+            "Farm": _("in the farm of"), #"tilalla"
+            "Hamlet": _("in the hamlet of"), #"talossa"
+            "Hautausmaa": _("Hautausmaalla"), #"hautausmaalla"
+            "Kappeliseurakunta": _("Kappeliseurakunnassa"), #"kappeliseurakunnassa"
+            "Kartano": _("in the mansion of"), #"kartanossa"
+            "Kuntakeskus": _("Kuntakeskuksessa"), #"kuntakeskuksessa"
+            "Linnoitus": _("in the fortress"), #"linnoituksessa"
+            "Locality": _("at locality of"), #"kulmakuntannassa"
+            "Organisaatio": _("in the organisation of"), #"organisaatiossa"
+            "Parish": _("in the parish"), #"seurakunnassa"
+            "Region": _("in the region"), #"alueella"
+            "State": _("Sn the state"), #"valtiossa"
+            "Tontti": _("Tontilla"), #"tontilla"
+            "Village": _("in the village of"), #"kylässä"
+            "srk": _("in the parish of") #"seurakunnassa"
         }
         try:    
             return tabl[term]

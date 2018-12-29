@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-12-27 20:20+0200\n"
+"POT-Creation-Date: 2018-12-29 13:13+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -191,7 +191,7 @@ msgstr ""
 msgid "Member"
 msgstr ""
 
-#: bp/admin/forms.py:54 bp/admin/forms.py:84
+#: bp/admin/forms.py:54 bp/admin/forms.py:84 templates/jinja_filters.py:115
 msgid "Research"
 msgstr ""
 
@@ -1070,16 +1070,16 @@ msgstr ""
 msgid "Number of families:"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:13 templates/table_families.html:13
+#: bp/scene/templates/scene/families.html:21 templates/table_families.html:13
 #: templates/table_persons2.html:13
 msgid "Uniq_id"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:14 templates/table_families.html:14
+#: bp/scene/templates/scene/families.html:22 templates/table_families.html:14
 msgid "id of Father"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:15
+#: bp/scene/templates/scene/families.html:23
 #: bp/scene/templates/scene/person.html:144
 #: bp/scene/templates/scene/person.html:177
 #: bp/scene/templates/scene/person_pg.html:170
@@ -1088,11 +1088,11 @@ msgstr ""
 msgid "Father"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:16 templates/table_families.html:16
+#: bp/scene/templates/scene/families.html:24 templates/table_families.html:16
 msgid "id of Mother"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:17
+#: bp/scene/templates/scene/families.html:25
 #: bp/scene/templates/scene/person.html:146
 #: bp/scene/templates/scene/person.html:179
 #: bp/scene/templates/scene/person_pg.html:172
@@ -1101,7 +1101,7 @@ msgstr ""
 msgid "Mother"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:18
+#: bp/scene/templates/scene/families.html:26
 #: bp/scene/templates/scene/place_events.html:55
 #: bp/scene/templates/scene/place_events.html:81
 #: templates/cite_sour_repo.html:15 templates/cite_sour_repo.html:58
@@ -1110,11 +1110,11 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:19 templates/table_families.html:19
+#: bp/scene/templates/scene/families.html:27 templates/table_families.html:19
 msgid "Child"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:42 templates/table_families.html:42
+#: bp/scene/templates/scene/families.html:50 templates/table_families.html:42
 #: templates/table_persons2.html:39
 msgid "No persons"
 msgstr ""
@@ -1347,7 +1347,8 @@ msgstr ""
 msgid "See Place details"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:111
+#: bp/scene/templates/scene/person.html:111 templates/jinja_filters.py:47
+#: templates/jinja_filters.py:109
 msgid "Cause Of Death"
 msgstr ""
 
@@ -1358,7 +1359,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/person.html:141
 #: bp/scene/templates/scene/person.html:142
-#: bp/scene/templates/scene/person.html:174
+#: bp/scene/templates/scene/person.html:174 templates/jinja_filters.py:73
 #: templates/table_families_by_id.html:37
 msgid "Family"
 msgstr ""
@@ -1830,6 +1831,483 @@ msgstr ""
 msgid "Success of database processing"
 msgstr ""
 
+#: templates/jinja_filters.py:30
+msgid "Birth Name"
+msgstr ""
+
+#: templates/jinja_filters.py:31
+msgid "Also Known As"
+msgstr ""
+
+#: templates/jinja_filters.py:32
+msgid "Married Name"
+msgstr ""
+
+#: templates/jinja_filters.py:33 templates/jinja_filters.py:140
+msgid "Unknown type"
+msgstr ""
+
+#: templates/jinja_filters.py:34
+msgid "Aateloitu nimi"
+msgstr ""
+
+#: templates/jinja_filters.py:35
+msgid "Aatelointinimi "
+msgstr ""
+
+#: templates/jinja_filters.py:40
+msgid "Birth"
+msgstr ""
+
+#: templates/jinja_filters.py:41
+msgid "Death"
+msgstr ""
+
+#: templates/jinja_filters.py:42 templates/select_refcols.html:35
+#: templates/select_refcols.html:63
+msgid "Occupation"
+msgstr ""
+
+#: templates/jinja_filters.py:43
+msgid "Baptism"
+msgstr ""
+
+#: templates/jinja_filters.py:44
+msgid "Burial"
+msgstr ""
+
+#: templates/jinja_filters.py:45
+msgid "Marriage"
+msgstr ""
+
+#: templates/jinja_filters.py:46
+msgid "Residence"
+msgstr ""
+
+#: templates/jinja_filters.py:48
+msgid "Luottamustoimi"
+msgstr ""
+
+#: templates/jinja_filters.py:49
+msgid "Moved out from"
+msgstr ""
+
+#: templates/jinja_filters.py:50
+msgid "Moved to"
+msgstr ""
+
+#: templates/jinja_filters.py:51
+msgid "Graduation"
+msgstr ""
+
+#: templates/jinja_filters.py:52
+msgid "Degree"
+msgstr ""
+
+#: templates/jinja_filters.py:53
+msgid "Ordination"
+msgstr ""
+
+#: templates/jinja_filters.py:54
+msgid "Property"
+msgstr ""
+
+#: templates/jinja_filters.py:55
+msgid "Education"
+msgstr ""
+
+#: templates/jinja_filters.py:56
+msgid "War"
+msgstr ""
+
+#: templates/jinja_filters.py:57
+msgid "Confirmation"
+msgstr ""
+
+#: templates/jinja_filters.py:58
+msgid "First Communion"
+msgstr ""
+
+#: templates/jinja_filters.py:59
+msgid "Military Service"
+msgstr ""
+
+#: templates/jinja_filters.py:60
+msgid "Käräjöinti"
+msgstr ""
+
+#: templates/jinja_filters.py:61
+msgid "Christening"
+msgstr ""
+
+#: templates/jinja_filters.py:62
+msgid "Marriage Banns"
+msgstr ""
+
+#: templates/jinja_filters.py:63
+msgid "Retirement"
+msgstr ""
+
+#: templates/jinja_filters.py:64
+msgid "Nobility Title"
+msgstr ""
+
+#: templates/jinja_filters.py:65
+msgid "Engagement"
+msgstr ""
+
+#: templates/jinja_filters.py:66
+msgid "Immigration"
+msgstr ""
+
+#: templates/jinja_filters.py:67
+msgid "Holy Communion"
+msgstr ""
+
+#: templates/jinja_filters.py:72
+msgid "Primary"
+msgstr ""
+
+#: templates/jinja_filters.py:74
+msgid "Kummi"
+msgstr ""
+
+#: templates/jinja_filters.py:75
+msgid "Perillinen"
+msgstr ""
+
+#: templates/jinja_filters.py:76
+msgid "kummi"
+msgstr ""
+
+#: templates/jinja_filters.py:77
+msgid "Clergy"
+msgstr ""
+
+#: templates/jinja_filters.py:78
+msgid "Osallinen"
+msgstr ""
+
+#: templates/jinja_filters.py:79
+msgid "Ostaja"
+msgstr ""
+
+#: templates/jinja_filters.py:80
+msgid "Perinnönjättäjä"
+msgstr ""
+
+#: templates/jinja_filters.py:81
+msgid "Vihkijä"
+msgstr ""
+
+#: templates/jinja_filters.py:82
+msgid "Pääosallinen"
+msgstr ""
+
+#: templates/jinja_filters.py:83
+msgid "Edunsaaja"
+msgstr ""
+
+#: templates/jinja_filters.py:84
+msgid "Myyjä"
+msgstr ""
+
+#: templates/jinja_filters.py:85
+msgid "Unknown role"
+msgstr ""
+
+#: templates/jinja_filters.py:90
+msgid "confidence 0/4"
+msgstr ""
+
+#: templates/jinja_filters.py:91
+msgid "confidence 1/4"
+msgstr ""
+
+#: templates/jinja_filters.py:92
+msgid "confidence 2/4"
+msgstr ""
+
+#: templates/jinja_filters.py:93
+msgid "confidence 3/4"
+msgstr ""
+
+#: templates/jinja_filters.py:94
+msgid "confidence 4/4"
+msgstr ""
+
+#: templates/jinja_filters.py:108
+msgid "See"
+msgstr ""
+
+#: templates/jinja_filters.py:110 templates/jinja_filters.py:124
+msgid "Citation"
+msgstr ""
+
+#: templates/jinja_filters.py:111 templates/jinja_filters.py:125
+msgid "Event Note"
+msgstr ""
+
+#: templates/jinja_filters.py:112 templates/jinja_filters.py:131
+msgid "Source Note"
+msgstr ""
+
+#: templates/jinja_filters.py:113 templates/jinja_filters.py:128
+msgid "Person Note"
+msgstr ""
+
+#: templates/jinja_filters.py:114 templates/jinja_filters.py:129
+msgid "Place Note"
+msgstr ""
+
+#: templates/jinja_filters.py:116 templates/jinja_filters.py:127
+msgid "Name Note"
+msgstr ""
+
+#: templates/jinja_filters.py:117
+msgid "To Do"
+msgstr ""
+
+#: templates/jinja_filters.py:118 templates/jinja_filters.py:126
+msgid "Family Note"
+msgstr ""
+
+#: templates/jinja_filters.py:119 templates/jinja_filters.py:130
+msgid "Repository Note"
+msgstr ""
+
+#: templates/jinja_filters.py:120
+msgid "Media Reference Note"
+msgstr ""
+
+#: templates/jinja_filters.py:121
+msgid "Media Note"
+msgstr ""
+
+#: templates/jinja_filters.py:122
+msgid "General"
+msgstr ""
+
+#: templates/jinja_filters.py:123
+msgid "Html code"
+msgstr ""
+
+#: templates/jinja_filters.py:136
+msgid "Album"
+msgstr ""
+
+#: templates/jinja_filters.py:137
+msgid "Archive"
+msgstr ""
+
+#: templates/jinja_filters.py:138
+msgid "Collection"
+msgstr ""
+
+#: templates/jinja_filters.py:139
+msgid "Library"
+msgstr ""
+
+#: templates/jinja_filters.py:141
+msgid "Web site"
+msgstr ""
+
+#: templates/jinja_filters.py:146
+msgid "Document"
+msgstr ""
+
+#: templates/jinja_filters.py:147
+msgid "Book"
+msgstr ""
+
+#: templates/jinja_filters.py:148
+msgid "Electronic"
+msgstr ""
+
+#: templates/jinja_filters.py:149
+msgid "Newspaper"
+msgstr ""
+
+#: templates/jinja_filters.py:150
+msgid "Unknown"
+msgstr ""
+
+#: templates/jinja_filters.py:155
+msgid "Vessel"
+msgstr ""
+
+#: templates/jinja_filters.py:156
+msgid "Borough"
+msgstr ""
+
+#: templates/jinja_filters.py:157
+msgid "Building"
+msgstr ""
+
+#: templates/jinja_filters.py:158
+msgid "City"
+msgstr ""
+
+#: templates/jinja_filters.py:159
+msgid "Country"
+msgstr ""
+
+#: templates/jinja_filters.py:160
+msgid "District"
+msgstr ""
+
+#: templates/jinja_filters.py:161 templates/jinja_filters.py:174
+msgid "Farm"
+msgstr ""
+
+#: templates/jinja_filters.py:162
+msgid "Hamlet"
+msgstr ""
+
+#: templates/jinja_filters.py:163
+msgid "Cemetery"
+msgstr ""
+
+#: templates/jinja_filters.py:164
+msgid "Kappeliseurakunta"
+msgstr ""
+
+#: templates/jinja_filters.py:165
+msgid "Mansion"
+msgstr ""
+
+#: templates/jinja_filters.py:166
+msgid "Kuntakeskus"
+msgstr ""
+
+#: templates/jinja_filters.py:167
+msgid "Kortteli"
+msgstr ""
+
+#: templates/jinja_filters.py:168
+msgid "Fortress"
+msgstr ""
+
+#: templates/jinja_filters.py:169
+msgid "Locality"
+msgstr ""
+
+#: templates/jinja_filters.py:170
+msgid "Organisation"
+msgstr ""
+
+#: templates/jinja_filters.py:171 templates/jinja_filters.py:179
+msgid "Parish"
+msgstr ""
+
+#: templates/jinja_filters.py:172
+msgid "Region"
+msgstr ""
+
+#: templates/jinja_filters.py:173
+msgid "State"
+msgstr ""
+
+#: templates/jinja_filters.py:175
+msgid "Tontti"
+msgstr ""
+
+#: templates/jinja_filters.py:176
+msgid "Torppa"
+msgstr ""
+
+#: templates/jinja_filters.py:177
+msgid "Town"
+msgstr ""
+
+#: templates/jinja_filters.py:178
+msgid "Village"
+msgstr ""
+
+#: templates/jinja_filters.py:184
+msgid "on vessel"
+msgstr ""
+
+#: templates/jinja_filters.py:185
+msgid "in the borough of"
+msgstr ""
+
+#: templates/jinja_filters.py:186
+msgid "in the building of"
+msgstr ""
+
+#: templates/jinja_filters.py:187
+msgid "in the City"
+msgstr ""
+
+#: templates/jinja_filters.py:188
+msgid "in the country of"
+msgstr ""
+
+#: templates/jinja_filters.py:189
+msgid "in the district of"
+msgstr ""
+
+#: templates/jinja_filters.py:190
+msgid "in the farm of"
+msgstr ""
+
+#: templates/jinja_filters.py:191
+msgid "in the hamlet of"
+msgstr ""
+
+#: templates/jinja_filters.py:192
+msgid "Hautausmaalla"
+msgstr ""
+
+#: templates/jinja_filters.py:193
+msgid "Kappeliseurakunnassa"
+msgstr ""
+
+#: templates/jinja_filters.py:194
+msgid "Kartanossa"
+msgstr ""
+
+#: templates/jinja_filters.py:195
+msgid "Kuntakeskuksessa"
+msgstr ""
+
+#: templates/jinja_filters.py:196
+msgid "Linnoituksessa"
+msgstr ""
+
+#: templates/jinja_filters.py:197
+msgid "at locality of"
+msgstr ""
+
+#: templates/jinja_filters.py:198
+msgid "in the organisation of"
+msgstr ""
+
+#: templates/jinja_filters.py:199
+msgid "in the parish"
+msgstr ""
+
+#: templates/jinja_filters.py:200
+msgid "in the region"
+msgstr ""
+
+#: templates/jinja_filters.py:201
+msgid "Sin the state"
+msgstr ""
+
+#: templates/jinja_filters.py:202
+msgid "Tontilla"
+msgstr ""
+
+#: templates/jinja_filters.py:203
+msgid "in the village of"
+msgstr ""
+
+#: templates/jinja_filters.py:204
+msgid "in the parsish of"
+msgstr ""
+
 #: templates/ladattu2.html:7
 msgid "Loaded file"
 msgstr ""
@@ -2044,10 +2522,6 @@ msgstr ""
 
 #: templates/select_refcols.html:34 templates/select_refcols.html:62
 msgid "Surname_normalized"
-msgstr ""
-
-#: templates/select_refcols.html:35 templates/select_refcols.html:63
-msgid "Occupation"
 msgstr ""
 
 #: templates/select_refcols.html:36 templates/select_refcols.html:64

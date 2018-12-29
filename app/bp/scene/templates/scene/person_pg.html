@@ -109,13 +109,10 @@ u { color: DarkKhaki; text-decoration: none; }
                         {% endfor %}</td>
 
                         <td class="ColumnEvent">
-                            <span class="id">
-                            {% if e.type == "Baptism" %}
-                            	<a href="/lista/baptism_data/{{e.uniq_id}}"
-                            	 >{{e.uniq_id}}</a></span>&nbsp;{{e.type|transl('evt')}}
-                         	{% else %}
-                         		{{e.uniq_id}}</span>&nbsp;{{e.type|transl('evt')}}
-                         	{% endif %}
+                            {% if e.type == "Baptism" %} 
+                            	<a href="/lista/baptism_data/{{e.uniq_id}}" class="inlink">
+                            	  {{e.type|transl('evt')}}</a></span>{% else %}
+                                {{e.type|transl('evt')}}{% endif %}&nbsp;<span class="id">[{{e.uniq_id}}]</span>
                             {% if e.role and e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
