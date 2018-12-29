@@ -22,14 +22,15 @@
              <div style="display: inline-block;">
                 <h3>{{ _("Active User names") }}</h3>
 		        <table class="table100">
-		            <tr><th>{{ _("User name") }}</th><th>{{ _("Name") }}</th><th>{{ _("mail") }}</th>
-		            <th>{{ _("Roles") }}</th><th>{{ _("Operations") }}</th></tr>
+		            <tr><th>{{ _("Username") }}</th><th>{{ _("Name") }}</th><th>{{ _("Email address") }}</th>
+		            <th>{{ _("Language") }}</th><th>{{ _("Roles") }}</th><th>{{ _("Operations") }}</th></tr>
 		        {% if users %}
 		            {% for u in users %}
 		                <tr>
 		                    <td>{{u.username}}</td>
 		                    <td>{{u.name}}</td>
-		                    <td>{{u.email}}</td>
+                            <td>{{u.email}}</td>
+                            <td class="center">{{u.language}}</td>
 		                    <td>{{u.roles}}</td>
 		                    <td><a href="list_uploads/{{u.username}}">{{ _("Uploaded files") }}</a>
                               | <a href="update_user/{{u.username}}">{{ _("Edit user") }}</a>
