@@ -30,13 +30,16 @@
 	        		  <td class="Citation">
 	        		    <div title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
-	   					  Sivu {{c.page}} {{ macro.stars(c.confidence|float) }}
+	   					  {{ _( "Page" ) }} {{c.page}} {{ macro.stars(c.confidence|float) }}
                           {% set conf = c.confidence | int %} 
 
 	               		  <ol type="a">
 	               		{% for cite in c.citators|sort(attribute='date') %}
 	                        <li>
-	                          {% if cite.eventtype %}{{ _("Person's") }}{% else %}{{ _('Person') }}{% endif %}
+	                          {% if cite.eventtype %} 
+	                          {% else %}
+	                           {{ _('The person') }}
+	                          {% endif %}
                               <a href="/scene/person={{cite.uniq_id}}" class="inlink"
                                  title="{{ _('see details of person %(id)s', id=cite.id) }}">
                                  {{cite.clearname}}</a>
