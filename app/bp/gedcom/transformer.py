@@ -85,8 +85,9 @@ class Gedcom:
             item.print_items(out) 
     
 class Item:
-    def __init__(self,line,children=None,lines=None):
+    def __init__(self,line,children=None,lines=None,linenum=None):
         if children is None: children = []
+        self.linenum = linenum
         temp = line.split()
         if len(temp) < 2: raise RuntimeError(_("Invalid line: ") + line)
         self.level = int(temp[0])
@@ -135,7 +136,7 @@ class Transformer:
         self.display_callback = display_callback
         self.transformation = transform_module.initialize(options)
 
-    def build_items(self,lines,level):
+    def build_items(self,lines,level,linenum=1):
         if len(lines) == 0: return []
         linenums = [] # list of line numbers having the specified level 
         for i,line in enumerate(lines):
@@ -153,8 +154,9 @@ class Transformer:
             # i.e. they form a substructure
             firstline = lines[i] 
             item = Item(firstline,
-                        children=self.build_items(lines[i+1:j],level+1),
+                        children=self.build_items(lines[i+1:j],level+1,linenum+i+1),
                         lines=lines[i:j],
+                        linenum=linenum+i
                         )
             items.append(item)
             
