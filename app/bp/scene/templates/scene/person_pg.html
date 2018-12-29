@@ -111,7 +111,7 @@ u { color: DarkKhaki; text-decoration: none; }
                         <td class="ColumnEvent">
                             {% if e.type == "Baptism" %} 
                             	<a href="/lista/baptism_data/{{e.uniq_id}}" class="inlink">
-                            	  {{e.type|transl('evt')}}</a></span>{% else %}
+                            	  {{e.type|transl('evt')}}</a>{% else %}
                                 {{e.type|transl('evt')}}{% endif %}&nbsp;<span class="id">[{{e.uniq_id}}]</span>
                             {% if e.role and e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}

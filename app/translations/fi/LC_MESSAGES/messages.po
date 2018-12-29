@@ -1591,7 +1591,7 @@ msgid "Family Member's"
 msgstr "Perheenjäsenen"
 
 #: bp/scene/templates/scene/source_events.html:47
-msgid "Of person"
+msgid "Person's"
 msgstr "Henkilön"
 
 #: bp/scene/templates/scene/sources.html:8 templates/table_sources.html:8

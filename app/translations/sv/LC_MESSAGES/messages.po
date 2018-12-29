@@ -1593,8 +1593,8 @@ msgid "Family Member's"
 msgstr "Familje medlemmar"
 
 #: bp/scene/templates/scene/source_events.html:47
-msgid "Of person"
-msgstr "Av person"
+msgid "Person's"
+msgstr "Personen"
 
 #: bp/scene/templates/scene/sources.html:8 templates/table_sources.html:8
 msgid "List of Sources"

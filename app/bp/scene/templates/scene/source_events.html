@@ -26,26 +26,28 @@
 
 			        {% for c in citations|sort(attribute='page') %}
 	        		<tr>
-	        		    <td class="CitationId"><span title="sitaatti {{c.uniq_id}}">{{c.id}}</span> </td>
-	        		    <td class="Citation"><div 
-	        		        title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
-                        {% if c.confidence and c.confidence < "2" %}
-                        style="color:red"{% endif %}>
-	   					Sivu {{c.page}} {{ macro.stars(c.confidence|float) }}
-                        {% set conf = c.confidence | int %} 
+	        		  <td class="CitationId"><span title="sitaatti {{c.uniq_id}}">{{c.id}}</span> </td>
+	        		  <td class="Citation">
+	        		    <div title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
+                          {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
+	   					  Sivu {{c.page}} {{ macro.stars(c.confidence|float) }}
+                          {% set conf = c.confidence | int %} 
 
-	               		<ol type="a" style="color:black">
+	               		  <ol type="a">
 	               		{% for cite in c.citators|sort(attribute='date') %}
-	                        {% if cite.eventtype %}{{ _('Of person') }}{% else %}{{ _('Person') }}{% endif %}
-                            <a href="/scene/person={{cite.uniq_id}}" class="inlink"
-                               title="{{ _('see details of person %(id)s', id=cite.id) }}">
-                                   {{cite.clearname}}</a>
+	                        <li>
+	                          {% if cite.eventtype %}{{ _("Person's") }}{% else %}{{ _('Person') }}{% endif %}
+                              <a href="/scene/person={{cite.uniq_id}}" class="inlink"
+                                 title="{{ _('see details of person %(id)s', id=cite.id) }}">
+                                 {{cite.clearname}}</a>
 	                           {{cite.eventtype|transl('evt')}}
 	                           {% if cite.edates %}{{cite.edates}}{% endif %}
-	                        {# endif #}
+               			    </li>
 	                    {% endfor %}
-	                    </ol>
-	         		</div></td></tr>
+	                      </ol>
+	         		    </div>
+	         		  </td>
+	         		</tr>
                     {% endfor %}
                     </tbody></table>
 	        </div>
