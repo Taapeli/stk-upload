@@ -258,6 +258,14 @@ class Cypher_family():
     '''
     Cypher clases for creating and accessing Families
     '''
+    
+    # from models.gen.family.read_families
+    read_families = """
+MATCH (f:Family) WHERE ID(f)>=$fw
+OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
+OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f) LIMIT $limit"""
 
     # from models.gen.person_combo.Person_combo.get_family_members 
     get_persons_family_members = """
