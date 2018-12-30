@@ -108,24 +108,18 @@ class Item:
 
     @property
     def line(self):
+        s = str(self.level)
         if self.xref:
-            return "{} {} {} {}".format(self.level,self.xref, self.tag, self.value)
-        if self.value == "":
-            return "{} {}".format(self.level,self.tag)
-        else:
-            return "{} {} {}".format(self.level,self.tag,self.value)
-                
+            s += " " + self.xref
+        s += " " + self.tag
+        if self.value or self.tag == "CONT": s += " " + self.value
+        return s
+
     def __repr__(self):
         return self.line 
     
     def print_items(self,out):
-        prefix = "%s %s " % (self.level,self.tag)
-        if self.value == "":
-            write(out,self.line.strip())
-        else:
-            for line in self.value.splitlines():
-                write(out,prefix+line)
-                prefix = "%s CONT " % (self.level+1)
+        write(out,self.line)
         for item in self.children:
             item.print_items(out)
 
