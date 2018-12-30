@@ -325,6 +325,18 @@ def gedcom_delete(gedcom):
             logging.info("Deleted:"+filename)
     return redirect(url_for('.gedcom_list'))
 
+@bp.route('/gedcom/delete_old_versions/<gedcom>')
+@login_required
+def gedcom_delete_old_versions(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = os.path.abspath(gedcom_folder)
+    for name in os.listdir(gedcom_folder):
+        filename = os.path.join(gedcom_folder, name)
+        if name.startswith(gedcom+"."):  
+            removefile(filename) 
+            logging.info("Deleted:"+filename)
+    return redirect(url_for('.gedcom_info',gedcom=gedcom))
+
 def removefile(fname): 
     try:
         os.remove(fname)
