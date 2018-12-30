@@ -92,6 +92,7 @@ class Analyzer(transformer.Transformation):
             "HEAD.GEDC.VERS",
             "HEAD.GEDC.FORM",
         }       
+
     def transform(self,item,options,phase):
         if 0:
             print("line:",item.line)
@@ -102,7 +103,7 @@ class Analyzer(transformer.Transformation):
         if path[0] == '@': path = path.split(".",maxsplit=1)[1]
         if item.tag != "CONC" and path not in self.allowed_paths:
             self.illegal_paths.add(path,item)
-            
+        
         if item.value == "" and len(item.children) == 0 and item.tag not in {"TRLR","CONT"}:
             self.novalues.add(item.line,item)         
             
