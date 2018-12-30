@@ -14,7 +14,17 @@
         </ol>
       {% endif %}
     {% endwith %}
-        <table>
+    <div class="helptext">
+    <pre>
+    	{{ _("Status for differents steps in XML file upload:") }}
+    	
+    	{{ _("1. UPLOADING - the file is being uploaded to server") }}
+    	{{ _("2. UPLOADED  - the file has been uploaded to server") }}
+    	{{ _("3. STORING   - the file content is being stored to the database") }}
+    	{{ _("4. STORED    - the file content has been stored to the database") }}
+	</pre>
+    </div>
+    <table>
            <tr>
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("XML file") }}</th>
@@ -29,8 +39,9 @@
 	           <td><a href=/gramps/xml_download/{{upload.xmlname | urlencode}}>{{ _("Download to your computer") }}</a> |
 	           	   <a href=/gramps/xml_delete/{{upload.xmlname | urlencode}}>{{ _("Delete") }}</a></td>
 	       </tr>
-	    {% endfor %}</table>
-    <p>{{ _("The administrator can load your file to database as yor new candadate material set") }}
+	    {% endfor %}
+    </table>
+    <p>{{ _("The administrator can load your file to database as your new candidate material set") }}
 	    {% if current_user.is_authenticated and current_user.has_role('admin') %}
             <a href="/admin/list_users">{{ _('on this page') }}</a>
         {% endif %}

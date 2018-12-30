@@ -26,9 +26,13 @@ t.
 Pekka
 
 """
+from flask_babelex import _
+
 from .. import transformer
 
 version = "2.0"
+name = _("Baptisms")
+
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Kasteet-ohjelma"
 
 def add_args(parser):

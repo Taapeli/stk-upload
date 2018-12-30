@@ -109,13 +109,10 @@ u { color: DarkKhaki; text-decoration: none; }
                         {% endfor %}</td>
 
                         <td class="ColumnEvent">
-                            <span class="id">
-                            {% if e.type == "Baptism" %}
-                            	<a href="/lista/baptism_data/{{e.uniq_id}}"
-                            	 >{{e.uniq_id}}</a></span>&nbsp;{{e.type|transl('evt')}}
-                         	{% else %}
-                         		{{e.uniq_id}}</span>&nbsp;{{e.type|transl('evt')}}
-                         	{% endif %}
+                            {% if e.type == "Baptism" %} 
+                            	<a href="/lista/baptism_data/{{e.uniq_id}}" class="inlink">
+                            	  {{e.type|transl('evt')}}</a>{% else %}
+                                {{e.type|transl('evt')}}{% endif %}&nbsp;<span class="id">[{{e.uniq_id}}]</span>
                             {% if e.role and e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
@@ -219,7 +216,7 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media") }}</h4>
         {% for ref in person.media_ref %}<div class="thumbnail">
-                <img alt="{{ _('kuva') }}" src="{{obj[ref].src}}" />
+                <img alt="{{ _('image') }}" src="{{obj[ref].src}}" />
                     <p>{{obj[ref].description}}</p>
             </div>
         {% endfor %}
@@ -266,7 +263,7 @@ u { color: DarkKhaki; text-decoration: none; }
             {% if mark_obj.c_id > 0 %}
                 {% set cita = obj[mark_obj.c_id] %}{% set conf = cita.confidence | int %}
              <li id="sref{{ mark_obj.mark }}" {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %} >
-                  <span title="[{{mark_obj.c_id}}] {{cita.confidence|transl("conf")}} {{ _('luotettavuus') }} ({{cita.confidence}})">
+                  <span title="[{{mark_obj.c_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
                       {{ mark_obj.mark }} {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
                   </span> {{ cita.noteref }}
                 {% for nref in cita.note_ref %}&nbsp; – <i>{{ _("see:") }}&nbsp;</i> {{ macro.notelink(obj[nref]) }}{% endfor %}

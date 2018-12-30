@@ -1,0 +1,55 @@
+{# /scene/templates/scene/families.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}{{ _('Database Information') }}{% endblock %}
+{% block body %}
+{{ super() }}
+<script src="/static/infobox.js"></script>
+
+<h2>{{ _('List of Families') }}</h2>
+<p>{{ _('Number of families:') }} {{families|count}}  
+
+<section id="lista">
+
+{% if families %}
+        {% set last = families|last %}
+{% endif %}
+
+<a href="/scene/families" title="alkuun">Alkuun</a> 
+<a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu">Seuraava</a>
+
+<table id="families">
+    <tr><th>{{ _("Uniq_id") }}</th>
+        <th>{{ _("id of Father") }}</th>
+        <th>{{ _("Father") }}</th>
+        <th>{{ _("id of Mother") }}</th>
+        <th>{{ _("Mother") }}</th>
+        <th>{{ _("Type") }}</th>
+        <th>{{ _("Child") }}</th>
+    </tr>
+{% if families %}
+    {% for f in families %}
+        <tr>
+                <td>{{f.uniq_id}}</td>
+                <td><a href="/scene/person={{f.father.uniq_id}}">{{f.father.uniq_id}}</a></td>
+                {% if f.father.names %}
+                    <td>{{f.father.names[0].firstname}} {{f.father.names[0].suffix}} {{f.father.names[0].surname}}</td>
+                {% else %}
+                    <td>-</td>
+                {% endif %}
+                <td><a href="/scene/person={{f.mother.uniq_id}}">{{f.mother.uniq_id}}</a></td>
+                {% if f.mother.names %}
+                    <td>{{f.mother.names[0].firstname}} {{f.mother.names[0].suffix}} {{f.mother.names[0].surname}}</td>
+                {% else %}
+                    <td>-</td>
+                {% endif %}
+                <td>{{f.type}}</td>
+                <td>{{f.no_of_children}}</td>
+        </tr>
+    {% endfor %}
+{% else %}
+        <tr><td colspan="5">{{ _('No persons') }}</td></tr>
+{% endif %}
+</table>
+<br>
+
+{% endblock %}

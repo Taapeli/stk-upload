@@ -9,7 +9,8 @@ logger = logging.getLogger('stkserver')
 import time
 
 from flask import render_template, request, redirect, url_for, flash
-from flask_security import current_user, login_required
+from flask_security import current_user, login_required, roles_accepted
+from urllib.parse import urlencode, quote_plus
 
 from . import bp
 from bp.scene.data_reader import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id
@@ -17,6 +18,7 @@ from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
+from models.gen.family import Family
 #from models.gen.family import Family_for_template
 from models.gen.place import Place
 from models.gen.source import Source
@@ -85,42 +87,62 @@ def show_persons_by_refname(refname, opt=""):
 
 # ------------------------------ Menu 1 Persons --------------------------------
 
-@bp.route('/scene/persons_own/<string:start>')
 @bp.route('/scene/persons_own/')
 @login_required
-def show_my_persons(start=''):
+#Todo: The roles should be forwarded to macros.html: should not show  menu(11)
+#
+#@roles_accepted('member', 'admin', "research", "audit")
+def show_my_persons():
     """ List all persons for menu(11)
         Restriction by owner's UserProfile 
     """
+    fw_from = request.args.get('f', '')
+    bw_from = request.args.get('b', '')
+    count = request.args.get('c', 100, type=int)
     t0 = time.time()
-    keys = ('all',)
+    
+    keys = ('own',)
     if current_user.is_authenticated:
         user=current_user.username
     else:
         user=None
-    persons = Person_combo.read_my_persons_list(user, show="my", start_name=start, limit=100)
+    persons = Person_combo.read_my_persons_list(user, show="own", limit=count,
+                                                fw_from=fw_from, bw_from=bw_from)
+    next_links = dict()
+    if persons:
+        if fw_from:
+            next_links['bw'] = quote_plus(persons[0].sortname)
+        next_links['fw'] = quote_plus(persons[-1].sortname)
+
     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
-                           rule=keys, elapsed=time.time()-t0)
+                           pick=None, next=next_links, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons_all/')
 #     @login_required
-def show_my_persons_all(start=''):
+def show_my_persons_all():
     """ List all persons for menu(12)
         Both owners and other persons 
     """
     t0 = time.time()
+    fw_from = request.args.get('f', '')
+    bw_from = request.args.get('b', '')
+    count = request.args.get('c', 100, int)
+
     keys = ('all',)
     if current_user.is_authenticated:
         user=current_user.username
     else:
         user=None
-#     if 'fn' in opt: order = 1   # firstname
-#     elif 'pn' in opt: order = 2 # firstname
-#     else: order = 0             # surname
-    persons = Person_combo.read_my_persons_list(user, show="all", start_name=start, limit=100)
-#     persons = read_persons_with_events(keys, user=user)
+    persons = Person_combo.read_my_persons_list(user, show="all", limit=count,
+                                                fw_from=fw_from, bw_from=bw_from)
+    next_links = dict()
+    if persons:
+        if fw_from:
+            next_links['bw'] = quote_plus(persons[0].sortname)
+        next_links['fw'] = quote_plus(persons[-1].sortname)
+
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
-                           rule=keys, elapsed=time.time()-t0)
+                           pick=user, next=next_links, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')
@@ -213,6 +235,25 @@ def show_person_page(uniq_id):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/person.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 
+                           elapsed=time.time()-t0)
+
+# ------------------------------ Menu 3: Families --------------------------------
+
+@bp.route('/scene/families')
+def show_families():
+    """ List of Families for menu(3)
+    """
+    fw_from = request.args.get('f', 0, type=int)
+    bw_from = request.args.get('b', 0, type=int)
+    count = request.args.get('c', 100, type=int)
+    t0 = time.time()
+        
+    try:
+        # 'families' has Family objects
+        families = Family.get_families(fw_from,  bw_from,  count)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    return render_template("/scene/families.html", families=families, 
                            elapsed=time.time()-t0)
 
 # ------------------------------ Menu 4: Places --------------------------------

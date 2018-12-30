@@ -92,7 +92,7 @@ h1 {
 	position: absolute; 
 	top: 12px; 
 	right: 4px; 
-	text-aligin: right;
+	text-align: right;
 	font-size: 12px;
 	color: blue;
 }
@@ -103,11 +103,22 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
-.id { color: sienna; text-align: right; }
-.idno { color: gray; text-size: 50%; }
+.id { color: sienna; font-size: 70%; text-align: right; 
+    font-family: serif
+}
+.idno { color: gray; font-size: 70%; text-align:center; 
+    font-family: serif
+}
+.owner { color: white; 
+    font-size: 70%; 
+    background: RoyalBlue;
+    border-radius: 5px;
+}
+.notmy { color:blue;}
+li.minor { list-style-type: circle; }
 .inlink { color: #000066; background: LemonChiffon; }
 .outlink { text-decoration: underline; color:gray}
-.refname { color:gray; text-size: 80%; }
+.refname { color:gray; font-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
 .note  { font-style: italic; /* font-size: 85%; margin:0.5em; */ }
 .myself { color: white; background: #555; font-style: italic; }
@@ -121,6 +132,42 @@ td.numbers {
 	font-size: 84%;
 /* 	color: darkslategray; */
 }
+/* Button style link (Next - Previous) */
+.navbar { text-align: center; 
+  background-color: #EEE;
+}
+.navlink, a.navlink:link, a.navlink:visited {
+  background-color: lightgray;
+  border: 1pt solid black;
+  border-radius: 10px;
+  color: black;
+  padding: 2px 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin-left:4px;
+}
+a.navlink:hover, a.navlink:active {
+  background-color: gray;
+}
+.navlink {
+  background-color: white;
+  color: gray;
+  border-color: gray;
+}
+
+/* Flexbox boxes floats next to each other */
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.flex-container > div {
+  background-color: ivory;
+  width: 300px;
+  /*border: 1px solid lightgray;*/
+  margin: 1em;
+}
 
 /* Styles with icon  */
 
@@ -131,9 +178,16 @@ td.numbers {
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
 }
+.outlink {
+    text-decoration: none;
+    color: maroon;
+    background: bisque;
+    padding-right: 5px;
+    padding-left: 5px;
+}
 .outlink::before {
-	margin-right: 5px;
-    font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f360";
+    /* font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f360"; */
+    content: "\260D";   /* RIGHTWARDS DOUBLE ARROW / SOUTH EAST ARROW TO CORNER? */
 }
 
 /* General Text
@@ -277,7 +331,7 @@ div#alphanav ul li {
     float: left;
     /* font-size: larger; / JMä */
     font-weight: bold;
-    background-color: ligthgray;
+    background-color: lightgray;
 }
 /* div#alphanav ul li:after {
     content: " |";

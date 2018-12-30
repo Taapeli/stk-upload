@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger('stkserver')
 import time
 
-from flask import render_template, request, redirect, url_for, flash 
+from flask import render_template, request, redirect, url_for, flash, g
 from flask_security import login_required, roles_accepted, current_user # ,roles_required
 from flask_babelex import _
 
@@ -88,6 +88,10 @@ def show_table_data(subj):
         headings, titles, lists = datareader.read_events_wo_place()
         return render_template("table_of_data.html",
                headings=headings, titles=titles, lists=lists, elapsed=time.time()-t0)
+    elif subj == 'families':
+        families = datareader.read_families()
+        return render_template("table_families.html", 
+        families=families, elapsed=time.time()-t0)
     elif subj == 'notes':
         titles, objs = datareader.get_note_list()
         return render_template("table_of_objects.html",
@@ -421,7 +425,7 @@ babel = Babel(app)
 @babel.localeselector
 def get_locale():
     try:
-        print(current_user)
+        g.locale = current_user.language 
         return current_user.language
     except:
         pass

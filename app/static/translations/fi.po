@@ -2875,13 +2875,6 @@ msgstr "Tiedoston lataaminen ei onnistu"
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
 
-msgid "Displaying %(num)s persons"
-msgstr "Näytetään %(num)s henkilöä"
-
-msgid "Go to"
-msgstr "Siirry"
-
-
 #~ msgid "User candidates from database"
 #~ msgstr "Käyttäjäehdokkaat kannasta"
 

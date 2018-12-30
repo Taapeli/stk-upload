@@ -18,109 +18,10 @@ table.diff td {
 }
 </style>
 
-<script>
-	
-    function hide_all() {
-        $("div.gedcom").hide();
-    }
-    
-    $(document).ready( function() {
-        console.log("ready");
+<script src="/static/js/gedcom_scripts.js?18"></script>
 
-        $(document).on({
-            ajaxStart: function() { $("body").addClass("loading");  },
-            ajaxStop: function() { $("body").removeClass("loading"); },    
-            ajaxError: function() { $("#errors").text("{{ _('Server error') }}").show(); }    
-        });
-        
-        $("#transforms").click(function() {
-            hide_all();
-            $("#div_transforms").show();
-        });
-        $("#versions").click(function() {
-            hide_all();
-            $.get("/gedcom/versions/{{ gedcom }}", function(versions) {
-                $("#versions_list").empty();
-                $.each(versions, function(i,version) {
-                	//$("#versions_list").append("<li>"+version+"</li>");
-                	var row = $("<tr><td>" +
-                	"<input type=radio name=v1>" +
-                	"<input type=radio name=v2>" +
-                	"<td><a href=/gedcom/download/"+version+">"+version+"</a></tr>");
-                	row.data("version",version);
-                	$("#versions_list").append(row);
-                });
-                $("#versions_list tr:nth-last-child(2) input[name=v1]").prop("checked",true);
-                $("#versions_list tr:nth-last-child(1) input[name=v2]").prop("checked",true);
-	            $("#div_versions").show();
-            });
-        });
-        $("a.transform").click(function(e) {
-            $.get("/gedcom/transform/{{ gedcom }}/" + $(e.target).attr("data-transform"), function(rsp) {
-                $("#div_transform_params1").html(rsp);
-	            $("#div_transform_params").show();
-            });
-        });
-        $("#delete").click(function() {
-        	//alert("{{ _('Function still planned') }}");
-            var ok = confirm('{{ _('Are you sure?') }}');
-            if (ok) {
-            	$.get("/gedcom/delete/{{ gedcom }}",function() {
-            		window.location.replace("/gedcom/list");
-            	});
-            }
-        });
-        $("#update_desc").click(function() {
-            $.post("/gedcom/update_desc/{{ gedcom }}", {desc:$("#desc").val()},function(rsp) {
-            	console.log(rsp);
-        	});
-        });
-        $("input,a").click(function() {
-        	 $("#errors").hide();
-        });
-        $("#palauta").click(function() {
-			var gedcom = "{{ gedcom }}";
-			var version = $("#oldname").text();
-            $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
-                	$("#div_oldname").hide();
-            });
-        	 
-        });
-        $("#compare").click(function() {
-        	var row1 = $("input[name=v1]:checked").parent().parent();
-        	var gedcom1 = row1.data("version");
-        	var row2 = $("input[name=v2]:checked").parent().parent();
-        	var gedcom2 = row2.data("version");
-        	$.get("/gedcom/compare/" + gedcom1 + "/" + gedcom2,function(rsp) {
-            	$("#difftable").html(rsp.diff);
-            	$("button.palauta_button").hide();
-            	$("#palauta1").text("{{ _('Revert to') }} " + gedcom1).data("gedcom",gedcom1);
-            	$("#palauta2").text("{{ _('Revert to') }} " + gedcom2).data("gedcom",gedcom2);
-            	if (!gedcom1.match(/\.ged$/)) $("#palauta1").show();
-            	if (!gedcom2.match(/\.ged$/)) $("#palauta2").show();
-            	$("#div_compare").show();
-        	});
-        });
-    	$("button.palauta_button").click(function(rsp) {
-			var gedcom = "{{ gedcom }}";
-			var version = $(this).data("gedcom");
-            $.get("/gedcom/revert/{{ gedcom }}/" + version, function(rsp) {
-		        $("#versions").click(); 
-                alert(gedcom + " {{ _('renamed to') }} " + rsp.newname + "\n" +
-                	  version + " {{ _('renamed to') }} " + gedcom);
-            });
-    	});
-    	$("#save_result").click(function(rsp) {
-			var gedcom = "{{ gedcom }}";
-            $.get("/gedcom/save/{{ gedcom }}", function(rsp) {
-		        var msg  = gedcom + " {{ _('renamed to') }} " + rsp.newname; 
-            	$("#oldname").text(rsp.newname);
-            	$("#div_oldname").show();
-            	$("#div_save").hide();
-            });
-    	});
-        hide_all();
-    });
+<script>
+var gedcom = "{{ gedcom }}";
 </script>
 
 <div class="startdiv">
@@ -136,16 +37,64 @@ table.diff td {
                 <div class="submit">
 			         <input type="button" id="update_desc" value='{{ _("Update") }}'>
 			    </div>
-				<p>({{ _('Visualisation data, not based on material') }})</p>
 				<table>
+                    {% if metadata.upload_time %}
+	                    <tr><td>{{ _('Upload time') }}
+	                        <td class="right">{{metadata.upload_time}}
+                    {% endif %}
+
+                    {% if 1  or info.date %}
+	                    <tr><td>{{ _('Gedcom date') }}
+	                        <td class="right">{{info.date}} {{info.time}}
+                    {% endif %}
+
+                    {% if info.submitter %}
+					    <tr><td>{{ _("Submitter") }}</td>
+					        <td class="right">{{ info.submitter }}</td></tr>
+                    {% endif %}
+                    
+                    {% if info.gedcom_version %}
+					    <tr><td>{{ _("Gedcom version") }}</td>
+					        <td class="right">{{ info.gedcom_version }}</td></tr>
+                    {% endif %}
+                    
+                    {% if metadata.encoding %}
+	                    <tr><td>{{ _('Encoding') }}
+	                        <td class="right">{{metadata.encoding}}
+                    {% endif %}
+
+                    {% if info.charset %}
+					    <tr><td>{{ _("Gedcom charset") }}</td>
+					        <td class="right">{{ info.charset }}</td></tr>
+                    {% endif %}
+
+                    {% if info.source_program %}
+					    <tr><td>{{ _("Source program") }}</td>
+					        <td class="right">{{ info.source_program_name }}
+		                    {% if info.source_program_version %}
+			                    {{ info.source_program_version }}
+		                    {% endif %}
+					        </td></tr>
+                    {% endif %}
+
 				    <tr><td>{{ _("Number of individuals") }}</td>
-				        <td class="right">{{ num_individuals }}</td></tr>
+				        <td class="right">{{ info.num_individuals }}</td></tr>
+				    <tr><td>{{ _("Number of families") }}</td>
+				        <td class="right">{{ info.num_families }}</td></tr>
+				    <tr><td>{{ _("Number of unique places") }}</td>
+				        <td class="right">{{ info.num_places }}</td></tr>
+				    <tr><td>{{ _("Number of notes") }}</td>
+				        <td class="right">{{ info.num_notes }}</td></tr>
+				    <tr><td>{{ _("Number of citations") }}</td>
+				        <td class="right">{{ info.num_citations }}</td></tr>
+				    <tr><td>{{ _("Number of sources") }}</td>
+				        <td class="right">{{ info.num_sources }}</td></tr>
+				    <tr><td>{{ _("Number of repositories") }}</td>
+				        <td class="right">{{ info.num_repos }}</td></tr>
+				    <tr><td>{{ _("Number of multimedia objects") }}</td>
+				        <td class="right">{{ info.num_multimedia }}</td></tr>
 	                <tr><td>{{ _("Allow help desk to view data") }}</td>
 	                    <td class="right"><input type="checkbox" id="view_permission"></td></tr>
-                    {% for meta in metadata.items() %}
-                    <tr><td>{{ meta.0 }}
-                        <td>{{ meta.1 }}
-                    {% endfor %}
 			    </table>
 	          </div>
 	       </div>
@@ -156,8 +105,11 @@ table.diff td {
 				<h3>{{ _("Options") }}</h3>
 				<div>
 				    <ul>
-				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">{{ _("Fetch this GEDCOM") }}</a></li>
-				        <li><a href="#" id="delete" data="/gedcom/delete">
+				        <li><a href="#" id="show_history">
+	                        {{ _("Show transformation history") }}</a></li>
+				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">
+				        	{{ _("Fetch this GEDCOM") }}</a></li>
+				        <li><a href="#" id="delete">
 	                        {{ _("Remove this GEDCOM") }}</a></li>
 	                </ul>
 				    <input type="submit" id="transforms" value='{{ _("Choose a transformation") }}'>
@@ -176,7 +128,7 @@ table.diff td {
 		        <table>
 		        {% for transform in transforms %}
 		            <tr><td><a href="#" class="transform" 
-		                 data-transform="{{ transform.name }}">{{ transform.name[:-3] }}</a>
+		                 data-transform="{{ transform.name }}">{{ transform.displayname }}</a>
 		            <td>{{ transform.docline }}
 		            <td>{% if transform.doclink %}
 		            	<a href="{{ transform.doclink }}" target="doc">{{ _("Description") }}
@@ -192,12 +144,24 @@ table.diff td {
 		        <h3>{{ _("Versions") }}</h3>
 		        <table id="versions_list"></table>
                 <div class="submit">
+		          <button id="delete_old_versions">{{ _("Delete old versions") }}</button>
 		          <button id="compare">{{ _("Compare versions") }}</button>
 		        </div>
 		    </div>
 		  </div>
 	        
-	      <div class="xstartbox gedcom" id="div_compare">
+	      <div class="gedcom" id="div_history">
+	        <div style="display: inline-block;">
+	
+		        <h3>{{ _("Transformation history") }}</h3>
+		        <pre>
+					<div id="history">
+					</div>
+	        	</pre>
+		    </div>
+		  </div>
+
+	      <div class="gedcom" id="div_compare">
 	        <h3>{{ _("GEDCOM comparison") }}:</h3>
 	        <button id="palauta1" class="palauta_button"></button>
 	        <button id="palauta2" class="palauta_button"></button>
@@ -210,7 +174,7 @@ table.diff td {
 			<form id="form">
 		      <div id="div_transform_params1">
 		      </div>
-			  <input type=submit id=transform value='{{ _("Perform transformation") }}'>
+			  <input type="submit" id="transform" value='{{ _("Perform transformation") }}'>
 	        </form>
 	      </div>
 	      

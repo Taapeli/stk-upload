@@ -73,7 +73,7 @@ def refnames():
 def set_all_person_refnames():
     """ Setting reference names for all persons """
     dburi = dbutil.get_server_location()
-    message = dataupdater.set_person_name_properties(ops=['refname']) or _('Made')
+    message = dataupdater.set_person_name_properties(ops=['refname']) or _('Done')
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 @bp.route('/admin/upload_csv', methods=['POST'])
@@ -197,6 +197,14 @@ def update_user(username):
 def list_uploads(username):
     upload_list = uploads.list_uploads(username) 
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
+
+@bp.route('/admin/list_uploads_all', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_uploads_all():
+    users = shareds.user_datastore.get_users()
+    upload_list = uploads.list_uploads_all(users) 
+    return render_template("/admin/uploads.html", uploads=upload_list)
 
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
 @login_required

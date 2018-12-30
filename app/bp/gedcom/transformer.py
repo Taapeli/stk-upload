@@ -8,8 +8,12 @@ Each transformation module should implement:
     Returns an instance of the class Transformation
 2. Function add_args
     Adds the transformation specific arguments (Argparse style)
+3. Attribute name
+4. Attribute docline
+5. Attribute doclink
+6. Attribute twophases
 
-The Transformation object should implement the method transform. Optionally
+The Transformation object should implement the methods transform and finish. Optionally
 it can implement the initializer (__init__) and the method finish.    
     
 Class Transformer parses a file or a list of lines into a hierarchical structure of "Item" objects. 
@@ -55,7 +59,8 @@ def fixlines(lines,options):
             line = tkns[0] + " _DUMMY"
             tkns = line.split(None,1)
             lines[i] = line
-        prevlevel = int(tkns[0])
+        tag = lines[i].split()[1]
+        if tag not in {"CONT","CONC"}: prevlevel = int(tkns[0])
     if line.strip() != "0 TRLR":
         lines.append("0 TRLR")
         if options.display_changes:
@@ -63,7 +68,7 @@ def fixlines(lines,options):
             print(_("Added:"))
             print("0 TRLR")
 
-class Transformation:
+class Transformation:   
     twophases = False
     
     def transform(self,item,options):
@@ -80,12 +85,18 @@ class Gedcom:
             item.print_items(out) 
     
 class Item:
-    def __init__(self,line,children=None,lines=None):
+    def __init__(self,line,children=None,lines=None,linenum=None):
         if children is None: children = []
-        temp = line.split(None,2)
+        self.linenum = linenum
+        temp = line.split()
         if len(temp) < 2: raise RuntimeError(_("Invalid line: ") + line)
-        self.level= int(temp[0])
-        self.tag = temp[1]
+        self.level = int(temp[0])
+        if self.level == 0 and temp[1][0] == '@':
+            self.xref = temp[1]
+            self.tag = temp[2]
+        else:
+            self.xref = ""
+            self.tag = temp[1]
         self._line = line
         self.children = children
         self.lines = lines
@@ -97,22 +108,18 @@ class Item:
 
     @property
     def line(self):
-        if self.value == "":
-            return "{} {}".format(self.level,self.tag)
-        else:
-            return "{} {} {}".format(self.level,self.tag,self.value)
-                
+        s = str(self.level)
+        if self.xref:
+            s += " " + self.xref
+        s += " " + self.tag
+        if self.value or self.tag == "CONT": s += " " + self.value
+        return s
+
     def __repr__(self):
         return self.line 
     
     def print_items(self,out):
-        prefix = "%s %s " % (self.level,self.tag)
-        if self.value == "":
-            write(out,self.line.strip())
-        else:
-            for line in self.value.splitlines():
-                write(out,prefix+line)
-                prefix = "%s CONT " % (self.level+1)
+        write(out,self.line)
         for item in self.children:
             item.print_items(out)
 
@@ -123,7 +130,7 @@ class Transformer:
         self.display_callback = display_callback
         self.transformation = transform_module.initialize(options)
 
-    def build_items(self,lines,level):
+    def build_items(self,lines,level,linenum=1):
         if len(lines) == 0: return []
         linenums = [] # list of line numbers having the specified level 
         for i,line in enumerate(lines):
@@ -140,15 +147,25 @@ class Transformer:
             # i and j are line numbers of lines having specified level so that all lines in between have higher line numbers;
             # i.e. they form a substructure
             firstline = lines[i] 
-            item = Item(firstline,children=self.build_items(lines[i+1:j],level+1),lines=lines[i:j])
+            item = Item(firstline,
+                        children=self.build_items(lines[i+1:j],level+1,linenum+i+1),
+                        lines=lines[i:j],
+                        linenum=linenum+i
+                        )
             items.append(item)
             
         return items
     
-    def transform_items(self,items,phase=1):
+    def transform_items(self,items,path="",phase=1):
         newitems = []
         for item in items:
-            item.children = self.transform_items(item.children)
+            if path: 
+                item.path = path + "." + item.tag
+            elif item.xref:
+                item.path = item.xref + "." + item.tag
+            else:
+                item.path = item.tag
+            item.children = self.transform_items(item.children,path=item.path,phase=phase)
             newitem = self.transformation.transform(item,self.options,phase)
             if newitem == True: # no change
                 newitems.append(item)

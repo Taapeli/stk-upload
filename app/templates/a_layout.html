@@ -16,6 +16,10 @@
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/static/ohjeet.js?"></script>
+	
+	<!-- i18n for Javascript: -->
+	<link rel="gettext" type="application/x-po" href="/static/translations/{{ g.locale }}.po">
+	<script src="/static/Gettext.js"></script>
   </head>
   <body>
     {% block body %}

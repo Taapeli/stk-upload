@@ -29,8 +29,8 @@ def format_timestamp(ts=None):
 
 def guess_encoding(fname):
     encodings = [
-        "UTF-8-SIG",
         "UTF-8",
+        "UTF-8-SIG",
         "ISO8859-1",
     ]
     for encoding in encodings:

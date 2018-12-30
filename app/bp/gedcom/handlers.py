@@ -8,9 +8,10 @@ import os
 import importlib
 import time
 import subprocess
+import traceback
 
 from re import match
-from collections import OrderedDict
+from collections import defaultdict
 
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_security import login_required, current_user
@@ -38,59 +39,46 @@ def init_log(logfile):
         pass
     logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
 
+def history_init(gedcom_fname):
+    history_file_name = gedcom_fname + "-history"
+    open(history_file_name,"w").write("{}: Uploaded {}\n".format(util.format_timestamp(),gedcom_fname))
+    
+def history_append(gedcom_fname,line):
+    history_file_name = gedcom_fname + "-history"
+    #open(history_file_name,"a").write("{}: {}\n".format(util.format_timestamp(),line))
+    open(history_file_name,"a").write("{}\n".format(line))
+
+def history_append_args(args):
+    history_file_name = args.input_gedcom + "-history"
+    with open(history_file_name,"a") as f:
+        for name,value in sorted(vars(args).items()):
+            f.write("- {}={}\n".format(name,value))
+        f.write("- User={}\n".format(current_user.username))
+
 
 def get_info(input_gedcom, enc):
-    ''' Read gedgom HEAD info and count level 0 items
-        Returns a list of descriptive lines
-     '''
-    msg = []
-    cnt = {}
-    #msg.append(os.path.basename(input_gedcom) + '\n')
-    try:
-        with open(input_gedcom, 'r', encoding=enc) as f:
-            for i_ in range(100):
-                ln = f.readline()
-                if ln[:6] in ['2 VERS', '1 NAME', '1 CHAR']:
-                    msg.append(ln[2:])
-                if ln.startswith('1 SOUR'):
-                    msg.append(_('Source ') + ln[7:-1] + ' ')
-                if ln.startswith('1 GEDC'):
-                    msg.append(_('Gedcom '))
-                if ln.startswith('2 CONT _COMMAND'):
-                    #print('"' + ln)
-                    msg.append('– ' + ln[16:-1])
-                if ln.startswith('2 CONT _DATE'):
-                    msg.append(ln[12:])
-                if match('0.*SUBM', ln):
-                    msg.append(_('Submitter '))
-                if match('0.*INDI', ln):
-                    cnt['INDI'] = 1
-                    break
-            ln = '-'
-            while ln:
-                ln = f.readline()[:-1]
-                if ln.startswith('0'):
-                    flds = ln.split(maxsplit=2)
-                    key = flds[-1][:4]
-                    if key in cnt:
-                        cnt[key] = cnt[key] + 1
-                    elif key != 'TRLR':
-                        cnt[key] = 1
+    ''' 
+    Read gedcom HEAD info and count level 0 items.
+    Uses the transformation framework.
+    '''
+    class Options:
+        display_changes = False
+        encoding = enc
 
-    except OSError:     # End of file
+    class Nullinfo:
         pass
-    #except UnicodeDecodeError as e:
-    #    msg.append(_("Wrong character set, add eg. '--Encoding ISO8859-1 '"))
-    #except Exception as e:
-    #    msg.append( type(e).__name__ + str(e))
-
-    if cnt:
-        msg.append(_('        count\n'))
-    for i in OrderedDict(sorted(cnt.items())):
-        msg.append('{:4} {:8}\n'.format(i, cnt[i]))
-    logging.info(msg)    
-    return cnt
-
+        
+    import gedcom_info_parser
+    try:
+        t = transformer.Transformer(transform_module=gedcom_info_parser,
+                                    display_callback=display_changes,
+                                    options=Options())
+        t.transform_file(input_gedcom)
+        return t.transformation.info 
+    except:
+        traceback.print_exc()
+        return Nullinfo()
+    
 def read_gedcom(filename):
     try:
         return open(filename).readlines()
@@ -118,6 +106,8 @@ def get_transforms():
     trans_dir = os.path.join(GEDCOM_APP, "transforms")
     names = sorted([name for name in os.listdir(trans_dir) \
                     if name.endswith(".py") and not name.startswith("_")])
+    
+    transforms = []
     for name in names:
         t = Transform()
         t.name = name
@@ -140,9 +130,16 @@ def get_transforms():
             t.doclink = transformer.doclink
         else:
             t.doclink = ""
+
+        if hasattr(transformer,"name"):
+            t.displayname = transformer.name
+        else:
+            t.displayname = t.modname
             
         t.version = getattr(transformer,"version","")
-        yield t
+        transforms.append(t)
+        #yield t
+    return sorted(transforms,key=lambda t: t.displayname)
 
 
 @bp.route('/gedcom/list', methods=['GET'])
@@ -174,6 +171,13 @@ def gedcom_versions(gedcom):
     versions.append(gedcom)
     return jsonify(versions)
 
+@bp.route('/gedcom/history/<gedcom>', methods=['GET'])
+@login_required
+def gedcom_history(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    history_filename = os.path.join(gedcom_folder,gedcom) + "-history"
+    return open(history_filename).read()
+
 @bp.route('/gedcom/compare/<gedcom1>/<gedcom2>', methods=['GET'])
 @login_required
 def gedcom_compare(gedcom1,gedcom2):
@@ -198,6 +202,9 @@ def gedcom_revert(gedcom,version):
     if os.path.exists(filename1) and os.path.exists(filename2):
         os.rename(filename1,newname)
         os.rename(filename2,filename1)
+        history_append(filename1,_("\n{}:").format(util.format_timestamp()))
+        history_append(filename1,_("File {} saved as {}").format(filename1,newname))
+        history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
         rsp = dict(newname=os.path.basename(newname))
     else:
         rsp = dict(status="Error")
@@ -212,6 +219,9 @@ def gedcom_save(gedcom):
     newname = util.generate_name(filename1)
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
+    history_append(filename1,"\n{}:".format(util.format_timestamp()))
+    history_append(filename1,_("File {} saved as {}").format(filename1,newname))
+    history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
     rsp = dict(newname=os.path.basename(newname))
     return jsonify(rsp) 
 
@@ -239,6 +249,10 @@ def gedcom_upload():
         filename = secure_filename(file.filename)
         os.makedirs(gedcom_folder, exist_ok=True)
         fullname = os.path.join(gedcom_folder, filename)
+        if os.path.exists(fullname):
+            flash(_('This GEDCOM file already exists'), category='flash_error')
+            return redirect(url_for('.gedcom_list'))
+            
         file.save(fullname)
 
         desc = request.form['desc']
@@ -249,7 +263,8 @@ def gedcom_upload():
             'upload_time':util.format_timestamp(),
         }
         save_metadata(filename, metadata)
-        return redirect(url_for('.gedcom_list'))
+        history_init(fullname)
+        return redirect(url_for('.gedcom_info',gedcom=filename))
   
 @bp.route('/gedcom/download/<gedcom>')
 @login_required
@@ -272,11 +287,16 @@ def gedcom_info(gedcom):
     metadata = get_metadata(gedcom)
     transforms = get_transforms()
     encoding = metadata.get('encoding','utf-8')
-    info = get_info(filename,encoding) 
-    num_individuals = info['INDI']
+    info = metadata.get('info')
+    if info: 
+        info = eval(info)
+    else:
+        info = get_info(filename,encoding)
+        metadata['info'] = repr(info.__dict__)
+        save_metadata(gedcom,metadata) 
     return render_template('gedcom_info.html', 
         gedcom=gedcom, filename=filename, 
-        num_individuals=num_individuals, 
+        info=info,
         transforms=transforms,
         metadata=metadata,
     )
@@ -304,6 +324,18 @@ def gedcom_delete(gedcom):
             removefile(filename) 
             logging.info("Deleted:"+filename)
     return redirect(url_for('.gedcom_list'))
+
+@bp.route('/gedcom/delete_old_versions/<gedcom>')
+@login_required
+def gedcom_delete_old_versions(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = os.path.abspath(gedcom_folder)
+    for name in os.listdir(gedcom_folder):
+        filename = os.path.join(gedcom_folder, name)
+        if name.startswith(gedcom+"."):  
+            removefile(filename) 
+            logging.info("Deleted:"+filename)
+    return redirect(url_for('.gedcom_info',gedcom=gedcom))
 
 def removefile(fname): 
     try:
@@ -334,7 +366,7 @@ def display_changes(lines,item):
         item.print_items(Out())
     print()
         
-def process_gedcom(cmd, transform_module):
+def process_gedcom(arglist, transform_module):
     """Implements another mechanism for Gedcom transforms:
 
     The transform_module is assumed to contain the following methods:
@@ -345,7 +377,6 @@ def process_gedcom(cmd, transform_module):
 
     See sukujutut.py as an example
     """
-
 
     msg = _("Transform '{}' started at {}").format(
              transform_module.__name__, 
@@ -369,12 +400,16 @@ def process_gedcom(cmd, transform_module):
     parser.add_argument('--encoding', type=str, default="UTF-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
                         help=_("Encoding of the input GEDCOM"))
     transform_module.add_args(parser)
-    args = parser.parse_args(cmd.split())
+    args = parser.parse_args(arglist)
     args.output_gedcom = None
+    args.nolog = True # replaced by history file
+    history_append(args.input_gedcom,"\n"+msg)
+    history_append_args(args)
     try:
         init_log(args.logfile)
         with Output(args) as out:
             out.original_line = None
+            out.transform_name = transform_module.__name__
             saved_stdout = sys.stdout
             saved_stderr = sys.stdout
             sys.stdout = io.StringIO()
@@ -393,10 +428,16 @@ def process_gedcom(cmd, transform_module):
     except:
         traceback.print_exc()
     finally:
-        time.sleep(1)  # for testing...
+        if old_name: 
+            history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom))
+            history_append(args.input_gedcom,_("Old file saved as {}").format(old_name))
+        else:
+            #history_append(args.input_gedcom,_("File was not saved"))
+            history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom+"-temp"))
         msg = _("Transform '{}' ended at {}").format(
                  transform_module.__name__, 
                  util.format_timestamp())
+        history_append(args.input_gedcom,msg)
         print("------ {} ------".format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()
@@ -430,8 +471,11 @@ def gedcom_transform(gedcom,transform):
         logging.info("Guessed encoding {} for {}".format(encoding,gedcom_filename))
         args += " --encoding {}".format(encoding)
         if hasattr(transform_module,"transformer"):
-            cmd = "{} {} {} {}".format(gedcom_filename,args,"--logfile", logfile)
-            return process_gedcom(cmd, transform_module)
+            command_args = parser.build_command_args(request.form.to_dict())
+            arglist = [gedcom_filename] + command_args 
+            arglist += ["--logfile",logfile]
+            arglist += ["--encoding",encoding]
+            return process_gedcom(arglist, transform_module)
         
         #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
         python_exe = sys.executable or "/opt/repo/virtenv/bin/python3"
@@ -537,6 +581,21 @@ def build_parser(filename,gedcom,gedcom_filename):
                             args += ' "%s"' % value
             return args
             
+        def build_command_args(self,argdict):
+            args = []
+            for arg in self.args:
+                if arg.name in argdict:
+                    value = argdict[arg.name].rstrip()
+                    if not value: value = arg.default
+                    if value: 
+                        if arg.action in {'store_true','store_false'} and value == "on": value = ""
+                        if arg.name[0] == "-":
+                            args.append(arg.name)
+                            if value: args.append(value)
+                        else:
+                            args.append(value)
+            return args
+
     parser = Parser()
 
     parser.add_argument('--display-changes', action='store_true',

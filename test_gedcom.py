@@ -3,6 +3,7 @@ import os
 import tempfile
 import logging
 import io
+import shutil
 
 import pytest
 
@@ -15,8 +16,9 @@ logging.basicConfig(level=logging.INFO)
 test_username = app.config['TEST_USERNAME']
 test_password = app.config['TEST_PASSWORD']
 gedcom_dir = "gedcoms/" + test_username
-test_gedcom = "aaa.ged"
-test_gedcom_fname = os.path.join(gedcom_dir,test_gedcom)
+testdata_dir = "gedcoms/testdata"
+temp_gedcom = "temporary_test.ged"
+temp_gedcom_fname = os.path.join(gedcom_dir,temp_gedcom)
 
 @pytest.fixture(scope='module')
 def client():
@@ -56,55 +58,57 @@ def test_login_logout(client):
     rv = login(client, "aaa", "bbb")
     assert 'Kirjaudu tunnuksillasi' in data
 
-    try:
-        os.remove(test_gedcom_fname)
-    except FileNotFoundError:
-        pass
-
     rv = login(client)
     
 def test_gedcom_upload(client):
-    assert not os.path.exists(test_gedcom_fname)
+    try:
+        os.remove(temp_gedcom_fname)
+    except FileNotFoundError:
+        pass
+    assert not os.path.exists(temp_gedcom_fname) 
 
-    args = dict(file=(io.BytesIO(b"aaa"),test_gedcom),desc="Description")
+    args = dict(file=(io.BytesIO(b"0 @I123@ INDI"),temp_gedcom),desc="Description")
     rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
     data = rv.data.decode("utf-8")
-    assert os.path.exists(test_gedcom_fname)
-    assert 'Uploaded GEDCOMs' in data
-    assert test_gedcom in data
-    assert 'Description' in data
+    assert os.path.exists(temp_gedcom_fname)
+    assert 'Lisävalinnat' in data
+    assert temp_gedcom in data
+    #os.remove(temp_gedcom_fname)
         
 def test_gedcom_list(client):
     rv = client.get('/gedcom/list')
     data = rv.data.decode("utf-8")
-    assert 'Uploaded GEDCOMs' in data
+    assert 'Ladatut gedcomit' in data
     
     for name in os.listdir(gedcom_dir):
         if not name.endswith(".ged"): continue
         assert name in data
 
 def test_gedcom_info(client):
-    rv = client.get('/gedcom/info/'+test_gedcom)
+    rv = client.get('/gedcom/info/'+temp_gedcom)
     data = rv.data.decode("utf-8")
-    assert 'Transformations' in data
+    assert 'Muunnokset' in data
 
 def test_gedcom_versions(client):
-    rv = client.get('/gedcom/versions/'+test_gedcom)
+    rv = client.get('/gedcom/versions/'+temp_gedcom)
     data = rv.data.decode("utf-8")
     assert type(eval(data)) == list
 
 def test_gedcom_transform_params(client):
-    rv = client.get('/gedcom/transform/'+test_gedcom+"/kasteet.py")
+    rv = client.get('/gedcom/transform/'+temp_gedcom+"/kasteet.py")
     data = rv.data.decode("utf-8")
-    assert 'kasteet transformation options' in data
+    assert 'kasteet muunnoksen vaihtoehdot' in data
     
 def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     args = {
         "--dryrun":"on",
         "--display-changes":"on",   
     }
+    orig_file = os.path.join(testdata_dir,test_gedcom)
+    dest_file = os.path.join(gedcom_dir,temp_gedcom)
+    shutil.copyfile(orig_file,dest_file)
     args.update({"--"+option:value for option,value in options.items()})
-    rv = client.post('/gedcom/transform/'+test_gedcom+"/"+transform,data=args)
+    rv = client.post('/gedcom/transform/'+temp_gedcom+"/"+transform,data=args)
     data = eval(rv.data.decode("utf-8"))
     assert data["stderr"] == ""
     assert expected in data['stdout']

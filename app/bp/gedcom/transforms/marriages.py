@@ -38,6 +38,7 @@ version = "2.0"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
 
 from flask_babelex import _
+name = _("Marriages") 
 docline = _('Splitting of data in PLAC of MARR')
 
 from .. import transformer
@@ -60,8 +61,8 @@ class Marriages(transformer.Transformation):
     
     def transform(self,item,options,phase):
         # phase 1
-        if item.value == "FAM":
-            fam = item.tag #  @Fxxx@
+        if phase == 1 and item.tag == "FAM":
+            fam = item.xref #  @Fxxx@
             place = ""
             date = None
             for c1 in item.children:
@@ -84,9 +85,10 @@ class Marriages(transformer.Transformation):
                 self.resi[wife].append((wife_place,date))
                 place_item.value = m.group(1)
                 return item
+
         # phase 2
-        if item.value == "INDI" and item.tag in self.resi:
-            for place,date in self.resi[item.tag]:
+        if phase == 2 and item.tag == "INDI" and item.xref in self.resi:
+            for place,date in self.resi[item.xref]:
                 c1 = Item("1 RESI")
                 c1.children.append(Item("2 TYPE marriage"))
                 c1.children.append(Item("2 PLAC " + place))

@@ -119,6 +119,8 @@ class DbTree():
                 if not rel.id in rl:
                     rl[rel.id] = rel.end
                     nid, ntype, nname, lv = nstack.pop()
+                    if not nid:
+                        raise ValueError("Hierarchy tree error")
                     if len(rl) == 1:    # Ensimmäinen solmu rootin alle
                         nid1, ntype1, nname1, lv1 = nstack.pop()
                         rl[0] = rel.end

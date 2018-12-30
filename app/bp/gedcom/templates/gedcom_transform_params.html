@@ -1,34 +1,6 @@
 <script>
-    $(document).ready( function() {
-        $("#transform").off("click");
-        $("#transform").click(function() {
-        	$("#output").hide();
-        	$("#output_log").empty();
-        	$("#error_log").empty();
-            $.post("/gedcom/transform/{{ gedcom }}/{{ transform }}", $("#form").serialize(), function(rsp) {
-                $("#output_log").text(rsp.stdout);
-                if (rsp.stderr) 
-                	$("#error_log").text("{{ _('Errors:') }}" + "\n" + rsp.stderr);
-                if (rsp.oldname) {
-                	$("#oldname").text(rsp.oldname);
-                	$("#div_oldname").show();
-                	$("#div_save").hide();
-            	}
-            	else {
-                	$("#div_oldname").hide();
-                	$("#div_save").show();
-            	}
-                $("#output").show();
-            });
-            return false;
-        });
-    });
+var transform = "{{ transform }}";
 </script>
-
-<!--
-<link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
-<link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
--->
 
 <div style="display: inline-block;">
     <h3>{{ transform[:-3] }} {{ _("transformation options") }}</h3>
