@@ -1,4 +1,6 @@
+import io
 import re
+import sys
 import time
 from collections import Counter, defaultdict
 
@@ -13,26 +15,11 @@ def initialize(options):
 def add_args(parser):
     pass
 
-class Info: 
-    gedcom_version = None
-    submitter = None
-    charset = None
-    date = ""
-    time = ""
-    source_program = None
-    source_program_version = None 
-    num_individuals = 0
-    num_families = 0
-    num_places = 0
-    num_notes = 0
-    num_sources = 0
-    num_citations = 0
-    num_repos = 0
-    num_multimedia = 0
+class Info: pass 
 
 def read_allowed_paths():
     allowed = set()
-    from ..gedcom_grammar_data import paths
+    from gedcom_grammar_data import paths
     for line in paths.splitlines():
         if line.strip() != "":
             allowed.add(line.strip())
@@ -128,6 +115,10 @@ class Analyzer(transformer.Transformation):
         return True
 
     def finish(self,options):
+        saved_stdout = sys.stdout
+        saved_stderr = sys.stdout
+        sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
         self.illegal_paths.display()
         self.novalues.display()
         self.invalid_dates.display()
@@ -138,7 +129,11 @@ class Analyzer(transformer.Transformation):
             for path in sorted(self.mandatory_paths):
                 print("-",path)
             
-            
+        self.info = sys.stdout.getvalue()
+        errors = sys.stderr.getvalue()
+        sys.stdout = saved_stdout
+        sys.stderr = saved_stderr
+
             
             
             
