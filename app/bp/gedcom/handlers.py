@@ -106,6 +106,8 @@ def get_transforms():
     trans_dir = os.path.join(GEDCOM_APP, "transforms")
     names = sorted([name for name in os.listdir(trans_dir) \
                     if name.endswith(".py") and not name.startswith("_")])
+    
+    transforms = []
     for name in names:
         t = Transform()
         t.name = name
@@ -135,7 +137,9 @@ def get_transforms():
             t.displayname = t.modname
             
         t.version = getattr(transformer,"version","")
-        yield t
+        transforms.append(t)
+        #yield t
+    return sorted(transforms,key=lambda t: t.displayname)
 
 
 @bp.route('/gedcom/list', methods=['GET'])
@@ -320,6 +324,18 @@ def gedcom_delete(gedcom):
             removefile(filename) 
             logging.info("Deleted:"+filename)
     return redirect(url_for('.gedcom_list'))
+
+@bp.route('/gedcom/delete_old_versions/<gedcom>')
+@login_required
+def gedcom_delete_old_versions(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = os.path.abspath(gedcom_folder)
+    for name in os.listdir(gedcom_folder):
+        filename = os.path.join(gedcom_folder, name)
+        if name.startswith(gedcom+"."):  
+            removefile(filename) 
+            logging.info("Deleted:"+filename)
+    return redirect(url_for('.gedcom_info',gedcom=gedcom))
 
 def removefile(fname): 
     try:

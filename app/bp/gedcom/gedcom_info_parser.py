@@ -27,17 +27,17 @@ class InfoParser(transformer.Transformation):
     def transform(self,item,options,phase):
         #print(item.path,item.value)
         if item.level == 0:
-            if item.value == "INDI":
+            if item.tag == "INDI":
                 self.info.num_individuals += 1
-            if item.value == "FAM":
+            if item.tag == "FAM":
                 self.info.num_families += 1
-            if item.value == "NOTE":
+            if item.tag == "NOTE":
                 self.info.num_notes += 1
-            if item.value == "SOUR":
+            if item.tag == "SOUR":
                 self.info.num_sources += 1
-            if item.value == "REPO":
+            if item.tag == "REPO":
                 self.info.num_repos += 1
-            if item.value == "OBJE":
+            if item.tag == "OBJE":
                 self.info.num_multimedia += 1
             return None
         if item.tag == "NOTE":

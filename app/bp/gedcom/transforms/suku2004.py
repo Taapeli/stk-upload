@@ -88,7 +88,7 @@ class Suku2004(transformer.Transformation):
                     return item
 
         if options.compress_sours:
-            if item.tag == "SOUR" and item.value == "" and len(item.children) > 0:
+            if item.level > 0 and item.tag == "SOUR" and item.value == "" and len(item.children) > 0:
                 newitems = []
                 # 2 SOUR 
                 # 3 CONT 
