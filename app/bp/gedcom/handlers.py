@@ -106,6 +106,8 @@ def get_transforms():
     trans_dir = os.path.join(GEDCOM_APP, "transforms")
     names = sorted([name for name in os.listdir(trans_dir) \
                     if name.endswith(".py") and not name.startswith("_")])
+    
+    transforms = []
     for name in names:
         t = Transform()
         t.name = name
@@ -135,7 +137,9 @@ def get_transforms():
             t.displayname = t.modname
             
         t.version = getattr(transformer,"version","")
-        yield t
+        transforms.append(t)
+        #yield t
+    return sorted(transforms,key=lambda t: t.displayname)
 
 
 @bp.route('/gedcom/list', methods=['GET'])
