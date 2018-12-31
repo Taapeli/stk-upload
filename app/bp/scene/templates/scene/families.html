@@ -16,7 +16,7 @@
 
 <a href="/scene/families" title="alkuun">Alkuun</a> 
 <a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu">Seuraava</a>
-
+                    
 <table id="families">
     <tr><th>{{ _("Uniq_id") }}</th>
         <th>{{ _("id of Father") }}</th>
@@ -24,7 +24,8 @@
         <th>{{ _("id of Mother") }}</th>
         <th>{{ _("Mother") }}</th>
         <th>{{ _("Type") }}</th>
-        <th>{{ _("Child") }}</th>
+        <th>{{ _("No of Children") }}</th>
+        <th>{{ _("Links of Children") }}</th>
     </tr>
 {% if families %}
     {% for f in families %}
@@ -44,6 +45,7 @@
                 {% endif %}
                 <td>{{f.type}}</td>
                 <td>{{f.no_of_children}}</td>
+                <td>{% for c in f.children %}<a href="/scene/person={{c.uniq_id}}">{{c.uniq_id}} </a>{% endfor %}</td>
         </tr>
     {% endfor %}
 {% else %}
