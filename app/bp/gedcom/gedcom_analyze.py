@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 
 import transformer
 from flask_babelex import _
+import traceback
 
 name = _("GEDCOM Analyzer")
 
@@ -16,6 +17,8 @@ def add_args(parser):
     pass
 
 class Info: pass 
+
+import gedcom_grammar_data2
 
 def read_allowed_paths():
     allowed = set()
@@ -61,6 +64,11 @@ def valid_date(datestring):
         
     return False
 
+class Out:
+    def emit(self,s):
+        print(s)
+out = Out()
+
 class LineCounter:
     def __init__(self,title):
         self.title = title
@@ -77,7 +85,11 @@ class LineCounter:
                 linenums = linenums[0:10] 
                 linenums.append("...")
             print("- {:25} (count={:5}, lines {})".format(key,len(itemlist),",".join(linenums)))   
-            #print("- {:25} (count={:5})".format(key,len(itemlist)))   
+            #print("- {:25} (count={:5})".format(key,len(itemlist)))
+            try:
+                for item in itemlist: item.print_item(out)
+            except:
+                traceback.print_exc()   
         
 class Analyzer(transformer.Transformation):
     def __init__(self):
@@ -86,12 +98,32 @@ class Analyzer(transformer.Transformation):
         self.illegal_paths = LineCounter(_("Illegal paths:"))
         self.novalues = LineCounter(_("No value:"))
         self.invalid_dates = LineCounter(_("Invalid dates:"))
+        #self.too_few = []
+        #self.too_many = []
+        self.too_few = LineCounter(_("Too few child tags:"))
+        self.too_many = LineCounter(_("Too many child tags:"))
+        self.submitter_refs = LineCounter(_("Records for submitters"))
+        self.submitters = dict()
+        self.records = set()
+        self.xrefs = set()
         self.mandatory_paths = {
+            "HEAD",
             "HEAD.SOUR",
             "HEAD.GEDC",
             "HEAD.GEDC.VERS",
             "HEAD.GEDC.FORM",
-        }       
+            "HEAD.CHAR",
+            "HEAD.SUBM",
+            "TRLR",
+        }
+        self.grammar_data = [
+            # parent tag/suffix, child tag, mincount, maxcount
+            # ->
+            # child tag must occur mincount to maxcount times under parent tag
+            (".MAP",    "LATI", 1,1),
+            (".MAP",    "LONG", 1,1),
+            (".HUSB",   "AGE", 1,1),
+        ]       
 
     def transform(self,item,options,phase):
         if 0:
@@ -113,6 +145,39 @@ class Analyzer(transformer.Transformation):
 
         if path in self.mandatory_paths: self.mandatory_paths.remove(path)     
         
+        """
+        for (suffix, tag, mincount,maxcount) in self.grammar_data:
+            if path.endswith(suffix):
+                count = 0
+                for c in item.children:
+                    if c.tag == tag: count += 1
+                if count < mincount:
+                    #self.too_few.append( (item,suffix,tag,mincount,count) )     
+                    self.too_few.add( "Only {} {} tags under {} - should be at least {}".format(count,tag,suffix,mincount), item )     
+                if count > maxcount:
+                    #self.too_many.append( (item, suffix,tag,maxcount,count) )     
+                    self.too_few.add( "{} {} tags under {} - should be at most {}".format(count,tag,suffix,maxcount), item )     
+        """
+        taglist = gedcom_grammar_data2.data.get(path)
+        if taglist:
+            for (tag,(mincount,maxcount)) in taglist:
+                count = 0
+                for c in item.children:
+                    if c.tag == tag: count += 1
+                if count < mincount:
+                    self.too_few.add( "Only {} {} tags under {} - should be at least {}".format(count,tag,path,mincount), item )     
+                if maxcount and count > maxcount:
+                    self.too_many.add( "{} {} tags under {} - should be at most {}".format(count,tag,path,maxcount), item )     
+        
+        if item.path.endswith("SUBM.NAME"):
+            xref = item.path.split(".")[0]
+            self.submitters[xref] = item.value 
+        if item.level == 1 and item.tag == "SUBM":
+            self.submitter_refs.add(item.value,item) 
+        if item.level == 0 and item.xref:
+            self.records.add(item.xref)
+        if item.level > 0 and item.value.startswith("@"):
+            self.xrefs.add(item.value)
         return True
 
     def finish(self,options):
@@ -122,14 +187,41 @@ class Analyzer(transformer.Transformation):
         sys.stderr = io.StringIO()
         self.illegal_paths.display()
         self.novalues.display()
-        self.invalid_dates.display()
+        self.too_few.display()
+        self.too_many.display()
+        #self.submitter_refs.display()
         
+        print()
+        print("Submitters:")
+        for xref,name in self.submitters.items():
+            print(xref,name)
+        
+        self.submitter_refs2 = LineCounter(_("Records for submitters"))
+        for xref,itemlist in self.submitter_refs.values.items():
+            name = self.submitters[xref]
+            self.submitter_refs2.values[name] = itemlist
+        self.submitter_refs2.display()
+             
         if len(self.mandatory_paths) > 0:
             print()
-            print("Missing paths:")
+            print(_("Missing paths:"))
             for path in sorted(self.mandatory_paths):
                 print("-",path)
-            
+
+        """print(_("Too few:"))            
+        print(self.too_few)            
+        print(_("Too many:"))            
+        print(self.too_many)
+        """
+        
+        for xref in self.xrefs:
+            if xref not in self.records:
+                print("Missing record:", xref)            
+
+        for xref in self.records:
+            if xref not in self.xrefs:
+                print("Unused record:", xref)            
+
         self.info = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()
         sys.stdout = saved_stdout
