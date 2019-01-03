@@ -3,6 +3,7 @@ import re
 import sys
 import time
 from collections import Counter, defaultdict
+from contextlib import redirect_stdout
 
 import transformer
 from flask_babelex import _
@@ -70,7 +71,7 @@ class Out:
 out = Out()
 
 class LineCounter:
-    def __init__(self,title):
+    def __init__(self,title=None):
         self.title = title
         self.values = defaultdict(list)
     def add(self,key,item):
@@ -86,11 +87,12 @@ class LineCounter:
                 linenums.append("...")
             print("- {:25} (count={:5}, lines {})".format(key,len(itemlist),",".join(linenums)))   
             #print("- {:25} (count={:5})".format(key,len(itemlist)))
-            try:
-                for item in itemlist: item.print_item(out)
-            except:
-                traceback.print_exc()   
-        
+            #try:
+            #    for item in itemlist: item.print_items(out)
+            #except:
+            #    traceback.print_exc()   
+       
+                
 class Analyzer(transformer.Transformation):
     def __init__(self):
         self.info = Info()
@@ -104,8 +106,11 @@ class Analyzer(transformer.Transformation):
         self.too_many = LineCounter(_("Too many child tags:"))
         self.submitter_refs = LineCounter(_("Records for submitters"))
         self.submitters = dict()
+        self.submitter_emails = dict()
         self.records = set()
         self.xrefs = set()
+        self.types = defaultdict(LineCounter)
+        self.genders = defaultdict(int)
         self.mandatory_paths = {
             "HEAD",
             "HEAD.SOUR",
@@ -138,6 +143,9 @@ class Analyzer(transformer.Transformation):
         
         if item.value == "" and len(item.children) == 0 and item.tag not in {"TRLR","CONT"}:
             self.novalues.add(item.line,item)         
+            
+        if item.tag == "SEX":
+            self.genders[item.value] += 1
             
         if item.tag == "DATE":
             if not valid_date(item.value.strip()):
@@ -172,33 +180,45 @@ class Analyzer(transformer.Transformation):
         if item.path.endswith("SUBM.NAME"):
             xref = item.path.split(".")[0]
             self.submitters[xref] = item.value 
+        if item.path.endswith("SUBM.EMAIL"):
+            xref = item.path.split(".")[0]
+            self.submitter_emails[xref] = item.value 
         if item.level == 1 and item.tag == "SUBM":
             self.submitter_refs.add(item.value,item) 
         if item.level == 0 and item.xref:
             self.records.add(item.xref)
-        if item.level > 0 and item.value.startswith("@"):
+        if item.level > 0 and item.value.startswith("@") and not item.value.startswith("@#"):
             self.xrefs.add(item.value)
+            
+        if item.tag == "TYPE": # classify types
+            parts = item.path.split(".")
+            if parts[0][0] == "@":
+                parent_path = ".".join(parts[1:-1])
+            else: 
+                parent_path = ".".join(parts[0:-1])
+            self.types[parent_path].add(item.value,item)
         return True
 
     def finish(self,options):
-        saved_stdout = sys.stdout
-        saved_stderr = sys.stdout
-        sys.stdout = io.StringIO()
-        sys.stderr = io.StringIO()
+        with io.StringIO() as buf, redirect_stdout(buf):
+            self.display_results(options)
+            self.info = buf.getvalue()
+
+            
+    def display_results(self,options):
+        print()
+        print(_("Genders:"))
+        for sex,count in sorted(self.genders.items()):
+            print("- {}: {:5}".format(sex,count))            
         self.illegal_paths.display()
         self.novalues.display()
         self.too_few.display()
         self.too_many.display()
-        #self.submitter_refs.display()
         
-        print()
-        print("Submitters:")
-        for xref,name in self.submitters.items():
-            print(xref,name)
-        
-        self.submitter_refs2 = LineCounter(_("Records for submitters"))
+        self.submitter_refs2 = LineCounter(_("Submitters"))
         for xref,itemlist in self.submitter_refs.values.items():
-            name = self.submitters[xref]
+            name = self.submitters.get(xref,xref)
+            if name == xref: name = self.submitter_emails.get(xref,xref)
             self.submitter_refs2.values[name] = itemlist
         self.submitter_refs2.display()
              
@@ -208,24 +228,21 @@ class Analyzer(transformer.Transformation):
             for path in sorted(self.mandatory_paths):
                 print("-",path)
 
-        """print(_("Too few:"))            
-        print(self.too_few)            
-        print(_("Too many:"))            
-        print(self.too_many)
-        """
-        
+        for parent_path,typeinfo in self.types.items():
+            typeinfo.title = _("TYPEs for %(parent_path)s",parent_path=parent_path)
+            typeinfo.display()
+
+        print()
         for xref in self.xrefs:
             if xref not in self.records:
                 print("Missing record:", xref)            
 
+        print()
         for xref in self.records:
             if xref not in self.xrefs:
                 print("Unused record:", xref)            
 
-        self.info = sys.stdout.getvalue()
-        errors = sys.stderr.getvalue()
-        sys.stdout = saved_stdout
-        sys.stderr = saved_stderr
+            
 
             
             
