@@ -124,14 +124,13 @@ def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname'
     return (refname_count, sortname_count)
 
 
-
-def joinpersons(base_id, join_ids):
-    """ Yhdistetään henkilöön oid=base_id toiset henkilöt, joiden oid:t on
-        listassa join_ids.
-        
-        Yhdistämisen tulisi koskea attribuutteja ja tapahtumia, 
-        jotka liittyvät ko. henkilöiin
-    """
-    logging.debug('Pitäisi yhdistää ' + str(base_id) + " + " + str(join_ids) )
-
-    pass
+# Moved to bp.tools.models.dataupdater.joinpersons
+# def joinpersons(base_id, join_ids):
+#     """ Yhdistetään henkilöön oid=base_id toiset henkilöt, joiden oid:t on
+#         listassa join_ids.
+#         
+#         Yhdistämisen tulisi koskea attribuutteja ja tapahtumia, 
+#         jotka liittyvät ko. henkilöiin
+#     """
+#     logging.debug('Pitäisi yhdistää ' + str(base_id) + " + " + str(join_ids) )
+#     pass
