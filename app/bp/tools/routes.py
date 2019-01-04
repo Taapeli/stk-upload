@@ -13,7 +13,7 @@ from flask import render_template, request, redirect, url_for, flash #, g
 from flask_security import roles_accepted #, login_required, current_user ,roles_required
 from flask_babelex import _
 
-import shareds
+#import shareds
 from models.gen.person_name import Name
 from models import datareader          # Tietojen haku kannasta (tai työtiedostosta)
 from .models import dataupdater         # Tietojen päivitysmetodit: joinpersons
@@ -32,7 +32,7 @@ def datatables():
 """ ---------------- Other listings (Table format) ----------------------------
 """
 
-@bp.route('/lista/<string:subj>')
+@bp.route('/listall/<string:subj>')
 def show_table_data(subj):
     """ Person listings
         tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
@@ -42,9 +42,9 @@ def show_table_data(subj):
 #         dburi = models.dbutil.get_server_location()
 #         persons = datareader.lue_henkilot()
 #         return render_template("table_persons.html", persons=persons, uri=dburi)
-    if subj == "henkilot2":
+    if subj == "persons":
         persons = datareader.read_persons_with_events()
-        return render_template("/tools/table_persons2.html", persons=persons, elapsed=time.time()-t0)
+        return render_template("/tools/table_persons.html", persons=persons, elapsed=time.time()-t0)
     elif subj == "surnames":
         surnames = Name.get_surnames()
         return render_template("/tools/table_surnames.html", surnames=surnames, elapsed=time.time()-t0)
@@ -124,14 +124,15 @@ def list_refnames(reftype):
     return render_template("/tools/table_refnames.html", names=names)
 
 
-@bp.route('/lista/people_by_surname/', defaults={'surname': ""})
-def list_people_by_surname(surname):
-    """ Table of Persons with identical surname
-        henkilöiden, joilla on sama sukunimi näyttäminen ruudulla 
-    """
-    people = datareader.get_people_by_surname(surname)
-    return render_template("/tools/table_people_by_surname.html",
-                           surname=surname, people=people)
+# Ei käytössä?
+# @bp.route('/lista/people_by_surname/', defaults={'surname': ""})
+# def list_people_by_surname(surname):
+#     """ Table of Persons with identical surname
+#         henkilöiden, joilla on sama sukunimi näyttäminen ruudulla 
+#     """
+#     people = datareader.get_people_by_surname(surname)
+#     return render_template("/tools/table_people_by_surname.html",
+#                            surname=surname, people=people)
 
 
     #  linkki oli sukunimiluettelosta
