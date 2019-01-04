@@ -16,7 +16,8 @@
         <th>{{ _("id of Mother") }}</th>
         <th onclick="sortTable(4)" style="cursor:pointer">{{ _("Mother") }}</th>
         <th onclick="sortTable(5)" style="cursor:pointer">{{ _("Type") }}</th>
-        <th>{{ _("Child") }}</th>
+        <th>{{ _("No of Children") }}</th>
+        <th>{{ _("Links of Children") }}</th>
     </tr>
 {% if families %}
     {% for f in families %}
@@ -36,6 +37,7 @@
                 {% endif %}
                 <td>{{f.type}}</td>
                 <td>{{f.no_of_children}}</td>
+                <td>{% for c in f.children %}<a href="/scene/person={{c.uniq_id}}">{{c.uniq_id}} </a>{% endfor %}</td>
         </tr>
     {% endfor %}
 {% else %}

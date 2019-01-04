@@ -15,6 +15,14 @@ $(document).ready( function() {
         ajaxError: function() { $("#errors").text(_('Server error')).show(); }    
     });
     
+    $("#analyze").click(function() {
+        hide_all();
+    	$.get("/gedcom/analyze/" + gedcom ,function(rsp) {
+    	    $("#results").text(rsp);
+    	    $("#div_results").show();
+    	});
+    });
+
     $("#transforms").click(function() {
         hide_all();
         $("#div_transforms").show();

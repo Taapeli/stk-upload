@@ -79,6 +79,25 @@ def get_info(input_gedcom, enc):
         traceback.print_exc()
         return Nullinfo()
     
+def analyze(input_gedcom, enc):
+    class Options:
+        display_changes = False
+        encoding = enc
+
+    class Nullinfo:
+        pass
+        
+    import gedcom_analyze
+    try:
+        t = transformer.Transformer(transform_module=gedcom_analyze,
+                                    display_callback=display_changes,
+                                    options=Options())
+        t.transform_file(input_gedcom)
+        return t.transformation.info 
+    except:
+        traceback.print_exc()
+        return "error"
+
 def read_gedcom(filename):
     try:
         return open(filename).readlines()
@@ -275,7 +294,7 @@ def gedcom_download(gedcom):
     filename = os.path.join(gedcom_folder, gedcom)
     logging.info(filename)
     return send_from_directory(directory=gedcom_folder, filename=gedcom) 
- 
+
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_info(gedcom):
@@ -309,6 +328,16 @@ def gedcom_update_desc(gedcom):
     metadata['desc'] = desc
     save_metadata(gedcom,metadata)
     return "ok"
+
+@bp.route('/gedcom/analyze/<gedcom>')
+@login_required
+def gedcom_analyze(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    filename = os.path.join(gedcom_folder,gedcom)
+    metadata = get_metadata(gedcom)
+    encoding = metadata['encoding']
+    rsp = analyze(filename,encoding)
+    return rsp
 
 @bp.route('/gedcom/delete/<gedcom>')
 @login_required

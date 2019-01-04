@@ -36,6 +36,11 @@ def fixlines(lines,options):
     prevlevel = -1
     for i,line in enumerate(lines):
         #line = line.strip()
+
+        if i == 0 and line and line[0] == "\ufeff":  # remove Byte Order Mark (BOM) 
+            line = line[1:]        
+            lines[i] = line        
+
         tkns = line.split(None,1)
         
         if (len(tkns) == 0 or not tkns[0].isdigit()):

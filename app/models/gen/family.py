@@ -182,8 +182,15 @@ RETURN family"""
                         family.mother = pw
                     
                     if record['child']:
-                        c = record['child']
-                        family.no_of_children = c
+                        childs = record['child']
+                        for ch in childs:
+                            child = Person_as_member()
+                            child.uniq_id = ch.id
+                            family.children.append(child)
+                    
+                    if record['no_of_children']:
+                        noc = record['no_of_children']
+                        family.no_of_children = noc
                     families.append(family)
             return (families)
 
