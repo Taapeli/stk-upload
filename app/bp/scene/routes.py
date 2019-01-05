@@ -9,8 +9,8 @@ logger = logging.getLogger('stkserver')
 import time
 
 from flask import render_template, request, redirect, url_for, flash
-from flask_security import current_user, login_required, roles_accepted
-from urllib.parse import urlencode, quote_plus
+from flask_security import current_user, login_required #, roles_accepted
+from urllib.parse import quote_plus # , urlencode
 
 from . import bp
 from bp.scene.data_reader import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id

@@ -783,7 +783,7 @@ msgid "Upload a new GEDCOM file"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_list.html:44
-msgid "Return to main page"
+msgid "Return main page"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_transform_params.html:6
