@@ -785,7 +785,7 @@ msgid "Upload a new GEDCOM file"
 msgstr "Lataa uusi gedcom-tiedosto"
 
 #: bp/gedcom/templates/gedcom_list.html:44
-msgid "Return to main page"
+msgid "Return main page"
 msgstr "Paluu etusivulle"
 
 #: bp/gedcom/templates/gedcom_transform_params.html:6
