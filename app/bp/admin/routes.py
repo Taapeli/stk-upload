@@ -133,7 +133,7 @@ def list_allowed_emails():
     lista = UserAdmin.get_allowed_emails()
     if form.validate_on_submit(): 
         # Register a new email
-        lista = UserAdmin.get_allowed_emails()
+#        lista = UserAdmin.get_allowed_emails()
         UserAdmin.register_allowed_email(form.allowed_email.data,
                                          form.default_role.data)
         return redirect(url_for('admin.list_allowed_emails'))
