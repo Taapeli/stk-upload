@@ -11,7 +11,7 @@
     <h2>{{ _('Fill in the User Information Form of Finland database Service') }}</h2> 
     <div>{% include "security/_messages.html" %}</div> 
     <div class="row"> 
-       <div class="startbox2"> 
+       <div class="startbox"> 
 		  <h1>{{ _('Register  as a database user of Suomi tietokanta Service') }}</h1> 
 		     <form action="{{ url_for_security('register') }}" 
 		           method="POST" name="register_user_form"> 
@@ -35,7 +35,6 @@
  
         <div class="startbox"> 
             <div style="display: inline-block;"> 
-                <h3>{{ _("Approved user's actions") }}</h3> 
                 {% include "security/_menu.html" %} 
             </div> 
         </div> 
