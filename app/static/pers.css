@@ -13,6 +13,7 @@ h1 {
     font-size: 11pt;
     width: 100%;
     padding: 2px;
+    margin-bottom: 2px; /* murupolun kanssa */
 }
 img#logo {
     width: 43px;
@@ -21,6 +22,16 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
+.bread {
+    margin: 2px; 
+    color: #cf7c19; 
+    font-style: italic; 
+}
+a.bread:link { text-decoration: none; }
+a.bread:visited { text-decoration: none; }
+a.bread:hover { text-decoration: underline; }
+a.bread:active { text-decoration: underline; }
+
 a#ohjeet, div#paluu {
     position: absolute;
     top: 7px;

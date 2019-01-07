@@ -8,27 +8,41 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _('Welcome to Finland Database') }}, {{current_user.username}}</h2>
+    <h2>{{ _('Finland Database') }}</h2>
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
-       <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
-          <i>{{ 'git'|app_date }}</i></span></p>
+       <span style="font-size:8pt; color:gray"></p>
 
     {% if current_user.is_authenticated and current_user.has_role('member') %}
     
-	    <div class="row">
-	       <div class="startbox">
-	         <div style="display: inline-block;">
-	           <form method="get" action="/scene/persons_own/">
-	             <h3>{{ _('My Family Tree') }}</h3>
-	             <p>{{ _('View your own candidate material and compare with Suomi tietokanta database') }}</p>
-	             <div class="submit"> 
-	                <button type="submit">{{ _('List of Persons') }}</button>
-	             </div>
-	           </form>
-	        </div>
-	       </div>
-	
+        <div class="row">
+           <div class="startbox">
+             <div style="display: inline-block;">
+               <form method="get" action="/scene/persons_own/">
+                 <h3>{{ _('My Candidate Family Tree') }}</h3>
+                 <p>{{ _('View your own candidate material and compare with Suomi tietokanta database') }}</p>
+                 <div class="submit"> 
+                    <button type="submit">{{ _('List of Persons') }}</button>
+                 </div>
+               </form>
+            </div>
+           </div>
+    
+           <div class="startbox">
+             <div style="display: inline-block;">
+               <form method="get" action="/scene/persons_all/">
+                 <h3>{{ _('Suomi-tietokanta') }}</h3>
+                 <p>{{ _('View approved and public material in Suomi tietokanta') }}</p>
+                 <p><input type="checkbox" name="cmp" value="own"> 
+                    {{ _('Compare to my own data') }} 
+                 </p>
+                 <div class="submit"> 
+                    <button type="submit">{{ _('List of Persons') }}</button>
+                 </div>
+               </form>
+            </div>
+           </div>
+{#
 	       <div class="startbox">
 	         <div style="display: inline-block;">
 	            <h3>{{ _('Send data to server') }}</h3>
@@ -45,7 +59,7 @@
 	             ▸ <a href=/gramps/uploads>{{ _("List uploads") }}</a>
 	         </div>
 	     </div>
-	
+#}
      {% endif %}
 
      <div class="startbox">
