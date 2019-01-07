@@ -52,6 +52,8 @@
         <tr><td colspan="5">{{ _('No persons') }}</td></tr>
 {% endif %}
 </table>
+<a href="/scene/families" title="alkuun">Alkuun</a> 
+<a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu">Seuraava</a>
 <br>
 
 {% endblock %}
