@@ -16,9 +16,58 @@ table.diff td {
 	max-width: 600px;
 	overflow: hidden; 
 }
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+
 </style>
 
-<script src="/static/js/gedcom_scripts.js?14"></script>
+<script src="/static/js/gedcom_scripts.js?20"></script>
 
 <script>
 var gedcom = "{{ gedcom }}";
@@ -112,8 +161,20 @@ var gedcom = "{{ gedcom }}";
 				        <li><a href="#" id="delete">
 	                        {{ _("Remove this GEDCOM") }}</a></li>
 	                </ul>
-				    <input type="submit" id="transforms" value='{{ _("Choose a transformation") }}'>
-				    <input type="submit" id="versions" value='{{ _("Display versions") }}'>
+				    <span class="tooltip">
+				    	<input type="submit" id="analyze" value='{{ _("Analyze") }}'>
+				    	<span class="tooltiptext">{{ _("Analyze this GEDCOM for structural problems") }}</span>
+			    	</span>
+				    <p>
+				    <span class="tooltip">
+					    <input type="submit" id="versions" value='{{ _("Display versions") }}'>
+				    	<span class="tooltiptext">{{ _("Display previous versions of this GEDCOM") }}</span>
+			    	</span>
+				    <p>
+				    <span class="tooltip">
+					    <input type="submit" id="transforms" value='{{ _("Choose a transformation") }}'>
+				    	<span class="tooltiptext">{{ _("Choose a transformation to perform for this GEDCOM") }}</span>
+			    	</span>
 				    <ul>
                         <li>&rtrif; <a href="/gedcom/list">{{ _("Switch to another GEDCOM") }}</a></li>
                     </ul>
@@ -144,8 +205,8 @@ var gedcom = "{{ gedcom }}";
 		        <h3>{{ _("Versions") }}</h3>
 		        <table id="versions_list"></table>
                 <div class="submit">
+		          <button id="delete_old_versions">{{ _("Delete old versions") }}</button>
 		          <button id="compare">{{ _("Compare versions") }}</button>
-		          <button id="delete_versions">{{ _("Delete old versions") }}</button>
 		        </div>
 		    </div>
 		  </div>
@@ -161,13 +222,22 @@ var gedcom = "{{ gedcom }}";
 		    </div>
 		  </div>
 
-	      <div class="xstartbox gedcom" id="div_compare">
+	      <div class="gedcom" id="div_compare">
 	        <h3>{{ _("GEDCOM comparison") }}:</h3>
 	        <button id="palauta1" class="palauta_button"></button>
 	        <button id="palauta2" class="palauta_button"></button>
 	        <p>
 	        <div id="difftable">
 		    </div>
+		  </div>
+
+	      <div class="gedcom" id="div_results">
+	        <h3>{{ _("Results") }}:</h3>
+	        <p>
+	        <pre>
+		        <div id="results">
+			    </div>
+		    </pre>
 		  </div>
 
 	      <div class="startbox gedcom" id="div_transform_params">

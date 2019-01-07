@@ -1,0 +1,46 @@
+{# _templates/start/s_layout.html_ #}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fi" lang="fi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Suomi-tietokanta</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pers.css') }}">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="/static/ohjeet.js?"></script>
+
+	<!-- i18n for Javascript: -->
+	<link rel="gettext" type="application/x-po" href="/static/translations/{{ g.locale }}.po">
+	<script src="/static/Gettext.js"></script>
+  </head>
+  
+  <body>
+    {% block body %}
+    <h1 style="margin-bottom: 2px"><a href="/"><img id="logo" src="/static/hlo.png" alt="{{ _('Back to Top') }}" title="{{ _('Back to Top') }}"
+             onmouseover="this.src='/static/hlo1.png';" 
+             onmouseout="this.src='/static/hlo.png';"/></a>
+        <i>{{ _('A Database of the Genealogical Society of Finland') }}</i></h1>
+    <a href="#" id="ohjeet" alt="{{ _('Instructions for this page') }}" 
+       title="{{ _('Instructions for this page') }}">{{ _('Help') }}</a>
+    <p class="bread">Suomi-tietokanta &gt; 
+        <a  class="bread" href="/">Etusivu</a></p>
+    {% endblock %}
+
+    <!-- TODO: Use https://flask-breadcrumbs.readthedocs.io/ -->
+
+    <div class="fullclear"></div>
+    <div id="footer">
+        <span id="createdate">{{ _("Stk-server") }} &nbsp;
+        {% if elapsed %}
+        <tt style="font-size:8pt;color:maroon;">time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
+        <small style="font-size: 6pt">{{ _('Version') }} {{ 'app'|app_date }}</small></span>
+    <div class="fullclear"></div>
+
+<div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>
+
+</body></html>

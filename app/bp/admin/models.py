@@ -83,39 +83,39 @@ class UserAdmin():
         raise ValueError(_("User {} has not admin privileges").format(self.username))
 
     @classmethod
-    def _build_email_from_node(cls, emailNode):
+    def _build_email_from_record(cls, emailRecord):
         ''' Returns an Allowed_email class instance '''
-        if emailNode is None:
+        if emailRecord is None:
             return None
-        email = shareds.allowed_email_model(**emailNode.properties)
-#        email.allowed_email = emailNode.properties['allowed_email']
-#        email.default_role = emailNode.properties['default_role']
-        if 'creator' in emailNode.properties:
-            email.creator = emailNode.properties['creator']
-        if 'created_at' in emailNode.properties:
-            email.created_at = datetime.fromtimestamp(int(emailNode.properties['created_at']/1000))
-        if 'confirmed_at' in emailNode.properties:
-            email.confirmed_at = datetime.fromtimestamp(int(emailNode.properties['confirmed_at']/1000))        
-       
+        email = shareds.allowed_email_model(**emailRecord)
+        if emailRecord['creator']:
+            email.creator = emailRecord['creator'] 
+        if emailRecord['created_at']:
+            email.created_at = datetime.fromtimestamp(float(emailRecord['created_at'])/1000) 
+        if emailRecord['confirmed_at']:    
+            email.confirmed_at = datetime.fromtimestamp(float(emailRecord['confirmed_at'])/1000)        
         return email
 
     @classmethod         
-    def _build_user_from_node(self, userNode):
-        ''' Returns a User instance based on a user node '''
-        if userNode is None:
-            return None
-        user = shareds.user_model(**userNode.properties) 
-        user.id = str(userNode.id)
-        user.password = ""
-        user.roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
-        if 'confirmed_at' in userNode.properties: 
-            user.confirmed_at = datetime.fromtimestamp(float(userNode.properties['confirmed_at'])/1000)
-        if 'last_login_at' in userNode.properties: 
-            user.last_login_at = datetime.fromtimestamp(float(userNode.properties['last_login_at'])/1000)
-        if 'current_login_at' in userNode.properties: 
-            user.current_login_at = datetime.fromtimestamp(float(userNode.properties['current_login_at'])/1000)                            
-        return user
-       
+    def _build_user_from_record(self, userRecord):
+        ''' Returns a User instance based on a user record '''
+        try:
+            if userRecord is None:
+                return None
+            user = shareds.user_model(**userRecord) 
+            user.id = str(userRecord.id)
+            user.password = ""
+            user.roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
+            if user.confirmed_at:
+                user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
+            if user.last_login_at:    
+                user.last_login_at = datetime.fromtimestamp(float(user.last_login_at)/1000)
+            if user.current_login_at:     
+                user.current_login_at = datetime.fromtimestamp(float(user.current_login_at)/1000) 
+            return user
+        except Exception as ex:
+            print(ex)  
+                 
     @classmethod
     def register_allowed_email(cls, email, role):
         try:
@@ -155,9 +155,9 @@ class UserAdmin():
     def get_allowed_emails(cls):
         try:
             with shareds.driver.session() as session:
-                emailNodes = session.read_transaction(cls._getAllowedEmails)
-                if emailNodes is not None:
-                    return [cls._build_email_from_node(emailNode) for emailNode in emailNodes] 
+                emailRecords = session.read_transaction(cls._getAllowedEmails)
+                if emailRecords is not None:
+                    return [cls._build_email_from_record(emailRecord) for emailRecord in emailRecords] 
                 return []
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -166,10 +166,11 @@ class UserAdmin():
     @classmethod                                              
     def _getAllowedEmails (cls, tx):
         try:
-            emailNodes = []
-            for record in tx.run(Cypher_adm.allowed_emails_get):
-                emailNodes.append(record['email'])
-            return emailNodes        
+#             emailRecords = []
+#             for record in tx.run(Cypher_adm.allowed_emails_get):
+#                 emailRecords.append(record['email'] )
+            emailRecords = [record['email'] for record in tx.run(Cypher_adm.allowed_emails_get)]    
+            return(emailRecords)       
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -184,9 +185,9 @@ class UserAdmin():
     def find_allowed_email(cls, email):
         try:
             with shareds.driver.session() as session:
-                emailNode = session.read_transaction(cls._findAllowedEmail, email)
-                if emailNode is not None:
-                    return cls._build_email_from_node(emailNode) 
+                emailRecord = session.read_transaction(cls._findAllowedEmail, email)
+                if emailRecord:
+                    return cls._build_email_from_record(emailRecord['email']) 
                 return None
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -195,12 +196,12 @@ class UserAdmin():
     @classmethod                                              
     def _findAllowedEmail (cls, tx, email):
         try:
-            emailNode = None
-            records = tx.run(Cypher_adm.allowed_email_find, email=email)
-            if records:
-                for record in records:
-                    emailNode = record['email']
-                    return emailNode        
+#            emailRecord = None
+            return(tx.run(Cypher_adm.allowed_email_find, email=email).single())
+#             if records:
+#                 for record in records:
+#                     emailRecord = record['email']
+#                     return emailNode        
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -234,7 +235,7 @@ class UserAdmin():
                 updated_user = session.write_transaction(cls._update_user, user)
                 if updated_user is None:
                     return None
-                return cls._build_user_from_node(updated_user) 
+                return(cls._build_user_from_record(updated_user))
 
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -247,20 +248,12 @@ class UserAdmin():
             logging.debug('user update' + user.email + ' ' + user.name)
 #   Commented identifier and history fields are not to be updated
             result = tx.run(Cypher_adm.user_update, 
- #               id=int(user.id), 
                 email=user.email,
  #               username = user.username,
                 name = user.name, 
                 language = user.language,              
                 is_active=user.is_active,
                 roles=user.roles)
-#                confirmed_at = user.confirmed_at, 
-#                last_login_at = int(user.last_login_at.timestamp() * 1000),
-#                current_login_at = int(user.current_login_at.timestamp() * 1000),
-#                last_login_ip = user.last_login_ip,
-#                current_login_ip = user.current_login_ip,
-#                login_count = user.login_count )
-
 #   Find list of previous user -> role connections
             prev_roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
 #   Delete connections that are not in edited connection list            
@@ -276,10 +269,10 @@ class UserAdmin():
                            email = user.email,
                            name = rolename)        
           
-            for record in result:
-                userNode = (record['user'])
-                logging.info('User with email address {} updated'.format(user.email)) 
-                return(userNode)
+#            for record in result:
+#                userNode = (record['user'])
+            logging.info('User with email address {} updated'.format(user.email)) 
+            return(result.single()['user'])
         except CypherError as ex:
             logging.error('CypherError', ex)            
             raise ex            

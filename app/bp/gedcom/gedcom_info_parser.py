@@ -24,22 +24,26 @@ class InfoParser(transformer.Transformation):
     def __init__(self):
         self.info = Info()
         self.places = set()
+        self.submitter_xref = None
+        
     def transform(self,item,options,phase):
         #print(item.path,item.value)
         if item.level == 0:
-            if item.value == "INDI":
+            if item.tag == "INDI":
                 self.info.num_individuals += 1
-            if item.value == "FAM":
+            if item.tag == "FAM":
                 self.info.num_families += 1
-            if item.value == "NOTE":
+            if item.tag == "NOTE":
                 self.info.num_notes += 1
-            if item.value == "SOUR":
+            if item.tag == "SOUR":
                 self.info.num_sources += 1
-            if item.value == "REPO":
+            if item.tag == "REPO":
                 self.info.num_repos += 1
-            if item.value == "OBJE":
+            if item.tag == "OBJE":
                 self.info.num_multimedia += 1
             return None
+        xref = None
+        if item.path[0] == '@': xref = item.path.split(".")[0]
         if item.tag == "NOTE":
             self.info.num_notes += 1
         if item.tag == "SOUR":
@@ -47,6 +51,8 @@ class InfoParser(transformer.Transformation):
         if item.tag == "PLAC":
             self.places.add(item.value)
             self.info.num_places = len(self.places)
+        if item.path == "HEAD.SUBM":
+            self.submitter_xref = item.value
         if item.path == "HEAD.CHAR":
             self.info.charset = item.value
         if item.path == "HEAD.DATE":
@@ -61,7 +67,7 @@ class InfoParser(transformer.Transformation):
             self.info.source_program_version = item.value
         if item.path == "HEAD.SOUR.NAME":
             self.info.source_program_name = item.value
-        if item.path.endswith(".SUBM.NAME"):
+        if item.path.endswith(".SUBM.NAME") and xref == self.submitter_xref: 
             self.info.submitter = item.value
             
         return None

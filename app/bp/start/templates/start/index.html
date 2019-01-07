@@ -1,11 +1,18 @@
-{# templates/mainindex.html_ #}
-{% extends "a_layout.html" %}
+{# start/index.html_ #}
+{% extends "start/s_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _('Logged on user') }}{% endblock %}
+{% block title %}{{ _('Stk Start Page') }} (start/index){% endblock %}
 {% block body %}
 {{ super() }}
 
-
+<h2>Aloitussivu: Tutustu Suomi-tietokantaan</h2>
+<ul>
+    <li>Esittely</li>
+    <li><a href='/scene/persons/restricted'>Silmäile Suomi-tietokantaa (rajatut tiedot)</a></li>
+    <li><a href="/register">Liity projektiin: ilmoittaudu mukaan ja rekisteröidy käyttäjäksi</a></li>
+    <li><b><a href="/start">Kirjaudu tunnuksillasi</a></b></li>
+</ul>
+<!-- 
 <div id="startdiv">
   <div>
     <h2>{{ _('Welcome to Finland Database') }}, {{current_user.username}}</h2>
@@ -14,49 +21,49 @@
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
           <i>{{ 'git'|app_date }}</i></span></p>
 
+        <div class="row">
+           <div class="startbox">
+             <div style="display: inline-block;">
+               <form method="get" action="/scene/persons_own/">
+                 <h3>{{ _('My Family Tree') }}</h3>
+                 <p>{{ _('View your own candidate material and compare with Suomi tietokanta database') }}</p>
+                 <div class="submit"> 
+                    <button type="submit">{{ _('List of Persons') }}</button>
+                 </div>
+               </form>
+            </div>
+           </div>
+    
     {% if current_user.is_authenticated and current_user.has_role('member') %}
     
-	    <div class="row">
-	       <div class="startbox">
-	         <div style="display: inline-block;">
-	           <form method="get" action="/scene/persons_own/">
-	             <h3>{{ _('My Family Tree') }}</h3>
-	             <p>{{ _('View your own candidate material and compare with Suomi tietokanta database') }}</p>
-	             <div class="submit"> 
-	                <button type="submit">{{ _('List of Persons') }}</button>
-	             </div>
-	           </form>
-	        </div>
-	       </div>
-	
-	       <div class="startbox">
-	         <div style="display: inline-block;">
-	            <h3>{{ _('Send data to server') }}</h3>
-	              <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
-	             <div style="display: inline-block;">
-	               <input type="hidden" name="material" value="xml_file">
-	               <p>{{ _('Select Gramps XML File (*. gramps) to become candidate material') }}</p>
-	               <input type="file" name="filenm" />
-	             </div>
-	             <div class="submit"> 
-	                <input type="submit" value="{{ _('Upload') }}" />
-	             </div>
-	             </form>
-	             ▸ <a href=/gramps/uploads>{{ _("List uploads") }}</a>
-	         </div>
-	     </div>
-	
-	     <div class="startbox">
-	        <div style="display: inline-block;">
-	        <form method="get" action="/gedcom/list">
-	           <h3>{{ _('My gedcom material') }}</h3>
-	           <p>{{ _('Upload your material in gedcom format or edit an already stored') }}</p>
-	          <div class="submit"> 
-	             <button type="submit">{{ _('Gedcom handlings') }}</button>
-	          </div>
-	        </form>
-	        </div>
-	     </div>
+           <div class="startbox">
+             <div style="display: inline-block;">
+                <h3>{{ _('Send data to server') }}</h3>
+                  <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
+                 <div style="display: inline-block;">
+                   <input type="hidden" name="material" value="xml_file">
+                   <p>{{ _('Select Gramps XML File (*. gramps) to become candidate material') }}</p>
+                   <input type="file" name="filenm" />
+                 </div>
+                 <div class="submit"> 
+                    <input type="submit" value="{{ _('Upload') }}" />
+                 </div>
+                 </form>
+                 ▸ <a href=/gramps/uploads>{{ _("List uploads") }}</a>
+             </div>
+         </div>
+    
+         <div class="startbox">
+            <div style="display: inline-block;">
+            <form method="get" action="/gedcom/list">
+               <h3>{{ _('My gedcom material') }}</h3>
+               <p>{{ _('Upload your material in gedcom format or edit an already stored') }}</p>
+              <div class="submit"> 
+                 <button type="submit">{{ _('Gedcom handlings') }}</button>
+              </div>
+            </form>
+            </div>
+         </div>
      
      {% endif %}
 
@@ -73,7 +80,6 @@
             </div>
          </form>
      </div>
-    {% endif %}
 
      <div class="startbox">
        <div style="display: inline-block;">
@@ -85,6 +91,8 @@
          </div>
        </div>
      </div>
+
+    {% endif %}
 
         {% if current_user.is_authenticated and 
             (current_user.has_role('admin')  or current_user.has_role('master') ) %}
@@ -108,7 +116,7 @@
        <p>{{ _('Ending the session') }}<br>&nbsp;</p>
     <form method="get" action="/logout">
           <div class="submit"> 
-	<button type="submit" style="color: blue">{{ _('Exit the Application') }}</button>
+    <button type="submit" style="color: blue">{{ _('Exit the Application') }}</button>
           </div>
  </form>
      </div>
@@ -116,4 +124,5 @@
     </div>
   </div>
 </div>
+ -->
 {% endblock %}

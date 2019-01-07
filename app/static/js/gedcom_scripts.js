@@ -15,6 +15,14 @@ $(document).ready( function() {
         ajaxError: function() { $("#errors").text(_('Server error')).show(); }    
     });
     
+    $("#analyze").click(function() {
+        hide_all();
+    	$.get("/gedcom/analyze/" + gedcom ,function(rsp) {
+    	    $("#results").text(rsp);
+    	    $("#div_results").show();
+    	});
+    });
+
     $("#transforms").click(function() {
         hide_all();
         $("#div_transforms").show();
@@ -37,8 +45,10 @@ $(document).ready( function() {
             $("#versions_list tr:nth-last-child(1) input[name=v2]").prop("checked",true);
             if (versions.length < 2) {
                 $("#compare").prop('disabled', true);
+                $("#delete_old_versions").prop('disabled', true);
             } else {
                 $("#compare").prop('disabled', false);
+                $("#delete_old_versions").prop('disabled', false);
             }
             $("#div_versions").show();
         });
@@ -56,6 +66,16 @@ $(document).ready( function() {
         if (ok) {
         	$.get("/gedcom/delete/" + gedcom ,function() {
         		window.location.replace("/gedcom/list");
+        	});
+        }
+    });
+
+    $("#delete_old_versions").click(function() {
+        var ok = confirm(_('Are you sure?'));
+        if (ok) {
+        	$.get("/gedcom/delete_old_versions/" + gedcom ,function() {
+        	    $("#div_compare").hide();
+        	    $("#div_versions").hide();
         	});
         }
     });

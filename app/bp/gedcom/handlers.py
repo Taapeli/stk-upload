@@ -79,6 +79,25 @@ def get_info(input_gedcom, enc):
         traceback.print_exc()
         return Nullinfo()
     
+def analyze(input_gedcom, enc):
+    class Options:
+        display_changes = False
+        encoding = enc
+
+    class Nullinfo:
+        pass
+        
+    import gedcom_analyze
+    try:
+        t = transformer.Transformer(transform_module=gedcom_analyze,
+                                    display_callback=display_changes,
+                                    options=Options())
+        t.transform_file(input_gedcom)
+        return t.transformation.info 
+    except:
+        traceback.print_exc()
+        return "error"
+
 def read_gedcom(filename):
     try:
         return open(filename).readlines()
@@ -106,6 +125,8 @@ def get_transforms():
     trans_dir = os.path.join(GEDCOM_APP, "transforms")
     names = sorted([name for name in os.listdir(trans_dir) \
                     if name.endswith(".py") and not name.startswith("_")])
+    
+    transforms = []
     for name in names:
         t = Transform()
         t.name = name
@@ -135,7 +156,9 @@ def get_transforms():
             t.displayname = t.modname
             
         t.version = getattr(transformer,"version","")
-        yield t
+        transforms.append(t)
+        #yield t
+    return sorted(transforms,key=lambda t: t.displayname)
 
 
 @bp.route('/gedcom/list', methods=['GET'])
@@ -271,7 +294,7 @@ def gedcom_download(gedcom):
     filename = os.path.join(gedcom_folder, gedcom)
     logging.info(filename)
     return send_from_directory(directory=gedcom_folder, filename=gedcom) 
- 
+
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_info(gedcom):
@@ -306,6 +329,16 @@ def gedcom_update_desc(gedcom):
     save_metadata(gedcom,metadata)
     return "ok"
 
+@bp.route('/gedcom/analyze/<gedcom>')
+@login_required
+def gedcom_analyze(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    filename = os.path.join(gedcom_folder,gedcom)
+    metadata = get_metadata(gedcom)
+    encoding = metadata['encoding']
+    rsp = analyze(filename,encoding)
+    return rsp
+
 @bp.route('/gedcom/delete/<gedcom>')
 @login_required
 def gedcom_delete(gedcom):
@@ -320,6 +353,18 @@ def gedcom_delete(gedcom):
             removefile(filename) 
             logging.info("Deleted:"+filename)
     return redirect(url_for('.gedcom_list'))
+
+@bp.route('/gedcom/delete_old_versions/<gedcom>')
+@login_required
+def gedcom_delete_old_versions(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = os.path.abspath(gedcom_folder)
+    for name in os.listdir(gedcom_folder):
+        filename = os.path.join(gedcom_folder, name)
+        if name.startswith(gedcom+"."):  
+            removefile(filename) 
+            logging.info("Deleted:"+filename)
+    return redirect(url_for('.gedcom_info',gedcom=gedcom))
 
 def removefile(fname): 
     try:
