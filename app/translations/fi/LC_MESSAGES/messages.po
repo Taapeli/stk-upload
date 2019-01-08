@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-04 12:38+0200\n"
+"POT-Creation-Date: 2019-01-08 14:25+0200\n"
 "PO-Revision-Date: 2018-12-27 20:25+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -22,8 +22,7 @@ msgstr ""
 msgid "Undefined"
 msgstr "Määrittelemätön"
 
-#: bp/stk_security/templates/security/_menu.html:10
-#: bp/stk_security/templates/security/login_user.html:4 setups.py:146
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:146
 msgid "Login"
 msgstr "Kirjautuminen"
 
@@ -293,20 +292,30 @@ msgid "Are you sure you want to delete your data?"
 msgstr "haluatko todella poistaa tuomasi tiedot?"
 
 #: bp/admin/templates/admin/admin.html:31
+#: bp/start/templates/start/index.html:18
 #: bp/stk_security/templates/security/login_user.html:10
 #: templates/mainindex.html:11
 msgid "Welcome to Finland Database"
 msgstr "Tervetuloa Suomikantaan"
 
-#: bp/admin/templates/admin/admin.html:32 templates/mainindex.html:12
+#: bp/admin/templates/admin/admin.html:32
+#: bp/gramps/templates/gramps/index_gramps.html:11
+#: bp/scene/templates/scene/index_scene.html:12
+#: bp/start/templates/start/index.html:19
+#: bp/start/templates/start/index_logged.html:11 templates/mainindex.html:12
 msgid "User"
 msgstr "Käyttäjä"
 
-#: bp/admin/templates/admin/admin.html:33 templates/mainindex.html:13
+#: bp/admin/templates/admin/admin.html:33
+#: bp/scene/templates/scene/index_scene.html:13
+#: bp/start/templates/start/index.html:20
+#: bp/start/templates/start/index_logged.html:12 templates/mainindex.html:13
 msgid "roles:"
 msgstr "roolit:"
 
 #: bp/admin/templates/admin/admin.html:34
+#: bp/start/templates/start/index.html:21
+#: bp/start/templates/start/index_logged.html:13
 #: bp/stk_security/templates/security/login_user.html:11
 #: templates/mainindex.html:14
 msgid "Git Application Version"
@@ -325,7 +334,9 @@ msgstr ""
 "Seuraavalla sivulla on erilaisia teknisempiä listauksia ja "
 "ongelmanselvitysvälineitä"
 
-#: bp/admin/templates/admin/admin.html:46 templates/mainindex.html:72
+#: bp/admin/templates/admin/admin.html:46
+#: bp/scene/templates/scene/index_scene.html:55
+#: bp/start/templates/start/index.html:79 templates/mainindex.html:72
 msgid "Explore the database"
 msgstr "Tutki tietokantaa"
 
@@ -376,30 +387,36 @@ msgstr "Ylläpitäjän sivut"
 #: bp/admin/templates/admin/layout.html:14
 #: bp/scene/templates/scene/layout.html:23
 #: bp/scene/templates/scene/locations.html:34
-#: bp/scene/templates/scene/sources.html:39 templates/a_layout.html:26
+#: bp/scene/templates/scene/sources.html:39
+#: bp/start/templates/start/s_layout.html:27 templates/a_layout.html:26
 #: templates/ladattu2.html:10 templates/virhe_lataus.html:20
 msgid "Back to Top"
 msgstr "Palaa alkuun"
 
 #: bp/admin/templates/admin/layout.html:17
-#: bp/scene/templates/scene/layout.html:26 templates/a_layout.html:29
+#: bp/scene/templates/scene/layout.html:26
+#: bp/start/templates/start/s_layout.html:30 templates/a_layout.html:29
 msgid "A Database of the Genealogical Society of Finland"
 msgstr "Suomen Sukututkimusseuran tietokanta"
 
-#: bp/admin/templates/admin/layout.html:18 templates/a_layout.html:30
+#: bp/admin/templates/admin/layout.html:18
+#: bp/start/templates/start/s_layout.html:39
+#: bp/start/templates/start/s_layout.html:41 templates/a_layout.html:30
 msgid "Instructions for this page"
 msgstr "Ohjeita tälle sivulle"
 
-#: bp/admin/templates/admin/layout.html:18 templates/a_layout.html:30
+#: bp/admin/templates/admin/layout.html:18
+#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:30
 msgid "Help"
-msgstr "ohjeet"
+msgstr "Sivuohje"
 
 #: bp/admin/templates/admin/layout.html:20
 msgid "Admin-Start Page"
 msgstr "Admin-alkusivulle"
 
 #: bp/admin/templates/admin/reference.html:3
-#: bp/gedcom/templates/gedcom_info.html:4 templates/mainindex.html:4
+#: bp/gedcom/templates/gedcom_info.html:4
+#: bp/scene/templates/scene/index_scene.html:4 templates/mainindex.html:4
 msgid "Logged on user"
 msgstr "Kirjautunut käyttäjä"
 
@@ -420,7 +437,9 @@ msgid "Destroying <u>all former</u> and creating a unique index"
 msgstr "Tuhotaan <u>kaikki entiset</u> ja luodaan yksikäsitteinen indeksi"
 
 #: bp/admin/templates/admin/reference.html:24
-#: bp/gedcom/templates/gedcom_list.html:41 templates/mainindex.html:42
+#: bp/gedcom/templates/gedcom_list.html:41
+#: bp/gramps/templates/gramps/index_gramps.html:27
+#: bp/start/templates/start/index.html:49 templates/mainindex.html:42
 msgid "Upload"
 msgstr "Lähetä"
 
@@ -449,15 +468,21 @@ msgstr "Aseta muuttuneet referenssinimet kaikille ihmisille"
 msgid "Do not use"
 msgstr "Älä käytä"
 
-#: bp/admin/templates/admin/reference.html:43 templates/mainindex.html:107
+#: bp/admin/templates/admin/reference.html:43
+#: bp/scene/templates/scene/index_scene.html:75
+#: bp/start/templates/start/index.html:115 templates/mainindex.html:107
 msgid "Log out"
 msgstr "Kirjaudu ulos"
 
-#: bp/admin/templates/admin/reference.html:44 templates/mainindex.html:108
+#: bp/admin/templates/admin/reference.html:44
+#: bp/scene/templates/scene/index_scene.html:76
+#: bp/start/templates/start/index.html:116 templates/mainindex.html:108
 msgid "Ending the session"
 msgstr "Istunnon lopettaminen"
 
-#: bp/admin/templates/admin/reference.html:47 templates/mainindex.html:111
+#: bp/admin/templates/admin/reference.html:47
+#: bp/scene/templates/scene/index_scene.html:79
+#: bp/start/templates/start/index.html:119 templates/mainindex.html:111
 msgid "Exit the Application"
 msgstr "Poistu sovelluksesta"
 
@@ -785,6 +810,7 @@ msgid "Upload a new GEDCOM file"
 msgstr "Lataa uusi gedcom-tiedosto"
 
 #: bp/gedcom/templates/gedcom_list.html:44
+#: bp/tools/templates/tools/tables.html:48
 msgid "Return main page"
 msgstr "Paluu etusivulle"
 
@@ -1023,6 +1049,36 @@ msgstr "Poista tag-X-merkinnät"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
+#: bp/gramps/templates/gramps/index_gramps.html:4
+msgid "Stk User's Candidate Material"
+msgstr "Käyttäjän ehdokasaineisto"
+
+#: bp/gramps/templates/gramps/index_gramps.html:10
+msgid "Candidate material files"
+msgstr "Tarjottavat XML-tiedostot"
+
+#: bp/gramps/templates/gramps/index_gramps.html:19
+#: bp/start/templates/start/index.html:41 templates/mainindex.html:34
+msgid "Send data to server"
+msgstr "Aineiston lähettäminen"
+
+#: bp/gramps/templates/gramps/index_gramps.html:23
+#: bp/start/templates/start/index.html:45 templates/mainindex.html:38
+msgid "Select Gramps XML File (*. gramps) to become candidate material"
+msgstr "Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi"
+
+#: bp/gramps/templates/gramps/index_gramps.html:35
+msgid "My data files in server"
+msgstr "Tiedostoni palvelimella"
+
+#: bp/gramps/templates/gramps/index_gramps.html:36
+msgid "Manage your uploaded files"
+msgstr "Hallinnoi lataamiasi tiedostoja"
+
+#: bp/gramps/templates/gramps/index_gramps.html:37
+msgid "List my uploads"
+msgstr "Tiedostoluettelo"
+
 #: bp/scene/templates/scene/families.html:3
 #: bp/tools/templates/tools/ng_compare.html:3
 #: bp/tools/templates/tools/ng_people_by_surname.html:3
@@ -1117,11 +1173,82 @@ msgstr "Lapset"
 msgid "No persons"
 msgstr "Ei ketään"
 
+#: bp/scene/templates/scene/index_scene.html:11
+msgid "Finland Database"
+msgstr "Suomikanta"
+
+#: bp/scene/templates/scene/index_scene.html:22
+#: bp/start/templates/start/index_logged.html:35
+msgid "My Candidate Family Tree"
+msgstr "Omat sukutietoni"
+
+#: bp/scene/templates/scene/index_scene.html:23
+#: bp/start/templates/start/index.html:29 templates/mainindex.html:24
+msgid ""
+"View your own candidate material and compare with Suomi tietokanta "
+"database"
+msgstr "Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan"
+
+#: bp/scene/templates/scene/index_scene.html:25
+#: bp/scene/templates/scene/index_scene.html:40
+#: bp/start/templates/start/index.html:31
+#: bp/tools/templates/tools/table_persons.html:8 templates/mainindex.html:26
+msgid "List of Persons"
+msgstr "Henkilöluettelo"
+
+#: bp/scene/templates/scene/index_scene.html:34
+msgid "Suomi-tietokanta"
+msgstr "Suomikanta"
+
+#: bp/scene/templates/scene/index_scene.html:35
+msgid "View approved and public material in Suomi tietokanta"
+msgstr "Tutki Suomikantaan talletettuja hyväksyttyjä tietoja"
+
+#: bp/scene/templates/scene/index_scene.html:37
+msgid "Compare to my own data"
+msgstr "Vertaa omiin ehdokastietoihini"
+
+#: bp/scene/templates/scene/index_scene.html:49
+#: bp/start/templates/start/index.html:73 templates/mainindex.html:66
+msgid "Table format tools"
+msgstr "Taulukkonäkymiä"
+
+#: bp/scene/templates/scene/index_scene.html:50
+#: bp/start/templates/start/index.html:74 templates/mainindex.html:67
+msgid "A variety of more technical listings and problem solving tools."
+msgstr "Joukko teknisiä listauksia ja ongelmanselvitysvälineitä."
+
+#: bp/scene/templates/scene/index_scene.html:51
+#: bp/start/templates/start/index.html:75 templates/mainindex.html:68
+msgid "The data includes accepted and candidate materials of all users."
+msgstr "Mukana on sekä hyväksytyt tiedot että kaikki ehdokasaineistot."
+
+#: bp/scene/templates/scene/index_scene.html:64
+#: bp/start/templates/start/index.html:86 templates/mainindex.html:80
+msgid "Message to Maintenance"
+msgstr "Viesti ylläpitoon"
+
+#: bp/scene/templates/scene/index_scene.html:65
+#: bp/start/templates/start/index.html:87 templates/mainindex.html:81
+msgid "Request a researcher's rights or send another message to the maintenance"
+msgstr "Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon"
+
+#: bp/scene/templates/scene/index_scene.html:66
+#: bp/start/templates/start/index.html:88 templates/mainindex.html:82
+msgid "Function still planned"
+msgstr "Toiminto vasta suunnitteilla"
+
+#: bp/scene/templates/scene/index_scene.html:68
+#: bp/start/templates/start/index.html:90 templates/mainindex.html:84
+msgid "Compose a message"
+msgstr "Laadi viesti"
+
 #: bp/scene/templates/scene/layout.html:5
 msgid "Stk"
 msgstr "Stk-palvelu"
 
-#: bp/scene/templates/scene/layout.html:35 templates/a_layout.html:35
+#: bp/scene/templates/scene/layout.html:35
+#: bp/start/templates/start/s_layout.html:61 templates/a_layout.html:35
 msgid "Stk-server"
 msgstr "Stk-palvelin"
 
@@ -1638,9 +1765,116 @@ msgstr "muoto"
 msgid "Repository Name"
 msgstr "Arkiston nimi"
 
-#: bp/stk_security/templates/security/_menu.html:2
-msgid "Menu"
-msgstr "Valikko"
+#: bp/start/templates/start/index.html:4
+msgid "Stk Start Page"
+msgstr "Suomikannan alkusivu"
+
+#: bp/start/templates/start/index.html:28 templates/mainindex.html:23
+msgid "My Family Tree"
+msgstr "Oma sukupuuni"
+
+#: bp/start/templates/start/index.html:52 templates/mainindex.html:45
+msgid "List uploads"
+msgstr "Näytä lähettämäni aineistot"
+
+#: bp/start/templates/start/index.html:59
+#: bp/start/templates/start/index_logged.html:51 templates/mainindex.html:52
+msgid "My gedcom material"
+msgstr "Gedcom-tiedostoni"
+
+#: bp/start/templates/start/index.html:60
+#: bp/start/templates/start/index_logged.html:52 templates/mainindex.html:53
+msgid "Upload your material in gedcom format or edit an already stored"
+msgstr "Muokkaa uutta tai jo talletettua gedcom-aineistoasi"
+
+#: bp/start/templates/start/index.html:62
+#: bp/start/templates/start/index_logged.html:54 templates/mainindex.html:55
+msgid "Gedcom handlings"
+msgstr "Gedcom-käsittelyt"
+
+#: bp/start/templates/start/index.html:101
+#: bp/start/templates/start/index.html:102
+#: bp/start/templates/start/index_logged.html:66
+#: bp/start/templates/start/index_logged.html:67 templates/mainindex.html:93
+#: templates/mainindex.html:94
+msgid "Admin function"
+msgstr "Ylläpitäjän toiminnot"
+
+#: bp/start/templates/start/index.html:103
+#: bp/start/templates/start/index_logged.html:68 templates/mainindex.html:95
+msgid "User and reference information management and database service tasks"
+msgstr "Käyttäjien ja referenssitietojen hallinta sekä tietokannan huoltotehtävät"
+
+#: bp/start/templates/start/index.html:107
+#: bp/start/templates/start/index_logged.html:72 templates/mainindex.html:99
+msgid "Maintenance"
+msgstr "Ylläpito"
+
+#: bp/start/templates/start/index_logged.html:4
+msgid "Stk User's Start Page"
+msgstr "Käyttäjän alkusivu"
+
+#: bp/start/templates/start/index_logged.html:10
+msgid "User's home page for Finland Database "
+msgstr "Suomikannan käyttäjän alkusivu"
+
+#: bp/start/templates/start/index_logged.html:22
+msgid "Send and manage your Gramps data"
+msgstr "Lähetä ja hallinnoi Gramps-aineistojasi"
+
+#: bp/start/templates/start/index_logged.html:24
+msgid "Manage your Gramps xml files and convert them to Suomi tietokanta."
+msgstr "Hallinnoi Grampsin xml-tiedostoja ja toimita Suomikantaan"
+
+#: bp/start/templates/start/index_logged.html:26
+msgid "Go"
+msgstr "Jatka"
+
+#: bp/start/templates/start/index_logged.html:36
+msgid ""
+"View your own data as candidate material and compare it with Suomi "
+"tietokanta database."
+msgstr "Näytä ehdokasaineistoasi ja vertaa Suomikantaan"
+
+#: bp/start/templates/start/index_logged.html:38
+msgid "My Persons and Events"
+msgstr "Omat henkilöt ja tapahtumat"
+
+#: bp/start/templates/start/s_layout.html:38
+msgid "Start page"
+msgstr "Alkusivu"
+
+#: bp/start/templates/start/s_layout.html:38
+msgid "Home"
+msgstr "Etusivulle"
+
+#: bp/start/templates/start/s_layout.html:42
+msgid "Contact administrator"
+msgstr "Viesti ylläpitäjälle"
+
+#: bp/start/templates/start/s_layout.html:43
+msgid "Select language and other options"
+msgstr "Valitse käyttämäsi kieli ym"
+
+#: bp/start/templates/start/s_layout.html:44
+msgid "My settings"
+msgstr "Omat asetukset"
+
+#: bp/start/templates/start/s_layout.html:45
+msgid "Log out from this application"
+msgstr "Lopeta istunto"
+
+#: bp/start/templates/start/s_layout.html:46
+msgid "Logout"
+msgstr "Kirjaudu ulos"
+
+#: bp/start/templates/start/s_layout.html:65 templates/a_layout.html:39
+msgid "Version"
+msgstr "versio"
+
+#: bp/start/templates/start/s_layout.html:68 templates/a_layout.html:42
+msgid "Instructions"
+msgstr "Ohjeita"
 
 #: bp/stk_security/templates/security/_menu.html:8
 msgid "Confirm account"
@@ -1658,34 +1892,29 @@ msgstr "Salasanan elvyttäminen"
 msgid "Send password recovery link"
 msgstr "Lähetä salasanan elvyttämislinkki"
 
+#: bp/stk_security/templates/security/login_user.html:4
+msgid "Welcome to Suomi database"
+msgstr "Tervetuloa Suomikantaan"
+
 #: bp/stk_security/templates/security/login_user.html:17
-msgid "Discover materials in Suomi Database Service"
-msgstr "Tutustu Suomikannan aineistoihin"
+msgid "Login with your credentials"
+msgstr "Kirjaudu tunnuksillasi"
 
-#: bp/stk_security/templates/security/login_user.html:18
-msgid "View our materials with limited rights"
-msgstr "Katso aineistojamme rajoitetuin oikeuksin"
-
-#: bp/stk_security/templates/security/login_user.html:21
-msgid "Persons"
-msgstr "Henkilöt"
-
-#: bp/stk_security/templates/security/login_user.html:24
-msgid "Enroll as user candidate in Suomi tietokanta Service"
-msgstr "Ilmoittaudu Suomikannan käyttäjäehdokkaaksi"
-
-#: bp/stk_security/templates/security/login_user.html:27
-msgid "Enroll"
-msgstr "Ilmoittaudu"
+#: bp/stk_security/templates/security/login_user.html:35
+msgid "Can't login?"
+msgstr "Eikö kirjautuminen onnistu?"
 
 #: bp/stk_security/templates/security/login_user.html:36
-msgid "Login with your credentialst (email or username)"
-msgstr "Kirjaudu tunnuksillasi (sähköposti tai käyttäjätunnus)"
+msgid "You must first ask for enrolling a user from administrator."
+msgstr "Sinun on pyydettävä kutsu ylläpitäjältä."
 
-#: bp/stk_security/templates/security/login_user.html:53
-#: bp/stk_security/templates/security/register_user.html:38
-msgid "Approved user's actions"
-msgstr "Kirjautuneen käyttäjän toimintoja"
+#: bp/stk_security/templates/security/login_user.html:37
+msgid "Then you can register in and create your user id."
+msgstr "Sitten voit rekisteröityä käyttäjäksi."
+
+#: bp/stk_security/templates/security/login_user.html:40
+msgid "Enroll as a test user"
+msgstr "Ilmoittaudu testikäyttäjäksi"
 
 #: bp/stk_security/templates/security/register_user.html:4
 msgid "Registration"
@@ -2051,10 +2280,6 @@ msgstr "Verkko-osoite"
 msgid "No URL information"
 msgstr "Ei verkko-osoitetta"
 
-#: bp/tools/templates/tools/table_persons.html:8 templates/mainindex.html:26
-msgid "List of Persons"
-msgstr "Henkilöluettelo"
-
 #: bp/tools/templates/tools/table_persons.html:9
 msgid "Number of persons:"
 msgstr "Henkilömäärä:"
@@ -2167,10 +2392,6 @@ msgstr "Viittauksettomat tapahtumat"
 msgid "Exit"
 msgstr "Poistu"
 
-#: bp/tools/templates/tools/tables.html:48
-msgid "Return start page"
-msgstr ""
-
 #: models/datareader.py:398 models/datareader.py:411 models/datareader.py:434
 #: models/datareader.py:453
 msgid "Event list"
@@ -2240,14 +2461,6 @@ msgstr "Arkistot"
 #: templates/_ng_table_repositories.html:11
 msgid "Showing repositories"
 msgstr "Näytetään arkistot (repositories)"
-
-#: templates/a_layout.html:39
-msgid "Version"
-msgstr "versio"
-
-#: templates/a_layout.html:42
-msgid "Instructions"
-msgstr "Ohjeita"
 
 #: templates/cite_sour_repo.html:31
 msgid "Confidence"
@@ -2758,80 +2971,6 @@ msgstr "Luettu tiedosto"
 msgid "Would display  statistics"
 msgstr "Näytettäisiin tilastoa"
 
-#: templates/mainindex.html:23
-msgid "My Family Tree"
-msgstr "Oma sukupuuni"
-
-#: templates/mainindex.html:24
-msgid ""
-"View your own candidate material and compare with Suomi tietokanta "
-"database"
-msgstr "Katso omaa ehdokasaineistoasi ja vertaa Suomikantaan"
-
-#: templates/mainindex.html:34
-msgid "Send data to server"
-msgstr "Aineiston lähettäminen"
-
-#: templates/mainindex.html:38
-msgid "Select Gramps XML File (*. gramps) to become candidate material"
-msgstr "Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi"
-
-#: templates/mainindex.html:45
-msgid "List uploads"
-msgstr "Näytä lähettämäni aineistot"
-
-#: templates/mainindex.html:52
-msgid "My gedcom material"
-msgstr "Gedcom-tiedostoni"
-
-#: templates/mainindex.html:53
-msgid "Upload your material in gedcom format or edit an already stored"
-msgstr "Muokkaa uutta tai jo talletettua gedcom-aineistoasi"
-
-#: templates/mainindex.html:55
-msgid "Gedcom handlings"
-msgstr "Gedcom-käsittelyt"
-
-#: templates/mainindex.html:66
-msgid "Table format tools"
-msgstr "Taulukkonäkymiä"
-
-#: templates/mainindex.html:67
-msgid "A variety of more technical listings and problem solving tools."
-msgstr "Joukko teknisiä listauksia ja ongelmanselvitysvälineitä."
-
-#: templates/mainindex.html:68
-msgid "The data includes accepted and candidate materials of all users."
-msgstr "Mukana on sekä hyväksytyt tiedot että kaikki ehdokasaineistot."
-
-#: templates/mainindex.html:80
-msgid "Message to Maintenance"
-msgstr "Viesti ylläpitoon"
-
-#: templates/mainindex.html:81
-msgid "Request a researcher's rights or send another message to the maintenance"
-msgstr "Pyydä tutkijaoikeuksia tai lähetä muu viesti ylläpitoon"
-
-#: templates/mainindex.html:82
-msgid "Function still planned"
-msgstr "Toiminto vasta suunnitteilla"
-
-#: templates/mainindex.html:84
-msgid "Compose a message"
-msgstr "Laadi viesti"
-
-#: templates/mainindex.html:93 templates/mainindex.html:94
-msgid "Admin function"
-msgstr "Ylläpitäjän toiminnot"
-
-#: templates/mainindex.html:95
-msgid "User and reference information management and database service tasks"
-msgstr "Käyttäjien ja referenssitietojen hallinta sekä tietokannan huoltotehtävät"
-
-#: templates/mainindex.html:99
-msgid "Maintenance"
-msgstr "Ylläpito"
-
 #: templates/repo_sources.html:3
 msgid "Repository Details"
 msgstr "Repositoryn tiedot"
@@ -2988,243 +3127,6 @@ msgstr "Tiedoston lataaminen ei onnistu"
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
 
-#~ msgid "User candidates from database"
-#~ msgstr "Käyttäjäehdokkaat kannasta"
-
-#~ msgid "Notifications"
-#~ msgstr "Ilmoitukset"
-
-#~ msgid "Create a new user candidate"
-#~ msgstr "Luo uusi käyttäjäehdokas"
-
-#~ msgid "Pending user candidates"
-#~ msgstr "Odottavat käyttäjäehdokkaat"
-
-#~ msgid "<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>"
-#~ msgstr "<th>sähköposti</th><th>rooli</th><th>luoja</th><th>luotu</th><th>rekisteröity</th>"
-
-#~ msgid "Our Users"
-#~ msgstr "Käyttäjämme"
-
-#~ msgid "Active User names"
-#~ msgstr "Aktiiviset käyttäjät"
-
-#~ msgid "mail"
-#~ msgstr "sähköposti"
-
-#~ msgid "Operations"
-#~ msgstr "Toimenpiteet"
-
-#~ msgid "No users"
-#~ msgstr "Ei käyttäjiä"
-
-#~ msgid "Gramps to Neo4j log"
-#~ msgstr "Lokitiedot siirrosta Grampsista tietokantaan"
-
-#~ msgid "Log of Gramps XML upload"
-#~ msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
-
-#~ msgid "Return"
-#~ msgstr "Palaa"
-
-#~ msgid "Data stored"
-#~ msgstr "Tiedot talletettu"
-
-#~ msgid "Store to Database"
-#~ msgstr "Tietojen talletus kantaan"
-
-#~ msgid "Uploads"
-#~ msgstr "Lataukset"
-
-#~ msgid "Uploads for user"
-#~ msgstr "Lataukset käyttäjältä"
-
-#~ msgid "XML file"
-#~ msgstr "XML tiedosto"
-
-#~ msgid "Status"
-#~ msgstr "Tila"
-
-#~ msgid "Store to database"
-#~ msgstr "Tallenna tietokantaan"
-
-#~ msgid "Show log"
-#~ msgstr "Näytä loki"
-
-#~ msgid "Delete file"
-#~ msgstr "Poista tiedosto"
-
-#~ msgid "Revert to"
-#~ msgstr "Palauta"
-
-#~ msgid "renamed to"
-#~ msgstr "uusi nimi"
-
-#~ msgid "Gramps to Neo5j log"
-#~ msgstr "Loki GRAMPS Neo5j siirrosta"
-
-#~ msgid "Log of storing Gramps XML into database"
-#~ msgstr "Loki GRAMPS XML tiedoston tallentamisesta tietokantaan"
-
-#~ msgid "Operation"
-#~ msgstr "Toimenpide"
-
-#~ msgid "Time / sec"
-#~ msgstr "Aika sekunneissa"
-
-#~ msgid "Download to your computer"
-#~ msgstr "Lataa omalle koneelle"
-
-#~ msgid "Delete"
-#~ msgstr "Poista"
-
-#~ msgid ""
-#~ "The administrator can load your file "
-#~ "to database as yor new candadate "
-#~ "material set"
-#~ msgstr "Ylläpitäjä voi tallettaa ehdokasaineistosi tietokantaan"
-
-#~ msgid "on this page"
-#~ msgstr "tällä sivulla"
-
-#~ msgid "List of persons"
-#~ msgstr "henkilöluettelo"
-
-#~ msgid "Persons ordered by"
-#~ msgstr "Henkilöt järjestyksessä"
-
-#~ msgid "Persons carrying a Name"
-#~ msgstr "Henkilöt, joilla on nimi"
-
-#~ msgid "Displaying %(num)s person names."
-#~ msgid_plural "Displaying %(num)s person names."
-#~ msgstr[0] "Näytetään %(num)s henkilö."
-#~ msgstr[1] "Näytetään %(num)s henkilöä."
-
-#~ msgid "Go to"
-#~ msgstr "Siirry"
-
-#~ msgid "Person's events"
-#~ msgstr "Henkilön tapahtumat"
-
-#~ msgid "Original ID"
-#~ msgstr "Alkuperäinen tunniste"
-
-#~ msgid "Sorting name"
-#~ msgstr "Lajitteluavain"
-
-#~ msgid "No one found with search keys"
-#~ msgstr "Ketään ei löytynyt hakutiedoilla"
-
-#~ msgid "Displaying %(num)s person in %(order)s order."
-#~ msgid_plural "Displaying %(num)s persons in %(order)s order."
-#~ msgstr[0] "Näytetään on %(num)s henkilön nimi."
-#~ msgstr[1] "Näytetään on %(num)s henkilönimeä %(order)s mukaisessa järjestyksessä."
-
-#~ msgid ""
-#~ "If the person has many names, they"
-#~ " will appear in the list under "
-#~ "each name."
-#~ msgstr "Jos henkilöllä on monta nimeä, hän esiintyy listalla kullakin nimellä."
-
-#~ msgid "Clicking a name will take you to the selected person's page."
-#~ msgstr "Nimen napsauttaminen vie sinut valitun henkilön sivulle."
-
-#~ msgid "Change Order:"
-#~ msgstr "Vaihda järjestys:"
-
-#~ msgid "First Name"
-#~ msgstr "etunimen"
-
-#~ msgid "Patronymic or Matronymic"
-#~ msgstr "patronyymin tai matronyymin"
-
-#~ msgid "Showing %(num)s person name"
-#~ msgid_plural "Showing %(num)s person names"
-#~ msgstr[0] "Näytetään %(num)s henkilönimi"
-#~ msgstr[1] "Näytetään %(num)s henkilönimeä "
-
-#~ msgid "Select people to display"
-#~ msgstr "Valitse näytettävät henkilöt"
-
-#~ msgid ""
-#~ "Search takes place from beginning of "
-#~ "selected name part, e.g. in Surname "
-#~ "\"Sib\" coincides with the name "
-#~ "\"Sibbe\"."
-#~ msgstr ""
-#~ "Haku tapahtuu annetun nimen alkuosalla, "
-#~ "esim. \"Sib\" osuu nimeen \"Sibbe\"."
-
-#~ msgid "Search word (beginning part)"
-#~ msgstr "Hakusana (alkuosa)"
-
-#~ msgid "Family Events"
-#~ msgstr "Perheen tapahtumat"
-
-#~ msgid "Keywords"
-#~ msgstr "hakusanat"
-
-#~ msgid "Users"
-#~ msgstr "Käyttäjät"
-
-#~ msgid "user id"
-#~ msgstr "Käyttäjän ID tunnus"
-
-#~ msgid "name"
-#~ msgstr "nimeä"
-
-#~ msgid "email"
-#~ msgstr "sähköpostiosoite"
-
-#~ msgid "roles"
-#~ msgstr "Roolit"
-
-#~ msgid "Create Username"
-#~ msgstr "Luo käyttäjätunnus"
-
-#~ msgid "Username"
-#~ msgstr "Käyttäjätunnus"
-
-#~ msgid "Create a new user or update the old one"
-#~ msgstr "Luo uusi käyttäjä tai päivitä vanha"
-
-#~ msgid "Included"
-#~ msgstr "Mukana"
-
-#~ msgid "Oid"
-#~ msgstr "oid"
-
-#~ msgid "Type ~ Ref. name"
-#~ msgstr "tyyppi ~ ref.nimi"
-
-#~ msgid "Name Source"
-#~ msgstr "nimilähde"
-
-#~ msgid "Redirects to reference names"
-#~ msgstr "Ohjaukset referenssinimiin"
-
-#~ msgid "Ref. Name"
-#~ msgstr "ref.nimi"
-
-#~ msgid "LOADING"
-#~ msgstr "LADATAAN"
-
-#~ msgid "DONE"
-#~ msgstr "TEHTY"
-
-#~ msgid "Source "
-#~ msgstr "Lähde"
-
-#~ msgid "Gedcom "
-#~ msgstr "gedcom"
-
-#~ msgid "Submitter "
-#~ msgstr "Lataaja"
-
-#~ msgid "        count\n"
-#~ msgstr "lukumäärä\n"
-
-#~ msgid "Visualisation data, not based on material"
-#~ msgstr "Näennäistiedot, ei aineistosta"
+#~ msgid "Menu"
+#~ msgstr "Valikko"
 
