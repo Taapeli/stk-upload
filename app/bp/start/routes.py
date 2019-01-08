@@ -56,7 +56,7 @@ def datatables():
     print("-> bp.start.routes.datatables")
     return render_template("/tools/tables.html")
 
-@shareds.app.route('/grampsdata')
+@shareds.app.route('/gramps')
 @login_required
 @roles_accepted('member', 'admin')
 def gramps_upload():

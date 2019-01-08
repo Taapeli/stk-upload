@@ -7,8 +7,12 @@
     <title>{% block title %}{% endblock %} - Suomi-tietokanta</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pers.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hamburger.css') }}">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
+    <style>
+	    #menuToggle { top: 18px; right: 10px; }
+	    #menu { margin-top: -24px; }    
+    </style>
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/static/ohjeet.js?"></script>
@@ -19,19 +23,39 @@
   </head>
   
   <body>
-    {% block body %}
-    <h1 style="margin-bottom: 2px"><a href="/"><img id="logo" src="/static/hlo.png" alt="{{ _('Back to Top') }}" title="{{ _('Back to Top') }}"
+{% block body %}
+    <h1><a href="/"><img id="logo" src="/static/hlo.png" alt="{{ _('Back to Top') }}" title="{{ _('Back to Top') }}"
              onmouseover="this.src='/static/hlo1.png';" 
              onmouseout="this.src='/static/hlo.png';"/></a>
         <i>{{ _('A Database of the Genealogical Society of Finland') }}</i></h1>
-    <a href="#" id="ohjeet" alt="{{ _('Instructions for this page') }}" 
+
+<nav role="navigation" >
+{# https://codepen.io/erikterwan/pen/EVzeRP #}
+  <div id="menuToggle">
+    <input type="checkbox" />
+    <span></span><span></span><span></span>
+    <ul id="menu">
+      <a href="/" title="{{ _('Start page') }}"><li>{{ _('Home') }}</li></a>
+      <a href="#" title="{{ _('Instructions for this page') }}">
+        <li>{{ _('Help') }}</li></a>
+       <a href="/message" title="{{ _('Instructions for this page') }}">
+        <li>{{ _('Contact administrator') }}</li></a>
+      <a href="/settings" title="{{ _('Select language and other options') }}">
+        <li>{{ _('My settings') }}</li></a>
+      <a href="/logout" title="{{ _('Log out from this application') }}">
+        <li><b>{{ _('Logout') }}</b></li></a>
+    </ul>
+  </div>
+</nav>
+
+{#  <a href="#" id="ohjeet" 
        title="{{ _('Instructions for this page') }}">{{ _('Help') }}</a>
     <p class="bread">Suomi-tietokanta &gt; 
         <a  class="bread" href="/">Etusivu</a></p>
-    {% endblock %}
-
     <!-- TODO: Use https://flask-breadcrumbs.readthedocs.io/ -->
+ #}
 
+{% endblock %}
     <div class="fullclear"></div>
     <div id="footer">
         <span id="createdate">{{ _("Stk-server") }} &nbsp;

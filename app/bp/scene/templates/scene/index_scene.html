@@ -42,24 +42,21 @@
                </form>
             </div>
            </div>
-{#
-	       <div class="startbox">
-	         <div style="display: inline-block;">
-	            <h3>{{ _('Send data to server') }}</h3>
-	              <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
-	             <div style="display: inline-block;">
-	               <input type="hidden" name="material" value="xml_file">
-	               <p>{{ _('Select Gramps XML File (*. gramps) to become candidate material') }}</p>
-	               <input type="file" name="filenm" />
-	             </div>
-	             <div class="submit"> 
-	                <input type="submit" value="{{ _('Upload') }}" />
-	             </div>
-	             </form>
-	             ▸ <a href=/gramps/uploads>{{ _("List uploads") }}</a>
-	         </div>
-	     </div>
-#}
+
+    {# if current_user.is_authenticated and 
+        ( current_user.has_role('member') or current_user.has_role('admin') ) #}
+     <div class="startbox">
+         <h3>{{ _('Table format tools') }}</h3>
+         <p>{{ _('A variety of more technical listings and problem solving tools.') }}
+         {{ _('The data includes accepted and candidate materials of all users.') }}
+         </p>
+         <form method="get" action="/tables">
+            <div class="submit"> 
+               <button type="submit">{{ _('Explore the database') }}</button>
+            </div>
+         </form>
+     </div>
+
      {% endif %}
 
      <div class="startbox">
