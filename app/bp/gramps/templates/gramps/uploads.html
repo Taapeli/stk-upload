@@ -46,6 +46,9 @@
 	    {% if current_user.is_authenticated and current_user.has_role('admin') %}
             <a href="/admin/list_users">{{ _('on this page') }}</a>
         {% endif %}
+	    {% if current_user.is_authenticated and current_user.has_role('member') %}
+	    	<p>&rtrif; <a href="/scene/persons_own">{{ _('See your own data') }}</a>
+        {% endif %}
     </p>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
 {% endblock %}
