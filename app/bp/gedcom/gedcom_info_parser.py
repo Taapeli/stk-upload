@@ -11,6 +11,7 @@ class Info:
     time = ""
     source_program = None
     source_program_version = None 
+    source_program_name = None 
     num_individuals = 0
     num_families = 0
     num_places = 0

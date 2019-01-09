@@ -34,7 +34,7 @@ def valid_date(datestring):
     parts = datestring.split(maxsplit=1)
     if len(parts) < 1: return False
 
-    if parts[0] in {"ABT","EST","CAL"}:
+    if len(parts) > 1 and parts[0] in {"ABT","EST","CAL"}:
         return valid_date(parts[1])
 
     m = re.match("BET (.+?) AND (.+)",datestring)
@@ -45,7 +45,7 @@ def valid_date(datestring):
     if m:
         return valid_date(m.group(1)) and valid_date(m.group(2))
 
-    if parts[0] in {"FROM","TO","BEF","AFT"}:
+    if len(parts) > 1 and parts[0] in {"FROM","TO","BEF","AFT"}:
         return valid_date(parts[1])
     
     try:
@@ -211,6 +211,7 @@ class Analyzer(transformer.Transformation):
         for sex,count in sorted(self.genders.items()):
             print("- {}: {:5}".format(sex,count))            
         self.illegal_paths.display()
+        self.invalid_dates.display()
         self.novalues.display()
         self.too_few.display()
         self.too_many.display()
