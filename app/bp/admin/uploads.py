@@ -204,7 +204,7 @@ def list_uploads(username):
 
 def list_uploads_all(users):
     for user in users:
-        for upload in list_uploads(user.name):
+        for upload in list_uploads(user.username):
             yield upload 
 
 
