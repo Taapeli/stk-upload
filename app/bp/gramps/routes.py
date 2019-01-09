@@ -55,7 +55,7 @@ def upload_gramps():
 
         logname = pathname + ".log"
         uploads.set_meta(current_user.username,infile.filename,
-                        status="uploaded",
+                        status=uploads.STATUS_UPLOADED,
                         upload_time=time.time())
         msg = "{}: User {} uploaded the file {}".format(
             util.format_timestamp(),current_user.username,pathname)

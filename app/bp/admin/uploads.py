@@ -22,6 +22,13 @@ from models import email, util    # loadfile,
 
 from ..gramps import gramps_loader
 
+STATUS_UPLOADED     = "uploaded"
+STATUS_LOADING      = "loading"
+STATUS_DONE         = "done"
+STATUS_FAILED       = "failed"
+STATUS_ERROR        = "error"
+
+
 #===============================================================================
 # Background loading of a Gramps XML file
 # 
@@ -110,13 +117,13 @@ def background_load_to_neo4j(username,filename):
     logname =  pathname+".log"
     try:
         os.makedirs(upload_folder, exist_ok=True)
-        set_meta(username,filename,status="loading")
+        set_meta(username,filename,status=STATUS_LOADING)
         this_thread = threading.current_thread()
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
         steps = gramps_loader.xml_to_neo4j(pathname,username)
         for step in steps:
             print(step)
-        set_meta(username,filename,status="done")
+        set_meta(username,filename,status=STATUS_DONE)
         msg = "{}:\nLoaded the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
         msg += "\nLog file: {}".format(logname)
         msg += "\n"
@@ -129,7 +136,7 @@ def background_load_to_neo4j(username,filename):
     except:
         traceback.print_exc()
         res = traceback.format_exc()
-        set_meta(username,filename,status="failed")
+        set_meta(username,filename,status=STATUS_FAILED)
         msg = "{}:\nLoading of file {} from user {} to neo4j FAILED".format(util.format_timestamp(),pathname,username)
         msg += "\nLog file: {}".format(logname)
         msg += "\n" + res
@@ -175,16 +182,16 @@ def list_uploads(username):
             meta = get_meta(fname)
             status = meta["status"]
             status_text = None
-            if status == "uploaded":
+            if status == STATUS_UPLOADED:
                 status_text = _("UPLOADED")
-            elif status == "loading":
+            elif status == STATUS_LOADING:
                 if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
                     status_text = _("ERROR")
                 else:
                     status_text = _("STORING") 
-            elif status == "done":
+            elif status == STATUS_DONE:
                 status_text = _("STORED")
-            elif status == "failed":
+            elif status == STATUS_FAILED:
                 status_text = _("FAILED")
             if status_text:
                 upload = Upload()
