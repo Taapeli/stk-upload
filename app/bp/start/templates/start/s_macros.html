@@ -1,0 +1,31 @@
+{# start/s_macros.html #}
+
+{% macro hamburger_menu(items) -%}
+    {# Hamburger menu in top rigth corner.
+        You may adjust position by by re-defining css top and right values of
+        #menuToggle top and right and #menu margin-top.
+    #}
+    
+	<nav role="navigation" >
+	{# https://codepen.io/erikterwan/pen/EVzeRP #}
+	{# items is a list of tuples (url, label, hover title) 
+	   example: items = (("/message", _('Contact administrator'), _('Message to the administrator')), 
+	                      ... ) 
+	#}
+	  <div id="menuToggle">
+	    <input type="checkbox" />
+	    <span></span><span></span><span></span>
+	    <ul id="menu">
+	      <a href="/" title="{{ _('Start page') }}"><li>{{ _('Home') }}</li></a>
+	      <a id="help" href="#" title="{{ _('Instructions for this page') }}" >
+	        <li>{{ _('Help') }}</li></a>
+	    {% for url, label, title in items %}
+	       <a href="{{url}}" title="{{title}}">
+	        <li>{{label}}</li></a>
+	    {% endfor %} 
+	      <a href="/logout" title="{{ _('Log out from this application') }}">
+	        <li><b>{{ _('Logout') }}</b></li></a>
+	    </ul>
+	  </div>
+	</nav>
+{%- endmacro %}

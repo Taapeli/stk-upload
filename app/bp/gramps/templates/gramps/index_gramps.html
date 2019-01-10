@@ -1,9 +1,17 @@
 {# start/index.html_ #}
 {% extends "start/s_layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _("Stk User's Candidate Material") }} (gramps/index_gramps){% endblock %}
 {% block body %}
 {{ super() }}
+
+{% include "security/_messages.html" %}
+{% import 'start/s_macros.html' as macro %}
+
+{{ macro.hamburger_menu( (
+    ("/message", _('Contact administrator'), _('Message to the administrator')),
+    ("/settings", _('Change language'), _('Select language'))
+   ) ) }}
+
 
 <div id="startdiv">
   <div>

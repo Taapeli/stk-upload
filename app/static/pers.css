@@ -183,8 +183,8 @@ li.itemrow {
 .msg_TITLE   {color: black; line-height: 1.8; font-size: 120% }
 .msg_INFO    {padding-left: 1em; color: black }
 .msg_WARNING {padding-left: 2em; color: blueviolet }
-.msg_ERROR   {padding-left: 3em; color: red; font-style: bold }
-.flash_error {color: red; font-style: bold }
+.msg_ERROR   {padding-left: 3em; color: red; font-weight: bold }
+.flash_error {color: red; font-weight: bold }
 .flash_warning {color: blueviolet }
 .flash_message { color: blue }
 
@@ -200,6 +200,16 @@ div.fullclear {
 	color: gray;
 	background: #eee;
 	text-align: right;
+}
+
+div.legend {
+     margin-left:4em; 
+     font-size: 90%;
+     border-left: 6px solid silver;
+}
+table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
+   border:none;
+   outline:none;
 }
 
 /* http://stackoverflow.com/questions/1964839/jquery-please-wait-loading-animation    */

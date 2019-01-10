@@ -19,7 +19,7 @@ import shareds
 from models import loadfile, email, util    # dbutil, 
 #from models import email
 from . import bp
-from pickle import Unpickler
+#from pickle import Unpickler
 from ..admin import uploads
 
 @bp.route('/gramps/show_log/<xmlfile>')
@@ -96,4 +96,5 @@ def xml_download(xmlfile):
     return send_from_directory(directory=xml_folder, filename=xmlfile, 
                                mimetype="application/gzip",
                                as_attachment=True)
-                               #attachment_filename=xmlfile+".gz") 
+#                                attachment_filename=xmlfile+".gz")
+                               
