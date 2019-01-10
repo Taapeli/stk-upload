@@ -22,13 +22,13 @@ from . import bp
 from pickle import Unpickler
 from ..admin import uploads
 
-@bp.route('/gramps/upload_info/<upload>')
-@roles_accepted('member', 'admin')
-def upload_info(upload): 
+@bp.route('/gramps/show_log/<xmlfile>')
+@roles_accepted('member')
+def show_upload_log(xmlfile):
     upload_folder = uploads.get_upload_folder(current_user.username)
-    fname = os.path.join(upload_folder,upload + ".loading.done")
-    result_list = Unpickler(open(fname,"rb")).load()
-    return render_template("/gramps/result.html", batch_events=result_list)
+    fname = os.path.join(upload_folder,xmlfile + ".log")
+    msg = open(fname, encoding="utf-8").read()
+    return render_template("/admin/load_result.html", msg=msg)
 
 @bp.route('/gramps/uploads')
 @roles_accepted('member', 'admin')
@@ -55,7 +55,7 @@ def upload_gramps():
 
         logname = pathname + ".log"
         uploads.set_meta(current_user.username,infile.filename,
-                        status="uploaded",
+                        status=uploads.STATUS_UPLOADED,
                         upload_time=time.time())
         msg = "{}: User {} uploaded the file {}".format(
             util.format_timestamp(),current_user.username,pathname)

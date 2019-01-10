@@ -15,14 +15,26 @@
       {% endif %}
     {% endwith %}
     <div class="helptext">
-    <pre>
-    	{{ _("Status for differents steps in XML file upload:") }}
-    	
-    	{{ _("1. UPLOADING - the file is being uploaded to server") }}
-    	{{ _("2. UPLOADED  - the file has been uploaded to server") }}
-    	{{ _("3. STORING   - the file content is being stored to the database") }}
-    	{{ _("4. STORED    - the file content has been stored to the database") }}
-	</pre>
+    	<b>{{ _("Status for differents steps in XML file upload:") }}</b>
+    	<table class=legend>
+    	<tr>
+    	<td>1
+    	<td>{{ _("UPLOADED") }}     
+    	<td>{{ _("the file has been uploaded to server") }}
+    	<tr>
+    	<td>2
+    	<td>{{ _("STORING") }}
+    	<td>{{ _("the file content is being stored to the database") }}
+    	<tr>
+    	<td>3
+    	<td>{{ _("STORED") }}
+    	<td>{{ _("the file content has been stored to the database") }}
+    	<tr>
+    	<td>4
+    	<td>{{ _("ERROR") }} / {{ _("FAILED") }}
+    	<td>{{ _("there was an error") }}
+    	</table>
+	<p>
     </div>
     <table>
            <tr>
@@ -37,6 +49,7 @@
 	           <td>{{upload.xmlname}}</td>
 	           <td>{{upload.status}}</td>
 	           <td><a href=/gramps/xml_download/{{upload.xmlname | urlencode}}>{{ _("Download to your computer") }}</a> |
+	               <a href=/gramps/show_log/{{upload.xmlname | urlencode}}>{{ _("Show log") }}</a> |
 	           	   <a href=/gramps/xml_delete/{{upload.xmlname | urlencode}}>{{ _("Delete") }}</a></td>
 	       </tr>
 	    {% endfor %}
@@ -44,6 +57,9 @@
     <p>{{ _("The administrator can load your file to database as your new candidate material set") }}
 	    {% if current_user.is_authenticated and current_user.has_role('admin') %}
             <a href="/admin/list_users">{{ _('on this page') }}</a>
+        {% endif %}
+	    {% if current_user.is_authenticated and current_user.has_role('member') %}
+	    	<p>&rtrif; <a href="/scene/persons_own">{{ _('See your own data') }}</a>
         {% endif %}
     </p>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>

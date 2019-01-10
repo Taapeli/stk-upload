@@ -11,6 +11,7 @@ class Info:
     time = ""
     source_program = None
     source_program_version = None 
+    source_program_name = None 
     num_individuals = 0
     num_families = 0
     num_places = 0
@@ -46,11 +47,13 @@ class InfoParser(transformer.Transformation):
         if item.path[0] == '@': xref = item.path.split(".")[0]
         if item.tag == "NOTE":
             self.info.num_notes += 1
-        if item.tag == "SOUR":
+        if item.tag == "SOUR" and item.path != "HEAD.SOUR":
             self.info.num_citations += 1
         if item.tag == "PLAC":
             self.places.add(item.value)
             self.info.num_places = len(self.places)
+        if item.tag == "OBJE" and item.value == "":
+            self.info.num_multimedia += 1
         if item.path == "HEAD.SUBM":
             self.submitter_xref = item.value
         if item.path == "HEAD.CHAR":

@@ -166,7 +166,7 @@ def get_transforms():
 def gedcom_list():
     gedcom_folder = get_gedcom_folder()
     try:
-        names = sorted([name for name in os.listdir(gedcom_folder) if name.endswith(".ged")])
+        names = sorted([name for name in os.listdir(gedcom_folder) if name.lower().endswith(".ged")])
     except:
         names = []
     allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
