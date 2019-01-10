@@ -7,6 +7,7 @@
     <title>{% block title %}{% endblock %} - Suomi-tietokanta</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='pers.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hamburger.css') }}">
 
  <!--link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
     <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
@@ -19,7 +20,7 @@
 	
 	<!-- i18n for Javascript: -->
 	<link rel="gettext" type="application/x-po" href="/static/translations/{{ g.locale }}.po">
-	<script src="/static/Gettext.js"></script>
+	<script src="/static/js/gettext.js"></script>
   </head>
   <body>
     {% block body %}
@@ -27,7 +28,6 @@
              onmouseover="this.src='/static/hlo1.png';" 
              onmouseout="this.src='/static/hlo.png';"/></a>
         <i>{{ _('A Database of the Genealogical Society of Finland') }}</i></h1>
-    <a href="#" id="ohjeet" alt="{{ _('Instructions for this page') }}" title="{{ _('Instructions for this page') }}">{{ _('Help') }}</a>
     {% endblock %}
 
     <div class="fullclear"></div>

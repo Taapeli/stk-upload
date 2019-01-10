@@ -183,8 +183,8 @@ li.itemrow {
 .msg_TITLE   {color: black; line-height: 1.8; font-size: 120% }
 .msg_INFO    {padding-left: 1em; color: black }
 .msg_WARNING {padding-left: 2em; color: blueviolet }
-.msg_ERROR   {padding-left: 3em; color: red; font-style: bold }
-.flash_error {color: red; font-style: bold }
+.msg_ERROR   {padding-left: 3em; color: red; font-weight: bold }
+.flash_error {color: red; font-weight: bold }
 .flash_warning {color: blueviolet }
 .flash_message { color: blue }
 
