@@ -1,9 +1,19 @@
-{# _myapp/templates/gr_result.html_ #}
+{# _gramps/uploads.html_ #}
 {% extends "start/s_layout.html" %}
 {% block title %}{{ _("Uploads from Gramps") }}{% endblock %}
 {% block body %}
-    {{ super() }}
-    <meta http-equiv="refresh" content="30">
+{{ super() }}
+    <!-- meta http-equiv="refresh" content="30" -->
+
+{% import 'start/s_macros.html' as macro %}
+
+{{ macro.hamburger_menu( (
+    ("/message", _('Contact administrator'), _('Message to the administrator')),
+    ("/settings", _('Change language'), _('Select language'))
+   ) ) }}
+
+<div id="startdiv">
+  <div>
     <h2>{{ _("Uploads") }}</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -14,25 +24,23 @@
         </ol>
       {% endif %}
     {% endwith %}
-    <div class="helptext">
-    	<b>{{ _("Status for differents steps in XML file upload:") }}</b>
-    	<table class=legend>
-    	<tr>
-    	<td>1
-    	<td>{{ _("UPLOADED") }}     
-    	<td>{{ _("the file has been uploaded to server") }}
-    	<tr>
-    	<td>2
-    	<td>{{ _("STORING") }}
-    	<td>{{ _("the file content is being stored to the database") }}
-    	<tr>
-    	<td>3
-    	<td>{{ _("STORED") }}
-    	<td>{{ _("the file content has been stored to the database") }}
-    	<tr>
-    	<td>4
-    	<td>{{ _("ERROR") }} / {{ _("FAILED") }}
-    	<td>{{ _("there was an error") }}
+    <div class="legend">
+    	<table class="legend">
+    	<tbody>
+	        <tr><th colspan="3">{{ _("Status for differents steps in XML file upload") }}</th></tr>
+	        <tr>
+	        <td>1</td><td>{{ _("UPLOADED") }}</td>  
+	        <td>{{ _("the file has been uploaded to server") }}</td></tr>
+	        <tr>
+	        <td>2</td><td>{{ _("STORING") }}</td>
+	        <td>{{ _("the file content is being stored to the database") }}</td></tr>
+	        <tr>
+	        <td>3</td><td>{{ _("STORED") }}</td>
+	        <td>{{ _("the file content has been stored to the database") }}</td></tr>
+	        <tr>
+	        <td>4</td><td>{{ _("ERROR") }} / {{ _("FAILED") }}</td>
+	        <td>{{ _("there was an error") }}</td></tr>
+    	</tbody>
     	</table>
 	<p>
     </div>
@@ -63,6 +71,9 @@
         {% endif %}
     </p>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
+    
+  </div>
+</div>
 {% endblock %}
 </body>
 </html>

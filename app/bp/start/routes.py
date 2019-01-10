@@ -48,6 +48,18 @@ def start_login():
                 format(current_user.username, current_user.email, role_names))
     return render_template('/start/index_logged.html')
 
+@shareds.app.route('/message')
+@login_required
+def my_message():
+    print("-> bp.start.routes.settings")
+    return render_template("/start/my_message.html")
+
+@shareds.app.route('/settings')
+@login_required
+def my_settings():
+    print("-> bp.start.routes.settings")
+    return render_template("/start/my_settings.html")
+
 @shareds.app.route('/tables')
 @login_required
 @roles_accepted('member', 'admin')
