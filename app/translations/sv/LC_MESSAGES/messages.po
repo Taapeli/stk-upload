@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-10 09:46+0200\n"
+"POT-Creation-Date: 2019-01-11 10:33+0200\n"
 "PO-Revision-Date: 2018-12-18 00:48+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -264,27 +264,27 @@ msgid "Data import from {!r} to database has been started."
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:27 bp/admin/uploads.py:186
-#: bp/admin/uploads.py:201 bp/gramps/templates/gramps/uploads.html:22
+#: bp/admin/uploads.py:201 bp/gramps/templates/gramps/uploads.html:32
 msgid "UPLOADED"
 msgstr "LADDAD"
 
 #: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:189
-#: bp/gramps/templates/gramps/uploads.html:34
+#: bp/gramps/templates/gramps/uploads.html:41
 msgid "ERROR"
 msgstr "FEL"
 
 #: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:191
-#: bp/admin/uploads.py:202 bp/gramps/templates/gramps/uploads.html:26
+#: bp/admin/uploads.py:202 bp/gramps/templates/gramps/uploads.html:35
 msgid "STORING"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:193
-#: bp/admin/uploads.py:200 bp/gramps/templates/gramps/uploads.html:30
+#: bp/admin/uploads.py:200 bp/gramps/templates/gramps/uploads.html:38
 msgid "STORED"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:195
-#: bp/gramps/templates/gramps/uploads.html:34
+#: bp/gramps/templates/gramps/uploads.html:41
 msgid "FAILED"
 msgstr "MISSLYCKADES"
 
@@ -308,23 +308,25 @@ msgid "Welcome to Finland Database"
 msgstr "Välkommen till Finland databasen"
 
 #: bp/admin/templates/admin/admin.html:32
-#: bp/gramps/templates/gramps/index_gramps.html:11
-#: bp/scene/templates/scene/index_scene.html:12
+#: bp/gramps/templates/gramps/index_gramps.html:19
+#: bp/scene/templates/scene/index_scene.html:20
 #: bp/start/templates/start/index.html:19
-#: bp/start/templates/start/index_logged.html:11 templates/mainindex.html:12
+#: bp/start/templates/start/index_logged.html:17
+#: bp/start/templates/start/my_message.html:19
+#: bp/start/templates/start/my_settings.html:21 templates/mainindex.html:12
 msgid "User"
 msgstr "Användare"
 
 #: bp/admin/templates/admin/admin.html:33
-#: bp/scene/templates/scene/index_scene.html:13
+#: bp/scene/templates/scene/index_scene.html:21
 #: bp/start/templates/start/index.html:20
-#: bp/start/templates/start/index_logged.html:12 templates/mainindex.html:13
+#: bp/start/templates/start/index_logged.html:18 templates/mainindex.html:13
 msgid "roles:"
 msgstr "Roll:"
 
 #: bp/admin/templates/admin/admin.html:34
 #: bp/start/templates/start/index.html:21
-#: bp/start/templates/start/index_logged.html:13
+#: bp/start/templates/start/index_logged.html:19
 #: bp/stk_security/templates/security/login_user.html:11
 #: templates/mainindex.html:14
 msgid "Git Application Version"
@@ -344,7 +346,7 @@ msgstr ""
 "verktyg"
 
 #: bp/admin/templates/admin/admin.html:46
-#: bp/scene/templates/scene/index_scene.html:55
+#: bp/scene/templates/scene/index_scene.html:63
 #: bp/start/templates/start/index.html:79 templates/mainindex.html:72
 msgid "Explore the database"
 msgstr "Utforska databasen"
@@ -383,8 +385,9 @@ msgid "User candidates"
 msgstr "Användare kandidater"
 
 #: bp/admin/templates/admin/admin.html:75
-#: bp/scene/templates/scene/persons.html:122
+#: bp/scene/templates/scene/persons.html:128
 #: bp/tools/templates/tools/table_refnames.html:13
+#: templates/join_persons.html:74
 msgid "Reference names"
 msgstr "Referens namn"
 
@@ -433,27 +436,26 @@ msgstr "Administratörs sidor"
 #: bp/scene/templates/scene/layout.html:23
 #: bp/scene/templates/scene/list_persons.html:81
 #: bp/scene/templates/scene/locations.html:34
-#: bp/scene/templates/scene/persons.html:109
+#: bp/scene/templates/scene/persons.html:115
 #: bp/scene/templates/scene/sources.html:39
-#: bp/start/templates/start/s_layout.html:27 templates/a_layout.html:26
+#: bp/start/templates/start/s_layout.html:24 templates/a_layout.html:27
 #: templates/ladattu2.html:10 templates/virhe_lataus.html:20
 msgid "Back to Top"
 msgstr "Till toppen"
 
 #: bp/admin/templates/admin/layout.html:17
 #: bp/scene/templates/scene/layout.html:26
-#: bp/start/templates/start/s_layout.html:30 templates/a_layout.html:29
+#: bp/start/templates/start/s_layout.html:27 templates/a_layout.html:30
 msgid "A Database of the Genealogical Society of Finland"
 msgstr "Genealogiska Samfundet i Finland's databas"
 
 #: bp/admin/templates/admin/layout.html:18
-#: bp/start/templates/start/s_layout.html:39
-#: bp/start/templates/start/s_layout.html:41 templates/a_layout.html:30
+#: bp/start/templates/start/s_macros.html:20
 msgid "Instructions for this page"
 msgstr "Instruktioner för denna sida"
 
 #: bp/admin/templates/admin/layout.html:18
-#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:30
+#: bp/start/templates/start/s_macros.html:21
 msgid "Help"
 msgstr "Hjälp"
 
@@ -500,7 +502,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:26
 #: bp/admin/templates/admin/uploads.html:52
-#: bp/gramps/templates/gramps/uploads.html:44
+#: bp/gramps/templates/gramps/uploads.html:52
 msgid "Operations"
 msgstr ""
 
@@ -533,7 +535,7 @@ msgstr ""
 #: bp/admin/templates/admin/update_user.html:41
 #: bp/admin/templates/admin/uploads.html:75
 #: bp/gramps/templates/gramps/result.html:27
-#: bp/gramps/templates/gramps/uploads.html:65
+#: bp/gramps/templates/gramps/uploads.html:73
 msgid "Return"
 msgstr ""
 
@@ -561,7 +563,7 @@ msgstr "Tar bort <u>alla föregående</u> och skapar ett unikt index"
 
 #: bp/admin/templates/admin/reference.html:24
 #: bp/gedcom/templates/gedcom_list.html:41
-#: bp/gramps/templates/gramps/index_gramps.html:27
+#: bp/gramps/templates/gramps/index_gramps.html:35
 #: bp/start/templates/start/index.html:49 templates/mainindex.html:42
 msgid "Upload"
 msgstr "Ladda upp"
@@ -592,19 +594,19 @@ msgid "Do not use"
 msgstr "Använd inte"
 
 #: bp/admin/templates/admin/reference.html:43
-#: bp/scene/templates/scene/index_scene.html:75
+#: bp/scene/templates/scene/index_scene.html:83
 #: bp/start/templates/start/index.html:115 templates/mainindex.html:107
 msgid "Log out"
 msgstr "Logga ut"
 
 #: bp/admin/templates/admin/reference.html:44
-#: bp/scene/templates/scene/index_scene.html:76
+#: bp/scene/templates/scene/index_scene.html:84
 #: bp/start/templates/start/index.html:116 templates/mainindex.html:108
 msgid "Ending the session"
 msgstr "Avslutar sessionen"
 
 #: bp/admin/templates/admin/reference.html:47
-#: bp/scene/templates/scene/index_scene.html:79
+#: bp/scene/templates/scene/index_scene.html:87
 #: bp/start/templates/start/index.html:119 templates/mainindex.html:111
 msgid "Exit the Application"
 msgstr "Avsluta programmet"
@@ -618,6 +620,8 @@ msgid "Store to Database"
 msgstr ""
 
 #: bp/admin/templates/admin/talletettu.html:27
+#: bp/start/templates/start/my_message.html:23
+#: bp/start/templates/start/my_settings.html:26
 #: bp/tools/templates/tools/person2.html:43
 #: bp/tools/templates/tools/source_citations.html:35
 #: templates/cite_sour_repo.html:73 templates/db_test.html:10
@@ -626,8 +630,7 @@ msgid "Go back"
 msgstr "Tillbaka"
 
 #: bp/admin/templates/admin/uploads.html:3
-#: bp/gramps/templates/gramps/uploads.html:3
-#: bp/gramps/templates/gramps/uploads.html:7
+#: bp/gramps/templates/gramps/uploads.html:17
 msgid "Uploads"
 msgstr ""
 
@@ -636,27 +639,26 @@ msgid "Uploads for user"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:23
-#: bp/gramps/templates/gramps/uploads.html:18
 msgid "Status for differents steps in XML file upload:"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:28
-#: bp/gramps/templates/gramps/uploads.html:23
+#: bp/gramps/templates/gramps/uploads.html:33
 msgid "the file has been uploaded to server"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:32
-#: bp/gramps/templates/gramps/uploads.html:27
+#: bp/gramps/templates/gramps/uploads.html:36
 msgid "the file content is being stored to the database"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:36
-#: bp/gramps/templates/gramps/uploads.html:31
+#: bp/gramps/templates/gramps/uploads.html:39
 msgid "the file content has been stored to the database"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:40
-#: bp/gramps/templates/gramps/uploads.html:35
+#: bp/gramps/templates/gramps/uploads.html:42
 msgid "there was an error"
 msgstr ""
 
@@ -666,17 +668,17 @@ msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:49
 #: bp/gedcom/templates/gedcom_info.html:91
-#: bp/gramps/templates/gramps/uploads.html:41
+#: bp/gramps/templates/gramps/uploads.html:49
 msgid "Upload time"
 msgstr "Uppladdnings tid"
 
 #: bp/admin/templates/admin/uploads.html:50
-#: bp/gramps/templates/gramps/uploads.html:42
+#: bp/gramps/templates/gramps/uploads.html:50
 msgid "XML file"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:51
-#: bp/gramps/templates/gramps/uploads.html:43
+#: bp/gramps/templates/gramps/uploads.html:51
 msgid "Status"
 msgstr ""
 
@@ -685,7 +687,7 @@ msgid "Store to database"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:69
-#: bp/gramps/templates/gramps/uploads.html:52
+#: bp/gramps/templates/gramps/uploads.html:60
 msgid "Show log"
 msgstr ""
 
@@ -1283,33 +1285,66 @@ msgstr ""
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Återställ markerad tag's: <tag>-X -> <tag>"
 
-#: bp/gramps/templates/gramps/index_gramps.html:4
+#: bp/gramps/templates/gramps/index_gramps.html:3
 msgid "Stk User's Candidate Material"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:10
+#: bp/gramps/templates/gramps/index_gramps.html:11
+#: bp/gramps/templates/gramps/uploads.html:11
+#: bp/scene/templates/scene/index_scene.html:11
+#: bp/start/templates/start/index_logged.html:10
+#: bp/start/templates/start/my_settings.html:10
+msgid "Contact administrator"
+msgstr ""
+
+#: bp/gramps/templates/gramps/index_gramps.html:11
+#: bp/gramps/templates/gramps/uploads.html:11
+#: bp/scene/templates/scene/index_scene.html:11
+#: bp/start/templates/start/index_logged.html:10
+#: bp/start/templates/start/my_settings.html:10
+msgid "Message to the administrator"
+msgstr ""
+
+#: bp/gramps/templates/gramps/index_gramps.html:12
+#: bp/gramps/templates/gramps/uploads.html:12
+#: bp/scene/templates/scene/index_scene.html:12
+#: bp/start/templates/start/index_logged.html:11
+#: bp/start/templates/start/my_settings.html:11
+#: bp/start/templates/start/my_settings.html:20
+msgid "Change language"
+msgstr ""
+
+#: bp/gramps/templates/gramps/index_gramps.html:12
+#: bp/gramps/templates/gramps/uploads.html:12
+#: bp/scene/templates/scene/index_scene.html:12
+#: bp/start/templates/start/index_logged.html:11
+#: bp/start/templates/start/my_settings.html:11
+msgid "Select language"
+msgstr ""
+
+#: bp/gramps/templates/gramps/index_gramps.html:18
 msgid "Candidate material files"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:19
+#: bp/gramps/templates/gramps/index_gramps.html:27
 #: bp/start/templates/start/index.html:41 templates/mainindex.html:34
 msgid "Send data to server"
 msgstr "Sänd data till servern"
 
-#: bp/gramps/templates/gramps/index_gramps.html:23
+#: bp/gramps/templates/gramps/index_gramps.html:31
 #: bp/start/templates/start/index.html:45 templates/mainindex.html:38
 msgid "Select Gramps XML File (*. gramps) to become candidate material"
 msgstr "Välj Gramps XML fil (*.gramps) att bli kandidat material"
 
-#: bp/gramps/templates/gramps/index_gramps.html:35
+#: bp/gramps/templates/gramps/index_gramps.html:43
 msgid "My data files in server"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:36
+#: bp/gramps/templates/gramps/index_gramps.html:44
 msgid "Manage your uploaded files"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:37
+#: bp/gramps/templates/gramps/index_gramps.html:45
 msgid "List my uploads"
 msgstr ""
 
@@ -1329,25 +1364,33 @@ msgstr ""
 msgid "Time / sec"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:51
+#: bp/gramps/templates/gramps/uploads.html:3
+msgid "Uploads from Gramps"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:30
+msgid "Status for differents steps in XML file upload"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:59
 msgid "Download to your computer"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:53
+#: bp/gramps/templates/gramps/uploads.html:61
 msgid "Delete"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:57
+#: bp/gramps/templates/gramps/uploads.html:65
 msgid ""
 "The administrator can load your file to database as your new candidate "
 "material set"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:59
+#: bp/gramps/templates/gramps/uploads.html:67
 msgid "on this page"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:62
+#: bp/gramps/templates/gramps/uploads.html:70
 msgid "See your own data"
 msgstr ""
 
@@ -1423,72 +1466,72 @@ msgstr ""
 msgid "No persons"
 msgstr "Inga personer"
 
-#: bp/scene/templates/scene/index_scene.html:11
+#: bp/scene/templates/scene/index_scene.html:19
 msgid "Finland Database"
 msgstr ""
 
-#: bp/scene/templates/scene/index_scene.html:22
-#: bp/start/templates/start/index_logged.html:35
+#: bp/scene/templates/scene/index_scene.html:30
+#: bp/start/templates/start/index_logged.html:41
 msgid "My Candidate Family Tree"
 msgstr ""
 
-#: bp/scene/templates/scene/index_scene.html:23
+#: bp/scene/templates/scene/index_scene.html:31
 #: bp/start/templates/start/index.html:29 templates/mainindex.html:24
 msgid ""
 "View your own candidate material and compare with Suomi tietokanta "
 "database"
 msgstr "Se det egna kandidat materialet och jämför med Finland databasen"
 
-#: bp/scene/templates/scene/index_scene.html:25
-#: bp/scene/templates/scene/index_scene.html:40
+#: bp/scene/templates/scene/index_scene.html:33
+#: bp/scene/templates/scene/index_scene.html:48
 #: bp/start/templates/start/index.html:31
 #: bp/tools/templates/tools/table_persons.html:8 templates/mainindex.html:26
 msgid "List of Persons"
 msgstr "Person lista"
 
-#: bp/scene/templates/scene/index_scene.html:34
+#: bp/scene/templates/scene/index_scene.html:42
 msgid "Suomi-tietokanta"
 msgstr ""
 
-#: bp/scene/templates/scene/index_scene.html:35
+#: bp/scene/templates/scene/index_scene.html:43
 msgid "View approved and public material in Suomi tietokanta"
 msgstr ""
 
-#: bp/scene/templates/scene/index_scene.html:37
+#: bp/scene/templates/scene/index_scene.html:45
 msgid "Compare to my own data"
 msgstr ""
 
-#: bp/scene/templates/scene/index_scene.html:49
+#: bp/scene/templates/scene/index_scene.html:57
 #: bp/start/templates/start/index.html:73 templates/mainindex.html:66
 msgid "Table format tools"
 msgstr ""
 
-#: bp/scene/templates/scene/index_scene.html:50
+#: bp/scene/templates/scene/index_scene.html:58
 #: bp/start/templates/start/index.html:74 templates/mainindex.html:67
 msgid "A variety of more technical listings and problem solving tools."
 msgstr ""
 
-#: bp/scene/templates/scene/index_scene.html:51
+#: bp/scene/templates/scene/index_scene.html:59
 #: bp/start/templates/start/index.html:75 templates/mainindex.html:68
 msgid "The data includes accepted and candidate materials of all users."
 msgstr ""
 
-#: bp/scene/templates/scene/index_scene.html:64
+#: bp/scene/templates/scene/index_scene.html:72
 #: bp/start/templates/start/index.html:86 templates/mainindex.html:80
 msgid "Message to Maintenance"
 msgstr "Meddelande till underhåll"
 
-#: bp/scene/templates/scene/index_scene.html:65
+#: bp/scene/templates/scene/index_scene.html:73
 #: bp/start/templates/start/index.html:87 templates/mainindex.html:81
 msgid "Request a researcher's rights or send another message to the maintenance"
 msgstr "Begär forskare rättigheter eller sänd annat meddelande till underhållet"
 
-#: bp/scene/templates/scene/index_scene.html:66
+#: bp/scene/templates/scene/index_scene.html:74
 #: bp/start/templates/start/index.html:88 templates/mainindex.html:82
 msgid "Function still planned"
 msgstr "Funktionen planerad"
 
-#: bp/scene/templates/scene/index_scene.html:68
+#: bp/scene/templates/scene/index_scene.html:76
 #: bp/start/templates/start/index.html:90 templates/mainindex.html:84
 msgid "Compose a message"
 msgstr "Skriv ett meddelande"
@@ -1498,7 +1541,7 @@ msgid "Stk"
 msgstr "Stk"
 
 #: bp/scene/templates/scene/layout.html:35
-#: bp/start/templates/start/s_layout.html:61 templates/a_layout.html:35
+#: bp/start/templates/start/s_layout.html:33 templates/a_layout.html:35
 msgid "Stk-server"
 msgstr "Stk-server"
 
@@ -1555,20 +1598,20 @@ msgstr "Efternamn"
 
 #: bp/scene/templates/scene/list_persons.html:49
 #: bp/scene/templates/scene/locations.html:15
-#: bp/scene/templates/scene/persons.html:90
+#: bp/scene/templates/scene/persons.html:91
 #: bp/scene/templates/scene/sources.html:16
 msgid "Top"
 msgstr "Toppen"
 
 #: bp/scene/templates/scene/list_persons.html:58
 #: bp/scene/templates/scene/locations.html:18
-#: bp/scene/templates/scene/persons.html:93
+#: bp/scene/templates/scene/persons.html:95
 #: bp/scene/templates/scene/sources.html:19
 msgid "Alphabetical Menu"
 msgstr "Alfabetisk meny"
 
 #: bp/scene/templates/scene/list_persons.html:66
-#: bp/scene/templates/scene/persons.html:100
+#: bp/scene/templates/scene/persons.html:106
 #: bp/scene/templates/scene/place_events.html:107
 #: bp/tools/templates/tools/person2.html:8
 msgid "Person"
@@ -1587,7 +1630,7 @@ msgstr "Händelser"
 
 #: bp/scene/templates/scene/list_persons.html:88
 #: bp/scene/templates/scene/macros.html:86
-#: bp/scene/templates/scene/persons.html:114
+#: bp/scene/templates/scene/persons.html:120
 #: bp/scene/templates/scene/source_events.html:44
 #, python-format
 msgid "see details of person %(id)s"
@@ -1602,7 +1645,7 @@ msgid "Sorting name"
 msgstr ""
 
 #: bp/scene/templates/scene/list_persons.html:127
-#: bp/scene/templates/scene/persons.html:143
+#: bp/scene/templates/scene/persons.html:149
 msgid "No one found with search keys"
 msgstr ""
 
@@ -2027,15 +2070,15 @@ msgstr ""
 msgid "Search word (beginning part)"
 msgstr ""
 
-#: bp/scene/templates/scene/persons.html:101
+#: bp/scene/templates/scene/persons.html:107
 msgid "Person's events"
 msgstr ""
 
-#: bp/scene/templates/scene/persons.html:102
+#: bp/scene/templates/scene/persons.html:108
 msgid "Family Events"
 msgstr ""
 
-#: bp/scene/templates/scene/persons.html:123
+#: bp/scene/templates/scene/persons.html:129
 msgid "Keywords"
 msgstr ""
 
@@ -2157,37 +2200,37 @@ msgid "List uploads"
 msgstr "Lista uppladdningar"
 
 #: bp/start/templates/start/index.html:59
-#: bp/start/templates/start/index_logged.html:51 templates/mainindex.html:52
+#: bp/start/templates/start/index_logged.html:57 templates/mainindex.html:52
 msgid "My gedcom material"
 msgstr "Mitt gedcom material"
 
 #: bp/start/templates/start/index.html:60
-#: bp/start/templates/start/index_logged.html:52 templates/mainindex.html:53
+#: bp/start/templates/start/index_logged.html:58 templates/mainindex.html:53
 msgid "Upload your material in gedcom format or edit an already stored"
 msgstr "Ladda upp ditt material i gedcom format, eller editera redan sparad"
 
 #: bp/start/templates/start/index.html:62
-#: bp/start/templates/start/index_logged.html:54 templates/mainindex.html:55
+#: bp/start/templates/start/index_logged.html:60 templates/mainindex.html:55
 msgid "Gedcom handlings"
 msgstr "Gedcom hantering"
 
 #: bp/start/templates/start/index.html:101
 #: bp/start/templates/start/index.html:102
-#: bp/start/templates/start/index_logged.html:66
-#: bp/start/templates/start/index_logged.html:67 templates/mainindex.html:93
+#: bp/start/templates/start/index_logged.html:72
+#: bp/start/templates/start/index_logged.html:73 templates/mainindex.html:93
 #: templates/mainindex.html:94
 msgid "Admin function"
 msgstr "Administratörs funktion"
 
 #: bp/start/templates/start/index.html:103
-#: bp/start/templates/start/index_logged.html:68 templates/mainindex.html:95
+#: bp/start/templates/start/index_logged.html:74 templates/mainindex.html:95
 msgid "User and reference information management and database service tasks"
 msgstr ""
 "Användare och referens informations underhåll och databas service "
 "uppgifter"
 
 #: bp/start/templates/start/index.html:107
-#: bp/start/templates/start/index_logged.html:72 templates/mainindex.html:99
+#: bp/start/templates/start/index_logged.html:78 templates/mainindex.html:99
 msgid "Maintenance"
 msgstr "Underhåll"
 
@@ -2195,67 +2238,77 @@ msgstr "Underhåll"
 msgid "Stk User's Start Page"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:10
+#: bp/start/templates/start/index_logged.html:16
 msgid "User's home page for Finland Database "
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:22
+#: bp/start/templates/start/index_logged.html:28
 msgid "Send and manage your Gramps data"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:24
+#: bp/start/templates/start/index_logged.html:30
 msgid "Manage your Gramps xml files and convert them to Suomi tietokanta."
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:26
+#: bp/start/templates/start/index_logged.html:32
 msgid "Go"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:36
+#: bp/start/templates/start/index_logged.html:42
 msgid ""
 "View your own data as candidate material and compare it with Suomi "
 "tietokanta database."
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:38
+#: bp/start/templates/start/index_logged.html:44
 msgid "My Persons and Events"
 msgstr ""
 
-#: bp/start/templates/start/s_layout.html:38
-msgid "Start page"
+#: bp/start/templates/start/my_message.html:4
+#: bp/start/templates/start/my_message.html:13
+msgid "Contact administrators"
 msgstr ""
 
-#: bp/start/templates/start/s_layout.html:38
-msgid "Home"
+#: bp/start/templates/start/my_message.html:17
+msgid "Write a message"
 msgstr ""
 
-#: bp/start/templates/start/s_layout.html:42
-msgid "Contact administrator"
+#: bp/start/templates/start/my_message.html:24
+#: bp/start/templates/start/my_settings.html:27
+msgid "Apply"
 msgstr ""
 
-#: bp/start/templates/start/s_layout.html:43
-msgid "Select language and other options"
+#: bp/start/templates/start/my_settings.html:4
+msgid "Stk User's Settings"
 msgstr ""
 
-#: bp/start/templates/start/s_layout.html:44
-msgid "My settings"
+#: bp/start/templates/start/my_settings.html:16
+msgid "Change my settings"
 msgstr ""
 
-#: bp/start/templates/start/s_layout.html:45
-msgid "Log out from this application"
-msgstr ""
-
-#: bp/start/templates/start/s_layout.html:46
-msgid "Logout"
-msgstr ""
-
-#: bp/start/templates/start/s_layout.html:65 templates/a_layout.html:39
+#: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:39
 msgid "Version"
 msgstr "Version"
 
-#: bp/start/templates/start/s_layout.html:68 templates/a_layout.html:42
+#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:42
 msgid "Instructions"
 msgstr "Instruktioner"
+
+#: bp/start/templates/start/s_macros.html:19
+msgid "Start page"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:19
+msgid "Home"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:26
+msgid "Log out from this application"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:27
+msgid "Logout"
+msgstr ""
 
 #: bp/stk_security/templates/security/_menu.html:8
 msgid "Confirm account"
@@ -3387,6 +3440,40 @@ msgstr ""
 msgid "in the parish of"
 msgstr ""
 
+#: templates/join_persons.html:3 templates/join_persons.html:17
+msgid "Merging people"
+msgstr ""
+
+#: templates/join_persons.html:29
+msgid "People whose name begins with"
+msgstr ""
+
+#: templates/join_persons.html:32
+msgid ""
+"Mark the central person (1st selection column) and the people to be "
+"merged (2nd column)"
+msgstr ""
+
+#: templates/join_persons.html:33
+msgid "If necessary, pick up nearby reference names <i> (not already in use)"
+msgstr ""
+
+#: templates/join_persons.html:34
+msgid "Merge to selected Central Person"
+msgstr ""
+
+#: templates/join_persons.html:37
+msgid "Relate Person"
+msgstr ""
+
+#: templates/join_persons.html:38
+msgid "person"
+msgstr ""
+
+#: templates/join_persons.html:39
+msgid "Court, Signum"
+msgstr ""
+
 #: templates/ladattu2.html:7
 msgid "Loaded file"
 msgstr "Laddad fil"
@@ -3882,5 +3969,11 @@ msgstr "Kan ej ladda filen, kod ="
 #~ msgstr "Godkända användar åtgärder"
 
 #~ msgid "Return start page"
+#~ msgstr ""
+
+#~ msgid "Select language and other options"
+#~ msgstr ""
+
+#~ msgid "My settings"
 #~ msgstr ""
 
