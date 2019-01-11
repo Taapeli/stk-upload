@@ -12,7 +12,6 @@ h1 {
     width: 100%;
     padding: 2px;
     height: 23px;
-    margin-bottom: 2px; /* murupolun kanssa */
     color: #6f512a;
     background-color:bisque;
     font-size: 13pt;
@@ -46,7 +45,7 @@ a.bread:visited { text-decoration: none; }
 a.bread:hover { text-decoration: underline; }
 a.bread:active { text-decoration: underline; }
 
-a#ohjeet, div#paluu {
+div#paluu {
     position: absolute;
     top: 7px;
     right: 4px;
@@ -86,7 +85,8 @@ div#paluu {
     padding: 1em; 
     background-color: bisque;
     width: 280px;
-    min-height: 150px;
+    min-height: 200px;
+    border-radius: 15px;
 }
 .startbox2 {
     width: 603px;

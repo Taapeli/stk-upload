@@ -52,11 +52,11 @@
                   {% endif %}><a href="/scene/persons" title="{{ _('Search for people') }}">{{ _('Search') }}</a></li>
                 <li{% if value == 1 %} class="CurrentSection"                           {# was: Persons #}
                   {% endif %}><a href="/scene/persons/all" title="{{ _('All persons') }}">{{ _('Names') }}</a></li>
-
-                <li{% if value == 11 %} class="CurrentSection"
+             {# <li{% if value == 11 %} class="CurrentSection"
                   {% endif %}><a href="/scene/persons_own/" title="{{ _('My persons') }}">{{ _('My persons') }}</a></li>
+              #}
                 <li{% if value == 12 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons_all/" title="{{ _('Compare persons') }}">{{ _('All persons') }}</a></li>
+                  {% endif %}><a href="/scene/persons_all/" title="{{ _('Person list by default name') }}">{{ _('Persons') }}</a></li>
 
             {# <li{% if value == 2 %} class="CurrentSection"
                   {% endif %}><a href="#" class="dimmed" title="{{ _('Surnames') }}">{{ _('Names') }}</a></li>

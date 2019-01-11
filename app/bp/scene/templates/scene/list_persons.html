@@ -4,6 +4,7 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro %}
+
 {% set cnt = persons | count %}
 
 {% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }}</h2>
@@ -50,15 +51,17 @@
 			    <li>{% if next['bw'] %}<a href="/scene/persons_{{rule[0]}}/" title="alkuun" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
-                <li><span class="navlink" title="edellinen sivu"> &lt; </span></li>
-        {% for p in persons %}{% set ini = p.sortname[0]|upper %}
-            {% if alpha != ini %}
-                {% set alpha = ini %}
-                {% if alpha == "#" %}{% set symbol = '_' %}{% else %}{% set symbol = ini %}{% endif %}
-                <li><a href="#{{symbol}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{symbol}}</a></li>
-            {% endif %}{% endfor %}
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+
+            {% for p in persons %}
+                {% set ini = p.sortname[0] %}
+                {% if loop.changed(ini) %}
+                    <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+                {% endif %}
+            {% endfor %}
             <li><a href="/scene/persons_{{rule[0]}}/?f={{next['fw']}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
-			</ul>
+            </ul>
+
 		</div>
 		<table class="IndividualList">
 			<thead>
@@ -74,10 +77,10 @@
 	           {% if p.owner == pick %}{% set notMine = 0 %}{% else %}{% set notMine = 1 %}{% endif %}
 	       {% else %}{% set notMine = 0 %}
 	       {% endif %}
-	            <tr><td class="ColumnAlpha">{% set ini = p.sortname[0] %}
-		           {% if alpha != ini %}
-		              {% set alpha = ini %}
-		               {% if alpha == "#" %}{% set symbol = '_' %}{% else %}{% set symbol = ini %}{% endif %}
+	            <tr><td class="ColumnAlpha">
+	               {% set ini = p.sortname[0] %}
+	               {% if loop.changed(ini) %}
+		               {% if ini == "#" %}{% set symbol = '_' %}{% else %}{% set symbol = ini %}{% endif %}
 		               <a id="{{symbol}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{symbol}}</a>
 	               {% endif %}</td>
 

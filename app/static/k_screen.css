@@ -84,9 +84,12 @@ body > div {
 ----------------------------------------------------- */
 h1 {
     position: relative;
+    color: #7e6b53; /* Darker bisque */
     background-color:bisque;
-    font-size: 11pt;
+    font-family: Georgia, "Times New Roman", times;
+    font-size: 13pt;
     width: 100%;
+    padding: 2px;
 }
 .h1_user {
 	position: absolute; 
