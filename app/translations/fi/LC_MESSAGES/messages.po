@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2019-01-11 10:33+0200\n"
-"PO-Revision-Date: 2019-01-11 10:34+0200\n"
+"PO-Revision-Date: 2019-01-11 15:40+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -29,7 +29,7 @@ msgstr "Kirjautuminen"
 
 #: setups.py:150
 msgid "Email Address"
-msgstr ""
+msgstr "Sähköpostiosoite"
 
 #: setups.py:151
 msgid "I have read and agree the "
@@ -63,7 +63,7 @@ msgstr "ruotsi"
 
 #: bp/admin/forms.py:45 setups.py:178
 msgid "English"
-msgstr ""
+msgstr "englanti"
 
 #: bp/admin/forms.py:38 setups.py:205
 msgid "User name"
@@ -88,7 +88,7 @@ msgstr "Kelpaamattomia kenttänimiä \"Name,Refname,Reftype,Source,Gender\" {}"
 
 #: bp/admin/forms.py:32
 msgid "id:"
-msgstr ""
+msgstr "tunnus:"
 
 #: bp/admin/forms.py:33
 msgid "Id of the user"
@@ -144,60 +144,60 @@ msgstr "Pääkäyttäjä"
 
 #: bp/admin/forms.py:57
 msgid "Assigned roles"
-msgstr ""
+msgstr "Roolit"
 
 #: bp/admin/forms.py:58
 msgid "Email confirmed time"
-msgstr ""
+msgstr "Sähköposti vahvistettu"
 
 #: bp/admin/forms.py:59
 msgid "Time of email confirmation"
-msgstr ""
+msgstr "Aika jolloin sähköpostivahvistus on tehty"
 
 #: bp/admin/forms.py:60
 msgid "Last login time"
-msgstr ""
+msgstr "Viimeinen kirjautuminen"
 
 #: bp/admin/forms.py:61
 msgid "Time of last login"
-msgstr ""
+msgstr "Aika jolloin viimeksi on kirjauduttu sisään sovellukseen"
 
 #: bp/admin/forms.py:62
 msgid "Last login IP address"
-msgstr ""
+msgstr "Viimeksi käytetty IP-osoite"
 
 #: bp/admin/forms.py:63
 msgid "IP address of last login"
-msgstr ""
+msgstr "IP-osoite josta on viimeksi kirjauduttu sisään sovellukseen"
 
 #: bp/admin/forms.py:64
 msgid "Current login time"
-msgstr ""
+msgstr "Kirjautumisaika"
 
 #: bp/admin/forms.py:65
 msgid "Time of current login"
-msgstr ""
+msgstr "Aika jolloin on viimeksi kirjaduttu sisään sovellukseen"
 
 #: bp/admin/forms.py:66
 msgid "Current login IP address"
-msgstr ""
+msgstr "Nykyinen IP-osoite"
 
 #: bp/admin/forms.py:67
 msgid "IP address of current login"
-msgstr ""
+msgstr "Tässä istunnossa käytetty  IP-osoite"
 
 #: bp/admin/forms.py:68
 msgid "Login count"
-msgstr ""
+msgstr "Kirjautumiskertoja"
 
 #: bp/admin/forms.py:69
 msgid "Count of logins"
-msgstr ""
+msgstr "Kirjautumiskertojen lukumäärä"
 
 #: bp/admin/forms.py:71 bp/admin/templates/admin/update_user.html:4
 #: bp/admin/templates/admin/update_user.html:11
 msgid "Update user"
-msgstr ""
+msgstr "Päivitä käyttäjätietoja"
 
 #: bp/admin/forms.py:77
 msgid "Maximum 100 characters"
@@ -484,11 +484,11 @@ msgstr "Toimenpiteet"
 
 #: bp/admin/templates/admin/list_users.html:35
 msgid "Uploaded files"
-msgstr ""
+msgstr "Ladatut tiedostot"
 
 #: bp/admin/templates/admin/list_users.html:36
 msgid "Edit user"
-msgstr ""
+msgstr "Muokkaa käyttäjätietoja"
 
 #: bp/admin/templates/admin/list_users.html:41
 msgid "No users"
@@ -496,7 +496,7 @@ msgstr "Ei käyttäjiä"
 
 #: bp/admin/templates/admin/list_users.html:45 bp/admin/templates/admin/uploads.html:10
 msgid "Uploads for all users"
-msgstr ""
+msgstr "Kaikkien käyttäjien lataamat tiedostot"
 
 #: bp/admin/templates/admin/load_result.html:3
 msgid "Gramps to Neo4j log"
@@ -603,27 +603,27 @@ msgstr "Lataukset käyttäjältä"
 
 #: bp/admin/templates/admin/uploads.html:23
 msgid "Status for differents steps in XML file upload:"
-msgstr ""
+msgstr "XML-tiedoston latauksen vaiheet"
 
 #: bp/admin/templates/admin/uploads.html:28 bp/gramps/templates/gramps/uploads.html:33
 msgid "the file has been uploaded to server"
-msgstr ""
+msgstr "tiedosto on siirretty palvelimelle"
 
 #: bp/admin/templates/admin/uploads.html:32 bp/gramps/templates/gramps/uploads.html:36
 msgid "the file content is being stored to the database"
-msgstr ""
+msgstr "tiedoston sisältöä ladataan tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:36 bp/gramps/templates/gramps/uploads.html:39
 msgid "the file content has been stored to the database"
-msgstr ""
+msgstr "tiedoston sisältö on ladattu tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:40 bp/gramps/templates/gramps/uploads.html:42
 msgid "there was an error"
-msgstr ""
+msgstr "virhetilanne"
 
 #: bp/admin/templates/admin/uploads.html:47
 msgid "User id"
-msgstr ""
+msgstr "Käyttäjätunnus"
 
 #: bp/admin/templates/admin/uploads.html:49 bp/gedcom/templates/gedcom_info.html:91
 #: bp/gramps/templates/gramps/uploads.html:49
@@ -668,32 +668,32 @@ msgstr "Virheellisiä päivämääriä:"
 
 #: bp/gedcom/gedcom_analyze.py:105
 msgid "Too few child tags:"
-msgstr ""
+msgstr "Liian vähän alarivejä"
 
 #: bp/gedcom/gedcom_analyze.py:106
 msgid "Too many child tags:"
-msgstr ""
+msgstr "Liian monta alariviä"
 
 #: bp/gedcom/gedcom_analyze.py:107
 msgid "Records for submitters"
-msgstr ""
+msgstr "Tutkijoiden tuottamat tiedot"
 
 #: bp/gedcom/gedcom_analyze.py:210
 msgid "Genders:"
-msgstr ""
+msgstr "Sukupuolet:"
 
 #: bp/gedcom/gedcom_analyze.py:219
 msgid "Submitters"
-msgstr ""
+msgstr "Tutkijat"
 
 #: bp/gedcom/gedcom_analyze.py:228
 msgid "Missing paths:"
-msgstr ""
+msgstr "Puuttuvat pakolliset tiedot"
 
 #: bp/gedcom/gedcom_analyze.py:233
 #, python-format
 msgid "TYPEs for %(parent_path)s"
-msgstr ""
+msgstr "TYPE-kentän arvot %(parent_path)s-rakenteissa"
 
 #: bp/gedcom/handlers.py:180
 msgid "Gedcoms"
@@ -1247,7 +1247,7 @@ msgstr "Viesti ylläpitäjälle"
 #: bp/start/templates/start/index_logged.html:10
 #: bp/start/templates/start/my_settings.html:10
 msgid "Message to the administrator"
-msgstr ""
+msgstr "Viesti ylläpitäjälle"
 
 #: bp/gramps/templates/gramps/index_gramps.html:12
 #: bp/gramps/templates/gramps/uploads.html:12 bp/scene/templates/scene/index_scene.html:12
@@ -1255,14 +1255,14 @@ msgstr ""
 #: bp/start/templates/start/my_settings.html:11
 #: bp/start/templates/start/my_settings.html:20
 msgid "Change language"
-msgstr ""
+msgstr "Vaihda kieltä"
 
 #: bp/gramps/templates/gramps/index_gramps.html:12
 #: bp/gramps/templates/gramps/uploads.html:12 bp/scene/templates/scene/index_scene.html:12
 #: bp/start/templates/start/index_logged.html:11
 #: bp/start/templates/start/my_settings.html:11
 msgid "Select language"
-msgstr ""
+msgstr "Valitse kieli"
 
 #: bp/gramps/templates/gramps/index_gramps.html:18
 msgid "Candidate material files"
@@ -1308,11 +1308,11 @@ msgstr "Aika sekunneissa"
 
 #: bp/gramps/templates/gramps/uploads.html:3
 msgid "Uploads from Gramps"
-msgstr ""
+msgstr "Ladatut Gramps-tiedostot"
 
 #: bp/gramps/templates/gramps/uploads.html:30
 msgid "Status for differents steps in XML file upload"
-msgstr ""
+msgstr "XML-tiedoston latauksen vaiheet"
 
 #: bp/gramps/templates/gramps/uploads.html:59
 msgid "Download to your computer"
@@ -1324,7 +1324,7 @@ msgstr "Poista"
 
 #: bp/gramps/templates/gramps/uploads.html:65
 msgid "The administrator can load your file to database as your new candidate material set"
-msgstr ""
+msgstr "Ylläpitäjä voi tallettaa ehdokasaineistosi tietokantaan"
 
 #: bp/gramps/templates/gramps/uploads.html:67
 msgid "on this page"
@@ -1332,7 +1332,7 @@ msgstr "tällä sivulla"
 
 #: bp/gramps/templates/gramps/uploads.html:70
 msgid "See your own data"
-msgstr ""
+msgstr "Siirry omiin tietoihin"
 
 #: bp/scene/templates/scene/families.html:8 bp/tools/templates/tools/table_families.html:8
 msgid "List of Families"
@@ -1510,7 +1510,7 @@ msgstr "Siirry"
 
 #: bp/scene/templates/scene/list_persons.html:29
 msgid "Starting letters of surname"
-msgstr ""
+msgstr "Sukunimen alku"
 
 #: bp/scene/templates/scene/list_persons.html:30 bp/scene/templates/scene/person.html:39
 #: bp/scene/templates/scene/person.html:164 bp/scene/templates/scene/persons.html:34
@@ -2127,23 +2127,23 @@ msgstr "Omat henkilöt ja tapahtumat"
 
 #: bp/start/templates/start/my_message.html:4 bp/start/templates/start/my_message.html:13
 msgid "Contact administrators"
-msgstr ""
+msgstr "Yhteys ylläpitäjään"
 
 #: bp/start/templates/start/my_message.html:17
 msgid "Write a message"
-msgstr ""
+msgstr "Kirjoita viesti"
 
 #: bp/start/templates/start/my_message.html:24 bp/start/templates/start/my_settings.html:27
 msgid "Apply"
-msgstr ""
+msgstr "Lähetä"
 
 #: bp/start/templates/start/my_settings.html:4
 msgid "Stk User's Settings"
-msgstr ""
+msgstr "Käyttäjän asetukset"
 
 #: bp/start/templates/start/my_settings.html:16
 msgid "Change my settings"
-msgstr ""
+msgstr "Muuta asetuksia"
 
 #: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:39
 msgid "Version"
@@ -2739,7 +2739,7 @@ msgstr "Näytetään lähteet joiden arkistoa ei ole annettu"
 
 #: models/dataupdater.py:62
 msgid "Estimated {} person lifetimes"
-msgstr ""
+msgstr "Arvioitu elinaika {}:lle henkilölle"
 
 #: static/js/gedcom_scripts.js:15
 msgid "Server error"
@@ -3293,24 +3293,24 @@ msgstr "seurakunnassa"
 
 #: templates/join_persons.html:3 templates/join_persons.html:17
 msgid "Merging people"
-msgstr ""
+msgstr "Henkilöiden yhdistäminen"
 
 #: templates/join_persons.html:29
 msgid "People whose name begins with"
-msgstr ""
+msgstr "Henkilöt joiden nimi alkaa"
 
 #: templates/join_persons.html:32
 msgid ""
 "Mark the central person (1st selection column) and the people to be merged (2nd column)"
-msgstr ""
+msgstr "Merkitse keskushenkilö (1. sarake) ja yhdistettävät henkilöt (2. sarake)"
 
 #: templates/join_persons.html:33
 msgid "If necessary, pick up nearby reference names <i> (not already in use)"
-msgstr ""
+msgstr "Valitse referenssinimet tarpeen mukaan"
 
 #: templates/join_persons.html:34
 msgid "Merge to selected Central Person"
-msgstr ""
+msgstr "Yhdistä keskushenkilöön"
 
 #: templates/join_persons.html:37
 msgid "Relate Person"
@@ -3318,7 +3318,7 @@ msgstr ""
 
 #: templates/join_persons.html:38
 msgid "person"
-msgstr ""
+msgstr "henkilö"
 
 #: templates/join_persons.html:39
 msgid "Court, Signum"
@@ -3483,69 +3483,3 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
-
-#~ msgid "Menu"
-#~ msgstr "Valikko"
-
-#~ msgid "Discover materials in Suomi Database Service"
-#~ msgstr "Tutustu Suomikannan aineistoihin"
-
-#~ msgid "View our materials with limited rights"
-#~ msgstr "Katso aineistojamme rajoitetuin oikeuksin"
-
-#~ msgid "Enroll as user candidate in Suomi tietokanta Service"
-#~ msgstr "Ilmoittaudu Suomikannan käyttäjäehdokkaaksi"
-
-#~ msgid "Enroll"
-#~ msgstr "Ilmoittaudu"
-
-#~ msgid "Login with your credentialst (email or username)"
-#~ msgstr "Kirjaudu tunnuksillasi (sähköposti tai käyttäjätunnus)"
-
-#~ msgid "Approved user's actions"
-#~ msgstr "Kirjautuneen käyttäjän toimintoja"
-
-#~ msgid "mail"
-#~ msgstr "sähköposti"
-
-#~ msgid "Revert to"
-#~ msgstr "Palauta"
-
-#~ msgid "renamed to"
-#~ msgstr "uusi nimi"
-
-#~ msgid ""
-#~ "The administrator can load your file to database as yor new candadate material set"
-#~ msgstr "Ylläpitäjä voi tallettaa ehdokasaineistosi tietokantaan"
-
-#~ msgid "Displaying %(num)s person names."
-#~ msgid_plural "Displaying %(num)s person names."
-#~ msgstr[0] "Näytetään %(num)s henkilö."
-#~ msgstr[1] "Näytetään %(num)s henkilöä."
-
-#~ msgid "LOADING"
-#~ msgstr "LADATAAN"
-
-#~ msgid "DONE"
-#~ msgstr "TEHTY"
-
-#~ msgid "Source "
-#~ msgstr "Lähde"
-
-#~ msgid "Gedcom "
-#~ msgstr "gedcom"
-
-#~ msgid "Submitter "
-#~ msgstr "Lataaja"
-
-#~ msgid "        count\n"
-#~ msgstr "lukumäärä\n"
-
-#~ msgid "Visualisation data, not based on material"
-#~ msgstr "Näennäistiedot, ei aineistosta"
-
-#~ msgid "Select language and other options"
-#~ msgstr "Valitse käyttämäsi kieli ym"
-
-#~ msgid "My settings"
-#~ msgstr "Omat asetukset"
