@@ -120,11 +120,13 @@ def background_load_to_neo4j(username,filename):
         set_meta(username,filename,status=STATUS_LOADING)
         this_thread = threading.current_thread()
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
-        steps = gramps_loader.xml_to_neo4j(pathname,username)
+        steps,batch_id = gramps_loader.xml_to_neo4j(pathname,username)
+        set_meta(username,filename,batch_id=batch_id)
         for step in steps:
             print(step)
         set_meta(username,filename,status=STATUS_DONE)
         msg = "{}:\nLoaded the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
+        msg += "\nBatch id: {}".format(batch_id)
         msg += "\nLog file: {}".format(logname)
         msg += "\n"
         for step in steps:

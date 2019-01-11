@@ -112,7 +112,7 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
 
     handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
                             'elapsed':time.time()-t0, 'percent':100})
-    return handler.blog.list()
+    return handler.blog.list(),handler.batch_id
 
 
 def file_clean(pathname):
