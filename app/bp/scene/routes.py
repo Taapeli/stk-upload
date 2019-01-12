@@ -8,7 +8,7 @@ from models.gen.person_combo import Person_combo
 logger = logging.getLogger('stkserver')
 import time
 
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required #, roles_accepted
 from urllib.parse import quote_plus # , urlencode
 
@@ -123,13 +123,19 @@ def show_my_persons_all():
     """ List all persons for menu(12)
         Both owners and other persons 
     """
+    fw_fromx = ''
+    if user_session.get('fw_fromx'): 
+        fw_fromx = user_session['fw_fromx']
+    else:
+        user_session['fw_fromx'] = fw_fromx    
+#    print(fw_fromx)        
     t0 = time.time()
     fw_from = request.args.get('f', '')
     bw_from = request.args.get('b', '')
     count = request.args.get('c', 100, int)
 
     keys = ('all',)
-    if current_user.is_authenticated:
+    if current_user.is_authenticated:  # Turha testi, jos @login_required
         user=current_user.username
     else:
         user=None
@@ -140,6 +146,7 @@ def show_my_persons_all():
         if fw_from:
             next_links['bw'] = quote_plus(persons[0].sortname)
         next_links['fw'] = quote_plus(persons[-1].sortname)
+        user_session['fw_fromx'] = next_links['fw']
 
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
                            pick=user, next=next_links, rule=keys, elapsed=time.time()-t0)
