@@ -98,8 +98,8 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
         #    ? Person sortname
         #    + Person lifetime
         #    - Confidence values
-        handler.set_sortname_refnames()
-        handler.set_estimated_dates()
+        handler.set_person_sortname_refnames()
+        handler.set_estimated_person_dates()
 
         handler.blog.complete(handler.tx)
         handler.commit()

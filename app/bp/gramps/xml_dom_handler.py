@@ -83,7 +83,8 @@ class DOM_handler():
         self.collection = DOMTree.documentElement    # XML documentElement
         self.username = current_user        # current username
 
-        self.uniq_ids = []                  # List of processed Person node unique id's
+        self.person_ids = []                # List of processed Person node unique id's
+        self.family_ids = []                # List of processed Family node unique id's
         self.tx = None                      # Transaction not opened
 
     def begin_tx(self, session):
@@ -326,6 +327,8 @@ class DOM_handler():
 
             f.save(self.tx, self.batch_id)
             counter += 1
+            # The sortnames and dates will be set for these families 
+            self.family_ids.append(f.uniq_id)
 
         self.blog.log_event({'title':"Families", 'count':counter, 
                              'elapsed':time.time()-t0, 'percent':1})
@@ -526,7 +529,7 @@ class DOM_handler():
             p.save(self.tx, self.batch_id)
             counter += 1
             # The refnames will be set for these persons 
-            self.uniq_ids.append(p.uniq_id)
+            self.person_ids.append(p.uniq_id)
 
         self.blog.log_event({'title':"Persons", 'count':counter, 
                              'elapsed':time.time()-t0, 'percent':1})
@@ -724,16 +727,16 @@ class DOM_handler():
                              'elapsed':time.time()-t0, 'percent':1})
 
 
-    def set_sortname_refnames(self):
+    def set_person_sortname_refnames(self):
         ''' Add links from each Person to Refnames and set Person.sortname
         '''
 
-        print ("***** {} Refnames & sortnames *****".format(len(self.uniq_ids)))
+        print ("***** {} Refnames & sortnames *****".format(len(self.person_ids)))
         t0 = time.time()
         refname_count = 0
         sortname_count = 0
 
-        for p_id in self.uniq_ids:
+        for p_id in self.person_ids:
             if p_id != None:
                 rc, sc = set_person_name_properties(tx=self.tx, uniq_id=p_id)
                 refname_count += rc
@@ -744,16 +747,16 @@ class DOM_handler():
         self.blog.log_event({'title':"Sorting names", 'count':sortname_count})
 
 
-    def set_estimated_dates(self):
+    def set_estimated_person_dates(self):
         ''' Sets estimated lifetime for each Person processed in handle_people
             in transaction
             
             Called from bp.gramps.gramps_loader.xml_to_neo4j
         '''
-        print ("***** {} Estimated lifetimes *****".format(len(self.uniq_ids)))
+        print ("***** {} Estimated lifetimes *****".format(len(self.person_ids)))
         t0 = time.time()
 
-        cnt = Person_combo.estimate_lifetimes(self.tx, self.uniq_ids)
+        cnt = Person_combo.estimate_lifetimes(self.tx, self.person_ids)
                             
         self.blog.log_event({'title':"Estimated person lifetimes", 
                              'count':cnt, 'elapsed':time.time()-t0,
