@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-12 12:59+0200\n"
+"POT-Creation-Date: 2019-01-14 19:27+0200\n"
 "PO-Revision-Date: 2019-01-11 10:34+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -83,8 +83,8 @@ msgid "Language"
 msgstr "Kieli"
 
 #: bp/admin/cvs_refnames.py:47
-msgid "Not valid field names"
-msgstr "Kelpaamattomia kenttänimiä"
+msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
+msgstr ""
 
 #: bp/admin/forms.py:32
 msgid "id:"
@@ -731,6 +731,12 @@ msgstr "TYPE-kentän arvot %(parent_path)s-rakenteissa"
 #: bp/gedcom/handlers.py:180
 msgid "Gedcoms"
 msgstr "gedcomit"
+
+#: bp/gedcom/handlers.py:224
+msgid ""
+"\n"
+"{}:"
+msgstr ""
 
 #: bp/gedcom/handlers.py:225 bp/gedcom/handlers.py:226
 #: bp/gedcom/handlers.py:242 bp/gedcom/handlers.py:243
@@ -1992,7 +1998,8 @@ msgstr[1] "Näytetään %(num)s henkilönimeä %(order)s mukaisessa järjestykse
 
 #: bp/scene/templates/scene/persons.html:27
 msgid ""
-"If the person has many names, they will appear in the list under each name."
+"If the person has many names, they will appear in the list under each "
+"name."
 msgstr "Sam henkilö voi esiintyä listalla moneen kertaan, kullakin nimellään."
 
 #: bp/scene/templates/scene/persons.html:30
@@ -2163,10 +2170,9 @@ msgstr "Tutustu palveluumme"
 msgid ""
 "<i>Finland Database</i> is a system for co'operatively collect validated "
 "Finnish Genealogy data."
-msgstr 
-"<i>Suomikanta</i> rakennetaan, jotta voimme "
-"yhteistyössä koota suuri luotettavasti "
-"tarkastettujen sukutietojen kokoelma."
+msgstr ""
+"<i>Suomikanta</i> rakennetaan, jotta voimme yhteistyössä koota suuri "
+"luotettavasti tarkastettujen sukutietojen kokoelma."
 
 #: bp/start/templates/start/index.html:24
 msgid "See the process for your data"
@@ -2191,16 +2197,16 @@ msgstr "Katso Suomikannan tietoja"
 #: bp/start/templates/start/index.html:36
 msgid "Here you can se a restrected view on Finnish genealogical data."
 msgstr ""
-"Tässä voit selata mm. henkilöitä, paikkoja ja lähdetietoja "
-"rajoitetussa näkymässä"
+"Tässä voit selata mm. henkilöitä, paikkoja ja lähdetietoja rajoitetussa "
+"näkymässä"
 
 #: bp/start/templates/start/index.html:38
 msgid ""
 "For members of Suomen sukututkimusseura, join our users and gain full "
 "access by"
 msgstr ""
-"Suomen sukututkimusseuran jäsenet voivat "
-"saada täyden pääsyn tietoihin lähettämällä"
+"Suomen sukututkimusseuran jäsenet voivat saada täyden pääsyn tietoihin "
+"lähettämällä"
 
 #: bp/start/templates/start/index.html:39
 msgid "sending a message to administrators"
@@ -3643,3 +3649,7 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
+
+#~ msgid "Not valid field names"
+#~ msgstr "Kelpaamattomia kenttänimiä"
+
