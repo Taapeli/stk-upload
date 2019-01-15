@@ -96,6 +96,7 @@ class LineCounter:
 class Analyzer(transformer.Transformation):
     def __init__(self):
         self.info = Info()
+        self.individuals = 0
         self.allowed_paths = read_allowed_paths()
         self.illegal_paths = LineCounter(_("Invalid tag hierarchy:"))
         self.novalues = LineCounter(_("No value:"))
@@ -143,6 +144,9 @@ class Analyzer(transformer.Transformation):
         if item.tag != "CONC" and path not in self.allowed_paths:
             self.illegal_paths.add(path,item)
         
+        if item.tag == "INDI":
+            self.individuals += 1
+
         if item.value == "" and len(item.children) == 0 and item.tag not in {"TRLR","CONT"}:
             self.novalues.add(item.line,item)         
             
@@ -224,8 +228,13 @@ class Analyzer(transformer.Transformation):
     def display_results(self,options):
         print()
         print(_("Genders:"))
+        
+        total = 0
         for sex,count in sorted(self.genders.items()):
-            print("- {}: {:5}".format(sex,count))            
+            print("- {}: {:5}".format(sex,count))
+            total += count
+        print("-  : {:5}".format(self.individuals-total))
+                    
         self.illegal_paths.display()
         self.invalid_dates.display()
         self.novalues.display()
