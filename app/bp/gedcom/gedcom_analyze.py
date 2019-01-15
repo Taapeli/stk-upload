@@ -97,7 +97,7 @@ class Analyzer(transformer.Transformation):
     def __init__(self):
         self.info = Info()
         self.allowed_paths = read_allowed_paths()
-        self.illegal_paths = LineCounter(_("Illegal paths:"))
+        self.illegal_paths = LineCounter(_("Invalid tag hierarchy:"))
         self.novalues = LineCounter(_("No value:"))
         self.invalid_dates = LineCounter(_("Invalid dates:"))
         #self.too_few = []

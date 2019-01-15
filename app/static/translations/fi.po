@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-14 19:27+0200\n"
+"POT-Creation-Date: 2019-01-15 11:13+0200\n"
 "PO-Revision-Date: 2019-01-11 10:34+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -688,8 +688,8 @@ msgid "GEDCOM Analyzer"
 msgstr "Gedcom-analysointi"
 
 #: bp/gedcom/gedcom_analyze.py:100
-msgid "Illegal paths:"
-msgstr "Virheellisiä tiedostopolkuja:"
+msgid "Invalid tag hierarchy:"
+msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:101
 msgid "No value:"
@@ -3652,4 +3652,7 @@ msgstr "Tiedoston lataus ei onnistu, koodi="
 
 #~ msgid "Not valid field names"
 #~ msgstr "Kelpaamattomia kenttänimiä"
+
+#~ msgid "Illegal paths:"
+#~ msgstr "Virheellisiä tiedostopolkuja:"
 

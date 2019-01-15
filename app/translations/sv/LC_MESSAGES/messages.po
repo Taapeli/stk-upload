@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-14 19:27+0200\n"
+"POT-Creation-Date: 2019-01-15 11:13+0200\n"
 "PO-Revision-Date: 2018-12-18 00:48+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -688,7 +688,7 @@ msgid "GEDCOM Analyzer"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:100
-msgid "Illegal paths:"
+msgid "Invalid tag hierarchy:"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:101
@@ -4096,5 +4096,8 @@ msgstr "Kan ej ladda filen, kod ="
 #~ msgstr ""
 
 #~ msgid "Transform '%(name)s' ended at %(time)s"
+#~ msgstr ""
+
+#~ msgid "Illegal paths:"
 #~ msgstr ""
 

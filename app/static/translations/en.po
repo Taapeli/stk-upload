@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-14 19:27+0200\n"
+"POT-Creation-Date: 2019-01-15 11:13+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -686,7 +686,7 @@ msgid "GEDCOM Analyzer"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:100
-msgid "Illegal paths:"
+msgid "Invalid tag hierarchy:"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:101
@@ -4272,5 +4272,8 @@ msgstr ""
 #~ msgid ""
 #~ "For members of Suomen sukututkimusseura, join our users and\n"
 #~ "\t\t\t\t\tgain full access by"
+#~ msgstr ""
+
+#~ msgid "Illegal paths:"
 #~ msgstr ""
 
