@@ -104,12 +104,14 @@ class Analyzer(transformer.Transformation):
         #self.too_many = []
         self.too_few = LineCounter(_("Too few child tags:"))
         self.too_many = LineCounter(_("Too many child tags:"))
-        self.submitter_refs = LineCounter(_("Records for submitters"))
+        self.submitter_refs = LineCounter(_("Records for submitters:"))
+        self.family_with_no_parents = LineCounter(_("Families with no parents:"))
         self.submitters = dict()
         self.submitter_emails = dict()
         self.records = set()
         self.xrefs = set()
         self.types = defaultdict(LineCounter)
+        
         self.genders = defaultdict(int)
         self.mandatory_paths = {
             "HEAD",
@@ -197,6 +199,20 @@ class Analyzer(transformer.Transformation):
             else: 
                 parent_path = ".".join(parts[0:-1])
             self.types[parent_path].add(item.value,item)
+            
+        if item.tag == "FAM":
+            husb = None
+            wife = None
+            for c1 in item.children:
+                if c1.tag == "HUSB":  
+                    husb = c1.value
+                if c1.tag == "WIFE":  
+                    wife = c1.value
+            if husb is None and wife is None:
+                self.family_with_no_parents.add("",item)
+
+
+            
         return True
 
     def finish(self,options):
@@ -215,6 +231,7 @@ class Analyzer(transformer.Transformation):
         self.novalues.display()
         self.too_few.display()
         self.too_many.display()
+        self.family_with_no_parents.display()
         
         self.submitter_refs2 = LineCounter(_("Submitters"))
         for xref,itemlist in self.submitter_refs.values.items():
