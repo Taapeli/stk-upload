@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-14 19:27+0200\n"
+"POT-Creation-Date: 2019-01-15 20:11+0200\n"
 "PO-Revision-Date: 2019-01-11 10:34+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -84,7 +84,7 @@ msgstr "Kieli"
 
 #: bp/admin/cvs_refnames.py:47
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
-msgstr ""
+msgstr "Kelpaamattomia kenttänimiä \"Name,Refname,Reftype,Source,Gender\" {}"
 
 #: bp/admin/forms.py:32
 msgid "id:"
@@ -427,7 +427,7 @@ msgstr "Ei tietoja"
 msgid "Admin pages"
 msgstr "Ylläpitäjän sivut"
 
-#: bp/admin/templates/admin/layout.html:14
+#: bp/admin/templates/admin/layout.html:14 bp/gedcom/templates/g_layout.html:28
 #: bp/scene/templates/scene/layout.html:25
 #: bp/scene/templates/scene/list_persons.html:84
 #: bp/scene/templates/scene/locations.html:34
@@ -438,7 +438,7 @@ msgstr "Ylläpitäjän sivut"
 msgid "Back to Top"
 msgstr "Palaa alkuun"
 
-#: bp/admin/templates/admin/layout.html:17
+#: bp/admin/templates/admin/layout.html:17 bp/gedcom/templates/g_layout.html:31
 #: bp/scene/templates/scene/layout.html:28
 #: bp/start/templates/start/s_layout.html:27 templates/a_layout.html:30
 msgid "A Database of the Genealogical Society of Finland"
@@ -834,6 +834,21 @@ msgstr "Virheellinen GEDCOM rivillä: {}"
 msgid "Invalid GEDCOM; no level %s lines"
 msgstr "Virheellinen Gedcom; ei tason %s rivejä"
 
+#: bp/gedcom/templates/g_layout.html:36 bp/scene/templates/scene/layout.html:41
+#: bp/start/templates/start/s_layout.html:33 templates/a_layout.html:35
+msgid "Stk-server"
+msgstr "Stk-palvelin"
+
+#: bp/gedcom/templates/g_layout.html:40
+#: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:39
+msgid "Version"
+msgstr "versio"
+
+#: bp/gedcom/templates/g_layout.html:43
+#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:42
+msgid "Instructions"
+msgstr "Ohjeita"
+
 #: bp/gedcom/templates/gedcom_info.html:78
 msgid "Gedcom transformations"
 msgstr "Gedcom-muunnokset"
@@ -1032,7 +1047,6 @@ msgid "Upload a new GEDCOM file"
 msgstr "Lataa uusi gedcom-tiedosto"
 
 #: bp/gedcom/templates/gedcom_list.html:44
-#: bp/tools/templates/tools/tables.html:52
 msgid "Return main page"
 msgstr "Paluu etusivulle"
 
@@ -1512,11 +1526,6 @@ msgstr "Muuta asetuksia"
 #: bp/scene/templates/scene/layout.html:32
 msgid "Select displayed data"
 msgstr "Valitse näytettävät tiedot"
-
-#: bp/scene/templates/scene/layout.html:41
-#: bp/start/templates/start/s_layout.html:33 templates/a_layout.html:35
-msgid "Stk-server"
-msgstr "Stk-palvelin"
 
 #: bp/scene/templates/scene/layout.html:45
 msgid "version"
@@ -2000,7 +2009,7 @@ msgstr[1] "Näytetään %(num)s henkilönimeä %(order)s mukaisessa järjestykse
 msgid ""
 "If the person has many names, they will appear in the list under each "
 "name."
-msgstr "Sam henkilö voi esiintyä listalla moneen kertaan, kullakin nimellään."
+msgstr "Sama henkilö voi esiintyä listalla moneen kertaan, kullakin nimellään."
 
 #: bp/scene/templates/scene/persons.html:30
 msgid "Clicking a name will take you to the selected person's page."
@@ -2171,8 +2180,8 @@ msgid ""
 "<i>Finland Database</i> is a system for co'operatively collect validated "
 "Finnish Genealogy data."
 msgstr ""
-"<i>Suomikanta</i> rakennetaan, jotta voimme yhteistyössä koota suuri "
-"luotettavasti tarkastettujen sukutietojen kokoelma."
+"<i>Suomikanta</i> rakennetaan, jotta voimme yhteistyössä koota suuren "
+"luotettavasti tarkastettujen sukutietojen kokoelman."
 
 #: bp/start/templates/start/index.html:24
 msgid "See the process for your data"
@@ -2188,7 +2197,7 @@ msgstr "Suomikanta ja sen hyödyntäminen"
 
 #: bp/start/templates/start/index.html:29
 msgid "Gedcom healing services"
-msgstr "Sukutietojen puhdistaminen Gedcom-ohjelmillamme"
+msgstr "Sukutietojen vakiointi Gedcom-ohjelmillamme"
 
 #: bp/start/templates/start/index.html:35
 msgid "Look at data in Suomikanta"
@@ -2851,15 +2860,11 @@ msgstr "Viittauksettomat lähteet"
 
 #: bp/tools/templates/tools/tables.html:45
 msgid "Sources without a repository"
-msgstr "Lähteet, joilta puuttuu arkistotieto"
+msgstr "Lähteet ilman arkistoa"
 
 #: bp/tools/templates/tools/tables.html:46
 msgid "Unreferenced Events"
 msgstr "Viittauksettomat tapahtumat"
-
-#: bp/tools/templates/tools/tables.html:51
-msgid "Exit"
-msgstr "Poistu"
 
 #: models/datareader.py:398 models/datareader.py:411 models/datareader.py:434
 #: models/datareader.py:453
@@ -3649,7 +3654,3 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
-
-#~ msgid "Not valid field names"
-#~ msgstr "Kelpaamattomia kenttänimiä"
-

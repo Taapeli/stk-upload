@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-14 19:27+0200\n"
+"POT-Creation-Date: 2019-01-15 20:11+0200\n"
 "PO-Revision-Date: 2018-12-18 00:48+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -427,7 +427,7 @@ msgstr "Inget data"
 msgid "Admin pages"
 msgstr "Administratörs sidor"
 
-#: bp/admin/templates/admin/layout.html:14
+#: bp/admin/templates/admin/layout.html:14 bp/gedcom/templates/g_layout.html:28
 #: bp/scene/templates/scene/layout.html:25
 #: bp/scene/templates/scene/list_persons.html:84
 #: bp/scene/templates/scene/locations.html:34
@@ -438,7 +438,7 @@ msgstr "Administratörs sidor"
 msgid "Back to Top"
 msgstr "Till toppen"
 
-#: bp/admin/templates/admin/layout.html:17
+#: bp/admin/templates/admin/layout.html:17 bp/gedcom/templates/g_layout.html:31
 #: bp/scene/templates/scene/layout.html:28
 #: bp/start/templates/start/s_layout.html:27 templates/a_layout.html:30
 msgid "A Database of the Genealogical Society of Finland"
@@ -834,6 +834,21 @@ msgstr "Felaktig GEDCOM vid rad: {}"
 msgid "Invalid GEDCOM; no level %s lines"
 msgstr "Felaktig GEDCOM; inga nivå %s rader"
 
+#: bp/gedcom/templates/g_layout.html:36 bp/scene/templates/scene/layout.html:41
+#: bp/start/templates/start/s_layout.html:33 templates/a_layout.html:35
+msgid "Stk-server"
+msgstr "Stk-server"
+
+#: bp/gedcom/templates/g_layout.html:40
+#: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:39
+msgid "Version"
+msgstr "Version"
+
+#: bp/gedcom/templates/g_layout.html:43
+#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:42
+msgid "Instructions"
+msgstr "Instruktioner"
+
 #: bp/gedcom/templates/gedcom_info.html:78
 msgid "Gedcom transformations"
 msgstr "Gedcom transformationer"
@@ -1032,7 +1047,6 @@ msgid "Upload a new GEDCOM file"
 msgstr "Ladda upp ny GEDCOM fil"
 
 #: bp/gedcom/templates/gedcom_list.html:44
-#: bp/tools/templates/tools/tables.html:52
 msgid "Return main page"
 msgstr "Tillbaka till huvud sidan"
 
@@ -1514,11 +1528,6 @@ msgstr ""
 #: bp/scene/templates/scene/layout.html:32
 msgid "Select displayed data"
 msgstr ""
-
-#: bp/scene/templates/scene/layout.html:41
-#: bp/start/templates/start/s_layout.html:33 templates/a_layout.html:35
-msgid "Stk-server"
-msgstr "Stk-server"
 
 #: bp/scene/templates/scene/layout.html:45
 msgid "version"
@@ -2298,14 +2307,6 @@ msgstr ""
 msgid "Change my settings"
 msgstr ""
 
-#: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:39
-msgid "Version"
-msgstr "Version"
-
-#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:42
-msgid "Instructions"
-msgstr "Instruktioner"
-
 #: bp/start/templates/start/s_macros.html:19
 msgid "Start page"
 msgstr ""
@@ -2852,10 +2853,6 @@ msgstr "Källor utan arkiv"
 #: bp/tools/templates/tools/tables.html:46
 msgid "Unreferenced Events"
 msgstr "Orefererade händelser"
-
-#: bp/tools/templates/tools/tables.html:51
-msgid "Exit"
-msgstr "Avsluta"
 
 #: models/datareader.py:398 models/datareader.py:411 models/datareader.py:434
 #: models/datareader.py:453
@@ -4097,4 +4094,7 @@ msgstr "Kan ej ladda filen, kod ="
 
 #~ msgid "Transform '%(name)s' ended at %(time)s"
 #~ msgstr ""
+
+#~ msgid "Exit"
+#~ msgstr "Avsluta"
 

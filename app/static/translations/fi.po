@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-14 19:27+0200\n"
+"POT-Creation-Date: 2019-01-15 20:11+0200\n"
 "PO-Revision-Date: 2019-01-11 10:34+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -427,7 +427,7 @@ msgstr "Ei tietoja"
 msgid "Admin pages"
 msgstr "Ylläpitäjän sivut"
 
-#: bp/admin/templates/admin/layout.html:14
+#: bp/admin/templates/admin/layout.html:14 bp/gedcom/templates/g_layout.html:28
 #: bp/scene/templates/scene/layout.html:25
 #: bp/scene/templates/scene/list_persons.html:84
 #: bp/scene/templates/scene/locations.html:34
@@ -438,7 +438,7 @@ msgstr "Ylläpitäjän sivut"
 msgid "Back to Top"
 msgstr "Palaa alkuun"
 
-#: bp/admin/templates/admin/layout.html:17
+#: bp/admin/templates/admin/layout.html:17 bp/gedcom/templates/g_layout.html:31
 #: bp/scene/templates/scene/layout.html:28
 #: bp/start/templates/start/s_layout.html:27 templates/a_layout.html:30
 msgid "A Database of the Genealogical Society of Finland"
@@ -834,6 +834,21 @@ msgstr "Virheellinen GEDCOM rivillä: {}"
 msgid "Invalid GEDCOM; no level %s lines"
 msgstr "Virheellinen Gedcom; ei tason %s rivejä"
 
+#: bp/gedcom/templates/g_layout.html:36 bp/scene/templates/scene/layout.html:41
+#: bp/start/templates/start/s_layout.html:33 templates/a_layout.html:35
+msgid "Stk-server"
+msgstr "Stk-palvelin"
+
+#: bp/gedcom/templates/g_layout.html:40
+#: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:39
+msgid "Version"
+msgstr "versio"
+
+#: bp/gedcom/templates/g_layout.html:43
+#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:42
+msgid "Instructions"
+msgstr "Ohjeita"
+
 #: bp/gedcom/templates/gedcom_info.html:78
 msgid "Gedcom transformations"
 msgstr "Gedcom-muunnokset"
@@ -1032,7 +1047,6 @@ msgid "Upload a new GEDCOM file"
 msgstr "Lataa uusi gedcom-tiedosto"
 
 #: bp/gedcom/templates/gedcom_list.html:44
-#: bp/tools/templates/tools/tables.html:52
 msgid "Return main page"
 msgstr "Paluu etusivulle"
 
@@ -1512,11 +1526,6 @@ msgstr "Muuta asetuksia"
 #: bp/scene/templates/scene/layout.html:32
 msgid "Select displayed data"
 msgstr "Valitse näytettävät tiedot"
-
-#: bp/scene/templates/scene/layout.html:41
-#: bp/start/templates/start/s_layout.html:33 templates/a_layout.html:35
-msgid "Stk-server"
-msgstr "Stk-palvelin"
 
 #: bp/scene/templates/scene/layout.html:45
 msgid "version"
@@ -2302,14 +2311,6 @@ msgstr "Käyttäjän asetukset"
 msgid "Change my settings"
 msgstr "Muuta asetuksia"
 
-#: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:39
-msgid "Version"
-msgstr "versio"
-
-#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:42
-msgid "Instructions"
-msgstr "Ohjeita"
-
 #: bp/start/templates/start/s_macros.html:19
 msgid "Start page"
 msgstr "Alkusivu"
@@ -2856,10 +2857,6 @@ msgstr "Lähteet, joilta puuttuu arkistotieto"
 #: bp/tools/templates/tools/tables.html:46
 msgid "Unreferenced Events"
 msgstr "Viittauksettomat tapahtumat"
-
-#: bp/tools/templates/tools/tables.html:51
-msgid "Exit"
-msgstr "Poistu"
 
 #: models/datareader.py:398 models/datareader.py:411 models/datareader.py:434
 #: models/datareader.py:453
@@ -3652,4 +3649,7 @@ msgstr "Tiedoston lataus ei onnistu, koodi="
 
 #~ msgid "Not valid field names"
 #~ msgstr "Kelpaamattomia kenttänimiä"
+
+#~ msgid "Exit"
+#~ msgstr "Poistu"
 

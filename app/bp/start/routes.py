@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger('stkserver')
 #import time
 
-from flask import render_template, redirect, url_for #, request, flash, g
+from flask import render_template   # redirect, url_for, request, flash, g
 from flask_security import login_required, roles_accepted, current_user # ,roles_required
 #from flask_babelex import _
 

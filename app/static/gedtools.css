@@ -1,0 +1,63 @@
+/* 
+    Created on : 15.1.2019 
+    Author     : JMä
+    
+    Gedcom tools own colors and specialities over pers.css
+*/
+
+h1 {
+    background-color: lightsteelblue;
+    color: white; 
+}
+
+.startbox, .startbox2 {
+    background-color: lightsteelblue;
+}
+
+#lista { width:80%; float:left}
+#tiedot { 
+    border: 1px solid silver;
+    background-color: whitesmoke;
+    opacity: 0.8;
+    width: 18%; 
+    position:fixed; top:90pt; right: 10pt;}
+#tiedot li {margin-left: -20pt;}
+#tiedot ul {list-style-type: none; font-size: 80%;}
+
+div.legend {
+     margin-left:4em; 
+     font-size: 90%;
+     border-left: 6px solid silver;
+}
+table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
+   border:none;
+   outline:none;
+}
+
+/* http://stackoverflow.com/questions/1964839/jquery-please-wait-loading-animation    */
+.modal {
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 ) 
+                url('http://i.stack.imgur.com/FhHRx.gif') 
+                50% 50% 
+                no-repeat;
+}
+
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading {
+    overflow: hidden;   
+}
+
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modal {
+    display: block;
+}
+
