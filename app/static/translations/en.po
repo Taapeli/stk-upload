@@ -686,7 +686,7 @@ msgid "GEDCOM Analyzer"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:100
-msgid "Illegal paths:"
+msgid "Invalid tag hierarchy:"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:101
@@ -4271,6 +4271,6 @@ msgstr ""
 #~ "\t\t\t\t\tgain full access by"
 #~ msgstr ""
 
-#~ msgid "Exit"
+#~ msgid "Illegal paths:"
 #~ msgstr ""
 

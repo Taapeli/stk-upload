@@ -686,7 +686,7 @@ msgid "GEDCOM Analyzer"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:100
-msgid "Illegal paths:"
+msgid "Invalid tag hierarchy:"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:101
