@@ -215,7 +215,7 @@ def show_a_person_w_apoc(uid):
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
     return render_template("/scene/person_pg.html", person=person, obj=objs, 
-                           marks=marks, menuno=1, elapsed=time.time()-t0)
+                           marks=marks, menuno=12, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person=<int:uniq_id>')
