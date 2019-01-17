@@ -222,7 +222,7 @@ class Neo4jUserDatastore(UserDatastore):
                            email = user.email,
                            name = rolename)        
             logger.info('User with email address {} updated'.format(user.email)) 
-            return self._build_user_from_record(userRecord)
+            return (userRecord)
         except CypherError as ex:
             logger.error('CypherError', ex)            
             raise ex            
