@@ -345,11 +345,12 @@ def gedcom_delete(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
     for name in os.listdir(gedcom_folder):
-        filename = os.path.join(gedcom_folder, name)
+        if name.endswith("-history"): continue # do not remove history
         if (name == gedcom or 
             name.startswith(gedcom+".") or 
             name.startswith(gedcom+"-")
         ):
+            filename = os.path.join(gedcom_folder, name)
             removefile(filename) 
             logging.info("Deleted:"+filename)
     return redirect(url_for('.gedcom_list'))
