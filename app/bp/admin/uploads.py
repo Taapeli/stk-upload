@@ -22,6 +22,9 @@ from models import email, util    # loadfile,
 
 from ..gramps import gramps_loader
 
+import shareds
+from models.cypher_gramps import Cypher_batch
+
 STATUS_UPLOADED     = "uploaded"
 STATUS_LOADING      = "loading"
 STATUS_DONE         = "done"
@@ -167,6 +170,13 @@ def initiate_background_load_to_neo4j(userid,filename):
     #    time.sleep(0.5)
     return False
 
+def batch_count(username,batch_id):
+    with shareds.driver.session() as session:
+        tx = session.begin_transaction()
+        count = tx.run(Cypher_batch.batch_count, user=username, bid=batch_id).single().value()
+        tx.commit()
+        return count
+        
 def list_uploads(username):
     ''' Gets a list of uploaded files and their process status '''
     upload_folder = get_upload_folder(username)
@@ -193,6 +203,10 @@ def list_uploads(username):
                     status_text = _("STORING") 
             elif status == STATUS_DONE:
                 status_text = _("STORED")
+                batch_id = meta['batch_id']
+                count = batch_count(username,batch_id)
+                if count == 0:
+                    status_text = _("UPLOADED")
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
             if status_text:
