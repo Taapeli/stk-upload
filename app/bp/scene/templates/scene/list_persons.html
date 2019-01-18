@@ -6,23 +6,30 @@
 {% import '/scene/macros.html' as macro %}
 
 {% set cnt = persons | count %}
+{% set who = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
+              3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'} %}
 
-{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }}</h2>
-{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
-{% else %}<h2>{{ _('Persons') }}</h2>
+{% if session['filter_div'] %}
+    <h2>{{ _('Persons filtered by') }} {{ who[ session['filter_div'] ] }}</h2>
+{# elif rule[0] == 'refname' %}
+    <h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2> #}
+{% else %}
+    <h2>{{ _('Persons') }}</h2>
 {% endif %}
 
-<!-- Rule = {{rule}} for {{cnt}} persons, pick {{pick}}, next {{next}} -->
+<p><small>{{cnt}} persons, pick {{pick}}, next {{next}}, 
+    fw {{session['fw_fromx']}}, filter {{session['filter_div']}}</small></p>
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
 	           <div>
-	            <p id="description">{{ _('Displaying %(num)s persons', num=cnt) }}.</p>
+	            <p id="description">{{ _('Displaying %(num)s persons', num=cnt) }}.
+                 </p>
 	           </div>
 	           <div>
-	               <form action="/scene/persons_{{rule[0]}}/">
+	               <form action="/scene/persons_all">
 	                 <fieldset>
 	                    <input type="hidden" name="c" value="10" >
 	                    <label for="f">{{ _('Go to') }}</label>
@@ -48,7 +55,7 @@
     {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-			    <li>{% if next['bw'] %}<a href="/scene/persons_{{rule[0]}}/" title="alkuun" class="navlink">|&lt;</a>
+			    <li>{% if next['bw'] %}<a href="/scene/persons_all/" title="alkuun" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
@@ -59,7 +66,7 @@
                     <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
                 {% endif %}
             {% endfor %}
-            <li><a href="/scene/persons_{{rule[0]}}/?f={{next['fw']}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+            <li><a href="/scene/persons_all/?f={{next['fw']}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
 
 		</div>
@@ -74,10 +81,13 @@
 
 	    {% for p in persons %}
 	       {% if pick %}
-	           {% if p.owner == pick %}{% set notMine = 0 %}{% else %}{% set notMine = 1 %}{% endif %}
+	           {% if p.owner == pick %}{% set notMine = 0 %}
+	           {% else %}{% set notMine = 1 %}{% endif %}
 	       {% else %}{% set notMine = 0 %}
 	       {% endif %}
 	            <tr><td class="ColumnAlpha">
+	               <small>{{notMine}} {{pick}}</small>
+
 	               {% set ini = p.sortname[0] %}
 	               {% if loop.changed(ini) %}
 		               {% if ini == "#" %}{% set symbol = '_' %}{% else %}{% set symbol = ini %}{% endif %}

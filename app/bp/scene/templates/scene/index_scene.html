@@ -43,9 +43,9 @@
      {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
                 <p>
-                  <input type="radio" name="sel" value="1" checked>Suomikanta<br>
-                  <input type="radio" name="sel" value="2">{{ _('My candidate material') }}<br>
-                  <input type="radio" name="sel" value="4">{{ _('Selected set of material') }}<br>
+                  <input type="radio" name="div" value="1" checked>Suomikanta<br>
+                  <input type="radio" name="div" value="2">{{ _('My candidate material') }}<br>
+                  <input type="radio" name="div" value="4">{{ _('Selected set of material') }}<br>
                   &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1" >
                         {{ _('Compare to Suomikanta') }} 
                 </p>

@@ -154,12 +154,13 @@ return path"""
         def _read_person_list(user, fw_from, limit):
             """ Read Person data from given fw_from 
             """
+            from bp.scene.routes import UserFilter
             try:
                 with shareds.driver.session() as session:
-                    if show == "own":
+                    if show == "own" or UserFilter.is_only_mine_data(): #show > 1:
                         result = session.run(Cypher_person.read_my_persons_with_events_from_name,
                                              user=user, start_name=fw_from, limit=limit)
-                    elif show == "all":
+                    else:
                         result = session.run(Cypher_person.read_all_persons_with_events_from_name,
                                              user=user, start_name=fw_from, limit=limit)
                     return result        
@@ -169,7 +170,11 @@ return path"""
 
 
         persons = []
-        print("Show {} {} persons for user {} starting from {!r}".format(limit, show, user, fw_from))
+        as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
+                   3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'}
+
+        print("Show {} persons of {} for user {} starting from {!r}".\
+              format(limit, as_text[show], user, fw_from))
         result = _read_person_list(user, fw_from, limit)
         for record in result:
             ''' <Record 

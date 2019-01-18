@@ -13,6 +13,8 @@ u { color: DarkKhaki; text-decoration: none; }
 </style>
 
 <h2>{{ _("Person's details") }}</h2>
+<p><small>owner {{person.owner}}, next {{next}}, 
+    fw {{session['fw_fromx']}}, filter {{session['filter_div']}}</small></p>
 
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">
