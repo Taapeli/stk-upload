@@ -608,6 +608,7 @@ def build_parser(filename,gedcom,gedcom_filename):
                             args += " %s %s" % (arg.name,value)
                         else:
                             args += ' "%s"' % value
+            args += " --dryrun"
             return args
             
         def build_command_args(self,argdict):
@@ -623,16 +624,17 @@ def build_parser(filename,gedcom,gedcom_filename):
                             if value: args.append(value)
                         else:
                             args.append(value)
+            args.append("--dryrun")
             return args
 
     parser = Parser()
 
     parser.add_argument('--display-changes', action='store_true',
                         help=_('Display changed rows'))
-    parser.add_argument('--dryrun', action='store_true',
-                        help=_('Do not produce an output file'))
-    parser.add_argument('--nolog', action='store_true',
-                        help=_('Do not produce a log in the output file'))
+    #parser.add_argument('--dryrun', action='store_true',
+    #                    help=_('Do not produce an output file'))
+    #parser.add_argument('--nolog', action='store_true',
+    #                    help=_('Do not produce a log in the output file'))
 #    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
 #                        help=_("Encoding of the input GEDCOM"))
     
