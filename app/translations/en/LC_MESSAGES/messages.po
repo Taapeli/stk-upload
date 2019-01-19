@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-15 20:11+0200\n"
+"POT-Creation-Date: 2019-01-19 10:26+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -263,27 +263,28 @@ msgstr ""
 msgid "Data import from {!r} to database has been started."
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:27 bp/admin/uploads.py:188
-#: bp/admin/uploads.py:203 bp/gramps/templates/gramps/uploads.html:32
+#: bp/admin/templates/admin/uploads.html:27 bp/admin/uploads.py:198
+#: bp/admin/uploads.py:209 bp/admin/uploads.py:217
+#: bp/gramps/templates/gramps/uploads.html:32
 msgid "UPLOADED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:191
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:201
 #: bp/gramps/templates/gramps/uploads.html:41
 msgid "ERROR"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:193
-#: bp/admin/uploads.py:204 bp/gramps/templates/gramps/uploads.html:35
+#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:203
+#: bp/admin/uploads.py:218 bp/gramps/templates/gramps/uploads.html:35
 msgid "STORING"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:195
-#: bp/admin/uploads.py:202 bp/gramps/templates/gramps/uploads.html:38
+#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:205
+#: bp/admin/uploads.py:216 bp/gramps/templates/gramps/uploads.html:38
 msgid "STORED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:197
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:211
 #: bp/gramps/templates/gramps/uploads.html:41
 msgid "FAILED"
 msgstr ""
@@ -685,43 +686,47 @@ msgstr ""
 msgid "GEDCOM Analyzer"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:100
+#: bp/gedcom/gedcom_analyze.py:101
 msgid "Invalid tag hierarchy:"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:101
+#: bp/gedcom/gedcom_analyze.py:102
 msgid "No value:"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:102
+#: bp/gedcom/gedcom_analyze.py:103
 msgid "Invalid dates:"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:105
+#: bp/gedcom/gedcom_analyze.py:106
 msgid "Too few child tags:"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:106
+#: bp/gedcom/gedcom_analyze.py:107
 msgid "Too many child tags:"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:107
-msgid "Records for submitters"
+#: bp/gedcom/gedcom_analyze.py:108
+msgid "Records for submitters:"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:210
+#: bp/gedcom/gedcom_analyze.py:109
+msgid "Families with no parents:"
+msgstr ""
+
+#: bp/gedcom/gedcom_analyze.py:230
 msgid "Genders:"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:219
+#: bp/gedcom/gedcom_analyze.py:245
 msgid "Submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:228
+#: bp/gedcom/gedcom_analyze.py:254
 msgid "Missing paths:"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:233
+#: bp/gedcom/gedcom_analyze.py:259
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr ""
@@ -753,65 +758,65 @@ msgstr ""
 msgid "That GEDCOM file does not exist on the server"
 msgstr ""
 
-#: bp/gedcom/handlers.py:382
+#: bp/gedcom/handlers.py:383
 msgid "Deleted:"
 msgstr ""
 
-#: bp/gedcom/handlers.py:387 bp/gedcom/transformer.py:53
+#: bp/gedcom/handlers.py:388 bp/gedcom/transformer.py:53
 #: bp/gedcom/transformer.py:60
 msgid "Replaced:"
 msgstr ""
 
-#: bp/gedcom/handlers.py:390 bp/gedcom/transformer.py:55
+#: bp/gedcom/handlers.py:391 bp/gedcom/transformer.py:55
 #: bp/gedcom/transformer.py:62
 msgid "With:"
 msgstr ""
 
-#: bp/gedcom/handlers.py:410
+#: bp/gedcom/handlers.py:411
 msgid "Transform '{}' started at {}"
 msgstr ""
 
-#: bp/gedcom/handlers.py:420
+#: bp/gedcom/handlers.py:421
 msgid "Name of the input GEDCOM file"
 msgstr ""
 
-#: bp/gedcom/handlers.py:421
+#: bp/gedcom/handlers.py:422
 msgid "Name of the log file"
 msgstr ""
 
-#: bp/gedcom/handlers.py:424 bp/gedcom/handlers.py:631
+#: bp/gedcom/handlers.py:425 bp/gedcom/handlers.py:626
 msgid "Display changed rows"
 msgstr ""
 
-#: bp/gedcom/handlers.py:426 bp/gedcom/handlers.py:633
+#: bp/gedcom/handlers.py:427
 msgid "Do not produce an output file"
 msgstr ""
 
-#: bp/gedcom/handlers.py:428 bp/gedcom/handlers.py:635
+#: bp/gedcom/handlers.py:429
 msgid "Do not produce a log in the output file"
 msgstr ""
 
-#: bp/gedcom/handlers.py:430
+#: bp/gedcom/handlers.py:431
 msgid "Encoding of the input GEDCOM"
 msgstr ""
 
-#: bp/gedcom/handlers.py:461 bp/gedcom/handlers.py:465
+#: bp/gedcom/handlers.py:462 bp/gedcom/handlers.py:466
 msgid "File saved as {}"
 msgstr ""
 
-#: bp/gedcom/handlers.py:462
+#: bp/gedcom/handlers.py:463
 msgid "Old file saved as {}"
 msgstr ""
 
-#: bp/gedcom/handlers.py:466
+#: bp/gedcom/handlers.py:467
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/handlers.py:528 static/js/gedcom_scripts.js:155
+#: bp/gedcom/handlers.py:532 static/js/gedcom_scripts.js:155
 msgid "Errors:"
 msgstr ""
 
-#: bp/gedcom/handlers.py:595
+#: bp/gedcom/handlers.py:599
 msgid "Unsupported type: "
 msgstr ""
 
@@ -1073,8 +1078,7 @@ msgid "Baptisms"
 msgstr ""
 
 #: bp/gedcom/transforms/lahdeviitteet.py:47
-#: bp/scene/templates/scene/sources.html:30
-msgid "Citations"
+msgid "Citation groups"
 msgstr ""
 
 #: bp/gedcom/transforms/marriages.py:41
@@ -1090,7 +1094,7 @@ msgid "Personal names"
 msgstr ""
 
 #: bp/gedcom/transforms/places.py:11 bp/scene/templates/scene/locations.html:3
-#: bp/scene/templates/scene/macros.html:67
+#: bp/scene/templates/scene/macros.html:64
 #: bp/tools/templates/tools/tables.html:26
 msgid "Places"
 msgstr ""
@@ -1549,7 +1553,7 @@ msgid "Persons carrying a Name"
 msgstr ""
 
 #: bp/scene/templates/scene/list_persons.html:12
-#: bp/scene/templates/scene/macros.html:59
+#: bp/scene/templates/scene/macros.html:56
 #: bp/scene/templates/scene/persons.html:13
 #: bp/tools/templates/tools/table_refnames.html:32
 msgid "Persons"
@@ -1610,7 +1614,7 @@ msgid "Events"
 msgstr ""
 
 #: bp/scene/templates/scene/list_persons.html:91
-#: bp/scene/templates/scene/macros.html:86
+#: bp/scene/templates/scene/macros.html:83
 #: bp/scene/templates/scene/persons.html:120
 #: bp/scene/templates/scene/source_events.html:44
 #, python-format
@@ -1679,11 +1683,11 @@ msgstr ""
 msgid "Names"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:59
+#: bp/scene/templates/scene/macros.html:56
 msgid "Person list by default name"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:65
+#: bp/scene/templates/scene/macros.html:62
 #: bp/scene/templates/scene/person.html:135
 #: bp/scene/templates/scene/person.html:137
 #: bp/scene/templates/scene/person_pg.html:158
@@ -1691,7 +1695,7 @@ msgstr ""
 msgid "Families"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:69
+#: bp/scene/templates/scene/macros.html:66
 #: bp/scene/templates/scene/person.html:81
 #: bp/scene/templates/scene/place_events.html:113
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:41
@@ -1699,15 +1703,15 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:71
+#: bp/scene/templates/scene/macros.html:68
 msgid "Thumbnails"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:71
+#: bp/scene/templates/scene/macros.html:68
 msgid "Pictures and other Media"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:90
+#: bp/scene/templates/scene/macros.html:87
 msgid "Anonymous"
 msgstr ""
 
@@ -2134,6 +2138,10 @@ msgstr ""
 
 #: bp/scene/templates/scene/sources.html:29
 msgid "In the repository"
+msgstr ""
+
+#: bp/scene/templates/scene/sources.html:30
+msgid "Citations"
 msgstr ""
 
 #: bp/scene/templates/scene/sources.html:30
@@ -4272,5 +4280,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Exit"
+#~ msgstr ""
+
+#~ msgid "Records for submitters"
 #~ msgstr ""
 
