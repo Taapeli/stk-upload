@@ -146,6 +146,7 @@ $(document).ready( function() {
     $("#transform").off("click");
 
     $("#transform").click(function() {
+        $("#errors").hide();
     	$("#output").hide();
     	$("#output_log").empty();
     	$("#error_log").empty();
