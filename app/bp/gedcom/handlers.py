@@ -519,6 +519,8 @@ def gedcom_transform(gedcom,transform):
 #         cmd3 = "PYTHONPATH='{}' {} {} {}".\
 #                 format(python_path, python_exe, transform_py, tr_args)
 
+        history_append(gedcom_filename,cmd3)
+
         print("#Doing " + cmd3)
         p = subprocess.Popen(cmd3, shell=True, cwd=gedcom_app,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -526,6 +528,7 @@ def gedcom_transform(gedcom,transform):
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
 #         if s2: print("=== Subprocess errors ===\n" + s2) 
+        if s2: history_append(args.input_gedcom,"\nErrors:\n"+s2)
         s = "\n" + _("Errors:") + "\n" + s2 + "\n\n" + s1
         try:
             log = open(logfile).read()
@@ -598,19 +601,7 @@ def build_parser(filename,gedcom,gedcom_filename):
             return render_template('gedcom_transform_params.html', gedcom=gedcom, transform=filename, rows=rows )
 
         def build_command(self,argdict):
-            args = ""
-            for arg in self.args:
-                if arg.name in argdict:
-                    value = argdict[arg.name].strip()
-                    if not value: value = arg.default
-                    if value: 
-                        if arg.action in {'store_true','store_false'} and value == "on": value = ""
-                        if arg.name[0] == "-":
-                            args += " %s %s" % (arg.name,value)
-                        else:
-                            args += ' "%s"' % value
-            args += " --dryrun"
-            return args
+            return " ".join(self.build_command_args(argdict))
             
         def build_command_args(self,argdict):
             args = []
@@ -626,6 +617,7 @@ def build_parser(filename,gedcom,gedcom_filename):
                         else:
                             args.append(value)
             args.append("--dryrun")
+            args.append("--nolog")
             return args
 
     parser = Parser()
