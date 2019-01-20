@@ -203,10 +203,11 @@ def list_uploads(username):
                     status_text = _("STORING") 
             elif status == STATUS_DONE:
                 status_text = _("STORED")
-                batch_id = meta['batch_id']
-                count = batch_count(username,batch_id)
-                if count == 0:
-                    status_text = _("UPLOADED")
+                if 'batch_id' in meta:
+                    batch_id = meta['batch_id']
+                    count = batch_count(username,batch_id)
+                    if count == 0:
+                        status_text = _("UPLOADED")
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
             if status_text:
