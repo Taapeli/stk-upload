@@ -34,6 +34,20 @@ WITH u, b
         DELETE c
     MERGE (u) -[:CURRENT_LOAD]-> (b)
 """
+
+    batch_list = """
+MATCH (u:UserProfile {userName: $user})
+MATCH (u) -[:HAS_LOADED]-> (b:Batch) 
+RETURN b AS bid
+ORDER BY bid 
+    """
+
+    batch_count = """
+MATCH (u:UserProfile {userName: $user})
+MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid})
+RETURN COUNT(r) as cnt
+"""
+
 #     batch_x = """
 # MATCH (u:UserProfile {userName: $user})
 # MERGE (u) -[:HAS_LOADED {status: $status}]-> 

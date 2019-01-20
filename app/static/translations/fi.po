@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-15 20:11+0200\n"
-"PO-Revision-Date: 2019-01-11 10:34+0200\n"
+"POT-Creation-Date: 2019-01-20 15:14+0200\n"
+"PO-Revision-Date: 2019-01-19 10:27+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -84,7 +84,7 @@ msgstr "Kieli"
 
 #: bp/admin/cvs_refnames.py:47
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
-msgstr ""
+msgstr "Kelpaamattomia kenttänimiä \"Name,Refname,Reftype,Source,Gender\" {}"
 
 #: bp/admin/forms.py:32
 msgid "id:"
@@ -263,27 +263,28 @@ msgstr "Käyttäjätiedot päivitetty"
 msgid "Data import from {!r} to database has been started."
 msgstr "Tietojen talletus tiedostosta {!r} on käynnistetty."
 
-#: bp/admin/templates/admin/uploads.html:27 bp/admin/uploads.py:188
-#: bp/admin/uploads.py:203 bp/gramps/templates/gramps/uploads.html:32
+#: bp/admin/templates/admin/uploads.html:27 bp/admin/uploads.py:198
+#: bp/admin/uploads.py:209 bp/admin/uploads.py:217
+#: bp/gramps/templates/gramps/uploads.html:32
 msgid "UPLOADED"
 msgstr "LADATTU"
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:191
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:201
 #: bp/gramps/templates/gramps/uploads.html:41
 msgid "ERROR"
 msgstr "VIRHE"
 
-#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:193
-#: bp/admin/uploads.py:204 bp/gramps/templates/gramps/uploads.html:35
+#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:203
+#: bp/admin/uploads.py:218 bp/gramps/templates/gramps/uploads.html:35
 msgid "STORING"
 msgstr "MENOSSA TIETOKANTAAN"
 
-#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:195
-#: bp/admin/uploads.py:202 bp/gramps/templates/gramps/uploads.html:38
+#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:205
+#: bp/admin/uploads.py:216 bp/gramps/templates/gramps/uploads.html:38
 msgid "STORED"
 msgstr "TIETOKANNASSA"
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:197
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:211
 #: bp/gramps/templates/gramps/uploads.html:41
 msgid "FAILED"
 msgstr "EPÄONNISTUI"
@@ -687,43 +688,47 @@ msgstr "Poista tiedosto"
 msgid "GEDCOM Analyzer"
 msgstr "Gedcom-analysointi"
 
-#: bp/gedcom/gedcom_analyze.py:100
-msgid "Invalid tag hierarchy:"
-msgstr ""
-
 #: bp/gedcom/gedcom_analyze.py:101
+msgid "Invalid tag hierarchy:"
+msgstr "Virheellinen hierarkia:"
+
+#: bp/gedcom/gedcom_analyze.py:102
 msgid "No value:"
 msgstr "Ei arvoa:"
 
-#: bp/gedcom/gedcom_analyze.py:102
+#: bp/gedcom/gedcom_analyze.py:103
 msgid "Invalid dates:"
 msgstr "Virheellisiä päivämääriä:"
 
-#: bp/gedcom/gedcom_analyze.py:105
+#: bp/gedcom/gedcom_analyze.py:106
 msgid "Too few child tags:"
 msgstr "Liian vähän alarivejä"
 
-#: bp/gedcom/gedcom_analyze.py:106
+#: bp/gedcom/gedcom_analyze.py:107
 msgid "Too many child tags:"
 msgstr "Liian monta alariviä"
 
-#: bp/gedcom/gedcom_analyze.py:107
-msgid "Records for submitters"
-msgstr "Tutkijoiden tuottamat tiedot"
+#: bp/gedcom/gedcom_analyze.py:108
+msgid "Records for submitters:"
+msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:210
+#: bp/gedcom/gedcom_analyze.py:109
+msgid "Families with no parents:"
+msgstr ""
+
+#: bp/gedcom/gedcom_analyze.py:230
 msgid "Genders:"
 msgstr "Sukupuolet:"
 
-#: bp/gedcom/gedcom_analyze.py:219
+#: bp/gedcom/gedcom_analyze.py:245
 msgid "Submitters"
 msgstr "Tutkijat"
 
-#: bp/gedcom/gedcom_analyze.py:228
+#: bp/gedcom/gedcom_analyze.py:254
 msgid "Missing paths:"
 msgstr "Puuttuvat pakolliset tiedot"
 
-#: bp/gedcom/gedcom_analyze.py:233
+#: bp/gedcom/gedcom_analyze.py:259
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr "TYPE-kentän arvot %(parent_path)s-rakenteissa"
@@ -755,65 +760,65 @@ msgstr "Gedcom-tiedosto on jo olemassa"
 msgid "That GEDCOM file does not exist on the server"
 msgstr "Tätä Gedcom-tiedostoa ei ole palvelimella"
 
-#: bp/gedcom/handlers.py:382
+#: bp/gedcom/handlers.py:383
 msgid "Deleted:"
 msgstr "Poistettu:"
 
-#: bp/gedcom/handlers.py:387 bp/gedcom/transformer.py:53
+#: bp/gedcom/handlers.py:388 bp/gedcom/transformer.py:53
 #: bp/gedcom/transformer.py:60
 msgid "Replaced:"
 msgstr "Korvattu:"
 
-#: bp/gedcom/handlers.py:390 bp/gedcom/transformer.py:55
+#: bp/gedcom/handlers.py:391 bp/gedcom/transformer.py:55
 #: bp/gedcom/transformer.py:62
 msgid "With:"
 msgstr "tällä:"
 
-#: bp/gedcom/handlers.py:410
+#: bp/gedcom/handlers.py:411
 msgid "Transform '{}' started at {}"
 msgstr "Muunnos {} käynnistettiin {}"
 
-#: bp/gedcom/handlers.py:420
+#: bp/gedcom/handlers.py:421
 msgid "Name of the input GEDCOM file"
 msgstr "Gedcom-tiedoston nimi"
 
-#: bp/gedcom/handlers.py:421
+#: bp/gedcom/handlers.py:422
 msgid "Name of the log file"
 msgstr "Lokitiedoston nimi"
 
-#: bp/gedcom/handlers.py:424 bp/gedcom/handlers.py:631
+#: bp/gedcom/handlers.py:425 bp/gedcom/handlers.py:650
 msgid "Display changed rows"
 msgstr "Näytä muutetut rivit"
 
-#: bp/gedcom/handlers.py:426 bp/gedcom/handlers.py:633
+#: bp/gedcom/handlers.py:427
 msgid "Do not produce an output file"
 msgstr "Älä tuota tulostiedostoa"
 
-#: bp/gedcom/handlers.py:428 bp/gedcom/handlers.py:635
+#: bp/gedcom/handlers.py:429
 msgid "Do not produce a log in the output file"
 msgstr "Älä tuota lokia tulostiedostoon"
 
-#: bp/gedcom/handlers.py:430
+#: bp/gedcom/handlers.py:431
 msgid "Encoding of the input GEDCOM"
 msgstr "Gedcom-tiedoston merkkikoodaus"
 
-#: bp/gedcom/handlers.py:461 bp/gedcom/handlers.py:465
+#: bp/gedcom/handlers.py:462 bp/gedcom/handlers.py:466
 msgid "File saved as {}"
 msgstr "Tiedosto talletettu nimelle {}"
 
-#: bp/gedcom/handlers.py:462
+#: bp/gedcom/handlers.py:463
 msgid "Old file saved as {}"
 msgstr "Vanha versio talletettu nimelle {}"
 
-#: bp/gedcom/handlers.py:466
+#: bp/gedcom/handlers.py:467
 msgid "Transform '{}' ended at {}"
 msgstr "Muunnos '{}' päättyi {}"
 
-#: bp/gedcom/handlers.py:528 static/js/gedcom_scripts.js:155
+#: bp/gedcom/handlers.py:556 static/js/gedcom_scripts.js:157
 msgid "Errors:"
 msgstr "Virheitä:"
 
-#: bp/gedcom/handlers.py:595
+#: bp/gedcom/handlers.py:623
 msgid "Unsupported type: "
 msgstr "Tyyppiä ei tueta:"
 
@@ -1075,9 +1080,8 @@ msgid "Baptisms"
 msgstr "Kasteet"
 
 #: bp/gedcom/transforms/lahdeviitteet.py:47
-#: bp/scene/templates/scene/sources.html:30
-msgid "Citations"
-msgstr "Sitaatteja"
+msgid "Citation groups"
+msgstr "Lähdeviitteiden ryhmät"
 
 #: bp/gedcom/transforms/marriages.py:41
 msgid "Marriages"
@@ -1092,7 +1096,7 @@ msgid "Personal names"
 msgstr "Henkilönimet"
 
 #: bp/gedcom/transforms/places.py:11 bp/scene/templates/scene/locations.html:3
-#: bp/scene/templates/scene/macros.html:67
+#: bp/scene/templates/scene/macros.html:64
 #: bp/tools/templates/tools/tables.html:26
 msgid "Places"
 msgstr "Paikat"
@@ -1221,61 +1225,65 @@ msgstr "Sukujutut"
 msgid "Sukujutut transformations"
 msgstr "Sukujutut muunnokset"
 
-#: bp/gedcom/transforms/sukujutut.py:169
+#: bp/gedcom/transforms/sukujutut.py:194
 msgid "Remove invalid DATE tags"
 msgstr "Poista virheelliset DATE tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:171
+#: bp/gedcom/transforms/sukujutut.py:196
 msgid "Remove empty NOTE tags"
 msgstr "Poista tyhjät NOTE tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:173
+#: bp/gedcom/transforms/sukujutut.py:198
 msgid "Remove DATE AVOLIITTO tags"
 msgstr "Poista DATE AVOLIITTO tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:175
+#: bp/gedcom/transforms/sukujutut.py:200
 msgid "Remove invalid DATEs for DIV tags"
 msgstr "Poista DIV tunnisteiden virheelliset DATE tiedot"
 
-#: bp/gedcom/transforms/sukujutut.py:177
+#: bp/gedcom/transforms/sukujutut.py:202
 msgid "Remove empty GIVN and SURN tags"
 msgstr "Poista tyhjät GIVN ja SURN tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:179
+#: bp/gedcom/transforms/sukujutut.py:204
 msgid "Remove duplicate SOUR lines under NAME"
 msgstr "Poista tupla SOUR rivit NAME tunnisteryhmässä"
 
-#: bp/gedcom/transforms/sukujutut.py:181
+#: bp/gedcom/transforms/sukujutut.py:206
 msgid "Remove REFN tags"
 msgstr "Poista REFN tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:183
+#: bp/gedcom/transforms/sukujutut.py:208
 msgid "Remove STAT tags"
 msgstr "Poista STAT tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:185
+#: bp/gedcom/transforms/sukujutut.py:210
 msgid "Move level 3 NOTEs to level 2 to save them"
 msgstr "Nota 3-tason NOTE tunnisteet 2-tasolle, niiden säästämiseksi"
 
-#: bp/gedcom/transforms/sukujutut.py:187
+#: bp/gedcom/transforms/sukujutut.py:212
 msgid "Insert ADR1 tags under ADDR"
 msgstr "Lisää ADR1 tunnisteet ADDR tunnisteryhmään"
 
-#: bp/gedcom/transforms/sukujutut.py:189
+#: bp/gedcom/transforms/sukujutut.py:214
 msgid "Change PLAC tags to NOTEs under certain events"
 msgstr "Vaihda eräissä tapahtumissa PLAC tunnisteet NOTE tunnisteiksi"
 
-#: bp/gedcom/transforms/sukujutut.py:191
+#: bp/gedcom/transforms/sukujutut.py:216
 msgid "Change event types \"Kaksonen\" and \"Kolmonen\" to NOTEs"
 msgstr "Muuta \"Kaksonen\" ja \"kolmonen\" tapahtumatyypit NOTE riveiksi"
 
-#: bp/gedcom/transforms/sukujutut.py:193
+#: bp/gedcom/transforms/sukujutut.py:218
 msgid "Remove trailing and multiple consecutive spaces in person and place names"
 msgstr "Poista alku- ja peräkkäiset välilyönnit henkilön ja paikan nimistä"
 
-#: bp/gedcom/transforms/sukujutut.py:195
+#: bp/gedcom/transforms/sukujutut.py:220
 msgid "Change EMIG to RESI"
 msgstr "Vaihda EMIG tunniste RESI tunnisteeseen"
+
+#: bp/gedcom/transforms/sukujutut.py:222
+msgid "Move an event NOTE to citation PAGE"
+msgstr ""
 
 #: bp/gedcom/transforms/unmark.py:10
 msgid "Unmark"
@@ -1551,7 +1559,7 @@ msgid "Persons carrying a Name"
 msgstr "Henkilöt, joilla on nimi"
 
 #: bp/scene/templates/scene/list_persons.html:12
-#: bp/scene/templates/scene/macros.html:59
+#: bp/scene/templates/scene/macros.html:56
 #: bp/scene/templates/scene/persons.html:13
 #: bp/tools/templates/tools/table_refnames.html:32
 msgid "Persons"
@@ -1612,7 +1620,7 @@ msgid "Events"
 msgstr "Tapahtumat"
 
 #: bp/scene/templates/scene/list_persons.html:91
-#: bp/scene/templates/scene/macros.html:86
+#: bp/scene/templates/scene/macros.html:83
 #: bp/scene/templates/scene/persons.html:120
 #: bp/scene/templates/scene/source_events.html:44
 #, python-format
@@ -1683,11 +1691,11 @@ msgstr "Kaikki henkilöt"
 msgid "Names"
 msgstr "Nimet"
 
-#: bp/scene/templates/scene/macros.html:59
+#: bp/scene/templates/scene/macros.html:56
 msgid "Person list by default name"
 msgstr "Oletusnimen mukainen henkilöluettelo"
 
-#: bp/scene/templates/scene/macros.html:65
+#: bp/scene/templates/scene/macros.html:62
 #: bp/scene/templates/scene/person.html:135
 #: bp/scene/templates/scene/person.html:137
 #: bp/scene/templates/scene/person_pg.html:158
@@ -1695,7 +1703,7 @@ msgstr "Oletusnimen mukainen henkilöluettelo"
 msgid "Families"
 msgstr "Perheet"
 
-#: bp/scene/templates/scene/macros.html:69
+#: bp/scene/templates/scene/macros.html:66
 #: bp/scene/templates/scene/person.html:81
 #: bp/scene/templates/scene/place_events.html:113
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:41
@@ -1703,15 +1711,15 @@ msgstr "Perheet"
 msgid "Sources"
 msgstr "Lähteet"
 
-#: bp/scene/templates/scene/macros.html:71
+#: bp/scene/templates/scene/macros.html:68
 msgid "Thumbnails"
 msgstr "Pienoiskuvat"
 
-#: bp/scene/templates/scene/macros.html:71
+#: bp/scene/templates/scene/macros.html:68
 msgid "Pictures and other Media"
 msgstr "Kuvat ja muu media"
 
-#: bp/scene/templates/scene/macros.html:90
+#: bp/scene/templates/scene/macros.html:87
 msgid "Anonymous"
 msgstr "nimetön"
 
@@ -2009,7 +2017,7 @@ msgstr[1] "Näytetään %(num)s henkilönimeä %(order)s mukaisessa järjestykse
 msgid ""
 "If the person has many names, they will appear in the list under each "
 "name."
-msgstr "Sam henkilö voi esiintyä listalla moneen kertaan, kullakin nimellään."
+msgstr "Sama henkilö voi esiintyä listalla moneen kertaan, kullakin nimellään."
 
 #: bp/scene/templates/scene/persons.html:30
 msgid "Clicking a name will take you to the selected person's page."
@@ -2143,6 +2151,10 @@ msgid "In the repository"
 msgstr "Arkistossa"
 
 #: bp/scene/templates/scene/sources.html:30
+msgid "Citations"
+msgstr "Sitaatteja"
+
+#: bp/scene/templates/scene/sources.html:30
 msgid "citated"
 msgstr "siteerattu"
 
@@ -2180,8 +2192,10 @@ msgid ""
 "<i>Finland Database</i> is a system for co'operatively collect validated "
 "Finnish Genealogy data."
 msgstr ""
-"<i>Suomikanta</i> rakennetaan, jotta voimme yhteistyössä koota suuri "
-"luotettavasti tarkastettujen sukutietojen kokoelma."
+"<i>Suomikanta</i> rakennetaan, jotta voimme yhteistyössä koota suuren "
+"luotettavasti tarkastettujen sukutietojen kokoelman.<i>Suomikanta</i> "
+"rakennetaan, jotta voimme yhteistyössä koota suuri luotettavasti "
+"tarkastettujen sukutietojen kokoelma."
 
 #: bp/start/templates/start/index.html:24
 msgid "See the process for your data"
@@ -2197,7 +2211,7 @@ msgstr "Suomikanta ja sen hyödyntäminen"
 
 #: bp/start/templates/start/index.html:29
 msgid "Gedcom healing services"
-msgstr "Sukutietojen puhdistaminen Gedcom-ohjelmillamme"
+msgstr "Sukutietojen vakiointi Gedcom-ohjelmillamme"
 
 #: bp/start/templates/start/index.html:35
 msgid "Look at data in Suomikanta"
@@ -2852,7 +2866,7 @@ msgstr "Viittauksettomat lähteet"
 
 #: bp/tools/templates/tools/tables.html:45
 msgid "Sources without a repository"
-msgstr "Lähteet, joilta puuttuu arkistotieto"
+msgstr "Lähteet ilman arkistoa"
 
 #: bp/tools/templates/tools/tables.html:46
 msgid "Unreferenced Events"
@@ -2907,16 +2921,16 @@ msgstr "Arvioitu elinaika {}:lle henkilölle"
 msgid "Server error"
 msgstr "Palvelinvirhe"
 
-#: static/js/gedcom_scripts.js:65 static/js/gedcom_scripts.js:74
+#: static/js/gedcom_scripts.js:66 static/js/gedcom_scripts.js:75
 msgid "Are you sure?"
 msgstr "Oletko varma?"
 
-#: static/js/gedcom_scripts.js:118 static/js/gedcom_scripts.js:119
+#: static/js/gedcom_scripts.js:119 static/js/gedcom_scripts.js:120
 msgid "Revert to %1"
 msgstr "Palauta %1"
 
-#: static/js/gedcom_scripts.js:130 static/js/gedcom_scripts.js:131
-#: static/js/gedcom_scripts.js:137
+#: static/js/gedcom_scripts.js:131 static/js/gedcom_scripts.js:132
+#: static/js/gedcom_scripts.js:138
 msgid "%1 renamed to %2"
 msgstr "%1: nimeksi vaihdettu %2"
 
@@ -3646,10 +3660,4 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
-
-#~ msgid "Not valid field names"
-#~ msgstr "Kelpaamattomia kenttänimiä"
-
-#~ msgid "Illegal paths:"
-#~ msgstr "Virheellisiä tiedostopolkuja:"
 
