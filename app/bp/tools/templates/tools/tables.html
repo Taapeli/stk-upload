@@ -3,9 +3,10 @@
 {% block title %}{{ _('Data Views') }}{% endblock %}
 {% block body %}
 {{ super() }}
-{% import 'start/s_macros.html' as macro %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+{# import 'start/s_macros.html' as macro #}
 
-{{ macro.hamburger_menu() }}
+{{ hamburger_menu() }}
 
 
 <div style="margin-left:50px; padding-bottom: 2em;">

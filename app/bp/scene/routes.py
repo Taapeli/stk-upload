@@ -25,6 +25,14 @@ from models.gen.source import Source
 #from models.gen.citation import Citation
 
 
+# Narrative start page
+@bp.route('/scene',  methods=['GET', 'POST'])
+def scene():
+    """ Home page for scene narrative pages ('kertova') """    
+    print("-> bp.start.routes.scene")
+    return render_template('/scene/index_scene.html')
+
+
 @bp.route('/scene/persons/restricted')
 def show_persons_restricted(selection=None):
     """ Show list of selected Persons, limited information 
@@ -34,6 +42,7 @@ def show_persons_restricted(selection=None):
         # Vaihtoehtoisesti kutsu toista metodia.
         keys = ('all',)
     persons = read_persons_with_events(keys)
+    print("-> bp.scene.routes.show_persons_restricted")
     return render_template("/scene/persons.html", persons=persons, 
                            menuno=1, rule=keys)
 
@@ -50,6 +59,7 @@ def show_person_list(selection=None):
             rule = request.form['rule']
             keys = (rule, name)
             persons = read_persons_with_events(keys)
+            print("-> bp.scene.routes.show_person_list POST")
             return render_template("/scene/persons.html", persons=persons, menuno=0,
                                    name=name, rule=keys, elapsed=time.time()-t0)
         except Exception as e:
@@ -65,6 +75,7 @@ def show_person_list(selection=None):
     else:
         keys = ('surname',)
     persons = [] #datareader.read_persons_with_events(keys)
+    print("-> bp.scene.routes.show_person_list GET")
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
@@ -82,6 +93,7 @@ def show_persons_by_refname(refname, opt=""):
     ref = ('ref' in opt)
     order = 0
     persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    print("-> bp.scene.routes.show_persons_by_refname")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order, rule=keys)
 
@@ -114,6 +126,7 @@ def show_my_persons():
             next_links['bw'] = quote_plus(persons[0].sortname)
         next_links['fw'] = quote_plus(persons[-1].sortname)
 
+    print("-> bp.scene.routes.show_my_persons")
     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
                            user=None, next=next_links, rule=keys, elapsed=time.time()-t0)
 
@@ -174,7 +187,7 @@ def show_my_persons_all():
         user=current_user.username
     else:
         user=None
-    print("Read persons from {}".format(fw))
+    print("-> bp.scene.routes.show_my_persons_all: read persons from {}".format(fw))
     persons = Person_combo.read_my_persons_list(user, show=user_session['filter_div'], 
                                                 limit=count, fw_from=fw, bw_from=bw)
     if persons:
@@ -208,6 +221,7 @@ def show_all_persons_list(opt=''):
     elif 'pn' in opt: order = 2 # firstname
     else: order = 0             # surname
     persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    print("-> bp.scene.routes.show_all_persons_list")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order,rule=keys, elapsed=time.time()-t0)
 
@@ -251,6 +265,7 @@ def show_a_person_w_apoc(uid):
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
+    print("-> bp.scene.routes.show_a_person_w_apoc")
     return render_template("/scene/person_pg.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
@@ -277,6 +292,7 @@ def show_person_page(uniq_id):
                           format(c.gender, c.uniq_id, c.id, c.birth_date))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+    print("-> bp.scene.routes.show_person_page")
     return render_template("/scene/person.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 
                            elapsed=time.time()-t0)

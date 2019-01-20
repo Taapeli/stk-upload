@@ -5,9 +5,9 @@
 {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
 
-{% import 'start/s_macros.html' as macro %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
 
-{{ macro.hamburger_menu( (
+{{ hamburger_menu( (
     ("/message", _('Contact administrator'), _('Message to the administrator')),
     ("/settings", _('Change language'), _('Select language'))
    ) ) }}

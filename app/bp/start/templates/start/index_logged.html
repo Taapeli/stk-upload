@@ -4,9 +4,10 @@
 {% block title %}{{ _("Stk User's Start Page") }} (start/index_logged){% endblock %}
 {% block body %}
 {{ super() }}
-{% import 'start/s_macros.html' as macro %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+{# import 'start/s_macros.html' as macro #}
 
-{{ macro.hamburger_menu( (
+{{ hamburger_menu( (
     ("/message", _('Contact administrator'), _('Message to the administrator')),
     ("/settings", _('Change language'), _('Select language'))
    ) ) }}
