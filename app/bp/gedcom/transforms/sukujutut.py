@@ -169,17 +169,50 @@ class Sukujutut(transformer.Transformation):
             # 2 SOUR Kustavi syntyneet 1764-1792 (I C:2)
             # 3 PAGE Födde 1766 Aprill 24
             # 2 PLAC Kustavi 
-            if True: # or item.tag in {"EVEN","BIRT","DEAT","CHR"}:
-                note_index = None
+            if item.tag in {"EVEN","BIRT","DEAT","CHR"}:
+                note_index = -1
                 for i,c in enumerate(item.children):
                     if c.tag == "NOTE" and len(c.children) == 0: 
                         note_index = i
-                    if c.tag == "SOUR" and note_index:
+                    if c.tag == "SOUR" and note_index >= 0:
                         note = item.children[note_index].value
                         del item.children[note_index]
                         newitem = Item("{} PAGE {}".format(item.level+2,note))
                         c.children.append(newitem)
                         return item 
+                return True
+
+        if options.sour_under_note:  
+            if item.tag == "NOTE": # nested NOTEs with SOUR
+                # 1 NOTE Kaurissalon Pukkilasta lampuodin tytär. Oli 1754-1755
+                # 2 CONC Kalannissa. Vihittäessä 1756 Saara oli piika Kivimaalla.Torpparin
+                # 2 CONC vaimo Kustavin Pleikilässä. Leskenä lastensa kanssa vuodesta 1787
+                # 2 CONC Pleikilän rantatorpassa, vuodesta 1792 Westan torpassa. Oli siellä
+                # 2 CONC vuoteen 1800, rippikirjan mukaan ei enää 1801.
+                # 2 NOTE Bleknäs torpare
+                # 2 SOUR Kustavi rippikirja 1784-1789 (I Aa:10)
+                # ->
+                # 1 NOTE Kaurissalon Pukkilasta lampuodin tytär. Oli 1754-1755
+                # 2 CONC Kalannissa. Vihittäessä 1756 Saara oli piika Kivimaalla.Torpparin
+                # 2 CONC vaimo Kustavin Pleikilässä. Leskenä lastensa kanssa vuodesta 1787
+                # 2 CONC Pleikilän rantatorpassa, vuodesta 1792 Westan torpassa. Oli siellä
+                # 2 CONC vuoteen 1800, rippikirjan mukaan ei enää 1801.
+                # 1 SOUR Kustavi rippikirja 1784-1789 (I Aa:10)
+                # 2 PAGE Bleknäs torpare
+                note_index = -1
+                for i,c in enumerate(item.children):
+                    if c.tag == "NOTE" and len(c.children) == 0: 
+                        note_index = i
+                    if c.tag == "SOUR" and len(c.children) == 0:
+                        sour = c.value
+                        del item.children[i]
+                        newitem = Item("{} SOUR {}".format(item.level,sour))
+                        if note_index >= 0: 
+                            note = item.children[note_index].value
+                            del item.children[note_index]
+                            newitem2 = Item("{} PAGE {}".format(item.level+1,note))
+                            newitem.children.append(newitem2)
+                        return [item,newitem] 
                 return True
 
         return True # no change
@@ -220,6 +253,8 @@ def add_args(parser):
                         help=_('Change EMIG to RESI'))
     parser.add_argument('--note_to_page', action='store_true',
                         help=_('Move an event NOTE to citation PAGE'))
+    parser.add_argument('--sour_under_note', action='store_true',
+                        help=_('Move a SOUR under NOTE to upper level'))
      
 
 
