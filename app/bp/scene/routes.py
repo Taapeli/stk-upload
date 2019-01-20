@@ -99,36 +99,36 @@ def show_persons_by_refname(refname, opt=""):
 
 # ------------------------------ Menu 1 Persons --------------------------------
 
-@bp.route('/scene/persons_own/')
-@login_required
-#Todo: The roles should be forwarded to macros.html: should not show in menu(11)
-#
-#@roles_accepted('member', 'admin', "research", "audit")
-def show_my_persons():
-    """ List all persons for menu(11)
-        Restriction by owner's UserProfile 
-    """
-    fw_from = request.args.get('f', '')
-    bw_from = request.args.get('b', '')
-    count = request.args.get('c', 100, type=int)
-    t0 = time.time()
-    
-    keys = ('own',)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    persons = Person_combo.read_my_persons_list(user, show="own", limit=count,
-                                                fw_from=fw_from, bw_from=bw_from)
-    next_links = dict()
-    if persons:
-        if fw_from:
-            next_links['bw'] = quote_plus(persons[0].sortname)
-        next_links['fw'] = quote_plus(persons[-1].sortname)
-
-    print("-> bp.scene.routes.show_my_persons")
-    return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
-                           user=None, next=next_links, rule=keys, elapsed=time.time()-t0)
+# @bp.route('/scene/persons_own/')
+# @login_required
+# #Todo: The roles should be forwarded to macros.html: should not show in menu(11)
+# #
+# #@roles_accepted('member', 'admin', "research", "audit")
+# def show_my_persons():
+#     """ List all persons for menu(11)
+#         Restriction by owner's UserProfile 
+#     """
+#     fw_from = request.args.get('f', '')
+#     bw_from = request.args.get('b', '')
+#     count = request.args.get('c', 100, type=int)
+#     t0 = time.time()
+#     
+#     keys = ('own',)
+#     if current_user.is_authenticated:
+#         user=current_user.username
+#     else:
+#         user=None
+#     persons = Person_combo.read_my_persons_list(user, show=2, limit=count,
+#                                                 fw_from=fw_from, bw_from=bw_from)
+#     next_links = dict()
+#     if persons:
+#         if fw_from:
+#             next_links['bw'] = quote_plus(persons[0].sortname)
+#         next_links['fw'] = quote_plus(persons[-1].sortname)
+# 
+#     print("-> bp.scene.routes.show_my_persons")
+#     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
+#                            user=None, next=next_links, rule=keys, elapsed=time.time()-t0)
 
 
 # -------------------------- Menu 12 Persons by user ---------------------------

@@ -25,10 +25,11 @@
 <p><small>{{session}}<br>{{ current_user.roles|count }} roles</small></p>
 
         <div class="row">
-    {% if current_user.is_authenticated and current_user.has_role('member') %}
+{#  {% if current_user.is_authenticated and current_user.has_role('member') %}
            <div class="startbox">
              <div style="display: inline-block;">
-               <form method="get" action="/scene/persons_own/">
+               <form method="get" action="/scene/persons_all/">
+                 <input name="div" type="hidden" value="2">
                  <h3>{{ _('My Candidate Family Tree') }}</h3>
                  <p>{{ _('View your own candidate material and compare with Suomi tietokanta database') }}</p>
                  <div class="submit"> 
@@ -38,7 +39,7 @@
             </div>
            </div>
     {% endif %}    
- 
+#} 
            <div class="startbox">
              <div style="display: inline-block;">
                <form method="get" action="/scene/persons_all/">
@@ -58,7 +59,7 @@
                         {{ _('Compare to Suomikanta') }} 
                 </p>
      {% else %}
-                <p>{{ _('View approved and public material in Suomi tietokanta') }}</p>
+                <p>{{ _('You can view only approved and public material in Suomi tietokanta') }}.</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
                 <div class="submit"> 
