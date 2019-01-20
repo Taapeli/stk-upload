@@ -89,7 +89,7 @@ def show_persons_by_refname(refname, opt=""):
 
 @bp.route('/scene/persons_own/')
 @login_required
-#Todo: The roles should be forwarded to macros.html: should not show  menu(11)
+#Todo: The roles should be forwarded to macros.html: should not show in menu(11)
 #
 #@roles_accepted('member', 'admin', "research", "audit")
 def show_my_persons():
@@ -115,8 +115,10 @@ def show_my_persons():
         next_links['fw'] = quote_plus(persons[-1].sortname)
 
     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
-                           pick=None, next=next_links, rule=keys, elapsed=time.time()-t0)
+                           user=None, next=next_links, rule=keys, elapsed=time.time()-t0)
 
+
+# -------------------------- Menu 12 Persons by user ---------------------------
 
 class UserFilter():
     as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
@@ -137,7 +139,7 @@ class UserFilter():
             if request.args.get('cmp', ''):
                 div = div | 1 
             user_session['filter_div'] = int(div)
-            print("Now filter div {}".format(div))
+            print("Now filter_div={}".format(div))
     
     @staticmethod
     def is_only_mine_data():
@@ -153,34 +155,37 @@ def show_my_persons_all():
     """ List all persons for menu(12)
         Both owners and other persons depending on url parameters or session variables
     """
+    # Näytettävä seuraava sivu on
+    #    1. argumentin fw sivu, jos on (sivun forward-nuoli tai hakukenttä)
+    #    2. session fw_from sivu, jos on (aiemmin viimeksi vierailtu sivu)
+    #    3. muuten "" (alkuun)
     UserFilter.store_request_filter()
-    fw_fromx = ''
-    if user_session.get('fw_fromx'): 
-        fw_fromx = user_session['fw_fromx']
-    else:
-        user_session['fw_fromx'] = fw_fromx    
+    fw = request.args.get('fw', '')
+    if not fw:
+        fw = user_session.get('fw_from', '')
+    user_session['fw_from'] = fw    
 #    print(fw_fromx)        
     t0 = time.time()
-    fw_from = request.args.get('f', '')
-    bw_from = request.args.get('b', '')
-    count = request.args.get('c', 100, int)
+#    fw_from = request.args.get('fw', '')
+    bw = request.args.get('bw', '')
+    count = int(request.args.get('c', 100))
 
     if current_user.is_authenticated:  # Turha testi, jos @login_required
         user=current_user.username
     else:
         user=None
+    print("Read persons from {}".format(fw))
     persons = Person_combo.read_my_persons_list(user, show=user_session['filter_div'], 
-                                                limit=count,
-                                                fw_from=fw_from, bw_from=bw_from)
-    next_links = dict()
+                                                limit=count, fw_from=fw, bw_from=bw)
     if persons:
-        if fw_from:
-            next_links['bw'] = quote_plus(persons[0].sortname)
-        next_links['fw'] = quote_plus(persons[-1].sortname)
-        user_session['fw_fromx'] = next_links['fw']
+        print("Display persons {} – {}".format(persons[0].sortname, persons[-1].sortname))
+#         print("User session {}".format(user_session))
+        # Next person links [backwards, forwards]
+        next_person = [quote_plus(persons[0].sortname), quote_plus(persons[-1].sortname)]
+        user_session['fw_from'] = next_person[0]
 
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
-                           pick=user, next=next_links, elapsed=time.time()-t0)
+                           user=user, next=next_person, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/persons/all/<string:opt>')
