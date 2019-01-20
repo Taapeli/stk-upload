@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-19 10:26+0200\n"
-"PO-Revision-Date: 2019-01-11 10:34+0200\n"
+"POT-Creation-Date: 2019-01-20 15:14+0200\n"
+"PO-Revision-Date: 2019-01-19 10:27+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -786,7 +786,7 @@ msgstr "Gedcom-tiedoston nimi"
 msgid "Name of the log file"
 msgstr "Lokitiedoston nimi"
 
-#: bp/gedcom/handlers.py:425 bp/gedcom/handlers.py:626
+#: bp/gedcom/handlers.py:425 bp/gedcom/handlers.py:650
 msgid "Display changed rows"
 msgstr "Näytä muutetut rivit"
 
@@ -814,11 +814,11 @@ msgstr "Vanha versio talletettu nimelle {}"
 msgid "Transform '{}' ended at {}"
 msgstr "Muunnos '{}' päättyi {}"
 
-#: bp/gedcom/handlers.py:532 static/js/gedcom_scripts.js:155
+#: bp/gedcom/handlers.py:556 static/js/gedcom_scripts.js:157
 msgid "Errors:"
 msgstr "Virheitä:"
 
-#: bp/gedcom/handlers.py:599
+#: bp/gedcom/handlers.py:623
 msgid "Unsupported type: "
 msgstr "Tyyppiä ei tueta:"
 
@@ -1081,7 +1081,7 @@ msgstr "Kasteet"
 
 #: bp/gedcom/transforms/lahdeviitteet.py:47
 msgid "Citation groups"
-msgstr ""
+msgstr "Lähdeviitteiden ryhmät"
 
 #: bp/gedcom/transforms/marriages.py:41
 msgid "Marriages"
@@ -1225,61 +1225,65 @@ msgstr "Sukujutut"
 msgid "Sukujutut transformations"
 msgstr "Sukujutut muunnokset"
 
-#: bp/gedcom/transforms/sukujutut.py:169
+#: bp/gedcom/transforms/sukujutut.py:194
 msgid "Remove invalid DATE tags"
 msgstr "Poista virheelliset DATE tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:171
+#: bp/gedcom/transforms/sukujutut.py:196
 msgid "Remove empty NOTE tags"
 msgstr "Poista tyhjät NOTE tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:173
+#: bp/gedcom/transforms/sukujutut.py:198
 msgid "Remove DATE AVOLIITTO tags"
 msgstr "Poista DATE AVOLIITTO tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:175
+#: bp/gedcom/transforms/sukujutut.py:200
 msgid "Remove invalid DATEs for DIV tags"
 msgstr "Poista DIV tunnisteiden virheelliset DATE tiedot"
 
-#: bp/gedcom/transforms/sukujutut.py:177
+#: bp/gedcom/transforms/sukujutut.py:202
 msgid "Remove empty GIVN and SURN tags"
 msgstr "Poista tyhjät GIVN ja SURN tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:179
+#: bp/gedcom/transforms/sukujutut.py:204
 msgid "Remove duplicate SOUR lines under NAME"
 msgstr "Poista tupla SOUR rivit NAME tunnisteryhmässä"
 
-#: bp/gedcom/transforms/sukujutut.py:181
+#: bp/gedcom/transforms/sukujutut.py:206
 msgid "Remove REFN tags"
 msgstr "Poista REFN tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:183
+#: bp/gedcom/transforms/sukujutut.py:208
 msgid "Remove STAT tags"
 msgstr "Poista STAT tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:185
+#: bp/gedcom/transforms/sukujutut.py:210
 msgid "Move level 3 NOTEs to level 2 to save them"
 msgstr "Nota 3-tason NOTE tunnisteet 2-tasolle, niiden säästämiseksi"
 
-#: bp/gedcom/transforms/sukujutut.py:187
+#: bp/gedcom/transforms/sukujutut.py:212
 msgid "Insert ADR1 tags under ADDR"
 msgstr "Lisää ADR1 tunnisteet ADDR tunnisteryhmään"
 
-#: bp/gedcom/transforms/sukujutut.py:189
+#: bp/gedcom/transforms/sukujutut.py:214
 msgid "Change PLAC tags to NOTEs under certain events"
 msgstr "Vaihda eräissä tapahtumissa PLAC tunnisteet NOTE tunnisteiksi"
 
-#: bp/gedcom/transforms/sukujutut.py:191
+#: bp/gedcom/transforms/sukujutut.py:216
 msgid "Change event types \"Kaksonen\" and \"Kolmonen\" to NOTEs"
 msgstr "Muuta \"Kaksonen\" ja \"kolmonen\" tapahtumatyypit NOTE riveiksi"
 
-#: bp/gedcom/transforms/sukujutut.py:193
+#: bp/gedcom/transforms/sukujutut.py:218
 msgid "Remove trailing and multiple consecutive spaces in person and place names"
 msgstr "Poista alku- ja peräkkäiset välilyönnit henkilön ja paikan nimistä"
 
-#: bp/gedcom/transforms/sukujutut.py:195
+#: bp/gedcom/transforms/sukujutut.py:220
 msgid "Change EMIG to RESI"
 msgstr "Vaihda EMIG tunniste RESI tunnisteeseen"
+
+#: bp/gedcom/transforms/sukujutut.py:222
+msgid "Move an event NOTE to citation PAGE"
+msgstr ""
 
 #: bp/gedcom/transforms/unmark.py:10
 msgid "Unmark"
@@ -2917,16 +2921,16 @@ msgstr "Arvioitu elinaika {}:lle henkilölle"
 msgid "Server error"
 msgstr "Palvelinvirhe"
 
-#: static/js/gedcom_scripts.js:65 static/js/gedcom_scripts.js:74
+#: static/js/gedcom_scripts.js:66 static/js/gedcom_scripts.js:75
 msgid "Are you sure?"
 msgstr "Oletko varma?"
 
-#: static/js/gedcom_scripts.js:118 static/js/gedcom_scripts.js:119
+#: static/js/gedcom_scripts.js:119 static/js/gedcom_scripts.js:120
 msgid "Revert to %1"
 msgstr "Palauta %1"
 
-#: static/js/gedcom_scripts.js:130 static/js/gedcom_scripts.js:131
-#: static/js/gedcom_scripts.js:137
+#: static/js/gedcom_scripts.js:131 static/js/gedcom_scripts.js:132
+#: static/js/gedcom_scripts.js:138
 msgid "%1 renamed to %2"
 msgstr "%1: nimeksi vaihdettu %2"
 

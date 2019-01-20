@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-19 10:26+0200\n"
+"POT-Creation-Date: 2019-01-20 15:14+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -784,7 +784,7 @@ msgstr ""
 msgid "Name of the log file"
 msgstr ""
 
-#: bp/gedcom/handlers.py:425 bp/gedcom/handlers.py:626
+#: bp/gedcom/handlers.py:425 bp/gedcom/handlers.py:650
 msgid "Display changed rows"
 msgstr ""
 
@@ -812,11 +812,11 @@ msgstr ""
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/handlers.py:532 static/js/gedcom_scripts.js:155
+#: bp/gedcom/handlers.py:556 static/js/gedcom_scripts.js:157
 msgid "Errors:"
 msgstr ""
 
-#: bp/gedcom/handlers.py:599
+#: bp/gedcom/handlers.py:623
 msgid "Unsupported type: "
 msgstr ""
 
@@ -1223,60 +1223,64 @@ msgstr ""
 msgid "Sukujutut transformations"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:169
+#: bp/gedcom/transforms/sukujutut.py:194
 msgid "Remove invalid DATE tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:171
+#: bp/gedcom/transforms/sukujutut.py:196
 msgid "Remove empty NOTE tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:173
+#: bp/gedcom/transforms/sukujutut.py:198
 msgid "Remove DATE AVOLIITTO tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:175
+#: bp/gedcom/transforms/sukujutut.py:200
 msgid "Remove invalid DATEs for DIV tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:177
+#: bp/gedcom/transforms/sukujutut.py:202
 msgid "Remove empty GIVN and SURN tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:179
+#: bp/gedcom/transforms/sukujutut.py:204
 msgid "Remove duplicate SOUR lines under NAME"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:181
+#: bp/gedcom/transforms/sukujutut.py:206
 msgid "Remove REFN tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:183
+#: bp/gedcom/transforms/sukujutut.py:208
 msgid "Remove STAT tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:185
+#: bp/gedcom/transforms/sukujutut.py:210
 msgid "Move level 3 NOTEs to level 2 to save them"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:187
+#: bp/gedcom/transforms/sukujutut.py:212
 msgid "Insert ADR1 tags under ADDR"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:189
+#: bp/gedcom/transforms/sukujutut.py:214
 msgid "Change PLAC tags to NOTEs under certain events"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:191
+#: bp/gedcom/transforms/sukujutut.py:216
 msgid "Change event types \"Kaksonen\" and \"Kolmonen\" to NOTEs"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:193
+#: bp/gedcom/transforms/sukujutut.py:218
 msgid "Remove trailing and multiple consecutive spaces in person and place names"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:195
+#: bp/gedcom/transforms/sukujutut.py:220
 msgid "Change EMIG to RESI"
+msgstr ""
+
+#: bp/gedcom/transforms/sukujutut.py:222
+msgid "Move an event NOTE to citation PAGE"
 msgstr ""
 
 #: bp/gedcom/transforms/unmark.py:10
@@ -2903,16 +2907,16 @@ msgstr ""
 msgid "Server error"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:65 static/js/gedcom_scripts.js:74
+#: static/js/gedcom_scripts.js:66 static/js/gedcom_scripts.js:75
 msgid "Are you sure?"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:118 static/js/gedcom_scripts.js:119
+#: static/js/gedcom_scripts.js:119 static/js/gedcom_scripts.js:120
 msgid "Revert to %1"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:130 static/js/gedcom_scripts.js:131
-#: static/js/gedcom_scripts.js:137
+#: static/js/gedcom_scripts.js:131 static/js/gedcom_scripts.js:132
+#: static/js/gedcom_scripts.js:138
 msgid "%1 renamed to %2"
 msgstr ""
 

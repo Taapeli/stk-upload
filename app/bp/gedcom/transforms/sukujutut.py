@@ -157,6 +157,31 @@ class Sukujutut(transformer.Transformation):
                 item.tag = "RESI"
                 return item
     
+        if options.note_to_page:  
+            # 1 BIRT
+            # 2 DATE 24 APR 1766
+            # 2 NOTE Födde 1766 Aprill 24
+            # 2 SOUR Kustavi syntyneet 1764-1792 (I C:2)
+            # 2 PLAC Kustavi
+            # ->
+            # 1 BIRT
+            # 2 DATE 24 APR 1766
+            # 2 SOUR Kustavi syntyneet 1764-1792 (I C:2)
+            # 3 PAGE Födde 1766 Aprill 24
+            # 2 PLAC Kustavi 
+            if True: # or item.tag in {"EVEN","BIRT","DEAT","CHR"}:
+                note_index = None
+                for i,c in enumerate(item.children):
+                    if c.tag == "NOTE" and len(c.children) == 0: 
+                        note_index = i
+                    if c.tag == "SOUR" and note_index:
+                        note = item.children[note_index].value
+                        del item.children[note_index]
+                        newitem = Item("{} PAGE {}".format(item.level+2,note))
+                        c.children.append(newitem)
+                        return item 
+                return True
+
         return True # no change
     
     
@@ -193,6 +218,8 @@ def add_args(parser):
                         help=_('Remove trailing and multiple consecutive spaces in person and place names'))
     parser.add_argument('--emig_to_resi', action='store_true',
                         help=_('Change EMIG to RESI'))
+    parser.add_argument('--note_to_page', action='store_true',
+                        help=_('Move an event NOTE to citation PAGE'))
      
 
 
