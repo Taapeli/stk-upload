@@ -200,8 +200,8 @@ class PersonName(GedcomLine):
                 # Use defaults descended GIVN, NDFX, NICK, and _CALL
 #                 print("{} tarkasta: {!r} päteekö etunimi '{}'".\
 #                       format(self.path, self.value, name_default.givn))
-                LOG.info("{} tarkasta: {!r} päteekö etunimi '{}'".\
-                         format(self.path, self.value, name_default.givn))
+#                 LOG.info("{} tarkasta: {!r} päteekö etunimi '{}'".\
+#                          format(self.path, self.value, name_default.givn))
                 self.givn = name_default.givn
                 if hasattr(name_default, 'nick_name'):
                     self.nick_name = name_default.nick_name

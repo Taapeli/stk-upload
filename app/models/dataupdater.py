@@ -45,7 +45,7 @@ def set_confidence_values(tx, uniq_id=None, batch_logger=None):
     return
 
 
-def set_estimated_dates(uids=None):
+def set_estimated_person_dates(uids=None):
     """ Sets an estimated lifietime in Person.lifetime
         (the properties in Person node are datetype, date1, and date2)
 

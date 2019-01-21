@@ -3,6 +3,11 @@
 {% block title %}{{ _('Data Views') }}{% endblock %}
 {% block body %}
 {{ super() }}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+{# import 'start/s_macros.html' as macro #}
+
+{{ hamburger_menu() }}
+
 
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
@@ -43,12 +48,13 @@
             </ul>
         </div>
 
-        <div class="startbox">
+{#      <div class="startbox">
           <h3>{{ _('Exit') }}</h3>
           <p>▸ <a href="/login">{{ _('Return main page') }}</a></p>
         </div>
-
+#}
     </div>
   </div>
-	
+</div>
+
 {% endblock %}

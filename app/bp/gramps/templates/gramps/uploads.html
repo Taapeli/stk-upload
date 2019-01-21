@@ -5,9 +5,9 @@
 {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
 
-{% import 'start/s_macros.html' as macro %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
 
-{{ macro.hamburger_menu( (
+{{ hamburger_menu( (
     ("/message", _('Contact administrator'), _('Message to the administrator')),
     ("/settings", _('Change language'), _('Select language'))
    ) ) }}
@@ -67,7 +67,7 @@
             <a href="/admin/list_users">{{ _('on this page') }}</a>
         {% endif %}
 	    {% if current_user.is_authenticated and current_user.has_role('member') %}
-	    	<p>&rtrif; <a href="/scene/persons_own">{{ _('See your own data') }}</a>
+	    	<p>&rtrif; <a href="/scene/persons_all?div=2">{{ _('See your own data') }}</a>
         {% endif %}
     </p>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>

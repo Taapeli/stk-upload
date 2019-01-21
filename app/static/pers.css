@@ -12,19 +12,12 @@ h1 {
     width: 100%;
     padding: 2px;
     height: 23px;
-    margin-bottom: 2px; /* murupolun kanssa */
-    color: #6f512a;
-    background-color:bisque;
     font-size: 13pt;
     font-family: Georgia, "Times New Roman", times;
     font-weight: 600;
     letter-spacing: 1px;
-}
-h1 {
-    position: relative;
-    color: #7e6b53; /* Darker bisque */
     background-color:bisque;
-    font-size: 13pt;
+    color: #7e6b53; /* Darker bisque */
     width: 100%;
     padding: 2px;
     margin-bottom: 2px; /* murupolun kanssa */
@@ -46,7 +39,7 @@ a.bread:visited { text-decoration: none; }
 a.bread:hover { text-decoration: underline; }
 a.bread:active { text-decoration: underline; }
 
-a#ohjeet, div#paluu {
+div#paluu {
     position: absolute;
     top: 7px;
     right: 4px;
@@ -86,12 +79,14 @@ div#paluu {
     padding: 1em; 
     background-color: bisque;
     width: 280px;
-    min-height: 150px;
+    min-height: 200px;
+    border-radius: 15px;
 }
 .startbox2 {
     width: 603px;
 }
 .admin {background-color: pink;}
+.gedtools {background-color: lightsteelblue;}
 .startbox h3, .startbox2 h3 { margin-top: 5px; margin-bottom: 5px; }
 .startbox div, .startbox2 div { display: inline-block; width: 100%; }
 .startbox ul, .startbox2 ul { display: inline-block; width: 100%; 
@@ -100,6 +95,14 @@ div#paluu {
 .inp label { display: inline-block; width: 100px; }
 .inp input { width: 120px;  margin-left: 1em; }
 .submit { text-align:right; }       /* 20.8.2018 / JMä */
+
+ul.compact {
+	margin: 0;
+    padding-left: 2em;
+}
+ul.compact > li {list-style-type: disc}
+
+.not-allowed {cursor: not-allowed;}
 
 table, th, td {
     border: 1px solid silver;

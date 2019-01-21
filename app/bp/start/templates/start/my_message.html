@@ -4,9 +4,9 @@
 {% block title %}{{ _("Contact administrators") }} (start/my_message){% endblock %}
 {% block body %}
 {{ super() }}
-{% import 'start/s_macros.html' as macro %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
 
-{{ macro.hamburger_menu() }}
+{{ hamburger_menu() }}
 
 <div id="startdiv">
   <div>

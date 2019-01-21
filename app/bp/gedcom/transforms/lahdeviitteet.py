@@ -44,7 +44,8 @@ Ohjelman toiminta:
 
 from flask_babelex import _
 
-name = _("Citations")
+name = _("Citation groups")
+doclink = "http://taapeli.referata.com/wiki/Lähdeviitteiden_ryhmät_-muunnos"
 
 version = "0.9" 
 

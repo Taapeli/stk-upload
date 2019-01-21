@@ -86,13 +86,19 @@
         </div>
 
     {% if persons|count > 0 %}
-		<div id="alphanav">{% set alpha = "¤" %}
+
+		<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-        {% for p in persons %}{% set ini = p.names[0].initial|upper %}
-            {% if alpha != ini %}{%set alpha = ini %}
-                <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
-            {% endif %}{% endfor %}
+	        {% for p in persons %}
+	        	{% set ini = p.names[0].initial|upper %}
+	            {% if loop.changed(ini) %}
+	                <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+	            {% endif %}
+	        {% endfor %}
 			</ul>
+		</div>
+
+		</ul>
 		</div>
 		<table class="IndividualList">
 			<thead>

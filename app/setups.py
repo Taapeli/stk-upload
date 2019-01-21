@@ -1,4 +1,4 @@
-from flask import session
+#from flask import session
 from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, ValidationError
 from wtforms import SelectField, SubmitField, BooleanField
@@ -13,7 +13,7 @@ from chkdate import Chkdate
 from templates import jinja_filters
 
 from datetime import datetime
-from neo4j.exceptions import ConstraintError, CypherError
+#from neo4j.exceptions import ConstraintError, CypherError
 import logging
 logger = logging.getLogger('stkserver') 
 
@@ -73,6 +73,16 @@ class Role(RoleMixin):
         self.name = kwargs['name']
         self.description = kwargs['description']
 #        self.timestamp = kwargs['timestamp']
+
+    @staticmethod
+    def has_role(name, role_list):
+        '''
+            Check, if given role name exists in a list of Role objects
+        '''
+        for role in role_list:
+            if role.name == name:
+                return True
+        return False
 
 
 class User(UserMixin):
@@ -264,6 +274,6 @@ def app_date(value):
     return 'Not defined'
 
 #------------------------  Load Flask routes file ------------------------------
-# DO NOT REMOVE (ON käytössä vaikka varoitus "unused import")
 
+# DO NOT REMOVE (ON käytössä vaikka varoitus "unused import")
 import routes

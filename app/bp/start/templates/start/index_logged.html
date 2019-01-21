@@ -4,9 +4,10 @@
 {% block title %}{{ _("Stk User's Start Page") }} (start/index_logged){% endblock %}
 {% block body %}
 {{ super() }}
-{% import 'start/s_macros.html' as macro %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+{# import 'start/s_macros.html' as macro #}
 
-{{ macro.hamburger_menu( (
+{{ hamburger_menu( (
     ("/message", _('Contact administrator'), _('Message to the administrator')),
     ("/settings", _('Change language'), _('Select language'))
    ) ) }}
@@ -35,10 +36,10 @@
              </div>
            </div>
 
-           <div class="startbox">
+           <div class="startbox" style="border:1.5pt solid #7e6b53;">
              <div style="display: inline-block;">
                <form method="get" action="/scene">
-                 <h3>{{ _('My Candidate Family Tree') }}</h3>
+                 <h3>{{ _('Family Trees') }}</h3>
                  <p>{{ _('View your own data as candidate material and compare it with Suomi tietokanta database.') }}</p>
                  <div class="submit"> 
                     <button type="submit">{{ _('My Persons and Events') }}</button>
@@ -51,7 +52,7 @@
     {% if current_user.is_authenticated and current_user.has_role('member') %}
     
     
-         <div class="startbox">
+         <div class="startbox gedtools">
             <div style="display: inline-block;">
             <form method="get" action="/gedcom/list">
                <h3>{{ _('My gedcom material') }}</h3>
