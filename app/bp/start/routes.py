@@ -27,7 +27,7 @@ import shareds
 @shareds.app.route('/', methods=['GET', 'POST'])
 def start():
     """ Home page for logged in user """
-    print("-> bp.start.routes.start auth={}".format(current_user.is_authenticated))
+    print("-> bp.start.routes.start auth={}, no request, user_session".format(current_user.is_authenticated))
     if current_user.is_authenticated:
         role_names = [role.name for role in current_user.roles]
         logger.info("Start user {}/{}, roles {}".\
@@ -68,13 +68,13 @@ def datatables():
     print("-> bp.start.routes.datatables")
     return render_template("/tools/tables.html")
 
-@shareds.app.route('/gramps')
-@login_required
-@roles_accepted('member', 'admin')
-def gramps_upload():
-    """ Home page gramps input file processing """
-    print("-> bp.start.routes.gramps_upload")
-    return render_template("/gramps/index_gramps.html")
+# @shareds.app.route('/gramps') moved to bp.gramps.routes 2019-01-22
+# @login_required
+# @roles_accepted('member', 'admin')
+# def gramps_upload():
+#     """ Home page gramps input file processing """
+#     print("-> bp.start.routes.gramps_upload")
+#     return render_template("/gramps/index_gramps.html")
 
 # Admin start page
 @shareds.app.route('/admin',  methods=['GET', 'POST'])
@@ -85,5 +85,5 @@ def admin():
     print("-> bp.start.routes.admin")
     return render_template('/admin/admin.html')
 
-# route('/scene',  methods=['GET', 'POST']) --> bp.scene.route
+# route('/scene',  methods=['GET', 'POST']) moved to bp.scene.routes 2019-01-20
 

@@ -29,6 +29,8 @@ from models.gen.source import Source
 @bp.route('/scene',  methods=['GET', 'POST'])
 def scene():
     """ Home page for scene narrative pages ('kertova') """    
+    print("--- " + repr(request))
+    print("--- " + repr(user_session))
     print("-> bp.start.routes.scene")
     return render_template('/scene/index_scene.html')
 
@@ -98,7 +100,6 @@ def show_persons_by_refname(refname, opt=""):
                            order=order, rule=keys)
 
 # ------------------------------ Menu 1 Persons --------------------------------
-
 # @bp.route('/scene/persons_own/')
 # @login_required
 # #Todo: The roles should be forwarded to macros.html: should not show in menu(11)
@@ -164,7 +165,7 @@ class UserFilter():
 
 @bp.route('/scene/persons_all/')
 #     @login_required
-def show_my_persons_all():
+def show_my_persons():
     """ List all persons for menu(12)
         Both owners and other persons depending on url parameters or session variables
     """
@@ -172,11 +173,15 @@ def show_my_persons_all():
     #    1. argumentin fw sivu, jos on (sivun forward-nuoli tai hakukenttä)
     #    2. session fw_from sivu, jos on (aiemmin viimeksi vierailtu sivu)
     #    3. muuten "" (alkuun)
+    print("--- " + repr(request))
+    print("--- " + repr(user_session))
     UserFilter.store_request_filter()
-    fw = request.args.get('fw', '')
-    if not fw:
+    fw = request.args.get('fw', None)
+    if fw == None:
         fw = user_session.get('fw_from', '')
-    user_session['fw_from'] = fw    
+    else:
+        fw = fw.title()
+    user_session['fw_from'] = fw
 #    print(fw_fromx)        
     t0 = time.time()
 #    fw_from = request.args.get('fw', '')
@@ -187,7 +192,7 @@ def show_my_persons_all():
         user=current_user.username
     else:
         user=None
-    print("-> bp.scene.routes.show_my_persons_all: read persons from {}".format(fw))
+    print("-> bp.scene.routes.show_my_persons: read persons from {}".format(fw))
     persons = Person_combo.read_my_persons_list(user, show=user_session['filter_div'], 
                                                 limit=count, fw_from=fw, bw_from=bw)
     if persons:

@@ -5,7 +5,7 @@ Created on 19.1.2019
 '''
 from setups import Role
 
-class UserSession():
+class ActiveRules():
     '''
     UserSession object carries user parameters transferred between different
     pages. 
@@ -62,7 +62,9 @@ class UserSession():
         self.session['next_person'] = []
 
     def setFilter(self, request):
-        "The parameters div=2&cmp=1 are stored as session variable filter_div"
+        """ The given url parameters div=2&cmp=1 are stored as session variable 
+            filter_div
+        """
         # filter_div tells, which data shall be displayed:
         #   001 1 = public Suomikanta data
         #   010 2 = user's own candidate data
