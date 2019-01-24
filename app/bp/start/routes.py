@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger('stkserver')
 #import time
 
-from flask import render_template, redirect, url_for #, request, flash, g
+from flask import render_template   # redirect, url_for, request, flash, g
 from flask_security import login_required, roles_accepted, current_user # ,roles_required
 #from flask_babelex import _
 
@@ -27,7 +27,7 @@ import shareds
 @shareds.app.route('/', methods=['GET', 'POST'])
 def start():
     """ Home page for logged in user """
-    print("-> bp.start.routes.start auth={}".format(current_user.is_authenticated))
+    print("-> bp.start.routes.start auth={}, no request, user_session".format(current_user.is_authenticated))
     if current_user.is_authenticated:
         role_names = [role.name for role in current_user.roles]
         logger.info("Start user {}/{}, roles {}".\
@@ -42,7 +42,7 @@ def start():
 @login_required
 def start_login():
     """ Home page for logged in user """
-    print("-> bp.start.routes.start_logged_in")
+    print("-> bp.start.routes.start_login (logged in)")
     role_names = [role.name for role in current_user.roles]
     logger.info("Start user {}/{}, roles {}".\
                 format(current_user.username, current_user.email, role_names))
@@ -68,13 +68,13 @@ def datatables():
     print("-> bp.start.routes.datatables")
     return render_template("/tools/tables.html")
 
-@shareds.app.route('/gramps')
-@login_required
-@roles_accepted('member', 'admin')
-def gramps_upload():
-    """ Home page gramps input file processing """
-    print("-> bp.start.routes.gramps_upload")
-    return render_template("/gramps/index_gramps.html")
+# @shareds.app.route('/gramps') moved to bp.gramps.routes 2019-01-22
+# @login_required
+# @roles_accepted('member', 'admin')
+# def gramps_upload():
+#     """ Home page gramps input file processing """
+#     print("-> bp.start.routes.gramps_upload")
+#     return render_template("/gramps/index_gramps.html")
 
 # Admin start page
 @shareds.app.route('/admin',  methods=['GET', 'POST'])
@@ -82,13 +82,8 @@ def gramps_upload():
 @roles_accepted('admin', 'master')
 def admin():
     """ Home page for administrator """    
-    print("-> bp.start.routes.scene")
+    print("-> bp.start.routes.admin")
     return render_template('/admin/admin.html')
 
-# Narrative start page
-@shareds.app.route('/scene',  methods=['GET', 'POST'])
-def scene():
-    """ Home page for scene narrative pages ('kertova') """    
-    print("-> bp.start.routes.scene")
-    return render_template('/scene/index_scene.html')
+# route('/scene',  methods=['GET', 'POST']) moved to bp.scene.routes 2019-01-20
 

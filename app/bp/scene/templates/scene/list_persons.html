@@ -1,4 +1,4 @@
-{# _myapp/templates/k_persons.html_ #}
+{# _myapp/templates/list_persons.html_ #}
 {% extends "/scene/layout.html" %}
 {% block title %}{{ _('List of persons') }}{% endblock %}
 {% block body %}
@@ -6,27 +6,42 @@
 {% import '/scene/macros.html' as macro %}
 
 {% set cnt = persons | count %}
+{% set who = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
+              3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'} %}
 
-{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }}</h2>
-{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
-{% else %}<h2>{{ _('Persons') }}</h2>
+{% if session['filter_div'] %}
+    <h2>{{ _('Persons filtered by') }} {{ who[ session['filter_div'] ] }}</h2>
+{# elif rule[0] == 'refname' %}
+    <h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2> #}
+{% else %}
+    <h2>{{ _('Persons') }}</h2>
 {% endif %}
 
-<!-- Rule = {{rule}} for {{cnt}} persons, pick {{pick}}, next {{next}} -->
+<p><small>{{cnt}} persons, user {{user}}, filter {{session['filter_div']}}, next {{next}}</small></p>
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
-	           <div>
-	            <p id="description">{{ _('Displaying %(num)s persons', num=cnt) }}.</p>
+	           <div id="description">
+	               <p>{{ _('Displaying %(num)s persons', num=cnt) }}. Tietojoukko:
+	                   {% if session['filter_div'] == 1 %}Suomikanta
+                       {% elif session['filter_div'] == 2 %}omat aineistot
+                       {% elif session['filter_div'] == 4 %}oma tuontierä
+                       {% elif session['filter_div'] == 3 %}
+                            &#9899;&nbsp;omat aineistot / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
+                       {% elif session['filter_div'] == 5 %}
+                            &#9899;&nbsp;oma tuontierä / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
+                       {% endif %}
+                       <i>(<a href="/scene" title="vaihda poimintasääntöä" 
+                            style="text-decoration-line: underline;">Vaihda</a>).</i></p>
 	           </div>
 	           <div>
-	               <form action="/scene/persons_{{rule[0]}}/">
+	               <form action="/scene/persons_all">
 	                 <fieldset>
-	                    <input type="hidden" name="c" value="10" >
+	                    <input type="hidden" name="c" value="50" >
 	                    <label for="f">{{ _('Go to') }}</label>
-	                    <input type="text" name="f" size="8" 
+	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of surname') }}" 
 	                     placeholder="{{ _('Surname') }}">
 	                    <input type="submit" value=" > ">
@@ -47,19 +62,20 @@
 
     {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
-			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-			    <li>{% if next['bw'] %}<a href="/scene/persons_{{rule[0]}}/" title="alkuun" class="navlink">|&lt;</a>
+			<ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
+			    <li>{% if next[0] %}
+			         <a href="/scene/persons_all/?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
 
             {% for p in persons %}
                 {% set ini = p.sortname[0] %}
-                {% if loop.changed(ini) %}
+                {% if loop.changed(ini) %}{% if not ini == "#" %}
                     <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
-                {% endif %}
+                {% endif %}{% endif %}
             {% endfor %}
-            <li><a href="/scene/persons_{{rule[0]}}/?f={{next['fw']}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+            <li><a href="/scene/persons_all/?fw={{next[1]}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
 
 		</div>
@@ -73,19 +89,24 @@
 			<tbody>
 
 	    {% for p in persons %}
-	       {% if pick %}
-	           {% if p.owner == pick %}{% set notMine = 0 %}{% else %}{% set notMine = 1 %}{% endif %}
+	       {% if user %}
+	           {% if p.owner == user %}{% set notMine = 0 %}
+	           {% else %}{% set notMine = 1 %}{% endif %}
 	       {% else %}{% set notMine = 0 %}
 	       {% endif %}
 	            <tr><td class="ColumnAlpha">
+	               <small>{{notMine}}</small>
+
 	               {% set ini = p.sortname[0] %}
 	               {% if loop.changed(ini) %}
-		               {% if ini == "#" %}{% set symbol = '_' %}{% else %}{% set symbol = ini %}{% endif %}
-		               <a id="{{symbol}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{symbol}}</a>
+		               {% if ini == "#" %}{% set symbol = '_' %}
+		               {% else %}{% set symbol = ini %}{% endif %}
+		               <a id="{{symbol}}" name="{{alpha}}" title="{{ _('Back to Top') }}" 
+		                  href="#">{{symbol}}</a>
 	               {% endif %}</td>
 
 	                <td class="ColumnPerson"><div>
-	                   {% if pick and notMine %}<span class="owner">&nbsp;{{p.owner}}&nbsp;</span>
+	                   {% if user and notMine %}<span class="owner">&nbsp;{{p.owner}}&nbsp;</span>
 	                   {% else %}&#9899;{% endif %}
 	                   <a href="/scene/person={{p.uniq_id}}"
 	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">

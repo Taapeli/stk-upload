@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory
-from flask_security import roles_accepted, current_user
+from flask_security import login_required, roles_accepted, current_user # ,roles_required
 #from flask_babelex import _
 
 import shareds
@@ -21,6 +21,14 @@ from models import loadfile, email, util    # dbutil,
 from . import bp
 #from pickle import Unpickler
 from ..admin import uploads
+
+@bp.route('/gramps')
+@login_required
+@roles_accepted('member', 'admin')
+def gramps_upload():
+    """ Home page gramps input file processing """
+    print("-> bp.start.routes.gramps_upload")
+    return render_template("/gramps/index_gramps.html")
 
 @bp.route('/gramps/show_log/<xmlfile>')
 @roles_accepted('member')

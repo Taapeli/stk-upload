@@ -22,9 +22,14 @@
 	    {% for url, label, title in items %}
 	       <a href="{{url}}" title="{{title}}">
 	        <li>{{label}}</li></a>
-	    {% endfor %} 
-	      <a href="/logout" title="{{ _('Log out from this application') }}">
-	        <li><b>{{ _('Logout') }}</b></li></a>
+	    {% endfor %}
+	    {% if current_user is defined and current_user.is_anonymous %}
+          <a href="/login" title="{{ _('Log in to this application') }}">
+            <li><b>{{ _('Log in') }}</b></li></a>
+	    {% else %}
+          <a href="/logout" title="{{ _('Log out from this application') }}">
+            <li><b>{{ _('Logout') }}</b></li></a>
+	    {% endif %}
 	    </ul>
 	  </div>
 	</nav>
