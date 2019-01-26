@@ -14,9 +14,10 @@
 		</p>
 		<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-        {% for s in sources %}{% set ini = s.stitle|list|first|upper %}
-            {% if alpha != ini %}{%set alpha = ini %}
-                <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
+        {% for s in sources %}
+        	{% set ini = s.stitle|list|first|upper %}
+            {% if loop.changed(ini) %}
+                <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
             {% endif %}
         {% endfor %}
 			</ul>
@@ -33,11 +34,13 @@
 			</thead>
 			<tbody>
 	{% if sources %}
-	    {% for s in sources %}{% set ini = s.stitle|list|first|upper %}
-	    	<tr><td class="ColumnAlpha">{% if alpha|upper != ini %}
-	               {%set alpha = ini %}
-	               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
-               {% endif %}</td>
+	    {% for s in sources %}
+	    	{% set ini = s.stitle|list|first|upper %}
+	    	<tr><td class="ColumnAlpha">
+	            {% if loop.changed(ini) %}
+	               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
+                {% endif %}
+                </td>
             <td class="ColumnPerson">
                <div>
                  {% set uniq_id = s.uniq_id %}

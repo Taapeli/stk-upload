@@ -13,9 +13,10 @@
 		</p>
 		<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
-        {% for p in locations %}{% set ini = p.pname[0]|list|first %}
-            {% if alpha != ini %}{%set alpha = ini %}
-                <li><a href="#{{alpha}}" title="{{ _('Alphabetical Menu') }}: {{alpha}}">{{alpha}}</a></li>
+        {% for p in locations %}
+        	{% set ini = p.pname[0]|list|first %}
+            {% if loop.changed(ini) %}
+                <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
             {% endif %}
         {% endfor %}
 			</ul>
@@ -29,10 +30,13 @@
 			</thead>
 			<tbody>
 	{% if locations %}
-	    {% for p in locations %}{% set ini = p.pname[0]|list|first %}
-            <tr><td class="ColumnAlpha">{% if alpha != ini %}{%set alpha = ini %}
-	               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
-                {% endif %}</td>
+	    {% for p in locations %}
+	    	{% set ini = p.pname[0]|list|first %}
+            <tr><td class="ColumnAlpha">
+	            {% if loop.changed(ini) %}
+	               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
+                {% endif %}
+                </td>
                 <td class="ColumnPerson">
                    <div>
                       <a href="/scene/location={{p.uniq_id}}" class="id"

@@ -5,6 +5,7 @@ Created on 12.8.2018
 '''
 import logging 
 from models.gen.person_combo import Person_combo
+from _ast import Div
 logger = logging.getLogger('stkserver')
 import time
 
@@ -28,10 +29,17 @@ from models.gen.source import Source
 # Narrative start page
 @bp.route('/scene',  methods=['GET', 'POST'])
 def scene():
-    """ Home page for scene narrative pages ('kertova') """    
+    """ Home page for scene narrative pages ('kertova') for anonymous """    
     print("--- " + repr(request))
     print("--- " + repr(user_session))
-    print("-> bp.start.routes.scene")
+    print("-> bp.scene.routes.scene")
+    # Is div parameter given in the form?
+    if UserFilter.store_div(request):
+        # Coming from start page: clear next_person links
+        next_person = UserFilter.store_next_person(None)
+    else:
+        # Coming from start page: clear next_person links
+        next_person = UserFilter.store_next_person(request)
     return render_template('/scene/index_scene.html')
 
 
@@ -139,7 +147,7 @@ class UserFilter():
                3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'}
 
     @staticmethod
-    def store_request_filter():
+    def store_div(request):
         "The parameters div=2&cmp=1 are stored as session variable filter_div"
         # filter_div tells, which data shall be displayed:
         #   001 1 = public Suomikanta data
@@ -154,7 +162,38 @@ class UserFilter():
                 div = div | 1 
             user_session['filter_div'] = int(div)
             print("Now filter_div={}".format(div))
-    
+            return div
+        return None
+
+    @staticmethod
+    def store_next_person(request):
+        """ Eventuel fb or bw parameters are stored in session['next_person'].
+            If neither is given, next_person is cleared.
+        """
+        next_person = [' ', ' ']
+        if request:
+            fw = request.args.get('fw', None)
+            bw = request.args.get('bw', None)
+            if fw == None and bw == None:
+                # Do not change next_person
+                return user_session.get('next_person', [' ', ' '])
+
+            if fw == None and 'next_person' in user_session:
+                next_person = user_session.get('next_person')
+            else:
+                if fw != None:
+                    fw = fw.title()
+                    next_person[1] = fw
+            if bw != None:
+                next_person[0] = bw
+            user_session['next_person'] = next_person
+            print("Now next_person={}".format(next_person))
+        else:
+            next_person = [' ', ' ']
+            user_session['next_person'] = next_person
+            print("Now next_person is cleared")
+        return next_person
+
     @staticmethod
     def is_only_mine_data():
         " Returns True, if return set is restrected to items of owner's Batch"
@@ -175,32 +214,31 @@ def show_my_persons():
     #    3. muuten "" (alkuun)
     print("--- " + repr(request))
     print("--- " + repr(user_session))
-    UserFilter.store_request_filter()
-    fw = request.args.get('fw', None)
-    if fw == None:
-        fw = user_session.get('fw_from', '')
+    # Is div parameter given in the form?
+    if UserFilter.store_div(request):
+        # Coming from start page: clear next_person links
+        next_person = UserFilter.store_next_person(None)
     else:
-        fw = fw.title()
-    user_session['fw_from'] = fw
-#    print(fw_fromx)        
-    t0 = time.time()
-#    fw_from = request.args.get('fw', '')
-    bw = request.args.get('bw', '')
+        # Coming from start page: clear next_person links
+        next_person = UserFilter.store_next_person(request)
+    
     count = int(request.args.get('c', 100))
 
     if current_user.is_authenticated:  # Turha testi, jos @login_required
         user=current_user.username
     else:
         user=None
-    print("-> bp.scene.routes.show_my_persons: read persons from {}".format(fw))
+    print("-> bp.scene.routes.show_my_persons: read persons from {}".format(next_person[1]))
+    t0 = time.time()
     persons = Person_combo.read_my_persons_list(user, show=user_session['filter_div'], 
-                                                limit=count, fw_from=fw, bw_from=bw)
+                                                limit=count, fw_from=next_person[1], bw_from=next_person[0])
     if persons:
         print("Display persons {} – {}".format(persons[0].sortname, persons[-1].sortname))
 #         print("User session {}".format(user_session))
         # Next person links [backwards, forwards]
         next_person = [quote_plus(persons[0].sortname), quote_plus(persons[-1].sortname)]
-        user_session['fw_from'] = next_person[0]
+        user_session['next_person'] = next_person
+        print("--> " + repr(user_session))
 
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
                            user=user, next=next_person, elapsed=time.time()-t0)
