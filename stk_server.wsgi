@@ -6,9 +6,7 @@ logging.basicConfig(level=logging.INFO, format=('%(asctime)s - %(name)s - %(leve
 
 logging.basicConfig(stream=sys.stderr)
 print("Start directory {}".format(os.getcwd()))
-#ys.path.insert(0, os.path.join(os.getcwd(),"app")) #"/opt/repo/ROOT/app"
-sys.path.insert(0, os.path.join(os.getcwd(),"ROOT"))
-sys.path.insert(0, os.path.join(os.getcwd(),"ROOT/app"))
+sys.path.insert(0, os.path.join(os.getcwd(),"app")) #"/opt/repo/ROOT/app"
 print('Polku: ' + str(sys.path))
 #os.chdir("/opt/repo/ROOT/app")
 print("Active directory {}".format(os.getcwd()))
