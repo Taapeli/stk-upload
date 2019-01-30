@@ -5,7 +5,6 @@ Created on 12.8.2018
 '''
 import logging 
 from models.gen.person_combo import Person_combo
-from _ast import Div
 logger = logging.getLogger('stkserver')
 import time
 
@@ -308,6 +307,7 @@ def show_a_person_w_apoc(uid):
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
+    print(person.sex_str())
     print("-> bp.scene.routes.show_a_person_w_apoc")
     return render_template("/scene/person_pg.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
@@ -332,7 +332,7 @@ def show_person_page(uniq_id):
             if f.children:
                 for c in f.children:
                     print("    Child ({}): {} / {} *{}".\
-                          format(c.gender, c.uniq_id, c.id, c.birth_date))
+                          format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     print("-> bp.scene.routes.show_person_page")

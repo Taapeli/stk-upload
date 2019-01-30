@@ -434,7 +434,7 @@ class DOM_handler():
 
             if len(person.getElementsByTagName('gender') ) == 1:
                 person_gender = person.getElementsByTagName('gender')[0]
-                p.gender = person_gender.childNodes[0].data
+                p.gender = p.sex_from_str(person_gender.childNodes[0].data)
             elif len(person.getElementsByTagName('gender') ) > 1:
                 self.blog.log_event({'title':"More than one gender in a person",
                                      'level':"WARNING", 'count':p.id})

@@ -24,7 +24,7 @@
 <section id="lista">
 <table>
     <h2>{{ _("Names") }}</h2>
-    <tr><th>{{ _("unique_id") }}</th><th>{{ _('private') }}</th><th>{{ _("gender") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th><th>{{ _("link") }}</th>
+    <tr><th>{{ _("unique_id") }}</th><th>{{ _('private') }}</th><th>{{ _("sex") }}</th><th>{{ _("firstname") }}</th><th>{{ _("suffix") }}</th><th>{{ _("surname") }}</th><th>{{ _("link") }}</th>
     </tr>
 {% if person %}
  	{% if person.names %}
@@ -32,7 +32,7 @@
 		<tr>
     		<td class="id">{{person.uniq_id}}</td>
     		<td>{% if person.priv %}{{person.priv}}{% endif %}</td>
-    		<td>{% if person.gender %}{{person.gender}}{% endif %}</td>
+    		<td>{% if person.sex %}{{person.sex}}{% endif %}</td>
     		<td>{% if pname.firstname %}{{pname.firstname}}{% endif %}</td>
     		<td>{% if pname.suffix %}{{pname.suffix}}{% endif %}</td>
     		<td>{{pname.surname}}</td>

@@ -258,12 +258,11 @@ a[href]:hover, a[href]:active {
     max-width: 30em;
 }
 .flashes {
-    font-size: 80%;
     color: darkblue;
     border: solid 2pt #c9ac45;
     background-color: #f9e9a3;
     margin: 3em;
-    padding: 1em;
+    padding: 2em;
     max-width: 40em;
 }
 .flash_error { color: red }

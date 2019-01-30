@@ -545,13 +545,13 @@ class Family_for_template(Family):
                 p.role = member[1]
                 rec = member[2]
                 # rec = {"handle":"_df908d402906150f6ac6e0cdc93",
-                #  "id":"I0004","priv":"","gender":"F","confidence":"",
+                #  "id":"I0004","priv":"","sex":"2","confidence":"",
                 #  "change":1536324696}
                 p.handle = rec['handle']
                 p.id = rec['id']
                 if 'priv' in rec:
                     p.priv = rec['priv']
-                p.gender = rec['gender']
+                p.sex = rec['sex']
                 p.confidence = rec['confidence']
                 p.change = rec['change']
                 # Names

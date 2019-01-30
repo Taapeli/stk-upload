@@ -29,7 +29,7 @@ class Person_gramps(Person):
     """ Henkilö
     
         From Person.__init__(): 
-            uniq_id, handle, id, priv, gender, confidence, change
+            uniq_id, handle, id, priv, sex, confidence, change
 
         Other properties:
             names[]:
@@ -101,7 +101,7 @@ class Person_gramps(Person):
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
-                "gender": self.gender,
+                "sex": self.sex,
                 "confidence":self.confidence,
                 "sortname":self.sortname
             }
