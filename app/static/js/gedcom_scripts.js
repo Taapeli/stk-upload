@@ -55,6 +55,7 @@ $(document).ready( function() {
     });
 
     $("a.transform").click(function(e) {
+        $("#div_transforms").hide();
         $.get("/gedcom/transform/" + gedcom + "/" + $(e.target).attr("data-transform"), function(rsp) {
             $("#div_transform_params1").html(rsp);
             $("#div_transform_params").show();
@@ -146,6 +147,7 @@ $(document).ready( function() {
     $("#transform").off("click");
 
     $("#transform").click(function() {
+        $("#errors").hide();
     	$("#output").hide();
     	$("#output_log").empty();
     	$("#error_log").empty();

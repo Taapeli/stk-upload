@@ -18,7 +18,7 @@ SECURITY_TRACKABLE = True
 
 #SECURITY_USER_IDENTITY_ATTRIBUTES = ['email', 'username']
 SECURITY_POST_LOGIN_VIEW = '/'
-SECURITY_POST_LOGOUT_VIEW = 'login'
+SECURITY_POST_LOGOUT_VIEW = '/'
 #SECURITY_LOGIN_USER_TEMPLATE = 'security/login_user.html'
 #SECURITY_REGISTER_USER_TEMPLATE = 'security/register_user.html'
 #SECURITY_RESET_PASSWORD_TEMPLATE = 'security/reset_password.html'

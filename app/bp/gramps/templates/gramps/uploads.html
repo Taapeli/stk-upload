@@ -1,9 +1,19 @@
-{# _myapp/templates/gr_result.html_ #}
-{% extends "a_layout.html" %}
-{% block title %}{{ _("Uploads") }}{% endblock %}
+{# _gramps/uploads.html_ #}
+{% extends "start/s_layout.html" %}
+{% block title %}{{ _("Uploads from Gramps") }}{% endblock %}
 {% block body %}
-    {{ super() }}
-    <meta http-equiv="refresh" content="30">
+{{ super() }}
+    <!-- meta http-equiv="refresh" content="30" -->
+
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu( (
+    ("/message", _('Contact administrator'), _('Message to the administrator')),
+    ("/settings", _('Change language'), _('Select language'))
+   ) ) }}
+
+<div id="startdiv">
+  <div>
     <h2>{{ _("Uploads") }}</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -14,15 +24,25 @@
         </ol>
       {% endif %}
     {% endwith %}
-    <div class="helptext">
-    <pre>
-    	{{ _("Status for differents steps in XML file upload:") }}
-    	
-    	{{ _("1. UPLOADING - the file is being uploaded to server") }}
-    	{{ _("2. UPLOADED  - the file has been uploaded to server") }}
-    	{{ _("3. STORING   - the file content is being stored to the database") }}
-    	{{ _("4. STORED    - the file content has been stored to the database") }}
-	</pre>
+    <div class="legend">
+    	<table class="legend">
+    	<tbody>
+	        <tr><th colspan="3">{{ _("Status for differents steps in XML file upload") }}</th></tr>
+	        <tr>
+	        <td>1</td><td>{{ _("UPLOADED") }}</td>  
+	        <td>{{ _("the file has been uploaded to server") }}</td></tr>
+	        <tr>
+	        <td>2</td><td>{{ _("STORING") }}</td>
+	        <td>{{ _("the file content is being stored to the database") }}</td></tr>
+	        <tr>
+	        <td>3</td><td>{{ _("STORED") }}</td>
+	        <td>{{ _("the file content has been stored to the database") }}</td></tr>
+	        <tr>
+	        <td>4</td><td>{{ _("ERROR") }} / {{ _("FAILED") }}</td>
+	        <td>{{ _("there was an error") }}</td></tr>
+    	</tbody>
+    	</table>
+	<p>
     </div>
     <table>
            <tr>
@@ -37,6 +57,7 @@
 	           <td>{{upload.xmlname}}</td>
 	           <td>{{upload.status}}</td>
 	           <td><a href=/gramps/xml_download/{{upload.xmlname | urlencode}}>{{ _("Download to your computer") }}</a> |
+	               <a href=/gramps/show_log/{{upload.xmlname | urlencode}}>{{ _("Show log") }}</a> |
 	           	   <a href=/gramps/xml_delete/{{upload.xmlname | urlencode}}>{{ _("Delete") }}</a></td>
 	       </tr>
 	    {% endfor %}
@@ -45,8 +66,14 @@
 	    {% if current_user.is_authenticated and current_user.has_role('admin') %}
             <a href="/admin/list_users">{{ _('on this page') }}</a>
         {% endif %}
+	    {% if current_user.is_authenticated and current_user.has_role('member') %}
+	    	<p>&rtrif; <a href="/scene/persons_all?div=2">{{ _('See your own data') }}</a>
+        {% endif %}
     </p>
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
+    
+  </div>
+</div>
 {% endblock %}
 </body>
 </html>

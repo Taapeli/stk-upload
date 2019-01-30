@@ -9,11 +9,9 @@ Created on 28.9.2017
 from flask_security.datastore import UserDatastore
 from .seccypher import Cypher  
 from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, ConstraintError
-import datetime
+from datetime import datetime
 #import shareds
 import logging
-#from flask_security.views import confirm_email
-#from wtforms.validators import ValidationError
 logger = logging.getLogger('neo4juserdatastore')
 
 driver = None
@@ -75,7 +73,7 @@ class Neo4jUserDatastore(UserDatastore):
            Toggles a user’s active status. Always returns True.
     """
 
-    # Uses classes Role, User, UserProfile, Allowed_email from setups.py
+    # Uses classes Role, User, UserProfile from setups.py
 
     def __init__(self, driver, user_model, user_profile_model, role_model):
         self.driver = driver
@@ -85,34 +83,41 @@ class Neo4jUserDatastore(UserDatastore):
         self.role_model = role_model
 #       self.role_dict = self.get_roles() 
         
-    def _build_user_from_node(self, userNode):
-        ''' Returns a list of Role class instances '''
-        if userNode is None:
-            return None
-        user = self.user_model(**userNode.properties)
-        user.id = str(userNode.id)
-        user.roles = self.find_UserRoles(user.email)
-        if 'confirmed_at' in userNode.properties: 
-            user.confirmed_at = datetime.datetime.fromtimestamp(float(userNode.properties['confirmed_at'])/1000)
-        if 'last_login_at' in userNode.properties: 
-            user.last_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['last_login_at'])/1000)
-        if 'current_login_at' in userNode.properties: 
-            user.current_login_at = datetime.datetime.fromtimestamp(float(userNode.properties['current_login_at'])/1000)                            
-        return user
- 
+    def _build_user_from_record(self, userRecord):
+        ''' Returns a User class based on a user type node '''
+        try:
+            if userRecord is None:
+                return None
+            user = self.user_model(**userRecord)
+#            print(userRecord.id)
+            user.id = str(userRecord.id)
+            user.roles = self.find_UserRoles(user.email)
+            if user.confirmed_at:
+                user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
+            if user.last_login_at:    
+                user.last_login_at = datetime.fromtimestamp(float(user.last_login_at)/1000)
+            if user.current_login_at:     
+                user.current_login_at = datetime.fromtimestamp(float(user.current_login_at)/1000)  
+            return user
+        except Exception as ex:
+            print(ex)
 #  
 #     def email_accepted(self, proposed_email):
 #         return proposed_email == self.find_allowed_email(proposed_email)
 #                               
         
     def put(self, model):
-        with self.driver.session() as session:
+        
             try:
                 if isinstance(model, self.user_model):
-                    if not model.id: 
-                        return session.write_transaction(self._put_user, model)
-                    else:
-                        return session.write_transaction(self._update_user, model)                                         
+                    userRecord = None
+                    if not model.id:    # New user to insert
+                        with self.driver.session() as session:
+                            userRecord = session.write_transaction(self._put_user, model)
+                    else:               # Old user to update
+                        with self.driver.session() as session:                        
+                            userRecord = session.write_transaction(self._update_user, model) 
+                    return(self._build_user_from_record(userRecord))                                        
                 elif isinstance(model, self.role_model):
                     return session.write_transaction(self._put_role, model)
             except ServiceUnavailable as ex:
@@ -149,13 +154,13 @@ class Neo4jUserDatastore(UserDatastore):
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
 
-            for record in result:
-                userNode = (record['user'])
-                logger.debug(userNode)
-                UserAdmin.user_profile_add(tx, userNode.properties['email'], userNode.properties['username'])
-                tx.commit()
-                logger.info('User with email address {} registered'.format(user.email)) 
-                return self._build_user_from_node(userNode)
+            userRecord = result.single()['user']
+#                userNode = (record['user'])
+#                logger.debug(userNode)
+            UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
+#                tx.commit()
+            logger.info('User with email address {} registered'.format(user.email)) 
+            return self._build_user_from_record(userRecord)
 #            tx.commit()
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
@@ -182,7 +187,7 @@ class Neo4jUserDatastore(UserDatastore):
 #   Confirm time is copied from allowed email if not in the user aregument        
             confirmtime = None 
             if user.confirmed_at == None:
-                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email).properties['confirmed_at']
+                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email)['confirmed_at']
             else:     
                 confirmtime = int(user.confirmed_at.timestamp() * 1000)
                                                    
@@ -201,6 +206,7 @@ class Neo4jUserDatastore(UserDatastore):
                 last_login_ip = user.last_login_ip,
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
+            userRecord = result.single()['user']
 #   Find list of previous user -> role connections
             prev_roles = [rolenode.name for rolenode in self.find_UserRoles(user.email)]
 #   Delete connections that are not in edited connection list            
@@ -215,11 +221,8 @@ class Neo4jUserDatastore(UserDatastore):
                     tx.run(Cypher.user_role_add, 
                            email = user.email,
                            name = rolename)        
-          
-            for record in result:
-                userNode = (record['user'])
-                logger.info('User with email address {} updated'.format(user.email)) 
-                return self._build_user_from_node(userNode)
+            logger.info('User with email address {} updated'.format(user.email)) 
+            return self._build_user_from_record(userRecord)
         except CypherError as ex:
             logger.error('CypherError', ex)            
             raise ex            
@@ -240,7 +243,7 @@ class Neo4jUserDatastore(UserDatastore):
                               name=role.name, 
                               description=role.description)
         #                      timestamp = datetime.datetime.timestamp())
-            return self.role_model(**roleNode.properties)
+            return self.role_model(**roleNode._properties)
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -261,19 +264,14 @@ class Neo4jUserDatastore(UserDatastore):
 #        self.email = id_or_email
         try:
             with self.driver.session() as session:
-                userNode = session.read_transaction(self._getUser, id_or_email) 
-                logger.debug ('get_user ', id_or_email, ' ', userNode)
-                return(self._build_user_from_node(userNode))
+                return(self._build_user_from_record(session.read_transaction(self._getUser, id_or_email)))
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
             return None
- 
-                        
+
     def _getUser (self, tx, pemail):
             try:
-                for record in tx.run(Cypher.email_or_id_find, id_or_email=pemail):            
-                    userNode = (record['user'])
-                    return userNode
+                return(tx.run(Cypher.email_or_id_find, id_or_email=pemail).single()['user'])
             except CypherError as ex:
                 logger.error('CypherError: ', ex.message, ' ', ex.code)            
                 raise      
@@ -290,7 +288,7 @@ class Neo4jUserDatastore(UserDatastore):
             with self.driver.session() as session:
                 userNodes = session.read_transaction(self._getUsers)
                 if userNodes is not None:
-                    return [self.user_model(**userNode.properties) for userNode in userNodes] 
+                    return [self.user_model(**userNode) for userNode in userNodes] 
                 return []
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
@@ -318,20 +316,14 @@ class Neo4jUserDatastore(UserDatastore):
 #        print('find_user ', args, ' ', kwargs)
         try:
             with self.driver.session() as session:
-                userNode = session.read_transaction(self._findUser, kwargs['id']) 
-#                print('find_user (node) ', userNode)
-                return(self._build_user_from_node(userNode))
+                return(self._build_user_from_record(session.read_transaction(self._findUser, kwargs['id'])))
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
             return None
         
     def _findUser (self, tx, arg):
         try:
-            rid = int(arg)
-#            print('rid=', rid)
-            for record in tx.run(Cypher.id_find, id=rid):
-                user = (record['user'])
-                return user        
+            return(tx.run(Cypher.id_find, id=int(arg)).single()['user'])        
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -348,7 +340,7 @@ class Neo4jUserDatastore(UserDatastore):
             with self.driver.session() as session:
                 userRoles = session.read_transaction(self._findUserRoles, email) 
                 if len(userRoles) > 0:
-                    return [self.role_model(**roleNode.properties) for roleNode in userRoles] 
+                    return [self.role_model(**roleRecord) for roleRecord in userRoles] 
                 return None
         except ServiceUnavailable as ex:
             logger.debug(ex.message)
@@ -356,11 +348,8 @@ class Neo4jUserDatastore(UserDatastore):
             
     def _findUserRoles (self, tx, pemail):
         try:
-            roles = []
-            for record in tx.run(Cypher.user_roles_find, email=pemail):
-                roles.append(record['role'])
-    #        print ('_findUserRoles ', pemail, roles)    
-            return roles
+            records = tx.run(Cypher.user_roles_find, email=pemail)
+            return([record['role'] for record in records])
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -375,10 +364,10 @@ class Neo4jUserDatastore(UserDatastore):
     def find_role(self, roleName):
         try:
             with self.driver.session() as session:
-                roleNode = session.read_transaction(self._findRole, roleName) 
-                if roleNode is not None:
-                    role =  self.role_model(**roleNode.properties)
-                    role.id = str(roleNode.id)
+                roleRecord = session.read_transaction(self._findRole, roleName) 
+                if roleRecord is not None:
+                    role =  self.role_model(**roleRecord)
+                    role.id = str(roleRecord.id)
                     return role
                 return None
         except ServiceUnavailable as ex:
@@ -387,8 +376,7 @@ class Neo4jUserDatastore(UserDatastore):
         
     def _findRole (self, tx, roleName):
         try:
-            for record in tx.run(Cypher.role_find, name=roleName):
-                return (record['role'])                
+            return(tx.run(Cypher.role_find, name=roleName).single())
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -404,11 +392,11 @@ class Neo4jUserDatastore(UserDatastore):
         self.id = rid
         try:
             with self.driver.session() as session:
-                roleNode = session.read_transaction(self._getRole, id) 
+                roleRecord = session.read_transaction(self._getRole, id) 
 #                print ('get_role ', rid, ' ', roleNode)
-                if roleNode is not None:
-                    role =  self.role_model(**roleNode.properties)
-                    role.id = str(roleNode.id)
+                if roleRecord is not None:
+                    role =  self.role_model(**roleRecord)
+                    role.id = str(roleRecord.id)
                     return role
                 return None
         except ServiceUnavailable as ex:
@@ -417,8 +405,7 @@ class Neo4jUserDatastore(UserDatastore):
                         
     def _getRole (self, tx, rid):
         try:
-            for record in tx.run(Cypher.role_get, id=rid):
-                return (record['role'])        
+            return(tx.run(Cypher.role_get, id=rid).single())
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -434,12 +421,12 @@ class Neo4jUserDatastore(UserDatastore):
         try:
             with self.driver.session() as session:
                 roles = {}
-                roleNodes = session.read_transaction(self._getRoles) 
+                roleRecords = session.read_transaction(self._getRoles) 
 #                print ('get_role ', rid, ' ', roleNode)
-                if len(roleNodes) > 0:
-                    for roleNode in roleNodes:
-                        role =  self.role_model(**roleNode.properties)
-                        role.id = str(roleNode.id)
+                if len(roleRecords) > 0:
+                    for roleRecord in roleRecords:
+                        role =  self.role_model(**roleRecord)
+                        role.id = str(roleRecords.id)
                         roles[role.name]=role
                     return roles
                 return None
@@ -449,10 +436,7 @@ class Neo4jUserDatastore(UserDatastore):
                                 
     def _getRoles (self, tx):
         try:
-            roleNodes = []        
-            for record in tx.run(Cypher.roles_get):
-                roleNodes.append(record['role'])
-            return roleNodes        
+            return([record['role'] for record in tx.run(Cypher.roles_get)])
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -469,7 +453,7 @@ class Neo4jUserDatastore(UserDatastore):
             with driver.session() as session:
                 with session.begin_transaction() as tx:
                     tx.run(Cypher.confirm_email, email=email)
-                    UserAdmin.confirm_allowed_email(tx, email.properties('email'), email.properties('confirmed__at'))   
+                    UserAdmin.confirm_allowed_email(tx, email['email'], email['confirmed__at'])   
                     tx.commit()
             logger.info('Email address {} confirmed'.format(email))                            
         except CypherError as ex:

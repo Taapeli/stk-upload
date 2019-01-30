@@ -1,6 +1,5 @@
 # coding: utf-8  
 
-import sys
 from datetime import datetime
 import logging
 logger = logging.getLogger('stkserver') 
@@ -167,7 +166,7 @@ def create_master(master_user):
         except ConstraintError as cex:
             logger.error('ConstraintError in create_master ' + cex)
             return
-    logger.info('Master user created')    
+    logger.info('Master user account created')    
 
 
 def create_role_constraints():
@@ -180,7 +179,7 @@ def create_role_constraints():
         except ConstraintError as cex:
             logger.error('ConstraintError in create_role_constraints ' + cex)
             return
-    logger.info('Role costraints created')
+    logger.info('Role constraints created')
 
 
 def create_user_constraints():
@@ -197,7 +196,7 @@ def create_user_constraints():
         except ConstraintError as cex:
             logger.error('ConstraintError in create_user_constraints ' + cex)
             return
-    logger.info('User constraints initialized')
+    logger.info('User constraints created')
     
 
 def create_allowed_email_constraints():
@@ -213,7 +212,7 @@ def create_allowed_email_constraints():
         except ConstraintError as cex:
             logger.error('ConstraintError in create_user_constraints ' + cex)
             return
-    logger.info('User constraints initialized')
+    logger.info('Allowed email constraints created')
 
 
 def initialize_db(): 

@@ -1,54 +1,104 @@
-{# templates/mainindex.html_ #}
+{# _scene/index_scene.html_ #}
 {% extends "a_layout.html" %}
 {% include "security/_messages.html" %}
 {% block title %}{{ _('Logged on user') }}{% endblock %}
 {% block body %}
 {{ super() }}
 
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu((
+    ("/message", _('Contact administrator'), _('Message to the administrator')),
+    ("/settings", _('Change language'), _('Select language'))
+   ) ) }}
+
 
 <div id="startdiv">
   <div>
-    <h2>{{ _('Welcome to Finland Database') }}, {{current_user.username}}</h2>
+    <h2>{{ _('Finland Database') }}</h2>
+    {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
-       <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
-          <i>{{ 'git'|app_date }}</i></span></p>
+       <span style="font-size:8pt; color:gray"></p>
+    {% endif %}
 
-    {% if current_user.is_authenticated and current_user.has_role('member') %}
-    
-	    <div class="row">
-	       <div class="startbox">
-	         <div style="display: inline-block;">
-	           <form method="get" action="/scene/persons_own/">
-	             <h3>{{ _('My Family Tree') }}</h3>
-	             <p>{{ _('View your own candidate material and compare with Suomi tietokanta database') }}</p>
-	             <div class="submit"> 
-	                <button type="submit">{{ _('List of Persons') }}</button>
-	             </div>
-	           </form>
-	        </div>
-	       </div>
-	
-	       <div class="startbox">
-	         <div style="display: inline-block;">
-	            <h3>{{ _('Send data to server') }}</h3>
-	              <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
-	             <div style="display: inline-block;">
-	               <input type="hidden" name="material" value="xml_file">
-	               <p>{{ _('Select Gramps XML File (*. gramps) to become candidate material') }}</p>
-	               <input type="file" name="filenm" />
-	             </div>
-	             <div class="submit"> 
-	                <input type="submit" value="{{ _('Upload') }}" />
-	             </div>
-	             </form>
-	             ▸ <a href=/gramps/uploads>{{ _("List uploads") }}</a>
-	         </div>
-	     </div>
-	
+<p><small>{{session}}</small></p>
+
+        <div class="row">
+{#  {% if current_user.is_authenticated and current_user.has_role('member') %}
+           <div class="startbox">
+             <div style="display: inline-block;">
+               <form method="get" action="/scene/persons_all/">
+                 <input name="div" type="hidden" value="2">
+                 <h3>{{ _('My Candidate Family Tree') }}</h3>
+                 <p>{{ _('View your own candidate material and compare with Suomi tietokanta database') }}</p>
+                 <div class="submit"> 
+                    <button type="submit">{{ _('List of Persons') }}</button>
+                 </div>
+               </form>
+            </div>
+           </div>
+    {% endif %}    
+#} 
+           <div class="startbox">
+             <div style="display: inline-block;">
+               <form method="get" action="/scene/persons_all/">
+                 <h3>{{ _('Select Material for Browsing') }}</h3>
+
+     {% if current_user.is_authenticated and 
+        ( current_user.has_role('member') or current_user.has_role('admin') ) %}
+                <p>{% set filt = session['filter_div'] %}
+                  <input type="radio" name="div" value="1" 
+                    {% if filt == 1 %}checked{% endif %}>Suomikanta<br>
+                  <input type="radio" name="div" value="2" 
+                    {% if filt == 2 or filt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
+                  <input type="radio" name="div" value="4" style="cursor:not-allowed" 
+                    {% if filt == 4 or filt == 5 %}checked{% endif %}>{{ _('Selected set of material') }}<br>
+                  &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
+                    {% if filt == 3 or filt == 5 %}checked{% endif %}>
+                        {{ _('Compare to Suomikanta') }} 
+                </p>
+     {% else %}
+                <p>{{ _('You can view only approved and public material in Suomi tietokanta') }}.</p>
+                <input name="div" type="hidden" value="1">
+     {% endif %}
+                <div class="submit"> 
+                    <button type="submit">{{ _('List of Persons') }}</button>
+                 </div>
+               </form>
+{#
+	<!-- 
+	filter_div    001 1 = public Suomikanta data
+	              010 2 = user's own candidate data
+	              100 4 = data from specific batch
+	              011 3 = 1+2 = users data & Suomikanta
+	              101 5 = 1+4 = user batch & Suomikanta
+	 -->
+                   <p>Tietojoukko {% set filt = session['filter_div'] %} {{filt}}
+                       {% if session['filter_div'] == 1 or filt == 3 or filt == 5 %}Suomikanta{% endif %}
+                       {% if session['filter_div'] == 2 or filt == 3 %}omat{% endif %}
+                       {% if session['filter_div'] == 4 or filt == 5 %}tuontierä{% endif %}</p>
+#}
+            </div>
+           </div>
+
+
+    {% if current_user.is_authenticated and 
+        ( current_user.has_role('member') or current_user.has_role('admin') ) %}
+     <div class="startbox">
+         <h3>{{ _('Table format tools') }}</h3>
+         <p>{{ _('A variety of more technical listings and problem solving tools.') }}
+         {{ _('The data includes accepted and candidate materials of all users.') }}
+         </p>
+         <form method="get" action="/tables">
+            <div class="submit"> 
+               <button type="submit">{{ _('Explore the database') }}</button>
+            </div>
+         </form>
+     </div>
      {% endif %}
 
-     <div class="startbox">
+ {#  <div class="startbox">
        <div style="display: inline-block;">
          <h3>{{ _('Message to Maintenance') }}</h3>
          <p>{{ _("Request a researcher's rights or send another message to the maintenance") }}</p>
@@ -67,9 +117,10 @@
           <div class="submit"> 
 	<button type="submit" style="color: blue">{{ _('Exit the Application') }}</button>
           </div>
- </form>
+    </form>
      </div>
      {% endif %}
+ #}
     </div>
   </div>
 </div>

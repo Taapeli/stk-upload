@@ -67,7 +67,7 @@ table.diff td {
 
 </style>
 
-<script src="/static/js/gedcom_scripts.js?20"></script>
+<script src="/static/js/gedcom_scripts.js?22"></script>
 
 <script>
 var gedcom = "{{ gedcom }}";
@@ -119,7 +119,12 @@ var gedcom = "{{ gedcom }}";
 
                     {% if info.source_program %}
 					    <tr><td>{{ _("Source program") }}</td>
-					        <td class="right">{{ info.source_program_name }}
+					        <td class="right">
+		                    {% if info.source_program_name %}
+			                    {{ info.source_program_name }}
+		                    {% else %}
+			                    {{ info.source_program }}
+		                    {% endif %}
 		                    {% if info.source_program_version %}
 			                    {{ info.source_program_version }}
 		                    {% endif %}

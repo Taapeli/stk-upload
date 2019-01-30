@@ -9,13 +9,15 @@
     <meta name="generator" content="stk-server">
     <meta name="author" content="SSS / JMä">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link href="{{ url_for('static', filename='k_screen.css') }}" media="screen" rel="stylesheet" type="text/css">
-    <link href="{{ url_for('static', filename='k_print.css') }}" media="print" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='k_screen.css') }}" media="screen">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='k_print.css') }}" media="print">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hamburger.css') }}">
 <!--
     <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jquery/css/base.css?v=1">
     <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
 -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/static/js/help.js?"></script>
 </head>
 <body>
 {% block body %}
@@ -24,9 +26,14 @@
              onmouseover="this.src='/static/hlo1.png';" 
              onmouseout="this.src='/static/hlo.png';"/></a>
         <i>{{ _('A Database of the Genealogical Society of Finland') }}</i></h1>
-    {% if current_user.is_authenticated %}
-    <div class="h1_user">{{current_user.roles[0].name}}: {{current_user.username}}</div>
-    {% endif %}
+        
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu((
+    ("/scene", _('Change settings'), _('Select displayed data')),
+    ("/settings", _('Change language'), _('Select language'))
+   ) ) }}
+
 {% endblock %}
 
     <div class="fullclear"></div>

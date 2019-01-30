@@ -9,10 +9,18 @@ body {
 }
 h1 {
     position: relative;
-    background-color:bisque;
-    font-size: 11pt;
     width: 100%;
     padding: 2px;
+    height: 23px;
+    font-size: 13pt;
+    font-family: Georgia, "Times New Roman", times;
+    font-weight: 600;
+    letter-spacing: 1px;
+    background-color:bisque;
+    color: #7e6b53; /* Darker bisque */
+    width: 100%;
+    padding: 2px;
+    margin-bottom: 2px; /* murupolun kanssa */
 }
 img#logo {
     width: 43px;
@@ -21,7 +29,17 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
-a#ohjeet, div#paluu {
+.bread {
+    margin: 2px; 
+    color: #cf7c19; 
+    font-style: italic; 
+}
+a.bread:link { text-decoration: none; }
+a.bread:visited { text-decoration: none; }
+a.bread:hover { text-decoration: underline; }
+a.bread:active { text-decoration: underline; }
+
+div#paluu {
     position: absolute;
     top: 7px;
     right: 4px;
@@ -61,12 +79,19 @@ div#paluu {
     padding: 1em; 
     background-color: bisque;
     width: 280px;
-    min-height: 150px;
+    min-height: 200px;
+    border-radius: 15px;
 }
 .startbox2 {
     width: 603px;
 }
+.bg_intro {
+	background-image: url(/static/charta_bg_680px.jpg);
+	background-size: cover;
+}
+
 .admin {background-color: pink;}
+.gedtools {background-color: lightsteelblue;}
 .startbox h3, .startbox2 h3 { margin-top: 5px; margin-bottom: 5px; }
 .startbox div, .startbox2 div { display: inline-block; width: 100%; }
 .startbox ul, .startbox2 ul { display: inline-block; width: 100%; 
@@ -75,6 +100,14 @@ div#paluu {
 .inp label { display: inline-block; width: 100px; }
 .inp input { width: 120px;  margin-left: 1em; }
 .submit { text-align:right; }       /* 20.8.2018 / JMä */
+
+ul.compact {
+	margin: 0;
+    padding-left: 2em;
+}
+ul.compact > li {list-style-type: disc}
+
+.not-allowed {cursor: not-allowed;}
 
 table, th, td {
     border: 1px solid silver;
@@ -158,8 +191,8 @@ li.itemrow {
 .msg_TITLE   {color: black; line-height: 1.8; font-size: 120% }
 .msg_INFO    {padding-left: 1em; color: black }
 .msg_WARNING {padding-left: 2em; color: blueviolet }
-.msg_ERROR   {padding-left: 3em; color: red; font-style: bold }
-.flash_error {color: red; font-style: bold }
+.msg_ERROR   {padding-left: 3em; color: red; font-weight: bold }
+.flash_error {color: red; font-weight: bold }
 .flash_warning {color: blueviolet }
 .flash_message { color: blue }
 
@@ -175,6 +208,16 @@ div.fullclear {
 	color: gray;
 	background: #eee;
 	text-align: right;
+}
+
+div.legend {
+     margin-left:4em; 
+     font-size: 90%;
+     border-left: 6px solid silver;
+}
+table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
+   border:none;
+   outline:none;
 }
 
 /* http://stackoverflow.com/questions/1964839/jquery-please-wait-loading-animation    */

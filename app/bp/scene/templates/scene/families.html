@@ -19,6 +19,7 @@
                     
 <table id="families">
     <tr><th>{{ _("Uniq_id") }}</th>
+        <th>{{ _("id") }}</th>
         <th>{{ _("id of Father") }}</th>
         <th>{{ _("Father") }}</th>
         <th>{{ _("id of Mother") }}</th>
@@ -31,6 +32,7 @@
     {% for f in families %}
         <tr>
                 <td>{{f.uniq_id}}</td>
+                <td>{{f.id}}</td>
                 <td><a href="/scene/person={{f.father.uniq_id}}">{{f.father.uniq_id}}</a></td>
                 {% if f.father.names %}
                     <td>{{f.father.names[0].firstname}} {{f.father.names[0].suffix}} {{f.father.names[0].surname}}</td>
@@ -52,6 +54,8 @@
         <tr><td colspan="5">{{ _('No persons') }}</td></tr>
 {% endif %}
 </table>
+<a href="/scene/families" title="alkuun">Alkuun</a> 
+<a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu">Seuraava</a>
 <br>
 
 {% endblock %}

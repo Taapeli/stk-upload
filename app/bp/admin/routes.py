@@ -57,7 +57,7 @@ def clear_db(opt):
 @roles_required('admin')
 def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    message = dataupdater.set_estimated_dates(list(uid))
+    message = dataupdater.set_estimated_person_dates(list(uid))
     ext = _("estimated lifetime")
     return render_template("/admin/talletettu.html", text=message, info=ext)
 
@@ -133,7 +133,7 @@ def list_allowed_emails():
     lista = UserAdmin.get_allowed_emails()
     if form.validate_on_submit(): 
         # Register a new email
-        lista = UserAdmin.get_allowed_emails()
+#        lista = UserAdmin.get_allowed_emails()
         UserAdmin.register_allowed_email(form.allowed_email.data,
                                          form.default_role.data)
         return redirect(url_for('admin.list_allowed_emails'))

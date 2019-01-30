@@ -53,14 +53,16 @@ function myFunction(oid, fn, ln) {
             <i>{% if p.occupation %}{{p.occupation}}{% endif %}</i></td>
         <td>{% if p.events|count %}<ul class="event">
                 {% for e in p.events %}
-                <li><span class="id">{{e.oid}}</span>
-                    {{e.name}} {{e.date}} {% if e.citation %}
-                    {% for note in e.citation.notes %}
-                        ({% if note.url %}<a href='{{note.url}}'>{{note.text}}</a>
-                         {% else %}{{note.text}}{% endif %})
-                {% else %}{{e.citation.oid}})
-                {% endif %}{% endif %}
-                </li>{% endfor %}</ul>
+	                <li><span class="id">{{e.oid}}</span>
+	                    {{e.name}} {{e.date}} {% if e.citation %}
+	                    {% for note in e.citation.notes %}
+	                        ({% if note.url %}<a href='{{note.url}}'>{{note.text}}</a>
+	                         {% else %}{{note.text}}{% endif %})
+	                    {% endfor %}
+	                {% else %}{{e.citation.oid}})
+	                {% endif %} 
+	                </li>
+                {% endfor %}</ul>
             {% endif %}
             </td>
     </tr>

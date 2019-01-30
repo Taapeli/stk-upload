@@ -12,23 +12,31 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, redirect, url_for, send_from_directory
-from flask_security import roles_accepted, current_user
+from flask_security import login_required, roles_accepted, current_user # ,roles_required
 #from flask_babelex import _
 
 import shareds
 from models import loadfile, email, util    # dbutil, 
 #from models import email
 from . import bp
-from pickle import Unpickler
+#from pickle import Unpickler
 from ..admin import uploads
 
-@bp.route('/gramps/upload_info/<upload>')
+@bp.route('/gramps')
+@login_required
 @roles_accepted('member', 'admin')
-def upload_info(upload): 
+def gramps_upload():
+    """ Home page gramps input file processing """
+    print("-> bp.start.routes.gramps_upload")
+    return render_template("/gramps/index_gramps.html")
+
+@bp.route('/gramps/show_log/<xmlfile>')
+@roles_accepted('member')
+def show_upload_log(xmlfile):
     upload_folder = uploads.get_upload_folder(current_user.username)
-    fname = os.path.join(upload_folder,upload + ".loading.done")
-    result_list = Unpickler(open(fname,"rb")).load()
-    return render_template("/gramps/result.html", batch_events=result_list)
+    fname = os.path.join(upload_folder,xmlfile + ".log")
+    msg = open(fname, encoding="utf-8").read()
+    return render_template("/admin/load_result.html", msg=msg)
 
 @bp.route('/gramps/uploads')
 @roles_accepted('member', 'admin')
@@ -55,7 +63,7 @@ def upload_gramps():
 
         logname = pathname + ".log"
         uploads.set_meta(current_user.username,infile.filename,
-                        status="uploaded",
+                        status=uploads.STATUS_UPLOADED,
                         upload_time=time.time())
         msg = "{}: User {} uploaded the file {}".format(
             util.format_timestamp(),current_user.username,pathname)
@@ -96,4 +104,5 @@ def xml_download(xmlfile):
     return send_from_directory(directory=xml_folder, filename=xmlfile, 
                                mimetype="application/gzip",
                                as_attachment=True)
-                               #attachment_filename=xmlfile+".gz") 
+#                                attachment_filename=xmlfile+".gz")
+                               

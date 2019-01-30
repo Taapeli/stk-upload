@@ -159,6 +159,7 @@ RETURN family"""
                 if record['f']:
                     f = record['f']
                     family = Family_for_template(f.id)
+                    family.id = f['id']
                     family.type = f['rel_type']
                 
                     if record['ph']:

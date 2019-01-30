@@ -3,7 +3,7 @@
 """
 Avio-PLAC:n hajoittaminen
 5.11.2016 16.48 
-	
+    
 Moi,
 vilkaisin gedcomista, miltä näyttää avioliitto, jossa on paikan nimeen lykätty myös sulhasen ja morsiamen kotipaikat. Tämä tapahan on itse asiassa hyvin tehokas ja ainoa mahdollinen, jos sukututkimusohjelma ei tue asuinpaikka-tapahtumia. Sen voisi jopa antaa suosituksena, jos näin kirjattu tieto kyettäisiin purkamaan.
 
@@ -46,25 +46,58 @@ from transformer import Item
 
 from collections import defaultdict 
 import re
+import logging
+
 
 def add_args(parser):
     pass
 
+
 def initialize(options):
     return Marriages()
+
 
 class Marriages(transformer.Transformation):
     twophases = True
     
     def __init__(self):
-        self.resi = defaultdict(list) # key=@individ-id@ value=[(place,date),...]
+        self.resi = defaultdict(list)  # key=@individ-id@ value=[(place,date),...]
+        self.test("Pitäjä, (kylä1/kylä2)")
+        self.test("Pitäjä,(kylä1/kylä2)")
+        self.test("Pitäjä ,(kylä1/kylä2)")
+        self.test("Pitäjä (kylä1/kylä2)")
+        self.test("Pitäjä , ( kylä1 /  kylä2 )  ")
+        self.test("Pitäjä , ( - /  kylä2 )  ")
+        self.test("Pitäjä , ( kylä1/ - )  ")
+        
+    def test(self,place):
+        ret = self.match(place)
+        logging.info("'{}' -> {}".format(place,ret))
+        
+    def match(self,place):
+        m = re.match(r"([^,]+),? ?\(([^/]+)/([^/]+)\)", place)
+        if not m: return False
+        place1 = m.group(1).strip()
+        place2 = m.group(2).strip()
+        place3 = m.group(3).strip()
+        if place2 == "-":
+            husb_place = place1
+        else:
+            husb_place = place2 + ", " + place1
+        if place3 == "-":
+            wife_place = place1
+        else:
+            wife_place = place3 + ", " + place1
+        return place1, husb_place, wife_place
     
-    def transform(self,item,options,phase):
+    def transform(self, item, options, phase):
         # phase 1
         if phase == 1 and item.tag == "FAM":
-            fam = item.xref #  @Fxxx@
+            fam = item.xref  #  @Fxxx@
             place = ""
             date = None
+            husb = None
+            wife = None
             for c1 in item.children:
                 if c1.tag == "MARR":
                     for c2 in c1.children:
@@ -77,18 +110,19 @@ class Marriages(transformer.Transformation):
                     husb = c1.value
                 if c1.tag == "WIFE":  
                     wife = c1.value
-            m = re.match(r"([^,]+), \(([^/]+)/([^/]+)\)",place)
-            if m:
-                husb_place = m.group(2)+", "+m.group(1)
-                wife_place = m.group(3)+", "+m.group(1)
-                self.resi[husb].append((husb_place,date))
-                self.resi[wife].append((wife_place,date))
-                place_item.value = m.group(1)
-                return item
+            if not (husb and wife): return True
+            ret = self.match(place)
+            if not ret: return True
+            place_item.value = ret[0]
+            husb_place = ret[1]
+            wife_place = ret[2]
+            self.resi[husb].append((husb_place, date))
+            self.resi[wife].append((wife_place, date))
+            return item
 
         # phase 2
         if phase == 2 and item.tag == "INDI" and item.xref in self.resi:
-            for place,date in self.resi[item.xref]:
+            for place, date in self.resi[item.xref]:
                 c1 = Item("1 RESI")
                 c1.children.append(Item("2 TYPE marriage"))
                 c1.children.append(Item("2 PLAC " + place))
@@ -97,5 +131,4 @@ class Marriages(transformer.Transformation):
                 item.children.append(c1)
             return item
         return True
-    
     

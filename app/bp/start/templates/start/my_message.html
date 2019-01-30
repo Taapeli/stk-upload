@@ -1,0 +1,32 @@
+{# _start/my_message.html_ #}
+{% extends "start/s_layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _("Contact administrators") }} (start/my_message){% endblock %}
+{% block body %}
+{{ super() }}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<div id="startdiv">
+  <div>
+    <h2>{{ _("Contact administrators") }}</h2>
+
+    {% if current_user.is_authenticated and current_user.has_role('member') %}
+    <div>
+        <h3>{{ _('Write a message') }}</h3>
+          <form action="#">
+		<p>{{ _('User') }} <i>{{current_user.name}}</i> 
+		    &lt;{{current_user.email}}&gt;</p>
+         <p>To do</p>
+         <div style="margin-left:10em;"> 
+            <button onclick="goBack()">{{ _('Go back') }}</button>
+            <input type="submit" value="{{ _('Apply') }}" />
+         </div>
+         </form>
+    </div>
+    {% endif %}
+  </div>
+  <p></p>
+</div>
+{% endblock %}

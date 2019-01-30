@@ -154,12 +154,13 @@ return path"""
         def _read_person_list(user, fw_from, limit):
             """ Read Person data from given fw_from 
             """
+            from bp.scene.routes import UserFilter
             try:
                 with shareds.driver.session() as session:
-                    if show == "own":
+                    if show == "own" or UserFilter.is_only_mine_data(): #show > 1:
                         result = session.run(Cypher_person.read_my_persons_with_events_from_name,
                                              user=user, start_name=fw_from, limit=limit)
-                    elif show == "all":
+                    else:
                         result = session.run(Cypher_person.read_all_persons_with_events_from_name,
                                              user=user, start_name=fw_from, limit=limit)
                     return result        
@@ -167,10 +168,25 @@ return path"""
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
                 raise      
 
+        def user_not_me(record):
+            # Returns owner, if it is not me
+            if 'user' in record:
+                u = record['user']
+                if u == user:
+                    return '-'
+                else:
+                    return record['user']
+            return None
+
 
         persons = []
-        print("Show {} {} persons for user {} starting from {!r}".format(limit, show, user, fw_from))
+        as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
+                   3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'}
+
+        print("Get {} persons of {} for user {} starting from {!r}".\
+              format(limit, as_text[show], user, fw_from))
         result = _read_person_list(user, fw_from, limit)
+#Todo: If p.id is the same as previous, do not create a new object but join the persons
         for record in result:
             ''' <Record 
                     person=<Node id=163281 labels={'Person'} 
@@ -192,28 +208,34 @@ return path"""
             node = record['person']
             # The same person is not created again
             p = Person_combo.from_node(node)
+
+            # Is this the same person as previous?
+            if len(persons) > 0 and persons[-1].uniq_id == p.uniq_id and 'user' in record:
+                # Yes, do not create a new person
+                persons[-1].owners.append(user_not_me(record))
+            else:
+
 #             if take_refnames and record['refnames']:
 #                 refnlist = sorted(record['refnames'])
 #                 p.refnames = ", ".join(refnlist)
-            for nnode in record['names']:
-                pname = Name.from_node(nnode)
-                p.names.append(pname)
+                for nnode in record['names']:
+                    pname = Name.from_node(nnode)
+                    p.names.append(pname)
+        
+                # Create a list with the mentioned user name, if present
+                p.owners = [user_not_me(record),]
+                                                                                                                                    
+                # Events
+        
+                for enode, pname, role in record['events']:
+                    if enode != None:
+                        e = Event_combo.from_node(enode)
+                        e.place = pname or ""
+                        if role and role != "Primary":
+                            e.role = role
+                        p.events.append(e)
     
-            # Owner, if present
-            if 'user' in record:
-                p.owner = record['user']
-
-            # Events
-    
-            for enode, pname, role in record['events']:
-                if enode != None:
-                    e = Event_combo.from_node(enode)
-                    e.place = pname or ""
-                    if role and role != "Primary":
-                        e.role = role
-                    p.events.append(e)
-
-            persons.append(p)
+                persons.append(p)   
     
         return (persons)
 
