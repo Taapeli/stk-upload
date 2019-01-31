@@ -5,7 +5,6 @@
 {{ super() }}
 <script src="/static/infobox.js"></script>
 
-{% set sp = {"M": "mies", "N": "nainen", "U": "?"} %}
 {% set tp = {"undef":" ", "fname":"etunimi", "lname":"sukunimi", "patro":"patronyymi", 
              "place":"paikka", "occu":"ammatti"} %}
 {% set rt = {'firstname':'etunimi', 'surname':'sukunimi', 'patronyme':'patronyymi', 
@@ -38,7 +37,7 @@
                 {% if not r.refname %}</b>{% endif %}</td>
             <td><span class="typevar">{{rt[r.reftype]}}</span>
             {% if r.refname %} ~ {{r.refname}}{% endif %}</td>
-            <td class="center">{% if r.gender %}{{sp[r.gender]}}{% endif %}</td>
+            <td class="center">{% if r.sex %}{{ r.sex_str() }}{% endif %}</td>
             <td>{% if r.source %}{{r.source}}{% endif %}</td>
             <td class="center">{% if r.usecount %}
             <a href="/scene/persons/ref={{r.name}}">{{r.usecount}}</a>{% endif %}</td>

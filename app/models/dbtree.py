@@ -34,16 +34,16 @@ class DbTree():
 
 
     def _get_tree_branches(self, node_id):
-        """ Example: Kyselyn tulos, kun puurakenne on
+        """ Example: Result for query for -
              ── Venäjä
-                └── Inkeri (kysytty node_id)
+                └── Inkeri (active node_id)
                     └── Tuutari
                         └── Nurkkala
             ╒══════════════════════════════╤════╤═══════╕
             │"nodes"                       │"lv"│"r"    │
             ╞══════════════════════════════╪════╪═══════╡
-            │[{"pname":"Inkeri","change":14│"1" │[{}]   │ 2 nodea ja
-            │96429798,"handle":"_d         │    │       │ 1 yhteys
+            │[{"pname":"Inkeri","change":14│"1" │[{}]   │ 2 nodes
+            │96429798,"handle":"_d         │    │       │ 1 relation
             │9c25aa5af17a80cc1af6a8533b","i│    │       │
             │d":"P0054","type":"State"},{"p│    │       │
             │name":"Tuutari","change":1496 │    │       │
@@ -51,8 +51,8 @@ class DbTree():
             │5abb00881f87b8bdbda5eb","id":"│    │       │
             │P0055","type":"Region"}]      │    │       │
             ├──────────────────────────────┼────┼───────┤
-            │[{"pname":"Inkeri","change":14│"2" │[{},{}]│ 3 nodea ja
-            │96429798,"handle":"_d         │    │       │ 2 yhteyttä
+            │[{"pname":"Inkeri","change":14│"2" │[{},{}]│ 3 nodes
+            │96429798,"handle":"_d         │    │       │ 2 relations
             │9c25aa5af17a80cc1af6a8533b","i│    │       │
             │d":"P0054","type":"State"},{"p│    │       │
             │name":"Tuutari","change":1496 │    │       │
@@ -64,8 +64,8 @@ class DbTree():
             │b0acf5873995a02ac6efe","id":"P│    │       │
             │0056","type":"Village"}]      │    │       │
             ├──────────────────────────────┼────┼───────┤
-            │[{"pname":"Inkeri","change":1 │"-1"│[{}]   │ 2 nodea ja
-            │496429798,"handle":"_d        │    │       │ 1 yhteys
+            │[{"pname":"Inkeri","change":1 │"-1"│[{}]   │ 2 nodes
+            │496429798,"handle":"_d        │    │       │ 1 relation
             │9c25aa5af17a80cc1af6a8533b","i│    │       │
             │d":"P0054","type":"State"},{"p│    │       │
             │name":"Venäjä","change":14996 │    │       │
@@ -90,7 +90,7 @@ class DbTree():
                 r       relation between terminal nodes
                 lv      lenght of the relation SIZE(r); 
                         negative, if upwards to the root of the tree
-            Other field names form arguments:
+            Other field names from arguments:
                 name_field_name  node instance display name
                 type_field_name  node instance type
                 
@@ -106,6 +106,7 @@ class DbTree():
         nstack.append((0, "root", "", -9999))
     
         for nodes, level, relations in self._get_tree_branches(node_id):
+            # The result has all nodes in the relation and their connections
             # Tuloksessa on kaikki ko. relaatioon osallistuvat solut ja niiden
             # väliset yksittäiset yhteydet
             for node in nodes:
@@ -115,7 +116,7 @@ class DbTree():
                                    node[self.name_field_name],          #["pname"], 
                                    level))
             for rel in relations:
-                # Käydään läpi relaatioketjun yksittäiset (start)-->(end) -välit
+                # Walk thru all (start)-->(end) relations
                 if not rel.id in rl:
                     rl[rel.id] = rel.end
                     nid, ntype, nname, lv = nstack.pop()
@@ -124,22 +125,22 @@ class DbTree():
                     if len(rl) == 1:    # Ensimmäinen solmu rootin alle
                         nid1, ntype1, nname1, lv1 = nstack.pop()
                         rl[0] = rel.end
-    #                     print("create_node('{}', '{}', parent={}, data={})".\
-    #                           format(nname1, nid1, 0, {'type':ntype1}))
+                        print("create_node('{}', '{}', parent={}, data={})".\
+                              format(nname1, nid1, 0, {'type':ntype1}))
                         self.tree.create_node(nname1, nid1, parent=0, 
                                               data={self.type_field_name:ntype1})
                     if lv > 0:
                         parent = rel.end
                     else:
                         parent = self.tree.parent(rel.start).identifier
-                    # Lisätään uusi solu ensin nykyisen rinnalle ja 
-                    # sitten siirretään nykyinen uuden alle
+                    # Add the new node by side on current; then move current under that 
+                    # Lisätään uusi solu ensin nykyisen rinnalle ja sitten siirretään nykyinen uuden alle
+                    print("create_node('{}', '{}', parent={}, data={})".\
+                          format(nname, nid, parent, {'type':ntype}))
                     self.tree.create_node(nname, nid, parent=parent, 
                                           data={self.type_field_name:ntype})
-    #                 print("create_node('{}', '{}', parent={}, data={})".\
-    #                       format(nname, nid, parent, {'type':ntype}))
                     if lv < 0:
-    #                     print("  move_node('{}', '{}')".format(rel.start, nid))
+                        print("  move_node('{}', '{}')".format(rel.start, nid))
                         self.tree.move_node(rel.start, nid)
         return self.tree
 

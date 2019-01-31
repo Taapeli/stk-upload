@@ -8,6 +8,8 @@ import time
 
 from models.gen.refname import Refname, REFTYPES
 from models.gen.user import User
+from models.gen.person import Person
+
 
 def load_refnames(pathname):
     """ Reads reference names from a local csv file. 
@@ -42,17 +44,12 @@ def load_refnames(pathname):
                 refname=row['Refname']
                 reftype=row['Reftype']
                 source=row['Source']
-                gd = row['Gender'].lower()
+                gd = row['Gender'].upper()
             except KeyError:
                 raise KeyError(_('Not valid field names "Name,Refname,Reftype,Source,Gender" {}').\
                                format(row.keys()))
 
-            if gd.startswith('m'):
-                sex = 'M'
-            elif gd.startswith('n') or  gd.startswith('f'):
-                sex = 'F'
-            else:
-                sex = ''
+            sex = Person.sex_from_str(gd)
 
             # Creating Refname
             r = Refname(nimi)
@@ -64,8 +61,8 @@ def load_refnames(pathname):
                 else:
                     logging.warning('cvs_refnames: Invalid reference {} discarded. '.\
                                     format(reftype))
-            if sex != '':
-                r.gender = sex
+            if sex:
+                r.sex = sex
             if source != '':
                 r.source = source
 

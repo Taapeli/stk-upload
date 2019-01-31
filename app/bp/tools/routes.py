@@ -121,6 +121,7 @@ def list_refnames(reftype):
 #         return render_template("table_refnames_1.html", names=names, reftype=reftype)
 #     else:
     names = datareader.read_refnames()
+    print(names[0])
     return render_template("/tools/table_refnames.html", names=names)
 
 
@@ -169,7 +170,7 @@ def compare_person_page(cond):
                     print(_(' Father: {}/{} p. {}').format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print(_(' Child ({}): {}/{} * {}').format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print(_(' Child ({}): {}/{} * {}').format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
         else:
             raise(KeyError(_('Wrong Search key')))
     except KeyError as e:
@@ -198,7 +199,7 @@ def compare_person_page(cond):
 #                     print(_(' Father: {}/{} p. {}').format(f.father.uniq_id, f.father.id, f.father.birth_date))
 #                 if f.children:
 #                     for c in f.children:
-#                         print(_(' Child ({}): {}/{} * {}').format(c.gender, c.uniq_id, c.id, c.birth_date))
+#                         print(_(' Child ({}): {}/{} * {}').format(c.sex, c.uniq_id, c.id, c.birth_date))
 #         else:
 #             raise(KeyError(_('Wrong Search key')))
 #     except KeyError as e:
@@ -291,31 +292,31 @@ def show_person_data_dbl(uniq_id):
                        person=person, events=events, photos=photos, sources=sources)
 
 
-@bp.route('/compare/<string:cond>')
-def compare_person_page_dbl(cond):
-    """ Vertailu - henkilön tietojen näyttäminen ruudulla
-        cond='uniq_id=value'    pick person by db key
-    """
-    key, value = cond.split('=')
-    try:
-        if key == 'uniq_id':
-            person, events, photos, sources, families = \
-                datareader.get_person_data_by_id(value)
-            for f in families:
-                print (_('{} in Family {}/{}').format(f.role, f.uniq_id, f.id))
-                if f.mother:
-                    print(_(' Mother: {}/{} p. {}').format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-                if f.father:
-                    print(_(' Father: {}/{} p. {}').format(f.father.uniq_id, f.father.id, f.father.birth_date))
-                if f.children:
-                    for c in f.children:
-                        print(_(' Child ({}): {}/{} * {}').format(c.gender, c.uniq_id, c.id, c.birth_date))
-        else:
-            raise(KeyError(_('Wrong Search key')))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("/tools/compare3.html",
-        person=person, events=events, photos=photos, sources=sources, families=families)
+# @bp.route('/compare/<string:cond>')
+# def compare_person_page_dbl(cond):
+#     """ Vertailu - henkilön tietojen näyttäminen ruudulla
+#         cond='uniq_id=value'    pick person by db key
+#     """
+#     key, value = cond.split('=')
+#     try:
+#         if key == 'uniq_id':
+#             person, events, photos, sources, families = \
+#                 datareader.get_person_data_by_id(value)
+#             for f in families:
+#                 print (_('{} in Family {}/{}').format(f.role, f.uniq_id, f.id))
+#                 if f.mother:
+#                     print(_(' Mother: {}/{} p. {}').format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+#                 if f.father:
+#                     print(_(' Father: {}/{} p. {}').format(f.father.uniq_id, f.father.id, f.father.birth_date))
+#                 if f.children:
+#                     for c in f.children:
+#                         print(_(' Child ({}): {}/{} * {}').format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
+#         else:
+#             raise(KeyError(_('Wrong Search key')))
+#     except KeyError as e:
+#         return redirect(url_for('virhesivu', code=1, text=str(e)))
+#     return render_template("/tools/compare3.html",
+#         person=person, events=events, photos=photos, sources=sources, families=families)
 
 
 @bp.route('/compare2/<string:cond>')
@@ -336,7 +337,7 @@ def compare_person_page2_dbl(cond):
                     print(_("  Father:  {} / {} s. {}").format(f.father.uniq_id, f.father.id, f.father.birth_date))
                 if f.children:
                     for c in f.children:
-                        print(_("    Child ({}): {} / {} *{}").format(c.gender, c.uniq_id, c.id, c.birth_date))
+                        print(_("    Child ({}): {} / {} *{}").format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
         else:
             raise(KeyError(_('Wrong Search key')))
     except KeyError as e:
