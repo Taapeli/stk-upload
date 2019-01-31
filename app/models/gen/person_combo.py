@@ -62,7 +62,7 @@ class Person_combo(Person):
     """ Henkilö
     
         From Person.__init__(): 
-            uniq_id, handle, id, priv, gender, confidence, lifetime, change
+            uniq_id, handle, id, priv, sex, confidence, lifetime, change
             Obsolete: #est_birth, #est_death
 
         Other properties:
@@ -191,7 +191,7 @@ return path"""
             ''' <Record 
                     person=<Node id=163281 labels={'Person'} 
                       properties={'sortname': 'Ahonius##Knut Hjalmar',  
-                        'gender': 'M', 'confidence': '', 'change': 1540719036, 
+                        'sex': '1', 'confidence': '', 'change': 1540719036, 
                         'handle': '_e04abcd5677326e0e132c9c8ad8', 'id': 'I1543', 
                         'priv': 1,'datetype': 19, 'date2': 1910808, 'date1': 1910808}> 
                     names=[<Node id=163282 labels={'Name'} 
@@ -345,14 +345,16 @@ RETURN person, name
 
         for person_record in person_result:
             if self.id == None:
-                self.handle = person_record["person"]['handle']
-                self.change = person_record["person"]['change']
-                self.id = person_record["person"]['id']
-                self.priv = person_record["person"]['priv']
-                self.gender = person_record["person"]['gender']
-                self.confidence = person_record["person"]['confidence']
-                self.est_birth = person_record["person"]['est_birth']
-                self.est_death = person_record["person"]['est_death']
+                node = person_record["person"]
+                self.from_node(node)
+#                 self.handle = person_record["person"]['handle']
+#                 self.change = person_record["person"]['change']
+#                 self.id = person_record["person"]['id']
+#                 self.priv = person_record["person"]['priv']
+#                 self.sex = person_record["person"]['sex']
+#                 self.confidence = person_record["person"]['confidence']
+#                 self.est_birth = person_record["person"]['est_birth']
+#                 self.est_death = person_record["person"]['est_death']
 
             if len(person_record["name"]) > 0:
                 pname = Name()
@@ -376,7 +378,7 @@ RETURN person, name
         for record in result:
             # <Record person=<Node id=72087 labels={'Person'} 
             #    properties={'handle': '_dd4a3c371f72257f442c1c42759', 'id': 'I1054', 
-            #        'priv': 1, 'gender': 'M', 'confidence': '2.0', 'change': 1523278690}> 
+            #        'priv': 1, 'sex': '1', 'confidence': '2.0', 'change': 1523278690}> 
             #    notes=[] 
             #    names=[<Node id=72088 labels={'Name'} 
             #            properties={'alt': '', 'firstname': 'Anthon', 'type': 'Also Known As', 
@@ -403,7 +405,7 @@ RETURN person, name
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_birth<>''
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
-                p2.gender = p1.gender AND p2.est_birth = p1.est_birth
+                p2.sex = p1.sex AND p2.est_birth = p1.est_birth
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death,
                 n1.firstname, n1.suffix, n1.surname,
                 ID(p2), p2.est_birth, p2.est_death,
@@ -419,7 +421,7 @@ RETURN person, name
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_death<>''
             MATCH (p2:Person)-[r2:NAME]->(n2:Name) WHERE ID(p1)<ID(p2) AND
-                p2.gender = p1.gender AND p2.est_death = p1.est_death
+                p2.sex = p1.sex AND p2.est_death = p1.est_death
                 RETURN COLLECT ([ID(p1), p1.est_birth, p1.est_death,
                 n1.firstname, n1.suffix, n1.surname,
                 ID(p2), p2.est_birth, p2.est_death,
@@ -441,7 +443,7 @@ RETURN person, name
 
         result = shareds.driver.session().run(query)
 
-        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'gender',
+        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'sex',
                   'firstname', 'surname']
         lists = []
 
@@ -456,7 +458,7 @@ RETURN person, name
             else:
                 data_line.append('-')
             if record["p"]['change']:
-                data_line.append(int(record["p"]['change']))  #TODO only temporary int()
+                data_line.append(record["p"]['change'])
             else:
                 data_line.append('-')
             if record["p"]['id']:
@@ -467,8 +469,8 @@ RETURN person, name
                 data_line.append(record["p"]['priv'])
             else:
                 data_line.append('-')
-            if record["p"]['gender']:
-                data_line.append(record["p"]['gender'])
+            if record["p"]['sex']:
+                data_line.append(record["p"]['sex'])
             else:
                 data_line.append('-')
             if record["n"]['firstname']:
@@ -593,7 +595,7 @@ RETURN person, name
 
         │ Person                       │   │ Name                         │
         ├──────────────────────────────┼───┼──────────────────────────────┤
-        │{"gender":"","handle":"       │{} │{"surname":"Andersen","alt":""│
+        │{"sex":"0","handle":"         │{} │{"surname":"Andersen","alt":""│
         │handle_6","change":0,"id":"6"}│   │,"type":"","suffix":"","firstn│
         │                              │   │ame":"Alexander","refname":""}│
         ├──────────────────────────────┼───┼──────────────────────────────┤
@@ -661,7 +663,7 @@ RETURN n.id, k.firstname, k.surname,
 # │{"handle":"_da692a09│{"alt":"","firstname│["Helena","Brita","K│[["Primary",{"datety│"K"      │
 # │bac110d27fa326f0a7",│":"Brita Helena","ty│lick"]              │pe":0,"change":15009│         │
 # │"id":"I0119","priv":│pe":"Birth Name","su│                    │07890,"description":│         │
-# │"","gender":"F","con│ffix":"","surname":"│                    │"","handle":"_da692d│         │
+# │"","sex":"2","con   │ffix":"","surname":"│                    │"","handle":"_da692d│         │
 # │fidence":"2.5","chan│Klick"}             │                    │0fb975c8e8ae9c4986d2│         │
 # │ge":1507492602}     │                    │                    │3","attr_type":"","i│         │
 # │                    │                    │                    │d":"E0161","date2":1│         │
@@ -936,7 +938,7 @@ with distinct x
             print ("Unique id: " + str(self.uniq_id) + " # " + str(comp_person.uniq_id))
             print ("Id: " + self.id + " # " + comp_person.id)
             print ("Priv: " + self.priv + " # " + comp_person.priv)
-            print ("Gender: " + self.gender + " # " + comp_person.gender)
+            print ("Sex: " + self.sex + " # " + comp_person.sex)
         if len(self.names) > 0:
             alt1 = []
             type1 = []
@@ -1037,7 +1039,7 @@ with distinct x
             print ("Change: {} # {}".format(self.change, comp_person.change))
             print ("Id: " + self.id + " # " + comp_person.id)
             print ("Priv: " + self.priv + " # " + comp_person.priv)
-            print ("Gender: " + self.gender + " # " + comp_person.gender)
+            print ("Sex: " + self.sex + " # " + comp_person.sex)
         if len(self.names) > 0:
             alt1 = []
             type1 = []

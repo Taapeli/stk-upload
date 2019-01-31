@@ -24,7 +24,7 @@
 	<tr ng-repeat="name in names">
 		<td class="id">{a name.uniq_id a}</td>
 		<td>{a name.priv a}</td>
-		<td>{a name.gender a}</td>
+		<td>{a name.sex a}</td>
 		<td>{a name.firstname a}</td>
 		<td>{a name.suffix a}</td>
 		<td>{a name.surname a}</td>
@@ -82,7 +82,7 @@
 	<tr ng-repeat="name in names2">
 		<td class="id">{a name.uniq_id a}</td>
 		<td>{a name.priv a}</td>
-		<td>{a name.gender a}</td>
+		<td>{a name.sex a}</td>
 		<td>{a name.firstname a}</td>
 		<td>{a name.suffix a}</td>
 		<td>{a name.surname a}</td>
@@ -131,18 +131,18 @@
 <script>
 var app = angular.module('myApp', []).controller('compareCtrl', function($scope) {
 	$scope.n_columns = [
-		{column:'uniq_id'}, {column:'priv'}, {column:'gender'},
+		{column:'uniq_id'}, {column:'priv'}, {column:'sex'},
 		{column:'firstname'}, {column:'suffix'}, {column:'surname'}
 	];
     $scope.names = [
 	{% for pname in person.names %}
-        {uniq_id:'{{person.uniq_id}}',priv:'{{person.priv}}',gender:'{{person.gender}}',
+        {uniq_id:'{{person.uniq_id}}',priv:'{{person.priv}}',sex:'{{person.sex_str()}}',
         firstname:'{{pname.firstname}}',suffix:'{{pname.suffix}}',surname:'{{pname.surname}}'},
     {% endfor %}
     ];
     $scope.names2 = [
 	{% for pname in person2.names %}
-        {uniq_id:'{{person2.uniq_id}}',priv:'{{person2.priv}}',gender:'{{person2.gender}}',
+        {uniq_id:'{{person2.uniq_id}}',priv:'{{person2.priv}}',sex:'{{person2.sex_str()}}',
         firstname:'{{pname.firstname}}',suffix:'{{pname.suffix}}',surname:'{{pname.surname}}'},
     {% endfor %}
     ];

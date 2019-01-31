@@ -10,6 +10,7 @@ import time
 from sys import stderr
 
 from flask_babelex import _
+from flask import flash
 
 from operator import itemgetter
 #from models.dbutil import Datefrom
@@ -18,6 +19,7 @@ from models.gen.event_combo import Event_combo
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
+from models.gen.person import SEX_MALE
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.place import Place
@@ -54,7 +56,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
         '''
         # <Record
             person=<Node id=80307 labels={'Person'}
-                properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F',
+                properties={'id': 'I0119', 'confidence': '2.5', 'sex': '1',
                      'change': 1507492602, 'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
             name=<Node id=80308 labels={'Name'}
                 properties={'type': 'Birth Name', 'suffix': '', 'order': 0,
@@ -112,12 +114,10 @@ def read_refnames():
     namelist = []
     t0 = time.time()
     recs = Refname.get_refnames()
-    for rec in recs:
-        namelist.append(rec)
 
     logging.info("TIME get_refnames {} sek".format(time.time()-t0))
 
-    return (namelist)
+    return (recs)
 
 def recreate_refnames():
     summary = Refname.recreate_refnames()
@@ -135,19 +135,19 @@ def recreate_refnames():
 #     recs = Refname.get_typed_refnames(reftype)
 # # Esimerkki:
 # # >>> for x in v_names: print(x)
-# # <Record a.oid=3 a.name='Aabi' a.gender=None a.source='harvinainen'
+# # <Record a.oid=3 a.name='Aabi' a.sex=None a.source='harvinainen'
 # #         base=[[2, 'Aapeli', None]] other=[[None, None, None]]>
-# # <Record a.oid=5 a.name='Aabraham' a.gender='M' a.source='Pojat 1990-luvulla'
+# # <Record a.oid=5 a.name='Aabraham' a.sex='1' a.source='Pojat 1990-luvulla'
 # #         base=[[None, None, None]] other=[[None, None, None]]>
-# # <Record a.oid=6 a.name='Aabrahami' a.gender=None a.source='harvinainen'
+# # <Record a.oid=6 a.name='Aabrahami' a.sex='0' a.source='harvinainen'
 # #         base=[[7, 'Aappo', None]] other=[[None, None, None]]>
 # # >>> for x in v_names: print(x[1])
 # # Aabrahami
 # # Aabrami
 # # Aaca
 #
-# #a.oid  a.name  a.gender  a.source   base                 other
-# #                                     [oid, name, gender]  [oid, name, gender]
+# #a.oid  a.name  a.sex  a.source   base                 other
+# #                                     [oid, name, sex]  [oid, name, sex]
 # #-----  ------  --------  --------   ----                 -----
 # #3493   Aake	F	  Messu- ja  [[null, null, null], [[3495, Aakke, null],
 # #                         kalenteri   [null, null, null],  [3660, Acatius, null],
@@ -159,13 +159,13 @@ def recreate_refnames():
 # #3495   Aakke   null     harvinainen [[3493, Aake, F]]    [[null, null, null]]
 #
 #     for rec in recs:
-# #        logging.debug("oid={}, name={}, gender={}, source={}, base={}, other={}".\
+# #        logging.debug("oid={}, name={}, sex={}, source={}, base={}, other={}".\
 # #               format( rec[0], rec[1],  rec[2],    rec[3],    rec[4],  rec[5]))
 #         # Luodaan nimi
 #         r = Refname(rec['a.name'])
 #         r.oid = rec['a.id']
-#         if rec['a.gender']:
-#             r.gender = rec['a.gender']
+#         if rec['a.sex']:
+#             r.sex = rec['a.sex']
 #         if rec['a.source']:
 #             r.source= rec['a.source']
 #
@@ -176,7 +176,7 @@ def recreate_refnames():
 #                 b = Refname(fld[1])
 #                 b.oid = fld[0]
 #                 if fld[2]:
-#                     b.gender = fld[2]
+#                     b.sex = fld[2]
 #                 baselist.append(b)
 #
 #         # Luodaan lista muista nimistä, joihin tämä viittaa
@@ -186,7 +186,7 @@ def recreate_refnames():
 #                 o = Refname(fld[1])
 #                 o.oid = fld[0]
 #                 if fld[2]:
-#                     o.gender = fld[2]
+#                     o.sex = fld[2]
 #                 otherlist.append(o)
 #
 #         namelist.append((r,baselist,otherlist))
@@ -494,7 +494,7 @@ def get_source_with_events(sourceid):
         #                        'dateval': '', 'change': 1521882215} >
         #        x_id=72104 label='Person'
         #        x=<Node id=72104 labels={'Person'}
-        #           properties={'gender': 'F', 'confidence': '2.0', 'id': 'I1069',
+        #           properties={'sex': '2', 'confidence': '2.0', 'id': 'I1069',
         #                       'handle': '_dd76810c8e6763f7ea816742a59',
         #                       'priv': '', 'change': 1521883281}>
         #        p_id=72104 >
@@ -740,7 +740,7 @@ def get_person_data_by_id(uniq_id):
     result = Person_combo.get_family_members(p.uniq_id)
     for record in result:
         # <Record family_id='F0461' f_uniq_id=208845 role='CHILD' m_id='I1235' 
-        #    uniq_id=207392 gender='M' birth_date=[0, 1818646, 1818646] 
+        #    uniq_id=207392 sex='1' birth_date=[0, 1818646, 1818646] 
         #    names=[<Node id=207393 labels={'Name'} 
         #           properties={'order': 0, 'firstname': 'Erik Berndt', 'type': 'Birth Name', 
         #               'suffix': '', 'surname': 'Konow'}> ] >
@@ -763,8 +763,8 @@ def get_person_data_by_id(uniq_id):
             if my_birth_date:
                 member.birth_date = my_birth_date
 
-        if record["gender"]:
-            member.gender = record["gender"]
+        if record["sex"]:
+            member.sex = record["sex"]
         if record["birth_date"]:
             datetype, date1, date2 = record["birth_date"]
             if datetype != None:
@@ -851,7 +851,7 @@ def get_families_data_by_id(uniq_id):
     p.uniq_id = uniq_id
     p.get_person_and_name_data_by_id()
 
-    if p.gender == 'M':
+    if p.sex == SEX_MALE:
         result = p.get_his_families_by_id()
     else:
         result = p.get_her_families_by_id()
@@ -879,7 +879,7 @@ def get_families_data_by_id(uniq_id):
             f.mother = mother
 
         spouse = Person_combo()
-        if p.gender == 'M':
+        if p.sex == SEX_MALE:
             spouse.uniq_id = f.mother
         else:
             spouse.uniq_id = f.father
@@ -917,7 +917,12 @@ def get_place_with_events (loc_id):
     place = Place()
     place.uniq_id = loc_id
     place.read_w_notes()
-    place_list = Place.get_place_tree(place.uniq_id)
+    try:
+        place_list = Place.get_place_tree(place.uniq_id)
+    except ValueError as e:
+        flash(str(e), 'error')
+        place_list = []
+            
     event_table = Place.get_place_events(place.uniq_id)
     return (place, place_list, event_table)
 

@@ -222,7 +222,7 @@ ORDER BY name.order"""
     get_all_persons_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
 RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
-    p.gender AS sex
+    p.sex AS sex
 ORDER BY n.order"""
 
 
@@ -274,11 +274,11 @@ MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name)
   OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
     WITH f.id AS family_id, ID(f) AS f_uniq_id, 
          TYPE(r1) AS role,
-         m.id AS m_id, ID(m) AS uniq_id, m.gender AS gender, 
+         m.id AS m_id, ID(m) AS uniq_id, m.sex AS sex, 
          n, [birth.datetype, birth.date1, birth.date2] AS birth_date
     ORDER BY n.order
     RETURN family_id, f_uniq_id, role, 
-           m_id, uniq_id, gender, birth_date,
+           m_id, uniq_id, sex, birth_date,
            COLLECT(n) AS names
     ORDER BY family_id, role, birth_date
 UNION
@@ -286,7 +286,7 @@ MATCH (p:Person) <-[r2]- (f:Family)
     WHERE id(p) = $pid
   OPTIONAL MATCH (p) -[:EVENT]-> (birth {type:'Birth'})
     RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
-           p.id AS m_id, ID(p) AS uniq_id, p.gender AS gender, 
+           p.id AS m_id, ID(p) AS uniq_id, p.sex AS sex, 
            [birth.datetype, birth.date1, birth.date2] AS birth_date,
            [] AS names"""
 

@@ -176,9 +176,9 @@ li.itemrow {
     font-style: italic;
     color: skyblue;
 }
-.genderF {color:red}
-.genderM {color:blue}
-.gender {}
+/* ISO/IEC 5218 codes 1=male, 2=female */
+.sex1 {color:blue}
+.sex2 {color:red}
 
 .flashes {
     font-size: 10pt;
