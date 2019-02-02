@@ -114,6 +114,7 @@ class Analyzer(transformer.Transformation):
         self.types = defaultdict(LineCounter)
         
         self.genders = defaultdict(int)
+        self.invalid_pointers = []
         self.mandatory_paths = {
             "HEAD",
             "HEAD.SOUR",
@@ -195,6 +196,11 @@ class Analyzer(transformer.Transformation):
             self.records.add(item.xref)
         if item.level > 0 and item.value.startswith("@") and not item.value.startswith("@#"):
             self.xrefs.add(item.value)
+            if (not item.value.startswith("@@") and 
+                not item.tag in {"SOUR","REPO","SUBM","NOTE",
+                                "FAMC","FAMS","CHIL","HUSB","WIFE",
+                                "OBJE","SUBN"}):
+                self.invalid_pointers.append(item.line)
             
         if item.tag == "TYPE": # classify types
             parts = item.path.split(".")
@@ -259,17 +265,26 @@ class Analyzer(transformer.Transformation):
             typeinfo.title = _("TYPEs for %(parent_path)s",parent_path=parent_path)
             typeinfo.display()
 
-        print()
-        for xref in self.xrefs:
-            if xref not in self.records:
-                print("Missing record:", xref)            
-
-        print()
-        for xref in self.records:
-            if xref not in self.xrefs:
-                print("Unused record:", xref)            
-
+        if len(self.invalid_pointers) > 0:
+            print()
+            print("Invalid pointers:")
+            for line in self.invalid_pointers:
+                print(" ",line)
             
+        recs = self.xrefs - self.records 
+        count = len(recs) 
+        if count > 0: 
+            print()
+            ellipsis = ", ..." if count > 10 else ""
+            print("{} missing records: {}{}".format(count,",".join(list(recs)[:10]),ellipsis))            
+
+        recs = self.records - self.xrefs 
+        count = len(recs) 
+        if count > 0: 
+            print()
+            ellipsis = ", ..." if count > 10 else ""
+            print("{} unused records: {}{}".format(count,", ".join(list(recs)[:10]),ellipsis))         
+
 
             
             
