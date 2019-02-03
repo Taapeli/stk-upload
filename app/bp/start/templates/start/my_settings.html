@@ -16,7 +16,7 @@
   <div>
     <h2>{{ _("Change my settings") }}</h2>
 
-    {% if current_user.is_authenticated and current_user.has_role('member') %}
+    {% if current_user is defined and current_user.is_authenticated %}
     <div>
         <h3>{{ _('Change language') }}</h3>
 		<p>{{ _('User') }} <i>{{current_user.name}}</i> 

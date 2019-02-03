@@ -69,9 +69,8 @@
                   {% endif %}><a href="#" class="dimmed"
                    title="{{ _('Thumbnails') }}">{{ _('Pictures and other Media') }}</a></li>
         {% if not current_user or not current_user.is_authenticated %}
-                <li style="border:1px dotted darkred;background:white;border-radius:5px;margin-left:3em;"
-                   ><a href="/login" title="{{ _('Get more info') }}"
-                     style="padding:3px;margin:1px;color:darkred;">{{ _('Log in to Stk') }}</a></li>
+                <li id="loginpadge"><a href="/login"
+                     title="{{ _('Get more info') }}">{{ _('Log in to Stk') }}!</a></li>
         {% endif %}
             </ul>
         </div>
