@@ -5,7 +5,7 @@ import time
 from collections import Counter, defaultdict
 from contextlib import redirect_stdout
 
-import transformer
+from . import transformer
 from flask_babelex import _
 import traceback
 
@@ -19,12 +19,12 @@ def add_args(parser):
 
 class Info: pass 
 
-import gedcom_grammar_data2
+from . import gedcom_grammar_data2
 
 def read_allowed_paths():
     allowed = set()
-    from gedcom_grammar_data import paths
-    for line in paths.splitlines():
+    from . import gedcom_grammar_data 
+    for line in gedcom_grammar_data.paths.splitlines():
         if line.strip() != "":
             allowed.add(line.strip())
     return allowed
