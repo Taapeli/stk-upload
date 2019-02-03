@@ -9,7 +9,7 @@
          - properties { handle:"_dd2c613026e7528c1a21f78da8a",
                         id:"I0000",
                         priv:None,
-                        gender:"N",
+                        sex:"2",
                         confidence:"2.0",
                         sortname:"Floor#Hans-Johansdotter#Katarina",
                         datetype:20, date1:1863872, date2:1868992,
@@ -71,10 +71,31 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
+'''
+    #Note:    The text field 'gender' is changed to another text field 'sex'
+              following the standard recommendation, also in DB.
+
+
+    The four codes specified in ISO/IEC 5218 are:
+    
+        0 = not known,
+        1 = male,
+        2 = female,
+        9 = not applicable.
+    
+    The standard specifies that its use may be referred to by the designator "SEX". 
+'''
 
 import shareds
 from .cypher import Cypher_person
 from .dates import DateRange
+
+from flask_babelex import _
+
+SEX_UNKOWN = 0 
+SEX_MALE = 1
+SEX_FEMALE = 2
+SEX_NOT_APPLICABLE = 9
 
 class Person:
     """ Henkilö
@@ -84,7 +105,7 @@ class Person:
             handle                str "_dd2c613026e7528c1a21f78da8a"
             id                    str "I0000"
             priv                  int 1 = merkitty yksityiseksi
-            gender                str "M", "N", "" sukupuoli
+            sex                   str "1", "2", "0" sukupuoli
             confidence            float "2.0" tietojen luotettavuus
             sortname              str default name as "surname#suffix#firstname"
             datetype,date1,date2  DateRange lifetime # estimated life time
@@ -99,19 +120,43 @@ class Person:
         self.uniq_id = None
         self.id = ''
         self.priv = None
-        self.gender = ''
+        self.sex = 0
+        #self.gender = ''
         self.confidence = ''
         self.sortname = ''
         self.lifetime = None    # Daterange: Estimated datetype, date1, date2
 
     def __str__(self):
-        # Person_combo 79584 I1234
-        if self.gender == 'M':  sex = 'male'
-        elif self.gender == 'F':  sex = 'female'
-        else: sex = 'unknown'
         dates = self.lifetime if self.lifetime else ''
-        return "{} {} {}".format(sex, self.id, dates)
+#         if self.gender == 'M':  sex = 'male'
+#         elif self.gender == 'F':  sex = 'female'
+#         else: sex = 'unknown'
+        return "{} {} {}".format(self.sex_str(), self.id, dates)
 
+    def sex_str(self):
+        " Returns person's sex as string"
+        return self.convert_sex_to_str(self.sex)
+
+    @staticmethod
+    def convert_sex_to_str(sex):
+        " Returns sex code as string"
+
+        sexstrings = {SEX_UNKOWN:_('sex not known'), 
+                      SEX_MALE:_('male'),
+                      SEX_FEMALE:_('female'),
+                      SEX_NOT_APPLICABLE:_('sex not applicable')}
+        return sexstrings.get(sex, '')
+
+    @staticmethod
+    def sex_from_str(s):
+        # Converts gender strings to ISO/IEC 5218 codes
+        ss = s[:1].upper()
+        if ss == 'M' or  ss == 1:
+            return 1
+        if ss == 'F' or ss == 'N' or ss == 2:
+            return 2
+        return 0
+        
     @classmethod
     def from_node(cls, node, obj=None):
         '''
@@ -121,14 +166,20 @@ class Person:
         where we are, either Person or Person_combo)
 
         <Node id=80307 labels={'Person'} 
-            properties={'id': 'I0119', 'confidence': '2.5', 'gender': 'F', 'change': 1507492602, 
+            properties={'id': 'I0119', 'confidence': '2.5', 'sex': '2', 'change': 1507492602, 
             'handle': '_da692a09bac110d27fa326f0a7', 'priv': 1}>
         '''
         if not obj:
             obj = cls()
         obj.uniq_id = node.id
         obj.id = node['id']
-        obj.gender = node['gender']
+        #TODO: Remove processing old 'gender' in the next version
+        if 'sex' in node:
+            obj.sex = node['sex']
+        elif 'gender' in node:
+            obj.sex = cls.sex_from_str(node['gender'])
+        else:
+            obj.sex = SEX_UNKOWN
         obj.handle = node['handle']
         obj.change = node['change']
         obj.confidence = node['confidence']
@@ -189,7 +240,7 @@ class Person:
         print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
         print ("Priv: " + self.priv)
-        print ("Gender: " + self.gender)
+        print ("Sex: " + self.sex)
         print ("Sort name: " + self.sortname)
 
         if len(self.names) > 0:

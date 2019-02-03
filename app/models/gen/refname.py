@@ -29,20 +29,21 @@ from sys import stderr
 import time
 import shareds
 from .cypher import Cypher_refname
+from .person import Person, SEX_UNKOWN
 
 # Global allowed reference types in Refname.reftype field or use attribute in db
 REFTYPES = ['basename', 'firstname', 'surname', 'patronyme', 'father', 'mother']
 
 class Refname:
     """
-        ( Refname {rid, nimi} ) -[reftype]-> (Refname)
+        ( Refname {uniq_id, nimi} ) -[reftype]-> (Refname)
                    reftype = (etunimi, sukunimi, patronyymi)
         Properties:                                             input source
-            rid     ID() ...                                    (created in save())
+            uniq_id     ID() ...                                    (created in save())
             name    1st letter capitalized                      (Nimi)
             refname * the std name referenced, if exists        (RefNimi)
             reftype * which kind of reference refname points to ('firstname')
-            gender  gender 'F', 'M' or ''                       (Sukupuoli)
+            sex  '2', '1' or '0'                                (Sukupuoli)
             source  points to Source                            (Lähde)
             
         * Note: refnamea ja reftypeä ei talleteta tekstinä, vaan kannassa tehdään
@@ -61,20 +62,20 @@ class Refname:
 # ╒═════════════════════════════╤═══════════╤═════════════════════════════╕
 # │"basename"                   │"base_ref" │"refname"                    │
 # ╞═════════════════════════════╪═══════════╪═════════════════════════════╡
-# │{"name":"Gustav","gender":"M"│"BASENAME" │{"name":"Kustaa","gender":"M"│
+# │{"name":"Gustav","sex":"1"   │"BASENAME" │{"name":"Kustaa","sex":"1"   │
 # │,"rid":3,"lang":"sv","pos":"f│           │,"rid":4,"lang":"fi","pos":"f│
 # │irstname"}                   │           │irstname"}                   │
 # ├─────────────────────────────┼───────────┼─────────────────────────────┤
-# │{"name":"Johansson","rid":5,"│"PARENTNAME│{"name":"Juha","gender":"M","│
+# │{"name":"Johansson","rid":5,"│"PARENTNAME│{"name":"Juha","sex":"1","   │
 # │lang":"sv","pos":"patronym"} │"          │lang":"fi","rid":6,"pos":"fir│
 # │                             │           │stname"}                     │
 # ├─────────────────────────────┼───────────┼─────────────────────────────┤
-# │{"name":"Christian","gender":│"BASENAME" │{"name":"Risto","gender":"M",│
-# │"M","rid":1,"lang":"sv","pos"│           │"rid":2,"lang":"fi","pos":"fi│
+# │{"name":"Christian","sex":   │"BASENAME" │{"name":"Risto","sex":"1",   │
+# │"1","rid":1,"lang":"sv","pos"│           │"rid":2,"lang":"fi","pos":"fi│
 # │:"firstname"}                │           │rstname"}                    │
 # └─────────────────────────────┴───────────┴─────────────────────────────┘
 
-    def __init__(self, nimi):
+    def __init__(self, nimi=None):
         """ Creating reference name
             The name is saved with first letter capitalized
         """
@@ -82,7 +83,7 @@ class Refname:
             self.name = nimi.strip().title()
         else:
             self.name = None
-        self.rid = None
+        self.uniq_id = None
 
 
     def __eq__(self, other):
@@ -94,16 +95,43 @@ class Refname:
 
 
     def __str__(self):
-        s = "(:REFNAME id:{1}, name:'{2}'".format(self.rid, self.name)
-        if 'gender' in dir(self):
-            s += ", gender:{}".format(self.gender)
+        s = "(:REFNAME id:{}, name:'{}'".format(self.uniq_id, self.name)
+        if 'sex' in dir(self):
+            s += ", sex:'{}'".format(self.sex)
         if 'refname' in dir(self):
-            s += ") -[{1}]-> (Refname ".format(self.reftype)
+            s += ") -[{}]-> (Refname ".format(self.reftype)
             if 'vid' in dir(self):
                 s += "id:{}, ".format(self.vid)
             s += "name:'{}'".format(self.refname)
         s += ")"
         return s
+
+    @classmethod
+    def from_node(cls, node):
+        '''
+        Transforms a db node to an object of type Refname.
+        
+        <Node ... >
+        '''
+        n = cls()
+        n.uniq_id = node.id         # Was: n.rid
+        n.id = node['id'] or ''
+        n.name = node["name"]
+        n.source = node["source"]
+        #n.sex = node["gender"]
+        #TODO: Remove processing old 'gender' in the next version
+        if 'sex' in node:
+            n.sex = node['sex']
+        elif 'gender' in node:
+            n.sex = Person.sex_from_str(node['gender'])
+        else:
+            n.sex = SEX_UNKOWN
+
+        return n
+
+    def sex_str(self):
+        " Returns sex as string"
+        return Person.convert_sex_to_str(self.sex)
 
 
     def save(self, tx=None):
@@ -117,7 +145,7 @@ class Refname:
             This object must have:
             - name (Name)
             The identifier is an ID(Refname)
-            - rid (int)
+            - uniq_id (int)
             Optional arguments:
             - gender ('M'/'F'/'')
             - source (str)
@@ -140,7 +168,7 @@ class Refname:
         # Setting attributes for 'A'
         a_attr = {'name': self.name}
         if hasattr(self, 'gender'):
-            a_attr['gender'] = self.gender
+            a_attr['sex'] = Person.sex_from_str(self.gender)
         if hasattr(self, 'source'):
             a_attr['source'] = self.source
 #        a_newoid = get_new_oid()
@@ -294,9 +322,9 @@ class Refname:
 # MATCH (a:Refname)
 #   OPTIONAL MATCH (m:Refname)-[:{0}*]->(a:Refname)
 #   OPTIONAL MATCH (a:Refname)-[:{1}]->(n:Refname)
-# RETURN a.id, a.name, a.gender, a.source,
-#   COLLECT ([ID(n), n.name, n.gender]) AS base,
-#   COLLECT ([ID(m), m.name, m.gender]) AS other
+# RETURN a.id, a.name, a.sex, a.source,
+#   COLLECT ([ID(n), n.name, n.sex]) AS base,
+#   COLLECT ([ID(m), m.name, m.sex]) AS other
 # ORDER BY a.name""".format(reftype, reftype)
 #         return shareds.driver.session().run(query)
 
@@ -310,17 +338,17 @@ class Refname:
 # ╒═══════╤═══════════════════════╤═══════════════════════╤═════════════╤══════╕
 # │"ID(n)"│"n"                    │"r_ref"                │"l_uses"     │"uses"│
 # ╞═══════╪═══════════════════════╪═══════════════════════╪═════════════╪══════╡
-# │32348  │{"gender":"M","name":"A│[[null,null,null]]     │[]           │0     │
+# │32348  │{"sex":"1","name":"A   │[[null,null,null]]     │[]           │0     │
 # │       │lex","source":"Pojat 19│                       │             │      │
 # │       │90-luvulla"}           │                       │             │      │
 # ├───────┼───────────────────────┼───────────────────────┼─────────────┼──────┤
-# │32352  │{"gender":"M","name":"A│[["BASENAME","firstname│["firstname"]│3     │
-# │       │lexander","source":"Mes│",{"gender":"M","name":│             │      │
+# │32352  │{"sex":"1","name":"A   │[["BASENAME","firstname│["firstname"]│3     │
+# │       │lexander","source":"Mes│",{"sex":"1","name":   │             │      │
 # │       │su- ja kalenteri"}     │"Aleksi","source":"Mess│             │      │
 # │       │                       │u- ja kalenteri"}]]    │             │      │
 # ├───────┼───────────────────────┼───────────────────────┼─────────────┼──────┤
 # │61368  │{"name":"Persson"}     │[["PARENTNAME","father"│[]           │0     │
-# │       │                       │,{"gender":"M","name":"│             │      │
+# │       │                       │,{"sex":"1","name":"   │             │      │
 # │       │                       │Pekka","source":"Pojat"│             │      │
 # │       │                       │}],["BASENAME",null,{"n│             │      │
 # │       │                       │ame":"Pekanpoika"}]]   │             │      │
@@ -330,10 +358,8 @@ class Refname:
             ret = []
             results = shareds.driver.session().run(Cypher_refname.get_all)
             for result in results:
-                rn = Refname(result['n']["name"])
-                rn.rid = result['n'].id
-                rn.gender = result['n']["gender"]
-                rn.source = result['n']["source"]
+                node = result['n']
+                rn = Refname.from_node(node)
                 reftypes = []
                 refnames = []
                 for r in result['r_ref']:

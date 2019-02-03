@@ -85,6 +85,11 @@ div#paluu {
 .startbox2 {
     width: 603px;
 }
+.bg_intro {
+	background-image: url(/static/charta_bg_680px.jpg);
+	background-size: cover;
+}
+
 .admin {background-color: pink;}
 .gedtools {background-color: lightsteelblue;}
 .startbox h3, .startbox2 h3 { margin-top: 5px; margin-bottom: 5px; }
@@ -171,9 +176,9 @@ li.itemrow {
     font-style: italic;
     color: skyblue;
 }
-.genderF {color:red}
-.genderM {color:blue}
-.gender {}
+/* ISO/IEC 5218 codes 1=male, 2=female */
+.sex1 {color:blue}
+.sex2 {color:red}
 
 .flashes {
     font-size: 10pt;

@@ -3,7 +3,7 @@
 {% block title %}{{ _('List of persons') }}{% endblock %}
 {% block body %}
 {{ super() }}
-{% import '/scene/macros.html' as macro %}
+{% import '/scene/macros.html' as macro with context %}
 {% set ordname = [_('surname'), _('first name'), _('patronymic')] %}
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
@@ -13,6 +13,8 @@
 {% else %}<H2>{{ _('Persons') }}</h2>
 {% endif %}
 <!-- Rule = {{rule}} for {{cnt}} persons -->
+
+<p><small>– Kaikki data, ei huomioida aineiston omistajaa</small></p>
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
@@ -110,10 +112,12 @@
 			</thead>
 			<tbody>
 	    {% for p in persons %}
-	            <tr><td class="ColumnAlpha">{% set ini = p.names[0].initial|upper %}
-	               {% if alpha != ini %}{%set alpha = ini %}
-		               <a id="{{alpha}}" name="{{alpha}}" title="{{ _('Back to Top') }}" href="#">{{alpha}}</a>
-	               {% endif %}</td>
+	            <tr><td class="ColumnAlpha">
+					{% set ini = p.names[0].initial|upper %}
+                    {% if loop.changed(ini) %}
+		               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
+					{% endif %}
+					</td>
 
 	                <td class="ColumnPerson"><div>
 	                   <a href="/scene/person={{p.uniq_id}}"

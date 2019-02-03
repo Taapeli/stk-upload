@@ -16,7 +16,7 @@
 	<div>
 		<div class="row">
 
-			<div class="startbox">
+			<div class="startbox bg_intro">
 				<div style="display: inline-block;">
 					<h3>{{ _('Learn about our service') }}</h3>
 					<p>
@@ -33,11 +33,7 @@
 
 			<div class="startbox">
 				<h3>{{ _('Look at data in Suomikanta') }}</h3>
-				<p>{{ _('Here you can se a restrected view on Finnish genealogical data.') }}</p>
-				<p>
-					{{ _('For members of Suomen sukututkimusseura, join our users and gain full access by') }} 
-					<a href="/message">{{ _('sending a message to administrators') }}</a>.
-				</p>
+				<p>{{ _('Here you can see a restrected view on Finnish genealogical data.') }}</p>
 				<form method="get" action="/scene">
 					<div class="submit">
 						<button type="submit">{{ _('Explore the database') }}</button>
@@ -48,9 +44,12 @@
 			<div class="startbox">
 				<div style="display: inline-block;">
 					<h3>{{ _('Log in') }}</h3>
+                    <p>{{ _('As a member of Suomen sukututkimusseura, you can gain full access by logging in.') }}</a>.
+                    {{ _('Join our users by') }} 
+                    <a href="/message">{{ _('sending a message to administrators') }}.</a>.
+                </p>
 					<p>{{ _('If you have credentials, please log in here.') }}</p>
-					<p>&nbsp;</p>
-					<form method="get" action="/start">
+					<form method="get" action="/login">
 						<div class="submit">
 							<button type="submit">{{ _('Log in') }}</button>
 						</div>

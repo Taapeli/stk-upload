@@ -46,6 +46,7 @@ from transformer import Item
 
 from collections import defaultdict 
 import re
+import logging
 
 
 def add_args(parser):
@@ -61,6 +62,33 @@ class Marriages(transformer.Transformation):
     
     def __init__(self):
         self.resi = defaultdict(list)  # key=@individ-id@ value=[(place,date),...]
+        self.test("Pitäjä, (kylä1/kylä2)")
+        self.test("Pitäjä,(kylä1/kylä2)")
+        self.test("Pitäjä ,(kylä1/kylä2)")
+        self.test("Pitäjä (kylä1/kylä2)")
+        self.test("Pitäjä , ( kylä1 /  kylä2 )  ")
+        self.test("Pitäjä , ( - /  kylä2 )  ")
+        self.test("Pitäjä , ( kylä1/ - )  ")
+        
+    def test(self,place):
+        ret = self.match(place)
+        logging.info("'{}' -> {}".format(place,ret))
+        
+    def match(self,place):
+        m = re.match(r"([^,]+),? ?\(([^/]+)/([^/]+)\)", place)
+        if not m: return False
+        place1 = m.group(1).strip()
+        place2 = m.group(2).strip()
+        place3 = m.group(3).strip()
+        if place2 == "-":
+            husb_place = place1
+        else:
+            husb_place = place2 + ", " + place1
+        if place3 == "-":
+            wife_place = place1
+        else:
+            wife_place = place3 + ", " + place1
+        return place1, husb_place, wife_place
     
     def transform(self, item, options, phase):
         # phase 1
@@ -82,17 +110,15 @@ class Marriages(transformer.Transformation):
                     husb = c1.value
                 if c1.tag == "WIFE":  
                     wife = c1.value
-            m = re.match(r"([^,]+), \(([^/]+)/([^/]+)\)", place)
-            if m:
-                husb_place = m.group(2) + ", " + m.group(1)
-                wife_place = m.group(3) + ", " + m.group(1)
-                if husb and wife:
-                    self.resi[husb].append((husb_place, date))
-                    self.resi[wife].append((wife_place, date))
-                    place_item.value = m.group(1)
-                    return item
-                else:
-                    return True  # no change if either parent missing
+            if not (husb and wife): return True
+            ret = self.match(place)
+            if not ret: return True
+            place_item.value = ret[0]
+            husb_place = ret[1]
+            wife_place = ret[2]
+            self.resi[husb].append((husb_place, date))
+            self.resi[wife].append((wife_place, date))
+            return item
 
         # phase 2
         if phase == 2 and item.tag == "INDI" and item.xref in self.resi:

@@ -293,7 +293,7 @@ def gedcom_download(gedcom):
     logging.info(gedcom_folder)
     filename = os.path.join(gedcom_folder, gedcom)
     logging.info(filename)
-    return send_from_directory(directory=gedcom_folder, filename=gedcom) 
+    return send_from_directory(directory=gedcom_folder, filename=gedcom, as_attachment=True) 
 
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required

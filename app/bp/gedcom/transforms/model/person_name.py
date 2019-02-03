@@ -35,12 +35,14 @@ _SURN = {'os.':'avionimi', 'o.s.':'avionimi', 'ent.':'otettu nimi', 'e.':'otettu
 #_VON = ['von', 'af', 'de', 'la']
 _BABY = {"vauva":"U", "poikavauva":"M", "tyttövauva":"F", 
          "poikalapsi":"M", "tyttölapsi":"F", "lapsi":"U",
+         "fröken":"F", "junfru":"F", "herr":"M", 
+         "neiti":"F", "rouva":"F", "herra":"M", 
          "(vauva)":"U", "(poikavauva)":"M", "(tyttövauva)":"F", 
          "(poikalapsi)":"M", "(tyttölapsi)":"F", "(lapsi)":"U",
          "barn":"U", "son":"M", "gåsse":"M", 
          "dotter":"F", "flicke":"F", "fl.barn":"U", "dödf.barn":"U",
          "(barn)":"U", "(son)":"M", "(gåsse)":"M", 
-         "(dotter)":"F", "(flicke)":"F", "(fl.barn)":"U", "(dödf.barn)":"U"}
+         "(dotter)":"F", "(flicke)":"F", "(fl.barn)":"U", "(dödf.barn)":"U" }
 
 
 class PersonName(GedcomLine):

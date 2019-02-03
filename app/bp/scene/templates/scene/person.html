@@ -3,8 +3,7 @@
 {% block title %}{{ _("Person's details") }}{% endblock %}
 {% block body %}
 {{ super() }}
-{% set sp = {'M':'mies', 'F':'nainen'} %}
-{% import '/scene/macros.html' as macro %}
+{% import '/scene/macros.html' as macro with context %}
 <!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" -->
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" 
     integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
@@ -47,10 +46,9 @@
                    -->
                     </td>
                 </tr>{% endfor %}
-                {% if person.gender %}<tr>
+                {% if person.sex %}<tr>
                     <td class="ColumnAttribute">{{ _('Gender') }}</td>
-                    <td class="ColumnValue">{% if person.gender in sp %}{{sp[person.gender]}}
-                      {% else %}{{person.gender}}{% endif %}</td>
+                    <td class="ColumnValue">{{ person.sex_str() }}</td>
                 </tr>{% endif %}
                 {% if person.priv %}<tr>
                     <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
@@ -146,7 +144,7 @@
 	                        <li>{{ _('Mother') }}: {{ macro.member(fam.mother, myid, '=') }}</li>
 	                {% endif %}{% if fam.children|count %}
 	                        <li>{{ _('Children') }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
-	                            <li>{{chtype[ch.gender]}}: {{ macro.member(ch, myid, '=') }}</li>{% endfor %}
+	                            <li>{{chtype[ch.sex]}}: {{ macro.member(ch, myid, '=') }}</li>{% endfor %}
 	                        </ul></li>
 	                {% endif %}
 	                    </ul>
@@ -179,7 +177,7 @@
 		                        <li>{{ _('Mother') }}: {{ macro.member(fam.mother, myid, '=') }}</li>
 		                {% endif %}{% if fam.children|count %}
 		                        <li>{{ _('Children') }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
-		                            <li>{{chtype[ch.gender]}}: {{ macro.member(ch, myid, '=') }}</li>
+		                            <li>{{chtype[ch.sex]}}: {{ macro.member(ch, myid, '=') }}</li>
 		                         {% endfor %}</ul></li>
 		                {% endif %}
 		                    </ul>
