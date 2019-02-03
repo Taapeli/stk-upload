@@ -144,7 +144,7 @@ countries = {
 villages = defaultdict(set)
 
 def numeric(s):
-    return s.replace(".","").isdigit()
+    return s.replace(".","").replace(":","").isdigit()
 
 def read_parishes(parishfile):
     for line in open(parishfile,encoding="utf-8"):
