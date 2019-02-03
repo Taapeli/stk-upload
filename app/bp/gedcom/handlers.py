@@ -68,7 +68,7 @@ def get_info(input_gedcom, enc):
     class Nullinfo:
         pass
         
-    import gedcom_info_parser
+    from . import gedcom_info_parser
     try:
         t = transformer.Transformer(transform_module=gedcom_info_parser,
                                     display_callback=display_changes,
@@ -87,7 +87,7 @@ def analyze(input_gedcom, enc):
     class Nullinfo:
         pass
         
-    import gedcom_analyze
+    from . import gedcom_analyze
     try:
         t = transformer.Transformer(transform_module=gedcom_analyze,
                                     display_callback=display_changes,
@@ -131,10 +131,7 @@ def get_transforms():
         t = Transform()
         t.name = name
         t.modname = name[0:-3]
-        saved_path = sys.path[:]
-        sys.path.append(os.path.join(APP_ROOT, GEDCOM_APP))
         transformer = importlib.import_module("bp.gedcom.transforms."+t.modname)
-        sys.path = saved_path
         doc = transformer.__doc__
         if doc:
             t.doc = doc
@@ -528,7 +525,7 @@ def gedcom_transform(gedcom,transform):
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
 #         if s2: print("=== Subprocess errors ===\n" + s2) 
-        if s2: history_append(args.input_gedcom,"\nErrors:\n"+s2)
+        if s2: history_append(gedcom_filename,"\nErrors:\n"+s2)
         s = "\n" + _("Errors:") + "\n" + s2 + "\n\n" + s1
         try:
             log = open(logfile).read()
@@ -539,15 +536,9 @@ def gedcom_transform(gedcom,transform):
            diff="")
         return jsonify(rsp)
 
-        return cmd + "\n\n" + log + "\n\n" + s
-
-   
 def build_parser(filename,gedcom,gedcom_filename):
     modname = filename[:-3]
-    saved_path = sys.path[:]
-    sys.path.append(os.path.join(APP_ROOT, GEDCOM_APP))
     transform_module = importlib.import_module("bp.gedcom.transforms."+modname)
-    sys.path = saved_path
 
     class Arg:
         def __init__(self,name,name2,action,type,choices,default,help):

@@ -3,7 +3,7 @@
 {% block title %}{{ _('Sources') }}{% endblock %}
 {% block body %}
 {{ super() }}
-{% import '/scene/macros.html' as macro %}
+{% import '/scene/macros.html' as macro with context %}
 
 <h2>{{ _('List of Sources') }}</h2>
 
