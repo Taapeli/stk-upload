@@ -10,8 +10,9 @@ import time
 import tempfile
 import logging
 LOG = logging.getLogger(__name__)
+VERSION = "0.1"
 
-sys.path.append("app/bp/gedcom") # otherwise pytest does not work??? 
+#sys.path.append("app/bp/gedcom") # otherwise pytest does not work??? 
 from models import util
 
 class Output:
@@ -75,7 +76,7 @@ class Output:
             self.log = False
             args = sys.argv[1:]
             try:
-                v = " v." + _VERSION
+                v = " v." + VERSION
             except NameError:
                 v = ""
             self.emit("1 NOTE _TRANSFORM{} {}".format(v, self.transform_name))
