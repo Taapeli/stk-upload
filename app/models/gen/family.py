@@ -187,6 +187,7 @@ RETURN family"""
                         for ch in childs:
                             child = Person_as_member()
                             child.uniq_id = ch.id
+                            child.sortname = ch['sortname']
                             family.children.append(child)
                     
                     if record['no_of_children']:

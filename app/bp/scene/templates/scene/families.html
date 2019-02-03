@@ -1,61 +1,105 @@
 {# /scene/templates/scene/families.html_ #}
-{% extends "a_layout.html" %}
-{% block title %}{{ _('Database Information') }}{% endblock %}
+{% extends "/scene/layout.html" %}
+{% block title %}{{ _('List of families') }} (scenefamilies){% endblock %}
 {% block body %}
 {{ super() }}
+{% import '/scene/macros.html' as macro with context %}
 <script src="/static/infobox.js"></script>
 
+{% set cnt = families|count %}
+
 <h2>{{ _('List of Families') }}</h2>
-<p>{{ _('Number of families:') }} {{families|count}}  
+<p><small>{{cnt}} persons, user {{user}}, filter {{session['filter_div']}}, next {{next}}</small></p>
+
+{{ macro.menu(3) }}
+    <div class="content" id="Individuals">
+        <div id="summaryarea">
+            <div class="flex-container">
+               <div id="description">
+                    <p>{{ _('Displaying %(num)s families', num=cnt) }}.</p>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <ul  class='flashes'>
+                {% for category, message in messages %}
+                  <li class='flash_{{category}}'>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+        </div>
+
+    {% if cnt %}
+        {% set last = families|last %}
+        <div id="alphanav">{% set alpha = "¤" %}
+            <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
+                <li>{% if last %}
+                     <a href="/scene/families" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+                {% else %}<span class="navlink">|&lt;</span>
+                {% endif %}</li>
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+                <li><a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+            </ul>
+        </div>
+    {% endif %}
 
 <section id="lista">
-
-{% if families %}
-        {% set last = families|last %}
-{% endif %}
 
 <a href="/scene/families" title="alkuun">Alkuun</a> 
 <a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu">Seuraava</a>
                     
 <table id="families">
-    <tr><th>{{ _("Uniq_id") }}</th>
-        <th>{{ _("id") }}</th>
-        <th>{{ _("id of Father") }}</th>
+    <tr><th>{{ _("family") }}</th>
         <th>{{ _("Father") }}</th>
-        <th>{{ _("id of Mother") }}</th>
         <th>{{ _("Mother") }}</th>
-        <th>{{ _("Type") }}</th>
-        <th>{{ _("No of Children") }}</th>
-        <th>{{ _("Links of Children") }}</th>
+        <th>{{ _("Children") }}</th>
     </tr>
-{% if families %}
+{% if cnt %}
     {% for f in families %}
         <tr>
-                <td>{{f.uniq_id}}</td>
-                <td>{{f.id}}</td>
-                <td><a href="/scene/person={{f.father.uniq_id}}">{{f.father.uniq_id}}</a></td>
-                {% if f.father.names %}
-                    <td>{{f.father.names[0].firstname}} {{f.father.names[0].suffix}} {{f.father.names[0].surname}}</td>
-                {% else %}
-                    <td>-</td>
-                {% endif %}
-                <td><a href="/scene/person={{f.mother.uniq_id}}">{{f.mother.uniq_id}}</a></td>
-                {% if f.mother.names %}
-                    <td>{{f.mother.names[0].firstname}} {{f.mother.names[0].suffix}} {{f.mother.names[0].surname}}</td>
-                {% else %}
-                    <td>-</td>
-                {% endif %}
-                <td>{{f.type}}</td>
-                <td>{{f.no_of_children}}</td>
-                <td>{% for c in f.children %}<a href="/scene/person={{c.uniq_id}}">{{c.uniq_id}} </a>{% endfor %}</td>
+            <td><span title="{{ _('Original ID') }}">{{f.id}}</span> {{f.type}} 
+                <a href="#" class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</a>
+                </td>
+            <td>&#9794; <a href="/scene/person={{f.father.uniq_id}}">
+            {% if f.father.names %}
+                {{f.father.names[0].firstname}} 
+                <i>{{f.father.names[0].suffix}}</i>
+                <b>{{f.father.names[0].surname}}</b>
+            {% else %}–
+            {% endif %}</td>
+            <td>&#9792; <a href="/scene/person={{f.mother.uniq_id}}">
+            {% if f.mother.names %}
+                {{f.mother.names[0].firstname}} 
+                <i>{{f.mother.names[0].suffix}}</i>
+                <b>{{f.mother.names[0].surname}}</b>
+            {% else %}–
+            {% endif %}</td>
+            <td><small>{% if f.no_of_children %}
+                {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}:
+            {% endif %}
+            {% for c in f.children %}{% set nm = c.sortname.split('#') %}
+                <a href="/scene/person={{c.uniq_id}}">{{nm[2]}}&nbsp;<b>{{nm[0]}}</b>&nbsp;<i>{{nm[1]}}</i>{{ "," if not loop.last }}</a>
+            {% endfor %}</small></td>
         </tr>
     {% endfor %}
 {% else %}
         <tr><td colspan="5">{{ _('No persons') }}</td></tr>
 {% endif %}
 </table>
-<a href="/scene/families" title="alkuun">Alkuun</a> 
-<a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu">Seuraava</a>
-<br>
+<div>
+    {% if cnt %}
+        {% set last = families|last %}
+        <div id="alphanav">{% set alpha = "¤" %}
+            <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
+                <li>{% if last %}
+                     <a href="/scene/families" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+                {% else %}<span class="navlink">|&lt;</span>
+                {% endif %}</li>
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+                <li><a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
 
 {% endblock %}
