@@ -40,24 +40,39 @@
     <div class="wrapper" id="nav" role="navigation">
         <div class="container">
             <ul class="menu" id="dropmenu">
+        {% if current_user and current_user.is_authenticated %}
                 <li{% if value == 0 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons" title="{{ _('Search for people') }}">{{ _('Search') }}</a></li>
+                  {% endif %}><a href="/scene/persons"
+                   title="{{ _('Search for people') }}">{{ _('Search') }}</a></li>
                 <li{% if value == 1 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons/all" title="{{ _('All persons') }}">{{ _('Names') }}</a></li>
+                  {% endif %}><a href="/scene/persons/all"
+                   title="{{ _('All persons') }}">{{ _('Names') }}</a></li>
+        {% endif %}
                 <li{% if value == 12 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/persons_all/" title="{{ _('Person list by default name') }}">{{ _('Persons') }}</a></li>
+                  {% endif %}><a href="/scene/persons_all/"
+                   title="{{ _('Person list by default name') }}">{{ _('Persons') }}</a></li>
 
             {# <li{% if value == 2 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed" title="{{ _('Surnames') }}">{{ _('Names') }}</a></li>
+                  {% endif %}><a href="#" class="dimmed"
+                   title="{{ _('Surnames') }}">{{ _('Names') }}</a></li>
              #}
                 <li{% if value == 3 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/families" class="CurrentSection" title="{{ _('Families') }}">{{ _('Families') }}</a></li>
+                  {% endif %}><a href="/scene/families" class="CurrentSection"
+                   title="{{ _('Families') }}">{{ _('Families') }}</a></li>
                 <li{% if value == 4 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/locations" title="{{ _('Places') }}">{{ _('Places') }}</a></li>
+                  {% endif %}><a href="/scene/locations"
+                   title="{{ _('Places') }}">{{ _('Places') }}</a></li>
                 <li{% if value == 5 %} class="CurrentSection"
-                  {% endif %}><a href="/scene/sources" title="{{ _('Sources') }}">{{ _('Sources') }}</a></li>
+                  {% endif %}><a href="/scene/sources"
+                   title="{{ _('Sources') }}">{{ _('Sources') }}</a></li>
                 <li{% if value == 6 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed" title="{{ _('Thumbnails') }}">{{ _('Pictures and other Media') }}</a></li>
+                  {% endif %}><a href="#" class="dimmed"
+                   title="{{ _('Thumbnails') }}">{{ _('Pictures and other Media') }}</a></li>
+        {% if not current_user or not current_user.is_authenticated %}
+                <li style="border:1px dotted darkred;background:white;border-radius:5px;margin-left:3em;"
+                   ><a href="/login" title="{{ _('Get more info') }}"
+                     style="padding:3px;margin:1px;color:darkred;">{{ _('Log in to Stk') }}</a></li>
+        {% endif %}
             </ul>
         </div>
     </div>
