@@ -45,9 +45,6 @@
 
 <section id="lista">
 
-<a href="/scene/families" title="alkuun">Alkuun</a> 
-<a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu">Seuraava</a>
-                    
 <table id="families">
     <tr><th>{{ _("family") }}</th>
         <th>{{ _("Father") }}</th>
@@ -60,26 +57,30 @@
             <td><span title="{{ _('Original ID') }}">{{f.id}}</span> {{f.type}} 
                 <a href="#" class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</a>
                 </td>
-            <td>&#9794; <a href="/scene/person={{f.father.uniq_id}}">
-            {% if f.father.names %}
+            <td>&#9794; {% if f.father.uniq_id %}<a href="/scene/person={{f.father.uniq_id}}">
                 {{f.father.names[0].firstname}} 
                 <i>{{f.father.names[0].suffix}}</i>
-                <b>{{f.father.names[0].surname}}</b>
-            {% else %}–
+                <b>{{f.father.names[0].surname}}</b></a>
+            {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
-            <td>&#9792; <a href="/scene/person={{f.mother.uniq_id}}">
-            {% if f.mother.names %}
+            <td>&#9792; {% if f.mother.uniq_id %}<a href="/scene/person={{f.mother.uniq_id}}">
                 {{f.mother.names[0].firstname}} 
                 <i>{{f.mother.names[0].suffix}}</i>
-                <b>{{f.mother.names[0].surname}}</b>
-            {% else %}–
+                <b>{{f.mother.names[0].surname}}</b></a>
+            {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
+        {% if true %}{# Do not show children names #}
+            <td>{% if f.no_of_children %}
+                {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}
+                {% endif %}</td>
+        {% else %}{# To be removed! Better to show marriage dates etc info #}
             <td><small>{% if f.no_of_children %}
                 {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}:
             {% endif %}
             {% for c in f.children %}{% set nm = c.sortname.split('#') %}
                 <a href="/scene/person={{c.uniq_id}}">{{nm[2]}}&nbsp;<b>{{nm[0]}}</b>&nbsp;<i>{{nm[1]}}</i>{{ "," if not loop.last }}</a>
             {% endfor %}</small></td>
+        {% endif %}
         </tr>
     {% endfor %}
 {% else %}
