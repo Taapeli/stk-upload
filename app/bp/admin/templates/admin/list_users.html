@@ -7,8 +7,13 @@
 <style>form { display: inline-block; }</style>
 <div id="startdiv">
     <div>
-        <h2>{{ _("Our Users") }}</h2>
+        <h2>{{ _("Active User names") }}</h2>
          {% with messages = get_flashed_messages(with_categories=true) %}
+	    <p><small>{{ _('User') }} <i>{{current_user.name}}</i> &lt;{{current_user.email}}&gt;
+	       {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+	       <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
+	          <i>{{ 'git'|app_date }}</i></span>
+	    </small></p>
           {% if messages %}
             <ul  class='flashes'>
             {% for category, message in messages %}
@@ -20,14 +25,15 @@
        <div id="errors" class="errors"></div>
         <div class="row">
              <div style="display: inline-block;">
-                <h3>{{ _("Active User names") }}</h3>
 		        <table class="table100">
-		            <tr><th>{{ _("Username") }}</th><th>{{ _("Name") }}</th><th>{{ _("Email address") }}</th>
+		            <tr><th>{{ _("User name") }}</th><th>{{ _("Name") }}</th><th>{{ _("Email address") }}</th>
 		            <th>{{ _("Language") }}</th><th>{{ _("Roles") }}</th><th>{{ _("Operations") }}</th></tr>
 		        {% if users %}
 		            {% for u in users %}
 		                <tr>
-		                    <td>{{u.username}}</td>
+		                    {% if current_user.username == u.username %}
+		                    <td title="{{ _('me') }}">&#9733; <b>{{u.username}}</b></td>
+		                      {% else %}<td>{{u.username}}{% endif %}</td>
 		                    <td>{{u.name}}</td>
                             <td>{{u.email}}</td>
                             <td class="center">{{u.language}}</td>

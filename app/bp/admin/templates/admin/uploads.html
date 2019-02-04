@@ -54,8 +54,10 @@
 	    {% for upload in uploads %}
 	       <tr>
 			    {% if not user %}
-	                <td>{{ upload.user }}</td>
-			    {% endif %}
+                  {% if current_user.username == upload.user %}
+                    <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>{% else %}
+                    <td>{{upload.user}}{% endif %}</td>
+			      {% endif %}
 	           <td class="msg_INFO">{{upload.upload_time_s}}</td>
 	           <td class="msg_INFO">
     	           <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}>
