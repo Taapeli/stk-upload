@@ -1,4 +1,4 @@
-import transformer
+from . import transformer
 
 def initialize(options):
     return InfoParser()
