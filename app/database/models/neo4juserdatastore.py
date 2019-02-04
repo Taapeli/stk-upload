@@ -160,7 +160,7 @@ class Neo4jUserDatastore(UserDatastore):
             UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
 #                tx.commit()
             logger.info('User with email address {} registered'.format(user.email)) 
-            return self._build_user_from_record(userRecord)
+            return(userRecord)
 #            tx.commit()
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
