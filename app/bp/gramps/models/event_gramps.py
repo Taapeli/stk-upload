@@ -104,6 +104,7 @@ class Event_gramps(Event):
                                   date=today, e_attr=e_attr).single()[0]
         except Exception as err:
             print("Virhe.event_save: {0}".format(err), file=stderr)
+            self.uniq_id = -1
 
         try:
             # Make relation to the Place node
