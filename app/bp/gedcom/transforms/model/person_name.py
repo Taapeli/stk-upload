@@ -9,7 +9,7 @@ import re
 import logging
 LOG = logging.getLogger(__name__)
 
-from transforms.model.gedcom_line import GedcomLine
+from .gedcom_line import GedcomLine
 
 _NONAME = 'N'            # Marker for missing name part
 _CHGTAG = "NOTE _orig_"  # Comment: original format

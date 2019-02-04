@@ -33,9 +33,9 @@ Created on 26.11.2016
 #           1 SEX M
 #             ...
 
-from transforms.model.gedcom_line import GedcomLine
-from transforms.model.gedcom_record import GedcomRecord
-from transforms.model.person_name import PersonName
+from ..transforms.model.gedcom_line import GedcomLine
+from ..transforms.model.gedcom_record import GedcomRecord
+from ..transforms.model.person_name import PersonName
 from flask_babelex import _
 
 name = _("Personal names")

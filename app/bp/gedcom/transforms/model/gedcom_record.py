@@ -9,8 +9,8 @@ import datetime
 LOG = logging.getLogger(__name__)
 
 from models import util
-from transforms.model.gedcom_line import GedcomLine
-from transforms.model.person_name import PersonName
+from .gedcom_line import GedcomLine
+from .person_name import PersonName
 
 
 class GedcomRecord(GedcomLine):
@@ -104,7 +104,7 @@ class GedcomRecord(GedcomLine):
 
 if __name__ == '__main__':
     ''' Test set '''
-    from transforms.model.ged_output import Output
+    from .ged_output import Output
 
     logging.basicConfig(filename='example.log', level=logging.DEBUG, format='%(levelname)s:%(message)s')
     LOG.info("------ Ajo '%s' alkoi %s", "Testi", util.format_timestamp() + " ------")

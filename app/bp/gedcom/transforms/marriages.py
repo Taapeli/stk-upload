@@ -42,7 +42,7 @@ name = _("Marriages")
 docline = _('Splitting of data in PLAC of MARR')
 
 from .. import transformer
-from transformer import Item
+from .. transformer import Item
 
 from collections import defaultdict 
 import re
