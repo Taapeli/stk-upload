@@ -157,6 +157,18 @@ a.navlink:hover, a.navlink:active {
   color: gray;
   border-color: gray;
 }
+/* Login badge with 'scene' menu tabs */
+#loginpadge {
+	border:1px dotted darkred;
+	background:white;
+	border-radius:5px;
+	margin-left:3em;
+}
+#loginpadge.a {
+	padding:3px;
+	margin:1px;
+	color:darkred;
+}
 
 /* Flexbox boxes floats next to each other */
 .flex-container {

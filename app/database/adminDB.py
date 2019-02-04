@@ -8,7 +8,7 @@ from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import shareds
 
 #inputs
-ROLES = ({'level':'0',  'name':'guest',    'description':'Kirjautumaton käyttäjä rajoitetuin lukuoikeuksin'},
+ROLES = ({'level':'0',  'name':'guest',    'description':'Kirjautunut käyttäjä, pääsee vain gedcom-muunnoksiin'},
          {'level':'1',  'name':'member',   'description':'Seuran jäsen täysin lukuoikeuksin'},
          {'level':'2',  'name':'research', 'description':'Tutkija, joka voi päivittää omaa tarjokaskantaansa'},
          {'level':'4',  'name':'audit',    'description':'Valvoja, joka auditoi ja hyväksyy ehdokasaineistoja'},
