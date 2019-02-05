@@ -5,7 +5,13 @@ Created on 26.11.2017
 
 Arvot asetetaan järjestelmän  setups.py:ssä
 '''
+
+from flask import session
+
+
+
 app = None
+babel = None
 security = None
 mail = None
 db = None
