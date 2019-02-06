@@ -251,7 +251,13 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one objref tag in an event",
                                      'level':"WARNING", 'count':e.id})
 
-            e.save(self.tx)
+            try:
+                e.save(self.tx)
+            except RuntimeError as e:
+                self.blog.log_event({'title':"Events", 'count':counter, 
+                             'level':"ERROR", 'elapsed':time.time()-t0, 'percent':1})
+                raise
+                
             if e.type == "Death" or e.type == "Cause Of Death":
                 print ("- {} event {} / {}".format(e.type, e.uniq_id, e.id))
                 #TODO: Don't know how to link them!

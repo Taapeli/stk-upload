@@ -78,28 +78,32 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
         handler.batch_id = handler.blog.start_batch(None, file_cleaned)
         status_update({'percent':1})
 
-        handler.handle_notes()
-        handler.handle_repositories()
-        handler.handle_media()
+        try:
+            handler.handle_notes()
+            handler.handle_repositories()
+            handler.handle_media()
+        
+            handler.handle_places()
+            handler.handle_sources()
+            handler.handle_citations()
+        
+            handler.handle_events()
+            handler.handle_people()
+            handler.handle_families()
     
-        handler.handle_places()
-        handler.handle_sources()
-        handler.handle_citations()
-    
-        handler.handle_events()
-        handler.handle_people()
-        handler.handle_families()
+            # Set person confidence values 
+            #TODO: Only for imported persons (now for all persons!)
+            set_confidence_values(handler.tx, batch_logger=handler.blog)
+            # Set properties (for imported persons)
+            #    + Refname links
+            #    ? Person sortname
+            #    + Person lifetime
+            #    - Confidence values
+            handler.set_person_sortname_refnames()
+            handler.set_estimated_person_dates()
 
-        # Set person confidence values 
-        #TODO: Only for imported persons (now for all persons!)
-        set_confidence_values(handler.tx, batch_logger=handler.blog)
-        # Set properties (for imported persons)
-        #    + Refname links
-        #    ? Person sortname
-        #    + Person lifetime
-        #    - Confidence values
-        handler.set_person_sortname_refnames()
-        handler.set_estimated_person_dates()
+        except Exception as e:
+            raise SystemExit("Stopped xml load due to {}".format(e))    # Stop processing?
 
         handler.blog.complete(handler.tx)
         handler.commit()
