@@ -1,12 +1,17 @@
-from flask import Flask
+from flask import Flask, session, request
+from flask_babelex import Babel
+from flask_security import current_user
 import shareds
 # Create app
-shareds.app = Flask(__name__, instance_relative_config=True)
-app = shareds.app 
+app = Flask(__name__, instance_relative_config=True)
+shareds.app = app
 print('Application instance path: ' + shareds.app.instance_path)
+
 
 shareds.app.config.from_object('config')
 shareds.app.config.from_pyfile('config.py')
+
+shareds.babel = Babel(shareds.app)
 
 from bp.start import bp as start_bp
 shareds.app.register_blueprint(start_bp)
@@ -29,4 +34,16 @@ shareds.app.register_blueprint(gramps_bp)
 from bp.admin import bp as admin_bp
 shareds.app.register_blueprint(admin_bp)
 
+
+@shareds.babel.localeselector
+def get_locale():
+    reqlang = request.args.get('lang')
+    if reqlang:
+        session['lang'] = reqlang
+    else:    
+        reqlang = session.get('lang')
+    if reqlang: 
+        return reqlang
+    return(current_user.language if current_user.is_authenticated else 'fi')
+ 
 import setups
