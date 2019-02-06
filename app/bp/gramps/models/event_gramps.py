@@ -100,10 +100,12 @@ class Event_gramps(Event):
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
-            self.uniq_id = tx.run(Cypher_event_w_handle.create, 
-                                  date=today, e_attr=e_attr).single()[0]
+            result = tx.run(Cypher_event_w_handle.create, date=today, e_attr=e_attr)
+            for res in result:
+                self.uniq_id = res[0]
+                print("Event {} {}".format(self.id, self.uniq_id))
         except Exception as err:
-            print("Virhe.event_save: {0} with {}".format(err, e_attr), file=stderr)
+            print("Virhe.event_save: {0} with {1}".format(err, e_attr), file=stderr)
             raise RuntimeError("Could not save Event {}".format(self.id))
 
         try:
