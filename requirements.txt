@@ -6,7 +6,7 @@ itsdangerous==0.24
 Jinja2==2.10
 Mako==1.0.3
 MarkupSafe==1.0
-neo4j-driver==1.5.2
+neo4j==1.7
 passlib==1.7.1
 pycparser==2.18
 six==1.11.0
