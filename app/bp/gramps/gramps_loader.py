@@ -103,9 +103,9 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
             handler.set_estimated_person_dates()
 
         except Exception as e:
-            raise SystemExit("Stopped xml load due to {}".format(e))    # Stop processing?
+            print("Stopped xml load due to {}".format(e))    # Stop processing?
             handler.commit(rollback=True)
-            return
+            return handler.blog.list(), None
 
         handler.blog.complete(handler.tx)
         handler.commit()
@@ -118,7 +118,7 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
 
     handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
                             'elapsed':time.time()-t0, 'percent':100})
-    return handler.blog.list(),handler.batch_id
+    return handler.blog.list(), handler.batch_id
 
 
 def file_clean(pathname):

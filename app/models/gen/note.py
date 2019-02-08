@@ -37,11 +37,12 @@ class Note:
         self.text = ''
         self.change = 0
         self.priv = None
-        self.url = ''
+        self.url = None
 
     def __str__(self):
         desc = self.text if len(self.text) < 17 else self.text[:16] + "..."
-        return "{} {} {!r} {}".format(self.id, self.type, desc, self.url)
+        url = '' if self.url == None else self.url
+        return "{} {} {!r} {}".format(self.id, self.type, desc, url)
 
     @classmethod
     def from_node(cls, node):

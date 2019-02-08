@@ -10,10 +10,11 @@ import logging
 import time
 import xml.dom.minidom
 import re
+from flask_babelex import _
 
 from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
-from .batchlogger import Log    # Batch
+from .batchlogger import Log
 
 from models.gen.family import Family
 from models.gen.note import Note
@@ -96,7 +97,7 @@ class DOM_handler():
         if rollback:
             self.tx.rollback()
             print("Transaction discarded")
-            self.blog.log_event({'title':_("Database save failed"), 'level':"ERROR"})
+            self.blog.log_event({'title': _("Database save failed"), 'level':"ERROR"})
             return
 
         if self.tx.closed():
@@ -216,12 +217,11 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one description tag in an event",
                                      'level':"WARNING", 'count':e.id})
 
-            """ Dates:
-                <daterange start="1820" stop="1825" quality="estimated"/>
-                <datespan start="1840-01-01" stop="1850-06-30" quality="calculated"/>
-                <dateval val="1870" type="about"/>
-                <datestr val="1700-luvulla" />    # Not processed!
-            """
+            # Dates:
+            #     <daterange start="1820" stop="1825" quality="estimated"/>
+            #     <datespan start="1840-01-01" stop="1850-06-30" quality="calculated"/>
+            #     <dateval val="1870" type="about"/>
+            #     <datestr val="1700-luvulla" />    # Not processed!
             try:
                 # type Gramps_DateRange
                 e.dates = self._extract_daterange(event)
@@ -264,9 +264,9 @@ class DOM_handler():
                              'level':"ERROR", 'elapsed':time.time()-t0, 'percent':1})
                 raise
                 
-            if e.type == "Death" or e.type == "Cause Of Death":
-                print ("- {} event {} / {}".format(e.type, e.uniq_id, e.id))
-                #TODO: Don't know how to link them!
+#             if e.type == "Death" or e.type == "Cause Of Death":
+#                 print ("- {} event {} / {}".format(e.type, e.uniq_id, e.id))
+#                 #TODO: Don't know how to link them!
             counter += 1
 
         self.blog.log_event({'title':"Events", 'count':counter, 
@@ -375,7 +375,7 @@ class DOM_handler():
 
             #TODO: 17.10.2018 Viime palaverissa mm. suunniteltiin, että kuolinsyyt 
             # konvertoitaisiin heti Note-nodeiksi sopivalla node-tyypillä
-            print(n)
+            #print("iNote {}".format(n))
 
             n.save(self.tx)
             counter += 1
@@ -414,6 +414,7 @@ class DOM_handler():
                 if obj_file.hasAttribute("description"):
                     o.description = obj_file.getAttribute("description")
 
+            # print("iMedia {}".format(o))
             o.save(self.tx)
             counter += 1
 

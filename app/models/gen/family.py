@@ -430,9 +430,13 @@ RETURN ID(person) AS mother"""
             }
             result = tx.run(Cypher_family_w_handle.create_to_batch, 
                             batch_id=batch_id, f_attr=f_attr)
-            for res in result:
-                self.uniq_id = res[0]
-                print("Family {} ".format(self.uniq_id))
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Families {} - {}, attr={}".format(self.id, ids, f_attr))
+                # print("Family {} ".format(self.uniq_id))
         except Exception as err:
             print("iError Family.save family: {0} attr={1}".format(err, f_attr), file=stderr)
 
