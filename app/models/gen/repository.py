@@ -169,9 +169,14 @@ class Repository:
                 "rname": self.rname,
                 "type": self.type,
             }
-            self.uniq_id = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr).single()[0]
-#             result = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
-#             self.uniq_id = result.single()[0]
+#             self.uniq_id = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr).single()[0]
+            result = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, r_attr))
         except Exception as err:
             print("iError Repository_save: {0} attr={1}".format(err, r_attr), file=stderr)
             raise RuntimeError("Could not save Repository {}".format(self.id))

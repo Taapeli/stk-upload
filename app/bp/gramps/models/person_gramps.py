@@ -112,14 +112,18 @@ class Person_gramps(Person):
             result = tx.run(Cypher_person_w_handle.create_to_batch, 
                             batch_id=batch_id, p_attr=p_attr, date=today)
 #             self.uniq_id = result.single()[0]
-            for res in result:
-                self.uniq_id = res[0]
-                print("Person {} ".format(self.uniq_id))
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Persons {} - {}, attr={}".format(self.id, ids, p_attr))
+                # print("Person {} ".format(self.uniq_id))
             if self.uniq_id == None:
-                print("Person <MISSING uniq_id> {}".format(p_attr))
+                print("iWarning got no uniq_id for Person {}".format(p_attr))
 
         except Exception as err:
-            print("Error: Person.save: {0} attr={1}".format(err, p_attr), file=stderr)
+            print("iError: Person.save: {0} attr={1}".format(err, p_attr), file=stderr)
 
         # Save Name nodes under the Person node
         for name in self.names:

@@ -330,8 +330,15 @@ return s'''
                 "stitle": self.stitle
             }
 
-            self.uniq_id = tx.run(Cypher_source_w_handle.create, s_attr=s_attr).single()[0]
-#             tx.run(Cypher_source_w_handle.create, s_attr=s_attr)
+#             self.uniq_id = tx.run(Cypher_source_w_handle.create, s_attr=s_attr).single()[0]
+            result = tx.run(Cypher_source_w_handle.create, s_attr=s_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, s_attr))
+
         except Exception as err:
             print("iError source_save: {0} attr={1}".format(err, s_attr), file=stderr)
             raise RuntimeError("Could not save Source {}".format(self.id))

@@ -478,7 +478,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         # Make hierarchy relations to upper Place nodes
         for upper in self.surround_ref:
             try:
-                print("upper {} -> {}".format(self, upper))
+                #print("upper {} -> {}".format(self, upper))
                 if 'dates' in upper and isinstance(upper['dates'], DateRange):
                     r_attr = upper['dates'].for_db()
                 else:

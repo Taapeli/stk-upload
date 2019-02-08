@@ -262,7 +262,7 @@ class Cypher_source_w_handle():
 #      Nyt tulee aina uusi instanssi
 
     create = """
-MERGE (s.source {handle: $s_attr.handle})
+MERGE (s:Source {handle: $s_attr.handle})
     SET s = $s_attr
 RETURN ID(s) as uniq_id"""
 #     create = """

@@ -118,6 +118,7 @@ def background_load_to_neo4j(username,filename):
     pathname = os.path.join(upload_folder,filename)
     metaname = pathname+".meta"
     logname =  pathname+".log"
+    steps = []
     try:
         os.makedirs(upload_folder, exist_ok=True)
         set_meta(username,filename,status=STATUS_LOADING)
@@ -127,6 +128,9 @@ def background_load_to_neo4j(username,filename):
         set_meta(username,filename,batch_id=batch_id)
         for step in steps:
             print(step)
+        if batch_id == None:
+            raise RuntimeError("Run Failed")
+
         set_meta(username,filename,status=STATUS_DONE)
         msg = "{}:\nLoaded the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
         msg += "\nBatch id: {}".format(batch_id)
@@ -145,6 +149,8 @@ def background_load_to_neo4j(username,filename):
         msg = "{}:\nLoading of file {} from user {} to neo4j FAILED".format(util.format_timestamp(),pathname,username)
         msg += "\nLog file: {}".format(logname)
         msg += "\n" + res
+        for step in steps:
+            msg += "\n{}".format(step)
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
                     "Stk: Gramps XML file load FAILED",
