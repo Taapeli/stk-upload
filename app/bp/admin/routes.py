@@ -14,7 +14,7 @@ import logging
 #from _pickle import Unpickler
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, send_from_directory, flash
+from flask import render_template, request, redirect, url_for, send_from_directory, flash, session
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _
 
@@ -171,6 +171,7 @@ def update_user(username):
                 current_login_ip = form.current_login_ip.data,
                 login_count = form.login_count.data)        
         updated_user = UserAdmin.update_user(user)
+        session['lang'] = form.language.data
         flash(_("User updated"))
         return redirect(url_for("admin.update_user",username=updated_user.username))
 

@@ -42,8 +42,10 @@ def get_locale():
         session['lang'] = reqlang
     else:    
         reqlang = session.get('lang')
-    if reqlang: 
-        return reqlang
-    return(current_user.language if current_user.is_authenticated else 'fi')
+        if not reqlang:
+            if current_user.is_authenticated: 
+                reqlang = current_user.language
+                session['lang'] = reqlang
+    return reqlang
  
 import setups
