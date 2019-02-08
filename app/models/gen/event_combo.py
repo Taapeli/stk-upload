@@ -97,7 +97,7 @@ class Event_combo(Event):
                     for ref in record["place_ref"]:
                         self.place_ref.append(ref)
             except Exception as err:
-                print("Virhe-get_event_combo: {1} {0}".format(err, self.uniq_id), file=stderr)
+                print("iError get_event_combo: {1} {0}".format(err, self.uniq_id), file=stderr)
 
     @staticmethod       
     def get_connected_events_w_links(uniq_id):

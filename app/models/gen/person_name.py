@@ -63,6 +63,8 @@ class Name:
     def save(self, tx, parent_id=None):
         """ Creates or updates this Name node. (There is no handle)
             If parent_id is given, a link (parent) -[:NAME]-> (Name) is created 
+
+            #TODO: Check, if this name exists; then update or create new
         """
         if not parent_id:
             raise ValueError("Name.save: no base person defined")
@@ -80,7 +82,7 @@ class Name:
         except ConnectionError as err:
             raise SystemExit("Stopped in Name.save: {}".format(err))
         except Exception as err:
-            print("Virhe (Name.save): {0}".format(err), file=stderr)
+            print("iError (Name.save): {0}".format(err), file=stderr)
 
 
     @staticmethod

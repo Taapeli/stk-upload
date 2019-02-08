@@ -104,14 +104,16 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
 
         except Exception as e:
             raise SystemExit("Stopped xml load due to {}".format(e))    # Stop processing?
+            handler.commit(rollback=True)
+            return
 
         handler.blog.complete(handler.tx)
         handler.commit()
 
     except ConnectionError as err:
-        print("Virhe ConnectionError {0}".format(err))
-        handler.blog.log_event(title="Talletus tietokantaan ei onnistunut {} {}".\
-                                     format(err.message, err.code), level="ERROR")
+        print("iError ConnectionError {0}".format(err))
+        handler.blog.log_event(title=_("Database save failed due to {} {}".\
+                                     format(err.message, err.code)), level="ERROR")
         raise SystemExit("Stopped due to ConnectionError")    # Stop processing?
 
     handler.blog.log_event({'title':"Total time", 'level':"TITLE", 

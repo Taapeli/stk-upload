@@ -381,5 +381,5 @@ class Refname:
             return ret
 
         except Exception as err:
-            print("Error (Refname.get_refnames): {0}".format(err), file=stderr)
+            print("iError (Refname.get_refnames): {0}".format(err), file=stderr)
             return []

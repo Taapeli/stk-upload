@@ -100,12 +100,10 @@ class Event_gramps(Event):
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
-            result = tx.run(Cypher_event_w_handle.create, date=today, e_attr=e_attr)
-            for res in result:
-                self.uniq_id = res[0]
-                print("Event {} {}".format(self.id, self.uniq_id))
+            self.uniq_id = tx.run(Cypher_event_w_handle.create, 
+                                  date=today, e_attr=e_attr).single()[0]
         except Exception as err:
-            print("Virhe.event_save: {0} with {1}".format(err, e_attr), file=stderr)
+            print("Error: Event_save: {0} attr={1}".format(err, e_attr), file=stderr)
             raise RuntimeError("Could not save Event {}".format(self.id))
 
         try:
@@ -114,7 +112,7 @@ class Event_gramps(Event):
                 tx.run(Cypher_event_w_handle.link_place, 
                        handle=self.handle, place_hlink=self.place_hlink)
         except Exception as err:
-            print("Virhe.event_link_place: {0}".format(err), file=stderr)
+            print("Error: Event_link_place: {0}".format(err), file=stderr)
 
         try:
             # Make relations to the Note nodes
@@ -125,7 +123,7 @@ class Event_gramps(Event):
 #                 cnt = result.single()["cnt"]
 #                 print ("Luotiin {} Note-yhteyttä".format(cnt))
         except Exception as err:
-            print("Virhe.event_link_notes: {0}".format(err), file=stderr)
+            print("Error: Event_link_notes: {0}".format(err), file=stderr)
 
         try:
             # Make relations to the Citation nodes
@@ -133,7 +131,7 @@ class Event_gramps(Event):
                 tx.run(Cypher_event_w_handle.link_citations,
                        handle=self.handle, citation_handles=self.citation_handles)
         except Exception as err:
-            print("Virhe.event_link_citations: {0}".format(err), file=stderr)
+            print("Error: Event_link_citations: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Media node
@@ -141,6 +139,6 @@ class Event_gramps(Event):
                 tx.run(Cypher_event_w_handle.link_media, 
                        handle=self.handle, objref_hlink=self.objref_hlink)
         except Exception as err:
-            print("Virhe.event_link_media: {0}".format(err), file=stderr)
+            print("Error: Event_link_media: {0}".format(err), file=stderr)
             
         return
