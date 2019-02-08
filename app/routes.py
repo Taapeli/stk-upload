@@ -9,11 +9,11 @@ import logging
 logger = logging.getLogger('stkserver')
 #import time
 
-from flask import render_template, request, g #, redirect, url_for, flash
-from flask_security import login_required, current_user #, roles_accepted # ,roles_required
+from flask import render_template, request #, g, redirect, url_for, flash
+from flask_security import login_required #, current_user, roles_accepted # ,roles_required
 
 # i18n: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n-legacy
-from flask_babelex import Babel
+#from flask_babelex import Babel
 #from flask_babelex import _
 
 import shareds
@@ -32,7 +32,7 @@ def virhesivu(code, text=''):
     """ Virhesivu näytetään """
     logging.debug('Virhesivu ' + str(code) )
     return render_template("virhe_lataus.html", code=code, text=text)
-
+'''
 babel = Babel(app)
 
 @babel.localeselector
@@ -45,6 +45,7 @@ def get_locale():
     return "fi"
     #return "en"
     #return request.accept_languages.best_match(LANGUAGES)
+    '''
 
 @shareds.app.route('/help')
 @login_required

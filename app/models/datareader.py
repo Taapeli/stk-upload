@@ -383,7 +383,7 @@ def read_sources(uniq_id=None):
                 s.citations.append(c)
             sources.append(s)
     except Exception as err:
-        print("Virhe-read_sources: {1} {0}".format(err, uniq_id), file=stderr)
+        print("iError read_sources: {1} {0}".format(err, uniq_id), file=stderr)
 
     return (sources)
 

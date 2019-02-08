@@ -139,6 +139,7 @@ countries = {
     "Venäjä","Russia",
     "Eesti","Viro","Estland",
     "Norja","Norge","Norway",
+    "Saksa","Deutschland","Germany",
 }
 
 villages = defaultdict(set)

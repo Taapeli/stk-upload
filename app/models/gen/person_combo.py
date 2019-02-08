@@ -691,7 +691,7 @@ RETURN n.id, k.firstname, k.surname,
                     return session.run(Cypher_person.get_events_by_refname_use,
                                        attr={'use':rule, 'name':key})
         except Exception as err:
-            print("Virhe-get_person_combos: {1} {0}".format(err, keys), file=stderr)
+            print("iError get_person_combos: {1} {0}".format(err, keys), file=stderr)
 
 
     @staticmethod
@@ -749,7 +749,7 @@ RETURN n.id, k.firstname, k.surname,
                     return session.run(Cypher_person.get_events_by_refname_use,
                                        attr={'use':rule, 'name':key})
         except Exception as err:
-            print("Virhe-get_events_k: {1} {0}".format(err, keys), file=stderr)
+            print("iError get_events_k: {1} {0}".format(err, keys), file=stderr)
 
 
     # Not in use!
@@ -1021,7 +1021,7 @@ with distinct x
                     uids = [uids]
                 result = tx.run(Cypher_person.set_est_lifetimes, idlist=uids)
         except Exception as err:
-            print("Virhe (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
+            print("iError (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
             return 0
 
         counters = result.consume().counters

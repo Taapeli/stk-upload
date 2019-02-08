@@ -420,6 +420,7 @@ RETURN ID(person) AS mother"""
             creates relations to parent, child and note nodes
         """
 
+        f_attr = {}
         try:
             f_attr = {
                 "handle": self.handle,
@@ -429,11 +430,15 @@ RETURN ID(person) AS mother"""
             }
             result = tx.run(Cypher_family_w_handle.create_to_batch, 
                             batch_id=batch_id, f_attr=f_attr)
-            for res in result:
-                self.uniq_id = res[0]
-                print("Family {} ".format(self.uniq_id))
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Families {} - {}, attr={}".format(self.id, ids, f_attr))
+                # print("Family {} ".format(self.uniq_id))
         except Exception as err:
-            print("Virhe (Family.save:Family): {0}".format(err), file=stderr)
+            print("iError Family.save family: {0} attr={1}".format(err, f_attr), file=stderr)
 
         # Make father and mother relations to Person nodes
         try:
@@ -445,35 +450,32 @@ RETURN ID(person) AS mother"""
                 tx.run(Cypher_family_w_handle.link_mother,
                        f_handle=self.handle, p_handle=self.mother)
         except Exception as err:
-            print("Virhe (Family.save:parents): {0}".format(err), file=stderr)
+            print("iError Family.save parents: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to Event nodes
-        if len(self.eventref_hlink) > 0:
+        try:
             for i in range(len(self.eventref_hlink)):
-                try:
-                    tx.run(Cypher_family_w_handle.link_event, 
-                           f_handle=self.handle, e_handle=self.eventref_hlink[i],
-                           role=self.eventref_role[i])
-                except Exception as err:
-                    print("Virhe (Family.save:Event): {0}".format(err), file=stderr)
+                tx.run(Cypher_family_w_handle.link_event, 
+                       f_handle=self.handle, e_handle=self.eventref_hlink[i],
+                       role=self.eventref_role[i])
+        except Exception as err:
+            print("iError Family.save events: {0} {1}".format(err, self.id), file=stderr)
   
         # Make child relations to Person nodes
-        if len(self.childref_hlink) > 0:
-            for i in range(len(self.childref_hlink)):
-                try:
-                    tx.run(Cypher_family_w_handle.link_child, 
-                           f_handle=self.handle, p_handle=self.childref_hlink[i])
-                except Exception as err:
-                    print("Virhe (Family.save:Child): {0}".format(err), file=stderr)
+        try:
+            for handle in self.childref_hlink:
+                tx.run(Cypher_family_w_handle.link_child, 
+                       f_handle=self.handle, p_handle=handle)
+        except Exception as err:
+            print("iError Family.save children: {0} {1}".format(err, self.id), file=stderr)
   
         # Make relation(s) to the Note node
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                try:
-                    tx.run(Cypher_family_w_handle.link_note,
-                           f_handle=self.handle, n_handle=self.noteref_hlink[i])
-                except Exception as err:
-                    print("Virhe (Family.save:Note): {0}".format(err), file=stderr)
+        try:
+            for handle in self.noteref_hlink:
+                tx.run(Cypher_family_w_handle.link_note,
+                       f_handle=self.handle, n_handle=handle)
+        except Exception as err:
+            print("iError Family.save notes: {0} {1}".format(err, self.id), file=stderr)
 
         return
 

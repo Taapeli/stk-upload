@@ -321,6 +321,7 @@ return s'''
     def save(self, tx):
         """ Saves this Source and connects it to Notes and Repositories """
 
+        s_attr = {}
         try:
             s_attr = {
                 "handle": self.handle,
@@ -329,10 +330,18 @@ return s'''
                 "stitle": self.stitle
             }
 
-            tx.run(Cypher_source_w_handle.create, s_attr=s_attr)
+#             self.uniq_id = tx.run(Cypher_source_w_handle.create, s_attr=s_attr).single()[0]
+            result = tx.run(Cypher_source_w_handle.create, s_attr=s_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, s_attr))
+
         except Exception as err:
-            print("Virhe (Source.save): {0}".format(err), file=stderr)
-            #TODO raise ConnectionError("Source.save: {0}".format(err))
+            print("iError source_save: {0} attr={1}".format(err, s_attr), file=stderr)
+            raise RuntimeError("Could not save Source {}".format(self.id))
 
         # Make relation to the Note node
         if self.noteref_hlink != '':
@@ -340,7 +349,7 @@ return s'''
                 tx.run(Cypher_source_w_handle.link_note,
                        handle=self.handle, hlink=self.noteref_hlink)
             except Exception as err:
-                print("Virhe (Source.save:Note): {0}".format(err), file=stderr)
+                print("iError Source.save note: {0}".format(err), file=stderr)
 
         # Make relation to the Repository node
         if self.reporef_hlink != '':
@@ -348,13 +357,13 @@ return s'''
                 tx.run(Cypher_source_w_handle.link_repository,
                        handle=self.handle, hlink=self.reporef_hlink)
             except Exception as err:
-                print("Virhe (Source.save:Repository): {0}".format(err), file=stderr)
+                print("iError Source.save Repository: {0}".format(err), file=stderr)
                 
             # Set the medium data of the Source node
             try:
                 tx.run(Cypher_source_w_handle.set_repository_medium,
                        handle=self.handle, medium=self.reporef_medium)
             except Exception as err:
-                print("Virhe (Source.save:repository_medium): {0}".format(err), file=stderr)
+                print("iError Source.save repository_medium: {0}".format(err), file=stderr)
 
         return

@@ -95,6 +95,7 @@ class Person_gramps(Person):
             self.handle = handles.pop()
 
         # Save the Person node under UserProfile; all attributes are replaced
+        p_attr = {}
         try:
             p_attr = {
                 "handle": self.handle,
@@ -111,14 +112,18 @@ class Person_gramps(Person):
             result = tx.run(Cypher_person_w_handle.create_to_batch, 
                             batch_id=batch_id, p_attr=p_attr, date=today)
 #             self.uniq_id = result.single()[0]
-            for res in result:
-                self.uniq_id = res[0]
-                print("Person {} ".format(self.uniq_id))
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Persons {} - {}, attr={}".format(self.id, ids, p_attr))
+                # print("Person {} ".format(self.uniq_id))
             if self.uniq_id == None:
-                print("Person <MISSING uniq_id> {}".format(p_attr))
+                print("iWarning got no uniq_id for Person {}".format(p_attr))
 
         except Exception as err:
-            print("Virhe (Person.save:Person): {0}".format(err), file=stderr)
+            print("iError: Person.save: {0} attr={1}".format(err, p_attr), file=stderr)
 
         # Save Name nodes under the Person node
         for name in self.names:
@@ -128,65 +133,61 @@ class Person_gramps(Person):
         for note in self.notes:
             note.save(tx, self.uniq_id)
 
-        if len(self.events) > 0:
-            # Make Event relations (if Events were stored in self.events)
-            # TODO: onkohan tämä käytössä? Ei ainakaan gramps-latauksessa
-            ''' Create and connect to an Person.event[*] '''
-            for e in self.events:
-                if handles:
-                    e.handle = handles.pop()
-                e_attr = {
-                    "handle": e.handle,
-                    "id": e.id,
-                    "name": e.name, # "e_type": e.tyyppi,
-                    "date": e.date,
-                    "descr": e.description
-                }
-                try:
-                    tx.run(Cypher_person_w_handle.link_event_embedded, 
-                           p_handle=self.handle, e_attr=e_attr, role="osallistuja")
-                except Exception as err:
-                    print("Virhe (Person.save:create Event): {0}".format(err), file=stderr)
+#         if len(self.events) > 0:
+#             # Make Event relations (if Events were stored in self.events)
+#             # TODO: onkohan tämä käytössä? Ei ainakaan gramps-latauksessa
+#             ''' Create and connect to an Person.event[*] '''
+#             for e in self.events:
+#                 if handles:
+#                     e.handle = handles.pop()
+#                 e_attr = {
+#                     "handle": e.handle,
+#                     "id": e.id,
+#                     "name": e.name, # "e_type": e.tyyppi,
+#                     "date": e.date,
+#                     "descr": e.description
+#                 }
+#                 try:
+#                     tx.run(Cypher_person_w_handle.link_event_embedded, 
+#                            p_handle=self.handle, e_attr=e_attr, role="osallistuja")
+#                 except Exception as err:
+#                     print("Virhe: Person.save event: {0} attr={1}".format(err, e_attr), file=stderr)
 
-        # Make Event relations by hlinks (from gramps_loader)
-        elif len(self.eventref_hlink) > 0:
-            ''' Connect to each Event loaded from Gramps '''
+        ''' Connect to each Event loaded from Gramps '''
+        try:
             for i in range(len(self.eventref_hlink)):
-                try:
-                    tx.run(Cypher_person_w_handle.link_event, 
-                           p_handle=self.handle, 
-                           e_handle=self.eventref_hlink[i], 
-                           role=self.eventref_role[i])
-                except Exception as err:
-                    print("Virhe (Person.save:Event): {0}".format(err), file=stderr)
+                tx.run(Cypher_person_w_handle.link_event, 
+                       p_handle=self.handle, 
+                       e_handle=self.eventref_hlink[i], 
+                       role=self.eventref_role[i])
+        except Exception as err:
+            print("Error: Person.save events: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Media nodes
-        if len(self.objref_hlink) > 0:
-            for ref in self.objref_hlink:
-                try:
-                    tx.run(Cypher_person_w_handle.link_media, 
-                           p_handle=self.handle, m_handle=ref)
-                except Exception as err:
-                    print("Virhe (Person.save:Media): {0}".format(err), file=stderr)
+        try:
+            for handle in self.objref_hlink:
+                tx.run(Cypher_person_w_handle.link_media, 
+                       p_handle=self.handle, m_handle=handle)
+        except Exception as err:
+            print("Error: Person.save medias: {0} {1}".format(err, self.id), file=stderr)
 
         # The relations to the Family node will be created in Family.save(),
         # because the Family object is not yet created
 
         # Make relations to the Note nodes
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                try:
-                    tx.run(Cypher_person_w_handle.link_note,
-                           p_handle=self.handle, n_handle=self.noteref_hlink[i])
-                except Exception as err:
-                    print("Virhe (Person.save:Note): {0}".format(err), file=stderr)
+        try:
+            for handle in self.noteref_hlink:
+                tx.run(Cypher_person_w_handle.link_note,
+                       p_handle=self.handle, n_handle=handle)
+        except Exception as err:
+            print("Error: Person.save notes: {0} {1}".format(err, self.id), file=stderr)
 
-        # Make relations to the Citation node
-        if len(self.citationref_hlink) > 0: #TODO Many citations!
-            try:
+        # Make relations to the Citation nodes
+        try:
+            for handle in self.citationref_hlink:
                 tx.run(Cypher_person_w_handle.link_citation,
-                       p_handle=self.handle, c_handle=self.citationref_hlink[0])
-            except Exception as err:
-                print("Virhe (Person.save:Citation): {0}".format(err), file=stderr)
+                       p_handle=self.handle, c_handle=handle)
+        except Exception as err:
+            print("Error: Person.save:Citation: {0} {1}".format(err, self.id), file=stderr)
         return
 
