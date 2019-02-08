@@ -22,7 +22,7 @@ To: %s
         conn.sendmail(mail_from, [mail_to], msg)
         conn.quit()
     except Exception as e:
-        logging.error("Error in sending email")
+        logging.error("iError in sending email")
         logging.error(str(e))
         traceback.print_exc()
 

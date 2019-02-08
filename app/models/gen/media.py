@@ -110,6 +110,7 @@ class Media:
     def save(self, tx):
         """ Saves this Media object to db """
 
+        m_attr = {}
         try:
             m_attr = {
                 "handle": self.handle,
@@ -119,9 +120,8 @@ class Media:
                 "mime": self.mime,
                 "description": self.description
             }
-            return tx.run(Cypher_media_w_handle.create, m_attr=m_attr)
-
+            self.uniq_id = tx.run(Cypher_media_w_handle.create, m_attr=m_attr).single()[0]
+#             return tx.run(Cypher_media_w_handle.create, m_attr=m_attr)
         except Exception as err:
-            print("Virhe (Media.save): {0}".format(err), file=stderr)
-            raise SystemExit("Stopped due to error in Media.save")    # Stop processing
-            #TODO raise ConnectionError("Media.save: {0}".format(err))
+            print("iError Media_save: {0} attr={1}".format(err, m_attr), file=stderr)
+            raise RuntimeError("Could not save Media {}".format(self.id))

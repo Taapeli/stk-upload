@@ -46,7 +46,7 @@ class User:
             shareds.driver.session().run(query, {"uid": self.userid, "name": self.name})
     
         except Exception as err:
-            print("Virhe: {0}".format(err), file=sys.stderr)
+            print("Error: {0}".format(err), file=sys.stderr)
             raise
             
         

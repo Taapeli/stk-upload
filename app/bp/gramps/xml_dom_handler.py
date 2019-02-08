@@ -91,8 +91,14 @@ class DOM_handler():
         self.tx = session.begin_transaction()
         print("Transaction started")
 
-    def commit(self):
-        """ Commit transaction """
+    def commit(self, rollback=False):
+        """ Commit or rollback transaction """
+        if rollback:
+            self.tx.rollback()
+            print("Transaction discarded")
+            self.blog.log_event({'title':_("Database save failed"), 'level':"ERROR"})
+            return
+
         if self.tx.closed():
             print("Transaction already closed!")
         else:
@@ -101,8 +107,8 @@ class DOM_handler():
                 print("Transaction committed")
             except Exception as e:
                 print("Transaction failed")
-                self.blog.log_event({'title':"Talletus tietokantaan ei onnistunut {} {}".\
-                                     format(e.__class__.__name__, e), 'level':"ERROR"})
+                self.blog.log_event({'title':_("Database save failed due to {} {}".\
+                                     format(e.__class__.__name__, e)), 'level':"ERROR"})
 
 
     # ---------------------   XML subtree handlers   --------------------------
@@ -386,7 +392,7 @@ class DOM_handler():
         t0 = time.time()
         counter = 0
 
-        # Print detail of each media object
+        # Details of each media object
         for obj in media:
 
             o = Media()

@@ -224,9 +224,8 @@ class Citation:
     def save(self, tx):
         """ Saves this Citation and connects it to it's Notes and Sources"""
 
+        c_attr = {}
         try:
-            # Create a new Citation node
-                
             c_attr = {
                 "handle": self.handle,
                 "change": self.change,
@@ -237,17 +236,16 @@ class Citation:
             }
             tx.run(Cypher_citation_w_handle.create, c_attr=c_attr)
         except Exception as err:
-            print("Virhe (Citation.save): {0}".format(err), file=stderr)
-            raise SystemExit("Stopped due to errors")    # Stop processing
-            #TODO raise ConnectionError("Citation.save: {0}".format(err))
+            print("Error: Citation_save: {0} attr={1}".format(err, c_attr), file=stderr)
+            raise RuntimeError("Could not save Citation {}".format(self.id))
 
         # Make relations to the Note nodes
-        for hlink in self.noteref_hlink:
-            try:
+        try:
+            for handle in self.noteref_hlink:
                 tx.run(Cypher_citation_w_handle.link_note, 
-                       handle=self.handle, hlink=hlink)
-            except Exception as err:
-                print("Virhe (Citation.save:Note hlink): {0}".format(err), file=stderr)
+                       handle=self.handle, hlink=handle)
+        except Exception as err:
+            print("Error: Citation.save Note hlink: {0} {1}".format(err, self.id), file=stderr)
 
         try:   
             # Make relation to the Source node
@@ -255,7 +253,7 @@ class Citation:
                 tx.run(Cypher_citation_w_handle.link_source,
                        handle=self.handle, hlink=self.source_handle)
         except Exception as err:
-            print("Virhe: {0}".format(err), file=stderr)
+            print("Error: Citation.save Source hlink: {0} {1}".format(err, self.id), file=stderr)
             
         return
 
