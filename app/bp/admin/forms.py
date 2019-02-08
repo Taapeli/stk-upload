@@ -49,7 +49,7 @@ class UpdateUserForm(FlaskForm):
         description = _('Active / passive user')) 
     roles = SelectMultipleField(_('Roles'), 
                 choices=[
-#                   ("guest",_("Guest")),
+                   ("guest",_("Guest")),
                    ("member",_("Member")),
                    ("research",_("Research")),
                    ("audit",_("Audit")),                      
