@@ -241,6 +241,16 @@ def gedcom_save(gedcom):
     rsp = dict(newname=os.path.basename(newname))
     return jsonify(rsp) 
 
+@bp.route('/gedcom/check/<gedcom>', methods=['GET'])
+@login_required
+def gedcom_check(gedcom):
+    gedcom_folder = get_gedcom_folder()
+    fullname = os.path.join(gedcom_folder, gedcom)
+    if os.path.exists(fullname):
+        return "exists"
+    else:
+        return "does not exist"
+  
 @bp.route('/gedcom/upload', methods=['POST'])
 @login_required
 def gedcom_upload():
@@ -281,7 +291,7 @@ def gedcom_upload():
         save_metadata(filename, metadata)
         history_init(fullname)
         return redirect(url_for('.gedcom_info',gedcom=filename))
-  
+
 @bp.route('/gedcom/download/<gedcom>')
 @login_required
 def gedcom_download(gedcom):

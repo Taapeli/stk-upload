@@ -14,6 +14,71 @@ $(document).ready( function() {
         ajaxStop: function() { $("body").removeClass("loading"); },    
         ajaxError: function() { $("#errors").text(_('Server error')).show(); }    
     });
+
+
+    $('#upload').click( function() {
+        // from https://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously    
+    console.log("click");
+        var gedcom_name = $("#file").val();
+        gedcom_name = gedcom_name.replace(/^C:\\fakepath\\/,"");
+        $.get("/gedcom/check/" + gedcom_name, function(rsp){
+            if (rsp == "does not exist") {
+                $.ajax({
+                    // Your server script to process the upload
+                    url: '/gedcom/upload',
+                    type: 'POST',
+
+                    // Form data
+                    data: new FormData($('#upload_form')[0]),
+
+                    // Tell jQuery not to process data or worry about content-type
+                    // You *must* include these options!
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+
+                    // Custom XMLHttpRequest
+                    xhr: function() {
+                        var myXhr = $.ajaxSettings.xhr();
+            console.log("myxhr:"+myXhr);
+            console.log("myxhr.upload:"+myXhr.upload);
+                        if (myXhr.upload) {
+                            // For handling the progress of the upload
+                            myXhr.upload.addEventListener('xprogress', function(e) {
+            console.log("progress");
+            console.log(e);
+                                if (e.lengthComputable) {
+                                    $('progress').attr({
+                                        value: e.loaded,
+                                        max: e.total,
+                                    });
+                                    if (e.loaded == e.total) {
+                                        $("progress").hide();
+                                        //document.location.href= "/gedcom/list";
+                                    }
+                                }
+                            } , false);
+                        }
+                        myXhr.done = function() { alert("done1"); };
+                        $("progress").show();
+                        return myXhr;
+                    }, // xhr
+                    
+                    complete: function() { console.log("complete"); },
+                    error: function() { console.log("error"); },
+                    success: function() { 
+                       console.log("success"); 
+                       document.location.href= "/gedcom/info/" + gedcom_name;
+                    }
+                }) // $.ajax
+                .done( function() { console.log("done"); });
+            } // does not exist
+            else { // exists
+                alert("File already exists");
+            } // exists
+        }); // $.get
+    });
+    
     
     $("#analyze").click(function() {
         hide_all();

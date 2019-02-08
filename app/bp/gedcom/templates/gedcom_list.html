@@ -5,6 +5,8 @@
 {% block body %}
 {{ super() }}
 
+<script src="/static/js/gedcom_scripts.js?18"></script>
+
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
     <h2>{{ _("GEDCOM Management") }}</h2>
@@ -31,16 +33,18 @@
 	        <div style="display: inline-block;">
 	            <h3>{{ _("Upload a new GEDCOM file") }}</h3>
 				<div>
-				    <form method="post" enctype="multipart/form-data" action="/gedcom/upload">
+				    <!-- form id="upload_form" method="post" enctype="multipart/form-data" action="/gedcom/upload" -->
+				    <form id="upload_form" method="post" enctype="multipart/form-data">
 				      <div>
-				        <input type="file" name="file" accept="{{ allowed_extensions }}">
+				        <input type="file" name="file" id="file" accept="{{ allowed_extensions }}">
 				      </div>
 				      <div><label for="desc">{{ _("Description") }}</label>
 				           <input name="desc" style="width: 14em"></div>
 				      <div class="submit">
-				        <input type="submit" value="{{ _('Upload') }}">
+				        <input type="button" id="upload" value="{{ _('Upload') }}">
 				      </div>
 				    </form>
+				    <progress style="display:none"></progress>
 				    <div>&rtrif; <a href="/">{{ _("Return main page") }}</a></div>
 				</div>
 			 </div>
@@ -48,6 +52,7 @@
 	</div>
   </div>
 </div>
+<div id="waiter" class="modal"></div>	
 {% endblock %}
 
 
