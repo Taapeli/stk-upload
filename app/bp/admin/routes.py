@@ -171,7 +171,8 @@ def update_user(username):
                 current_login_ip = form.current_login_ip.data,
                 login_count = form.login_count.data)        
         updated_user = UserAdmin.update_user(user)
-        session['lang'] = form.language.data
+        if updated_user.username == current_user.username:
+            session['lang'] = form.language.data
         flash(_("User updated"))
         return redirect(url_for("admin.update_user",username=updated_user.username))
 
