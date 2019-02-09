@@ -106,9 +106,9 @@ class Event_gramps(Event):
                 self.uniq_id = record[0]
                 ids.append(self.uniq_id)
                 if len(ids) > 1:
-                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, e_attr))
+                    print("iError updated multiple Events {} - {}, attr={}".format(self.id, ids, e_attr))
         except Exception as err:
-            print("Error: Event_save: {0} attr={1}".format(err, e_attr), file=stderr)
+            print("iError: Event_save: {0} attr={1}".format(err, e_attr), file=stderr)
             raise RuntimeError("Could not save Event {}".format(self.id))
 
         try:
@@ -117,7 +117,7 @@ class Event_gramps(Event):
                 tx.run(Cypher_event_w_handle.link_place, 
                        handle=self.handle, place_hlink=self.place_hlink)
         except Exception as err:
-            print("Error: Event_link_place: {0}".format(err), file=stderr)
+            print("iError: Event_link_place: {0}".format(err), file=stderr)
 
         try:
             # Make relations to the Note nodes
@@ -128,7 +128,7 @@ class Event_gramps(Event):
 #                 cnt = result.single()["cnt"]
 #                 print ("Luotiin {} Note-yhteyttä".format(cnt))
         except Exception as err:
-            print("Error: Event_link_notes: {0}".format(err), file=stderr)
+            print("iError: Event_link_notes: {0}".format(err), file=stderr)
 
         try:
             # Make relations to the Citation nodes
@@ -136,7 +136,7 @@ class Event_gramps(Event):
                 tx.run(Cypher_event_w_handle.link_citations,
                        handle=self.handle, citation_handles=self.citation_handles)
         except Exception as err:
-            print("Error: Event_link_citations: {0}".format(err), file=stderr)
+            print("iError: Event_link_citations: {0}".format(err), file=stderr)
 
         try:
             # Make relation to the Media node
@@ -144,6 +144,6 @@ class Event_gramps(Event):
                 tx.run(Cypher_event_w_handle.link_media, 
                        handle=self.handle, objref_hlink=self.objref_hlink)
         except Exception as err:
-            print("Error: Event_link_media: {0}".format(err), file=stderr)
+            print("iError: Event_link_media: {0}".format(err), file=stderr)
             
         return

@@ -103,7 +103,7 @@ def read_gedcom(args):
         raise
     except Exception as err:
         LOG.error(type(err))
-        LOG.error("iError read_gedcom" {0}".format(err))
+        LOG.error("iError read_gedcom {0}".format(err))
         LOG.error(traceback.format_exc())
 
 

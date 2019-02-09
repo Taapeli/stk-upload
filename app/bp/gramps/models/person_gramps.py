@@ -161,7 +161,7 @@ class Person_gramps(Person):
                        e_handle=self.eventref_hlink[i], 
                        role=self.eventref_role[i])
         except Exception as err:
-            print("Error: Person.save events: {0} {1}".format(err, self.id), file=stderr)
+            print("iError: Person.save events: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Media nodes
         try:
@@ -169,7 +169,7 @@ class Person_gramps(Person):
                 tx.run(Cypher_person_w_handle.link_media, 
                        p_handle=self.handle, m_handle=handle)
         except Exception as err:
-            print("Error: Person.save medias: {0} {1}".format(err, self.id), file=stderr)
+            print("iError: Person.save medias: {0} {1}".format(err, self.id), file=stderr)
 
         # The relations to the Family node will be created in Family.save(),
         # because the Family object is not yet created
@@ -180,7 +180,7 @@ class Person_gramps(Person):
                 tx.run(Cypher_person_w_handle.link_note,
                        p_handle=self.handle, n_handle=handle)
         except Exception as err:
-            print("Error: Person.save notes: {0} {1}".format(err, self.id), file=stderr)
+            print("iError: Person.save notes: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Citation nodes
         try:
@@ -188,6 +188,6 @@ class Person_gramps(Person):
                 tx.run(Cypher_person_w_handle.link_citation,
                        p_handle=self.handle, c_handle=handle)
         except Exception as err:
-            print("Error: Person.save:Citation: {0} {1}".format(err, self.id), file=stderr)
+            print("iError: Person.save:Citation: {0} {1}".format(err, self.id), file=stderr)
         return
 
