@@ -12,4 +12,4 @@ pycparser==2.18
 six==1.11.0
 treelib==1.4.0
 virtualenv==13.1.2
-Werkzeug==0.12.2
+Werkzeug==0.14.1
