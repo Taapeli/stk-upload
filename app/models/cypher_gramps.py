@@ -290,7 +290,8 @@ class Cypher_citation_w_handle():
 
     create = """
 CREATE (n:Citation)
-    SET n = $c_attr"""
+    SET n = $c_attr
+RETURN ID(n) as uniq_id"""
 
     link_note = """
 MERGE (n:Citation {handle: $handle})
