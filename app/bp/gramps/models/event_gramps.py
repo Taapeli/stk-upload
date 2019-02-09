@@ -100,8 +100,13 @@ class Event_gramps(Event):
         if self.dates:
             e_attr.update(self.dates.for_db())
         try:
-            self.uniq_id = tx.run(Cypher_event_w_handle.create, 
-                                  date=today, e_attr=e_attr).single()[0]
+            result = tx.run(Cypher_event_w_handle.create, date=today, e_attr=e_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, e_attr))
         except Exception as err:
             print("Error: Event_save: {0} attr={1}".format(err, e_attr), file=stderr)
             raise RuntimeError("Could not save Event {}".format(self.id))
