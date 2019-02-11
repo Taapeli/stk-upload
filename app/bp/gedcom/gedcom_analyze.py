@@ -21,6 +21,72 @@ class Info: pass
 
 from . import gedcom_grammar_data2
 
+
+events = """
+INDI
+FAM
+FAM.ANUL
+FAM.CENS
+FAM.DIVF
+FAM.DIV
+FAM.ENGA
+FAM.EVEN
+FAM.MARB
+FAM.MARC
+FAM.MARL
+FAM.MARR
+FAM.MARS
+FAM.RESI
+FAM.SLGS
+INDI.ADOP
+INDI.ASSO
+INDI.BAPL
+INDI.BAPM
+INDI.BARM
+INDI.BASM
+INDI.BIRT
+INDI.BLES
+INDI.BURI
+INDI.CAST
+INDI.CENS
+INDI.CHRA
+INDI.CHR
+INDI.CONF
+INDI.CONL
+INDI.CREM
+INDI.DEAT
+INDI.DSCR
+INDI.EDUC
+INDI.EMIG
+INDI.ENDL
+INDI.EVEN
+INDI.FACT
+INDI.FCOM
+INDI.GRAD
+INDI.IDNO
+INDI.IMMI
+INDI.NAME.FONE
+INDI.NAME.ROMN
+INDI.NAME
+INDI.NATI
+INDI.NATU
+INDI.NCHI
+INDI.NMR
+INDI.OCCU
+INDI.ORDN
+INDI.PROB
+INDI.PROP
+INDI.RELI
+INDI.RESI
+INDI.RETI
+INDI.SLGC
+INDI.SSN
+INDI.TITL
+INDI.WILL
+"""
+
+events = set(events.splitlines())
+
 def read_allowed_paths():
     allowed = set()
     from . import gedcom_grammar_data 
@@ -112,6 +178,9 @@ class Analyzer(transformer.Transformation):
         self.records = set()
         self.xrefs = set()
         self.types = defaultdict(LineCounter)
+
+        self.with_sources = LineCounter(_("With sources"))
+        self.without_sources = LineCounter(_("Without sources"))
         
         self.genders = defaultdict(int)
         self.invalid_pointers = []
@@ -221,8 +290,14 @@ class Analyzer(transformer.Transformation):
             if husb is None and wife is None:
                 self.family_with_no_parents.add("",item)
 
-
-            
+        if path in events:
+            for c in item.children:
+                if c.tag == "SOUR":
+                    self.with_sources.add(path,item)
+                    break
+            else:  
+                self.without_sources.add(path,item)
+        
         return True
 
     def finish(self,options):
@@ -242,6 +317,11 @@ class Analyzer(transformer.Transformation):
         print("-  : {:5}".format(self.individuals-total))
                     
         self.illegal_paths.display()
+
+        print()
+        self.with_sources.display()
+        self.without_sources.display()
+
         self.invalid_dates.display()
         self.novalues.display()
         self.too_few.display()
