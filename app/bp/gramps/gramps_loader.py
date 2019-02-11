@@ -7,6 +7,7 @@
 import time
 import gzip
 from os.path import basename, splitext
+from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import Batch, Log

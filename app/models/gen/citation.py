@@ -234,9 +234,15 @@ class Citation:
                 "page": self.page, 
                 "confidence": self.confidence
             }
-            tx.run(Cypher_citation_w_handle.create, c_attr=c_attr)
+            result = tx.run(Cypher_citation_w_handle.create, c_attr=c_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Citations {} - {}, attr={}".format(self.id, ids, c_attr))
         except Exception as err:
-            print("Error: Citation_save: {0} attr={1}".format(err, c_attr), file=stderr)
+            print("iError: Event_save: {0} attr={1}".format(err, c_attr), file=stderr)
             raise RuntimeError("Could not save Citation {}".format(self.id))
 
         # Make relations to the Note nodes
@@ -245,7 +251,7 @@ class Citation:
                 tx.run(Cypher_citation_w_handle.link_note, 
                        handle=self.handle, hlink=handle)
         except Exception as err:
-            print("Error: Citation.save Note hlink: {0} {1}".format(err, self.id), file=stderr)
+            print("iError: Citation.save Note hlink: {0} {1}".format(err, self.id), file=stderr)
 
         try:   
             # Make relation to the Source node
@@ -253,7 +259,7 @@ class Citation:
                 tx.run(Cypher_citation_w_handle.link_source,
                        handle=self.handle, hlink=self.source_handle)
         except Exception as err:
-            print("Error: Citation.save Source hlink: {0} {1}".format(err, self.id), file=stderr)
+            print("iError: Citation.save Source hlink: {0} {1}".format(err, self.id), file=stderr)
             
         return
 
