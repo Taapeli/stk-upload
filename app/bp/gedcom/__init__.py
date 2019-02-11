@@ -15,4 +15,4 @@ print("gedcom.init APP={}, DATA={}".format(GEDCOM_APP, GEDCOM_DATA))
 
 ALLOWED_EXTENSIONS = {"ged"}  
 
-from . import handlers
+from . import routes
