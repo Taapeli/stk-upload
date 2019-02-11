@@ -99,7 +99,7 @@ def test_gedcom_versions(client):
 def test_gedcom_transform_params(client):
     rv = client.get('/gedcom/transform/'+temp_gedcom+"/kasteet.py")
     data = rv.data.decode("utf-8")
-    assert 'kasteet muunnoksen vaihtoehdot' in data
+    assert 'Kasteet: muunnoksen vaihtoehdot' in data
     
 def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     args = {
