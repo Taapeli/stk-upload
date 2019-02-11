@@ -498,7 +498,10 @@ def gedcom_transform(gedcom,transform):
     gedcom_filename = os.path.join(gedcom_folder, gedcom)
     transform_module,parser = build_parser(transform, gedcom, gedcom_filename)
     if request.method == 'GET':
-        return parser.generate_html()
+        rows = parser.generate_option_rows()
+        return render_template('gedcom_transform_params.html', 
+                               gedcom=gedcom, transform=transform, 
+                               transform_name=transform_module.name, rows=rows )
     else:
         logfile = gedcom_filename + "-log"
 #         print("#logfile:",logfile)
@@ -566,7 +569,7 @@ def build_parser(filename,gedcom,gedcom_filename):
         def add_argument(self,name,name2=None,action='store',type=str,default=None,help=None,nargs=0,choices=None):
             self.args.append(Arg(name,name2,action,type,choices,default,help))
              
-        def generate_html(self):
+        def generate_option_rows(self):
             rows = []
             class Row: pass
             for arg in self.args:
@@ -599,7 +602,7 @@ def build_parser(filename,gedcom,gedcom_filename):
                 else:
                     raise RuntimeError(_("Unsupported type: "), arg.type )
                 rows.append(row)
-            return render_template('gedcom_transform_params.html', gedcom=gedcom, transform=filename, rows=rows )
+            return rows
 
         def build_command(self,argdict):
             return " ".join(self.build_command_args(argdict))
