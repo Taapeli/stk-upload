@@ -18,7 +18,6 @@ $(document).ready( function() {
 
     $('#upload').click( function() {
         // from https://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously    
-    console.log("click");
         var gedcom_name = $("#file").val();
         gedcom_name = gedcom_name.replace(/^C:\\fakepath\\/,"");
         $.get("/gedcom/check/" + gedcom_name, function(rsp){
@@ -40,13 +39,9 @@ $(document).ready( function() {
                     // Custom XMLHttpRequest
                     xhr: function() {
                         var myXhr = $.ajaxSettings.xhr();
-            console.log("myxhr:"+myXhr);
-            console.log("myxhr.upload:"+myXhr.upload);
                         if (myXhr.upload) {
                             // For handling the progress of the upload
                             myXhr.upload.addEventListener('xprogress', function(e) {
-            console.log("progress");
-            console.log(e);
                                 if (e.lengthComputable) {
                                     $('progress').attr({
                                         value: e.loaded,
