@@ -523,10 +523,10 @@ def get_source_with_events(sourceid):
             # Use previous
             c = citations[c_id]
 
-        citation = record['c']
-        c.id = citation['id']
-        c.page = citation['page']
-        c.confidence = citation['confidence']
+        c_node = record['c']
+        c.id = c_node['id']
+        c.page = c_node['page']
+        c.confidence = c_node['confidence']
 
         p_uid = record['p_id']
         x_node = record['x']
@@ -534,8 +534,8 @@ def get_source_with_events(sourceid):
         noderef = NodeRef()
         # Referring Person or Family
         noderef.uniq_id = p_uid      # 72104
-        noderef.id = x_node['id']  # 'I1069' or 'E2821'
-        noderef.label = x_node.labels.pop()
+        noderef.id = x_node['id']    # 'I1069' or 'E2821'
+        noderef.label = next(iter(x_node.labels))   # Get a member of a frozenset
         event_role = record['role']
 
         print('Citation {} {} {} {} {}'.format(c.uniq_id, event_role,
