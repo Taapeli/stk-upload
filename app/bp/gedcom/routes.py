@@ -13,7 +13,7 @@ import traceback
 from re import match
 from collections import defaultdict
 
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash, jsonify, session
 from flask_security import login_required, current_user
 from flask import send_from_directory
 from flask_babelex import _
@@ -27,6 +27,8 @@ from . import bp
 from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
 from .transforms.model.ged_output import Output
 from . import transformer
+
+from werkzeug.utils import secure_filename
 
 # --------------------- GEDCOM functions ------------------------
 
@@ -104,8 +106,13 @@ def read_gedcom(filename):
     except UnicodeDecodeError:
         return open(filename,encoding="ISO8859-1").readlines()
 
+def get_gedcom_user():
+    return session.get("gedcom_user",current_user.username)
+
 def get_gedcom_folder():
-    return os.path.join(GEDCOM_DATA, current_user.username)
+    user = get_gedcom_user()
+    logging.info("gedcom user: "+user)
+    return os.path.join(GEDCOM_DATA, user)
 
 def get_metadata(gedcom):
     gedcom_folder = get_gedcom_folder()
@@ -174,7 +181,8 @@ def gedcom_list():
         f.name = name
         f.metadata = get_metadata(name)
         files.append(f)
-    return render_template('gedcom_list.html', title=_("Gedcoms"), 
+    return render_template('gedcom_list.html', title=_("Gedcoms"),
+                           user=get_gedcom_user(), 
                            files=files, kpl=len(names),
                            allowed_extensions=allowed_extensions )
     
@@ -245,7 +253,8 @@ def gedcom_save(gedcom):
 @login_required
 def gedcom_check(gedcom):
     gedcom_folder = get_gedcom_folder()
-    fullname = os.path.join(gedcom_folder, gedcom)
+    fullname = os.path.join(gedcom_folder, secure_filename(gedcom))
+    logging.info("fullname2: "+fullname)
     if os.path.exists(fullname):
         return "exists"
     else:
@@ -255,7 +264,6 @@ def gedcom_check(gedcom):
 @login_required
 def gedcom_upload():
     # code from: http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
-    from werkzeug.utils import secure_filename
     def allowed_file(filename):
         return '.' in filename and \
                filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -275,6 +283,7 @@ def gedcom_upload():
         filename = secure_filename(file.filename)
         os.makedirs(gedcom_folder, exist_ok=True)
         fullname = os.path.join(gedcom_folder, filename)
+        logging.info("fullname1: "+fullname)
         if os.path.exists(fullname):
             flash(_('This GEDCOM file already exists'), category='flash_error')
             return redirect(url_for('.gedcom_list'))
@@ -306,7 +315,7 @@ def gedcom_download(gedcom):
 @login_required
 def gedcom_info(gedcom):
     gedcom_folder = get_gedcom_folder()
-    filename = os.path.join(gedcom_folder,gedcom)
+    filename = os.path.join(gedcom_folder,secure_filename(gedcom))
     if not os.path.exists(filename):
         flash(_("That GEDCOM file does not exist on the server"), category='flash_error')
         return redirect(url_for('.gedcom_list'))
@@ -321,7 +330,8 @@ def gedcom_info(gedcom):
         metadata['info'] = repr(info.__dict__)
         save_metadata(gedcom,metadata) 
     return render_template('gedcom_info.html', 
-        gedcom=gedcom, filename=filename, 
+        user=get_gedcom_user(),
+        gedcom=gedcom, filename=filename,
         info=info,
         transforms=transforms,
         metadata=metadata,

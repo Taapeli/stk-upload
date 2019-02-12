@@ -20,7 +20,7 @@ $(document).ready( function() {
         // from https://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously    
         var gedcom_name = $("#file").val();
         gedcom_name = gedcom_name.replace(/^C:\\fakepath\\/,"");
-        $.get("/gedcom/check/" + gedcom_name, function(rsp){
+        $.get("/gedcom/check/" + encodeURIComponent(gedcom_name), function(rsp){
             if (rsp == "does not exist") {
                 $.ajax({
                     // Your server script to process the upload
