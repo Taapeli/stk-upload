@@ -28,8 +28,9 @@ def client():
     client = app.test_client()
 
     rv = login(client)
-    assert b'Oma sukupuuni' in rv.data
-
+    #txt = "Oma sukupuuni"
+    txt = "Suomikannan käyttäjän alkusivu"
+    assert txt in rv.data.decode("utf-8")
     yield client
     
 
@@ -48,14 +49,15 @@ def xtest_nologon(client):
     rv = client.get('/',follow_redirects=True)
     assert b'Hanki toimivat tunnukset' in rv.data
     
-def test_login_logout(client):
+def xtest_login_logout(client):
     """Make sure login and logout works."""
 
-    rv = logout(client)
-    data = rv.data.decode("utf-8")
-    assert 'Kirjaudu tunnuksillasi' in data
+    #rv = logout(client)
+    #data = rv.data.decode("utf-8")
+    #assert 'Kirjaudu tunnuksillasi' in data
 
     rv = login(client, "aaa", "bbb")
+    data = rv.data.decode("utf-8")
     assert 'Kirjaudu tunnuksillasi' in data
 
     rv = login(client)
@@ -97,7 +99,7 @@ def test_gedcom_versions(client):
 def test_gedcom_transform_params(client):
     rv = client.get('/gedcom/transform/'+temp_gedcom+"/kasteet.py")
     data = rv.data.decode("utf-8")
-    assert 'kasteet muunnoksen vaihtoehdot' in data
+    assert 'Kasteet: muunnoksen vaihtoehdot' in data
     
 def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     args = {
@@ -109,6 +111,8 @@ def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     shutil.copyfile(orig_file,dest_file)
     args.update({"--"+option:value for option,value in options.items()})
     rv = client.post('/gedcom/transform/'+temp_gedcom+"/"+transform,data=args)
+    data1 = rv.data.decode("utf-8")
+    open("trace.txt","w").write(data1)
     data = eval(rv.data.decode("utf-8"))
     assert data["stderr"] == ""
     assert expected in data['stdout']

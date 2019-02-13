@@ -261,10 +261,13 @@ class Cypher_source_w_handle():
 #      saman omistajan duplikaatit gramps_handlen mukaan
 #      Nyt tulee aina uusi instanssi
 
-
     create = """
-CREATE (s:Source)
-SET s = $s_attr"""
+MERGE (s:Source {handle: $s_attr.handle})
+    SET s = $s_attr
+RETURN ID(s) as uniq_id"""
+#     create = """
+# CREATE (s:Source)
+# SET s = $s_attr"""
 
     link_note = """
 MATCH (n:Source) WHERE n.handle=$handle
@@ -287,7 +290,8 @@ class Cypher_citation_w_handle():
 
     create = """
 CREATE (n:Citation)
-    SET n = $c_attr"""
+    SET n = $c_attr
+RETURN ID(n) as uniq_id"""
 
     link_note = """
 MERGE (n:Citation {handle: $handle})
@@ -304,9 +308,13 @@ class Cypher_repository_w_handle():
     """ For Repository class """
 
     create = """
-CREATE (r:Repository)
-SET r = $r_attr
-return id(r) as uniq_id"""
+MERGE (r:Repository {handle: $r_attr.handle}) 
+    SET r = $r_attr
+RETURN id(r) as uniq_id"""
+#     create = """
+# CREATE (r:Repository)
+# SET r = $r_attr
+# return id(r) as uniq_id"""
 
 
 class Cypher_x():

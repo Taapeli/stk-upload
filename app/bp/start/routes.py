@@ -6,7 +6,7 @@
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import render_template   # redirect, url_for, request, flash, g
+from flask import render_template, request, session   # redirect, url_for, flash, g
 from flask_security import login_required, roles_accepted, current_user # ,roles_required
 #from flask_babelex import _
 
@@ -19,13 +19,17 @@ import shareds
 @shareds.app.route('/', methods=['GET', 'POST'])
 def start():
     """ Home page for logged in user (from login page or home button) """
-    print("-> bp.start.routes.start auth={}, no request, user_session".format(current_user.is_authenticated))
+#    new_lang = request.args.get('lang', "")
+    print("--- " + repr(request))
+#    print("-> bp.start.routes.start auth={}, new_lang={}, user_session".\
+#          format(current_user.is_authenticated, new_lang))
     if current_user.is_authenticated:
         role_names = [role.name for role in current_user.roles]
         logger.info("Start user {}/{}, roles {}".\
                     format(current_user.username, current_user.email, role_names))
         return render_template('/start/index_logged.html')
     else:
+#        session['lang'] = new_lang
         logger.info('Anonymous user')
         return render_template('/start/index.html')
 

@@ -37,11 +37,12 @@ class Note:
         self.text = ''
         self.change = 0
         self.priv = None
-        self.url = ''
+        self.url = None
 
     def __str__(self):
         desc = self.text if len(self.text) < 17 else self.text[:16] + "..."
-        return "{} {} {!r} {}".format(self.id, self.type, desc, self.url)
+        url = '' if self.url == None else self.url
+        return "{} {} {!r} {}".format(self.id, self.type, desc, url)
 
     @classmethod
     def from_node(cls, node):
@@ -154,6 +155,7 @@ ORDER BY n.type"""
         """ Creates or updates this Note object as a Note node using handle
             If parent_id is given, a link (parent) --> (Note) is created 
         """
+        n_attr = {}
         try:
             n_attr = {
                 "handle": self.handle,
@@ -166,17 +168,17 @@ ORDER BY n.type"""
             }
             if parent_id:
                 if self.handle:
-                    return tx.run(Cypher_note_w_handle.merge_as_leaf, 
-                                  parent_id=parent_id, n_attr=n_attr)
+                    self.uniq_id = tx.run(Cypher_note_w_handle.merge_as_leaf, 
+                                          parent_id=parent_id, n_attr=n_attr).single()[0]
                 else:
-                    return tx.run(Cypher_note_w_handle.create_as_leaf, 
-                                  parent_id=parent_id, n_attr=n_attr)
+                    self.uniq_id = tx.run(Cypher_note_w_handle.create_as_leaf, 
+                                          parent_id=parent_id, n_attr=n_attr).single()[0]
             elif self.handle:
-                return tx.run(Cypher_note_w_handle.create, n_attr=n_attr)
+                self.uniq_id = tx.run(Cypher_note_w_handle.create, 
+                                      n_attr=n_attr).single()[0]
             else:
                 print("Note.save: No handle or parent node")
 
-        except ConnectionError as err:
-            raise SystemExit("Stopped in Note.save: {}".format(err))
         except Exception as err:
-            print("Virhe (Note.save): {0}".format(err), file=stderr)
+            print("iError Note_save: {0} attr={1}".format(err, n_attr), file=stderr)
+            raise RuntimeError("Could not save Note {}".format(self.id))

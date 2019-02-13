@@ -447,6 +447,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
     def save(self, tx):
         """ Saves a Place with Place_names and hierarchy links """
 
+        p_attr = {}
         try:
             p_attr = {"handle": self.handle,
                       "change": self.change,
@@ -459,10 +460,11 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
             self.uniq_id = result.single()[0]
         except Exception as err:
-            print("Virhe Place.create: {0}".format(err), file=stderr)
+            print("iError Place.create: {0} attr={}".format(err, p_attr), file=stderr)
 
         try:
             for i in range(len(self.names)):
+                #TODO: Check, if this name exists; then update or create new
                 n_attr = {"name": self.names[i].name,
                           "lang": self.names[i].lang}
                 if self.names[i].dates:
@@ -471,12 +473,12 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                 tx.run(Cypher_place_w_handle.add_name,
                        handle=self.handle, n_attr=n_attr)
         except Exception as err:
-            print("Virhe Place.add_name: {0}".format(err), file=stderr)
+            print("iError Place.add_name: {0}".format(err), file=stderr)
 
         # Make hierarchy relations to upper Place nodes
         for upper in self.surround_ref:
             try:
-                print("upper {} -> {}".format(self, upper))
+                #print("upper {} -> {}".format(self, upper))
                 if 'dates' in upper and isinstance(upper['dates'], DateRange):
                     r_attr = upper['dates'].for_db()
                 else:
@@ -484,7 +486,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                 tx.run(Cypher_place_w_handle.link_hier,
                        handle=self.handle, hlink=upper['hlink'], r_attr=r_attr)
             except Exception as err:
-                print("Virhe Place.link_hier: {0}".format(err), file=stderr)
+                print("iError Place.link_hier: {0}".format(err), file=stderr)
 
         # Make place note relations
         if len(self.noteref_hlink) > 0:
@@ -493,7 +495,7 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                     tx.run(Cypher_place_w_handle.link_note,
                            handle=self.handle, hlink=self.noteref_hlink[i])
                 except Exception as err:
-                    print("Virhe Place.link_note: {0}".format(err), file=stderr)
+                    print("iError Place.link_note: {0}".format(err), file=stderr)
 
         return
 

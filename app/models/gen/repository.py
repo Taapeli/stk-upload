@@ -160,6 +160,7 @@ class Repository:
     def save(self, tx):
         """ Saves this Repository to db"""
 
+        r_attr = {}
         try:
             r_attr = {
                 "handle": self.handle,
@@ -168,18 +169,23 @@ class Repository:
                 "rname": self.rname,
                 "type": self.type,
             }
+#             self.uniq_id = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr).single()[0]
             result = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
-            self.uniq_id = result.single()[0]
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, r_attr))
         except Exception as err:
-            print("Error Repository.save: {0}".format(err), file=stderr)
-            raise SystemExit("Stopped due to errors")    # Stop processing
-            #TODO raise ConnectionError("Repository.save: {0}".format(err))
+            print("iError Repository_save: {0} attr={1}".format(err, r_attr), file=stderr)
+            raise RuntimeError("Could not save Repository {}".format(self.id))
 
         try:
             for note in self.notes:
                 note.save(tx, self.uniq_id)
         except Exception as err:
-            print("Error Repository.save note: {0}".format(err), file=stderr)
+            print("iError Repository.save note: {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
             #TODO raise ConnectionError("Repository.save: {0}".format(err))
 

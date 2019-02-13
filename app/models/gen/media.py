@@ -28,6 +28,10 @@ class Media:
         self.change = 0
         self.id = ''
 
+    def __str__(self):
+        desc = self.description if len(self.description) < 17 else self.description[:16] + "..."
+        return "{}: {} {} {!r}".format(self.id, self.mime, self.src, desc)
+
     @classmethod
     def from_node(cls, node):
         '''
@@ -110,6 +114,7 @@ class Media:
     def save(self, tx):
         """ Saves this Media object to db """
 
+        m_attr = {}
         try:
             m_attr = {
                 "handle": self.handle,
@@ -119,9 +124,14 @@ class Media:
                 "mime": self.mime,
                 "description": self.description
             }
-            return tx.run(Cypher_media_w_handle.create, m_attr=m_attr)
-
+#             self.uniq_id = tx.run(Cypher_media_w_handle.create, m_attr=m_attr).single()[0]
+            result = tx.run(Cypher_media_w_handle.create, m_attr=m_attr)
+            ids = []
+            for record in result:
+                self.uniq_id = record[0]
+                ids.append(self.uniq_id)
+                if len(ids) > 1:
+                    print("iError updated multiple Medias {} - {}, attr={}".format(self.id, ids, m_attr))
         except Exception as err:
-            print("Virhe (Media.save): {0}".format(err), file=stderr)
-            raise SystemExit("Stopped due to error in Media.save")    # Stop processing
-            #TODO raise ConnectionError("Media.save: {0}".format(err))
+            print("iError Media_save: {0} attr={1}".format(err, m_attr), file=stderr)
+            raise RuntimeError("Could not save Media {}".format(self.id))

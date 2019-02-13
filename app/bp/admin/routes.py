@@ -14,7 +14,7 @@ import logging
 #from _pickle import Unpickler
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, send_from_directory, flash
+from flask import render_template, request, redirect, url_for, send_from_directory, flash, session
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _
 
@@ -26,7 +26,7 @@ from .cvs_refnames import load_refnames
 from .forms import AllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
-
+from .. import gedcom
 
 # Admin start page in app/routes.py:
 #@shareds.app.route('/admin',  methods=['GET', 'POST'])
@@ -171,6 +171,8 @@ def update_user(username):
                 current_login_ip = form.current_login_ip.data,
                 login_count = form.login_count.data)        
         updated_user = UserAdmin.update_user(user)
+        if updated_user.username == current_user.username:
+            session['lang'] = form.language.data
         flash(_("User updated"))
         return redirect(url_for("admin.update_user",username=updated_user.username))
 
@@ -258,3 +260,9 @@ def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     return redirect(url_for('admin.list_uploads', username=username))
 
+@bp.route('/admin/list_user_gedcoms/<user>', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_user_gedcoms(user):
+    session["gedcom_user"] = user
+    return gedcom.routes.gedcom_list()

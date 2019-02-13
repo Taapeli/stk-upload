@@ -22,7 +22,7 @@
 
         <div class="row">
 
-    {% if current_user.is_authenticated and current_user.has_role('member') %}
+    {% if current_user.is_authenticated and current_user.has_role('research') %}
     
            <div class="startbox">
              <div style="display: inline-block;">
@@ -30,7 +30,7 @@
                   <form action="/gramps">
                  <p>{{ _('Manage your Gramps xml files and convert them to Suomi tietokanta.') }}</p>
                  <div class="submit"> 
-                    <input type="submit" value="{{ _('Go') }}" />
+                    <input type="submit" value="{{ _('Gramps files') }}" />
                  </div>
                  </form>
              </div>
@@ -49,9 +49,8 @@
            </div>
     {% endif %}
     
-    {% if current_user.is_authenticated and current_user.has_role('member') %}
-    
-    
+    {% if current_user.is_authenticated %}
+
          <div class="startbox gedtools">
             <div style="display: inline-block;">
             <form method="get" action="/gedcom/list">
@@ -67,7 +66,7 @@
      {% endif %}
 
         {% if current_user.is_authenticated and 
-            (current_user.has_role('admin')  or current_user.has_role('master') ) %}
+            (current_user.has_role('admin') or current_user.has_role('master') ) %}
      <div class="startbox admin">
        <div style="display: inline-block;">
 <h3>{{ _('Admin function') }}</h3>

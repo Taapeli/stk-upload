@@ -72,7 +72,7 @@ def show_person_list(selection=None):
             return render_template("/scene/persons.html", persons=persons, menuno=0,
                                    name=name, rule=keys, elapsed=time.time()-t0)
         except Exception as e:
-            logger.debug("Error {} in show_person_list".format(e))
+            logger.debug("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
 
     # the code below is executed if the request method

@@ -78,8 +78,8 @@ import logging
 LOG = logging.getLogger(__name__)
 
 # These work, when program is run in app.bp.gedcom directory!
-from transforms.model.gedcom_line import GedcomLine
-from transforms.model.ged_output import Output
+from bp.gedcom.transforms.model.gedcom_line import GedcomLine
+from bp.gedcom.transforms.model.ged_output import Output
 from models import util
 
 def numeric(s):
@@ -103,7 +103,7 @@ def read_gedcom(args):
         raise
     except Exception as err:
         LOG.error(type(err))
-        LOG.error("Virhe: {0}".format(err))
+        LOG.error("iError read_gedcom {0}".format(err))
         LOG.error(traceback.format_exc())
 
 
@@ -160,7 +160,7 @@ def get_transforms():
         if name.endswith(".py") and name != "__init__.py": 
             modname = name[0:-3]
             try:
-                transformer = importlib.import_module("transforms."+modname)
+                transformer = importlib.import_module("bp.gedcom.transforms."+modname)
             except:
                 continue
             doc = transformer.__doc__

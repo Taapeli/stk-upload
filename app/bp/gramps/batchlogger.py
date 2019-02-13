@@ -66,7 +66,7 @@ class Batch(object):
             try:
                 batch_id = tx.run(Cypher_batch.batch_find_id, 
                                   user=self.userid, batch_base=base).single().value()
-                print("# Pervious batch_id={}".format(batch_id))
+                # print("# Pervious batch_id={}".format(batch_id))
                 i = batch_id.rfind('.')
                 ext = int(batch_id[i+1:])
             except AttributeError as e:

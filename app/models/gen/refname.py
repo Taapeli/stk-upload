@@ -200,7 +200,7 @@ class Refname:
 #                                       format(a_oid, a_name, a_use, b_oid, b_name))
                     
             except Exception as err:
-                print("Error: {0}".format(err), file=stderr)
+                print("iError: {0}".format(err), file=stderr)
                 logging.warning('Could no store (a) -[:{}]-> (b): {}'.format(link_type, err))
 
         else:
@@ -219,7 +219,7 @@ class Refname:
                     
             except Exception as err:
                 # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
-                print("Error: {0}".format(err), file=stderr)
+                print("iError: {0}".format(err), file=stderr)
                 logging.warning('Lisääminen (a) ei onnistunut: {}'.format(err))
 
 
@@ -243,7 +243,7 @@ class Refname:
 
         except Exception as err:
             # Ei ole kovin fataali, ehkä jokin attribuutti hukkuu?
-            print("Error: {0}".format(err), file=stderr)
+            print("iError: {0}".format(err), file=stderr)
 
 
     @staticmethod
@@ -268,7 +268,7 @@ class Refname:
                               format(counters, time.time()-t0))
 
             except Exception as err:
-                logging.error("Error: {0}".format(err))
+                logging.error("iError: {0}".format(err))
 
 
 
@@ -381,5 +381,5 @@ class Refname:
             return ret
 
         except Exception as err:
-            print("Error (Refname.get_refnames): {0}".format(err), file=stderr)
+            print("iError (Refname.get_refnames): {0}".format(err), file=stderr)
             return []
