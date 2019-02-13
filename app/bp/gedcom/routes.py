@@ -172,6 +172,7 @@ def get_transforms():
 @login_required
 def gedcom_list():
     gedcom_folder = get_gedcom_folder()
+    user = get_gedcom_user()
     try:
         names = sorted([name for name in os.listdir(gedcom_folder) if name.lower().endswith(".ged")])
     except:
@@ -183,10 +184,12 @@ def gedcom_list():
         f = File()
         f.name = name
         f.metadata = get_metadata(name)
-        files.append(f)
+        
+        if user == current_user.username or f.metadata.get("admin_permission"):
+            files.append(f)
     return render_template('gedcom_list.html', title=_("Gedcoms"),
                            user=get_gedcom_user(), 
-                           files=files, kpl=len(names),
+                           files=files, kpl=len(files),
                            allowed_extensions=allowed_extensions )
     
 @bp.route('/gedcom/versions/<gedcom>', methods=['GET'])
@@ -343,6 +346,14 @@ def gedcom_update_desc(gedcom):
     metadata = get_metadata(gedcom)
     desc = request.form['desc']
     metadata['desc'] = desc
+    save_metadata(gedcom,metadata)
+    return "ok"
+
+@bp.route('/gedcom/update_permission/<gedcom>/<permission>')
+@login_required
+def gedcom_update_permission(gedcom,permission):
+    metadata = get_metadata(gedcom)
+    metadata['admin_permission'] = (permission == "true")
     save_metadata(gedcom,metadata)
     return "ok"
 
