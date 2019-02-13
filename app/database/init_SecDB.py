@@ -18,10 +18,10 @@ driver = GraphDatabase.driver(uri, auth=auth)
 
 #inputs
 
-ROLES = ({'level':'0', 'name':'guest', 'description':'Guest user with limited read permissions'},
-         {'level':'1', 'name':'user', 'description':'Basic user with read/write permissions to own trees'},
-         {'level':'4', 'name':'audit', 'description':'Auditor with read permission to everything'},
-         {'level':'8', 'name':'admin', 'description':'Administrator with all permissions'})
+# ROLES = ({'level':'0', 'name':'guest', 'description':'Guest user with limited read permissions'},
+#          {'level':'1', 'name':'user', 'description':'Basic user with read/write permissions to own trees'},
+#          {'level':'4', 'name':'audit', 'description':'Auditor with read permission to everything'},
+#          {'level':'8', 'name':'admin', 'description':'Administrator with all permissions'})
 
 role_create = 'CREATE (role:Role {name : $name, description : $description})' 
 

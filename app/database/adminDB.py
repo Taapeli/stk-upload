@@ -8,10 +8,10 @@ from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 import shareds
 
 #inputs
-ROLES = ({'level':'0',  'name':'guest',    'description':'Kirjautunut käyttäjä, pääsee vain gedcom-muunnoksiin'},
+ROLES = ({'level':'0',  'name':'gedcom',   'description':'Kirjautunut käyttäjä, pääsee vain gedcom-muunnoksiin'},
          {'level':'1',  'name':'member',   'description':'Seuran jäsen täysin lukuoikeuksin'},
-         {'level':'2',  'name':'research', 'description':'Tutkija, joka voi päivittää omaa tarjokaskantaansa'},
-         {'level':'4',  'name':'audit',    'description':'Valvoja, joka auditoi ja hyväksyy ehdokasaineistoja'},
+         {'level':'2',  'name':'research', 'description':'Tutkija, joka voi käsitellä omaa tarjokasaineistoaan'},
+         {'level':'4',  'name':'audit',    'description':'#Valvoja, joka auditoi ja hyväksyy gramps- ja tarjokasaineistoja'},
          {'level':'8',  'name':'admin',    'description':'Ylläpitäjä kaikin oikeuksin'},
          {'level':'16', 'name':'master',   'description':'Tietokannan pääkäyttäjä, ei sovellusoikeuksia'})
 
