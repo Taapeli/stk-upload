@@ -328,7 +328,7 @@ def gedcom_info(gedcom):
     info = metadata.get('info')
     if info: 
         info = eval(info)
-    else:
+    else: 
         info = get_info(filename,encoding)
         metadata['info'] = repr(info.__dict__)
         save_metadata(gedcom,metadata) 
