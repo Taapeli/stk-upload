@@ -67,7 +67,7 @@ table.diff td {
 
 </style>
 
-<script src="/static/js/gedcom_scripts.js?22"></script>
+<script src="/static/js/gedcom_scripts.js?25"></script>
 
 <script>
 var gedcom = "{{ gedcom }}";
@@ -75,7 +75,7 @@ var gedcom = "{{ gedcom }}";
 
 <div class="startdiv">
     <div>
-	    <h2>{{ _("Gedcom transformations") }}</h2>
+	    <h2>{{ _("Gedcom transformations") }} ({{ _("user") }}: {{ user }})</h2>
 	    <div id="errors" class="errors"></div>
 	    <div class="row">
 	       <div class="startbox">
@@ -148,7 +148,12 @@ var gedcom = "{{ gedcom }}";
 				    <tr><td>{{ _("Number of multimedia objects") }}</td>
 				        <td class="right">{{ info.num_multimedia }}</td></tr>
 	                <tr><td>{{ _("Allow help desk to view data") }}</td>
-	                    <td class="right"><input type="checkbox" id="view_permission"></td></tr>
+	                    <td class="right"><input type="checkbox" 
+	                    	id="view_permission"
+	                    	{%if metadata.admin_permission %}
+	                    		checked
+                    		{% endif %}
+                    	></td></tr>
 			    </table>
 	          </div>
 	       </div>

@@ -13,7 +13,7 @@ import traceback
 from re import match
 from collections import defaultdict
 
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash, jsonify, session
 from flask_security import login_required, current_user
 from flask import send_from_directory
 from flask_babelex import _
@@ -27,6 +27,8 @@ from . import bp
 from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
 from .transforms.model.ged_output import Output
 from . import transformer
+
+from werkzeug.utils import secure_filename
 
 # --------------------- GEDCOM functions ------------------------
 
@@ -104,20 +106,28 @@ def read_gedcom(filename):
     except UnicodeDecodeError:
         return open(filename,encoding="ISO8859-1").readlines()
 
+def get_gedcom_user():
+    return session.get("gedcom_user",current_user.username)
+
 def get_gedcom_folder():
-    return os.path.join(GEDCOM_DATA, current_user.username)
+    user = get_gedcom_user()
+    logging.info("gedcom user: "+user)
+    return os.path.join(GEDCOM_DATA, user)
+
+def gedcom_fullname(gedcom):
+    return os.path.join(get_gedcom_folder(),secure_filename(gedcom))
 
 def get_metadata(gedcom):
     gedcom_folder = get_gedcom_folder()
     try:
-        metaname = os.path.join(gedcom_folder, gedcom + "-meta")
+        metaname = os.path.join(gedcom_folder, secure_filename(gedcom) + "-meta")
         return eval(open(metaname).read())
     except FileNotFoundError:
         return {}
 
 def save_metadata(gedcom,metadata):
     gedcom_folder = get_gedcom_folder()
-    metaname = os.path.join(gedcom_folder, gedcom + "-meta")
+    metaname = os.path.join(gedcom_folder, secure_filename(gedcom) + "-meta")
     open(metaname,"w").write(repr(metadata))
     
 def get_transforms():
@@ -162,6 +172,7 @@ def get_transforms():
 @login_required
 def gedcom_list():
     gedcom_folder = get_gedcom_folder()
+    user = get_gedcom_user()
     try:
         names = sorted([name for name in os.listdir(gedcom_folder) if name.lower().endswith(".ged")])
     except:
@@ -173,15 +184,19 @@ def gedcom_list():
         f = File()
         f.name = name
         f.metadata = get_metadata(name)
-        files.append(f)
-    return render_template('gedcom_list.html', title=_("Gedcoms"), 
-                           files=files, kpl=len(names),
+        
+        if user == current_user.username or f.metadata.get("admin_permission"):
+            files.append(f)
+    return render_template('gedcom_list.html', title=_("Gedcoms"),
+                           user=get_gedcom_user(), 
+                           files=files, kpl=len(files),
                            allowed_extensions=allowed_extensions )
     
 @bp.route('/gedcom/versions/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
+    gedcom = secure_filename(gedcom)
     versions = sorted([name for name in os.listdir(gedcom_folder) \
                        if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
     versions.append(gedcom)
@@ -190,17 +205,15 @@ def gedcom_versions(gedcom):
 @bp.route('/gedcom/history/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_history(gedcom):
-    gedcom_folder = get_gedcom_folder()
-    history_filename = os.path.join(gedcom_folder,gedcom) + "-history"
+    history_filename = gedcom_fullname(gedcom) + "-history"
     return open(history_filename).read()
 
 @bp.route('/gedcom/compare/<gedcom1>/<gedcom2>', methods=['GET'])
 @login_required
 def gedcom_compare(gedcom1,gedcom2):
     import difflib
-    gedcom_folder = get_gedcom_folder()
-    filename1 = os.path.join(gedcom_folder,gedcom1)
-    filename2 = os.path.join(gedcom_folder,gedcom2)
+    filename1 = gedcom_fullname(gedcom1)
+    filename2 = gedcom_fullname(gedcom2)
     lines1 = read_gedcom(filename1)
     lines2 = read_gedcom(filename2)
     difftable = difflib.HtmlDiff().make_file(lines1, lines2, context=True, numlines=2,
@@ -211,9 +224,8 @@ def gedcom_compare(gedcom1,gedcom2):
 @bp.route('/gedcom/revert/<gedcom>/<version>', methods=['GET'])
 @login_required
 def gedcom_revert(gedcom,version):
-    gedcom_folder = get_gedcom_folder()
-    filename1 = os.path.join(gedcom_folder,gedcom)
-    filename2 = os.path.join(gedcom_folder,version)
+    filename1 = gedcom_fullname(gedcom)
+    filename2 = gedcom_fullname(version)
     newname = util.generate_name(filename1)
     if os.path.exists(filename1) and os.path.exists(filename2):
         os.rename(filename1,newname)
@@ -229,9 +241,8 @@ def gedcom_revert(gedcom,version):
 @bp.route('/gedcom/save/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_save(gedcom):
-    gedcom_folder = get_gedcom_folder()
-    filename1 = os.path.join(gedcom_folder,gedcom)
-    filename2 = os.path.join(gedcom_folder,gedcom) + "-temp"
+    filename1 = gedcom_fullname(gedcom)
+    filename2 = filename1 + "-temp"
     newname = util.generate_name(filename1)
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
@@ -244,8 +255,8 @@ def gedcom_save(gedcom):
 @bp.route('/gedcom/check/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_check(gedcom):
-    gedcom_folder = get_gedcom_folder()
-    fullname = os.path.join(gedcom_folder, gedcom)
+    fullname = gedcom_fullname(gedcom)
+    logging.info("fullname2: "+fullname)
     if os.path.exists(fullname):
         return "exists"
     else:
@@ -255,7 +266,6 @@ def gedcom_check(gedcom):
 @login_required
 def gedcom_upload():
     # code from: http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
-    from werkzeug.utils import secure_filename
     def allowed_file(filename):
         return '.' in filename and \
                filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -275,6 +285,8 @@ def gedcom_upload():
         filename = secure_filename(file.filename)
         os.makedirs(gedcom_folder, exist_ok=True)
         fullname = os.path.join(gedcom_folder, filename)
+
+        logging.info("fullname1: "+fullname)
         if os.path.exists(fullname):
             flash(_('This GEDCOM file already exists'), category='flash_error')
             return redirect(url_for('.gedcom_list'))
@@ -297,6 +309,7 @@ def gedcom_upload():
 def gedcom_download(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
+    gedcom = secure_filename(gedcom)
     logging.info(gedcom_folder)
     filename = os.path.join(gedcom_folder, gedcom)
     logging.info(filename)
@@ -305,8 +318,7 @@ def gedcom_download(gedcom):
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
 def gedcom_info(gedcom):
-    gedcom_folder = get_gedcom_folder()
-    filename = os.path.join(gedcom_folder,gedcom)
+    filename = gedcom_fullname(gedcom)
     if not os.path.exists(filename):
         flash(_("That GEDCOM file does not exist on the server"), category='flash_error')
         return redirect(url_for('.gedcom_list'))
@@ -321,7 +333,8 @@ def gedcom_info(gedcom):
         metadata['info'] = repr(info.__dict__)
         save_metadata(gedcom,metadata) 
     return render_template('gedcom_info.html', 
-        gedcom=gedcom, filename=filename, 
+        user=get_gedcom_user(),
+        gedcom=gedcom, filename=filename,
         info=info,
         transforms=transforms,
         metadata=metadata,
@@ -336,11 +349,18 @@ def gedcom_update_desc(gedcom):
     save_metadata(gedcom,metadata)
     return "ok"
 
+@bp.route('/gedcom/update_permission/<gedcom>/<permission>')
+@login_required
+def gedcom_update_permission(gedcom,permission):
+    metadata = get_metadata(gedcom)
+    metadata['admin_permission'] = (permission == "true")
+    save_metadata(gedcom,metadata)
+    return "ok"
+
 @bp.route('/gedcom/analyze/<gedcom>')
 @login_required
 def gedcom_analyze(gedcom):
-    gedcom_folder = get_gedcom_folder()
-    filename = os.path.join(gedcom_folder,gedcom)
+    filename = gedcom_fullname(gedcom)
     metadata = get_metadata(gedcom)
     encoding = metadata['encoding']
     rsp = analyze(filename,encoding)
@@ -351,6 +371,7 @@ def gedcom_analyze(gedcom):
 def gedcom_delete(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
+    gedcom = secure_filename(gedcom)
     for name in os.listdir(gedcom_folder):
         if name.endswith("-history"): continue # do not remove history
         if (name == gedcom or 
@@ -367,6 +388,7 @@ def gedcom_delete(gedcom):
 def gedcom_delete_old_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
+    gedcom = secure_filename(gedcom)
     for name in os.listdir(gedcom_folder):
         filename = os.path.join(gedcom_folder, name)
         if name.startswith(gedcom+"."):  
@@ -494,8 +516,7 @@ def process_gedcom(arglist, transform_module):
 @bp.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
 @login_required
 def gedcom_transform(gedcom,transform):
-    gedcom_folder = get_gedcom_folder()
-    gedcom_filename = os.path.join(gedcom_folder, gedcom)
+    gedcom_filename = gedcom_fullname(gedcom)
     transform_module,parser = build_parser(transform, gedcom, gedcom_filename)
     if request.method == 'GET':
         rows = parser.generate_option_rows()
