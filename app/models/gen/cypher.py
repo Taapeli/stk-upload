@@ -58,7 +58,7 @@ MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person
 WITH p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
-    OPTIONAL MATCH (p) <-[:MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
+    OPTIONAL MATCH (p) <-[:PARENT|MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
 WITH p, n, re.role as role, e, f.rel_type as rel, fe  ORDER BY p.sortname, n.order
     OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
     OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
@@ -86,7 +86,7 @@ WITH p, b.user as user
 ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
-    OPTIONAL MATCH (p) <-[:MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
+    OPTIONAL MATCH (p) <-[:PARENT|MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
 WITH p, n, re.role as role, e, f.rel_type as rel, fe, user
 ORDER BY p.sortname, n.order
     OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
@@ -260,6 +260,16 @@ class Cypher_family():
     '''
     
     # from models.gen.family.read_families
+    read_families_p = """
+MATCH (f:Family) WHERE ID(f)>=$fw
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person) -[:NAME]-> (np:Name) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+RETURN f, 
+    COLLECT([pp, np]) AS parent, 
+    COLLECT(pc) AS child, 
+    COUNT(pc) AS no_of_children 
+    ORDER BY ID(f) LIMIT $limit"""
+    #TODO Obsolete
     read_families = """
 MATCH (f:Family) WHERE ID(f)>=$fw
 OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
@@ -273,11 +283,11 @@ MATCH (p:Person) <-- (f:Family) -[r1]-> (m:Person) -[:NAME]-> (n:Name)
     WHERE ID(p) = $pid
   OPTIONAL MATCH (m) -[:EVENT]-> (birth {type:'Birth'})
     WITH f.id AS family_id, ID(f) AS f_uniq_id, 
-         TYPE(r1) AS role,
+         TYPE(r1) AS role, r1.role AS parent_role,
          m.id AS m_id, ID(m) AS uniq_id, m.sex AS sex, 
          n, [birth.datetype, birth.date1, birth.date2] AS birth_date
     ORDER BY n.order
-    RETURN family_id, f_uniq_id, role, 
+    RETURN family_id, f_uniq_id, role, parent_role,
            m_id, uniq_id, sex, birth_date,
            COLLECT(n) AS names
     ORDER BY family_id, role, birth_date
@@ -285,17 +295,18 @@ UNION
 MATCH (p:Person) <-[r2]- (f:Family) 
     WHERE id(p) = $pid
   OPTIONAL MATCH (p) -[:EVENT]-> (birth {type:'Birth'})
-    RETURN f.id AS family_id, ID(f) AS f_uniq_id, TYPE(r2) AS role, 
-           p.id AS m_id, ID(p) AS uniq_id, p.sex AS sex, 
-           [birth.datetype, birth.date1, birth.date2] AS birth_date,
-           [] AS names"""
+    RETURN f.id AS family_id, ID(f) AS f_uniq_id, 
+        TYPE(r2) AS role, r2.role AS parent_role,
+        p.id AS m_id, ID(p) AS uniq_id, p.sex AS sex, 
+        [birth.datetype, birth.date1, birth.date2] AS birth_date,
+        [] AS names"""
 
     # from models.gen.family.Family_for_template.get_person_families_w_members
     # NOT IN USE
     get_members = '''
 match (x) <-[r0]- (f:Family) where id(x) = $pid
 with x, r0, f
-match (f) -[r:FATHER|MOTHER|CHILD]-> (p:Person)
+match (f) -[r:CHILD|PARENT|FATHER|MOTHER]-> (p:Person)
     where id(x) <> id(p)
 with x, r0, f, r, p
 match (p) -[rn:NAME]-> (n:Name)
@@ -304,7 +315,7 @@ return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
     collect(distinct [id(p), n, rn]) as names'''
 
     get_wedding_couple_names = """
-match (e:Event) <-- (:Family) -[r:FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)
+match (e:Event) <-- (:Family) -[r:PARENT|FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)
     where ID(e)=$eid
 return type(r) as frole, id(p) as pid, collect(n) as names"""
 

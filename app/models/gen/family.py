@@ -82,7 +82,7 @@ class Family:
         all_nodes_query_w_apoc="""
 MATCH (f:Family) WHERE id(f) = $fid
 CALL apoc.path.subgraphAll(f, {maxLevel:2, relationshipFilter: 
-        'CHILD>|FATHER>|MOTHER>|EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|NOTE>|HIERARCHY>'}) YIELD nodes, relationships
+        'CHILD>|PARENT>FATHER>|MOTHER>|EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|NOTE>|HIERARCHY>'}) YIELD nodes, relationships
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
         extract(x in nodes | x) as nodelist"""
@@ -122,7 +122,7 @@ RETURN family"""
         family_result = shareds.driver.session().run(query, {"pid": pid})
         
         for family_record in family_result:
-            self.change = int(family_record["family"]['change'])  #TODO only temporary int()
+            self.change = family_record["family"]['change']
             self.id = family_record["family"]['id']
             self.rel_type = family_record["family"]['rel_type']
             
@@ -151,8 +151,8 @@ RETURN family"""
         
         try:
             with shareds.driver.session() as session:
-                result = session.run(Cypher_family.read_families,
-                                             fw=fw, limit=limit)
+                result = session.run(Cypher_family.read_families_p,
+                                     fw=fw, limit=limit)
                 
             families = []
             for record in result:
@@ -162,33 +162,37 @@ RETURN family"""
                     family.id = f['id']
                     family.type = f['rel_type']
                 
-                    if record['ph']:
-                        husband = record['ph']
-                        ph = Person_as_member()
-                        ph.uniq_id = husband.id
-                        
-                        if record['nh']:
-                            hname = record['nh']
-                            ph.names.append(hname)
-                        family.father = ph
+#                     if record['ph']:
+#                         husband = record['ph']
+#                         ph = Person_as_member()
+#                         ph.uniq_id = husband.id
+#                         if record['nh']:
+#                             hname = record['nh']
+#                             ph.names.append(hname)
+#                         family.father = ph
+#                     if record['pw']:
+#                         wife = record['pw']
+#                         pw = Person_as_member()
+#                         pw.uniq_id = wife.id
+#                         if record['nw']:
+#                             wname = record['nw']
+#                             pw.names.append(wname)
+#                         family.mother = pw
                     
-                    if record['pw']:
-                        wife = record['pw']
-                        pw = Person_as_member()
-                        pw.uniq_id = wife.id
-                        
-                        if record['nw']:
-                            wname = record['nw']
-                            pw.names.append(wname)
-                        family.mother = pw
+                    for parent, role in record['parent']:
+                        pp = Person_as_member()
+                        pp.uniq_id = parent.id
+                        pp.sortname = parent['sortname']
+                        if role == 'father':
+                            family.father = pp
+                        elif role == 'mother':
+                            family.mother = pp
                     
-                    if record['child']:
-                        childs = record['child']
-                        for ch in childs:
-                            child = Person_as_member()
-                            child.uniq_id = ch.id
-                            child.sortname = ch['sortname']
-                            family.children.append(child)
+                    for ch in record['child']:
+                        child = Person_as_member()
+                        child.uniq_id = ch.id
+                        child.sortname = ch['sortname']
+                        family.children.append(child)
                     
                     if record['no_of_children']:
                         noc = record['no_of_children']
@@ -203,7 +207,9 @@ RETURN family"""
     
     @staticmethod       
     def get_all_families():
-        """ Find all families from the database """
+        """ Find all families from the database 
+            #TODO Use [:PARENT] link
+        """
         
         query = """
 MATCH (f:Family)
@@ -248,7 +254,9 @@ RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f)"""
     
     @staticmethod       
     def get_own_families(user=None):
-        """ Find all families from the database """
+        """ Find all families from the database 
+            #TODO Use [:PARENT] link
+        """
         
         query = """
 MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:BATCH_MEMBER]->(f:Family) WHERE prof.userName=$user 
@@ -324,6 +332,7 @@ RETURN ID(f) AS uniq_id, f.rel_type AS type,
     @staticmethod       
     def get_marriage_parent_names(event_uniq_id):
         """ Find the parents and all their names
+            #TODO Use [:PARENT] link
         
             Returns a dictionary like 
             {'FATHER': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
@@ -357,26 +366,20 @@ RETURN ID(f) AS uniq_id, f.rel_type AS type,
         return namedict
 
     
-    def get_father_by_id(self):
-        """ Luetaan perheen isän tiedot """
+    def get_father_by_id(self, role='father'):
+        """ Luetaan perheen isän (tai äidin) tiedot """
                         
         pid = int(self.uniq_id)
         query = """
-MATCH (family:Family)-[r:FATHER]->(person:Person)
-  WHERE ID(family)=$pid
+MATCH (family:Family) -[r:PARENT]-> (person:Person)
+  WHERE ID(family)=$pid and r.role = $role
 RETURN ID(person) AS father"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+        return  shareds.driver.session().run(query, pid=pid, role=role)
     
     
     def get_mother_by_id(self):
         """ Luetaan perheen äidin tiedot """
-                        
-        pid = int(self.uniq_id)
-        query = """
-MATCH (family:Family)-[r:MOTHER]->(person:Person)
-  WHERE ID(family)=$pid
-RETURN ID(person) AS mother"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+        return self.get_father_by_id(self, role='mother')
         
     
     @staticmethod       
@@ -443,11 +446,11 @@ RETURN ID(person) AS mother"""
         # Make father and mother relations to Person nodes
         try:
             if hasattr(self,'father') and self.father != '':
-                tx.run(Cypher_family_w_handle.link_father, 
+                tx.run(Cypher_family_w_handle.link_parent, role='father',
                        f_handle=self.handle, p_handle=self.father)
 
             if hasattr(self,'mother') and self.mother != '':
-                tx.run(Cypher_family_w_handle.link_mother,
+                tx.run(Cypher_family_w_handle.link_parent, role='mother',
                        f_handle=self.handle, p_handle=self.mother)
         except Exception as err:
             print("iError Family.save parents: {0} {1}".format(err, self.id), file=stderr)
@@ -502,86 +505,86 @@ class Family_for_template(Family):
         self.spouse = None
         self.children = []
 
-    @staticmethod       
-    def get_person_families_w_members(uid):
-        ''' NOT IN USE!
-            Finds all Families, where Person uid belongs to
-            and return them as a Families list
-        '''
-# ╒═══════╤══════════╤════════╤═════════════════════╤═════════════════════╕
-# │"f_id" │"rel_type"│"myrole"│"members"            │"names"              │
-# ╞═══════╪══════════╪════════╪═════════════════════╪═════════════════════╡
-# │"F0000"│"Married" │"FATHER"│[[72533,"CHILD",     │[[72533,             │
-# │       │          │        │  "CHILD",{"han      │  {"alt":"","fi      │
-# │       │          │        │dle":"_dd2c613026e752│rstname":"Jan Erik","│
-# │       │          │        │8c1a21f78da8a","id":"│type":"Birth Name","s│
-# │       │          │        │I0000","priv":"","gen│uffix":"Jansson","sur│
-# │       │          │        │der":"M","confidence"│name":"Mannerheim","r│
-# │       │          │        │:"2.0","change":15363│efname":""},{}],     │
-# │       │          │        │24580}],             │ [72537,             │
-# │       │          │        │ [72537,"MOTHER",    │{"alt":"1","firstname│
-# │       │          │        │{"handle":...        │":"Liisa Maija",...  │
-# └───────┴──────────┴────────┴─────────────────────┴─────────────────────┘
-
-        families = []
-        result = shareds.driver.session().run(Cypher_family.get_members, pid=uid)
-        for record in result:
-            # Fill Family properties
-#                 handle          
-#                 change
-#                 id              esim. "F0001"
-#                 uniq_id         int database key
-#                 rel_type        str suhteen tyyppi
-#                 father          int isän osoite
-#                 mother          int äidin osoite
-#                 no_of_children  int lasten lukumäärä
-#                 children[]      int lasten osoitteet
-
-            f = Family_for_template()
-            f.id = record['f_id']
-            f.rel_type = record['rel_type']
-            # Family members
-            for member in record['members']:
-                # [ id(node), role, <Person node> ]
-                p = Person_as_member()
-                p.uniq_id = member[0]
-                p.role = member[1]
-                rec = member[2]
-                # rec = {"handle":"_df908d402906150f6ac6e0cdc93",
-                #  "id":"I0004","priv":"","sex":"2","confidence":"",
-                #  "change":1536324696}
-                p.handle = rec['handle']
-                p.id = rec['id']
-                if 'priv' in rec:
-                    p.priv = rec['priv']
-                p.sex = rec['sex']
-                p.confidence = rec['confidence']
-                p.change = rec['change']
-                # Names
-                order = ""
-                for persid, namerec, namerel in record['names']:
-                    if persid == p.uniq_id and not namerec['order'] > order:
-                        # A name of this family member,
-                        # preferring the one with lowest order value
-                        n = Name()
-                        n.type = namerec['type']
-                        n.firstname = namerec['firstname']
-                        n.surname = namerec['surname']
-                        n.suffix = namerec['suffix']
-                        n.order = namerec['order']
-                        order = n.order
-                        p.names.append(n)
-                        
-                # Members role
-                if p.role == 'CHILD':
-                    f.children.append(p)
-                elif p.role == 'FATHER':
-                    f.father = p
-                elif p.role == 'MOTHER':
-                    f.mother = p
-                else:
-                    raise LookupError("Invalid Family member role {}".format(member.role))
-
-            families.append(f)
-
-        return families
+#    @staticmethod       
+#     def get_person_families_w_members(uid):
+#         ''' NOT IN USE!
+#             Finds all Families, where Person uid belongs to
+#             and return them as a Families list
+#         '''
+# # ╒═══════╤══════════╤════════╤═════════════════════╤═════════════════════╕
+# # │"f_id" │"rel_type"│"myrole"│"members"            │"names"              │
+# # ╞═══════╪══════════╪════════╪═════════════════════╪═════════════════════╡
+# # │"F0000"│"Married" │"FATHER"│[[72533,"CHILD",     │[[72533,             │
+# # │       │          │        │  "CHILD",{"han      │  {"alt":"","fi      │
+# # │       │          │        │dle":"_dd2c613026e752│rstname":"Jan Erik","│
+# # │       │          │        │8c1a21f78da8a","id":"│type":"Birth Name","s│
+# # │       │          │        │I0000","priv":"","gen│uffix":"Jansson","sur│
+# # │       │          │        │der":"M","confidence"│name":"Mannerheim","r│
+# # │       │          │        │:"2.0","change":15363│efname":""},{}],     │
+# # │       │          │        │24580}],             │ [72537,             │
+# # │       │          │        │ [72537,"MOTHER",    │{"alt":"1","firstname│
+# # │       │          │        │{"handle":...        │":"Liisa Maija",...  │
+# # └───────┴──────────┴────────┴─────────────────────┴─────────────────────┘
+# 
+#         families = []
+#         result = shareds.driver.session().run(Cypher_family.get_members, pid=uid)
+#         for record in result:
+#             # Fill Family properties
+# #                 handle          
+# #                 change
+# #                 id              esim. "F0001"
+# #                 uniq_id         int database key
+# #                 rel_type        str suhteen tyyppi
+# #                 father          int isän osoite
+# #                 mother          int äidin osoite
+# #                 no_of_children  int lasten lukumäärä
+# #                 children[]      int lasten osoitteet
+# 
+#             f = Family_for_template()
+#             f.id = record['f_id']
+#             f.rel_type = record['rel_type']
+#             # Family members
+#             for member in record['members']:
+#                 # [ id(node), role, <Person node> ]
+#                 p = Person_as_member()
+#                 p.uniq_id = member[0]
+#                 p.role = member[1]
+#                 rec = member[2]
+#                 # rec = {"handle":"_df908d402906150f6ac6e0cdc93",
+#                 #  "id":"I0004","priv":"","sex":"2","confidence":"",
+#                 #  "change":1536324696}
+#                 p.handle = rec['handle']
+#                 p.id = rec['id']
+#                 if 'priv' in rec:
+#                     p.priv = rec['priv']
+#                 p.sex = rec['sex']
+#                 p.confidence = rec['confidence']
+#                 p.change = rec['change']
+#                 # Names
+#                 order = ""
+#                 for persid, namerec, namerel in record['names']:
+#                     if persid == p.uniq_id and not namerec['order'] > order:
+#                         # A name of this family member,
+#                         # preferring the one with lowest order value
+#                         n = Name()
+#                         n.type = namerec['type']
+#                         n.firstname = namerec['firstname']
+#                         n.surname = namerec['surname']
+#                         n.suffix = namerec['suffix']
+#                         n.order = namerec['order']
+#                         order = n.order
+#                         p.names.append(n)
+#                         
+#                 # Members role
+#                 if p.role == 'CHILD':
+#                     f.children.append(p)
+#                 elif p.role == 'FATHER':
+#                     f.father = p
+#                 elif p.role == 'MOTHER':
+#                     f.mother = p
+#                 else:
+#                     raise LookupError("Invalid Family member role {}".format(member.role))
+# 
+#             families.append(f)
+# 
+#         return families

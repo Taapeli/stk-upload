@@ -264,26 +264,37 @@ RETURN r.role AS eventref_role, ID(event) AS event_ref"""
         return  shareds.driver.session().run(query, {"pid": root})
 
 
-    def get_her_families_by_id(self):
-        """ Luetaan naisen perheiden id:t """
+    def get_families_by_id(self):
+        """ Luetaan miehen tai naisen perheiden id:t """
 
         pid = int(self.uniq_id)
         query = """
-MATCH (person:Person)<-[r:MOTHER]-(family:Family)
+MATCH (person:Person) <-[r:PARENT]- (family:Family)
   WHERE ID(person)=$pid
 RETURN ID(family) AS uniq_id"""
         return  shareds.driver.session().run(query, {"pid": pid})
 
 
-    def get_his_families_by_id(self):
-        """ Luetaan miehen perheiden id:t """
-
-        pid = int(self.uniq_id)
-        query = """
-MATCH (person:Person)<-[r:FATHER]-(family:Family)
-  WHERE ID(person)=$pid
-RETURN ID(family) AS uniq_id"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+#     def get_her_families_by_id(self):
+#         """ Luetaan naisen perheiden id:t """
+# 
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (person:Person)<-[r:MOTHER]-(family:Family)
+#   WHERE ID(person)=$pid
+# RETURN ID(family) AS uniq_id"""
+#         return  shareds.driver.session().run(query, {"pid": pid})
+# 
+# 
+#     def get_his_families_by_id(self):
+#         """ Luetaan miehen perheiden id:t """
+# 
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (person:Person)<-[r:FATHER]-(family:Family)
+#   WHERE ID(person)=$pid
+# RETURN ID(family) AS uniq_id"""
+#         return  shareds.driver.session().run(query, {"pid": pid})
 
 
     def get_hlinks_by_id(self):
@@ -1113,7 +1124,7 @@ class Person_as_member(Person):
     """ A person as a family member
 
         Extra properties:
-            role         str "CHILD", "FATHER" or "MOTHER"
+            role         str 'child', 'father' or 'mother' # "CHILD", "FATHER" or "MOTHER"
             birth_date   str '1749-11-02'
             names[]      Name
      """

@@ -19,7 +19,7 @@ from models.gen.event_combo import Event_combo
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import SEX_MALE
+from models.gen.person import SEX_MALE, SEX_FEMALE
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.place import Place
@@ -776,7 +776,14 @@ def get_person_data_by_id(uniq_id):
 
         if member.role == "CHILD":
             families[fid].children.append(member)
-        elif member.role == "FATHER":
+        elif member.role == "PARENT":
+            parent_role = record["parent_role"]
+            if parent_role == 'mother':
+                families[fid].mother = member
+            elif parent_role == 'father':
+                families[fid].father = member
+        # TODO: Remove these, obsolete
+        elif member.role == "FATHER":   
             families[fid].father = member
         elif member.role == "MOTHER":
             families[fid].mother = member

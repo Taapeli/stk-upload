@@ -118,15 +118,19 @@ RETURN ID(f) as uniq_id"""
 #    SET f = $f_attr
 #RETURN ID(f) as uniq_id"""
 
-    link_father = """
+    link_parent = """
 MATCH (n:Family) WHERE n.handle=$f_handle
 MATCH (m:Person) WHERE m.handle=$p_handle
-MERGE (n)-[r:FATHER]->(m)"""
-
-    link_mother = """
-MATCH (n:Family) WHERE n.handle=$f_handle
-MATCH (m:Person) WHERE m.handle=$p_handle
-MERGE (n)-[r:MOTHER]->(m)"""
+MERGE (n) -[r:PARENT {role:$role}]-> (m)"""
+#     link_father = """
+# MATCH (n:Family) WHERE n.handle=$f_handle
+# MATCH (m:Person) WHERE m.handle=$p_handle
+# MERGE (n)-[r:FATHER]->(m)"""
+# 
+#     link_mother = """
+# MATCH (n:Family) WHERE n.handle=$f_handle
+# MATCH (m:Person) WHERE m.handle=$p_handle
+# MERGE (n)-[r:MOTHER]->(m)"""
 
     link_event = """
 MATCH (n:Family) WHERE n.handle=$f_handle
