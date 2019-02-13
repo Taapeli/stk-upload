@@ -156,6 +156,13 @@ $(document).ready( function() {
     	});
     });
 
+    $("#view_permission").click(function() {
+        var value = $("#view_permission").is(":checked");
+        $.get("/gedcom/update_permission/" + gedcom + "/" + value,function(rsp) {
+        	console.log(rsp);
+    	});
+    });
+
     $("input,a").click(function() {
     	 $("#errors").hide();
     });
