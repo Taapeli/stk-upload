@@ -26,7 +26,7 @@ from .cvs_refnames import load_refnames
 from .forms import AllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
-
+from .. import gedcom
 
 # Admin start page in app/routes.py:
 #@shareds.app.route('/admin',  methods=['GET', 'POST'])
@@ -260,3 +260,9 @@ def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     return redirect(url_for('admin.list_uploads', username=username))
 
+@bp.route('/admin/list_user_gedcoms/<user>', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_user_gedcoms(user):
+    session["gedcom_user"] = user
+    return gedcom.routes.gedcom_list()
