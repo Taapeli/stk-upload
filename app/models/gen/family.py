@@ -157,10 +157,13 @@ RETURN family"""
             families = []
             for record in result:
                 if record['f']:
-                    f = record['f']
-                    family = Family_for_template(f.id)
-                    family.id = f['id']
-                    family.type = f['rel_type']
+                    # <Node id=55577 labels={'Family'} 
+                    #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
+                    #    'id': 'F0000', 'change': 1507492602}>
+                    f_node = record['f']
+                    family = Family_for_template(f_node.id)
+                    family.id = f_node['id']
+                    family.type = f_node['rel_type']
                 
 #                     if record['ph']:
 #                         husband = record['ph']
@@ -178,25 +181,44 @@ RETURN family"""
 #                             wname = record['nw']
 #                             pw.names.append(wname)
 #                         family.mother = pw
-                    
-                    for parent, role in record['parent']:
-                        pp = Person_as_member()
-                        pp.uniq_id = parent.id
-                        pp.sortname = parent['sortname']
-                        if role == 'father':
-                            family.father = pp
-                        elif role == 'mother':
-                            family.mother = pp
+
+                    uniq_id = -1
+                    for role, parent_node, name_node in record['parent']:
+                        if parent_node:
+                            # <Node id=214500 labels={'Person'} 
+                            #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
+                            #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496, 
+                            #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008', 
+                            #    'date2': 1997946, 'date1': 1929380}>
+                            if uniq_id != parent_node.id:
+                                # Skip person with double default name
+                                pp = Person_as_member()
+                                uniq_id = parent_node.id
+                                pp.uniq_id = uniq_id
+                                pp.sortname = parent_node['sortname']
+                                pp.sex = parent_node['sex']
+                                if role == 'father':
+                                    family.father = pp
+                                elif role == 'mother':
+                                    family.mother = pp
+
+                            pname = Name.from_node(name_node)
+                            pp.names.append(pname)
+
                     
                     for ch in record['child']:
+                        # <Node id=60320 labels={'Person'} 
+                        #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19, 
+                        #    'confidence': '', 'sex': 0, 'change': 1507492602, 
+                        #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
+                        #    'date2': 1609920, 'date1': 1609920}>
                         child = Person_as_member()
                         child.uniq_id = ch.id
                         child.sortname = ch['sortname']
                         family.children.append(child)
                     
                     if record['no_of_children']:
-                        noc = record['no_of_children']
-                        family.no_of_children = noc
+                        family.no_of_children = record['no_of_children']
                     families.append(family)
             return (families)
 
@@ -445,11 +467,11 @@ RETURN ID(person) AS father"""
 
         # Make father and mother relations to Person nodes
         try:
-            if hasattr(self,'father') and self.father != '':
+            if hasattr(self,'father') and self.father:
                 tx.run(Cypher_family_w_handle.link_parent, role='father',
                        f_handle=self.handle, p_handle=self.father)
 
-            if hasattr(self,'mother') and self.mother != '':
+            if hasattr(self,'mother') and self.mother:
                 tx.run(Cypher_family_w_handle.link_parent, role='mother',
                        f_handle=self.handle, p_handle=self.mother)
         except Exception as err:

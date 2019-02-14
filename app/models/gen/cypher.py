@@ -97,19 +97,19 @@ RETURN p as person,
     user
 ORDER BY person.sortname"""
 
-    xxxx_all_persons_with_events_from_name = """
-MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
-    WHERE p.sortname >= $start_name
-WITH p, b.user as user ORDER BY p.sortname LIMIT $limit
-  MATCH (p:Person) -[:NAME]-> (n:Name)
-  WITH p, n ORDER BY p.sortname, n.order, user
-    OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
-    OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
-RETURN p as person, 
-    collect(distinct n) as names, 
-    collect(distinct [e, pl.pname, rn.role]) as events,
-    user
-ORDER BY p.sortname"""
+#     xxxx_all_persons_with_events_from_name = """
+# MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
+#     WHERE p.sortname >= $start_name
+# WITH p, b.user as user ORDER BY p.sortname LIMIT $limit
+#   MATCH (p:Person) -[:NAME]-> (n:Name)
+#   WITH p, n ORDER BY p.sortname, n.order, user
+#     OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
+#     OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
+# RETURN p as person, 
+#     collect(distinct n) as names, 
+#     collect(distinct [e, pl.pname, rn.role]) as events,
+#     user
+# ORDER BY p.sortname"""
 
 
 
@@ -262,10 +262,11 @@ class Cypher_family():
     # from models.gen.family.read_families
     read_families_p = """
 MATCH (f:Family) WHERE ID(f)>=$fw
-OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person) -[:NAME]-> (np:Name) 
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
 RETURN f, 
-    COLLECT([pp, np]) AS parent, 
+    COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(pc) AS child, 
     COUNT(pc) AS no_of_children 
     ORDER BY ID(f) LIMIT $limit"""
