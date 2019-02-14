@@ -157,11 +157,11 @@ return path"""
             from bp.scene.routes import UserFilter
             try:
                 with shareds.driver.session() as session:
-                    if show == "own" or UserFilter.is_only_mine_data(): #show > 1:
-                        result = session.run(Cypher_person.read_my_persons_with_events_from_name,
+                    if show == 3 or show == 5 or UserFilter.is_only_mine_data(): 
+                        result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
                                              user=user, start_name=fw_from, limit=limit)
                     else:
-                        result = session.run(Cypher_person.read_all_persons_with_events_from_name,
+                        result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
                                              user=user, start_name=fw_from, limit=limit)
                     return result        
             except Exception as e:
@@ -170,7 +170,7 @@ return path"""
 
         def user_not_me(record):
             # Returns owner, if it is not me
-            if 'user' in record:
+            if 'user' in record.keys():
                 u = record['user']
                 if u == user:
                     return '-'
@@ -264,26 +264,37 @@ RETURN r.role AS eventref_role, ID(event) AS event_ref"""
         return  shareds.driver.session().run(query, {"pid": root})
 
 
-    def get_her_families_by_id(self):
-        """ Luetaan naisen perheiden id:t """
+    def get_families_by_id(self):
+        """ Luetaan miehen tai naisen perheiden id:t """
 
         pid = int(self.uniq_id)
         query = """
-MATCH (person:Person)<-[r:MOTHER]-(family:Family)
+MATCH (person:Person) <-[r:PARENT]- (family:Family)
   WHERE ID(person)=$pid
 RETURN ID(family) AS uniq_id"""
         return  shareds.driver.session().run(query, {"pid": pid})
 
 
-    def get_his_families_by_id(self):
-        """ Luetaan miehen perheiden id:t """
-
-        pid = int(self.uniq_id)
-        query = """
-MATCH (person:Person)<-[r:FATHER]-(family:Family)
-  WHERE ID(person)=$pid
-RETURN ID(family) AS uniq_id"""
-        return  shareds.driver.session().run(query, {"pid": pid})
+#     def get_her_families_by_id(self):
+#         """ Luetaan naisen perheiden id:t """
+# 
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (person:Person)<-[r:MOTHER]-(family:Family)
+#   WHERE ID(person)=$pid
+# RETURN ID(family) AS uniq_id"""
+#         return  shareds.driver.session().run(query, {"pid": pid})
+# 
+# 
+#     def get_his_families_by_id(self):
+#         """ Luetaan miehen perheiden id:t """
+# 
+#         pid = int(self.uniq_id)
+#         query = """
+# MATCH (person:Person)<-[r:FATHER]-(family:Family)
+#   WHERE ID(person)=$pid
+# RETURN ID(family) AS uniq_id"""
+#         return  shareds.driver.session().run(query, {"pid": pid})
 
 
     def get_hlinks_by_id(self):
@@ -1113,7 +1124,7 @@ class Person_as_member(Person):
     """ A person as a family member
 
         Extra properties:
-            role         str "CHILD", "FATHER" or "MOTHER"
+            role         str 'child', 'father' or 'mother' # "CHILD", "FATHER" or "MOTHER"
             birth_date   str '1749-11-02'
             names[]      Name
      """

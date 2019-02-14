@@ -124,7 +124,6 @@ class Media:
                 "mime": self.mime,
                 "description": self.description
             }
-#             self.uniq_id = tx.run(Cypher_media_w_handle.create, m_attr=m_attr).single()[0]
             result = tx.run(Cypher_media_w_handle.create, m_attr=m_attr)
             ids = []
             for record in result:

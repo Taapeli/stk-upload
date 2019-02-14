@@ -19,7 +19,7 @@ from models.gen.event_combo import Event_combo
 from models.gen.family import Family, Family_for_template
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import SEX_MALE
+from models.gen.person import SEX_MALE, SEX_FEMALE
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.place import Place
@@ -523,10 +523,10 @@ def get_source_with_events(sourceid):
             # Use previous
             c = citations[c_id]
 
-        citation = record['c']
-        c.id = citation['id']
-        c.page = citation['page']
-        c.confidence = citation['confidence']
+        c_node = record['c']
+        c.id = c_node['id']
+        c.page = c_node['page']
+        c.confidence = c_node['confidence']
 
         p_uid = record['p_id']
         x_node = record['x']
@@ -534,8 +534,8 @@ def get_source_with_events(sourceid):
         noderef = NodeRef()
         # Referring Person or Family
         noderef.uniq_id = p_uid      # 72104
-        noderef.id = x_node['id']  # 'I1069' or 'E2821'
-        noderef.label = x_node.labels.pop()
+        noderef.id = x_node['id']    # 'I1069' or 'E2821'
+        noderef.label = next(iter(x_node.labels))   # Get a member of a frozenset
         event_role = record['role']
 
         print('Citation {} {} {} {} {}'.format(c.uniq_id, event_role,
@@ -739,11 +739,15 @@ def get_person_data_by_id(uniq_id):
     fid = 0
     result = Person_combo.get_family_members(p.uniq_id)
     for record in result:
-        # <Record family_id='F0461' f_uniq_id=208845 role='CHILD' m_id='I1235' 
-        #    uniq_id=207392 sex='1' birth_date=[0, 1818646, 1818646] 
-        #    names=[<Node id=207393 labels={'Name'} 
-        #           properties={'order': 0, 'firstname': 'Erik Berndt', 'type': 'Birth Name', 
-        #               'suffix': '', 'surname': 'Konow'}> ] >
+        # <Record family_id='F0018' f_uniq_id=217546 role='PARENT' parent_role='mother' 
+        #  m_id='I0038' uniq_id=217511 sex=2 birth_date=[0, 1892433, 1892433] 
+        #  names=[
+        #    <Node id=217512 labels={'Name'} properties={'firstname': 'Brita Kristina', 
+        #        'type': 'Birth Name', 'suffix': 'Eriksdotter', 'surname': 'Berttunen', 
+        #        'order': 0}>, 
+        #    <Node id=217513 labels={'Name'} properties={'firstname': 'Brita Kristina', 
+        #        'type': 'Married Name', 'suffix': '', 'surname': 'Silius', 
+        #        'order': 1}>]>
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]
             if not fid in families:
@@ -776,7 +780,14 @@ def get_person_data_by_id(uniq_id):
 
         if member.role == "CHILD":
             families[fid].children.append(member)
-        elif member.role == "FATHER":
+        elif member.role == "PARENT":
+            parent_role = record["parent_role"]
+            if parent_role == 'mother':
+                families[fid].mother = member
+            elif parent_role == 'father':
+                families[fid].father = member
+        # TODO: Remove these, obsolete
+        elif member.role == "FATHER":   
             families[fid].father = member
         elif member.role == "MOTHER":
             families[fid].mother = member

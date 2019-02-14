@@ -5,7 +5,6 @@
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
-{# import 'start/s_macros.html' as macro #}
 
 {{ hamburger_menu( (
     ("/message", _('Contact administrator'), _('Message to the administrator')),
