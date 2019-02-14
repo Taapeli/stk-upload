@@ -105,10 +105,10 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
-.id { color: sienna; font-size: 70%; text-align: right; 
+.id { color: sienna; font-size: 80%; text-align: right; 
     font-family: serif
 }
-.idno { color: gray; font-size: 70%; text-align:center; 
+.idno { color: gray; font-size: 80%; text-align:center; 
     font-family: serif
 }
 .owner { color: white; 
