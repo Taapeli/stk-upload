@@ -52,7 +52,7 @@ RETURN extract(x IN relationships |
         extract(x in nodes | x) as nodelist"""
 
 # Ver 0.2 Person lists with names and events
-    read_my_persons_with_events_from_name = """
+    read_my_persons_with_events_starting_name = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
     WHERE prof.userName = $user AND p.sortname >= $start_name
 WITH p ORDER BY p.sortname LIMIT $limit
@@ -79,7 +79,7 @@ RETURN p as person,
 #     collect(distinct [e, pl.pname, rn.role]) as events
 # ORDER BY p.sortname"""
 
-    read_all_persons_with_events_from_name = """
+    read_all_persons_with_events_starting_name = """
 MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
     WHERE p.sortname >= $start_name
 WITH p, b.user as user

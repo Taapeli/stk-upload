@@ -739,11 +739,15 @@ def get_person_data_by_id(uniq_id):
     fid = 0
     result = Person_combo.get_family_members(p.uniq_id)
     for record in result:
-        # <Record family_id='F0461' f_uniq_id=208845 role='CHILD' m_id='I1235' 
-        #    uniq_id=207392 sex='1' birth_date=[0, 1818646, 1818646] 
-        #    names=[<Node id=207393 labels={'Name'} 
-        #           properties={'order': 0, 'firstname': 'Erik Berndt', 'type': 'Birth Name', 
-        #               'suffix': '', 'surname': 'Konow'}> ] >
+        # <Record family_id='F0018' f_uniq_id=217546 role='PARENT' parent_role='mother' 
+        #  m_id='I0038' uniq_id=217511 sex=2 birth_date=[0, 1892433, 1892433] 
+        #  names=[
+        #    <Node id=217512 labels={'Name'} properties={'firstname': 'Brita Kristina', 
+        #        'type': 'Birth Name', 'suffix': 'Eriksdotter', 'surname': 'Berttunen', 
+        #        'order': 0}>, 
+        #    <Node id=217513 labels={'Name'} properties={'firstname': 'Brita Kristina', 
+        #        'type': 'Married Name', 'suffix': '', 'surname': 'Silius', 
+        #        'order': 1}>]>
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]
             if not fid in families:

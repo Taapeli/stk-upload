@@ -157,11 +157,11 @@ return path"""
             from bp.scene.routes import UserFilter
             try:
                 with shareds.driver.session() as session:
-                    if show == "own" or UserFilter.is_only_mine_data(): #show > 1:
-                        result = session.run(Cypher_person.read_my_persons_with_events_from_name,
+                    if show == 3 or show == 5 or UserFilter.is_only_mine_data(): 
+                        result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
                                              user=user, start_name=fw_from, limit=limit)
                     else:
-                        result = session.run(Cypher_person.read_all_persons_with_events_from_name,
+                        result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
                                              user=user, start_name=fw_from, limit=limit)
                     return result        
             except Exception as e:
@@ -170,7 +170,7 @@ return path"""
 
         def user_not_me(record):
             # Returns owner, if it is not me
-            if 'user' in record:
+            if 'user' in record.keys():
                 u = record['user']
                 if u == user:
                     return '-'

@@ -29,10 +29,10 @@
 	                   {% if session['filter_div'] == 1 %}Suomikanta
                        {% elif session['filter_div'] == 2 %}omat aineistot
                        {% elif session['filter_div'] == 3 %}
-                            &#9786;&nbsp;omat aineistot / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
+                            &FilledSmallSquare;&nbsp;omat aineistot / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
                        {% elif session['filter_div'] == 4 %}oma tuontierä
                        {% elif session['filter_div'] == 5 %}
-                            &#9786;&nbsp;oma tuontierä / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
+                            &FilledSmallSquare;&nbsp;oma tuontierä / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
                        {% endif %}
                        {% if user %}
                        <i>(<a href="/scene?fw={{next[0]}}" title="vaihda poimintasääntöä" 
@@ -108,7 +108,7 @@
 	                <td class="ColumnPerson"><div>
 	                   {% for ow in owner_but_me %}
 	                       {% if ow != '-' %}<span class="owner">&nbsp;{{ow}}&nbsp;</span>
-	                       {% else %}&#9786;{% endif %}
+	                       {% else %}&FilledSmallSquare;{% endif %}
 	                   {% endfor %}
 	                   <a href="/scene/person={{p.uniq_id}}"
 	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
