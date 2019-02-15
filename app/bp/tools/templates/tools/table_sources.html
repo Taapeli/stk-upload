@@ -4,6 +4,13 @@
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
+        
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu((
+    ("/scene", _('Change settings'), _('Select displayed data')),
+    ("/settings", _('Change language'), _('Select language'))
+   ) ) }}
 
 <h2>{{ _('List of Sources') }}</h2>
 <p>{{ _('Showing sources') }}</p>

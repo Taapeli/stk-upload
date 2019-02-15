@@ -324,7 +324,7 @@ class DOM_handler():
                         f.eventref_hlink.append(family_eventref.getAttribute("hlink"))
                     if family_eventref.hasAttribute("role"):
                         f.eventref_role.append(family_eventref.getAttribute("role"))
-
+                #TODO: Yhdistä kentät eventref_hlink ja eventref_role > eventref[2]
             if len(family.getElementsByTagName('childref') ) >= 1:
                 for i in range(len(family.getElementsByTagName('childref') )):
                     family_childref = family.getElementsByTagName('childref')[i]
@@ -447,7 +447,7 @@ class DOM_handler():
 
             if len(person.getElementsByTagName('gender') ) == 1:
                 person_gender = person.getElementsByTagName('gender')[0]
-                p.gender = p.sex_from_str(person_gender.childNodes[0].data)
+                p.sex = p.sex_from_str(person_gender.childNodes[0].data)
             elif len(person.getElementsByTagName('gender') ) > 1:
                 self.blog.log_event({'title':"More than one gender in a person",
                                      'level':"WARNING", 'count':p.id})

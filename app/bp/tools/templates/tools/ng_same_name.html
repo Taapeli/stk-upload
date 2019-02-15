@@ -6,6 +6,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <script src="/static/infobox.js"></script>
+{% from "start/s_macros.html" import hamburger_menu with context %}
+{# import 'start/s_macros.html' as macro #}
+
+{{ hamburger_menu((
+    ("/scene", _('Change settings'), _('Select displayed data')),
+    ("/settings", _('Change language'), _('Select language'))
+   ) ) }}
 
 <h2>{{ _('List of persons with the same name') }}</h2>
 <p>{{ _('Showing person pairs') }}</p>

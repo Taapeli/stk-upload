@@ -17,7 +17,8 @@
 	    <span></span><span></span><span></span>
 	    <ul id="menu">
 	      <a href="/" title="{{ _('Start page') }}"><li>{{ _('Home') }}</li></a>
-	      <a id="help" href="#" title="{{ _('Instructions for this page') }}" >
+	      <a id="help" href="#" title="{{ _('Instructions for this page') }}" 
+	      	language={{ session.lang }} target="_blank">
 	        <li>{{ _('Help') }}</li></a>
 	    {% for url, label, title in items %}
 	       <a href="{{url}}" title="{{title}}">

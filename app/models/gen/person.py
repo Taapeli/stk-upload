@@ -151,10 +151,10 @@ class Person:
     def sex_from_str(s):
         # Converts gender strings to ISO/IEC 5218 codes
         ss = s[:1].upper()
-        if ss == 'M' or  ss == 1:
-            return 1
-        if ss == 'F' or ss == 'N' or ss == 2:
-            return 2
+        if ss == 'M' or  ss == str(SEX_MALE):
+            return SEX_MALE
+        if ss == 'F' or ss == 'N' or ss == str(SEX_FEMALE):
+            return SEX_FEMALE
         return 0
         
     @classmethod

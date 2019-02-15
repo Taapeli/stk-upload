@@ -160,8 +160,8 @@ def connect_object_as_leaf(src, target, rel_type=None):
         -[:NAME]-> (:Name)       to .names[]
         -[:EVENT]-> (:Event)     to .events[]
         -[:CHILD]-> (:Family)    to .child[]
-        -[:FATHER]-> (:Family)   to .father
-        -[:MOTHER]-> (:Family)   to .mother
+        -[:PARENT {role:'father'}]-> (:Family)   to .father
+        -[:PARENT {role:'mother'}]-> (:Family)   to .mother
         -[:HIERARCHY]-> (:Place) to .place
 
     The following relation targets are stored as object references (uniq_id) 
@@ -228,7 +228,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
             if rel_type == 'CHILD':
                 src.families_as_child.append(target)
                 return src.families_as_child[-1]
-            if rel_type == 'MOTHER' or rel_type == 'FATHER':
+            if rel_type == 'PARENT': #'MOTHER' or rel_type == 'FATHER':
                 src.families_as_parent.append(target)
                 return src.families_as_parent[-1]
         elif target_class == 'Citation':

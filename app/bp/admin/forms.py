@@ -49,7 +49,7 @@ class UpdateUserForm(FlaskForm):
         description = _('Active / passive user')) 
     roles = SelectMultipleField(_('Roles'), 
                 choices=[
-                   ("guest",_("Guest")),
+                   ("gedcom",_("Gedcom-files")),
                    ("member",_("Member")),
                    ("research",_("Research")),
                    ("audit",_("Audit")),                      
@@ -79,7 +79,7 @@ class AllowedEmailForm(FlaskForm):
         description = _('Enter the email address'))
     default_role = SelectField(_('Default role:'), 
                     choices=[
-                       ("guest",_("Guest")),
+                       ("gedcom",_("Gedcom-files")),
                        ("member",_("Member")),
                        ("research",_("Research")),
                        ("audit",_("Audit")),                      
