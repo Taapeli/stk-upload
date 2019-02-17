@@ -29,6 +29,15 @@
              onmouseover="this.src='/static/hlo1.png';" 
              onmouseout="this.src='/static/hlo.png';"/></a>
         <i>{{ _('A Database of the Genealogical Society of Finland') }}</i></h1>
+
+        
+	{% from "start/s_macros.html" import hamburger_menu with context %}
+	
+	{{ hamburger_menu((
+	    ("/scene", _('Change settings'), _('Select displayed data')),
+	    ("/settings", _('Change language'), _('Select language'))
+	   ) ) }}
+
     {% endblock %}
 
     <div class="fullclear"></div>
