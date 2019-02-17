@@ -41,8 +41,9 @@ a.bread:active { text-decoration: underline; }
 
 div#paluu {
     position: absolute;
-    top: 7px;
-    right: 4px;
+    top: 50px;
+    left: 4px;
+    width: 38px;
     /*position: absolute;
     top: -18pt;
     right: 0;*/
@@ -50,19 +51,13 @@ div#paluu {
     font-weight: normal;
     font-size: 9pt;
     text-decoration: none;
-    background: #fcfec3; 
+    background: #f6f6f6; 
+    padding: 2pt;
     color: black;
     border:1px solid gray;
     border-style: outset;
     border-radius: 4pt;
-    padding: 0 5pt 0 5pt;
     margin: 5pt;
-}
-div#paluu {
-    top: 3em;
-    right: 4px;
-    background: #f6f6f6; 
-    padding: 2pt;
 }
 #paluu a { 
 	text-decoration: none; 
