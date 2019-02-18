@@ -266,3 +266,31 @@ def xml_delete(username,xmlfile):
 def list_user_gedcoms(user):
     session["gedcom_user"] = user
     return gedcom.routes.gedcom_list()
+
+@bp.route("/admin/site-map")
+@login_required
+@roles_accepted('admin')
+def site_map():
+    
+    class Link():
+        def __init__(self, url='', endpoint='', methods=''):
+            self.url = url
+            self.endpoint = endpoint
+            self.methods = methods
+
+    links = []
+    for rule in shareds.app.url_map.iter_rules():
+        methods=''
+        if "GET" in rule.methods: 
+            methods="GET"
+        if "POST" in rule.methods: 
+            methods += " POST"
+        try:
+            print("{} def {}".format(rule.rule, rule.defaults))
+            url = rule.rule
+            #url = url_for(rule.endpoint, **(rule.defaults or {}))
+        except:
+            url="-"
+        links.append(Link(url, rule.endpoint, methods))
+    
+    return render_template("/admin/site-map.html", links=links)
