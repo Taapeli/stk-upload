@@ -27,7 +27,7 @@ RETURN user'''
 
     id_find = '''
 MATCH (user:User) 
-    WHERE id(user) = $id 
+    WHERE user.username = $id 
 RETURN user'''
 
     get_users = '''
@@ -98,12 +98,12 @@ RETURN role'''
 
     role_get = '''
 MATCH (role:Role)
-    WHERE id(role) = $id
+    WHERE role.name = $id
 RETURN role'''
 
     user_roles_delete = '''
 MATCH (u:User) -[h:HAS_ROLE]-> () 
-    WHERE id(u)=$id
+    WHERE role.name =$id
 SET u.roles = []
 DELETE h'''
 

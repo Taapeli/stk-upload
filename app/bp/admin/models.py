@@ -103,7 +103,7 @@ class UserAdmin():
             if userRecord is None:
                 return None
             user = shareds.user_model(**userRecord) 
-            user.id = str(userRecord.id)
+            user.id = user.username
             user.password = ""
             user.roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
             if user.confirmed_at:

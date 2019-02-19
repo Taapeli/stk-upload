@@ -90,7 +90,7 @@ class Neo4jUserDatastore(UserDatastore):
                 return None
             user = self.user_model(**userRecord)
 #            print(userRecord.id)
-            user.id = str(userRecord.id)
+            user.id = user.username
             user.roles = self.find_UserRoles(user.email)
             if user.confirmed_at:
                 user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
@@ -192,7 +192,7 @@ class Neo4jUserDatastore(UserDatastore):
                 confirmtime = int(user.confirmed_at.timestamp() * 1000)
                                                    
             result = tx.run(Cypher.user_update, 
-                id=int(user.id), 
+                id=user.username, 
                 email=user.email,
                 password=user.password, 
                 is_active=user.is_active,
@@ -326,7 +326,7 @@ class Neo4jUserDatastore(UserDatastore):
         
     def _findUser (self, tx, arg):
         try:
-            result = tx.run(Cypher.id_find, id=int(arg)).single()
+            result = tx.run(Cypher.id_find, id=arg).single()
             return(result['user'] if result else None)               
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
