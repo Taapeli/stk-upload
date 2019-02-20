@@ -67,8 +67,9 @@ def initialize( options):
     return Citations()
   
 def parseText(textpart):
-    import re    
-    regexb = "^([A-ZÅÄÖa-zåäö0-9., ]*)\s*(RK|LK|vihityt|syntyneet|pääkirja|F/D)\s*([12][0-9]{3})-?([0-9]{0,4})?\s*(sivu |s\. |s\.|s |s|p |p\. |p\.|p|pg\. |pg\.|pg |pg)?\s*([0-9]{1,4})?\s*(.*)?"  
+    import re  
+    regexb = "^([A-ZÅÄÖa-zåäö0-9., ]*?)\s*(RK|LK|vihityt|syntyneet|pääkirja|F\/D)\s*([12][0-9]{3})-?([0-9]{0,4})\s*(.*?)(sivu |s\. |s\.|s |s|p |p\. |p\.|p|pg\. |pg\.|pg |pg)?\s*([0-9]{1,5})?\s*(.*)$"       
+#        regexb = "^([A-ZÅÄÖa-zåäö0-9., ]*)\s*(RK|LK|vihityt|syntyneet|pääkirja|F/D)\s*([12][0-9]{3})-?([0-9]{0,4})?\s*(sivu |s\. |s\.|s |s|p |p\. |p\.|p|pg\. |pg\.|pg |pg)?\s*([0-9]{1,4})?\s*(.*)?"  
     """ Groups:
             0   archive name, mandatory at the first citation, optional at following if the same
                white space 
@@ -77,7 +78,7 @@ def parseText(textpart):
             2   start year  1nnn or 2nnn   
                optional "-"   
             3   optional end year 2 or 4 digits, mandatory if preceding "-"
-               optional white space
+               optional white space or text?
             4   page indicator
                optional white space
             5   page number
@@ -102,11 +103,14 @@ def parseText(textpart):
 #            LOG.debug('    >>>>', lpart)
             if re.match(regexb, lpart):                
                 src_groups = re.match(regexb, lpart).groups()
-                print("    Parsed: {}  >>>>>>> {}|{}|{}|{}|{}|{}|{}"\
-                      .format(lpart, src_groups[0], src_groups[1],src_groups[2], src_groups[3], src_groups[4], \
-                      str(src_groups[5]) if src_groups[5] else "",  src_groups[6] if src_groups[6] else ""))
+                print("    Parsed: {}  >>>>>>> {}|{}|{}|{}|{}|{}|{}|{}"\
+                      .format(lpart, src_groups[0], src_groups[1],src_groups[2], src_groups[3], \
+                              src_groups[4] if src_groups[4] else "", \
+                              str(src_groups[5]) if src_groups[5] else "", \
+                              src_groups[6] if src_groups[6] else "", \
+                              src_groups[7] if src_groups[7] else ""))
                                                                             
-                endYear = None    
+                endYear = ""    
                 if archiver == '': 
                     archiver = src_groups[0].strip()
                 if not src_groups[3]:
@@ -117,9 +121,11 @@ def parseText(textpart):
                         endYear = endYear + 100
                 else:
                     endYear =  int(src_groups[3])       
-                textout = "{} {} {}{}".format(archiver, src_groups[1], src_groups[2], "-" + str(endYear) if endYear else "") 
+                textout = "{} {} {}{} {}".format(archiver, src_groups[1], \
+                                                 src_groups[2], "-" + str(endYear) if endYear else "", \
+                                                 src_groups[4] if src_groups[4] else "") 
                 textouts.append(textout)    
-                cstring = "s.{} {}".format(str(src_groups[5]), src_groups[6].strip() if src_groups[6].strip() else "")
+                cstring = "{} {}".format(("s." + str(src_groups[6]) if src_groups[6] else ""), src_groups[7].strip() if src_groups[7] else "")
                 citations.append(cstring)
 
             else:
@@ -165,29 +171,23 @@ class Citations(transformer.Transformation):
                 spointer = path.split('.', 1)[0]
                 spointer = item.value
 #                print("Phase1  {} {} {}     SOUR {} referenced".format(str(item.linenum), str(item), item.path, spointer))
-                
                 if spointer in self.references:
                     self.references[spointer].append([linenumber, slevel])
                 else:    
                     self.references[spointer] = [[linenumber, slevel]]
-        #            insertions[linenumber] = [pointer]
             elif item.level == 0 and path.endswith('SOUR'):
                 spointer = path.split('.', 1)[0] 
                 slinenumber = item.linenum
 #                print("Phase1  {} {} {}   New SOUR declaration {}, referenced by {}"\
 #                    .format(str(item.linenum), item, item.path, item.line, self.references[spointer]))
-#                ttitletexts = []
                 ntitletexts = []
-#                tcitations = []
                 ncitations = []
                 tlinenumber = None
-#                nlinenumber = None
                 ttext = ntext = ""
                 nitem = None
                 for child in item.children:
                     linenumber = child.linenum
                     if child.path.endswith('.TITL'): 
-#                        tpath = child.path 
                         tlinenumber = child.linenum
 #                        print("Phase1  " + str(child.linenum) + "  "  + str(child) + "  " + tpath )    
 #                         if child.value == ttext:
@@ -201,9 +201,7 @@ class Citations(transformer.Transformation):
                     elif  child.path.endswith('.NOTE'):
 #                        print("Phase1  " + str(item.linenum) + "  "  + str(child) + "  " + child.path + "  >>>>>>>  Source Note")
                         nitem = child
-#                        npath = child.path
                         ntext = child.value
-#                        nlinenumber = child.linenum
                         ntitletexts, ncitations = parseText(ntext)
 #                        print("    -NOTE ", ntext, " >>>>>>> ", ntitletexts, " ", ncitations)
 
@@ -217,6 +215,8 @@ class Citations(transformer.Transformation):
                     title = "1 TITL {}".format(ntitletexts[0])
                     self.replaces[tlinenumber] = [transformer.Item(title)]
                     for ind in range(0, len(referrers)):
+                        if ncitations[0] == " ":
+                            continue
                         citation = "{} PAGE ".format(str(referrers[ind][1] + 1)) + ncitations[0]
                         self.insertions[referrers[ind][0]] = [transformer.Item(citation)]
 #                         print("    Insert lines after {} {}".\
