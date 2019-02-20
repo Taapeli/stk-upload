@@ -3,10 +3,10 @@
 {% include "security/_messages.html" %}
 {% block title %}{{ _("Stk User's Start Page") }} (start/index_logged){% endblock %}
 {% block body %}
-{{ super() }}
-{% from "start/s_macros.html" import hamburger_menu with context %}
+  {{ super() }}
+  {% from "start/s_macros.html" import hamburger_menu with context %}
 
-{{ hamburger_menu( (
+  {{ hamburger_menu( (
     ("/message", _('Contact administrator'), _('Message to the administrator')),
     ("/settings", _('Change language'), _('Select language'))
    ) ) }}
@@ -34,6 +34,9 @@
                  </form>
              </div>
            </div>
+    {% endif %}           
+
+    {% if current_user.is_authenticated and current_user.has_role('member') %}
 
            <div class="startbox" style="border:1.5pt solid #7e6b53;">
              <div style="display: inline-block;">
@@ -48,7 +51,7 @@
            </div>
     {% endif %}
     
-    {% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated and current_user.has_role('gedcom')%}
 
          <div class="startbox gedtools">
             <div style="display: inline-block;">
@@ -64,19 +67,21 @@
      
      {% endif %}
 
-        {% if current_user.is_authenticated and 
+    {% if current_user.is_authenticated and 
             (current_user.has_role('admin') or current_user.has_role('master') ) %}
-     <div class="startbox admin">
-       <div style="display: inline-block;">
-<h3>{{ _('Admin function') }}</h3>
-         <p>{{ _('User and reference information management and database service tasks') }}.</p>
-         <form method="get" action="/admin">
+        <div class="startbox admin">
+           <div style="display: inline-block;">
+           <form method="get" action="/admin">
+              <h3>{{ _('Admin function') }}</h3>
+              <p>{{ _('User and reference information management and database service tasks') }}.</p>
             <div class="submit"> 
                <button type="submit">{{ _('Maintenance') }}</button>
             </div>
          </form>
       </div>
-     </div>{% endif %}
+     </div>
+     
+    {% endif %}
 
     </div>
   </div>
