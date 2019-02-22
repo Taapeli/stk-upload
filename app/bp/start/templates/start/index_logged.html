@@ -51,11 +51,11 @@
            </div>
     {% endif %}
     
-    {% if current_user.is_authenticated and current_user.has_role('gedcom')%}
-
+    {% if current_user.is_authenticated and 
+       (current_user.has_role('gedcom') or current_user.has_role('research')) %}
          <div class="startbox gedtools">
             <div style="display: inline-block;">
-            <form method="get" action="/gedcom/list">
+            <form method="get" action="/gedcom">
                <h3>{{ _('My gedcom material') }}</h3>
                <p>{{ _('Upload your material in gedcom format or edit an already stored') }}</p>
               <div class="submit"> 
@@ -64,7 +64,6 @@
             </form>
             </div>
          </div>
-     
      {% endif %}
 
     {% if current_user.is_authenticated and 
@@ -80,7 +79,6 @@
          </form>
       </div>
      </div>
-     
     {% endif %}
 
     </div>

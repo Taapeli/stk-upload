@@ -28,16 +28,15 @@ from . import bp
 from . import uploads
 from .. import gedcom
 
-# Admin start page in app/routes.py:
-#@shareds.app.route('/admin',  methods=['GET', 'POST'])
 
-# # Go to admin start page in app/routes.py 
-# @bp.route('/admin',  methods=['GET', 'POST'])
-# @login_required
-# @roles_required('admin')
-# def admin():
-#     """ Home page for administraor """    
-#     return render_template('/admin/admin.html') # entinen adminindex.html
+# Admin start page
+@bp.route('/admin',  methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'master')
+def admin():
+    """ Home page for administrator """    
+    print("-> bp.start.routes.admin")
+    return render_template('/admin/admin.html')
 
 
 @bp.route('/admin/clear_db/<string:opt>')
@@ -271,12 +270,13 @@ def list_user_gedcoms(user):
 @login_required
 @roles_accepted('admin')
 def site_map():
-    
+    "Show list of application route paths"
     class Link():
-        def __init__(self, url='', endpoint='', methods=''):
+        def __init__(self, url='', endpoint='', methods='', desc=''):
             self.url = url
             self.endpoint = endpoint
             self.methods = methods
+            self.desc = desc
 
     links = []
     for rule in shareds.app.url_map.iter_rules():

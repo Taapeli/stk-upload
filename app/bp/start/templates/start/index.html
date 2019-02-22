@@ -41,23 +41,19 @@
 				</form>
 			</div>
 
-			<div class="startbox">
-				<div style="display: inline-block;">
-					<h3>{{ _('Log in') }}</h3>
-                    <p>{{ _('As a member of Suomen sukututkimusseura, you can gain full access by logging in.') }}</a>.
-                    {{ _('Join our users by') }} 
-                    <a href="/message">{{ _('sending a message to administrators') }}.</a>.
-                </p>
-					<p>{{ _('If you have credentials, please log in here.') }}</p>
-					<form method="get" action="/login">
-						<div class="submit">
-							<button type="submit">{{ _('Log in') }}</button>
-						</div>
-					</form>
-				</div>
-			</div>
+         <div class="startbox gedtools">
+            <div style="display: inline-block;">
+            <form method="get" action="/gedcom">
+               <h3>{{ _('My gedcom material') }}</h3>
+               <p>{{ _('Upload your material in gedcom format or edit an already stored') }}</p>
+              <div class="submit"> 
+                 <button type="submit">{{ _('Gedcom handlings') }}</button>
+              </div>
+            </form>
+            </div>
+         </div>
 
-		</div>
+	   </div>
 	</div>
 </div>
 {% endblock %}

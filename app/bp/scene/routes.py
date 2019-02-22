@@ -32,13 +32,6 @@ def scene():
     print("--- " + repr(request))
     print("--- " + repr(user_session))
     print("-> bp.scene.routes.scene")
-#     # Is div parameter given in the form?
-#     if UserFilter.store_div(request):
-#         # Coming from start page: clear next_person links
-#         next_person = UserFilter.store_next_person(None)
-#     else:
-#         # Coming from start page: clear next_person links
-#         next_person = UserFilter.store_next_person(request)
     return render_template('/scene/index_scene.html')
 
 

@@ -78,7 +78,7 @@ def test_gedcom_upload(client):
     #os.remove(temp_gedcom_fname)
         
 def test_gedcom_list(client):
-    rv = client.get('/gedcom/list')
+    rv = client.get('/gedcom')
     data = rv.data.decode("utf-8")
     assert 'Ladatut gedcomit' in data
     
