@@ -14,7 +14,7 @@ from re import match
 from collections import defaultdict
 
 from flask import render_template, request, redirect, url_for, flash, jsonify, session
-from flask_security import login_required, current_user
+from flask_security import login_required, current_user, roles_required, roles_accepted
 from flask import send_from_directory
 from flask_babelex import _
 
@@ -168,8 +168,9 @@ def get_transforms():
     return sorted(transforms,key=lambda t: t.displayname)
 
 
-@bp.route('/gedcom/list', methods=['GET'])
+@bp.route('/gedcom', methods=['GET'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_list():
     gedcom_folder = get_gedcom_folder()
     user = get_gedcom_user()
@@ -194,6 +195,7 @@ def gedcom_list():
     
 @bp.route('/gedcom/versions/<gedcom>', methods=['GET'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom = secure_filename(gedcom)
@@ -204,12 +206,14 @@ def gedcom_versions(gedcom):
 
 @bp.route('/gedcom/history/<gedcom>', methods=['GET'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_history(gedcom):
     history_filename = gedcom_fullname(gedcom) + "-history"
     return open(history_filename).read()
 
 @bp.route('/gedcom/compare/<gedcom1>/<gedcom2>', methods=['GET'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_compare(gedcom1,gedcom2):
     import difflib
     filename1 = gedcom_fullname(gedcom1)
@@ -223,6 +227,7 @@ def gedcom_compare(gedcom1,gedcom2):
 
 @bp.route('/gedcom/revert/<gedcom>/<version>', methods=['GET'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_revert(gedcom,version):
     filename1 = gedcom_fullname(gedcom)
     filename2 = gedcom_fullname(version)
@@ -240,6 +245,7 @@ def gedcom_revert(gedcom,version):
 
 @bp.route('/gedcom/save/<gedcom>', methods=['GET'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_save(gedcom):
     filename1 = gedcom_fullname(gedcom)
     filename2 = filename1 + "-temp"
@@ -254,6 +260,7 @@ def gedcom_save(gedcom):
 
 @bp.route('/gedcom/check/<gedcom>', methods=['GET'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_check(gedcom):
     fullname = gedcom_fullname(gedcom)
     logging.info("fullname2: "+fullname)
@@ -264,6 +271,7 @@ def gedcom_check(gedcom):
     
 @bp.route('/gedcom/upload', methods=['POST'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_upload():
     # code from: http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
     def allowed_file(filename):
@@ -306,6 +314,7 @@ def gedcom_upload():
   
 @bp.route('/gedcom/download/<gedcom>')
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_download(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
@@ -317,6 +326,7 @@ def gedcom_download(gedcom):
 
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_info(gedcom):
     filename = gedcom_fullname(gedcom)
     if not os.path.exists(filename):
@@ -342,6 +352,7 @@ def gedcom_info(gedcom):
 
 @bp.route('/gedcom/update_desc/<gedcom>', methods=['POST'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_update_desc(gedcom):
     metadata = get_metadata(gedcom)
     desc = request.form['desc']
@@ -351,6 +362,7 @@ def gedcom_update_desc(gedcom):
 
 @bp.route('/gedcom/update_permission/<gedcom>/<permission>')
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_update_permission(gedcom,permission):
     metadata = get_metadata(gedcom)
     metadata['admin_permission'] = (permission == "true")
@@ -359,6 +371,7 @@ def gedcom_update_permission(gedcom,permission):
 
 @bp.route('/gedcom/analyze/<gedcom>')
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_analyze(gedcom):
     filename = gedcom_fullname(gedcom)
     metadata = get_metadata(gedcom)
@@ -368,6 +381,7 @@ def gedcom_analyze(gedcom):
 
 @bp.route('/gedcom/delete/<gedcom>')
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_delete(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
@@ -385,6 +399,7 @@ def gedcom_delete(gedcom):
 
 @bp.route('/gedcom/delete_old_versions/<gedcom>')
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_delete_old_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
@@ -515,6 +530,7 @@ def process_gedcom(arglist, transform_module):
                  
 @bp.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
 @login_required
+@roles_accepted('gedcom', 'research')
 def gedcom_transform(gedcom,transform):
     gedcom_filename = gedcom_fullname(gedcom)
     transform_module,parser = build_parser(transform, gedcom, gedcom_filename)

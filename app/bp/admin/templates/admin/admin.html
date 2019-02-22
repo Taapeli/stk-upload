@@ -33,22 +33,12 @@ function confirm_delete(url) {
        {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version') }} 
           <i>{{ 'git'|app_date }}</i></span>
-    
-    <div class="row">
-    {% if current_user.is_authenticated
-        and ( current_user.has_role('member') or current_user.has_role('admin') or current_user.has_role('master')) %}
-        <div class="startbox">
-            <h3>{{ _('Data Views as tables') }}</h3>
-            <p>{{ _('On the next page there are a variety of more technical listings and problem solving tools') }}
-            </p>
-            <form method="get" action="/tables">
-               <div class="submit"> 
-                  <button type="submit">{{ _('Explore the database') }}</button>
-               </div>
-            </form>
-        </div>
-    {% endif %}
 
+    <div id="paluu">
+        <a href="/">{{ _('Front Page') }}</a>
+    </div>
+   
+    <div class="row">
     {% if current_user.is_authenticated 
         and (current_user.has_role('admin') or current_user.has_role('master'))  %}
     <div class="startbox admin">
@@ -77,5 +67,19 @@ function confirm_delete(url) {
         </ul>
       </div>
     </div>{% endif %}
+
+    {% if current_user.is_authenticated
+        and ( current_user.has_role('member') or current_user.has_role('admin') or current_user.has_role('master')) %}
+        <div class="startbox">
+            <h3>{{ _('Data Views as tables') }}</h3>
+            <p>{{ _('On the next page there are a variety of more technical listings and problem solving tools') }}
+            </p>
+            <form method="get" action="/tables">
+               <div class="submit"> 
+                  <button type="submit">{{ _('Explore the database') }}</button>
+               </div>
+            </form>
+        </div>
+    {% endif %}
 
 {% endblock %}

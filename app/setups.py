@@ -5,7 +5,7 @@ from wtforms import SelectField, SubmitField, BooleanField
 from flask_security.utils import _
 from flask_mail import Mail
 from database.models.neo4jengine import Neo4jEngine 
-from database.models.neo4juserdatastore import Neo4jUserDatastore
+from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from database import adminDB
 import shareds

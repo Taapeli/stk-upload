@@ -6,7 +6,8 @@
 
 import os
 import logging
-from flask import Flask
+import shareds
+# from flask import Flask
 from werkzeug.utils import secure_filename
 
 if 'TMPDIR' in os.environ:
@@ -18,8 +19,8 @@ else:
 
 ALLOWED_EXTENSIONS = set(['gramps', 'txt', 'csv', 'xml'])
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# app = Flask(__name__)
+shareds.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 def upload_file(infile,folder=None, secure=False):
@@ -27,7 +28,7 @@ def upload_file(infile,folder=None, secure=False):
         and return the final full name of the file 
     """
     if not folder:
-        folder = app.config['UPLOAD_FOLDER']
+        folder = shareds.app.config['UPLOAD_FOLDER']
     try:
         filename = normalized_name(infile.filename)
     except Exception:
@@ -62,8 +63,8 @@ def fullname(name, secure=False):
     if not name:
         return ''
     elif secure:
-        return os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(name))
-    return os.path.join(app.config['UPLOAD_FOLDER'], name)
+        return os.path.join(shareds.app.config['UPLOAD_FOLDER'], secure_filename(name))
+    return os.path.join(shareds.app.config['UPLOAD_FOLDER'], name)
 
 def status_update(status):
     ''' STUB: Store process progress status 0..100 in metadata for display

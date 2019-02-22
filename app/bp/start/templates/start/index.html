@@ -21,15 +21,30 @@
 					<h3>{{ _('Learn about our service') }}</h3>
 					<p>
 						{{ _('<i>Finland Database</i> is a system for co\'operatively collect validated Finnish Genealogy data.') }} 
-						<a href="#" class="not-allowed">{{ _('See the process for your data') }}</a>.
+						<a href="http://isotammi.referata.com/wiki/Oma_aineisto_Isotammeen" 
+						 target="esite">{{ _('See the process for your data') }}</a>.
 					</p>
 					<p>{{ _("For more info see also documents -") }}</p>
 					<ul class="compact">
-						<li><a href="#" class="not-allowed">{{ _('Suomikanta database') }}</a></li>
-						<li><a href="#" class="not-allowed">{{ _('Gedcom healing services') }}</a></li>
+						<li><a href="http://isotammi.referata.com/wiki/Suomikanta_ja_sen_hy%C3%B6dynt%C3%A4minen"
+						 target="esite">{{ _('Suomikanta database') }}</a></li>
+						<li><a href="http://isotammi.referata.com/wiki/Sukutietojen_vakiointi_Gedcom-ohjelmilla"
+						 target="esite">{{ _('Gedcom healing services') }}</a></li>
 					</ul>
 				</div>
 			</div>
+
+         <div class="startbox gedtools">
+            <div style="display: inline-block;">
+            <form method="get" action="/gedcom">
+               <h3>{{ _('My gedcom material') }}</h3>
+               <p>{{ _('Upload your material in gedcom format or edit an already stored') }}</p>
+              <div class="submit"> 
+                 <button type="submit">{{ _('Gedcom handlings') }}</button>
+              </div>
+            </form>
+            </div>
+         </div>
 
 			<div class="startbox">
 				<h3>{{ _('Look at data in Suomikanta') }}</h3>
@@ -41,23 +56,7 @@
 				</form>
 			</div>
 
-			<div class="startbox">
-				<div style="display: inline-block;">
-					<h3>{{ _('Log in') }}</h3>
-                    <p>{{ _('As a member of Suomen sukututkimusseura, you can gain full access by logging in.') }}</a>.
-                    {{ _('Join our users by') }} 
-                    <a href="/message">{{ _('sending a message to administrators') }}.</a>.
-                </p>
-					<p>{{ _('If you have credentials, please log in here.') }}</p>
-					<form method="get" action="/login">
-						<div class="submit">
-							<button type="submit">{{ _('Log in') }}</button>
-						</div>
-					</form>
-				</div>
-			</div>
-
-		</div>
+	   </div>
 	</div>
 </div>
 {% endblock %}
