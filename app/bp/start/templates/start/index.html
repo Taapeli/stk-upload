@@ -21,24 +21,17 @@
 					<h3>{{ _('Learn about our service') }}</h3>
 					<p>
 						{{ _('<i>Finland Database</i> is a system for co\'operatively collect validated Finnish Genealogy data.') }} 
-						<a href="#" class="not-allowed">{{ _('See the process for your data') }}</a>.
+						<a href="http://isotammi.referata.com/wiki/Oma_aineisto_Isotammeen" 
+						 target="esite">{{ _('See the process for your data') }}</a>.
 					</p>
 					<p>{{ _("For more info see also documents -") }}</p>
 					<ul class="compact">
-						<li><a href="#" class="not-allowed">{{ _('Suomikanta database') }}</a></li>
-						<li><a href="#" class="not-allowed">{{ _('Gedcom healing services') }}</a></li>
+						<li><a href="http://isotammi.referata.com/wiki/Suomikanta_ja_sen_hy%C3%B6dynt%C3%A4minen"
+						 target="esite">{{ _('Suomikanta database') }}</a></li>
+						<li><a href="http://isotammi.referata.com/wiki/Sukutietojen_vakiointi_Gedcom-ohjelmilla"
+						 target="esite">{{ _('Gedcom healing services') }}</a></li>
 					</ul>
 				</div>
-			</div>
-
-			<div class="startbox">
-				<h3>{{ _('Look at data in Suomikanta') }}</h3>
-				<p>{{ _('Here you can see a restrected view on Finnish genealogical data.') }}</p>
-				<form method="get" action="/scene">
-					<div class="submit">
-						<button type="submit">{{ _('Explore the database') }}</button>
-					</div>
-				</form>
 			</div>
 
          <div class="startbox gedtools">
@@ -52,6 +45,16 @@
             </form>
             </div>
          </div>
+
+			<div class="startbox">
+				<h3>{{ _('Look at data in Suomikanta') }}</h3>
+				<p>{{ _('Here you can see a restrected view on Finnish genealogical data.') }}</p>
+				<form method="get" action="/scene">
+					<div class="submit">
+						<button type="submit">{{ _('Explore the database') }}</button>
+					</div>
+				</form>
+			</div>
 
 	   </div>
 	</div>
