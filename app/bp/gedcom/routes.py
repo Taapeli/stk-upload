@@ -111,7 +111,6 @@ def get_gedcom_user():
 
 def get_gedcom_folder():
     user = get_gedcom_user()
-    logging.info("gedcom user: "+user)
     return os.path.join(GEDCOM_DATA, user)
 
 def gedcom_fullname(gedcom):
