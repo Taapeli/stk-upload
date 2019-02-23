@@ -44,7 +44,7 @@ table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
     height:     100%;
     width:      100%;
     background: rgba( 255, 255, 255, .8 ) 
-                url('http://i.stack.imgur.com/FhHRx.gif') 
+                url('/static/5.gif') 
                 50% 50% 
                 no-repeat;
 }
