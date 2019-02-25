@@ -34,7 +34,7 @@ def datatables():
 
 @bp.route('/listall/<string:subj>')
 def show_table_data(subj):
-    """ Person listings
+    """ Person etc listings
         tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
     """
     t0 = time.time()

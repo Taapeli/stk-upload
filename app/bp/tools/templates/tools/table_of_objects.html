@@ -35,7 +35,7 @@ tbody tr td {max-width:300px}
               {% elif  k == "handle" %}<td><small>{{obj[k]|d('-')}}</small></td>
               {% elif  obj[k]|is_list %}<td><ul>
                 {% for i in obj[k] %}<li>{{i|d('-')}}</li>{% endfor %}</ul></td>
-              {% else %}<td>{{obj[k]|d('-')}}</td>
+              {% else %}<td>{% if obj[k] %}{{obj[k]|d('-')}}{% endif %}</td>
 		      {% endif %}
 	    	{% endfor %}
 	        </tr>

@@ -156,8 +156,9 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
 
 
     def save(self, tx, batch_id=None, parent_id=None):
-        """ Creates this Note object as a Note node using handle
-            If parent_id is given, a link (parent) --> (Note) is created 
+        """ Creates this Note object as a Note node
+            - if parent_id is given, link (parent) --> (:Note)  
+            - if batch_id is given, link (:Batch) --> (:Note)
         """
         n_attr = {}
         try:
@@ -173,14 +174,11 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
             if parent_id:
                 self.uniq_id = tx.run(Cypher_note_in_batch.create_as_leaf, 
                                       parent_id=parent_id, n_attr=n_attr).single()[0]
-            elif self.handle:
-                if batch_id:
-                    self.uniq_id = tx.run(Cypher_note_in_batch.create, 
-                                          bid=batch_id, n_attr=n_attr).single()[0]
-                else:
-                    raise RuntimeError("Note.save need batch_id {}".format(self.id))
+            elif batch_id:
+                self.uniq_id = tx.run(Cypher_note_in_batch.create, 
+                                      bid=batch_id, n_attr=n_attr).single()[0]
             else:
-                print("Note.save: No handle or parent node")
+                raise RuntimeError("Note.save need batch_id or parent_id for {}".format(self.id))
 
         except Exception as err:
             print("iError Note_save: {0} attr={1}".format(err, n_attr), file=stderr)

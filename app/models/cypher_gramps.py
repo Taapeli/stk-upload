@@ -164,15 +164,14 @@ class Cypher_note_in_batch():
         # MATCH (u:Batch {id:$bid}) -[*]-> (a {handle:$parent_handle})
     """
 
-    # Find the parent in given batch '2019-02-24.006'
-    # with handle '_e095a9d8e5513fe5fe9f8cb6436'
+    # Find the batch like '2019-02-24.006' and connect Note in that Batch
     create = """
-MATCH (u:Batch {id:$bid}) -[*]-> (a {handle:$parent_handle})
+MATCH (u:Batch {id:$bid})
 CREATE (u) -[:IN_BATCH]-> (n:Note {handle: $n_attr.handle}) 
     SET n = $n_attr
 RETURN ID(n)"""
 
-    # Find the parent in given batch '2019-02-24.006' with uniq_id.
+    # Find a known parent node with uniq_id and connect a new Note to it
     create_as_leaf = """
 MATCH (a) WHERE ID(a) = $parent_id
 CREATE (a) -[:NOTE]-> (n:Note {handle: $n_attr.handle}) 
