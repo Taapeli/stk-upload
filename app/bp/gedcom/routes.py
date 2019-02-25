@@ -554,7 +554,7 @@ def gedcom_transform(gedcom,transform):
             return process_gedcom(arglist, transform_module)
         
         #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
-        python_exe = sys.executable or "/opt/repo/virtenv/bin/python3"
+        python_exe = sys.executable or "/opt/jelastic-python37/bin/python3"
         python_path = ':'.join([os.path.join(APP_ROOT, 'app'), GEDCOM_APP])
         gedcom_app = GEDCOM_APP
         transform_py = os.path.join(GEDCOM_APP, "gedcom_transform.py")
