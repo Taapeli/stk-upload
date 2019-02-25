@@ -92,12 +92,16 @@ $(document).ready( function() {
         hide_all();
         $.get("/gedcom/versions/" + gedcom , function(versions) {
             $("#versions_list").empty();
-            $.each(versions, function(i,version) {
+            $.each(versions, function(i,versioninfo) {
             	//$("#versions_list").append("<li>"+version+"</li>");
+            	var version_number = versioninfo[0];
+            	var version = versioninfo[1];
+            	var displayname = versioninfo[2];
+            	var modtime = versioninfo[3];
             	var row = $("<tr><td>" +
             	"<input type=radio name=v1>" +
             	"<input type=radio name=v2>" +
-            	"<td><a href=/gedcom/download/"+version+">"+version+"</a></tr>");
+            	"<td><a href=/gedcom/download/"+version+">"+ modtime+" "+displayname+ "</a></tr>");
             	row.data("version",version);
             	$("#versions_list").append(row);
             });

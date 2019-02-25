@@ -19,7 +19,7 @@ from flask import send_from_directory
 from flask_babelex import _
 
 import logging 
-LOG = logging.getLogger(__name__)    
+LOG = logging.getLogger(__name__)
 
 from models import util
 
@@ -198,9 +198,17 @@ def gedcom_list():
 def gedcom_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom = secure_filename(gedcom)
-    versions = sorted([name for name in os.listdir(gedcom_folder) \
-                       if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
-    versions.append(gedcom)
+    versions = [] 
+    for name in os.listdir(gedcom_folder):
+        if name.startswith(gedcom+"."):
+            fullname = os.path.join(gedcom_folder,name)
+            modtime = util.format_date(os.stat(fullname).st_mtime)
+            version_number = int(name.split(".")[-1])
+            displayname = f"v.{version_number}" 
+            versions.append((version_number,name,displayname,modtime))
+    versions.sort()
+    fullname = os.path.join(gedcom_folder,gedcom)
+    versions.append((-1,gedcom,_("Current file"),util.format_date(os.stat(fullname).st_mtime)))
     return jsonify(versions)
 
 @bp.route('/gedcom/history/<gedcom>', methods=['GET'])
