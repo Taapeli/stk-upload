@@ -8,6 +8,23 @@
 
 {{ hamburger_menu() }}
 
+<script>
+$(document).ready( function() {
+    $('#send').click( function() {
+		$.post("/send_email",$("form").serialize(), 
+		function(rsp) {
+			alert("{{ _('Message sent') }}");
+		}
+	).fail(
+		function(rsp) {
+			alert("{{ _('Message send failed') }}");
+		}
+	);
+    });
+});
+</script>
+	
+
 <div id="startdiv">
   <div>
     <h2>{{ _("Contact administrators") }}</h2>
@@ -18,10 +35,11 @@
           <form action="#">
 		<p>{{ _('User') }} <i>{{current_user.name}}</i> 
 		    &lt;{{current_user.email}}&gt;</p>
-         <p>To do. (Should be possible also for unregistered user!)</p>
-         <div style="margin-left:10em;"> 
-            <button onclick="goBack()">{{ _('Go back') }}</button>
-            <input type="submit" value="{{ _('Apply') }}" />
+         <p>
+         <textarea id="message" name="message" rows="20" cols="80"></textarea>
+         </p>
+         <div> 
+            <input type="button" id="send" value="{{ _('Apply') }}" />
          </div>
          </form>
     </div>
