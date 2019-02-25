@@ -8,15 +8,16 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2019-02-11 15:41+0200\n"
-"PO-Revision-Date: 2018-12-18 00:48+0200\n"
+"PO-Revision-Date: 2019-02-25 20:37+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
 "Language-Team: sv <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -338,12 +339,8 @@ msgid "Data Views as tables"
 msgstr "Data vyn som tabeller"
 
 #: bp/admin/templates/admin/admin.html:42
-msgid ""
-"On the next page there are a variety of more technical listings and "
-"problem solving tools"
-msgstr ""
-"På nästa sida finns det mer tekniska listningar och problem lösnings "
-"verktyg"
+msgid "On the next page there are a variety of more technical listings and problem solving tools"
+msgstr "På nästa sida finns det mer tekniska listningar och problem lösnings verktyg"
 
 #: bp/admin/templates/admin/admin.html:46
 #: bp/scene/templates/scene/index_scene.html:95
@@ -737,8 +734,7 @@ msgid "Gedcoms"
 msgstr "Gedcom"
 
 #: bp/gedcom/handlers.py:221
-msgid ""
-"\n"
+msgid "\n"
 "{}:"
 msgstr ""
 
@@ -952,7 +948,7 @@ msgstr "Tag bort denna GEDCOM"
 
 #: bp/gedcom/templates/gedcom_info.html:170
 msgid "Analyze"
-msgstr ""
+msgstr "Teknisk analys"
 
 #: bp/gedcom/templates/gedcom_info.html:171
 msgid "Analyze this GEDCOM for structural problems"
@@ -1274,9 +1270,7 @@ msgstr "Ändra händelse typ \"Kaksonen\" och \"Kolmonen\" till NOTE taggar"
 
 #: bp/gedcom/transforms/sukujutut.py:251
 msgid "Remove trailing and multiple consecutive spaces in person and place names"
-msgstr ""
-"Tag bort radsluts mellanslag samt konsekutiva mellanslag i person och "
-"plats namn"
+msgstr "Tag bort radsluts mellanslag samt konsekutiva mellanslag i person och plats namn"
 
 #: bp/gedcom/transforms/sukujutut.py:253
 msgid "Change EMIG to RESI"
@@ -1406,9 +1400,7 @@ msgid "Delete"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:65
-msgid ""
-"The administrator can load your file to database as your new candidate "
-"material set"
+msgid "The administrator can load your file to database as your new candidate material set"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:67
@@ -1659,12 +1651,8 @@ msgid "Places List"
 msgstr "Plats lista"
 
 #: bp/scene/templates/scene/locations.html:12
-msgid ""
-"This page contains a directory of all the places and the closest lower-"
-"level locations beneath them."
-msgstr ""
-"Denna sida innehåller ett arkiv av alla platser samt de närmaste "
-"underliggande platser"
+msgid "This page contains a directory of all the places and the closest lower-level locations beneath them."
+msgstr "Denna sida innehåller ett arkiv av alla platser samt de närmaste underliggande platser"
 
 #: bp/scene/templates/scene/locations.html:24
 #: bp/scene/templates/scene/persons.html:93
@@ -2032,9 +2020,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: bp/scene/templates/scene/persons.html:29
-msgid ""
-"If the person has many names, they will appear in the list under each "
-"name."
+msgid "If the person has many names, they will appear in the list under each name."
 msgstr ""
 
 #: bp/scene/templates/scene/persons.html:32
@@ -2065,9 +2051,7 @@ msgid "Select people to display"
 msgstr ""
 
 #: bp/scene/templates/scene/persons.html:58
-msgid ""
-"Search takes place from beginning of selected name part, e.g. in Surname "
-"\"Sib\" coincides with the name \"Sibbe\"."
+msgid "Search takes place from beginning of selected name part, e.g. in Surname \"Sib\" coincides with the name \"Sibbe\"."
 msgstr ""
 
 #: bp/scene/templates/scene/persons.html:59
@@ -2213,9 +2197,7 @@ msgid "Learn about our service"
 msgstr ""
 
 #: bp/start/templates/start/index.html:23
-msgid ""
-"<i>Finland Database</i> is a system for co'operatively collect validated "
-"Finnish Genealogy data."
+msgid "<i>Finland Database</i> is a system for co'operatively collect validated Finnish Genealogy data."
 msgstr ""
 
 #: bp/start/templates/start/index.html:24
@@ -2249,9 +2231,7 @@ msgid "Log in"
 msgstr ""
 
 #: bp/start/templates/start/index.html:47
-msgid ""
-"As a member of Suomen sukututkimusseura, you can gain full access by "
-"logging in."
+msgid "As a member of Suomen sukututkimusseura, you can gain full access by logging in."
 msgstr ""
 
 #: bp/start/templates/start/index.html:48
@@ -2291,9 +2271,7 @@ msgid "Family Trees"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:43
-msgid ""
-"View your own data as candidate material and compare it with Suomi "
-"tietokanta database."
+msgid "View your own data as candidate material and compare it with Suomi tietokanta database."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:45
@@ -2318,9 +2296,7 @@ msgstr "Administratörs funktion"
 
 #: bp/start/templates/start/index_logged.html:73
 msgid "User and reference information management and database service tasks"
-msgstr ""
-"Användare och referens informations underhåll och databas service "
-"uppgifter"
+msgstr "Användare och referens informations underhåll och databas service uppgifter"
 
 #: bp/start/templates/start/index_logged.html:76
 msgid "Maintenance"
@@ -3548,9 +3524,7 @@ msgid "People whose name begins with"
 msgstr ""
 
 #: templates/join_persons.html:32
-msgid ""
-"Mark the central person (1st selection column) and the people to be "
-"merged (2nd column)"
+msgid "Mark the central person (1st selection column) and the people to be merged (2nd column)"
 msgstr ""
 
 #: templates/join_persons.html:33
@@ -3880,6 +3854,7 @@ msgstr "Kan ej ladda filen, kod ="
 #~ msgstr "Personer som har ett namn"
 
 #~ msgid "This page contains %(num)s person in %(order)s order."
+
 #~ msgid_plural "This page contains %(num)s persons in %(order)s order."
 #~ msgstr[0] "Denna sida innehåller %(num)s personer sorterade i %(order)s ordning."
 #~ msgstr[1] "Denna sida innehåller %(num)s personer sorterade i %(order)s ordning."
@@ -3903,6 +3878,7 @@ msgstr "Kan ej ladda filen, kod ="
 #~ msgstr "Patronym eller Matronym"
 
 #~ msgid "Showing %(num)s person name"
+
 #~ msgid_plural "Showing %(num)s person names"
 #~ msgstr[0] "Visar %(num)s person namn"
 #~ msgstr[1] "Visar %(num)s person namn"
@@ -4214,4 +4190,3 @@ msgstr "Kan ej ladda filen, kod ="
 
 #~ msgid "gender"
 #~ msgstr "kön"
-

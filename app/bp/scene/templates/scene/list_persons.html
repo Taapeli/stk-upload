@@ -7,7 +7,7 @@
 
 {% set cnt = persons|count %}
 {% set who = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-              3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'} %}
+              3:'omat ja Suomikanta', 5:'tuontierä ja Suomikanta'} %}
 
 {% if session['filter_div'] %}
     <h2>{{ _('Persons filtered by') }} {{ who[ session['filter_div'] ] }}</h2>

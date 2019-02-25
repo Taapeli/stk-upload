@@ -136,7 +136,7 @@ def show_persons_by_refname(refname, opt=""):
 
 class UserFilter():
     as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-               3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'}
+               3:'omat ja Suomikanta', 5:'tuontierä ja Suomikanta'}
 
     @staticmethod
     def store_div(request):
