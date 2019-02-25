@@ -4,6 +4,9 @@
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
+<style>
+tbody tr td {max-width:300px}
+</style>
         
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
