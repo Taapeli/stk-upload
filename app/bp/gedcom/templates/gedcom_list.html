@@ -11,20 +11,20 @@
   <div>
     <h2>{{ _("GEDCOM Management") }} ({{ _("user") }}: {{ user }})</h2>
     <div class="row">
-        <div class="startbox">
+        <div class="startbox2"> 
 	        <div style="display: inline-block;">
-	            <h3>{{ _("Uploaded GEDCOMs") }}</h3>
+	            <h3>{{ _("Uploaded GEDCOMs") }}</h3> 
 				<div>
-				    <ul>
+				    <table>
 					    {% for file in files %}
-						    <li>
-						    <b>{{ file.metadata.desc|escape }}</b>
-						    <br>
+						    <tr>
+						    <td>
 						    <a href="/gedcom/info/{{ file.name|escape }}">{{ file.name }}</a>
-						    <p>
-						    </li>
+						    <td><b>{{ file.metadata.desc|escape }}</b>
+						    </tr>
 					    {% endfor %}
-				    <p>{{ kpl }} {{ _("files") }}</p>
+					</table>
+				    <br><p>{{ kpl }} {{ _("files") }}</p>
 				</div>
 			</div>
 		</div>
