@@ -136,7 +136,7 @@ $(document).ready( function() {
         var ok = confirm(_('Are you sure?'));
         if (ok) {
         	$.get("/gedcom/delete/" + gedcom ,function() {
-        		window.location.replace("/gedcom/list");
+        		window.location.replace("/gedcom");
         	});
         }
     });
