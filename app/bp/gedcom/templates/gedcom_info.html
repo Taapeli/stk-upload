@@ -112,10 +112,8 @@ var gedcom = "{{ gedcom }}";
 	                        <td class="right">{{metadata.encoding}}
                     {% endif %}
 
-                    {% if info.charset %}
-					    <tr><td>{{ _("Gedcom charset") }}</td>
-					        <td class="right">{{ info.charset }}</td></tr>
-                    {% endif %}
+				    <tr><td>{{ _("Gedcom charset") }}</td>
+				        <td class="right">{{ info.charset }}</td></tr>
 
                     {% if info.source_program %}
 					    <tr><td>{{ _("Source program") }}</td>
