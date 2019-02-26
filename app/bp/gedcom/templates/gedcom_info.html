@@ -22,6 +22,16 @@ table.diff td {
   position: relative;
   display: inline-block;
   border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+  background-color: #657891; /* Triadic color of lightsteelblue */
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.tooltip a {
+  color: white;
+  font-weight: bold;
+  font-size:larger;
+  text-decoration: none;
 }
 
 /* Tooltip text */
@@ -64,6 +74,12 @@ table.diff td {
   opacity: 1;
 }
 
+.link {
+  color: #2f435e;
+  font-weight: bold;
+  font-size:larger;
+  text-decoration: none;
+}
 
 </style>
 
@@ -161,31 +177,45 @@ var gedcom = "{{ gedcom }}";
 	
 				<h3>{{ _("Options") }}</h3>
 				<div>
-				    <ul>
-				        <li><a href="#" id="show_history">
-	                        {{ _("Show transformation history") }}</a></li>
-				        <li><a href="/gedcom/download/{{ gedcom }}" id="download">
-				        	{{ _("Fetch this GEDCOM") }}</a></li>
-				        <li><a href="#" id="delete">
-	                        {{ _("Remove this GEDCOM") }}</a></li>
-	                </ul>
 				    <span class="tooltip">
-				    	<input type="submit" id="analyze" value='{{ _("Analyze") }}'>
+				    	<a href="#" id="analyze">{{ _("Analyze") }}</a>
 				    	<span class="tooltiptext">{{ _("Analyze this GEDCOM for structural problems") }}</span>
 			    	</span>
 				    <p>
+
 				    <span class="tooltip">
-					    <input type="submit" id="versions" value='{{ _("Display versions") }}'>
+					    <a href="#" id="transforms">{{ _("Choose a transformation") }}</a>
+				    	<span class="tooltiptext">{{ _("Choose a transformation to perform for this GEDCOM") }}</span>
+			    	</span>
+					<p>
+
+				    <span class="tooltip">
+					    <a href="#" id="versions">{{ _("Display versions") }}</a>
 				    	<span class="tooltiptext">{{ _("Display previous versions of this GEDCOM") }}</span>
 			    	</span>
 				    <p>
+
 				    <span class="tooltip">
-					    <input type="submit" id="transforms" value='{{ _("Choose a transformation") }}'>
-				    	<span class="tooltiptext">{{ _("Choose a transformation to perform for this GEDCOM") }}</span>
+				        <a href="#" id="show_history">
+	                        {{ _("Show transformation history") }}</a>
+				    	<span class="tooltiptext">{{ _("Show log of previous tranformations for this GEDCOM") }}</span>
 			    	</span>
-				    <ul>
-                        <li>&rtrif; <a href="/gedcom">{{ _("Switch to another GEDCOM") }}</a></li>
-                    </ul>
+			    	<p>
+
+				    <span class="tooltip">
+				    	<a href="/gedcom/download/{{ gedcom }}" id="download">
+				        	{{ _("Fetch this GEDCOM") }}</a>
+				    	<span class="tooltiptext">{{ _("Fetch this GEDCOM") }}</span>
+			    	</span>
+			    	<p>
+
+				    <span class="tooltip">
+				    	<a href="#" id="delete">{{ _("Remove this GEDCOM") }}</a>
+				    	<span class="tooltiptext">{{ _("Remove this GEDCOM") }}</span>
+			    	</span>
+			    	<p>
+
+                    &rtrif; <a class="link" href="/gedcom">{{ _("Switch to another GEDCOM") }}</a>
 				</div>
 	        </div>
 	      </div>
