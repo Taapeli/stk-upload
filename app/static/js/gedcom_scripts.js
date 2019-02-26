@@ -6,6 +6,12 @@ function hide_all() {
     $("div.gedcom").hide();
 }
 
+function show(id) {
+    var rect = $(id).show().get(0).getBoundingClientRect();
+	var y = rect.top;
+	window.scroll(0,y-50);
+}
+
 $(document).ready( function() {
     console.log("ready");
 
@@ -79,7 +85,7 @@ $(document).ready( function() {
         hide_all();
     	$.get("/gedcom/analyze/" + gedcom ,function(rsp) {
     	    $("#results").text(rsp);
-    	    $("#div_results").show();
+    	    show("#div_results");
     	});
     });
 
@@ -150,7 +156,7 @@ $(document).ready( function() {
     	$("#difftable").empty();
         $.get("/gedcom/history/" + gedcom , function(rsp) {
             $("#history").text(rsp);
-            $("#div_history").show();
+            show("#div_history");
         });
     });
 
@@ -191,7 +197,7 @@ $(document).ready( function() {
         	$("#palauta2").text(_('Revert to %1', [gedcom2])).data("gedcom",gedcom2);
         	if (!gedcom1.match(/\.ged$/)) $("#palauta1").show();
         	if (!gedcom2.match(/\.ged$/)) $("#palauta2").show();
-        	$("#div_compare").show();
+            show("#div_compare");
     	});
     });
 
@@ -235,7 +241,7 @@ $(document).ready( function() {
             	$("#div_oldname").hide();
             	$("#div_save").show();
         	}
-            $("#output").show();
+            show("#output");
         });
         return false;
     });
