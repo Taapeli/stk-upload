@@ -64,6 +64,12 @@ div.results-box {
   text-align: center;
 }
 
+.important {
+  color: red;
+  font-weight: bold;
+  font-size:larger;
+}
+
 /* http://stackoverflow.com/questions/1964839/jquery-please-wait-loading-animation    */
 .modal {
     display:    none;
