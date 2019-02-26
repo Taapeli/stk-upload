@@ -108,6 +108,11 @@ var gedcom = "{{ gedcom }}";
 	                        <td class="right">{{metadata.upload_time}}
                     {% endif %}
 
+                    {% if metadata.size %}
+	                    <tr><td>{{ _('File size') }}
+	                        <td class="right">{{metadata.size}}
+                    {% endif %}
+
                     {% if 1  or info.date %}
 	                    <tr><td>{{ _('Gedcom date') }}
 	                        <td class="right">{{info.date}} {{info.time}}

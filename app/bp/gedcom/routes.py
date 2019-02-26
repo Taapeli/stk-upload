@@ -314,6 +314,7 @@ def gedcom_upload():
             'desc':desc,
             'encoding':encoding,
             'upload_time':util.format_timestamp(),
+            'size':os.stat(fullname).st_size,
         }
         save_metadata(filename, metadata)
         history_init(fullname)
