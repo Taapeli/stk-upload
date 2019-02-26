@@ -84,7 +84,7 @@ $(document).ready( function() {
     $("#analyze").click(function() {
         hide_all();
     	$.get("/gedcom/analyze/" + gedcom ,function(rsp) {
-    	    $("#results").text(rsp);
+    	    $("#results").html(rsp);
     	    show("#div_results");
     	});
     });

@@ -136,6 +136,18 @@ class Out:
         print(s)
 out = Out()
 
+def printheader(title):
+    print("<div class=results-box>")
+    print(f"<h3 class=results-title>{title}</h3>")
+    print("<table class=results>")
+
+def printtrailer():
+    print("</table>")
+    print("</div>")
+
+def printitem(item):
+    print(f"<tr><td>{item}")
+
 class LineCounter:
     def __init__(self,title=None):
         self.title = title
@@ -145,34 +157,31 @@ class LineCounter:
     def display(self):
         if len(self.values) == 0: return
         print()
-        print(self.title) 
+        printheader(self.title) 
         for key,itemlist in sorted(self.values.items()):
             linenums = [str(item.linenum) for item in itemlist]
             if len(linenums) > 10:
                 linenums = linenums[0:10] 
                 linenums.append("...")
-            print("- {:25} (count={:5}, lines {})".format(key,len(itemlist),",".join(linenums)))   
-            #print("- {:25} (count={:5})".format(key,len(itemlist)))
-            #try:
-            #    for item in itemlist: item.print_items(out)
-            #except:
-            #    traceback.print_exc()   
-       
+            printitem(f"<b>{key:25}</b><td>(count={len(itemlist):5}, lines {','.join(linenums)})")
+        printtrailer() 
                 
+
+
 class Analyzer(transformer.Transformation):
     def __init__(self):
         self.info = Info()
         self.individuals = 0
         self.allowed_paths = read_allowed_paths()
-        self.illegal_paths = LineCounter(_("Invalid tag hierarchy:"))
-        self.novalues = LineCounter(_("No value:"))
-        self.invalid_dates = LineCounter(_("Invalid dates:"))
+        self.illegal_paths = LineCounter(_("Invalid tag hierarchy"))
+        self.novalues = LineCounter(_("No value"))
+        self.invalid_dates = LineCounter(_("Invalid dates"))
         #self.too_few = []
         #self.too_many = []
-        self.too_few = LineCounter(_("Too few child tags:"))
-        self.too_many = LineCounter(_("Too many child tags:"))
-        self.submitter_refs = LineCounter(_("Records for submitters:"))
-        self.family_with_no_parents = LineCounter(_("Families with no parents:"))
+        self.too_few = LineCounter(_("Too few child tags"))
+        self.too_many = LineCounter(_("Too many child tags"))
+        self.submitter_refs = LineCounter(_("Records for submitters"))
+        self.family_with_no_parents = LineCounter(_("Families with no parents"))
         self.submitters = dict()
         self.submitter_emails = dict()
         self.records = set()
@@ -229,26 +238,13 @@ class Analyzer(transformer.Transformation):
 
         if path in self.mandatory_paths: self.mandatory_paths.remove(path)     
         
-        """
-        for (suffix, tag, mincount,maxcount) in self.grammar_data:
-            if path.endswith(suffix):
-                count = 0
-                for c in item.children:
-                    if c.tag == tag: count += 1
-                if count < mincount:
-                    #self.too_few.append( (item,suffix,tag,mincount,count) )     
-                    self.too_few.add( "Only {} {} tags under {} - should be at least {}".format(count,tag,suffix,mincount), item )     
-                if count > maxcount:
-                    #self.too_many.append( (item, suffix,tag,maxcount,count) )     
-                    self.too_few.add( "{} {} tags under {} - should be at most {}".format(count,tag,suffix,maxcount), item )     
-        """
         taglist = gedcom_grammar_data2.data.get(path)
         if taglist:
             for (tag,(mincount,maxcount)) in taglist:
                 count = 0
                 for c in item.children:
                     if c.tag == tag: count += 1
-                if count < mincount:
+                if count > 0 and count < mincount:
                     self.too_few.add( "Only {} {} tags under {} - should be at least {}".format(count,tag,path,mincount), item )     
                 if maxcount and count > maxcount:
                     self.too_many.add( "{} {} tags under {} - should be at most {}".format(count,tag,path,maxcount), item )     
@@ -307,18 +303,17 @@ class Analyzer(transformer.Transformation):
 
             
     def display_results(self,options):
-        print()
-        print(_("Genders:"))
+        printheader(_("Genders:"))
         
         total = 0
         for sex,count in sorted(self.genders.items()):
-            print("- {}: {:5}".format(sex,count))
+            printitem(f"<b>{sex}</b><td>{count:5}")
             total += count
-        print("-  : {:5}".format(self.individuals-total))
+        printitem(f"<td>{self.individuals-total:5}")
+        printtrailer()
                     
         self.illegal_paths.display()
 
-        print()
         self.with_sources.display()
         self.without_sources.display()
 
@@ -336,34 +331,41 @@ class Analyzer(transformer.Transformation):
         self.submitter_refs2.display()
              
         if len(self.mandatory_paths) > 0:
-            print()
-            print(_("Missing paths:"))
+            printheader(_("Missing paths"))
             for path in sorted(self.mandatory_paths):
-                print("-",path)
+                printitem(f"<b>{path}</b>")
+            printtrailer()
 
         for parent_path,typeinfo in self.types.items():
             typeinfo.title = _("TYPEs for %(parent_path)s",parent_path=parent_path)
             typeinfo.display()
 
         if len(self.invalid_pointers) > 0:
-            print()
-            print("Invalid pointers:")
+            printheader(_("Invalid pointers"))
             for line in self.invalid_pointers:
-                print(" ",line)
+                printitem(line)
+            printtrailer()
             
         recs = self.xrefs - self.records 
         count = len(recs) 
         if count > 0: 
-            print()
             ellipsis = ", ..." if count > 10 else ""
-            print("{} missing records: {}{}".format(count,",".join(list(recs)[:10]),ellipsis))            
+            printheader(_("Missing records"))
+            for rec in list(recs)[:10]:          
+                printitem(rec)          
+            if count > 10: printitem("...")          
+            printitem(_("Total") + f"{count}")
+            printtrailer()
 
         recs = self.records - self.xrefs 
         count = len(recs) 
         if count > 0: 
-            print()
-            ellipsis = ", ..." if count > 10 else ""
-            print("{} unused records: {}{}".format(count,", ".join(list(recs)[:10]),ellipsis))         
+            printheader(_("Unused records"))
+            for rec in list(recs)[:10]:          
+                printitem(rec)          
+            if count > 10: printitem("...")          
+            printitem(_("Total") + f"{count}")
+            printtrailer()
 
 
             

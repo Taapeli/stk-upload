@@ -18,7 +18,7 @@
 				    <table>
 					    {% for file in files %}
 						    <tr>
-						    <td>
+						    <td class="gedcom-name">
 						    <a href="/gedcom/info/{{ file.name|escape }}">{{ file.name }}</a>
 						    <td><b>{{ file.metadata.desc|escape }}</b>
 						    </tr>
