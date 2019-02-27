@@ -176,12 +176,16 @@ class Neo4jUserDatastore(UserDatastore):
             raise
 
     def _update_user (self, tx, user):         # ============ User update ==============
-        rolelist = []
+        
+        if user.username == 'master': 
+            rolelist = ['master']
+        else:    
+            rolelist = []
 #   Build a list of updated user role names        
-        for role in user.roles:
-            roleToAdd = (role.name if isinstance(role, self.role_model) else role)
-            if not roleToAdd in rolelist:
-                rolelist.append(roleToAdd)
+            for role in user.roles:
+                roleToAdd = (role.name if isinstance(role, self.role_model) else role)
+                if not roleToAdd in rolelist:
+                    rolelist.append(roleToAdd)
         try:
             logger.debug('_put_user update' + user.email + ' ' + user.name)
 #   Confirm time is copied from allowed email if not in the user aregument        
