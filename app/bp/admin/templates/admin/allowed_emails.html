@@ -47,8 +47,8 @@
 	                    <td>{{e.allowed_email}}</td>
 	                    <td>{{e.default_role}}</td>
 	                    <td>{{e.creator}}</td>
-	                    <td>{{e.created_at}}</td>
-	                    <td>{{e.confirmed_at}}</td>
+	                    <td>{{e.created_at | isodatetime}}</td>
+	                    <td>{{e.confirmed_at | isodatetime}}</td>
 	                </tr>
 	            {% endfor %}
 	        {% else %}
