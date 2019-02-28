@@ -3,11 +3,11 @@
 {% block title %}{{ _("Uploads") }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <meta http-equiv="refresh" content="30">
-    {% if user %}
-	    <h2>{{ _("Uploads for user") }} '{{ user }}'</h2>
+    <!-- meta http-equiv="refresh" content="30" -->
+    {% if users %}
+    	<h2>{{ _("Uploads for users: ") }} <i>{{users}}</i></h2>
     {% else %}
-    	<h2>{{ _("Uploads for all users") }}</h2>
+	    <h2>{{ _("Uploads for all users") }}</h2>
     {% endif %}
     
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -73,8 +73,11 @@
 	           			{{ _("Delete file") }}</a> &nbsp;
 	           	</td>
 	       </tr>
-	    {% endfor %}</table>
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Return") }}</a></p>
+	    {% endfor %}
+	    </table>
+	    <br>
+	    {{ _("Number of files") }}: {{ uploads|count }}
+    <p>&rtrif; <a href="list_users">{{ _("List of users") }}</a></p>
 {% endblock %}
 </body>
 </html>
