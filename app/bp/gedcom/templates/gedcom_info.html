@@ -183,40 +183,44 @@ var gedcom = "{{ gedcom }}";
 				<h3>{{ _("Options") }}</h3>
 				<div>
 				    <span class="tooltip">
-				    	<a href="#" id="analyze">{{ _("Analyze") }}</a>
-				    	<span class="tooltiptext">{{ _("Analyze this GEDCOM for structural problems") }}</span>
+				    	<a href="#" id="analyze"
+				    	title='{{ _("Analyze this GEDCOM for structural problems") }}'>
+				    	{{ _("Analyze") }}</a>
 			    	</span>
 				    <p>
 
 				    <span class="tooltip">
-					    <a href="#" id="transforms">{{ _("Choose a transformation") }}</a>
-				    	<span class="tooltiptext">{{ _("Choose a transformation to perform for this GEDCOM") }}</span>
+					    <a href="#" id="transforms"
+				    	title='{{ _("Choose a transformation to perform for this GEDCOM") }}'>
+					    {{ _("Choose a transformation") }}</a>
 			    	</span>
 					<p>
 
 				    <span class="tooltip">
-					    <a href="#" id="versions">{{ _("Display versions") }}</a>
-				    	<span class="tooltiptext">{{ _("Display previous versions of this GEDCOM") }}</span>
+					    <a href="#" id="versions"
+				    	title='{{ _("Display previous versions of this GEDCOM") }}'>
+					    {{ _("Display versions") }}</a>
 			    	</span>
 				    <p>
 
 				    <span class="tooltip">
-				        <a href="#" id="show_history">
+				        <a href="#" id="show_history"
+				    	title='{{ _("Show log of previous tranformations for this GEDCOM") }}'>
 	                        {{ _("Show transformation history") }}</a>
-				    	<span class="tooltiptext">{{ _("Show log of previous tranformations for this GEDCOM") }}</span>
 			    	</span>
 			    	<p>
 
 				    <span class="tooltip">
-				    	<a href="/gedcom/download/{{ gedcom }}" id="download">
+				    	<a href="/gedcom/download/{{ gedcom }}" id="download"
+				    	title='{{ _("Fetch this GEDCOM") }}'>
 				        	{{ _("Fetch this GEDCOM") }}</a>
-				    	<span class="tooltiptext">{{ _("Fetch this GEDCOM") }}</span>
 			    	</span>
 			    	<p>
 
 				    <span class="tooltip">
-				    	<a href="#" id="delete">{{ _("Remove this GEDCOM") }}</a>
-				    	<span class="tooltiptext">{{ _("Remove this GEDCOM") }}</span>
+				    	<a href="#" id="delete"
+				    	title='{{ _("Remove this GEDCOM") }}'>
+				    	{{ _("Remove this GEDCOM") }}</a>
 			    	</span>
 			    	<p>
 
