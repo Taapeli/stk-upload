@@ -95,7 +95,7 @@ $(document).ready( function() {
 		                <tr data-active="{{u.is_active}}">
 		                	<td><input type="checkbox" class="user" name="select_user" value="{{u.username}}">
 		                	<td>{% if u.is_active %} {{ _("Active") }} {%else%} {{ _("Inactive") }} {%endif%}</td>
-		                    <td>{{(u.last_login_at / 1000) | timestamp }}</td>
+		                    <td>{% if u.last_login_at %} {{(u.last_login_at / 1000) | timestamp }} {% endif %}</td>
 		                    {% if current_user.username == u.username %}
 		                    <td title="{{ _('me') }}">&#9733; <b>{{u.username}}</b></td>
 		                      {% else %}<td>{{u.username}}{% endif %}</td>
