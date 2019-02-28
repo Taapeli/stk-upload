@@ -17,62 +17,23 @@ table.diff td {
 	overflow: hidden; 
 }
 
-/* Tooltip container */
-.tooltip {
+btn, span.button a {
   position: relative;
-  display: inline-block;
+  display: block;
   border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
   background-color: #657891; /* Triadic color of lightsteelblue */
   padding: 5px;
   border-radius: 10px;
-}
-
-.tooltip a {
   color: white;
   font-weight: bold;
   font-size:larger;
   text-decoration: none;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: auto;
 }
 
-/* Tooltip text */
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 120px;
-  background-color: #555;
-  color: #fff;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 6px;
-
-  /* Position the tooltip text */
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -60px;
-
-  /* Fade in tooltip */
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* Tooltip arrow */
-.tooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #555 transparent transparent transparent;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-}
 
 .link {
   color: #2f435e;
@@ -99,9 +60,7 @@ var gedcom = "{{ gedcom }}";
 				<h3>{{ _("GEDCOM") }} "{{gedcom}}"</h3>
 				<label for="desc">{{ _("Description") }}</label>
 			    <input id="desc" value='{{ metadata.desc }}' style="width: 14em">
-                <div class="submit">
-			         <input type="button" id="update_desc" value='{{ _("Update") }}'>
-			    </div>
+				<btn id="update_desc">{{ _("Update") }}</btn>
 				<table>
                     {% if metadata.upload_time %}
 	                    <tr><td>{{ _('Upload time') }}
@@ -182,47 +141,36 @@ var gedcom = "{{ gedcom }}";
 	
 				<h3>{{ _("Options") }}</h3>
 				<div>
-				    <span class="tooltip">
-				    	<a href="#" id="analyze"
+				    <btn id="analyze"
 				    	title='{{ _("Analyze this GEDCOM for structural problems") }}'>
-				    	{{ _("Analyze") }}</a>
-			    	</span>
-				    <p>
+				    	{{ _("Analyze") }}
+			    	</btn>
 
-				    <span class="tooltip">
-					    <a href="#" id="transforms"
+				    <btn id="transforms"
 				    	title='{{ _("Choose a transformation to perform for this GEDCOM") }}'>
-					    {{ _("Choose a transformation") }}</a>
-			    	</span>
-					<p>
+					    {{ _("Choose a transformation") }}
+			    	</btn>
 
-				    <span class="tooltip">
-					    <a href="#" id="versions"
+				    <btn id="versions"
 				    	title='{{ _("Display previous versions of this GEDCOM") }}'>
-					    {{ _("Display versions") }}</a>
-			    	</span>
-				    <p>
+					    {{ _("Display versions") }}
+			    	</btn>
 
-				    <span class="tooltip">
-				        <a href="#" id="show_history"
+				    <btn id="show_history"
 				    	title='{{ _("Show log of previous tranformations for this GEDCOM") }}'>
-	                        {{ _("Show transformation history") }}</a>
-			    	</span>
-			    	<p>
+	                        {{ _("Show transformation history") }}
+			    	</btn>
 
-				    <span class="tooltip">
+				    <span class="button">
 				    	<a href="/gedcom/download/{{ gedcom }}" id="download"
 				    	title='{{ _("Fetch this GEDCOM") }}'>
 				        	{{ _("Fetch this GEDCOM") }}</a>
 			    	</span>
-			    	<p>
 
-				    <span class="tooltip">
-				    	<a href="#" id="delete"
+				    <btn id="delete"
 				    	title='{{ _("Remove this GEDCOM") }}'>
 				    	{{ _("Remove this GEDCOM") }}</a>
-			    	</span>
-			    	<p>
+			    	</btn>
 
                     &rtrif; <a class="link" href="/gedcom">{{ _("Switch to another GEDCOM") }}</a>
 				</div>
@@ -251,9 +199,9 @@ var gedcom = "{{ gedcom }}";
 	
 		        <h3>{{ _("Versions") }}</h3>
 		        <table id="versions_list"></table>
-                <div class="submit">
-		          <button id="delete_old_versions">{{ _("Delete old versions") }}</button>
-		          <button id="compare">{{ _("Compare versions") }}</button>
+                <div class="xsubmit">
+		          <btn id="delete_old_versions">{{ _("Delete old versions") }}</btn>
+		          <btn id="compare">{{ _("Compare versions") }}</btn>
 		        </div>
 		    </div>
 		  </div>
@@ -262,6 +210,12 @@ var gedcom = "{{ gedcom }}";
 	        <div style="display: inline-block;">
 	
 		        <h3>{{ _("Transformation history") }}</h3>
+		        <a href="javascript:window.scroll(0,0)">
+			        <img src="/static/444-512.png" 
+			        	 width=100
+			        	 title="Top"
+		 		         style="position:fixed;bottom:0;right:0">
+		        </a>
 		        <pre>
 					<div id="history">
 					</div>
@@ -274,6 +228,12 @@ var gedcom = "{{ gedcom }}";
 	        <button id="palauta1" class="palauta_button"></button>
 	        <button id="palauta2" class="palauta_button"></button>
 	        <p>
+	        <a href="javascript:window.scroll(0,0)">
+		        <img src="/static/444-512.png" 
+		        	 width=100
+		        	 title="Top"
+	 		         style="position:fixed;bottom:0;right:0">
+	        </a>
 	        <div id="difftable">
 		    </div>
 		  </div>
@@ -295,7 +255,7 @@ var gedcom = "{{ gedcom }}";
 			<form id="form">
 		      <div id="div_transform_params1">
 		      </div>
-			  <input type="submit" id="transform" value='{{ _("Perform transformation") }}'>
+		      <btn id="transform">{{ _("Perform transformation") }}</btn>
 	        </form>
 	      </div>
 	      
@@ -311,6 +271,12 @@ var gedcom = "{{ gedcom }}";
 		<span class="important">{{ _("Not saved yet") }}</span>
 		<h3><button id="save_result">{{ _("Save result") }}</button></h3>
 		</div>
+	        <a href="javascript:window.scroll(0,0)">
+		        <img src="/static/444-512.png" 
+		        	 width=100
+		        	 title="Top"
+	 		         style="position:fixed;bottom:0;right:0">
+	        </a>
 		<pre>
 		  <div id="output_log">
 		  </div>
