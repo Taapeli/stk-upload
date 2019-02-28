@@ -110,7 +110,7 @@ class User(UserMixin):
         self.name = kwargs.get('name')
         self.language = kwargs.get('language')   
         self.password = kwargs.get('password')
-        self.is_active = True
+        self.is_active = kwargs.get('is_active')
         self.confirmed_at = kwargs.get('confirmed_at')
         self.roles = kwargs['roles']
         self.last_login_at = kwargs.get('last_login_at')
