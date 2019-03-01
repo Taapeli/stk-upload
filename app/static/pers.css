@@ -44,12 +44,10 @@ div#paluu {
     top: 50px;
     left: 4px;
     width: 38px;
-    /*position: absolute;
-    top: -18pt;
-    right: 0;*/
     display: inline-block;
     font-weight: normal;
     font-size: 9pt;
+    text-align: center;
     text-decoration: none;
     background: #f6f6f6; 
     padding: 2pt;

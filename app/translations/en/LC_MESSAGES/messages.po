@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-01 12:39+0200\n"
+"POT-Creation-Date: 2019-03-01 17:29+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -317,7 +317,10 @@ msgid "User"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:40
-msgid "witn roles"
+#: bp/admin/templates/admin/list_users.html:58
+#: bp/scene/templates/scene/index_scene.html:21
+#: bp/start/templates/start/index_logged.html:18
+msgid "with roles"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:41
@@ -466,11 +469,6 @@ msgstr ""
 msgid "Active User names"
 msgstr ""
 
-#: bp/admin/templates/admin/list_users.html:58
-#: bp/scene/templates/scene/index_scene.html:21
-msgid "roles:"
-msgstr ""
-
 #: bp/admin/templates/admin/list_users.html:91
 #: bp/admin/templates/admin/uploads.html:52
 #: bp/gramps/templates/gramps/uploads.html:52
@@ -507,7 +505,6 @@ msgid "Show uploaded Gramps files"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:116
-#: bp/gedcom/templates/gedcom_list.html:16
 msgid "Uploaded GEDCOMs"
 msgstr ""
 
@@ -552,8 +549,8 @@ msgid "Destroying <u>all former</u> and creating a unique index"
 msgstr ""
 
 #: bp/admin/templates/admin/reference.html:24
-#: bp/gedcom/templates/gedcom_list.html:44
-#: bp/gramps/templates/gramps/index_gramps.html:35
+#: bp/gedcom/templates/gedcom_list.html:41
+#: bp/gramps/templates/gramps/index_gramps.html:34
 msgid "Upload"
 msgstr ""
 
@@ -616,7 +613,6 @@ msgid "User list"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:3
-#: bp/gramps/templates/gramps/uploads.html:17
 msgid "Uploads"
 msgstr ""
 
@@ -735,7 +731,7 @@ msgid "Without sources"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:306
-msgid "Genders:"
+msgid "Genders"
 msgstr ""
 
 #: bp/gedcom/gedcom_analyze.py:326
@@ -773,12 +769,6 @@ msgstr ""
 
 #: bp/gedcom/routes.py:211
 msgid "Current file"
-msgstr ""
-
-#: bp/gedcom/routes.py:245
-msgid ""
-"\n"
-"{}:"
 msgstr ""
 
 #: bp/gedcom/routes.py:246 bp/gedcom/routes.py:247 bp/gedcom/routes.py:263
@@ -987,7 +977,7 @@ msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:61
 #: bp/gedcom/templates/gedcom_info.html:190
-#: bp/gedcom/templates/gedcom_list.html:41
+#: bp/gedcom/templates/gedcom_list.html:38
 #: bp/scene/templates/scene/person.html:77
 #: bp/scene/templates/scene/place_events.html:120
 #: bp/tools/templates/tools/table_baptism_data.html:16
@@ -1172,17 +1162,16 @@ msgstr ""
 msgid "GEDCOM Management"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_list.html:27
-msgid "file"
-msgid_plural "files"
-msgstr[0] ""
-msgstr[1] ""
+#: bp/gedcom/templates/gedcom_list.html:16
+msgid "Select your file for processing"
+msgstr ""
 
-#: bp/gedcom/templates/gedcom_list.html:34
+#: bp/gedcom/templates/gedcom_list.html:31
 msgid "Upload a new GEDCOM file"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_list.html:47
+#: bp/gedcom/templates/gedcom_list.html:44
+#: bp/gedcom/templates/gedcom_list.html:49
 msgid "Return main page"
 msgstr ""
 
@@ -1437,7 +1426,7 @@ msgid "Database save failed"
 msgstr ""
 
 #: bp/gramps/templates/gramps/index_gramps.html:3
-msgid "Stk User's Candidate Material"
+msgid "Isotammi User's Candidate Material"
 msgstr ""
 
 #: bp/gramps/templates/gramps/index_gramps.html:11
@@ -1459,26 +1448,26 @@ msgid "Message to the administrator"
 msgstr ""
 
 #: bp/gramps/templates/gramps/index_gramps.html:18
-msgid "Candidate material files"
+msgid "Candidate material xml files"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:27
+#: bp/gramps/templates/gramps/index_gramps.html:26
 msgid "Send data to server"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:31
-msgid "Select Gramps XML File (*. gramps) to become candidate material"
+#: bp/gramps/templates/gramps/index_gramps.html:30
+msgid "Select Gramps XML File (*.gramps) for converting to candidate material"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:43
-msgid "My data files in server"
+#: bp/gramps/templates/gramps/index_gramps.html:40
+msgid "My Gramps files on server"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:44
+#: bp/gramps/templates/gramps/index_gramps.html:41
 msgid "Manage your uploaded files"
 msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:45
+#: bp/gramps/templates/gramps/index_gramps.html:42
 msgid "List my uploads"
 msgstr ""
 
@@ -1499,6 +1488,7 @@ msgid "Time / sec"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:3
+#: bp/gramps/templates/gramps/uploads.html:17
 msgid "Uploads from Gramps"
 msgstr ""
 
@@ -1623,7 +1613,7 @@ msgid "No persons"
 msgstr ""
 
 #: bp/scene/templates/scene/index_scene.html:18
-msgid "Finland Database"
+msgid "Isotammi Database"
 msgstr ""
 
 #: bp/scene/templates/scene/index_scene.html:46
@@ -1639,11 +1629,11 @@ msgid "Selected set of material"
 msgstr ""
 
 #: bp/scene/templates/scene/index_scene.html:59
-msgid "Compare to Suomikanta"
+msgid "Compare to Isotammi Database"
 msgstr ""
 
 #: bp/scene/templates/scene/index_scene.html:62
-msgid "You can view only approved and public material in Suomi tietokanta"
+msgid "You can view only approved and public material in Isotammi Database"
 msgstr ""
 
 #: bp/scene/templates/scene/index_scene.html:66
@@ -1836,7 +1826,7 @@ msgid "Get more info"
 msgstr ""
 
 #: bp/scene/templates/scene/macros.html:74
-msgid "Log in to Stk"
+msgid "Log in to Isotammi"
 msgstr ""
 
 #: bp/scene/templates/scene/macros.html:94
@@ -2301,7 +2291,7 @@ msgid "Message from Isotammi user "
 msgstr ""
 
 #: bp/start/templates/start/index.html:4
-msgid "Stk Start Page"
+msgid "Isotammi Start Page"
 msgstr ""
 
 #: bp/start/templates/start/index.html:19
@@ -2375,15 +2365,11 @@ msgid "If you have credentials, please log in here."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:4
-msgid "Stk User's Start Page"
+msgid "Isotammi User's Start Page"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:16
-msgid "User's home page for Isotammi Database "
-msgstr ""
-
-#: bp/start/templates/start/index_logged.html:18
-msgid "with roles"
+msgid "User's home page for Isotammi Services"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:28
@@ -2406,8 +2392,8 @@ msgstr ""
 
 #: bp/start/templates/start/index_logged.html:45
 msgid ""
-"View your own data as candidate material and compare it with Suomi "
-"tietokanta database."
+"View your own data as candidate material and compare it with Isotammi "
+"database."
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:47
@@ -2461,7 +2447,7 @@ msgid "Apply"
 msgstr ""
 
 #: bp/start/templates/start/my_settings.html:4
-msgid "Stk User's Settings"
+msgid "User Settings"
 msgstr ""
 
 #: bp/start/templates/start/my_settings.html:17
@@ -2513,11 +2499,11 @@ msgid "Send password recovery link"
 msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:4
-msgid "Welcome to Suomi database"
+msgid "Welcome to Isotammi"
 msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:10
-msgid "Welcome to Finland Database"
+msgid "Welcome to Isotammi Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:17
@@ -2545,11 +2531,11 @@ msgid "Registration"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:11
-msgid "Fill in the User Information Form of Finland database Service"
+msgid "Fill in the User Information Form of Isotammi database Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:15
-msgid "Register  as a database user of Suomi tietokanta Service"
+msgid "Register as an user of Isotammi Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/send_confirmation.html:5
@@ -4640,5 +4626,75 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "User and reference information management and database service tasks"
+#~ msgstr ""
+
+#~ msgid "witn roles"
+#~ msgstr ""
+
+#~ msgid "roles:"
+#~ msgstr ""
+
+#~ msgid "Genders:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "\n"
+#~ "{}:"
+#~ msgstr ""
+
+#~ msgid "file"
+#~ msgid_plural "files"
+#~ msgstr[0] ""
+#~ msgstr[1] ""
+
+#~ msgid "Stk User's Candidate Material"
+#~ msgstr ""
+
+#~ msgid "Candidate material files"
+#~ msgstr ""
+
+#~ msgid "Select Gramps XML File (*. gramps) to become candidate material"
+#~ msgstr ""
+
+#~ msgid "My data files in server"
+#~ msgstr ""
+
+#~ msgid "Finland Database"
+#~ msgstr ""
+
+#~ msgid "Compare to Suomikanta"
+#~ msgstr ""
+
+#~ msgid "You can view only approved and public material in Suomi tietokanta"
+#~ msgstr ""
+
+#~ msgid "Log in to Stk"
+#~ msgstr ""
+
+#~ msgid "Stk Start Page"
+#~ msgstr ""
+
+#~ msgid "Stk User's Start Page"
+#~ msgstr ""
+
+#~ msgid "User's home page for Isotammi Database "
+#~ msgstr ""
+
+#~ msgid ""
+#~ "View your own data as candidate "
+#~ "material and compare it with Suomi "
+#~ "tietokanta database."
+#~ msgstr ""
+
+#~ msgid "Stk User's Settings"
+#~ msgstr ""
+
+#~ msgid "Welcome to Suomi database"
+#~ msgstr ""
+
+#~ msgid "Welcome to Finland Database"
+#~ msgstr ""
+
+#~ msgid "Fill in the User Information Form of Finland database Service"
 #~ msgstr ""
 
