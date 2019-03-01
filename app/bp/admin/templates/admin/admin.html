@@ -26,11 +26,18 @@ function confirm_delete(url) {
 }
 </script>
 
+<style>
+.startbox ul, .startbox2 ul {
+    list-style-type: disc;
+    margin-left: -26px;
+}
+</style>
+
 <div style="margin-left:50px; padding-bottom: 2em;">
   <div>
-    <h2>{{ _('Welcome to Finland Database') }}, {{current_user.username}}</h2>
+    <h2>{{ _('Isotammi Database Management Operations') }}</h2>
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
-       {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+       {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version') }} 
           <i>{{ 'git'|app_date }}</i></span>
 
@@ -46,10 +53,12 @@ function confirm_delete(url) {
         <h3>{{ _('Database Emptyings') }}</h3>
             <p><i>{{ _('Dangerous operations, which can not be undone!') }}</i></p>
             <ul>
-              <li><a href="#" onclick="confirm_clear('/admin/clear_db/total')">{{ _('Clear entire database') }}</a></li>
-              <li><a href="#" onclick="confirm_clear('/admin/clear_db/save_users')">{{ _('Clear entire database but saving user IDs') }}</a></li>
-              <li><a href="#" onclick="confirm_delete('/admin/clear_db/my_own')">{{ _('Delete my imported data') }} 
-                  ({{current_user.username}})</a></li>
+              <li><a href="#" onclick="confirm_clear('/admin/clear_db/total')">
+                  {{ _('Clear the entire database') }}</a></li>
+              <li><a href="#" onclick="confirm_clear('/admin/clear_db/save_users')">
+                  {{ _('Clear the database but save user IDs') }}</a></li>
+              <li><a href="#" onclick="confirm_delete('/admin/clear_db/my_own')">
+                  {{ _('Delete the imported data of user') }} <b>{{current_user.username}}</b></a></li>
             </ul>
       </div>
     </div>{% endif %}

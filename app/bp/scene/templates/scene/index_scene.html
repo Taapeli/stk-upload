@@ -15,10 +15,10 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _('Finland Database') }}</h2>
+    <h2>{{ _('Isotammi Database') }}</h2>
     {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
-       {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+       {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray"></p>
     {% endif %}
 
@@ -56,10 +56,10 @@
                     {% if filt == 4 or filt == 5 %}checked{% endif %}>{{ _('Selected set of material') }}<br>
                   &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
                     {% if filt == 3 or filt == 5 %}checked{% endif %}>
-                        {{ _('Compare to Suomikanta') }} 
+                        {{ _('Compare to Isotammi Database') }} 
                 </p>
      {% else %}
-                <p>{{ _('You can view only approved and public material in Suomi tietokanta') }}.</p>
+                <p>{{ _('You can view only approved and public material in Isotammi Database') }}.</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
                 <div class="submit"> 

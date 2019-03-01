@@ -303,7 +303,7 @@ class Analyzer(transformer.Transformation):
 
             
     def display_results(self,options):
-        printheader(_("Genders:"))
+        printheader(_("Genders"))
         
         total = 0
         for sex,count in sorted(self.genders.items()):

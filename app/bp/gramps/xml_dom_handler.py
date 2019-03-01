@@ -377,7 +377,7 @@ class DOM_handler():
             # konvertoitaisiin heti Note-nodeiksi sopivalla node-tyypillä
             #print("iNote {}".format(n))
 
-            n.save(self.tx)
+            n.save(self.tx, self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Notes", 'count':counter, 

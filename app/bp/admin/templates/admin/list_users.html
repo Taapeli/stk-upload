@@ -55,7 +55,7 @@ $(document).ready( function() {
         <h2>{{ _("Active User names") }}</h2>
          {% with messages = get_flashed_messages(with_categories=true) %}
 	    <p><small>{{ _('User') }} <i>{{current_user.name}}</i> &lt;{{current_user.email}}&gt;
-	       {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+	       {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
 	       <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
 	          <i>{{ 'git'|app_date }}</i></span>
 	    </small></p>

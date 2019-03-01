@@ -9,7 +9,7 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 from sys import stderr
 
 from models.gen.cypher import Cypher_note
-from models.cypher_gramps import Cypher_note_w_handle
+from models.cypher_gramps import Cypher_note_w_handle, Cypher_note_in_batch
 import shareds
 
 class Note:
@@ -110,6 +110,7 @@ class Note:
     @staticmethod
     def get_note_list(uniq_id):
         """ Reads all Note nodes or selected Note node from db
+            Also counts references to each Note
 
             Called only from models.datareader.get_notes for "table_of_data.html"
         """
@@ -119,22 +120,25 @@ class Note:
             if uniq_id:
                 query = """
 MATCH (n:Note) WHERE ID(note)=$nid
-RETURN ID(n) AS uniq_id, n"""
+    OPTIONAL MATCH (a) --> (n)
+RETURN ID(n) AS uniq_id, n, count(a) AS ref"""
                 result =  session.run(query, nid=uniq_id)
             else:
                 query = """
 MATCH (n:Note)
-RETURN ID(n) AS uniq_id, n 
-ORDER BY n.type"""
+    OPTIONAL MATCH (a) --> (n)
+RETURN ID(n) AS uniq_id, n, count(a) AS ref 
+    ORDER BY n.type"""
                 result =  session.run(query)
 
-        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text', 'url']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text', 'url', 'ref']
         notes = []
 
         for record in result:
             # Create a Note object from record
             node = record['n']
             n = Note.from_node(node)
+            n.ref = record['ref']
             notes.append(n)
 
         return (titles, notes)
@@ -151,9 +155,10 @@ ORDER BY n.type"""
         return '0'
 
 
-    def save(self, tx, parent_id=None):
-        """ Creates or updates this Note object as a Note node using handle
-            If parent_id is given, a link (parent) --> (Note) is created 
+    def save(self, tx, batch_id=None, parent_id=None):
+        """ Creates this Note object as a Note node
+            - if parent_id is given, link (parent) --> (:Note)  
+            - if batch_id is given, link (:Batch) --> (:Note)
         """
         n_attr = {}
         try:
@@ -167,17 +172,13 @@ ORDER BY n.type"""
                 "url": self.url
             }
             if parent_id:
-                if self.handle:
-                    self.uniq_id = tx.run(Cypher_note_w_handle.merge_as_leaf, 
-                                          parent_id=parent_id, n_attr=n_attr).single()[0]
-                else:
-                    self.uniq_id = tx.run(Cypher_note_w_handle.create_as_leaf, 
-                                          parent_id=parent_id, n_attr=n_attr).single()[0]
-            elif self.handle:
-                self.uniq_id = tx.run(Cypher_note_w_handle.create, 
-                                      n_attr=n_attr).single()[0]
+                self.uniq_id = tx.run(Cypher_note_in_batch.create_as_leaf, 
+                                      parent_id=parent_id, n_attr=n_attr).single()[0]
+            elif batch_id:
+                self.uniq_id = tx.run(Cypher_note_in_batch.create, 
+                                      bid=batch_id, n_attr=n_attr).single()[0]
             else:
-                print("Note.save: No handle or parent node")
+                raise RuntimeError("Note.save need batch_id or parent_id for {}".format(self.id))
 
         except Exception as err:
             print("iError Note_save: {0} attr={1}".format(err, n_attr), file=stderr)

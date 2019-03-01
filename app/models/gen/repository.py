@@ -183,7 +183,7 @@ class Repository:
 
         try:
             for note in self.notes:
-                note.save(tx, self.uniq_id)
+                note.save(tx, parent_id=self.uniq_id)
         except Exception as err:
             print("iError Repository.save note: {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing

@@ -242,7 +242,7 @@ def gedcom_revert(gedcom,version):
     if os.path.exists(filename1) and os.path.exists(filename2):
         os.rename(filename1,newname)
         os.rename(filename2,filename1)
-        history_append(filename1,_("\n{}:").format(util.format_timestamp()))
+        history_append("\n{}:".format(util.format_timestamp()))
         history_append(filename1,_("File {} saved as {}").format(filename1,newname))
         history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
         rsp = dict(newname=os.path.basename(newname))
