@@ -25,7 +25,8 @@
         {% for p in locations %}
         	{% set ini = p.pname[0]|list|first %}
             {% if loop.changed(ini) %}
-                <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+                <!-- li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li -->
+                <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
             {% endif %}
         {% endfor %}
 			</ul>

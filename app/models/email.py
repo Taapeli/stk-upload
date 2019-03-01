@@ -26,8 +26,9 @@ To: %s
         logging.error(str(e))
         traceback.print_exc()
 
-def email_admin(subject,body):
-    mail_from = shareds.app.config.get('ADMIN_EMAIL_FROM')
+def email_admin(subject,body,sender=None):
+    if sender is None:
+        sender = shareds.app.config.get('ADMIN_EMAIL_FROM')
     mail_to = shareds.app.config.get('ADMIN_EMAIL_TO')
-    if mail_from and mail_to:
-        email(mail_from,mail_to,subject,body)
+    if sender and mail_to:
+        email(sender,mail_to,subject,body)

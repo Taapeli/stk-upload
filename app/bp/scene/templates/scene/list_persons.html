@@ -7,7 +7,7 @@
 
 {% set cnt = persons|count %}
 {% set who = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-              3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'} %}
+              3:'omat ja Suomikanta', 5:'tuontierä ja Suomikanta'} %}
 
 {% if session['filter_div'] %}
     <h2>{{ _('Persons filtered by') }} {{ who[ session['filter_div'] ] }}</h2>
@@ -75,7 +75,7 @@
             {% for p in persons %}
                 {% set ini = p.sortname[0] %}
                 {% if loop.changed(ini) %}{% if not ini == "#" %}
-                    <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+	                <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
                 {% endif %}{% endif %}
             {% endfor %}
             <li><a href="/scene/persons_all/?fw={{next[1]}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
@@ -101,7 +101,7 @@
 	               {% if loop.changed(ini) %}
 		               {% if ini == "#" %}{% set symbol = '–' %}
 		               {% else %}{% set symbol = ini %}{% endif %}
-		               <a id="{{symbol}}" name="{{alpha}}" title="{{ _('Back to Top') }}" 
+		               <a id="{{symbol}}" name="{{ini}}" title="{{ _('Back to Top') }}" 
 		                  href="#">{{symbol}}</a>
 	               {% endif %}</td>
 

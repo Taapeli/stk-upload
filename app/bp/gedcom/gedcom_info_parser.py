@@ -6,7 +6,7 @@ def initialize(options):
 class Info: 
     gedcom_version = None
     submitter = None
-    charset = None
+    charset = ""
     date = ""
     time = ""
     source_program = None

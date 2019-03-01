@@ -5,6 +5,51 @@
 {{ super() }}
 
 <style>form { display: inline-block; }</style>
+
+<script>
+$(document).ready( function() {
+    console.log("ready");
+
+    $(document).on({
+        ajaxStart: function() { $("body").addClass("loading");  },
+        ajaxStop: function() { $("body").removeClass("loading"); },    
+        ajaxError: function() { $("#errors").text(('Server error')).show(); }    
+    });
+
+	$("#select_all").click(function(e) {
+		var checked = $("#select_all").is(":checked");
+		$("input.user").prop("checked",checked);
+    });
+ 
+	$("input[name=select]").click(function(e) {
+		var value = $(e.target).val();
+		$("tr[data-active]").hide();
+		if (value == "all") $("tr[data-active]").show();
+		if (value == "active") $("tr[data-active=True]").show();
+		if (value == "inactive") $("tr[data-active=False]").show();
+    });
+
+	$("#list_uploads").click(function(e) {
+		$("input.user:hidden:checked").prop("checked",false);
+		$("#form").attr("action","list_uploads_all");
+		$("#form").submit();
+    });
+
+	$("#list_user_gedcoms").click(function(e) {
+		$("input.user:hidden:checked").prop("checked",false);
+		$("#form").attr("action","list_user_gedcoms");
+		$("#form").submit();
+    });
+
+	$("#send_email").click(function(e) {
+		$("input.user:hidden:checked").prop("checked",false);
+		$("#form").attr("action","send_email");
+		$("#form").submit();
+    });
+});
+	        
+</script>
+                    
 <div id="startdiv">
     <div>
         <h2>{{ _("Active User names") }}</h2>
@@ -24,13 +69,33 @@
         {% endwith %}
        <div id="errors" class="errors"></div>
         <div class="row">
+        	<table>
+        		<tr>
+        			<td><input type="radio" name="select" value="all" checked>All users
+        			<td><input type="radio" name="select" value="active">Active users only
+        			<td><input type="radio" name="select" value="inactive">Inactive users only
+        	</table>
+        	<br>
              <div style="display: inline-block;">
+             <form id="form" action="" method="post">
 		        <table class="table100">
-		            <tr><th>{{ _("User name") }}</th><th>{{ _("Name") }}</th><th>{{ _("Email address") }}</th>
-		            <th>{{ _("Language") }}</th><th>{{ _("Roles") }}</th><th>{{ _("Operations") }}</th></tr>
+		            <tr>
+                	<th><input type="checkbox" id="select_all"></th>
+		            <th>{{ _("Is active") }}</th>
+		            <th>{{ _("Last login time") }}</th>
+		            <th>{{ _("User name") }}</th>
+		            <th>{{ _("Name") }}</th>
+		            <th>{{ _("Email address") }}</th>
+		            <th>{{ _("Language") }}</th>
+		            <th>{{ _("Roles") }}</th>
+		            <th>{{ _("Operations") }}</th>
+		            </tr>
 		        {% if users %}
 		            {% for u in users %}
-		                <tr>
+		                <tr data-active="{{u.is_active}}">
+		                	<td><input type="checkbox" class="user" name="select_user" value="{{u.username}}">
+		                	<td>{% if u.is_active %} {{ _("Active") }} {%else%} {{ _("Inactive") }} {%endif%}</td>
+		                    <td>{% if u.last_login_at %} {{(u.last_login_at / 1000) | timestamp }} {% endif %}</td>
 		                    {% if current_user.username == u.username %}
 		                    <td title="{{ _('me') }}">&#9733; <b>{{u.username}}</b></td>
 		                      {% else %}<td>{{u.username}}{% endif %}</td>
@@ -38,10 +103,7 @@
                             <td>{{u.email}}</td>
                             <td class="center">{{u.language}}</td>
 		                    <td>{{u.roles}}</td>
-		                    <td><a href="list_uploads/{{u.username}}">{{ _("Uploaded files") }}</a>
-		                      | <a href="list_user_gedcoms/{{u.username}}">{{ _("Uploaded GEDCOMs") }}</a>
-                              | <a href="update_user/{{u.username}}">{{ _("Edit user") }}</a>
-                            </td>
+		                    <td><a href="update_user/{{u.username}}">{{ _("Edit user") }}</a></td>
 		                </tr>
 		            {% endfor %}
 		        {% else %}
@@ -49,7 +111,11 @@
 		        {% endif %}
 		        </table>
 		        <p>
-	            <a href=list_uploads_all>{{ _("Uploads for all users") }}</a>
+		        <h3>{{ _("Operations for selected users") }}</h3>
+					<button id="list_uploads">{{ _("Show uploaded Gramps files") }}</button>
+		        	<button id="list_user_gedcoms">{{ _("Uploaded GEDCOMs") }}</button>
+		        	<button id="send_email">{{ _("Send email") }}</button>
+	        </form>
 	        </div>
     </div> 
   </div>

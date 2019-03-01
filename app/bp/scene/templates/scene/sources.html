@@ -17,7 +17,7 @@
         {% for s in sources %}
         	{% set ini = s.stitle|list|first|upper %}
             {% if loop.changed(ini) %}
-                <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+                <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
             {% endif %}
         {% endfor %}
 			</ul>

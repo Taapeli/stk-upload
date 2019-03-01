@@ -110,7 +110,7 @@ class User(UserMixin):
         self.name = kwargs.get('name')
         self.language = kwargs.get('language')   
         self.password = kwargs.get('password')
-        self.is_active = True
+        self.is_active = kwargs.get('is_active')
         self.confirmed_at = kwargs.get('confirmed_at')
         self.roles = kwargs['roles']
         self.last_login_at = kwargs.get('last_login_at')
@@ -146,8 +146,10 @@ class Allowed_email():
        
     def __init__(self, **kwargs):
         self.allowed_email = kwargs['allowed_email']
-        self.default_role = kwargs.get('default_role')        
-
+        self.default_role = kwargs.get('default_role') 
+        self.creator = kwargs.get('creator')
+        self.created_at = kwargs.get('created_at')         
+        self.confirmed_at = kwargs.get('confirmed_at') 
 
 
 class ExtendedLoginForm(LoginForm):
@@ -252,6 +254,16 @@ def _jinja2_filter_datestamp(time_str, fmt=None):
     except:
         return time_str
 
+@shareds.app.template_filter('isodatetime')
+def _jinja2_filter_datetime(datetime, fmt=None):
+    """ Datetime ISO-muotoon ilman sekunnin osia """
+    if datetime == None:
+        return ""
+    try:
+        s = datetime.strftime('%Y-%m-%d %H:%M:%S')
+        return s
+    except:
+        return "Error"
 
 @shareds.app.template_filter('transl')
 def _jinja2_filter_translate(term, var_name, lang="fi"):

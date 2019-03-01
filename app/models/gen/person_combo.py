@@ -181,7 +181,7 @@ return path"""
 
         persons = []
         as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-                   3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'}
+                   3:'omat ja Suomikanta', 5:'tuontierä ja Suomikanta'}
 
         print("Get {} persons of {} for user {} starting from {!r}".\
               format(limit, as_text[show], user, fw_from))

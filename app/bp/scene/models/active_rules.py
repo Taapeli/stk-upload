@@ -7,7 +7,7 @@ from setups import Role
 
 class UserFilter():
     as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-               3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'}
+               3:'omat ja Suomikanta', 5:'tuontierä ja Suomikanta'}
 
     def __init__(self, user_session):
         '''
@@ -94,7 +94,7 @@ class ActiveRules():
                   FILTER_OWN:                   'omat aineistoni', 
                   FILTER_BATCH:                 'tuontierä',
                   FILTER_PUBLIC + FILTER_OWN:   'omat ja Suomikanta', 
-                  FILTER_PUBLIC + FILTER_BATCH: 'tuotierä ja Suomikanta'}
+                  FILTER_PUBLIC + FILTER_BATCH: 'tuontierä ja Suomikanta'}
 
     def __init__(self, session, roles=[]):
         '''
