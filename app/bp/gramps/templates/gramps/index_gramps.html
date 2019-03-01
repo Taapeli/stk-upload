@@ -15,7 +15,7 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _('Candidate material files') }}</h2>
+    <h2>{{ _('Candidate material xml files') }}</h2>
     <p>{{ _('User') }} <b>{{current_user.name}}</b></p>
 
         <div class="row">
@@ -28,7 +28,7 @@
                   <form action="/gramps/upload" method="post"  enctype="multipart/form-data">
                  <div style="display: inline-block;">
                    <input type="hidden" name="material" value="xml_file">
-                   <p>{{ _('Select Gramps XML File (*. gramps) to become candidate material') }}</p>
+                   <p>{{ _('Select Gramps XML File (*.gramps) for converting to candidate material') }}</p>
                    <input type="file" name="filenm" />
                  </div>
                  <div class="submit"> 
@@ -40,7 +40,7 @@
     
          <div class="startbox">
             <div style="display: inline-block;">
-	            <h3>{{ _('My data files in server') }}</h3>
+	            <h3>{{ _('My Gramps files in server') }}</h3>
 	            <p>{{ _('Manage your uploaded files') }}</p>
 	            <p><a href=/gramps/uploads>{{ _("List my uploads") }}</a></p>
             </div>

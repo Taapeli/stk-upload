@@ -167,7 +167,7 @@ class Cypher_note_in_batch():
     # Find the batch like '2019-02-24.006' and connect Note in that Batch
     create = """
 MATCH (u:Batch {id:$bid})
-CREATE (u) -[:IN_BATCH]-> (n:Note {handle: $n_attr.handle}) 
+CREATE (u) -[:IN_BATCH]-> (n:Note) 
     SET n = $n_attr
 RETURN ID(n)"""
 
