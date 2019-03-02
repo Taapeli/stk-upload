@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-01 12:39+0200\n"
+"POT-Creation-Date: 2019-03-01 17:29+0200\n"
 "PO-Revision-Date: 2019-02-26 18:01+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -304,7 +304,7 @@ msgstr "haluatko todella poistaa tuomasi tiedot?"
 
 #: bp/admin/templates/admin/admin.html:38
 msgid "Isotammi Database Management Operations"
-msgstr ""
+msgstr "Isotammi-tietokannan hallinta"
 
 #: bp/admin/templates/admin/admin.html:39
 #: bp/admin/templates/admin/list_users.html:57
@@ -317,8 +317,11 @@ msgid "User"
 msgstr "Käyttäjä"
 
 #: bp/admin/templates/admin/admin.html:40
-msgid "witn roles"
-msgstr ""
+#: bp/admin/templates/admin/list_users.html:58
+#: bp/scene/templates/scene/index_scene.html:21
+#: bp/start/templates/start/index_logged.html:18
+msgid "with roles"
+msgstr "rooleina"
 
 #: bp/admin/templates/admin/admin.html:41
 #: bp/admin/templates/admin/list_users.html:59
@@ -329,7 +332,7 @@ msgstr "Sovellusversio"
 
 #: bp/admin/templates/admin/admin.html:45
 msgid "Front Page"
-msgstr "Etusivu"
+msgstr "Etu-sivu"
 
 #: bp/admin/templates/admin/admin.html:53
 msgid "Database Emptyings"
@@ -341,15 +344,15 @@ msgstr "Vaarallisia toimintoja, joita ei voi perua!"
 
 #: bp/admin/templates/admin/admin.html:57
 msgid "Clear the entire database"
-msgstr ""
+msgstr "Tyhjennä koko tietokanta"
 
 #: bp/admin/templates/admin/admin.html:59
 msgid "Clear the database but save user IDs"
-msgstr ""
+msgstr "Tyhjennä tietokanta, säästä käyttäjät rooleineen"
 
 #: bp/admin/templates/admin/admin.html:61
 msgid "Delete the imported data of user"
-msgstr ""
+msgstr "Tyhjennä käyttäjän tuomat tiedot:"
 
 #: bp/admin/templates/admin/admin.html:70
 msgid "User and reference information management"
@@ -468,11 +471,6 @@ msgstr "Tiedot kannasta"
 msgid "Active User names"
 msgstr "Aktiiviset käyttäjät"
 
-#: bp/admin/templates/admin/list_users.html:58
-#: bp/scene/templates/scene/index_scene.html:21
-msgid "roles:"
-msgstr "roolit:"
-
 #: bp/admin/templates/admin/list_users.html:91
 #: bp/admin/templates/admin/uploads.html:52
 #: bp/gramps/templates/gramps/uploads.html:52
@@ -481,11 +479,11 @@ msgstr "Toimenpiteet"
 
 #: bp/admin/templates/admin/list_users.html:97
 msgid "Active"
-msgstr ""
+msgstr "Aktiivinen"
 
 #: bp/admin/templates/admin/list_users.html:97
 msgid "Inactive"
-msgstr ""
+msgstr "Suljettu"
 
 #: bp/admin/templates/admin/list_users.html:100
 #: bp/admin/templates/admin/uploads.html:58
@@ -502,20 +500,19 @@ msgstr "Ei käyttäjiä"
 
 #: bp/admin/templates/admin/list_users.html:114
 msgid "Operations for selected users"
-msgstr ""
+msgstr "Toiminnot valituille käyttäjille"
 
 #: bp/admin/templates/admin/list_users.html:115
 msgid "Show uploaded Gramps files"
-msgstr ""
+msgstr "Näytä ladatut Gramps-tiedostot"
 
 #: bp/admin/templates/admin/list_users.html:116
-#: bp/gedcom/templates/gedcom_list.html:16
 msgid "Uploaded GEDCOMs"
 msgstr "Ladatut gedcomit"
 
 #: bp/admin/templates/admin/list_users.html:117
 msgid "Send email"
-msgstr ""
+msgstr "Lähetä sähköposti"
 
 #: bp/admin/templates/admin/load_result.html:3
 msgid "Gramps to Neo4j log"
@@ -554,8 +551,8 @@ msgid "Destroying <u>all former</u> and creating a unique index"
 msgstr "Tuhotaan <u>kaikki entiset</u> ja luodaan yksikäsitteinen indeksi"
 
 #: bp/admin/templates/admin/reference.html:24
-#: bp/gedcom/templates/gedcom_list.html:44
-#: bp/gramps/templates/gramps/index_gramps.html:35
+#: bp/gedcom/templates/gedcom_list.html:41
+#: bp/gramps/templates/gramps/index_gramps.html:34
 msgid "Upload"
 msgstr "Lähetä"
 
@@ -615,16 +612,15 @@ msgstr "Paluu"
 
 #: bp/admin/templates/admin/update_user.html:41
 msgid "User list"
-msgstr ""
+msgstr "Käyttäjäluettelo"
 
 #: bp/admin/templates/admin/uploads.html:3
-#: bp/gramps/templates/gramps/uploads.html:17
 msgid "Uploads"
 msgstr "Lataukset"
 
 #: bp/admin/templates/admin/uploads.html:8
 msgid "Uploads for users: "
-msgstr ""
+msgstr "Lataukset käyttäjäiltä: "
 
 #: bp/admin/templates/admin/uploads.html:10
 msgid "Uploads for all users"
@@ -690,11 +686,11 @@ msgstr "Poista tiedosto"
 
 #: bp/admin/templates/admin/uploads.html:79
 msgid "Number of files"
-msgstr ""
+msgstr "Tiedostojen lukumäärä"
 
 #: bp/admin/templates/admin/uploads.html:80
 msgid "List of users"
-msgstr ""
+msgstr "Käyttäjälistaus"
 
 #: bp/gedcom/gedcom_analyze.py:12
 msgid "GEDCOM Analyzer"
@@ -737,8 +733,8 @@ msgid "Without sources"
 msgstr "Ilman lähteitä"
 
 #: bp/gedcom/gedcom_analyze.py:306
-msgid "Genders:"
-msgstr ""
+msgid "Genders"
+msgstr "Sukupuolet"
 
 #: bp/gedcom/gedcom_analyze.py:326
 msgid "Submitters"
@@ -755,19 +751,19 @@ msgstr "TYPE-kentän arvot %(parent_path)s-rakenteissa"
 
 #: bp/gedcom/gedcom_analyze.py:344
 msgid "Invalid pointers"
-msgstr ""
+msgstr "Vialliset osoittimet"
 
 #: bp/gedcom/gedcom_analyze.py:353
 msgid "Missing records"
-msgstr ""
+msgstr "Puuttuvat tietueet"
 
 #: bp/gedcom/gedcom_analyze.py:357 bp/gedcom/gedcom_analyze.py:367
 msgid "Total"
-msgstr ""
+msgstr "Yhteensä"
 
 #: bp/gedcom/gedcom_analyze.py:363
 msgid "Unused records"
-msgstr ""
+msgstr "Käyttämättömät tiedot"
 
 #: bp/gedcom/routes.py:190
 msgid "Gedcoms"
@@ -776,12 +772,6 @@ msgstr "gedcomit"
 #: bp/gedcom/routes.py:211
 msgid "Current file"
 msgstr "Nykyinen tiedosto"
-
-#: bp/gedcom/routes.py:245
-msgid ""
-"\n"
-"{}:"
-msgstr ""
 
 #: bp/gedcom/routes.py:246 bp/gedcom/routes.py:247 bp/gedcom/routes.py:263
 #: bp/gedcom/routes.py:264
@@ -989,7 +979,7 @@ msgstr "gedcom"
 
 #: bp/gedcom/templates/gedcom_info.html:61
 #: bp/gedcom/templates/gedcom_info.html:190
-#: bp/gedcom/templates/gedcom_list.html:41
+#: bp/gedcom/templates/gedcom_list.html:38
 #: bp/scene/templates/scene/person.html:77
 #: bp/scene/templates/scene/place_events.html:120
 #: bp/tools/templates/tools/table_baptism_data.html:16
@@ -1002,7 +992,7 @@ msgstr "Päivitä"
 
 #: bp/gedcom/templates/gedcom_info.html:71
 msgid "File size"
-msgstr ""
+msgstr "Tiedoston koko"
 
 #: bp/gedcom/templates/gedcom_info.html:76
 msgid "Gedcom date"
@@ -1174,17 +1164,16 @@ msgstr "Gedcom-aineistot"
 msgid "GEDCOM Management"
 msgstr "Gedcom-tiedostojen hallinta"
 
-#: bp/gedcom/templates/gedcom_list.html:27
-msgid "file"
-msgid_plural "files"
-msgstr[0] "tiedosto"
-msgstr[1] "tiedostoa"
+#: bp/gedcom/templates/gedcom_list.html:16
+msgid "Select your file for processing"
+msgstr ""
 
-#: bp/gedcom/templates/gedcom_list.html:34
+#: bp/gedcom/templates/gedcom_list.html:31
 msgid "Upload a new GEDCOM file"
 msgstr "Lataa uusi gedcom-tiedosto"
 
-#: bp/gedcom/templates/gedcom_list.html:47
+#: bp/gedcom/templates/gedcom_list.html:44
+#: bp/gedcom/templates/gedcom_list.html:49
 msgid "Return main page"
 msgstr "Paluu etusivulle"
 
@@ -1439,7 +1428,7 @@ msgid "Database save failed"
 msgstr "Talletus tietokantaan epäonnistui"
 
 #: bp/gramps/templates/gramps/index_gramps.html:3
-msgid "Stk User's Candidate Material"
+msgid "Isotammi User's Candidate Material"
 msgstr "Käyttäjän ehdokasaineisto"
 
 #: bp/gramps/templates/gramps/index_gramps.html:11
@@ -1461,26 +1450,26 @@ msgid "Message to the administrator"
 msgstr "Pyyntö tai ilmoitus Toimistolle"
 
 #: bp/gramps/templates/gramps/index_gramps.html:18
-msgid "Candidate material files"
-msgstr "Ehdokasaineistot XML-muodossa"
+msgid "Candidate material xml files"
+msgstr ""
 
-#: bp/gramps/templates/gramps/index_gramps.html:27
+#: bp/gramps/templates/gramps/index_gramps.html:26
 msgid "Send data to server"
 msgstr "Aineiston lähettäminen"
 
-#: bp/gramps/templates/gramps/index_gramps.html:31
-msgid "Select Gramps XML File (*. gramps) to become candidate material"
+#: bp/gramps/templates/gramps/index_gramps.html:30
+msgid "Select Gramps XML File (*.gramps) for converting to candidate material"
 msgstr "Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi"
 
-#: bp/gramps/templates/gramps/index_gramps.html:43
-msgid "My data files in server"
+#: bp/gramps/templates/gramps/index_gramps.html:40
+msgid "My Gramps files on server"
 msgstr "Tiedostoni palvelimella"
 
-#: bp/gramps/templates/gramps/index_gramps.html:44
+#: bp/gramps/templates/gramps/index_gramps.html:41
 msgid "Manage your uploaded files"
 msgstr "Hallinnoi lataamiasi tiedostoja"
 
-#: bp/gramps/templates/gramps/index_gramps.html:45
+#: bp/gramps/templates/gramps/index_gramps.html:42
 msgid "List my uploads"
 msgstr "Tiedostoluettelo"
 
@@ -1501,6 +1490,7 @@ msgid "Time / sec"
 msgstr "Aika sekunneissa"
 
 #: bp/gramps/templates/gramps/uploads.html:3
+#: bp/gramps/templates/gramps/uploads.html:17
 msgid "Uploads from Gramps"
 msgstr "Grampsista ladatut aineistot"
 
@@ -1625,8 +1615,8 @@ msgid "No persons"
 msgstr "Ei ketään"
 
 #: bp/scene/templates/scene/index_scene.html:18
-msgid "Finland Database"
-msgstr "Suomikanta"
+msgid "Isotammi Database"
+msgstr "Isotammi"
 
 #: bp/scene/templates/scene/index_scene.html:46
 msgid "Select Material for Browsing"
@@ -1641,12 +1631,12 @@ msgid "Selected set of material"
 msgstr "Valittu ehdokasaineisto (tuontierä)"
 
 #: bp/scene/templates/scene/index_scene.html:59
-msgid "Compare to Suomikanta"
-msgstr "Vertaa Suomikantaan"
+msgid "Compare to Isotammi Database"
+msgstr "Vertaa Isotammi-tietokantaan"
 
 #: bp/scene/templates/scene/index_scene.html:62
-msgid "You can view only approved and public material in Suomi tietokanta"
-msgstr "Voit katsoa vain hyväksyttyjä, julkisia tietoja Suomikannassa"
+msgid "You can view only approved and public material in Isotammi Database"
+msgstr "Voit katsoa vain hyväksyttyjä, julkisia tietoja Isotammi-tietokannassa"
 
 #: bp/scene/templates/scene/index_scene.html:66
 #: bp/tools/templates/tools/table_persons.html:15
@@ -1759,8 +1749,8 @@ msgid ""
 "This page contains a directory of all the places and the closest lower-"
 "level locations beneath them."
 msgstr ""
-"Tällä sivulla on hakemisto kaikista paikoista ja niiden alla lähinnä "
-"olevista  alemman tason paikoista."
+"Tällä sivulla on hakemisto kaikista paikoista ja niihin välittömästi "
+"sisältyvistä paikoista."
 
 #: bp/scene/templates/scene/locations.html:24
 #: bp/scene/templates/scene/persons.html:93
@@ -1840,7 +1830,7 @@ msgid "Get more info"
 msgstr "Katso lisätietoja"
 
 #: bp/scene/templates/scene/macros.html:74
-msgid "Log in to Stk"
+msgid "Log in to Isotammi"
 msgstr "Kirjaudu sisään"
 
 #: bp/scene/templates/scene/macros.html:94
@@ -2307,26 +2297,28 @@ msgid "Message from Isotammi user "
 msgstr "Viesti Isotammi-käyttäjältä"
 
 #: bp/start/templates/start/index.html:4
-msgid "Stk Start Page"
-msgstr "Suomikannan alkusivu"
+msgid "Isotammi Start Page"
+msgstr "Isotammi alkusivu"
 
 #: bp/start/templates/start/index.html:19
 msgid "Welcome to Isotammi Services"
-msgstr ""
+msgstr "Tervetuloa Isotammeen"
 
 #: bp/start/templates/start/index.html:24
 msgid "Learn about Isotammi"
-msgstr ""
+msgstr "Tutustu palveluumme"
 
 #: bp/start/templates/start/index.html:27
 msgid ""
 "<i>Isotammi Database</i> is a system for co'operatively collect validated"
 " Finnish Genealogy data."
 msgstr ""
+"<i>Isotammi-tietokanta</i> rakennetaan, jotta voimme yhteistyössä koota "
+"suuren luotettavasti tarkastettujen sukutietojen kokoelman."
 
 #: bp/start/templates/start/index.html:29
 msgid "See the process for your data"
-msgstr "Katso miten sukutietosi voidaan liittää Suomen aineistoon"
+msgstr "Katso miten sukutietosi voidaan liittää Isotammen aineistoon"
 
 #: bp/start/templates/start/index.html:31
 msgid "For more info see also documents -"
@@ -2334,23 +2326,23 @@ msgstr "Lisätietoja kuvauksissa –"
 
 #: bp/start/templates/start/index.html:34
 msgid "Why Isotammi database"
-msgstr ""
+msgstr "Mikä on Isotammi-tietokanta?"
 
 #: bp/start/templates/start/index.html:36
 msgid "Gedcom data healing services"
-msgstr ""
+msgstr "Sukutietojen vakiointi Gedcom-ohjelmillamme"
 
 #: bp/start/templates/start/index.html:41
 msgid "Look at demo data in Isotammi Database"
-msgstr ""
+msgstr "Selaa Isotammen demotietokantaa"
 
 #: bp/start/templates/start/index.html:42
 msgid "Here you can see a restrected view on demo genealogical data."
-msgstr ""
+msgstr "Tässä rajattu näkymä Isotammen tietoihin."
 
 #: bp/start/templates/start/index.html:45
 msgid "Explore demo"
-msgstr ""
+msgstr "Selaa demotietoja"
 
 #: bp/start/templates/start/index.html:51
 #: bp/start/templates/start/index.html:60
@@ -2360,47 +2352,45 @@ msgstr "Kirjaudu sisään"
 
 #: bp/start/templates/start/index.html:52
 msgid "As a member of <i>Suomen sukututkimusseura</i>, you can log in,"
-msgstr ""
+msgstr "<i>Suomen sukututkimusseuran</i> jäsenenä voit kirjatua sisää,"
 
 #: bp/start/templates/start/index.html:53
 msgid ""
 "refine the structure of your own data and get full access to the demo "
 "database"
-msgstr ""
+msgstr "parantaa omien tietojesi rakennetta ja saada pääsyn koko demokantaan"
 
 #: bp/start/templates/start/index.html:54
 msgid "Join our users by"
-msgstr ""
+msgstr "Liity käyttäjäksi"
 
 #: bp/start/templates/start/index.html:55
 msgid "sending a message to administrators"
-msgstr ""
+msgstr "lähettämällä viestin ylläpitäjille Isotammen toimistoon"
 
 #: bp/start/templates/start/index.html:57
 msgid "If you have credentials, please log in here."
-msgstr ""
+msgstr "Jos sinulla on käyttäjätunnukset, kirjaudu sisään tästä."
 
 #: bp/start/templates/start/index_logged.html:4
-msgid "Stk User's Start Page"
+msgid "Isotammi User's Start Page"
 msgstr "Käyttäjän alkusivu"
 
 #: bp/start/templates/start/index_logged.html:16
-msgid "User's home page for Isotammi Database "
-msgstr ""
-
-#: bp/start/templates/start/index_logged.html:18
-msgid "with roles"
+msgid "User's home page for Isotammi Services"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:28
 msgid "Your Gramps data"
-msgstr ""
+msgstr "Gramps-tiedostosi"
 
 #: bp/start/templates/start/index_logged.html:30
 msgid ""
 "Send your Gramps xml file to Isotammi database and store it as a "
 "candidate material."
 msgstr ""
+"Lähetä oma Gramps xml -tiedostosi palvelimelle ja talleta se Isotammen "
+"ehdokasaineistoksi."
 
 #: bp/start/templates/start/index_logged.html:32
 msgid "Gramps files"
@@ -2408,13 +2398,13 @@ msgstr "Gramps-tiedostot"
 
 #: bp/start/templates/start/index_logged.html:44
 msgid "Look at the Family Trees"
-msgstr ""
+msgstr "Tutustu Isotammen sukupuihin"
 
 #: bp/start/templates/start/index_logged.html:45
 msgid ""
-"View your own data as candidate material and compare it with Suomi "
-"tietokanta database."
-msgstr "Näytä ehdokasaineistoasi ja vertaa Suomikantaan"
+"View your own data as candidate material and compare it with Isotammi "
+"database."
+msgstr "Katso ehdokasaineistoasi ja vertaa Isotammi-tietokantaan"
 
 #: bp/start/templates/start/index_logged.html:47
 msgid "Family Trees"
@@ -2422,23 +2412,23 @@ msgstr "Sukupuut"
 
 #: bp/start/templates/start/index_logged.html:59
 msgid "My Gedcom Materials"
-msgstr ""
+msgstr "Gedcom-vakiointi"
 
 #: bp/start/templates/start/index_logged.html:60
 msgid "Upload your .ged files and experiment various cleanup functions"
-msgstr ""
+msgstr "Lataa oma .ged-tiedostosi palvelimelle ja kokeile eri vakiointitoimia"
 
 #: bp/start/templates/start/index_logged.html:62
 msgid "My Gedcom files"
-msgstr ""
+msgstr "Gedcom-tiedostot"
 
 #: bp/start/templates/start/index_logged.html:74
 msgid "Admin Operations"
-msgstr ""
+msgstr "Ylläpitotoimet"
 
 #: bp/start/templates/start/index_logged.html:75
 msgid "Manage users, reference data sets and do database maintanance tasks"
-msgstr ""
+msgstr "Hallinnoi käyttäjiä ja referenssitietoja sekä hallinnoi tietokantaa."
 
 #: bp/start/templates/start/index_logged.html:77
 msgid "Maintenance"
@@ -2467,7 +2457,7 @@ msgid "Apply"
 msgstr "Lähetä"
 
 #: bp/start/templates/start/my_settings.html:4
-msgid "Stk User's Settings"
+msgid "User Settings"
 msgstr "Käyttäjän asetukset"
 
 #: bp/start/templates/start/my_settings.html:17
@@ -2519,12 +2509,12 @@ msgid "Send password recovery link"
 msgstr "Lähetä salasanan elvyttämislinkki"
 
 #: bp/stk_security/templates/security/login_user.html:4
-msgid "Welcome to Suomi database"
-msgstr "Tervetuloa Suomikantaan"
+msgid "Welcome to Isotammi"
+msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:10
-msgid "Welcome to Finland Database"
-msgstr "Tervetuloa Suomikantaan"
+msgid "Welcome to Isotammi Service"
+msgstr "Tervetuloa Isotammi-palveluun"
 
 #: bp/stk_security/templates/security/login_user.html:17
 msgid "Login with your credentials"
@@ -2536,7 +2526,7 @@ msgstr "Eikö kirjautuminen onnistu?"
 
 #: bp/stk_security/templates/security/login_user.html:36
 msgid "You must first ask for enrolling a user from administrator."
-msgstr "Sinun on pyydettävä kutsu ylläpitäjältä."
+msgstr "Sinun on pyydettävä kutsu Isotammen toimistosta."
 
 #: bp/stk_security/templates/security/login_user.html:37
 msgid "Then you can register in and create your user id."
@@ -2551,12 +2541,12 @@ msgid "Registration"
 msgstr "Rekisteröityminen"
 
 #: bp/stk_security/templates/security/register_user.html:11
-msgid "Fill in the User Information Form of Finland database Service"
-msgstr "Täytä käyttäjätietolomake Suomikantaan"
+msgid "Fill in the User Information Form of Isotammi database Service"
+msgstr "Täytä käyttäjätietolomake Isotammeen"
 
 #: bp/stk_security/templates/security/register_user.html:15
-msgid "Register  as a database user of Suomi tietokanta Service"
-msgstr "Rekisteröidy Suomitietokannan käyttäjäksi"
+msgid "Register as an user of Isotammi Service"
+msgstr "Rekisteröidy Isotammen käyttäjäksi"
 
 #: bp/stk_security/templates/security/send_confirmation.html:5
 msgid "Verifying registration"
@@ -2568,7 +2558,7 @@ msgstr "Lähetä vahvistamislinkki"
 
 #: bp/tools/routes.py:66
 msgid "Note List"
-msgstr "Huomautusluettelo"
+msgstr "Huomautukset"
 
 #: bp/tools/routes.py:66
 msgid "Note Items"
@@ -3535,7 +3525,7 @@ msgstr "mökki"
 
 #: templates/jinja_filters.py:163
 msgid "Cemetery"
-msgstr "kautausmaa"
+msgstr "hautausmaa"
 
 #: templates/jinja_filters.py:164
 msgid "Kappeliseurakunta"
@@ -3785,7 +3775,7 @@ msgstr "-- valitse sarake --"
 
 #: templates/select_refcols.html:31 templates/select_refcols.html:59
 msgid "Given name_normalized"
-msgstr "Etunimi_vakioitu"
+msgstr "Etunimi, vakioitu"
 
 #: templates/select_refcols.html:33 templates/select_refcols.html:61
 msgid "PatroRef"
@@ -3793,11 +3783,11 @@ msgstr "Viite patronyymissä olevaan etunimeen"
 
 #: templates/select_refcols.html:34 templates/select_refcols.html:62
 msgid "Surname_normalized"
-msgstr "Sukunimi_vakioitu"
+msgstr "Sukunimi, vakioitu"
 
 #: templates/select_refcols.html:36 templates/select_refcols.html:64
 msgid "Occupation_normalized"
-msgstr "Ammatti_vakioitu"
+msgstr "Ammatti, vakioitu"
 
 #: templates/select_refcols.html:38 templates/select_refcols.html:66
 msgid "Place_normalized"
@@ -3871,109 +3861,25 @@ msgstr "Tiedoston lataaminen ei onnistu"
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
 
-#~ msgid "Guest"
-#~ msgstr "Avoimet palvelut"
-
-#~ msgid "Stk-server"
-#~ msgstr "Stk-palvelin"
-
-#~ msgid "files"
-#~ msgstr "tiedostoa"
-
-#~ msgid "Citation groups"
-#~ msgstr "Lähdeviitteiden ryhmät"
-
-#~ msgid "Stk"
-#~ msgstr "Stk-palvelu"
+#~ msgid "roles:"
+#~ msgstr "roolit:"
 
 #~ msgid ""
-#~ "As a member of Suomen sukututkimusseura,"
-#~ " you can gain full access by "
-#~ "logging in."
-#~ msgstr ""
-#~ "Suomen sukututkimusseuran jäsenenä pääset "
-#~ "selaamaan kaikkia tietoja kirjautumalla."
-
-#~ msgid "Join our users by"
-#~ msgstr "Liity käyttäjiimme lähettämällä"
-
-#~ msgid "sending a message to administrators"
-#~ msgstr "viestin ylläpitäjille 'Toimistoon'"
-
-#~ msgid "If you have credentials, please log in here."
-#~ msgstr "Jos sinulla on käyttäjätunnukset, kirjaudu tässä."
-
-#~ msgid "Clear entire database"
-#~ msgstr "Tyhjennä koko kanta"
-
-#~ msgid "Clear entire database but saving user IDs"
-#~ msgstr "Tyhjennä säästäen käyttäjätunnukset"
-
-#~ msgid "Delete my imported data"
-#~ msgstr "Poista itse tuomani tiedot"
-
-#~ msgid "Uploaded files"
-#~ msgstr "Ladatut tiedostot"
-
-#~ msgid "Uploads for user"
-#~ msgstr "Lataukset käyttäjältä"
-
-#~ msgid "Genders"
-#~ msgstr "Sukupuolet"
-
-#~ msgid "KKu: Editing of Family tree sources"
+#~ "\n"
+#~ "{}:"
 #~ msgstr ""
 
-#~ msgid "Learn about our service"
-#~ msgstr "Tutustu palveluumme"
+#~ msgid "file"
+#~ msgid_plural "files"
+#~ msgstr[0] "tiedosto"
+#~ msgstr[1] "tiedostoa"
 
-#~ msgid ""
-#~ "<i>Finland Database</i> is a system for"
-#~ " co'operatively collect validated Finnish "
-#~ "Genealogy data."
-#~ msgstr ""
-#~ "<i>Suomikanta</i> rakennetaan, jotta voimme "
-#~ "yhteistyössä koota suuren luotettavasti "
-#~ "tarkastettujen sukutietojen kokoelman."
+#~ msgid "Candidate material files"
+#~ msgstr "Ehdokasaineistot XML-muodossa"
 
-#~ msgid "Suomikanta database"
-#~ msgstr "Suomikanta ja sen hyödyntäminen"
+#~ msgid "User's home page for Isotammi Database "
+#~ msgstr "Isotammi-tietokannan kotisivu"
 
-#~ msgid "Gedcom healing services"
-#~ msgstr "Sukutietojen vakiointi Gedcom-ohjelmillamme"
-
-#~ msgid "My gedcom material"
-#~ msgstr "Gedcom-tiedostoni"
-
-#~ msgid "Upload your material in gedcom format or edit an already stored"
-#~ msgstr "Muokkaa uutta tai jo talletettua gedcom-aineistoasi"
-
-#~ msgid "Gedcom handlings"
-#~ msgstr "Gedcom-käsittelyt"
-
-#~ msgid "Look at data in Suomikanta"
-#~ msgstr "Katso Suomikannan tietoja"
-
-#~ msgid "Here you can see a restrected view on Finnish genealogical data."
-#~ msgstr "Tässä rajattu näkymä Suomikannan tietoihin."
-
-#~ msgid "User's home page for Finland Database "
-#~ msgstr "Suomikannan käyttäjän alkusivu"
-
-#~ msgid "Send and manage your Gramps data"
-#~ msgstr "Lähetä ja hallinnoi Gramps-aineistojasi"
-
-#~ msgid "Manage your Gramps xml files and convert them to Suomi tietokanta."
-#~ msgstr "Hallinnoi Grampsin xml-tiedostoja ja toimita Suomikantaan"
-
-#~ msgid "My Persons and Events"
-#~ msgstr "Omat henkilöni ja tapahtumani"
-
-#~ msgid "Admin function"
-#~ msgstr "Ylläpitäjän toiminnot"
-
-#~ msgid "User and reference information management and database service tasks"
-#~ msgstr ""
-#~ "Käyttäjien ja referenssitietojen hallinta sekä"
-#~ " tietokannan huoltotehtävät"
+#~ msgid "Welcome to Isotammi Database"
+#~ msgstr "Kirjaudu Isotammi-tietokannan käyttäjänä"
 
