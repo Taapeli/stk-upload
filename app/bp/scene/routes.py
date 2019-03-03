@@ -18,6 +18,7 @@ from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
+from models.active_rules import OwnerFilter
 from models.gen.family import Family
 #from models.gen.family import Family_for_template
 from models.gen.place import Place
@@ -99,60 +100,9 @@ def show_persons_by_refname(refname, opt=""):
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order, rule=keys)
 
-# ------------------------------ Menu 1 Persons --------------------------------
-# @bp.route('/scene/persons_own/')
-# @login_required
-# #Todo: The roles should be forwarded to macros.html: should not show in menu(11)
-# #
-# #@roles_accepted('member', 'admin', "research", "audit")
-# def show_my_persons():
-#     """ List all persons for menu(11)
-#         Restriction by owner's UserProfile 
-#     """
-#     fw_from = request.args.get('f', '')
-#     bw_from = request.args.get('b', '')
-#     count = request.args.get('c', 100, type=int)
-#     t0 = time.time()
-#     
-#     keys = ('own',)
-#     if current_user.is_authenticated:
-#         user=current_user.username
-#     else:
-#         user=None
-#     persons = Person_combo.read_my_persons_list(user, show=2, limit=count,
-#                                                 fw_from=fw_from, bw_from=bw_from)
-#     next_links = dict()
-#     if persons:
-#         if fw_from:
-#             next_links['bw'] = quote_plus(persons[0].sortname)
-#         next_links['fw'] = quote_plus(persons[-1].sortname)
-# 
-#     print("-> bp.scene.routes.show_my_persons")
-#     return render_template("/scene/list_persons.html", persons=persons, menuno=11, 
-#                            user=None, next=next_links, rule=keys, elapsed=time.time()-t0)
-
 
 # -------------------------- Menu 12 Persons by user ---------------------------
 
-# class UserFilter():
-#     @staticmethod
-#     def store_div(request):
-#         "The parameters div=2&cmp=1 are stored as session variable filter_div"
-#         # filter_div tells, which data shall be displayed:
-#         #   001 1 = public Suomikanta data
-#         #   010 2 = user's own candidate data
-#         #   100 4 = data from specific input batch
-#         #   011 3 = 1+2 = users data & Suomikanta
-#         #   101 5 = 1+4 = user batch & Suomikanta
-#     @staticmethod
-#     def store_next_person(request):
-#         """ Eventuel fb or bw parameters are stored in session['next_person'].
-#             If neither is given, next_person is cleared.
-#         """
-#     @staticmethod
-#     def is_only_mine_data():
-
-from models.active_rules import OwnerFilter
 
 @bp.route('/scene/persons_all/')
 #     @login_required
@@ -167,26 +117,19 @@ def show_my_persons():
     print("--- " + repr(request))
     print("--- " + repr(user_session))
     # Is div parameter given in the form?
-    owner_filter = OwnerFilter(current_user)
-    if owner_filter.store_owner_filter(request):
-        # Coming from start page: clear next_person links
-        owner_filter.store_next_person(None)
-    else:
-        # Coming from start page: clear next_person links
-        owner_filter.store_next_person(request)
-    
+    owner_filter = OwnerFilter(user_session)
+    owner_filter.store_owner_filter(request)    
+    owner_filter.store_next_person(request)
     count = int(request.args.get('c', 100))
 
     print("-> bp.scene.routes.show_my_persons: read persons starting '{}'".format(owner_filter.next_person[1]))
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=owner_filter, limit=count)
-        # (user, show=user_session['filter_div'], fw_from=next_person[1], bw_from=next_person[0])
     if persons:
         print("Display persons {} – {}".format(persons[0].sortname, persons[-1].sortname))
-#         print("User session {}".format(user_session))
         # Next person links [backwards, forwards]
-        next_person = [quote_plus(persons[0].sortname), quote_plus(persons[-1].sortname)]
-        user_session['next_person'] = next_person
+        owner_filter.next_person = [quote_plus(persons[0].sortname), quote_plus(persons[-1].sortname)]
+        user_session['next_person'] = owner_filter.next_person
         print("--> " + repr(user_session))
 
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 

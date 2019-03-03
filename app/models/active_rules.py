@@ -9,7 +9,7 @@ Created on 19.1.2019
 @author: jm
 '''
 
-from enum import Enum
+#from enum import Enum
 from flask_babelex import _
 
 
@@ -17,48 +17,64 @@ class OwnerFilter():
     """ Store filter values for finding the active subset of database
 
         Filters:
-        - user          str  username from current_user, if any
-        - owner_filter  int  code expressing filter method by data owners
-        - next_person   list starting names for next Persons page []
+        - user          str  Username from current_user, if any
+        - owner_filter  int  Code expressing filter method by data owners
+                             from request.div or session.owner_filter.
+                             Default = 1 (common) if neither present
+        - next_person   list Starting names for prev/next Persons page
+                             values [backward, forward] sortnames
+                             from request.fw, equest.bw variables.
+                             default ['', '']
+
+        #TODO: Oletusarvot anonyymin käyttäjän aloittaessa
+        #TODO: Milloin nollataan kukin arvo
+        #TODO: Yhdistä kaikki asetukset set_filters_from(session, current_user)
     """
 
     # using Enum data structure in accordance with Two Scoops of Django 1.11 (ch. 6.4.8) 
     # and the following article
     # https://hackernoon.com/using-enum-as-model-field-choice-in-django-92d8b97aaa63
 
-    class OwnerChoices(Enum):
-        common = (1, _('Isotammi database'))    # Suomikanta
-        own   =  (2, _('all my candidate data')) # kaikki ehdokasaineistoni
-        batch =  (4, _('my candidate batch'))    # tuontierä
-        common_own = (common + own, _('my own and Isotammi'))       # omat ja Suomikanta
-        common_batch = (common+batch, _('my batch and Isotammi')) # tuontierä ja Suomikanta
-
-        @classmethod
-        def get_value(cls, member):
-            return cls[member].value[0]
-
-        @classmethod
-        def get_str(cls, member):
-            # Return given key, if it in in this enum, else 0
-            return cls[member].value[1]
+    class OwnerChoices():
+        """
+        """
+        COMMON = 1
+        OWN = 2
+        BATCH = 4
+        as_str = {
+            COMMON:         _('Isotammi database'), 
+            OWN:            _('all my candidate data'), 
+            BATCH:          _('my candidate batch'),
+            COMMON + OWN:   _('my own and Isotammi'), 
+            COMMON + BATCH: _('my batch and Isotammi')
+        }
 
         @classmethod
         def get_key(cls, number):
-            # Return the key, if number is in in this enum, else ''
-            for name in cls._member_names_:
-                if cls.get_value(name) == number:
-                    return name
-            return ''
-
-
+            # Return the key, if valid number, else 0
+            for i in cls.as_str.keys():
+                if i == number:
+                    return i
+            return 0
+        
     def __init__(self, user_session):
         '''
             User_session is used for storing the values set
         '''
         self.user_session = user_session
-        self.user = None
-        self.owner_filter = ''
+        if 'username' in user_session.__dict__:
+            self.user = user_session.username 
+        else:
+            self.user = None
+        self.owner_filter = self.OwnerChoices.COMMON
         self.next_person = ['', '']
+
+    def owner_str(self):
+        # Return current owner choise as text 
+        try:
+            return self.OwnerChoices.as_str[self.owner_filter]
+        except:
+            return ''
 
     def store_user(self, current_user=None):
         ''' Set active user, if any username '''
@@ -72,7 +88,7 @@ class OwnerFilter():
         """ The parameters div=2&cmp=1 are stored as session variable owner_filter.
             Returns owner filter name id detected, otherwise False
         """
-        # filter_div tells, which data shall be displayed:
+        # owner_filter tells, which data shall be displayed:
         #   common       001 1 = common Suomikanta data
         #   own          010 2 = user's own candidate data
         #   batch        100 4 = data from specific input batch
@@ -87,8 +103,13 @@ class OwnerFilter():
             if self.owner_filter:
                 self.user_session.owner_filter = self.owner_filter
                 print("OwnerFilter: Now owner_filter={}".format(self.owner_filter))
-                return self.owner_filter
-        return 0
+                #return self.owner_filter
+        else:
+            # If no div variable, clear next and reset owner_filter ??
+            self.owner_filter = self.OwnerChoices.COMMON
+            if not self.user_session.owner_filter:
+                self.user_session.owner_filter = self.OwnerChoices.COMMON
+        #return 0
 
     def store_next_person(self, request):
         """ Eventuel fb or bw parameters are stored in session['next_person'].
@@ -118,101 +139,20 @@ class OwnerFilter():
             print("OwnerFilter: Now next_person is cleared")
         return self.next_person
 
+# owner_filter tells which data shall be displayed:
+#   common       001 1 = common Suomikanta data
+#   own          010 2 = user's own candidate data
+#   batch        100 4 = data from specific input batch
+#   common_own   011 3 = 1+2 = users data & Suomikanta
+#   common_batch 101 5 = 1+4 = user batch & Suomikanta
+
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner:
             Always if 'common' is not required
         '''
-        return self.owner_filter != self.OwnerChoices.common 
+        return not (self.owner_filter & 1) 
     
     def use_common(self):
         ''' Tells, if you should select objects from common database 
         '''
-        return self.owner_filter == self.OwnerChoices.common \
-            or self.owner_filter == self.OwnerChoices.common_own \
-            or self.owner_filter == self.OwnerChoices.common_batch
-
-
-
-# ============================= NOT IN USE YET ================================
-
-class ActiveRules():
-    '''
-    UserSession object carries user parameters transferred between different
-    pages. 
-    
-    Parameters in self.session
-        filter_div            which data shall be displayed, values
-              001 1 = common Suomikanta data
-              010 2 = user's own candidate data
-              100 4 = data from an input batch
-              011 3 = 1+2 = users data & Suomikanta
-              101 5 = 1+4 = user batch & Suomikanta
-        next_person = [backwards, forwards]  
-                            the names from which next listing page starts
-        is_member = 1, if logged in with a role of member, admin or reserach
-
-    Methods
-        __init__(session)      load parameter values from session object
-        reset_persons()        set default values for next_person
-        setFilter(request)     update parameters from request arguments
-        testFilter(key)        check if given property is set
-        strFilter()            selected filter as clear text
-        
-    '''
-    FILTER_PUBLIC = 1
-    FILTER_OWN = 2
-    FILTER_BATCH = 4
-    FILTER_STR = {FILTER_PUBLIC:                'Suomikanta', 
-                  FILTER_OWN:                   'omat aineistoni', 
-                  FILTER_BATCH:                 'tuontierä',
-                  FILTER_PUBLIC + FILTER_OWN:   'omat ja Suomikanta', 
-                  FILTER_PUBLIC + FILTER_BATCH: 'tuontierä ja Suomikanta'}
-
-    def __init__(self, session, roles=[]):
-        '''
-        Constructor using session parameters and a list of Role objects
-        '''
-        self.next_person = [session.get('next_person_fw', ''), 
-                            session.get('next_person_bw', '')]
-        next.filter_div = session.get('filter_div', '')
-        
-        self.is_member = False
-        for role in roles:
-            if hasattr(role, 'name') and role.name in ['member', 'admin', 'reserach']:
-                self.is_member = True
-        session['is_member'] = self.is_member
-
-        self.session = session
-
-    def reset_persons(self):
-        '''
-        Forget next_person
-        '''
-        self.next_person = []
-        self.session['next_person'] = []
-
-    def setFilter(self, request):
-        """ The given url parameters div=2&cmp=1 are stored as session variable 
-            filter_div
-        """
-        # filter_div tells, which data shall be displayed:
-        #   001 1 = common Suomikanta data
-        #   010 2 = user's own candidate data
-        #   100 4 = data from specific input batch
-        #   011 3 = 1+2 = users data & Suomikanta
-        #   101 5 = 1+4 = user batch & Suomikanta
-    
-        div = int(request.args.get('div', 0))
-        if div:
-            if request.args.get('cmp', ''):
-                div = div | 1 
-            self.session['filter_div'] = int(div)
-            print("Now filter div {}".format(div))
-
-#     @staticmethod
-    def is_only_my_data(self):
-        " Returns True, if return set is restrected to items of owner's Batch"
-        if 'filter_div' in self.session and not self.session['filter_div'] & 1:
-            return True
-        else:
-            return False
+        return (self.owner_filter & 1) != 0

@@ -9,16 +9,16 @@
 {% set who = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
               3:'omat ja Suomikanta', 5:'tuontierä ja Suomikanta'} %}
 
-{% if session['filter_div'] %}
-    <h2>{{ _('Persons filtered by') }} {{ who[ session['filter_div'] ] }}</h2>
+{% if session['owner_filter'] %}
+    <h2>{{ _('Persons filtered by') }} {{ who[ session['owner_filter'] ] }}</h2>
 {# elif rule[0] == 'refname' %}
     <h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2> #}
 {% else %}
     <h2>{{ _('Persons') }}</h2>
 {% endif %}
 
-<p><small>{{cnt}} persons, user {{user}}, filter {{session['filter_div']}}, next {{next}}</small></p>
-{% set has_many_owners = ( session['filter_div'] == 3 or session['filter_div'] == 5 ) %}
+<p><small>{{cnt}} persons, user {{user}}, filter {{session['owner_filter']}}, next {{next}}</small></p>
+{% set has_many_owners = ( session['owner_filter'] == 3 or session['owner_filter'] == 5 ) %}
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
@@ -26,12 +26,12 @@
             <div class="flex-container">
 	           <div id="description">
 	               <p>{{ _('Displaying %(num)s persons', num=cnt) }}. Tietojoukko:
-	                   {% if session['filter_div'] == 1 %}Suomikanta
-                       {% elif session['filter_div'] == 2 %}omat aineistot
-                       {% elif session['filter_div'] == 3 %}
+	                   {% if session['owner_filter'] == 1 %}Suomikanta
+                       {% elif session['owner_filter'] == 2 %}omat aineistot
+                       {% elif session['owner_filter'] == 3 %}
                             &FilledSmallSquare;&nbsp;omat aineistot / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
-                       {% elif session['filter_div'] == 4 %}oma tuontierä
-                       {% elif session['filter_div'] == 5 %}
+                       {% elif session['owner_filter'] == 4 %}oma tuontierä
+                       {% elif session['owner_filter'] == 5 %}
                             &FilledSmallSquare;&nbsp;oma tuontierä / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
                        {% endif %}
                        {% if user %}
