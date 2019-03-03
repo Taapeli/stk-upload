@@ -56,6 +56,7 @@ from .event_combo import Event_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
+from models.active_rules import OwnerFilter
 
 
 class Person_combo(Person):
@@ -144,23 +145,35 @@ return path"""
             return None
 
     @staticmethod
-    def read_my_persons_list(user=None, show="own", fw_from="", bw_from="Not used yet", limit=100):
+    #ef read_my_persons_list(user=None, show=1, fw_from="", bw_from="Not used yet", limit=100):
+    #   read_my_persons_list(filter=owner_filter, limit=count)
+    def read_my_persons_list(o_filter, limit=100):
         """ Reads Person Name and Event objects for display.
             By default, 100 names are got beginning from fw_from 
 
             Returns Person objects, with included Events and Names
             ordered by Person.sortname
         """
-        def _read_person_list(user, fw_from, limit):
+        def _read_person_list(o_filter, limit):
             """ Read Person data from given fw_from 
             """
-            from bp.scene.routes import UserFilter
+            user = o_filter.user
+            # Select a) filter by user b) show Isotammi common data (too)
+            show_by_owner = o_filter.use_owner_filter()
+            show_with_common = o_filter.use_common()
+            """            show_by_owner    show_all
+                        +-------------------------------
+            with common |  me + Suomi       Suomi
+            no common   |  me               -
+            """
             try:
                 with shareds.driver.session() as session:
-                    if show == 3 or show == 5 or UserFilter.is_only_mine_data(): 
+                    if show == 3 or show == 5 or OwnerFilter.is_only_my_data(): 
+                        # 3: 'omat ja Suomikanta', 5: 'tuontierä ja Suomikanta'
                         result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
                                              user=user, start_name=fw_from, limit=limit)
                     else:
+                        # 1: 'Suomikanta', 2: 'kaikki ehdokasaineistoni', 4: 'tuontierä'
                         result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
                                              user=user, start_name=fw_from, limit=limit)
                     return result        
@@ -180,13 +193,12 @@ return path"""
 
 
         persons = []
-        as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-                   3:'omat ja Suomikanta', 5:'tuontierä ja Suomikanta'}
+        fw_from = o_filter.next_person[1]     # next_person names [bw_from, fw_from]
 
-        print("Get {} persons of {} for user {} starting from {!r}".\
-              format(limit, as_text[show], user, fw_from))
-        result = _read_person_list(user, fw_from, limit)
-#Todo: If p.id is the same as previous, do not create a new object but join the persons
+        print("read_my_persons_list: Get {} persons of {} for user {} starting from {!r}".\
+              format(limit, o_filter.owner_filter, o_filter.user, fw_from))
+        result = _read_person_list(o_filter, limit)
+#Todo: ? If p.id is the same as previous, do not create a new object but join the persons
         for record in result:
             ''' <Record 
                     person=<Node id=163281 labels={'Person'} 
