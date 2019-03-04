@@ -30,6 +30,8 @@ class Dates(transformer.Transformation):
         Fix dates of the forms:
         
         31.12.1888 -> 31 DEC 1888
+        .12.1888   ->    DEC 1888
+        12.1888    ->    DEC 1888
         """
         if item.tag == "DATE":
             # 31.12.1888 -> 31 DEC 1888
@@ -45,6 +47,22 @@ class Dates(transformer.Transformation):
                 if val:
                     item.value = val
                     return item
+
+            # .12.1888 -> DEC 1888
+            #  12.1888 -> DEC 1888
+            r = re.match("\.?"
+                         r"(?P<mm>\d{1,2})\."
+                         r"(?P<yyyy>\d{4})",item.value.strip())
+            if r:
+                print(item.value)
+                y = int(r.group('yyyy'))
+                m = int(r.group('mm'))
+                d = 1
+                val = fmtdate(y,m,d)
+                if val:
+                    item.value = val[3:]
+                    return item
+        
 
         return True
 
