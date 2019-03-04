@@ -117,6 +117,7 @@ class Item:
         if self.xref:
             s += " " + self.xref
         s += " " + self.tag
+        if not self.value and self._line.strip() == s.strip(): return self._line
         if self.value or self.tag == "CONT": s += " " + self.value
         return s
 
