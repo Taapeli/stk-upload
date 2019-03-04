@@ -29,7 +29,8 @@ def client():
 
     rv = login(client)
     #txt = "Oma sukupuuni"
-    txt = "Suomikannan käyttäjän alkusivu"
+    #txt = "Suomikannan käyttäjän alkusivu"
+    txt = "Käyttäjän Isotammi-aloitussivu"
     assert txt in rv.data.decode("utf-8")
     yield client
     
@@ -80,7 +81,7 @@ def test_gedcom_upload(client):
 def test_gedcom_list(client):
     rv = client.get('/gedcom')
     data = rv.data.decode("utf-8")
-    assert 'Ladatut gedcomit' in data
+    assert 'Gedcom-tiedostojen hallinta' in data
     
     for name in os.listdir(gedcom_dir):
         if not name.endswith(".ged"): continue
