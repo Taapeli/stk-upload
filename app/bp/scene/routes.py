@@ -18,7 +18,7 @@ from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
-from models.active_rules import OwnerFilter
+from models.owner import OwnerFilter
 from models.gen.family import Family
 #from models.gen.family import Family_for_template
 from models.gen.place import Place
@@ -116,9 +116,8 @@ def show_my_persons():
     #    3. muuten "" (alkuun)
     print("--- " + repr(request))
     print("--- " + repr(user_session))
-    # Is div parameter given in the form?
-    owner_filter = OwnerFilter(user_session)
-    owner_filter.store_owner_filter(request)    
+    # Is div parameter given in the form? What attributes are inherited in session?
+    owner_filter = OwnerFilter(user_session, current_user, request)
     owner_filter.store_next_person(request)
     count = int(request.args.get('c', 100))
 

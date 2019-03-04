@@ -18,7 +18,9 @@ from models import email
 
 @shareds.app.route('/', methods=['GET', 'POST'])
 def start():
-    """ Home page for logged in user (from login page or home button) """
+    """ Home page for logged in user (from login page or home button) 
+        or anonymous user (home)
+    """
     print("--- " + repr(request))
 #    print("-> bp.start.routes.start auth={}, new_lang={}, user_session".\
 #          format(current_user.is_authenticated, new_lang))
@@ -52,14 +54,13 @@ def my_settings():
     print("-> bp.start.routes.settings")
     return render_template("/start/my_settings.html")
 
-@shareds.app.route('/tables')
-@login_required
-@roles_accepted('member', 'admin')
-def datatables():
-    """ Home page for table format tools """
-    print("-> bp.start.routes.datatables")
-    return render_template("/tools/tables.html")
-
+# @shareds.app.route('/tables') --> see bp.tools.routes.datatables
+# @login_required
+# @roles_accepted('member', 'admin')
+# def datatables():
+#     """ Home page for table format tools """
+#     print("-> bp.start.routes.datatables")
+#     return render_template("/tools/tables.html")
 # @shareds.app.route('/gramps') moved to bp.gramps.routes 2019-01-22
 # @login_required
 # @roles_accepted('member', 'admin')

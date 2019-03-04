@@ -135,8 +135,9 @@
 
 	              <td class="ColumnEvent">
 	        {% if p.events is iterable %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li{% if e.type != "Birth" and e.type != "Death" %} class="minor"{% endif %}>
-		                  <i>{{e.type|transl('evt')}} {{e.description}}</i>
+		              <li{% if e.type == "Birth" or e.type == "Death" %} style="list-style-type: square;"
+		                  {% else %} style="list-style-type: circle;"{% endif %}>
+		                  <i>{{e.type|transl('evt')}}</i> {{e.description}}
 		                  {% if e.dates %}{{e.dates}} {% endif %}
 		                  {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
