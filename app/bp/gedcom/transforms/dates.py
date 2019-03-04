@@ -30,17 +30,30 @@ class Dates(transformer.Transformation):
         Fix dates of the forms:
         
         31.12.1888 -> 31 DEC 1888
+        31,12,1888 -> 31 DEC 1888
+        31-12-1888 -> 31 DEC 1888
+        31/12/1888 -> 31 DEC 1888
         .12.1888   ->    DEC 1888
         12.1888    ->    DEC 1888
+        12/1888    ->    DEC 1888
+        12-1888    ->    DEC 1888
         0.12.1888   ->    DEC 1888
+        00.12.1888   ->    DEC 1888
+        00.00.1888   ->    1888
+        00 JAN 1888   ->    JAN 1888
         """
+        sep = "[\.,-/]"
         if item.tag == "DATE":
             # 31.12.1888 -> 31 DEC 1888
-            r = re.match(r"(?P<dd>\d{1,2})\."
-                         r"(?P<mm>\d{1,2})\."
+            # 31,12,1888 -> 31 DEC 1888
+            # 31-12-1888 -> 31 DEC 1888
+            # 31/12/1888 -> 31 DEC 1888
+            r = re.match(r"(?P<dd>\d{1,2})" +
+                         sep +
+                         r"(?P<mm>\d{1,2})" +
+                         sep +
                          r"(?P<yyyy>\d{4})",item.value.strip())
             if r:
-                print(item.value)
                 y = int(r.group('yyyy'))
                 m = int(r.group('mm'))
                 d = int(r.group('dd'))
@@ -49,13 +62,22 @@ class Dates(transformer.Transformation):
                     item.value = val
                     return item
 
-            # .12.1888 -> DEC 1888
-            #  12.1888 -> DEC 1888
-            r = re.match("(0?\.)?"
-                         r"(?P<mm>\d{1,2})\."
+            # 0.0.1888 -> 1888
+            # 00.00.1888 -> 1888
+            r = re.match("0{1,2}\.0{1,2}\." +
                          r"(?P<yyyy>\d{4})",item.value.strip())
             if r:
-                print(item.value)
+                item.value = r.group('yyyy')
+                return item
+        
+            # 00.12.1888 -> DEC 1888
+            # .12.1888 -> DEC 1888
+            #  12.1888 -> DEC 1888
+            r = re.match("(0{0,2}\.)?" +
+                         r"(?P<mm>\d{1,2})" +
+                         sep +
+                         r"(?P<yyyy>\d{4})",item.value.strip())
+            if r:
                 y = int(r.group('yyyy'))
                 m = int(r.group('mm'))
                 d = 1
@@ -63,7 +85,16 @@ class Dates(transformer.Transformation):
                 if val:
                     item.value = val[3:]
                     return item
-        
+
+            # 0 JAN 1888   ->    JAN 1888
+            if item.value.startswith("0 "):
+                item.value = item.value[2:]
+                return item
+            
+            # 00 JAN 1888   ->    JAN 1888
+            if item.value.startswith("00 "):
+                item.value = item.value[3:]
+                return item
 
         return True
 
