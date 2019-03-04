@@ -47,7 +47,7 @@
 
      {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
-                <p>{% set filt = session['filter_div'] %}
+                <p>{% set filt = session['owner_filter'] %}filt={{ filt }}<br>
                   <input type="radio" name="div" value="1" 
                     {% if filt == 1 %}checked{% endif %}>Suomikanta<br>
                   <input type="radio" name="div" value="2" 
@@ -68,16 +68,16 @@
                </form>
 {#
 	<!-- 
-	filter_div    001 1 = public Suomikanta data
+	owner_filter  001 1 = common Suomikanta data
 	              010 2 = user's own candidate data
 	              100 4 = data from specific batch
 	              011 3 = 1+2 = users data & Suomikanta
 	              101 5 = 1+4 = user batch & Suomikanta
 	 -->
-                   <p>Tietojoukko {% set filt = session['filter_div'] %} {{filt}}
-                       {% if session['filter_div'] == 1 or filt == 3 or filt == 5 %}Suomikanta{% endif %}
-                       {% if session['filter_div'] == 2 or filt == 3 %}omat{% endif %}
-                       {% if session['filter_div'] == 4 or filt == 5 %}tuontierä{% endif %}</p>
+                   <p>Tietojoukko {% set filt = session['owner_filter'] %} {{filt}}
+                       {% if session['owner_filter'] == 1 or filt == 3 or filt == 5 %}Suomikanta{% endif %}
+                       {% if session['owner_filter'] == 2 or filt == 3 %}omat{% endif %}
+                       {% if session['owner_filter'] == 4 or filt == 5 %}tuontierä{% endif %}</p>
 #}
             </div>
            </div>

@@ -22,7 +22,6 @@
         <div class="row">
 
     {% if current_user.is_authenticated and current_user.has_role('research') %}
-    
            <div class="startbox">
              <div style="display: inline-block;">
                 <h3>{{ _('Your Gramps data') }}</h3>
@@ -36,8 +35,8 @@
            </div>
     {% endif %}           
 
-    {% if current_user.is_authenticated and current_user.has_role('member') %}
-
+    {% if current_user.is_authenticated and 
+        ( current_user.has_role('member') or current_user.has_role('research') ) %}
            <div class="startbox" style="border:1.5pt solid #7e6b53;">
              <div style="display: inline-block;">
                <form method="get" action="/scene">

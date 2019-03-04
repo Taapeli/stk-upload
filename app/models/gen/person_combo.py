@@ -56,6 +56,7 @@ from .event_combo import Event_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
+from models.active_rules import OwnerFilter
 
 
 class Person_combo(Person):
@@ -144,35 +145,62 @@ return path"""
             return None
 
     @staticmethod
-    def read_my_persons_list(user=None, show="own", fw_from="", bw_from="Not used yet", limit=100):
+    #ef read_my_persons_list(user=None, show=1, fw_from="", bw_from="Not used yet", limit=100):
+    #   read_my_persons_list(filter=owner_filter, limit=count)
+    def read_my_persons_list(o_filter, limit=100):
         """ Reads Person Name and Event objects for display.
             By default, 100 names are got beginning from fw_from 
 
             Returns Person objects, with included Events and Names
             ordered by Person.sortname
         """
-        def _read_person_list(user, fw_from, limit):
+        def _read_person_list(o_filter, limit):
             """ Read Person data from given fw_from 
             """
-            from bp.scene.routes import UserFilter
+            # Select a) filter by user b) show Isotammi common data (too)
+            show_by_owner = o_filter.use_owner_filter()
+            show_with_common = o_filter.use_common()
+            user = o_filter.user
+            """
+                           show_by_owner    show_all
+                        +-------------------------------
+            with common |  me + common      common
+            no common   |  me                -
+            """
             try:
+                print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
+
                 with shareds.driver.session() as session:
-                    if show == 3 or show == 5 or UserFilter.is_only_mine_data(): 
-                        result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
-                                             user=user, start_name=fw_from, limit=limit)
-                    else:
-                        result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
-                                             user=user, start_name=fw_from, limit=limit)
-                    return result        
+                    if show_by_owner:
+
+                        if show_with_common: #1 get all with owner name for all
+                            print("read_my_persons_list: by owner with common")
+                            result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
+                                                 user=user, start_name=fw_from, limit=limit)
+                            # Returns person, names, events, user
+
+                        else: #2 get my own (no owner name needed)
+                            print("read_my_persons_list: by owner only")
+                            result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
+                                                 user=user, start_name=fw_from, limit=limit)
+                            # Returns person, names, events
+
+                    else: #3 == #1 simulates common by reading all
+                        print("read_my_persons_list: common only")
+                        result = session.run(Cypher_person.read_all_persons_with_events_starting_name, #user=user, 
+                                             start_name=fw_from, limit=limit)
+                        # Returns person, names, events, user
+
+                    return result
             except Exception as e:
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
                 raise      
 
         def user_not_me(record):
-            # Returns owner, if it is not me
+            # Returns owner of this record, if available and not me
             if 'user' in record.keys():
                 u = record['user']
-                if u == user:
+                if u == o_filter.user:
                     return '-'
                 else:
                     return record['user']
@@ -180,13 +208,13 @@ return path"""
 
 
         persons = []
-        as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-                   3:'omat ja Suomikanta', 5:'tuontierä ja Suomikanta'}
+        fw_from = o_filter.next_person[1]     # next_person names [bw_from, fw_from]
 
-        print("Get {} persons of {} for user {} starting from {!r}".\
-              format(limit, as_text[show], user, fw_from))
-        result = _read_person_list(user, fw_from, limit)
-#Todo: If p.id is the same as previous, do not create a new object but join the persons
+        ustr = "user " + o_filter.user if o_filter.user else "no user"
+        print("read_my_persons_list: Get {} persons from {} for {} starting at {!r}".\
+              format(limit, o_filter.owner_str(), ustr, fw_from))
+        result = _read_person_list(o_filter, limit)
+
         for record in result:
             ''' <Record 
                     person=<Node id=163281 labels={'Person'} 
