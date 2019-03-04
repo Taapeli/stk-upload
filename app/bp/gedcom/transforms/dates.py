@@ -32,6 +32,7 @@ class Dates(transformer.Transformation):
         31.12.1888 -> 31 DEC 1888
         .12.1888   ->    DEC 1888
         12.1888    ->    DEC 1888
+        0.12.1888   ->    DEC 1888
         """
         if item.tag == "DATE":
             # 31.12.1888 -> 31 DEC 1888
@@ -50,7 +51,7 @@ class Dates(transformer.Transformation):
 
             # .12.1888 -> DEC 1888
             #  12.1888 -> DEC 1888
-            r = re.match("\.?"
+            r = re.match("(0?\.)?"
                          r"(?P<mm>\d{1,2})\."
                          r"(?P<yyyy>\d{4})",item.value.strip())
             if r:
