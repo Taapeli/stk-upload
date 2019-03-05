@@ -1665,7 +1665,7 @@ msgstr "henkilöluettelo"
 
 #: bp/scene/templates/scene/list_persons.html:15
 msgid "Persons filtered by"
-msgstr "Henkilöt rajauksella"
+msgstr "Henkilöt:"
 
 #: bp/scene/templates/scene/list_persons.html:19
 #: bp/scene/templates/scene/macros.html:54
