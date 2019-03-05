@@ -2129,6 +2129,11 @@ msgid ""
 "name."
 msgstr "Sama henkilö voi esiintyä listalla moneen kertaan, kullakin nimellään."
 
+#: bp/scene/templates/scene/persons.html:30
+msgid ""
+"Note that family events are not included."
+msgstr "Huomaa että perhetapahtumia ei tässä näytetä."
+
 #: bp/scene/templates/scene/persons.html:32
 msgid "Clicking a name will take you to the selected person's page."
 msgstr "Nimen napsauttaminen vie sinut valitun henkilön sivulle."

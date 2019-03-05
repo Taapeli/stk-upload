@@ -665,7 +665,7 @@ RETURN n.id, k.firstname, k.surname,
         if keys:
             rule=keys[0]
             key=keys[1].title() if len(keys) > 1 else None
-            print("Selected {} '{}'".format(rule, key))
+            #print("Selected {} '{}'".format(rule, key))
         else:
             rule="all"
             key=""
