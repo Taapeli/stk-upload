@@ -9,6 +9,7 @@ Created on 19.1.2019
 @author: jm
 '''
 
+from urllib.parse import unquote_plus
 from flask_babelex import _
 
 
@@ -31,27 +32,30 @@ class OwnerFilter():
         COMMON = 1
         OWN = 2
         BATCH = 4
-        as_str = {
-            COMMON:         _('Isotammi database'), 
-            OWN:            _('all my candidate data'), 
-            BATCH:          _('my candidate batch'),
-            COMMON + OWN:   _('my own and Isotammi'), 
-            COMMON + BATCH: _('my batch and Isotammi')
-        }
 
-        @classmethod
-        def get_key(cls, number):
+        def __init__(self):
+            ''' Initialise choise texts in user language '''
+            self.as_str = {
+                self.COMMON:              _('Isotammi database'), 
+                self.OWN:                 _('all my candidate data'), 
+                self.BATCH:               _('my candidate batch'),
+                self.COMMON + self.OWN:   _('my own and Isotammi'), 
+                self.COMMON + self.BATCH: _('my batch and Isotammi')
+            }
+
+        def get_valid_key(self, number):
             # Return the key, if valid number, otherwise 0
-            if number in list(cls.as_str.keys()):
-                    return number
+            if number in list(self.as_str.keys()):
+                return number
             return 0
         
     def __init__(self, user_session, current_user=None, request=None):
         '''
             User_session knows the values from session and request.
         '''
-        self.user_session = user_session
-        self.owner_filter = self.OwnerChoices.COMMON
+        self.session = user_session
+        self.choices = self.OwnerChoices()
+        self.filter = self.choices.COMMON
 
         ''' Set active user, if any username '''
         if current_user:
@@ -68,26 +72,26 @@ class OwnerFilter():
         """
         div = 0
         if request:
-            ''' The div argument from request is stored in self.owner_filter
+            ''' The div argument from request is stored in self.filter
             '''
             div = int(request.args.get('div', 0))
             if div:
                 # div tells, which data shall be displayed:
-                #   common       001 1 = common Suomikanta data
+                #   common       001 1 = common Isotammi data
                 #   own          010 2 = user's own candidate data
                 #   batch        100 4 = data from specific input batch
-                #   common_own   011 3 = 1+2 = users data & Suomikanta
-                #   common_batch 101 5 = 1+4 = user batch & Suomikanta
+                #   common_own   011 3 = 1+2 = users data & Isotammi
+                #   common_batch 101 5 = 1+4 = user batch & Isotammi
                 if request.args.get('cmp', ''):
                     div = div | 1
-                self.owner_filter = self.OwnerChoices.get_key(div)
-                if self.owner_filter:
-                    self.user_session['owner_filter'] = self.owner_filter
-                    print("OwnerFilter: Now owner_filter={}".format(self.owner_filter))
+                self.filter = self.choices.get_valid_key(div)
+                if self.filter:
+                    self.session['owner_filter'] = self.filter
+                    print("OwnerFilter: Now owner_filter={}".format(self.filter))
         if div == 0:
             # If got no request owner_filter, use session value or 1
-            self.owner_filter = user_session.get('owner_filter', self.OwnerChoices.COMMON)
-            print("OwnerFilter: Uses default owner_filter={}".format(self.owner_filter))
+            self.filter = user_session.get('owner_filter', self.choices.COMMON)
+            print("OwnerFilter: Uses default owner_filter={}".format(self.filter))
 
 
     def store_next_person(self, request):
@@ -95,7 +99,7 @@ class OwnerFilter():
             If neither is given, next_person is cleared.
         """
         self.next_person = ['', '']
-        session_next = self.user_session.get('next_person', self.next_person)
+        session_next = self.session.get('next_person', self.next_person)
 
         if request:
             fw = request.args.get('fw', None)
@@ -106,44 +110,43 @@ class OwnerFilter():
                 return 
 
             if fw != None:
-                self.next_person[1] = fw
+                self.next_person[1] = unquote_plus(fw)
             else:
-                self.next_person[1] = session_next[1]
+                self.next_person[1] = unquote_plus(session_next[1])
             if bw != None:
-                self.next_person[0] = bw
+                self.next_person[0] = unquote_plus(bw)
             else:
-                self.next_person[0] = session_next[0]
+                self.next_person[0] = unquote_plus(session_next[0])
 
-            self.user_session['next_person'] = self.next_person
+            self.session['next_person'] = self.next_person
             print("OwnerFilter: Now next_person={}".format(self.next_person))
         else:
             # No request
-            self.user_session['next_person'] = self.next_person
+            self.session['next_person'] = self.next_person
             print("OwnerFilter: Now next_person is cleared")
-        #return self.next_person
 
 
     def owner_str(self):
         # Return current owner choise as text 
         try:
-            return self.OwnerChoices.as_str[self.owner_filter]
+            return self.choices.as_str[self.filter]
         except:
             return ''
 
 # owner_filter tells which data shall be displayed:
-#   common       001 1 = common Suomikanta data
+#   common       001 1 = common Isotammi data
 #   own          010 2 = user's own candidate data
 #   batch        100 4 = data from specific input batch
-#   common_own   011 3 = 1+2 = users data & Suomikanta
-#   common_batch 101 5 = 1+4 = user batch & Suomikanta
+#   common_own   011 3 = 1+2 = users data & Isotammi
+#   common_batch 101 5 = 1+4 = user batch & Isotammi
 
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner:
             Always if 'common' is not required
         '''
-        return not (self.owner_filter & 1) 
+        return (self.filter & 2) > 0
     
     def use_common(self):
         ''' Tells, if you should select objects from common database 
         '''
-        return (self.owner_filter & 1) != 0
+        return (self.filter & 1) > 0

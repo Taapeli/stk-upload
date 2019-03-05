@@ -107,33 +107,36 @@ def show_persons_by_refname(refname, opt=""):
 @bp.route('/scene/persons_all/')
 #     @login_required
 def show_my_persons():
-    """ List all persons for menu(12)
-        Both owners and other persons depending on url parameters or session variables
+    """ List all persons for menu(12).
+
+        Both my own and other persons depending on url attribute div
+        or session variables.
+
+        The position in persons list is defined by -
+           1. by attribute fw, if defined (the forward arrow or from seach field)
+           2. by session next_person[1], if defined (the page last visited)
+              #TODO: next_person[0] is not in use, yet (backward arrow)
+           3. otherwise "" (beginning)
     """
-    # Näytettävä seuraava sivu on
-    #    1. argumentin fw sivu, jos on (sivun forward-nuoli tai hakukenttä)
-    #    2. session fw_from sivu, jos on (aiemmin viimeksi vierailtu sivu)
-    #    3. muuten "" (alkuun)
     print("--- " + repr(request))
     print("--- " + repr(user_session))
-    # Is div parameter given in the form? What attributes are inherited in session?
-    owner_filter = OwnerFilter(user_session, current_user, request)
-    owner_filter.store_next_person(request)
+    my_filter = OwnerFilter(user_session, current_user, request)
+    my_filter.store_next_person(request)
     count = int(request.args.get('c', 100))
 
-    print("-> bp.scene.routes.show_my_persons: read persons starting '{}'".format(owner_filter.next_person[1]))
+    print("-> bp.scene.routes.show_my_persons: read persons starting '{}'".format(my_filter.next_person[1]))
     t0 = time.time()
-    persons = Person_combo.read_my_persons_list(o_filter=owner_filter, limit=count)
+    persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
     if persons:
         print("Display persons {} – {}".format(persons[0].sortname, persons[-1].sortname))
         # Next person links [backwards, forwards]
-        owner_filter.next_person = [quote_plus(persons[0].sortname), quote_plus(persons[-1].sortname)]
-        user_session['next_person'] = owner_filter.next_person
+        my_filter.next_person = [persons[0].sortname, persons[-1].sortname]
+        #my_filter.next_person = [quote_plus(persons[0].sortname), quote_plus(persons[-1].sortname)]
+        user_session['next_person'] = my_filter.next_person
         print("--> " + repr(user_session))
 
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
-                           user=owner_filter.user, next=owner_filter.next_person, 
-                           elapsed=time.time()-t0)
+                           owner_filter=my_filter, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/persons/all/<string:opt>')

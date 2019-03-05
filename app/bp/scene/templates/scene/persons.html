@@ -147,12 +147,13 @@
 	           </tr>
 	    {% endfor %}
 				</tr>
+            </tbody>
+        </table>
 	{% else %}
-        <table class="IndividualList">
-            <tbody>
-	        <tr><td>{{ _('No one found with search keys') }}<//td></tr>
+        <div class="NotFound">
+            <p>{{ _('No one found with search keys') }}.</p>
+        </div>
+        <p>&nbsp;</p>
 	{% endif %}
-			</tbody>
-		</table>
 	</div>
 {% endblock %}

@@ -118,6 +118,7 @@ img#logo {
 }
 .notmy { color:blue;}
 li.minor { list-style-type: circle; }
+li.major { list-style-type: square; }
 .inlink { color: #000066; background: LemonChiffon; }
 .outlink { text-decoration: underline; color:gray}
 .refname { color:gray; font-size: 80%; }
@@ -137,6 +138,14 @@ td.ColumnEvent ul li i {
 	font-size: 84%;
 /* 	color: darkslategray; */
 }
+
+div.NotFound {
+	margin: 1em;
+	background: linen;
+	padding: 1em;
+	border: maroon solid 1pt;
+}
+
 /* Button style link (Next - Previous) */
 .navbar { text-align: center; 
   background-color: #EEE;

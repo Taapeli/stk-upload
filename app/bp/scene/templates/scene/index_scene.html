@@ -31,7 +31,7 @@
                <form method="get" action="/scene/persons_all/">
                  <input name="div" type="hidden" value="2">
                  <h3>{{ _('My Candidate Family Tree') }}</h3>
-                 <p>{{ _('View your own candidate material and compare with Suomi tietokanta database') }}</p>
+                 <p>{{ _('View your own candidate material and compare with Isotammi tietokanta database') }}</p>
                  <div class="submit"> 
                     <button type="submit">{{ _('List of Persons') }}</button>
                  </div>
@@ -47,9 +47,9 @@
 
      {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
-                <p>{% set filt = session['owner_filter'] %}filt={{ filt }}<br>
+                <p>{% set filt = session['owner_filter'] %}<br>
                   <input type="radio" name="div" value="1" 
-                    {% if filt == 1 %}checked{% endif %}>Suomikanta<br>
+                    {% if filt == 1 %}checked{% endif %}>Isotammi<br>
                   <input type="radio" name="div" value="2" 
                     {% if filt == 2 or filt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
                   <input type="radio" name="div" value="4" style="cursor:not-allowed" 

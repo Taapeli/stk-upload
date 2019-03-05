@@ -159,7 +159,7 @@ return path"""
             # Select a) filter by user b) show Isotammi common data (too)
             show_by_owner = o_filter.use_owner_filter()
             show_with_common = o_filter.use_common()
-            print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
+            #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
             user = o_filter.user
             try:
                 """
@@ -194,7 +194,7 @@ return path"""
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
                 raise      
 
-        def user_not_me(record):
+        def owner_not_me(record):
             # Returns owner of this record, if available and not me
             if 'user' in record.keys():
                 u = record['user']
@@ -209,7 +209,7 @@ return path"""
         fw_from = o_filter.next_person[1]     # next_person names [bw_from, fw_from]
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
-        print("read_my_persons_list: Get {} persons from {} for {} starting at {!r}".\
+        print("read_my_persons_list: Get {} persons from {!r} for {} starting at {!r}".\
               format(limit, o_filter.owner_str(), ustr, fw_from))
         result = _read_person_list(o_filter, limit)
 
@@ -238,7 +238,7 @@ return path"""
             # Is this the same person as previous?
             if len(persons) > 0 and persons[-1].uniq_id == p.uniq_id and 'user' in record:
                 # Yes, do not create a new person
-                persons[-1].owners.append(user_not_me(record))
+                persons[-1].owners.append(owner_not_me(record))
             else:
 
 #             if take_refnames and record['refnames']:
@@ -249,7 +249,7 @@ return path"""
                     p.names.append(pname)
         
                 # Create a list with the mentioned user name, if present
-                p.owners = [user_not_me(record),]
+                p.owners = [owner_not_me(record),]
                                                                                                                                     
                 # Events
         
