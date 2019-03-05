@@ -97,6 +97,7 @@ def read_allowed_paths():
 
 def valid_date(datestring):
     # date checker, not perfect
+    datestring = datestring.upper()
     parts = datestring.split(maxsplit=1)
     if len(parts) < 1: return False
 
