@@ -10,7 +10,6 @@ import time
 
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required #, roles_accepted
-from urllib.parse import quote_plus # , urlencode
 
 from . import bp
 from bp.scene.data_reader import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id
@@ -29,16 +28,20 @@ from models.gen.source import Source
 # Narrative start page
 @bp.route('/scene',  methods=['GET', 'POST'])
 def scene():
-    """ Home page for scene narrative pages ('kertova') for anonymous """    
-    print("--- " + repr(request))
-    print("--- " + repr(user_session))
-    print("-> bp.scene.routes.scene")
+    """ Home page for scene narrative pages ('kertova') for anonymous. """    
+    print(f"--- {request}")
+    print(f"--- {user_session}")
+    #print("-> bp.scene.routes.scene")
+    my_filter = OwnerFilter(user_session, current_user, request)
+    my_filter.store_next_person(request)
+    print(f"-> bp.scene.routes.scene: home saving '{my_filter.next_person[1]}'")
     return render_template('/scene/index_scene.html')
 
 
 @bp.route('/scene/persons/restricted')
 def show_persons_restricted(selection=None):
-    """ Show list of selected Persons, limited information 
+    """ NOT IN USE Show list of selected Persons, limited information.
+ 
         for non-logged users from login_user.html """
     if not current_user.is_authenticated:
         # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
@@ -53,7 +56,7 @@ def show_persons_restricted(selection=None):
 
 @bp.route('/scene/persons', methods=['POST', 'GET'])
 def show_person_list(selection=None):
-    """ Show list of selected Persons for menu(0) """
+    """ Show list of selected Persons for menu(0). """
     t0 = time.time()
     if request.method == 'POST':
         try:
@@ -61,8 +64,8 @@ def show_person_list(selection=None):
             name = request.form['name']
             rule = request.form['rule']
             keys = (rule, name)
+            print(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
-            print("-> bp.scene.routes.show_person_list POST")
             return render_template("/scene/persons.html", persons=persons, menuno=0,
                                    name=name, rule=keys, elapsed=time.time()-t0)
         except Exception as e:
@@ -78,7 +81,7 @@ def show_person_list(selection=None):
     else:
         keys = ('surname',)
     persons = [] #datareader.read_persons_with_events(keys)
-    print("-> bp.scene.routes.show_person_list GET")
+    print(f"-> bp.scene.routes.show_person_list GET {keys}")
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
@@ -86,7 +89,7 @@ def show_person_list(selection=None):
 @bp.route('/scene/persons/ref=<string:refname>/<opt>')
 @login_required
 def show_persons_by_refname(refname, opt=""):
-    """ List persons by refname
+    """ List persons by refname.
     """
     keys = ('refname', refname)
     if current_user.is_authenticated:
@@ -105,7 +108,6 @@ def show_persons_by_refname(refname, opt=""):
 
 
 @bp.route('/scene/persons_all/')
-#     @login_required
 def show_my_persons():
     """ List all persons for menu(12).
 
@@ -118,22 +120,21 @@ def show_my_persons():
               #TODO: next_person[0] is not in use, yet (backward arrow)
            3. otherwise "" (beginning)
     """
-    print("--- " + repr(request))
-    print("--- " + repr(user_session))
+    print(f"--- {request}")
+    print(f"--- {user_session}")
     my_filter = OwnerFilter(user_session, current_user, request)
     my_filter.store_next_person(request)
     count = int(request.args.get('c', 100))
 
-    print("-> bp.scene.routes.show_my_persons: read persons starting '{}'".format(my_filter.next_person[1]))
+    print(f"-> bp.scene.routes.show_my_persons: read persons starting '{my_filter.next_person[1]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
     if persons:
-        print("Display persons {} – {}".format(persons[0].sortname, persons[-1].sortname))
         # Next person links [backwards, forwards]
+        print(f"Display persons {persons[0].sortname} – {persons[-1].sortname}")
         my_filter.next_person = [persons[0].sortname, persons[-1].sortname]
-        #my_filter.next_person = [quote_plus(persons[0].sortname), quote_plus(persons[-1].sortname)]
         user_session['next_person'] = my_filter.next_person
-        print("--> " + repr(user_session))
+        print(f"--> {repr(user_session)}")
 
     return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
                            owner_filter=my_filter, elapsed=time.time()-t0)
@@ -144,6 +145,7 @@ def show_my_persons():
 #     @login_required
 def show_all_persons_list(opt=''):
     """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
+
         The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
         with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
         TODO Should have restriction by owner's UserProfile 

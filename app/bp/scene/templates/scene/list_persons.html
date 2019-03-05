@@ -35,14 +35,14 @@
         <div id="summaryarea">
             <div class="flex-container">
 	           <div id="description">
-	               <p>{{ _('Displaying %(num)s persons', num=cnt) }}. Tietojoukko:
+	               <p>{{ _('Displaying %(num)s persons', num=cnt) }}. Tietojoukko: <b>
                        {% if multi_owners %}
                             &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
                        {% else %}{{my_set}}
-                       {% endif %}
+                       {% endif %}</b>
                        {% if user %}
-                       <i>(<a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
-                            style="text-decoration-line: underline;">Vaihda</a>).</i>
+                       (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
+                            style="text-decoration-line: underline;">Vaihda</a></i>).
                        {% endif %}</p>
 	           </div>
 	           <div>
@@ -143,7 +143,7 @@
 	              <td class="ColumnEvent">
 	        {% if p.events is iterable %}<ul>{% for e in p.events|sort(attribute='date') %}
 		              <li{% if e.type == "Birth" or e.type == "Death" %} class="major"
-		                  {% else %} class="major"{% endif %}>
+		                  {% else %} class="minor"{% endif %}>
 		                  <i>{{e.type|transl('evt')}}</i> {{e.description}}
 		                  {% if e.dates %}{{e.dates}} {% endif %}
 		                  {% if e.place %} | {{e.place}}{% endif %}</li>

@@ -10,7 +10,7 @@ Created on 19.1.2019
 '''
 
 from urllib.parse import unquote_plus
-from flask_babelex import _
+from flask_babelex import _, lazy_gettext as N_
 
 
 class OwnerFilter():
@@ -36,11 +36,11 @@ class OwnerFilter():
         def __init__(self):
             ''' Initialise choise texts in user language '''
             self.as_str = {
-                self.COMMON:              _('Isotammi database'), 
-                self.OWN:                 _('all my candidate data'), 
-                self.BATCH:               _('my candidate batch'),
-                self.COMMON + self.OWN:   _('my own and Isotammi'), 
-                self.COMMON + self.BATCH: _('my batch and Isotammi')
+                self.COMMON:              N_('Isotammi database'), 
+                self.OWN:                 N_('all my candidate data'), 
+                self.BATCH:               N_('my candidate batch'),
+                self.COMMON + self.OWN:   N_('my own and Isotammi'), 
+                self.COMMON + self.BATCH: N_('my batch and Isotammi')
             }
 
         def get_valid_key(self, number):

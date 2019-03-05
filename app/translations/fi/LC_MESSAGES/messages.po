@@ -1665,7 +1665,7 @@ msgstr "henkilöluettelo"
 
 #: bp/scene/templates/scene/list_persons.html:15
 msgid "Persons filtered by"
-msgstr "Henkilöt rajauksella"
+msgstr "Henkilöt:"
 
 #: bp/scene/templates/scene/list_persons.html:19
 #: bp/scene/templates/scene/macros.html:54
@@ -2128,6 +2128,11 @@ msgid ""
 "If the person has many names, they will appear in the list under each "
 "name."
 msgstr "Sama henkilö voi esiintyä listalla moneen kertaan, kullakin nimellään."
+
+#: bp/scene/templates/scene/persons.html:30
+msgid ""
+"Note that family events are not included."
+msgstr "Huomaa että perhetapahtumia ei tässä näytetä."
 
 #: bp/scene/templates/scene/persons.html:32
 msgid "Clicking a name will take you to the selected person's page."
