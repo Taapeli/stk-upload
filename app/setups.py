@@ -1,4 +1,3 @@
-#from flask import session
 from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, ValidationError
 from wtforms import SelectField, SubmitField, BooleanField
@@ -13,7 +12,8 @@ from chkdate import Chkdate
 from templates import jinja_filters
 
 from datetime import datetime
-#from neo4j.exceptions import ConstraintError, CypherError
+from urllib.parse import urlencode
+
 import logging
 logger = logging.getLogger('stkserver') 
 
@@ -264,6 +264,14 @@ def _jinja2_filter_datetime(datetime, fmt=None):
         return s
     except:
         return "Error"
+
+@shareds.app.template_filter('urlencode')
+def _jinja2_filter_urlencode(u):
+    """ Urlencode argument dictionary.
+    
+        {'fw':'Mainio#Jalmari Yrjö'} --> 'fw=Mainio%23Jalmari+Yrj%C3%B6'
+    """
+    return urlencode(u)
 
 @shareds.app.template_filter('transl')
 def _jinja2_filter_translate(term, var_name, lang="fi"):

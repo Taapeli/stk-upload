@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-01 17:29+0200\n"
+"POT-Creation-Date: 2019-03-05 10:15+0200\n"
 "PO-Revision-Date: 2019-02-26 18:01+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -870,7 +870,7 @@ msgid "Invalid GEDCOM; no level %s lines"
 msgstr "Virheellinen Gedcom; ei tason %s rivejä"
 
 #: bp/gedcom/templates/g_layout.html:28 bp/scene/templates/scene/layout.html:25
-#: bp/scene/templates/scene/list_persons.html:104
+#: bp/scene/templates/scene/list_persons.html:105
 #: bp/scene/templates/scene/locations.html:47
 #: bp/scene/templates/scene/persons.html:118
 #: bp/scene/templates/scene/sources.html:41
@@ -1166,14 +1166,13 @@ msgstr "Gedcom-tiedostojen hallinta"
 
 #: bp/gedcom/templates/gedcom_list.html:16
 msgid "Select your file for processing"
-msgstr ""
+msgstr "Valitse käsiteltävä tiedostosi"
 
 #: bp/gedcom/templates/gedcom_list.html:31
 msgid "Upload a new GEDCOM file"
 msgstr "Lataa uusi gedcom-tiedosto"
 
-#: bp/gedcom/templates/gedcom_list.html:44
-#: bp/gedcom/templates/gedcom_list.html:49
+#: bp/gedcom/templates/gedcom_list.html:48
 msgid "Return main page"
 msgstr "Paluu etusivulle"
 
@@ -1536,13 +1535,13 @@ msgstr "Näytetään %(num)s perhettä"
 
 #: bp/scene/templates/scene/families.html:35
 #: bp/scene/templates/scene/families.html:94
-#: bp/scene/templates/scene/list_persons.html:68
+#: bp/scene/templates/scene/list_persons.html:69
 msgid "Top of page"
 msgstr "Sivun yläreunaan"
 
 #: bp/scene/templates/scene/families.html:37
 #: bp/scene/templates/scene/families.html:96
-#: bp/scene/templates/scene/list_persons.html:70
+#: bp/scene/templates/scene/list_persons.html:71
 msgid "first page"
 msgstr "Ensimmäiselle sivulle"
 
@@ -1587,7 +1586,7 @@ msgid "Children"
 msgstr "Lapset"
 
 #: bp/scene/templates/scene/families.html:57
-#: bp/scene/templates/scene/list_persons.html:132
+#: bp/scene/templates/scene/list_persons.html:133
 msgid "Original ID"
 msgstr "Alkuperäinen tunniste"
 
@@ -1664,31 +1663,31 @@ msgstr "versio"
 msgid "List of persons"
 msgstr "henkilöluettelo"
 
-#: bp/scene/templates/scene/list_persons.html:13
+#: bp/scene/templates/scene/list_persons.html:15
 msgid "Persons filtered by"
 msgstr "Henkilöt rajauksella"
 
-#: bp/scene/templates/scene/list_persons.html:17
+#: bp/scene/templates/scene/list_persons.html:19
 #: bp/scene/templates/scene/macros.html:54
 #: bp/scene/templates/scene/persons.html:13
 #: bp/tools/templates/tools/table_refnames.html:38
 msgid "Persons"
 msgstr "Henkilöt"
 
-#: bp/scene/templates/scene/list_persons.html:28
+#: bp/scene/templates/scene/list_persons.html:29
 #, python-format
 msgid "Displaying %(num)s persons"
 msgstr "Näytetään %(num)s henkilöä"
 
-#: bp/scene/templates/scene/list_persons.html:46
+#: bp/scene/templates/scene/list_persons.html:47
 msgid "Go to"
 msgstr "Siirry"
 
-#: bp/scene/templates/scene/list_persons.html:48
+#: bp/scene/templates/scene/list_persons.html:49
 msgid "Starting letters of surname"
 msgstr "Sukunimen alku"
 
-#: bp/scene/templates/scene/list_persons.html:49
+#: bp/scene/templates/scene/list_persons.html:50
 #: bp/scene/templates/scene/person.html:38
 #: bp/scene/templates/scene/person.html:162
 #: bp/scene/templates/scene/persons.html:36
@@ -1697,7 +1696,7 @@ msgstr "Sukunimen alku"
 msgid "Surname"
 msgstr "sukunimi"
 
-#: bp/scene/templates/scene/list_persons.html:78
+#: bp/scene/templates/scene/list_persons.html:79
 #: bp/scene/templates/scene/locations.html:28
 #: bp/scene/templates/scene/locations.html:29
 #: bp/scene/templates/scene/persons.html:97
@@ -1705,14 +1704,14 @@ msgstr "sukunimi"
 msgid "Alphabetical Menu"
 msgstr "Aakkosvalikko"
 
-#: bp/scene/templates/scene/list_persons.html:88
+#: bp/scene/templates/scene/list_persons.html:89
 #: bp/scene/templates/scene/persons.html:108
 #: bp/scene/templates/scene/place_events.html:116
 #: bp/tools/templates/tools/person2.html:8
 msgid "Person"
 msgstr "Henkilö"
 
-#: bp/scene/templates/scene/list_persons.html:89
+#: bp/scene/templates/scene/list_persons.html:90
 #: bp/scene/templates/scene/person.html:70
 #: bp/scene/templates/scene/person_pg.html:85
 #: bp/scene/templates/scene/place_events.html:111
@@ -1723,7 +1722,7 @@ msgstr "Henkilö"
 msgid "Events"
 msgstr "Tapahtumat"
 
-#: bp/scene/templates/scene/list_persons.html:114
+#: bp/scene/templates/scene/list_persons.html:115
 #: bp/scene/templates/scene/macros.html:90
 #: bp/scene/templates/scene/persons.html:124
 #: bp/scene/templates/scene/source_events.html:44
@@ -1731,11 +1730,11 @@ msgstr "Tapahtumat"
 msgid "see details of person %(id)s"
 msgstr "Katso henkilön %(id)s tiedot"
 
-#: bp/scene/templates/scene/list_persons.html:133
+#: bp/scene/templates/scene/list_persons.html:134
 msgid "Sorting name"
 msgstr "Lajitteluavain"
 
-#: bp/scene/templates/scene/list_persons.html:153
+#: bp/scene/templates/scene/list_persons.html:155
 #: bp/scene/templates/scene/persons.html:153
 msgid "No one found with search keys"
 msgstr "Ketään ei löytynyt hakutiedoilla"
@@ -2292,7 +2291,7 @@ msgstr "muoto"
 msgid "Repository Name"
 msgstr "Arkiston nimi"
 
-#: bp/start/routes.py:46
+#: bp/start/routes.py:48
 msgid "Message from Isotammi user "
 msgstr "Viesti Isotammi-käyttäjältä"
 
@@ -2378,13 +2377,13 @@ msgstr "Käyttäjän alkusivu"
 
 #: bp/start/templates/start/index_logged.html:16
 msgid "User's home page for Isotammi Services"
-msgstr ""
+msgstr "Käyttäjän Isotammi-aloitussivu"
 
-#: bp/start/templates/start/index_logged.html:28
+#: bp/start/templates/start/index_logged.html:27
 msgid "Your Gramps data"
 msgstr "Gramps-tiedostosi"
 
-#: bp/start/templates/start/index_logged.html:30
+#: bp/start/templates/start/index_logged.html:29
 msgid ""
 "Send your Gramps xml file to Isotammi database and store it as a "
 "candidate material."
@@ -2392,45 +2391,45 @@ msgstr ""
 "Lähetä oma Gramps xml -tiedostosi palvelimelle ja talleta se Isotammen "
 "ehdokasaineistoksi."
 
-#: bp/start/templates/start/index_logged.html:32
+#: bp/start/templates/start/index_logged.html:31
 msgid "Gramps files"
 msgstr "Gramps-tiedostot"
 
-#: bp/start/templates/start/index_logged.html:44
+#: bp/start/templates/start/index_logged.html:43
 msgid "Look at the Family Trees"
 msgstr "Tutustu Isotammen sukupuihin"
 
-#: bp/start/templates/start/index_logged.html:45
+#: bp/start/templates/start/index_logged.html:44
 msgid ""
 "View your own data as candidate material and compare it with Isotammi "
 "database."
 msgstr "Katso ehdokasaineistoasi ja vertaa Isotammi-tietokantaan"
 
-#: bp/start/templates/start/index_logged.html:47
+#: bp/start/templates/start/index_logged.html:46
 msgid "Family Trees"
 msgstr "Sukupuut"
 
-#: bp/start/templates/start/index_logged.html:59
+#: bp/start/templates/start/index_logged.html:58
 msgid "My Gedcom Materials"
 msgstr "Gedcom-vakiointi"
 
-#: bp/start/templates/start/index_logged.html:60
+#: bp/start/templates/start/index_logged.html:59
 msgid "Upload your .ged files and experiment various cleanup functions"
 msgstr "Lataa oma .ged-tiedostosi palvelimelle ja kokeile eri vakiointitoimia"
 
-#: bp/start/templates/start/index_logged.html:62
+#: bp/start/templates/start/index_logged.html:61
 msgid "My Gedcom files"
 msgstr "Gedcom-tiedostot"
 
-#: bp/start/templates/start/index_logged.html:74
+#: bp/start/templates/start/index_logged.html:73
 msgid "Admin Operations"
 msgstr "Ylläpitotoimet"
 
-#: bp/start/templates/start/index_logged.html:75
+#: bp/start/templates/start/index_logged.html:74
 msgid "Manage users, reference data sets and do database maintanance tasks"
 msgstr "Hallinnoi käyttäjiä ja referenssitietoja sekä hallinnoi tietokantaa."
 
-#: bp/start/templates/start/index_logged.html:77
+#: bp/start/templates/start/index_logged.html:76
 msgid "Maintenance"
 msgstr "Ylläpito"
 
@@ -3096,6 +3095,26 @@ msgstr "Näytetään lähteet joiden arkistoa ei ole annettu"
 #: models/dataupdater.py:62
 msgid "Estimated {} person lifetimes"
 msgstr "Arvioitu elinaika {}:lle henkilölle"
+
+#: models/owner.py:39
+msgid "Isotammi database"
+msgstr ""
+
+#: models/owner.py:40
+msgid "all my candidate data"
+msgstr ""
+
+#: models/owner.py:41
+msgid "my candidate batch"
+msgstr ""
+
+#: models/owner.py:42
+msgid "my own and Isotammi"
+msgstr ""
+
+#: models/owner.py:43
+msgid "my batch and Isotammi"
+msgstr ""
 
 #: models/gen/person.py:144
 msgid "sex not known"
