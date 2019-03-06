@@ -8,7 +8,7 @@ Created on 8.8.2018
 '''
 
 import os
-
+import json
 import logging 
 #import datetime
 #from _pickle import Unpickler
@@ -28,7 +28,7 @@ from . import bp
 from . import uploads
 from .. import gedcom
 from models import email
-
+from models import syslog 
 
 # Admin start page
 @bp.route('/admin',  methods=['GET', 'POST'])
@@ -351,3 +351,14 @@ def site_map():
         links.append(Link(url, rule.endpoint, methods))
     
     return render_template("/admin/site-map.html", links=links)
+
+
+#------------------- Log -------------------------
+@bp.route("/admin/readlog")
+@login_required
+@roles_accepted('admin')
+def readlog():
+    lines = syslog.readlog()
+    rows = [json.loads(line) for line in lines]
+    return render_template("/admin/syslog.html", rows=rows)
+    

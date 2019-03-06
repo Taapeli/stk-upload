@@ -293,6 +293,16 @@ def app_date(value):
         return sysversion.revision_date()
     return 'Not defined'
 
+@shareds.app.template_filter('logcontent')
+def logcontent(row):
+    s = ""
+    sep = ""
+    for name,value in sorted(row.items()):
+        if name.startswith("_"): continue
+        s += f"{sep}{name}={repr(value)}"
+        sep = " "
+    return s
+
 #------------------------  Load Flask routes file ------------------------------
 
 # DO NOT REMOVE (ON käytössä vaikka varoitus "unused import")

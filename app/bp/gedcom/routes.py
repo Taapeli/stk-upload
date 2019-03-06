@@ -21,7 +21,7 @@ from flask_babelex import _
 import logging 
 LOG = logging.getLogger(__name__)
 
-from models import util
+from models import util, syslog
 
 from . import bp
 from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
@@ -321,6 +321,7 @@ def gedcom_upload():
         }
         save_metadata(filename, metadata)
         history_init(fullname)
+        syslog.log(type="uploaded a gedcom",gedcom=file.filename)    
         return redirect(url_for('.gedcom_info',gedcom=filename))
   
 @bp.route('/gedcom/download/<gedcom>')
@@ -413,6 +414,7 @@ def gedcom_delete(gedcom):
             filename = os.path.join(gedcom_folder, name)
             removefile(filename) 
             logging.info("Deleted:"+filename)
+    syslog.log(type="deleted a gedcom",gedcom=gedcom)    
     return redirect(url_for('.gedcom_list'))
 
 @bp.route('/gedcom/delete_old_versions/<gedcom>')
@@ -427,6 +429,7 @@ def gedcom_delete_old_versions(gedcom):
         if name.startswith(gedcom+"."):  
             removefile(filename) 
             logging.info("Deleted:"+filename)
+    syslog.log(type="deleted old versions for gedcom",gedcom=gedcom)    
     return redirect(url_for('.gedcom_info',gedcom=gedcom))
 
 def removefile(fname): 
