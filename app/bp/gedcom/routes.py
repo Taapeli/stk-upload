@@ -109,9 +109,10 @@ def read_gedcom(filename):
 def get_gedcom_user():
     return session.get("gedcom_user",current_user.username)
 
-def get_gedcom_folder():
-    user = get_gedcom_user()
-    return os.path.join(GEDCOM_DATA, user)
+def get_gedcom_folder(username=None):
+    if username is None:
+        username = get_gedcom_user()
+    return os.path.join(GEDCOM_DATA, username)
 
 def gedcom_fullname(gedcom):
     return os.path.join(get_gedcom_folder(),secure_filename(gedcom))
@@ -166,32 +167,34 @@ def get_transforms():
         #yield t
     return sorted(transforms,key=lambda t: t.displayname)
 
-
-@bp.route('/gedcom', methods=['GET'])
-@login_required
-@roles_accepted('gedcom', 'research')
-def gedcom_list():
-    gedcom_folder = get_gedcom_folder()
-    user = get_gedcom_user()
+def list_gedcoms(username):
+    gedcom_folder = get_gedcom_folder(username)
     try:
         names = sorted([name for name in os.listdir(gedcom_folder) if name.lower().endswith(".ged")])
     except:
         names = []
-    allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
     files = []
     class File: pass
     for name in names:
         f = File()
         f.name = name
         f.metadata = get_metadata(name)
-        
-        if user == current_user.username or f.metadata.get("admin_permission"):
+        if username == current_user.username or f.metadata.get("admin_permission"):
             files.append(f)
+    return files
+    
+@bp.route('/gedcom', methods=['GET'])
+@login_required
+@roles_accepted('gedcom', 'research')
+def gedcom_list():
+    username = get_gedcom_user()
+    files = list_gedcoms(username)
+    allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
     return render_template('gedcom_list.html', title=_("Gedcoms"),
-                           user=get_gedcom_user(), 
+                           user=username, 
                            files=files, kpl=len(files),
                            allowed_extensions=allowed_extensions )
-    
+
 @bp.route('/gedcom/versions/<gedcom>', methods=['GET'])
 @login_required
 @roles_accepted('gedcom', 'research')
@@ -324,6 +327,10 @@ def gedcom_upload():
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_download(gedcom):
+    metadata = get_metadata(gedcom)
+    if get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
+        flash(_("You don't have permission to view that GEDCOM"), category='flash_error')
+        return redirect(url_for('gedcom.gedcom_list'))
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
     gedcom = secure_filename(gedcom)
@@ -334,16 +341,19 @@ def gedcom_download(gedcom):
 
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
-@roles_accepted('gedcom', 'research')
+@roles_accepted('gedcom', 'research','admin')
 def gedcom_info(gedcom):
     filename = gedcom_fullname(gedcom)
     if not os.path.exists(filename):
         flash(_("That GEDCOM file does not exist on the server"), category='flash_error')
-        return redirect(url_for('.gedcom_list'))
+        return redirect(url_for('gedcom.gedcom_list'))
     metadata = get_metadata(gedcom)
     transforms = get_transforms()
     encoding = metadata.get('encoding','utf-8')
     info = metadata.get('info')
+    if get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
+        flash(_("You don't have permission to view that GEDCOM"), category='flash_error')
+        return redirect(url_for('gedcom.gedcom_list'))
     if info: 
         info = eval(info)
     else: 

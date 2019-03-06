@@ -271,12 +271,37 @@ def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     return redirect(url_for('admin.list_uploads', username=username))
 
+#------------------- GEDCOMs -------------------------
+
+def list_gedcoms(users):
+    for user in users:
+        for f in gedcom.routes.list_gedcoms(user.username):
+            yield (user.username,f)
+
 @bp.route('/admin/list_user_gedcoms/<user>', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit')
 def list_user_gedcoms(user):
     session["gedcom_user"] = user
     return gedcom.routes.gedcom_list()
+
+@bp.route('/admin/list_user_gedcom/<user>/<gedcomname>', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_user_gedcom(user,gedcomname):
+    session["gedcom_user"] = user
+    return gedcom.routes.gedcom_info(gedcomname)
+
+@bp.route('/admin/list_gedcoms_for_users', methods=['POST'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_gedcoms_for_users():
+    requested_users = request.form.getlist('select_user')
+    print(requested_users)
+    users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
+    gedcom_list = list(list_gedcoms(users))
+    return render_template("/admin/gedcoms.html", gedcom_list=gedcom_list, 
+                           users=", ".join(requested_users))
 
 @bp.route("/admin/site-map")
 @login_required
