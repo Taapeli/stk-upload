@@ -32,3 +32,8 @@ def email_admin(subject,body,sender=None):
     mail_to = shareds.app.config.get('ADMIN_EMAIL_TO')
     if sender and mail_to:
         email(sender,mail_to,subject,body)
+
+def email_from_admin(subject,body,receiver):
+    sender = shareds.app.config.get('ADMIN_EMAIL_FROM')
+    if sender:
+        email(sender,receiver,subject,body)        

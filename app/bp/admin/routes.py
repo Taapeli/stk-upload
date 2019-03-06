@@ -27,6 +27,7 @@ from .forms import AllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
 from .. import gedcom
+from models import email
 
 
 # Admin start page
@@ -203,9 +204,7 @@ def list_uploads(username):
 @login_required
 @roles_accepted('admin', 'audit')
 def list_uploads_for_users():
-    requested_users = request.form.getlist('users[]')
     requested_users = request.form.getlist('select_user')
-    print(requested_users)
     users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
     return render_template("/admin/uploads.html", uploads=upload_list, 
@@ -297,11 +296,32 @@ def list_user_gedcom(user,gedcomname):
 @roles_accepted('admin', 'audit')
 def list_gedcoms_for_users():
     requested_users = request.form.getlist('select_user')
-    print(requested_users)
     users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     gedcom_list = list(list_gedcoms(users))
     return render_template("/admin/gedcoms.html", gedcom_list=gedcom_list, 
                            users=", ".join(requested_users))
+
+#------------------- Email -------------------------
+@bp.route('/admin/send_email', methods=['POST'])
+@login_required
+@roles_accepted('admin', 'audit')
+def send_email():
+    requested_users = request.form.getlist('select_user')
+    emails = [user.email for user in shareds.user_datastore.get_users() if user.username in requested_users]
+    return render_template("/admin/message.html", 
+                           users=", ".join(requested_users),emails=emails)
+    
+@shareds.app.route('/admin/send_emails',methods=["post"])
+@login_required
+def send_emails():
+    subject = request.form["subject"]
+    body = request.form["message"]
+    receivers = request.form.getlist("email")
+    for receiver in receivers:
+        email.email_from_admin(subject,body,receiver)
+    return "ok"
+    
+#------------------- Site map -------------------------
 
 @bp.route("/admin/site-map")
 @login_required
