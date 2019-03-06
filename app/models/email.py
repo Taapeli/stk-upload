@@ -4,6 +4,7 @@ import shareds
 import logging
 import traceback
 
+from models import syslog
 
 def email(mail_from,mail_to,subject,body):
     msg = """\
@@ -32,8 +33,10 @@ def email_admin(subject,body,sender=None):
     mail_to = shareds.app.config.get('ADMIN_EMAIL_TO')
     if sender and mail_to:
         email(sender,mail_to,subject,body)
-
+        syslog.log(type="sent email to admin",sender=sender,receiver=mail_to,subject=subject)    
+        
 def email_from_admin(subject,body,receiver):
     sender = shareds.app.config.get('ADMIN_EMAIL_FROM')
     if sender:
-        email(sender,receiver,subject,body)        
+        email(sender,receiver,subject,body)    
+        syslog.log(type="sent email from admin",sender=sender,receiver=receiver,subject=subject)    
