@@ -4,24 +4,17 @@ import shareds
 import logging
 import traceback
 
+from flask_mail import Mail, Message
 from models import syslog
 
 def email(mail_from,mail_to,subject,body):
-    msg = """\
-From: %s
-Subject: %s
-To: %s
-
-%s
-""" % (mail_from,subject,mail_to,body)
-    #print msg
     try:
-        mail_server = shareds.app.config['MAIL_SERVER']
-        conn = smtplib.SMTP(mail_server)
-        conn.set_debuglevel(True)
-        msg = msg.encode("utf-8",errors='ignore')
-        conn.sendmail(mail_from, [mail_to], msg)
-        conn.quit()
+        mail = Mail()
+        msg = Message(subject,
+                      body=body,
+                      sender=mail_from,
+                      recipients=[mail_to])
+        mail.send(msg)
     except Exception as e:
         logging.error("iError in sending email")
         logging.error(str(e))
