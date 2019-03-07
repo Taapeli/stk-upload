@@ -174,7 +174,7 @@ class DOM_handler():
             counter += 1
 
         self.blog.log_event({'title':"Citations", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_events(self):
@@ -261,7 +261,7 @@ class DOM_handler():
                 e.save(self.tx)
             except RuntimeError as e:
                 self.blog.log_event({'title':"Events", 'count':counter, 
-                             'level':"ERROR", 'elapsed':time.time()-t0, 'percent':1})
+                             'level':"ERROR", 'elapsed':time.time()-t0}) #, 'percent':1})
                 raise
                 
 #             if e.type == "Death" or e.type == "Cause Of Death":
@@ -270,7 +270,7 @@ class DOM_handler():
             counter += 1
 
         self.blog.log_event({'title':"Events", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_families(self):
@@ -343,7 +343,7 @@ class DOM_handler():
             self.family_ids.append(f.uniq_id)
 
         self.blog.log_event({'title':"Families", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_notes(self):
@@ -381,7 +381,7 @@ class DOM_handler():
             counter += 1
 
         self.blog.log_event({'title':"Notes", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_media(self):
@@ -419,7 +419,7 @@ class DOM_handler():
             counter += 1
 
         self.blog.log_event({'title':"Media objects", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_people(self):
@@ -545,7 +545,7 @@ class DOM_handler():
             self.person_ids.append(p.uniq_id)
 
         self.blog.log_event({'title':"Persons", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_places(self):
@@ -635,7 +635,7 @@ class DOM_handler():
             counter += 1
 
         self.blog.log_event({'title':"Places", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_repositories(self):
@@ -684,7 +684,7 @@ class DOM_handler():
             counter += 1
 
         self.blog.log_event({'title':"Repositories", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_sources(self):
@@ -737,7 +737,7 @@ class DOM_handler():
             counter += 1
 
         self.blog.log_event({'title':"Sources", 'count':counter, 
-                             'elapsed':time.time()-t0, 'percent':1})
+                             'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def set_person_sortname_refnames(self):
@@ -772,8 +772,8 @@ class DOM_handler():
         cnt = Person_combo.estimate_lifetimes(self.tx, self.person_ids)
                             
         self.blog.log_event({'title':"Estimated person lifetimes", 
-                             'count':cnt, 'elapsed':time.time()-t0,
-                             'percent':1})
+                             'count':cnt, 'elapsed':time.time()-t0}) 
+#                            ,  'percent':1})
 
 
     def _extract_daterange(self, obj):

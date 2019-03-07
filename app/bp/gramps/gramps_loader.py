@@ -11,7 +11,7 @@ from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import Batch, Log
-from models.loadfile import status_update
+#from models.loadfile import status_update
 from models.dataupdater import set_confidence_values
 import shareds
 
@@ -32,25 +32,19 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
             create (p) -[:HAS_LOADED]-> (b:Batch {id:"2018-06-02.0", status:"started"}) 
             return b
     # Load the file (in routes.save_loaded_gramps) 
-        models.loadfile.upload_file > 
-            models.loadfile.status_update({status:"started", percent:1}) 
+        models.loadfile.upload_file > status:"started"
         # Clean apostrophes
-        file clean > 
-            models.loadfile.status_update({status:"loading", percent:2}) 
+        file clean > status:"loading"
     # Käsittele tietoryhmä 1
-        models.gramps.gramps_loader.xml_to_neo4j > 
-            models.loadfile.status_update({status:"storing", percent:3}) 
+        models.gramps.gramps_loader.xml_to_neo4j > status:"storing" 
     # Käsittele tietoryhmä 2 ...
     # ...
     # Käsittele henkilöt
-        models.gramps.gramps_loader.xml_to_neo4j >
-            # (Henkilömäärä / 64) kertaa kasvatetaan prosenttilukua x yhdellä
-            models.loadfile.status_update({status:"storing", percent:x}) 
+        models.gramps.gramps_loader.xml_to_neo4j > status:"storing"
     # Viimeistele data
-        models.gramps.gramps_loader.xml_to_neo4j > 
-            models.loadfile.status_update({status:"storing", percent:95}) 
+        models.gramps.gramps_loader.xml_to_neo4j > status:"storing"
     # Merkitse valmiiksi
-        models.loadfile.status_update({status:"done", percent:100}) 
+        status:"done"
 
         match (p:UserProfile {username:"jussi"}); 
         match (p) -[r:CURRENT_LOAD]-> () delete r
@@ -118,7 +112,7 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
         raise SystemExit("Stopped due to ConnectionError")    # Stop processing?
 
     handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
-                            'elapsed':time.time()-t0, 'percent':100})
+                            'elapsed':time.time()-t0})  #, 'percent':100})
     return handler.blog.list(), handler.batch_id
 
 
@@ -161,6 +155,6 @@ def file_clean(pathname):
                 counter = _clean_apostrophes(file_in, file_out)
             msg = "Cleaned apostrophes from input lines"
         event = Log({'title':msg, 'count':counter, 
-                     'elapsed':time.time()-t0, 'percent':1})
+                     'elapsed':time.time()-t0}) #, 'percent':1})
     return (file_cleaned, file_displ, event)
 
