@@ -20,5 +20,5 @@ def log(type,**kwargs):
     
 def readlog():
     logname = shareds.app.config.get('SYSLOGNAME')
-    if not logname: return None
+    if not logname: return []
     return open(logname).readlines()
