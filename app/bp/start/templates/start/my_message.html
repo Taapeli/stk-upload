@@ -8,6 +8,13 @@
 
 {{ hamburger_menu() }}
 
+<style>
+table, td {
+	border: none;
+	vertical-align: top;
+}
+</style>
+
 <script>
 $(document).ready( function() {
     $('#send').click( function() {
@@ -29,14 +36,21 @@ $(document).ready( function() {
   <div>
     <h2>{{ _("Contact administrators") }}</h2>
 
-    {% if current_user.is_authenticated and current_user.has_role('member') %}
+    {% if current_user.is_authenticated %}
     <div>
         <h3>{{ _('Write a message') }}</h3>
           <form action="#">
 		<p>{{ _('User') }} <i>{{current_user.name}}</i> 
 		    &lt;{{current_user.email}}&gt;</p>
          <p>
-         <textarea id="message" name="message" rows="20" cols="80"></textarea>
+         <table>
+         <tr>
+         	<td>{{ _("Subject") }}: 
+         	<td><input name="subject" size="80" value="{{ _('Message from Isotammi user') }} {{current_user.name}}">
+         <tr>
+         	<td>{{ _("Message") }}:
+         	<td><textarea id="message" name="message" rows="20" cols="80"></textarea>
+     	 </table>
          </p>
          <div> 
             <input type="button" id="send" value="{{ _('Apply') }}" />
