@@ -1,7 +1,7 @@
 {# _start/my_message.html_ #}
 {% extends "start/s_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _("Contact administrators") }} (start/my_message){% endblock %}
+{% block title %}{{ _("Send email to users") }} (start/my_message){% endblock %}
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -18,7 +18,7 @@ table, td {
 <script>
 $(document).ready( function() {
     $('#send').click( function() {
-		$.post("/send_email",$("form").serialize(), 
+		$.post("send_emails",$("form").serialize(), 
 		function(rsp) {
 			alert("{{ _('Message sent') }}");
 		}
@@ -34,31 +34,28 @@ $(document).ready( function() {
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("Contact administrators") }}</h2>
-
-    {% if current_user.is_authenticated %}
+    <h2>{{ _("Send email to users") }}: {{users}}</h2>
     <div>
         <h3>{{ _('Write a message') }}</h3>
-          <form action="#">
-		<p>{{ _('User') }} <i>{{current_user.name}}</i> 
-		    &lt;{{current_user.email}}&gt;</p>
-         <p>
+         <form action="#">
+		 {% for email in emails %}
+	         <input type="hidden" name="email" value="{{email}}">
+         {% endfor %}
          <table>
          <tr>
          	<td>{{ _("Subject") }}: 
-         	<td><input name="subject" size="80" value="{{ _('Message from Isotammi user') }} {{current_user.name}}">
+         	<td><input name="subject" size="80" value="{{ _('Message from Isotammi admin') }}">
          <tr>
          	<td>{{ _("Message") }}:
          	<td><textarea id="message" name="message" rows="20" cols="80"></textarea>
      	 </table>
-         </p>
+         <p>
          <div> 
             <input type="button" id="send" value="{{ _('Apply') }}" />
          </div>
          </form>
     </div>
-    {% endif %}
   </div>
-  <p></p>
+  <p>&rtrif; <a href="list_users">{{ _("List of users") }}</a></p>
 </div>
 {% endblock %}

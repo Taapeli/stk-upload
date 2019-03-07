@@ -1,0 +1,40 @@
+{# _myapp/templates/gr_result.html_ #}
+{% extends "/admin/layout.html" %}
+{% block title %}{{ _("Uploads") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+    <!-- meta http-equiv="refresh" content="30" -->
+    {% if users %}
+    	<h2>{{ _("GEDCOMs for users: ") }} <i>{{users}}</i></h2>
+    {% else %}
+	    <h2>{{ _("GEDCOMs for all users") }}</h2>
+    {% endif %}
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+        <table>
+           <tr>
+                <th>{{ _("User id") }}</th>
+                <th>{{ _("GEDCOM file") }}</th>
+           </tr>
+	    {% for username,gedcomfile in gedcom_list %}
+	       <tr>
+	           <td>{{ username }}</td>
+	           <td><a href="list_user_gedcom/{{ username }}/{{ gedcomfile.name }}">{{ gedcomfile.name }}</a></td>
+	       </tr>
+	    {% endfor %}
+	    </table>
+	    <br>
+	    {{ _("Number of files") }}: {{ gedcom_list|count }}
+    <p>&rtrif; <a href="list_users">{{ _("List of users") }}</a></p>
+{% endblock %}
+</body>
+</html>
+

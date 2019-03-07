@@ -265,13 +265,13 @@ def _jinja2_filter_datetime(datetime, fmt=None):
     except:
         return "Error"
 
-@shareds.app.template_filter('urlencode')
-def _jinja2_filter_urlencode(u):
-    """ Urlencode argument dictionary.
-    
-        {'fw':'Mainio#Jalmari Yrjö'} --> 'fw=Mainio%23Jalmari+Yrj%C3%B6'
-    """
-    return urlencode(u)
+# @shareds.app.template_filter('urlencode')
+# def _jinja2_filter_urlencode(u):
+#     """ Urlencode argument dictionary.
+#     
+#         {'fw':'Mainio#Jalmari Yrjö'} --> 'fw=Mainio%23Jalmari+Yrj%C3%B6'
+#     """
+#     return urlencode(u)
 
 @shareds.app.template_filter('transl')
 def _jinja2_filter_translate(term, var_name, lang="fi"):
@@ -292,6 +292,16 @@ def app_date(value):
         # Set the value in the beginning of this file
         return sysversion.revision_date()
     return 'Not defined'
+
+@shareds.app.template_filter('logcontent')
+def logcontent(row):
+    s = ""
+    sep = ""
+    for name,value in sorted(row.items()):
+        if name.startswith("_"): continue
+        s += f"{sep}{name}={repr(value)}"
+        sep = " "
+    return s
 
 #------------------------  Load Flask routes file ------------------------------
 

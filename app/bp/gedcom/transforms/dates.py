@@ -64,7 +64,7 @@ class Dates(transformer.Transformation):
 
             # 0.0.1888 -> 1888
             # 00.00.1888 -> 1888
-            r = re.match("0{1,2}\.0{1,2}\." +
+            r = re.match(r"0{1,2}\.0{1,2}\." +
                          r"(?P<yyyy>\d{4})",item.value.strip())
             if r:
                 item.value = r.group('yyyy')
@@ -73,7 +73,7 @@ class Dates(transformer.Transformation):
             # 00.12.1888 -> DEC 1888
             # .12.1888 -> DEC 1888
             #  12.1888 -> DEC 1888
-            r = re.match("(0{0,2}\.)?" +
+            r = re.match(r"(0{0,2}\.)?" +
                          r"(?P<mm>\d{1,2})" +
                          sep +
                          r"(?P<yyyy>\d{4})",item.value.strip())

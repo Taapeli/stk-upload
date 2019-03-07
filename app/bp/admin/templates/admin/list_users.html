@@ -35,9 +35,9 @@ $(document).ready( function() {
 		$("#form").submit();
     });
 
-	$("#list_user_gedcoms").click(function(e) {
+	$("#list_gedcoms").click(function(e) {
 		$("input.user:hidden:checked").prop("checked",false);
-		$("#form").attr("action","list_user_gedcoms");
+		$("#form").attr("action","list_gedcoms_for_users");
 		$("#form").submit();
     });
 
@@ -113,7 +113,7 @@ $(document).ready( function() {
 		        <p>
 		        <h3>{{ _("Operations for selected users") }}</h3>
 					<button id="list_uploads">{{ _("Show uploaded Gramps files") }}</button>
-		        	<button id="list_user_gedcoms">{{ _("Uploaded GEDCOMs") }}</button>
+		        	<button id="list_gedcoms">{{ _("Uploaded GEDCOMs") }}</button>
 		        	<button id="send_email">{{ _("Send email") }}</button>
 	        </form>
 	        </div>
