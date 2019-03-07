@@ -88,12 +88,12 @@ class UserAdmin():
         if emailRecord is None:
             return None
         email = shareds.allowed_email_model(**emailRecord)
-        if emailRecord['creator']:
-            email.creator = emailRecord['creator'] 
-        if emailRecord['created_at']:
-            email.created_at = datetime.fromtimestamp(float(emailRecord['created_at'])/1000) 
-        if emailRecord['confirmed_at']:    
-            email.confirmed_at = datetime.fromtimestamp(float(emailRecord['confirmed_at'])/1000)        
+#        if emailRecord['creator']:
+#            email.creator = emailRecord['creator'] 
+        if email.created_at:
+            email.created_at = datetime.fromtimestamp(float(email.created_at)/1000) 
+        if email.confirmed_at:    
+            email.confirmed_at = datetime.fromtimestamp(float(email.confirmed_at)/1000)        
         return email
 
     @classmethod         
@@ -157,7 +157,7 @@ class UserAdmin():
             with shareds.driver.session() as session:
                 emailRecords = session.read_transaction(cls._getAllowedEmails)
                 if emailRecords is not None:
-                    return [cls._build_email_from_record(emailRecord) for emailRecord in emailRecords] 
+                    return [cls._build_email_from_record(emailRecord['email']) for emailRecord in emailRecords] 
                 return []
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -169,7 +169,7 @@ class UserAdmin():
 #             emailRecords = []
 #             for record in tx.run(Cypher_adm.allowed_emails_get):
 #                 emailRecords.append(record['email'] )
-            emailRecords = [record['email'] for record in tx.run(Cypher_adm.allowed_emails_get)]    
+            emailRecords = [record for record in tx.run(Cypher_adm.allowed_emails_get)]    
             return(emailRecords)       
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
@@ -246,31 +246,32 @@ class UserAdmin():
 
         try:
             logging.debug('user update' + user.email + ' ' + user.name)
-#   Commented identifier and history fields are not to be updated
+            if user.username == 'master': 
+                user.roles = ['master']
+#   Identifier and history fields are not to be updated
             result = tx.run(Cypher_adm.user_update, 
-                email=user.email,
+                email = user.email,
  #               username = user.username,
                 name = user.name, 
                 language = user.language,              
-                is_active=user.is_active,
-                roles=user.roles)
+                is_active = user.is_active,
+                roles = user.roles)
+            if user.username != 'master':
 #   Find list of previous user -> role connections
-            prev_roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
+                prev_roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
 #   Delete connections that are not in edited connection list            
-            for rolename in prev_roles:
-                if not rolename in user.roles:
-                    tx.run(Cypher_adm.user_role_delete,
-                           email = user.email,
-                           name = rolename) 
+                for rolename in prev_roles:
+                    if not rolename in user.roles:
+                        tx.run(Cypher_adm.user_role_delete,
+                               email = user.email,
+                               name = rolename) 
 #   Add connections that are not in previous connection list                    
-            for rolename in user.roles:
-                if not rolename in prev_roles:
-                    tx.run(Cypher_adm.user_role_add, 
-                           email = user.email,
-                           name = rolename)        
+                for rolename in user.roles:
+                    if not rolename in prev_roles:
+                        tx.run(Cypher_adm.user_role_add, 
+                               email = user.email,
+                               name = rolename)        
           
-#            for record in result:
-#                userNode = (record['user'])
             logging.info('User with email address {} updated'.format(user.email)) 
             return(result.single()['user'])
         except CypherError as ex:

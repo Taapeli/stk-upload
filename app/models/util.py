@@ -26,6 +26,10 @@ def format_timestamp(ts=None):
     return time.strftime("%a %Y-%m-%d %H:%M:%S", 
                                time.localtime(ts))
 
+def format_date(ts=None):
+    if ts is None: ts = time.time()
+    return time.strftime("%Y-%m-%d", 
+                               time.localtime(ts))
 
 def guess_encoding(fname):
     encodings = [

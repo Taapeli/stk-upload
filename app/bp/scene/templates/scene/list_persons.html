@@ -6,44 +6,50 @@
 {% import '/scene/macros.html' as macro with context %}
 
 {% set cnt = persons|count %}
-{% set who = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-              3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'} %}
+{% set user = owner_filter.user %}
+{% set next = owner_filter.next_person %}
+{% set owners = owner_filter.filter %}
+{% if owners == 3 or owners == 5 %}{#
+	#   common_own   011 3 = 1+2 = users data & Isotammi
+	#   common_batch 101 5 = 1+4 = user batch & Isotammi #}
+	{% set multi_owners = owners - 1 %}
+    {% set my_set = owner_filter.choices.as_str[owners-1] %}
+    {% set my_common = "Isotammi" %}
+{% else %}
+    {% set multi_owners = 0 %}
+    {% set my_set = owner_filter.choices.as_str[owners] %}
+{% endif %}
 
-{% if session['filter_div'] %}
-    <h2>{{ _('Persons filtered by') }} {{ who[ session['filter_div'] ] }}</h2>
+{% if session['owner_filter'] %}
+    <h2>{{ _('Persons filtered by') }} {{ owner_filter.owner_str() }}</h2>
 {# elif rule[0] == 'refname' %}
     <h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2> #}
 {% else %}
     <h2>{{ _('Persons') }}</h2>
 {% endif %}
 
-<p><small>{{cnt}} persons, user {{user}}, filter {{session['filter_div']}}, next {{next}}</small></p>
-{% set has_many_owners = ( session['filter_div'] == 3 or session['filter_div'] == 5 ) %}
+<p><small>{{cnt}} persons, user {{user}}, filter {{owners}} {{my_set}}, next {{next}}</small></p>
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
 	           <div id="description">
-	               <p>{{ _('Displaying %(num)s persons', num=cnt) }}. Tietojoukko:
-	                   {% if session['filter_div'] == 1 %}Suomikanta
-                       {% elif session['filter_div'] == 2 %}omat aineistot
-                       {% elif session['filter_div'] == 3 %}
-                            &FilledSmallSquare;&nbsp;omat aineistot / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
-                       {% elif session['filter_div'] == 4 %}oma tuontierä
-                       {% elif session['filter_div'] == 5 %}
-                            &FilledSmallSquare;&nbsp;oma tuontierä / <span class="owner">&nbsp;Suomikanta&nbsp;</span>.
-                       {% endif %}
+	               <p>{{ _('Displaying %(num)s persons', num=cnt) }}. Tietojoukko: <b>
+                       {% if multi_owners %}
+                            &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
+                       {% else %}{{my_set}}
+                       {% endif %}</b>
                        {% if user %}
-                       <i>(<a href="/scene?fw={{next[0]}}" title="vaihda poimintasääntöä" 
-                            style="text-decoration-line: underline;">Vaihda</a>).</i>
+                       (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
+                            style="text-decoration-line: underline;">Vaihda</a></i>).
                        {% endif %}</p>
 	           </div>
 	           <div>
 	               <form action="/scene/persons_all">
 	                 <fieldset>
 	                    <input type="hidden" name="c" value="50" >
-	                    <label for="f">{{ _('Go to') }}</label>
+	                    <label for="fw">{{ _('Go to') }}</label>
 	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of surname') }}" 
 	                     placeholder="{{ _('Surname') }}">
@@ -75,10 +81,11 @@
             {% for p in persons %}
                 {% set ini = p.sortname[0] %}
                 {% if loop.changed(ini) %}{% if not ini == "#" %}
-                    <li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
+	                <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
                 {% endif %}{% endif %}
             {% endfor %}
-            <li><a href="/scene/persons_all/?fw={{next[1]}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+            <li><a href="/scene/persons_all/?{{ {'fw':next[1]} | urlencode }}" 
+                 title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
 
 		</div>
@@ -92,7 +99,7 @@
 			<tbody>
 
 	    {% for p in persons %}
-	       {% if has_many_owners %}
+	       {% if multi_owners %}
                {% set owner_but_me = p.owners | sort %}
 	       {% else %}{% set owner_but_me = [] %}
 	       {% endif %}
@@ -101,7 +108,7 @@
 	               {% if loop.changed(ini) %}
 		               {% if ini == "#" %}{% set symbol = '–' %}
 		               {% else %}{% set symbol = ini %}{% endif %}
-		               <a id="{{symbol}}" name="{{alpha}}" title="{{ _('Back to Top') }}" 
+		               <a id="{{symbol}}" name="{{ini}}" title="{{ _('Back to Top') }}" 
 		                  href="#">{{symbol}}</a>
 	               {% endif %}</td>
 
@@ -135,8 +142,9 @@
 
 	              <td class="ColumnEvent">
 	        {% if p.events is iterable %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li{% if e.type != "Birth" and e.type != "Death" %} class="minor"{% endif %}>
-		                  <i>{{e.type|transl('evt')}} {{e.description}}</i>
+		              <li{% if e.type == "Birth" or e.type == "Death" %} class="major"
+		                  {% else %} class="minor"{% endif %}>
+		                  <i>{{e.type|transl('evt')}}</i> {{e.description}}
 		                  {% if e.dates %}{{e.dates}} {% endif %}
 		                  {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
@@ -148,11 +156,13 @@
             </tbody>
         </table>
 	{% else %}
-        <table class="IndividualList">
-            <tbody>
-	        <tr><td>{{ _('No one found with search keys') }}</td></tr>
-            </tbody>
-        </table>
+        <div class="NotFound">
+            <p>{{ _('No one found with search keys starting "%(name)s"', name=next[0]) }}.</p>
+            {% if next[0] %}<p>&nbsp;&#9656; <a href="/scene/persons_all/?fw=%20" 
+                title="{{ _('first page') }}">{{ _("Search from the beginning") }}</a></p>
+            {% endif %}
+        </div>
+        <p>&nbsp;</p>
 	{% endif %}
     </div>
 {% endblock %}

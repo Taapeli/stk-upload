@@ -19,9 +19,9 @@ from flask import send_from_directory
 from flask_babelex import _
 
 import logging 
-LOG = logging.getLogger(__name__)    
+LOG = logging.getLogger(__name__)
 
-from models import util
+from models import util, syslog
 
 from . import bp
 from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
@@ -109,10 +109,10 @@ def read_gedcom(filename):
 def get_gedcom_user():
     return session.get("gedcom_user",current_user.username)
 
-def get_gedcom_folder():
-    user = get_gedcom_user()
-    logging.info("gedcom user: "+user)
-    return os.path.join(GEDCOM_DATA, user)
+def get_gedcom_folder(username=None):
+    if username is None:
+        username = get_gedcom_user()
+    return os.path.join(GEDCOM_DATA, username)
 
 def gedcom_fullname(gedcom):
     return os.path.join(get_gedcom_folder(),secure_filename(gedcom))
@@ -167,41 +167,51 @@ def get_transforms():
         #yield t
     return sorted(transforms,key=lambda t: t.displayname)
 
-
-@bp.route('/gedcom', methods=['GET'])
-@login_required
-@roles_accepted('gedcom', 'research')
-def gedcom_list():
-    gedcom_folder = get_gedcom_folder()
-    user = get_gedcom_user()
+def list_gedcoms(username):
+    gedcom_folder = get_gedcom_folder(username)
     try:
         names = sorted([name for name in os.listdir(gedcom_folder) if name.lower().endswith(".ged")])
     except:
         names = []
-    allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
     files = []
     class File: pass
     for name in names:
         f = File()
         f.name = name
         f.metadata = get_metadata(name)
-        
-        if user == current_user.username or f.metadata.get("admin_permission"):
+        if username == current_user.username or f.metadata.get("admin_permission"):
             files.append(f)
+    return files
+    
+@bp.route('/gedcom', methods=['GET'])
+@login_required
+@roles_accepted('gedcom', 'research')
+def gedcom_list():
+    username = get_gedcom_user()
+    files = list_gedcoms(username)
+    allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
     return render_template('gedcom_list.html', title=_("Gedcoms"),
-                           user=get_gedcom_user(), 
+                           user=username, 
                            files=files, kpl=len(files),
                            allowed_extensions=allowed_extensions )
-    
+
 @bp.route('/gedcom/versions/<gedcom>', methods=['GET'])
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_versions(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom = secure_filename(gedcom)
-    versions = sorted([name for name in os.listdir(gedcom_folder) \
-                       if name.startswith(gedcom+".")],key=lambda x: int(x.split(".")[-1]))
-    versions.append(gedcom)
+    versions = [] 
+    for name in os.listdir(gedcom_folder):
+        if name.startswith(gedcom+"."):
+            fullname = os.path.join(gedcom_folder,name)
+            modtime = util.format_date(os.stat(fullname).st_mtime)
+            version_number = int(name.split(".")[-1])
+            displayname = f"v.{version_number}" 
+            versions.append((version_number,name,displayname,modtime))
+    versions.sort()
+    fullname = os.path.join(gedcom_folder,gedcom)
+    versions.append((-1,gedcom,_("Current file"),util.format_date(os.stat(fullname).st_mtime)))
     return jsonify(versions)
 
 @bp.route('/gedcom/history/<gedcom>', methods=['GET'])
@@ -235,7 +245,7 @@ def gedcom_revert(gedcom,version):
     if os.path.exists(filename1) and os.path.exists(filename2):
         os.rename(filename1,newname)
         os.rename(filename2,filename1)
-        history_append(filename1,_("\n{}:").format(util.format_timestamp()))
+        history_append(filename1,"\n{}:".format(util.format_timestamp()))
         history_append(filename1,_("File {} saved as {}").format(filename1,newname))
         history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
         rsp = dict(newname=os.path.basename(newname))
@@ -307,15 +317,21 @@ def gedcom_upload():
             'desc':desc,
             'encoding':encoding,
             'upload_time':util.format_timestamp(),
+            'size':os.stat(fullname).st_size,
         }
         save_metadata(filename, metadata)
         history_init(fullname)
+        syslog.log(type="uploaded a gedcom",gedcom=file.filename)    
         return redirect(url_for('.gedcom_info',gedcom=filename))
   
 @bp.route('/gedcom/download/<gedcom>')
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_download(gedcom):
+    metadata = get_metadata(gedcom)
+    if get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
+        flash(_("You don't have permission to view that GEDCOM"), category='flash_error')
+        return redirect(url_for('gedcom.gedcom_list'))
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
     gedcom = secure_filename(gedcom)
@@ -326,16 +342,19 @@ def gedcom_download(gedcom):
 
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
-@roles_accepted('gedcom', 'research')
+@roles_accepted('gedcom', 'research','admin')
 def gedcom_info(gedcom):
     filename = gedcom_fullname(gedcom)
     if not os.path.exists(filename):
         flash(_("That GEDCOM file does not exist on the server"), category='flash_error')
-        return redirect(url_for('.gedcom_list'))
+        return redirect(url_for('gedcom.gedcom_list'))
     metadata = get_metadata(gedcom)
     transforms = get_transforms()
     encoding = metadata.get('encoding','utf-8')
     info = metadata.get('info')
+    if get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
+        flash(_("You don't have permission to view that GEDCOM"), category='flash_error')
+        return redirect(url_for('gedcom.gedcom_list'))
     if info: 
         info = eval(info)
     else: 
@@ -395,6 +414,7 @@ def gedcom_delete(gedcom):
             filename = os.path.join(gedcom_folder, name)
             removefile(filename) 
             logging.info("Deleted:"+filename)
+    syslog.log(type="deleted a gedcom",gedcom=gedcom)    
     return redirect(url_for('.gedcom_list'))
 
 @bp.route('/gedcom/delete_old_versions/<gedcom>')
@@ -409,6 +429,7 @@ def gedcom_delete_old_versions(gedcom):
         if name.startswith(gedcom+"."):  
             removefile(filename) 
             logging.info("Deleted:"+filename)
+    syslog.log(type="deleted old versions for gedcom",gedcom=gedcom)    
     return redirect(url_for('.gedcom_info',gedcom=gedcom))
 
 def removefile(fname): 
@@ -555,7 +576,7 @@ def gedcom_transform(gedcom,transform):
             return process_gedcom(arglist, transform_module)
         
         #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
-        python_exe = sys.executable or "/opt/repo/virtenv/bin/python3"
+        python_exe = sys.executable or "/opt/jelastic-python37/bin/python3"
         python_path = ':'.join([os.path.join(APP_ROOT, 'app'), GEDCOM_APP])
         gedcom_app = GEDCOM_APP
         transform_py = os.path.join(GEDCOM_APP, "gedcom_transform.py")

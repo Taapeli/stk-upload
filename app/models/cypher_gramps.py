@@ -158,11 +158,34 @@ MERGE (m:Media {handle: $m_attr.handle})
 
 
 
+class Cypher_note_in_batch():
+    """ A Note is added to given batch or parent node 
+    
+        # MATCH (u:Batch {id:$bid}) -[*]-> (a {handle:$parent_handle})
+    """
+
+    # Find the batch like '2019-02-24.006' and connect Note in that Batch
+    create = """
+MATCH (u:Batch {id:$bid})
+CREATE (u) -[:IN_BATCH]-> (n:Note) 
+    SET n = $n_attr
+RETURN ID(n)"""
+
+    # Find a known parent node with uniq_id and connect a new Note to it
+    create_as_leaf = """
+MATCH (a) WHERE ID(a) = $parent_id
+CREATE (a) -[:NOTE]-> (n:Note {handle: $n_attr.handle}) 
+    SET n = $n_attr
+RETURN ID(n)"""
+
+
 class Cypher_note_w_handle():
     """ For Note class """
 
+# create_in_batch = """MATCH (u:Batch {id:$bid}) -[*]-> (x {handle:$parent_id})
+
     create = """
-MERGE (n:Note {handle: $n_attr.handle}) 
+CREATE (n:Note {handle: $n_attr.handle}) 
     SET n = $n_attr
 RETURN ID(n)"""
 

@@ -10,7 +10,7 @@ logger = logging.getLogger('stkserver')
 import time
 
 from flask import render_template, request, redirect, url_for, flash #, g
-from flask_security import roles_accepted #, login_required, current_user ,roles_required
+from flask_security import roles_accepted, login_required #, current_user ,roles_required
 from flask_babelex import _
 
 #import shareds
@@ -22,7 +22,7 @@ from . import bp
 
 
 @bp.route('/tables')
-#     @roles_accepted('member', 'admin')
+@login_required
 @roles_accepted('member', 'admin')
 def datatables():
     """ Home page for table format tools """
@@ -34,7 +34,7 @@ def datatables():
 
 @bp.route('/listall/<string:subj>')
 def show_table_data(subj):
-    """ Person listings
+    """ Person etc listings
         tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
     """
     t0 = time.time()

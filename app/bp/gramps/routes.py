@@ -11,9 +11,9 @@ import time
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, send_from_directory
+from flask import render_template, request, redirect, url_for, send_from_directory, flash
 from flask_security import login_required, roles_accepted, current_user # ,roles_required
-#from flask_babelex import _
+from flask_babelex import _
 
 import shareds
 from models import loadfile, email, util    # dbutil, 
@@ -77,11 +77,13 @@ def upload_gramps():
     return redirect(url_for('gramps.list_uploads'))
     #return redirect(url_for('gramps.save_loaded_gramps', filename=infile.filename))
 
-
-# @bp.route('/gramps/save/xml_file/<string:filename>')
-# @roles_accepted('member', 'admin')
-# def save_loaded_gramps(filename):
-#     """ Save loaded gramps data to the database (synchronous, no batch) """
+@bp.route('/gramps/start_upload/<xmlname>')
+@login_required
+@roles_accepted('member')
+def start_load_to_neo4j(xmlname):
+    uploads.initiate_background_load_to_neo4j(current_user.username,xmlname)
+    flash(_('Data import from {!r} to database has been started.'.format(xmlname)), 'info')
+    return redirect(url_for('gramps.list_uploads'))
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')
 @roles_accepted('member', 'admin')

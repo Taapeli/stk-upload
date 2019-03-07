@@ -11,26 +11,23 @@
   <div>
     <h2>{{ _("GEDCOM Management") }} ({{ _("user") }}: {{ user }})</h2>
     <div class="row">
-        <div class="startbox">
-	        <div style="display: inline-block;">
-	            <h3>{{ _("Uploaded GEDCOMs") }}</h3>
+    
+        <div class="startbox2"> 
+	            <h3>{{ _("Select your file for processing") }}</h3> 
 				<div>
-				    <ul>
+				    <table>
 					    {% for file in files %}
-						    <li>
-						    <b>{{ file.metadata.desc|escape }}</b>
-						    <br>
-						    <a href="/gedcom/info/{{ file.name|escape }}">{{ file.name }}</a>
-						    <p>
-						    </li>
+						    <tr>
+						    <td class="gedcom-name">
+						    <a href="/gedcom/info/{{ file.name|escape }}">{{ file.name }}</a></td>
+						    <td>{{ file.metadata.desc|escape }}</td>
+						    </tr>
 					    {% endfor %}
-				    <p>{{ kpl }} {{ _("files") }}</p>
+					</table>
 				</div>
-			</div>
 		</div>
 
 	    <div class="startbox">
-	        <div style="display: inline-block;">
 	            <h3>{{ _("Upload a new GEDCOM file") }}</h3>
 				<div>
 				    <!-- form id="upload_form" method="post" enctype="multipart/form-data" action="/gedcom/upload" -->
@@ -44,11 +41,11 @@
 				        <input type="button" id="upload" value="{{ _('Upload') }}">
 				      </div>
 				    </form>
-				    <div>&rtrif; <a href="/">{{ _("Return main page") }}</a></div>
 				</div>
-			 </div>
 	    </div>
+
 	</div>
+	<div>&rtrif; <a href="/">{{ _("Return main page") }}</a></div>
   </div>
 </div>
 <div id="waiter" class="modal"></div>	

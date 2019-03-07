@@ -27,6 +27,7 @@
     	cnt, order=ordname[order] ) 
     }}
     {{ _('If the person has many names, they will appear in the list under each name.') }}
+    {{ _('Note that family events are not included.') }}
     <br> 
     <br> 
     {{ _("Clicking a name will take you to the selected person's page.")}} 
@@ -124,7 +125,7 @@
 	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
-		               {% else %}<i>{{p.names[0].patronyme}}</i>{% endif %}
+		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}
 		               <small class="idno">[{{p.uniq_id}}</small></a><small class="idno"><a 
 		                href="/scene/person/{{p.uniq_id}}">]</a></small>
 		               {# TODO Remove later test link at ']' #}
@@ -136,7 +137,7 @@
 
 	              <td class="ColumnEvent">
 	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li><i>{{e.type|transl('evt')}} {{e.description}}</i>
+		              <li><i>{{e.type|transl('evt')}}</i> {{e.description}}
 		              {% if e.dates %}{{e.dates}} {% endif %}
 		              {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
@@ -147,12 +148,13 @@
 	           </tr>
 	    {% endfor %}
 				</tr>
-	{% else %}
-        <table class="IndividualList">
-            <tbody>
-	        <tr><td>{{ _('No one found with search keys') }}<//td></tr>
+            </tbody>
+        </table>
+	{% elif rule | count > 1 %}
+        <div class="NotFound">
+            <p>{{ _('No one found with search keys') }}.</p>
+        </div>
+        <p>&nbsp;</p>
 	{% endif %}
-			</tbody>
-		</table>
 	</div>
 {% endblock %}

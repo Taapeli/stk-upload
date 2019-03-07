@@ -1,7 +1,7 @@
 {# start/index.html_ #} 
 {% extends "start/s_layout.html" %} 
 {% include "security/_messages.html" %} 
-{% block title %}{{ _('Stk Start Page') }} (start/index){% endblock %} 
+{% block title %}{{ _('Isotammi Start Page') }} (start/index){% endblock %} 
 {% block body %} 
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -11,47 +11,53 @@
     ("/settings", _('Change language'), _('Select language'))
    ) ) }}
 
+<style>
+div.startbox { min-height: 270px;}
+</style>
+
 <div id="startdiv">
-    <h2>{{ _('Welcome to Finland Database') }}</h2>
+    <h2>{{ _('Welcome to Isotammi Services') }}</h2>
 	<div>
 		<div class="row">
 
 			<div class="startbox bg_intro">
-				<div style="display: inline-block;">
-					<h3>{{ _('Learn about our service') }}</h3>
-					<p>
-						{{ _('<i>Finland Database</i> is a system for co\'operatively collect validated Finnish Genealogy data.') }} 
-						<a href="http://isotammi.referata.com/wiki/Oma_aineisto_Isotammeen" 
-						 target="esite">{{ _('See the process for your data') }}</a>.
-					</p>
-					<p>{{ _("For more info see also documents -") }}</p>
-					<ul class="compact">
-						<li><a href="http://isotammi.referata.com/wiki/Suomikanta_ja_sen_hy%C3%B6dynt%C3%A4minen"
-						 target="esite">{{ _('Suomikanta database') }}</a></li>
-						<li><a href="http://isotammi.referata.com/wiki/Sukutietojen_vakiointi_Gedcom-ohjelmilla"
-						 target="esite">{{ _('Gedcom healing services') }}</a></li>
-					</ul>
-				</div>
+				<h3>{{ _('Learn about Isotammi') }}</h3>
+				<img alt="Suomen sukututkimusseura ry" src="/static/SSS-tunnus-160.png" style="float:left">
+				<p>
+					{{ _('<i>Isotammi Database</i> is a system for co\'operatively collect validated Finnish Genealogy data.') }} 
+					<a href="http://isotammi.referata.com/wiki/Oma_aineisto_Isotammeen" 
+					 target="esite">{{ _('See the process for your data') }}</a>.
+				</p>
+				<p>{{ _("For more info see also documents -") }}</p>
+				<ul class="compact">
+					<li><a href="http://isotammi.referata.com/wiki/Suomikanta_ja_sen_hy%C3%B6dynt%C3%A4minen"
+					 target="esite">{{ _('Why Isotammi database') }}</a></li>
+					<li><a href="http://isotammi.referata.com/wiki/Sukutietojen_vakiointi_Gedcom-ohjelmilla"
+					 target="esite">{{ _('Gedcom data healing services') }}</a></li>
+				</ul>
 			</div>
 
-         <div class="startbox gedtools">
-            <div style="display: inline-block;">
-            <form method="get" action="/gedcom">
-               <h3>{{ _('My gedcom material') }}</h3>
-               <p>{{ _('Upload your material in gedcom format or edit an already stored') }}</p>
-              <div class="submit"> 
-                 <button type="submit">{{ _('Gedcom handlings') }}</button>
-              </div>
-            </form>
-            </div>
-         </div>
+			<div class="startbox">
+				<h3>{{ _('Look at demo data in Isotammi Database') }}</h3>
+				<p>{{ _('Here you can see a restrected view on demo genealogical data.') }}</p>
+				<form method="get" action="/scene?div=1">
+					<div class="submit">
+						<button type="submit">{{ _('Explore demo') }}</button>
+					</div>
+				</form>
+			</div>
 
 			<div class="startbox">
-				<h3>{{ _('Look at data in Suomikanta') }}</h3>
-				<p>{{ _('Here you can see a restrected view on Finnish genealogical data.') }}</p>
-				<form method="get" action="/scene">
+				<h3>{{ _('Log in') }}</h3>
+				<p>{{ _('As a member of <i>Suomen sukututkimusseura</i>, you can log in,') }}
+				   {{ _('refine the structure of your own data and get full access to the demo database') }}</a>.
+				   {{ _('Join our users by') }} 
+				   <a href="/message">{{ _('sending a message to administrators') }}.</a>.
+				</p>
+				<p>{{ _('If you have credentials, please log in here.') }}</p>
+				<form method="get" action="/login">
 					<div class="submit">
-						<button type="submit">{{ _('Explore the database') }}</button>
+						<button type="submit">{{ _('Log in') }}</button>
 					</div>
 				</form>
 			</div>

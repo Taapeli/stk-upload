@@ -77,7 +77,7 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
         handler.begin_tx(shareds.driver.session())
         # Create new Batch node and start
         handler.batch_id = handler.blog.start_batch(None, file_cleaned)
-        status_update({'percent':1})
+        #status_update({'percent':1})
 
         try:
             handler.handle_notes()

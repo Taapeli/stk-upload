@@ -8,7 +8,7 @@ Created on 8.8.2018
 '''
 
 import os
-
+import json
 import logging 
 #import datetime
 #from _pickle import Unpickler
@@ -27,7 +27,8 @@ from .forms import AllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
 from .. import gedcom
-
+from models import email
+from models import syslog 
 
 # Admin start page
 @bp.route('/admin',  methods=['GET', 'POST'])
@@ -199,13 +200,23 @@ def list_uploads(username):
     upload_list = uploads.list_uploads(username) 
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
 
+@bp.route('/admin/list_uploads_all', methods=['POST'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_uploads_for_users():
+    requested_users = request.form.getlist('select_user')
+    users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
+    upload_list = list(uploads.list_uploads_all(users))
+    return render_template("/admin/uploads.html", uploads=upload_list, 
+                           users=", ".join(requested_users))
+
 @bp.route('/admin/list_uploads_all', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit')
 def list_uploads_all():
     users = shareds.user_datastore.get_users()
-    upload_list = uploads.list_uploads_all(users) 
-    return render_template("/admin/uploads.html", uploads=upload_list)
+    upload_list = list(uploads.list_uploads_all(users))
+    return render_template("/admin/uploads.html", uploads=upload_list )
 
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
 @login_required
@@ -259,12 +270,58 @@ def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     return redirect(url_for('admin.list_uploads', username=username))
 
+#------------------- GEDCOMs -------------------------
+
+def list_gedcoms(users):
+    for user in users:
+        for f in gedcom.routes.list_gedcoms(user.username):
+            yield (user.username,f)
+
 @bp.route('/admin/list_user_gedcoms/<user>', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit')
 def list_user_gedcoms(user):
     session["gedcom_user"] = user
     return gedcom.routes.gedcom_list()
+
+@bp.route('/admin/list_user_gedcom/<user>/<gedcomname>', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_user_gedcom(user,gedcomname):
+    session["gedcom_user"] = user
+    return gedcom.routes.gedcom_info(gedcomname)
+
+@bp.route('/admin/list_gedcoms_for_users', methods=['POST'])
+@login_required
+@roles_accepted('admin', 'audit')
+def list_gedcoms_for_users():
+    requested_users = request.form.getlist('select_user')
+    users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
+    gedcom_list = list(list_gedcoms(users))
+    return render_template("/admin/gedcoms.html", gedcom_list=gedcom_list, 
+                           users=", ".join(requested_users))
+
+#------------------- Email -------------------------
+@bp.route('/admin/send_email', methods=['POST'])
+@login_required
+@roles_accepted('admin', 'audit')
+def send_email():
+    requested_users = request.form.getlist('select_user')
+    emails = [user.email for user in shareds.user_datastore.get_users() if user.username in requested_users]
+    return render_template("/admin/message.html", 
+                           users=", ".join(requested_users),emails=emails)
+    
+@shareds.app.route('/admin/send_emails',methods=["post"])
+@login_required
+def send_emails():
+    subject = request.form["subject"]
+    body = request.form["message"]
+    receivers = request.form.getlist("email")
+    for receiver in receivers:
+        email.email_from_admin(subject,body,receiver)
+    return "ok"
+    
+#------------------- Site map -------------------------
 
 @bp.route("/admin/site-map")
 @login_required
@@ -294,3 +351,14 @@ def site_map():
         links.append(Link(url, rule.endpoint, methods))
     
     return render_template("/admin/site-map.html", links=links)
+
+
+#------------------- Log -------------------------
+@bp.route("/admin/readlog")
+@login_required
+@roles_accepted('admin')
+def readlog():
+    lines = syslog.readlog()
+    rows = [json.loads(line) for line in lines]
+    return render_template("/admin/syslog.html", rows=rows)
+    

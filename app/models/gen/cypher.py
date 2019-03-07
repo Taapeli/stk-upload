@@ -267,8 +267,8 @@ OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0})
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
 RETURN f, 
     COLLECT([r.role, pp, np]) AS parent, 
-    COLLECT(pc) AS child, 
-    COUNT(pc) AS no_of_children 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY ID(f) LIMIT $limit"""
     #TODO Obsolete
     read_families = """

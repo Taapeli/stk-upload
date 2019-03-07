@@ -1,4 +1,3 @@
-#from flask import session
 from flask_security import Security, UserMixin, RoleMixin
 from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, ValidationError
 from wtforms import SelectField, SubmitField, BooleanField
@@ -13,7 +12,8 @@ from chkdate import Chkdate
 from templates import jinja_filters
 
 from datetime import datetime
-#from neo4j.exceptions import ConstraintError, CypherError
+from urllib.parse import urlencode
+
 import logging
 logger = logging.getLogger('stkserver') 
 
@@ -110,7 +110,7 @@ class User(UserMixin):
         self.name = kwargs.get('name')
         self.language = kwargs.get('language')   
         self.password = kwargs.get('password')
-        self.is_active = True
+        self.is_active = kwargs.get('is_active')
         self.confirmed_at = kwargs.get('confirmed_at')
         self.roles = kwargs['roles']
         self.last_login_at = kwargs.get('last_login_at')
@@ -146,8 +146,10 @@ class Allowed_email():
        
     def __init__(self, **kwargs):
         self.allowed_email = kwargs['allowed_email']
-        self.default_role = kwargs.get('default_role')        
-
+        self.default_role = kwargs.get('default_role') 
+        self.creator = kwargs.get('creator')
+        self.created_at = kwargs.get('created_at')         
+        self.confirmed_at = kwargs.get('confirmed_at') 
 
 
 class ExtendedLoginForm(LoginForm):
@@ -252,6 +254,24 @@ def _jinja2_filter_datestamp(time_str, fmt=None):
     except:
         return time_str
 
+@shareds.app.template_filter('isodatetime')
+def _jinja2_filter_datetime(datetime, fmt=None):
+    """ Datetime ISO-muotoon ilman sekunnin osia """
+    if datetime == None:
+        return ""
+    try:
+        s = datetime.strftime('%Y-%m-%d %H:%M:%S')
+        return s
+    except:
+        return "Error"
+
+# @shareds.app.template_filter('urlencode')
+# def _jinja2_filter_urlencode(u):
+#     """ Urlencode argument dictionary.
+#     
+#         {'fw':'Mainio#Jalmari Yrjö'} --> 'fw=Mainio%23Jalmari+Yrj%C3%B6'
+#     """
+#     return urlencode(u)
 
 @shareds.app.template_filter('transl')
 def _jinja2_filter_translate(term, var_name, lang="fi"):
@@ -272,6 +292,16 @@ def app_date(value):
         # Set the value in the beginning of this file
         return sysversion.revision_date()
     return 'Not defined'
+
+@shareds.app.template_filter('logcontent')
+def logcontent(row):
+    s = ""
+    sep = ""
+    for name,value in sorted(row.items()):
+        if name.startswith("_"): continue
+        s += f"{sep}{name}={repr(value)}"
+        sep = " "
+    return s
 
 #------------------------  Load Flask routes file ------------------------------
 

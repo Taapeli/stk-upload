@@ -4,6 +4,9 @@
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
+<style>
+tbody tr td {max-width:300px}
+</style>
         
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
@@ -32,7 +35,7 @@
               {% elif  k == "handle" %}<td><small>{{obj[k]|d('-')}}</small></td>
               {% elif  obj[k]|is_list %}<td><ul>
                 {% for i in obj[k] %}<li>{{i|d('-')}}</li>{% endfor %}</ul></td>
-              {% else %}<td>{{obj[k]|d('-')}}</td>
+              {% else %}<td>{% if obj[k] %}{{obj[k]|d('-')}}{% endif %}</td>
 		      {% endif %}
 	    	{% endfor %}
 	        </tr>

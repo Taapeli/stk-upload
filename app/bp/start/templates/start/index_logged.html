@@ -1,7 +1,7 @@
 {# start/index.html_ #}
 {% extends "start/s_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _("Stk User's Start Page") }} (start/index_logged){% endblock %}
+{% block title %}{{ _("Isotammi User's Start Page") }} (start/index_logged){% endblock %}
 {% block body %}
   {{ super() }}
   {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -13,21 +13,20 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("User's home page for Finland Database ") }}</h2>
+    <h2>{{ _("User's home page for Isotammi Services") }}</h2>
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
-       {{ _('roles:') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
+       {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
           <i>{{ 'git'|app_date }}</i></span></p>
 
         <div class="row">
 
     {% if current_user.is_authenticated and current_user.has_role('research') %}
-    
            <div class="startbox">
              <div style="display: inline-block;">
-                <h3>{{ _('Send and manage your Gramps data') }}</h3>
+                <h3>{{ _('Your Gramps data') }}</h3>
                   <form action="/gramps">
-                 <p>{{ _('Manage your Gramps xml files and convert them to Suomi tietokanta.') }}</p>
+                 <p>{{ _('Send your Gramps xml file to Isotammi database and store it as a candidate material.') }}</p>
                  <div class="submit"> 
                     <input type="submit" value="{{ _('Gramps files') }}" />
                  </div>
@@ -36,15 +35,15 @@
            </div>
     {% endif %}           
 
-    {% if current_user.is_authenticated and current_user.has_role('member') %}
-
+    {% if current_user.is_authenticated and 
+        ( current_user.has_role('member') or current_user.has_role('research') ) %}
            <div class="startbox" style="border:1.5pt solid #7e6b53;">
              <div style="display: inline-block;">
                <form method="get" action="/scene">
-                 <h3>{{ _('Family Trees') }}</h3>
-                 <p>{{ _('View your own data as candidate material and compare it with Suomi tietokanta database.') }}</p>
+                 <h3>{{ _('Look at the Family Trees') }}</h3>
+                 <p>{{ _('View your own data as candidate material and compare it with Isotammi database.') }}</p>
                  <div class="submit"> 
-                    <button type="submit">{{ _('My Persons and Events') }}</button>
+                    <button type="submit">{{ _('Family Trees') }}</button>
                  </div>
                </form>
             </div>
@@ -56,10 +55,10 @@
          <div class="startbox gedtools">
             <div style="display: inline-block;">
             <form method="get" action="/gedcom">
-               <h3>{{ _('My gedcom material') }}</h3>
-               <p>{{ _('Upload your material in gedcom format or edit an already stored') }}</p>
+               <h3>{{ _('My Gedcom Materials') }}</h3>
+               <p>{{ _('Upload your .ged files and experiment various cleanup functions') }}.</p>
               <div class="submit"> 
-                 <button type="submit">{{ _('Gedcom handlings') }}</button>
+                 <button type="submit">{{ _('My Gedcom files') }}</button>
               </div>
             </form>
             </div>
@@ -71,8 +70,8 @@
         <div class="startbox admin">
            <div style="display: inline-block;">
            <form method="get" action="/admin">
-              <h3>{{ _('Admin function') }}</h3>
-              <p>{{ _('User and reference information management and database service tasks') }}.</p>
+              <h3>{{ _('Admin Operations') }}</h3>
+              <p>{{ _('Manage users, reference data sets and do database maintanance tasks') }}.</p>
             <div class="submit"> 
                <button type="submit">{{ _('Maintenance') }}</button>
             </div>

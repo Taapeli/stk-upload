@@ -9,7 +9,7 @@ Created on 17.2.2017
 Ohjelman perusteet:
 
             Kun sukututkimusohjelmalla (esimerkiksi Brothers Keeper) voidaan tallettaa lähde (SOUR), 
-            mutta muista elementeistå viittaus lähteeseen vaan ei sille lähdeviittauksia (PAGE),
+            ja muista elementeistå viittaus lähteeseen vaan ei sille lähdeviittauksia (PAGE),
             voidaan tämän muunnoksen avulla täydentää vittaukset GEDCOM-rakenteisiin. 
             Jos lähteiden määrittelyn kommentteihin (NOTE) talletetaan lähdeviittaukset tietyssä muodossa
             puolipisteillä eroteltuna, voidaan tuotetusta gedcom-aineistosta siirtää lähdeviittaukset 
@@ -44,7 +44,72 @@ Ohjelman toiminta:
             
 -- Phase 2   Gedcom-aineisto käydään läpi ja jos rivinumero on avaimena jossain 
             dictionaryista, suoritetaan arvo-osassa korvaukset ja/tai lisäykset
-             
+ 
+ Lähteen Note-rivillä määriteltävän viittauksen rakenne on
+ 
+        arkistonpitäjän nimi   ( jos samalla rivillä useampia viittauksia, riittää vain ensimmäisessä)
+        lähdetyyppi (vaihtoehtoja RK LK vihityt syntyneet kuolleeet pääkirja F/D)
+        alkamisvuosi  (4 numwroa)
+        '-' loppumisvuosi  (2 tai 4 numeroa, valinnainen
+        sivun ilmaisin  (vaihtoehtoja sivu s s. p p. pg pg.
+        sivunumero
+        lisäteksti (valinnainen) 
+            
+    Näitä viittauksia voi kirjoittaa samalle riville useampia puolipisteellä eroteltuina              
+ 
+ 
+ Esimerkkejä: 
+ 
+    Yksittäinen viittaus lähteessä, yksi viittaaja:
+    -----------------------------------------------
+        
+        0 @I001@ INDI                                                     0 @I001@ INDI
+        1 BIRT                                                            1 BIRT
+        2 SOUR @S001@                                                     2 SOUR @S001@
+                                                                          2 PAGE s.360
+                                                                ==>  
+        0 @S001@ SOUR                                                     0 @S001@ SOUR
+        1 TITL Kiika RK 1841-47                                           1 TITL Kiika RK 1841-47
+        1 NOTE Kiika RK 1841-47 p.360                                     1 NOTE Kiika RK 1841-47 p.360
+  
+    Yksittäinen viittaus lähteessä, useita viittaajia:
+    --------------------------------------------------
+    
+        0 @I001@ INDI                                                    0 @I001@ INDI   
+        1 BIRT                                                           1 BIRT
+        2 SOUR @S001@                                                    2 SOUR @S001@
+                                                                         2 PAGE s.360
+  
+        0 @I002@ INDI                                                    0 @I002@ INDI   
+        1 BIRT                                                           1 BIRT
+        2 SOUR @S001@                                                    2 SOUR @S001@
+                                                                         2 PAGE s.360  
+                                                                                                       
+                                                                ==>  
+        0 @S001@ SOUR                                                    0 @S001@ SOUR
+        1 TITL Kiika RK 1841-47                                          1 TITL Kiika RK 1841-47
+        1 NOTE Kiika RK 1841-47 p.360                                    1 NOTE Kiika RK 1841-47 p.360
+   
+    Useita viittauksia lähteessä, useita viittaajia:
+    ------------------------------------------------
+ 
+        0 @I001@ INDI                                                    0 @I001@ INDI   
+        1 BIRT                                                           1 BIRT
+        2 SOUR @S001@                                                    2 SOUR @S001001@
+                                                                         2 PAGE s.360
+  
+        0 @I002@ INDI                                                    0 @I002@ INDI   
+        1 BIRT                                                           1 BIRT
+        2 SOUR @S001@                                                    2 SOUR @S001002@
+                                                                         2 PAGE s.220 ylin  
+                                                                                                       
+                                                                ==>   
+        0 @S001@ SOUR                                                    0 @S001001@ SOUR
+        1 TITL Kiika RK 1841-47                                          1 TITL Kiika RK 1841-47
+        1 NOTE Kiika RK 1841-47 p.360 ; LK 1801-88 s 220 ylin            1 NOTE Kiika RK 1841-47 p.360  
+                                                                         0 @S001002@ SOUR
+                                                                         1 TITL Kiika LK 1801-88
+                                                                         1 NOTE Kiika LK 1801-88 s 220 ylin                       
 '''
 
 from flask_babelex import _
@@ -68,7 +133,7 @@ def initialize( options):
   
 def parseText(textpart):
     import re  
-    regexb = "^([A-ZÅÄÖa-zåäö0-9., ]*?)\s*(RK|LK|vihityt|syntyneet|pääkirja|F\/D)\s*([12][0-9]{3})-?([0-9]{0,4})\s*(.*?)(sivu |s\. |s\.|s |s|p |p\. |p\.|p|pg\. |pg\.|pg |pg)?\s*([0-9]{1,5})?\s*(.*)$"       
+    regexb = "^([A-ZÅÄÖa-zåäö0-9., ]*?)\s*(RK|LK|vihityt|syntyneet|kuolleet|pääkirja|F\/D)\s*([12][0-9]{3})-?([0-9]{0,4})\s*(.*?)(sivu |s\. |s\.|s |s|p |p\. |p\.|p|pg\. |pg\.|pg |pg)?\s*([0-9]{1,5})?\s*(.*)$"       
 #        regexb = "^([A-ZÅÄÖa-zåäö0-9., ]*)\s*(RK|LK|vihityt|syntyneet|pääkirja|F/D)\s*([12][0-9]{3})-?([0-9]{0,4})?\s*(sivu |s\. |s\.|s |s|p |p\. |p\.|p|pg\. |pg\.|pg |pg)?\s*([0-9]{1,4})?\s*(.*)?"  
     """ Groups:
             0   archive name, mandatory at the first citation, optional at following if the same
@@ -206,9 +271,9 @@ class Citations(transformer.Transformation):
 #                        print("    -NOTE ", ntext, " >>>>>>> ", ntitletexts, " ", ncitations)
 
 #       Source childs processed, Title and Note found an analyzed   
-#                 print("{} title elements {} and citations {}".format(spointer, len(ttitletexts), len(tcitations))) 
-#                 print("{}  note elements {} and citations {}".format(spointer, len(ntitletexts), len(ncitations))) 
-#                 print("referrers {}".format(len(self.references[spointer])))
+#                print("{} title elements {} and citations {}".format(spointer, len(ttitletexts), len(tcitations))) 
+#                print("{}  note elements {} and citations {}".format(spointer, len(ntitletexts), len(ncitations))) 
+#                print("referrers {}".format(len(self.references[spointer])))
                 referrers = self.references[spointer]
                 if len(ntitletexts) == 1:
 #       One entry                

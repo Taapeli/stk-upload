@@ -56,10 +56,11 @@ from .event_combo import Event_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
+#from models.owner import OwnerFilter
 
 
 class Person_combo(Person):
-    """ Henkilö
+    """ A Person combined from database person node, names, events etc.
     
         From Person.__init__(): 
             uniq_id, handle, id, priv, sex, confidence, lifetime, change
@@ -85,7 +86,7 @@ class Person_combo(Person):
      """
 
     def __init__(self):
-        """ Luo uuden person-instanssin
+        """ Create a Person instance. 
         """
         Person.__init__(self)
 
@@ -120,7 +121,7 @@ class Person_combo(Person):
 
     @staticmethod
     def get_person_paths(uniq_id):
-        ''' Read a person and paths for all connected nodes
+        ''' Read a person and paths for all connected nodes.
         '''
         query = """
 match path = (p) -[*]-> (x)
@@ -134,7 +135,7 @@ return path"""
 
     @staticmethod
     def get_person_paths_apoc(uniq_id):
-        ''' Read a person and paths for all connected nodes
+        ''' Read a person and paths for all connected nodes.
         '''
         try:
             return  shareds.driver.session().run(Cypher_person.all_nodes_query_w_apoc, 
@@ -144,35 +145,60 @@ return path"""
             return None
 
     @staticmethod
-    def read_my_persons_list(user=None, show="own", fw_from="", bw_from="Not used yet", limit=100):
+    def read_my_persons_list(o_filter, limit=100):
         """ Reads Person Name and Event objects for display.
+
             By default, 100 names are got beginning from fw_from 
 
             Returns Person objects, with included Events and Names
             ordered by Person.sortname
         """
-        def _read_person_list(user, fw_from, limit):
+        def _read_person_list(o_filter, limit):
             """ Read Person data from given fw_from 
             """
-            from bp.scene.routes import UserFilter
+            # Select a) filter by user b) show Isotammi common data (too)
+            show_by_owner = o_filter.use_owner_filter()
+            show_with_common = o_filter.use_common()
+            #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
+            user = o_filter.user
             try:
+                """
+                               show_by_owner    show_all
+                            +-------------------------------
+                with common |  me + common      common
+                no common   |  me                -
+                """
                 with shareds.driver.session() as session:
-                    if show == 3 or show == 5 or UserFilter.is_only_mine_data(): 
-                        result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
-                                             user=user, start_name=fw_from, limit=limit)
-                    else:
-                        result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
-                                             user=user, start_name=fw_from, limit=limit)
-                    return result        
+                    if show_by_owner:
+
+                        if show_with_common: #1 get all with owner name for all
+                            print("_read_person_list: by owner with common")
+                            result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
+                                                 user=user, start_name=fw_from, limit=limit)
+                            # Returns person, names, events, user
+
+                        else: #2 get my own (no owner name needed)
+                            print("_read_person_list: by owner only")
+                            result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
+                                                 user=user, start_name=fw_from, limit=limit)
+                            # Returns person, names, events
+
+                    else: #3 == #1 simulates common by reading all
+                        print("_read_person_list: common only")
+                        result = session.run(Cypher_person.read_all_persons_with_events_starting_name, #user=user, 
+                                             start_name=fw_from, limit=limit)
+                        # Returns person, names, events, user
+
+                    return result
             except Exception as e:
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
                 raise      
 
-        def user_not_me(record):
-            # Returns owner, if it is not me
+        def owner_not_me(record):
+            # Returns owner of this record, if available and not me
             if 'user' in record.keys():
                 u = record['user']
-                if u == user:
+                if u == o_filter.user:
                     return '-'
                 else:
                     return record['user']
@@ -180,13 +206,13 @@ return path"""
 
 
         persons = []
-        as_text = {1:'Suomikanta', 2:'kaikki ehdokasaineistoni', 4:'tuontierä',
-                   3:'omat ja Suomkanta', 5:'tuotierä ja Suomikanta'}
+        fw_from = o_filter.next_person[1]     # next_person names [bw_from, fw_from]
 
-        print("Get {} persons of {} for user {} starting from {!r}".\
-              format(limit, as_text[show], user, fw_from))
-        result = _read_person_list(user, fw_from, limit)
-#Todo: If p.id is the same as previous, do not create a new object but join the persons
+        ustr = "user " + o_filter.user if o_filter.user else "no user"
+        print("read_my_persons_list: Get {} persons from {!r} for {} starting at {!r}".\
+              format(limit, o_filter.owner_str(), ustr, fw_from))
+        result = _read_person_list(o_filter, limit)
+
         for record in result:
             ''' <Record 
                     person=<Node id=163281 labels={'Person'} 
@@ -212,7 +238,7 @@ return path"""
             # Is this the same person as previous?
             if len(persons) > 0 and persons[-1].uniq_id == p.uniq_id and 'user' in record:
                 # Yes, do not create a new person
-                persons[-1].owners.append(user_not_me(record))
+                persons[-1].owners.append(owner_not_me(record))
             else:
 
 #             if take_refnames and record['refnames']:
@@ -223,7 +249,7 @@ return path"""
                     p.names.append(pname)
         
                 # Create a list with the mentioned user name, if present
-                p.owners = [user_not_me(record),]
+                p.owners = [owner_not_me(record),]
                                                                                                                                     
                 # Events
         
@@ -241,7 +267,7 @@ return path"""
 
 
     def get_citation_id(self):
-        """ Luetaan henkilön viittauksen id """
+        """ Luetaan henkilön viittauksen id. """
 
         query = """
             MATCH (person:Person)-[r:CITATION]->(c:Citation)
@@ -252,7 +278,8 @@ return path"""
 
 
     def get_event_data_by_id(self):
-        """ Luetaan henkilön tapahtumien id:t 
+        """ Luetaan henkilön tapahtumien id:t.
+
             Korvaava versio models.gen.event_combo.Event_combo.get_connected_events_w_links
         """
 
@@ -265,7 +292,7 @@ RETURN r.role AS eventref_role, ID(event) AS event_ref"""
 
 
     def get_families_by_id(self):
-        """ Luetaan miehen tai naisen perheiden id:t """
+        """ Luetaan niiden perheiden id:t, jossa lapsena. """
 
         pid = int(self.uniq_id)
         query = """
@@ -273,28 +300,6 @@ MATCH (person:Person) <-[r:PARENT]- (family:Family)
   WHERE ID(person)=$pid
 RETURN ID(family) AS uniq_id"""
         return  shareds.driver.session().run(query, {"pid": pid})
-
-
-#     def get_her_families_by_id(self):
-#         """ Luetaan naisen perheiden id:t """
-# 
-#         pid = int(self.uniq_id)
-#         query = """
-# MATCH (person:Person)<-[r:MOTHER]-(family:Family)
-#   WHERE ID(person)=$pid
-# RETURN ID(family) AS uniq_id"""
-#         return  shareds.driver.session().run(query, {"pid": pid})
-# 
-# 
-#     def get_his_families_by_id(self):
-#         """ Luetaan miehen perheiden id:t """
-# 
-#         pid = int(self.uniq_id)
-#         query = """
-# MATCH (person:Person)<-[r:FATHER]-(family:Family)
-#   WHERE ID(person)=$pid
-# RETURN ID(family) AS uniq_id"""
-#         return  shareds.driver.session().run(query, {"pid": pid})
 
 
     def get_hlinks_by_id(self):
@@ -321,7 +326,7 @@ RETURN ID(family) AS uniq_id"""
 
 
     def get_media_id(self):
-        """ Luetaan henkilön tallenteen id """
+        """ Luetaan henkilöön liittyvien medioiden id:t. """
 
         query = """
             MATCH (person:Person)-[r:MEDIA]->(obj:Media)
@@ -343,7 +348,7 @@ RETURN ID(family) AS uniq_id"""
 
 
     def get_person_and_name_data_by_id(self):
-        """ Luetaan kaikki henkilön tiedot ja nimet
+        """ Luetaan henkilö ja hänen kaikki nimensä.
         """
         pid = int(self.uniq_id)
         query = """
@@ -358,14 +363,6 @@ RETURN person, name
             if self.id == None:
                 node = person_record["person"]
                 self.from_node(node)
-#                 self.handle = person_record["person"]['handle']
-#                 self.change = person_record["person"]['change']
-#                 self.id = person_record["person"]['id']
-#                 self.priv = person_record["person"]['priv']
-#                 self.sex = person_record["person"]['sex']
-#                 self.confidence = person_record["person"]['confidence']
-#                 self.est_birth = person_record["person"]['est_birth']
-#                 self.est_death = person_record["person"]['est_death']
 
             if len(person_record["name"]) > 0:
                 pname = Name()
@@ -379,7 +376,7 @@ RETURN person, name
 
 
     def get_person_w_names(self):
-        """ Returns Person with Names and Notes included
+        """ Returns Person with Names and Notes included.
 
             Luetaan kaikki henkilön tiedot ja nimet, huomautukset
         """
@@ -411,7 +408,10 @@ RETURN person, name
 
     @staticmethod
     def get_people_with_same_birthday():
-        """ Etsi kaikki henkilöt, joiden syntymäaika on sama"""
+        """ Etsi kaikki henkilöt, joiden syntymäaika on sama. 
+        
+            #TODO: p1.est_birth ei enää käytössä
+        """
 
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_birth<>''
@@ -427,7 +427,9 @@ RETURN person, name
 
     @staticmethod
     def get_people_with_same_deathday():
-        """ Etsi kaikki henkilöt, joiden kuolinaika on sama"""
+        """ Etsi kaikki henkilöt, joiden kuolinaika on sama 
+        
+            #TODO: p1.est_death ei enää käytössä"""
 
         query = """
             MATCH (p1:Person)-[r1:NAME]->(n1:Name) WHERE p1.est_death<>''
@@ -443,7 +445,7 @@ RETURN person, name
 
     @staticmethod
     def get_people_wo_birth():
-        """ Voidaan lukea henkilöitä ilman syntymätapahtumaa kannasta
+        """ Etsitään henkilöt ilman syntymätapahtumaa.
         """
 
         query = """
@@ -500,20 +502,22 @@ RETURN person, name
 
     @staticmethod
     def get_old_people_top():
-        """ Voidaan lukea henkilöitä joilla syntymä- ja kuolintapahtumaa kannasta
+        """ Etsitään vanhimmat henkilöt.
+        
+            Mukana vain ne, joilla on syntymä- ja kuolintapahtuma
         """
 
         persons_get_oldest = """
  MATCH (p:Person)-[:EVENT]->(a:Event) 
-     WHERE EXISTS ((p)-[:EVENT]->(a:Event {type:'Birth'}))
- WITH p, a 
+     WHERE EXISTS ((p)-[:EVENT]->(b:Event {type:'Birth'}))
+ WITH p, b 
  MATCH (p)-[:EVENT]->(b:Event) 
-     WHERE EXISTS ((p)-[:EVENT]->(b:Event {type:'Death'}))
- WITH p, a, b
+     WHERE EXISTS ((p)-[:EVENT]->(d:Event {type:'Death'}))
+ WITH p, b, d
  MATCH (p)-[:NAME]->(n:Name)
  RETURN ID(p) AS uniq_id, p, n, 
-     [a.datetype, a.date1, a.date2] AS birth, 
-     [b.datetype, b.date1, b.date2] AS death 
+     [b.datetype, b.date1, b.date2] AS birth, 
+     [d.datetype, d.date1, d.date2] AS death 
  ORDER BY n.surname, n.firstname"""
                 
         result = shareds.driver.session().run(persons_get_oldest)
@@ -587,7 +591,9 @@ RETURN person, name
 
     @staticmethod
     def get_person_events (nmax=0, pid=None, names=None):
-        """ Voidaan lukea henkilöitä tapahtumineen kannasta seuraavasti:
+        """ Luetaan henkilöitä tapahtumineen kannasta.
+        
+        Usage:
             get_persons()               kaikki
             get_persons(pid=123)        tietty henkilö oid:n mukaan poimittuna
             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
@@ -623,12 +629,6 @@ RETURN person, name
             where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
         else:
             where = ""
-#         query = """
-#  MATCH (n:Person) {0}
-#  OPTIONAL MATCH (n)-[r]->(e)
-#  RETURN n.oid, n.firstname, n.lastname, n.occu, n.place, type(r),
-#   COLLECT([e.oid, e.kind, e.name, e.date, e.name_orig]) AS events
-#  ORDER BY n.lastname, n.firstname {1}""".format(where, qmax)
 
         query = """
 MATCH (n:Person) -[:NAME]->( k:Name) {0}
@@ -642,9 +642,10 @@ RETURN n.id, k.firstname, k.surname,
 
     @staticmethod
     def get_person_combos (keys, currentuser, take_refnames=False, order=0):
-        """ Version 0.1
-            Read Persons with Names, Events, Refnames (reference names) and Places
-            called from models.datareader.read_persons_with_events
+        """ Read Persons with Names, Events, Refnames (reference names) and Places.
+        
+            Version 0.1
+            Called from models.datareader.read_persons_with_events
             
             UUSI KORVAAMAAN get_events_k:n
 
@@ -664,7 +665,7 @@ RETURN n.id, k.firstname, k.surname,
         if keys:
             rule=keys[0]
             key=keys[1].title() if len(keys) > 1 else None
-            print("Selected {} '{}'".format(rule, key))
+            #print("Selected {} '{}'".format(rule, key))
         else:
             rule="all"
             key=""
@@ -707,10 +708,10 @@ RETURN n.id, k.firstname, k.surname,
 
     @staticmethod
     def get_events_k (keys, currentuser, take_refnames=False, order=0):
-        """ OBSOLETE - tilalle tulee Person_combo.get_person_combos
+        """ OBSOLETE Read Persons with Names, Events and Refnames (reference names)
 
-            Read Persons with Names, Events and Refnames (reference names)
-            called from models.datareader.read_persons_with_events
+            - tilalle tulee Person_combo.get_person_combos
+            Called from models.datareader.read_persons_with_events
 
              a) selected by unique id
                 keys=['uniq_id', uid]    by person's uniq_id (for table_person_by_id.html)
@@ -765,9 +766,9 @@ RETURN n.id, k.firstname, k.surname,
 
     # Not in use!
     def get_my_places(self, cleartext_list=False):
-        ''' Finds all Places with their Place_names
-            which are connected to any personal Events
-            and stores them in self.places list
+        ''' Stores all Places with their Place_names in self.places list.
+
+            Finds names which are connected to any personal Events
         '''
 
         get_places_w_names = """
@@ -858,7 +859,8 @@ with r, e, pl
 
     @staticmethod
     def get_family_members (uniq_id):
-        """ Read the Families and member names connected to given Person
+        """ Read the Families and member names connected to given Person.
+
             for '/scene/person=<string:uniq_id>'
         """
 
@@ -868,7 +870,7 @@ with r, e, pl
 
     @staticmethod
     def get_refnames(pid):
-        """ List Person's all Refnames with name use"""
+        """ List Person's all Refnames with name use. """
         # ╒══════════════════════════╤═════════════════════╕
         # │"a"                       │"li"                 │
         # ╞══════════════════════════╪═════════════════════╡
@@ -887,7 +889,8 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
  
     @staticmethod
     def get_ref_weburls(pid_list):
-        """ Get all weburls referenced from list of uniq_ids
+        """ Get all weburls referenced from list of uniq_ids.
+
             #TODO Mitä tietoja halutaan?
         """
         query="""
@@ -940,7 +943,8 @@ with distinct x
 #
 
     def get_points_for_compared_data(self, comp_person, print_out=True):
-        """ Tulostaa kahden henkilön tiedot vieretysten """
+        """ Tulostaa kahden henkilön tiedot vieretysten. """
+
         points = 0
         print ("*****Person*****")
         if (print_out):
@@ -1013,8 +1017,9 @@ with distinct x
 
     @staticmethod
     def estimate_lifetimes(tx, uids=[]):
-        """ Sets an estimated lifietime to Person.lifetime
-            and store it as Person properties: datetype, date1, and date2
+        """ Sets an estimated lifietime to Person.lifetime.
+
+            Stores it as Person properties: datetype, date1, and date2
 
             The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
             sets all lifetimes.
@@ -1042,7 +1047,8 @@ with distinct x
 
 
     def print_compared_data(self, comp_person, print_out=True):
-        """ Tulostaa kahden henkilön tiedot vieretysten """
+        """ Tulostaa kahden henkilön tiedot vieretysten. """
+
         points = 0
         print ("*****Person*****")
         if (print_out):
@@ -1070,7 +1076,6 @@ with distinct x
                 alt1.append(pname.order)
                 type1.append(pname.type)
                 first1.append(pname.firstname)
-#                 refname1.append(pname.refname)
                 surname1.append(pname.surname)
                 suffix1.append(pname.suffix)
 
@@ -1079,7 +1084,6 @@ with distinct x
                 alt2.append(pname.order)
                 type2.append(pname.type)
                 first2.append(pname.firstname)
-#                 refname2.append(pname.refname)
                 surname2.append(pname.surname)
                 suffix2.append(pname.suffix)
 
@@ -1093,7 +1097,6 @@ with distinct x
                         print ("Alt: " + alt1[i] + " # " + alt2[i])
                         print ("Type: " + type1[i] + " # " + type2[i])
                         print ("First: " + first1[i] + " # " + first2[i])
-#                         print ("Refname: " + refname1[i] + " # " + refname2[i])
                         print ("Surname: " + surname1[i] + " # " + surname2[i])
                         print ("Suffix: " + suffix1[i] + " # " + suffix2[i])
             else:
@@ -1105,14 +1108,13 @@ with distinct x
                         print ("Alt: " + alt1[i] + " # " + alt2[i])
                         print ("Type: " + type1[i] + " # " + type2[i])
                         print ("First: " + first1[i] + " # " + first2[i])
-                        print ("Refname: " + refname1[i] + " # " + refname2[i])
                         print ("Surname: " + surname1[i] + " # " + surname2[i])
                         print ("Suffix: " + suffix1[i] + " # " + suffix2[i])
         return points
 
 
     def save(self, username, tx):
-        """ Saves the Person object and possibly the Names, Events ja Citations
+        """ Saves the Person object and possibly the Names, Events ja Citations.
 
             On return, the self.uniq_id is set
         """
@@ -1121,7 +1123,7 @@ with distinct x
 
 
 class Person_as_member(Person):
-    """ A person as a family member
+    """ A person as a family member.
 
         Extra properties:
             role         str 'child', 'father' or 'mother' # "CHILD", "FATHER" or "MOTHER"

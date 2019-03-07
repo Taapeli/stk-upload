@@ -1,0 +1,27 @@
+{% extends "/admin/layout.html" %}
+{% block title %}{{ _("Uploads") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+  	<h2>{{ _("Syslog") }}</h2>
+        <table>
+           <tr>
+                <th>{{ _("Time") }}</th>
+                <th>{{ _("User id") }}</th>
+                <th>{{ _("Type") }}</th>
+                <th>{{ _("Content") }}</th>
+           </tr>
+	    {% for row in rows %}
+	       <tr>
+	           <td>{{row._timestr}}</td>
+	           <td>{{row._user}}</td>
+	           <td>{{row._type}}</td>
+	           <td>{{row|logcontent}}</td>
+	       </tr>
+	    {% endfor %}
+	    </table>
+	    <br>
+    <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
+{% endblock %}
+</body>
+</html>
+

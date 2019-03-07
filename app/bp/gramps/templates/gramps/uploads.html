@@ -3,7 +3,7 @@
 {% block title %}{{ _("Uploads from Gramps") }}{% endblock %}
 {% block body %}
 {{ super() }}
-    <!-- meta http-equiv="refresh" content="30" -->
+    <meta http-equiv="refresh" content="30">
 
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
@@ -14,7 +14,7 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("Uploads") }}</h2>
+    <h2>{{ _("Uploads from Gramps") }}</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -57,6 +57,8 @@
 	           <td>{{upload.xmlname}}</td>
 	           <td>{{upload.status}}</td>
 	           <td><a href=/gramps/xml_download/{{upload.xmlname | urlencode}}>{{ _("Download to your computer") }}</a> |
+	           		<a href=/gramps/start_upload/{{upload.xmlname | urlencode}}>
+	           			{{ _("Store to database") }}</a> |
 	               <a href=/gramps/show_log/{{upload.xmlname | urlencode}}>{{ _("Show log") }}</a> |
 	           	   <a href=/gramps/xml_delete/{{upload.xmlname | urlencode}}>{{ _("Delete") }}</a></td>
 	       </tr>

@@ -139,8 +139,8 @@ def build_master_user():
     with shareds.app.app_context():
         return( 
             {'username': 'master', 
-             'password': sec_utils.hash_password('taapeli'),  
-             'email': 'stk.sukututkimusseura@gmail.com', 
+             'password': sec_utils.hash_password(shareds.app.config['MASTER_USER_PASSWORD']),  
+             'email': shareds.app.config['MASTER_USER_EMAIL'], 
              'name': 'Stk-kannan pääkäyttäjä',
              'language': 'fi',  
              'is_active': True,
@@ -148,7 +148,7 @@ def build_master_user():
              'roles': ['master'],
              'last_login_at': datetime.now().timestamp()/1000,
              'current_login_at': datetime.now().timestamp()/1000,
-             'last_login_ip': '127.0.0.1',
+             'last_login_ip': '127.0.0.1',  
              'current_login_ip': '127.0.0.1',
              'login_count': 0            
              } )
