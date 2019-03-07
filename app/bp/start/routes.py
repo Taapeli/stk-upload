@@ -45,7 +45,9 @@ def my_message():
 def send_email():
     body = request.form["message"]
     print(body)
-    email.email_admin(_("Message from Isotammi user " + current_user.username),body,sender=current_user.email)
+    email.email_admin(_("Message from Isotammi user " + current_user.username),
+                      body,
+                      sender=(current_user.name,current_user.email))
     return "ok"
 
 @shareds.app.route('/settings')
