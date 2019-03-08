@@ -17,13 +17,22 @@
 	    <span></span><span></span><span></span>
 	    <ul id="menu">
 	      <a href="/" title="{{ _('Start page') }}"><li>{{ _('Home') }}</li></a>
+
 	      <a id="help" href="#" title="{{ _('Instructions for this page') }}" 
 	      	language={{ session.lang }} target="_blank">
 	        <li>{{ _('Help') }}</li></a>
+
+	       <a href="/message" title="{{_('Message to the administrator')}}">
+	        <li>{{_('Contact administrator')}}</li></a>
+
+	       <a href="/settings" title="{{_('Select language')}}">
+	        <li>{{ _('Change language')}}</li></a>
+
 	    {% for url, label, title in items %}
 	       <a href="{{url}}" title="{{title}}">
 	        <li>{{label}}</li></a>
 	    {% endfor %}
+
 	    {% if current_user is defined and current_user.is_anonymous %}
           <a href="/login" title="{{ _('Log in to this application') }}">
             <li><b>{{ _('Log in') }}</b></li></a>
