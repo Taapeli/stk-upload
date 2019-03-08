@@ -88,6 +88,7 @@ class Place:
         p.id = node['id'] or ''
         p.type = node['type'] or ''
         p.pname = node['pname'] or ''
+        p.coord = node['coord'] or None
         return p
 
 
@@ -548,14 +549,15 @@ class Point:
             coord   coordinates of the point as list [lat, lon]
                     (north, east directions in degrees)
     """
+    _point_coordinate_tr = str.maketrans(',°′″\\\'"NESWPIEL', '.              ')
+
 
     def __init__(self,  lon,  lat=None):
         """ Create a new Point instance.
             Arguments may be:
             - lon(float), lat(float)    - real coordinates
             - lon(str), lat(str)        - coordinates to be converted
-            - [lon, lat]                - ready coordinate vector (list of tuple)
-            Returns coordinate vector (if anybody needs it)
+            - [lon, lat]                - ready coordinate vector (list or tuple)
         """
         self.coord = None
         try:
@@ -575,7 +577,6 @@ class Point:
                 and '\' are replaced by space and the comma by dot with this table.
                 (These letters stand for North, East, ... Pohjoinen, Itä ...)
             '''
-            point_coordinate_tr = str.maketrans(',°′″\\\'"NESWPIEL', '.              ')
 
             for i in list(range(len(self.coord))):   # [0,1]
                 # If a coordinate is float, it's ok
@@ -587,7 +588,7 @@ class Point:
                         # String conversion to float:
                         #   example "60° 37' 34,647N" gives ['60', '37', '34.647']
                         #   and "26° 11\' 7,411"I" gives
-                        a = x.translate(point_coordinate_tr).split()
+                        a = x.translate(self._point_coordinate_tr).split()
                         if not a:
                             raise ValueError("Point arg error {}".format(self.coord))
                         degrees = float(a[0])

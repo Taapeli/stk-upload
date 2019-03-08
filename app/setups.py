@@ -12,7 +12,6 @@ from chkdate import Chkdate
 from templates import jinja_filters
 
 from datetime import datetime
-from urllib.parse import urlencode
 
 import logging
 logger = logging.getLogger('stkserver') 

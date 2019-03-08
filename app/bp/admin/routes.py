@@ -21,7 +21,8 @@ from flask_babelex import _
 import shareds
 from setups import User #, Role
 from models import dbutil, dataupdater, loadfile, datareader
-from .models import DataAdmin, UserAdmin
+from bp.admin.models.data_admin import DataAdmin
+from bp.admin.models.user_admin import UserAdmin
 from .cvs_refnames import load_refnames
 from .forms import AllowedEmailForm, UpdateUserForm
 from . import bp

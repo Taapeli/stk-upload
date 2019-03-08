@@ -11,7 +11,6 @@ from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import Batch, Log
-from models.loadfile import status_update
 from models.dataupdater import set_confidence_values
 import shareds
 
