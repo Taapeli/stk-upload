@@ -5,45 +5,6 @@
 {% block body %}
 {{ super() }}
 
-<style> 
-.errors {
-	font-size: 9pt;
-	color: white;
-	background-color: red; 
-}
-
-table.diff td {
-	max-width: 600px;
-	overflow: hidden; 
-}
-
-btn, span.button a {
-  position: relative;
-  display: block;
-  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-  background-color: #657891; /* Triadic color of lightsteelblue */
-  padding: 5px;
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
-  font-size:larger;
-  text-decoration: none;
-  cursor: pointer;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: auto;
-}
-
-
-.link {
-  color: #2f435e;
-  font-weight: bold;
-  font-size:larger;
-  text-decoration: none;
-}
-
-</style>
-
 <script src="/static/js/gedcom_scripts.js?37"></script>
 
 <script>
@@ -131,7 +92,10 @@ var gedcom = "{{ gedcom }}";
 	                    	{%if metadata.admin_permission %}
 	                    		checked
                     		{% endif %}
-                    	></td></tr>
+                    	>
+                    	</td></tr>
+							<tr><td><td>
+							<div id="permission_message">{{ _("Permission updated") }}</div>
 			    </table>
 	          </div>
 	       </div>
@@ -211,10 +175,7 @@ var gedcom = "{{ gedcom }}";
 	
 		        <h3>{{ _("Transformation history") }}</h3>
 		        <a href="javascript:window.scroll(0,0)">
-			        <img src="/static/444-512.png" 
-			        	 width=100
-			        	 title="Top"
-		 		         style="position:fixed;bottom:0;right:0">
+		        <img src="/static/444-512.png" class="totop" title="Top">
 		        </a>
 		        <pre>
 					<div id="history">
@@ -229,10 +190,7 @@ var gedcom = "{{ gedcom }}";
 	        <button id="palauta2" class="palauta_button"></button>
 	        <p>
 	        <a href="javascript:window.scroll(0,0)">
-		        <img src="/static/444-512.png" 
-		        	 width=100
-		        	 title="Top"
-	 		         style="position:fixed;bottom:0;right:0">
+		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
 	        <div id="difftable">
 		    </div>
@@ -241,10 +199,7 @@ var gedcom = "{{ gedcom }}";
 	      <div class="gedcom" id="div_results">
 	        <h3>{{ _("Results") }}:</h3>
 	        <a href="javascript:window.scroll(0,0)">
-		        <img src="/static/444-512.png" 
-		        	 width=100
-		        	 title="Top"
-	 		         style="position:fixed;bottom:0;right:0">
+		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
 	        <p>
 	        <div id="results">
@@ -272,10 +227,7 @@ var gedcom = "{{ gedcom }}";
 		<h3><button id="save_result">{{ _("Save result") }}</button></h3>
 		</div>
 	        <a href="javascript:window.scroll(0,0)">
-		        <img src="/static/444-512.png" 
-		        	 width=100
-		        	 title="Top"
-	 		         style="position:fixed;bottom:0;right:0">
+		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
 		<pre>
 		  <div id="output_log">
@@ -289,5 +241,6 @@ var gedcom = "{{ gedcom }}";
 </div>
 
 <div id="waiter" class="modal"></div>	
+
     
 {% endblock %}

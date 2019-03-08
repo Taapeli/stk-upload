@@ -102,3 +102,61 @@ body.loading .modal {
     display: block;
 }
 
+.errors {
+	font-size: 9pt;
+	color: white;
+	background-color: red; 
+}
+
+table.diff td {
+	max-width: 600px;
+	overflow: hidden; 
+}
+
+btn, span.button a {
+  position: relative;
+  display: block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+  background-color: #657891; /* Triadic color of lightsteelblue */
+  padding: 5px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  font-size:larger;
+  text-decoration: none;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: auto;
+}
+
+.link {
+  color: #2f435e;
+  font-weight: bold;
+  font-size:larger;
+  text-decoration: none;
+}
+
+#permission_message {
+  display:    none;
+  width: 120px;
+  background-color: #657891;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  z-index: 1;
+  top: 105%;
+  left: 50%;
+  margin-left: -60px;
+  position: relative;
+}
+  
+  
+img.totop {
+  position:fixed;
+  width:50px;
+  top:50px;
+  right:0;
+}
+
