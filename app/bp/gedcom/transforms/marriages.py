@@ -72,7 +72,7 @@ class Marriages(transformer.Transformation):
         
     def test(self,place):
         ret = self.match(place)
-        logging.info("'{}' -> {}".format(place,ret))
+        #logging.info("'{}' -> {}".format(place,ret))
         
     def match(self,place):
         m = re.match(r"([^,]+),? ?\(([^/]+)/([^/]+)\)", place)
