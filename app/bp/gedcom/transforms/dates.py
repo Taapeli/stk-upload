@@ -25,6 +25,10 @@ def add_args(parser):
                         help=_('Change 00 DEC 1999 to DEC 1999'))
     parser.add_argument('--handle_intervals', action='store_true',
                         help=_('Change 1950-[19]59 to FROM 1950 TO 1959'))
+    parser.add_argument('--handle_intervals2', action='store_true',
+                        help=_('Change 1950-/>1950 to FROM/AFT 1950'))
+    parser.add_argument('--handle_intervals3', action='store_true',
+                        help=_('Change -1950/<1950 to TO/BEF 1950'))
 
 
 def initialize(options):
@@ -43,7 +47,10 @@ twodigits = r"\d{2}"
 fourdigits = r"\d{4}"
 dash = r"-"
 sep = "[\.,-/]"
+gt = "\>"
+lt = "\<"
 
+# regex helpers
 def p(**kwargs):
     ret = ""
     for name,pat in kwargs.items():
@@ -65,18 +72,24 @@ class Dates(transformer.Transformation):
         """
         Fix dates of the forms:
         
-        31.12.1888 -> 31 DEC 1888
-        31,12,1888 -> 31 DEC 1888
-        31-12-1888 -> 31 DEC 1888
-        31/12/1888 -> 31 DEC 1888
-        .12.1888   ->    DEC 1888
-        12.1888    ->    DEC 1888
-        12/1888    ->    DEC 1888
-        12-1888    ->    DEC 1888
-        0.12.1888   ->    DEC 1888
-        00.12.1888   ->    DEC 1888
-        00.00.1888   ->    1888
+        31.12.1888    -> 31 DEC 1888
+        31,12,1888    -> 31 DEC 1888
+        31-12-1888    -> 31 DEC 1888
+        31/12/1888    -> 31 DEC 1888
+        1888-12-31    -> 31 DEC 1888
+        .12.1888      ->    DEC 1888
+        12.1888       ->    DEC 1888
+        12/1888       ->    DEC 1888
+        12-1888       ->    DEC 1888
+        0.12.1888     ->    DEC 1888
+        00.12.1888    ->    DEC 1888
+        00.00.1888    ->    1888
         00 JAN 1888   ->    JAN 1888
+        1950-[19]59   -> FROM 1950 TO 1959
+        1950-         -> FROM 1950 
+        >1950         -> FROM 1950 
+        -1950         -> TO 1950 
+        <1950         -> TO 1950 
         """
         if item.tag == "DATE":
             value = item.value.strip()
@@ -152,6 +165,34 @@ class Dates(transformer.Transformation):
                     item.value = f"FROM {r.y1} TO {century}{r.y2}"
                     return item
                     
+            if options.handle_intervals2:
+                # 1888-, >1888
+                tag = item.path.split(".")[-2]
+                kw = "AFT"
+                if tag in ('RESI','OCCU'): kw = "FROM"
+                r = match(value,y=fourdigits,sep=dash)
+                if r:
+                    item.value = f"{kw} {r.y}"  
+                    return item
+                r = match(value,sep=gt,y=fourdigits)
+                if r:
+                    item.value = f"{kw} {r.y}"  
+                    return item
+    
+            if options.handle_intervals3:
+                # -1888, <1888
+                tag = item.path.split(".")[-2]
+                kw = "BEF"
+                if tag in ('RESI','OCCU'): kw = "TO"
+                r = match(value,sep=dash,y=fourdigits)
+                if r:
+                    item.value = f"{kw} {r.y}" 
+                    return item
+                r = match(value,sep=lt,y=fourdigits)
+                if r:
+                    item.value = f"{kw} {r.y}"  
+                    return item
+    
             if options.handle_yyyy_mm_dd:
                 # 1888-12-31
                 r = match(value,y=fourdigits,sep=dash,m=twodigits,sep2=dash,d=twodigits)
