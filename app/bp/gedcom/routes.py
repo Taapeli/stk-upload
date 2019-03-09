@@ -474,7 +474,7 @@ def process_gedcom(arglist, transform_module):
     """
 
     msg = _("Transform '{}' started at {}").format(
-             transform_module.__name__, 
+             transform_module.name, 
              util.format_timestamp())
     LOG.info("------ {} ------".format(msg))
 
@@ -530,7 +530,7 @@ def process_gedcom(arglist, transform_module):
             #history_append(args.input_gedcom,_("File was not saved"))
             history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom+"-temp"))
         msg = _("Transform '{}' ended at {}").format(
-                 transform_module.__name__, 
+                 transform_module.name, 
                  util.format_timestamp())
         history_append(args.input_gedcom,msg)
         print("------ {} ------".format(msg))
