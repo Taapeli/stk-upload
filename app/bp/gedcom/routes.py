@@ -520,6 +520,7 @@ def process_gedcom(arglist, transform_module):
                                         options=args)
             g = t.transform_file(args.input_gedcom) 
             g.print_items(out)
+            print(_("------ Number of changes:"), t.num_changes)
     except:
         traceback.print_exc()
     finally:
