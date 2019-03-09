@@ -268,6 +268,7 @@ def show_upload_log(username,xmlfile):
 @roles_accepted('admin', 'audit')
 def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
+    syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------
