@@ -185,13 +185,10 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
     #language = StringField('Language', validators=[Required('Language required')])
-    language = SelectField('Language', 
-                choices=[
-                    ("fi",_("Finnish")),
-                    ("sv",_("Swedish")),
-                    ("en",_("English"))],
-                validators=[Required('Language required')])
 
+    language = SelectField('Language', 
+                choices=shareds.app.config.get('LANGUAGES'),
+                validators=[Required(_('Language required'))])
 
 #============================== Start here ====================================
 

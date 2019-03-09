@@ -8,6 +8,7 @@ from wtforms import StringField, SubmitField, SelectField, SelectMultipleField, 
 from wtforms.validators import InputRequired, Optional, Email, Length
 from flask_wtf import FlaskForm
 from flask_babelex import _
+import shareds
 
 class UpdateUserForm(FlaskForm):
 
@@ -39,10 +40,7 @@ class UpdateUserForm(FlaskForm):
     name = StringField(_('Name:'), 
         description = _('Name of the user'))      
     language = SelectField( _('Language'), [Optional()],
-            choices=[
-               ("fi",_("Finnish")),
-               ("sv",_("Swedish")),
-               ("en",_("English"))],
+            choices=shareds.app.config.get('LANGUAGES'),
             default=2,
             description = _('Language')) 
     is_active = BooleanField(_('Is active'), [Optional()],
