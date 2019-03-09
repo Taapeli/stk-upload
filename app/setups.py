@@ -15,6 +15,8 @@ from datetime import datetime
 from urllib.parse import urlencode
 
 import logging
+from flask_login.utils import current_user
+from flask.globals import session
 logger = logging.getLogger('stkserver') 
 
 
@@ -220,6 +222,7 @@ adminDB.initialize_db()
 
 def log_user_logged_in(sender, user, **extra):
     syslog.log(type="user logged in")
+    session['lang'] = current_user.language
     
 def log_user_logged_out(sender, user, **extra):
     syslog.log(type="user logged out")
