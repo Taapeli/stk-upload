@@ -8,6 +8,7 @@ import re
 
 version = "1.0"
 name = _("Dates")
+docline = _('Correct some invalid date formats')
 
 #doclink = "http://taapeli.referata.com/wiki/Gedcom-Dates-ohjelma"
 
