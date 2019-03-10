@@ -10,7 +10,7 @@ Created on 19.1.2019
 '''
 
 from urllib.parse import unquote_plus
-from flask_babelex import _, lazy_gettext as N_
+from flask_babelex import lazy_gettext as N_
 
 
 class OwnerFilter():
@@ -87,11 +87,11 @@ class OwnerFilter():
                 self.filter = self.choices.get_valid_key(div)
                 if self.filter:
                     self.session['owner_filter'] = self.filter
-                    print("OwnerFilter: Now owner_filter={}".format(self.filter))
+                    print(f"OwnerFilter: Now owner_filter={self.filter}")
         if div == 0:
             # If got no request owner_filter, use session value or 1
             self.filter = user_session.get('owner_filter', self.choices.COMMON)
-            print("OwnerFilter: Uses default owner_filter={}".format(self.filter))
+            print(f"OwnerFilter: Uses same or default owner_filter={self.filter}")
 
 
     def store_next_person(self, request):
