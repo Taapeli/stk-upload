@@ -332,7 +332,7 @@ msgstr "Sovellusversio"
 
 #: bp/admin/templates/admin/admin.html:45
 msgid "Front Page"
-msgstr "Etu-sivu"
+msgstr "Etusivu"
 
 #: bp/admin/templates/admin/admin.html:53
 msgid "Database Emptyings"
