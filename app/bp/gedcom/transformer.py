@@ -178,7 +178,7 @@ class Transformer:
                 newitems.append(item)
                 continue
             self.num_changes += 1
-            if self.options.display_changes: self.display_callback(item.lines,newitem)
+            if self.options.display_changes: self.display_callback(item.lines,newitem,item.linenum)
             if newitem is None: continue # delete item
             if type(newitem) == list:
                 for it in newitem:
