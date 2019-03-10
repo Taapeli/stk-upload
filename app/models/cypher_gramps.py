@@ -331,17 +331,24 @@ MERGE (m:Source   {handle: $hlink})
 MERGE (n) -[r:SOURCE]-> (m)"""
 
 
-class Cypher_repository_w_handle():
-    """ For Repository class """
+class Cypher_repository_in_batch():
+    """ For Repocitory class """
 
+    # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
-MERGE (r:Repository {handle: $r_attr.handle}) 
-    SET r = $r_attr
-RETURN id(r) as uniq_id"""
+MATCH (u:Batch {id:$bid})
+CREATE (u) -[:OWNS]-> (a:Repocitory) 
+    SET a = $r_attr
+RETURN ID(a) as uniq_id"""
+
+
+# class Cypher_repository_w_handle():
+#     """ For Repository class """
+# 
 #     create = """
-# CREATE (r:Repository)
-# SET r = $r_attr
-# return id(r) as uniq_id"""
+# MERGE (r:Repository {handle: $r_attr.handle}) 
+#     SET r = $r_attr
+# RETURN id(r) as uniq_id"""
 
 
 class Cypher_x():
