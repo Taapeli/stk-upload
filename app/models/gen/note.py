@@ -9,7 +9,7 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 from sys import stderr
 
 from models.gen.cypher import Cypher_note
-from models.cypher_gramps import Cypher_note_w_handle, Cypher_note_in_batch
+from models.cypher_gramps import Cypher_note_in_batch # Cypher_note_w_handle,
 import shareds
 
 class Note:
@@ -155,6 +155,23 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
         return '0'
 
 
+    @staticmethod
+    def save_note_list(tx, parent):
+        """ Save the parent.notes[] objects as a descendant of the parent node.
+
+            If no note.id or note.handle is defined, new ids are denerated
+        """
+        n_cnt = 0
+        for note in parent.notes:
+            if isinstance(note, Note):
+                if not note.id:
+                    n_cnt += 1
+                    note.id = f"N{n_cnt}-{parent.id}"
+                note.save(tx, parent_id=parent.uniq_id)
+            else:
+                raise AttributeError("note.save_note_list: Argument not a Note")
+
+
     def save(self, tx, batch_id=None, parent_id=None):
         """ Creates this Note object as a Note node
             - if parent_id is given, link (parent) --> (:Note)  
@@ -163,7 +180,7 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
         n_attr = {}
         try:
             n_attr = {
-                "handle": self.handle,
+                "handle": self.handle if self.handle else None, # f"handle-{self.id}",
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
@@ -172,14 +189,16 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
                 "url": self.url
             }
             if parent_id:
+                print(f"Note_save: parent (uid={parent_id}) --> (id={self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create_as_leaf, 
                                       parent_id=parent_id, n_attr=n_attr).single()[0]
             elif batch_id:
+                print(f"Note_save: batch ({batch_id}) --> ({self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create, 
                                       bid=batch_id, n_attr=n_attr).single()[0]
             else:
-                raise RuntimeError("Note.save need batch_id or parent_id for {}".format(self.id))
+                raise RuntimeError(f"Note.save need batch_id or parent_id for {self.id}")
 
         except Exception as err:
-            print("iError Note_save: {0} attr={1}".format(err, n_attr), file=stderr)
-            raise RuntimeError("Could not save Note {}".format(self.id))
+            print(f"iError Note_save: {err} attr={n_attr}", file=stderr)
+            raise RuntimeError("Could not save Note {self.id}".format())

@@ -633,7 +633,7 @@ msgstr "Syöttötiedoston käsittelyvaiheet"
 #: bp/admin/templates/admin/uploads.html:28
 #: bp/gramps/templates/gramps/uploads.html:33
 msgid "the file has been uploaded to server"
-msgstr "tiedosto on siirretty palvelimelle"
+msgstr "tiedosto on tuotu palvelimelle"
 
 #: bp/admin/templates/admin/uploads.html:32
 #: bp/gramps/templates/gramps/uploads.html:36

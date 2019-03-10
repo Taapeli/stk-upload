@@ -23,6 +23,7 @@ import models.dbutil
 
 from models.gen.person import Person
 from models.cypher_gramps import Cypher_person_w_handle
+from models.gen.note import Note
 
 
 class Person_gramps(Person):
@@ -130,8 +131,8 @@ class Person_gramps(Person):
             name.save(tx, self.uniq_id)
 
         # Save web urls as Note nodes connected under the Person
-        for note in self.notes:
-            note.save(tx, self.uniq_id)
+        if self.notes:
+            Note.save_note_list(tx, self)
 
 #         if len(self.events) > 0:
 #             # Make Event relations (if Events were stored in self.events)
