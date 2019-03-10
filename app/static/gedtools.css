@@ -44,7 +44,6 @@ table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
 }
 
 a {
-  /* color: #2f435e; font-weight: bold; font-size:larger; 10.3.2019/JMä */
   text-decoration: none;
 }
 a:hover {
@@ -56,12 +55,16 @@ table.results, table.results td {
 }
 
 .gedcom-name {
-	/* max-width:300px; */
-	overflow-x:hidden;
-	/* padding-right:20px; */
-	display: inline-block; 
-	min-width: 250px;
-	font-weight: bold;
+    /* max-width:300px; */
+    overflow-x:hidden;
+    /* padding-right:20px; */
+    display: inline-block; 
+    min-width: 250px;
+}
+
+.gedcom-name a {
+    font-weight: bold;
+    color: #2f435e;
 }
 
 div.results-box {
