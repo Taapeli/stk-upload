@@ -990,6 +990,10 @@ msgstr "Kuvaus"
 msgid "Update"
 msgstr "Päivitä"
 
+#: bp/gedcom/templates/gedcom_info.html:23
+msgid "File"
+msgstr "Tiedosto"
+
 #: bp/gedcom/templates/gedcom_info.html:71
 msgid "File size"
 msgstr "Tiedoston koko"
@@ -1102,7 +1106,11 @@ msgstr "Poista tämä gedcom palvelimelta"
 
 #: bp/gedcom/templates/gedcom_info.html:175
 msgid "Switch to another GEDCOM"
-msgstr "Siirry toiseen gedcomiin"
+msgstr "Vaihda gedcom-tiedostoa"
+
+#: bp/gedcom/templates/gedcom_info.html:45
+msgid "Statistics"
+msgstr "Tietoja"
 
 #: bp/gedcom/templates/gedcom_info.html:183
 msgid "Transformations"
