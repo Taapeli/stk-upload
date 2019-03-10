@@ -5,45 +5,6 @@
 {% block body %}
 {{ super() }}
 
-<style> 
-.errors {
-	font-size: 9pt;
-	color: white;
-	background-color: red; 
-}
-
-table.diff td {
-	max-width: 600px;
-	overflow: hidden; 
-}
-
-btn, span.button a {
-  position: relative;
-  display: block;
-  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-  background-color: #657891; /* Triadic color of lightsteelblue */
-  padding: 5px;
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
-  font-size:larger;
-  text-decoration: none;
-  cursor: pointer;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: auto;
-}
-
-
-.link {
-  color: #2f435e;
-  font-weight: bold;
-  font-size:larger;
-  text-decoration: none;
-}
-
-</style>
-
 <script src="/static/js/gedcom_scripts.js?37"></script>
 
 <script>
@@ -52,15 +13,36 @@ var gedcom = "{{ gedcom }}";
 
 <div class="startdiv">
     <div>
-	    <h2>{{ _("Gedcom transformations") }} ({{ _("user") }}: {{ user }})</h2>
+	    <h2>{{ _("Gedcom transformations") }}</h2>
 	    <div id="errors" class="errors"></div>
+
 	    <div class="row">
+
 	       <div class="startbox">
 	         <div style="display: inline-block;">
-				<h3>{{ _("GEDCOM") }} "{{gedcom}}"</h3>
-				<label for="desc">{{ _("Description") }}</label>
-			    <input id="desc" value='{{ metadata.desc }}' style="width: 14em">
+				<h3>{{ _("File") }} <i>{{gedcom}}</i></h3>
+				<p>{{ _("user") }}: <b>{{ user }}</b></p>
+				<label for="desc">{{ _("Description") }}<br></label>
+			    <input id="desc" value='{{ metadata.desc }}' style="width: 263px;">
 				<btn id="update_desc">{{ _("Update") }}</btn>
+                <div><input type="checkbox" 
+                        id="view_permission"
+                        {%if metadata.admin_permission %}
+                            checked
+                        {% endif %}
+                    > {{ _("Allow help desk to view data") }}
+                </div>
+                <div id="permission_message">{{ _("Permission updated") }}</div>
+                <div style="margin-top: 4em;"> 
+                    &rtrif; <a class="link" href="/gedcom">{{ _("Switch to another GEDCOM") }}</a>
+                </div>
+              </div>
+           </div>
+    
+          <div class="startbox">
+            <div style="display: inline-block;">
+    
+                <h3>{{ _("Statistics") }}</h3>
 				<table>
                     {% if metadata.upload_time %}
 	                    <tr><td>{{ _('Upload time') }}
@@ -125,13 +107,6 @@ var gedcom = "{{ gedcom }}";
 				        <td class="right">{{ info.num_repos }}</td></tr>
 				    <tr><td>{{ _("Number of multimedia objects") }}</td>
 				        <td class="right">{{ info.num_multimedia }}</td></tr>
-	                <tr><td>{{ _("Allow help desk to view data") }}</td>
-	                    <td class="right"><input type="checkbox" 
-	                    	id="view_permission"
-	                    	{%if metadata.admin_permission %}
-	                    		checked
-                    		{% endif %}
-                    	></td></tr>
 			    </table>
 	          </div>
 	       </div>
@@ -172,7 +147,6 @@ var gedcom = "{{ gedcom }}";
 				    	{{ _("Remove this GEDCOM") }}</a>
 			    	</btn>
 
-                    &rtrif; <a class="link" href="/gedcom">{{ _("Switch to another GEDCOM") }}</a>
 				</div>
 	        </div>
 	      </div>
@@ -211,10 +185,7 @@ var gedcom = "{{ gedcom }}";
 	
 		        <h3>{{ _("Transformation history") }}</h3>
 		        <a href="javascript:window.scroll(0,0)">
-			        <img src="/static/444-512.png" 
-			        	 width=100
-			        	 title="Top"
-		 		         style="position:fixed;bottom:0;right:0">
+		        <img src="/static/444-512.png" class="totop" title="Top">
 		        </a>
 		        <pre>
 					<div id="history">
@@ -229,10 +200,7 @@ var gedcom = "{{ gedcom }}";
 	        <button id="palauta2" class="palauta_button"></button>
 	        <p>
 	        <a href="javascript:window.scroll(0,0)">
-		        <img src="/static/444-512.png" 
-		        	 width=100
-		        	 title="Top"
-	 		         style="position:fixed;bottom:0;right:0">
+		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
 	        <div id="difftable">
 		    </div>
@@ -241,17 +209,14 @@ var gedcom = "{{ gedcom }}";
 	      <div class="gedcom" id="div_results">
 	        <h3>{{ _("Results") }}:</h3>
 	        <a href="javascript:window.scroll(0,0)">
-		        <img src="/static/444-512.png" 
-		        	 width=100
-		        	 title="Top"
-	 		         style="position:fixed;bottom:0;right:0">
+		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
 	        <p>
 	        <div id="results">
 		    </div>
 		  </div>
 
-	      <div class="startbox gedcom" id="div_transform_params">
+	      <div class="startbox2 gedcom" id="div_transform_params">
 			<form id="form">
 		      <div id="div_transform_params1">
 		      </div>
@@ -259,8 +224,12 @@ var gedcom = "{{ gedcom }}";
 	        </form>
 	      </div>
 	      
-	   </div>
+	   </div><!-- row -->
    </div> 
+
+</div><!-- startdiv -->
+
+<div class="resultdiv">
    <div>
 	  <div id="output" class="gedcom">
 		<h3>{{ _("Transformation results") }}</h3>
@@ -269,13 +238,10 @@ var gedcom = "{{ gedcom }}";
 		</div>
 		<div id="div_save">
 		<span class="important">{{ _("Not saved yet") }}</span>
-		<h3><button id="save_result">{{ _("Save result") }}</button></h3>
+		<button id="save_result">{{ _("Save result") }}</button>
 		</div>
 	        <a href="javascript:window.scroll(0,0)">
-		        <img src="/static/444-512.png" 
-		        	 width=100
-		        	 title="Top"
-	 		         style="position:fixed;bottom:0;right:0">
+		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
 		<pre>
 		  <div id="output_log">
@@ -289,5 +255,6 @@ var gedcom = "{{ gedcom }}";
 </div>
 
 <div id="waiter" class="modal"></div>	
+
     
 {% endblock %}

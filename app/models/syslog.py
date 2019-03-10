@@ -1,5 +1,6 @@
 import json
 import time
+import traceback
 
 from flask_security import current_user
 
@@ -9,16 +10,27 @@ from models import util
 def log(type,**kwargs):
     logname = shareds.app.config.get('SYSLOGNAME')
     if not logname: return
+    try:
+        user=current_user.username
+    except:
+        user = ""
     values = dict(
         _type=type,
-        _user=current_user.username,
+        _user=user,
         _time=time.time(),
         _timestr=util.format_timestamp())
     values.update(kwargs)
     msg = json.dumps(values)
-    open(logname,"a").write(msg+"\n")
+    try:
+        open(logname,"a").write(msg+"\n")
+    except:
+        traceback.print_exc()
     
 def readlog():
     logname = shareds.app.config.get('SYSLOGNAME')
     if not logname: return []
-    return open(logname).readlines()
+    try:
+        return open(logname).readlines()
+    except:
+        traceback.print_exc()
+        return []

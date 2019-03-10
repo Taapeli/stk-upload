@@ -44,7 +44,7 @@ def get_locale():
         pass
     return "fi"
     #return "en"
-    #return request.accept_languages.best_match(LANGUAGES)
+    #return request.accept_languages.best_match(get('LANGUAGES'))
     '''
 
 @shareds.app.route('/help')

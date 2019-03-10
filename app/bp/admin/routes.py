@@ -21,7 +21,8 @@ from flask_babelex import _
 import shareds
 from setups import User #, Role
 from models import dbutil, dataupdater, loadfile, datareader
-from .models import DataAdmin, UserAdmin
+from bp.admin.models.data_admin import DataAdmin
+from bp.admin.models.user_admin import UserAdmin
 from .cvs_refnames import load_refnames
 from .forms import AllowedEmailForm, UpdateUserForm
 from . import bp
@@ -268,6 +269,7 @@ def show_upload_log(username,xmlfile):
 @roles_accepted('admin', 'audit')
 def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
+    syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------

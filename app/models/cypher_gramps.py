@@ -109,7 +109,7 @@ class Cypher_family_w_handle():
 
     create_to_batch = """
 MATCH (b:Batch {id: $batch_id})
-MERGE (b) -[r:BATCH_MEMBER]-> (f:Family {handle: $f_attr.handle}) 
+MERGE (b) -[r:OWNS]-> (f:Family {handle: $f_attr.handle}) 
     SET f = $f_attr
 RETURN ID(f) as uniq_id"""
 
@@ -167,14 +167,14 @@ class Cypher_note_in_batch():
     # Find the batch like '2019-02-24.006' and connect Note in that Batch
     create = """
 MATCH (u:Batch {id:$bid})
-CREATE (u) -[:IN_BATCH]-> (n:Note) 
+CREATE (u) -[:OWNS]-> (n:Note) 
     SET n = $n_attr
 RETURN ID(n)"""
 
     # Find a known parent node with uniq_id and connect a new Note to it
     create_as_leaf = """
 MATCH (a) WHERE ID(a) = $parent_id
-CREATE (a) -[:NOTE]-> (n:Note {handle: $n_attr.handle}) 
+CREATE (a) -[:NOTE]-> (n:Note) 
     SET n = $n_attr
 RETURN ID(n)"""
 
@@ -208,7 +208,7 @@ class Cypher_person_w_handle():
     create_to_batch = """
 MATCH (b:Batch {id: $batch_id})
 MERGE (p:Person {handle: $p_attr.handle})
-MERGE (b) -[r:BATCH_MEMBER]-> (p)
+MERGE (b) -[r:OWNS]-> (p)
     SET p = $p_attr
 RETURN ID(p) as uniq_id"""
 

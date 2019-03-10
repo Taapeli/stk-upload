@@ -281,7 +281,7 @@ RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f)"""
         """
         
         query = """
-MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:BATCH_MEMBER]->(f:Family) WHERE prof.userName=$user 
+MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:BATCH_MEMBER|OWNS]->(f:Family) WHERE prof.userName=$user 
 OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name)  
 OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
 OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 

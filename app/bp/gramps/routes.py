@@ -16,10 +16,8 @@ from flask_security import login_required, roles_accepted, current_user # ,roles
 from flask_babelex import _
 
 import shareds
-from models import loadfile, email, util    # dbutil, 
-#from models import email
+from models import loadfile, email, util, syslog 
 from . import bp
-#from pickle import Unpickler
 from ..admin import uploads
 
 @bp.route('/gramps')
@@ -71,6 +69,7 @@ def upload_gramps():
         email.email_admin(
                     "Stk: Gramps XML file uploaded",
                     msg )
+        syslog.log(type="gramps file uploaded",file=infile.filename)
     except Exception as e:
         return redirect(url_for('gramps.error_page', code=1, text=str(e)))
 
@@ -96,6 +95,7 @@ def error_page(code, text=''):
 @roles_accepted('member', 'admin')
 def xml_delete(xmlfile):
     uploads.delete_files(current_user.username,xmlfile)
+    syslog.log(type="gramps file deleted",file=xmlfile)
     return redirect(url_for('gramps.list_uploads'))
 
 @bp.route('/gramps/xml_download/<xmlfile>')

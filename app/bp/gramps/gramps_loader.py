@@ -11,7 +11,6 @@ from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import Batch, Log
-#from models.loadfile import status_update
 from models.dataupdater import set_confidence_values
 import shareds
 
@@ -70,7 +69,7 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
         ''' Start DOM transaction '''
         handler.begin_tx(shareds.driver.session())
         # Create new Batch node and start
-        handler.batch_id = handler.blog.start_batch(None, file_cleaned)
+        handler.batch_id = handler.blog.start_batch(handler.tx, file_cleaned)
         #status_update({'percent':1})
 
         try:

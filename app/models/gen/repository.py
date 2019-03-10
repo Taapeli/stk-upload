@@ -10,6 +10,7 @@ from sys import stderr
 
 from models.cypher_gramps import Cypher_repository_w_handle
 from .cypher import Cypher_repository
+from .note import Note
 import shareds
    
 
@@ -156,7 +157,6 @@ class Repository:
 #         print ("Url description: " + self.url_description)
         return True
 
-
     def save(self, tx):
         """ Saves this Repository to db"""
 
@@ -180,10 +180,11 @@ class Repository:
         except Exception as err:
             print("iError Repository_save: {0} attr={1}".format(err, r_attr), file=stderr)
             raise RuntimeError("Could not save Repository {}".format(self.id))
-
+        
         try:
-            for note in self.notes:
-                note.save(tx, parent_id=self.uniq_id)
+            # Save the notes attached to self
+            if self.notes:
+                Note.save_note_list(tx, self)
         except Exception as err:
             print("iError Repository.save note: {0}".format(err), file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing

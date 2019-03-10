@@ -3,13 +3,11 @@
 {% block title %}{{ _("Uploads from Gramps") }}{% endblock %}
 {% block body %}
 {{ super() }}
-    <meta http-equiv="refresh" content="30">
+    <!-- meta http-equiv="refresh" content="30" -->
 
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 {{ hamburger_menu( (
-    ("/message", _('Contact administrator'), _('Message to the administrator')),
-    ("/settings", _('Change language'), _('Select language'))
    ) ) }}
 
 <div id="startdiv">
