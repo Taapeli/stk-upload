@@ -14,6 +14,8 @@ from templates import jinja_filters
 from datetime import datetime
 
 import logging
+from flask_login.utils import current_user
+from flask.globals import session
 logger = logging.getLogger('stkserver') 
 
 
@@ -182,13 +184,10 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
     #language = StringField('Language', validators=[Required('Language required')])
-    language = SelectField('Language', 
-                choices=[
-                    ("fi",_("Finnish")),
-                    ("sv",_("Swedish")),
-                    ("en",_("English"))],
-                validators=[Required('Language required')])
 
+    language = SelectField('Language', 
+                choices=shareds.app.config.get('LANGUAGES'),
+                validators=[Required(_('Language required'))])
 
 #============================== Start here ====================================
 
@@ -217,6 +216,18 @@ def security_register_processor():
 
 adminDB.initialize_db() 
 
+def log_user_logged_in(sender, user, **extra):
+    syslog.log(type="user logged in")
+    session['lang'] = current_user.language
+    
+def log_user_logged_out(sender, user, **extra):
+    syslog.log(type="user logged out")
+
+from flask_login import user_logged_in, user_logged_out
+from models import syslog
+syslog.log(type="application initialized")
+user_logged_in.connect(log_user_logged_in,shareds.app)
+user_logged_out.connect(log_user_logged_out,shareds.app)
 
 """ 
     Application filter definitions 

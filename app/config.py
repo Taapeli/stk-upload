@@ -5,7 +5,9 @@ Created on 17.11.2017
 
 Sovelluksen toiminnallisuutta ohjaavat tiedot  
 '''
-  
+
+from flask_babelex import _
+ 
 print('Reading application config.py')
 DEBUG = False
 
@@ -25,7 +27,13 @@ SECURITY_POST_LOGOUT_VIEW = '/'
 #SECURITY_CHANGE_PASSWORD_TEMPLATE = 'security/change_password.html'
 SECURITY_SEND_REGISTER_EMAIL = True
 
-DEFAULT_ROLE='admin'
+LANGUAGES = [("fi",_("Finnish")),
+             ("sv",_("Swedish")),
+             ("en",_("English"))]
+
+LANGS = [LANGUAGE[0] for LANGUAGE in LANGUAGES]
+
+#DEFAULT_ROLE='admin'
 EXPLAIN_TEMPLATE_LOADING=False   # True: explain Flask, if you like
 from os import getcwd
 APP_ROOT = getcwd() or 'None'

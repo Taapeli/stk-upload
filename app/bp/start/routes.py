@@ -6,8 +6,8 @@
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request #, session, redirect, url_for, flash, g
-from flask_security import login_required, roles_accepted, current_user # ,roles_required
+from flask import render_template, request, session , flash
+from flask_security import login_required, roles_accepted, current_user
 from flask_babelex import _
 
 import shareds
@@ -50,9 +50,23 @@ def send_email():
                       sender=(current_user.name,current_user.email))
     return "ok"
 
-@shareds.app.route('/settings')
+@shareds.app.route('/settings',methods=["GET","POST"])
 @login_required
 def my_settings():
+    lang = request.form.get("lang")
+    if lang:
+        try:
+            from bp.admin.models import UserAdmin # can't import earlier
+            current_user.language = lang
+            saved_roles = current_user.roles 
+            current_user.roles = [role.name for role in current_user.roles]
+            updated_user = UserAdmin.update_user(current_user)
+            current_user.roles = saved_roles
+            if not updated_user:
+                flash(_("Update did not work"),category='flash_error')
+            session['lang'] = lang
+        except:
+            flash(_("Update did not work"),category='flash_error')
     print("-> bp.start.routes.settings")
     return render_template("/start/my_settings.html")
 

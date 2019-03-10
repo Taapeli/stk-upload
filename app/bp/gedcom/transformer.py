@@ -135,6 +135,7 @@ class Transformer:
         self.transform_module = transform_module
         self.display_callback = display_callback
         self.transformation = transform_module.initialize(options)
+        self.num_changes = 0
 
     def build_items(self,lines,level,linenum=1):
         if len(lines) == 0: return []
@@ -176,6 +177,7 @@ class Transformer:
             if newitem == True: # no change
                 newitems.append(item)
                 continue
+            self.num_changes += 1
             if self.options.display_changes: self.display_callback(item.lines,newitem)
             if newitem is None: continue # delete item
             if type(newitem) == list:

@@ -18,7 +18,7 @@ logger = logging.getLogger('stkserver')
 
 from flask_babelex import _
 
-from models import email, util    # loadfile, 
+from models import email, util, syslog 
 
 from ..gramps import gramps_loader
 
@@ -142,6 +142,7 @@ def background_load_to_neo4j(username,filename):
         email.email_admin(
                     "Stk: Gramps XML file loaded",
                     msg )
+        syslog.log(type="gramps file upload complete",file=filename,user=username)
     except:
         traceback.print_exc()
         res = traceback.format_exc()
@@ -155,6 +156,7 @@ def background_load_to_neo4j(username,filename):
         email.email_admin(
                     "Stk: Gramps XML file load FAILED",
                     msg )
+        syslog.log(type="gramps file upload failed",file=filename,user=username)
 
 
 def initiate_background_load_to_neo4j(userid,filename):
@@ -170,6 +172,7 @@ def initiate_background_load_to_neo4j(userid,filename):
         background_load_to_neo4j(userid,filename)
         
     threading.Thread(target=background_load_to_neo4j_thread,name="neo4j load for " + filename).start()
+    syslog.log(type="gramps file upload initiated",file=filename,user=userid)
     
     #for i in range(10):
     #    if os.path.exists(logname): return True

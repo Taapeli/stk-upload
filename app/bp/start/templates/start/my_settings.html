@@ -7,8 +7,7 @@
 {% from "start/s_macros.html" import hamburger_menu with context %}
 {# import 'start/s_macros.html' as macro #}
 
-{{ hamburger_menu( (
-   ) ) }}
+{{ hamburger_menu() }}
 
 <div id="startdiv">
   <div>
@@ -17,11 +16,22 @@
     {% if current_user is defined and current_user.is_authenticated %}
     <div>
         <h3>{{ _('Change language') }}</h3>
-		<p>{{ _('User') }} <i>{{current_user.name}}</i> 
-		    &lt;{{current_user.email}}&gt;</p>
-         <p>To do</p>
-         <div style="margin-left:10em;"> 
-          <form action="#">
+		{{ _('User') }} <i>{{current_user.name}}</i> 
+		    &lt;{{current_user.email}}&gt;
+         <div> 
+          <form method="post">
+          	<div id="lang">
+          		<br><input type="radio" name="lang" value="fi"
+          			{% if session.lang == "fi" %} checked {% endif %}
+      			>{{ _("Finnish") }}
+          		<br><input type="radio" name="lang" value="sv"
+          			{% if session.lang == "sv" %} checked {% endif %}
+          		>{{ _("Swedish") }}
+          		<br><input type="radio" name="lang" value="en"
+          			{% if session.lang == "en" %} checked {% endif %}
+          		>{{ _("English") }}
+          	</div>
+          	<br>
             <button onclick="goBack()">{{ _('Go back') }}</button>
             <input type="submit" value="{{ _('Apply') }}" />
          </form>
