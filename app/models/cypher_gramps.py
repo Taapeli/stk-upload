@@ -149,13 +149,21 @@ MATCH (m:Note)   WHERE m.handle=$n_handle
 MERGE (n)-[r:NOTE]->(m)"""
 
 
-class Cypher_media_w_handle():
+class Cypher_media_in_batch():
     """ For Media class """
 
+    # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
-MERGE (m:Media {handle: $m_attr.handle}) 
-    SET m = $m_attr"""
+MATCH (u:Batch {id:$bid})
+CREATE (u) -[:OWNS]-> (a:Media) 
+    SET a = $m_attr
+RETURN ID(a) as uniq_id"""
 
+# class Cypher_media_w_handle():
+#     """ For Media class """
+#     create = """
+# MERGE (m:Media {handle: $m_attr.handle}) 
+#     SET m = $m_attr"""
 
 
 class Cypher_note_in_batch():

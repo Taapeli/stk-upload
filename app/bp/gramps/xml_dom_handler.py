@@ -414,7 +414,7 @@ class DOM_handler():
                 if obj_file.hasAttribute("description"):
                     o.description = obj_file.getAttribute("description")
 
-            # print("iMedia {}".format(o))
+            #TODO: Varmista, ettei mediassa voi olla Note
             o.save(self.tx)
             counter += 1
 

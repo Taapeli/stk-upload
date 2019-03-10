@@ -5,7 +5,8 @@ Created on 22.7.2017
 '''
 
 from sys import stderr
-from models.cypher_gramps import Cypher_media_w_handle
+from models.cypher_gramps import Cypher_media_in_batch
+from models.gen.cypher import Cypher_media
 import shareds
 
 class Media:
@@ -62,36 +63,24 @@ class Media:
         else:
             query = "MATCH (o:Media) RETURN ID(o) AS uniq_id, o"
             return  shareds.driver.session().run(query)
-            
 
 
     def get_data(self):
         """ Luetaan tallenteen tiedot """
 
-        query = """
-            MATCH (obj:Media)
-                WHERE ID(obj)={}
-                RETURN obj
-            """.format(self.uniq_id)
-        obj_result = shareds.driver.session().run(query)
+        obj_result = shareds.driver.session().run(Cypher_media.get_one, rid=self.id)
 
-        for obj_record in obj_result:
-            self.id = obj_record["obj"]["id"]
-            self.change = int(obj_record["obj"]["change"])  #TODO only temporary int()
-            self.src = obj_record["obj"]["src"]
-            self.mime = obj_record["obj"]["mime"]
-            self.description = obj_record["obj"]["description"]
+        for node in obj_result:
+            self.from_node(node)
                     
-        return True
+        return self.id
                 
         
     @staticmethod
     def get_total():
         """ Tulostaa tallenteiden määrän tietokannassa """
                         
-        query = """
-            MATCH (o:Media) RETURN COUNT(o)
-            """
+        query = "MATCH (o:Media) RETURN COUNT(o)"
             
         results =  shareds.driver.session().run(query)
         
@@ -124,13 +113,13 @@ class Media:
                 "mime": self.mime,
                 "description": self.description
             }
-            result = tx.run(Cypher_media_w_handle.create, m_attr=m_attr)
+            result = tx.run(Cypher_media_in_batch.create, m_attr=m_attr)
             ids = []
             for record in result:
                 self.uniq_id = record[0]
                 ids.append(self.uniq_id)
                 if len(ids) > 1:
-                    print("iError updated multiple Medias {} - {}, attr={}".format(self.id, ids, m_attr))
+                    print(f"iError updated multiple Medias {self.id} - {ids}, attr={m_attr}")
         except Exception as err:
-            print("iError Media_save: {0} attr={1}".format(err, m_attr), file=stderr)
-            raise RuntimeError("Could not save Media {}".format(self.id))
+            print(f"iError Media_save: {err} attr={m_attr}", file=stderr)
+            raise RuntimeError(f"Could not save Media {self.id}")

@@ -495,35 +495,18 @@ match (repo:Repository) where ID(repo) = $rid
 return repo, collect(w) as notes"""
 
     get_one = """
-match (r:Repository) where ID(r) == $rid
+match (r:Repository) where ID(r) = $rid
 return r"""
 
     get_all = """
 match (r:Repository)
 return r order by r.type"""
 
-# class Cypher_weburl():
-#     '''
-#     Cypher clases for creating and accessing Weburls
-#     '''
-#     link_to_weburl = """
-# merge (w:Weburl {href: $href})
-# with w
-#     match (x) where ID(x) = $parent_id
-#     with w, x
-#         merge (x) -[r:WEBREF]-> (w)
-#             set r.type = $type
-#             set r.desc = $desc
-#             set r.priv = $priv
-# return id(r) as ref_id, id(w) as weburl_id"""
-#     link_to_weburl_X = """
-# match (x) where ID(x) = $parent_id
-#     optional match (w:Weburl) where w.href = $href
-# with x, w
-#     merge (x) -[r:WEBREF]-> (w)
-#         set w.href = $href
-#         set r.type = $type
-#         set r.desc = $desc
-#         set r.priv = $priv
-# return id(r) as ref_id, id(w) as weburl_id"""
+
+class Cypher_media():
+
+    get_one = """
+MATCH (obj:Media)
+    WHERE ID(obj) = $rid
+    RETURN obj"""
 
