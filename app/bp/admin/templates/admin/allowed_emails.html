@@ -23,7 +23,7 @@
   <div>
     <h2>{{ _('User candidates') }}</h2>
 
-    <div class="startbox">
+    <div class="startbox admin">
    	  <h3>{{ _('Create a new user candidate') }}</h3>
 	    <div style="display: inline-block;">    
 	        <form action="{{ url_for('admin.list_allowed_emails') }}" method="POST">
@@ -35,7 +35,7 @@
 	        </form>
 	    </div>
 	</div>
-    <div class="startbox2">
+    <div class="startbox2 admin">
       <h3>{{ _('Pending user candidates') }}</h3>
         <!--section id="lista" -->
 	        <table class="table100">
