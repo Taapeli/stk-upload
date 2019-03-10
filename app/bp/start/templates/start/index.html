@@ -1,7 +1,7 @@
 {# start/index.html_ #} 
 {% extends "start/s_layout.html" %} 
 {% include "security/_messages.html" %} 
-{% block title %}{{ _('Isotammi Start Page') }} (start/index){% endblock %} 
+{% block title %}{{ _('Isotammi Start Page') }}{% endblock %} 
 {% block body %} 
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -16,7 +16,7 @@ div.startbox { min-height: 270px;}
 <div id="startdiv">
     <h2>{{ _('Welcome to Isotammi Services') }}</h2>
     <div style="background-color: bisque; padding: 1em; width: 280px;
-                border-radius: 15px; font-style: italic;">
+                border-radius: 15px; font-style: italic; margin-bottom: 1em;">
         <a href="/?lang=fi">Suomen kielellä</a> –
         <a href="/?lang=se">På svenska</a> –
         <a href="/?lang=en">In English</a>
