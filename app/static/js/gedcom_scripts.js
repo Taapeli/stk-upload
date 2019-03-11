@@ -230,7 +230,7 @@ $(document).ready( function() {
     	$("#output_log").empty();
     	$("#error_log").empty();
         $.post("/gedcom/transform/" + gedcom + "/" + transform, $("#form").serialize(), function(rsp) {
-            $("#output_log").text(rsp.stdout);
+            $("#output_log").html(rsp.stdout);
             if (rsp.stderr) 
             	$("#error_log").text(_('Errors:') + "\n" + rsp.stderr);
             if (rsp.oldname) {

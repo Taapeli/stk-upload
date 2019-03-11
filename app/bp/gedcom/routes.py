@@ -438,28 +438,35 @@ def removefile(fname):
     except FileNotFoundError:
         pass
 
-def display_changes(lines,item):
+def display_changes(lines,item,linenum=None):
     class Out:
         def emit(self,s):
             print(s)
 
-    print("-----------------------")
     if not item: 
-        print(_("Deleted:"))
+        print("<b>"+_("Deleted:")+"</b>")
+        print("<gedcom-text>")
         for line in lines:
             print(line)
+        print("</gedcom-text>")
         print()
         return
-    print(_("Replaced:"))
+    print("<b>"+_("Replaced:")+"</b>")
+    if linenum: print("("+_("starting from line ")+str(linenum)+")")
+    print("<gedcom-text>")
     for line in lines:
         print(line)
-    print(_("With:"))
+    print("</gedcom-text>")
+    print("<b>"+_("With:")+"</b>")
+    print("<gedcom-text>")
     if isinstance(item, list):
         for it in item:
             it.print_items(Out())
     else:
         item.print_items(Out())
+    print("</gedcom-text>")
     print()
+    print("<br>-----------------------<br>")
         
 def process_gedcom(arglist, transform_module):
     """Implements another mechanism for Gedcom transforms:
@@ -514,7 +521,7 @@ def process_gedcom(arglist, transform_module):
             else:
                 old_name = out.new_name
 
-            print("------ {} ------".format(msg))
+            print("<h3>------ {} ------</h3>".format(msg))
             t = transformer.Transformer(transform_module=transform_module,
                                         display_callback=display_changes,
                                         options=args)
@@ -534,7 +541,7 @@ def process_gedcom(arglist, transform_module):
                  transform_module.name, 
                  util.format_timestamp())
         history_append(args.input_gedcom,msg)
-        print("------ {} ------".format(msg))
+        print("<h3>------ {} ------</h3>".format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()
         sys.stdout = saved_stdout
