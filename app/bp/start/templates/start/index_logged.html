@@ -12,12 +12,7 @@
 <div id="startdiv">
   <div>
     <h2>{{ _("User's home page for Isotammi Services") }}</h2>
-    <div style="background-color: bisque; padding: 1em; width: 280px;
-                border-radius: 15px; font-style: italic;">
-        <a href="/?lang=fi">Suomen kielellä</a> –
-        <a href="/?lang=se">På svenska</a> –
-        <a href="/?lang=en">In English</a>
-    </div>
+
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
