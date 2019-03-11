@@ -169,3 +169,8 @@ img.totop {
   right:0;
 }
 
+gedcom-text {
+    white-space: pre;
+    text-indent: 20px;
+}
+
