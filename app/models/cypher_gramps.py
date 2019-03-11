@@ -262,30 +262,69 @@ MERGE (n)-[r:NOTE]->(m)"""
 
 
 
-class Cypher_place_w_handle():
+class Cypher_place_in_batch():
     """ For Place class """
 
+    # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
-CREATE (p:Place)
-    SET p = $p_attr
-RETURN id(p) AS uniq_id"""
+MATCH (u:Batch {id:$batch_id})
+CREATE (u) -[:OWNS]-> (a:Place) 
+    SET a = $p_attr
+RETURN ID(a) as uniq_id"""
+
+    merge = """
+MATCH (u:Batch {id:$batch_id})
+MATCH (a:Place {id:$plid})
+MERGE (u) -[:OWNS]-> (a) 
+    SET a = $p_attr
+RETURN ID(a) as uniq_id"""
 
     add_name = """
-MATCH (p:Place) WHERE p.handle=$handle
-CREATE (n:Place_name)
-MERGE (p) -[r:NAME]-> (n)
-SET n = $n_attr"""
+MATCH (pl:Place) WHERE id(pl) = $pid,
+MERGE (pl) -[r:NAME]-> (n:Place_name)
+    SET n = $n_attr"""
 
     link_hier = """
-MATCH (n:Place) WHERE n.handle=$handle
-MATCH (m:Place) WHERE m.handle=$hlink
-MERGE (n) -[r:HIERARCY]-> (m)
-SET r = $r_attr"""
+MATCH (pl:Place) WHERE id(pl) = $plid
+MATCH (up:Place) WHERE id(up) = $up_id
+MERGE (pl) -[r:HIERARCY]-> (up)
+    SET r = $r_attr"""
+
+    link_create_hier = """
+MATCH (pl:Place) WHERE id(pl) = $plid
+MERGE (pl) -[r:HIERARCY]-> (m:Place {handle: $up_handle})
+    SET r = $r_attr
+return ID(m) as uniq_id"""
 
     link_note = """
-MATCH (n:Place) WHERE n.handle=$handle
-MATCH (m:Note)  WHERE m.handle=$hlink
-MERGE (n) -[r:NOTE]-> (m)"""
+MATCH (pl:Place) WHERE id(pl) = $pid
+MATCH (n:Note)  WHERE n.handle=$hlink
+MERGE (pl) -[r:NOTE]-> (m)"""
+
+# class Cypher_place_w_handle():
+#     """ For Place class """
+
+#     create = """
+# CREATE (p:Place)
+#     SET p = $p_attr
+# RETURN id(p) AS uniq_id"""
+
+#     add_name = """
+# MATCH (p:Place) WHERE p.handle=$handle
+# CREATE (n:Place_name)
+# MERGE (p) -[r:NAME]-> (n)
+# SET n = $n_attr"""
+
+#     link_hier = """
+# MATCH (n:Place) WHERE n.handle=$handle
+# MATCH (m:Place) WHERE m.handle=$hlink
+# MERGE (n) -[r:HIERARCY]-> (m)
+# SET r = $r_attr"""
+
+#     link_note = """
+# MATCH (n:Place) WHERE n.handle=$handle
+# MATCH (m:Note)  WHERE m.handle=$hlink
+# MERGE (n) -[r:NOTE]-> (m)"""
 
 
 

@@ -14,16 +14,16 @@ from flask_babelex import _
 
 from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
+from .models.place_gramps import Place_gramps
 from .batchlogger import Log
 
+from models.gen.place import Place_name, Point
+from models.gen.dates import Gramps_DateRange
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person_name import Name
 from models.gen.person_combo import Person_combo
-
-from models.gen.place import Place, Place_name, Point
-from models.gen.dates import Gramps_DateRange
 from models.gen.citation import Citation
 from models.gen.source import Source
 from models.gen.repository import Repository
@@ -87,6 +87,7 @@ class DOM_handler():
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
         self.tx = None                      # Transaction not opened
+        self.batch_id = None
 
     def begin_tx(self, session):
         self.tx = session.begin_transaction()
@@ -549,7 +550,15 @@ class DOM_handler():
 
 
     def handle_places(self):
-        # Get all the places in the collection
+        ''' Get all the places in the collection.
+        
+            To create place hierarchy links, there must be a dictionary of 
+            Place handles and uniq_ids created so far. The link may use
+            previous node or create a new one.
+        '''
+
+        place_keys = {}    # place_keys[handle] = uniq_id
+
         places = self.collection.getElementsByTagName("placeobj")
 
         print ("***** {} Places *****".format(len(places)))
@@ -559,7 +568,7 @@ class DOM_handler():
         # Print detail of each placeobj
         for placeobj in places:
 
-            pl = Place()
+            pl = Place_gramps()
             # List of upper places in hierarchy as {hlink, dates} dictionaries
             #TODO move in Place and remove Place.placeref_hlink string
             pl.surround_ref = []
@@ -591,10 +600,10 @@ class DOM_handler():
             for placeobj_coord in placeobj.getElementsByTagName('coord'):
                 if placeobj_coord.hasAttribute("lat") \
                    and placeobj_coord.hasAttribute("long"):
-                    coord_lat = placeobj_coord.getAttribute("lat")
-                    coord_long = placeobj_coord.getAttribute("long")
+                    lat = placeobj_coord.getAttribute("lat")
+                    long = placeobj_coord.getAttribute("long")
                     try:
-                        pl.coord = Point(coord_lat, coord_long)
+                        pl.coord = Point(lat, long)
                     except Exception as e:
                         self.blog.log_event({
                             'title':"Invalid coordinates - {}".format(e),
@@ -619,6 +628,7 @@ class DOM_handler():
                 pl.surround_ref.append({'hlink':hlink, 'dates':dates})
 #             # Piti sallia useita ylempia paikkoja eri päivämäärillä
 #             # Tässä vain 1 sallitaan elikä päivämäärää ole
+#
 #             if len(placeobj.getElementsByTagName('placeref') ) == 1:
 #                 placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
 #                 if placeobj_placeref.hasAttribute("hlink"):
@@ -631,7 +641,10 @@ class DOM_handler():
                 if placeobj_noteref.hasAttribute("hlink"):
                     pl.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
 
-            pl.save(self.tx)
+            # Save Place, Place_names, Notes and connect to hierarchy
+            pl.save(self.tx, self.batch_id, place_keys)
+            # The place_keys has beeb updated 
+
             counter += 1
 
         self.blog.log_event({'title':"Places", 'count':counter, 

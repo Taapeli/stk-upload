@@ -101,7 +101,10 @@ class Media:
 
 
     def save(self, tx):
-        """ Saves this Media object to db """
+        """ Saves this Media object to db.
+        
+            #TODO: Can there be Notes for media?
+        """
 
         m_attr = {}
         try:

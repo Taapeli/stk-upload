@@ -4,21 +4,19 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 
-from sys import stderr
-
 import  shareds
 #from .weburl import Weburl
 from .note import Note
 from .dates import DateRange
 from .cypher import Cypher_place
 from models.dbtree import DbTree
-from models.cypher_gramps import Cypher_place_w_handle
 from models.gen.event_combo import Event_combo
 
 class Place:
-    """ Paikka
+    """ Place / Paikka:
 
         Properties:
+            Defined here:
                 handle
                 change
                 id                  esim. "P0001"
@@ -30,6 +28,7 @@ class Place:
                    dates            DateRange date expression
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
+            May be defined in Place_gramps:
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 note_ref[]          int uniq_ids of Notes
                 citation_ref[]      int uniq_ids of Citations
@@ -38,7 +37,8 @@ class Place:
      """
 
     def __init__(self, uniq_id=None, ptype="", pname="", level=None):
-        """ Luo uuden place-instanssin.
+        """ Creates a new Place instance.
+
             Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyylin, nimen
             ja (tulossivua varten) mahdollisen hierarkiatason
         """
@@ -54,12 +54,13 @@ class Place:
         self.coord = None
         
         self.uppers = []        # Upper place objects for hirearchy display
-        self.notes = []         # Upper place objects for hierarchy display
-#         self.urls = []          # Weburl poistettu, käytössä notes[]
+        self.notes = []         # Notes connected to this place
 
-        self.note_ref = []      # uniq_ids of Notes
-        self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
-        self.noteref_hlink = []
+# These are in bp.gramps.models.place_gramps.Place_gramps.__init__
+#
+#         self.note_ref = []      # uniq_ids of Notes
+#         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
+#         self.noteref_hlink = []
 
 
     def __str__(self):
@@ -73,9 +74,11 @@ class Place:
 
     @classmethod
     def from_node(cls, node):
-        ''' models.gen.place.Place.from_node
-        Transforms a db node to an object of type Place.
+        ''' Creates a node object of type Place from a Neo4j node.
         
+        models.gen.place.Place.from_node. 
+        
+        Example node:
         <Node id=78279 labels={'Place'} 
             properties={'handle': '_da68e12a415d936f1f6722d57a', 'id': 'P0002', 
                 'change': 1500899931, 'pname': 'Kangasalan srk', 'type': 'Parish'}>
@@ -437,68 +440,12 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             print ("Pname: " + self.pname)
         if self.coord:
             print ("Coord: {}".format(self.coord))
-        if self.placeref_hlink != '':
-            print ("Placeref_hlink: " + self.placeref_hlink)
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                print ("Noteref_hlink: " + self.noteref_hlink[i])
+#         if self.placeref_hlink != '':
+#             print ("Placeref_hlink: " + self.placeref_hlink)
+#         if len(self.noteref_hlink) > 0:
+#             for i in range(len(self.noteref_hlink)):
+#                 print ("Noteref_hlink: " + self.noteref_hlink[i])
         return True
-
-
-    def save(self, tx):
-        """ Saves a Place with Place_names and hierarchy links """
-
-        p_attr = {}
-        try:
-            p_attr = {"handle": self.handle,
-                      "change": self.change,
-                      "id": self.id,
-                      "type": self.type,
-                      "pname": self.pname}
-            if self.coord:
-                # If no coordinates, don't set coord attribute
-                p_attr.update({"coord": self.coord.get_coordinates()})
-            result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
-            self.uniq_id = result.single()[0]
-        except Exception as err:
-            print("iError Place.create: {0} attr={}".format(err, p_attr), file=stderr)
-
-        try:
-            for i in range(len(self.names)):
-                #TODO: Check, if this name exists; then update or create new
-                n_attr = {"name": self.names[i].name,
-                          "lang": self.names[i].lang}
-                if self.names[i].dates:
-                    # If date information, add datetype, date1 and date2
-                    n_attr.update(self.names[i].dates.for_db())
-                tx.run(Cypher_place_w_handle.add_name,
-                       handle=self.handle, n_attr=n_attr)
-        except Exception as err:
-            print("iError Place.add_name: {0}".format(err), file=stderr)
-
-        # Make hierarchy relations to upper Place nodes
-        for upper in self.surround_ref:
-            try:
-                #print("upper {} -> {}".format(self, upper))
-                if 'dates' in upper and isinstance(upper['dates'], DateRange):
-                    r_attr = upper['dates'].for_db()
-                else:
-                    r_attr = {}
-                tx.run(Cypher_place_w_handle.link_hier,
-                       handle=self.handle, hlink=upper['hlink'], r_attr=r_attr)
-            except Exception as err:
-                print("iError Place.link_hier: {0}".format(err), file=stderr)
-
-        # Make place note relations
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                try:
-                    tx.run(Cypher_place_w_handle.link_note,
-                           handle=self.handle, hlink=self.noteref_hlink[i])
-                except Exception as err:
-                    print("iError Place.link_note: {0}".format(err), file=stderr)
-
-        return
 
 
 class Place_name:
