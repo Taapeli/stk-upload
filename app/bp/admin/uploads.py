@@ -128,7 +128,7 @@ def background_load_to_neo4j(username,filename):
         set_meta(username,filename,batch_id=batch_id)
         for step in steps:
             print(step)
-        if batch_id == None:
+        if not batch_id:
             raise RuntimeError("Run Failed")
 
         set_meta(username,filename,status=STATUS_DONE)

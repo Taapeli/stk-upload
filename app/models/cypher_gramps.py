@@ -272,16 +272,17 @@ CREATE (u) -[:OWNS]-> (a:Place)
     SET a = $p_attr
 RETURN ID(a) as uniq_id"""
 
+    # Find Batch and upper Place and connect new object to those
     merge = """
-MATCH (u:Batch {id:$batch_id})
-MATCH (a:Place {id:$plid})
-MERGE (u) -[:OWNS]-> (a) 
-    SET a = $p_attr
-RETURN ID(a) as uniq_id"""
+MATCH (pl:Place {id:$plid})
+    SET pl = $p_attr"""
+# plid=plid, p_attr=pl_attr
+#MERGE (u) -[:OWNS]-> (pl) <-[r:HIERARCY]- (plu:Place {handle: $up_handle}) 
+#RETURN ID(pl) as uniq_id"""
 
     add_name = """
-MATCH (pl:Place) WHERE id(pl) = $pid,
-MERGE (pl) -[r:NAME]-> (n:Place_name)
+MATCH (pl:Place) WHERE id(pl) = $pid
+CREATE (pl) -[r:NAME]-> (n:Place_name)
     SET n = $n_attr"""
 
     link_hier = """

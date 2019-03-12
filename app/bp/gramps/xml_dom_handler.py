@@ -416,7 +416,7 @@ class DOM_handler():
                     o.description = obj_file.getAttribute("description")
 
             #TODO: Varmista, ettei mediassa voi olla Note
-            o.save(self.tx)
+            o.save(self.tx, self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Media objects", 'count':counter, 
@@ -587,15 +587,19 @@ class DOM_handler():
                                      'level':"WARNING", 'count':pl.id})
 
             for placeobj_pname in placeobj.getElementsByTagName('pname'):
-                placename = Place_name()
                 if placeobj_pname.hasAttribute("value"):
+                    placename = Place_name()
                     placename.name = placeobj_pname.getAttribute("value")
-                    if pl.pname == '':
-                        # First name is default name for Place node
-                        pl.pname = placename.name
-                if placeobj_pname.hasAttribute("lang"):
-                    placename.lang = placeobj_pname.getAttribute("lang")
-                pl.names.append(placename)
+                    if placename.name:
+                        if pl.pname == '':
+                            # First name is default name for Place node
+                            pl.pname = placename.name
+                        if placeobj_pname.hasAttribute("lang"):
+                            placename.lang = placeobj_pname.getAttribute("lang")
+                        pl.names.append(placename)
+                    else:
+                        self.blog.log_event({'title':f"This place has an empty name",
+                                             'level':"WARNING", 'count':pl.id})
 
             for placeobj_coord in placeobj.getElementsByTagName('coord'):
                 if placeobj_coord.hasAttribute("lat") \
@@ -693,7 +697,7 @@ class DOM_handler():
                 if n.url:
                     r.notes.append(n)
 
-            r.save(self.tx)
+            r.save(self.tx, self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Repositories", 'count':counter, 

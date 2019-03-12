@@ -197,7 +197,7 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
                 self.uniq_id = tx.run(Cypher_note_in_batch.create, 
                                       bid=batch_id, n_attr=n_attr).single()[0]
             else:
-                raise RuntimeError(f"Note.save need batch_id or parent_id for {self.id}")
+                raise RuntimeError(f"Note.save needs batch_id or parent_id for {self.id}")
 
         except Exception as err:
             print(f"iError Note_save: {err} attr={n_attr}", file=stderr)

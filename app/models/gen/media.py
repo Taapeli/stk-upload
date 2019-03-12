@@ -100,11 +100,13 @@ class Media:
         return True
 
 
-    def save(self, tx):
+    def save(self, tx, batch_id=None):
         """ Saves this Media object to db.
         
             #TODO: Can there be Notes for media?
         """
+        if batch_id == None:
+            raise RuntimeError(f"Repocitory.save needs batch_id for {self.id}")
 
         m_attr = {}
         try:
@@ -116,13 +118,8 @@ class Media:
                 "mime": self.mime,
                 "description": self.description
             }
-            result = tx.run(Cypher_media_in_batch.create, m_attr=m_attr)
-            ids = []
-            for record in result:
-                self.uniq_id = record[0]
-                ids.append(self.uniq_id)
-                if len(ids) > 1:
-                    print(f"iError updated multiple Medias {self.id} - {ids}, attr={m_attr}")
+            result = tx.run(Cypher_media_in_batch.create, bid=batch_id, m_attr=m_attr)
+            self.uniq_id = result.single()[0]
         except Exception as err:
             print(f"iError Media_save: {err} attr={m_attr}", file=stderr)
             raise RuntimeError(f"Could not save Media {self.id}")
