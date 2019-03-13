@@ -360,7 +360,12 @@ def site_map():
 @login_required
 @roles_accepted('admin')
 def readlog():
-    lines = syslog.readlog()
-    rows = [json.loads(line) for line in lines]
-    return render_template("/admin/syslog.html", rows=rows)
+    direction = request.args.get("direction")
+    startid_arg = request.args.get("id")
+    if startid_arg:
+        startid = int(startid_arg)
+    else:
+        startid = None
+    recs = syslog.readlog(direction,startid)
+    return render_template("/admin/syslog.html", recs=recs)
     

@@ -16,6 +16,7 @@ from datetime import datetime
 import logging
 from flask_login.utils import current_user
 from flask.globals import session
+import json
 logger = logging.getLogger('stkserver') 
 
 
@@ -225,6 +226,7 @@ def log_user_logged_out(sender, user, **extra):
 
 from flask_login import user_logged_in, user_logged_out
 from models import syslog
+syslog.syslog_init()
 syslog.log(type="application initialized")
 user_logged_in.connect(log_user_logged_in,shareds.app)
 user_logged_out.connect(log_user_logged_out,shareds.app)
@@ -307,6 +309,7 @@ def app_date(value):
 def logcontent(row):
     s = ""
     sep = ""
+    row = json.loads(row)
     for name,value in sorted(row.items()):
         if name.startswith("_"): continue
         s += f"{sep}{name}={repr(value)}"
