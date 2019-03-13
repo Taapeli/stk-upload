@@ -1,7 +1,8 @@
 {% extends "/admin/layout.html" %}
-{% block title %}{{ _("Uploads") }}{% endblock %}
+{% block title %}{{ _("Syslog") }}{% endblock %}
 {% block body %}
     {{ super() }}
+    recs: {{ recs }}
   	<h2>{{ _("Syslog") }}</h2>
         <table>
            <tr>
@@ -10,16 +11,28 @@
                 <th>{{ _("Type") }}</th>
                 <th>{{ _("Content") }}</th>
            </tr>
-	    {% for row in rows %}
-	       <tr>
-	           <td>{{row._timestr}}</td>
-	           <td>{{row._user}}</td>
-	           <td>{{row._type}}</td>
-	           <td>{{row|logcontent}}</td>
-	       </tr>
+       
+		{% set ns = namespace(first=false,last=false,count=0) %}
+	   	{% for rec in recs %}
+	    	{% if loop.first %} {% set ns.first = rec.row %} {% endif %}
+	    	{% if loop.last %} {% set ns.last = rec.row %} {% endif %}
+	    	{% set ns.count = ns.count + 1 %}
+			<tr>
+			   <td>{{rec.row.timestr}}</td>
+			   <td>{{rec.row.user}}</td>
+			   <td>{{rec.row.type}}</td>
+			   <td>{{rec.row.msg|logcontent}}</td>
+			</tr>
 	    {% endfor %}
 	    </table>
 	    <br>
+	{% if ns.first %}
+	    <a href="readlog?direction=backward&id={{ ns.first.id }}">{{ _("Older events") }} {{ns.first.row.timestr}}</a> 
+    {% endif %}
+    -
+	{% if ns.last %}
+	   <a href="readlog?direction=forward&id={{ ns.last.id }}">{{ _("Newer events") }} {{ns.last.row.timestr}}</a> 
+    {% endif %}
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
 {% endblock %}
 </body>
