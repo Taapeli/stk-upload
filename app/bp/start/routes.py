@@ -44,9 +44,9 @@ def my_message():
 @shareds.app.route('/send_email',methods=["post"])
 @login_required
 def send_email():
+    subject = request.form["subject"]
     body = request.form["message"]
-    print(body)
-    email.email_admin(_("Message from Isotammi user " + current_user.username),
+    email.email_admin(_(subject),
                       body,
                       sender=(current_user.name,current_user.email))
     return "ok"
