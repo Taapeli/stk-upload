@@ -236,9 +236,7 @@ return path"""
             p = Person_combo.from_node(node)
 
             # Is this the same person as previous?
-            if len(persons) > 0 \
-                and persons[-1].uniq_id == p.uniq_id \
-                and 'user' in record.keys():
+            if len(persons) > 0 and persons[-1].uniq_id == p.uniq_id and 'user' in record:
                 # Yes, do not create a new person
                 persons[-1].owners.append(owner_not_me(record))
             else:

@@ -24,8 +24,6 @@ def translate(term, var_name, lang="fi"):
         'medium' = media types
     """
 #     print("# {}[{}]".format(var_name, term))
-    if not term:
-        return "~"
     if var_name == "nt":
         # Name types
         tabl = {
