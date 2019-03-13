@@ -27,9 +27,9 @@ class Place_gramps(Place):
                    dates            DateRange date expression
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
+                note_ref[]          int uniq_ids of Notes
             Defined here:
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
-                note_ref[]          int uniq_ids of Notes
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
@@ -61,7 +61,7 @@ class Place_gramps(Place):
 
             For each 'self.surround_ref' link to upper node:
             3) upper node is created: create link to that node
-            2) new upper node: create and link hierarchy to Place self
+            4) new upper node: create and link hierarchy to Place self
 
             Place names are always created as new 'Place_name' nodes.
             - If place has date information, add datetype, date1 and date2 
@@ -92,8 +92,11 @@ class Place_gramps(Place):
             if plid:
                 # 1) node has been created: update known Place node parameters 
                 self.uniq_id = plid
-                print(f"Pl_save-1 Update Place {self.id} #{plid}")
-                result = tx.run(Cypher_place_in_batch.merge, plid=plid, p_attr=pl_attr)
+                if self.type:
+                    print(f"Pl_save-1 Update Place {self.id} #{plid}")
+                    result = tx.run(Cypher_place_in_batch.merge, plid=plid, p_attr=pl_attr)
+                else:
+                    print(f"Pl_save-1 NO UPDATE Place {self.id} #{plid} attr={pl_attr}")
             else:
                 # 2) new node: create and link to Batch
                 print(f"Pl_save-2 Create a new Place {self.id} {self.pname}")
@@ -141,7 +144,7 @@ class Place_gramps(Place):
                     result = tx.run(Cypher_place_in_batch.link_hier,
                                     plid=self.uniq_id, up_id=uid, r_attr=rel_attr)
                 else:
-                    # 2) new upper node: create a Place with only handle
+                    # 4) new upper node: create a Place with only handle
                     #    parameter and link hierarchy to Place self
                     print(f"Pl_save-4 Update Place node {self.id}, #{self.uniq_id} --> {up_handle}")
                     result = tx.run(Cypher_place_in_batch.link_create_hier,

@@ -28,9 +28,9 @@ class Place:
                    dates            DateRange date expression
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
+                note_ref[]          int uniq_ids of Notes
             May be defined in Place_gramps:
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
-                note_ref[]          int uniq_ids of Notes
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
@@ -55,10 +55,9 @@ class Place:
         
         self.uppers = []        # Upper place objects for hirearchy display
         self.notes = []         # Notes connected to this place
+        self.note_ref = []      # uniq_ids of Notes
 
 # These are in bp.gramps.models.place_gramps.Place_gramps.__init__
-#
-#         self.note_ref = []      # uniq_ids of Notes
 #         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
 #         self.noteref_hlink = []
 
@@ -155,15 +154,19 @@ class Place:
                                        place_id=self.uniq_id)
 
             for place_record in place_result:
-                self.change = int(place_record["place"]["change"])  #TODO only temporary int()
-                self.id = place_record["place"]["id"]
-                self.type = place_record["place"]["type"]
-                self.coord = place_record["place"]["coord"]
-                self.pname = Place.namelist_w_lang(place_record["names"])
+                node = place_record["place"]
+                self.type = node.get('type')
+                self.change = node["change"]
+                self.id = node["id"]
+                self.coord = node["coord"]
+                names_node = place_record["names"]
+                self.pname = Place.namelist_w_lang(names_node)
 
                 for node in place_record['notes']:
                     n = Note.from_node(node)
                     self.notes.append(n)
+                if not (self.type and self.id):
+                    print(f"MYERROR Place.read_w_notes: missing data for {self}")
         return
 
 
@@ -281,7 +284,10 @@ class Place:
 
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
-            p = Place(record['id'], record['type'], Place.namelist_w_lang(record['name']))
+            pl_id =record['id']
+            pl_type = record['type']
+            pl_name = record['name']
+            p = Place(pl_id, pl_type, Place.namelist_w_lang(pl_name))
             if record['coord']:
                 p.coord = Point(record['coord']).coord
             p.uppers = combine_places(record['upper'])

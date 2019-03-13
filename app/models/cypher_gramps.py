@@ -275,7 +275,7 @@ RETURN ID(a) as uniq_id"""
     # Find Batch and upper Place and connect new object to those
     merge = """
 MATCH (pl:Place {id:$plid})
-    SET pl = $p_attr"""
+    SET pl += $p_attr"""
 # plid=plid, p_attr=pl_attr
 #MERGE (u) -[:OWNS]-> (pl) <-[r:HIERARCY]- (plu:Place {handle: $up_handle}) 
 #RETURN ID(pl) as uniq_id"""
