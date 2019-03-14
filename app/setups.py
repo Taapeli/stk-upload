@@ -217,20 +217,6 @@ def security_register_processor():
 
 adminDB.initialize_db() 
 
-def log_user_logged_in(sender, user, **extra):
-    syslog.log(type="user logged in")
-    session['lang'] = current_user.language
-    
-def log_user_logged_out(sender, user, **extra):
-    syslog.log(type="user logged out")
-
-from flask_login import user_logged_in, user_logged_out
-from models import syslog
-syslog.syslog_init()
-syslog.log(type="application initialized")
-user_logged_in.connect(log_user_logged_in,shareds.app)
-user_logged_out.connect(log_user_logged_out,shareds.app)
-
 """ 
     Application filter definitions 
 """

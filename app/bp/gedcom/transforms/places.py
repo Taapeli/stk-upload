@@ -108,7 +108,7 @@ class Places(transformer.Transformation):
     def finish(self,options):
         if options.display_unique_changes:
             print("--------------------")
-            print(_("Place names changed:")) 
+            print("<h3>"+_("Place names changed:")+"</h3><pre>") 
             w1 = 5
             w2 = 60
             print("{:{w1}.{w1}}   {:<{w2}.{w2}} {:<{w2}.{w2}}".format(_("Count"),_("Old name"),_("New name"),
@@ -116,14 +116,14 @@ class Places(transformer.Transformation):
             for (place,newname),count in self.changed.most_common():
                 print("{:{w1}}   {:<{w2}.{w2}} {:<{w2}.{w2}}".format(count,place,newname,
                                                                     w1=w1,w2=w2))
-            print() 
+            print("</pre>") 
                 
         if options.display_nonchanges:
             print("--------------------")
-            print(_("Place names not changed:")) 
+            print("<h3>"+_("Place names not changed:")+"</h3><pre>") 
             for place,count in self.nonchanged.most_common():
                 print(count,place)
-            print() 
+            print("</pre>") 
 
 ignored = [name.strip() for name in ignored_text.splitlines() if name.strip() != ""]
 

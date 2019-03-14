@@ -610,8 +610,8 @@ def gedcom_transform(gedcom,transform):
             log = open(logfile).read()
         except FileNotFoundError:
             log = "" 
-        time.sleep(1)  # for testing...
-        rsp = dict(stdout=log + "\n" + s1,stderr=s2,oldname="",logfile=logfile,
+#        time.sleep(1)  # for testing...
+        rsp = dict(stdout="<pre>"+log + "\n" + s1 + "</pre>",stderr="<pre>"+s2+"</pre>",oldname="",logfile=logfile,
            diff="")
         return jsonify(rsp)
 
