@@ -202,6 +202,7 @@ def list_uploads(username):
             xmlname = name.rsplit(".",maxsplit=1)[0]
             meta = get_meta(fname)
             status = meta["status"]
+            batch_id = ""
             status_text = None
             if status == STATUS_UPLOADED:
                 status_text = _("UPLOADED")
@@ -223,6 +224,7 @@ def list_uploads(username):
                 upload = Upload()
                 upload.xmlname = xmlname
                 upload.status = status_text
+                upload.batch_id = batch_id
                 upload.done = (status_text == _("STORED"))
                 upload.uploaded = (status_text == _("UPLOADED"))
                 upload.loading = (status_text == _("STORING"))

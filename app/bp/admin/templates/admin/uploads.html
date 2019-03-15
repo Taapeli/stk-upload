@@ -63,7 +63,9 @@
     	           <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}>
     	               {{upload.xmlname}}</a> 
 	           </td>
-	           <td class="msg_INFO">{{upload.status}}</td>
+	           <td class="msg_INFO">{{upload.status}}
+	           	{% if upload.batch_id %} (id={{ upload.batch_id }}) {% endif %}
+               </td>
 	           <td class="msg_INFO">
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
