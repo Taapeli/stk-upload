@@ -53,7 +53,9 @@
 	       <tr>
 	           <td>{{upload.upload_time_s}}</td>
 	           <td>{{upload.xmlname}}</td>
-	           <td>{{upload.status}}</td>
+	           <td>{{upload.status}}  
+	           	{% if upload.batch_id %} (id={{ upload.batch_id }}) {% endif %}
+	           </td>
 	           <td><a href=/gramps/xml_download/{{upload.xmlname | urlencode}}>{{ _("Download to your computer") }}</a> |
 	           		<a href=/gramps/start_upload/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
