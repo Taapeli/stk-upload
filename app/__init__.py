@@ -47,5 +47,22 @@ def get_locale():
                 reqlang = current_user.language
                 session['lang'] = reqlang
     return reqlang
+
+from flask_login import user_logged_in, user_logged_out
+from models import syslog
+
+def log_user_logged_in(sender, user, **extra):
+    syslog.log(type="user logged in")
+    session['lang'] = current_user.language
+    
+def log_user_logged_out(sender, user, **extra):
+    syslog.log(type="user logged out")
+
+import logging
+logging.info(f"dir(syslog)={dir(syslog)}")
+syslog.syslog_init()
+syslog.log(type="application initialized")
+user_logged_in.connect(log_user_logged_in,shareds.app)
+user_logged_out.connect(log_user_logged_out,shareds.app)
  
 import setups
