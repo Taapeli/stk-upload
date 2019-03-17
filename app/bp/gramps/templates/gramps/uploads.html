@@ -85,8 +85,11 @@ $(document).ready( function() {
 	                   onClick="selectFile(this);"></td>
 	           <td>{{upload.upload_time_s}}</td>
 	           <td>{{upload.xmlname}}</td>
-	           <td>{{upload.status}}  
-	           	{% if upload.batch_id %} (id={{ upload.batch_id }}) {% endif %}
+	           <td>{{upload.status}}
+	           	{% if upload.batch_id %}
+	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
+	           	   {% else %}(id={{ upload.batch_id }}){% endif %}
+	           	{% endif %}
 	           </td>
 	       </tr>
 	    {% endfor %}
