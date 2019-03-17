@@ -3899,26 +3899,3 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
-
-#~ msgid "roles:"
-#~ msgstr "roolit:"
-
-#~ msgid ""
-#~ "\n"
-#~ "{}:"
-#~ msgstr ""
-
-#~ msgid "file"
-#~ msgid_plural "files"
-#~ msgstr[0] "tiedosto"
-#~ msgstr[1] "tiedostoa"
-
-#~ msgid "Candidate material files"
-#~ msgstr "Ehdokasaineistot XML-muodossa"
-
-#~ msgid "User's home page for Isotammi Database "
-#~ msgstr "Isotammi-tietokannan kotisivu"
-
-#~ msgid "Welcome to Isotammi Database"
-#~ msgstr "Kirjaudu Isotammi-tietokannan käyttäjänä"
-
