@@ -210,7 +210,7 @@ div.fullclear {
 	text-align: right;
 }
 
-div.legend {
+div.legend { /* Not used? */
      margin-left:4em; 
      font-size: 90%;
      border-left: 6px solid silver;
@@ -220,4 +220,20 @@ table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
    outline:none;
 }
 
-
+div.steps { margin: 1em;}
+div.steps div {
+	border-style: solid;
+	border-radius: 5px;
+	border-width: 1px 3px 3px 1px;
+	border-color: gray;
+	display: inline-block;
+    height: 70px;
+	width: 150px;
+	padding: 5px;
+	background-color: lightyellow;
+	box-shadow: 10px 10px 5px lightgrey;
+}
+.fileselect {
+	border-width: 2px 3px 3px 2px; 
+	min-width: 725px;
+}

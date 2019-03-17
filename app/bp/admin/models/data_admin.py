@@ -51,7 +51,7 @@ class DataAdmin():
             result = shareds.driver.session().run(Cypher_adm.remove_data_nodes)
         elif opt == "my_own":
             #return "NOT COMPLETED! Todo: Can not remove user's data nodes"
-            msg = _(f"All persons and event by {self.username} are removed. ")
+            msg = _("All persons and event by {} are removed.", self.username)
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
                                                   user=self.username)
