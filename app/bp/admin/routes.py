@@ -211,7 +211,7 @@ def list_uploads_for_users():
     else:
         users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
-    return render_template("/admin/uploads.html", uploads=upload_list, 
+    return render_template("/admin/uploads.html", uploads=upload_list,  
                            users=users, num_requested_users=len(requested_users), num_users=len(users))
 
 @bp.route('/admin/list_uploads_all', methods=['GET'])
