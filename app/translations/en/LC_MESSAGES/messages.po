@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-18 10:35+0200\n"
+"POT-Creation-Date: 2019-03-18 17:16+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -248,36 +248,35 @@ msgstr ""
 msgid "User updated"
 msgstr ""
 
-#: bp/admin/routes.py:227 bp/gramps/routes.py:84
+#: bp/admin/routes.py:230 bp/gramps/routes.py:84
 msgid "Data import from {!r} to database has been started."
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:27 bp/admin/uploads.py:208
-#: bp/admin/uploads.py:230 bp/gramps/templates/gramps/uploads.html:70
+#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:208
+#: bp/admin/uploads.py:230 bp/gramps/templates/gramps/uploads.html:74
 msgid "UPLOADED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:211
-#: bp/gramps/templates/gramps/uploads.html:73
+#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:211
 msgid "ERROR"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:213
-#: bp/admin/uploads.py:231 bp/gramps/templates/gramps/uploads.html:71
+#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:213
+#: bp/admin/uploads.py:231 bp/gramps/templates/gramps/uploads.html:75
 msgid "STORING"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:215
-#: bp/admin/uploads.py:229 bp/gramps/templates/gramps/uploads.html:72
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:215
+#: bp/admin/uploads.py:229 bp/gramps/templates/gramps/uploads.html:77
 msgid "STORED"
 msgstr ""
 
-#: bp/admin/uploads.py:220
+#: bp/admin/uploads.py:220 bp/gramps/templates/gramps/uploads.html:80
 msgid "REMOVED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:223
-#: bp/gramps/templates/gramps/uploads.html:73
+#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:223
+#: bp/gramps/templates/gramps/uploads.html:81
 msgid "FAILED"
 msgstr ""
 
@@ -457,7 +456,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/gedcoms.html:24
 #: bp/admin/templates/admin/syslog.html:10
-#: bp/admin/templates/admin/uploads.html:47
+#: bp/admin/templates/admin/uploads.html:51
 msgid "User id"
 msgstr ""
 
@@ -466,13 +465,13 @@ msgid "GEDCOM file"
 msgstr ""
 
 #: bp/admin/templates/admin/gedcoms.html:35
-#: bp/admin/templates/admin/uploads.html:81
+#: bp/admin/templates/admin/uploads.html:85
 msgid "Number of files"
 msgstr ""
 
 #: bp/admin/templates/admin/gedcoms.html:36
 #: bp/admin/templates/admin/message.html:59
-#: bp/admin/templates/admin/uploads.html:82
+#: bp/admin/templates/admin/uploads.html:86
 msgid "List of users"
 msgstr ""
 
@@ -545,7 +544,7 @@ msgid "Active User names"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:91
-#: bp/admin/templates/admin/uploads.html:52
+#: bp/admin/templates/admin/uploads.html:56
 msgid "Operations"
 msgstr ""
 
@@ -558,7 +557,7 @@ msgid "Inactive"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:100
-#: bp/admin/templates/admin/uploads.html:58
+#: bp/admin/templates/admin/uploads.html:62
 msgid "me"
 msgstr ""
 
@@ -748,64 +747,69 @@ msgstr ""
 msgid "User list"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:8
-msgid "Uploads for users: "
+#: bp/admin/templates/admin/uploads.html:9
+msgid "Uploads for user"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:10
+#: bp/admin/templates/admin/uploads.html:11
+#, python-format
+msgid "Uploads for %(n)s users"
+msgstr ""
+
+#: bp/admin/templates/admin/uploads.html:14
 msgid "Uploads for all users"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:23
+#: bp/admin/templates/admin/uploads.html:27
 msgid "Status for differents steps in XML file upload:"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:28
-#: bp/gramps/templates/gramps/uploads.html:70
+#: bp/admin/templates/admin/uploads.html:32
+#: bp/gramps/templates/gramps/uploads.html:74
 msgid "the file has been uploaded to server"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:32
-#: bp/gramps/templates/gramps/uploads.html:71
+#: bp/admin/templates/admin/uploads.html:36
+#: bp/gramps/templates/gramps/uploads.html:75
 msgid "the file content is being stored to the database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:36
-#: bp/gramps/templates/gramps/uploads.html:72
+#: bp/admin/templates/admin/uploads.html:40
+#: bp/gramps/templates/gramps/uploads.html:77
 msgid "the file content has been stored to the database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:40
-#: bp/gramps/templates/gramps/uploads.html:73
+#: bp/admin/templates/admin/uploads.html:44
+#: bp/gramps/templates/gramps/uploads.html:81
 msgid "there was an error"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:49
+#: bp/admin/templates/admin/uploads.html:53
 #: bp/gedcom/templates/gedcom_info.html:48
-#: bp/gramps/templates/gramps/uploads.html:78
+#: bp/gramps/templates/gramps/uploads.html:87
 msgid "Upload time"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:50
-#: bp/gramps/templates/gramps/uploads.html:79
+#: bp/admin/templates/admin/uploads.html:54
+#: bp/gramps/templates/gramps/uploads.html:88
 msgid "XML file"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:51
-#: bp/gramps/templates/gramps/uploads.html:80
+#: bp/admin/templates/admin/uploads.html:55
+#: bp/gramps/templates/gramps/uploads.html:89
 msgid "Status"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:71
-#: bp/gramps/templates/gramps/uploads.html:102
+#: bp/admin/templates/admin/uploads.html:75
+#: bp/gramps/templates/gramps/uploads.html:111
 msgid "Store to database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:73
+#: bp/admin/templates/admin/uploads.html:77
 msgid "Show log"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:75
+#: bp/admin/templates/admin/uploads.html:79
 msgid "Delete file"
 msgstr ""
 
@@ -1577,43 +1581,47 @@ msgid "Time / sec"
 msgstr ""
 
 #: bp/gramps/templates/gramps/uploads.html:3
-#: bp/gramps/templates/gramps/uploads.html:57
+#: bp/gramps/templates/gramps/uploads.html:61
 msgid "Uploads from Gramps"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:68
+#: bp/gramps/templates/gramps/uploads.html:72
 msgid "Status for differents steps in XML file upload"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:90
+#: bp/gramps/templates/gramps/uploads.html:80
+msgid "Not found any more"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:99
 msgid "deleted from database"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:99
+#: bp/gramps/templates/gramps/uploads.html:108
 msgid "Operations for"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:99
+#: bp/gramps/templates/gramps/uploads.html:108
 msgid "the selected file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:101
+#: bp/gramps/templates/gramps/uploads.html:110
 msgid "Download to your computer"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:103
+#: bp/gramps/templates/gramps/uploads.html:112
 msgid "Show last log"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:104
+#: bp/gramps/templates/gramps/uploads.html:113
 msgid "Delete the file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:110
+#: bp/gramps/templates/gramps/uploads.html:119
 msgid "See your own data"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:112
+#: bp/gramps/templates/gramps/uploads.html:121
 msgid "Return to front page"
 msgstr ""
 
@@ -4845,5 +4853,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Message from Isotammi user "
+#~ msgstr ""
+
+#~ msgid "Uploads for users: "
 #~ msgstr ""
 

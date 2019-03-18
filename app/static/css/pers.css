@@ -231,7 +231,20 @@ div.steps div {
 	width: 150px;
 	padding: 5px;
 	background-color: lightyellow;
-	box-shadow: 10px 10px 5px lightgrey;
+	box-shadow: 5px 5px 5px lightgrey;
+}
+div.steps div.bg {
+    border: 0px;
+    height:35px;
+    /*color: none;
+    background-color: #ffffe9;*/
+}
+div.steps div.exception {
+    border: 0px;
+    margin:3px;
+    height:auto;
+    color: gray;
+    background-color: #ffffe9;
 }
 .fileselect {
 	border-width: 2px 3px 3px 2px; 

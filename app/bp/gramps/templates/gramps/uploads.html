@@ -20,8 +20,12 @@ function selectFile(sel) {
 
 $(document).ready( function() {
 
-	// The operations buttons
+	// On reload there may be a selection done
+	var selector = document.querySelector('input[name="sel"]:checked'); 
+	if(selector) selectFile(selector);
 
+    // The operations buttons
+    
     $("#download").click(function(e) {
         $("#form").attr("action","/gramps/xml_download/" + 
                 document.getElementById('nm').innerText);
@@ -68,9 +72,14 @@ $(document).ready( function() {
     <h3>{{ _("Status for differents steps in XML file upload") }}</h3>
     <div class="steps">
         <div>1. {{ _("UPLOADED") }}<br>{{ _("the file has been uploaded to server") }}</div> –
-        <div>2. {{ _("STORING") }}<br>{{ _("the file content is being stored to the database") }}</div> –
-        <div>3. {{ _("STORED") }}<br>{{ _("the file content has been stored to the database") }}</div> –
-        <div>4. {{ _("ERROR") }} / {{ _("FAILED") }}<br>{{ _("there was an error") }}</div>
+        <div>2. {{ _("STORING") }}<br>{{ _("the file content is being stored to the database") }}</div>
+        –
+        <div>3. {{ _("STORED") }}<br>{{ _("the file content has been stored to the database") }}</div>
+        &nbsp;
+        <div class="bg">
+	        <div class="exception">{{ _("REMOVED") }}<br>{{ _("Not found any more") }}</div>
+	        <div class="exception">{{ _("FAILED") }}<br>{{ _("there was an error") }}</div>
+        </div>
     </div>
 
     <table class="fileselect" style="border-width: 2px 3px 3px 2px; min-width: 725px;">
@@ -106,10 +115,11 @@ $(document).ready( function() {
 	  </form>
     </div>
     
-  {% if current_user.is_authenticated and current_user.has_role('member') %}
-	<p>&rtrif; <a href="/scene/persons_all?div=2">{{ _('See your own data') }}</a></p>
+  <p>{% if current_user.is_authenticated and current_user.has_role('member') %}
+	&rtrif; <a href="/scene/persons_all?div=2">{{ _('See your own data') }}</a><br>
    {% endif %}
-    <p>&rtrif; <a href="javascript:history.back()">{{ _("Return to front page") }}</a></p>
+    &rtrif; <a href="javascript:history.back()">{{ _("Return to front page") }}</a>
+  </p>
     
   </div>
 </div>
