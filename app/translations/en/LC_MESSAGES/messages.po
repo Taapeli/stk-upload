@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-17 22:38+0200\n"
+"POT-Creation-Date: 2019-03-18 10:35+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -253,8 +253,7 @@ msgid "Data import from {!r} to database has been started."
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:27 bp/admin/uploads.py:208
-#: bp/admin/uploads.py:220 bp/admin/uploads.py:229
-#: bp/gramps/templates/gramps/uploads.html:70
+#: bp/admin/uploads.py:230 bp/gramps/templates/gramps/uploads.html:70
 msgid "UPLOADED"
 msgstr ""
 
@@ -264,16 +263,20 @@ msgid "ERROR"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:213
-#: bp/admin/uploads.py:230 bp/gramps/templates/gramps/uploads.html:71
+#: bp/admin/uploads.py:231 bp/gramps/templates/gramps/uploads.html:71
 msgid "STORING"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:215
-#: bp/admin/uploads.py:228 bp/gramps/templates/gramps/uploads.html:72
+#: bp/admin/uploads.py:229 bp/gramps/templates/gramps/uploads.html:72
 msgid "STORED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:222
+#: bp/admin/uploads.py:220
+msgid "REMOVED"
+msgstr ""
+
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:223
 #: bp/gramps/templates/gramps/uploads.html:73
 msgid "FAILED"
 msgstr ""

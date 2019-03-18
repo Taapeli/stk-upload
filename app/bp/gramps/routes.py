@@ -44,7 +44,7 @@ def list_uploads():
 
 @bp.route('/gramps/upload', methods=['POST'])
 @roles_accepted('member', 'admin')
-def upload_gramps():  
+def upload_gramps(): 
     """ Load a gramps xml file to temp directory for processing in the server
     """
     try:

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-17 22:38+0200\n"
+"POT-Creation-Date: 2019-03-18 10:35+0200\n"
 "PO-Revision-Date: 2019-02-26 18:01+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -253,8 +253,7 @@ msgid "Data import from {!r} to database has been started."
 msgstr "Tietojen talletus tiedostosta {!r} on käynnistetty."
 
 #: bp/admin/templates/admin/uploads.html:27 bp/admin/uploads.py:208
-#: bp/admin/uploads.py:220 bp/admin/uploads.py:229
-#: bp/gramps/templates/gramps/uploads.html:70
+#: bp/admin/uploads.py:230 bp/gramps/templates/gramps/uploads.html:70
 msgid "UPLOADED"
 msgstr "LADATTU"
 
@@ -264,16 +263,20 @@ msgid "ERROR"
 msgstr "VIRHE"
 
 #: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:213
-#: bp/admin/uploads.py:230 bp/gramps/templates/gramps/uploads.html:71
+#: bp/admin/uploads.py:231 bp/gramps/templates/gramps/uploads.html:71
 msgid "STORING"
 msgstr "MENOSSA TIETOKANTAAN"
 
 #: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:215
-#: bp/admin/uploads.py:228 bp/gramps/templates/gramps/uploads.html:72
+#: bp/admin/uploads.py:229 bp/gramps/templates/gramps/uploads.html:72
 msgid "STORED"
 msgstr "TIETOKANNASSA"
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:222
+#: bp/admin/uploads.py:220
+msgid "REMOVED"
+msgstr ""
+
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:223
 #: bp/gramps/templates/gramps/uploads.html:73
 msgid "FAILED"
 msgstr "EPÄONNISTUI"
@@ -1586,7 +1589,7 @@ msgstr "Käsittelyn vaiheet"
 
 #: bp/gramps/templates/gramps/uploads.html:90
 msgid "deleted from database"
-msgstr ""
+msgstr "poistettu kannasta"
 
 #: bp/gramps/templates/gramps/uploads.html:99
 msgid "Operations for"
@@ -2545,7 +2548,7 @@ msgstr "Viesti Toimistoon"
 
 #: bp/start/templates/start/my_message.html:49
 msgid "Message from Isotammi user"
-msgstr "Viesti Isotammen käyttäjälle"
+msgstr "Viesti Isotammen käyttäjältä"
 
 #: bp/start/templates/start/my_settings.html:4
 msgid "User Settings"

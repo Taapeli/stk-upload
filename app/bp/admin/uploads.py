@@ -217,7 +217,8 @@ def list_uploads(username):
                     batch_id = meta['batch_id']
                     count = batch_count(username,batch_id)
                     if count == 0:
-                        status_text = _("UPLOADED")
+                        status_text = _("REMOVED")
+                        batch_id = ""
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
             if status_text:
