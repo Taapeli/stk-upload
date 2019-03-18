@@ -206,10 +206,13 @@ def list_uploads(username):
 @roles_accepted('admin', 'audit')
 def list_uploads_for_users():
     requested_users = request.form.getlist('select_user')
-    users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
+    if len(requested_users) == 0:
+        users = shareds.user_datastore.get_users()  # default: all users
+    else:
+        users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
     return render_template("/admin/uploads.html", uploads=upload_list, 
-                           users=", ".join(requested_users))
+                           users=users, num_requested_users=len(requested_users), num_users=len(users))
 
 @bp.route('/admin/list_uploads_all', methods=['GET'])
 @login_required
