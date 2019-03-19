@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-19 15:03+0200\n"
-"PO-Revision-Date: 2019-03-19 15:07+0200\n"
+"POT-Creation-Date: 2019-03-19 15:22+0200\n"
+"PO-Revision-Date: 2019-03-19 15:23+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -772,77 +772,79 @@ msgstr "Poista tiedosto"
 msgid "GEDCOM Analyzer"
 msgstr "Gedcom-analysointi"
 
-#: bp/gedcom/gedcom_analyze.py:167
+#: bp/gedcom/gedcom_analyze.py:170
 #, python-format
-msgid "count=%(count)d, lines %(lines)s"
-msgstr "%(count)d kpl, riveillä %(lines)s"
+msgid "count=%(num)d, line %(lines)s"
+msgid_plural "count=%(num)d, lines %(lines)s"
+msgstr[0] "%(num)d kpl, rivillä %(lines)s"
+msgstr[1] "%(num)d kpl, riveillä %(lines)s"
 
-#: bp/gedcom/gedcom_analyze.py:180
+#: bp/gedcom/gedcom_analyze.py:183
 msgid "Invalid tag hierarchy"
 msgstr "Virheellinen hierarkia"
 
-#: bp/gedcom/gedcom_analyze.py:181
+#: bp/gedcom/gedcom_analyze.py:184
 msgid "No value"
 msgstr "Ei arvoa"
 
-#: bp/gedcom/gedcom_analyze.py:182
+#: bp/gedcom/gedcom_analyze.py:185
 msgid "Invalid dates"
 msgstr "Virheellisiä päivämääriä"
 
-#: bp/gedcom/gedcom_analyze.py:185
+#: bp/gedcom/gedcom_analyze.py:188
 msgid "Too few child tags"
 msgstr "Liian vähän alarivejä"
 
-#: bp/gedcom/gedcom_analyze.py:186
+#: bp/gedcom/gedcom_analyze.py:189
 msgid "Too many child tags"
 msgstr "Liian monta alariviä"
 
-#: bp/gedcom/gedcom_analyze.py:187
+#: bp/gedcom/gedcom_analyze.py:190
 msgid "Records for submitters"
 msgstr "Tutkijakohtaiset tietueiden lukumäärät"
 
-#: bp/gedcom/gedcom_analyze.py:188
+#: bp/gedcom/gedcom_analyze.py:191
 msgid "Families with no parents"
 msgstr "Perheet joilla ei vanhempia"
 
-#: bp/gedcom/gedcom_analyze.py:195
+#: bp/gedcom/gedcom_analyze.py:198
 msgid "With sources"
 msgstr "Lähteillä varustetut"
 
-#: bp/gedcom/gedcom_analyze.py:196
+#: bp/gedcom/gedcom_analyze.py:199
 msgid "Without sources"
 msgstr "Ilman lähteitä"
 
-#: bp/gedcom/gedcom_analyze.py:310
+#: bp/gedcom/gedcom_analyze.py:313
 msgid "Genders"
 msgstr "Sukupuolet"
 
-#: bp/gedcom/gedcom_analyze.py:330
+#: bp/gedcom/gedcom_analyze.py:333
 msgid "Submitters"
 msgstr "Tutkijat"
 
-#: bp/gedcom/gedcom_analyze.py:338
+#: bp/gedcom/gedcom_analyze.py:341
 msgid "Missing paths"
 msgstr "Puuttuvat pakolliset tiedot"
 
-#: bp/gedcom/gedcom_analyze.py:344
+#: bp/gedcom/gedcom_analyze.py:347
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr "TYPE-kentän arvot %(parent_path)s-rakenteissa"
 
-#: bp/gedcom/gedcom_analyze.py:348
+#: bp/gedcom/gedcom_analyze.py:351
 msgid "Invalid pointers"
 msgstr "Vialliset osoittimet"
 
-#: bp/gedcom/gedcom_analyze.py:357
+#: bp/gedcom/gedcom_analyze.py:360
 msgid "Missing records"
 msgstr "Puuttuvat tietueet"
 
-#: bp/gedcom/gedcom_analyze.py:361 bp/gedcom/gedcom_analyze.py:371
+#: bp/gedcom/gedcom_analyze.py:364 bp/gedcom/gedcom_analyze.py:374
 msgid "Total"
 msgstr "Yhteensä"
 
-#: bp/gedcom/gedcom_analyze.py:367
+#: bp/gedcom/gedcom_analyze.py:370
 msgid "Unused records"
 msgstr "Käyttämättömät tiedot"
 

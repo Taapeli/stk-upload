@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-19 15:03+0200\n"
+"POT-Creation-Date: 2019-03-19 15:22+0200\n"
 "PO-Revision-Date: 2019-02-25 20:37+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -820,77 +820,79 @@ msgstr ""
 msgid "GEDCOM Analyzer"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:167
+#: bp/gedcom/gedcom_analyze.py:170
 #, python-format
-msgid "count=%(count)d, lines %(lines)s"
-msgstr ""
+msgid "count=%(num)d, line %(lines)s"
+msgid_plural "count=%(num)d, lines %(lines)s"
+msgstr[0] ""
+msgstr[1] ""
 
-#: bp/gedcom/gedcom_analyze.py:180
+#: bp/gedcom/gedcom_analyze.py:183
 msgid "Invalid tag hierarchy"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:181
+#: bp/gedcom/gedcom_analyze.py:184
 msgid "No value"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:182
+#: bp/gedcom/gedcom_analyze.py:185
 msgid "Invalid dates"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:185
+#: bp/gedcom/gedcom_analyze.py:188
 msgid "Too few child tags"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:186
+#: bp/gedcom/gedcom_analyze.py:189
 msgid "Too many child tags"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:187
+#: bp/gedcom/gedcom_analyze.py:190
 msgid "Records for submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:188
+#: bp/gedcom/gedcom_analyze.py:191
 msgid "Families with no parents"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:195
+#: bp/gedcom/gedcom_analyze.py:198
 msgid "With sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:196
+#: bp/gedcom/gedcom_analyze.py:199
 msgid "Without sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:310
+#: bp/gedcom/gedcom_analyze.py:313
 msgid "Genders"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:330
+#: bp/gedcom/gedcom_analyze.py:333
 msgid "Submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:338
+#: bp/gedcom/gedcom_analyze.py:341
 msgid "Missing paths"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:344
+#: bp/gedcom/gedcom_analyze.py:347
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:348
+#: bp/gedcom/gedcom_analyze.py:351
 msgid "Invalid pointers"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:357
+#: bp/gedcom/gedcom_analyze.py:360
 msgid "Missing records"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:361 bp/gedcom/gedcom_analyze.py:371
+#: bp/gedcom/gedcom_analyze.py:364 bp/gedcom/gedcom_analyze.py:374
 msgid "Total"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:367
+#: bp/gedcom/gedcom_analyze.py:370
 msgid "Unused records"
 msgstr ""
 
