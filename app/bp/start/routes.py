@@ -55,6 +55,7 @@ def send_email():
 @login_required
 def my_settings():
     lang = request.form.get("lang")
+    referrer = request.form.get("referrer",default=request.referrer)
     if lang:
         try:
             from bp.admin.models.user_admin import UserAdmin # can't import earlier
@@ -70,7 +71,9 @@ def my_settings():
             flash(_("Update did not work"),category='flash_error')
             traceback.print_exc()
     print("-> bp.start.routes.settings")
-    return render_template("/start/my_settings.html")
+    return render_template("/start/my_settings.html",
+                           referrer=referrer,
+                           roles=current_user.roles)
 
 # @shareds.app.route('/tables') --> see bp.tools.routes.datatables
 # @login_required
