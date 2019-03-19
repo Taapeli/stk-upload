@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-18 17:16+0200\n"
+"POT-Creation-Date: 2019-03-19 15:03+0200\n"
 "PO-Revision-Date: 2019-02-25 20:37+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -22,17 +22,17 @@ msgstr ""
 msgid "Undefined"
 msgstr "Odefinerad"
 
-#: bp/start/templates/start/my_settings.html:26 config.py:30
+#: bp/start/templates/start/my_settings.html:29 config.py:30
 #: templates/select_refcols.html:48 templates/select_refcols.html:76
 msgid "Finnish"
 msgstr "Finska"
 
-#: bp/start/templates/start/my_settings.html:29 config.py:31
+#: bp/start/templates/start/my_settings.html:32 config.py:31
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr "Svenska"
 
-#: bp/start/templates/start/my_settings.html:32 config.py:32
+#: bp/start/templates/start/my_settings.html:35 config.py:32
 msgid "English"
 msgstr "Engelska"
 
@@ -128,6 +128,7 @@ msgid "Active / passive user"
 msgstr "Aktiv / inaktiv användare"
 
 #: bp/admin/forms.py:48 bp/admin/templates/admin/list_users.html:90
+#: bp/start/templates/start/my_settings.html:46
 msgid "Roles"
 msgstr "Roll"
 
@@ -322,7 +323,7 @@ msgstr ""
 #: bp/scene/templates/scene/index_scene.html:18
 #: bp/start/templates/start/index_logged.html:16
 #: bp/start/templates/start/my_message.html:43
-#: bp/start/templates/start/my_settings.html:19
+#: bp/start/templates/start/my_settings.html:18
 msgid "User"
 msgstr "Användare"
 
@@ -636,7 +637,7 @@ msgstr ""
 
 #: bp/admin/templates/admin/message.html:54
 #: bp/start/templates/start/my_message.html:56
-#: bp/start/templates/start/my_settings.html:36
+#: bp/start/templates/start/my_settings.html:38
 msgid "Apply"
 msgstr ""
 
@@ -737,7 +738,7 @@ msgid "Store to Database"
 msgstr ""
 
 #: bp/admin/templates/admin/talletettu.html:27
-#: bp/start/templates/start/my_settings.html:35
+#: bp/start/templates/start/my_settings.html:39
 #: bp/tools/templates/tools/person2.html:43
 #: bp/tools/templates/tools/source_citations.html:35
 #: templates/cite_sour_repo.html:73 templates/db_test.html:10
@@ -819,72 +820,77 @@ msgstr ""
 msgid "GEDCOM Analyzer"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:177
+#: bp/gedcom/gedcom_analyze.py:167
+#, python-format
+msgid "count=%(count)d, lines %(lines)s"
+msgstr ""
+
+#: bp/gedcom/gedcom_analyze.py:180
 msgid "Invalid tag hierarchy"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:178
+#: bp/gedcom/gedcom_analyze.py:181
 msgid "No value"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:179
+#: bp/gedcom/gedcom_analyze.py:182
 msgid "Invalid dates"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:182
+#: bp/gedcom/gedcom_analyze.py:185
 msgid "Too few child tags"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:183
+#: bp/gedcom/gedcom_analyze.py:186
 msgid "Too many child tags"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:184
+#: bp/gedcom/gedcom_analyze.py:187
 msgid "Records for submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:185
+#: bp/gedcom/gedcom_analyze.py:188
 msgid "Families with no parents"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:192
+#: bp/gedcom/gedcom_analyze.py:195
 msgid "With sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:193
+#: bp/gedcom/gedcom_analyze.py:196
 msgid "Without sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:307
+#: bp/gedcom/gedcom_analyze.py:310
 msgid "Genders"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:327
+#: bp/gedcom/gedcom_analyze.py:330
 msgid "Submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:335
+#: bp/gedcom/gedcom_analyze.py:338
 msgid "Missing paths"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:341
+#: bp/gedcom/gedcom_analyze.py:344
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:345
+#: bp/gedcom/gedcom_analyze.py:348
 msgid "Invalid pointers"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:354
+#: bp/gedcom/gedcom_analyze.py:357
 msgid "Missing records"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:358 bp/gedcom/gedcom_analyze.py:368
+#: bp/gedcom/gedcom_analyze.py:361 bp/gedcom/gedcom_analyze.py:371
 msgid "Total"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:364
+#: bp/gedcom/gedcom_analyze.py:367
 msgid "Unused records"
 msgstr ""
 
@@ -917,73 +923,73 @@ msgstr ""
 msgid "That GEDCOM file does not exist on the server"
 msgstr "GEDCOM filen finns inte på servern"
 
-#: bp/gedcom/routes.py:447
+#: bp/gedcom/routes.py:469
 msgid "Deleted:"
 msgstr "Raderade:"
 
-#: bp/gedcom/routes.py:454 bp/gedcom/transformer.py:53
+#: bp/gedcom/routes.py:476 bp/gedcom/transformer.py:53
 #: bp/gedcom/transformer.py:60
 msgid "Replaced:"
 msgstr "Ersatta:"
 
-#: bp/gedcom/routes.py:455
+#: bp/gedcom/routes.py:477
 msgid "starting from line "
 msgstr ""
 
-#: bp/gedcom/routes.py:460 bp/gedcom/transformer.py:55
+#: bp/gedcom/routes.py:482 bp/gedcom/transformer.py:55
 #: bp/gedcom/transformer.py:62
 msgid "With:"
 msgstr "Med:"
 
-#: bp/gedcom/routes.py:483
+#: bp/gedcom/routes.py:505
 msgid "Transform '{}' started at {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:493
+#: bp/gedcom/routes.py:515
 msgid "Name of the input GEDCOM file"
 msgstr "Inmatnings GEDCOM filens namn"
 
-#: bp/gedcom/routes.py:494
+#: bp/gedcom/routes.py:516
 msgid "Name of the log file"
 msgstr "Loggfilens namn"
 
-#: bp/gedcom/routes.py:497 bp/gedcom/routes.py:696
+#: bp/gedcom/routes.py:519 bp/gedcom/routes.py:718
 msgid "Display changed rows"
 msgstr "Visa ändrade rader"
 
-#: bp/gedcom/routes.py:499
+#: bp/gedcom/routes.py:521
 msgid "Do not produce an output file"
 msgstr "Skapa inte en utdatafil"
 
-#: bp/gedcom/routes.py:501
+#: bp/gedcom/routes.py:523
 msgid "Do not produce a log in the output file"
 msgstr "Skapa inte logg i utdatafilen"
 
-#: bp/gedcom/routes.py:503
+#: bp/gedcom/routes.py:525
 msgid "Encoding of the input GEDCOM"
 msgstr "Kodning av GEDCOM infilen"
 
-#: bp/gedcom/routes.py:530
+#: bp/gedcom/routes.py:552
 msgid "------ Number of changes:"
 msgstr ""
 
-#: bp/gedcom/routes.py:535 bp/gedcom/routes.py:539
+#: bp/gedcom/routes.py:557 bp/gedcom/routes.py:561
 msgid "File saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:536
+#: bp/gedcom/routes.py:558
 msgid "Old file saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:540
+#: bp/gedcom/routes.py:562
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:608 static/js/gedcom_scripts.js:235
+#: bp/gedcom/routes.py:630 static/js/gedcom_scripts.js:248
 msgid "Errors:"
 msgstr "Fel:"
 
-#: bp/gedcom/routes.py:669
+#: bp/gedcom/routes.py:691
 msgid "Unsupported type: "
 msgstr "Ostödd typ:"
 
@@ -1204,27 +1210,27 @@ msgstr "GEDCOM jämförelse"
 msgid "Results"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:223
+#: bp/gedcom/templates/gedcom_info.html:229
 msgid "Perform transformation"
 msgstr "Utför transformation"
 
-#: bp/gedcom/templates/gedcom_info.html:235
+#: bp/gedcom/templates/gedcom_info.html:241
 msgid "Transformation results"
 msgstr "Transformations resultat"
 
-#: bp/gedcom/templates/gedcom_info.html:237
+#: bp/gedcom/templates/gedcom_info.html:243
 msgid "Old version is saved as"
 msgstr "Gamla versionen sparad som"
 
-#: bp/gedcom/templates/gedcom_info.html:237
+#: bp/gedcom/templates/gedcom_info.html:243
 msgid "Revert to old version"
 msgstr "Återgå till gamla versionen"
 
-#: bp/gedcom/templates/gedcom_info.html:240
+#: bp/gedcom/templates/gedcom_info.html:246
 msgid "Not saved yet"
 msgstr "Ej sparad"
 
-#: bp/gedcom/templates/gedcom_info.html:241
+#: bp/gedcom/templates/gedcom_info.html:247
 msgid "Save result"
 msgstr "Spara resultatet"
 
@@ -2403,11 +2409,11 @@ msgstr "Format"
 msgid "Repository Name"
 msgstr "Arkiv namn"
 
-#: bp/start/routes.py:67
+#: bp/start/routes.py:68
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:70
+#: bp/start/routes.py:71
 msgid "Update did not work"
 msgstr ""
 
@@ -2562,9 +2568,12 @@ msgstr ""
 msgid "Change my settings"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:18
-#: bp/start/templates/start/s_macros.html:29
+#: bp/start/templates/start/my_settings.html:23
 msgid "Change language"
+msgstr ""
+
+#: bp/start/templates/start/my_settings.html:54
+msgid "Candidate materials"
 msgstr ""
 
 #: bp/start/templates/start/s_macros.html:19
@@ -2592,7 +2601,11 @@ msgid "Contact administrator"
 msgstr ""
 
 #: bp/start/templates/start/s_macros.html:28
-msgid "Select language"
+msgid "User profile settings"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:29
+msgid "Settings"
 msgstr ""
 
 #: bp/start/templates/start/s_macros.html:37
@@ -3252,16 +3265,16 @@ msgstr ""
 msgid "Server error"
 msgstr "Server fel"
 
-#: static/js/gedcom_scripts.js:136 static/js/gedcom_scripts.js:145
+#: static/js/gedcom_scripts.js:149 static/js/gedcom_scripts.js:158
 msgid "Are you sure?"
 msgstr "År du säker?"
 
-#: static/js/gedcom_scripts.js:197 static/js/gedcom_scripts.js:198
+#: static/js/gedcom_scripts.js:210 static/js/gedcom_scripts.js:211
 msgid "Revert to %1"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:209 static/js/gedcom_scripts.js:210
-#: static/js/gedcom_scripts.js:216
+#: static/js/gedcom_scripts.js:222 static/js/gedcom_scripts.js:223
+#: static/js/gedcom_scripts.js:229
 msgid "%1 renamed to %2"
 msgstr ""
 
@@ -3995,699 +4008,4 @@ msgstr "Kan ej ladda filen"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Kan ej ladda filen, kod ="
-
-#~ msgid "LOADING"
-#~ msgstr "LADDAR"
-
-#~ msgid "DONE"
-#~ msgstr "FÄRDIG"
-
-#~ msgid "User candidates from database"
-#~ msgstr "Användare kandidater från databasen"
-
-#~ msgid "Notifications"
-#~ msgstr "Notifikationer"
-
-#~ msgid "Create a new user candidate"
-#~ msgstr "Skapa ny användar kandidat"
-
-#~ msgid "Pending user candidates"
-#~ msgstr "Väntande användar kandidater"
-
-#~ msgid "<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>"
-#~ msgstr "<th>epost</th><th>roll</th><th>skapare</th><th>skapad</th><th>registrerad</th>"
-
-#~ msgid "Our Users"
-#~ msgstr ""
-
-#~ msgid "Active User names"
-#~ msgstr "Namn på aktiva användare"
-
-#~ msgid "mail"
-#~ msgstr "post"
-
-# Åtgärder ?
-#~ msgid "Operations"
-#~ msgstr "Åtgärder"
-
-#~ msgid "Uploaded files"
-#~ msgstr ""
-
-#~ msgid "Edit user"
-#~ msgstr "Modifiera användare"
-
-#~ msgid "No users"
-#~ msgstr "Inga användare"
-
-#~ msgid "Gramps to Neo4j log"
-#~ msgstr "Gramps -> Neo4j logg"
-
-# Logg av ..?
-#~ msgid "Log of Gramps XML upload"
-#~ msgstr "Logg över Gramps XML laddningar"
-
-#~ msgid "Return"
-#~ msgstr "Tillbaka"
-
-# Data lagrat ?
-#~ msgid "Data stored"
-#~ msgstr "Data sparat"
-
-# Lagra.. ?
-#~ msgid "Store to Database"
-#~ msgstr "Spara till databasen"
-
-#~ msgid "Uploads"
-#~ msgstr "Upp laddningar"
-
-#~ msgid "Uploads for user"
-#~ msgstr ""
-
-#~ msgid "XML file"
-#~ msgstr "XML fil"
-
-#~ msgid "Status"
-#~ msgstr "Status"
-
-#~ msgid "Store to database"
-#~ msgstr "Spara till databas"
-
-#~ msgid "Show log"
-#~ msgstr "Visa logg"
-
-#~ msgid "Delete file"
-#~ msgstr "Radera fil"
-
-#~ msgid "Source "
-#~ msgstr "Källa"
-
-#~ msgid "Gedcom "
-#~ msgstr "Gedcom"
-
-#~ msgid "Submitter "
-#~ msgstr "Inlämnare"
-
-#~ msgid "        count\n"
-#~ msgstr "antal\n"
-
-#~ msgid "Revert to"
-#~ msgstr "Gå tillbaka till"
-
-#~ msgid "renamed to"
-#~ msgstr "ändrad till"
-
-#~ msgid "Visualisation data, not based on material"
-#~ msgstr "Visualiseringsdata, inte baserat på material"
-
-#~ msgid "Gramps to Neo5j log"
-#~ msgstr "Gramps -> Neo5j logg"
-
-# spadare ?? kanske "sparning" ??
-#~ msgid "Log of storing Gramps XML into database"
-#~ msgstr "Logg över sparade Gramps XML till databasen"
-
-#~ msgid "Operation"
-#~ msgstr "Operation"
-
-#~ msgid "Time / sec"
-#~ msgstr "Tid / sek"
-
-#~ msgid "Download to your computer"
-#~ msgstr "Ladda ned till din dator"
-
-#~ msgid "Delete"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Now the administrator can load your "
-#~ "file to database as yor new "
-#~ "candadate material set"
-#~ msgstr ""
-#~ "Nu kan administratören ladda din fil "
-#~ "till databasen som ett nytt kandidat "
-#~ "set"
-
-#~ msgid "on this page"
-#~ msgstr ""
-
-#~ msgid "People"
-#~ msgstr "Personer"
-
-#~ msgid "List of persons"
-#~ msgstr "Person lista"
-
-#~ msgid "Persons ordered by"
-#~ msgstr "Personer sorterad enligt"
-
-#~ msgid "Persons carrying a Name"
-#~ msgstr "Personer som har ett namn"
-
-#~ msgid "This page contains %(num)s person in %(order)s order."
-#~ msgid_plural "This page contains %(num)s persons in %(order)s order."
-#~ msgstr[0] "Denna sida innehåller %(num)s personer sorterade i %(order)s ordning."
-#~ msgstr[1] "Denna sida innehåller %(num)s personer sorterade i %(order)s ordning."
-
-#~ msgid "Clicking a name will take you to the selected person's page."
-#~ msgstr "Klicka på namnet för att gå till personens sida"
-
-#~ msgid ""
-#~ "If the person has many names, they"
-#~ " will appear in the list under "
-#~ "each name."
-#~ msgstr "Om personen har flera namn, så syns dom som lista under namnet."
-
-#~ msgid "Change Order:"
-#~ msgstr "Ändra sortering:"
-
-#~ msgid "First Name"
-#~ msgstr "Förnamn"
-
-#~ msgid "Patronymic or Matronymic"
-#~ msgstr "Patronym eller Matronym"
-
-#~ msgid "Showing %(num)s person name"
-#~ msgid_plural "Showing %(num)s person names"
-#~ msgstr[0] "Visar %(num)s person namn"
-#~ msgstr[1] "Visar %(num)s person namn"
-
-#~ msgid "Select people to display"
-#~ msgstr "Välj person att visa"
-
-#~ msgid ""
-#~ "Search takes place from beginning of "
-#~ "selected name part, e.g. in Surname "
-#~ "\"Sib\" coincides with the name "
-#~ "\"Sibbe\"."
-#~ msgstr ""
-#~ "Sökningen sker från början av vald "
-#~ "namndel, t.ex. i efternamn \"Sib\" "
-#~ "sammanfaller med namnet \"Sibbe\"."
-
-#~ msgid "Search word (beginning part)"
-#~ msgstr "Sökord (början)"
-
-#~ msgid "Person's events"
-#~ msgstr "Personens händelser"
-
-#~ msgid "Family Events"
-#~ msgstr "Familje händelser"
-
-#~ msgid "Keywords"
-#~ msgstr "Nyckelord"
-
-#~ msgid "No one found with search keys"
-#~ msgstr "Ingen hittad med sökordet"
-
-#~ msgid "Register  as a database user of Finland database Service"
-#~ msgstr "Registrera som databasanvändare av Finlands databas Service"
-
-#~ msgid ""
-#~ "Read and accept <a href = "
-#~ "\"static/Conditionsofuse. html\" > Terms of"
-#~ " use"
-#~ msgstr ""
-#~ "Läs och acceptera <a href = "
-#~ "\"static/Conditionsofuse. html\" > användar "
-#~ "villkoren"
-
-#~ msgid "I approve user actions"
-#~ msgstr "Jag godkänner användaråtgärderna"
-
-#~ msgid "Users"
-#~ msgstr "Användare"
-
-#~ msgid "user id"
-#~ msgstr "användar id"
-
-#~ msgid "name"
-#~ msgstr "namn"
-
-#~ msgid "email"
-#~ msgstr "epost"
-
-#~ msgid "roles"
-#~ msgstr "roller"
-
-#~ msgid "Create Username"
-#~ msgstr "Skapa användarnamn"
-
-#~ msgid "Username"
-#~ msgstr "Användarnamn"
-
-#~ msgid "Create a new user or update the old one"
-#~ msgstr "Skapa ny användare eller uppdatera nuvarande"
-
-#~ msgid "Included"
-#~ msgstr "Inkluderad"
-
-#~ msgid "Oid"
-#~ msgstr "Oid"
-
-#~ msgid "Type ~ Ref. name"
-#~ msgstr "Type ~ Ref. name"
-
-#~ msgid "Name Source"
-#~ msgstr "Namn källa"
-
-#~ msgid "Redirects to reference names"
-#~ msgstr "Omdirigerar till referensnamn"
-
-#~ msgid "Ref. Name"
-#~ msgstr "Ref.Name"
-
-#~ msgid "kuva"
-#~ msgstr "bild"
-
-#~ msgid "luotettavuus"
-#~ msgstr "konfidens"
-
-#~ msgid "Made"
-#~ msgstr "Skapad"
-
-#~ msgid "The information is deleted without further asking!"
-#~ msgstr "Informationen raderas utan flera frågor!"
-
-#~ msgid "Tags"
-#~ msgstr "Taggar"
-
-#~ msgid "Family Member's"
-#~ msgstr "Familje medlemmar"
-
-#~ msgid "Person's"
-#~ msgstr "Personen"
-
-#~ msgid "Moved out from"
-#~ msgstr ""
-
-#~ msgid "Kartanossa"
-#~ msgstr ""
-
-#~ msgid "Linnoituksessa"
-#~ msgstr ""
-
-#~ msgid "Sin the state"
-#~ msgstr ""
-
-#~ msgid "in the parsish of"
-#~ msgstr ""
-
-#~ msgid "Person "
-#~ msgstr "Henkilö "
-
-#~ msgid "Child"
-#~ msgstr ""
-
-#~ msgid "or end session"
-#~ msgstr "eller stäng sessionen"
-
-#~ msgid "Displaying %(num)s persons"
-#~ msgstr "Visar %(num)s personer"
-
-#~ msgid "Go to"
-#~ msgstr "Go till"
-
-#~ msgid "Menu"
-#~ msgstr "Meny"
-
-#~ msgid "Discover materials in Suomi Database Service"
-#~ msgstr "Upptäck material i Suomi Databas Servicen"
-
-#~ msgid "View our materials with limited rights"
-#~ msgstr "Se våra material med begränsade rättigheter"
-
-#~ msgid "Persons"
-#~ msgstr "Personer"
-
-#~ msgid "Enroll as user candidate in Suomi tietokanta Service"
-#~ msgstr "Anmäl dig som användarkandidat i Suomi databas servisen"
-
-#~ msgid "Enroll"
-#~ msgstr "Anmäl"
-
-#~ msgid "Login with your credentialst (email or username)"
-#~ msgstr "Logga in med din credentials (email eller användarnamn)"
-
-#~ msgid "Approved user's actions"
-#~ msgstr "Godkända användar åtgärder"
-
-#~ msgid "Return start page"
-#~ msgstr ""
-
-#~ msgid "Select language and other options"
-#~ msgstr ""
-
-#~ msgid "My settings"
-#~ msgstr ""
-
-#~ msgid "Suomi-tietokanta"
-#~ msgstr ""
-
-#~ msgid "Compare to my own data"
-#~ msgstr ""
-
-#~ msgid "My persons"
-#~ msgstr "Mina personer"
-
-#~ msgid "Compare persons"
-#~ msgstr ""
-
-#~ msgid "My Family Tree"
-#~ msgstr "Mitt Familje Träd"
-
-#~ msgid ""
-#~ "View your own candidate material and "
-#~ "compare with Suomi tietokanta database"
-#~ msgstr "Se det egna kandidat materialet och jämför med Finland databasen"
-
-#~ msgid "List uploads"
-#~ msgstr "Lista uppladdningar"
-
-#~ msgid "Message to Maintenance"
-#~ msgstr "Meddelande till underhåll"
-
-#~ msgid ""
-#~ "Request a researcher's rights or send"
-#~ " another message to the maintenance"
-#~ msgstr "Begär forskare rättigheter eller sänd annat meddelande till underhållet"
-
-#~ msgid "Function still planned"
-#~ msgstr "Funktionen planerad"
-
-#~ msgid "Compose a message"
-#~ msgstr "Skriv ett meddelande"
-
-#~ msgid "My Candidate Family Tree"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "<i>Finland Database</i> is a system for co'operatively\n"
-#~ "\t\t\t\t\t\tcollect validated Finnish Genealogy data."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Here you can se a restrected view on Finnish\n"
-#~ "\t\t\t\t\tgenealogical data."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "For members of Suomen sukututkimusseura, join our users and\n"
-#~ "\t\t\t\t\tgain full access by"
-#~ msgstr ""
-
-#~ msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
-#~ msgstr "Ej valida fältnamn \"Name,Refname,Reftype,Source,Gender\" {}"
-
-#~ msgid "User {} has not admin privileges"
-#~ msgstr "Användare {} har ej administratörs rättigheter"
-
-#~ msgid "Data type '{}' is not supported"
-#~ msgstr "Data typen '{}' är ej supporterad"
-
-#~ msgid "Data import from {!r} to database has been started."
-#~ msgstr ""
-
-#~ msgid "File {} saved as {}"
-#~ msgstr ""
-
-#~ msgid "Transform '{}' started at {}"
-#~ msgstr "Transformering '{}' startade vid {}"
-
-#~ msgid "File saved as {}"
-#~ msgstr ""
-
-#~ msgid "Old file saved as {}"
-#~ msgstr ""
-
-#~ msgid "Transform '{}' ended at {}"
-#~ msgstr "Transformering '{}' slutade vid {}"
-
-#~ msgid "Not valid field names"
-#~ msgstr ""
-
-#~ msgid "User %(name)s has not admin privileges"
-#~ msgstr ""
-
-#~ msgid "Data type %(subj)s is not supported"
-#~ msgstr ""
-
-#~ msgid "Data import from %(name)s to database has been started."
-#~ msgstr ""
-
-#~ msgid "File %(name1)s saved as %(name2)s"
-#~ msgstr ""
-
-#~ msgid "Transform '%(name)s' started at %(time)s"
-#~ msgstr ""
-
-#~ msgid "File saved as "
-#~ msgstr ""
-
-#~ msgid "Old file saved as "
-#~ msgstr ""
-
-#~ msgid "Transform '%(name)s' ended at %(time)s"
-#~ msgstr ""
-
-#~ msgid "Exit"
-#~ msgstr "Avsluta"
-
-#~ msgid "Illegal paths:"
-#~ msgstr ""
-
-#~ msgid "Records for submitters"
-#~ msgstr ""
-
-#~ msgid "View approved and public material in Suomi tietokanta"
-#~ msgstr ""
-
-#~ msgid "Here you can se a restrected view on Finnish genealogical data."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "For members of Suomen sukututkimusseura, "
-#~ "join our users and gain full "
-#~ "access by"
-#~ msgstr ""
-
-#~ msgid "id"
-#~ msgstr ""
-
-#~ msgid "Go"
-#~ msgstr ""
-
-#~ msgid "gender"
-#~ msgstr "kön"
-
-#~ msgid "Guest"
-#~ msgstr "Gäst"
-
-#~ msgid "Stk-server"
-#~ msgstr "Stk-server"
-
-#~ msgid "files"
-#~ msgstr "filer"
-
-#~ msgid "Citation groups"
-#~ msgstr ""
-
-#~ msgid "Stk"
-#~ msgstr "Stk"
-
-#~ msgid ""
-#~ "As a member of Suomen sukututkimusseura,"
-#~ " you can gain full access by "
-#~ "logging in."
-#~ msgstr ""
-
-#~ msgid "Join our users by"
-#~ msgstr ""
-
-#~ msgid "sending a message to administrators"
-#~ msgstr ""
-
-#~ msgid "If you have credentials, please log in here."
-#~ msgstr ""
-
-#~ msgid "Clear entire database"
-#~ msgstr "Töm hela databasen"
-
-#~ msgid "Clear entire database but saving user IDs"
-#~ msgstr "Töm hela databasen, men spara ID:na"
-
-#~ msgid "Delete my imported data"
-#~ msgstr "Radera mina importerade data"
-
-#~ msgid "Invalid tag hierarchy:"
-#~ msgstr ""
-
-#~ msgid "No value:"
-#~ msgstr ""
-
-#~ msgid "Invalid dates:"
-#~ msgstr ""
-
-#~ msgid "Too few child tags:"
-#~ msgstr ""
-
-#~ msgid "Too many child tags:"
-#~ msgstr ""
-
-#~ msgid "Records for submitters:"
-#~ msgstr ""
-
-#~ msgid "Families with no parents:"
-#~ msgstr ""
-
-#~ msgid "Missing paths:"
-#~ msgstr ""
-
-#~ msgid "KKu: Editing of Family tree sources"
-#~ msgstr ""
-
-#~ msgid "Learn about our service"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "<i>Finland Database</i> is a system for"
-#~ " co'operatively collect validated Finnish "
-#~ "Genealogy data."
-#~ msgstr ""
-
-#~ msgid "Suomikanta database"
-#~ msgstr ""
-
-#~ msgid "Gedcom healing services"
-#~ msgstr ""
-
-#~ msgid "My gedcom material"
-#~ msgstr "Mitt gedcom material"
-
-#~ msgid "Upload your material in gedcom format or edit an already stored"
-#~ msgstr "Ladda upp ditt material i gedcom format, eller editera redan sparad"
-
-#~ msgid "Gedcom handlings"
-#~ msgstr "Gedcom hantering"
-
-#~ msgid "Look at data in Suomikanta"
-#~ msgstr ""
-
-#~ msgid "Here you can see a restrected view on Finnish genealogical data."
-#~ msgstr ""
-
-#~ msgid "User's home page for Finland Database "
-#~ msgstr ""
-
-#~ msgid "Send and manage your Gramps data"
-#~ msgstr ""
-
-#~ msgid "Manage your Gramps xml files and convert them to Suomi tietokanta."
-#~ msgstr ""
-
-#~ msgid "My Persons and Events"
-#~ msgstr ""
-
-#~ msgid "Admin function"
-#~ msgstr "Administratörs funktion"
-
-#~ msgid "User and reference information management and database service tasks"
-#~ msgstr ""
-#~ "Användare och referens informations underhåll"
-#~ " och databas service uppgifter"
-
-#~ msgid "witn roles"
-#~ msgstr ""
-
-#~ msgid "roles:"
-#~ msgstr "Roll:"
-
-#~ msgid "Genders:"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "\n"
-#~ "{}:"
-#~ msgstr ""
-
-#~ msgid "file"
-#~ msgid_plural "files"
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
-#~ msgid "Stk User's Candidate Material"
-#~ msgstr ""
-
-#~ msgid "Candidate material files"
-#~ msgstr ""
-
-#~ msgid "Select Gramps XML File (*. gramps) to become candidate material"
-#~ msgstr "Välj Gramps XML fil (*.gramps) att bli kandidat material"
-
-#~ msgid "My data files in server"
-#~ msgstr ""
-
-#~ msgid "Finland Database"
-#~ msgstr ""
-
-#~ msgid "Compare to Suomikanta"
-#~ msgstr ""
-
-#~ msgid "You can view only approved and public material in Suomi tietokanta"
-#~ msgstr ""
-
-#~ msgid "Log in to Stk"
-#~ msgstr ""
-
-#~ msgid "Stk Start Page"
-#~ msgstr ""
-
-#~ msgid "Stk User's Start Page"
-#~ msgstr ""
-
-#~ msgid "User's home page for Isotammi Database "
-#~ msgstr ""
-
-#~ msgid ""
-#~ "View your own data as candidate "
-#~ "material and compare it with Suomi "
-#~ "tietokanta database."
-#~ msgstr ""
-
-#~ msgid "Stk User's Settings"
-#~ msgstr ""
-
-#~ msgid "Welcome to Suomi database"
-#~ msgstr ""
-
-#~ msgid "Welcome to Finland Database"
-#~ msgstr "Välkommen till Finland databasen"
-
-#~ msgid "Fill in the User Information Form of Finland database Service"
-#~ msgstr "Fyll i användarinformationsformuläret för Finlands databastjänst"
-
-#~ msgid "Register  as a database user of Suomi tietokanta Service"
-#~ msgstr ""
-
-#~ msgid "Log out"
-#~ msgstr "Logga ut"
-
-#~ msgid "Ending the session"
-#~ msgstr "Avslutar sessionen"
-
-#~ msgid "Exit the Application"
-#~ msgstr "Avsluta programmet"
-
-#~ msgid "GEDCOM"
-#~ msgstr "GEDCOM"
-
-#~ msgid ""
-#~ "The administrator can load your file "
-#~ "to database as your new candidate "
-#~ "material set"
-#~ msgstr ""
-
-#~ msgid "Message from Isotammi user "
-#~ msgstr ""
-
-#~ msgid "Uploads for users: "
-#~ msgstr ""
 

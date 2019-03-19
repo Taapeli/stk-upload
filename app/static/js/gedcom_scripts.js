@@ -86,8 +86,21 @@ $(document).ready( function() {
     	$.get("/gedcom/analyze/" + gedcom ,function(rsp) {
     	    $("#results").html(rsp);
     	    show("#div_results");
+
+            $("a.gedcomlink").click(function(e) {
+                var linenum = $(e.target).text();
+            	$.get("/gedcom/get_excerpt/" + gedcom + "/" + linenum,function(rsp) {
+            	    $("#excerpt").html(rsp);
+            	    $("#div_excerpt").dialog({title: gedcom});
+            	    return false;
+            	});
+            });
+            $("#div_excerpt button").click(function(e) {
+        	    $("#div_excerpt").dialog("close");
+            });
     	});
     });
+
 
     $("#transforms").click(function() {
         hide_all();

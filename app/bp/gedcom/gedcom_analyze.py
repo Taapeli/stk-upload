@@ -163,8 +163,11 @@ class LineCounter:
             linenums = [str(item.linenum) for item in itemlist]
             if len(linenums) > 10:
                 linenums = linenums[0:10] 
-                linenums.append("...")
-            printitem(f"<b>{key:25}</b><td>(count={len(itemlist):5}, lines {','.join(linenums)})")
+            links = [f"<a href='#' class='gedcomlink'>{linenum}</a>" for linenum in linenums]
+            txt = _("count=%(count)d, lines %(lines)s",count=len(itemlist), lines=','.join(links))
+            if len(itemlist) > len(linenums): txt += ",..."
+            printitem(f"<b>{key:25}</b><td>({txt})")
+            #printitem(f"<b>{key:25}</b><td>(count={len(itemlist):5}, lines {','.join(links)})")
         printtrailer() 
                 
 

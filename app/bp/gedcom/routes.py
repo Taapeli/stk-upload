@@ -398,6 +398,28 @@ def gedcom_analyze(gedcom):
     rsp = analyze(filename,encoding)
     return rsp
 
+@bp.route('/gedcom/get_excerpt/<gedcom>/<int:linenum>')
+@login_required
+@roles_accepted('gedcom', 'research')
+def get_excerpt(gedcom,linenum):
+    filename = gedcom_fullname(gedcom)
+    metadata = get_metadata(gedcom)
+    encoding = metadata['encoding'] 
+    lines = open(filename,encoding=encoding).readlines()
+    firstline = linenum - 10
+    if firstline < 0: firstline = 0
+    html = ""
+    for i,line in enumerate(lines[firstline:linenum+9]):
+        line = line.strip()
+        html += f"<br><span class=linenum>{firstline+i+1}</span>: "
+        if firstline+i == linenum-1:
+            html += f"<span class=current_line>{line}</span>"
+        else:    
+            html += f"{line}"
+    return html
+        
+    return "".join(lines[firstline:linenum+5])
+
 @bp.route('/gedcom/delete/<gedcom>')
 @login_required
 @roles_accepted('gedcom', 'research')

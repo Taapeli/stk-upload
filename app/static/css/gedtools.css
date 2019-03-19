@@ -124,53 +124,66 @@ table.diff td {
 }
 
 btn, span.button a {
-  position: relative;
-  display: block;
-  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-  background-color: #657891; /* Triadic color of lightsteelblue */
-  padding: 5px;
-  border-radius: 10px;
-  color: white;
-  /* font-weight: bold; font-size:larger; 10.3.2019 JMä */
-  text-decoration: none;
-  cursor: pointer;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: auto;
+    position: relative;
+    display: block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+    background-color: #657891; /* Triadic color of lightsteelblue */
+    padding: 5px;
+    border-radius: 10px;
+    color: white;
+    /* font-weight: bold; font-size:larger; 10.3.2019 JMä */
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: auto;
 }
 
 .link {
-  color: #2f435e;
-  font-weight: bold;
-  /* font-size:larger; 10.3.2019 JMä */
-  text-decoration: none;
+    color: #2f435e;
+    font-weight: bold;
+    /* font-size:larger; 10.3.2019 JMä */
+    text-decoration: none;
 }
 
 #permission_message {
-  display:    none;
-  width: 120px;
-  background-color: #657891;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  z-index: 1;
-  top: 105%;
-  left: 50%;
-  margin-left: -60px;
-  position: relative;
+    display:    none;
+    width: 120px;
+    background-color: #657891;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    z-index: 1;
+    top: 105%;
+    left: 50%;
+    margin-left: -60px;
+    position: relative;
 }
   
   
 img.totop {
-  position:fixed;
-  width:50px;
-  top:50px;
-  right:0;
+    position:fixed;
+    width:50px;
+    top:50px;
+    right:0;
 }
 
 gedcom-text {
     white-space: pre;
     text-indent: 20px;
+}
+
+#div_excerpt {
+    background: #f7f9fc;
+}
+
+.current_line {
+    background-color: yellow;
+}
+
+.linenum {
+    color: green;
+    font-size: smaller;
 }
 
