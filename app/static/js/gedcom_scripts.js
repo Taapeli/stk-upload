@@ -245,10 +245,14 @@ $(document).ready( function() {
     $("#transform").click(function() {
         $("#errors").hide();
     	$("#output").hide();
+    	$("#output_log_pre").empty();
     	$("#output_log").empty();
     	$("#error_log").empty();
         $.post("/gedcom/transform/" + gedcom + "/" + transform, $("#form").serialize(), function(rsp) {
-            $("#output_log").html(rsp.stdout);
+            if (rsp.plain_text)
+                $("#output_log_pre").text(rsp.stdout);
+            else
+                $("#output_log").html(rsp.stdout);
             if (rsp.stderr) 
             	$("#error_log").text(_('Errors:') + "\n" + rsp.stderr);
             if (rsp.oldname) {
