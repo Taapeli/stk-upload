@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-20 15:34+0200\n"
+"POT-Creation-Date: 2019-03-20 15:46+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -897,102 +897,102 @@ msgstr ""
 msgid "Unused records"
 msgstr ""
 
-#: bp/gedcom/routes.py:193
+#: bp/gedcom/routes.py:197
 msgid "Gedcoms"
 msgstr ""
 
-#: bp/gedcom/routes.py:214
+#: bp/gedcom/routes.py:218
 msgid "Current file"
 msgstr ""
 
-#: bp/gedcom/routes.py:249 bp/gedcom/routes.py:250 bp/gedcom/routes.py:266
-#: bp/gedcom/routes.py:267
+#: bp/gedcom/routes.py:253 bp/gedcom/routes.py:254 bp/gedcom/routes.py:270
+#: bp/gedcom/routes.py:271
 msgid "File {} saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:294 bp/gedcom/routes.py:300
+#: bp/gedcom/routes.py:298 bp/gedcom/routes.py:304
 msgid "Choose a GEDCOM file to upload"
 msgstr ""
 
-#: bp/gedcom/routes.py:309
+#: bp/gedcom/routes.py:313
 msgid "This GEDCOM file already exists"
 msgstr ""
 
-#: bp/gedcom/routes.py:333 bp/gedcom/routes.py:356
+#: bp/gedcom/routes.py:337 bp/gedcom/routes.py:360
 msgid "You don't have permission to view that GEDCOM"
 msgstr ""
 
-#: bp/gedcom/routes.py:349
+#: bp/gedcom/routes.py:353
 msgid "That GEDCOM file does not exist on the server"
 msgstr ""
 
-#: bp/gedcom/routes.py:469
+#: bp/gedcom/routes.py:473
 msgid "Deleted:"
 msgstr ""
 
-#: bp/gedcom/routes.py:476 bp/gedcom/transformer.py:53
+#: bp/gedcom/routes.py:480 bp/gedcom/transformer.py:53
 #: bp/gedcom/transformer.py:60
 msgid "Replaced:"
 msgstr ""
 
-#: bp/gedcom/routes.py:477
+#: bp/gedcom/routes.py:481
 msgid "starting from line "
 msgstr ""
 
-#: bp/gedcom/routes.py:482 bp/gedcom/transformer.py:55
+#: bp/gedcom/routes.py:486 bp/gedcom/transformer.py:55
 #: bp/gedcom/transformer.py:62
 msgid "With:"
 msgstr ""
 
-#: bp/gedcom/routes.py:505
+#: bp/gedcom/routes.py:509
 msgid "Transform '{}' started at {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:515
+#: bp/gedcom/routes.py:519
 msgid "Name of the input GEDCOM file"
 msgstr ""
 
-#: bp/gedcom/routes.py:516
+#: bp/gedcom/routes.py:520
 msgid "Name of the log file"
 msgstr ""
 
-#: bp/gedcom/routes.py:519 bp/gedcom/routes.py:718
+#: bp/gedcom/routes.py:523 bp/gedcom/routes.py:722
 msgid "Display changed rows"
 msgstr ""
 
-#: bp/gedcom/routes.py:521
+#: bp/gedcom/routes.py:525
 msgid "Do not produce an output file"
 msgstr ""
 
-#: bp/gedcom/routes.py:523
+#: bp/gedcom/routes.py:527
 msgid "Do not produce a log in the output file"
 msgstr ""
 
-#: bp/gedcom/routes.py:525
+#: bp/gedcom/routes.py:529
 msgid "Encoding of the input GEDCOM"
 msgstr ""
 
-#: bp/gedcom/routes.py:552
+#: bp/gedcom/routes.py:556
 msgid "------ Number of changes:"
 msgstr ""
 
-#: bp/gedcom/routes.py:557 bp/gedcom/routes.py:561
+#: bp/gedcom/routes.py:561 bp/gedcom/routes.py:565
 msgid "File saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:558
+#: bp/gedcom/routes.py:562
 msgid "Old file saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:562
+#: bp/gedcom/routes.py:566
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:630 static/js/gedcom_scripts.js:253
+#: bp/gedcom/routes.py:634 static/js/gedcom_scripts.js:253
 msgid "Errors:"
 msgstr ""
 
-#: bp/gedcom/routes.py:691
+#: bp/gedcom/routes.py:695
 msgid "Unsupported type: "
 msgstr ""
 
@@ -1063,7 +1063,7 @@ msgid "Description"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:27
-msgid "Update"
+msgid "Update description"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:33

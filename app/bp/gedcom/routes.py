@@ -19,6 +19,7 @@ from flask import send_from_directory
 from flask_babelex import _
 
 import logging 
+import string
 LOG = logging.getLogger(__name__)
 
 from models import util, syslog
@@ -170,7 +171,10 @@ def get_transforms():
 def list_gedcoms(username):
     gedcom_folder = get_gedcom_folder(username)
     try:
-        names = sorted([name for name in os.listdir(gedcom_folder) if name.lower().endswith(".ged")])
+        names = sorted([name for name in os.listdir(gedcom_folder) 
+                        if name.lower().endswith(".ged")],
+                        key=lambda s: s.lower()
+                    )
     except:
         names = []
     files = []

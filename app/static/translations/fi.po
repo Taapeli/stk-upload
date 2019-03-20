@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-20 15:34+0200\n"
-"PO-Revision-Date: 2019-03-19 15:23+0200\n"
+"POT-Creation-Date: 2019-03-20 15:46+0200\n"
+"PO-Revision-Date: 2019-03-20 15:38+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -899,102 +899,102 @@ msgstr "Yhteensä"
 msgid "Unused records"
 msgstr "Käyttämättömät tiedot"
 
-#: bp/gedcom/routes.py:193
+#: bp/gedcom/routes.py:197
 msgid "Gedcoms"
 msgstr "gedcomit"
 
-#: bp/gedcom/routes.py:214
+#: bp/gedcom/routes.py:218
 msgid "Current file"
 msgstr "Nykyinen tiedosto"
 
-#: bp/gedcom/routes.py:249 bp/gedcom/routes.py:250 bp/gedcom/routes.py:266
-#: bp/gedcom/routes.py:267
+#: bp/gedcom/routes.py:253 bp/gedcom/routes.py:254 bp/gedcom/routes.py:270
+#: bp/gedcom/routes.py:271
 msgid "File {} saved as {}"
 msgstr "Tiedosto {} talletettu nimelle {}"
 
-#: bp/gedcom/routes.py:294 bp/gedcom/routes.py:300
+#: bp/gedcom/routes.py:298 bp/gedcom/routes.py:304
 msgid "Choose a GEDCOM file to upload"
 msgstr "Valitse ladattava gedcom-tiedosto"
 
-#: bp/gedcom/routes.py:309
+#: bp/gedcom/routes.py:313
 msgid "This GEDCOM file already exists"
 msgstr "Gedcom-tiedosto on jo olemassa"
 
-#: bp/gedcom/routes.py:333 bp/gedcom/routes.py:356
+#: bp/gedcom/routes.py:337 bp/gedcom/routes.py:360
 msgid "You don't have permission to view that GEDCOM"
 msgstr "Sinulla ei ole oiketta katsoa tätä Gedcom-tiedostoa"
 
-#: bp/gedcom/routes.py:349
+#: bp/gedcom/routes.py:353
 msgid "That GEDCOM file does not exist on the server"
 msgstr "Tätä Gedcom-tiedostoa ei ole palvelimella"
 
-#: bp/gedcom/routes.py:469
+#: bp/gedcom/routes.py:473
 msgid "Deleted:"
 msgstr "Poistettu:"
 
-#: bp/gedcom/routes.py:476 bp/gedcom/transformer.py:53
+#: bp/gedcom/routes.py:480 bp/gedcom/transformer.py:53
 #: bp/gedcom/transformer.py:60
 msgid "Replaced:"
 msgstr "Korvattu:"
 
-#: bp/gedcom/routes.py:477
+#: bp/gedcom/routes.py:481
 msgid "starting from line "
 msgstr "alkaen riviltä "
 
-#: bp/gedcom/routes.py:482 bp/gedcom/transformer.py:55
+#: bp/gedcom/routes.py:486 bp/gedcom/transformer.py:55
 #: bp/gedcom/transformer.py:62
 msgid "With:"
 msgstr "tällä:"
 
-#: bp/gedcom/routes.py:505
+#: bp/gedcom/routes.py:509
 msgid "Transform '{}' started at {}"
 msgstr "Muunnos {} käynnistettiin {}"
 
-#: bp/gedcom/routes.py:515
+#: bp/gedcom/routes.py:519
 msgid "Name of the input GEDCOM file"
 msgstr "Gedcom-tiedoston nimi"
 
-#: bp/gedcom/routes.py:516
+#: bp/gedcom/routes.py:520
 msgid "Name of the log file"
 msgstr "Lokitiedoston nimi"
 
-#: bp/gedcom/routes.py:519 bp/gedcom/routes.py:718
+#: bp/gedcom/routes.py:523 bp/gedcom/routes.py:722
 msgid "Display changed rows"
 msgstr "Näytä muutetut rivit"
 
-#: bp/gedcom/routes.py:521
+#: bp/gedcom/routes.py:525
 msgid "Do not produce an output file"
 msgstr "Älä tuota tulostiedostoa"
 
-#: bp/gedcom/routes.py:523
+#: bp/gedcom/routes.py:527
 msgid "Do not produce a log in the output file"
 msgstr "Älä tuota lokia tulostiedostoon"
 
-#: bp/gedcom/routes.py:525
+#: bp/gedcom/routes.py:529
 msgid "Encoding of the input GEDCOM"
 msgstr "Gedcom-tiedoston merkkikoodaus"
 
-#: bp/gedcom/routes.py:552
+#: bp/gedcom/routes.py:556
 msgid "------ Number of changes:"
 msgstr "------ Muutosten lukumäärä:"
 
-#: bp/gedcom/routes.py:557 bp/gedcom/routes.py:561
+#: bp/gedcom/routes.py:561 bp/gedcom/routes.py:565
 msgid "File saved as {}"
 msgstr "Tiedosto talletettu nimelle {}"
 
-#: bp/gedcom/routes.py:558
+#: bp/gedcom/routes.py:562
 msgid "Old file saved as {}"
 msgstr "Vanha versio talletettu nimelle {}"
 
-#: bp/gedcom/routes.py:562
+#: bp/gedcom/routes.py:566
 msgid "Transform '{}' ended at {}"
 msgstr "Muunnos '{}' päättyi {}"
 
-#: bp/gedcom/routes.py:630 static/js/gedcom_scripts.js:253
+#: bp/gedcom/routes.py:634 static/js/gedcom_scripts.js:253
 msgid "Errors:"
 msgstr "Virheitä:"
 
-#: bp/gedcom/routes.py:691
+#: bp/gedcom/routes.py:695
 msgid "Unsupported type: "
 msgstr "Tyyppiä ei tueta:"
 
@@ -1044,7 +1044,7 @@ msgstr "Ohjeita"
 #: bp/gedcom/templates/gedcom_list.html:12
 #: bp/start/templates/start/index_logged.html:57
 msgid "Gedcom tools"
-msgstr ""
+msgstr "Gedcom-työkalut"
 
 #: bp/gedcom/templates/gedcom_info.html:23
 msgid "File"
@@ -1065,8 +1065,8 @@ msgid "Description"
 msgstr "Kuvaus"
 
 #: bp/gedcom/templates/gedcom_info.html:27
-msgid "Update"
-msgstr "Päivitä"
+msgid "Update description"
+msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:33
 msgid "Allow help desk to view data"
@@ -1082,7 +1082,7 @@ msgstr "Vaihda gedcom-tiedostoa"
 
 #: bp/gedcom/templates/gedcom_info.html:45
 msgid "Show GEDCOM info"
-msgstr ""
+msgstr "Näytä Gedcomin tiedot"
 
 #: bp/gedcom/templates/gedcom_info.html:54
 msgid "Statistics"
@@ -1150,7 +1150,7 @@ msgstr "Liitetiedostoja"
 
 #: bp/gedcom/templates/gedcom_info.html:126
 msgid "Actions"
-msgstr ""
+msgstr "Toiminnot"
 
 #: bp/gedcom/templates/gedcom_info.html:129
 msgid "Choose a transformation to perform for this GEDCOM"
@@ -1166,7 +1166,7 @@ msgstr "Näytä edellinen versio"
 
 #: bp/gedcom/templates/gedcom_info.html:135
 msgid "Versions management"
-msgstr ""
+msgstr "Versioiden hallinta"
 
 #: bp/gedcom/templates/gedcom_info.html:140
 #: bp/gedcom/templates/gedcom_info.html:141
@@ -2407,55 +2407,55 @@ msgstr "Arkiston nimi"
 
 #: bp/start/forms.py:10
 msgid "Your name:"
-msgstr ""
+msgstr "Nimesi:"
 
 #: bp/start/forms.py:13
 msgid "Your email address:"
-msgstr ""
+msgstr "Sähköpostiosoitteesi:"
 
 #: bp/start/forms.py:23 bp/start/templates/start/join2.html:39
 msgid "Are you a member of the Genealogical Society of Finland?"
-msgstr ""
+msgstr "Oletko Suomen Sukututkimusseuran jäsen?"
 
 #: bp/start/forms.py:26 bp/start/templates/start/join2.html:40
 msgid "Yes"
-msgstr ""
+msgstr "Kyllä"
 
 #: bp/start/forms.py:27 bp/start/templates/start/join2.html:41
 msgid "No"
-msgstr ""
+msgstr "Ei"
 
 #: bp/start/forms.py:28
 msgid "Don't know"
-msgstr ""
+msgstr "En tiedä"
 
 #: bp/start/forms.py:30 bp/start/templates/start/join2.html:43
 msgid "How many years have you been doing genealogical research?"
-msgstr ""
+msgstr "Monta vuotta olet harrastanut sukututkimusta?"
 
 #: bp/start/forms.py:31 bp/start/templates/start/join2.html:46
 msgid "What genealogy software are you mainly using?"
-msgstr ""
+msgstr "Mitä sukututkimusohjelmia pääasiallisesti käytät?"
 
 #: bp/start/forms.py:32 bp/start/templates/start/join2.html:49
 msgid "Which families/surnames are you mainly researching?"
-msgstr ""
+msgstr "Mitä sukuja pääasiassa tutkit?"
 
 #: bp/start/forms.py:33 bp/start/templates/start/join2.html:52
 msgid "Which places are you mainly researching?"
-msgstr ""
+msgstr "Mitä paikkakuntia pääasiallisesti tutkit?"
 
 #: bp/start/forms.py:34
 msgid "Message:"
-msgstr ""
+msgstr "Viesti:"
 
 #: bp/start/forms.py:37
 msgid "Send request"
-msgstr ""
+msgstr "Lähetä pyyntö"
 
 #: bp/start/routes.py:90
 msgid "Join message sent"
-msgstr ""
+msgstr "Liittymisviesti lähetetty"
 
 #: bp/start/routes.py:141
 msgid "Update did not work1"
@@ -2602,7 +2602,7 @@ msgstr "Ylläpito"
 #: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:36
 #: bp/start/templates/start/join2.html:4 bp/start/templates/start/join2.html:20
 msgid "Join Isotammi"
-msgstr ""
+msgstr "Liity Isotammeen"
 
 #: bp/start/templates/start/join.html:50 bp/start/templates/start/join2.html:24
 msgid ""
