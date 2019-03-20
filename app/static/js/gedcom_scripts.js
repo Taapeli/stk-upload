@@ -4,6 +4,7 @@ var ngettext = function(msgid, msgid_plural, n) { return gt.ngettext(msgid, msgi
 	
 function hide_all() {
     $("div.gedcom").hide();
+    $("#div_show_info").show();
 }
 
 function show(id) {
@@ -80,6 +81,10 @@ $(document).ready( function() {
         }); // $.get
     });
     
+    $("#show_info").click(function() {
+        $("#info").show();
+        $("#div_show_info").hide();
+    });
     
     $("#analyze").click(function() {
         hide_all();

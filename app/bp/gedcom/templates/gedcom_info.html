@@ -13,7 +13,7 @@ var gedcom = "{{ gedcom }}";
 
 <div class="startdiv">
     <div>
-	    <h2>{{ _("Gedcom transformations") }}</h2>
+	    <h2>{{ _("Gedcom tools") }}</h2>
 	    <div id="errors" class="errors"></div>
 
 	    <div class="row">
@@ -34,12 +34,21 @@ var gedcom = "{{ gedcom }}";
                 </div>
                 <div id="permission_message">{{ _("Permission updated") }}</div>
                 <div style="margin-top: 4em;"> 
-                    &rtrif; <a class="link" href="/gedcom">{{ _("Switch to another GEDCOM") }}</a>
+                    &rtrif; 
+                    <a class="link" href="/gedcom">
+                    	{{ _("Switch to another GEDCOM") }}
+                    </a>
+                </div>
+                <div style="margin-top: 1em;" id="div_show_info"> 
+                    &rtrif; 
+                    <a id="show_info" class="link" href="#">
+                        {{ _("Show GEDCOM info") }}
+                    </a>
                 </div>
               </div>
            </div>
     
-          <div class="startbox">
+          <div class="startbox gedcom" id="info">
             <div style="display: inline-block;">
     
                 <h3>{{ _("Statistics") }}</h3>
@@ -114,13 +123,8 @@ var gedcom = "{{ gedcom }}";
 	      <div class="startbox">
 	        <div style="display: inline-block;">
 	
-				<h3>{{ _("Options") }}</h3>
+				<h3>{{ _("Actions") }}</h3>
 				<div>
-				    <btn id="analyze"
-				    	title='{{ _("Analyze this GEDCOM for structural problems") }}'>
-				    	{{ _("Analyze") }}
-			    	</btn>
-
 				    <btn id="transforms"
 				    	title='{{ _("Choose a transformation to perform for this GEDCOM") }}'>
 					    {{ _("Choose a transformation") }}
@@ -128,12 +132,7 @@ var gedcom = "{{ gedcom }}";
 
 				    <btn id="versions"
 				    	title='{{ _("Display previous versions of this GEDCOM") }}'>
-					    {{ _("Display versions") }}
-			    	</btn>
-
-				    <btn id="show_history"
-				    	title='{{ _("Show log of previous tranformations for this GEDCOM") }}'>
-	                        {{ _("Show transformation history") }}
+					    {{ _("Versions management") }}
 			    	</btn>
 
 				    <span class="button">
@@ -146,6 +145,19 @@ var gedcom = "{{ gedcom }}";
 				    	title='{{ _("Remove this GEDCOM") }}'>
 				    	{{ _("Remove this GEDCOM") }}</a>
 			    	</btn>
+
+	                <div style="margin-top: 1em;"> 
+	                    &rtrif; 
+	                    <a id="analyze" class="link" href="#">
+	                    {{ _("Analyze this GEDCOM for structural problems") }}</a>
+	                </div>
+	
+	                <div style="margin-top: 1em;"> 
+	                    &rtrif; 
+	                    <a id="show_history" class="link" href="#">
+	                        {{ _("Show transformation history") }}
+                        </a>
+	                </div>
 
 				</div>
 	        </div>

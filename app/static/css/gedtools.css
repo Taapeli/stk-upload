@@ -187,3 +187,6 @@ gedcom-text {
     font-size: smaller;
 }
 
+#div_show_info {
+    display: none;
+}
