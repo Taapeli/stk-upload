@@ -1,0 +1,34 @@
+{# _start/join.html_ #}
+{% extends "start/s_layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _("Thank You") }} (start/my_message){% endblock %}
+{% block body %}
+{{ super() }}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<style>
+table, td {
+	border: none;
+	vertical-align: top;
+}
+</style>
+
+<div id="startdiv">
+  <div>
+    <h2>{{ _("Thank You for joining Isotammi") }}</h2>
+
+    <div>
+        <h4>
+        {{ _('We are processing your request and will soon send you further instructions in email.') }}
+        </h4>
+        <h4>
+        	<a href="/">{{ _('Go to main page') }}
+        </h4>
+    </div>
+
+  </div>
+  <p></p>
+</div>
+{% endblock %}

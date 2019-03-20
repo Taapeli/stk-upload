@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-19 15:22+0200\n"
+"POT-Creation-Date: 2019-03-20 12:01+0200\n"
 "PO-Revision-Date: 2019-02-25 20:37+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -83,7 +83,8 @@ msgid "Name"
 msgstr "Namn"
 
 #: bp/admin/forms.py:42 bp/admin/forms.py:45
-#: bp/admin/templates/admin/list_users.html:89 setups.py:216
+#: bp/admin/templates/admin/list_users.html:89 bp/start/forms.py:18
+#: bp/start/forms.py:22 setups.py:216
 msgid "Language"
 msgstr "Språk"
 
@@ -115,7 +116,7 @@ msgstr "Användar namn:"
 msgid "Name:"
 msgstr "Namn:"
 
-#: bp/admin/forms.py:41
+#: bp/admin/forms.py:41 bp/start/forms.py:12
 msgid "Name of the user"
 msgstr "Användarens namn"
 
@@ -209,11 +210,11 @@ msgstr "Antal inloggningar"
 msgid "Update user"
 msgstr "Uppdatera användare"
 
-#: bp/admin/forms.py:75
+#: bp/admin/forms.py:75 bp/start/forms.py:15
 msgid "Maximum 100 characters"
 msgstr "Maximum 100 tecken"
 
-#: bp/admin/forms.py:77
+#: bp/admin/forms.py:77 bp/start/forms.py:17
 msgid "Enter the email address"
 msgstr "Ange epost address"
 
@@ -631,11 +632,13 @@ msgid "Message from Isotammi admin"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:49
+#: bp/start/templates/start/join2.html:55
 #: bp/start/templates/start/my_message.html:51
 msgid "Message"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:54
+#: bp/start/templates/start/join2.html:60
 #: bp/start/templates/start/my_message.html:56
 #: bp/start/templates/start/my_settings.html:38
 msgid "Apply"
@@ -2411,11 +2414,63 @@ msgstr "Format"
 msgid "Repository Name"
 msgstr "Arkiv namn"
 
-#: bp/start/routes.py:68
+#: bp/start/forms.py:10
+msgid "Your name:"
+msgstr ""
+
+#: bp/start/forms.py:13
+msgid "Your email address:"
+msgstr ""
+
+#: bp/start/forms.py:23 bp/start/templates/start/join2.html:39
+msgid "Are you a member of the Genealogical Society of Finland?"
+msgstr ""
+
+#: bp/start/forms.py:26 bp/start/templates/start/join2.html:40
+msgid "Yes"
+msgstr ""
+
+#: bp/start/forms.py:27 bp/start/templates/start/join2.html:41
+msgid "No"
+msgstr ""
+
+#: bp/start/forms.py:28
+msgid "Don't know"
+msgstr ""
+
+#: bp/start/forms.py:30 bp/start/templates/start/join2.html:43
+msgid "How many years have you been doing genealogical research?"
+msgstr ""
+
+#: bp/start/forms.py:31 bp/start/templates/start/join2.html:46
+msgid "What genealogy software are you mainly using?"
+msgstr ""
+
+#: bp/start/forms.py:32 bp/start/templates/start/join2.html:49
+msgid "Which families/surnames are you mainly researching?"
+msgstr ""
+
+#: bp/start/forms.py:33 bp/start/templates/start/join2.html:52
+msgid "Which places are you mainly researching?"
+msgstr ""
+
+#: bp/start/forms.py:34
+msgid "Message:"
+msgstr ""
+
+#: bp/start/forms.py:37
+msgid "Send request"
+msgstr ""
+
+#: bp/start/routes.py:90
+msgid "Join message sent"
+msgstr ""
+
+#: bp/start/routes.py:141
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:71
+#: bp/start/routes.py:144
 msgid "Update did not work"
 msgstr ""
 
@@ -2553,6 +2608,39 @@ msgstr ""
 msgid "Maintenance"
 msgstr "Underhåll"
 
+#: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:36
+#: bp/start/templates/start/join2.html:4 bp/start/templates/start/join2.html:20
+msgid "Join Isotammi"
+msgstr ""
+
+#: bp/start/templates/start/join.html:50 bp/start/templates/start/join2.html:24
+msgid ""
+"To join the Isotammi project we wish that you will provide some basic "
+"information below."
+msgstr ""
+
+#: bp/start/templates/start/join.html:51 bp/start/templates/start/join2.html:25
+msgid "Please let us know at least your name and email address."
+msgstr ""
+
+#: bp/start/templates/start/join.html:52 bp/start/templates/start/join2.html:26
+msgid ""
+"You can also provide any comments or additional information in the "
+"message field."
+msgstr ""
+
+#: bp/start/templates/start/join.html:53 bp/start/templates/start/join2.html:27
+msgid "Thank You!"
+msgstr ""
+
+#: bp/start/templates/start/join2.html:33
+msgid "Your name"
+msgstr ""
+
+#: bp/start/templates/start/join2.html:36
+msgid "Your email"
+msgstr ""
+
 #: bp/start/templates/start/my_message.html:4
 #: bp/start/templates/start/my_message.html:37
 msgid "Contact administrators"
@@ -2620,6 +2708,24 @@ msgstr ""
 
 #: bp/start/templates/start/s_macros.html:41
 msgid "Logout"
+msgstr ""
+
+#: bp/start/templates/start/thankyou.html:4
+msgid "Thank You"
+msgstr ""
+
+#: bp/start/templates/start/thankyou.html:20
+msgid "Thank You for joining Isotammi"
+msgstr ""
+
+#: bp/start/templates/start/thankyou.html:24
+msgid ""
+"We are processing your request and will soon send you further "
+"instructions in email."
+msgstr ""
+
+#: bp/start/templates/start/thankyou.html:27
+msgid "Go to main page"
 msgstr ""
 
 #: bp/stk_security/templates/security/_menu.html:8

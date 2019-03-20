@@ -5,6 +5,9 @@
 
 import logging 
 import traceback
+from bp.start.forms import JoinForm
+from werkzeug.utils import redirect
+from flask.helpers import url_for
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
@@ -35,10 +38,80 @@ def start():
         logger.info('Anonymous user')
         return render_template('/start/index.html')
 
+@shareds.app.route('/join2',methods=['get','post'])
+def join2():
+    if request.method == 'POST':
+        msg = ""
+        for name,value in request.form.items():
+            msg += f"\n{name}: {value}"
+        email.email_admin("New user for Isotammi", msg )
+        return render_template("/start/thankyou.html")
+    else:
+        return render_template("/start/join.html")
+
+@shareds.app.route('/thankyou')
+def thankyou():
+    return render_template("/start/thankyou.html")
+
+@shareds.app.route('/join', methods=['GET', 'POST'])
+def join():
+    
+    form = JoinForm()
+    msg = ""
+    for name,value in request.form.items():
+        msg += f"\n{name}: {value}"
+    logging.info(msg)
+    if form.validate_on_submit(): 
+        msg = ""
+        for name,value in request.form.items():
+            if name == "csrf_token": continue
+            if name == "submit": continue
+            msg += f"\n{name}: {value}"
+        logging.info(msg)
+        email.email_admin("New user request for Isotammi", msg )
+        """
+        user = User(id = form.id.data,
+                email = form.email.data,
+                username = form.username.data,
+                name = form.name.data,
+                language = form.language.data,
+                is_active = form.is_active.data,
+                roles = form.roles.data,
+                confirmed_at = form.confirmed_at.data,
+                last_login_at = form.last_login_at.data, 
+                last_login_ip = form.last_login_ip.data,                    
+                current_login_at = form.current_login_at.data,  
+                current_login_ip = form.current_login_ip.data,
+                login_count = form.login_count.data)        
+        updated_user = UserAdmin.update_user(user)
+        if updated_user.username == current_user.username:
+            session['lang'] = form.language.data
+        """
+        flash(_("Join message sent"))
+        return redirect(url_for("thankyou"))
+
+    """
+    user = shareds.user_datastore.get_user(username) 
+    form.id.data = user.id  
+    form.username.data = user.username
+    form.name.data = user.name 
+    form.language.data = user.language
+    form.is_active.data = user.is_active
+    form.roles.data = [role.name for role in user.roles]
+    form.confirmed_at.data = user.confirmed_at 
+    form.last_login_at.data = user.last_login_at  
+    form.last_login_ip.data = user.last_login_ip
+    form.current_login_at.data = user.current_login_at
+    form.current_login_ip.data = user.current_login_ip
+    form.login_count.data = user.login_count
+    """    
+    #form.email.data = user.email
+    return render_template("/start/join.html", form=form)  
+
+
 @shareds.app.route('/message')
 @login_required
 def my_message():
-    print("-> bp.start.routes.settings")
     return render_template("/start/my_message.html")
 
 @shareds.app.route('/send_email',methods=["post"])
