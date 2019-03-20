@@ -172,9 +172,12 @@ class Sukujutut(transformer.Transformation):
             if item.tag in {"EVEN","BIRT","DEAT","CHR"}:
                 note_index = -1
                 for i,c in enumerate(item.children):
-                    if c.tag == "NOTE" and len(c.children) == 0: 
+                    if c.tag == "NOTE" and len(c.children) == 0 and not c.value.startswith("@"): 
                         note_index = i
                     if c.tag == "SOUR" and note_index >= 0:
+                        for c2 in c.children:
+                            if c2.tag == "PAGE": # PAGE already exists, ignore
+                                return True
                         note = item.children[note_index].value
                         del item.children[note_index]
                         newitem = Item("{} PAGE {}".format(item.level+2,note))
