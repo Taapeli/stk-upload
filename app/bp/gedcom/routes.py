@@ -478,7 +478,7 @@ def display_changes(lines,item,linenum=None):
         print()
         return
     print("<b>"+_("Replaced:")+"</b>")
-    if linenum: print("("+_("starting from line ")+str(linenum)+")")
+    if linenum: print("("+_("starting from line ")+f"<a href='#' class='gedcomlink'>{linenum}</a>)")
     print("<gedcom-text>")
     for line in lines:
         print(line)

@@ -13,6 +13,20 @@ function show(id) {
 	window.scroll(0,y-50);
 }
 
+function add_gedcom_links() {
+    $("a.gedcomlink").click(function(e) {
+        var linenum = $(e.target).text();
+    	$.get("/gedcom/get_excerpt/" + gedcom + "/" + linenum,function(rsp) {
+    	    $("#excerpt").html(rsp);
+    	    $("#div_excerpt").dialog({title: gedcom});
+    	    return false;
+    	});
+    });
+    $("#div_excerpt button").click(function(e) {
+	    $("#div_excerpt").dialog("close");
+    });
+}
+
 $(document).ready( function() {
     console.log("ready");
 
@@ -91,18 +105,7 @@ $(document).ready( function() {
     	$.get("/gedcom/analyze/" + gedcom ,function(rsp) {
     	    $("#results").html(rsp);
     	    show("#div_results");
-
-            $("a.gedcomlink").click(function(e) {
-                var linenum = $(e.target).text();
-            	$.get("/gedcom/get_excerpt/" + gedcom + "/" + linenum,function(rsp) {
-            	    $("#excerpt").html(rsp);
-            	    $("#div_excerpt").dialog({title: gedcom});
-            	    return false;
-            	});
-            });
-            $("#div_excerpt button").click(function(e) {
-        	    $("#div_excerpt").dialog("close");
-            });
+            add_gedcom_links();
     	});
     });
 
@@ -264,6 +267,7 @@ $(document).ready( function() {
             	$("#div_oldname").hide();
             	$("#div_save").show();
         	}
+            add_gedcom_links();
             show("#output");
         });
         return false;
