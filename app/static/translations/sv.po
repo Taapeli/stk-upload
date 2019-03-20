@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-20 12:01+0200\n"
+"POT-Creation-Date: 2019-03-20 15:34+0200\n"
 "PO-Revision-Date: 2019-02-25 20:37+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -791,7 +791,7 @@ msgid "there was an error"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:53
-#: bp/gedcom/templates/gedcom_info.html:48
+#: bp/gedcom/templates/gedcom_info.html:57
 #: bp/gramps/templates/gramps/uploads.html:87
 msgid "Upload time"
 msgstr "Uppladdnings tid"
@@ -990,7 +990,7 @@ msgstr ""
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:630 static/js/gedcom_scripts.js:248
+#: bp/gedcom/routes.py:630 static/js/gedcom_scripts.js:253
 msgid "Errors:"
 msgstr "Fel:"
 
@@ -1040,8 +1040,11 @@ msgid "Instructions"
 msgstr "Instruktioner"
 
 #: bp/gedcom/templates/gedcom_info.html:16
-msgid "Gedcom transformations"
-msgstr "Gedcom transformationer"
+#: bp/gedcom/templates/gedcom_list.html:4
+#: bp/gedcom/templates/gedcom_list.html:12
+#: bp/start/templates/start/index_logged.html:57
+msgid "Gedcom tools"
+msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:23
 msgid "File"
@@ -1053,7 +1056,7 @@ msgid "user"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:25
-#: bp/gedcom/templates/gedcom_info.html:164
+#: bp/gedcom/templates/gedcom_info.html:176
 #: bp/gedcom/templates/gedcom_list.html:38
 #: bp/scene/templates/scene/person.html:76
 #: bp/scene/templates/scene/place_events.html:117
@@ -1073,179 +1076,167 @@ msgstr "Tillåt helpdesk att se data"
 msgid "Permission updated"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:37
+#: bp/gedcom/templates/gedcom_info.html:39
 msgid "Switch to another GEDCOM"
 msgstr "Byt till annan GEDCOM"
 
 #: bp/gedcom/templates/gedcom_info.html:45
+msgid "Show GEDCOM info"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:54
 msgid "Statistics"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:53
+#: bp/gedcom/templates/gedcom_info.html:62
 msgid "File size"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:58
+#: bp/gedcom/templates/gedcom_info.html:67
 msgid "Gedcom date"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:63
+#: bp/gedcom/templates/gedcom_info.html:72
 msgid "Submitter"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:68
+#: bp/gedcom/templates/gedcom_info.html:77
 msgid "Gedcom version"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:73
+#: bp/gedcom/templates/gedcom_info.html:82
 msgid "Encoding"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:77
+#: bp/gedcom/templates/gedcom_info.html:86
 msgid "Gedcom charset"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:81
+#: bp/gedcom/templates/gedcom_info.html:90
 msgid "Source program"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:94
+#: bp/gedcom/templates/gedcom_info.html:103
 msgid "Number of individuals"
 msgstr "Antal individer"
 
-#: bp/gedcom/templates/gedcom_info.html:96
+#: bp/gedcom/templates/gedcom_info.html:105
 msgid "Number of families"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:98
+#: bp/gedcom/templates/gedcom_info.html:107
 msgid "Number of unique places"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:100
+#: bp/gedcom/templates/gedcom_info.html:109
 msgid "Number of notes"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:102
+#: bp/gedcom/templates/gedcom_info.html:111
 msgid "Number of citations"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:104
+#: bp/gedcom/templates/gedcom_info.html:113
 msgid "Number of sources"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:106
+#: bp/gedcom/templates/gedcom_info.html:115
 msgid "Number of repositories"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:108
+#: bp/gedcom/templates/gedcom_info.html:117
 msgid "Number of multimedia objects"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:117
-msgid "Options"
-msgstr "Optioner"
-
-#: bp/gedcom/templates/gedcom_info.html:120
-msgid "Analyze this GEDCOM for structural problems"
+#: bp/gedcom/templates/gedcom_info.html:126
+msgid "Actions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:121
-msgid "Analyze"
-msgstr "Teknisk analys"
-
-#: bp/gedcom/templates/gedcom_info.html:125
+#: bp/gedcom/templates/gedcom_info.html:129
 msgid "Choose a transformation to perform for this GEDCOM"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:126
+#: bp/gedcom/templates/gedcom_info.html:130
 msgid "Choose a transformation"
 msgstr "Välj transformation"
 
-#: bp/gedcom/templates/gedcom_info.html:130
+#: bp/gedcom/templates/gedcom_info.html:134
 msgid "Display previous versions of this GEDCOM"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:131
-msgid "Display versions"
-msgstr "Visa versioner"
-
 #: bp/gedcom/templates/gedcom_info.html:135
-msgid "Show log of previous tranformations for this GEDCOM"
+msgid "Versions management"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:136
-msgid "Show transformation history"
-msgstr ""
-
+#: bp/gedcom/templates/gedcom_info.html:140
 #: bp/gedcom/templates/gedcom_info.html:141
-#: bp/gedcom/templates/gedcom_info.html:142
 msgid "Fetch this GEDCOM"
 msgstr "Hämta denna GEDCOM"
 
+#: bp/gedcom/templates/gedcom_info.html:145
 #: bp/gedcom/templates/gedcom_info.html:146
-#: bp/gedcom/templates/gedcom_info.html:147
 msgid "Remove this GEDCOM"
 msgstr "Tag bort denna GEDCOM"
 
-#: bp/gedcom/templates/gedcom_info.html:157
+#: bp/gedcom/templates/gedcom_info.html:152
+msgid "Analyze this GEDCOM for structural problems"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:158
+msgid "Show transformation history"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:169
 msgid "Transformations"
 msgstr "Transformationer"
 
-#: bp/gedcom/templates/gedcom_info.html:174
+#: bp/gedcom/templates/gedcom_info.html:186
 msgid "Versions"
 msgstr "Versioner"
 
-#: bp/gedcom/templates/gedcom_info.html:177
+#: bp/gedcom/templates/gedcom_info.html:189
 msgid "Delete old versions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:178
+#: bp/gedcom/templates/gedcom_info.html:190
 msgid "Compare versions"
 msgstr "Jämför versioner"
 
-#: bp/gedcom/templates/gedcom_info.html:186
+#: bp/gedcom/templates/gedcom_info.html:198
 msgid "Transformation history"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:198
+#: bp/gedcom/templates/gedcom_info.html:210
 msgid "GEDCOM comparison"
 msgstr "GEDCOM jämförelse"
 
-#: bp/gedcom/templates/gedcom_info.html:210
+#: bp/gedcom/templates/gedcom_info.html:222
 msgid "Results"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:229
+#: bp/gedcom/templates/gedcom_info.html:241
 msgid "Perform transformation"
 msgstr "Utför transformation"
 
-#: bp/gedcom/templates/gedcom_info.html:241
+#: bp/gedcom/templates/gedcom_info.html:253
 msgid "Transformation results"
 msgstr "Transformations resultat"
 
-#: bp/gedcom/templates/gedcom_info.html:243
+#: bp/gedcom/templates/gedcom_info.html:255
 msgid "Old version is saved as"
 msgstr "Gamla versionen sparad som"
 
-#: bp/gedcom/templates/gedcom_info.html:243
+#: bp/gedcom/templates/gedcom_info.html:255
 msgid "Revert to old version"
 msgstr "Återgå till gamla versionen"
 
-#: bp/gedcom/templates/gedcom_info.html:246
+#: bp/gedcom/templates/gedcom_info.html:258
 msgid "Not saved yet"
 msgstr "Ej sparad"
 
-#: bp/gedcom/templates/gedcom_info.html:247
+#: bp/gedcom/templates/gedcom_info.html:259
 msgid "Save result"
 msgstr "Spara resultatet"
-
-#: bp/gedcom/templates/gedcom_list.html:4
-msgid "GEDCOM Materials"
-msgstr "GEDCOM material"
-
-#: bp/gedcom/templates/gedcom_list.html:12
-msgid "GEDCOM Management"
-msgstr "GEDCOM underhåll"
 
 #: bp/gedcom/templates/gedcom_list.html:16
 msgid "Select your file for processing"
@@ -2584,10 +2575,6 @@ msgstr ""
 msgid "Family Trees"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:57
-msgid "My Gedcom Materials"
-msgstr ""
-
 #: bp/start/templates/start/index_logged.html:58
 msgid "Upload your .ged files and experiment various cleanup functions"
 msgstr ""
@@ -3369,20 +3356,20 @@ msgstr ""
 msgid "sex not applicable"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:21
+#: static/js/gedcom_scripts.js:22
 msgid "Server error"
 msgstr "Server fel"
 
-#: static/js/gedcom_scripts.js:149 static/js/gedcom_scripts.js:158
+#: static/js/gedcom_scripts.js:154 static/js/gedcom_scripts.js:163
 msgid "Are you sure?"
 msgstr "År du säker?"
 
-#: static/js/gedcom_scripts.js:210 static/js/gedcom_scripts.js:211
+#: static/js/gedcom_scripts.js:215 static/js/gedcom_scripts.js:216
 msgid "Revert to %1"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:222 static/js/gedcom_scripts.js:223
-#: static/js/gedcom_scripts.js:229
+#: static/js/gedcom_scripts.js:227 static/js/gedcom_scripts.js:228
+#: static/js/gedcom_scripts.js:234
 msgid "%1 renamed to %2"
 msgstr ""
 
