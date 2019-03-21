@@ -17,10 +17,10 @@
     {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
-       <span style="font-size:8pt; color:gray"></p>
+    </p>
     {% endif %}
 
-<p><small>{{session}}</small></p>
+{# <p><small>{{session}}</small></p> #}
 
         <div class="row">
 {#  {% if current_user.is_authenticated and current_user.has_role('member') %}
@@ -64,20 +64,7 @@
                     <button type="submit">{{ _('List of Persons') }}</button>
                  </div>
                </form>
-{#
-	<!-- 
-	owner_filter  001 1 = common Suomikanta data
-	              010 2 = user's own candidate data
-	              100 4 = data from specific batch
-	              011 3 = 1+2 = users data & Suomikanta
-	              101 5 = 1+4 = user batch & Suomikanta
-	 -->
-                   <p>Tietojoukko {% set filt = session['owner_filter'] %} {{filt}}
-                       {% if session['owner_filter'] == 1 or filt == 3 or filt == 5 %}Suomikanta{% endif %}
-                       {% if session['owner_filter'] == 2 or filt == 3 %}omat{% endif %}
-                       {% if session['owner_filter'] == 4 or filt == 5 %}tuontierä{% endif %}</p>
-#}
-            </div>
+             </div>
            </div>
 
 
@@ -96,29 +83,6 @@
      </div>
      {% endif %}
 
- {#  <div class="startbox">
-       <div style="display: inline-block;">
-         <h3>{{ _('Message to Maintenance') }}</h3>
-         <p>{{ _("Request a researcher's rights or send another message to the maintenance") }}</p>
-         {{ _('Function still planned') }}
-         <div class="submit"> 
-           <button type="button" disabled>{{ _('Compose a message') }}</button>
-         </div>
-       </div>
-     </div>
-
-     {% if current_user.is_authenticated %}
-     <div class="startbox">
-       <h3>{{ _('Log out') }}</h3>
-       <p>{{ _('Ending the session') }}<br>&nbsp;</p>
-    <form method="get" action="/logout">
-          <div class="submit"> 
-	<button type="submit" style="color: blue">{{ _('Exit the Application') }}</button>
-          </div>
-    </form>
-     </div>
-     {% endif %}
- #}
     </div>
   </div>
 </div>
