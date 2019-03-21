@@ -13,7 +13,7 @@
 
 <div id="startdiv">
   <div>
-    <h2>{{ _('Isotammi Database') }}</h2>
+    <h2>{{ _('Exploring Isotammi Database') }}</h2>
     {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
@@ -31,7 +31,7 @@
                  <h3>{{ _('My Candidate Family Tree') }}</h3>
                  <p>{{ _('View your own candidate material and compare with Isotammi tietokanta database') }}</p>
                  <div class="submit"> 
-                    <button type="submit">{{ _('List of Persons') }}</button>
+                    <button type="submit">{{ _('Start Exploring') }}</button>
                  </div>
                </form>
             </div>
@@ -41,10 +41,10 @@
            <div class="startbox">
              <div style="display: inline-block;">
                <form method="get" action="/scene/persons_all/">
-                 <h3>{{ _('Select Material for Browsing') }}</h3>
 
      {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
+                <h3>{{ _('Select Material for Browsing') }}</h3>
                 <p>{% set filt = session['owner_filter'] %}<br>
                   <input type="radio" name="div" value="1" 
                     {% if filt == 1 %}checked{% endif %}>Isotammi<br>
@@ -57,11 +57,12 @@
                         {{ _('Compare to Isotammi Database') }} 
                 </p>
      {% else %}
+                <h3>{{ _('The Browsed Material') }}</h3>
                 <p>{{ _('You can view only approved and public material in Isotammi Database') }}.</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
                 <div class="submit"> 
-                    <button type="submit">{{ _('List of Persons') }}</button>
+                    <button type="submit">{{ _('Start Exploring') }}</button>
                  </div>
                </form>
              </div>

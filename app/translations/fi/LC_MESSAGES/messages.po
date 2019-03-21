@@ -1649,12 +1649,16 @@ msgid "No persons"
 msgstr "Ei ketään"
 
 #: bp/scene/templates/scene/index_scene.html:16
-msgid "Isotammi Database"
-msgstr "Isotammi"
+msgid "Exploring Isotammi Database"
+msgstr "Tutustu Isotammi-tietokantaan"
 
-#: bp/scene/templates/scene/index_scene.html:44
+#: bp/scene/templates/scene/index_scene.html:47
 msgid "Select Material for Browsing"
 msgstr "Valitse selattava aineisto"
+
+#: bp/scene/templates/scene/index_scene.html:60
+msgid "The Browsed Material"
+msgstr "Selattava aineisto"
 
 #: bp/scene/templates/scene/index_scene.html:52
 msgid "My candidate material"
@@ -1673,6 +1677,9 @@ msgid "You can view only approved and public material in Isotammi Database"
 msgstr "Voit katsoa vain hyväksyttyjä, julkisia tietoja Isotammi-tietokannassa"
 
 #: bp/scene/templates/scene/index_scene.html:64
+msgid "Start Exploring"
+msgstr "Aloita tästä"
+
 #: bp/tools/templates/tools/table_persons.html:14
 msgid "List of Persons"
 msgstr "Henkilöluettelo"
