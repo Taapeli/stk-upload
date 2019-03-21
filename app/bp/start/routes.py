@@ -143,7 +143,7 @@ def my_settings():
         except:
             flash(_("Update did not work"),category='flash_error')
             traceback.print_exc()
-    print("-> bp.start.routes.settings")
+    print("-> bp.start.routes.my_settings")
     return render_template("/start/my_settings.html",
                            referrer=referrer,
                            roles=current_user.roles)
