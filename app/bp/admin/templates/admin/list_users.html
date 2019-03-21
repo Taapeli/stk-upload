@@ -1,4 +1,4 @@
-{# _myapp/templates/table1.html_ #}
+{# _bp/admin/templates/admin/list_users.html_ #}
 {% extends "/admin/layout.html" %}
 {% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
@@ -54,11 +54,7 @@ $(document).ready( function() {
     <div>
         <h2>{{ _("Active User names") }}</h2>
          {% with messages = get_flashed_messages(with_categories=true) %}
-	    <p><small>{{ _('User') }} <i>{{current_user.name}}</i> &lt;{{current_user.email}}&gt;
-	       {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
-	       <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
-	          <i>{{ 'git'|app_date }}</i></span>
-	    </small></p>
+
           {% if messages %}
             <ul  class='flashes'>
             {% for category, message in messages %}
@@ -68,27 +64,25 @@ $(document).ready( function() {
           {% endif %}
         {% endwith %}
        <div id="errors" class="errors"></div>
-        <div class="row">
-        	<table>
-        		<tr>
-        			<td><input type="radio" name="select" value="all" checked>All users
-        			<td><input type="radio" name="select" value="active">Active users only
-        			<td><input type="radio" name="select" value="inactive">Inactive users only
-        	</table>
-        	<br>
-             <div style="display: inline-block;">
+        <div>
+          <div><p>{{ _('Show') }}
+	            <input type="radio" name="select" value="all" checked>{{ _('all users') }} /
+	        	<input type="radio" name="select" value="active">{{ _('active users only') }} /
+	        	<input type="radio" name="select" value="inactive">{{ _('inactive users only') }}
+	          </p>
+          </div>
+          <div style="display: inline-block;">
              <form id="form" action="" method="post">
 		        <table class="table100">
 		            <tr>
                 	<th><input type="checkbox" id="select_all"></th>
 		            <th>{{ _("Is active") }}</th>
 		            <th>{{ _("Last login time") }}</th>
-		            <th>{{ _("User name") }}</th>
+		            <th>{{ _("User") }}</th>
 		            <th>{{ _("Name") }}</th>
 		            <th>{{ _("Email address") }}</th>
 		            <th>{{ _("Language") }}</th>
 		            <th>{{ _("Roles") }}</th>
-		            <th>{{ _("Operations") }}</th>
 		            </tr>
 		        {% if users %}
 		            {% for u in users %}
@@ -96,14 +90,19 @@ $(document).ready( function() {
 		                	<td><input type="checkbox" class="user" name="select_user" value="{{u.username}}">
 		                	<td>{% if u.is_active %} {{ _("Active") }} {%else%} {{ _("Inactive") }} {%endif%}</td>
 		                    <td>{% if u.last_login_at %} {{(u.last_login_at / 1000) | timestamp }} {% endif %}</td>
-		                    {% if current_user.username == u.username %}
-		                    <td title="{{ _('me') }}">&#9733; <b>{{u.username}}</b></td>
-		                      {% else %}<td>{{u.username}}{% endif %}</td>
+		                    <td>{% if current_user.username == u.username %}
+		                      &#9733; <a href="update_user/{{u.username}}" title="{{ _('Edit me') }}">
+		                          <b>{{u.username}}</b></a>
+		                      {% else %}
+		                      <a href="update_user/{{u.username}}" title="{{ _('Edit') }}">
+		                          {{u.username}}</a>
+		                      {% endif %}
+		                    </td>
+		                    </td>
 		                    <td>{{u.name}}</td>
                             <td>{{u.email}}</td>
                             <td class="center">{{u.language}}</td>
-		                    <td>{{u.roles}}</td>
-		                    <td><a href="update_user/{{u.username}}">{{ _("Edit user") }}</a></td>
+		                    <td>{{ u.roles|join(', ') }}</td>
 		                </tr>
 		            {% endfor %}
 		        {% else %}
@@ -116,7 +115,7 @@ $(document).ready( function() {
 		        	<button id="list_gedcoms">{{ _("Uploaded GEDCOMs") }}</button>
 		        	<button id="send_email">{{ _("Send email") }}</button>
 	        </form>
-	        </div>
+	    </div>
     </div> 
   </div>
 </div>

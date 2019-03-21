@@ -524,6 +524,22 @@ msgstr "Tiedot kannasta"
 msgid "Active User names"
 msgstr "Aktiiviset käyttäjät"
 
+#: bp/admin/templates/admin/list_users.html:72
+msgid "Show"
+msgstr "Näytä"
+
+#: bp/admin/templates/admin/list_users.html:73
+msgid "all users"
+msgstr "kaikki käyttäjät"
+
+#: bp/admin/templates/admin/list_users.html:74
+msgid "active users only"
+msgstr "vain aktiiviset käyttäjät"
+
+#: bp/admin/templates/admin/list_users.html:75
+msgid "inactive users only"
+msgstr "vain suljetut käyttäjät"
+                
 #: bp/admin/templates/admin/list_users.html:91 bp/admin/templates/admin/uploads.html:56
 msgid "Operations"
 msgstr "Toimenpiteet"
@@ -537,12 +553,12 @@ msgid "Inactive"
 msgstr "Suljettu"
 
 #: bp/admin/templates/admin/list_users.html:100 bp/admin/templates/admin/uploads.html:62
-msgid "me"
-msgstr "minä"
+msgid "Edit me"
+msgstr "Muokkaa profiiliani"
 
 #: bp/admin/templates/admin/list_users.html:106
-msgid "Edit user"
-msgstr "Muokkaa käyttäjän tietoja"
+msgid "Edit"
+msgstr "Muokkaa"
 
 #: bp/admin/templates/admin/list_users.html:110
 msgid "No users"

@@ -17,6 +17,7 @@
              src="/static/tam.png" alt="{{ _('Admin-Start Page') }}" title="{{ _('Admin-Start Page') }}"
              onmouseover="this.src='/static/tam1.png';" 
              onmouseout="this.src='/static/tam.png';"/></a>
+        <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
         <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
 
 	{% from "start/s_macros.html" import hamburger_menu with context %}
@@ -26,5 +27,18 @@
 	   ) ) }}
 
     {% endblock %}
+
+    <div class="fullclear"></div>
+    <div id="footer">
+        <span class="copyright">&nbsp;</span>
+        <span class="createdate">{{ config.STK_SYSNAME }} &nbsp;
+            {{ _('Version') }} {{ 'app'|app_date }}
+            {% if elapsed %}
+                <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+            {% endif %}
+        </span>
+    </div>
+    <div class="fullclear"></div>
+
   </body>
 </html>

@@ -214,6 +214,34 @@ div.fullclear {
 	background: #eee;
 	text-align: right;
 }
+/* Footer
+----------------------------------------------------- */
+#footer {
+    clear: both;
+    margin-top: 1em;
+    background-color: #CCC;
+    border-top: solid 1px #555;
+}
+#footer > * {
+    background-color: #CCC;
+}
+#footer span.copyright {
+    display: inline-block;
+    width: 50%;
+    padding-left: 15px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+#footer span.createdate {
+    display: inline-block;
+    margin-top: 7px;
+    float: right;
+    text-align: right;
+    padding-right: 15px;
+    width: 40%;
+    font-size:8pt;
+    color: gray;
+}
 
 div.legend { /* Not used? */
      margin-left:4em; 
