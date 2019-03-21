@@ -88,16 +88,25 @@ h1 {
     background-color:bisque;
     font-family: Georgia, "Times New Roman", times;
     font-size: 13pt;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 2px;
     width: 100%;
 }
-.h1_user {
-	position: absolute; 
-	top: 12px; 
-	right: 4px; 
-	text-align: right;
-	font-size: 12px;
-	color: blue;
+h1 div.curr_user {
+    float: right; 
+    margin-right: 30px; 
+    font-family: verdana, sans-serif;
+    font-weight: normal; 
+    font-size: 9pt;
+    padding: 4px;
 }
+h1 div.curr_user a { 
+    text-decoration: none;     
+    color: #7e6b53; /* Darker bisque */
+}
+h1 div.curr_user a:hover { text-decoration: underline; }
+
 img#logo {
     width: 43px;
     height: 44px;
@@ -772,25 +781,29 @@ a.familymap {
 ----------------------------------------------------- */
 #footer {
     clear: both;
-    padding-top: 1em;
+    margin-top: 1em;
     background-color: #CCC;
     border-top: solid 1px #555;
 }
 #footer > * {
-    background-color: #EEE;
+    background-color: #CCC;
 }
-#footer p#createdate {
-    float: left;
-    width: 50%;
-    text-align: left;
+#footer span.copyright {
+    display: inline-block;
+	width: 50%;
     padding-left: 15px;
-    margin-top: 1em;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
-#footer p#copyright {
-    float: right;
-    width: 40%;
+#footer span.createdate {
+    display: inline-block;
+    margin-top: 7px;
+	float: right;
     text-align: right;
     padding-right: 15px;
+    width: 40%;
+    font-size:8pt;
+    color: gray;
 }
 
 /* Overwritten

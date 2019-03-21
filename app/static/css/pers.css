@@ -29,15 +29,19 @@ img#logo {
     margin: -16px 5px 0 5px;
     vertical-align: text-top;
 }
-.bread {
-    margin: 2px; 
-    color: #cf7c19; 
-    font-style: italic; 
+h1 div.curr_user {
+    float: right; 
+    margin-right: 30px; 
+    font-family: verdana, sans-serif;
+    font-weight: normal; 
+    font-size: 9pt;
+    padding: 4px;
 }
-a.bread:link { text-decoration: none; }
-a.bread:visited { text-decoration: none; }
-a.bread:hover { text-decoration: underline; }
-a.bread:active { text-decoration: underline; }
+h1 div.curr_user a { 
+	text-decoration: none;     
+    color: #7e6b53; /* Darker bisque */
+}
+h1 div.curr_user a:hover { text-decoration: underline; }
 
 div#paluu {
     position: absolute;
@@ -61,6 +65,7 @@ div#paluu {
 	text-decoration: none; 
     color: black;
 }
+#createdate { font-size:8pt; }
 
 #startdiv {
 	margin-left:50px;

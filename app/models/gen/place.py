@@ -152,7 +152,7 @@ class Place:
                                        place_id=self.uniq_id)
 
             for place_record in place_result:
-                self.change = int(place_record["place"]["change"])  #TODO only temporary int()
+                self.change = place_record["place"]["change"]
                 self.id = place_record["place"]["id"]
                 self.type = place_record["place"]["type"]
                 self.coord = place_record["place"]["coord"]

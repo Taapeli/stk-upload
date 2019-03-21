@@ -36,16 +36,16 @@
 
     <div class="fullclear"></div>
     <div id="footer">
-        <p id="createdate">{{ config.STK_SYSNAME }} &nbsp;
-        {% if elapsed %}
-        <tt style="font-size:8pt;color:maroon;">time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
-        {% endif %}
-        <small style="font-size:8pt">{{ _('version') }} {{ 'app'|app_date }}</small>
-        </p>
-        <p id="copyright">
-        © 2019 {{ _('The Genealogical Society of Finland') }}
-        </p>
+        <span class="copyright">© 2019 {{ _('The Genealogical Society of Finland') }}</span>
+        <span class="createdate">{{ config.STK_SYSNAME }} &nbsp;
+            {{ _('Version') }} {{ 'app'|app_date }}
+	        {% if elapsed %}
+	            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+	        {% endif %}
+        </span>
     </div>
+    <div class="fullclear"></div>
+
     <script src="/static/js/help.js?2"></script>
 
 </body></html>
