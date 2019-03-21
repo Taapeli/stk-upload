@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-20 15:46+0200\n"
-"PO-Revision-Date: 2019-03-20 15:46+0200\n"
+"POT-Creation-Date: 2019-03-20 18:32+0200\n"
+"PO-Revision-Date: 2019-03-20 18:33+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -252,30 +252,30 @@ msgstr "Käyttäjätiedot päivitetty"
 msgid "Data import from {!r} to database has been started."
 msgstr "Tietojen talletus tiedostosta {!r} on käynnistetty."
 
-#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:208 bp/admin/uploads.py:230
+#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:209 bp/admin/uploads.py:232
 #: bp/gramps/templates/gramps/uploads.html:74
 msgid "UPLOADED"
 msgstr "LADATTU"
 
-#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:211
+#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:212
 msgid "ERROR"
 msgstr "VIRHE"
 
-#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:213 bp/admin/uploads.py:231
+#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:214 bp/admin/uploads.py:233
 #: bp/gramps/templates/gramps/uploads.html:75
 msgid "STORING"
 msgstr "MENOSSA TIETOKANTAAN"
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:215 bp/admin/uploads.py:229
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:216 bp/admin/uploads.py:231
 #: bp/gramps/templates/gramps/uploads.html:77
 msgid "STORED"
 msgstr "TIETOKANNASSA"
 
-#: bp/admin/uploads.py:220 bp/gramps/templates/gramps/uploads.html:80
+#: bp/admin/uploads.py:221 bp/gramps/templates/gramps/uploads.html:80
 msgid "REMOVED"
 msgstr "POISTETTU KANNASTA"
 
-#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:223
+#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:224
 #: bp/gramps/templates/gramps/uploads.html:81
 msgid "FAILED"
 msgstr "EPÄONNISTUI"
@@ -757,7 +757,7 @@ msgstr "XML-tiedosto"
 msgid "Status"
 msgstr "Tila"
 
-#: bp/admin/templates/admin/uploads.html:75 bp/gramps/templates/gramps/uploads.html:111
+#: bp/admin/templates/admin/uploads.html:75 bp/gramps/templates/gramps/uploads.html:112
 msgid "Store to database"
 msgstr "Tallenna tietokantaan"
 
@@ -906,7 +906,7 @@ msgstr "Gedcom-tiedoston nimi"
 msgid "Name of the log file"
 msgstr "Lokitiedoston nimi"
 
-#: bp/gedcom/routes.py:523 bp/gedcom/routes.py:722
+#: bp/gedcom/routes.py:523 bp/gedcom/routes.py:724
 msgid "Display changed rows"
 msgstr "Näytä muutetut rivit"
 
@@ -938,11 +938,11 @@ msgstr "Vanha versio talletettu nimelle {}"
 msgid "Transform '{}' ended at {}"
 msgstr "Muunnos '{}' päättyi {}"
 
-#: bp/gedcom/routes.py:634 static/js/gedcom_scripts.js:253
+#: bp/gedcom/routes.py:636 static/js/gedcom_scripts.js:257
 msgid "Errors:"
 msgstr "Virheitä:"
 
-#: bp/gedcom/routes.py:695
+#: bp/gedcom/routes.py:697
 msgid "Unsupported type: "
 msgstr "Tyyppiä ei tueta:"
 
@@ -1538,31 +1538,36 @@ msgstr "Ehdokasaineisto poistunut"
 msgid "deleted from database"
 msgstr "poistettu kannasta"
 
-#: bp/gramps/templates/gramps/uploads.html:108
+#: bp/gramps/templates/gramps/uploads.html:100
+#, python-format
+msgid "batch %(batch_id)s; %(persons)d persons"
+msgstr "erä %(batch_id)s; %(persons)d henkilöä"
+
+#: bp/gramps/templates/gramps/uploads.html:109
 msgid "Operations for"
 msgstr "Toiminnot tiedostolle"
 
-#: bp/gramps/templates/gramps/uploads.html:108
+#: bp/gramps/templates/gramps/uploads.html:109
 msgid "the selected file"
 msgstr "valittu tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:110
+#: bp/gramps/templates/gramps/uploads.html:111
 msgid "Download to your computer"
 msgstr "Lataa omalle koneelle"
 
-#: bp/gramps/templates/gramps/uploads.html:112
+#: bp/gramps/templates/gramps/uploads.html:113
 msgid "Show last log"
 msgstr "Näytä viimeisin loki"
 
-#: bp/gramps/templates/gramps/uploads.html:113
+#: bp/gramps/templates/gramps/uploads.html:114
 msgid "Delete the file"
 msgstr "Tuhoa tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:119
+#: bp/gramps/templates/gramps/uploads.html:120
 msgid "See your own data"
 msgstr "Katso muodostettuja ehdokasaineistojasi"
 
-#: bp/gramps/templates/gramps/uploads.html:121
+#: bp/gramps/templates/gramps/uploads.html:122
 msgid "Return to front page"
 msgstr "Palaa etusivulle"
 

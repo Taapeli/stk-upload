@@ -68,7 +68,11 @@
     	               {{upload.xmlname}}</a> 
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}
-	           	{% if upload.batch_id %} (id={{ upload.batch_id }}) {% endif %}
+	           	{% if upload.batch_id %}
+	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
+	           	   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
+	           	   {% endif %}
+	           	{% endif %}
                </td>
 	           <td class="msg_INFO">
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>

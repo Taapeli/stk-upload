@@ -478,7 +478,7 @@ def display_changes(lines,item,linenum=None):
         print()
         return
     print("<b>"+_("Replaced:")+"</b>")
-    if linenum: print("("+_("starting from line ")+str(linenum)+")")
+    if linenum: print("("+_("starting from line ")+f"<a href='#' class='gedcomlink'>{linenum}</a>)")
     print("<gedcom-text>")
     for line in lines:
         print(line)
@@ -580,6 +580,8 @@ def process_gedcom(arglist, transform_module):
         os.rename(old_name,args.input_gedcom)
         old_basename = "" 
     rsp = dict(stdout=output,stderr=errors,oldname=old_basename,logfile=args.logfile)
+    if hasattr(transform_module,"output_format") and transform_module.output_format == "plain_text":
+        rsp["plain_text"] = True
     return jsonify(rsp)
             
                  
@@ -637,8 +639,8 @@ def gedcom_transform(gedcom,transform):
         except FileNotFoundError:
             log = "" 
 #        time.sleep(1)  # for testing...
-        rsp = dict(stdout="<pre>"+log + "\n" + s1 + "</pre>",stderr="<pre>"+s2+"</pre>",oldname="",logfile=logfile,
-           diff="")
+        rsp = dict(stdout=log + "\n" + s1,stderr=s2,oldname="",logfile=logfile,
+           diff="",plain_text=True)
         return jsonify(rsp)
 
 def build_parser(filename,gedcom,gedcom_filename):

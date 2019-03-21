@@ -117,6 +117,9 @@ from flask_babelex import _
 name = _("Citations in notes")
 version = "0.9" 
 doclink = "http://taapeli.referata.com/wiki/Lähdeviitteiden_ryhmät_-muunnos"
+#output_format = "plain_text"
+
+debugging = False
 
 import logging
 # LOG = logging.getLogger(__name__)
@@ -168,7 +171,8 @@ def parseText(textpart):
 #            LOG.debug('    >>>>', lpart)
             if re.match(regexb, lpart):                
                 src_groups = re.match(regexb, lpart).groups()
-                print("    Parsed: {}  >>>>>>> {}|{}|{}|{}|{}|{}|{}|{}"\
+                if debugging: 
+                    print("    Parsed: {}  >>>>>>> {}|{}|{}|{}|{}|{}|{}|{}"\
                       .format(lpart, src_groups[0], src_groups[1],src_groups[2], src_groups[3], \
                               src_groups[4] if src_groups[4] else "", \
                               str(src_groups[5]) if src_groups[5] else "", \
@@ -194,7 +198,7 @@ def parseText(textpart):
                 citations.append(cstring)
 
             else:
-                print('    textpart-parser match failed', lpart)    
+                if debugging: print('    textpart-parser match failed', lpart)    
     return textouts, citations
 
 class Citations(transformer.Transformation):
