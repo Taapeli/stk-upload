@@ -20,14 +20,22 @@ from models import email
 """ Application route definitions
 """ 
 
+@shareds.app.before_request
+def force_https():
+    if request.endpoint in shareds.app.view_functions and not request.is_secure:
+        #print(f"redirect to {request.url.replace('http://', 'https://')}")
+        host = request.host.split(":")[0]
+        if host in {"localhost","127.0.0.1"}: return
+        return redirect(request.url.replace('http://', 'https://'))
+    
 @shareds.app.route('/', methods=['GET', 'POST'])
 def start():
     """ Home page for logged in user (from login page or home button) 
         or anonymous user (home)
     """
-    print("--- " + repr(request))
-#    print("-> bp.start.routes.start auth={}, new_lang={}, user_session".\
-#          format(current_user.is_authenticated, new_lang))
+    print(f"request.endpoint = {request.endpoint}")
+    print(f"request.is_secure = {request.is_secure}")
+    print(f"request.host = {request.host}")
     if current_user.is_authenticated:
         role_names = [role.name for role in current_user.roles]
         logger.info("Start user {}/{}, roles {}".\
