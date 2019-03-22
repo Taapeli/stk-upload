@@ -4,7 +4,12 @@
 {% block body %}
 {{ super() }}
 
-<style>form { display: inline-block; }</style>
+<style>
+form { display: inline-block; }
+#pending table tbody tr td {
+    padding: 4px;
+}
+</style>
 
 <script>
 $(document).ready( function() {
@@ -52,7 +57,7 @@ $(document).ready( function() {
                     
 <div id="startdiv">
     <div>
-        <h2>{{ _("Active User names") }}</h2>
+        <h2>{{ _("User List") }}</h2>
          {% with messages = get_flashed_messages(with_categories=true) %}
 
           {% if messages %}
@@ -65,6 +70,7 @@ $(document).ready( function() {
         {% endwith %}
        <div id="errors" class="errors"></div>
         <div>
+          <h3>{{ _("Active User names") }}</h3>
           <div><p>{{ _('Show') }}
 	            <input type="radio" name="select" value="all" checked>{{ _('all users') }} /
 	        	<input type="radio" name="select" value="active">{{ _('active users only') }} /
@@ -109,14 +115,43 @@ $(document).ready( function() {
 		                <tr><td colspan="1">{{ _("No users") }}</td></tr>
 		        {% endif %}
 		        </table>
-		        <p>
-		        <h3>{{ _("Operations for selected users") }}</h3>
-					<button id="list_uploads">{{ _("Show uploaded Gramps files") }}</button>
-		        	<button id="list_gedcoms">{{ _("Uploaded GEDCOMs") }}</button>
-		        	<button id="send_email">{{ _("Send email") }}</button>
+		        <div style="margin-left:2em;">
+	                <h4>{{ _("Operations for selected users") }}</h4>
+			        <p>
+						<button id="list_uploads">{{ _("Show uploaded Gramps files") }}</button>
+			        	<button id="list_gedcoms">{{ _("Uploaded GEDCOMs") }}</button>
+			        	<button id="send_email">{{ _("Send email") }}</button>
+		        	</p>
+		        </div>
 	        </form>
 	    </div>
     </div> 
   </div>
+
+    <div>
+          <div id="pending" style="display: inline-block;">
+            <h3>{{ _('Pending user candidates') }}</h3>
+            <table class="table100">
+                <tr>{{ _('<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>') }}
+                </tr>
+            {% if emails %}
+                {% for e in emails %}
+                    <tr>
+                        <td>{{e.allowed_email}}</td>
+                        <td>{{e.default_role}}</td>
+                        <td>{{e.creator}}</td>
+                        <td>{{e.created_at | isodatetime}}</td>
+                        <td>{{e.confirmed_at | isodatetime}}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                    <tr><td colspan="1">{{ _('No data') }}</td></tr>
+            {% endif %}
+            </table>
+            <p>&rtrif; <a href="/admin/allowed_emails">{{ _('Create a new user candidate') }}</a>
+            </p>
+         </div>
+    </div>
+
 </div>
 {% endblock %}

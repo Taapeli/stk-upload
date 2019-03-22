@@ -24,8 +24,7 @@
     <h1><a href="/"><img id="logo" src="/static/tam.png" alt="{{ _('Back to Top') }}" title="{{ _('Back to Top') }}"
              onmouseover="this.src='/static/tam1.png';" 
              onmouseout="this.src='/static/tam.png';"/></a>
-        <div style="float: right; margin-right: 30px; font-family: verdana, sans-serif;
-                    font-weight: normal; font-size: 9pt;padding: 4px;">{{current_user.username}}</div>
+        <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
         <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
 
 {% endblock %}
@@ -33,9 +32,9 @@
     <div id="footer">
         <span id="createdate">{{ config.STK_SYSNAME }} &nbsp;
         {% if elapsed %}
-        <tt style="font-size:8pt;color:maroon;">time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
         {% endif %}
-        <small style="font-size: 6pt">{{ _('Version') }} {{ 'app'|app_date }}</small></span>
+        {{ _('Version') }} {{ 'app'|app_date }}</span>
     <div class="fullclear"></div>
 
 <div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>

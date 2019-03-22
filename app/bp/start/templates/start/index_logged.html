@@ -1,7 +1,7 @@
-{# start/index.html_ #}
+{# start/index_logged.html_ #}
 {% extends "start/s_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _("Isotammi User's Start Page") }} (start/index_logged){% endblock %}
+{% block title %}{{ _("Isotammi User's Start Page") }}{% endblock %}
 {% block body %}
   {{ super() }}
   {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -13,11 +13,11 @@
   <div>
     <h2>{{ _("User's home page for Isotammi Services") }}</h2>
 
-    <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
+{#  <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
           <i>{{ 'git'|app_date }}</i></span></p>
-
+#}
         <div class="row">
 
     {% if current_user.is_authenticated and current_user.has_role('research') %}
@@ -54,7 +54,7 @@
          <div class="startbox gedtools">
             <div style="display: inline-block;">
             <form method="get" action="/gedcom">
-               <h3>{{ _('My Gedcom Materials') }}</h3>
+               <h3>{{ _('Gedcom tools') }}</h3>
                <p>{{ _('Upload your .ged files and experiment various cleanup functions') }}.</p>
               <div class="submit"> 
                  <button type="submit">{{ _('My Gedcom files') }}</button>

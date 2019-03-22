@@ -34,7 +34,7 @@ function confirm_delete(url) {
 </style>
 
 <div style="margin-left:50px; padding-bottom: 2em;">
-  <div>
+
     <h2>{{ _('Isotammi Database Management Operations') }}</h2>
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
@@ -91,5 +91,7 @@ function confirm_delete(url) {
             </form>
         </div>
     {% endif %}
+  </div>{# row #}
+</div>
 
 {% endblock %}

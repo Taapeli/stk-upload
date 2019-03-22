@@ -19,6 +19,7 @@ from flask import send_from_directory
 from flask_babelex import _
 
 import logging 
+import string
 LOG = logging.getLogger(__name__)
 
 from models import util, syslog
@@ -170,7 +171,10 @@ def get_transforms():
 def list_gedcoms(username):
     gedcom_folder = get_gedcom_folder(username)
     try:
-        names = sorted([name for name in os.listdir(gedcom_folder) if name.lower().endswith(".ged")])
+        names = sorted([name for name in os.listdir(gedcom_folder) 
+                        if name.lower().endswith(".ged")],
+                        key=lambda s: s.lower()
+                    )
     except:
         names = []
     files = []
@@ -398,6 +402,28 @@ def gedcom_analyze(gedcom):
     rsp = analyze(filename,encoding)
     return rsp
 
+@bp.route('/gedcom/get_excerpt/<gedcom>/<int:linenum>')
+@login_required
+@roles_accepted('gedcom', 'research')
+def get_excerpt(gedcom,linenum):
+    filename = gedcom_fullname(gedcom)
+    metadata = get_metadata(gedcom)
+    encoding = metadata['encoding'] 
+    lines = open(filename,encoding=encoding).readlines()
+    firstline = linenum - 10
+    if firstline < 0: firstline = 0
+    html = ""
+    for i,line in enumerate(lines[firstline:linenum+9]):
+        line = line.strip()
+        html += f"<br><span class=linenum>{firstline+i+1}</span>: "
+        if firstline+i == linenum-1:
+            html += f"<span class=current_line>{line}</span>"
+        else:    
+            html += f"{line}"
+    return html
+        
+    return "".join(lines[firstline:linenum+5])
+
 @bp.route('/gedcom/delete/<gedcom>')
 @login_required
 @roles_accepted('gedcom', 'research')
@@ -452,7 +478,7 @@ def display_changes(lines,item,linenum=None):
         print()
         return
     print("<b>"+_("Replaced:")+"</b>")
-    if linenum: print("("+_("starting from line ")+str(linenum)+")")
+    if linenum: print("("+_("starting from line ")+f"<a href='#' class='gedcomlink'>{linenum}</a>)")
     print("<gedcom-text>")
     for line in lines:
         print(line)
@@ -554,6 +580,8 @@ def process_gedcom(arglist, transform_module):
         os.rename(old_name,args.input_gedcom)
         old_basename = "" 
     rsp = dict(stdout=output,stderr=errors,oldname=old_basename,logfile=args.logfile)
+    if hasattr(transform_module,"output_format") and transform_module.output_format == "plain_text":
+        rsp["plain_text"] = True
     return jsonify(rsp)
             
                  
@@ -611,8 +639,8 @@ def gedcom_transform(gedcom,transform):
         except FileNotFoundError:
             log = "" 
 #        time.sleep(1)  # for testing...
-        rsp = dict(stdout="<pre>"+log + "\n" + s1 + "</pre>",stderr="<pre>"+s2+"</pre>",oldname="",logfile=logfile,
-           diff="")
+        rsp = dict(stdout=log + "\n" + s1,stderr=s2,oldname="",logfile=logfile,
+           diff="",plain_text=True)
         return jsonify(rsp)
 
 def build_parser(filename,gedcom,gedcom_filename):

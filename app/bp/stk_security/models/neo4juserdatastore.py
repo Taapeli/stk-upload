@@ -138,7 +138,7 @@ class Neo4jUserDatastore(UserDatastore):
         user.confirmed_at = None
         user.is_active = True
         try:
-            logger.debug('_put_user new', user.email, ' ', user.name, ' ', user.roles[0])                
+            logging.info('_put_user new: %s', user.__dict__) # debugging
             result = tx.run(Cypher.user_register,
                 email = user.email,
                 password = user.password, 

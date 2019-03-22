@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-18 17:16+0200\n"
+"POT-Creation-Date: 2019-03-20 18:32+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -22,17 +22,17 @@ msgstr ""
 msgid "Undefined"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:26 config.py:30
+#: bp/start/templates/start/my_settings.html:29 config.py:30
 #: templates/select_refcols.html:48 templates/select_refcols.html:76
 msgid "Finnish"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:29 config.py:31
+#: bp/start/templates/start/my_settings.html:32 config.py:31
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:32 config.py:32
+#: bp/start/templates/start/my_settings.html:35 config.py:32
 msgid "English"
 msgstr ""
 
@@ -83,7 +83,8 @@ msgid "Name"
 msgstr ""
 
 #: bp/admin/forms.py:42 bp/admin/forms.py:45
-#: bp/admin/templates/admin/list_users.html:89 setups.py:216
+#: bp/admin/templates/admin/list_users.html:89 bp/start/forms.py:18
+#: bp/start/forms.py:22 setups.py:216
 msgid "Language"
 msgstr ""
 
@@ -115,7 +116,7 @@ msgstr ""
 msgid "Name:"
 msgstr ""
 
-#: bp/admin/forms.py:41
+#: bp/admin/forms.py:41 bp/start/forms.py:12
 msgid "Name of the user"
 msgstr ""
 
@@ -128,6 +129,7 @@ msgid "Active / passive user"
 msgstr ""
 
 #: bp/admin/forms.py:48 bp/admin/templates/admin/list_users.html:90
+#: bp/start/templates/start/my_settings.html:46
 msgid "Roles"
 msgstr ""
 
@@ -208,11 +210,11 @@ msgstr ""
 msgid "Update user"
 msgstr ""
 
-#: bp/admin/forms.py:75
+#: bp/admin/forms.py:75 bp/start/forms.py:15
 msgid "Maximum 100 characters"
 msgstr ""
 
-#: bp/admin/forms.py:77
+#: bp/admin/forms.py:77 bp/start/forms.py:17
 msgid "Enter the email address"
 msgstr ""
 
@@ -252,30 +254,30 @@ msgstr ""
 msgid "Data import from {!r} to database has been started."
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:208
-#: bp/admin/uploads.py:230 bp/gramps/templates/gramps/uploads.html:74
+#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:209
+#: bp/admin/uploads.py:232 bp/gramps/templates/gramps/uploads.html:74
 msgid "UPLOADED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:211
+#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:212
 msgid "ERROR"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:213
-#: bp/admin/uploads.py:231 bp/gramps/templates/gramps/uploads.html:75
+#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:214
+#: bp/admin/uploads.py:233 bp/gramps/templates/gramps/uploads.html:75
 msgid "STORING"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:215
-#: bp/admin/uploads.py:229 bp/gramps/templates/gramps/uploads.html:77
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:216
+#: bp/admin/uploads.py:231 bp/gramps/templates/gramps/uploads.html:77
 msgid "STORED"
 msgstr ""
 
-#: bp/admin/uploads.py:220 bp/gramps/templates/gramps/uploads.html:80
+#: bp/admin/uploads.py:221 bp/gramps/templates/gramps/uploads.html:80
 msgid "REMOVED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:223
+#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:224
 #: bp/gramps/templates/gramps/uploads.html:81
 msgid "FAILED"
 msgstr ""
@@ -322,7 +324,7 @@ msgstr ""
 #: bp/scene/templates/scene/index_scene.html:18
 #: bp/start/templates/start/index_logged.html:16
 #: bp/start/templates/start/my_message.html:43
-#: bp/start/templates/start/my_settings.html:19
+#: bp/start/templates/start/my_settings.html:18
 msgid "User"
 msgstr ""
 
@@ -628,13 +630,15 @@ msgid "Message from Isotammi admin"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:49
+#: bp/start/templates/start/join2.html:55
 #: bp/start/templates/start/my_message.html:51
 msgid "Message"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:54
+#: bp/start/templates/start/join2.html:60
 #: bp/start/templates/start/my_message.html:56
-#: bp/start/templates/start/my_settings.html:36
+#: bp/start/templates/start/my_settings.html:38
 msgid "Apply"
 msgstr ""
 
@@ -735,7 +739,7 @@ msgid "Store to Database"
 msgstr ""
 
 #: bp/admin/templates/admin/talletettu.html:27
-#: bp/start/templates/start/my_settings.html:35
+#: bp/start/templates/start/my_settings.html:39
 #: bp/tools/templates/tools/person2.html:43
 #: bp/tools/templates/tools/source_citations.html:35
 #: templates/cite_sour_repo.html:73 templates/db_test.html:10
@@ -785,7 +789,7 @@ msgid "there was an error"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:53
-#: bp/gedcom/templates/gedcom_info.html:48
+#: bp/gedcom/templates/gedcom_info.html:57
 #: bp/gramps/templates/gramps/uploads.html:87
 msgid "Upload time"
 msgstr ""
@@ -801,7 +805,7 @@ msgid "Status"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:75
-#: bp/gramps/templates/gramps/uploads.html:111
+#: bp/gramps/templates/gramps/uploads.html:112
 msgid "Store to database"
 msgstr ""
 
@@ -817,171 +821,178 @@ msgstr ""
 msgid "GEDCOM Analyzer"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:177
+#: bp/gedcom/gedcom_analyze.py:170
+#, python-format
+msgid "count=%(num)d, line %(lines)s"
+msgid_plural "count=%(num)d, lines %(lines)s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: bp/gedcom/gedcom_analyze.py:183
 msgid "Invalid tag hierarchy"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:178
+#: bp/gedcom/gedcom_analyze.py:184
 msgid "No value"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:179
+#: bp/gedcom/gedcom_analyze.py:185
 msgid "Invalid dates"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:182
+#: bp/gedcom/gedcom_analyze.py:188
 msgid "Too few child tags"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:183
+#: bp/gedcom/gedcom_analyze.py:189
 msgid "Too many child tags"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:184
+#: bp/gedcom/gedcom_analyze.py:190
 msgid "Records for submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:185
+#: bp/gedcom/gedcom_analyze.py:191
 msgid "Families with no parents"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:192
+#: bp/gedcom/gedcom_analyze.py:198
 msgid "With sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:193
+#: bp/gedcom/gedcom_analyze.py:199
 msgid "Without sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:307
+#: bp/gedcom/gedcom_analyze.py:313
 msgid "Genders"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:327
+#: bp/gedcom/gedcom_analyze.py:333
 msgid "Submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:335
+#: bp/gedcom/gedcom_analyze.py:341
 msgid "Missing paths"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:341
+#: bp/gedcom/gedcom_analyze.py:347
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:345
+#: bp/gedcom/gedcom_analyze.py:351
 msgid "Invalid pointers"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:354
+#: bp/gedcom/gedcom_analyze.py:360
 msgid "Missing records"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:358 bp/gedcom/gedcom_analyze.py:368
+#: bp/gedcom/gedcom_analyze.py:364 bp/gedcom/gedcom_analyze.py:374
 msgid "Total"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:364
+#: bp/gedcom/gedcom_analyze.py:370
 msgid "Unused records"
 msgstr ""
 
-#: bp/gedcom/routes.py:193
+#: bp/gedcom/routes.py:197
 msgid "Gedcoms"
 msgstr ""
 
-#: bp/gedcom/routes.py:214
+#: bp/gedcom/routes.py:218
 msgid "Current file"
 msgstr ""
 
-#: bp/gedcom/routes.py:249 bp/gedcom/routes.py:250 bp/gedcom/routes.py:266
-#: bp/gedcom/routes.py:267
+#: bp/gedcom/routes.py:253 bp/gedcom/routes.py:254 bp/gedcom/routes.py:270
+#: bp/gedcom/routes.py:271
 msgid "File {} saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:294 bp/gedcom/routes.py:300
+#: bp/gedcom/routes.py:298 bp/gedcom/routes.py:304
 msgid "Choose a GEDCOM file to upload"
 msgstr ""
 
-#: bp/gedcom/routes.py:309
+#: bp/gedcom/routes.py:313
 msgid "This GEDCOM file already exists"
 msgstr ""
 
-#: bp/gedcom/routes.py:333 bp/gedcom/routes.py:356
+#: bp/gedcom/routes.py:337 bp/gedcom/routes.py:360
 msgid "You don't have permission to view that GEDCOM"
 msgstr ""
 
-#: bp/gedcom/routes.py:349
+#: bp/gedcom/routes.py:353
 msgid "That GEDCOM file does not exist on the server"
 msgstr ""
 
-#: bp/gedcom/routes.py:447
+#: bp/gedcom/routes.py:473
 msgid "Deleted:"
 msgstr ""
 
-#: bp/gedcom/routes.py:454 bp/gedcom/transformer.py:53
+#: bp/gedcom/routes.py:480 bp/gedcom/transformer.py:53
 #: bp/gedcom/transformer.py:60
 msgid "Replaced:"
 msgstr ""
 
-#: bp/gedcom/routes.py:455
+#: bp/gedcom/routes.py:481
 msgid "starting from line "
 msgstr ""
 
-#: bp/gedcom/routes.py:460 bp/gedcom/transformer.py:55
+#: bp/gedcom/routes.py:486 bp/gedcom/transformer.py:55
 #: bp/gedcom/transformer.py:62
 msgid "With:"
 msgstr ""
 
-#: bp/gedcom/routes.py:483
+#: bp/gedcom/routes.py:509
 msgid "Transform '{}' started at {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:493
+#: bp/gedcom/routes.py:519
 msgid "Name of the input GEDCOM file"
 msgstr ""
 
-#: bp/gedcom/routes.py:494
+#: bp/gedcom/routes.py:520
 msgid "Name of the log file"
 msgstr ""
 
-#: bp/gedcom/routes.py:497 bp/gedcom/routes.py:696
+#: bp/gedcom/routes.py:523 bp/gedcom/routes.py:724
 msgid "Display changed rows"
 msgstr ""
 
-#: bp/gedcom/routes.py:499
+#: bp/gedcom/routes.py:525
 msgid "Do not produce an output file"
 msgstr ""
 
-#: bp/gedcom/routes.py:501
+#: bp/gedcom/routes.py:527
 msgid "Do not produce a log in the output file"
 msgstr ""
 
-#: bp/gedcom/routes.py:503
+#: bp/gedcom/routes.py:529
 msgid "Encoding of the input GEDCOM"
 msgstr ""
 
-#: bp/gedcom/routes.py:530
+#: bp/gedcom/routes.py:556
 msgid "------ Number of changes:"
 msgstr ""
 
-#: bp/gedcom/routes.py:535 bp/gedcom/routes.py:539
+#: bp/gedcom/routes.py:561 bp/gedcom/routes.py:565
 msgid "File saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:536
+#: bp/gedcom/routes.py:562
 msgid "Old file saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:540
+#: bp/gedcom/routes.py:566
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:608 static/js/gedcom_scripts.js:235
+#: bp/gedcom/routes.py:636 static/js/gedcom_scripts.js:257
 msgid "Errors:"
 msgstr ""
 
-#: bp/gedcom/routes.py:669
+#: bp/gedcom/routes.py:697
 msgid "Unsupported type: "
 msgstr ""
 
@@ -1027,7 +1038,10 @@ msgid "Instructions"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:16
-msgid "Gedcom transformations"
+#: bp/gedcom/templates/gedcom_list.html:4
+#: bp/gedcom/templates/gedcom_list.html:12
+#: bp/start/templates/start/index_logged.html:57
+msgid "Gedcom tools"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:23
@@ -1040,7 +1054,7 @@ msgid "user"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:25
-#: bp/gedcom/templates/gedcom_info.html:164
+#: bp/gedcom/templates/gedcom_info.html:176
 #: bp/gedcom/templates/gedcom_list.html:38
 #: bp/scene/templates/scene/person.html:76
 #: bp/scene/templates/scene/place_events.html:117
@@ -1049,7 +1063,7 @@ msgid "Description"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:27
-msgid "Update"
+msgid "Update description"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:33
@@ -1060,178 +1074,166 @@ msgstr ""
 msgid "Permission updated"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:37
+#: bp/gedcom/templates/gedcom_info.html:39
 msgid "Switch to another GEDCOM"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:45
+msgid "Show GEDCOM info"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:54
 msgid "Statistics"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:53
+#: bp/gedcom/templates/gedcom_info.html:62
 msgid "File size"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:58
+#: bp/gedcom/templates/gedcom_info.html:67
 msgid "Gedcom date"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:63
+#: bp/gedcom/templates/gedcom_info.html:72
 msgid "Submitter"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:68
+#: bp/gedcom/templates/gedcom_info.html:77
 msgid "Gedcom version"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:73
+#: bp/gedcom/templates/gedcom_info.html:82
 msgid "Encoding"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:77
+#: bp/gedcom/templates/gedcom_info.html:86
 msgid "Gedcom charset"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:81
+#: bp/gedcom/templates/gedcom_info.html:90
 msgid "Source program"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:94
+#: bp/gedcom/templates/gedcom_info.html:103
 msgid "Number of individuals"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:96
+#: bp/gedcom/templates/gedcom_info.html:105
 msgid "Number of families"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:98
+#: bp/gedcom/templates/gedcom_info.html:107
 msgid "Number of unique places"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:100
+#: bp/gedcom/templates/gedcom_info.html:109
 msgid "Number of notes"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:102
+#: bp/gedcom/templates/gedcom_info.html:111
 msgid "Number of citations"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:104
+#: bp/gedcom/templates/gedcom_info.html:113
 msgid "Number of sources"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:106
+#: bp/gedcom/templates/gedcom_info.html:115
 msgid "Number of repositories"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:108
+#: bp/gedcom/templates/gedcom_info.html:117
 msgid "Number of multimedia objects"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:117
-msgid "Options"
+#: bp/gedcom/templates/gedcom_info.html:126
+msgid "Actions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:120
-msgid "Analyze this GEDCOM for structural problems"
-msgstr ""
-
-#: bp/gedcom/templates/gedcom_info.html:121
-msgid "Analyze"
-msgstr ""
-
-#: bp/gedcom/templates/gedcom_info.html:125
+#: bp/gedcom/templates/gedcom_info.html:129
 msgid "Choose a transformation to perform for this GEDCOM"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:126
+#: bp/gedcom/templates/gedcom_info.html:130
 msgid "Choose a transformation"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:130
+#: bp/gedcom/templates/gedcom_info.html:134
 msgid "Display previous versions of this GEDCOM"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:131
-msgid "Display versions"
-msgstr ""
-
 #: bp/gedcom/templates/gedcom_info.html:135
-msgid "Show log of previous tranformations for this GEDCOM"
+msgid "Versions management"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:136
-msgid "Show transformation history"
-msgstr ""
-
+#: bp/gedcom/templates/gedcom_info.html:140
 #: bp/gedcom/templates/gedcom_info.html:141
-#: bp/gedcom/templates/gedcom_info.html:142
 msgid "Fetch this GEDCOM"
 msgstr ""
 
+#: bp/gedcom/templates/gedcom_info.html:145
 #: bp/gedcom/templates/gedcom_info.html:146
-#: bp/gedcom/templates/gedcom_info.html:147
 msgid "Remove this GEDCOM"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:157
+#: bp/gedcom/templates/gedcom_info.html:152
+msgid "Analyze this GEDCOM for structural problems"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:158
+msgid "Show transformation history"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:169
 msgid "Transformations"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:174
+#: bp/gedcom/templates/gedcom_info.html:186
 msgid "Versions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:177
+#: bp/gedcom/templates/gedcom_info.html:189
 msgid "Delete old versions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:178
+#: bp/gedcom/templates/gedcom_info.html:190
 msgid "Compare versions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:186
+#: bp/gedcom/templates/gedcom_info.html:198
 msgid "Transformation history"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:198
+#: bp/gedcom/templates/gedcom_info.html:210
 msgid "GEDCOM comparison"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:210
+#: bp/gedcom/templates/gedcom_info.html:222
 msgid "Results"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:223
+#: bp/gedcom/templates/gedcom_info.html:241
 msgid "Perform transformation"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:235
+#: bp/gedcom/templates/gedcom_info.html:253
 msgid "Transformation results"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:237
+#: bp/gedcom/templates/gedcom_info.html:255
 msgid "Old version is saved as"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:237
+#: bp/gedcom/templates/gedcom_info.html:255
 msgid "Revert to old version"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:240
+#: bp/gedcom/templates/gedcom_info.html:258
 msgid "Not saved yet"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:241
+#: bp/gedcom/templates/gedcom_info.html:259
 msgid "Save result"
-msgstr ""
-
-#: bp/gedcom/templates/gedcom_list.html:4
-msgid "GEDCOM Materials"
-msgstr ""
-
-#: bp/gedcom/templates/gedcom_list.html:12
-msgid "GEDCOM Management"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_list.html:16
@@ -1597,31 +1599,36 @@ msgstr ""
 msgid "deleted from database"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:108
+#: bp/gramps/templates/gramps/uploads.html:100
+#, python-format
+msgid "batch %(batch_id)s; %(persons)d persons"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:109
 msgid "Operations for"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:108
+#: bp/gramps/templates/gramps/uploads.html:109
 msgid "the selected file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:110
+#: bp/gramps/templates/gramps/uploads.html:111
 msgid "Download to your computer"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:112
+#: bp/gramps/templates/gramps/uploads.html:113
 msgid "Show last log"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:113
+#: bp/gramps/templates/gramps/uploads.html:114
 msgid "Delete the file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:119
+#: bp/gramps/templates/gramps/uploads.html:120
 msgid "See your own data"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:121
+#: bp/gramps/templates/gramps/uploads.html:122
 msgid "Return to front page"
 msgstr ""
 
@@ -2397,11 +2404,63 @@ msgstr ""
 msgid "Repository Name"
 msgstr ""
 
-#: bp/start/routes.py:67
+#: bp/start/forms.py:10
+msgid "Your name:"
+msgstr ""
+
+#: bp/start/forms.py:13
+msgid "Your email address:"
+msgstr ""
+
+#: bp/start/forms.py:23 bp/start/templates/start/join2.html:39
+msgid "Are you a member of the Genealogical Society of Finland?"
+msgstr ""
+
+#: bp/start/forms.py:26 bp/start/templates/start/join2.html:40
+msgid "Yes"
+msgstr ""
+
+#: bp/start/forms.py:27 bp/start/templates/start/join2.html:41
+msgid "No"
+msgstr ""
+
+#: bp/start/forms.py:28
+msgid "Don't know"
+msgstr ""
+
+#: bp/start/forms.py:30 bp/start/templates/start/join2.html:43
+msgid "How many years have you been doing genealogical research?"
+msgstr ""
+
+#: bp/start/forms.py:31 bp/start/templates/start/join2.html:46
+msgid "What genealogy software are you mainly using?"
+msgstr ""
+
+#: bp/start/forms.py:32 bp/start/templates/start/join2.html:49
+msgid "Which families/surnames are you mainly researching?"
+msgstr ""
+
+#: bp/start/forms.py:33 bp/start/templates/start/join2.html:52
+msgid "Which places are you mainly researching?"
+msgstr ""
+
+#: bp/start/forms.py:34
+msgid "Message:"
+msgstr ""
+
+#: bp/start/forms.py:37
+msgid "Send request"
+msgstr ""
+
+#: bp/start/routes.py:90
+msgid "Join message sent"
+msgstr ""
+
+#: bp/start/routes.py:141
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:70
+#: bp/start/routes.py:144
 msgid "Update did not work"
 msgstr ""
 
@@ -2515,10 +2574,6 @@ msgstr ""
 msgid "Family Trees"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:57
-msgid "My Gedcom Materials"
-msgstr ""
-
 #: bp/start/templates/start/index_logged.html:58
 msgid "Upload your .ged files and experiment various cleanup functions"
 msgstr ""
@@ -2539,6 +2594,39 @@ msgstr ""
 msgid "Maintenance"
 msgstr ""
 
+#: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:36
+#: bp/start/templates/start/join2.html:4 bp/start/templates/start/join2.html:20
+msgid "Join Isotammi"
+msgstr ""
+
+#: bp/start/templates/start/join.html:50 bp/start/templates/start/join2.html:24
+msgid ""
+"To join the Isotammi project we wish that you will provide some basic "
+"information below."
+msgstr ""
+
+#: bp/start/templates/start/join.html:51 bp/start/templates/start/join2.html:25
+msgid "Please let us know at least your name and email address."
+msgstr ""
+
+#: bp/start/templates/start/join.html:52 bp/start/templates/start/join2.html:26
+msgid ""
+"You can also provide any comments or additional information in the "
+"message field."
+msgstr ""
+
+#: bp/start/templates/start/join.html:53 bp/start/templates/start/join2.html:27
+msgid "Thank You!"
+msgstr ""
+
+#: bp/start/templates/start/join2.html:33
+msgid "Your name"
+msgstr ""
+
+#: bp/start/templates/start/join2.html:36
+msgid "Your email"
+msgstr ""
+
 #: bp/start/templates/start/my_message.html:4
 #: bp/start/templates/start/my_message.html:37
 msgid "Contact administrators"
@@ -2556,9 +2644,12 @@ msgstr ""
 msgid "Change my settings"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:18
-#: bp/start/templates/start/s_macros.html:29
+#: bp/start/templates/start/my_settings.html:23
 msgid "Change language"
+msgstr ""
+
+#: bp/start/templates/start/my_settings.html:54
+msgid "Candidate materials"
 msgstr ""
 
 #: bp/start/templates/start/s_macros.html:19
@@ -2586,7 +2677,11 @@ msgid "Contact administrator"
 msgstr ""
 
 #: bp/start/templates/start/s_macros.html:28
-msgid "Select language"
+msgid "User profile settings"
+msgstr ""
+
+#: bp/start/templates/start/s_macros.html:29
+msgid "Settings"
 msgstr ""
 
 #: bp/start/templates/start/s_macros.html:37
@@ -2599,6 +2694,24 @@ msgstr ""
 
 #: bp/start/templates/start/s_macros.html:41
 msgid "Logout"
+msgstr ""
+
+#: bp/start/templates/start/thankyou.html:4
+msgid "Thank You"
+msgstr ""
+
+#: bp/start/templates/start/thankyou.html:20
+msgid "Thank You for joining Isotammi"
+msgstr ""
+
+#: bp/start/templates/start/thankyou.html:24
+msgid ""
+"We are processing your request and will soon send you further "
+"instructions in email."
+msgstr ""
+
+#: bp/start/templates/start/thankyou.html:27
+msgid "Go to main page"
 msgstr ""
 
 #: bp/stk_security/templates/security/_menu.html:8
@@ -3242,20 +3355,20 @@ msgstr ""
 msgid "sex not applicable"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:21
+#: static/js/gedcom_scripts.js:22
 msgid "Server error"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:136 static/js/gedcom_scripts.js:145
+#: static/js/gedcom_scripts.js:154 static/js/gedcom_scripts.js:163
 msgid "Are you sure?"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:197 static/js/gedcom_scripts.js:198
+#: static/js/gedcom_scripts.js:215 static/js/gedcom_scripts.js:216
 msgid "Revert to %1"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:209 static/js/gedcom_scripts.js:210
-#: static/js/gedcom_scripts.js:216
+#: static/js/gedcom_scripts.js:227 static/js/gedcom_scripts.js:228
+#: static/js/gedcom_scripts.js:234
 msgid "%1 renamed to %2"
 msgstr ""
 
@@ -3989,872 +4102,4 @@ msgstr ""
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr ""
-
-#~ msgid "No file part"
-#~ msgstr ""
-
-#~ msgid "Ladatut gedcomit:"
-#~ msgstr "Uploaded GEDCOMs:"
-
-#~ msgid "Lataa uusi GEDCOM"
-#~ msgstr "Upload a new GEDCOM"
-
-#~ msgid "Temp"
-#~ msgstr ""
-
-#~ msgid "Toiminto vasta suunnitteilla"
-#~ msgstr ""
-
-#~ msgid "Oletko varma?"
-#~ msgstr ""
-
-#~ msgid "GEDCOM"
-#~ msgstr ""
-
-#~ msgid "Ladattu"
-#~ msgstr ""
-
-#~ msgid "Henkilöiden lukumäärä"
-#~ msgstr ""
-
-#~ msgid "Sallin neuvontapalvelun katselumahdollisuuden"
-#~ msgstr ""
-
-#~ msgid "Muunnokset"
-#~ msgstr ""
-
-#~ msgid "Versiot"
-#~ msgstr ""
-
-#~ msgid "Lataa GEDCOM"
-#~ msgstr ""
-
-#~ msgid "Poista GEDCOM"
-#~ msgstr "Delete GEDCOM"
-
-#~ msgid "Paluu"
-#~ msgstr "Return"
-
-#~ msgid "Ladatut gedcomit"
-#~ msgstr ""
-
-#~ msgid "kpl"
-#~ msgstr ""
-
-#~ msgid "Lataa uusi Gedcom-tiedosto"
-#~ msgstr ""
-
-#~ msgid "Lataa"
-#~ msgstr ""
-
-#~ msgid "Muunnosparametrit"
-#~ msgstr "Transformation parameters"
-
-#~ msgid "Arvo"
-#~ msgstr ""
-
-#~ msgid "Kuvaus"
-#~ msgstr ""
-
-#~ msgid "Oletusarvo"
-#~ msgstr ""
-
-#~ msgid "Lisää"
-#~ msgstr ""
-
-#~ msgid "Muunna"
-#~ msgstr ""
-
-#~ msgid "Muunnoksen tulostus"
-#~ msgstr "Transformation output"
-
-#~ msgid "Lähetä salasanan elvyttämislinkki"
-#~ msgstr ""
-
-#~ msgid "Rekisteröi uusi Suomitietokannan käyttäjäehdokas"
-#~ msgstr ""
-
-#~ msgid "Rekisteröidy Suomitietokannan käyttäjäksi"
-#~ msgstr ""
-
-#~ msgid "Lähetä vahvistamislinkki"
-#~ msgstr ""
-
-#~ msgid "Gedcomit"
-#~ msgstr "Gedcoms"
-
-#~ msgid "Valitse ladattava gedcom-tiedosto"
-#~ msgstr "Please select a Gedcom file to upload"
-
-#~ msgid "Tiedostoa ei ole"
-#~ msgstr ""
-
-#~ msgid "Choose e GEDCOM file to upload"
-#~ msgstr ""
-
-#~ msgid "------ Transform '{}'  started {} ------"
-#~ msgstr ""
-
-#~ msgid "------ Transform '{}'  started  {} ------"
-#~ msgstr ""
-
-#~ msgid "------ Transform '{}'  ended    {} ------"
-#~ msgstr ""
-
-#~ msgid "Palauta"
-#~ msgstr ""
-
-#~ msgid "Päivitä"
-#~ msgstr ""
-
-#~ msgid "Hae tämä tiedosto"
-#~ msgstr ""
-
-#~ msgid "Poista tämä tiedosto"
-#~ msgstr ""
-
-#~ msgid "Valitse muunnos"
-#~ msgstr ""
-
-#~ msgid "Näytä versiot"
-#~ msgstr ""
-
-#~ msgid "Vaihda toiseen aineistoon"
-#~ msgstr ""
-
-#~ msgid "Vertaa versioita"
-#~ msgstr ""
-
-#~ msgid "GEDCOM-vertailu"
-#~ msgstr ""
-
-#~ msgid "Tulokset"
-#~ msgstr ""
-
-#~ msgid "Vanha versio talletettu nimelle"
-#~ msgstr ""
-
-#~ msgid "Paluu alkusivulle"
-#~ msgstr ""
-
-#~ msgid "muunnosparametrit"
-#~ msgstr ""
-
-#~ msgid "Asetus"
-#~ msgstr ""
-
-#~ msgid "Käyttäjänimi"
-#~ msgstr ""
-
-#~ msgid "Nimi"
-#~ msgstr "Name"
-
-#~ msgid "Kieli"
-#~ msgstr ""
-
-#~ msgid "Choose a  GEDCOM file to upload"
-#~ msgstr ""
-
-#~ msgid "Transform '{}' started {}"
-#~ msgstr ""
-
-#~ msgid "Transform '{}' ended {}"
-#~ msgstr ""
-
-#~ msgid "Palautustoimintoa ei vielä ole toteutettu"
-#~ msgstr ""
-
-#~ msgid "Avio-PLAC:n hajoittaminen"
-#~ msgstr ""
-
-#~ msgid "Only process places containing any match string"
-#~ msgstr ""
-
-#~ msgid "Not changed: '{}'"
-#~ msgstr ""
-
-#~ msgid "Add a CONT line if there is no level number"
-#~ msgstr ""
-
-#~ msgid "Insert s _DUMMY tag if a tag is missing"
-#~ msgstr ""
-
-#~ msgid "Start time"
-#~ msgstr ""
-
-#~ msgid "Death cause"
-#~ msgstr ""
-
-#~ msgid "Active / passive user)"
-#~ msgstr ""
-
-#~ msgid "Download"
-#~ msgstr ""
-
-#~ msgid "Download your material in gedcom format or edit an already stored"
-#~ msgstr ""
-
-#~ msgid "Login with your credentials (email or username)"
-#~ msgstr ""
-
-#~ msgid "Register  as a database user of Suomi tietokanta Service"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Read and accept < a href = "
-#~ "\"static/Conditionsofuse. html\" > Terms of"
-#~ " use"
-#~ msgstr ""
-
-#~ msgid "People"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Now the administrator can load your "
-#~ "file to database as yor new "
-#~ "candadate material set"
-#~ msgstr ""
-
-#~ msgid "This page contains %(num)s person."
-#~ msgid_plural "This page contains %(num)s person names."
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
-#~ msgid "This page contains %(num)s person in %(order)s order."
-#~ msgid_plural "This page contains %(num)s persons in %(order)s order."
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
-#~ msgid ""
-#~ "Read and accept <a href = "
-#~ "\"static/Conditionsofuse. html\" > Terms of"
-#~ " use"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "If the person has alternative names, "
-#~ "they will appear in the list under"
-#~ " each name."
-#~ msgstr ""
-
-#~ msgid "Register  as a database user of Finland database Service"
-#~ msgstr ""
-
-#~ msgid "Read and accept <a href=\"static/termsofuse.html\"> Terms of use</a>"
-#~ msgstr ""
-
-#~ msgid "I approve user actions"
-#~ msgstr ""
-
-#~ msgid "User candidates from database"
-#~ msgstr ""
-
-#~ msgid "Notifications"
-#~ msgstr ""
-
-#~ msgid "Create a new user candidate"
-#~ msgstr ""
-
-#~ msgid "Pending user candidates"
-#~ msgstr ""
-
-#~ msgid "<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>"
-#~ msgstr ""
-
-#~ msgid "Our Users"
-#~ msgstr ""
-
-#~ msgid "Active User names"
-#~ msgstr ""
-
-#~ msgid "mail"
-#~ msgstr ""
-
-#~ msgid "Operations"
-#~ msgstr ""
-
-#~ msgid "Uploaded files"
-#~ msgstr ""
-
-#~ msgid "Edit user"
-#~ msgstr ""
-
-#~ msgid "No users"
-#~ msgstr ""
-
-#~ msgid "Gramps to Neo4j log"
-#~ msgstr ""
-
-#~ msgid "Log of Gramps XML upload"
-#~ msgstr ""
-
-#~ msgid "Return"
-#~ msgstr ""
-
-#~ msgid "Data stored"
-#~ msgstr ""
-
-#~ msgid "Store to Database"
-#~ msgstr ""
-
-#~ msgid "Uploads"
-#~ msgstr ""
-
-#~ msgid "Uploads for user"
-#~ msgstr ""
-
-#~ msgid "Upload time"
-#~ msgstr ""
-
-#~ msgid "XML file"
-#~ msgstr ""
-
-#~ msgid "Status"
-#~ msgstr ""
-
-#~ msgid "Store to database"
-#~ msgstr ""
-
-#~ msgid "Show log"
-#~ msgstr ""
-
-#~ msgid "Delete file"
-#~ msgstr ""
-
-#~ msgid "Revert to"
-#~ msgstr ""
-
-#~ msgid "renamed to"
-#~ msgstr ""
-
-#~ msgid "Gramps to Neo5j log"
-#~ msgstr ""
-
-#~ msgid "Log of storing Gramps XML into database"
-#~ msgstr ""
-
-#~ msgid "Operation"
-#~ msgstr ""
-
-#~ msgid "Time / sec"
-#~ msgstr ""
-
-#~ msgid "Download to your computer"
-#~ msgstr ""
-
-#~ msgid "Delete"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "The administrator can load your file "
-#~ "to database as yor new candadate "
-#~ "material set"
-#~ msgstr ""
-
-#~ msgid "on this page"
-#~ msgstr ""
-
-#~ msgid "List of persons"
-#~ msgstr ""
-
-#~ msgid "Persons ordered by"
-#~ msgstr ""
-
-#~ msgid "Persons carrying a Name"
-#~ msgstr ""
-
-#~ msgid "Displaying %(num)s person names."
-#~ msgid_plural "Displaying %(num)s person names."
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
-#~ msgid "Go to"
-#~ msgstr ""
-
-#~ msgid "Person's events"
-#~ msgstr ""
-
-#~ msgid "Original ID"
-#~ msgstr ""
-
-#~ msgid "Sorting name"
-#~ msgstr ""
-
-#~ msgid "No one found with search keys"
-#~ msgstr ""
-
-#~ msgid "Displaying %(num)s person in %(order)s order."
-#~ msgid_plural "Displaying %(num)s persons in %(order)s order."
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
-#~ msgid ""
-#~ "If the person has many names, they"
-#~ " will appear in the list under "
-#~ "each name."
-#~ msgstr ""
-
-#~ msgid "Clicking a name will take you to the selected person's page."
-#~ msgstr ""
-
-#~ msgid "Change Order:"
-#~ msgstr ""
-
-#~ msgid "First Name"
-#~ msgstr ""
-
-#~ msgid "Patronymic or Matronymic"
-#~ msgstr ""
-
-#~ msgid "Showing %(num)s person name"
-#~ msgid_plural "Showing %(num)s person names"
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
-#~ msgid "Select people to display"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Search takes place from beginning of "
-#~ "selected name part, e.g. in Surname "
-#~ "\"Sib\" coincides with the name "
-#~ "\"Sibbe\"."
-#~ msgstr ""
-
-#~ msgid "Search word (beginning part)"
-#~ msgstr ""
-
-#~ msgid "Family Events"
-#~ msgstr ""
-
-#~ msgid "Keywords"
-#~ msgstr ""
-
-#~ msgid "Users"
-#~ msgstr ""
-
-#~ msgid "user id"
-#~ msgstr ""
-
-#~ msgid "name"
-#~ msgstr ""
-
-#~ msgid "email"
-#~ msgstr ""
-
-#~ msgid "roles"
-#~ msgstr ""
-
-#~ msgid "Create Username"
-#~ msgstr ""
-
-#~ msgid "Username"
-#~ msgstr ""
-
-#~ msgid "Create a new user or update the old one"
-#~ msgstr ""
-
-#~ msgid "Included"
-#~ msgstr ""
-
-#~ msgid "Oid"
-#~ msgstr ""
-
-#~ msgid "Type ~ Ref. name"
-#~ msgstr ""
-
-#~ msgid "Name Source"
-#~ msgstr ""
-
-#~ msgid "Redirects to reference names"
-#~ msgstr ""
-
-#~ msgid "Ref. Name"
-#~ msgstr ""
-
-#~ msgid "LOADING"
-#~ msgstr ""
-
-#~ msgid "DONE"
-#~ msgstr ""
-
-#~ msgid "Source "
-#~ msgstr ""
-
-#~ msgid "Gedcom "
-#~ msgstr ""
-
-#~ msgid "Submitter "
-#~ msgstr ""
-
-#~ msgid "        count\n"
-#~ msgstr ""
-
-#~ msgid "Visualisation data, not based on material"
-#~ msgstr ""
-
-#~ msgid "kuva"
-#~ msgstr ""
-
-#~ msgid "luotettavuus"
-#~ msgstr ""
-
-#~ msgid "Made"
-#~ msgstr ""
-
-#~ msgid "The information is deleted without further asking!"
-#~ msgstr ""
-
-#~ msgid "Tags"
-#~ msgstr ""
-
-#~ msgid "Family Member's"
-#~ msgstr ""
-
-#~ msgid "Of person"
-#~ msgstr ""
-
-#~ msgid "Moved out from"
-#~ msgstr ""
-
-#~ msgid "Kartanossa"
-#~ msgstr ""
-
-#~ msgid "Linnoituksessa"
-#~ msgstr ""
-
-#~ msgid "Sin the state"
-#~ msgstr ""
-
-#~ msgid "in the parsish of"
-#~ msgstr ""
-
-#~ msgid "Person "
-#~ msgstr ""
-
-#~ msgid "Child"
-#~ msgstr ""
-
-#~ msgid "or end session"
-#~ msgstr ""
-
-#~ msgid "Menu"
-#~ msgstr ""
-
-#~ msgid "Discover materials in Suomi Database Service"
-#~ msgstr ""
-
-#~ msgid "View our materials with limited rights"
-#~ msgstr ""
-
-#~ msgid "Persons"
-#~ msgstr ""
-
-#~ msgid "Enroll as user candidate in Suomi tietokanta Service"
-#~ msgstr ""
-
-#~ msgid "Enroll"
-#~ msgstr ""
-
-#~ msgid "Login with your credentialst (email or username)"
-#~ msgstr ""
-
-#~ msgid "Approved user's actions"
-#~ msgstr ""
-
-#~ msgid "Return start page"
-#~ msgstr ""
-
-#~ msgid "Select language and other options"
-#~ msgstr ""
-
-#~ msgid "My settings"
-#~ msgstr ""
-
-#~ msgid "Suomi-tietokanta"
-#~ msgstr ""
-
-#~ msgid "Compare to my own data"
-#~ msgstr ""
-
-#~ msgid "My persons"
-#~ msgstr ""
-
-#~ msgid "Compare persons"
-#~ msgstr ""
-
-#~ msgid "My Family Tree"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "View your own candidate material and "
-#~ "compare with Suomi tietokanta database"
-#~ msgstr ""
-
-#~ msgid "List uploads"
-#~ msgstr ""
-
-#~ msgid "Message to Maintenance"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Request a researcher's rights or send"
-#~ " another message to the maintenance"
-#~ msgstr ""
-
-#~ msgid "Function still planned"
-#~ msgstr ""
-
-#~ msgid "Compose a message"
-#~ msgstr ""
-
-#~ msgid "My Candidate Family Tree"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "<i>Finland Database</i> is a system for co'operatively\n"
-#~ "\t\t\t\t\t\tcollect validated Finnish Genealogy data."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "Here you can se a restrected view on Finnish\n"
-#~ "\t\t\t\t\tgenealogical data."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "For members of Suomen sukututkimusseura, join our users and\n"
-#~ "\t\t\t\t\tgain full access by"
-#~ msgstr ""
-
-#~ msgid "Exit"
-#~ msgstr ""
-
-#~ msgid "Records for submitters"
-#~ msgstr ""
-
-#~ msgid "View approved and public material in Suomi tietokanta"
-#~ msgstr ""
-
-#~ msgid "Here you can se a restrected view on Finnish genealogical data."
-#~ msgstr ""
-
-#~ msgid ""
-#~ "For members of Suomen sukututkimusseura, "
-#~ "join our users and gain full "
-#~ "access by"
-#~ msgstr ""
-
-#~ msgid "id"
-#~ msgstr ""
-
-#~ msgid "Go"
-#~ msgstr ""
-
-#~ msgid "gender"
-#~ msgstr ""
-
-#~ msgid "Guest"
-#~ msgstr ""
-
-#~ msgid "Stk-server"
-#~ msgstr ""
-
-#~ msgid "files"
-#~ msgstr ""
-
-#~ msgid "Citation groups"
-#~ msgstr ""
-
-#~ msgid "Stk"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "As a member of Suomen sukututkimusseura,"
-#~ " you can gain full access by "
-#~ "logging in."
-#~ msgstr ""
-
-#~ msgid "Join our users by"
-#~ msgstr ""
-
-#~ msgid "sending a message to administrators"
-#~ msgstr ""
-
-#~ msgid "If you have credentials, please log in here."
-#~ msgstr ""
-
-#~ msgid "Clear entire database"
-#~ msgstr ""
-
-#~ msgid "Clear entire database but saving user IDs"
-#~ msgstr ""
-
-#~ msgid "Delete my imported data"
-#~ msgstr ""
-
-#~ msgid "Invalid tag hierarchy:"
-#~ msgstr ""
-
-#~ msgid "No value:"
-#~ msgstr ""
-
-#~ msgid "Invalid dates:"
-#~ msgstr ""
-
-#~ msgid "Too few child tags:"
-#~ msgstr ""
-
-#~ msgid "Too many child tags:"
-#~ msgstr ""
-
-#~ msgid "Records for submitters:"
-#~ msgstr ""
-
-#~ msgid "Families with no parents:"
-#~ msgstr ""
-
-#~ msgid "Missing paths:"
-#~ msgstr ""
-
-#~ msgid "KKu: Editing of Family tree sources"
-#~ msgstr ""
-
-#~ msgid "Learn about our service"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "<i>Finland Database</i> is a system for"
-#~ " co'operatively collect validated Finnish "
-#~ "Genealogy data."
-#~ msgstr ""
-
-#~ msgid "Suomikanta database"
-#~ msgstr ""
-
-#~ msgid "Gedcom healing services"
-#~ msgstr ""
-
-#~ msgid "My gedcom material"
-#~ msgstr ""
-
-#~ msgid "Upload your material in gedcom format or edit an already stored"
-#~ msgstr ""
-
-#~ msgid "Gedcom handlings"
-#~ msgstr ""
-
-#~ msgid "Look at data in Suomikanta"
-#~ msgstr ""
-
-#~ msgid "Here you can see a restrected view on Finnish genealogical data."
-#~ msgstr ""
-
-#~ msgid "User's home page for Finland Database "
-#~ msgstr ""
-
-#~ msgid "Send and manage your Gramps data"
-#~ msgstr ""
-
-#~ msgid "Manage your Gramps xml files and convert them to Suomi tietokanta."
-#~ msgstr ""
-
-#~ msgid "My Persons and Events"
-#~ msgstr ""
-
-#~ msgid "Admin function"
-#~ msgstr ""
-
-#~ msgid "User and reference information management and database service tasks"
-#~ msgstr ""
-
-#~ msgid "witn roles"
-#~ msgstr ""
-
-#~ msgid "roles:"
-#~ msgstr ""
-
-#~ msgid "Genders:"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "\n"
-#~ "{}:"
-#~ msgstr ""
-
-#~ msgid "file"
-#~ msgid_plural "files"
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
-#~ msgid "Stk User's Candidate Material"
-#~ msgstr ""
-
-#~ msgid "Candidate material files"
-#~ msgstr ""
-
-#~ msgid "Select Gramps XML File (*. gramps) to become candidate material"
-#~ msgstr ""
-
-#~ msgid "My data files in server"
-#~ msgstr ""
-
-#~ msgid "Finland Database"
-#~ msgstr ""
-
-#~ msgid "Compare to Suomikanta"
-#~ msgstr ""
-
-#~ msgid "You can view only approved and public material in Suomi tietokanta"
-#~ msgstr ""
-
-#~ msgid "Log in to Stk"
-#~ msgstr ""
-
-#~ msgid "Stk Start Page"
-#~ msgstr ""
-
-#~ msgid "Stk User's Start Page"
-#~ msgstr ""
-
-#~ msgid "User's home page for Isotammi Database "
-#~ msgstr ""
-
-#~ msgid ""
-#~ "View your own data as candidate "
-#~ "material and compare it with Suomi "
-#~ "tietokanta database."
-#~ msgstr ""
-
-#~ msgid "Stk User's Settings"
-#~ msgstr ""
-
-#~ msgid "Welcome to Suomi database"
-#~ msgstr ""
-
-#~ msgid "Welcome to Finland Database"
-#~ msgstr ""
-
-#~ msgid "Fill in the User Information Form of Finland database Service"
-#~ msgstr ""
-
-#~ msgid "Log out"
-#~ msgstr ""
-
-#~ msgid "Ending the session"
-#~ msgstr ""
-
-#~ msgid "Exit the Application"
-#~ msgstr ""
-
-#~ msgid ""
-#~ "The administrator can load your file "
-#~ "to database as your new candidate "
-#~ "material set"
-#~ msgstr ""
-
-#~ msgid "Message from Isotammi user "
-#~ msgstr ""
-
-#~ msgid "Uploads for users: "
-#~ msgstr ""
 

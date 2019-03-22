@@ -97,7 +97,8 @@ $(document).ready( function() {
 	           <td>{{upload.status}}
 	           	{% if upload.batch_id %}
 	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
-	           	   {% else %}(id={{ upload.batch_id }}){% endif %}
+	           	   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
+	           	   {% endif %}
 	           	{% endif %}
 	           </td>
 	       </tr>

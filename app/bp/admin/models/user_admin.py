@@ -108,9 +108,18 @@ class UserAdmin():
         try:
             with shareds.driver.session() as session:
                 emailRecords = session.read_transaction(cls._getAllowedEmails)
-                if emailRecords is not None:
-                    return [cls._build_email_from_record(emailRecord['email']) for emailRecord in emailRecords] 
-                return []
+                ret = []
+                for record in emailRecords:
+                    node = record['email']
+                    # <<Node id=105651 labels={'Allowed_email'} 
+                    #    properties={'created_at': 1542095367861, 'default_role': 'member', 
+                    #        'creator': 'master', 'allowed_email': 'jpek@iki.fi', 
+                    #        'confirmed_at': 1544302717575}>
+                    ret.append(cls._build_email_from_record(node))
+                return ret
+#                 if emailRecords is not None:
+#                     return [cls._build_email_from_record(emailRecord['email']) for emailRecord in emailRecords] 
+#                 return []
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
             return []                 

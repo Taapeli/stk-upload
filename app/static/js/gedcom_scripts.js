@@ -4,12 +4,27 @@ var ngettext = function(msgid, msgid_plural, n) { return gt.ngettext(msgid, msgi
 	
 function hide_all() {
     $("div.gedcom").hide();
+    $("#div_show_info").show();
 }
 
 function show(id) {
     var rect = $(id).show().get(0).getBoundingClientRect();
 	var y = rect.top;
 	window.scroll(0,y-50);
+}
+
+function add_gedcom_links() {
+    $("a.gedcomlink").click(function(e) {
+        var linenum = $(e.target).text();
+    	$.get("/gedcom/get_excerpt/" + gedcom + "/" + linenum,function(rsp) {
+    	    $("#excerpt").html(rsp);
+    	    $("#div_excerpt").dialog({title: gedcom});
+    	    return false;
+    	});
+    });
+    $("#div_excerpt button").click(function(e) {
+	    $("#div_excerpt").dialog("close");
+    });
 }
 
 $(document).ready( function() {
@@ -80,14 +95,20 @@ $(document).ready( function() {
         }); // $.get
     });
     
+    $("#show_info").click(function() {
+        $("#info").show();
+        $("#div_show_info").hide();
+    });
     
     $("#analyze").click(function() {
         hide_all();
     	$.get("/gedcom/analyze/" + gedcom ,function(rsp) {
     	    $("#results").html(rsp);
     	    show("#div_results");
+            add_gedcom_links();
     	});
     });
+
 
     $("#transforms").click(function() {
         hide_all();
@@ -227,10 +248,14 @@ $(document).ready( function() {
     $("#transform").click(function() {
         $("#errors").hide();
     	$("#output").hide();
+    	$("#output_log_pre").empty();
     	$("#output_log").empty();
     	$("#error_log").empty();
         $.post("/gedcom/transform/" + gedcom + "/" + transform, $("#form").serialize(), function(rsp) {
-            $("#output_log").html(rsp.stdout);
+            if (rsp.plain_text)
+                $("#output_log_pre").text(rsp.stdout);
+            else
+                $("#output_log").html(rsp.stdout);
             if (rsp.stderr) 
             	$("#error_log").text(_('Errors:') + "\n" + rsp.stderr);
             if (rsp.oldname) {
@@ -242,6 +267,7 @@ $(document).ready( function() {
             	$("#div_oldname").hide();
             	$("#div_save").show();
         	}
+            add_gedcom_links();
             show("#output");
         });
         return false;
