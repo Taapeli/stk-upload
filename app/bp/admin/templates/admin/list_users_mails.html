@@ -1,14 +1,12 @@
 {# _bp/admin/templates/admin/list_users.html_ #}
 {% extends "/admin/layout.html" %}
-{% block title %}{{ _('Database Information') }}{% endblock %}
+{% block title %}{{ _("Isotammi User List") }}{% endblock %}
 {% block body %}
 {{ super() }}
 
 <style>
 form { display: inline-block; }
-#pending table tbody tr td {
-    padding: 4px;
-}
+#pending table tbody tr td { padding: 4px; }
 </style>
 
 <script>
@@ -57,7 +55,7 @@ $(document).ready( function() {
                     
 <div id="startdiv">
     <div>
-        <h2>{{ _("User List") }}</h2>
+        <h2>{{ _("Isotammi User List") }}</h2>
          {% with messages = get_flashed_messages(with_categories=true) %}
 
           {% if messages %}
@@ -148,7 +146,8 @@ $(document).ready( function() {
                     <tr><td colspan="1">{{ _('No data') }}</td></tr>
             {% endif %}
             </table>
-            <p>&rtrif; <a href="/admin/allowed_emails">{{ _('Create a new user candidate') }}</a>
+            <p style="margin-left:2em;">
+               &rtrif; <a href="/admin/allowed_emails">{{ _('Add a new user candidate') }}</a>
             </p>
          </div>
     </div>

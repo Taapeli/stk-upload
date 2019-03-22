@@ -81,6 +81,14 @@ msgstr "Käyttäjätunnus"
 msgid "Name"
 msgstr "Nimi"
 
+#: bp/admin/templates/admin/list_users_mails.html:58
+msgid "Isotammi User List"
+msgstr "Isotammen käyttäjät"
+
+#: bp/admin/templates/admin/list_users_mails.html:150
+msgid "Add a new user candidate"
+msgstr "Lisää käyttäjäehdokas"
+
 #: bp/admin/forms.py:42 bp/admin/forms.py:45 bp/admin/templates/admin/list_users.html:89
 #: bp/start/forms.py:18 bp/start/forms.py:22 setups.py:216
 msgid "Language"
@@ -365,8 +373,12 @@ msgid "User and reference information management"
 msgstr "Käyttäjien ja referenssitietojen hallinta"
 
 #: bp/admin/templates/admin/admin.html:72
+msgid "Active and pending users, including –"
+msgstr "Aktiiviset ja odottavat käyttäjät, ml."
+
+#: bp/admin/templates/admin/admin.html:72
 msgid "Usernames and uploaded materials"
-msgstr "Käyttäjätunnukset ja ladatut tiedostot"
+msgstr "Käyttäjätunnukset ja tiedostot"
 
 #: bp/admin/templates/admin/admin.html:73 bp/admin/templates/admin/allowed_emails.html:24
 msgid "User candidates"
