@@ -151,6 +151,31 @@ def list_users():
     lista = shareds.user_datastore.get_users()
     return render_template("/admin/list_users.html", users=lista)  
 
+
+@bp.route('/admin/list_all_users', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'audit', 'master')
+def list_all_users():
+    """ List users and candidate users.
+    
+        list_allowed_emails + list_users
+    """
+    # Allowe emails
+    form = AllowedEmailForm()
+    list_emails = UserAdmin.get_allowed_emails()
+    if form.validate_on_submit(): 
+        # Register a new email
+#        lista = UserAdmin.get_allowed_emails()
+        UserAdmin.register_allowed_email(form.allowed_email.data,
+                                         form.default_role.data)
+        return redirect(url_for('admin.list_allowed_emails'))
+
+
+    list_users = shareds.user_datastore.get_users()
+    return render_template("/admin/list_users_mails.html", 
+                           users=list_users, emails=list_emails)  
+
+
 @bp.route('/admin/update_user/<username>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'master')
