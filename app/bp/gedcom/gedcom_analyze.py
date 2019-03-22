@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 from contextlib import redirect_stdout
 
 from . import transformer
-from flask_babelex import _
+from flask_babelex import _, ngettext
 import traceback
 
 name = _("GEDCOM Analyzer")
@@ -163,8 +163,14 @@ class LineCounter:
             linenums = [str(item.linenum) for item in itemlist]
             if len(linenums) > 10:
                 linenums = linenums[0:10] 
-                linenums.append("...")
-            printitem(f"<b>{key:25}</b><td>(count={len(itemlist):5}, lines {','.join(linenums)})")
+            links = [f"<a href='#' class='gedcomlink'>{linenum}</a>" for linenum in linenums]
+            txt = ngettext(
+                "count=%(num)d, line %(lines)s",
+                "count=%(num)d, lines %(lines)s",
+                 num=len(itemlist), lines=', '.join(links))
+            if len(itemlist) > len(linenums): txt += ",..."
+            printitem(f"<b>{key:25}</b><td>({txt})")
+            #printitem(f"<b>{key:25}</b><td>(count={len(itemlist):5}, lines {','.join(links)})")
         printtrailer() 
                 
 

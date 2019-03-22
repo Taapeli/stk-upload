@@ -1,0 +1,75 @@
+{# _start/join.html_ #}
+{% extends "start/s_layout.html" %}
+{% include "security/_messages.html" %}
+{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% block title %}{{ _("Join Isotammi") }} (start/my_message){% endblock %}
+{% block body %}
+{{ super() }}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<style>
+table, td {
+	border: none;
+	vertical-align: top;
+
+}
+label { 
+	display: inline-block; 
+	width: 340px; 
+}
+
+ul li {
+	color: red;
+}
+
+ul[id] li {
+	color: black !important;
+}
+
+</style>
+
+
+<div id="startdiv">
+  <div>
+    <h2>{{ _("Join Isotammi") }}</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+
+    <div class="startbox2">
+        <div>
+        {{ _('To join the Isotammi project we wish that you will provide some basic information below.') }}
+        {{ _('Please let us know at least your name and email address.') }}
+        {{ _('You can also provide any comments or additional information in the message field.') }}
+        {{ _('Thank You!') }}
+        </div>
+          <form method="post">
+	      {{ form.hidden_tag() }}
+   	      {{ render_field_with_errors(form.name) }}	
+   	      {{ render_field_with_errors(form.email) }}	
+   	      {{ render_field_with_errors(form.is_member) }}	
+   	      {{ render_field_with_errors(form.years) }}	
+   	      {{ render_field_with_errors(form.software) }}	
+   	      {{ render_field_with_errors(form.surnames) }}	
+   	      {{ render_field_with_errors(form.places) }}	
+   	      {{ form.message.label }}
+   	      {{ render_field(form.message,rows=20,cols=59) }}	
+         <div> 
+     	      {{ render_field(form.submit) }}	
+         </div>
+         </form>
+    </div>
+
+  </div>
+  <p></p>
+</div>
+{% endblock %}

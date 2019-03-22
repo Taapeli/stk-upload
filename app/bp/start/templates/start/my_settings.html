@@ -14,10 +14,13 @@
     <h2>{{ _("Change my settings") }}</h2>
 
     {% if current_user is defined and current_user.is_authenticated %}
-    <div>
+	<div>
+	{{ _('User') }} <i>{{current_user.name}}</i> 
+	    &lt;{{current_user.email}}&gt;
+    </div>
+    <p>
+    <div class=startbox>
         <h3>{{ _('Change language') }}</h3>
-		{{ _('User') }} <i>{{current_user.name}}</i> 
-		    &lt;{{current_user.email}}&gt;
          <div> 
           <form method="post">
           	<div id="lang">
@@ -31,12 +34,27 @@
           			{% if session.lang == "en" %} checked {% endif %}
           		>{{ _("English") }}
           	</div>
-          	<br>
-            <button onclick="goBack()">{{ _('Go back') }}</button>
+          	<p>
             <input type="submit" value="{{ _('Apply') }}" />
+            <p><a href="{{ referrer }}">{{ _('Go back') }}</a>
+            <input type="hidden" name="referrer" value="{{ referrer }}" />
          </form>
          </div>
     </div>
+
+    <div class=startbox>
+        <h3>{{ _('Roles') }}</h3>
+        {% for role in  roles %}
+        	<br>{{role.name}}
+        {% endfor %}
+        
+    </div>
+
+    <div class=startbox>
+        <h3>{{ _('Candidate materials') }}</h3>
+        tbd
+    </div>
+
     {% endif %}
   </div>
   <p></p>

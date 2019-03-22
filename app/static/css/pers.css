@@ -29,15 +29,19 @@ img#logo {
     margin: -16px 5px 0 5px;
     vertical-align: text-top;
 }
-.bread {
-    margin: 2px; 
-    color: #cf7c19; 
-    font-style: italic; 
+h1 div.curr_user {
+    float: right; 
+    margin-right: 30px; 
+    font-family: verdana, sans-serif;
+    font-weight: normal; 
+    font-size: 9pt;
+    padding: 4px;
 }
-a.bread:link { text-decoration: none; }
-a.bread:visited { text-decoration: none; }
-a.bread:hover { text-decoration: underline; }
-a.bread:active { text-decoration: underline; }
+h1 div.curr_user a { 
+	text-decoration: none;     
+    color: #7e6b53; /* Darker bisque */
+}
+h1 div.curr_user a:hover { text-decoration: underline; }
 
 div#paluu {
     position: absolute;
@@ -61,6 +65,7 @@ div#paluu {
 	text-decoration: none; 
     color: black;
 }
+#createdate { font-size:8pt; }
 
 #startdiv {
 	margin-left:50px;
@@ -209,6 +214,34 @@ div.fullclear {
 	background: #eee;
 	text-align: right;
 }
+/* Footer
+----------------------------------------------------- */
+#footer {
+    clear: both;
+    margin-top: 1em;
+    background-color: #CCC;
+    border-top: solid 1px #555;
+}
+#footer > * {
+    background-color: #CCC;
+}
+#footer span.copyright {
+    display: inline-block;
+    width: 50%;
+    padding-left: 15px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+#footer span.createdate {
+    display: inline-block;
+    margin-top: 7px;
+    float: right;
+    text-align: right;
+    padding-right: 15px;
+    width: 40%;
+    font-size:8pt;
+    color: gray;
+}
 
 div.legend { /* Not used? */
      margin-left:4em; 
@@ -231,7 +264,20 @@ div.steps div {
 	width: 150px;
 	padding: 5px;
 	background-color: lightyellow;
-	box-shadow: 10px 10px 5px lightgrey;
+	box-shadow: 5px 5px 5px lightgrey;
+}
+div.steps div.bg {
+    border: 0px;
+    height:35px;
+    /*color: none;
+    background-color: #ffffe9;*/
+}
+div.steps div.exception {
+    border: 0px;
+    margin:3px;
+    height:auto;
+    color: gray;
+    background-color: #ffffe9;
 }
 .fileselect {
 	border-width: 2px 3px 3px 2px; 

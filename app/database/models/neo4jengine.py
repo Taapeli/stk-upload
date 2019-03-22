@@ -4,7 +4,7 @@
 
 @author: TimNal - Timo Nallikari 2017
 '''
-from neo4j.v1 import GraphDatabase
+from neo4j import GraphDatabase
 
 DEBUG = False
 

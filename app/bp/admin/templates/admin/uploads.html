@@ -4,8 +4,12 @@
 {% block body %}
     {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
-    {% if users %}
-    	<h2>{{ _("Uploads for users: ") }} <i>{{users}}</i></h2>
+    {% if num_requested_users > 0 %}
+    	{% if num_users == 1 %}
+	    	<h2>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
+    	{% else %}
+    		<h2>{{ _("Uploads for %(n)s users", n=num_users) }}</h2>
+		{% endif %}
     {% else %}
 	    <h2>{{ _("Uploads for all users") }}</h2>
     {% endif %}
@@ -64,7 +68,11 @@
     	               {{upload.xmlname}}</a> 
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}
-	           	{% if upload.batch_id %} (id={{ upload.batch_id }}) {% endif %}
+	           	{% if upload.batch_id %}
+	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
+	           	   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
+	           	   {% endif %}
+	           	{% endif %}
                </td>
 	           <td class="msg_INFO">
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>

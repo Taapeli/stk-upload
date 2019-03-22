@@ -151,6 +151,31 @@ def list_users():
     lista = shareds.user_datastore.get_users()
     return render_template("/admin/list_users.html", users=lista)  
 
+
+@bp.route('/admin/list_all_users', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'audit', 'master')
+def list_all_users():
+    """ List users and candidate users.
+    
+        list_allowed_emails + list_users
+    """
+    # Allowe emails
+    form = AllowedEmailForm()
+    list_emails = UserAdmin.get_allowed_emails()
+    if form.validate_on_submit(): 
+        # Register a new email
+#        lista = UserAdmin.get_allowed_emails()
+        UserAdmin.register_allowed_email(form.allowed_email.data,
+                                         form.default_role.data)
+        return redirect(url_for('admin.list_allowed_emails'))
+
+
+    list_users = shareds.user_datastore.get_users()
+    return render_template("/admin/list_users_mails.html", 
+                           users=list_users, emails=list_emails)  
+
+
 @bp.route('/admin/update_user/<username>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'master')
@@ -206,10 +231,13 @@ def list_uploads(username):
 @roles_accepted('admin', 'audit')
 def list_uploads_for_users():
     requested_users = request.form.getlist('select_user')
-    users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
+    if len(requested_users) == 0:
+        users = shareds.user_datastore.get_users()  # default: all users
+    else:
+        users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
-    return render_template("/admin/uploads.html", uploads=upload_list, 
-                           users=", ".join(requested_users))
+    return render_template("/admin/uploads.html", uploads=upload_list,  
+                           users=users, num_requested_users=len(requested_users), num_users=len(users))
 
 @bp.route('/admin/list_uploads_all', methods=['GET'])
 @login_required

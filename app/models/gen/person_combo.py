@@ -510,18 +510,14 @@ RETURN person, name
         """
 
         persons_get_oldest = """
- MATCH (p:Person)-[:EVENT]->(a:Event) 
-     WHERE EXISTS ((p)-[:EVENT]->(b:Event {type:'Birth'}))
- WITH p, b 
- MATCH (p)-[:EVENT]->(b:Event) 
-     WHERE EXISTS ((p)-[:EVENT]->(d:Event {type:'Death'}))
- WITH p, b, d
- MATCH (p)-[:NAME]->(n:Name)
- RETURN ID(p) AS uniq_id, p, n, 
-     [b.datetype, b.date1, b.date2] AS birth, 
-     [d.datetype, d.date1, d.date2] AS death 
- ORDER BY n.surname, n.firstname"""
-                
+            MATCH (p:Person)-[:EVENT]->(b:Event {type:'Birth'})
+            MATCH (p)-[:EVENT]->(d:Event {type:'Death'})
+            MATCH (p)-[:NAME]->(n:Name)
+            RETURN ID(p) AS uniq_id, p, n, 
+                [b.datetype, b.date1, b.date2] AS birth, 
+                [d.datetype, d.date1, d.date2] AS death 
+            ORDER BY n.surname, n.firstname"""
+
         result = shareds.driver.session().run(persons_get_oldest)
 
         titles = ['uniq_id', 'firstname', 'surname', 'birth', 'death',

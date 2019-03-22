@@ -204,6 +204,7 @@ def list_uploads(username):
             status = meta["status"]
             batch_id = ""
             status_text = None
+            count = 0
             if status == STATUS_UPLOADED:
                 status_text = _("UPLOADED")
             elif status == STATUS_LOADING:
@@ -217,7 +218,8 @@ def list_uploads(username):
                     batch_id = meta['batch_id']
                     count = batch_count(username,batch_id)
                     if count == 0:
-                        status_text = _("UPLOADED")
+                        status_text = _("REMOVED")
+                        batch_id = ""
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
             if status_text:
@@ -225,6 +227,7 @@ def list_uploads(username):
                 upload.xmlname = xmlname
                 upload.status = status_text
                 upload.batch_id = batch_id
+                upload.count = count
                 upload.done = (status_text == _("STORED"))
                 upload.uploaded = (status_text == _("UPLOADED"))
                 upload.loading = (status_text == _("STORING"))
