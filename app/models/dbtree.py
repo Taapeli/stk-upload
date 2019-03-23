@@ -6,7 +6,7 @@ Created on 8.9.2017
 @author: jm
 '''
 import sys
-from neo4j.v1 import GraphDatabase, basic_auth
+from neo4j import GraphDatabase, basic_auth
 import treelib
 
 class DbTree():
