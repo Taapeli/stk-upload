@@ -138,7 +138,7 @@ class Neo4jUserDatastore(UserDatastore):
         user.confirmed_at = None
         user.is_active = True
         try:
-            logging.info('_put_user new: %s', user.__dict__) # debugging
+            logger.info('_put_user new', user.email, ' ', user.name, ' ', user.roles[0])                
             result = tx.run(Cypher.user_register,
                 email = user.email,
                 password = user.password, 
@@ -154,13 +154,19 @@ class Neo4jUserDatastore(UserDatastore):
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
 
-            userRecord = result.single()['user']
+            node = result.single()
+            if node:
+                userRecord = node['user']
 #                userNode = (record['user'])
 #                logger.debug(userNode)
-            UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
+                UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
 #                tx.commit()
-            logger.info('User with email address {} registered'.format(user.email)) 
-            return(userRecord)
+                logger.info(f'User with email address {user.email} registered') 
+                return(userRecord)
+            else:
+                logger.info(f'put_user: Cannot register user with {user.email}') 
+                raise(RuntimeError, f'Could not register user with {user.email}')
+                
 #            tx.commit()
         except CypherError as ex:
             logger.error('CypherError: ', ex.message, ' ', ex.code)            
