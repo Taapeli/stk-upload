@@ -165,7 +165,7 @@ class Neo4jUserDatastore(UserDatastore):
                 return(userRecord)
             else:
                 logger.info(f'put_user: Cannot register user with {user.email}') 
-                raise(RuntimeError, f'Could not register user with {user.email}')
+                raise RuntimeError(f'Could not register user with {user.email}')
                 
 #            tx.commit()
         except CypherError as ex:
