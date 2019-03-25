@@ -13,6 +13,10 @@
     <div class="row"> 
        <div class="startbox"> 
 		  <h3>{{ _('Register as an user of Isotammi Service') }}</h3> 
+              <p><b>{{ _('Note!') }}</b>
+                {{ _('When you have sent this form, you must wail mail from us and klick the link '
+                     '"%(link)s" in the message you got. Then you can log in!', 
+                     link="Confirm my account") }}</p>
 		     <form action="{{ url_for_security('register') }}" 
 		           method="POST" name="register_user_form"> 
 		            
@@ -32,7 +36,7 @@
 				  {{ render_field(register_user_form.submit) }} 
 		     </form> 
 	    </div> 
- 
+
         <div class="startbox"> 
             <div style="display: inline-block;"> 
             <h3>{{ _('Other Options') }}</h3> 
