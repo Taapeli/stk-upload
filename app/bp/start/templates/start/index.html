@@ -56,16 +56,16 @@ div.startbox { min-height: 270px;}
 			<div class="startbox">
 				<h3>{{ _('Log in') }}</h3>
 				<p>{{ _('As a member of <i>Suomen sukututkimusseura</i>, you can log in,') }}
-				   {{ _('refine the structure of your own data and get full access to the demo database') }}</a>.
-				   {{ _('Join our users by') }} 
-				   <a href="/join">{{ _('sending a message to administrators') }}</a>.
+				   {{ _('refine the structure of your own data and get full access to the demo database') }}.
 				</p>
-				<p>{{ _('If you have credentials, please log in here.') }}</p>
-				<form method="get" action="/login">
-					<div class="submit">
-						<button type="submit">{{ _('Log in') }}</button>
-					</div>
-				</form>
+				<p>{{ _("If you have credentials, please log in here. "
+                        "Else, if you are a member, join us using the Join button") }}.</p>
+				<div class="submit">
+                    <form method="get">
+                       <button type="submit" formaction="/join">{{ _('Join us') }}</button>
+                       <button type="submit" formaction="/login">{{ _('Log in') }}</button>
+                    </form>
+				</div>
 			</div>
 
 	   </div>
