@@ -279,6 +279,9 @@ div.steps div.exception {
     color: gray;
     background-color: #ffffe9;
 }
+div.steps div.active {
+    background-color: gainsboro;
+}
 .fileselect {
 	border-width: 2px 3px 3px 2px; 
 	min-width: 725px;

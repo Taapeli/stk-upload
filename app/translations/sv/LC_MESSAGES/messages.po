@@ -2764,7 +2764,7 @@ msgstr "Sedan kan du registrera dig och skapa ditt användar-ID."
 
 #: bp/stk_security/templates/security/login_user.html:42
 msgid "Enroll as a test user"
-msgstr "Registrera dig som test användare"
+msgstr "Anmäla dig som test användare"
 
 #: bp/stk_security/templates/security/register_user.html:4
 msgid "Registration"
