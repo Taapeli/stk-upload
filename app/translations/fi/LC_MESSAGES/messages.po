@@ -7,12 +7,12 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-24 14:45+0200\n"
+"POT-Creation-Date: 2019-03-25 17:22+0200\n"
 "PO-Revision-Date: 2019-03-20 18:33+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -52,6 +52,7 @@ msgstr "Olen lukenut ja hyväksynyt"
 msgid "Terms of use"
 msgstr "Käyttöehdot"
 
+#: bp/start/templates/start/join.html:54
 #: bp/stk_security/templates/security/_menu.html:5 setups.py:168
 msgid "Register"
 msgstr "Rekisteröidy"
@@ -2515,15 +2516,15 @@ msgstr "Viesti:"
 msgid "Send request"
 msgstr "Lähetä pyyntö"
 
-#: bp/start/routes.py:98
+#: bp/start/routes.py:110
 msgid "Join message sent"
 msgstr "Liittymisviesti lähetetty"
 
-#: bp/start/routes.py:149
+#: bp/start/routes.py:161
 msgid "Update did not work1"
 msgstr "Päivitys ei onnistunut"
 
-#: bp/start/routes.py:152
+#: bp/start/routes.py:164
 msgid "Update did not work"
 msgstr "Päivitys ei onnistunut"
 
@@ -2591,17 +2592,18 @@ msgid ""
 "database"
 msgstr "parantaa omien tietojesi rakennetta ja saada pääsyn koko demokantaan"
 
-#: bp/start/templates/start/index.html:60
-msgid "Join our users by"
-msgstr "Liity käyttäjäksi"
-
 #: bp/start/templates/start/index.html:61
-msgid "sending a message to administrators"
-msgstr "lähettämällä viestin ylläpitäjille Isotammen toimistoon"
+msgid ""
+"If you have credentials, please log in here. Else, if you are a member, "
+"join us using the Join button"
+msgstr ""
+"Jos sinulla on käyttäjätunnukset, kirjaudu sisään tästä. "
+"Muuten, jos olet Seuran jäsen, pyydä kutsua Isotammen testkäyttäjäksi "
+"Liity-painikkeesta"
 
-#: bp/start/templates/start/index.html:63
-msgid "If you have credentials, please log in here."
-msgstr "Jos sinulla on käyttäjätunnukset, kirjaudu sisään tästä."
+#: bp/start/templates/start/index.html:65 bp/start/templates/start/join.html:49
+msgid "Join us"
+msgstr "Liity"
 
 #: bp/start/templates/start/index_logged.html:4
 msgid "Isotammi User's Start Page"
@@ -2666,33 +2668,51 @@ msgstr "Ylläpito"
 msgid "Join Isotammi"
 msgstr "Liity Isotammeen"
 
-#: bp/start/templates/start/join.html:50 bp/start/templates/start/join2.html:24
+#: bp/start/templates/start/join.html:49
+msgid "Enroll as a test user on this page"
+msgstr "Liity testikäyttäjäksi tämän sivun lomakkeella"
+
+#: bp/start/templates/start/join.html:51
+msgid "Approval"
+msgstr "Hyväksyminen"
+
+#: bp/start/templates/start/join.html:52
+msgid "You are granted to register by Office"
+msgstr "Toimisto tarkastaa jäsenyyden ja ilmoittaa sinulle"
+
+#: bp/start/templates/start/join.html:54
+msgid "Create your user name and log in"
+msgstr "Rekisteröidy käyttäjäksi ja kirjaudu sisään"
+
+#: bp/start/templates/start/join.html:59 bp/start/templates/start/join2.html:24
 msgid ""
 "To join the Isotammi project we wish that you will provide some basic "
 "information below."
-msgstr ""
+msgstr "Liittyäksesi Isotammi-projektin testikäyttäjäksi pyydämme antamaan "
+"joitakin perustietoja. Jos olet nämä tiedot antanut, voit siirtyä suoraan "
+"rekisteröitymiseen."
 
-#: bp/start/templates/start/join.html:51 bp/start/templates/start/join2.html:25
+#: bp/start/templates/start/join.html:60 bp/start/templates/start/join2.html:25
 msgid "Please let us know at least your name and email address."
-msgstr ""
+msgstr "Täytä ainakin nimesi ja sähköpostiosoitteesi."
 
-#: bp/start/templates/start/join.html:52 bp/start/templates/start/join2.html:26
+#: bp/start/templates/start/join.html:61 bp/start/templates/start/join2.html:26
 msgid ""
 "You can also provide any comments or additional information in the "
 "message field."
-msgstr ""
+msgstr "Alle voit halutessasi kirjoittaa lisätietoja."
 
-#: bp/start/templates/start/join.html:53 bp/start/templates/start/join2.html:27
+#: bp/start/templates/start/join.html:62 bp/start/templates/start/join2.html:27
 msgid "Thank You!"
-msgstr ""
+msgstr "Kiitos!"
 
 #: bp/start/templates/start/join2.html:33
 msgid "Your name"
-msgstr ""
+msgstr "Nimi"
 
 #: bp/start/templates/start/join2.html:36
 msgid "Your email"
-msgstr ""
+msgstr "Sähköposti"
 
 #: bp/start/templates/start/my_message.html:4
 #: bp/start/templates/start/my_message.html:37
@@ -2765,11 +2785,11 @@ msgstr "Kirjaudu ulos"
 
 #: bp/start/templates/start/thankyou.html:4
 msgid "Thank You"
-msgstr ""
+msgstr "Kiitos!"
 
 #: bp/start/templates/start/thankyou.html:20
 msgid "Thank You for joining Isotammi"
-msgstr ""
+msgstr "Kiitos, että liityit Isotammen käyttäjiin"
 
 #: bp/start/templates/start/thankyou.html:24
 msgid ""
@@ -2779,7 +2799,7 @@ msgstr ""
 
 #: bp/start/templates/start/thankyou.html:27
 msgid "Go to main page"
-msgstr ""
+msgstr "Etusivulle"
 
 #: bp/stk_security/templates/security/_menu.html:8
 msgid "Confirm account"
@@ -2871,8 +2891,9 @@ msgstr "Lähetä vahvistuslinkki"
 msgid ""
 "If you can't find the registeration confirmation mail message we have "
 "sent, you can ask for a new one."
-msgstr "Jos lähettämämme rekisteröitymisen vahvistuslinkki ei toimi "
-"enää, voit pyytää uutta tässä."
+msgstr ""
+"Jos lähettämämme rekisteröitymisen vahvistuslinkki ei toimi enää, voit "
+"pyytää uutta tässä."
 
 #: bp/tools/routes.py:66
 msgid "Note List"
