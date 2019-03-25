@@ -46,18 +46,6 @@ def start():
         logger.info('Anonymous user')
         return render_template('/start/index.html')
 
-@shareds.app.route('/get_in',methods=['get','post'])
-def get_in():
-    """ A Button Join of Login is pressed. 
-    
-        Note. Didn't use html5 <button>, as somebody may have IE9 browser ?
-    """
-    button = request.args.get('act')
-    if button == "join":
-        return render_template("/start/join.html")
-    elif button == "login":
-        return redirect("login")
-
 @shareds.app.route('/join2',methods=['get','post'])
 def join2():
     if request.method == 'POST':

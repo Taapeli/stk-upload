@@ -46,12 +46,14 @@ ul[id] li {
     {% endwith %}
 
     <div class="steps" style="margin-left: 4em;">
-        <div class="active">1. <b>{{ _("Join us") }}</b><br>{{ _("Enroll as a test user on this page") }}</div>
+        <div class="active">1. <b>{{ _("Join us") }}</b><br>
+            {{ _("Enroll as a test user on this page") }}</div>
          –
         <div class="exception">2. <b>{{ _("Approval") }}</b><br>
             {{ _("You are granted to register by Office") }}</div>
         –
-        <div>3. <b>{{ _("Register") }}</b><br>{{ _("Create your user name and log in") }}</div>
+        <div>3. <b><a href="/register">{{ _("Register") }}</b></a><br>
+            {{ _("Create your user name and log in") }}</div>
     </div>
 
     <div class="startbox2">
