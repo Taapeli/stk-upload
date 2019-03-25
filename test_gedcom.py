@@ -4,6 +4,7 @@ import tempfile
 import logging
 import io
 import shutil
+import json
 
 import pytest
 
@@ -70,14 +71,19 @@ def test_gedcom_upload(client):
         pass
     assert not os.path.exists(temp_gedcom_fname) 
 
-    args = dict(file=(io.BytesIO(b"0 @I123@ INDI"),temp_gedcom),desc="Description")
+    #args = dict(file=(io.BytesIO(b"0 @I123@ INDI"),temp_gedcom),desc="Description")
+    args = dict(file=(open(testdata_dir+"/allged.ged","rb"),temp_gedcom),desc="Description")
     rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
     data = rv.data.decode("utf-8")
     assert os.path.exists(temp_gedcom_fname)
     assert 'Toiminnot' in data
     assert temp_gedcom in data
-    #os.remove(temp_gedcom_fname)
-        
+    meta_fname = temp_gedcom_fname + "-meta"
+    assert os.path.exists(meta_fname)
+    metadata = eval(open(meta_fname).read())
+    assert type(metadata) == dict
+    assert "encoding" in metadata
+
 def test_gedcom_list(client):
     rv = client.get('/gedcom')
     data = rv.data.decode("utf-8")
@@ -92,10 +98,13 @@ def test_gedcom_info(client):
     data = rv.data.decode("utf-8")
     assert 'Muunnokset' in data
 
-def test_gedcom_versions(client):
-    rv = client.get('/gedcom/versions/'+temp_gedcom)
+def test_gedcom_info_nonexistent(client):
+    rv = client.get('/gedcom/info/zzz.ged')
     data = rv.data.decode("utf-8")
-    assert type(eval(data)) == list
+#    assert 'Gedcom-työkalut' in data
+#    assert 'Tätä Gedcom-tiedostoa ei ole palvelimella' in data
+    assert 'Redirecting' in data
+
 
 def test_gedcom_transform_params(client):
     rv = client.get('/gedcom/transform/'+temp_gedcom+"/kasteet.py")
@@ -114,7 +123,7 @@ def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     rv = client.post('/gedcom/transform/'+temp_gedcom+"/"+transform,data=args)
     data1 = rv.data.decode("utf-8")
     open("trace.txt","w").write(data1)
-    data = eval(rv.data.decode("utf-8"))
+    data = json.loads(rv.data.decode("utf-8"))
     assert data["stderr"] == ""
     assert expected in data['stdout']
 
@@ -134,6 +143,93 @@ def test_gedcom_transform_sukujutut(client):
         insert_dummy_tags="on",
     )
 
+def test_gedcom_transform_nimet(client):
+    dotest_gedcom_transform(client,"sukujutut-1.ged","names.py","Ajo 'names'   alkoi",
+        add_cont_if_no_level_number="on",
+        insert_dummy_tags="on",
+    )
+    
 def test_gedcom_transform_unmark(client):
     dotest_gedcom_transform(client,"unmark-1.ged","unmark.py","PLAC-X a,Loviisa, Finland")
+
+def test_gedcom_analyze(client):
+    rv = client.get('/gedcom/analyze/'+temp_gedcom)
+    data = rv.data.decode("utf-8")
+    assert "Sukupuolet" in data
+
+def test_gedcom_save(client):
+    rv = client.get('/gedcom/save/'+temp_gedcom)
+    data = rv.data.decode("utf-8")
+    rsp = json.loads(data)
+    assert type(rsp) == dict
+    assert "newname" in rsp
+
+def test_gedcom_versions(client):
+    rv = client.get('/gedcom/versions/'+temp_gedcom)
+    data = rv.data.decode("utf-8")
+    assert type(json.loads(data)) == list
         
+def test_gedcom_download(client):
+    rv = client.get('/gedcom/download/'+temp_gedcom)
+    data = rv.data.decode("utf-8")
+    assert data.startswith("0 HEAD")
+
+def test_gedcom_check(client):
+    rv = client.get(f'/gedcom/check/{temp_gedcom}')
+    data = rv.data.decode("utf-8")
+    assert data == "exists"
+
+def test_gedcom_check_nonexistent(client):
+    rv = client.get(f'/gedcom/check/zzz.ged')
+    data = rv.data.decode("utf-8")
+    assert data == "does not exist"
+
+def test_gedcom_update_desc(client):
+    rv = client.post('/gedcom/update_desc/'+temp_gedcom,data=dict(desc="Newdesc"))
+    data = rv.data.decode("utf-8")
+    assert data == "ok"
+
+def test_gedcom_update_permission(client):
+    rv = client.get(f'/gedcom/update_permission/{temp_gedcom}/true')
+    data = rv.data.decode("utf-8")
+    assert data == "ok"
+
+def test_gedcom_history(client):
+    rv = client.get('/gedcom/history/'+temp_gedcom)
+    data = rv.data.decode("utf-8")
+    assert "Uploaded" in data
+
+def test_gedcom_get_excerpt(client):
+    rv = client.get(f'/gedcom/get_excerpt/{temp_gedcom}/1')
+    data = rv.data.decode("utf-8")
+    assert data.startswith("<br><span class=linenum>1</span>: <span class=current_line>0 HEAD")
+
+def test_gedcom_compare(client):
+    rv = client.get(f'/gedcom/compare/{temp_gedcom}/{temp_gedcom}')
+    data = rv.data.decode("utf-8")
+    assert "No Differences Found" in data
+
+def test_gedcom_revert(client):
+    rv = client.get(f'/gedcom/revert/{temp_gedcom}/{temp_gedcom}.0')
+    data = rv.data.decode("utf-8")
+    rsp = json.loads(data)
+    assert type(rsp) == dict
+    assert "newname" in rsp
+
+def test_gedcom_delete_old_versions(client):
+    rv = client.get(f'/gedcom/delete_old_versions/{temp_gedcom}')
+    data = rv.data.decode("utf-8")
+    assert 'Redirecting' in data
+
+
+def test_gedcom_revert2(client):
+    rv = client.get(f'/gedcom/revert/{temp_gedcom}/{temp_gedcom}.0')
+    data = rv.data.decode("utf-8")
+    rsp = json.loads(data)
+    assert type(rsp) == dict
+    assert rsp["status"] == "Error" # was already deleted
+
+def test_gedcom_delete(client):
+    rv = client.get(f'/gedcom/delete/{temp_gedcom}')
+    data = rv.data.decode("utf-8")
+    assert 'Redirecting' in data
