@@ -20,7 +20,7 @@ from models import email
 """ Application route definitions
 """ 
 
-@shareds.app.before_request
+#@shareds.app.before_request
 def force_https():
     if request.endpoint in shareds.app.view_functions and not request.is_secure:
         #print(f"redirect to {request.url.replace('http://', 'https://')}")
