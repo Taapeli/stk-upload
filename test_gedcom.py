@@ -84,14 +84,11 @@ def test_gedcom_upload(client):
     assert type(metadata) == dict
     assert "encoding" in metadata
 
-<<<<<<< Upstream, based on testing
 def test_gedcom_analyze(client):
     rv = client.get('/gedcom/analyze/'+temp_gedcom)
     data = rv.data.decode("utf-8")
     assert "Sukupuolet" in data
 
-=======
->>>>>>> 96a5f4f Updated tests
 def test_gedcom_list(client):
     rv = client.get('/gedcom')
     data = rv.data.decode("utf-8")
@@ -171,7 +168,6 @@ def test_gedcom_transform_nimet(client):
         add_cont_if_no_level_number="on",
         insert_dummy_tags="on",
     )
-<<<<<<< Upstream, based on testing
 
 def test_gedcom_transform_dates(client):
     dotest_gedcom_transform(client,"dates.ged","dates.py","Muunnos Päivämäärät käynnistettiin",
@@ -185,19 +181,9 @@ def test_gedcom_transform_dates(client):
         handle_intervals2="on",
         handle_intervals3="on",
     )
-=======
->>>>>>> 96a5f4f Updated tests
     
 def test_gedcom_transform_unmark(client):
     dotest_gedcom_transform(client,"unmark-1.ged","unmark.py","PLAC-X a,Loviisa, Finland")
-
-<<<<<<< Upstream, based on testing
-=======
-def test_gedcom_analyze(client):
-    rv = client.get('/gedcom/analyze/'+temp_gedcom)
-    data = rv.data.decode("utf-8")
-    assert "Sukupuolet" in data
->>>>>>> 96a5f4f Updated tests
 
 def test_gedcom_save(client):
     rv = client.get('/gedcom/save/'+temp_gedcom)
