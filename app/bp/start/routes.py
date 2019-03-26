@@ -22,7 +22,7 @@ from models import email
 
 @shareds.app.before_request
 def force_https():
-    if not shareds.app.config['FORCE_HTTPS']: return
+    if not shareds.app.config.get('FORCE_HTTPS'): return
     if request.endpoint in shareds.app.view_functions and not request.is_secure:
         host = request.host.split(":")[0]
         if host in {"localhost","127.0.0.1"}: return
