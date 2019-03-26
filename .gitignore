@@ -10,3 +10,4 @@ RemoteSystemsTempFiles/\.project
 /env.sh
 /__pycache__/
 /venv/
+.coverage
