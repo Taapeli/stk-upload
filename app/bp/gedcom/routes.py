@@ -78,7 +78,7 @@ def get_info(input_gedcom, enc):
                                     options=Options())
         t.transform_file(input_gedcom)
         return t.transformation.info 
-    except:
+    except: # pragma: no cover
         traceback.print_exc()
         return Nullinfo()
     

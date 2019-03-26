@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 test_username = app.config['TEST_USERNAME']
 test_password = app.config['TEST_PASSWORD']
 gedcom_dir = "gedcoms/" + test_username
-testdata_dir = "gedcoms/testdata"
+testdata_dir = "testdata"
 temp_gedcom = "temporary_test.ged"
 temp_gedcom_fname = os.path.join(gedcom_dir,temp_gedcom)
 
