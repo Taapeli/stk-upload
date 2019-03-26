@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-25 18:35+0200\n"
+"POT-Creation-Date: 2019-03-26 13:35+0200\n"
 "PO-Revision-Date: 2019-03-24 16:34+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -2676,6 +2676,7 @@ msgstr "Underhåll"
 
 #: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:36
 #: bp/start/templates/start/join2.html:4 bp/start/templates/start/join2.html:20
+#: bp/stk_security/templates/security/register_user.html:17
 msgid "Join Isotammi"
 msgstr "Anslut Isotammi"
 
@@ -2692,10 +2693,18 @@ msgid "You are granted to register by Office"
 msgstr ""
 
 #: bp/start/templates/start/join.html:56
-msgid "Create your user name and log in"
+msgid "Create your user name and password"
 msgstr ""
 
-#: bp/start/templates/start/join.html:61 bp/start/templates/start/join2.html:24
+#: bp/start/templates/start/join.html:58
+msgid "Confirm"
+msgstr ""
+
+#: bp/start/templates/start/join.html:59
+msgid "Press Confirm button in your email and log in"
+msgstr ""
+
+#: bp/start/templates/start/join.html:65 bp/start/templates/start/join2.html:24
 msgid ""
 "To join the Isotammi project we wish that you will provide some basic "
 "information below."
@@ -2703,11 +2712,11 @@ msgstr ""
 "För att ansluta Isotammi projektet önskar vi att du kger några "
 "grundläggande information nedan."
 
-#: bp/start/templates/start/join.html:62 bp/start/templates/start/join2.html:25
+#: bp/start/templates/start/join.html:66 bp/start/templates/start/join2.html:25
 msgid "Please let us know at least your name and email address."
 msgstr "Meddela oss åtminstone ditt namn och din e-postadress."
 
-#: bp/start/templates/start/join.html:63 bp/start/templates/start/join2.html:26
+#: bp/start/templates/start/join.html:67 bp/start/templates/start/join2.html:26
 msgid ""
 "You can also provide any comments or additional information in the "
 "message field."
@@ -2715,7 +2724,7 @@ msgstr ""
 "Du kan också lämna kommentarer eller ytterligare information i meddelande"
 " fältet."
 
-#: bp/start/templates/start/join.html:64 bp/start/templates/start/join2.html:27
+#: bp/start/templates/start/join.html:68 bp/start/templates/start/join2.html:27
 msgid "Thank You!"
 msgstr "Tack!"
 
@@ -2845,7 +2854,6 @@ msgstr ""
 "få instruktionerna via e-post."
 
 #: bp/stk_security/templates/security/forgot_password.html:24
-#: bp/stk_security/templates/security/register_user.html:42
 #: bp/stk_security/templates/security/send_confirmation.html:23
 msgid "Other Options"
 msgstr "Andra alternativ"
@@ -2893,14 +2901,32 @@ msgid "Register as an user of Isotammi Service"
 msgstr "Registrera dig som användare av Isotammi Service"
 
 #: bp/stk_security/templates/security/register_user.html:16
+msgid ""
+"It is possible to register only if you have got an invitation. You may "
+"ask for invitation on the page"
+msgstr ""
+
+#: bp/stk_security/templates/security/register_user.html:18
 msgid "Note!"
 msgstr ""
 
-#: bp/stk_security/templates/security/register_user.html:17
+#: bp/stk_security/templates/security/register_user.html:19
 #, python-format
 msgid ""
 "When you have sent this form, you must wail mail from us and klick the "
 "link \"%(link)s\" in the message you got. Then you can log in!"
+msgstr ""
+
+#: bp/stk_security/templates/security/register_user.html:22
+msgid "Other Operations"
+msgstr ""
+
+#: bp/stk_security/templates/security/register_user.html:27
+msgid "My User Properties"
+msgstr ""
+
+#: bp/stk_security/templates/security/register_user.html:34
+msgid "Define a username and password for you"
 msgstr ""
 
 #: bp/stk_security/templates/security/send_confirmation.html:5

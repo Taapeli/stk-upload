@@ -12,36 +12,41 @@
     <div>{% include "security/_messages.html" %}</div> 
     <div class="row"> 
        <div class="startbox"> 
-		  <h3>{{ _('Register as an user of Isotammi Service') }}</h3> 
+          <h3>{{ _('Register as an user of Isotammi Service') }}</h3> 
+              <p>{{ _('It is possible to register only if you have got an invitation. ' 
+              'You may ask for invitation on the page') }} <a href="/join">{{ _('Join Isotammi') }}</a>.</p>
               <p><b>{{ _('Note!') }}</b>
                 {{ _('When you have sent this form, you must wail mail from us and klick the link '
                      '"%(link)s" in the message you got. Then you can log in!', 
                      link="Confirm my account") }}</p>
+            <h3>{{ _('Other Operations') }}</h3> 
+                {% include "security/_menu.html" %} 
+       </div>
+
+       <div class="startbox"> 
+          <h3>{{ _('My User Properties') }}</h3> 
 		     <form action="{{ url_for_security('register') }}" 
 		           method="POST" name="register_user_form"> 
 		            
 				  {{ register_user_form.hidden_tag() }} 
 				  {{ render_field_with_errors(register_user_form.email) }} 
-				  {{ render_field_with_errors(register_user_form.password) }} 
+                  {{ render_field_with_errors(register_user_form.name) }} 
+                  <p>{{ _('Define a username and password for you') }}:</p>
+                  {{ render_field_with_errors(register_user_form.username) }} 
+                  {{ render_field_with_errors(register_user_form.password) }} 
 				 
 				  {% if register_user_form.password_confirm %} 
 				    {{ render_field_with_errors(register_user_form.password_confirm) }} 
 				  {% endif %} 
-				  {{ render_field_with_errors(register_user_form.username) }} 
-				  {{ render_field_with_errors(register_user_form.name) }} 
 				  {{ render_field_with_errors(register_user_form.language) }} 
 				  {# render_field(register_user_form.terms) #} 
  
                   {{ render_field_with_errors(register_user_form.agree) }} 
-				  {{ render_field(register_user_form.submit) }} 
+                  <div class="right-button">
+				    {{ render_field(register_user_form.submit) }}
+				  </div>
 		     </form> 
 	    </div> 
 
-        <div class="startbox"> 
-            <div style="display: inline-block;"> 
-            <h3>{{ _('Other Options') }}</h3> 
-                {% include "security/_menu.html" %} 
-            </div> 
-        </div> 
 </div> 
 {% endblock %}

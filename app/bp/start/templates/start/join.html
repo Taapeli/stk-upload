@@ -45,7 +45,7 @@ ul[id] li {
       {% endif %}
     {% endwith %}
 
-    <div class="steps" style="margin-left: 4em;">
+    <div class="steps">
         <div class="active">1. <b>{{ _("Join us") }}</b><br>
             {{ _("Enroll as a test user on this page") }}</div>
          –
@@ -53,7 +53,11 @@ ul[id] li {
             {{ _("You are granted to register by Office") }}</div>
         –
         <div>3. <b><a href="/register">{{ _("Register") }}</b></a><br>
-            {{ _("Create your user name and log in") }}</div>
+            {{ _("Create your user name and password") }}</div>
+        –
+        <div>4. <b>{{ _("Confirm") }}</b><br>
+            {{ _("Press Confirm button in your email and log in") }}</div>
+        
     </div>
 
     <div class="startbox2">
@@ -74,7 +78,7 @@ ul[id] li {
    	      {{ render_field_with_errors(form.places) }}	
    	      {{ form.message.label }}
    	      {{ render_field(form.message,rows=20,cols=59) }}	
-         <div> 
+         <div class="right-button">
      	      {{ render_field(form.submit) }}	
          </div>
          </form>
