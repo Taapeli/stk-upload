@@ -119,7 +119,7 @@ class OwnerFilter():
                 self.next_person[0] = unquote_plus(session_next[0])
 
             self.session['next_person'] = self.next_person
-            print("OwnerFilter: Now next_person={}".format(self.next_person))
+            # print("OwnerFilter: Now next_person={}".format(self.next_person))
         else:
             # No request
             self.session['next_person'] = self.next_person

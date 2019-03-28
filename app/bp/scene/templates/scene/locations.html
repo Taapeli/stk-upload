@@ -5,7 +5,10 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
 
-<h2>{{ _('Places List') }}</h2>
+<div id="startdiv">
+    <h2>{{ _('Places List') }}</h2>
+</div>
+
 {{ macro.menu(4) }}
 	<div class="content" id="Individuals">
 		<p id="description">
