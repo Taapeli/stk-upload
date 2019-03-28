@@ -6,13 +6,13 @@ Created on 8.9.2017
 @author: jm
 '''
 import sys
-from neo4j.v1 import GraphDatabase, basic_auth
+from neo4j import GraphDatabase
 import treelib
 
 def connect_db():
     global driver
     host = "bolt:localhost:7687"
-    driver = GraphDatabase.driver(host, auth=basic_auth("neo4j", "2000Neo4j"))
+    driver = GraphDatabase.driver(host, auth=("neo4j", "2000Neo4j"))
 
 
 def get_connections(locid):

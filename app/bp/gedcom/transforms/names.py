@@ -161,12 +161,12 @@ def phase3(run_args, gedline, f):
 '''
 # ---- Automation rules ----
 #                             1 ALIA
-# state \input!!0 INDI!0 ... !1 NAME !1 BIRT !2 DATE !2,3,4, !1 ... ! end
-#-------------++------+------+-------+-------+-------+------+-----
-# 0  "Started"|| 1,T1 | 0,T3 | 0,T3  | 0,T3  | 0,T3  | 0,T3  | 0,T3 | 0,T2
-# 1  "INDI"   || 1,T1 | 0,T2 | 2,T4  | 3,T6  | 1,T6  | 1,T6  | 1,T6 | 0,T2
-# 2  "NAME"   || 1,T1 | 0,T2 | 2,T4  | 3,T6  | 2,T7  | 2,T7  | 1,T6 | 0,T2
-# 3  "BIRT"   || 1,T1 | 0,T2 | 2,T4  | 1,T6  | 1,T5  | 3,T6  | 1,T6 | 0,T2
+# state \ input!!0 INDI!0 ... !1 NAME !1 BIRT !2 DATE !2,3,4, !1 ... ! end
+#--------------++------+------+-------+-------+-------+------+-----
+# 0  "Started" || 1,T1 | 0,T3 | 0,T3  | 0,T3  | 0,T3  | 0,T3  | 0,T3 | 0,T2
+# 1  "INDI"    || 1,T1 | 0,T2 | 2,T4  | 3,T6  | 1,T6  | 1,T6  | 1,T6 | 0,T2
+# 2  "NAME"    || 1,T1 | 0,T2 | 2,T4  | 3,T6  | 2,T7  | 2,T7  | 1,T6 | 0,T2
+# 3  "BIRT"    || 1,T1 | 0,T2 | 2,T4  | 1,T6  | 1,T5  | 3,T6  | 1,T6 | 0,T2
  For example rule "2,T4" means operation T4 and new state 2.
 '''
 
