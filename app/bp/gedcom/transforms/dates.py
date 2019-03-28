@@ -191,9 +191,10 @@ class Dates(transformer.Transformation):
                 # 1888-99
                 r = match(value,y1=fourdigits,sep=dash,y2=twodigits)
                 if r:
-                    century = r.y1[0:2]
-                    item.value = f"FROM {r.y1} TO {century}{r.y2}"
-                    return item
+                    if int(r.y2) > int(r.y1[2:]): 
+                        century = r.y1[0:2]
+                        item.value = f"FROM {r.y1} TO {century}{r.y2}"
+                        return item
                     
             if options.handle_intervals2:
                 # 1888-, >1888
@@ -234,7 +235,7 @@ class Dates(transformer.Transformation):
     
             if options.handle_yyyy_mm:
                 # 1888-12
-                r = match(value,y=fourdigits,sep1=dash,m=twodigits,sep2=dash,d=twodigits)
+                r = match(value,y=fourdigits,sep1=dash,m=twodigits)
                 if r:
                     val = fmtdate(r.y,r.m,1)
                     if val:

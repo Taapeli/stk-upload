@@ -104,11 +104,11 @@ def test_gedcom_info(client):
     assert 'Muunnokset' in data
 
 def test_gedcom_info_nonexistent(client):
-    rv = client.get('/gedcom/info/zzz.ged')
+    rv = client.get('/gedcom/info/zzz.ged',follow_redirects=True)
     data = rv.data.decode("utf-8")
-#    assert 'Gedcom-työkalut' in data
-#    assert 'Tätä Gedcom-tiedostoa ei ole palvelimella' in data
-    assert 'Redirecting' in data
+    assert 'Gedcom-työkalut' in data
+    assert 'Tätä Gedcom-tiedostoa ei ole palvelimella' in data
+#    assert 'Redirecting' in data
 
 
 def test_gedcom_transform_params(client):
@@ -171,6 +171,7 @@ def test_gedcom_transform_nimet(client):
 
 def test_gedcom_transform_dates(client):
     dotest_gedcom_transform(client,"dates.ged","dates.py","Muunnos Päivämäärät käynnistettiin",
+        display_invalid_dates="on",
         add_cont_if_no_level_number="on",
         insert_dummy_tags="on",
         handle_dd_mm_yyyy="on",
@@ -180,6 +181,7 @@ def test_gedcom_transform_dates(client):
         handle_intervals="on",
         handle_intervals2="on",
         handle_intervals3="on",
+        handle_yyyy_mm_dd="on",
     )
     
 def test_gedcom_transform_unmark(client):
@@ -195,7 +197,9 @@ def test_gedcom_save(client):
 def test_gedcom_versions(client):
     rv = client.get('/gedcom/versions/'+temp_gedcom)
     data = rv.data.decode("utf-8")
-    assert type(json.loads(data)) == list
+    versions =  json.loads(data)
+    assert type(versions) == list
+    assert len(versions) == 2
         
 def test_gedcom_download(client):
     rv = client.get('/gedcom/download/'+temp_gedcom)
@@ -245,11 +249,14 @@ def test_gedcom_revert(client):
     assert "newname" in rsp
 
 def test_gedcom_delete_old_versions(client):
-    rv = client.get(f'/gedcom/delete_old_versions/{temp_gedcom}')
+    rv = client.get(f'/gedcom/delete_old_versions/{temp_gedcom}',follow_redirects=True)
     data = rv.data.decode("utf-8")
-    assert 'Redirecting' in data
-
-
+    assert 'Muunnokset' in data
+    n = 0
+    for name in os.listdir(gedcom_dir):
+        if name == temp_gedcom or name.startswith(temp_gedcom+"."): n += 1 
+    assert n == 1
+    
 def test_gedcom_revert2(client):
     rv = client.get(f'/gedcom/revert/{temp_gedcom}/{temp_gedcom}.0')
     data = rv.data.decode("utf-8")
@@ -258,6 +265,10 @@ def test_gedcom_revert2(client):
     assert rsp["status"] == "Error" # was already deleted
 
 def test_gedcom_delete(client):
-    rv = client.get(f'/gedcom/delete/{temp_gedcom}')
+    rv = client.get(f'/gedcom/delete/{temp_gedcom}',follow_redirects=True)
     data = rv.data.decode("utf-8")
-    assert 'Redirecting' in data
+    assert 'Gedcom-työkalut' in data
+    n = 0
+    for name in os.listdir(gedcom_dir):
+        if name == temp_gedcom or name.startswith(temp_gedcom+"."): n += 1 
+    assert n == 0
