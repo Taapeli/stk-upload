@@ -410,11 +410,14 @@ def get_excerpt(gedcom,linenum):
     metadata = get_metadata(gedcom)
     encoding = metadata['encoding'] 
     lines = open(filename,encoding=encoding).readlines()
-    firstline = linenum - 10
+    firstline = linenum 
+    while not lines[firstline].startswith("0"):
+        firstline -= 1
     if firstline < 0: firstline = 0
     html = ""
     for i,line in enumerate(lines[firstline:linenum+9]):
         line = line.strip()
+        if firstline+i > linenum-1 and line.startswith("0"): break
         html += f"<br><span class=linenum>{firstline+i+1}</span>: "
         if firstline+i == linenum-1:
             html += f"<span class=current_line>{line}</span>"
