@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2019-03-28 10:37+0200\n"
-"PO-Revision-Date: 2019-03-28 10:41+0200\n"
+"PO-Revision-Date: 2019-03-28 20:49+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -971,7 +971,7 @@ msgstr "tällä:"
 
 #: bp/gedcom/routes.py:509
 msgid "Transform '{}' started at {}"
-msgstr "Muunnos {} käynnistettiin {}"
+msgstr "Muunnos '{}' käynnistettiin {}"
 
 #: bp/gedcom/routes.py:519
 msgid "Name of the input GEDCOM file"
