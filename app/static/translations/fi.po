@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-26 13:35+0200\n"
+"POT-Creation-Date: 2019-03-28 10:37+0200\n"
 "PO-Revision-Date: 2019-03-20 18:33+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -1338,49 +1338,62 @@ msgstr "Lisää"
 msgid "Default"
 msgstr "Oletusarvo"
 
-#: bp/gedcom/transforms/citationsinnotes.py:117
+#: bp/gedcom/transforms/citationsinnotes.py:118
 msgid "Citations in notes"
 msgstr "Lähdeviitteet lisätiedoissa"
 
-#: bp/gedcom/transforms/dates.py:10
+#: bp/gedcom/transforms/dates.py:14
 msgid "Dates"
 msgstr "Päivämäärät"
 
-#: bp/gedcom/transforms/dates.py:11
+#: bp/gedcom/transforms/dates.py:15
 msgid "Correct some invalid date formats"
 msgstr "Korjaa virheellisiä päivämääriä"
 
-#: bp/gedcom/transforms/dates.py:17
+#: bp/gedcom/transforms/dates.py:21
+msgid "Display invalid dates"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:23
 msgid "Change 31.12.1999 to 31 DEC 1999"
 msgstr "31.12.1999 -> 31 DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:19
+#: bp/gedcom/transforms/dates.py:25
 msgid "Change 1999-12-31 to 31 DEC 1999"
 msgstr "1999-12-31 -> 31 DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:21
+#: bp/gedcom/transforms/dates.py:27
 msgid "Change 1999-12 to DEC 1999"
 msgstr "1999-12 -> DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:23
+#: bp/gedcom/transforms/dates.py:29
 msgid "Change [00.]12.1999 to DEC 1999"
 msgstr "[00.]12.1999 -> DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:25
+#: bp/gedcom/transforms/dates.py:31
 msgid "Change 00 DEC 1999 to DEC 1999"
 msgstr "00 DEC 1999 -> DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:27
+#: bp/gedcom/transforms/dates.py:33
 msgid "Change 1950-[19]59 to FROM 1950 TO 1959"
 msgstr "1950-[19]59 -> FROM 1950 TO 1959"
 
-#: bp/gedcom/transforms/dates.py:29
+#: bp/gedcom/transforms/dates.py:35
 msgid "Change 1950-/>1950 to FROM/AFT 1950"
 msgstr "1950-/>1950 -> FROM/AFT 1950"
 
-#: bp/gedcom/transforms/dates.py:31
+#: bp/gedcom/transforms/dates.py:37
 msgid "Change -1950/<1950 to TO/BEF 1950"
 msgstr "-1950/<1950 -> TO/BEF 1950"
+
+#: bp/gedcom/transforms/dates.py:82
+msgid "Invalid dates:"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:91
+#, python-format
+msgid "%(date)s (line %(linkstr)s)<br>"
+msgstr ""
 
 #: bp/gedcom/transforms/kasteet.py:34
 msgid "Baptisms"
@@ -2682,15 +2695,15 @@ msgstr "Toimisto tarkastaa jäsenyyden ja ilmoittaa sinulle"
 
 #: bp/start/templates/start/join.html:56
 msgid "Create your user name and password"
-msgstr ""
+msgstr "Luo käyttäjätunnus ja salasana"
 
 #: bp/start/templates/start/join.html:58
 msgid "Confirm"
-msgstr ""
+msgstr "Vahvistus"
 
 #: bp/start/templates/start/join.html:59
 msgid "Press Confirm button in your email and log in"
-msgstr ""
+msgstr "Paina Confirm-painiketta sähköpostissasi; voila!"
 
 #: bp/start/templates/start/join.html:65 bp/start/templates/start/join2.html:24
 msgid ""

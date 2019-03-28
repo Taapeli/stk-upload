@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-26 13:35+0200\n"
+"POT-Creation-Date: 2019-03-28 10:37+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -1336,48 +1336,61 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: bp/gedcom/transforms/citationsinnotes.py:117
+#: bp/gedcom/transforms/citationsinnotes.py:118
 msgid "Citations in notes"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:10
+#: bp/gedcom/transforms/dates.py:14
 msgid "Dates"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:11
+#: bp/gedcom/transforms/dates.py:15
 msgid "Correct some invalid date formats"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:17
-msgid "Change 31.12.1999 to 31 DEC 1999"
-msgstr ""
-
-#: bp/gedcom/transforms/dates.py:19
-msgid "Change 1999-12-31 to 31 DEC 1999"
-msgstr ""
-
 #: bp/gedcom/transforms/dates.py:21
-msgid "Change 1999-12 to DEC 1999"
+msgid "Display invalid dates"
 msgstr ""
 
 #: bp/gedcom/transforms/dates.py:23
-msgid "Change [00.]12.1999 to DEC 1999"
+msgid "Change 31.12.1999 to 31 DEC 1999"
 msgstr ""
 
 #: bp/gedcom/transforms/dates.py:25
-msgid "Change 00 DEC 1999 to DEC 1999"
+msgid "Change 1999-12-31 to 31 DEC 1999"
 msgstr ""
 
 #: bp/gedcom/transforms/dates.py:27
-msgid "Change 1950-[19]59 to FROM 1950 TO 1959"
+msgid "Change 1999-12 to DEC 1999"
 msgstr ""
 
 #: bp/gedcom/transforms/dates.py:29
-msgid "Change 1950-/>1950 to FROM/AFT 1950"
+msgid "Change [00.]12.1999 to DEC 1999"
 msgstr ""
 
 #: bp/gedcom/transforms/dates.py:31
+msgid "Change 00 DEC 1999 to DEC 1999"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:33
+msgid "Change 1950-[19]59 to FROM 1950 TO 1959"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:35
+msgid "Change 1950-/>1950 to FROM/AFT 1950"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:37
 msgid "Change -1950/<1950 to TO/BEF 1950"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:82
+msgid "Invalid dates:"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:91
+#, python-format
+msgid "%(date)s (line %(linkstr)s)<br>"
 msgstr ""
 
 #: bp/gedcom/transforms/kasteet.py:34

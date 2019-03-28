@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-03-26 13:35+0200\n"
+"POT-Creation-Date: 2019-03-28 10:37+0200\n"
 "PO-Revision-Date: 2019-03-24 16:34+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -1340,49 +1340,62 @@ msgstr "Lägg till"
 msgid "Default"
 msgstr "Standard"
 
-#: bp/gedcom/transforms/citationsinnotes.py:117
+#: bp/gedcom/transforms/citationsinnotes.py:118
 msgid "Citations in notes"
 msgstr "Citeringar i noter"
 
-#: bp/gedcom/transforms/dates.py:10
+#: bp/gedcom/transforms/dates.py:14
 msgid "Dates"
 msgstr "Datum"
 
-#: bp/gedcom/transforms/dates.py:11
+#: bp/gedcom/transforms/dates.py:15
 msgid "Correct some invalid date formats"
 msgstr "Korrigera vissa ogiltiga datum format"
 
-#: bp/gedcom/transforms/dates.py:17
+#: bp/gedcom/transforms/dates.py:21
+msgid "Display invalid dates"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:23
 msgid "Change 31.12.1999 to 31 DEC 1999"
 msgstr "Förändring 31.12.1999 DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:19
+#: bp/gedcom/transforms/dates.py:25
 msgid "Change 1999-12-31 to 31 DEC 1999"
 msgstr "Förändring 1999-12-31 till 31 DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:21
+#: bp/gedcom/transforms/dates.py:27
 msgid "Change 1999-12 to DEC 1999"
 msgstr "Förändring 1999-12 till DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:23
+#: bp/gedcom/transforms/dates.py:29
 msgid "Change [00.]12.1999 to DEC 1999"
 msgstr "Ändra [00.] 12,1999 till DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:25
+#: bp/gedcom/transforms/dates.py:31
 msgid "Change 00 DEC 1999 to DEC 1999"
 msgstr "Förändring 00 DEC 1999 till DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:27
+#: bp/gedcom/transforms/dates.py:33
 msgid "Change 1950-[19]59 to FROM 1950 TO 1959"
 msgstr "Förändring 1950-[19] 59 till från 1950 till 1959"
 
-#: bp/gedcom/transforms/dates.py:29
+#: bp/gedcom/transforms/dates.py:35
 msgid "Change 1950-/>1950 to FROM/AFT 1950"
 msgstr "Förändring 1950-/> 1950 till FROM/AFT 1950"
 
-#: bp/gedcom/transforms/dates.py:31
+#: bp/gedcom/transforms/dates.py:37
 msgid "Change -1950/<1950 to TO/BEF 1950"
 msgstr "Förändring-1950/< 1950 till TO/BEF 1950"
+
+#: bp/gedcom/transforms/dates.py:82
+msgid "Invalid dates:"
+msgstr ""
+
+#: bp/gedcom/transforms/dates.py:91
+#, python-format
+msgid "%(date)s (line %(linkstr)s)<br>"
+msgstr ""
 
 #: bp/gedcom/transforms/kasteet.py:34
 msgid "Baptisms"
