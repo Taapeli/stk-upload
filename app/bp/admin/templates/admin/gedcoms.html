@@ -1,15 +1,18 @@
 {# _myapp/templates/gr_result.html_ #}
 {% extends "/admin/layout.html" %}
-{% block title %}{{ _("Uploads") }}{% endblock %}
+{% block title %}{{ _("GEDCOMs") }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <!-- meta http-equiv="refresh" content="30" -->
-    {% if users %}
-    	<h2>{{ _("GEDCOMs for users: ") }} <i>{{users}}</i></h2>
+    {% if num_requested_users > 0 %}
+    	{% if num_users == 1 %}
+	    	<h2>{{ _("GEDCOMs for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
+    	{% else %}
+    		<h2>{{ _("GEDCOMs for %(n)s users", n=num_users) }}</h2>
+		{% endif %}
     {% else %}
 	    <h2>{{ _("GEDCOMs for all users") }}</h2>
     {% endif %}
-    
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
