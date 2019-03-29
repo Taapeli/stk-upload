@@ -37,7 +37,9 @@
         <div id="summaryarea">
             <div class="flex-container">
 	           <div id="description">
-	               <p>{{ _('Displaying %(num)s persons', num=cnt) }}. Tietojoukko: <b>
+                   <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
+                        {{ _('starting <tt>%(name)s</tt>', name=next[0]) }}
+                      – {{ _('data set') }}<b>
                        {% if multi_owners %}
                             &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
                        {% else %}{{my_set}}

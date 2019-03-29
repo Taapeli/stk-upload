@@ -129,8 +129,9 @@ def show_my_persons():
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
     if persons:
         # Next person links [backwards, forwards]
-        print(f"Displaying {persons[0].sortname} – {persons[-1].sortname}")
-        if len(persons) == count:
+        person_owner_count = sum(len(x.owners) for x in persons)
+        print(f"Displaying {persons[0].sortname} – {persons[-1].sortname}, got {person_owner_count}/{len(persons)} persons")
+        if count == person_owner_count:
             my_filter.next_person = [persons[0].sortname, persons[-1].sortname]
         else:
             # Forward to end is marked 
