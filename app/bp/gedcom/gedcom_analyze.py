@@ -1,13 +1,11 @@
 import io
 import re
-import sys
 import time
-from collections import Counter, defaultdict
+from collections import defaultdict
 from contextlib import redirect_stdout
 
 from . import transformer
 from flask_babelex import _, ngettext
-import traceback
 
 name = _("GEDCOM Analyzer")
 
@@ -155,7 +153,7 @@ class LineCounter:
         self.values = defaultdict(list)
     def add(self,key,item):
         self.values[key].append(item)
-    def display(self):
+    def display(self,count=None):
         if len(self.values) == 0: return
         print()
         printheader(self.title) 
@@ -170,7 +168,9 @@ class LineCounter:
                  num=len(itemlist), lines=', '.join(links))
             if len(itemlist) > len(linenums): txt += ",..."
             printitem(f"<b>{key:25}</b><td>({txt})")
-            #printitem(f"<b>{key:25}</b><td>(count={len(itemlist):5}, lines {','.join(links)})")
+        if count is not None:
+            if count > len(self.values): printitem(f"<b>...")
+            printitem(f"<b>Count: {count}")
         printtrailer() 
                 
 
@@ -183,16 +183,14 @@ class Analyzer(transformer.Transformation):
         self.illegal_paths = LineCounter(_("Invalid tag hierarchy"))
         self.novalues = LineCounter(_("No value"))
         self.invalid_dates = LineCounter(_("Invalid dates"))
-        #self.too_few = []
-        #self.too_many = []
         self.too_few = LineCounter(_("Too few child tags"))
         self.too_many = LineCounter(_("Too many child tags"))
         self.submitter_refs = LineCounter(_("Records for submitters"))
         self.family_with_no_parents = LineCounter(_("Families with no parents"))
         self.submitters = dict()
         self.submitter_emails = dict()
-        self.records = set()
-        self.xrefs = set()
+        self.records = {}
+        self.xrefs = {}
         self.types = defaultdict(LineCounter)
 
         self.with_sources = LineCounter(_("With sources"))
@@ -210,14 +208,6 @@ class Analyzer(transformer.Transformation):
             "HEAD.SUBM",
             "TRLR",
         }
-        self.grammar_data = [
-            # parent tag/suffix, child tag, mincount, maxcount
-            # ->
-            # child tag must occur mincount to maxcount times under parent tag
-            (".MAP",    "LATI", 1,1),
-            (".MAP",    "LONG", 1,1),
-            (".HUSB",   "AGE", 1,1),
-        ]       
 
     def transform(self,item,options,phase):
         if 0:
@@ -265,9 +255,9 @@ class Analyzer(transformer.Transformation):
         if item.level == 1 and item.tag == "SUBM":
             self.submitter_refs.add(item.value,item) 
         if item.level == 0 and item.xref:
-            self.records.add(item.xref)
+            self.records[item.xref] = item
         if item.level > 0 and item.value.startswith("@") and not item.value.startswith("@#"):
-            self.xrefs.add(item.value)
+            self.xrefs[item.value] = item
             if (not item.value.startswith("@@") and 
                 not item.tag in {"SOUR","REPO","SUBM","NOTE",
                                 "FAMC","FAMS","CHIL","HUSB","WIFE",
@@ -353,28 +343,22 @@ class Analyzer(transformer.Transformation):
                 printitem(line)
             printtrailer()
             
-        recs = self.xrefs - self.records 
-        count = len(recs) 
+        xrefs = self.xrefs.keys() - self.records.keys()
+        count = len(xrefs) 
         if count > 0: 
-            ellipsis = ", ..." if count > 10 else ""
-            printheader(_("Missing records"))
-            for rec in list(recs)[:10]:          
-                printitem(rec)          
-            if count > 10: printitem("...")          
-            printitem(_("Total") + f"{count}")
-            printtrailer()
+            missing = LineCounter(_("Missing records"))
+            for xref in list(xrefs)[:10]:          
+                missing.add(xref,self.xrefs[xref])          
+            missing.display(count)
 
-        recs = self.records - self.xrefs 
-        count = len(recs) 
+        xrefs = self.records.keys() - self.xrefs.keys()
+        count = len(xrefs) 
         if count > 0: 
-            printheader(_("Unused records"))
-            for rec in list(recs)[:10]:          
-                printitem(rec)          
-            if count > 10: printitem("...")          
-            printitem(_("Total") + f"{count}")
-            printtrailer()
+            unused = LineCounter(_("Unused records"))
+            for xref in list(xrefs)[:10]:          
+                unused.add(xref,self.records[xref])
+            unused.display(count)
 
 
-            
             
             
