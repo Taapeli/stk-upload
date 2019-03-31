@@ -145,7 +145,25 @@ def test_gedcom_transform_marriages(client):
     dotest_gedcom_transform(client,"marriages-1.ged","marriages.py","PLAC p3, p1")
 
 def test_gedcom_transform_places(client):
-    dotest_gedcom_transform(client,"paikat-1.ged","places.py","2 PLAC Finland, Loviisa, a",
+    dotest_gedcom_transform(client,"paikat-1.ged","places.py","2 PLAC-X Finland, Loviisa, a",
+                            match="a",
+                            mark_changes="on",
+                            mark_all_matching="on",
+                            display_nonchanges="on",
+                            display_unique_changes="on",
+                            auto_combine="on",
+                            add_commas="on",
+                            display_ignored="on",
+                            auto_order="on",
+                            reverse="on")
+
+def test_gedcom_transform_places2(client):
+    dotest_gedcom_transform(client,"paikat-1.ged","places.py","2 PLAC-X Finland, Loviisa, a",
+                            add_commas="on",
+                            mark_changes="on",
+                            minlen="2",
+                            ignore_digits="on",
+                            ignore_lowercase="on",
                             reverse="on")
 
 def test_gedcom_transform_sukujutut(client):
