@@ -124,6 +124,12 @@ def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     orig_file = os.path.join(testdata_dir,test_gedcom)
     dest_file = os.path.join(gedcom_dir,temp_gedcom)
     shutil.copyfile(orig_file,dest_file)
+
+    # this will generate the transformation options form
+    rv = client.get('/gedcom/transform/'+temp_gedcom+"/"+transform)
+    data1 = rv.data.decode("utf-8")
+    assert "muunnoksen vaihtoehdot" in data1
+    
     args.update({"--"+option:value for option,value in options.items()})
     rv = client.post('/gedcom/transform/'+temp_gedcom+"/"+transform,data=args)
     data1 = rv.data.decode("utf-8")
@@ -170,7 +176,7 @@ def test_gedcom_transform_nimet(client):
     )
 
 def test_gedcom_transform_dates(client):
-    dotest_gedcom_transform(client,"dates.ged","dates.py","Muunnos Päivämäärät käynnistettiin",
+    dotest_gedcom_transform(client,"dates.ged","dates.py","Muunnos 'Päivämäärät' käynnistettiin",
         display_invalid_dates="on",
         add_cont_if_no_level_number="on",
         insert_dummy_tags="on",
