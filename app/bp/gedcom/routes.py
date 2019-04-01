@@ -298,7 +298,7 @@ def gedcom_upload():
     file = request.files['file']
     # if user does not select file, browser also
     # submit an empty part without filename
-    if file.filename == '':
+    if file.filename == '': # pragma: no cover
         flash(_('Choose a GEDCOM file to upload'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     if file and allowed_file(file.filename):
@@ -419,8 +419,6 @@ def get_excerpt(gedcom,linenum):
         else:    
             html += f"{line}"
     return html
-        
-    return "".join(lines[firstline:linenum+5])
 
 @bp.route('/gedcom/delete/<gedcom>')
 @login_required

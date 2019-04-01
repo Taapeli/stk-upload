@@ -28,6 +28,8 @@
 1 SUBN @SUBMISSION@
 1 FILE ALLGED.GED
 1 COPR (C) 1997-2000 by H. Eichmann. You can use and distribute this file freely as long as you do not charge for it
+1 GEDC
+2 VERS 5.5
 1 GEDCx
 2 VERS 5.5
 2 FORM LINEAGE-LINKED
@@ -1169,5 +1171,16 @@
 1 SEX M
 1 SEX X
 1 AAA @invalid@
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
+1 _TESTTAG
 0 @Fxxx@ FAM
 0 TRLR
