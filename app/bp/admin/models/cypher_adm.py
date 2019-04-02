@@ -25,7 +25,6 @@ DETACH DELETE a"""
 CREATE (email:Allowed_email {
     allowed_email: $email,
     default_role: $role,
-    approved: False
     creator: $admin_name,
     created_at: timestamp() } )"""
     
@@ -36,11 +35,12 @@ SET email.confirmed_at = timestamp()
 RETURN email """
              
     allowed_email_update = """
-MATCH (email:Allowed_email)
-    WHERE email.allowed_email = $email    
-SET email.default_role = $default_role,
-    email.approved = $approved
-RETURN email"""
+UPDATE (email:Allowed_email {
+    allowed_email: $email,
+    default_role: $role,
+    creator: $admin_name,
+    created_at: $created_at,     
+    confirmed_at: $confirmed_at } )"""
         
     allowed_emails_get = """
 MATCH (email:Allowed_email)
@@ -52,32 +52,6 @@ MATCH (email:Allowed_email)
     WHERE email.allowed_email = $email
 RETURN email"""
 
-    user_profile_register = """
-CREATE (up:UserProfile {   
-    name: $name,
-    email: $email,
-    userName: $userName,
-    language: $language,
-    research_years: $research_years,
-    software: $software,
-    researched_names: $researched_names,
-    researched_places: $researched_places,
-    text_message: profile.text_message
-    created_at: timestamp() } )"""
-
-    user_profile_update = """
-MATCH (up:UserProfile) WHERE up.email = $email 
-    SET name = $name,
-    SET email = $email,
-    SET userName = $userName,
-    SET language = $language,
-    SET research_years = $research_years,
-    SET software = $software,
-    SET researched_names = $researched_names,
-    SET researched_places = $researched_places,
-    SET text_message = profile.text_message
-RETURN up)"""
-    
     user_profile_add = '''         
 MATCH (u:User) 
     WHERE u.email = $email

@@ -12,9 +12,6 @@ name = _("GEDCOM Analyzer")
 def initialize(options):
     return Analyzer()
 
-def add_args(parser):
-    pass
-
 class Info: pass 
 
 from . import gedcom_grammar_data2
@@ -130,11 +127,6 @@ def valid_date(datestring):
         
     return False
 
-class Out:
-    def emit(self,s):
-        print(s)
-out = Out()
-
 def printheader(title):
     print("<div class=results-box>")
     print(f"<h3 class=results-title>{title}</h3>")
@@ -183,7 +175,6 @@ class Analyzer(transformer.Transformation):
         self.illegal_paths = LineCounter(_("Invalid tag hierarchy"))
         self.novalues = LineCounter(_("No value"))
         self.invalid_dates = LineCounter(_("Invalid dates"))
-        self.too_few = LineCounter(_("Too few child tags"))
         self.too_many = LineCounter(_("Too many child tags"))
         self.submitter_refs = LineCounter(_("Records for submitters"))
         self.family_with_no_parents = LineCounter(_("Families with no parents"))
@@ -241,8 +232,6 @@ class Analyzer(transformer.Transformation):
                 count = 0
                 for c in item.children:
                     if c.tag == tag: count += 1
-                if count > 0 and count < mincount:
-                    self.too_few.add( "Only {} {} tags under {} - should be at least {}".format(count,tag,path,mincount), item )     
                 if maxcount and count > maxcount:
                     self.too_many.add( "{} {} tags under {} - should be at most {}".format(count,tag,path,maxcount), item )     
         
@@ -306,7 +295,8 @@ class Analyzer(transformer.Transformation):
         for sex,count in sorted(self.genders.items()):
             printitem(f"<b>{sex}</b><td>{count:5}")
             total += count
-        printitem(f"<td>{self.individuals-total:5}")
+        if self.individuals > total:
+            printitem(f"<td>{self.individuals-total:5}")
         printtrailer()
                     
         self.illegal_paths.display()
@@ -316,7 +306,6 @@ class Analyzer(transformer.Transformation):
 
         self.invalid_dates.display()
         self.novalues.display()
-        self.too_few.display()
         self.too_many.display()
         self.family_with_no_parents.display()
         

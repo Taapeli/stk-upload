@@ -71,7 +71,6 @@ def test_gedcom_upload(client):
         pass
     assert not os.path.exists(temp_gedcom_fname) 
 
-    #args = dict(file=(io.BytesIO(b"0 @I123@ INDI"),temp_gedcom),desc="Description")
     args = dict(file=(open(testdata_dir+"/allged.ged","rb"),temp_gedcom),desc="Description")
     rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
     data = rv.data.decode("utf-8")
@@ -84,11 +83,34 @@ def test_gedcom_upload(client):
     assert type(metadata) == dict
     assert "encoding" in metadata
 
+def test_gedcom_duplicate_upload(client):
+    args = dict(file=(open(testdata_dir+"/allged.ged","rb"),temp_gedcom),desc="Description")
+    rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
+    data = rv.data.decode("utf-8")
+    assert 'Gedcom-tiedosto on jo olemassa' in data
+
+def test_gedcom_invalid_upload(client):
+    rv = client.post('/gedcom/upload',data={},follow_redirects=True, content_type='multipart/form-data')
+    data = rv.data.decode("utf-8")
+    assert 'Valitse ladattava gedcom-tiedosto' in data
+
 def test_gedcom_analyze(client):
     rv = client.get('/gedcom/analyze/'+temp_gedcom)
     data = rv.data.decode("utf-8")
     assert "Sukupuolet" in data
 
+def test_gedcom_analyze_invalid_gedcom(client):
+    try:
+        os.remove(temp_gedcom_fname)
+    except FileNotFoundError:
+        pass
+    assert not os.path.exists(temp_gedcom_fname) 
+    args = dict(file=(open(testdata_dir+"/invalid_gedcom.ged","rb"),temp_gedcom),desc="Invalid_gedcom")
+    rv = client.post('/gedcom/upload',data=args,follow_redirects=True, content_type='multipart/form-data')
+    rv = client.get('/gedcom/analyze/'+temp_gedcom)
+    data = rv.data.decode("utf-8")
+    assert data == 'error'
+    
 def test_gedcom_list(client):
     rv = client.get('/gedcom')
     data = rv.data.decode("utf-8")
