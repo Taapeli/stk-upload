@@ -190,6 +190,16 @@ class UserAdmin():
             raise
  
     @classmethod 
+    def update_user_language(cls, username, language):
+        try:
+            result = shareds.driver.session().run(Cypher_adm.user_update_language,
+                         username=username,language=language).single()
+            return result
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+
+    @classmethod 
     def update_user(cls, user):
         try:
             with shareds.driver.session() as session:

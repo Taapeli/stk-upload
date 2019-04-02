@@ -102,11 +102,8 @@ def my_settings():
         try:
             from bp.admin.models.user_admin import UserAdmin # can't import earlier
             current_user.language = lang
-            saved_roles = current_user.roles 
-            current_user.roles = [role.name for role in current_user.roles]
-            updated_user = UserAdmin.update_user(current_user)
-            current_user.roles = saved_roles
-            if not updated_user:
+            result = UserAdmin.update_user_language(current_user.username,lang)
+            if not result:
                 flash(_("Update did not work1"),category='flash_error')
             session['lang'] = lang
         except:

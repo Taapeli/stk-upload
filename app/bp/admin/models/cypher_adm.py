@@ -70,6 +70,12 @@ SET user.name = $name,
     user.roles = $roles
 RETURN user'''
 
+    user_update_language = '''
+MATCH (user:User)
+    WHERE user.username = $username
+SET 
+    user.language = $language
+RETURN user'''
 
     user_role_add = '''         
 MATCH  (r:Role) WHERE r.name = $name
