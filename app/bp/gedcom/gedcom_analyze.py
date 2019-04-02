@@ -295,7 +295,8 @@ class Analyzer(transformer.Transformation):
         for sex,count in sorted(self.genders.items()):
             printitem(f"<b>{sex}</b><td>{count:5}")
             total += count
-        printitem(f"<td>{self.individuals-total:5}")
+        if self.individuals > total:
+            printitem(f"<td>{self.individuals-total:5}")
         printtrailer()
                     
         self.illegal_paths.display()
