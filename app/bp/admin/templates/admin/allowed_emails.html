@@ -35,17 +35,34 @@
 	        </form>
 	    </div>
 	</div>
-    <div class="startbox2 admin">
+	       <div><p>{{ _('Show') }}
+            <input type="radio" name="select" value="all" checked>{{ _('all users') }} /
+        	<input type="radio" name="select" value="registered">{{ _('registered users only') }} /
+        	<input type="radio" name="select" value="pending">{{ _('pending candidates only') }}
+          </p>
+          </div>
+    <div>
       <h3>{{ _('Pending user candidates') }}</h3>
         <!--section id="lista" -->
 	        <table class="table100">
-	            <tr>{{ _('<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>') }}
+	            <tr>
+	               <th>   </th>
+	               <th>{{ _('email') }}</th>
+                   <th>{{ _('role') }}</th>
+	               <th>{{ _('approved') }}</td>
+	               <th>{{ _('creator') }}</th>
+	               <th>{{ _('created') }}</th>
+	               <th>{{ _('registered') }}</th>
 	            </tr>
 	        {% if emails %}
 	            {% for e in emails %}
-	                <tr>
-	                    <td>{{e.allowed_email}}</td>
+	                <tr data-active="{{e.is_active}}">
+	                    <td><input type="checkbox" class="user" name="select_user" value="{{e.allowed_email}}">
+                        <td><a href="update_allowed_email/{{e.allowed_email}}" title="{{ _('Edit') }}">
+		                          {{e.allowed_email}}</a>
+		                   </td>	
 	                    <td>{{e.default_role}}</td>
+	                    <td>{{e.approved}}</td>
 	                    <td>{{e.creator}}</td>
 	                    <td>{{e.created_at | isodatetime}}</td>
 	                    <td>{{e.confirmed_at | isodatetime}}</td>

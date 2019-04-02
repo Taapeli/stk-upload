@@ -8,7 +8,7 @@ Created on 8.8.2018
 '''
 
 import os
-import json
+
 import logging 
 #import datetime
 #from _pickle import Unpickler
@@ -19,12 +19,12 @@ from flask_security import login_required, roles_accepted, roles_required, curre
 from flask_babelex import _
 
 import shareds
-from setups import User #, Role
+from setups import User, Allowed_email #, Role
 from models import dbutil, dataupdater, loadfile, datareader
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
 from .cvs_refnames import load_refnames
-from .forms import AllowedEmailForm, UpdateUserForm
+from .forms import AllowedEmailForm, UpdateAllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
 from .. import gedcom
@@ -98,6 +98,7 @@ def upload_csv():
     return redirect(url_for('admin.save_loaded_csv', filename=infile.filename, subj=material))
 
 @bp.route('/admin/save/<string:subj>/<string:filename>')
+@login_required
 @roles_required('admin')
 def save_loaded_csv(filename, subj):
     """ Save loaded cvs data to the database """
@@ -124,7 +125,6 @@ def save_loaded_csv(filename, subj):
 #     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 
-# Siirretty security--> admin
 @bp.route('/admin/allowed_emails',  methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'master') 
@@ -133,17 +133,41 @@ def list_allowed_emails():
 #    if request.method == 'POST':
     lista = UserAdmin.get_allowed_emails()
     if form.validate_on_submit(): 
-        # Register a new email
-#        lista = UserAdmin.get_allowed_emails()
+# Register a new email
         UserAdmin.register_allowed_email(form.allowed_email.data,
                                          form.default_role.data)
         return redirect(url_for('admin.list_allowed_emails'))
 
     return render_template("/admin/allowed_emails.html", emails=lista, 
                             form=form)
+    
+@bp.route('/admin/update_allowed_email/<email>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'master')
+def update_allowed_email(email):
+    
+    form = UpdateAllowedEmailForm()
+    if form.validate_on_submit():
+        allowed_email = Allowed_email(
+                allowed_email = form.email.data,
+                default_role = form.role.data,
+                approved = form.approved.data,
+                creator = form.creator.data,
+                created_at = form.created.data,
+                confirmed_at = form.confirmed_at.data) 
+        updated_allowed_email = UserAdmin.update_allowed_email(allowed_email)
+        flash(_("Allowed email updated"))
+        return redirect(url_for("admin.update_allowed_email", email=updated_allowed_email.allowed_email))
 
+    allowed_email = UserAdmin.find_allowed_email(email) 
+    form.email.data = allowed_email.allowed_email
+    form.approved.data = allowed_email.approved
+    form.role.data = allowed_email.default_role
+    form.creator.data = allowed_email.creator
+    form.created.data = allowed_email.created_at
+    form.confirmed_at.data = allowed_email.confirmed_at
+    return render_template("/admin/update_allowed_email.html", allowed_email=allowed_email.allowed_email, form=form)  
 
-# Siirretty security--> admin
 @bp.route('/admin/list_users', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit', 'master')
@@ -200,7 +224,7 @@ def update_user(username):
         if updated_user.username == current_user.username:
             session['lang'] = form.language.data
         flash(_("User updated"))
-        return redirect(url_for("admin.update_user",username=updated_user.username))
+        return redirect(url_for("admin.update_user", username=updated_user.username))
 
     user = shareds.user_datastore.get_user(username) 
     form.id.data = user.id  

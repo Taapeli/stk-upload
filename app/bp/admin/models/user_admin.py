@@ -15,6 +15,50 @@ from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, Const
 from .cypher_adm import Cypher_adm
 
 
+class Allowed_email():
+    """ Object for storing an allowed user to register in """
+    allowed_email = ''
+    default_role = ''
+    approved = False
+    creator = ''
+    created_at = ''
+    confirmed_at = ''
+       
+    def __init__(self, **kwargs):
+        self.allowed_email = kwargs.get('allowed_email')
+        self.default_role = kwargs.get('default_role') 
+        self.approved = kwargs.get('approved')
+        self.creator = kwargs.get('creator')
+        self.created_at = kwargs.get('created_at')         
+        self.confirmed_at = kwargs.get('confirmed_at') 
+
+class UserProfile():
+    """ Object describing dynamic user properties """
+    name = ''
+    email = ''
+    userName = ''
+    language = ''
+    GSF_membership = ''
+    research_years = ''
+    software = ''
+    researched_names = ''
+    researched_places = ''
+    text_message = ''
+    created_at = None
+    approved_at = None
+
+    def __init__(self, **kwargs):
+        self.userName = kwargs.get('userName')
+        self.name = kwargs.get('name')
+        self.email = kwargs.get('email')
+        self.language = kwargs.get('language')
+        self.GSF_membership = kwargs.get('GSF_membership')
+        self.research_years = kwargs.get('research_years')
+        self.software = kwargs.get('software')
+        self.researched_names = kwargs.get('researched_names')
+        self.researched_places = kwargs.get('researched_places')
+        self.text_message = kwargs.get('text_message')
+
 class UserAdmin():
     '''
     Methods for user information maintaining
@@ -35,13 +79,25 @@ class UserAdmin():
         raise ValueError(_("User {} has not admin privileges").format(self.username))
 
     @classmethod
+    def _build_profile_from_record(cls, userProfile):
+        ''' Returns an Allowed_email class instance '''
+        if userProfile is None:
+            return None
+        profile = UserProfile(**userProfile)
+#        email.default_role = emailRecord['default_role'] 
+        if profile.created_at:
+            profile.created_at = datetime.fromtimestamp(float(profile.created_at)/1000) 
+        if profile.approved_at:    
+            profile.approved_at = datetime.fromtimestamp(float(profile.approved_at)/1000)        
+        return profile
+
+    @classmethod
     def _build_email_from_record(cls, emailRecord):
         ''' Returns an Allowed_email class instance '''
         if emailRecord is None:
             return None
         email = shareds.allowed_email_model(**emailRecord)
-#        if emailRecord['creator']:
-#            email.creator = emailRecord['creator'] 
+#        email.default_role = emailRecord['default_role'] 
         if email.created_at:
             email.created_at = datetime.fromtimestamp(float(email.created_at)/1000) 
         if email.confirmed_at:    
@@ -67,6 +123,77 @@ class UserAdmin():
             return user
         except Exception as ex:
             print(ex)  
+ 
+    @classmethod
+    def register_applicant(cls, profile, role):
+        try:
+            with shareds.driver.session() as session:
+                with session.begin_transaction() as tx:
+                    tx.run(Cypher_adm.user_profile_register,  
+                        name = profile.name,
+                        email = profile.email,
+                        userName = profile.userName,
+                        language = profile.language,
+                        research_years = profile.research_years,
+                        software = profile.software,
+                        researched_names = profile.researched_names,
+                        researched_places = profile.researched_places,
+                        text_message = profile.text_message)
+                    
+                    tx.run(Cypher_adm.allowed_email_register, 
+                        email = profile.email, 
+                        role = role, 
+                        admin_name = 'system')              
+                    tx.commit()
+            return(True)        
+        except ConstraintError as ex:
+            logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
+            flash(_("Given allowed email address already exists"))                            
+        except CypherError as ex:
+            logging.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logging.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logging.error('Exception: ', ex)            
+            raise  
+ 
+    @classmethod
+    def update_applicant(cls, profile, email):
+        try:
+            with shareds.driver.session() as session:
+                with session.begin_transaction() as tx:
+                    tx.run(Cypher_adm.user_profile_update,  
+                        name = profile.name,
+                        email = profile.email,
+                        userName = profile.userName,
+                        language = profile.language,
+                        research_years = profile.research_years,
+                        software = profile.software,
+                        researched_names = profile.researched_names,
+                        researched_places = profile.researched_places,
+                        text_message = profile.text_message)
+                    
+                    tx.run(Cypher_adm.allowed_email_update, 
+                        email = email.allowed_email, 
+                        role = email.role)              
+                    tx.commit()
+            return(True)        
+        except ConstraintError as ex:
+            logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
+            flash(_("Given allowed email address already exists"))                            
+        except CypherError as ex:
+            logging.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logging.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logging.error('Exception: ', ex)            
+            raise  
+          
+                          
                  
     @classmethod
     def register_allowed_email(cls, email, role):
@@ -102,7 +229,44 @@ class UserAdmin():
         except Exception as ex:
             logging.error('Exception: ', ex)            
             raise
+ 
+    @classmethod 
+    def update_allowed_email(cls, allowed_email):
+        try:
+            with shareds.driver.session() as session:
+                updated_allowed_email = session.write_transaction(cls._update_allowed_email, allowed_email)
+                if updated_allowed_email is None:
+                    return None
+                return(cls._build_email_from_record(updated_allowed_email))
 
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+
+    @classmethod                                              
+    def _update_allowed_email (cls, tx, allowed_email):    
+
+        try:
+            logging.debug('allowed email update' + allowed_email.allowed_email)
+#   Identifier and history fields are not to be updated
+            result = tx.run(Cypher_adm.allowed_email_update, 
+                email = allowed_email.allowed_email,
+                approved = allowed_email.approved,
+                default_role = allowed_email.default_role)
+
+            logging.info('Allowed email with email address {} updated'.format(allowed_email.allowed_email)) 
+            return(result.single()['email'])
+#                      return(result.single()['allowed_email'])
+        except CypherError as ex:
+            logging.error('CypherError', ex)            
+            raise ex            
+        except ClientError as ex:
+            logging.error('ClientError: ', ex)            
+            raise
+        except Exception as ex:
+            logging.error('Exception: ', ex)            
+            raise
+        
     @classmethod   
     def get_allowed_emails(cls):
         try:
@@ -125,11 +289,8 @@ class UserAdmin():
             return []                 
 
     @classmethod                                              
-    def _getAllowedEmails (cls, tx):
+    def _getAllowedEmails(cls, tx):
         try:
-#             emailRecords = []
-#             for record in tx.run(Cypher_adm.allowed_emails_get):
-#                 emailRecords.append(record['email'] )
             emailRecords = [record for record in tx.run(Cypher_adm.allowed_emails_get)]    
             return(emailRecords)       
         except CypherError as ex:

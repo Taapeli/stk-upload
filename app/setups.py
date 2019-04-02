@@ -5,6 +5,7 @@ from flask_security.utils import _
 from flask_mail import Mail
 from database.models.neo4jengine import Neo4jEngine 
 from bp.stk_security.models.neo4juserdatastore import Neo4jUserDatastore
+from bp.admin.models.user_admin import UserProfile, Allowed_email
 from models.gen.dates import DateRange  # Aikavälit ym. määreet
 from database import adminDB
 import shareds
@@ -121,39 +122,46 @@ class User(UserMixin):
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
 
-
-class UserProfile():
-    """ Object describing dynamic user properties """
-    uid = ''
-    userName = ''
-    numSessions = 0
-    lastSessionTime = None  
-
-    def __init__(self, **kwargs):
-        self.numSessions = kwargs['numSessions']
-        self.lastSessionTime = kwargs.get('lastSessionTime')
-
-    def newSession(self):   
-        self.numSessions += 1
-        self.lastSessionTime = datetime.timestamp() 
+# 
+# class UserProfile():
+#     """ Object describing dynamic user properties """
+#     uid = ''
+#     name = ''
+#     userName = ''
+#     language = ''
+#     numSessions = 0
+#     lastSessionTime = None  
+# 
+#     def __init__(self, **kwargs):
+#         self.userName = kwargs.get('userName')
+#         self.name = kwargs.get('name')
+#         self.language = kwargs.get('language')
+#         self.numSessions = kwargs['numSessions']
+#         self.lastSessionTime = kwargs.get('lastSessionTime')
+# 
+#     def newSession(self):   
+#         self.numSessions += 1
+#         self.lastSessionTime = datetime.timestamp() 
+# 
+#      
+# class Allowed_email():
+#     """ Object for storing an allowed user to register in """
+#     allowed_email = ''
+#     default_role = ''
+#     approved = False
+#     creator = ''
+#     created_at = ''
+#     confirmed_at = ''
+#        
+#     def __init__(self, **kwargs):
+#         self.allowed_email = kwargs.get('allowed_email')
+#         self.default_role = kwargs.get('default_role') 
+#         self.approved = kwargs.get('approved')
+#         self.creator = kwargs.get('creator')
+#         self.created_at = kwargs.get('created_at')         
+#         self.confirmed_at = kwargs.get('confirmed_at') 
 
      
-class Allowed_email():
-    """ Object for storing an allowed user to register in """
-    allowed_email = ''
-    default_role = ''
-    creator = ''
-    created_at = ''
-    confirmed_at = ''
-       
-    def __init__(self, **kwargs):
-        self.allowed_email = kwargs['allowed_email']
-        self.default_role = kwargs.get('default_role') 
-        self.creator = kwargs.get('creator')
-        self.created_at = kwargs.get('created_at')         
-        self.confirmed_at = kwargs.get('confirmed_at') 
-
-
 class ExtendedLoginForm(LoginForm):
 
     email = StringField('Email or Username', validators=[Required('Email required') ])
