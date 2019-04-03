@@ -77,15 +77,24 @@ MATCH (up:UserProfile) WHERE up.email = $email
     SET researched_places = $researched_places,
     SET text_message = profile.text_message
 RETURN up)"""
+
+
+#     user_profile_add = '''         
+# MATCH (u:User) 
+#     WHERE u.email = $email
+# CREATE (up:UserProfile {
+#         userName: $username,
+#         numSessions: 0,
+#         lastSessionTime: timestamp() }
+#     ) <-[:SUPPLEMENTED]- (u)'''
     
     user_profile_add = '''         
 MATCH (u:User) 
     WHERE u.email = $email
-CREATE (up:UserProfile {
-        userName: $username,
-        numSessions: 0,
-        lastSessionTime: timestamp() }
-    ) <-[:SUPPLEMENTED]- (u)'''
+MERGE (p:UserProfile {email: u.email})    
+  ON CREATE SET p.name = u.name, p.userName = u.username, p.language = u.language, p.created_at = timestamp()
+  ON MATCH SET p.language = u.language
+CREATE (u) <-[:SUPPLEMENTED]- (p)'''
 
     user_update = '''
 MATCH (user:User)

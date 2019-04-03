@@ -129,7 +129,7 @@ class UserAdmin():
         try:
             with shareds.driver.session() as session:
                 with session.begin_transaction() as tx:
-                    tx.run(Cypher_adm.user_profile_register,  
+                    tx.run(Cypher_adm.user_profile_register,   
                         name = profile.name,
                         email = profile.email,
                         userName = profile.userName,
