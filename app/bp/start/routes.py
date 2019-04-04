@@ -43,24 +43,14 @@ def start():
         logger.info('Anonymous user')
         return render_template('/start/index.html')
 
-@shareds.app.route('/join2',methods=['get','post'])
-def join2():
-    if request.method == 'POST':
-        msg = ""
-        for name,value in request.form.items():
-            msg += f"\n{name}: {value}"
-        email.email_admin("New user for Isotammi", msg )
-        return render_template("/start/thankyou.html")
-    else:
-        return render_template("/start/join.html")
-
 @shareds.app.route('/thankyou')
 def thankyou():
     return render_template("/start/thankyou.html")
 
 @shareds.app.route('/join', methods=['GET', 'POST'])
 def join():
-    
+    from bp.admin.models.user_admin import UserProfile, UserAdmin
+
     form = JoinForm()
     msg = ""
     for name,value in request.form.items():
@@ -73,6 +63,18 @@ def join():
             msg += f"\n{name}: {value}"
         email.email_admin("New user request for Isotammi", msg )
         flash(_("Join message sent"))
+        profile = UserProfile(
+            name=request.form.get("name"),
+            email = request.form.get('email'),
+            language = request.form.get('language'),
+            GSF_membership = request.form.get('GSF_membership'),
+            research_years = request.form.get('research_years'),
+            software = request.form.get('software'),
+            researched_names = request.form.get('researched_names'),
+            researched_places = request.form.get('researched_places'),
+            text_message = request.form.get('text_message'),
+        )
+        UserAdmin.register_applicant(profile,role=None)
         return redirect(url_for("thankyou"))
 
     return render_template("/start/join.html", form=form)  

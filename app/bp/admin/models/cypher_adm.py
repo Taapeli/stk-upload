@@ -62,7 +62,7 @@ CREATE (up:UserProfile {
     software: $software,
     researched_names: $researched_names,
     researched_places: $researched_places,
-    text_message: profile.text_message
+    text_message: $text_message,
     created_at: timestamp() } )"""
 
     user_profile_update = """

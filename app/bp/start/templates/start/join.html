@@ -71,13 +71,14 @@ ul[id] li {
 	      {{ form.hidden_tag() }}
    	      {{ render_field_with_errors(form.name) }}	
    	      {{ render_field_with_errors(form.email) }}	
-   	      {{ render_field_with_errors(form.is_member) }}	
-   	      {{ render_field_with_errors(form.years) }}	
+   	      {{ render_field_with_errors(form.language) }}	
+   	      {{ render_field_with_errors(form.GSF_membership) }}	
+   	      {{ render_field_with_errors(form.research_years) }}	
    	      {{ render_field_with_errors(form.software) }}	
-   	      {{ render_field_with_errors(form.surnames) }}	
-   	      {{ render_field_with_errors(form.places) }}	
-   	      {{ form.message.label }}
-   	      {{ render_field(form.message,rows=20,cols=59) }}	
+   	      {{ render_field_with_errors(form.researched_names) }}	
+   	      {{ render_field_with_errors(form.researched_places) }}	
+   	      {{ form.text_message.label }}
+   	      {{ render_field(form.text_message,rows=20,cols=59) }}	
          <div class="right-button">
      	      {{ render_field(form.submit) }}	
          </div>

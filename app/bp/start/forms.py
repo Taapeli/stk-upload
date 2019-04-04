@@ -20,18 +20,18 @@ class JoinForm(FlaskForm):
                         choices=shareds.app.config.get('LANGUAGES'),
                         default=2,
                         description = _('Language')) 
-    is_member = RadioField(_('Are you a member of the Genealogical Society of Finland?'), 
+    GSF_membership = RadioField(_('Are you a member of the Genealogical Society of Finland?'), 
                         [Optional()],
                         choices=[
                             ("yes",_("Yes")),
                             ("no",_("No")),
                             ("dontknow",_("Don't know")),
                         ])
-    years = StringField(_("How many years have you been doing genealogical research?"))
+    research_years = StringField(_("How many years have you been doing genealogical research?"))
     software = StringField(_("What genealogy software are you mainly using?"))
-    surnames = StringField(_("Which families/surnames are you mainly researching?"))
-    places = StringField(_("Which places are you mainly researching?"))
-    message = TextAreaField(_("Message:"))
+    researched_names = StringField(_("Which families/surnames are you mainly researching?"))
+    researched_places = StringField(_("Which places are you mainly researching?"))
+    text_message = TextAreaField(_("Message:"))
                        
 
     submit = SubmitField(_('Send request'))
