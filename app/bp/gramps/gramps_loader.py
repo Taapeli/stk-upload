@@ -95,6 +95,9 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
             #    - Confidence values
             handler.set_person_sortname_refnames()
             handler.set_estimated_person_dates()
+            
+            # Copy information from Person and Event nodes to Family nodes
+            handler.set_family_sortname_dates()
 
         except Exception as e:
             print("Stopped xml load due to {}".format(e))    # Stop processing?
