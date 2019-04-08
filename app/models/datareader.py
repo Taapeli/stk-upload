@@ -868,7 +868,7 @@ def get_families_data_by_id(uniq_id):
         result = p.get_her_families_by_id()
 
     for record in result:
-        f = Family_for_template()
+        f = Family_combo()
         f.uniq_id = record['uniq_id']
         f.get_family_data_by_id()
 

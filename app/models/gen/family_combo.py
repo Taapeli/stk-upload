@@ -77,8 +77,8 @@ MATCH (family:Family)-[r:CHILD]->(person:Person)
   WHERE ID(family)=$pid
 RETURN ID(person) AS children"""
         return  shareds.driver.session().run(query, {"pid": pid})
-    
-    
+
+
     def get_family_events(self):
         """ Luetaan perheen tapahtumien tiedot """
                         
@@ -124,6 +124,18 @@ RETURN family"""
             
         return True
     
+    
+    @staticmethod           
+    def get_dates_parents(tx, uniq_id):
+        return tx.run(Cypher_family.get_dates_parents,id=uniq_id)
+
+    @staticmethod           
+    def set_dates_sortnames(tx, uniq_id, datetype, date1, date2, father_sortname, mother_sortname):
+        return tx.run(Cypher_family.set_dates_sortname, id=uniq_id, 
+              datetype=datetype, date1=date1, date2=date2,
+              father_sortname=father_sortname, mother_sortname=mother_sortname)
+
+
     @staticmethod       
     def get_families(fw=0, bw=0, limit=100):
         """ Find families from the database """
@@ -370,7 +382,7 @@ RETURN ID(f) AS uniq_id, f.rel_type AS type,
             namedict[role] = ' • '.join(names)
         return namedict
 
-    
+
     def get_father_by_id(self, role='father'):
         """ Luetaan perheen isän (tai äidin) tiedot """
                         
@@ -380,8 +392,8 @@ MATCH (family:Family) -[r:PARENT]-> (person:Person)
   WHERE ID(family)=$pid and r.role = $role
 RETURN ID(person) AS father"""
         return  shareds.driver.session().run(query, pid=pid, role=role)
-    
-    
+
+
     def get_mother_by_id(self):
         """ Luetaan perheen äidin tiedot """
         return self.get_father_by_id(self, role='mother')
@@ -510,6 +522,7 @@ class Family_for_template(Family):
         self.mother = None
         self.spouse = None
         self.children = []
+
 
 #    @staticmethod       
 #     def get_person_families_w_members(uid):

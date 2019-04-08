@@ -321,6 +321,24 @@ match (e:Event) <-- (:Family) -[r:PARENT|FATHER|MOTHER]-> (p:Person) -[:NAME]-> 
 return type(r) as frole, id(p) as pid, collect(n) as names"""
 
 
+    get_dates_parents = """
+MATCH (family:Family) WHERE ID(family)=$id
+OPTIONAL MATCH (family)-[:PARENT {role:"father"}]-(father:Person)
+OPTIONAL MATCH (family)-[:PARENT {role:"mother"}]-(mother:Person)
+OPTIONAL MATCH (family)-[:EVENT]-(event:Event) WHERE event.type="Marriage"
+RETURN father.sortname AS father_sortname, mother.sortname AS mother_sortname,
+       event.datetype AS datetype, event.date1 AS date1, event.date2 AS date2"""
+
+
+    set_dates_sortname = """
+MATCH (family:Family) WHERE ID(family) = $id
+SET family.datetype=$datetype
+SET family.date1=$date1
+SET family.date2=$date2
+SET family.father_sortname=$father_sortname
+SET family.mother_sortname=$mother_sortname"""
+
+
 class Cypher_place():
     '''
     Cypher clases for creating and accessing Places
