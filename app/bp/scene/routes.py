@@ -5,6 +5,7 @@ Created on 12.8.2018
 '''
 import logging 
 from models.gen.person_combo import Person_combo
+from models.gen.family_combo import Family_combo
 logger = logging.getLogger('stkserver')
 import time
 
@@ -256,11 +257,28 @@ def show_families():
         
     try:
         # 'families' has Family objects
-        families = Family.get_families(fw_from,  bw_from,  count)
+        families = Family_combo.get_families(fw_from,  bw_from,  count)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/families.html", families=families, 
                            elapsed=time.time()-t0)
+
+@bp.route('/scene/family=<int:fid>')
+def show_famiy_page(fid):
+    """ Home page for a Family.
+
+        fid = id(Family)
+    """
+    try:
+        family = Family_combo()   #, events = get_place_with_events(fid)
+        family.id = fid
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+#     for p in place_list:
+#         print ("# {} ".format(p))
+#     for u in place.notes:
+#         print ("# {} ".format(u))
+    return render_template("/scene/family.html", family=family, menuno=3)
 
 # ------------------------------ Menu 4: Places --------------------------------
 

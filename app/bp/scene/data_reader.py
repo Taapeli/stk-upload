@@ -8,7 +8,7 @@ Created on 24.9.2018
 #from models.datareader import read_persons_with_events
 from .models.footnote import Footnotes, SourceFootnote
 from models.gen.from_node import get_object_from_node
-from models.gen.family import Family_for_template
+from models.gen.family_combo import Family_for_template
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.event_combo import Event_combo
