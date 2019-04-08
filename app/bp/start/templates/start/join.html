@@ -45,6 +45,21 @@ ul[id] li {
       {% endif %}
     {% endwith %}
 
+    <div class="steps">
+        <div class="active">1. <b>{{ _("Join us") }}</b><br>
+            {{ _("Enroll as a test user on this page") }}</div>
+         –
+        <div class="exception">2. <b>{{ _("Approval") }}</b><br>
+            {{ _("You are granted to register by Office") }}</div>
+        –
+        <div>3. <b><a href="/register">{{ _("Register") }}</b></a><br>
+            {{ _("Create your user name and password") }}</div>
+        –
+        <div>4. <b>{{ _("Confirm") }}</b><br>
+            {{ _("Press Confirm button in your email and log in") }}</div>
+        
+    </div>
+
     <div class="startbox2">
         <div>
         {{ _('To join the Isotammi project we wish that you will provide some basic information below.') }}
@@ -56,20 +71,26 @@ ul[id] li {
 	      {{ form.hidden_tag() }}
    	      {{ render_field_with_errors(form.name) }}	
    	      {{ render_field_with_errors(form.email) }}	
-   	      {{ render_field_with_errors(form.is_member) }}	
-   	      {{ render_field_with_errors(form.years) }}	
+   	      {{ render_field_with_errors(form.language) }}	
+   	      {{ render_field_with_errors(form.GSF_membership) }}	
+   	      {{ render_field_with_errors(form.research_years) }}	
    	      {{ render_field_with_errors(form.software) }}	
-   	      {{ render_field_with_errors(form.surnames) }}	
-   	      {{ render_field_with_errors(form.places) }}	
-   	      {{ form.message.label }}
-   	      {{ render_field(form.message,rows=20,cols=59) }}	
-         <div> 
+   	      {{ render_field_with_errors(form.researched_names) }}	
+   	      {{ render_field_with_errors(form.researched_places) }}	
+   	      {{ form.text_message.label }}
+   	      {{ render_field(form.text_message,rows=20,cols=59) }}	
+         <div class="right-button">
      	      {{ render_field(form.submit) }}	
          </div>
          </form>
     </div>
 
+{#
+    <div class="startbox">
+        <h3>{{ _('Registeration Steps') }}</h3>
+        <p>{{ _('Here you can see a restrected view on demo genealogical data.') }}</p>
+    </div>
+#}
   </div>
-  <p></p>
 </div>
 {% endblock %}

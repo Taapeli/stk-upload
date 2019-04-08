@@ -20,22 +20,26 @@
     {% set my_set = owner_filter.choices.as_str[owners] %}
 {% endif %}
 
-{% if session['owner_filter'] %}
-    <h2>{{ _('Persons filtered by') }} {{ owner_filter.owner_str() }}</h2>
-{# elif rule[0] == 'refname' %}
-    <h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2> #}
-{% else %}
-    <h2>{{ _('Persons') }}</h2>
-{% endif %}
-
-{# <p><small>{{cnt}} persons, user {{user}}, filter {{owners}} {{my_set}}, next {{next}}</small></p> #}
+<div id="startdiv">
+	{% if session['owner_filter'] %}
+	    <h2>{{ _('Persons filtered by') }} {{ owner_filter.owner_str() }}</h2>
+	{# elif rule[0] == 'refname' %}
+	    <h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2> #}
+	{% else %}
+	    <h2>{{ _('Persons') }}</h2>
+	{% endif %}
+	
+	{# <p><small>{{cnt}} persons, user {{user}}, filter {{owners}} {{my_set}}, next {{next}}</small></p> #}
+</div>
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
 	           <div id="description">
-	               <p>{{ _('Displaying %(num)s persons', num=cnt) }}. Tietojoukko: <b>
+                   <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
+                        {{ _('starting <tt>%(name)s</tt>', name=next[0]) }}
+                      – {{ _('data set') }}<b>
                        {% if multi_owners %}
                             &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
                        {% else %}{{my_set}}
@@ -76,7 +80,7 @@
 			         <a href="/scene/persons_all/?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
-                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+                <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
 
             {% for p in persons %}
                 {% set ini = p.sortname[0] %}
@@ -84,8 +88,12 @@
 	                <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
                 {% endif %}{% endif %}
             {% endfor %}
-            <li><a href="/scene/persons_all/?{{ {'fw':next[1]} | urlencode }}" 
-                 title="seuraava sivu" class="navlink"> &gt; </a></li>
+            {% if next[1].startswith('>') %}
+                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
+            {% else %}
+	            <li><a href="/scene/persons_all/?{{ {'fw':next[1]} | urlencode }}" 
+	                 title="{{ _('next page') }}" class="navlink"> &gt; </a></li>
+            {% endif %}
             </ul>
 
 		</div>

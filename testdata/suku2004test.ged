@@ -1,0 +1,28 @@
+0 HEAD
+1 SOUR Genealogia
+2 VERS 10.0.0.7
+2 NAME Sukuohjelmisto 2004
+2 CORP KK-Software
+3 ADDR http://www.kk-software.fi
+1 GEDC
+2 VERS 5.5
+2 FORM LINEAGE-LINKED
+2 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Antti /Anttila/
+1 SEX M
+1 BIRT
+2 DATE 6 DEC 1777
+2 PLAC California
+1 BIRT
+2 DATE 6 DEC 1777
+2 ADDR Finland
+1 BIRT
+2 DATE 7 MAY 1998
+2 PLAC California
+2 ADDR San Jos
+3 CONT USA 
+1 DEAT
+2 PLAC California
+2 ADDR New York
+0 TRLR

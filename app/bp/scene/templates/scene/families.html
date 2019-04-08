@@ -8,10 +8,12 @@
 
 {% set cnt = families|count %}
 
-<h2>{{ _('List of Families') }}</h2>
-<!-- 
-<small>{{cnt}} persons, user {{user}}, filter {{session['owner_filter']}}, next {{next}}</small>
- -->
+<div id="startdiv">
+	<h2>{{ _('List of Families') }}</h2>
+	<!-- 
+	<small>{{cnt}} persons, user {{user}}, filter {{session['owner_filter']}}, next {{next}}</small>
+	 -->
+</div>
 
 {{ macro.menu(3) }}
     <div class="content" id="Individuals">

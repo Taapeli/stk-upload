@@ -68,6 +68,12 @@ body {
 body > div {
     clear: both;
 }
+
+#startdiv {
+    margin-left:50px;
+    margin-bottom:1em;
+}
+
 .content {
     background-color: white;
     border-top: solid 1px #999;

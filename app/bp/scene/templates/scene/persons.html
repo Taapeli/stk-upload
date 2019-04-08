@@ -8,13 +8,15 @@
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
 
-{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
-{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
-{% else %}<H2>{{ _('Persons') }}</h2>
-{% endif %}
-<!-- Rule = {{rule}} for {{cnt}} persons -->
-
-<p><small>– Kaikki data, ei huomioida aineiston omistajaa</small></p>
+<div id="startdiv">
+	{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
+	{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
+	{% else %}<H2>{{ _('Persons') }}</h2>
+	{% endif %}
+	<!-- Rule = {{rule}} for {{cnt}} persons -->
+	
+	<p><small>– Kaikki data, ei huomioida aineiston omistajaa</small></p>
+</div>
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">

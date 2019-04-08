@@ -52,14 +52,49 @@ MATCH (email:Allowed_email)
     WHERE email.allowed_email = $email
 RETURN email"""
 
+    user_profile_register = """
+CREATE (up:UserProfile {   
+    name: $name,
+    email: $email,
+    userName: $userName,
+    language: $language,
+    research_years: $research_years,
+    software: $software,
+    researched_names: $researched_names,
+    researched_places: $researched_places,
+    text_message: $text_message,
+    created_at: timestamp() } )"""
+
+    user_profile_update = """
+MATCH (up:UserProfile) WHERE up.email = $email 
+    SET name = $name,
+    SET email = $email,
+    SET userName = $userName,
+    SET language = $language,
+    SET research_years = $research_years,
+    SET software = $software,
+    SET researched_names = $researched_names,
+    SET researched_places = $researched_places,
+    SET text_message = profile.text_message
+RETURN up)"""
+
+
+#     user_profile_add = '''         
+# MATCH (u:User) 
+#     WHERE u.email = $email
+# CREATE (up:UserProfile {
+#         userName: $username,
+#         numSessions: 0,
+#         lastSessionTime: timestamp() }
+#     ) <-[:SUPPLEMENTED]- (u)'''
+    
     user_profile_add = '''         
 MATCH (u:User) 
     WHERE u.email = $email
-CREATE (up:UserProfile {
-        userName: $username,
-        numSessions: 0,
-        lastSessionTime: timestamp() }
-    ) <-[:SUPPLEMENTED]- (u)'''
+MERGE (p:UserProfile {email: u.email})    
+  ON CREATE SET p.name = u.name, p.userName = u.username, p.language = u.language, p.created_at = timestamp()
+  ON MATCH SET p.language = u.language
+CREATE (u) <-[:SUPPLEMENTED]- (p)'''
 
     user_update = '''
 MATCH (user:User)
@@ -70,6 +105,12 @@ SET user.name = $name,
     user.roles = $roles
 RETURN user'''
 
+    user_update_language = '''
+MATCH (user:User)
+    WHERE user.username = $username
+SET 
+    user.language = $language
+RETURN user'''
 
     user_role_add = '''         
 MATCH  (r:Role) WHERE r.name = $name

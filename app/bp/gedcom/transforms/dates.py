@@ -3,8 +3,12 @@ import datetime
 from flask_babelex import _
 
 from .. import transformer
+from .. import gedcom_analyze
+
 
 import re
+import sys
+from _collections import defaultdict
 
 version = "1.0"
 name = _("Dates")
@@ -13,6 +17,8 @@ docline = _('Correct some invalid date formats')
 #doclink = "http://taapeli.referata.com/wiki/Gedcom-Dates-ohjelma"
 
 def add_args(parser):
+    parser.add_argument('--display_invalid_dates', action='store_true',
+                        help=_('Display invalid dates'))
     parser.add_argument('--handle_dd_mm_yyyy', action='store_true',
                         help=_('Change 31.12.1999 to 31 DEC 1999'))
     parser.add_argument('--handle_yyyy_mm_dd', action='store_true',
@@ -68,6 +74,22 @@ def match(s,**kwargs):
     return ret
 
 class Dates(transformer.Transformation):
+    def __init__(self):
+        self.invalid_dates = defaultdict(list)
+        
+    def finish(self,options):
+        if self.invalid_dates:
+            print("<p><b>",_("Invalid dates:"),"</b><p>")
+            for date in sorted(self.invalid_dates):
+                linenums = self.invalid_dates[date]
+                links = []
+                for linenum in linenums:
+                    link = f"<a href=# class=gedcomlink>{linenum}</a>"
+                    links.append(link)
+                if len(links) > 10: links = links[0:10] + ["..."]
+                linkstr = ", ".join(links)
+                print("",_("%(date)s (line %(linkstr)s)<br>",date=date,linkstr=linkstr))
+
     def transform(self,item,options,phase):
         """
         Fix dates of the forms:
@@ -91,8 +113,16 @@ class Dates(transformer.Transformation):
         -1950         -> TO 1950 
         <1950         -> TO 1950 
         """
+        self.options = options
+
         if item.tag == "DATE":
             value = item.value.strip()
+
+
+            if options.display_invalid_dates:
+                valid = gedcom_analyze.valid_date(value)
+                if not valid:
+                    self.invalid_dates[value].append(item.linenum)
 
             if options.handle_dd_mm_yyyy:
                     # 31.12.1888 -> 31 DEC 1888
@@ -161,9 +191,10 @@ class Dates(transformer.Transformation):
                 # 1888-99
                 r = match(value,y1=fourdigits,sep=dash,y2=twodigits)
                 if r:
-                    century = r.y1[0:2]
-                    item.value = f"FROM {r.y1} TO {century}{r.y2}"
-                    return item
+                    if int(r.y2) > int(r.y1[2:]): 
+                        century = r.y1[0:2]
+                        item.value = f"FROM {r.y1} TO {century}{r.y2}"
+                        return item
                     
             if options.handle_intervals2:
                 # 1888-, >1888
@@ -204,7 +235,7 @@ class Dates(transformer.Transformation):
     
             if options.handle_yyyy_mm:
                 # 1888-12
-                r = match(value,y=fourdigits,sep1=dash,m=twodigits,sep2=dash,d=twodigits)
+                r = match(value,y=fourdigits,sep1=dash,m=twodigits)
                 if r:
                     val = fmtdate(r.y,r.m,1)
                     if val:

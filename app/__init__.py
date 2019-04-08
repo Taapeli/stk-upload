@@ -59,7 +59,6 @@ def log_user_logged_out(sender, user, **extra):
     syslog.log(type="user logged out")
 
 import logging
-logging.info(f"dir(syslog)={dir(syslog)}")
 syslog.syslog_init()
 syslog.log(type="application initialized")
 user_logged_in.connect(log_user_logged_in,shareds.app)

@@ -209,11 +209,7 @@ li.itemrow {
 div.fullclear {
     clear: both;
 }
-#footer {
-	color: gray;
-	background: #eee;
-	text-align: right;
-}
+
 /* Footer
 ----------------------------------------------------- */
 #footer {
@@ -221,6 +217,8 @@ div.fullclear {
     margin-top: 1em;
     background-color: #CCC;
     border-top: solid 1px #555;
+    color: gray;
+    text-align: right;
 }
 #footer > * {
     background-color: #CCC;
@@ -279,7 +277,20 @@ div.steps div.exception {
     color: gray;
     background-color: #ffffe9;
 }
+div.steps div.active {
+    background-color: gainsboro;
+}
 .fileselect {
 	border-width: 2px 3px 3px 2px; 
 	min-width: 725px;
+}
+
+div.right-button { /* Area for Next button located in right corner */
+	display: -webkit-flex; /* Safari */
+	-webkit-justify-content: right; /* Safari 6.1+ */
+	display: flex;
+	justify-content: right;
+}
+div.right-button p {
+	margin:0;
 }
