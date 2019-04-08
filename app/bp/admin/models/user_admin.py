@@ -349,7 +349,37 @@ class UserAdmin():
         except Exception as ex:
             logging.error('Exception: ', ex)            
             raise
- 
+        
+    @classmethod   
+    def get_user_profiles(cls):
+        try:
+            with shareds.driver.session() as session:
+                profileRecords = session.read_transaction(cls._getProfileRecords)
+                result = []
+                for record in profileRecords:
+                    node = record['profile']
+                    result.append(cls._build_profile_from_record(node))
+                return result
+
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return []                 
+
+    @classmethod                                              
+    def _getUserProfiles(cls, tx):
+        try:
+            profileRecords = [record for record in tx.run(Cypher_adm.user_profiles_get)]    
+            return(profileRecords)       
+        except CypherError as ex:
+            logging.error('CypherError: ', ex.message, ' ', ex.code)            
+            raise      
+        except ClientError as ex:
+            logging.error('ClientError: ', ex.message, ' ', ex.code)            
+            raise
+        except Exception as ex:
+            logging.error('Exception: ', ex)            
+            raise
+         
     @classmethod 
     def update_user_language(cls, username, language):
         try:
