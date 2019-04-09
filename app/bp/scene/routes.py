@@ -4,8 +4,6 @@ Created on 12.8.2018
 @author: jm
 '''
 import logging 
-from models.gen.person_combo import Person_combo
-from models.gen.family_combo import Family_combo
 logger = logging.getLogger('stkserver')
 import time
 
@@ -14,15 +12,17 @@ from flask_security import current_user, login_required #, roles_accepted
 #from flask_babelex import _
 
 from . import bp
-from bp.scene.data_reader import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id
+from bp.scene.scene_reader import get_a_person_for_display_apoc
+from models.gen.person_combo import Person_combo
+from models.gen.family_combo import Family_combo
+from models.gen.place import Place
+from models.gen.source import Source
+
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.owner import OwnerFilter
-from models.gen.family import Family
-from models.gen.place import Place
-from models.gen.source import Source
 
 # Narrative start page
 @bp.route('/scene',  methods=['GET', 'POST'])
