@@ -32,10 +32,10 @@ class Family_combo(Family):
                 noteref_hlink   str lisätiedon osoite
      """
 
-    def __init__(self):
+    def __init__(self, uniq_id=None):
         """ Creates a Family instance for carrying whole family information. 
         """
-        Family.__init__(self)
+        Family.__init__(self, uniq_id)
 
         self.father = None
         self.mother = None
