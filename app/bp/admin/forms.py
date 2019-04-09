@@ -111,7 +111,7 @@ class UpdateAllowedEmailForm(FlaskForm):
                    ("research",_("Research")),
                    ("audit",_("Audit")),                      
                    ("admin",_("Admin")) ],
-                description = _('Assigned role choises')) 
+                description = _('Assigned role choices')) 
     approved = BooleanField(_('Approved'), [Optional()],
         description = _('Approved / pending user')) 
     creator = StringField(_('Creator:'), 

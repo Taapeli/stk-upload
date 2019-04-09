@@ -162,7 +162,7 @@ class LineCounter:
             printitem(f"<b>{key:25}</b><td>({txt})")
         if count is not None:
             if count > len(self.values): printitem(f"<b>...")
-            printitem(f"<b>Count: {count}")
+            printitem("<b>" + _("Count") +f": {count}")
         printtrailer() 
                 
 
