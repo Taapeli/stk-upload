@@ -16,10 +16,10 @@ from operator import itemgetter
 #from models.dbutil import Datefrom
 from models.gen.event import Event
 from models.gen.event_combo import Event_combo
-from models.gen.family_combo import Family, Family_for_template, Family_combo
+from models.gen.family_combo import Family, Family_combo
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import SEX_MALE, SEX_FEMALE
+from models.gen.person import SEX_MALE #, SEX_FEMALE
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.place import Place
@@ -27,7 +27,6 @@ from models.gen.refname import Refname
 from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
-#from models.gen.weburl import Weburl
 from models.gen.dates import DateRange
 
 
@@ -751,7 +750,7 @@ def get_person_data_by_id(uniq_id):
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]
             if not fid in families:
-                families[fid] = Family_for_template(fid)
+                families[fid] = Family_combo(fid)
                 families[fid].id = record['family_id']
 
         member = Person_as_member()    # A kind of Person

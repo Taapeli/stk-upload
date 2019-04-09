@@ -3,14 +3,14 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 @author: jm
 '''
-from sys import stderr
+#from sys import stderr
 import  shareds
 
 from .cypher import Cypher_family
 from .family import Family
 from .person_combo import Person_as_member
 from .person_name import Name
-from models.cypher_gramps import Cypher_family_w_handle
+#from models.cypher_gramps import Cypher_family_w_handle
 
 
 class Family_combo(Family):
@@ -32,10 +32,10 @@ class Family_combo(Family):
                 noteref_hlink   str lisätiedon osoite
      """
 
-    def __init__(self):
-        """ Creates a Family instance. 
+    def __init__(self, uniq_id=None):
+        """ Creates a Family instance for carrying whole family information. 
         """
-        Family.__init__(self)
+        Family.__init__(self, uniq_id)
 
         self.father = None
         self.mother = None
@@ -91,7 +91,10 @@ RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
     
     
     def get_family_data_by_id(self):
-        """ Luetaan perheen tiedot """
+        """ Luetaan perheen tiedot.
+        
+            Called from models.datareader.get_families_data_by_id
+        """
                         
         pid = int(self.uniq_id)
         query = """
@@ -152,7 +155,7 @@ RETURN family"""
                     #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
                     #    'id': 'F0000', 'change': 1507492602}>
                     f_node = record['f']
-                    family = Family_for_template(f_node.id)
+                    family = Family_combo(f_node.id)
                     family.id = f_node['id']
                     family.type = f_node['rel_type']
                 
@@ -237,7 +240,7 @@ RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f)"""
         for record in result:
             if record['f']:
                 f = record['f']
-                family = Family_for_template(f.id)
+                family = Family_combo(f.id)
                 family.type = f['rel_type']
             
                 if record['ph']:
@@ -342,45 +345,45 @@ RETURN ID(f) AS uniq_id, f.rel_type AS type,
             families.append(family)
         
         return (families)
-        
-    
-    @staticmethod       
-    def get_marriage_parent_names(event_uniq_id):
-        """ Find the parents and all their names - not in use!
 
-            Called from models.datareader.get_source_with_events
-            #TODO Use [:PARENT] link
-        
-            Returns a dictionary like 
-            {'FATHER': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
 
-╒════════╤═════╤═══════════════════════════════════════════════════╕
-│"frole" │"pid"│"names"                                            │
-╞════════╪═════╪═══════════════════════════════════════════════════╡
-│"FATHER"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
-│        │     │suffix":"","surname":"Forstén"}]                   │
-├────────┼─────┼───────────────────────────────────────────────────┤
-│"MOTHER"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
-│        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
-│        │     │alt":"1","firstname":"Catharina Margareta","type":"│
-│        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
-└────────┴─────┴───────────────────────────────────────────────────┘
-        """
-                        
-        result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
-                                              eid=event_uniq_id)
-        namedict = {}
-        for record in result:
-            role = record['frole']
-#             pid = record['pid']
-            names = []
-            for name in record['names']:
-                fn = name['firstname']
-                sn = name['surname']
-                pn = name['suffix']
-                names.append("{} {} {}".format(fn, pn, sn))
-            namedict[role] = ' • '.join(names)
-        return namedict
+#     @staticmethod       
+#     def get_marriage_parent_names(event_uniq_id):
+#         """ Find the parents and all their names - not in use!
+# 
+#             Called from models.datareader.get_source_with_events
+#             #TODO Use [:PARENT] link
+#         
+#             Returns a dictionary like 
+#             {'FATHER': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
+# 
+# ╒════════╤═════╤═══════════════════════════════════════════════════╕
+# │"frole" │"pid"│"names"                                            │
+# ╞════════╪═════╪═══════════════════════════════════════════════════╡
+# │"FATHER"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
+# │        │     │suffix":"","surname":"Forstén"}]                   │
+# ├────────┼─────┼───────────────────────────────────────────────────┤
+# │"MOTHER"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
+# │        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
+# │        │     │alt":"1","firstname":"Catharina Margareta","type":"│
+# │        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
+# └────────┴─────┴───────────────────────────────────────────────────┘
+#         """
+#                         
+#         result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
+#                                               eid=event_uniq_id)
+#         namedict = {}
+#         for record in result:
+#             role = record['frole']
+# #             pid = record['pid']
+#             names = []
+#             for name in record['names']:
+#                 fn = name['firstname']
+#                 sn = name['surname']
+#                 pn = name['suffix']
+#                 names.append("{} {} {}".format(fn, pn, sn))
+#             namedict[role] = ' • '.join(names)
+#         return namedict
 
 
     def get_father_by_id(self, role='father'):
@@ -399,21 +402,6 @@ RETURN ID(person) AS father"""
         return self.get_father_by_id(self, role='mother')
         
     
-    @staticmethod       
-    def get_total():
-        """ Tulostaa perheiden määrän tietokannassa """
-        
-        global session
-                
-        query = """
-            MATCH (f:Family) RETURN COUNT(f)
-            """
-        results =  shareds.driver.session().run(query)
-        
-        for result in results:
-            return str(result[0])
-
-
     def print_data(self):
         """ Tulostaa tiedot """
         print ("*****Family*****")
@@ -433,95 +421,6 @@ RETURN ID(person) AS father"""
             for i in range(len(self.childref_hlink)):
                 print ("Childref_hlink: " + self.childref_hlink[i])
         return True
-
-
-    def save(self, tx, batch_id):
-        """ Saves the family node to db and 
-            creates relations to parent, child and note nodes
-        """
-
-        f_attr = {}
-        try:
-            f_attr = {
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "rel_type": self.rel_type
-            }
-            result = tx.run(Cypher_family_w_handle.create_to_batch, 
-                            batch_id=batch_id, f_attr=f_attr)
-            ids = []
-            for record in result:
-                self.uniq_id = record[0]
-                ids.append(self.uniq_id)
-                if len(ids) > 1:
-                    print("iError updated multiple Families {} - {}, attr={}".format(self.id, ids, f_attr))
-                # print("Family {} ".format(self.uniq_id))
-        except Exception as err:
-            print("iError Family.save family: {0} attr={1}".format(err, f_attr), file=stderr)
-
-        # Make father and mother relations to Person nodes
-        try:
-            if hasattr(self,'father') and self.father:
-                tx.run(Cypher_family_w_handle.link_parent, role='father',
-                       f_handle=self.handle, p_handle=self.father)
-
-            if hasattr(self,'mother') and self.mother:
-                tx.run(Cypher_family_w_handle.link_parent, role='mother',
-                       f_handle=self.handle, p_handle=self.mother)
-        except Exception as err:
-            print("iError Family.save parents: {0} {1}".format(err, self.id), file=stderr)
-
-        # Make relations to Event nodes
-        try:
-            for i in range(len(self.eventref_hlink)):
-                tx.run(Cypher_family_w_handle.link_event, 
-                       f_handle=self.handle, e_handle=self.eventref_hlink[i],
-                       role=self.eventref_role[i])
-        except Exception as err:
-            print("iError Family.save events: {0} {1}".format(err, self.id), file=stderr)
-  
-        # Make child relations to Person nodes
-        try:
-            for handle in self.childref_hlink:
-                tx.run(Cypher_family_w_handle.link_child, 
-                       f_handle=self.handle, p_handle=handle)
-        except Exception as err:
-            print("iError Family.save children: {0} {1}".format(err, self.id), file=stderr)
-  
-        # Make relation(s) to the Note node
-        try:
-            for handle in self.noteref_hlink:
-                tx.run(Cypher_family_w_handle.link_note,
-                       f_handle=self.handle, n_handle=handle)
-        except Exception as err:
-            print("iError Family.save notes: {0} {1}".format(err, self.id), file=stderr)
-
-        return
-
-
-class Family_for_template(Family):
-    """ Templaten perhe perii Perhe luokan
-        Käytetään datareader.get_families_data_by_id() metodissa
-        sivua table_families_by_id.html varten
-            
-        Properties:
-                role        str    henkilön rooli perheessä: "Child", "Parent"
-                father      Person isän tiedot
-                mother      Person äidin tiedot
-                spouse      Person puolisoiden tiedot
-                children[]  Person lasten tiedot
-     """
-
-    def __init__(self, uniq_id=None):
-        """ Luo uuden family_for_template-instanssin """
-        Family.__init__(self, uniq_id)
-
-        self.role = ""
-        self.father = None
-        self.mother = None
-        self.spouse = None
-        self.children = []
 
 
 #    @staticmethod       
