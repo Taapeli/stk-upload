@@ -201,7 +201,7 @@ class UserAdmin():
         try:
             with shareds.driver.session() as session:
                 with session.begin_transaction() as tx:
-                    tx.run(Cypher_adm.allowed_email_register, email=email, role=role, admin_name=current_user.username)
+                    tx.run(Cypher_adm.allowed_email_register, email=email, role=role, approved=True, creator=current_user.username)
                     tx.commit()
         except ConstraintError as ex:
             logging.error('ConstraintError: ', ex.message, ' ', ex.code)            
