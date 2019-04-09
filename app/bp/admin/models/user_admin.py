@@ -142,7 +142,8 @@ class UserAdmin():
                     
                     tx.run(Cypher_adm.allowed_email_register, 
                         email = profile.email, 
-                        role = role, 
+                        role = role,
+                        approved = False, 
                         admin_name = 'system')              
                     tx.commit()
             return(True)        
@@ -219,7 +220,7 @@ class UserAdmin():
     def confirm_allowed_email(cls, tx, email):
         try:
             for record in tx.run(Cypher_adm.allowed_email_confirm, email=email):
-                return(record['email'])
+                return(record['ae'])
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
             raise      
@@ -249,13 +250,15 @@ class UserAdmin():
         try:
             logging.debug('allowed email update' + allowed_email.allowed_email)
 #   Identifier and history fields are not to be updated
-            result = tx.run(Cypher_adm.allowed_email_update, 
+            result = tx.run(Cypher_adm.allowed_email_update,
                 email = allowed_email.allowed_email,
                 approved = allowed_email.approved,
-                default_role = allowed_email.default_role)
-
+                role = allowed_email.default_role,
+                creator = allowed_email.creator)
+#                 created_at = allowed_email.created_at,     
+#                 confirmed_at = allowed_email.confirmed_at)
             logging.info('Allowed email with email address {} updated'.format(allowed_email.allowed_email)) 
-            return(result.single()['email'])
+            return(result.single())
 #                      return(result.single()['allowed_email'])
         except CypherError as ex:
             logging.error('CypherError', ex)            
@@ -274,7 +277,7 @@ class UserAdmin():
                 emailRecords = session.read_transaction(cls._getAllowedEmails)
                 ret = []
                 for record in emailRecords:
-                    node = record['email']
+                    node = record['ae']
                     # <<Node id=105651 labels={'Allowed_email'} 
                     #    properties={'created_at': 1542095367861, 'default_role': 'member', 
                     #        'creator': 'master', 'allowed_email': 'jpek@iki.fi', 
@@ -309,7 +312,7 @@ class UserAdmin():
             with shareds.driver.session() as session:
                 emailRecord = session.read_transaction(cls._findAllowedEmail, email)
                 if emailRecord:
-                    return cls._build_email_from_record(emailRecord['email']) 
+                    return cls._build_email_from_record(emailRecord['ae']) 
                 return None
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -386,6 +389,28 @@ class UserAdmin():
             result = shareds.driver.session().run(Cypher_adm.user_update_language,
                          username=username,language=language).single()
             return result
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+
+    @classmethod 
+    def update_user_email(cls, username, email):
+        try:
+#             result = shareds.driver.session().run(Cypher_adm.user_update_language,
+#                          username=username,language=language).single()
+#             return result
+            return("Ok")
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+
+    @classmethod 
+    def confirm_updated_email(cls, username, email):
+        try:
+#             result = shareds.driver.session().run(Cypher_adm.user_update_language,
+#                          username=username,language=language).single()
+#             return result
+            return("Ok")
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
             return None                 

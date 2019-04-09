@@ -152,12 +152,12 @@ def update_allowed_email(email):
                 allowed_email = form.email.data,
                 default_role = form.role.data,
                 approved = form.approved.data,
-                creator = form.creator.data,
-                created_at = form.created.data,
-                confirmed_at = form.confirmed_at.data) 
+                creator = form.creator.data)
+#                 created_at = form.created.data,
+#                 confirmed_at = form.confirmed_at.data) 
         updated_allowed_email = UserAdmin.update_allowed_email(allowed_email)
         flash(_("Allowed email updated"))
-        return redirect(url_for("admin.update_allowed_email", email=updated_allowed_email.allowed_email))
+        return redirect(url_for("admin.update_allowed_email", email=form.email.data))
 
     allowed_email = UserAdmin.find_allowed_email(email) 
     form.email.data = allowed_email.allowed_email
