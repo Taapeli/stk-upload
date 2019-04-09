@@ -19,9 +19,6 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     """ 
     Reads a Gramps xml file, and saves the information to db 
     
-Todo: There are beforehand estimated progress persentage values 1..100 for each
-    upload step. The are stored in *.meta file and may be queried from the UI.
-    
     Metacode for batch log creation UserProfile --> Batch.
 
     # Start a Batch 

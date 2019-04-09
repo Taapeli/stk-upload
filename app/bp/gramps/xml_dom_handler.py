@@ -30,6 +30,7 @@ from models.gen.repository import Repository
 
 from models.dataupdater import set_person_name_properties
 from models.dataupdater import set_family_name_properties
+from bp.gramps.models.family_gramps import Family_gramps
 
 
 def pick_url(src):
@@ -285,7 +286,7 @@ class DOM_handler():
         # Print detail of each family
         for family in families:
 
-            f = Family()
+            f = Family_gramps()
 
             if family.hasAttribute("handle"):
                 f.handle = family.getAttribute("handle")
