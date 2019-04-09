@@ -16,7 +16,7 @@ from operator import itemgetter
 #from models.dbutil import Datefrom
 from models.gen.event import Event
 from models.gen.event_combo import Event_combo
-from models.gen.family import Family, Family_for_template
+from models.gen.family_combo import Family, Family_for_template, Family_combo
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person import SEX_MALE, SEX_FEMALE
@@ -418,7 +418,7 @@ def read_families():
     """ Lukee tietokannasta Family- objektit näytettäväksi
     """
 
-    families = Family.get_families()
+    families = Family_combo.get_families()
     
     return (families)
 
@@ -868,7 +868,7 @@ def get_families_data_by_id(uniq_id):
         result = p.get_her_families_by_id()
 
     for record in result:
-        f = Family_for_template()
+        f = Family_combo()
         f.uniq_id = record['uniq_id']
         f.get_family_data_by_id()
 

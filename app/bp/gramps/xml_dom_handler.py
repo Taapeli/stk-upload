@@ -29,6 +29,7 @@ from models.gen.source import Source
 from models.gen.repository import Repository
 
 from models.dataupdater import set_person_name_properties
+from models.dataupdater import set_family_name_properties
 
 
 def pick_url(src):
@@ -739,6 +740,26 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
+    def set_family_sortname_dates(self):
+        ''' For each Family set Family.father_sortname, Family.mother_sortname, 
+            Family.datetype, Family.date1 and Family.date2
+        '''
+
+        print ("***** {} Sortnames & dates *****".format(len(self.family_ids)))
+        t0 = time.time()
+        dates_count = 0
+        sortname_count = 0
+
+        for p_id in self.family_ids:
+            if p_id != None:
+                dc, sc = set_family_name_properties(tx=self.tx, uniq_id=p_id)
+                dates_count += dc
+                sortname_count += sc
+
+        self.blog.log_event({'title':"Dates", 
+                                'count':dates_count, 'elapsed':time.time()-t0})
+        self.blog.log_event({'title':"Sorting names", 'count':sortname_count})
+        
 
     def set_person_sortname_refnames(self):
         ''' Add links from each Person to Refnames and set Person.sortname

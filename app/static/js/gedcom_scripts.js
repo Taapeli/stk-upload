@@ -18,7 +18,7 @@ function add_gedcom_links() {
         var linenum = $(e.target).text();
     	$.get("/gedcom/get_excerpt/" + gedcom + "/" + linenum,function(rsp) {
     	    $("#excerpt").html(rsp);
-    	    $("#div_excerpt").dialog({title: gedcom});
+    	    $("#div_excerpt").dialog({title: gedcom, width:500});
     	    return false;
     	});
     });

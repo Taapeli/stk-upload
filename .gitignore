@@ -11,3 +11,6 @@ RemoteSystemsTempFiles/\.project
 /__pycache__/
 /venv/
 .coverage
+/htmlcov/
+
+trace\.txt

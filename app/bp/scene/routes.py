@@ -5,11 +5,13 @@ Created on 12.8.2018
 '''
 import logging 
 from models.gen.person_combo import Person_combo
+from models.gen.family_combo import Family_combo
 logger = logging.getLogger('stkserver')
 import time
 
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required #, roles_accepted
+#from flask_babelex import _
 
 from . import bp
 from bp.scene.data_reader import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id
@@ -19,11 +21,8 @@ from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.owner import OwnerFilter
 from models.gen.family import Family
-#from models.gen.family import Family_for_template
 from models.gen.place import Place
 from models.gen.source import Source
-#from models.gen.citation import Citation
-
 
 # Narrative start page
 @bp.route('/scene',  methods=['GET', 'POST'])
@@ -126,13 +125,20 @@ def show_my_persons():
     my_filter.store_next_person(request)
     count = int(request.args.get('c', 100))
 
-    print(f"-> bp.scene.routes.show_my_persons: read persons starting '{my_filter.next_person[1]}'")
+    print(f"-> bp.scene.routes.show_my_persons: read persons forward from '{my_filter.next_person[1]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
     if persons:
         # Next person links [backwards, forwards]
-        print(f"Display persons {persons[0].sortname} – {persons[-1].sortname}")
-        my_filter.next_person = [persons[0].sortname, persons[-1].sortname]
+        person_owner_count = sum(len(x.owners) for x in persons)
+        print(f"Displaying {persons[0].sortname} – {persons[-1].sortname}, got {person_owner_count}/{len(persons)} persons")
+        if count == person_owner_count:
+            my_filter.next_person = [persons[0].sortname, persons[-1].sortname]
+        else:
+            # Forward to end is marked 
+            my_filter.next_person = [persons[0].sortname,  '> end']
+        print(f"Display persons {my_filter.next_person[0]} – {my_filter.next_person[1]}")
+
         user_session['next_person'] = my_filter.next_person
         print(f"--> {repr(user_session)}")
 
@@ -251,11 +257,28 @@ def show_families():
         
     try:
         # 'families' has Family objects
-        families = Family.get_families(fw_from,  bw_from,  count)
+        families = Family_combo.get_families(fw_from,  bw_from,  count)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/families.html", families=families, 
                            elapsed=time.time()-t0)
+
+@bp.route('/scene/family=<int:fid>')
+def show_famiy_page(fid):
+    """ Home page for a Family.
+
+        fid = id(Family)
+    """
+    try:
+        family = Family_combo()   #, events = get_place_with_events(fid)
+        family.id = fid
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+#     for p in place_list:
+#         print ("# {} ".format(p))
+#     for u in place.notes:
+#         print ("# {} ".format(u))
+    return render_template("/scene/family.html", family=family, menuno=3)
 
 # ------------------------------ Menu 4: Places --------------------------------
 

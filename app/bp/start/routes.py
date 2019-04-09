@@ -33,9 +33,6 @@ def start():
     """ Home page for logged in user (from login page or home button) 
         or anonymous user (home)
     """
-    print(f"request.endpoint = {request.endpoint}")
-    print(f"request.is_secure = {request.is_secure}")
-    print(f"request.host = {request.host}")
     if current_user.is_authenticated:
         role_names = [role.name for role in current_user.roles]
         logger.info("Start user {}/{}, roles {}".\
@@ -46,74 +43,40 @@ def start():
         logger.info('Anonymous user')
         return render_template('/start/index.html')
 
-@shareds.app.route('/join2',methods=['get','post'])
-def join2():
-    if request.method == 'POST':
-        msg = ""
-        for name,value in request.form.items():
-            msg += f"\n{name}: {value}"
-        email.email_admin("New user for Isotammi", msg )
-        return render_template("/start/thankyou.html")
-    else:
-        return render_template("/start/join.html")
-
 @shareds.app.route('/thankyou')
 def thankyou():
     return render_template("/start/thankyou.html")
 
 @shareds.app.route('/join', methods=['GET', 'POST'])
 def join():
-    
+    from bp.admin.models.user_admin import UserProfile, UserAdmin
+
     form = JoinForm()
     msg = ""
     for name,value in request.form.items():
         msg += f"\n{name}: {value}"
-    logging.info(msg)
     if form.validate_on_submit(): 
         msg = ""
         for name,value in request.form.items():
             if name == "csrf_token": continue
             if name == "submit": continue
             msg += f"\n{name}: {value}"
-        logging.info(msg)
         email.email_admin("New user request for Isotammi", msg )
-        """
-        user = User(id = form.id.data,
-                email = form.email.data,
-                username = form.username.data,
-                name = form.name.data,
-                language = form.language.data,
-                is_active = form.is_active.data,
-                roles = form.roles.data,
-                confirmed_at = form.confirmed_at.data,
-                last_login_at = form.last_login_at.data, 
-                last_login_ip = form.last_login_ip.data,                    
-                current_login_at = form.current_login_at.data,  
-                current_login_ip = form.current_login_ip.data,
-                login_count = form.login_count.data)        
-        updated_user = UserAdmin.update_user(user)
-        if updated_user.username == current_user.username:
-            session['lang'] = form.language.data
-        """
         flash(_("Join message sent"))
+        profile = UserProfile(
+            name=request.form.get("name"),
+            email = request.form.get('email'),
+            language = request.form.get('language'),
+            GSF_membership = request.form.get('GSF_membership'),
+            research_years = request.form.get('research_years'),
+            software = request.form.get('software'),
+            researched_names = request.form.get('researched_names'),
+            researched_places = request.form.get('researched_places'),
+            text_message = request.form.get('text_message'),
+        )
+        UserAdmin.register_applicant(profile,role=None)
         return redirect(url_for("thankyou"))
 
-    """
-    user = shareds.user_datastore.get_user(username) 
-    form.id.data = user.id  
-    form.username.data = user.username
-    form.name.data = user.name 
-    form.language.data = user.language
-    form.is_active.data = user.is_active
-    form.roles.data = [role.name for role in user.roles]
-    form.confirmed_at.data = user.confirmed_at 
-    form.last_login_at.data = user.last_login_at  
-    form.last_login_ip.data = user.last_login_ip
-    form.current_login_at.data = user.current_login_at
-    form.current_login_ip.data = user.current_login_ip
-    form.login_count.data = user.login_count
-    """    
-    #form.email.data = user.email
     return render_template("/start/join.html", form=form)  
 
 
@@ -141,11 +104,8 @@ def my_settings():
         try:
             from bp.admin.models.user_admin import UserAdmin # can't import earlier
             current_user.language = lang
-            saved_roles = current_user.roles 
-            current_user.roles = [role.name for role in current_user.roles]
-            updated_user = UserAdmin.update_user(current_user)
-            current_user.roles = saved_roles
-            if not updated_user:
+            result = UserAdmin.update_user_language(current_user.username,lang)
+            if not result:
                 flash(_("Update did not work1"),category='flash_error')
             session['lang'] = lang
         except:
@@ -156,21 +116,6 @@ def my_settings():
                            referrer=referrer,
                            roles=current_user.roles)
 
-# @shareds.app.route('/tables') --> see bp.tools.routes.datatables
-# @login_required
-# @roles_accepted('member', 'admin')
-# def datatables():
-#     """ Home page for table format tools """
-#     print("-> bp.start.routes.datatables")
-#     return render_template("/tools/tables.html")
-# @shareds.app.route('/gramps') moved to bp.gramps.routes 2019-01-22
-# @login_required
-# @roles_accepted('member', 'admin')
-# def gramps_upload():
-#     """ Home page gramps input file processing """
-#     print("-> bp.start.routes.gramps_upload")
-#     return render_template("/gramps/index_gramps.html")
-
 # Admin start page
 @shareds.app.route('/admin',  methods=['GET', 'POST'])
 @login_required
@@ -180,5 +125,4 @@ def admin():
     print("-> bp.start.routes.admin")
     return render_template('/admin/admin.html')
 
-# route('/scene',  methods=['GET', 'POST']) moved to bp.scene.routes 2019-01-20
 

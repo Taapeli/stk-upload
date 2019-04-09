@@ -8,10 +8,12 @@
 
 {% set cnt = families|count %}
 
-<h2>{{ _('List of Families') }}</h2>
-<!-- 
-<small>{{cnt}} persons, user {{user}}, filter {{session['owner_filter']}}, next {{next}}</small>
- -->
+<div id="startdiv">
+	<h2>{{ _('List of Families') }}</h2>
+	<!-- 
+	<small>{{cnt}} persons, user {{user}}, filter {{session['owner_filter']}}, next {{next}}</small>
+	 -->
+</div>
 
 {{ macro.menu(3) }}
     <div class="content" id="Individuals">
@@ -57,7 +59,8 @@
     {% for f in families %}
         <tr>
             <td><span title="{{ _('Original ID') }}">{{f.id}}</span> {{f.type}} 
-                <a href="#" class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</a>
+                <a href="/scene/family={{f.uniq_id}}" class="idno"
+                   title="{{ _('Key') }}">{{f.uniq_id}}</a>
                 </td>
             <td>&#9794; {% if f.father.uniq_id %}<a href="/scene/person={{f.father.uniq_id}}">
                 {{f.father.names[0].firstname}} 

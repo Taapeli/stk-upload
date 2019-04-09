@@ -209,8 +209,8 @@ return path"""
         fw_from = o_filter.next_person[1]     # next_person names [bw_from, fw_from]
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
-        print("read_my_persons_list: Get {} persons from {!r} for {} starting at {!r}".\
-              format(limit, o_filter.owner_str(), ustr, fw_from))
+        print(f"read_my_persons_list: Get max {limit} persons from "
+              f"{o_filter.owner_str()!r} for {ustr} starting at {fw_from!r}")
         result = _read_person_list(o_filter, limit)
 
         for record in result:

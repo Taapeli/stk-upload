@@ -278,35 +278,36 @@ class Citations(transformer.Transformation):
 #                print("{} title elements {} and citations {}".format(spointer, len(ttitletexts), len(tcitations))) 
 #                print("{}  note elements {} and citations {}".format(spointer, len(ntitletexts), len(ncitations))) 
 #                print("referrers {}".format(len(self.references[spointer])))
-                referrers = self.references[spointer]
-                if len(ntitletexts) == 1:
+                if spointer in self.references.keys():
+                    referrers = self.references[spointer]
+                    if len(ntitletexts) == 1:
 #       One entry                
-                    title = "1 TITL {}".format(ntitletexts[0])
-                    self.replaces[tlinenumber] = [transformer.Item(title)]
-                    for ind in range(0, len(referrers)):
-                        if ncitations[0] == " ":
-                            continue
-                        citation = "{} PAGE ".format(str(referrers[ind][1] + 1)) + ncitations[0]
-                        self.insertions[referrers[ind][0]] = [transformer.Item(citation)]
-#                         print("    Insert lines after {} {}".\
-#                                    format(referrers[ind][0], self.insertions[referrers[ind][0]]))   
-                elif len(ntitletexts) > 1:                            
-#       Several entries  
-                    self.replaces[slinenumber] = []                
-                    for ind in range(0, len(ntitletexts)):
-                        sourceid = spointer[:-1] + str(ind + 1).zfill(3) + "@"
-                        source = "0 {} SOUR".format(sourceid)
-                        self.replaces[slinenumber].append(transformer.Item(source))
-                        title = "1 TITL {}".format(ntitletexts[ind])
-                        self.replaces[slinenumber].append(transformer.Item(title))
-                        self.replaces[slinenumber].append(nitem)
-                        if ind < len(referrers):
-                            sourceref = "{} SOUR {}".format(referrers[ind][1], sourceid)
+                        title = "1 TITL {}".format(ntitletexts[0])
+                        self.replaces[tlinenumber] = [transformer.Item(title)]
+                        for ind in range(0, len(referrers)):
+                            if ncitations[0] == " ":
+                                continue
                             citation = "{} PAGE ".format(str(referrers[ind][1] + 1)) + ncitations[0]
-                            self.replaces[referrers[ind][0]] = [transformer.Item(sourceref), transformer.Item(citation)]
-#                             print("    replace line {} with {}".\
-#                                         format(referrers[ind][0], self.replaces[referrers[ind][0]]))                        
-                                             
+                            self.insertions[referrers[ind][0]] = [transformer.Item(citation)]
+#                            print("    Insert lines after {} {}".\
+#                            format(referrers[ind][0], self.insertions[referrers[ind][0]]))   
+                    elif len(ntitletexts) > 1:                            
+#       Several entries  
+                        self.replaces[slinenumber] = []                
+                        for ind in range(0, len(ntitletexts)):
+                            sourceid = spointer[:-1] + str(ind + 1).zfill(3) + "@"
+                            source = "0 {} SOUR".format(sourceid)
+                            self.replaces[slinenumber].append(transformer.Item(source))
+                            title = "1 TITL {}".format(ntitletexts[ind])
+                            self.replaces[slinenumber].append(transformer.Item(title))
+                            self.replaces[slinenumber].append(nitem)
+                            if ind < len(referrers):
+                                sourceref = "{} SOUR {}".format(referrers[ind][1], sourceid)
+                                citation = "{} PAGE ".format(str(referrers[ind][1] + 1)) + ncitations[0]
+                                self.replaces[referrers[ind][0]] = [transformer.Item(sourceref), transformer.Item(citation)]
+#           #                    print("    replace line {} with {}".\
+    #       #                           format(referrers[ind][0], self.replaces[referrers[ind][0]]))                        
+                                                 
             return(True)   
           
         elif phase == 2:  

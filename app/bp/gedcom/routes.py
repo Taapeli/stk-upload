@@ -48,7 +48,6 @@ def history_init(gedcom_fname):
     
 def history_append(gedcom_fname,line):
     history_file_name = gedcom_fname + "-history"
-    #open(history_file_name,"a").write("{}: {}\n".format(util.format_timestamp(),line))
     open(history_file_name,"a").write("{}\n".format(line))
 
 def history_append_args(args):
@@ -277,7 +276,6 @@ def gedcom_save(gedcom):
 @roles_accepted('gedcom', 'research')
 def gedcom_check(gedcom):
     fullname = gedcom_fullname(gedcom)
-    logging.info("fullname2: "+fullname)
     if os.path.exists(fullname):
         return "exists"
     else:
@@ -300,7 +298,7 @@ def gedcom_upload():
     file = request.files['file']
     # if user does not select file, browser also
     # submit an empty part without filename
-    if file.filename == '':
+    if file.filename == '': # pragma: no cover
         flash(_('Choose a GEDCOM file to upload'), category='flash_warning')
         return redirect(url_for('.gedcom_list'))
     if file and allowed_file(file.filename):
@@ -308,7 +306,6 @@ def gedcom_upload():
         os.makedirs(gedcom_folder, exist_ok=True)
         fullname = os.path.join(gedcom_folder, filename)
 
-        logging.info("fullname1: "+fullname)
         if os.path.exists(fullname):
             flash(_('This GEDCOM file already exists'), category='flash_error')
             return redirect(url_for('.gedcom_list'))
@@ -339,9 +336,7 @@ def gedcom_download(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
     gedcom = secure_filename(gedcom)
-    logging.info(gedcom_folder)
     filename = os.path.join(gedcom_folder, gedcom)
-    logging.info(filename)
     return send_from_directory(directory=gedcom_folder, filename=gedcom, as_attachment=True) 
 
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
@@ -410,19 +405,20 @@ def get_excerpt(gedcom,linenum):
     metadata = get_metadata(gedcom)
     encoding = metadata['encoding'] 
     lines = open(filename,encoding=encoding).readlines()
-    firstline = linenum - 10
+    firstline = linenum-1 
+    while not lines[firstline].startswith("0"):
+        firstline -= 1
     if firstline < 0: firstline = 0
     html = ""
     for i,line in enumerate(lines[firstline:linenum+9]):
         line = line.strip()
+        if i > 0 and firstline+i > linenum-1 and line.startswith("0"): break
         html += f"<br><span class=linenum>{firstline+i+1}</span>: "
         if firstline+i == linenum-1:
             html += f"<span class=current_line>{line}</span>"
         else:    
             html += f"{line}"
     return html
-        
-    return "".join(lines[firstline:linenum+5])
 
 @bp.route('/gedcom/delete/<gedcom>')
 @login_required
@@ -561,7 +557,6 @@ def process_gedcom(arglist, transform_module):
             history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom))
             history_append(args.input_gedcom,_("Old file saved as {}").format(old_name))
         else:
-            #history_append(args.input_gedcom,_("File was not saved"))
             history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom+"-temp"))
         msg = _("Transform '{}' ended at {}").format(
                  transform_module.name, 
@@ -620,8 +615,6 @@ def gedcom_transform(gedcom,transform):
                 format(transform[:-3], gedcom_filename, args, "--logfile", logfile)
         cmd3 = "cd '{}'; PYTHONPATH='{}' {} {} {}".\
                 format(gedcom_app, python_path, python_exe, transform_py, tr_args)
-#         cmd3 = "PYTHONPATH='{}' {} {} {}".\
-#                 format(python_path, python_exe, transform_py, tr_args)
 
         history_append(gedcom_filename,cmd3)
 
@@ -631,14 +624,12 @@ def gedcom_transform(gedcom,transform):
         s1 = p.stdout.read().decode('UTF-8')
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
-#         if s2: print("=== Subprocess errors ===\n" + s2) 
         if s2: history_append(gedcom_filename,"\nErrors:\n"+s2)
         s = "\n" + _("Errors:") + "\n" + s2 + "\n\n" + s1
         try:
             log = open(logfile).read()
         except FileNotFoundError:
             log = "" 
-#        time.sleep(1)  # for testing...
         rsp = dict(stdout=log + "\n" + s1,stderr=s2,oldname="",logfile=logfile,
            diff="",plain_text=True)
         return jsonify(rsp)
@@ -722,12 +713,6 @@ def build_parser(filename,gedcom,gedcom_filename):
 
     parser.add_argument('--display-changes', action='store_true',
                         help=_('Display changed rows'))
-    #parser.add_argument('--dryrun', action='store_true',
-    #                    help=_('Do not produce an output file'))
-    #parser.add_argument('--nolog', action='store_true',
-    #                    help=_('Do not produce a log in the output file'))
-#    parser.add_argument('--encoding', type=str, default="utf-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
-#                        help=_("Encoding of the input GEDCOM"))
     
     transform_module.add_args(parser)
 

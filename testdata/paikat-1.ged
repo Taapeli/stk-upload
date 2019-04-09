@@ -1,12 +1,16 @@
 0 HEAD
-1 NOTE _TRANSFORM gedcom_transform.py
-2 CONT _COMMAND gedcom_transform.py places test/paikat-1.ged --display-chan
-2 CONT _DATE kari 02 Jul 2017 16:07:58
-2 CONT _SAVEDFILE test/paikat-1.ged.0
 0 @I1@ INDI
 1 NAME a
 1 BIRT
-2 PLAC a,Loviisa, Finland
+2 PLAC Finland, Loviisa, Kirkonkylä
+2 PLAC Finland Loviisa Kirkonkylä
+2 PLAC Helsingin pitäjä
+2 PLAC Hamina
+2 PLAC Hamina Kirkonkylä n:o 9 Mikkola
+2 PLAC Hamina Kirkonkylä n:o 101
+2 PLAC Hamina Kirkonkylä N:o 102
+2 PLAC Hamina vpl
+2 PLAC Antrea,
 0 @I2@ INDI
 1 NAME b
 1 BIRT
@@ -15,6 +19,6 @@
 0 @I3@ INDI
 1 NAME b
 1 BIRT
-2 PLAC <b>a,Loviisa, Finland </b>
+2 PLAC a,Loviisa, Finland
 2 DATE 12 MAY 1888
 0 TRLR

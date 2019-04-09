@@ -46,31 +46,31 @@ las
 def add_args(parser):
     parser.add_argument('--reverse', action='store_true',
                         help=_('Reverse the order of places'))
-    parser.add_argument('--add-commas', action='store_true',
+    parser.add_argument('--add_commas', action='store_true',
                         help=_('Replace spaces with commas'))
-    parser.add_argument('--ignore-lowercase', action='store_true',
+    parser.add_argument('--ignore_lowercase', action='store_true',
                         help=_('Ignore lowercase words'))
-    parser.add_argument('--ignore-digits', action='store_true',
+    parser.add_argument('--ignore_digits', action='store_true',
                         help=_('Ignore numeric words'))
     parser.add_argument('--minlen', type=int, default=0,
                         help=_("Ignore words shorter that minlen"))
-    parser.add_argument('--auto-order', action='store_true',
+    parser.add_argument('--auto_order', action='store_true',
                         help=_('Try to discover correct order...'))
-    parser.add_argument('--auto-combine', action='store_true',
+    parser.add_argument('--auto_combine', action='store_true',
                         help=_('Try to combine certain names...'))
     parser.add_argument('--addname', type=str, 
                         help=_('Add this name at the end'))
     parser.add_argument('--display_unique_changes', action='store_true',
                         help=_('Display unique changed places'))
-    parser.add_argument('--display-nonchanges', action='store_true',
+    parser.add_argument('--display_nonchanges', action='store_true',
                         help=_('Display unchanged places'))
-    parser.add_argument('--display-ignored', action='store_true',
+    parser.add_argument('--display_ignored', action='store_true',
                         help=_('Display ignored places'))
     parser.add_argument('--match', type=str, 
                         help=_('Only process places containing this string'))
-    parser.add_argument('--mark-changes', action='store_true',
+    parser.add_argument('--mark_changes', action='store_true',
                         help=_('Replace changed PLAC tags with PLAC-X'))
-    parser.add_argument('--mark-all-matching', action='store_true',
+    parser.add_argument('--mark_all_matching', action='store_true',
                         help=_('Replace all matching PLAC tags with PLAC-X'))
                         
 def initialize(options):
@@ -278,7 +278,7 @@ def process_place(options, place):
  
 
 
-def check(in_file, expected_output, **kwargs):
+def check(in_file, expected_output, **kwargs): # pragma: no cover
     class Options: pass
     options = Options()
     options.reverse = False
@@ -297,7 +297,7 @@ def check(in_file, expected_output, **kwargs):
         print("{}: expecting '{}', got '{}'".format(in_file, expected_output, newplace),file=sys.stderr)
         
 
-def test():
+def test(): # pragma: no cover
     check("Helsingin pitäjä Herttoniemi","Herttoniemi, Helsingin pitäjä",add_commas=True,reverse=True)
     check("Rättölä, Heinjoki","Heinjoki, Rättölä",reverse=True)
     check("Rättölä Heinjoki","Rättölä, Heinjoki",add_commas=True)
@@ -326,7 +326,8 @@ def test():
 
 
     
-if __name__ == "__main__":
-    test()
+if __name__ == "__main__": # pragma: no cover
+    #test()
+    pass
 
 

@@ -6,13 +6,13 @@ Created on 8.9.2017
 @author: jm
 '''
 import sys
-from neo4j.v1 import GraphDatabase, basic_auth
+from neo4j import GraphDatabase
 import treelib
 
 def connect_db():
     global driver
     host = "bolt:localhost:7687"
-    driver = GraphDatabase.driver(host, auth=basic_auth("neo4j", "2000Neo4j"))
+    driver = GraphDatabase.driver(host, auth=("neo4j", "2000Neo4j"))
 
 
 def get_connections(locid):
@@ -92,7 +92,7 @@ def load_to_tree_struct(result):
                 rl[rel.id] = rel.end
                 nid, ntype, nname, lv = nstack.pop()
                 if len(rl) == 1:    # Ensimmäinen solmu rootin alle
-                    nid1, ntype1, nname1, lv1 = nstack.pop()
+                    nid1, ntype1, nname1, _lv1 = nstack.pop()
                     rl[0] = rel.end
 #                     print("create_node('{}', '{}', parent={}, data={})".\
 #                           format(nname1, nid1, 0, {'type':ntype1}))
@@ -123,16 +123,18 @@ def print_tree(t):
             else:
                 lv = lv + 1
                 nl[node.identifier] = lv
-            fill = ''.join([ "       " for n in range(lv-1)])
-            print("({}){} {:5d}<-{:5d} {} ".format(lv, fill, 
-                  node.bpointer, node.identifier, node.tag))
+            fill = "        " * (lv-1)
+            print(f"({lv}){fill} {node.bpointer:6d}<-{node.identifier:6d} {node.tag} ")
 
 if __name__ == '__main__':
+    """ Run 'python test/place_tree.py 103338'
+        where the argument is uniq_id of a place
+    """
     if len(sys.argv) <= 1:
         locid = 21773
     else:
         locid = int(sys.argv[1])
-    print ("paikka {}".format(locid))
+    print (f"paikka {locid}")
 
     connect_db()
     # Suoritetaan haku tietokannasta: paikkaan locid liittyvät

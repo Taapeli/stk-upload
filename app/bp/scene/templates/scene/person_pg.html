@@ -11,8 +11,10 @@
 u { color: DarkKhaki; text-decoration: none; }
 </style>
 
-<h2>{{ _("Person's details") }}</h2>
-<p><small>owner {{person.owner}}, next {{next}}, filter {{session['owner_filter']}}</small></p>
+<div id="startdiv">
+    <h2>{{ _("Person's details") }}</h2>
+    <!-- owner {{person.owner}}, next {{next}}, filter {{session['owner_filter']}}</small> -->
+</div>
 
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">

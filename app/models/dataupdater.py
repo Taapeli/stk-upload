@@ -12,6 +12,7 @@ from models.gen.person import Person
 from models.gen.person_name import Name
 from models.gen.refname import Refname
 from models.gen.person_combo import Person_combo
+from models.gen.family_combo import Family_combo
 
 
 def set_confidence_values(tx, uniq_id=None, batch_logger=None):
@@ -63,6 +64,41 @@ def set_estimated_person_dates(uids=None):
     User.endTransaction(my_tx)
     
     return msg
+
+
+def set_family_name_properties(tx=None, uniq_id=None):
+    """ Set Family.father_sortname and Family.mother_sortname using the data in Person
+        Set Family.datetype, Family.date1 and Family.date2 using the data in Event
+        If handler is defined
+        - if there is transaction tx, use it, else create a new 
+    """
+    dates_count = 0
+    sortname_count = 0
+    
+    if tx:
+        my_tx = tx
+    else:
+        my_tx = User.beginTransaction()
+
+    # Process each family 
+    result = Family_combo.get_dates_parents(my_tx, uniq_id)
+    for record in result:
+        father_sortname = record['father_sortname']
+        mother_sortname = record['mother_sortname']
+        datetype = record['datetype']
+        date1 = record['date1']
+        date2 = record['date2']
+        
+        # Copy the dates from Event node and sortnames from Person nodes
+        Family_combo.set_dates_sortnames(my_tx, uniq_id, datetype, date1, date2, father_sortname, mother_sortname)
+        dates_count += 1
+        sortname_count += 1
+    
+    if not tx:
+        # Close my own created transaction
+        User.endTransaction(my_tx)
+
+    return (dates_count, sortname_count)
 
 
 def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname']):
