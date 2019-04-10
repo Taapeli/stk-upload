@@ -8,9 +8,8 @@ RemoteSystemsTempFiles/\.project
 /uploads/
 .pydevproject 
 /env.sh
-/__pycache__/
+__pycache__/
 /venv/
 .coverage
 /htmlcov/
-
 trace\.txt
