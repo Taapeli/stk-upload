@@ -177,16 +177,26 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
  
     def validate_agree(self, field):
         if not field.data:
-            raise ValidationError(_('Please indicate that you have read and agree to the Terms and Conditions')) 
+            raise ValidationError(_('Please indicate that you have read and agree to the Terms and Conditions'), 'error') 
         else:
             return True 
 
     def validate_email(self, field):
         allowed_email = UserAdmin.find_allowed_email(field.data)
         if allowed_email:
-            if (allowed_email.creator != 'system') or allowed_email.approved:
+            if allowed_email.confirmed_at != None:
+                raise ValidationError(_('Email address has been confirmed earlier'))
+            elif (allowed_email.creator == 'system') and not allowed_email.approved:
+                raise ValidationError(_('Email address has not been approved yet'))             
+#            if (allowed_email.creator != 'system') or allowed_email.approved:
+            else: 
                 return True
         raise ValidationError(_('Email address must be an authorized one')) 
+
+    def validate_username(self, field):
+        user = shareds.user_datastore.get_user(field.data)
+        if user:
+            raise ValidationError(_('Username has been reserved already'))
 
     username = StringField('Username', validators=[Required('Username required')])
     name = StringField('Name', validators=[Required('Name required')])
