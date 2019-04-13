@@ -13,7 +13,7 @@
   </head>
   <body>
     {% block body %}
-    <h1 class="admin"><a href="/admin"><img id="logo" 
+    <h1 class="admin"><a href="/"><img id="logo" 
              src="/static/tam.png" alt="{{ _('Admin-Start Page') }}" title="{{ _('Admin-Start Page') }}"
              onmouseover="this.src='/static/tam1.png';" 
              onmouseout="this.src='/static/tam.png';"/></a>
@@ -25,6 +25,10 @@
 	{{ hamburger_menu((
 	    ("/scene", _('Change settings'), _('Select displayed data')),
 	   ) ) }}
+
+    <div id="paluu">
+        <a href="/admin">&#9881; Admin home</a>
+    </div>
 
     {% endblock %}
 
