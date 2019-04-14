@@ -5,13 +5,12 @@ Created on 8.10.2018
 '''
 from .citation import Citation
 from .event_combo import Event_combo
-from .family import Family
+from .family_combo import Family_combo
 from .media import Media
 from .note import Note
 from .person_combo import Person_combo
 from .person_name import Name
 from .place import Place, Place_name
-from .refname import Refname
 from .repository import Repository
 from .source import Source
 
@@ -48,7 +47,7 @@ def get_object_from_node(node):
     elif label == "Note":
         return Note.from_node(node)
     elif label == "Family":
-        return Family.from_node(node)
+        return Family_combo.from_node(node)
     elif label == "Media":
         return Media.from_node(node)
     else: return None
