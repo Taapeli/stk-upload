@@ -1,0 +1,35 @@
+STK_SYSNAME = "Isotammi dev"
+
+DEBUG = False # Turns on debugging features in Flask
+
+TEMPLATES_AUTO_RELOAD = True
+
+NEO4J_HOST = 'localhost'
+NEO4J_PORT = 27017
+NEO4J_URI = "bolt://localhost:7687"
+NEO4J_USERNAME = 'neo4j'
+NEO4J_PASSWORD = '<neo4j password>'
+
+#=============== Salausavainten konfigurointi ==================
+SECRET_KEY = '<secret-1>'
+SECURITY_PASSWORD_SALT = '<secret-2>'
+SECURITY_LOGIN_SALT = '<secret-3>'
+SECURITY_CONFIRM_SALT = '<secret-4>'
+
+#=============== Sähköpostin konfigurointi ==================
+MAIL_SERVER = 'smtp.kolumbus.fi'
+MAIL_USE_SSL = False
+# MAIL_USERNAME = "<mail-user>          # if needed
+# MAIL_USERNAME = "<mail-password>
+
+MASTER_USER_EMAIL = '<oma sähköposti>'
+MASTER_USER_PASSWORD = '<master-password>'
+
+SECURITY_EMAIL_SENDER = '<sähköposti>'
+MAIL_ASCII_ATTACHMENTS = False
+MAIL_SUPPRESS_SEND = False
+MAX_EMAILS = None
+MAIL_DEBUG = True
+ADMIN_EMAIL_FROM = '<sähköposti>'
+ADMIN_EMAIL_TO = '<oma sähköposti>'
+
