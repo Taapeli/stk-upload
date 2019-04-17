@@ -269,7 +269,7 @@ RETURN f,
     COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(DISTINCT pc) AS child, 
     COUNT(DISTINCT pc) AS no_of_children 
-    ORDER BY ID(f) LIMIT $limit"""
+    ORDER BY f.father_sortname LIMIT $limit"""
     #TODO Obsolete
     read_families = """
 MATCH (f:Family) WHERE ID(f)>=$fw
