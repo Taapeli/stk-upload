@@ -68,7 +68,8 @@ def set_estimated_person_dates(uids=None):
 
 def set_family_name_properties(tx=None, uniq_id=None):
     """ Set Family.father_sortname and Family.mother_sortname using the data in Person
-        Set Family.datetype, Family.date1 and Family.date2 using the data in Event
+        Set Family.date1 using the data in marriage Event
+        Set Family.datetype and Family.date2 using the data in divorce or death Events
         If handler is defined
         - if there is transaction tx, use it, else create a new 
     """
@@ -84,13 +85,35 @@ def set_family_name_properties(tx=None, uniq_id=None):
     result = Family_combo.get_dates_parents(my_tx, uniq_id)
     for record in result:
         father_sortname = record['father_sortname']
+        father_death_date = record['father_death_date']
         mother_sortname = record['mother_sortname']
-        datetype = record['datetype']
-        date1 = record['date1']
-        date2 = record['date2']
+        mother_death_date = record['mother_death_date']
+        marriage_date = record['marriage_date']
+        divorce_date = record['divorce_date']
+        
+        datetype = ''
+        end_date = ''
+        if divorce_date:
+            end_date = divorce_date
+        elif father_death_date and mother_death_date:
+            if father_death_date < mother_death_date:
+                end_date = father_death_date
+            else:
+                end_date = mother_death_date
+        elif father_death_date:
+            end_date = father_death_date
+        elif mother_death_date:
+            end_date = mother_death_date
+
+        if end_date:
+            datetype = "3"
+        elif marriage_date:
+            datetype = "0"
+            end_date = marriage_date
         
         # Copy the dates from Event node and sortnames from Person nodes
-        Family_combo.set_dates_sortnames(my_tx, uniq_id, datetype, date1, date2, father_sortname, mother_sortname)
+        Family_combo.set_dates_sortnames(my_tx, uniq_id, datetype, marriage_date, end_date,
+                                         father_sortname, mother_sortname)
         dates_count += 1
         sortname_count += 1
     
