@@ -250,8 +250,8 @@ def show_person_page(uniq_id):
 def show_families():
     """ List of Families for menu(3)
     """
-    fw_from = request.args.get('f', 0, type=int)
-    bw_from = request.args.get('b', 0, type=int)
+    fw_from = request.args.get('f', '', type=str)
+    bw_from = request.args.get('b', '', type=str)
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         

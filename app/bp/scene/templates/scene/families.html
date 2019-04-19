@@ -42,7 +42,7 @@
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?f={{last.father_sortname | replace("#", "%23")}}", title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}
@@ -63,12 +63,14 @@
                    title="{{ _('Key') }}">{{f.uniq_id}}</a>
                 </td>
             <td>&#9794; {% if f.father.uniq_id %}<a href="/scene/person={{f.father.uniq_id}}">
+                <small>{{f.father_sortname}}</small>
                 {{f.father.names[0].firstname}} 
                 <i>{{f.father.names[0].suffix}}</i>
                 <b>{{f.father.names[0].surname}}</b></a>
             {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
             <td>&#9792; {% if f.mother.uniq_id %}<a href="/scene/person={{f.mother.uniq_id}}">
+                <small>{{f.mother_sortname}}</small>
                 {{f.mother.names[0].firstname}} 
                 <i>{{f.mother.names[0].suffix}}</i>
                 <b>{{f.mother.names[0].surname}}</b></a>
@@ -102,7 +104,7 @@
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?f={{last.father_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}

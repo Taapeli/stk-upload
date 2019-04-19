@@ -140,7 +140,7 @@ RETURN family"""
 
 
     @staticmethod       
-    def get_families(fw=0, bw=0, limit=100):
+    def get_families(fw='', bw='', limit=100):
         """ Find families from the database """
         
         try:
@@ -158,6 +158,8 @@ RETURN family"""
                     family = Family_combo(f_node.id)
                     family.id = f_node['id']
                     family.type = f_node['rel_type']
+                    family.father_sortname = f_node['father_sortname']
+                    family.mother_sortname = f_node['mother_sortname']
                 
 #                     if record['ph']:
 #                         husband = record['ph']

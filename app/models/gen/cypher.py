@@ -261,7 +261,7 @@ class Cypher_family():
     
     # from models.gen.family.read_families
     read_families_p = """
-MATCH (f:Family) WHERE ID(f)>=$fw
+MATCH (f:Family) WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
