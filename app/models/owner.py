@@ -14,21 +14,40 @@ from flask_babelex import lazy_gettext as N_
 
 
 class OwnerFilter():
-    """ Store filter values for finding the active subset of database
-
-        Filters:
+    """ Store filter values for finding the active subset of database.
+    
+        Possible settings:
         - user          str  Username from current_user, if any
         - owner_filter  int  Code expressing filter method by data owners
                              from request.div or session.owner_filter.
                              Default = 1 (common) if neither present
+            COMMON 1         published common data 'Isotammi'
+            OWN - 2          all user's own candidate materials
+            BATCH - 3        selected Batch set
+            COMMON+OWN
+            COMMON+BATCH
         - next_person   list Starting names for prev/next Persons page
                              values [backward, forward] sortnames
                              from request.fw, equest.bw variables.
                              default ['', '']
+          next_person[1] (which name to start, forwards):
+            NEXT_START '<'   from first name of data
+            name             from a name given
+            NEXT_END '>'     end reached: there is nothing forwards
+          next_person[0] (which name to start, backwards):
+            NEXT_END '>'     from last name of data
+            name             from a name given
+            NEXT_START '<'   top reached: there is nothing backwards
+
+        #TODO self.batch_id not set or used
     """
+    NEXT_START = '<'  # from first name of data
+    NEXT_END = '>'    # end reached: there is nothing forwards
+
 
     class OwnerChoices():
-        """ Represents all possible values of owner selection code. """
+        """ Represents all possible components of selection by owner and batch. 
+        """
         COMMON = 1
         OWN = 2
         BATCH = 4
@@ -42,20 +61,22 @@ class OwnerFilter():
                 self.COMMON + self.OWN:   N_('my own and Isotammi'), 
                 self.COMMON + self.BATCH: N_('my batch and Isotammi')
             }
+            self.batch_name = None
 
         def get_valid_key(self, number):
             # Return the key, if valid number, otherwise 0
             if number in list(self.as_str.keys()):
                 return number
             return 0
-        
+
+
     def __init__(self, user_session, current_user=None, request=None):
         '''
-            User_session knows the values from session and request.
+            Set filtering properties from user session, request and current user.
         '''
         self.session = user_session
         self.choices = self.OwnerChoices()
-        self.filter = self.choices.COMMON
+        self.filter = self.OwnerChoices.COMMON
 
         ''' Set active user, if any username '''
         if current_user:
@@ -66,9 +87,8 @@ class OwnerFilter():
         else:
             self.user = user_session.get('username', None)
 
-        #def store_owner_filter(self):
-        """ The parameters div=2&cmp=1 are stored as session variable owner_filter.
-            Returns owner filter name id detected, otherwise False
+        """ Store the request parameters div=2&cmp=1 as session variable owner_filter.
+            Returns owner filter name if detected, otherwise False
         """
         div = 0
         if request:
