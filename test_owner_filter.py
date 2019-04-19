@@ -1,63 +1,12 @@
 import sys
-# import os
-# import tempfile
-# import logging
-# import io
-# import shutil
-# import json
 from models.owner import OwnerFilter
 import pytest
+from flask.globals import request
 # logging.basicConfig(level=logging.INFO)
 
 
-@pytest.fixture(scope="module")
-def create_env():
-    class MockUserSession():
-        ''' Usage example: user_session.get('username', None)
-        '''
-        def __init(self, **args):
-            ''' When creating this mock the arguments must be a dict like 
-                {'user_id':None, 'owner_filter':None, 'next_person':['',''], 'lang':'fi'}
-            '''
-            self.args = args
-            
-        def get(self, var_name, default_value=None):
-            if var_name in self.args.keys():
-                return self.args[var_name]
-            else:
-                return default_value
-    
-    class MockRequest():
-        ''' Usage example: request.args.get('div', 0)
-        '''
-        def __init__(self, **args):
-            ''' When creating this mock the arguments must be a dict like 
-                {'div':'2', 'cmp':'1'}
-            '''
-            # request.args ~ ImmutableMultiDict([('div', '2'), ('cmp', '1')])
-            if args:
-                self.args = args
-            else:
-                self.args = {}
-    
-    mock_request = MockRequest
-    mock_user_session = MockUserSession
-
-#------------------------------------------------------------------------------
-
-@pytest.mark.usefixtures("create_env") 
-def test_ownerfilter_getuser():
-    user_session = create_env.MockUserSession(owner_filter=1, username='jussi')
-    user = user_session.get('username', None)
-    assert user == 'jussi'
-
-    f = OwnerFilter(user_session)
-
-    assert f.filter == 1
-    assert f.owner_str() == 'Isotammi database'
-
-
-def test_ownerfilter_1():
+def test_ownerfilter_nouser():
+    # OwnerFilter(user_session)
     user_session = {}
     user_session['owner_filter'] = 1
 
@@ -65,3 +14,98 @@ def test_ownerfilter_1():
 
     assert f.filter == 1
     assert f.owner_str() == 'Isotammi database'
+
+    user_session['owner_filter'] = 2
+    assert f.filter == 1
+    assert f.owner_str() == 'Isotammi database', "No user gets wrong data"
+
+
+def test_ownerfilter_user_selection():
+    ''' Example: 
+            - Show all my data / div=2
+            - with common data / cmp=1
+
+        <Request 'http://127.0.0.1:5000/scene/persons_all/?div=2&cmp=1' [GET]>
+        <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
+            'lang': 'en', 'next_person': ['', '>'], 'owner_filter': 2, 'user_id': 'juha'}>
+    '''
+    # OwnerFilter(user_session, current_user, request)
+    # Allow user_session.get('username', None)
+    user_session = {}
+    user_session['owner_filter'] = 1
+    user_session['lang'] = 'en'
+    # # Set current user
+    class CurrentUser():pass
+    current_user = CurrentUser()
+    current_user.is_active = True
+    current_user.is_authenticated = True
+    current_user.username = 'jussi'
+    # Allow request.args.get('div', 0)
+    class Request(): pass
+    request = Request()
+    request.args = {}
+    request.args['div'] = '1'
+    request.args['cmp'] = 0
+
+    f = OwnerFilter(user_session, current_user, request)
+
+    assert f.filter == 1
+    assert f.owner_str() == 'Isotammi database'
+    x = f.use_owner_filter()
+    assert x == False, "use_owner_filter() failed"
+    x = f.use_common()
+    assert x == True, "use_common() failed"
+
+
+def test_ownerfilter_next_person():
+    ''' Example: Show all my data  with common data
+            default direction (fw)
+            - from previous next_person: start '<'
+            - from previous next_person 'Abrahamsson##Juho Kustaa'
+            - from previous next_person: end '>'
+
+        <Request 'http://127.0.0.1:5000/scene/persons_all/?div=2&cmp=1' [GET]>
+        <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
+            'lang': 'en', 'next_person': ['', '>'], 'owner_filter': 2, 'user_id': 'juha'}>
+    '''
+    # OwnerFilter(user_session, current_user, request)
+    # Allow user_session.get('username', None)
+    user_session = {}
+    user_session['owner_filter'] = 1
+    user_session['lang'] = 'en'
+    # # Set current user
+    class CurrentUser():pass
+    current_user = CurrentUser()
+    current_user.is_active = True
+    current_user.is_authenticated = True
+    current_user.username = 'jussi'
+    # Allow request.args.get('div', 0)
+    class Request(): pass
+    request = Request()
+    request.args = {}
+    request.args['div'] = '1'
+    request.args['cmp'] = 0
+
+    f = OwnerFilter(user_session, current_user, request)
+    
+    # 1. In the beginning
+    user_session['next_person'] = ['', '<']
+    f.store_next_person(request)
+    
+    x = f.person_name_fw()
+    assert x == ' ', "next fw not in the beginning"
+    
+    # 2. At given point
+    user_session['next_person'] = ['', 'Man']
+    f.store_next_person(request)
+    
+    x = f.person_name_fw()
+    assert x == 'Man', "next fw not at given point"
+    
+    # 3. At end
+    user_session['next_person'] = ['', '>']
+    f.store_next_person(request)
+    
+    x = f.person_name_fw()
+    assert x == '> end', "next fw not at end"
+

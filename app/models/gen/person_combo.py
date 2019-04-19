@@ -171,19 +171,22 @@ return path"""
                 with shareds.driver.session() as session:
                     if show_by_owner:
 
-                        if show_with_common: #1 get all with owner name for all
+                        if show_with_common: 
+                            #1 get all with owner name for all
                             print("_read_person_list: by owner with common")
                             result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
                                                  user=user, start_name=fw_from, limit=limit)
                             # Returns person, names, events, user
 
-                        else: #2 get my own (no owner name needed)
+                        else: 
+                            #2 get my own (no owner name needed)
                             print("_read_person_list: by owner only")
                             result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
                                                  user=user, start_name=fw_from, limit=limit)
                             # Returns person, names, events
 
-                    else: #3 == #1 simulates common by reading all
+                    else: 
+                        #3 == #1 simulates common by reading all
                         print("_read_person_list: common only")
                         result = session.run(Cypher_person.read_all_persons_with_events_starting_name, #user=user, 
                                              start_name=fw_from, limit=limit)
@@ -206,7 +209,7 @@ return path"""
 
 
         persons = []
-        fw_from = o_filter.next_person[1]     # next_person names [bw_from, fw_from]
+        fw_from = o_filter.person_name_fw()     # next_person names [bw_from, fw_from]
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
         print(f"read_my_persons_list: Get max {limit} persons from "

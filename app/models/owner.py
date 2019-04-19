@@ -28,7 +28,7 @@ class OwnerFilter():
             COMMON+BATCH
         - next_person   list Starting names for prev/next Persons page
                              values [backward, forward] sortnames
-                             from request.fw, equest.bw variables.
+                             from request.fw, request.bw variables.
                              default ['', '']
           next_person[1] (which name to start, forwards):
             NEXT_START '<'   from first name of data
@@ -116,7 +116,9 @@ class OwnerFilter():
 
     def store_next_person(self, request):
         """ Eventuel fb or bw parameters are stored in user_session['next_person'].
-            If neither is given, next_person is cleared.
+        
+            - If bw is defined, clear fw; otherwise clear bw
+            - If neither is given, next_person is cleared
         """
         self.next_person = ['', '']
         session_next = self.session.get('next_person', self.next_person)
@@ -161,12 +163,27 @@ class OwnerFilter():
 #   common_batch 101 5 = 1+4 = user batch & Isotammi
 
     def use_owner_filter(self):
-        ''' Tells, if you should select object by data owner:
-            Always if 'common' is not required
+        ''' Tells, if you should select object by data owner.
+
+            Always when others but self.OwnerChoices.OWN only are required
         '''
+        
         return (self.filter & 2) > 0
     
     def use_common(self):
-        ''' Tells, if you should select objects from common database 
+        ''' Tells, if you should select objects from common database.
+
+            Always when self.OwnerChoices.COMMON is required
         '''
         return (self.filter & 1) > 0
+
+    def person_name_fw(self):
+        ''' Tells the name from which the names must be read from.
+        '''
+        if self.next_person[1] == self.NEXT_END:
+            return '> end'
+        elif self.next_person[1] == self.NEXT_START:
+            return ' '
+        else:
+            return self.next_person[1]
+        
