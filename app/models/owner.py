@@ -21,7 +21,7 @@ class OwnerFilter():
         - owner_filter  int  Code expressing filter method by data owners
                              from request.div or session.owner_filter.
                              Default = 1 (common) if neither present
-            COMMON 1         published common data 'Isotammi'
+            COMMON - 1       published common data 'Isotammi'
             OWN - 2          all user's own candidate materials
             BATCH - 3        selected Batch set
             COMMON+OWN
