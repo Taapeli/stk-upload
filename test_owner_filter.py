@@ -89,21 +89,21 @@ def test_ownerfilter_next_person():
     f = OwnerFilter(user_session, current_user, request)
     
     # 1. In the beginning
-    user_session['next_person'] = ['', '<']
+    user_session['person_scope'] = ['', '<']
     f.store_next_person(request)
     
     x = f.person_name_fw()
-    assert x == ' ', "next fw not in the beginning"
+    assert x == '', "next fw not in the beginning"
     
     # 2. At given point
-    user_session['next_person'] = ['', 'Man']
+    user_session['person_scope'] = ['Man', None]
     f.store_next_person(request)
     
     x = f.person_name_fw()
     assert x == 'Man', "next fw not at given point"
     
     # 3. At end
-    user_session['next_person'] = ['', '>']
+    user_session['person_scope'] = ['>', None]
     f.store_next_person(request)
     
     x = f.person_name_fw()

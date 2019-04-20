@@ -1,8 +1,9 @@
 '''
+    Describes filtering rules for Scene pages.
 
-    Describe filtering rules for Scene pages:
     - active user, if any
     - next person (forward/backwards) in Person list
+    - next in other lists (ToDo)
 
 Created on 19.1.2019
 
@@ -16,37 +17,48 @@ from flask_babelex import lazy_gettext as N_
 class OwnerFilter():
     """ Store filter values for finding the active subset of database.
     
-        Possible settings:
-        - user          str  Username from current_user, if any
-        - owner_filter  int  Code expressing filter method by data owners
-                             from request.div or session.owner_filter.
-                             Default = 1 (common) if neither present
-            COMMON - 1       published common data 'Isotammi'
-            OWN - 2          all user's own candidate materials
-            BATCH - 3        selected Batch set
+        Settings stored in self:
+        
+        - user          str     Username from current_user, if any
+        - owner_filter  int     Code expressing filter method by data owners
+                                from request.div or session.owner_filter.
+                                Default = 1 (common) if neither present
+            COMMON - 1          published common data 'Isotammi'
+            OWN - 2             all user's own candidate materials
+            BATCH - 3           selected Batch set
             COMMON+OWN
             COMMON+BATCH
-        - next_person   list Starting names for prev/next Persons page
-                             values [backward, forward] sortnames
-                             from request.fw, request.bw variables.
-                             default ['', '']
-          next_person[1] (which name to start, forwards):
-            NEXT_START '<'   from first name of data
+        - scope          list   Boundary names for current display page [from, to]
+        
+                                For Persons page, the scope variable in
+                                user session is 'person_scope' and the values 
+                                are from Person.sortname field.
+
+            - Displayed scope is from scope[0] to scope[1]
+            - With forward button, show from scope[1] towards end
+            - With backward button, show from scope[0] towards top
+            
+            - Current page includes the bounding names from scope
+            - The same boundary names are included in next pages, too
+              to ensure no duplicate names are skipped.
+
+        scope[0] (from which name to display, forwards):
+            ' '              from first name of data
             name             from a name given
-            NEXT_END '>'     end reached: there is nothing forwards
-          next_person[0] (which name to start, backwards):
+            NEXT_END '>'     bottom reached: there is nothing forwards
+        scope[1] (from which name to display, backwards):
             NEXT_END '>'     from last name of data
             name             from a name given
-            NEXT_START '<'   top reached: there is nothing backwards
+            NEXT_START '<'   top reached: there is nothing before
 
-        #TODO self.batch_id not set or used
+    #TODO self.batch_id not set or used
     """
     NEXT_START = '<'  # from first name of data
     NEXT_END = '>'    # end reached: there is nothing forwards
 
 
     class OwnerChoices():
-        """ Represents all possible components of selection by owner and batch. 
+        """ Represents all possible combibations of selection by owner and batch. 
         """
         COMMON = 1
         OWN = 2
@@ -69,7 +81,53 @@ class OwnerFilter():
                 return number
             return 0
 
+    class NextStartPoint():
+        ''' For multi page object display, define next keys forwards/backwards.
+        '''
 
+        def __init__(self, session, session_var):
+            ''' Initialize session and scope. 
+            
+                - session_var    str    session variable name
+                - request        http request
+            
+                Use request arguments fw or bw, if defined.
+                Else use orifinal from session.
+            '''
+            self.session = session
+            self.session_var = session_var
+            self.scope = session.get(session_var, ['', '>'])
+    
+    
+        def set_next(self, request=None):
+            ''' Calculate scope values from request or session. 
+            
+                - session_var    str    session variable name
+                - request        http request
+            
+                Use request arguments fw or bw, if defined.
+                Else use orifinal from session.
+            '''
+            if request:
+                fw = request.args.get('fw', None)
+                bw = request.args.get('bw', None)
+                if fw == None and bw == None:
+                    # Use original session_scope as is
+                    return self.scope
+    
+                if fw != None:
+                    # Direction forward from fw parameter
+                    return [unquote_plus(fw), None]
+                else: # bw != None:
+                    # Direction backwards from bw parameter
+                    return [None, unquote_plus(bw)]
+            else:
+                # No request
+                session[session_var] = session_scope
+                print(f"OwnerFilter: Now {session_var} is cleared")
+                return session_scope
+            
+    
     def __init__(self, user_session, current_user=None, request=None):
         '''
             Set filtering properties from user session, request and current user.
@@ -114,53 +172,12 @@ class OwnerFilter():
             print(f"OwnerFilter: Uses same or default owner_filter={self.filter}")
 
 
-    def store_next_person(self, request):
-        """ Eventuel fb or bw parameters are stored in user_session['next_person'].
-        
-            - If bw is defined, clear fw; otherwise clear bw
-            - If neither is given, next_person is cleared
-        """
-        self.next_person = ['', '']
-        session_next = self.session.get('next_person', self.next_person)
-
-        if request:
-            fw = request.args.get('fw', None)
-            bw = request.args.get('bw', None)
-            if fw == None and bw == None:
-                # Do not change next_person
-                self.next_person = session_next
-                return 
-
-            if fw != None:
-                self.next_person[1] = unquote_plus(fw)
-            else:
-                self.next_person[1] = unquote_plus(session_next[1])
-            if bw != None:
-                self.next_person[0] = unquote_plus(bw)
-            else:
-                self.next_person[0] = unquote_plus(session_next[0])
-
-            self.session['next_person'] = self.next_person
-            # print("OwnerFilter: Now next_person={}".format(self.next_person))
-        else:
-            # No request
-            self.session['next_person'] = self.next_person
-            print("OwnerFilter: Now next_person is cleared")
-
-
     def owner_str(self):
         # Return current owner choise as text 
         try:
             return self.choices.as_str[self.filter]
         except:
             return ''
-
-# owner_filter tells which data shall be displayed:
-#   common       001 1 = common Isotammi data
-#   own          010 2 = user's own candidate data
-#   batch        100 4 = data from specific input batch
-#   common_own   011 3 = 1+2 = users data & Isotammi
-#   common_batch 101 5 = 1+4 = user batch & Isotammi
 
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner.
@@ -177,13 +194,28 @@ class OwnerFilter():
         '''
         return (self.filter & 1) > 0
 
+    def store_next_person(self, request):
+        """ Eventuel request fb or bw parameters are stored in session['person_scope'].
+        
+            - If fw is defined, clear bw; otherwise clear bw
+            - If neither is given, person_scope is cleared
+        """
+        self.nextpoint = self.NextStartPoint(self.session, 'person_scope')
+        self.scope = self.nextpoint.set_next(request)
+        print(f"OwnerFilter: Now next person={self.scope}")
+
+
     def person_name_fw(self):
         ''' Tells the name from which the names must be read from.
+
+            scope[0] (from which name to display, forwards):
+                ' '              from first name of data
+                name             from a name given
+                NEXT_END '>'     bottom reached: there is nothing forwards
         '''
-        if self.next_person[1] == self.NEXT_END:
+        if self.scope[0] == self.NEXT_END:
+            # Generic end mark
             return '> end'
-        elif self.next_person[1] == self.NEXT_START:
-            return ' '
         else:
-            return self.next_person[1]
+            return self.scope[0]
         
