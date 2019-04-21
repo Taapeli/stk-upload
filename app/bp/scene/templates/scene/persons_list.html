@@ -38,7 +38,7 @@
             <div class="flex-container">
 	           <div id="description">
                    <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
-                       {%if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
+                       {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
                        {% else %}{{ _('from begin') }},
                        {% endif %}{{ _('data set') }}
                        <b>{% if multi_owners %}
@@ -77,7 +77,7 @@
     {% if cnt %}
 		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
-			    <li>{% if next[0] %}
+			    <li>{% if next[0] > ' ' %}
 			         <a href="/scene/persons_all/?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
 			    {% else %}<span class="navlink">|&lt;</span>
 			    {% endif %}</li>
