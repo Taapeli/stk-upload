@@ -140,13 +140,17 @@ RETURN family"""
 
 
     @staticmethod       
-    def get_families(fw='', bw='', limit=100):
+    def get_families(opt='father', fw='', fwm='', bw='', limit=100):
         """ Find families from the database """
         
         try:
             with shareds.driver.session() as session:
-                result = session.run(Cypher_family.read_families_p,
+                if opt == 'father':
+                    result = session.run(Cypher_family.read_families_p,
                                      fw=fw, limit=limit)
+                elif opt == 'mother':
+                    result = session.run(Cypher_family.read_families_m,
+                                     fwm=fwm, limit=limit)
                 
             families = []
             for record in result:

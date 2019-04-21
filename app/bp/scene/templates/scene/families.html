@@ -38,11 +38,19 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+                     <a href="/scene/families?o=father" title="Pater {{ _('first page') }}" class="navlink"> Pater: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?f={{last.father_sortname | replace("#", "%23")}}", title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?o=father&f={{last.father_sortname | replace("#", "%23")}}" 
+                	title="seuraava sivu" class="navlink"> &gt; </a></li>
+ 
+                <li>{% if last %}
+                     <a href="/scene/families?o=mother" title="Mater {{ _('first page') }}" class="navlink"> Mater: |&lt;</a>
+                {% else %}<span class="navlink">|&lt;</span>
+                {% endif %}</li>
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+                <li><a href="/scene/families?o=mother&m={{last.mother_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}
@@ -100,11 +108,18 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+                     <a href="/scene/families?o=father" title="Pater {{ _('first page') }}" class="navlink">|&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?f={{last.father_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?o=father&f={{last.father_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+
+                <li>{% if last %}
+                     <a href="/scene/families?o=mother" title="Mater {{ _('first page') }}" class="navlink">|&lt;</a>
+                {% else %}<span class="navlink">|&lt;</span>
+                {% endif %}</li>
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+                <li><a href="/scene/families?o=mother&m={{last.mother_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}

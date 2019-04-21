@@ -250,14 +250,16 @@ def show_person_page(uniq_id):
 def show_families():
     """ List of Families for menu(3)
     """
+    opt = request.args.get('o', 'father', type=str)
     fw_from = request.args.get('f', '', type=str)
+    fwm_from = request.args.get('m', '', type=str)
     bw_from = request.args.get('b', '', type=str)
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
     try:
         # 'families' has Family objects
-        families = Family_combo.get_families(fw_from,  bw_from,  count)
+        families = Family_combo.get_families(opt, fw_from, fwm_from,  bw_from,  count)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/families.html", families=families, 
