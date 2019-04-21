@@ -123,9 +123,9 @@ class OwnerFilter():
                     return [None, unquote_plus(bw)]
             else:
                 # No request
-                session[session_var] = session_scope
-                print(f"OwnerFilter: Now {session_var} is cleared")
-                return session_scope
+                self.session[self.session_var] = self.scope
+                print(f"OwnerFilter: Now {self.session_var} is cleared")
+                return self.scope
             
     
     def __init__(self, user_session, current_user=None, request=None):
@@ -139,27 +139,21 @@ class OwnerFilter():
         ''' Set active user, if any username '''
         if current_user:
             if current_user.is_active and current_user.is_authenticated:
-                self.user = current_user.username
+                user = current_user.username
             else:
-                self.user = None
+                user = None
         else:
-            self.user = user_session.get('username', None)
+            user = user_session.get('username', None)
+        self.user = user
 
         """ Store the request parameters div=2&cmp=1 as session variable owner_filter.
             Returns owner filter name if detected, otherwise False
         """
         div = 0
         if request:
-            ''' The div argument from request is stored in self.filter
-            '''
+            # The div argument from request is stored in self.filter
             div = int(request.args.get('div', 0))
             if div:
-                # div tells, which data shall be displayed:
-                #   common       001 1 = common Isotammi data
-                #   own          010 2 = user's own candidate data
-                #   batch        100 4 = data from specific input batch
-                #   common_own   011 3 = 1+2 = users data & Isotammi
-                #   common_batch 101 5 = 1+4 = user batch & Isotammi
                 if request.args.get('cmp', ''):
                     div = div | 1
                 self.filter = self.choices.get_valid_key(div)
@@ -194,8 +188,9 @@ class OwnerFilter():
         '''
         return (self.filter & 1) > 0
 
-    def store_next_person(self, request):
-        """ Eventuel request fb or bw parameters are stored in session['person_scope'].
+
+    def set_scope_from_request(self, request):
+        """ Eventuel request fw or bw parameters are stored in session['person_scope'].
         
             - If fw is defined, clear bw; otherwise clear bw
             - If neither is given, person_scope is cleared

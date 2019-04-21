@@ -7,17 +7,17 @@
 
 {% set cnt = persons|count %}
 {% set user = owner_filter.user %}
-{% set next = owner_filter.next_person %}
-{% set owners = owner_filter.filter %}
-{% if owners == 3 or owners == 5 %}{#
+{% set next = owner_filter.scope %}
+{% set filt_owners = owner_filter.filter %}
+{% if filt_owners == 3 or filt_owners == 5 %}{#
 	#   common_own   011 3 = 1+2 = users data & Isotammi
 	#   common_batch 101 5 = 1+4 = user batch & Isotammi #}
-	{% set multi_owners = owners - 1 %}
-    {% set my_set = owner_filter.choices.as_str[owners-1] %}
+	{% set multi_owners = filt_owners - 1 %}
+    {% set my_set = owner_filter.choices.as_str[filt_owners-1] %}
     {% set my_common = "Isotammi" %}
 {% else %}
     {% set multi_owners = 0 %}
-    {% set my_set = owner_filter.choices.as_str[owners] %}
+    {% set my_set = owner_filter.choices.as_str[filt_owners] %}
 {% endif %}
 
 <div id="startdiv">
@@ -29,7 +29,7 @@
 	    <h2>{{ _('Persons') }}</h2>
 	{% endif %}
 	
-	<p><small>{{cnt}} persons, user {{user}}, filter {{owners}} {{my_set}}, next {{next}}</small></p>
+	<p><small>{{cnt}} persons, user {{user}}, filter {{filt_owners}} {{my_set}}, next {{next}}</small></p>
 </div>
 
 {{ macro.menu(menuno) }}
@@ -38,9 +38,10 @@
             <div class="flex-container">
 	           <div id="description">
                    <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
-                        {{ _('starting <tt>%(name)s</tt>', name=next[0]) }}
-                      – {{ _('data set') }}<b>
-                       {% if multi_owners %}
+                       {%if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
+                       {% else %}{{ _('from begin') }},
+                       {% endif %}{{ _('data set') }}
+                       <b>{% if multi_owners %}
                             &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
                        {% else %}{{my_set}}
                        {% endif %}</b>
@@ -121,9 +122,9 @@
 	               {% endif %}</td>
 
 	                <td class="ColumnPerson"><div>
-	                   {% for ow in owner_but_me %}
-	                       {% if ow != '-' %}<span class="owner">&nbsp;{{ow}}&nbsp;</span>
-	                       {% else %}&FilledSmallSquare;{% endif %}
+	                   {% for ow in p.owners %}
+                           {% if ow == user %}&FilledSmallSquare;
+                           {% else %}<span class="owner">&nbsp;{{ow}}&nbsp;</span>{% endif %}
 	                   {% endfor %}
 	                   <a href="/scene/person={{p.uniq_id}}"
 	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
@@ -158,9 +159,16 @@
 		        {% endfor %}</ul>
 		    {% else %}<u>See person {{p.events}}</u></td>
 	        {% endif %}
-	           </tr>
+	            </tr>
 	    {% endfor %}
-				</tr>
+        {% if next[1].startswith('>') %}
+                <tr><td class="ColumnAlpha"></td>
+                    <td colspan="2" style="text-align: center;">
+                        <i style="background-color:#999; padding:3px 30px 3px 30px; color:white; border-radius:15px;">
+                            {{ _('End of data') }}</i>
+                    </td>
+                </tr>
+	    {% endif %}
             </tbody>
         </table>
 	{% else %}

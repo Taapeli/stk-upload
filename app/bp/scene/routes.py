@@ -32,24 +32,24 @@ def scene():
     print(f"--- {user_session}")
     #print("-> bp.scene.routes.scene")
     my_filter = OwnerFilter(user_session, current_user, request)
-    my_filter.store_next_person(request)
-    print(f"-> bp.scene.routes.scene: home saving '{my_filter.next_person[1]}'")
+    my_filter.set_scope_from_request(request)
+    print(f"-> bp.scene.routes.scene: home saving '{my_filter.scope[0]}'")
     return render_template('/scene/index_scene.html')
 
 
-@bp.route('/scene/persons/restricted')
-def show_persons_restricted(selection=None):
-    """ NOT IN USE Show list of selected Persons, limited information.
- 
-        for non-logged users from login_user.html """
-    if not current_user.is_authenticated:
-        # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
-        # Vaihtoehtoisesti kutsu toista metodia.
-        keys = ('all',)
-    persons = read_persons_with_events(keys)
-    print("-> bp.scene.routes.show_persons_restricted")
-    return render_template("/scene/persons.html", persons=persons, 
-                           menuno=1, rule=keys)
+# @bp.route('/scene/persons/restricted')
+# def show_persons_restricted(selection=None):
+#     """ NOT IN USE Show list of selected Persons, limited information.
+#  
+#         for non-logged users from login_user.html """
+#     if not current_user.is_authenticated:
+#         # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
+#         # Vaihtoehtoisesti kutsu toista metodia.
+#         keys = ('all',)
+#     persons = read_persons_with_events(keys)
+#     print("-> bp.scene.routes.show_persons_restricted")
+#     return render_template("/scene/persons.html", persons=persons, 
+#                            menuno=1, rule=keys)
 
 # ------------------------- Menu 0: Person search ------------------------------
 
@@ -121,28 +121,18 @@ def show_my_persons():
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
+    # Set filter by owner and the data selection
     my_filter = OwnerFilter(user_session, current_user, request)
-    my_filter.store_next_person(request)
+    # Which range of data is shown
+    my_filter.set_scope_from_request(request)
+    # About how mamy items to read
     count = int(request.args.get('c', 100))
 
-    print(f"-> bp.scene.routes.show_my_persons: read persons forward from '{my_filter.next_person[1]}'")
+    print(f"-> bp.scene.routes.show_my_persons: read persons forward from '{my_filter.scope[0]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
-    if persons:
-        # Next person links [backwards, forwards]
-        person_owner_count = sum(len(x.owners) for x in persons)
-        print(f"Displaying {persons[0].sortname} – {persons[-1].sortname}, got {person_owner_count}/{len(persons)} persons")
-        if count == person_owner_count:
-            my_filter.next_person = [persons[0].sortname, persons[-1].sortname]
-        else:
-            # Forward to end is marked 
-            my_filter.next_person = [persons[0].sortname,  '> end']
-        print(f"Display persons {my_filter.next_person[0]} – {my_filter.next_person[1]}")
 
-        user_session['next_person'] = my_filter.next_person
-        print(f"--> {repr(user_session)}")
-
-    return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
+    return render_template("/scene/persons_list.html", persons=persons, menuno=12, 
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 

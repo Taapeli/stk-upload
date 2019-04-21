@@ -90,21 +90,21 @@ def test_ownerfilter_next_person():
     
     # 1. In the beginning
     user_session['person_scope'] = ['', '<']
-    f.store_next_person(request)
+    f.set_scope_from_request(request)
     
     x = f.person_name_fw()
     assert x == '', "next fw not in the beginning"
     
     # 2. At given point
     user_session['person_scope'] = ['Man', None]
-    f.store_next_person(request)
+    f.set_scope_from_request(request)
     
     x = f.person_name_fw()
     assert x == 'Man', "next fw not at given point"
     
     # 3. At end
     user_session['person_scope'] = ['>', None]
-    f.store_next_person(request)
+    f.set_scope_from_request(request)
     
     x = f.person_name_fw()
     assert x == '> end', "next fw not at end"

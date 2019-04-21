@@ -153,6 +153,7 @@ return path"""
             Returns Person objects, with included Events and Names
             ordered by Person.sortname
         """
+
         def _read_person_list(o_filter, limit):
             """ Read Person data from given fw_from 
             """
@@ -191,31 +192,22 @@ return path"""
                         result = session.run(Cypher_person.read_all_persons_with_events_starting_name, #user=user, 
                                              start_name=fw_from, limit=limit)
                         # Returns person, names, events, user
-
+                        
                     return result
             except Exception as e:
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
                 raise      
 
-        def owner_not_me(record):
-            # Returns owner of this record, if available and not me
-            if 'user' in record.keys():
-                u = record['user']
-                if u == o_filter.user:
-                    return '-'
-                else:
-                    return record['user']
-            return None
-
 
         persons = []
-        fw_from = o_filter.person_name_fw()     # next_person names [bw_from, fw_from]
+        fw_from = o_filter.person_name_fw()     # next person name
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
         print(f"read_my_persons_list: Get max {limit} persons from "
               f"{o_filter.owner_str()!r} for {ustr} starting at {fw_from!r}")
         result = _read_person_list(o_filter, limit)
 
+        rec_cnt = 0
         for record in result:
             ''' <Record 
                     person=<Node id=163281 labels={'Person'} 
@@ -234,40 +226,52 @@ return path"""
                          None
                          ]]>
             '''
+            rec_cnt += 1
             node = record['person']
             # The same person is not created again
             p = Person_combo.from_node(node)
 
-            # Is this the same person as previous?
-            if len(persons) > 0 \
-                and persons[-1].uniq_id == p.uniq_id \
-                and 'user' in record.keys():
-                # Yes, do not create a new person
-                persons[-1].owners.append(owner_not_me(record))
-            else:
-
 #             if take_refnames and record['refnames']:
 #                 refnlist = sorted(record['refnames'])
 #                 p.refnames = ", ".join(refnlist)
-                for nnode in record['names']:
-                    pname = Name.from_node(nnode)
-                    p.names.append(pname)
-        
-                # Create a list with the mentioned user name, if present
-                p.owners = [owner_not_me(record),]
-                                                                                                                                    
-                # Events
-        
-                for enode, pname, role in record['events']:
-                    if enode != None:
-                        e = Event_combo.from_node(enode)
-                        e.place = pname or ""
-                        if role and role != "Primary":
-                            e.role = role
-                        p.events.append(e)
+            for nnode in record['names']:
+                pname = Name.from_node(nnode)
+                p.names.append(pname)
     
-                persons.append(p)   
+            # Create a list with the mentioned user name, if present
+            p.owners = record['owners']
+                                                                                                                                
+            # Events
     
+            for enode, pname, role in record['events']:
+                if enode != None:
+                    e = Event_combo.from_node(enode)
+                    e.place = pname or ""
+                    if role and role != "Primary":
+                        e.role = role
+                    p.events.append(e)
+
+            persons.append(p)   
+
+        print(f"read_my_persons_list: Got {len(persons)} persons {persons[0].sortname!r} – {persons[-1].sortname!r}, "
+              f"{rec_cnt}/{limit} records")
+        if rec_cnt == limit:
+            # Got required amount of items
+            o_filter.scope[1] = persons[-1].sortname
+        else:
+            # End reached 
+            o_filter.scope[1] = '> end'
+        if o_filter.scope[0] > ' ':
+            o_filter.scope[0] = persons[0].sortname
+        print(f"read_my_persons_list: New scope {o_filter.scope[0]!r} – {o_filter.scope[1]!r}")
+
+        o_filter.session['person_scope'] = o_filter.scope
+        print(f"--> {repr(o_filter.session)}")
+        #Todo: remove this lates
+        if 'next_person' in o_filter.session: # Unused field
+            o_filter.session.pop('next_person')
+            o_filter.session.modified = True
+
         return (persons)
 
 
