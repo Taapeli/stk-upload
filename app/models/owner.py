@@ -200,6 +200,31 @@ class OwnerFilter():
         print(f"OwnerFilter: Now next person={self.scope}")
 
 
+    def update_session_scope(self, var_name, name1, name2, limit, rec_cnt):
+        """ Update the session scope according to items really found.
+        
+            var_name    str    field name in self.session
+            name1       str    the first item name got from database
+            name2       str    the last item name
+            limit       int    number of items requested
+            rec_cnt     int    records actually recieved
+        """
+        print(f"update_session_scope: Got {rec_cnt} items {name1!r} – {name2!r}, "
+              f"{rec_cnt}/{limit} records")
+        scope0 = self.scope
+        if rec_cnt == limit: # Got required amount of items
+            self.scope[1] = name2
+        else:
+            self.scope[1] = '> end' # End reached
+        if self.scope[0] > ' ':
+            self.scope[0] = name1
+        if scope0 != self.scope:
+            print(f"update_session_scope: New scope {self.scope[0]!r} – {self.scope[1]!r}")
+
+        self.session[var_name] = self.scope
+        print(f"--> {repr(self.session)}")
+
+
     def person_name_fw(self):
         ''' Tells the name from which the names must be read from.
 

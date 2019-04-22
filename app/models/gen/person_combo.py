@@ -203,11 +203,10 @@ return path"""
         fw_from = o_filter.person_name_fw()     # next person name
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
-        print(f"read_my_persons_list: Get max {limit} persons from "
-              f"{o_filter.owner_str()!r} for {ustr} starting at {fw_from!r}")
+        print(f"read_my_persons_list: Get max {limit} persons "
+              f"for {ustr} starting at {fw_from!r}")
         result = _read_person_list(o_filter, limit)
 
-        rec_cnt = 0
         for record in result:
             ''' <Record 
                     person=<Node id=163281 labels={'Person'} 
@@ -226,7 +225,6 @@ return path"""
                          None
                          ]]>
             '''
-            rec_cnt += 1
             node = record['person']
             # The same person is not created again
             p = Person_combo.from_node(node)
@@ -239,7 +237,7 @@ return path"""
                 p.names.append(pname)
     
             # Create a list with the mentioned user name, if present
-            p.owners = record['owners']
+            p.owners = record.get('owners',[])
                                                                                                                                 
             # Events
     
@@ -253,21 +251,12 @@ return path"""
 
             persons.append(p)   
 
-        print(f"read_my_persons_list: Got {len(persons)} persons {persons[0].sortname!r} – {persons[-1].sortname!r}, "
-              f"{rec_cnt}/{limit} records")
-        if rec_cnt == limit:
-            # Got required amount of items
-            o_filter.scope[1] = persons[-1].sortname
-        else:
-            # End reached 
-            o_filter.scope[1] = '> end'
-        if o_filter.scope[0] > ' ':
-            o_filter.scope[0] = persons[0].sortname
-        print(f"read_my_persons_list: New scope {o_filter.scope[0]!r} – {o_filter.scope[1]!r}")
+        # Update the page scope according to items really found 
+        o_filter.update_session_scope('person_scope', 
+                                      persons[0].sortname, persons[-1].sortname, 
+                                      limit, len(persons))
 
-        o_filter.session['person_scope'] = o_filter.scope
-        print(f"--> {repr(o_filter.session)}")
-        #Todo: remove this lates
+        #Todo: remove this later
         if 'next_person' in o_filter.session: # Unused field
             o_filter.session.pop('next_person')
             o_filter.session.modified = True

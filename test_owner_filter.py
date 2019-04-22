@@ -91,6 +91,7 @@ def test_ownerfilter_next_person():
     # 1. In the beginning
     user_session['person_scope'] = ['', '<']
     f.set_scope_from_request(request)
+    f.update_session_scope('person_name', '##Elisabet Andersdotter', '#Hansson#Lars', 100, 100)
     
     x = f.person_name_fw()
     assert x == '', "next fw not in the beginning"

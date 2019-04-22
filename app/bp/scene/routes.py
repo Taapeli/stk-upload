@@ -128,7 +128,7 @@ def show_my_persons():
     # About how mamy items to read
     count = int(request.args.get('c', 100))
 
-    print(f"-> bp.scene.routes.show_my_persons: read persons forward from '{my_filter.scope[0]}'")
+    #print(f"-> bp.scene.routes.show_my_persons: read persons forward from '{my_filter.scope[0]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
 
