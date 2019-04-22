@@ -4,6 +4,27 @@ import pytest
 from flask.globals import request
 # logging.basicConfig(level=logging.INFO)
 
+@pytest.fixture
+def user_env():
+    ''' Set a typical set of user session, current user and http request
+    '''
+    user_session = {}
+    user_session['owner_filter'] = 1
+    user_session['lang'] = 'en'
+    # # Set current user
+    class CurrentUser():pass
+    current_user = CurrentUser()
+    current_user.is_active = True
+    current_user.is_authenticated = True
+    current_user.username = 'jussi'
+    # Allow request.args.get('div', 0)
+    class Request(): pass
+    request = Request()
+    request.args = {}
+    request.args['div'] = '1'
+    request.args['cmp'] = 0
+    return [user_session, current_user, request]
+
 
 def test_ownerfilter_nouser():
     # OwnerFilter(user_session)
@@ -20,7 +41,7 @@ def test_ownerfilter_nouser():
     assert f.owner_str() == 'Isotammi database', "No user gets wrong data"
 
 
-def test_ownerfilter_user_selection():
+def test_ownerfilter_user_selection(user_env):
     ''' Example: 
             - Show all my data / div=2
             - with common data / cmp=1
@@ -29,23 +50,7 @@ def test_ownerfilter_user_selection():
         <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
             'lang': 'en', 'next_person': ['', '>'], 'owner_filter': 2, 'user_id': 'juha'}>
     '''
-    # OwnerFilter(user_session, current_user, request)
-    # Allow user_session.get('username', None)
-    user_session = {}
-    user_session['owner_filter'] = 1
-    user_session['lang'] = 'en'
-    # # Set current user
-    class CurrentUser():pass
-    current_user = CurrentUser()
-    current_user.is_active = True
-    current_user.is_authenticated = True
-    current_user.username = 'jussi'
-    # Allow request.args.get('div', 0)
-    class Request(): pass
-    request = Request()
-    request.args = {}
-    request.args['div'] = '1'
-    request.args['cmp'] = 0
+    user_session, current_user, request = user_env
 
     f = OwnerFilter(user_session, current_user, request)
 
@@ -57,7 +62,7 @@ def test_ownerfilter_user_selection():
     assert x == True, "use_common() failed"
 
 
-def test_ownerfilter_next_item():
+def test_ownerfilter_next_item(user_env):
     ''' Example: Show all my data  with common data
             default direction (fw)
             - from previous next_person: start '<'
@@ -68,30 +73,14 @@ def test_ownerfilter_next_item():
         <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
             'lang': 'en', 'next_person': ['', '>'], 'owner_filter': 2, 'user_id': 'juha'}>
     '''
-    # OwnerFilter(user_session, current_user, request)
-    # Allow user_session.get('username', None)
-    user_session = {}
-    user_session['owner_filter'] = 1
-    user_session['lang'] = 'en'
-    # # Set current user
-    class CurrentUser():pass
-    current_user = CurrentUser()
-    current_user.is_active = True
-    current_user.is_authenticated = True
-    current_user.username = 'jussi'
-    # Allow request.args.get('div', 0)
-    class Request(): pass
-    request = Request()
-    request.args = {}
-    request.args['div'] = '1'
-    request.args['cmp'] = 0
+    user_session, current_user, request = user_env
 
     # 0. Initialize OwnerFilter with current session, user and request info
     f = OwnerFilter(user_session, current_user, request)
     
     # 1. In the beginning
     user_session['person_scope'] = ['', '<']
-    f.set_scope_from_request(request)
+    f.set_scope_from_request(request, 'person_scope')
     #    Read data here --> got required amount
     f.update_session_scope('person_name', '##Elisabet', '#Hansson#Lars', 100, 100)
     
@@ -100,7 +89,7 @@ def test_ownerfilter_next_item():
     
     # 2. At given point
     user_session['person_scope'] = ['Za', None]
-    f.set_scope_from_request(request)
+    f.set_scope_from_request(request, 'person_scope')
     #    Read data here --> reached end
     f.update_session_scope('person_name', 'Zakrevski##Arseni', 'Östling##Carl', 50, 28)
     
@@ -110,7 +99,7 @@ def test_ownerfilter_next_item():
     # 3. At end
     user_session['person_scope'] = ['>', None]
     #    Read data here --> reached end
-    f.set_scope_from_request(request)
+    f.set_scope_from_request(request, 'person_scope')
     
     x = f.next_name_fw()
     assert x == '> end', "next fw not at end"
