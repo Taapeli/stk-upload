@@ -32,7 +32,7 @@ def scene():
     print(f"--- {user_session}")
     #print("-> bp.scene.routes.scene")
     my_filter = OwnerFilter(user_session, current_user, request)
-    my_filter.set_scope_from_request(request)
+    my_filter.set_scope_from_request(request, 'person_scope')
     print(f"-> bp.scene.routes.scene: home saving '{my_filter.scope[0]}'")
     return render_template('/scene/index_scene.html')
 
@@ -124,7 +124,7 @@ def show_my_persons():
     # Set filter by owner and the data selection
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request)
+    my_filter.set_scope_from_request(request, 'person_scope')
     # About how mamy items to read
     count = int(request.args.get('c', 100))
 

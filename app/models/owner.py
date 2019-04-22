@@ -99,7 +99,7 @@ class OwnerFilter():
             self.scope = session.get(session_var, ['', '>'])
     
     
-        def set_next(self, request=None):
+        def set_next_from_request(self, request=None):
             ''' Calculate scope values from request or session. 
             
                 - session_var    str    session variable name
@@ -189,15 +189,15 @@ class OwnerFilter():
         return (self.filter & 1) > 0
 
 
-    def set_scope_from_request(self, request):
+    def set_scope_from_request(self, request, var_name):
         """ Eventuel request fw or bw parameters are stored in session['person_scope'].
         
             - If fw is defined, clear bw; otherwise clear bw
             - If neither is given, person_scope is cleared
         """
-        self.nextpoint = self.NextStartPoint(self.session, 'person_scope')
-        self.scope = self.nextpoint.set_next(request)
-        print(f"OwnerFilter: Now next person={self.scope}")
+        self.nextpoint = self.NextStartPoint(self.session, var_name)
+        self.scope = self.nextpoint.set_next_from_request(request)
+        print(f"OwnerFilter: Now next item={self.scope}")
 
 
     def update_session_scope(self, var_name, name1, name2, limit, rec_cnt):
@@ -225,7 +225,7 @@ class OwnerFilter():
         print(f"--> {repr(self.session)}")
 
 
-    def person_name_fw(self):
+    def next_name_fw(self):
         ''' Tells the name from which the names must be read from.
 
             scope[0] (from which name to display, forwards):

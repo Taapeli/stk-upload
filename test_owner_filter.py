@@ -57,7 +57,7 @@ def test_ownerfilter_user_selection():
     assert x == True, "use_common() failed"
 
 
-def test_ownerfilter_next_person():
+def test_ownerfilter_next_item():
     ''' Example: Show all my data  with common data
             default direction (fw)
             - from previous next_person: start '<'
@@ -95,7 +95,7 @@ def test_ownerfilter_next_person():
     #    Read data here --> got required amount
     f.update_session_scope('person_name', '##Elisabet', '#Hansson#Lars', 100, 100)
     
-    x = f.person_name_fw()
+    x = f.next_name_fw()
     assert x == '', "next fw not in the beginning"
     
     # 2. At given point
@@ -104,7 +104,7 @@ def test_ownerfilter_next_person():
     #    Read data here --> reached end
     f.update_session_scope('person_name', 'Zakrevski##Arseni', 'Östling##Carl', 50, 28)
     
-    x = f.person_name_fw()
+    x = f.next_name_fw()
     assert x == 'Zakrevski##Arseni', "next fw not at given point"
     
     # 3. At end
@@ -112,6 +112,6 @@ def test_ownerfilter_next_person():
     #    Read data here --> reached end
     f.set_scope_from_request(request)
     
-    x = f.person_name_fw()
+    x = f.next_name_fw()
     assert x == '> end', "next fw not at end"
 

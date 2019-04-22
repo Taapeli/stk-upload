@@ -200,7 +200,7 @@ return path"""
 
 
         persons = []
-        fw_from = o_filter.person_name_fw()     # next person name
+        fw_from = o_filter.next_name_fw()     # next person name
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
         print(f"read_my_persons_list: Get max {limit} persons "
@@ -223,7 +223,8 @@ return path"""
                             'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
                             'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
                          None
-                         ]]>
+                         ]] 
+                    owners=['jpek']>
             '''
             node = record['person']
             # The same person is not created again
@@ -237,7 +238,8 @@ return path"""
                 p.names.append(pname)
     
             # Create a list with the mentioned user name, if present
-            p.owners = record.get('owners',[])
+            if o_filter.user:
+                p.owners = record.get('owners',[])
                                                                                                                                 
             # Events
     
@@ -252,9 +254,10 @@ return path"""
             persons.append(p)   
 
         # Update the page scope according to items really found 
-        o_filter.update_session_scope('person_scope', 
-                                      persons[0].sortname, persons[-1].sortname, 
-                                      limit, len(persons))
+        if persons:
+            o_filter.update_session_scope('person_scope', 
+                                          persons[0].sortname, persons[-1].sortname, 
+                                          limit, len(persons))
 
         #Todo: remove this later
         if 'next_person' in o_filter.session: # Unused field
