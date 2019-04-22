@@ -177,7 +177,7 @@ return path"""
                             print("_read_person_list: by owner with common")
                             result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
                                                  user=user, start_name=fw_from, limit=limit)
-                            # Returns person, names, events, user
+                            # Returns person, names, events, owners
 
                         else: 
                             #2 get my own (no owner name needed)
@@ -191,7 +191,7 @@ return path"""
                         print("_read_person_list: common only")
                         result = session.run(Cypher_person.read_all_persons_with_events_starting_name, #user=user, 
                                              start_name=fw_from, limit=limit)
-                        # Returns person, names, events, user
+                        # Returns person, names, events, owners
                         
                     return result
             except Exception as e:

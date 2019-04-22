@@ -86,25 +86,30 @@ def test_ownerfilter_next_person():
     request.args['div'] = '1'
     request.args['cmp'] = 0
 
+    # 0. Initialize OwnerFilter with current session, user and request info
     f = OwnerFilter(user_session, current_user, request)
     
     # 1. In the beginning
     user_session['person_scope'] = ['', '<']
     f.set_scope_from_request(request)
-    f.update_session_scope('person_name', '##Elisabet Andersdotter', '#Hansson#Lars', 100, 100)
+    #    Read data here --> got required amount
+    f.update_session_scope('person_name', '##Elisabet', '#Hansson#Lars', 100, 100)
     
     x = f.person_name_fw()
     assert x == '', "next fw not in the beginning"
     
     # 2. At given point
-    user_session['person_scope'] = ['Man', None]
+    user_session['person_scope'] = ['Za', None]
     f.set_scope_from_request(request)
+    #    Read data here --> reached end
+    f.update_session_scope('person_name', 'Zakrevski##Arseni', 'Östling##Carl', 50, 28)
     
     x = f.person_name_fw()
-    assert x == 'Man', "next fw not at given point"
+    assert x == 'Zakrevski##Arseni', "next fw not at given point"
     
     # 3. At end
     user_session['person_scope'] = ['>', None]
+    #    Read data here --> reached end
     f.set_scope_from_request(request)
     
     x = f.person_name_fw()
