@@ -66,35 +66,23 @@ RETURN p as person,
     COLLECT(distinct n) AS names,
     COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events 
     ORDER BY person.sortname"""
-#     xxxx_my_persons_with_events_from_name = """
-# MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
-#     WHERE prof.userName = $user AND p.sortname >= $start_name
-# WITH p ORDER BY p.sortname LIMIT $limit
-#   MATCH (p:Person) -[:NAME]-> (n:Name)
-# WITH p, n ORDER BY p.sortname, n.order
-#     OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
-#     OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
-# RETURN p as person, 
-#     collect(distinct n) as names, 
-#     collect(distinct [e, pl.pname, rn.role]) as events
-# ORDER BY p.sortname"""
 
     read_all_persons_with_events_starting_name = """
 MATCH (b:Batch) -[:BATCH_MEMBER|OWNS]-> (p:Person)
     WHERE p.sortname >= $start_name
-WITH p, b.user as user
+WITH p, COLLECT(DISTINCT b.user) as owners
 ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
     OPTIONAL MATCH (p) <-[:PARENT|MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
-WITH p, n, re.role as role, e, f.rel_type as rel, fe, user
+WITH p, n, re.role as role, e, f.rel_type as rel, fe, owners
 ORDER BY p.sortname, n.order
     OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
     OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
 RETURN p as person, 
     COLLECT(distinct n) as names, 
     COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events,
-    user
+    owners
 ORDER BY person.sortname"""
 
 #     xxxx_all_persons_with_events_from_name = """
@@ -261,7 +249,7 @@ class Cypher_family():
     
     # from models.gen.family.read_families
     read_families_p = """
-MATCH (f:Family) WHERE ID(f)>=$fw
+MATCH (f:Family) WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
@@ -269,7 +257,19 @@ RETURN f,
     COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(DISTINCT pc) AS child, 
     COUNT(DISTINCT pc) AS no_of_children 
-    ORDER BY ID(f) LIMIT $limit"""
+    ORDER BY f.father_sortname LIMIT $limit"""
+    
+    read_families_m = """
+MATCH (f:Family) WHERE f.mother_sortname>=$fwm
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+RETURN f, 
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.mother_sortname LIMIT $limit"""
+    
     #TODO Obsolete
     read_families = """
 MATCH (f:Family) WHERE ID(f)>=$fw
@@ -324,10 +324,14 @@ return type(r) as frole, id(p) as pid, collect(n) as names"""
     get_dates_parents = """
 MATCH (family:Family) WHERE ID(family)=$id
 OPTIONAL MATCH (family)-[:PARENT {role:"father"}]-(father:Person)
+OPTIONAL MATCH (father)-[:EVENT]-(father_death:Event {type:"Death"})
 OPTIONAL MATCH (family)-[:PARENT {role:"mother"}]-(mother:Person)
+OPTIONAL MATCH (mother)-[:EVENT]-(mother_death:Event {type:"Death"})
 OPTIONAL MATCH (family)-[:EVENT]-(event:Event) WHERE event.type="Marriage"
-RETURN father.sortname AS father_sortname, mother.sortname AS mother_sortname,
-       event.datetype AS datetype, event.date1 AS date1, event.date2 AS date2"""
+OPTIONAL MATCH (f)-[:EVENT]-(divorce_event:Event {type:"Divorce"})
+RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
+       mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
+       event.date1 AS marriage_date, divorce_event.date1 AS divorce_date"""
 
 
     set_dates_sortname = """

@@ -6,6 +6,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 import  shareds
 
+from .dates import DateRange
+
 #from .cypher import Cypher_family
 #from .person_combo import Person_as_member
 #from .person_name import Name
@@ -69,6 +71,9 @@ class Family:
         '''
         Transforms a db node to an object of type Family.
         
+        You can create a Family or Family_combo instance. (cls is the class 
+        where we are, either Family or Family_combo)
+        
         <Node id=99991 labels={'Family'} 
             properties={'rel_type': 'Married', 'handle': '_da692e4ca604cf37ac7973d7778', 
             'id': 'F0031', 'change': 1507492602}>
@@ -79,6 +84,10 @@ class Family:
         n.handle = node['handle']
         n.change = node['change']
         n.rel_type = node['rel_type'] or ''
+        n.father_sortname = node['father_sortname']
+        n.mother_sortname = node['mother_sortname']
+        if "datetype" in node:
+            n.lifetime = DateRange(node["datetype"], node["date1"], node["date2"])
         return n
 
     

@@ -11,11 +11,11 @@ import pytest
 sys.path.append("app")
 from app import app
 
-#logging.basicConfig(level=logging.DEBUG, filename="test.log")
 logging.basicConfig(level=logging.INFO)
 
-test_username = app.config['TEST_USERNAME']
-test_password = app.config['TEST_PASSWORD']
+test_user_session = None
+test_current_user=None
+test_request=None
 
 @pytest.fixture(scope='module')
 def client():

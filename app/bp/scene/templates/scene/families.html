@@ -38,11 +38,19 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+                     <a href="/scene/families?o=father" title="Pater {{ _('first page') }}" class="navlink"> Pater: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?o=father&f={{last.father_sortname | replace("#", "%23")}}" 
+                	title="seuraava sivu" class="navlink"> &gt; </a></li>
+ 
+                <li>{% if last %}
+                     <a href="/scene/families?o=mother" title="Mater {{ _('first page') }}" class="navlink"> Mater: |&lt;</a>
+                {% else %}<span class="navlink">|&lt;</span>
+                {% endif %}</li>
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+                <li><a href="/scene/families?o=mother&m={{last.mother_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}
@@ -58,7 +66,7 @@
 {% if cnt %}
     {% for f in families %}
         <tr>
-            <td><span title="{{ _('Original ID') }}">{{f.id}}</span> {{f.type}} 
+            <td><span title="{{ _('Original ID') }}">{{f.id}}</span> {{f.type}}<br>
                 <a href="/scene/family={{f.uniq_id}}" class="idno"
                    title="{{ _('Key') }}">{{f.uniq_id}}</a>
                 </td>
@@ -66,12 +74,14 @@
                 {{f.father.names[0].firstname}} 
                 <i>{{f.father.names[0].suffix}}</i>
                 <b>{{f.father.names[0].surname}}</b></a>
+                <br><small style="padding-left: 1.2em;">{{f.father_sortname}}</small>
             {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
             <td>&#9792; {% if f.mother.uniq_id %}<a href="/scene/person={{f.mother.uniq_id}}">
                 {{f.mother.names[0].firstname}} 
                 <i>{{f.mother.names[0].suffix}}</i>
                 <b>{{f.mother.names[0].surname}}</b></a>
+                <br><small style="padding-left: 1.2em;">{{f.mother_sortname}}</small>
             {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
         {% if true %}{# Do not show children names #}
@@ -98,11 +108,18 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+                     <a href="/scene/families?o=father" title="Pater {{ _('first page') }}" class="navlink">|&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?o=father&f={{last.father_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+
+                <li>{% if last %}
+                     <a href="/scene/families?o=mother" title="Mater {{ _('first page') }}" class="navlink">|&lt;</a>
+                {% else %}<span class="navlink">|&lt;</span>
+                {% endif %}</li>
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+                <li><a href="/scene/families?o=mother&m={{last.mother_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}
