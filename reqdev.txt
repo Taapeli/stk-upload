@@ -1,2 +1,4 @@
 coverage==4.5.3
 pytest==4.3.1
+babel==2.6.0
+jinja2==2.10.1
