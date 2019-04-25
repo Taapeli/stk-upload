@@ -38,7 +38,7 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families?o=father" title="Pater {{ _('first page') }}" class="navlink"> Pater: |&lt;</a>
+                     <a href="/scene/families?o=father" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
@@ -46,7 +46,7 @@
                 	title="seuraava sivu" class="navlink"> &gt; </a></li>
  
                 <li>{% if last %}
-                     <a href="/scene/families?o=mother" title="Mater {{ _('first page') }}" class="navlink"> Mater: |&lt;</a>
+                     <a href="/scene/families?o=mother" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
@@ -61,6 +61,7 @@
     <tr><th>{{ _("family") }}</th>
         <th>{{ _("Father") }}</th>
         <th>{{ _("Mother") }}</th>
+        <th>{{ _("Marriage time") }}</th>
         <th>{{ _("Children") }}</th>
     </tr>
 {% if cnt %}
@@ -82,6 +83,10 @@
                 <i>{{f.mother.names[0].suffix}}</i>
                 <b>{{f.mother.names[0].surname}}</b></a>
                 <br><small style="padding-left: 1.2em;">{{f.mother_sortname}}</small>
+            {% else %}<small>{{ _('unknown') }}</small>
+            {% endif %}</td>
+            <td>{% if f.marriage_date %}
+                {{f.marriage_date}}
             {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
         {% if true %}{# Do not show children names #}
@@ -108,14 +113,14 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families?o=father" title="Pater {{ _('first page') }}" class="navlink">|&lt;</a>
+                     <a href="/scene/families?o=father" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}|&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
                 <li><a href="/scene/families?o=father&f={{last.father_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
 
                 <li>{% if last %}
-                     <a href="/scene/families?o=mother" title="Mater {{ _('first page') }}" class="navlink">|&lt;</a>
+                     <a href="/scene/families?o=mother" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}|&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>

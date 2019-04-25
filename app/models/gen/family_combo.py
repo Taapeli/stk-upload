@@ -10,6 +10,7 @@ from .cypher import Cypher_family
 from .family import Family
 from .person_combo import Person_as_member
 from .person_name import Name
+from models.gen.dates import DateRange
 #from models.cypher_gramps import Cypher_family_w_handle
 
 
@@ -164,7 +165,11 @@ RETURN family"""
                     family.type = f_node['rel_type']
                     family.father_sortname = f_node['father_sortname']
                     family.mother_sortname = f_node['mother_sortname']
-                
+                    datetype = f_node['datetype']
+                    date1 = f_node['date1']
+                    date2 = f_node['date2']
+                    if datetype != None:
+                        family.marriage_date = DateRange(datetype, date1, date2)
 #                     if record['ph']:
 #                         husband = record['ph']
 #                         ph = Person_as_member()
