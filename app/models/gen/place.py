@@ -287,6 +287,21 @@ class Place:
         # REturn sorted by first name in the list p.pname
         return sorted(ret, key=lambda x:x.pname[0])
 
+
+    @staticmethod
+    def make_hierarchy(tx, place):
+        for upper in place.surround_ref:
+            try:
+                #print("upper {} -> {}".format(self, upper))
+                if 'dates' in upper and isinstance(upper['dates'], DateRange):
+                    r_attr = upper['dates'].for_db()
+                else:
+                    r_attr = {}
+                tx.run(Cypher_place_w_handle.link_hier,
+                       handle=place.handle, hlink=upper['hlink'], r_attr=r_attr)
+            except Exception as err:
+                print("iError Place.link_hier: {0}".format(err), file=stderr)
+
     @staticmethod
     def namelist_w_lang(field):
         """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit
@@ -476,18 +491,19 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
         except Exception as err:
             print("iError Place.add_name: {0}".format(err), file=stderr)
 
-        # Make hierarchy relations to upper Place nodes
-        for upper in self.surround_ref:
-            try:
-                #print("upper {} -> {}".format(self, upper))
-                if 'dates' in upper and isinstance(upper['dates'], DateRange):
-                    r_attr = upper['dates'].for_db()
-                else:
-                    r_attr = {}
-                tx.run(Cypher_place_w_handle.link_hier,
-                       handle=self.handle, hlink=upper['hlink'], r_attr=r_attr)
-            except Exception as err:
-                print("iError Place.link_hier: {0}".format(err), file=stderr)
+        # Note! This will be done after all Place nodes were stored
+        #Make hierarchy relations to upper Place nodes
+#         for upper in self.surround_ref:
+#             try:
+#                 #print("upper {} -> {}".format(self, upper))
+#                 if 'dates' in upper and isinstance(upper['dates'], DateRange):
+#                     r_attr = upper['dates'].for_db()
+#                 else:
+#                     r_attr = {}
+#                 tx.run(Cypher_place_w_handle.link_hier,
+#                        handle=self.handle, hlink=upper['hlink'], r_attr=r_attr)
+#             except Exception as err:
+#                 print("iError Place.link_hier: {0}".format(err), file=stderr)
 
         # Make place note relations
         if len(self.noteref_hlink) > 0:

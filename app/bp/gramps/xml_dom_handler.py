@@ -14,6 +14,7 @@ from flask_babelex import _
 
 from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
+from .models.family_gramps import Family_gramps
 from .batchlogger import Log
 
 from models.gen.family import Family
@@ -30,7 +31,7 @@ from models.gen.repository import Repository
 
 from models.dataupdater import set_person_name_properties
 from models.dataupdater import set_family_name_properties
-from bp.gramps.models.family_gramps import Family_gramps
+from models.dataupdater import make_place_hierarchy_properties
 
 
 def pick_url(src):
@@ -88,6 +89,7 @@ class DOM_handler():
 
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
+        self.place_ids = []                 # List of processed Place node unique id's
         self.tx = None                      # Transaction not opened
 
     def begin_tx(self, session):
@@ -635,6 +637,8 @@ class DOM_handler():
 
             pl.save(self.tx)
             counter += 1
+            
+            self.place_ids.append(pl)
 
         self.blog.log_event({'title':"Places", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
@@ -740,6 +744,21 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+
+    def make_place_hierarchy(self):
+        ''' Connect places to the upper place
+        '''
+
+        print ("***** {} Place hierarchy *****".format(len(self.place_ids)))
+        t0 = time.time()
+        hierarchy_count = 0
+
+        for pl in self.place_ids:
+            hc = make_place_hierarchy_properties(tx=self.tx, place=pl)
+            hierarchy_count += hc
+
+        self.blog.log_event({'title':"Place hierarchy", 
+                                'count':hierarchy_count, 'elapsed':time.time()-t0})
 
     def set_family_sortname_dates(self):
         ''' For each Family set Family.father_sortname, Family.mother_sortname, 

@@ -95,6 +95,9 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             
             # Copy information from Person and Event nodes to Family nodes
             handler.set_family_sortname_dates()
+            
+            # Make the place hierarchy
+            handler.make_place_hierarchy()
 
         except Exception as e:
             print("Stopped xml load due to {}".format(e))    # Stop processing?
