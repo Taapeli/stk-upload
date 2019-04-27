@@ -170,6 +170,7 @@ RETURN family"""
                     date2 = f_node['date2']
                     if datetype != None:
                         family.marriage_date = DateRange(datetype, date1, date2)
+                    family.marriage_place = record['marriage_place']
 #                     if record['ph']:
 #                         husband = record['ph']
 #                         ph = Person_as_member()

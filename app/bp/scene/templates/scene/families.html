@@ -62,6 +62,7 @@
         <th>{{ _("Father") }}</th>
         <th>{{ _("Mother") }}</th>
         <th>{{ _("Marriage time") }}</th>
+        <th>{{ _("Place") }}</th>
         <th>{{ _("Children") }}</th>
     </tr>
 {% if cnt %}
@@ -87,6 +88,10 @@
             {% endif %}</td>
             <td>{% if f.marriage_date %}
                 {{f.marriage_date}}
+            {% else %}<small>{{ _('unknown') }}</small>
+            {% endif %}</td>
+            <td>{% if f.marriage_place %}
+                {{f.marriage_place}}
             {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
         {% if true %}{# Do not show children names #}
