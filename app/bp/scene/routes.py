@@ -240,6 +240,12 @@ def show_person_page(uniq_id):
 def show_families():
     """ List of Families for menu(3)
     """
+    print(f"--- {request}")
+    print(f"--- {user_session}")
+    # Set filter by owner and the data selection
+    my_filter = OwnerFilter(user_session, current_user, request)
+    # Which range of data is shown
+    my_filter.set_scope_from_request(request, 'family_scope')
     opt = request.args.get('o', 'father', type=str)
     fw_from = request.args.get('f', '', type=str)
     fwm_from = request.args.get('m', '', type=str)
@@ -247,11 +253,9 @@ def show_families():
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
-    try:
-        # 'families' has Family objects
-        families = Family_combo.get_families(opt, fw_from, fwm_from,  bw_from,  count)
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    # 'families' has Family objects
+    families = Family_combo.get_families(fw=fw_from, fwm=fwm_from,  bw=bw_from, o_filter=my_filter, opt=opt, limit=count)
+
     return render_template("/scene/families.html", families=families, 
                            elapsed=time.time()-t0)
 

@@ -141,96 +141,133 @@ RETURN family"""
 
 
     @staticmethod       
-    def get_families(opt='father', fw='', fwm='', bw='', limit=100):
+    def get_families(fw, fwm,  bw, o_filter, opt='father', limit=100):
         """ Find families from the database """
         
-        try:
-            with shareds.driver.session() as session:
-                if opt == 'father':
-                    result = session.run(Cypher_family.read_families_p,
-                                     fw=fw, limit=limit)
-                elif opt == 'mother':
-                    result = session.run(Cypher_family.read_families_m,
-                                     fwm=fwm, limit=limit)
+        def _read_family_list(o_filter, opt, fw, fwm, bw, imit):
+            """ Read Family data from given fw/fwm
+            """
+            # Select a) filter by user b) show Isotammi common data (too)
+            show_by_owner = o_filter.use_owner_filter()
+            show_with_common = o_filter.use_common()
+            #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
+            user = o_filter.user
+            try:
+                """
+                               show_by_owner    show_all
+                            +-------------------------------
+                with common |  me + common      common
+                no common   |  me                -
+                """
+                with shareds.driver.session() as session:
+                    if show_by_owner:
+
+                        if show_with_common: 
+                            if opt == 'father':
+                                #1 get all with owner name for all
+                                print("_read_families_p: by owner with common")
+                                result = session.run(Cypher_family.read_families_p,
+                                                     fw=fw, limit=limit)
+                            elif opt == 'mother':
+                                #1 get all with owner name for all
+                                print("_read_families_m: by owner with common")
+                                result = session.run(Cypher_family.read_families_m,
+                                                     fwm=fwm, limit=limit)
+                        else: 
+                            if opt == 'father':
+                                #2 get my own (no owner name needed)
+                                print("_read_families_p: by owner only")
+                                result = session.run(Cypher_family.read_my_families_p,
+                                                     user=user, fw=fw, limit=limit)
+                            elif opt == 'mother':
+                                #1 get all with owner name for all
+                                print("_read_families_m: by owner only")
+                                result = session.run(Cypher_family.read_my_families_m,
+                                                     user=user, fwm=fwm, limit=limit)
+
+                    else: 
+                        if opt == 'father':
+                            #3 == #1 simulates common by reading all
+                            print("_read_families_p: common only")
+                            result = session.run(Cypher_family.read_families_p, #user=user, 
+                                                 fw=fw, limit=limit)
+                        elif opt == 'mother':
+                            #1 get all with owner name for all
+                            print("_read_families_m: common only")
+                            result = session.run(Cypher_family.read_families_m,
+                                                 fwm=fwm, limit=limit)
+                        
+                    return result
+            except Exception as e:
+                print('Error _read_families_p: {} {}'.format(e.__class__.__name__, e))            
+                raise      
                 
-            families = []
-            for record in result:
-                if record['f']:
-                    # <Node id=55577 labels={'Family'} 
-                    #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
-                    #    'id': 'F0000', 'change': 1507492602}>
-                    f_node = record['f']
-                    family = Family_combo(f_node.id)
-                    family.id = f_node['id']
-                    family.type = f_node['rel_type']
-                    family.father_sortname = f_node['father_sortname']
-                    family.mother_sortname = f_node['mother_sortname']
-                    datetype = f_node['datetype']
-                    date1 = f_node['date1']
-                    date2 = f_node['date2']
-                    if datetype != None:
-                        family.marriage_date = DateRange(datetype, date1, date2)
-                    family.marriage_place = record['marriage_place']
-#                     if record['ph']:
-#                         husband = record['ph']
-#                         ph = Person_as_member()
-#                         ph.uniq_id = husband.id
-#                         if record['nh']:
-#                             hname = record['nh']
-#                             ph.names.append(hname)
-#                         family.father = ph
-#                     if record['pw']:
-#                         wife = record['pw']
-#                         pw = Person_as_member()
-#                         pw.uniq_id = wife.id
-#                         if record['nw']:
-#                             wname = record['nw']
-#                             pw.names.append(wname)
-#                         family.mother = pw
+        families = []
+#        fw = o_filter.next_name_fw()     # next father name
+#        fwm = o_filter.next_name_fwm()   # next mother name
 
-                    uniq_id = -1
-                    for role, parent_node, name_node in record['parent']:
-                        if parent_node:
-                            # <Node id=214500 labels={'Person'} 
-                            #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
-                            #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496, 
-                            #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008', 
-                            #    'date2': 1997946, 'date1': 1929380}>
-                            if uniq_id != parent_node.id:
-                                # Skip person with double default name
-                                pp = Person_as_member()
-                                uniq_id = parent_node.id
-                                pp.uniq_id = uniq_id
-                                pp.sortname = parent_node['sortname']
-                                pp.sex = parent_node['sex']
-                                if role == 'father':
-                                    family.father = pp
-                                elif role == 'mother':
-                                    family.mother = pp
+        ustr = "user " + o_filter.user if o_filter.user else "no user"
+        print(f"read_my_family_list: Get max {limit} persons "
+              f"for {ustr} starting at {fw!r} or  {fwm!r}")
+        result = _read_family_list(o_filter, opt, fw, fwm,  bw, limit)
+        
+        for record in result:
+            if record['f']:
+                # <Node id=55577 labels={'Family'} 
+                #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
+                #    'id': 'F0000', 'change': 1507492602}>
+                f_node = record['f']
+                family = Family_combo(f_node.id)
+                family.id = f_node['id']
+                family.type = f_node['rel_type']
+                family.father_sortname = f_node['father_sortname']
+                family.mother_sortname = f_node['mother_sortname']
+                datetype = f_node['datetype']
+                date1 = f_node['date1']
+                date2 = f_node['date2']
+                if datetype != None:
+                    family.marriage_date = DateRange(datetype, date1, date2)
+                family.marriage_place = record['marriage_place']
 
-                            pname = Name.from_node(name_node)
-                            pp.names.append(pname)
+                uniq_id = -1
+                for role, parent_node, name_node in record['parent']:
+                    if parent_node:
+                        # <Node id=214500 labels={'Person'} 
+                        #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
+                        #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496, 
+                        #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008', 
+                        #    'date2': 1997946, 'date1': 1929380}>
+                        if uniq_id != parent_node.id:
+                            # Skip person with double default name
+                            pp = Person_as_member()
+                            uniq_id = parent_node.id
+                            pp.uniq_id = uniq_id
+                            pp.sortname = parent_node['sortname']
+                            pp.sex = parent_node['sex']
+                            if role == 'father':
+                                family.father = pp
+                            elif role == 'mother':
+                                family.mother = pp
 
-                    
-                    for ch in record['child']:
-                        # <Node id=60320 labels={'Person'} 
-                        #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19, 
-                        #    'confidence': '', 'sex': 0, 'change': 1507492602, 
-                        #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
-                        #    'date2': 1609920, 'date1': 1609920}>
-                        child = Person_as_member()
-                        child.uniq_id = ch.id
-                        child.sortname = ch['sortname']
-                        family.children.append(child)
-                    
-                    if record['no_of_children']:
-                        family.no_of_children = record['no_of_children']
-                    families.append(family)
-            return (families)
+                        pname = Name.from_node(name_node)
+                        pp.names.append(pname)
 
-        except Exception as e:
-            print('Error _read_families: {} {}'.format(e.__class__.__name__, e))            
-            raise      
+                
+                for ch in record['child']:
+                    # <Node id=60320 labels={'Person'} 
+                    #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19, 
+                    #    'confidence': '', 'sex': 0, 'change': 1507492602, 
+                    #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
+                    #    'date2': 1609920, 'date1': 1609920}>
+                    child = Person_as_member()
+                    child.uniq_id = ch.id
+                    child.sortname = ch['sortname']
+                    family.children.append(child)
+                
+                if record['no_of_children']:
+                    family.no_of_children = record['no_of_children']
+                families.append(family)
+        return (families)
 
     
     @staticmethod       
