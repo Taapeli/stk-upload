@@ -61,16 +61,17 @@
     <tr><th>{{ _("family") }}</th>
         <th>{{ _("Father") }}</th>
         <th>{{ _("Mother") }}</th>
-        <th>{{ _("Marriage time") }}</th>
-        <th>{{ _("Place") }}</th>
         <th>{{ _("Children") }}</th>
     </tr>
 {% if cnt %}
     {% for f in families %}
         <tr>
-            <td><span title="{{ _('Original ID') }}">{{f.id}}</span> {{f.type}}<br>
-                <a href="/scene/family={{f.uniq_id}}" class="idno"
-                   title="{{ _('Key') }}">{{f.uniq_id}}</a>
+            <td><a href="/scene/family={{f.uniq_id}}"
+                   title="{{ _('Go to family page') }}">{{f.type|transl('marr')}}</a>
+                {% if f.marriage_date %}{{f.marriage_date}}{% endif %}
+                {% if f.marriage_place %}{{f.marriage_place}}{% endif %}
+                <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
+                <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
             <td>&#9794; {% if f.father.uniq_id %}<a href="/scene/person={{f.father.uniq_id}}">
                 {{f.father.names[0].firstname}} 
@@ -84,14 +85,6 @@
                 <i>{{f.mother.names[0].suffix}}</i>
                 <b>{{f.mother.names[0].surname}}</b></a>
                 <br><small style="padding-left: 1.2em;">{{f.mother_sortname}}</small>
-            {% else %}<small>{{ _('unknown') }}</small>
-            {% endif %}</td>
-            <td>{% if f.marriage_date %}
-                {{f.marriage_date}}
-            {% else %}<small>{{ _('unknown') }}</small>
-            {% endif %}</td>
-            <td>{% if f.marriage_place %}
-                {{f.marriage_place}}
             {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
         {% if true %}{# Do not show children names #}

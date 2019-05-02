@@ -289,7 +289,9 @@ def _jinja2_filter_datetime(datetime, fmt=None):
 
 @shareds.app.template_filter('transl')
 def _jinja2_filter_translate(term, var_name, lang="fi"):
-    """ Given term is translated depending of var_name name
+    """ Given term is translated depending of var_name name.
+
+        Example: event type code e.type in jinja template: {{e.type|transl('evt')}}
         and language [TODO]
     """
     return jinja_filters.translate(term, var_name, lang)
