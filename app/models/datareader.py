@@ -196,7 +196,9 @@ def recreate_refnames():
 
 
 def read_cite_sour_repo(uniq_id=None):
-    """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi
+    """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
+    
+        NOT IN USE
     """
 
     sources = []
@@ -228,21 +230,7 @@ def read_cite_sour_repo(uniq_id=None):
                     if record_source['stitle']:
                         s.stitle = record_source['stitle']
 
-                    s.get_reporef_hlink()
-                    if s.reporef_hlink != '':
-
-                        r = Repository()
-                        r.uniq_id = s.reporef_hlink
-                        result_repo = r.get_repo_w_notes()
-                        for record_repo in result_repo:
-                            if record_repo['rname']:
-                                r.rname = record_repo['rname']
-                            if record_repo['type']:
-                                r.type = record_repo['type']
-                            for node in record_repo['notes']:
-                                wu = Note.from_node(node)
-                                r.notes.append(wu)
-                        s.repocitory = r
+                    s.get_repositories_w_notes()
 
                 c.source = s    # s.append(s)
             e.citations.append(c)

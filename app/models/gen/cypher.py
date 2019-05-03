@@ -492,7 +492,7 @@ OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
 
 class Cypher_source():
     '''
-    Cypher clases for creating and accessing Sources
+    Cypher class for creating and accessing Sources
     '''
     source_list = """
 MATCH (s:Source)
@@ -504,6 +504,14 @@ RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle,
        COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
 ORDER BY toUpper(stitle)
 """
+
+#       NOT IN USE
+    get_repositories_w_notes = """
+MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
+    WHERE ID(source) = $sid
+OPTIONAL MATCH (repo) -[:NOTE]-> (note:Note)
+RETURN r.medium AS medium, repo, COLLECT(note) AS notes"""
+            
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
@@ -551,29 +559,4 @@ return r"""
     get_all = """
 match (r:Repository)
 return r order by r.type"""
-
-# class Cypher_weburl():
-#     '''
-#     Cypher clases for creating and accessing Weburls
-#     '''
-#     link_to_weburl = """
-# merge (w:Weburl {href: $href})
-# with w
-#     match (x) where ID(x) = $parent_id
-#     with w, x
-#         merge (x) -[r:WEBREF]-> (w)
-#             set r.type = $type
-#             set r.desc = $desc
-#             set r.priv = $priv
-# return id(r) as ref_id, id(w) as weburl_id"""
-#     link_to_weburl_X = """
-# match (x) where ID(x) = $parent_id
-#     optional match (w:Weburl) where w.href = $href
-# with x, w
-#     merge (x) -[r:WEBREF]-> (w)
-#         set w.href = $href
-#         set r.type = $type
-#         set r.desc = $desc
-#         set r.priv = $priv
-# return id(r) as ref_id, id(w) as weburl_id"""
 

@@ -720,24 +720,22 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one stitle in a source",
                                      'level':"WARNING", 'count':s.id})
 
-#TODO More than one noteref in a source     S0041, S0002
-            if len(source.getElementsByTagName('noteref') ) == 1:
-                source_noteref = source.getElementsByTagName('noteref')[0]
+            for source_noteref in source.getElementsByTagName('noteref'):
+                # Traverse links to surrounding places
                 if source_noteref.hasAttribute("hlink"):
-                    s.noteref_hlink = source_noteref.getAttribute("hlink")
-            elif len(source.getElementsByTagName('noteref') ) > 1:
-                self.blog.log_event({'title':"More than one noteref in a source",
-                                     'level':"WARNING", 'count':s.id})
+                    s.noteref_hlink.append = source_noteref.getAttribute("hlink")
 
-            if len(source.getElementsByTagName('reporef') ) == 1:
-                source_reporef = source.getElementsByTagName('reporef')[0]
+            for source_reporef in source.getElementsByTagName('reporef'):
+                repo = Repository()
                 if source_reporef.hasAttribute("hlink"):
-                    s.reporef_hlink = source_reporef.getAttribute("hlink")
+                    # s.reporef_hlink = source_reporef.getAttribute("hlink")
+                    repo.handle = source_reporef.getAttribute("hlink")
                 if source_reporef.hasAttribute("medium"):
-                    s.reporef_medium = source_reporef.getAttribute("medium")
-            elif len(source.getElementsByTagName('reporef') ) > 1:
-                self.blog.log_event({'title':"More than one reporef in a source",
-                                     'level':"WARNING", 'count':s.id})
+                    # s.reporef_medium = source_reporef.getAttribute("medium")
+                    repo.type = source_reporef.getAttribute("medium")
+#             elif len(source.getElementsByTagName('reporef') ) > 1:
+#                 self.blog.log_event({'title':"More than one reporef in a source",
+#                                      'level':"WARNING", 'count':s.id})
 
             s.save(self.tx)
             counter += 1

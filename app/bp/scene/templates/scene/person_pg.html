@@ -255,7 +255,7 @@ u { color: DarkKhaki; text-decoration: none; }
                      title="[{{s_id}}] {{ _('See source %(name)s details', name=source.id) }}"
                      >{{source.stitle}}</a>
             {% else %}<b title="{{mark_list}}">{{ _("No source information!") }}</b>{% endif %}
-            <!-- Repocitory -->
+            <!-- Repository -->
             {% if mark_list[0].r_id > 0 %} – {{obj[mark_list[0].r_id].rname}}
             {% else %}<b title="{{mark_list}}">{{ _("No archive information!") }}</b>{% endif %}
         <ul>
