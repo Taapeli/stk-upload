@@ -195,49 +195,11 @@ def recreate_refnames():
 #     return (namelist)
 
 
-def read_cite_sour_repo(uniq_id=None):
-    """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
-    
-        NOT IN USE
-    """
-
-    sources = []
-    result_cite = Event_combo.get_event_cite(uniq_id)
-    for record_cite in result_cite:
-        pid = record_cite['id']
-        e = Event_combo()
-        e.uniq_id = pid
-        if record_cite['type']:
-            e.type = record_cite['type']
-        if record_cite['date']:
-            e.date = record_cite['date']
-        if record_cite['dates']:
-            e.dates = DateRange(record_cite['dates'])
-
-        for source_cite in record_cite['sources']:
-            c = Citation()
-            c.uniq_id = source_cite[0]
-            c.dateval = source_cite[1]
-            c.page = source_cite[2]
-            c.confidence = source_cite[3]
-
-            c.get_sourceref_hlink()
-            if c.source_handle != '':
-                s = Source()
-                s.uniq_id = c.source_handle
-                result_source = s.get_source_data()
-                for record_source in result_source:
-                    if record_source['stitle']:
-                        s.stitle = record_source['stitle']
-
-                    s.get_repositories_w_notes()
-
-                c.source = s    # s.append(s)
-            e.citations.append(c)
-
-        sources.append(e)
-
-    return (sources)
+# def read_cite_sour_repo(uniq_id=None):
+#     """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
+#     
+#         NOT IN USE, removed 3.5.2019
+#     """
 
 
 def read_medias(uniq_id=None):
@@ -279,7 +241,7 @@ def get_repositories(uniq_id=None):
     │        │        │        │        │        │       │"]]     │        │
     └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
     """
-    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'notes']
+    titles = ['change', 'handle', 'id', 'rname', 'type', 'uniq_id', 'notes', 'sources']
     repositories = []
     result = Repository.get_w_source(uniq_id)
     for record in result:

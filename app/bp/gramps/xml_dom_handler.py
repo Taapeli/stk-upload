@@ -15,6 +15,7 @@ from flask_babelex import _
 from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
+from .models.source_gramps import Source_gramps
 from .batchlogger import Log
 
 from models.gen.family import Family
@@ -32,6 +33,7 @@ from models.gen.repository import Repository
 from models.dataupdater import set_person_name_properties
 from models.dataupdater import set_family_name_properties
 from models.dataupdater import make_place_hierarchy_properties
+from bp.gramps.models import source_gramps
 
 
 def pick_url(src):
@@ -341,6 +343,7 @@ class DOM_handler():
                     if family_noteref.hasAttribute("hlink"):
                         f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
 
+            # print(f"# save Family {f}")
             f.save(self.tx, self.batch_id)
             counter += 1
             # The sortnames and dates will be set for these families 
@@ -704,7 +707,7 @@ class DOM_handler():
         # Print detail of each source
         for source in sources:
 
-            s = Source()
+            s = Source_gramps()
 
             if source.hasAttribute("handle"):
                 s.handle = source.getAttribute("handle")
@@ -723,25 +726,26 @@ class DOM_handler():
             for source_noteref in source.getElementsByTagName('noteref'):
                 # Traverse links to surrounding places
                 if source_noteref.hasAttribute("hlink"):
-                    s.noteref_hlink.append = source_noteref.getAttribute("hlink")
+                    s.note_handles.append(source_noteref.getAttribute("hlink"))
 
             for source_reporef in source.getElementsByTagName('reporef'):
-                repo = Repository()
+                r = Repository()
                 if source_reporef.hasAttribute("hlink"):
                     # s.reporef_hlink = source_reporef.getAttribute("hlink")
-                    repo.handle = source_reporef.getAttribute("hlink")
+                    r.handle = source_reporef.getAttribute("hlink")
                 if source_reporef.hasAttribute("medium"):
                     # s.reporef_medium = source_reporef.getAttribute("medium")
-                    repo.type = source_reporef.getAttribute("medium")
-#             elif len(source.getElementsByTagName('reporef') ) > 1:
-#                 self.blog.log_event({'title':"More than one reporef in a source",
-#                                      'level':"WARNING", 'count':s.id})
+                    r.medium = source_reporef.getAttribute("medium")
 
+                s.repositories.append(r)
+
+#             print(f'#source.save {s}')
             s.save(self.tx)
             counter += 1
 
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
+
 
     def make_place_hierarchy(self):
         ''' Connect places to the upper place

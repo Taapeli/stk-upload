@@ -506,13 +506,12 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
 #                 print("iError Place.link_hier: {0}".format(err), file=stderr)
 
         # Make place note relations
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                try:
-                    tx.run(Cypher_place_w_handle.link_note,
-                           handle=self.handle, hlink=self.noteref_hlink[i])
-                except Exception as err:
-                    print("iError Place.link_note: {0}".format(err), file=stderr)
+        for i in range(len(self.noteref_hlink)):
+            try:
+                tx.run(Cypher_place_w_handle.link_note,
+                       handle=self.handle, hlink=self.noteref_hlink[i])
+            except Exception as err:
+                print("iError Place.link_note: {0}".format(err), file=stderr)
 
         return
 

@@ -505,13 +505,12 @@ RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle,
 ORDER BY toUpper(stitle)
 """
 
-#       NOT IN USE
-    get_repositories_w_notes = """
-MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
-    WHERE ID(source) = $sid
-OPTIONAL MATCH (repo) -[:NOTE]-> (note:Note)
-RETURN r.medium AS medium, repo, COLLECT(note) AS notes"""
-            
+#     get_repositories_w_notes = """
+# MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
+#     WHERE ID(source) = $sid
+# OPTIONAL MATCH (repo) -[:NOTE]-> (note:Note)
+# RETURN r.medium AS medium, repo, COLLECT(note) AS notes"""
+
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
@@ -541,7 +540,7 @@ return id(r) AS uniq_id,
     r.handle as handle,
     r.id as id,
     collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
-    collect(w) as notes
+    collect(distinct w) as notes
 order by r.rname"""
 
     get_w_sources_all = _get_all + _get_tail 

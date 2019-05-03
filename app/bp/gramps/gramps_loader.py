@@ -100,7 +100,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             handler.make_place_hierarchy()
 
         except Exception as e:
-            print("Stopped xml load due to {}".format(e))    # Stop processing?
+            msg = f"Stopped xml load due to {e}"    # Stop processing?
+            print(msg)
             handler.commit(rollback=True)
             return handler.blog.list(), None
 
