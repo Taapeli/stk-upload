@@ -13,3 +13,5 @@ __pycache__/
 .coverage
 /htmlcov/
 trace\.txt
+pyinfo.py
+wsgi.py
