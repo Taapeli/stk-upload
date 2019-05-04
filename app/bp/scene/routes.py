@@ -247,17 +247,14 @@ def show_families():
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
-    fw_from = request.args.get('f', '', type=str)
-    fwm_from = request.args.get('m', '', type=str)
-    bw_from = request.args.get('b', '', type=str)
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
     # 'families' has Family objects
-    families = Family_combo.get_families(fw=fw_from, fwm=fwm_from,  bw=bw_from, o_filter=my_filter, opt=opt, limit=count)
+    families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
 
     return render_template("/scene/families.html", families=families, 
-                           elapsed=time.time()-t0)
+                           owner_filter=my_filter, elapsed=time.time()-t0)
 
 @bp.route('/scene/family=<int:fid>')
 def show_famiy_page(fid):

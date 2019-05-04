@@ -58,7 +58,7 @@
                    title="{{ _('Surnames') }}">{{ _('Names') }}</a></li>
              #}
                 <li{% if value == 3 %} class="CurrentSection"
-                  {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %} href="/scene/families"{% endif %}
+                  {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %} href="/scene/families?o=father&f=%20"{% endif %}
                    title="{{ _('Families') }}">{{ _('Families') }}</a></li>
                 <li{% if value == 4 %} class="CurrentSection"
                   {% endif %}><a href="/scene/locations"

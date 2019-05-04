@@ -7,6 +7,9 @@
 <script src="/static/infobox.js"></script>
 
 {% set cnt = families|count %}
+{% set user = owner_filter.user %}
+{% set next = owner_filter.scope %}
+{% set filt_owners = owner_filter.filter %}
 
 <div id="startdiv">
 	<h2>{{ _('List of Families') }}</h2>
@@ -27,8 +30,8 @@
 	                 <fieldset>
 	                    <input type="hidden" name="o" value="father" >
 	                    <input type="hidden" name="c" value="50" >
-	                    <label for="f">{{ _('Go to') }} {{ _('Father') }}</label>
-	                    <input type="text" name="f" size="8" 
+	                    <label for="fw">{{ _('Go to') }} {{ _('Father') }}</label>
+	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of surname') }}" 
 	                     placeholder="{{ _('Surname') }}">
 	                    <input type="submit" value=" > ">
@@ -40,8 +43,8 @@
 	                 <fieldset>
 	                    <input type="hidden" name="o" value="mother" >
 	                    <input type="hidden" name="c" value="50" >
-	                    <label for="m">{{ _('Go to') }} {{ _('Mother') }}</label>
-	                    <input type="text" name="m" size="8" 
+	                    <label for="fw">{{ _('Go to') }} {{ _('Mother') }}</label>
+	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of surname') }}" 
 	                     placeholder="{{ _('Surname') }}">
 	                    <input type="submit" value=" > ">
@@ -65,19 +68,20 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families?o=father" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
+                     <a href="/scene/families?o=father&fw=%20" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?o=father&f={{last.father_sortname | replace("#", "%23")}}" 
+                <li><a href="/scene/families?o=father&{{ {'fw':next[1]} | urlencode }}"
                 	title="seuraava sivu" class="navlink"> &gt; </a></li>
  
                 <li>{% if last %}
-                     <a href="/scene/families?o=mother" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
+                     <a href="/scene/families?o=mother&fw=%20" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?o=mother&m={{last.mother_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?o=mother&{{ {'fw':next[1]} | urlencode }}"
+                	title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}
@@ -138,18 +142,20 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families?o=father" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
+                     <a href="/scene/families?o=father&fw=%20" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?o=father&f={{last.father_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?o=father&{{ {'fw':next[1]} | urlencode }}"
+                	title="seuraava sivu" class="navlink"> &gt; </a></li>
 
                 <li>{% if last %}
-                     <a href="/scene/families?o=mother" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
+                     <a href="/scene/families?o=mother&fw=%20" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?o=mother&m={{last.mother_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?o=mother&{{ {'fw':next[1]} | urlencode }}"
+                	title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}

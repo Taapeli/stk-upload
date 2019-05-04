@@ -141,10 +141,10 @@ RETURN family"""
 
 
     @staticmethod       
-    def get_families(fw, fwm,  bw, o_filter, opt='father', limit=100):
+    def get_families(o_filter, opt='father', limit=100):
         """ Find families from the database """
         
-        def _read_family_list(o_filter, opt, fw, fwm, bw, imit):
+        def _read_family_list(o_filter, opt, limit):
             """ Read Family data from given fw/fwm
             """
             # Select a) filter by user b) show Isotammi common data (too)
@@ -172,7 +172,7 @@ RETURN family"""
                                 #1 get all with owner name for all
                                 print("_read_families_m: by owner with common")
                                 result = session.run(Cypher_family.read_families_m,
-                                                     fwm=fwm, limit=limit)
+                                                     fwm=fw, limit=limit)
                         else: 
                             if opt == 'father':
                                 #2 get my own (no owner name needed)
@@ -183,7 +183,7 @@ RETURN family"""
                                 #1 get all with owner name for all
                                 print("_read_families_m: by owner only")
                                 result = session.run(Cypher_family.read_my_families_m,
-                                                     user=user, fwm=fwm, limit=limit)
+                                                     user=user, fwm=fw, limit=limit)
 
                     else: 
                         if opt == 'father':
@@ -195,7 +195,7 @@ RETURN family"""
                             #1 get all with owner name for all
                             print("_read_families_m: common only")
                             result = session.run(Cypher_family.read_families_m,
-                                                 fwm=fwm, limit=limit)
+                                                 fwm=fw, limit=limit)
                         
                     return result
             except Exception as e:
@@ -203,13 +203,12 @@ RETURN family"""
                 raise      
                 
         families = []
-#        fw = o_filter.next_name_fw()     # next father name
-#        fwm = o_filter.next_name_fwm()   # next mother name
+        fw = o_filter.next_name_fw()     # next name
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
         print(f"read_my_family_list: Get max {limit} persons "
-              f"for {ustr} starting at {fw!r} or  {fwm!r}")
-        result = _read_family_list(o_filter, opt, fw, fwm,  bw, limit)
+              f"for {ustr} starting at {fw!r}")
+        result = _read_family_list(o_filter, opt, limit)
         
         for record in result:
             if record['f']:
@@ -267,6 +266,18 @@ RETURN family"""
                 if record['no_of_children']:
                     family.no_of_children = record['no_of_children']
                 families.append(family)
+                
+        # Update the page scope according to items really found 
+        if families:
+            if opt == 'father':
+                o_filter.update_session_scope('person_scope', 
+                                              families[0].father_sortname, families[-1].father_sortname, 
+                                              limit, len(families))
+            else:
+                o_filter.update_session_scope('person_scope', 
+                                              families[0].mother_sortname, families[-1].mother_sortname, 
+                                              limit, len(families))
+
         return (families)
 
     
