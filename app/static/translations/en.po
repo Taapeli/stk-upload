@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-04-24 10:10+0300\n"
+"POT-Creation-Date: 2019-05-04 17:19+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -543,8 +543,8 @@ msgstr ""
 #: bp/tools/templates/tools/table_media.html:36
 #: bp/tools/templates/tools/table_of_data.html:40
 #: bp/tools/templates/tools/table_of_data.html:43
-#: bp/tools/templates/tools/table_of_objects.html:43
-#: bp/tools/templates/tools/table_of_objects.html:46
+#: bp/tools/templates/tools/table_of_objects.html:48
+#: bp/tools/templates/tools/table_of_objects.html:51
 #: bp/tools/templates/tools/table_people_by_surname.html:29
 #: bp/tools/templates/tools/table_sources.html:30
 #: bp/tools/templates/tools/table_surnames.html:23
@@ -617,7 +617,7 @@ msgstr ""
 #: bp/tools/templates/tools/table_families.html:11
 #: bp/tools/templates/tools/table_media.html:11
 #: bp/tools/templates/tools/table_of_data.html:11
-#: bp/tools/templates/tools/table_of_objects.html:14
+#: bp/tools/templates/tools/table_of_objects.html:19
 #: bp/tools/templates/tools/table_persons.html:11
 #: bp/tools/templates/tools/table_refnames.html:11
 #: bp/tools/templates/tools/table_sources.html:11
@@ -630,7 +630,7 @@ msgstr ""
 #: bp/tools/templates/tools/table_families.html:11
 #: bp/tools/templates/tools/table_media.html:11
 #: bp/tools/templates/tools/table_of_data.html:11
-#: bp/tools/templates/tools/table_of_objects.html:14
+#: bp/tools/templates/tools/table_of_objects.html:19
 #: bp/tools/templates/tools/table_persons.html:11
 #: bp/tools/templates/tools/table_refnames.html:11
 #: bp/tools/templates/tools/table_sources.html:11
@@ -1715,11 +1715,11 @@ msgstr ""
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr ""
 
-#: bp/gramps/gramps_loader.py:110 bp/gramps/xml_dom_handler.py:114
+#: bp/gramps/gramps_loader.py:114 bp/gramps/xml_dom_handler.py:118
 msgid "Database save failed due to {} {}"
 msgstr ""
 
-#: bp/gramps/xml_dom_handler.py:102
+#: bp/gramps/xml_dom_handler.py:106
 msgid "Database save failed"
 msgstr ""
 
@@ -1827,18 +1827,42 @@ msgid "Displaying %(num)s families"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:39
-#: bp/scene/templates/scene/families.html:109
+#: bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/persons_list.html:79
 msgid "Top of page"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:41
+#: bp/scene/templates/scene/families.html:62
+#: bp/scene/templates/scene/families.html:114
+#: bp/scene/templates/scene/person.html:141
+#: bp/scene/templates/scene/person.html:174
+#: bp/scene/templates/scene/person_pg.html:168
+#: bp/scene/templates/scene/person_pg.html:201
+#: bp/tools/templates/tools/table_families.html:21
+#: bp/tools/templates/tools/table_families_by_id.html:67
+msgid "Father"
+msgstr ""
+
+#: bp/scene/templates/scene/families.html:41
 #: bp/scene/templates/scene/families.html:49
-#: bp/scene/templates/scene/families.html:111
-#: bp/scene/templates/scene/families.html:118
+#: bp/scene/templates/scene/families.html:114
+#: bp/scene/templates/scene/families.html:121
 #: bp/scene/templates/scene/persons_list.html:81
 #: bp/scene/templates/scene/persons_list.html:178
 msgid "first page"
+msgstr ""
+
+#: bp/scene/templates/scene/families.html:49
+#: bp/scene/templates/scene/families.html:63
+#: bp/scene/templates/scene/families.html:121
+#: bp/scene/templates/scene/person.html:143
+#: bp/scene/templates/scene/person.html:176
+#: bp/scene/templates/scene/person_pg.html:170
+#: bp/scene/templates/scene/person_pg.html:203
+#: bp/tools/templates/tools/table_families.html:23
+#: bp/tools/templates/tools/table_families_by_id.html:91
+msgid "Mother"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:61
@@ -1852,26 +1876,6 @@ msgstr ""
 msgid "family"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:62
-#: bp/scene/templates/scene/person.html:141
-#: bp/scene/templates/scene/person.html:174
-#: bp/scene/templates/scene/person_pg.html:168
-#: bp/scene/templates/scene/person_pg.html:201
-#: bp/tools/templates/tools/table_families.html:21
-#: bp/tools/templates/tools/table_families_by_id.html:67
-msgid "Father"
-msgstr ""
-
-#: bp/scene/templates/scene/families.html:63
-#: bp/scene/templates/scene/person.html:143
-#: bp/scene/templates/scene/person.html:176
-#: bp/scene/templates/scene/person_pg.html:170
-#: bp/scene/templates/scene/person_pg.html:203
-#: bp/tools/templates/tools/table_families.html:23
-#: bp/tools/templates/tools/table_families_by_id.html:91
-msgid "Mother"
-msgstr ""
-
 #: bp/scene/templates/scene/families.html:64
 #: bp/scene/templates/scene/person.html:145
 #: bp/scene/templates/scene/person.html:178
@@ -1881,29 +1885,33 @@ msgstr ""
 msgid "Children"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:69
+#: bp/scene/templates/scene/families.html:70
+msgid "Go to family page"
+msgstr ""
+
+#: bp/scene/templates/scene/families.html:73
 #: bp/scene/templates/scene/persons_list.html:148
 msgid "Original ID"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:71
+#: bp/scene/templates/scene/families.html:74
 msgid "Key"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:78
-#: bp/scene/templates/scene/families.html:85
+#: bp/scene/templates/scene/families.html:81
+#: bp/scene/templates/scene/families.html:88
 msgid "unknown"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:89
-#: bp/scene/templates/scene/families.html:93
+#: bp/scene/templates/scene/families.html:92
+#: bp/scene/templates/scene/families.html:96
 #, python-format
 msgid "%(num)d child"
 msgid_plural "%(num)d children"
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/scene/templates/scene/families.html:102
+#: bp/scene/templates/scene/families.html:105
 #: bp/tools/templates/tools/table_families.html:50
 #: bp/tools/templates/tools/table_persons.html:45
 msgid "No persons"
@@ -3578,48 +3586,48 @@ msgstr ""
 msgid "Unreferenced Events"
 msgstr ""
 
-#: models/datareader.py:397 models/datareader.py:410 models/datareader.py:433
-#: models/datareader.py:452
+#: models/datareader.py:347 models/datareader.py:360 models/datareader.py:383
+#: models/datareader.py:402
 msgid "Event list"
 msgstr ""
 
-#: models/datareader.py:398
+#: models/datareader.py:348
 msgid "Showing events without source citation"
 msgstr ""
 
-#: models/datareader.py:411
+#: models/datareader.py:361
 msgid "Showing events without places"
 msgstr ""
 
-#: models/datareader.py:434
+#: models/datareader.py:384
 msgid "Showing persons without a birth event"
 msgstr ""
 
-#: models/datareader.py:453
+#: models/datareader.py:403
 msgid "Showing oldest persons and their age"
 msgstr ""
 
-#: models/datareader.py:466
+#: models/datareader.py:416
 msgid "List of places"
 msgstr ""
 
-#: models/datareader.py:467
+#: models/datareader.py:417
 msgid "Showing places"
 msgstr ""
 
-#: models/datareader.py:575 models/datareader.py:588
+#: models/datareader.py:525 models/datareader.py:538
 msgid "Source list"
 msgstr ""
 
-#: models/datareader.py:576
+#: models/datareader.py:526
 msgid "Showing sources without source citations"
 msgstr ""
 
-#: models/datareader.py:589
+#: models/datareader.py:539
 msgid "Showing sources without a repository"
 msgstr ""
 
-#: models/dataupdater.py:63
+#: models/dataupdater.py:85
 msgid "Estimated {} person lifetimes"
 msgstr ""
 
@@ -4030,183 +4038,207 @@ msgid "Newspaper"
 msgstr ""
 
 #: templates/jinja_filters.py:152
+msgid "Magazine"
+msgstr ""
+
+#: templates/jinja_filters.py:153
+msgid "Tombstone"
+msgstr ""
+
+#: templates/jinja_filters.py:154
+msgid "Manuscript"
+msgstr ""
+
+#: templates/jinja_filters.py:155
+msgid "Photo"
+msgstr ""
+
+#: templates/jinja_filters.py:156
 msgid "Unknown"
 msgstr ""
 
-#: templates/jinja_filters.py:157
+#: templates/jinja_filters.py:161
 msgid "Vessel"
 msgstr ""
 
-#: templates/jinja_filters.py:158
+#: templates/jinja_filters.py:162
 msgid "Borough"
 msgstr ""
 
-#: templates/jinja_filters.py:159
+#: templates/jinja_filters.py:163
 msgid "Building"
 msgstr ""
 
-#: templates/jinja_filters.py:160
+#: templates/jinja_filters.py:164
 msgid "City"
 msgstr ""
 
-#: templates/jinja_filters.py:161
+#: templates/jinja_filters.py:165
 msgid "Country"
 msgstr ""
 
-#: templates/jinja_filters.py:162
+#: templates/jinja_filters.py:166
 msgid "District"
 msgstr ""
 
-#: templates/jinja_filters.py:163 templates/jinja_filters.py:176
+#: templates/jinja_filters.py:167 templates/jinja_filters.py:180
 msgid "Farm"
 msgstr ""
 
-#: templates/jinja_filters.py:164
+#: templates/jinja_filters.py:168
 msgid "Hamlet"
 msgstr ""
 
-#: templates/jinja_filters.py:165
+#: templates/jinja_filters.py:169
 msgid "Cemetery"
 msgstr ""
 
-#: templates/jinja_filters.py:166
+#: templates/jinja_filters.py:170
 msgid "Kappeliseurakunta"
 msgstr ""
 
-#: templates/jinja_filters.py:167
+#: templates/jinja_filters.py:171
 msgid "Mansion"
 msgstr ""
 
-#: templates/jinja_filters.py:168
+#: templates/jinja_filters.py:172
 msgid "Kuntakeskus"
 msgstr ""
 
-#: templates/jinja_filters.py:169
+#: templates/jinja_filters.py:173
 msgid "Kortteli"
 msgstr ""
 
-#: templates/jinja_filters.py:170
+#: templates/jinja_filters.py:174
 msgid "Fortress"
 msgstr ""
 
-#: templates/jinja_filters.py:171
+#: templates/jinja_filters.py:175
 msgid "Locality"
 msgstr ""
 
-#: templates/jinja_filters.py:172
+#: templates/jinja_filters.py:176
 msgid "Organisation"
 msgstr ""
 
-#: templates/jinja_filters.py:173 templates/jinja_filters.py:181
+#: templates/jinja_filters.py:177 templates/jinja_filters.py:185
 msgid "Parish"
 msgstr ""
 
-#: templates/jinja_filters.py:174
+#: templates/jinja_filters.py:178
 msgid "Region"
 msgstr ""
 
-#: templates/jinja_filters.py:175
+#: templates/jinja_filters.py:179
 msgid "State"
 msgstr ""
 
-#: templates/jinja_filters.py:177
+#: templates/jinja_filters.py:181
 msgid "Tontti"
 msgstr ""
 
-#: templates/jinja_filters.py:178
+#: templates/jinja_filters.py:182
 msgid "Torppa"
 msgstr ""
 
-#: templates/jinja_filters.py:179
+#: templates/jinja_filters.py:183
 msgid "Town"
 msgstr ""
 
-#: templates/jinja_filters.py:180
+#: templates/jinja_filters.py:184
 msgid "Village"
 msgstr ""
 
-#: templates/jinja_filters.py:186
+#: templates/jinja_filters.py:190
 msgid "on vessel"
 msgstr ""
 
-#: templates/jinja_filters.py:187
+#: templates/jinja_filters.py:191
 msgid "in the borough of"
 msgstr ""
 
-#: templates/jinja_filters.py:188
+#: templates/jinja_filters.py:192
 msgid "in the building of"
 msgstr ""
 
-#: templates/jinja_filters.py:189
+#: templates/jinja_filters.py:193
 msgid "in the City"
 msgstr ""
 
-#: templates/jinja_filters.py:190
+#: templates/jinja_filters.py:194
 msgid "in the country of"
 msgstr ""
 
-#: templates/jinja_filters.py:191
+#: templates/jinja_filters.py:195
 msgid "in the district of"
 msgstr ""
 
-#: templates/jinja_filters.py:192
+#: templates/jinja_filters.py:196
 msgid "in the farm of"
 msgstr ""
 
-#: templates/jinja_filters.py:193
+#: templates/jinja_filters.py:197
 msgid "in the hamlet of"
 msgstr ""
 
-#: templates/jinja_filters.py:194
+#: templates/jinja_filters.py:198
 msgid "Hautausmaalla"
 msgstr ""
 
-#: templates/jinja_filters.py:195
+#: templates/jinja_filters.py:199
 msgid "Kappeliseurakunnassa"
 msgstr ""
 
-#: templates/jinja_filters.py:196
+#: templates/jinja_filters.py:200
 msgid "in the mansion of"
 msgstr ""
 
-#: templates/jinja_filters.py:197
+#: templates/jinja_filters.py:201
 msgid "Kuntakeskuksessa"
 msgstr ""
 
-#: templates/jinja_filters.py:198
+#: templates/jinja_filters.py:202
 msgid "in the fortress"
 msgstr ""
 
-#: templates/jinja_filters.py:199
+#: templates/jinja_filters.py:203
 msgid "at locality of"
 msgstr ""
 
-#: templates/jinja_filters.py:200
+#: templates/jinja_filters.py:204
 msgid "in the organisation of"
 msgstr ""
 
-#: templates/jinja_filters.py:201
+#: templates/jinja_filters.py:205
 msgid "in the parish"
 msgstr ""
 
-#: templates/jinja_filters.py:202
+#: templates/jinja_filters.py:206
 msgid "in the region"
 msgstr ""
 
-#: templates/jinja_filters.py:203
+#: templates/jinja_filters.py:207
 msgid "Sn the state"
 msgstr ""
 
-#: templates/jinja_filters.py:204
+#: templates/jinja_filters.py:208
 msgid "Tontilla"
 msgstr ""
 
-#: templates/jinja_filters.py:205
+#: templates/jinja_filters.py:209
 msgid "in the village of"
 msgstr ""
 
-#: templates/jinja_filters.py:206
+#: templates/jinja_filters.py:210
 msgid "in the parish of"
+msgstr ""
+
+#: templates/jinja_filters.py:220
+msgid "Married"
+msgstr ""
+
+#: templates/jinja_filters.py:221
+msgid "Unknown relation"
 msgstr ""
 
 #: templates/join_persons.html:3 templates/join_persons.html:17

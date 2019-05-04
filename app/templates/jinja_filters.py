@@ -149,6 +149,10 @@ def translate(term, var_name, lang="fi"):
             "Book": _("Book"), #"kirja"
             "Electronic": _("Electronic"), #"sähköinen"
             "Newspaper": _("Newspaper"), #"lehti"
+            'Magazine': _('Magazine'),  #"aikakauslehti"
+            'Tombstone': _('Tombstone'), #'hautakivi'
+            'Manuscript': _('Manuscript'), #'käsikirjoitus'
+            'Photo': _('Photo'),
             "Unknown": _("Unknown"), #"tuntematon"
             }
     elif var_name == "lt":
