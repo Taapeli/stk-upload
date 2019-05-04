@@ -252,8 +252,22 @@ class Cypher_family():
 MATCH (f:Family) WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
-OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
-RETURN f, 
+OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.father_sortname LIMIT $limit"""
+
+    read_my_families_p = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER|OWNS]-> (f:Family)
+    WHERE prof.userName = $user AND f.father_sortname>=$fw
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
     COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(DISTINCT pc) AS child, 
     COUNT(DISTINCT pc) AS no_of_children 
@@ -264,7 +278,21 @@ MATCH (f:Family) WHERE f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
-RETURN f, 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.mother_sortname LIMIT $limit"""
+    
+    read_my_families_m = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER|OWNS]-> (f:Family)
+    WHERE prof.userName = $user AND f.mother_sortname>=$fwm
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
     COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(DISTINCT pc) AS child, 
     COUNT(DISTINCT pc) AS no_of_children 
@@ -464,7 +492,7 @@ OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
 
 class Cypher_source():
     '''
-    Cypher clases for creating and accessing Sources
+    Cypher class for creating and accessing Sources
     '''
     source_list = """
 MATCH (s:Source)
@@ -476,6 +504,13 @@ RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle,
        COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
 ORDER BY toUpper(stitle)
 """
+
+#     get_repositories_w_notes = """
+# MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
+#     WHERE ID(source) = $sid
+# OPTIONAL MATCH (repo) -[:NOTE]-> (note:Note)
+# RETURN r.medium AS medium, repo, COLLECT(note) AS notes"""
+
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
@@ -505,7 +540,7 @@ return id(r) AS uniq_id,
     r.handle as handle,
     r.id as id,
     collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
-    collect(w) as notes
+    collect(distinct w) as notes
 order by r.rname"""
 
     get_w_sources_all = _get_all + _get_tail 
@@ -523,29 +558,4 @@ return r"""
     get_all = """
 match (r:Repository)
 return r order by r.type"""
-
-# class Cypher_weburl():
-#     '''
-#     Cypher clases for creating and accessing Weburls
-#     '''
-#     link_to_weburl = """
-# merge (w:Weburl {href: $href})
-# with w
-#     match (x) where ID(x) = $parent_id
-#     with w, x
-#         merge (x) -[r:WEBREF]-> (w)
-#             set r.type = $type
-#             set r.desc = $desc
-#             set r.priv = $priv
-# return id(r) as ref_id, id(w) as weburl_id"""
-#     link_to_weburl_X = """
-# match (x) where ID(x) = $parent_id
-#     optional match (w:Weburl) where w.href = $href
-# with x, w
-#     merge (x) -[r:WEBREF]-> (w)
-#         set w.href = $href
-#         set r.type = $type
-#         set r.desc = $desc
-#         set r.priv = $priv
-# return id(r) as ref_id, id(w) as weburl_id"""
 

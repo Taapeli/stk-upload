@@ -123,7 +123,7 @@ class DbTree():
                     if not nid:
                         raise ValueError("Hierarchy tree error")
                     if len(rl) == 1:    # Ensimmäinen solmu rootin alle
-                        nid1, ntype1, nname1, lv1 = nstack.pop()
+                        nid1, ntype1, nname1, _lv1 = nstack.pop()
                         rl[0] = rel.end
                         print("create_node('{}', '{}', parent={}, data={})".\
                               format(nname1, nid1, 0, {'type':ntype1}))
@@ -159,7 +159,7 @@ class DbTree():
                 else:
                     lv = lv + 1
                     nl[node.identifier] = lv
-                fill = ''.join([ "       " for n in range(lv-1)])
+                fill = ''.join([ "       " for _n in range(lv-1)])
                 print("({}){} {:5d}<-{:5d} {} ".format(lv, fill, 
                       node.bpointer, node.identifier, node.tag))
 

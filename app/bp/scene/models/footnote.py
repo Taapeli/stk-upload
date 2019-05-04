@@ -101,11 +101,11 @@ class SourceFootnote():
     '''
     A structure for creating footnotes for sources and citations:
 
-        (cite:Citation) -[*]-> (source:Source) -[1]-> (repo:Repocitory)
+        (cite:Citation) -[*]-> (source:Source) -[1]-> (repo:Repository)
 
         self ~ Source reference
             .source             Source object
-            .repo               Repocitory object covering this Source
+            .repo               Repository object covering this Source
             .cites[]            Citation objects pointing this Source
             .source.uniq_id     int ~ index1 (Source)
             .cites[j].uniq_id   int ~ index2 (Citation)
@@ -116,7 +116,7 @@ class SourceFootnote():
         SourceFootnote constructor
         '''
         self.source = None      # Source object (this)
-        self.repo = None        # Repocitory object
+        self.repo = None        # Repository object
         self.cites = []         # Citation objects
         self.mark = '1a'
 
@@ -160,8 +160,8 @@ class SourceFootnote():
             source              Source object ~ from objs[cit.source]
             - source.stitle     str     Source title
                                 source href="#sref{{ source.uniq_id }}"
-            repo                Repocitory object ~ from objs[source.repocitory_id]
-            - repo.rname        str     Repocitory name"
+            repo                Repository object ~ from objs[source.repocitory_id]
+            - repo.rname        str     Repository name"
         '''
         if not ( isinstance(cit, Citation) and isinstance(objs, dict) ):
             raise TypeError("SourceFootnote: Invalid arguments {}".format(cit))

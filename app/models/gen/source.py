@@ -10,7 +10,9 @@ from sys import stderr
 
 import shareds
 from .cypher import Cypher_source
-from models.cypher_gramps import Cypher_source_w_handle
+#from .repository import Repository
+#from .note import Note
+#from models.cypher_gramps import Cypher_source_w_handle
 
 
 class Source:
@@ -21,9 +23,8 @@ class Source:
                 change
                 id              esim. "S0001"
                 stitle          str lähteen otsikko
-                noteref_hlink   str huomautuksen osoite
-                reporef_hlink   str arkiston osoite
-                reporef_medium  str arkiston laatu, esim. "Book"
+        
+        See also: bp.gramps.models.source_gramps.Source_gramps
      """
 
     def __init__(self):
@@ -33,18 +34,15 @@ class Source:
         self.change = 0
         self.id = ''
         self.stitle = ''
-        self.noteref_hlink = ''
-        self.reporef_hlink = ''
-        self.reporef_medium = ''
+        
+#         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
+#         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
+#         self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
+#         self.note_ref = []      # uniq_ids (previously note[])
 
-        self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
-        self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
-        self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
-        self.note_ref = []      # uniq_ids (previously note[])
-        self.repocitory_id = None # uniq_id of Repocitory
-        self.repocitory = None  # Repocitory object For creating display sets (vanhempi)
 
         #Todo: Obsolete?
+        # self.repocitory = None  # Repository object For creating display sets (vanhempi)
         self.citations = []   # For creating display sets
         self.notes = []
 
@@ -86,22 +84,50 @@ return s'''
             sources[s.id] = s
         return sources
 
+#     def get_repositories_w_notes(self):
+#         """ Read the repositories referenced by this source with optional notes.
+# 
+#             NOT IN USE, removed 3.5.2019
+# 
+#             The referenced Repositories are stored in self.repositories[] and
+#             possible Notes in self.repositories[].notes[]
+#         """
+#         result = shareds.driver.session().run(Cypher_source.get_repositories_w_notes)
+#         for record in result:
+#             # ╒════════╤══════════════════════════════╤══════════════════════════════╕
+#             # │"medium"│"repo"                        │"notes"                       │
+#             # ╞════════╪══════════════════════════════╪══════════════════════════════╡
+#             # │"Book"  │{"handle":"_d82643ea4fb541e47c│[{"id":"N1-R0003","text":"Lapi│
+#             # │        │47b1960a1","id":"R0003","rname│njärven srk arkisto Digihakemi│
+#             # │        │":"Lapinjärven seurakunnan ark│stossa","type":"Web Search","u│
+#             # │        │isto","type":"Archive","change│rl":"http://digihakemisto...  │
+#             # │        │":"1541271759"}               │                              │
+#             # └────────┴──────────────────────────────┴──────────────────────────────┘
+#             repo = Repository.from_node(record['repo'])
+#             
+#             if record['medium']:
+#                 repo.medium = record['medium']
+#             for node in record['notes']:
+#                 repo.notes.append(Note.from_node(node))
+# 
+#             self.repositories.append(repo)
 
-    def get_reporef_hlink(self):
-        """ Luetaan lähteen arkiston uniq_id kannasta """
-                        
-        query = """
-            MATCH (source:Source)-[r:REPOSITORY]->(repo:Repository)
-                WHERE ID(source)={}
-                RETURN ID(repo) AS id, r.medium AS reporef_medium
-            """.format(self.uniq_id)
-            
-        result = shareds.driver.session().run(query)
-        for record in result:
-            if record['id']:
-                self.reporef_hlink = record['id']
-            if record['reporef_medium']:
-                self.reporef_medium = record['reporef_medium']
+
+#     def get_reporef_hlink(self):
+#         """ Luetaan lähteen arkiston uniq_id kannasta, removed 3.5.2019 """
+#                         
+#         query = """
+#             MATCH (source:Source)-[r:REPOSITORY]->(repo:Repository)
+#                 WHERE ID(source)={}
+#                 RETURN ID(repo) AS id, r.medium AS reporef_medium
+#             """.format(self.uniq_id)
+#             
+#         result = shareds.driver.session().run(query)
+#         for record in result:
+#             if record['id']:
+#                 self.reporef_hlink = record['id']
+#             if record['reporef_medium']:
+#                 self.reporef_medium = record['reporef_medium']
         
     
     def get_source_data(self):
@@ -230,7 +256,7 @@ return s'''
             else:
                 data_line.append('-')
             if record["s"]['change']:
-                data_line.append(int(record["s"]['change']))  #TODO only temporary int()
+                data_line.append(record["s"]['change'])
             else:
                 data_line.append('-')
             if record["s"]['id']:
@@ -273,7 +299,7 @@ return s'''
             else:
                 data_line.append('-')
             if record["s"]['change']:
-                data_line.append(int(record["s"]['change']))  #TODO only temporary int()
+                data_line.append(record["s"]['change'])
             else:
                 data_line.append('-')
             if record["s"]['id']:
@@ -311,59 +337,10 @@ return s'''
         print ("Id: " + self.id)
         if self.stitle != '':
             print ("Stitle: " + self.stitle)
-        if self.noteref_hlink != '':
-            print ("Noteref_hlink: " + self.noteref_hlink)
-        if self.reporef_hlink != '':
-            print ("Reporef_hlink: " + self.reporef_hlink)
+        if self.note_handles:
+            print (f"Note handles: {self.note_handles}")
+        for repo in self.repocitories:
+            print (f"Repository: {repo}")
         return True
         
 
-    def save(self, tx):
-        """ Saves this Source and connects it to Notes and Repositories """
-
-        s_attr = {}
-        try:
-            s_attr = {
-                "handle": self.handle,
-                "change": self.change,
-                "id": self.id,
-                "stitle": self.stitle
-            }
-
-#             self.uniq_id = tx.run(Cypher_source_w_handle.create, s_attr=s_attr).single()[0]
-            result = tx.run(Cypher_source_w_handle.create, s_attr=s_attr)
-            ids = []
-            for record in result:
-                self.uniq_id = record[0]
-                ids.append(self.uniq_id)
-                if len(ids) > 1:
-                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, s_attr))
-
-        except Exception as err:
-            print("iError source_save: {0} attr={1}".format(err, s_attr), file=stderr)
-            raise RuntimeError("Could not save Source {}".format(self.id))
-
-        # Make relation to the Note node
-        if self.noteref_hlink != '':
-            try:
-                tx.run(Cypher_source_w_handle.link_note,
-                       handle=self.handle, hlink=self.noteref_hlink)
-            except Exception as err:
-                print("iError Source.save note: {0}".format(err), file=stderr)
-
-        # Make relation to the Repository node
-        if self.reporef_hlink != '':
-            try:
-                tx.run(Cypher_source_w_handle.link_repository,
-                       handle=self.handle, hlink=self.reporef_hlink)
-            except Exception as err:
-                print("iError Source.save Repository: {0}".format(err), file=stderr)
-                
-            # Set the medium data of the Source node
-            try:
-                tx.run(Cypher_source_w_handle.set_repository_medium,
-                       handle=self.handle, medium=self.reporef_medium)
-            except Exception as err:
-                print("iError Source.save repository_medium: {0}".format(err), file=stderr)
-
-        return

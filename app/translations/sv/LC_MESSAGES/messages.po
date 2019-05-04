@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-04-24 10:10+0300\n"
+"POT-Creation-Date: 2019-05-04 17:19+0300\n"
 "PO-Revision-Date: 2019-04-09 15:30+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -543,8 +543,8 @@ msgstr "Redigera"
 #: bp/tools/templates/tools/table_media.html:36
 #: bp/tools/templates/tools/table_of_data.html:40
 #: bp/tools/templates/tools/table_of_data.html:43
-#: bp/tools/templates/tools/table_of_objects.html:43
-#: bp/tools/templates/tools/table_of_objects.html:46
+#: bp/tools/templates/tools/table_of_objects.html:48
+#: bp/tools/templates/tools/table_of_objects.html:51
 #: bp/tools/templates/tools/table_people_by_surname.html:29
 #: bp/tools/templates/tools/table_sources.html:30
 #: bp/tools/templates/tools/table_surnames.html:23
@@ -617,7 +617,7 @@ msgstr "Genealogiska Samfundet i Finland"
 #: bp/tools/templates/tools/table_families.html:11
 #: bp/tools/templates/tools/table_media.html:11
 #: bp/tools/templates/tools/table_of_data.html:11
-#: bp/tools/templates/tools/table_of_objects.html:14
+#: bp/tools/templates/tools/table_of_objects.html:19
 #: bp/tools/templates/tools/table_persons.html:11
 #: bp/tools/templates/tools/table_refnames.html:11
 #: bp/tools/templates/tools/table_sources.html:11
@@ -630,7 +630,7 @@ msgstr "Ändra inställningar"
 #: bp/tools/templates/tools/table_families.html:11
 #: bp/tools/templates/tools/table_media.html:11
 #: bp/tools/templates/tools/table_of_data.html:11
-#: bp/tools/templates/tools/table_of_objects.html:14
+#: bp/tools/templates/tools/table_of_objects.html:19
 #: bp/tools/templates/tools/table_persons.html:11
 #: bp/tools/templates/tools/table_refnames.html:11
 #: bp/tools/templates/tools/table_sources.html:11
@@ -1719,11 +1719,11 @@ msgstr "Avmarkera"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Återställ markerad tag's: <tag>-X -> <tag>"
 
-#: bp/gramps/gramps_loader.py:110 bp/gramps/xml_dom_handler.py:114
+#: bp/gramps/gramps_loader.py:114 bp/gramps/xml_dom_handler.py:118
 msgid "Database save failed due to {} {}"
 msgstr "Databas sparningen misslyckades på grund av {} {}"
 
-#: bp/gramps/xml_dom_handler.py:102
+#: bp/gramps/xml_dom_handler.py:106
 msgid "Database save failed"
 msgstr "Det gick inte att spara databasen"
 
@@ -1833,19 +1833,43 @@ msgid "Displaying %(num)s families"
 msgstr "Visar %(num)s familjer"
 
 #: bp/scene/templates/scene/families.html:39
-#: bp/scene/templates/scene/families.html:109
+#: bp/scene/templates/scene/families.html:112
 #: bp/scene/templates/scene/persons_list.html:79
 msgid "Top of page"
 msgstr "Överst på sidan"
 
 #: bp/scene/templates/scene/families.html:41
+#: bp/scene/templates/scene/families.html:62
+#: bp/scene/templates/scene/families.html:114
+#: bp/scene/templates/scene/person.html:141
+#: bp/scene/templates/scene/person.html:174
+#: bp/scene/templates/scene/person_pg.html:168
+#: bp/scene/templates/scene/person_pg.html:201
+#: bp/tools/templates/tools/table_families.html:21
+#: bp/tools/templates/tools/table_families_by_id.html:67
+msgid "Father"
+msgstr "Fader"
+
+#: bp/scene/templates/scene/families.html:41
 #: bp/scene/templates/scene/families.html:49
-#: bp/scene/templates/scene/families.html:111
-#: bp/scene/templates/scene/families.html:118
+#: bp/scene/templates/scene/families.html:114
+#: bp/scene/templates/scene/families.html:121
 #: bp/scene/templates/scene/persons_list.html:81
 #: bp/scene/templates/scene/persons_list.html:178
 msgid "first page"
 msgstr "första sidan"
+
+#: bp/scene/templates/scene/families.html:49
+#: bp/scene/templates/scene/families.html:63
+#: bp/scene/templates/scene/families.html:121
+#: bp/scene/templates/scene/person.html:143
+#: bp/scene/templates/scene/person.html:176
+#: bp/scene/templates/scene/person_pg.html:170
+#: bp/scene/templates/scene/person_pg.html:203
+#: bp/tools/templates/tools/table_families.html:23
+#: bp/tools/templates/tools/table_families_by_id.html:91
+msgid "Mother"
+msgstr "Moder"
 
 #: bp/scene/templates/scene/families.html:61
 #: bp/scene/templates/scene/person_pg.html:165
@@ -1858,26 +1882,6 @@ msgstr "första sidan"
 msgid "family"
 msgstr "familj"
 
-#: bp/scene/templates/scene/families.html:62
-#: bp/scene/templates/scene/person.html:141
-#: bp/scene/templates/scene/person.html:174
-#: bp/scene/templates/scene/person_pg.html:168
-#: bp/scene/templates/scene/person_pg.html:201
-#: bp/tools/templates/tools/table_families.html:21
-#: bp/tools/templates/tools/table_families_by_id.html:67
-msgid "Father"
-msgstr "Fader"
-
-#: bp/scene/templates/scene/families.html:63
-#: bp/scene/templates/scene/person.html:143
-#: bp/scene/templates/scene/person.html:176
-#: bp/scene/templates/scene/person_pg.html:170
-#: bp/scene/templates/scene/person_pg.html:203
-#: bp/tools/templates/tools/table_families.html:23
-#: bp/tools/templates/tools/table_families_by_id.html:91
-msgid "Mother"
-msgstr "Moder"
-
 #: bp/scene/templates/scene/families.html:64
 #: bp/scene/templates/scene/person.html:145
 #: bp/scene/templates/scene/person.html:178
@@ -1887,29 +1891,33 @@ msgstr "Moder"
 msgid "Children"
 msgstr "Barn"
 
-#: bp/scene/templates/scene/families.html:69
+#: bp/scene/templates/scene/families.html:70
+msgid "Go to family page"
+msgstr ""
+
+#: bp/scene/templates/scene/families.html:73
 #: bp/scene/templates/scene/persons_list.html:148
 msgid "Original ID"
 msgstr "Ursprungligt ID"
 
-#: bp/scene/templates/scene/families.html:71
+#: bp/scene/templates/scene/families.html:74
 msgid "Key"
 msgstr "Nyckel"
 
-#: bp/scene/templates/scene/families.html:78
-#: bp/scene/templates/scene/families.html:85
+#: bp/scene/templates/scene/families.html:81
+#: bp/scene/templates/scene/families.html:88
 msgid "unknown"
 msgstr "okänd"
 
-#: bp/scene/templates/scene/families.html:89
-#: bp/scene/templates/scene/families.html:93
+#: bp/scene/templates/scene/families.html:92
+#: bp/scene/templates/scene/families.html:96
 #, python-format
 msgid "%(num)d child"
 msgid_plural "%(num)d children"
 msgstr[0] "%(num)d barn"
 msgstr[1] "%(num)d barn"
 
-#: bp/scene/templates/scene/families.html:102
+#: bp/scene/templates/scene/families.html:105
 #: bp/tools/templates/tools/table_families.html:50
 #: bp/tools/templates/tools/table_persons.html:45
 msgid "No persons"
@@ -3610,48 +3618,48 @@ msgstr "Källor utan arkiv"
 msgid "Unreferenced Events"
 msgstr "Orefererade händelser"
 
-#: models/datareader.py:397 models/datareader.py:410 models/datareader.py:433
-#: models/datareader.py:452
+#: models/datareader.py:347 models/datareader.py:360 models/datareader.py:383
+#: models/datareader.py:402
 msgid "Event list"
 msgstr "Händelse lista"
 
-#: models/datareader.py:398
+#: models/datareader.py:348
 msgid "Showing events without source citation"
 msgstr "Visa händelser utan käll citat"
 
-#: models/datareader.py:411
+#: models/datareader.py:361
 msgid "Showing events without places"
 msgstr "Visa händelser utan platser"
 
-#: models/datareader.py:434
+#: models/datareader.py:384
 msgid "Showing persons without a birth event"
 msgstr "Visa personer utan födelse händelse"
 
-#: models/datareader.py:453
+#: models/datareader.py:403
 msgid "Showing oldest persons and their age"
 msgstr "Visa äldsta personer och deras ålder"
 
-#: models/datareader.py:466
+#: models/datareader.py:416
 msgid "List of places"
 msgstr "Plats lista"
 
-#: models/datareader.py:467
+#: models/datareader.py:417
 msgid "Showing places"
 msgstr "Visa platser"
 
-#: models/datareader.py:575 models/datareader.py:588
+#: models/datareader.py:525 models/datareader.py:538
 msgid "Source list"
 msgstr "Käll lista"
 
-#: models/datareader.py:576
+#: models/datareader.py:526
 msgid "Showing sources without source citations"
 msgstr "Visa källor utan käll citat"
 
-#: models/datareader.py:589
+#: models/datareader.py:539
 msgid "Showing sources without a repository"
 msgstr "Visa källor utan arkiv"
 
-#: models/dataupdater.py:63
+#: models/dataupdater.py:85
 msgid "Estimated {} person lifetimes"
 msgstr "Beräknade {} person livstider"
 
@@ -4062,184 +4070,208 @@ msgid "Newspaper"
 msgstr "Tidning"
 
 #: templates/jinja_filters.py:152
+msgid "Magazine"
+msgstr ""
+
+#: templates/jinja_filters.py:153
+msgid "Tombstone"
+msgstr ""
+
+#: templates/jinja_filters.py:154
+msgid "Manuscript"
+msgstr ""
+
+#: templates/jinja_filters.py:155
+msgid "Photo"
+msgstr ""
+
+#: templates/jinja_filters.py:156
 msgid "Unknown"
 msgstr "Okänd"
 
-#: templates/jinja_filters.py:157
+#: templates/jinja_filters.py:161
 msgid "Vessel"
 msgstr "Fartyg"
 
-#: templates/jinja_filters.py:158
+#: templates/jinja_filters.py:162
 msgid "Borough"
 msgstr "Stadsdel"
 
-#: templates/jinja_filters.py:159
+#: templates/jinja_filters.py:163
 msgid "Building"
 msgstr "Byggnad"
 
-#: templates/jinja_filters.py:160
+#: templates/jinja_filters.py:164
 msgid "City"
 msgstr "Stad"
 
-#: templates/jinja_filters.py:161
+#: templates/jinja_filters.py:165
 msgid "Country"
 msgstr "Land"
 
-#: templates/jinja_filters.py:162
+#: templates/jinja_filters.py:166
 msgid "District"
 msgstr "Distrikt"
 
-#: templates/jinja_filters.py:163 templates/jinja_filters.py:176
+#: templates/jinja_filters.py:167 templates/jinja_filters.py:180
 msgid "Farm"
 msgstr "Gård"
 
-#: templates/jinja_filters.py:164
+#: templates/jinja_filters.py:168
 msgid "Hamlet"
 msgstr "By"
 
-#: templates/jinja_filters.py:165
+#: templates/jinja_filters.py:169
 msgid "Cemetery"
 msgstr "Kyrkogård"
 
-#: templates/jinja_filters.py:166
+#: templates/jinja_filters.py:170
 msgid "Kappeliseurakunta"
 msgstr "Kappel församling"
 
-#: templates/jinja_filters.py:167
+#: templates/jinja_filters.py:171
 msgid "Mansion"
 msgstr "Herrgård"
 
-#: templates/jinja_filters.py:168
+#: templates/jinja_filters.py:172
 msgid "Kuntakeskus"
 msgstr "Kommun centrum"
 
-#: templates/jinja_filters.py:169
+#: templates/jinja_filters.py:173
 msgid "Kortteli"
 msgstr "Kvarter"
 
-#: templates/jinja_filters.py:170
+#: templates/jinja_filters.py:174
 msgid "Fortress"
 msgstr "Fästning"
 
-#: templates/jinja_filters.py:171
+#: templates/jinja_filters.py:175
 msgid "Locality"
 msgstr "Lokalitet"
 
-#: templates/jinja_filters.py:172
+#: templates/jinja_filters.py:176
 msgid "Organisation"
 msgstr "Organisation"
 
-#: templates/jinja_filters.py:173 templates/jinja_filters.py:181
+#: templates/jinja_filters.py:177 templates/jinja_filters.py:185
 msgid "Parish"
 msgstr "Församling"
 
-#: templates/jinja_filters.py:174
+#: templates/jinja_filters.py:178
 msgid "Region"
 msgstr "Region"
 
-#: templates/jinja_filters.py:175
+#: templates/jinja_filters.py:179
 msgid "State"
 msgstr "Delstat"
 
-#: templates/jinja_filters.py:177
+#: templates/jinja_filters.py:181
 msgid "Tontti"
 msgstr "Tomt"
 
-#: templates/jinja_filters.py:178
+#: templates/jinja_filters.py:182
 msgid "Torppa"
 msgstr "Torp"
 
-#: templates/jinja_filters.py:179
+#: templates/jinja_filters.py:183
 msgid "Town"
 msgstr "Stad"
 
-#: templates/jinja_filters.py:180
+#: templates/jinja_filters.py:184
 msgid "Village"
 msgstr "By"
 
-#: templates/jinja_filters.py:186
+#: templates/jinja_filters.py:190
 msgid "on vessel"
 msgstr "på fartyg"
 
-#: templates/jinja_filters.py:187
+#: templates/jinja_filters.py:191
 msgid "in the borough of"
 msgstr "i stadsdelen av"
 
-#: templates/jinja_filters.py:188
+#: templates/jinja_filters.py:192
 msgid "in the building of"
 msgstr "i byggnad  av"
 
-#: templates/jinja_filters.py:189
+#: templates/jinja_filters.py:193
 msgid "in the City"
 msgstr "i staden"
 
-#: templates/jinja_filters.py:190
+#: templates/jinja_filters.py:194
 msgid "in the country of"
 msgstr "i land av"
 
-#: templates/jinja_filters.py:191
+#: templates/jinja_filters.py:195
 msgid "in the district of"
 msgstr "i diskrit av"
 
-#: templates/jinja_filters.py:192
+#: templates/jinja_filters.py:196
 msgid "in the farm of"
 msgstr "på gården av"
 
-#: templates/jinja_filters.py:193
+#: templates/jinja_filters.py:197
 msgid "in the hamlet of"
 msgstr "i liten by av"
 
-#: templates/jinja_filters.py:194
+#: templates/jinja_filters.py:198
 msgid "Hautausmaalla"
 msgstr "På kyrkogården"
 
-#: templates/jinja_filters.py:195
+#: templates/jinja_filters.py:199
 msgid "Kappeliseurakunnassa"
 msgstr "I kappel församling"
 
-#: templates/jinja_filters.py:196
+#: templates/jinja_filters.py:200
 msgid "in the mansion of"
 msgstr "i herrgården av"
 
-#: templates/jinja_filters.py:197
+#: templates/jinja_filters.py:201
 msgid "Kuntakeskuksessa"
 msgstr "I kommun centrum"
 
-#: templates/jinja_filters.py:198
+#: templates/jinja_filters.py:202
 msgid "in the fortress"
 msgstr "i fästningen"
 
-#: templates/jinja_filters.py:199
+#: templates/jinja_filters.py:203
 msgid "at locality of"
 msgstr "på orten"
 
-#: templates/jinja_filters.py:200
+#: templates/jinja_filters.py:204
 msgid "in the organisation of"
 msgstr "i organisation av"
 
-#: templates/jinja_filters.py:201
+#: templates/jinja_filters.py:205
 msgid "in the parish"
 msgstr "i församlingen"
 
-#: templates/jinja_filters.py:202
+#: templates/jinja_filters.py:206
 msgid "in the region"
 msgstr "i regionen"
 
-#: templates/jinja_filters.py:203
+#: templates/jinja_filters.py:207
 msgid "Sn the state"
 msgstr "I staten"
 
-#: templates/jinja_filters.py:204
+#: templates/jinja_filters.py:208
 msgid "Tontilla"
 msgstr "På tomten"
 
-#: templates/jinja_filters.py:205
+#: templates/jinja_filters.py:209
 msgid "in the village of"
 msgstr "i by av"
 
-#: templates/jinja_filters.py:206
+#: templates/jinja_filters.py:210
 msgid "in the parish of"
 msgstr "i församlingen av"
+
+#: templates/jinja_filters.py:220
+msgid "Married"
+msgstr ""
+
+#: templates/jinja_filters.py:221
+msgid "Unknown relation"
+msgstr ""
 
 #: templates/join_persons.html:3 templates/join_persons.html:17
 msgid "Merging people"

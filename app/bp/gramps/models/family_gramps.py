@@ -44,8 +44,9 @@ class Family_gramps(Family):
 
 
     def save(self, tx, batch_id):
-        """ Saves the family node to db and 
-            creates relations to parent, child and note nodes
+        """ Saves the family node to db with its relations.
+        
+            Connects the family to parent, child and note nodes
         """
 
         f_attr = {}

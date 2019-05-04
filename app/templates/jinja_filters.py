@@ -19,9 +19,9 @@ def translate(term, var_name, lang="fi"):
         'lt'   = Location types
         'lt_in' = Location types, inessive form
         'notet' = note type
-        #'urlt' = web page type
         'rept' = repository types
         'medium' = media types
+        'marr' = marriage types
     """
 #     print("# {}[{}]".format(var_name, term))
     if not term:
@@ -149,6 +149,10 @@ def translate(term, var_name, lang="fi"):
             "Book": _("Book"), #"kirja"
             "Electronic": _("Electronic"), #"sähköinen"
             "Newspaper": _("Newspaper"), #"lehti"
+            'Magazine': _('Magazine'),  #"aikakauslehti"
+            'Tombstone': _('Tombstone'), #'hautakivi'
+            'Manuscript': _('Manuscript'), #'käsikirjoitus'
+            'Photo': _('Photo'),
             "Unknown": _("Unknown"), #"tuntematon"
             }
     elif var_name == "lt":
@@ -209,6 +213,13 @@ def translate(term, var_name, lang="fi"):
             return tabl[term]
         except:
             return term + ":ssa"
+
+    elif var_name == "marr":
+        # Marriage types
+        tabl = {
+            "Married": _("Married"), #"aluksessa"
+            "Unknown": _("Unknown relation") #"aluehallintoyksikössä"
+        }
 
     elif var_name == "handle":
         # Shows handle '_dd3d7f7206c3ca3408c9daf6c58' in short format '_d…f6c58'"

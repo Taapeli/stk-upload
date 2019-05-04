@@ -304,12 +304,7 @@ MERGE (n) -[r:NOTE]-> (m)"""
     link_repository = """
 MATCH (n:Source) WHERE n.handle=$handle
 MATCH (m:Repository) WHERE m.handle=$hlink
-MERGE (n) -[r:REPOSITORY]-> (m)"""
-
-    set_repository_medium = """
-MATCH (n:Source) -[r:REPOSITORY]-> (m) 
-    WHERE n.handle=$handle
-SET r.medium=$medium"""
+MERGE (n) -[r:REPOSITORY {medium:$medium}]-> (m)"""
 
 
 class Cypher_citation_w_handle():

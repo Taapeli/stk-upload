@@ -9,12 +9,34 @@ from flask_babelex import _
 from bp.gramps.batchlogger import Batch
 from models.gen.user import User
 from models.gen.person import Person
+from models.gen.place import Place
 from models.gen.person_name import Name
 from models.gen.refname import Refname
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
 
 
+def make_place_hierarchy_properties(tx=None, place=None):
+    """ Connects places to the upper level places
+    """
+    hierarchy_count = 0
+    
+    if tx:
+        my_tx = tx
+    else:
+        my_tx = User.beginTransaction()
+        
+    place.make_hierarchy(my_tx, place)
+    
+    hierarchy_count += 1
+
+    return (hierarchy_count)
+
+    if not tx:
+        # Close my own created transaction
+        User.endTransaction(my_tx)
+        
+    
 def set_confidence_values(tx, uniq_id=None, batch_logger=None):
     """ Sets a quality rate for one or all Persons
         Asettaa henkilölle laatuarvion

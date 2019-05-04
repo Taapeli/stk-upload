@@ -5,7 +5,12 @@
 {{ super() }}
 <script src="/static/infobox.js"></script>
 <style>
-tbody tr td {max-width:300px}
+tbody tr td {max-width:250px}
+td ul {
+    padding-left:1em; 
+    font-size: smaller;
+}
+td {vertical-align: top; }
 </style>
         
 {% from "start/s_macros.html" import hamburger_menu with context %}
