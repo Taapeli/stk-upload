@@ -21,6 +21,33 @@
             <div class="flex-container">
                <div id="description">
                     <p>{{ _('Displaying %(num)s families', num=cnt) }}.</p>
+	           </div>
+	           <div>
+	               <form action="/scene/families">
+	                 <fieldset>
+	                    <input type="hidden" name="o" value="father" >
+	                    <input type="hidden" name="c" value="50" >
+	                    <label for="f">{{ _('Go to') }} {{ _('Father') }}</label>
+	                    <input type="text" name="f" size="8" 
+	                     title="{{ _('Starting letters of surname') }}" 
+	                     placeholder="{{ _('Surname') }}">
+	                    <input type="submit" value=" > ">
+	                 </fieldset>
+	               </form>
+	           </div>
+	           <div>
+	               <form action="/scene/families">
+	                 <fieldset>
+	                    <input type="hidden" name="o" value="mother" >
+	                    <input type="hidden" name="c" value="50" >
+	                    <label for="m">{{ _('Go to') }} {{ _('Mother') }}</label>
+	                    <input type="text" name="m" size="8" 
+	                     title="{{ _('Starting letters of surname') }}" 
+	                     placeholder="{{ _('Surname') }}">
+	                    <input type="submit" value=" > ">
+	                 </fieldset>
+	               </form>
+	           </div>
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
@@ -111,14 +138,14 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families?o=father" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}|&lt;</a>
+                     <a href="/scene/families?o=father" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
                 <li><a href="/scene/families?o=father&f={{last.father_sortname | replace("#", "%23")}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
 
                 <li>{% if last %}
-                     <a href="/scene/families?o=mother" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}|&lt;</a>
+                     <a href="/scene/families?o=mother" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>

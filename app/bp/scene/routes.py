@@ -245,7 +245,7 @@ def show_families():
     # Set filter by owner and the data selection
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request, 'family_scope')
+    my_filter.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
     fw_from = request.args.get('f', '', type=str)
     fwm_from = request.args.get('m', '', type=str)
