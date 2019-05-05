@@ -494,17 +494,33 @@ class Cypher_source():
     '''
     Cypher class for creating and accessing Sources
     '''
-    source_list = """
-MATCH (s:Source)
-OPTIONAL MATCH (s)<-[:SOURCE]-(c:Citation)
-OPTIONAL MATCH (c)<-[:CITATION]-(e)
-OPTIONAL MATCH (s)-[r:REPOSITORY]->(a:Repository)
-RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle, 
-       a.rname AS repository, r.medium AS medium,
-       COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
-ORDER BY toUpper(stitle)
-"""
+#     source_list = """
+# MATCH (s:Source)
+#     OPTIONAL MATCH (s) <-[:SOURCE]- (c:Citation)
+#     OPTIONAL MATCH (c) <-[:NOTE]- (note)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (cit)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        rep.rname AS repository, r.medium AS medium,
+#        COUNT(c) AS cit_cnt, COUNT(cit) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)
+# """
 
+    get_sources_w_notes = """
+MATCH (s:Source)
+    OPTIONAL MATCH (s) -[:NOTE]-> (note)
+    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+       collect(DISTINCT [r.medium, rep]) as repositories,
+       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+ORDER BY toUpper(s.stitle)"""
+
+    get_a_source_w_notes = """
+MATCH (source:Source) WHERE ID(source)=$sid
+OPTIONAL MATCH (source) -[:NOTE]-> (n)
+RETURN source, COLLECT(n) as notes"""
 #     get_repositories_w_notes = """
 # MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
 #     WHERE ID(source) = $sid

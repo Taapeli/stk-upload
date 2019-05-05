@@ -420,14 +420,29 @@ def read_places():
 
 
 def get_source_with_events(sourceid):
-    """ Lukee tietokannasta Source- objektin tapahtumat näytettäväksi
+    """ Lukee tietokannasta Source- objektin tapahtumineen näytettäväksi
     """
 
-    s = Source()
-    s.uniq_id = int(sourceid)
-    result = s.get_source_data()
+    result = Source.get_source_w_notes(sourceid)
     for record in result:
-        s.stitle = record["stitle"]
+        # Record: <Record 
+        #    source=<Node id=242395 labels={'Source'} 
+        #        properties={'handle': '_d9d28fe83184fd33368', 'id': 'S0052', 
+        #        'stitle': 'Hämeenlinna ksrk syntyneet 1850-1874', 'change': '1543225947'}> 
+        #    notes=[
+        #        <Node id=234937 labels={'Note'} 
+        #            properties={'handle': '_d9d291becb75743756e', 'text': '', 
+        #                'id': 'N2213', 'type': 'Citation', 
+        #                'url': 'http://digi.narc.fi/digi/view.ka?kuid=6062348', 
+        #                'change': 1532807569}>
+        #    ]>
+
+        s = Source.from_node(record['source'])
+        notes = record['notes']
+        for node in notes:
+            n = Note.from_node(node)
+            s.notes.append(n)
+
     result = Source.get_citating_nodes(sourceid)
 
     citations = {}
@@ -512,7 +527,7 @@ def get_source_with_events(sourceid):
 #             noderef.label = 'Person'
         c.citators.append(noderef)
 
-    return (s.stitle, list(citations.values()))
+    return (s, list(citations.values()))
 
 
 def read_sources_wo_cites():

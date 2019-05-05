@@ -328,9 +328,9 @@ def show_source_page(sourceid):
     """ Home page for a Source with referring Event and Person data
     """
     try:
-        stitle, citations = get_source_with_events(sourceid)
+        source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/source_events.html",
-                           stitle=stitle, citations=citations)
+                           source=source, citations=citations)
 

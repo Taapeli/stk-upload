@@ -98,7 +98,11 @@
                     
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
-    {{note.text}}{% if note.url %}
+    {% set list1 = note.text.split('\n') %}
+	{% for l in list1 %}
+	   <p>{{ l }}</p>
+	{% endfor %}
+    {% if note.url %}
     <a href="{{note.url}}" class="outlink" 
        target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}
 {%- endmacro %}
