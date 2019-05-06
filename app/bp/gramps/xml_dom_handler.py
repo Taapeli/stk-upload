@@ -18,7 +18,7 @@ from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
 from .batchlogger import Log
 
-from models.gen.family import Family
+#from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person_name import Name
@@ -27,13 +27,14 @@ from models.gen.person_combo import Person_combo
 from models.gen.place import Place, Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.citation import Citation
-from models.gen.source import Source
+#from models.gen.source import Source
 from models.gen.repository import Repository
 
-from models.dataupdater import set_person_name_properties
-from models.dataupdater import set_family_name_properties
-from models.dataupdater import make_place_hierarchy_properties
-from bp.gramps.models import source_gramps
+from models import dataupdater
+#from models.dataupdater import set_person_name_properties
+#from models.dataupdater import set_family_name_properties
+#from models.dataupdater import make_place_hierarchy_properties
+#from bp.gramps.models import source_gramps
 
 
 def pick_url(src):
@@ -756,7 +757,7 @@ class DOM_handler():
         hierarchy_count = 0
 
         for pl in self.place_ids:
-            hc = make_place_hierarchy_properties(tx=self.tx, place=pl)
+            hc = dataupdater.make_place_hierarchy_properties(tx=self.tx, place=pl)
             hierarchy_count += hc
 
         self.blog.log_event({'title':"Place hierarchy", 
@@ -774,7 +775,7 @@ class DOM_handler():
 
         for p_id in self.family_ids:
             if p_id != None:
-                dc, sc = set_family_name_properties(tx=self.tx, uniq_id=p_id)
+                dc, sc = dataupdater.set_family_name_properties(tx=self.tx, uniq_id=p_id)
                 dates_count += dc
                 sortname_count += sc
 
@@ -791,6 +792,8 @@ class DOM_handler():
         t0 = time.time()
         refname_count = 0
         sortname_count = 0
+
+        from models.dataupdater import set_person_name_properties
 
         for p_id in self.person_ids:
             if p_id != None:

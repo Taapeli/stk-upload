@@ -134,3 +134,10 @@ CREATE (u) -[:HAS_ROLE]-> (r)'''
     user_role_delete = '''
 MATCH (u:User {email: $email}) -[c:HAS_ROLE]-> (r:Role {name: $name})
 DELETE c'''
+
+class Cypher_stats():
+    
+    get_batches = '''
+match (b:Batch) -[:OWNS]-> (x) where b.user = $user
+return b.user as user, b.id as batch, labels(x)[0] as label, count(x) as cnt 
+    order by user, batch'''

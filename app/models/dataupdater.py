@@ -2,14 +2,14 @@
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 11.4.2016
 
-import logging
+#import logging
 import time
 from flask_babelex import _
 
 from bp.gramps.batchlogger import Batch
 from models.gen.user import User
 from models.gen.person import Person
-from models.gen.place import Place
+#from models.gen.place import Place
 from models.gen.person_name import Name
 from models.gen.refname import Refname
 from models.gen.person_combo import Person_combo
