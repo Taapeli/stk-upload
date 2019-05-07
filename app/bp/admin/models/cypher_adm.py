@@ -18,7 +18,7 @@ where not ( 'UserProfile' IN labels(a)
 DETACH DELETE a"""
 
     remove_my_nodes = """
-MATCH (a)<-[r:REVISION|HAS_LOADED]-(u:UserProfile {userName:$user})
+MATCH (u:UserProfile) -[*]-> (a) WHERE u.userName=$user
 DETACH DELETE a"""
 
     allowed_email_register = """

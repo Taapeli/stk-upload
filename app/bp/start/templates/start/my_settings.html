@@ -39,7 +39,7 @@ td,th {background: beige;}
           	</div>
           	<div class="submit">
                 <input type="submit" value="{{ _('Apply') }}" /></div>
-            <p>&gt; <a href="{{ referrer }}">{{ _('Go back') }}</a></p>
+            <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back') }}</a></p>
             <input type="hidden" name="referrer" value="{{ referrer }}" />
          </form>
          </div>
@@ -49,17 +49,18 @@ td,th {background: beige;}
         <h3>{{ _('My Roles') }}</h3>
         <ul>
         {% for role in  roles %}
-        	<li>{{role.name}}</li>
+        	<li><b>{{role.name}}</b>: {{role.description}}</li>
         {% endfor %}
         </ul>
     </div>
 
     <div class=startbox>
         <h3>{{ _('My Data Batches') }}</h3>
-        <p>{{ _('The amount of different data nodes connected directly to your candidate Batches.') }}
+        <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
 {# labels = ['Family', 'Note', 'Person']
    user_batches = {'jpek': {'batch': 'jpek 2019-05-03.001', 'Person': 1949, 'Family': 736}}
 #}
+    {% if batches %}
         <table>
         <tr>
             <th>{{ _('Batch') }}</th>
@@ -77,6 +78,11 @@ td,th {background: beige;}
 		</tr>
 		{% endfor %}
         </table>
+    {% else %}
+        <p>{{ _('You have no candidate data loaded in the database.') }}
+        <a href="/gramps">{{ _('Upload your data here') }}</a>.
+        </p>
+    {% endif %}
     </div>
 
     {% endif %}

@@ -121,7 +121,8 @@ $(document).ready( function() {
 	  </form>
     </div>
     
-  <p>{% if current_user.is_authenticated and current_user.has_role('member') %}
+  <p>&rtrif; <a href="/gramps">{{ _("Send a new Gramps file") }}</a><br>
+   {% if current_user.is_authenticated and current_user.has_role('member') %}
 	&rtrif; <a href="/scene/persons_all?div=2">{{ _('See your own data') }}</a><br>
    {% endif %}
     &rtrif; <a href="javascript:history.back()">{{ _("Return to front page") }}</a>
