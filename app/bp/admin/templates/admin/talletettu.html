@@ -13,6 +13,7 @@
         </ol>
       {% endif %}
     {% endwith %}
+    <div id="startdiv">
     {% if text is string %}
 	       <p>{{text}}</p>
 	    {% else %}<table>
@@ -25,5 +26,6 @@
 	    {% endfor %}</table>
     {% endif %}
     <p>&rtrif; <a href="javascript:history.back()">{{ _('Go back') }}</a></p>
+    </div>
 {% endblock %}
 

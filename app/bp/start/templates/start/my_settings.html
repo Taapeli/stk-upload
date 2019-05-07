@@ -9,7 +9,7 @@
 
 {{ hamburger_menu() }}
 <style>
-td,th {background: beige;}
+td,th {background: white;}
 </style>
 
 <div id="startdiv">
@@ -19,7 +19,7 @@ td,th {background: beige;}
     {% if current_user is defined and current_user.is_authenticated %}
 
     <div class=startbox>
-        <h3>{{ _('User') }} {{current_user.username}}</h3>
+        <h3>{{ _('User') }} <i>{{current_user.username}}</i></h3>
 	     <div><i>{{current_user.name}}</i> 
 	        &lt;{{current_user.email}}&gt;
 	     </div>
@@ -46,7 +46,7 @@ td,th {background: beige;}
     </div>
 
     <div class=startbox>
-        <h3>{{ _('My Roles') }}</h3>
+        <h3>{{ _('Active Roles') }}</h3>
         <ul>
         {% for role in  roles %}
         	<li><b>{{role.name}}</b>: {{role.description}}</li>
@@ -55,17 +55,17 @@ td,th {background: beige;}
     </div>
 
     <div class=startbox>
-        <h3>{{ _('My Data Batches') }}</h3>
+        <h3>{{ _('Data Batches') }}</h3>
         <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
 {# labels = ['Family', 'Note', 'Person']
-   user_batches = {'jpek': {'batch': 'jpek 2019-05-03.001', 'Person': 1949, 'Family': 736}}
+   user_batches = {'user1/2019-05-03.001': {'Person': 1949, 'Family': 736}}
 #}
     {% if batches %}
         <table>
         <tr>
             <th>{{ _('Batch') }}</th>
-	        {% for label in labels %}<th>{{label}}</th>
-	        {% endfor %}
+            {% for label in labels %}<th>{{label}}</th>
+            {% endfor %}
         </tr>
         {% for key1,item in batches.items() %}
             {% set user0 = user %}
@@ -73,20 +73,45 @@ td,th {background: beige;}
 <!--              <tr><th colspan="{{ labels|length + 1 }}">{{user}}</th></tr> -->
         <tr><td>{{batch}}</td>
             {% for label in labels %}
-		      <td class="right"> {{item[label]}} </td>
-		    {% endfor %}
-		</tr>
-		{% endfor %}
+              <td class="right"> {{item[label]}} </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
         </table>
     {% else %}
-        <p>{{ _('You have no candidate data loaded in the database.') }}
-        <a href="/gramps">{{ _('Upload your data here') }}</a>.
-        </p>
+        <p>{{ _('You have no candidate data loaded in the database.') }}</p>
     {% endif %}
+            <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a></p>
     </div>
 
+    <div class=startbox>
+        <h3>{{ _('My Gedcom files') }}</h3>
+    {% if gedcoms %}
+           <table>
+                <tr><th>{{ _('File') }}</th>
+                    <th>{{ _('Date') }}</th>
+                    <th>{{ _('Bytes') }}</th></tr>
+               {% for file in gedcoms %}
+                   <tr>
+	                   <td class="gedcom-name">{{ file.name }}</td>
+	                   {% set date = file.metadata.upload_time.split() %}
+	                   <td>{{ date[1] }}</td>
+	                   <td class="right">{{ file.metadata.size }}</td>
+	               </tr>
+                   {% if file.metadata.desc %}
+                   <tr><td colspan="4"><small>&nbsp;
+                          <i>{{ file.metadata.desc|escape }}</i></small></td>
+                   </tr>{% endif %}
+               {% endfor %}
+           </table>
+    {% else %}
+        <p>{{ _('You have no Gedcom files in the server.') }}</p>
+    {% endif %}
+            <p>&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a></p>
+    </div>
     {% endif %}
   </div>
+
   <p></p>
 </div>
 {% endblock %}

@@ -321,8 +321,8 @@ msgstr "Käyttäjätiedot päivitetty"
 
 #: bp/admin/routes.py:280 bp/gramps/routes.py:84
 #, python-format
-msgid "Data import from %(i)d to database has been started."
-msgstr "Tuonti tiedostosta %(i)d on alkanut."
+msgid "Data import from %(i)s to database has been started."
+msgstr "Tuonti tiedostosta %(i)s on alkanut."
 
 #: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:209
 #: bp/admin/uploads.py:232 bp/gramps/templates/gramps/uploads.html:74
@@ -2848,12 +2848,12 @@ msgid "Tools and Links"
 msgstr "Työkaluja ja linkkejä"
 
 #: bp/start/templates/start/index_logged.html:86
-msgid "Supplementary utilities"
-msgstr "Varusohjeimia"
+msgid "Supplementary utilities in our help page"
+msgstr "Varusohjeimia ohjesivuillamme"
 
 #: bp/start/templates/start/index_logged.html:88
-msgid "Tools"
-msgstr "Työkaluja"
+msgid "Help page"
+msgstr "Ohjesivulle"
 
 #: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:36
 #: bp/stk_security/templates/security/register_user.html:17
@@ -2929,12 +2929,12 @@ msgid "Change language"
 msgstr "Vaihda kieltä"
 
 #: bp/start/templates/start/my_settings.html:49
-msgid "My Roles"
-msgstr "Omat roolini"
+msgid "Active Roles"
+msgstr "Määritellyt roolit"
 
 #: bp/start/templates/start/my_settings.html:58
-msgid "My Data Batches"
-msgstr "Omat tuontieräni"
+msgid "Data Batches"
+msgstr "Tuontierät"
 
 #: bp/start/templates/start/my_settings.html:59
 msgid ""
@@ -2953,7 +2953,7 @@ msgid "You have no candidate data loaded in the database."
 msgstr "Sinulla ei ole ehdokasaineistoja kannassa."
 
 #: bp/start/templates/start/my_settings.html:83
-msgid "Upload your data here"
+msgid "Upload another file"
 msgstr "Talleta aineistojasi tästä"
 
 #: bp/start/templates/start/s_macros.html:19

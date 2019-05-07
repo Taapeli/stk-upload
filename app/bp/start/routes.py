@@ -118,11 +118,17 @@ def my_settings():
     batch_reader = Batches(current_user.username)
     labels, user_batches = batch_reader.get_user_batch_stats()
     print(f'# User batches {user_batches}')
+
+    from bp.gedcom.routes import list_gedcoms
+    gedcoms = list_gedcoms(current_user.username)
+    print(f'# Gedcoms {gedcoms}')
+    
     return render_template("/start/my_settings.html",
                            referrer=referrer,
                            roles=current_user.roles,
                            labels=labels,
-                           batches=user_batches)
+                           batches=user_batches,
+                           gedcoms=gedcoms)
 
 # Admin start page
 @shareds.app.route('/admin',  methods=['GET', 'POST'])
