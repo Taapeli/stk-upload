@@ -53,7 +53,7 @@ RETURN extract(x IN relationships |
 
 # Ver 0.2 Person lists with names and events
     read_my_persons_with_events_starting_name = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER|OWNS]-> (p:Person)
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (p:Person)
     WHERE prof.userName = $user AND p.sortname >= $start_name
 WITH p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
@@ -66,35 +66,23 @@ RETURN p as person,
     COLLECT(distinct n) AS names,
     COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events 
     ORDER BY person.sortname"""
-#     xxxx_my_persons_with_events_from_name = """
-# MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
-#     WHERE prof.userName = $user AND p.sortname >= $start_name
-# WITH p ORDER BY p.sortname LIMIT $limit
-#   MATCH (p:Person) -[:NAME]-> (n:Name)
-# WITH p, n ORDER BY p.sortname, n.order
-#     OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
-#     OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
-# RETURN p as person, 
-#     collect(distinct n) as names, 
-#     collect(distinct [e, pl.pname, rn.role]) as events
-# ORDER BY p.sortname"""
 
     read_all_persons_with_events_starting_name = """
-MATCH (b:Batch) -[:BATCH_MEMBER|OWNS]-> (p:Person)
+MATCH (b:Batch) -[:OWNS]-> (p:Person)
     WHERE p.sortname >= $start_name
-WITH p, b.user as user
+WITH p, COLLECT(DISTINCT b.user) as owners
 ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
     OPTIONAL MATCH (p) <-[:PARENT|MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
-WITH p, n, re.role as role, e, f.rel_type as rel, fe, user
+WITH p, n, re.role as role, e, f.rel_type as rel, fe, owners
 ORDER BY p.sortname, n.order
     OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
     OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
 RETURN p as person, 
     COLLECT(distinct n) as names, 
     COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events,
-    user
+    owners
 ORDER BY person.sortname"""
 
 #     xxxx_all_persons_with_events_from_name = """
@@ -261,15 +249,55 @@ class Cypher_family():
     
     # from models.gen.family.read_families
     read_families_p = """
-MATCH (f:Family) WHERE ID(f)>=$fw
+MATCH (f:Family) WHERE f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
-OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
-RETURN f, 
+OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
     COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(DISTINCT pc) AS child, 
     COUNT(DISTINCT pc) AS no_of_children 
-    ORDER BY ID(f) LIMIT $limit"""
+    ORDER BY f.father_sortname LIMIT $limit"""
+
+    read_my_families_p = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
+    WHERE prof.userName = $user AND f.father_sortname>=$fw
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.father_sortname LIMIT $limit"""
+    
+    read_families_m = """
+MATCH (f:Family) WHERE f.mother_sortname>=$fwm
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.mother_sortname LIMIT $limit"""
+    
+    read_my_families_m = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
+    WHERE prof.userName = $user AND f.mother_sortname>=$fwm
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.mother_sortname LIMIT $limit"""
+    
     #TODO Obsolete
     read_families = """
 MATCH (f:Family) WHERE ID(f)>=$fw
@@ -319,6 +347,28 @@ return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
 match (e:Event) <-- (:Family) -[r:PARENT|FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)
     where ID(e)=$eid
 return type(r) as frole, id(p) as pid, collect(n) as names"""
+
+
+    get_dates_parents = """
+MATCH (family:Family) WHERE ID(family)=$id
+OPTIONAL MATCH (family)-[:PARENT {role:"father"}]-(father:Person)
+OPTIONAL MATCH (father)-[:EVENT]-(father_death:Event {type:"Death"})
+OPTIONAL MATCH (family)-[:PARENT {role:"mother"}]-(mother:Person)
+OPTIONAL MATCH (mother)-[:EVENT]-(mother_death:Event {type:"Death"})
+OPTIONAL MATCH (family)-[:EVENT]-(event:Event) WHERE event.type="Marriage"
+OPTIONAL MATCH (f)-[:EVENT]-(divorce_event:Event {type:"Divorce"})
+RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
+       mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
+       event.date1 AS marriage_date, divorce_event.date1 AS divorce_date"""
+
+
+    set_dates_sortname = """
+MATCH (family:Family) WHERE ID(family) = $id
+SET family.datetype=$datetype
+SET family.date1=$date1
+SET family.date2=$date2
+SET family.father_sortname=$father_sortname
+SET family.mother_sortname=$mother_sortname"""
 
 
 class Cypher_place():
@@ -442,18 +492,41 @@ OPTIONAL MATCH (c) -[n:NOTE]-> (note:Note)
 
 class Cypher_source():
     '''
-    Cypher clases for creating and accessing Sources
+    Cypher class for creating and accessing Sources
     '''
-    source_list = """
+#     source_list = """
+# MATCH (s:Source)
+#     OPTIONAL MATCH (s) <-[:SOURCE]- (c:Citation)
+#     OPTIONAL MATCH (c) <-[:NOTE]- (note)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (cit)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        rep.rname AS repository, r.medium AS medium,
+#        COUNT(c) AS cit_cnt, COUNT(cit) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)
+# """
+
+    get_sources_w_notes = """
 MATCH (s:Source)
-OPTIONAL MATCH (s)<-[:SOURCE]-(c:Citation)
-OPTIONAL MATCH (c)<-[:CITATION]-(e)
-OPTIONAL MATCH (s)-[r:REPOSITORY]->(a:Repository)
-RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle, 
-       a.rname AS repository, r.medium AS medium,
-       COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
-ORDER BY toUpper(stitle)
-"""
+    OPTIONAL MATCH (s) -[:NOTE]-> (note)
+    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+       collect(DISTINCT [r.medium, rep]) as repositories,
+       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+ORDER BY toUpper(s.stitle)"""
+
+    get_a_source_w_notes = """
+MATCH (source:Source) WHERE ID(source)=$sid
+OPTIONAL MATCH (source) -[:NOTE]-> (n)
+RETURN source, COLLECT(n) as notes"""
+#     get_repositories_w_notes = """
+# MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
+#     WHERE ID(source) = $sid
+# OPTIONAL MATCH (repo) -[:NOTE]-> (note:Note)
+# RETURN r.medium AS medium, repo, COLLECT(note) AS notes"""
+
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
@@ -483,7 +556,7 @@ return id(r) AS uniq_id,
     r.handle as handle,
     r.id as id,
     collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
-    collect(w) as notes
+    collect(distinct w) as notes
 order by r.rname"""
 
     get_w_sources_all = _get_all + _get_tail 

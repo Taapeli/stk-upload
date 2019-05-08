@@ -3,9 +3,14 @@
 {% block title %}{{ _('Events of a Source') }}{% endblock %}
 {% block body %}
 {{ super() }}
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+<style>
+div#summaryarea ul li p { margin: 0 0 0.3em 0; }
+</style>
+
+{#<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
     integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
     crossorigin="anonymous">
+#}
 {% import '/scene/macros.html' as macro with context %}
 
 <div id="startdiv">
@@ -14,16 +19,16 @@
 
 {{ macro.menu(5) }}
     <div class="content" id="IndividualDetail">
-	    <h3 style="position:sticky; top:0;" title="{{ _('Source') }}">{{stitle}}</h3>
+	    <h3 style="position:sticky; top:0;" title="{{ _('Source') }}">{{source.stitle}}</h3>
+	        <div id="summaryarea">
+            {% if source.notes %}<ul>{% for note in source.notes %}
+                <li>{{ macro.notelink(note) }}</li>
+            {% endfor %}</ul>{% endif %}
+	        </div>
+
 	        <div class="subsection" id="citations">
 	            <h4>{{ _('Source References and Events') }}</h4>
 	            <table class="infolist eventlist" width="100%">
-	                <!-- thead>
-	                    <tr>
-	                        <th class="ColumnId"></th>
-	                        <th class="ColumnEvent">{{ _('Source and references') }}</th>
-	                    </tr>
-	                </thead -->
 	                <tbody>
 
 			        {% for c in citations|sort(attribute='page') %}

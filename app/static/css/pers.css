@@ -43,6 +43,9 @@ h1 div.curr_user a {
 }
 h1 div.curr_user a:hover { text-decoration: underline; }
 
+h4 {
+    margin-bottom: 0.5em;
+}
 div#paluu {
     position: absolute;
     top: 50px;

@@ -6,12 +6,12 @@
 import sys
 import os
 import importlib
-import time
+#import time
 import subprocess
 import traceback
 
-from re import match
-from collections import defaultdict
+#from re import match
+#from collections import defaultdict
 
 from flask import render_template, request, redirect, url_for, flash, jsonify, session
 from flask_security import login_required, current_user, roles_required, roles_accepted
@@ -19,7 +19,7 @@ from flask import send_from_directory
 from flask_babelex import _
 
 import logging 
-import string
+#import string
 LOG = logging.getLogger(__name__)
 
 from models import util, syslog
@@ -336,7 +336,7 @@ def gedcom_download(gedcom):
     gedcom_folder = get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
     gedcom = secure_filename(gedcom)
-    filename = os.path.join(gedcom_folder, gedcom)
+#     filename = os.path.join(gedcom_folder, gedcom)
     return send_from_directory(directory=gedcom_folder, filename=gedcom, as_attachment=True) 
 
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
@@ -509,7 +509,7 @@ def process_gedcom(arglist, transform_module):
 
     import argparse
     import io
-    import traceback
+#     import traceback
     parser = argparse.ArgumentParser()
 #    parser.add_argument('transform', help="Name of the transform (Python module)")
     parser.add_argument('input_gedcom', help=_("Name of the input GEDCOM file"))
@@ -625,7 +625,7 @@ def gedcom_transform(gedcom,transform):
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
         if s2: history_append(gedcom_filename,"\nErrors:\n"+s2)
-        s = "\n" + _("Errors:") + "\n" + s2 + "\n\n" + s1
+#         s = "\n" + _("Errors:") + "\n" + s2 + "\n\n" + s1
         try:
             log = open(logfile).read()
         except FileNotFoundError:

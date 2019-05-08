@@ -44,6 +44,8 @@ las
 
 
 def add_args(parser):
+    parser.add_argument('--display_all_unique_places', action='store_true',
+                        help=_('Display all unique places'))
     parser.add_argument('--reverse', action='store_true',
                         help=_('Reverse the order of places'))
     parser.add_argument('--add_commas', action='store_true',
@@ -82,11 +84,14 @@ class Places(transformer.Transformation):
     def __init__(self):
         self.changed = Counter()
         self.nonchanged = Counter()
+        self.allplaces = Counter()
         
     def transform(self,item,options,phase):
         if item.tag != "PLAC":  return True
         if not item.value: return True
         place = item.value
+        if options.display_all_unique_places:
+            self.allplaces[place] += 1
         if options.match and not stringmatch(place,options.match):
             return True
         newplace = process_place(options, place)
@@ -106,6 +111,13 @@ class Places(transformer.Transformation):
         raise RuntimeError(_("Internal error"))
 
     def finish(self,options):
+        if options.display_all_unique_places:
+            print("--------------------")
+            print("<h3>"+_("All unique place names:")+"</h3><pre>") 
+            for place,count in sorted(self.allplaces.most_common()):
+                print(count,place)
+            print("</pre>") 
+
         if options.display_unique_changes:
             print("--------------------")
             print("<h3>"+_("Place names changed:")+"</h3><pre>") 

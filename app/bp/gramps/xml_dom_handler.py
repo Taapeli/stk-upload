@@ -14,6 +14,8 @@ from flask_babelex import _
 
 from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
+from .models.family_gramps import Family_gramps
+from .models.source_gramps import Source_gramps
 from .models.place_gramps import Place_gramps
 from .batchlogger import Log
 
@@ -25,10 +27,14 @@ from models.gen.media import Media
 from models.gen.person_name import Name
 from models.gen.person_combo import Person_combo
 from models.gen.citation import Citation
-from models.gen.source import Source
+#from models.gen.source import Source
 from models.gen.repository import Repository
 
-from models.dataupdater import set_person_name_properties
+from models import dataupdater
+#from models.dataupdater import set_person_name_properties
+#from models.dataupdater import set_family_name_properties
+#from models.dataupdater import make_place_hierarchy_properties
+#from bp.gramps.models import source_gramps
 
 
 def pick_url(src):
@@ -86,6 +92,7 @@ class DOM_handler():
 
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
+        self.place_ids = []                 # List of processed Place node unique id's
         self.tx = None                      # Transaction not opened
         self.batch_id = None
 
@@ -285,7 +292,7 @@ class DOM_handler():
         # Print detail of each family
         for family in families:
 
-            f = Family()
+            f = Family_gramps()
 
             if family.hasAttribute("handle"):
                 f.handle = family.getAttribute("handle")
@@ -338,6 +345,7 @@ class DOM_handler():
                     if family_noteref.hasAttribute("hlink"):
                         f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
 
+            # print(f"# save Family {f}")
             f.save(self.tx, self.batch_id)
             counter += 1
             # The sortnames and dates will be set for these families 
@@ -650,6 +658,8 @@ class DOM_handler():
             # The place_keys has beeb updated 
 
             counter += 1
+            
+            self.place_ids.append(pl)
 
         self.blog.log_event({'title':"Places", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
@@ -715,7 +725,7 @@ class DOM_handler():
         # Print detail of each source
         for source in sources:
 
-            s = Source()
+            s = Source_gramps()
 
             if source.hasAttribute("handle"):
                 s.handle = source.getAttribute("handle")
@@ -731,31 +741,65 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one stitle in a source",
                                      'level':"WARNING", 'count':s.id})
 
-#TODO More than one noteref in a source     S0041, S0002
-            if len(source.getElementsByTagName('noteref') ) == 1:
-                source_noteref = source.getElementsByTagName('noteref')[0]
+            for source_noteref in source.getElementsByTagName('noteref'):
+                # Traverse links to surrounding places
                 if source_noteref.hasAttribute("hlink"):
-                    s.noteref_hlink = source_noteref.getAttribute("hlink")
-            elif len(source.getElementsByTagName('noteref') ) > 1:
-                self.blog.log_event({'title':"More than one noteref in a source",
-                                     'level':"WARNING", 'count':s.id})
+                    s.note_handles.append(source_noteref.getAttribute("hlink"))
 
-            if len(source.getElementsByTagName('reporef') ) == 1:
-                source_reporef = source.getElementsByTagName('reporef')[0]
+            for source_reporef in source.getElementsByTagName('reporef'):
+                r = Repository()
                 if source_reporef.hasAttribute("hlink"):
-                    s.reporef_hlink = source_reporef.getAttribute("hlink")
+                    # s.reporef_hlink = source_reporef.getAttribute("hlink")
+                    r.handle = source_reporef.getAttribute("hlink")
                 if source_reporef.hasAttribute("medium"):
-                    s.reporef_medium = source_reporef.getAttribute("medium")
-            elif len(source.getElementsByTagName('reporef') ) > 1:
-                self.blog.log_event({'title':"More than one reporef in a source",
-                                     'level':"WARNING", 'count':s.id})
+                    # s.reporef_medium = source_reporef.getAttribute("medium")
+                    r.medium = source_reporef.getAttribute("medium")
 
+                s.repositories.append(r)
+
+#             print(f'#source.save {s}')
             s.save(self.tx)
             counter += 1
 
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
+
+    def make_place_hierarchy(self):
+        ''' Connect places to the upper place
+        '''
+
+        print ("***** {} Place hierarchy *****".format(len(self.place_ids)))
+        t0 = time.time()
+        hierarchy_count = 0
+
+        for pl in self.place_ids:
+            hc = dataupdater.make_place_hierarchy_properties(tx=self.tx, place=pl)
+            hierarchy_count += hc
+
+        self.blog.log_event({'title':"Place hierarchy", 
+                                'count':hierarchy_count, 'elapsed':time.time()-t0})
+
+    def set_family_sortname_dates(self):
+        ''' For each Family set Family.father_sortname, Family.mother_sortname, 
+            Family.datetype, Family.date1 and Family.date2
+        '''
+
+        print ("***** {} Sortnames & dates *****".format(len(self.family_ids)))
+        t0 = time.time()
+        dates_count = 0
+        sortname_count = 0
+
+        for p_id in self.family_ids:
+            if p_id != None:
+                dc, sc = dataupdater.set_family_name_properties(tx=self.tx, uniq_id=p_id)
+                dates_count += dc
+                sortname_count += sc
+
+        self.blog.log_event({'title':"Dates", 
+                                'count':dates_count, 'elapsed':time.time()-t0})
+        self.blog.log_event({'title':"Sorting names", 'count':sortname_count})
+        
 
     def set_person_sortname_refnames(self):
         ''' Add links from each Person to Refnames and set Person.sortname
@@ -765,6 +809,8 @@ class DOM_handler():
         t0 = time.time()
         refname_count = 0
         sortname_count = 0
+
+        from models.dataupdater import set_person_name_properties
 
         for p_id in self.person_ids:
             if p_id != None:

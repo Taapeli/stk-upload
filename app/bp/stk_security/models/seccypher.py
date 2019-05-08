@@ -78,6 +78,15 @@ SET user.username = $username,
     user.login_count = $login_count 
 RETURN user'''
 
+    user_to_profile_link = '''
+MATCH (user:User) 
+    WHERE user.email = $email   
+MATCH (profile:UserProfile)
+    WHERE profile.email = $email
+CREATE  (user) -[:HAS_ROLE]-> (profile) 
+RETURN user'''    
+        
+
     user_del = '''
 MATCH (user:User)'
     WHERE user.username = $uname_or_mail 

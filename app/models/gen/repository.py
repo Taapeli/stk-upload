@@ -15,7 +15,7 @@ import shareds
    
 
 class Repository:
-    """ Repository / Arkisto
+    """ Repository / Arkisto.
             
         Properties:
             uniq_id         int    db native key or None
@@ -24,22 +24,25 @@ class Repository:
             id              str    esim. "R0001"
             rname           str    arkiston nimi
             type            str    arkiston tyyppi
+            medium          str    from relation.medium
             notes           Note[]
      """
 
     def __init__(self):
         """ Luo uuden repository-instanssin """
         self.uniq_id = None
+        self.type = ''
         self.handle = ''
         self.change = 0
         self.id = ''
         self.rname = ''
-        self.notes = []     # contains Note instances (prev. url_refs = [])
+        self.medium = ''
+        self.notes = []     # contains Note instances
 
         self.sources = []   # For creating display sets (Not used??)
 
     def __str__(self):
-        return "{} '{}'".format(self.id, self.rname)
+        return f"{self.id} '{self.rname}' {self.medium}"
 
 
     @classmethod
@@ -98,8 +101,8 @@ class Repository:
             repositories.append(n)
 
         return (titles, repositories)
-    
-    
+
+
     @staticmethod       
     def get_w_source (uniq_id):
         """ Voidaan lukea repositoreja sourceneen kannasta

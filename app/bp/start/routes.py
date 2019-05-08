@@ -5,7 +5,6 @@
 
 import logging 
 import traceback
-from bp.start.forms import JoinForm
 from werkzeug.utils import redirect
 from flask.helpers import url_for
 logger = logging.getLogger('stkserver')
@@ -16,6 +15,9 @@ from flask_babelex import _
 
 import shareds
 from models import email
+
+from bp.start.forms import JoinForm
+from bp.admin.users import Batches
 
 """ Application route definitions
 """ 
@@ -100,6 +102,7 @@ def send_email():
 def my_settings():
     lang = request.form.get("lang")
     referrer = request.form.get("referrer",default=request.referrer)
+    print("-> bp.start.routes.my_settings")
     if lang:
         try:
             from bp.admin.models.user_admin import UserAdmin # can't import earlier
@@ -111,10 +114,21 @@ def my_settings():
         except:
             flash(_("Update did not work"),category='flash_error')
             traceback.print_exc()
-    print("-> bp.start.routes.my_settings")
+
+    batch_reader = Batches(current_user.username)
+    labels, user_batches = batch_reader.get_user_batch_stats()
+    print(f'# User batches {user_batches}')
+
+    from bp.gedcom.routes import list_gedcoms
+    gedcoms = list_gedcoms(current_user.username)
+    print(f'# Gedcoms {gedcoms}')
+    
     return render_template("/start/my_settings.html",
                            referrer=referrer,
-                           roles=current_user.roles)
+                           roles=current_user.roles,
+                           labels=labels,
+                           batches=user_batches,
+                           gedcoms=gedcoms)
 
 # Admin start page
 @shareds.app.route('/admin',  methods=['GET', 'POST'])

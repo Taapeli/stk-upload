@@ -13,6 +13,7 @@ def email(mail_from,mail_to,subject,body):
         msg = Message(subject,
                       body=body,
                       sender=mail_from,
+                      reply_to=mail_from,
                       recipients=[mail_to])
         mail.send(msg)
     except Exception as e:

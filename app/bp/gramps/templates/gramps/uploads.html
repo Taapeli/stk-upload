@@ -95,11 +95,16 @@ $(document).ready( function() {
 	           <td>{{upload.upload_time_s}}</td>
 	           <td>{{upload.xmlname}}</td>
 	           <td>{{upload.status}}
-	           	{% if upload.batch_id %}
-	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
-	           	   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
-	           	   {% endif %}
-	           	{% endif %}
+                {% if upload.batch_id %}
+                   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
+                   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
+                   {% endif %}
+                {% endif %}
+                {% if upload.loading %}
+                    <a href="javascript:window.location.href=window.location.href"
+                     title="{{ _('See if ready') }}"
+                     style="text-decoration: none;font-weight: bold;font-size: large;">↻</a>
+                {% endif %}
 	           </td>
 	       </tr>
 	    {% endfor %}
@@ -116,7 +121,8 @@ $(document).ready( function() {
 	  </form>
     </div>
     
-  <p>{% if current_user.is_authenticated and current_user.has_role('member') %}
+  <p>&rtrif; <a href="/gramps">{{ _("Send a new Gramps file") }}</a><br>
+   {% if current_user.is_authenticated and current_user.has_role('member') %}
 	&rtrif; <a href="/scene/persons_all?div=2">{{ _('See your own data') }}</a><br>
    {% endif %}
     &rtrif; <a href="javascript:history.back()">{{ _("Return to front page") }}</a>

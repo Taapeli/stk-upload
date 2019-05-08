@@ -332,7 +332,7 @@ class DateRange():
                     month = int(a[1]) if len(a) > 1 else None
                     day  =  int(a[2]) if len(a) > 2 else None
                     self._set(year, month, day)
-                except ValueError as e:
+                except ValueError:
                     raise ValueError('DateInt({})'.format(arg0))
             else:
                 raise TypeError('DateInt({})'.format(arg0))
@@ -426,11 +426,11 @@ class DateRange():
             try:
                 a = self.vector()
                 if len(a) == 3:
-                    p = int(a[2])
-                    k = int(a[1])
+#                     p = int(a[2])
+#                     k = int(a[1])
                     return "{}.{}.{}".format(a[2],a[1],a[0]) 
                 elif len(a) == 2:
-                    k = int(a[1])
+#                     k = int(a[1])
                     return "{}.{}".format(a[1],a[0]) 
                 else:
                     return "{}".format(a[0])

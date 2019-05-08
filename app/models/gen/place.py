@@ -296,6 +296,21 @@ class Place:
         # REturn sorted by first name in the list p.pname
         return sorted(ret, key=lambda x:x.pname[0])
 
+
+    @staticmethod
+    def make_hierarchy(tx, place):
+        for upper in place.surround_ref:
+            try:
+                #print("upper {} -> {}".format(self, upper))
+                if 'dates' in upper and isinstance(upper['dates'], DateRange):
+                    r_attr = upper['dates'].for_db()
+                else:
+                    r_attr = {}
+                tx.run(Cypher_place_w_handle.link_hier,
+                       handle=place.handle, hlink=upper['hlink'], r_attr=r_attr)
+            except Exception as err:
+                print("iError Place.link_hier: {0}".format(err), file=stderr)
+
     @staticmethod
     def namelist_w_lang(field):
         """ Muodostetaan nimien luettelo jossa on mahdolliset kielikoodit
@@ -452,6 +467,62 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
 #             for i in range(len(self.noteref_hlink)):
 #                 print ("Noteref_hlink: " + self.noteref_hlink[i])
         return True
+
+
+    def save(self, tx):
+        """ Saves a Place with Place_names and hierarchy links """
+
+        p_attr = {}
+        try:
+            p_attr = {"handle": self.handle,
+                      "change": self.change,
+                      "id": self.id,
+                      "type": self.type,
+                      "pname": self.pname}
+            if self.coord:
+                # If no coordinates, don't set coord attribute
+                p_attr.update({"coord": self.coord.get_coordinates()})
+            result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
+            self.uniq_id = result.single()[0]
+        except Exception as err:
+            print("iError Place.create: {0} attr={}".format(err, p_attr), file=stderr)
+
+        try:
+            for i in range(len(self.names)):
+                #TODO: Check, if this name exists; then update or create new
+                n_attr = {"name": self.names[i].name,
+                          "lang": self.names[i].lang}
+                if self.names[i].dates:
+                    # If date information, add datetype, date1 and date2
+                    n_attr.update(self.names[i].dates.for_db())
+                tx.run(Cypher_place_w_handle.add_name,
+                       handle=self.handle, n_attr=n_attr)
+        except Exception as err:
+            print("iError Place.add_name: {0}".format(err), file=stderr)
+
+        # Note! This will be done after all Place nodes were stored
+        #Make hierarchy relations to upper Place nodes
+#         for upper in self.surround_ref:
+#             try:
+#                 #print("upper {} -> {}".format(self, upper))
+#                 if 'dates' in upper and isinstance(upper['dates'], DateRange):
+#                     r_attr = upper['dates'].for_db()
+#                 else:
+#                     r_attr = {}
+#                 tx.run(Cypher_place_w_handle.link_hier,
+#                        handle=self.handle, hlink=upper['hlink'], r_attr=r_attr)
+#             except Exception as err:
+#                 print("iError Place.link_hier: {0}".format(err), file=stderr)
+
+        # Make place note relations
+        for i in range(len(self.noteref_hlink)):
+            try:
+                tx.run(Cypher_place_w_handle.link_note,
+                       handle=self.handle, hlink=self.noteref_hlink[i])
+            except Exception as err:
+                print("iError Place.link_note: {0}".format(err), file=stderr)
+
+        return
 
 
 class Place_name:

@@ -2,18 +2,41 @@
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 11.4.2016
 
-import logging
+#import logging
 import time
 from flask_babelex import _
 
 from bp.gramps.batchlogger import Batch
 from models.gen.user import User
 from models.gen.person import Person
+#from models.gen.place import Place
 from models.gen.person_name import Name
 from models.gen.refname import Refname
 from models.gen.person_combo import Person_combo
+from models.gen.family_combo import Family_combo
 
 
+def make_place_hierarchy_properties(tx=None, place=None):
+    """ Connects places to the upper level places
+    """
+    hierarchy_count = 0
+    
+    if tx:
+        my_tx = tx
+    else:
+        my_tx = User.beginTransaction()
+        
+    place.make_hierarchy(my_tx, place)
+    
+    hierarchy_count += 1
+
+    return (hierarchy_count)
+
+    if not tx:
+        # Close my own created transaction
+        User.endTransaction(my_tx)
+        
+    
 def set_confidence_values(tx, uniq_id=None, batch_logger=None):
     """ Sets a quality rate for one or all Persons
         Asettaa henkilölle laatuarvion
@@ -63,6 +86,64 @@ def set_estimated_person_dates(uids=None):
     User.endTransaction(my_tx)
     
     return msg
+
+
+def set_family_name_properties(tx=None, uniq_id=None):
+    """ Set Family.father_sortname and Family.mother_sortname using the data in Person
+        Set Family.date1 using the data in marriage Event
+        Set Family.datetype and Family.date2 using the data in divorce or death Events
+        If handler is defined
+        - if there is transaction tx, use it, else create a new 
+    """
+    dates_count = 0
+    sortname_count = 0
+    
+    if tx:
+        my_tx = tx
+    else:
+        my_tx = User.beginTransaction()
+
+    # Process each family 
+    result = Family_combo.get_dates_parents(my_tx, uniq_id)
+    for record in result:
+        father_sortname = record['father_sortname']
+        father_death_date = record['father_death_date']
+        mother_sortname = record['mother_sortname']
+        mother_death_date = record['mother_death_date']
+        marriage_date = record['marriage_date']
+        divorce_date = record['divorce_date']
+        
+        datetype = None
+        end_date = None
+        if divorce_date:
+            end_date = divorce_date
+        elif father_death_date and mother_death_date:
+            if father_death_date < mother_death_date:
+                end_date = father_death_date
+            else:
+                end_date = mother_death_date
+        elif father_death_date:
+            end_date = father_death_date
+        elif mother_death_date:
+            end_date = mother_death_date
+
+        if end_date:
+            datetype = "3"
+        elif marriage_date:
+            datetype = "0"
+            end_date = marriage_date
+        
+        # Copy the dates from Event node and sortnames from Person nodes
+        Family_combo.set_dates_sortnames(my_tx, uniq_id, datetype, marriage_date, end_date,
+                                         father_sortname, mother_sortname)
+        dates_count += 1
+        sortname_count += 1
+    
+    if not tx:
+        # Close my own created transaction
+        User.endTransaction(my_tx)
+
+    return (dates_count, sortname_count)
 
 
 def set_person_name_properties(tx=None, uniq_id=None, ops=['refname', 'sortname']):

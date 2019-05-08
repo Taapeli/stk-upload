@@ -155,7 +155,7 @@ def dotest_gedcom_transform(client,test_gedcom,transform,expected,**options):
     args.update({"--"+option:value for option,value in options.items()})
     rv = client.post('/gedcom/transform/'+temp_gedcom+"/"+transform,data=args)
     data1 = rv.data.decode("utf-8")
-    open("trace.txt","w").write(data1)
+    #open("trace.txt","w").write(data1)
     data = json.loads(rv.data.decode("utf-8"))
     assert data["stderr"] == ""
     assert expected in data['stdout']

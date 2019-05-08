@@ -23,9 +23,9 @@ from ..admin import uploads
 @bp.route('/gramps')
 @login_required
 @roles_accepted('research', 'admin')
-def gramps_upload():
+def gramps_index():
     """ Home page gramps input file processing """
-    print("-> bp.start.routes.gramps_upload")
+    print("-> bp.start.routes.gramps_index")
     return render_template("/gramps/index_gramps.html")
 
 @bp.route('/gramps/show_log/<xmlfile>')
@@ -44,7 +44,7 @@ def list_uploads():
 
 @bp.route('/gramps/upload', methods=['POST'])
 @roles_accepted('research', 'admin')
-def upload_gramps():  
+def upload_gramps(): 
     """ Load a gramps xml file to temp directory for processing in the server
     """
     try:
@@ -81,7 +81,7 @@ def upload_gramps():
 @roles_accepted('research')
 def start_load_to_neo4j(xmlname):
     uploads.initiate_background_load_to_neo4j(current_user.username,xmlname)
-    flash(_('Data import from {!r} to database has been started.'.format(xmlname)), 'info')
+    flash(_("Data import from %(i)s to database has been started.", i=xmlname), 'info')
     return redirect(url_for('gramps.list_uploads'))
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')

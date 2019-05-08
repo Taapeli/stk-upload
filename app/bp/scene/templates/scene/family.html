@@ -1,0 +1,35 @@
+{# _templates/scene/person_pg.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}{{ _("Family details") }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+    crossorigin="anonymous">
+<style>
+u { color: DarkKhaki; text-decoration: none; }
+</style>
+
+<div id="startdiv">
+    <h2>{{ _("Family details") }}</h2>
+    <!-- owner {{family.owner}}, next {{next}}, filter {{session['owner_filter']}}</small> -->
+</div>
+
+{{ macro.menu(menuno) }}
+    <div class="content" id="IndividualDetail">
+
+        <h3 style="position:sticky; top:0;">Family {{ family.id }}</h3>
+
+        <div id="summaryarea">
+            <table>
+                <tr>
+                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="ColumnValue"><span class="id">tuntematon</span> / <tt>{{family.id}}</tt></td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+{% endblock %}
+

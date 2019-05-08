@@ -4,6 +4,12 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
+<style>
+td.ColumnSource ul { margin: 0.5em;}
+td.ColumnSource ul li { font-size: smaller; }
+td.Archive ul { margin: 0; padding-left: 1em; padding-bottom: 0.5em; }
+td ul li p { margin: 0 0 0.3em 0; }
+</style>
 
 <div id="startdiv">
     <h2>{{ _('List of Sources') }}</h2>
@@ -27,8 +33,7 @@
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-                    <th>{{ _('Source') }}</th>
-                    <th>{{ _('Tool') }}</th>
+                    <th>{{ _('Source') }}, {{ _('Notes') }}</th>
                     <th>{{ _('In the repository') }}</th>
                     <th title="{{ _('Citations') }}">{{ _('citated') }}</th>
                     <th title="{{ _('events, persons, etc., referred to as "> referenced') }}</th>
@@ -43,7 +48,7 @@
 	               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
                 {% endif %}
                 </td>
-            <td class="ColumnPerson">
+            <td class="ColumnSource">
                <div>
                  {% set uniq_id = s.uniq_id %}
                  {% set id = s.id %}
@@ -52,9 +57,21 @@
                      title="{{ _('Source') }} {{s.uniq_id}} ({{s.id}}) {{ _('unused') }}">{% else %}
                      title="{{ _('see details of source %(uniq_id)s (%(id)s)', uniq_id=uniq_id, id=id) }}">{% endif %}
                      {{s.stitle}}</a>
-                </div></td>
-            <td title="{{ _('Format') }}: {{s.medium}}">{% if s.medium %}{{s.medium|transl('medium')}}{% endif %}</td>
-            <td title="{{ _('Repository Name') }}">{% if s.repo_name %}{{s.repo_name}}{% endif %}</td>
+                </div>
+
+	        {% if s.notes %}<ul>{% for note in s.notes %}
+	            <li>{{ macro.notelink(note) }}</li>
+            {% endfor %}</ul>{% endif %}
+            </td>
+            <td class="Archive">{% if s.repositories|length > 1 %}
+                <ul>{% for repo in s.repositories %}
+                    <li title="{{ _('Repository Name') }}">{{repo.rname}} 
+                        <i>{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</i></li>
+                {% endfor %}</ul>
+            {% elif s.repositories %}{% set repo = s.repositories[0] %}
+                <span title="{{ _('Repository Name') }}">{{repo.rname}} 
+                        <i>{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</i></span>
+            {% endif %}</td>
             <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
             <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
             </tr>

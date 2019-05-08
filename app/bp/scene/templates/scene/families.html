@@ -7,6 +7,9 @@
 <script src="/static/infobox.js"></script>
 
 {% set cnt = families|count %}
+{% set user = owner_filter.user %}
+{% set next = owner_filter.scope %}
+{% set filt_owners = owner_filter.filter %}
 
 <div id="startdiv">
 	<h2>{{ _('List of Families') }}</h2>
@@ -20,7 +23,45 @@
         <div id="summaryarea">
             <div class="flex-container">
                <div id="description">
-                    <p>{{ _('Displaying %(num)s families', num=cnt) }}.</p>
+                   <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
+                       {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
+                       {% else %}{{ _('from begin') }},
+                       {% endif %}{{ _('data set') }}
+                       <b>{% if multi_owners %}
+                            &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
+                       {% else %}{{my_set}}
+                       {% endif %}</b>
+                       {% if user %}
+                       (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
+                            style="text-decoration-line: underline;">Vaihda</a></i>).
+                       {% endif %}</p>
+	           </div>
+	           <div>
+	               <form action="/scene/families">
+	                 <fieldset>
+	                    <input type="hidden" name="o" value="father" >
+	                    <input type="hidden" name="c" value="50" >
+	                    <label for="fw">{{ _('Go to') }} {{ _('Father') }}</label>
+	                    <input type="text" name="fw" size="8" 
+	                     title="{{ _('Starting letters of surname') }}" 
+	                     placeholder="{{ _('Surname') }}">
+	                    <input type="submit" value=" > ">
+	                 </fieldset>
+	               </form>
+	           </div>
+	           <div>
+	               <form action="/scene/families">
+	                 <fieldset>
+	                    <input type="hidden" name="o" value="mother" >
+	                    <input type="hidden" name="c" value="50" >
+	                    <label for="fw">{{ _('Go to') }} {{ _('Mother') }}</label>
+	                    <input type="text" name="fw" size="8" 
+	                     title="{{ _('Starting letters of surname') }}" 
+	                     placeholder="{{ _('Surname') }}">
+	                    <input type="submit" value=" > ">
+	                 </fieldset>
+	               </form>
+	           </div>
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
@@ -38,11 +79,28 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+                     <a href="/scene/families?o=father&fw=%20" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+             	{% if next[1].startswith('>') %}
+	                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
+	            {% else %}
+	                <li><a href="/scene/families?o=father&{{ {'fw':next[1]} | urlencode }}"
+	                	title="seuraava sivu" class="navlink"> &gt; </a></li>
+            	{% endif %}
+ 
+                <li>{% if last %}
+                     <a href="/scene/families?o=mother&fw=%20" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
+                {% else %}<span class="navlink">|&lt;</span>
+                {% endif %}</li>
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+            	{% if next[1].startswith('>') %}
+	                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
+	            {% else %}
+	                <li><a href="/scene/families?o=mother&{{ {'fw':next[1]} | urlencode }}"
+	                	title="seuraava sivu" class="navlink"> &gt; </a></li>
+            	{% endif %}
             </ul>
         </div>
     {% endif %}
@@ -58,19 +116,25 @@
 {% if cnt %}
     {% for f in families %}
         <tr>
-            <td><span title="{{ _('Original ID') }}">{{f.id}}</span> {{f.type}} 
-                <a href="#" class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</a>
+            <td><a href="/scene/family={{f.uniq_id}}"
+                   title="{{ _('Go to family page') }}">{{f.type|transl('marr')}}</a>
+                {% if f.marriage_date %}{{f.marriage_date}}{% endif %}
+                {% if f.marriage_place %}{{f.marriage_place}}{% endif %}
+                <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
+                <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
             <td>&#9794; {% if f.father.uniq_id %}<a href="/scene/person={{f.father.uniq_id}}">
                 {{f.father.names[0].firstname}} 
                 <i>{{f.father.names[0].suffix}}</i>
                 <b>{{f.father.names[0].surname}}</b></a>
+                <br><small style="padding-left: 1.2em;">{{f.father_sortname}}</small>
             {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
             <td>&#9792; {% if f.mother.uniq_id %}<a href="/scene/person={{f.mother.uniq_id}}">
                 {{f.mother.names[0].firstname}} 
                 <i>{{f.mother.names[0].suffix}}</i>
                 <b>{{f.mother.names[0].surname}}</b></a>
+                <br><small style="padding-left: 1.2em;">{{f.mother_sortname}}</small>
             {% else %}<small>{{ _('unknown') }}</small>
             {% endif %}</td>
         {% if true %}{# Do not show children names #}
@@ -97,11 +161,20 @@
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
                 <li>{% if last %}
-                     <a href="/scene/families" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+                     <a href="/scene/families?o=father&fw=%20" title="{{ _("Father") }} {{ _('first page') }}" class="navlink">{{ _("Father") }}: |&lt;</a>
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-                <li><a href="/scene/families?f={{last.uniq_id}}" title="seuraava sivu" class="navlink"> &gt; </a></li>
+                <li><a href="/scene/families?o=father&{{ {'fw':next[1]} | urlencode }}"
+                	title="seuraava sivu" class="navlink"> &gt; </a></li>
+
+                <li>{% if last %}
+                     <a href="/scene/families?o=mother&fw=%20" title="{{ _("Mother") }} {{ _('first page') }}" class="navlink">{{ _("Mother") }}: |&lt;</a>
+                {% else %}<span class="navlink">|&lt;</span>
+                {% endif %}</li>
+                <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
+                <li><a href="/scene/families?o=mother&{{ {'fw':next[1]} | urlencode }}"
+                	title="seuraava sivu" class="navlink"> &gt; </a></li>
             </ul>
         </div>
     {% endif %}

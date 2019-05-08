@@ -18,39 +18,49 @@ where not ( 'UserProfile' IN labels(a)
 DETACH DELETE a"""
 
     remove_my_nodes = """
-MATCH (a)<-[r:REVISION|HAS_LOADED]-(u:UserProfile {userName:$user})
+MATCH (u:UserProfile) -[*]-> (a) WHERE u.userName=$user
 DETACH DELETE a"""
 
     allowed_email_register = """
-CREATE (email:Allowed_email {
+CREATE (ae:Allowed_email {
     allowed_email: $email,
     default_role: $role,
-    creator: $admin_name,
+    approved: $approved,
+    creator: $creator,
     created_at: timestamp() } )"""
     
     allowed_email_confirm = """
-MATCH (email:Allowed_email)
-  WHERE email.allowed_email = $email 
-SET email.confirmed_at = timestamp()
-RETURN email """
+MATCH (ae:Allowed_email)
+  WHERE ae.allowed_email = $email 
+SET ae.confirmed_at = timestamp()
+RETURN ae """
              
     allowed_email_update = """
-UPDATE (email:Allowed_email {
-    allowed_email: $email,
-    default_role: $role,
-    creator: $admin_name,
-    created_at: $created_at,     
-    confirmed_at: $confirmed_at } )"""
-        
+MATCH (ae:Allowed_email)
+    WHERE ae.allowed_email = $email
+SET ae.default_role = $role,
+    ae.approved = $approved,
+    ae.creator = $creator
+RETURN ae"""
+
+#     allowed_email_update = """
+# MATCH (email:allowed_email {allowed_email: $email})    
+# SET email.default_role = $role,
+#     email.creator = $admin_name,
+#     email.approved = $approved,
+#     email.created_at = $created_at,     
+#     email.confirmed_at = $confirmed_at
+# RETURN email""" 
+      
     allowed_emails_get = """
-MATCH (email:Allowed_email)
-RETURN DISTINCT email 
-    ORDER BY email.created_at DESC"""    
+MATCH (ae:Allowed_email)
+RETURN DISTINCT ae 
+    ORDER BY ae.created_at DESC"""    
     
     allowed_email_find = """
-MATCH (email:Allowed_email)
-    WHERE email.allowed_email = $email
-RETURN email"""
+MATCH (ae:Allowed_email)
+    WHERE ae.allowed_email = $email
+RETURN ae"""
 
     user_profile_register = """
 CREATE (up:UserProfile {   
@@ -93,12 +103,16 @@ MATCH (u:User)
     WHERE u.email = $email
 MERGE (p:UserProfile {email: u.email})    
   ON CREATE SET p.name = u.name, p.userName = u.username, p.language = u.language, p.created_at = timestamp()
-  ON MATCH SET p.language = u.language
+  ON MATCH SET p.language = u.language, p.userName = u.username
 CREATE (u) <-[:SUPPLEMENTED]- (p)'''
+       
+    user_profiles_get = '''
+MATCH (p:UserProfile)
+RETURN DISTINCT p 
+    ORDER BY p.created_at DESC'''  
 
     user_update = '''
-MATCH (user:User)
-    WHERE user.email = $email
+MATCH (user:User {email: $email})
 SET user.name = $name,
     user.language = $language,
     user.is_active = $is_active,
@@ -120,3 +134,10 @@ CREATE (u) -[:HAS_ROLE]-> (r)'''
     user_role_delete = '''
 MATCH (u:User {email: $email}) -[c:HAS_ROLE]-> (r:Role {name: $name})
 DELETE c'''
+
+class Cypher_stats():
+    
+    get_batches = '''
+match (b:Batch) -[:OWNS]-> (x) where b.user = $user
+return b.user as user, b.id as batch, labels(x)[0] as label, count(x) as cnt 
+    order by user, batch'''

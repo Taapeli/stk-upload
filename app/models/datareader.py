@@ -16,10 +16,10 @@ from operator import itemgetter
 #from models.dbutil import Datefrom
 from models.gen.event import Event
 from models.gen.event_combo import Event_combo
-from models.gen.family import Family, Family_for_template
+from models.gen.family_combo import Family, Family_combo
 from models.gen.note import Note
 from models.gen.media import Media
-from models.gen.person import SEX_MALE, SEX_FEMALE
+from models.gen.person import SEX_MALE #, SEX_FEMALE
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.place import Place
@@ -27,7 +27,6 @@ from models.gen.refname import Refname
 from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
-#from models.gen.weburl import Weburl
 from models.gen.dates import DateRange
 
 
@@ -196,61 +195,11 @@ def recreate_refnames():
 #     return (namelist)
 
 
-def read_cite_sour_repo(uniq_id=None):
-    """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi
-    """
-
-    sources = []
-    result_cite = Event_combo.get_event_cite(uniq_id)
-    for record_cite in result_cite:
-        pid = record_cite['id']
-        e = Event_combo()
-        e.uniq_id = pid
-        if record_cite['type']:
-            e.type = record_cite['type']
-        if record_cite['date']:
-            e.date = record_cite['date']
-        if record_cite['dates']:
-            e.dates = DateRange(record_cite['dates'])
-
-        for source_cite in record_cite['sources']:
-            c = Citation()
-            c.uniq_id = source_cite[0]
-            c.dateval = source_cite[1]
-            c.page = source_cite[2]
-            c.confidence = source_cite[3]
-
-            c.get_sourceref_hlink()
-            if c.source_handle != '':
-                s = Source()
-                s.uniq_id = c.source_handle
-                result_source = s.get_source_data()
-                for record_source in result_source:
-                    if record_source['stitle']:
-                        s.stitle = record_source['stitle']
-
-                    s.get_reporef_hlink()
-                    if s.reporef_hlink != '':
-
-                        r = Repository()
-                        r.uniq_id = s.reporef_hlink
-                        result_repo = r.get_repo_w_notes()
-                        for record_repo in result_repo:
-                            if record_repo['rname']:
-                                r.rname = record_repo['rname']
-                            if record_repo['type']:
-                                r.type = record_repo['type']
-                            for node in record_repo['notes']:
-                                wu = Note.from_node(node)
-                                r.notes.append(wu)
-                        s.repocitory = r
-
-                c.source = s    # s.append(s)
-            e.citations.append(c)
-
-        sources.append(e)
-
-    return (sources)
+# def read_cite_sour_repo(uniq_id=None):
+#     """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
+#     
+#         NOT IN USE, removed 3.5.2019
+#     """
 
 
 def read_medias(uniq_id=None):
@@ -292,7 +241,7 @@ def get_repositories(uniq_id=None):
     │        │        │        │        │        │       │"]]     │        │
     └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
     """
-    titles = ['change', 'handle', 'id', 'rname', 'sources', 'type', 'uniq_id', 'notes']
+    titles = ['change', 'handle', 'id', 'rname', 'type', 'uniq_id', 'notes', 'sources']
     repositories = []
     result = Repository.get_w_source(uniq_id)
     for record in result:
@@ -418,7 +367,7 @@ def read_families():
     """ Lukee tietokannasta Family- objektit näytettäväksi
     """
 
-    families = Family.get_families()
+    families = Family_combo.get_families()
     
     return (families)
 
@@ -471,14 +420,29 @@ def read_places():
 
 
 def get_source_with_events(sourceid):
-    """ Lukee tietokannasta Source- objektin tapahtumat näytettäväksi
+    """ Lukee tietokannasta Source- objektin tapahtumineen näytettäväksi
     """
 
-    s = Source()
-    s.uniq_id = int(sourceid)
-    result = s.get_source_data()
+    result = Source.get_source_w_notes(sourceid)
     for record in result:
-        s.stitle = record["stitle"]
+        # Record: <Record 
+        #    source=<Node id=242395 labels={'Source'} 
+        #        properties={'handle': '_d9d28fe83184fd33368', 'id': 'S0052', 
+        #        'stitle': 'Hämeenlinna ksrk syntyneet 1850-1874', 'change': '1543225947'}> 
+        #    notes=[
+        #        <Node id=234937 labels={'Note'} 
+        #            properties={'handle': '_d9d291becb75743756e', 'text': '', 
+        #                'id': 'N2213', 'type': 'Citation', 
+        #                'url': 'http://digi.narc.fi/digi/view.ka?kuid=6062348', 
+        #                'change': 1532807569}>
+        #    ]>
+
+        s = Source.from_node(record['source'])
+        notes = record['notes']
+        for node in notes:
+            n = Note.from_node(node)
+            s.notes.append(n)
+
     result = Source.get_citating_nodes(sourceid)
 
     citations = {}
@@ -563,7 +527,7 @@ def get_source_with_events(sourceid):
 #             noderef.label = 'Person'
         c.citators.append(noderef)
 
-    return (s.stitle, list(citations.values()))
+    return (s, list(citations.values()))
 
 
 def read_sources_wo_cites():
@@ -751,7 +715,7 @@ def get_person_data_by_id(uniq_id):
         if fid != record["f_uniq_id"]:
             fid = record["f_uniq_id"]
             if not fid in families:
-                families[fid] = Family_for_template(fid)
+                families[fid] = Family_combo(fid)
                 families[fid].id = record['family_id']
 
         member = Person_as_member()    # A kind of Person
@@ -868,7 +832,7 @@ def get_families_data_by_id(uniq_id):
         result = p.get_her_families_by_id()
 
     for record in result:
-        f = Family_for_template()
+        f = Family_combo()
         f.uniq_id = record['uniq_id']
         f.get_family_data_by_id()
 

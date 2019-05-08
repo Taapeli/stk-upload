@@ -130,7 +130,7 @@ class Neo4jUserDatastore(UserDatastore):
     def _put_user (self, tx, user):    # ============ New user ==============
 
         allowed_email = UserAdmin.find_allowed_email(user.email)
-        if allowed_email == None:
+        if (allowed_email == None) or (allowed_email.approved != True):
             return(None)
 #            raise(ValidationError("Email address not accepted"))
         if len(user.roles) == 0:
@@ -157,11 +157,15 @@ class Neo4jUserDatastore(UserDatastore):
             node = result.single()
             if node:
                 userRecord = node['user']
+                status = allowed_email.approved
+                if (status == None) or (status == True):
 #                userNode = (record['user'])
 #                logger.debug(userNode)
-                UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
+                    UserAdmin.user_profile_add(tx, userRecord['email'], userRecord['username'])
+                   
 #                tx.commit()
                 logger.info(f'User with email address {user.email} registered') 
+                
                 return(userRecord)
             else:
                 logger.info(f'put_user: Cannot register user with {user.email}') 

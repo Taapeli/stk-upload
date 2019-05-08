@@ -4,7 +4,6 @@ Created on 12.8.2018
 @author: jm
 '''
 import logging 
-from models.gen.person_combo import Person_combo
 logger = logging.getLogger('stkserver')
 import time
 
@@ -13,15 +12,17 @@ from flask_security import current_user, login_required #, roles_accepted
 #from flask_babelex import _
 
 from . import bp
-from bp.scene.data_reader import get_a_person_for_display_apoc # get_a_person_for_display, get_person_for_display, get_person_data_by_id
+from bp.scene.scene_reader import get_a_person_for_display_apoc
+from models.gen.person_combo import Person_combo
+from models.gen.family_combo import Family_combo
+from models.gen.place import Place
+from models.gen.source import Source
+
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.owner import OwnerFilter
-from models.gen.family import Family
-from models.gen.place import Place
-from models.gen.source import Source
 
 # Narrative start page
 @bp.route('/scene',  methods=['GET', 'POST'])
@@ -31,24 +32,24 @@ def scene():
     print(f"--- {user_session}")
     #print("-> bp.scene.routes.scene")
     my_filter = OwnerFilter(user_session, current_user, request)
-    my_filter.store_next_person(request)
-    print(f"-> bp.scene.routes.scene: home saving '{my_filter.next_person[1]}'")
+    my_filter.set_scope_from_request(request, 'person_scope')
+    print(f"-> bp.scene.routes.scene: home saving '{my_filter.scope[0]}'")
     return render_template('/scene/index_scene.html')
 
 
-@bp.route('/scene/persons/restricted')
-def show_persons_restricted(selection=None):
-    """ NOT IN USE Show list of selected Persons, limited information.
- 
-        for non-logged users from login_user.html """
-    if not current_user.is_authenticated:
-        # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
-        # Vaihtoehtoisesti kutsu toista metodia.
-        keys = ('all',)
-    persons = read_persons_with_events(keys)
-    print("-> bp.scene.routes.show_persons_restricted")
-    return render_template("/scene/persons.html", persons=persons, 
-                           menuno=1, rule=keys)
+# @bp.route('/scene/persons/restricted')
+# def show_persons_restricted(selection=None):
+#     """ NOT IN USE Show list of selected Persons, limited information.
+#  
+#         for non-logged users from login_user.html """
+#     if not current_user.is_authenticated:
+#         # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
+#         # Vaihtoehtoisesti kutsu toista metodia.
+#         keys = ('all',)
+#     persons = read_persons_with_events(keys)
+#     print("-> bp.scene.routes.show_persons_restricted")
+#     return render_template("/scene/persons.html", persons=persons, 
+#                            menuno=1, rule=keys)
 
 # ------------------------- Menu 0: Person search ------------------------------
 
@@ -120,28 +121,18 @@ def show_my_persons():
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
+    # Set filter by owner and the data selection
     my_filter = OwnerFilter(user_session, current_user, request)
-    my_filter.store_next_person(request)
+    # Which range of data is shown
+    my_filter.set_scope_from_request(request, 'person_scope')
+    # About how mamy items to read
     count = int(request.args.get('c', 100))
 
-    print(f"-> bp.scene.routes.show_my_persons: read persons forward from '{my_filter.next_person[1]}'")
+    #print(f"-> bp.scene.routes.show_my_persons: read persons forward from '{my_filter.scope[0]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
-    if persons:
-        # Next person links [backwards, forwards]
-        person_owner_count = sum(len(x.owners) for x in persons)
-        print(f"Displaying {persons[0].sortname} – {persons[-1].sortname}, got {person_owner_count}/{len(persons)} persons")
-        if count == person_owner_count:
-            my_filter.next_person = [persons[0].sortname, persons[-1].sortname]
-        else:
-            # Forward to end is marked 
-            my_filter.next_person = [persons[0].sortname,  '> end']
-        print(f"Display persons {my_filter.next_person[0]} – {my_filter.next_person[1]}")
 
-        user_session['next_person'] = my_filter.next_person
-        print(f"--> {repr(user_session)}")
-
-    return render_template("/scene/list_persons.html", persons=persons, menuno=12, 
+    return render_template("/scene/persons_list.html", persons=persons, menuno=12, 
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 
@@ -249,18 +240,38 @@ def show_person_page(uniq_id):
 def show_families():
     """ List of Families for menu(3)
     """
-    fw_from = request.args.get('f', 0, type=int)
-    bw_from = request.args.get('b', 0, type=int)
+    print(f"--- {request}")
+    print(f"--- {user_session}")
+    # Set filter by owner and the data selection
+    my_filter = OwnerFilter(user_session, current_user, request)
+    # Which range of data is shown
+    my_filter.set_scope_from_request(request, 'person_scope')
+    opt = request.args.get('o', 'father', type=str)
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
+    # 'families' has Family objects
+    families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
+
+    return render_template("/scene/families.html", families=families, 
+                           owner_filter=my_filter, elapsed=time.time()-t0)
+
+@bp.route('/scene/family=<int:fid>')
+def show_famiy_page(fid):
+    """ Home page for a Family.
+
+        fid = id(Family)
+    """
     try:
-        # 'families' has Family objects
-        families = Family.get_families(fw_from,  bw_from,  count)
+        family = Family_combo()   #, events = get_place_with_events(fid)
+        family.id = fid
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    return render_template("/scene/families.html", families=families, 
-                           elapsed=time.time()-t0)
+#     for p in place_list:
+#         print ("# {} ".format(p))
+#     for u in place.notes:
+#         print ("# {} ".format(u))
+    return render_template("/scene/family.html", family=family, menuno=3)
 
 # ------------------------------ Menu 4: Places --------------------------------
 
@@ -317,9 +328,9 @@ def show_source_page(sourceid):
     """ Home page for a Source with referring Event and Person data
     """
     try:
-        stitle, citations = get_source_with_events(sourceid)
+        source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/source_events.html",
-                           stitle=stitle, citations=citations)
+                           source=source, citations=citations)
 

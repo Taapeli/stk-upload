@@ -153,6 +153,7 @@ return path"""
             Returns Person objects, with included Events and Names
             ordered by Person.sortname
         """
+
         def _read_person_list(o_filter, limit):
             """ Read Person data from given fw_from 
             """
@@ -171,46 +172,39 @@ return path"""
                 with shareds.driver.session() as session:
                     if show_by_owner:
 
-                        if show_with_common: #1 get all with owner name for all
+                        if show_with_common: 
+                            #1 get all with owner name for all
                             print("_read_person_list: by owner with common")
                             result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
                                                  user=user, start_name=fw_from, limit=limit)
-                            # Returns person, names, events, user
+                            # Returns person, names, events, owners
 
-                        else: #2 get my own (no owner name needed)
+                        else: 
+                            #2 get my own (no owner name needed)
                             print("_read_person_list: by owner only")
                             result = session.run(Cypher_person.read_my_persons_with_events_starting_name,
                                                  user=user, start_name=fw_from, limit=limit)
                             # Returns person, names, events
 
-                    else: #3 == #1 simulates common by reading all
+                    else: 
+                        #3 == #1 simulates common by reading all
                         print("_read_person_list: common only")
                         result = session.run(Cypher_person.read_all_persons_with_events_starting_name, #user=user, 
                                              start_name=fw_from, limit=limit)
-                        # Returns person, names, events, user
-
+                        # Returns person, names, events, owners
+                        
                     return result
             except Exception as e:
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
                 raise      
 
-        def owner_not_me(record):
-            # Returns owner of this record, if available and not me
-            if 'user' in record.keys():
-                u = record['user']
-                if u == o_filter.user:
-                    return '-'
-                else:
-                    return record['user']
-            return None
-
 
         persons = []
-        fw_from = o_filter.next_person[1]     # next_person names [bw_from, fw_from]
+        fw_from = o_filter.next_name_fw()     # next person name
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
-        print(f"read_my_persons_list: Get max {limit} persons from "
-              f"{o_filter.owner_str()!r} for {ustr} starting at {fw_from!r}")
+        print(f"read_my_persons_list: Get max {limit} persons "
+              f"for {ustr} starting at {fw_from!r}")
         result = _read_person_list(o_filter, limit)
 
         for record in result:
@@ -229,42 +223,47 @@ return path"""
                             'description': '', 'handle': '_e04abcd46811349c7b18f6321ed', 
                             'id': 'E5126', 'date2': 1910808, 'type': 'Birth', 'date1': 1910808}>,
                          None
-                         ]]>
+                         ]] 
+                    owners=['jpek']>
             '''
             node = record['person']
             # The same person is not created again
             p = Person_combo.from_node(node)
 
-            # Is this the same person as previous?
-            if len(persons) > 0 \
-                and persons[-1].uniq_id == p.uniq_id \
-                and 'user' in record.keys():
-                # Yes, do not create a new person
-                persons[-1].owners.append(owner_not_me(record))
-            else:
-
 #             if take_refnames and record['refnames']:
 #                 refnlist = sorted(record['refnames'])
 #                 p.refnames = ", ".join(refnlist)
-                for nnode in record['names']:
-                    pname = Name.from_node(nnode)
-                    p.names.append(pname)
-        
-                # Create a list with the mentioned user name, if present
-                p.owners = [owner_not_me(record),]
-                                                                                                                                    
-                # Events
-        
-                for enode, pname, role in record['events']:
-                    if enode != None:
-                        e = Event_combo.from_node(enode)
-                        e.place = pname or ""
-                        if role and role != "Primary":
-                            e.role = role
-                        p.events.append(e)
+            for nnode in record['names']:
+                pname = Name.from_node(nnode)
+                p.names.append(pname)
     
-                persons.append(p)   
+            # Create a list with the mentioned user name, if present
+            if o_filter.user:
+                p.owners = record.get('owners',[])
+                                                                                                                                
+            # Events
     
+            for enode, pname, role in record['events']:
+                if enode != None:
+                    e = Event_combo.from_node(enode)
+                    e.place = pname or ""
+                    if role and role != "Primary":
+                        e.role = role
+                    p.events.append(e)
+
+            persons.append(p)   
+
+        # Update the page scope according to items really found 
+        if persons:
+            o_filter.update_session_scope('person_scope', 
+                                          persons[0].sortname, persons[-1].sortname, 
+                                          limit, len(persons))
+
+        #Todo: remove this later
+        if 'next_person' in o_filter.session: # Unused field
+            o_filter.session.pop('next_person')
+            o_filter.session.modified = True
+
         return (persons)
 
 

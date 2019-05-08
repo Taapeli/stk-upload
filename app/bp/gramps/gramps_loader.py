@@ -11,16 +11,14 @@ from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import Batch, Log
-from models.dataupdater import set_confidence_values
+from models import dataupdater
+#from models.dataupdater import set_confidence_values
 import shareds
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
     """ 
     Reads a Gramps xml file, and saves the information to db 
-    
-Todo: There are beforehand estimated progress persentage values 1..100 for each
-    upload step. The are stored in *.meta file and may be queried from the UI.
     
     Metacode for batch log creation UserProfile --> Batch.
 
@@ -87,7 +85,7 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
     
             # Set person confidence values 
             #TODO: Only for imported persons (now for all persons!)
-            set_confidence_values(handler.tx, batch_logger=handler.blog)
+            dataupdater.set_confidence_values(handler.tx, batch_logger=handler.blog)
             # Set properties (for imported persons)
             #    + Refname links
             #    ? Person sortname
@@ -95,9 +93,16 @@ Todo: There are beforehand estimated progress persentage values 1..100 for each
             #    - Confidence values
             handler.set_person_sortname_refnames()
             handler.set_estimated_person_dates()
+            
+            # Copy information from Person and Event nodes to Family nodes
+            handler.set_family_sortname_dates()
+            
+            # Make the place hierarchy
+            handler.make_place_hierarchy()
 
         except Exception as e:
-            print("Stopped xml load due to {}".format(e))    # Stop processing?
+            msg = f"Stopped xml load due to {e}"    # Stop processing?
+            print(msg)
             handler.commit(rollback=True)
             return handler.blog.list(), None
 

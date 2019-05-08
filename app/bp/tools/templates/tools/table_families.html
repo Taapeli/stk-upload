@@ -43,7 +43,7 @@
                 {% endif %}
                 <td>{{f.type}}</td>
                 <td>{{f.no_of_children}}</td>
-                <td>{% for c in f.children %}<a href="/scene/person={{c.uniq_id}}">{{c.uniq_id}} </a>{% endfor %}</td>
+                <td>{% for c in f.children %}<a href="/scene/person={{c.uniq_id}}">{{c.uniq_id}}</a> {% endfor %}</td>
         </tr>
     {% endfor %}
 {% else %}

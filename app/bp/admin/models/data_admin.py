@@ -35,7 +35,7 @@ class DataAdmin():
         self.username = user.username
         self.roles = user.roles
         if user.has_role('admin'):
-                return
+            return
         raise ValueError(_("User {} has not admin privileges").format(self.username))
 
 
@@ -51,14 +51,24 @@ class DataAdmin():
             result = shareds.driver.session().run(Cypher_adm.remove_data_nodes)
         elif opt == "my_own":
             #return "NOT COMPLETED! Todo: Can not remove user's data nodes"
-            msg = _("All persons and event by {} are removed.", self.username)
+
+            # It is possible to check, id there are nodes whith a foreign owners, 
+            # too. It takes 60s for 750 persons data:
+            #
+            # match (u:User) -[:SUPPLEMENTED]-> (up:UserProfile) -[*]-> (x)  
+            #     where u.username="user1"
+            # with x
+            # match (x) <-[*]- (p:UserProfile) where not p.userName="user1"
+            #     RETURN labels(x)[0] as lab, count(x)
+
+            msg = _("All persons and event by %(un)s are removed.", un=self.username)
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
                                                   user=self.username)
             
         counters = result.consume().counters
-        msg2 = "Poistettu {} solmua, {} relaatiota".\
-              format(counters.nodes_deleted, counters.relationships_deleted)
+        msg2 = _("Removed %(cn)d nodes, %(cr)d relations", 
+                 cn=counters.nodes_deleted, cr=counters.relationships_deleted)
         logging.info(msg2)
         return '\n'.join((msg, msg2))
 

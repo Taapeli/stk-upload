@@ -70,7 +70,7 @@
            <div style="display: inline-block;">
            <form method="get" action="/admin">
               <h3>{{ _('Admin Operations') }}</h3>
-              <p>{{ _('Manage users, reference data sets and do database maintanance tasks') }}.</p>
+              <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
             <div class="submit"> 
                <button type="submit">{{ _('Maintenance') }}</button>
             </div>
@@ -78,6 +78,18 @@
       </div>
      </div>
     {% endif %}
+
+    <div class="startbox">
+      <div style="display: inline-block;">
+       <form method="get" action="http://isotammi.referata.com/wiki/Työkaluja" target="_blank">
+          <h3>{{ _('Tools and Links') }}</h3>
+          <p>{{ _('Supplementary utilities in our help page') }}.</p>
+          <div class="submit"> 
+            <button type="submit">{{ _('Help page') }}</button>
+          </div>
+        </form>
+	  </div>
+    </div>
 
     </div>
   </div>
