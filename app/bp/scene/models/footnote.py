@@ -90,12 +90,12 @@ class Footnotes():
 class CitationMark():
     def __init__(self, mark=None, ids=[-1, -1, -1]):
         self.mark = mark
-        self.r_id = ids[0]
+        self.r_ids = ids[0]
         self.s_id = ids[1]
         self.c_id = ids[2]
 
     def __str__(self):
-        return "{}: r={},s={},c={}".format(self.mark, self.r_id, self.s_id, self.c_id)
+        return "{}: r={},s={},c={}".format(self.mark, self.r_ids, self.s_id, self.c_id)
 
 class SourceFootnote():
     '''
@@ -160,7 +160,7 @@ class SourceFootnote():
             source              Source object ~ from objs[cit.source]
             - source.stitle     str     Source title
                                 source href="#sref{{ source.uniq_id }}"
-            repo                Repository object ~ from objs[source.repocitory_id]
+            repo                Repository object ~ from objs[source.repositories[]]
             - repo.rname        str     Repository name"
         '''
         if not ( isinstance(cit, Citation) and isinstance(objs, dict) ):
@@ -174,12 +174,13 @@ class SourceFootnote():
         else:
             s_id = -1
 
-        if n.source and n.source.repocitory_id in objs:
-            n.repo = objs[n.source.repocitory_id]
-            r_id = n.repo.uniq_id
-        else:
-            r_id = -1
-        n.cites[0].ids = [r_id, s_id, n.cites[0].uniq_id]
+        r_ids = []
+        if n.source:
+            for rep in n.source.repositories:
+                if rep in objs:
+                    n.repo = objs[rep]
+                    r_ids.append(n.repo.uniq_id)
+        n.cites[0].ids = [r_ids, s_id, n.cites[0].uniq_id]
         print("- ind=(r,s,c)={}".format(n.cites[0].ids))
         return n
 

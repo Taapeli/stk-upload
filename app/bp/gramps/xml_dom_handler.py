@@ -689,14 +689,14 @@ class DOM_handler():
                 repository_rname = repository.getElementsByTagName('rname')[0]
                 r.rname = repository_rname.childNodes[0].data
             elif len(repository.getElementsByTagName('rname') ) > 1:
-                self.blog.log_event({'title':"More than one rname in a repocitory",
+                self.blog.log_event({'title':"More than one rname in a repository",
                                      'level':"WARNING", 'count':r.id})
 
             if len(repository.getElementsByTagName('type') ) == 1:
                 repository_type = repository.getElementsByTagName('type')[0]
                 r.type =  repository_type.childNodes[0].data
             elif len(repository.getElementsByTagName('type') ) > 1:
-                self.blog.log_event({'title':"More than one type in a repocitory",
+                self.blog.log_event({'title':"More than one type in a repository",
                                      'level':"WARNING", 'count':r.id})
 
             for repository_url in repository.getElementsByTagName('url'):

@@ -38,7 +38,7 @@ class Source:
 #         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
 #         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
 #         self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
-#         self.note_ref = []      # uniq_ids (previously note[])
+        self.note_ref = []      # uniq_ids (previously note[])
 #         self.repocitory = None  # Repository object For creating display sets (vanhempi)
 
         # For display combo
@@ -255,8 +255,7 @@ return s'''
         query = """
  MATCH (citation:Citation)-[r:SOURCE]->(source:Source) {0}
    WITH citation, r, source ORDER BY citation.page
- RETURN ID(source) AS id, source.stitle AS stitle, 
-  COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence]) AS citations
+ RETURN source, COLLECT(citation) AS citations
  ORDER BY source.stitle""".format(where)
                 
         return shareds.driver.session().run(query)
@@ -371,7 +370,7 @@ return s'''
             print ("Stitle: " + self.stitle)
         if self.note_handles:
             print (f"Note handles: {self.note_handles}")
-        for repo in self.repocitories:
+        for repo in self.repositories:
             print (f"Repository: {repo}")
         return True
         

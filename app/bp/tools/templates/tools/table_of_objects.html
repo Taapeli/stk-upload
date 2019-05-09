@@ -3,7 +3,7 @@
 {% block title %}{{ _('Database Information') }}{% endblock %}
 {% block body %}
 {{ super() }}
-<script src="/static/infobox.js"></script>
+<!-- Entisiä käräjätietoja näytettiin pop-upina <script src="/static/infobox.js"></script> -->
 <style>
 tbody tr td {max-width:250px}
 td ul {
@@ -37,6 +37,7 @@ td {vertical-align: top; }
 	    	  {% if k in ["date", "birth", "death"] %}<td>{{obj[k]|d('')|pvm}}</td>
               {% elif  k == "change" %}<td><small>{{obj[k]|d('-')|timestamp}}</small></td>
               {% elif  k == "handle" %}<td><small>{{obj[k]|d('-')}}</small></td>
+              {% elif  k == "url" and obj[k] %}<td><small><a href="{{obj[k]}}">{{obj[k]}}</a></small></td>
               {% elif  obj[k]|is_list %}<td><ul>
                 {% for i in obj[k] %}<li>{{i|d('-')}}</li>{% endfor %}</ul></td>
               {% else %}<td>{% if obj[k] %}{{obj[k]|d('-')}}{% endif %}</td>

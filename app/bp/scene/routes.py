@@ -201,7 +201,7 @@ def show_a_person_w_apoc(uid):
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
-    print(person.sex_str())
+#     print(person.sex_str())
     print("-> bp.scene.routes.show_a_person_w_apoc")
     return render_template("/scene/person_pg.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
