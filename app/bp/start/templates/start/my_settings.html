@@ -54,14 +54,14 @@ td,th {background: white;}
         </ul>
     </div>
 
-    <div class=startbox>
+    <div class="startbox2">
         <h3>{{ _('Data Batches') }}</h3>
         <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
 {# labels = ['Family', 'Note', 'Person']
    user_batches = {'user1/2019-05-03.001': {'Person': 1949, 'Family': 736}}
 #}
     {% if batches %}
-        <table>
+        <table width="100%">
         <tr>
             <th>{{ _('Batch') }}</th>
             {% for label in labels %}<th>{{label}}</th>
@@ -84,24 +84,23 @@ td,th {background: white;}
             <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a></p>
     </div>
 
-    <div class=startbox>
+    <div class="startbox2">
         <h3>{{ _('My Gedcom files') }}</h3>
     {% if gedcoms %}
-           <table>
+           <table width="100%">
                 <tr><th>{{ _('File') }}</th>
                     <th>{{ _('Date') }}</th>
-                    <th>{{ _('Bytes') }}</th></tr>
+                    <th>{{ _('Bytes') }}</th>
+                    <th>{{ _('Description') }}</th>
+                </tr>
                {% for file in gedcoms %}
                    <tr>
 	                   <td class="gedcom-name">{{ file.name }}</td>
 	                   {% set date = file.metadata.upload_time.split() %}
 	                   <td>{{ date[1] }}</td>
 	                   <td class="right">{{ file.metadata.size }}</td>
-	               </tr>
-                   {% if file.metadata.desc %}
-                   <tr><td colspan="4"><small>&nbsp;
-                          <i>{{ file.metadata.desc|escape }}</i></small></td>
-                   </tr>{% endif %}
+	                   <td colspan="4">{{ file.metadata.desc|escape }}</td>
+                   </tr>
                {% endfor %}
            </table>
     {% else %}

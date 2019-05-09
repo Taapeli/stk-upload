@@ -149,13 +149,21 @@ MATCH (m:Note)   WHERE m.handle=$n_handle
 MERGE (n)-[r:NOTE]->(m)"""
 
 
-class Cypher_media_w_handle():
+class Cypher_media_in_batch():
     """ For Media class """
 
+    # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
-MERGE (m:Media {handle: $m_attr.handle}) 
-    SET m = $m_attr"""
+MATCH (u:Batch {id:$bid})
+CREATE (u) -[:OWNS]-> (a:Media) 
+    SET a = $m_attr
+RETURN ID(a) as uniq_id"""
 
+# class Cypher_media_w_handle():
+#     """ For Media class """
+#     create = """
+# MERGE (m:Media {handle: $m_attr.handle}) 
+#     SET m = $m_attr"""
 
 
 class Cypher_note_in_batch():
@@ -254,30 +262,70 @@ MERGE (n)-[r:NOTE]->(m)"""
 
 
 
-class Cypher_place_w_handle():
+class Cypher_place_in_batch():
     """ For Place class """
 
+    # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
-CREATE (p:Place)
-    SET p = $p_attr
-RETURN id(p) AS uniq_id"""
+MATCH (u:Batch {id:$batch_id})
+CREATE (u) -[:OWNS]-> (a:Place) 
+    SET a = $p_attr
+RETURN ID(a) as uniq_id"""
+
+    # Find Batch and upper Place and connect new object to those
+    merge = """
+MATCH (pl:Place {id:$plid})
+    SET pl += $p_attr"""
+# plid=plid, p_attr=pl_attr
+#MERGE (u) -[:OWNS]-> (pl) <-[r:HIERARCY]- (plu:Place {handle: $up_handle}) 
+#RETURN ID(pl) as uniq_id"""
 
     add_name = """
-MATCH (p:Place) WHERE p.handle=$handle
-CREATE (n:Place_name)
-MERGE (p) -[r:NAME]-> (n)
-SET n = $n_attr"""
+MATCH (pl:Place) WHERE id(pl) = $pid
+CREATE (pl) -[r:NAME]-> (n:Place_name)
+    SET n = $n_attr"""
 
     link_hier = """
-MATCH (n:Place) WHERE n.handle=$handle
-MATCH (m:Place) WHERE m.handle=$hlink
-MERGE (n) -[r:HIERARCY]-> (m)
-SET r = $r_attr"""
+MATCH (pl:Place) WHERE id(pl) = $plid
+MATCH (up:Place) WHERE id(up) = $up_id
+MERGE (pl) -[r:HIERARCY]-> (up)
+    SET r = $r_attr"""
+
+    link_create_hier = """
+MATCH (pl:Place) WHERE id(pl) = $plid
+MERGE (pl) -[r:HIERARCY]-> (m:Place {handle: $up_handle})
+    SET r = $r_attr
+return ID(m) as uniq_id"""
 
     link_note = """
-MATCH (n:Place) WHERE n.handle=$handle
-MATCH (m:Note)  WHERE m.handle=$hlink
-MERGE (n) -[r:NOTE]-> (m)"""
+MATCH (pl:Place) WHERE id(pl) = $pid
+MATCH (n:Note)  WHERE n.handle=$hlink
+MERGE (pl) -[r:NOTE]-> (m)"""
+
+# class Cypher_place_w_handle():
+#     """ For Place class """
+
+#     create = """
+# CREATE (p:Place)
+#     SET p = $p_attr
+# RETURN id(p) AS uniq_id"""
+
+#     add_name = """
+# MATCH (p:Place) WHERE p.handle=$handle
+# CREATE (n:Place_name)
+# MERGE (p) -[r:NAME]-> (n)
+# SET n = $n_attr"""
+
+#     link_hier = """
+# MATCH (n:Place) WHERE n.handle=$handle
+# MATCH (m:Place) WHERE m.handle=$hlink
+# MERGE (n) -[r:HIERARCY]-> (m)
+# SET r = $r_attr"""
+
+#     link_note = """
+# MATCH (n:Place) WHERE n.handle=$handle
+# MATCH (m:Note)  WHERE m.handle=$hlink
+# MERGE (n) -[r:NOTE]-> (m)"""
 
 
 
@@ -326,17 +374,24 @@ MERGE (m:Source   {handle: $hlink})
 MERGE (n) -[r:SOURCE]-> (m)"""
 
 
-class Cypher_repository_w_handle():
-    """ For Repository class """
+class Cypher_repository_in_batch():
+    """ For Repocitory class """
 
+    # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
-MERGE (r:Repository {handle: $r_attr.handle}) 
-    SET r = $r_attr
-RETURN id(r) as uniq_id"""
+MATCH (u:Batch {id:$bid})
+CREATE (u) -[:OWNS]-> (a:Repocitory) 
+    SET a = $r_attr
+RETURN ID(a) as uniq_id"""
+
+
+# class Cypher_repository_w_handle():
+#     """ For Repository class """
+# 
 #     create = """
-# CREATE (r:Repository)
-# SET r = $r_attr
-# return id(r) as uniq_id"""
+# MERGE (r:Repository {handle: $r_attr.handle}) 
+#     SET r = $r_attr
+# RETURN id(r) as uniq_id"""
 
 
 class Cypher_x():

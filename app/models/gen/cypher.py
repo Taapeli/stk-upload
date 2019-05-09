@@ -568,10 +568,18 @@ match (repo:Repository) where ID(repo) = $rid
 return repo, collect(w) as notes"""
 
     get_one = """
-match (r:Repository) where ID(r) == $rid
+match (r:Repository) where ID(r) = $rid
 return r"""
 
     get_all = """
 match (r:Repository)
 return r order by r.type"""
+
+
+class Cypher_media():
+
+    get_one = """
+MATCH (obj:Media)
+    WHERE ID(obj) = $rid
+    RETURN obj"""
 

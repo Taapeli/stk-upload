@@ -4,21 +4,19 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 
-from sys import stderr
-
 import  shareds
 #from .weburl import Weburl
 from .note import Note
 from .dates import DateRange
 from .cypher import Cypher_place
 from models.dbtree import DbTree
-from models.cypher_gramps import Cypher_place_w_handle
 from models.gen.event_combo import Event_combo
 
 class Place:
-    """ Paikka
+    """ Place / Paikka:
 
         Properties:
+            Defined here:
                 handle
                 change
                 id                  esim. "P0001"
@@ -30,15 +28,17 @@ class Place:
                    dates            DateRange date expression
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
-                surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 note_ref[]          int uniq_ids of Notes
+            May be defined in Place_gramps:
+                surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self, uniq_id=None, ptype="", pname="", level=None):
-        """ Luo uuden place-instanssin.
+        """ Creates a new Place instance.
+
             Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyylin, nimen
             ja (tulossivua varten) mahdollisen hierarkiatason
         """
@@ -54,12 +54,12 @@ class Place:
         self.coord = None
         
         self.uppers = []        # Upper place objects for hirearchy display
-        self.notes = []         # Upper place objects for hierarchy display
-#         self.urls = []          # Weburl poistettu, käytössä notes[]
-
+        self.notes = []         # Notes connected to this place
         self.note_ref = []      # uniq_ids of Notes
-        self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
-        self.noteref_hlink = []
+
+# These are in bp.gramps.models.place_gramps.Place_gramps.__init__
+#         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
+#         self.noteref_hlink = []
 
 
     def __str__(self):
@@ -73,9 +73,11 @@ class Place:
 
     @classmethod
     def from_node(cls, node):
-        ''' models.gen.place.Place.from_node
-        Transforms a db node to an object of type Place.
+        ''' Creates a node object of type Place from a Neo4j node.
         
+        models.gen.place.Place.from_node. 
+        
+        Example node:
         <Node id=78279 labels={'Place'} 
             properties={'handle': '_da68e12a415d936f1f6722d57a', 'id': 'P0002', 
                 'change': 1500899931, 'pname': 'Kangasalan srk', 'type': 'Parish'}>
@@ -152,15 +154,19 @@ class Place:
                                        place_id=self.uniq_id)
 
             for place_record in place_result:
-                self.change = place_record["place"]["change"]
-                self.id = place_record["place"]["id"]
-                self.type = place_record["place"]["type"]
-                self.coord = place_record["place"]["coord"]
-                self.pname = Place.namelist_w_lang(place_record["names"])
+                node = place_record["place"]
+                self.type = node.get('type')
+                self.change = node["change"]
+                self.id = node["id"]
+                self.coord = node["coord"]
+                names_node = place_record["names"]
+                self.pname = Place.namelist_w_lang(names_node)
 
                 for node in place_record['notes']:
                     n = Note.from_node(node)
                     self.notes.append(n)
+                if not (self.type and self.id):
+                    print(f"MYERROR Place.read_w_notes: missing data for {self}")
         return
 
 
@@ -278,7 +284,10 @@ class Place:
 
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
-            p = Place(record['id'], record['type'], Place.namelist_w_lang(record['name']))
+            pl_id =record['id']
+            pl_type = record['type']
+            pl_name = record['name']
+            p = Place(pl_id, pl_type, Place.namelist_w_lang(pl_name))
             if record['coord']:
                 p.coord = Point(record['coord']).coord
             p.uppers = combine_places(record['upper'])
@@ -452,11 +461,11 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             print ("Pname: " + self.pname)
         if self.coord:
             print ("Coord: {}".format(self.coord))
-        if self.placeref_hlink != '':
-            print ("Placeref_hlink: " + self.placeref_hlink)
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                print ("Noteref_hlink: " + self.noteref_hlink[i])
+#         if self.placeref_hlink != '':
+#             print ("Placeref_hlink: " + self.placeref_hlink)
+#         if len(self.noteref_hlink) > 0:
+#             for i in range(len(self.noteref_hlink)):
+#                 print ("Noteref_hlink: " + self.noteref_hlink[i])
         return True
 
 

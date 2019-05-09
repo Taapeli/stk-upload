@@ -48,9 +48,11 @@ def fmtdate(y,m,d):
         return None
 
 
+zerototwozeros = r"0{0,2}"
 oneortwodigits = r"\d{1,2}"
 twodigits = r"\d{2}"
 fourdigits = r"\d{4}"
+dot = r"\."
 dash = r"-"
 sep = "[\.,-/]"
 gt = "\>"
@@ -62,7 +64,10 @@ def p(**kwargs):
     for name,pat in kwargs.items():
         ret += f"(?P<{name}>{pat})"
     return ret
-    
+
+def optional(pat):
+    return f"({pat})?"    
+
 def match(s,**kwargs):    
     pat = p(**kwargs)
     flags = re.VERBOSE
@@ -129,16 +134,12 @@ class Dates(transformer.Transformation):
                     # 31,12,1888 -> 31 DEC 1888
                     # 31-12-1888 -> 31 DEC 1888
                     # 31/12/1888 -> 31 DEC 1888
-                    r = re.match(r"(?P<dd>\d{1,2})" +
-                                 sep +
-                                 r"(?P<mm>\d{1,2})" +
-                                 sep +
-                                 r"(?P<yyyy>\d{4})",value)
+                    r = match(value,
+                              d=oneortwodigits,sep1=sep,
+                              m=oneortwodigits,sep2=sep,
+                              y=fourdigits)
                     if r:
-                        y = r.group('yyyy')
-                        m = r.group('mm')
-                        d = r.group('dd')
-                        val = fmtdate(y,m,d)
+                        val = fmtdate(r.y,r.m,r.d)
                         if val:
                             item.value = val
                             return item
@@ -146,28 +147,23 @@ class Dates(transformer.Transformation):
             if options.handle_zeros:
                 # 0.0.1888 -> 1888
                 # 00.00.1888 -> 1888
-                r = re.match(r"0{1,2}\.0{1,2}\." +
-                             r"(?P<yyyy>\d{4})",value)
+                r = match(value,z1=zerototwozeros,dot=dot,z2=zerototwozeros,y=fourdigits)
                 if r:
-                    item.value = r.group('yyyy')
+                    item.value = r.y
                     return item
             
                 # 00.12.1888 -> DEC 1888
                 # .12.1888 -> DEC 1888
                 #  12.1888 -> DEC 1888
-                r = re.match(r"(0{0,2}\.)?" +
-                             r"(?P<mm>\d{1,2})" +
-                             sep +
-                             r"(?P<yyyy>\d{4})",value)
+                r = match(value,z=zerototwozeros,dot1=dot,m=oneortwodigits,dot2=dot,y=fourdigits)
+                if not r:
+                    r = match(value,m=oneortwodigits,dot=dot,y=fourdigits)
                 if r:
-                    y = r.group('yyyy')
-                    m = r.group('mm')
-                    d = 1
-                    val = fmtdate(y,m,d)
+                    val = fmtdate(r.y,r.m,1)
                     if val:
                         item.value = val[3:]
                         return item
-    
+
             if options.handle_zeros2:
                 # 0 JAN 1888   ->    JAN 1888
                 if value.startswith("0 "):

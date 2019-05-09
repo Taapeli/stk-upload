@@ -55,11 +55,11 @@ class Person_gramps(Person):
      """
 
     def __init__(self):
-        """ Creates an Person_gramps instance for Person data xml load
+        """ Creates an Person_gramps instance for Person data xml load.
         """
         Person.__init__(self)
 
-        # For emadded or referenced child objects, displaying Person page
+        # For embadded or referenced child objects, displaying Person page
         # @see Plan bp.scene.data_reader.connect_object_as_leaf
 
         self.names = []                 # models.gen.person_name.Name
@@ -82,7 +82,7 @@ class Person_gramps(Person):
 
 
     def save(self, tx, batch_id):
-        """ Saves the Person object and possibly the Names, Events ja Citations
+        """ Saves the Person object and possibly the Names, Events ja Citations.
 
             On return, the self.uniq_id is set
             

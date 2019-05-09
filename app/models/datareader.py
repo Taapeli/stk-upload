@@ -195,11 +195,49 @@ def recreate_refnames():
 #     return (namelist)
 
 
-# def read_cite_sour_repo(uniq_id=None):
-#     """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
-#     
-#         NOT IN USE, removed 3.5.2019
-#     """
+def read_cite_sour_repo(uniq_id=None):
+    """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
+    
+        Called from bp.tools.routes.pick_selection
+    """
+
+    sources = []
+    result_cite = Event_combo.get_event_cite(uniq_id)
+    for record_cite in result_cite:
+        pid = record_cite['id']
+        e = Event_combo()
+        e.uniq_id = pid
+        if record_cite['type']:
+            e.type = record_cite['type']
+        if record_cite['date']:
+            e.date = record_cite['date']
+        if record_cite['dates']:
+            e.dates = DateRange(record_cite['dates'])
+
+        for source_cite in record_cite['sources']:
+            c = Citation()
+            c.uniq_id = source_cite[0]
+            c.dateval = source_cite[1]
+            c.page = source_cite[2]
+            c.confidence = source_cite[3]
+
+            c.get_sourceref_hlink()
+            if c.source_handle != '':
+                s = Source()
+                s.uniq_id = c.source_handle
+                result_source = s.get_source_data()
+                for record_source in result_source:
+                    if record_source['stitle']:
+                        s.stitle = record_source['stitle']
+
+                    s.get_repositories_w_notes()
+
+                c.source = s    # s.append(s)
+            e.citations.append(c)
+
+        sources.append(e)
+
+    return (sources)
 
 
 def read_medias(uniq_id=None):
@@ -318,17 +356,18 @@ def read_sources(uniq_id=None):
         result = Source.get_source_citation(uniq_id)
         # One Source, many Citations
         for record in result:
-            pid = record['id']
-            s = Source()
-            s.uniq_id = pid
-            if record['stitle']:
-                s.stitle = record['stitle']
-            for citation in record['citations']:
-                c = Citation()
-                c.uniq_id = citation[0]
-                c.dateval = citation[1]
-                c.page = citation[2]
-                c.confidence = citation[3]
+            # Record: <Record 
+            #    source=<Node id=243603 labels={'Source'} 
+            #        properties={'handle': '_e07cc43dfb33a13e25893c4a19c', 'id': 'S1371', 
+            #            'stitle': '1079 Akti , joka koskee Pietariin ...', 
+            #            'change': '1542665570'}> 
+            #    citations=[<Node id=246933 labels={'Citation'} 
+            #        properties={'handle': '_e07cc55a985217d798f0ff0df64', 'id': 'C3223', 
+            #        'page': '', 'dateval': '', 'change': 1542665572, 'confidence': '2'}>
+            #     ]>
+            s = Source.from_node(record['source'])
+            for node in record['citations']:
+                c = Citation.from_node(node)
                 s.citations.append(c)
             sources.append(s)
     except Exception as err:
@@ -681,7 +720,7 @@ def get_person_data_by_id(uniq_id):
                         r.rname = source[4]
                         r.type = source[5]
 
-                        s.repocitory = r
+                        s.repositories.append(r)
                         c.source = s
 
                     print("Eve:{} {} > Cit:{} '{}' > Sour:{} '{}' > Repo:{} '{}'".\

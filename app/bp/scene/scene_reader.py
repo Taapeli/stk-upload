@@ -60,22 +60,22 @@ def get_a_person_for_display_apoc(uniq_id, user):
             # [80234, 'EVENT', 'Primary', 88208]
             if relation[3] != person.uniq_id:
                 # Going to add a new node under src node
-                node_id1 = relation[0]
-                node_id2 = relation[3]
+                node_rel1 = relation[0]
+                node_rel2 = relation[3]
             else:
                 # Reverse connection (Family)-->(Person): add src under target node
-                node_id1 = relation[3]
-                node_id2 = relation[0]
-            src_node = nodes[node_id1]
+                node_rel1 = relation[3]
+                node_rel2 = relation[0]
+            src_node = nodes[node_rel1]
             src_label = list(src_node.labels)[0]
-            target_node = nodes[node_id2]
+            target_node = nodes[node_rel2]
             target_label = list(target_node.labels)[0]
 
             if not src_node.id in objs:
                 # Create new object
                 try:
                     src_obj = get_object_from_node(src_node)
-                    print("  new obj[{}] <- {} {}".\
+                    print(" new objs[{}] <- {} {}".\
                           format(src_obj.uniq_id, src_label, src_obj))
                     objs[src_obj.uniq_id] = src_obj
                 except Exception as e:
@@ -94,7 +94,7 @@ def get_a_person_for_display_apoc(uniq_id, user):
                 src_obj = objs[src_node.id]
                 target_obj = get_object_from_node(target_node)
                 if not target_obj:  
-                    print("Not implemented yet! {}".format(target_obj))
+                    print("iERROR Not implemented yet! {}".format(target_obj))
                     continue
                 if role:    # Relation attribute 'role'
                     target_obj.role = role
@@ -201,7 +201,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
             .place_ref[]
             .note_ref[]
             .citation_ref[]
-        Family
+        Family_combo
              children[]
             .father, .mother, .children[]
             .events[]
@@ -225,7 +225,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
         elif target_class == 'Event_combo':
             src.events.append(target)
             return src.events[-1]
-        elif target_class == 'Family':
+        elif target_class == 'Family_combo':
             if rel_type == 'CHILD':
                 src.families_as_child.append(target)
                 return src.families_as_child[-1]
@@ -273,7 +273,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
             src.note_ref.append(target.uniq_id)
             return None
 
-    elif src_class == 'Family':
+    elif src_class == 'Family_combo':
         if target_class == 'Event_combo':
             src.events.append(target)
             return src.events[-1]
@@ -283,7 +283,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
 
     elif src_class == 'Source':
         if target_class == 'Repository':
-            src.repocitory_id = target.uniq_id
+            src.repositories.append(target.uniq_id)
             return None
         if target_class == 'Note':
             src.note_ref.append(target.uniq_id)

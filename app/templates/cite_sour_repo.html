@@ -51,17 +51,19 @@
 	        </li>
 	    </ol>
     
-		    {% if s.repocitory %}
+		    {% if s.repositories %}
 		    <h4>{{ _('Repositories') }}</h4>
 		    <ol class="num">
+		      {% for repo in s.repositories %}
 		        <li><div class="itemrow">
 		                <div class="col1">{{ _('Identifier') }}<br />{{ _('Rname') }}<br />{{ _("Type") }}<br /><br /></div>
 		                <div class="col3"><span class="id">
-		                	<a href="/pick/repo_uniq_id={{s.repocitory.uniq_id}}">{{s.repocitory.uniq_id}}</a></span><br />
-		                	{{s.repocitory.rname}}<br />
-		                	{{s.repocitory.type}}<br /><br /></div>
+		                	<a href="/pick/repo_uniq_id={{repo.uniq_id}}">{{s.repository.uniq_id}}</a></span><br />
+		                	{{repo.rname}}<br />
+		                	{{repo.type}}<br /><br /></div>
 		            </div>
 		        </li>
+		      {% endfor %}
 		    </ol>
     
     		{% endif %}

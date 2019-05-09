@@ -161,7 +161,7 @@ class Citation:
 
     @staticmethod       
     def get_source_repo (uniq_id=None):
-        """ Read Citation -> Source -> Repository chain
+        """ Read Citation -> Source -> Repositories chain
             and optionally Notes.            
             Citation has all data but c.handle
 

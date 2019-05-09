@@ -144,7 +144,7 @@ class UserAdmin():
                         email = profile.email, 
                         role = role,
                         approved = False, 
-                        admin_name = 'system')              
+                        creator = 'system')              
                     tx.commit()
             return(True)        
         except ConstraintError as ex:

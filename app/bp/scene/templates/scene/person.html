@@ -280,14 +280,16 @@
 >>> cita = citations[0] = <models.gen.citation.Citation object>
 >>> citations[0].source = <models.gen.source.Source object>
 >>> citations[0].source.stitle = 'Kangasala syntyneet 1721-1778'
->>> citations[0].source.repocitory.rname = 'Kangasalan seurakunnan arkisto'
+>>> citations[0].source.repositories[0].rname = 'Kangasalan seurakunnan arkisto'
 #}
                 {% for cita in citations %}
                 <li>
-            		{{cita.source.repocitory.rname}}:
-            		<a href="/scene/source={{cita.source.uniq_id}}" class="inlink"
-                       title="{{ _('see details of source %(id)s', id=cita.source.uniq_id) }}"
-                       >{{cita.source.stitle}}</a>
+                    {% for repo in cita.source.repositories %}
+	            		{{repo.rname}}:
+	            		<a href="/scene/source={{cita.source.uniq_id}}" class="inlink"
+	                       title="{{ _('see details of source %(id)s', id=cita.source.uniq_id) }}"
+	                       >{{cita.source.stitle}}</a>
+                    {% endfor %}
                     <ol>
                          {% set source_cnt = source_cnt + 1 %}
                          {% set conf = cita.confidence | int %}
