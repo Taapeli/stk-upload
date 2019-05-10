@@ -7,6 +7,7 @@ import logging
 import traceback
 from werkzeug.utils import redirect
 from flask.helpers import url_for
+from ..gedcom.models import gedcom_utils
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
@@ -119,8 +120,7 @@ def my_settings():
     labels, user_batches = batch_reader.get_user_batch_stats()
     print(f'# User batches {user_batches}')
 
-    from bp.gedcom.routes import list_gedcoms
-    gedcoms = list_gedcoms(current_user.username)
+    gedcoms = gedcom_utils.list_gedcoms(current_user.username)
     print(f'# Gedcoms {gedcoms}')
     
     return render_template("/start/my_settings.html",
