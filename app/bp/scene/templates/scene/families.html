@@ -10,6 +10,16 @@
 {% set user = owner_filter.user %}
 {% set next = owner_filter.scope %}
 {% set filt_owners = owner_filter.filter %}
+{% if filt_owners == 3 or filt_owners == 5 %}{#
+	#   common_own   011 3 = 1+2 = users data & Isotammi
+	#   common_batch 101 5 = 1+4 = user batch & Isotammi #}
+	{% set multi_owners = filt_owners - 1 %}
+    {% set my_set = owner_filter.choices.as_str[filt_owners-1] %}
+    {% set my_common = "Isotammi" %}
+{% else %}
+    {% set multi_owners = 0 %}
+    {% set my_set = owner_filter.choices.as_str[filt_owners] %}
+{% endif %}
 
 <div id="startdiv">
 	<h2>{{ _('List of Families') }}</h2>
