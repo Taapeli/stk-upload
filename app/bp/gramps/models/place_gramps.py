@@ -155,6 +155,17 @@ class Place_gramps(Place):
             except Exception as err:
                 print(f"iError Place.link_hier: {err} at {self.id} --> {up_handle}", file=stderr)
                 raise
+            
+        try:
+            for note in self.notes:
+                n_attr = {"url": note.url,
+                          "type": note.type,
+                          "text": note.text}
+                result = tx.run(Cypher_place_in_batch.add_urls, 
+                                batch_id=batch_id, pid=self.uniq_id, n_attr=n_attr)
+        except Exception as err:
+            print(f"iError Place.add_urls {note}: {err}", file=stderr)
+            raise
 
         # Make the place note relations; the Notes have been stored before
         #TODO: Voi olla useita Noteja samalla handlella! Käytä uniq_id:tä!

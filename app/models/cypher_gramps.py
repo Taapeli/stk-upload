@@ -297,6 +297,14 @@ MERGE (pl) -[r:HIERARCY]-> (m:Place {handle: $up_handle})
     SET r = $r_attr
 return ID(m) as uniq_id"""
 
+    add_urls = """
+MATCH (u:Batch {id:$batch_id})
+CREATE (u) -[:OWNS]-> (n:Note) 
+    SET n = $n_attr
+WITH n
+    MATCH (pl:Place) WHERE id(pl) = $pid
+    MERGE (pl) -[r:NOTE]-> (n)"""
+
     link_note = """
 MATCH (pl:Place) WHERE id(pl) = $pid
 MATCH (n:Note)  WHERE n.handle=$hlink
