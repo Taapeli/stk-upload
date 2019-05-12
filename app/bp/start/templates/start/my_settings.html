@@ -5,12 +5,22 @@
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
-{# import 'start/s_macros.html' as macro #}
 
 {{ hamburger_menu() }}
 <style>
 td,th {background: white;}
 </style>
+<script>
+function confirm_delete(url) {
+    var msg = "{{ _('Are you sure you want to delete your data?') }}";
+    var ok = confirm(msg);
+    if (!ok) {
+        return false;
+    }
+    location.href = url;
+    return true;
+}
+</script>
 
 <div id="startdiv">
   <div>
@@ -54,18 +64,14 @@ td,th {background: white;}
         </ul>
     </div>
 
+    {% if batches %}
     <div class="startbox2">
         <h3>{{ _('Data Batches') }}</h3>
         <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
-{# labels = ['Family', 'Note', 'Person']
-   user_batches = {'user1/2019-05-03.001': {'Person': 1949, 'Family': 736}}
-#}
-    {% if batches %}
         <table width="100%">
         <tr>
             <th>{{ _('Batch') }}</th>
-            {% for label in labels %}<th>{{label}}</th>
-            {% endfor %}
+            {% for label in labels %}<th>{{label}}</th>{% endfor %}
         </tr>
         {% for key1,item in batches.items() %}
             {% set user0 = user %}
@@ -78,15 +84,22 @@ td,th {background: white;}
         </tr>
         {% endfor %}
         </table>
-    {% else %}
-        <p>{{ _('You have no candidate data loaded in the database.') }}</p>
-    {% endif %}
-            <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a></p>
+        <p>&rtrif; <a href="#" onclick="confirm_delete('/admin/clear_db/my_own')">
+                  {{ _('Delete all my imported data') }}</a>
+        <br>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
+        </p>
     </div>
+    {% else %}
+    <div class="startbox">
+        <h3>{{ _('Data Batches') }}</h3>
+        <p>{{ _('You have no candidate data loaded in the database.') }}</p>
+        <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a></p>
+    </div>
+    {% endif %}{# Batches #}
 
+    {% if gedcoms %}
     <div class="startbox2">
         <h3>{{ _('My Gedcom files') }}</h3>
-    {% if gedcoms %}
            <table width="100%">
                 <tr><th>{{ _('File') }}</th>
                     <th>{{ _('Date') }}</th>
@@ -95,22 +108,27 @@ td,th {background: white;}
                 </tr>
                {% for file in gedcoms %}
                    <tr>
-	                   <td class="gedcom-name">{{ file.name }}</td>
-	                   {% set date = file.metadata.upload_time.split() %}
-	                   <td>{{ date[1] }}</td>
-	                   <td class="right">{{ file.metadata.size }}</td>
-	                   <td colspan="4">{{ file.metadata.desc|escape }}</td>
+                       <td class="gedcom-name">{{ file.name }}</td>
+                       <td>{% if file.metadata.upload_time %}
+                           {% set date = file.metadata.upload_time.split() %}
+                           {{ date[1] }}
+                       {% endif %}</td>
+                       <td class="right">{{ file.metadata.size }}</td>
+                       <td colspan="4">{{ file.metadata.desc|escape }}</td>
                    </tr>
                {% endfor %}
            </table>
-    {% else %}
-        <p>{{ _('You have no Gedcom files in the server.') }}</p>
-    {% endif %}
-            <p>&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a></p>
+           <p>&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a></p>
     </div>
-    {% endif %}
-  </div>
+    {% else %}
+    <div class="startbox">
+        <h3>{{ _('My Gedcom files') }}</h3>
+        <p>{{ _('You have no Gedcom files in the server.') }}</p>
+        <p>&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a></p>
+    </div>
+    {% endif %}{# Gedcoms #}
 
-  <p></p>
+  {% endif %}
+  </div>
 </div>
 {% endblock %}

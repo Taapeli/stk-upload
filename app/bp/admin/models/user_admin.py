@@ -399,6 +399,7 @@ class UserAdmin():
 #             result = shareds.driver.session().run(Cypher_adm.user_update_language,
 #                          username=username,language=language).single()
 #             return result
+            print("*** Update user is not done! ***")
             return("Ok")
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -410,6 +411,7 @@ class UserAdmin():
 #             result = shareds.driver.session().run(Cypher_adm.user_update_language,
 #                          username=username,language=language).single()
 #             return result
+            print("*** Update user is not done! ***")
             return("Ok")
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
