@@ -17,7 +17,9 @@ from models.gen.family_combo import Family_combo
 
 
 def make_place_hierarchy_properties(tx=None, place=None):
-    """ Connects places to the upper level places
+    """ Connects places to the upper level places.
+    
+        TODO: NOT IN USE
     """
     hierarchy_count = 0
     

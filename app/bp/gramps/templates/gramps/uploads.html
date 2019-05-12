@@ -86,6 +86,8 @@ $(document).ready( function() {
            <tr> <th></th>
                 <th>{{ _("Upload time") }}</th>
                 <th>{{ _("XML file") }}</th>
+                <th>{{ _("Batch") }}</th>
+                <th>{{ _("Persons") }}</th>
                 <th>{{ _("Status") }}</th>
    			</tr>
 	    {% for upload in uploads %}
@@ -94,12 +96,13 @@ $(document).ready( function() {
 	                   onClick="selectFile(this);"></td>
 	           <td>{{upload.upload_time_s}}</td>
 	           <td>{{upload.xmlname}}</td>
+               <td>{% if upload.batch_id %}
+                    {% if upload.status == "LADATTU" %}{{_( "deleted from database" ) }})
+                    {% else %}{{upload.batch_id}}{% endif %}
+                {% endif %}</td>
+               <td class="center">{% if upload.count %}{{upload.count}}{% endif %}</td>
 	           <td>{{upload.status}}
-                {% if upload.batch_id %}
-                   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
-                   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
-                   {% endif %}
-                {% endif %}
+                
                 {% if upload.loading %}
                     <a href="javascript:window.location.href=window.location.href"
                      title="{{ _('See if ready') }}"

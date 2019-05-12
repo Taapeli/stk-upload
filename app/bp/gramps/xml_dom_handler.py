@@ -92,7 +92,7 @@ class DOM_handler():
 
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
-        self.place_ids = []                 # List of processed Place node unique id's
+#         self.place_ids = []                 # List of processed Place node unique id's
         self.tx = None                      # Transaction not opened
         self.batch_id = None
 
@@ -578,7 +578,6 @@ class DOM_handler():
 
             pl = Place_gramps()
             # List of upper places in hierarchy as {hlink, dates} dictionaries
-            #TODO move in Place and remove Place.placeref_hlink string
             pl.surround_ref = []
 
             pl.handle = placeobj.getAttribute("handle")
@@ -587,7 +586,7 @@ class DOM_handler():
             pl.id = placeobj.getAttribute("id")
             pl.type = placeobj.getAttribute("type")
 
-            if len(placeobj.getElementsByTagName('ptitle') ) == 1:
+            if len(placeobj.getElementsByTagName('ptitle')) == 1:
                 placeobj_ptitle = placeobj.getElementsByTagName('ptitle')[0]
                 pl.ptitle = placeobj_ptitle.childNodes[0].data
             elif len(placeobj.getElementsByTagName('ptitle') ) > 1:
@@ -614,12 +613,16 @@ class DOM_handler():
                    and placeobj_coord.hasAttribute("long"):
                     lat = placeobj_coord.getAttribute("lat")
                     long = placeobj_coord.getAttribute("long")
-                    try:
-                        pl.coord = Point(lat, long)
-                    except Exception as e:
-                        self.blog.log_event({
-                            'title':"Invalid coordinates - {}".format(e),
-                            'level':"WARNING", 'count':pl.id})
+                    if pl.coord:
+                        self.blog.log_event({'title':"More than one coordinates in a place",
+                                             'level':"WARNING", 'count':pl.id})
+                    else:
+                        try:
+                            pl.coord = Point(lat, long)
+                        except Exception as e:
+                            self.blog.log_event({
+                                'title':"Invalid coordinates - {}".format(e),
+                                'level':"WARNING", 'count':pl.id})
 
             for placeobj_url in placeobj.getElementsByTagName('url'):
                 n = Note()
@@ -634,20 +637,10 @@ class DOM_handler():
                     pl.notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName('placeref'):
-                # Traverse links to surrounding places
+                # Traverse links to surrounding (upper) places
                 hlink = placeobj_placeref.getAttribute("hlink")
                 dates = self._extract_daterange(placeobj_placeref)
                 pl.surround_ref.append({'hlink':hlink, 'dates':dates})
-#             # Piti sallia useita ylempia paikkoja eri päivämäärillä
-#             # Tässä vain 1 sallitaan elikä päivämäärää ole
-#
-#             if len(placeobj.getElementsByTagName('placeref') ) == 1:
-#                 placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
-#                 if placeobj_placeref.hasAttribute("hlink"):
-#                     pl.placeref_hlink = placeobj_placeref.getAttribute("hlink")
-#                     pl.dates = self._extract_daterange(placeobj_placeref)
-#             elif len(placeobj.getElementsByTagName('placeref') ) > 1:
-#                 print("Warning: Ignored 2nd placeref in a pl - useita hierarkian yläpuolisia paikkoja")
 
             for placeobj_noteref in placeobj.getElementsByTagName('noteref'):
                 if placeobj_noteref.hasAttribute("hlink"):
@@ -659,7 +652,7 @@ class DOM_handler():
 
             counter += 1
             
-            self.place_ids.append(pl)
+#             self.place_ids.append(pl.uniq_id)
 
         self.blog.log_event({'title':"Places", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
@@ -764,21 +757,21 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
-
-    def make_place_hierarchy(self):
-        ''' Connect places to the upper place
-        '''
-
-        print ("***** {} Place hierarchy *****".format(len(self.place_ids)))
-        t0 = time.time()
-        hierarchy_count = 0
-
-        for pl in self.place_ids:
-            hc = dataupdater.make_place_hierarchy_properties(tx=self.tx, place=pl)
-            hierarchy_count += hc
-
-        self.blog.log_event({'title':"Place hierarchy", 
-                                'count':hierarchy_count, 'elapsed':time.time()-t0})
+# 
+#     def make_place_hierarchy(self):
+#         ''' Connect places to the upper place
+#         '''
+# 
+#         print ("***** {} Place hierarchy *****".format(len(self.place_ids)))
+#         t0 = time.time()
+#         hierarchy_count = 0
+# 
+#         for pl in self.place_ids:
+#             hc = dataupdater.make_place_hierarchy_properties(tx=self.tx, place=pl)
+#             hierarchy_count += hc
+# 
+#         self.blog.log_event({'title':"Place hierarchy", 
+#                                 'count':hierarchy_count, 'elapsed':time.time()-t0})
 
     def set_family_sortname_dates(self):
         ''' For each Family set Family.father_sortname, Family.mother_sortname, 
@@ -805,7 +798,7 @@ class DOM_handler():
         ''' Add links from each Person to Refnames and set Person.sortname
         '''
 
-        print ("***** {} Refnames & sortnames *****".format(len(self.person_ids)))
+        print ("***** {} Person refnames & sortnames *****".format(len(self.person_ids)))
         t0 = time.time()
         refname_count = 0
         sortname_count = 0

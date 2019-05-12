@@ -41,9 +41,10 @@ class Place:
     def __init__(self, uniq_id=None, ptype="", pname="", level=None):
         """ Creates a new Place instance.
 
-            Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyylin, nimen
+            Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyypin, nimen
             ja (tulossivua varten) mahdollisen hierarkiatason
         """
+        self.id = ''
         self.uniq_id = uniq_id
         self.type = ptype
         self.pname = pname
@@ -180,45 +181,67 @@ class Place:
 
         query = """
  MATCH (p:Place)
- RETURN ID(p) AS uniq_id, p
+ OPTIONAL MATCH (p) -[r:HIERARCY]-> (up:Place)
+ RETURN ID(p) AS uniq_id, p, 
+     COLLECT(DISTINCT [up.pname, r.datetype, r.date1, r.date2]) AS up
  ORDER BY p.pname, p.type"""
 
         result = shareds.driver.session().run(query)
 
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 'pname',
-                  'coord']
+                  'coord', 'upper']
         lists = []
 
         for record in result:
+            # <Record uniq_id=271313 
+            #    p=<Node id=271313 labels={'Place'} 
+            #        properties={'coord': [60.0, 27.0], 'handle': '_ddd39c2aa3518f6db8053050c70', 
+            #        'id': 'P0000', 'type': 'Town', 'pname': 'Helsinki', 'change': 1524381255}> 
+            #    up=[
+            #        ['Suomen suuriruhtinaskunta', 3, 1852509, 1964420], 
+            #        ['Suomi', 2, 1964421, 1964421]
+            #    ]>
             data_line = []
             if record['uniq_id']:
                 data_line.append(record['uniq_id'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['handle']:
                 data_line.append(record["p"]['handle'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['change']:
                 data_line.append(int(record["p"]['change']))  #TODO only temporary int()
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['id']:
                 data_line.append(record["p"]['id'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['type']:
                 data_line.append(record["p"]['type'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['pname']:
                 data_line.append(record["p"]['pname'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['coord']:
                 data_line.append(record["p"]['coord'])
             else:
-                data_line.append('-')
+                data_line.append('')
+            uppers = []
+            for up in record['up']:
+                if up[0]:
+                    # ['Suomi', 2, 1964421, 1964421]
+                    pname = up[0]
+                    if up[1]:
+                        dates = DateRange(up[1],up[2],up[3])
+                        text = f'{pname} ({dates})'
+                    else:
+                        text = pname
+                    uppers.append(text)
+            data_line.append(uppers)
 
             lists.append(data_line)
 
@@ -298,20 +321,6 @@ class Place:
         # REturn sorted by first name in the list p.pname
         return sorted(ret, key=lambda x:x.pname[0])
 
-
-    @staticmethod
-    def make_hierarchy(tx, place):
-        for upper in place.surround_ref:
-            try:
-                #print("upper {} -> {}".format(self, upper))
-                if 'dates' in upper and isinstance(upper['dates'], DateRange):
-                    r_attr = upper['dates'].for_db()
-                else:
-                    r_attr = {}
-                tx.run(Cypher_place_w_handle.link_hier,
-                       handle=place.handle, hlink=upper['hlink'], r_attr=r_attr)
-            except Exception as err:
-                print("iError Place.link_hier: {0}".format(err), file=stderr)
 
     @staticmethod
     def namelist_w_lang(field):

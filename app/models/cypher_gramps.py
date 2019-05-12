@@ -268,14 +268,17 @@ class Cypher_place_in_batch():
     # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
 MATCH (u:Batch {id:$batch_id})
-CREATE (u) -[:OWNS]-> (a:Place) 
-    SET a = $p_attr
-RETURN ID(a) as uniq_id"""
+CREATE (new_pl:Place)
+    SET new_pl = $p_attr
+CREATE (u) -[:OWNS]-> (new_pl) 
+RETURN ID(new_pl) as uniq_id"""
 
-    # Find Batch and upper Place and connect new object to those
-    merge = """
-MATCH (pl:Place {id:$plid})
-    SET pl += $p_attr"""
+    # Set properties for an existing Place and connect it to Batch
+    complete = """
+MATCH (u:Batch {id:$batch_id})
+MATCH (pl:Place) WHERE ID(pl) = $plid
+    SET pl += $p_attr
+CREATE (u) -[:OWNS]-> (pl)"""
 # plid=plid, p_attr=pl_attr
 #MERGE (u) -[:OWNS]-> (pl) <-[r:HIERARCY]- (plu:Place {handle: $up_handle}) 
 #RETURN ID(pl) as uniq_id"""
@@ -285,17 +288,21 @@ MATCH (pl:Place) WHERE id(pl) = $pid
 CREATE (pl) -[r:NAME]-> (n:Place_name)
     SET n = $n_attr"""
 
+    # Link to a known upper Place
     link_hier = """
 MATCH (pl:Place) WHERE id(pl) = $plid
 MATCH (up:Place) WHERE id(up) = $up_id
 MERGE (pl) -[r:HIERARCY]-> (up)
     SET r = $r_attr"""
 
+    # Link to a new dummy upper Place
     link_create_hier = """
 MATCH (pl:Place) WHERE id(pl) = $plid
-MERGE (pl) -[r:HIERARCY]-> (m:Place {handle: $up_handle})
+CREATE (new_pl:Place)
+    SET new_pl.handle = $up_handle
+CREATE (pl) -[r:HIERARCY]-> (new_pl)
     SET r = $r_attr
-return ID(m) as uniq_id"""
+return ID(new_pl) as uniq_id"""
 
     add_urls = """
 MATCH (u:Batch {id:$batch_id})

@@ -69,14 +69,13 @@ function confirm_delete(url) {
         <h3>{{ _('Data Batches') }}</h3>
         <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
         <table width="100%">
-        <tr>
+        <tr>{% set w = (100.0 / (labels|length + 3) | round(0,'floor')) | int %}
             <th>{{ _('Batch') }}</th>
-            {% for label in labels %}<th>{{label}}</th>{% endfor %}
+            {% for label in labels %}<th style="width:{{w}}%">{{label}}</th>{% endfor %}
         </tr>
         {% for key1,item in batches.items() %}
             {% set user0 = user %}
             {% set user, batch = key1.split('/') %}
-<!--              <tr><th colspan="{{ labels|length + 1 }}">{{user}}</th></tr> -->
         <tr><td>{{batch}}</td>
             {% for label in labels %}
               <td class="right"> {{item[label]}} </td>
@@ -84,9 +83,9 @@ function confirm_delete(url) {
         </tr>
         {% endfor %}
         </table>
-        <p>&rtrif; <a href="#" onclick="confirm_delete('/admin/clear_db/my_own')">
+        <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
+        <br>&rtrif; <a href="#" onclick="confirm_delete('/admin/clear_db/my_own')">
                   {{ _('Delete all my imported data') }}</a>
-        <br>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
         </p>
     </div>
     {% else %}
