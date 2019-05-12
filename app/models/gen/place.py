@@ -4,6 +4,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 
+from sys import stderr
+
 import  shareds
 #from .weburl import Weburl
 from .note import Note
