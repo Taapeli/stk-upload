@@ -10,7 +10,9 @@ import time
 from sys import stderr
 
 from flask_babelex import _
-from flask import flash
+#from flask import flash
+from flask import render_template, request, redirect, url_for, flash, session as user_session
+from flask_security import current_user, login_required #, roles_accepted
 
 from operator import itemgetter
 #from models.dbutil import Datefrom
@@ -28,6 +30,7 @@ from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.dates import DateRange
+from models.owner import OwnerFilter
 
 
 def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
@@ -406,7 +409,13 @@ def read_families():
     """ Lukee tietokannasta Family- objektit näytettäväksi
     """
 
-    families = Family_combo.get_families()
+    my_filter = OwnerFilter(user_session, current_user, request)
+    # Which range of data is shown
+    my_filter.set_scope_from_request(request, 'person_scope')
+    opt = request.args.get('o', 'father', type=str)
+    count = request.args.get('c', 100, type=int)
+
+    families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
     
     return (families)
 
