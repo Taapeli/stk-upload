@@ -6,6 +6,8 @@
 #import urllib
 
 import logging 
+from flask import jsonify
+from bp.tools import api
 logger = logging.getLogger('stkserver')
 import time
 
@@ -379,3 +381,23 @@ def henkiloiden_yhdistely():
     flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
     return redirect(url_for('pick_selection', ehto='names='+names))
 
+@bp.route('/api/v1/search', methods=['GET'])
+def api_v1_search():
+    lookfor = request.args.get("lookfor")
+    print(lookfor)
+    if not lookfor: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'lookfor'",
+        ))
+    rsp = api.search(lookfor) 
+    return jsonify(rsp)
+
+@bp.route('/api/v1/record', methods=['GET'])
+def api_v1_record():
+    id = request.args.get("id")
+    if not id: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'id'",
+        ))
+    rsp = api.record(id) 
+    return jsonify(rsp)
