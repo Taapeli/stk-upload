@@ -105,9 +105,18 @@ RETURN family"""
         family_result = shareds.driver.session().run(query, {"pid": pid})
         
         for family_record in family_result:
-            self.change = family_record["family"]['change']
-            self.id = family_record["family"]['id']
-            self.rel_type = family_record["family"]['rel_type']
+            family = family_record["family"]
+            self.change = family['change']
+            self.id = family['id']
+            self.rel_type = family['rel_type']
+            
+            self.father_sortname = family['father_sortname']
+            self.mother_sortname = family['mother_sortname']
+            datetype = family['datetype']
+            date1 = family['date1']
+            date2 = family['date2']
+            if datetype != None:
+                self.marriage_date = DateRange(datetype, date1, date2)
             
         father_result = self.get_parent_by_id('father')
         for father_record in father_result:            
@@ -115,7 +124,7 @@ RETURN family"""
 
         mother_result = self.get_parent_by_id('mother')
         for mother_record in mother_result:            
-            self.mother = mother_record["mother"]
+            self.mother = mother_record["father"]
 
         event_result = self.get_family_events()
         for event_record in event_result:            

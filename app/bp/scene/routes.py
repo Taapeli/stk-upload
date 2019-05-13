@@ -264,7 +264,8 @@ def show_famiy_page(fid):
     """
     try:
         family = Family_combo()   #, events = get_place_with_events(fid)
-        family.id = fid
+        family.uniq_id = fid
+        family.get_family_data_by_id()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in place_list:
