@@ -101,7 +101,7 @@ with c
     link_media = """
 MATCH (n:Event) WHERE n.handle=$handle
 MATCH (m:Media) WHERE m.handle=$objref_hlink
-MERGE (n)-[r:Media]->(m)"""
+MERGE (n)-[r:MEDIA]->(m)"""
 
 
 class Cypher_family_w_handle():
