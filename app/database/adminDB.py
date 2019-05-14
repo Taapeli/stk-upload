@@ -6,6 +6,7 @@ logger = logging.getLogger('stkserver')
 from neo4j.exceptions import CypherSyntaxError, ConstraintError, CypherError
 
 import shareds
+from .cypher_setup import SetupCypher
 
 #inputs
 ROLES = ({'level':'0',  'name':'gedcom',   'description':'Kirjautunut käyttäjä, pääsee vain gedcom-muunnoksiin'},
@@ -15,68 +16,6 @@ ROLES = ({'level':'0',  'name':'gedcom',   'description':'Kirjautunut käyttäj�
          {'level':'8',  'name':'admin',    'description':'Ylläpitäjä kaikin oikeuksin'},
          {'level':'16', 'name':'master',   'description':'Tietokannan pääkäyttäjä, ei sovellusoikeuksia'})
 
-
-class SetupCypher():
-    """ Cypher classes for setup """
-#erase database 
-    delete_database = """
-    MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r
-    """
-    check_role_count = """
-    MATCH (a:Role) RETURN COUNT(a)
-    """
-
-    set_role_constraint = """
-    CREATE CONSTRAINT ON (role:Role) ASSERT role.name IS UNIQUE
-    """
-
-    role_create = """
-    CREATE (role:Role 
-    {level: $level, name: $name, 
-    description: $description, timestamp: timestamp()})
-    """
-
-    master_check_existence = """
-    MATCH  (user:User) WHERE user.username = 'master' RETURN COUNT(user)
-    """
-        
-    email_val = """
-    MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN COUNT(a)
-    """
-
-    set_user_constraint1 = """
-    CREATE CONSTRAINT ON (user:User) 
-        ASSERT (user.email) IS UNIQUE;
-    """
- 
-    set_user_constraint2 = """
-    CREATE CONSTRAINT ON (user:User) 
-        ASSERT (user.username) IS UNIQUE;
-    """  
-     
-    set_allowed_email_constraint = """ 
-    CREATE CONSTRAINT ON (email:Allowed_email) 
-    ASSERT email.allowed_email IS UNIQUE
-    """  
-    
-    master_create = """
-    MATCH  (role:Role) WHERE role.name = 'master'
-    CREATE (user:User 
-        {username : $username, 
-        password : $password,  
-        email : $email, 
-        name : $name,
-        language : $language, 
-        is_active : $is_active,
-        confirmed_at : timestamp(), 
-        roles : $roles,
-        last_login_at : timestamp(),
-        current_login_at : timestamp(),
-        last_login_ip : $last_login_ip,
-        current_login_ip : $current_login_ip,
-        login_count : $login_count} )           
-        -[:HAS_ROLE]->(role)
-    """ 
 
 #erase total database 
 def delete_database(tx):
@@ -214,6 +153,34 @@ def create_allowed_email_constraints():
             return
     logger.info('Allowed email constraints created')
 
+def do_schema_fixes():
+    """ Search current obsolete terms in schema and fix them.
+    
+        #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
+    """
+    change_HIERARCY_to_IS_INSIDE = """
+MATCH (a) -[r:HIERARCY]-> (b)
+    MERGE (a) -[rr:IS_INSIDE]-> (b)
+        set rr = {datetype:r.datetype, date1:r.date1, date2:r.date2}
+    DELETE r
+RETURN count(rr)"""
+    change_userName_to_username = """
+match (u:UserProfile) where exists(u.userName)
+    set u.username = u.userName
+    set u.userName = null
+return count(u)"""
+    with shareds.driver.session() as session: 
+        try:
+            result = session.run(change_HIERARCY_to_IS_INSIDE)
+            cnt1 = result.single()[0]
+            result = session.run(change_userName_to_username)
+            cnt2 = result.single()[0]
+            print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes")
+
+        except Exception as e:
+            logger.error(f"{e} in database.adminDB.do_schema_fixes")
+            return
+
 
 def initialize_db(): 
     if not roles_exist():
@@ -224,3 +191,6 @@ def initialize_db():
         create_user_constraints()
         create_master(build_master_user())
         create_allowed_email_constraints()
+
+    # Fix chaanged schema
+    do_schema_fixes()

@@ -18,7 +18,7 @@ where not ( 'UserProfile' IN labels(a)
 DETACH DELETE a"""
 
     remove_my_nodes = """
-MATCH (u:UserProfile) -[*]-> (a) WHERE u.userName=$user
+MATCH (u:UserProfile) -[*]-> (a) WHERE u.username=$user
 DETACH DELETE a"""
 
     allowed_email_register = """
@@ -66,7 +66,7 @@ RETURN ae"""
 CREATE (up:UserProfile {   
     name: $name,
     email: $email,
-    userName: $userName,
+    username: $username,
     language: $language,
     research_years: $research_years,
     software: $software,
@@ -79,7 +79,7 @@ CREATE (up:UserProfile {
 MATCH (up:UserProfile) WHERE up.email = $email 
     SET name = $name,
     SET email = $email,
-    SET userName = $userName,
+    SET username = $username,
     SET language = $language,
     SET research_years = $research_years,
     SET software = $software,
@@ -93,7 +93,7 @@ RETURN up)"""
 # MATCH (u:User) 
 #     WHERE u.email = $email
 # CREATE (up:UserProfile {
-#         userName: $username,
+#         username: $username,
 #         numSessions: 0,
 #         lastSessionTime: timestamp() }
 #     ) <-[:SUPPLEMENTED]- (u)'''
@@ -102,8 +102,8 @@ RETURN up)"""
 MATCH (u:User) 
     WHERE u.email = $email
 MERGE (p:UserProfile {email: u.email})    
-  ON CREATE SET p.name = u.name, p.userName = u.username, p.language = u.language, p.created_at = timestamp()
-  ON MATCH SET p.language = u.language, p.userName = u.username
+  ON CREATE SET p.name = u.name, p.username = u.username, p.language = u.language, p.created_at = timestamp()
+  ON MATCH SET p.language = u.language, p.username = u.username
 CREATE (u) <-[:SUPPLEMENTED]- (p)'''
        
     user_profiles_get = '''

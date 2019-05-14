@@ -181,7 +181,7 @@ class Place:
 
         query = """
  MATCH (p:Place)
- OPTIONAL MATCH (p) -[r:HIERARCY]-> (up:Place)
+ OPTIONAL MATCH (p) -[r:IS_INSIDE]-> (up:Place)
  RETURN ID(p) AS uniq_id, p, 
      COLLECT(DISTINCT [up.pname, r.datetype, r.date1, r.date2]) AS up
  ORDER BY p.pname, p.type"""
@@ -370,10 +370,10 @@ class Place:
 
         # Query for Place hierarcy
         hier_query = """
-MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
-MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
         # Query for single Place without hierarcy

@@ -54,7 +54,7 @@ RETURN extract(x IN relationships |
 # Ver 0.2 Person lists with names and events
     read_my_persons_with_events_starting_name = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (p:Person)
-    WHERE prof.userName = $user AND p.sortname >= $start_name
+    WHERE prof.username = $user AND p.sortname >= $start_name
 WITH p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
@@ -262,7 +262,7 @@ RETURN f, p.pname AS marriage_place,
 
     read_my_families_p = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
-    WHERE prof.userName = $user AND f.father_sortname>=$fw
+    WHERE prof.username = $user AND f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
@@ -287,7 +287,7 @@ RETURN f, p.pname AS marriage_place,
     
     read_my_families_m = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
-    WHERE prof.userName = $user AND f.mother_sortname>=$fwm
+    WHERE prof.username = $user AND f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
@@ -387,8 +387,8 @@ ORDER BY edates[1]"""
 
     get_name_hierarcy = """
 MATCH (a:Place) -[:NAME]-> (pn:Place_name)
-OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
+OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
+OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
 RETURN ID(a) AS id, a.type AS type,
     COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
     COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,

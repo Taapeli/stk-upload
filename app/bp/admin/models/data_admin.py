@@ -58,7 +58,7 @@ class DataAdmin():
             # match (u:User) -[:SUPPLEMENTED]-> (up:UserProfile) -[*]-> (x)  
             #     where u.username="user1"
             # with x
-            # match (x) <-[*]- (p:UserProfile) where not p.userName="user1"
+            # match (x) <-[*]- (p:UserProfile) where not p.username="user1"
             #     RETURN labels(x)[0] as lab, count(x)
 
             msg = _("All persons and event by %(un)s are removed.", un=self.username)

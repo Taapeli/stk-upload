@@ -12,7 +12,7 @@ class Cypher_batch(object):
     '''
 
     batch_find_id = """
-MATCH (u:UserProfile {userName: $user})
+MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch) 
     WHERE b.id STARTS WITH $batch_base 
 RETURN b.id AS bid
@@ -20,12 +20,12 @@ RETURN b.id AS bid
     LIMIT 1"""
 
     batch_create = """
-MATCH (u:UserProfile {userName: $b_attr.user})
+MATCH (u:UserProfile {username: $b_attr.user})
 MERGE (u) -[:HAS_LOADED {status: $b_attr.status}]-> (b:Batch {id: $b_attr.id})
     SET b = $b_attr"""
 
     batch_complete = """
-MATCH (u:UserProfile {userName: $user})
+MATCH (u:UserProfile {username: $user})
 MATCH (u) -[r1:HAS_LOADED]-> (b:Batch {id: $bid})
     SET r1.status="completed"
     SET b.status="completed"
@@ -36,20 +36,20 @@ WITH u, b
 """
 
     batch_list = """
-MATCH (u:UserProfile {userName: $user})
+MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch) 
 RETURN b AS bid
 ORDER BY bid 
     """
 
     batch_count = """
-MATCH (u:UserProfile {userName: $user})
+MATCH (u:UserProfile {username: $user})
 MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid}) --> (p:Person)
 RETURN COUNT(p) as cnt
 """
 
 #     batch_x = """
-# MATCH (u:UserProfile {userName: $user})
+# MATCH (u:UserProfile {username: $user})
 # MERGE (u) -[:HAS_LOADED {status: $status}]-> 
 #     (b:Batch {id: $batch, file: $file}) -[:COMPLETED]-> 
 #     (l:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
@@ -221,7 +221,7 @@ MERGE (b) -[r:OWNS]-> (p)
 RETURN ID(p) as uniq_id"""
 
 #    create = """
-#MATCH (u:UserProfile {userName: $username})
+#MATCH (u:UserProfile {username: $username})
 #MERGE (p:Person {handle: $p_attr.handle})
 #MERGE (u) -[r:REVISION {date: $date}]-> (p)
 #    SET p = $p_attr
@@ -280,7 +280,7 @@ MATCH (pl:Place) WHERE ID(pl) = $plid
     SET pl += $p_attr
 CREATE (u) -[:OWNS]-> (pl)"""
 # plid=plid, p_attr=pl_attr
-#MERGE (u) -[:OWNS]-> (pl) <-[r:HIERARCY]- (plu:Place {handle: $up_handle}) 
+#MERGE (u) -[:OWNS]-> (pl) <-[r:IS_INSIDE]- (plu:Place {handle: $up_handle}) 
 #RETURN ID(pl) as uniq_id"""
 
     add_name = """
@@ -292,7 +292,7 @@ CREATE (pl) -[r:NAME]-> (n:Place_name)
     link_hier = """
 MATCH (pl:Place) WHERE id(pl) = $plid
 MATCH (up:Place) WHERE id(up) = $up_id
-MERGE (pl) -[r:HIERARCY]-> (up)
+MERGE (pl) -[r:IS_INSIDE]-> (up)
     SET r = $r_attr"""
 
     # Link to a new dummy upper Place
@@ -300,7 +300,7 @@ MERGE (pl) -[r:HIERARCY]-> (up)
 MATCH (pl:Place) WHERE id(pl) = $plid
 CREATE (new_pl:Place)
     SET new_pl.handle = $up_handle
-CREATE (pl) -[r:HIERARCY]-> (new_pl)
+CREATE (pl) -[r:IS_INSIDE]-> (new_pl)
     SET r = $r_attr
 return ID(new_pl) as uniq_id"""
 
@@ -334,7 +334,7 @@ MERGE (pl) -[r:NOTE]-> (m)"""
 #     link_hier = """
 # MATCH (n:Place) WHERE n.handle=$handle
 # MATCH (m:Place) WHERE m.handle=$hlink
-# MERGE (n) -[r:HIERARCY]-> (m)
+# MERGE (n) -[r:IS_INSIDE]-> (m)
 # SET r = $r_attr"""
 
 #     link_note = """
@@ -413,6 +413,6 @@ class Cypher_x():
     """ For Batch and Log classes """
 
     batch_create = '''
-MATCH (p:UserProfile {userName:$user}); 
+MATCH (p:UserProfile {username:$user}); 
 CREATE (p) -[:HAS_LOADED]-> (b:Batch {id:$bid, status:$status}) 
 RETURN ID(b) AS uniq_id'''

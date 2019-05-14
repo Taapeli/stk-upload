@@ -342,7 +342,7 @@ RETURN family"""
 #         """
 #         
 #         query = """
-# MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:OWNS]->(f:Family) WHERE prof.userName=$user 
+# MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:OWNS]->(f:Family) WHERE prof.username=$user 
 # OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name)  
 # OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
 # OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
