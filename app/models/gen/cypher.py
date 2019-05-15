@@ -304,10 +304,12 @@ OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
 OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
 RETURN f, p.pname AS marriage_place,
     COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(DISTINCT pc) AS child, 
-    COUNT(DISTINCT pc) AS no_of_children"""
+    COUNT(DISTINCT pc) AS no_of_children,
+    COLLECT(DISTINCT note) AS note"""
     
     #TODO Obsolete
     read_families = """
