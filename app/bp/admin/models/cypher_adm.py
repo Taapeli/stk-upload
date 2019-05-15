@@ -18,7 +18,7 @@ where not ( 'UserProfile' IN labels(a)
 DETACH DELETE a"""
 
     remove_my_nodes = """
-MATCH (a)<-[r:REVISION|HAS_LOADED]-(u:UserProfile {userName:$user})
+MATCH (u:UserProfile) -[*]-> (a) WHERE u.username=$user
 DETACH DELETE a"""
 
     allowed_email_register = """
@@ -66,7 +66,7 @@ RETURN ae"""
 CREATE (up:UserProfile {   
     name: $name,
     email: $email,
-    userName: $userName,
+    username: $username,
     language: $language,
     research_years: $research_years,
     software: $software,
@@ -79,7 +79,7 @@ CREATE (up:UserProfile {
 MATCH (up:UserProfile) WHERE up.email = $email 
     SET name = $name,
     SET email = $email,
-    SET userName = $userName,
+    SET username = $username,
     SET language = $language,
     SET research_years = $research_years,
     SET software = $software,
@@ -93,7 +93,7 @@ RETURN up)"""
 # MATCH (u:User) 
 #     WHERE u.email = $email
 # CREATE (up:UserProfile {
-#         userName: $username,
+#         username: $username,
 #         numSessions: 0,
 #         lastSessionTime: timestamp() }
 #     ) <-[:SUPPLEMENTED]- (u)'''
@@ -102,8 +102,8 @@ RETURN up)"""
 MATCH (u:User) 
     WHERE u.email = $email
 MERGE (p:UserProfile {email: u.email})    
-  ON CREATE SET p.name = u.name, p.userName = u.username, p.language = u.language, p.created_at = timestamp()
-  ON MATCH SET p.language = u.language, p.userName = u.username
+  ON CREATE SET p.name = u.name, p.username = u.username, p.language = u.language, p.created_at = timestamp()
+  ON MATCH SET p.language = u.language, p.username = u.username
 CREATE (u) <-[:SUPPLEMENTED]- (p)'''
        
     user_profiles_get = '''
@@ -134,3 +134,10 @@ CREATE (u) -[:HAS_ROLE]-> (r)'''
     user_role_delete = '''
 MATCH (u:User {email: $email}) -[c:HAS_ROLE]-> (r:Role {name: $name})
 DELETE c'''
+
+class Cypher_stats():
+    
+    get_batches = '''
+match (b:Batch) -[:OWNS]-> (x) where b.user = $user
+return b.user as user, b.id as batch, labels(x)[0] as label, count(x) as cnt 
+    order by user, batch'''

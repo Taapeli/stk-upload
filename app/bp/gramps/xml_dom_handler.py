@@ -16,24 +16,25 @@ from .models.person_gramps import Person_gramps
 from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
+from .models.place_gramps import Place_gramps
 from .batchlogger import Log
 
+from models.gen.place import Place_name, Point
+from models.gen.dates import Gramps_DateRange
 from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person_name import Name
 from models.gen.person_combo import Person_combo
-
-from models.gen.place import Place, Place_name, Point
-from models.gen.dates import Gramps_DateRange
 from models.gen.citation import Citation
-from models.gen.source import Source
+#from models.gen.source import Source
 from models.gen.repository import Repository
 
-from models.dataupdater import set_person_name_properties
-from models.dataupdater import set_family_name_properties
-from models.dataupdater import make_place_hierarchy_properties
-from bp.gramps.models import source_gramps
+from models import dataupdater
+#from models.dataupdater import set_person_name_properties
+#from models.dataupdater import set_family_name_properties
+#from models.dataupdater import make_place_hierarchy_properties
+#from bp.gramps.models import source_gramps
 
 
 def pick_url(src):
@@ -91,8 +92,9 @@ class DOM_handler():
 
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
-        self.place_ids = []                 # List of processed Place node unique id's
+#         self.place_ids = []                 # List of processed Place node unique id's
         self.tx = None                      # Transaction not opened
+        self.batch_id = None
 
     def begin_tx(self, session):
         self.tx = session.begin_transaction()
@@ -421,8 +423,8 @@ class DOM_handler():
                 if obj_file.hasAttribute("description"):
                     o.description = obj_file.getAttribute("description")
 
-            # print("iMedia {}".format(o))
-            o.save(self.tx)
+            #TODO: Varmista, ettei mediassa voi olla Note
+            o.save(self.tx, self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Media objects", 'count':counter, 
@@ -556,7 +558,15 @@ class DOM_handler():
 
 
     def handle_places(self):
-        # Get all the places in the collection
+        ''' Get all the places in the collection.
+        
+            To create place hierarchy links, there must be a dictionary of 
+            Place handles and uniq_ids created so far. The link may use
+            previous node or create a new one.
+        '''
+
+        place_keys = {}    # place_keys[handle] = uniq_id
+
         places = self.collection.getElementsByTagName("placeobj")
 
         print ("***** {} Places *****".format(len(places)))
@@ -566,9 +576,8 @@ class DOM_handler():
         # Print detail of each placeobj
         for placeobj in places:
 
-            pl = Place()
+            pl = Place_gramps()
             # List of upper places in hierarchy as {hlink, dates} dictionaries
-            #TODO move in Place and remove Place.placeref_hlink string
             pl.surround_ref = []
 
             pl.handle = placeobj.getAttribute("handle")
@@ -577,7 +586,7 @@ class DOM_handler():
             pl.id = placeobj.getAttribute("id")
             pl.type = placeobj.getAttribute("type")
 
-            if len(placeobj.getElementsByTagName('ptitle') ) == 1:
+            if len(placeobj.getElementsByTagName('ptitle')) == 1:
                 placeobj_ptitle = placeobj.getElementsByTagName('ptitle')[0]
                 pl.ptitle = placeobj_ptitle.childNodes[0].data
             elif len(placeobj.getElementsByTagName('ptitle') ) > 1:
@@ -585,27 +594,35 @@ class DOM_handler():
                                      'level':"WARNING", 'count':pl.id})
 
             for placeobj_pname in placeobj.getElementsByTagName('pname'):
-                placename = Place_name()
                 if placeobj_pname.hasAttribute("value"):
+                    placename = Place_name()
                     placename.name = placeobj_pname.getAttribute("value")
-                    if pl.pname == '':
-                        # First name is default name for Place node
-                        pl.pname = placename.name
-                if placeobj_pname.hasAttribute("lang"):
-                    placename.lang = placeobj_pname.getAttribute("lang")
-                pl.names.append(placename)
+                    if placename.name:
+                        if pl.pname == '':
+                            # First name is default name for Place node
+                            pl.pname = placename.name
+                        if placeobj_pname.hasAttribute("lang"):
+                            placename.lang = placeobj_pname.getAttribute("lang")
+                        pl.names.append(placename)
+                    else:
+                        self.blog.log_event({'title':f"This place has an empty name",
+                                             'level':"WARNING", 'count':pl.id})
 
             for placeobj_coord in placeobj.getElementsByTagName('coord'):
                 if placeobj_coord.hasAttribute("lat") \
                    and placeobj_coord.hasAttribute("long"):
-                    coord_lat = placeobj_coord.getAttribute("lat")
-                    coord_long = placeobj_coord.getAttribute("long")
-                    try:
-                        pl.coord = Point(coord_lat, coord_long)
-                    except Exception as e:
-                        self.blog.log_event({
-                            'title':"Invalid coordinates - {}".format(e),
-                            'level':"WARNING", 'count':pl.id})
+                    lat = placeobj_coord.getAttribute("lat")
+                    long = placeobj_coord.getAttribute("long")
+                    if pl.coord:
+                        self.blog.log_event({'title':"More than one coordinates in a place",
+                                             'level':"WARNING", 'count':pl.id})
+                    else:
+                        try:
+                            pl.coord = Point(lat, long)
+                        except Exception as e:
+                            self.blog.log_event({
+                                'title':"Invalid coordinates - {}".format(e),
+                                'level':"WARNING", 'count':pl.id})
 
             for placeobj_url in placeobj.getElementsByTagName('url'):
                 n = Note()
@@ -620,28 +637,22 @@ class DOM_handler():
                     pl.notes.append(n)
 
             for placeobj_placeref in placeobj.getElementsByTagName('placeref'):
-                # Traverse links to surrounding places
+                # Traverse links to surrounding (upper) places
                 hlink = placeobj_placeref.getAttribute("hlink")
                 dates = self._extract_daterange(placeobj_placeref)
                 pl.surround_ref.append({'hlink':hlink, 'dates':dates})
-#             # Piti sallia useita ylempia paikkoja eri päivämäärillä
-#             # Tässä vain 1 sallitaan elikä päivämäärää ole
-#             if len(placeobj.getElementsByTagName('placeref') ) == 1:
-#                 placeobj_placeref = placeobj.getElementsByTagName('placeref')[0]
-#                 if placeobj_placeref.hasAttribute("hlink"):
-#                     pl.placeref_hlink = placeobj_placeref.getAttribute("hlink")
-#                     pl.dates = self._extract_daterange(placeobj_placeref)
-#             elif len(placeobj.getElementsByTagName('placeref') ) > 1:
-#                 print("Warning: Ignored 2nd placeref in a pl - useita hierarkian yläpuolisia paikkoja")
 
             for placeobj_noteref in placeobj.getElementsByTagName('noteref'):
                 if placeobj_noteref.hasAttribute("hlink"):
                     pl.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
 
-            pl.save(self.tx)
+            # Save Place, Place_names, Notes and connect to hierarchy
+            pl.save(self.tx, self.batch_id, place_keys)
+            # The place_keys has beeb updated 
+
             counter += 1
             
-            self.place_ids.append(pl)
+#             self.place_ids.append(pl.uniq_id)
 
         self.blog.log_event({'title':"Places", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
@@ -671,14 +682,14 @@ class DOM_handler():
                 repository_rname = repository.getElementsByTagName('rname')[0]
                 r.rname = repository_rname.childNodes[0].data
             elif len(repository.getElementsByTagName('rname') ) > 1:
-                self.blog.log_event({'title':"More than one rname in a repocitory",
+                self.blog.log_event({'title':"More than one rname in a repository",
                                      'level':"WARNING", 'count':r.id})
 
             if len(repository.getElementsByTagName('type') ) == 1:
                 repository_type = repository.getElementsByTagName('type')[0]
                 r.type =  repository_type.childNodes[0].data
             elif len(repository.getElementsByTagName('type') ) > 1:
-                self.blog.log_event({'title':"More than one type in a repocitory",
+                self.blog.log_event({'title':"More than one type in a repository",
                                      'level':"WARNING", 'count':r.id})
 
             for repository_url in repository.getElementsByTagName('url'):
@@ -689,7 +700,7 @@ class DOM_handler():
                 if n.url:
                     r.notes.append(n)
 
-            r.save(self.tx)
+            r.save(self.tx, self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Repositories", 'count':counter, 
@@ -746,21 +757,21 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
-
-    def make_place_hierarchy(self):
-        ''' Connect places to the upper place
-        '''
-
-        print ("***** {} Place hierarchy *****".format(len(self.place_ids)))
-        t0 = time.time()
-        hierarchy_count = 0
-
-        for pl in self.place_ids:
-            hc = make_place_hierarchy_properties(tx=self.tx, place=pl)
-            hierarchy_count += hc
-
-        self.blog.log_event({'title':"Place hierarchy", 
-                                'count':hierarchy_count, 'elapsed':time.time()-t0})
+# 
+#     def make_place_hierarchy(self):
+#         ''' Connect places to the upper place
+#         '''
+# 
+#         print ("***** {} Place hierarchy *****".format(len(self.place_ids)))
+#         t0 = time.time()
+#         hierarchy_count = 0
+# 
+#         for pl in self.place_ids:
+#             hc = dataupdater.make_place_hierarchy_properties(tx=self.tx, place=pl)
+#             hierarchy_count += hc
+# 
+#         self.blog.log_event({'title':"Place hierarchy", 
+#                                 'count':hierarchy_count, 'elapsed':time.time()-t0})
 
     def set_family_sortname_dates(self):
         ''' For each Family set Family.father_sortname, Family.mother_sortname, 
@@ -774,7 +785,7 @@ class DOM_handler():
 
         for p_id in self.family_ids:
             if p_id != None:
-                dc, sc = set_family_name_properties(tx=self.tx, uniq_id=p_id)
+                dc, sc = dataupdater.set_family_name_properties(tx=self.tx, uniq_id=p_id)
                 dates_count += dc
                 sortname_count += sc
 
@@ -787,10 +798,12 @@ class DOM_handler():
         ''' Add links from each Person to Refnames and set Person.sortname
         '''
 
-        print ("***** {} Refnames & sortnames *****".format(len(self.person_ids)))
+        print ("***** {} Person refnames & sortnames *****".format(len(self.person_ids)))
         t0 = time.time()
         refname_count = 0
         sortname_count = 0
+
+        from models.dataupdater import set_person_name_properties
 
         for p_id in self.person_ids:
             if p_id != None:

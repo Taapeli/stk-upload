@@ -94,7 +94,7 @@ RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
     def get_family_data_by_id(self):
         """ Luetaan perheen tiedot.
         
-            Called from models.datareader.get_families_data_by_id
+            Called from models.datareader.get_families_data_by_id 
         """
                         
         pid = int(self.uniq_id)
@@ -105,17 +105,26 @@ RETURN family"""
         family_result = shareds.driver.session().run(query, {"pid": pid})
         
         for family_record in family_result:
-            self.change = family_record["family"]['change']
-            self.id = family_record["family"]['id']
-            self.rel_type = family_record["family"]['rel_type']
+            family = family_record["family"]
+            self.change = family['change']
+            self.id = family['id']
+            self.rel_type = family['rel_type']
             
-        father_result = self.get_father_by_id()
+            self.father_sortname = family['father_sortname']
+            self.mother_sortname = family['mother_sortname']
+            datetype = family['datetype']
+            date1 = family['date1']
+            date2 = family['date2']
+            if datetype != None:
+                self.marriage_date = DateRange(datetype, date1, date2)
+            
+        father_result = self.get_parent_by_id('father')
         for father_record in father_result:            
             self.father = father_record["father"]
 
-        mother_result = self.get_mother_by_id()
+        mother_result = self.get_parent_by_id('mother')
         for mother_record in mother_result:            
-            self.mother = mother_record["mother"]
+            self.mother = mother_record["father"]
 
         event_result = self.get_family_events()
         for event_record in event_result:            
@@ -127,6 +136,74 @@ RETURN family"""
             self.childref_hlink.append(children_record["children"])
             
         return True
+    
+    
+    def get_family_data(self):
+        """ Luetaan perheen tiedot.
+        """
+        with shareds.driver.session() as session:
+            try:
+                result = session.run(Cypher_family.get_family_data, 
+                                     pid=self.uniq_id)    
+            
+                for record in result:
+                    if record['f']:
+                        # <Node id=55577 labels={'Family'} 
+                        #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
+                        #    'id': 'F0000', 'change': 1507492602}>
+                        f_node = record['f']
+                        self.id = f_node['id']
+                        self.type = f_node['rel_type']
+                        self.father_sortname = f_node['father_sortname']
+                        self.mother_sortname = f_node['mother_sortname']
+                        datetype = f_node['datetype']
+                        date1 = f_node['date1']
+                        date2 = f_node['date2']
+                        if datetype != None:
+                            self.marriage_date = DateRange(datetype, date1, date2)
+                        self.marriage_place = record['marriage_place']
+        
+                        uniq_id = -1
+                        for role, parent_node, name_node in record['parent']:
+                            if parent_node:
+                                # <Node id=214500 labels={'Person'} 
+                                #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
+                                #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496, 
+                                #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008', 
+                                #    'date2': 1997946, 'date1': 1929380}>
+                                if uniq_id != parent_node.id:
+                                    # Skip person with double default name
+                                    pp = Person_as_member()
+                                    uniq_id = parent_node.id
+                                    pp.uniq_id = uniq_id
+                                    pp.sortname = parent_node['sortname']
+                                    pp.sex = parent_node['sex']
+                                    if role == 'father':
+                                        self.father = pp
+                                    elif role == 'mother':
+                                        self.mother = pp
+        
+                                pname = Name.from_node(name_node)
+                                pp.names.append(pname)
+        
+                        
+                        for ch in record['child']:
+                            # <Node id=60320 labels={'Person'} 
+                            #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19, 
+                            #    'confidence': '', 'sex': 0, 'change': 1507492602, 
+                            #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
+                            #    'date2': 1609920, 'date1': 1609920}>
+                            child = Person_as_member()
+                            child.uniq_id = ch.id
+                            child.sortname = ch['sortname']
+                            self.children.append(child)
+                        
+                        if record['no_of_children']:
+                            self.no_of_children = record['no_of_children']
+            
+            except Exception as e:
+                print('Error get_family: {} {}'.format(e.__class__.__name__, e))            
+                raise      
     
     
     @staticmethod           
@@ -141,10 +218,10 @@ RETURN family"""
 
 
     @staticmethod       
-    def get_families(fw, fwm,  bw, o_filter, opt='father', limit=100):
+    def get_families(o_filter, opt='father', limit=100):
         """ Find families from the database """
         
-        def _read_family_list(o_filter, opt, fw, fwm, bw, imit):
+        def _read_family_list(o_filter, opt, limit):
             """ Read Family data from given fw/fwm
             """
             # Select a) filter by user b) show Isotammi common data (too)
@@ -172,7 +249,7 @@ RETURN family"""
                                 #1 get all with owner name for all
                                 print("_read_families_m: by owner with common")
                                 result = session.run(Cypher_family.read_families_m,
-                                                     fwm=fwm, limit=limit)
+                                                     fwm=fw, limit=limit)
                         else: 
                             if opt == 'father':
                                 #2 get my own (no owner name needed)
@@ -183,7 +260,7 @@ RETURN family"""
                                 #1 get all with owner name for all
                                 print("_read_families_m: by owner only")
                                 result = session.run(Cypher_family.read_my_families_m,
-                                                     user=user, fwm=fwm, limit=limit)
+                                                     user=user, fwm=fw, limit=limit)
 
                     else: 
                         if opt == 'father':
@@ -195,7 +272,7 @@ RETURN family"""
                             #1 get all with owner name for all
                             print("_read_families_m: common only")
                             result = session.run(Cypher_family.read_families_m,
-                                                 fwm=fwm, limit=limit)
+                                                 fwm=fw, limit=limit)
                         
                     return result
             except Exception as e:
@@ -203,13 +280,12 @@ RETURN family"""
                 raise      
                 
         families = []
-#        fw = o_filter.next_name_fw()     # next father name
-#        fwm = o_filter.next_name_fwm()   # next mother name
+        fw = o_filter.next_name_fw()     # next name
 
         ustr = "user " + o_filter.user if o_filter.user else "no user"
         print(f"read_my_family_list: Get max {limit} persons "
-              f"for {ustr} starting at {fw!r} or  {fwm!r}")
-        result = _read_family_list(o_filter, opt, fw, fwm,  bw, limit)
+              f"for {ustr} starting at {fw!r}")
+        result = _read_family_list(o_filter, opt, limit)
         
         for record in result:
             if record['f']:
@@ -267,133 +343,141 @@ RETURN family"""
                 if record['no_of_children']:
                     family.no_of_children = record['no_of_children']
                 families.append(family)
+                
+        # Update the page scope according to items really found 
+        if families:
+            if opt == 'father':
+                o_filter.update_session_scope('person_scope', 
+                                              families[0].father_sortname, families[-1].father_sortname, 
+                                              limit, len(families))
+            else:
+                o_filter.update_session_scope('person_scope', 
+                                              families[0].mother_sortname, families[-1].mother_sortname, 
+                                              limit, len(families))
+
         return (families)
 
     
-    @staticmethod       
-    def get_all_families():
-        """ Find all families from the database - not in use!
-        
-            #TODO Remove or Use [:PARENT] link
-        """
-        
-        query = """
-MATCH (f:Family)
-OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
-OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
-OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
-RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f)"""
-        result = shareds.driver.session().run(query)
-                
-        families = []
-        for record in result:
-            if record['f']:
-                f = record['f']
-                family = Family_combo(f.id)
-                family.type = f['rel_type']
-            
-                if record['ph']:
-                    husband = record['ph']
-                    ph = Person_as_member()
-                    ph.uniq_id = husband.id
-                    
-                    if record['nh']:
-                        hname = record['nh']
-                        ph.names.append(hname)
-                    family.father = ph
-                
-                if record['pw']:
-                    wife = record['pw']
-                    pw = Person_as_member()
-                    pw.uniq_id = wife.id
-                    
-                    if record['nw']:
-                        wname = record['nw']
-                        pw.names.append(wname)
-                    family.mother = pw
-                
-                if record['child']:
-                    c = record['child']
-                    family.no_of_children = c
-                families.append(family)
-        return (families)
+#     @staticmethod       
+#     def get_all_families():
+#         """ Find all families from the database - not in use!
+#         """
+#         
+#         query = """
+# MATCH (f:Family)
+# OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
+# OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+# OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+# RETURN f, ph, nh, pw, nw, COUNT(pc) AS child ORDER BY ID(f)"""
+#         result = shareds.driver.session().run(query)
+#                 
+#         families = []
+#         for record in result:
+#             if record['f']:
+#                 f = record['f']
+#                 family = Family_combo(f.id)
+#                 family.type = f['rel_type']
+#             
+#                 if record['ph']:
+#                     husband = record['ph']
+#                     ph = Person_as_member()
+#                     ph.uniq_id = husband.id
+#                     
+#                     if record['nh']:
+#                         hname = record['nh']
+#                         ph.names.append(hname)
+#                     family.father = ph
+#                 
+#                 if record['pw']:
+#                     wife = record['pw']
+#                     pw = Person_as_member()
+#                     pw.uniq_id = wife.id
+#                     
+#                     if record['nw']:
+#                         wname = record['nw']
+#                         pw.names.append(wname)
+#                     family.mother = pw
+#                 
+#                 if record['child']:
+#                     c = record['child']
+#                     family.no_of_children = c
+#                 families.append(family)
+#         return (families)
     
-    @staticmethod       
-    def get_own_families(user=None):
-        """ Find all families from the database - not in use!
-
-            #TODO Remove or Use [:PARENT] link
-        """
-        
-        query = """
-MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:BATCH_MEMBER|OWNS]->(f:Family) WHERE prof.userName=$user 
-OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name)  
-OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
-OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
-WITH f, pc, pw, nw.surname AS wsn, nw.suffix AS wx, nw.firstname AS wfn, 
-   ph, nh.surname AS hsn, nh.firstname AS hfn, nh.suffix AS hx 
-RETURN ID(f) AS uniq_id, f.rel_type AS type, 
-   ID(ph) AS hid, hsn, hx, hfn, 
-   ID(pw) AS wid, wsn, wx, wfn, 
-   COUNT(pc) AS child ORDER BY hsn, hfn"""
-        result = shareds.driver.session().run(query, {"user":user})
-                
-        families = []
-        for record in result:
-            family = []
-            data = []
-            if record['uniq_id']:
-                data.append(record['uniq_id'])
-            if record['type']:
-                data.append(record['type'])
-            else:
-                data.append("-")
-            if record['child']:
-                data.append(record['child'])
-            else:
-                data.append("-")
-            family.append(data)
-            
-            father = []
-            if record['hid']:
-                father.append(record['hid'])
-            else:
-                father.append("-")
-            if record['hsn']:
-                father.append(record['hsn'])
-            else:
-                father.append("-")
-            if record['hx']:
-                father.append(record['hx'])
-            else:
-                father.append("-")
-            if record['hfn']:
-                father.append(record['hfn'])
-            else:
-                father.append("-")
-            family.append(father)
-            
-            mother = []
-            if record['wid']:
-                mother.append(record['wid'])
-            else:
-                mother.append("-")
-            if record['wsn']:
-                mother.append(record['wsn'])
-            else:
-                mother.append("-")
-            if record['wx']:
-                mother.append(record['wx'])
-            else:
-                mother.append("-")
-            if record['wfn']:
-                mother.append(record['wfn'])
-            else:
-                mother.append("-")
-            family.append(mother)
-            families.append(family)
-        
-        return (families)
+#     @staticmethod       
+#     def get_own_families(user=None):
+#         """ Find all families from the database - not in use!
+#         """
+#         
+#         query = """
+# MATCH (prof:UserProfile)-[:HAS_LOADED]->(batch:Batch)-[:OWNS]->(f:Family) WHERE prof.username=$user 
+# OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name)  
+# OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+# OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+# WITH f, pc, pw, nw.surname AS wsn, nw.suffix AS wx, nw.firstname AS wfn, 
+#    ph, nh.surname AS hsn, nh.firstname AS hfn, nh.suffix AS hx 
+# RETURN ID(f) AS uniq_id, f.rel_type AS type, 
+#    ID(ph) AS hid, hsn, hx, hfn, 
+#    ID(pw) AS wid, wsn, wx, wfn, 
+#    COUNT(pc) AS child ORDER BY hsn, hfn"""
+#         result = shareds.driver.session().run(query, {"user":user})
+#                 
+#         families = []
+#         for record in result:
+#             family = []
+#             data = []
+#             if record['uniq_id']:
+#                 data.append(record['uniq_id'])
+#             if record['type']:
+#                 data.append(record['type'])
+#             else:
+#                 data.append("-")
+#             if record['child']:
+#                 data.append(record['child'])
+#             else:
+#                 data.append("-")
+#             family.append(data)
+#             
+#             father = []
+#             if record['hid']:
+#                 father.append(record['hid'])
+#             else:
+#                 father.append("-")
+#             if record['hsn']:
+#                 father.append(record['hsn'])
+#             else:
+#                 father.append("-")
+#             if record['hx']:
+#                 father.append(record['hx'])
+#             else:
+#                 father.append("-")
+#             if record['hfn']:
+#                 father.append(record['hfn'])
+#             else:
+#                 father.append("-")
+#             family.append(father)
+#             
+#             mother = []
+#             if record['wid']:
+#                 mother.append(record['wid'])
+#             else:
+#                 mother.append("-")
+#             if record['wsn']:
+#                 mother.append(record['wsn'])
+#             else:
+#                 mother.append("-")
+#             if record['wx']:
+#                 mother.append(record['wx'])
+#             else:
+#                 mother.append("-")
+#             if record['wfn']:
+#                 mother.append(record['wfn'])
+#             else:
+#                 mother.append("-")
+#             family.append(mother)
+#             families.append(family)
+#         
+#         return (families)
 
 
 #     @staticmethod       
@@ -435,7 +519,7 @@ RETURN ID(f) AS uniq_id, f.rel_type AS type,
 #         return namedict
 
 
-    def get_father_by_id(self, role='father'):
+    def get_parent_by_id(self, role='father'):
         """ Luetaan perheen isän (tai äidin) tiedot """
                         
         pid = int(self.uniq_id)
@@ -446,9 +530,9 @@ RETURN ID(person) AS father"""
         return  shareds.driver.session().run(query, pid=pid, role=role)
 
 
-    def get_mother_by_id(self):
-        """ Luetaan perheen äidin tiedot """
-        return self.get_father_by_id(self, role='mother')
+#     def get_mother_by_id(self):
+#         """ Luetaan perheen äidin tiedot """
+#         return self.get_parent_by_id(self, role='mother')
         
     
     def print_data(self):

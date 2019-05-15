@@ -81,7 +81,7 @@ def upload_gramps():
 @roles_accepted('research')
 def start_load_to_neo4j(xmlname):
     uploads.initiate_background_load_to_neo4j(current_user.username,xmlname)
-    flash(_('Data import from {!r} to database has been started.'.format(xmlname)), 'info')
+    flash(_("Data import from %(i)s to database has been started.", i=xmlname), 'info')
     return redirect(url_for('gramps.list_uploads'))
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')

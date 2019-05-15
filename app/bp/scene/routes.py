@@ -201,7 +201,7 @@ def show_a_person_w_apoc(uid):
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
-    print(person.sex_str())
+#     print(person.sex_str())
     print("-> bp.scene.routes.show_a_person_w_apoc")
     return render_template("/scene/person_pg.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
@@ -247,17 +247,14 @@ def show_families():
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
-    fw_from = request.args.get('f', '', type=str)
-    fwm_from = request.args.get('m', '', type=str)
-    bw_from = request.args.get('b', '', type=str)
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
     # 'families' has Family objects
-    families = Family_combo.get_families(fw=fw_from, fwm=fwm_from,  bw=bw_from, o_filter=my_filter, opt=opt, limit=count)
+    families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
 
     return render_template("/scene/families.html", families=families, 
-                           elapsed=time.time()-t0)
+                           owner_filter=my_filter, elapsed=time.time()-t0)
 
 @bp.route('/scene/family=<int:fid>')
 def show_famiy_page(fid):
@@ -267,7 +264,8 @@ def show_famiy_page(fid):
     """
     try:
         family = Family_combo()   #, events = get_place_with_events(fid)
-        family.id = fid
+        family.uniq_id = fid
+        family.get_family_data()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in place_list:
@@ -331,9 +329,9 @@ def show_source_page(sourceid):
     """ Home page for a Source with referring Event and Person data
     """
     try:
-        stitle, citations = get_source_with_events(sourceid)
+        source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/source_events.html",
-                           stitle=stitle, citations=citations)
+                           source=source, citations=citations)
 

@@ -176,6 +176,7 @@ gedcom-text {
 
 #div_excerpt {
     background: #f7f9fc;
+    display: none;
 }
 
 .current_line {

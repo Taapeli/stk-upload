@@ -53,8 +53,8 @@ RETURN extract(x IN relationships |
 
 # Ver 0.2 Person lists with names and events
     read_my_persons_with_events_starting_name = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER|OWNS]-> (p:Person)
-    WHERE prof.userName = $user AND p.sortname >= $start_name
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (p:Person)
+    WHERE prof.username = $user AND p.sortname >= $start_name
 WITH p ORDER BY p.sortname LIMIT $limit
     MATCH (p:Person) -[:NAME]-> (n:Name)
     OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
@@ -68,7 +68,7 @@ RETURN p as person,
     ORDER BY person.sortname"""
 
     read_all_persons_with_events_starting_name = """
-MATCH (b:Batch) -[:BATCH_MEMBER|OWNS]-> (p:Person)
+MATCH (b:Batch) -[:OWNS]-> (p:Person)
     WHERE p.sortname >= $start_name
 WITH p, COLLECT(DISTINCT b.user) as owners
 ORDER BY p.sortname LIMIT $limit
@@ -261,8 +261,8 @@ RETURN f, p.pname AS marriage_place,
     ORDER BY f.father_sortname LIMIT $limit"""
 
     read_my_families_p = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER|OWNS]-> (f:Family)
-    WHERE prof.userName = $user AND f.father_sortname>=$fw
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
+    WHERE prof.username = $user AND f.father_sortname>=$fw
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
@@ -286,8 +286,8 @@ RETURN f, p.pname AS marriage_place,
     ORDER BY f.mother_sortname LIMIT $limit"""
     
     read_my_families_m = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:BATCH_MEMBER|OWNS]-> (f:Family)
-    WHERE prof.userName = $user AND f.mother_sortname>=$fwm
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
+    WHERE prof.username = $user AND f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
@@ -297,6 +297,17 @@ RETURN f, p.pname AS marriage_place,
     COLLECT(DISTINCT pc) AS child, 
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.mother_sortname LIMIT $limit"""
+    
+    get_family_data = """
+MATCH (f:Family) WHERE ID(f)=$pid
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children"""
     
     #TODO Obsolete
     read_families = """
@@ -387,8 +398,8 @@ ORDER BY edates[1]"""
 
     get_name_hierarcy = """
 MATCH (a:Place) -[:NAME]-> (pn:Place_name)
-OPTIONAL MATCH (a:Place) -[:HIERARCY]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:HIERARCY]- (do:Place) -[:NAME]-> (don:Place_name)
+OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
+OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
 RETURN ID(a) AS id, a.type AS type,
     COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
     COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
@@ -494,17 +505,33 @@ class Cypher_source():
     '''
     Cypher class for creating and accessing Sources
     '''
-    source_list = """
-MATCH (s:Source)
-OPTIONAL MATCH (s)<-[:SOURCE]-(c:Citation)
-OPTIONAL MATCH (c)<-[:CITATION]-(e)
-OPTIONAL MATCH (s)-[r:REPOSITORY]->(a:Repository)
-RETURN ID(s) AS uniq_id, s.id AS id, s.stitle AS stitle, 
-       a.rname AS repository, r.medium AS medium,
-       COUNT(c) AS cit_cnt, COUNT(e) AS ref_cnt 
-ORDER BY toUpper(stitle)
-"""
+#     source_list = """
+# MATCH (s:Source)
+#     OPTIONAL MATCH (s) <-[:SOURCE]- (c:Citation)
+#     OPTIONAL MATCH (c) <-[:NOTE]- (note)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (cit)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        rep.rname AS repository, r.medium AS medium,
+#        COUNT(c) AS cit_cnt, COUNT(cit) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)
+# """
 
+    get_sources_w_notes = """
+MATCH (s:Source)
+    OPTIONAL MATCH (s) -[:NOTE]-> (note)
+    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+       collect(DISTINCT [r.medium, rep]) as repositories,
+       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+ORDER BY toUpper(s.stitle)"""
+
+    get_a_source_w_notes = """
+MATCH (source:Source) WHERE ID(source)=$sid
+OPTIONAL MATCH (source) -[:NOTE]-> (n)
+RETURN source, COLLECT(n) as notes"""
 #     get_repositories_w_notes = """
 # MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
 #     WHERE ID(source) = $sid
@@ -552,10 +579,18 @@ match (repo:Repository) where ID(repo) = $rid
 return repo, collect(w) as notes"""
 
     get_one = """
-match (r:Repository) where ID(r) == $rid
+match (r:Repository) where ID(r) = $rid
 return r"""
 
     get_all = """
 match (r:Repository)
 return r order by r.type"""
+
+
+class Cypher_media():
+
+    get_one = """
+MATCH (obj:Media)
+    WHERE ID(obj) = $rid
+    RETURN obj"""
 

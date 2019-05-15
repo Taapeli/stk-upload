@@ -10,7 +10,9 @@ import time
 from sys import stderr
 
 from flask_babelex import _
-from flask import flash
+#from flask import flash
+from flask import render_template, request, redirect, url_for, flash, session as user_session
+from flask_security import current_user, login_required #, roles_accepted
 
 from operator import itemgetter
 #from models.dbutil import Datefrom
@@ -28,6 +30,7 @@ from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.dates import DateRange
+from models.owner import OwnerFilter
 
 
 def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
@@ -195,11 +198,49 @@ def recreate_refnames():
 #     return (namelist)
 
 
-# def read_cite_sour_repo(uniq_id=None):
-#     """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
-#     
-#         NOT IN USE, removed 3.5.2019
-#     """
+def read_cite_sour_repo(uniq_id=None):
+    """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
+    
+        Called from bp.tools.routes.pick_selection
+    """
+
+    sources = []
+    result_cite = Event_combo.get_event_cite(uniq_id)
+    for record_cite in result_cite:
+        pid = record_cite['id']
+        e = Event_combo()
+        e.uniq_id = pid
+        if record_cite['type']:
+            e.type = record_cite['type']
+        if record_cite['date']:
+            e.date = record_cite['date']
+        if record_cite['dates']:
+            e.dates = DateRange(record_cite['dates'])
+
+        for source_cite in record_cite['sources']:
+            c = Citation()
+            c.uniq_id = source_cite[0]
+            c.dateval = source_cite[1]
+            c.page = source_cite[2]
+            c.confidence = source_cite[3]
+
+            c.get_sourceref_hlink()
+            if c.source_handle != '':
+                s = Source()
+                s.uniq_id = c.source_handle
+                result_source = s.get_source_data()
+                for record_source in result_source:
+                    if record_source['stitle']:
+                        s.stitle = record_source['stitle']
+
+                    s.get_repositories_w_notes()
+
+                c.source = s    # s.append(s)
+            e.citations.append(c)
+
+        sources.append(e)
+
+    return (sources)
 
 
 def read_medias(uniq_id=None):
@@ -318,17 +359,18 @@ def read_sources(uniq_id=None):
         result = Source.get_source_citation(uniq_id)
         # One Source, many Citations
         for record in result:
-            pid = record['id']
-            s = Source()
-            s.uniq_id = pid
-            if record['stitle']:
-                s.stitle = record['stitle']
-            for citation in record['citations']:
-                c = Citation()
-                c.uniq_id = citation[0]
-                c.dateval = citation[1]
-                c.page = citation[2]
-                c.confidence = citation[3]
+            # Record: <Record 
+            #    source=<Node id=243603 labels={'Source'} 
+            #        properties={'handle': '_e07cc43dfb33a13e25893c4a19c', 'id': 'S1371', 
+            #            'stitle': '1079 Akti , joka koskee Pietariin ...', 
+            #            'change': '1542665570'}> 
+            #    citations=[<Node id=246933 labels={'Citation'} 
+            #        properties={'handle': '_e07cc55a985217d798f0ff0df64', 'id': 'C3223', 
+            #        'page': '', 'dateval': '', 'change': 1542665572, 'confidence': '2'}>
+            #     ]>
+            s = Source.from_node(record['source'])
+            for node in record['citations']:
+                c = Citation.from_node(node)
                 s.citations.append(c)
             sources.append(s)
     except Exception as err:
@@ -367,7 +409,13 @@ def read_families():
     """ Lukee tietokannasta Family- objektit näytettäväksi
     """
 
-    families = Family_combo.get_families()
+    my_filter = OwnerFilter(user_session, current_user, request)
+    # Which range of data is shown
+    my_filter.set_scope_from_request(request, 'person_scope')
+    opt = request.args.get('o', 'father', type=str)
+    count = request.args.get('c', 100, type=int)
+
+    families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
     
     return (families)
 
@@ -420,14 +468,29 @@ def read_places():
 
 
 def get_source_with_events(sourceid):
-    """ Lukee tietokannasta Source- objektin tapahtumat näytettäväksi
+    """ Lukee tietokannasta Source- objektin tapahtumineen näytettäväksi
     """
 
-    s = Source()
-    s.uniq_id = int(sourceid)
-    result = s.get_source_data()
+    result = Source.get_source_w_notes(sourceid)
     for record in result:
-        s.stitle = record["stitle"]
+        # Record: <Record 
+        #    source=<Node id=242395 labels={'Source'} 
+        #        properties={'handle': '_d9d28fe83184fd33368', 'id': 'S0052', 
+        #        'stitle': 'Hämeenlinna ksrk syntyneet 1850-1874', 'change': '1543225947'}> 
+        #    notes=[
+        #        <Node id=234937 labels={'Note'} 
+        #            properties={'handle': '_d9d291becb75743756e', 'text': '', 
+        #                'id': 'N2213', 'type': 'Citation', 
+        #                'url': 'http://digi.narc.fi/digi/view.ka?kuid=6062348', 
+        #                'change': 1532807569}>
+        #    ]>
+
+        s = Source.from_node(record['source'])
+        notes = record['notes']
+        for node in notes:
+            n = Note.from_node(node)
+            s.notes.append(n)
+
     result = Source.get_citating_nodes(sourceid)
 
     citations = {}
@@ -512,7 +575,7 @@ def get_source_with_events(sourceid):
 #             noderef.label = 'Person'
         c.citators.append(noderef)
 
-    return (s.stitle, list(citations.values()))
+    return (s, list(citations.values()))
 
 
 def read_sources_wo_cites():
@@ -666,7 +729,7 @@ def get_person_data_by_id(uniq_id):
                         r.rname = source[4]
                         r.type = source[5]
 
-                        s.repocitory = r
+                        s.repositories.append(r)
                         c.source = s
 
                     print("Eve:{} {} > Cit:{} '{}' > Sour:{} '{}' > Repo:{} '{}'".\

@@ -58,7 +58,7 @@
                    title="{{ _('Surnames') }}">{{ _('Names') }}</a></li>
              #}
                 <li{% if value == 3 %} class="CurrentSection"
-                  {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %} href="/scene/families"{% endif %}
+                  {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %} href="/scene/families?o=father&f=%20"{% endif %}
                    title="{{ _('Families') }}">{{ _('Families') }}</a></li>
                 <li{% if value == 4 %} class="CurrentSection"
                   {% endif %}><a href="/scene/locations"
@@ -98,7 +98,11 @@
                     
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
-    {{note.text}}{% if note.url %}
+    {% set list1 = note.text.split('\n') %}
+	{% for l in list1 %}
+	   <p>{{ l }}</p>
+	{% endfor %}
+    {% if note.url %}
     <a href="{{note.url}}" class="outlink" 
        target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}
 {%- endmacro %}

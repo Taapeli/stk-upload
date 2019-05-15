@@ -11,7 +11,8 @@ from flask_babelex import _
 
 from .xml_dom_handler import DOM_handler
 from .batchlogger import Batch, Log
-from models.dataupdater import set_confidence_values
+from models import dataupdater
+#from models.dataupdater import set_confidence_values
 import shareds
 
 
@@ -84,7 +85,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     
             # Set person confidence values 
             #TODO: Only for imported persons (now for all persons!)
-            set_confidence_values(handler.tx, batch_logger=handler.blog)
+            dataupdater.set_confidence_values(handler.tx, batch_logger=handler.blog)
             # Set properties (for imported persons)
             #    + Refname links
             #    ? Person sortname
@@ -95,9 +96,11 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             
             # Copy information from Person and Event nodes to Family nodes
             handler.set_family_sortname_dates()
-            
-            # Make the place hierarchy
-            handler.make_place_hierarchy()
+   
+# Huom. Paikkahierarkia on tehty metodissa Place_gramps.save niin että
+#       aluksi luodaan tarvittaessa viitattu ylempi paikka vajailla tiedoilla.
+#             # Make the place hierarchy
+#             handler.make_place_hierarchy()
 
         except Exception as e:
             msg = f"Stopped xml load due to {e}"    # Stop processing?

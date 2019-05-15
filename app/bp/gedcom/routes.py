@@ -6,12 +6,12 @@
 import sys
 import os
 import importlib
-import time
+#import time
 import subprocess
 import traceback
 
-from re import match
-from collections import defaultdict
+#from re import match
+#from collections import defaultdict
 
 from flask import render_template, request, redirect, url_for, flash, jsonify, session
 from flask_security import login_required, current_user, roles_required, roles_accepted
@@ -19,179 +19,28 @@ from flask import send_from_directory
 from flask_babelex import _
 
 import logging 
-import string
+from bp.gedcom.models import gedcom_utils
+#import string
 LOG = logging.getLogger(__name__)
 
 from models import util, syslog
 
 from . import bp
-from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
+from bp.gedcom import APP_ROOT, GEDCOM_APP, ALLOWED_EXTENSIONS
 from .transforms.model.ged_output import Output
 from . import transformer
 
 from werkzeug.utils import secure_filename
 
-# --------------------- GEDCOM functions ------------------------
-
-def init_log(logfile): 
-    ''' Define log file and save one previous log '''
-    try:
-        if os.open(logfile, os.O_RDONLY):
-            os.rename(logfile, logfile + '~')
-    except:
-        pass
-    logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
-
-def history_init(gedcom_fname):
-    history_file_name = gedcom_fname + "-history"
-    open(history_file_name,"w").write("{}: Uploaded {}\n".format(util.format_timestamp(),gedcom_fname))
-    
-def history_append(gedcom_fname,line):
-    history_file_name = gedcom_fname + "-history"
-    open(history_file_name,"a").write("{}\n".format(line))
-
-def history_append_args(args):
-    history_file_name = args.input_gedcom + "-history"
-    with open(history_file_name,"a") as f:
-        for name,value in sorted(vars(args).items()):
-            f.write("- {}={}\n".format(name,value))
-        f.write("- User={}\n".format(current_user.username))
 
 
-def get_info(input_gedcom, enc):
-    ''' 
-    Read gedcom HEAD info and count level 0 items.
-    Uses the transformation framework.
-    '''
-    class Options:
-        display_changes = False
-        encoding = enc
-
-    class Nullinfo:
-        pass
-        
-    from . import gedcom_info_parser
-    try:
-        t = transformer.Transformer(transform_module=gedcom_info_parser,
-                                    display_callback=display_changes,
-                                    options=Options())
-        t.transform_file(input_gedcom)
-        return t.transformation.info 
-    except: # pragma: no cover
-        traceback.print_exc()
-        return Nullinfo()
-    
-def analyze(input_gedcom, enc):
-    class Options:
-        display_changes = False
-        encoding = enc
-
-    class Nullinfo:
-        pass
-        
-    from . import gedcom_analyze
-    try:
-        t = transformer.Transformer(transform_module=gedcom_analyze,
-                                    display_callback=display_changes,
-                                    options=Options())
-        t.transform_file(input_gedcom)
-        return t.transformation.info 
-    except:
-        traceback.print_exc()
-        return "error"
-
-def read_gedcom(filename):
-    try:
-        return open(filename).readlines()
-    except UnicodeDecodeError:
-        return open(filename,encoding="ISO8859-1").readlines()
-
-def get_gedcom_user():
-    return session.get("gedcom_user",current_user.username)
-
-def get_gedcom_folder(username=None):
-    if username is None:
-        username = get_gedcom_user()
-    return os.path.join(GEDCOM_DATA, username)
-
-def gedcom_fullname(gedcom):
-    return os.path.join(get_gedcom_folder(),secure_filename(gedcom))
-
-def get_metadata(gedcom):
-    gedcom_folder = get_gedcom_folder()
-    try:
-        metaname = os.path.join(gedcom_folder, secure_filename(gedcom) + "-meta")
-        return eval(open(metaname).read())
-    except FileNotFoundError:
-        return {}
-
-def save_metadata(gedcom,metadata):
-    gedcom_folder = get_gedcom_folder()
-    metaname = os.path.join(gedcom_folder, secure_filename(gedcom) + "-meta")
-    open(metaname,"w").write(repr(metadata))
-    
-def get_transforms():
-    class Transform: pass
-    trans_dir = os.path.join(GEDCOM_APP, "transforms")
-    names = sorted([name for name in os.listdir(trans_dir) \
-                    if name.endswith(".py") and not name.startswith("_")])
-    
-    transforms = []
-    for name in names:
-        t = Transform()
-        t.name = name
-        t.modname = name[0:-3]
-        transformer = importlib.import_module("bp.gedcom.transforms."+t.modname)
-        doc = transformer.__doc__
-        if doc:
-            t.doc = doc
-            t.docline = doc.strip().splitlines()[0]
-            t.docline = _(t.docline)
-        else:
-            t.doc = ""
-            t.docline = ""
-        if hasattr(transformer,"docline"):
-            t.docline = transformer.docline
-        if hasattr(transformer,"doclink"):
-            t.doclink = transformer.doclink
-        else:
-            t.doclink = ""
-
-        if hasattr(transformer,"name"):
-            t.displayname = transformer.name
-        else:
-            t.displayname = t.modname
-            
-        t.version = getattr(transformer,"version","")
-        transforms.append(t)
-        #yield t
-    return sorted(transforms,key=lambda t: t.displayname)
-
-def list_gedcoms(username):
-    gedcom_folder = get_gedcom_folder(username)
-    try:
-        names = sorted([name for name in os.listdir(gedcom_folder) 
-                        if name.lower().endswith(".ged")],
-                        key=lambda s: s.lower()
-                    )
-    except:
-        names = []
-    files = []
-    class File: pass
-    for name in names:
-        f = File()
-        f.name = name
-        f.metadata = get_metadata(name)
-        if username == current_user.username or f.metadata.get("admin_permission"):
-            files.append(f)
-    return files
     
 @bp.route('/gedcom', methods=['GET'])
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_list():
-    username = get_gedcom_user()
-    files = list_gedcoms(username)
+    username = gedcom_utils.get_gedcom_user()
+    files = gedcom_utils.list_gedcoms(username)
     allowed_extensions = ",".join(["."+ext for ext in ALLOWED_EXTENSIONS])
     return render_template('gedcom_list.html', title=_("Gedcoms"),
                            user=username, 
@@ -202,7 +51,7 @@ def gedcom_list():
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_versions(gedcom):
-    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = gedcom_utils.get_gedcom_folder()
     gedcom = secure_filename(gedcom)
     versions = [] 
     for name in os.listdir(gedcom_folder):
@@ -221,7 +70,7 @@ def gedcom_versions(gedcom):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_history(gedcom):
-    history_filename = gedcom_fullname(gedcom) + "-history"
+    history_filename = gedcom_utils.gedcom_fullname(gedcom) + "-history"
     return open(history_filename).read()
 
 @bp.route('/gedcom/compare/<gedcom1>/<gedcom2>', methods=['GET'])
@@ -229,10 +78,10 @@ def gedcom_history(gedcom):
 @roles_accepted('gedcom', 'research')
 def gedcom_compare(gedcom1,gedcom2):
     import difflib
-    filename1 = gedcom_fullname(gedcom1)
-    filename2 = gedcom_fullname(gedcom2)
-    lines1 = read_gedcom(filename1)
-    lines2 = read_gedcom(filename2)
+    filename1 = gedcom_utils.gedcom_fullname(gedcom1)
+    filename2 = gedcom_utils.gedcom_fullname(gedcom2)
+    lines1 = gedcom_utils.read_gedcom(filename1)
+    lines2 = gedcom_utils.read_gedcom(filename2)
     difftable = difflib.HtmlDiff().make_file(lines1, lines2, context=True, numlines=2,
                                              fromdesc=gedcom1, todesc=gedcom2)
     rsp = dict(diff=difftable)
@@ -242,15 +91,15 @@ def gedcom_compare(gedcom1,gedcom2):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_revert(gedcom,version):
-    filename1 = gedcom_fullname(gedcom)
-    filename2 = gedcom_fullname(version)
+    filename1 = gedcom_utils.gedcom_fullname(gedcom)
+    filename2 = gedcom_utils.gedcom_fullname(version)
     newname = util.generate_name(filename1)
     if os.path.exists(filename1) and os.path.exists(filename2):
         os.rename(filename1,newname)
         os.rename(filename2,filename1)
-        history_append(filename1,"\n{}:".format(util.format_timestamp()))
-        history_append(filename1,_("File {} saved as {}").format(filename1,newname))
-        history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
+        gedcom_utils.history_append(filename1,"\n{}:".format(util.format_timestamp()))
+        gedcom_utils.history_append(filename1,_("File {} saved as {}").format(filename1,newname))
+        gedcom_utils.history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
         rsp = dict(newname=os.path.basename(newname))
     else:
         rsp = dict(status="Error")
@@ -260,14 +109,14 @@ def gedcom_revert(gedcom,version):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_save(gedcom):
-    filename1 = gedcom_fullname(gedcom)
+    filename1 = gedcom_utils.gedcom_fullname(gedcom)
     filename2 = filename1 + "-temp"
     newname = util.generate_name(filename1)
     os.rename(filename1,newname)
     os.rename(filename2,filename1)
-    history_append(filename1,"\n{}:".format(util.format_timestamp()))
-    history_append(filename1,_("File {} saved as {}").format(filename1,newname))
-    history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
+    gedcom_utils.history_append(filename1,"\n{}:".format(util.format_timestamp()))
+    gedcom_utils.history_append(filename1,_("File {} saved as {}").format(filename1,newname))
+    gedcom_utils.history_append(filename1,_("File {} saved as {}").format(filename2,filename1))
     rsp = dict(newname=os.path.basename(newname))
     return jsonify(rsp) 
 
@@ -275,7 +124,7 @@ def gedcom_save(gedcom):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_check(gedcom):
-    fullname = gedcom_fullname(gedcom)
+    fullname = gedcom_utils.gedcom_fullname(gedcom)
     if os.path.exists(fullname):
         return "exists"
     else:
@@ -290,7 +139,7 @@ def gedcom_upload():
         return '.' in filename and \
                filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
     
-    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = gedcom_utils.get_gedcom_folder()
     # check if the post request has the file part
     if 'file' not in request.files:
         flash(_('Choose a GEDCOM file to upload'), category='flash_warning')
@@ -320,8 +169,8 @@ def gedcom_upload():
             'upload_time':util.format_timestamp(),
             'size':os.stat(fullname).st_size,
         }
-        save_metadata(filename, metadata)
-        history_init(fullname)
+        gedcom_utils.save_metadata(filename, metadata)
+        gedcom_utils.history_init(fullname)
         syslog.log(type="uploaded a gedcom",gedcom=file.filename)    
         return redirect(url_for('.gedcom_info',gedcom=filename))
   
@@ -329,39 +178,39 @@ def gedcom_upload():
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_download(gedcom):
-    metadata = get_metadata(gedcom)
-    if get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
+    metadata = gedcom_utils.get_metadata(gedcom)
+    if gedcom_utils.get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
         flash(_("You don't have permission to view that GEDCOM"), category='flash_error')
         return redirect(url_for('gedcom.gedcom_list'))
-    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = gedcom_utils.get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
     gedcom = secure_filename(gedcom)
-    filename = os.path.join(gedcom_folder, gedcom)
+#     filename = os.path.join(gedcom_folder, gedcom)
     return send_from_directory(directory=gedcom_folder, filename=gedcom, as_attachment=True) 
 
 @bp.route('/gedcom/info/<gedcom>', methods=['GET'])
 @login_required
 @roles_accepted('gedcom', 'research','admin')
 def gedcom_info(gedcom):
-    filename = gedcom_fullname(gedcom)
+    filename = gedcom_utils.gedcom_fullname(gedcom)
     if not os.path.exists(filename):
         flash(_("That GEDCOM file does not exist on the server"), category='flash_error')
         return redirect(url_for('gedcom.gedcom_list'))
-    metadata = get_metadata(gedcom)
-    transforms = get_transforms()
+    metadata = gedcom_utils.get_metadata(gedcom)
+    transforms = gedcom_utils.get_transforms()
     encoding = metadata.get('encoding','utf-8')
     info = metadata.get('info')
-    if get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
+    if gedcom_utils.get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
         flash(_("You don't have permission to view that GEDCOM"), category='flash_error')
         return redirect(url_for('gedcom.gedcom_list'))
     if info: 
         info = eval(info)
     else: 
-        info = get_info(filename,encoding)
+        info = gedcom_utils.get_info(filename,encoding)
         metadata['info'] = repr(info.__dict__)
-        save_metadata(gedcom,metadata) 
+        gedcom_utils.save_metadata(gedcom,metadata) 
     return render_template('gedcom_info.html', 
-        user=get_gedcom_user(),
+        user=gedcom_utils.get_gedcom_user(),
         gedcom=gedcom, filename=filename,
         info=info,
         transforms=transforms,
@@ -372,37 +221,37 @@ def gedcom_info(gedcom):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_update_desc(gedcom):
-    metadata = get_metadata(gedcom)
+    metadata = gedcom_utils.get_metadata(gedcom)
     desc = request.form['desc']
     metadata['desc'] = desc
-    save_metadata(gedcom,metadata)
+    gedcom_utils.save_metadata(gedcom,metadata)
     return "ok"
 
 @bp.route('/gedcom/update_permission/<gedcom>/<permission>')
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_update_permission(gedcom,permission):
-    metadata = get_metadata(gedcom)
+    metadata = gedcom_utils.get_metadata(gedcom)
     metadata['admin_permission'] = (permission == "true")
-    save_metadata(gedcom,metadata)
+    gedcom_utils.save_metadata(gedcom,metadata)
     return "ok"
 
 @bp.route('/gedcom/analyze/<gedcom>')
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_analyze(gedcom):
-    filename = gedcom_fullname(gedcom)
-    metadata = get_metadata(gedcom)
+    filename = gedcom_utils.gedcom_fullname(gedcom)
+    metadata = gedcom_utils.get_metadata(gedcom)
     encoding = metadata['encoding']
-    rsp = analyze(filename,encoding)
+    rsp = gedcom_utils.analyze(filename,encoding)
     return rsp
 
 @bp.route('/gedcom/get_excerpt/<gedcom>/<int:linenum>')
 @login_required
 @roles_accepted('gedcom', 'research')
 def get_excerpt(gedcom,linenum):
-    filename = gedcom_fullname(gedcom)
-    metadata = get_metadata(gedcom)
+    filename = gedcom_utils.gedcom_fullname(gedcom)
+    metadata = gedcom_utils.get_metadata(gedcom)
     encoding = metadata['encoding'] 
     lines = open(filename,encoding=encoding).readlines()
     firstline = linenum-1 
@@ -424,7 +273,7 @@ def get_excerpt(gedcom,linenum):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_delete(gedcom):
-    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = gedcom_utils.get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
     gedcom = secure_filename(gedcom)
     for name in os.listdir(gedcom_folder):
@@ -434,7 +283,7 @@ def gedcom_delete(gedcom):
             name.startswith(gedcom+"-")
         ):
             filename = os.path.join(gedcom_folder, name)
-            removefile(filename) 
+            gedcom_utils.removefile(filename) 
             logging.info("Deleted:"+filename)
     syslog.log(type="deleted a gedcom",gedcom=gedcom)    
     return redirect(url_for('.gedcom_list'))
@@ -443,53 +292,18 @@ def gedcom_delete(gedcom):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_delete_old_versions(gedcom):
-    gedcom_folder = get_gedcom_folder()
+    gedcom_folder = gedcom_utils.get_gedcom_folder()
     gedcom_folder = os.path.abspath(gedcom_folder)
     gedcom = secure_filename(gedcom)
     for name in os.listdir(gedcom_folder):
         filename = os.path.join(gedcom_folder, name)
         if name.startswith(gedcom+"."):  
-            removefile(filename) 
+            gedcom_utils.removefile(filename) 
             logging.info("Deleted:"+filename)
     syslog.log(type="deleted old versions for gedcom",gedcom=gedcom)    
     return redirect(url_for('.gedcom_info',gedcom=gedcom))
 
-def removefile(fname): 
-    try:
-        os.remove(fname)
-    except FileNotFoundError:
-        pass
-
-def display_changes(lines,item,linenum=None):
-    class Out:
-        def emit(self,s):
-            print(s)
-
-    if not item: 
-        print("<b>"+_("Deleted:")+"</b>")
-        print("<gedcom-text>")
-        for line in lines:
-            print(line)
-        print("</gedcom-text>")
-        print()
-        return
-    print("<b>"+_("Replaced:")+"</b>")
-    if linenum: print("("+_("starting from line ")+f"<a href='#' class='gedcomlink'>{linenum}</a>)")
-    print("<gedcom-text>")
-    for line in lines:
-        print(line)
-    print("</gedcom-text>")
-    print("<b>"+_("With:")+"</b>")
-    print("<gedcom-text>")
-    if isinstance(item, list):
-        for it in item:
-            it.print_items(Out())
-    else:
-        item.print_items(Out())
-    print("</gedcom-text>")
-    print()
-    print("<br>-----------------------<br>")
-        
+      
 def process_gedcom(arglist, transform_module):
     """Implements another mechanism for Gedcom transforms:
 
@@ -509,7 +323,7 @@ def process_gedcom(arglist, transform_module):
 
     import argparse
     import io
-    import traceback
+#     import traceback
     parser = argparse.ArgumentParser()
 #    parser.add_argument('transform', help="Name of the transform (Python module)")
     parser.add_argument('input_gedcom', help=_("Name of the input GEDCOM file"))
@@ -527,10 +341,10 @@ def process_gedcom(arglist, transform_module):
     args = parser.parse_args(arglist)
     args.output_gedcom = None
     args.nolog = True # replaced by history file
-    history_append(args.input_gedcom,"\n"+msg)
-    history_append_args(args)
+    gedcom_utils.history_append(args.input_gedcom,"\n"+msg)
+    gedcom_utils.history_append_args(args)
     try:
-        init_log(args.logfile)
+        gedcom_utils.init_log(args.logfile)
         with Output(args) as out:
             out.original_line = None
             out.transform_name = transform_module.__name__
@@ -545,7 +359,7 @@ def process_gedcom(arglist, transform_module):
 
             print("<h3>------ {} ------</h3>".format(msg))
             t = transformer.Transformer(transform_module=transform_module,
-                                        display_callback=display_changes,
+                                        display_callback=gedcom_utils.display_changes,
                                         options=args)
             g = t.transform_file(args.input_gedcom) 
             g.print_items(out)
@@ -554,14 +368,14 @@ def process_gedcom(arglist, transform_module):
         traceback.print_exc()
     finally:
         if old_name: 
-            history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom))
-            history_append(args.input_gedcom,_("Old file saved as {}").format(old_name))
+            gedcom_utils.history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom))
+            gedcom_utils.history_append(args.input_gedcom,_("Old file saved as {}").format(old_name))
         else:
-            history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom+"-temp"))
+            gedcom_utils.history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom+"-temp"))
         msg = _("Transform '{}' ended at {}").format(
                  transform_module.name, 
                  util.format_timestamp())
-        history_append(args.input_gedcom,msg)
+        gedcom_utils.history_append(args.input_gedcom,msg)
         print("<h3>------ {} ------</h3>".format(msg))
         output = sys.stdout.getvalue()
         errors = sys.stderr.getvalue()
@@ -584,7 +398,7 @@ def process_gedcom(arglist, transform_module):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_transform(gedcom,transform):
-    gedcom_filename = gedcom_fullname(gedcom)
+    gedcom_filename = gedcom_utils.gedcom_fullname(gedcom)
     transform_module,parser = build_parser(transform, gedcom, gedcom_filename)
     if request.method == 'GET':
         rows = parser.generate_option_rows()
@@ -594,7 +408,7 @@ def gedcom_transform(gedcom,transform):
     else:
         logfile = gedcom_filename + "-log"
 #         print("#logfile:",logfile)
-        removefile(logfile)
+        gedcom_utils.removefile(logfile)
         args = parser.build_command(request.form.to_dict())
         encoding = util.guess_encoding(gedcom_filename)
         logging.info("Guessed encoding {} for {}".format(encoding,gedcom_filename))
@@ -616,7 +430,7 @@ def gedcom_transform(gedcom,transform):
         cmd3 = "cd '{}'; PYTHONPATH='{}' {} {} {}".\
                 format(gedcom_app, python_path, python_exe, transform_py, tr_args)
 
-        history_append(gedcom_filename,cmd3)
+        gedcom_utils.history_append(gedcom_filename,cmd3)
 
         print("#Doing " + cmd3)
         p = subprocess.Popen(cmd3, shell=True, cwd=gedcom_app,
@@ -624,8 +438,8 @@ def gedcom_transform(gedcom,transform):
         s1 = p.stdout.read().decode('UTF-8')
         s2 = p.stderr.read().decode('UTF-8')
         p.wait()
-        if s2: history_append(gedcom_filename,"\nErrors:\n"+s2)
-        s = "\n" + _("Errors:") + "\n" + s2 + "\n\n" + s1
+        if s2: gedcom_utils.history_append(gedcom_filename,"\nErrors:\n"+s2)
+#         s = "\n" + _("Errors:") + "\n" + s2 + "\n\n" + s1
         try:
             log = open(logfile).read()
         except FileNotFoundError:

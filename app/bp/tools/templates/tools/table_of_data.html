@@ -28,12 +28,18 @@
 	    {% for line in lists %}
 		    <tr>
 	    	{% for i in range(len) %}
-	    	  {% if titles[i] in ["date", "birth", "death"] %}<td>{{line[i]|pvm}}</td>
-              {% elif  titles[i] == "change" %}<td><small>{{line[i]|timestamp}}</small></td>
-              {% elif  titles[i] == "handle" %}<td><small>{{line[i]}}</small></td>
-              {% else %}<td>{{line[i]}}</td>
-		      {% endif %}
-	    	{% endfor %}
+	    	  {% set t = line[i] %}
+	    	  <td>{% if t %}
+			          {% if titles[i] in ["date", "birth", "death"] %} {{t|pvm}}
+		              {% elif  titles[i] == "change" %} <small>{{t|timestamp}}</small>
+		              {% elif  titles[i] == "handle" %} <small>{{t}}</small>
+	              	  {% elif t is string %}{{t}}
+	                  {% elif t is iterable %}{{t | join(', ') }}
+	                  {% else %} {{t}}
+	                  {% endif %}
+                  {% endif %}
+	    	  </td>
+	    	{% endfor %}{# i #}
 	        </tr>
 	    {% endfor %}
 	{% else %}

@@ -12,13 +12,13 @@ from .note import Note
 from .dates import DateRange
 from .cypher import Cypher_place
 from models.dbtree import DbTree
-from models.cypher_gramps import Cypher_place_w_handle
 from models.gen.event_combo import Event_combo
 
 class Place:
-    """ Paikka
+    """ Place / Paikka:
 
         Properties:
+            Defined here:
                 handle
                 change
                 id                  esim. "P0001"
@@ -30,18 +30,21 @@ class Place:
                    dates            DateRange date expression
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
-                surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 note_ref[]          int uniq_ids of Notes
+            May be defined in Place_gramps:
+                surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations
                 placeref_hlink      str paikan osoite
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
     def __init__(self, uniq_id=None, ptype="", pname="", level=None):
-        """ Luo uuden place-instanssin.
-            Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyylin, nimen
+        """ Creates a new Place instance.
+
+            Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyypin, nimen
             ja (tulossivua varten) mahdollisen hierarkiatason
         """
+        self.id = ''
         self.uniq_id = uniq_id
         self.type = ptype
         self.pname = pname
@@ -54,12 +57,12 @@ class Place:
         self.coord = None
         
         self.uppers = []        # Upper place objects for hirearchy display
-        self.notes = []         # Upper place objects for hierarchy display
-#         self.urls = []          # Weburl poistettu, käytössä notes[]
-
+        self.notes = []         # Notes connected to this place
         self.note_ref = []      # uniq_ids of Notes
-        self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
-        self.noteref_hlink = []
+
+# These are in bp.gramps.models.place_gramps.Place_gramps.__init__
+#         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
+#         self.noteref_hlink = []
 
 
     def __str__(self):
@@ -73,9 +76,11 @@ class Place:
 
     @classmethod
     def from_node(cls, node):
-        ''' models.gen.place.Place.from_node
-        Transforms a db node to an object of type Place.
+        ''' Creates a node object of type Place from a Neo4j node.
         
+        models.gen.place.Place.from_node. 
+        
+        Example node:
         <Node id=78279 labels={'Place'} 
             properties={'handle': '_da68e12a415d936f1f6722d57a', 'id': 'P0002', 
                 'change': 1500899931, 'pname': 'Kangasalan srk', 'type': 'Parish'}>
@@ -152,15 +157,19 @@ class Place:
                                        place_id=self.uniq_id)
 
             for place_record in place_result:
-                self.change = place_record["place"]["change"]
-                self.id = place_record["place"]["id"]
-                self.type = place_record["place"]["type"]
-                self.coord = place_record["place"]["coord"]
-                self.pname = Place.namelist_w_lang(place_record["names"])
+                node = place_record["place"]
+                self.type = node.get('type')
+                self.change = node["change"]
+                self.id = node["id"]
+                self.coord = node["coord"]
+                names_node = place_record["names"]
+                self.pname = Place.namelist_w_lang(names_node)
 
                 for node in place_record['notes']:
                     n = Note.from_node(node)
                     self.notes.append(n)
+                if not (self.type and self.id):
+                    print(f"MYERROR Place.read_w_notes: missing data for {self}")
         return
 
 
@@ -172,45 +181,67 @@ class Place:
 
         query = """
  MATCH (p:Place)
- RETURN ID(p) AS uniq_id, p
+ OPTIONAL MATCH (p) -[r:IS_INSIDE]-> (up:Place)
+ RETURN ID(p) AS uniq_id, p, 
+     COLLECT(DISTINCT [up.pname, r.datetype, r.date1, r.date2]) AS up
  ORDER BY p.pname, p.type"""
 
         result = shareds.driver.session().run(query)
 
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 'pname',
-                  'coord']
+                  'coord', 'upper']
         lists = []
 
         for record in result:
+            # <Record uniq_id=271313 
+            #    p=<Node id=271313 labels={'Place'} 
+            #        properties={'coord': [60.0, 27.0], 'handle': '_ddd39c2aa3518f6db8053050c70', 
+            #        'id': 'P0000', 'type': 'Town', 'pname': 'Helsinki', 'change': 1524381255}> 
+            #    up=[
+            #        ['Suomen suuriruhtinaskunta', 3, 1852509, 1964420], 
+            #        ['Suomi', 2, 1964421, 1964421]
+            #    ]>
             data_line = []
             if record['uniq_id']:
                 data_line.append(record['uniq_id'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['handle']:
                 data_line.append(record["p"]['handle'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['change']:
                 data_line.append(int(record["p"]['change']))  #TODO only temporary int()
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['id']:
                 data_line.append(record["p"]['id'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['type']:
                 data_line.append(record["p"]['type'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['pname']:
                 data_line.append(record["p"]['pname'])
             else:
-                data_line.append('-')
+                data_line.append('')
             if record["p"]['coord']:
                 data_line.append(record["p"]['coord'])
             else:
-                data_line.append('-')
+                data_line.append('')
+            uppers = []
+            for up in record['up']:
+                if up[0]:
+                    # ['Suomi', 2, 1964421, 1964421]
+                    pname = up[0]
+                    if up[1]:
+                        dates = DateRange(up[1],up[2],up[3])
+                        text = f'{pname} ({dates})'
+                    else:
+                        text = pname
+                    uppers.append(text)
+            data_line.append(uppers)
 
             lists.append(data_line)
 
@@ -278,7 +309,10 @@ class Place:
 
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
-            p = Place(record['id'], record['type'], Place.namelist_w_lang(record['name']))
+            pl_id =record['id']
+            pl_type = record['type']
+            pl_name = record['name']
+            p = Place(pl_id, pl_type, Place.namelist_w_lang(pl_name))
             if record['coord']:
                 p.coord = Point(record['coord']).coord
             p.uppers = combine_places(record['upper'])
@@ -287,20 +321,6 @@ class Place:
         # REturn sorted by first name in the list p.pname
         return sorted(ret, key=lambda x:x.pname[0])
 
-
-    @staticmethod
-    def make_hierarchy(tx, place):
-        for upper in place.surround_ref:
-            try:
-                #print("upper {} -> {}".format(self, upper))
-                if 'dates' in upper and isinstance(upper['dates'], DateRange):
-                    r_attr = upper['dates'].for_db()
-                else:
-                    r_attr = {}
-                tx.run(Cypher_place_w_handle.link_hier,
-                       handle=place.handle, hlink=upper['hlink'], r_attr=r_attr)
-            except Exception as err:
-                print("iError Place.link_hier: {0}".format(err), file=stderr)
 
     @staticmethod
     def namelist_w_lang(field):
@@ -350,10 +370,10 @@ class Place:
 
         # Query for Place hierarcy
         hier_query = """
-MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
-MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
         # Query for single Place without hierarcy
@@ -452,11 +472,11 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             print ("Pname: " + self.pname)
         if self.coord:
             print ("Coord: {}".format(self.coord))
-        if self.placeref_hlink != '':
-            print ("Placeref_hlink: " + self.placeref_hlink)
-        if len(self.noteref_hlink) > 0:
-            for i in range(len(self.noteref_hlink)):
-                print ("Noteref_hlink: " + self.noteref_hlink[i])
+#         if self.placeref_hlink != '':
+#             print ("Placeref_hlink: " + self.placeref_hlink)
+#         if len(self.noteref_hlink) > 0:
+#             for i in range(len(self.noteref_hlink)):
+#                 print ("Noteref_hlink: " + self.noteref_hlink[i])
         return True
 
 

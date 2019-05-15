@@ -127,13 +127,13 @@ class User(UserMixin):
 #     """ Object describing dynamic user properties """
 #     uid = ''
 #     name = ''
-#     userName = ''
+#     username = ''
 #     language = ''
 #     numSessions = 0
 #     lastSessionTime = None  
 # 
 #     def __init__(self, **kwargs):
-#         self.userName = kwargs.get('userName')
+#         self.username = kwargs.get('username')
 #         self.name = kwargs.get('name')
 #         self.language = kwargs.get('language')
 #         self.numSessions = kwargs['numSessions']

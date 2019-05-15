@@ -10,8 +10,8 @@ from sys import stderr
 
 import shareds
 from .cypher import Cypher_source
-#from .repository import Repository
-#from .note import Note
+from .repository import Repository
+from .note import Note
 #from models.cypher_gramps import Cypher_source_w_handle
 
 
@@ -38,12 +38,12 @@ class Source:
 #         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
 #         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
 #         self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
-#         self.note_ref = []      # uniq_ids (previously note[])
+        self.note_ref = []      # uniq_ids (previously note[])
+#         self.repocitory = None  # Repository object For creating display sets (vanhempi)
 
-
-        #Todo: Obsolete?
-        # self.repocitory = None  # Repository object For creating display sets (vanhempi)
-        self.citations = []   # For creating display sets
+        # For display combo
+        self.repositories = []
+        self.citations = []
         self.notes = []
 
     def __str__(self):
@@ -130,15 +130,17 @@ return s'''
 #                 self.reporef_medium = record['reporef_medium']
         
     
-    def get_source_data(self):
+    @staticmethod       
+    def get_source_w_notes(uniq_id):
         """ Luetaan lähteen tiedot """
                         
-        query = """
-            MATCH (source:Source)
-                WHERE ID(source)={}
-                RETURN source.stitle AS stitle
-            """.format(self.uniq_id)
-        return  shareds.driver.session().run(query)
+#         query = """
+#             MATCH (source:Source)
+#                 WHERE ID(source)={}
+#                 RETURN source.stitle AS stitle
+#             """.format(self.uniq_id)
+        return  shareds.driver.session().run(Cypher_source.get_a_source_w_notes,
+                                             sid=uniq_id)
     
     
     @staticmethod       
@@ -182,7 +184,10 @@ return s'''
 
     @staticmethod       
     def get_source_list():
-        """ Luetaan kaikki lähteet """
+        """ Reading all sources with notes and repositories.
+        
+            Luetaan kaikki lähteet 
+        """
 # ╒═════════╤═════╤════════════════╤════════════════╤═════════╤═════════╤═════════╕
 # │"uniq_id"│"id" │"stitle"        │"repository"    │"medium" │"cit_cnt"│"ref_cnt"│
 # ╞═══════╪═══════╪════════════════╪════════════════╪════════════╪══════╪═════════╡
@@ -195,16 +200,43 @@ return s'''
 # └───────┴───────┴────────────────┴────────────────┴────────────┴──────┴─────────┘
 
         ret = []
-        result = shareds.driver.session().run(Cypher_source.source_list)
-        for record in result:
-            s = Source()
-            s.uniq_id = record['uniq_id']
-            s.id = record['id']
-            s.stitle = record['stitle']
-            s.repo_name = record['repository']
-            s.medium = record['medium']
-            s.cit_cnt = record['cit_cnt']
-            s.ref_cnt = record['ref_cnt']
+        result = shareds.driver.session().run(Cypher_source.get_sources_w_notes)
+        for _uniq_id, source, notes, repositories, cit_cnt, ref_cnt in result:
+            # <Record
+            # 0  uniq_id=242567 
+            # 1  source=<Node id=242567 labels={'Source'} 
+            #        properties={'handle': '_dcb5682a0f47b7de686b3251557', 'id': 'S0334', 
+            #            'stitle': 'Åbo stifts herdaminne 1554-1640', 'change': '1516698633'}> 
+            # 2  notes=[<Node id=238491 labels={'Note'} 
+            #        properties={'handle': '_e07cd6210c57e0d53393a62fa7a', 'id': 'N3952', 
+            #        'text': '', 'type': 'Source Note', 'url': 'http://www.narc.fi:8080/...', 
+            #        'change': 1542667331}>] 
+            # 3  repositories=[
+            #        ['Book', <Node id=238996 labels={'Repository'} 
+            #            properties={'handle': '_db51a3f358e67ac82ade828edd1', 'id': 'R0057', 
+            #            'rname': 'Painoteokset', 'type': 'Collection', 'change': '1541350910'}>]]
+            # 4  cit_cnt=1 
+            # 5  ref_cnt=1
+            # >
+
+            s = Source.from_node(source)
+
+            for note in notes:
+                n = Note.from_node(note)
+                s.notes.append(n)
+
+            for repo_item in repositories:
+                # [medium, repo_node]
+                if repo_item[1] != None:
+                    rep = Repository.from_node(repo_item[1])
+                    rep.medium = repo_item[0]
+                    s.repositories.append(rep)
+#             s.repo_name = record['repository']
+#             s.medium = record['medium']
+            s.cit_cnt = cit_cnt
+            s.ref_cnt = ref_cnt
+#             s.cit_cnt = record['cit_cnt']
+#             s.ref_cnt = record['ref_cnt']
             ret.append(s)
             
         return ret
@@ -223,8 +255,7 @@ return s'''
         query = """
  MATCH (citation:Citation)-[r:SOURCE]->(source:Source) {0}
    WITH citation, r, source ORDER BY citation.page
- RETURN ID(source) AS id, source.stitle AS stitle, 
-  COLLECT([ID(citation), citation.dateval, citation.page, citation.confidence]) AS citations
+ RETURN source, COLLECT(citation) AS citations
  ORDER BY source.stitle""".format(where)
                 
         return shareds.driver.session().run(query)
@@ -339,7 +370,7 @@ return s'''
             print ("Stitle: " + self.stitle)
         if self.note_handles:
             print (f"Note handles: {self.note_handles}")
-        for repo in self.repocitories:
+        for repo in self.repositories:
             print (f"Repository: {repo}")
         return True
         

@@ -60,7 +60,7 @@ var gedcom = "{{ gedcom }}";
 
                     {% if metadata.size %}
 	                    <tr><td>{{ _('File size') }}
-	                        <td class="right">{{metadata.size}}
+	                        <td class="right">{{metadata.size}} {{ _('bytes') }}
                     {% endif %}
 
                     {% if 1  or info.date %}

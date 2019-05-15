@@ -27,6 +27,7 @@ from .cvs_refnames import load_refnames
 from .forms import AllowedEmailForm, UpdateAllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
+from .. gedcom.models import gedcom_utils
 from .. import gedcom
 from models import email
 from models import syslog 
@@ -277,7 +278,7 @@ def list_uploads_all():
 @roles_accepted('admin', 'audit')
 def start_load_to_neo4j(username,xmlname):
     uploads.initiate_background_load_to_neo4j(username,xmlname)
-    flash(_('Data import from {!r} to database has been started.'.format(xmlname)), 'info')
+    flash(_('Data import from %(i)s to database has been started.', i=xmlname), 'info')
     return redirect(url_for('admin.list_uploads', username=username))
 
 @bp.route('/admin/list_threads', methods=['GET'])
@@ -329,7 +330,7 @@ def xml_delete(username,xmlfile):
 
 def list_gedcoms(users):
     for user in users:
-        for f in gedcom.routes.list_gedcoms(user.username):
+        for f in gedcom_utils.list_gedcoms(user.username):
             yield (user.username,f)
 
 @bp.route('/admin/list_user_gedcoms/<user>', methods=['GET'])

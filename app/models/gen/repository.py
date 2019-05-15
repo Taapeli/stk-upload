@@ -8,7 +8,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 
-from models.cypher_gramps import Cypher_repository_w_handle
+from models.cypher_gramps import Cypher_repository_in_batch
 from .cypher import Cypher_repository
 from .note import Note
 import shareds
@@ -58,7 +58,7 @@ class Repository:
         n = cls()   # Repository
         n.uniq_id = node.id
         n.id = node['id'] or ''
-        n.handle = node['handle']
+        n.handle = node['handle'] or None
         n.change = node['change'] or 0
         n.rname = node['rname'] or ''
         n.type = node['type'] or ''
@@ -119,9 +119,7 @@ class Repository:
     def get_total():
         """ Tulostaa arkistojen määrän tietokannassa """
                         
-        query = """
-            MATCH (r:Repository) RETURN COUNT(r)
-            """
+        query = "MATCH (r:Repository) RETURN COUNT(r)"
         results =  shareds.driver.session().run(query)
         
         for result in results:
@@ -136,13 +134,14 @@ class Repository:
         print ("Id: " + self.id)
         print ("Rname: " + self.rname)
         print ("Type: " + self.type)
-#         print ("Url href: " + self.url_href)
-#         print ("Url type: " + self.url_type)
-#         print ("Url description: " + self.url_description)
         return True
 
-    def save(self, tx):
-        """ Saves this Repository to db"""
+
+    def save(self, tx, batch_id=None):
+        """ Saves this Repository to db under given batch. 
+        """
+        if batch_id == None:
+            raise RuntimeError(f"Repocitory.save needs batch_id for {self.id}")
 
         r_attr = {}
         try:
@@ -154,15 +153,11 @@ class Repository:
                 "type": self.type,
             }
 #             self.uniq_id = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr).single()[0]
-            result = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr)
-            ids = []
-            for record in result:
-                self.uniq_id = record[0]
-                ids.append(self.uniq_id)
-                if len(ids) > 1:
-                    print("iError updated multiple Sources {} - {}, attr={}".format(self.id, ids, r_attr))
+            result = tx.run(Cypher_repository_in_batch.create,
+                            bid=batch_id, r_attr=r_attr)
+            self.uniq_id = result.single()[0]
         except Exception as err:
-            print("iError Repository_save: {0} attr={1}".format(err, r_attr), file=stderr)
+            print(f"iError Repository_save: {err} attr={r_attr}", file=stderr)
             raise RuntimeError("Could not save Repository {}".format(self.id))
         
         try:
@@ -170,7 +165,7 @@ class Repository:
             if self.notes:
                 Note.save_note_list(tx, self)
         except Exception as err:
-            print("iError Repository.save note: {0}".format(err), file=stderr)
+            print(f"iError Repository.save note: {err}", file=stderr)
             raise SystemExit("Stopped due to errors")    # Stop processing
             #TODO raise ConnectionError("Repository.save: {0}".format(err))
 

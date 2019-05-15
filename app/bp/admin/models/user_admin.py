@@ -36,7 +36,7 @@ class UserProfile():
     """ Object describing dynamic user properties """
     name = ''
     email = ''
-    userName = ''
+    username = ''
     language = ''
     GSF_membership = ''
     research_years = ''
@@ -48,7 +48,7 @@ class UserProfile():
     approved_at = None
 
     def __init__(self, **kwargs):
-        self.userName = kwargs.get('userName')
+        self.username = kwargs.get('username')
         self.name = kwargs.get('name')
         self.email = kwargs.get('email')
         self.language = kwargs.get('language')
@@ -132,7 +132,7 @@ class UserAdmin():
                     tx.run(Cypher_adm.user_profile_register,   
                         name = profile.name,
                         email = profile.email,
-                        userName = profile.userName,
+                        username = profile.username,
                         language = profile.language,
                         research_years = profile.research_years,
                         software = profile.software,
@@ -144,7 +144,7 @@ class UserAdmin():
                         email = profile.email, 
                         role = role,
                         approved = False, 
-                        admin_name = 'system')              
+                        creator = 'system')              
                     tx.commit()
             return(True)        
         except ConstraintError as ex:
@@ -168,7 +168,7 @@ class UserAdmin():
                     tx.run(Cypher_adm.user_profile_update,  
                         name = profile.name,
                         email = profile.email,
-                        userName = profile.userName,
+                        username = profile.username,
                         language = profile.language,
                         research_years = profile.research_years,
                         software = profile.software,
@@ -399,6 +399,7 @@ class UserAdmin():
 #             result = shareds.driver.session().run(Cypher_adm.user_update_language,
 #                          username=username,language=language).single()
 #             return result
+            print("*** Update user is not done! ***")
             return("Ok")
         except ServiceUnavailable as ex:
             logging.debug(ex.message)
@@ -410,6 +411,7 @@ class UserAdmin():
 #             result = shareds.driver.session().run(Cypher_adm.user_update_language,
 #                          username=username,language=language).single()
 #             return result
+            print("*** Update user is not done! ***")
             return("Ok")
         except ServiceUnavailable as ex:
             logging.debug(ex.message)

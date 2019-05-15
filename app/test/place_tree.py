@@ -58,10 +58,10 @@ def get_connections(locid):
     """
     global driver
     query = """
-MATCH x= (p:Place)<-[r:HIERARCY*]-(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
     UNION
-MATCH x= (p:Place)-[r:HIERARCY*]->(i:Place) WHERE ID(p) = $locid
+MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
 """
     return (driver.session().run(query, locid=int(locid)))

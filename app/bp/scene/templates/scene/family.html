@@ -19,13 +19,20 @@ u { color: DarkKhaki; text-decoration: none; }
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">
 
-        <h3 style="position:sticky; top:0;">Family {{ family.id }}</h3>
+        <h3 style="position:sticky; top:0;">{{ _("Family") }} {{ family.uniq_id }}</h3>
+        <h3 style="position:sticky; top:0;">{{ _("Type") }} {{ family.type }}</h3>
+        <h3 style="position:sticky; top:0;">{{ _("Marriage dates") }} {{ family.marriage_date }}</h3>
+        <h3 style="position:sticky; top:0;">{{ _("Marriage place") }} {{ family.marriage_place }}</h3>
+        <h3 style="position:sticky; top:0;">{{ _("Father") }} {{ family.father}}</h3>
+        <h3 style="position:sticky; top:0;">{{ _("Father sortname") }} {{ family.father_sortname}}</h3>
+        <h3 style="position:sticky; top:0;">{{ _("Mother") }} {{ family.mother}}</h3>
+        <h3 style="position:sticky; top:0;">{{ _("Mother sortname") }} {{ family.mother_sortname}}</h3>
 
         <div id="summaryarea">
             <table>
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="ColumnValue"><span class="id">tuntematon</span> / <tt>{{family.id}}</tt></td>
+                    <td class="ColumnValue"><span class="id">tuntematon</span> / <tt>{{family.uniq_id}}</tt></td>
                 </tr>
             </table>
         </div>

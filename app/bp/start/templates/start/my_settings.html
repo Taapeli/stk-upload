@@ -5,58 +5,129 @@
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
-{# import 'start/s_macros.html' as macro #}
 
 {{ hamburger_menu() }}
+<style>
+td,th {background: white;}
+</style>
+<script>
+function confirm_delete(url) {
+    var msg = "{{ _('Are you sure you want to delete your data?') }}";
+    var ok = confirm(msg);
+    if (!ok) {
+        return false;
+    }
+    location.href = url;
+    return true;
+}
+</script>
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("Change my settings") }}</h2>
+    <h2>{{ _("My Home Page") }}</h2>
 
     {% if current_user is defined and current_user.is_authenticated %}
-	<div>
-	{{ _('User') }} <i>{{current_user.name}}</i> 
-	    &lt;{{current_user.email}}&gt;
-    </div>
-    <p>
+
     <div class=startbox>
-        <h3>{{ _('Change language') }}</h3>
+        <h3>{{ _('User') }} <i>{{current_user.username}}</i></h3>
+	     <div><i>{{current_user.name}}</i> 
+	        &lt;{{current_user.email}}&gt;
+	     </div>
          <div> 
+          <h4>{{ _('Change language') }}</h4>
           <form method="post">
           	<div id="lang">
-          		<br><input type="radio" name="lang" value="fi"
+          		<input type="radio" name="lang" value="fi"
           			{% if session.lang == "fi" %} checked {% endif %}
       			>{{ _("Finnish") }}
-          		<br><input type="radio" name="lang" value="sv"
+          		<input type="radio" name="lang" value="sv"
           			{% if session.lang == "sv" %} checked {% endif %}
           		>{{ _("Swedish") }}
-          		<br><input type="radio" name="lang" value="en"
+          		<input type="radio" name="lang" value="en"
           			{% if session.lang == "en" %} checked {% endif %}
           		>{{ _("English") }}
           	</div>
-          	<p>
-            <input type="submit" value="{{ _('Apply') }}" />
-            <p><a href="{{ referrer }}">{{ _('Go back') }}</a>
+          	<div class="submit">
+                <input type="submit" value="{{ _('Apply') }}" /></div>
+            <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back') }}</a></p>
             <input type="hidden" name="referrer" value="{{ referrer }}" />
          </form>
          </div>
     </div>
 
     <div class=startbox>
-        <h3>{{ _('Roles') }}</h3>
+        <h3>{{ _('Active Roles') }}</h3>
+        <ul>
         {% for role in  roles %}
-        	<br>{{role.name}}
+        	<li><b>{{role.name}}</b>: {{role.description}}</li>
         {% endfor %}
-        
+        </ul>
     </div>
 
-    <div class=startbox>
-        <h3>{{ _('Candidate materials') }}</h3>
-        tbd
+    {% if batches %}
+    <div class="startbox2">
+        <h3>{{ _('Data Batches') }}</h3>
+        <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
+        <table width="100%">
+        <tr>{% set w = (100.0 / (labels|length + 3) | round(0,'floor')) | int %}
+            <th>{{ _('Batch') }}</th>
+            {% for label in labels %}<th style="width:{{w}}%">{{label}}</th>{% endfor %}
+        </tr>
+        {% for key1,item in batches.items() %}
+            {% set user0 = user %}
+            {% set user, batch = key1.split('/') %}
+        <tr><td>{{batch}}</td>
+            {% for label in labels %}
+              <td class="right"> {{item[label]}} </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </table>
+        <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
+        <br>&rtrif; <a href="#" onclick="confirm_delete('/admin/clear_db/my_own')">
+                  {{ _('Delete all my imported data') }}</a>
+        </p>
     </div>
+    {% else %}
+    <div class="startbox">
+        <h3>{{ _('Data Batches') }}</h3>
+        <p>{{ _('You have no candidate data loaded in the database.') }}</p>
+        <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a></p>
+    </div>
+    {% endif %}{# Batches #}
 
-    {% endif %}
+    {% if gedcoms %}
+    <div class="startbox2">
+        <h3>{{ _('My Gedcom files') }}</h3>
+           <table width="100%">
+                <tr><th>{{ _('File') }}</th>
+                    <th>{{ _('Date') }}</th>
+                    <th>{{ _('Bytes') }}</th>
+                    <th>{{ _('Description') }}</th>
+                </tr>
+               {% for file in gedcoms %}
+                   <tr>
+                       <td class="gedcom-name">{{ file.name }}</td>
+                       <td>{% if file.metadata.upload_time %}
+                           {% set date = file.metadata.upload_time.split() %}
+                           {{ date[1] }}
+                       {% endif %}</td>
+                       <td class="right">{{ file.metadata.size }}</td>
+                       <td colspan="4">{{ file.metadata.desc|escape }}</td>
+                   </tr>
+               {% endfor %}
+           </table>
+           <p>&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a></p>
+    </div>
+    {% else %}
+    <div class="startbox">
+        <h3>{{ _('My Gedcom files') }}</h3>
+        <p>{{ _('You have no Gedcom files in the server.') }}</p>
+        <p>&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a></p>
+    </div>
+    {% endif %}{# Gedcoms #}
+
+  {% endif %}
   </div>
-  <p></p>
 </div>
 {% endblock %}
