@@ -114,8 +114,8 @@ def record(id):
         id=id,
         name=p['pname'],
         type=p['type'],
-        surroundedBy=places1,
-        surrounds=places2,
+        surroundedBy=sorted(places1,key=lambda x:x['name']),
+        surrounds=sorted(places2,key=lambda x:x['name']),
     )
     return {"status":"OK",
      "statusText":"OK",
