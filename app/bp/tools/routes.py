@@ -390,7 +390,9 @@ def api_v1_search():
             statusText="Missing argument 'lookfor'",
         ))
     rsp = api.search(lookfor) 
-    return jsonify(rsp)
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
 
 @bp.route('/api/v1/record', methods=['GET'])
 def api_v1_record():
@@ -400,4 +402,7 @@ def api_v1_record():
             statusText="Missing argument 'id'",
         ))
     rsp = api.record(id) 
-    return jsonify(rsp)
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+    
