@@ -298,6 +298,17 @@ RETURN f, p.pname AS marriage_place,
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.mother_sortname LIMIT $limit"""
     
+    get_family_data = """
+MATCH (f:Family) WHERE ID(f)=$pid
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children"""
+    
     #TODO Obsolete
     read_families = """
 MATCH (f:Family) WHERE ID(f)>=$fw
