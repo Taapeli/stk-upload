@@ -390,12 +390,12 @@ MERGE (n) -[r:SOURCE]-> (m)"""
 
 
 class Cypher_repository_in_batch():
-    """ For Repocitory class """
+    """ For Repository class """
 
     # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
 MATCH (u:Batch {id:$bid})
-CREATE (u) -[:OWNS]-> (a:Repocitory) 
+CREATE (u) -[:OWNS]-> (a:Repository) 
     SET a = $r_attr
 RETURN ID(a) as uniq_id"""
 

@@ -106,7 +106,7 @@ class Media:
             #TODO: Can there be Notes for media?
         """
         if batch_id == None:
-            raise RuntimeError(f"Repocitory.save needs batch_id for {self.id}")
+            raise RuntimeError(f"Media.save needs batch_id for {self.id}")
 
         m_attr = {}
         try:
