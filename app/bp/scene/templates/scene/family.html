@@ -46,7 +46,15 @@ u { color: DarkKhaki; text-decoration: none; }
  				{% if n.url %}<p><a href="{{ n.url }}">{{ n.url }}</a></p>{% endif %}
             {% endfor %}<br>
         {% endif %}
-
+        
+        {% if family.sources %}<h3 style="position:sticky; top:0;">{{ _("Source") }}</h3>
+             {% for data in family.sources %}
+         		{{ data[0] }}: 
+         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>,
+         		{{ _("Page") }}: {{ data[3] }}<br>
+             {% endfor %}<br>
+		{% endif %}
+        
         <div id="summaryarea">
             <table>
                 <tr>

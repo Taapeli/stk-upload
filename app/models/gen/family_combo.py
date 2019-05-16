@@ -11,6 +11,9 @@ from .family import Family
 from .person_combo import Person_as_member
 from .person_name import Name
 from .note import Note
+from .citation import Citation
+from .source import Source
+from .repository import Repository
 from models.gen.dates import DateRange
 #from models.cypher_gramps import Cypher_family_w_handle
 
@@ -44,6 +47,7 @@ class Family_combo(Family):
         self.children = []      # Child object
         self.events = []        # Event objects
         self.notes = []
+        self.sources = []
         self.note_ref = []      # For a page, where same note may be referenced
                                 # from multiple events and other objects
 
@@ -201,6 +205,13 @@ RETURN family"""
                         
                         if record['no_of_children']:
                             self.no_of_children = record['no_of_children']
+                            
+                        for repository_node, source_node, citation_node in record['sources']:
+                            rname = repository_node['rname']
+                            s_pid = source_node.id
+                            stitle = source_node['stitle']
+                            page = citation_node['page']
+                            self.sources.append([rname, s_pid, stitle, page])
                             
                         for n in record['note']:
                             note = Note()
