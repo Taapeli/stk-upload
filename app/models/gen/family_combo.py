@@ -207,11 +207,12 @@ RETURN family"""
                             self.no_of_children = record['no_of_children']
                             
                         for repository_node, source_node, citation_node in record['sources']:
-                            rname = repository_node['rname']
-                            s_pid = source_node.id
-                            stitle = source_node['stitle']
-                            page = citation_node['page']
-                            self.sources.append([rname, s_pid, stitle, page])
+                            if repository_node:
+                                rname = repository_node['rname']
+                                s_pid = source_node.id
+                                stitle = source_node['stitle']
+                                page = citation_node['page']
+                                self.sources.append([rname, s_pid, stitle, page])
                             
                         for n in record['note']:
                             note = Note()
