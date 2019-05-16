@@ -169,13 +169,20 @@ match (u:UserProfile) where exists(u.userName)
     set u.username = u.userName
     set u.userName = null
 return count(u)"""
+    change_Repocitory_to_Repository = """
+match (a:Repocitory)
+    set a:Repository
+    remove a:Repocitory
+return count(a)"""
     with shareds.driver.session() as session: 
         try:
             result = session.run(change_HIERARCY_to_IS_INSIDE)
             cnt1 = result.single()[0]
             result = session.run(change_userName_to_username)
             cnt2 = result.single()[0]
-            print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes")
+            result = session.run(change_Repocitory_to_Repository)
+            cnt3 = result.single()[0]
+            print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes, {cnt3} label changes")
 
         except Exception as e:
             logger.error(f"{e} in database.adminDB.do_schema_fixes")
