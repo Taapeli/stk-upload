@@ -313,6 +313,7 @@ class DateRange():
             """
             if arg0 == None:
                 # No value
+                print(f"ERROR: Invalid DateInt({arg0}, {month}, {day})")
                 self.intvalue = 0
             elif isinstance(arg0, int):
                 if arg0 > 9999:
@@ -420,10 +421,17 @@ class DateRange():
             return s
 
         def to_local(self):
-            """ DateRange.DateInt.to_local() converts the DateInt value to
-                Finnish style 20.9.2017 date, even when the month or day are zeroes
+            """ DateRange.DateInt.to_local() converts DateInt to local string.
+            
+                The string is now a Finnish style "20.9.2017" date 
+                (or shortened "9.2017" or "2017", when the month or day are zeroes).
+                
+                For missign date value returns "".
             """
             try:
+                if self.intvalue == 0:
+                    # Missing date
+                    return "<error>"
                 a = self.vector()
                 if len(a) == 3:
 #                     p = int(a[2])
