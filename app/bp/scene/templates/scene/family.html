@@ -24,15 +24,20 @@ u { color: DarkKhaki; text-decoration: none; }
         <p><b>{{ _("Marriage place") }}</b> {{ family.marriage_place }}</p>
         <p><b>{{ _("Marriage dates") }}</b> {{ family.marriage_date }}</p>
         <p><b>{{ _("Father") }}</b>
-        	<a href="/scene/person={{family.father.uniq_id}}">
-    		{{family.father.names[0].firstname}} 
-            <i>{{family.father.names[0].suffix}}</i>
-            <b>{{family.father.names[0].surname}}</b></a></h3>
+        	{% if family.father %}
+                <a href="/scene/person={{family.father.uniq_id}}">
+                {{family.father.names[0].firstname}} 
+                <i>{{family.father.names[0].suffix}}</i>
+                <b>{{family.father.names[0].surname}}</b></a></h3>
+            {% else %}<small>{{ _('unknown') }}</small>{% endif %}
+    
         <p><b>{{ _("Mother") }}</b>
-        	<a href="/scene/person={{family.mother.uniq_id}}">
-        	{{family.mother.names[0].firstname}} 
-            <i>{{family.mother.names[0].suffix}}</i>
-            <b>{{family.mother.names[0].surname}}</b></a></h3>
+        	{% if family.mother %}
+                <a href="/scene/person={{family.mother.uniq_id}}">
+                {{family.mother.names[0].firstname}} 
+                <i>{{family.mother.names[0].suffix}}</i>
+                <b>{{family.mother.names[0].surname}}</b></a></h3>
+            {% else %}<small>{{ _('unknown') }}</small>{% endif %}
             
         {% if family.children %} <br><br><b>{{ _("Children") }}</b><br>     
             <table>
