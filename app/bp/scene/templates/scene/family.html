@@ -21,38 +21,44 @@ u { color: DarkKhaki; text-decoration: none; }
 
         <h3 style="position:sticky; top:0;">{{ _("Family") }} {{ family.uniq_id }}</h3>
         <p><b>{{ _("Type") }}</b> {{ family.type|transl('marr') }}</p>
-        <p><b>{{ _("Marriage dates") }}</b> {{ family.marriage_date }}</p>
         <p><b>{{ _("Marriage place") }}</b> {{ family.marriage_place }}</p>
-        <h3 style="position:sticky; top:0;">{{ _("Father") }}</h3>
-        <p><b>{{ _("Name") }}</b> <a href="/scene/person={{family.father.uniq_id}}">
+        <p><b>{{ _("Marriage dates") }}</b> {{ family.marriage_date }}</p>
+        <p><b>{{ _("Father") }}</b>
+        	<a href="/scene/person={{family.father.uniq_id}}">
     		{{family.father.names[0].firstname}} 
             <i>{{family.father.names[0].suffix}}</i>
-            <b>{{family.father.names[0].surname}}</b></a></p>
-        <h3 style="position:sticky; top:0;">{{ _("Mother") }}</h3>
-        <p><b>{{ _("Name") }}</b> <a href="/scene/person={{family.mother.uniq_id}}">
+            <b>{{family.father.names[0].surname}}</b></a></h3>
+        <p><b>{{ _("Mother") }}</b>
+        	<a href="/scene/person={{family.mother.uniq_id}}">
         	{{family.mother.names[0].firstname}} 
             <i>{{family.mother.names[0].suffix}}</i>
-            <b>{{family.mother.names[0].surname}}</b></a></p>
+            <b>{{family.mother.names[0].surname}}</b></a></h3>
             
-        {% if family.children %} <h3 style="position:sticky; top:0;">{{ _("Children") }}</h3>     
+        {% if family.children %} <br><br><b>{{ _("Children") }}</b><br>     
+            <table>
         	{% for c in family.children %}{% set nm = c.sortname.split('#') %}
-                <p><a href="/scene/person={{c.uniq_id}}">{{nm[2]}}&nbsp;<b>{{nm[0]}}</b>&nbsp;<i>{{nm[1]}}</i>{{ "," if not loop.last }}</a></big></p>
-            {% endfor %}<br>
+                <tr><td><a href="/scene/person={{c.uniq_id}}">{{nm[2]}}&nbsp;<b>{{nm[0]}}</b>&nbsp;<i>{{nm[1]}}</i>{{ "," if not loop.last }}</a></big></td></tr>
+            {% endfor %}
+            </table><br>
         {% endif %}
 
-        {% if family.notes %}<h3 style="position:sticky; top:0;">{{ _("Note") }}</h3>
-             {% for n in family.notes %}
- 				{% if n.text %}<p>{{ n.text }}</p>{% endif %}
- 				{% if n.url %}<p><a href="{{ n.url }}">{{ n.url }}</a></p>{% endif %}
-            {% endfor %}<br>
+        {% if family.notes %}<br><br><b>{{ _("Notes") }}</b><br>
+            <table>
+            {% for n in family.notes %}
+ 				<tr>{% if n.text %}<td>{{ n.text }}</p></td>{% endif %}
+ 				{% if n.url %}<td><a href="{{ n.url }}">{{ n.url }}</a></td>{% endif %}</tr>
+            {% endfor %}
+            </table><br>
         {% endif %}
         
-        {% if family.sources %}<h3 style="position:sticky; top:0;">{{ _("Source") }}</h3>
-             {% for data in family.sources %}
-         		{{ data[0] }}: 
+        {% if family.sources %}<br><br><b>{{ _("Sources") }}</b><br>
+            <table>
+            {% for data in family.sources %}
+         		<tr><td>{{ data[0] }}: 
          		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>,
-         		{{ _("Page") }}: {{ data[3] }}<br>
-             {% endfor %}<br>
+         		{{ _("Page") }}: {{ data[3] }}</td></tr>
+            {% endfor %}
+            </table><br>
 		{% endif %}
         
         <div id="summaryarea">
