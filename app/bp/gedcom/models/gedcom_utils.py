@@ -103,8 +103,12 @@ def gedcom_fullname(gedcom):
 
 def get_metadata(gedcom):
     gedcom_folder = get_gedcom_folder()
+    gedcom_fullname = os.path.join(gedcom_folder, secure_filename(gedcom))
+    return get_metadata2(gedcom_fullname)
+
+def get_metadata2(gedcom_fullname):
     try:
-        metaname = os.path.join(gedcom_folder, secure_filename(gedcom) + "-meta")
+        metaname = gedcom_fullname + "-meta"
         return eval(open(metaname).read())
     except FileNotFoundError:
         return {}
@@ -166,7 +170,8 @@ def list_gedcoms(username):
     for name in names:
         f = File()
         f.name = name
-        f.metadata = get_metadata(name)
+        gedcom_fullname = os.path.join(gedcom_folder,name)
+        f.metadata = get_metadata2(gedcom_fullname)
         if username == current_user.username or f.metadata.get("admin_permission"):
             files.append(f)
     return files
