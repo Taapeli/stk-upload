@@ -104,7 +104,7 @@ MATCH (u:User)
 MERGE (p:UserProfile {email: u.email})    
   ON CREATE SET p.name = u.name, p.username = u.username, p.language = u.language, p.created_at = timestamp()
   ON MATCH SET p.language = u.language, p.username = u.username
-CREATE (u) <-[:SUPPLEMENTED]- (p)'''
+CREATE (u) -[:SUPPLEMENTED]-> (p)'''
        
     user_profiles_get = '''
 MATCH (p:UserProfile)

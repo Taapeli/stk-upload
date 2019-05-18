@@ -33,7 +33,7 @@
         <div id="summaryarea">
             <div class="flex-container">
                <div id="description">
-                   <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
+                   <p>{{ _('Displaying %(num)s distinct families', num=cnt) }}
                        {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
                        {% else %}{{ _('from begin') }},
                        {% endif %}{{ _('data set') }}
@@ -128,8 +128,8 @@
         <tr>
             <td><a href="/scene/family={{f.uniq_id}}"
                    title="{{ _('Go to family page') }}">{{f.type|transl('marr')}}</a>
-                {% if f.marriage_date %}{{f.marriage_date}}{% endif %}
                 {% if f.marriage_place %}{{f.marriage_place}}{% endif %}
+                {% if f.marriage_date %}{{f.marriage_date}}{% endif %}
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
