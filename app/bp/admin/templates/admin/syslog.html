@@ -29,14 +29,14 @@
 	    </table>
 
 	    <div style="margin-top:1em;">
-	{% if ns.first %}&lt;
-	    <a href="readlog?direction=backward&id={{ ns.first.id }}">
+	{% if ns.first %}
+	    <a href="readlog?direction=backward&id={{ ns.first.id }}" class="navlink">
 	       {{ _("Older events") }} {{ns.first.row.timestr}}</a> 
     {% endif %}
     &mdash;
 	{% if ns.last %}
-	   <a href="readlog?direction=forward&id={{ ns.last.id }}">
-	       {{ _("Newer events") }} {{ns.last.row.timestr}}</a> &gt;
+	   <a href="readlog?direction=forward&id={{ ns.last.id }}" class="navlink">
+	       {{ _("Newer events") }} {{ns.last.row.timestr}}</a>
     {% endif %}
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
         </div>
