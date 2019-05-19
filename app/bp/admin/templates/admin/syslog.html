@@ -2,8 +2,10 @@
 {% block title %}{{ _("Syslog") }}{% endblock %}
 {% block body %}
     {{ super() }}
-    recs: {{ recs }}
-  	<h2>{{ _("Syslog") }}</h2>
+<!--     recs: {{ recs }} -->
+<div id="startdiv">
+    <div>
+  	    <h2>{{ _("Syslog") }}</h2>
         <table>
            <tr>
                 <th>{{ _("Time") }}</th>
@@ -25,15 +27,21 @@
 			</tr>
 	    {% endfor %}
 	    </table>
-	    <br>
-	{% if ns.first %}
-	    <a href="readlog?direction=backward&id={{ ns.first.id }}">{{ _("Older events") }} {{ns.first.row.timestr}}</a> 
+
+	    <div style="margin-top:1em;">
+	{% if ns.first %}&lt;
+	    <a href="readlog?direction=backward&id={{ ns.first.id }}">
+	       {{ _("Older events") }} {{ns.first.row.timestr}}</a> 
     {% endif %}
-    -
+    &mdash;
 	{% if ns.last %}
-	   <a href="readlog?direction=forward&id={{ ns.last.id }}">{{ _("Newer events") }} {{ns.last.row.timestr}}</a> 
+	   <a href="readlog?direction=forward&id={{ ns.last.id }}">
+	       {{ _("Newer events") }} {{ns.last.row.timestr}}</a> &gt;
     {% endif %}
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
+        </div>
+    </div>
+    </div>
 {% endblock %}
 </body>
 </html>
