@@ -1,6 +1,8 @@
 from flask import Flask, session, request
 from flask_babelex import Babel
 from flask_security import current_user
+import logging
+
 import shareds
 # Create app
 app = Flask(__name__, instance_relative_config=True)
@@ -10,6 +12,11 @@ print('Application instance path: ' + shareds.app.instance_path)
 
 shareds.app.config.from_object('config')
 shareds.app.config.from_pyfile('config.py')
+
+_level = shareds.app.config.get('STK_LOG_LEVEL')
+if _level:
+    print (f"stkserver log level set to {_level}")
+    logging.getLogger('stkserver').setLevel(_level)
 
 shareds.babel = Babel(shareds.app)
 #-----------------------------------------------------------------------------

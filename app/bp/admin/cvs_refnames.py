@@ -3,8 +3,10 @@
 # JMä 27.1.2016
 
 import csv
-import logging
 import time
+from flask_babelex import _
+import logging
+logger = logging.getLogger('stkserver')
 
 from models.gen.refname import Refname, REFTYPES
 from models.gen.user import User
@@ -25,15 +27,21 @@ def load_refnames(pathname):
             Name,Refname,Reftype,Source,Gender
             Carl,Kalle,firstname,Sibelius-aineisto,male
             Carlsdotter,Carl,father,Sibelius-aineisto,
+        
+        #TODO:  - remove "von"
+                - If Refname has multiple names, create a set of refnames
+                - Set source parameter to refname, too?
     """
     row_nro = 0
     empties = 0
     
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
         tx = User.beginTransaction()
-        reader=csv.DictReader(f, dialect='excel')
+        reader=csv.DictReader(f)    #, dialect='excel')
         t0 = time.time()
         for row in reader:
+            if row_nro == 0:
+                print(f'Column names are {", ".join(row)}')
             row_nro += 1
             try:
                 nimi=row['Name'].strip()
@@ -57,10 +65,10 @@ def load_refnames(pathname):
                 if reftype in REFTYPES:
                     r.refname = refname
                     r.reftype = reftype
-                    logging.debug("cvs_refnames: {0} --> {1}".format(nimi, refname))
+                    logger.debug("cvs_refnames: {0} --> {1}".format(nimi, refname))
                 else:
-                    logging.warning('cvs_refnames: Invalid reference {} discarded. '.\
-                                    format(reftype))
+                    logger.warning('cvs_refnames: Invalid reference {} discarded. '.\
+                                   format(reftype))
             if sex:
                 r.sex = sex
             if source != '':
@@ -71,8 +79,8 @@ def load_refnames(pathname):
 
         tx.commit()
 
-    msg = '{}: {} rows, {} skipped. TIME {} sek'.\
-        format(pathname, row_nro, empties, time.time()-t0)
-    logging.info(msg)
+    msg = '{}: {} rows, {} skipped. TIME {:.1f} sek'.\
+          format(pathname, row_nro, empties, time.time()-t0)
+    logger.info(msg)
     return (msg)
 

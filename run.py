@@ -19,7 +19,8 @@ if __name__ == '__main__':
     if True:
         loglevel = 'DEBUG'
         # Ajo paikallisesti
-        print ("Stk server ajetaan {}-lokitasolla".format(loglevel))
+        print(f"Using log levels: Flask {loglevel}, Neo4j {neo4j_log.getEffectiveLevel()},"
+              f" stkserver {logger.getEffectiveLevel()}")
         app.run(debug=loglevel)
     else:
         # Julkinen sovellus
