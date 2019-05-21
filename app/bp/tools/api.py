@@ -31,8 +31,8 @@ cypher_search = """
 cypher_record = """
     match (p:Place)
         where id(p) = $id 
-    optional match (smallerPlace:Place)-[h2:HIERARCY]->(p) 
-    optional match (p)-[h1:HIERARCY]->(largerPlace:Place) 
+    optional match (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
+    optional match (p)-[h1:IS_INSIDE]->(largerPlace:Place) 
     return p,
         collect (distinct [h1,largerPlace,id(largerPlace)]) as largerPlaces,
         collect (distinct [h2,smallerPlace,id(smallerPlace)]) as smallerPlaces
@@ -54,13 +54,6 @@ def search(lookfor):
      "statusText":"OK",
      "resultCount": len(records),
      "records":records,
-    }
-    return {"status":"OK",
-     "statusText":"OK",
-     "resultCount": 2,
-     "records":[ { "id":"123", "name":"Antrea", "type":"place"},
-                 { "id":"333", "name":"Antrea", "type":"village"},
-               ]
     }
 
 
