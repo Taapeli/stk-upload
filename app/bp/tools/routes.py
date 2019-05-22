@@ -1,4 +1,4 @@
-# coding=UTF-8
+coding=UTF-8
 # Flask routes program for Stk application tools blueprint
 # @ Sss 2016
 # JMä 3.1.2019
@@ -405,4 +405,3 @@ def api_v1_record():
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
-    

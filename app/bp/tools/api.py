@@ -116,5 +116,3 @@ def record(id):
      "record": record, 
     }
 
-
-
