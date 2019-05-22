@@ -107,7 +107,7 @@ var app = new Vue({
             this.search(this.q);
         },
         setplace: function(place) {
-            axios.get('http://localhost:5000/api/v1/record?id=' + encodeURIComponent(place.id)).
+            axios.get('/api/v1/record?id=' + encodeURIComponent(place.id)).
                 then(function(rsp, status) {
                     log(rsp);
                     var record = rsp.data.record;
@@ -123,7 +123,7 @@ var app = new Vue({
         },
 
         search: function(q) {
-            axios.get('http://localhost:5000/api/v1/search?lookfor=' + encodeURIComponent(q)).
+            axios.get('/api/v1/search?lookfor=' + encodeURIComponent(q)).
                 then(function(rsp, status) {
                     log(rsp);
                     app.records = rsp.data.records;
