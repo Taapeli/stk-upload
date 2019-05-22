@@ -174,6 +174,16 @@ match (a:Repocitory)
     set a:Repository
     remove a:Repocitory
 return count(a)"""
+    change_Family_dates = """
+match (f:Family) where f.datetype="3" and not exists (f.date1)
+
+    set f.datatype = "1"
+
+    set f.data1 = f.data2
+
+    set f.data2 = NULL
+
+return count(f)"""
     change_wrong_supplemented_direction = """
 MATCH (u:User)<-[r:SUPPLEMENTED]-(p:UserProfile) 
     DELETE r 
@@ -188,8 +198,12 @@ return count(u)"""
             cnt2 = result.single()[0]
             result = session.run(change_Repocitory_to_Repository)
             cnt3 = result.single()[0]
-            result = session.run(change_wrong_supplemented_direction)
+            result = session.run(change_Family_dates)
             cnt4 = result.single()[0]
+            result = session.run(change_wrong_supplemented_direction)
+            cnt5 = result.single()[0]
+
+            print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes, {cnt3} label changes, {cnt4} family changes, {cnt5} direction changes")
             print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes, {cnt3} label changes, {cnt4} direction changes")
 
         except Exception as e:
