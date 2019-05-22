@@ -174,6 +174,12 @@ match (a:Repocitory)
     set a:Repository
     remove a:Repocitory
 return count(a)"""
+    change_Family_dates = """
+match (f:Family) where f.datetype="3" and not exists (f.date1)
+    set f.datatype = "1"
+    set f.data1 = f.data2
+    set f.data2 = NULL
+return count(f)"""
     with shareds.driver.session() as session: 
         try:
             result = session.run(change_HIERARCY_to_IS_INSIDE)
@@ -182,7 +188,9 @@ return count(a)"""
             cnt2 = result.single()[0]
             result = session.run(change_Repocitory_to_Repository)
             cnt3 = result.single()[0]
-            print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes, {cnt3} label changes")
+            result = session.run(change_Family_dates)
+            cnt4 = result.single()[0]
+            print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes, {cnt3} label changes, {cnt4} family changes")
 
         except Exception as e:
             logger.error(f"{e} in database.adminDB.do_schema_fixes")
