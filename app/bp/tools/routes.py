@@ -1,4 +1,3 @@
-# coding=UTF-8
 # Flask routes program for Stk application tools blueprint
 # @ Sss 2016
 # JMä 3.1.2019
@@ -9,7 +8,7 @@ import logging
 logger = logging.getLogger('stkserver')
 import time
 
-from flask import render_template, request, redirect, url_for, flash #, g
+from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_security import roles_accepted, login_required #, current_user ,roles_required
 from flask_babelex import _
 
@@ -19,7 +18,7 @@ from models import datareader          # Tietojen haku kannasta (tai työtiedost
 from .models import dataupdater         # Tietojen päivitysmetodit: joinpersons
 
 from . import bp
-
+from . import api
 
 @bp.route('/tables')
 @login_required
@@ -379,3 +378,27 @@ def henkiloiden_yhdistely():
     flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
     return redirect(url_for('pick_selection', ehto='names='+names))
 
+@bp.route('/api/v1/search', methods=['GET'])
+def api_v1_search():
+    lookfor = request.args.get("lookfor")
+    print(lookfor)
+    if not lookfor: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'lookfor'",
+        ))
+    rsp = api.search(lookfor) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+@bp.route('/api/v1/record', methods=['GET'])
+def api_v1_record():
+    id = request.args.get("id")
+    if not id: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'id'",
+        ))
+    rsp = api.record(id) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
