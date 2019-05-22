@@ -128,12 +128,18 @@ def set_family_name_properties(tx=None, uniq_id=None):
             end_date = father_death_date
         elif mother_death_date:
             end_date = mother_death_date
-
-        if end_date:
-            datetype = "3"
-        elif marriage_date:
-            datetype = "0"
-            end_date = marriage_date
+            
+        if marriage_date:
+            if end_date:
+                datetype = "3"
+            else:
+                datetype = "0"
+                end_date = marriage_date
+        else:
+            if end_date:
+                datetype = "1"
+                marriage_date = end_date
+                end_date = None
         
         # Copy the dates from Event node and sortnames from Person nodes
         Family_combo.set_dates_sortnames(my_tx, uniq_id, datetype, marriage_date, end_date,
