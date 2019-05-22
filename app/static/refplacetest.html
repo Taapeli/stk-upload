@@ -1,0 +1,141 @@
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: Verdana, Helvetica, sans-serif;
+  background-color: #DDDDDD;
+} 
+
+table {
+    border-collapse: collapse;
+}
+
+</style>
+<!-- development version, includes helpful console warnings -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<!-- production version, optimized for size and speed -->
+<!-- script src="https://cdn.jsdelivr.net/npm/vue"></script -->
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+</head>
+
+<body>
+
+<h4>Referenssipaikat</h4>
+
+<p>
+
+<div id="myApp">
+
+    Hakuteksti: <input v-model="q" v-on:keyup.enter="search(q)" size="40" placeholder="Kirjoita hakuteksti tähän">
+    <input type="button" id="search" value="Haku" v-on:click="search(q)">
+
+    <p>
+    <form v-show="hakutulos">
+        <h4>Hakutulos</h4>
+        <table border>
+            <tr><th>Nimi</th><th>Tyyppi</th><th>Id</th></tr>
+            <tr v-for="place in records">
+                <td><a href=# v-on:click="setplace(place)">{{place.name}}</a>
+                <td>{{ place.type }}
+                <td>{{ place.id }}
+                <td>{{ place.timespan }}
+            </tr>
+        </table>
+    </form>
+    <form v-if="!hakutulos">
+        <table border>
+            <tr><th>Paikkakunta<td>{{ current_place.name }}
+            <tr><th>Tyyppi<td>{{ current_place.type }}
+            <tr><th>Id<td>{{ current_place.id }}
+        </table>
+        <h4>Sisältyy</h4>
+        <table border>
+            <tr><th>Nimi</th><th>Tyyppi</th><th>Id</th></tr>
+            <tr v-for="place in enclosing_places">
+                <td><a href=# v-on:click="setplace(place)">{{place.name}}</a>
+                <td>{{ place.type }}
+                <td>{{ place.id }}
+                <td>{{ place.timespan }}
+            </tr>
+        </table>
+        <h4>Sisältää</h4>
+        <table border>
+            <tr><th>Nimi</th><th>Tyyppi</th><th>Id</th></tr>
+            <tr v-for="place in enclosed_places">
+                <td><a href=# v-on:click="setplace(place)">{{place.name}}</a>
+                <td>{{ place.type }}
+                <td>{{ place.id }}
+                <td>{{ place.timespan }}
+            </tr>
+        </table>
+    </form>
+
+    <div class="modal" ng-if="loading"></div>
+
+</div>
+</body>
+
+<script>
+function log(msg) {
+    console.log(msg);
+}
+
+var initial_place = {name:"Antrea",id:52800,type:"City"};
+
+var app = new Vue({
+    el: '#myApp',
+    created: function() {
+        this.init();    
+    },
+    data: {
+        q: "Antrea",
+        hakutulos: true,
+        records: [],
+        enclosed_places: [],
+        enclosing_places: [],
+        current_place: null
+    }, // data
+    methods: {
+        init: function() {
+            //this.setplace(initial_place);
+            this.search(this.q);
+        },
+        setplace: function(place) {
+            axios.get('http://localhost:5000/api/v1/record?id=' + encodeURIComponent(place.id)).
+                then(function(rsp, status) {
+                    log(rsp);
+                    var record = rsp.data.record;
+                    log(record);
+                    log(record.surrounds);
+                    app.enclosed_places = record.surrounds;
+                    log( this.enclosed_places);
+                    app.enclosing_places = record.surroundedBy;
+                    app.hakutulos = false;
+                });
+            this.current_place = place;
+            this.q = place.name;
+        },
+
+        search: function(q) {
+            axios.get('http://localhost:5000/api/v1/search?lookfor=' + encodeURIComponent(q)).
+                then(function(rsp, status) {
+                    log(rsp);
+                    app.records = rsp.data.records;
+                    app.hakutulos = true;
+                });
+        }
+    } // methods
+
+});
+
+</script>
+
+
+</html>
+
