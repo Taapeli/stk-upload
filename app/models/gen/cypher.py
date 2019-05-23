@@ -209,7 +209,7 @@ ORDER BY name.order"""
 
     get_all_persons_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
-RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
+RETURN ID(p) AS ID, n.firstname AS fn, n.prefix AS vn, n.surname AS sn, n.suffix AS pn,
     p.sex AS sex
 ORDER BY n.order"""
 
@@ -396,7 +396,7 @@ MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
   WHERE id(l) = $locid
 MATCH (p) --> (n:Name)
 RETURN id(p) AS uid, r.role AS role,
-  COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
+  COLLECT([n.type, n.firstname, n.prefix, n.surname, n.suffix]) AS names,
   e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
 ORDER BY edates[1]"""
 

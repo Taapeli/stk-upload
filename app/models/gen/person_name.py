@@ -21,21 +21,23 @@ class Name:
                 alt             str muun nimen numero
                 firstname       str etunimi
                 surname         str sukunimi
+                prefix          str etuliite
                 suffix          str patronyymi
     """
 
-    def __init__(self, givn='', surn='', suff=''):
+    def __init__(self, givn='', surn='', pref='', suff=''):
         """ Luo uuden name-instanssin """
         self.type = ''
         self.alt = ''   #Todo: Should be removed?
         self.order = None
         self.firstname = givn
         self.surname = surn
+        self.prefix = pref
         self.suffix = suff
 
     def __str__(self):
         # Gedcom style key
-        return "{}/{}/{}".format(self.firstname, self.surname, self.suffix)
+        return "{}/{}/{}/{}".format(self.firstname, self.prefix, self.surname, self.suffix)
 
     def key_surname(self):
         # Standard sort order key "Klick#Jönsdotter#Brita Helena"
@@ -55,6 +57,7 @@ class Name:
         n.id = node.id
         n.type = node['type']
         n.firstname = node['firstname']
+        n.prefix = node['prefix']
         n.suffix = node['suffix']
         n.surname = node['surname']
         n.order = node['order']
@@ -75,6 +78,7 @@ class Name:
                 "type": self.type,
                 "firstname": self.firstname,
                 "surname": self.surname,
+                "prefix": self.prefix,
                 "suffix": self.suffix
             }
             tx.run(Cypher_name.create_as_leaf,
@@ -149,9 +153,10 @@ class Name:
             #        'suffix': 'Jansson', 'surname': 'Mannerheim', 'order': 0}>
             node = record['name']
             fn = node['firstname']
+            vn = node['prefix']
             sn = node['surname']
             pn = node['suffix']
-            names.append("{} {} {}".format(fn, pn, sn))
+            names.append("{} {} {} {}".format(fn, pn, vn, sn))
         return ' • '.join(names)
 
 
