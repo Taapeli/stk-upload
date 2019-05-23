@@ -63,8 +63,7 @@ def upload_gramps():
         uploads.set_meta(current_user.username,infile.filename,
                         status=uploads.STATUS_UPLOADED,
                         upload_time=time.time())
-        msg = "{}: User {} uploaded the file {}".format(
-            util.format_timestamp(),current_user.username,pathname)
+        msg = f"{util.format_timestamp()}: User {current_user.name} ({current_user.username}) uploaded the file {pathname}"
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
                     "Stk: Gramps XML file uploaded",
