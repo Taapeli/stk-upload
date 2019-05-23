@@ -106,5 +106,11 @@
     <a href="{{note.url}}" class="outlink" 
        target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}
 {%- endmacro %}
-                    
-                        
+
+{% macro place_names(pl) -%}
+    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
+    {% for n in pl.names|sort(attribute='lang') %}
+        {% if not loop.first %} • {% endif %}
+        {{ n.name|safe }}{% if n.lang %} ({{n.lang}}){% endif %}
+    {% endfor %}
+{%- endmacro %}

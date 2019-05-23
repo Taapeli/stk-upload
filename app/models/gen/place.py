@@ -4,14 +4,13 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: jm
 '''
 
-from sys import stderr
+#from sys import stderr
 
 import  shareds
-#from .weburl import Weburl
-from .note import Note
+#from .note import Note
 from .dates import DateRange
 from .cypher import Cypher_place
-from models.dbtree import DbTree
+#from models.dbtree import DbTree
 from models.gen.event_combo import Event_combo
 from models.gen.person_name import Name
 
@@ -25,10 +24,8 @@ class Place:
                 id                  esim. "P0001"
                 type                str paikan tyyppi
                 pname               str paikan nimi
-                names[]:
-                   name             str paikan nimi
-                   lang             str kielikoodi
-                   dates            DateRange date expression
+            May be defined in Place_combo:
+                names[]             PlaceName
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
                 note_ref[]          int uniq_ids of Notes
@@ -39,27 +36,24 @@ class Place:
                 noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
      """
 
-    def __init__(self, uniq_id=None, ptype="", pname="", level=None):
+    def __init__(self, uniq_id=None):
         """ Creates a new Place instance.
-
-            Argumenttina voidaan antaa valmiiksi paikan uniq_id, tyypin, nimen
-            ja (tulossivua varten) mahdollisen hierarkiatason
         """
         self.id = ''
         self.uniq_id = uniq_id
-        self.type = ptype
-        self.pname = pname
-        if level != None:
-            self.level = level
+        self.type = []
+        self.names = []
+        self.pname = ''
+
         # Gramps-tietoja
         self.handle = ''
         self.change = 0
-        self.names = []
         self.coord = None
         
-        self.uppers = []        # Upper place objects for hirearchy display
-        self.notes = []         # Notes connected to this place
-        self.note_ref = []      # uniq_ids of Notes
+# These are in bp.gramps.models.place_gramps.Place_gramps.__init__
+#         self.uppers = []        # Upper place objects for hirearchy display
+#         self.notes = []         # Notes connected to this place
+#         self.note_ref = []      # uniq_ids of Notes
 
 # These are in bp.gramps.models.place_gramps.Place_gramps.__init__
 #         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
@@ -67,12 +61,7 @@ class Place:
 
 
     def __str__(self):
-        if hasattr(self, 'level'):
-            lv = self.level
-        else:
-            lv = ""
-        desc = "{} {} ({}) {}".format(self.uniq_id, self.pname, self.type, lv)
-        return desc
+        return f"{self.uniq_id} {self.pname} ({self.type})"
 
 
     @classmethod
@@ -145,34 +134,8 @@ class Place:
         return places
 
 
-    def read_w_notes(self):
-        """ Luetaan kaikki paikan tiedot ml. nimivariaatiot (tekstinä)
-            #TODO: Luetaan Notes ja Citations vasta get_persondata_by_id() lopuksi
-
-            Nimivariaatiot talletetaan kenttään pname,
-            esim. [["Svartholm", "sv"], ["Svartholma", None]]
-            #TODO: Ei hieno, pitäisi palauttaa Place_name objects!
-        """
-        with shareds.driver.session() as session:
-            place_result = session.run(Cypher_place.get_w_names_notes, 
-                                       place_id=self.uniq_id)
-
-            for place_record in place_result:
-                node = place_record["place"]
-                self.type = node.get('type')
-                self.change = node["change"]
-                self.id = node["id"]
-                self.coord = node["coord"]
-                names_node = place_record["names"]
-                self.pname = Place.namelist_w_lang(names_node)
-
-                for node in place_record['notes']:
-                    n = Note.from_node(node)
-                    self.notes.append(n)
-                if not (self.type and self.id):
-                    print(f"MYERROR Place.read_w_notes: missing data for {self}")
-        return
-
+#     def read_w_notes(self): # See: Place_combo.get_w_notes()
+#         """ Luetaan kaikki paikan tiedot ml. nimivariaatiot (tekstinä)
 
     @staticmethod
     def get_my_places():
@@ -249,78 +212,9 @@ class Place:
         return (titles, lists)
 
 
-    @staticmethod
-    def get_place_hierarchy():
-        """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-            Place list with upper and lower places in herarchy
-
-            Esim.
-╒═════╤══════════╤═══════════════════╤═══════╤═══════════════════╤═══════════════════╕
-│"id" │"type"    │"name"             │"coord"│"upper"            │"lower"            │
-╞═════╪══════════╪═══════════════════╪═══════╪═══════════════════╪═══════════════════╡
-│91225│"Tontti"  │[["1. Kortteli Nro │null   │[[78239,"City","Bor│[[null,null,null,nu│
-│     │          │8",""]]            │       │gå","sv"],[78239,"C│ll]]               │
-│     │          │                   │       │ity","Porvoo",""]] │                   │
-├─────┼──────────┼───────────────────┼───────┼───────────────────┼───────────────────┤
-│78068│"Tontti"  │[["2. Kortteli 2. T│null   │[[null,null,null,nu│[[null,null,null,nu│
-│     │          │ontti",""]]        │       │ll]]               │ll]]               │
-├─────┼──────────┼───────────────────┼───────┼───────────────────┼───────────────────┤
-│92425│"Kortteli"│[["2. quarter",""]]│[60.122│[[78213,"City","Fre│[[92510,"Tontti","T│
-│     │          │                   │7857,24│drikshamn","sv"],[7│ontti 39",""]]     │
-│     │          │                   │.440669│8213,"City","Hamina│                   │
-│     │          │                   │4]     │",""]]             │                   │
-├─────┼──────────┼───────────────────┼───────┼───────────────────┼───────────────────┤
-│92457│"Tontti"  │[["3. Kortteli 3. t│null   │[[92339,"City","Lov│[[null,null,null,nu│
-│     │          │ontti",""]]        │       │iisa",""],[92339,"C│ll]]               │
-│     │          │                   │       │ity","Degerby",""]]│                   │
-├─────┼──────────┼───────────────────┼───────┼───────────────────┼───────────────────┤
-│92455│"Tontti"  │[["3. Kortteli 8. t│null   │[[92339,"City","Lov│[[null,null,null,nu│
-│     │          │ontti",""]]        │       │iisa",""],[92339,"C│ll]]               │
-│     │          │                   │       │ity","Degerby",""]]│                   │
-└─────┴──────────┴───────────────────┴───────┴───────────────────┴───────────────────┘
-"""
-
-        def combine_places(pl_tuple):
-            """ Returns a list of cleartext names got from Place_name objects
-            
-                Kenttä pl_tuple sisältää Places-tietoja tuplena [[28101, "City",
-                "Lovisa", "sv"]].
-                Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
-                Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
-            """
-            namedict = {}
-            for near in pl_tuple:
-                if near[0]: # id of a lower place
-                    if near[0] in namedict:
-                        # Append name to existing Place
-                        namedict[near[0]].pname.extend(Place.namelist_w_lang( (near[2:],) ))
-                    else:
-                        # Add a new Place
-                        namedict[near[0]] = \
-                            Place(near[0], near[1], Place.namelist_w_lang( (near[2:],) ))
-            return list(namedict.values())
-
-        ret = []
-        result = shareds.driver.session().run(Cypher_place.get_name_hierarcy)
-        for record in result:
-            # Record: <Record id=140843 type='Tontti' 
-            #    name=[['1. Kortteli Nro 37', ''], ['Elias Unoniuksen kauppaliike', '']] 
-            #    coord=None upper=[[140824, 'City', 'Degerby', ''], [140824, 'City', 'Loviisa', '']] 
-            #    lower=[[None, None, None, None]]>
-
-            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
-            # alemmista paikoista
-            pl_id =record['id']
-            pl_type = record['type']
-            pl_name = record['name']
-            p = Place(pl_id, pl_type, Place.namelist_w_lang(pl_name))
-            if record['coord']:
-                p.coord = Point(record['coord']).coord
-            p.uppers = combine_places(record['upper'])
-            p.lowers = combine_places(record['lower'])
-            ret.append(p)
-        # REturn sorted by first name in the list p.pname
-        return sorted(ret, key=lambda x:x.pname[0])
+#     @staticmethod get_place_hierarchy(), see Place_combo.get_place_hierarchy()
+#         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+#             Place list with upper and lower places in herarchy
 
 
     @staticmethod
@@ -341,84 +235,9 @@ class Place:
         return names
 
 
-    @staticmethod
-    def get_place_tree(locid):
-        """ Haetaan koko paikkojen ketju paikan locid ympärillä
-            Palauttaa listan paikka-olioita ylimmästä alimpaan.
-            Jos hierarkiaa ei ole, listalla on vain oma Place.
-
-            Esim. Tuutarin hierarkia
-                  2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala
-                  tulee tietokannasta näin:
-            ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
-            │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
-            ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
-            │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
-            ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-            │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
-            ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-            │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
-            └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
-            Metodi palauttaa siitä listan
-                Place(result[0].id2) # Artjärvi City
-                Place(result[0].id1) # Männistö Village
-                Place(result[1].id1) # Pekkala Farm
-            Muuttuja lv on taso:
-                >0 = ylemmät,
-                 0 = tämä,
-                <0 = alemmat
-        """
-
-        # Query for Place hierarcy
-        hier_query = """
-MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
-    UNION
-MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
-"""
-        # Query for single Place without hierarcy
-        root_query = """
-MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.pname AS name
-"""
-        # Query to get names for a Place
-        name_query="""
-MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid
-RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
-"""
-
-        t = DbTree(shareds.driver, hier_query, 'pname', 'type')
-        t.load_to_tree_struct(locid)
-        if t.tree.depth() == 0:
-            # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
-            # Hae oman paikan tiedot ilman yhteyksiä
-            with shareds.driver.session() as session:
-                result = session.run(root_query, locid=int(locid))
-                record = result.single()
-                t.tree.create_node(record["name"], locid, parent=0,
-                                   data={'type': record["type"]})
-        ret = []
-        for node in t.tree.expand_tree(mode=t.tree.DEPTH):
-            print ("{} {} {}".format(t.tree.depth(t.tree[node]), t.tree[node],
-                                     t.tree[node].bpointer))
-            if node != 0:
-                n = t.tree[node]
-
-                # Get all names
-                with shareds.driver.session() as session:
-                    result = session.run(name_query, locid=node)
-                    record = result.single()
-                    # Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
-                    # josta tehdään ["Svartholm (sv)","Svartholma"]
-                    names = Place.namelist_w_lang(record['names'])
-
-                p = Place(uniq_id=node, ptype=n.data['type'], \
-                          pname=names, level=t.tree.depth(n))
-                print ("# {}".format(p))
-                p.parent = n.bpointer
-                ret.append(p)
-        return ret
+#     @staticmethod get_place_tree(locid):
+#         """ Haetaan koko paikkojen ketju paikan locid ympärillä
+#             Palauttaa listan paikka-olioita ylimmästä alimpaan.
 
 
     @staticmethod
@@ -485,68 +304,50 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             print ("Pname: " + self.pname)
         if self.coord:
             print ("Coord: {}".format(self.coord))
-#         if self.placeref_hlink != '':
-#             print ("Placeref_hlink: " + self.placeref_hlink)
-#         if len(self.noteref_hlink) > 0:
-#             for i in range(len(self.noteref_hlink)):
-#                 print ("Noteref_hlink: " + self.noteref_hlink[i])
         return True
 
 
-    def save(self, tx):
-        """ Saves a Place with Place_names and hierarchy links """
-
-        p_attr = {}
-        try:
-            p_attr = {"handle": self.handle,
-                      "change": self.change,
-                      "id": self.id,
-                      "type": self.type,
-                      "pname": self.pname}
-            if self.coord:
-                # If no coordinates, don't set coord attribute
-                p_attr.update({"coord": self.coord.get_coordinates()})
-            result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
-            self.uniq_id = result.single()[0]
-        except Exception as err:
-            print("iError Place.create: {0} attr={}".format(err, p_attr), file=stderr)
-
-        try:
-            for i in range(len(self.names)):
-                #TODO: Check, if this name exists; then update or create new
-                n_attr = {"name": self.names[i].name,
-                          "lang": self.names[i].lang}
-                if self.names[i].dates:
-                    # If date information, add datetype, date1 and date2
-                    n_attr.update(self.names[i].dates.for_db())
-                tx.run(Cypher_place_w_handle.add_name,
-                       handle=self.handle, n_attr=n_attr)
-        except Exception as err:
-            print("iError Place.add_name: {0}".format(err), file=stderr)
-
-        # Note! This will be done after all Place nodes were stored
-        #Make hierarchy relations to upper Place nodes
-#         for upper in self.surround_ref:
+#     save() - see PlaceGramps.save()
+#     def save(self, tx):
+#         """ Saves a Place with Place_names and hierarchy links """
+# 
+#         p_attr = {}
+#         try:
+#             p_attr = {"handle": self.handle,
+#                       "change": self.change,
+#                       "id": self.id,
+#                       "type": self.type,
+#                       "pname": self.pname}
+#             if self.coord:
+#                 # If no coordinates, don't set coord attribute
+#                 p_attr.update({"coord": self.coord.get_coordinates()})
+#             result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
+#             self.uniq_id = result.single()[0]
+#         except Exception as err:
+#             print("iError Place.create: {0} attr={}".format(err, p_attr), file=stderr)
+# 
+#         try:
+#             for i in range(len(self.names)):
+#                 #TODO: Check, if this name exists; then update or create new
+#                 n_attr = {"name": self.names[i].name,
+#                           "lang": self.names[i].lang}
+#                 if self.names[i].dates:
+#                     # If date information, add datetype, date1 and date2
+#                     n_attr.update(self.names[i].dates.for_db())
+#                 tx.run(Cypher_place_w_handle.add_name,
+#                        handle=self.handle, n_attr=n_attr)
+#         except Exception as err:
+#             print("iError Place.add_name: {0}".format(err), file=stderr)
+#
+#         # Make place note relations
+#         for i in range(len(self.noteref_hlink)):
 #             try:
-#                 #print("upper {} -> {}".format(self, upper))
-#                 if 'dates' in upper and isinstance(upper['dates'], DateRange):
-#                     r_attr = upper['dates'].for_db()
-#                 else:
-#                     r_attr = {}
-#                 tx.run(Cypher_place_w_handle.link_hier,
-#                        handle=self.handle, hlink=upper['hlink'], r_attr=r_attr)
+#                 tx.run(Cypher_place_w_handle.link_note,
+#                        handle=self.handle, hlink=self.noteref_hlink[i])
 #             except Exception as err:
-#                 print("iError Place.link_hier: {0}".format(err), file=stderr)
-
-        # Make place note relations
-        for i in range(len(self.noteref_hlink)):
-            try:
-                tx.run(Cypher_place_w_handle.link_note,
-                       handle=self.handle, hlink=self.noteref_hlink[i])
-            except Exception as err:
-                print("iError Place.link_note: {0}".format(err), file=stderr)
-
-        return
+#                 print("iError Place.link_note: {0}".format(err), file=stderr)
+# 
+#         return
 
 
 class Place_name:
@@ -558,10 +359,10 @@ class Place_name:
                 dates            DateRange aikajakso
     """
 
-    def __init__(self):
+    def __init__(self, name='', lang=''):
         """ Luo uuden name-instanssin """
-        self.name = ''
-        self.lang = ''
+        self.name = name
+        self.lang = lang
         self.dates = None
 
     def __str__(self):
@@ -570,9 +371,9 @@ class Place_name:
         else:
             d = ""
         if self.lang != '':
-            return "'{}' ({}){}".format(self.name, self.lang, d)
+            return f"'{self.name}' ({self.lang}){d}"
         else:
-            return "'{}'{}".format(self.name, d)
+            return f"'{self.name}'{d}"
 
     @classmethod
     def from_node(cls, node):
@@ -584,9 +385,9 @@ class Place_name:
         '''
         pn = cls()  # Place_name()
         pn.uniq_id = node.id
-        pn.name = node['name']
-        pn.lang = node['lang'] or ''
-        pn.dates = node['dates'] or None
+        pn.name = node.get('name', '?')
+        pn.lang = node.get('lang', '')
+        pn.dates = node.get('dates')
         return pn
 
 

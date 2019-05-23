@@ -4,8 +4,6 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" 
-    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
 <div id="startdiv">
     <h2>{{ _('Place events') }}</h2>
@@ -34,7 +32,7 @@
         {% endif %}</div>
       {% endif %}
 
-    <h3 style="position:sticky; top:0;">{{place.pname|join('<br>'|safe)}}</h3>
+    <h3 style="position:sticky; top:0;">{{ macro.place_names(place) }}</h3>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -47,10 +45,10 @@
     {% endwith %}
             <ul>{% for p in locations %}
                 <li style="margin-left: {{p.level * 2}}em;">
-                {% if p.uniq_id == locid|int %}<span class="id">{{p.uniq_id}}</span>
-                    <b>{{p.pname|join(' • ')}}</b>
+                {% if p.uniq_id == locid %}<span class="id">{{p.uniq_id}}</span>
+                    <b>{{ macro.place_names(p) }}</b>
                 {% else %}<a href="/scene/location={{p.uniq_id}}"><span class="id">{{p.uniq_id}}</span></a>
-                    {{p.pname|join(' • ')}}
+                    {{ macro.place_names(p) }}
                 {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
             {% endfor %}</ul>
         </div>

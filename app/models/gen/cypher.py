@@ -400,22 +400,22 @@ RETURN id(p) AS uid, r.role AS role,
   e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
 ORDER BY edates[1]"""
 
-    get_name_hierarcy = """
+    get_name_hierarchies = """
 MATCH (a:Place) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
 OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
 RETURN ID(a) AS id, a.type AS type,
-    COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
+    COLLECT(DISTINCT pn) AS names, a.coord AS coord,
     COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
     COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
-ORDER BY name[0][0]"""
+ORDER BY names[0].name"""
 
     get_w_names_notes = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE ID(place)=$place_id
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
 RETURN place, 
-    COLLECT(DISTINCT [n.name, n.lang]) AS names,
+    COLLECT(DISTINCT n) AS names,
     COLLECT (DISTINCT note) AS notes"""
 
     place_get_one = """
