@@ -13,6 +13,7 @@ from .dates import DateRange
 from .cypher import Cypher_place
 from models.dbtree import DbTree
 from models.gen.event_combo import Event_combo
+from models.gen.person_name import Name
 
 class Place:
     """ Place / Paikka:
@@ -426,13 +427,23 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
             osallisen henkilön nimitiedot.
 
         Palauttaa esimerkin mukaiset tiedot:
-        ╒═════╤═════════╤═══════════════════╤═══════════╤═══════════════════╕
-        │"uid"│"role"   │"names"            │"etype"    │"edates"           │
-        ╞═════╪═════════╪═══════════════════╪═══════════╪═══════════════════╡
-        │66953│"Primary"│[["Birth Name","Jan│"Residence"│[2,1858752,1858752]│
-        │     │         │ Erik","Mannerheim"│           │                   │
-        │     │         │,"Jansson"]]       │           │                   │
-        └─────┴─────────┴───────────────────┴───────────┴───────────────────┘
+        ╒══════╤═════════╤═══════════════════╤═════════════╤═══════════════════╕
+        │"uid" │"role"   │"names"            │"etype"      │"edates"           │
+        ╞══════╪═════════╪═══════════════════╪═════════════╪═══════════════════╡
+        │305353│"Primary"│[{"firstname":"Eva │"Residence"  │[3,1863872,1866944]│
+        │      │         │Sophia","type":"Bir│             │                   │
+        │      │         │th Name","suffix":"│             │                   │
+        │      │         │","surname":"Forsté│             │                   │
+        │      │         │n","order":0, "pref│             │                   │
+        |      |         |ix":""}]           │             │                   │
+        ├──────┼─────────┼───────────────────┼─────────────┼───────────────────┤
+        │305450│"Primary"│[{"firstname":"Erik│"Occupation" │[3,1863872,1866944]│
+        │      │         │ Berndt","type":"Bi│             │                   │
+        │      │         │rth Name","suffix":│             │                   │
+        │      │         │"","surname":"Konow│             │                   │
+        │      │         │","order":0, "prefi│             │                   │
+        |      |         |x":"von"}]         │             │                   │
+        └──────┴─────────┴───────────────────┴─────────────┴───────────────────┘
         """
         result = shareds.driver.session().run(Cypher_place.get_person_events, 
                                               locid=int(loc_id))
@@ -447,7 +458,9 @@ RETURN COLLECT([n.name, n.lang]) AS names LIMIT 15
                 e.dates = str(dates)
                 e.date = dates.estimate()
             e.role = record["role"]
-            e.names = record["names"]   # tuples [name_type, given_name, surname]
+            e.names = []
+            for node in record["names"]:
+                e.names.append(Name.from_node(node))
             ret.append(e)
         return ret
 

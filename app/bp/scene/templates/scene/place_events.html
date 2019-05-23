@@ -130,17 +130,15 @@
                             <a href="/scene/person={{e.uid}}" class="id"
                               title="{{ _("See Person's Details") }}">{{e.uid}}</a>
                         </td>
-                        <td>{% for n in e.names|sort %} 
-                         {% if n[0] != "Birth Name" %}
-                            <span class="typedesc">{{n[0]|transl('nt')}}</span>
+                        <td>{% for pn in e.names|sort(attribute='order') %}
+                         {% if loop.index > 1 %}<br>{% endif %}
+                         {% if pn.type != "Birth Name" %}
+                            <span class="typedesc">{{pn.type|transl('nt')}}</span>
                          {% endif %}
-                         {{n[1]}} 
-                         {% if n[2] %}
-                            <b>{{n[2]}}</b>
-                         {% else %}
-                            <i>{{n[3]}}</i>
-                         {% endif %}
-                         <br />{% endfor %}
+                           {{pn.firstname}} 
+	                       {% if pn.surname %} {{pn.prefix}} <b>{{pn.surname}}</b>
+	                       {% else %}<i>{{pn.suffix}}</i>{% endif %}
+                         {% endfor %}
                         </td>
                         <td class="ColumnEvent">{{e.type|transl('evt')}}
                           {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
@@ -163,11 +161,12 @@
     {% endif %}
         </div>
 
-<!--    <div class="subsection" id="sourcerefs">
+<!-- <div class="subsection" id="sourcerefs">
+        <div>
             <h4>{{ _('Source References') }}</h4>
-            <p>{{ _('No source pointers found') }}</p>
+            <p style="margin-left:2em;">{{ _('No source pointers found') }}</p>
         </div>
+     </div>
 -->
-    </div>
 {% endblock %}
 

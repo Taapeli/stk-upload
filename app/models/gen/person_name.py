@@ -56,10 +56,10 @@ class Name:
         n.uniq_id = node.id
         n.id = node.id
         n.type = node['type']
-        n.firstname = node['firstname']
-        n.prefix = node['prefix']
-        n.suffix = node['suffix']
-        n.surname = node['surname']
+        n.firstname = node.get('firstname', '')
+        n.prefix = node.get('prefix', '')
+        n.suffix = node.get('suffix', '')
+        n.surname = node.get('surname', '')
         n.order = node['order']
         return n
 
