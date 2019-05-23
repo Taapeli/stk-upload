@@ -164,7 +164,9 @@ def connect_object_as_leaf(src, target, rel_type=None):
         -[:PARENT {role:'father'}]-> (:Family)   to .father
         -[:PARENT {role:'mother'}]-> (:Family)   to .mother
         -[:HIERARCHY]-> (:Place) to .place
-
+        (:Place)
+        -[:NAME]-> (:Name)       to .names[]
+        
     The following relation targets are stored as object references (uniq_id) 
     in root object variable. The actual referenced target objects are stored to 
     separate 'obj_dict' variable:
@@ -243,7 +245,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
             return None
 
     elif src_class == 'Event_combo':
-        if target_class == 'Place':
+        if target_class == 'Place_combo':
             src.place_ref.append(target.uniq_id)
             return None
         elif target_class == 'Citation':
@@ -262,11 +264,11 @@ def connect_object_as_leaf(src, target, rel_type=None):
             src.note_ref.append(target.uniq_id)
             return None
 
-    elif src_class == 'Place':
+    elif src_class == 'Place_combo':
         if target_class == 'Place_name':
             src.names.append(target)
             return src.names[-1]
-        if target_class == 'Place':
+        if target_class == 'Place_combo':
             src.uppers.append(target)
             return src.uppers[-1]
         if target_class == 'Note':

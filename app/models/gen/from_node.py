@@ -13,6 +13,7 @@ from .person_name import Name
 from .place import Place, Place_name
 from .repository import Repository
 from .source import Source
+from models.gen.place_combo import Place_combo
 
 
 def get_object_from_node(node):
@@ -41,7 +42,7 @@ def get_object_from_node(node):
     elif label == "Repository":
         return Repository.from_node(node)
     elif label == "Place":
-        return Place.from_node(node)
+        return Place_combo.from_node(node)
     elif label == "Place_name":
         return Place_name.from_node(node)
     elif label == "Note":

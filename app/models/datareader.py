@@ -661,13 +661,14 @@ def get_person_data_by_id(uniq_id):
             my_birth_date = e.date
 
         for ref in e.place_ref:
-            place = Place()
-            place.uniq_id = ref
-            place.read_w_notes()
+            place = Place_combo.get_w_notes(ref)
+#             place.read_w_notes()
             # Location / place name, type and reference
-            e.location = place.pname
-            e.locid = place.uniq_id
-            e.ltype = place.type
+            e.place = place
+#             #TODO: remove 3 lines
+#             e.location = place.pname
+#             e.locid = place.uniq_id
+#             e.ltype = place.type
 
         if e.note_ref: # A list of uniq_ids; prev. e.noteref_hlink != '':
             # Read the Note objects from db and store them as a member of Event

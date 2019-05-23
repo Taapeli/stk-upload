@@ -97,9 +97,11 @@
                         </td>
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
                         <td class="ColumnPlace">
-                            <a href="/scene/location={{e.locid}}" class="inlink"
-                            title="{{ _('of Type') }} {{e.ltype}}; {{ _('See Place details') }}">
-                            {{e.location|join(' • ')}}</a>
+                          {% if e.place %}
+                            <a href="/scene/location={{e.place.uniq_id}}" class="inlink"
+                            title="{{ _('of Type') }} {{e.place.type}}; {{ _('See Place details') }}">
+                            {{macro.place_names(e.place)}}</a>
+                          {% endif %}
                         </td>
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">

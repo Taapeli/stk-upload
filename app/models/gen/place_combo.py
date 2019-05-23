@@ -144,6 +144,7 @@ class Place_combo(Place):
 
                 for names_node in place_record["names"]:
                     pl.names.append(Place_name.from_node(names_node))
+                    pl.pname = Place.namelist_w_lang(names_node)
 
                 for notes_node in place_record['notes']:
                     n = Note.from_node(notes_node)
