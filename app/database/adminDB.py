@@ -175,14 +175,9 @@ match (a:Repocitory)
     remove a:Repocitory
 return count(a)"""
     change_Family_dates = """
-match (f:Family) where f.datetype="3" and not exists (f.date1)
-
+match (f:Family) where f.datetype="3" and not exists(f.date1)
     set f.datatype = "1"
-
     set f.data1 = f.data2
-
-    set f.data2 = NULL
-
 return count(f)"""
     change_wrong_supplemented_direction = """
 MATCH (u:User)<-[r:SUPPLEMENTED]-(p:UserProfile) 
@@ -203,8 +198,8 @@ return count(u)"""
             result = session.run(change_wrong_supplemented_direction)
             cnt5 = result.single()[0]
 
-            print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes, {cnt3} label changes, {cnt4} family changes, {cnt5} direction changes")
-            print(f"adminDB.do_schema_fixes: {cnt1} relation changes, {cnt2} property changes, {cnt3} label changes, {cnt4} direction changes")
+            print(f"adminDB.do_schema_fixes: changed {cnt1} relatios, {cnt2} properties, "
+                  f"{cnt3} labels, {cnt4} families, {cnt5} supplemented directions")
 
         except Exception as e:
             logger.error(f"{e} in database.adminDB.do_schema_fixes")
