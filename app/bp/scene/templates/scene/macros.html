@@ -89,7 +89,7 @@
     <a href="/scene/person{{delim}}{{ch.uniq_id}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=ch.id) }}">
         {% if ch.names|length %}
-        {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> <b>{{ch.names[0].surname}}</b></a>
+        {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> {{ch.names[0].prefix}} <b>{{ch.names[0].surname}}</b></a>
         {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
         {% else %}{{ _('Anonymous') }}
         {% endif %}

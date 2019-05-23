@@ -486,6 +486,8 @@ class DOM_handler():
 
                     if len(person_name.getElementsByTagName('surname') ) == 1:
                         person_surname = person_name.getElementsByTagName('surname')[0]
+                        if person_surname.hasAttribute("prefix"):
+                            pname.prefix = person_surname.getAttribute("prefix")
                         if len(person_surname.childNodes ) == 1:
                             pname.surname = person_surname.childNodes[0].data
                         elif len(person_surname.childNodes) > 1:
