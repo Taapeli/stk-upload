@@ -7,10 +7,15 @@ import traceback
 from flask_mail import Mail, Message
 from models import syslog
 
+def get_sysname():
+    sysname = shareds.app.config.get("STK_SYSNAME")
+    return sysname
+
 def email(mail_from,mail_to,subject,body):
     try:
         mail = Mail()
-        msg = Message(subject,
+        sysname = get_sysname()
+        msg = Message(f"{subject} ({sysname})",
                       body=body,
                       sender=mail_from,
                       reply_to=mail_from,
