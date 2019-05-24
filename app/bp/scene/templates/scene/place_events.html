@@ -10,8 +10,8 @@
 </div>
 
 {{ macro.menu(4) }}
-
     <div class="content" id="IndividualDetail">
+{% if place %}
       {% if place.coord %}
         <div id="map">{% if '°' in place.coord %}
         {{ _('Invalid coordinates') }}: {{place.coord}}
@@ -32,7 +32,8 @@
         {% endif %}</div>
       {% endif %}
 
-    <h3 style="position:sticky; top:0;">{{ macro.place_names(place) }}</h3>
+    <h3 style="position:sticky; top:0;">{{ _(place.type)|title }}
+        {{ macro.place_names(place) }}</h3>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -52,6 +53,7 @@
                 {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
             {% endfor %}</ul>
         </div>
+
     {% if place.notes %}
         <div id="events">
             <h4>{{ _('Website') }}</h4>
@@ -166,5 +168,9 @@
         </div>
      </div>
 -->
+{% else %}
+<p>{{ _('The required place was not found.') }}</p>
+</div>
+{% endif %}
 {% endblock %}
 

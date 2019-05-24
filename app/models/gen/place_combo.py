@@ -41,7 +41,7 @@ class Place_combo(Place):
      """
 
     def __init__(self, uniq_id=None, ptype="", level=None):
-        """ Creates a new Place instance.
+        """ Creates a new Place_combo instance.
 
             You may also give for printout eventuell hierarhy level
         """
@@ -67,7 +67,7 @@ class Place_combo(Place):
 
 
 #     @classmethod from_node(cls, node):
-#         ''' Creates a node object of type Place from a Neo4j node.
+#         ''' Creates a node object of type Place_combo from a Neo4j node.
 
 
     def show_names_list(self):
@@ -88,8 +88,7 @@ class Place_combo(Place):
 
     @staticmethod
     def read_place_w_names(uniq_id):
-        """ Reads Place nodes or selected Place node with Place_name objects
-            and clearname
+        """ Reads Place_combo nodes or selected node with Place_name objects.
         """
         result = None
         with shareds.driver.session() as session:
@@ -101,9 +100,9 @@ class Place_combo(Place):
         places = []
 
         for record in result:
-            # Create a Place object from record
+            # Create a Place_combo object from record
             node = record['p']
-            pl = Place.from_node(node)
+            pl = Place_combo.from_node(node)
             names = []
             for node in record['names']:
                 # <Node id=78278 labels={'Place_name'} properties={'lang': '', 
@@ -144,20 +143,27 @@ class Place_combo(Place):
 
                 for names_node in place_record["names"]:
                     pl.names.append(Place_name.from_node(names_node))
-                    pl.pname = Place.namelist_w_lang(names_node)
+#                     if pl.names[-1].lang in ['fi', '']:
+#                         #TODO: use cureent_user's lang
+#                         pl.pname = pl.names[-1].name
 
                 for notes_node in place_record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
                 if not (pl.type and pl.id):
-                    logger.error(f"Place.read_w_notes: missing data for {self}")
-        return pl
+                    logger.error(f"Place_combo.read_w_notes: missing data for {self}")
+
+        try:
+            return pl
+        except Exception:
+            logger.error(f"Place_combo.read_w_notes: no Place with uniq_id={uniq_id}")
+            return None
 
 
     @staticmethod
     def get_my_places():
         """ Luetaan kaikki paikat kannasta
-        #TODO Eikö voisi palauttaa listan Place-olioita?
+        #TODO Eikö voisi palauttaa listan Place_combo-olioita?
         """
 
         query = """
@@ -262,14 +268,14 @@ class Place_combo(Place):
                 if nid: # id of a lower place
                     pn = Place_name(name=name, lang=lang)
                     if nid in placedict:
-                        # Append name to existing Place
+                        # Append name to existing Place_combo
                         placedict[nid].names.append(pn)
                         if pn.lang in ['fi', '']:
                             # Default language name
                             #TODO use language from current_user's preferences
                             placedict[nid].pname = pn.name
                     else:
-                        # Add a new Place
+                        # Add a new Place_combo
                         p = Place_combo(nid)
                         p.type = ntype
                         p.names.append(pn)
@@ -339,7 +345,7 @@ class Place_combo(Place):
     def get_place_tree(locid):
         """ Haetaan koko paikkojen ketju paikan locid ympärillä
             Palauttaa listan paikka-olioita ylimmästä alimpaan.
-            Jos hierarkiaa ei ole, listalla on vain oma Place.
+            Jos hierarkiaa ei ole, listalla on vain oma Place_combo.
 
             Esim. Tuutarin hierarkia
                   2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala

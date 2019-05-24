@@ -943,6 +943,9 @@ def get_place_with_events (loc_id):
     place = Place_combo.get_w_notes(loc_id)
     try:
         place_list = Place_combo.get_place_tree(place.uniq_id)
+    except AttributeError as e:
+        flash(f"Place {loc_id} not found", 'error')
+        return None, None, None
     except ValueError as e:
         flash(str(e), 'error')
         place_list = []

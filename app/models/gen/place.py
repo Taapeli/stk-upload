@@ -41,7 +41,7 @@ class Place:
         """
         self.id = ''
         self.uniq_id = uniq_id
-        self.type = []
+        self.type = ''
         self.names = []
         self.pname = ''
 
