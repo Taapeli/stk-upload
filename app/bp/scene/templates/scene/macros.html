@@ -111,6 +111,7 @@
     {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
     {% for n in pl.names|sort(attribute='lang') %}
         {% if not loop.first %} • {% endif %}
-        {{ n.name|safe }}{% if n.lang %} ({{n.lang}}){% endif %}
+        {% if n.lang %}<span class='typedesc'>{{n.lang}}</span>&nbsp;{% 
+         endif %}{{ n.name|safe }}
     {% endfor %}
 {%- endmacro %}

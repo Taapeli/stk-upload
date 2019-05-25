@@ -152,10 +152,10 @@ class Name:
             #    properties={'firstname': 'Jan Erik', 'type': 'Birth Name', 
             #        'suffix': 'Jansson', 'surname': 'Mannerheim', 'order': 0}>
             node = record['name']
-            fn = node['firstname']
-            vn = node['prefix']
-            sn = node['surname']
-            pn = node['suffix']
+            fn = node.get('firstname', '')
+            vn = node.get('prefix', '')
+            sn = node.get('surname', '')
+            pn = node.get('suffix', '')
             names.append("{} {} {} {}".format(fn, pn, vn, sn))
         return ' • '.join(names)
 
