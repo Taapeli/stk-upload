@@ -93,7 +93,7 @@ $(document).ready( function() {
 		                <tr data-active="{{u.is_active}}">
 		                	<td><input type="checkbox" class="user" name="select_user" value="{{u.username}}">
 		                	<td>{% if u.is_active %} {{ _("Active") }} {%else%} {{ _("Inactive") }} {%endif%}</td>
-		                    <td>{% if u.last_login_at %} {{(u.last_login_at / 1000) | timestamp }} {% endif %}</td>
+		                    <td>{% if u.current_login_at %} {{(u.current_login_at / 1000) | timestamp }} {% endif %}</td>
 		                    <td>{% if current_user.username == u.username %}
 		                      &#9733; <a href="update_user/{{u.username}}" title="{{ _('Edit me') }}">
 		                          <b>{{u.username}}</b></a>
