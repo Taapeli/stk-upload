@@ -402,3 +402,15 @@ def api_v1_record():
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
+
+@bp.route('/api/v1/record_with_subs', methods=['GET'])
+def api_v1_record_with_subs():
+    id = request.args.get("id")
+    if not id: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'id'",
+        ))
+    rsp = api.record_with_subs(id) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
