@@ -28,7 +28,9 @@ u { color: DarkKhaki; text-decoration: none; }
                 <a href="/scene/person={{family.father.uniq_id}}">
                 {{family.father.names[0].firstname}} 
                 <i>{{family.father.names[0].suffix}}</i>
-                <b>{{family.father.names[0].surname}}</b></a></h3>
+ 				{% if family.father.names[0].prefix %}
+ 				{{family.father.names[0].prefix}}{% endif %}
+ 				<b>{{family.father.names[0].surname}}</b></a></h3>
             {% else %}<small>{{ _('unknown') }}</small>{% endif %}
     
         <p><b>{{ _("Mother") }}</b>
@@ -36,6 +38,8 @@ u { color: DarkKhaki; text-decoration: none; }
                 <a href="/scene/person={{family.mother.uniq_id}}">
                 {{family.mother.names[0].firstname}} 
                 <i>{{family.mother.names[0].suffix}}</i>
+  				{% if family.mother.names[0].prefix %}
+ 				{{family.mother.names[0].prefix}}{% endif %}
                 <b>{{family.mother.names[0].surname}}</b></a></h3>
             {% else %}<small>{{ _('unknown') }}</small>{% endif %}
             
