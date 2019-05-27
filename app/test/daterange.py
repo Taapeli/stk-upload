@@ -95,11 +95,11 @@ class Test(unittest.TestCase):
         """
         d = DateRange(DR['BEFORE'], date(2017, 10, 16))
         self.assertEqual(d.to_list(), [1, "2017-10-16"])
-        self.assertEqual(str(d), "16.10.2017 saakka")
+        self.assertEqual(str(d), "till 16.10.2017")
 
         d = DateRange(DR['AFTER'], date(2017, 4, 8))
         self.assertEqual(d.to_list(), [2, "2017-04-08"])
-        self.assertEqual(str(d), "8.4.2017 alkaen")
+        self.assertEqual(str(d), "from 8.4.2017")
 
         d = DateRange((1, "2017-04-08", ""))
         self.assertEqual(d.to_list(), [1, "2017-04-08"])
@@ -120,7 +120,7 @@ class Test(unittest.TestCase):
         
         d = DateRange(DR['BETWEEN'], date(2017, 4, 8), date(2017, 10, 16))
         self.assertEqual(d.to_list(), [4, "2017-04-08", "2017-10-16"])
-        self.assertEqual(str(d), "välillä 8.4.2017 … 16.10.2017")
+        self.assertEqual(str(d), "between 8.4.2017 … 16.10.2017")
 
         d = DateRange(DR['PERIOD'], "1784", "1796")
         self.assertEqual(d.to_list(), [3, "1784", "1796"])
@@ -128,7 +128,7 @@ class Test(unittest.TestCase):
 
         d = DateRange(4, 1740992, 1843503)
         self.assertEqual(d.to_list(), [4, '1700', '1800-09'])
-        self.assertEqual(str(d), 'välillä 1700 … 9.1800')
+        self.assertEqual(str(d), 'between 1700 … 9.1800')
 
     def testDateRange_calc_est(self):
         """
@@ -143,19 +143,19 @@ class Test(unittest.TestCase):
         """
         d = DateRange(DR['CALC_BEFORE'], date(2017, 10, 16))
         self.assertEqual(d.to_list(), [9, "2017-10-16"])
-        self.assertEqual(str(d), "laskettuna 16.10.2017 saakka")
+        self.assertEqual(str(d), "calculated till 16.10.2017")
         
         d = DateRange(DR['EST_PERIOD'], date(2017, 4, 8), date(2017, 10, 16))
         self.assertEqual(d.to_list(), [19, "2017-04-08", "2017-10-16"])
-        self.assertEqual(str(d), "arviolta 8.4.2017 – 16.10.2017")
+        self.assertEqual(str(d), "estimated 8.4.2017 – 16.10.2017")
         
         d = DateRange(DR['CALC_BETWEEN'], date(2017, 4, 8), date(2017, 10, 16))
         self.assertEqual(d.to_list(), [12, "2017-04-08", "2017-10-16"])
-        self.assertEqual(str(d), "laskettuna välillä 8.4.2017 … 16.10.2017")
+        self.assertEqual(str(d), "calculated between 8.4.2017 … 16.10.2017")
 
         d = DateRange(DR['EST_ABOUT'], date(2017, 10, 16))
         self.assertEqual(d.to_list(), [21, "2017-10-16"])
-        self.assertEqual(str(d), "arviolta noin 16.10.2017")
+        self.assertEqual(str(d), "estimated about 16.10.2017")
 
     def testDateRange_DateInt(self):
         """

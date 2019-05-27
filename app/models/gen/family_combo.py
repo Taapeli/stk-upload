@@ -11,9 +11,9 @@ from .family import Family
 from .person_combo import Person_as_member
 from .person_name import Name
 from .note import Note
-from .citation import Citation
-from .source import Source
-from .repository import Repository
+#from .citation import Citation
+#from .source import Source
+#from .repository import Repository
 from models.gen.dates import DateRange
 #from models.cypher_gramps import Cypher_family_w_handle
 
