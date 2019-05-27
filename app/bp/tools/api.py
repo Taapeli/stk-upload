@@ -172,7 +172,7 @@ def record_with_subs(id):
         name=p['pname'],
         type=p['type'],
         surroundedBy=[], #places1, #sorted(places1,key=lambda x:x.get('name','')),
-        surrounds=places2, #sorted(places2,key=lambda x:x.get('name','')),
+        surrounds=sorted(places2,key=lambda x:x.get('name','')),
     )
     return {"status":"OK",
      "statusText":"OK",
