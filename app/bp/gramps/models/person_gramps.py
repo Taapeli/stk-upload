@@ -17,7 +17,7 @@ Created on 18.10.2018
 
 import datetime
 from sys import stderr
-#import logging
+from shareds import logger
 
 import models.dbutil
 
@@ -181,7 +181,8 @@ class Person_gramps(Person):
                 tx.run(Cypher_person_w_handle.link_note,
                        p_handle=self.handle, n_handle=handle)
         except Exception as err:
-            print("iError: Person.save notes: {0} {1}".format(err, self.id), file=stderr)
+            logger.error(f"Person_gramps.save: {err} in linking Notes {self.handle} -> {self.noteref_hlink}")
+            #print("iError: Person.save notes: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Citation nodes
         try:

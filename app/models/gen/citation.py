@@ -251,6 +251,7 @@ class Citation:
                 tx.run(Cypher_citation_w_handle.link_note, 
                        handle=self.handle, hlink=handle)
         except Exception as err:
+            logger.error(f"Citation.save: {err} in linking Notes {self.handle} -> {self.noteref_hlink}")
             print("iError: Citation.save Note hlink: {0} {1}".format(err, self.id), file=stderr)
 
         try:   

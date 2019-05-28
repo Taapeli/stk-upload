@@ -21,7 +21,7 @@ from .batchlogger import Log
 
 from models.gen.place import Place_name, Point
 from models.gen.dates import Gramps_DateRange
-from models.gen.family import Family
+#from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person_name import Name

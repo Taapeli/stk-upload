@@ -86,11 +86,11 @@ MATCH (m:Place) WHERE m.handle=$place_hlink
 MERGE (n)-[r:PLACE]->(m)"""
 
     link_notes = """
-match (n:Note)  where n.handle in $note_handles
-with n
-    match (e:Event)  where e.handle=$handle
-    merge (e) -[r:NOTE]-> (n)"""
-#return count(r) as cnt"""
+MATCH (n:Note)  WHERE n.handle IN $note_handles
+WITH n
+    MATCH (e:Event)  WHERE e.handle=$handle
+    CREATE (e) -[r:NOTE]-> (n)
+RETURN count(r) AS cnt"""
 
     link_citations = """
 match (c:Citation) where c.handle in $citation_handles
@@ -146,7 +146,7 @@ MERGE (n)-[r:CHILD]->(m)"""
     link_note = """
 MATCH (n:Family) WHERE n.handle=$f_handle
 MATCH (m:Note)   WHERE m.handle=$n_handle
-MERGE (n)-[r:NOTE]->(m)"""
+CREATE (n)-[r:NOTE]->(m)"""
 
 
 class Cypher_media_in_batch():
@@ -258,7 +258,7 @@ MERGE (p)-[r:CITATION]->(c)"""
     link_note = """
 MATCH (n) WHERE n.handle=$p_handle
 MATCH (m:Note)   WHERE m.handle=$n_handle
-MERGE (n)-[r:NOTE]->(m)"""
+CREATE (n)-[r:NOTE]->(m)"""
 
 
 
@@ -315,7 +315,7 @@ WITH n
     link_note = """
 MATCH (pl:Place) WHERE id(pl) = $pid
 MATCH (n:Note)  WHERE n.handle=$hlink
-MERGE (pl) -[r:NOTE]-> (m)"""
+CREATE (pl) -[r:NOTE]-> (m)"""
 
 # class Cypher_place_w_handle():
 #     """ For Place class """
@@ -362,7 +362,7 @@ RETURN ID(s) as uniq_id"""
     link_note = """
 MATCH (n:Source) WHERE n.handle=$handle
 MATCH (m:Note)   WHERE m.handle=$hlink
-MERGE (n) -[r:NOTE]-> (m)"""
+CREATE (n) -[r:NOTE]-> (m)"""
 
     link_repository = """
 MATCH (n:Source) WHERE n.handle=$handle
@@ -381,7 +381,7 @@ RETURN ID(n) as uniq_id"""
     link_note = """
 MERGE (n:Citation {handle: $handle})
 MERGE (m:Note     {handle: $hlink})
-MERGE (n) -[r:NOTE]-> (m)"""
+CREATE (n) -[r:NOTE]-> (m)"""
 
     link_source = """
 MERGE (n:Citation {handle: $handle})

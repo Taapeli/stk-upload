@@ -8,11 +8,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 
-#import shareds
+from shareds import logger
 from models.gen.source import Source
-#from models.gen.cypher import Cypher_source
-#from models.gen.repository import Repository
-#from models.gen.note import Note
 from models.cypher_gramps import Cypher_source_w_handle
 
 
@@ -72,7 +69,8 @@ class Source_gramps(Source):
                 tx.run(Cypher_source_w_handle.link_note,
                        handle=self.handle, hlink=note_handle)
             except Exception as err:
-                print("iError Source.save note: {0}".format(err), file=stderr)
+                logger.error(f"Source_gramps.save: {err} in linking Notes {self.handle} -> {self.note_handles}")
+                #print("iError Source.save note: {0}".format(err), file=stderr)
 
         # Make relation to the Repository nodes
         for repo in self.repositories:
