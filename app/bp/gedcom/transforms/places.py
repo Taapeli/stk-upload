@@ -112,10 +112,17 @@ class Places(transformer.Transformation):
 
     def finish(self,options):
         if options.display_all_unique_places:
+            totalcount = 0
+            uniquecount = 0
             print("--------------------")
             print("<h3>"+_("All unique place names:")+"</h3><pre>") 
             for place,count in sorted(self.allplaces.most_common()):
                 print(count,place)
+                totalcount += count
+                uniquecount += 1
+            print()
+            print(_("Count of all places: "),totalcount)
+            print(_("Count of unique places: "),uniquecount)
             print("</pre>") 
 
         if options.display_unique_changes:
