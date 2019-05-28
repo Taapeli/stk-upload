@@ -9,6 +9,7 @@ from sys import stderr
 from models.gen.dates import DateRange
 from models.gen.place import Place
 from models.cypher_gramps import Cypher_place_in_batch
+import traceback
 
 
 class Place_gramps(Place):     
@@ -189,7 +190,8 @@ class Place_gramps(Place):
                 result = tx.run(Cypher_place_in_batch.add_urls, 
                                 batch_id=batch_id, pid=self.uniq_id, n_attr=n_attr)
         except Exception as err:
-            print(f"iError Place.add_urls {note}: {err}", file=stderr)
+            traceback.print_exc()
+            print(f"iError Place.add_urls: {err}", file=stderr)
             raise
 
         # Make the place note relations; the Notes have been stored before

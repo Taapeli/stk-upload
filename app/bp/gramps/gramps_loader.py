@@ -14,6 +14,7 @@ from .batchlogger import Batch, Log
 from models import dataupdater
 #from models.dataupdater import set_confidence_values
 import shareds
+import traceback
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
@@ -103,6 +104,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
 #             handler.make_place_hierarchy()
 
         except Exception as e:
+            traceback.print_exc()
             msg = f"Stopped xml load due to {e}"    # Stop processing?
             print(msg)
             handler.commit(rollback=True)
