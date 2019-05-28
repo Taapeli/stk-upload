@@ -477,10 +477,15 @@ def build_parser(filename,gedcom,gedcom_filename):
                 row.action = arg.action
                 row.help = arg.help
                 row.checked = ""
+                row.classname = "transform_option"
                 if arg.action == 'store_true':
                     row.type = "checkbox"
                     if row.name == "--dryrun": row.checked = "checked"
-                    if row.name == "--display-changes": row.checked = "checked"
+                    if row.name == "--display-changes": 
+                        row.checked = "checked"
+                        row.classname = "display_option"
+                    elif row.name == "--display_all_unique_places": 
+                        row.classname = "clear_others"
                 elif arg.action == 'store_false':
                     row.type = "checkbox"
                 elif arg.action == 'store_const':
