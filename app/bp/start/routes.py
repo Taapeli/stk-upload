@@ -36,6 +36,8 @@ def start():
     """ Home page for logged in user (from login page or home button) 
         or anonymous user (home)
     """
+    if "gedcom_user" in session: del session["gedcom_user"]  
+    
     if current_user.is_authenticated:
         role_names = [role.name for role in current_user.roles]
         logger.info("Start user {}/{}, roles {}".\

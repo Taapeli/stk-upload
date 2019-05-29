@@ -16,7 +16,7 @@
             </div>
         </div>{% endif %}
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
-            <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
+            <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b>
         </h3>
         {% set myid = person.uniq_id %}
         {# set mybirth = "" %}{% for e in events %}
@@ -31,9 +31,9 @@
                 {% for pname in person.names|sort(attribute='order')  %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
-                        {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <span title="{{ _('Firstname') }}">{{pname.firstname}}</span>
                         <i title="{{ _('Patronymic') }}">{{pname.suffix}}</i>
+                        {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <b title="{{ _('Surname') }}">{{pname.surname}}</b>
                         <!-- todo: <a href="#sref3a">3a</a> -->
                         <!-- {% if pname.refname %}&nbsp; 
@@ -97,9 +97,11 @@
                         </td>
                         <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
                         <td class="ColumnPlace">
-                            <a href="/scene/location={{e.locid}}" class="inlink"
-                            title="{{ _('of Type') }} {{e.ltype}}; {{ _('See Place details') }}">
-                            {{e.location|join(' • ')}}</a>
+                          {% if e.place %}
+                            <a href="/scene/location={{e.place.uniq_id}}" class="inlink"
+                            title="{{ _('of Type') }} {{e.place.type}}; {{ _('See Place details') }}">
+                            {{macro.place_names(e.place)}}</a>
+                          {% endif %}
                         </td>
                         <td class="ColumnDescription">{{e.description}}</td>
                         <td class="ColumnNotes">
@@ -136,7 +138,7 @@
             {% for fam in families %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="{{ _('Family') }} {{fam.id}}">
-	                    <p>{{ _('Family') }} {{fam.id}}</p>
+	                    <p>{{ _('Family') }} <a href="/scene/family={{fam.uniq_id}}">{{fam.id}}</a></p>
 	                    <ul>{% if fam.father %}
 	                        <li>{{ _('Father') }}: {{ macro.member(fam.father, myid, '=') }}</li>
 	                {% endif %}{% if fam.mother %}
@@ -158,7 +160,8 @@
 		            <div class="personbox" title="{{ _('self') }}">
 		                <span title="{{ _('Firstname') }}">{{person.names[0].firstname}}</span>
 		                {% if not person.names[0].surname %}<i title="{{ _('Patronymic') }}">{{person.names[0].suffix}}</i>
-		                {% else %}<b title="{{ _('Surname') }}">{{person.names[0].surname}}</b>
+		                {% else %}{% if person.names[0].prefix %}<span title="etuliite">{{person.names[0].prefix}}</span>{% endif %}
+		                <b title="{{ _('Surname') }}">{{person.names[0].surname}}</b>
 		                {% endif %}
 		            </div>
 	            </div>
@@ -169,7 +172,7 @@
 	            <div class="groupbox">
 		            {% for fam in families %}{% if fam.role != "CHILD" %}
 		            <div class="familybox" title="{{ _('Family') }} {{fam.id}} {{fam.role}}">
-		                <p>perhe {{fam.id}}</p>
+		                <p>{{ _('Family') }} <a href="/scene/family={{fam.uniq_id}}">{{fam.id}}</a></p>
 		                <ul>{% if fam.father %}
 		                        <li>{{ _('Father') }}: {{ macro.member(fam.father, myid, '=') }}</li>
 		                {% endif %}{% if fam.mother %}

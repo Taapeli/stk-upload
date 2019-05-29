@@ -25,7 +25,8 @@ var transform = "{{ transform }}";
 		    </select>
 	        {% else %}
 		    <input type='{{ row.type }}' name='{{ row.name }}' 
-		          style="width: 10em" {{ row.checked }}>
+		    		class='{{ row.classname }}'
+ 					style="width: 10em" {{ row.checked }}>
 		        {% if row.action == 'append' %}
 		            <input type=button value="{{ _('Add') }}">
 		        {% endif %}

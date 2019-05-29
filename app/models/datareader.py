@@ -11,8 +11,9 @@ from sys import stderr
 
 from flask_babelex import _
 #from flask import flash
-from flask import render_template, request, redirect, url_for, flash, session as user_session
-from flask_security import current_user, login_required #, roles_accepted
+from flask import request, flash #, render_template, redirect, url_for
+from flask import session as user_session
+from flask_security import current_user #, login_required #, roles_accepted
 
 from operator import itemgetter
 #from models.dbutil import Datefrom
@@ -25,6 +26,7 @@ from models.gen.person import SEX_MALE #, SEX_FEMALE
 from models.gen.person_combo import Person_combo, Person_as_member
 from models.gen.person_name import Name
 from models.gen.place import Place
+from models.gen.place_combo import Place_combo
 from models.gen.refname import Refname
 from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
@@ -659,13 +661,14 @@ def get_person_data_by_id(uniq_id):
             my_birth_date = e.date
 
         for ref in e.place_ref:
-            place = Place()
-            place.uniq_id = ref
-            place.read_w_notes()
+            place = Place_combo.get_w_notes(ref)
+#             place.read_w_notes()
             # Location / place name, type and reference
-            e.location = place.pname
-            e.locid = place.uniq_id
-            e.ltype = place.type
+            e.place = place
+#             #TODO: remove 3 lines
+#             e.location = place.pname
+#             e.locid = place.uniq_id
+#             e.ltype = place.type
 
         if e.note_ref: # A list of uniq_ids; prev. e.noteref_hlink != '':
             # Read the Note objects from db and store them as a member of Event
@@ -937,11 +940,12 @@ def get_place_with_events (loc_id):
         etype         event type
         edates        event date
     """
-    place = Place()
-    place.uniq_id = loc_id
-    place.read_w_notes()
+    place = Place_combo.get_w_notes(loc_id)
     try:
-        place_list = Place.get_place_tree(place.uniq_id)
+        place_list = Place_combo.get_place_tree(place.uniq_id)
+    except AttributeError as e:
+        flash(f"Place {loc_id} not found", 'error')
+        return None, None, None
     except ValueError as e:
         flash(str(e), 'error')
         place_list = []

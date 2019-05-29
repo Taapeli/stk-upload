@@ -9,6 +9,9 @@ import sys
 from neo4j import GraphDatabase, basic_auth
 import treelib
 
+import logging
+logger = logging.getLogger('stkserver')
+
 class DbTree():
     """ Builds a tree structure in memory by Neo4j query and offers
         services to access it
@@ -110,23 +113,41 @@ class DbTree():
             # Tuloksessa on kaikki ko. relaatioon osallistuvat solut ja niiden
             # väliset yksittäiset yhteydet
             for node in nodes:
+                # <Node id=287043 labels={'Place'} 
+                #    properties={'handle': '_df87894b3d441856d402c87b38d', 'id': 'P0122', 
+                #    'type': 'Country', 'pname': 'Suomi', 'change': 1556957839}>
                 if not node.id in nl:
-                    nl[node.id] = node[self.name_field_name]            #["pname"]
-                    nstack.append((node.id, node[self.type_field_name], #["type"], 
-                                   node[self.name_field_name],          #["pname"], 
+                    nl[node.id] = node.get(self.name_field_name)            #["pname"]
+                    nstack.append((node.id, node.get(self.type_field_name), #["type"], 
+                                   node.get(self.name_field_name),          #["pname"], 
                                    level))
             for rel in relations:
                 # Walk thru all (start)-->(end) relations
+                #
+                # <Relationship id=117186 
+                #    nodes=(
+                #        <Node id=287984 labels={'Place'} 
+                #            properties={'coord': [60.64, 22.58], 'handle': '_dd4067f458c6cdc4f0e8e33254a', 
+                #                'id': 'P0616', 'type': 'City', 'pname': 'Aura', 'change': 1556955829}>, 
+                #        <Node id=287043 labels={'Place'} 
+                #            properties={'handle': '_df87894b3d441856d402c87b38d', 
+                #                'id': 'P0122', 'type': 'Country', 'pname': 'Suomi', 'change': 1556957839}>)
+                #    type='IS_INSIDE' properties={}>
+
                 if not rel.id in rl:
                     rl[rel.id] = rel.end
                     nid, ntype, nname, lv = nstack.pop()
                     if not nid:
-                        raise ValueError("Hierarchy tree error")
+                        # ** FAILED! **
+                        logger.error(f"Hierarchy tree error: {nid}, {ntype}, {nname}, {lv}")
+#                         raise ValueError(f"Hierarchy tree error: {nid}, {ntype}, {nname}, {lv}")
+                        return self.tree
+
                     if len(rl) == 1:    # Ensimmäinen solmu rootin alle
                         nid1, ntype1, nname1, _lv1 = nstack.pop()
                         rl[0] = rel.end
-                        print("create_node('{}', '{}', parent={}, data={})".\
-                              format(nname1, nid1, 0, {'type':ntype1}))
+                        logger.debug("create_node('{}', '{}', parent={}, data={})".\
+                                     format(nname1, nid1, 0, {'type':ntype1}))
                         self.tree.create_node(nname1, nid1, parent=0, 
                                               data={self.type_field_name:ntype1})
                     if lv > 0:
@@ -135,12 +156,12 @@ class DbTree():
                         parent = self.tree.parent(rel.start).identifier
                     # Add the new node by side on current; then move current under that 
                     # Lisätään uusi solu ensin nykyisen rinnalle ja sitten siirretään nykyinen uuden alle
-                    print("create_node('{}', '{}', parent={}, data={})".\
-                          format(nname, nid, parent, {'type':ntype}))
+                    logger.debug("create_node('{}', '{}', parent={}, data={})".\
+                                 format(nname, nid, parent, {'type':ntype}))
                     self.tree.create_node(nname, nid, parent=parent, 
                                           data={self.type_field_name:ntype})
                     if lv < 0:
-                        print("  move_node('{}', '{}')".format(rel.start, nid))
+                        logger.debug("  move_node('{}', '{}')".format(rel.start, nid))
                         self.tree.move_node(rel.start, nid)
         return self.tree
 

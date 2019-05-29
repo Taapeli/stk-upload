@@ -27,7 +27,7 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>{% endif %}
 
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
-            <i>{{person.names[0].suffix}}</i> <b>{{person.names[0].surname}}</b>
+            <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b>
         </h3>
 
         {% set myid = person.uniq_id %}
@@ -50,9 +50,9 @@ u { color: DarkKhaki; text-decoration: none; }
                 {% for pname in person.names|sort(attribute='order') %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
                     <td class="ColumnValue">
-                        {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <span title="{{ _('first name') }}">{{pname.firstname}}</span>
                         <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
+                        {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <b title="{{ _('surname') }}">{{pname.surname}}</b>
                     </td>
                 </tr>{% endfor %}
@@ -124,7 +124,7 @@ u { color: DarkKhaki; text-decoration: none; }
                             {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/scene/location={{obj[pref].uniq_id}}" class="inlink"
                             title="{{ _('of type') }} {{obj[pref].type}}; {{ _('see details of place') }}">
-                            {{e.clearnames|join(' • ')}}</a> 
+                            {{macro.place_names(obj[pref])}}</a> 
                             {% endfor %}
                         </td>
 
@@ -185,7 +185,7 @@ u { color: DarkKhaki; text-decoration: none; }
 		            <div class="personbox" title="{{ _('Self') }}">
 		                <span title="{{ _('first name') }}">{{person.names[0].firstname}}</span>
 		                {% if not person.names[0].surname %}<i title="{{ _('patronymic') }}">{{person.names[0].suffix}}</i>
-		                {% else %}<b title="{{ _('surname') }}">{{person.names[0].surname}}</b>
+		                {% else %}<b title="{{ _('surname') }}">{{person.names[0].prefix}} {{person.names[0].surname}}</b>
 		                {% endif %}
 		            </div>
 	            </div>

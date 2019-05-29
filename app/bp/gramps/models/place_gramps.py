@@ -9,6 +9,8 @@ from sys import stderr
 from models.gen.dates import DateRange
 from models.gen.place import Place
 from models.cypher_gramps import Cypher_place_in_batch
+from shareds import logger
+import traceback
 
 
 class Place_gramps(Place):     
@@ -46,6 +48,7 @@ class Place_gramps(Place):
         Place.__init__(self, uniq_id)
         self.note_ref = []      # uniq_ids of Notes
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
+        self.notes = []
         self.noteref_hlink = []
 
 
@@ -188,7 +191,8 @@ class Place_gramps(Place):
                 result = tx.run(Cypher_place_in_batch.add_urls, 
                                 batch_id=batch_id, pid=self.uniq_id, n_attr=n_attr)
         except Exception as err:
-            print(f"iError Place.add_urls {note}: {err}", file=stderr)
+            traceback.print_exc()
+            print(f"iError Place.add_urls: {err}", file=stderr)
             raise
 
         # Make the place note relations; the Notes have been stored before
@@ -198,7 +202,8 @@ class Place_gramps(Place):
                 result = tx.run(Cypher_place_in_batch.link_note, 
                                 pid=self.uniq_id, hlink=n_handle)
         except Exception as err:
-            print(f"iError Place.link_notes {self.noteref_hlink}: {err}", file=stderr)
+            logger.error(f"Place_gramps.save: {err} in linking Notes {self.handle} -> {self.noteref_hlink}")
+            #print(f"iError Place.link_notes {self.noteref_hlink}: {err}", file=stderr)
             raise
 
         return

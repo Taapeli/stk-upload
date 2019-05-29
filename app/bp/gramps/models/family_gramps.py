@@ -9,6 +9,7 @@ from sys import stderr
 #from models.gen.cypher import Cypher_family
 from models.gen.family import Family
 from models.cypher_gramps import Cypher_family_w_handle
+from shareds import logger
 
 
 class Family_gramps(Family):
@@ -64,10 +65,11 @@ class Family_gramps(Family):
                 self.uniq_id = record[0]
                 ids.append(self.uniq_id)
                 if len(ids) > 1:
-                    print("iError updated multiple Families {} - {}, attr={}".format(self.id, ids, f_attr))
+                    logger.warning(f"Family_gramps.save updated multiple Families {self.id} - {ids}, attr={f_attr}")
                 # print("Family {} ".format(self.uniq_id))
         except Exception as err:
-            print("iError Family.save family: {0} attr={1}".format(err, f_attr), file=stderr)
+            logger.error(f"Family_gramps.save: {err} in #{self.uniq_id} - {f_attr}")
+            #print("iError Family.save family: {0} attr={1}".format(err, f_attr), file=stderr)
 
         # Make father and mother relations to Person nodes
         try:
@@ -100,11 +102,13 @@ class Family_gramps(Family):
   
         # Make relation(s) to the Note node
         try:
+            #print(f"Family_gramps.save: linking Notes {self.handle} -> {self.noteref_hlink}")
             for handle in self.noteref_hlink:
                 tx.run(Cypher_family_w_handle.link_note,
                        f_handle=self.handle, n_handle=handle)
         except Exception as err:
-            print("iError Family.save notes: {0} {1}".format(err, self.id), file=stderr)
+            logger.error(f"Family_gramps.save: {err} in linking Notes {self.handle} -> {self.noteref_hlink}")
+            #print("iError Family.save notes: {0} {1}".format(err, self.id), file=stderr)
 
         return
 

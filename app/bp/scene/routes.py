@@ -15,7 +15,8 @@ from . import bp
 from bp.scene.scene_reader import get_a_person_for_display_apoc
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
-from models.gen.place import Place
+#from models.gen.place import Place
+from models.gen.place_combo import Place_combo
 from models.gen.source import Source
 
 from models.datareader import read_persons_with_events
@@ -284,7 +285,7 @@ def show_locations():
     try:
         # 'locations' has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        locations = Place.get_place_hierarchy()
+        locations = Place_combo.get_place_hierarchy()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:

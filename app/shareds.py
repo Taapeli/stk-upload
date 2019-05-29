@@ -6,8 +6,9 @@ Created on 26.11.2017
 Arvot asetetaan järjestelmän  setups.py:ssä
 '''
 
-from flask import session
-
+#from flask import session
+import logging 
+logger = logging.getLogger('stkserver')
 
 
 app = None

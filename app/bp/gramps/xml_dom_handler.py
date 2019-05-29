@@ -21,7 +21,7 @@ from .batchlogger import Log
 
 from models.gen.place import Place_name, Point
 from models.gen.dates import Gramps_DateRange
-from models.gen.family import Family
+#from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person_name import Name
@@ -486,6 +486,8 @@ class DOM_handler():
 
                     if len(person_name.getElementsByTagName('surname') ) == 1:
                         person_surname = person_name.getElementsByTagName('surname')[0]
+                        if person_surname.hasAttribute("prefix"):
+                            pname.prefix = person_surname.getAttribute("prefix")
                         if len(person_surname.childNodes ) == 1:
                             pname.surname = person_surname.childNodes[0].data
                         elif len(person_surname.childNodes) > 1:

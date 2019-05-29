@@ -20,14 +20,56 @@ u { color: DarkKhaki; text-decoration: none; }
     <div class="content" id="IndividualDetail">
 
         <h3 style="position:sticky; top:0;">{{ _("Family") }} {{ family.uniq_id }}</h3>
-        <h3 style="position:sticky; top:0;">{{ _("Type") }} {{ family.type }}</h3>
-        <h3 style="position:sticky; top:0;">{{ _("Marriage dates") }} {{ family.marriage_date }}</h3>
-        <h3 style="position:sticky; top:0;">{{ _("Marriage place") }} {{ family.marriage_place }}</h3>
-        <h3 style="position:sticky; top:0;">{{ _("Father") }} {{ family.father}}</h3>
-        <h3 style="position:sticky; top:0;">{{ _("Father sortname") }} {{ family.father_sortname}}</h3>
-        <h3 style="position:sticky; top:0;">{{ _("Mother") }} {{ family.mother}}</h3>
-        <h3 style="position:sticky; top:0;">{{ _("Mother sortname") }} {{ family.mother_sortname}}</h3>
+        <p><b>{{ _("Type") }}</b> {{ family.type|transl('marr') }}</p>
+        <p><b>{{ _("Marriage place") }}</b> {{ family.marriage_place }}</p>
+        <p><b>{{ _("Marriage dates") }}</b> {{ family.marriage_date }}</p>
+        <p><b>{{ _("Father") }}</b>
+        	{% if family.father %}
+                <a href="/scene/person={{family.father.uniq_id}}">
+                {{family.father.names[0].firstname}} 
+                <i>{{family.father.names[0].suffix}}</i>
+ 				{% if family.father.names[0].prefix %}
+ 				{{family.father.names[0].prefix}}{% endif %}
+ 				<b>{{family.father.names[0].surname}}</b></a></h3>
+            {% else %}<small>{{ _('unknown') }}</small>{% endif %}
+    
+        <p><b>{{ _("Mother") }}</b>
+        	{% if family.mother %}
+                <a href="/scene/person={{family.mother.uniq_id}}">
+                {{family.mother.names[0].firstname}} 
+                <i>{{family.mother.names[0].suffix}}</i>
+  				{% if family.mother.names[0].prefix %}
+ 				{{family.mother.names[0].prefix}}{% endif %}
+                <b>{{family.mother.names[0].surname}}</b></a></h3>
+            {% else %}<small>{{ _('unknown') }}</small>{% endif %}
+            
+        {% if family.children %} <br><br><b>{{ _("Children") }}</b><br>     
+            <table>
+        	{% for c in family.children %}{% set nm = c.sortname.split('#') %}
+                <tr><td><a href="/scene/person={{c.uniq_id}}">{{nm[2]}}&nbsp;<b>{{nm[0]}}</b>&nbsp;<i>{{nm[1]}}</i>{{ "," if not loop.last }}</a></big></td></tr>
+            {% endfor %}
+            </table><br>
+        {% endif %}
 
+        {% if family.notes %}<br><br><b>{{ _("Notes") }}</b><br>
+            <table>
+            {% for n in family.notes %}
+ 				<tr>{% if n.text %}<td>{{ n.text }}</p></td>{% endif %}
+ 				{% if n.url %}<td><a href="{{ n.url }}">{{ n.url }}</a></td>{% endif %}</tr>
+            {% endfor %}
+            </table><br>
+        {% endif %}
+        
+        {% if family.sources %}<br><br><b>{{ _("Sources") }}</b><br>
+            <table>
+            {% for data in family.sources %}
+         		<tr><td>{{ data[0] }}: 
+         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>,
+         		{{ _("Page") }}: {{ data[3] }}</td></tr>
+            {% endfor %}
+            </table><br>
+		{% endif %}
+        
         <div id="summaryarea">
             <table>
                 <tr>

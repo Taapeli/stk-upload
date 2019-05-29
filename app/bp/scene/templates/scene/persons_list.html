@@ -1,6 +1,6 @@
 {# _myapp/templates/list_persons.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}{{ _('List of persons') }} (scene/list_persons){% endblock %}
+{% block title %}{{ _('List of persons') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
@@ -29,7 +29,7 @@
 	    <h2>{{ _('Persons') }}</h2>
 	{% endif %}
 	
-	<p><small>{{cnt}} persons, user {{user}}, filter {{filt_owners}} {{my_set}}, next {{next}}</small></p>
+<!-- 	<p><small>{{cnt}} persons, user {{user}}, filter {{filt_owners}} {{my_set}}, next {{next}}</small></p> -->
 </div>
 
 {{ macro.menu(menuno) }}
@@ -129,7 +129,8 @@
 	                   <a href="/scene/person={{p.uniq_id}}"
 	                     title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">
 		               {{p.names[0].firstname}} 
-		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
+		               {% if p.names[0].surname %} {% if p.names[0].prefix %}{{p.names[0].prefix}}{% endif %}
+		               <b>{{p.names[0].surname}}</b>
 		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}</a>
 
 		               {%set eka = 1 %}
@@ -137,7 +138,8 @@
 		                  {% if eka == 1 %}{% set eka = 0 %}{% else %}<br><small>
 		                      <span class="typedesc">{{name.type|transl('nt')}}</span> 
 		                      {{name.firstname}} 
-                            {% if name.surname %} <b>{{name.surname}}</b>
+                              {% if name.surname %} {% if name.prefix %}{{name.prefix}}{% endif %}
+		                	  <b>{{name.surname}}</b>
                             {% else %}<i>{{name.suffix}}</i>{% endif %}</small>
                           {% endif %}
                        {% endfor %}

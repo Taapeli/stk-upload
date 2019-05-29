@@ -4,16 +4,14 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" 
-    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
 <div id="startdiv">
     <h2>{{ _('Place events') }}</h2>
 </div>
 
 {{ macro.menu(4) }}
-
     <div class="content" id="IndividualDetail">
+{% if place %}
       {% if place.coord %}
         <div id="map">{% if '°' in place.coord %}
         {{ _('Invalid coordinates') }}: {{place.coord}}
@@ -21,20 +19,22 @@
         {% else %}{% set r = 0.15 %}
             {% set y = place.coord[0] %}
             {% set x = place.coord[1] %}
-            <iframe width="250" height="250" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
-            src="http://www.openstreetmap.org/export/embed.html?bbox={{
+           <iframe width="250" height="250" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
+            src="https://www.openstreetmap.org/export/embed.html?bbox={{
              x - r }}%2C{{ y - r }}%2C{{ x + r  }}%2C{{ y + r }}&amp;layer=mapnik&amp;marker={{y}}%2C{{x}}" 
-            style="border: 1px solid black"></iframe><br/><!--small--><a 
-            href="http://www.openstreetmap.org/?mlat={{y}}&amp;mlon={{x}}#map=9/{{y}}/{{x}}">
-            - {{ _('OpenStreetMap on a larger scale') }}</a><!--/small--><br>
-            <a target="_blank" href="https://www.google.fi/maps/@{{y}},{{x}},14z?hl=fi">
-            - {{ _('on Google Map') }}</a><br>&nbsp;<br>
-            {{ _('Location') }}: N&nbsp;{{ '{0:0.4f}'.format(y) }}, 
-            E&nbsp;{{ '{0:0.4f}'.format(x) }}
+            style="border: 1px solid black"></iframe><br>
+           <a target="map"
+            href="https://www.openstreetmap.org/?mlat={{y}}&amp;mlon={{x}}#map=9/{{y}}/{{x}}">
+            - {{ _('OpenStreetMap on a larger scale') }}</a><br>
+           <a target="map" href="https://www.google.fi/maps/@{{y}},{{x}},14z?hl=fi">
+            - {{ _('on Google Map') }}</a>
+           <p>{{ _('Location') }}: N&nbsp;{{ '{0:0.4f}'.format(y) }}, 
+            E&nbsp;{{ '{0:0.4f}'.format(x) }}</p>
         {% endif %}</div>
       {% endif %}
 
-    <h3 style="position:sticky; top:0;">{{place.pname|join('<br>'|safe)}}</h3>
+    <h3 style="position:sticky; top:0;">{{ _(place.type)|title }}
+        {{ macro.place_names(place) }}</h3>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -47,13 +47,14 @@
     {% endwith %}
             <ul>{% for p in locations %}
                 <li style="margin-left: {{p.level * 2}}em;">
-                {% if p.uniq_id == locid|int %}<span class="id">{{p.uniq_id}}</span>
-                    <b>{{p.pname|join(' • ')}}</b>
+                {% if p.uniq_id == locid %}<span class="id">{{p.uniq_id}}</span>
+                    <b>{{ macro.place_names(p) }}</b>
                 {% else %}<a href="/scene/location={{p.uniq_id}}"><span class="id">{{p.uniq_id}}</span></a>
-                    {{p.pname|join(' • ')}}
+                    {{ macro.place_names(p) }}
                 {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
             {% endfor %}</ul>
         </div>
+
     {% if place.notes %}
         <div id="events">
             <h4>{{ _('Website') }}</h4>
@@ -130,17 +131,15 @@
                             <a href="/scene/person={{e.uid}}" class="id"
                               title="{{ _("See Person's Details") }}">{{e.uid}}</a>
                         </td>
-                        <td>{% for n in e.names|sort %} 
-                         {% if n[0] != "Birth Name" %}
-                            <span class="typedesc">{{n[0]|transl('nt')}}</span>
+                        <td>{% for pn in e.names|sort(attribute='order') %}
+                         {% if loop.index > 1 %}<br>{% endif %}
+                         {% if pn.type != "Birth Name" %}
+                            <span class="typedesc">{{pn.type|transl('nt')}}</span>
                          {% endif %}
-                         {{n[1]}} 
-                         {% if n[2] %}
-                            <b>{{n[2]}}</b>
-                         {% else %}
-                            <i>{{n[3]}}</i>
-                         {% endif %}
-                         <br />{% endfor %}
+                           {{pn.firstname}} 
+	                       {% if pn.surname %} {{pn.prefix}} <b>{{pn.surname}}</b>
+	                       {% else %}<i>{{pn.suffix}}</i>{% endif %}
+                         {% endfor %}
                         </td>
                         <td class="ColumnEvent">{{e.type|transl('evt')}}
                           {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
@@ -163,11 +162,16 @@
     {% endif %}
         </div>
 
-<!--    <div class="subsection" id="sourcerefs">
+<!-- <div class="subsection" id="sourcerefs">
+        <div>
             <h4>{{ _('Source References') }}</h4>
-            <p>{{ _('No source pointers found') }}</p>
+            <p style="margin-left:2em;">{{ _('No source pointers found') }}</p>
         </div>
+     </div>
 -->
-    </div>
+{% else %}
+<p>{{ _('The required place was not found.') }}</p>
+</div>
+{% endif %}
 {% endblock %}
 

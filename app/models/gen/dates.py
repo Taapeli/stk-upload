@@ -6,6 +6,8 @@ Created on 16.10.2017
 '''
 
 from datetime import date
+from flask_security.utils import _
+from flask_babelex import lazy_gettext as _l
 
 DR = {
     'DATE':0,           # exact date d1
@@ -54,25 +56,37 @@ DR = {
 class DateRange():
     '''
     DateRange handles date expressions needed for genealogical data.
-    The dates are expressed with date range type and one or two string values
-    representing the date limits (from, to).
 
-    This class is designed specially for efficient processing in the database
-    and it's user interfaces.
+    The dates are expressed with 
+    - an date range type (datetype) and 
+    - one or two values (date1, date2) representing the date limits (from, to). 
+    A datetype value is one of int values from models.gen.dates.DR dictionary.
+    The date limits are integer values coded by DateInt() from their string 
+    repesentations.
 
-    The data is stored in the following variables:
-    - datetype    int    date type from DR array
-    - datestr1    string 'from' date
-    - datestr2    string 'to' date, a string or None
+    In the database a DateRange instance is reprecented always by three int
+    parameters of neo4j.types.graph.Node. 
+
+    Examples f"{d} = {d.for_db()}":
+
+        9.9.1875 = {'datetype': 0, 'date1': 1920296, 'date2': 1920296}
+        1860 – 1875 = {'datetype': 3, 'date1': 1904832, 'date2': 1920192}
+        2.9.1788 alkaen = {'datetype': 2, 'date1': 1831201, 'date2': 1831201}
+        arviolta noin 1709 = {'datetype': 21, 'date1': 1750208, 'date2': 1750208}
+
+    The date2 is never missing in the database, for simplicity.
+    
+    #TODO: The DateRange comparison methods are very brutal
+    #TODO: The DateRange math is very brutal
     '''
 
     def __init__(self, *args):
         '''
         DateRange constructor can be called following ways:
-            DateRange(d1)
-            DateRange(int, d1)
-            DateRange(int, d1, d2)
-            DataRange((int, str1, str2))
+            (a) DateRange(d1)
+            (b) DateRange(int, d1)
+            (c) DateRange(int, d1, d2)
+            (d) DataRange((int, str1, str2))
 
             The first int argument tells the range type. It is not obligatory, 
             when the type is DR['DATE'] (meaning a single exact date).
@@ -92,7 +106,7 @@ class DateRange():
 
         if len(args) == 1:
             if isinstance(args[0], (list, tuple)) and len(args[0]) in [2, 3]:
-                # The only argument is a tuple like (3, '1918-12', '2017-10-16')
+                # (d) The only argument is a tuple like (3, '1918-12', '2017-10-16')
                 self.datetype = int(args[0][0])
                 self.date1 = DateRange.DateInt(args[0][1])
                 if len(args[0]) == 3 and args[0][2] != None and args[0][2] != '':
@@ -101,13 +115,13 @@ class DateRange():
                     self.date2 = None
                 return
             elif isinstance(args[0], (DateRange, Gramps_DateRange)):
-                # The only argument is a DataRange
+                # (a.1) The only argument is a DataRange
                 self.datetype = args[0].datetype
                 self.date1 = self.DateInt(args[0].date1)
                 self.date2 = self.DateInt(args[0].date2)
                 return
             elif isinstance(args[0], (str, date)):
-                # Maybe the only argument is some kind of date string
+                # (a.2) Maybe the only argument is some kind of date string
                 try:
                     self.datetype = DR['DATE']
                     self.date1 = self.DateInt(args[0])
@@ -118,8 +132,8 @@ class DateRange():
 
         if isinstance(args[0], int) or \
           (isinstance(args[0], str) and args[0].isdigit()):
-            """ Arguments are datetype (int or numeric str) 
-                and there is 1 or 2 date values:
+            """ (b) (c) Arguments are datetype (int or numeric str) 
+                        and there is 1 or 2 date values:
                     DateRange(DR['BEFORE'], date(2017, 10, 16))
                     DateRange(DR['BEFORE'], "2017-10-16")
                     DateRange("1", "2017-10-16")
@@ -158,10 +172,10 @@ class DateRange():
 
         if type_opt == 8:   
             # Code name starts with 'CALC_'
-            dopt = 'laskettuna '
+            dopt = _l('calculated ') # 'laskettuna '
         elif type_opt == 16:
             # Code name starts with 'EST_'
-            dopt = 'arviolta '
+            dopt = _l('estimated ')   #'arviolta '
         else:
             dopt = ''
 
@@ -171,25 +185,25 @@ class DateRange():
         if type_e == DR['DATE']: # Exact date d1
             return dopt + dstr1
         elif type_e == DR['BEFORE']:  # Date till d1
-            return "{}{} saakka".format(dopt, dstr1)
+            return _l("{}till {}").format(dopt, dstr1)
+            #return "{}{} saakka".format(dopt, dstr1)
         elif type_e == DR['AFTER']: # Date from d1
-            return "{}{} alkaen".format(dopt, dstr1)
+            return _l("{}from {}").format(dopt, dstr1)
+            #return "{}{} alkaen".format(dopt, dstr1)
         elif type_e == DR['PERIOD']: # Date period d1-d2
             return "{}{} – {}".format(dopt, dstr1, dstr2)
         elif type_e == DR['BETWEEN']: # A date between d1 and d2
-            return "{}välillä {} … {}".format(dopt, dstr1, dstr2)
+            return _l("{}between {} … {}").format(dopt, dstr1, dstr2)
+            #return "{}välillä {} … {}".format(dopt, dstr1, dstr2)
         elif type_e == DR['ABOUT']: # A date near d1
-            return "{}noin {}".format(dopt, dstr1)
+            return _l("{}about {}").format(dopt, dstr1)
+            #return "{}noin {}".format(dopt, dstr1)
 
         return "<Date type={}, {}...{}>".format(self.datetype, dstr1, dstr2)
 
 
 #     def __cmp__(self, other):
 #         """ Obosolete on Python 3.0!
-#             The 'other' must be an objct of type DateRange.
-#  
-#             The return value of self.__cmp__(other) is 0 for equal to, 
-#             1 for greater than,  and -1 for less than the compared value.
 #         """
 
     '''
@@ -274,32 +288,45 @@ class DateRange():
     # ----------------------- DateRange.DateInt class --------------------------
 
     class DateInt():
-        ''' DateRange.DateInt class carries single date components as an integer, 
-            which is can be oredered even if there are missing date parts.
+        ''' DateRange.DateInt class carries single date as an integer.
+ 
+            DateInt objects can be ordered even if there were missing date parts.
+            A missing day or month value are estimated in the middle of
+            corresponding year or month.
 
-            The missing day or month value is set in the middle of
-            year or month respectively, as if '6½th month' and '15½th day'.
+            A stored int value v consists of three bitwise fieds:
+            - day: lowest 5 bits – v & 0x1f
+            - month: next 5 bits – (v >> 5) & 0x0f
+            - year: high 10 bits – v >> 10
 
-            >>> DateInt("1917-12-15")
+            >>> DateInt("1917-12-15")         # y..........m....d....
             # 1917 12 14 = 1963406 / 00000000000111011111010110001110 internal
             >>> DateInt(1917, 12)
             # 1917 12 15 = 1963407 / 00000000000111011111010110001111 internal
             >>> DateInt(1917, 12, 16)
             # 1917 12 16 = 1963408 / 00000000000111011111010110010000 internal
+
+            The missing day or month values are simulated as
+            '6½th month' and '15½th day' to allow somehow decent of sorting.
         '''
+
         def __init__(self, arg0=None, month=None, day=None):
-            """ DateRange.DateInt.__init__() builds an DateInt value from
+            """ Builds an integer value of a date expression.
+            
+                Arguments may be -
                 - date expressions like '2017-09-20' or '2017-09' or '2017'
                 - int values year, month, day
 
-                The missing day or month values are simulated as
-                '6½th month' and '15½th day' to allow some kind of sorting.
+                A stored int value v consists of three bitwise fieds:
+                year y, month m and day d, which are stored as (d*32 + m)*32 + y
 
-                The int value special cases:
-                - if the day part is 15 --> only year-month are given
-                - if the month part is 6 --> only year is given
+                The values for month and day are modified so that an empty slot
+                is saved to represent a missing day or month. These special
+                values indicate missing value:
+                - if d = 15 --> only year and month are given
+                - if m = 6  --> only year is given
 
-                'yyyy- mm - dd'
+                'yyyy- mm - dd'    | modified field values
                 a[0]  a[1]  a[2]   | y       m       d
                 -------------------+-----------------------
                 9999  1..6  -      | a[0]    a[1]-1  15
@@ -309,10 +336,10 @@ class DateRange():
                 9999  99    -      | a[0]    *       15
                 9999  99    16..31 | a[0]    *       a[2]
 
-                The stored value is (d*32 + m)*32 + y
             """
             if arg0 == None:
                 # No value
+                print(f"ERROR: Invalid DateInt({arg0}, {month}, {day})")
                 self.intvalue = 0
             elif isinstance(arg0, int):
                 if arg0 > 9999:
@@ -339,7 +366,8 @@ class DateRange():
             return
 
         def _set(self, year, month, day):
-            ''' Set dateint value by components '''
+            ''' Set dateint value by components.
+            '''
             if month == None or month == 0:
                 month = 6
                 day = 0
@@ -361,17 +389,17 @@ class DateRange():
             return self.long_date()
 
         def value(self):
-            ''' Returns the comparable date integer value of DateRange.DateInt '''
+            ''' Returns the internal date integer value, which allow comparison.
+            '''
             return self.intvalue
 
         def vector(self):
-            """ Splits the DateRange.DateInt value to integer components.
+            """ Splits the DateRange.DateInt value to integer y, m, d components.
 
                 A date '2047-02-02' gives binary list (2047, 2, 2)
                     0....:....1....:....2. ...:. ...3.
                     0000000000011111111111 00001 00001
                                yyyyyyyyyyy mmmmm ddddd
-                               [0:21]    [22:26] [27:31]
                 Special processing:
                 - if the day part is 15 --> only year-month are returned
                 - if the month part is 6 --> only year is returned
@@ -420,23 +448,28 @@ class DateRange():
             return s
 
         def to_local(self):
-            """ DateRange.DateInt.to_local() converts the DateInt value to
-                Finnish style 20.9.2017 date, even when the month or day are zeroes
+            """ DateRange.DateInt.to_local() converts DateInt to local date string.
+            
+                The string is now a Finnish style "20.9.2017" date 
+                (or shortened "9.2017" or "2017", when the month or day are zeroes).
             """
             try:
+                if self.intvalue == 0:
+                    # Missing date
+                    return "<error>"
                 a = self.vector()
                 if len(a) == 3:
 #                     p = int(a[2])
 #                     k = int(a[1])
-                    return "{}.{}.{}".format(a[2],a[1],a[0]) 
+                    return f"{a[2]}.{a[1]}.{a[0]}"
                 elif len(a) == 2:
 #                     k = int(a[1])
-                    return "{}.{}".format(a[1],a[0]) 
+                    return f"{a[1]}.{a[0]}"
                 else:
-                    return "{}".format(a[0])
+                    return f"{a[0]}"
             except:
                 # Could not split
-                return "({})".format(self.long_date())
+                return f"({self.long_date()})"
 
 
 # -------------------------- Gramps_DateRange class ---------------------------

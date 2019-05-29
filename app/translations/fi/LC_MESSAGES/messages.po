@@ -7,33 +7,32 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-05-07 12:59+0300\n"
+"POT-Creation-Date: 2019-05-27 10:49+0300\n"
 "PO-Revision-Date: 2019-05-13 14:12+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
-"X-Generator: Poedit 1.8.7.1\n"
 
 #: chkdate.py:13
 msgid "Undefined"
 msgstr "Määrittelemätön"
 
-#: bp/start/templates/start/my_settings.html:32 config.py:30
+#: bp/start/templates/start/my_settings.html:42 config.py:30
 #: templates/select_refcols.html:48 templates/select_refcols.html:76
 msgid "Finnish"
 msgstr "suomi"
 
-#: bp/start/templates/start/my_settings.html:35 config.py:31
+#: bp/start/templates/start/my_settings.html:45 config.py:31
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr "ruotsi"
 
-#: bp/start/templates/start/my_settings.html:38 config.py:32
+#: bp/start/templates/start/my_settings.html:48 config.py:32
 msgid "English"
 msgstr "englanti"
 
@@ -53,8 +52,8 @@ msgstr "Olen lukenut ja hyväksynyt"
 msgid "Terms of use"
 msgstr "Käyttöehdot"
 
-#: bp/start/templates/start/join.html:55 bp/stk_security/templates/security/_menu.html:5
-#: setups.py:176
+#: bp/start/templates/start/join.html:55
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:176
 msgid "Register"
 msgstr "Rekisteröidy"
 
@@ -88,15 +87,16 @@ msgstr "Käyttäjätunnus"
 
 #: bp/admin/templates/admin/list_users.html:82
 #: bp/admin/templates/admin/list_users_mails.html:86
-#: bp/scene/templates/scene/place_events.html:117 bp/tools/templates/tools/person2.html:16
+#: bp/scene/templates/scene/place_events.html:118
+#: bp/tools/templates/tools/person2.html:16
 #: bp/tools/templates/tools/table_persons.html:20
 #: bp/tools/templates/tools/table_refnames.html:33 setups.py:232
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Nimi"
 
-#: bp/admin/forms.py:42 bp/admin/forms.py:45 bp/admin/forms.py:145 bp/admin/forms.py:148
-#: bp/admin/templates/admin/list_users.html:84
+#: bp/admin/forms.py:42 bp/admin/forms.py:45 bp/admin/forms.py:145
+#: bp/admin/forms.py:148 bp/admin/templates/admin/list_users.html:84
 #: bp/admin/templates/admin/list_users_mails.html:88 bp/start/forms.py:18
 #: bp/start/forms.py:22 setups.py:232
 msgid "Language"
@@ -114,7 +114,8 @@ msgstr "tunnus:"
 msgid "Id of the user"
 msgstr "Käyttäjän id"
 
-#: bp/admin/forms.py:35 bp/admin/forms.py:75 bp/admin/forms.py:104 bp/admin/forms.py:140
+#: bp/admin/forms.py:35 bp/admin/forms.py:75 bp/admin/forms.py:104
+#: bp/admin/forms.py:140
 msgid "Email Address:"
 msgstr "Sähköpostiosoite:"
 
@@ -150,24 +151,28 @@ msgstr "Käyttäjä on nyt aktiivinen / passivinen"
 msgid "Roles"
 msgstr "Roolit"
 
-#: bp/admin/forms.py:50 bp/admin/forms.py:85 bp/admin/forms.py:109 bp/admin/forms.py:153
+#: bp/admin/forms.py:50 bp/admin/forms.py:85 bp/admin/forms.py:109
+#: bp/admin/forms.py:153
 msgid "Gedcom-files"
 msgstr "Gedcom-tiedostot"
 
-#: bp/admin/forms.py:51 bp/admin/forms.py:86 bp/admin/forms.py:110 bp/admin/forms.py:154
+#: bp/admin/forms.py:51 bp/admin/forms.py:86 bp/admin/forms.py:110
+#: bp/admin/forms.py:154
 msgid "Member"
 msgstr "Jäsen"
 
-#: bp/admin/forms.py:52 bp/admin/forms.py:87 bp/admin/forms.py:111 bp/admin/forms.py:155
-#: templates/jinja_filters.py:117
+#: bp/admin/forms.py:52 bp/admin/forms.py:87 bp/admin/forms.py:111
+#: bp/admin/forms.py:155 templates/jinja_filters.py:117
 msgid "Research"
 msgstr "Tutkija"
 
-#: bp/admin/forms.py:53 bp/admin/forms.py:88 bp/admin/forms.py:112 bp/admin/forms.py:156
+#: bp/admin/forms.py:53 bp/admin/forms.py:88 bp/admin/forms.py:112
+#: bp/admin/forms.py:156
 msgid "Audit"
 msgstr "Auditoija"
 
-#: bp/admin/forms.py:54 bp/admin/forms.py:89 bp/admin/forms.py:113 bp/admin/forms.py:157
+#: bp/admin/forms.py:54 bp/admin/forms.py:89 bp/admin/forms.py:113
+#: bp/admin/forms.py:157
 msgid "Admin"
 msgstr "Pääkäyttäjä"
 
@@ -290,37 +295,37 @@ msgstr "Sähköpostin rekistoröinnin vahvistus"
 msgid "Update allowed email"
 msgstr "Päivitä hyväksytty sähköpostiosoite"
 
-#: bp/admin/routes.py:62
+#: bp/admin/routes.py:63
 msgid "estimated lifetime"
 msgstr "arvioitu elinaika"
 
-#: bp/admin/routes.py:77
+#: bp/admin/routes.py:78
 msgid "Done"
 msgstr "Tehty"
 
-#: bp/admin/routes.py:112
+#: bp/admin/routes.py:113
 msgid "Data type '{}' is not supported"
 msgstr "Tietotyyppiä '{}' ei tueta"
 
-#: bp/admin/routes.py:115
+#: bp/admin/routes.py:116
 msgid "Missing proper column title: "
 msgstr "Kelvollinen sarakeotsikko puuttuu:"
 
-#: bp/admin/routes.py:159
+#: bp/admin/routes.py:160
 msgid "Allowed email updated"
 msgstr "Sallitut sähköpostiosoitteet päivitetty"
 
-#: bp/admin/routes.py:226
+#: bp/admin/routes.py:227
 msgid "User updated"
 msgstr "Käyttäjätiedot päivitetty"
 
-#: bp/admin/routes.py:280 bp/gramps/routes.py:84
+#: bp/admin/routes.py:281 bp/gramps/routes.py:83
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr "Tuonti tiedostosta %(i)s on alkanut."
 
-#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:209 bp/admin/uploads.py:232
-#: bp/gramps/templates/gramps/uploads.html:74
+#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:209
+#: bp/admin/uploads.py:232 bp/gramps/templates/gramps/uploads.html:74
 msgid "UPLOADED"
 msgstr "LADATTU"
 
@@ -328,13 +333,13 @@ msgstr "LADATTU"
 msgid "ERROR"
 msgstr "VIRHE"
 
-#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:214 bp/admin/uploads.py:233
-#: bp/gramps/templates/gramps/uploads.html:75
+#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:214
+#: bp/admin/uploads.py:233 bp/gramps/templates/gramps/uploads.html:75
 msgid "STORING"
 msgstr "MENOSSA TIETOKANTAAN"
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:216 bp/admin/uploads.py:231
-#: bp/gramps/templates/gramps/uploads.html:77
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:216
+#: bp/admin/uploads.py:231 bp/gramps/templates/gramps/uploads.html:77
 msgid "STORED"
 msgstr "TIETOKANNASSA"
 
@@ -383,6 +388,7 @@ msgid "Are you sure you want to clear the database?"
 msgstr "Haluatko todella tyhjentää tietokannan?"
 
 #: bp/admin/templates/admin/admin.html:19
+#: bp/start/templates/start/my_settings.html:15
 msgid "Are you sure you want to delete your data?"
 msgstr "haluatko todella poistaa tuomasi tiedot?"
 
@@ -390,15 +396,18 @@ msgstr "haluatko todella poistaa tuomasi tiedot?"
 msgid "Isotammi Database Management Operations"
 msgstr "Isotammi-tietokannan hallinta"
 
-#: bp/admin/templates/admin/admin.html:39 bp/admin/templates/admin/list_users.html:81
+#: bp/admin/templates/admin/admin.html:39
+#: bp/admin/templates/admin/list_users.html:81
 #: bp/admin/templates/admin/list_users_mails.html:85
 #: bp/gramps/templates/gramps/index_gramps.html:17
-#: bp/scene/templates/scene/index_scene.html:18 bp/start/templates/start/my_message.html:43
-#: bp/start/templates/start/my_settings.html:22
+#: bp/scene/templates/scene/index_scene.html:18
+#: bp/start/templates/start/my_message.html:43
+#: bp/start/templates/start/my_settings.html:32
 msgid "User"
 msgstr "Käyttäjä"
 
-#: bp/admin/templates/admin/admin.html:40 bp/scene/templates/scene/index_scene.html:19
+#: bp/admin/templates/admin/admin.html:40
+#: bp/scene/templates/scene/index_scene.html:19
 msgid "with roles"
 msgstr "rooleina"
 
@@ -423,44 +432,53 @@ msgstr "Tyhjennä koko tietokanta"
 msgid "Clear the database but save user IDs"
 msgstr "Tyhjennä tietokanta, säästä käyttäjät rooleineen"
 
-#: bp/admin/templates/admin/admin.html:57
-msgid "Delete the imported data of user"
-msgstr "Tyhjennä käyttäjän tuomat tiedot:"
+#: bp/admin/templates/admin/admin.html:56
+#: bp/start/templates/start/my_settings.html:88
+msgid "Delete all my imported data"
+msgstr "Poista kaikki tarjokasaineistoni"
 
-#: bp/admin/templates/admin/admin.html:66
+#: bp/admin/templates/admin/admin.html:56
+#: bp/start/templates/start/my_settings.html:27
+msgid "My Home Page"
+msgstr "Omat tiedot"
+
+#: bp/admin/templates/admin/admin.html:65
 msgid "User and reference information management"
 msgstr "Käyttäjien ja referenssitietojen hallinta"
 
-#: bp/admin/templates/admin/admin.html:68
+#: bp/admin/templates/admin/admin.html:67
 msgid "Active and pending users, including –"
 msgstr "Aktiiviset ja odottavat käyttäjät, ml."
 
-#: bp/admin/templates/admin/admin.html:70
+#: bp/admin/templates/admin/admin.html:69
 msgid "Usernames and uploaded materials"
 msgstr "Käyttäjätunnukset ja tiedostot"
 
-#: bp/admin/templates/admin/admin.html:71 bp/admin/templates/admin/allowed_emails.html:45
+#: bp/admin/templates/admin/admin.html:70
+#: bp/admin/templates/admin/allowed_emails.html:45
 msgid "User candidates"
 msgstr "Kutsutut käyttäjät"
 
-#: bp/admin/templates/admin/admin.html:73 bp/scene/templates/scene/persons.html:135
-#: bp/tools/templates/tools/table_refnames.html:18 templates/join_persons.html:74
+#: bp/admin/templates/admin/admin.html:72
+#: bp/scene/templates/scene/persons.html:136
+#: bp/tools/templates/tools/table_refnames.html:18
+#: templates/join_persons.html:74
 msgid "Reference names"
 msgstr "Referenssinimet"
 
-#: bp/admin/templates/admin/admin.html:74
+#: bp/admin/templates/admin/admin.html:73
 msgid "Set the estimated birth and death dates of a person"
 msgstr "Aseta henkilön arvioidut syntymä- ja kuolinajat"
 
-#: bp/admin/templates/admin/admin.html:83
+#: bp/admin/templates/admin/admin.html:82
 msgid "Application management"
 msgstr "Sovelluksen hallinta"
 
-#: bp/admin/templates/admin/admin.html:85
+#: bp/admin/templates/admin/admin.html:84
 msgid "Display application log"
 msgstr "Näytä sovelluksen loki"
 
-#: bp/admin/templates/admin/admin.html:86
+#: bp/admin/templates/admin/admin.html:85
 msgid "List all application pages"
 msgstr "Kaikkien sivujen luettelo"
 
@@ -501,7 +519,8 @@ msgstr "sallittu vain odottaville käyttäjille"
 msgid "Pending user candidates"
 msgstr "Odottavat käyttäjäehdokkaat"
 
-#: bp/admin/templates/admin/allowed_emails.html:71 templates/del_table_users.html:20
+#: bp/admin/templates/admin/allowed_emails.html:71
+#: templates/del_table_users.html:20
 msgid "email"
 msgstr "sähköpostiosoite"
 
@@ -535,14 +554,14 @@ msgstr "Muokkaa"
 #: bp/admin/templates/admin/allowed_emails.html:93
 #: bp/admin/templates/admin/list_users_mails.html:146
 #: bp/tools/templates/tools/table_media.html:36
-#: bp/tools/templates/tools/table_of_data.html:40
-#: bp/tools/templates/tools/table_of_data.html:43
-#: bp/tools/templates/tools/table_of_objects.html:48
-#: bp/tools/templates/tools/table_of_objects.html:51
+#: bp/tools/templates/tools/table_of_data.html:46
+#: bp/tools/templates/tools/table_of_data.html:49
+#: bp/tools/templates/tools/table_of_objects.html:49
+#: bp/tools/templates/tools/table_of_objects.html:52
 #: bp/tools/templates/tools/table_people_by_surname.html:29
-#: bp/tools/templates/tools/table_sources.html:30
-#: bp/tools/templates/tools/table_surnames.html:23 templates/_ng_table_repositories.html:28
-#: templates/del_table_users.html:32
+#: bp/tools/templates/tools/table_sources.html:34
+#: bp/tools/templates/tools/table_surnames.html:23
+#: templates/_ng_table_repositories.html:28 templates/del_table_users.html:32
 msgid "No data"
 msgstr "Ei tietoja"
 
@@ -563,7 +582,8 @@ msgstr "Gedcomit %(n)s käyttäjältä"
 msgid "GEDCOMs for all users"
 msgstr "Gedcom-tiedostot kaikilta käyttäjiltä"
 
-#: bp/admin/templates/admin/gedcoms.html:27 bp/admin/templates/admin/syslog.html:10
+#: bp/admin/templates/admin/gedcoms.html:27
+#: bp/admin/templates/admin/syslog.html:12
 #: bp/admin/templates/admin/uploads.html:51
 msgid "User id"
 msgstr "Käyttäjätunnus"
@@ -572,11 +592,13 @@ msgstr "Käyttäjätunnus"
 msgid "GEDCOM file"
 msgstr "Gedcom-tiedosto"
 
-#: bp/admin/templates/admin/gedcoms.html:38 bp/admin/templates/admin/uploads.html:89
+#: bp/admin/templates/admin/gedcoms.html:38
+#: bp/admin/templates/admin/uploads.html:89
 msgid "Number of files"
 msgstr "Tiedostojen lukumäärä"
 
-#: bp/admin/templates/admin/gedcoms.html:39 bp/admin/templates/admin/message.html:59
+#: bp/admin/templates/admin/gedcoms.html:39
+#: bp/admin/templates/admin/message.html:59
 #: bp/admin/templates/admin/uploads.html:90
 msgid "List of users"
 msgstr "Käyttäjälistaus"
@@ -590,18 +612,20 @@ msgid "Admin-Start Page"
 msgstr "Ylläpitäjän alkusivulle"
 
 #: bp/admin/templates/admin/layout.html:20 bp/gedcom/templates/g_layout.html:28
-#: bp/scene/templates/scene/layout.html:28 bp/start/templates/start/s_layout.html:27
-#: templates/a_layout.html:27
+#: bp/scene/templates/scene/layout.html:28
+#: bp/start/templates/start/s_layout.html:27 templates/a_layout.html:27
 msgid "My profile"
 msgstr "Käyttäjäprofiilini"
 
-#: bp/admin/templates/admin/layout.html:21 bp/scene/templates/scene/layout.html:29
-#: bp/scene/templates/scene/layout.html:40 bp/start/templates/start/s_layout.html:28
-#: templates/a_layout.html:28
+#: bp/admin/templates/admin/layout.html:21
+#: bp/scene/templates/scene/layout.html:29
+#: bp/scene/templates/scene/layout.html:40
+#: bp/start/templates/start/s_layout.html:28 templates/a_layout.html:28
 msgid "The Genealogical Society of Finland"
 msgstr "Suomen Sukututkimusseura"
 
-#: bp/admin/templates/admin/layout.html:26 bp/tools/templates/tools/ng_same_name.html:13
+#: bp/admin/templates/admin/layout.html:26
+#: bp/tools/templates/tools/ng_same_name.html:13
 #: bp/tools/templates/tools/ng_same_person.html:13
 #: bp/tools/templates/tools/table_families.html:11
 #: bp/tools/templates/tools/table_media.html:11
@@ -613,7 +637,8 @@ msgstr "Suomen Sukututkimusseura"
 msgid "Change settings"
 msgstr "Muuta asetuksia"
 
-#: bp/admin/templates/admin/layout.html:26 bp/tools/templates/tools/ng_same_name.html:13
+#: bp/admin/templates/admin/layout.html:26
+#: bp/tools/templates/tools/ng_same_name.html:13
 #: bp/tools/templates/tools/ng_same_person.html:13
 #: bp/tools/templates/tools/table_families.html:11
 #: bp/tools/templates/tools/table_media.html:11
@@ -626,12 +651,13 @@ msgid "Select displayed data"
 msgstr "Valitse näytettävät tiedot"
 
 #: bp/admin/templates/admin/layout.html:39 bp/gedcom/templates/g_layout.html:45
-#: bp/scene/templates/scene/layout.html:42 bp/start/templates/start/s_layout.html:37
-#: templates/a_layout.html:37
+#: bp/scene/templates/scene/layout.html:42
+#: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:37
 msgid "Version"
 msgstr "versio"
 
-#: bp/admin/templates/admin/list_users.html:3 bp/tools/templates/tools/ng_compare.html:3
+#: bp/admin/templates/admin/list_users.html:3
+#: bp/tools/templates/tools/ng_compare.html:3
 #: bp/tools/templates/tools/ng_people_by_surname.html:3
 #: bp/tools/templates/tools/ng_same_birthday.html:3
 #: bp/tools/templates/tools/ng_same_deathday.html:3
@@ -647,8 +673,9 @@ msgstr "versio"
 #: bp/tools/templates/tools/table_person_by_id.html:3
 #: bp/tools/templates/tools/table_persons.html:3
 #: bp/tools/templates/tools/table_sources.html:3
-#: bp/tools/templates/tools/table_surnames.html:3 templates/_ng_table_repositories.html:3
-#: templates/del_table_users.html:3 templates/ladattu2.html:3
+#: bp/tools/templates/tools/table_surnames.html:3
+#: templates/_ng_table_repositories.html:3 templates/del_table_users.html:3
+#: templates/ladattu2.html:3
 msgid "Database Information"
 msgstr "Tiedot kannasta"
 
@@ -728,27 +755,33 @@ msgstr "Lokitiedot siirrosta Grampsista tietokantaan"
 msgid "Log of Gramps XML upload"
 msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
-#: bp/admin/templates/admin/load_result.html:19 bp/gramps/templates/gramps/result.html:27
+#: bp/admin/templates/admin/load_result.html:19
+#: bp/gramps/templates/gramps/result.html:27
 msgid "Return"
 msgstr "Palaa"
 
-#: bp/admin/templates/admin/message.html:4 bp/admin/templates/admin/message.html:37
+#: bp/admin/templates/admin/message.html:4
+#: bp/admin/templates/admin/message.html:37
 msgid "Send email to users"
 msgstr "Sähköpostia käyttäjille"
 
-#: bp/admin/templates/admin/message.html:23 bp/start/templates/start/my_message.html:23
+#: bp/admin/templates/admin/message.html:23
+#: bp/start/templates/start/my_message.html:23
 msgid "Message sent"
 msgstr "Viesti lähetetty"
 
-#: bp/admin/templates/admin/message.html:27 bp/start/templates/start/my_message.html:27
+#: bp/admin/templates/admin/message.html:27
+#: bp/start/templates/start/my_message.html:27
 msgid "Message send failed"
 msgstr "Viestin lähetys epäonnistui"
 
-#: bp/admin/templates/admin/message.html:39 bp/start/templates/start/my_message.html:41
+#: bp/admin/templates/admin/message.html:39
+#: bp/start/templates/start/my_message.html:41
 msgid "Write a message"
 msgstr "Kirjoita viesti"
 
-#: bp/admin/templates/admin/message.html:46 bp/start/templates/start/my_message.html:48
+#: bp/admin/templates/admin/message.html:46
+#: bp/start/templates/start/my_message.html:48
 msgid "Subject"
 msgstr "Aihe"
 
@@ -756,16 +789,19 @@ msgstr "Aihe"
 msgid "Message from Isotammi admin"
 msgstr "Viesti Isotammen ylläpitäjältä"
 
-#: bp/admin/templates/admin/message.html:49 bp/start/templates/start/my_message.html:51
+#: bp/admin/templates/admin/message.html:49
+#: bp/start/templates/start/my_message.html:51
 msgid "Message"
 msgstr "Viesti"
 
-#: bp/admin/templates/admin/message.html:54 bp/start/templates/start/my_message.html:56
-#: bp/start/templates/start/my_settings.html:41
+#: bp/admin/templates/admin/message.html:54
+#: bp/start/templates/start/my_message.html:56
+#: bp/start/templates/start/my_settings.html:51
 msgid "Apply"
 msgstr "Lähetä"
 
-#: bp/admin/templates/admin/reference.html:3 bp/gedcom/templates/gedcom_info.html:4
+#: bp/admin/templates/admin/reference.html:3
+#: bp/gedcom/templates/gedcom_info.html:4
 #: bp/scene/templates/scene/index_scene.html:4
 msgid "Logged on user"
 msgstr "Kirjautunut käyttäjä"
@@ -786,7 +822,8 @@ msgstr "Lataa referenssinimiä"
 msgid "Destroying <u>all former</u> and creating a unique index"
 msgstr "Tuhotaan <u>kaikki entiset</u> ja luodaan yksikäsitteinen indeksi"
 
-#: bp/admin/templates/admin/reference.html:24 bp/gedcom/templates/gedcom_list.html:41
+#: bp/admin/templates/admin/reference.html:24
+#: bp/gedcom/templates/gedcom_list.html:41
 #: bp/gramps/templates/gramps/index_gramps.html:32
 msgid "Upload"
 msgstr "Lähetä"
@@ -799,7 +836,8 @@ msgstr "Referenssinimien käsittely"
 msgid "Listings"
 msgstr "Listaukset"
 
-#: bp/admin/templates/admin/reference.html:34 bp/tools/templates/tools/tables.html:28
+#: bp/admin/templates/admin/reference.html:34
+#: bp/tools/templates/tools/tables.html:28
 msgid "List reference names"
 msgstr "Listaa referenssinimet"
 
@@ -815,35 +853,39 @@ msgstr "Aseta muuttuneet referenssinimet kaikille ihmisille"
 msgid "Do not use"
 msgstr "Älä käytä"
 
-#: bp/admin/templates/admin/syslog.html:2 bp/admin/templates/admin/syslog.html:6
+#: bp/admin/templates/admin/syslog.html:2
+#: bp/admin/templates/admin/syslog.html:8
 msgid "Syslog"
 msgstr "Järjestelmän loki"
 
-#: bp/admin/templates/admin/syslog.html:9
+#: bp/admin/templates/admin/syslog.html:11
 msgid "Time"
 msgstr "Aika"
 
-#: bp/admin/templates/admin/syslog.html:11 bp/scene/templates/scene/place_events.html:64
-#: bp/scene/templates/scene/place_events.html:90
+#: bp/admin/templates/admin/syslog.html:13
+#: bp/scene/templates/scene/family.html:23
+#: bp/scene/templates/scene/place_events.html:65
+#: bp/scene/templates/scene/place_events.html:91
 #: bp/tools/templates/tools/table_baptism_data.html:11
-#: bp/tools/templates/tools/table_families.html:24 templates/cite_sour_repo.html:15
-#: templates/cite_sour_repo.html:58 templates/repo_sources.html:19
+#: bp/tools/templates/tools/table_families.html:24
+#: templates/cite_sour_repo.html:15 templates/cite_sour_repo.html:59
+#: templates/repo_sources.html:19
 msgid "Type"
 msgstr "Tyyppi"
 
-#: bp/admin/templates/admin/syslog.html:12
+#: bp/admin/templates/admin/syslog.html:14
 msgid "Content"
 msgstr "Sisältö"
 
-#: bp/admin/templates/admin/syslog.html:30
+#: bp/admin/templates/admin/syslog.html:34
 msgid "Older events"
 msgstr "Vanhemmat tapahtumat"
 
-#: bp/admin/templates/admin/syslog.html:34
+#: bp/admin/templates/admin/syslog.html:39
 msgid "Newer events"
 msgstr "Uudemmat tapahtumat"
 
-#: bp/admin/templates/admin/syslog.html:36
+#: bp/admin/templates/admin/syslog.html:41
 msgid "Back"
 msgstr "Takaisin"
 
@@ -855,10 +897,12 @@ msgstr "Tiedot talletettu"
 msgid "Store to Database"
 msgstr "Tietojen talletus kantaan"
 
-#: bp/admin/templates/admin/talletettu.html:27 bp/start/templates/start/my_settings.html:42
+#: bp/admin/templates/admin/talletettu.html:28
+#: bp/start/templates/start/my_settings.html:52
 #: bp/tools/templates/tools/person2.html:43
-#: bp/tools/templates/tools/source_citations.html:35 templates/cite_sour_repo.html:73
-#: templates/db_test.html:10 templates/repo_sources.html:52
+#: bp/tools/templates/tools/source_citations.html:35
+#: templates/cite_sour_repo.html:75 templates/db_test.html:10
+#: templates/repo_sources.html:52
 msgid "Go back"
 msgstr "Paluu"
 
@@ -895,32 +939,39 @@ msgstr "Kaikkien käyttäjien lataamat tiedostot"
 msgid "Status for differents steps in XML file upload:"
 msgstr "Syöttötiedoston käsittelyvaiheet"
 
-#: bp/admin/templates/admin/uploads.html:32 bp/gramps/templates/gramps/uploads.html:74
+#: bp/admin/templates/admin/uploads.html:32
+#: bp/gramps/templates/gramps/uploads.html:74
 msgid "the file has been uploaded to server"
 msgstr "tiedosto on tuotu palvelimelle"
 
-#: bp/admin/templates/admin/uploads.html:36 bp/gramps/templates/gramps/uploads.html:75
+#: bp/admin/templates/admin/uploads.html:36
+#: bp/gramps/templates/gramps/uploads.html:75
 msgid "the file content is being stored to the database"
 msgstr "tiedoston sisältöä ladataan tietokantaan"
 
-#: bp/admin/templates/admin/uploads.html:40 bp/gramps/templates/gramps/uploads.html:77
+#: bp/admin/templates/admin/uploads.html:40
+#: bp/gramps/templates/gramps/uploads.html:77
 msgid "the file content has been stored to the database"
 msgstr "tiedot on talletettu tietokantaan"
 
-#: bp/admin/templates/admin/uploads.html:44 bp/gramps/templates/gramps/uploads.html:81
+#: bp/admin/templates/admin/uploads.html:44
+#: bp/gramps/templates/gramps/uploads.html:81
 msgid "there was an error"
 msgstr "päättyi virhetilanteeseen"
 
-#: bp/admin/templates/admin/uploads.html:53 bp/gedcom/templates/gedcom_info.html:57
+#: bp/admin/templates/admin/uploads.html:53
+#: bp/gedcom/templates/gedcom_info.html:57
 #: bp/gramps/templates/gramps/uploads.html:87
 msgid "Upload time"
 msgstr "Ladattu palvelimelle"
 
-#: bp/admin/templates/admin/uploads.html:54 bp/gramps/templates/gramps/uploads.html:88
+#: bp/admin/templates/admin/uploads.html:54
+#: bp/gramps/templates/gramps/uploads.html:88
 msgid "XML file"
 msgstr "XML-tiedosto"
 
-#: bp/admin/templates/admin/uploads.html:55 bp/gramps/templates/gramps/uploads.html:89
+#: bp/admin/templates/admin/uploads.html:55
+#: bp/gramps/templates/gramps/uploads.html:91
 msgid "Status"
 msgstr "Tila"
 
@@ -930,18 +981,20 @@ msgstr "Toimenpiteet"
 
 #: bp/admin/templates/admin/uploads.html:62
 msgid "me"
-msgstr ""
+msgstr "minä"
 
-#: bp/admin/templates/admin/uploads.html:72 bp/gramps/templates/gramps/uploads.html:99
+#: bp/admin/templates/admin/uploads.html:72
+#: bp/gramps/templates/gramps/uploads.html:100
 msgid "deleted from database"
 msgstr "poistettu kannasta"
 
-#: bp/admin/templates/admin/uploads.html:73 bp/gramps/templates/gramps/uploads.html:100
+#: bp/admin/templates/admin/uploads.html:73
 #, python-format
 msgid "batch %(batch_id)s; %(persons)d persons"
 msgstr "erä %(batch_id)s; %(persons)d henkilöä"
 
-#: bp/admin/templates/admin/uploads.html:79 bp/gramps/templates/gramps/uploads.html:117
+#: bp/admin/templates/admin/uploads.html:79
+#: bp/gramps/templates/gramps/uploads.html:120
 msgid "Store to database"
 msgstr "Tallenna tietokantaan"
 
@@ -1030,102 +1083,92 @@ msgstr "Puuttuvat tietueet"
 msgid "Unused records"
 msgstr "Käyttämättömät tiedot"
 
-#: bp/gedcom/routes.py:196
+#: bp/gedcom/routes.py:45
 msgid "Gedcoms"
 msgstr "gedcomit"
 
-#: bp/gedcom/routes.py:217
+#: bp/gedcom/routes.py:66
 msgid "Current file"
 msgstr "Nykyinen tiedosto"
 
-#: bp/gedcom/routes.py:252 bp/gedcom/routes.py:253 bp/gedcom/routes.py:269
-#: bp/gedcom/routes.py:270
+#: bp/gedcom/routes.py:101 bp/gedcom/routes.py:102 bp/gedcom/routes.py:118
+#: bp/gedcom/routes.py:119
 msgid "File {} saved as {}"
 msgstr "Tiedosto {} talletettu nimelle {}"
 
-#: bp/gedcom/routes.py:296 bp/gedcom/routes.py:302
+#: bp/gedcom/routes.py:145 bp/gedcom/routes.py:151
 msgid "Choose a GEDCOM file to upload"
 msgstr "Valitse ladattava gedcom-tiedosto"
 
-#: bp/gedcom/routes.py:310
+#: bp/gedcom/routes.py:159
 msgid "This GEDCOM file already exists"
 msgstr "Gedcom-tiedosto on jo olemassa"
 
-#: bp/gedcom/routes.py:334 bp/gedcom/routes.py:355
+#: bp/gedcom/routes.py:183 bp/gedcom/routes.py:204
 msgid "You don't have permission to view that GEDCOM"
 msgstr "Sinulla ei ole oiketta katsoa tätä Gedcom-tiedostoa"
 
-#: bp/gedcom/routes.py:348
+#: bp/gedcom/routes.py:197
 msgid "That GEDCOM file does not exist on the server"
 msgstr "Tätä Gedcom-tiedostoa ei ole palvelimella"
 
-#: bp/gedcom/routes.py:469
-msgid "Deleted:"
-msgstr "Poistettu:"
-
-#: bp/gedcom/routes.py:476 bp/gedcom/transformer.py:53 bp/gedcom/transformer.py:60
-msgid "Replaced:"
-msgstr "Korvattu:"
-
-#: bp/gedcom/routes.py:477
-msgid "starting from line "
-msgstr "alkaen riviltä "
-
-#: bp/gedcom/routes.py:482 bp/gedcom/transformer.py:55 bp/gedcom/transformer.py:62
-msgid "With:"
-msgstr "tällä:"
-
-#: bp/gedcom/routes.py:505
+#: bp/gedcom/routes.py:319
 msgid "Transform '{}' started at {}"
 msgstr "Muunnos '{}' käynnistettiin {}"
 
-#: bp/gedcom/routes.py:515
+#: bp/gedcom/routes.py:329
 msgid "Name of the input GEDCOM file"
 msgstr "Gedcom-tiedoston nimi"
 
-#: bp/gedcom/routes.py:516
+#: bp/gedcom/routes.py:330
 msgid "Name of the log file"
 msgstr "Lokitiedoston nimi"
 
-#: bp/gedcom/routes.py:519 bp/gedcom/routes.py:715
+#: bp/gedcom/routes.py:333 bp/gedcom/routes.py:529
 msgid "Display changed rows"
 msgstr "Näytä muutetut rivit"
 
-#: bp/gedcom/routes.py:521
+#: bp/gedcom/routes.py:335
 msgid "Do not produce an output file"
 msgstr "Älä tuota tulostiedostoa"
 
-#: bp/gedcom/routes.py:523
+#: bp/gedcom/routes.py:337
 msgid "Do not produce a log in the output file"
 msgstr "Älä tuota lokia tulostiedostoon"
 
-#: bp/gedcom/routes.py:525
+#: bp/gedcom/routes.py:339
 msgid "Encoding of the input GEDCOM"
 msgstr "Gedcom-tiedoston merkkikoodaus"
 
-#: bp/gedcom/routes.py:552
+#: bp/gedcom/routes.py:366
 msgid "------ Number of changes:"
 msgstr "------ Muutosten lukumäärä:"
 
-#: bp/gedcom/routes.py:557 bp/gedcom/routes.py:560
+#: bp/gedcom/routes.py:371 bp/gedcom/routes.py:374
 msgid "File saved as {}"
 msgstr "Tiedosto talletettu nimelle {}"
 
-#: bp/gedcom/routes.py:558
+#: bp/gedcom/routes.py:372
 msgid "Old file saved as {}"
 msgstr "Vanha versio talletettu nimelle {}"
 
-#: bp/gedcom/routes.py:561
+#: bp/gedcom/routes.py:375
 msgid "Transform '{}' ended at {}"
 msgstr "Muunnos '{}' päättyi {}"
 
-#: bp/gedcom/routes.py:628 static/js/gedcom_scripts.js:260
-msgid "Errors:"
-msgstr "Virheitä:"
-
-#: bp/gedcom/routes.py:688
+#: bp/gedcom/routes.py:502
 msgid "Unsupported type: "
 msgstr "Tyyppiä ei tueta:"
+
+#: bp/gedcom/models/gedcom_utils.py:198 bp/gedcom/transformer.py:53
+#: bp/gedcom/transformer.py:60
+msgid "Replaced:"
+msgstr "Korvattu:"
+
+#: bp/gedcom/models/gedcom_utils.py:204 bp/gedcom/transformer.py:55
+#: bp/gedcom/transformer.py:62
+msgid "With:"
+msgstr "tällä:"
 
 #: bp/gedcom/transformer.py:73
 msgid "Added:"
@@ -1144,9 +1187,19 @@ msgstr "Virheellinen GEDCOM rivillä: {}"
 msgid "Invalid GEDCOM; no level %s lines"
 msgstr "Virheellinen Gedcom; ei tason %s rivejä"
 
+#: bp/gedcom/models/gedcom_utils.py:191
+msgid "Deleted:"
+msgstr "Poistettu:"
+
+#: bp/gedcom/models/gedcom_utils.py:199
+msgid "starting from line "
+msgstr "alkaen riviltä "
+
 #: bp/gedcom/templates/g_layout.html:25 bp/scene/templates/scene/layout.html:25
-#: bp/scene/templates/scene/locations.html:50 bp/scene/templates/scene/persons.html:121
-#: bp/scene/templates/scene/persons_list.html:120 bp/scene/templates/scene/sources.html:48
+#: bp/scene/templates/scene/locations.html:50
+#: bp/scene/templates/scene/persons.html:121
+#: bp/scene/templates/scene/persons_list.html:120
+#: bp/scene/templates/scene/sources.html:48
 #: bp/start/templates/start/s_layout.html:24 templates/a_layout.html:24
 #: templates/ladattu2.html:10 templates/virhe_lataus.html:20
 msgid "Back to Top"
@@ -1156,27 +1209,36 @@ msgstr "Palaa alkuun"
 msgid "A Database of the Genealogical Society of Finland"
 msgstr "Suomen Sukututkimusseuran tietokanta"
 
-#: bp/gedcom/templates/g_layout.html:49 bp/start/templates/start/s_layout.html:40
-#: templates/a_layout.html:41
+#: bp/gedcom/templates/g_layout.html:49
+#: bp/start/templates/start/s_layout.html:40 templates/a_layout.html:41
 msgid "Instructions"
 msgstr "Ohjeita"
 
-#: bp/gedcom/templates/gedcom_info.html:16 bp/gedcom/templates/gedcom_list.html:4
-#: bp/gedcom/templates/gedcom_list.html:12 bp/start/templates/start/index_logged.html:57
+#: bp/gedcom/templates/gedcom_info.html:16
+#: bp/gedcom/templates/gedcom_list.html:4
+#: bp/gedcom/templates/gedcom_list.html:12
+#: bp/start/templates/start/index_logged.html:57
+#: bp/start/templates/start/my_settings.html:120
+#: bp/start/templates/start/my_settings.html:126
 msgid "Gedcom tools"
 msgstr "Gedcom-työkalut"
 
 #: bp/gedcom/templates/gedcom_info.html:23
+#: bp/start/templates/start/my_settings.html:103
 msgid "File"
 msgstr "Tiedosto"
 
-#: bp/gedcom/templates/gedcom_info.html:24 bp/gedcom/templates/gedcom_list.html:12
+#: bp/gedcom/templates/gedcom_info.html:24
+#: bp/gedcom/templates/gedcom_list.html:12
 msgid "user"
 msgstr "käyttäjätunnus"
 
-#: bp/gedcom/templates/gedcom_info.html:25 bp/gedcom/templates/gedcom_info.html:176
-#: bp/gedcom/templates/gedcom_list.html:38 bp/scene/templates/scene/person.html:76
-#: bp/scene/templates/scene/place_events.html:120
+#: bp/gedcom/templates/gedcom_info.html:25
+#: bp/gedcom/templates/gedcom_info.html:176
+#: bp/gedcom/templates/gedcom_list.html:38
+#: bp/scene/templates/scene/person.html:76
+#: bp/scene/templates/scene/place_events.html:121
+#: bp/start/templates/start/my_settings.html:106
 #: bp/tools/templates/tools/table_baptism_data.html:16
 msgid "Description"
 msgstr "Kuvaus"
@@ -1208,6 +1270,10 @@ msgstr "Tietoja"
 #: bp/gedcom/templates/gedcom_info.html:62
 msgid "File size"
 msgstr "Tiedoston koko"
+
+#: bp/gedcom/templates/gedcom_info.html:63
+msgid "bytes"
+msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:67
 msgid "Gedcom date"
@@ -1285,11 +1351,13 @@ msgstr "Näytä edellinen versio"
 msgid "Versions management"
 msgstr "Versioiden hallinta"
 
-#: bp/gedcom/templates/gedcom_info.html:140 bp/gedcom/templates/gedcom_info.html:141
+#: bp/gedcom/templates/gedcom_info.html:140
+#: bp/gedcom/templates/gedcom_info.html:141
 msgid "Fetch this GEDCOM"
 msgstr "Nouda tämä tiedosto työasemallesi"
 
-#: bp/gedcom/templates/gedcom_info.html:145 bp/gedcom/templates/gedcom_info.html:146
+#: bp/gedcom/templates/gedcom_info.html:145
+#: bp/gedcom/templates/gedcom_info.html:146
 msgid "Remove this GEDCOM"
 msgstr "Poista tämä gedcom palvelimelta"
 
@@ -1433,11 +1501,11 @@ msgstr "1950-/>1950 -> FROM/AFT 1950"
 msgid "Change -1950/<1950 to TO/BEF 1950"
 msgstr "-1950/<1950 -> TO/BEF 1950"
 
-#: bp/gedcom/transforms/dates.py:82
+#: bp/gedcom/transforms/dates.py:87
 msgid "Invalid dates:"
 msgstr "Virheellisiä päivämääriä:"
 
-#: bp/gedcom/transforms/dates.py:91
+#: bp/gedcom/transforms/dates.py:96
 #, python-format
 msgid "%(date)s (line %(linkstr)s)<br>"
 msgstr "%(date)s (rivillä %(linkstr)s)<br>\t"
@@ -1459,7 +1527,8 @@ msgid "Personal names"
 msgstr "Henkilönimet"
 
 #: bp/gedcom/transforms/places.py:11 bp/scene/templates/scene/locations.html:3
-#: bp/scene/templates/scene/macros.html:65 bp/tools/templates/tools/tables.html:27
+#: bp/scene/templates/scene/macros.html:65
+#: bp/tools/templates/tools/tables.html:27
 msgid "Places"
 msgstr "Paikat"
 
@@ -1663,17 +1732,17 @@ msgstr "Poista tag-X-merkinnät"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
-#: bp/gramps/gramps_loader.py:115 bp/gramps/xml_dom_handler.py:119
+#: bp/gramps/gramps_loader.py:117 bp/gramps/xml_dom_handler.py:120
 msgid "Database save failed due to {} {}"
 msgstr "Talletus tietokantaan epäonnistui, syy {} {}"
 
-#: bp/gramps/xml_dom_handler.py:107
+#: bp/gramps/xml_dom_handler.py:108
 msgid "Database save failed"
 msgstr "Talletus tietokantaan epäonnistui"
 
 #: bp/gramps/templates/gramps/index_gramps.html:3
 msgid "Isotammi User's Candidate Material"
-msgstr "Käyttäjän ehdokasaineisto"
+msgstr "Käyttäjän tarjokasaineisto"
 
 #: bp/gramps/templates/gramps/index_gramps.html:16
 msgid "Candidate material xml files"
@@ -1685,7 +1754,7 @@ msgstr "Aineiston lähettäminen"
 
 #: bp/gramps/templates/gramps/index_gramps.html:28
 msgid "Select Gramps XML File (*.gramps) for converting to candidate material"
-msgstr "Valitse Gramps XML-tiedosto (*.gramps) ehdokasaineistoksi"
+msgstr "Valitse Gramps XML-tiedosto (*.gramps) tarjokasaineistoksi"
 
 #: bp/gramps/templates/gramps/index_gramps.html:38
 msgid "My Gramps files on server"
@@ -1715,7 +1784,8 @@ msgstr "Toimenpide"
 msgid "Time / sec"
 msgstr "Aika sekunneissa"
 
-#: bp/gramps/templates/gramps/uploads.html:3 bp/gramps/templates/gramps/uploads.html:61
+#: bp/gramps/templates/gramps/uploads.html:3
+#: bp/gramps/templates/gramps/uploads.html:61
 msgid "Uploads from Gramps"
 msgstr "Grampsista ladatut aineistot"
 
@@ -1727,39 +1797,52 @@ msgstr "Käsittelyn vaiheet"
 msgid "Not found any more"
 msgstr "Ehdokasaineisto poistunut"
 
-#: bp/gramps/templates/gramps/uploads.html:105
+#: bp/gramps/templates/gramps/uploads.html:89
+#: bp/start/templates/start/my_settings.html:73
+msgid "Batch"
+msgstr "Erä"
+
+#: bp/gramps/templates/gramps/uploads.html:90
+#: bp/scene/templates/scene/macros.html:54
+#: bp/scene/templates/scene/persons.html:14
+#: bp/scene/templates/scene/persons_list.html:29
+#: bp/tools/templates/tools/table_refnames.html:37
+msgid "Persons"
+msgstr "Henkilöt"
+
+#: bp/gramps/templates/gramps/uploads.html:108
 msgid "See if ready"
 msgstr "Tarkasta, joko valmistui"
 
-#: bp/gramps/templates/gramps/uploads.html:114
+#: bp/gramps/templates/gramps/uploads.html:117
 msgid "Operations for"
 msgstr "Toiminnot tiedostolle"
 
-#: bp/gramps/templates/gramps/uploads.html:114
+#: bp/gramps/templates/gramps/uploads.html:117
 msgid "the selected file"
 msgstr "valittu tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:116
+#: bp/gramps/templates/gramps/uploads.html:119
 msgid "Download to your computer"
 msgstr "Lataa omalle koneelle"
 
-#: bp/gramps/templates/gramps/uploads.html:118
+#: bp/gramps/templates/gramps/uploads.html:121
 msgid "Show last log"
 msgstr "Näytä viimeisin loki"
 
-#: bp/gramps/templates/gramps/uploads.html:119
+#: bp/gramps/templates/gramps/uploads.html:122
 msgid "Delete the file"
 msgstr "Tuhoa tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:124
+#: bp/gramps/templates/gramps/uploads.html:127
 msgid "Send a new Gramps file"
 msgstr "Tuo uusi Gramps-tiedosto"
 
-#: bp/gramps/templates/gramps/uploads.html:126
+#: bp/gramps/templates/gramps/uploads.html:129
 msgid "See your own data"
-msgstr "Katso muodostettuja ehdokasaineistojasi"
+msgstr "Katso muodostettuja tarjokasaineistojasi"
 
-#: bp/gramps/templates/gramps/uploads.html:128
+#: bp/gramps/templates/gramps/uploads.html:131
 msgid "Return to front page"
 msgstr "Palaa etusivulle"
 
@@ -1767,66 +1850,110 @@ msgstr "Palaa etusivulle"
 msgid "List of families"
 msgstr "Perheluettelo"
 
-#: bp/scene/templates/scene/families.html:15
+#: bp/scene/templates/scene/families.html:25
 #: bp/tools/templates/tools/table_families.html:14
 msgid "List of Families"
 msgstr "Perheluettelo"
 
-#: bp/scene/templates/scene/families.html:26
+#: bp/scene/templates/scene/families.html:36
 #, python-format
-msgid "Displaying %(num)s families"
+msgid "Displaying %(num)s distinct families"
 msgstr "Näytetään %(num)s perhettä"
 
-#: bp/scene/templates/scene/families.html:33 bp/scene/templates/scene/families.html:46
+#: bp/scene/templates/scene/families.html:37
+#: bp/scene/templates/scene/persons_list.html:41
+#, python-format
+msgid "starting <tt>%(name)s</tt>"
+msgstr "alkaen <tt>%(name)s</tt>"
+
+#: bp/scene/templates/scene/families.html:38
+#: bp/scene/templates/scene/persons_list.html:42
+msgid "from begin"
+msgstr "alusta"
+
+#: bp/scene/templates/scene/families.html:39
+#: bp/scene/templates/scene/persons_list.html:43
+msgid "data set"
+msgstr "tietojoukko"
+
+#: bp/scene/templates/scene/families.html:54
+#: bp/scene/templates/scene/families.html:67
 #: bp/scene/templates/scene/persons_list.html:57
 msgid "Go to"
 msgstr "Siirry"
 
-#: bp/scene/templates/scene/families.html:33 bp/scene/templates/scene/families.html:71
-#: bp/scene/templates/scene/families.html:93 bp/scene/templates/scene/families.html:145
-#: bp/scene/templates/scene/person.html:141 bp/scene/templates/scene/person.html:174
-#: bp/scene/templates/scene/person_pg.html:168 bp/scene/templates/scene/person_pg.html:201
+#: bp/scene/templates/scene/families.html:54
+#: bp/scene/templates/scene/families.html:92
+#: bp/scene/templates/scene/families.html:122
+#: bp/scene/templates/scene/families.html:174
+#: bp/scene/templates/scene/family.html:26
+#: bp/scene/templates/scene/person.html:143
+#: bp/scene/templates/scene/person.html:177
+#: bp/scene/templates/scene/person_pg.html:168
+#: bp/scene/templates/scene/person_pg.html:201
 #: bp/tools/templates/tools/table_families.html:21
 #: bp/tools/templates/tools/table_families_by_id.html:67
 msgid "Father"
 msgstr "Mies"
 
-#: bp/scene/templates/scene/families.html:35 bp/scene/templates/scene/families.html:48
+#: bp/scene/templates/scene/families.html:56
+#: bp/scene/templates/scene/families.html:69
 #: bp/scene/templates/scene/persons_list.html:59
 msgid "Starting letters of surname"
 msgstr "Sukunimen alku"
 
-#: bp/scene/templates/scene/families.html:36 bp/scene/templates/scene/families.html:49
-#: bp/scene/templates/scene/person.html:37 bp/scene/templates/scene/person.html:161
-#: bp/scene/templates/scene/persons.html:39 bp/scene/templates/scene/persons.html:68
+#: bp/scene/templates/scene/families.html:57
+#: bp/scene/templates/scene/families.html:70
+#: bp/scene/templates/scene/person.html:37
+#: bp/scene/templates/scene/person.html:164
+#: bp/scene/templates/scene/persons.html:39
+#: bp/scene/templates/scene/persons.html:68
 #: bp/scene/templates/scene/persons_list.html:60
 #: bp/tools/templates/tools/table_surnames.html:10
 msgid "Surname"
 msgstr "sukunimi"
 
-#: bp/scene/templates/scene/families.html:46 bp/scene/templates/scene/families.html:79
-#: bp/scene/templates/scene/families.html:94 bp/scene/templates/scene/families.html:153
-#: bp/scene/templates/scene/person.html:143 bp/scene/templates/scene/person.html:176
-#: bp/scene/templates/scene/person_pg.html:170 bp/scene/templates/scene/person_pg.html:203
+#: bp/scene/templates/scene/families.html:67
+#: bp/scene/templates/scene/families.html:104
+#: bp/scene/templates/scene/families.html:123
+#: bp/scene/templates/scene/families.html:186
+#: bp/scene/templates/scene/family.html:34
+#: bp/scene/templates/scene/person.html:145
+#: bp/scene/templates/scene/person.html:179
+#: bp/scene/templates/scene/person_pg.html:170
+#: bp/scene/templates/scene/person_pg.html:203
 #: bp/tools/templates/tools/table_families.html:23
 #: bp/tools/templates/tools/table_families_by_id.html:91
 msgid "Mother"
 msgstr "Vaimo"
 
-#: bp/scene/templates/scene/families.html:69 bp/scene/templates/scene/families.html:143
+#: bp/scene/templates/scene/families.html:90
+#: bp/scene/templates/scene/families.html:172
 #: bp/scene/templates/scene/persons_list.html:79
 msgid "Top of page"
 msgstr "Sivun yläreunaan"
 
-#: bp/scene/templates/scene/families.html:71 bp/scene/templates/scene/families.html:79
-#: bp/scene/templates/scene/families.html:145 bp/scene/templates/scene/families.html:153
+#: bp/scene/templates/scene/families.html:92
+#: bp/scene/templates/scene/families.html:104
+#: bp/scene/templates/scene/families.html:174
+#: bp/scene/templates/scene/families.html:186
 #: bp/scene/templates/scene/persons_list.html:81
-#: bp/scene/templates/scene/persons_list.html:178
+#: bp/scene/templates/scene/persons_list.html:180
 msgid "first page"
 msgstr "Ensimmäiselle sivulle"
 
-#: bp/scene/templates/scene/families.html:92 bp/scene/templates/scene/person_pg.html:165
-#: bp/scene/templates/scene/person_pg.html:166 bp/scene/templates/scene/person_pg.html:199
+#: bp/scene/templates/scene/families.html:97
+#: bp/scene/templates/scene/families.html:109
+#: bp/scene/templates/scene/families.html:179
+#: bp/scene/templates/scene/families.html:191
+#: bp/scene/templates/scene/persons_list.html:93
+msgid "no next page"
+msgstr "ei seuraavaa sivua"
+
+#: bp/scene/templates/scene/families.html:121
+#: bp/scene/templates/scene/person_pg.html:165
+#: bp/scene/templates/scene/person_pg.html:166
+#: bp/scene/templates/scene/person_pg.html:199
 #: bp/tools/templates/tools/table_families_by_id.html:44
 #: bp/tools/templates/tools/table_families_by_id.html:54
 #: bp/tools/templates/tools/table_person_by_id.html:39
@@ -1834,55 +1961,106 @@ msgstr "Ensimmäiselle sivulle"
 msgid "family"
 msgstr "perhe"
 
-#: bp/scene/templates/scene/families.html:95 bp/scene/templates/scene/person.html:145
-#: bp/scene/templates/scene/person.html:178 bp/scene/templates/scene/person_pg.html:172
+#: bp/scene/templates/scene/families.html:124
+#: bp/scene/templates/scene/family.html:42
+#: bp/scene/templates/scene/person.html:147
+#: bp/scene/templates/scene/person.html:181
+#: bp/scene/templates/scene/person_pg.html:172
 #: bp/scene/templates/scene/person_pg.html:205
 #: bp/tools/templates/tools/table_families_by_id.html:115
 msgid "Children"
 msgstr "Lapset"
 
-#: bp/scene/templates/scene/families.html:101
+#: bp/scene/templates/scene/families.html:130
 msgid "Go to family page"
 msgstr "Siirry perhesivulle"
 
-#: bp/scene/templates/scene/families.html:104
-#: bp/scene/templates/scene/persons_list.html:148
+#: bp/scene/templates/scene/families.html:133
+#: bp/scene/templates/scene/persons_list.html:150
 msgid "Original ID"
 msgstr "Alkuperäinen tunniste"
 
-#: bp/scene/templates/scene/families.html:105
+#: bp/scene/templates/scene/families.html:134
 msgid "Key"
 msgstr "Avain"
 
-#: bp/scene/templates/scene/families.html:112 bp/scene/templates/scene/families.html:119
+#: bp/scene/templates/scene/families.html:141
+#: bp/scene/templates/scene/families.html:148
+#: bp/scene/templates/scene/family.html:32
+#: bp/scene/templates/scene/family.html:40
 msgid "unknown"
 msgstr "tuntematon"
 
-#: bp/scene/templates/scene/families.html:123 bp/scene/templates/scene/families.html:127
+#: bp/scene/templates/scene/families.html:152
+#: bp/scene/templates/scene/families.html:156
 #, python-format
 msgid "%(num)d child"
 msgid_plural "%(num)d children"
 msgstr[0] "lapsi"
 msgstr[1] "%(num)d lasta"
 
-#: bp/scene/templates/scene/families.html:136
+#: bp/scene/templates/scene/families.html:165
 #: bp/tools/templates/tools/table_families.html:50
 #: bp/tools/templates/tools/table_persons.html:45
 msgid "No persons"
 msgstr "Ei ketään"
 
-#: bp/scene/templates/scene/family.html:3 bp/scene/templates/scene/family.html:15
+#: bp/scene/templates/scene/family.html:3
+#: bp/scene/templates/scene/family.html:15
 msgid "Family details"
 msgstr "Perheen tiedot"
 
-#: bp/scene/templates/scene/family.html:27 bp/scene/templates/scene/person.html:28
+#: bp/scene/templates/scene/family.html:22
+#: bp/scene/templates/scene/person.html:140
+#: bp/scene/templates/scene/person.html:141
+#: bp/scene/templates/scene/person.html:174
+#: bp/scene/templates/scene/person.html:175
+#: bp/tools/templates/tools/table_families_by_id.html:37
+#: templates/jinja_filters.py:75
+msgid "Family"
+msgstr "perhe"
+
+#: bp/scene/templates/scene/family.html:24
+msgid "Marriage place"
+msgstr "Liiton solmimispaikka"
+
+#: bp/scene/templates/scene/family.html:25
+msgid "Marriage dates"
+msgstr "Liiton solmimispäivä"
+
+#: bp/scene/templates/scene/family.html:50
+#: bp/scene/templates/scene/sources.html:36
+#: bp/tools/templates/tools/ng_compare.html:54
+#: bp/tools/templates/tools/ng_compare.html:112
+msgid "Notes"
+msgstr "Lisätiedot"
+
+#: bp/scene/templates/scene/family.html:59
+#: bp/scene/templates/scene/macros.html:68
+#: bp/scene/templates/scene/person.html:78
+#: bp/scene/templates/scene/place_events.html:123
+#: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:41
+#: templates/repo_sources.html:38
+msgid "Sources"
+msgstr "Lähteet"
+
+#: bp/scene/templates/scene/family.html:64
+#: bp/scene/templates/scene/person.html:303
+#: bp/scene/templates/scene/person_pg.html:270
+#: bp/scene/templates/scene/source_events.html:40
+#: templates/cite_sour_repo.html:31
+msgid "Page"
+msgstr "Sivu"
+
+#: bp/scene/templates/scene/family.html:72
+#: bp/scene/templates/scene/person.html:28
 #: bp/scene/templates/scene/person_pg.html:40
 msgid "Identifiers"
 msgstr "Tunnisteet"
 
 #: bp/scene/templates/scene/index_scene.html:16
 msgid "Exploring Isotammi Database"
-msgstr "Tutustu Isotammi-tietokantaan"
+msgstr "Tutustu Isotammi-aineistoon"
 
 #: bp/scene/templates/scene/index_scene.html:47
 msgid "Select Material for Browsing"
@@ -1890,15 +2068,15 @@ msgstr "Valitse selattava aineisto"
 
 #: bp/scene/templates/scene/index_scene.html:52
 msgid "My candidate material"
-msgstr "Kaikki ehdokasaineistoni"
+msgstr "Kaikki tarjokasaineistoni"
 
 #: bp/scene/templates/scene/index_scene.html:54
 msgid "Selected set of material"
-msgstr "Valittu ehdokasaineisto (tuontierä)"
+msgstr "Valittu tarjokasaineisto"
 
 #: bp/scene/templates/scene/index_scene.html:57
 msgid "Compare to Isotammi Database"
-msgstr "Vertaa Isotammi-tietokantaan"
+msgstr "Vertaa Isotammi-aineistoon"
 
 #: bp/scene/templates/scene/index_scene.html:60
 msgid "The Browsed Material"
@@ -1906,7 +2084,7 @@ msgstr "Selattava aineisto"
 
 #: bp/scene/templates/scene/index_scene.html:61
 msgid "You can view only approved and public material in Isotammi Database"
-msgstr "Voit katsoa vain hyväksyttyjä, julkisia tietoja Isotammi-tietokannassa"
+msgstr "Voit katsoa vain hyväksyttyjä, julkisia tietoja Isotammi-aineistossa"
 
 #: bp/scene/templates/scene/index_scene.html:65
 msgid "Start Exploring"
@@ -1922,7 +2100,7 @@ msgstr "Joukko teknisiä listauksia ja ongelmanselvitysvälineitä."
 
 #: bp/scene/templates/scene/index_scene.html:77
 msgid "The data includes accepted and candidate materials of all users."
-msgstr "Mukana on sekä hyväksytyt tiedot että kaikki ehdokasaineistot."
+msgstr "Mukana on sekä hyväksytyt tiedot että kaikki tarjokasaineistot."
 
 #: bp/scene/templates/scene/index_scene.html:81
 msgid "Explore the database"
@@ -1934,19 +2112,22 @@ msgstr "Paikat"
 
 #: bp/scene/templates/scene/locations.html:15
 msgid ""
-"This page contains a directory of all the places and the closest lower-level locations "
-"beneath them."
+"This page contains a directory of all the places and the closest lower-"
+"level locations beneath them."
 msgstr ""
-"Tällä sivulla on hakemisto kaikista paikoista ja niihin välittömästi sisältyvistä "
-"paikoista."
+"Tällä sivulla on hakemisto kaikista paikoista ja niihin välittömästi "
+"sisältyvistä paikoista."
 
-#: bp/scene/templates/scene/locations.html:27 bp/scene/templates/scene/persons.html:96
+#: bp/scene/templates/scene/locations.html:27
+#: bp/scene/templates/scene/persons.html:96
 #: bp/scene/templates/scene/sources.html:24
 msgid "Top"
 msgstr "Alkuun"
 
-#: bp/scene/templates/scene/locations.html:31 bp/scene/templates/scene/locations.html:32
-#: bp/scene/templates/scene/persons.html:100 bp/scene/templates/scene/persons_list.html:89
+#: bp/scene/templates/scene/locations.html:31
+#: bp/scene/templates/scene/locations.html:32
+#: bp/scene/templates/scene/persons.html:100
+#: bp/scene/templates/scene/persons_list.html:89
 #: bp/scene/templates/scene/sources.html:28
 msgid "Alphabetical Menu"
 msgstr "Aakkosvalikko"
@@ -1955,7 +2136,8 @@ msgstr "Aakkosvalikko"
 msgid "Location, related places"
 msgstr "Paikka, liittyvät paikat"
 
-#: bp/scene/templates/scene/locations.html:41 bp/scene/templates/scene/place_events.html:32
+#: bp/scene/templates/scene/locations.html:41
+#: bp/scene/templates/scene/place_events.html:31
 msgid "Location"
 msgstr "Sijainti"
 
@@ -1964,7 +2146,8 @@ msgstr "Sijainti"
 msgid "see details of place %(id)s"
 msgstr "Katso paikan %(id)s tiedot"
 
-#: bp/scene/templates/scene/locations.html:62 bp/scene/templates/scene/locations.html:69
+#: bp/scene/templates/scene/locations.html:62
+#: bp/scene/templates/scene/locations.html:69
 msgid "Go to location"
 msgstr "Siirry paikkaan"
 
@@ -1980,7 +2163,8 @@ msgstr "Haku"
 msgid "All persons"
 msgstr "Kaikki henkilöt"
 
-#: bp/scene/templates/scene/macros.html:51 bp/tools/templates/tools/ng_compare.html:14
+#: bp/scene/templates/scene/macros.html:51
+#: bp/tools/templates/tools/ng_compare.html:14
 #: bp/tools/templates/tools/ng_compare.html:73
 #: bp/tools/templates/tools/table_baptism_data.html:21
 #: bp/tools/templates/tools/table_person_by_id.html:26
@@ -1991,23 +2175,13 @@ msgstr "Nimet"
 msgid "Person list by default name"
 msgstr "Oletusnimen mukainen henkilöluettelo"
 
-#: bp/scene/templates/scene/macros.html:54 bp/scene/templates/scene/persons.html:14
-#: bp/scene/templates/scene/persons_list.html:29
-#: bp/tools/templates/tools/table_refnames.html:37
-msgid "Persons"
-msgstr "Henkilöt"
-
-#: bp/scene/templates/scene/macros.html:62 bp/scene/templates/scene/person.html:132
-#: bp/scene/templates/scene/person.html:134 bp/scene/templates/scene/person_pg.html:159
+#: bp/scene/templates/scene/macros.html:62
+#: bp/scene/templates/scene/person.html:134
+#: bp/scene/templates/scene/person.html:136
+#: bp/scene/templates/scene/person_pg.html:159
 #: bp/scene/templates/scene/person_pg.html:161
 msgid "Families"
 msgstr "Perheet"
-
-#: bp/scene/templates/scene/macros.html:68 bp/scene/templates/scene/person.html:78
-#: bp/scene/templates/scene/place_events.html:122 bp/scene/templates/scene/sources.html:3
-#: templates/cite_sour_repo.html:41 templates/repo_sources.html:38
-msgid "Sources"
-msgstr "Lähteet"
 
 #: bp/scene/templates/scene/macros.html:71
 msgid "Thumbnails"
@@ -2025,7 +2199,8 @@ msgstr "Katso lisätietoja"
 msgid "Log in to Isotammi"
 msgstr "Kirjaudu sisään"
 
-#: bp/scene/templates/scene/macros.html:90 bp/scene/templates/scene/persons.html:127
+#: bp/scene/templates/scene/macros.html:90
+#: bp/scene/templates/scene/persons.html:127
 #: bp/scene/templates/scene/persons_list.html:130
 #: bp/scene/templates/scene/source_events.html:51
 #, python-format
@@ -2036,23 +2211,28 @@ msgstr "Katso henkilön %(id)s tiedot"
 msgid "Anonymous"
 msgstr "nimetön"
 
-#: bp/scene/templates/scene/person.html:3 bp/scene/templates/scene/person.html:9
-#: bp/scene/templates/scene/person_pg.html:3 bp/scene/templates/scene/person_pg.html:15
+#: bp/scene/templates/scene/person.html:3
+#: bp/scene/templates/scene/person.html:9
+#: bp/scene/templates/scene/person_pg.html:3
+#: bp/scene/templates/scene/person_pg.html:15
 #: bp/tools/templates/tools/person2.html:3
 msgid "Person's details"
 msgstr "Henkilön tiedot"
 
-#: bp/scene/templates/scene/person.html:15 bp/scene/templates/scene/person_pg.html:24
+#: bp/scene/templates/scene/person.html:15
+#: bp/scene/templates/scene/person_pg.html:24
 msgid "in Photo"
 msgstr "Kuvassa"
 
-#: bp/scene/templates/scene/person.html:35 bp/scene/templates/scene/person.html:159
+#: bp/scene/templates/scene/person.html:34
+#: bp/scene/templates/scene/person.html:161
 #: bp/scene/templates/scene/persons.html:71 templates/select_refcols.html:30
 #: templates/select_refcols.html:58
 msgid "Firstname"
 msgstr "etunimi"
 
-#: bp/scene/templates/scene/person.html:36 bp/scene/templates/scene/person.html:160
+#: bp/scene/templates/scene/person.html:35
+#: bp/scene/templates/scene/person.html:162
 #: bp/scene/templates/scene/persons.html:74 templates/select_refcols.html:32
 #: templates/select_refcols.html:60
 msgid "Patronymic"
@@ -2066,157 +2246,172 @@ msgstr "referenssinimi"
 msgid "This will contain a Person Note"
 msgstr "Henkilön lisätiedot"
 
-#: bp/scene/templates/scene/person.html:49 bp/scene/templates/scene/person_pg.html:61
+#: bp/scene/templates/scene/person.html:49
+#: bp/scene/templates/scene/person_pg.html:61
 #: bp/tools/templates/tools/table_refnames.html:35
 msgid "Gender"
 msgstr "Sukupuoli"
 
-#: bp/scene/templates/scene/person.html:53 bp/scene/templates/scene/person_pg.html:65
-#: bp/scene/templates/scene/place_events.html:72
-#: bp/scene/templates/scene/place_events.html:97
+#: bp/scene/templates/scene/person.html:53
+#: bp/scene/templates/scene/person_pg.html:65
+#: bp/scene/templates/scene/place_events.html:73
+#: bp/scene/templates/scene/place_events.html:98
 msgid "Private data"
 msgstr "Yksityinen tieto"
 
-#: bp/scene/templates/scene/person.html:57 bp/scene/templates/scene/person_pg.html:69
+#: bp/scene/templates/scene/person.html:57
+#: bp/scene/templates/scene/person_pg.html:69
 msgid "Confidence of data"
 msgstr "Tietojen luotettavuus"
 
-#: bp/scene/templates/scene/person.html:61 bp/scene/templates/scene/person_pg.html:73
+#: bp/scene/templates/scene/person.html:61
+#: bp/scene/templates/scene/person_pg.html:73
 msgid "Age at death"
 msgstr "Ikä kuollessa"
 
-#: bp/scene/templates/scene/person.html:69 bp/scene/templates/scene/person_pg.html:87
+#: bp/scene/templates/scene/person.html:69
+#: bp/scene/templates/scene/person_pg.html:87
 #: bp/scene/templates/scene/persons_list.html:105
-#: bp/scene/templates/scene/place_events.html:111
-#: bp/tools/templates/tools/ng_compare.html:36 bp/tools/templates/tools/ng_compare.html:94
+#: bp/scene/templates/scene/place_events.html:112
+#: bp/tools/templates/tools/ng_compare.html:36
+#: bp/tools/templates/tools/ng_compare.html:94
 #: bp/tools/templates/tools/person2.html:30
 #: bp/tools/templates/tools/table_person_by_id.html:54
 msgid "Events"
 msgstr "Tapahtumat"
 
-#: bp/scene/templates/scene/person.html:73 bp/scene/templates/scene/person_pg.html:92
-#: bp/scene/templates/scene/place_events.html:118 templates/cite_sour_repo.html:8
+#: bp/scene/templates/scene/person.html:73
+#: bp/scene/templates/scene/person_pg.html:92
+#: bp/scene/templates/scene/place_events.html:119
+#: templates/cite_sour_repo.html:8
 msgid "Event"
 msgstr "Tapahtuma"
 
-#: bp/scene/templates/scene/person.html:74 bp/scene/templates/scene/person_pg.html:93
-#: bp/scene/templates/scene/place_events.html:119
+#: bp/scene/templates/scene/person.html:74
+#: bp/scene/templates/scene/person_pg.html:93
+#: bp/scene/templates/scene/place_events.html:120
+#: bp/start/templates/start/my_settings.html:104
 #: bp/tools/templates/tools/table_baptism_data.html:12
 #: bp/tools/templates/tools/table_baptism_data.html:13
-#: bp/tools/templates/tools/table_persons.html:22 templates/cite_sour_repo.html:19
-#: templates/cite_sour_repo.html:31
+#: bp/tools/templates/tools/table_persons.html:22
+#: templates/cite_sour_repo.html:19 templates/cite_sour_repo.html:31
 msgid "Date"
 msgstr "Päivämäärä"
 
-#: bp/scene/templates/scene/person.html:75 bp/scene/templates/scene/person_pg.html:94
+#: bp/scene/templates/scene/person.html:75
+#: bp/scene/templates/scene/person_pg.html:94
 #: bp/tools/templates/tools/table_baptism_data.html:15
-#: bp/tools/templates/tools/table_persons.html:23 templates/select_refcols.html:37
-#: templates/select_refcols.html:65
+#: bp/tools/templates/tools/table_persons.html:23
+#: templates/select_refcols.html:37 templates/select_refcols.html:65
 msgid "Place"
 msgstr "Paikka"
 
-#: bp/scene/templates/scene/person.html:77 bp/scene/templates/scene/person.html:204
+#: bp/scene/templates/scene/person.html:77
+#: bp/scene/templates/scene/person.html:207
 #: bp/scene/templates/scene/person_pg.html:231
-#: bp/scene/templates/scene/place_events.html:66
-#: bp/scene/templates/scene/place_events.html:85
-#: bp/scene/templates/scene/place_events.html:121
+#: bp/scene/templates/scene/place_events.html:67
+#: bp/scene/templates/scene/place_events.html:86
+#: bp/scene/templates/scene/place_events.html:122
 msgid "Note"
 msgstr "Lisätiedot"
 
-#: bp/scene/templates/scene/person.html:101
+#: bp/scene/templates/scene/person.html:102
 msgid "of Type"
 msgstr "tyyppiä"
 
-#: bp/scene/templates/scene/person.html:101
+#: bp/scene/templates/scene/person.html:102
 msgid "See Place details"
 msgstr "Katso paikan tiedot"
 
-#: bp/scene/templates/scene/person.html:108 templates/jinja_filters.py:49
+#: bp/scene/templates/scene/person.html:110 templates/jinja_filters.py:49
 #: templates/jinja_filters.py:111
 msgid "Cause Of Death"
 msgstr "Kuolinsyy"
 
-#: bp/scene/templates/scene/person.html:135 bp/scene/templates/scene/person_pg.html:162
+#: bp/scene/templates/scene/person.html:137
+#: bp/scene/templates/scene/person_pg.html:162
 msgid "Parents' family"
 msgstr "Vanhempien perhe"
 
-#: bp/scene/templates/scene/person.html:138 bp/scene/templates/scene/person.html:139
-#: bp/scene/templates/scene/person.html:171
-#: bp/tools/templates/tools/table_families_by_id.html:37 templates/jinja_filters.py:75
-msgid "Family"
-msgstr "perhe"
-
-#: bp/scene/templates/scene/person.html:155
+#: bp/scene/templates/scene/person.html:157
 msgid "Central Person"
 msgstr "Päähenkilö"
 
-#: bp/scene/templates/scene/person.html:156 bp/scene/templates/scene/person.html:158
+#: bp/scene/templates/scene/person.html:158
+#: bp/scene/templates/scene/person.html:160
 #: bp/scene/templates/scene/person_pg.html:183
 msgid "self"
 msgstr "itse"
 
-#: bp/scene/templates/scene/person.html:167 bp/scene/templates/scene/person_pg.html:194
+#: bp/scene/templates/scene/person.html:170
+#: bp/scene/templates/scene/person_pg.html:194
 msgid "Own families"
 msgstr "Omat perheet"
 
-#: bp/scene/templates/scene/person.html:168 bp/scene/templates/scene/person_pg.html:195
+#: bp/scene/templates/scene/person.html:171
+#: bp/scene/templates/scene/person_pg.html:195
 msgid "As Parent in Family"
 msgstr "Perheessä vanhempana"
 
-#: bp/scene/templates/scene/person.html:191 bp/scene/templates/scene/person_pg.html:218
+#: bp/scene/templates/scene/person.html:194
+#: bp/scene/templates/scene/person_pg.html:218
 msgid "Media"
 msgstr "Media"
 
-#: bp/scene/templates/scene/person.html:193
+#: bp/scene/templates/scene/person.html:196
 msgid "Picture"
 msgstr "kuva"
 
-#: bp/scene/templates/scene/person.html:201 bp/scene/templates/scene/person_pg.html:228
+#: bp/scene/templates/scene/person.html:204
+#: bp/scene/templates/scene/person_pg.html:228
 msgid "Narrated"
 msgstr "Kerrottua"
 
-#: bp/scene/templates/scene/person.html:211
+#: bp/scene/templates/scene/person.html:214
 msgid "Ahnentafel Report"
 msgstr "Esipolvien taulu"
 
-#: bp/scene/templates/scene/person.html:276 bp/scene/templates/scene/place_events.html:167
+#: bp/scene/templates/scene/person.html:279
+#: bp/scene/templates/scene/place_events.html:167
 msgid "Source References"
 msgstr "Lähdeviitteet"
 
-#: bp/scene/templates/scene/person.html:289
+#: bp/scene/templates/scene/person.html:293
 #, python-format
 msgid "see details of source %(id)s"
 msgstr "Katso lähteen %(id)s tiedot"
 
-#: bp/scene/templates/scene/person.html:295 bp/scene/templates/scene/person_pg.html:267
+#: bp/scene/templates/scene/person.html:300
+#: bp/scene/templates/scene/person_pg.html:269
 #: bp/scene/templates/scene/source_events.html:38
+#: bp/tools/templates/tools/table_sources.html:29
 msgid "confidence"
 msgstr "luottamustaso"
 
-#: bp/scene/templates/scene/person.html:298 bp/scene/templates/scene/person_pg.html:268
-#: bp/scene/templates/scene/source_events.html:40 templates/cite_sour_repo.html:31
-msgid "Page"
-msgstr "Sivu"
-
-#: bp/scene/templates/scene/person_pg.html:43 bp/scene/templates/scene/person_pg.html:91
-#: bp/scene/templates/scene/source_events.html:22 bp/scene/templates/scene/sources.html:36
+#: bp/scene/templates/scene/person_pg.html:43
+#: bp/scene/templates/scene/person_pg.html:91
+#: bp/scene/templates/scene/source_events.html:22
+#: bp/scene/templates/scene/sources.html:36
 #: bp/scene/templates/scene/sources.html:57
 #: bp/tools/templates/tools/source_citations.html:8
 #: bp/tools/templates/tools/table_refnames_1.html:28
 msgid "Source"
 msgstr "Lähde"
 
-#: bp/scene/templates/scene/person_pg.html:54 bp/scene/templates/scene/person_pg.html:186
+#: bp/scene/templates/scene/person_pg.html:53
+#: bp/scene/templates/scene/person_pg.html:186
 #: bp/scene/templates/scene/persons.html:7
 msgid "first name"
 msgstr "etunimi"
 
-#: bp/scene/templates/scene/person_pg.html:55 bp/scene/templates/scene/person_pg.html:187
+#: bp/scene/templates/scene/person_pg.html:54
+#: bp/scene/templates/scene/person_pg.html:187
 #: bp/scene/templates/scene/persons.html:7
 msgid "patronymic"
 msgstr "patronyymi"
 
-#: bp/scene/templates/scene/person_pg.html:56 bp/scene/templates/scene/person_pg.html:188
+#: bp/scene/templates/scene/person_pg.html:56
+#: bp/scene/templates/scene/person_pg.html:188
 #: bp/scene/templates/scene/persons.html:7
 #: bp/tools/templates/tools/table_baptism_data.html:22
 #: bp/tools/templates/tools/table_families_by_id.html:11
@@ -2270,11 +2465,12 @@ msgstr "Lähdetieto puuttuu!"
 msgid "No archive information!"
 msgstr "Arkistotieto puuttuu!"
 
-#: bp/scene/templates/scene/person_pg.html:270
+#: bp/scene/templates/scene/person_pg.html:272
 msgid "see:"
 msgstr "ks."
 
-#: bp/scene/templates/scene/persons.html:3 bp/scene/templates/scene/persons_list.html:3
+#: bp/scene/templates/scene/persons.html:3
+#: bp/scene/templates/scene/persons_list.html:3
 msgid "List of persons"
 msgstr "henkilöluettelo"
 
@@ -2294,7 +2490,9 @@ msgstr[0] "Näytetään %(num)s henkilön nimi."
 msgstr[1] "Näytetään %(num)s henkilönimeä %(order)s mukaisessa järjestyksessä."
 
 #: bp/scene/templates/scene/persons.html:31
-msgid "If the person has many names, they will appear in the list under each name."
+msgid ""
+"If the person has many names, they will appear in the list under each "
+"name."
 msgstr "Sama henkilö voi esiintyä listalla moneen kertaan, kullakin nimellään."
 
 #: bp/scene/templates/scene/persons.html:32
@@ -2330,16 +2528,20 @@ msgstr "Valitse näytettävät henkilöt"
 
 #: bp/scene/templates/scene/persons.html:61
 msgid ""
-"Search takes place from beginning of selected name part, e.g. in Surname \"Sib\" "
-"coincides with the name \"Sibbe\"."
-msgstr "Haku tapahtuu annetun nimen alkuosalla, esim. \"Sib\" osuu nimeen \"Sibbe\"."
+"Search takes place from beginning of selected name part, e.g. in Surname "
+"\"Sib\" coincides with the name \"Sibbe\"."
+msgstr ""
+"Haku tapahtuu annetun nimen alkuosalla, esim. \"Sib\" osuu nimeen "
+"\"Sibbe\"."
 
 #: bp/scene/templates/scene/persons.html:62
 msgid "Search word (beginning part)"
 msgstr "Hakusana (alkuosa)"
 
-#: bp/scene/templates/scene/persons.html:111 bp/scene/templates/scene/persons_list.html:104
-#: bp/scene/templates/scene/place_events.html:116 bp/tools/templates/tools/person2.html:8
+#: bp/scene/templates/scene/persons.html:111
+#: bp/scene/templates/scene/persons_list.html:104
+#: bp/scene/templates/scene/place_events.html:117
+#: bp/tools/templates/tools/person2.html:8
 msgid "Person"
 msgstr "Henkilö"
 
@@ -2351,11 +2553,11 @@ msgstr "Henkilön tapahtumat"
 msgid "Family Events"
 msgstr "Perheen tapahtumat"
 
-#: bp/scene/templates/scene/persons.html:136
+#: bp/scene/templates/scene/persons.html:137
 msgid "Keywords"
 msgstr "hakusanat"
 
-#: bp/scene/templates/scene/persons.html:157
+#: bp/scene/templates/scene/persons.html:158
 msgid "No one found with search keys"
 msgstr "Ketään ei löytynyt hakutiedoilla"
 
@@ -2368,93 +2570,80 @@ msgstr "Henkilöt:"
 msgid "Displaying %(num)s distinct persons"
 msgstr "Näytetään %(num)s eri henkilöä"
 
-#: bp/scene/templates/scene/persons_list.html:41
-#, python-format
-msgid "starting <tt>%(name)s</tt>"
-msgstr "alkaen <tt>%(name)s</tt>"
-
-#: bp/scene/templates/scene/persons_list.html:42
-msgid "from begin"
-msgstr "alusta"
-
-#: bp/scene/templates/scene/persons_list.html:43
-msgid "data set"
-msgstr "tietojoukko"
-
 #: bp/scene/templates/scene/persons_list.html:84
 msgid "previous page"
 msgstr "edellinen sivu"
-
-#: bp/scene/templates/scene/persons_list.html:93
-msgid "no next page"
-msgstr "ei seuraavaa sivua"
 
 #: bp/scene/templates/scene/persons_list.html:96
 msgid "next page"
 msgstr "seuraava sivu"
 
-#: bp/scene/templates/scene/persons_list.html:149
+#: bp/scene/templates/scene/persons_list.html:151
 msgid "Sorting name"
 msgstr "Lajitteluavain"
 
-#: bp/scene/templates/scene/persons_list.html:168
+#: bp/scene/templates/scene/persons_list.html:170
 msgid "End of data"
 msgstr "Tiedot loppuivat"
 
-#: bp/scene/templates/scene/persons_list.html:176
+#: bp/scene/templates/scene/persons_list.html:178
 #, python-format
 msgid "No one found with search keys starting \"%(name)s\""
-msgstr "Ketään ei löytynyt hakutiedoilla alkaen \"%(name)s\""
+msgstr "Ketään ei löytynyt hakutiedoilla \"%(name)s\" eteenpäin"
 
-#: bp/scene/templates/scene/persons_list.html:178
+#: bp/scene/templates/scene/persons_list.html:180
 msgid "Go to the first person"
 msgstr "Siirry listan ensimmäiseen henkilöön"
 
 #: bp/scene/templates/scene/place_events.html:3
-#: bp/scene/templates/scene/place_events.html:11
+#: bp/scene/templates/scene/place_events.html:9
 msgid "Place events"
 msgstr "Paikan tapahtumat"
 
-#: bp/scene/templates/scene/place_events.html:19
+#: bp/scene/templates/scene/place_events.html:17
 msgid "Invalid coordinates"
 msgstr "Virheelliset koordinaatit"
 
-#: bp/scene/templates/scene/place_events.html:20
+#: bp/scene/templates/scene/place_events.html:18
 msgid "should be in decimal format"
 msgstr "pitäisi olla desimaalimuodossa"
 
-#: bp/scene/templates/scene/place_events.html:29
+#: bp/scene/templates/scene/place_events.html:28
 msgid "OpenStreetMap on a larger scale"
 msgstr "OpenstreetMap uudella sivulla"
 
-#: bp/scene/templates/scene/place_events.html:31
+#: bp/scene/templates/scene/place_events.html:30
 msgid "on Google Map"
 msgstr "Google-kartta uudella sivulla"
 
-#: bp/scene/templates/scene/place_events.html:59
+#: bp/scene/templates/scene/place_events.html:60
 msgid "Website"
 msgstr "Verkkosivut"
 
-#: bp/scene/templates/scene/place_events.html:65
+#: bp/scene/templates/scene/place_events.html:66
 #: bp/tools/templates/tools/table_refnames_1.html:27
 msgid "Reference"
 msgstr "Viite"
 
-#: bp/scene/templates/scene/place_events.html:91
+#: bp/scene/templates/scene/place_events.html:92
 msgid "Additional Information"
 msgstr "Lisätieto"
 
-#: bp/scene/templates/scene/place_events.html:131
+#: bp/scene/templates/scene/place_events.html:132
 msgid "See Person's Details"
 msgstr "katso henkilön tiedot"
 
-#: bp/scene/templates/scene/place_events.html:162
+#: bp/scene/templates/scene/place_events.html:161
 msgid "No events"
 msgstr "Ei tapahtumia"
 
 #: bp/scene/templates/scene/place_events.html:168
 msgid "No source pointers found"
 msgstr "Ei lähdeviitteitä haettuna"
+
+#: bp/scene/templates/scene/place_events.html:173
+msgid "The required place was not found."
+msgstr "Pyydettyä paikkaa ei löydy!"
 
 #: bp/scene/templates/scene/source_events.html:3
 #: bp/scene/templates/scene/source_events.html:17
@@ -2469,18 +2658,14 @@ msgstr "Lähdeviitteet ja tapahtumat"
 msgid "The person"
 msgstr "Henkilö"
 
-#: bp/scene/templates/scene/sources.html:15 bp/tools/templates/tools/table_sources.html:14
+#: bp/scene/templates/scene/sources.html:15
+#: bp/tools/templates/tools/table_sources.html:14
 msgid "List of Sources"
 msgstr "Lähdeluettelo"
 
 #: bp/scene/templates/scene/sources.html:21
 msgid "This page contains a directory of all sources."
 msgstr "Tällä sivulla on hakemisto kaikista lähteistä."
-
-#: bp/scene/templates/scene/sources.html:36 bp/tools/templates/tools/ng_compare.html:54
-#: bp/tools/templates/tools/ng_compare.html:112
-msgid "Notes"
-msgstr "Lisätiedot"
 
 #: bp/scene/templates/scene/sources.html:37
 msgid "In the repository"
@@ -2507,7 +2692,8 @@ msgstr "ei käytetä"
 msgid "see details of source %(uniq_id)s (%(id)s)"
 msgstr "Katso lähteen %(uniq_id)s (%(id)s) tiedot"
 
-#: bp/scene/templates/scene/sources.html:68 bp/scene/templates/scene/sources.html:72
+#: bp/scene/templates/scene/sources.html:68
+#: bp/scene/templates/scene/sources.html:72
 msgid "Repository Name"
 msgstr "Arkiston nimi"
 
@@ -2559,15 +2745,19 @@ msgstr "Viesti:"
 msgid "Send request"
 msgstr "Lähetä pyyntö"
 
-#: bp/start/routes.py:67
+#: bp/start/routes.py:68
 msgid "Join message sent"
 msgstr "Liittymisviesti lähetetty"
 
-#: bp/start/routes.py:112
+#: bp/start/routes.py:70
+msgid "Sending join message failed"
+msgstr "Liittymisviestin lähettäminen ei onnistunut"
+
+#: bp/start/routes.py:115
 msgid "Update did not work1"
 msgstr "Päivitys ei onnistunut"
 
-#: bp/start/routes.py:115
+#: bp/start/routes.py:118
 msgid "Update did not work"
 msgstr "Päivitys ei onnistunut"
 
@@ -2575,72 +2765,75 @@ msgstr "Päivitys ei onnistunut"
 msgid "Isotammi Start Page"
 msgstr "Isotammi alkusivu"
 
-#: bp/start/templates/start/index.html:26
+#: bp/start/templates/start/index.html:27
 msgid "Welcome to Isotammi Services"
 msgstr "Tervetuloa Isotammeen"
 
-#: bp/start/templates/start/index.html:30
+#: bp/start/templates/start/index.html:32
 msgid "Learn about Isotammi"
 msgstr "Tutustu palveluumme"
 
-#: bp/start/templates/start/index.html:34
-msgid ""
-"<i>Isotammi Database</i> is a system for co'operatively collect validated Finnish "
-"Genealogy data."
-msgstr ""
-"<i>Isotammi-tietokanta</i> rakennetaan, jotta voimme yhteistyössä koota suuren "
-"luotettavasti tarkastettujen sukutietojen kokoelman."
-
 #: bp/start/templates/start/index.html:36
+msgid ""
+"<i>Isotammi Database</i> is a system for co'operatively collect validated"
+" Finnish Genealogy data."
+msgstr ""
+"<i>Isotammi-järjestelmä</i> rakennetaan, jotta voimme yhteistyössä koota "
+"suuren luotettavasti tarkastettujen sukutietojen kokoelman."
+
+#: bp/start/templates/start/index.html:38
 msgid "See the process for your data"
 msgstr "Katso miten sukutietosi voidaan liittää Isotammen aineistoon"
 
-#: bp/start/templates/start/index.html:38
+#: bp/start/templates/start/index.html:40
 msgid "For more info see also documents -"
 msgstr "Lisätietoja kuvauksissa –"
 
-#: bp/start/templates/start/index.html:41
-msgid "Why Isotammi database"
-msgstr "Mikä on Isotammi-tietokanta?"
-
 #: bp/start/templates/start/index.html:43
+msgid "Why Isotammi database"
+msgstr "Mikä on Isotammi-järjestelmä?"
+
+#: bp/start/templates/start/index.html:45
 msgid "Gedcom data healing services"
 msgstr "Sukutietojen vakiointi Gedcom-ohjelmillamme"
 
-#: bp/start/templates/start/index.html:48
+#: bp/start/templates/start/index.html:50
 msgid "Look at demo data in Isotammi Database"
-msgstr "Selaa Isotammen demotietokantaa"
+msgstr "Selaa Isotammen demoaineistoa"
 
-#: bp/start/templates/start/index.html:49
+#: bp/start/templates/start/index.html:51
 msgid "Here you can see a restricted view on demo genealogical data."
 msgstr "Tässä rajattu näkymä Isotammen tietoihin."
 
-#: bp/start/templates/start/index.html:52
+#: bp/start/templates/start/index.html:54
 msgid "Explore demo"
 msgstr "Selaa demotietoja"
 
-#: bp/start/templates/start/index.html:58 bp/start/templates/start/index.html:67
+#: bp/start/templates/start/index.html:60
+#: bp/start/templates/start/index.html:69
 #: bp/start/templates/start/s_macros.html:38
 msgid "Log in"
 msgstr "Kirjaudu sisään"
 
-#: bp/start/templates/start/index.html:59
+#: bp/start/templates/start/index.html:61
 msgid "As a member of <i>Suomen sukututkimusseura</i>, you can log in,"
 msgstr "<i>Suomen sukututkimusseuran</i> jäsenenä voit kirjatua sisään,"
 
-#: bp/start/templates/start/index.html:60
-msgid "refine the structure of your own data and get full access to the demo database"
-msgstr "parantaa omien tietojesi rakennetta ja saada pääsyn koko demokantaan"
-
 #: bp/start/templates/start/index.html:62
 msgid ""
-"If you have credentials, please log in here. Else, if you are a member, join us using "
-"the Join button"
-msgstr ""
-"Jos sinulla on käyttäjätunnukset, kirjaudu sisään tästä. Muuten, jos olet Seuran jäsen, "
-"pyydä kutsua Isotammen testkäyttäjäksi Liity-painikkeesta"
+"refine the structure of your own data and get full access to the demo "
+"database"
+msgstr "parantaa omien tietojesi rakennetta ja saada pääsyn koko demokantaan"
 
-#: bp/start/templates/start/index.html:66 bp/start/templates/start/join.html:49
+#: bp/start/templates/start/index.html:64
+msgid ""
+"If you have credentials, please log in here. Else, if you are a member, "
+"join us using the Join button"
+msgstr ""
+"Jos sinulla on käyttäjätunnukset, kirjaudu sisään tästä. Muuten, jos olet"
+" Seuran jäsen, pyydä kutsua Isotammen testkäyttäjäksi Liity-painikkeesta"
+
+#: bp/start/templates/start/index.html:68 bp/start/templates/start/join.html:49
 msgid "Join us"
 msgstr "Liity"
 
@@ -2658,10 +2851,11 @@ msgstr "Gramps-tiedostosi"
 
 #: bp/start/templates/start/index_logged.html:28
 msgid ""
-"Send your Gramps xml file to Isotammi database and store it as a candidate material."
+"Send your Gramps xml file to Isotammi database and store it as a "
+"candidate material."
 msgstr ""
 "Lähetä oma Gramps xml -tiedostosi palvelimelle ja talleta se Isotammen "
-"ehdokasaineistoksi."
+"tarjokasaineistoksi."
 
 #: bp/start/templates/start/index_logged.html:30
 msgid "Gramps files"
@@ -2672,8 +2866,10 @@ msgid "Look at the Family Trees"
 msgstr "Tutustu Isotammen sukupuihin"
 
 #: bp/start/templates/start/index_logged.html:43
-msgid "View your own data as candidate material and compare it with Isotammi database."
-msgstr "Katso ehdokasaineistoasi ja vertaa Isotammi-aineistoon"
+msgid ""
+"View your own data as candidate material and compare it with Isotammi "
+"database."
+msgstr "Katso tarjokasaineistoasi ja vertaa Isotammi-aineistoon"
 
 #: bp/start/templates/start/index_logged.html:45
 msgid "Family Trees"
@@ -2684,6 +2880,8 @@ msgid "Send your gedcom files and experiment various cleanup functions"
 msgstr "Lähetä oma gedcom-tiedostosi palvelimelle ja kokeile eri vakiointitoimia"
 
 #: bp/start/templates/start/index_logged.html:60
+#: bp/start/templates/start/my_settings.html:101
+#: bp/start/templates/start/my_settings.html:124
 msgid "My Gedcom files"
 msgstr "Gedcom-tiedostot"
 
@@ -2742,24 +2940,29 @@ msgstr "Klikkaa Confirm sähköpostissasi; voila!"
 
 #: bp/start/templates/start/join.html:65
 msgid ""
-"To join the Isotammi project we wish that you will provide some basic information below."
+"To join the Isotammi project we wish that you will provide some basic "
+"information below."
 msgstr ""
-"Liittyäksesi Isotammi-projektin testikäyttäjäksi pyydämme antamaan joitakin "
-"perustietoja. Jos olet nämä tiedot antanut, voit siirtyä suoraan rekisteröitymiseen."
+"Liittyäksesi Isotammi-projektin testikäyttäjäksi pyydämme antamaan "
+"joitakin perustietoja. Jos olet nämä tiedot antanut, voit siirtyä suoraan"
+" rekisteröitymiseen."
 
 #: bp/start/templates/start/join.html:66
 msgid "Please let us know at least your name and email address."
 msgstr "Täytä ainakin nimesi ja sähköpostiosoitteesi."
 
 #: bp/start/templates/start/join.html:67
-msgid "You can also provide any comments or additional information in the message field."
+msgid ""
+"You can also provide any comments or additional information in the "
+"message field."
 msgstr "Alle voit halutessasi kirjoittaa lisätietoja."
 
 #: bp/start/templates/start/join.html:68
 msgid "Thank You!"
 msgstr "Kiitos!"
 
-#: bp/start/templates/start/my_message.html:4 bp/start/templates/start/my_message.html:37
+#: bp/start/templates/start/my_message.html:4
+#: bp/start/templates/start/my_message.html:37
 msgid "Contact administrators"
 msgstr "Viesti Toimistoon"
 
@@ -2771,39 +2974,43 @@ msgstr "Viesti Isotammen käyttäjältä"
 msgid "User Settings"
 msgstr "Käyttäjän asetukset"
 
-#: bp/start/templates/start/my_settings.html:17
-msgid "My Home Page"
-msgstr "Omat tiedot"
-
-#: bp/start/templates/start/my_settings.html:27
+#: bp/start/templates/start/my_settings.html:37
 msgid "Change language"
 msgstr "Vaihda kieltä"
 
-#: bp/start/templates/start/my_settings.html:49
+#: bp/start/templates/start/my_settings.html:59
 msgid "Active Roles"
 msgstr "Määritellyt roolit"
 
-#: bp/start/templates/start/my_settings.html:58
+#: bp/start/templates/start/my_settings.html:69
+#: bp/start/templates/start/my_settings.html:93
 msgid "Data Batches"
 msgstr "Tuontierät"
 
-#: bp/start/templates/start/my_settings.html:59
+#: bp/start/templates/start/my_settings.html:70
 msgid ""
-"The amount of different data nodes connected directly to your candidate data batches."
+"The amount of different data nodes connected directly to your candidate "
+"data batches."
 msgstr ""
-"Niiden erityyppisten solmujen määrä kannassa, jotka on kytketty suoraan tuontierään."
+"Niiden erityyppisten solmujen määrä kannassa, jotka on kytketty suoraan "
+"tarjokasaineistoon."
 
-#: bp/start/templates/start/my_settings.html:66
-msgid "Batch"
-msgstr "Erä"
-
-#: bp/start/templates/start/my_settings.html:82
-msgid "You have no candidate data loaded in the database."
-msgstr "Sinulla ei ole ehdokasaineistoja kannassa."
-
-#: bp/start/templates/start/my_settings.html:83
+#: bp/start/templates/start/my_settings.html:86
+#: bp/start/templates/start/my_settings.html:95
 msgid "Upload another file"
 msgstr "Talleta aineistojasi tästä"
+
+#: bp/start/templates/start/my_settings.html:94
+msgid "You have no candidate data loaded in the database."
+msgstr "Sinulla ei ole tarjokasaineistoja kannassa."
+
+#: bp/start/templates/start/my_settings.html:105
+msgid "Bytes"
+msgstr "merkkiä"
+
+#: bp/start/templates/start/my_settings.html:125
+msgid "You have no Gedcom files in the server."
+msgstr "Palvelimella ei ole yhtään gedcom-tiedostojasi."
 
 #: bp/start/templates/start/s_macros.html:19
 msgid "Start page"
@@ -2859,7 +3066,8 @@ msgstr "Kiitos, että liityit Isotammen käyttäjiin"
 
 #: bp/start/templates/start/thankyou.html:24
 msgid ""
-"We are processing your request and will soon send you further instructions in email."
+"We are processing your request and will soon send you further "
+"instructions in email."
 msgstr "Käsittelemme pyyntösi ja lähetämme pian lisäohjeita sähköpostilla."
 
 #: bp/start/templates/start/thankyou.html:27
@@ -2888,11 +3096,11 @@ msgstr "Pyydä uutta salasanaa"
 
 #: bp/stk_security/templates/security/forgot_password.html:13
 msgid ""
-"If you have forgotten your password, you can ask for a new one here. You will get the "
-"instructions by email."
+"If you have forgotten your password, you can ask for a new one here. You "
+"will get the instructions by email."
 msgstr ""
-"Jos salasanasi on unohtunut, voit pyytää salasanan elvytystä. Saat vastauksena linkin, "
-"jonka kautta pääset jatkamaan."
+"Jos salasanasi on unohtunut, voit pyytää salasanan elvytystä. Saat "
+"vastauksena linkin, jonka kautta pääset jatkamaan."
 
 #: bp/stk_security/templates/security/forgot_password.html:24
 #: bp/stk_security/templates/security/send_confirmation.html:23
@@ -2941,10 +3149,11 @@ msgstr "Rekisteröidy Isotammen käyttäjäksi"
 
 #: bp/stk_security/templates/security/register_user.html:16
 msgid ""
-"It is possible to register only if you have got an invitation. You may ask for "
-"invitation on the page"
+"It is possible to register only if you have got an invitation. You may "
+"ask for invitation on the page"
 msgstr ""
-"Voit rekisteröityä vain jos olet saanut kutsun. Voit ilmoittautua halukkaaksi sivulla "
+"Voit rekisteröityä vain jos olet saanut kutsun. Voit ilmoittautua "
+"halukkaaksi sivulla "
 
 #: bp/stk_security/templates/security/register_user.html:18
 msgid "Note!"
@@ -2953,11 +3162,11 @@ msgstr "Huomaa!"
 #: bp/stk_security/templates/security/register_user.html:19
 #, python-format
 msgid ""
-"When you have sent this form, you must wait for mail from us and click the link "
-"\"%(link)s\" in the message you got. Then you can log in!"
+"When you have sent this form, you must wait for mail from us and click "
+"the link \"%(link)s\" in the message you got. Then you can log in!"
 msgstr ""
-"Kun olet lähettänyt tämän lomakkeen, odota sähköpostia meiltä. Klikkaa siinä olevaa "
-"linkkiä \"%(link)s\". Näin pääset aloittamaan Isotammessa!"
+"Kun olet lähettänyt tämän lomakkeen, odota sähköpostia meiltä. Klikkaa "
+"siinä olevaa linkkiä \"%(link)s\". Näin pääset aloittamaan Isotammessa!"
 
 #: bp/stk_security/templates/security/register_user.html:22
 msgid "Other Operations"
@@ -2985,82 +3194,84 @@ msgstr "Lähetä vahvistuslinkki"
 
 #: bp/stk_security/templates/security/send_confirmation.html:13
 msgid ""
-"If you can't find the registeration confirmation mail message we have sent, you can ask "
-"for a new one."
+"If you can't find the registeration confirmation mail message we have "
+"sent, you can ask for a new one."
 msgstr ""
-"Jos lähettämämme rekisteröitymisen vahvistuslinkki ei toimi enää, voit pyytää uutta "
-"tässä."
+"Jos lähettämämme rekisteröitymisen vahvistuslinkki ei toimi enää, voit "
+"pyytää uutta tässä."
 
-#: bp/tools/routes.py:66
+#: bp/tools/routes.py:65
 msgid "Note List"
 msgstr "Huomautukset"
 
-#: bp/tools/routes.py:66
+#: bp/tools/routes.py:65
 msgid "Note Items"
 msgstr "Note-kohteet"
 
-#: bp/tools/routes.py:85 templates/cite_sour_repo.html:55
+#: bp/tools/routes.py:84 templates/cite_sour_repo.html:55
 msgid "Repositories"
 msgstr "Arkistot"
 
-#: bp/tools/routes.py:85
+#: bp/tools/routes.py:84
 msgid "Repository data"
 msgstr "Arkistotiedot (repository)"
 
-#: bp/tools/routes.py:113
+#: bp/tools/routes.py:112
 msgid "Material type"
 msgstr "Aineistotyypin"
 
-#: bp/tools/routes.py:113
+#: bp/tools/routes.py:112
 msgid "processing still missing"
 msgstr "käsittely puuttuu vielä"
 
-#: bp/tools/routes.py:166
+#: bp/tools/routes.py:165
 msgid "{} in Family {}/{}"
 msgstr "{} perheessä {} / {}"
 
-#: bp/tools/routes.py:168
+#: bp/tools/routes.py:167
 msgid " Mother: {}/{} p. {}"
 msgstr "  Äiti: {} / {} s. {}"
 
-#: bp/tools/routes.py:170
+#: bp/tools/routes.py:169
 msgid " Father: {}/{} p. {}"
 msgstr "  Isä:  {} / {} s. {}"
 
-#: bp/tools/routes.py:173
+#: bp/tools/routes.py:172
 msgid " Child ({}): {}/{} * {}"
 msgstr "    Lapsi ({}): {} / {} *{}"
 
-#: bp/tools/routes.py:175 bp/tools/routes.py:342
+#: bp/tools/routes.py:174 bp/tools/routes.py:341
 msgid "Wrong Search key"
 msgstr "Väärä hakuavain"
 
-#: bp/tools/routes.py:260
+#: bp/tools/routes.py:259
 msgid "Only the OID can retrieve"
 msgstr "Vain avaimella voi hakea"
 
-#: bp/tools/routes.py:333
+#: bp/tools/routes.py:332
 msgid "{} in the family {} / {}"
 msgstr "{} perheessä {} / {}"
 
-#: bp/tools/routes.py:335
+#: bp/tools/routes.py:334
 msgid "  Mother: {} / {} s. {}"
 msgstr "  Äiti: {} / {} s. {}"
 
-#: bp/tools/routes.py:337
+#: bp/tools/routes.py:336
 msgid "  Father:  {} / {} s. {}"
 msgstr "  Isä:  {} / {} s. {}"
 
-#: bp/tools/routes.py:340
+#: bp/tools/routes.py:339
 msgid "    Child ({}): {} / {} *{}"
 msgstr "    Lapsi ({}): {} / {} *{}"
 
-#: bp/tools/templates/tools/ng_compare.html:12 bp/tools/templates/tools/ng_compare.html:70
+#: bp/tools/templates/tools/ng_compare.html:12
+#: bp/tools/templates/tools/ng_compare.html:70
 #: bp/tools/templates/tools/table_person_by_id.html:22
 msgid "Person data"
 msgstr "Henkilön tiedot"
 
-#: bp/tools/templates/tools/ng_compare.html:18 bp/tools/templates/tools/ng_compare.html:76
+#: bp/tools/templates/tools/ng_compare.html:18
+#: bp/tools/templates/tools/ng_compare.html:76
 msgid "Link to Narrated Page"
 msgstr "Linkki henkilösivulle"
 
@@ -3110,9 +3321,10 @@ msgstr "KAIKKI/Sama syntymäaika"
 
 #: bp/tools/templates/tools/person2.html:11
 #: bp/tools/templates/tools/source_citations.html:11
-#: bp/tools/templates/tools/table_baptism_data.html:10 templates/cite_sour_repo.html:11
-#: templates/cite_sour_repo.html:31 templates/cite_sour_repo.html:45
-#: templates/cite_sour_repo.html:58 templates/repo_sources.html:11
+#: bp/tools/templates/tools/table_baptism_data.html:10
+#: templates/cite_sour_repo.html:11 templates/cite_sour_repo.html:31
+#: templates/cite_sour_repo.html:45 templates/cite_sour_repo.html:59
+#: templates/repo_sources.html:11
 msgid "Identifier"
 msgstr "Tunniste"
 
@@ -3128,7 +3340,8 @@ msgstr "Tietokanta-avain"
 msgid "Identifier < br/> Type < br/> Date </div>"
 msgstr "Tunniste<br />tyyppi<br />aika</div>"
 
-#: bp/tools/templates/tools/source_citations.html:3 templates/cite_sour_repo.html:3
+#: bp/tools/templates/tools/source_citations.html:3
+#: templates/cite_sour_repo.html:3
 msgid "Source Details"
 msgstr "Lähteen tiedot"
 
@@ -3136,7 +3349,8 @@ msgstr "Lähteen tiedot"
 msgid "Title"
 msgstr "Otsikko"
 
-#: bp/tools/templates/tools/source_citations.html:20 templates/cite_sour_repo.html:27
+#: bp/tools/templates/tools/source_citations.html:20
+#: templates/cite_sour_repo.html:27
 msgid "References"
 msgstr "Viittaukset"
 
@@ -3304,6 +3518,7 @@ msgid "link to source data"
 msgstr "linkki alkuperäiseen tietoon"
 
 #: bp/tools/templates/tools/table_person_by_id.html:72
+#: bp/tools/templates/tools/table_sources.html:21
 msgid "citations"
 msgstr "lainaukset"
 
@@ -3340,7 +3555,8 @@ msgid "Event type"
 msgstr "Tapahtuman tyyppi"
 
 #: bp/tools/templates/tools/table_refnames.html:3
-#: bp/tools/templates/tools/table_refnames_1.html:3 templates/select_refcols.html:3
+#: bp/tools/templates/tools/table_refnames_1.html:3
+#: templates/select_refcols.html:3
 msgid "Reference names from Database"
 msgstr "Referenssinimet kannasta"
 
@@ -3350,7 +3566,8 @@ msgid "Included"
 msgstr "Mukana"
 
 #: bp/tools/templates/tools/table_refnames.html:19
-#: bp/tools/templates/tools/table_refnames_1.html:12 templates/del_table_users.html:20
+#: bp/tools/templates/tools/table_refnames_1.html:12
+#: templates/del_table_users.html:20
 msgid "name"
 msgstr "nimeä"
 
@@ -3479,50 +3696,50 @@ msgstr "Lähteet ilman arkistoa"
 msgid "Unreferenced Events"
 msgstr "Viittauksettomat tapahtumat"
 
-#: models/datareader.py:347 models/datareader.py:360 models/datareader.py:383
-#: models/datareader.py:402
+#: models/datareader.py:391 models/datareader.py:404 models/datareader.py:433
+#: models/datareader.py:452
 msgid "Event list"
 msgstr "Tapahtumaluettelo"
 
-#: models/datareader.py:348
+#: models/datareader.py:392
 msgid "Showing events without source citation"
 msgstr "Näytetään tapahtumat joissa ei lähdelainausta"
 
-#: models/datareader.py:361
+#: models/datareader.py:405
 msgid "Showing events without places"
 msgstr "Näytetään tapahtumat joissa ei paikkatietoa"
 
-#: models/datareader.py:384
+#: models/datareader.py:434
 msgid "Showing persons without a birth event"
 msgstr "Näytetään henkilöt joilla ei syntymätapahtumaa"
 
-#: models/datareader.py:403
+#: models/datareader.py:453
 msgid "Showing oldest persons and their age"
 msgstr "Näytetään vanhimmat henkilöt ja heidän ikänsä"
 
-#: models/datareader.py:416
+#: models/datareader.py:466
 msgid "List of places"
 msgstr "Paikat-lista"
 
-#: models/datareader.py:417
+#: models/datareader.py:467
 msgid "Showing places"
 msgstr "Näytetään paikat"
 
-#: models/datareader.py:540 models/datareader.py:553
+#: models/datareader.py:590 models/datareader.py:603
 msgid "Source list"
 msgstr "Lähteiden lista"
 
-#: models/datareader.py:541
+#: models/datareader.py:591
 msgid "Showing sources without source citations"
 msgstr "Näytetään lähteet joista ei lainauksia"
 
-#: models/datareader.py:554
+#: models/datareader.py:604
 msgid "Showing sources without a repository"
 msgstr "Näytetään lähteet joiden arkistoa ei ole annettu"
 
-#: models/dataupdater.py:85
+#: models/dataupdater.py:87
 msgid "Estimated {} person lifetimes"
-msgstr "Arvioitu elinaika {}:lle henkilölle"
+msgstr "Arvioitu elinaika {} henkilölle"
 
 #: models/owner.py:70
 msgid "Isotammi database"
@@ -3530,19 +3747,43 @@ msgstr "Isotammi-aineisto"
 
 #: models/owner.py:71
 msgid "all my candidate data"
-msgstr "kaikki ehdokasaineistoni"
+msgstr "kaikki tarjokasaineistoni"
 
 #: models/owner.py:72
 msgid "my candidate batch"
-msgstr "tuontierä"
+msgstr "tarjokasaineisto"
 
 #: models/owner.py:73
 msgid "my own and Isotammi"
-msgstr "ehdokkaani Isotammi-aineiston rinnalla"
+msgstr "tarjokkaani Isotammi-aineiston rinnalla"
 
 #: models/owner.py:74
 msgid "my batch and Isotammi"
-msgstr "tuontieräni Isotammi-aineiston rinnalla"
+msgstr "tarjokkaani Isotammi-aineiston rinnalla"
+
+#: models/gen/dates.py:173
+msgid "calculated "
+msgstr "laskettu "
+
+#: models/gen/dates.py:176
+msgid "estimated "
+msgstr "arvioitu "
+
+#: models/gen/dates.py:186
+msgid "{}till {}"
+msgstr "{}{} saakka"
+
+#: models/gen/dates.py:189
+msgid "{}from {}"
+msgstr "{}{} alkaen"
+
+#: models/gen/dates.py:194
+msgid "{}between {} … {}"
+msgstr "{}välillä {} … {}"
+
+#: models/gen/dates.py:197
+msgid "{}about {}"
+msgstr "{}noin {}"
 
 #: models/gen/person.py:144
 msgid "sex not known"
@@ -3577,6 +3818,10 @@ msgstr "Palauta %1"
 msgid "%1 renamed to %2"
 msgstr "%1: nimeksi vaihdettu %2"
 
+#: static/js/gedcom_scripts.js:260
+msgid "Errors:"
+msgstr "Virheitä:"
+
 #: templates/_ng_table_repositories.html:10
 msgid "List of Repositories"
 msgstr "Arkistot"
@@ -3597,7 +3842,7 @@ msgstr "Otsikko"
 msgid "Medium"
 msgstr "Keskiarvo"
 
-#: templates/cite_sour_repo.html:58
+#: templates/cite_sour_repo.html:59
 msgid "Rname"
 msgstr "Otsikko"
 
@@ -4144,7 +4389,8 @@ msgstr "Henkilöt joiden nimi alkaa"
 
 #: templates/join_persons.html:32
 msgid ""
-"Mark the central person (1st selection column) and the people to be merged (2nd column)"
+"Mark the central person (1st selection column) and the people to be "
+"merged (2nd column)"
 msgstr "Merkitse keskushenkilö (1. sarake) ja yhdistettävät henkilöt (2. sarake)"
 
 #: templates/join_persons.html:33
@@ -4326,3 +4572,4 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:13
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
+

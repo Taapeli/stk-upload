@@ -141,7 +141,7 @@ class Repository:
         """ Saves this Repository to db under given batch. 
         """
         if batch_id == None:
-            raise RuntimeError(f"Repocitory.save needs batch_id for {self.id}")
+            raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
 
         r_attr = {}
         try:

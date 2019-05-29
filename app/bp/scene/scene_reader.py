@@ -9,6 +9,7 @@ from .models.footnote import Footnotes, SourceFootnote
 
 from models.gen.from_node import get_object_from_node
 from models.gen.person_combo import Person_combo #, Person_as_member
+from shareds import logger
 
 # from models.datareader import read_persons_with_events
 # from models.gen.family_combo import Family_for_template
@@ -69,7 +70,13 @@ def get_a_person_for_display_apoc(uniq_id, user):
             src_node = nodes[node_rel1]
             src_label = list(src_node.labels)[0]
             target_node = nodes[node_rel2]
-            target_label = list(target_node.labels)[0]
+            #print(f"Target_node.labels {target_node.labels}")
+            if len(target_node.labels) > 0:
+                target_label = list(target_node.labels)[0]
+            else:
+                logger.error("get_a_person_for_display_apoc: invalid target "
+                             f"#{target_node.id} for source #{src_node.id}")
+                target_label = None
 
             if not src_node.id in objs:
                 # Create new object
@@ -164,7 +171,9 @@ def connect_object_as_leaf(src, target, rel_type=None):
         -[:PARENT {role:'father'}]-> (:Family)   to .father
         -[:PARENT {role:'mother'}]-> (:Family)   to .mother
         -[:HIERARCHY]-> (:Place) to .place
-
+        (:Place)
+        -[:NAME]-> (:Name)       to .names[]
+        
     The following relation targets are stored as object references (uniq_id) 
     in root object variable. The actual referenced target objects are stored to 
     separate 'obj_dict' variable:
@@ -243,7 +252,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
             return None
 
     elif src_class == 'Event_combo':
-        if target_class == 'Place':
+        if target_class == 'Place_combo':
             src.place_ref.append(target.uniq_id)
             return None
         elif target_class == 'Citation':
@@ -262,11 +271,11 @@ def connect_object_as_leaf(src, target, rel_type=None):
             src.note_ref.append(target.uniq_id)
             return None
 
-    elif src_class == 'Place':
+    elif src_class == 'Place_combo':
         if target_class == 'Place_name':
             src.names.append(target)
             return src.names[-1]
-        if target_class == 'Place':
+        if target_class == 'Place_combo':
             src.uppers.append(target)
             return src.uppers[-1]
         if target_class == 'Note':

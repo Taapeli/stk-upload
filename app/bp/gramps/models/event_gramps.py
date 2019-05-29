@@ -39,6 +39,7 @@ Created on 2.5.2017
 import datetime
 from sys import stderr
 
+from shareds import logger
 from models.gen.event import Event
 from models.cypher_gramps import Cypher_event_w_handle
 
@@ -122,13 +123,13 @@ class Event_gramps(Event):
         try:
             # Make relations to the Note nodes
             if len(self.note_handles) > 0:
-                #result = 
-                tx.run(Cypher_event_w_handle.link_notes, handle=self.handle,
+                result = tx.run(Cypher_event_w_handle.link_notes, handle=self.handle,
                        note_handles=self.note_handles)
-#                 cnt = result.single()["cnt"]
-#                 print ("Luotiin {} Note-yhteyttä".format(cnt))
+                cnt = result.single()["cnt"]
+                #print(f"##Luotiin {cnt} Note-yhteyttä: {self.id}->{self.note_handles}")
         except Exception as err:
-            print("iError: Event_link_notes: {0}".format(err), file=stderr)
+            logger.error(f"{err}: in creating Note links: {self.id}->{self.note_handles}")
+            #print("iError: Event_link_notes: {0}".format(err), file=stderr)
 
         try:
             # Make relations to the Citation nodes

@@ -62,6 +62,8 @@ def add_args(parser):
                         help=_('Try to combine certain names...'))
     parser.add_argument('--addname', type=str, 
                         help=_('Add this name at the end'))
+    parser.add_argument('--bypass_foreign_countries', action='store_true',
+                        help=_('Bypass foreign countries'))
     parser.add_argument('--display_unique_changes', action='store_true',
                         help=_('Display unique changed places'))
     parser.add_argument('--display_nonchanges', action='store_true',
@@ -80,6 +82,12 @@ def initialize(options):
     read_villages("app/static/kylat.txt")
     return Places()
 
+
+def is_in_foreign_country(place):
+    for country in foreign_countries:
+        if place.endswith(country): return True
+    return False
+
 class Places(transformer.Transformation):
     def __init__(self):
         self.changed = Counter()
@@ -93,6 +101,8 @@ class Places(transformer.Transformation):
         if options.display_all_unique_places:
             self.allplaces[place] += 1
         if options.match and not stringmatch(place,options.match):
+            return True
+        if options.bypass_foreign_countries and is_in_foreign_country(place):
             return True
         newplace = process_place(options, place)
         if newplace != place:
@@ -112,10 +122,17 @@ class Places(transformer.Transformation):
 
     def finish(self,options):
         if options.display_all_unique_places:
+            totalcount = 0
+            uniquecount = 0
             print("--------------------")
             print("<h3>"+_("All unique place names:")+"</h3><pre>") 
             for place,count in sorted(self.allplaces.most_common()):
                 print(count,place)
+                totalcount += count
+                uniquecount += 1
+            print()
+            print(_("Count of all places: "),totalcount)
+            print(_("Count of unique places: "),uniquecount)
             print("</pre>") 
 
         if options.display_unique_changes:
@@ -141,18 +158,24 @@ ignored = [name.strip() for name in ignored_text.splitlines() if name.strip() !=
 
 parishes = set()
 
-countries = {
-    "Finland","Suomi",
+foreign_countries = {
     "Kanada","Canada",
-    "Yhdysvallat","USA","United States",
-    "Alankomaat","Hollanti","Netherlands"
+    "Yhdysvallat","USA","United States","Förenta Staterna",
+    "Alankomaat","Hollanti","Netherlands",
     "Ruotsi","Sverige","Sweden",
     "Australia",
-    "Venäjä","Russia",
+    "Venäjä","Russia","Ryssland",
+    "Neuvostoliitto","NL","Sovjetunionen","Soviet Union","CCCP","USSR",
     "Eesti","Viro","Estland",
+    "Latvia",
+    "Liettua",
     "Norja","Norge","Norway",
     "Saksa","Deutschland","Germany",
 }
+
+countries = foreign_countries.copy()
+countries.add("Suomi")
+countries.add("Finland")
 
 villages = defaultdict(set)
 

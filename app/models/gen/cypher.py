@@ -209,7 +209,7 @@ ORDER BY name.order"""
 
     get_all_persons_names = """
 MATCH (n)<-[r:NAME]-(p:Person)
-RETURN ID(p) AS ID, n.firstname AS fn, n.surname AS sn, n.suffix AS pn,
+RETURN ID(p) AS ID, n.firstname AS fn, n.prefix AS vn, n.surname AS sn, n.suffix AS pn,
     p.sex AS sex
 ORDER BY n.order"""
 
@@ -303,11 +303,15 @@ MATCH (f:Family) WHERE ID(f)=$pid
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
-OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+OPTIONAL MATCH (f) -[:EVENT]-> (e:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+OPTIONAL MATCH (e) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
+OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
 RETURN f, p.pname AS marriage_place,
     COLLECT([r.role, pp, np]) AS parent, 
     COLLECT(DISTINCT pc) AS child, 
-    COUNT(DISTINCT pc) AS no_of_children"""
+    COUNT(DISTINCT pc) AS no_of_children,
+    COLLECT(DISTINCT [re, s, c]) AS sources,
+    COLLECT(DISTINCT note) AS note"""
     
     #TODO Obsolete
     read_families = """
@@ -392,26 +396,26 @@ MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
   WHERE id(l) = $locid
 MATCH (p) --> (n:Name)
 RETURN id(p) AS uid, r.role AS role,
-  COLLECT([n.type, n.firstname, n.surname, n.suffix]) AS names,
+  COLLECT(n) AS names,
   e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
 ORDER BY edates[1]"""
 
-    get_name_hierarcy = """
+    get_name_hierarchies = """
 MATCH (a:Place) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
 OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
 RETURN ID(a) AS id, a.type AS type,
-    COLLECT(DISTINCT [pn.name, pn.lang]) AS name, a.coord AS coord,
+    COLLECT(DISTINCT pn) AS names, a.coord AS coord,
     COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
     COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
-ORDER BY name[0][0]"""
+ORDER BY names[0].name"""
 
     get_w_names_notes = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE ID(place)=$place_id
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
 RETURN place, 
-    COLLECT(DISTINCT [n.name, n.lang]) AS names,
+    COLLECT(DISTINCT n) AS names,
     COLLECT (DISTINCT note) AS notes"""
 
     place_get_one = """

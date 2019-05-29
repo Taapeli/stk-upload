@@ -27,6 +27,13 @@ function add_gedcom_links() {
     });
 }
 
+function clear_others() {
+	if (this.checked) { // uncheck other options, clear text input
+		$("input.transform_option").prop("checked", false);
+		$("input.transform_option").val("");
+	}
+}
+
 $(document).ready( function() {
     console.log("ready");
 
@@ -149,6 +156,7 @@ $(document).ready( function() {
         $("#div_transforms").hide();
         $.get("/gedcom/transform/" + gedcom + "/" + $(e.target).attr("data-transform"), function(rsp) {
             $("#div_transform_params1").html(rsp);
+            $("input.clear_others").click(clear_others);
             $("#div_transform_params").show();
         });
     });
