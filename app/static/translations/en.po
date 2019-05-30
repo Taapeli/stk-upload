@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-05-27 10:49+0300\n"
+"POT-Creation-Date: 2019-05-30 17:22+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -1017,7 +1017,7 @@ msgid_plural "count=%(num)d, lines %(lines)s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/gedcom/gedcom_analyze.py:165 bp/gedcom/transforms/places.py:126
+#: bp/gedcom/gedcom_analyze.py:165 bp/gedcom/transforms/places.py:143
 #: bp/gramps/templates/gramps/result.html:18
 msgid "Count"
 msgstr ""
@@ -1124,7 +1124,7 @@ msgstr ""
 msgid "Name of the log file"
 msgstr ""
 
-#: bp/gedcom/routes.py:333 bp/gedcom/routes.py:529
+#: bp/gedcom/routes.py:333 bp/gedcom/routes.py:534
 msgid "Display changed rows"
 msgstr ""
 
@@ -1156,7 +1156,7 @@ msgstr ""
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:502
+#: bp/gedcom/routes.py:507
 msgid "Unsupported type: "
 msgstr ""
 
@@ -1362,7 +1362,7 @@ msgid "Remove this GEDCOM"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:152
-msgid "Analyze this GEDCOM for structural problems"
+msgid "Technical analysis"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:158
@@ -1445,11 +1445,11 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_transform_params.html:30
+#: bp/gedcom/templates/gedcom_transform_params.html:31
 msgid "Add"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_transform_params.html:32
+#: bp/gedcom/templates/gedcom_transform_params.html:33
 msgid "Default"
 msgstr ""
 
@@ -1573,54 +1573,66 @@ msgid "Add this name at the end"
 msgstr ""
 
 #: bp/gedcom/transforms/places.py:66
-msgid "Display unique changed places"
+msgid "Bypass foreign countries"
 msgstr ""
 
 #: bp/gedcom/transforms/places.py:68
-msgid "Display unchanged places"
+msgid "Display unique changed places"
 msgstr ""
 
 #: bp/gedcom/transforms/places.py:70
-msgid "Display ignored places"
+msgid "Display unchanged places"
 msgstr ""
 
 #: bp/gedcom/transforms/places.py:72
-msgid "Only process places containing this string"
+msgid "Display ignored places"
 msgstr ""
 
 #: bp/gedcom/transforms/places.py:74
-msgid "Replace changed PLAC tags with PLAC-X"
+msgid "Only process places containing this string"
 msgstr ""
 
 #: bp/gedcom/transforms/places.py:76
+msgid "Replace changed PLAC tags with PLAC-X"
+msgstr ""
+
+#: bp/gedcom/transforms/places.py:78
 msgid "Replace all matching PLAC tags with PLAC-X"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:111
+#: bp/gedcom/transforms/places.py:121
 msgid "Internal error"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:116
+#: bp/gedcom/transforms/places.py:128
 msgid "All unique place names:"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:123
-msgid "Place names changed:"
-msgstr ""
-
-#: bp/gedcom/transforms/places.py:126
-msgid "Old name"
-msgstr ""
-
-#: bp/gedcom/transforms/places.py:126
-msgid "New name"
+#: bp/gedcom/transforms/places.py:134
+msgid "Count of all places: "
 msgstr ""
 
 #: bp/gedcom/transforms/places.py:135
+msgid "Count of unique places: "
+msgstr ""
+
+#: bp/gedcom/transforms/places.py:140
+msgid "Place names changed:"
+msgstr ""
+
+#: bp/gedcom/transforms/places.py:143
+msgid "Old name"
+msgstr ""
+
+#: bp/gedcom/transforms/places.py:143
+msgid "New name"
+msgstr ""
+
+#: bp/gedcom/transforms/places.py:152
 msgid "Place names not changed:"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:263
+#: bp/gedcom/transforms/places.py:286
 msgid "ignored: "
 msgstr ""
 
@@ -1732,7 +1744,7 @@ msgstr ""
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr ""
 
-#: bp/gramps/gramps_loader.py:117 bp/gramps/xml_dom_handler.py:120
+#: bp/gramps/gramps_loader.py:119 bp/gramps/xml_dom_handler.py:120
 msgid "Database save failed due to {} {}"
 msgstr ""
 
@@ -1885,7 +1897,7 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:54
 #: bp/scene/templates/scene/families.html:92
 #: bp/scene/templates/scene/families.html:122
-#: bp/scene/templates/scene/families.html:174
+#: bp/scene/templates/scene/families.html:178
 #: bp/scene/templates/scene/family.html:26
 #: bp/scene/templates/scene/person.html:143
 #: bp/scene/templates/scene/person.html:177
@@ -1916,8 +1928,8 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:67
 #: bp/scene/templates/scene/families.html:104
 #: bp/scene/templates/scene/families.html:123
-#: bp/scene/templates/scene/families.html:186
-#: bp/scene/templates/scene/family.html:34
+#: bp/scene/templates/scene/families.html:190
+#: bp/scene/templates/scene/family.html:36
 #: bp/scene/templates/scene/person.html:145
 #: bp/scene/templates/scene/person.html:179
 #: bp/scene/templates/scene/person_pg.html:170
@@ -1928,15 +1940,15 @@ msgid "Mother"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:90
-#: bp/scene/templates/scene/families.html:172
+#: bp/scene/templates/scene/families.html:176
 #: bp/scene/templates/scene/persons_list.html:79
 msgid "Top of page"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:92
 #: bp/scene/templates/scene/families.html:104
-#: bp/scene/templates/scene/families.html:174
-#: bp/scene/templates/scene/families.html:186
+#: bp/scene/templates/scene/families.html:178
+#: bp/scene/templates/scene/families.html:190
 #: bp/scene/templates/scene/persons_list.html:81
 #: bp/scene/templates/scene/persons_list.html:180
 msgid "first page"
@@ -1944,8 +1956,8 @@ msgstr ""
 
 #: bp/scene/templates/scene/families.html:97
 #: bp/scene/templates/scene/families.html:109
-#: bp/scene/templates/scene/families.html:179
-#: bp/scene/templates/scene/families.html:191
+#: bp/scene/templates/scene/families.html:183
+#: bp/scene/templates/scene/families.html:195
 #: bp/scene/templates/scene/persons_list.html:93
 msgid "no next page"
 msgstr ""
@@ -1962,7 +1974,7 @@ msgid "family"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:124
-#: bp/scene/templates/scene/family.html:42
+#: bp/scene/templates/scene/family.html:46
 #: bp/scene/templates/scene/person.html:147
 #: bp/scene/templates/scene/person.html:181
 #: bp/scene/templates/scene/person_pg.html:172
@@ -1984,22 +1996,22 @@ msgstr ""
 msgid "Key"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:141
-#: bp/scene/templates/scene/families.html:148
-#: bp/scene/templates/scene/family.html:32
-#: bp/scene/templates/scene/family.html:40
+#: bp/scene/templates/scene/families.html:143
+#: bp/scene/templates/scene/families.html:152
+#: bp/scene/templates/scene/family.html:34
+#: bp/scene/templates/scene/family.html:44
 msgid "unknown"
 msgstr ""
 
-#: bp/scene/templates/scene/families.html:152
 #: bp/scene/templates/scene/families.html:156
+#: bp/scene/templates/scene/families.html:160
 #, python-format
 msgid "%(num)d child"
 msgid_plural "%(num)d children"
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/scene/templates/scene/families.html:165
+#: bp/scene/templates/scene/families.html:169
 #: bp/tools/templates/tools/table_families.html:50
 #: bp/tools/templates/tools/table_persons.html:45
 msgid "No persons"
@@ -2028,14 +2040,14 @@ msgstr ""
 msgid "Marriage dates"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:50
+#: bp/scene/templates/scene/family.html:54
 #: bp/scene/templates/scene/sources.html:36
 #: bp/tools/templates/tools/ng_compare.html:54
 #: bp/tools/templates/tools/ng_compare.html:112
 msgid "Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:59
+#: bp/scene/templates/scene/family.html:63
 #: bp/scene/templates/scene/macros.html:68
 #: bp/scene/templates/scene/person.html:78
 #: bp/scene/templates/scene/place_events.html:123
@@ -2044,7 +2056,7 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:64
+#: bp/scene/templates/scene/family.html:68
 #: bp/scene/templates/scene/person.html:303
 #: bp/scene/templates/scene/person_pg.html:270
 #: bp/scene/templates/scene/source_events.html:40
@@ -2052,7 +2064,7 @@ msgstr ""
 msgid "Page"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:72
+#: bp/scene/templates/scene/family.html:76
 #: bp/scene/templates/scene/person.html:28
 #: bp/scene/templates/scene/person_pg.html:40
 msgid "Identifiers"
@@ -2741,19 +2753,19 @@ msgstr ""
 msgid "Send request"
 msgstr ""
 
-#: bp/start/routes.py:68
+#: bp/start/routes.py:70
 msgid "Join message sent"
 msgstr ""
 
-#: bp/start/routes.py:70
+#: bp/start/routes.py:72
 msgid "Sending join message failed"
 msgstr ""
 
-#: bp/start/routes.py:115
+#: bp/start/routes.py:117
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:118
+#: bp/start/routes.py:120
 msgid "Update did not work"
 msgstr ""
 
@@ -3738,27 +3750,27 @@ msgstr ""
 msgid "my batch and Isotammi"
 msgstr ""
 
-#: models/gen/dates.py:173
+#: models/gen/dates.py:175
 msgid "calculated "
 msgstr ""
 
-#: models/gen/dates.py:176
-msgid "estimated"
+#: models/gen/dates.py:178
+msgid "estimated "
 msgstr ""
 
-#: models/gen/dates.py:186
+#: models/gen/dates.py:188
 msgid "{}till {}"
 msgstr ""
 
-#: models/gen/dates.py:189
+#: models/gen/dates.py:191
 msgid "{}from {}"
 msgstr ""
 
-#: models/gen/dates.py:194
+#: models/gen/dates.py:196
 msgid "{}between {} … {}"
 msgstr ""
 
-#: models/gen/dates.py:197
+#: models/gen/dates.py:199
 msgid "{}about {}"
 msgstr ""
 
@@ -3778,24 +3790,24 @@ msgstr ""
 msgid "sex not applicable"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:36
+#: static/js/gedcom_scripts.js:43
 msgid "Server error"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:157 static/js/gedcom_scripts.js:166
+#: static/js/gedcom_scripts.js:165 static/js/gedcom_scripts.js:174
 msgid "Are you sure?"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:218 static/js/gedcom_scripts.js:219
+#: static/js/gedcom_scripts.js:226 static/js/gedcom_scripts.js:227
 msgid "Revert to %1"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:230 static/js/gedcom_scripts.js:231
-#: static/js/gedcom_scripts.js:237
+#: static/js/gedcom_scripts.js:238 static/js/gedcom_scripts.js:239
+#: static/js/gedcom_scripts.js:245
 msgid "%1 renamed to %2"
 msgstr ""
 
-#: static/js/gedcom_scripts.js:260
+#: static/js/gedcom_scripts.js:268
 msgid "Errors:"
 msgstr ""
 
