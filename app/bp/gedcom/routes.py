@@ -20,7 +20,6 @@ from flask_babelex import _
 
 import logging 
 from bp.gedcom.models import gedcom_utils
-#import string
 LOG = logging.getLogger(__name__)
 
 from models import util, syslog
@@ -178,7 +177,12 @@ def gedcom_upload():
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_download(gedcom):
-    metadata = gedcom_utils.get_metadata(gedcom)
+    parts = gedcom.rsplit(".",maxsplit=1)
+    if len(parts) == 2 and parts[1].isdigit():
+        base_gedcom = parts[0]  # remove version number
+    else:
+        base_gedcom = gedcom
+    metadata = gedcom_utils.get_metadata(base_gedcom)
     if gedcom_utils.get_gedcom_user() != current_user.username and not metadata.get("admin_permission"):
         flash(_("You don't have permission to view that GEDCOM"), category='flash_error')
         return redirect(url_for('gedcom.gedcom_list'))
