@@ -353,7 +353,7 @@ def process_gedcom(arglist, transform_module):
             out.original_line = None
             out.transform_name = transform_module.__name__
             saved_stdout = sys.stdout
-            saved_stderr = sys.stdout
+            saved_stderr = sys.stderr
             sys.stdout = io.StringIO()
             sys.stderr = io.StringIO()
             if args.dryrun:
