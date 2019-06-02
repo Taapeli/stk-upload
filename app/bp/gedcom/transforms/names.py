@@ -38,10 +38,9 @@ from ..transforms.model.gedcom_record import GedcomRecord
 from ..transforms.model.person_name import PersonName
 from flask_babelex import _
 
-name = _("Personal names")
-
 version = "0.1"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
+name = _("Personal names") #+ " " + version
 
 # Active Indi logical record GedcomRecord
 indi_record = None
