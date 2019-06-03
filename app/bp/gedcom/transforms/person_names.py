@@ -1,9 +1,9 @@
 '''
-    Nimimuotojen normalisointi
+    Nimimuotojen normalisointi (Älä käytä vielä!)
 
-    Processes gedcom lines trying to fix problems of individual name tags
+    Processes gedcom Items trying to fix problems of individual name tags
 
-    The input flow of GedcomLine objects have the following process:
+    The input flow of Item objects have the following process:
       1. When an INDI line is found, a new GedcomRecord is created
         - The following lines associated to this person are stored in a list in the GedcomRecord:
           - When a "1 NAME" line is found, a new PersonName object is created and the following
@@ -12,7 +12,7 @@
             the transformed lines are written to output using GedcomRecord.emit() method.
       2. The other input records (HEAD, FAM etc.) are written out immediately line by line
 
-Created on 26.11.2016
+Created on 26.11.2016 – 2.6.2019
 
 @author: JMä
 '''
@@ -32,30 +32,107 @@ Created on 26.11.2016
 #             3 NOTE @N0175@
 #           1 SEX M
 #             ...
+import logging 
+logger = logging.getLogger('stkserver')
 
 from ..transforms.model.gedcom_line import GedcomLine
 from ..transforms.model.gedcom_record import GedcomRecord
-from ..transforms.model.person_name import PersonName
+from ..transforms.model.person_name_v2 import PersonName
+
+from .. import transformer
+from ..transformer import Item
 from flask_babelex import _
 
-version = "0.1"
+version = "0.2"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
-name = _("Personal names") + " " + version
+name = _("Personal names") + " (kesken)"
 
 # Active Indi logical record GedcomRecord
 indi_record = None
 # state 0 = started, 1 = indi processing, 2 = name processing, 3 = birth processing
 state = 0
 
-def initialize(run_args):
-    global indi_record
-    global state            
-    state = 0
-    indi_record = None
+def initialize(args):
+    return PersonNames()
 
 def add_args(parser):
     pass
 
+class PersonNames(transformer.Transformation):
+
+    def transform(self, item, options, phase):
+        """
+        Performs a transformation for the given Gedcom "item" (i.e. "line block")
+        Returns one of
+        - True: keep this item without changes
+        - None: remove the item
+        - item: use this item as a replacement (can be the same object as input if the contents have been changed)
+        - list of items ([item1,item2,...]): replace the original item with these
+        
+        This is called for every line in the Gedcom so that the "innermost" items are processed first.
+        
+        Note: If you change the item in this function but still return True, then the changes
+        are applied to the Gedcom but they are not displayed with the --display-changes option.
+        """
+        if True:    # options.remove_invalid_marriage_dates:
+            logger.debug(f"#Item {item.linenum}: {item}")
+            if item.line.strip() == "1 MARR":
+                # replace
+                #     1 MARR
+                #     2 DATE AVOLIITTO
+                # with
+                #     1 MARR
+                #     2 TYPE AVOLIITTO
+                if len(item.children) > 0 and item.children[0].line.startswith("2 DATE AVOLIITTO"):
+                    item.children[0] = Item("2 TYPE AVOLIITTO")
+                    return item
+                return True # no change
+
+        if False:   #options.remove_multiple_blanks: # 2.2.3
+            if item.tag in ('NAME','PLAC'):
+                newtext = "kukkuu"      # remove_multiple_blanks(item.value)
+                if newtext != item.value:
+                    item.value = newtext
+                    return item
+    
+        if True:        #options.note_to_page:  
+            # 1 BIRT
+            # 2 DATE 24 APR 1766
+            # 2 NOTE Födde 1766 Aprill 24
+            # 2 SOUR Kustavi syntyneet 1764-1792 (I C:2)
+            # 2 PLAC Kustavi
+            # ->
+            # 1 BIRT
+            # 2 DATE 24 APR 1766
+            # 2 SOUR Kustavi syntyneet 1764-1792 (I C:2)
+            # 3 PAGE Födde 1766 Aprill 24
+            # 2 PLAC Kustavi 
+            if item.tag in {"EVEN","BIRT","DEAT","CHR"}:
+                note_index = -1
+                for i,c in enumerate(item.children):
+                    if c.tag == "NOTE" and len(c.children) == 0 and not c.value.startswith("@"): 
+                        note_index = i
+                    if c.tag == "SOUR" and note_index >= 0:
+                        for c2 in c.children:
+                            if c2.tag == "PAGE": # PAGE already exists, ignore
+                                return True
+                        note = item.children[note_index].value
+                        del item.children[note_index]
+                        newitem = Item("{} PAGE {}".format(item.level+2,note))
+                        c.children.append(newitem)
+                        return item 
+                return True
+
+
+        return True # no change
+
+#-------------------------------------------------------------------------------
+
+# def initialize(run_args):
+#     global indi_record
+#     global state            
+#     state = 0
+#     indi_record = None
 
 def phase3(run_args, gedline, f):
     '''
@@ -226,3 +303,4 @@ def _is_gedline_a_NAME(gedline):
     '''
     return gedline.tag == 'NAME' or \
         (gedline.tag == 'ALIA' and not gedline.value.startswith('@'))
+
