@@ -45,7 +45,7 @@ _BABY = {"vauva":"U", "poikavauva":"M", "tyttövauva":"F",
          "(dotter)":"F", "(flicke)":"F", "(fl.barn)":"U", "(dödf.barn)":"U" }
 
 
-class PersonName(GedcomLine):
+class PersonName_v1(GedcomLine):
     '''
     Stores and fixes Gedcom individual name information.
 
@@ -101,7 +101,7 @@ class PersonName(GedcomLine):
     def get_person_rows(self, name_default): 
         ''' Analyze this NAME and return it's GedcomLines: first NAME and 
             then the descendant rows in the level hierarchy.
-            Attribute name_default may be a PersonName, 
+            Attribute name_default may be a PersonName_v1, 
             who's given name is used in place of a missing givn.
 
             The rules about merging original and generated values should be applied here
@@ -127,7 +127,7 @@ class PersonName(GedcomLine):
         self._evaluate_givn(name_default)
         ''' 1.2) nsfx Suffix part: nothing to do? '''
         pass
-        ''' 1.3) SURN Surname part: pick each surname as a new PersonName
+        ''' 1.3) SURN Surname part: pick each surname as a new PersonName_v1
                  Creates NAME, GIVN, SURN, NSFX rows and their associated lines into self.rows
         '''
         ret = []    # List of merged GedcomLines
@@ -218,26 +218,26 @@ class PersonName(GedcomLine):
         ''' Process surname part of NAME record and return a list of PersonNames,
             which are generated from each surname mentioned
         Examples:
-            "Mattila"                  => PersonName[0]="givn/Mattila/"
-            "Frisk os. Mattila"        => PersonName[0]="givn/Mattila/"
-                                          PersonName[1]="givn/Frisk/" TYPE="avionimi"
-            "Surname1/Surname2"        => PersonName[0]="givn/Surname1/"
-                                          PersonName[1]="givn/Surname2/" TYPE="tunnettu myös"
-            "Reipas e. Frisk os. Laine"=> PersonName[0]="givn/Laine/"
-                                          PersonName[1]="givn/Frisk/" TYPE="avionimi"
-                                          PersonName[2]="givn/Reipas/" TYPE="otettu nimi"
-            "Lehti os. Lampi e. af Damm"=>PersonName[0]="givn/Damm/" SPFX="af"
-                                          PersonName[1]="givn/Lampi/" TYP="otettu nimi"
-                                          PersonName[2]="givn/Lehti/" TYPE="avionimi"
-            "Mattila (Matts)"          => PersonName[0]="givn/Mattila/"
-                                          PersonName[1]="givn/Matts/" TYPE="tunnettu myös"
+            "Mattila"                  => PersonName_v1[0]="givn/Mattila/"
+            "Frisk os. Mattila"        => PersonName_v1[0]="givn/Mattila/"
+                                          PersonName_v1[1]="givn/Frisk/" TYPE="avionimi"
+            "Surname1/Surname2"        => PersonName_v1[0]="givn/Surname1/"
+                                          PersonName_v1[1]="givn/Surname2/" TYPE="tunnettu myös"
+            "Reipas e. Frisk os. Laine"=> PersonName_v1[0]="givn/Laine/"
+                                          PersonName_v1[1]="givn/Frisk/" TYPE="avionimi"
+                                          PersonName_v1[2]="givn/Reipas/" TYPE="otettu nimi"
+            "Lehti os. Lampi e. af Damm"=>PersonName_v1[0]="givn/Damm/" SPFX="af"
+                                          PersonName_v1[1]="givn/Lampi/" TYP="otettu nimi"
+                                          PersonName_v1[2]="givn/Lehti/" TYPE="avionimi"
+            "Mattila (Matts)"          => PersonName_v1[0]="givn/Mattila/"
+                                          PersonName_v1[1]="givn/Matts/" TYPE="tunnettu myös"
         '''
 
         ret = []
         preferred = self.is_preferred_name
         for prefix, nm, sn_type in self._get_surname_list():
             name = '{}/{}/{}'.format(self.givn, nm.strip(), self.nsfx)
-            pn = PersonName((self.level, 'NAME', name))
+            pn = PersonName_v1((self.level, 'NAME', name))
             pn.surn = nm                #TODO: self.surn or nm?
             pn.givn = self.givn
             pn.nsfx = self.nsfx
@@ -319,7 +319,7 @@ class PersonName(GedcomLine):
                     known_as = (prefix, name.capitalize(), _SURN[nm])
                     state = 0
                 elif nm in _SURN: # a delimiter
-                    ''''op2: Output PersonName rows'''
+                    ''''op2: Output PersonName_v1 rows'''
                     ret.append((prefix, name, name_type))
                     if known_as:
                         ret.append(known_as)
@@ -357,7 +357,7 @@ class PersonName(GedcomLine):
 
 
     def _create_gedcom_rows(self, pn):
-        ''' Stores the given PersonName as GedcomLines so that previous values of pn.rows are merged.
+        ''' Stores the given PersonName_v1 as GedcomLines so that previous values of pn.rows are merged.
             This is important, as original lines may have descentants like SOUR, which must be kept
             in place.
             1. Insert NAME row on the top
@@ -406,7 +406,7 @@ class PersonName(GedcomLine):
         if hasattr(pn, 'prefix'):       #TODO: or a SPFX row found in self.rows
             my_tags.append(['SPFX', pn.prefix])
 
-        # 1. The first row is the PersonName (inherited class from GedcomLine)
+        # 1. The first row is the PersonName_v1 (inherited class from GedcomLine)
         orig_rows = [self]
         # 1.1 If original value had '?', insert a NOTE _question message
         if self.questionable:
@@ -430,7 +430,7 @@ class PersonName(GedcomLine):
                       format(r.path, len(pn.rows), r.tag, new_value))
                 pn.rows.append(GedcomLine((r.level, r.tag, new_value)))
                 # Show NAME differences 
-                if type(r) == PersonName and r.tag_orig == 'NAME' and r.tag != 'ALIA':
+                if type(r) == PersonName_v1 and r.tag_orig == 'NAME' and r.tag != 'ALIA':
                     if re.sub(r' ', '', pn.value.lower()) != name_self: 
                         report_change(r.tag, self.value, new_value)
                     pn.is_preferred_name = False

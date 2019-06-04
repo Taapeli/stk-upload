@@ -37,7 +37,7 @@ logger = logging.getLogger('stkserver')
 
 from ..transforms.model.gedcom_line import GedcomLine
 from ..transforms.model.gedcom_record import GedcomRecord
-from ..transforms.model.person_name_v2 import PersonName
+from ..transforms.model.person_name import PersonName
 
 from .. import transformer
 from ..transformer import Item

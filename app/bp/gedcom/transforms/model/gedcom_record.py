@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 
 from models import util
 from .gedcom_line import GedcomLine
-from .person_name import PersonName
+from .person_name_v1 import PersonName_v1
 
 
 class GedcomRecord(GedcomLine):
@@ -34,7 +34,7 @@ class GedcomRecord(GedcomLine):
         self.rows = []
         # optional attributes {'BIRT':1820}
         self.attributes = {}
-        # Latest PersonName index in self.rows
+        # Latest PersonName_v1 index in self.rows
         self.current_index = -1
         # The name found first, userd for default GIVN, _CALL, NICK
         self.name_default = None
@@ -53,9 +53,9 @@ class GedcomRecord(GedcomLine):
 
     def add_member(self, gedline):
         ''' Adds a gedcom line to record set.
-            "2 NAME" line is added as a PersonName object, others as GedcomLine objects
+            "2 NAME" line is added as a PersonName_v1 object, others as GedcomLine objects
         '''
-        if type(gedline) is PersonName:
+        if type(gedline) is PersonName_v1:
             # gedline is "1 NAME ...". The first one is the preferred name
             gedline.is_preferred_name = (self.current_index < 0)
 #             print("#record row({}) <= {} (name {!r})".format(len(self.rows), gedline.path, gedline.name), file=stderr)
@@ -79,7 +79,7 @@ class GedcomRecord(GedcomLine):
         for obj in self.rows:
 #             i += 1; print ("#{:3}     {}".format(i, obj))
 #             j = -1
-            if isinstance(obj, PersonName):
+            if isinstance(obj, PersonName_v1):
                 # Each NAME row generated from /surname1, surname2/
                 for x in obj.get_person_rows(self.name_default):
 #                     j += 1; print ("#{:3}.{:02}  {}".format(i, j, x))
@@ -97,7 +97,7 @@ class GedcomRecord(GedcomLine):
 
 
     def get_nameobject(self):
-        ''' Returns the latest object of type PersonName '''
+        ''' Returns the latest object of type PersonName_v1 '''
         if self.current_index >= 0:
             return self.rows[self.current_index]
 
@@ -111,26 +111,26 @@ if __name__ == '__main__':
 
     # One person with two NAME lines
     my_record_1 = GedcomRecord(GedcomLine('0 @I1@ INDI'))
-    my_name = PersonName(GedcomLine('1 NAME Amalia Saima* (Sanni) Erikint./Raitala os. von Krats/Ericsdr.'))
+    my_name = PersonName_v1(GedcomLine('1 NAME Amalia Saima* (Sanni) Erikint./Raitala os. von Krats/Ericsdr.'))
     my_record_1.add_member(my_name)
     my_name.add_line(GedcomLine(('2','GIVN','Saimi')))
     my_name.add_line(GedcomLine('3 SOUR Äidiltä'))
     my_name.add_line(GedcomLine('2 SURN Raitala'))
     my_name.add_line(GedcomLine('2 NOTE Kummin kaima'))
     my_record_2 = GedcomRecord(GedcomLine('0 @I2@ INDI'))
-    my_name = PersonName(GedcomLine('1 NAME vauva//Ericsdr.'))
+    my_name = PersonName_v1(GedcomLine('1 NAME vauva//Ericsdr.'))
     my_record_2.add_member(my_name)
     my_record_3 = GedcomRecord(GedcomLine('0 @I3@ INDI'))
-    my_name = PersonName(GedcomLine('1 NAME Niilo/Niemelä/Niemeläinen/'))
+    my_name = PersonName_v1(GedcomLine('1 NAME Niilo/Niemelä/Niemeläinen/'))
     my_name.add_line(GedcomLine('2 SOUR Perunkirjoitus'))
     my_record_3.add_member(my_name)
     my_record_4 = GedcomRecord(GedcomLine('0 @I4@ INDI'))
-    my_name = PersonName(GedcomLine('1 NAME Janne/Mattila (Matts)/'))
+    my_name = PersonName_v1(GedcomLine('1 NAME Janne/Mattila (Matts)/'))
     my_record_4.add_member(my_name)
-    my_name = PersonName(GedcomLine('1 NAME /Matiainen/'))
+    my_name = PersonName_v1(GedcomLine('1 NAME /Matiainen/'))
     my_name.add_line(GedcomLine('2 SOUR Kuulopuhe'))
     my_record_4.add_member(my_name)
-    my_name = PersonName(GedcomLine('1 NAME Jouto-Janne'))
+    my_name = PersonName_v1(GedcomLine('1 NAME Jouto-Janne'))
     my_name.add_line(GedcomLine('2 NOTE _orig_ALIA Jouto-Janne'))
     my_record_4.add_member(my_name)
     run_args = {'nolog': False, 'output_gedcom': '../../out.txt', 'encoding': 'UTF-8', 'dryrun': False}
