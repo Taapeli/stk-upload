@@ -352,10 +352,11 @@ def process_gedcom(arglist, transform_module):
         with Output(args) as out:
             out.original_line = None
             out.transform_name = transform_module.__name__
-            saved_stdout = sys.stdout
-            saved_stderr = sys.stderr
-            sys.stdout = io.StringIO()
-            sys.stderr = io.StringIO()
+# TODO: RESTORE TEMPORARY REMOVAL
+#             saved_stdout = sys.stdout
+#             saved_stderr = sys.stderr
+#             sys.stdout = io.StringIO()
+#             sys.stderr = io.StringIO()
             if args.dryrun:
                 old_name = ""
             else:
@@ -381,10 +382,13 @@ def process_gedcom(arglist, transform_module):
                  util.format_timestamp())
         gedcom_utils.history_append(args.input_gedcom,msg)
         print("<h3>------ {} ------</h3>".format(msg))
-        output = sys.stdout.getvalue()
-        errors = sys.stderr.getvalue()
-        sys.stdout = saved_stdout
-        sys.stderr = saved_stderr
+        output = None
+        errors = None
+# TODO: RESTORE TEMPORARY REMOVAL
+#         output = sys.stdout.getvalue()
+#         errors = sys.stderr.getvalue()
+#         sys.stdout = saved_stdout
+#         sys.stderr = saved_stderr
     if old_name:
         old_basename = os.path.basename(old_name)
     else:
