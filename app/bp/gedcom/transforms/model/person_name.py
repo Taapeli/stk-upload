@@ -89,7 +89,7 @@ class PersonName(Item):
         self.tag_orig = self.tag
 
 
-    def process_name_item(self, name_default=None):
+    def process_NAME(self, name_default=None):
         ''' Analyze and fix a NAME Item.
         
             First NAME and then the descendant Items included in the level hierarchy.
@@ -142,7 +142,7 @@ class PersonName(Item):
 #         ''' Analyze this NAME and return it's GedcomLines: first NAME and 
 #             then the descendant rows in the level hierarchy.
 #         '''
-#         ret = self.process_name_item(name_default)
+#         ret = self.process_NAME(name_default)
 #         return ret
 
     

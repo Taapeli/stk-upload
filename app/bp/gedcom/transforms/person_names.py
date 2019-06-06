@@ -37,8 +37,8 @@ Created on 26.11.2016 – 2.6.2019
 import logging 
 logger = logging.getLogger('stkserver')
 
-from ..transforms.model.gedcom_line import GedcomLine
-from ..transforms.model.gedcom_record import GedcomRecord
+#from ..transforms.model.gedcom_line import GedcomLine
+#from ..transforms.model.gedcom_record import GedcomRecord
 from ..transforms.model.person_name import PersonName
 
 from .. import transformer
@@ -54,7 +54,7 @@ indi_record = None
 # state 0 = started, 1 = indi processing, 2 = name processing, 3 = birth processing
 state = 0
 
-def initialize(args):
+def initialize(_args):
     return PersonNames()
 
 def add_args(parser):
@@ -62,7 +62,7 @@ def add_args(parser):
 
 class PersonNames(transformer.Transformation):
 
-    def transform(self, item, options, phase):
+    def transform(self, item, _options, _phase):
         """
         Performs a transformation for the given Gedcom "item" (i.e. "line block")
         Returns one of
@@ -76,16 +76,31 @@ class PersonNames(transformer.Transformation):
         Note: If you change the item in this function but still return True, then the changes
         are applied to the Gedcom but they are not displayed with the --display-changes option.
         """
-        print(f"#Item {item.linenum}: {item} ({len(item.children)} included)")
+        print(f"#Item {item.linenum}: {item.list()}")
         if item.path.find('.INDI') < 0:
             return True
 
+        # 1. Clean "Waldemar (Valte)/Rosén/Persson" to components
         if item.tag == "NAME":
-            print(f"## Name {item.value} conversion")
-            logger.debug(f"##Item {item.linenum}: {item}")
-            n = PersonName(item)
-            n.process_name_item(False)
-            return n
+            print(f"## Name {item.value}")
+            logger.debug(f"##Item {item.linenum}: {item.list()}")
+            pn = PersonName(item)
+            pn.process_NAME(False)
+            return pn
+
+        #2. If there is SURN.NOTE etc without any name, move their Notes and  
+        #   Sources to NAME level
+        if item.tag in ["NPFX", "GIVN", "NICK", "SPFX", "SURN", "NSFX"] \
+           and item.value == "" \
+           and item.children:
+            print(f"##   {item} – TODO move children with children to self")
+            logger.debug(f"##Item {item.linenum}: {item.list()}")
+            new_items = []
+            for c in item.children:
+                it = Item(c.line, c.children, c.linenum)
+                it.level += -1
+                new_items.append(it)
+            return new_items
 
         if False:   #options.remove_multiple_blanks: # 2.2.3
             if item.tag in ('NAME','PLAC'):
