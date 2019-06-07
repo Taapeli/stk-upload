@@ -76,13 +76,13 @@ class PersonNames(transformer.Transformation):
         Note: If you change the item in this function but still return True, then the changes
         are applied to the Gedcom but they are not displayed with the --display-changes option.
         """
-        print(f"#Item {item.linenum}: {item.list()}")
+        print(f"#Item {item.linenum}: {item.list()}<br>")
         if item.path.find('.INDI') < 0:
             return True
 
         # 1. Clean "Waldemar (Valte)/Rosén/Persson" to components
         if item.tag == "NAME":
-            print(f"## Name {item.value}")
+            print(f"## Name {item.value}<br>")
             logger.debug(f"##Item {item.linenum}: {item.list()}")
             pn = PersonName(item)
             pn.process_NAME(False)
@@ -93,7 +93,7 @@ class PersonNames(transformer.Transformation):
         if item.tag in ["NPFX", "GIVN", "NICK", "SPFX", "SURN", "NSFX"] \
            and item.value == "" \
            and item.children:
-            print(f"##   {item} – TODO move children with children to self")
+            print(f"##   {item} – TODO move children with children to self<br>")
             logger.debug(f"##Item {item.linenum}: {item.list()}")
             new_items = []
             for c in item.children:
@@ -108,35 +108,6 @@ class PersonNames(transformer.Transformation):
                 if newtext != item.value:
                     item.value = newtext
                     return item
-    
-        if True:        #options.note_to_page:  
-            # 1 BIRT
-            # 2 DATE 24 APR 1766
-            # 2 NOTE Födde 1766 Aprill 24
-            # 2 SOUR Kustavi syntyneet 1764-1792 (I C:2)
-            # 2 PLAC Kustavi
-            # ->
-            # 1 BIRT
-            # 2 DATE 24 APR 1766
-            # 2 SOUR Kustavi syntyneet 1764-1792 (I C:2)
-            # 3 PAGE Födde 1766 Aprill 24
-            # 2 PLAC Kustavi 
-            if item.tag in {"EVEN","BIRT","DEAT","CHR"}:
-                note_index = -1
-                for i,c in enumerate(item.children):
-                    if c.tag == "NOTE" and len(c.children) == 0 and not c.value.startswith("@"): 
-                        note_index = i
-                    if c.tag == "SOUR" and note_index >= 0:
-                        for c2 in c.children:
-                            if c2.tag == "PAGE": # PAGE already exists, ignore
-                                return True
-                        note = item.children[note_index].value
-                        del item.children[note_index]
-                        newitem = Item("{} PAGE {}".format(item.level+2,note))
-                        c.children.append(newitem)
-                        return item 
-                return True
-
 
         return True # no change
 

@@ -170,8 +170,16 @@ img.totop {
 }
 
 gedcom-text {
+    display: inline-block;
+    padding-left: 2em;
+	white-space: pre;
+    color: blue;
+}
+gedcom-replaced {
+    display: inline-block;
+    padding-left: 2em;
     white-space: pre;
-    text-indent: 20px;
+    color: red;
 }
 
 #div_excerpt {

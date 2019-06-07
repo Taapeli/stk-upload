@@ -188,21 +188,19 @@ def display_changes(lines,item,linenum=None):
             print(s)
 
     if not item: 
-        print("<b>"+_("Deleted:")+"</b>")
-        print("<gedcom-text>")
+        print("<div><b>"+_("Deleted:")+"</b></div><gedcom-replaced>", end="")
         for line in lines:
             print(line)
-        print("</gedcom-text>")
-        print()
+        print("</gedcom-replaced>")
         return
-    print("<b>"+_("Replaced:")+"</b>")
-    if linenum: print("("+_("starting from line ")+f"<a href='#' class='gedcomlink'>{linenum}</a>)")
-    print("<gedcom-text>")
+    print("<div><b>"+_("Replaced:")+"</b>")
+    if linenum: 
+        print(f"{_('starting from line ')}<a href='#' class='gedcomlink'>{linenum}</a>")
+    print("</div><gedcom-replaced>", end="")
     for line in lines:
         print(line)
-    print("</gedcom-text>")
-    print("<b>"+_("With:")+"</b>")
-    print("<gedcom-text>")
+    print("</gedcom-replaced>")
+    print("<div><b>"+_("With:")+"</b></div><gedcom-text>", end="")
     if isinstance(item, list):
         for it in item:
             it.print_items(Out())
@@ -210,4 +208,4 @@ def display_changes(lines,item,linenum=None):
         item.print_items(Out())
     print("</gedcom-text>")
     print()
-    print("<br>-----------------------<br>")
+    print("<hr>")   #("<br>-----------------------<br>")

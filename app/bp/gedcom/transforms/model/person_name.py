@@ -126,7 +126,7 @@ class PersonName(Item):
         ''' 1.3) SURN Surname part: pick each surname as a new PersonName
              Creates NAME, GIVN, SURN, NSFX rows and their associated lines into name_item.rows
     '''
-        ret = [] # List of merged GedcomLines
+#         ret = [] # List of merged GedcomLines
         surnames = name_item._extract_surnames()
         for pn in surnames:
             logger.debug('#' + str(pn)) # Merge original and new rows
@@ -455,21 +455,3 @@ class PersonName(Item):
         # 4 Gender, if defined
         if hasattr(self, 'sex') and self.sex != "U":    # Only "M" or "F"
             pn.rows.append(GedcomLine((self.level+1, "SEX", self.sex)))
-
-
-# Keskeneräinen idea, olisikohan tarpeen, toimisikohan?
-#
-#     def _evaluate_attribute(self, key, attr):
-#         ''' Looks up a value for an attribute from a) self.rows[] or b) local attributes of self.
-#             Returns the value and removes the row, if used
-#             #TODO: Which one is preferred?
-#         '''
-#         # Find a row having te key
-#         for i in self.rows:
-#             if str(i)[2:].startswith(key):
-#                 value = i.value
-#                 #TODO: Remove the row
-#                 
-#         # Find the local attr of the key
-#         value = getattr(self, attr, None)
-#         return value

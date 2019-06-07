@@ -240,7 +240,7 @@ class Transformer:
         """
         newitems = []
         if items:
-            print(f"# Processing {items[:5]} ..." if len(items) > 6 else f"# Processing {items}")
+            print(f"# Processing {items[:5]} ..." if len(items) > 6 else f"# Processing {items}<br>")
 
         for item in items:
             if path:        item.path = path + "." + item.tag
