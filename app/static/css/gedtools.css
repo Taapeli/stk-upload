@@ -139,10 +139,13 @@ btn, span.button a {
     width: auto;
 }
 
+.link_item {
+    margin-top: 1em;
+}
+
 .link {
     color: #2f435e;
     font-weight: bold;
-    /* font-size:larger; 10.3.2019 JMä */
     text-decoration: none;
 }
 
