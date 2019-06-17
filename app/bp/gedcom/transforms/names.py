@@ -6,8 +6,8 @@
     The input flow of GedcomLine objects have the following process:
       1. When an INDI line is found, a new GedcomRecord is created
         - The following lines associated to this person are stored in a list in the GedcomRecord:
-          - When a "1 NAME" line is found, a new PersonName object is created and the following
-            lines associated to this name are stored as a list in the PersonName
+          - When a "1 NAME" line is found, a new PersonName_v1 object is created and the following
+            lines associated to this name are stored as a list in the PersonName_v1
           - When all lines of current INDI record (0 INDI and all lower level rows)
             the transformed lines are written to output using GedcomRecord.emit() method.
       2. The other input records (HEAD, FAM etc.) are written out immediately line by line
@@ -35,12 +35,12 @@ Created on 26.11.2016
 
 from ..transforms.model.gedcom_line import GedcomLine
 from ..transforms.model.gedcom_record import GedcomRecord
-from ..transforms.model.person_name import PersonName
+from ..transforms.model.person_name_v1 import PersonName_v1
 from flask_babelex import _
 
 version = "0.1"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
-name = _("Personal names") #+ " " + version
+name = _("Personal names") + " " + version
 
 # Active Indi logical record GedcomRecord
 indi_record = None
@@ -108,7 +108,7 @@ def phase3(run_args, gedline, f):
     if state == 1:      # INDI processing active
         if gedline.level == 1:
             if _is_gedline_a_NAME(gedline):
-                # Start a new PersonName in GedcomRecord
+                # Start a new PersonName_v1 in GedcomRecord
                 _T4_store_name(gedline)
                 state = 2
                 return
@@ -124,7 +124,7 @@ def phase3(run_args, gedline, f):
         if gedline.level == 1:
             # Level 1 lines terminate current NAME group
             if _is_gedline_a_NAME(gedline):
-                # Start a new PersonName in GedcomRecord
+                # Start a new PersonName_v1 in GedcomRecord
                 _T4_store_name(gedline)
                 state = 2
                 return
@@ -146,7 +146,7 @@ def phase3(run_args, gedline, f):
             return
         if gedline.level == 1:
             if _is_gedline_a_NAME(gedline):
-                # Start a new PersonName in GedcomRecord
+                # Start a new PersonName_v1 in GedcomRecord
                 _T4_store_name(gedline)
                 state = 2
             else:
@@ -191,16 +191,16 @@ def _T3_emit_gedline(gedline, f):
     gedline.emit(f)
 
 def _T4_store_name(gedline):
-    ''' Save gedline as a new PersonName to the logical person record '''
+    ''' Save gedline as a new PersonName_v1 to the logical person record '''
     global indi_record
     if gedline.tag == 'ALIA':
         # For an ALIA line: 1) Change tag to 'NAME' 2) add line '_orig_ALIA'
-        nm = PersonName(gedline)
+        nm = PersonName_v1(gedline)
         nm.tag = 'NAME'
         noteline = GedcomLine((gedline.level + 1, 'NOTE', '_orig_ALIA' + gedline.value))
         nm.add_line(noteline)
     else: # Real 'NAME'
-        nm = PersonName(gedline)
+        nm = PersonName_v1(gedline)
     indi_record.add_member(nm)
 
 def _T5_save_date(gedline, tag):
@@ -222,7 +222,7 @@ def _T7_store_name_member(gedline):
 
 def _is_gedline_a_NAME(gedline):
     ''' Check if this is a NAME line or a ALIA line with no @...@ reference.
-        (This kind of ALIA will be changed to NAME when outputting PersonName)
+        (This kind of ALIA will be changed to NAME when outputting PersonName_v1)
     '''
     return gedline.tag == 'NAME' or \
         (gedline.tag == 'ALIA' and not gedline.value.startswith('@'))

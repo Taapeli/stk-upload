@@ -24,7 +24,7 @@ Finally the top level object is returned: this is a Gedcom object
 which contains a list of top level (level 0) Gedcom records (as Items). 
 
 """
-# import sys
+import sys
 # import os
 # from subprocess import call
 # import logging 
@@ -33,10 +33,10 @@ which contains a list of top level (level 0) Gedcom records (as Items).
 from flask_babelex import _
 
 def write(out,s):
-    out.emit(s)        
+    out.emit(s)
 
 def fixlines(lines,options):
-    """ Clean Gedcom lones from line feed marks and fix CONT.
+    """ Clean Gedcom lines from line feed marks and fix CONT.
     """
     prevlevel = -1
     for i,line in enumerate(lines):
@@ -143,20 +143,20 @@ class Item:
         - value         str    text following tag "F" etc
                         int    x
     """
-    def __init__(self,line,children=None,lines=None,linenum=None):
+    def __init__(self, line, children=None, lines=None, linenum=None):
         if children is None: 
             children = []
         self.linenum = linenum
-        temp = line.split()
-        if len(temp) < 2: 
+        parts = line.split()
+        if len(parts) < 2: 
             raise RuntimeError(_("Invalid line: ") + line)
-        self.level = int(temp[0])
-        if self.level == 0 and temp[1][0] == '@':
-            self.xref = temp[1]
-            self.tag = temp[2]
+        self.level = int(parts[0])
+        if self.level == 0 and parts[1][0] == '@':
+            self.xref = parts[1]
+            self.tag = parts[2]
         else:
             self.xref = ""
-            self.tag = temp[1]
+            self.tag = parts[1]
         self._line = line
         self.children = children
         self.lines = lines
@@ -179,9 +179,22 @@ class Item:
         return s
 
     def __repr__(self):
+        """ Return current line.  """
         return self.line 
     
-    def print_items(self,out):
+    def list(self, show_children=True):
+        """ Display item, optionally with included inner level items. """
+        if show_children:
+            if len(self.children) > 6:
+                return f"{self.line} {self.children[:5]} ..."
+            else:
+                return f"{self.line} {self.children}"
+        else:
+            return self.line
+
+    def print_items(self, out):
+        """ Print item with included inner level items.
+        """
         write(out,self.line)
         for item in self.children:
             item.print_items(out)
@@ -221,32 +234,36 @@ class Transformer:
         return items
     
     def transform_items(self, items, path="", phase=1):
-        """ Do Item transformation.
+        """ Do transformation for a list of Items.
+        
+            This is called recursive for inner level Items.
         """
         newitems = []
+        if items:
+            print(f"# Processing {items[:5]} ..." if len(items) > 6 else f"# Processing {items}<br>")
+
         for item in items:
-            #print(f"##Item {item.linenum}: {item} (+{len(item.children)})\n")
-            if path: 
-                item.path = path + "." + item.tag
-            elif item.xref:
-                item.path = item.xref + "." + item.tag
-            else:
-                item.path = item.tag
+            if path:        item.path = path + "." + item.tag
+            elif item.xref: item.path = item.xref + "." + item.tag
+            else:           item.path = item.tag
             # Process the children (lines with next higher level numbers)
             item.children = self.transform_items(item.children, path=item.path, phase=phase)
-            newitem = self.transformation.transform(item,self.options,phase)
+            # Process current type transformation for this Item
+            newitem = self.transformation.transform(item, self.options,phase)
+            #print(f"# {item.line[:6]} – {len(item.children)} children")
             if newitem == True: # no change
                 newitems.append(item)
                 continue
             self.num_changes += 1
-            if self.options.display_changes: self.display_callback(item.lines, newitem,item.linenum)
+            if self.options.display_changes:
+                self.display_callback(item.lines, newitem, item.linenum)
             if newitem is None: continue # delete item
             if type(newitem) == list:
                 for it in newitem:
                     newitems.append(it)
             else:
                 newitems.append(newitem)
-            
+
         return newitems
         
     

@@ -13,8 +13,8 @@ import traceback
 #from re import match
 #from collections import defaultdict
 
-from flask import render_template, request, redirect, url_for, flash, jsonify, session
-from flask_security import login_required, current_user, roles_required, roles_accepted
+from flask import render_template, request, redirect, url_for, flash, jsonify #, session
+from flask_security import login_required, current_user, roles_accepted #, roles_required
 from flask import send_from_directory
 from flask_babelex import _
 
@@ -347,27 +347,32 @@ def process_gedcom(arglist, transform_module):
     args.nolog = True # replaced by history file
     gedcom_utils.history_append(args.input_gedcom,"\n"+msg)
     gedcom_utils.history_append_args(args)
+    # You may deny stdout redirect by setting GEDCOM_REDIRECT_SYSOUT=False in config.py
+    if not 'GEDCOM_REDIRECT_SYSOUT' in globals():
+        GEDCOM_REDIRECT_SYSOUT = True
     try:
         gedcom_utils.init_log(args.logfile)
         with Output(args) as out:
             out.original_line = None
             out.transform_name = transform_module.__name__
-            saved_stdout = sys.stdout
-            saved_stderr = sys.stderr
-            sys.stdout = io.StringIO()
-            sys.stderr = io.StringIO()
+            if GEDCOM_REDIRECT_SYSOUT:
+                saved_stdout = sys.stdout
+                saved_stderr = sys.stderr
+                sys.stdout = io.StringIO()
+                sys.stderr = io.StringIO()
             if args.dryrun:
                 old_name = ""
             else:
                 old_name = out.new_name
 
-            print("<h3>------ {} ------</h3>".format(msg))
+            print(f"<h3>------ {msg} ------</h3>")
             t = transformer.Transformer(transform_module=transform_module,
                                         display_callback=gedcom_utils.display_changes,
                                         options=args)
             g = t.transform_file(args.input_gedcom) 
             g.print_items(out)
-            print(_("------ Number of changes:"), t.num_changes)
+            print("<div>")
+            print(f'{ _("------ Number of changes:")} {t.num_changes}')
     except:
         traceback.print_exc()
     finally:
@@ -381,10 +386,14 @@ def process_gedcom(arglist, transform_module):
                  util.format_timestamp())
         gedcom_utils.history_append(args.input_gedcom,msg)
         print("<h3>------ {} ------</h3>".format(msg))
-        output = sys.stdout.getvalue()
-        errors = sys.stderr.getvalue()
-        sys.stdout = saved_stdout
-        sys.stderr = saved_stderr
+        print("</div>")
+        output = None
+        errors = None
+        if GEDCOM_REDIRECT_SYSOUT:
+            output = sys.stdout.getvalue()
+            errors = sys.stderr.getvalue()
+            sys.stdout = saved_stdout
+            sys.stderr = saved_stderr
     if old_name:
         old_basename = os.path.basename(old_name)
     else:

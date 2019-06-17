@@ -33,16 +33,17 @@ var gedcom = "{{ gedcom }}";
                     > {{ _("Allow help desk to view data") }}
                 </div>
                 <div id="permission_message">{{ _("Permission updated") }}</div>
-                <div style="margin-top: 4em;"> 
-                    &rtrif; 
-                    <a class="link" href="/gedcom">
-                    	{{ _("Switch to another GEDCOM") }}
-                    </a>
-                </div>
-                <div style="margin-top: 1em;" id="div_show_info"> 
+                <hr style="margin:2em;">
+                <div class="link_item" id="div_show_info"> 
                     &rtrif; 
                     <a id="show_info" class="link" href="#">
                         {{ _("Show GEDCOM info") }}
+                    </a>
+                </div>
+                <div class="link_item"> 
+                    &rtrif; 
+                    <a class="link" href="/gedcom">
+                    	{{ _("Switch to another GEDCOM") }}
                     </a>
                 </div>
               </div>
@@ -124,7 +125,6 @@ var gedcom = "{{ gedcom }}";
 	        <div style="display: inline-block;">
 	
 				<h3>{{ _("Actions") }}</h3>
-				<div>
 				    <btn id="transforms"
 				    	title='{{ _("Choose a transformation to perform for this GEDCOM") }}'>
 					    {{ _("Choose a transformation") }}
@@ -146,20 +146,19 @@ var gedcom = "{{ gedcom }}";
 				    	{{ _("Remove this GEDCOM") }}</a>
 			    	</btn>
 
-	                <div style="margin-top: 1em;"> 
+	                <div class="link_item"> 
 	                    &rtrif; 
 	                    <a id="analyze" class="link" href="#">
 	                    {{ _("Technical analysis") }}</a>
 	                </div>
 	
-	                <div style="margin-top: 1em;"> 
+	                <div class="link_item"> 
 	                    &rtrif; 
 	                    <a id="show_history" class="link" href="#">
 	                        {{ _("Show transformation history") }}
                         </a>
 	                </div>
 
-				</div>
 	        </div>
 	      </div>
 	
