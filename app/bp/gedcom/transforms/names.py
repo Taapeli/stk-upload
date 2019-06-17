@@ -3,6 +3,8 @@
 
     Processes gedcom lines trying to fix problems of individual name tags
 
+    Note: NEXT VERSION OF THIS MODULE IS person_names.py
+
     The input flow of GedcomLine objects have the following process:
       1. When an INDI line is found, a new GedcomRecord is created
         - The following lines associated to this person are stored in a list in the GedcomRecord:
@@ -40,7 +42,7 @@ from flask_babelex import _
 
 version = "0.1"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
-name = _("Personal names") + " " + version
+name = _("Personal names")
 
 # Active Indi logical record GedcomRecord
 indi_record = None
