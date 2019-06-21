@@ -5,10 +5,10 @@
 
 import sys
 import os
-import importlib
+# import importlib
 #import time
 import subprocess
-import traceback
+# import traceback
 
 #from re import match
 #from collections import defaultdict
@@ -26,8 +26,9 @@ from models import util, syslog
 
 from . import bp
 from bp.gedcom import APP_ROOT, GEDCOM_APP, ALLOWED_EXTENSIONS
-from .transforms.model.ged_output import Output
-from . import transformer
+# from .transforms.model.ged_output import Output
+# from . import transformer
+from .models.processor import build_parser, process_gedcom
 
 from werkzeug.utils import secure_filename
 
@@ -307,132 +308,47 @@ def gedcom_delete_old_versions(gedcom):
     syslog.log(type="deleted old versions for gedcom",gedcom=gedcom)    
     return redirect(url_for('.gedcom_info',gedcom=gedcom))
 
-      
-def process_gedcom(arglist, transform_module):
-    """Implements another mechanism for Gedcom transforms:
 
-    The transform_module is assumed to contain the following methods:
-    - initialize
-    - transform: implements the actual transformation for a single line block ("item")
-    - fixlines: preprocesses the Gedcom contents (list of lines/strings)
-    - add_args: adds the transform-specific arguments (ArgumentParser style)
-
-    See sukujutut.py as an example
-    """
-
-    msg = _("Transform '{}' started at {}").format(
-             transform_module.name, 
-             util.format_timestamp())
-    LOG.info("------ {} ------".format(msg))
-
-    import argparse
-    import io
-#     import traceback
-    parser = argparse.ArgumentParser()
-#    parser.add_argument('transform', help="Name of the transform (Python module)")
-    parser.add_argument('input_gedcom', help=_("Name of the input GEDCOM file"))
-    parser.add_argument('--logfile', help=_("Name of the log file"), default="_LOGFILE" )
-#    parser.add_argument('--output_gedcom', help="Name of the output GEDCOM file; this file will be created/overwritten" )
-    parser.add_argument('--display-changes', action='store_true',
-                        help=_('Display changed rows'))
-    parser.add_argument('--dryrun', action='store_true',
-                        help=_('Do not produce an output file'))
-    parser.add_argument('--nolog', action='store_true',
-                        help=_('Do not produce a log in the output file'))
-    parser.add_argument('--encoding', type=str, default="UTF-8", choices=["UTF-8", "UTF-8-SIG", "ISO8859-1"],
-                        help=_("Encoding of the input GEDCOM"))
-    transform_module.add_args(parser)
-    args = parser.parse_args(arglist)
-    args.output_gedcom = None
-    args.nolog = True # replaced by history file
-    gedcom_utils.history_append(args.input_gedcom,"\n"+msg)
-    gedcom_utils.history_append_args(args)
-    # You may deny stdout redirect by setting GEDCOM_REDIRECT_SYSOUT=False in config.py
-    if not 'GEDCOM_REDIRECT_SYSOUT' in globals():
-        GEDCOM_REDIRECT_SYSOUT = True
-    try:
-        gedcom_utils.init_log(args.logfile)
-        with Output(args) as out:
-            out.original_line = None
-            out.transform_name = transform_module.__name__
-            if GEDCOM_REDIRECT_SYSOUT:
-                saved_stdout = sys.stdout
-                saved_stderr = sys.stderr
-                sys.stdout = io.StringIO()
-                sys.stderr = io.StringIO()
-            if args.dryrun:
-                old_name = ""
-            else:
-                old_name = out.new_name
-
-            print(f"<h3>------ {msg} ------</h3>")
-            t = transformer.Transformer(transform_module=transform_module,
-                                        display_callback=gedcom_utils.display_changes,
-                                        options=args)
-            g = t.transform_file(args.input_gedcom) 
-            g.print_items(out)
-            print("<div>")
-            print(f'{ _("------ Number of changes:")} {t.num_changes}')
-    except:
-        traceback.print_exc()
-    finally:
-        if old_name: 
-            gedcom_utils.history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom))
-            gedcom_utils.history_append(args.input_gedcom,_("Old file saved as {}").format(old_name))
-        else:
-            gedcom_utils.history_append(args.input_gedcom,_("File saved as {}").format(args.input_gedcom+"-temp"))
-        msg = _("Transform '{}' ended at {}").format(
-                 transform_module.name, 
-                 util.format_timestamp())
-        gedcom_utils.history_append(args.input_gedcom,msg)
-        print("<h3>------ {} ------</h3>".format(msg))
-        print("</div>")
-        output = None
-        errors = None
-        if GEDCOM_REDIRECT_SYSOUT:
-            output = sys.stdout.getvalue()
-            errors = sys.stderr.getvalue()
-            sys.stdout = saved_stdout
-            sys.stderr = saved_stderr
-    if old_name:
-        old_basename = os.path.basename(old_name)
-    else:
-        old_basename = ""
-    if errors and old_basename:
-        os.rename(old_name,args.input_gedcom)
-        old_basename = "" 
-    rsp = dict(stdout=output,stderr=errors,oldname=old_basename,logfile=args.logfile)
-    if hasattr(transform_module,"output_format") and transform_module.output_format == "plain_text":
-        rsp["plain_text"] = True
-    return jsonify(rsp)
-            
-                 
 @bp.route('/gedcom/transform/<gedcom>/<transform>', methods=['get','post'])
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_transform(gedcom,transform):
+    """ Execute the pre-defined transformation.
+    """
     gedcom_filename = gedcom_utils.gedcom_fullname(gedcom)
-    transform_module,parser = build_parser(transform, gedcom, gedcom_filename)
+    transform_module, parser = build_parser(transform, gedcom, gedcom_filename)
     if request.method == 'GET':
+        """ (1) Shows transformation parameter page
+        """
         rows = parser.generate_option_rows()
         return render_template('gedcom_transform_params.html', 
                                gedcom=gedcom, transform=transform, 
-                               transform_name=transform_module.name, rows=rows )
+                               transform_name=transform_module.name, rows=rows)
     else:
+        """ (2) Starts the transformation with parameters from (1).
+        """
         logfile = gedcom_filename + "-log"
 #         print("#logfile:",logfile)
         gedcom_utils.removefile(logfile)
         args = parser.build_command(request.form.to_dict())
         encoding = util.guess_encoding(gedcom_filename)
-        logging.info("Guessed encoding {} for {}".format(encoding,gedcom_filename))
-        args += " --encoding {}".format(encoding)
-        if hasattr(transform_module,"transformer"):
+        logging.info(f"Guessed encoding {encoding} for {gedcom_filename}")
+        args += f" --encoding {encoding}"
+        if hasattr(transform_module, "transformer"):
+            """ (2a) Runs Gedcom transformation
+                     using bp.gedcom.models.processor.process_gedcom
+            """
             command_args = parser.build_command_args(request.form.to_dict())
             arglist = [gedcom_filename] + command_args 
             arglist += ["--logfile",logfile]
             arglist += ["--encoding",encoding]
-            return process_gedcom(arglist, transform_module)
+            return jsonify(process_gedcom(arglist, transform_module))
         
+        """ (2b) Runs Gedcom transformation by obsolete stand alone program emulation.
+
+            Used only for older bp.gedcom.transforms.names,
+            to be replaced by   bp.gedcom.transforms.person_names
+        """
         #TODO EI PYTHON EXCECUTABLEN POLKUA, miten korjataan
         python_exe = sys.executable or "/opt/jelastic-python37/bin/python3"
         python_path = ':'.join([os.path.join(APP_ROOT, 'app'), GEDCOM_APP])
@@ -460,93 +376,4 @@ def gedcom_transform(gedcom,transform):
         rsp = dict(stdout=log + "\n" + s1,stderr=s2,oldname="",logfile=logfile,
            diff="",plain_text=True)
         return jsonify(rsp)
-
-def build_parser(filename,gedcom,gedcom_filename):
-    modname = filename[:-3]
-    transform_module = importlib.import_module("bp.gedcom.transforms."+modname)
-
-    class Arg:
-        def __init__(self,name,name2,action,type,choices,default,help):
-            self.name = name
-            self.name2 = name2
-            self.action = action
-            self.type = type
-            self.choices = choices
-            self.default = default
-            self.help = help
-
-    class Parser:
-        def __init__(self):
-            self.args = []
-        def add_argument(self,name,name2=None,action='store',type=str,default=None,help=None,nargs=0,choices=None):
-            self.args.append(Arg(name,name2,action,type,choices,default,help))
-             
-        def generate_option_rows(self):
-            rows = []
-            class Row: pass
-            for arg in self.args:
-                row = Row()
-                row.name = arg.name
-                row.action = arg.action
-                row.help = arg.help
-                row.checked = ""
-                row.classname = "transform_option"
-                if arg.action == 'store_true':
-                    row.type = "checkbox"
-                    if row.name == "--dryrun": row.checked = "checked"
-                    if row.name == "--display-changes": 
-                        row.checked = "checked"
-                        row.classname = "display_option"
-                    elif row.name == "--display_all_unique_places": 
-                        row.classname = "clear_others"
-                elif arg.action == 'store_false':
-                    row.type = "checkbox"
-                elif arg.action == 'store_const':
-                    row.type = "checkbox"
-                elif arg.choices:
-                    row.type = "select"
-                    row.choices = arg.choices
-                elif arg.action == 'store' or arg.action is None:
-                    row.type = 'text'
-                    if arg.type == int:
-                        row.type = 'number'
-                elif arg.action == 'append':
-                    row.type = 'text'
-                elif arg.type == str:
-                    row.type = 'text'
-                elif arg.type == int:
-                    row.type = 'number'
-                else:
-                    raise RuntimeError(_("Unsupported type: "), arg.type )
-                rows.append(row)
-            return rows
-
-        def build_command(self,argdict):
-            return " ".join(self.build_command_args(argdict))
-            
-        def build_command_args(self,argdict):
-            args = []
-            for arg in self.args:
-                if arg.name in argdict:
-                    value = argdict[arg.name].rstrip()
-                    if not value: value = arg.default
-                    if value: 
-                        if arg.action in {'store_true','store_false'} and value == "on": value = ""
-                        if arg.name[0] == "-":
-                            args.append(arg.name)
-                            if value: args.append(value)
-                        else:
-                            args.append(value)
-            args.append("--dryrun")
-            args.append("--nolog")
-            return args
-
-    parser = Parser()
-
-    parser.add_argument('--display-changes', action='store_true',
-                        help=_('Display changed rows'))
-    
-    transform_module.add_args(parser)
-
-    return transform_module,parser
 

@@ -158,6 +158,9 @@ def do_schema_fixes():
     
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
     """
+    print(f"adminDB.do_schema_fixes: none")
+    return
+
     change_HIERARCY_to_IS_INSIDE = """
 MATCH (a) -[r:HIERARCY]-> (b)
     MERGE (a) -[rr:IS_INSIDE]-> (b)
