@@ -5,34 +5,23 @@
 
 import sys
 import os
-# import importlib
-#import time
 import subprocess
-# import traceback
 
-#from re import match
-#from collections import defaultdict
-
-from flask import render_template, request, redirect, url_for, flash, jsonify #, session
-from flask_security import login_required, current_user, roles_accepted #, roles_required
+from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask_security import login_required, current_user, roles_accepted
 from flask import send_from_directory
 from flask_babelex import _
+from werkzeug.utils import secure_filename
+from difflib import HtmlDiff
 
 import logging 
-from bp.gedcom.models import gedcom_utils
 LOG = logging.getLogger(__name__)
 
-from models import util, syslog
-
 from . import bp
+from models import util, syslog
 from bp.gedcom import APP_ROOT, GEDCOM_APP, ALLOWED_EXTENSIONS
-# from .transforms.model.ged_output import Output
-# from . import transformer
+from bp.gedcom.models import gedcom_utils
 from .models.processor import build_parser, process_gedcom
-
-from werkzeug.utils import secure_filename
-
-
 
     
 @bp.route('/gedcom', methods=['GET'])
@@ -77,13 +66,13 @@ def gedcom_history(gedcom):
 @login_required
 @roles_accepted('gedcom', 'research')
 def gedcom_compare(gedcom1,gedcom2):
-    import difflib
     filename1 = gedcom_utils.gedcom_fullname(gedcom1)
     filename2 = gedcom_utils.gedcom_fullname(gedcom2)
     lines1 = gedcom_utils.read_gedcom(filename1)
     lines2 = gedcom_utils.read_gedcom(filename2)
-    difftable = difflib.HtmlDiff().make_file(lines1, lines2, context=True, numlines=2,
-                                             fromdesc=gedcom1, todesc=gedcom2)
+
+    difftable = HtmlDiff().make_file(lines1, lines2, context=True, numlines=2,
+                                     fromdesc=gedcom1, todesc=gedcom2)
     rsp = dict(diff=difftable)
     return jsonify(rsp)
 
@@ -342,7 +331,9 @@ def gedcom_transform(gedcom,transform):
             arglist = [gedcom_filename] + command_args 
             arglist += ["--logfile",logfile]
             arglist += ["--encoding",encoding]
-            return jsonify(process_gedcom(arglist, transform_module))
+            
+            rsp = process_gedcom(arglist, transform_module)
+            return jsonify(rsp)
         
         """ (2b) Runs Gedcom transformation by obsolete stand alone program emulation.
 
