@@ -144,6 +144,7 @@ $(document).ready( function() {
             if (versions.length < 2) {
                 $("#compare").prop('disabled', true);
                 $("#delete_old_versions").prop('disabled', true);
+	            $("#versions_list tr:nth-last-child(1) input[name=v1]").prop("checked",true);
             } else {
                 $("#compare").prop('disabled', false);
                 $("#delete_old_versions").prop('disabled', false);
