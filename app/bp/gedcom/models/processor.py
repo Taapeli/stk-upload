@@ -12,7 +12,7 @@ import importlib
 import traceback
 from argparse import ArgumentParser
 
-from flask_babelex import _
+from flask_babelex import _, ngettext
 
 import logging 
 from bp.gedcom.models import gedcom_utils
@@ -27,8 +27,8 @@ def process_gedcom(arglist, transform_module):
     """ Implements a mechanism for Gedcom transforms.
     
     Returns a dictionary:
-        - stdout        result stream 
-        - stderr        errors stream 
+        - stdout        result texts for the user log page
+        - stderr        errors texts for the user log page 
         - oldname       original name of gedcom file
         - logfile       log file name
 
@@ -41,7 +41,8 @@ def process_gedcom(arglist, transform_module):
     See sukujutut.py as an example
     """
 
-    msg = _(f"Transform '{transform_module.name}' started at {util.format_timestamp()}")
+    msg = _("Transform '{}' started at {}").format(transform_module.name, 
+                                                   util.format_timestamp())
     LOG.info(f"------ {msg} ------")
 
     parser = ArgumentParser()
@@ -95,22 +96,26 @@ def process_gedcom(arglist, transform_module):
             g = t.transform_file(args.input_gedcom) 
             g.print_items(out)
             print("<div>")
-            print(_("------ Number of changes: %(n)s", n=t.num_changes))
+            print("<b>------ " + 
+                  ngettext("Total {num} change", "Total {num} changes", 
+                           num=t.num_changes).format(num=t.num_changes) +
+                  "</b>")
+            #print(_("------ Number of changes: {}").format(t.num_changes))
     except:
         traceback.print_exc()
     finally:
         if old_name: 
             gedcom_utils.history_append(args.input_gedcom, 
-                                        _('File saved as %(n)s', n=args.input_gedcom))
+                                        _('File saved as {}').format(args.input_gedcom))
             gedcom_utils.history_append(args.input_gedcom, 
-                                        _("Old file saved as %(n)s", n=old_name))
+                                        _("Old file saved as {}").format(old_name))
         else:
             gedcom_utils.history_append(args.input_gedcom, 
-                                        _("File saved as %(n)s", n=args.input_gedcom+"-temp"))
-        msg = _("Transform '%(name)s' ended at %(time)s",
-                name=transform_module.name, time=util.format_timestamp())
+                                        _("File saved as {}").format(args.input_gedcom + "temp"))
+            msg = _("Transform '{}' ended at {}").format(transform_module.name,
+                                                         util.format_timestamp())
         gedcom_utils.history_append(args.input_gedcom, msg)
-        print("<h3>------ {} ------</h3>".format(msg))
+        print(f"<h3>------ {msg} ------</h3>")
         print("</div>")
         output = None
         errors = None
@@ -150,9 +155,9 @@ def build_parser(filename, _gedcom, _gedcom_filename):
     class Parser:
         def __init__(self):
             self.args = []
-        def add_argument(self, name, name2=None, action='store', atype=str, 
+        def add_argument(self, name, name2=None, action='store', type=str, 
                          default=None, help=None, nargs=0, choices=None):
-            self.args.append(Arg(name, name2, action, atype, choices, 
+            self.args.append(Arg(name, name2, action, type, choices, 
                                  default, help))
              
         def generate_option_rows(self):

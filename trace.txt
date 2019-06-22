@@ -1,6 +1,0 @@
-{
-  "logfile": "/home/jm/workspace/stk-upload/gedcoms/jpek/temporary_test.ged-log", 
-  "oldname": "", 
-  "stderr": "", 
-  "stdout": "<h3>------ Muunnos Poista tag-X-merkinn\u00e4t k\u00e4ynnistettiin Wed 2019-03-27 14:41:53 ------</h3>\n<b>Korvattu:</b>\n(alkaen rivilt\u00e4 <a href='#' class='gedcomlink'>9</a>)\n<gedcom-text>\n2 PLAC-X a,Loviisa, Finland\n</gedcom-text>\n<b>t\u00e4ll\u00e4:</b>\n<gedcom-text>\n2 PLAC a,Loviisa, Finland\n</gedcom-text>\n\n<br>-----------------------<br>\n<b>Korvattu:</b>\n(alkaen rivilt\u00e4 <a href='#' class='gedcomlink'>13</a>)\n<gedcom-text>\n2 PLAC-X a,Loviisa, Finland\n</gedcom-text>\n<b>t\u00e4ll\u00e4:</b>\n<gedcom-text>\n2 PLAC a,Loviisa, Finland\n</gedcom-text>\n\n<br>-----------------------<br>\n<b>Korvattu:</b>\n(alkaen rivilt\u00e4 <a href='#' class='gedcomlink'>18</a>)\n<gedcom-text>\n2 PLAC-X a,Loviisa, Finland\n</gedcom-text>\n<b>t\u00e4ll\u00e4:</b>\n<gedcom-text>\n2 PLAC a,Loviisa, Finland\n</gedcom-text>\n\n<br>-----------------------<br>\n------ Muutosten lukum\u00e4\u00e4r\u00e4: 3\n<h3>------ Muunnos 'Poista tag-X-merkinn\u00e4t' p\u00e4\u00e4ttyi Wed 2019-03-27 14:41:53 ------</h3>\n"
-}

@@ -204,12 +204,9 @@ def gedcom_info(gedcom):
         metadata['info'] = repr(info.__dict__)
         gedcom_utils.save_metadata(gedcom,metadata) 
     return render_template('gedcom_info.html', 
-        user=gedcom_utils.get_gedcom_user(),
-        gedcom=gedcom, filename=filename,
-        info=info,
-        transforms=transforms,
-        metadata=metadata,
-    )
+                           user=gedcom_utils.get_gedcom_user(), gedcom=gedcom, 
+                           filename=filename, info=info, transforms=transforms, 
+                           metadata=metadata)
 
 @bp.route('/gedcom/update_desc/<gedcom>', methods=['POST'])
 @login_required

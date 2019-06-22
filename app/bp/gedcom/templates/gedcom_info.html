@@ -251,7 +251,9 @@ var gedcom = "{{ gedcom }}";
 	  <div id="output" class="gedcom">
 		<h3>{{ _("Transformation results") }}</h3>
 		<div id="div_oldname">
-		<h3>{{ _("Old version is saved as") }} <span id="oldname"></span> (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h3>
+		<h3>{{ _("Old version is saved as") }} 
+		  <span id="oldname"></span> 
+		  (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h3>
 		</div>
 		<div id="div_save">
 		<span class="important">{{ _("Not saved yet") }}</span>
@@ -260,15 +262,11 @@ var gedcom = "{{ gedcom }}";
 	        <a href="javascript:window.scroll(0,0)">
 		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
-         <pre>
-			  <div id="output_log_pre">
-			  </div>
-		  </pre>
+          <pre><div id="output_log_pre"></div></pre>
 		  <div id="output_log">
 		  </div>
 		  <pre>
-		  <div id="error_log" class="errors">
-		  </div>
+		      <div id="error_log" class="errors"></div>
 		  </pre>
 	  	<div id="diff"></div>	
       </div>

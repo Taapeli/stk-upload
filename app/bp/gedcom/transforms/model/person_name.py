@@ -75,7 +75,7 @@ class PersonName(Item):
                 Item.__init__(self, item)
         except AttributeError:
                 raise RuntimeError("bp.gedcom.transforms.model.person_name.PersonName.__init__: " \
-                                   + _(f"Invalid Item for PersonName {item}"))
+                                   + f"Invalid Item for PersonName {item}")
         self.givn = ''
         self.surn = ''
         self.nsfx = ''
@@ -285,29 +285,29 @@ class PersonName(Item):
         known_as = None
         self.reported_value = None
 
-        ''' The Following automate reads surnames and separators from right to left
-            and stores (prefix, name, name_type) tuples to return list ret[] 
-
-            !state \ input !! ','   ! delim ! name  ! end   ! von
-            |--------------++-------+-------+-------+-------+-------
-            | 0 "Started"  || -     | -     | 1,op1 | -     ! -
-            | 1 "name"     || 0,op7 | 2,op2 | 1,op3 | 3,op4 ! 4,op5
-            | 2 "delim"    || -     | -     | 1,op1 | -     ! -
-            | 3 "end"      || -     | -     | -     | -     ! -
-            | 4 "von"      || 0,op7 | 2,op2 | -     | -     | 4,op6
-            | - "error"    || 
-            For example rule "2,op3" means operation op3 and new state 2.
-                op1: save name=nm, clear name_type and prefix
-                op2: return (prefix, name, name_type)
-                            and possibly saved 'known as' name
-                op3: concatenate a two part name
-                op4: return (prefix, name, name_type)
-                            and possibly saved 'known as' name
-                op5: create prefix
-                op6: concatenate a two part prefix
-                op7: save a 'know as' name
-            Each '-' would be an error!
-        '''
+        # ''' The Following automate reads surnames and separators from right to left
+        #     and stores (prefix, name, name_type) tuples to return list ret[] 
+        # 
+        #     !state \ input !! ','   ! delim ! name  ! end   ! von
+        #     |--------------++-------+-------+-------+-------+-------
+        #     | 0 "Started"  || -     | -     | 1,op1 | -     ! -
+        #     | 1 "name"     || 0,op7 | 2,op2 | 1,op3 | 3,op4 ! 4,op5
+        #     | 2 "delim"    || -     | -     | 1,op1 | -     ! -
+        #     | 3 "end"      || -     | -     | -     | -     ! -
+        #     | 4 "von"      || 0,op7 | 2,op2 | -     | -     | 4,op6
+        #     | - "error"    || 
+        #     For example rule "2,op3" means operation op3 and new state 2.
+        #         op1: save name=nm, clear name_type and prefix
+        #         op2: return (prefix, name, name_type)
+        #                     and possibly saved 'known as' name
+        #         op3: concatenate a two part name
+        #         op4: return (prefix, name, name_type)
+        #                     and possibly saved 'known as' name
+        #         op5: create prefix
+        #         op6: concatenate a two part prefix
+        #         op7: save a 'know as' name
+        #     Each '-' would be an error!
+        # '''
 
         for nm in reversed(surnames):
             if state == 0 or state == 2:        # Start state: Only a name expected
