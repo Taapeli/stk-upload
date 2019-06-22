@@ -45,9 +45,9 @@ from .. import transformer
 from ..transformer import Item
 from flask_babelex import _
 
-version = "0.2"
-doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
-name = _("Personal names") + " (kesken)"
+# version = "0.2"
+# doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
+# name = _("Personal names") + " (kesken)"
 
 # Active Indi logical record GedcomRecord
 indi_record = None
