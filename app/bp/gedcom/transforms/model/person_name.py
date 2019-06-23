@@ -80,6 +80,7 @@ class PersonName(Item):
         self.surn = ''
         self.nsfx = ''
         self.nick_name = ''
+        self.call_name = ''
 
         # No default name Item is given
         self.is_preferred_name = False
@@ -119,7 +120,18 @@ class PersonName(Item):
             name_item.nsfx = ''
 
         ''' 1.1) GIVN given name part rules '''
+        givn_orig = name_item.givn
+        nsfx_orig = name_item.nsfx
         name_item._evaluate_givn(name_default)
+        if givn_orig != name_item.givn:
+            if name_item.call_name:
+                print(f"##TODO: Store CALL name {name_item.call_name}")
+            elif name_item.nick_name:
+                print(f"##TODO: Store NICK name {name_item.nick_name}")
+            elif nsfx_orig != name_item.nsfx:
+                print(f"##TODO: Store patronyme {name_item.nsfx}")
+            else:
+                print(f"##TODO: '{givn_orig}' != '{name_item.givn}'")
 
         ''' 1.2) nsfx Suffix part: nothing to do? '''
 
