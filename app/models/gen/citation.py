@@ -8,6 +8,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 from sys import stderr
+import logging 
+logger = logging.getLogger('stkserver')
 
 import shareds
 from .cypher import Cypher_citation

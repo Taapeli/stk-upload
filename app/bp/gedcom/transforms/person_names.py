@@ -45,9 +45,9 @@ from .. import transformer
 from ..transformer import Item
 from flask_babelex import _
 
-# version = "0.2"
-# doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
-# name = _("Personal names") + " (kesken)"
+version = "0.2"
+doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
+name = _("Personal names") + ' ' + version
 
 # Active Indi logical record GedcomRecord
 indi_record = None
@@ -58,7 +58,19 @@ def initialize(_args):
     return PersonNames()
 
 def add_args(parser):
-    pass
+    parser.add_argument('--missing_name_part', action='store_true',
+                        help=_('Mark missing name parts as "N"'))
+#     parser.add_argument('--child_as_firstname', action='store_true',
+#                         help=_('Handle "child" expressions'))
+    parser.add_argument('--patronyme_in_given_name', action='store_true',
+                        help=_('Recognize_patronymes'))
+    parser.add_argument('--call_names', action='store_true',
+                        help=_('Call names and aliases'))
+    parser.add_argument('--create_surname_history', action='store_true',
+                        help=_('Create surname history from multiple names'))
+    parser.add_argument('--aliases', action='store_true',
+                        help=_("Process_nonstd_ALIA_lines"))
+
 
 class PersonNames(transformer.Transformation):
 
@@ -93,7 +105,7 @@ class PersonNames(transformer.Transformation):
         if item.tag in ["NPFX", "GIVN", "NICK", "SPFX", "SURN", "NSFX"] \
            and item.value == "" \
            and item.children:
-            print(f"##   {item} – TODO move children with children to self<br>")
+            print(f"##   {item} – TODO move child nodes with children to self<br>")
             logger.debug(f"##Item {item.linenum}: {item.list()}")
             new_items = []
             for c in item.children:

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-05-30 17:22+0300\n"
+"POT-Creation-Date: 2019-06-22 19:25+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -960,7 +960,7 @@ msgid "there was an error"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:53
-#: bp/gedcom/templates/gedcom_info.html:57
+#: bp/gedcom/templates/gedcom_info.html:58
 #: bp/gramps/templates/gramps/uploads.html:87
 msgid "Upload time"
 msgstr ""
@@ -1083,106 +1083,58 @@ msgstr ""
 msgid "Unused records"
 msgstr ""
 
-#: bp/gedcom/routes.py:45
+#: bp/gedcom/routes.py:34
 msgid "Gedcoms"
 msgstr ""
 
-#: bp/gedcom/routes.py:66
+#: bp/gedcom/routes.py:55
 msgid "Current file"
 msgstr ""
 
-#: bp/gedcom/routes.py:101 bp/gedcom/routes.py:102 bp/gedcom/routes.py:118
-#: bp/gedcom/routes.py:119
+#: bp/gedcom/routes.py:90 bp/gedcom/routes.py:91 bp/gedcom/routes.py:107
+#: bp/gedcom/routes.py:108
 msgid "File {} saved as {}"
 msgstr ""
 
-#: bp/gedcom/routes.py:145 bp/gedcom/routes.py:151
+#: bp/gedcom/routes.py:134 bp/gedcom/routes.py:140
 msgid "Choose a GEDCOM file to upload"
 msgstr ""
 
-#: bp/gedcom/routes.py:159
+#: bp/gedcom/routes.py:148
 msgid "This GEDCOM file already exists"
 msgstr ""
 
-#: bp/gedcom/routes.py:183 bp/gedcom/routes.py:204
+#: bp/gedcom/routes.py:177 bp/gedcom/routes.py:198
 msgid "You don't have permission to view that GEDCOM"
 msgstr ""
 
-#: bp/gedcom/routes.py:197
+#: bp/gedcom/routes.py:191
 msgid "That GEDCOM file does not exist on the server"
 msgstr ""
 
-#: bp/gedcom/routes.py:319
-msgid "Transform '{}' started at {}"
-msgstr ""
-
-#: bp/gedcom/routes.py:329
-msgid "Name of the input GEDCOM file"
-msgstr ""
-
-#: bp/gedcom/routes.py:330
-msgid "Name of the log file"
-msgstr ""
-
-#: bp/gedcom/routes.py:333 bp/gedcom/routes.py:534
-msgid "Display changed rows"
-msgstr ""
-
-#: bp/gedcom/routes.py:335
-msgid "Do not produce an output file"
-msgstr ""
-
-#: bp/gedcom/routes.py:337
-msgid "Do not produce a log in the output file"
-msgstr ""
-
-#: bp/gedcom/routes.py:339
-msgid "Encoding of the input GEDCOM"
-msgstr ""
-
-#: bp/gedcom/routes.py:366
-msgid "------ Number of changes:"
-msgstr ""
-
-#: bp/gedcom/routes.py:371 bp/gedcom/routes.py:374
-msgid "File saved as {}"
-msgstr ""
-
-#: bp/gedcom/routes.py:372
-msgid "Old file saved as {}"
-msgstr ""
-
-#: bp/gedcom/routes.py:375
-msgid "Transform '{}' ended at {}"
-msgstr ""
-
-#: bp/gedcom/routes.py:507
-msgid "Unsupported type: "
-msgstr ""
-
-#: bp/gedcom/models/gedcom_utils.py:198 bp/gedcom/transformer.py:53
-#: bp/gedcom/transformer.py:60
+#: bp/gedcom/models/gedcom_utils.py:196 bp/gedcom/transformer.py:58
+#: bp/gedcom/transformer.py:65
 msgid "Replaced:"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:204 bp/gedcom/transformer.py:55
-#: bp/gedcom/transformer.py:62
+#: bp/gedcom/models/gedcom_utils.py:203 bp/gedcom/transformer.py:60
+#: bp/gedcom/transformer.py:67
 msgid "With:"
 msgstr ""
 
-#: bp/gedcom/transformer.py:73
+#: bp/gedcom/transformer.py:78
 msgid "Added:"
 msgstr ""
 
-#: bp/gedcom/transformer.py:97
+#: bp/gedcom/transformer.py:152
 msgid "Invalid line: "
 msgstr ""
 
-#: bp/gedcom/transformer.py:148
+#: bp/gedcom/transformer.py:218
 msgid "Invalid GEDCOM at line: {}"
 msgstr ""
 
-#: bp/gedcom/transformer.py:151
+#: bp/gedcom/transformer.py:221
 #, python-format
 msgid "Invalid GEDCOM; no level %s lines"
 msgstr ""
@@ -1191,8 +1143,54 @@ msgstr ""
 msgid "Deleted:"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:199
-msgid "starting from line "
+#: bp/gedcom/models/processor.py:44
+msgid "Transform '{}' started at {}"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:50
+msgid "Name of the input GEDCOM file"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:51
+msgid "Name of the log file"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:54 bp/gedcom/models/processor.py:230
+msgid "Display changed rows"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:56
+msgid "Do not produce an output file"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:58
+msgid "Do not produce a log in the output file"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:61
+msgid "Encoding of the input GEDCOM"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:100
+msgid "Total {num} change"
+msgid_plural "Total {num} changes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: bp/gedcom/models/processor.py:109 bp/gedcom/models/processor.py:114
+msgid "File saved as {}"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:111
+msgid "Old file saved as {}"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:115
+msgid "Transform '{}' ended at {}"
+msgstr ""
+
+#: bp/gedcom/models/processor.py:199
+msgid "Unsupported type: "
 msgstr ""
 
 #: bp/gedcom/templates/g_layout.html:25 bp/scene/templates/scene/layout.html:25
@@ -1234,7 +1232,7 @@ msgid "user"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:25
-#: bp/gedcom/templates/gedcom_info.html:176
+#: bp/gedcom/templates/gedcom_info.html:175
 #: bp/gedcom/templates/gedcom_list.html:38
 #: bp/scene/templates/scene/person.html:76
 #: bp/scene/templates/scene/place_events.html:121
@@ -1255,83 +1253,83 @@ msgstr ""
 msgid "Permission updated"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:39
-msgid "Switch to another GEDCOM"
-msgstr ""
-
-#: bp/gedcom/templates/gedcom_info.html:45
+#: bp/gedcom/templates/gedcom_info.html:40
 msgid "Show GEDCOM info"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:54
+#: bp/gedcom/templates/gedcom_info.html:46
+msgid "Switch to another GEDCOM"
+msgstr ""
+
+#: bp/gedcom/templates/gedcom_info.html:55
 msgid "Statistics"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:62
+#: bp/gedcom/templates/gedcom_info.html:63
 msgid "File size"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:63
+#: bp/gedcom/templates/gedcom_info.html:64
 msgid "bytes"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:67
+#: bp/gedcom/templates/gedcom_info.html:68
 msgid "Gedcom date"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:72
+#: bp/gedcom/templates/gedcom_info.html:73
 msgid "Submitter"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:77
+#: bp/gedcom/templates/gedcom_info.html:78
 msgid "Gedcom version"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:82
+#: bp/gedcom/templates/gedcom_info.html:83
 msgid "Encoding"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:86
+#: bp/gedcom/templates/gedcom_info.html:87
 msgid "Gedcom charset"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:90
+#: bp/gedcom/templates/gedcom_info.html:91
 msgid "Source program"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:103
+#: bp/gedcom/templates/gedcom_info.html:104
 msgid "Number of individuals"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:105
+#: bp/gedcom/templates/gedcom_info.html:106
 msgid "Number of families"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:107
+#: bp/gedcom/templates/gedcom_info.html:108
 msgid "Number of unique places"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:109
+#: bp/gedcom/templates/gedcom_info.html:110
 msgid "Number of notes"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:111
+#: bp/gedcom/templates/gedcom_info.html:112
 msgid "Number of citations"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:113
+#: bp/gedcom/templates/gedcom_info.html:114
 msgid "Number of sources"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:115
+#: bp/gedcom/templates/gedcom_info.html:116
 msgid "Number of repositories"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:117
+#: bp/gedcom/templates/gedcom_info.html:118
 msgid "Number of multimedia objects"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:126
+#: bp/gedcom/templates/gedcom_info.html:127
 msgid "Actions"
 msgstr ""
 
@@ -1369,55 +1367,55 @@ msgstr ""
 msgid "Show transformation history"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:169
+#: bp/gedcom/templates/gedcom_info.html:168
 msgid "Transformations"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:186
+#: bp/gedcom/templates/gedcom_info.html:185
 msgid "Versions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:189
+#: bp/gedcom/templates/gedcom_info.html:188
 msgid "Delete old versions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:190
+#: bp/gedcom/templates/gedcom_info.html:189
 msgid "Compare versions"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:198
+#: bp/gedcom/templates/gedcom_info.html:197
 msgid "Transformation history"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:210
+#: bp/gedcom/templates/gedcom_info.html:209
 msgid "GEDCOM comparison"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:222
+#: bp/gedcom/templates/gedcom_info.html:221
 msgid "Results"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:241
+#: bp/gedcom/templates/gedcom_info.html:240
 msgid "Perform transformation"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:253
+#: bp/gedcom/templates/gedcom_info.html:252
 msgid "Transformation results"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:255
+#: bp/gedcom/templates/gedcom_info.html:254
 msgid "Old version is saved as"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:255
+#: bp/gedcom/templates/gedcom_info.html:256
 msgid "Revert to old version"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:258
+#: bp/gedcom/templates/gedcom_info.html:259
 msgid "Not saved yet"
 msgstr ""
 
-#: bp/gedcom/templates/gedcom_info.html:259
+#: bp/gedcom/templates/gedcom_info.html:260
 msgid "Save result"
 msgstr ""
 
@@ -1522,7 +1520,7 @@ msgstr ""
 msgid "Splitting of data in PLAC of MARR"
 msgstr ""
 
-#: bp/gedcom/transforms/names.py:41
+#: bp/gedcom/transforms/names.py:45 bp/gedcom/transforms/person_names.py:50
 msgid "Personal names"
 msgstr ""
 
