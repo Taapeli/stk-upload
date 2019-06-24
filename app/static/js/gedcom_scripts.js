@@ -144,10 +144,16 @@ $(document).ready( function() {
             if (versions.length < 2) {
                 $("#compare").prop('disabled', true);
                 $("#delete_old_versions").prop('disabled', true);
-	            $("#versions_list tr:nth-last-child(1) input[name=v1]").prop("checked",true);
+	            //$("#versions_list tr:nth-last-child(1) input[name=v1]").prop("checked",true);
+                $("#compare").hide();
+                $("#delete_old_versions").hide();
+                $("#no_versions").show();
             } else {
                 $("#compare").prop('disabled', false);
                 $("#delete_old_versions").prop('disabled', false);
+                $("#compare").show();
+                $("#delete_old_versions").show();
+                $("#no_versions").hide();
             }
             $("#div_versions").show();
         });
