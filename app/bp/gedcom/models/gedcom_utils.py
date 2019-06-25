@@ -9,11 +9,12 @@ from flask_babelex import _
 
 from werkzeug.utils import secure_filename
 
-from models import util, syslog
-
-from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
-
+from models import util #, syslog
+from bp.gedcom import GEDCOM_DATA, GEDCOM_APP #, APP_ROOT, ALLOWED_EXTENSIONS
 from .. import transformer
+
+# Default document server
+DOC_SERVER = 'http://mwikitammi.paas.datacenter.fi/index.php'
 
 # --------------------- GEDCOM functions ------------------------
 
@@ -24,7 +25,7 @@ def init_log(logfile):
             os.rename(logfile, logfile + '~')
     except:
         pass
-    logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
+    logging.basicConfig(filename=logfile, level=logging.INFO, format='%(levelname)s:%(message)s')
 
 def history_init(gedcom_fname):
     history_file_name = gedcom_fname + "-history"
@@ -141,7 +142,10 @@ def get_transforms():
         if hasattr(transformer,"docline"):
             t.docline = transformer.docline
         if hasattr(transformer,"doclink"):
-            t.doclink = transformer.doclink
+            if transformer.doclink.startswith('/'):
+                t.doclink = DOC_SERVER + transformer.doclink
+            else:
+                t.doclink = transformer.doclink
         else:
             t.doclink = ""
 

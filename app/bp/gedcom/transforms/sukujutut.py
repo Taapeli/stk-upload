@@ -6,18 +6,18 @@ Kari Kujansuu <kari.kujansuu@gmail.com>
 The notation "# 1.1.2" etc. refer to notation in the discussion about this transformation in August 2018. 
 The numbering was originally based on Diedrich Hesmer's Gedcom Conversion program.
 """
-import sys
-import os
+# import sys
+# import os
 
 from .. import transformer
 from ..transformer import Item
 from flask_babelex import _
 
 name = _("Sukujutut")
-doclink = "http://taapeli.referata.com/wiki/Sukujutut-muunnos"
+doclink = "/Sukujutut-muunnos"
 docline = _("Sukujutut transformations")
 
-def initialize(args):
+def initialize(_args):
     return Sukujutut()
 
 def allempty(items):
@@ -29,7 +29,7 @@ def remove_multiple_blanks(text):
     return " ".join(text.split())
 
 class Sukujutut(transformer.Transformation):
-    def transform(self,item,options,phase):
+    def transform(self, item, options, _phase):
         """
         Performs a transformation for the given Gedcom "item" (i.e. "line block")
         Returns one of
