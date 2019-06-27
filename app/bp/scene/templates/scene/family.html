@@ -30,7 +30,8 @@ u { color: DarkKhaki; text-decoration: none; }
                 <i>{{family.father.names[0].suffix}}</i>
  				{% if family.father.names[0].prefix %}
  				{{family.father.names[0].prefix}}{% endif %}
- 				<b>{{family.father.names[0].surname}}</b></a></h3>
+ 				<b>{{family.father.names[0].surname}}</b></a>
+ 				s. {{ family.father.dates }}</h3>
             {% else %}<small>{{ _('unknown') }}</small>{% endif %}
     
         <p><b>{{ _("Mother") }}</b>
@@ -40,13 +41,22 @@ u { color: DarkKhaki; text-decoration: none; }
                 <i>{{family.mother.names[0].suffix}}</i>
   				{% if family.mother.names[0].prefix %}
  				{{family.mother.names[0].prefix}}{% endif %}
-                <b>{{family.mother.names[0].surname}}</b></a></h3>
+                <b>{{family.mother.names[0].surname}}</b></a>
+ 				s. {{ family.mother.dates }}</h3>
             {% else %}<small>{{ _('unknown') }}</small>{% endif %}
             
         {% if family.children %} <br><br><b>{{ _("Children") }}</b><br>     
             <table>
-        	{% for c in family.children %}{% set nm = c.sortname.split('#') %}
-                <tr><td><a href="/scene/person={{c.uniq_id}}">{{nm[2]}}&nbsp;<b>{{nm[0]}}</b>&nbsp;<i>{{nm[1]}}</i>{{ "," if not loop.last }}</a></big></td></tr>
+        	{% for c in family.children %}
+                <tr><td><a href="/scene/person={{c.uniq_id}}">
+            		{{c.names[0].firstname}}
+            		<i>{{c.names[0].suffix}}</i>
+            		{% if c.names[0].prefix %}
+		 				{{c.names[0].prefix}}
+	 				{% endif %}
+	 				<b>{{c.names[0].surname}}</b>
+	 				s. {{ c.dates }}</h3>
+	 				{{ "," if not loop.last }}</a></td></tr>
             {% endfor %}
             </table><br>
         {% endif %}
