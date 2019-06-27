@@ -204,18 +204,19 @@ RETURN family"""
                             #    'confidence': '', 'sex': 0, 'change': 1507492602, 
                             #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
                             #    'date2': 1609920, 'date1': 1609920}>
-                            child = Person_as_member()
-                            child.uniq_id = child_node.id
-                            child.sortname = child_node['sortname']
-                            cdatetype = child_node['datetype']
-                            cdate1 = child_node['date1']
-                            cdate2 = child_node['date2']
-                            if cdatetype != None:
-                                child.dates = DateRange(cdatetype, cdate1, cdate2)
-                            
-                            cname = Name.from_node(child_name_node)
-                            child.names.append(cname)
-                            self.children.append(child)
+                            if child_node:
+                                child = Person_as_member()
+                                child.uniq_id = child_node.id
+                                child.sortname = child_node['sortname']
+                                cdatetype = child_node['datetype']
+                                cdate1 = child_node['date1']
+                                cdate2 = child_node['date2']
+                                if cdatetype != None:
+                                    child.dates = DateRange(cdatetype, cdate1, cdate2)
+                                
+                                cname = Name.from_node(child_name_node)
+                                child.names.append(cname)
+                                self.children.append(child)
                         
                         if record['no_of_children']:
                             self.no_of_children = record['no_of_children']
