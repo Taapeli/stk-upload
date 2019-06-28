@@ -302,14 +302,17 @@ RETURN f, p.pname AS marriage_place,
 MATCH (f:Family) WHERE ID(f)=$pid
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (pp) -[:EVENT]-> (pe:Event)
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
 OPTIONAL MATCH (pc) -[:NAME]-> (nc:Name {order:0}) 
+OPTIONAL MATCH (pc) -[:EVENT]-> (cbe:Event {type:"Birth"})
+OPTIONAL MATCH (pc) -[:EVENT]-> (cde:Event {type:"Death"})
 OPTIONAL MATCH (f) -[:EVENT]-> (e:Event {type:"Marriage"})-[:PLACE]->(p:Place)
 OPTIONAL MATCH (e) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
 OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
 RETURN f, p.pname AS marriage_place,
-    COLLECT([r.role, pp, np]) AS parent, 
-    COLLECT(DISTINCT [pc, nc]) AS child, 
+    COLLECT([r.role, pp, np, pe]) AS parent, 
+    COLLECT(DISTINCT [pc, nc, cbe, cde]) AS child, 
     COUNT(DISTINCT pc) AS no_of_children,
     COLLECT(DISTINCT [re, s, c]) AS sources,
     COLLECT(DISTINCT note) AS note"""

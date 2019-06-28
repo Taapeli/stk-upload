@@ -31,7 +31,7 @@ u { color: DarkKhaki; text-decoration: none; }
  				{% if family.father.names[0].prefix %}
  				{{family.father.names[0].prefix}}{% endif %}
  				<b>{{family.father.names[0].surname}}</b></a>
- 				s. {{ family.father.dates }}</h3>
+ 				{{ family.father.dates }}</h3>
             {% else %}<small>{{ _('unknown') }}</small>{% endif %}
     
         <p><b>{{ _("Mother") }}</b>
@@ -54,9 +54,9 @@ u { color: DarkKhaki; text-decoration: none; }
             		{% if c.names[0].prefix %}
 		 				{{c.names[0].prefix}}
 	 				{% endif %}
-	 				<b>{{c.names[0].surname}}</b>
-	 				s. {{ c.dates }}</h3>
-	 				{{ "," if not loop.last }}</a></td></tr>
+	 				<b>{{c.names[0].surname}}</b></a>
+	 				{{ c.dates }}</h3>
+	 				{{ "," if not loop.last }}</td></tr>
             {% endfor %}
             </table><br>
         {% endif %}

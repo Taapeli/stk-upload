@@ -9,6 +9,7 @@ import  shareds
 from .cypher import Cypher_family
 from .family import Family
 from .person_combo import Person_as_member
+from .event_combo import Event_combo
 from .person_name import Name
 from .note import Note
 #from .citation import Citation
@@ -169,7 +170,14 @@ RETURN family"""
                         self.marriage_place = record['marriage_place'] or ''
         
                         uniq_id = -1
-                        for role, parent_node, name_node in record['parent']:
+                        
+                        pdatetype = None
+                        pdate1 = None
+                        pdate2 = None
+                        cdatetype = None
+                        cdate1 = None
+                        cdate2 = None
+                        for role, parent_node, name_node, event_node in record['parent']:
                             if parent_node:
                                 # <Node id=214500 labels={'Person'} 
                                 #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
@@ -187,18 +195,27 @@ RETURN family"""
                                         self.father = pp
                                     elif role == 'mother':
                                         self.mother = pp
-                                        
-                                    pdatetype = parent_node['datetype']
-                                    pdate1 = parent_node['date1']
-                                    pdate2 = parent_node['date2']
-                                    if pdatetype != None:
-                                        pp.dates = DateRange(pdatetype, pdate1, pdate2)
-        
+
                                 pname = Name.from_node(name_node)
                                 pp.names.append(pname)
-        
+
+                                if event_node:
+                                    if event_node['type'] == 'Birth':
+                                        pdate1 = event_node['date1']
+                                    elif event_node['type'] == 'Death':
+                                        pdate2 = event_node['date2']
+                                        
+                                    if pdate1 and pdate2:
+                                        pdatetype = '3'
+                                    elif pdate1:
+                                        pdatetype = '2'
+                                    elif pdate2:
+                                        pdatetype = '1'
+                                        
+                                    if pdatetype != None:
+                                        pp.dates = DateRange(pdatetype, pdate1, pdate2)
                         
-                        for child_node, child_name_node in record['child']:
+                        for child_node, child_name_node, child_birth_node, child_death_node in record['child']:
                             # <Node id=60320 labels={'Person'} 
                             #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19, 
                             #    'confidence': '', 'sex': 0, 'change': 1507492602, 
@@ -208,14 +225,24 @@ RETURN family"""
                                 child = Person_as_member()
                                 child.uniq_id = child_node.id
                                 child.sortname = child_node['sortname']
-                                cdatetype = child_node['datetype']
-                                cdate1 = child_node['date1']
-                                cdate2 = child_node['date2']
-                                if cdatetype != None:
-                                    child.dates = DateRange(cdatetype, cdate1, cdate2)
-                                
+                                                                
                                 cname = Name.from_node(child_name_node)
                                 child.names.append(cname)
+                                
+                                if child_birth_node:
+                                    cdate1 = child_birth_node['date1']
+                                if child_death_node:
+                                    cdate2 = child_death_node['date1']
+                                            
+                                if cdate1 and cdate2:
+                                    cdatetype = '3'
+                                elif cdate1:
+                                    cdatetype = '2'
+                                elif cdate2:
+                                    cdatetype = '1'
+
+                                if cdatetype != None:
+                                    child.dates = DateRange(cdatetype, cdate1, cdate2)                                    
                                 self.children.append(child)
                         
                         if record['no_of_children']:
