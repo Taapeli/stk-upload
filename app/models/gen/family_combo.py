@@ -174,10 +174,8 @@ RETURN family"""
                         pdatetype = None
                         pdate1 = None
                         pdate2 = None
-                        cdatetype = None
-                        cdate1 = None
-                        cdate2 = None
-                        for role, parent_node, name_node, event_node in record['parent']:
+                        
+                        for role, parent_node, name_node, birth_node, death_node in record['parent']:
                             if parent_node:
                                 # <Node id=214500 labels={'Person'} 
                                 #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
@@ -199,21 +197,23 @@ RETURN family"""
                                 pname = Name.from_node(name_node)
                                 pp.names.append(pname)
 
-                                if event_node:
-                                    if event_node['type'] == 'Birth':
-                                        pdate1 = event_node['date1']
-                                    elif event_node['type'] == 'Death':
-                                        pdate2 = event_node['date2']
+                                if birth_node and death_node:
+                                    pdate1 = birth_node['date1']
+                                    pdate2 = death_node['date1']
+                                    pdatetype = '3'
+                                elif birth_node:
+                                    pdate1 = birth_node['date1']
+                                    pdatetype = '2'
+                                elif death_node:
+                                    pdate1 = death_node['date1']
+                                    pdatetype = '1'
                                         
-                                    if pdate1 and pdate2:
-                                        pdatetype = '3'
-                                    elif pdate1:
-                                        pdatetype = '2'
-                                    elif pdate2:
-                                        pdatetype = '1'
-                                        
-                                    if pdatetype != None:
-                                        pp.dates = DateRange(pdatetype, pdate1, pdate2)
+                                if pdatetype != None:
+                                    pp.dates = DateRange(pdatetype, pdate1, pdate2)
+                                    
+                        cdatetype = None
+                        cdate1 = None
+                        cdate2 = None
                         
                         for child_node, child_name_node, child_birth_node, child_death_node in record['child']:
                             # <Node id=60320 labels={'Person'} 
@@ -229,16 +229,15 @@ RETURN family"""
                                 cname = Name.from_node(child_name_node)
                                 child.names.append(cname)
                                 
-                                if child_birth_node:
+                                if child_birth_node and child_death_node:
                                     cdate1 = child_birth_node['date1']
-                                if child_death_node:
                                     cdate2 = child_death_node['date1']
-                                            
-                                if cdate1 and cdate2:
                                     cdatetype = '3'
-                                elif cdate1:
+                                elif child_birth_node:
+                                    cdate1 = child_birth_node['date1']
                                     cdatetype = '2'
-                                elif cdate2:
+                                elif child_death_node:
+                                    cdate1 = child_death_node['date1']
                                     cdatetype = '1'
 
                                 if cdatetype != None:

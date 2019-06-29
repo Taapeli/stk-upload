@@ -42,7 +42,7 @@ u { color: DarkKhaki; text-decoration: none; }
   				{% if family.mother.names[0].prefix %}
  				{{family.mother.names[0].prefix}}{% endif %}
                 <b>{{family.mother.names[0].surname}}</b></a>
- 				s. {{ family.mother.dates }}</h3>
+ 				{{ family.mother.dates }}</h3>
             {% else %}<small>{{ _('unknown') }}</small>{% endif %}
             
         {% if family.children %} <br><br><b>{{ _("Children") }}</b><br>     
