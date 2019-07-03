@@ -48,6 +48,11 @@ MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid}) --> (p:Person)
 RETURN COUNT(p) as cnt
 """
 
+    batch_delete = """
+MATCH (u:UserProfile) -[:HAS_LOADED]-> (b:Batch{id:batch_id}) -[*]-> (a) 
+WHERE u.username=$username 
+DETACH DELETE a, b
+"""
 #     batch_x = """
 # MATCH (u:UserProfile {username: $user})
 # MERGE (u) -[:HAS_LOADED {status: $status}]-> 

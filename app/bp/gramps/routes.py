@@ -19,6 +19,7 @@ import shareds
 from models import loadfile, email, util, syslog 
 from . import bp
 from ..admin import uploads
+from .models import batch
 
 @bp.route('/gramps')
 @login_required
@@ -106,4 +107,12 @@ def xml_download(xmlfile):
                                mimetype="application/gzip",
                                as_attachment=True)
 #                                attachment_filename=xmlfile+".gz")
+
+@bp.route('/gramps/batch_delete/<batch_id>')
+@roles_accepted('research', 'admin')
+def batch_delete(batch_id):
+    syslog.log(type="batch_id deleted",batch_id=batch_id) 
+    batch.delete_batch(current_user.username,batch_id)
+    flash(_("Batch id %(batch_id) has been deleted", batch_id=batch_id), 'info')
+    return redirect(url_for('gramps.list_uploads'))
                                

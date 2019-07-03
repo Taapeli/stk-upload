@@ -8,14 +8,17 @@
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 <script>
-function selectFile(sel) {
+var selected_batch_id = '';
+
+function selectFile(sel,batch_id) {
     document.getElementById('nm').innerHTML=sel.value;
-    
+    selected_batch_id = batch_id;
     var buttons = document.getElementsByTagName('button');
     for (var i = 0, length = buttons.length; i < length; i++)
     {
      buttons[i].disabled = false;
     }
+    if (batch_id == '') document.getElementById('batch_delete').disabled = true;
 };
 
 $(document).ready( function() {
@@ -47,6 +50,11 @@ $(document).ready( function() {
     $("#xml_delete").click(function(e) {
         $("#form").attr("action","/gramps/xml_delete/" + 
                 document.getElementById('nm').innerText);
+        $("#form").submit();
+    });
+
+    $("#batch_delete").click(function(e) {
+        $("#form").attr("action","/gramps/batch_delete/" + selected_batch_id);
         $("#form").submit();
     });
 
@@ -93,7 +101,7 @@ $(document).ready( function() {
 	    {% for upload in uploads %}
 	       <tr>
 	           <td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
-	                   onClick="selectFile(this);"></td>
+	                   onClick="selectFile(this,'{{upload.batch_id}}');"></td>
 	           <td>{{upload.upload_time_s}}</td>
 	           <td>{{upload.xmlname}}</td>
                <td>{% if upload.batch_id %}
@@ -120,6 +128,7 @@ $(document).ready( function() {
             <button id="start_upload" disabled>{{ _("Store to database") }}</button>
             <button id="show_log" disabled>{{ _("Show last log") }}</button>
             <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
+            <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
 	    </div>
 	  </form>
     </div>
