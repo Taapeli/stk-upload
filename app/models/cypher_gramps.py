@@ -49,7 +49,7 @@ RETURN COUNT(p) as cnt
 """
 
     batch_delete = """
-MATCH (u:UserProfile) -[:HAS_LOADED]-> (b:Batch{id:batch_id}) -[*]-> (a) 
+MATCH (u:UserProfile) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) -[*]-> (a) 
 WHERE u.username=$username 
 DETACH DELETE a, b
 """
