@@ -113,6 +113,6 @@ def xml_download(xmlfile):
 def batch_delete(batch_id):
     syslog.log(type="batch_id deleted",batch_id=batch_id) 
     batch.delete_batch(current_user.username,batch_id)
-    flash(_("Batch id %(batch_id) has been deleted", batch_id=batch_id), 'info')
+    flash(_("Batch id %(batch_id)s has been deleted", batch_id=batch_id), 'info')
     return redirect(url_for('gramps.list_uploads'))
                                
