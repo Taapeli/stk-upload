@@ -1,9 +1,9 @@
 {# _start/my_settings.html_ #}
 {% extends "start/s_layout.html" %}
-{% include "security/_messages.html" %}
 {% block title %}{{ _("User Settings") }} (start/my_settings){% endblock %}
 {% block body %}
 {{ super() }}
+{% include "security/_messages.html" %}
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 {{ hamburger_menu() }}
@@ -70,13 +70,15 @@ function confirm_delete(url) {
         <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
         <table width="100%">
         <tr>{% set w = (100.0 / (labels|length + 3) | round(0,'floor')) | int %}
-            <th>{{ _('Batch') }}</th>
+            <th><th>{{ _('Batch') }}</th>
             {% for label in labels %}<th style="width:{{w}}%">{{label}}</th>{% endfor %}
         </tr>
         {% for key1,item in batches.items() %}
             {% set user0 = user %}
             {% set user, batch = key1.split('/') %}
-        <tr><td>{{batch}}</td>
+        <tr>
+        <td><a href="/gramps/batch_delete/{{ batch }}">{{ _("Delete") }}</a></td>
+        <td>{{batch}}</td>
             {% for label in labels %}
               <td class="right"> {{item[label]}} </td>
             {% endfor %}
