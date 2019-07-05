@@ -59,6 +59,12 @@ MATCH (u:UserProfile) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) -[*]-> (a)
 WHERE u.username=$username 
 DETACH DELETE a, b
 """
+
+    batch_find = """
+MATCH (b:Batch {id: $batch_id}) 
+RETURN b
+"""
+
 #     batch_x = """
 # MATCH (u:UserProfile {username: $user})
 # MERGE (u) -[:HAS_LOADED {status: $status}]-> 
