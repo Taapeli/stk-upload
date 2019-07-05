@@ -731,7 +731,10 @@ class DOM_handler():
 
             if len(source.getElementsByTagName('stitle') ) == 1:
                 source_stitle = source.getElementsByTagName('stitle')[0]
-                s.stitle = source_stitle.childNodes[0].data
+                if len(source_stitle.childNodes) > 0:
+                    s.stitle = source_stitle.childNodes[0].data
+                else:
+                    s.stitle = ""
             elif len(source.getElementsByTagName('stitle') ) > 1:
                 self.blog.log_event({'title':"More than one stitle in a source",
                                      'level':"WARNING", 'count':s.id})
