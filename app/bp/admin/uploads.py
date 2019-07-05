@@ -186,6 +186,13 @@ def batch_count(username,batch_id):
         tx.commit()
         return count
         
+def batch_person_count(username,batch_id):
+    with shareds.driver.session() as session:
+        tx = session.begin_transaction()
+        count = tx.run(Cypher_batch.batch_person_count, user=username, bid=batch_id).single().value()
+        tx.commit()
+        return count
+
 def list_uploads(username):
     ''' Gets a list of uploaded files and their process status '''
     upload_folder = get_upload_folder(username)
@@ -222,12 +229,13 @@ def list_uploads(username):
                         batch_id = ""
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
+            person_count = batch_person_count(username,batch_id)
             if status_text:
                 upload = Upload()
                 upload.xmlname = xmlname
                 upload.status = status_text
                 upload.batch_id = batch_id
-                upload.count = count
+                upload.count = person_count
                 upload.done = (status_text == _("STORED"))
                 upload.uploaded = (status_text == _("UPLOADED"))
                 upload.loading = (status_text == _("STORING"))
