@@ -16,7 +16,7 @@ MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch) 
     WHERE b.id STARTS WITH $batch_base 
 RETURN b.id AS bid
-    ORDER BY b.bid DESC 
+    ORDER BY bid DESC 
     LIMIT 1"""
 
     batch_create = """
