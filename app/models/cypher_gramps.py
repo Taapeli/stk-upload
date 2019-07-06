@@ -42,6 +42,11 @@ RETURN b AS bid
 ORDER BY bid 
     """
 
+    batch_list_all = """
+MATCH (b:Batch) 
+RETURN b 
+    """
+
     batch_count = """
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid})

@@ -1,0 +1,192 @@
+{# templates/admin/start.html_ #}
+{% extends "/a_layout.html" %}
+{% block title %}{{ _('Duplicates search') }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+
+<!-- development version, includes helpful console warnings -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<!-- production version, optimized for size and speed -->
+<!-- script src="https://cdn.jsdelivr.net/npm/vue"></script -->
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
+  <h2>{{ _('Duplicates search') }}</h2>
+
+    <div class="startbox2">
+        <h3>{{ _('Data Batches') }}</h3>
+        <table width="100%">
+        <tr>
+            <th>{{ _('Select') }}</th>
+            <th>{{ _('Batch') }}</th>
+            <th>{{ _('User') }}</th>
+            <th>{{ _('File') }}</th>
+            <th>{{ _('Search in') }}</th>
+        </tr>
+        <tr v-for="batch in batches">
+            <td><input type=radio name=select v-model="batch_id" v-bind:value="batch.id">
+        	<td>${ batch.id }
+        	<td>${ batch.user }
+        	<td>${ batch.file }
+            <td><input type=radio name=select2 v-model="batch_id2" v-bind:value="batch.id">
+        </tr>
+        </table>
+        <table>
+        <tr>
+        	<td>Min score: <input v-model="minscore" size=5 type=number>
+        	<td>Min items: <input v-model="minitems" size=5 type=number>
+        </table>
+        <br>
+        <button v-on:click="generate_keys" v-bind:disabled="batch_id == ''">
+        	{{ _('Generate comparison keys') }}
+    	</button>
+        <button v-on:click="remove_keys" v-bind:disabled="batch_id == ''">
+        	{{ _('Remove comparison keys') }}
+    	</button>
+        <button v-on:click="search_duplicates" v-bind:disabled="batch_id == '' || batch_id2 == ''">
+        	{{ _('Search duplicates') }}
+    	</button>
+        </p>
+    </div>
+
+    <div class="startbox2">
+    	${ status }
+		<div v-if="operation == 'generate_keys'">
+			Generated keys for ${ gencount } people
+		</div>
+		<div v-if="operation == 'remove_keys'">
+			Removed keys for ${ gencount } people
+		</div>
+		<div v-if="operation == 'search_duplicates'">
+			Search output
+			<table>
+			<tr>
+				<th>Score
+				<th>Person 1
+				<th>Person 2
+			<tr v-for="match in matches">
+				<td>${ match.score }
+				<td><a target=_blank v-bind:href="'/scene/person=' + match.p1.pid">${ match.p1.name }</a> 
+				<td><a target=_blank v-bind:href="'/scene/person=' + match.p2.pid">${ match.p2.name }</a> 
+			</tr>
+			</table>
+			${ matches.length } matches
+		</div>
+	</div>
+
+
+</div>
+
+<script>
+
+function log(msg) {
+	console.log(msg);
+}
+
+var app = new Vue({
+    delimiters: ['${', '}'],
+    el: '#myApp',
+    created: function() {
+        this.init();    
+    },
+    data: {
+        batches: [],
+        matches: [],
+        output: "",
+        status: "",
+        batch_id: "",
+        batch_id2: "",
+        minscore: 5.0,
+        minitems: 5,
+        operation:undefined,
+        gencount:undefined,
+        matchcount:undefined,
+        i: 0,
+        done: false
+    }, // data
+    methods: {
+        init: function() {
+            this.fetch_batches();
+        },
+
+		generate_keys:  function(q) {
+			log("Generating");
+			app.status = "Generating keys for " + app.batch_id; 
+            app.operation = undefined;
+            axios.get('/dupsearch/generate_keys/' + app.batch_id).
+                then(function(rsp, status) {
+                    app.gencount = rsp.data;
+					app.status = "";
+                    app.operation = 'generate_keys';
+                });
+		},
+
+		remove_keys:  function(q) {
+			log("remove_keys");
+			app.status = "Removing keys for " + app.batch_id;
+            app.operation = undefined;
+            axios.get('/dupsearch/remove_keys/' + app.batch_id).
+                then(function(rsp, status) {
+                    app.gencount = rsp.data;
+					app.status = "";
+                    app.operation = 'remove_keys';
+                }, function () {
+					app.status = "Not implemented";
+                });
+			
+		},
+
+		logger: function () {
+			if (!app.done) { 
+				app.status = "\nSearching..." + app.i;
+				app.i += 1;
+				setTimeout(app.logger,1000);
+			}
+		},
+
+		search_duplicates:  function(q) {
+			log("search_duplicates");
+            app.operation = undefined;
+			app.status = "";
+			app.i = 0;
+			app.done = false;
+			setTimeout(app.logger,1000);
+            axios.post('/dupsearch/search', {
+            	batchid1: app.batch_id,
+            	batchid2: app.batch_id2,
+            	minscore: app.minscore,
+            	minitems: app.minitems
+            	}).
+                then(function(rsp, status) {
+					app.done = true;
+                    log(rsp);
+					app.status = "";
+                    app.operation = 'search_duplicates';
+                    app.matches = rsp.data;
+                    app.matchcount = app.matches.length;
+                }, function () {
+					app.done = true;
+					app.status = "Search failed";
+                });
+		},
+
+        fetch_batches: function(q) {
+            axios.get('/dupsearch/batches').
+                then(function(rsp, status) {
+                    log(rsp);
+                    app.batches = rsp.data;
+                });
+        }
+    } // methods
+
+});
+
+</script>
+
+
+
+{% endblock %}

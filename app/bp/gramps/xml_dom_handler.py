@@ -204,6 +204,17 @@ class DOM_handler():
                 e.change = int(event.getAttribute("change"))
             if event.hasAttribute("id"):
                 e.id = event.getAttribute("id")
+            if False and counter > 0 and counter % 1000 == 0: 
+                elapsed = time.time()-t0
+                eventspersec = counter/elapsed
+                remainingevents = len(events) - counter
+                remainingtime = remainingevents/eventspersec
+                print(f"Event {counter} {e.id} "
+                                         f"{time.asctime()} {elapsed:6.2f} "
+                                         f"{eventspersec:6.2f} "
+                                         f"{remainingevents} "
+                                         f"{remainingtime:6.2f} "
+                                         )
 
             if len(event.getElementsByTagName('type') ) == 1:
                 event_type = event.getElementsByTagName('type')[0]

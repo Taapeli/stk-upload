@@ -16,3 +16,8 @@ def get_filename(username, batch_id):
    result = shareds.driver.session().run(Cypher_batch.batch_find, batch_id=batch_id).single()
    return result.get('b').get('file')
 
+def get_batches():
+   result = shareds.driver.session().run(Cypher_batch.batch_list_all)
+   for rec in result:
+       print("p",rec.get('b').items())
+       yield dict(rec.get('b'))
