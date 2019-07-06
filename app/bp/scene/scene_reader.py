@@ -11,20 +11,59 @@ from models.gen.from_node import get_object_from_node
 from models.gen.person_combo import Person_combo #, Person_as_member
 from shareds import logger
 
-# from models.datareader import read_persons_with_events
-# from models.gen.family_combo import Family_for_template
-# from models.gen.person_name import Name
-# from models.gen.event_combo import Event_combo
-# from models.gen.place import Place
-# from models.gen.source import Source
-# from models.gen.citation import Citation
-# from models.gen.repository import Repository
-# from models.gen.note import Note
-# from models.gen.media import Media
-
 
 def get_a_person_for_display_apoc(uniq_id, user):
-    """ Get a Person with all connected nodes 
+    """ Get a Person with all connected nodes for display in Person page.
+
+
+    Person object tree is creation
+
+    For Person data page we must have all business objects, which hace connection
+    to current Person. The objects are stored in Person object tree as included 
+    objects or references to "objs" list. (For ex. Sources may be referenced 
+    multiple times and we want to store them once only.)
+
+    - The Person is identified by given uniq_id (db kay). 
+      A Neo4j APOC procedure models.gen.cypher.Cypher_person.all_nodes_query_w_apoc 
+      returns one record containing 2 list variables: relations and nodes.
+
+        relation (source) -[r]-> (target)
+                contains uniq_ids of source and target nodes, relation type
+                and role attribute of relation r. They are expressed as list 
+                [source_uniq_id, relation type, relation role, target uniq_id]
+        node
+                has Neo4j Node id, labels and properties
+
+    1. The 1st node is the current person
+
+    2. Each node is converted to our bussines model objects (Event, Name, Family, ...) 
+       and stored in dictionary objs[uniq_id].
+
+    3. From each relation, the objects corresponding the source and target nodes
+       are created with method models.gen.from_node.get_object_from_node.
+
+       The method bp.scene.scene_reader.connect_object_as_leaf handles adding the
+       target node to Person object tree as an object or reference to objs[].
+
+    4. The person Events are ordered by date
+
+    5. The clear text Event place names are created.
+
+
+    Footnote processing
+    
+    Each Citation reference is stored in in person.citation_ref and other objects. 
+    The citation in Person page shall be expressed as footnote reference, which
+    is created using class bp.scene.models.footnote.Footnotes.
+    
+    For a citation, data must be collected from path
+    (cite:Citation) -[*]-> (source:Source) -[1]-> (repo:Repository)
+    with method bp.scene.models.footnote.SourceFootnote.from_citation_objs .
+
+
+    #TODO: Presentation of Family tree 
+    
+    #TODO: Describe footnote processing in "/scene/person_pg.html" template
     """
 
     # 1. Read person p and paths for all nodes connected to p
@@ -40,12 +79,16 @@ def get_a_person_for_display_apoc(uniq_id, user):
         
         # Create gen objects tree: Person with all connected objects
 
+
         # 1. Create the Person instance, in which all objects shall be stored
+
         person = Person_combo.from_node(nodelist[0])
         # Store a pointer to this object
         objs = {person.uniq_id: person}
 
+
         # 2. Create a directory of nodes which are envolved
+
         nodes = {}  # uniq_id : node
         for node in nodelist:
             # <Node id=80234 labels={'Person'} 
@@ -53,8 +96,9 @@ def get_a_person_for_display_apoc(uniq_id, user):
             #    'priv': 1, 'sex': '2', 'confidence': '2.5', 'change': 1507492602}>
             nodes[node.id] = node
 
-        # 3. Store each gen object from nodes of relations as leafs
-        #    of Person object tree. 
+
+        # 3. Store each gen object from nodes of relations as leafs of Person object tree.
+
         #    Also create a directory of all of those objects
         for relation in relations:
             # [source uniq_id, relation type, relation role, target uniq_id]
@@ -108,7 +152,7 @@ def get_a_person_for_display_apoc(uniq_id, user):
                 # Store target object of the relation as a leaf object in src_obj
                 target_link = connect_object_as_leaf(src_obj, target_obj, rel_type)
                 # Target_link point to that leaf. 
-                # Put it also in objs and cits directories for possible re-use
+                # Put it also in objs and cits dictionaries for possible re-use
                 if target_link == None:
                     #TODO mitä tehdään, eikö joku muu lista?
                     objs[target_obj.uniq_id] = target_obj
@@ -121,10 +165,10 @@ def get_a_person_for_display_apoc(uniq_id, user):
             else:
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
 
-    # Sort events by date
+    # 4. Sort events by date
     person.events.sort(key=lambda event: event.date)
 
-    # 4. Generate clear names for event places
+    # 5. Generate clear names for event places and create citation footnotes
 
     fns = Footnotes()
     set_citations(person.citation_ref, fns, objs)
@@ -155,10 +199,11 @@ def set_citations(refs, fns, objs):
 
 
 def connect_object_as_leaf(src, target, rel_type=None):
-    ''' Subroutine for Person page display
+    ''' Subroutine for Person page display.
+
         Saves target object in appropiate place in the src object 
         (Person, Event etc).
-        Returns saved target object or None, if target was not saved here.
+        Returns saved target object or None, if no new object was saved here.
     
     Plan 17 Sep 2018 / JMä
 
