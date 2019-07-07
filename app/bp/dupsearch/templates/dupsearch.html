@@ -39,6 +39,7 @@
         <tr>
         	<td>Min score: <input v-model="minscore" size=5 type=number>
         	<td>Min items: <input v-model="minitems" size=5 type=number>
+        	<td>Name match: <input v-model="namematch" size=15>
         </table>
         <br>
         <button v-on:click="generate_keys" v-bind:disabled="batch_id == ''">
@@ -102,6 +103,7 @@ var app = new Vue({
         batch_id2: "",
         minscore: 5.0,
         minitems: 5,
+        namematch: '',
         operation:undefined,
         gencount:undefined,
         matchcount:undefined,
@@ -159,7 +161,8 @@ var app = new Vue({
             	batchid1: app.batch_id,
             	batchid2: app.batch_id2,
             	minscore: app.minscore,
-            	minitems: app.minitems
+            	minitems: app.minitems,
+            	namematch: app.namematch
             	}).
                 then(function(rsp, status) {
 					app.done = true;

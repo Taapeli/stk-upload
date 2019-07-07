@@ -2,6 +2,8 @@
 import argparse
 import traceback
 from neo4j import GraphDatabase
+from models.gen.event import Event
+import shareds
 
 # https://neo4j.com/developer/kb/fulltext-search-in-neo4j/
 # https://neo4j.com/docs/cypher-manual/3.5/schema/index/#schema-index-fulltext-search
@@ -9,17 +11,13 @@ from neo4j import GraphDatabase
 #
 # Requires Neo4j 3.5 or later
 
-neo4j_uri = "bolt://localhost:7687"
-neo4j_username = 'neo4j'
-neo4jpassword = 'eno4j'
+neo4j_uri = shareds.app.config.get("NEO4J_URI")
+neo4j_username = shareds.app.config.get("NEO4J_USERNAME")
+neo4j_password = shareds.app.config.get("NEO4J_PASSWORD")
 
-minscore = .5
-minkeyitems = 3
-display_keys = True
-   
 neo4j_driver = GraphDatabase.driver(
         neo4j_uri, 
-        auth = (neo4j_username,neo4jpassword), 
+        auth = (neo4j_username,neo4j_password), 
         connection_timeout = 15)
 
 def run(cypher,callback=None,**kwargs):
@@ -75,10 +73,6 @@ def generate_searchkey1(rec):
     """
     keys = []
     pid = rec.get('pid')
-    #pn = rec.get('pn')
-    #fname = pn.get('firstname')
-    #sname = pn.get('surname')
-    #patronyme = pn.get('patronyme')
     refnames = rec.get('refnames')
     for (rn,bn) in refnames:
         if rn is None or bn is None: continue
@@ -99,9 +93,10 @@ def generate_searchkey1(rec):
                 keys.append("X"+patronyme)
     for e,pl in rec.get('events'):
         if e is None: continue
-        etype = e.get('type')
+        event = Event.from_node(e)
+        etype = event.type
         if etype not in {'Birth','Death'}: continue
-        edate = e.get('date1')
+        edate = event.date
         if pl: 
             eplace = pl.get('pname')
         else:
@@ -117,6 +112,7 @@ def generate_searchkey1(rec):
                 eplace = eplace.replace(" ","#")
                 keys.append(f"E{etype}P{eplace}")
     searchkey1 = " ".join(sorted(keys))
+    #print(searchkey1)
     run("match (p:Person) where id(p) = $pid set p.searchkey1=$searchkey1 return p",
         searchkey1=searchkey1,pid=pid)
 
@@ -124,7 +120,6 @@ def generate_searchkey(rec):
     """
     generates searchkey for all persons
     """
-    keys = []
     pid = rec.get('pid')
     p = rec.get('p')
     searchkey1 = p.get('searchkey1')
@@ -205,32 +200,31 @@ def remove_keys(args):
     n = run(cypher,batch_id=args.from_batch)
     print(f"Removed searchkeys from {n} people")
 
+def getname(namenode):
+    firstname = namenode.get("firstname")
+    patronyme = namenode.get("suffix")
+    surname = namenode.get("surname")
+    name = ''
+    if firstname: 
+        name = firstname
+    if patronyme: 
+        name += ' ' + patronyme
+    if surname: 
+        name += ' ' + surname
+    return name.strip()
+
 def display_matches(args,p,pid,pn,rec,matches):   
-    def getname(namenode):
-        firstname = namenode.get("firstname")
-        patronyme = namenode.get("suffix")
-        surname = namenode.get("surname")
-        if patronyme and surname:
-            name = f"{firstname} {patronyme} {surname}"
-        elif surname:
-            name = f"{firstname} {surname}"
-        elif patronyme:
-            name = f"{firstname} {patronyme}"
-        else:
-            name = f"{firstname}"
-        return name
-    
     score = rec.get('score')
     matchid = rec.get('node').get("id")
     matchname = rec.get('mn')
     matchnode = rec.get('node')
     matchpid = rec.get("matchpid")
     if score >= args.minscore:
-        print("-------------------------")
-        print("person: ", p.get("id"),getname(pn))
-        if display_keys: print("key:    ",p.get('searchkey'))
-        print(f"    match score {score:6.2f}: {matchid} {getname(matchname)}")
-        if display_keys: print("                   key:",matchnode.get('searchkey'))
+        #print("-------------------------")
+        #print("person: ", p.get("id"),getname(pn))
+        #if display_keys: print("key:    ",p.get('searchkey'))
+        #print(f"    match score {score:6.2f}: {matchid} {getname(matchname)}")
+        #if display_keys: print("                   key:",matchnode.get('searchkey'))
         pdict1 = dict(p)
         pdict1['name'] = getname(pn)
         pdict1['pid'] = pid
@@ -241,15 +235,18 @@ def display_matches(args,p,pid,pn,rec,matches):
         matches.append(res)
     
 def __search_dups(args,rec,matches):   
-    keys = []
     pid = rec.get('pid')
     p = rec.get('p')
     pn = rec.get('pn')
     searchkey = p.get('searchkey')
     if searchkey is None: return
     keys = searchkey.split()
-    if len(keys) < args.minitems: return # <----------------------------
-    #print(rec)
+    if len(keys) < args.minitems: return 
+
+    if args.namematch:
+        name = getname(pn).lower()
+        if name.find(args.namematch.lower()) < 0: return
+
     n = run("""
         CALL db.index.fulltext.queryNodes("personIndex", $searchkey) YIELD node, score
         where id(node) <> $pid
@@ -264,7 +261,6 @@ def __search_dups(args,rec,matches):
         batch_id=args.batchid2
         )
     print("Search result:", n)
-#    """,callback=res.add, batch_id=args.batch1)
         
 def search_dups(args):
     matches = []
