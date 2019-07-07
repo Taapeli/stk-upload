@@ -51,6 +51,13 @@
         <button v-on:click="search_duplicates" v-bind:disabled="batch_id == '' || batch_id2 == ''">
         	{{ _('Search duplicates') }}
     	</button>
+    	<p>
+        <button v-on:click="create_index">
+        	{{ _('Create index') }}
+    	</button>
+        <button v-on:click="drop_index">
+        	{{ _('Drop index') }}
+    	</button>
         </p>
     </div>
 
@@ -142,6 +149,8 @@ var app = new Vue({
 			
 		},
 
+
+
 		logger: function () {
 			if (!app.done) { 
 				app.status = "\nSearching..." + app.i;
@@ -182,6 +191,30 @@ var app = new Vue({
                 then(function(rsp, status) {
                     log(rsp);
                     app.batches = rsp.data;
+                });
+        },
+        
+        create_index: function(q) {
+            axios.get('/dupsearch/create_index').
+                then(function(rsp, status) {
+                    log(rsp);
+					app.status = "Index created";
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Index creation failed";
+                });
+        },
+        
+        drop_index: function(q) {
+            axios.get('/dupsearch/drop_index').
+                then(function(rsp, status) {
+                    log(rsp);
+					app.status = "Index dropped";
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Index drop failed";
                 });
         }
     } // methods

@@ -35,3 +35,15 @@ def search_dups():
     args.minitems = int(args.minitems)
     res = search.search_dups(args)
     return jsonify(res)
+
+@bp.route('/dupsearch/create_index', methods=['GET'])
+@login_required
+def create_index():
+    res = search.create_index(None)
+    return jsonify(res)
+
+@bp.route('/dupsearch/drop_index', methods=['GET'])
+@login_required
+def drop_index():
+    res = search.drop_index(None)
+    return jsonify(res)
