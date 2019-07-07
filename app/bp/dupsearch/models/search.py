@@ -225,6 +225,8 @@ def display_matches(args,p,pid,pn,rec,matches):
         #if display_keys: print("key:    ",p.get('searchkey'))
         #print(f"    match score {score:6.2f}: {matchid} {getname(matchname)}")
         #if display_keys: print("                   key:",matchnode.get('searchkey'))
+        matchkeys = matchnode.get('searchkey')
+        if len(matchkeys.split()) < args.minitems: return
         pdict1 = dict(p)
         pdict1['name'] = getname(pn)
         pdict1['pid'] = pid
@@ -249,7 +251,7 @@ def __search_dups(args,rec,matches):
 
     n = run("""
         CALL db.index.fulltext.queryNodes("personIndex", $searchkey) YIELD node, score
-        where id(node) <> $pid
+        where id(node) <> $pid and score >= $minscore
         match 
             (b:Batch)
         where $batch_id = '' or b.id = $batch_id
@@ -258,7 +260,8 @@ def __search_dups(args,rec,matches):
     """,callback=lambda rec: display_matches(args,p,pid,pn,rec,matches),
         searchkey=searchkey,
         pid=pid,
-        batch_id=args.batchid2
+        batch_id=args.batchid2,
+        minscore=args.minscore,
         )
     print("Search result:", n)
         
