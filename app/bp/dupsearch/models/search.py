@@ -65,7 +65,8 @@ def list_batch(rec):
 def sanitize(name):
     name = (name.replace("'","_")
     .replace("?","_")
-    .replace("*","_"))
+    .replace("*","_")
+    .replace(":","_"))
     return name
     
 def generate_searchkey1(rec):   
