@@ -24,9 +24,11 @@ def run(cypher,callback=None,**kwargs):
     try:
         res = neo4j_driver.session().run(cypher, kwargs)
         n = 0
-        for rec in res:
-            if callback: callback(rec)
+        reslist = list(res)
+        count = len(reslist)
+        for rec in reslist:
             n += 1
+            if callback: callback(n,count,rec)
         return n
     except:
         traceback.print_exc()
@@ -61,13 +63,19 @@ def list_batch(rec):
     print(f"{id:14s} {user:16s} {file:60s} {status}")
 
 def sanitize(name):
-    name = (name.replace("'","_")
+    name = (name
+    .replace("'","_")
+    .replace("/","_")
+    .replace("[","_")
+    .replace("]","_")
+    .replace("(","_")
+    .replace(")","_")
     .replace("?","_")
     .replace("*","_")
     .replace(":","_"))
     return name
     
-def generate_searchkey1(rec):   
+def generate_searchkey1(n,count,rec):   
     """
     generates searchkey1 for all persons
     """
@@ -116,7 +124,7 @@ def generate_searchkey1(rec):
     run("match (p:Person) where id(p) = $pid set p.searchkey1=$searchkey1 return p",
         searchkey1=searchkey1,pid=pid)
 
-def generate_searchkey(rec):   
+def generate_searchkey(n,count,rec):   
     """
     generates searchkey for all persons
     """
@@ -220,11 +228,6 @@ def display_matches(args,p,pid,pn,rec,matches):
     matchnode = rec.get('node')
     matchpid = rec.get("matchpid")
     if score >= args.minscore:
-        #print("-------------------------")
-        #print("person: ", p.get("id"),getname(pn))
-        #if display_keys: print("key:    ",p.get('searchkey'))
-        #print(f"    match score {score:6.2f}: {matchid} {getname(matchname)}")
-        #if display_keys: print("                   key:",matchnode.get('searchkey'))
         matchkeys = matchnode.get('searchkey')
         if len(matchkeys.split()) < args.minitems: return
         pdict1 = dict(p)
@@ -236,7 +239,7 @@ def display_matches(args,p,pid,pn,rec,matches):
         res = dict(score=score,p1=pdict1,p2=pdict2)
         matches.append(res)
     
-def __search_dups(args,rec,matches):   
+def __search_dups(n,count,args,rec,matches):   
     pid = rec.get('pid')
     p = rec.get('p')
     pn = rec.get('pn')
@@ -249,7 +252,7 @@ def __search_dups(args,rec,matches):
         name = getname(pn).lower()
         if name.find(args.namematch.lower()) < 0: return
 
-    n = run("""
+    num_matches = run("""
         CALL db.index.fulltext.queryNodes("personIndex", $searchkey) YIELD node, score
         where id(node) <> $pid and score >= $minscore
         match 
@@ -257,13 +260,14 @@ def __search_dups(args,rec,matches):
         where $batch_id = '' or b.id = $batch_id
         MATCH (b) --> (node) --> (mn:Name{order:0})
         RETURN node, score, mn, id(node) as matchpid   
-    """,callback=lambda rec: display_matches(args,p,pid,pn,rec,matches),
+    """,callback=lambda n,count,rec: display_matches(args,p,pid,pn,rec,matches),
         searchkey=searchkey,
         pid=pid,
         batch_id=args.batchid2,
         minscore=args.minscore,
         )
-    print("Search result:", n)
+    #count = rec.get('count')
+    print(f"Search: {n}/{count}: {num_matches} matches")
         
 def search_dups(args):
     matches = []
@@ -273,7 +277,7 @@ def search_dups(args):
         where $batch_id = '' or b.id = $batch_id
         match (b) --> (p:Person)--(pn:Name) 
         return id(p) as pid,p,pn
-    """,callback=lambda rec: __search_dups(args,rec,matches), batch_id=args.batchid1)
+    """,callback=lambda n,count,rec: __search_dups(n,count,args,rec,matches), batch_id=args.batchid1)
     return sorted(matches,reverse=True,key=lambda match: match['score'])
 
 def check_batch(batch_id):

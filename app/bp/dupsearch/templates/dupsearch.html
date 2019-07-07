@@ -80,6 +80,7 @@
 				<td>${ match.score }
 				<td><a target=_blank v-bind:href="'/scene/person=' + match.p1.pid">${ match.p1.name }</a> 
 				<td><a target=_blank v-bind:href="'/scene/person=' + match.p2.pid">${ match.p2.name }</a> 
+				<td><span v-if="match.p1.name == match.p2.name">Same name</span>
 			</tr>
 			</table>
 			${ matches.length } matches
