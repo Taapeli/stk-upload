@@ -135,7 +135,9 @@ def generate_searchkey(n,count,rec):
     pkeys = []
     for n,parent in enumerate(parents):
         key = parent.get("searchkey1")
-        if not key: raise RuntimeError(f"searchkey1 not found, person_id: {pid}, parent {parent}")
+        if not key: 
+            #raise RuntimeError(f"searchkey1 not found, person_id: {pid}, parent {parent}")
+            continue # parent was probably added in another batch, ignore
         for k in key.split():
             #pkeys.append(f"Parent{n+1}{k}")
             pkeys.append(f"Parent{k}")
