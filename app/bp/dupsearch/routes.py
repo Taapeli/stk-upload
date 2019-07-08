@@ -26,6 +26,13 @@ def generate_keys(batchid):
     res = search.generate_keys(args)
     return jsonify(res)
 
+@bp.route('/dupsearch/remove_keys/<batchid>',  methods=['GET'])
+@login_required
+def remove_keys(batchid):
+    args = SimpleNamespace(from_batch=batchid)
+    res = search.remove_keys(args)
+    return jsonify(res)
+
 @bp.route('/dupsearch/search', methods=['POST'])
 @login_required
 def search_dups():

@@ -207,6 +207,7 @@ def remove_keys(args):
     """
     n = run(cypher,batch_id=args.from_batch)
     print(f"Removed searchkeys from {n} people")
+    return n
 
 def getname(namenode):
     firstname = namenode.get("firstname")
