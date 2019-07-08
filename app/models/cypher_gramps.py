@@ -60,11 +60,18 @@ RETURN COUNT(p) as cnt
 """
 
     batch_delete = """
-MATCH (u:UserProfile) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) -[*]-> (a) 
-WHERE u.username=$username 
-DETACH DELETE a, b
+MATCH (u:UserProfile{username:$username}) 
+    -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
+    -[:OWNS]-> (x) 
+    -[*]-> (a) 
+WITH a, b, x
+MATCH (b2:Batch) -[:OWNS]-> (x)
+WITH a,b,x,COUNT(b2) as cnt
+WHERE cnt = 1 
+DETACH DELETE a, b, x
 """
 
+    
     batch_find = """
 MATCH (b:Batch {id: $batch_id}) 
 RETURN b
