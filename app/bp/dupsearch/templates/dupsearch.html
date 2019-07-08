@@ -132,6 +132,9 @@ var app = new Vue({
                     app.gencount = rsp.data;
 					app.status = "";
                     app.operation = 'generate_keys';
+                }, function () {
+					app.done = true;
+					app.status = "Generation failed";
                 });
 		},
 
@@ -145,7 +148,8 @@ var app = new Vue({
 					app.status = "";
                     app.operation = 'remove_keys';
                 }, function () {
-					app.status = "Not implemented";
+					app.done = true;
+					app.status = "Removing failed";
                 });
 			
 		},
@@ -192,6 +196,10 @@ var app = new Vue({
                 then(function(rsp, status) {
                     log(rsp);
                     app.batches = rsp.data;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Fetching batches failed";
                 });
         },
         
