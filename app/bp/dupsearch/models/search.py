@@ -135,7 +135,7 @@ def generate_searchkey(n,count,rec):
     pkeys = []
     for n,parent in enumerate(parents):
         key = parent.get("searchkey1")
-        if not key: raise RuntimeError(f"searchkey1 not found, person_id: {pid}")
+        if not key: raise RuntimeError(f"searchkey1 not found, person_id: {pid}, parent {parent}")
         for k in key.split():
             #pkeys.append(f"Parent{n+1}{k}")
             pkeys.append(f"Parent{k}")
@@ -144,10 +144,8 @@ def generate_searchkey(n,count,rec):
     
     run("""match (p:Person) where id(p) = $pid 
         set p.searchkey=$searchkey
-        remove p.searchkey1
         return p
         """,
-        searchkey1=searchkey1,
         searchkey=searchkey,
         pid=pid)
 
