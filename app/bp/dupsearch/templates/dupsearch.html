@@ -25,6 +25,7 @@
             <th>{{ _('Batch') }}</th>
             <th>{{ _('User') }}</th>
             <th>{{ _('File') }}</th>
+            <th>{{ _('Has searchkeys') }}</th>
             <th>{{ _('Search in') }}</th>
         </tr>
         <tr v-for="batch in batches">
@@ -32,6 +33,7 @@
         	<td>${ batch.id }
         	<td>${ batch.user }
         	<td>${ batch.file }
+        	<td>${ batch.has_searchkeys }
             <td><input type=radio name=select2 v-model="batch_id2" v-bind:value="batch.id">
         </tr>
         </table>
@@ -125,16 +127,23 @@ var app = new Vue({
 
 		generate_keys:  function(q) {
 			log("Generating");
-			app.status = "Generating keys for " + app.batch_id; 
+			//app.status = "Generating keys for " + app.batch_id; 
             app.operation = undefined;
+			app.done = false;
+			app.i = 0;
+			app.msg = "Generating keys for " + app.batch_id + " ... ";
+			setTimeout(app.logger,1000);
             axios.get('/dupsearch/generate_keys/' + app.batch_id).
                 then(function(rsp, status) {
+					app.done = true;
                     app.gencount = rsp.data;
-					app.status = "";
+					app.status += " done";
                     app.operation = 'generate_keys';
+                    app.fetch_batches();
                 }, function () {
 					app.done = true;
-					app.status = "Generation failed";
+					app.status += " FAILED";
+					//app.status = "Generation failed";
                 });
 		},
 
@@ -142,14 +151,21 @@ var app = new Vue({
 			log("remove_keys");
 			app.status = "Removing keys for " + app.batch_id;
             app.operation = undefined;
+			app.done = false;
+			app.i = 0;
+			app.msg = "Removing keys for " + app.batch_id + " ... ";
+			setTimeout(app.logger,1000);
             axios.get('/dupsearch/remove_keys/' + app.batch_id).
                 then(function(rsp, status) {
+					app.done = true;
                     app.gencount = rsp.data;
-					app.status = "";
+					app.status += " done";
                     app.operation = 'remove_keys';
+                    app.fetch_batches();
                 }, function () {
 					app.done = true;
-					app.status = "Removing failed";
+					app.status += " FAILED";
+					//app.status = "Removing failed";
                 });
 			
 		},
@@ -158,7 +174,8 @@ var app = new Vue({
 
 		logger: function () {
 			if (!app.done) { 
-				app.status = "\nSearching..." + app.i;
+				//app.status = "\nSearching... " + app.i;
+				app.status = app.msg + app.i;
 				app.i += 1;
 				setTimeout(app.logger,1000);
 			}
@@ -170,6 +187,7 @@ var app = new Vue({
 			app.status = "";
 			app.i = 0;
 			app.done = false;
+			app.msg = "Searching... "
 			setTimeout(app.logger,1000);
             axios.post('/dupsearch/search', {
             	batchid1: app.batch_id,
