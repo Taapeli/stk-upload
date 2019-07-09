@@ -132,7 +132,7 @@ def generate_searchkey(n,count,rec):
     p = rec.get('p')
     searchkey1 = p.get('searchkey1')
     parents = rec.get('parents')
-    pkeys = []
+    pkeys = set()
     for n,parent in enumerate(parents):
         key = parent.get("searchkey1")
         if not key: 
@@ -140,8 +140,8 @@ def generate_searchkey(n,count,rec):
             continue # parent was probably added in another batch, ignore
         for k in key.split():
             #pkeys.append(f"Parent{n+1}{k}")
-            pkeys.append(f"Parent{k}")
-    psearchkey = " ".join(pkeys)
+            pkeys.add(f"Parent{k}")
+    psearchkey = " ".join(sorted(pkeys))
     searchkey = searchkey1 + " " + psearchkey
     
     run("""match (p:Person) where id(p) = $pid 
@@ -184,7 +184,9 @@ def generate_keys(args):
         match 
             (b)-->(p:Person)
         optional match
-            (p)<-[:CHILD]-(fam:Family)-[:PARENT]->(parent:Person)
+            (p)<-[:CHILD]-(fam:Family)-[:PARENT]->(parent:Person),
+            (b) --> (fam)
+        set b.has_searchkeys = true
         return 
             id(p) as pid,
             p,
@@ -203,6 +205,7 @@ def remove_keys(args):
         where exists(p.searchkey)  
         remove p.searchkey 
         remove p.searchkey1 
+        remove b.has_searchkeys
         return p
     """
     n = run(cypher,batch_id=args.from_batch)
@@ -225,7 +228,8 @@ def getname(namenode):
 def display_matches(args,p,pid,pn,rec,matches):   
     score = rec.get('score')
     matchid = rec.get('node').get("id")
-    matchname = rec.get('mn')
+    namenodes = rec.get('namenodes') # there may be several Name nodes with order:0, pick the first
+    matchname = namenodes[0]
     matchnode = rec.get('node')
     matchpid = rec.get("matchpid")
     if score >= args.minscore:
@@ -243,7 +247,10 @@ def display_matches(args,p,pid,pn,rec,matches):
 def __search_dups(n,count,args,rec,matches):   
     pid = rec.get('pid')
     p = rec.get('p')
-    pn = rec.get('pn')
+
+    namenodes = rec.get('namenodes') # there may be several Name nodes with order:0, pick the first
+    pn = namenodes[0]
+
     searchkey = p.get('searchkey')
     if searchkey is None: return
     keys = searchkey.split()
@@ -256,11 +263,8 @@ def __search_dups(n,count,args,rec,matches):
     num_matches = run("""
         CALL db.index.fulltext.queryNodes("personIndex", $searchkey) YIELD node, score
         where id(node) <> $pid and score >= $minscore
-        match 
-            (b:Batch)
-        where $batch_id = '' or b.id = $batch_id
-        MATCH (b) --> (node) --> (mn:Name{order:0})
-        RETURN node, score, mn, id(node) as matchpid   
+        MATCH (b:Batch{id:$batch_id}) --> (node) --> (mn:Name{order:0})
+        RETURN node, score, collect(mn) as namenodes, id(node) as matchpid   
     """,callback=lambda n,count,rec: display_matches(args,p,pid,pn,rec,matches),
         searchkey=searchkey,
         pid=pid,
@@ -273,11 +277,8 @@ def __search_dups(n,count,args,rec,matches):
 def search_dups(args):
     matches = []
     run("""
-        match 
-            (b:Batch)
-        where $batch_id = '' or b.id = $batch_id
-        match (b) --> (p:Person)--(pn:Name) 
-        return id(p) as pid,p,pn
+        match (b:Batch{id:$batch_id}) -[:OWNS]-> (p:Person) -[:NAME]-> (pn:Name{order:0}) 
+        return id(p) as pid, p, collect(pn) as namenodes
     """,callback=lambda n,count,rec: __search_dups(n,count,args,rec,matches), batch_id=args.batchid1)
     return sorted(matches,reverse=True,key=lambda match: match['score'])
 
