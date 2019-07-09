@@ -271,8 +271,7 @@ def __search_dups(n,count,args,rec,matches):
         batch_id=args.batchid2,
         minscore=args.minscore,
         )
-    #count = rec.get('count')
-    print(f"Search: {n}/{count}: {num_matches} matches")
+    #print(f"Search: {n}/{count}: {num_matches} matches")
         
 def search_dups(args):
     matches = []
