@@ -168,10 +168,13 @@ def initiate_background_load_to_neo4j(userid,filename):
     #                  + logname,
     #                   shell=True)
     #===========================================================================
-    def background_load_to_neo4j_thread():
-        background_load_to_neo4j(userid,filename)
+    def background_load_to_neo4j_thread(app):
+        with app.app_context():
+            background_load_to_neo4j(userid,filename)
         
-    threading.Thread(target=background_load_to_neo4j_thread,name="neo4j load for " + filename).start()
+    threading.Thread(target=background_load_to_neo4j_thread,
+                     args=(shareds.app,),
+                     name="neo4j load for " + filename).start()
     syslog.log(type="gramps file upload initiated",file=filename,user=userid)
     
     #for i in range(10):
