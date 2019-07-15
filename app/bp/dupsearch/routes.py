@@ -20,7 +20,7 @@ def batches():
     for b in batch_list:
         file = b.get('file')
         if file:
-            file = file.split("/")[-1].replace("_clean.gramps",".gramps")
+            file = file.split("/")[-1].replace("_clean.",".")
             b['file'] = file 
     return jsonify(batch_list)
 

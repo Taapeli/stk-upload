@@ -113,8 +113,7 @@ def xml_download(xmlfile):
 def batch_delete(batch_id):
     syslog.log(type="batch_id deleted",batch_id=batch_id) 
     filename = batch.get_filename(current_user.username,batch_id)
-    metafile = filename.replace("_clean.gramps",".gramps").replace(".gramps",".gramps.meta")
-    batch.delete_batch(current_user.username,batch_id)
+    metafile = filename.replace("_clean.",".") + ".meta"
     data = eval(open(metafile).read())
     if data.get('batch_id') == batch_id:
         del data['batch_id']
