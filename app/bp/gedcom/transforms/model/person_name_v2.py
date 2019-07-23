@@ -10,8 +10,6 @@ import re
 import logging 
 logger = logging.getLogger('stkserver')
 
-from ...transformer import Item
-
 _NONAME = 'N'            # Marker for missing name part
 _CHGTAG = "NOTE _orig_"  # Comment: original format
 
@@ -33,6 +31,13 @@ _LATIN_PATRONYME = [
     ]
 _SURN = {'os.':'avionimi', 'o.s.':'avionimi', 'ent.':'otettu nimi', 'e.':'otettu nimi', \
          '/':'tunnettu myös', ',':'tunnettu myös'}
+TYPES = {'os.':'syntymänimi', 
+         'o.s.':'syntymänimi', 
+         's.':'syntymänimi', 
+         'ent.':'otettu nimi', 
+         'e.':'otettu nimi', 
+}
+
 #_VON = ['von', 'af', 'de', 'la']
 _BABY = {"vauva":"U", "poikavauva":"M", "tyttövauva":"F", 
          "poikalapsi":"M", "tyttölapsi":"F", "lapsi":"U",
@@ -114,22 +119,12 @@ class PersonName:
             return True # should not come here
 
         ''' 1.1) GIVN given name part rules '''
-        n = self._evaluate_givn(givn)
-
-        surnames = self._get_surname_list(surn)
-        newitems = []
-        for prefix, nm, sn_type in surnames:
-            #logger.debug('#' + str(pn)) # Merge original and new rows
-            #print(f"{n.givn}/{nm}/{n.nsfx}")
-            item = Item(f"{self.item.level} NAME {n.givn}/{nm}/{n.nsfx if n.nsfx else ''}")
-            if sn_type:
-                typeitem = Item(f"{self.item.level+1} TYPE {sn_type}")
-                item.children.append(typeitem)
-            newitems.append(item)
-#             ret.extend(pn.rows)
-        return newitems
-        #del name_item.reported_value
-        return True
+        name_parts = self._evaluate_givn(givn)
+        if not name_parts.nsfx: name_parts.nsfx = nsfx
+        #surnames = self._get_surname_list(surn)
+        surnames = self._extract_surnames(surn)
+        
+        return (name_parts,surnames)
 
 
 #     def get_person_rows(self, name_default): 
@@ -139,6 +134,31 @@ class PersonName:
 #         ret = self.process_NAME(name_default)
 #         return ret
 
+    def parse_surnames(self,surn):
+        for s in TYPES.keys():
+            surn = surn.replace(f" {s}",f" {s} ")
+            surn = surn.replace(f",{s}",f" {s} ")
+            surn = surn.replace(f",{s[:-1]}",f" {s} ")
+        surnames1 = self.parse_surnames1(surn.split())
+        surnames = []
+        for name_type, namelist in surnames1:
+            surname = " ".join(namelist)
+            surnames.append((name_type,surname))
+        return surnames
+
+    def parse_surnames1(self,words):
+        for i,n in enumerate(words):
+            if n in TYPES or n+'.' in TYPES:
+                if i > 0:
+                    return [(None,words[0:i])] + self.parse_surnames1(words[i:])
+                else:
+                    if n in TYPES:
+                        name_type = TYPES[n]
+                    else:
+                        name_type = TYPES[n+'.']
+                    names = self.parse_surnames1(words[i+1:])
+                    return [(name_type,names[0][1])] + names[1:]
+        return [(None,words)]
     
     def _evaluate_givn(self, givn):
         ''' Process given name part of NAME record '''
@@ -156,7 +176,7 @@ class PersonName:
                     return nm[:-len(short)] + full
             return None
 
-        class NameItem:
+        class NameParts:
             givn = None
             surn = None
             nsfx = None
@@ -165,8 +185,8 @@ class PersonName:
             nick_name = None
             changed = False
 
-        name_item = NameItem()
-        name_item.givn = givn
+        name_parts = NameParts()
+        name_parts.givn = givn
         
         gnames = givn.split()
         
@@ -176,36 +196,36 @@ class PersonName:
             nm = gnames[-1]
             pn = _match_patronyme(nm)
             if pn != None:
-                name_item.nsfx = pn
-                name_item.givn = ' '.join(gnames[0:-1])
-                name_item.changed = True
+                name_parts.nsfx = pn
+                name_parts.givn = ' '.join(gnames[0:-1])
+                name_parts.changed = True
 
         # 1.1b) A generic baby name replaced as no name
             elif gnames[0] in _BABY:
                 # A unnamed baby
-                name_item.givn = _NONAME
-                name_item.sex = _BABY[gnames[0]]
-                name_item.changed = True
-                return name_item
+                name_parts.givn = _NONAME
+                name_parts.sex = _BABY[gnames[0]]
+                name_parts.changed = True
+                return name_parts
 
-        gnames = name_item.givn.split()
-        name_parts = []
+        gnames = name_parts.givn.split()
+        parts = []
         for nm in gnames:
             # Name has a star '*'
             if nm.endswith('*'):
                 # Remove star
                 nm = nm[:-1]
-                name_item.call_name = nm
-                name_parts.append(nm)
-                name_item.changed = True
+                name_parts.call_name = nm
+                parts.append(nm)
+                name_parts.changed = True
             # Nick name in parenthesis "(Jussi)"
             elif re.match(r"\(.*\)", nm) != None:
-                name_item.nick_name = nm[1:-1]
-                name_item.changed = True
+                name_parts.nick_name = nm[1:-1]
+                name_parts.changed = True
             else:
-                name_parts.append(nm)
-        name_item.givn = " ".join(name_parts)
-        return name_item
+                parts.append(nm)
+        name_parts.givn = " ".join(parts)
+        return name_parts
                 
 
     def _extract_surnames(self,surn):
@@ -228,25 +248,31 @@ class PersonName:
         '''
 
         ret = []
-        preferred = self.is_preferred_name
+        #preferred = self.is_preferred_name
+        preferred = True
         for prefix, nm, sn_type in self._get_surname_list(surn):
             #name = '{}/{}/{}'.format(self.givn, nm.strip(), self.nsfx)
             pn = PersonName(None)    # line, children=None, lines=None, linenum=None
             pn.surn = nm                #TODO: self.surn or nm?
             #pn.givn = self.givn
             #pn.nsfx = self.nsfx
-            if self.tag_orig == 'ALIA': #TODO: check TYPE row of self
-                sn_type = _SURN[',']
-            if hasattr(self,'nsfx_org'):
-                pn.nsfx_orig = self.nsfx_orig
-            if hasattr(self,'call_name'):       #TODO: call_name has not been copied from name_default
-                pn.call_name = self.call_name
-            if hasattr(self,'nick_name'):
-                pn.nick_name = self.nick_name
+            
+            ##if self.tag_orig == 'ALIA': #TODO: check TYPE row of self
+            ##    sn_type = _SURN[',']
+            ##if hasattr(self,'nsfx_org'):
+            ##    pn.nsfx_orig = self.nsfx_orig
+            ##if hasattr(self,'call_name'):       #TODO: call_name has not been copied from name_default
+            ##    pn.call_name = self.call_name
+            ##if hasattr(self,'nick_name'):
+            ##    pn.nick_name = self.nick_name
             if prefix: # von
                 pn.prefix = prefix
+            else:
+                pn.prefix = ''
             if sn_type:
                 pn.name_type = sn_type
+            else:
+                pn.name_type = ''
             # Mark the first generated surname of a person as preferred
             pn.is_preferred_name = preferred
             preferred = False
@@ -508,10 +534,18 @@ def test_surn(surn):
     from pprint import pprint
     pn = PersonName(None)
     x = pn._get_surname_list(surn)
+    x = pn._extract_surnames(surn)
     print()
     print(surn)
     for n in x: print(n)
     surnames.append(surn)
+
+def test_surn(surn):
+    pn = PersonName(None)
+    x = pn.parse_surnames(surn)
+    print()
+    print(surn)
+    print(x)
 
 def test():
     from pprint import pprint
@@ -536,14 +570,19 @@ def test():
     test_surn("Hällström (af Hällström)")
     test_surn("Hällström (af Hällström) e. Hellström, os. Mönkkönen")
     test_surn("af Hällström (Hällström) e. Hellström, os. Mönkkönen")
+    test_surn("af Hällström (Hällström) ent.Hellström, os.Mönkkönen")
+    test_surn("af Hällström (Hällström) ent.Hellström, s.Mönkkönen")
+    test_surn("af Hällström (Hällström) ent Hellström, os Mönkkönen")
     test_surn("Garcia Marquez")
     test_surn("Heikkilä/Mattila")
     test_surn("Heikkilä,Mattila")
     test_surn("von der Goltz")
     test_surn("de Godzinsky")
+    test_surn(r"Lehti\Lahti\Lehto")
 
     n = 0
     for g in given_names:
+        break
         for s in surnames:
             print(f"0 @I{n} INDI")
             print(f"1 NAME {g}/{s}/")

@@ -1,5 +1,5 @@
 '''
-    Nimimuotojen normalisointi (Älä käytä vielä!)
+    Nimimuotojen normalisointi (Kehityksen alla!)
 
     Processes gedcom Items trying to fix problems of individual name tags
 
@@ -39,13 +39,13 @@ logger = logging.getLogger('stkserver')
 
 #from ..transforms.model.gedcom_line import GedcomLine
 #from ..transforms.model.gedcom_record import GedcomRecord
-from ..transforms.model.person_name import PersonName
+from ..transforms.model.person_name_v2 import PersonName
 
 from .. import transformer
-from ..transformer import Item
+from ..transformer import Item 
 from flask_babelex import _
 
-version = "0.2"
+version = "0.3kku"
 doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
 name = _("Personal names") + ' ' + version
 
@@ -88,17 +88,31 @@ class PersonNames(transformer.Transformation):
         Note: If you change the item in this function but still return True, then the changes
         are applied to the Gedcom but they are not displayed with the --display-changes option.
         """
-        print(f"#Item {item.linenum}: {item.list()}<br>")
+        #print(f"#Item {item.linenum}: {item.list()}<br>")
         if item.path.find('.INDI') < 0:
             return True
 
         # 1. Clean "Waldemar (Valte)/Rosén/Persson" to components
         if item.tag == "NAME":
-            print(f"## Name {item.value}<br>")
+            #print(f"## Name {item.value}<br>")
             logger.debug(f"##Item {item.linenum}: {item.list()}")
             pn = PersonName(item)
-            pn.process_NAME(False)
-            return pn
+            n,surnames = pn.process_NAME(False)
+            newitems = []
+            for pn in surnames:
+                #logger.debug('#' + str(pn)) # Merge original and new rows
+                #print(f"{n.givn}/{nm}/{n.nsfx}")
+                if pn.prefix:
+                    surname = f"{pn.prefix} {pn.surn}"
+                else:
+                    surname = pn.surn
+                item = Item(f"{item.level} NAME {n.givn}/{surname}/{n.nsfx}")
+                if pn.name_type:
+                    typeitem = Item(f"{item.level+1} TYPE {pn.name_type}")
+                    item.children.append(typeitem)
+                newitems.append(item)
+    #             ret.extend(pn.rows)
+            return newitems
 
         #2. If there is SURN.NOTE etc without any name, move their Notes and  
         #   Sources to NAME level
