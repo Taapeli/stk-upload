@@ -15,6 +15,8 @@ from models import dataupdater
 #from models.dataupdater import set_confidence_values
 import shareds
 import traceback
+from tarfile import TarFile
+import io
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
@@ -151,17 +153,23 @@ def file_clean(pathname):
 # - filename for display
     file_displ = basename(pathname)
     with open(file_cleaned, "w", encoding='utf-8') as file_out:
-        # Creates the ouput file and closes it
-        try:
-            with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
-                # print("A gzipped file")
+        # Creates the output file and closes it
+        if ext == ".gpkg": # gzipped tar file with embedded gzipped 'data.gramps' xml file
+            with gzip.open(TarFile(fileobj=gzip.GzipFile(pathname)).extractfile('data.gramps'),
+                           mode='rt',encoding='utf-8') as file_in:
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from packed input lines" # Try to read a gzipped file
-        except OSError: # Not gzipped; Read as an ordinary file
-            with open(pathname, mode='rt', encoding='utf-8') as file_in:
-                print("Not a gzipped file")
-                counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from input lines"
+            msg = "Cleaned apostrophes from .gpkg input file" # Try to read a gzipped file
+        else: # .gramps: either gzipped or plain xml file
+            try:
+                with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
+                    # print("A gzipped file")
+                    counter = _clean_apostrophes(file_in, file_out)
+                msg = "Cleaned apostrophes from packed input lines" # Try to read a gzipped file
+            except OSError: # Not gzipped; Read as an ordinary file
+                with open(pathname, mode='rt', encoding='utf-8') as file_in:
+                    print("Not a gzipped file")
+                    counter = _clean_apostrophes(file_in, file_out)
+                msg = "Cleaned apostrophes from input lines"
         event = Log({'title':msg, 'count':counter, 
                      'elapsed':time.time()-t0}) #, 'percent':1})
     return (file_cleaned, file_displ, event)
