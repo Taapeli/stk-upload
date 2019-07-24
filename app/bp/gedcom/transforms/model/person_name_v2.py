@@ -54,11 +54,19 @@ _BABY = {"vauva":"U", "poikavauva":"M", "tyttövauva":"F",
          "(barn)":"U", "(son)":"M", "(gåsse)":"M", 
          "(dotter)":"F", "(flicke)":"F", "(fl.barn)":"U", "(dödf.barn)":"U" }
 
+class NameParts:
+    givn = None
+    surn = None
+    nsfx = None
+    sex = None
+    call_name = None
+    nick_name = None
+    changed = False
+
 @dataclass
-class SurnameInfo:
-    surn:str = ""
-    name_type:str = ""  # "birth name", "married", "aka" etc
-    prefix:str = ""
+class ParseResult:
+    name_parts:NameParts 
+    surnames:str
 
 class ParseError(Exception): pass
 
@@ -79,26 +87,7 @@ class PersonName:
        from each of them
     '''
 
-    def __init__(self, item):
-        ''' Creates a PersonName instance from a '1 NAME' Item.
-        '''
-        self.item = item
-        self.givn = ''
-        self.surn = ''
-        self.nsfx = ''
-        self.nick_name = ''
-        self.call_name = ''
-
-        # No default name Item is given
-        self.is_preferred_name = False
-        
-        # If any name has a question mark, a NOTE must be written to gedcom
-        #self.questionable = '?' in self.value
-        # For ALIA line the tag may be changed later
-        #self.tag_orig = self.tag
-
-
-    def process_NAME(self, name_default=None):
+    def process_NAME(self, value):
         ''' Analyze and fix a NAME Item.
         
             First NAME and then the descendant Items included in the level hierarchy.
@@ -112,13 +101,11 @@ class PersonName:
         '''
 
         ''' 1) Full name parts like 'givn/surn/nsfx' will be isolated and analyzed ''' 
-        name_parts = self.item.value.split("/")
-        if len(name_parts) < 3: return True # no change
+        name_parts = value.split("/")
+        if len(name_parts) < 3: 
+            print("Illegal name:", value)
+            return None # no change
 
-        #givn = name_parts[0].strip()
-        #surn = name_parts[1].strip()
-        #nsfx = name_parts[2].strip()
-        value = self.item.value
         s1 = value.find('/')
         s2 = value.rfind('/')
         if s1 >= 0 and s2 >= 0 and s1 != s2: 
@@ -127,7 +114,8 @@ class PersonName:
             surn = value[s1+1:s2].strip()
             nsfx = value[s2+1:].strip()
         else:
-            return True # should not come here
+            print("Illegal name:", value)
+            return None # should not come here
 
         ''' 1.1) GIVN given name part rules '''
         name_parts = self._evaluate_givn(givn)
@@ -137,7 +125,7 @@ class PersonName:
         surnameparser = SurnameParser()
         surnames = surnameparser.parse_surnames(surn)
         
-        return (name_parts,surnames)
+        return ParseResult(name_parts,surnames)
     
     def _evaluate_givn(self, givn):
         ''' Process given name part of NAME record '''
@@ -155,14 +143,6 @@ class PersonName:
                     return nm[:-len(short)] + full
             return None
 
-        class NameParts:
-            givn = None
-            surn = None
-            nsfx = None
-            sex = None
-            call_name = None
-            nick_name = None
-            changed = False
 
         name_parts = NameParts()
         name_parts.givn = givn

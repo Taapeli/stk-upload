@@ -94,13 +94,13 @@ class PersonNames(transformer.Transformation):
             return True
 
         if item.tag == "NAME":
-            pn = PersonName(item)
-            n,surnames = pn.process_NAME(False)
+            pn = PersonName()
+            parseresult = pn.process_NAME(item.value)
+            if parseresult is None: return True
+            n = parseresult.name_parts
             newitems = []
             first = True
-            for pn in sorted(surnames,key=self.surname_sortkey):
-                #logger.debug('#' + str(pn)) # Merge original and new rows
-                #print(f"{n.givn}/{nm}/{n.nsfx}")
+            for pn in sorted(parseresult.surnames,key=self.surname_sortkey):
                 if pn.prefix:
                     surname = f"{pn.prefix} {pn.surn}"
                 else:
