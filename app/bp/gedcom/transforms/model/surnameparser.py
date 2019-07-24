@@ -42,6 +42,8 @@ class SurnameParser:
         """
         Tutkii sukunimi-stringin rakenteen. Paluuarvona on lista SurnameInfo-objekteja.
         """
+        if surn.strip() == "":
+            return [SurnameInfo("",None,"")]
         try:
             return self._parse_surnames0(surn)
         except ParseError: 
@@ -97,6 +99,7 @@ class SurnameParser:
         # Etsitään ensin ensimmäinen nimen tyyppia osoittava sana (esim. "os.") ja
         # käsitellään rekursiivisesti listan loppuosa.
         # Jos alussa oli jokin nimi (ts. i > 0), liitetään se listan alkuun.
+        # Paluuarvo on lista jonka jäsenet ovat tuplia (name_type,surname).
         i = self._find_first_type(words) # the index of first "os." or "ent." etc
         if i == -1: # eg. "Mäkinen Virtanen"
             return [(None,words)]
