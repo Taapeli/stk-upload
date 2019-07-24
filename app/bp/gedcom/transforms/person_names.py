@@ -105,19 +105,20 @@ class PersonNames(transformer.Transformation):
                     surname = f"{pn.prefix} {pn.surn}"
                 else:
                     surname = pn.surn
-                item = Item(f"{item.level} NAME {n.givn}/{surname}/{n.nsfx}")
+                newitem = Item(f"{item.level} NAME {n.givn}/{surname}/{n.nsfx}")
+                newitem.children = item.children
                 if pn.name_type:
                     typename = surnameparser.TYPE_NAMES.get(pn.name_type,"unknown")
                     typeitem = Item(f"{item.level+1} TYPE {typename}")
-                    item.children.append(typeitem)
-                newitems.append(item)
+                    newitem.children.append(typeitem)
+                newitems.append(newitem)
                 if first:
                     if n.call_name:
                         item2 = Item(f"{item.level+1} CALL {n.call_name}")
-                        item.children.append(item2)
+                        newitem.children.append(item2)
                     if n.nick_name:
                         item2 = Item(f"{item.level+1} NICK {n.nick_name}")
-                        item.children.append(item2)
+                        newitem.children.append(item2)
                 first = False
             return newitems
 
