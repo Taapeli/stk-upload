@@ -35,6 +35,7 @@ Created on 26.11.2016 – 2.6.2019
 #           1 SEX M
 #             ...
 import logging 
+from ..transforms.model import surnameparser
 logger = logging.getLogger('stkserver')
 
 #from ..transforms.model.gedcom_line import GedcomLine
@@ -92,14 +93,12 @@ class PersonNames(transformer.Transformation):
         if item.path.find('.INDI') < 0:
             return True
 
-        # 1. Clean "Waldemar (Valte)/Rosén/Persson" to components
         if item.tag == "NAME":
-            #print(f"## Name {item.value}<br>")
-            logger.debug(f"##Item {item.linenum}: {item.list()}")
             pn = PersonName(item)
             n,surnames = pn.process_NAME(False)
             newitems = []
-            for pn in surnames:
+            first = True
+            for pn in sorted(surnames,key=self.surname_sortkey):
                 #logger.debug('#' + str(pn)) # Merge original and new rows
                 #print(f"{n.givn}/{nm}/{n.nsfx}")
                 if pn.prefix:
@@ -108,12 +107,23 @@ class PersonNames(transformer.Transformation):
                     surname = pn.surn
                 item = Item(f"{item.level} NAME {n.givn}/{surname}/{n.nsfx}")
                 if pn.name_type:
-                    typeitem = Item(f"{item.level+1} TYPE {pn.name_type}")
+                    typename = surnameparser.TYPE_NAMES.get(pn.name_type,"unknown")
+                    typeitem = Item(f"{item.level+1} TYPE {typename}")
                     item.children.append(typeitem)
                 newitems.append(item)
-    #             ret.extend(pn.rows)
+                if first:
+                    if n.call_name:
+                        item2 = Item(f"{item.level+1} CALL {n.call_name}")
+                        item.children.append(item2)
+                    if n.nick_name:
+                        item2 = Item(f"{item.level+1} NICK {n.nick_name}")
+                        item.children.append(item2)
+                first = False
             return newitems
 
+        return True
+    
+        # ---- TEKEMÄTTÄ: ----
         #2. If there is SURN.NOTE etc without any name, move their Notes and  
         #   Sources to NAME level
         if item.tag in ["NPFX", "GIVN", "NICK", "SPFX", "SURN", "NSFX"] \
@@ -128,12 +138,13 @@ class PersonNames(transformer.Transformation):
                 new_items.append(it)
             return new_items
 
-        if False:   #options.remove_multiple_blanks: # 2.2.3
-            if item.tag in ('NAME','PLAC'):
-                newtext = "kukkuu"      # remove_multiple_blanks(item.value)
-                if newtext != item.value:
-                    item.value = newtext
-                    return item
-
         return True # no change
+
+    def surname_sortkey(self,surnameinfo):
+        # Sort birth names first
+        if surnameinfo.name_type == surnameparser.Name_types.BIRTH_NAME: return 0
+        if surnameinfo.name_type is None: return 1
+        return 2
+
+
 
