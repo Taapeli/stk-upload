@@ -31,7 +31,7 @@ TYPE_NAMES = {
 @dataclass
 class SurnameInfo:
     surn:str = ""
-    name_type:str = ""  # "birth name", "married", "aka" etc
+    name_type:Name_types = None  
     prefix:str = ""
 
 class ParseError(Exception): pass
@@ -94,7 +94,7 @@ class SurnameParser:
 
     def _parse_surnames_list(self,words):
         # Käsitellään erillisiksi sanoiksi hajotettu sukunimi.
-        # Etsitään ensin ensimmäinen nimen tyyppia osoittava sama (esim. "os.") ja
+        # Etsitään ensin ensimmäinen nimen tyyppia osoittava sana (esim. "os.") ja
         # käsitellään rekursiivisesti listan loppuosa.
         # Jos alussa oli jokin nimi (ts. i > 0), liitetään se listan alkuun.
         i = self._find_first_type(words) # the index of first "os." or "ent." etc
@@ -109,9 +109,10 @@ class SurnameParser:
             else:
                 name_type = TYPES[n+'.']
             names = self._parse_surnames_list(words[i+1:])
-            if len(names) > 0:
+            if len(names) > 0: # lisätään tyyppi ensimmäiseen nimeen
                 return [(name_type,names[0][1])] + names[1:]
             else:
+                # nimi päättyy tyyppiin!
                 surname = " ".join(words)
                 raise ParseError(f"Invalid surname syntax: '{surname}'")
 
