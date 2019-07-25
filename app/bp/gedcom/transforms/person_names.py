@@ -73,6 +73,10 @@ def add_args(parser):
                         help=_("Process_nonstd_ALIA_lines"))
 
 
+def normalize(namestring):
+    return namestring.replace(" /","/").replace("/ ","/")
+
+
 class PersonNames(transformer.Transformation):
 
     def transform(self, item, _options, _phase):
@@ -100,27 +104,35 @@ class PersonNames(transformer.Transformation):
             n = parseresult.name_parts
             newitems = []
             first = True
+            changed = False
+            if len(parseresult.surnames) > 1: changed = True
             for pn in sorted(parseresult.surnames,key=self.surname_sortkey):
                 if pn.prefix:
                     surname = f"{pn.prefix} {pn.surn}"
                 else:
                     surname = pn.surn
-                newitem = Item(f"{item.level} NAME {n.givn}/{surname}/{n.nsfx}")
+                namestring = f"{n.givn}/{surname}/{n.nsfx}"
+                if normalize(namestring) != normalize(item.value): changed = True
+                newitem = Item(f"{item.level} NAME {namestring}")
                 newitem.children = item.children
                 item.children = []
                 if pn.name_type:
                     typename = surnameparser.TYPE_NAMES.get(pn.name_type,"unknown")
                     typeitem = Item(f"{item.level+1} TYPE {typename}")
                     newitem.children.append(typeitem)
+                    changed = True
                 if first:
                     if n.call_name:
                         item2 = Item(f"{item.level+1} CALL {n.call_name}")
                         newitem.children.append(item2)
+                        changed = True
                     if n.nick_name:
                         item2 = Item(f"{item.level+1} NICK {n.nick_name}")
                         newitem.children.append(item2)
+                        changed = True
                 newitems.append(newitem)
                 first = False
+            if not changed: return True
             return newitems
 
         return True
