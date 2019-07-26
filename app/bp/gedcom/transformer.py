@@ -31,6 +31,7 @@ import sys
 # logger = logging.getLogger('stkserver')
 
 from flask_babelex import _
+from .models import  gedcom_utils
 
 def write(out,s):
     out.emit(s)
@@ -50,33 +51,25 @@ def fixlines(lines,options):
         
         if (len(tkns) == 0 or not tkns[0].isdigit()):
             # assume this is a continuation line
-            line2 = "%s CONT %s" % (prevlevel+1,line)
-            tkns = line2.split(None,1)
-            lines[i] = line2
+            newline = "%s CONT %s" % (prevlevel+1,line)
+            tkns = newline.split(None,1)
+            lines[i] = newline
             if options.display_changes:
-                print("-----------------------")
-                print(_("Replaced:"))
-                print(line)
-                print(_("With:"))
-                print(line2)
+                gedcom_utils.display_changed_lines([line],[newline],i+1)
         elif len(tkns) == 1:
+            newline = tkns[0] + " _DUMMY"
             if options.display_changes:
-                print("-----------------------")
-                print(_("Replaced:"))
-                print(tkns[0])
-                print(_("With:"))
-                print(tkns[0] + " _DUMMY")
-            line = tkns[0] + " _DUMMY"
+                gedcom_utils.display_changed_lines([line],[newline],i+1)
+            line = newline
             tkns = line.split(None,1)
             lines[i] = line
         tag = lines[i].split()[1]
         if tag not in {"CONT","CONC"}: prevlevel = int(tkns[0])
     if line.strip() != "0 TRLR":
-        lines.append("0 TRLR")
+        newline = "0 TRLR"
+        lines.append(newline)
         if options.display_changes:
-            print("-----------------------")
-            print(_("Added:"))
-            print("0 TRLR")
+            gedcom_utils.display_changed_lines(None,[newline],None)
 
 class Transformation:
     """ Base class for different transformation objects.

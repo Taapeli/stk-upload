@@ -186,30 +186,54 @@ def removefile(fname):
     except FileNotFoundError:
         pass
 
-def display_changes(lines,item,linenum=None):
-    class Out:
-        def emit(self,s):
-            print(s)
-
-    if not item: 
+def display_changed_lines(old_lines, new_lines, linenum=None):
+    if old_lines is None: 
+        print("<div><b>"+_("Added:")+"</b></div><gedcom-text>", end="")
+        for line in new_lines:
+            print(line)
+        print("</gedcom-text>")
+        print("<hr>")  
+        return
+    if not new_lines: 
         print("<div><b>"+_("Deleted:")+"</b></div><gedcom-replaced>", end="")
-        for line in lines:
+        if linenum: 
+            print(f"{_('starting from line ')}<a href='#' class='gedcomlink'>{linenum}</a>")
+        for line in old_lines:
             print(line)
         print("</gedcom-replaced>")
+        print("<hr>")  
         return
     print("<div><b>"+_("Replaced:")+"</b>")
     if linenum: 
         print(f"{_('starting from line ')}<a href='#' class='gedcomlink'>{linenum}</a>")
     print("</div><gedcom-replaced>", end="")
-    for line in lines:
+    for line in old_lines:
         print(line)
     print("</gedcom-replaced>")
     print("<div><b>"+_("With:")+"</b></div><gedcom-text>", end="")
-    if isinstance(item, list):
-        for it in item:
-            it.print_items(Out())
-    else:
-        item.print_items(Out())
+    for line in new_lines:
+        print(line)
     print("</gedcom-text>")
     print()
-    print("<hr>")   #("<br>-----------------------<br>")
+    print("<hr>")  
+
+def display_changes(lines,item,linenum=None):
+    class Out:
+        lines = []
+        def emit(self,line):
+            lines.append(line)
+
+    out = Out()
+
+    if not item:
+        display_changed_lines(lines,None)
+    else:
+        if isinstance(item, list):
+            for it in item:
+                it.print_items(out)
+        else:
+            item.print_items(out)
+    
+        display_changed_lines(lines,out.lines)
+    
+        
