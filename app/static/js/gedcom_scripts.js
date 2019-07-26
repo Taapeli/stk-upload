@@ -165,6 +165,10 @@ $(document).ready( function() {
             $("#div_transform_params1").html(rsp);
             $("input.clear_others").click(clear_others);
             $("#div_transform_params").show();
+			$("#check_all").click(function(rsp) {
+				var checked = $("#check_all").is(":checked");
+				$(".transform_option").prop("checked",checked);
+			});
         });
     });
 

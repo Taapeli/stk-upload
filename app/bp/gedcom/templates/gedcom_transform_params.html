@@ -36,6 +36,13 @@ var transform = "{{ transform }}";
 		    </td>
 		    </tr>
 		{% endfor %}
+		
+		{% if rows|length is gt(1) %}
+			<tr>
+				<td style="float:right"><span  class="check_all">{{ _("check all") }}</span></td>
+				<td><input type="checkbox" id="check_all" style="width: 10em"></td>
+			</tr>
+		{% endif %}
 		</table><div align="right" style="margin-top:1em">
     </div>
 </div>
