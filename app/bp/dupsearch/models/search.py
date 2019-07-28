@@ -1,9 +1,12 @@
 #!/usr/bin/env python
-import argparse
+import os
 import traceback
 from neo4j import GraphDatabase
 from models.gen.event import Event
 import shareds
+
+from werkzeug.utils import secure_filename
+import subprocess
 
 # https://neo4j.com/developer/kb/fulltext-search-in-neo4j/
 # https://neo4j.com/docs/cypher-manual/3.5/schema/index/#schema-index-fulltext-search
@@ -14,6 +17,7 @@ import shareds
 neo4j_uri = shareds.app.config.get("NEO4J_URI")
 neo4j_username = shareds.app.config.get("NEO4J_USERNAME")
 neo4j_password = shareds.app.config.get("NEO4J_PASSWORD")
+libsvm_folder = shareds.app.config.get("LIBSVM_FOLDER")
 
 neo4j_driver = GraphDatabase.driver(
         neo4j_uri, 
@@ -225,6 +229,36 @@ def getname(namenode):
         name += ' ' + surname
     return name.strip()
 
+
+def getvalue(searchkeys, prefix):
+    valueset = set()
+    for key in searchkeys:
+        if key.startswith(prefix): valueset.add( key[len(prefix):] )
+    if len(valueset) == 0:
+        return None
+    else:
+        return valueset
+
+def compute_match(searchkey1,searchkey2):
+    keys1 = searchkey1.split()
+    keys2 = searchkey2.split()
+    matchvalues = []
+    for prefix in (
+        'G','L','X',
+        'EBirthD','EBirthY','EBirthP    '
+        'EDeathD','EDeathY','EDeathP',
+    ):
+        value1 = getvalue(keys1,prefix)
+        value2 = getvalue(keys2,prefix)
+        value = 1 if value1 and value2 and value1 == value2 else 0
+        matchvalues.append(value)
+
+        value1 = getvalue(keys1,"Parent"+prefix)
+        value2 = getvalue(keys2,"Parent"+prefix)
+        value = 1 if value1 and value2 and value1 == value2 else 0
+        matchvalues.append(value)
+    return tuple(matchvalues)
+        
 def display_matches(args,p,pid,pn,rec,matches):   
     score = rec.get('score')
     matchid = rec.get('node').get("id")
@@ -238,11 +272,17 @@ def display_matches(args,p,pid,pn,rec,matches):
         pdict1 = dict(p)
         pdict1['name'] = getname(pn)
         pdict1['pid'] = pid
+        pdict1['searchkey'] = p.get('searchkey')
         pdict2 = dict(matchnode)
         pdict2['name'] = getname(matchname)
         pdict2['pid'] = matchpid
-        res = dict(score=score,p1=pdict1,p2=pdict2)
+        pdict2['searchkey'] = matchkeys
+        matchvector = compute_match(pdict1['searchkey'],pdict2['searchkey'])
+        #score = score * sum(matchvector)
+        matchvectorstring = "".join([str(x) for x in matchvector])
+        res = dict(score=score,matchvector=matchvectorstring,p1=pdict1,p2=pdict2)
         matches.append(res)
+        
     
 def __search_dups(n,count,args,rec,matches):   
     pid = rec.get('pid')
@@ -271,14 +311,34 @@ def __search_dups(n,count,args,rec,matches):
         batch_id=args.batchid2,
         minscore=args.minscore,
         )
-    #print(f"Search: {n}/{count}: {num_matches} matches")
-        
+
+    
 def search_dups(args):
+    print(args)
+    print(args.model)
     matches = []
     run("""
         match (b:Batch{id:$batch_id}) -[:OWNS]-> (p:Person) -[:NAME]-> (pn:Name{order:0}) 
         return id(p) as pid, p, collect(pn) as namenodes
     """,callback=lambda n,count,rec: __search_dups(n,count,args,rec,matches), batch_id=args.batchid1)
+
+    test_data = "kku/test_data.txt"
+    with open(test_data,"w") as f:
+        value = 0
+        for res in matches:
+            values = " ".join(["%s:%s" % (i+1,value) for (i,value) in enumerate(res['matchvector'])])
+            matchdata = "{} {}\n".format(value,values)
+            f.write(matchdata)
+            value = 1-value
+    from subprocess import Popen, PIPE
+    models_folder = "training/models"
+    model = os.path.join(models_folder,args.model)
+    output_file = "/tmp/output.txt"
+    cmd = f"{libsvm_folder}/svm-predict {test_data} {model} {output_file}"
+    f = subprocess.run(cmd, shell = True ) #, stdout = PIPE).stdout
+    for i,line in enumerate(open(output_file)):
+        matches[i]['match_value'] = int(line)
+
     return sorted(matches,reverse=True,key=lambda match: match['score'])
 
 def check_batch(batch_id):
@@ -291,5 +351,31 @@ def check_batch(batch_id):
         batch_id=batch_id)
     if n == 0:
         raise RuntimeError(f"No such batch: {batch_id}")
+
+
+def upload(file):
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '': # pragma: no cover
+        return dict(status='error')
+    print(file.filename)
+    filename = secure_filename(file.filename)
+    training_data_folder = "training/data"
+    models_folder = "training/models"
+    os.makedirs(training_data_folder, exist_ok=True)
+    os.makedirs(models_folder, exist_ok=True)
+    fullname = os.path.join(training_data_folder, filename)
+    file.save(fullname)
+
+    model = os.path.join(models_folder, filename)
+    cmd = f"{libsvm_folder}/svm-train {fullname} {model}"
+    f = subprocess.run(cmd, shell = True ) 
+    return dict(status='ok')
+
+
+def get_models():
+    models_folder = "training/models"
+    os.makedirs(models_folder, exist_ok=True)
+    return os.listdir(models_folder)
 
 

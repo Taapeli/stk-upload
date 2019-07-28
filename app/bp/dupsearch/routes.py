@@ -8,6 +8,7 @@ from bp.dupsearch.models import search
 from types import SimpleNamespace
 import json
 
+
 @bp.route('/dupsearch',  methods=['GET'])
 @login_required
 def dupsearch():
@@ -20,7 +21,7 @@ def batches():
     for b in batch_list:
         file = b.get('file')
         if file:
-            file = file.split("/")[-1].replace("_clean.",".")
+            file = file.split("/")[-1].replace("_clean.gramps",".gramps")
             b['file'] = file 
     return jsonify(batch_list)
 
@@ -59,3 +60,17 @@ def create_index():
 def drop_index():
     res = search.drop_index(None)
     return jsonify(res)
+
+@bp.route('/dupsearch/get_models', methods=['GET'])
+@login_required
+def get_models():
+    res = search.get_models()
+    return jsonify(res)
+
+@bp.route('/dupsearch/upload', methods=['POST'])
+@login_required
+def upload():
+    file = request.files['file']
+    res = search.upload(file)
+    return jsonify(res)
+
