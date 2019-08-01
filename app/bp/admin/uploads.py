@@ -30,7 +30,7 @@ STATUS_LOADING      = "loading"
 STATUS_DONE         = "done"
 STATUS_FAILED       = "failed"
 STATUS_ERROR        = "error"
-
+STATUS_REMOVED      = "removed"
 
 #===============================================================================
 # Background loading of a Gramps XML file
@@ -232,6 +232,8 @@ def list_uploads(username):
                         batch_id = ""
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
+            elif status == STATUS_REMOVED:
+                status_text = _("REMOVED")
             person_count = batch_person_count(username,batch_id)
             if status_text:
                 upload = Upload()

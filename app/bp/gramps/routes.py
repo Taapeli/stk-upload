@@ -111,14 +111,16 @@ def xml_download(xmlfile):
 @bp.route('/gramps/batch_delete/<batch_id>')
 @roles_accepted('research', 'admin')
 def batch_delete(batch_id):
-    syslog.log(type="batch_id deleted",batch_id=batch_id) 
     filename = batch.get_filename(current_user.username,batch_id)
     metafile = filename.replace("_clean.",".") + ".meta"
-    data = eval(open(metafile).read())
-    if data.get('batch_id') == batch_id:
-        del data['batch_id']
-        data['status'] = uploads.STATUS_UPLOADED
-        open(metafile,"w").write(repr(data))
+    if os.path.exists(metafile):
+        data = eval(open(metafile).read())
+        if data.get('batch_id') == batch_id:
+            del data['batch_id']
+            data['status'] = uploads.STATUS_REMOVED
+            open(metafile,"w").write(repr(data))
+    batch.delete_batch(current_user.username,batch_id)
+    syslog.log(type="batch_id deleted",batch_id=batch_id) 
     flash(_("Batch id %(batch_id)s has been deleted", batch_id=batch_id), 'info')
     referrer = request.headers.get("Referer")                               
     return redirect(referrer)
