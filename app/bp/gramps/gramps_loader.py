@@ -66,13 +66,14 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler.blog.log(cleaning_log)
     t0 = time.time()
 
+    handler.batch_id = handler.blog.start_batch(None, file_cleaned)
+    
     try:
         ''' Start DOM transaction '''
         handler.begin_tx(shareds.driver.session())
         # Create new Batch node and start
-        handler.batch_id = handler.blog.start_batch(handler.tx, file_cleaned)
         #status_update({'percent':1})
-
+        
         try:
             handler.handle_notes()
             handler.handle_repositories()

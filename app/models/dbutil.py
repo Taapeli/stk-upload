@@ -62,3 +62,6 @@ RETURN a.handle AS handle''', {"inc": inc} ):
 #     for i in refname_index:
 #         sch.create_index("Refname", i)
 
+def aqcuire_lock(tx,lock_id):
+    tx.run("merge (lock:Lock {id:$lock_id}) set lock.locked = true", lock_id=lock_id)
+

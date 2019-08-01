@@ -208,6 +208,12 @@ return count(u)"""
             logger.error(f"{e} in database.adminDB.do_schema_fixes")
             return
 
+def create_lock_constraint():
+    # can be created multiple times!
+    shareds.driver.session().run( 
+        "create constraint on (l:Lock) assert l.id is unique"
+    )
+
 
 def initialize_db(): 
     if not roles_exist():
@@ -218,6 +224,8 @@ def initialize_db():
         create_user_constraints()
         create_master(build_master_user())
         create_allowed_email_constraints()
+
+    create_lock_constraint()
 
     # Fix chaanged schema
     do_schema_fixes()

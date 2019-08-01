@@ -16,6 +16,7 @@ Created on 26.5.2018
 from datetime import date
 import shareds
 from models.cypher_gramps import Cypher_batch
+from models import dbutil
 
 
 class Batch(object):
@@ -61,7 +62,10 @@ class Batch(object):
                 tx = session.begin_transaction()
                 local_tx = True
             
+            dbutil.aqcuire_lock(tx, 'batch_id')
             # 1. Find the latest Batch id of today from the db
+            import time
+            time.sleep(20)
             base = str(date.today())
             try:
                 batch_id = tx.run(Cypher_batch.batch_find_id, 
