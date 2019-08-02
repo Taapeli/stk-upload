@@ -339,7 +339,7 @@ WITH n
     link_note = """
 MATCH (pl:Place) WHERE id(pl) = $pid
 MATCH (n:Note)  WHERE n.handle=$hlink
-CREATE (pl) -[r:NOTE]-> (m)"""
+CREATE (pl) -[r:NOTE]-> (n)"""
 
 # class Cypher_place_w_handle():
 #     """ For Place class """
