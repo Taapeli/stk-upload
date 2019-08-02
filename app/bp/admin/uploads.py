@@ -270,3 +270,8 @@ def delete_files(username, xmlfile):
     removefile(os.path.join(upload_folder,xmlfile))
     removefile(os.path.join(upload_folder,xmlfile+".meta"))
     removefile(os.path.join(upload_folder,xmlfile+".log"))
+    i = xmlfile.rfind(".")
+    if i >= 0:
+        file_cleaned = xmlfile[:i] + "_clean" + xmlfile[i:]
+        removefile(os.path.join(upload_folder,file_cleaned))
+        
