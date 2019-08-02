@@ -36,7 +36,8 @@ class Batches(object):
             user = record['user']
             batch = record['batch']
             label = record['label']
-            if not label in labels:
+            if not label: label = ""
+            if label and not label in labels:
                 labels.append(label)
             cnt = record['cnt']
 
