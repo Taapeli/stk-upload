@@ -64,8 +64,6 @@ class Batch(object):
             
             dbutil.aqcuire_lock(tx, 'batch_id')
             # 1. Find the latest Batch id of today from the db
-            import time
-            time.sleep(20)
             base = str(date.today())
             try:
                 batch_id = tx.run(Cypher_batch.batch_find_id, 

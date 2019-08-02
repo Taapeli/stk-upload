@@ -100,7 +100,10 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             
             # Copy information from Person and Event nodes to Family nodes
             handler.set_family_sortname_dates()
-   
+
+            handler.remove_handles()
+            handler.add_links()
+
 # Huom. Paikkahierarkia on tehty metodissa Place_gramps.save niin että
 #       aluksi luodaan tarvittaessa viitattu ylempi paikka vajailla tiedoilla.
 #             # Make the place hierarchy

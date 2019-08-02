@@ -119,6 +119,21 @@ class DOM_handler():
                 self.blog.log_event({'title':_("Database save failed due to {} {}".\
                                      format(e.__class__.__name__, e)), 'level':"ERROR"})
 
+    def remove_handles(self):
+        cypher_remove_handles = """
+            match (b:Batch {id:$batch_id}) -[*]-> (a)
+            remove a.handle
+        """
+        self.tx.run(cypher_remove_handles,batch_id=self.batch_id)
+
+    def add_links(self):
+        cypher_add_links = """
+            match (n) where exists (n.handle)
+            match (b:Batch{id:$batch_id})
+            merge (b)-[:OWNS_OTHER]->(n)
+            remove n.handle
+        """
+        self.tx.run(cypher_add_links,batch_id=self.batch_id)
 
     # ---------------------   XML subtree handlers   --------------------------
 
