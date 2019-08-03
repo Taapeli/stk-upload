@@ -749,9 +749,10 @@ def get_person_data_by_id(uniq_id):
                     citations.append(c)
 
     for link in p.media_ref:
-        o = Media()
-        o.uniq_id = link
-        o.get_data()
+        #o = Media()
+        #o.uniq_id = link
+        #o.get_data()
+        o = Media.from_uniq_id(link)
         photos.append(o)
 
     # Families

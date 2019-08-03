@@ -8,6 +8,7 @@ from sys import stderr
 from models.cypher_gramps import Cypher_media_in_batch
 from models.gen.cypher import Cypher_media
 import shareds
+import traceback
 
 class Media:
     """ Tallenne
@@ -43,8 +44,9 @@ class Media:
             'id': 'O0005', 'src': 'Sukututkimusdata/Sibelius/katarina_borg.gif', 
             'mime': 'image/gif', 'change': 1524411014}>
         '''
+        print("node:",node)
         n = cls()
-        n.uniq_id = node.id
+        #n.uniq_id = node.id
         n.id = node['id']
         n.handle = node['handle']
         n.change = node['change']
@@ -64,6 +66,16 @@ class Media:
             query = "MATCH (o:Media) RETURN ID(o) AS uniq_id, o"
             return  shareds.driver.session().run(query)
 
+
+    @staticmethod
+    def from_uniq_id(uniq_id):
+        """ Luetaan tallenteen tiedot """
+
+        obj_result = shareds.driver.session().run(Cypher_media.get_one, rid=uniq_id).single()
+        if obj_result:
+            return Media.from_node(obj_result['obj'])
+        else:
+            return None
 
     def get_data(self):
         """ Luetaan tallenteen tiedot """
