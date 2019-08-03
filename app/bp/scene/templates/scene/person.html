@@ -192,11 +192,19 @@
 
         <div class="subsection" id="indivgallery">
             <h4>{{ _('Media') }}</h4>
-        {% for photo in photos %}<div class="thumbnail">
-                <img alt="{{ _('Picture') }}" src="media?{{photo.src}}" />
-                    <p>{{photo.description}}</p>
-            </div>
-        {% endfor %}
+            <table>
+		        <tr>
+		        {% for photo in photos %}
+	                <td>{{photo.description}}
+		        {% endfor %}
+		
+		        <tr>
+		        {% for photo in photos %}
+	                <td><a href="media?id={{photo.src}}">
+		                	<img alt="{{ _('Picture') }}" src="thumbnail?id={{photo.src}}" />
+	                	</a>
+		        {% endfor %}
+	        </table>
             <div class="fullclear"></div>
         </div>
 <!--

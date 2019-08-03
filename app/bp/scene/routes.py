@@ -4,6 +4,9 @@ Created on 12.8.2018
 @author: jm
 '''
 import logging 
+import os
+from flask import send_file
+from bp.scene.models import media
 logger = logging.getLogger('stkserver')
 import time
 
@@ -340,4 +343,21 @@ def show_source_page(sourceid):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/source_events.html",
                            source=source, citations=citations)
+
+@bp.route('/scene/media')
+def fetch_media():
+    """ Fetch media file, assumes jpg, fix later...
+    """
+    name = request.args.get("id")
+    fullname = media.get_fullname(name)
+    return send_file(fullname, mimetype='image/jpg')        
+
+@bp.route('/scene/thumbnail')
+def fetch_thumbnail():
+    """ Fetch thumbnail
+    """
+    name = request.args.get("id")
+    thumbname = media.get_thumbname(name)
+    return send_file(thumbname, mimetype='image/jpg')        
+
 
