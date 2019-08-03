@@ -16,7 +16,7 @@ from models import dataupdater
 import shareds
 import traceback
 from tarfile import TarFile
-import io
+import os
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
@@ -53,7 +53,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
 
     ''' Uncompress and hide apostrophes for DOM handler (and save log)
     '''
-    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    file_cleaned, file_displ, cleaning_log = file_clean(pathname,userid)
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
     handler = DOM_handler(file_cleaned, userid)
@@ -130,7 +130,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     return handler.blog.list(), handler.batch_id
 
 
-def file_clean(pathname):
+def file_clean(pathname,username):
     # Decompress file and clean problematic delimiter (')
     # - build 2nd filename
     # - create Log for logging
@@ -163,6 +163,10 @@ def file_clean(pathname):
                            mode='rt',encoding='utf-8') as file_in:
                 counter = _clean_apostrophes(file_in, file_out)
             msg = "Cleaned apostrophes from .gpkg input file" # Try to read a gzipped file
+            media_base_folder = "media"
+            media_folder = os.path.join(media_base_folder,username)
+            os.makedirs(media_folder)
+            TarFile(fileobj=gzip.GzipFile(pathname)).extractall(path=media_folder)
         else: # .gramps: either gzipped or plain xml file
             try:
                 with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
