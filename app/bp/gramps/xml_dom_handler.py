@@ -137,6 +137,22 @@ class DOM_handler():
 
     # ---------------------   XML subtree handlers   --------------------------
 
+
+    def set_mediapath(self, path):
+        self.tx.run("match (b:Batch{id:$batch_id}) set b.mediapath = $path", 
+                    batch_id=self.batch_id, path=path)
+    
+    
+    def handle_header(self):
+        # Get all the citations in the collection
+        for header in self.collection.getElementsByTagName("header"):
+            for mediapath in header.getElementsByTagName("mediapath"):
+                if (len(mediapath.childNodes) > 0):
+                    path = mediapath.childNodes[0].data
+                    self.set_mediapath(path)
+                    return
+        self.set_mediapath("")
+            
     def handle_citations(self):
         # Get all the citations in the collection
         citations = self.collection.getElementsByTagName("citation")

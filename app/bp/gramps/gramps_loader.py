@@ -75,6 +75,8 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
         #status_update({'percent':1})
         
         try:
+            handler.handle_header()
+            
             handler.handle_notes()
             handler.handle_repositories()
             handler.handle_media()
@@ -165,7 +167,7 @@ def file_clean(pathname,username):
             msg = "Cleaned apostrophes from .gpkg input file" # Try to read a gzipped file
             media_base_folder = "media"
             media_folder = os.path.join(media_base_folder,username)
-            os.makedirs(media_folder)
+            os.makedirs(media_folder, exist_ok=True)
             TarFile(fileobj=gzip.GzipFile(pathname)).extractall(path=media_folder)
         else: # .gramps: either gzipped or plain xml file
             try:
