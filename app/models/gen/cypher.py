@@ -301,21 +301,23 @@ RETURN f, p.pname AS marriage_place,
     get_family_data = """
 MATCH (f:Family) WHERE ID(f)=$pid
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
-OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
-OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})
+    OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+    OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})
 OPTIONAL MATCH (pp) -[:EVENT]-> (pde:Event {type:"Death"})
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
-OPTIONAL MATCH (pc) -[:NAME]-> (nc:Name {order:0}) 
-OPTIONAL MATCH (pc) -[:EVENT]-> (cbe:Event {type:"Birth"})
-OPTIONAL MATCH (pc) -[:EVENT]-> (cde:Event {type:"Death"})
+    OPTIONAL MATCH (pc) -[:NAME]-> (nc:Name {order:0}) 
+    OPTIONAL MATCH (pc) -[:EVENT]-> (cbe:Event {type:"Birth"})
+    OPTIONAL MATCH (pc) -[:EVENT]-> (cde:Event {type:"Death"})
 WITH f, r, pp, np, pbe, pde, pc, nc, cbe, cde ORDER BY cbe.date1
-OPTIONAL MATCH (f) -[:EVENT]-> (e:Event {type:"Marriage"})-[:PLACE]->(p:Place)
-OPTIONAL MATCH (e) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
-OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
-RETURN f, p.pname AS marriage_place,
-    COLLECT([r.role, pp, np, pbe, pde]) AS parent, 
+    OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event) // {type:"Marriage"})-[:PLACE]->(p:Place)
+        OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
+    OPTIONAL MATCH (fe) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
+    OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
+RETURN f, 
+    COLLECT(DISTINCT [fe, fep]) AS family_event,    //p.pname AS marriage_place,
+    COLLECT(DISTINCT [r.role, pp, np, pbe, pde]) AS parent, 
     COLLECT(DISTINCT [pc, nc, cbe, cde]) AS child, 
-    COUNT(DISTINCT pc) AS no_of_children,
+    // COUNT(DISTINCT pc) AS no_of_children,
     COLLECT(DISTINCT [re, s, c]) AS sources,
     COLLECT(DISTINCT note) AS note"""
     

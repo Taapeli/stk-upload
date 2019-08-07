@@ -110,10 +110,12 @@ class Person_combo(Person):
 
         # Other variables
 
-        #self.urls = []                # REMOVED: Now use note_ref[]
-        self.est_birth = ''
-        self.est_death = ''
+        #self.urls = []                 # REMOVED: Now use note_ref[]
 
+        #self.est_birth = ''            # REMOVED: Now use self.lifetime (Daterange)
+        #self.est_death = ''
+
+        self.role = ''                  # Role in Family
         self.families_as_child = []     # - Propably one only
         self.families_as_parent =[]
         self.parentin_hlink = []

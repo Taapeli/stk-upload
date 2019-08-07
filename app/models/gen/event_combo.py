@@ -49,6 +49,7 @@ class Event_combo(Event):
                                 # only the first one)
         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
+        self.place = None       # Place node, if included
         self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
         self.note_ref = []      # uniq_ids (previously note[])
         

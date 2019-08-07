@@ -258,21 +258,18 @@ def show_families():
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 @bp.route('/scene/family=<int:fid>')
-def show_famiy_page(fid):
+def show_family_page(fid):
     """ Home page for a Family.
 
         fid = id(Family)
     """
     try:
-        family = Family_combo()   #, events = get_place_with_events(fid)
-        family.uniq_id = fid
-        family.get_family_data()
+#         family = Family_combo()   #, events = get_place_with_events(fid)
+#         family.uniq_id = fid
+        family = Family_combo.get_family_data(fid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in place_list:
-#         print ("# {} ".format(p))
-#     for u in place.notes:
-#         print ("# {} ".format(u))
+
     return render_template("/scene/family.html", family=family, menuno=3)
 
 # ------------------------------ Menu 4: Places --------------------------------
