@@ -98,6 +98,8 @@ class Person_combo(Person):
         self.events = []                # models.gen.event_combo.Event_combo
         self.event_ref = []             # Event uniq_ids # Gramps event handles (?)
         self.eventref_role = []         # ... and roles
+        self.event_birth = None         # For birth ans death events
+        self.event_death = None
 
         self.citation_ref = []          # models.gen.citation.Citation
         #remove: self.citations = []

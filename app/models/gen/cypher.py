@@ -303,7 +303,7 @@ MATCH (f:Family) WHERE ID(f)=$pid
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
     OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
     OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})
-OPTIONAL MATCH (pp) -[:EVENT]-> (pde:Event {type:"Death"})
+    OPTIONAL MATCH (pp) -[:EVENT]-> (pde:Event {type:"Death"})
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
     OPTIONAL MATCH (pc) -[:NAME]-> (nc:Name {order:0}) 
     OPTIONAL MATCH (pc) -[:EVENT]-> (cbe:Event {type:"Birth"})

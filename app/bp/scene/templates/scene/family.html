@@ -17,6 +17,7 @@ td { padding-right:1em;}
 
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">
+
         <h3>{{ _("Family")|capitalize }}</h3>
         <div id="summaryarea">
             <table><tbody>
@@ -36,12 +37,15 @@ td { padding-right:1em;}
                         <a href="/scene/person={{p.uniq_id}}" class="inlink">
                         {{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
                         {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a></td>
-                    <td class="Value">{{ p.lifetime }}</td>
+                    <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
+                                    – {% if p.event_death.dates %}{{ p.event_death.dates }}{% endif %}
+                    </td>
                 </tr>
                 {% endif %}
             {% endfor %}
             </tbody></table>
 
+        {% if family.events %} 
         <h3>{{ _("Family Events") }}</h3>
         <div id="summaryarea">
             <table style="margin-top:1em;"><tbody>
@@ -54,20 +58,23 @@ td { padding-right:1em;}
         {% endfor %}
             </tbody></table>
       </div>
+      {% endif %}
 
         {% if family.children %} 
         <h3>{{ _("Children") }}</h3>
         <div id="summaryarea">
             <table style="margin-top:1em;"><tbody>
-        {% for c in family.children %}
-                <tr><td class="ColumnAttribute">{{c.sex|transl('child')}}</td>
-                    <td class="Value"><span class="id">{{c.id}}</span>
-                        <a href="/scene/person={{c.uniq_id}}" class="inlink">
-                    {{c.names[0].firstname}}
-                    <i>{{c.names[0].suffix}}</i>
-                        {{c.names[0].prefix}}
-                    <b>{{c.names[0].surname}}</b></a></td>
-                    <td class="Value">{{ c.lifetime }}</td>
+        {% for p in family.children|sort(attribute='lifetime') %}
+                <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
+                    <td class="Value"><span class="id">{{p.id}}</span>
+                        <a href="/scene/person={{p.uniq_id}}" class="inlink">
+                    {{p.names[0].firstname}}
+                    <i>{{p.names[0].suffix}}</i>
+                        {{p.names[0].prefix}}
+                    <b>{{p.names[0].surname}}</b></a></td>
+                    <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
+                                    – {% if p.event_death.dates %}{{ p.event_death.dates }}{% endif %}
+                    </td>
                 </tr>
         {% endfor %}
             </tbody></table>

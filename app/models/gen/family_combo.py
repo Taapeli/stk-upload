@@ -143,17 +143,53 @@ RETURN family"""
     
     @staticmethod
     def get_family_data(uniq_id):
-        """ Read Family information including Events and Children.
+        """ Read Family information including Events, Children, Notes and Sources.
+        
+            1) read 
+                (f:Family) --> (e:Event)
+                (f:Family) -[:PARENT]-> (pp:Person) -> (np:Name)
+                (f:Family) -[:CHILD]->  (pc:Person) -> (nc:Name)
+                (f:Family) --> (fn:Note)
+                (e:Event) --> (en:Note)
+                (f:Family) --> (fac:Citation) --> (fas:Source) --> (far:Repository)
+                (e:Event) --> (evc:Citation) --> (evs:Source) --> (evr:Repository)
+╒═══════════════╤═══════════════╤═══════════════╤═══════════════╤═══════════════╤═══════╕
+│"family"       │"events"       │"parents"      │"children"     │"sources"      │"notes"│
+╞═══════════════╪═══════════════╪═══════════════╪═══════════════╪═══════════════╪═══════╡
+│family         │[event, fep]   │[r.role, parent│[child, cn, ce]│[ID(event), re,│[note] │
+│               │               │, pn, pe]      │               │s, c]          │       │
+└───────────────┴───────────────┴───────────────┴───────────────┴───────────────┴───────┘
+ 
+            2) read
+                (pp:Person) --> (ppe:Event) --> (:Place)
+                (pc:Person) --> (pce:Event) --> (:Place)
 
-            Returns a Family object with events and children included
+            3) build
+                Family_combo.mother, .names, event_birth, event_death
+                Family_combo.father, .names, event_birth, event_death
+                Family_combo.events
+                Family_combo.notes
+                Family_combo.sources / citation -> source -> repocitory ?
+                Family_combo.children, .names, event_birth, event_death
+            Returns a Family object with other objects included
         """
+
+        def set_birth_death(person, birth_node, death_node):
+            '''
+            Set person.birth and person.death events from db nodes
+            '''
+            if birth_node:
+                person.event_birth = Event_combo.from_node(birth_node)
+            if death_node:
+                person.event_death = Event_combo.from_node(death_node)
+
+
         family = None
 
         with shareds.driver.session() as session:
             try:
                 result = session.run(Cypher_family.get_family_data, 
-                                     pid=uniq_id)    
-            
+                                     pid=uniq_id)
                 for record in result:
                     if record['f']:
                         # <Node id=272710 labels={'Family'} 
@@ -184,7 +220,7 @@ RETURN family"""
         
                         uniq_id = -1
                         
-                        for role, parent_node, name_node, birth_node, death_node in record['parent']:
+                        for role, person_node, name_node, birth_node, death_node in record['parent']:
                             # ['mother', 
                             #    <Node id=235105 labels={'Person'} 
                             #        properties={'sortname': 'Gröndahl#Juhantytär#Fredrika', 'datetype': 19, 
@@ -203,28 +239,22 @@ RETURN family"""
                             #            'handle': '_dcf94f357e2d61f5f76e1ba7cb', 'id': 'E1532', 
                             #            'date2': 1937700, 'type': 'Death', 'date1': 1937700}>
                             # ]
-                            if parent_node:
-                                if uniq_id != parent_node.id:
+                            if person_node:
+                                if uniq_id != person_node.id:
                                     # Skip person with double default name
-                                    pp = Person_combo.from_node(parent_node)
-                                    pp.role = role
+                                    p = Person_combo.from_node(person_node)
+                                    p.role = role
+                                    if name_node:
+                                        p.names.append(Name.from_node(name_node))
+
+                                    set_birth_death(p, birth_node, death_node)
+
                                     if role == 'father':
-                                        family.father = pp
+                                        family.father = p
                                     elif role == 'mother':
-                                        family.mother = pp
-
-                                pname = Name.from_node(name_node)
-                                pp.names.append(pname)
-
-# Using Person.lifetime; don't need their events
-#                                 if birth_node and death_node:
-#                                     pp.lifetime = DateRange(3, birth_node['date1'])
-#                                 elif birth_node:
-#                                     pp.lifetime = DateRange(2, birth_node['date1'])
-#                                 elif death_node:
-#                                     pp.lifetime = DateRange(1, birth_node['date1'])
+                                        family.mother = p
                         
-                        for child_node, name_node, birth_node, death_node in record['child']:
+                        for person_node, name_node, birth_node, death_node in record['child']:
                             # record['child'][0]:
                             # [<Node id=235176 labels={'Person'} 
                             #    properties={'sortname': '#Andersdotter#Maria Christina', 
@@ -240,11 +270,12 @@ RETURN family"""
                             #    properties={'datetype': 0, 'change': 1519916327, 'description': '', 'handle': '_dd2a65b218a4e85ab141faeab48', 
                             #        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
                             # ]
-                            if child_node:
-                                child = Person_combo.from_node(child_node)
-                                cname = Name.from_node(name_node)
-                                child.names.append(cname)
-                                family.children.append(child)
+                            if person_node:
+                                p = Person_combo.from_node(person_node)
+                                if name_node:
+                                    p.names.append(Name.from_node(name_node))
+                                set_birth_death(p, birth_node, death_node)
+                                family.children.append(p)
                         
                         family.no_of_children = len(family.children)
                             
@@ -271,13 +302,13 @@ RETURN family"""
                         for n in record['note']:
                             note = Note()
                             note.uniq_id = n.id
-                            note.type = n['type'] or ''
-                            note.text = n['text'] or ''
-                            note.url = n['url'] or ''
+                            note.type = n['type']
+                            note.text = n['text']
+                            note.url = n['url']
                             family.notes.append(note)
             
             except Exception as e:
-                print('Error get_family: {} {}'.format(e.__class__.__name__, e))            
+                print('Error get_family_data: {} {}'.format(e.__class__.__name__, e))            
                 raise      
     
         return family
