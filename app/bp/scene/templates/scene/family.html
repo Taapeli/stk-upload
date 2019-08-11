@@ -49,7 +49,7 @@ td { padding-right:1em;}
         <h3>{{ _("Family Events") }}</h3>
         <div id="summaryarea">
             <table style="margin-top:1em;"><tbody>
-        {% for e in family.events %}
+        {% for e in family.events|sort(attribute='dates') %}
                 <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
                     <td class="Value">{{e.dates}}</td>
                     <td class="Value"><a href="/scene/location={{e.place.uniq_id}}"
@@ -64,14 +64,12 @@ td { padding-right:1em;}
         <h3>{{ _("Children") }}</h3>
         <div id="summaryarea">
             <table style="margin-top:1em;"><tbody>
-        {% for p in family.children|sort(attribute='lifetime') %}
+        {% for p in family.children|sort(attribute='event_birth.dates') %}
                 <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
                     <td class="Value"><span class="id">{{p.id}}</span>
                         <a href="/scene/person={{p.uniq_id}}" class="inlink">
-                    {{p.names[0].firstname}}
-                    <i>{{p.names[0].suffix}}</i>
-                        {{p.names[0].prefix}}
-                    <b>{{p.names[0].surname}}</b></a></td>
+	                    {{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
+	                    {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a></td>
                     <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
                                     – {% if p.event_death.dates %}{{ p.event_death.dates }}{% endif %}
                     </td>
