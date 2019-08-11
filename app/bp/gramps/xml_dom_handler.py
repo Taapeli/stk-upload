@@ -765,6 +765,26 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one stitle in a source",
                                      'level':"WARNING", 'count':s.id})
 
+            if len(source.getElementsByTagName('sauthor') ) == 1:
+                source_sauthor = source.getElementsByTagName('sauthor')[0]
+                if len(source_sauthor.childNodes) > 0:
+                    s.sauthor = source_sauthor.childNodes[0].data
+                else:
+                    s.sauthor = ""
+            elif len(source.getElementsByTagName('sauthor') ) > 1:
+                self.blog.log_event({'title':"More than one sauthor in a source",
+                                     'level':"WARNING", 'count':s.id})
+
+            if len(source.getElementsByTagName('spubinfo') ) == 1:
+                source_spubinfo = source.getElementsByTagName('spubinfo')[0]
+                if len(source_spubinfo.childNodes) > 0:
+                    s.spubinfo = source_spubinfo.childNodes[0].data
+                else:
+                    s.spubinfo = ""
+            elif len(source.getElementsByTagName('spubinfo') ) > 1:
+                self.blog.log_event({'title':"More than one spubinfo in a source",
+                                     'level':"WARNING", 'count':s.id})
+
             for source_noteref in source.getElementsByTagName('noteref'):
                 # Traverse links to surrounding places
                 if source_noteref.hasAttribute("hlink"):

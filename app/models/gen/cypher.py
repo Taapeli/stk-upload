@@ -495,7 +495,7 @@ return extract(x IN rel | endnode(x))  as end, source_id
     _cita_sour_repo_tail = """
 RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidence, 
    note.text AS notetext,
-   COLLECT(DISTINCT [ID(source), source.stitle, 
+   COLLECT(DISTINCT [ID(source), source.stitle, source.sauthor, source.spubinfo, 
                      rr.medium, 
                      ID(repo), repo.rname, repo.type]) AS sources"""
 
@@ -578,7 +578,7 @@ return id(r) AS uniq_id,
     r.change as change,
     r.handle as handle,
     r.id as id,
-    collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
+    collect(distinct [id(s), s.stitle, s.sauthor, s.spubinfo, rr.medium]) AS sources,
     collect(distinct w) as notes
 order by r.rname"""
 

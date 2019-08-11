@@ -296,8 +296,10 @@ RETURN family"""
                                 rname = repository_node['rname']
                                 s_pid = source_node.id
                                 stitle = source_node['stitle']
+                                sauthor = source_node['sauthor']
+                                spubinfo = source_node['spubinfo']
                                 page = citation_node['page']
-                                family.sources.append([rname, s_pid, stitle, page])
+                                family.sources.append([rname, s_pid, stitle, sauthor, spubinfo, page])
                             
                         for n in record['note']:
                             note = Note()
