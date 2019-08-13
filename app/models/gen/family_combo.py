@@ -196,7 +196,7 @@ RETURN family"""
                         #    properties={'father_sortname': '#Andersson#Anders', 
                         #        'change': 1519839324, 'rel_type': 'Married', 'handle': '_dcf94f357ea7b126cd8277f4495', 
                         #        'id': 'F0268', 'mother_sortname': 'Gröndahl#Juhantytär#Fredrika', 
-                        #        'datetype': '3', 'date2': 1878089, 'date1': 1875043}>
+                        #        'datetype': 3, 'date2': 1878089, 'date1': 1875043}>
                         node = record['f']
                         family = Family_combo.from_node(node)
 
@@ -321,10 +321,17 @@ RETURN family"""
         return tx.run(Cypher_family.get_dates_parents,id=uniq_id)
 
     @staticmethod           
-    def set_dates_sortnames(tx, uniq_id, datetype, date1, date2, father_sortname, mother_sortname):
-        return tx.run(Cypher_family.set_dates_sortname, id=uniq_id, 
-              datetype=datetype, date1=date1, date2=date2,
-              father_sortname=father_sortname, mother_sortname=mother_sortname)
+    def set_dates_sortnames(tx, uniq_id, dates, father_sortname, mother_sortname):
+        ''' Update Family dates and parents' sortnames.
+        '''
+        f_attr = {
+            "father_sortname": father_sortname,
+            "mother_sortname": mother_sortname
+        }
+        f_attr.update(dates.for_db())
+
+        return tx.run(Cypher_family.set_dates_sortname, 
+                      id=uniq_id, f_attr=f_attr)
 
 
     @staticmethod       

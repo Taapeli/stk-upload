@@ -385,13 +385,16 @@ RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_da
        event.date1 AS marriage_date, divorce_event.date1 AS divorce_date"""
 
 
+#     set_dates_sortname = """
+# MATCH (family:Family) WHERE ID(family) = $id
+# SET family.datetype=$datetype
+# SET family.date1=$date1
+# SET family.date2=$date2
+# SET family.father_sortname=$father_sortname
+# SET family.mother_sortname=$mother_sortname"""
     set_dates_sortname = """
 MATCH (family:Family) WHERE ID(family) = $id
-SET family.datetype=$datetype
-SET family.date1=$date1
-SET family.date2=$date2
-SET family.father_sortname=$father_sortname
-SET family.mother_sortname=$mother_sortname"""
+SET family += $f_attr"""
 
 
 class Cypher_place():

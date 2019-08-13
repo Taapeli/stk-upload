@@ -98,7 +98,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             handler.set_person_sortname_refnames()
             handler.set_estimated_person_dates()
             
-            # Copy information from Person and Event nodes to Family nodes
+            # Copy date and name information from Person and Event nodes to Family nodes
             handler.set_family_sortname_dates()
 
             handler.remove_handles()

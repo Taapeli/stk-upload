@@ -825,7 +825,9 @@ class DOM_handler():
 #                                 'count':hierarchy_count, 'elapsed':time.time()-t0})
 
     def set_family_sortname_dates(self):
-        ''' For each Family set Family.father_sortname, Family.mother_sortname, 
+        ''' Set sortnames and dates for each Family in the list self.family_ids.
+
+            For each Family set Family.father_sortname, Family.mother_sortname, 
             Family.datetype, Family.date1 and Family.date2
         '''
 

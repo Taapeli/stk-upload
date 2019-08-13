@@ -178,8 +178,8 @@ match (a:Repocitory)
     remove a:Repocitory
 return count(a)"""
     change_Family_dates = """
-match (f:Family) where f.datetype="3" and not exists(f.date1)
-    set f.datatype = "1"
+match (f:Family) where f.datetype=3 and not exists(f.date1)
+    set f.datatype = 1
     set f.data1 = f.data2
 return count(f)"""
     change_wrong_supplemented_direction = """
