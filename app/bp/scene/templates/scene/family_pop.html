@@ -1,0 +1,89 @@
+<html>
+<head>
+<title>{{ _('Family') }} {{family.id}}</title></head>
+<style>
+body,td {
+    font-family: Sans-serif, Arial;
+    font-size: 9pt;
+}
+#canvas {
+    padding: 0.5em;
+    border: solid 1px gray; 
+    width:400px; 
+    background-color:LemonChiffon;
+}
+h1 {font-size:120%; margin-bottom:0}
+h2 {font-size:110%; margin-bottom:0}
+.id {
+    color: sienna;
+    font-size: 80%;
+    text-align: right;
+    font-family: serif;
+}
+.minor {color: DarkSlateGray; }
+u { color: DarkKhaki; text-decoration: none; }
+td { padding-right:1em; vertical-align: top;}
+/* unvisited link */
+a:link { color: darkblue; }
+/* visited link */
+a:visited { color: darkblue; }
+/* mouse over link */
+a:hover { color: blue; }
+#nextlink {
+    color: darkblue;
+    margin-top:1em;
+    text-align:right;
+}
+</style>
+<body>
+<div id="canvas">
+    <h1>{{ _("Family")|capitalize }} {{family.id}}</h1>
+        <table><tbody>
+            <tr><td class="Minor">{{ _("Relation") }}</td>
+                <td> {{ family.rel_type|transl('marr') }}</td>
+                <td class="Minor">{{ family.lifetime }}</td>
+            </tr>
+        {% for p in [family.father, family.mother]%}
+            {% if p %}
+            <tr><td class="Minor">{{p.role|transl('role')|capitalize}}</td>
+                <td>{{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
+                    {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></td>
+                <td class="Minor">{% if p.event_birth.dates %}★{{ p.event_birth.dates }}{% endif %}
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody></table>
+
+        {% if family.events %} 
+        <h2>{{ _("Family Events") }}</h2>
+            <table><tbody>
+        {% for e in family.events|sort(attribute='dates') %}
+                <tr><td class="Minor">{{e.type|transl('evt')|capitalize}}</td>
+                    <td>{{e.dates}}</td>
+                    <td class="Minor">{{e.place.pname}}</a></td>
+                </tr>
+        {% endfor %}
+            </tbody></table>
+      {% endif %}
+
+        {% if family.children %} 
+        <h2>{{ _("Children") }}</h2>
+            <table><tbody>
+        {% for p in family.children|sort(attribute='event_birth.dates') %}
+                <tr><td class="Minor">{{p.sex|transl('child')}}</td>
+                    <td>{{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
+	                    {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a>
+	                </td>
+                    <td class="Minor">{% if p.event_birth.dates %}★{{ p.event_birth.dates }}{% endif %}
+                    </td>
+                </tr>
+        {% endfor %}
+            </tbody></table>
+        {% endif %}
+        <div>
+            <div id="nextlink">▸ <a href="/scene/family={{family.uniq_id}}">{{ _('Family Page') }}</a></div>
+        </div>
+</div>
+</body>
+</html>

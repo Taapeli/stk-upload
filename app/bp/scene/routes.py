@@ -272,6 +272,14 @@ def show_family_page(fid):
 
     return render_template("/scene/family.html", family=family, menuno=3)
 
+@bp.route('/pop/family=<int:fid>')
+def show_family_popup(fid):
+    """ Small Family pop-up.
+    """
+    #TODO Gen only fewer pieces of data
+    family = Family_combo.get_family_data(fid)
+    return render_template("/scene/family_pop.html", family=family)
+
 # ------------------------------ Menu 4: Places --------------------------------
 
 @bp.route('/scene/locations')
