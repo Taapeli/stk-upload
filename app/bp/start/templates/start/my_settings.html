@@ -21,17 +21,6 @@ table.transparent tbody tr td {
     vertical-align:top;
 }
 </style>
-<script>
-function confirm_delete(url) {
-    var msg = "{{ _('Are you sure you want to delete your data?') }}";
-    var ok = confirm(msg);
-    if (!ok) {
-        return false;
-    }
-    location.href = url;
-    return true;
-}
-</script>
 
 <div id="startdiv">
   <div>
@@ -95,14 +84,13 @@ function confirm_delete(url) {
         <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
         <table width="100%">
         <tr>{% set w = (100.0 / (labels|length + 3) | round(0,'floor')) | int %}
-            <th><th>{{ _('Batch') }}</th>
+            <th>{{ _('Batch') }}</th>
             {% for label in labels %}<th style="width:{{w}}%">{{label}}</th>{% endfor %}
         </tr>
         {% for key1,item in batches.items() %}
             {% set user0 = user %}
             {% set user, batch = key1.split('/') %}
         <tr>
-        <td><a href="/gramps/batch_delete/{{ batch }}">{{ _("Delete") }}</a></td>
         <td>{{batch}}</td>
             {% for label in labels %}
               <td class="right"> {{item[label]}} </td>
@@ -110,9 +98,8 @@ function confirm_delete(url) {
         </tr>
         {% endfor %}
         </table>
-        <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
-        <br>&rtrif; <a href="#" onclick="confirm_delete('/admin/clear_my_own')">
-                  {{ _('Delete all my imported data') }}</a>
+        <p class="goto">
+            &rtrif; <a href="/gramps">{{ _('Upload or remove a file or batch') }}</a>
         </p>
     </div>
     {% else %}

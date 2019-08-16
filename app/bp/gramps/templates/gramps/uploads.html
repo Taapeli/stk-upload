@@ -48,17 +48,34 @@ $(document).ready( function() {
     });
 
     $("#xml_delete").click(function(e) {
-        $("#form").attr("action","/gramps/xml_delete/" + 
-                document.getElementById('nm').innerText);
-        $("#form").submit();
+        if (confirm_delete('xml')) {
+	        $("#form").attr("action","/gramps/xml_delete/" + 
+	                document.getElementById('nm').innerText);
+	        $("#form").submit();
+        }
     });
 
     $("#batch_delete").click(function(e) {
-        $("#form").attr("action","/gramps/batch_delete/" + selected_batch_id);
-        $("#form").submit();
+        if (confirm_delete('batch')) {
+	        $("#form").attr("action","/gramps/batch_delete/" + selected_batch_id);
+	        $("#form").submit();
+        };
     });
 
 });
+
+function confirm_delete(subj) {
+	if (subj == 'xml') {
+		var msg = "{{ _('Are you sure you want to delete the XML file?') }}";
+	} else {
+	    var msg = "{{ _('Are you sure you want to delete this batch from database?') }}";
+	}
+    var ok = confirm(msg);
+    if (!ok) {
+        return false;
+    }
+    return true;
+}
 </script>
 
 {{ hamburger_menu( (
@@ -124,12 +141,11 @@ $(document).ready( function() {
       <form id="form" action="" method="get">
 	    <h3>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h3>
         <div>
-            <button id="download" disabled>{{ _("Download to your computer") }}</button>
+            <button id="download" disabled>{{ _("Download XML to your computer") }}</button>
             <button id="start_upload" disabled>{{ _("Store to database") }}</button>
             <button id="show_log" disabled>{{ _("Show last log") }}</button>
-            <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
             <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
-	    </div>
+            <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
 	  </form>
     </div>
     
