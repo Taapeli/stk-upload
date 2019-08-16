@@ -63,7 +63,7 @@ def log(type,**kwargs):
     try:
         user=current_user.username
     except:
-        user = ""
+        user = kwargs.get("user","")
     timestamp = time.time()
     timestr=util.format_timestamp(timestamp)
     msg = json.dumps(kwargs)
