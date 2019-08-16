@@ -9,6 +9,17 @@
 {{ hamburger_menu() }}
 <style>
 td,th {background: white;}
+.tight {margin: 2pt;}
+.goto {margin:3pt 12pt;}
+table.transparent {
+    background-color:inherit;
+    border-width:0
+}
+table.transparent tbody tr td {
+    background-color:inherit;
+    border-width:0;
+    vertical-align:top;
+}
 </style>
 <script>
 function confirm_delete(url) {
@@ -24,12 +35,12 @@ function confirm_delete(url) {
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("My Home Page") }}</h2>
+    <h2>{{ _("My Profile Page") }}</h2>
 
     {% if current_user is defined and current_user.is_authenticated %}
 
     <div class=startbox>
-        <h3>{{ _('User') }} <i>{{current_user.username}}</i></h3>
+       <h3>{{ _('User') }} <i>{{current_user.username}}</i></h3>
 	     <div><i>{{current_user.name}}</i> 
 	        &lt;{{current_user.email}}&gt;
 	     </div>
@@ -38,11 +49,11 @@ function confirm_delete(url) {
                     style="width:100%;margin-top=0.5em">
                         <b>{{ _("Logout") }}</b></button>
             </div>
-         <div> 
-          <h4>{{ _('Change language') }}</h4>
-          <form method="post">
-          	<div id="lang">
-          	    <select name="lang">
+
+       <h4>{{ _('Change language') }}</h4>
+         <div id="lang">
+           <form method="post" style="margin-left:2em;">
+          	 <select name="lang" onchange="this.form.submit()">
 				  <option value="fi"
                     {% if session.lang == "fi" %}selected{% endif %}
 				  >{{ _("Finnish") }}</option>
@@ -52,11 +63,9 @@ function confirm_delete(url) {
 				  <option value="en"
                     {% if session.lang == "en" %}selected{% endif %}
 				  >{{ _("English") }}</option>
-				</select> 
-                <input type="submit" value="{{ _('Apply') }}" />
-          	</div>
-            <input type="hidden" name="referrer" value="{{ referrer }}" />
-         </form>
+			 </select> 
+             <input type="hidden" name="referrer" value="{{ referrer }}" />
+           </form>
 	         <div class="submit">&rtrif;
 	           <a href="{{ referrer }}">{{ _('Go back') }}</a>
 	         </div>
@@ -65,11 +74,19 @@ function confirm_delete(url) {
 
     <div class=startbox>
         <h3>{{ _('Active Roles') }}</h3>
-        <ul>
+        <table class="transparent">
         {% for role in  roles %}
-        	<li><b>{{role.name}}</b>: {{role.description}}</li>
+        	<tr><td><b>{{role.name}}</b>:</td>
+        	    <td>{{role.description}}</td></tr>
         {% endfor %}
-        </ul>
+        </table>
+       <h4>{{ _('Ask for a new role') }}</h4>
+         <div>
+            <p class="tight">{{ _('Send a message to Isotammi office to acquire permission for new steps.') }}
+            <p class="goto">
+                &rtrif; <a href="/message">{{ _('Contact administrator') }}</a>
+            </p>
+         </div>
     </div>
 
     {% if batches %}
@@ -102,7 +119,9 @@ function confirm_delete(url) {
     <div class="startbox">
         <h3>{{ _('Data Batches') }}</h3>
         <p>{{ _('You have no candidate data loaded in the database.') }}</p>
-        <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a></p>
+        <p class="goto">
+            &rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
+        </p>
     </div>
     {% endif %}{# Batches #}
 
@@ -127,13 +146,17 @@ function confirm_delete(url) {
                    </tr>
                {% endfor %}
            </table>
-           <p>&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a></p>
+        <p class="goto">
+            &rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a>
+        </p>
     </div>
     {% else %}
     <div class="startbox">
         <h3>{{ _('My Gedcom files') }}</h3>
         <p>{{ _('You have no Gedcom files in the server.') }}</p>
-        <p>&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a></p>
+        <p class="goto">
+            &rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a>
+        </p>
     </div>
     {% endif %}{# Gedcoms #}
 
