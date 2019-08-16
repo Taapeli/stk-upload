@@ -33,25 +33,33 @@ function confirm_delete(url) {
 	     <div><i>{{current_user.name}}</i> 
 	        &lt;{{current_user.email}}&gt;
 	     </div>
+            <div style="margin:0.5em;">
+                <button onclick="window.location.href = '/';"
+                    style="width:100%;margin-top=0.5em">
+                        <b>{{ _("Logout") }}</b></button>
+            </div>
          <div> 
           <h4>{{ _('Change language') }}</h4>
           <form method="post">
           	<div id="lang">
-          		<input type="radio" name="lang" value="fi"
-          			{% if session.lang == "fi" %} checked {% endif %}
-      			>{{ _("Finnish") }}
-          		<input type="radio" name="lang" value="sv"
-          			{% if session.lang == "sv" %} checked {% endif %}
-          		>{{ _("Swedish") }}
-          		<input type="radio" name="lang" value="en"
-          			{% if session.lang == "en" %} checked {% endif %}
-          		>{{ _("English") }}
+          	    <select name="lang">
+				  <option value="fi"
+                    {% if session.lang == "fi" %}selected{% endif %}
+				  >{{ _("Finnish") }}</option>
+				  <option value="sv"
+                    {% if session.lang == "sv" %}selected{% endif %}
+				  >{{ _("Swedish") }}</option>
+				  <option value="en"
+                    {% if session.lang == "en" %}selected{% endif %}
+				  >{{ _("English") }}</option>
+				</select> 
+                <input type="submit" value="{{ _('Apply') }}" />
           	</div>
-          	<div class="submit">
-                <input type="submit" value="{{ _('Apply') }}" /></div>
-            <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back') }}</a></p>
             <input type="hidden" name="referrer" value="{{ referrer }}" />
          </form>
+	         <div class="submit">&rtrif;
+	           <a href="{{ referrer }}">{{ _('Go back') }}</a>
+	         </div>
          </div>
     </div>
 
@@ -86,7 +94,7 @@ function confirm_delete(url) {
         {% endfor %}
         </table>
         <p>&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
-        <br>&rtrif; <a href="#" onclick="confirm_delete('/admin/clear_db/my_own')">
+        <br>&rtrif; <a href="#" onclick="confirm_delete('/admin/clear_my_own')">
                   {{ _('Delete all my imported data') }}</a>
         </p>
     </div>

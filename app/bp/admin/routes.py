@@ -53,6 +53,19 @@ def clear_db(opt):
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
+@bp.route('/admin/clear_my_own')
+@login_required
+@roles_accepted('research')
+def clear_my_db():
+    """ Clear database - with no confirmation! """
+    try:
+        updater = DataAdmin(current_user)
+        msg =  updater.db_reset('my_own') # dbutil.alusta_kanta()
+        return render_template("/admin/talletettu.html", text=msg)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
 @bp.route('/admin/set/estimated_dates')
 @bp.route('/admin/set/estimated_dates/<int:uid>')
