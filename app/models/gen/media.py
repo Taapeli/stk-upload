@@ -46,7 +46,7 @@ class Media:
         '''
         print("node:",node)
         n = cls()
-        #n.uniq_id = node.id
+        n.uniq_id = node.id
         n.id = node['id']
         n.handle = node['handle']
         n.change = node['change']

@@ -12,7 +12,9 @@
     <div class="content" id="IndividualDetail">
         {% if photos %}<div class="snapshot">
             <div class="thumbnail">
-                <img alt="{{ _('in Photo') }} {{photos[0].description}}" src="thumbnail?id={{photos[0].src}}" />
+                <img alt="{{ _('in Photo') }} {{photos[0].description}}"
+                     src="thumbnail?id={{photos[0].src}}" />
+                <div style="font-size:6pt;text-color:ligthgray">"thumbnail?id={{photos[0].src}}"</div>
             </div>
         </div>{% endif %}
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 

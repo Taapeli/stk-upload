@@ -18,7 +18,6 @@ from . import bp
 from bp.scene.scene_reader import get_a_person_for_display_apoc
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
-#from models.gen.place import Place
 from models.gen.place_combo import Place_combo
 from models.gen.source import Source
 
@@ -207,6 +206,9 @@ def show_a_person_w_apoc(uid):
 
 #     print(person.sex_str())
     print("-> bp.scene.routes.show_a_person_w_apoc")
+    from bp.scene.models.media import get_thumbname
+    for i in person.media_ref:
+        print(get_thumbname(objs[i].src))
     return render_template("/scene/person_pg.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 

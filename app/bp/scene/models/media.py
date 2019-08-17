@@ -12,10 +12,13 @@ media_base_folder = "media"
 
 def make_thumbnail(fname, thumbname):
     #os.system(f"convert '{fname}' -resize 200x200  '{thumbname}'")
-    im = Image.open(fname)
-    size = 128, 128
-    im.thumbnail(size)
-    im.save(thumbname, "JPEG")
+    try:
+        im = Image.open(fname)
+        size = 128, 128
+        im.thumbnail(size)
+        im.save(thumbname, "JPEG")
+    except FileNotFoundError as e:
+        print(f'ERROR in bp.scene.models.media.make_thumbnail file "{fname}"\n{e}')
 
 def get_media_files_folder(username):
     media_folder = os.path.join(media_base_folder,username)
@@ -38,7 +41,7 @@ def get_thumbname(name):
     media_thumbnails_folder = get_media_thumbnails_folder(current_user.username)
     thumbname = os.path.join(media_thumbnails_folder,name)
     if not os.path.exists(thumbname):
-        thumbdir, x = os.path.split(thumbname)
+        thumbdir, _x = os.path.split(thumbname)
         os.makedirs(thumbdir, exist_ok=True)
         make_thumbnail(fname,thumbname)
     fullname = os.path.abspath(thumbname)

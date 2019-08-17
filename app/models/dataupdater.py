@@ -118,6 +118,7 @@ def set_family_name_properties(tx=None, uniq_id=None):
         marriage_date = record['marriage_date']
         divorce_date = record['divorce_date']
 
+        dates=None
         end_date = None
         if divorce_date:
             end_date = divorce_date

@@ -328,7 +328,8 @@ RETURN family"""
             "father_sortname": father_sortname,
             "mother_sortname": mother_sortname
         }
-        f_attr.update(dates.for_db())
+        if dates:
+            f_attr.update(dates.for_db())
 
         return tx.run(Cypher_family.set_dates_sortname, 
                       id=uniq_id, f_attr=f_attr)
