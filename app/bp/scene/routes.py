@@ -360,6 +360,7 @@ def fetch_thumbnail():
     """
     name = request.args.get("id")
     thumbname = media.get_thumbname(name)
+    print(f'fetch_thumbnail {name} -> {thumbname}')
     return send_file(thumbname, mimetype='image/jpg')        
 
 

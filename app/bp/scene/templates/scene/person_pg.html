@@ -17,9 +17,10 @@ u { color: DarkKhaki; text-decoration: none; }
     <div class="content" id="IndividualDetail">
 
         {% if person.media_ref %}<div class="snapshot">
-            <div class="thumbnail" style="border: solid lightgray 1px; padding: 5px;">
-                <img alt="{{ _('Photo') }}: {{obj[person.media_ref[0]].description}}" 
-                     src="thumbnail?id={{obj[person.media_ref[0]].src}}" />
+            <div class="thumbnail" style="border: solid lightgray 1px; padding: 5px; text-align: center;">
+                <img alt="({{ _('Photo') }})" 
+                     src="media?id={{obj[person.media_ref[0]].src}}" />
+                <div style="text-color:ligthgray">{{obj[person.media_ref[0]].description}}</div>
                 <div style="font-size:6pt;text-color:ligthgray">"thumbnail?id={{obj[person.media_ref[0]].src}}"</div>
             </div>
         </div>{% endif %}
@@ -214,11 +215,19 @@ u { color: DarkKhaki; text-decoration: none; }
 
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media") }}</h4>
-        {% for ref in person.media_ref %}<div class="thumbnail">
+        {% for ref in person.media_ref %}
+            <div class="thumbnail" style="border: solid lightgray 1px; padding: 5px; text-align: center;">
+                <img alt="({{ _('Photo') }})" 
+                     src="media?id={{obj[ref].src}}" />
+                <div style="text-color:ligthgray">{{obj[ref].description}}</div>
+                <div style="font-size:6pt;text-color:ligthgray">"thumbnail?id={{obj[ref].src}}"</div>
+            </div>
+{#          <div class="thumbnail">
                 <img alt="{{ _('image') }}" 
                      src="thumbnail?id={{obj[ref].src}}" />
                     <p>{{obj[ref].description}}</p>
             </div>
+#}
         {% endfor %}
             <div class="fullclear"></div>
         </div>
