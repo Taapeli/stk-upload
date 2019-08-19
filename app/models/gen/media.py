@@ -9,6 +9,7 @@ from models.cypher_gramps import Cypher_media_in_batch
 from models.gen.cypher import Cypher_media
 import shareds
 import traceback
+import uuid
 
 class Media:
     """ Tallenne
@@ -44,10 +45,10 @@ class Media:
             'id': 'O0005', 'src': 'Sukututkimusdata/Sibelius/katarina_borg.gif', 
             'mime': 'image/gif', 'change': 1524411014}>
         '''
-        print("node:",node)
         n = cls()
         n.uniq_id = node.id
         n.id = node['id']
+        n.uuid = node['uuid']
         n.handle = node['handle']
         n.change = node['change']
         n.description = node['description'] or ''
@@ -123,9 +124,11 @@ class Media:
         m_attr = {}
         try:
             m_attr = {
+                "uuid": uuid.uuid4().hex,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
+                "batch_id":batch_id,
                 "src": self.src,
                 "mime": self.mime,
                 "description": self.description

@@ -19,9 +19,9 @@ u { color: DarkKhaki; text-decoration: none; }
         {% if person.media_ref %}<div class="snapshot">
             <div class="thumbnail" style="border: solid lightgray 1px; padding: 5px; text-align: center;">
                 <img alt="({{ _('Photo') }})" 
-                     src="media?id={{obj[person.media_ref[0]].src}}" />
+                     src="/scene/thumbnail?id={{obj[person.media_ref[0]].uuid}}" />
                 <div style="text-color:ligthgray">{{obj[person.media_ref[0]].description}}</div>
-                <div style="font-size:6pt;text-color:ligthgray">"thumbnail?id={{obj[person.media_ref[0]].src}}"</div>
+                <div style="font-size:6pt;text-color:ligthgray">"thumbnail?id={{obj[person.media_ref[0]].uuid}}"</div>
             </div>
         </div>{% endif %}
 
@@ -218,13 +218,13 @@ u { color: DarkKhaki; text-decoration: none; }
         {% for ref in person.media_ref %}
             <div class="thumbnail" style="border: solid lightgray 1px; padding: 5px; text-align: center;">
                 <img alt="({{ _('Photo') }})" 
-                     src="media?id={{obj[ref].src}}" />
+                     src="/scene/thumbnail?id={{obj[ref].uuid}}" />
                 <div style="text-color:ligthgray">{{obj[ref].description}}</div>
-                <div style="font-size:6pt;text-color:ligthgray">"thumbnail?id={{obj[ref].src}}"</div>
+                <div style="font-size:6pt;text-color:ligthgray">"/scene/thumbnail?id={{obj[ref].uuid}}"</div>
             </div>
 {#          <div class="thumbnail">
                 <img alt="{{ _('image') }}" 
-                     src="thumbnail?id={{obj[ref].src}}" />
+                     src="/scene/thumbnail?id={{obj[ref].uuid}}" />
                     <p>{{obj[ref].description}}</p>
             </div>
 #}

@@ -10,6 +10,7 @@ from .models.footnote import Footnotes, SourceFootnote
 from models.gen.from_node import get_object_from_node
 from models.gen.person_combo import Person_combo #, Person_as_member
 from shareds import logger
+import traceback
 
 
 def get_a_person_for_display_apoc(uniq_id, user):
@@ -70,6 +71,7 @@ def get_a_person_for_display_apoc(uniq_id, user):
     try:
         results = Person_combo.get_person_paths_apoc(uniq_id)
     except Exception as e:
+        traceback.print_exc()
         print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
         return [None, None]
 

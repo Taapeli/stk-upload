@@ -54,7 +54,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
 
     ''' Uncompress and hide apostrophes for DOM handler (and save log)
     '''
-    file_cleaned, file_displ, cleaning_log = file_clean(pathname,userid,"")
+    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
     handler = DOM_handler(file_cleaned, userid)
@@ -68,6 +68,9 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     t0 = time.time()
 
     handler.batch_id = handler.blog.start_batch(None, file_cleaned)
+
+    if pathname.endswith(".gpkg"):
+        extract_media(pathname,handler.batch_id)
     
     try:
         ''' Start DOM transaction '''
@@ -142,7 +145,7 @@ def create_thumbnails(media_folder):
             thumbnail_fname = "media/thumbnails/" + fname
 
 
-def file_clean(pathname,username,batch_id):
+def file_clean(pathname):
     # Decompress file and clean problematic delimiter (')
     # - build 2nd filename
     # - create Log for logging
@@ -175,10 +178,6 @@ def file_clean(pathname,username,batch_id):
                            mode='rt',encoding='utf-8') as file_in:
                 counter = _clean_apostrophes(file_in, file_out)
             msg = "Cleaned apostrophes from .gpkg input file" # Try to read a gzipped file
-            media_files_folder = media.get_media_files_folder(username)
-            os.makedirs(media_files_folder, exist_ok=True)
-            TarFile(fileobj=gzip.GzipFile(pathname)).extractall(path=media_files_folder)
-            #create_thumbnails(media_folder)
         else: # .gramps: either gzipped or plain xml file
             try:
                 with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
@@ -194,3 +193,13 @@ def file_clean(pathname,username,batch_id):
                      'elapsed':time.time()-t0}) #, 'percent':1})
     return (file_cleaned, file_displ, event)
 
+def extract_media(pathname,batch_id):
+    try:
+        media_files_folder = media.get_media_files_folder(batch_id)
+        os.makedirs(media_files_folder, exist_ok=True)
+        TarFile(fileobj=gzip.GzipFile(pathname)).extractall(path=media_files_folder)
+        xml_filename = os.path.join(media_files_folder,"data.gramps")
+        os.remove(xml_filename)
+    except:
+        traceback.print_exc()
+    #create_thumbnails(media_folder)

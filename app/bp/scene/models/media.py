@@ -8,6 +8,8 @@ from PIL import Image
 
 from flask_security import current_user 
 
+import shareds
+
 media_base_folder = "media"
 
 def make_thumbnail(fname, thumbname):
@@ -20,30 +22,36 @@ def make_thumbnail(fname, thumbname):
     except FileNotFoundError as e:
         print(f'ERROR in bp.scene.models.media.make_thumbnail file "{fname}"\n{e}')
 
-def get_media_files_folder(username):
-    media_folder = os.path.join(media_base_folder,username)
+def get_media_files_folder(batch_id):
+    media_folder = os.path.join(media_base_folder,batch_id)
     media_files_folder = os.path.join(media_folder,"files")
-    return media_files_folder
+    return os.path.abspath(media_files_folder)
     
-def get_media_thumbnails_folder(username):
-    media_folder = os.path.join(media_base_folder,username)
-    thumbnails_files_folder = os.path.join(media_folder,"thumbnails")
-    return thumbnails_files_folder
+def get_media_thumbnails_folder(batch_id):
+    media_folder = os.path.join(media_base_folder,batch_id)
+    media_thumbnails_folder = os.path.join(media_folder,"thumbnails")
+    return os.path.abspath(media_thumbnails_folder)
 
-def get_fullname(name):
-    media_files_folder = get_media_files_folder(current_user.username)
-    fname = os.path.join(media_files_folder,name)
-    fullname = os.path.abspath(fname)
+def get_fullname(uuid):
+    rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",uuid=uuid).single()
+    m = rec['m']
+    batch_id = m['batch_id']
+    src = m['src']
+    media_files_folder = get_media_files_folder(batch_id)
+    fullname = os.path.join(media_files_folder,src)
     return fullname
 
-def get_thumbname(name):
-    fname = get_fullname(name)
-    media_thumbnails_folder = get_media_thumbnails_folder(current_user.username)
-    thumbname = os.path.join(media_thumbnails_folder,name)
+def get_thumbname(uuid):
+    rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",uuid=uuid).single()
+    m = rec['m']
+    batch_id = m['batch_id']
+    src = m['src']
+    media_thumbnails_folder = get_media_thumbnails_folder(batch_id)
+    thumbname = os.path.join(media_thumbnails_folder,src)
     if not os.path.exists(thumbname):
+        media_files_folder = get_media_files_folder(batch_id)
+        fname = os.path.join(media_files_folder,src)
         thumbdir, _x = os.path.split(thumbname)
         os.makedirs(thumbdir, exist_ok=True)
         make_thumbnail(fname,thumbname)
-    fullname = os.path.abspath(thumbname)
-    return fullname
-
+    return thumbname

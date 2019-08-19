@@ -18,4 +18,8 @@ wsgi.py
 training
 kku/
 /media/
+<<<<<<< Upstream, based on branch 'master' of https://github.com/Taapeli/stk-upload.git
 app/static/tmp/
+=======
+
+>>>>>>> a9a4a5c UUID for media files

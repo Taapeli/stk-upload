@@ -12,9 +12,8 @@
     <div class="content" id="IndividualDetail">
         {% if photos %}<div class="snapshot">
             <div class="thumbnail">
-                <img alt="{{ _('in Photo') }} {{photos[0].description}}"
-                     src="thumbnail?id={{photos[0].src}}" />
-                <div style="font-size:6pt;text-color:ligthgray">"thumbnail?id={{photos[0].src}}"</div>
+                <img alt="{{ _('in Photo') }} {{photos[0].description}}" 
+                	src="thumbnail?id={{photos[0].uuid}}" />
             </div>
         </div>{% endif %}
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
@@ -202,8 +201,8 @@
 		
 		        <tr>
 		        {% for photo in photos %}
-	                <td><a href="media?id={{photo.src}}">
-		                	<img alt="{{ _('Picture') }}" src="thumbnail?id={{photo.src}}" />
+	                <td><a href="media?id={{photo.uuid}}">
+		                	<img alt="{{ _('Picture') }}" src="thumbnail?id={{photo.uuid}}" />
 	                	</a>
 		        {% endfor %}
 	        </table>

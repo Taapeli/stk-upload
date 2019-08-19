@@ -208,7 +208,7 @@ def show_a_person_w_apoc(uid):
     print("-> bp.scene.routes.show_a_person_w_apoc")
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
-        print(get_thumbname(objs[i].src))
+        print(get_thumbname(objs[i].uuid))
     return render_template("/scene/person_pg.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
@@ -350,17 +350,17 @@ def show_source_page(sourceid):
 def fetch_media():
     """ Fetch media file, assumes jpg, fix later...
     """
-    name = request.args.get("id")
-    fullname = media.get_fullname(name)
+    uuid = request.args.get("id")
+    fullname = media.get_fullname(uuid)
     return send_file(fullname, mimetype='image/jpg')        
 
 @bp.route('/scene/thumbnail')
 def fetch_thumbnail():
     """ Fetch thumbnail
     """
-    name = request.args.get("id")
-    thumbname = media.get_thumbname(name)
-    print(f'fetch_thumbnail {name} -> {thumbname}')
+    uuid = request.args.get("id")
+    thumbname = media.get_thumbname(uuid) 
+    print(thumbname)
     return send_file(thumbname, mimetype='image/jpg')        
 
 
