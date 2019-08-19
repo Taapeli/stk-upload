@@ -3,6 +3,8 @@ Created on 6.5.2019
 
 @author: jm
 '''
+from datetime import datetime
+ 
 import shareds
 from .models.cypher_adm import Cypher_stats
 
@@ -35,13 +37,20 @@ class Batches(object):
             # <Record user='jpek' batch='jpek 2019-05-03.001' label='Person' cnt=1949>
             user = record['user']
             batch = record['batch']
+            ts = record['timestamp']
+            if ts:
+                if isinstance(ts, int):
+                    t = float(ts)/1000.
+                tstring = datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
+            else:
+                tstring = ""
             label = record['label']
             if not label: label = ""
             if label and not label in labels:
                 labels.append(label)
             cnt = record['cnt']
 
-            key = f'{user}/{batch}'
+            key = f'{user}/{batch}/{tstring}'
             if not key in users:
                 users[key] = {}
             users[key][label] = cnt

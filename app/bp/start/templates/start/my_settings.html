@@ -89,9 +89,9 @@ table.transparent tbody tr td {
         </tr>
         {% for key1,item in batches.items() %}
             {% set user0 = user %}
-            {% set user, batch = key1.split('/') %}
+            {% set user, batch, time = key1.split('/') %}
         <tr>
-        <td>{{batch}}</td>
+        <td>{{batch}}{% if time %}<br><small>{{ _('stored at') }} {{time}}</small>{% endif %}</td>
             {% for label in labels %}
               <td class="right"> {{item[label]}} </td>
             {% endfor %}

@@ -14,6 +14,7 @@ Created on 26.5.2018
 @author: jm
 '''
 from datetime import date
+import time
 import shareds
 from models.cypher_gramps import Cypher_batch
 from models import dbutil
@@ -175,4 +176,4 @@ class Log():
             e = "{:.4f}".format(self.elapsed)
         else:
             e = ""
-        return "{} {}: {}: {}".format(self.level, self.title, c, e)
+        return f"{self.level} {self.title}: {c} / {e} sek"

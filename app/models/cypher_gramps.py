@@ -22,7 +22,8 @@ RETURN b.id AS bid
     batch_create = """
 MATCH (u:UserProfile {username: $b_attr.user})
 MERGE (u) -[:HAS_LOADED {status: $b_attr.status}]-> (b:Batch {id: $b_attr.id})
-    SET b = $b_attr"""
+    SET b = $b_attr
+    SET b.timestamp = timestamp()"""
 
     batch_complete = """
 MATCH (u:UserProfile {username: $user})
