@@ -99,12 +99,21 @@
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
     {% set list1 = note.text.split('\n') %}
-	{% for l in list1 %}
-	   <p>{{ l }}</p>
-	{% endfor %}
+    {% for l in list1 %}
+       <p>{{ l }}</p>
+    {% endfor %}
     {% if note.url %}
     <a href="{{note.url}}" class="outlink" 
        target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}
+{%- endmacro %}
+
+{% macro notelink_2col(note) -%}
+    {#  Displays a Note link and Note text in 2 columns #}
+    <td>{% if note.url %}
+    <a href="{{note.url}}" class="outlink" 
+       target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}</td>
+    {% set list1 = note.text.split('\n') %}
+    <td>{% for l in list1 %}{{ l }} {% endfor %}</td>
 {%- endmacro %}
 
 {% macro place_names(pl) -%}
