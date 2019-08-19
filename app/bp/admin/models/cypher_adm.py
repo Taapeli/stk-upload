@@ -144,3 +144,10 @@ optional match (b) -[:OWNS]-> (x)
 return b.user as user, b.id as batch,  b.timestamp as timestamp,
     labels(x)[0] as label, count(x) as cnt 
     order by user, batch'''
+
+    get_user_batch_names = '''
+match (b:Batch) where b.user = $user
+optional match (b) -[r:OWNS]-> (:Person)
+return b.id as batch, b.timestamp as timestamp, b.status as status,
+    count(r) as persons 
+    order by batch'''

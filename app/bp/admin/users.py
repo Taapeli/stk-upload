@@ -39,9 +39,11 @@ class Batches(object):
             batch = record['batch']
             ts = record['timestamp']
             if ts:
-                if isinstance(ts, int):
-                    t = float(ts)/1000.
-                tstring = datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
+                t = float(ts)/1000.
+                tstring = datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M")
+                d, t = tstring.split()
+                if batch[:10] == d:
+                    tstring = t
             else:
                 tstring = ""
             label = record['label']
@@ -55,7 +57,7 @@ class Batches(object):
                 users[key] = {}
             users[key][label] = cnt
 
-            print(f'users[{key}] {users[key]}')
+            #print(f'users[{key}] {users[key]}')
 
         return sorted(labels), users
 

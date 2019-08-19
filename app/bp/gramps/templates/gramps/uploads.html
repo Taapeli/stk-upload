@@ -10,7 +10,7 @@
 <script>
 var selected_batch_id = '';
 
-function selectFile(sel,batch_id) {
+function selectFile(sel,batch_id,xml_name) {
     document.getElementById('nm').innerHTML=sel.value;
     selected_batch_id = batch_id;
     var buttons = document.getElementsByTagName('button');
@@ -19,6 +19,7 @@ function selectFile(sel,batch_id) {
      buttons[i].disabled = false;
     }
     if (batch_id == '') document.getElementById('batch_delete').disabled = true;
+    if (xml_name == '') document.getElementById('xml_delete').disabled = true;
 };
 
 $(document).ready( function() {
@@ -118,7 +119,8 @@ function confirm_delete(subj) {
 	    {% for upload in uploads %}
 	       <tr>
 	           <td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
-	                   onClick="selectFile(this,'{{upload.batch_id}}');"></td>
+	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}');">
+	           </td>
 	           <td>{{upload.upload_time_s}}</td>
 	           <td>{{upload.xmlname}}</td>
                <td>{% if upload.batch_id %}
