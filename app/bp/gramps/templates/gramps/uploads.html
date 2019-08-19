@@ -84,7 +84,7 @@ function confirm_delete(subj) {
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("Uploads from Gramps") }}</h2>
+    <h2>{{ _("Uploaded Candidate Materials") }}</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -95,7 +95,7 @@ function confirm_delete(subj) {
       {% endif %}
     {% endwith %}
 
-    <h3>{{ _("Status for differents steps in XML file upload") }}</h3>
+    <h3>{{ _("Steps for uploading Gramps files") }}</h3>
     <div class="steps">
         <div>1. {{ _("UPLOADED") }}<br>{{ _("the file has been uploaded to server") }}</div> –
         <div>2. {{ _("STORING") }}<br>{{ _("the file content is being stored to the database") }}</div>
@@ -111,9 +111,9 @@ function confirm_delete(subj) {
     <table class="fileselect" style="border-width: 2px 3px 3px 2px; min-width: 725px;">
            <tr> <th></th>
                 <th>{{ _("Upload time") }}</th>
-                <th>{{ _("XML file") }}</th>
-                <th>{{ _("Batch") }}</th>
-                <th>{{ _("Persons") }}</th>
+                <th>{{ _("Gramps file") }}</th>
+                <th>{{ _("Batch id") }}</th>
+                <th>{{ _("Person count") }}</th>
                 <th>{{ _("Status") }}</th>
    			</tr>
 	    {% for upload in uploads %}
@@ -153,7 +153,7 @@ function confirm_delete(subj) {
     
   <p>&rtrif; <a href="/gramps">{{ _("Send a new Gramps file") }}</a><br>
    {% if current_user.is_authenticated and current_user.has_role('member') %}
-	&rtrif; <a href="/scene/persons_all?div=2">{{ _('See your own data') }}</a><br>
+	&rtrif; <a href="/scene/persons_all?div=2">{{ _('See all your candidate data') }}</a><br>
    {% endif %}
     &rtrif; <a href="javascript:history.back()">{{ _("Return to front page") }}</a>
   </p>

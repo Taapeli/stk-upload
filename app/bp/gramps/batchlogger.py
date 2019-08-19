@@ -14,7 +14,6 @@ Created on 26.5.2018
 @author: jm
 '''
 from datetime import date
-import time
 import shareds
 from models.cypher_gramps import Cypher_batch
 from models import dbutil

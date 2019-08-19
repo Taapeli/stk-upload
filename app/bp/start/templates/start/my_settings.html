@@ -80,11 +80,11 @@ table.transparent tbody tr td {
 
     {% if batches %}
     <div class="startbox2">
-        <h3>{{ _('Data Batches') }}</h3>
-        <p>{{ _('The amount of different data nodes connected directly to your candidate data batches.') }}
+        <h3>{{ _('Candidate Materials') }}</h3>
+        <p>{{ _('The amount of some data nodes included in your candidate data batches.') }}
         <table width="100%">
         <tr>{% set w = (100.0 / (labels|length + 3) | round(0,'floor')) | int %}
-            <th>{{ _('Batch') }}</th>
+            <th>{{ _('Batch id') }}</th>
             {% for label in labels %}<th style="width:{{w}}%">{{label}}</th>{% endfor %}
         </tr>
         {% for key1,item in batches.items() %}
@@ -99,7 +99,7 @@ table.transparent tbody tr td {
         {% endfor %}
         </table>
         <p class="goto">
-            &rtrif; <a href="/gramps">{{ _('Upload or remove a file or batch') }}</a>
+            &rtrif; <a href="/gramps">{{ _('Upload or remove a file or candidate batch') }}</a>
         </p>
     </div>
     {% else %}
@@ -126,7 +126,8 @@ table.transparent tbody tr td {
                        <td class="gedcom-name">{{ file.name }}</td>
                        <td>{% if file.metadata.upload_time %}
                            {% set date = file.metadata.upload_time.split() %}
-                           {{ date[1] }}
+                           {% set d = date[1].split('-') %}
+                           {{d[2]}}.{{d[1]}}.{{d[0]}}
                        {% endif %}</td>
                        <td class="right">{{ file.metadata.size }}</td>
                        <td colspan="4">{{ file.metadata.desc|escape }}</td>

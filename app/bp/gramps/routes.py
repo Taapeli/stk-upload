@@ -124,5 +124,3 @@ def batch_delete(batch_id):
     flash(_("Batch id %(batch_id)s has been deleted", batch_id=batch_id), 'info')
     referrer = request.headers.get("Referer")                               
     return redirect(referrer)
-                               
-                               
