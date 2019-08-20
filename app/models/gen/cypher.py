@@ -314,6 +314,7 @@ OPTIONAL MATCH (f) -[:CHILD]- (pc:Person)
 WITH f, r, pp, np, pbe, pde, pc, nc, cbe, cde ORDER BY cbe.date1
     OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event) // {type:"Marriage"})-[:PLACE]->(p:Place)
         OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
+    OPTIONAL MATCH (f) -[:CITATION]-> (fc:Citation) -[:SOURCE]-> (fs:Source)-[:REPOSITORY]-> (fre:Repository)
     OPTIONAL MATCH (fe) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
     OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
 RETURN f, 
@@ -321,7 +322,7 @@ RETURN f,
     COLLECT(DISTINCT [r.role, pp, np, pbe, pde]) AS parent, 
     COLLECT(DISTINCT [pc, nc, cbe, cde]) AS child, 
     // COUNT(DISTINCT pc) AS no_of_children,
-    COLLECT(DISTINCT [re, s, c]) AS sources,
+    COLLECT(DISTINCT [re, s, c]) + COLLECT(DISTINCT [fre, fs, fc]) AS sources,
     COLLECT(DISTINCT note) AS note"""
     
     #TODO Obsolete

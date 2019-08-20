@@ -93,8 +93,8 @@ td { padding-right:1em;}
             <table>
             {% for data in family.sources %}
          		<tr><td>{{ data[0] }}: 
-         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>,
-         		{{ _("Page") }}: {{ data[3] }}</td></tr>
+         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>, {{ data[3] }}, {{ data[4] }}
+         		{{ _("Page") }}: {{ data[5] }}</td></tr>
             {% endfor %}
             </table><br>
 		{% endif %}
