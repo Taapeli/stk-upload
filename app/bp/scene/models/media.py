@@ -37,9 +37,10 @@ def get_fullname(uuid):
     m = rec['m']
     batch_id = m['batch_id']
     src = m['src']
+    mimetype = m['mime']
     media_files_folder = get_media_files_folder(batch_id)
     fullname = os.path.join(media_files_folder,src)
-    return fullname
+    return fullname,mimetype
 
 def get_thumbname(uuid):
     rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",uuid=uuid).single()
