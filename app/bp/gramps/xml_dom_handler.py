@@ -386,6 +386,12 @@ class DOM_handler():
                     family_noteref = family.getElementsByTagName('noteref')[i]
                     if family_noteref.hasAttribute("hlink"):
                         f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
+                        
+            if len(family.getElementsByTagName('citationref') ) >= 1:
+                for i in range(len(family.getElementsByTagName('citationref') )):
+                    family_citationref = family.getElementsByTagName('citationref')[i]
+                    if family_citationref.hasAttribute("hlink"):
+                        f.citationref_hlink.append(family_citationref.getAttribute("hlink"))
 
             # print(f"# save Family {f}")
             f.save(self.tx, self.batch_id)
@@ -545,6 +551,12 @@ class DOM_handler():
                     elif len(person_name.getElementsByTagName('suffix') ) > 1:
                         self.blog.log_event({'title':"More than one suffix in a person",
                                              'level':"WARNING", 'count':p.id})
+
+                    if len(person_name.getElementsByTagName('citationref') ) >= 1:
+                        for i in range(len(person_name.getElementsByTagName('citationref') )):
+                            person_name_citationref = person_name.getElementsByTagName('citationref')[i]
+                            if person_name_citationref.hasAttribute("hlink"):
+                                pname.citation_handles.append(person_name_citationref.getAttribute("hlink"))
 
                     p.names.append(pname)
 

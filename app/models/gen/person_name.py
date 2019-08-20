@@ -16,13 +16,14 @@ class Name:
     """ Nimi
 
         Properties:
-                type            str nimen tyyppi
-                order           int name order of Person etc. (from Gramps xml)
-                alt             str muun nimen numero
-                firstname       str etunimi
-                surname         str sukunimi
-                prefix          str etuliite
-                suffix          str patronyymi
+                type                str nimen tyyppi
+                order               int name order of Person etc. (from Gramps xml)
+                alt                 str muun nimen numero
+                firstname           str etunimi
+                surname             str sukunimi
+                prefix              str etuliite
+                suffix              str patronyymi
+                citation_handles    str lähteen viitteet
     """
 
     def __init__(self, givn='', surn='', pref='', suff=''):
@@ -34,6 +35,7 @@ class Name:
         self.surname = surn
         self.prefix = pref
         self.suffix = suff
+        self.citation_handles = []
 
     def __str__(self):
         # Gedcom style key
@@ -82,11 +84,11 @@ class Name:
                 "suffix": self.suffix
             }
             tx.run(Cypher_name.create_as_leaf,
-                   n_attr=n_attr, parent_id=parent_id)
+                   n_attr=n_attr, parent_id=parent_id, citation_handles=self.citation_handles)
         except ConnectionError as err:
             raise SystemExit("Stopped in Name.save: {}".format(err))
         except Exception as err:
-            print("iError (Name.save): {0}".format(err), file=stderr)
+            print("iError (Name.save): {0}".format(err), file=stderr)            
 
 
     @staticmethod

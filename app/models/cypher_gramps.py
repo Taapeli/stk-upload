@@ -173,6 +173,11 @@ MATCH (n:Family) WHERE n.handle=$f_handle
 MATCH (m:Note)   WHERE m.handle=$n_handle
 CREATE (n)-[r:NOTE]->(m)"""
 
+    link_citation = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Citation) WHERE m.handle=$c_handle
+CREATE (n)-[r:CITATION]->(m)"""
+
 
 class Cypher_media_in_batch():
     """ For Media class """

@@ -223,7 +223,10 @@ class Cypher_name():
 CREATE (n:Name) SET n = $n_attr
 WITH n
 MATCH (p:Person)    WHERE ID(p) = $parent_id
-MERGE (p)-[r:NAME]->(n)"""
+MERGE (p)-[r:NAME]->(n)
+WITH n
+match (c:Citation) where c.handle in $citation_handles
+merge (n) -[r:CITATION]-> (c)"""
 
 
 class Cypher_event():
