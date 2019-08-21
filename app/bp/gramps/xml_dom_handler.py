@@ -836,21 +836,6 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
-# 
-#     def make_place_hierarchy(self):
-#         ''' Connect places to the upper place
-#         '''
-# 
-#         print ("***** {} Place hierarchy *****".format(len(self.place_ids)))
-#         t0 = time.time()
-#         hierarchy_count = 0
-# 
-#         for pl in self.place_ids:
-#             hc = dataupdater.make_place_hierarchy_properties(tx=self.tx, place=pl)
-#             hierarchy_count += hc
-# 
-#         self.blog.log_event({'title':"Place hierarchy", 
-#                                 'count':hierarchy_count, 'elapsed':time.time()-t0})
 
     def set_family_sortname_dates(self):
         ''' Set sortnames and dates for each Family in the list self.family_ids.
@@ -872,7 +857,7 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Dates", 
                                 'count':dates_count, 'elapsed':time.time()-t0})
-        self.blog.log_event({'title':"Sorting names", 'count':sortname_count})
+        self.blog.log_event({'title':"Family sorting names", 'count':sortname_count})
         
 
     def set_person_sortname_refnames(self):
@@ -894,7 +879,7 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Refname references", 
                                 'count':refname_count, 'elapsed':time.time()-t0})
-        self.blog.log_event({'title':"Sorting names", 'count':sortname_count})
+        self.blog.log_event({'title':"Person sorting names", 'count':sortname_count})
 
 
     def set_estimated_person_dates(self):

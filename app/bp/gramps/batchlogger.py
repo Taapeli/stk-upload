@@ -131,7 +131,7 @@ class Batch(object):
         if isinstance(obj, Log) and isinstance(obj.elapsed, float):
             self.totaltime += obj.elapsed
             print("# " + str(obj))
-            print('# BatchLogger totaltime={:.6f}'.format(obj.elapsed))
+            #print('# BatchLogger totaltime={:.6f}'.format(obj.elapsed))
         return None
 
     def list(self):
@@ -173,6 +173,5 @@ class Log():
             c = self.count
         if self.elapsed:
             e = "{:.4f}".format(self.elapsed)
-        else:
-            e = ""
-        return f"{self.level} {self.title}: {c} / {e} sek"
+            return f"{self.level} {self.title}: {c} / {e} sek"
+        return f"{self.level} {self.title}: {c}"

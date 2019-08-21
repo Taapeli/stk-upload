@@ -20,8 +20,9 @@ u { color: DarkKhaki; text-decoration: none; }
             <div class="thumbnail" style="border: solid lightgray 1px; padding: 5px; text-align: center;">
                 <img alt="({{ _('Photo') }})" 
                      src="/scene/thumbnail?id={{obj[person.media_ref[0]].uuid}}" />
-                <div style="text-color:ligthgray">{{obj[person.media_ref[0]].description}}</div>
-                <div style="font-size:6pt;text-color:ligthgray">"thumbnail?id={{obj[person.media_ref[0]].uuid}}"</div>
+                <div style="text-color:ligthgray;word-break: break-all;">
+                    {{obj[person.media_ref[0]].description}}</div>
+                <!-- {{obj[person.media_ref[0]].uuid}} -->
             </div>
         </div>{% endif %}
 
@@ -221,8 +222,9 @@ u { color: DarkKhaki; text-decoration: none; }
             <div class="thumbnail" style="border: solid lightgray 1px; padding: 5px; text-align: center;">
                 <img alt="({{ _('Photo') }})" 
                      src="/scene/thumbnail?id={{obj[ref].uuid}}" />
-                <div style="text-color:ligthgray">{{obj[ref].description}}</div>
-                <div style="font-size:6pt;text-color:ligthgray">"/scene/thumbnail?id={{obj[ref].uuid}}"</div>
+                <div style="word-break: break-all;">
+                    {{obj[ref].description}}</div>
+                <!-- {{obj[ref].uuid}}  -->
             </div>
 {#          <div class="thumbnail">
                 <img alt="{{ _('image') }}" 
