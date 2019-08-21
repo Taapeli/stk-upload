@@ -1320,7 +1320,7 @@ msgstr "Statistik"
 #: bp/gedcom/templates/gedcom_info.html:58
 #: bp/gramps/templates/gramps/uploads.html:113
 msgid "Upload time"
-msgstr "Uppladdnings tid"
+msgstr "Uppladdad"
 
 #: bp/gedcom/templates/gedcom_info.html:63
 msgid "File size"
