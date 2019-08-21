@@ -22,17 +22,18 @@ class Family_combo(Family):
         Properties:
                 handle          
                 change
-                id              esim. "F0001"
-                uniq_id         int database key
-                rel_type        str suhteen tyyppi
-                father          Person isä (isän osoite?)
-                mother          Person äiti (äidin osoite?)
-                children[]      [Person,] lapset (lasten osoitteet?)
+                id                  esim. "F0001"
+                uniq_id             int database key
+                rel_type            str suhteen tyyppi
+                father              Person isä (isän osoite?)
+                mother              Person äiti (äidin osoite?)
+                children[]          [Person,] lapset (lasten osoitteet?)
             #TODO: Obsolete properties?
-                eventref_hlink  str tapahtuman osoite
-                eventref_role   str tapahtuman rooli
-                childref_hlink  str lapsen osoite
-                noteref_hlink   str lisätiedon osoite
+                eventref_hlink      str tapahtuman osoite
+                eventref_role       str tapahtuman rooli
+                childref_hlink      str lapsen osoite
+                noteref_hlink       str lisätiedon osoite
+                citationref_hlink   str lisätiedon osoite
      """
 
     def __init__(self, uniq_id=None):
@@ -42,18 +43,19 @@ class Family_combo(Family):
 
         self.father = None
         self.mother = None
-        self.children = []      # Child object
-        self.events = []        # Event objects
+        self.children = []          # Child object
+        self.events = []            # Event objects
         self.notes = []
         self.sources = []
-        self.note_ref = []      # For a page, where same note may be referenced
-                                # from multiple events and other objects
+        self.note_ref = []          # For a page, where same note may be referenced
+                                    # from multiple events and other objects
 
         #TODO Obsolete parameters???
         self.eventref_hlink = []
         self.eventref_role = []
         self.childref_hlink = []    # handles
         self.noteref_hlink = []
+        self.citationref_hlink = []
 
 
     @staticmethod

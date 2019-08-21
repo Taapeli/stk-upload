@@ -214,6 +214,11 @@ def create_lock_constraint():
         "create constraint on (l:Lock) assert l.id is unique"
     )
 
+def create_uuid_constraint():
+    # can be created multiple times!
+    shareds.driver.session().run( 
+        "create constraint on (m:Media) assert m.uuid is unique"
+    )
 
 def initialize_db(): 
     if not roles_exist():
@@ -226,6 +231,7 @@ def initialize_db():
         create_allowed_email_constraints()
 
     create_lock_constraint()
+    create_uuid_constraint()
 
     # Fix chaanged schema
     do_schema_fixes()

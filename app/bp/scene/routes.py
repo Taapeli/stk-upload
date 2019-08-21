@@ -346,13 +346,13 @@ def show_source_page(sourceid):
     return render_template("/scene/source_events.html",
                            source=source, citations=citations)
 
-@bp.route('/scene/media')
-def fetch_media():
+@bp.route('/scene/media/<fname>')
+def fetch_media(fname):
     """ Fetch media file, assumes jpg, fix later...
     """
     uuid = request.args.get("id")
-    fullname = media.get_fullname(uuid)
-    return send_file(fullname, mimetype='image/jpg')        
+    fullname, mimetype = media.get_fullname(uuid)
+    return send_file(fullname, mimetype=mimetype)        
 
 @bp.route('/scene/thumbnail')
 def fetch_thumbnail():
@@ -361,6 +361,6 @@ def fetch_thumbnail():
     uuid = request.args.get("id")
     thumbname = media.get_thumbname(uuid) 
     print(thumbname)
-    return send_file(thumbname, mimetype='image/jpg')        
+    return send_file(thumbname, mimetype='image/jpg')
 
 

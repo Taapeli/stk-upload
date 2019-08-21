@@ -10,6 +10,7 @@ from models.gen.cypher import Cypher_media
 import shareds
 import traceback
 import uuid
+import os
 
 class Media:
     """ Tallenne
@@ -54,6 +55,10 @@ class Media:
         n.description = node['description'] or ''
         n.src = node['src'] or ''
         n.mime = node['mime'] or ''
+        if n.src:
+            n.name = os.path.split(n.src)[1]
+        else:
+            n.name = ""
         return n
 
     @staticmethod

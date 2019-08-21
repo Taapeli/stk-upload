@@ -201,7 +201,7 @@
 		
 		        <tr>
 		        {% for photo in photos %}
-	                <td><a href="media?id={{photo.uuid}}">
+	                <td><a href="media/{{photo.name}}?id={{photo.uuid}}">
 		                	<img alt="{{ _('Picture') }}" src="thumbnail?id={{photo.uuid}}" />
 	                	</a>
 		        {% endfor %}

@@ -64,7 +64,8 @@ td { padding-right:1em;}
         <h3>{{ _("Children") }}</h3>
         <div id="summaryarea">
             <table style="margin-top:1em;"><tbody>
-        {% for p in family.children|sort(attribute='event_birth.dates') %}
+        <!-- |sort(attribute='event_birth.dates') -->
+        {% for p in family.children %}
                 <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
                     <td class="Value"><span class="id">{{p.id}}</span>
                         <a href="/scene/person={{p.uniq_id}}" class="inlink">
@@ -92,8 +93,8 @@ td { padding-right:1em;}
             <table>
             {% for data in family.sources %}
          		<tr><td>{{ data[0] }}: 
-         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>,
-         		{{ _("Page") }}: {{ data[3] }}</td></tr>
+         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>, {{ data[3] }}, {{ data[4] }}
+         		{{ _("Page") }}: {{ data[5] }}</td></tr>
             {% endfor %}
             </table><br>
 		{% endif %}
