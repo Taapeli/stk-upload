@@ -89,6 +89,8 @@ def translate(term, var_name, lang="fi"):
             "Myyjä": _("Myyjä"), #"myyjänä"
             "father": _("Mies"), 
             "mother": _("Vaimo"),
+            "man": _("Mies"), 
+            "wife": _("Vaimo"),
             "Unknown": _("Unknown role") #"määräämätön"
         }
     elif var_name == "conf":

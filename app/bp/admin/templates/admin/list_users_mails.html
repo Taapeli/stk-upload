@@ -128,7 +128,7 @@ $(document).ready( function() {
 
     <div>
           <div id="pending" style="display: inline-block;">
-            <h3>{{ _('Pending user candidates') }}</h3>
+            <h3>{{ _('Users and user candidates') }}</h3>
             <table class="table100">
                 <tr>{{ _('<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>') }}
                 </tr>
@@ -139,7 +139,8 @@ $(document).ready( function() {
                         <td>{{e.default_role}}</td>
                         <td>{{e.creator}}</td>
                         <td>{{e.created_at | isodatetime}}</td>
-                        <td>{{e.confirmed_at | isodatetime}}</td>
+                        <td>{% if e.confirmed_at %}{{e.confirmed_at | isodatetime}}{% else %}
+                            <i>{{ _('Pending') }}</i>{% endif %}</td>
                     </tr>
                 {% endfor %}
             {% else %}
