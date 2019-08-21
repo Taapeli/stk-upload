@@ -44,15 +44,17 @@ def get_fullname(uuid):
 
 def get_thumbname(uuid):
     rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",uuid=uuid).single()
-    m = rec['m']
-    batch_id = m['batch_id']
-    src = m['src']
-    media_thumbnails_folder = get_media_thumbnails_folder(batch_id)
-    thumbname = os.path.join(media_thumbnails_folder,src)
-    if not os.path.exists(thumbname):
-        media_files_folder = get_media_files_folder(batch_id)
-        fname = os.path.join(media_files_folder,src)
-        thumbdir, _x = os.path.split(thumbname)
-        os.makedirs(thumbdir, exist_ok=True)
-        make_thumbnail(fname,thumbname)
-    return thumbname
+    if rec:
+        m = rec['m']
+        batch_id = m['batch_id']
+        src = m['src']
+        media_thumbnails_folder = get_media_thumbnails_folder(batch_id)
+        thumbname = os.path.join(media_thumbnails_folder,src)
+        if not os.path.exists(thumbname):
+            media_files_folder = get_media_files_folder(batch_id)
+            fname = os.path.join(media_files_folder,src)
+            thumbdir, _x = os.path.split(thumbname)
+            os.makedirs(thumbdir, exist_ok=True)
+            make_thumbnail(fname,thumbname)
+        return thumbname
+    return ""
