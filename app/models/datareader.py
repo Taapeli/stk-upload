@@ -855,9 +855,9 @@ def get_baptism_data(uniq_id):
     e.get_event_combo()
 
     if e.place_ref:
-        place = Place()
+        place = Place_combo()
         place.uniq_id = e.place_ref[0]
-        place.read_w_notes()
+        place.get_w_notes(place.uniq_id)
         # Location / place data
         e.location = place.pname
         e.locid = place.uniq_id
