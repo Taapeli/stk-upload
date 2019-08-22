@@ -79,7 +79,7 @@ class Person_combo(Person):
         The indexes of referred objects are in variables:
             eventref_hlink[]   int tapahtuman uniq_id, rooli 
             - eventref_role[]  str edellisen rooli
-            media_ref[]        int median uniq_id (previous objref_hlink[])
+            media_ref[]        int median uniq_id (previous objref_hlink[] (!))
             parentin_hlink[]   int vanhempien uniq_id
             noteref_hlink[]    int huomautuksen uniq_id tai handle?
             citation_ref[]     int viittauksen uniq_id    (ent.citationref_hlink)
@@ -336,7 +336,7 @@ RETURN ID(family) AS uniq_id"""
         query = """
             MATCH (person:Person)-[r:MEDIA]->(obj:Media)
                 WHERE ID(person)={}
-                RETURN ID(obj) AS media_ref
+            RETURN ID(obj) AS media_ref ORDER BY r:order
             """.format(self.uniq_id)
         return  shareds.driver.session().run(query)
 

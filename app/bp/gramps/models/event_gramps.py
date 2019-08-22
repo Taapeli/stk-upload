@@ -70,7 +70,7 @@ class Event_gramps(Event):
         self.citation_handles = []  # (previous citationref_hlink)
 
         self.place_hlink = ''
-        self.objref_hlink = ''
+        self.media_handles = []
 
         self.citations = []   # For creating display sets
         self.names = []   # For creating display sets
@@ -140,10 +140,12 @@ class Event_gramps(Event):
             print("iError: Event_link_citations: {0}".format(err), file=stderr)
 
         try:
-            # Make relation to the Media node
-            if self.objref_hlink != '':
+            # Make relation to the Media nodes
+            order = 1
+            for handle in self.media_handles:
                 tx.run(Cypher_event_w_handle.link_media, 
-                       handle=self.handle, objref_hlink=self.objref_hlink)
+                       handle=self.handle, m_handle=handle, order=order)
+                order =+ 1
         except Exception as err:
             print("iError: Event_link_media: {0}".format(err), file=stderr)
             

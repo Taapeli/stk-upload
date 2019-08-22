@@ -299,13 +299,9 @@ class DOM_handler():
                 if ref.hasAttribute("hlink"):
                     e.citation_handles.append(ref.getAttribute("hlink"))
 
-            if len(event.getElementsByTagName('objref') ) == 1:
-                event_objref = event.getElementsByTagName('objref')[0]
-                if event_objref.hasAttribute("hlink"):
-                    e.objref_hlink = event_objref.getAttribute("hlink")
-            elif len(event.getElementsByTagName('objref') ) > 1:
-                self.blog.log_event({'title':"More than one objref tag in an event",
-                                     'level':"WARNING", 'count':e.id})
+            for ref in event.getElementsByTagName('objref'):
+                if ref.hasAttribute("hlink"):
+                    e.media_handles.append(ref.getAttribute("hlink"))
 
             try:
                 e.save(self.tx)
@@ -509,70 +505,65 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one gender in a person",
                                      'level':"WARNING", 'count':p.id})
 
-            if len(person.getElementsByTagName('name') ) >= 1:
-                for i in range(len(person.getElementsByTagName('name') )):
-                    person_name = person.getElementsByTagName('name')[i]
-                    pname = Name()
-                    pname.order = name_order
-                    name_order += 1
+            for person_name in person.getElementsByTagName('name'):
+                pname = Name()
+                pname.order = name_order
+                name_order += 1
 
-                    if person_name.hasAttribute("alt"):
-                        pname.alt = person_name.getAttribute("alt")
-                    if person_name.hasAttribute("type"):
-                        pname.type = person_name.getAttribute("type")
+                if person_name.hasAttribute("alt"):
+                    pname.alt = person_name.getAttribute("alt")
+                if person_name.hasAttribute("type"):
+                    pname.type = person_name.getAttribute("type")
 
-                    if len(person_name.getElementsByTagName('first') ) == 1:
-                        person_first = person_name.getElementsByTagName('first')[0]
-                        if len(person_first.childNodes) == 1:
-                            pname.firstname = person_first.childNodes[0].data
-                        elif len(person_first.childNodes) > 1:
-                            self.blog.log_event({'title':"More than one child node in a first name of a person",
-                                                'level':"WARNING", 'count':p.id})
-                    elif len(person_name.getElementsByTagName('first') ) > 1:
-                        self.blog.log_event({'title':"More than one first name in a person",
+                if len(person_name.getElementsByTagName('first') ) == 1:
+                    person_first = person_name.getElementsByTagName('first')[0]
+                    if len(person_first.childNodes) == 1:
+                        pname.firstname = person_first.childNodes[0].data
+                    elif len(person_first.childNodes) > 1:
+                        self.blog.log_event({'title':"More than one child node in a first name of a person",
+                                            'level':"WARNING", 'count':p.id})
+                elif len(person_name.getElementsByTagName('first') ) > 1:
+                    self.blog.log_event({'title':"More than one first name in a person",
+                                         'level':"WARNING", 'count':p.id})
+
+                if len(person_name.getElementsByTagName('surname') ) == 1:
+                    person_surname = person_name.getElementsByTagName('surname')[0]
+                    if person_surname.hasAttribute("prefix"):
+                        pname.prefix = person_surname.getAttribute("prefix")
+                    if len(person_surname.childNodes ) == 1:
+                        pname.surname = person_surname.childNodes[0].data
+                    elif len(person_surname.childNodes) > 1:
+                        self.blog.log_event({'title':"More than one child node in a surname of a person",
                                              'level':"WARNING", 'count':p.id})
+                elif len(person_name.getElementsByTagName('surname') ) > 1:
+                    self.blog.log_event({'title':"More than one surname in a person",
+                                         'level':"WARNING", 'count':p.id})
 
-                    if len(person_name.getElementsByTagName('surname') ) == 1:
-                        person_surname = person_name.getElementsByTagName('surname')[0]
-                        if person_surname.hasAttribute("prefix"):
-                            pname.prefix = person_surname.getAttribute("prefix")
-                        if len(person_surname.childNodes ) == 1:
-                            pname.surname = person_surname.childNodes[0].data
-                        elif len(person_surname.childNodes) > 1:
-                            self.blog.log_event({'title':"More than one child node in a surname of a person",
-                                                 'level':"WARNING", 'count':p.id})
-                    elif len(person_name.getElementsByTagName('surname') ) > 1:
-                        self.blog.log_event({'title':"More than one surname in a person",
-                                             'level':"WARNING", 'count':p.id})
+                if len(person_name.getElementsByTagName('suffix') ) == 1:
+                    person_suffix = person_name.getElementsByTagName('suffix')[0]
+                    pname.suffix = person_suffix.childNodes[0].data
+                elif len(person_name.getElementsByTagName('suffix') ) > 1:
+                    self.blog.log_event({'title':"More than one suffix in a person",
+                                         'level':"WARNING", 'count':p.id})
 
-                    if len(person_name.getElementsByTagName('suffix') ) == 1:
-                        person_suffix = person_name.getElementsByTagName('suffix')[0]
-                        pname.suffix = person_suffix.childNodes[0].data
-                    elif len(person_name.getElementsByTagName('suffix') ) > 1:
-                        self.blog.log_event({'title':"More than one suffix in a person",
-                                             'level':"WARNING", 'count':p.id})
+                if len(person_name.getElementsByTagName('citationref') ) >= 1:
+                    for i in range(len(person_name.getElementsByTagName('citationref') )):
+                        person_name_citationref = person_name.getElementsByTagName('citationref')[i]
+                        if person_name_citationref.hasAttribute("hlink"):
+                            pname.citation_handles.append(person_name_citationref.getAttribute("hlink"))
 
-                    if len(person_name.getElementsByTagName('citationref') ) >= 1:
-                        for i in range(len(person_name.getElementsByTagName('citationref') )):
-                            person_name_citationref = person_name.getElementsByTagName('citationref')[i]
-                            if person_name_citationref.hasAttribute("hlink"):
-                                pname.citation_handles.append(person_name_citationref.getAttribute("hlink"))
+                p.names.append(pname)
 
-                    p.names.append(pname)
+#TODO Muuttaisiko p.eventref_hlink = (hlink, role). Nyt voisi mennä epätahtiin
+            for person_eventref in person.getElementsByTagName('eventref'):
+                if person_eventref.hasAttribute("hlink"):
+                    p.eventref_hlink.append(person_eventref.getAttribute("hlink"))
+                if person_eventref.hasAttribute("role"):
+                    p.eventref_role.append(person_eventref.getAttribute("role"))
 
-            if len(person.getElementsByTagName('eventref') ) >= 1:
-                for i in range(len(person.getElementsByTagName('eventref') )):
-                    person_eventref = person.getElementsByTagName('eventref')[i]
-                    if person_eventref.hasAttribute("hlink"):
-                        p.eventref_hlink.append(person_eventref.getAttribute("hlink"))
-                    if person_eventref.hasAttribute("role"):
-                        p.eventref_role.append(person_eventref.getAttribute("role"))
-
-            if len(person.getElementsByTagName('objref') ) >= 1:
-                for i in range(len(person.getElementsByTagName('objref') )):
-                    person_objref = person.getElementsByTagName('objref')[i]
-                    if person_objref.hasAttribute("hlink"):
-                        p.objref_hlink.append(person_objref.getAttribute("hlink"))
+            for person_objref in person.getElementsByTagName('objref'):
+                if person_objref.hasAttribute("hlink"):
+                    p.media_handles.append(person_objref.getAttribute("hlink"))
 
             for person_url in person.getElementsByTagName('url'):
                 n = Note()
@@ -586,23 +577,17 @@ class DOM_handler():
                 if n.url:
                     p.notes.append(n)
 
-            if len(person.getElementsByTagName('parentin') ) >= 1:
-                for i in range(len(person.getElementsByTagName('parentin') )):
-                    person_parentin = person.getElementsByTagName('parentin')[i]
-                    if person_parentin.hasAttribute("hlink"):
-                        p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
-                        
-            if len(person.getElementsByTagName('noteref') ) >= 1:
-                for i in range(len(person.getElementsByTagName('noteref') )):
-                    person_noteref = person.getElementsByTagName('noteref')[i]
-                    if person_noteref.hasAttribute("hlink"):
-                        p.noteref_hlink.append(person_noteref.getAttribute("hlink"))
+            for person_parentin in person.getElementsByTagName('parentin'):
+                if person_parentin.hasAttribute("hlink"):
+                    p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
 
-            if len(person.getElementsByTagName('citationref') ) >= 1:
-                for i in range(len(person.getElementsByTagName('citationref') )):
-                    person_citationref = person.getElementsByTagName('citationref')[i]
-                    if person_citationref.hasAttribute("hlink"):
-                        p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
+            for person_noteref in person.getElementsByTagName('noteref'):
+                if person_noteref.hasAttribute("hlink"):
+                    p.noteref_hlink.append(person_noteref.getAttribute("hlink"))
+
+            for person_citationref in person.getElementsByTagName('citationref'):
+                if person_citationref.hasAttribute("hlink"):
+                    p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
 
             p.save(self.tx, self.batch_id)
             counter += 1

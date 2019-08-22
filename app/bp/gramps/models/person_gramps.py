@@ -48,7 +48,7 @@ class Person_gramps(Person):
         The handles of referred objects are in variables:
             eventref_hlink[]    str tapahtuman handle
             - eventref_role[]   str edellisen rooli
-            objref_hlink[]      str median handle
+            media_handles[]     str median handle          (ent. objref_hlink)
             parentin_hlink[]    str vanhempien uniq_id
             noteref_hlink[]     str huomautuksen uniq_id
             citationref_hlink[] str viittauksen uniq_id    (ent.citationref_hlink)
@@ -66,7 +66,7 @@ class Person_gramps(Person):
         # Gramps handles (and roles)
         self.eventref_hlink = []        # handles of Events
         self.eventref_role = []         # ... and roles
-        self.objref_hlink = []          # handles of Media
+        self.media_handles = []          # handles of Media (prev. objref_hlink)
         self.parentin_hlink = []        # handle for parent family
         self.noteref_hlink = []         # 
         self.citationref_hlink = []     # models.gen.citation.Citation
@@ -134,26 +134,6 @@ class Person_gramps(Person):
         if self.notes:
             Note.save_note_list(tx, self)
 
-#         if len(self.events) > 0:
-#             # Make Event relations (if Events were stored in self.events)
-#             # TODO: onkohan tämä käytössä? Ei ainakaan gramps-latauksessa
-#             ''' Create and connect to an Person.event[*] '''
-#             for e in self.events:
-#                 if handles:
-#                     e.handle = handles.pop()
-#                 e_attr = {
-#                     "handle": e.handle,
-#                     "id": e.id,
-#                     "name": e.name, # "e_type": e.tyyppi,
-#                     "date": e.date,
-#                     "descr": e.description
-#                 }
-#                 try:
-#                     tx.run(Cypher_person_w_handle.link_event_embedded, 
-#                            p_handle=self.handle, e_attr=e_attr, role="osallistuja")
-#                 except Exception as err:
-#                     print("Virhe: Person.save event: {0} attr={1}".format(err, e_attr), file=stderr)
-
         ''' Connect to each Event loaded from Gramps '''
         try:
             for i in range(len(self.eventref_hlink)):
@@ -165,10 +145,13 @@ class Person_gramps(Person):
             print("iError: Person.save events: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Media nodes
+        # The order of medias is stored in MEDIA link
         try:
-            for handle in self.objref_hlink:
+            order = 0
+            for handle in self.media_handles:
                 tx.run(Cypher_person_w_handle.link_media, 
-                       p_handle=self.handle, m_handle=handle)
+                       p_handle=self.handle, m_handle=handle, order=order)
+                order =+ 1
         except Exception as err:
             print("iError: Person.save medias: {0} {1}".format(err, self.id), file=stderr)
 

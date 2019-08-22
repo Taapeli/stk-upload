@@ -125,8 +125,8 @@ with c
 
     link_media = """
 MATCH (n:Event) WHERE n.handle=$handle
-MATCH (m:Media) WHERE m.handle=$objref_hlink
-MERGE (n)-[r:MEDIA]->(m)"""
+MATCH (m:Media) WHERE m.handle=$m_handle
+MERGE (p) -[r:MEDIA {order:$order}]-> (m)"""
 
 
 class Cypher_family_w_handle():
@@ -276,7 +276,7 @@ MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
     link_media = """
 MATCH (p:Person {handle: $p_handle})
 MATCH (m:Media  {handle: $m_handle})
-MERGE (p) -[r:MEDIA]-> (m)"""
+MERGE (p) -[r:MEDIA {order:$order}]-> (m)"""
 
 # use models.gen.cypher.Cypher_name (there is no handle)
 

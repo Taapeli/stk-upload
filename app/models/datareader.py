@@ -748,11 +748,11 @@ def get_person_data_by_id(uniq_id):
                                  s.stitle, s.sauthor, s.spubinfo, r.uniq_id, r.rname))
                     citations.append(c)
 
-    for link in p.media_ref:
+    for uniq_id in p.media_ref:
         #o = Media()
-        #o.uniq_id = link
+        #o.uniq_id = uniq_id
         #o.get_data()
-        o = Media.from_uniq_id(link)
+        o = Media.from_uniq_id(uniq_id)
         photos.append(o)
 
     # Families
