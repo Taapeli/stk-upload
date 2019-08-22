@@ -393,8 +393,8 @@ def api_v1_search():
 
 @bp.route('/api/v1/record', methods=['GET'])
 def api_v1_record():
-    id = request.args.get("id")
-    if not id: return jsonify(dict(
+    rid = request.args.get("id")
+    if not rid: return jsonify(dict(
             status="Error",
             statusText="Missing argument 'id'",
         ))
@@ -405,12 +405,12 @@ def api_v1_record():
 
 @bp.route('/api/v1/record_with_subs', methods=['GET'])
 def api_v1_record_with_subs():
-    id = request.args.get("id")
-    if not id: return jsonify(dict(
+    rid = request.args.get("id")
+    if not rid: return jsonify(dict(
             status="Error",
             statusText="Missing argument 'id'",
         ))
-    rsp = api.record_with_subs(id) 
+    rsp = api.record_with_subs(rid) 
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 

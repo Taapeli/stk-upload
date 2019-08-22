@@ -6,7 +6,7 @@ Created on 16.10.2017
 '''
 
 from datetime import date
-from flask_security.utils import _
+#from flask_security.utils import _
 from flask_babelex import lazy_gettext as _l
 
 DR = {

@@ -8,7 +8,7 @@ from sys import stderr
 from models.cypher_gramps import Cypher_media_in_batch
 from models.gen.cypher import Cypher_media
 import shareds
-import traceback
+#import traceback
 import uuid
 import os
 

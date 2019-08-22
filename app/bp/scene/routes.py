@@ -4,7 +4,7 @@ Created on 12.8.2018
 @author: jm
 '''
 import logging 
-import os
+#import os
 from flask import send_file
 from bp.scene.models import media
 logger = logging.getLogger('stkserver')

@@ -228,7 +228,7 @@ class Analyzer(transformer.Transformation):
         
         taglist = gedcom_grammar_data2.data.get(path)
         if taglist:
-            for (tag,(mincount,maxcount)) in taglist:
+            for (tag,(_mincount,maxcount)) in taglist:
                 count = 0
                 for c in item.children:
                     if c.tag == tag: count += 1
