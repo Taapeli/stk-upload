@@ -169,7 +169,7 @@ def update_allowed_email(email):
                 creator = form.creator.data)
 #                 created_at = form.created.data,
 #                 confirmed_at = form.confirmed_at.data) 
-        updated_allowed_email = UserAdmin.update_allowed_email(allowed_email)
+        _updated_allowed_email = UserAdmin.update_allowed_email(allowed_email)
         flash(_("Allowed email updated"))
         return redirect(url_for("admin.update_allowed_email", email=form.email.data))
 

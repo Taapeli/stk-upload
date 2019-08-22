@@ -3,7 +3,7 @@
 Tries to recognize place names and order them correctly
 """
 import sys
-import os
+#import os
 
 from flask_babelex import _
 
