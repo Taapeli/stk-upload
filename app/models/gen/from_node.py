@@ -10,7 +10,7 @@ from .media import Media
 from .note import Note
 from .person_combo import Person_combo
 from .person_name import Name
-from .place import Place, Place_name
+from .place import Place_name
 from .repository import Repository
 from .source import Source
 from models.gen.place_combo import Place_combo

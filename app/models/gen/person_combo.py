@@ -334,22 +334,20 @@ RETURN ID(family) AS uniq_id"""
         """ Luetaan henkilöön liittyvien medioiden id:t. """
 
         query = """
-            MATCH (person:Person)-[r:MEDIA]->(obj:Media)
-                WHERE ID(person)={}
-            RETURN ID(obj) AS media_ref ORDER BY r:order
-            """.format(self.uniq_id)
-        return  shareds.driver.session().run(query)
+MATCH (person:Person)-[r:MEDIA]->(obj:Media)
+    WHERE ID(person)=$uid
+RETURN ID(obj) AS media_ref ORDER BY r.order"""
+        return  shareds.driver.session().run(query, uid=self.uniq_id)
 
 
     def get_parentin_id(self):
         """ Luetaan henkilön syntymäperheen id """
 
         query = """
-            MATCH (person:Person)<-[r:CHILD]-(family:Family)
-                WHERE ID(person)={}
-                RETURN ID(family) AS family_ref
-            """.format(self.uniq_id)
-        return  shareds.driver.session().run(query)
+MATCH (person:Person)<-[r:CHILD]-(family:Family)
+    WHERE ID(person)=$uid
+RETURN ID(family) AS family_ref"""
+        return  shareds.driver.session().run(query, uid=self.uniq_id)
 
 
     def get_person_and_name_data_by_id(self):

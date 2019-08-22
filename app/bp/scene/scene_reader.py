@@ -138,8 +138,10 @@ def get_a_person_for_display_apoc(uniq_id, user):
                 src_obj = objs[src_node.id]
 
             rel_type = relation[1]
-            role = relation[2]
-            if role:    r = ' '.join(relation[1:3])
+            role = relation[2].get('role', "")
+            order = relation[2].get('order', None)
+            if role:            r = f"{relation[1]} {role} {relation[3]}"
+            elif order != None: r = f"{relation[1]} nr.{order} {relation[3]}"
             else:       r = relation[1]
             print("relation ({} {}) -[{}]-> ({} {})".format(src_node.id, src_label, r, target_node.id, target_label))
             # Source object, for ex. Person_combo
@@ -257,6 +259,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
             .place_ref[]
             .note_ref[]
             .citation_ref[]
+            #TODO: .media_ref[]
         Family_combo
              children[]
             .father, .mother, .children[]
@@ -295,6 +298,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
             src.note_ref.append(target.uniq_id)
             return None
         if target_class == 'Media':
+            # TODO Noudata medioiden järjestystä!
             src.media_ref.append(target.uniq_id)
             return None
 
@@ -327,6 +331,10 @@ def connect_object_as_leaf(src, target, rel_type=None):
             return src.uppers[-1]
         if target_class == 'Note':
             src.note_ref.append(target.uniq_id)
+            return None
+        if target_class == 'Media':
+            # TODO Noudata medioiden järjestystä!
+            src.media_ref.append(target.uniq_id)
             return None
 
     elif src_class == 'Family_combo':

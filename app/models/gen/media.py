@@ -45,7 +45,7 @@ class Media(NodeObject):
             'id': 'O0005', 'src': 'Sukututkimusdata/Sibelius/katarina_borg.gif', 
             'mime': 'image/gif', 'change': 1524411014}>
         '''
-        n = NodeObject.from_node(node)
+        n = super(Media, cls).from_node(node)
 #         n = cls()
 #         n.uniq_id = node.id
 #         n.id = node['id']
