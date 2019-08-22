@@ -1,15 +1,18 @@
 '''
 Created on 22.11.2016
 
-@author: jm
+    Converted from bp.gedcom.transforms.model.person_name_v1.PersonName_v1
+
+@author: jm 4.6.2019
 '''
 
+from flask_babelex import _
 import re
-#import sys
-import logging
-LOG = logging.getLogger(__name__)
+import logging 
+logger = logging.getLogger('stkserver')
 
 from .gedcom_line import GedcomLine
+from ...transformer import Item
 
 _NONAME = 'N'            # Marker for missing name part
 _CHGTAG = "NOTE _orig_"  # Comment: original format
@@ -45,7 +48,7 @@ _BABY = {"vauva":"U", "poikavauva":"M", "tyttövauva":"F",
          "(dotter)":"F", "(flicke)":"F", "(fl.barn)":"U", "(dödf.barn)":"U" }
 
 
-class PersonName(GedcomLine):
+class PersonName(Item):
     '''
     Stores and fixes Gedcom individual name information.
 
@@ -62,85 +65,97 @@ class PersonName(GedcomLine):
        from each of them
     '''
 
-    def __init__(self, gedline):
-        ''' Creates a new instance on person name definition from a '1 NAME' row.
-            The arguments must be a NAME gedcom line with person name.
+    def __init__(self, item):
+        ''' Creates a PersonName instance from a '1 NAME' Item.
         '''
-#       Example: GedLine{
-#         path='@I0001@.NAME'
-#         level=2
-#         tag='NAME'
-#         value='Anders (Antti)/Puupää e. Träskalle/' }
+        try:
+            if item.__class__.__name__ == 'Item':
+                Item.__init__(self, item.line, item.children, item.lines, item.linenum)
+            elif item.__class__.__name__ == 'str':
+                Item.__init__(self, item)
+        except AttributeError:
+                raise RuntimeError("bp.gedcom.transforms.model.person_name.PersonName.__init__: " \
+                                   + f"Invalid Item for PersonName {item}")
+        self.givn = ''
+        self.surn = ''
+        self.nsfx = ''
+        self.nick_name = ''
+        self.call_name = ''
 
-        self.rows = []
-        # is_preferred_name shall carry information, if all descendant rows from input file 
-        # are included in this default name
+        # No default name Item is given
         self.is_preferred_name = False
-        if type(gedline) == GedcomLine:
-            GedcomLine.__init__(self, (gedline.level, gedline.tag, gedline.value))
-        else:
-            GedcomLine.__init__(self, gedline)
         # If any name has a question mark, a NOTE must be written to gedcom
-        self.questionable = '?' in str(gedline)
+        self.questionable = '?' in self.value
         # For ALIA line the tag may be changed later
         self.tag_orig = self.tag
 
 
-    def add_line(self, gedline):
-        ''' Adds a new, descendant row with higher level number to person name structure
+    def process_NAME(self, name_default=None):
+        ''' Analyze and fix a NAME Item.
+        
+            First NAME and then the descendant Items included in the level hierarchy.
 
-        Arguments example:
-            path='@I0002@.NAME'
-            level=2
-            tag='GIVN'
-            value='GIVN Brita Kristiina/'
-        '''
-        self.rows.append(gedline)
+            Attribute name_default may be an NAME Item, who's given name is used
+            in place of a missing givn.
 
-
-    def get_person_rows(self, name_default): 
-        ''' Analyze this NAME and return it's GedcomLines: first NAME and 
-            then the descendant rows in the level hierarchy.
-            Attribute name_default may be a PersonName, 
-            who's given name is used in place of a missing givn.
-
-            The rules about merging original and generated values should be applied here
+            The rules about merging original and generated values are applied here.
             
             #TODO: If there is no '/', don't output givn, surn, ... lines ??
         '''
 
-        ''' 1) Full name parts like 'givn/surn/nsfx' will be isolated and analyzed '''
+        name_item = self
+
+        ''' 1) Full name parts like 'givn/surn/nsfx' will be isolated and analyzed ''' 
         # Split 'ginv/surn/nsfx' from NAME line
         s1 = self.value.find('/')
         s2 = self.value.rfind('/')
-        if s1 >= 0 and s2 >= 0 and s1 != s2:     
+        if s1 >= 0 and s2 >= 0 and s1 != s2: 
             # Contains '.../Surname/...' or even '.../Surname1/Surname2/...' etc
-            self.givn = self.value[:s1].rstrip()
-            self.surn = self.value[s1+1:s2]
-            self.nsfx = self.value[s2+1:]
+            name_item.givn = self.value[:s1].rstrip()
+            name_item.surn = self.value[s1 + 1:s2]
+            name_item.nsfx = self.value[s2 + 1:]
         else:
-            self.givn = ''
-            self.surn = self.value
-            self.nsfx = ''
-            
-        ''' 1.1) GIVN given name part rules '''
-        self._evaluate_givn(name_default)
-        ''' 1.2) nsfx Suffix part: nothing to do? '''
-        pass
-        ''' 1.3) SURN Surname part: pick each surname as a new PersonName
-                 Creates NAME, GIVN, SURN, NSFX rows and their associated lines into self.rows
-        '''
-        ret = []    # List of merged GedcomLines
-        surnames = self._extract_surnames()
-        for pn in surnames:
-            LOG.debug('#' + str(pn))
-            # Merge original and new rows
-            self._create_gedcom_rows(pn)
-            # Collect merged rows
-            ret.extend(pn.rows)
+            name_item.givn = ''
+            name_item.surn = self.value
+            name_item.nsfx = ''
 
-        del self.reported_value
-        return ret
+        ''' 1.1) GIVN given name part rules '''
+        givn_orig = name_item.givn
+        nsfx_orig = name_item.nsfx
+        name_item._evaluate_givn(name_default)
+        if givn_orig != name_item.givn:
+            if name_item.call_name:
+                print(f"##TODO: Store CALL name {name_item.call_name}")
+            elif name_item.nick_name:
+                print(f"##TODO: Store NICK name {name_item.nick_name}")
+            elif nsfx_orig != name_item.nsfx:
+                print(f"##TODO: Store patronyme {name_item.nsfx}")
+            else:
+                print(f"##TODO: '{givn_orig}' != '{name_item.givn}'")
+
+        ''' 1.2) nsfx Suffix part: nothing to do? '''
+
+        ''' 1.3) SURN Surname part: pick each surname as a new PersonName
+             Creates NAME, GIVN, SURN, NSFX rows and their associated lines into name_item.rows
+    '''
+#         ret = [] # List of merged GedcomLines
+        surnames = name_item._extract_surnames()
+        for pn in surnames:
+            logger.debug('#' + str(pn)) # Merge original and new rows
+            #TODO: Create rows for each surname variation
+#             name_item._create_gedcom_rows(pn) # Collect merged rows
+#             ret.extend(pn.rows)
+        
+        del name_item.reported_value
+        return name_item
+
+
+#     def get_person_rows(self, name_default): 
+#         ''' Analyze this NAME and return it's GedcomLines: first NAME and 
+#             then the descendant rows in the level hierarchy.
+#         '''
+#         ret = self.process_NAME(name_default)
+#         return ret
 
     
     def _evaluate_givn(self, name_default=None):
@@ -165,7 +180,7 @@ class PersonName(GedcomLine):
             
             # 1.1a) Find if last givn is actually a patronyme; mark it as new nsfx 
             
-            if (len(gnames) > 0):
+            if len(gnames) > 0:
                 nm = gnames[-1]
                 pn = _match_patronyme(nm)
                 if pn != None:
@@ -202,7 +217,7 @@ class PersonName(GedcomLine):
                 # Use defaults descended GIVN, NDFX, NICK, and _CALL
 #                 print("{} tarkasta: {!r} päteekö etunimi '{}'".\
 #                       format(self.path, self.value, name_default.givn))
-#                 LOG.info("{} tarkasta: {!r} päteekö etunimi '{}'".\
+#                 logger.info("{} tarkasta: {!r} päteekö etunimi '{}'".\
 #                          format(self.path, self.value, name_default.givn))
                 self.givn = name_default.givn
                 if hasattr(name_default, 'nick_name'):
@@ -237,7 +252,7 @@ class PersonName(GedcomLine):
         preferred = self.is_preferred_name
         for prefix, nm, sn_type in self._get_surname_list():
             name = '{}/{}/{}'.format(self.givn, nm.strip(), self.nsfx)
-            pn = PersonName((self.level, 'NAME', name))
+            pn = PersonName(f"{self.level} NAME {name}")    # line, children=None, lines=None, linenum=None
             pn.surn = nm                #TODO: self.surn or nm?
             pn.givn = self.givn
             pn.nsfx = self.nsfx
@@ -282,29 +297,29 @@ class PersonName(GedcomLine):
         known_as = None
         self.reported_value = None
 
-        ''' The Following automate reads surnames and separators from right to left
-            and stores (prefix, name, name_type) tuples to return list ret[] 
-
-            !state \ input !! ','   ! delim ! name  ! end   ! von
-            |--------------++-------+-------+-------+-------+-------
-            | 0 "Started"  || -     | -     | 1,op1 | -     ! -
-            | 1 "name"     || 0,op7 | 2,op2 | 1,op3 | 3,op4 ! 4,op5
-            | 2 "delim"    || -     | -     | 1,op1 | -     ! -
-            | 3 "end"      || -     | -     | -     | -     ! -
-            | 4 "von"      || 0,op7 | 2,op2 | -     | -     | 4,op6
-            | - "error"    || 
-            For example rule "2,op3" means operation op3 and new state 2.
-                op1: save name=nm, clear name_type and prefix
-                op2: return (prefix, name, name_type)
-                            and possibly saved 'known as' name
-                op3: concatenate a two part name
-                op4: return (prefix, name, name_type)
-                            and possibly saved 'known as' name
-                op5: create prefix
-                op6: concatenate a two part prefix
-                op7: save a 'know as' name
-            Each '-' would be an error!
-        '''
+        # ''' The Following automate reads surnames and separators from right to left
+        #     and stores (prefix, name, name_type) tuples to return list ret[] 
+        # 
+        #     !state \ input !! ','   ! delim ! name  ! end   ! von
+        #     |--------------++-------+-------+-------+-------+-------
+        #     | 0 "Started"  || -     | -     | 1,op1 | -     ! -
+        #     | 1 "name"     || 0,op7 | 2,op2 | 1,op3 | 3,op4 ! 4,op5
+        #     | 2 "delim"    || -     | -     | 1,op1 | -     ! -
+        #     | 3 "end"      || -     | -     | -     | -     ! -
+        #     | 4 "von"      || 0,op7 | 2,op2 | -     | -     | 4,op6
+        #     | - "error"    || 
+        #     For example rule "2,op3" means operation op3 and new state 2.
+        #         op1: save name=nm, clear name_type and prefix
+        #         op2: return (prefix, name, name_type)
+        #                     and possibly saved 'known as' name
+        #         op3: concatenate a two part name
+        #         op4: return (prefix, name, name_type)
+        #                     and possibly saved 'known as' name
+        #         op5: create prefix
+        #         op6: concatenate a two part prefix
+        #         op7: save a 'know as' name
+        #     Each '-' would be an error!
+        # '''
 
         for nm in reversed(surnames):
             if state == 0 or state == 2:        # Start state: Only a name expected
@@ -389,7 +404,7 @@ class PersonName(GedcomLine):
                 path = self.path
             else:
                 path = "{}.{}".format(self.path, tag)
-            LOG.info("{} {!r:>36} --> {!r}".format(path, value, new_value))
+            logger.info("{} {!r:>36} --> {!r}".format(path, value, new_value))
             self.reported_value = value
 
 
@@ -412,7 +427,7 @@ class PersonName(GedcomLine):
         if self.questionable:
             orig_rows.append(GedcomLine( (self.level + 1, 
                  "NOTE", "_question Nimessä on kysymysmerkki") ))
-            LOG.info("{} Selvitä kysymysmerkin osoittama tieto: {!r}".\
+            logger.info("{} Selvitä kysymysmerkin osoittama tieto: {!r}".\
                      format(self.path, self.value))
 #         if pn.is_preferred_name:
             # Only the person's first NAME and there the first surname 
@@ -426,7 +441,7 @@ class PersonName(GedcomLine):
             # 2.1 Is there a new value for this line
             new_value = in_tags(r.tag)
             if new_value:
-                LOG.debug("#{:>36} repl row[{}] {} {!r}".\
+                logger.debug("#{:>36} repl row[{}] {} {!r}".\
                       format(r.path, len(pn.rows), r.tag, new_value))
                 pn.rows.append(GedcomLine((r.level, r.tag, new_value)))
                 # Show NAME differences 
@@ -438,35 +453,17 @@ class PersonName(GedcomLine):
                     report_change(r.tag, self.value, self.nsfx_orig)
                 continue
             # 2.2 Only append to pn.row
-            LOG.debug("#{:>36} add  row[{}] {} {!r}".\
+            logger.debug("#{:>36} add  row[{}] {} {!r}".\
                   format(r.path, len(pn.rows), r.tag, r.value))
             pn.rows.append(GedcomLine((r.level, r.tag, r.value)))
 
         # 3 Create new rows for unused tags (except trivial ones)
         for tag, value in my_tags:
             if value and not tag in ('NAME', 'GIVN', 'SURN'):
-                LOG.debug("#{:>36} new  row[{}] {} {!r}".\
+                logger.debug("#{:>36} new  row[{}] {} {!r}".\
                       format("{}.{}".format(self.path, tag), len(pn.rows), tag, value))
                 pn.rows.append(GedcomLine((pn.level + 1, tag, value)))
 
         # 4 Gender, if defined
         if hasattr(self, 'sex') and self.sex != "U":    # Only "M" or "F"
             pn.rows.append(GedcomLine((self.level+1, "SEX", self.sex)))
-
-
-# Keskeneräinen idea, olisikohan tarpeen, toimisikohan?
-#
-#     def _evaluate_attribute(self, key, attr):
-#         ''' Looks up a value for an attribute from a) self.rows[] or b) local attributes of self.
-#             Returns the value and removes the row, if used
-#             #TODO: Which one is preferred?
-#         '''
-#         # Find a row having te key
-#         for i in self.rows:
-#             if str(i)[2:].startswith(key):
-#                 value = i.value
-#                 #TODO: Remove the row
-#                 
-#         # Find the local attr of the key
-#         value = getattr(self, attr, None)
-#         return value

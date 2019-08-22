@@ -33,16 +33,17 @@ var gedcom = "{{ gedcom }}";
                     > {{ _("Allow help desk to view data") }}
                 </div>
                 <div id="permission_message">{{ _("Permission updated") }}</div>
-                <div style="margin-top: 4em;"> 
-                    &rtrif; 
-                    <a class="link" href="/gedcom">
-                    	{{ _("Switch to another GEDCOM") }}
-                    </a>
-                </div>
-                <div style="margin-top: 1em;" id="div_show_info"> 
+                <hr style="margin:2em;">
+                <div class="link_item" id="div_show_info"> 
                     &rtrif; 
                     <a id="show_info" class="link" href="#">
                         {{ _("Show GEDCOM info") }}
+                    </a>
+                </div>
+                <div class="link_item"> 
+                    &rtrif; 
+                    <a class="link" href="/gedcom">
+                    	{{ _("Switch to another GEDCOM") }}
                     </a>
                 </div>
               </div>
@@ -124,7 +125,6 @@ var gedcom = "{{ gedcom }}";
 	        <div style="display: inline-block;">
 	
 				<h3>{{ _("Actions") }}</h3>
-				<div>
 				    <btn id="transforms"
 				    	title='{{ _("Choose a transformation to perform for this GEDCOM") }}'>
 					    {{ _("Choose a transformation") }}
@@ -146,20 +146,19 @@ var gedcom = "{{ gedcom }}";
 				    	{{ _("Remove this GEDCOM") }}</a>
 			    	</btn>
 
-	                <div style="margin-top: 1em;"> 
+	                <div class="link_item"> 
 	                    &rtrif; 
 	                    <a id="analyze" class="link" href="#">
-	                    {{ _("Analyze this GEDCOM for structural problems") }}</a>
+	                    {{ _("Technical analysis") }}</a>
 	                </div>
 	
-	                <div style="margin-top: 1em;"> 
+	                <div class="link_item"> 
 	                    &rtrif; 
 	                    <a id="show_history" class="link" href="#">
 	                        {{ _("Show transformation history") }}
                         </a>
 	                </div>
 
-				</div>
 	        </div>
 	      </div>
 	
@@ -188,6 +187,7 @@ var gedcom = "{{ gedcom }}";
                 <div class="xsubmit">
 		          <btn id="delete_old_versions">{{ _("Delete old versions") }}</btn>
 		          <btn id="compare">{{ _("Compare versions") }}</btn>
+		          <div id="no_versions">{{ _("No previous versions") }}</div>
 		        </div>
 		    </div>
 		  </div>
@@ -252,7 +252,9 @@ var gedcom = "{{ gedcom }}";
 	  <div id="output" class="gedcom">
 		<h3>{{ _("Transformation results") }}</h3>
 		<div id="div_oldname">
-		<h3>{{ _("Old version is saved as") }} <span id="oldname"></span> (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h3>
+		<h3>{{ _("Old version is saved as") }} 
+		  <span id="oldname"></span> 
+		  (<a id="palauta" href="#">{{ _("Revert to old version") }}</a>)</h3>
 		</div>
 		<div id="div_save">
 		<span class="important">{{ _("Not saved yet") }}</span>
@@ -261,15 +263,11 @@ var gedcom = "{{ gedcom }}";
 	        <a href="javascript:window.scroll(0,0)">
 		        <img src="/static/444-512.png" class="totop" title="Top">
 	        </a>
-         <pre>
-			  <div id="output_log_pre">
-			  </div>
-		  </pre>
+          <pre><div id="output_log_pre"></div></pre>
 		  <div id="output_log">
 		  </div>
 		  <pre>
-		  <div id="error_log" class="errors">
-		  </div>
+		      <div id="error_log" class="errors"></div>
 		  </pre>
 	  	<div id="diff"></div>	
       </div>

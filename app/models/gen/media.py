@@ -8,6 +8,9 @@ from sys import stderr
 from models.cypher_gramps import Cypher_media_in_batch
 from models.gen.cypher import Cypher_media
 import shareds
+import traceback
+import uuid
+import os
 
 class Media:
     """ Tallenne
@@ -46,11 +49,16 @@ class Media:
         n = cls()
         n.uniq_id = node.id
         n.id = node['id']
+        n.uuid = node['uuid']
         n.handle = node['handle']
         n.change = node['change']
         n.description = node['description'] or ''
         n.src = node['src'] or ''
         n.mime = node['mime'] or ''
+        if n.src:
+            n.name = os.path.split(n.src)[1]
+        else:
+            n.name = ""
         return n
 
     @staticmethod
@@ -64,6 +72,16 @@ class Media:
             query = "MATCH (o:Media) RETURN ID(o) AS uniq_id, o"
             return  shareds.driver.session().run(query)
 
+
+    @staticmethod
+    def from_uniq_id(uniq_id):
+        """ Luetaan tallenteen tiedot """
+
+        obj_result = shareds.driver.session().run(Cypher_media.get_one, rid=uniq_id).single()
+        if obj_result:
+            return Media.from_node(obj_result['obj'])
+        else:
+            return None
 
     def get_data(self):
         """ Luetaan tallenteen tiedot """
@@ -111,9 +129,11 @@ class Media:
         m_attr = {}
         try:
             m_attr = {
+                "uuid": uuid.uuid4().hex,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
+                "batch_id":batch_id,
                 "src": self.src,
                 "mime": self.mime,
                 "description": self.description

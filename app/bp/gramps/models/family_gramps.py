@@ -19,10 +19,11 @@ class Family_gramps(Family):
             See also models.gen.family.Family
 
             Gramps variables
-                eventref_hlink  str tapahtuman osoite
-                eventref_role   str tapahtuman rooli
-                childref_hlink  str lapsen osoite
-                noteref_hlink   str lisätiedon osoite
+                eventref_hlink      str tapahtuman osoite
+                eventref_role       str tapahtuman rooli
+                childref_hlink      str lapsen osoite
+                noteref_hlink       str lisätiedon osoite
+                citationref_hlink   str lähteen osoite
      """
 
     def __init__(self, uniq_id=None):
@@ -42,6 +43,7 @@ class Family_gramps(Family):
         self.eventref_role = []
         self.childref_hlink = []    # handles
         self.noteref_hlink = []
+        self.citationref_hlink = []
 
 
     def save(self, tx, batch_id):
@@ -109,6 +111,16 @@ class Family_gramps(Family):
         except Exception as err:
             logger.error(f"Family_gramps.save: {err} in linking Notes {self.handle} -> {self.noteref_hlink}")
             #print("iError Family.save notes: {0} {1}".format(err, self.id), file=stderr)
+  
+        # Make relation(s) to the Citation node
+        try:
+            #print(f"Family_gramps.save: linking Citations {self.handle} -> {self.citationref_hlink}")
+            for handle in self.citationref_hlink:
+                tx.run(Cypher_family_w_handle.link_citation,
+                       f_handle=self.handle, c_handle=handle)
+        except Exception as err:
+            logger.error(f"Family_gramps.save: {err} in linking Citations {self.handle} -> {self.citationref_hlink}")
+            #print("iError Family.save citations: {0} {1}".format(err, self.id), file=stderr)
 
         return
 

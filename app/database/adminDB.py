@@ -158,6 +158,9 @@ def do_schema_fixes():
     
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
     """
+    print(f"adminDB.do_schema_fixes: none")
+    return
+
     change_HIERARCY_to_IS_INSIDE = """
 MATCH (a) -[r:HIERARCY]-> (b)
     MERGE (a) -[rr:IS_INSIDE]-> (b)
@@ -175,8 +178,8 @@ match (a:Repocitory)
     remove a:Repocitory
 return count(a)"""
     change_Family_dates = """
-match (f:Family) where f.datetype="3" and not exists(f.date1)
-    set f.datatype = "1"
+match (f:Family) where f.datetype=3 and not exists(f.date1)
+    set f.datatype = 1
     set f.data1 = f.data2
 return count(f)"""
     change_wrong_supplemented_direction = """
@@ -205,6 +208,17 @@ return count(u)"""
             logger.error(f"{e} in database.adminDB.do_schema_fixes")
             return
 
+def create_lock_constraint():
+    # can be created multiple times!
+    shareds.driver.session().run( 
+        "create constraint on (l:Lock) assert l.id is unique"
+    )
+
+def create_uuid_constraint():
+    # can be created multiple times!
+    shareds.driver.session().run( 
+        "create constraint on (m:Media) assert m.uuid is unique"
+    )
 
 def initialize_db(): 
     if not roles_exist():
@@ -215,6 +229,9 @@ def initialize_db():
         create_user_constraints()
         create_master(build_master_user())
         create_allowed_email_constraints()
+
+    create_lock_constraint()
+    create_uuid_constraint()
 
     # Fix chaanged schema
     do_schema_fixes()

@@ -191,7 +191,7 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
                 "url": self.url
             }
             if parent_id:
-                print(f"Note_save: parent (uid={parent_id}) --> (id={self.id})")
+                #print(f"Note_save: parent (uid={parent_id}) --> (id={self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create_as_leaf, 
                                       parent_id=parent_id, n_attr=n_attr).single()[0]
             elif batch_id:

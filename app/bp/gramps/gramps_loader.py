@@ -15,6 +15,9 @@ from models import dataupdater
 #from models.dataupdater import set_confidence_values
 import shareds
 import traceback
+from tarfile import TarFile
+import os
+from bp.scene.models import media
 
 
 def xml_to_neo4j(pathname, userid='Taapeli'):
@@ -64,14 +67,20 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler.blog.log(cleaning_log)
     t0 = time.time()
 
+    handler.batch_id = handler.blog.start_batch(None, file_cleaned)
+
+    if pathname.endswith(".gpkg"):
+        extract_media(pathname,handler.batch_id)
+    
     try:
         ''' Start DOM transaction '''
         handler.begin_tx(shareds.driver.session())
         # Create new Batch node and start
-        handler.batch_id = handler.blog.start_batch(handler.tx, file_cleaned)
         #status_update({'percent':1})
-
+        
         try:
+            handler.handle_header()
+            
             handler.handle_notes()
             handler.handle_repositories()
             handler.handle_media()
@@ -95,9 +104,12 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             handler.set_person_sortname_refnames()
             handler.set_estimated_person_dates()
             
-            # Copy information from Person and Event nodes to Family nodes
+            # Copy date and name information from Person and Event nodes to Family nodes
             handler.set_family_sortname_dates()
-   
+
+            handler.remove_handles()
+            handler.add_links()
+
 # Huom. Paikkahierarkia on tehty metodissa Place_gramps.save niin että
 #       aluksi luodaan tarvittaessa viitattu ylempi paikka vajailla tiedoilla.
 #             # Make the place hierarchy
@@ -122,6 +134,15 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     handler.blog.log_event({'title':"Total time", 'level':"TITLE", 
                             'elapsed':time.time()-t0})  #, 'percent':100})
     return handler.blog.list(), handler.batch_id
+
+
+def create_thumbnails(media_folder):
+    print("walk")
+    for dirname,dirnames,filenames in os.walk(media_folder):
+        print(dirname,dirnames,filenames)
+        for name in filenames:
+            fname = os.path.join(dirname,name)
+            thumbnail_fname = "media/thumbnails/" + fname
 
 
 def file_clean(pathname):
@@ -151,18 +172,34 @@ def file_clean(pathname):
 # - filename for display
     file_displ = basename(pathname)
     with open(file_cleaned, "w", encoding='utf-8') as file_out:
-        # Creates the ouput file and closes it
-        try:
-            with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
-                # print("A gzipped file")
+        # Creates the output file and closes it
+        if ext == ".gpkg": # gzipped tar file with embedded gzipped 'data.gramps' xml file
+            with gzip.open(TarFile(fileobj=gzip.GzipFile(pathname)).extractfile('data.gramps'),
+                           mode='rt',encoding='utf-8') as file_in:
                 counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from packed input lines" # Try to read a gzipped file
-        except OSError: # Not gzipped; Read as an ordinary file
-            with open(pathname, mode='rt', encoding='utf-8') as file_in:
-                print("Not a gzipped file")
-                counter = _clean_apostrophes(file_in, file_out)
-            msg = "Cleaned apostrophes from input lines"
+            msg = "Cleaned apostrophes from .gpkg input file" # Try to read a gzipped file
+        else: # .gramps: either gzipped or plain xml file
+            try:
+                with gzip.open(pathname, mode='rt', encoding='utf-8', compresslevel=9) as file_in:
+                    # print("A gzipped file")
+                    counter = _clean_apostrophes(file_in, file_out)
+                msg = "Cleaned apostrophes from packed input lines" # Try to read a gzipped file
+            except OSError: # Not gzipped; Read as an ordinary file
+                with open(pathname, mode='rt', encoding='utf-8') as file_in:
+                    print("Not a gzipped file")
+                    counter = _clean_apostrophes(file_in, file_out)
+                msg = "Cleaned apostrophes from input lines"
         event = Log({'title':msg, 'count':counter, 
                      'elapsed':time.time()-t0}) #, 'percent':1})
     return (file_cleaned, file_displ, event)
 
+def extract_media(pathname,batch_id):
+    try:
+        media_files_folder = media.get_media_files_folder(batch_id)
+        os.makedirs(media_files_folder, exist_ok=True)
+        TarFile(fileobj=gzip.GzipFile(pathname)).extractall(path=media_files_folder)
+        xml_filename = os.path.join(media_files_folder,"data.gramps")
+        os.remove(xml_filename)
+    except:
+        traceback.print_exc()
+    #create_thumbnails(media_folder)

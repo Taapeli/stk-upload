@@ -4,11 +4,10 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
-    crossorigin="anonymous">
 <style>
 u { color: DarkKhaki; text-decoration: none; }
+table {margin-top:1em;}
+td { padding-right:1em;}
 </style>
 
 <div id="startdiv">
@@ -19,39 +18,69 @@ u { color: DarkKhaki; text-decoration: none; }
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">
 
-        <h3 style="position:sticky; top:0;">{{ _("Family") }} {{ family.uniq_id }}</h3>
-        <p><b>{{ _("Type") }}</b> {{ family.type|transl('marr') }}</p>
-        <p><b>{{ _("Marriage place") }}</b> {{ family.marriage_place }}</p>
-        <p><b>{{ _("Marriage dates") }}</b> {{ family.marriage_date }}</p>
-        <p><b>{{ _("Father") }}</b>
-        	{% if family.father %}
-                <a href="/scene/person={{family.father.uniq_id}}">
-                {{family.father.names[0].firstname}} 
-                <i>{{family.father.names[0].suffix}}</i>
- 				{% if family.father.names[0].prefix %}
- 				{{family.father.names[0].prefix}}{% endif %}
- 				<b>{{family.father.names[0].surname}}</b></a></h3>
-            {% else %}<small>{{ _('unknown') }}</small>{% endif %}
-    
-        <p><b>{{ _("Mother") }}</b>
-        	{% if family.mother %}
-                <a href="/scene/person={{family.mother.uniq_id}}">
-                {{family.mother.names[0].firstname}} 
-                <i>{{family.mother.names[0].suffix}}</i>
-  				{% if family.mother.names[0].prefix %}
- 				{{family.mother.names[0].prefix}}{% endif %}
-                <b>{{family.mother.names[0].surname}}</b></a></h3>
-            {% else %}<small>{{ _('unknown') }}</small>{% endif %}
-            
-        {% if family.children %} <br><br><b>{{ _("Children") }}</b><br>     
-            <table>
-        	{% for c in family.children %}{% set nm = c.sortname.split('#') %}
-                <tr><td><a href="/scene/person={{c.uniq_id}}">{{nm[2]}}&nbsp;<b>{{nm[0]}}</b>&nbsp;<i>{{nm[1]}}</i>{{ "," if not loop.last }}</a></big></td></tr>
+        <h3>{{ _("Family")|capitalize }}</h3>
+        <div id="summaryarea">
+            <table><tbody>
+                <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="Value">{{ family.id }} / <tt>{{ family.uniq_id }}</tt></td>
+                    <td></td>
+                </tr>
+                <tr><td class="ColumnAttribute">{{ _("Relation") }}</td>
+                    <td class="Value"> {{ family.rel_type|transl('marr') }}</td>
+                    <td>{{ family.lifetime }}</td>
+                </tr>
+                <tr><td colspan="3">&nbsp;</td></tr>
+            {% for p in [family.father, family.mother]%}
+                {% if p %}
+                <tr><td class="ColumnAttribute">{{p.role|transl('role')|capitalize}}</td>
+                    <td class="Value"><span class="id">{{p.id}}</span>
+                        <a href="/scene/person={{p.uniq_id}}" class="inlink">
+                        {{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
+                        {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a></td>
+                    <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
+                                    – {% if p.event_death.dates %}{{ p.event_death.dates }}{% endif %}
+                    </td>
+                </tr>
+                {% endif %}
             {% endfor %}
-            </table><br>
-        {% endif %}
+            </tbody></table>
 
-        {% if family.notes %}<br><br><b>{{ _("Notes") }}</b><br>
+        {% if family.events %} 
+        <h3>{{ _("Family Events") }}</h3>
+        <div id="summaryarea">
+            <table style="margin-top:1em;"><tbody>
+        {% for e in family.events|sort(attribute='dates') %}
+                <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
+                    <td class="Value">{{e.dates}}</td>
+                    <td class="Value"><a href="/scene/location={{e.place.uniq_id}}"
+                            class="inlink">{{e.place.pname}}</a></td>
+                </tr>
+        {% endfor %}
+            </tbody></table>
+      </div>
+      {% endif %}
+
+        {% if family.children %} 
+        <h3>{{ _("Children") }}</h3>
+        <div id="summaryarea">
+            <table style="margin-top:1em;"><tbody>
+        <!-- |sort(attribute='event_birth.dates') -->
+        {% for p in family.children %}
+                <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
+                    <td class="Value"><span class="id">{{p.id}}</span>
+                        <a href="/scene/person={{p.uniq_id}}" class="inlink">
+	                    {{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
+	                    {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a></td>
+                    <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
+                                    – {% if p.event_death.dates %}{{ p.event_death.dates }}{% endif %}
+                    </td>
+                </tr>
+        {% endfor %}
+            </tbody></table>
+      </div>
+        {% endif %}
+ 
+        {% if family.notes %}<h3>{{ _("Notes") }}</h3>
             <table>
             {% for n in family.notes %}
  				<tr>{% if n.text %}<td>{{ n.text }}</p></td>{% endif %}
@@ -60,24 +89,15 @@ u { color: DarkKhaki; text-decoration: none; }
             </table><br>
         {% endif %}
         
-        {% if family.sources %}<br><br><b>{{ _("Sources") }}</b><br>
+        {% if family.sources %}<h3>{{ _("Sources") }}</h3>
             <table>
             {% for data in family.sources %}
          		<tr><td>{{ data[0] }}: 
-         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>,
-         		{{ _("Page") }}: {{ data[3] }}</td></tr>
+         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>, {{ data[3] }}, {{ data[4] }}
+         		{{ _("Page") }}: {{ data[5] }}</td></tr>
             {% endfor %}
             </table><br>
 		{% endif %}
-        
-        <div id="summaryarea">
-            <table>
-                <tr>
-                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="ColumnValue"><span class="id">tuntematon</span> / <tt>{{family.uniq_id}}</tt></td>
-                </tr>
-            </table>
-        </div>
 
     </div>
 {% endblock %}

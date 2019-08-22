@@ -12,7 +12,8 @@
     <div class="content" id="IndividualDetail">
         {% if photos %}<div class="snapshot">
             <div class="thumbnail">
-                <img alt="{{ _('in Photo') }} {{photos[0].description}}" src="{{photos[0].src}}" />
+                <img alt="{{ _('in Photo') }} {{photos[0].description}}" 
+                	src="thumbnail?id={{photos[0].uuid}}" />
             </div>
         </div>{% endif %}
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
@@ -192,11 +193,19 @@
 
         <div class="subsection" id="indivgallery">
             <h4>{{ _('Media') }}</h4>
-        {% for photo in photos %}<div class="thumbnail">
-                <img alt="{{ _('Picture') }}" src="{{photo.src}}" />
-                    <p>{{photo.description}}</p>
-            </div>
-        {% endfor %}
+            <table>
+		        <tr>
+		        {% for photo in photos %}
+	                <td>{{photo.description}}
+		        {% endfor %}
+		
+		        <tr>
+		        {% for photo in photos %}
+	                <td><a href="media/{{photo.name}}?id={{photo.uuid}}">
+		                	<img alt="{{ _('Picture') }}" src="thumbnail?id={{photo.uuid}}" />
+	                	</a>
+		        {% endfor %}
+	        </table>
             <div class="fullclear"></div>
         </div>
 <!--

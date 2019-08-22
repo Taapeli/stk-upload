@@ -3,6 +3,8 @@ Created on 6.5.2019
 
 @author: jm
 '''
+from datetime import datetime
+ 
 import shareds
 from .models.cypher_adm import Cypher_stats
 
@@ -32,20 +34,32 @@ class Batches(object):
         users = {}
         result = shareds.driver.session().run(Cypher_stats.get_batches, user=self.user)
         for record in result:
-            # <Record user='jpek' batch='jpek 2019-05-03.001' label='Person' cnt=1949>
+            # <Record user='jpek' batch='2019-08-19.001' timestamp=1566215904871 
+            #    label='Repository' cnt=6>
             user = record['user']
             batch = record['batch']
+            ts = record['timestamp']
+            if ts:
+                t = float(ts)/1000.
+                tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+#                 tstring = datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M")
+#                 d, t = tstring.split()
+#                 if batch[:10] == d:
+#                     tstring = t
+            else:
+                tstring = ""
             label = record['label']
-            if not label in labels:
+            if not label: label = ""
+            if label and not label in labels:
                 labels.append(label)
             cnt = record['cnt']
 
-            key = f'{user}/{batch}'
+            key = f'{user}/{batch}/{tstring}'
             if not key in users:
                 users[key] = {}
             users[key][label] = cnt
 
-            print(f'users[{key}] {users[key]}')
+            #print(f'users[{key}] {users[key]}')
 
         return sorted(labels), users
 

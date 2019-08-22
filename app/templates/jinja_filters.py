@@ -8,6 +8,8 @@ Created on 4.1.2018
 '''
 from urllib.parse import urlparse
 from flask_babelex import _
+from models.gen.person import SEX_FEMALE, SEX_MALE, SEX_UNKOWN
+
 
 def translate(term, var_name, lang="fi"):
     """ Given term is translated depending of var_name name.
@@ -22,6 +24,7 @@ def translate(term, var_name, lang="fi"):
         'rept' = repository types
         'medium' = media types
         'marr' = marriage types
+        'child' = child relations
     """
 #     print("# {}[{}]".format(var_name, term))
     if not term:
@@ -84,6 +87,10 @@ def translate(term, var_name, lang="fi"):
             "Pääosallinen": _("Pääosallinen"), #"pääosallisena"
             "Edunsaaja": _("Edunsaaja"), #"edunsaajana"
             "Myyjä": _("Myyjä"), #"myyjänä"
+            "father": _("Mies"), 
+            "mother": _("Vaimo"),
+            "man": _("Mies"), 
+            "wife": _("Vaimo"),
             "Unknown": _("Unknown role") #"määräämätön"
         }
     elif var_name == "conf":
@@ -217,8 +224,16 @@ def translate(term, var_name, lang="fi"):
     elif var_name == "marr":
         # Marriage types
         tabl = {
-            "Married": _("Married"), #"aluksessa"
-            "Unknown": _("Unknown relation") #"aluehallintoyksikössä"
+            "Married": _("Married"),
+            "Unknown": _("Unknown relation")
+        }
+
+    elif var_name == "child":
+        # Child relations to family
+        tabl = {
+            SEX_FEMALE: _("Daughter"),
+            SEX_MALE: _("Son"),
+            SEX_UNKOWN: _("Child")
         }
 
     elif var_name == "handle":

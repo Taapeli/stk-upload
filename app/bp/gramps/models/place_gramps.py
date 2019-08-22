@@ -116,14 +116,15 @@ class Place_gramps(Place):
                 #    update known Place node parameters and link from Batch
                 self.uniq_id = plid
                 if self.type:
-                    print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
+                    #print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
                     result = tx.run(Cypher_place_in_batch.complete, #TODO
                                     batch_id=batch_id, plid=plid, p_attr=pl_attr)
                 else:
-                    print(f"Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
+                    #print(f"Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
+                    pass
             else:
                 # 2) new node: create and link from Batch
-                print(f"Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
+                #print(f"Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
                 result = tx.run(Cypher_place_in_batch.create, 
                                 batch_id=batch_id, p_attr=pl_attr)
                 self.uniq_id = result.single()[0]
@@ -166,14 +167,14 @@ class Place_gramps(Place):
                     # 3) Link to a known upper Place
                     #    The upper node is already created: create a link to that
                     #    upper Place node
-                    print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {r} (#{uid})")
+                    #print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {r} (#{uid})")
                     result = tx.run(Cypher_place_in_batch.link_hier,
                                     plid=self.uniq_id, up_id=uid, r_attr=rel_attr)
                 else:
                     # 4) Link to unknown place
                     #    A new upper node: create a Place with only handle
                     #    parameter and link hierarchy to Place self
-                    print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {r} {up_handle}")
+                    #print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {r} {up_handle}")
                     result = tx.run(Cypher_place_in_batch.link_create_hier,
                                     plid=self.uniq_id, r_attr=rel_attr, 
                                     up_handle=up_handle)

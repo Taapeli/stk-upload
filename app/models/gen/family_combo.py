@@ -8,14 +8,12 @@ import  shareds
 
 from .cypher import Cypher_family
 from .family import Family
-from .person_combo import Person_as_member
+from .person_combo import Person_combo, Person_as_member
+from .event_combo import Event_combo
 from .person_name import Name
 from .note import Note
-#from .citation import Citation
-#from .source import Source
-#from .repository import Repository
 from models.gen.dates import DateRange
-#from models.cypher_gramps import Cypher_family_w_handle
+from models.gen.place_combo import Place_combo
 
 
 class Family_combo(Family):
@@ -24,17 +22,18 @@ class Family_combo(Family):
         Properties:
                 handle          
                 change
-                id              esim. "F0001"
-                uniq_id         int database key
-                rel_type        str suhteen tyyppi
-                father          Person isä (isän osoite?)
-                mother          Person äiti (äidin osoite?)
-                children[]      [Person,] lapset (lasten osoitteet?)
+                id                  esim. "F0001"
+                uniq_id             int database key
+                rel_type            str suhteen tyyppi
+                father              Person isä (isän osoite?)
+                mother              Person äiti (äidin osoite?)
+                children[]          [Person,] lapset (lasten osoitteet?)
             #TODO: Obsolete properties?
-                eventref_hlink  str tapahtuman osoite
-                eventref_role   str tapahtuman rooli
-                childref_hlink  str lapsen osoite
-                noteref_hlink   str lisätiedon osoite
+                eventref_hlink      str tapahtuman osoite
+                eventref_role       str tapahtuman rooli
+                childref_hlink      str lapsen osoite
+                noteref_hlink       str lisätiedon osoite
+                citationref_hlink   str lisätiedon osoite
      """
 
     def __init__(self, uniq_id=None):
@@ -44,18 +43,19 @@ class Family_combo(Family):
 
         self.father = None
         self.mother = None
-        self.children = []      # Child object
-        self.events = []        # Event objects
+        self.children = []          # Child object
+        self.events = []            # Event objects
         self.notes = []
         self.sources = []
-        self.note_ref = []      # For a page, where same note may be referenced
-                                # from multiple events and other objects
+        self.note_ref = []          # For a page, where same note may be referenced
+                                    # from multiple events and other objects
 
         #TODO Obsolete parameters???
         self.eventref_hlink = []
         self.eventref_role = []
         self.childref_hlink = []    # handles
         self.noteref_hlink = []
+        self.citationref_hlink = []
 
 
     @staticmethod
@@ -143,99 +143,198 @@ RETURN family"""
         return True
     
     
-    def get_family_data(self):
-        """ Luetaan perheen tiedot.
+    @staticmethod
+    def get_family_data(uniq_id):
+        """ Read Family information including Events, Children, Notes and Sources.
+        
+            1) read 
+                (f:Family) --> (e:Event)
+                (f:Family) -[:PARENT]-> (pp:Person) -> (np:Name)
+                (f:Family) -[:CHILD]->  (pc:Person) -> (nc:Name)
+                (f:Family) --> (fn:Note)
+                (e:Event) --> (en:Note)
+                (f:Family) --> (fac:Citation) --> (fas:Source) --> (far:Repository)
+                (e:Event) --> (evc:Citation) --> (evs:Source) --> (evr:Repository)
+╒═══════════════╤═══════════════╤═══════════════╤═══════════════╤═══════════════╤═══════╕
+│"family"       │"events"       │"parents"      │"children"     │"sources"      │"notes"│
+╞═══════════════╪═══════════════╪═══════════════╪═══════════════╪═══════════════╪═══════╡
+│family         │[event, fep]   │[r.role, parent│[child, cn, ce]│[ID(event), re,│[note] │
+│               │               │, pn, pe]      │               │s, c]          │       │
+└───────────────┴───────────────┴───────────────┴───────────────┴───────────────┴───────┘
+ 
+            2) read
+                (pp:Person) --> (ppe:Event) --> (:Place)
+                (pc:Person) --> (pce:Event) --> (:Place)
+
+            3) build
+                Family_combo.mother, .names, event_birth, event_death
+                Family_combo.father, .names, event_birth, event_death
+                Family_combo.events
+                Family_combo.notes
+                Family_combo.sources / citation -> source -> repocitory ?
+                Family_combo.children, .names, event_birth, event_death
+            Returns a Family object with other objects included
         """
+
+        def set_birth_death(person, birth_node, death_node):
+            '''
+            Set person.birth and person.death events from db nodes
+            '''
+            if birth_node:
+                person.event_birth = Event_combo.from_node(birth_node)
+            if death_node:
+                person.event_death = Event_combo.from_node(death_node)
+
+
+        family = None
+
         with shareds.driver.session() as session:
             try:
                 result = session.run(Cypher_family.get_family_data, 
-                                     pid=self.uniq_id)    
-            
+                                     pid=uniq_id)
                 for record in result:
                     if record['f']:
-                        # <Node id=55577 labels={'Family'} 
-                        #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
-                        #    'id': 'F0000', 'change': 1507492602}>
-                        f_node = record['f']
-                        self.id = f_node['id']
-                        self.type = f_node['rel_type']
-                        self.father_sortname = f_node['father_sortname']
-                        self.mother_sortname = f_node['mother_sortname']
-                        datetype = f_node['datetype']
-                        date1 = f_node['date1']
-                        date2 = f_node['date2']
-                        if datetype != None:
-                            self.marriage_date = DateRange(datetype, date1, date2)
-                        self.marriage_place = record['marriage_place'] or ''
+                        # <Node id=272710 labels={'Family'} 
+                        #    properties={'father_sortname': '#Andersson#Anders', 
+                        #        'change': 1519839324, 'rel_type': 'Married', 'handle': '_dcf94f357ea7b126cd8277f4495', 
+                        #        'id': 'F0268', 'mother_sortname': 'Gröndahl#Juhantytär#Fredrika', 
+                        #        'datetype': 3, 'date2': 1878089, 'date1': 1875043}>
+                        node = record['f']
+                        family = Family_combo.from_node(node)
+
+                        for event_node, place_node in record['family_event']:
+                            if event_node:
+                                # event_node:
+                                # <Node id=242570 labels={'Event'} 
+                                #    properties={'datetype': 0, 'change': 1528183878, 'description': '', 
+                                #        'handle': '_dcf94f35ea262b7e1a0a0066d6e', 'id': 'E1692', 
+                                #        'date2': 1875043, 'type': 'Marriage', 'date1': 1875043}>
+                                e = Event_combo.from_node(event_node)
+                                if place_node:
+                                    # place_node:
+                                    # <Node id=251746 labels={'Place'} 
+                                    #    properties={'coord': [60.5625, 21.609722222222224], 'handle': '_dc388cd23f634d21dbce8ea8775', 
+                                    #        'id': 'P0468', 'type': 'City', 'pname': 'Taivassalo', 
+                                    #        'change': 1556953682}>
+                                    e.place = Place_combo.from_node(place_node)
+
+                                family.events.append(e)
         
                         uniq_id = -1
-                        for role, parent_node, name_node in record['parent']:
-                            if parent_node:
-                                # <Node id=214500 labels={'Person'} 
-                                #    properties={'sortname': 'Airola#ent. Silius#Kalle Kustaa', 
-                                #    'datetype': 19, 'confidence': '2.7', 'change': 1504606496, 
-                                #    'sex': 0, 'handle': '_ce373c1941d452bd5eb', 'id': 'I0008', 
-                                #    'date2': 1997946, 'date1': 1929380}>
-                                if uniq_id != parent_node.id:
+                        
+                        for role, person_node, name_node, birth_node, death_node in record['parent']:
+                            # ['mother', 
+                            #    <Node id=235105 labels={'Person'} 
+                            #        properties={'sortname': 'Gröndahl#Juhantytär#Fredrika', 'datetype': 19, 
+                            #            'confidence': '2.0', 'sex': 2, 'change': 1536161195, 
+                            #            'handle': '_dcf94f357d9f565664a975f99f', 'id': 'I2475', 
+                            #            'date2': 1937706, 'date1': 1856517}>, 
+                            #    <Node id=235106 labels={'Name'} 
+                            #        properties={'firstname': 'Fredrika', 'type': 'Married Name', 
+                            #            'suffix': 'Juhantytär', 'prefix': '', 'surname': 'Gröndahl', 'order': 0}>, 
+                            #    <Node id=242532 labels={'Event'} 
+                            #        properties={'datetype': 0, 'change': 1519151217, 'description': '', 
+                            #            'handle': '_dcf94f357db6f3c846e6472915f', 'id': 'E1531', 
+                            #            'date2': 1856517, 'type': 'Birth', 'date1': 1856517}>, 
+                            #    <Node id=242536 labels={'Event'} 
+                            #        properties={'datetype': 0, 'change': 1519150640, 'description': '', 
+                            #            'handle': '_dcf94f357e2d61f5f76e1ba7cb', 'id': 'E1532', 
+                            #            'date2': 1937700, 'type': 'Death', 'date1': 1937700}>
+                            # ]
+                            if person_node:
+                                if uniq_id != person_node.id:
                                     # Skip person with double default name
-                                    pp = Person_as_member()
-                                    uniq_id = parent_node.id
-                                    pp.uniq_id = uniq_id
-                                    pp.sortname = parent_node['sortname']
-                                    pp.sex = parent_node['sex']
+                                    p = Person_combo.from_node(person_node)
+                                    p.role = role
+                                    if name_node:
+                                        p.names.append(Name.from_node(name_node))
+
+                                    set_birth_death(p, birth_node, death_node)
+
                                     if role == 'father':
-                                        self.father = pp
+                                        family.father = p
                                     elif role == 'mother':
-                                        self.mother = pp
-        
-                                pname = Name.from_node(name_node)
-                                pp.names.append(pname)
-        
+                                        family.mother = p
                         
-                        for ch in record['child']:
-                            # <Node id=60320 labels={'Person'} 
-                            #    properties={'sortname': '#Björnsson#Simon', 'datetype': 19, 
-                            #    'confidence': '', 'sex': 0, 'change': 1507492602, 
-                            #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
-                            #    'date2': 1609920, 'date1': 1609920}>
-                            child = Person_as_member()
-                            child.uniq_id = ch.id
-                            child.sortname = ch['sortname']
-                            self.children.append(child)
+                        for person_node, name_node, birth_node, death_node in record['child']:
+                            # record['child'][0]:
+                            # [<Node id=235176 labels={'Person'} 
+                            #    properties={'sortname': '#Andersdotter#Maria Christina', 
+                            #        'datetype': 19, 'confidence': '2.0', 'sex': 2, 'change': 1532009600, 
+                            #        'handle': '_dd2a65b2f8c7e05bc664bd49d54', 'id': 'I0781', 'date2': 1877226, 'date1': 1877219}>, 
+                            #  <Node id=235177 labels={'Name'} 
+                            #    properties={'firstname': 'Maria Christina', 'type': 'Birth Name', 'suffix': 'Andersdotter', 
+                            #        'prefix': '', 'surname': '', 'order': 0}>, 
+                            #  <Node id=242697 labels={'Event'} 
+                            #    properties={'datetype': 0, 'change': 1532009545, 'description': '', 'handle': '_dd2a65b218a14e81692d77955d2', 
+                            #        'id': 'E1886', 'date2': 1877219, 'type': 'Birth', 'date1': 1877219}>, 
+                            #  <Node id=242702 labels={'Event'} 
+                            #    properties={'datetype': 0, 'change': 1519916327, 'description': '', 'handle': '_dd2a65b218a4e85ab141faeab48', 
+                            #        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
+                            # ]
+                            if person_node:
+                                p = Person_combo.from_node(person_node)
+                                if name_node:
+                                    p.names.append(Name.from_node(name_node))
+                                set_birth_death(p, birth_node, death_node)
+                                family.children.append(p)
                         
-                        if record['no_of_children']:
-                            self.no_of_children = record['no_of_children']
+                        family.no_of_children = len(family.children)
                             
                         for repository_node, source_node, citation_node in record['sources']:
+                            # record['sources'][0]:
+                            # [<Node id=253027 labels={'Repository'} 
+                            #    properties={'handle': '_dcad22f5914b34fe61c341dad0', 'id': 'R0068', 'rname': 'Taivassalon seurakunnan arkisto', 
+                            #        'type': 'Archive', 'change': '1546265916'}>, 
+                            #  <Node id=247578 labels={'Source'} 
+                            #    properties={'handle': '_e085cd6d68d256a94afecd2162d', 'id': 'S1418', 
+                            #        'stitle': 'Taivassalon seurakunnan syntyneiden ja kastettujen luettelot 1790-1850 (I C:4)', 
+                            #        'change': '1543186596'}>, 
+                            #  <Node id=246371 labels={'Citation'} 
+                            #    properties={'handle': '_dd12b0b88d5741ee11d8bef1ca5', 'id': 'C0854', 'page': 'Vigde år 1831 April 4', 
+                            #        'dateval': '', 'change': 1543186596, 'confidence': '2'}>
+                            # ]
                             if repository_node:
                                 rname = repository_node['rname']
                                 s_pid = source_node.id
                                 stitle = source_node['stitle']
+                                sauthor = source_node['sauthor']
+                                spubinfo = source_node['spubinfo']
                                 page = citation_node['page']
-                                self.sources.append([rname, s_pid, stitle, page])
+                                family.sources.append([rname, s_pid, stitle, sauthor, spubinfo, page])
                             
                         for n in record['note']:
                             note = Note()
                             note.uniq_id = n.id
-                            note.type = n['type'] or ''
-                            note.text = n['text'] or ''
-                            note.url = n['url'] or ''
-                            self.notes.append(note)
+                            note.type = n['type']
+                            note.text = n['text']
+                            note.url = n['url']
+                            family.notes.append(note)
             
             except Exception as e:
-                print('Error get_family: {} {}'.format(e.__class__.__name__, e))            
+                print('Error get_family_data: {} {}'.format(e.__class__.__name__, e))            
                 raise      
     
+        return family
+
     
     @staticmethod           
     def get_dates_parents(tx, uniq_id):
         return tx.run(Cypher_family.get_dates_parents,id=uniq_id)
 
     @staticmethod           
-    def set_dates_sortnames(tx, uniq_id, datetype, date1, date2, father_sortname, mother_sortname):
-        return tx.run(Cypher_family.set_dates_sortname, id=uniq_id, 
-              datetype=datetype, date1=date1, date2=date2,
-              father_sortname=father_sortname, mother_sortname=mother_sortname)
+    def set_dates_sortnames(tx, uniq_id, dates, father_sortname, mother_sortname):
+        ''' Update Family dates and parents' sortnames.
+        '''
+        f_attr = {
+            "father_sortname": father_sortname,
+            "mother_sortname": mother_sortname
+        }
+        if dates:
+            f_attr.update(dates.for_db())
+
+        return tx.run(Cypher_family.set_dates_sortname, 
+                      id=uniq_id, f_attr=f_attr)
 
 
     @staticmethod       

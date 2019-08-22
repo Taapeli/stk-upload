@@ -4,6 +4,9 @@ Created on 12.8.2018
 @author: jm
 '''
 import logging 
+import os
+from flask import send_file
+from bp.scene.models import media
 logger = logging.getLogger('stkserver')
 import time
 
@@ -15,7 +18,6 @@ from . import bp
 from bp.scene.scene_reader import get_a_person_for_display_apoc
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
-#from models.gen.place import Place
 from models.gen.place_combo import Place_combo
 from models.gen.source import Source
 
@@ -204,6 +206,9 @@ def show_a_person_w_apoc(uid):
 
 #     print(person.sex_str())
     print("-> bp.scene.routes.show_a_person_w_apoc")
+    from bp.scene.models.media import get_thumbname
+    for i in person.media_ref:
+        print(get_thumbname(objs[i].uuid))
     return render_template("/scene/person_pg.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
@@ -258,22 +263,27 @@ def show_families():
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 @bp.route('/scene/family=<int:fid>')
-def show_famiy_page(fid):
+def show_family_page(fid):
     """ Home page for a Family.
 
         fid = id(Family)
     """
     try:
-        family = Family_combo()   #, events = get_place_with_events(fid)
-        family.uniq_id = fid
-        family.get_family_data()
+#         family = Family_combo()   #, events = get_place_with_events(fid)
+#         family.uniq_id = fid
+        family = Family_combo.get_family_data(fid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in place_list:
-#         print ("# {} ".format(p))
-#     for u in place.notes:
-#         print ("# {} ".format(u))
+
     return render_template("/scene/family.html", family=family, menuno=3)
+
+@bp.route('/pop/family=<int:fid>')
+def show_family_popup(fid):
+    """ Small Family pop-up.
+    """
+    #TODO Gen only fewer pieces of data
+    family = Family_combo.get_family_data(fid)
+    return render_template("/scene/family_pop.html", family=family)
 
 # ------------------------------ Menu 4: Places --------------------------------
 
@@ -335,4 +345,22 @@ def show_source_page(sourceid):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     return render_template("/scene/source_events.html",
                            source=source, citations=citations)
+
+@bp.route('/scene/media/<fname>')
+def fetch_media(fname):
+    """ Fetch media file, assumes jpg, fix later...
+    """
+    uuid = request.args.get("id")
+    fullname, mimetype = media.get_fullname(uuid)
+    return send_file(fullname, mimetype=mimetype)        
+
+@bp.route('/scene/thumbnail')
+def fetch_thumbnail():
+    """ Fetch thumbnail
+    """
+    uuid = request.args.get("id")
+    thumbname = media.get_thumbname(uuid)
+    print(thumbname)
+    return send_file(thumbname, mimetype='image/jpg')
+
 

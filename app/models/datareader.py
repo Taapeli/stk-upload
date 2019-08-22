@@ -234,6 +234,10 @@ def read_cite_sour_repo(uniq_id=None):
                 for record_source in result_source:
                     if record_source['stitle']:
                         s.stitle = record_source['stitle']
+                    if record_source['sauthor']:
+                        s.sauthor = record_source['sauthor']
+                    if record_source['spubinfo']:
+                        s.spubinfo = record_source['spubinfo']
 
                     s.get_repositories_w_notes()
 
@@ -307,7 +311,9 @@ def get_repositories(uniq_id=None):
             s = Source()
             s.uniq_id = node[0]
             s.stitle = node[1]
-            s.reporef_medium = node[2]
+            s.sauthor = node[2]
+            s.spubinfo = node[3]
+            s.reporef_medium = node[4]
             r.sources.append(s)
 
         repositories.append(r)
@@ -725,24 +731,28 @@ def get_person_data_by_id(uniq_id):
                         s = Source()
                         s.uniq_id = source[0]
                         s.stitle = source[1]
-                        s.reporef_medium = source[2]
+                        s.sauthor = source[2]
+                        s.spubinfo = source[3]
+                        s.reporef_medium = source[4]
 
                         r = Repository()
-                        r.uniq_id = source[3]
-                        r.rname = source[4]
-                        r.type = source[5]
+                        r.uniq_id = source[5]
+                        r.rname = source[6]
+                        r.type = source[7]
 
                         s.repositories.append(r)
                         c.source = s
 
                     print("Eve:{} {} > Cit:{} '{}' > Sour:{} '{}' > Repo:{} '{}'".\
-                          format(e.uniq_id, e.id, c.uniq_id, c.page, s.uniq_id, s.stitle, r.uniq_id, r.rname))
+                          format(e.uniq_id, e.id, c.uniq_id, c.page, s.uniq_id, 
+                                 s.stitle, s.sauthor, s.spubinfo, r.uniq_id, r.rname))
                     citations.append(c)
 
     for link in p.media_ref:
-        o = Media()
-        o.uniq_id = link
-        o.get_data()
+        #o = Media()
+        #o.uniq_id = link
+        #o.get_data()
+        o = Media.from_uniq_id(link)
         photos.append(o)
 
     # Families
@@ -845,9 +855,9 @@ def get_baptism_data(uniq_id):
     e.get_event_combo()
 
     if e.place_ref:
-        place = Place()
+        place = Place_combo()
         place.uniq_id = e.place_ref[0]
-        place.read_w_notes()
+        place.get_w_notes(place.uniq_id)
         # Location / place data
         e.location = place.pname
         e.locid = place.uniq_id

@@ -16,13 +16,14 @@ MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch) 
     WHERE b.id STARTS WITH $batch_base 
 RETURN b.id AS bid
-    ORDER BY b.bid DESC 
+    ORDER BY bid DESC 
     LIMIT 1"""
 
     batch_create = """
 MATCH (u:UserProfile {username: $b_attr.user})
 MERGE (u) -[:HAS_LOADED {status: $b_attr.status}]-> (b:Batch {id: $b_attr.id})
-    SET b = $b_attr"""
+    SET b = $b_attr
+    SET b.timestamp = timestamp()"""
 
     batch_complete = """
 MATCH (u:UserProfile {username: $user})
@@ -42,10 +43,34 @@ RETURN b AS bid
 ORDER BY bid 
     """
 
+    batch_list_all = """
+MATCH (b:Batch) 
+RETURN b 
+    """
+
     batch_count = """
+MATCH (u:UserProfile {username: $user})
+MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid})
+RETURN COUNT(b) as cnt
+"""
+
+    batch_person_count = """
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid}) --> (p:Person)
 RETURN COUNT(p) as cnt
+"""
+
+    batch_delete = """
+MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
+OPTIONAL MATCH
+    (b) -[*]-> (n) 
+DETACH DELETE b, n
+"""
+
+    
+    batch_find = """
+MATCH (b:Batch {id: $batch_id}) 
+RETURN b
 """
 
 #     batch_x = """
@@ -147,6 +172,11 @@ MERGE (n)-[r:CHILD]->(m)"""
 MATCH (n:Family) WHERE n.handle=$f_handle
 MATCH (m:Note)   WHERE m.handle=$n_handle
 CREATE (n)-[r:NOTE]->(m)"""
+
+    link_citation = """
+MATCH (n:Family) WHERE n.handle=$f_handle
+MATCH (m:Citation) WHERE m.handle=$c_handle
+CREATE (n)-[r:CITATION]->(m)"""
 
 
 class Cypher_media_in_batch():
@@ -315,7 +345,7 @@ WITH n
     link_note = """
 MATCH (pl:Place) WHERE id(pl) = $pid
 MATCH (n:Note)  WHERE n.handle=$hlink
-CREATE (pl) -[r:NOTE]-> (m)"""
+CREATE (pl) -[r:NOTE]-> (n)"""
 
 # class Cypher_place_w_handle():
 #     """ For Place class """

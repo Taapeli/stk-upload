@@ -45,7 +45,7 @@ class Cypher_person():
     all_nodes_query_w_apoc="""
 MATCH (p:Person) WHERE id(p) = $pid
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 
-        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<FATHER|<MOTHER'}) 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<PARENT'}) 
     YIELD nodes, relationships
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
@@ -223,7 +223,10 @@ class Cypher_name():
 CREATE (n:Name) SET n = $n_attr
 WITH n
 MATCH (p:Person)    WHERE ID(p) = $parent_id
-MERGE (p)-[r:NAME]->(n)"""
+MERGE (p)-[r:NAME]->(n)
+WITH n
+match (c:Citation) where c.handle in $citation_handles
+merge (n) -[r:CITATION]-> (c)"""
 
 
 class Cypher_event():
@@ -301,16 +304,25 @@ RETURN f, p.pname AS marriage_place,
     get_family_data = """
 MATCH (f:Family) WHERE ID(f)=$pid
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
-OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+    OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+    OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})
+    OPTIONAL MATCH (pp) -[:EVENT]-> (pde:Event {type:"Death"})
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
-OPTIONAL MATCH (f) -[:EVENT]-> (e:Event {type:"Marriage"})-[:PLACE]->(p:Place)
-OPTIONAL MATCH (e) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
-OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
-RETURN f, p.pname AS marriage_place,
-    COLLECT([r.role, pp, np]) AS parent, 
-    COLLECT(DISTINCT pc) AS child, 
-    COUNT(DISTINCT pc) AS no_of_children,
-    COLLECT(DISTINCT [re, s, c]) AS sources,
+    OPTIONAL MATCH (pc) -[:NAME]-> (nc:Name {order:0}) 
+    OPTIONAL MATCH (pc) -[:EVENT]-> (cbe:Event {type:"Birth"})
+    OPTIONAL MATCH (pc) -[:EVENT]-> (cde:Event {type:"Death"})
+WITH f, r, pp, np, pbe, pde, pc, nc, cbe, cde ORDER BY cbe.date1
+    OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event) // {type:"Marriage"})-[:PLACE]->(p:Place)
+        OPTIONAL MATCH (fe) -[:PLACE]-> (fep:Place)
+    OPTIONAL MATCH (f) -[:CITATION]-> (fc:Citation) -[:SOURCE]-> (fs:Source)-[:REPOSITORY]-> (fre:Repository)
+    OPTIONAL MATCH (fe) -[:CITATION]-> (c:Citation) -[:SOURCE]-> (s:Source)-[:REPOSITORY]-> (re:Repository)
+    OPTIONAL MATCH (f) -[:NOTE]- (note:Note) 
+RETURN f, 
+    COLLECT(DISTINCT [fe, fep]) AS family_event,    //p.pname AS marriage_place,
+    COLLECT(DISTINCT [r.role, pp, np, pbe, pde]) AS parent, 
+    COLLECT(DISTINCT [pc, nc, cbe, cde]) AS child, 
+    // COUNT(DISTINCT pc) AS no_of_children,
+    COLLECT(DISTINCT [re, s, c]) + COLLECT(DISTINCT [fre, fs, fc]) AS sources,
     COLLECT(DISTINCT note) AS note"""
     
     #TODO Obsolete
@@ -371,19 +383,22 @@ OPTIONAL MATCH (father)-[:EVENT]-(father_death:Event {type:"Death"})
 OPTIONAL MATCH (family)-[:PARENT {role:"mother"}]-(mother:Person)
 OPTIONAL MATCH (mother)-[:EVENT]-(mother_death:Event {type:"Death"})
 OPTIONAL MATCH (family)-[:EVENT]-(event:Event) WHERE event.type="Marriage"
-OPTIONAL MATCH (f)-[:EVENT]-(divorce_event:Event {type:"Divorce"})
+OPTIONAL MATCH (family)-[:EVENT]-(divorce_event:Event {type:"Divorce"})
 RETURN father.sortname AS father_sortname, father_death.date1 AS father_death_date,
        mother.sortname AS mother_sortname, mother_death.date1 AS mother_death_date,
        event.date1 AS marriage_date, divorce_event.date1 AS divorce_date"""
 
 
+#     set_dates_sortname = """
+# MATCH (family:Family) WHERE ID(family) = $id
+# SET family.datetype=$datetype
+# SET family.date1=$date1
+# SET family.date2=$date2
+# SET family.father_sortname=$father_sortname
+# SET family.mother_sortname=$mother_sortname"""
     set_dates_sortname = """
 MATCH (family:Family) WHERE ID(family) = $id
-SET family.datetype=$datetype
-SET family.date1=$date1
-SET family.date2=$date2
-SET family.father_sortname=$father_sortname
-SET family.mother_sortname=$mother_sortname"""
+SET family += $f_attr"""
 
 
 class Cypher_place():
@@ -487,7 +502,7 @@ return extract(x IN rel | endnode(x))  as end, source_id
     _cita_sour_repo_tail = """
 RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidence, 
    note.text AS notetext,
-   COLLECT(DISTINCT [ID(source), source.stitle, 
+   COLLECT(DISTINCT [ID(source), source.stitle, source.sauthor, source.spubinfo, 
                      rr.medium, 
                      ID(repo), repo.rname, repo.type]) AS sources"""
 
@@ -570,7 +585,7 @@ return id(r) AS uniq_id,
     r.change as change,
     r.handle as handle,
     r.id as id,
-    collect(distinct [id(s), s.stitle, rr.medium]) AS sources,
+    collect(distinct [id(s), s.stitle, s.sauthor, s.spubinfo, rr.medium]) AS sources,
     collect(distinct w) as notes
 order by r.rname"""
 

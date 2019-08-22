@@ -1,0 +1,325 @@
+{# templates/admin/start.html_ #}
+{% extends "/a_layout.html" %}
+{% block title %}{{ _('Duplicates search') }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+
+<!-- development version, includes helpful console warnings -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<!-- production version, optimized for size and speed -->
+<!-- script src="https://cdn.jsdelivr.net/npm/vue"></script -->
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<style>
+div.searchkey { display: none; }
+td.matchvector:hover ~ td > div.searchkey { display: inline; }
+</style>
+
+<div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
+  <h2>{{ _('Duplicates search') }}</h2>
+
+    <div class="startbox2">
+        <h3>{{ _('Data Batches') }}</h3>
+        <table width="100%">
+        <tr>
+            <th>{{ _('Select') }}</th>
+            <th>{{ _('Batch') }}</th>
+            <th>{{ _('User') }}</th>
+            <th>{{ _('File') }}</th>
+            <th>{{ _('Has searchkeys') }}</th>
+            <th>{{ _('Search in') }}</th>
+        </tr>
+        <tr v-for="batch in batches">
+            <td><input type=radio name=select v-model="batch1" v-bind:value="batch">
+        	<td>${ batch.id }
+        	<td>${ batch.user }
+        	<td>${ batch.file }
+        	<td>${ batch.has_searchkeys }
+            <td><input type=radio name=select2 v-model="batch2" v-bind:value="batch">
+        </tr>
+        </table>
+        <table>
+        <tr>
+        	<td>Min score: <input v-model="minscore" size=5 type=number>
+        	<td>Min items: <input v-model="minitems" size=5 type=number>
+        	<td>Name match: <input v-model="namematch" size=15>
+        </table>
+    	<p>
+        <button v-on:click="search_duplicates" v-bind:disabled="!batch1 || !batch2">
+        	{{ _('Search duplicates') }}
+    	</button>
+        Using model: <select v-model="selected_model">
+        	<option v-for="model in models" v-bind:value="model">
+        		${ model }
+        	</option>
+        </select>
+        <p>
+        <button v-on:click="generate_keys" v-bind:disabled="!batch1">
+        	{{ _('Generate comparison keys') }}
+    	</button>
+        <button v-on:click="remove_keys" v-bind:disabled="!batch1">
+        	{{ _('Remove comparison keys') }}
+    	</button>
+
+
+    	<p>
+        {{ _('Upload training data') }}: 
+        <input type="file" id="file">
+        <button v-on:click="upload_training_data">
+        	{{ _('Upload') }}
+    	</button>
+    	
+    	<p>
+        <button v-on:click="create_index">
+        	{{ _('Create index') }}
+    	</button>
+        <button v-on:click="drop_index">
+        	{{ _('Drop index') }}
+    	</button>
+    </div>
+
+    <div class="startbox2">
+    	${ status }
+		<div v-if="operation == 'generate_keys'">
+			Generated keys for ${ gencount } people
+		</div>
+		<div v-if="operation == 'remove_keys'">
+			Removed keys for ${ gencount } people
+		</div>
+		<div v-if="operation == 'search_duplicates'">
+			Search result
+			<table>
+			<tr>
+				<th>Score
+				<th>Matchvector
+				<th>Person 1
+				<th>Person 2
+				<th>Names match?
+				<th>Match?
+			<tr v-for="match in matches" class="match_row">
+				<td>${ match.score.toFixed(2) }
+				<td class="matchvector">${ match.matchvector }
+				<td><a 
+						target=_blank 
+						v-bind:href="'/scene/person=' + match.p1.pid"
+						class="plink"
+					>
+					${ match.p1.name }
+					</a>
+					<div class="searchkey">${ match.p1.searchkey }</div> 
+				<td><a 
+						target=_blank 
+						v-bind:href="'/scene/person=' + match.p2.pid"
+						class="plink"
+					>
+					${ match.p2.name }
+					</a> 
+					<div class="searchkey">${ match.p2.searchkey }</div> 
+				<td><span v-if="match.p1.name == match.p2.name">Same name</span>
+				<td>${ match.match_value }
+			</tr>
+			</table>
+			${ matches.length } matches
+		</div>
+	</div>
+
+
+</div>
+
+<script>
+
+function log(msg) {
+	console.log(msg);
+}
+
+var app = new Vue({
+    delimiters: ['${', '}'],
+    el: '#myApp',
+    created: function() {
+        this.init();    
+    },
+    data: {
+        batches: [],
+        matches: [],
+        models: [],
+        output: "",
+        status: "",
+        batch1: undefined,
+        batch2: undefined,
+        minscore: 5.0,
+        minitems: 5,
+        selected_model:'',
+        namematch: '',
+        operation:undefined,
+        gencount:undefined,
+        matchcount:undefined,
+        p1_active: false,
+        p2_active: false,
+        i: 0,
+        done: false
+    }, // data
+    methods: {
+        init: function() {
+            this.fetch_batches();
+            this.get_models();
+        },
+
+		generate_keys:  function(q) {
+			log("Generating");
+			//app.status = "Generating keys for " + app.batch1.id; 
+            app.operation = undefined;
+			app.done = false;
+			app.i = 0;
+			app.msg = "Generating keys for " + app.batch1.id + " ... ";
+			setTimeout(app.logger,1000);
+            axios.get('/dupsearch/generate_keys/' + app.batch1.id).
+                then(function(rsp, status) {
+					app.done = true;
+                    app.gencount = rsp.data;
+					app.status += " done";
+                    app.operation = 'generate_keys';
+                    app.fetch_batches();
+                }, function () {
+					app.done = true;
+					app.status += " FAILED";
+					//app.status = "Generation failed";
+                });
+		},
+
+		remove_keys:  function(q) {
+			log("remove_keys");
+			app.status = "Removing keys for " + app.batch1.id;
+            app.operation = undefined;
+			app.done = false;
+			app.i = 0;
+			app.msg = "Removing keys for " + app.batch1.id + " ... ";
+			setTimeout(app.logger,1000);
+            axios.get('/dupsearch/remove_keys/' + app.batch1.id).
+                then(function(rsp, status) {
+					app.done = true;
+                    app.gencount = rsp.data;
+					app.status += " done";
+                    app.operation = 'remove_keys';
+                    app.fetch_batches();
+                }, function () {
+					app.done = true;
+					app.status += " FAILED";
+					//app.status = "Removing failed";
+                });
+			
+		},
+
+
+
+		logger: function () {
+			if (!app.done) { 
+				//app.status = "\nSearching... " + app.i;
+				app.status = app.msg + app.i;
+				app.i += 1;
+				setTimeout(app.logger,1000);
+			}
+		},
+
+		search_duplicates:  function(q) {
+			log("search_duplicates");
+            app.operation = undefined;
+			app.status = "";
+			app.i = 0;
+			app.done = false;
+			app.msg = "Searching... "
+			setTimeout(app.logger,1000);
+            axios.post('/dupsearch/search', {
+            	batchid1: app.batch1.id,
+            	batchid2: app.batch2.id,
+            	minscore: app.minscore,
+            	minitems: app.minitems,
+            	model: app.selected_model,
+            	namematch: app.namematch
+            	}).
+                then(function(rsp, status) {
+					app.done = true;
+                    log(rsp);
+					app.status = "";
+                    app.operation = 'search_duplicates';
+                    app.matches = rsp.data;
+                    app.matchcount = app.matches.length;
+                }, function () {
+					app.done = true;
+					app.status = "Search failed";
+                });
+		},
+
+        fetch_batches: function(q) {
+            axios.get('/dupsearch/batches').
+                then(function(rsp, status) {
+                    log(rsp);
+                    app.batches = rsp.data;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Fetching batches failed";
+                });
+        },
+        
+        create_index: function(q) {
+            axios.get('/dupsearch/create_index').
+                then(function(rsp, status) {
+                    log(rsp);
+					app.status = "Index created";
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Index creation failed";
+                });
+        },
+        
+        drop_index: function(q) {
+            axios.get('/dupsearch/drop_index').
+                then(function(rsp, status) {
+                    log(rsp);
+					app.status = "Index dropped";
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Index drop failed";
+                });
+        },
+
+        get_models: function(q) {
+            axios.get('/dupsearch/get_models').
+                then(function(rsp, status) {
+                    log(rsp);
+                    app.models = rsp.data;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Fetching models failed";
+                });
+        },
+
+        upload_training_data: function() {
+			var data = new FormData();
+			data.append('file', document.getElementById('file').files[0]);
+            axios.post('/dupsearch/upload', data ).
+                then(function(rsp, status) {
+					app.done = true;
+                    log(rsp);
+					app.status = "";
+					app.get_models();
+                }, function () {
+					app.done = true;
+					app.status = "Upload failed";
+                });
+      	}
+    } // methods
+
+});
+
+</script>
+
+
+
+{% endblock %}

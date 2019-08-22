@@ -8,14 +8,18 @@
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 <script>
-function selectFile(sel) {
+var selected_batch_id = '';
+
+function selectFile(sel,batch_id,xml_name) {
     document.getElementById('nm').innerHTML=sel.value;
-    
+    selected_batch_id = batch_id;
     var buttons = document.getElementsByTagName('button');
     for (var i = 0, length = buttons.length; i < length; i++)
     {
      buttons[i].disabled = false;
     }
+    if (batch_id == '') document.getElementById('batch_delete').disabled = true;
+    if (xml_name == '') document.getElementById('xml_delete').disabled = true;
 };
 
 $(document).ready( function() {
@@ -45,12 +49,34 @@ $(document).ready( function() {
     });
 
     $("#xml_delete").click(function(e) {
-        $("#form").attr("action","/gramps/xml_delete/" + 
-                document.getElementById('nm').innerText);
-        $("#form").submit();
+        if (confirm_delete('xml')) {
+	        $("#form").attr("action","/gramps/xml_delete/" + 
+	                document.getElementById('nm').innerText);
+	        $("#form").submit();
+        }
+    });
+
+    $("#batch_delete").click(function(e) {
+        if (confirm_delete('batch')) {
+	        $("#form").attr("action","/gramps/batch_delete/" + selected_batch_id);
+	        $("#form").submit();
+        };
     });
 
 });
+
+function confirm_delete(subj) {
+	if (subj == 'xml') {
+		var msg = "{{ _('Are you sure you want to delete the XML file?') }}";
+	} else {
+	    var msg = "{{ _('Are you sure you want to delete this batch from database?') }}";
+	}
+    var ok = confirm(msg);
+    if (!ok) {
+        return false;
+    }
+    return true;
+}
 </script>
 
 {{ hamburger_menu( (
@@ -58,7 +84,7 @@ $(document).ready( function() {
 
 <div id="startdiv">
   <div>
-    <h2>{{ _("Uploads from Gramps") }}</h2>
+    <h2>{{ _("Uploaded Candidate Materials") }}</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -69,7 +95,7 @@ $(document).ready( function() {
       {% endif %}
     {% endwith %}
 
-    <h3>{{ _("Status for differents steps in XML file upload") }}</h3>
+    <h3>{{ _("Steps for uploading Gramps files") }}</h3>
     <div class="steps">
         <div>1. {{ _("UPLOADED") }}<br>{{ _("the file has been uploaded to server") }}</div> –
         <div>2. {{ _("STORING") }}<br>{{ _("the file content is being stored to the database") }}</div>
@@ -85,15 +111,16 @@ $(document).ready( function() {
     <table class="fileselect" style="border-width: 2px 3px 3px 2px; min-width: 725px;">
            <tr> <th></th>
                 <th>{{ _("Upload time") }}</th>
-                <th>{{ _("XML file") }}</th>
-                <th>{{ _("Batch") }}</th>
-                <th>{{ _("Persons") }}</th>
+                <th>{{ _("Gramps file") }}</th>
+                <th>{{ _("Batch id") }}</th>
+                <th>{{ _("Person count") }}</th>
                 <th>{{ _("Status") }}</th>
    			</tr>
 	    {% for upload in uploads %}
 	       <tr>
 	           <td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
-	                   onClick="selectFile(this);"></td>
+	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}');">
+	           </td>
 	           <td>{{upload.upload_time_s}}</td>
 	           <td>{{upload.xmlname}}</td>
                <td>{% if upload.batch_id %}
@@ -116,17 +143,17 @@ $(document).ready( function() {
       <form id="form" action="" method="get">
 	    <h3>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h3>
         <div>
-            <button id="download" disabled>{{ _("Download to your computer") }}</button>
+            <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
             <button id="start_upload" disabled>{{ _("Store to database") }}</button>
             <button id="show_log" disabled>{{ _("Show last log") }}</button>
+            <button id="batch_delete" disabled>{{ _("Delete from database") }}</button>
             <button id="xml_delete" disabled>{{ _("Delete the file") }}</button>
-	    </div>
 	  </form>
     </div>
     
   <p>&rtrif; <a href="/gramps">{{ _("Send a new Gramps file") }}</a><br>
    {% if current_user.is_authenticated and current_user.has_role('member') %}
-	&rtrif; <a href="/scene/persons_all?div=2">{{ _('See your own data') }}</a><br>
+	&rtrif; <a href="/scene/persons_all?div=2">{{ _('Look at your candidate materials') }}</a><br>
    {% endif %}
     &rtrif; <a href="javascript:history.back()">{{ _("Return to front page") }}</a>
   </p>

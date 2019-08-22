@@ -44,8 +44,8 @@ class Family:
         self.rel_type = ''
         self.dates = None       #TODO DateRange marriage .. divorce
         # Sorting name of family's father and mother
-        self.sortfather = ''
-        self.sortmother = ''
+        self.father_sortname = ''
+        self.mother_sortname = ''
 
 # See: Family_combo, bp.gramps.models.family_gramps.Family_gramps
 #         self.father = None

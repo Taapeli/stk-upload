@@ -34,6 +34,8 @@ class Source:
         self.change = 0
         self.id = ''
         self.stitle = ''
+        self.sauthor = ''
+        self.spubinfo = ''
         
 #         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
 #         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
@@ -47,7 +49,7 @@ class Source:
         self.notes = []
 
     def __str__(self):
-        return "{} '{}'".format(self.id, self.stitle)
+        return "{} '{}' '{}' '{}'".format(self.id, self.stitle, self.sauthor, self.spubinfo)
 
 
     @classmethod
@@ -64,6 +66,8 @@ class Source:
         s.id = node['id']
         s.handle = node['handle']
         s.stitle = node['stitle']
+        s.sauthor = node['sauthor']
+        s.spubinfo = node['spubinfo']
         s.change = node['change']
         return s
 
@@ -298,6 +302,14 @@ return s'''
                 data_line.append(record["s"]['stitle'])
             else:
                 data_line.append('-')
+            if record["s"]['sauthor']:
+                data_line.append(record["s"]['sauthor'])
+            else:
+                data_line.append('-')
+            if record["s"]['spubinfo']:
+                data_line.append(record["s"]['spubinfo'])
+            else:
+                data_line.append('-')
                 
             lists.append(data_line)
         
@@ -316,7 +328,7 @@ return s'''
                 
         result = shareds.driver.session().run(query)
         
-        titles = ['uniq_id', 'handle', 'change', 'id', 'stitle']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'stitle', 'sauthor', 'spubinfo']
         lists = []
         
         for record in result:
@@ -339,6 +351,14 @@ return s'''
                 data_line.append('-')
             if record["s"]['stitle']:
                 data_line.append(record["s"]['stitle'])
+            else:
+                data_line.append('-')
+            if record["s"]['sauthor']:
+                data_line.append(record["s"]['sauthor'])
+            else:
+                data_line.append('-')
+            if record["s"]['spubinfo']:
+                data_line.append(record["s"]['spubinfo'])
             else:
                 data_line.append('-')
                 
@@ -368,6 +388,10 @@ return s'''
         print ("Id: " + self.id)
         if self.stitle != '':
             print ("Stitle: " + self.stitle)
+        if self.stitle != '':
+            print ("Sauthor: " + self.sauthor)
+        if self.stitle != '':
+            print ("Spubinfo: " + self.spubinfo)
         if self.note_handles:
             print (f"Note handles: {self.note_handles}")
         for repo in self.repositories:

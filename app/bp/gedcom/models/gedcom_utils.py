@@ -9,11 +9,12 @@ from flask_babelex import _
 
 from werkzeug.utils import secure_filename
 
-from models import util, syslog
-
-from bp.gedcom import APP_ROOT, GEDCOM_DATA, GEDCOM_APP, ALLOWED_EXTENSIONS
-
+from models import util #, syslog
+from bp.gedcom import GEDCOM_DATA, GEDCOM_APP #, APP_ROOT, ALLOWED_EXTENSIONS
 from .. import transformer
+
+# Default document server
+DOC_SERVER = 'http://mwikitammi.paas.datacenter.fi/index.php'
 
 # --------------------- GEDCOM functions ------------------------
 
@@ -24,7 +25,7 @@ def init_log(logfile):
             os.rename(logfile, logfile + '~')
     except:
         pass
-    logging.basicConfig(filename=logfile,level=logging.INFO, format='%(levelname)s:%(message)s')
+    logging.basicConfig(filename=logfile, level=logging.INFO, format='%(levelname)s:%(message)s')
 
 def history_init(gedcom_fname):
     history_file_name = gedcom_fname + "-history"
@@ -141,7 +142,10 @@ def get_transforms():
         if hasattr(transformer,"docline"):
             t.docline = transformer.docline
         if hasattr(transformer,"doclink"):
-            t.doclink = transformer.doclink
+            if transformer.doclink.startswith('/'):
+                t.doclink = DOC_SERVER + transformer.doclink
+            else:
+                t.doclink = transformer.doclink
         else:
             t.doclink = ""
 
@@ -182,32 +186,54 @@ def removefile(fname):
     except FileNotFoundError:
         pass
 
-def display_changes(lines,item,linenum=None):
-    class Out:
-        def emit(self,s):
-            print(s)
-
-    if not item: 
-        print("<b>"+_("Deleted:")+"</b>")
-        print("<gedcom-text>")
-        for line in lines:
+def display_changed_lines(old_lines, new_lines, linenum=None):
+    if old_lines is None: 
+        print("<div><b>"+_("Added:")+"</b></div><gedcom-text>", end="")
+        for line in new_lines:
             print(line)
         print("</gedcom-text>")
-        print()
+        print("<hr>")  
         return
-    print("<b>"+_("Replaced:")+"</b>")
-    if linenum: print("("+_("starting from line ")+f"<a href='#' class='gedcomlink'>{linenum}</a>)")
-    print("<gedcom-text>")
-    for line in lines:
+    if not new_lines: 
+        print("<div><b>"+_("Deleted:")+"</b></div><gedcom-replaced>", end="")
+        if linenum: 
+            print(f"{_('starting from line ')}<a href='#' class='gedcomlink'>{linenum}</a>")
+        for line in old_lines:
+            print(line)
+        print("</gedcom-replaced>")
+        print("<hr>")  
+        return
+    print("<div><b>"+_("Replaced:")+"</b>")
+    if linenum: 
+        print(f"{_('starting from line ')}<a href='#' class='gedcomlink'>{linenum}</a>")
+    print("</div><gedcom-replaced>", end="")
+    for line in old_lines:
+        print(line)
+    print("</gedcom-replaced>")
+    print("<div><b>"+_("With:")+"</b></div><gedcom-text>", end="")
+    for line in new_lines:
         print(line)
     print("</gedcom-text>")
-    print("<b>"+_("With:")+"</b>")
-    print("<gedcom-text>")
-    if isinstance(item, list):
-        for it in item:
-            it.print_items(Out())
-    else:
-        item.print_items(Out())
-    print("</gedcom-text>")
     print()
-    print("<br>-----------------------<br>")
+    print("<hr>")  
+
+def display_changes(lines,item,linenum=None):
+    class Out:
+        lines = []
+        def emit(self,line):
+            lines.append(line)
+
+    out = Out()
+
+    if not item:
+        display_changed_lines(lines,None)
+    else:
+        if isinstance(item, list):
+            for it in item:
+                it.print_items(out)
+        else:
+            item.print_items(out)
+    
+        display_changed_lines(lines,out.lines)
+    
+        

@@ -19,18 +19,17 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from models import email, util, syslog 
-
 from ..gramps import gramps_loader
-
 import shareds
 from models.cypher_gramps import Cypher_batch
+from ..admin.models.cypher_adm import Cypher_stats
 
 STATUS_UPLOADED     = "uploaded"
 STATUS_LOADING      = "loading"
 STATUS_DONE         = "done"
 STATUS_FAILED       = "failed"
 STATUS_ERROR        = "error"
-
+STATUS_REMOVED      = "removed"
 
 #===============================================================================
 # Background loading of a Gramps XML file
@@ -168,26 +167,51 @@ def initiate_background_load_to_neo4j(userid,filename):
     #                  + logname,
     #                   shell=True)
     #===========================================================================
-    def background_load_to_neo4j_thread():
-        background_load_to_neo4j(userid,filename)
+    def background_load_to_neo4j_thread(app):
+        with app.app_context():
+            background_load_to_neo4j(userid,filename)
         
-    threading.Thread(target=background_load_to_neo4j_thread,name="neo4j load for " + filename).start()
+    threading.Thread(target=background_load_to_neo4j_thread,
+                     args=(shareds.app,),
+                     name="neo4j load for " + filename).start()
     syslog.log(type="gramps file upload initiated",file=filename,user=userid)
-    
-    #for i in range(10):
-    #    if os.path.exists(logname): return True
-    #    time.sleep(0.5)
     return False
 
-def batch_count(username,batch_id):
-    with shareds.driver.session() as session:
-        tx = session.begin_transaction()
-        count = tx.run(Cypher_batch.batch_count, user=username, bid=batch_id).single().value()
-        tx.commit()
-        return count
-        
+# def batch_count(username,batch_id):
+#     count = shareds.driver.session().run(Cypher_batch.batch_count, 
+#                                          user=username, bid=batch_id).single().value()
+#     return count
+# #     with shareds.driver.session() as session:
+# #         tx = session.begin_transaction()
+# #         count = tx.run(Cypher_batch.batch_count, user=username, bid=batch_id).single().value()
+# #         tx.commit()
+# #         return count
+#         
+# def batch_person_count(username,batch_id):
+#     count = shareds.driver.session().run(Cypher_batch.batch_person_count, 
+#                                          user=username, bid=batch_id).single().value()
+#     return count
+# #     with shareds.driver.session() as session:
+# #         tx = session.begin_transaction()
+# #         count = tx.run(Cypher_batch.batch_person_count, user=username, bid=batch_id).single().value()
+# #         tx.commit()
+# #         return count
+
 def list_uploads(username):
-    ''' Gets a list of uploaded files and their process status '''
+    ''' Gets a list of uploaded files and their process status.
+    
+        Also db Batches without upload file are included in the list.
+    '''
+    # 1. List Batches, their status and Person count
+    batches = {}
+    result = shareds.driver.session().run(Cypher_stats.get_user_batch_names, 
+                                          user=username)
+    for record in result:
+        # <Record batch='2019-08-12.001' timestamp=None persons=1949>
+        batch = record['batch']
+        batches[batch] = (record['status'], record['persons'])
+
+    # 2. List uploaded files
     upload_folder = get_upload_folder(username)
     try:
         names = sorted([name for name in os.listdir(upload_folder)]) 
@@ -204,7 +228,7 @@ def list_uploads(username):
             status = meta["status"]
             batch_id = ""
             status_text = None
-            count = 0
+
             if status == STATUS_UPLOADED:
                 status_text = _("UPLOADED")
             elif status == STATUS_LOADING:
@@ -216,18 +240,24 @@ def list_uploads(username):
                 status_text = _("STORED")
                 if 'batch_id' in meta:
                     batch_id = meta['batch_id']
-                    count = batch_count(username,batch_id)
-                    if count == 0:
-                        status_text = _("REMOVED")
-                        batch_id = ""
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
+            elif status == STATUS_REMOVED:
+                status_text = _("REMOVED")
+
+            if not batch_id in batches:
+                #status_text = _("REMOVED")
+                batch_id = ""
+                person_count = 0
+            else:
+                status, person_count = batches.pop(batch_id)
+
             if status_text:
                 upload = Upload()
                 upload.xmlname = xmlname
                 upload.status = status_text
                 upload.batch_id = batch_id
-                upload.count = count
+                upload.count = person_count
                 upload.done = (status_text == _("STORED"))
                 upload.uploaded = (status_text == _("UPLOADED"))
                 upload.loading = (status_text == _("STORING"))
@@ -235,6 +265,20 @@ def list_uploads(username):
                 upload.upload_time_s = util.format_timestamp(upload.upload_time)
                 upload.user = username
                 uploads.append(upload)
+    
+    # 3. Add batches where there is no file
+    for batch, item in batches.items():
+        upload = Upload()
+        upload.batch_id = batch
+        status, count = item
+        if status == "started":
+            upload.status = _("UNKNOWN")
+        elif status == "completed":
+            upload.status = _("STORED")
+        upload.count = count
+        upload.upload_time = 0.0
+        uploads.append(upload)
+        
     return sorted(uploads,key=lambda x: x.upload_time)
 
 def list_uploads_all(users):
@@ -257,3 +301,8 @@ def delete_files(username, xmlfile):
     removefile(os.path.join(upload_folder,xmlfile))
     removefile(os.path.join(upload_folder,xmlfile+".meta"))
     removefile(os.path.join(upload_folder,xmlfile+".log"))
+    i = xmlfile.rfind(".")
+    if i >= 0:
+        file_cleaned = xmlfile[:i] + "_clean" + xmlfile[i:]
+        removefile(os.path.join(upload_folder,file_cleaned))
+        

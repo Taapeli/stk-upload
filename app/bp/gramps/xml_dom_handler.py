@@ -119,9 +119,40 @@ class DOM_handler():
                 self.blog.log_event({'title':_("Database save failed due to {} {}".\
                                      format(e.__class__.__name__, e)), 'level':"ERROR"})
 
+    def remove_handles(self):
+        cypher_remove_handles = """
+            match (b:Batch {id:$batch_id}) -[*]-> (a)
+            remove a.handle
+        """
+        self.tx.run(cypher_remove_handles,batch_id=self.batch_id)
+
+    def add_links(self):
+        cypher_add_links = """
+            match (n) where exists (n.handle)
+            match (b:Batch{id:$batch_id})
+            merge (b)-[:OWNS_OTHER]->(n)
+            remove n.handle
+        """
+        self.tx.run(cypher_add_links,batch_id=self.batch_id)
 
     # ---------------------   XML subtree handlers   --------------------------
 
+
+    def set_mediapath(self, path):
+        self.tx.run("match (b:Batch{id:$batch_id}) set b.mediapath = $path", 
+                    batch_id=self.batch_id, path=path)
+    
+    
+    def handle_header(self):
+        # Get all the citations in the collection
+        for header in self.collection.getElementsByTagName("header"):
+            for mediapath in header.getElementsByTagName("mediapath"):
+                if (len(mediapath.childNodes) > 0):
+                    path = mediapath.childNodes[0].data
+                    self.set_mediapath(path)
+                    return
+        self.set_mediapath("")
+            
     def handle_citations(self):
         # Get all the citations in the collection
         citations = self.collection.getElementsByTagName("citation")
@@ -204,6 +235,17 @@ class DOM_handler():
                 e.change = int(event.getAttribute("change"))
             if event.hasAttribute("id"):
                 e.id = event.getAttribute("id")
+            if False and counter > 0 and counter % 1000 == 0: 
+                elapsed = time.time()-t0
+                eventspersec = counter/elapsed
+                remainingevents = len(events) - counter
+                remainingtime = remainingevents/eventspersec
+                print(f"Event {counter} {e.id} "
+                                         f"{time.asctime()} {elapsed:6.2f} "
+                                         f"{eventspersec:6.2f} "
+                                         f"{remainingevents} "
+                                         f"{remainingtime:6.2f} "
+                                         )
 
             if len(event.getElementsByTagName('type') ) == 1:
                 event_type = event.getElementsByTagName('type')[0]
@@ -344,6 +386,12 @@ class DOM_handler():
                     family_noteref = family.getElementsByTagName('noteref')[i]
                     if family_noteref.hasAttribute("hlink"):
                         f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
+                        
+            if len(family.getElementsByTagName('citationref') ) >= 1:
+                for i in range(len(family.getElementsByTagName('citationref') )):
+                    family_citationref = family.getElementsByTagName('citationref')[i]
+                    if family_citationref.hasAttribute("hlink"):
+                        f.citationref_hlink.append(family_citationref.getAttribute("hlink"))
 
             # print(f"# save Family {f}")
             f.save(self.tx, self.batch_id)
@@ -503,6 +551,12 @@ class DOM_handler():
                     elif len(person_name.getElementsByTagName('suffix') ) > 1:
                         self.blog.log_event({'title':"More than one suffix in a person",
                                              'level':"WARNING", 'count':p.id})
+
+                    if len(person_name.getElementsByTagName('citationref') ) >= 1:
+                        for i in range(len(person_name.getElementsByTagName('citationref') )):
+                            person_name_citationref = person_name.getElementsByTagName('citationref')[i]
+                            if person_name_citationref.hasAttribute("hlink"):
+                                pname.citation_handles.append(person_name_citationref.getAttribute("hlink"))
 
                     p.names.append(pname)
 
@@ -731,9 +785,32 @@ class DOM_handler():
 
             if len(source.getElementsByTagName('stitle') ) == 1:
                 source_stitle = source.getElementsByTagName('stitle')[0]
-                s.stitle = source_stitle.childNodes[0].data
+                if len(source_stitle.childNodes) > 0:
+                    s.stitle = source_stitle.childNodes[0].data
+                else:
+                    s.stitle = ""
             elif len(source.getElementsByTagName('stitle') ) > 1:
                 self.blog.log_event({'title':"More than one stitle in a source",
+                                     'level':"WARNING", 'count':s.id})
+
+            if len(source.getElementsByTagName('sauthor') ) == 1:
+                source_sauthor = source.getElementsByTagName('sauthor')[0]
+                if len(source_sauthor.childNodes) > 0:
+                    s.sauthor = source_sauthor.childNodes[0].data
+                else:
+                    s.sauthor = ""
+            elif len(source.getElementsByTagName('sauthor') ) > 1:
+                self.blog.log_event({'title':"More than one sauthor in a source",
+                                     'level':"WARNING", 'count':s.id})
+
+            if len(source.getElementsByTagName('spubinfo') ) == 1:
+                source_spubinfo = source.getElementsByTagName('spubinfo')[0]
+                if len(source_spubinfo.childNodes) > 0:
+                    s.spubinfo = source_spubinfo.childNodes[0].data
+                else:
+                    s.spubinfo = ""
+            elif len(source.getElementsByTagName('spubinfo') ) > 1:
+                self.blog.log_event({'title':"More than one spubinfo in a source",
                                      'level':"WARNING", 'count':s.id})
 
             for source_noteref in source.getElementsByTagName('noteref'):
@@ -759,24 +836,11 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
-# 
-#     def make_place_hierarchy(self):
-#         ''' Connect places to the upper place
-#         '''
-# 
-#         print ("***** {} Place hierarchy *****".format(len(self.place_ids)))
-#         t0 = time.time()
-#         hierarchy_count = 0
-# 
-#         for pl in self.place_ids:
-#             hc = dataupdater.make_place_hierarchy_properties(tx=self.tx, place=pl)
-#             hierarchy_count += hc
-# 
-#         self.blog.log_event({'title':"Place hierarchy", 
-#                                 'count':hierarchy_count, 'elapsed':time.time()-t0})
 
     def set_family_sortname_dates(self):
-        ''' For each Family set Family.father_sortname, Family.mother_sortname, 
+        ''' Set sortnames and dates for each Family in the list self.family_ids.
+
+            For each Family set Family.father_sortname, Family.mother_sortname, 
             Family.datetype, Family.date1 and Family.date2
         '''
 
@@ -793,7 +857,7 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Dates", 
                                 'count':dates_count, 'elapsed':time.time()-t0})
-        self.blog.log_event({'title':"Sorting names", 'count':sortname_count})
+        self.blog.log_event({'title':"Family sorting names", 'count':sortname_count})
         
 
     def set_person_sortname_refnames(self):
@@ -815,7 +879,7 @@ class DOM_handler():
 
         self.blog.log_event({'title':"Refname references", 
                                 'count':refname_count, 'elapsed':time.time()-t0})
-        self.blog.log_event({'title':"Sorting names", 'count':sortname_count})
+        self.blog.log_event({'title':"Person sorting names", 'count':sortname_count})
 
 
     def set_estimated_person_dates(self):

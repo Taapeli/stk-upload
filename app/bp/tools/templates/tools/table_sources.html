@@ -18,6 +18,8 @@
 <table>
     <tr><th>{{ _("uniq_id") }}</th>
         <th>{{ _("stitle") }}</th>
+        <th>{{ _("sauthor") }}</th>
+        <th>{{ _("spubinfo") }}</th>
         <th>{{ _("citations") }}</th>
     </tr>
 {% if sources %}
@@ -25,6 +27,8 @@
 	    <tr>
 	        <td><a href="/pick/source_uniq_id={{s.uniq_id}}">{{s.uniq_id}}</a></td>
 	        <td>{{s.stitle}}</td>
+	        <td>{{s.sauthor}}</td>
+	        <td>{{s.spubinfo}}</td>
 	        <td>{% if s.citations %}<ul>{% for c in s.citations %}
 	           <li>{{c.id}}: {{c.page}} ({{ _("confidence") }}:{{c.confidence}})
 	           {% endfor %}</ul>{% endif %}</td>

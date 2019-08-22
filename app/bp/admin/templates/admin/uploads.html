@@ -4,7 +4,7 @@
 {% block body %}
     {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
-    {% if num_requested_users > 0 %}
+    {% if num_requested_users %}
     	{% if num_users == 1 %}
 	    	<h2>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
     	{% else %}
@@ -50,8 +50,7 @@
 			    {% if not user %}
 	                <th>{{ _("User id") }}</th>
 			    {% endif %}
-                <th>{{ _("Upload time") }}</th>
-                <th>{{ _("XML file") }}</th>
+                <th>{{ _("Gramps file / uploaded at") }}</th>
                 <th>{{ _("Status") }}</th>
                 <th>{{ _("Operations") }}</th>
            </tr>
@@ -62,10 +61,9 @@
                     <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>{% else %}
                     <td>{{upload.user}}{% endif %}</td>
 			      {% endif %}
-	           <td class="msg_INFO">{{upload.upload_time_s}}</td>
 	           <td class="msg_INFO">
     	           <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}>
-    	               {{upload.xmlname}}</a> 
+    	               {{upload.xmlname}}</a> {{upload.upload_time_s}} 
 	           </td>
 	           <td class="msg_INFO">{{upload.status}}
 	           	{% if upload.batch_id %}

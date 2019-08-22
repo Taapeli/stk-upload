@@ -21,6 +21,8 @@ class Source_gramps(Source):
                 change
                 id              esim. "S0001"
                 stitle          str lähteen otsikko
+                sauthor         str lähteen tekijä
+                spubinfo        str lähteen julkaisutiedot
                 note_handles[]  str list note handles (ent. noteref_hlink)
                 repositories[]  Repository object containing 
                                 prev. reporef_hlink and reporef_medium
@@ -47,7 +49,9 @@ class Source_gramps(Source):
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
-                "stitle": self.stitle
+                "stitle": self.stitle,
+                "sauthor": self.sauthor,
+                "spubinfo": self.spubinfo
             }
 
 #             self.uniq_id = tx.run(Cypher_source_w_handle.create, s_attr=s_attr).single()[0]

@@ -2,7 +2,6 @@
 # Taapeli harjoitustyö @ Sss 2016
 # JMä 11.4.2016
 
-#import logging
 import time
 from flask_babelex import _
 
@@ -14,6 +13,7 @@ from models.gen.person_name import Name
 from models.gen.refname import Refname
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
+from models.gen.dates import DateRange, DR
 
 
 def make_place_hierarchy_properties(tx=None, place=None):
@@ -40,9 +40,10 @@ def make_place_hierarchy_properties(tx=None, place=None):
         
     
 def set_confidence_values(tx, uniq_id=None, batch_logger=None):
-    """ Sets a quality rate for one or all Persons
-        Asettaa henkilölle laatuarvion
-        
+    """ Sets a quality rate for one or all Persons.
+
+        Asettaa henkilölle laatuarvion.
+
         Person.confidence is mean of all Citations used for Person's Events
     """
     counter = 0
@@ -71,12 +72,12 @@ def set_confidence_values(tx, uniq_id=None, batch_logger=None):
 
 
 def set_estimated_person_dates(uids=None):
-    """ Sets an estimated lifietime in Person.lifetime
-        (the properties in Person node are datetype, date1, and date2)
-
-        With transaction, see gramps_loader.DOM_handler.set_estimated_dates_tr
+    """ Sets an estimated lifetime in Person.lifetime.
 
         Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+
+        The properties in Person node are datetype, date1, and date2.
+        With transaction, see gramps_loader.DOM_handler.set_estimated_dates_tr
 
         Called from bp.admin.routes.estimate_dates
     """
@@ -91,7 +92,9 @@ def set_estimated_person_dates(uids=None):
 
 
 def set_family_name_properties(tx=None, uniq_id=None):
-    """ Set Family.father_sortname and Family.mother_sortname using the data in Person
+    """ Set Family sortnames and estimated DateRange.
+
+        Set Family.father_sortname and Family.mother_sortname using the data in Person
         Set Family.date1 using the data in marriage Event
         Set Family.datetype and Family.date2 using the data in divorce or death Events
         If handler is defined
@@ -114,8 +117,8 @@ def set_family_name_properties(tx=None, uniq_id=None):
         mother_death_date = record['mother_death_date']
         marriage_date = record['marriage_date']
         divorce_date = record['divorce_date']
-        
-        datetype = None
+
+        dates=None
         end_date = None
         if divorce_date:
             end_date = divorce_date
@@ -131,17 +134,14 @@ def set_family_name_properties(tx=None, uniq_id=None):
 
         if marriage_date:
             if end_date:
-                datetype = "3"
+                dates = DateRange(DR['PERIOD'], marriage_date, end_date)
             else:
-                datetype = "0"
-                end_date = marriage_date
+                dates = DateRange(DR['DATE'], marriage_date)
         elif end_date:
-            datetype = "1"
-            marriage_date = end_date
-            end_date = None
+            dates = DateRange(DR['BEFORE'], end_date)
         
         # Copy the dates from Event node and sortnames from Person nodes
-        Family_combo.set_dates_sortnames(my_tx, uniq_id, datetype, marriage_date, end_date,
+        Family_combo.set_dates_sortnames(my_tx, uniq_id, dates,
                                          father_sortname, mother_sortname)
         dates_count += 1
         sortname_count += 1

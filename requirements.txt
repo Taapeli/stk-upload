@@ -4,3 +4,5 @@ Flask-BabelEx==0.9.3
 Flask-Security==3.0.0
 neo4j==1.7.2
 treelib==1.5.5
+Pillow==6.1.0
+

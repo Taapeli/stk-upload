@@ -72,15 +72,14 @@
                     <tr>
                         <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(u.priv) }}</td> 
                         <td class="ColumnDescription">{{u.type|transl('urlt')}}</td> 
-                        <td class="ColumnDescription">
-                            <a href="{{u.url}}" class="outlink">{{u.description}}</a></td> 
-                        <td class="ColumnDescription">{{u.text}}</td> 
+                        {{ macro.notelink_2col(u) }} 
                     </tr>
          {% endfor %}
                  </tbody>
             </table>
         </div>
     {% endif %}
+
     {% if place.noteref_hlink %}
         <div id="notes">
             <h4>{{ _('Note') }}</h4>
