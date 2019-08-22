@@ -79,7 +79,7 @@ class Person_combo(Person):
         The indexes of referred objects are in variables:
             eventref_hlink[]   int tapahtuman uniq_id, rooli 
             - eventref_role[]  str edellisen rooli
-            media_ref[]        int median uniq_id (previous objref_hlink[])
+            media_ref[]        int median uniq_id (previous objref_hlink[] (!))
             parentin_hlink[]   int vanhempien uniq_id
             noteref_hlink[]    int huomautuksen uniq_id tai handle?
             citation_ref[]     int viittauksen uniq_id    (ent.citationref_hlink)
@@ -334,22 +334,20 @@ RETURN ID(family) AS uniq_id"""
         """ Luetaan henkilöön liittyvien medioiden id:t. """
 
         query = """
-            MATCH (person:Person)-[r:MEDIA]->(obj:Media)
-                WHERE ID(person)={}
-                RETURN ID(obj) AS media_ref
-            """.format(self.uniq_id)
-        return  shareds.driver.session().run(query)
+MATCH (person:Person)-[r:MEDIA]->(obj:Media)
+    WHERE ID(person)=$uid
+RETURN ID(obj) AS media_ref ORDER BY r.order"""
+        return  shareds.driver.session().run(query, uid=self.uniq_id)
 
 
     def get_parentin_id(self):
         """ Luetaan henkilön syntymäperheen id """
 
         query = """
-            MATCH (person:Person)<-[r:CHILD]-(family:Family)
-                WHERE ID(person)={}
-                RETURN ID(family) AS family_ref
-            """.format(self.uniq_id)
-        return  shareds.driver.session().run(query)
+MATCH (person:Person)<-[r:CHILD]-(family:Family)
+    WHERE ID(person)=$uid
+RETURN ID(family) AS family_ref"""
+        return  shareds.driver.session().run(query, uid=self.uniq_id)
 
 
     def get_person_and_name_data_by_id(self):

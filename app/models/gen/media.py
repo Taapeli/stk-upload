@@ -5,15 +5,17 @@ Created on 22.7.2017
 '''
 
 from sys import stderr
+
+from .base import NodeObject
+from .cypher import Cypher_media
 from models.cypher_gramps import Cypher_media_in_batch
-from models.gen.cypher import Cypher_media
 import shareds
-#import traceback
-import uuid
 import os
 
-class Media:
-    """ Tallenne
+class Media(NodeObject):
+    """ A media object with description, file link and mime information.
+    
+        Tallenne
             
         Properties:
                 handle          
@@ -25,12 +27,9 @@ class Media:
                 description     str description
      """
 
-    def __init__(self):
+    def __init__(self, uniq_id=None):
         """ Luo uuden media-instanssin """
-        self.uniq_id = None
-        self.handle = ''
-        self.change = 0
-        self.id = ''
+        NodeObject.__init__(self, uniq_id)
 
     def __str__(self):
         desc = self.description if len(self.description) < 17 else self.description[:16] + "..."
@@ -46,15 +45,16 @@ class Media:
             'id': 'O0005', 'src': 'Sukututkimusdata/Sibelius/katarina_borg.gif', 
             'mime': 'image/gif', 'change': 1524411014}>
         '''
-        n = cls()
-        n.uniq_id = node.id
-        n.id = node['id']
-        n.uuid = node['uuid']
-        n.handle = node['handle']
-        n.change = node['change']
-        n.description = node['description'] or ''
-        n.src = node['src'] or ''
-        n.mime = node['mime'] or ''
+        n = super(Media, cls).from_node(node)
+#         n = cls()
+#         n.uniq_id = node.id
+#         n.id = node['id']
+#         n.uuid = node['uuid']
+#         n.handle = node['handle']
+#         n.change = node['change']
+        n.description = node['description']
+        n.src = node['src']
+        n.mime = node['mime']
         if n.src:
             n.name = os.path.split(n.src)[1]
         else:
@@ -77,18 +77,18 @@ class Media:
     def from_uniq_id(uniq_id):
         """ Luetaan tallenteen tiedot """
 
-        obj_result = shareds.driver.session().run(Cypher_media.get_one, rid=uniq_id).single()
-        if obj_result:
-            return Media.from_node(obj_result['obj'])
+        record = shareds.driver.session().run(Cypher_media.get_one, rid=uniq_id).single()
+        if record:
+            return Media.from_node(record['obj'])
         else:
             return None
 
     def get_data(self):
         """ Luetaan tallenteen tiedot """
 
-        obj_result = shareds.driver.session().run(Cypher_media.get_one, rid=self.id)
+        record = shareds.driver.session().run(Cypher_media.get_one, rid=self.id)
 
-        for node in obj_result:
+        for node in record:
             self.from_node(node)
                     
         return self.id
@@ -129,7 +129,7 @@ class Media:
         m_attr = {}
         try:
             m_attr = {
-                "uuid": uuid.uuid4().hex,
+                "uuid": self.newUuid(),
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,

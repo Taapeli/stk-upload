@@ -48,7 +48,7 @@ CALL apoc.path.subgraphAll(p, {maxLevel:4,
         relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<PARENT'}) 
     YIELD nodes, relationships
 RETURN extract(x IN relationships | 
-        [id(startnode(x)), type(x), x.role, id(endnode(x))]) as relations,
+        [id(startnode(x)), type(x), properties(x), id(endnode(x))]) as relations,
         extract(x in nodes | x) as nodelist"""
 
 # Ver 0.2 Person lists with names and events
