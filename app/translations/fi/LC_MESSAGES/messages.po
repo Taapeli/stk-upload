@@ -3206,7 +3206,7 @@ msgstr "Käyttäjäprofiilin asetukset"
 
 #: bp/start/templates/start/s_macros.html:29
 msgid "My home page"
-msgstr "Kotisivuni"
+msgstr "Käyttäjäprofiilini"
 
 #: bp/start/templates/start/s_macros.html:37
 msgid "Log in to this application"
