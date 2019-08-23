@@ -139,11 +139,12 @@ DELETE c'''
 class Cypher_stats():
     
     get_batches = '''
-match (b:Batch) where b.user = $user
+match (b:Batch) 
+    where b.user = $user and b.status = "completed"
 optional match (b) -[:OWNS]-> (x)
-return b.user as user, b.id as batch,  b.timestamp as timestamp,
+return b as batch,
     labels(x)[0] as label, count(x) as cnt 
-    order by user, batch'''
+    order by batch.user, batch.id'''
 
     get_user_batch_names = '''
 match (b:Batch) where b.user = $user

@@ -34,11 +34,18 @@ class Batches(object):
         users = {}
         result = shareds.driver.session().run(Cypher_stats.get_batches, user=self.user)
         for record in result:
-            # <Record user='jpek' batch='2019-08-19.001' timestamp=1566215904871 
-            #    label='Repository' cnt=6>
-            user = record['user']
+            # <Record batch=<Node id=319388 labels={'Batch'} 
+            #    properties={'mediapath': '/home/jm/my_own.media', 
+            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps', 
+            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787, 
+            #        'status': 'completed'}> 
+            #  label='Note'
+            #  cnt=2>
             batch = record['batch']
-            ts = record['timestamp']
+            label = record['label']
+            cnt = record['cnt']
+            batch_id = batch.get('id')
+            ts = batch.get('timestamp')
             if ts:
                 t = float(ts)/1000.
                 tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
@@ -54,7 +61,7 @@ class Batches(object):
                 labels.append(label)
             cnt = record['cnt']
 
-            key = f'{user}/{batch}/{tstring}'
+            key = f'{self.user}/{batch_id}/{tstring}'
             if not key in users:
                 users[key] = {}
             users[key][label] = cnt

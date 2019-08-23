@@ -116,7 +116,7 @@ function confirm_delete(subj) {
                 <th>{{ _("Person count") }}</th>
                 <th>{{ _("Status") }}</th>
    			</tr>
-	    {% for upload in uploads %}
+	    {% for upload in uploads %}{% if upload.status != "?" %}
 	       <tr>
 	           <td><input type="radio" name="sel" value="{{upload.xmlname | urlencode}}"
 	                onClick="selectFile(this,'{{upload.batch_id}}', '{{upload.xmlname}}');">
@@ -137,7 +137,7 @@ function confirm_delete(subj) {
                 {% endif %}
 	           </td>
 	       </tr>
-	    {% endfor %}
+	    {% endif %}{% endfor %}
     </table>
     <div>
       <form id="form" action="" method="get">
