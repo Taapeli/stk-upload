@@ -272,7 +272,7 @@ def list_uploads(username):
         upload.batch_id = batch
         status, count = item
         if status == "started":
-            upload.status = _("UNKNOWN")
+            upload.status = "?"
         elif status == "completed":
             upload.status = _("STORED")
         upload.count = count

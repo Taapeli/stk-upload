@@ -6,59 +6,39 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 import  shareds
 
+from .base import NodeObject
 from .dates import DateRange
 
-#from .cypher import Cypher_family
-#from .person_combo import Person_as_member
-#from .person_name import Name
-#from models.cypher_gramps import Cypher_family_w_handle
 
-
-class Family:
-    """ Perhe
+class Family(NodeObject):
+    """ Family Node object.
+    
+        Perhe
             
         Properties:
-                handle          
                 change
                 id              esim. "F0001"
                 uniq_id         int database key
+                uuid            str UUID key
                 rel_type        str suhteen tyyppi
-                father          Person isä (isän osoite?)
-                mother          Person äiti (äidin osoite?)
-                children[]      [Person,] lapset (lasten osoitteet?)
-            #TODO: Obsolete properties?
-                eventref_hlink  str tapahtuman osoite
-                eventref_role   str tapahtuman rooli
-                childref_hlink  str lapsen osoite
-                noteref_hlink   str lisätiedon osoite
+                priv            str private if exists
+                father_sortname str search key
+                mother_sortname str search key
      """
 
     def __init__(self, uniq_id=None):
         """ Creates a new Family instance representing a database Family node.
         
         """
-        self.handle = ''
-        self.change = 0
-        self.id = ''
-        self.uniq_id = uniq_id
+        """ Luo uuden family-instanssin """
+        NodeObject.__init__(self, uniq_id)
+        self.priv = None
         self.rel_type = ''
         self.dates = None       #TODO DateRange marriage .. divorce
         # Sorting name of family's father and mother
         self.father_sortname = ''
         self.mother_sortname = ''
 
-# See: Family_combo, bp.gramps.models.family_gramps.Family_gramps
-#         self.father = None
-#         self.mother = None
-#         self.children = []      # Child object
-#         self.events = []        # Event objects
-#         self.notes = []
-#         self.note_ref = []
-#         #TODO Obsolete parameters???
-#         self.eventref_hlink = []
-#         self.eventref_role = []
-#         self.childref_hlink = []    # handles
-#         self.noteref_hlink = []
 
     def __str__(self):
         if self.rel_type:   rel = self.rel_type

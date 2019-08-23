@@ -1,6 +1,6 @@
 {# _myapp/templates/table1.html_ #}
 {% extends "a_layout.html" %}
-{% block title %}{{ _('Database Information') }}{% endblock %}
+{% block title %}{{ _('Database Information') + ", media" }}{% endblock %}
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
@@ -12,7 +12,6 @@
    ) ) }}
 
 <h2>{{ _('Media files') }}</h2>
-<p>{{ _('Displaying Media objects') }}</p>
 
 <section id="lista">
 <table>
@@ -29,7 +28,7 @@
 	        <td>{{obj.src}}</td>
     		<td>{{obj.mime}}</td>
     		<td>{{obj.description}}</td>
-    		<td><img src="/static/{{obj.src}}" alt="{{ _('Picture cannot be found') }}"></td>
+    		<td><a href="/scene/media/{{obj.name}}?id={{obj.uuid}}">{{obj.uuid_str()}}</a></td>
         </tr>
     {% endfor %}
 {% else %}

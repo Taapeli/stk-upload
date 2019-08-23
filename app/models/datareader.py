@@ -250,22 +250,14 @@ def read_cite_sour_repo(uniq_id=None):
 
 
 def read_medias(uniq_id=None):
-    """ Lukee tietokannasta Media- objektit näytettäväksi
+    """ Lukee tietokannasta Media-objektit näytettäväksi.
     """
 
     media = []
     result = Media.get_medias(uniq_id)
     for record in result:
-        pid = record['uniq_id']
-        o = Media()
-        o.uniq_id = pid
-        if record['o']['src']:
-            o.src = record['o']['src']
-        if record['o']['mime']:
-            o.mime = record['o']['mime']
-        if record['o']['description']:
-            o.description = record['o']['description']
-
+        node = record[0]
+        o = Media.from_node(node)
         media.append(o)
 
     return (media)
@@ -749,10 +741,7 @@ def get_person_data_by_id(uniq_id):
                     citations.append(c)
 
     for uniq_id in p.media_ref:
-        #o = Media()
-        #o.uniq_id = uniq_id
-        #o.get_data()
-        o = Media.from_uniq_id(uniq_id)
+        o = Media.get_one(uniq_id)
         photos.append(o)
 
     # Families

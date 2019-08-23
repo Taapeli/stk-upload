@@ -11,34 +11,52 @@ class NodeObject():
     '''
 
 
-    def __init__(self, uniq_id=None):
+    def __init__(self, oid=None):
         '''
-        Constructor
+        Constructor. 
+        
+        Optional oid may be uuid identifier (str) or database key (int).
         '''
-        self.uniq_id = uniq_id
-        self.handle = ''
-        self.change = 0
-        self.id = ''
+        self.uuid = None        # UUID
+        self.uniq_id = None     # Neo4j object id
+        self.change = 0         # Object change time
+        self.id = ''            # Gedcom object id like "I1234"
+        #self.handle = ''       # Gramps handle (?)
+        if oid:
+            if isinstance(oid, int):
+                self.uniq_id = oid
+            else:
+                self.uuid = oid
 
     @classmethod
     def from_node(cls, node):
         '''
         Starts Transforming a db node to an undefined type object.
-        Call from an inherited class, f.ex. n = Media.from_node(node)
-        
+
+        Call from an inherited class, f.ex. n = Media.from_node(node)        
         '''
         n = cls()
         n.uniq_id = node.id
         n.id = node['id']
         n.uuid = node['uuid']
-        n.handle = node['handle']
+        if node['handle']:
+            n.handle = node['handle']
         n.change = node['change']
         return n
     
     
-    def newUuid(self):
+    @staticmethod       
+    def newUuid():
         ''' Generates a new uuid key.
         
             See. https://docs.python.org/3/library/uuid.html
         '''
         return uuid.uuid4().hex
+    
+    
+    def uuid_str(self):
+        ''' Display uuid in short form, or show self.uniq_id is missing. '''
+        if self.uuid:
+            return self.uuid[:6]
+        else:
+            return f'({self.uniq_id})'

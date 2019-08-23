@@ -180,12 +180,15 @@ CREATE (n)-[r:CITATION]->(m)"""
 
 
 class Cypher_media_in_batch():
-    """ For Media class """
+    """ For Media class.
+
+        Using UUID as key
+    """
 
     # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
 MATCH (u:Batch {id:$bid})
-CREATE (u) -[:OWNS]-> (a:Media) 
+MERGE (u) -[:OWNS]-> (a:Media {uuid:$m_attr.uuid}) 
     SET a = $m_attr
 RETURN ID(a) as uniq_id"""
 

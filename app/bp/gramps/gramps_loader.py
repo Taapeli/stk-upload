@@ -136,13 +136,13 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
     return handler.blog.list(), handler.batch_id
 
 
-def create_thumbnails(media_folder):
-    print("walk")
-    for dirname,dirnames,filenames in os.walk(media_folder):
-        print(dirname,dirnames,filenames)
-        for name in filenames:
-            fname = os.path.join(dirname,name)
-            thumbnail_fname = "media/thumbnails/" + fname
+# def create_thumbnails(media_folder):
+#     print("walk")
+#     for dirname,dirnames,filenames in os.walk(media_folder):
+#         print(dirname,dirnames,filenames)
+#         for name in filenames:
+#             fname = os.path.join(dirname,name)
+#             thumbnail_fname = "media/thumbnails/" + fname
 
 
 def file_clean(pathname):

@@ -30,10 +30,14 @@ class Media(NodeObject):
     def __init__(self, uniq_id=None):
         """ Luo uuden media-instanssin """
         NodeObject.__init__(self, uniq_id)
+        self.description = ""
+        self.src = None
+        self.mime = None
+        self.name = ""
 
     def __str__(self):
         desc = self.description if len(self.description) < 17 else self.description[:16] + "..."
-        return "{}: {} {} {!r}".format(self.id, self.mime, self.src, desc)
+        return f"{self.id}: {self.mime} {self.src} {desc!r}"
 
     @classmethod
     def from_node(cls, node):
@@ -66,33 +70,34 @@ class Media(NodeObject):
         """ Lukee kaikki tallenteet tietokannasta """
                         
         if uniq_id:
-            query = "MATCH (o:Media) WHERE ID(o)=$id RETURN ID(o) AS uniq_id, o"
-            return  shareds.driver.session().run(query, id=int(uniq_id))
+            query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
+            return  shareds.driver.session().run(query, id=uniq_id)
         else:
-            query = "MATCH (o:Media) RETURN ID(o) AS uniq_id, o"
+            query = "MATCH (o:Media) RETURN o"
             return  shareds.driver.session().run(query)
 
 
     @staticmethod
-    def from_uniq_id(uniq_id):
-        """ Luetaan tallenteen tiedot """
+    def get_one(oid):
+        """ Read a Media object, selected by UUID or uniq_id.
+        
+            Luetaan tallenteen tiedot
+        """
+        if oid:
+            with shareds.driver.session() as session:
+                if isinstance(oid, int):
+                    # User uniq_id
+                    record = session.run(Cypher_media.get_by_uniq_id,
+                                         rid=oid).single()
+                else:
+                    # Use UUID
+                    record = session.run(Cypher_media.get_by_uuid,
+                                         rid=oid).single()
 
-        record = shareds.driver.session().run(Cypher_media.get_one, rid=uniq_id).single()
-        if record:
-            return Media.from_node(record['obj'])
-        else:
-            return None
+                if record:
+                    return Media.from_node(record['obj'])
+        return None
 
-    def get_data(self):
-        """ Luetaan tallenteen tiedot """
-
-        record = shareds.driver.session().run(Cypher_media.get_one, rid=self.id)
-
-        for node in record:
-            self.from_node(node)
-                    
-        return self.id
-                
         
     @staticmethod
     def get_total():
@@ -128,8 +133,10 @@ class Media(NodeObject):
 
         m_attr = {}
         try:
+            self.uuid = self.newUuid()
+            print(f'#Creating Media {self.uuid} {self.src}')
             m_attr = {
-                "uuid": self.newUuid(),
+                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,

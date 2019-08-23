@@ -114,7 +114,7 @@ class Event_gramps(Event):
 
         try:
             # Make relation to the Place node
-            if self.place_hlink != '':
+            if self.place_hlink:
                 tx.run(Cypher_event_w_handle.link_place, 
                        handle=self.handle, place_hlink=self.place_hlink)
         except Exception as err:
@@ -122,10 +122,10 @@ class Event_gramps(Event):
 
         try:
             # Make relations to the Note nodes
-            if len(self.note_handles) > 0:
+            if self.note_handles:
                 result = tx.run(Cypher_event_w_handle.link_notes, handle=self.handle,
                        note_handles=self.note_handles)
-                cnt = result.single()["cnt"]
+                _cnt = result.single()["cnt"]
                 #print(f"##Luotiin {cnt} Note-yhteyttä: {self.id}->{self.note_handles}")
         except Exception as err:
             logger.error(f"{err}: in creating Note links: {self.id}->{self.note_handles}")
@@ -133,7 +133,7 @@ class Event_gramps(Event):
 
         try:
             # Make relations to the Citation nodes
-            if len(self.citation_handles) > 0: #  citationref_hlink != '':
+            if self.citation_handles: #  citationref_hlink != '':
                 tx.run(Cypher_event_w_handle.link_citations,
                        handle=self.handle, citation_handles=self.citation_handles)
         except Exception as err:
