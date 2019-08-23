@@ -6,15 +6,11 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 import  shareds
 
+from .base import NodeObject
 from .dates import DateRange
 
-#from .cypher import Cypher_family
-#from .person_combo import Person_as_member
-#from .person_name import Name
-#from models.cypher_gramps import Cypher_family_w_handle
 
-
-class Family:
+class Family(NodeObject):
     """ Perhe
             
         Properties:
@@ -37,6 +33,9 @@ class Family:
         """ Creates a new Family instance representing a database Family node.
         
         """
+        """ Luo uuden media-instanssin """
+        NodeObject.__init__(self, uniq_id)
+
         self.handle = ''
         self.change = 0
         self.id = ''

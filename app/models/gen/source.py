@@ -6,7 +6,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
-from sys import stderr
+#from sys import stderr
 
 import shareds
 from .cypher import Cypher_source

@@ -608,8 +608,13 @@ return r order by r.type"""
 
 class Cypher_media():
 
-    get_one = """
+    get_by_uuid = """
+MATCH (obj:Media)
+    WHERE Iobj.uuid = $rid
+RETURN obj"""
+
+    get_by_uniq_id = """
 MATCH (obj:Media)
     WHERE ID(obj) = $rid
-    RETURN obj"""
+RETURN obj"""
 

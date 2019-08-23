@@ -44,9 +44,9 @@ def search(lookfor):
     records = []
     for rec in  result:
         p = rec['p']
-        id = rec['id']
+        oid = rec['id']
         r = dict(
-            id=id,
+            id=oid,
             name=p['pname'],
             type=p['type'],
         )
@@ -59,8 +59,8 @@ def search(lookfor):
 
 
 
-def record(id):
-    result = shareds.driver.session().run(cypher_record,id=int(id)).single()
+def record(oid):
+    result = shareds.driver.session().run(cypher_record,id=oid).single()
     print(result)
     if not result: return dict(status="OK",resultCount=0)
     p = result.get('p')
@@ -117,12 +117,12 @@ def record(id):
      "record": record, 
     }
 
-def record_with_subs(id):
-    result = shareds.driver.session().run(cypher_record,id=int(id)).single()
+def record_with_subs(oid):
+    result = shareds.driver.session().run(cypher_record,id=oid).single()
     print(result)
     if not result: return dict(status="Not found",statusText="Not found",resultCount=0)
     p = result.get('p')
-    print(f"id={id} name={p['pname']}")
+    print(f"id={oid} name={p['pname']}")
     largerPlaces = result['largerPlaces']
     smallerPlaces = result['smallerPlaces']
     places1 = []
@@ -168,7 +168,7 @@ def record_with_subs(id):
             place['timespan'] = timespan
         places2.append(place)
     resultrecord = dict(
-        id=id,
+        id=oid,
         name=p['pname'],
         type=p['type'],
         surroundedBy=[], #places1, #sorted(places1,key=lambda x:x.get('name','')),
