@@ -19,15 +19,14 @@ from models.gen.place_combo import Place_combo
 class Family_combo(Family):
     """ Perhe
             
-        Properties:
-                handle          
+        Properties from Family:
                 change
-                id                  esim. "F0001"
-                uniq_id             int database key
-                rel_type            str suhteen tyyppi
-                father              Person isä (isän osoite?)
-                mother              Person äiti (äidin osoite?)
-                children[]          [Person,] lapset (lasten osoitteet?)
+                id              esim. "F0001"
+                uniq_id         int database key
+                uuid            str UUID key
+                rel_type        str suhteen tyyppi
+                father_sortname str search key
+                mother_sortname str search key
             #TODO: Obsolete properties?
                 eventref_hlink      str tapahtuman osoite
                 eventref_role       str tapahtuman rooli
@@ -129,7 +128,7 @@ RETURN family"""
 
         mother_result = self.get_parent_by_id('mother')
         for mother_record in mother_result:            
-            self.mother = mother_record["father"]
+            self.mother = mother_record["mother"]
 
         event_result = self.get_family_events()
         for event_record in event_result:            

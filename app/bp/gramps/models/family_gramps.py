@@ -31,10 +31,9 @@ class Family_gramps(Family):
         """
         Family.__init__(self, uniq_id)
 
-        #TODO: Are these actually in use, when data got from Gramps?
-        self.father = None
+        self.father = None      # Gramps handles
         self.mother = None
-        self.children = []      # Child object
+        self.children = []
 
         # For Gramps xml fields
         self.note_ref = []      # For a page, where same note may be referenced
@@ -53,8 +52,10 @@ class Family_gramps(Family):
         """
 
         f_attr = {}
+        self.uuid = Family.newUuid()
         try:
             f_attr = {
+                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,

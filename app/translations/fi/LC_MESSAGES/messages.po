@@ -3003,7 +3003,7 @@ msgstr "Hallinnoi tarjokasaineistoja ja Gramps-tiedostoja"
 
 #: bp/start/templates/start/index_logged.html:31
 msgid "Browse and Manage"
-msgstr "Selaa ja muokkaa"
+msgstr "Lisää ja muokkaa"
 
 #: bp/start/templates/start/index_logged.html:43
 msgid "Look at the Family Trees"
