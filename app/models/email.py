@@ -6,6 +6,7 @@ import traceback
 
 from flask_mail import Mail, Message
 from models import syslog
+from builtins import False
 
 def get_sysname():
     sysname = shareds.app.config.get("STK_SYSNAME")
@@ -35,8 +36,11 @@ def email_admin(subject,body,sender=None):
     if sender and mail_to:
         if email(sender,mail_to,subject,body):
             syslog.log(type="sent email to admin", sender=sender,receiver=mail_to,subject=subject)
+            return True
         else:    
             syslog.log(type="FAILED: email to admin", sender=sender,receiver=mail_to,subject=subject)
+            return False
+    return False
         
 def email_from_admin(subject,body,receiver):
     sender = shareds.app.config.get('ADMIN_EMAIL_FROM')
