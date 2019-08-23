@@ -20,6 +20,22 @@
 #}
         <div class="row">
 
+    {% if current_user.is_authenticated and 
+       (current_user.has_role('gedcom') or current_user.has_role('research')) %}
+         <div class="startbox gedtools">
+            <div style="display: inline-block;">
+            <form method="get" action="/gedcom">
+               <h3>{{ _('Gedcom tools') }}</h3>
+               <p>Ennen kuin tuot aineistosi Isotammeen, se kannattaa tarkastaa ja siivota Gedcom-työkaluillamme.</p>
+               <p>{{ _('Send your gedcom files and experiment various cleanup functions') }}.</p>
+              <div class="submit"> 
+                 <button type="submit">{{ _('My Gedcom files') }}</button>
+              </div>
+            </form>
+            </div>
+         </div>
+     {% endif %}
+
     {% if current_user.is_authenticated and current_user.has_role('research') %}
            <div class="startbox">
              <div style="display: inline-block;">
@@ -37,7 +53,7 @@
 
     {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('research') ) %}
-           <div class="startbox" style="border:1.5pt solid #7e6b53;">
+           <div class="startbox" style="border:1.5pt solid #7e6b53;box-shadow: 5px 5px 5px grey;">
              <div style="display: inline-block;">
                <form method="get" action="/scene">
                  <h3>{{ _('Look at the Family Trees') }}</h3>
@@ -50,22 +66,6 @@
            </div>
     {% endif %}
     
-    {% if current_user.is_authenticated and 
-       (current_user.has_role('gedcom') or current_user.has_role('research')) %}
-         <div class="startbox gedtools">
-            <div style="display: inline-block;">
-            <form method="get" action="/gedcom">
-               <h3>{{ _('Gedcom tools') }}</h3>
-               <p>Ennen kuin tuot aineistosi Isotammeen, se kannattaa tarkastaa ja siivota Gedcom-työkaluillamme.</p>
-               <p>{{ _('Send your gedcom files and experiment various cleanup functions') }}.</p>
-              <div class="submit"> 
-                 <button type="submit">{{ _('My Gedcom files') }}</button>
-              </div>
-            </form>
-            </div>
-         </div>
-     {% endif %}
-
     {% if current_user.is_authenticated and 
             (current_user.has_role('admin') or current_user.has_role('master') ) %}
         <div class="startbox admin">

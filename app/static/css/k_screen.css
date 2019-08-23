@@ -717,11 +717,15 @@ div#families table.attrlist td.ColumnType {
     text-align: center;
     margin: 0.8em 0.5em;
 }
-#indivgallery h4 + .thumbnail {
+#indivgallery > div.thumbnail {
     margin-left: 15px;
-    /* Problem: if there are more thumnails then fit on a single row, the
-     *          first thumnail on each next row should also have a margin-left
-     *          of 15 px. */
+    border: solid lightgray 1px; 
+    padding: 5px; 
+    text-align: center;
+}
+div.thumbnail > div {
+	word-break: break-all;
+	color: gray;
 }
 #indivgallery img {
     border: solid 1px #999;
@@ -740,7 +744,7 @@ i + div.grampsstylednote p {
     margin: 0 0 0.3em 0;
 }
 div.grampsstylednote p {
-    margin-bottom: 0.5em;
+    margin: 4px;
 }
 
 /* Subsection : Family Map

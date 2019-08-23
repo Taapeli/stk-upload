@@ -42,3 +42,10 @@ class NodeObject():
             See. https://docs.python.org/3/library/uuid.html
         '''
         return uuid.uuid4().hex
+    
+    def uuid_str(self):
+        ''' Display uuid in short form, or show self.uniq_id is missing. '''
+        if self.uuid:
+            return self.uuid[:6]
+        else:
+            return f'({self.uniq_id})'

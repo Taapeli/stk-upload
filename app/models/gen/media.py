@@ -33,7 +33,7 @@ class Media(NodeObject):
 
     def __str__(self):
         desc = self.description if len(self.description) < 17 else self.description[:16] + "..."
-        return "{}: {} {} {!r}".format(self.id, self.mime, self.src, desc)
+        return f"{self.id}: {self.mime} {self.src} {desc!r}"
 
     @classmethod
     def from_node(cls, node):

@@ -11,10 +11,10 @@
 {{ macro.menu(1) }}
     <div class="content" id="IndividualDetail">
         {% if photos %}<div class="snapshot">
-            <div class="thumbnail">
+            <div class="thumbnail"><a href="#indivgallery">
                 <img alt="{{ _('in Photo') }} {{photos[0].description}}" 
                 	src="thumbnail?id={{photos[0].uuid}}" />
-            </div>
+            </a></div>
         </div>{% endif %}
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b>
@@ -192,22 +192,20 @@
         </div>
 
         <div class="subsection" id="indivgallery">
-            <h4>{{ _('Media') }}</h4>
-            <table>
-		        <tr>
-		        {% for photo in photos %}
-	                <td>{{photo.description}}
-		        {% endfor %}
-		
-		        <tr>
-		        {% for photo in photos %}
-	                <td><a href="media/{{photo.name}}?id={{photo.uuid}}">
-		                	<img alt="{{ _('Picture') }}" src="thumbnail?id={{photo.uuid}}" />
-	                	</a>
-		        {% endfor %}
-	        </table>
+            <h4>{{ _("Media") }}</h4>
+        {% for photo in photos %}
+            <div class="thumbnail">
+                <a href="media/{{photo.name}}?id={{photo.uuid}}">
+                  <img alt="({{ _('Photo') }})" 
+                     src="/scene/thumbnail?id={{photo.uuid}}" 
+                     title="key = {{photo.uuid_str()}}"/></a>
+                <div style="word-break: break-all;">
+                    {{photo.description}}</div>
+            </div>
+        {% endfor %}
             <div class="fullclear"></div>
         </div>
+
 <!--
         <div class="subsection scene">
             <h4>{{ _('Narrated') }}</h4>
