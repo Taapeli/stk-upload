@@ -6,7 +6,7 @@ Created on Aug 16, 2019
 import os
 from PIL import Image 
 
-from flask_security import current_user 
+#from flask_security import current_user 
 
 import shareds
 
