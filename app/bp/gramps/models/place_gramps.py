@@ -96,14 +96,17 @@ class Place_gramps(Place):
 
         # Create or update this Place
 
+        self.uuid = self.newUuid()
         pl_attr = {}
         try:
 
-            pl_attr = {"handle": self.handle,
-                      "change": self.change,
-                      "id": self.id,
-                      "type": self.type,
-                      "pname": self.pname}
+            pl_attr = {
+                "uuid": self.uuid,
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "type": self.type,
+                "pname": self.pname}
             if self.coord:
                 # If no coordinates, don't set coord attribute
                 pl_attr.update({"coord": self.coord.get_coordinates()})

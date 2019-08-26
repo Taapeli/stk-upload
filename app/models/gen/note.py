@@ -8,11 +8,12 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 
 from sys import stderr
 
-from models.gen.cypher import Cypher_note
+from .base import NodeObject
+from .cypher import Cypher_note
 from models.cypher_gramps import Cypher_note_in_batch # Cypher_note_w_handle,
 import shareds
 
-class Note:
+class Note(NodeObject):
     """ Note / Huomautus
         including eventual web link
 
@@ -30,13 +31,10 @@ class Note:
     def __init__(self):
         """ Creates a Note instance in memory 
         """
-        self.uniq_id = None
-        self.id = ''
+        NodeObject.__init__(self)
         self.type = ''
-        self.handle = ''
-        self.text = ''
-        self.change = 0
         self.priv = None
+        self.text = ''
         self.url = None
 
     def __str__(self):
@@ -177,11 +175,13 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
     def save(self, tx, batch_id=None, parent_id=None):
         """ Creates this Note object as a Note node
             - if parent_id is given, link (parent) --> (:Note)  
-            - if batch_id is given, link (:Batch) --> (:Note)
+            - else if batch_id is given, link (:Batch) --> (:Note)
         """
+        self.uuid = self.newUuid()
         n_attr = {}
         try:
             n_attr = {
+                "uuid": self.uuid,
                 "handle": self.handle if self.handle else None, # f"handle-{self.id}",
                 "change": self.change,
                 "id": self.id,
@@ -203,4 +203,4 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
 
         except Exception as err:
             print(f"iError Note_save: {err} attr={n_attr}", file=stderr)
-            raise RuntimeError("Could not save Note {self.id}".format())
+            raise RuntimeError(f"Could not save Note {self.id}")

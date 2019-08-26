@@ -8,13 +8,14 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 
+from .base import NodeObject
 from models.cypher_gramps import Cypher_repository_in_batch
 from .cypher import Cypher_repository
 from .note import Note
 import shareds
    
 
-class Repository:
+class Repository(NodeObject):
     """ Repository / Arkisto.
             
         Properties:
@@ -30,11 +31,8 @@ class Repository:
 
     def __init__(self):
         """ Luo uuden repository-instanssin """
-        self.uniq_id = None
+        NodeObject.__init__(self)
         self.type = ''
-        self.handle = ''
-        self.change = 0
-        self.id = ''
         self.rname = ''
         self.medium = ''
         self.notes = []     # contains Note instances
@@ -143,9 +141,11 @@ class Repository:
         if batch_id == None:
             raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
 
+        self.uuid = self.newUuid()
         r_attr = {}
         try:
             r_attr = {
+                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,

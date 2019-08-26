@@ -51,8 +51,8 @@ class Family_gramps(Family):
             Connects the family to parent, child and note nodes
         """
 
+        self.uuid = self.newUuid()
         f_attr = {}
-        self.uuid = Family.newUuid()
         try:
             f_attr = {
                 "uuid": self.uuid,

@@ -21,7 +21,7 @@ class NodeObject():
         self.uniq_id = None     # Neo4j object id
         self.change = 0         # Object change time
         self.id = ''            # Gedcom object id like "I1234"
-        #self.handle = ''       # Gramps handle (?)
+        self.handle = ''       # Gramps handle (?)
         if oid:
             if isinstance(oid, int):
                 self.uniq_id = oid

@@ -91,14 +91,16 @@ class Person_gramps(Person):
         """
 
         today = str(datetime.date.today())
-        if not self.handle:
-            handles = models.dbutil.get_new_handles(3)
-            self.handle = handles.pop()
+#         if not self.handle:
+#             handles = models.dbutil.get_new_handles(3)
+#             self.handle = handles.pop()
 
+        self.uuid = self.newUuid()
         # Save the Person node under UserProfile; all attributes are replaced
         p_attr = {}
         try:
             p_attr = {
+                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,

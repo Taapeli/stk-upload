@@ -87,6 +87,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 import shareds
+from .base import NodeObject
 from .cypher import Cypher_person
 from .dates import DateRange
 
@@ -97,7 +98,7 @@ SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
 
-class Person:
+class Person(NodeObject):
     """ Henkilö
 
          - uniq_id                int database key
@@ -114,14 +115,10 @@ class Person:
      """
 
     def __init__(self):
-        """ Luo uuden person-instanssin """
-        self.handle = ''
-        self.change = 0
-        self.uniq_id = None
-        self.id = ''
+        """ Creates a new Person instance. """
+        NodeObject.__init__(self)
         self.priv = None
         self.sex = 0
-        #self.gender = ''
         self.confidence = ''
         self.sortname = ''
         self.lifetime = None    # Daterange: Estimated datetype, date1, date2

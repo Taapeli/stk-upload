@@ -9,13 +9,14 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 
 import shareds
+from .base import NodeObject
 from .cypher import Cypher_source
 from .repository import Repository
 from .note import Note
 #from models.cypher_gramps import Cypher_source_w_handle
 
 
-class Source:
+class Source(NodeObject):
     """ Lähde
             
         Properties:
@@ -29,10 +30,7 @@ class Source:
 
     def __init__(self):
         """ Luo uuden source-instanssin """
-        self.uniq_id = None
-        self.handle = ''
-        self.change = 0
-        self.id = ''
+        NodeObject.__init__(self)
         self.stitle = ''
         self.sauthor = ''
         self.spubinfo = ''
