@@ -221,9 +221,12 @@ class Citation(NodeObject):
         return True
 
 
-    def save(self, tx):
-        """ Saves this Citation and connects it to it's Notes and Sources"""
-
+    def save(self, tx, **kwargs):
+        """ Saves this Citation and connects it to it's Notes and Sources.
+        """
+        if kwargs:
+            print(f"Warning: Citation.save: extra arguments {kwargs}!")
+            
         self.uuid = self.newUuid()
         c_attr = {}
         try:

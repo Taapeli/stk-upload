@@ -71,7 +71,7 @@ class Place_gramps(Place):
                 print("iError Place.link_hier: {0}".format(err), file=stderr)
 
 
-    def save(self, tx, batch_id, place_keys=None):
+    def save(self, tx, **kwargs):   # batch_id, place_keys=None):
         """ Saves a Place with Place_names, notes and hierarchy links.
 
             The 'uniq_id's of already created nodes can be found in 'place_keys' 
@@ -93,6 +93,10 @@ class Place_gramps(Place):
 
             Raises an error, if write fails.
         """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Place_gramps.save needs batch_id for {self.id}")
 
         # Create or update this Place
 
@@ -113,10 +117,11 @@ class Place_gramps(Place):
 
             # Create Place self
 
-            plid = place_keys.get(self.handle) if place_keys else None 
-            if plid:
+            if 'place_keys' in kwargs:
                 # 1) node has been created but not connected to Batch.
                 #    update known Place node parameters and link from Batch
+                place_keys = kwargs['place_keys']
+                plid = place_keys.get(self.handle)
                 self.uniq_id = plid
                 if self.type:
                     #print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")

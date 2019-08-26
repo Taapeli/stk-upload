@@ -172,7 +172,7 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
                 raise AttributeError("note.save_note_list: Argument not a Note")
 
 
-    def save(self, tx, batch_id=None, parent_id=None):
+    def save(self, tx, **kwargs):   # batch_id=None, parent_id=None):
         """ Creates this Note object as a Note node
             - if parent_id is given, link (parent) --> (:Note)  
             - else if batch_id is given, link (:Batch) --> (:Note)
@@ -182,7 +182,6 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
         try:
             n_attr = {
                 "uuid": self.uuid,
-                "handle": self.handle if self.handle else None, # f"handle-{self.id}",
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
@@ -190,14 +189,18 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
                 "text": self.text,
                 "url": self.url
             }
-            if parent_id:
-                #print(f"Note_save: parent (uid={parent_id}) --> (id={self.id})")
+            if self.handle: 
+                n_attr['handle'] = self.handle
+            if 'parent_id' in kwargs:
+                print(f"Note_save: parent (uid={kwargs['parent_id']}) --> (id={self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create_as_leaf, 
-                                      parent_id=parent_id, n_attr=n_attr).single()[0]
-            elif batch_id:
-                # print(f"Note_save: batch ({batch_id}) --> ({self.id})")
+                                      parent_id=kwargs['parent_id'], 
+                                      n_attr=n_attr).single()[0]
+            elif 'batch_id' in kwargs:
+                print(f"Note_save: batch ({kwargs['batch_id']}) --> ({self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create, 
-                                      bid=batch_id, n_attr=n_attr).single()[0]
+                                      bid=kwargs['batch_id'], 
+                                      n_attr=n_attr).single()[0]
             else:
                 raise RuntimeError(f"Note.save needs batch_id or parent_id for {self.id}")
 

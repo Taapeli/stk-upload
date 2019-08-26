@@ -135,10 +135,10 @@ class Repository(NodeObject):
         return True
 
 
-    def save(self, tx, batch_id=None):
+    def save(self, tx,  **kwargs):
         """ Saves this Repository to db under given batch. 
         """
-        if batch_id == None:
+        if not 'batch_id' in kwargs:
             raise RuntimeError(f"Repository.save needs batch_id for {self.id}")
 
         self.uuid = self.newUuid()
@@ -154,7 +154,7 @@ class Repository(NodeObject):
             }
 #             self.uniq_id = tx.run(Cypher_repository_w_handle.create, r_attr=r_attr).single()[0]
             result = tx.run(Cypher_repository_in_batch.create,
-                            bid=batch_id, r_attr=r_attr)
+                            bid=kwargs['batch_id'], r_attr=r_attr)
             self.uniq_id = result.single()[0]
         except Exception as err:
             print(f"iError Repository_save: {err} attr={r_attr}", file=stderr)

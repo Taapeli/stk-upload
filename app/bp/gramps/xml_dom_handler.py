@@ -157,12 +157,12 @@ class DOM_handler():
                     batch_id=self.batch_id, path=path)
 
 
-    def save_and_link_handle(self, e, batch_id=None):
+    def save_and_link_handle(self, e, **kwargs):
         ''' Save object and store its identifiers in the dictionary by handle.
 
-            Some objects may accept batch_id parameter 
+            Some objects may accept arguments like batch_id="2019-08-26.004" and others
         '''
-        e.save(self.tx, batch_id)
+        e.save(self.tx, **kwargs)
         self.handle_to_node[e.handle] = self.dbKeys(e.uuid, e.uniq_id)
         print(f'# {e.__class__.__name__} [{e.handle}] --> {self.handle_to_node[e.handle]}')
 
@@ -239,9 +239,6 @@ class DOM_handler():
                                      'level':"WARNING",'count':c.id})
 
             self.save_and_link_handle(c)
-#             c.save(self.tx)
-#             self.handle_to_node[c.handle] = self.dbKeys(c.uuid, c.uniq_id)
-#             print(f'# Citation [{c.handle}] --> {self.handle_to_node[c.handle]}')
             counter += 1
 
         self.blog.log_event({'title':"Citations", 'count':counter, 
@@ -467,7 +464,7 @@ class DOM_handler():
             # konvertoitaisiin heti Note-nodeiksi sopivalla node-tyypillä
             #print("iNote {}".format(n))
 
-            self.save_and_link_handle(n, self.batch_id)
+            self.save_and_link_handle(n, batch_id=self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Notes", 'count':counter, 
@@ -734,10 +731,8 @@ class DOM_handler():
                     print(f'# Place {pl.id} has note {pl.noteref_hlink[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
-            pl.save(self.tx, self.batch_id, place_keys)
+            self.save_and_link_handle(pl, batch_id=self.batch_id, place_keys=place_keys)
             # The place_keys has been updated 
-            self.handle_to_node[pl.handle] = self.dbKeys(pl.uuid, pl.uniq_id)
-            print(f'# Place [{pl.handle}] --> {self.handle_to_node[pl.handle]}')
             counter += 1
             
 #             self.place_ids.append(pl.uniq_id)
@@ -788,7 +783,7 @@ class DOM_handler():
                 if n.url:
                     r.notes.append(n)
 
-            self.save_and_link_handle(r, self.batch_id)
+            self.save_and_link_handle(r, batch_id=self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Repositories", 'count':counter, 
@@ -856,13 +851,14 @@ class DOM_handler():
                 if source_reporef.hasAttribute("hlink"):
                     # s.reporef_hlink = source_reporef.getAttribute("hlink")
                     r.handle = source_reporef.getAttribute("hlink")
-                    print(f'# Source {s.id} belongs repository {r.handle}')
+                    print(f'# Source {s.id} in repository {r.handle}')
                 if source_reporef.hasAttribute("medium"):
                     # s.reporef_medium = source_reporef.getAttribute("medium")
                     r.medium = source_reporef.getAttribute("medium")
                 # Mostly 1 repository!
                 s.repositories.append(r)
 
+            #elf.save_and_link_handle(r, self.batch_id)
             self.save_and_link_handle(s)
             counter += 1
 

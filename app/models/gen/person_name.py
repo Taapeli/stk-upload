@@ -65,13 +65,13 @@ class Name:
         n.order = node['order']
         return n
 
-    def save(self, tx, parent_id=None):
+    def save(self, tx, **kwargs):   #parent_id=None):
         """ Creates or updates this Name node. (There is no handle)
             If parent_id is given, a link (parent) -[:NAME]-> (Name) is created 
 
             #TODO: Check, if this name exists; then update or create new
         """
-        if not parent_id:
+        if not 'parent_id' in kwargs:
             raise ValueError("Name.save: no base person defined")
 
         try:
@@ -84,7 +84,8 @@ class Name:
                 "suffix": self.suffix
             }
             tx.run(Cypher_name.create_as_leaf,
-                   n_attr=n_attr, parent_id=parent_id, citation_handles=self.citation_handles)
+                   n_attr=n_attr, parent_id=kwargs['parent_id'], 
+                   citation_handles=self.citation_handles)
         except ConnectionError as err:
             raise SystemExit("Stopped in Name.save: {}".format(err))
         except Exception as err:
