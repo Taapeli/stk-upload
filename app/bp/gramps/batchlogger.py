@@ -19,7 +19,7 @@ from models.cypher_gramps import Cypher_batch
 from models import dbutil
 
 
-class Batch(object):
+class Batch():
     '''
     Creates a log of userid bach steps.
     append()  Adds a log event to log
@@ -64,7 +64,7 @@ class Batch(object):
             
             dbutil.aqcuire_lock(tx, 'batch_id')
             # 1. Find the latest Batch id of today from the db
-            base = str(date.today())
+            base = f'{self.userid} {str(date.today())}'
             try:
                 batch_id = tx.run(Cypher_batch.batch_find_id, 
                                   user=self.userid, batch_base=base).single().value()

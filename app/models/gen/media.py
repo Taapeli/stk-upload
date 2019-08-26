@@ -129,15 +129,13 @@ class Media(NodeObject):
             #TODO: Can there be Notes for media?
         """
         if not 'batch_id' in kwargs:
-            raise RuntimeError(f"Media.save needs batch_id for {self.id}")
+            raise RuntimeError(f"Media.save needs batch_id for parent {self.id}")
 
         self.uuid = self.newUuid()
         m_attr = {}
         try:
-            self.uuid = self.newUuid()
             print(f'#Creating Media {self.uuid} {self.src}')
             m_attr = {
-                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
@@ -148,8 +146,8 @@ class Media(NodeObject):
             if 'batch_id' in kwargs:
                 m_attr['batch_id'] = kwargs['batch_id']
             result = tx.run(Cypher_media_in_batch.create, 
-                            bid=kwargs['batch_id'], m_attr=m_attr)
+                            bid=kwargs['batch_id'], uuid=self.uuid, m_attr=m_attr)
             self.uniq_id = result.single()[0]
         except Exception as err:
-            print(f"iError Media_save: {err} attr={m_attr}", file=stderr)
+            print(f"iError Media_save: {err.title}\n:** {err} attr={m_attr}", file=stderr)
             raise RuntimeError(f"Could not save Media {self.id}")

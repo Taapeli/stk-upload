@@ -128,17 +128,16 @@ class DOM_handler():
                                      format(e.__class__.__name__, e)), 'level':"ERROR"})
 
     def remove_handles(self):
-#         ''' Removal CANCELLED '''
-#         return
-#         #---------------------------------------------
         cypher_remove_handles = """
             match (b:Batch {id:$batch_id}) -[*]-> (a)
             remove a.handle
-            return a.handle
+            return labels(a)[0]
         """
+        ids = []
         results = self.tx.run(cypher_remove_handles,batch_id=self.batch_id)
         for result in results:
-            print (f'# - removed handle {result[0]}')
+            ids.append(result[0])
+        print (f'# - removed handle from {len(ids)} nodes')
 
 
     def add_links(self):
@@ -164,7 +163,7 @@ class DOM_handler():
         '''
         e.save(self.tx, **kwargs)
         self.handle_to_node[e.handle] = self.dbKeys(e.uuid, e.uniq_id)
-        print(f'# {e.__class__.__name__} [{e.handle}] --> {self.handle_to_node[e.handle]}')
+        #print(f'# {e.__class__.__name__} [{e.handle}] --> {self.handle_to_node[e.handle]}')
 
    
     # ---------------------   XML subtree handlers   --------------------------
