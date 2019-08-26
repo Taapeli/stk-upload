@@ -12,11 +12,12 @@ import logging
 logger = logging.getLogger('stkserver')
 
 import shareds
+from .base import NodeObject
 from .cypher import Cypher_citation
 from models.cypher_gramps import Cypher_citation_w_handle
 
 
-class Citation:
+class Citation(NodeObject):
     """ Lähdeviittaus
             
         Properties:
@@ -34,11 +35,8 @@ class Citation:
 
     def __init__(self):
         """ Luo uuden citation-instanssin """
-        self.uniq_id = None
-        self.handle = ''
-        self.change = 0
-        self.id = ''
-        self.dateval = ''
+        NodeObject.__init__(self)
+        self.dateval = None
         self.page = ''
         self.confidence = ''
         self.mark = ''          # citation mark like '1a', if defined
@@ -223,12 +221,17 @@ class Citation:
         return True
 
 
-    def save(self, tx):
-        """ Saves this Citation and connects it to it's Notes and Sources"""
-
+    def save(self, tx, **kwargs):
+        """ Saves this Citation and connects it to it's Notes and Sources.
+        """
+        if kwargs:
+            print(f"Warning: Citation.save: extra arguments {kwargs}!")
+            
+        self.uuid = self.newUuid()
         c_attr = {}
         try:
             c_attr = {
+                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,

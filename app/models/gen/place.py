@@ -7,14 +7,13 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 
 import  shareds
-#from .note import Note
+from .base import NodeObject
 from .dates import DateRange
 from .cypher import Cypher_place
-#from models.dbtree import DbTree
-from models.gen.event_combo import Event_combo
-from models.gen.person_name import Name
+from .event_combo import Event_combo
+from .person_name import Name
 
-class Place:
+class Place(NodeObject):
     """ Place / Paikka:
 
         Properties:
@@ -39,15 +38,16 @@ class Place:
     def __init__(self, uniq_id=None):
         """ Creates a new Place instance.
         """
-        self.id = ''
+        NodeObject.__init__(self)
+#         self.uuid = None        # UUID
+#         self.uniq_id = None     # Neo4j object id
+#         self.change = 0         # Object change time
+#         self.id = ''            # Gedcom object id like "I1234"
+#         self.handle = ''       # Gramps handle (?)
         self.uniq_id = uniq_id
         self.type = ''
         self.names = []
         self.pname = ''
-
-        # Gramps-tietoja
-        self.handle = ''
-        self.change = 0
         self.coord = None
         
 # These are in bp.gramps.models.place_gramps.Place_gramps.__init__

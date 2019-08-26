@@ -41,7 +41,7 @@
 
     class bp.gramps.models.person_gramps.Person_gramps(Person):
         - __init__()
-        - save(self, username, tx)      Tallettaa Person, Names, Events ja Citations
+        - save(self, tx)                Tallettaa Person, Names, Events ja Citations
 
     Not in use or obsolete:
     - from models.gen.person_combo.Person_combo(Person)
@@ -87,6 +87,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 
 import shareds
+from .base import NodeObject
 from .cypher import Cypher_person
 from .dates import DateRange
 
@@ -97,7 +98,7 @@ SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
 
-class Person:
+class Person(NodeObject):
     """ Henkilö
 
          - uniq_id                int database key
@@ -114,14 +115,10 @@ class Person:
      """
 
     def __init__(self):
-        """ Luo uuden person-instanssin """
-        self.handle = ''
-        self.change = 0
-        self.uniq_id = None
-        self.id = ''
+        """ Creates a new Person instance. """
+        NodeObject.__init__(self)
         self.priv = None
         self.sex = 0
-        #self.gender = ''
         self.confidence = ''
         self.sortname = ''
         self.lifetime = None    # Daterange: Estimated datetype, date1, date2
@@ -171,20 +168,13 @@ class Person:
         '''
         if not obj:
             obj = cls()
+        obj.uuid = node.get('uuid')
+        obj.handle = node.get('handle')
         obj.uniq_id = node.id
         obj.id = node['id']
-        #TODO: Remove processing old 'gender' in the next version
-        if 'sex' in node:
-            obj.sex = node['sex']
-        elif 'gender' in node:
-            obj.sex = cls.sex_from_str(node['gender'])
-        else:
-            obj.sex = SEX_UNKOWN
-        obj.handle = node['handle']
+        obj.sex = node.get('a_5', 'UNKNOWN')
         obj.change = node['change']
-        obj.confidence = node['confidence']
-        if obj.confidence == None:
-            obj.confidence = ''
+        obj.confidence = node.get('confidence', '')
         obj.sortname = node['sortname']
         obj.priv = node['priv']
         if "datetype" in node:

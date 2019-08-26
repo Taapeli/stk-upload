@@ -1112,7 +1112,7 @@ with distinct x
         return points
 
 
-    def save(self, username, tx):
+    def save(self, tx, **kwargs):
         """ Saves the Person object and possibly the Names, Events ja Citations.
 
             On return, the self.uniq_id is set

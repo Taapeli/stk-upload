@@ -123,30 +123,31 @@ class Media(NodeObject):
         return True
 
 
-    def save(self, tx, batch_id=None):
-        """ Saves this Media object to db.
+    def save(self, tx, **kwargs):   # batch_id=None):
+        """ Saves this new Media object to db.
         
             #TODO: Can there be Notes for media?
         """
-        if batch_id == None:
-            raise RuntimeError(f"Media.save needs batch_id for {self.id}")
+        if not 'batch_id' in kwargs:
+            raise RuntimeError(f"Media.save needs batch_id for parent {self.id}")
 
+        self.uuid = self.newUuid()
         m_attr = {}
         try:
-            self.uuid = self.newUuid()
             print(f'#Creating Media {self.uuid} {self.src}')
             m_attr = {
-                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
-                "batch_id":batch_id,
                 "src": self.src,
                 "mime": self.mime,
                 "description": self.description
             }
-            result = tx.run(Cypher_media_in_batch.create, bid=batch_id, m_attr=m_attr)
+            if 'batch_id' in kwargs:
+                m_attr['batch_id'] = kwargs['batch_id']
+            result = tx.run(Cypher_media_in_batch.create, 
+                            bid=kwargs['batch_id'], uuid=self.uuid, m_attr=m_attr)
             self.uniq_id = result.single()[0]
         except Exception as err:
-            print(f"iError Media_save: {err} attr={m_attr}", file=stderr)
+            print(f"iError Media_save: {err.title}\n:** {err} attr={m_attr}", file=stderr)
             raise RuntimeError(f"Could not save Media {self.id}")

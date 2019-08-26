@@ -8,11 +8,12 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 
 from sys import stderr
 
-from models.gen.cypher import Cypher_note
+from .base import NodeObject
+from .cypher import Cypher_note
 from models.cypher_gramps import Cypher_note_in_batch # Cypher_note_w_handle,
 import shareds
 
-class Note:
+class Note(NodeObject):
     """ Note / Huomautus
         including eventual web link
 
@@ -30,13 +31,10 @@ class Note:
     def __init__(self):
         """ Creates a Note instance in memory 
         """
-        self.uniq_id = None
-        self.id = ''
+        NodeObject.__init__(self)
         self.type = ''
-        self.handle = ''
-        self.text = ''
-        self.change = 0
         self.priv = None
+        self.text = ''
         self.url = None
 
     def __str__(self):
@@ -174,15 +172,16 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
                 raise AttributeError("note.save_note_list: Argument not a Note")
 
 
-    def save(self, tx, batch_id=None, parent_id=None):
+    def save(self, tx, **kwargs):   # batch_id=None, parent_id=None):
         """ Creates this Note object as a Note node
             - if parent_id is given, link (parent) --> (:Note)  
-            - if batch_id is given, link (:Batch) --> (:Note)
+            - else if batch_id is given, link (:Batch) --> (:Note)
         """
+        self.uuid = self.newUuid()
         n_attr = {}
         try:
             n_attr = {
-                "handle": self.handle if self.handle else None, # f"handle-{self.id}",
+                "uuid": self.uuid,
                 "change": self.change,
                 "id": self.id,
                 "priv": self.priv,
@@ -190,17 +189,21 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
                 "text": self.text,
                 "url": self.url
             }
-            if parent_id:
-                #print(f"Note_save: parent (uid={parent_id}) --> (id={self.id})")
+            if self.handle: 
+                n_attr['handle'] = self.handle
+            if 'parent_id' in kwargs:
+                print(f"Note_save: parent (uid={kwargs['parent_id']}) --> (id={self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create_as_leaf, 
-                                      parent_id=parent_id, n_attr=n_attr).single()[0]
-            elif batch_id:
-                # print(f"Note_save: batch ({batch_id}) --> ({self.id})")
+                                      parent_id=kwargs['parent_id'], 
+                                      n_attr=n_attr).single()[0]
+            elif 'batch_id' in kwargs:
+                print(f"Note_save: batch ({kwargs['batch_id']}) --> ({self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create, 
-                                      bid=batch_id, n_attr=n_attr).single()[0]
+                                      bid=kwargs['batch_id'], 
+                                      n_attr=n_attr).single()[0]
             else:
                 raise RuntimeError(f"Note.save needs batch_id or parent_id for {self.id}")
 
         except Exception as err:
             print(f"iError Note_save: {err} attr={n_attr}", file=stderr)
-            raise RuntimeError("Could not save Note {self.id}".format())
+            raise RuntimeError(f"Could not save Note {self.id}")

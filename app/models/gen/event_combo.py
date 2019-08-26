@@ -37,11 +37,11 @@ class Event_combo(Event):
     "syntynyt välillä 1.3.1840...31.3.1840 Hauho".
     '''
 
-    def __init__(self, eid='', desc='', handle=''):
+    def __init__(self):         #, eid='', desc='', handle=''):
         '''
         Constructor Luo uuden Event_combo -instanssin
         '''
-        Event.__init__(self, eid, desc, handle)
+        Event.__init__(self)
         self.clearnames = []    # filled by models.gen.place.Place.show_names_list
                                 # to show names list 
         self.role = ''          # role of event from EVENT relation, if available

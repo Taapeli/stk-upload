@@ -39,13 +39,17 @@ class Source_gramps(Source):
                                 # prev. repocitory_id, reporef_hlink and reporef_medium
 
 
-    def save(self, tx):
+    def save(self, tx, **kwargs):
         """ Saves this Source and connect it to Notes and Repositories.
         """
-
+        if kwargs:
+            print(f"Warning: Sitation_save: extra arguments {kwargs}!")
+            
+        self.uuid = self.newUuid()
         s_attr = {}
         try:
             s_attr = {
+                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,

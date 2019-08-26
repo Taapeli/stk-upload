@@ -188,8 +188,8 @@ class Cypher_media_in_batch():
     # Find the batch like '2019-02-24.006' and connect new object to that Batch
     create = """
 MATCH (u:Batch {id:$bid})
-MERGE (u) -[:OWNS]-> (a:Media {uuid:$m_attr.uuid}) 
-    SET a = $m_attr
+MERGE (u) -[:OWNS]-> (a:Media {uuid:$uuid})
+    SET a += $m_attr
 RETURN ID(a) as uniq_id"""
 
 # class Cypher_media_w_handle():

@@ -93,6 +93,9 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             handler.handle_people()
             handler.handle_families()
     
+            for k in handler.handle_to_node.keys():
+                print (f'\t{k} –> {handler.handle_to_node[k]}')
+                
             # Set person confidence values 
             #TODO: Only for imported persons (now for all persons!)
             dataupdater.set_confidence_values(handler.tx, batch_logger=handler.blog)

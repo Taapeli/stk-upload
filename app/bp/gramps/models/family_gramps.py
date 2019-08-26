@@ -45,14 +45,18 @@ class Family_gramps(Family):
         self.citationref_hlink = []
 
 
-    def save(self, tx, batch_id):
+    def save(self, tx, **kwargs):   # batch_id):
         """ Saves the family node to db with its relations.
         
             Connects the family to parent, child and note nodes
         """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Family_gramps.save needs batch_id for {self.id}")
 
+        self.uuid = self.newUuid()
         f_attr = {}
-        self.uuid = Family.newUuid()
         try:
             f_attr = {
                 "uuid": self.uuid,

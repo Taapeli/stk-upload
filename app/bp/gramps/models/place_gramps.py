@@ -71,7 +71,7 @@ class Place_gramps(Place):
                 print("iError Place.link_hier: {0}".format(err), file=stderr)
 
 
-    def save(self, tx, batch_id, place_keys=None):
+    def save(self, tx, **kwargs):   # batch_id, place_keys=None):
         """ Saves a Place with Place_names, notes and hierarchy links.
 
             The 'uniq_id's of already created nodes can be found in 'place_keys' 
@@ -93,38 +93,51 @@ class Place_gramps(Place):
 
             Raises an error, if write fails.
         """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Place_gramps.save needs batch_id for {self.id}")
 
         # Create or update this Place
 
+        self.uuid = self.newUuid()
         pl_attr = {}
         try:
 
-            pl_attr = {"handle": self.handle,
-                      "change": self.change,
-                      "id": self.id,
-                      "type": self.type,
-                      "pname": self.pname}
+            pl_attr = {
+                "uuid": self.uuid,
+                "handle": self.handle,
+                "change": self.change,
+                "id": self.id,
+                "type": self.type,
+                "pname": self.pname}
             if self.coord:
                 # If no coordinates, don't set coord attribute
                 pl_attr.update({"coord": self.coord.get_coordinates()})
 
             # Create Place self
 
-            plid = place_keys.get(self.handle) if place_keys else None 
+            if 'place_keys' in kwargs:
+                # Check if this Place node is already created
+                place_keys = kwargs['place_keys']
+                plid = place_keys.get(self.handle)
+            else:
+                plid = None
+
             if plid:
                 # 1) node has been created but not connected to Batch.
                 #    update known Place node parameters and link from Batch
                 self.uniq_id = plid
                 if self.type:
-                    #print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
+                    print(f"Pl_save-1 Complete Place ({self.id} #{plid}) {self.handle} {self.pname}")
                     result = tx.run(Cypher_place_in_batch.complete, #TODO
                                     batch_id=batch_id, plid=plid, p_attr=pl_attr)
                 else:
-                    #print(f"Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
+                    print(f"Pl_save-1 NO UPDATE Place ({self.id} #{plid}) attr={pl_attr}")
                     pass
             else:
                 # 2) new node: create and link from Batch
-                #print(f"Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
+                print(f"Pl_save-2 Create a new Place ({self.id} #{self.uniq_id} {self.pname}) {self.handle}")
                 result = tx.run(Cypher_place_in_batch.create, 
                                 batch_id=batch_id, p_attr=pl_attr)
                 self.uniq_id = result.single()[0]
@@ -152,7 +165,7 @@ class Place_gramps(Place):
         for ref in self.surround_ref:
             try:
                 up_handle = ref['hlink']
-                #print(f"Pl_save-surrounding {self} -[{ref['dates']}]-> {up_handle}")
+                print(f"Pl_save-surrounding {self} -[{ref['dates']}]-> {up_handle}")
                 if 'dates' in ref and isinstance(ref['dates'], DateRange):
                     rel_attr = ref['dates'].for_db()
                     r = f"-[{ref['dates']}]->"
@@ -167,14 +180,14 @@ class Place_gramps(Place):
                     # 3) Link to a known upper Place
                     #    The upper node is already created: create a link to that
                     #    upper Place node
-                    #print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {r} (#{uid})")
+                    print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {r} (#{uid})")
                     result = tx.run(Cypher_place_in_batch.link_hier,
                                     plid=self.uniq_id, up_id=uid, r_attr=rel_attr)
                 else:
                     # 4) Link to unknown place
                     #    A new upper node: create a Place with only handle
                     #    parameter and link hierarchy to Place self
-                    #print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {r} {up_handle}")
+                    print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {r} {up_handle}")
                     result = tx.run(Cypher_place_in_batch.link_create_hier,
                                     plid=self.uniq_id, r_attr=rel_attr, 
                                     up_handle=up_handle)

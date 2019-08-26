@@ -8,7 +8,7 @@ Created on 18.10.2018
     
     class bp.gramps.models.person_gramps.Person_gramps(Person): 
         - __init__()
-        - save(self, username, tx)      Tallettaa Person, Names, Events ja Citations
+        - save(self, tx, batch_id)      Tallettaa Person, Names, Events ja Citations
 
 
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi> 
@@ -19,7 +19,7 @@ import datetime
 from sys import stderr
 from shareds import logger
 
-import models.dbutil
+#import models.dbutil
 
 from models.gen.person import Person
 from models.cypher_gramps import Cypher_person_w_handle
@@ -81,7 +81,7 @@ class Person_gramps(Person):
         self.est_death = ''
 
 
-    def save(self, tx, batch_id):
+    def save(self, tx, **kwargs):   # batch_id):
         """ Saves the Person object and possibly the Names, Events ja Citations.
 
             On return, the self.uniq_id is set
@@ -89,16 +89,22 @@ class Person_gramps(Person):
             @todo: Remove those referenced person names, which are not among
                    new names (:Person) --> (:Name) 
         """
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
 
         today = str(datetime.date.today())
-        if not self.handle:
-            handles = models.dbutil.get_new_handles(3)
-            self.handle = handles.pop()
+#         if not self.handle:
+#             handles = models.dbutil.get_new_handles(3)
+#             self.handle = handles.pop()
 
+        self.uuid = self.newUuid()
         # Save the Person node under UserProfile; all attributes are replaced
         p_attr = {}
         try:
             p_attr = {
+                "uuid": self.uuid,
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
@@ -128,7 +134,7 @@ class Person_gramps(Person):
 
         # Save Name nodes under the Person node
         for name in self.names:
-            name.save(tx, self.uniq_id)
+            name.save(tx, parent_id=self.uniq_id)
 
         # Save web urls as Note nodes connected under the Person
         if self.notes:
