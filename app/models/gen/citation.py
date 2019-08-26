@@ -9,6 +9,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 import logging 
+from models.gen.dates import DateRange
 logger = logging.getLogger('stkserver')
 
 import shareds
@@ -24,19 +25,26 @@ class Citation(NodeObject):
                 handle           str
                 change           int
                 id               esim. "C0001"
-                dateval          str date
+                dates            DateRange date
                 page             str page description
                 confidence       str confidence 0.0 - 5.0 (?)
                 note_ref         int huomautuksen osoite (ent. noteref_hlink str)
                 source_handle    str handle of source   _or_
                 source_id        int uniq_id of a Source object
                 citators         NodeRef nodes referring this citation
-     """
+
+    #TODO: Remove references to "dateval" variable when reading from db
+    
+         object attributes        db attributes
+    OLD: dateval str              {dateval: "2015-03-08"}
+    NEW: dates DateRange          {datetype: 0, date1: 1898523, date2: 1898523}
+    """
 
     def __init__(self):
         """ Luo uuden citation-instanssin """
         NodeObject.__init__(self)
-        self.dateval = None
+    
+        self.dates = None
         self.page = ''
         self.confidence = ''
         self.mark = ''          # citation mark like '1a', if defined
@@ -62,7 +70,10 @@ class Citation(NodeObject):
         n.change = node['change']
         n.id = node['id'] or ''
         n.confidence = node['confidence'] or ''
-        n.dateval = node['dateva'] or None
+        if 'datetype' in node:
+            n.dates = DateRange(node['datetype'], node['date1'], node['date2'])
+        else:
+            n.dates = None
         n.page = node['page'] or ''
         return n
 
@@ -210,7 +221,7 @@ class Citation(NodeObject):
         print ("Handle: " + self.handle)
         print ("Change: {}".format(self.change))
         print ("Id: " + self.id)
-        print ("Dateval: " + self.dateval)
+        print ("Dates: " + self.dates)
         print ("Page: " + self.page)
         print ("Confidence: " + self.confidence)
         if len(self.noteref_hlink) > 0:
@@ -235,10 +246,12 @@ class Citation(NodeObject):
                 "handle": self.handle,
                 "change": self.change,
                 "id": self.id,
-                "dateval": self.dateval, 
                 "page": self.page, 
                 "confidence": self.confidence
             }
+            if self.dates:
+                c_attr.update(self.dates.for_db())
+
             result = tx.run(Cypher_citation_w_handle.create, c_attr=c_attr)
             ids = []
             for record in result:
