@@ -62,9 +62,9 @@ class Event_gramps(Event):
                 objref_hlink       str median handle
      """
 
-    def __init__(self, eid='', desc='', handle=''):
+    def __init__(self):             # , eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
-        Event.__init__(self, eid, desc, handle)
+        Event.__init__(self)
         self.note_handles = []      # Note handles (previous noteref_hlink had
                                     # only the first one)
         self.citation_handles = []  # (previous citationref_hlink)
@@ -76,7 +76,7 @@ class Event_gramps(Event):
         self.names = []   # For creating display sets
 
 
-    def save(self, tx):
+    def save(self, tx, **kwargs):
         """ Saves event to database:
             - Creates a new db node for this Event
             - Sets self.uniq_id
@@ -84,9 +84,13 @@ class Event_gramps(Event):
             - links to existing Place, Note, Citation, Media objects
             - Does not link it from UserProfile or Person
         """
+        if kwargs:
+            print(f"Warning: Event_gramps.save: extra arguments {kwargs}!")
 
         today = str(datetime.date.today())
+        self.uuid = self.newUuid()
         e_attr = {
+            "uuid": self.uuid,
             "handle": self.handle,
             "change": self.change, 
             "id": self.id, 

@@ -41,7 +41,7 @@
 
     class bp.gramps.models.person_gramps.Person_gramps(Person):
         - __init__()
-        - save(self, username, tx)      Tallettaa Person, Names, Events ja Citations
+        - save(self, tx)                Tallettaa Person, Names, Events ja Citations
 
     Not in use or obsolete:
     - from models.gen.person_combo.Person_combo(Person)
@@ -168,20 +168,13 @@ class Person(NodeObject):
         '''
         if not obj:
             obj = cls()
+        obj.uuid = node.get('uuid')
+        obj.handle = node.get('handle')
         obj.uniq_id = node.id
         obj.id = node['id']
-        #TODO: Remove processing old 'gender' in the next version
-        if 'sex' in node:
-            obj.sex = node['sex']
-        elif 'gender' in node:
-            obj.sex = cls.sex_from_str(node['gender'])
-        else:
-            obj.sex = SEX_UNKOWN
-        obj.handle = node['handle']
+        obj.sex = node.get('a_5', 'UNKNOWN')
         obj.change = node['change']
-        obj.confidence = node['confidence']
-        if obj.confidence == None:
-            obj.confidence = ''
+        obj.confidence = node.get('confidence', '')
         obj.sortname = node['sortname']
         obj.priv = node['priv']
         if "datetype" in node:

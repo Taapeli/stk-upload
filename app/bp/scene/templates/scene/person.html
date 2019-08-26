@@ -27,7 +27,9 @@
             <table>
                 <tr>
                     <td class="ColumnAttribute">{{ _('Identifiers') }}</td>
-                    <td class="ColumnValue"><span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
+                    <td class="ColumnValue">
+                        {% if person.uuid %}<span class="id">{{person.uuid[:6]}}</span> /{% endif %}
+                        <span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                 </tr>
                 {% for pname in person.names|sort(attribute='order')  %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>

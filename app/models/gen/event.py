@@ -2,7 +2,7 @@
 
     Event hierarkiasuunnitelma 31.8.2018/JMä
 
-    class gen.event.Event(): 
+    class gen.event.Event(NodeObject): 
        vain Event-noden parametrit (uniq_id, tyyppi, handle, päivämäärät)
 
     class gen.event.Event_combo(Event): 
@@ -41,12 +41,15 @@ Created on 2.5.2017
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
+from .base import NodeObject
 from .dates import DateRange
 import  shareds
 
 
-class Event:
-    """ Tapahtuma
+class Event(NodeObject):
+    """ Person or Family Event object.
+    
+        Tapahtuma
             
         Properties:
                 handle             Unique constant handle (mostly from Gramps)
@@ -73,14 +76,16 @@ class Event:
                 names = []         Names attached
      """
 
-    def __init__(self, eid='', desc='', handle=''):
+    def __init__(self):     #, eid='', desc='', handle=''):
         """ Luo uuden event-instanssin """
-        self.handle = handle
-        self.change = 0
-        self.id = eid
+        NodeObject.__init__(self)
+#         self.uuid = None        # UUID
+#         self.uniq_id = None     # Neo4j object id
+#         self.change = 0         # Object change time
+#         self.id = ''            # Gedcom object id like "I1234"
+#         self.handle = ''       # Gramps handle (?)
         self.type = ''
-        self.description = desc
-        self.date = ''
+        self.description = ''
         self.dates = None
         self.attr = dict()         # prev. attr_type, attr_value
         # Only in Event_combo

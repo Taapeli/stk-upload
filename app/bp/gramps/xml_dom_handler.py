@@ -424,7 +424,7 @@ class DOM_handler():
                         f.citationref_hlink.append(family_citationref.getAttribute("hlink"))
                         print(f'# Family {f.id} has cite {f.citationref_hlink[-1]}')
 
-            self.save_and_link_handle(family)
+            self.save_and_link_handle(f, batch_id=self.batch_id)
             counter += 1
             # The sortnames and dates will be set for these families 
             self.family_ids.append(f.uniq_id)
@@ -502,7 +502,7 @@ class DOM_handler():
                     o.description = obj_file.getAttribute("description")
 
             #TODO: Varmista, ettei mediassa voi olla Note
-            self.save_and_link_handle(o, self.batch_id)
+            self.save_and_link_handle(o, batch_id=self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Media objects", 'count':counter, 
@@ -627,7 +627,7 @@ class DOM_handler():
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
-            self.save_and_link_handle(p, self.batch_id)
+            self.save_and_link_handle(p, batch_id=self.batch_id)
             print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
             # The refnames will be set for these persons 
