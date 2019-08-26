@@ -226,13 +226,13 @@ class DOM_handler():
             for citation_noteref in citation.getElementsByTagName('noteref'):
                 if citation_noteref.hasAttribute("hlink"):
                     c.noteref_hlink.append(citation_noteref.getAttribute("hlink"))
-                    print(f'# Citation {c.id} has note {c.noteref_hlink[-1]}')
+                    ##print(f'# Citation {c.id} has note {c.noteref_hlink[-1]}')
 
             if len(citation.getElementsByTagName('sourceref') ) == 1:
                 citation_sourceref = citation.getElementsByTagName('sourceref')[0]
                 if citation_sourceref.hasAttribute("hlink"):
                     c.source_handle = citation_sourceref.getAttribute("hlink")
-                    print(f'# Citation {c.id} points source {c.source_handle}')
+                    ##print(f'# Citation {c.id} points source {c.source_handle}')
             elif len(citation.getElementsByTagName('sourceref') ) > 1:
                 self.blog.log_event({'title':"More than one sourceref tag in a citation",
                                      'level':"WARNING",'count':c.id})
@@ -310,7 +310,7 @@ class DOM_handler():
                 event_place = event.getElementsByTagName('place')[0]
                 if event_place.hasAttribute("hlink"):
                     e.place_hlink = event_place.getAttribute("hlink")
-                    print(f'# Event {e.id} is located in {e.place_hlink}')
+                    ##print(f'# Event {e.id} is located in {e.place_hlink}')
             elif len(event.getElementsByTagName('place') ) > 1:
                 self.blog.log_event({'title':"More than one place tag in an event",
                                      'level':"WARNING", 'count':e.id})
@@ -323,17 +323,17 @@ class DOM_handler():
             for ref in event.getElementsByTagName('noteref'):
                 if ref.hasAttribute("hlink"):
                     e.note_handles.append(ref.getAttribute("hlink"))
-                    print(f'# Event {e.id} has note {e.note_handles[-1]}')
+                    ##print(f'# Event {e.id} has note {e.note_handles[-1]}')
 
             for ref in event.getElementsByTagName('citationref'):
                 if ref.hasAttribute("hlink"):
                     e.citation_handles.append(ref.getAttribute("hlink"))
-                    print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
+                    ##print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
 
             for ref in event.getElementsByTagName('objref'):
                 if ref.hasAttribute("hlink"):
                     e.media_handles.append(ref.getAttribute("hlink"))
-                    print(f'# Event {e.id} has pic {e.media_handles[-1]}')
+                    ##print(f'# Event {e.id} has pic {e.media_handles[-1]}')
 
             try:
                 self.save_and_link_handle(e)
@@ -379,7 +379,7 @@ class DOM_handler():
                 family_father = family.getElementsByTagName('father')[0]
                 if family_father.hasAttribute("hlink"):
                     f.father = family_father.getAttribute("hlink")
-                    print(f'# Family {f.id} has father {f.father}')
+                    ##print(f'# Family {f.id} has father {f.father}')
             elif len(family.getElementsByTagName('father') ) > 1:
                 self.blog.log_event({'title':"More than one father tag in a family",
                                      'level':"WARNING", 'count':f.id})
@@ -388,7 +388,7 @@ class DOM_handler():
                 family_mother = family.getElementsByTagName('mother')[0]
                 if family_mother.hasAttribute("hlink"):
                     f.mother = family_mother.getAttribute("hlink")
-                    print(f'# Family {f.id} has mother {f.mother}')
+                    ##print(f'# Family {f.id} has mother {f.mother}')
             elif len(family.getElementsByTagName('mother') ) > 1:
                 self.blog.log_event({'title':"More than one mother tag in a family",
                                      'level':"WARNING", 'count':f.id})
@@ -399,7 +399,7 @@ class DOM_handler():
                     if family_eventref.hasAttribute("hlink"):
                         f.eventref_hlink.append(family_eventref.getAttribute("hlink"))
                         f.eventref_role.append(family_eventref.getAttribute("role"))
-                        print(f'# Family {f.id} has event {f.eventref_hlink[-1]}')
+                        ##print(f'# Family {f.id} has event {f.eventref_hlink[-1]}')
                     #TODO: Yhdistä kentät eventref_hlink ja eventref_role
 
             if len(family.getElementsByTagName('childref') ) >= 1:
@@ -407,21 +407,21 @@ class DOM_handler():
                     family_childref = family.getElementsByTagName('childref')[i]
                     if family_childref.hasAttribute("hlink"):
                         f.childref_hlink.append(family_childref.getAttribute("hlink"))
-                        print(f'# Family {f.id} has child {f.childref_hlink[-1]}')
+                        ##print(f'# Family {f.id} has child {f.childref_hlink[-1]}')
 
             if len(family.getElementsByTagName('noteref') ) >= 1:
                 for i in range(len(family.getElementsByTagName('noteref') )):
                     family_noteref = family.getElementsByTagName('noteref')[i]
                     if family_noteref.hasAttribute("hlink"):
                         f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
-                        print(f'# Family {f.id} has note {f.noteref_hlink[-1]}')
+                        ##print(f'# Family {f.id} has note {f.noteref_hlink[-1]}')
                        
             if len(family.getElementsByTagName('citationref') ) >= 1:
                 for i in range(len(family.getElementsByTagName('citationref') )):
                     family_citationref = family.getElementsByTagName('citationref')[i]
                     if family_citationref.hasAttribute("hlink"):
                         f.citationref_hlink.append(family_citationref.getAttribute("hlink"))
-                        print(f'# Family {f.id} has cite {f.citationref_hlink[-1]}')
+                        ##print(f'# Family {f.id} has cite {f.citationref_hlink[-1]}')
 
             self.save_and_link_handle(f, batch_id=self.batch_id)
             counter += 1
@@ -584,7 +584,7 @@ class DOM_handler():
                         person_name_citationref = person_name.getElementsByTagName('citationref')[i]
                         if person_name_citationref.hasAttribute("hlink"):
                             pname.citation_handles.append(person_name_citationref.getAttribute("hlink"))
-                            print(f'# Person name for {p.id} has cite {pname.citation_handles[-1]}')
+                            ##print(f'# Person name for {p.id} has cite {pname.citation_handles[-1]}')
 
                 p.names.append(pname)
 
@@ -598,7 +598,7 @@ class DOM_handler():
             for person_objref in person.getElementsByTagName('objref'):
                 if person_objref.hasAttribute("hlink"):
                     p.media_handles.append(person_objref.getAttribute("hlink"))
-                    print(f'# Person {p.id} has pic {p.media_handles[-1]}')
+                    ##print(f'# Person {p.id} has pic {p.media_handles[-1]}')
 
             for person_url in person.getElementsByTagName('url'):
                 n = Note()
@@ -615,7 +615,7 @@ class DOM_handler():
             for person_parentin in person.getElementsByTagName('parentin'):
                 if person_parentin.hasAttribute("hlink"):
                     p.parentin_hlink.append(person_parentin.getAttribute("hlink"))
-                    print(f'# Person {p.id} is parent in family {p.parentin_hlink[-1]}')
+                    ##print(f'# Person {p.id} is parent in family {p.parentin_hlink[-1]}')
 
             for person_noteref in person.getElementsByTagName('noteref'):
                 if person_noteref.hasAttribute("hlink"):
@@ -624,10 +624,10 @@ class DOM_handler():
             for person_citationref in person.getElementsByTagName('citationref'):
                 if person_citationref.hasAttribute("hlink"):
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
-                    print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
+                    ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
             self.save_and_link_handle(p, batch_id=self.batch_id)
-            print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
+            ##print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
             # The refnames will be set for these persons 
             self.person_ids.append(p.uniq_id)
@@ -722,12 +722,12 @@ class DOM_handler():
                 # surround_ref elements example
                 # {'hlink': '_ddd3...', 'dates': <Gramps_DateRange object>}
                 pl.surround_ref.append({'hlink':hlink, 'dates':dates})
-                print(f'# Place {pl.id} is surrouded by {pl.surround_ref[-1]["hlink"]}')
+                ##print(f'# Place {pl.id} is surrouded by {pl.surround_ref[-1]["hlink"]}')
 
             for placeobj_noteref in placeobj.getElementsByTagName('noteref'):
                 if placeobj_noteref.hasAttribute("hlink"):
                     pl.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
-                    print(f'# Place {pl.id} has note {pl.noteref_hlink[-1]}')
+                    ##print(f'# Place {pl.id} has note {pl.noteref_hlink[-1]}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
             self.save_and_link_handle(pl, batch_id=self.batch_id, place_keys=place_keys)
@@ -843,7 +843,7 @@ class DOM_handler():
                 # Traverse links to surrounding places
                 if source_noteref.hasAttribute("hlink"):
                     s.note_handles.append(source_noteref.getAttribute("hlink"))
-                    print(f'# Source {s.id} has note {s.note_handles[-1]}')
+                    ##print(f'# Source {s.id} has note {s.note_handles[-1]}')
 
             for source_reporef in source.getElementsByTagName('reporef'):
                 r = Repository()
