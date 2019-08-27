@@ -6,29 +6,25 @@ Created on 21.3.2018
 @author: jm
 '''
 
-class Cypher_batch(object):
+class Cypher_batch():
     '''
-    Cypher clauses for managing Batch and Log nodes
+    Cypher clauses for managing Batch nodes
     '''
 
     batch_find_id = """
-MATCH (u:UserProfile {username: $user})
-MATCH (u) -[:HAS_LOADED]-> (b:Batch) 
-    WHERE b.id STARTS WITH $batch_base 
+MATCH (b:Batch) WHERE b.id STARTS WITH $batch_base
 RETURN b.id AS bid
-    ORDER BY bid DESC 
-    LIMIT 1"""
+    ORDER BY bid DESC LIMIT 1"""
 
     batch_create = """
 MATCH (u:UserProfile {username: $b_attr.user})
-MERGE (u) -[:HAS_LOADED {status: $b_attr.status}]-> (b:Batch {id: $b_attr.id})
+MERGE (u) -[:HAS_LOADED]-> (b:Batch {id: $b_attr.id})
     SET b = $b_attr
     SET b.timestamp = timestamp()"""
 
     batch_complete = """
 MATCH (u:UserProfile {username: $user})
-MATCH (u) -[r1:HAS_LOADED]-> (b:Batch {id: $bid})
-    SET r1.status="completed"
+MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
     SET b.status="completed"
 WITH u, b
     OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
@@ -48,17 +44,17 @@ MATCH (b:Batch)
 RETURN b 
     """
 
-    batch_count = """
-MATCH (u:UserProfile {username: $user})
-MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid})
-RETURN COUNT(b) as cnt
-"""
+#     batch_count = """
+# MATCH (u:UserProfile {username: $user})
+# MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid})
+# RETURN COUNT(b) as cnt
+# """
 
-    batch_person_count = """
-MATCH (u:UserProfile {username: $user})
-MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid}) --> (p:Person)
-RETURN COUNT(p) as cnt
-"""
+#     batch_person_count = """
+# MATCH (u:UserProfile {username: $user})
+# MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid}) --> (p:Person)
+# RETURN COUNT(p) as cnt
+# """
 
     batch_delete = """
 MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
@@ -66,26 +62,11 @@ OPTIONAL MATCH
     (b) -[*]-> (n) 
 DETACH DELETE b, n
 """
-
     
-    batch_find = """
-MATCH (b:Batch {id: $batch_id}) 
-RETURN b
+    get_batch_filename = """
+MATCH (b:Batch {id: $batch_id, user: $username}) 
+RETURN b.file
 """
-
-#     batch_x = """
-# MATCH (u:UserProfile {username: $user})
-# MERGE (u) -[:HAS_LOADED {status: $status}]-> 
-#     (b:Batch {id: $batch, file: $file}) -[:COMPLETED]-> 
-#     (l:Log {status: $status, msg: $msg, size: $size, elapsed: $elapsed})
-# WITH u, b
-#     OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
-#         DELETE c
-#     CREATE (u) -[:CURRENT_LOAD]-> (b)
-# """
-
-
-#TODO Kaikki lauseet geneologisten tietojen lukemiseen ja päivittämiseen Batchin kautta puuttuvat
 
 # ==============================================================================
 
