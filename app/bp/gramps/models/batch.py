@@ -8,16 +8,19 @@ import shareds
 from models.cypher_gramps import Cypher_batch
 
 def delete_batch(username, batch_id):
-   result = shareds.driver.session().run(Cypher_batch.batch_delete, 
-                                      username=username,batch_id=batch_id)
-   return result
+    with shareds.driver.session() as session:
+        result = session.run(Cypher_batch.batch_delete,
+                             username=username, batch_id=batch_id)
+        return result
             
 def get_filename(username, batch_id):
-   result = shareds.driver.session().run(Cypher_batch.batch_find, batch_id=batch_id).single()
-   return result.get('b').get('file')
+    with shareds.driver.session() as session:
+        result = session.run(Cypher_batch.get_batch_filename,
+                             username=username, batch_id=batch_id).single()
+        return result.get('b.file')
 
 def get_batches():
-   result = shareds.driver.session().run(Cypher_batch.batch_list_all)
-   for rec in result:
-       print("p",rec.get('b').items())
-       yield dict(rec.get('b'))
+    result = shareds.driver.session().run(Cypher_batch.batch_list_all)
+    for rec in result:
+        print("p",rec.get('b').items())
+        yield dict(rec.get('b'))

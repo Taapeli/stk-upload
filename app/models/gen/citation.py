@@ -35,9 +35,10 @@ class Citation(NodeObject):
 
     #TODO: Remove references to "dateval" variable when reading from db
     
-         object attributes        db attributes
-    OLD: dateval str              {dateval: "2015-03-08"}
-    NEW: dates DateRange          {datetype: 0, date1: 1898523, date2: 1898523}
+         object attributes     db attributes
+         -----------------     -------------
+    OLD: dateval str           {dateval: "2015-03-08"}
+    NEW: dates DateRange       {datetype: 0, date1: 1898523, date2: 1898523}
     """
 
     def __init__(self):
@@ -66,15 +67,21 @@ class Citation(NodeObject):
         '''
         n = cls()
         n.uniq_id = node.id
-        n.handle = node['handle']
-        n.change = node['change']
-        n.id = node['id'] or ''
-        n.confidence = node['confidence'] or ''
+        n.handle = getattr(node, 'handle', None)
+        n.change = getattr(node, 'change', None)
+        n.id = getattr(node, 'id', '')
+        n.confidence = getattr(node, 'confidence', '')
+        n.page = getattr(node, 'page', '')
+#TODO: Remove dateval processing later
         if 'datetype' in node:
             n.dates = DateRange(node['datetype'], node['date1'], node['date2'])
-        else:
-            n.dates = None
-        n.page = node['page'] or ''
+        elif 'dateval' in node:
+            try:
+                n.dates = DateRange(node['dateval'])
+            except ValueError as e:
+                print(f"Error: {getattr(e, 'message', repr(e))} in {n}")
+        n.dateval = str(n.dates) if n.dates else ""
+
         return n
 
     @staticmethod       

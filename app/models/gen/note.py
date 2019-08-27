@@ -192,12 +192,12 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
             if self.handle: 
                 n_attr['handle'] = self.handle
             if 'parent_id' in kwargs:
-                print(f"Note_save: parent (uid={kwargs['parent_id']}) --> (id={self.id})")
+                #print(f"Note_save: parent (uid={kwargs['parent_id']}) --> (id={self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create_as_leaf, 
                                       parent_id=kwargs['parent_id'], 
                                       n_attr=n_attr).single()[0]
             elif 'batch_id' in kwargs:
-                print(f"Note_save: batch ({kwargs['batch_id']}) --> ({self.id})")
+                #print(f"Note_save: batch ({kwargs['batch_id']}) --> ({self.id})")
                 self.uniq_id = tx.run(Cypher_note_in_batch.create, 
                                       bid=kwargs['batch_id'], 
                                       n_attr=n_attr).single()[0]

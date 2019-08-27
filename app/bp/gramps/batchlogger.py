@@ -64,15 +64,15 @@ class Batch():
             
             dbutil.aqcuire_lock(tx, 'batch_id')
             # 1. Find the latest Batch id of today from the db
-            base = f'{self.userid} {str(date.today())}'
+            base = str(date.today())
             try:
                 batch_id = tx.run(Cypher_batch.batch_find_id, 
-                                  user=self.userid, batch_base=base).single().value()
-                # print("# Pervious batch_id={}".format(batch_id))
+                                  batch_base=base).single().value()
+                print("# Pervious batch_id={}".format(batch_id))
                 i = batch_id.rfind('.')
                 ext = int(batch_id[i+1:])
             except AttributeError as e:
-                # print ("Ei vanhaa arvoa {}".format(e))
+                print ("Ei vanhaa arvoa {}".format(e))
                 ext = 0
             except Exception as e:
                 print ("Poikkeus {}".format(e))

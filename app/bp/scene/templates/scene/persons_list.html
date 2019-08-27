@@ -19,6 +19,17 @@
     {% set multi_owners = 0 %}
     {% set my_set = owner_filter.choices.as_str[filt_owners] %}
 {% endif %}
+<style>
+.grid {  display: flex; }
+.grid .col { float: left; }
+.grid .col.col_event {
+    width: 9em;
+    font-style: italic;
+    color: #000066;
+}
+.grid .col.col_desc { width: 60%; }
+.major { font-weight: bold; }
+</style>
 
 <div id="startdiv">
 	{% if session['owner_filter'] %}
@@ -148,20 +159,23 @@
                        <a href="/scene/person/{{p.uniq_id}}" class="idno">ID: {{p.uniq_id}} /</a>
                                {# TODO Remove the test link at ']' #}
                        <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
-                       <span class="refname" title="{{ _('Sorting name') }}">{{p.sortname}}</span>
+<!--                        <span class="refname" title="{{ _('Sorting name') }}">{{p.sortname}}</span> -->
 	                </div></td>
 
-	              <td class="ColumnEvent">
-	        {% if p.events is iterable %}<ul>{% for e in p.events|sort(attribute='date') %}
-		              <li{% if e.type == "Birth" or e.type == "Death" %} class="major"
-		                  {% else %} class="minor"{% endif %}>
-		                  <i>{{e.type|transl('evt')}}</i> {{e.description}}
-		                  {% if e.dates %}{{e.dates}} {% endif %}
-		                  {% if e.place %} | {{e.place}}{% endif %}</li>
-		        {% endfor %}</ul>
-		    {% else %}<u>See person {{p.events}}</u></td>
-	        {% endif %}
-	            </tr>
+                  <td class="ColumnEvent">
+            {% if p.events is iterable %}
+                <div>{% for e in p.events|sort(attribute='date') %}
+                    {% if e.type == "Birth" or e.type == "Death" %}{% set ecl = "major" %}
+                    {% else %}{% set ecl = "minor" %}{% endif %}
+                      <div class="grid">
+                          <div class="col col_event {{ecl}}">{{e.type|transl('evt')|lower}}</div>
+                          <div class="col col_desc">{{e.description}}
+                          {% if e.dates %}{{e.dates}} {% endif %}
+                          {% if e.place %} | {{e.place}}{% endif %}</div>
+                      </div>
+                {% endfor %}</div>
+            {% else %}<u>See person {{p.events}}</u></td>
+            {% endif %}
 	    {% endfor %}
         {% if next[1].startswith('>') %}
                 <tr><td class="ColumnAlpha"></td>

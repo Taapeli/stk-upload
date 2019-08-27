@@ -287,13 +287,11 @@ return path"""
 
             Korvaava versio models.gen.event_combo.Event_combo.get_connected_events_w_links
         """
-
-        root = int(self.uniq_id)
         query = """
 MATCH (person:Person)-[r:EVENT]->(event:Event)
   WHERE ID(person)=$pid
 RETURN r.role AS eventref_role, ID(event) AS event_ref"""
-        return  shareds.driver.session().run(query, {"pid": root})
+        return  shareds.driver.session().run(query, pid=self.uniq_id)
 
 
     def get_families_by_id(self):
