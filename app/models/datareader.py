@@ -631,7 +631,7 @@ def get_person_data_by_id(uniq_id):
         families
     """
     p = Person_combo()
-    p.uniq_id = int(uniq_id)
+    p.uniq_id = uniq_id
     # Get Person and her Name properties, also Note properties
     p.get_person_w_names()
     # Get reference (uniq_id) and role for Events

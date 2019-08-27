@@ -169,10 +169,11 @@ class Person(NodeObject):
         if not obj:
             obj = cls()
         obj.uuid = node.get('uuid')
-        obj.handle = node.get('handle')
+        if 'handle' in node:
+            obj.handle = node.get('handle')
         obj.uniq_id = node.id
         obj.id = node['id']
-        obj.sex = node.get('a_5', 'UNKNOWN')
+        obj.sex = node.get('sex', 'UNKNOWN')
         obj.change = node['change']
         obj.confidence = node.get('confidence', '')
         obj.sortname = node['sortname']
