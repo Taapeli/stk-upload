@@ -708,7 +708,8 @@ def get_person_data_by_id(uniq_id):
                     #         100272,
                     #         'Lapinjärven seurakunnan arkisto',
                     #         'Archive']
-                    #    ]>
+                    #    ]
+                    #   url='http://...">
                     c.dateval = record['date']
                     c.page = record['page']
                     c.confidence = record['confidence']
@@ -731,13 +732,21 @@ def get_person_data_by_id(uniq_id):
                         r.uniq_id = source[5]
                         r.rname = source[6]
                         r.type = source[7]
-
                         s.repositories.append(r)
+
+                        n = Note()
+                        n.url = record['url']
+                        s.notes.append(n)
+
                         c.source = s
 
-                    print("Eve:{} {} > Cit:{} '{}' > Sour:{} '{}' > Repo:{} '{}'".\
-                          format(e.uniq_id, e.id, c.uniq_id, c.page, s.uniq_id, 
-                                 s.stitle, s.sauthor, s.spubinfo, r.uniq_id, r.rname))
+                    print("Eve:{} {} > Cit:{} '{}' > Sour:{} '{}' '{}' '{}' > Repo:{} '{}' > Url: '{}'".\
+                          format(e.uniq_id, e.id,
+                                 c.uniq_id, c.page,
+                                 s.uniq_id, s.stitle, s.sauthor, s.spubinfo,
+                                 r.uniq_id, r.rname,
+                                 n.url,
+                          ))
                     citations.append(c)
 
     for uniq_id in p.media_ref:

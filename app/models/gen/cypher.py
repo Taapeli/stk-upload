@@ -501,7 +501,7 @@ return extract(x IN rel | endnode(x))  as end, source_id
 
     _cita_sour_repo_tail = """
 RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidence, 
-   note.text AS notetext,
+   note.text AS notetext, note.url as url,
    COLLECT(DISTINCT [ID(source), source.stitle, source.sauthor, source.spubinfo, 
                      rr.medium, 
                      ID(repo), repo.rname, repo.type]) AS sources"""
