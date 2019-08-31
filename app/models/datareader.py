@@ -539,6 +539,7 @@ def get_source_with_events(sourceid):
         c.id = c_node['id']
         c.page = c_node['page']
         c.confidence = c_node['confidence']
+        c.note_ref = record['note']
 
         p_uid = record['p_id']
         x_node = record['x']

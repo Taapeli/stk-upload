@@ -562,10 +562,12 @@ RETURN source, COLLECT(n) as notes"""
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
 with c
     match (c) <-[:CITATION]- (x)
+    optional match (c) -[:NOTE]-> (n:Note)
     optional match (x) <-[re:EVENT]- (p)
     return id(c) as c_id, c, re.role as role,
            id(x) as x_id, labels(x)[0] as label, x, 
-           coalesce(id(p), id(x))  as p_id
+           coalesce(id(p), id(x))  as p_id,
+           n.url as note
     order by c_id, p_id"""
 
 
