@@ -494,6 +494,7 @@ def get_source_with_events(sourceid):
     result = Source.get_citating_nodes(sourceid)
 
     citations = {}
+    notes = {}
     persons = dict()    # {uniq_id: clearname}
 
     for record in result:               # Nodes record
@@ -539,7 +540,15 @@ def get_source_with_events(sourceid):
         c.id = c_node['id']
         c.page = c_node['page']
         c.confidence = c_node['confidence']
-        c.note_ref = record['note']
+        
+        c_notes = record['notes']
+        for note in c_notes:
+            n_id = note['id']
+            if n_id not in notes.keys():
+                notes[n_id] = n_id
+                if note['url']:
+                    c.note_ref.append(note['url'])
+                    
 
         p_uid = record['p_id']
         x_node = record['x']

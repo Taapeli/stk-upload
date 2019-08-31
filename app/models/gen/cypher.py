@@ -564,10 +564,9 @@ with c
     match (c) <-[:CITATION]- (x)
     optional match (c) -[:NOTE]-> (n:Note)
     optional match (x) <-[re:EVENT]- (p)
-    return id(c) as c_id, c, re.role as role,
+    return id(c) as c_id, c, collect(n) as notes, re.role as role,
            id(x) as x_id, labels(x)[0] as label, x, 
-           coalesce(id(p), id(x))  as p_id,
-           n.url as note
+           coalesce(id(p), id(x))  as p_id
     order by c_id, p_id"""
 
 
