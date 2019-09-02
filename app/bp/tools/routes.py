@@ -249,7 +249,7 @@ def pick_selection(cond):
 #             return render_template("repo_sources.html",
 #                                    repositories=repositories)
         elif key == 'source_uniq_id':   # from cite_sourc_repo.html, table_sources.html
-            sources = datareader.read_sources(uniq_id=value)
+            sources = datareader.read_sources(uniq_id=int(value))
             return render_template("/tools/source_citations.html",
                                    sources=sources)
         elif key == 'uniq_id':          # from table_persons2.html

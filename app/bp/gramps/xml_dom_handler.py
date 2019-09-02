@@ -297,6 +297,7 @@ class DOM_handler():
             try:
                 # Gramps_DateRange or None
                 e.dates = self._extract_daterange(event)
+                #TODO: val="1700-luvulla" muunnettava Noteksi
             except:
                 e.dates = None
 

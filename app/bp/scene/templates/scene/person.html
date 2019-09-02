@@ -19,7 +19,7 @@
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b>
         </h3>
-        {% set myid = person.uniq_id %}
+        {% set myuuid = person.uuid %}
         {# set mybirth = "" %}{% for e in events %}
             {% if e.type == "Birth" %}{% set mybirth = e.date %}{% endif %}{% endfor #}
         
@@ -29,7 +29,7 @@
                     <td class="ColumnAttribute">{{ _('Identifiers') }}</td>
                     <td class="ColumnValue">
                         {% if person.uuid %}<span class="id">{{person.uuid[:6]}}</span> /{% endif %}
-                        <span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
+                        <span class="id">{{person.uniq_id}}</span> / <tt>{{person.id}}@{{person.owner}}</tt></td>
                 </tr>
                 {% for pname in person.names|sort(attribute='order')  %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
@@ -82,7 +82,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events|sort(attribute='date') %}
+        {% for e in events|sort(attribute='dates') %}
                     <tr>
                  	{% if e.type == "Cause Of Death" %}
                 		{% set t_cause_of_death = e %}
@@ -143,12 +143,12 @@
 	                <div class="familybox" title="{{ _('Family') }} {{fam.id}}">
 	                    <p>{{ _('Family') }} <a href="/scene/family={{fam.uniq_id}}">{{fam.id}}</a></p>
 	                    <ul>{% if fam.father %}
-	                        <li>{{ _('Father') }}: {{ macro.member(fam.father, myid, '=') }}</li>
+	                        <li>{{ _('Father') }}: {{ macro.person(fam.father, myuuid) }}</li>
 	                {% endif %}{% if fam.mother %}
-	                        <li>{{ _('Mother') }}: {{ macro.member(fam.mother, myid, '=') }}</li>
+	                        <li>{{ _('Mother') }}: {{ macro.person(fam.mother, myuuid) }}</li>
 	                {% endif %}{% if fam.children|count %}
 	                        <li>{{ _('Children') }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
-	                            <li>{{chtype[ch.sex]}}: {{ macro.member(ch, myid, '=') }}</li>{% endfor %}
+	                            <li>{{chtype[ch.sex]}}: {{ macro.person(ch, myuuid) }}</li>{% endfor %}
 	                        </ul></li>
 	                {% endif %}
 	                    </ul>
@@ -177,12 +177,12 @@
 		            <div class="familybox" title="{{ _('Family') }} {{fam.id}} {{fam.role}}">
 		                <p>{{ _('Family') }} <a href="/scene/family={{fam.uniq_id}}">{{fam.id}}</a></p>
 		                <ul>{% if fam.father %}
-		                        <li>{{ _('Father') }}: {{ macro.member(fam.father, myid, '=') }}</li>
+		                        <li>{{ _('Father') }}: {{ macro.person(fam.father, myuuid) }}</li>
 		                {% endif %}{% if fam.mother %}
-		                        <li>{{ _('Mother') }}: {{ macro.member(fam.mother, myid, '=') }}</li>
+		                        <li>{{ _('Mother') }}: {{ macro.person(fam.mother, myuuid) }}</li>
 		                {% endif %}{% if fam.children|count %}
 		                        <li>{{ _('Children') }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
-		                            <li>{{chtype[ch.sex]}}: {{ macro.member(ch, myid, '=') }}</li>
+		                            <li>{{chtype[ch.sex]}}: {{ macro.person(ch, myuuid) }}</li>
 		                         {% endfor %}</ul></li>
 		                {% endif %}
 		                    </ul>

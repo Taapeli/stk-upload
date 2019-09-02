@@ -97,7 +97,7 @@ class Event_gramps(Event):
             "type": self.type,
             "description": self.description}
         if self.attr:
-            # Convert dict to list for db
+            # Convert 'attr' dict to list for db
             a = []
             for key, value in self.attr.items(): 
                 a = a + [key, value]

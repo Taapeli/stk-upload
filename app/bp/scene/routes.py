@@ -213,7 +213,34 @@ def show_a_person_w_apoc(uid):
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
 
+@bp.route('/scene/person/uuid=<uuid>')
+#     @login_required
+def show_person_uuid(uuid):
+    """ Full homepage by uuid for a Person in database (vanhempi versio)
+    """
+    t0 = time.time()
+    try:
+        person, events, photos, citations, families = get_person_data_by_id(uuid)
+        for f in families:
+            print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
+            if f.mother:
+                print("  Mother: {} / {} s. {}".\
+                      format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+            if f.father:
+                print("  Father:  {} / {} s. {}".\
+                      format(f.father.uniq_id, f.father.id, f.father.birth_date))
+            if f.children:
+                for c in f.children:
+                    print("    Child ({}): {} / {} *{}".\
+                          format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    print("-> bp.scene.routes.show_person_page")
+    return render_template("/scene/person.html", person=person, events=events, 
+                           photos=photos, citations=citations, families=families, 
+                           elapsed=time.time()-t0)
 @bp.route('/scene/person=<int:uniq_id>')
+
 #     @login_required
 def show_person_page(uniq_id):
     """ Full homepage for a Person in database (vanhempi versio)

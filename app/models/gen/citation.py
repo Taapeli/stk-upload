@@ -67,114 +67,117 @@ class Citation(NodeObject):
         '''
         n = cls()
         n.uniq_id = node.id
-        n.handle = getattr(node, 'handle', None)
-        n.change = getattr(node, 'change', None)
-        n.id = getattr(node, 'id', '')
-        n.confidence = getattr(node, 'confidence', '')
-        n.page = getattr(node, 'page', '')
+        if 'handle' in node:
+            n.handle = node['handle']
+        n.change = node['change']
+        n.id = node['id']
+        n.uuid = node['uuid']
+        n.confidence = node['confidence']
+        n.page = node['page']
 #TODO: Remove dateval processing later
         if 'datetype' in node:
             n.dates = DateRange(node['datetype'], node['date1'], node['date2'])
         elif 'dateval' in node:
             try:
-                n.dates = DateRange(node['dateval'])
+                if node['dateval']:
+                    n.dates = DateRange(node['dateval'])
             except ValueError as e:
                 print(f"Error: {getattr(e, 'message', repr(e))} in {n}")
         n.dateval = str(n.dates) if n.dates else ""
 
         return n
 
-    @staticmethod       
-    def get_persons_citations (uniq_id):
-        """ Read 'Person -> Event -> Citation' and 'Person -> Citation' paths
-
-            Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
-            ja talleta niihin viittaaja (citator Event tai Person)
-            
-            Returns list of Citations and list of Source ids
-        """
-# ╒══════════════════════════════════════════════════════════════════════╤═══════════╕
-# │"end"                                                                 │"source_id"│
-# ╞══════════════════════════════════════════════════════════════════════╪═══════════╡
-# │[{"datetype":0,"change":1521882842,"description":"","handle":"_dd7681e│91637      │
-# │08a259cca1aa0c055cb2","attr_type":"","id":"E2820","date2":1869085,"typ│           │
-# │e":"Birth","date1":1869085,"attr_value":""},                          │           │
-# │                                            {"handle":"_dd768dca3a6265│           │
-# │4475a5726dfcd","page":"s. 336 1825 Augusti 29 kaste 27","id":"C1362","│           │
-# │dateval":"","confidence":"2","change":1521882911},{"handle":"_dd162a3b│           │
-# │cb7533c6d1779e039c6","id":"S0409","stitle":"Askainen syntyneet 1783-18│           │
-# │25","change":"1519858899"}]                                           │           │
-# ├──────────────────────────────────────────────────────────────────────┼───────────┤
-# │[{"handle":"_dd7686926d946cd18c5642e61e2","id":"C1361","page":"1891 Sy│91657      │
-# │yskuu 22","dateval":"","change":1521882215,"confidence":"2"},{"handle"│           │
-# │:"_dd3d7f7206c3ca3408c9daf6c58","id":"S0333","stitle":"Askainen kuolle│           │
-# │et 1890-1921","change":"1520351255"}]                                 │           │
-# ├──────────────────────────────────────────────────────────────────────┼───────────┤
-# │[{"datetype":0,"change":1521882240,"description":"","handle":"_dd76825│91657      │
-# │122e5977bf3ee88e213f","attr_type":"","id":"E2821","date2":1936694,"typ│           │
-# │e":"Death","date1":1936694,"attr_value":""},                          │           │
-# │                                            {"handle":"_dd7686926d946c│           │
-# │d18c5642e61e2","id":"C1361","page":"1891 Syyskuu 22","dateval":"","cha│           │
-# │nge":1521882215,"confidence":"2"},{"handle":"_dd3d7f7206c3ca3408c9daf6│           │
-# │c58","id":"S0333","stitle":"Askainen kuolleet 1890-1921","change":"152│           │
-# │0351255"}]                                                            │           │
-# └──────────────────────────────────────────────────────────────────────┴───────────┘
-        
-        result = shareds.driver.session().run(Cypher_citation.get_persons_citation_paths, 
-                                              pid=uniq_id)
-        # Esimerkki:
-        # ╒══════╤═════════════════════════════════════════════════╤═══════════╕
-        # │"id_p"│"end"                                            │"source_id"│
-        # ╞══════╪═════════════════════════════════════════════════╪═══════════╡
-        # │80307 │[[88523,"E0076"],[90106,"C0046"],[91394,"S0078"]]│91394      │
-        # ├──────┼─────────────────────────────────────────────────┼───────────┤
-        # │80307 │[[90209,"C0038"],[91454,"S0003"]]                │91454      │
-        # ├──────┼─────────────────────────────────────────────────┼───────────┤
-        # │80307 │[[88533,"E0166"],[90343,"C0462"],[91528,"S0257"]]│91528      │
-        # └──────┴─────────────────────────────────────────────────┴───────────┘
-        # -liitä Event "E0076" -> "C0046", "C0046" -> "S0078"
-        # -liitä Person  80307 -> "C0038", "C0038" -> "S0003"
-        # -liitä Event "E0166" -> "C0462", "C0462" ->"S0257"
-        citations = []
-        source_ids = []
-        for record in result:
-            nodes = record['end']
-            c = Citation()
-            c.source_id = record['source_id']
-            if len(source_ids) == 0 or c.source_id != source_ids[-1]:
-                # Get data of this source
-                source_ids.append(c.source_id)
-
-            if len(nodes) == 1:
-                # Direct link (:Person) --> (:Citation)
-                # Nodes[0] ~ Citation
-                # <Node id=89360 labels={'Citation'} 
-                #       properties={'change': 1521882911, 
-                #                   'handle': '_dd768dca3a62654475a5726dfcd', 
-                #                   'page': 's. 336 1825 Augusti 29 kaste 27', 
-                #                   'id': 'C1362', 'confidence': '2', 'dateval': ''
-                #                  }>
-                cit = nodes[0]
-            else:
-                # Longer path (:Person) -> (x) -> (:Citation)
-                # Nodes[0] ~ Event (or something else)
-                # Nodes[1] ~ Citation
-                eve = nodes[0]
-                cit = nodes[1]
-                e = NodeRef()
-                e.uniq_id = eve.id
-                e.eventtype = eve['type']
-                c.citators.append(e)
-
-            c.uniq_id = cit.id
-            c.id = cit['id']
-            c.label = cit.labels.pop()
-            c.page = cit['page']
-            c.confidence = cit['confidence']
-
-            citations.append(c)
-        
-        return [citations, source_ids]
+#     @staticmethod       
+#     def get_persons_citations (uniq_id):
+#         """ Read 'Person -> Event -> Citation' and 'Person -> Citation' paths
+# 
+#             Haetaan henkilön Citationit, suoraan tai välisolmujen kautta
+#             ja talleta niihin viittaaja (citator Event tai Person)
+#             
+#             Returns list of Citations and list of Source ids
+#         """
+# # ╒══════════════════════════════════════════════════════════════════════╤═══════════╕
+# # │"end"                                                                 │"source_id"│
+# # ╞══════════════════════════════════════════════════════════════════════╪═══════════╡
+# # │[{"datetype":0,"change":1521882842,"description":"","handle":"_dd7681e│91637      │
+# # │08a259cca1aa0c055cb2","attr_type":"","id":"E2820","date2":1869085,"typ│           │
+# # │e":"Birth","date1":1869085,"attr_value":""},                          │           │
+# # │                                            {"handle":"_dd768dca3a6265│           │
+# # │4475a5726dfcd","page":"s. 336 1825 Augusti 29 kaste 27","id":"C1362","│           │
+# # │dateval":"","confidence":"2","change":1521882911},{"handle":"_dd162a3b│           │
+# # │cb7533c6d1779e039c6","id":"S0409","stitle":"Askainen syntyneet 1783-18│           │
+# # │25","change":"1519858899"}]                                           │           │
+# # ├──────────────────────────────────────────────────────────────────────┼───────────┤
+# # │[{"handle":"_dd7686926d946cd18c5642e61e2","id":"C1361","page":"1891 Sy│91657      │
+# # │yskuu 22","dateval":"","change":1521882215,"confidence":"2"},{"handle"│           │
+# # │:"_dd3d7f7206c3ca3408c9daf6c58","id":"S0333","stitle":"Askainen kuolle│           │
+# # │et 1890-1921","change":"1520351255"}]                                 │           │
+# # ├──────────────────────────────────────────────────────────────────────┼───────────┤
+# # │[{"datetype":0,"change":1521882240,"description":"","handle":"_dd76825│91657      │
+# # │122e5977bf3ee88e213f","attr_type":"","id":"E2821","date2":1936694,"typ│           │
+# # │e":"Death","date1":1936694,"attr_value":""},                          │           │
+# # │                                            {"handle":"_dd7686926d946c│           │
+# # │d18c5642e61e2","id":"C1361","page":"1891 Syyskuu 22","dateval":"","cha│           │
+# # │nge":1521882215,"confidence":"2"},{"handle":"_dd3d7f7206c3ca3408c9daf6│           │
+# # │c58","id":"S0333","stitle":"Askainen kuolleet 1890-1921","change":"152│           │
+# # │0351255"}]                                                            │           │
+# # └──────────────────────────────────────────────────────────────────────┴───────────┘
+#         
+#         result = shareds.driver.session().run(Cypher_citation.get_persons_citation_paths, 
+#                                               pid=uniq_id)
+#         # Esimerkki:
+#         # ╒══════╤═════════════════════════════════════════════════╤═══════════╕
+#         # │"id_p"│"end"                                            │"source_id"│
+#         # ╞══════╪═════════════════════════════════════════════════╪═══════════╡
+#         # │80307 │[[88523,"E0076"],[90106,"C0046"],[91394,"S0078"]]│91394      │
+#         # ├──────┼─────────────────────────────────────────────────┼───────────┤
+#         # │80307 │[[90209,"C0038"],[91454,"S0003"]]                │91454      │
+#         # ├──────┼─────────────────────────────────────────────────┼───────────┤
+#         # │80307 │[[88533,"E0166"],[90343,"C0462"],[91528,"S0257"]]│91528      │
+#         # └──────┴─────────────────────────────────────────────────┴───────────┘
+#         # -liitä Event "E0076" -> "C0046", "C0046" -> "S0078"
+#         # -liitä Person  80307 -> "C0038", "C0038" -> "S0003"
+#         # -liitä Event "E0166" -> "C0462", "C0462" ->"S0257"
+#         citations = []
+#         source_ids = []
+#         for record in result:
+#             nodes = record['end']
+#             c = Citation()
+#             c.source_id = record['source_id']
+#             if len(source_ids) == 0 or c.source_id != source_ids[-1]:
+#                 # Get data of this source
+#                 source_ids.append(c.source_id)
+# 
+#             if len(nodes) == 1:
+#                 # Direct link (:Person) --> (:Citation)
+#                 # Nodes[0] ~ Citation
+#                 # <Node id=89360 labels={'Citation'} 
+#                 #       properties={'change': 1521882911, 
+#                 #                   'handle': '_dd768dca3a62654475a5726dfcd', 
+#                 #                   'page': 's. 336 1825 Augusti 29 kaste 27', 
+#                 #                   'id': 'C1362', 'confidence': '2', 'dateval': ''
+#                 #                  }>
+#                 cit = nodes[0]
+#             else:
+#                 # Longer path (:Person) -> (x) -> (:Citation)
+#                 # Nodes[0] ~ Event (or something else)
+#                 # Nodes[1] ~ Citation
+#                 eve = nodes[0]
+#                 cit = nodes[1]
+#                 e = NodeRef()
+#                 e.uniq_id = eve.id
+#                 e.eventtype = eve['type']
+#                 c.citators.append(e)
+# 
+#             c.uniq_id = cit.id
+#             c.id = cit['id']
+#             c.label = cit.labels.pop()
+#             c.page = cit['page']
+#             c.confidence = cit['confidence']
+# 
+#             citations.append(c)
+#         
+#         return [citations, source_ids]
 
 
     @staticmethod       

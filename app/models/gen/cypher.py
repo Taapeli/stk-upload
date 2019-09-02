@@ -194,12 +194,21 @@ WHERE NOT (dmax IS NULL OR dmin IS NULL)
     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
 RETURN null"""
 
+    get_by_uuid_w_names_notes = """
+MATCH (b:Batch) -[:OWNS]-> (person:Person) -[r:NAME]-> (name:Name)
+  WHERE person.uuid=$pid
+OPTIONAL MATCH (person) -[:NOTE]-> (n:Note)
+  WITH person, name, COLLECT (n) AS notes, b.user AS owner
+  ORDER BY name.order
+RETURN person, notes, COLLECT (name) AS names, owner"""
+
     get_w_names_notes = """
-MATCH (person:Person) -[r:NAME]-> (name:Name)
+MATCH (b:Batch) -[:OWNS]-> (person:Person) -[r:NAME]-> (name:Name)
   WHERE ID(person)=$pid
 OPTIONAL MATCH (person) -[:NOTE]-> (n:Note)
-  WITH person, name, COLLECT (n) AS notes ORDER BY name.order
-RETURN person, notes, COLLECT (name) AS names"""
+  WITH person, name, COLLECT (n) AS notes, b.user AS owner
+  ORDER BY name.order
+RETURN person, notes, COLLECT (name) AS names, owner"""
 
     get_names = """
 MATCH (n) <-[r:NAME]- (p:Person)

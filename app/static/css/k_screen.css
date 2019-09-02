@@ -123,8 +123,8 @@ img#logo {
 .id { color: sienna; font-size: 80%; text-align: right; 
     font-family: serif
 }
-.idno { color: gray; font-size: 80%; text-align:center; 
-    font-family: serif
+.idno { color: gray; text-align:center; 
+    font-family: monospace
 }
 .owner { color: white; 
     font-size: 70%; 
