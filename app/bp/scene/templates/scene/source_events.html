@@ -38,13 +38,13 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 	        		    <div title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
 	   					  {{ _( "Page" ) }} {{c.page}} 
-	   					  {% if c.note_ref %}
-	   					    {% for note_url in c.note_ref %}
-	   					  	   <a href="{{note_url}}"> Link </a>
-	   					  	{% endfor %}
-   					  	  {% endif %}
 	   					  {{ macro.stars(c.confidence|float) }}
                           {% set conf = c.confidence | int %} 
+	   					  {% if c.note_ref %}<ul>
+	   					    {% for note in c.note_ref %}
+   					  			<li>{{ macro.notelink(note) }}</li>
+	   					  	{% endfor %}</ul>
+   					  	  {% endif %}
 
 	               		  <ol type="a">
 	               		{% for cite in c.citators|sort(attribute='date') %}
