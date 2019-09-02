@@ -37,7 +37,13 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 	        		  <td class="Citation">
 	        		    <div title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
-	   					  {{ _( "Page" ) }} {{c.page}} {{ macro.stars(c.confidence|float) }}
+	   					  {{ _( "Page" ) }} {{c.page}} 
+	   					  {% if c.note_ref %}
+	   					    {% for note_url in c.note_ref %}
+	   					  	   <a href="{{note_url}}"> Link </a>
+	   					  	{% endfor %}
+   					  	  {% endif %}
+	   					  {{ macro.stars(c.confidence|float) }}
                           {% set conf = c.confidence | int %} 
 
 	               		  <ol type="a">

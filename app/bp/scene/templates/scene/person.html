@@ -309,7 +309,10 @@
                           title="{{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})"
                            {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
-                            {{ _('Page') }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+                             {{ _('Page') }}:
+<!--			     {{cita.page}}-->
+			     <a href="{{cita.source.notes[0].url}}" target="_blank"> {{cita.page}}</a>
+			     &nbsp; {{ macro.stars(conf) }}
 
                    {% if cita.notetext %}<br>
                               <i {% if cita.confidence and cita.confidence < "2" %}

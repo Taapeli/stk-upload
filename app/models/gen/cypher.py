@@ -501,7 +501,7 @@ return extract(x IN rel | endnode(x))  as end, source_id
 
     _cita_sour_repo_tail = """
 RETURN ID(c) AS id, c.dateval AS date, c.page AS page, c.confidence AS confidence, 
-   note.text AS notetext,
+   note.text AS notetext, note.url as url,
    COLLECT(DISTINCT [ID(source), source.stitle, source.sauthor, source.spubinfo, 
                      rr.medium, 
                      ID(repo), repo.rname, repo.type]) AS sources"""
@@ -562,8 +562,9 @@ RETURN source, COLLECT(n) as notes"""
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
 with c
     match (c) <-[:CITATION]- (x)
+    optional match (c) -[:NOTE]-> (n:Note)
     optional match (x) <-[re:EVENT]- (p)
-    return id(c) as c_id, c, re.role as role,
+    return id(c) as c_id, c, collect(n) as notes, re.role as role,
            id(x) as x_id, labels(x)[0] as label, x, 
            coalesce(id(p), id(x))  as p_id
     order by c_id, p_id"""
