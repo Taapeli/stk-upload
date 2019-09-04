@@ -510,12 +510,12 @@ msgid "all users"
 msgstr "kaikki käyttäjät"
 
 #: bp/admin/templates/admin/allowed_emails.html:61
-msgid "registered users only"
-msgstr "sallittu vain rekisteröityneille käyttäjille"
+msgid "registered users"
+msgstr "rekisteröityneet käyttäjät"
 
 #: bp/admin/templates/admin/allowed_emails.html:62
 msgid "pending candidates only"
-msgstr "sallittu vain odottaville käyttäjille"
+msgstr "odottavat käyttäjäehdokkaat"
 
 #: bp/admin/templates/admin/allowed_emails.html:66
 msgid "Pending user candidates"

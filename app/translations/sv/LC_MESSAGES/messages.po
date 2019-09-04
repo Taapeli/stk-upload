@@ -510,16 +510,16 @@ msgid "all users"
 msgstr "alla användare"
 
 #: bp/admin/templates/admin/allowed_emails.html:61
-msgid "registered users only"
-msgstr ""
+msgid "registered users"
+msgstr "registrerade användare"
 
 #: bp/admin/templates/admin/allowed_emails.html:62
-msgid "pending candidates only"
-msgstr ""
+msgid "pending candidates"
+msgstr "väntande användarkandidater"
 
 #: bp/admin/templates/admin/allowed_emails.html:66
 msgid "Pending user candidates"
-msgstr "Väntande användar kandidater"
+msgstr "Väntande användarkandidater"
 
 #: bp/admin/templates/admin/allowed_emails.html:71
 #: templates/del_table_users.html:20
