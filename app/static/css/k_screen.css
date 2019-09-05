@@ -131,6 +131,12 @@ img#logo {
     background: RoyalBlue;
     border-radius: 5px;
 }
+.magnifier {
+	display: inline;
+	width: 1em; 
+	margin:0 auto; 
+	text-align: center; 
+}
 .notmy { color:blue;}
 li.minor { list-style-type: circle; }
 li.major { list-style-type: square; }

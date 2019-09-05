@@ -137,14 +137,17 @@
                            {% if ow == user %}&FilledSmallSquare;
                            {% else %}<span class="owner">&nbsp;{{ow}}&nbsp;</span>{% endif %}
 	                   {% endfor %}
-	                   {% if p.uuid %}
+
+	                   {% if p.uuid %}<div class="magnifier" alt="{{p.uniq_id}}">
 		                   <a href="/scene/person/uuid={{p.uuid}}"
 		                     title="{{ _('see details of person %(id)s', id=p.uuid[:6]) }}">
+		               {% else %}<div style="display: inline; font-style: italic; color:DarkSlateGray;">
 		               {% endif %}
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].surname %} {% if p.names[0].prefix %}{{p.names[0].prefix}}{% endif %}
 		               <b>{{p.names[0].surname}}</b>
-		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}{% if p.uuid %}</a>{% endif %}
+		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}{% if p.uuid %}</a>
+		               </div>{% endif %}
 
 		               {%set eka = 1 %}
 		               {% for name in p.names %}
@@ -158,9 +161,9 @@
                        {% endfor %}
 
                        <br>
-                       {% if p.uuid %}
-	                       <a href="/scene/person/uuid={{p.uuid}}" class="idno">Id:{{p.uuid[:6]}} /</a>
-	                   {% else %} <a href="/scene/person/{{p.uniq_id}}" class="idno">ID: {{p.uniq_id}} /</a>
+                       {% if p.uuid %}<span class="idno">Id:{{p.uuid[:6]}} /</span>
+	                   {% else %} <a href="/scene/person/{{p.uniq_id}}" class="idno"
+	                                 title="Kokeellinen henkilösivu">ID: {{p.uniq_id}} /</a>
 	                   {% endif %}
                                {# TODO Remove the test link at ']' #}
                        <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
