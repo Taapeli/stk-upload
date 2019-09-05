@@ -62,7 +62,9 @@ class Source(NodeObject):
         s = cls()   # create a new Source
         s.uniq_id = node.id
         s.id = node['id']
-        s.handle = node['handle']
+        s.uuid = node['uuid']
+        if 'handle' in node:
+            s.handle = node['handle']
         s.stitle = node['stitle']
         s.sauthor = node['sauthor']
         s.spubinfo = node['spubinfo']
@@ -250,18 +252,21 @@ return s'''
         """
 
         if uniq_id:
-            where = "WHERE ID(source)={} ".format(uniq_id)
+            get_one = """
+MATCH (citation:Citation)-[r:SOURCE]->(source:Source) 
+    WHERE ID(source)=$uid
+WITH citation, r, source ORDER BY citation.page
+RETURN source, COLLECT(citation) AS citations
+    ORDER BY source.stitle"""
+            return shareds.driver.session().run(get_one, uid=uniq_id)
         else:
-            where = ''
-        
-        query = """
- MATCH (citation:Citation)-[r:SOURCE]->(source:Source) {0}
-   WITH citation, r, source ORDER BY citation.page
- RETURN source, COLLECT(citation) AS citations
- ORDER BY source.stitle""".format(where)
-                
-        return shareds.driver.session().run(query)
-    
+            get_all = """
+MATCH (citation:Citation)-[r:SOURCE]->(source:Source) 
+WITH citation, r, source ORDER BY citation.page
+RETURN source, COLLECT(citation) AS citations
+    ORDER BY source.stitle"""
+            return shareds.driver.session().run(get_all)
+
     
     @staticmethod       
     def get_sources_wo_citation ():

@@ -4545,7 +4545,7 @@ msgstr "seurakunnassa"
 
 #: templates/jinja_filters.py:227
 msgid "Married"
-msgstr "Naimisissa"
+msgstr "Avioliitossa"
 
 #: templates/jinja_filters.py:228
 msgid "Unknown relation"

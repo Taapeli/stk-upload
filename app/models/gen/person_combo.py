@@ -381,8 +381,13 @@ RETURN person, name
 
             Luetaan kaikki henkilön tiedot ja nimet, huomautukset
         """
-        result = shareds.driver.session().run(Cypher_person.get_w_names_notes, 
-                                              pid=int(self.uniq_id))
+        with shareds.driver.session() as session:
+            if self.uuid:
+                result = session.run(Cypher_person.get_by_uuid_w_names_notes,
+                                     pid=self.uuid)
+            else:
+                result = session.run(Cypher_person.get_w_names_notes,
+                                     pid=self.uniq_id)
 
         for record in result:
             # <Record person=<Node id=72087 labels={'Person'} 
@@ -395,7 +400,7 @@ RETURN person, name
             #        <Node id=72089 labels={'Name'} 
             #            properties={'alt': '1', 'firstname': 'Anthonius', 'type': 'Birth Name', 
             #                'suffix': '', 'surname': 'Naht'}>]
-            # >
+            #    owner='sauli'>
             node = record['person']
             self.from_node(node, obj=self)
 
@@ -405,6 +410,8 @@ RETURN person, name
 
             for note_id in record["notes"]:
                 self.note_ref.append(note_id)
+
+            self.owner = record['owner']
 
 
     @staticmethod

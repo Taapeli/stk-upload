@@ -21,13 +21,11 @@ from .batchlogger import Log
 
 from models.gen.place import Place_name, Point
 from models.gen.dates import Gramps_DateRange
-#from models.gen.family import Family
 from models.gen.note import Note
 from models.gen.media import Media
 from models.gen.person_name import Name
 from models.gen.person_combo import Person_combo
 from models.gen.citation import Citation
-#from models.gen.source import Source
 from models.gen.repository import Repository
 
 from models import dataupdater
@@ -193,21 +191,21 @@ class DOM_handler():
         for citation in citations:
 
             c = Citation()
+            # Extract handle, change and id
+            self._extract_base(citation, c)
 
-            if citation.hasAttribute("handle"):
-                c.handle = citation.getAttribute("handle")
-            if citation.hasAttribute("change"):
-                c.change = int(citation.getAttribute("change"))
-            if citation.hasAttribute("id"):
-                c.id = citation.getAttribute("id")
-
-            if len(citation.getElementsByTagName('dateval') ) == 1:
-                citation_dateval = citation.getElementsByTagName('dateval')[0]
-                if citation_dateval.hasAttribute("val"):
-                    c.dateval = citation_dateval.getAttribute("val")
-            elif len(citation.getElementsByTagName('dateval') ) > 1:
-                self.blog.log_event({'title':"More than one dateval tag in a citation",
-                                     'level':"WARNING", 'count':c.id})
+            try:
+                # type Gramps_DateRange or None
+                c.dates = self._extract_daterange(citation)
+            except:
+                c.dates = None
+#             if len(citation.getElementsByTagName('dateval') ) == 1:
+#                 citation_dateval = citation.getElementsByTagName('dateval')[0]
+#                 if citation_dateval.hasAttribute("val"):
+#                     c.dateval = citation_dateval.getAttribute("val")
+#             elif len(citation.getElementsByTagName('dateval') ) > 1:
+#                 self.blog.log_event({'title':"More than one dateval tag in a citation",
+#                                      'level':"WARNING", 'count':c.id})
 
             if len(citation.getElementsByTagName('page') ) == 1:
                 citation_page = citation.getElementsByTagName('page')[0]
@@ -256,24 +254,20 @@ class DOM_handler():
         for event in events:
             # Create an event with Gramps attributes
             e = Event_gramps()
+            # Extract handle, change and id
+            self._extract_base(event, e)
 
-            if event.hasAttribute("handle"):
-                e.handle = event.getAttribute("handle")
-            if event.hasAttribute("change"):
-                e.change = int(event.getAttribute("change"))
-            if event.hasAttribute("id"):
-                e.id = event.getAttribute("id")
-            if False and counter > 0 and counter % 1000 == 0: 
-                elapsed = time.time()-t0
-                eventspersec = counter/elapsed
-                remainingevents = len(events) - counter
-                remainingtime = remainingevents/eventspersec
-                print(f"Event {counter} {e.id} "
-                                         f"{time.asctime()} {elapsed:6.2f} "
-                                         f"{eventspersec:6.2f} "
-                                         f"{remainingevents} "
-                                         f"{remainingtime:6.2f} "
-                                         )
+#             if False and counter > 0 and counter % 1000 == 0: 
+#                 elapsed = time.time()-t0
+#                 eventspersec = counter/elapsed
+#                 remainingevents = len(events) - counter
+#                 remainingtime = remainingevents/eventspersec
+#                 print(f"Event {counter} {e.id} "
+#                                          f"{time.asctime()} {elapsed:6.2f} "
+#                                          f"{eventspersec:6.2f} "
+#                                          f"{remainingevents} "
+#                                          f"{remainingtime:6.2f} "
+#                                          )
 
             if len(event.getElementsByTagName('type') ) == 1:
                 event_type = event.getElementsByTagName('type')[0]
@@ -301,8 +295,9 @@ class DOM_handler():
             #     <dateval val="1870" type="about"/>
             #     <datestr val="1700-luvulla" />    # Not processed!
             try:
-                # type Gramps_DateRange
+                # Gramps_DateRange or None
                 e.dates = self._extract_daterange(event)
+                #TODO: val="1700-luvulla" muunnettava Noteksi
             except:
                 e.dates = None
 
@@ -359,13 +354,8 @@ class DOM_handler():
         for family in families:
 
             f = Family_gramps()
-
-            if family.hasAttribute("handle"):
-                f.handle = family.getAttribute("handle")
-            if family.hasAttribute("change"):
-                f.change = int(family.getAttribute("change"))
-            if family.hasAttribute("id"):
-                f.id = family.getAttribute("id")
+            # Extract handle, change and id
+            self._extract_base(family, f)
 
             if len(family.getElementsByTagName('rel') ) == 1:
                 family_rel = family.getElementsByTagName('rel')[0]
@@ -393,35 +383,27 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one mother tag in a family",
                                      'level':"WARNING", 'count':f.id})
 
-            if len(family.getElementsByTagName('eventref') ) >= 1:
-                for i in range(len(family.getElementsByTagName('eventref') )):
-                    family_eventref = family.getElementsByTagName('eventref')[i]
-                    if family_eventref.hasAttribute("hlink"):
-                        f.eventref_hlink.append(family_eventref.getAttribute("hlink"))
-                        f.eventref_role.append(family_eventref.getAttribute("role"))
-                        ##print(f'# Family {f.id} has event {f.eventref_hlink[-1]}')
-                    #TODO: Yhdistä kentät eventref_hlink ja eventref_role
+#TODO: Yhdistä kentät eventref_hlink ja eventref_role kentäksi eventref ?
+            for ref in family.getElementsByTagName('eventref'):
+                if ref.hasAttribute("hlink"):
+                    f.eventref_hlink.append(ref.getAttribute("hlink"))
+                    f.eventref_role.append(ref.getAttribute("role"))
+                    print(f'# Family {f.id} has event {f.eventref_hlink[-1]}')
 
-            if len(family.getElementsByTagName('childref') ) >= 1:
-                for i in range(len(family.getElementsByTagName('childref') )):
-                    family_childref = family.getElementsByTagName('childref')[i]
-                    if family_childref.hasAttribute("hlink"):
-                        f.childref_hlink.append(family_childref.getAttribute("hlink"))
-                        ##print(f'# Family {f.id} has child {f.childref_hlink[-1]}')
+            for ref in family.getElementsByTagName('childref'):
+                if ref.hasAttribute("hlink"):
+                    f.childref_hlink.append(ref.getAttribute("hlink"))
+                    print(f'# Family {f.id} has child {f.childref_hlink[-1]}')
 
-            if len(family.getElementsByTagName('noteref') ) >= 1:
-                for i in range(len(family.getElementsByTagName('noteref') )):
-                    family_noteref = family.getElementsByTagName('noteref')[i]
-                    if family_noteref.hasAttribute("hlink"):
-                        f.noteref_hlink.append(family_noteref.getAttribute("hlink"))
-                        ##print(f'# Family {f.id} has note {f.noteref_hlink[-1]}')
+            for ref in family.getElementsByTagName('noteref'):
+                if ref.hasAttribute("hlink"):
+                    f.noteref_hlink.append(ref.getAttribute("hlink"))
+                    print(f'# Family {f.id} has note {f.noteref_hlink[-1]}')
                        
-            if len(family.getElementsByTagName('citationref') ) >= 1:
-                for i in range(len(family.getElementsByTagName('citationref') )):
-                    family_citationref = family.getElementsByTagName('citationref')[i]
-                    if family_citationref.hasAttribute("hlink"):
-                        f.citationref_hlink.append(family_citationref.getAttribute("hlink"))
-                        ##print(f'# Family {f.id} has cite {f.citationref_hlink[-1]}')
+            for ref in family.getElementsByTagName('citationref'):
+                if ref.hasAttribute("hlink"):
+                    f.citationref_hlink.append(ref.getAttribute("hlink"))
+                    print(f'# Family {f.id} has cite {f.citationref_hlink[-1]}')
 
             self.save_and_link_handle(f, batch_id=self.batch_id)
             counter += 1
@@ -442,19 +424,15 @@ class DOM_handler():
 
         for note in notes:
             n = Note()
+            # Extract handle, change and id
+            self._extract_base(note, n)
 
-            if note.hasAttribute("handle"):
-                n.handle = note.getAttribute("handle")
-            if note.hasAttribute("change"):
-                n.change = int(note.getAttribute("change"))
-            if note.hasAttribute("id"):
-                n.id = note.getAttribute("id")
             n.priv = get_priv(note)
             if note.hasAttribute("type"):
                 n.type = note.getAttribute("type")
 
-            if len(note.getElementsByTagName('text') ) == 1:
-                note_text = note.getElementsByTagName('text')[0]
+            if note.hasAttribute('text'):
+                note_text = note.getElementsByTagName('text')
                 n.text = note_text.childNodes[0].data
                 # Pick possible url
                 n.text, n.url = pick_url(n.text)
@@ -482,17 +460,14 @@ class DOM_handler():
         for obj in media:
 
             o = Media()
+            # Extract handle, change and id
+            self._extract_base(obj, o)
 
-            if obj.hasAttribute("handle"):
-                o.handle = obj.getAttribute("handle")
-            if obj.hasAttribute("change"):
-                o.change = int(obj.getAttribute("change"))
-            if obj.hasAttribute("id"):
-                o.id = obj.getAttribute("id")
-
-            if len(obj.getElementsByTagName('file') ) == 1:
-                obj_file = obj.getElementsByTagName('file')[0]
-
+            for obj_file in obj.getElementsByTagName('file'):
+                if o.src:
+                    self.blog.log_event({'title':"More than one files for a media",
+                                         'level':"WARNING", 'count':o.id})
+                    break
                 if obj_file.hasAttribute("src"):
                     o.src = obj_file.getAttribute("src")
                 if obj_file.hasAttribute("mime"):
@@ -519,24 +494,18 @@ class DOM_handler():
 
         # Get details of each person
         for person in people:
-
-            p = Person_gramps()
             name_order = 0
 
-            if person.hasAttribute("handle"):
-                p.handle = person.getAttribute("handle")
-            if person.hasAttribute("change"):
-                p.change = int(person.getAttribute("change"))
-            if person.hasAttribute("id"):
-                p.id = person.getAttribute("id")
-            self.priv = get_priv(person)
+            p = Person_gramps()
+            # Extract handle, change and id
+            self._extract_base(person, p)
 
-            if len(person.getElementsByTagName('gender') ) == 1:
-                person_gender = person.getElementsByTagName('gender')[0]
+            for person_gender in person.getElementsByTagName('gender'):
+                if p.sex:
+                    self.blog.log_event({'title':"More than one sexes in a person",
+                                         'level':"WARNING", 'count':p.id})
+                    break
                 p.sex = p.sex_from_str(person_gender.childNodes[0].data)
-            elif len(person.getElementsByTagName('gender') ) > 1:
-                self.blog.log_event({'title':"More than one gender in a person",
-                                     'level':"WARNING", 'count':p.id})
 
             for person_name in person.getElementsByTagName('name'):
                 pname = Name()
@@ -548,16 +517,16 @@ class DOM_handler():
                 if person_name.hasAttribute("type"):
                     pname.type = person_name.getAttribute("type")
 
-                if len(person_name.getElementsByTagName('first') ) == 1:
-                    person_first = person_name.getElementsByTagName('first')[0]
+                for person_first in person_name.getElementsByTagName('first'):
+                    if pname.firstname:
+                        self.blog.log_event({'title':"More than one first name in a person",
+                                             'level':"WARNING", 'count':p.id})
+                        break
                     if len(person_first.childNodes) == 1:
                         pname.firstname = person_first.childNodes[0].data
                     elif len(person_first.childNodes) > 1:
                         self.blog.log_event({'title':"More than one child node in a first name of a person",
                                             'level':"WARNING", 'count':p.id})
-                elif len(person_name.getElementsByTagName('first') ) > 1:
-                    self.blog.log_event({'title':"More than one first name in a person",
-                                         'level':"WARNING", 'count':p.id})
 
                 if len(person_name.getElementsByTagName('surname') ) == 1:
                     person_surname = person_name.getElementsByTagName('surname')[0]
@@ -603,12 +572,9 @@ class DOM_handler():
             for person_url in person.getElementsByTagName('url'):
                 n = Note()
                 n.priv = get_priv(person_url)
-                if person_url.hasAttribute("href"):
-                    n.url = person_url.getAttribute("href")
-                if person_url.hasAttribute("type"):
-                    n.type = person_url.getAttribute("type")
-                if person_url.hasAttribute("description"):
-                    n.text = person_url.getAttribute("description")
+                n.url = person_url.getAttribute("href")
+                n.type = person_url.getAttribute("type")
+                n.text = person_url.getAttribute("description")
                 if n.url:
                     p.notes.append(n)
 
@@ -627,7 +593,7 @@ class DOM_handler():
                     ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
             self.save_and_link_handle(p, batch_id=self.batch_id)
-            ##print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
+            #print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
             # The refnames will be set for these persons 
             self.person_ids.append(p.uniq_id)
@@ -656,14 +622,11 @@ class DOM_handler():
         for placeobj in places:
 
             pl = Place_gramps()
+            # Extract handle, change and id
+            self._extract_base(placeobj, pl)
+
             # List of upper places in hierarchy as {hlink, dates} dictionaries
             pl.surround_ref = []
-
-            pl.handle = placeobj.getAttribute("handle")
-            if placeobj.hasAttribute("change"):
-                pl.change = int(placeobj.getAttribute("change"))
-            pl.id = placeobj.getAttribute("id")
-            pl.type = placeobj.getAttribute("type")
 
             if len(placeobj.getElementsByTagName('ptitle')) == 1:
                 placeobj_ptitle = placeobj.getElementsByTagName('ptitle')[0]
@@ -678,13 +641,12 @@ class DOM_handler():
                     placename.name = placeobj_pname.getAttribute("value")
                     if placename.name:
                         if pl.pname == '':
-                            # First name is default name for Place node
+                            # First name is default pname for Place node
                             pl.pname = placename.name
-                        if placeobj_pname.hasAttribute("lang"):
-                            placename.lang = placeobj_pname.getAttribute("lang")
+                        placename.lang = placeobj_pname.getAttribute("lang")
                         pl.names.append(placename)
                     else:
-                        self.blog.log_event({'title':f"This place has an empty name",
+                        self.blog.log_event({'title':"This place has an empty name",
                                              'level':"WARNING", 'count':pl.id})
 
             for placeobj_coord in placeobj.getElementsByTagName('coord'):
@@ -706,12 +668,9 @@ class DOM_handler():
             for placeobj_url in placeobj.getElementsByTagName('url'):
                 n = Note()
                 n.priv = get_priv(placeobj_url)
-                if placeobj_url.hasAttribute("href"):
-                    n.url = placeobj_url.getAttribute("href")
-                if placeobj_url.hasAttribute("type"):
-                    n.type = placeobj_url.getAttribute("type")
-                if placeobj_url.hasAttribute("description"):
-                    n.text = placeobj_url.getAttribute("description")
+                n.url = placeobj_url.getAttribute("href")
+                n.type = placeobj_url.getAttribute("type")
+                n.text = placeobj_url.getAttribute("description")
                 if n.url:
                     pl.notes.append(n)
 
@@ -752,13 +711,8 @@ class DOM_handler():
         for repository in repositories:
 
             r = Repository()
-
-            if repository.hasAttribute("handle"):
-                r.handle = repository.getAttribute("handle")
-            if repository.hasAttribute("change"):
-                r.change = repository.getAttribute("change")
-            if repository.hasAttribute("id"):
-                r.id = repository.getAttribute("id")
+            # Extract handle, change and id
+            self._extract_base(repository, r)
 
             if len(repository.getElementsByTagName('rname') ) == 1:
                 repository_rname = repository.getElementsByTagName('rname')[0]
@@ -801,20 +755,13 @@ class DOM_handler():
         for source in sources:
 
             s = Source_gramps()
-
-            if source.hasAttribute("handle"):
-                s.handle = source.getAttribute("handle")
-            if source.hasAttribute("change"):
-                s.change = source.getAttribute("change")
-            if source.hasAttribute("id"):
-                s.id = source.getAttribute("id")
+            # Extract handle, change and id
+            self._extract_base(source, s)
 
             if len(source.getElementsByTagName('stitle') ) == 1:
                 source_stitle = source.getElementsByTagName('stitle')[0]
                 if len(source_stitle.childNodes) > 0:
                     s.stitle = source_stitle.childNodes[0].data
-                else:
-                    s.stitle = ""
             elif len(source.getElementsByTagName('stitle') ) > 1:
                 self.blog.log_event({'title':"More than one stitle in a source",
                                      'level':"WARNING", 'count':s.id})
@@ -823,8 +770,6 @@ class DOM_handler():
                 source_sauthor = source.getElementsByTagName('sauthor')[0]
                 if len(source_sauthor.childNodes) > 0:
                     s.sauthor = source_sauthor.childNodes[0].data
-                else:
-                    s.sauthor = ""
             elif len(source.getElementsByTagName('sauthor') ) > 1:
                 self.blog.log_event({'title':"More than one sauthor in a source",
                                      'level':"WARNING", 'count':s.id})
@@ -833,8 +778,6 @@ class DOM_handler():
                 source_spubinfo = source.getElementsByTagName('spubinfo')[0]
                 if len(source_spubinfo.childNodes) > 0:
                     s.spubinfo = source_spubinfo.childNodes[0].data
-                else:
-                    s.spubinfo = ""
             elif len(source.getElementsByTagName('spubinfo') ) > 1:
                 self.blog.log_event({'title':"More than one spubinfo in a source",
                                      'level':"WARNING", 'count':s.id})
@@ -850,10 +793,8 @@ class DOM_handler():
                 if source_reporef.hasAttribute("hlink"):
                     # s.reporef_hlink = source_reporef.getAttribute("hlink")
                     r.handle = source_reporef.getAttribute("hlink")
-                    print(f'# Source {s.id} in repository {r.handle}')
-                if source_reporef.hasAttribute("medium"):
-                    # s.reporef_medium = source_reporef.getAttribute("medium")
                     r.medium = source_reporef.getAttribute("medium")
+                    print(f'# Source {s.id} in repository {r.handle} {r.medium}')
                 # Mostly 1 repository!
                 s.repositories.append(r)
 
@@ -864,6 +805,7 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
+# -----------------------------------------------------------------------------
 
     def set_family_sortname_dates(self):
         ''' Set sortnames and dates for each Family in the list self.family_ids.
@@ -926,7 +868,7 @@ class DOM_handler():
 
 
     def _extract_daterange(self, obj):
-        """ Extract a date information from these kind of date formats:
+        """ Extract date information from these kind of date formats:
                 <daterange start="1820" stop="1825" quality="estimated"/>
                 <datespan start="1840-01-01" stop="1850-06-30" quality="calculated"/>
                 <dateval val="1870" type="about"/>
@@ -968,3 +910,18 @@ class DOM_handler():
                                     level="ERROR"))
 
         return None
+
+    def _extract_base(self, dom, node):
+        ''' Extract common variables from DOM object to NodeObject fields.
+
+            node.id = self.id = ''            str Gedcom object id like "I1234"
+            node.change = self.change         int Gramps object change timestamp
+            node.handle = self.handle = ''    str Gramps handle
+        '''
+        if dom.hasAttribute("handle"):
+            node.handle = dom.getAttribute("handle")
+        if dom.hasAttribute("change"):
+            node.change = int(dom.getAttribute("change"))
+        if dom.hasAttribute("id"):
+            node.id = dom.getAttribute("id")
+

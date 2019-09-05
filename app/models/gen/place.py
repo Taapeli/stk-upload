@@ -268,14 +268,23 @@ class Place(NodeObject):
                                               locid=int(loc_id))
         ret = []
         for record in result:
+            # <Record uid=414999 role='Primary' 
+            #  names=[
+            #    <Node id=415001 labels={'Name'} 
+            #        properties={'firstname': 'Esajas', 'type': 'Also Known As', 
+            #            'suffix': '', 'prefix': '', 'surname': 'Hildeen', 'order': 1}>, 
+            #    <Node id=415000 labels={'Name'} 
+            #        properties={'firstname': 'Esaias', 'type': 'Birth Name', 
+            #            'suffix': '', 'prefix': '', 'surname': 'Hildén', 'order': 0}>] 
+            #  etype='Baptism' 
+            #  edates=[0, 1782139, 1782139]>
+
             e = Event_combo()
             # Fields uid (person uniq_id) and names are on standard in Event_combo
             e.uid = record["uid"]
             e.type = record["etype"]
             if record["edates"][0] != None:
-                dates = DateRange(record["edates"])
-                e.dates = str(dates)
-                e.date = dates.estimate()
+                e.dates = DateRange(record["edates"])
             e.role = record["role"]
             e.names = []
             for node in record["names"]:

@@ -211,17 +211,29 @@ class DateRange():
         #TODO Compare all fields, not only date1!
     '''
     def __lt__(self, other):
-        return self.date1.intvalue < other.date1.intvalue
+        if other:
+            return self.date1.intvalue < other.date1.intvalue
+        return False
     def __gt__(self, other):
-        return self.date1.intvalue > other.date1.intvalue
+        if other:
+            return self.date1.intvalue > other.date1.intvalue
+        return True
     def __eq__(self, other):
-        return self.date1.intvalue == other.date1.intvalue
+        if other:
+            return self.date1.intvalue == other.date1.intvalue
+        return False
     def __le__(self, other):
-        return self.date1.intvalue <= other.date1.intvalue
+        if other:
+            return self.date1.intvalue <= other.date1.intvalue
+        return False
     def __ge__(self, other):
-        return self.date1.intvalue >= other.date1.intvalue
+        if other:
+            return self.date1.intvalue >= other.date1.intvalue
+        return True
     def __ne__(self, other):
-        return self.date1.intvalue != other.date1.intvalue
+        if other:
+            return self.date1.intvalue != other.date1.intvalue
+        return True
 
     @staticmethod
     def minus(d1, d2):

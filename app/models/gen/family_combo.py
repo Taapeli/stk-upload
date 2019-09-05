@@ -291,7 +291,7 @@ RETURN family"""
                             #        'change': '1543186596'}>, 
                             #  <Node id=246371 labels={'Citation'} 
                             #    properties={'handle': '_dd12b0b88d5741ee11d8bef1ca5', 'id': 'C0854', 'page': 'Vigde år 1831 April 4', 
-                            #        'dateval': '', 'change': 1543186596, 'confidence': '2'}>
+                            #        /* dates missing here */, 'change': 1543186596, 'confidence': '2'}>
                             # ]
                             if repository_node:
                                 rname = repository_node['rname']

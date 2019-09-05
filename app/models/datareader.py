@@ -625,8 +625,11 @@ def get_people_by_surname(surname):
     return (people)
 
 
-def get_person_data_by_id(uniq_id):
+def get_person_data_by_id(pid):
     """ Get 5 data sets:                    ---- vanhempi versio ----
+
+        The given pid may be an uuid (str) or uniq_id (int).
+
         person: Person object with name data
             The indexes of referred objects are in variables
                 event_ref[]        str tapahtuman uniq_id, rooli eventref_role[]
@@ -640,7 +643,10 @@ def get_person_data_by_id(uniq_id):
         families
     """
     p = Person_combo()
-    p.uniq_id = uniq_id
+    if isinstance(pid, int):
+        p.uniq_id = pid
+    else:
+        p.uuid = pid
     # Get Person and her Name properties, also Note properties
     p.get_person_w_names()
     # Get reference (uniq_id) and role for Events
