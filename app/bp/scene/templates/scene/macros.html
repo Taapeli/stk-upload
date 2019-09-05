@@ -78,6 +78,12 @@
     </div>
 {%- endmacro %}
 
+{% macro person_name(name) -%}
+    {#  Formats a Person name. #}
+    {{name.firstname}}
+    {% if not name.surname %}<i>{{name.suffix}}</i>{% endif %} {{name.prefix}} <b>{{name.surname}}</b>
+{%- endmacro %}
+
 {% macro person(ch, uuid, delim) -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
     {% if ch.uuid == uuid %}
@@ -87,8 +93,7 @@
         title="{{ _('see details of person %(id)s', id=ch.uuid[:6]) }}">
     {% else %}<a href="/scene/person={{ch.uniq_id}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=ch.uniq_id) }}">{% endif %}
-        {% if ch.names|length %}
-        {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> {{ch.names[0].prefix}} <b>{{ch.names[0].surname}}</b></a>
+        {% if ch.names|length %}{{ person_name(ch.names[0]) }}</a>
         {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
         {% else %}{{ _('Anonymous') }}
         {% endif %}
