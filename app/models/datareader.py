@@ -542,14 +542,13 @@ def get_source_with_events(sourceid):
         c.confidence = c_node['confidence']
         
         c_notes = record['notes']
-        for note in c_notes:
-            n_id = note['id']
+        for n_node in c_notes:
+            n_id = n_node['id']
             if n_id not in notes.keys():
+                note = Note.from_node(n_node)
+                c.note_ref.append(note)
                 notes[n_id] = n_id
-                if note['url']:
-                    c.note_ref.append(note['url'])
                     
-
         p_uid = record['p_id']
         x_node = record['x']
         #x_uid = x_node.id
