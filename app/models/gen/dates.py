@@ -202,33 +202,43 @@ class DateRange():
         return "<Date type={}, {}...{}>".format(self.datetype, dstr1, dstr2)
 
 
-#     def __cmp__(self, other):
-#         """ Obosolete on Python 3.0!
-#         """
-
     '''
-        Date comparisons
-        #TODO Compare all fields, not only date1!
+        Dates comparison
+
+        If self < other, then self.__lt__(other) = True
+        None as other is always considered the 1st in order (= smallest value)
+
+                  other ----------------
+        op        None   >     =     <    # self <op> other = True?
+        --        ----  ----  ----  ----
+        lt        False True  False True
+        le        False True  True  True
+        eq        False False True  True
+        ge        True  False True  True
+        gt        True  False False True
+        ne        True  True  False True
+
+        #TODO Compare all DateRange types, now DR_DATE is assumed!
     '''
     def __lt__(self, other):
         if other:
             return self.date1.intvalue < other.date1.intvalue
         return False
-    def __gt__(self, other):
-        if other:
-            return self.date1.intvalue > other.date1.intvalue
-        return True
-    def __eq__(self, other):
-        if other:
-            return self.date1.intvalue == other.date1.intvalue
-        return False
     def __le__(self, other):
         if other:
             return self.date1.intvalue <= other.date1.intvalue
         return False
+    def __eq__(self, other):
+        if other:
+            return self.date1.intvalue == other.date1.intvalue
+        return False
     def __ge__(self, other):
         if other:
             return self.date1.intvalue >= other.date1.intvalue
+        return True
+    def __gt__(self, other):
+        if other:
+            return self.date1.intvalue > other.date1.intvalue
         return True
     def __ne__(self, other):
         if other:

@@ -46,9 +46,10 @@
                 <li{% if value == 0 %} class="CurrentSection"
                   {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons"{% endif %}
                    title="{{ _('Search for people') }}">{{ _('Search') }}</a></li>
-                <li{% if value == 1 %} class="CurrentSection"
+{#              <li{% if value == 1 %} class="CurrentSection"
                   {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons/all"{% endif %}
                    title="{{ _('All persons') }}">{{ _('Names') }}</a></li>
+#}
                 <li{% if value == 12 %} class="CurrentSection"
                   {% endif %}><a href="/scene/persons_all/"
                    title="{{ _('Person list by default name') }}">{{ _('Persons') }}</a></li>

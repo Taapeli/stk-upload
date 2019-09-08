@@ -59,7 +59,7 @@ class Event_combo(Event):
         #self.places = []        # Places of the event (for person list)
 
 
-# @classmethod from_node(cls, node): see evetn.from_node
+# @classmethod from_node(cls, node): see event.from_node
 
 
     # Entinen get_event_data_by_id()

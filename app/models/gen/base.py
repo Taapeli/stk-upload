@@ -28,6 +28,10 @@ class NodeObject():
             else:
                 self.uuid = oid
 
+    def __str__(self):
+        uuid = self.uuid if self.uuid else '-'
+        return f'(NodeObject {uuid}/{self.uniq_id}/{self.id} date {self.dates})"'
+
     @classmethod
     def from_node(cls, node):
         '''
@@ -43,7 +47,43 @@ class NodeObject():
             n.handle = node['handle']
         n.change = node['change']
         return n
-    
+
+
+    '''
+        Compare 
+            self.dates <op> other.dates = True?
+
+        See also: models.gen.dates.DateRange.__lt__()
+
+        - None as other.dates is always considered the 1st in order
+        - None as self.dates  is always considered last in order
+    '''
+
+    def __lt__(self, other):
+        if self.dates:
+            return self.dates < other.dates
+        return True
+    def __le__(self, other):
+        if self.dates:
+            return self.dates <= other.dates
+        return True
+    def __eq__(self, other):
+        if self.dates:
+            return self.dates == other.dates
+        return False
+    def __ge__(self, other):
+        if self.dates:
+            return self.dates >= other.dates
+        return False
+    def __gt__(self, other):
+        if self.dates:
+            return self.dates > other.dates
+        return False
+    def __ne__(self, other):
+        if self.dates:
+            return self.dates != other.dates
+        return False
+
     
     @staticmethod       
     def newUuid():

@@ -157,7 +157,7 @@ def get_a_person_for_display_apoc(uniq_id, user):
                 target_link = connect_object_as_leaf(src_obj, target_obj, rel_type)
                 # Target_link point to that leaf. 
                 # Put it also in objs and cits dictionaries for possible re-use
-                if target_link == None:
+                if not target_link:
                     #TODO mitä tehdään, eikö joku muu lista?
                     objs[target_obj.uniq_id] = target_obj
                 elif not target_link.uniq_id in objs:
@@ -170,7 +170,7 @@ def get_a_person_for_display_apoc(uniq_id, user):
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
 
     # 4. Sort events by date
-    person.events.sort(key=lambda event: event.date)
+    person.events.sort()
 
     # 5. Generate clear names for event places and create citation footnotes
 
