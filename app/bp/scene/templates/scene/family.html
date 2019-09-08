@@ -22,7 +22,9 @@ td { padding-right:1em;}
         <div id="summaryarea">
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="Value">{{ family.id }} / <tt>{{ family.uniq_id }}</tt></td>
+                    <td class="Value">
+                        {% if family.uuid %}<span class="id">{{family.uuid[:6]}}</span> /{% endif %}
+                        <span class="id">{{ family.uniq_id }}</span> / {{ family.id }}</td>
                     <td></td>
                 </tr>
                 <tr><td class="ColumnAttribute">{{ _("Relation") }}</td>
@@ -34,7 +36,7 @@ td { padding-right:1em;}
                 {% if p %}
                 <tr><td class="ColumnAttribute">{{p.role|transl('role')|capitalize}}</td>
                     <td class="Value"><span class="id">{{p.id}}</span>
-                        {% if p.uuid %}<a href="/scene/person/uuid={{p.uuid[:6]}}" class="inlink"
+                        {% if p.uuid %}<a href="/scene/person/uuid={{p.uuid}}" class="inlink"
                            title="{{ _('person %(id)s', id=p.uuid[:6]) }}">
                         {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink"
                            title="{{ _('person %(id)s', id=p.uniq_id) }}">
@@ -72,7 +74,7 @@ td { padding-right:1em;}
         {% for p in family.children %}
                 <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
                     <td class="Value"><span class="id">{{p.id}}</span>
-                        {% if p.uuid %}<a href="/scene/person/uuid={{p.uuid[:6]}}" class="inlink"
+                        {% if p.uuid %}<a href="/scene/person/uuid={{p.uuid}}" class="inlink"
                            title="{{ _('person %(id)s', id=p.uuid[:6]) }}">
                         {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink"
                            title="{{ _('person %(id)s', id=p.uniq_id) }}">

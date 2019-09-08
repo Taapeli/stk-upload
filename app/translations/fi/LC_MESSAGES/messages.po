@@ -2217,7 +2217,7 @@ msgstr "Voit katsoa vain hyväksyttyjä, julkisia tietoja Isotammi-aineistossa"
 
 #: bp/scene/templates/scene/index_scene.html:65
 msgid "Start Exploring"
-msgstr "Aloita tästä"
+msgstr "Jatka"
 
 #: bp/scene/templates/scene/index_scene.html:75
 msgid "Table format tools"

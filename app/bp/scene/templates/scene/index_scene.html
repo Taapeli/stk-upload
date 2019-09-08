@@ -50,9 +50,9 @@
                     {% if filt == 1 %}checked{% endif %}>Isotammi<br>
                   <input type="radio" name="div" value="2" 
                     {% if filt == 2 or filt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
-                  <input type="radio" name="div" value="4" style="cursor:not-allowed" 
+{#                <input type="radio" name="div" value="4" style="cursor:not-allowed" 
                     {% if filt == 4 or filt == 5 %}checked{% endif %}>{{ _('Selected set of material') }}<br>
-                  &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
+#}                 &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
                     {% if filt == 3 or filt == 5 %}checked{% endif %}>
                         {{ _('Compare to Isotammi Database') }} 
                 </p>

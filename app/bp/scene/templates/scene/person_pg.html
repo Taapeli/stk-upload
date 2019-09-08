@@ -44,9 +44,11 @@ u { color: DarkKhaki; text-decoration: none; }
                         <a class="id" href="/scene/person/uuid={{person.uuid}}"
                            title="{{ _('Other page format') }}">{{person.uuid[:6]}}</a> /
                     {% endif %}
-                        <span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
-                    {% if person.citation_ref %}<td class="ColumnValue" 
-                        rowspan="2"><small>{{ _("Source") }}:
+                        <span class="id">{{myid}}</span> / <tt>{{person.id}}</tt> /
+                        <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
+                    </td>
+                    {% if person.citation_ref %}
+                    <td class="ColumnValue" rowspan="2"><small>{{ _("Source") }}:
                         {% for cr in person.citation_ref %}
                             <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
                         {% endfor %}</small>

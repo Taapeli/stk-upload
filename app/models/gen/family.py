@@ -61,6 +61,7 @@ class Family(NodeObject):
         n = cls()
         n.uniq_id = node.id
         n.id = node['id'] or ''
+        n.uuid = node['uuid']
         n.handle = node['handle']
         n.change = node['change']
         n.rel_type = node['rel_type'] or ''
