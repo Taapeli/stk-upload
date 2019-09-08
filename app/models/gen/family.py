@@ -67,7 +67,7 @@ class Family(NodeObject):
         n.father_sortname = node['father_sortname']
         n.mother_sortname = node['mother_sortname']
         if "datetype" in node:
-            n.lifetime = DateRange(node["datetype"], node["date1"], node["date2"])
+            n.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return n
 
     

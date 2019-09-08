@@ -41,7 +41,7 @@ a:hover { color: blue; }
         <table><tbody>
             <tr><td class="Minor">{{ _("Relation") }}</td>
                 <td> {{ family.rel_type|transl('marr') }}</td>
-                <td class="Minor">{{ family.lifetime }}</td>
+                <td class="Minor">{{ family.dates }}</td>
             </tr>
         {% for p in [family.father, family.mother]%}
             {% if p %}

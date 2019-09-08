@@ -109,7 +109,7 @@ class Person(NodeObject):
             sex                   str "1", "2", "0" sukupuoli
             confidence            float "2.0" tietojen luotettavuus
             sortname              str default name as "surname#suffix#firstname"
-            datetype,date1,date2  DateRange lifetime # estimated life time
+            datetype,date1,date2  DateRange dates # estimated life time
             change                int 1536324580
            }
      """
@@ -121,10 +121,10 @@ class Person(NodeObject):
         self.sex = 0
         self.confidence = ''
         self.sortname = ''
-        self.lifetime = None    # Daterange: Estimated datetype, date1, date2
+        self.dates = None    # Daterange: Estimated datetype, date1, date2
 
     def __str__(self):
-        dates = self.lifetime if self.lifetime else ''
+        dates = self.dates if self.dates else ''
 #         if self.gender == 'M':  sex = 'male'
 #         elif self.gender == 'F':  sex = 'female'
 #         else: sex = 'unknown'
@@ -179,7 +179,7 @@ class Person(NodeObject):
         obj.sortname = node['sortname']
         obj.priv = node['priv']
         if "datetype" in node:
-            obj.lifetime = DateRange(node["datetype"], node["date1"], node["date2"])
+            obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return obj
 
 

@@ -63,7 +63,7 @@ class Person_combo(Person):
     """ A Person combined from database person node, names, events etc.
     
         From Person.__init__(): 
-            uniq_id, handle, id, priv, sex, confidence, lifetime, change
+            uniq_id, handle, id, priv, sex, confidence, dates, change
             Obsolete: #est_birth, #est_death
 
         Other properties:
@@ -114,7 +114,7 @@ class Person_combo(Person):
 
         #self.urls = []                 # REMOVED: Now use note_ref[]
 
-        #self.est_birth = ''            # REMOVED: Now use self.lifetime (Daterange)
+        #self.est_birth = ''            # REMOVED: Now use Daterange self.dates
         #self.est_death = ''
 
         self.role = ''                  # Role in Family
@@ -1021,7 +1021,7 @@ with distinct x
 
     @staticmethod
     def estimate_lifetimes(tx, uids=[]):
-        """ Sets an estimated lifietime to Person.lifetime.
+        """ Sets an estimated lifietime to Person.dates.
 
             Stores it as Person properties: datetype, date1, and date2
 

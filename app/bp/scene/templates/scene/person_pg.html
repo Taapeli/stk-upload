@@ -40,7 +40,10 @@ u { color: DarkKhaki; text-decoration: none; }
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
-                        {% if person.uuid %}<span class="id">{{person.uuid[:6]}}</span> /{% endif %}
+                    {% if person.uuid %}
+                        <a class="id" href="/scene/person/uuid={{person.uuid}}"
+                           title="{{ _('Other page format') }}">{{person.uuid[:6]}}</a> /
+                    {% endif %}
                         <span class="id">{{myid}}</span> / <tt>{{person.id}}</tt></td>
                     {% if person.citation_ref %}<td class="ColumnValue" 
                         rowspan="2"><small>{{ _("Source") }}:

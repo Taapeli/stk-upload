@@ -2373,6 +2373,11 @@ msgstr "etunimi"
 msgid "Patronymic"
 msgstr "patronyymi"
 
+#: bp/scene/templates/scene/person.html:31
+#: bp/scene/templates/scene/person_pg.html:45
+msgid "Other page format"
+msgstr "Toisenmallinen sivu"
+
 #: bp/scene/templates/scene/person.html:41
 msgid "Reference name"
 msgstr "referenssinimi"
@@ -4274,6 +4279,10 @@ msgstr "tapahtuma"
 #: templates/jinja_filters.py:121 templates/jinja_filters.py:140
 msgid "Source Note"
 msgstr "lähde"
+
+#: templates/jinja_filters.py:121 templates/jinja_filters.py:141
+msgid "Web Search"
+msgstr "verkosta löytynyt"
 
 #: templates/jinja_filters.py:122 templates/jinja_filters.py:137
 msgid "Person Note"

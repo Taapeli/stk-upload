@@ -27,7 +27,8 @@
                     <td class="ColumnAttribute">{{ _('Identifiers') }}</td>
                     <td class="ColumnValue">
                         {% if person.uuid %}<span class="id">{{person.uuid[:6]}}</span> /{% endif %}
-                        <span class="id"><a href="/scene/person/{{person.uniq_id}}">{{person.uniq_id}}</a></span> /
+                        <a class="id" href="/scene/person/{{person.uniq_id}}"
+                           title="{{ _('Other page format') }}">{{person.uniq_id}}</a> /
                         <tt>{{person.id}}@{{person.owner}}</tt></td>
                 </tr>
                 {% for pname in person.names|sort(attribute='order')  %}<tr>

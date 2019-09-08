@@ -196,7 +196,7 @@ def show_a_person_w_apoc(uid):
         user=None
     
     person, objs, marks = get_a_person_for_display_apoc(uid, user)
-    if person == None:
+    if not person:
         return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
 #     for m in marks:
 #         print("Citation mark {}".format(m))

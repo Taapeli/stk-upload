@@ -808,7 +808,7 @@ class DOM_handler():
 # -----------------------------------------------------------------------------
 
     def set_family_sortname_dates(self):
-        ''' Set sortnames and dates for each Family in the list self.family_ids.
+        ''' Set sortnames and lifetime dates for each Family in the list self.family_ids.
 
             For each Family set Family.father_sortname, Family.mother_sortname, 
             Family.datetype, Family.date1 and Family.date2
@@ -852,7 +852,7 @@ class DOM_handler():
 
 
     def set_estimated_person_dates(self):
-        ''' Sets estimated lifetime for each Person processed in handle_people
+        ''' Sets estimated dates for each Person processed in handle_people
             in transaction
             
             Called from bp.gramps.gramps_loader.xml_to_neo4j

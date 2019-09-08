@@ -27,15 +27,18 @@ td { padding-right:1em;}
                 </tr>
                 <tr><td class="ColumnAttribute">{{ _("Relation") }}</td>
                     <td class="Value"> {{ family.rel_type|transl('marr') }}</td>
-                    <td>{{ family.lifetime }}</td>
+                    <td>{{ family.dates }}</td>
                 </tr>
                 <tr><td colspan="3">&nbsp;</td></tr>
             {% for p in [family.father, family.mother]%}
                 {% if p %}
                 <tr><td class="ColumnAttribute">{{p.role|transl('role')|capitalize}}</td>
                     <td class="Value"><span class="id">{{p.id}}</span>
-                        <a href="/scene/person/uuid={{p.uuid}}" class="inlink"
+                        {% if p.uuid %}<a href="/scene/person/uuid={{p.uuid[:6]}}" class="inlink"
                            title="{{ _('person %(id)s', id=p.uuid[:6]) }}">
+                        {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink"
+                           title="{{ _('person %(id)s', id=p.uniq_id) }}">
+                        {% endif %}
                         {{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
                         {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a></td>
                     <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
@@ -69,8 +72,11 @@ td { padding-right:1em;}
         {% for p in family.children %}
                 <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
                     <td class="Value"><span class="id">{{p.id}}</span>
-                        <a href="/scene/person/uuid={{p.uuid}}" class="inlink"
+                        {% if p.uuid %}<a href="/scene/person/uuid={{p.uuid[:6]}}" class="inlink"
                            title="{{ _('person %(id)s', id=p.uuid[:6]) }}">
+                        {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink"
+                           title="{{ _('person %(id)s', id=p.uniq_id) }}">
+                        {% endif %}
 	                    {{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
 	                    {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a></td>
                     <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
