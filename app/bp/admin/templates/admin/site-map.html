@@ -12,12 +12,19 @@
         <div class="row">
              <div style="display: inline-block;">
 		        <table class="table100">
-		            <tr><th>Url</th><th>Rule end point</th><th>Method</th></tr>
+		            <tr><th>Url</th>
+		            	<th>Rule end point</th>
+		            	<th>Method</th>
+		            	<th>Login required</th>
+		            	<th>Roles</th>
+	            	</tr>
 		            {% for rule in links | sort(attribute='url') %}
 		                <tr>
                             <td>{{rule.url}}</td>
                             <td>{{rule.endpoint}}</td>
                             <td>{{rule.methods}}</td>
+                            <td>{% if rule.login_required %} X {%endif %}</td>
+                            <td>{{rule.roles}}</td>
 		                </tr>
 		            {% endfor %}
 		        </table>
