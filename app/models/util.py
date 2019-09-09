@@ -3,6 +3,7 @@ import time
 from pprint import pprint
 import ast
 import _ast
+import traceback
 
 def generate_name(name):
     """
@@ -50,8 +51,14 @@ from dataclasses import dataclass
 
 
 def scan_endpoints_for_file(fname):    
+    print(f"Scanning file {fname}")
+    endpoints = {}
     source = open(fname).read()
-    root = ast.parse(source)
+    try:
+        root = ast.parse(source)
+    except SyntaxError as e:
+        traceback.print_exc()
+        return endpoints
 
     @dataclass
     class Info: 
@@ -61,7 +68,6 @@ def scan_endpoints_for_file(fname):
         roles_accepted: str = None
         roles_required: str = None
 
-    endpoints = {}
     for node in ast.iter_child_nodes(root):
         if hasattr(node,'decorator_list'):
             #print(node.name,node.decorator_list)
