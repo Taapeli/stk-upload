@@ -198,7 +198,7 @@ class Place_combo(Place):
             else:
                 data_line.append('')
             if record["p"]['change']:
-                data_line.append(int(record["p"]['change']))  #TODO only temporary int()
+                data_line.append(record["p"]['change'])
             else:
                 data_line.append('')
             if record["p"]['id']:

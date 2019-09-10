@@ -51,7 +51,7 @@ class User:
             
         
 #     def get_ids_and_refnames_of_people_of_user(self):
-#         """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+#         """ Korjaa: refname-kenttää ei ole, käytä Refname-nodea
 #             Etsi kaikki käyttäjän henkilöt"""
 #         
 #         query = """
@@ -63,7 +63,7 @@ class User:
         
         
 #     def get_refnames_of_people_of_user(self):
-#         """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+#         """ Korjaa: refname-kenttää ei ole, käytä Refname-nodea
 #             Etsi kaikki käyttäjän henkilöt"""
 #         
 #         query = """

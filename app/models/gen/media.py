@@ -126,7 +126,8 @@ class Media(NodeObject):
     def save(self, tx, **kwargs):   # batch_id=None):
         """ Saves this new Media object to db.
         
-            #TODO: Can there be Notes for media?
+            #TODO: Process also Notes for media?
+
         """
         if not 'batch_id' in kwargs:
             raise RuntimeError(f"Media.save needs batch_id for parent {self.id}")

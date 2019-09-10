@@ -14,8 +14,6 @@
         - get_people_with_same_deathday() Etsi henkilöt, joiden kuolinaika on sama
         - get_people_wo_birth()         Luetaan henkilöt ilman syntymätapahtumaa
         - get_old_people_top()          Henkilöt joilla syntymä- ja kuolintapahtuma
-        - get_person_events (nmax=0, pid=None, names=None)
-                                        Luetaan henkilöitä tapahtumineen
         - get_person_combos (keys, currentuser, take_refnames=False, order=0):
                                         Read Persons with Names, Events and Refnames
         - get_my_places(self)              Tallettaa liittyvät Paikat henkilöön
@@ -418,7 +416,7 @@ RETURN person, name
     def get_people_with_same_birthday():
         """ Etsi kaikki henkilöt, joiden syntymäaika on sama. 
         
-            #TODO: p1.est_birth ei enää käytössä
+            #TODO: p1.est_birth ei enää käytössä, käytä p1.date1 ?
         """
 
         query = """
@@ -593,55 +591,55 @@ RETURN person, name
         return (titles, lists)
 
 
-    @staticmethod
-    def get_person_events (nmax=0, pid=None, names=None):
-        """ Luetaan henkilöitä tapahtumineen kannasta.
-        
-        Usage:
-            get_persons()               kaikki
-            get_persons(pid=123)        tietty henkilö oid:n mukaan poimittuna
-            get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
-            - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
-
-        Palauttaa riveillä listan muuttujia:
-        n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
-          0      1            2           3       4      5        6
-         146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]
-
-        jossa 'events' on lista käräjiä, jonka jäseninä on lista ko
-        käräjäin muuttujia:
-        [[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
-            0      1        2        3                4
-        [[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
-
-        │ Person                       │   │ Name                         │
-        ├──────────────────────────────┼───┼──────────────────────────────┤
-        │{"sex":"0","handle":"         │{} │{"surname":"Andersen","alt":""│
-        │handle_6","change":0,"id":"6"}│   │,"type":"","suffix":"","firstn│
-        │                              │   │ame":"Alexander","refname":""}│
-        ├──────────────────────────────┼───┼──────────────────────────────┤
-        """
-
-        #TODO nmax now not available
-        if nmax > 0:
-            qmax = "LIMIT " + str(nmax)
-        else:
-            qmax = ""
-        if pid:
-            where = "WHERE n.oid={} ".format(pid)
-        elif names:
-            where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
-        else:
-            where = ""
-
-        query = """
-MATCH (n:Person) -[:NAME]->( k:Name) {0}
-    OPTIONAL MATCH (n) -[r:EVENT]-> (e)
-RETURN n.id, k.firstname, k.surname,
-       COLLECT([e.name, e.kind]) AS events
-    ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
-
-        return shareds.driver.session().run(query)
+#     @staticmethod
+#     def get_person_events (nmax=0, pid=None, names=None):
+#         """ Luetaan henkilöitä tapahtumineen kannasta.
+#             NOT IN USE: Ei käytössä? Tehoton Cypher-lause
+# 
+#         Usage:
+#             get_persons()               kaikki
+#             get_persons(pid=123)        tietty henkilö oid:n mukaan poimittuna
+#             get_persons(names='And')    henkilöt, joiden sukunimen alku täsmää
+#             - lisäksi (nmax=100)         rajaa luettavien henkilöiden määrää
+# 
+#         Palauttaa riveillä listan muuttujia:
+#         n.oid, n.firstname, n.lastname, n.occu, n.place, type(r), events
+#           0      1            2           3       4      5        6
+#          146    Bengt       Bengtsson   soldat   null    OSALLISTUI [[...]]
+# 
+#         jossa 'events' on lista käräjiä, jonka jäseninä on lista ko
+#         käräjäin muuttujia:
+#         [[e.oid, e.kind,  e.name,  e.date,          e.name_orig]...]
+#             0      1        2        3                4
+#         [[ 147,  Käräjät, Sakkola, 1669-03-22 … 23, Sakkola 1669.03.22-23]]
+# 
+#         │ Person                       │   │ Name                         │
+#         ├──────────────────────────────┼───┼──────────────────────────────┤
+#         │{"sex":"0","handle":"         │{} │{"surname":"Andersen","alt":""│
+#         │handle_6","change":0,"id":"6"}│   │,"type":"","suffix":"","firstn│
+#         │                              │   │ame":"Alexander","refname":""}│
+#         ├──────────────────────────────┼───┼──────────────────────────────┤
+#         """
+# 
+#         if nmax > 0:
+#             qmax = "LIMIT " + str(nmax)
+#         else:
+#             qmax = ""
+#         if pid:
+#             where = "WHERE n.oid={} ".format(pid)
+#         elif names:
+#             where = "WHERE n.lastname STARTS WITH '{}' ".format(names)
+#         else:
+#             where = ""
+# 
+#         query = """
+# MATCH (n:Person) -[:NAME]->( k:Name) {0}
+#     OPTIONAL MATCH (n) -[r:EVENT]-> (e)
+# RETURN n.id, k.firstname, k.surname,
+#        COLLECT([e.name, e.kind]) AS events
+#     ORDER BY k.surname, k.firstname {1}""".format(where, qmax)
+# 
+#         return shareds.driver.session().run(query)
 
 
     @staticmethod
@@ -710,62 +708,61 @@ RETURN n.id, k.firstname, k.surname,
             print("iError get_person_combos: {1} {0}".format(err, keys), file=stderr)
 
 
-    @staticmethod
-    def get_events_k (keys, currentuser, take_refnames=False, order=0):
-        """ OBSOLETE Read Persons with Names, Events and Refnames (reference names)
-
-            - tilalle tulee Person_combo.get_person_combos
-            Called from models.datareader.read_persons_with_events
-
-             a) selected by unique id
-                keys=['uniq_id', uid]    by person's uniq_id (for table_person_by_id.html)
-             b) selected by name
-                keys=['all']             all
-                keys=['surname', name]   by start of surname
-                keys=['firstname', name] by start of the first of first names
-                keys=['patronyme', name] by start of patronyme name
-                keys=['refname', name]   by exact refname
-            If currentuser is defined, select only her Events
-
-            #TODO: take_refnames should determine, if refnames are returned, too
-        """
-        if keys:
-            rule=keys[0]
-            key=keys[1].title() if len(keys) > 1 else None
-            print("Selected {} '{}'".format(rule, key))
-        else:
-            rule="all"
-            key=""
-
-# ╒═════╤════════════════╤═══════════╤════════╤═════════════════╤═════════════════╕
-# │"id" │"firstname"     │"surname"  │"suffix"│"refnames"       │"events"         │
-# ╞═════╪════════════════╪═══════════╪════════╪═════════════════╪═════════════════╡
-# │31844│"August Wilhelm"│"Wallenius"│""      │["August","Wilhel│[[29933,"Baptism"│
-# │     │                │           │        │m","Wallenius"]  │, ...            │
-# └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
-# There is also fields confidence, est_birth, est_death, which are empty for now
-
-#TODO: filter by owner
-
-        try:
-            with shareds.driver.session() as session:
-                if rule == 'uniq_id':
-                    return session.run(Cypher_person.get_events_uniq_id, id=int(key))
-                elif rule == 'refname':
-                    return session.run(Cypher_person.get_events_by_refname, name=key)
-                elif rule == 'all':
-                    if order == 1:      # order by first name
-                        return session.run(Cypher_person.get_events_all_firstname)
-                    elif order == 2:    # order by patroname
-                        return session.run(Cypher_person.get_events_all_patronyme)
-                    else:
-                        return session.run(Cypher_person.get_events_all)
-                else:
-                    # Selected names and name types (untested?)
-                    return session.run(Cypher_person.get_events_by_refname_use,
-                                       attr={'use':rule, 'name':key})
-        except Exception as err:
-            print("iError get_events_k: {1} {0}".format(err, keys), file=stderr)
+#     @staticmethod def get_events_k (keys, currentuser, take_refnames=False, order=0):
+#         """ OBSOLETE Read Persons with Names, Events and Refnames (reference names)
+# 
+#             - tilalle tulee Person_combo.get_person_combos
+#             Called from models.datareader.read_persons_with_events
+# 
+#              a) selected by unique id
+#                 keys=['uniq_id', uid]    by person's uniq_id (for table_person_by_id.html)
+#              b) selected by name
+#                 keys=['all']             all
+#                 keys=['surname', name]   by start of surname
+#                 keys=['firstname', name] by start of the first of first names
+#                 keys=['patronyme', name] by start of patronyme name
+#                 keys=['refname', name]   by exact refname
+#             If currentuser is defined, select only her Events
+# 
+#             #TODO: take_refnames should determine, if refnames are returned, too
+#         """
+#         if keys:
+#             rule=keys[0]
+#             key=keys[1].title() if len(keys) > 1 else None
+#             print("Selected {} '{}'".format(rule, key))
+#         else:
+#             rule="all"
+#             key=""
+# 
+# # ╒═════╤════════════════╤═══════════╤════════╤═════════════════╤═════════════════╕
+# # │"id" │"firstname"     │"surname"  │"suffix"│"refnames"       │"events"         │
+# # ╞═════╪════════════════╪═══════════╪════════╪═════════════════╪═════════════════╡
+# # │31844│"August Wilhelm"│"Wallenius"│""      │["August","Wilhel│[[29933,"Baptism"│
+# # │     │                │           │        │m","Wallenius"]  │, ...            │
+# # └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
+# # There is also fields confidence, est_birth, est_death, which are empty for now
+# 
+# #TODO: filter by owner
+# 
+#         try:
+#             with shareds.driver.session() as session:
+#                 if rule == 'uniq_id':
+#                     return session.run(Cypher_person.get_events_uniq_id, id=int(key))
+#                 elif rule == 'refname':
+#                     return session.run(Cypher_person.get_events_by_refname, name=key)
+#                 elif rule == 'all':
+#                     if order == 1:      # order by first name
+#                         return session.run(Cypher_person.get_events_all_firstname)
+#                     elif order == 2:    # order by patroname
+#                         return session.run(Cypher_person.get_events_all_patronyme)
+#                     else:
+#                         return session.run(Cypher_person.get_events_all)
+#                 else:
+#                     # Selected names and name types (untested?)
+#                     return session.run(Cypher_person.get_events_by_refname_use,
+#                                        attr={'use':rule, 'name':key})
+#         except Exception as err:
+#             print("iError get_events_k: {1} {0}".format(err, keys), file=stderr)
 
 
     # Not in use!
@@ -857,7 +854,7 @@ with r, e, pl
 #             which are connected to Person, Events or Families
 #             and stores them in self.notes and self.Weburl lists
 #         '''
-#         #TODO Mihin tarvitaan?
+#         # Mihin tarvitaan?
 #         pass
 
 

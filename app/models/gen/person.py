@@ -29,8 +29,6 @@
         - get_people_with_same_deathday() Etsi henkilöt, joiden kuolinaika on sama
         - get_people_wo_birth()         Luetaan henkilöt ilman syntymätapahtumaa
         - get_old_people_top()          Henkilöt joilla syntymä- ja kuolintapahtuma
-        - get_person_events (nmax=0, pid=None, names=None)
-                                        Luetaan henkilöitä tapahtumineen
         - get_person_combos (keys, currentuser, take_refnames=False, order=0):
                                         Read Persons with Names, Events and Refnames
         - get_places(self)              Hakee liittyvät Paikat henkilöön

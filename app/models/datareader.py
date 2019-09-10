@@ -115,7 +115,6 @@ def read_refnames():
     """ Reads all Refname objects for display
         (n:Refname)-[r]->(m)
     """
-    namelist = []
     t0 = time.time()
     recs = Refname.get_refnames()
 
@@ -459,7 +458,7 @@ def read_places():
     """
 
     headings = []
-    titles, events = Place.get_my_places()
+    titles, events = Place_combo.get_my_places()
     
     headings.append(_("List of places"))
     headings.append(_("Showing places"))

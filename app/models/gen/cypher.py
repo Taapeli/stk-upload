@@ -334,13 +334,13 @@ RETURN f,
     COLLECT(DISTINCT [re, s, c]) + COLLECT(DISTINCT [fre, fs, fc]) AS sources,
     COLLECT(DISTINCT note) AS note"""
     
-    #TODO Obsolete
-    read_families = """
-MATCH (f:Family) WHERE ID(f)>=$fw
-OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
-OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
-OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
-RETURN f, ph, nh, pw, nw, COLLECT(pc) AS child, COUNT(pc) AS no_of_children ORDER BY ID(f) LIMIT $limit"""
+#     # Obsolete
+#     read_families = """
+# MATCH (f:Family) WHERE ID(f)>=$fw
+# OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
+# OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+# OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+# RETURN f, ph, nh, pw, nw, COLLECT(pc) AS child, COUNT(pc) AS no_of_children ORDER BY ID(f) LIMIT $limit"""
 
     # from models.gen.person_combo.Person_combo.get_family_members 
     get_persons_family_members = """
