@@ -144,14 +144,14 @@ class Place_combo(Place):
                 for names_node in place_record["names"]:
                     pl.names.append(Place_name.from_node(names_node))
 #                     if pl.names[-1].lang in ['fi', '']:
-#                         #TODO: use cureent_user's lang
+#                         #TODO: use current_user's lang
 #                         pl.pname = pl.names[-1].name
 
                 for notes_node in place_record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
                 if not (pl.type and pl.id):
-                    logger.error(f"Place_combo.read_w_notes: missing data for {self}")
+                    logger.error(f"Place_combo.read_w_notes: missing data for {pl}")
 
         try:
             return pl

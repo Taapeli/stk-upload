@@ -388,22 +388,22 @@ class DOM_handler():
                 if ref.hasAttribute("hlink"):
                     f.eventref_hlink.append(ref.getAttribute("hlink"))
                     f.eventref_role.append(ref.getAttribute("role"))
-                    print(f'# Family {f.id} has event {f.eventref_hlink[-1]}')
+                    ##print(f'# Family {f.id} has event {f.eventref_hlink[-1]}')
 
             for ref in family.getElementsByTagName('childref'):
                 if ref.hasAttribute("hlink"):
                     f.childref_hlink.append(ref.getAttribute("hlink"))
-                    print(f'# Family {f.id} has child {f.childref_hlink[-1]}')
+                    ##print(f'# Family {f.id} has child {f.childref_hlink[-1]}')
 
             for ref in family.getElementsByTagName('noteref'):
                 if ref.hasAttribute("hlink"):
                     f.noteref_hlink.append(ref.getAttribute("hlink"))
-                    print(f'# Family {f.id} has note {f.noteref_hlink[-1]}')
+                    ##print(f'# Family {f.id} has note {f.noteref_hlink[-1]}')
                        
             for ref in family.getElementsByTagName('citationref'):
                 if ref.hasAttribute("hlink"):
                     f.citationref_hlink.append(ref.getAttribute("hlink"))
-                    print(f'# Family {f.id} has cite {f.citationref_hlink[-1]}')
+                    ##print(f'# Family {f.id} has cite {f.citationref_hlink[-1]}')
 
             self.save_and_link_handle(f, batch_id=self.batch_id)
             counter += 1
@@ -624,6 +624,7 @@ class DOM_handler():
             pl = Place_gramps()
             # Extract handle, change and id
             self._extract_base(placeobj, pl)
+            pl.type = placeobj.getAttribute("type")
 
             # List of upper places in hierarchy as {hlink, dates} dictionaries
             pl.surround_ref = []
@@ -794,7 +795,7 @@ class DOM_handler():
                     # s.reporef_hlink = source_reporef.getAttribute("hlink")
                     r.handle = source_reporef.getAttribute("hlink")
                     r.medium = source_reporef.getAttribute("medium")
-                    print(f'# Source {s.id} in repository {r.handle} {r.medium}')
+                    ##print(f'# Source {s.id} in repository {r.handle} {r.medium}')
                 # Mostly 1 repository!
                 s.repositories.append(r)
 
