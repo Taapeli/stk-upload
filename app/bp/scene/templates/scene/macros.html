@@ -1,8 +1,6 @@
 {% macro lock(value) -%}
     {# Draws a lock icon, is value is '1' #}
-	{% if value == '1' %}
-		<i class='fa fa-lock'></i>
-	{% endif %}                           
+	{% if value == '1' %}&#x1F512;{% endif %}                           
 {%- endmacro %}
 
 

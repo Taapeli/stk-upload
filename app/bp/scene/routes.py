@@ -290,7 +290,7 @@ def show_family_popup(fid):
 # ------------------------------ Menu 4: Places --------------------------------
 
 @bp.route('/scene/locations')
-def show_locations():
+def show_places():
     """ List of Places for menu(4)
     """
     t0 = time.time()
@@ -302,12 +302,12 @@ def show_locations():
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
 #         print ("# {} ".format(p))
-    return render_template("/scene/locations.html", locations=locations, 
+    return render_template("/scene/places.html", locations=locations, 
                            elapsed=time.time()-t0)
 
 
 @bp.route('/scene/location=<int:locid>')
-def show_location_page(locid):
+def show_place_page(locid):
     """ Home page for a Place, shows events and place hierarchy
         locid = id(Place)
     """

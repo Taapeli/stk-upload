@@ -124,7 +124,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events|sort(attribute='dates') %}
+        {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
                             <a href="/scene/person={{e.uid}}" class="id"
