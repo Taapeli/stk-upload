@@ -379,13 +379,15 @@ RETURN person, name
 
             Luetaan kaikki henkilön tiedot ja nimet, huomautukset
         """
+        #TODO Should need this
+        user = None 
         with shareds.driver.session() as session:
             if self.uuid:
                 result = session.run(Cypher_person.get_by_uuid_w_names_notes,
                                      pid=self.uuid)
             else:
                 result = session.run(Cypher_person.get_w_names_notes,
-                                     pid=self.uniq_id)
+                                     my_user=user, pid=self.uniq_id)
 
         for record in result:
             # <Record person=<Node id=72087 labels={'Person'} 

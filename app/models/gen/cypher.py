@@ -209,6 +209,8 @@ OPTIONAL MATCH (person) -[:NOTE]-> (n:Note)
   WITH person, name, COLLECT (n) AS notes, b.user AS owner
   ORDER BY name.order
 RETURN person, notes, COLLECT (name) AS names, owner"""
+#Todo: MATCH (z:UserProfile) -[:READS|HAS_LOADED]-> (b:Batch) 
+#      -[:OWNS]-> (person:Person) -[r:NAME]-> (name:Name)
 
     get_names = """
 MATCH (n) <-[r:NAME]- (p:Person)
