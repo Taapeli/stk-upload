@@ -13,7 +13,7 @@ from shareds import logger
 import traceback
 
 
-def get_a_person_for_display_apoc(uniq_id, user):
+def get_a_person_for_display_apoc(uid, user):
     """ Get a Person with all connected nodes for display in Person page.
 
 
@@ -65,14 +65,17 @@ def get_a_person_for_display_apoc(uniq_id, user):
     #TODO: Presentation of Family tree 
     
     #TODO: Describe footnote processing in "/scene/person_pg.html" template
+    
+    #TODO: Process user parameter to check user permissions
     """
 
     # 1. Read person p and paths for all nodes connected to p
+    person=None
     try:
-        results = Person_combo.get_person_paths_apoc(uniq_id)
+        results = Person_combo.get_person_paths_apoc(uid)
     except Exception as e:
         traceback.print_exc()
-        print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
+        print("Henkilötietojen {} luku epäonnistui: {} {}".format(uid, e.__class__().name, e))
         return [None, None]
 
     for result in results:
@@ -168,6 +171,9 @@ def get_a_person_for_display_apoc(uniq_id, user):
 #                     print("  citation[{}] <- {}".format(target_obj.uniq_id, target_obj))
             else:
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
+
+    if person is None:
+        return (None, None, None)
 
     # 4. Sort events by date
     person.events.sort()

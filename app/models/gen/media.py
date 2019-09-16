@@ -135,7 +135,7 @@ class Media(NodeObject):
         self.uuid = self.newUuid()
         m_attr = {}
         try:
-            print(f'#Creating Media {self.uuid} {self.src}')
+            ##print(f'#Creating Media {self.uuid} {self.src}')
             m_attr = {
                 "handle": self.handle,
                 "change": self.change,

@@ -40,11 +40,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
-                    {% if person.uuid %}
-                        <a class="id" href="/scene/person/uuid={{person.uuid}}"
-                           title="{{ _('Other page format') }}">{{person.uuid[:6]}}</a> /
-                    {% endif %}
-                        <span class="id">{{myid}}</span> / <tt>{{person.id}}</tt> /
+                        {{macro.all_obj_ids(person)}} /
                         <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
                     </td>
                     {% if person.citation_ref %}
@@ -117,12 +113,13 @@ u { color: DarkKhaki; text-decoration: none; }
                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
                         {% endfor %}</td>
 
-                        <td class="ColumnEvent">
+                        {% if e.uuid %}{% set uuid = e.uuid %}{% else %}{% set uuid = "" %}{% endif %}
+                        <td class="ColumnEvent" title="{{e.id}} {{uuid[:6]}}" >
                             {% if e.type == "Baptism" %} 
-                            	<a href="/lista/baptism_data/{{e.uniq_id}}" class="inlink">
+                            	<a href="/lista/baptism_data/{{e.uniq_id}}" class="inlink" title="{{e.id}} {{uuid[:6]}}">
                             	  {{e.type|transl('evt')}}</a>{% else %}
                                 {{e.type|transl('evt')}}{% endif %}&nbsp;<span class="id">[{{e.uniq_id}}]</span>
-                            {% if e.role and e.role != "Primary" %}<span 
+                            {% if e.role and e.role != "Primary" %}<span
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
 

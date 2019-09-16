@@ -77,6 +77,13 @@
     </div>
 {%- endmacro %}
 
+{% macro all_obj_ids(obj) -%}
+    {#  Formats object keys for display. #}
+    <tt title="{{ _('UUID key') }}">{{obj.uuid[:6]}}</tt> /
+    <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
+    <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
+{%- endmacro %}
+
 {% macro person_name(name) -%}
     {#  Formats a Person name. Shows firstname and a surname or patronyme. #}
     {{name.firstname}}
@@ -86,6 +93,11 @@
 {% macro person_name_long(name) -%}
     {#  Formats a Person name. Shows all firstname, patronyme and surname. #}
     {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>
+{%- endmacro %}
+
+{% macro sex(person) -%}
+    {#  Shows Person gender symbol (only for man and woman). #}
+    {% if person.sex == 1 %}&#9794;{% elif person.sex == 2 %}&#9792;{% endif %}
 {%- endmacro %}
 
 {% macro person(p, uuid) -%}
@@ -105,7 +117,7 @@
     {% endif %}
 {%- endmacro %}
                     
-{% macro member(ch, uniq_id, delim) -%} {# Better version: macro person #}
+{% macro member(ch, uniq_id, delim) -%} {# OBSOLETE, Better version: macro person #}
     {#  Creates a Person name and link (for family tree graph). 
         Optional 'delim' can be "=" for older person page
     #}

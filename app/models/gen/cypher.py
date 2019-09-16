@@ -43,7 +43,16 @@ class Cypher_person():
     Cypher clases for creating and accessing Places
     '''
     all_nodes_query_w_apoc="""
-MATCH (p:Person) WHERE id(p) = $pid
+MATCH (p:Person {uuid:$uuid})
+CALL apoc.path.subgraphAll(p, {maxLevel:4, 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<PARENT'}) 
+    YIELD nodes, relationships
+RETURN extract(x IN relationships | 
+        [id(startnode(x)), type(x), properties(x), id(endnode(x))]) as relations,
+        extract(x in nodes | x) as nodelist"""
+    #TODO Obsolete
+    all_nodes_uniq_id_query_w_apoc="""
+MATCH (p:Person) WHERE id(p) = $uniq_id
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 
         relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<PARENT'}) 
     YIELD nodes, relationships

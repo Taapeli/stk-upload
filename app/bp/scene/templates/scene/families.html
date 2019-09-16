@@ -119,8 +119,8 @@
 
 <table id="families">
     <tr><th>{{ _("family") }}</th>
-        <th>{{ _("Father") }}</th>
-        <th>{{ _("Mother") }}</th>
+        <th>{{ _("Man") }}</th>
+        <th>{{ _("Wife") }}</th>
         <th>{{ _("Children") }}</th>
     </tr>
 {% if cnt %}
@@ -133,13 +133,13 @@
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
-            <td>{% if f.father.uniq_id %} &#9794;
+            <td>{% if f.father.uniq_id %} <!-- &#9794; -->
                 <a href="/scene/person={{f.father.uniq_id}}" class="inlink"
                    title="{{f.father_sortname}}">
                 {{ macro.person_name_long(f.father.names[0]) }}</a>
             {% else %} –
             {% endif %}</td>
-            <td>{% if f.mother.uniq_id %} &#9792;
+            <td>{% if f.mother.uniq_id %} <!-- &#9792; -->
                 <a href="/scene/person={{f.mother.uniq_id}}" class="inlink"
                    title="{{f.mother_sortname}}">
                 {{ macro.person_name_long(f.mother.names[0]) }}</a>

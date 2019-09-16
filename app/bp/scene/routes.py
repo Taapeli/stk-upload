@@ -54,7 +54,7 @@ def scene():
 #     return render_template("/scene/persons.html", persons=persons, 
 #                            menuno=1, rule=keys)
 
-# ------------------------- Menu 0: Person search ------------------------------
+# ------------------------- Menu 1: Person search ------------------------------
 
 @bp.route('/scene/persons', methods=['POST', 'GET'])
 def show_person_list(selection=None):
@@ -105,6 +105,32 @@ def show_persons_by_refname(refname, opt=""):
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order, rule=keys)
 
+@bp.route('/scene/persons/all/<string:opt>')
+@bp.route('/scene/persons/all/')
+#     @login_required
+def show_all_persons_list(opt=''):
+    """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
+
+        The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
+        with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
+        TODO Should have restriction by owner's UserProfile 
+    """
+    t0 = time.time()
+    keys = ('all',)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    ref = ('ref' in opt)
+    if 'fn' in opt: order = 1   # firstname
+    elif 'pn' in opt: order = 2 # firstname
+    else: order = 0             # surname
+    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    print("-> bp.scene.routes.show_all_persons_list")
+    return render_template("/scene/persons.html", persons=persons, menuno=1, 
+                           order=order,rule=keys, elapsed=time.time()-t0)
+
+
 
 # -------------------------- Menu 12 Persons by user ---------------------------
 
@@ -139,54 +165,16 @@ def show_my_persons():
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 
-@bp.route('/scene/persons/all/<string:opt>')
-@bp.route('/scene/persons/all/')
-#     @login_required
-def show_all_persons_list(opt=''):
-    """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
-
-        The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
-        with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
-        TODO Should have restriction by owner's UserProfile 
-    """
-    t0 = time.time()
-    keys = ('all',)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    ref = ('ref' in opt)
-    if 'fn' in opt: order = 1   # firstname
-    elif 'pn' in opt: order = 2 # firstname
-    else: order = 0             # surname
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
-    print("-> bp.scene.routes.show_all_persons_list")
-    return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           order=order,rule=keys, elapsed=time.time()-t0)
-
 
 @bp.route('/scene/person/<int:uid>')
+@bp.route('/scene/person', methods=['GET'])
 #     @login_required
-# def show_a_person(uid):
-#     """ One Person with connected Events, Families etc
-#         Korvaamaan metodin show_person_page()
-#     """
-#     if not uid:
-#         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
-#     if current_user.is_authenticated:
-#         user=current_user.username
-#     else:
-#         user=None
-#     person, sources = get_a_person_for_display(uid, user)
-#     return render_template("/scene/person_pg.html", 
-#                            person=person, sources=sources, menuno=1)
-@bp.route('/scene/person/a=<int:uid>')
-#     @login_required
-def show_a_person_w_apoc(uid):
+def show_a_person_w_apoc(uid=None):
     """ One Person with all connected nodes
         Korvaamaan metodin show_person_page()
     """
     t0 = time.time()
+    uid = request.args.get('uuid', uid)
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
 

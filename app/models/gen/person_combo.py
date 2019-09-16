@@ -136,15 +136,20 @@ return path"""
         return  shareds.driver.session().run(query, pid=uniq_id)
 
     @staticmethod
-    def get_person_paths_apoc(uniq_id):
+    def get_person_paths_apoc(uid):
         ''' Read a person and paths for all connected nodes.
         '''
         try:
-            return  shareds.driver.session().run(Cypher_person.all_nodes_query_w_apoc, 
-                                                 pid=uniq_id)
+            if isinstance(uid, int):
+                return  shareds.driver.session().run(Cypher_person.all_nodes_uniq_id_query_w_apoc, 
+                                                     uniq_id=uid)
+            else:
+                return  shareds.driver.session().run(Cypher_person.all_nodes_query_w_apoc, 
+                                                     uuid=uid)
         except Exception as e:
-            print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
-            return None
+            print(f"Henkilötietojen {uid} luku epäonnistui: {e.__class__().name} {e}")
+        return None
+
 
     @staticmethod
     def read_my_persons_list(o_filter, limit=100):

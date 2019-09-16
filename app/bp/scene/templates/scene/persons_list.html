@@ -128,11 +128,12 @@
 	                   {% endfor %}
 
 	                   {% if p.uuid %}<div class="detail_link" alt="{{p.uniq_id}}">
-		                   <a href="/scene/person/uuid={{p.uuid}}"
+		                   {{macro.sex(p)}}
+		                   <a href="/scene/person?uuid={{p.uuid}}"
 		                     title="{{ _('see details of person %(id)s', id=p.uuid[:6]) }}">
                            {{macro.person_name(p.names[0])}}</a></div>
 		               {% else %}<div class="no_detail" title="UUID puuttuu!">
-                           {{macro.person_name(p.names[0])}}</div>
+                           {{macro.sex(p)}} {{macro.person_name(p.names[0])}}</div>
                        {% endif %}
 
 		               {%set eka = 1 %}

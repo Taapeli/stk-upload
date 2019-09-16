@@ -120,6 +120,9 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
+.gedcom_id { color: sienna; text-align: right; 
+    font-family: monospace
+}
 .id { color: sienna; font-size: 80%; text-align: right; 
     font-family: serif
 }
