@@ -163,8 +163,8 @@
                     {% if e.type == "Birth" or e.type == "Death" %}{% set ecl = "major" %}
                     {% else %}{% set ecl = "minor" %}{% endif %}
                       <div class="eventgrid">
-                          <div class="col col_event {{ecl}}">
-                          <span class="evtype">{{e.type|transl('evt')|lower}}</span>
+                          <div class="col col_event">
+                          <span class="evtype {{ecl}}">{{e.type|transl('evt')|lower}}</span>
                           {{e.description}}</div>
                           <div class="col col_date">
                           {% if e.dates %}{{e.dates}} {% endif %}

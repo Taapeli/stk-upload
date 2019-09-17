@@ -858,7 +858,49 @@ def get_person_data_by_id(pid):
     return (p, events, photos, citations, family_list)
 
 
+def get_event_participants(uniq_id):
+    '''
+        Get event data and participants.
+    '''
+
+    e = Event_combo()
+    e.uniq_id = uniq_id
+    e.get_event_combo()
+
+    if e.place_ref:
+        e.place = Place_combo.get_w_notes(e.place_ref[0])
+
+    persons = []
+    result = e.get_participants()
+    for record in result:
+        # <Record role='Clergy' 
+        #    person=<Node id=344292 labels={'Person'} 
+        #        properties={'sortname': 'Hougberg#Svensson#Carl Adolf Hougberg', 
+        #            'datetype': 19, 'confidence': '', 'sex': 1, 'change': 1541582091, 
+        #            'id': 'I0442', 'date2': 1884352, 'date1': 1805441, 
+        #            'uuid': '3a77b72614194491a546a4360171cf29'}> 
+        #    name=<Node id=344293 labels={'Name'} 
+        #        properties={'firstname': 'Carl Adolf Hougberg', 'type': 'Birth Name', 
+        #            'suffix': 'Svensson', 'prefix': '', 'surname': 'Hougberg', 
+        #            'order': 0}
+        # >  >
+        person_node = record['person']
+        name_node = record['name']
+
+        p = Person_combo.from_node(person_node)
+        p.role = record['role']
+        name = Name.from_node(name_node)
+        p.names.append(name)
+
+        persons.append(p)
+
+    return (e, persons)
+
+
 def get_baptism_data(uniq_id):
+    '''
+        Get event data and participants.
+    '''
 
     persons = []
 

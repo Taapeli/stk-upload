@@ -16,7 +16,6 @@
         <h3 style="position:sticky; top:0;">
             <i>{{event.type|transl('evt')|title}}:</i> {{event.description}}
         </h3>
-        {% set myid = event.uniq_id %}
  
         <div id="summaryarea">
             <table>
@@ -33,8 +32,7 @@
                             <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
                         {% endfor %}</small>
                     </td>{% endif %}
-#}
-                </tr>
+#}              </tr>
 
                 {% if event.description %}<tr>
                     <td class="ColumnAttribute">{{ _("Description") }}</td>
@@ -44,9 +42,12 @@
                     <td class="ColumnAttribute">{{ _("Date") }}</td>
                     <td class="ColumnValue">{{ event.dates }}</td>
                 </tr>{% endif %}
-                {% if event.location %}<tr>
+                {% if event.place %}<tr>
                     <td class="ColumnAttribute">{{ _("Place") }}</td>
-                    <td class="ColumnValue">{{event.location |join(' • ')}}</td>
+                    <td class="ColumnValue">
+                        <a href="/scene/location={{event.place.uniq_id}}" class="inlink">
+                            {{event.place.pname}}</a>
+                    </td>
                 </tr>{% endif %}
 
             </table>
@@ -69,7 +70,7 @@
 	    		{% else %}
 	    		    {{person.role|transl('role')}}
 	    		{% endif %}</td>
-                <td>{{ macro.member(person, myid) }}</td>
+                <td>{{ macro.member(person, None) }}</td>
 			</tr>
 	{% endfor %}
 </table>

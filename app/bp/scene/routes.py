@@ -23,7 +23,7 @@ from models.gen.source import Source
 
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
-from models.datareader import get_baptism_data
+from models.datareader import get_event_participants
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.owner import OwnerFilter
@@ -232,16 +232,16 @@ def show_person_page(pid):
                            elapsed=time.time()-t0)
 
 
-@bp.route('/scene/event_baptism/<int:uniq_id>')
-def show_event_baptism(uniq_id):
-    """ Table of a baptism Event persons.
+@bp.route('/scene/event/<int:uniq_id>')
+def show_event(uniq_id):
+    """ Table of a (baptism) Event persons.
 
         Kastetapahtuman tietojen näyttäminen ruudulla
         
         Derived from bp.tools.routes.show_baptism_data()
     """
-    event, persons = get_baptism_data(uniq_id)
-    return render_template("/scene/event_baptism.html",
+    event, persons = get_event_participants(uniq_id)
+    return render_template("/scene/event.html",
                            event=event, persons=persons)
 
 
