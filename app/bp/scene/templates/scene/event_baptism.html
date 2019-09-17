@@ -10,11 +10,11 @@
     <!-- owner {{event.owner}}, next {{next}}, filter {{session['owner_filter']}}</small> -->
 </div>
 
-{{ macro.menu(menuno) }}
+{{ macro.menu(12) }}
     <div class="content" id="IndividualDetail">
 
         <h3 style="position:sticky; top:0;">
-            <i>{{event.type}}</i> {{event.description}}
+            <i>{{event.type|transl('evt')|title}}:</i> {{event.description}}
         </h3>
         {% set myid = event.uniq_id %}
  
@@ -23,7 +23,7 @@
                 <tr>
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
-                        {{macro.all_obj_ids(event)}} /
+                        {{macro.all_obj_ids(event)}} 
                         <a href="/lista/baptism_data/{{event.uniq_id}}" 
                            style="color:pink;font-size: 70%;">(vanhalle sivulle)</a>
                     </td>
