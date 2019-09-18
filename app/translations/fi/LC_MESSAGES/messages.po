@@ -2130,6 +2130,14 @@ msgstr "Ei ketään"
 msgid "Family details"
 msgstr "Perheen tiedot"
 
+#: bp/scene/templates/scene/event.html:9
+msgid "Event details"
+msgstr "Tapahtuman tietoja"
+
+#: bp/scene/templates/scene/event.html:57
+msgid "Participants"
+msgstr "Tapahtumaan osalliset"
+
 #: bp/scene/templates/scene/family.html:21
 #: bp/scene/templates/scene/family_pop.html:3
 #: bp/scene/templates/scene/family_pop.html:40
@@ -2195,17 +2203,21 @@ msgstr "Tutustu Isotammi-aineistoon"
 msgid "Select Material for Browsing"
 msgstr "Valitse selattava aineisto"
 
+#: bp/scene/templates/scene/index_scene.html:50
+msgid "Demo database"
+msgstr "Demo-aineistot"
+
 #: bp/scene/templates/scene/index_scene.html:52
 msgid "My candidate material"
-msgstr "Kaikki tarjokasaineistoni"
+msgstr "Tarjokasaineistoni"
 
 #: bp/scene/templates/scene/index_scene.html:54
 msgid "Selected set of material"
 msgstr "Valittu tarjokasaineisto"
 
 #: bp/scene/templates/scene/index_scene.html:57
-msgid "Compare to Isotammi Database"
-msgstr "Vertaa Isotammi-aineistoon"
+msgid "Compare to Demo Database"
+msgstr "Vertaa demo-aineistot"
 
 #: bp/scene/templates/scene/index_scene.html:60
 msgid "The Browsed Material"

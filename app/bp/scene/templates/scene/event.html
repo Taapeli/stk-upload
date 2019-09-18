@@ -14,7 +14,11 @@
     <div class="content" id="IndividualDetail">
 
         <h3 style="position:sticky; top:0;">
+        {% if event.description %}
             <i>{{event.type|transl('evt')|title}}:</i> {{event.description}}
+        {% else %}
+            <i>{{event.type|transl('evt')|title}}</i>
+        {% endif %}
         </h3>
  
         <div id="summaryarea">

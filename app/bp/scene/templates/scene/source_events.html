@@ -40,11 +40,6 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 	   					  {{ _( "Page" ) }} {{c.page}} 
 	   					  {{ macro.stars(c.confidence|float) }}
                           {% set conf = c.confidence | int %} 
-	   					  {% if c.note_ref %}<ul>
-	   					    {% for note in c.note_ref %}
-   					  			<li>{{ macro.notelink(note) }}</li>
-	   					  	{% endfor %}</ul>
-   					  	  {% endif %}
 
 	               		  <ol type="a">
 	               		{% for cite in c.citators|sort(attribute='date') %}
@@ -53,7 +48,7 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 	                          {% else %}
 	                           {{ _('The person') }}
 	                          {% endif %}
-                              <a href="/scene/person={{cite.uniq_id}}" class="inlink"
+                              <a href="/scene/person/{{cite.uniq_id}}" class="inlink"
                                  title="{{ _('see details of person %(id)s', id=cite.id) }}">
                                  {{cite.clearname}}</a>
 	                           {{cite.eventtype|transl('evt')}}
@@ -61,6 +56,12 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
                			    </li>
 	                    {% endfor %}
 	                      </ol>
+
+                          {% if c.note_ref %}<ul>
+                            {% for note in c.note_ref %}
+                                <li>{{ macro.notelink(note) }}</li>
+                            {% endfor %}</ul>
+                          {% endif %}
 	         		    </div>
 	         		  </td>
 	         		</tr>

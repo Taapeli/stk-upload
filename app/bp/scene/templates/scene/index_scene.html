@@ -47,18 +47,18 @@
                 <h3>{{ _('Select Material for Browsing') }}</h3>
                 <p>{% set filt = session['owner_filter'] %}<br>
                   <input type="radio" name="div" value="1" 
-                    {% if filt == 1 %}checked{% endif %}>Isotammi<br>
+                    {% if filt == 1 %}checked{% endif %}>{{ _('Demo database') }}<br>
                   <input type="radio" name="div" value="2" 
                     {% if filt == 2 or filt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
 {#                <input type="radio" name="div" value="4" style="cursor:not-allowed" 
                     {% if filt == 4 or filt == 5 %}checked{% endif %}>{{ _('Selected set of material') }}<br>
 #}                 &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
                     {% if filt == 3 or filt == 5 %}checked{% endif %}>
-                        {{ _('Compare to Isotammi Database') }} 
+                        {{ _('Compare to Demo Database') }} 
                 </p>
      {% else %}
                 <h3>{{ _('The Browsed Material') }}</h3>
-                <p>{{ _('You can view only approved and public material in Isotammi Database') }}.</p>
+                <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
                 <div class="submit"> 

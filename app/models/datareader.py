@@ -467,7 +467,9 @@ def read_places():
 
 
 def get_source_with_events(sourceid):
-    """ Lukee tietokannasta Source- objektin tapahtumineen näytettäväksi
+    """ Reads a Source with events, citations and notes.
+    
+        Lukee tietokannasta Source- objektin tapahtumineen näytettäväksi
     """
 
     result = Source.get_source_w_notes(sourceid)
