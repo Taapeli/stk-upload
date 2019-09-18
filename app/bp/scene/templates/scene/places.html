@@ -52,20 +52,20 @@
                 </td>
                 <td class="ColumnPerson">
                    <div>
-                      <a href="/scene/location={{p.uniq_id}}" class="id"
+                      <a href="/scene/location/uuid={{p.uuid}}" 
                         title="{{ _('see details of place %(id)s', id=p.uniq_id) }}"
-                        id="{{p.uniq_id}}">{{p.uniq_id}}</a> <b>{{ macro.place_names(p) }}</b>
+                        id="{{p.uniq_id}}"><b>{{ macro.place_names(p) }}</b></a>
                       <span class="typedesc">{{p.type|transl('lt')}}</span>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
 						<span class="typedesc">{{e.type|transl('lt_in')}}</span>
-						<a href="#{{e.uniq_id}}" 
+						<a href="/scene/location/uuid={{e.uuid}}" 
 						  title="{{ _('Go to location') }} id={{e.uniq_id}}">{{ macro.place_names(e) }}</a> 
 		        {% endif %}
                    </div>
             {% if p.lowers %}
 		           <ul style="margin:0 0 5px 1em;">
 		        {% for e in p.lowers|sort(attribute='pname') %}    <li>
-	                       <a href="#{{e.uniq_id}}"
+	                       <a href="/scene/location/uuid={{e.uuid}}"
 	                         title="{{ _('Go to location') }} id={{e.uniq_id}}">{{ macro.place_names(e) }}</a>
 	                       &nbsp;<span class="typedesc">{{e.type|transl('lt')}}</span>
                       </li>

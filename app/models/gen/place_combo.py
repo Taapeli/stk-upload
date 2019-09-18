@@ -116,14 +116,23 @@ class Place_combo(Place):
         return places
 
     @staticmethod
-    def get_w_notes(uniq_id):
+    def get_w_notes(locid): 
         """ Returns the Place_combo with Notes and PlaceNames included.
 
             #TODO: Luetaan Notes ja Citations vasta get_persondata_by_id() lopuksi?
         """
+        #if isinstance(locid,int):
+        #    p.uniq_id = locid
+        #else:
+        #    p.uuid = locid
+
         with shareds.driver.session() as session:
-            place_result = session.run(Cypher_place.get_w_names_notes, 
-                                       place_id=uniq_id)
+            if isinstance(locid,int):
+                place_result = session.run(Cypher_place.get_w_names_notes, 
+                                       place_id=locid)
+            else:
+                place_result = session.run(Cypher_place.get_w_names_notes_uuid, 
+                                       uuid=locid)
 
             for place_record in place_result:
                 # <Record
@@ -156,7 +165,7 @@ class Place_combo(Place):
         try:
             return pl
         except Exception:
-            logger.error(f"Place_combo.read_w_notes: no Place with uniq_id={uniq_id}")
+            logger.error(f"Place_combo.read_w_notes: no Place with locid={locid}") 
             return None
 
 
@@ -264,7 +273,7 @@ class Place_combo(Place):
                 Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
             """
             placedict = {}
-            for nid, ntype, name, lang in pn_tuples:
+            for nid, nuuid, ntype, name, lang in pn_tuples:
                 if nid: # id of a lower place
                     pn = Place_name(name=name, lang=lang)
                     if nid in placedict:
@@ -277,6 +286,7 @@ class Place_combo(Place):
                     else:
                         # Add a new Place_combo
                         p = Place_combo(nid)
+                        p.uuid = nuuid
                         p.type = ntype
                         p.names.append(pn)
                         p.pname = pn.name
@@ -304,6 +314,7 @@ class Place_combo(Place):
             # >
             pl_id =record['id']
             p = Place_combo(pl_id)
+            p.uuid =record['uuid']
             p.type = record.get('type')
             if record['coord']:
                 p.coord = Point(record['coord']).coord
@@ -380,7 +391,7 @@ MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
         # Query for single Place without hierarcy
         root_query = """
 MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.pname AS name
+RETURN p.type AS type, p.uuid as uuid, p.pname AS name
 """
         # Query to get names for a Place
         name_query="""
@@ -397,7 +408,7 @@ RETURN COLLECT(n) AS names LIMIT 15
                 result = session.run(root_query, locid=int(locid))
                 record = result.single()
                 t.tree.create_node(record["name"], locid, parent=0,
-                                   data={'type': record["type"]})
+                                   data={'type': record["type"],'uuid':record['uuid']})
         ret = []
         for node in t.tree.expand_tree(mode=t.tree.DEPTH):
             logger.debug(f"{t.tree.depth(t.tree[node])} {t.tree[node]} {t.tree[node].bpointer}")
@@ -421,6 +432,7 @@ RETURN COLLECT(n) AS names LIMIT 15
                     # ]>
                 lv = t.tree.depth(n)
                 p = Place_combo(uniq_id=node, ptype=n.data['type'], level=lv)
+                p.uuid = n.data['uuid']
                 for node in record['names']:
                     p.names.append(Place_name.from_node(node))
                 # TODO: Order by lang here!

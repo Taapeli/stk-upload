@@ -433,6 +433,9 @@ class Cypher_place():
     Cypher clases for creating and accessing Places
     '''
 
+    
+   
+
     get_person_events = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
   WHERE id(l) = $locid
@@ -446,15 +449,23 @@ ORDER BY edates[1]"""
 MATCH (a:Place) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
 OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.type AS type,
+RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
     COLLECT(DISTINCT pn) AS names, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
+    COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
+    COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
 ORDER BY names[0].name"""
 
     get_w_names_notes = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE ID(place)=$place_id
+OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
+RETURN place, 
+    COLLECT(DISTINCT n) AS names,
+    COLLECT (DISTINCT note) AS notes"""
+
+    get_w_names_notes_uuid = """
+MATCH (place:Place) -[:NAME]-> (n:Place_name)
+    WHERE place.uuid=$uuid
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
 RETURN place, 
     COLLECT(DISTINCT n) AS names,

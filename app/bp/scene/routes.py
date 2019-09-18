@@ -309,6 +309,7 @@ def show_places():
                            elapsed=time.time()-t0)
 
 
+@bp.route('/scene/location/uuid=<locid>')
 @bp.route('/scene/location=<int:locid>')
 def show_place_page(locid):
     """ Home page for a Place, shows events and place hierarchy
@@ -319,6 +320,8 @@ def show_place_page(locid):
         # upper place in hierarcy. Events
         place, place_list, events = get_place_with_events(locid)
     except KeyError as e:
+        import traceback
+        traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in place_list:
 #         print ("# {} ".format(p))

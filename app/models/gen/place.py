@@ -78,6 +78,7 @@ class Place(NodeObject):
         '''
         p = cls()
         p.uniq_id = node.id
+        p.uuid = node['uuid']
         p.handle = node['handle']
         p.change = node['change']
         p.id = node['id'] or ''

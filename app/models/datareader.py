@@ -33,6 +33,7 @@ from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.dates import DateRange
 from models.owner import OwnerFilter
+import traceback
 
 
 def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
@@ -1010,6 +1011,7 @@ def get_place_with_events (loc_id):
     try:
         place_list = Place_combo.get_place_tree(place.uniq_id)
     except AttributeError as e:
+        traceback.print_exc()
         flash(f"Place {loc_id} not found", 'error')
         return None, None, None
     except ValueError as e:
