@@ -431,8 +431,8 @@ class DOM_handler():
             if note.hasAttribute("type"):
                 n.type = note.getAttribute("type")
 
-            if note.hasAttribute('text'):
-                note_text = note.getElementsByTagName('text')
+            if len(note.getElementsByTagName('text')) == 1:
+                note_text = note.getElementsByTagName('text')[0]
                 n.text = note_text.childNodes[0].data
                 # Pick possible url
                 n.text, n.url = pick_url(n.text)

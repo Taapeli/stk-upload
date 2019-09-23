@@ -4,7 +4,7 @@ Restores marked tags: <tag>-X -> <tag>
 """
 
 version = "2.0"
-#doclink = "http://taapeli.referata.com/wiki/Gedcom-Marriages-ohjelma"
+#doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Marriages-ohjelma"
 
 from flask_babelex import _
 name = _("Unmark")

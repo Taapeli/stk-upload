@@ -41,7 +41,7 @@ from ..transforms.model.person_name_v1 import PersonName_v1
 from flask_babelex import _
 
 version = "0.1"
-doclink = "http://taapeli.referata.com/wiki/Gedcom-Names-ohjelma"
+doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Names-ohjelma"
 name = _("Personal names")
 
 # Active Indi logical record GedcomRecord
