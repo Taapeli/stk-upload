@@ -4,7 +4,7 @@ function capitalizeFirstLetter(string) {
 
 $(document).ready(function() {
 	var language = $("#help").attr("language");
-	var url = "isotammi.referata.com/wiki/" + capitalizeFirstLetter(document.location.pathname.substring(1)) + "/" + language;
+	var url = "wiki.isotammi.net/wiki/" + capitalizeFirstLetter(document.location.pathname.substring(1)) + "/" + language;
 	var re = new RegExp("//","g");
 	url = url.replace(re,"/");
 	$("#help").attr("href","http://"+url);
