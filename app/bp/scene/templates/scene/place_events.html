@@ -49,7 +49,7 @@
                 <li style="margin-left: {{p.level * 2}}em;">
                 {% if p.uniq_id == locid %}<span class="id">{{p.uniq_id}}</span>
                     <b>{{ macro.place_names(p) }}</b>
-                {% else %}<a href="/scene/location/uuid={{p.uuid}}"><b>
+                {% else %}<a href="/scene/location/uuid={{p.uuid}}" class="inlink"><b>
                     {{ macro.place_names(p) }}
                 </b></a>
                 {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
