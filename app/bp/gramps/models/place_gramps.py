@@ -46,6 +46,7 @@ class Place_gramps(Place):
         """
 
         Place.__init__(self, uniq_id)
+        self.uuid = self.newUuid()
         self.note_ref = []      # uniq_ids of Notes
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.notes = []

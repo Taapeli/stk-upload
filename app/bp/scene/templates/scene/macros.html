@@ -138,7 +138,7 @@
     {% if note.text %}
 	    {% set list1 = note.text.split('\n') %}
 	    {% for l in list1 %}
-	       <p>{{ l }}</p>
+	       <p><i>{{ l }}</i></p>
 	    {% endfor %}
     {% endif %}
 {%- endmacro %}
