@@ -955,7 +955,7 @@ msgstr "tiedosto on talletettu palvelimelle"
 #: bp/admin/templates/admin/uploads.html:36
 #: bp/gramps/templates/gramps/uploads.html:101
 msgid "the file content is being stored to the database"
-msgstr "tiedoston sisältöä ladataan tietokantaan"
+msgstr "tiedostoa viedään tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:40
 #: bp/gramps/templates/gramps/uploads.html:103
@@ -4294,7 +4294,7 @@ msgstr "lähde"
 
 #: templates/jinja_filters.py:121 templates/jinja_filters.py:141
 msgid "Web Search"
-msgstr "verkosta löytynyt"
+msgstr "verkosta"
 
 #: templates/jinja_filters.py:122 templates/jinja_filters.py:137
 msgid "Person Note"
