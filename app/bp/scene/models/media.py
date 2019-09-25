@@ -18,7 +18,7 @@ def make_thumbnail(fname, thumbname):
         im = Image.open(fname)
         size = 128, 128
         im.thumbnail(size)
-        im.save(thumbname, "JPEG")
+        im.convert('RGB').save(thumbname, "JPEG")
     except FileNotFoundError as e:
         print(f'ERROR in bp.scene.models.media.make_thumbnail file "{fname}"\n{e}')
 
