@@ -169,10 +169,10 @@ class Place_gramps(Place):
                 #print(f"Pl_save-surrounding {self} -[{ref['dates']}]-> {up_handle}")
                 if 'dates' in ref and isinstance(ref['dates'], DateRange):
                     rel_attr = ref['dates'].for_db()
-                    r = f"-[{ref['dates']}]->"
+                    #_r = f"-[{ref['dates']}]->"
                 else:
                     rel_attr = {}
-                    r = f"-->"
+                    #_r = f"-->"
 
                 # Link to upper node
 
@@ -181,14 +181,14 @@ class Place_gramps(Place):
                     # 3) Link to a known upper Place
                     #    The upper node is already created: create a link to that
                     #    upper Place node
-                    #print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {r} (#{uid})")
+                    #print(f"Pl_save-3 Link ({self.id} #{self.uniq_id}) {_r} (#{uid})")
                     result = tx.run(Cypher_place_in_batch.link_hier,
                                     plid=self.uniq_id, up_id=uid, r_attr=rel_attr)
                 else:
                     # 4) Link to unknown place
                     #    A new upper node: create a Place with only handle
                     #    parameter and link hierarchy to Place self
-                    #print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {r} {up_handle}")
+                    #print(f"Pl_save-4 Link to empty upper Place ({self.id} #{self.uniq_id}) {_r} {up_handle}")
                     result = tx.run(Cypher_place_in_batch.link_create_hier,
                                     plid=self.uniq_id, r_attr=rel_attr, 
                                     up_handle=up_handle)
