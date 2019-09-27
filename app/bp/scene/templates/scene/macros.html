@@ -13,23 +13,15 @@
    #}
    {% if value < 2 %}
      {% if value == 0 %}&#9873;&#9873;
-     <!-- i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i -->
      {% else %}&#9873;
-     <!-- i class='fa fa-exclamation-circle'></i -->
      {% endif %}
    {% else %}
      {% if   value < 2.25 %}&#9733;&#9733;
-     <!-- i class="far fa-star"></i><i class="far fa-star"></i -->
      {% elif value < 2.75 %}&#9733;&#9734;
-     <!-- i class="far fa-star"></i></i><i class="far fa-star-half"></i -->
      {% elif value < 3.25 %}&#9733;&#9733;
-     <!-- i class="far fa-star"></i><i class='far fa-star'></i -->
      {% elif value < 3.75 %}&#9733;&#9733;&#9734;
-     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i -->
      {% elif value < 4.25 %}&#9733;&#9733;&#9733;
-     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i -->
      {% elif value < 4.75 %}&#9733;&#9733;&#9733;&#9734;
-     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i -->
      {% endif %}
    {% endif %}                           
 {%- endmacro %}
@@ -139,13 +131,16 @@
                     
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
-    {% set list1 = note.text.split('\n') %}
-    {% for l in list1 %}
-       <p>{{ l }}</p>
-    {% endfor %}
     {% if note.url %}
-    <a href="{{note.url}}" class="outlink" 
-       target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}
+        <a href="{{note.url}}" class="outlink" 
+           target="_blank">{{note.url|transl('urldomain')}}</a>
+    {% endif %}
+    {% if note.text %}
+	    {% set list1 = note.text.split('\n') %}
+	    {% for l in list1 %}
+	       <p><i>{{ l }}</i></p>
+	    {% endfor %}
+    {% endif %}
 {%- endmacro %}
 
 {% macro notelink_2col(note) -%}

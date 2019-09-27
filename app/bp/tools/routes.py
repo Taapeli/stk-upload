@@ -398,7 +398,7 @@ def api_v1_record():
             status="Error",
             statusText="Missing argument 'id'",
         ))
-    rsp = api.record(id) 
+    rsp = api.record(int(rid)) 
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
@@ -410,7 +410,7 @@ def api_v1_record_with_subs():
             status="Error",
             statusText="Missing argument 'id'",
         ))
-    rsp = api.record_with_subs(rid) 
+    rsp = api.record_with_subs(int(rid)) 
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 

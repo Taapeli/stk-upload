@@ -105,7 +105,7 @@ def record(oid):
             place['timespan'] = timespan
         places2.append(place)
     record = dict(
-        id=id,
+        id=oid,
         name=p['pname'],
         type=p['type'],
         surroundedBy=sorted(places1,key=lambda x:x['name']),

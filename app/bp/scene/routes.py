@@ -369,6 +369,7 @@ def fetch_thumbnail():
     uuid = request.args.get("id")
     thumbname = media.get_thumbname(uuid)
     print(thumbname)
-    return send_file(thumbname, mimetype='image/jpg')
+    mimetype='image/jpg'
+    return send_file(thumbname, mimetype=mimetype)
 
 

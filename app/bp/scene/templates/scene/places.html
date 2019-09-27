@@ -52,13 +52,13 @@
                 </td>
                 <td class="ColumnPerson">
                    <div>
-                      <a href="/scene/location/uuid={{p.uuid}}" 
+                      <a href="/scene/location/uuid={{p.uuid}}" class="inlink"
                         title="{{ _('see details of place %(id)s', id=p.uniq_id) }}"
                         id="{{p.uniq_id}}"><b>{{ macro.place_names(p) }}</b></a>
                       <span class="typedesc">{{p.type|transl('lt')}}</span>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
 						<span class="typedesc">{{e.type|transl('lt_in')}}</span>
-						<a href="/scene/location/uuid={{e.uuid}}" 
+						<a href="/scene/location/uuid={{e.uuid}}" class="inlink"
 						  title="{{ _('Go to location') }} id={{e.uniq_id}}">{{ macro.place_names(e) }}</a> 
 		        {% endif %}
                    </div>
