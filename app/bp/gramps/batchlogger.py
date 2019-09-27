@@ -72,7 +72,8 @@ class Batch():
                 i = batch_id.rfind('.')
                 ext = int(batch_id[i+1:])
             except AttributeError as e:
-                print ("Ei vanhaa arvoa {}".format(e))
+                # Normal exception: this is the first batch of day
+                #print ("Ei vanhaa arvoa {}".format(e))
                 ext = 0
             except Exception as e:
                 print ("Poikkeus {}".format(e))
