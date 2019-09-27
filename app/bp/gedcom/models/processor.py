@@ -155,10 +155,14 @@ def build_parser(filename, _gedcom, _gedcom_filename):
     class Parser:
         def __init__(self):
             self.args = []
-        def add_argument(self, name, name2=None, action='store', atype=str, 
-                         default=None, ahelp=None, nargs=0, choices=None):
-            self.args.append(Arg(name, name2, action, atype, choices, 
-                                 default, ahelp))
+        def add_argument(self, name, name2=None, action='store', 
+                         type=str,  # @ReservedAssignment
+                         default=None, 
+                         help=None, # @ReservedAssignment
+                         nargs=0,   # @UnusedVariable 
+                         choices=None):  
+            self.args.append(Arg(name, name2, action, type, choices, 
+                                 default, help))
              
         def generate_option_rows(self):
             rows = []

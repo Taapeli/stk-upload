@@ -43,7 +43,7 @@
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
 		<td>{a event.date a}</td>
-		<td>{a event.location.substr(0,event.location.length-2) a}</td>
+		<td>{a event.place.substr(0,event.place.length-2) a}</td>
 		<td>{a event.description a}</td>
 	</tr>
 </table>
@@ -101,7 +101,7 @@
 		<td class="id">{a event.uniq_id a}</td>
 		<td>{a event.type a}</td>
 		<td>{a event.date a}</td>
-		<td>{a event.location.substr(0, event.location.length-2) a}</td>
+		<td>{a event.place.substr(0, event.place.length-2) a}</td>
 		<td>{a event.description a}</td>
 	</tr>
 </table>
@@ -157,7 +157,7 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
         {% elif event.daterange %}date:'{{event.daterange}}',
         {% else %}date:'-',
         {% endif %}
-		location:'{% for loc in event.location %}{{loc}} * {% endfor %}',
+		location:'{% for loc in event.place %}{{loc}} * {% endfor %}',
         description:'{{event.description}}'},
     {% endfor %}
     ];
@@ -168,7 +168,7 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
         {% elif event.daterange %}date:'{{event.daterange}}',
         {% else %}date:'-',
         {% endif %}
-		location:'{% for loc in event.location %}{{loc}} * {% endfor %}',
+		location:'{% for loc in event.place %}{{loc}} * {% endfor %}',
         description:'{{event.description}}'},
     {% endfor %}
     ];

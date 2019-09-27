@@ -13,7 +13,7 @@ from shareds import logger
 import traceback
 
 
-def get_a_person_for_display_apoc(uniq_id, user):
+def get_a_person_for_display_apoc(uid, user):
     """ Get a Person with all connected nodes for display in Person page.
 
 
@@ -65,14 +65,17 @@ def get_a_person_for_display_apoc(uniq_id, user):
     #TODO: Presentation of Family tree 
     
     #TODO: Describe footnote processing in "/scene/person_pg.html" template
+    
+    #TODO: Process user parameter to check user permissions
     """
 
     # 1. Read person p and paths for all nodes connected to p
+    person=None
     try:
-        results = Person_combo.get_person_paths_apoc(uniq_id)
+        results = Person_combo.get_person_paths_apoc(uid)
     except Exception as e:
         traceback.print_exc()
-        print("Henkilötietojen {} luku epäonnistui: {} {}".format(uniq_id, e.__class__().name, e))
+        print("Henkilötietojen {} luku epäonnistui: {} {}".format(uid, e.__class__().name, e))
         return [None, None]
 
     for result in results:
@@ -157,7 +160,7 @@ def get_a_person_for_display_apoc(uniq_id, user):
                 target_link = connect_object_as_leaf(src_obj, target_obj, rel_type)
                 # Target_link point to that leaf. 
                 # Put it also in objs and cits dictionaries for possible re-use
-                if target_link == None:
+                if not target_link:
                     #TODO mitä tehdään, eikö joku muu lista?
                     objs[target_obj.uniq_id] = target_obj
                 elif not target_link.uniq_id in objs:
@@ -169,8 +172,11 @@ def get_a_person_for_display_apoc(uniq_id, user):
             else:
                 print("Ei objektia {} {}".format(src_obj.uniq_id, src_obj.id))
 
+    if person is None:
+        return (None, None, None)
+
     # 4. Sort events by date
-    person.events.sort(key=lambda event: event.date)
+    person.events.sort()
 
     # 5. Generate clear names for event places and create citation footnotes
 

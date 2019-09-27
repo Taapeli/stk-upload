@@ -49,8 +49,9 @@
                 <li style="margin-left: {{p.level * 2}}em;">
                 {% if p.uniq_id == locid %}<span class="id">{{p.uniq_id}}</span>
                     <b>{{ macro.place_names(p) }}</b>
-                {% else %}<a href="/scene/location={{p.uniq_id}}"><span class="id">{{p.uniq_id}}</span></a>
+                {% else %}<a href="/scene/location/uuid={{p.uuid}}" class="inlink"><b>
                     {{ macro.place_names(p) }}
+                </b></a>
                 {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
             {% endfor %}</ul>
         </div>
@@ -124,10 +125,10 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events|sort(attribute='dates') %}
+        {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
-                            <a href="/scene/person={{e.uid}}" class="id"
+                            <a href="/scene/person/{{e.uid}}" class="id"
                               title="{{ _("See Person's Details") }}">{{e.uid}}</a>
                         </td>
                         <td>{% for pn in e.names|sort(attribute='order') %}

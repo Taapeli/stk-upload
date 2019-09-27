@@ -22,24 +22,22 @@ td { padding-right:1em;}
         <div id="summaryarea">
             <table><tbody>
                 <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
-                    <td class="Value">{{ family.id }} / <tt>{{ family.uniq_id }}</tt></td>
+                    <td class="Value">{{macro.all_obj_ids(family)}}</td>
                     <td></td>
                 </tr>
                 <tr><td class="ColumnAttribute">{{ _("Relation") }}</td>
                     <td class="Value"> {{ family.rel_type|transl('marr') }}</td>
-                    <td>{{ family.lifetime }}</td>
+                    <td>{{ family.dates }}</td>
                 </tr>
                 <tr><td colspan="3">&nbsp;</td></tr>
             {% for p in [family.father, family.mother]%}
                 {% if p %}
                 <tr><td class="ColumnAttribute">{{p.role|transl('role')|capitalize}}</td>
                     <td class="Value"><span class="id">{{p.id}}</span>
-                        <a href="/scene/person/uuid={{p.uuid}}" class="inlink"
-                           title="{{ _('person %(id)s', id=p.uuid[:6]) }}">
-                        {{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
-                        {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a></td>
-                    <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
-                                    – {% if p.event_death.dates %}{{ p.event_death.dates }}{% endif %}
+                        {{ macro.person(p, uuid) }}
+                    </td>
+                    <td class="Value">{% if p.event_birth.dates %}&#x2606;{{ p.event_birth.dates }}{% endif %}
+                                      {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
                     </td>
                 </tr>
                 {% endif %}
@@ -69,12 +67,10 @@ td { padding-right:1em;}
         {% for p in family.children %}
                 <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
                     <td class="Value"><span class="id">{{p.id}}</span>
-                        <a href="/scene/person/uuid={{p.uuid}}" class="inlink"
-                           title="{{ _('person %(id)s', id=p.uuid[:6]) }}">
-	                    {{p.names[0].firstname}} <i>{{p.names[0].suffix}}</i>
-	                    {{p.names[0].prefix}} <b>{{p.names[0].surname}}</b></a></td>
-                    <td class="Value">{% if p.event_birth.dates %}{{ p.event_birth.dates }}{% endif %}
-                                    – {% if p.event_death.dates %}{{ p.event_death.dates }}{% endif %}
+                        {{ macro.person(p, uuid) }}
+                    </td>
+                    <td class="Value">{% if p.event_birth.dates %}&#x2606;{{ p.event_birth.dates }}{% endif %}
+                                      {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
                     </td>
                 </tr>
         {% endfor %}

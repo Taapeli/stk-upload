@@ -191,7 +191,7 @@ class OwnerFilter():
 
     def set_scope_from_request(self, request, var_name):
         """ Eventuel request fw or bw parameters are stored in session['person_scope'].
-        
+
             - If fw is defined, clear bw; otherwise clear bw
             - If neither is given, person_scope is cleared
         """

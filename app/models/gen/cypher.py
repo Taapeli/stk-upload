@@ -43,7 +43,16 @@ class Cypher_person():
     Cypher clases for creating and accessing Places
     '''
     all_nodes_query_w_apoc="""
-MATCH (p:Person) WHERE id(p) = $pid
+MATCH (p:Person {uuid:$uuid})
+CALL apoc.path.subgraphAll(p, {maxLevel:4, 
+        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<PARENT'}) 
+    YIELD nodes, relationships
+RETURN extract(x IN relationships | 
+        [id(startnode(x)), type(x), properties(x), id(endnode(x))]) as relations,
+        extract(x in nodes | x) as nodelist"""
+    #TODO Obsolete
+    all_nodes_uniq_id_query_w_apoc="""
+MATCH (p:Person) WHERE id(p) = $uniq_id
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 
         relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<PARENT'}) 
     YIELD nodes, relationships
@@ -209,6 +218,8 @@ OPTIONAL MATCH (person) -[:NOTE]-> (n:Note)
   WITH person, name, COLLECT (n) AS notes, b.user AS owner
   ORDER BY name.order
 RETURN person, notes, COLLECT (name) AS names, owner"""
+#Todo: MATCH (z:UserProfile) -[:READS|HAS_LOADED]-> (b:Batch) 
+#      -[:OWNS]-> (person:Person) -[r:NAME]-> (name:Name)
 
     get_names = """
 MATCH (n) <-[r:NAME]- (p:Person)
@@ -252,6 +263,13 @@ return e as event,
     collect(distinct id(p)) as place_ref, 
     collect(distinct id(c)) as citation_ref, 
     collect(distinct id(n)) as note_ref'''
+
+    get_participants_uniq_id = """
+MATCH (event:Event) <-[r:EVENT]- (p:Person) 
+    WHERE ID(event)=$pid
+OPTIONAL MATCH (p) -[:NAME]-> (n:Name {order:0})
+RETURN  r.role AS role, p AS person, n AS name
+    ORDER BY role"""
 
 
 class Cypher_family():
@@ -334,13 +352,13 @@ RETURN f,
     COLLECT(DISTINCT [re, s, c]) + COLLECT(DISTINCT [fre, fs, fc]) AS sources,
     COLLECT(DISTINCT note) AS note"""
     
-    #TODO Obsolete
-    read_families = """
-MATCH (f:Family) WHERE ID(f)>=$fw
-OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
-OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
-OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
-RETURN f, ph, nh, pw, nw, COLLECT(pc) AS child, COUNT(pc) AS no_of_children ORDER BY ID(f) LIMIT $limit"""
+#     # Obsolete
+#     read_families = """
+# MATCH (f:Family) WHERE ID(f)>=$fw
+# OPTIONAL MATCH (f)-[:FATHER]->(ph:Person)-[:NAME]->(nh:Name) 
+# OPTIONAL MATCH (f)-[:MOTHER]-(pw:Person)-[:NAME]->(nw:Name) 
+# OPTIONAL MATCH (f)-[:CHILD]-(pc:Person) 
+# RETURN f, ph, nh, pw, nw, COLLECT(pc) AS child, COUNT(pc) AS no_of_children ORDER BY ID(f) LIMIT $limit"""
 
     # from models.gen.person_combo.Person_combo.get_family_members 
     get_persons_family_members = """
@@ -415,6 +433,9 @@ class Cypher_place():
     Cypher clases for creating and accessing Places
     '''
 
+    
+   
+
     get_person_events = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
   WHERE id(l) = $locid
@@ -428,15 +449,23 @@ ORDER BY edates[1]"""
 MATCH (a:Place) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
 OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.type AS type,
+RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
     COLLECT(DISTINCT pn) AS names, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.type, don.name, don.lang]) AS lower
+    COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
+    COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
 ORDER BY names[0].name"""
 
     get_w_names_notes = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE ID(place)=$place_id
+OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
+RETURN place, 
+    COLLECT(DISTINCT n) AS names,
+    COLLECT (DISTINCT note) AS notes"""
+
+    get_w_names_notes_uuid = """
+MATCH (place:Place) -[:NAME]-> (n:Place_name)
+    WHERE place.uuid=$uuid
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
 RETURN place, 
     COLLECT(DISTINCT n) AS names,

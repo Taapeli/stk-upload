@@ -9,7 +9,7 @@ from flask_babelex import _
 
 version = "1.0"
 name = _("Places")
-doclink = "http://taapeli.referata.com/wiki/Gedcom-Places-ohjelma"
+doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Places-ohjelma"
 docline = _("Tries to recognize place names and order them correctly")
 
 from collections import defaultdict, Counter 

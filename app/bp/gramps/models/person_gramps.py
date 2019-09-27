@@ -113,8 +113,8 @@ class Person_gramps(Person):
                 "confidence":self.confidence,
                 "sortname":self.sortname
             }
-            if self.lifetime:
-                p_attr.update(self.lifetime.for_db())
+            if self.dates:
+                p_attr.update(self.dates.for_db())
 
             result = tx.run(Cypher_person_w_handle.create_to_batch, 
                             batch_id=batch_id, p_attr=p_attr, date=today)

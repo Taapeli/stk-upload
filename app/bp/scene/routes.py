@@ -23,6 +23,7 @@ from models.gen.source import Source
 
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
+from models.datareader import get_event_participants
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.owner import OwnerFilter
@@ -54,7 +55,7 @@ def scene():
 #     return render_template("/scene/persons.html", persons=persons, 
 #                            menuno=1, rule=keys)
 
-# ------------------------- Menu 0: Person search ------------------------------
+# ------------------------- Menu 1: Person search ------------------------------
 
 @bp.route('/scene/persons', methods=['POST', 'GET'])
 def show_person_list(selection=None):
@@ -105,6 +106,32 @@ def show_persons_by_refname(refname, opt=""):
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order, rule=keys)
 
+@bp.route('/scene/persons/all/<string:opt>')
+@bp.route('/scene/persons/all/')
+#     @login_required
+def show_all_persons_list(opt=''):
+    """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
+
+        The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
+        with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
+        TODO Should have restriction by owner's UserProfile 
+    """
+    t0 = time.time()
+    keys = ('all',)
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    ref = ('ref' in opt)
+    if 'fn' in opt: order = 1   # firstname
+    elif 'pn' in opt: order = 2 # firstname
+    else: order = 0             # surname
+    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    print("-> bp.scene.routes.show_all_persons_list")
+    return render_template("/scene/persons.html", persons=persons, menuno=1, 
+                           order=order,rule=keys, elapsed=time.time()-t0)
+
+
 
 # -------------------------- Menu 12 Persons by user ---------------------------
 
@@ -139,54 +166,16 @@ def show_my_persons():
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 
-@bp.route('/scene/persons/all/<string:opt>')
-@bp.route('/scene/persons/all/')
-#     @login_required
-def show_all_persons_list(opt=''):
-    """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
-
-        The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
-        with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
-        TODO Should have restriction by owner's UserProfile 
-    """
-    t0 = time.time()
-    keys = ('all',)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    ref = ('ref' in opt)
-    if 'fn' in opt: order = 1   # firstname
-    elif 'pn' in opt: order = 2 # firstname
-    else: order = 0             # surname
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
-    print("-> bp.scene.routes.show_all_persons_list")
-    return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           order=order,rule=keys, elapsed=time.time()-t0)
-
 
 @bp.route('/scene/person/<int:uid>')
+@bp.route('/scene/person', methods=['GET'])
 #     @login_required
-# def show_a_person(uid):
-#     """ One Person with connected Events, Families etc
-#         Korvaamaan metodin show_person_page()
-#     """
-#     if not uid:
-#         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
-#     if current_user.is_authenticated:
-#         user=current_user.username
-#     else:
-#         user=None
-#     person, sources = get_a_person_for_display(uid, user)
-#     return render_template("/scene/person_pg.html", 
-#                            person=person, sources=sources, menuno=1)
-@bp.route('/scene/person/a=<int:uid>')
-#     @login_required
-def show_a_person_w_apoc(uid):
+def show_a_person_w_apoc(uid=None):
     """ One Person with all connected nodes
         Korvaamaan metodin show_person_page()
     """
     t0 = time.time()
+    uid = request.args.get('uuid', uid)
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
 
@@ -196,7 +185,7 @@ def show_a_person_w_apoc(uid):
         user=None
     
     person, objs, marks = get_a_person_for_display_apoc(uid, user)
-    if person == None:
+    if not person:
         return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
 #     for m in marks:
 #         print("Citation mark {}".format(m))
@@ -213,41 +202,17 @@ def show_a_person_w_apoc(uid):
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
 
-@bp.route('/scene/person/uuid=<uuid>')
+@bp.route('/scene/person/uuid=<pid>')
+@bp.route('/scene/person=<int:pid>')
 #     @login_required
-def show_person_uuid(uuid):
-    """ Full homepage by uuid for a Person in database (vanhempi versio)
-    """
-    t0 = time.time()
-    try:
-        person, events, photos, citations, families = get_person_data_by_id(uuid)
-        for f in families:
-            print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
-            if f.mother:
-                print("  Mother: {} / {} s. {}".\
-                      format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-            if f.father:
-                print("  Father:  {} / {} s. {}".\
-                      format(f.father.uniq_id, f.father.id, f.father.birth_date))
-            if f.children:
-                for c in f.children:
-                    print("    Child ({}): {} / {} *{}".\
-                          format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-    print("-> bp.scene.routes.show_person_page")
-    return render_template("/scene/person.html", person=person, events=events, 
-                           photos=photos, citations=citations, families=families, 
-                           elapsed=time.time()-t0)
-@bp.route('/scene/person=<int:uniq_id>')
+def show_person_page(pid):
+    """ Full homepage for a Person in database (vanhempi versio).
 
-#     @login_required
-def show_person_page(uniq_id):
-    """ Full homepage for a Person in database (vanhempi versio)
+        The pid may be 1) an uuid or 2) an uniq_id
     """
     t0 = time.time()
     try:
-        person, events, photos, citations, families = get_person_data_by_id(uniq_id)
+        person, events, photos, citations, families = get_person_data_by_id(pid)
         for f in families:
             print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
             if f.mother:
@@ -256,16 +221,29 @@ def show_person_page(uniq_id):
             if f.father:
                 print("  Father:  {} / {} s. {}".\
                       format(f.father.uniq_id, f.father.id, f.father.birth_date))
-            if f.children:
-                for c in f.children:
-                    print("    Child ({}): {} / {} *{}".\
-                          format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
+            for c in f.children:
+                print("    Child ({}): {} / {} s. {}".\
+                      format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     print("-> bp.scene.routes.show_person_page")
     return render_template("/scene/person.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 
                            elapsed=time.time()-t0)
+
+
+@bp.route('/scene/event/<int:uniq_id>')
+def show_event(uniq_id):
+    """ Table of a (baptism) Event persons.
+
+        Kastetapahtuman tietojen näyttäminen ruudulla
+        
+        Derived from bp.tools.routes.show_baptism_data()
+    """
+    event, persons = get_event_participants(uniq_id)
+    return render_template("/scene/event.html",
+                           event=event, persons=persons)
+
 
 # ------------------------------ Menu 3: Families --------------------------------
 
@@ -315,7 +293,7 @@ def show_family_popup(fid):
 # ------------------------------ Menu 4: Places --------------------------------
 
 @bp.route('/scene/locations')
-def show_locations():
+def show_places():
     """ List of Places for menu(4)
     """
     t0 = time.time()
@@ -327,12 +305,13 @@ def show_locations():
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
 #         print ("# {} ".format(p))
-    return render_template("/scene/locations.html", locations=locations, 
+    return render_template("/scene/places.html", locations=locations, 
                            elapsed=time.time()-t0)
 
 
+@bp.route('/scene/location/uuid=<locid>')
 @bp.route('/scene/location=<int:locid>')
-def show_location_page(locid):
+def show_place_page(locid):
     """ Home page for a Place, shows events and place hierarchy
         locid = id(Place)
     """
@@ -341,6 +320,8 @@ def show_location_page(locid):
         # upper place in hierarcy. Events
         place, place_list, events = get_place_with_events(locid)
     except KeyError as e:
+        import traceback
+        traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in place_list:
 #         print ("# {} ".format(p))
@@ -388,6 +369,7 @@ def fetch_thumbnail():
     uuid = request.args.get("id")
     thumbname = media.get_thumbname(uuid)
     print(thumbname)
-    return send_file(thumbname, mimetype='image/jpg')
+    mimetype='image/jpg'
+    return send_file(thumbname, mimetype=mimetype)
 
 

@@ -120,6 +120,9 @@ img#logo {
     margin: -5px 5px 0 5px;
     vertical-align: text-top;
 }
+.gedcom_id { color: sienna; text-align: right; 
+    font-family: monospace
+}
 .id { color: sienna; font-size: 80%; text-align: right; 
     font-family: serif
 }
@@ -131,13 +134,18 @@ img#logo {
     background: RoyalBlue;
     border-radius: 5px;
 }
-.magnifier {
+.notmy {color:blue;}
+
+.detail_link {
 	display: inline;
 	width: 1em; 
 	margin:0 auto; 
 	text-align: center; 
 }
-.notmy { color:blue;}
+.no_detail {
+	display: inline; 
+	color: #6d898a;
+}
 li.minor { list-style-type: circle; }
 li.major { list-style-type: square; }
 .inlink { color: #000066; background: LemonChiffon; }
@@ -448,6 +456,7 @@ td.ColumnBirth, td.ColumnDeath, td.ColumnPartner, td.ColumnParents {
 table.infolist tr td ol {
     margin: 0px;
 }
+
 #summaryarea table.infolist td.ColumnAttribute,
 #parents table.infolist td.ColumnAttribute,
 #families table.infolist td.ColumnType,
@@ -526,6 +535,18 @@ ul.eventnotes {
         min-width: 500px;
     }
 }
+
+/* For person list events column */
+.eventgrid {  display: flex; }
+.eventgrid .col { float: left; }
+.eventgrid .col.col_event { width: 15em; }
+.eventgrid .col.col_event span.evtype {
+    font-style: italic;
+    color: #000066;
+}
+.eventgrid .col.col_date { width: 60%; }
+.major { font-weight: bold; }
+
 #EventList table.infolist tr.BeginType td {
     border-top:dashed 1px #CCC;
 }

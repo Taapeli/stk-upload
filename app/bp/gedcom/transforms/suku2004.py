@@ -10,7 +10,7 @@ from _collections import defaultdict
 
 version = "1.0"
 name = _("Suku2004")
-doclink = "http://taapeli.referata.com/wiki/Gedcom-Suku2004-ohjelma"
+doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Suku2004-ohjelma"
 docline = _('Fixes problems in Sukuohjelmisto 2004 Gedcoms')
 
 custom_tags = {

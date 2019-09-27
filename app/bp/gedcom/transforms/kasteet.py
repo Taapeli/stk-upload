@@ -33,7 +33,7 @@ from .. import transformer
 version = "2.0"
 name = _("Baptisms")
 
-doclink = "http://taapeli.referata.com/wiki/Gedcom-Kasteet-ohjelma"
+doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Kasteet-ohjelma"
 
 def add_args(parser):
     pass

@@ -604,7 +604,7 @@ RETURN family"""
 #         """ Find the parents and all their names - not in use!
 # 
 #             Called from models.datareader.get_source_with_events
-#             #TODO Use [:PARENT] link
+#             #Should use [:PARENT] link
 #         
 #             Returns a dictionary like 
 #             {'FATHER': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}

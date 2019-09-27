@@ -92,16 +92,16 @@ class Name:
             print("iError (Name.save): {0}".format(err), file=stderr)            
 
 
-    @staticmethod
-    def get_people_with_refname(refname):
-        """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
-            Etsi kaikki henkilöt, joiden referenssinimi on annettu"""
-
-        query = """
-            MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
-                RETURN p.handle AS handle
-            """.format(refname)
-        return shareds.driver.session().run(query)
+#     @staticmethod
+#     def get_people_with_refname(refname):
+#         """ Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+#             Etsi kaikki henkilöt, joiden referenssinimi on annettu"""
+# 
+#         query = """
+#             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
+#                 RETURN p.handle AS handle
+#             """.format(refname)
+#         return shareds.driver.session().run(query)
 
 
     @staticmethod
@@ -120,17 +120,17 @@ class Name:
         return shareds.driver.session().run(query)
 
 
-    @staticmethod
-    def get_ids_of_people_with_refname_and_user_given(userid, refname):
-        """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
-            Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
-
-        query = """
-            MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name)
-                WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
-                RETURN ID(p) AS id
-            """.format(userid, refname)
-        return shareds.driver.session().run(query)
+#     @staticmethod
+#     def get_ids_of_people_with_refname_and_user_given(userid, refname):
+#         """ Korjaa: refname-kenttää ei ole, käytä Refname-nodea
+#             Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
+# 
+#         query = """
+#             MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name)
+#                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
+#                 RETURN ID(p) AS id
+#             """.format(userid, refname)
+#         return shareds.driver.session().run(query)
 
 
     @staticmethod
@@ -193,15 +193,3 @@ class Name:
                 ORDER BY n.surname
             """
         return shareds.driver.session().run(query)
-
-
-#     @staticmethod
-#     def set_refname(tx, uniq_id, refname):
-#         """ TODO Korjaa: refname-kenttää ei ole, käytä Refname-nodea
-#             Asetetaan etunimen referenssinimi  """
-# 
-#         query = """
-# MATCH (n:Name) WHERE ID(n)=$id
-# SET n.refname=$refname
-#             """
-#         return tx.run(query, id=uniq_id, refname=refname)

@@ -8,7 +8,7 @@
     integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 <h2>{{ _("Person's details") }}</h2>
 
-{{ macro.menu(1) }}
+{{ macro.menu(12) }}
     <div class="content" id="IndividualDetail">
         {% if photos %}<div class="snapshot">
             <div class="thumbnail"><a href="#indivgallery">
@@ -16,9 +16,7 @@
                 	src="thumbnail?id={{photos[0].uuid}}" />
             </a></div>
         </div>{% endif %}
-        <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
-            <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b>
-        </h3>
+        <h3 style="position:sticky; top:0;">{{macro.person_name(person.names[0])}}</h3>
         {% set myuuid = person.uuid %}
         {# set mybirth = "" %}{% for e in events %}
             {% if e.type == "Birth" %}{% set mybirth = e.date %}{% endif %}{% endfor #}
@@ -29,7 +27,11 @@
                     <td class="ColumnAttribute">{{ _('Identifiers') }}</td>
                     <td class="ColumnValue">
                         {% if person.uuid %}<span class="id">{{person.uuid[:6]}}</span> /{% endif %}
-                        <span class="id">{{person.uniq_id}}</span> / <tt>{{person.id}}@{{person.owner}}</tt></td>
+                        <a class="id" href="/scene/person/{{person.uniq_id}}"
+                           title="{{ _('Other page format') }}">{{person.uniq_id}}</a> /
+                        <tt>{{person.id}} @{{person.owner}}</tt> /
+                        <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
+                        </td>
                 </tr>
                 {% for pname in person.names|sort(attribute='order')  %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
@@ -82,7 +84,7 @@
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in events|sort(attribute='dates') %}
+        {% for e in events|sort %}
                     <tr>
                  	{% if e.type == "Cause Of Death" %}
                 		{% set t_cause_of_death = e %}
@@ -90,8 +92,9 @@
                         <td class="ColumnEvent">
                             <div class="magnifier" alt="{{e.uniq_id}}">
                             {% if e.type == "Baptism" %}<a href="/lista/baptism_data/{{e.uniq_id}}"
-                                >&#x1F50E;</a>{% else %}
-                            	&#x26AA;{% endif %}</div>&nbsp;{{e.type|transl('evt')}}
+                                class="inlink">&#x1F50E;&nbsp;{{e.type|transl('evt')}}</a>
+                            {% else %}
+                            	&#x26AA;&nbsp;{{e.type|transl('evt')}}{% endif %}
                             {% if e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
@@ -157,13 +160,7 @@
             <div class="mainbox" title="{{ _('Central Person') }}">
 	            <p>{{person.names[0].firstname}} {{ _('self') }}</p>
 	            <div class="groupbox">
-		            <div class="personbox" title="{{ _('self') }}">
-		                <span title="{{ _('Firstname') }}">{{person.names[0].firstname}}</span>
-		                {% if not person.names[0].surname %}<i title="{{ _('Patronymic') }}">{{person.names[0].suffix}}</i>
-		                {% else %}{% if person.names[0].prefix %}<span title="etuliite">{{person.names[0].prefix}}</span>{% endif %}
-		                <b title="{{ _('Surname') }}">{{person.names[0].surname}}</b>
-		                {% endif %}
-		            </div>
+		            <div class="personbox" title="{{ _('self') }}">{{macro.person_name(person.names[0])}}</div>
 	            </div>
 	        </div>
 
@@ -306,9 +303,12 @@
                           title="{{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})"
                            {% if cita.confidence and cita.confidence < "2" %}
                              style="color:red"{% endif %}>
-                             {{ _('Page') }}:
-<!--			     {{cita.page}}-->
-			     <a href="{{cita.source.notes[0].url}}" target="_blank"> {{cita.page}}</a>
+                            {% for note in cita.source.notes %} <!-- {{cita.page, note}}-->
+			                 {{ _('Page') }}:{% if note.url %}
+			                 <a href="{{note.url}}" target="_blank" class="outlink">{{cita.page}}</a>
+			                 {% else %}{{cita.page}}
+			                 {% endif %}
+                            {% endfor %}
 			     &nbsp; {{ macro.stars(conf) }}
 
                    {% if cita.notetext %}<br>

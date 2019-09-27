@@ -46,7 +46,7 @@ def start():
     else:
 #        session['lang'] = new_lang
         logger.info('Anonymous user')
-        return render_template('/start/index.html')
+        return render_template('/start/guest_index.html')
 
 @shareds.app.route('/thankyou')
 def thankyou():

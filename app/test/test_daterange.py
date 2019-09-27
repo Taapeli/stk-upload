@@ -6,6 +6,7 @@ Created on 10.11.2017
 import unittest
 from datetime import date
 from models.gen.dates import DateRange, DR
+from models.gen.base import NodeObject
 
 
 class Test(unittest.TestCase):
@@ -180,32 +181,64 @@ class Test(unittest.TestCase):
         d = DateRange.DateInt(s)
         ds = d.long_date()
         self.assertEqual(s + '-00-00', ds)
-        
 
 
-#     def testDate_compare_DR_DATE(self):
-#         ''' Compare DR_DATE to other date types '''
-# TODO: Daterange.__cmp__()
-#         mydate=DateRange(DR['DATE'], "1645")
-#         
-#         self.assertEqual(-1, mydate.__cmp__(DateRange(DR['DATE'], "1640")))
-#         self.assertEqual(0, mydate.__cmp__(DateRange(DR['DATE'], "1645")))
-#         self.assertEqual(1, mydate.__cmp__(DateRange(DR['DATE'], "1650")))
-# 
+    def testNodeObject_sort(self):
+        cmp = NodeObject(1)
+        cmp.dates = DateRange("1917-12-15")
+        datevector = [
+            DateRange("1917-12-15"), 
+            DateRange("1917-12"),
+            None,
+            DateRange("1917-12-14"), 
+            DateRange("1917-12-16")]
+        nodevector = []
+        for i in range(len(datevector)):
+            nodevector.append(NodeObject(i+1))
+            nodevector[i].dates = datevector[i]
+#             print(f"{nodevector[i]}")
+
+#         print (f"Compare dates:")
+#         for i in range(len(datevector)):
+#             node = nodevector[i]
+#             print(f'A {cmp} < {node} = {cmp.__lt__(node)}')
+#             print(f'B {node} < {cmp} = {node.__lt__(cmp)}')
+
+        nodesorted = sorted(nodevector)
+        expected_uids = [3, 4, 1, 2, 5]
+        for i in range(len(nodesorted)):
+            self.assertEqual(nodesorted[i].uniq_id, expected_uids[i], f"Invalid sort order, pos {i}")
+
+#         print (f"Sorted nodes:")
+#         for node in nodesorted:
+#             print(f'{node}')
+
+    def testDate_compare(self):
+        ''' Compare DR_DATE to other date types '''
+
+        mydate=DateRange(DR['DATE'], "1645")
+        # If self < other?
+        self.assertEqual(mydate.__lt__(DateRange(DR['DATE'], "1650")), True, "Not 1645 < 1650")
+        self.assertEqual(mydate.__eq__(DateRange(DR['DATE'], "1645")), True, "Not 1645 == 1645")
+        self.assertEqual(mydate.__gt__(DateRange(DR['DATE'], "1640")), True, "Not 1645 > 1640")
+        self.assertEqual(mydate.__gt__(None), True, "Not 1645 > None")
+
+#TODO: other DR-types not implemented 
+# Note: The __cmp__() is obsolete in python3 
 #         self.assertEqual(1, mydate.__cmp__(DateRange(DR['TILL'], "1640")))
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['TILL'], "1645")))
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['TILL'], "1650")))
-# 
+#  
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['FROM'], "1640")))
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['FROM'], "1645")))
 #         self.assertEqual(-1, mydate.__cmp__(DateRange(DR['FROM'], "1650")))
-# 
+#  
 #         self.assertEqual(1, mydate.__cmp__(DateRange(DR['PERIOD'], "1640", "1944")))
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['PERIOD'], "1644", "1645")))
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['PERIOD'], "1645", "1646")))
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['PERIOD'], "1644", "1646")))
 #         self.assertEqual(-1, mydate.__cmp__(DateRange(DR['PERIOD'], "1650", "1656")))
-# 
+#  
 #         self.assertEqual(-1, mydate.__cmp__(DateRange(DR['ABOUT'], "1640")))
 #         self.assertEqual(0, mydate.__cmp__(DateRange(DR['ABOUT'], "1645")))
 #         self.assertEqual(1, mydate.__cmp__(DateRange(DR['ABOUT'], "1650")))

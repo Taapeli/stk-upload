@@ -66,7 +66,7 @@
     		<td>{% if event.type %}{{event.type}}{% endif %}</td>
     		<td>{% if event.datetype %} {{event.datetype}} {% endif %}
     		    {% if event.date %}{{event.date}}{% elif event.daterange %}{{event.daterange}}{% endif %}</td>
-    		<td>{% if event.location %}{{event.location |join(' • ')}}{% endif %}</td>
+    		<td>{% if event.place %}{{event.place |join(' • ')}}{% endif %}</td>
     		<td>{% if event.description %}{{event.description}}{% endif %}</td>
             <td>{% if event.citation_ref %}
             		<a href="/pick/cite_sour_repo={{event.uniq_id}}">{{ _("citations") }}</a>

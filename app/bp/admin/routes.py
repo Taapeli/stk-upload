@@ -10,6 +10,8 @@ Created on 8.8.2018
 import os
 
 import logging 
+import inspect
+import traceback
 #import datetime
 #from _pickle import Unpickler
 logger = logging.getLogger('stkserver')
@@ -20,7 +22,7 @@ from flask_babelex import _
 
 import shareds
 from setups import User, Allowed_email #, Role
-from models import dbutil, dataupdater, loadfile, datareader
+from models import dbutil, dataupdater, loadfile, datareader, util
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
 from .cvs_refnames import load_refnames
@@ -397,32 +399,55 @@ def send_emails():
     
 #------------------- Site map -------------------------
 
+def find_roles(endpoint,endpoints):
+    info = endpoints.get(endpoint)
+    if not info: return False,[]
+    roles = []
+    if info.roles_accepted: roles += info.roles_accepted
+    if info.roles_required: roles += info.roles_required
+    return info.login_required,roles
+
 @bp.route("/admin/site-map")
 @login_required
 @roles_accepted('admin')
 def site_map():
     "Show list of application route paths"
     class Link():
-        def __init__(self, url='', endpoint='', methods='', desc=''):
+        def __init__(self, url='', endpoint='', methods='', desc='', roles='', login_required=False):
             self.url = url
             self.endpoint = endpoint
             self.methods = methods
             self.desc = desc
+            self.roles = roles
+            self.login_required = login_required
 
     links = []
+    
+    endpoints = util.scan_endpoints()
     for rule in shareds.app.url_map.iter_rules():
+        #if not rule.endpoint.startswith("admin.clear"): continue
+        #print(dir(rule.methods))
+        #print(rule.methods)
         methods=''
+        roles=''
         if "GET" in rule.methods: 
             methods="GET"
         if "POST" in rule.methods: 
             methods += " POST"
         try:
-            print("{} def {}".format(rule.rule, rule.defaults))
+            #print("{} def {}".format(rule.rule, rule.defaults))
             url = rule.rule
             #url = url_for(rule.endpoint, **(rule.defaults or {}))
+            try:
+                view_function = shareds.app.view_functions[rule.endpoint]
+                login_required, roles = find_roles(rule.rule, endpoints)
+            except:
+                traceback.print_exc()
+                pass
         except:
+            traceback.print_exc()
             url="-"
-        links.append(Link(url, rule.endpoint, methods))
+        links.append(Link(url, rule.endpoint, methods, roles=",".join(roles),login_required=login_required))
     
     return render_template("/admin/site-map.html", links=links)
 

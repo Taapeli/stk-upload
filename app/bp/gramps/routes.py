@@ -30,6 +30,7 @@ def gramps_index():
     return render_template("/gramps/index_gramps.html")
 
 @bp.route('/gramps/show_log/<xmlfile>')
+@login_required
 @roles_accepted('research')
 def show_upload_log(xmlfile):
     upload_folder = uploads.get_upload_folder(current_user.username)
@@ -38,12 +39,14 @@ def show_upload_log(xmlfile):
     return render_template("/admin/load_result.html", msg=msg)
 
 @bp.route('/gramps/uploads')
+@login_required
 @roles_accepted('research', 'admin')
 def list_uploads():
     upload_list = uploads.list_uploads(current_user.username) 
     return render_template("/gramps/uploads.html", uploads=upload_list)
 
 @bp.route('/gramps/upload', methods=['POST'])
+@login_required
 @roles_accepted('research', 'admin')
 def upload_gramps(): 
     """ Load a gramps xml file to temp directory for processing in the server
@@ -85,6 +88,7 @@ def start_load_to_neo4j(xmlname):
     return redirect(url_for('gramps.list_uploads'))
 
 @bp.route('/gramps/virhe_lataus/<int:code>/<text>')
+@login_required
 @roles_accepted('research', 'admin')
 def error_page(code, text=''):
     """ Virhesivu näytetään """
@@ -92,6 +96,7 @@ def error_page(code, text=''):
     return render_template("virhe_lataus.html", code=code, text=text)
 
 @bp.route('/gramps/xml_delete/<xmlfile>')
+@login_required
 @roles_accepted('research', 'admin')
 def xml_delete(xmlfile):
     uploads.delete_files(current_user.username,xmlfile)
@@ -99,6 +104,7 @@ def xml_delete(xmlfile):
     return redirect(url_for('gramps.list_uploads'))
 
 @bp.route('/gramps/xml_download/<xmlfile>')
+@login_required
 @roles_accepted('research', 'admin')
 def xml_download(xmlfile):
     xml_folder = uploads.get_upload_folder(current_user.username)
@@ -109,6 +115,7 @@ def xml_download(xmlfile):
 #                                attachment_filename=xmlfile+".gz")
 
 @bp.route('/gramps/batch_delete/<batch_id>')
+@login_required
 @roles_accepted('research', 'admin')
 def batch_delete(batch_id):
     filename = batch.get_filename(current_user.username,batch_id)

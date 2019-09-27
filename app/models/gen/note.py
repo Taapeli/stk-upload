@@ -156,10 +156,6 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
     @staticmethod
     def save_note_list(tx, parent):
         """ Save the parent.notes[] objects as a descendant of the parent node.
-
-            If no note.id or note.handle is defined, new ids are denerated
-
-            #TODO: Pitäisikö generoida myös handle?
         """
         n_cnt = 0
         for note in parent.notes:

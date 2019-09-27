@@ -955,7 +955,7 @@ msgstr "tiedosto on talletettu palvelimelle"
 #: bp/admin/templates/admin/uploads.html:36
 #: bp/gramps/templates/gramps/uploads.html:101
 msgid "the file content is being stored to the database"
-msgstr "tiedoston sisältöä ladataan tietokantaan"
+msgstr "tiedostoa viedään tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:40
 #: bp/gramps/templates/gramps/uploads.html:103
@@ -2130,6 +2130,14 @@ msgstr "Ei ketään"
 msgid "Family details"
 msgstr "Perheen tiedot"
 
+#: bp/scene/templates/scene/event.html:9
+msgid "Event details"
+msgstr "Tapahtuman tietoja"
+
+#: bp/scene/templates/scene/event.html:57
+msgid "Participants"
+msgstr "Tapahtumaan osalliset"
+
 #: bp/scene/templates/scene/family.html:21
 #: bp/scene/templates/scene/family_pop.html:3
 #: bp/scene/templates/scene/family_pop.html:40
@@ -2195,17 +2203,21 @@ msgstr "Tutustu Isotammi-aineistoon"
 msgid "Select Material for Browsing"
 msgstr "Valitse selattava aineisto"
 
+#: bp/scene/templates/scene/index_scene.html:50
+msgid "Demo database"
+msgstr "Demo-aineistot"
+
 #: bp/scene/templates/scene/index_scene.html:52
 msgid "My candidate material"
-msgstr "Kaikki tarjokasaineistoni"
+msgstr "Tarjokasaineistoni"
 
 #: bp/scene/templates/scene/index_scene.html:54
 msgid "Selected set of material"
 msgstr "Valittu tarjokasaineisto"
 
 #: bp/scene/templates/scene/index_scene.html:57
-msgid "Compare to Isotammi Database"
-msgstr "Vertaa Isotammi-aineistoon"
+msgid "Compare to Demo Database"
+msgstr "Vertaa demo-aineistot"
 
 #: bp/scene/templates/scene/index_scene.html:60
 msgid "The Browsed Material"
@@ -2217,7 +2229,7 @@ msgstr "Voit katsoa vain hyväksyttyjä, julkisia tietoja Isotammi-aineistossa"
 
 #: bp/scene/templates/scene/index_scene.html:65
 msgid "Start Exploring"
-msgstr "Aloita tästä"
+msgstr "Jatka"
 
 #: bp/scene/templates/scene/index_scene.html:75
 msgid "Table format tools"
@@ -2372,6 +2384,11 @@ msgstr "etunimi"
 #: templates/select_refcols.html:60
 msgid "Patronymic"
 msgstr "patronyymi"
+
+#: bp/scene/templates/scene/person.html:31
+#: bp/scene/templates/scene/person_pg.html:45
+msgid "Other page format"
+msgstr "Toisenmallinen sivu"
 
 #: bp/scene/templates/scene/person.html:41
 msgid "Reference name"
@@ -4274,6 +4291,10 @@ msgstr "tapahtuma"
 #: templates/jinja_filters.py:121 templates/jinja_filters.py:140
 msgid "Source Note"
 msgstr "lähde"
+
+#: templates/jinja_filters.py:121 templates/jinja_filters.py:141
+msgid "Web Search"
+msgstr "verkosta"
 
 #: templates/jinja_filters.py:122 templates/jinja_filters.py:137
 msgid "Person Note"

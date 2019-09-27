@@ -59,7 +59,7 @@ class Event_combo(Event):
         #self.places = []        # Places of the event (for person list)
 
 
-# @classmethod from_node(cls, node): see evetn.from_node
+# @classmethod from_node(cls, node): see event.from_node
 
 
     # Entinen get_event_data_by_id()
@@ -157,8 +157,17 @@ return r.role as role, e as event,
         return events
 
 
+    def get_participants(self):
+        """ Read the persons related to this Event.
+
+            Luetaan [kaste]tapahtuman henkilöt nimineen
+        """
+        return  shareds.driver.session().run(Cypher_event.get_participants_uniq_id, 
+                                             pid=self.uniq_id)
+
+
     def get_baptism_data(self):
-        """ Read the persons related to this babtism Event.
+        """ Read the persons related to this babtism Event.  (for bp.tools)
 
             Luetaan kastetapahtuman henkilöt nimineen
         """

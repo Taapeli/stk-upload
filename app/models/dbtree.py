@@ -118,7 +118,9 @@ class DbTree():
                 #    'type': 'Country', 'pname': 'Suomi', 'change': 1556957839}>
                 if not node.id in nl:
                     nl[node.id] = node.get(self.name_field_name)            #["pname"]
-                    nstack.append((node.id, node.get(self.type_field_name), #["type"], 
+                    nstack.append((node.id,
+                                   node.get('uuid'), 
+                                   node.get(self.type_field_name), #["type"], 
                                    node.get(self.name_field_name),          #["pname"], 
                                    level))
             for rel in relations:
@@ -136,7 +138,7 @@ class DbTree():
 
                 if not rel.id in rl:
                     rl[rel.id] = rel.end
-                    nid, ntype, nname, lv = nstack.pop()
+                    nid, nuuid, ntype, nname, lv = nstack.pop()
                     if not nid:
                         # ** FAILED! **
                         logger.error(f"Hierarchy tree error: {nid}, {ntype}, {nname}, {lv}")
@@ -144,12 +146,12 @@ class DbTree():
                         return self.tree
 
                     if len(rl) == 1:    # Ensimmäinen solmu rootin alle
-                        nid1, ntype1, nname1, _lv1 = nstack.pop()
+                        nid1, nuuid1, ntype1, nname1, _lv1 = nstack.pop()
                         rl[0] = rel.end
                         logger.debug("create_node('{}', '{}', parent={}, data={})".\
                                      format(nname1, nid1, 0, {'type':ntype1}))
                         self.tree.create_node(nname1, nid1, parent=0, 
-                                              data={self.type_field_name:ntype1})
+                                              data={self.type_field_name:ntype1,'uuid':nuuid1})
                     if lv > 0:
                         parent = rel.end
                     else:
@@ -159,7 +161,7 @@ class DbTree():
                     logger.debug("create_node('{}', '{}', parent={}, data={})".\
                                  format(nname, nid, parent, {'type':ntype}))
                     self.tree.create_node(nname, nid, parent=parent, 
-                                          data={self.type_field_name:ntype})
+                                          data={self.type_field_name:ntype,'uuid':nuuid})
                     if lv < 0:
                         logger.debug("  move_node('{}', '{}')".format(rel.start, nid))
                         self.tree.move_node(rel.start, nid)

@@ -116,7 +116,7 @@ from flask_babelex import _
 
 name = _("Citations in notes")
 version = "0.9" 
-doclink = "http://taapeli.referata.com/wiki/Lähdeviitteiden_ryhmät_-muunnos"
+doclink = "http://wiki.isotammi.net/wiki/Gedcom:Lähdeviitteiden_ryhmät_-muunnos"
 #output_format = "plain_text"
 
 debugging = False

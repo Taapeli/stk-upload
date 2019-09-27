@@ -1,8 +1,6 @@
 {% macro lock(value) -%}
     {# Draws a lock icon, is value is '1' #}
-	{% if value == '1' %}
-		<i class='fa fa-lock'></i>
-	{% endif %}                           
+	{% if value == '1' %}&#x1F512;{% endif %}                           
 {%- endmacro %}
 
 
@@ -15,23 +13,15 @@
    #}
    {% if value < 2 %}
      {% if value == 0 %}&#9873;&#9873;
-     <!-- i class='fa fa-exclamation-circle'></i><i class='fa fa-exclamation-circle'></i -->
      {% else %}&#9873;
-     <!-- i class='fa fa-exclamation-circle'></i -->
      {% endif %}
    {% else %}
      {% if   value < 2.25 %}&#9733;&#9733;
-     <!-- i class="far fa-star"></i><i class="far fa-star"></i -->
      {% elif value < 2.75 %}&#9733;&#9734;
-     <!-- i class="far fa-star"></i></i><i class="far fa-star-half"></i -->
      {% elif value < 3.25 %}&#9733;&#9733;
-     <!-- i class="far fa-star"></i><i class='far fa-star'></i -->
      {% elif value < 3.75 %}&#9733;&#9733;&#9734;
-     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i -->
      {% elif value < 4.25 %}&#9733;&#9733;&#9733;
-     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i -->
      {% elif value < 4.75 %}&#9733;&#9733;&#9733;&#9734;
-     <!-- i class='far fa-star'></i><i class='far fa-star'></i><i class='far fa-star'></i><i class="far fa-star-half-alt"></i -->
      {% endif %}
    {% endif %}                           
 {%- endmacro %}
@@ -46,9 +36,10 @@
                 <li{% if value == 0 %} class="CurrentSection"
                   {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons"{% endif %}
                    title="{{ _('Search for people') }}">{{ _('Search') }}</a></li>
-                <li{% if value == 1 %} class="CurrentSection"
+{#              <li{% if value == 1 %} class="CurrentSection"
                   {% endif %}><a {% if hide %}href="#" class="dimmed"{% else %}href="/scene/persons/all"{% endif %}
                    title="{{ _('All persons') }}">{{ _('Names') }}</a></li>
+#}
                 <li{% if value == 12 %} class="CurrentSection"
                   {% endif %}><a href="/scene/persons_all/"
                    title="{{ _('Person list by default name') }}">{{ _('Persons') }}</a></li>
@@ -78,24 +69,49 @@
     </div>
 {%- endmacro %}
 
-{% macro person(ch, uuid, delim) -%}
+{% macro all_obj_ids(obj) -%}
+    {#  Formats object keys for display. #}
+    {% if obj.uuid %}
+    <tt title="{{ _('UUID key') }}">{{obj.uuid[:6]}}</tt> /
+    {% endif %}
+    <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
+    <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
+{%- endmacro %}
+
+{% macro person_name(name) -%}
+    {#  Formats a Person name. Shows firstname and a surname or patronyme. #}
+    {{name.firstname}}
+    {% if not name.surname %}<i>{{name.suffix}}</i>{% endif %} {{name.prefix}} <b>{{name.surname}}</b>
+{%- endmacro %}
+
+{% macro person_name_long(name) -%}
+    {#  Formats a Person name. Shows all firstname, patronyme and surname. #}
+    {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>
+{%- endmacro %}
+
+{% macro sex(person) -%}
+    {#  Shows Person gender symbol (only for man and woman). #}
+    {% if person.sex == 1 %}&#9794;{% elif person.sex == 2 %}&#9792;{% endif %}
+{%- endmacro %}
+
+{% macro person(p, uuid) -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
-    {% if ch.uuid == uuid %}
+    <!-- {{p.uuid}} {{uuid}} -->
+    {% if p.uuid == uuid %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
-    {% else %}{% if ch.uuid %}
-    <a href="/scene/person/uuid={{ch.uuid}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=ch.uuid[:6]) }}">
-    {% else %}<a href="/scene/person={{ch.uniq_id}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=ch.uniq_id) }}">{% endif %}
-        {% if ch.names|length %}
-        {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> {{ch.names[0].prefix}} <b>{{ch.names[0].surname}}</b></a>
-        {% if ch.birth_date %}s.&nbsp;{{ch.birth_date|pvm}}{% endif %}
-        {% else %}{{ _('Anonymous') }}
+    {% else %}{% if p.uuid %}
+    <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
+        title="{{ _('see details of person %(id)s', id=p.uuid[:6]) }} (nr. {{p.uniq_id}})">
+    {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink" 
+        title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">{% endif %}
+        {% if p.names|length %}{{ person_name(p.names[0]) }}</a>
+	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
+	    {% else %}{{ _('Anonymous') }}</a>
         {% endif %}
     {% endif %}
 {%- endmacro %}
                     
-{% macro member(ch, uniq_id, delim) -%} {# Better version: macro person #}
+{% macro member(ch, uniq_id, delim) -%} {# OBSOLETE, Better version: macro person #}
     {#  Creates a Person name and link (for family tree graph). 
         Optional 'delim' can be "=" for older person page
     #}
@@ -115,13 +131,16 @@
                     
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
-    {% set list1 = note.text.split('\n') %}
-    {% for l in list1 %}
-       <p>{{ l }}</p>
-    {% endfor %}
     {% if note.url %}
-    <a href="{{note.url}}" class="outlink" 
-       target="_blank">{{note.url|transl('urldomain')}}</a>{% endif %}
+        <a href="{{note.url}}" class="outlink" 
+           target="_blank">{{note.url|transl('urldomain')}}</a>
+    {% endif %}
+    {% if note.text %}
+	    {% set list1 = note.text.split('\n') %}
+	    {% for l in list1 %}
+	       <p><i>{{ l }}</i></p>
+	    {% endfor %}
+    {% endif %}
 {%- endmacro %}
 
 {% macro notelink_2col(note) -%}

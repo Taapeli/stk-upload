@@ -33,6 +33,7 @@ from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.dates import DateRange
 from models.owner import OwnerFilter
+import traceback
 
 
 def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
@@ -115,7 +116,6 @@ def read_refnames():
     """ Reads all Refname objects for display
         (n:Refname)-[r]->(m)
     """
-    namelist = []
     t0 = time.time()
     recs = Refname.get_refnames()
 
@@ -459,7 +459,7 @@ def read_places():
     """
 
     headings = []
-    titles, events = Place.get_my_places()
+    titles, events = Place_combo.get_my_places()
     
     headings.append(_("List of places"))
     headings.append(_("Showing places"))
@@ -468,7 +468,9 @@ def read_places():
 
 
 def get_source_with_events(sourceid):
-    """ Lukee tietokannasta Source- objektin tapahtumineen näytettäväksi
+    """ Reads a Source with events, citations and notes.
+    
+        Lukee tietokannasta Source- objektin tapahtumineen näytettäväksi
     """
 
     result = Source.get_source_w_notes(sourceid)
@@ -859,7 +861,49 @@ def get_person_data_by_id(pid):
     return (p, events, photos, citations, family_list)
 
 
+def get_event_participants(uniq_id):
+    '''
+        Get event data and participants.
+    '''
+
+    e = Event_combo()
+    e.uniq_id = uniq_id
+    e.get_event_combo()
+
+    if e.place_ref:
+        e.place = Place_combo.get_w_notes(e.place_ref[0])
+
+    persons = []
+    result = e.get_participants()
+    for record in result:
+        # <Record role='Clergy' 
+        #    person=<Node id=344292 labels={'Person'} 
+        #        properties={'sortname': 'Hougberg#Svensson#Carl Adolf Hougberg', 
+        #            'datetype': 19, 'confidence': '', 'sex': 1, 'change': 1541582091, 
+        #            'id': 'I0442', 'date2': 1884352, 'date1': 1805441, 
+        #            'uuid': '3a77b72614194491a546a4360171cf29'}> 
+        #    name=<Node id=344293 labels={'Name'} 
+        #        properties={'firstname': 'Carl Adolf Hougberg', 'type': 'Birth Name', 
+        #            'suffix': 'Svensson', 'prefix': '', 'surname': 'Hougberg', 
+        #            'order': 0}
+        # >  >
+        person_node = record['person']
+        name_node = record['name']
+
+        p = Person_combo.from_node(person_node)
+        p.role = record['role']
+        name = Name.from_node(name_node)
+        p.names.append(name)
+
+        persons.append(p)
+
+    return (e, persons)
+
+
 def get_baptism_data(uniq_id):
+    '''
+        Get event data and participants.
+    '''
 
     persons = []
 
@@ -967,6 +1011,7 @@ def get_place_with_events (loc_id):
     try:
         place_list = Place_combo.get_place_tree(place.uniq_id)
     except AttributeError as e:
+        traceback.print_exc()
         flash(f"Place {loc_id} not found", 'error')
         return None, None, None
     except ValueError as e:
