@@ -15,6 +15,7 @@ from flask_security import current_user, login_required #, roles_accepted
 #from flask_babelex import _
 
 from . import bp
+from bp.scene.scene_reader import get_person_full_data
 from bp.scene.scene_reader import get_a_person_for_display_apoc
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
@@ -170,9 +171,10 @@ def show_my_persons():
 @bp.route('/scene/person/<int:uid>')
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
-def show_a_person_w_apoc(uid=None):
-    """ One Person with all connected nodes
-        Korvaamaan metodin show_person_page()
+def show_a_person(uid=None):
+    """ One Person with all connected nodes - NEW version 3: not using apoc any more.
+    
+        Korvaamaan metodi show_person_page()
     """
     t0 = time.time()
     uid = request.args.get('uuid', uid)
@@ -184,7 +186,10 @@ def show_a_person_w_apoc(uid=None):
     else:
         user=None
     
-    person, objs, marks = get_a_person_for_display_apoc(uid, user)
+    if isinstance(uid, int):    # v2 Person page data
+        person, objs, marks = get_a_person_for_display_apoc(uid, user)
+    else:                       # v3 Person page data
+        person, objs, marks = get_person_full_data(uid, user)
     if not person:
         return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
 #     for m in marks:
@@ -194,7 +199,7 @@ def show_a_person_w_apoc(uid=None):
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
 #     print(person.sex_str())
-    print("-> bp.scene.routes.show_a_person_w_apoc")
+    print("-> bp.scene.routes.show_a_person")
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
         print(get_thumbname(objs[i].uuid))
