@@ -42,8 +42,8 @@ class Name:
         return "{}/{}/{}/{}".format(self.firstname, self.prefix, self.surname, self.suffix)
 
     def key_surname(self):
-        # Standard sort order key "Klick#Jönsdotter#Brita Helena"
-        return "{}#{}#{}".format(self.surname, self.suffix, self.firstname)
+        # Standard sort order key "Klick#Brita Helena#Jönsdotter"
+        return f"{self.surname}#{self.firstname}#{self.suffix}"
 
     @classmethod
     def from_node(cls, node):
