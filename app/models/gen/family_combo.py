@@ -8,7 +8,12 @@ import  shareds
 
 from .cypher import Cypher_family
 from .family import Family
-from .person_combo import Person_combo, Person_as_member
+try:
+    from .person_combo import Person_combo
+except ImportError: pass
+try:
+    from .person_combo import Person_as_member
+except ImportError: pass
 from .event_combo import Event_combo
 from .person_name import Name
 from .note import Note

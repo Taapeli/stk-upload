@@ -51,6 +51,7 @@ import shareds
 from .person import Person
 from .person_name import Name
 from .event_combo import Event_combo
+from .family_combo import Family_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .dates import DateRange
@@ -162,11 +163,11 @@ return path"""
         '''
         try:
             if user:
-                get_person_user = """
+                person_get_user = """
 MATCH (b:UserProfile {username:$user}) --> (:Batch)
       -[:OWNS]-> (p:Person {uuid:$uuid})
 RETURN p"""
-                record = session.run(get_person_user, uuid=uuid, user=user).single()
+                record = session.run(person_get_user, uuid=uuid, user=user).single()
             else:
                 get_person_public = """
 MATCH (p:Person {uuid:$uuid}) 
@@ -174,13 +175,14 @@ RETURN p"""
                 record = session.run(get_person_public, uuid=uuid).single() # Show a person from public database
             #TODO: Rule for public database is missing, taking all!
             if record == None:
-                raise KeyError("Henkilöä {uuid} ei ole.")
+                raise KeyError("Person {uuid} not found.")
             node = record[0]
             p = Person_combo.from_node(node)
             print(f"#Person {p}")
             objs[p.uniq_id] = p
         except Exception as e:
-            print(f"Henkilötietojen {uuid} luku epäonnistui: {e}")
+            print(f"Could not read person {uuid}: {e}")
+            return None
 
         return p
 
@@ -189,10 +191,10 @@ RETURN p"""
         ''' Read names and events to Person variables.
         '''
         try:
-            get_person_names_events = """
+            person_get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE id(p) = $uid
 RETURN rel, x ORDER BY x.order"""
-            results = session.run(get_person_names_events, 
+            results = session.run(person_get_names_events, 
                 uid=self.uniq_id)
             for record in results:
                 # <Record rel=<Relationship id=453912
@@ -207,7 +209,7 @@ RETURN rel, x ORDER BY x.order"""
                 #            'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>>
                 relation = record['rel']
                 rel_type = relation.type
-                role = relation.get('role', None)
+                role = relation.get('role', '')
                 node = record['x']
                 label = list(record['x'].labels)[0]
                 #print(f"# -[:{rel_type} {relation._properties}]-> (x:{label})")
@@ -220,15 +222,11 @@ RETURN rel, x ORDER BY x.order"""
                     x_obj.role = role
                     self.events.append(x_obj)
                     objs[x_obj.uniq_id] = x_obj 
-#                   elif label == 'Family':
-#                       x_obj = Family_combo.from_node(node)
-#                       self.families.append(x_obj)
-                print(f"# () -[:{rel_type} '{role}']-> (:{label} '{x_obj}')")
+                print(f"# ({self.id}) -[:{rel_type} {role}]-> (:{label} '{x_obj}')")
          
         except Exception as e:
-            print(f"Nimien ja tapahtumien {self.uuid} luku epäonnistui: {e}")
-
-            return
+            print(f"Could not read names and events for person {self.uuid}: {e}")
+        return
 
     def _read_person_families(self, session, objs):
         ''' Read the families, where this Person is a member.
@@ -239,7 +237,65 @@ RETURN rel, x ORDER BY x.order"""
                  (f) --> (fp:Person) -[*1]-> (fpn:Name)
                  (f) --> (fe:Event)
         '''
-        pass
+
+        try:
+            person_get_families = """
+match (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
+optional match (f) -[:EVENT]-> (fe:Event)
+optional match (f) -[:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
+optional match (m) -[:EVENT]-> (me:Event {type:"Birth"})
+return rel, f as family, collect(distinct fe) as events, 
+    collect(distinct [m, n, me]) as members
+    order by family.date1"""
+            results = session.run(person_get_families, 
+                uid=self.uniq_id)
+            for record in results:
+                # <Record
+                #  rel=<Relationship id=671269
+                #     nodes=(
+                #        <Node id=432641 labels={'Family'} 
+                #            properties={'datetype': 3, 'father_sortname': 'Järnefelt##August Aleksander', 
+                #                'change': 1542401728, 'rel_type': 'Married', 'mother_sortname': 'Clodt von Jürgensburg##Elisabeth', 
+                #                'date2': 1941614, 'id': 'F0015', 'date1': 1901974, 'uuid': '90282a3cf6ee47a1b8f9a4a2c710c736'}>, 
+                #        <Node id=427799 labels={'Person'} 
+                #            properties={'sortname': 'Järnefelt##Aino', 'datetype': 19, 'confidence': '2.0', 
+                #                'sex': 2, 'change': 1566323471, 'id': 'I0035', 'date2': 2016423, 'date1': 1916169, 
+                #                'uuid': '925ea92d7dab4e8c92b53c1dcbdad36f'}>) 
+                #    type='CHILD' 
+                #    properties={}> 
+                #  family=<Node id=432641 labels={'Family'} properties={...}> 
+                #  events=[<Node id=269554 labels={'Event'} properties={'type': 'Marriage', ...}>
+                #  ]
+                #  members=[
+                #    [<Node id=428883 labels={'Person'} 
+                #        properties={'sortname': 'Järnefelt##Caspar Woldemar', ...}>, 
+                #     <Node id=428884 labels={'Name'}
+                #        properties={'firstname': 'Caspar Woldemar', 'type': 'Birth Name', 'suffix': '', 'prefix': '', 'surname': 'Järnefelt', 'order': 0}>, 
+                #     <Node id=267935 labels={'Event'} 
+                #        properties={'datetype': 0, 'change': 1542400914, 'description': '', 'id': 'E0935', 'date2': 1903840, 'type': 'Birth', 
+                #            'date1': 1903840, 'uuid': '2409c0f541eb449597d8a754bd0ad08c'}>], 
+                #   ...
+                #   [<Node id=428898 labels={'Person'} properties={'sortname': 'Järnefelt##Hilja Salma Saimi', ...}>,
+                #    <Node id=428899 labels={'Name'} properties={'firstname': 'Hilja Salma Saimi', ...}>,
+                #    <Node id=267947 labels={'Event'} properties={'type': 'Birth', ...}>]
+                #  ]>
+                relation = record['rel']
+                rel_type = relation.type
+                role = relation.get('role', "")
+                # return rel, f as family, collect(distinct fe) as events, 
+                #    collect(distinct [m, n, me]) as members
+                node = record['family']
+                f_obj = Family_combo.from_node(node)
+                f_obj.role = rel_type
+                if rel_type == "CHILD":
+                    self.families_as_child.append(f_obj)
+                elif rel_type == "PARENT":
+                    self.families_as_parent.append(f_obj)
+                print(f"# ({self.id}) -[:{rel_type} {role}]-> (:Family '{f_obj}')")
+         
+        except Exception as e:
+            print(f"Could not read families for person {self.uuid}: {e}")
+        return
 
     @staticmethod
     def get_person_essentials(uuid, user):
@@ -252,15 +308,16 @@ RETURN rel, x ORDER BY x.order"""
             # 1. Read Person p and essential directly connected nodes z
             #       (p:Person) --> (x:Name|Event)
             p = Person_combo._get_person_node(session, uuid, objs, user)
-            p._read_person_names_events(session, objs)
-            # 2. (p:Person) <-- (f:Family)
-            #    for f
-            #      (f) --> (fp:Person) -[*1]-> (fpn:Name)
-            #      (f) --> (fe:Event)
-            p._read_person_families(session, objs)
+            if isinstance(p,Person_combo):
+                p._read_person_names_events(session, objs)
+                # 2. (p:Person) <-- (f:Family)
+                #    for f
+                #      (f) --> (fp:Person) -[*1]-> (fpn:Name)
+                #      (f) --> (fe:Event)
+                p._read_person_families(session, objs)
 
         print(f"# Nodes for Person {p.uniq_id} are {list(objs.keys())}")
-        return (p, objs)
+        return p, objs
 
     @staticmethod
     def read_my_persons_list(o_filter, limit=100):
