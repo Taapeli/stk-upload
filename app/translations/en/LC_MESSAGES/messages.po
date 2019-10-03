@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-09-27 15:52+0300\n"
+"POT-Creation-Date: 2019-10-03 10:32+0300\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.6.0\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -296,31 +296,31 @@ msgstr ""
 msgid "Update allowed email"
 msgstr ""
 
-#: bp/admin/routes.py:78
+#: bp/admin/routes.py:80
 msgid "estimated lifetime"
 msgstr ""
 
-#: bp/admin/routes.py:93
+#: bp/admin/routes.py:95
 msgid "Done"
 msgstr ""
 
-#: bp/admin/routes.py:128
+#: bp/admin/routes.py:130
 msgid "Data type '{}' is not supported"
 msgstr ""
 
-#: bp/admin/routes.py:131
+#: bp/admin/routes.py:133
 msgid "Missing proper column title: "
 msgstr ""
 
-#: bp/admin/routes.py:175
+#: bp/admin/routes.py:177
 msgid "Allowed email updated"
 msgstr ""
 
-#: bp/admin/routes.py:242
+#: bp/admin/routes.py:244
 msgid "User updated"
 msgstr ""
 
-#: bp/admin/routes.py:296 bp/gramps/routes.py:87
+#: bp/admin/routes.py:298 bp/gramps/routes.py:87
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr ""
@@ -381,6 +381,48 @@ msgstr ""
 msgid "Given allowed email address already exists"
 msgstr ""
 
+#: bp/admin/templates/admin/access_management.html:3
+#: bp/admin/templates/admin/access_management.html:17
+msgid "Management of access to batches"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:19
+msgid "Add access for user"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:25
+msgid "to batchid"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:30
+msgid "Add access"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:32
+msgid "Current accesses"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:34
+msgid "Delete marked"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:39
+#: bp/admin/templates/admin/admin.html:39
+#: bp/admin/templates/admin/list_users.html:81
+#: bp/admin/templates/admin/list_users_mails.html:85
+#: bp/dupsearch/templates/dupsearch.html:30
+#: bp/gramps/templates/gramps/index_gramps.html:17
+#: bp/scene/templates/scene/index_scene.html:18
+#: bp/start/templates/start/my_message.html:43
+#: bp/start/templates/start/my_settings.html:32
+msgid "User"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:40
+#: bp/dupsearch/templates/dupsearch.html:29
+msgid "Batch"
+msgstr ""
+
 #: bp/admin/templates/admin/admin.html:4
 msgid "Administrator"
 msgstr ""
@@ -395,17 +437,6 @@ msgstr ""
 
 #: bp/admin/templates/admin/admin.html:38
 msgid "Isotammi Database Management Operations"
-msgstr ""
-
-#: bp/admin/templates/admin/admin.html:39
-#: bp/admin/templates/admin/list_users.html:81
-#: bp/admin/templates/admin/list_users_mails.html:85
-#: bp/dupsearch/templates/dupsearch.html:30
-#: bp/gramps/templates/gramps/index_gramps.html:17
-#: bp/scene/templates/scene/index_scene.html:18
-#: bp/start/templates/start/my_message.html:43
-#: bp/start/templates/start/my_settings.html:32
-msgid "User"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:40
@@ -470,15 +501,19 @@ msgstr ""
 msgid "Set the estimated birth and death dates of a person"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:82
+#: bp/admin/templates/admin/admin.html:74
+msgid "Access management"
+msgstr ""
+
+#: bp/admin/templates/admin/admin.html:83
 msgid "Application management"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:84
+#: bp/admin/templates/admin/admin.html:85
 msgid "Display application log"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:85
+#: bp/admin/templates/admin/admin.html:86
 msgid "List all application pages"
 msgstr ""
 
@@ -1022,10 +1057,6 @@ msgstr ""
 
 #: bp/dupsearch/templates/dupsearch.html:28
 msgid "Select"
-msgstr ""
-
-#: bp/dupsearch/templates/dupsearch.html:29
-msgid "Batch"
 msgstr ""
 
 #: bp/dupsearch/templates/dupsearch.html:31
