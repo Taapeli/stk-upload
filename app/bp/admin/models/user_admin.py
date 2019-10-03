@@ -472,3 +472,45 @@ class UserAdmin():
         except Exception as ex:
             logging.error('Exception: ', ex)            
             raise
+
+    @staticmethod 
+    def get_accesses():
+        try:
+            rsp = []
+            for rec in shareds.driver.session().run(Cypher_adm.list_accesses):
+                user = dict(rec.get("user"))
+                batch = dict(rec.get("batch"))
+                batch["file"] = batch["file"].split("/")[-1].replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
+                rel = dict(rec.get("r"))
+                rel_id = rec.get("rel_id")
+                access = dict(user=user,batch=batch,rel_id=rel_id)
+                print("access:",access)
+                rsp.append(access)
+            return rsp
+
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+
+    
+    @staticmethod
+    def add_access(username, batchid):
+        try:
+            rsp = shareds.driver.session().run(Cypher_adm.add_access,username=username,batchid=batchid).single()
+            return rsp
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+    
+    @staticmethod
+    def delete_accesses(idlist):
+        try:
+            rsp = shareds.driver.session().run(Cypher_adm.delete_accesses,idlist=idlist).single()
+            return rsp
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+    
+    
+    
+        
