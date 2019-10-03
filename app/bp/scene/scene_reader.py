@@ -27,7 +27,7 @@ def get_person_full_data(uuid, owner):
        for f
        (f) --> (fp:Person) -[*1]-> (fpn:Name)
        (f) --> (fe:Event)
-    3. for y in p, x, fe, z, s, r
+    3. for z in p, x, fe, z, s, r
        (y) --> (z:Citation|Note|Media)
     4. for pl in z:Place, ph
        (pl) --> (pn:Place_name)
@@ -35,7 +35,7 @@ def get_person_full_data(uuid, owner):
     5. for c in z:Citation
        (c) --> (s:Source) --> (r:Repository)
 
-    + perheenjäsenten syntymä- ja kuolintapahtumat
+    #TODO perheenjäsenten syntymätapahtumat
 
     p:Person
       +-- x:Name
@@ -52,7 +52,7 @@ def get_person_full_data(uuid, owner):
       |     +-- z:Citation (2)
       |     +-- z:Note (3)
       |     +-- z:Media (4)
-      +-- x:Family
+      +-- f:Family
       |     +-- fp:Person
       |     |     +-- fpn:Name
       |     +-- fe:Event (1)
@@ -78,22 +78,14 @@ def get_person_full_data(uuid, owner):
             +-- z:Note (3)
       
     The objects are stored in Person object tree as
-    - x: included objects or
-    - others: references to "objs" list. 
+    - x and f: included objects or
+    - others: references to "objs" dictionary. 
     For ex. Sources may be referenced multiple times and we want to store them 
     once only.
 
     - The Person is identified by uuid key.
 
-      A Neo4j APOC procedure models.gen.cypher.Cypher_person.all_nodes_query_w_apoc 
-      returns one record containing 2 list variables: relations and nodes.
-
-        relation (source) -[r]-> (target)
-                contains uniq_ids of source and target nodes, relation type
-                and role attribute of relation r. They are expressed as list 
-                [source_uniq_id, relation type, relation role, target uniq_id]
-        node
-                has Neo4j Node id, labels and properties
+    #TODO: check description
 
     1. The 1st node is the current person
 
@@ -127,6 +119,10 @@ def get_person_full_data(uuid, owner):
 
     # 1. Read Person p and essential directly connected nodes z
     #       (p:Person) --> (x:Name|Event)
+    # 2. (p:Person) <-- (f:Family)
+    #    for f
+    #       (f) --> (fp:Person) -[*1]-> (fpn:Name)
+    #       (f) --> (fe:Event)
 
     try:
         person, objs = Person_combo.get_person_essentials(uuid, owner)
@@ -136,12 +132,6 @@ def get_person_full_data(uuid, owner):
         return (None, None, None)
 
     return (person, objs, [])
-
-    # 2. Read Famililes and their Persons fp and Events fe
-    #    (p:Person) <-- (f:Family)
-    #    for f in f
-    #       (f) --> (fp:Person) -[*1]-> (fpn:Name)
-    #       (f) --> (fe:Event)
 
     # 3. Read their connected nodes z: Citations, Notes, Medias and Places
     #    for y in p, x, fe, z, s, r
