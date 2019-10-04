@@ -131,7 +131,7 @@ def background_load_to_neo4j(username,filename):
             raise RuntimeError("Run Failed")
 
         set_meta(username,filename,status=STATUS_DONE)
-        msg = "{}:\nLoaded the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
+        msg = "{}:\nStored the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
         msg += "\nBatch id: {}".format(batch_id)
         msg += "\nLog file: {}".format(logname)
         msg += "\n"
@@ -139,23 +139,23 @@ def background_load_to_neo4j(username,filename):
             msg += "\n{}".format(step)
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
-                    "Stk: Gramps XML file loaded",
+                    "Stk: Gramps XML file stored",
                     msg )
-        syslog.log(type="gramps file upload complete",file=filename,user=username)
+        syslog.log(type="storing to database complete",file=filename,user=username)
     except:
         traceback.print_exc()
         res = traceback.format_exc()
         set_meta(username,filename,status=STATUS_FAILED)
-        msg = "{}:\nLoading of file {} from user {} to neo4j FAILED".format(util.format_timestamp(),pathname,username)
+        msg = "{}:\nStoring the file {} from user {} to database FAILED".format(util.format_timestamp(),pathname,username)
         msg += "\nLog file: {}".format(logname)
         msg += "\n" + res
         for step in steps:
             msg += "\n{}".format(step)
         open(logname,"w", encoding='utf-8').write(msg)
         email.email_admin(
-                    "Stk: Gramps XML file load FAILED",
+                    "Stk: Gramps XML file storing FAILED",
                     msg )
-        syslog.log(type="gramps file upload failed",file=filename,user=username)
+        syslog.log(type="gramps store to database failed",file=filename,user=username)
 
 
 def initiate_background_load_to_neo4j(userid,filename):
@@ -174,7 +174,7 @@ def initiate_background_load_to_neo4j(userid,filename):
     threading.Thread(target=background_load_to_neo4j_thread,
                      args=(shareds.app,),
                      name="neo4j load for " + filename).start()
-    syslog.log(type="gramps file upload initiated",file=filename,user=userid)
+    syslog.log(type="storing to database initiated",file=filename,user=userid)
     return False
 
 # def batch_count(username,batch_id):
