@@ -97,10 +97,13 @@ def my_message():
 def send_email():
     subject = request.form["subject"]
     body = request.form["message"]
-    email.email_admin(_(subject),
+    ok = email.email_admin(_(subject),
                       body,
                       sender=(current_user.name,current_user.email))
-    return "ok"
+    if ok:
+        return "ok"
+    else:
+        return "failed"
 
 @shareds.app.route('/settings',methods=["GET","POST"])
 @login_required

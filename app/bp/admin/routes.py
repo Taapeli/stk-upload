@@ -9,14 +9,16 @@ Created on 8.8.2018
 
 import os
 
+import json
 import logging 
 import inspect
 import traceback
-#import datetime
-#from _pickle import Unpickler
+
+from bp.gramps.models import batch
+
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, send_from_directory, flash, session
+from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _
 
@@ -466,3 +468,67 @@ def readlog():
     recs = syslog.readlog(direction,startid)
     return render_template("/admin/syslog.html", recs=recs)
     
+
+#------------------- Access Management -------------------------
+@bp.route("/admin/access_management")
+@login_required
+@roles_accepted('admin')
+def access_management():
+    return render_template("/admin/access_management.html")
+
+@bp.route('/admin/fetch_users', methods=['GET'])
+@login_required
+@roles_accepted('admin')
+def fetch_users():
+    userlist = shareds.user_datastore.get_users()
+    users = [
+        dict(
+            username=user.username,
+            name=user.name,
+            email=user.email,
+        )
+        for user in userlist if user.username != 'master']
+    return jsonify(users)
+
+@bp.route('/admin/fetch_batches', methods=['GET'])
+@login_required
+@roles_accepted('admin')
+def fetch_batches():
+    batch_list = list(batch.get_batches())
+    for b in batch_list:
+        file = b.get('file')
+        if file:
+            file = file.split("/")[-1].replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
+            b['file'] = file 
+    return jsonify(batch_list)
+
+@bp.route('/admin/fetch_accesses', methods=['GET'])
+@login_required
+@roles_accepted('admin')
+def fetch_accesses():
+    access_list = UserAdmin.get_accesses();
+    return jsonify(access_list)
+
+@bp.route('/admin/add_access', methods=['POST'])
+@login_required
+@roles_accepted('admin')
+def add_access():
+    data = json.loads(request.data)
+    print(data)
+    username = data.get("username")
+    batchid = data.get("batchid")
+    rsp = UserAdmin.add_access(username,batchid)
+    print(rsp)
+    print(rsp.get("r"))
+    return jsonify(dict(rsp.get("r")))
+
+@bp.route('/admin/delete_accesses', methods=['POST'])
+@login_required
+@roles_accepted('admin')
+def delete_accesses():
+    data = json.loads(request.data)
+    print(data)
+    rsp = UserAdmin.delete_accesses(data)
+    return jsonify(rsp)
+
+

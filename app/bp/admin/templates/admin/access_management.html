@@ -1,0 +1,202 @@
+{# _bp/admin/templates/admin/list_users.html_ #}
+{% extends "/admin/layout.html" %}
+{% block title %}{{ _('Management of access to batches') }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<!-- development version, includes helpful console warnings -->
+<!-- script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script -->
+
+<!-- production version, optimized for size and speed -->
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<div id="myApp" style="margin-left:50px; padding-bottom: 2em;">
+  <h2>{{ _("Management of access to batches") }}</h2>
+
+    {{ _("Add access for user") }} 
+    <select v-model="user">
+        <option>
+        <option v-for="user in users" v-bind:value="user">${ user | render_user }
+    </select>
+    
+    {{_("to batchid") }} 
+    <select v-model="batch">
+        <option>
+        <option v-for="batch in batches" v-bind:value="batch">${ batch | render_batch }
+    </select>
+    <button v-on:click="add_access()" v-bind:disabled="!user || !batch">{{ _("Add access") }}</button>
+    <p>
+    <h3>{{ _("Current accesses") }}</h3>
+    <p>
+    <button v-on:click="delete_accesses()">{{ _("Delete marked") }}</button>
+    <p>
+    <table border>
+        <tr>
+            <td>
+            <th><a href="#" v-on:click="sort_by_user()">{{ _("User") }}</a>
+            <th><a href="#" v-on:click="sort_by_batch()">{{ _("Batch") }}</a>
+        </tr>
+        <tr v-for="access in accesses">
+            <td><input type=checkbox v-model="access.selected">
+        	<td>${ access.user | render_user } 
+        	<td>${ access.batch | render_batch }
+        </tr>
+    </table>
+
+    
+</div>
+
+<script>
+
+function log(msg) {
+	console.log(msg);
+}
+
+function stringsort(a, b) {
+  var nameA = a.toUpperCase(); // ignore upper and lowercase
+  var nameB = b.toUpperCase(); // ignore upper and lowercase
+  if (nameA < nameB) {
+    return -1;
+  }
+  if (nameA > nameB) {
+    return 1;
+  }
+
+  // names must be equal
+  return 0;
+}
+
+var app = new Vue({
+    delimiters: ['${', '}'],
+    el: '#myApp',
+    created: function() {
+        this.init();    
+    },
+    filters: {
+        truncate: function(value, size) {
+            if (value.length > size) {
+                value = value.substring(0, size-3) + '...';
+            }
+            return value;
+        },
+        stringify: function(value) {
+            return JSON.stringify(value);
+        },
+        render_user: user => {
+            return user.username + " (" + user.name +")"
+        },
+        render_batch: batch => {
+            return batch.id + " " + batch.file 
+       },
+    },
+    data: {
+        accesses: [],
+        users: [],
+        batches: [],
+        user: undefined,
+        batch: undefined,
+    }, // data
+    methods: {
+        init: function() {
+            this.fetch_accesses();
+            this.fetch_users();
+            this.fetch_batches();
+        },
+		fail: function(msg,rsp) {
+			alert(msg);
+			log(msg);
+			log("rsp:");
+			log(rsp);
+		},
+        fetch_accesses: function() {
+            /*
+            Sample data:
+            [
+                {user:{username:"kari",name:"Kari"},batch:{id:"2019-09-01.001",file:"Sibelius-2019-07-03.gpkg"}},
+                {user:{username:"admin",name:"Admin"},batch:{id:"2019-09-02.002",file:"Tobelius-2019-07-22.gpkg"}},
+            ]
+            */
+            axios.get('fetch_accesses').
+                then(function(rsp, status) {
+                    app.accesses = [];
+                    for (access of rsp.data) {
+                    	access.selected = false;
+                        app.accesses.push(access);
+                    }
+                }).
+                catch(function(rsp, status) {
+					app.fail("Fetching _accesses failed",rsp);
+                });
+        },
+        fetch_users: function() {
+            /*
+            Sample data:
+            [
+                {username:"kari",name:"Kari Kujansuu"},
+                {username:"admin",name:"Admin"},
+            ];
+            */
+            axios.get('fetch_users').
+                then(function(rsp, status) {
+                    app.users = rsp.data;
+                }).
+                catch(function(rsp, status) {
+					app.fail("Fetching users failed",rsp);
+                });
+        },
+        fetch_batches: function() {
+            /*
+            Sample data:
+            [
+                {id:"2019-09-01.001",file:"Sibelius-2019-07-03.gpkg"},
+                {id:"2019-09-02.002",file:"Tobelius-2019-07-22.gramps"},
+            ]
+            */
+            axios.get('fetch_batches').
+                then(function(rsp, status) {
+                    app.batches = rsp.data;
+                }).
+                catch(function(rsp, status) {
+					app.fail("Fetching batches failed",rsp);
+                });
+        },
+        add_access: function() {
+        	if (!this.user || !this.batch) return; 
+            axios.post('add_access',{username:this.user.username,batchid:this.batch.id}).
+                then(function(rsp, status) {
+                    app.fetch_accesses();
+                }).
+                catch(function(rsp, status) {
+					app.fail("Adding access failed",rsp);
+                });
+        },
+        delete_accesses: function() {
+            let idlist = [];
+            for (let access of this.accesses) {
+                if (access.selected) idlist.push(access.rel_id);
+            }
+            axios.post('delete_accesses',idlist).
+                then(function(rsp, status) {
+                    app.fetch_accesses();
+                }).
+                catch(function(rsp, status) {
+					app.fail("Deleting accesses failed",rsp);
+                });
+		},        
+        sort_by_user: function() {
+            app.accesses = app.accesses.sort( (a1,a2) => { return stringsort(a1.user.username,a2.user.username);} );
+        },
+        sort_by_batch: function() {
+            app.accesses = app.accesses.sort( (a1,a2) => { return stringsort(a1.batch.id,a2.batch.id);} );
+        },
+    } // methods
+
+});
+
+</script>
+
+{% endblock %}
+

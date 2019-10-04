@@ -135,6 +135,22 @@ CREATE (u) -[:HAS_ROLE]-> (r)'''
 MATCH (u:User {email: $email}) -[c:HAS_ROLE]-> (r:Role {name: $name})
 DELETE c'''
 
+# Access management
+
+    list_accesses = """
+MATCH (user:User) -[:SUPPLEMENTED]->(userprofile:UserProfile) -[r:HAS_ACCESS]-> (batch:Batch) RETURN *,id(r) as rel_id
+    """
+
+    add_access = """
+MATCH (user:UserProfile{username:$username}), (batch:Batch{id:$batchid})
+MERGE (user)-[r:HAS_ACCESS]->(batch)
+RETURN r,id(r) as rel_id
+    """
+
+    delete_accesses = """
+MATCH (a) -[r:HAS_ACCESS]->(b) WHERE id(r) in $idlist DELETE r
+    """
+
 
 class Cypher_stats():
     
