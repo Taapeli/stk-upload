@@ -69,8 +69,9 @@ class SetupCypher():
         -[:HAS_ROLE]->(role)
     """ 
     
+    
     guest_create = """
-    MATCH  (role:Role) WHERE role.name = 'guest'
+    MATCH  (role:Role) WHERE role.name = 'guest' 
     CREATE (user:User 
         {username : $username, 
         password : $password,  
