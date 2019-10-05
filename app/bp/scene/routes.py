@@ -11,7 +11,7 @@ logger = logging.getLogger('stkserver')
 import time
 
 from flask import render_template, request, redirect, url_for, flash, session as user_session
-from flask_security import current_user, login_required #, roles_accepted
+from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
 from . import bp
@@ -137,6 +137,8 @@ def show_all_persons_list(opt=''):
 
 
 @bp.route('/scene/persons_all/')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_my_persons():
     """ List all persons for menu(12).
 
@@ -170,6 +172,7 @@ def show_my_persons():
 @bp.route('/scene/person/<int:uid>')
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
+@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def show_a_person_w_apoc(uid=None):
     """ One Person with all connected nodes
         Korvaamaan metodin show_person_page()

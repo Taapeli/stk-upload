@@ -11,7 +11,7 @@ from ..gedcom.models import gedcom_utils
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
-from flask_security import login_required, roles_accepted, current_user
+from flask_security import login_required, roles_accepted, current_user, utils as secutils
 from flask_babelex import _
 
 import shareds
@@ -31,7 +31,19 @@ def force_https():
         if host in {"localhost","127.0.0.1"}: return
         return redirect(request.url.replace('http://', 'https://'))
     
-@shareds.app.route('/', methods=['GET', 'POST'])
+@shareds.app.route('/start/guest', methods=['GET', 'POST'])
+def guest_start():
+    """ Home page for a guest user (from login page or home button) 
+        or anonymous user (home)
+    """
+    user = shareds.user_datastore.get_user('guest')
+    secutils.login_user(user)
+    logger.info('Anonymous user')
+    return render_template('/scene/index_scene.html')
+    
+@shareds.app.route('/start/logged', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start():
     """ Home page for logged in user (from login page or home button) 
         or anonymous user (home)

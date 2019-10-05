@@ -27,7 +27,7 @@ def generate_name(name):
 
 def format_timestamp(ts=None):
     if ts is None: ts = time.time()
-    return time.strftime("%-d.%-m.%Y %-H:%M", time.localtime(ts))
+    return time.strftime("%d.%m.%Y %H:%M", time.localtime(ts))
 
 def format_date(ts=None):
     if ts is None: ts = time.time()
@@ -53,7 +53,7 @@ from dataclasses import dataclass
 def scan_endpoints_for_file(fname):    
     print(f"Scanning file {fname}")
     endpoints = {}
-    source = open(fname).read()
+    source = open(fname, encoding="utf-8").read()
     try:
         root = ast.parse(source)
     except SyntaxError as e:

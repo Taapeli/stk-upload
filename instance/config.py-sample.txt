@@ -22,8 +22,11 @@ MAIL_USE_SSL = False
 # MAIL_USERNAME = "<mail-user>          # if needed
 # MAIL_USERNAME = "<mail-password>
 
-MASTER_USER_EMAIL = '<oma sähköposti>'
+MASTER_USER_EMAIL = '<sähköposti>'
 MASTER_USER_PASSWORD = '<master-password>'
+
+GUEST_USER_EMAIL = '<sähköposti>'
+GUEST_USER_PASSWORD = '<guest-password>'
 
 SECURITY_EMAIL_SENDER = '<sähköposti>'
 MAIL_ASCII_ATTACHMENTS = False

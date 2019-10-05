@@ -56,7 +56,7 @@ div.startbox { min-height: 270px;}
                 <div class="submit">
                     <form method="get">
                        <button type="submit" formaction="/join">{{ _('Join us') }}</button>
-                       <button type="submit" formaction="/login">{{ _('Log in') }}</button>
+                       <button type="submit" formaction="/start/logged">{{ _('Log in') }}</button>
                     </form>
                 </div>
             </div>
@@ -64,7 +64,7 @@ div.startbox { min-height: 270px;}
 			<div class="startbox">
 				<h3>{{ _('Look at demo data in Isotammi Database') }}</h3>
 				<p>{{ _('Here you can see a restricted view on demo genealogical data.') }}</p>
-				<form method="get" action="/scene?div=1">
+				<form method="get" action="/start/guest?div=1">
 					<div class="submit">
 						<button type="submit">{{ _('Explore demo') }}</button>
 					</div>

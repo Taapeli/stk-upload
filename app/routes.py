@@ -10,7 +10,7 @@ logger = logging.getLogger('stkserver')
 #import time
 
 from flask import render_template, request #, g, redirect, url_for, flash
-from flask_security import login_required #, current_user, roles_accepted # ,roles_required
+from flask_security import login_required, logout_user, current_user # ,roles_required
 
 # i18n: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n-legacy
 #from flask_babelex import Babel
@@ -22,6 +22,14 @@ app = shareds.app
 if not app:
     raise RuntimeError("Start this application in '..' from 'run.py' or 'runssl.py'")
 
+
+@shareds.app.route('/')
+def entry():
+    if current_user.has_role("guest"):
+#        print("Authenticated guest user at entry") 
+        logout_user()
+          
+    return render_template('/entry_index.html')
 
 """ -------------------------- Yleinen virhesivu ------------------------------
 """
