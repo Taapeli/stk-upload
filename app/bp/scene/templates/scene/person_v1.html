@@ -31,7 +31,11 @@
                            title="{{ _('Other page format') }}">{{person.uniq_id}}</a> /
                         <tt>{{person.id}} @{{person.owner}}</tt> /
                         <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
-                        </td>
+                        <span style="font-size:70%;background:lightgray;">&nbsp; v1 /
+                            <a href="/scene/person/{{person.uniq_id}}">v2</a> /
+                            <a href="/scene/person?uuid={{person.uuid}}">v3</a> &nbsp;
+                        </span>
+                    </td>
                 </tr>
                 {% for pname in person.names|sort(attribute='order')  %}<tr>
                     <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>

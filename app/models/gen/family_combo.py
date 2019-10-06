@@ -8,17 +8,15 @@ import  shareds
 
 from .cypher import Cypher_family
 from .family import Family
-try:
-    from .person_combo import Person_combo
-except ImportError: pass
-try:
-    from .person_combo import Person_as_member
-except ImportError: pass
 from .event_combo import Event_combo
 from .person_name import Name
 from .note import Note
-from models.gen.dates import DateRange
-from models.gen.place_combo import Place_combo
+from .dates import DateRange
+from .place_combo import Place_combo
+
+# Import these later to handle circular dependencies where referencing from Person classes! 
+#from .person_combo import Person_combo
+#from .person_combo import Person_as_member
 
 
 class Family_combo(Family):
@@ -179,6 +177,8 @@ RETURN family"""
                 Family_combo.children, .names, event_birth, event_death
             Returns a Family object with other objects included
         """
+        # Import here to handle circular dependency 
+        from .person_combo import Person_combo
 
         def set_birth_death(person, birth_node, death_node):
             '''
@@ -344,6 +344,9 @@ RETURN family"""
     @staticmethod       
     def get_families(o_filter, opt='father', limit=100):
         """ Find families from the database """
+
+        # Import here to handle circular dependency 
+        from .person_combo import Person_as_member
         
         def _read_family_list(o_filter, opt, limit):
             """ Read Family data from given fw/fwm

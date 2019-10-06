@@ -42,8 +42,11 @@ u { color: DarkKhaki; text-decoration: none; }
                     <td class="ColumnValue">
                         {{macro.all_obj_ids(person)}} /
                         <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
-                        <a href="/scene/person/uuid={{person.uuid}}" 
-                           style="color:pink;font-size: 70%;">(v1 sivulle)</a>
+                        <span style="font-size:70%;background:lightgray;">&nbsp;
+                            <a href="/scene/person={{person.uniq_id}}">v1</a> /
+                            <a href="/scene/person/{{person.uniq_id}}">v2</a> /
+                            <a href="/scene/person?uuid={{person.uuid}}">v3</a> &nbsp;
+                        </span>
                     </td>
                     {% if person.citation_ref %}
                     <td class="ColumnValue" rowspan="2"><small>{{ _("Source") }}:

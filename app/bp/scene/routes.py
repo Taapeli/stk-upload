@@ -211,7 +211,7 @@ def show_a_person(uid=None):
 @bp.route('/scene/person=<int:pid>')
 #     @login_required
 def show_person_page(pid):
-    """ Full homepage for a Person in database (vanhempi versio).
+    """ Full homepage for a Person in database (v1 versio).
 
         The pid may be 1) an uuid or 2) an uniq_id
     """
@@ -232,7 +232,7 @@ def show_person_page(pid):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     print("-> bp.scene.routes.show_person_page")
-    return render_template("/scene/person.html", person=person, events=events, 
+    return render_template("/scene/person_v1.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 
                            elapsed=time.time()-t0)
 
