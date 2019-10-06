@@ -242,10 +242,10 @@ RETURN rel, x ORDER BY x.order"""
             person_get_families = """
 match (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
 optional match (f) -[:EVENT]-> (fe:Event)
-optional match (f) -[:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
+optional match (f) -[mr:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
 optional match (m) -[:EVENT]-> (me:Event {type:"Birth"})
 return rel, f as family, collect(distinct fe) as events, 
-    collect(distinct [m, n, me]) as members
+    collect(distinct [mr, m, n, me]) as members
     order by family.date1"""
             results = session.run(person_get_families, 
                 uid=self.uniq_id)
@@ -266,33 +266,69 @@ return rel, f as family, collect(distinct fe) as events,
                 #  family=<Node id=432641 labels={'Family'} properties={...}> 
                 #  events=[<Node id=269554 labels={'Event'} properties={'type': 'Marriage', ...}>
                 #  ]
-                #  members=[
-                #    [<Node id=428883 labels={'Person'} 
-                #        properties={'sortname': 'Järnefelt##Caspar Woldemar', ...}>, 
-                #     <Node id=428884 labels={'Name'}
-                #        properties={'firstname': 'Caspar Woldemar', 'type': 'Birth Name', 'suffix': '', 'prefix': '', 'surname': 'Järnefelt', 'order': 0}>, 
-                #     <Node id=267935 labels={'Event'} 
-                #        properties={'datetype': 0, 'change': 1542400914, 'description': '', 'id': 'E0935', 'date2': 1903840, 'type': 'Birth', 
-                #            'date1': 1903840, 'uuid': '2409c0f541eb449597d8a754bd0ad08c'}>], 
-                #   ...
-                #   [<Node id=428898 labels={'Person'} properties={'sortname': 'Järnefelt##Hilja Salma Saimi', ...}>,
-                #    <Node id=428899 labels={'Name'} properties={'firstname': 'Hilja Salma Saimi', ...}>,
-                #    <Node id=267947 labels={'Event'} properties={'type': 'Birth', ...}>]
-                #  ]>
+                #  members=[[
+                #    <Relationship ...  type='CHILD' ...>, 
+                #    <Node ... labels={'Person'}...>, 
+                #    <Node ... labels={'Name'}...>, 
+                #    <Node ... labels={'Event'}...]
+                #    ...]>
                 relation = record['rel']
                 rel_type = relation.type
                 role = relation.get('role', "")
                 # return rel, f as family, collect(distinct fe) as events, 
                 #    collect(distinct [m, n, me]) as members
                 node = record['family']
-                f_obj = Family_combo.from_node(node)
-                f_obj.role = rel_type
+                family = Family_combo.from_node(node)
+                family.role = rel_type
                 if rel_type == "CHILD":
-                    self.families_as_child.append(f_obj)
+                    self.families_as_child.append(family)
                 elif rel_type == "PARENT":
-                    self.families_as_parent.append(f_obj)
-                print(f"# ({self.id}) -[:{rel_type} {role}]-> (:Family '{f_obj}')")
-         
+                    self.families_as_parent.append(family)
+                print(f"# ({self.id}) -[:{rel_type} {role}]-> (:Family '{family}')")
+                
+                for event_node in record['events']:
+                    f_event = Event_combo.from_node(event_node)
+                    print(f"# event {f_event}")
+                    if f_event.type == "Marriage":
+                        family.marriage_dates = f_event.dates
+                    else:
+                        family.marriage_dates = None
+                
+                for relation, member_node, name_node, event_node in record['members']:
+                    # relation = <Relationship
+                    #    id=671263 
+                    #    nodes=(
+                    #        <Node id=432641 labels={'Family'} properties={'rel_type': 'Married', ...}>, 
+                    #        <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ...}>)
+                    #    type='CHILD' 
+                    #    properties={}>
+                    # member_node = <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ... }>
+                    # name_node = <Node id=428884 labels={'Name'} properties={'firstname': 'Caspar Woldemar' ...}>
+                    # event_node = <Node id=267935 labels={'Event'} properties={'type': 'Birth', ... }>
+                    start = relation.start
+                    end = relation.end
+                    role = relation['role']
+                    member = Person_as_member.from_node(member_node)
+                    if name_node:
+                        name = Name.from_node(name_node)
+                        member.names.append(name)
+                    else:
+                        name = None
+                    if event_node:
+                        event = Event_combo.from_node(event_node)
+                        member.birth_date = event.dates
+                    else:
+                        event = None
+                    print(f"#  member ({start}) -[:{relation.type} {relation._properties}]-> ({end}) {member} {name} {event}")
+                    if relation.type == "CHILD":
+                        family.children.append(member)
+                    elif relation.type == "PARENT":
+                        if role == "father":
+                            family.father = member
+                        elif role == "mother":
+                            family.mother = member
+                    pass
+
         except Exception as e:
             print(f"Could not read families for person {self.uuid}: {e}")
         return
