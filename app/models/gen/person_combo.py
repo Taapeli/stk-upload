@@ -267,8 +267,7 @@ return rel, f as family, collect(distinct fe) as events,
                 #    type='CHILD' 
                 #    properties={}> 
                 #  family=<Node id=432641 labels={'Family'} properties={...}> 
-                #  events=[<Node id=269554 labels={'Event'} properties={'type': 'Marriage', ...}>
-                #  ]
+                #  events=[<Node id=269554 labels={'Event'} properties={'type': 'Marriage', ...}> ...]
                 #  members=[[
                 #    <Relationship ...  type='CHILD' ...>, 
                 #    <Node ... labels={'Person'}...>, 
@@ -300,10 +299,10 @@ return rel, f as family, collect(distinct fe) as events,
                     print(f"# event {f_event}")
                     if f_event.type == "Marriage":
                         family.marriage_dates = f_event.dates
-                    else:
-                        family.marriage_dates = None
-                    # Add marriage / divorce to person events, too
+                    # Add family events to person events, too
                     if rel_type == "PARENT":
+                        f_event.role = "Family"
+                        print(f"# ({self.id}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
                         self.events.append(f_event)
 
                 # 4. Family members and their birth events
@@ -333,14 +332,17 @@ return rel, f as family, collect(distinct fe) as events,
                         member.birth_date = event.dates
                     else:
                         event = None
-                    print(f"#  member ({start}) -[:{rel_type} {relation._properties}]-> ({end}) {member} {name} {event}")
+
                     if rel_type == "CHILD":
-                        family.children.append(member)
+                        print(f"#  parent's family ({start}) -[:CHILD {relation._properties}]-> ({end}) {member} {name} {event}")
                     elif rel_type == "PARENT":
-                        if role == "father":
-                            family.father = member
-                        elif role == "mother":
-                            family.mother = member
+                        print(f"#  own family ({start}) -[:PARENT {relation._properties}]-> ({end}) {member} {name} {event}")
+                    if role == "father":
+                        family.father = member
+                    elif role == "mother":
+                        family.mother = member
+                    else:
+                        family.children.append(member)
                     pass
 
         except Exception as e:

@@ -49,6 +49,7 @@ class Family_combo(Family):
         self.events = []            # Event objects
         self.notes = []
         self.sources = []
+        self.marriage_dates = None
         self.note_ref = []          # For a page, where same note may be referenced
                                     # from multiple events and other objects
 

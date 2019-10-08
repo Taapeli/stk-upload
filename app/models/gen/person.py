@@ -132,6 +132,22 @@ class Person(NodeObject):
         " Returns person's sex as string"
         return self.convert_sex_to_str(self.sex)
 
+    def sex_symbol(self):
+        " Returns person's sex as string"
+        symbols = {SEX_UNKOWN:_(''), 
+                   SEX_MALE:_('♂'),
+                   SEX_FEMALE:_('♀'),
+                   SEX_NOT_APPLICABLE:_('-')}
+        return symbols.get(self.sex, '?')
+
+    def child_by_sex(self):
+        " Returns person's sex as string"
+        ch = {SEX_UNKOWN:_('Child'), 
+              SEX_MALE:_('Son'),
+              SEX_FEMALE:_('Daughter'),
+              SEX_NOT_APPLICABLE:_('Child')}
+        return ch.get(self.sex, '?')
+
     @staticmethod
     def convert_sex_to_str(sex):
         " Returns sex code as string"
@@ -140,7 +156,7 @@ class Person(NodeObject):
                       SEX_MALE:_('male'),
                       SEX_FEMALE:_('female'),
                       SEX_NOT_APPLICABLE:_('sex not applicable')}
-        return sexstrings.get(sex, '')
+        return sexstrings.get(sex, '?')
 
     @staticmethod
     def sex_from_str(s):

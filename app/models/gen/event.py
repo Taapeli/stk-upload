@@ -98,7 +98,7 @@ class Event(NodeObject):
 
 
     def __str__(self):
-        return "{} {}".format(self.type, self.dates or "")
+        return "{} {}".format(self.type, self.dates or "No date")
 
     @classmethod
     def from_node(cls, node, obj=None):
@@ -123,7 +123,7 @@ class Event(NodeObject):
             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
             obj.date = obj.dates.estimate()
         else:
-            obj.dates = None
+            obj.dates = DateRange()
             obj.date = ""
         obj.description = node['description'] or ''
         obj.attr = node['attr'] or dict()

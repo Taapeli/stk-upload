@@ -6,10 +6,10 @@ Created on 16.10.2017
 '''
 
 from datetime import date
-#from flask_security.utils import _
 from flask_babelex import lazy_gettext as _l
 
 DR = {
+    'MISSING':-1,       # no date
     'DATE':0,           # exact date d1
     'BEFORE':1,         # date till d1
     'AFTER':2,          # date from d1
@@ -104,6 +104,13 @@ class DateRange():
             method, and the components formats are not checked.
         '''
 
+        if len(args) == 0:
+            # Missing date value, maybe needed for comparisons?
+            self.datetype = DR['MISSING']
+            self.date1 = self.DateInt()
+            self.date2 = None
+            return
+
         if len(args) == 1:
             if isinstance(args[0], (list, tuple)) and len(args[0]) in [2, 3]:
                 # (d) The only argument is a tuple like (3, '1918-12', '2017-10-16')
@@ -167,6 +174,8 @@ class DateRange():
     def __str__(self):
         """ Return DateRange in display format like 'välillä 1700 … 9.1800'
         """
+        if self.datetype < 0:
+            return "–"
         type_e = self.datetype & 7        # Lower bits has effective type code
         type_opt = self.datetype-type_e   # Upper bits has options
 
@@ -206,7 +215,8 @@ class DateRange():
         Dates comparison
 
         If self < other, then self.__lt__(other) = True
-        None as other is always considered the 1st in order (= smallest value)
+        - if other is None or MISSING value, it is treated as smallest value
+        - If self is MISSING value, self is always ordered largest value
 
                   other ----------------
         op        None   >     =     <    # self <op> other = True?
@@ -221,26 +231,38 @@ class DateRange():
         #TODO Compare all DateRange types, now DR_DATE is assumed!
     '''
     def __lt__(self, other):
+        if self.datetype == DR['MISSING']:
+            return False
         if other:
             return self.date1.intvalue < other.date1.intvalue
         return False
     def __le__(self, other):
+        if self.datetype == DR['MISSING']:
+            return False
         if other:
             return self.date1.intvalue <= other.date1.intvalue
         return False
     def __eq__(self, other):
+        if self.datetype == DR['MISSING']:
+            return self.date1.intvalue == other.date1.intvalue
         if other:
             return self.date1.intvalue == other.date1.intvalue
         return False
     def __ge__(self, other):
+        if self.datetype == DR['MISSING']:
+            return True
         if other:
             return self.date1.intvalue >= other.date1.intvalue
         return True
     def __gt__(self, other):
+        if self.datetype == DR['MISSING']:
+            return True
         if other:
             return self.date1.intvalue > other.date1.intvalue
         return True
     def __ne__(self, other):
+        if self.datetype == DR['MISSING']:
+            return self.date1.intvalue != other.date1.intvalue
         if other:
             return self.date1.intvalue != other.date1.intvalue
         return True
@@ -361,8 +383,7 @@ class DateRange():
             """
             if arg0 == None:
                 # No value
-                print(f"ERROR: Invalid DateInt({arg0}, {month}, {day})")
-                self.intvalue = 0
+                self.intvalue = -1
             elif isinstance(arg0, int):
                 if arg0 > 9999:
                     # Not a year but a ready DateInt value
