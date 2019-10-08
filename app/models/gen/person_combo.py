@@ -230,7 +230,9 @@ RETURN rel, x ORDER BY x.order"""
 
     def _read_person_families(self, session, objs):
         ''' Read the families, where this Person is a member.
-            Also return the Family members with their birth event.
+
+            Also return the Family members with their birth event
+            and add family events to this person's events.
 
             (p:Person) <-- (f:Family)
                for f
@@ -247,6 +249,7 @@ optional match (m) -[:EVENT]-> (me:Event {type:"Birth"})
 return rel, f as family, collect(distinct fe) as events, 
     collect(distinct [mr, m, n, me]) as members
     order by family.date1"""
+
             results = session.run(person_get_families, 
                 uid=self.uniq_id)
             for record in results:
@@ -272,11 +275,15 @@ return rel, f as family, collect(distinct fe) as events,
                 #    <Node ... labels={'Name'}...>, 
                 #    <Node ... labels={'Event'}...]
                 #    ...]>
+
+                # 1. What is the relation this Person to their Family
+
                 relation = record['rel']
                 rel_type = relation.type
                 role = relation.get('role', "")
-                # return rel, f as family, collect(distinct fe) as events, 
-                #    collect(distinct [m, n, me]) as members
+
+                # 2. The Family node
+
                 node = record['family']
                 family = Family_combo.from_node(node)
                 family.role = rel_type
@@ -285,7 +292,9 @@ return rel, f as family, collect(distinct fe) as events,
                 elif rel_type == "PARENT":
                     self.families_as_parent.append(family)
                 print(f"# ({self.id}) -[:{rel_type} {role}]-> (:Family '{family}')")
-                
+
+                # 3. Family Events
+
                 for event_node in record['events']:
                     f_event = Event_combo.from_node(event_node)
                     print(f"# event {f_event}")
@@ -293,7 +302,12 @@ return rel, f as family, collect(distinct fe) as events,
                         family.marriage_dates = f_event.dates
                     else:
                         family.marriage_dates = None
-                
+                    # Add marriage / divorce to person events, too
+                    if rel_type == "PARENT":
+                        self.events.append(f_event)
+
+                # 4. Family members and their birth events
+
                 for relation, member_node, name_node, event_node in record['members']:
                     # relation = <Relationship
                     #    id=671263 
@@ -319,10 +333,10 @@ return rel, f as family, collect(distinct fe) as events,
                         member.birth_date = event.dates
                     else:
                         event = None
-                    print(f"#  member ({start}) -[:{relation.type} {relation._properties}]-> ({end}) {member} {name} {event}")
-                    if relation.type == "CHILD":
+                    print(f"#  member ({start}) -[:{rel_type} {relation._properties}]-> ({end}) {member} {name} {event}")
+                    if rel_type == "CHILD":
                         family.children.append(member)
-                    elif relation.type == "PARENT":
+                    elif rel_type == "PARENT":
                         if role == "father":
                             family.father = member
                         elif role == "mother":
