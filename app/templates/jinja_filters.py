@@ -28,6 +28,7 @@ def translate(term, var_name, lang="fi"):
     """
 #     print("# {}[{}]".format(var_name, term))
     if not term:
+        print(f"WARNING: templates.jinja_filters.translate: missing term={term}, var_name={var_name}")
         return "~"
     if var_name == "nt":
         # Name types
@@ -39,7 +40,7 @@ def translate(term, var_name, lang="fi"):
             "Aateloitu nimi": _("Aateloitu nimi"), #"Aateloitu nimi"
             "Aatelointinimi" : _("Aatelointinimi ") #"Aatelointinimi"
         }
-    if var_name == "evt":
+    elif var_name == "evt":
         # Event types    
         tabl = {
             "Birth": _("Birth"), #"syntymä"
@@ -48,6 +49,7 @@ def translate(term, var_name, lang="fi"):
             "Baptism": _("Baptism"), #"kaste"
             "Burial": _("Burial"), #"hautaus"
             "Marriage": _("Marriage"), #"avioliitto"
+            "Divorce": _("Divorce"), #"avioero"
             "Residence": _("Residence"), #"asuinpaikka"
             "Cause Of Death": _("Cause Of Death"), #"kuolinsyy"
             "Luottamustoimi": _("Luottamustoimi"), #"luottamustoimi"
@@ -69,7 +71,8 @@ def translate(term, var_name, lang="fi"):
             "Nobility Title": _("Nobility Title"), #"aatelointi"
             "Engagement": _("Engagement"), #"kihlajaiset"
             "Immigration": _("Immigration"), #"maahanmuutto"
-            "Ehtoollinen": _("Holy Communion") #"ehtoollinen"      
+            "Ehtoollinen": _("Holy Communion"), #"ehtoollinen"      
+            "Family": _("Family") #"ehtoollinen"      
     }
     elif var_name == "role":
         # Name types

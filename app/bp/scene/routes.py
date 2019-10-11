@@ -15,6 +15,7 @@ from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
 from . import bp
+from bp.scene.scene_reader import get_person_full_data
 from bp.scene.scene_reader import get_a_person_for_display_apoc
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
@@ -74,17 +75,18 @@ def show_person_list(selection=None):
         except Exception as e:
             logger.debug("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
-
-    # the code below is executed if the request method
-    # was GET or the credentials were invalid
-    persons = []
-    if selection:
-        # Use selection filter
-        keys = selection.split('=')
     else:
-        keys = ('surname',)
-    persons = [] #datareader.read_persons_with_events(keys)
-    print(f"-> bp.scene.routes.show_person_list GET {keys}")
+        # the code below is executed if the request method
+        # was GET or the credentials were invalid
+        persons = []
+        if selection:
+            # Use selection filter
+            keys = selection.split('=')
+        else:
+            keys = ('surname',)
+        persons = read_persons_with_events(keys)
+        print(f"-> bp.scene.routes.show_person_list GET {keys}")
+
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
@@ -173,9 +175,12 @@ def show_my_persons():
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_a_person_w_apoc(uid=None):
-    """ One Person with all connected nodes
-        Korvaamaan metodin show_person_page()
+def show_a_person(uid=None):
+    """ One Person with all connected nodes - NEW version 3.
+    
+        Note: not using apoc any more.
+    
+        Korvaamaan metodi show_person_page()
     """
     t0 = time.time()
     uid = request.args.get('uuid', uid)
@@ -187,9 +192,12 @@ def show_a_person_w_apoc(uid=None):
     else:
         user=None
     
-    person, objs, marks = get_a_person_for_display_apoc(uid, user)
+    if isinstance(uid, int):    # v2 Person page data
+        person, objs, marks = get_a_person_for_display_apoc(uid, user)
+    else:                       # v3 Person page data
+        person, objs, marks = get_person_full_data(uid, user)
     if not person:
-        return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
+        return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 #     for m in marks:
 #         print("Citation mark {}".format(m))
 #     for e in person.events:
@@ -197,7 +205,7 @@ def show_a_person_w_apoc(uid=None):
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
 #     print(person.sex_str())
-    print("-> bp.scene.routes.show_a_person_w_apoc")
+    print("-> bp.scene.routes.show_a_person")
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
         print(get_thumbname(objs[i].uuid))
@@ -209,7 +217,7 @@ def show_a_person_w_apoc(uid=None):
 @bp.route('/scene/person=<int:pid>')
 #     @login_required
 def show_person_page(pid):
-    """ Full homepage for a Person in database (vanhempi versio).
+    """ Full homepage for a Person in database (v1 versio).
 
         The pid may be 1) an uuid or 2) an uniq_id
     """
@@ -228,9 +236,9 @@ def show_person_page(pid):
                 print("    Child ({}): {} / {} s. {}".\
                       format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
     except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        return redirect(url_for('virhesivu', code=2, text=str(e)))
     print("-> bp.scene.routes.show_person_page")
-    return render_template("/scene/person.html", person=person, events=events, 
+    return render_template("/scene/person_v1.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 
                            elapsed=time.time()-t0)
 

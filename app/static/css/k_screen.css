@@ -710,19 +710,21 @@ div#families table.attrlist td.ColumnType {
     align-self: flex-start;
     width: 200px;
     margin: 1em;
-    font-size: 80%;
+    font-size: 90%;
 }
 .familybox {
-	width: 250px;
+	width: 350px;
 	border: 1px solid gray; 
     border-radius: 10px;
     background: bisque;
     flex-wrap: wrap;
     align-self: flex-start;
-    font-size: 80%;
+    font-size: 90%;
     margin: 10px;
 }
 .familybox p { padding-left: 1em; padding-top: 1em; }
+.familybox ul li ul { padding-left: 1.5em; }
+
 .groupbox {
     display: flex;
     align-items: flex-start;

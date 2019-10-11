@@ -13,8 +13,144 @@ from shareds import logger
 import traceback
 
 
-def get_a_person_for_display_apoc(uid, user):
+def get_person_full_data(uuid, owner):
     """ Get a Person with all connected nodes for display in Person page.
+
+
+    Obtaining Person object tree
+
+    For Person data page we must have all business objects, which has connection
+    to current Person. This is done in the following steps:
+
+    1. (p:Person) --> (x:Name|Event)
+    2. (p:Person) <-- (f:Family)
+       for f
+       (f) --> (fp:Person) -[*1]-> (fpn:Name)
+       (f) --> (fe:Event)
+    3. for z in p, x, fe, z, s, r
+       (y) --> (z:Citation|Note|Media)
+    4. for pl in z:Place, ph
+       (pl) --> (pn:Place_name)
+       (pl) --> (ph:Place)
+    5. for c in z:Citation
+       (c) --> (s:Source) --> (r:Repository)
+
+    #TODO perheenjäsenten syntymätapahtumat
+
+    p:Person
+      +-- x:Name
+      |     +-- z:Citation (2)
+      |     +-- z:Note (3)
+      |     +-- z:Media (4)
+(1)   +-- x:Event
+      |     +-- z:Place
+      |     |     +-- pn:Place_name
+      |     |     +-- z:Place (hierarkia)
+      |     |     +-- z:Citation (2)
+      |     |     +-- z:Note (3)
+      |     |     +-- z:Media (4)
+      |     +-- z:Citation (2)
+      |     +-- z:Note (3)
+      |     +-- z:Media (4)
+      +-- f:Family
+      |     +-- fp:Person
+      |     |     +-- fpn:Name
+      |     +-- fe:Event (1)
+      |     +-- z:Citation (2)
+      |     +-- z:Note (3)
+      |     +-- z:Media (4)
+(2)   +-- z:Citation
+      |     +-- s:Source
+      |     |     +-- r:Repository
+      |     |     |     +-- z:Citation (2)
+      |     |     |     +-- z:Note (3)
+      |     |     |     +-- z:Media (4)
+      |     |     +-- z:Citation (2)
+      |     |     +-- z:Note (3)
+      |     |     +-- z:Media (4)
+      |     +-- z:Note (3)
+      |     +-- z:Media (4)
+(3)    +-- z:Note
+      |     +-- z:Citation (2)
+      |     +-- z:Media (4)
+(4)   +-- z:Media
+            +-- z:Citation (2)
+            +-- z:Note (3)
+      
+    The objects are stored in Person object tree as
+    - x and f: included objects or
+    - others: references to "objs" dictionary. 
+    For ex. Sources may be referenced multiple times and we want to store them 
+    once only.
+
+    - The Person is identified by uuid key.
+
+    #TODO: check description
+
+    1. The 1st node is the current person
+
+    2. Each node is converted to our bussines model objects (Event, Name, Family, ...) 
+       and stored in dictionary objs[uniq_id].
+
+    3. From each relation, the objects corresponding the source and target nodes
+       are created with method models.gen.from_node.get_object_from_node.
+
+       The method bp.scene.scene_reader.connect_object_as_leaf handles adding the
+       target node to Person object tree as an object or reference to objs[].
+
+    4. The person Events are ordered by date
+
+    5. The clear text Event place names are created.
+
+
+    Footnote processing
+    
+    Each Citation reference is stored in in person.citation_ref and other objects. 
+    The citation in Person page shall be expressed as footnote reference, which
+    is created using class bp.scene.models.footnote.Footnotes.
+    
+    For a citation, data must be collected from path
+    (cite:Citation) -[*]-> (source:Source) -[1]-> (repo:Repository)
+    with method bp.scene.models.footnote.SourceFootnote.from_citation_objs .
+
+
+    #TODO: Describe footnote processing in "/scene/person_pg.html" template
+    """
+
+    # 1. Read Person p and essential directly connected nodes z
+    #       (p:Person) --> (x:Name|Event)
+    # 2. (p:Person) <-- (f:Family)
+    #    for f
+    #       (f) --> (fp:Person) -[*1]-> (fpn:Name)
+    #       (f) --> (fe:Event)
+
+    try:
+        person, objs = Person_combo.get_person_essentials(uuid, owner)
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Henkilötietojen {uuid} luku epäonnistui: {e}")
+        return (None, None, None)
+
+    return (person, objs, [])
+
+    # 3. Read their connected nodes z: Citations, Notes, Medias and Places
+    #    for y in p, x, fe, z, s, r
+    #        (y) --> (z:Citation|Note|Media|Place)
+
+    # 4. Read Place names pn
+    #    for pl in z:Place
+    #        (pl) --> (pn:Place_name)
+
+    # 5. Read Sources s and Repositories r for all Citations
+    #   5. for c in z:Citation
+    #        (c) --> (s:Source) --> (r:Repository)
+
+    
+        # Create gen objects tree: Person with all connected objects
+
+
+def get_a_person_for_display_apoc(uid, user):
+    """ Get a Person with all connected nodes for display in Person page (v2).
 
 
     Person object tree is creation

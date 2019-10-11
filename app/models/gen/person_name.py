@@ -29,7 +29,7 @@ class Name:
     def __init__(self, givn='', surn='', pref='', suff=''):
         """ Luo uuden name-instanssin """
         self.type = ''
-        self.alt = ''   #Todo: Should be removed?
+        #self.alt = ''   #Todo: Should be removed?
         self.order = None
         self.firstname = givn
         self.surname = surn
