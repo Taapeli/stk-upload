@@ -75,17 +75,18 @@ def show_person_list(selection=None):
         except Exception as e:
             logger.debug("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
-
-    # the code below is executed if the request method
-    # was GET or the credentials were invalid
-    persons = []
-    if selection:
-        # Use selection filter
-        keys = selection.split('=')
     else:
-        keys = ('surname',)
-    persons = [] #datareader.read_persons_with_events(keys)
-    print(f"-> bp.scene.routes.show_person_list GET {keys}")
+        # the code below is executed if the request method
+        # was GET or the credentials were invalid
+        persons = []
+        if selection:
+            # Use selection filter
+            keys = selection.split('=')
+        else:
+            keys = ('surname',)
+        persons = read_persons_with_events(keys)
+        print(f"-> bp.scene.routes.show_person_list GET {keys}")
+
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
@@ -172,7 +173,9 @@ def show_my_persons():
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 def show_a_person(uid=None):
-    """ One Person with all connected nodes - NEW version 3: not using apoc any more.
+    """ One Person with all connected nodes - NEW version 3.
+    
+        Note: not using apoc any more.
     
         Korvaamaan metodi show_person_page()
     """

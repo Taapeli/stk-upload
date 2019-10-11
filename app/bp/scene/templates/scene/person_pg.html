@@ -119,12 +119,10 @@ u { color: DarkKhaki; text-decoration: none; }
                         {% endfor %}</td>
 
                         {% if e.uuid %}{% set uuid = e.uuid %}{% else %}{% set uuid = "" %}{% endif %}
-                        <td class="ColumnEvent" title="{{e.id}} {{uuid[:6]}} nr:{{e.uniq_id}}">
+                        <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
                             {% if e.type == "Baptism" %}<a href="/scene/event/{{e.uniq_id}}"
-                                class="inlink">&#x1F50E;&nbsp;{{e.type|transl('evt')}}</a>
-                            {% else %}
-                                &#x26AA;&nbsp;{{e.type|transl('evt')}}{% endif %}
+                                class="inlink">&rarr;&nbsp;{% endif %}{{e.type|transl('evt')}}
                             {% if e.role and e.role != "Primary" %}<span 
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>

@@ -286,6 +286,7 @@ return rel, f as family, collect(distinct fe) as events,
                 node = record['family']
                 family = Family_combo.from_node(node)
                 family.role = rel_type
+                family.marriage_dates = ""  # type string or DataRange
                 if rel_type == "CHILD":
                     self.families_as_child.append(family)
                 elif rel_type == "PARENT":

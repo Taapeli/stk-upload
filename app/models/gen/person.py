@@ -123,9 +123,6 @@ class Person(NodeObject):
 
     def __str__(self):
         dates = self.dates if self.dates else ''
-#         if self.gender == 'M':  sex = 'male'
-#         elif self.gender == 'F':  sex = 'female'
-#         else: sex = 'unknown'
         return "{} {} {}".format(self.sex_str(), self.id, dates)
 
     def sex_str(self):

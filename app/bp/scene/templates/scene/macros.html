@@ -89,10 +89,7 @@
     {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>
 {%- endmacro %}
 
-{% macro sex(person) -%}
-    {#  Shows Person gender symbol (only for man and woman). #}
-    {% if person.sex == 1 %}&#9794;{% elif person.sex == 2 %}&#9792;{% endif %}
-{%- endmacro %}
+{# Note. Person.sex_symbol() method replaces macro.sex() #}
 
 {% macro person(p, uuid) -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
@@ -101,7 +98,7 @@
     <span class="myself">&nbsp;(itse)&nbsp;</span>
     {% else %}{% if p.uuid %}
     <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.uuid[:6]) }} (nr. {{p.uniq_id}})">
+        title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr. {{p.uniq_id}})">
     {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">{% endif %}
         {% if p.names|length %}{{ person_name(p.names[0]) }}</a>

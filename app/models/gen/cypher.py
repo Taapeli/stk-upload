@@ -165,7 +165,7 @@ MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:
 MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
 WHERE search.name STARTS WITH $attr.name
 WITH search, person
-MATCH (person) -[:NAME]-> (name:Name)
+MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
 
     get_confidences_all = """
