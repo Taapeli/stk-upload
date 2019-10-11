@@ -41,7 +41,7 @@ class Family(NodeObject):
 
 
     def __str__(self):
-        if self.rel_type:   rel = self.rel_type
+        if self.rel_type:   rel = self.rel_type.lower()
         else:               rel = _('undefined relation')
         return "{} {}".format(self.id, rel, self.dates)
 

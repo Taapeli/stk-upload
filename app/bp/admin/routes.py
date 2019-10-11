@@ -9,16 +9,14 @@ Created on 8.8.2018
 
 import os
 
-import json
 import logging 
 import inspect
 import traceback
-
-from bp.gramps.models import batch
-
+#import datetime
+#from _pickle import Unpickler
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
+from flask import render_template, request, redirect, url_for, send_from_directory, flash, session
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _
 
@@ -47,6 +45,7 @@ def admin():
 
 
 @bp.route('/admin/clear_db/<string:opt>')
+@login_required
 @roles_required('admin')
 def clear_db(opt):
     """ Clear database - with no confirmation! """
@@ -73,6 +72,7 @@ def clear_my_db():
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
 @bp.route('/admin/set/estimated_dates')
 @bp.route('/admin/set/estimated_dates/<int:uid>')
+@login_required
 @roles_required('admin')
 def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
@@ -82,12 +82,14 @@ def estimate_dates(uid=None):
 
 # Refnames homa page
 @bp.route('/admin/refnames')
-#@roles_required('admin')
+@login_required
+@roles_required('admin')
 def refnames():
     """ Operations for reference names """
     return render_template("/admin/reference.html")
 
 @bp.route('/admin/set/refnames')
+@login_required
 @roles_accepted('member', 'admin')
 def set_all_person_refnames():
     """ Setting reference names for all persons """
@@ -96,6 +98,7 @@ def set_all_person_refnames():
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 @bp.route('/admin/upload_csv', methods=['POST'])
+@login_required
 @roles_required('admin')
 def upload_csv():
     """ Load a cvs file to temp directory for processing in the server
@@ -299,6 +302,7 @@ def start_load_to_neo4j(username,xmlname):
     return redirect(url_for('admin.list_uploads', username=username))
 
 @bp.route('/admin/list_threads', methods=['GET'])
+@login_required
 @roles_accepted('admin', 'audit')
 def list_threads(): # for debugging
     import threading
@@ -325,6 +329,7 @@ def xml_download(username,xmlfile):
     #attachment_filename=xmlfile+".gz") 
 
 @bp.route('/admin/show_upload_log/<username>/<xmlfile>')
+@login_required
 @roles_accepted('member', 'admin')
 def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(username)
@@ -391,6 +396,7 @@ def send_email():
     
 @shareds.app.route('/admin/send_emails',methods=["post"])
 @login_required
+@roles_accepted('admin', 'audit')
 def send_emails():
     subject = request.form["subject"]
     body = request.form["message"]
@@ -468,67 +474,3 @@ def readlog():
     recs = syslog.readlog(direction,startid)
     return render_template("/admin/syslog.html", recs=recs)
     
-
-#------------------- Access Management -------------------------
-@bp.route("/admin/access_management")
-@login_required
-@roles_accepted('admin')
-def access_management():
-    return render_template("/admin/access_management.html")
-
-@bp.route('/admin/fetch_users', methods=['GET'])
-@login_required
-@roles_accepted('admin')
-def fetch_users():
-    userlist = shareds.user_datastore.get_users()
-    users = [
-        dict(
-            username=user.username,
-            name=user.name,
-            email=user.email,
-        )
-        for user in userlist if user.username != 'master']
-    return jsonify(users)
-
-@bp.route('/admin/fetch_batches', methods=['GET'])
-@login_required
-@roles_accepted('admin')
-def fetch_batches():
-    batch_list = list(batch.get_batches())
-    for b in batch_list:
-        file = b.get('file')
-        if file:
-            file = file.split("/")[-1].replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
-            b['file'] = file 
-    return jsonify(batch_list)
-
-@bp.route('/admin/fetch_accesses', methods=['GET'])
-@login_required
-@roles_accepted('admin')
-def fetch_accesses():
-    access_list = UserAdmin.get_accesses();
-    return jsonify(access_list)
-
-@bp.route('/admin/add_access', methods=['POST'])
-@login_required
-@roles_accepted('admin')
-def add_access():
-    data = json.loads(request.data)
-    print(data)
-    username = data.get("username")
-    batchid = data.get("batchid")
-    rsp = UserAdmin.add_access(username,batchid)
-    print(rsp)
-    print(rsp.get("r"))
-    return jsonify(dict(rsp.get("r")))
-
-@bp.route('/admin/delete_accesses', methods=['POST'])
-@login_required
-@roles_accepted('admin')
-def delete_accesses():
-    data = json.loads(request.data)
-    print(data)
-    rsp = UserAdmin.delete_accesses(data)
-    return jsonify(rsp)
-
-

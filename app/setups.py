@@ -15,8 +15,8 @@ from templates import jinja_filters
 from datetime import datetime
 
 import logging
-from flask_login.utils import current_user
-from flask.globals import session
+#from flask_login.utils import current_user
+#from flask.globals import session
 import json
 logger = logging.getLogger('stkserver') 
 

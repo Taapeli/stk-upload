@@ -175,7 +175,7 @@ RETURN p"""
                 record = session.run(get_person_public, uuid=uuid).single() # Show a person from public database
             #TODO: Rule for public database is missing, taking all!
             if record == None:
-                raise KeyError("Person {uuid} not found.")
+                raise KeyError(f"Person {uuid} not found.")
             node = record[0]
             p = Person_combo.from_node(node)
             print(f"#Person {p}")
@@ -294,6 +294,7 @@ return rel, f as family, collect(distinct fe) as events,
                 print(f"# ({self.id}) -[:{rel_type} {role}]-> (:Family '{family}')")
 
                 # 3. Family Events
+                #TODO: Cause of death is not displayed!
 
                 for event_node in record['events']:
                     f_event = Event_combo.from_node(event_node)
@@ -369,7 +370,8 @@ return rel, f as family, collect(distinct fe) as events,
                 #      (f) --> (fe:Event)
                 p._read_person_families(session, objs)
 
-        print(f"# Nodes for Person {p.uniq_id} are {list(objs.keys())}")
+        if objs:
+            print(f"# Nodes for Person {p.uniq_id} are {list(objs.keys())}")
         return p, objs
 
     @staticmethod

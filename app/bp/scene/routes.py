@@ -11,7 +11,7 @@ logger = logging.getLogger('stkserver')
 import time
 
 from flask import render_template, request, redirect, url_for, flash, session as user_session
-from flask_security import current_user, login_required #, roles_accepted
+from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
 from . import bp
@@ -139,6 +139,8 @@ def show_all_persons_list(opt=''):
 
 
 @bp.route('/scene/persons_all/')
+@login_required
+@roles_accepted('guest', 'research', 'audit', 'admin')
 def show_my_persons():
     """ List all persons for menu(12).
 
@@ -172,6 +174,7 @@ def show_my_persons():
 @bp.route('/scene/person/<int:uid>')
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
+@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def show_a_person(uid=None):
     """ One Person with all connected nodes - NEW version 3.
     
@@ -194,7 +197,7 @@ def show_a_person(uid=None):
     else:                       # v3 Person page data
         person, objs, marks = get_person_full_data(uid, user)
     if not person:
-        return redirect(url_for('virhesivu', code=1, text="Henkilötietoja ei saatu"))
+        return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 #     for m in marks:
 #         print("Citation mark {}".format(m))
 #     for e in person.events:
@@ -233,7 +236,7 @@ def show_person_page(pid):
                 print("    Child ({}): {} / {} s. {}".\
                       format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
     except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        return redirect(url_for('virhesivu', code=2, text=str(e)))
     print("-> bp.scene.routes.show_person_page")
     return render_template("/scene/person_v1.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 

@@ -57,6 +57,7 @@ CREATE (user:User {
         name: $name,
         language: $language, 
         is_active: $is_active, 
+        confirmed_at: $confirmed_at,
         roles: $roles}
     ) -[:HAS_ROLE]-> (role) 
 RETURN user'''

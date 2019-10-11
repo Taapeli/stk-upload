@@ -17,15 +17,18 @@ class SetupCypher():
     set_role_constraint = """
     CREATE CONSTRAINT ON (role:Role) ASSERT role.name IS UNIQUE
     """
-
+    role_check_existence = """
+    MATCH  (role:Role) WHERE role.name = $rolename RETURN COUNT(role)
+    """
+        
     role_create = """
     CREATE (role:Role 
     {level: $level, name: $name, 
     description: $description, timestamp: timestamp()})
     """
 
-    master_check_existence = """
-    MATCH  (user:User) WHERE user.username = 'master' RETURN COUNT(user)
+    user_check_existence = """
+    MATCH  (user:User) WHERE user.username = $username RETURN COUNT(user)
     """
         
     email_val = """
@@ -49,6 +52,26 @@ class SetupCypher():
     
     master_create = """
     MATCH  (role:Role) WHERE role.name = 'master'
+    CREATE (user:User 
+        {username : $username, 
+        password : $password,  
+        email : $email, 
+        name : $name,
+        language : $language, 
+        is_active : $is_active,
+        confirmed_at : timestamp(), 
+        roles : $roles,
+        last_login_at : timestamp(),
+        current_login_at : timestamp(),
+        last_login_ip : $last_login_ip,
+        current_login_ip : $current_login_ip,
+        login_count : $login_count} )           
+        -[:HAS_ROLE]->(role)
+    """ 
+    
+    
+    guest_create = """
+    MATCH  (role:Role) WHERE role.name = 'guest' 
     CREATE (user:User 
         {username : $username, 
         password : $password,  

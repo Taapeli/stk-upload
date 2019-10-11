@@ -123,18 +123,20 @@
 
 	                <td class="ColumnPerson"><div>
 	                   {% for ow in p.owners %}
-                           {% if ow == user %}&FilledSmallSquare;
-                           {% else %}<span class="owner">&nbsp;{{ow}}&nbsp;</span>{% endif %}
+                           {% if ow == user %}<!-- &FilledSmallSquare; -->
+                           <div class="detail_link" alt="{{p.uniq_id}}">
+                             {{p.sex_symbol()}}
+                             <a href="/scene/person?uuid={{p.uuid}}"
+                                title="{{ _('see details of person %(id)s', id=p.uuid_short()) }}">
+                             {{macro.person_name(p.names[0])}}</a>
+                           </div>
+                           {% else %}
+                           <span class="owner">&nbsp;{{ow}}&nbsp;</span>
+                           <div class="no_detail" title="Ei katseluoikeutta!">
+                             {{p.sex_symbol()}} {{macro.person_name(p.names[0])}}
+                           </div>
+                           {% endif %}
 	                   {% endfor %}
-
-	                   {% if p.uuid %}<div class="detail_link" alt="{{p.uniq_id}}">
-		                   {{p.sex_symbol()}}
-		                   <a href="/scene/person?uuid={{p.uuid}}"
-		                     title="{{ _('see details of person %(id)s', id=p.uuid_short()) }}">
-                           {{macro.person_name(p.names[0])}}</a></div>
-		               {% else %}<div class="no_detail" title="UUID puuttuu!">
-                           {{p.sex_symbol()}} {{macro.person_name(p.names[0])}}</div>
-                       {% endif %}
 
 		               {%set eka = 1 %}
 		               {% for name in p.names %}
