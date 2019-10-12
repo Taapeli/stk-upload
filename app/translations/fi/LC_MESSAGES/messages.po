@@ -533,7 +533,7 @@ msgstr "rekisteröityneet käyttäjät"
 
 #: bp/admin/templates/admin/allowed_emails.html:67
 msgid "pending candidates"
-msgstr ""
+msgstr "rekisteröitymättömät ehdokkaat"
 
 #: bp/admin/templates/admin/allowed_emails.html:71
 msgid "Pending user candidates"

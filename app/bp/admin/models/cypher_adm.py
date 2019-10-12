@@ -14,6 +14,7 @@ MATCH (a)
 where not ( 'UserProfile' IN labels(a)
     OR 'Allowed_email' IN labels(a)
     OR 'User' IN labels(a)
+    OR 'Guest' IN labels(a)
     OR 'Role' IN labels(a) )
 DETACH DELETE a"""
 
