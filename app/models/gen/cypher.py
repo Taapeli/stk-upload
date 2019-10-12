@@ -42,6 +42,27 @@ class Cypher_person():
     '''
     Cypher clases for creating and accessing Places
     '''
+# For Person_pg v3
+    get_by_user = """
+MATCH (b:UserProfile {username:$user}) --> (:Batch)
+       -[:OWNS]-> (p:Person {uuid:$uuid})
+RETURN p"""
+    get_public = """
+MATCH (p:Person {uuid:$uuid}) 
+RETURN p"""
+    get_names_events = """
+MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
+RETURN rel, x ORDER BY x.order"""
+    get_families = """
+MATCH (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
+OPTIONAL MATCH (f) -[:EVENT]-> (fe:Event)
+OPTIONAL MATCH (f) -[mr:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
+OPTIONAL MATCH (m) -[:EVENT]-> (me:Event {type:"Birth"})
+RETURN rel, f AS family, COLLECT(distinct fe) AS events, 
+    COLLECT(distinct [mr, m, n, me]) AS members
+    ORDER BY family.date1"""
+
+#For Person_pg v2
     all_nodes_query_w_apoc="""
 MATCH (p:Person {uuid:$uuid})
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 

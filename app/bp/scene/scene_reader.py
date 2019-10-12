@@ -125,7 +125,7 @@ def get_person_full_data(uuid, owner):
     #       (f) --> (fe:Event)
 
     try:
-        person, objs = Person_combo.get_person_essentials(uuid, owner)
+        person, objs = Person_combo.get_person_full(uuid, owner)
     except Exception as e:
         traceback.print_exc()
         print(f"Henkilötietojen {uuid} luku epäonnistui: {e}")

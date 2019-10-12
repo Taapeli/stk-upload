@@ -162,18 +162,13 @@ return path"""
         ''' Read a person, who must belong to user's Batch, if user is given.
         '''
         try:
-            if user:
-                person_get_user = """
-MATCH (b:UserProfile {username:$user}) --> (:Batch)
-      -[:OWNS]-> (p:Person {uuid:$uuid})
-RETURN p"""
-                record = session.run(person_get_user, uuid=uuid, user=user).single()
-            else:
-                get_person_public = """
-MATCH (p:Person {uuid:$uuid}) 
-RETURN p"""
-                record = session.run(get_person_public, uuid=uuid).single() # Show a person from public database
-            #TODO: Rule for public database is missing, taking all!
+            if user != 'guest':    # Select person owned by user
+                record = session.run(Cypher_person.get_by_user,
+                                     uuid=uuid, user=user).single()
+            else:       # Select person from public database
+                #TODO: Rule for public database is missing, taking all!
+                record = session.run(Cypher_person.get_public,
+                                     uuid=uuid).single()
             if record == None:
                 raise KeyError(f"Person {uuid} not found.")
             node = record[0]
@@ -191,11 +186,8 @@ RETURN p"""
         ''' Read names and events to Person variables.
         '''
         try:
-            person_get_names_events = """
-MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE id(p) = $uid
-RETURN rel, x ORDER BY x.order"""
-            results = session.run(person_get_names_events, 
-                uid=self.uniq_id)
+            results = session.run(Cypher_person.get_names_events,
+                                  uid=self.uniq_id)
             for record in results:
                 # <Record rel=<Relationship id=453912
                 #    nodes=(
@@ -239,19 +231,9 @@ RETURN rel, x ORDER BY x.order"""
                  (f) --> (fp:Person) -[*1]-> (fpn:Name)
                  (f) --> (fe:Event)
         '''
-
         try:
-            person_get_families = """
-match (p:Person) <-[rel:CHILD|PARENT]- (f:Family) WHERE ID(p) = $uid
-optional match (f) -[:EVENT]-> (fe:Event)
-optional match (f) -[mr:CHILD|PARENT]-> (m:Person) -[:NAME]-> (n:Name {order:0})
-optional match (m) -[:EVENT]-> (me:Event {type:"Birth"})
-return rel, f as family, collect(distinct fe) as events, 
-    collect(distinct [mr, m, n, me]) as members
-    order by family.date1"""
-
-            results = session.run(person_get_families, 
-                uid=self.uniq_id)
+            results = session.run(Cypher_person.get_families,
+                                  uid=self.uniq_id)
             for record in results:
                 # <Record
                 #  rel=<Relationship id=671269
@@ -352,7 +334,7 @@ return rel, f as family, collect(distinct fe) as events,
         return
 
     @staticmethod
-    def get_person_essentials(uuid, user):
+    def get_person_full(uuid, user):
         ''' Read a person and paths for essential connected nodes. (Version 3)
 
             The Person must belong to user's Batch, if user is given.

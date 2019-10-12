@@ -175,7 +175,7 @@ def show_my_persons():
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_a_person(uid=None):
+def show_person_pg_v2_v3(uid=None):
     """ One Person with all connected nodes - NEW version 3.
     
         Note: not using apoc any more.
@@ -205,7 +205,7 @@ def show_a_person(uid=None):
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
 
 #     print(person.sex_str())
-    print("-> bp.scene.routes.show_a_person")
+    print("-> bp.scene.routes.show_person_pg_v2_v3")
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
         print(get_thumbname(objs[i].uuid))
@@ -216,7 +216,7 @@ def show_a_person(uid=None):
 @bp.route('/scene/person/uuid=<pid>')
 @bp.route('/scene/person=<int:pid>')
 #     @login_required
-def show_person_page(pid):
+def show_person_v1(pid):
     """ Full homepage for a Person in database (v1 versio).
 
         The pid may be 1) an uuid or 2) an uniq_id
@@ -237,7 +237,7 @@ def show_person_page(pid):
                       format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=2, text=str(e)))
-    print("-> bp.scene.routes.show_person_page")
+    print("-> bp.scene.routes.show_person_v1")
     return render_template("/scene/person_v1.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 
                            elapsed=time.time()-t0)
