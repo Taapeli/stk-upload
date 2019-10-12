@@ -289,6 +289,9 @@ return path"""
                         f_event.role = "Family"
                         print(f"# ({self.id}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
                         self.events.append(f_event)
+                        # Add Event to list of those events, who's references are searched
+                        if not f_event.uniq_id in objs.keys():
+                            objs[f_event.uniq_id] = f_event
 
                 # 4. Family members and their birth events
 
@@ -335,7 +338,7 @@ return path"""
         return
 
     def _read_object_places(self, session, objs):
-        ''' Read names and events to Person variables.
+        ''' Read Place hierarchies for all objects in objs.
         '''
         try:
             uids = list(objs.keys())
@@ -373,41 +376,50 @@ return path"""
                 #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': ''}>
                 #    ]>
 
-                src_node = record['x']
-                src_label = list(src_node.labels)[0]
+                node = record['x']
+                src_label = list(node.labels)[0]
                 if src_label == "Event":
-                    src = Event_combo.from_node(record['x'])
+                    #src = Event_combo.from_node(node)
+                    src_uniq_id = node.id
+                    src = None
                 else:
                     raise TypeError('An Event excepted, got {src_label}')
 
-                if src.uniq_id in objs.keys():
-                    # Use the Event from Person events
-                    for e in self.events:
-                        if e.uniq_id == src.uniq_id:
-                            src = e
-                            break
-                else:
-                    raise LookupError("ERROR: Unknown Event {src}!?")
+                # Use the Event from Person events
+                for e in self.events:
+                    if e.uniq_id == src_uniq_id:
+                        src = e
+                        break
+                if not src:
+                    raise LookupError("ERROR: Unknown Event {src_uniq_id}!?")
 
                 pl = Place_combo.from_node(record['pl'])
                 if pl.uniq_id in objs.keys():
-                    print(f"Known {list(record['pl'].labels)[0]} {objs[pl.uniq_id]}")
+                    print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
                 else:
                     # A new place
                     objs[pl.uniq_id] = pl
-                    print(f"# new (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
+                    print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
     
-                    for pn_node in record['pnames']:
-                        pn = Place_name.from_node(pn_node)
-                        print(f"#  Place_name {pn.uniq_id} {pn}")
+                    for node in record['pnames']:
+                        pl.names.append(Place_name.from_node(node))
+                        print(f"#  ({pl}) --> (Place_name {pl.names[-1].uniq_id} {pl.names[-1]})")
+                src.place_ref.append(pl.uniq_id)
+
                 # Surrounding places
                 pl_in = Place_combo.from_node(record['pi'])
-                print(f"# -[:IS_INSIDE]-> (pi:Place {pl_in})")
-                for pn_node in record['pinames']:
-                    pn = Place_name.from_node(pn_node)
-                    print(f"#  Place_name {pn.uniq_id} {pn}")
+                print(f"#   hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
+                if pl_in.uniq_id in objs:
+                    pl.uppers.append(objs[pl_in.uniq_id])
+                    print(f"# - Using a known place {objs[pl_in.uniq_id]}")
+                else:
+                    pl.uppers.append(pl_in)
+                    objs[pl_in.uniq_id] = pl_in
+                    for node in record['pinames']:
+                        pl_in.names.append(Place_name.from_node(node))
+                        print(f"#  ({pl_in}) --> (Place_name {pl_in.names[-1].uniq_id} {pl_in.names[-1]})")
                 pass
-         
+
         except Exception as e:
             print(f"Could not read places for person {self.uuid} objects {objs}: {e}")
         return

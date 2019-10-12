@@ -133,7 +133,8 @@ u { color: DarkKhaki; text-decoration: none; }
                             {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/scene/location/uuid={{obj[pref].uuid}}" class="inlink"
                             title="{{ _('of type') }} {{obj[pref].type}}; {{ _('see details of place') }}">
-                            {{macro.place_names(obj[pref])}}</a> 
+                            {{macro.place_names(obj[pref])}}</a>
+                            {% if obj[pref].uppers %}, <small>{{macro.place_names(obj[pref].uppers[0])}}</small>{% endif %}
                             {% endfor %}
                         </td>
 

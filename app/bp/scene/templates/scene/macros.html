@@ -71,9 +71,7 @@
 
 {% macro all_obj_ids(obj) -%}
     {#  Formats object keys for display. #}
-    {% if obj.uuid %}
-    <tt title="{{ _('UUID key') }}">{{obj.uuid[:6]}}</tt> /
-    {% endif %}
+    <tt title="{{ _('UUID key') }}">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
 {%- endmacro %}
@@ -88,8 +86,6 @@
     {#  Formats a Person name. Shows all firstname, patronyme and surname. #}
     {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>
 {%- endmacro %}
-
-{# Note. Person.sex_symbol() method replaces macro.sex() #}
 
 {% macro person(p, uuid) -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}

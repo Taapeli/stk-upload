@@ -203,8 +203,6 @@ def show_person_pg_v2_v3(uid=None):
 #     for e in person.events:
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
-
-#     print(person.sex_str())
     print("-> bp.scene.routes.show_person_pg_v2_v3")
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
