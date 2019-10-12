@@ -127,7 +127,7 @@ u { color: DarkKhaki; text-decoration: none; }
                                 class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
                         </td>
 
-                        <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
+                        <td class="ColumnDate">{{e.dates}}</td>
 
                         <td class="ColumnPlace">{% set br=0 %}{% for pref in e.place_ref %}
                             {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
