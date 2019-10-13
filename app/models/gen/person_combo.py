@@ -51,9 +51,10 @@ import shareds
 from .person import Person
 from .person_name import Name
 from .event_combo import Event_combo
-from .family_combo import Family_combo
+#from .family_combo import Family_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
+from .place_combo import Place_combo
 from .dates import DateRange
 try:
     from models.gen.family_combo import Family_combo
@@ -170,7 +171,7 @@ return path"""
                 record = session.run(Cypher_person.get_public,
                                      uuid=uuid).single()
             if record == None:
-                raise KeyError(f"Person {uuid} not found.")
+                raise LookupError(f"Person {uuid} not found.")
             node = record[0]
             p = Person_combo.from_node(node)
             print(f"#Person {p}")
@@ -288,6 +289,9 @@ return path"""
                         f_event.role = "Family"
                         print(f"# ({self.id}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
                         self.events.append(f_event)
+                        # Add Event to list of those events, who's references are searched
+                        if not f_event.uniq_id in objs.keys():
+                            objs[f_event.uniq_id] = f_event
 
                 # 4. Family members and their birth events
 
@@ -302,8 +306,8 @@ return path"""
                     # member_node = <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ... }>
                     # name_node = <Node id=428884 labels={'Name'} properties={'firstname': 'Caspar Woldemar' ...}>
                     # event_node = <Node id=267935 labels={'Event'} properties={'type': 'Birth', ... }>
-                    start = relation.start
-                    end = relation.end
+#                     start = relation.start
+#                     end = relation.end
                     role = relation['role']
                     member = Person_as_member.from_node(member_node)
                     if name_node:
@@ -317,10 +321,10 @@ return path"""
                     else:
                         event = None
 
-                    if rel_type == "CHILD":
-                        print(f"#  parent's family ({start}) -[:CHILD {relation._properties}]-> ({end}) {member} {name} {event}")
-                    elif rel_type == "PARENT":
-                        print(f"#  own family ({start}) -[:PARENT {relation._properties}]-> ({end}) {member} {name} {event}")
+#                     if rel_type == "CHILD":
+#                         print(f"#  parent's family ({start}) -[:CHILD {relation._properties}]-> ({end}) {member} {name} {event}")
+#                     elif rel_type == "PARENT":
+#                         print(f"#  own family ({start}) -[:PARENT {relation._properties}]-> ({end}) {member} {name} {event}")
                     if role == "father":
                         family.father = member
                     elif role == "mother":
@@ -333,6 +337,90 @@ return path"""
             print(f"Could not read families for person {self.uuid}: {e}")
         return
 
+    def _read_object_places(self, session, objs):
+        ''' Read Place hierarchies for all objects in objs.
+        '''
+        try:
+            uids = list(objs.keys())
+            results = session.run(Cypher_person.get_places,
+                                  uid_list=uids)
+            for record in results:
+                # <Record 
+                #    x=<Node id=426916 labels={'Event'} 
+                #        properties={'datetype': 0, 'change': 1543867969, 'description': '', 
+                #            'id': 'E6600', 'date2': 1913866, 'type': 'Baptism', 
+                #            'date1': 1913866, 'uuid': 'cd6c826d30a741dea41df2ab207ec810'}> 
+                #    pl=<Node id=306042 labels={'Place'}
+                #        properties={'id': 'P0456', 'type': 'Parish', 'uuid': '7aeb4e26754d46d0aacfd80910fa1bb1',
+                #            'pname': 'Helsingin seurakunnat', 'change': 1543867969}> 
+                #    pnames=[
+                #        <Node id=306043 labels={'Place_name'}
+                #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>, 
+                #        <Node id=306043 labels={'Place_name'} 
+                #            properties={'name': 'Helsingin seurakunnat', 'lang': ''}>
+                #    ]
+                ##    ri=<Relationship id=631695 
+                ##        nodes=(
+                ##            <Node id=306042 labels={'Place'} properties={'id': 'P0456', ...>, 
+                ##            <Node id=307637 labels={'Place'} 
+                ##                properties={'coord': [60.16664166666666, 24.94353611111111], 
+                ##                    'id': 'P0366', 'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 
+                ##                    'pname': 'Helsinki', 'change': 1556954884}>
+                ##        )
+                ##        type='IS_INSIDE' properties={}> 
+                #    pi=<Node id=307637 labels={'Place'} 
+                #        properties={'coord': [60.16664166666666, 24.94353611111111], 'id': 'P0366', 
+                #            'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 'pname': 'Helsinki', 'change': 1556954884}> 
+                #    pinames=[
+                #        <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
+                #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
+                #    ]>
+
+                node = record['x']
+                src_label = list(node.labels)[0]
+                if src_label == "Event":
+                    #src = Event_combo.from_node(node)
+                    src_uniq_id = node.id
+                    src = None
+                else:
+                    raise TypeError('An Event excepted, got {src_label}')
+
+                # Use the Event from Person events
+                for e in self.events:
+                    if e.uniq_id == src_uniq_id:
+                        src = e
+                        break
+                if not src:
+                    raise LookupError("ERROR: Unknown Event {src_uniq_id}!?")
+
+                pl = Place_combo.from_node(record['pl'])
+                if pl.uniq_id in objs.keys():
+                    print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
+                else:
+                    # A new place
+                    objs[pl.uniq_id] = pl
+                    print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
+                    pl.set_names_from_nodes(record['pnames'])
+                src.place_ref.append(pl.uniq_id)
+
+                # Surrounding places
+                if record['pi']:
+                    pl_in = Place_combo.from_node(record['pi'])
+                    print(f"#   hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
+                    if pl_in.uniq_id in objs:
+                        pl.uppers.append(objs[pl_in.uniq_id])
+                        print(f"# - Using a known place {objs[pl_in.uniq_id]}")
+                    else:
+                        pl.uppers.append(pl_in)
+                        objs[pl_in.uniq_id] = pl_in
+                        pl_in.set_names_from_nodes(record['pinames'])
+                        print(f"#  ({pl_in} names {pl_in.names})")
+                pass
+
+        except Exception as e:
+            print(f"Could not read places for person {self.uuid} objects {objs}: {e}")
+        return
+
     @staticmethod
     def get_person_full(uuid, user):
         ''' Read a person and paths for essential connected nodes. (Version 3)
@@ -341,16 +429,24 @@ return path"""
         '''
         objs = {}
         with shareds.driver.session() as session:
-            # 1. Read Person p and essential directly connected nodes z
-            #       (p:Person) --> (x:Name|Event)
+            # 1. Read Person p, if not denied
             p = Person_combo._get_person_node(session, uuid, objs, user)
             if isinstance(p,Person_combo):
+
+                # 1. (p:Person) --> (x:Name|Event)
                 p._read_person_names_events(session, objs)
+
                 # 2. (p:Person) <-- (f:Family)
                 #    for f
                 #      (f) --> (fp:Person) -[*1]-> (fpn:Name)
                 #      (f) --> (fe:Event)
                 p._read_person_families(session, objs)
+
+                # 4. for pl in z:Place, ph
+                #      (pl) --> (pn:Place_name)
+                #      (pl) --> (pi:Place)
+                #      (pi) --> (pin:Place_name)
+                p._read_object_places(session, objs)
 
         if objs:
             print(f"# Nodes for Person {p.uniq_id} are {list(objs.keys())}")
