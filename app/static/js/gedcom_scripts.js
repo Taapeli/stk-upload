@@ -2,6 +2,8 @@ var gt = new Gettext({domain: 'gedcom_transformations'});
 var _ = function(msgid,args) { return gt.strargs(gt.gettext(msgid),args); };
 var ngettext = function(msgid, msgid_plural, n) { return gt.ngettext(msgid, msgid_plural, n); };
 	
+var TOOLARGE =  _("The file is too large (max 60 MB)");
+	
 function hide_all() {
     $("div.gedcom").hide();
     $("#div_show_info").show();
@@ -34,6 +36,20 @@ function clear_others() {
 	}
 }
 
+function checkFileSize() {
+ 	try {
+	 	var input = document.getElementById('file');
+ 	 	var file = input.files[0];
+ 	 	if (file.size > 60000000) {
+			alert(TOOLARGE);
+			return false;
+ 	 	}
+ 	}
+ 	catch {
+ 	}
+	return true;
+}
+
 $(document).ready( function() {
     console.log("ready");
 
@@ -45,7 +61,8 @@ $(document).ready( function() {
 
 
     $('#upload').click( function() {
-        // from https://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously    
+        // from https://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously   
+        if (!checkFileSize()) return; 
         var gedcom_name = $("#file").val();
         gedcom_name = gedcom_name.replace(/^C:\\fakepath\\/,"");
         $.get("/gedcom/check/" + encodeURIComponent(gedcom_name), function(rsp){
@@ -88,7 +105,15 @@ $(document).ready( function() {
                     }, // xhr
                     
                     complete: function() { console.log("complete"); },
-                    error: function() { console.log("error"); },
+                    error: function() { 
+                    	console.log("error");
+                    	console.log(this);
+                 	},
+                    statusCode: {
+					    413: function() {
+					      alert(TOOLARGE);
+					    }
+					},
                     success: function() { 
                        console.log("success"); 
                        document.location.href= "/gedcom/info/" + gedcom_name;
@@ -97,7 +122,7 @@ $(document).ready( function() {
                 .done( function() { console.log("done"); });
             } // does not exist
             else { // exists
-                alert("File already exists");
+                alert(_("File already exists"));
             } // exists
         }); // $.get
     });
