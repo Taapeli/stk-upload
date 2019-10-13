@@ -22,45 +22,45 @@ logger = logging.getLogger('stkserver')
 
 
 #===================== Classes to create user session ==========================
-
-class SetupCypher():
-    """ Cypher classes for setup """
-
-    set_user_constraint = '''
-        CREATE CONSTRAINT ON (user:User) 
-            ASSERT user.username IS UNIQUE'''
-    
-    role_create = '''
-        CREATE (role:Role {level: $level, name: $name, 
-                           description: $description, timestamp: $timestamp})'''
-
-    master_check_existence = """
-        MATCH  (user:User) 
-        WHERE user.username = 'master' 
-        RETURN COUNT(user)"""
-        
-    email_val = """
-        MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN a"""
-        
-    master_create = ('''
-        MATCH  (role:Role) WHERE role.name = 'admin'
-        CREATE (user:User 
-            {username : $username, 
-            password : $password,  
-            email : $email, 
-            name : $name,
-            language : $language, 
-            is_active : $is_active,
-            confirmed_at : $confirmed_at, 
-            roles : $roles,
-            last_login_at : $last_login_at,
-            current_login_at : $current_login_at,
-            last_login_ip : $last_login_ip,
-            current_login_ip : $current_login_ip,
-            login_count : $login_count} )           
-            -[:HAS_ROLE]->(role)
-        ''' ) 
-
+#  
+# class SetupCypher():
+#     """ Cypher classes for setup """
+# 
+#     set_user_constraint = '''
+#         CREATE CONSTRAINT ON (user:User) 
+#             ASSERT user.username IS UNIQUE'''
+#     
+#     role_create = '''
+#         CREATE (role:Role {level: $level, name: $name, 
+#                            description: $description, timestamp: $timestamp})'''
+# 
+#     master_check_existence = """
+#         MATCH  (user:User) 
+#         WHERE user.username = 'master' 
+#         RETURN COUNT(user)"""
+#         
+#     email_val = """
+#         MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN a"""
+#         
+#     master_create = ('''
+#         MATCH  (role:Role) WHERE role.name = 'admin'
+#         CREATE (user:User 
+#             {username : $username, 
+#             password : $password,  
+#             email : $email, 
+#             name : $name,
+#             language : $language, 
+#             is_active : $is_active,
+#             confirmed_at : $confirmed_at, 
+#             roles : $roles,
+#             last_login_at : $last_login_at,
+#             current_login_at : $current_login_at,
+#             last_login_ip : $last_login_ip,
+#             current_login_ip : $current_login_ip,
+#             login_count : $login_count} )           
+#             -[:HAS_ROLE]->(role)
+#         ''' ) 
+#  
        
 class Role(RoleMixin):
     """ Object describing any application user roles,
