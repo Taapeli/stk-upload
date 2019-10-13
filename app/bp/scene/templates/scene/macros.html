@@ -89,7 +89,7 @@
 
 {% macro person(p, uuid) -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
-    <!-- {{p.uuid}} {{uuid}} -->
+    <!-- if {{p.uuid}} == {{uuid}}, show text 'Anonymous'/'Itse' -->
     {% if p.uuid == uuid %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
     {% else %}{% if p.uuid %}
@@ -144,6 +144,12 @@
     {% set list1 = note.text.split('\n') %}
     <td>{% for l in list1 %}{{ l }} {% endfor %}</td>
 {%- endmacro %}
+
+{% macro place_names_lang(pl) -%}
+    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
+    {% for n in pl.names %}{% if not loop.first %} / {% endif %}
+       {{ n.name|safe }}{% endfor 
+%}{%- endmacro %}
 
 {% macro place_names(pl) -%}
     {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}

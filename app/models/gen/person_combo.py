@@ -373,7 +373,7 @@ return path"""
                 #            'type': 'City', 'uuid': '93c25330a25f4fa49c1efffd7f4e941b', 'pname': 'Helsinki', 'change': 1556954884}> 
                 #    pinames=[
                 #        <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
-                #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': ''}>
+                #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
                 #    ]>
 
                 node = record['x']
@@ -400,24 +400,21 @@ return path"""
                     # A new place
                     objs[pl.uniq_id] = pl
                     print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
-    
-                    for node in record['pnames']:
-                        pl.names.append(Place_name.from_node(node))
-                        print(f"#  ({pl}) --> (Place_name {pl.names[-1].uniq_id} {pl.names[-1]})")
+                    pl.set_names_from_nodes(record['pnames'])
                 src.place_ref.append(pl.uniq_id)
 
                 # Surrounding places
-                pl_in = Place_combo.from_node(record['pi'])
-                print(f"#   hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
-                if pl_in.uniq_id in objs:
-                    pl.uppers.append(objs[pl_in.uniq_id])
-                    print(f"# - Using a known place {objs[pl_in.uniq_id]}")
-                else:
-                    pl.uppers.append(pl_in)
-                    objs[pl_in.uniq_id] = pl_in
-                    for node in record['pinames']:
-                        pl_in.names.append(Place_name.from_node(node))
-                        print(f"#  ({pl_in}) --> (Place_name {pl_in.names[-1].uniq_id} {pl_in.names[-1]})")
+                if record['pi']:
+                    pl_in = Place_combo.from_node(record['pi'])
+                    print(f"#   hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
+                    if pl_in.uniq_id in objs:
+                        pl.uppers.append(objs[pl_in.uniq_id])
+                        print(f"# - Using a known place {objs[pl_in.uniq_id]}")
+                    else:
+                        pl.uppers.append(pl_in)
+                        objs[pl_in.uniq_id] = pl_in
+                        pl_in.set_names_from_nodes(record['pinames'])
+                        print(f"#  ({pl_in} names {pl_in.names})")
                 pass
 
         except Exception as e:

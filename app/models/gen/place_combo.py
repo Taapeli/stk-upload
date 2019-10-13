@@ -335,6 +335,46 @@ class Place_combo(Place):
         return sorted(ret, key=lambda x:x.pname)
 
 
+    def set_names_from_nodes(self, nodes):
+        ''' Filter Name objects from a list of Cypher nodes to self.names.
+        
+            Fill self.names with Place_names by following rules:
+            1. Place_names using lang == current_user.language
+            2. Place_names using lang == ""
+            3. If none found, use the last Place_name
+            Place_names using other languages are discarded
+
+            nodes=[
+                <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
+                <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
+            ]>
+        '''
+        own_lang = []
+        no_lang = []
+        alien_lang = []
+        from flask_security import current_user
+        for node in nodes:
+            pn = Place_name.from_node(node)
+            if pn.lang == "":
+                no_lang.append(pn)
+                print(f"#  other {len(self.names)} (Place_name {pn.uniq_id} {pn})")
+            elif pn.lang == current_user.language:
+                own_lang.append(pn)
+                print(f"#      own (Place_name {pn.uniq_id} {pn})")
+            else:
+                alien_lang.append(pn)
+                print(f"#    alien (Place_name {pn})")
+
+        if own_lang:
+            self.names = own_lang
+        elif no_lang:
+            self.names = no_lang
+        else:
+            self.names = alien_lang
+        for pn in self.names:
+            print(f"#  names: {pn}")
+
+
     def namelist_w_lang(self):
         """ Return a vector of name data for this place.
          

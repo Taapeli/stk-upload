@@ -204,6 +204,7 @@ def show_person_pg_v2_v3(uid=None):
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
     print("-> bp.scene.routes.show_person_pg_v2_v3")
+    #print (f"Current language {current_user.language}")
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
         print(get_thumbname(objs[i].uuid))
