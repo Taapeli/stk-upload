@@ -14,6 +14,8 @@ from flask_babelex import _
 from werkzeug.utils import secure_filename
 from difflib import HtmlDiff
 
+import shareds
+
 import logging 
 LOG = logging.getLogger(__name__)
 
@@ -34,7 +36,8 @@ def gedcom_list():
     return render_template('gedcom_list.html', title=_("Gedcoms"),
                            user=username, 
                            files=files, kpl=len(files),
-                           allowed_extensions=allowed_extensions )
+                           allowed_extensions=allowed_extensions,
+                           maxsize=shareds.app.config.get("MAX_CONTENT_LENGTH") )
 
 @bp.route('/gedcom/versions/<gedcom>', methods=['GET'])
 @login_required

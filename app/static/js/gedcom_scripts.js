@@ -2,7 +2,7 @@ var gt = new Gettext({domain: 'gedcom_transformations'});
 var _ = function(msgid,args) { return gt.strargs(gt.gettext(msgid),args); };
 var ngettext = function(msgid, msgid_plural, n) { return gt.ngettext(msgid, msgid_plural, n); };
 	
-var TOOLARGE =  _("The file is too large (max 60 MB)");
+var TOOLARGE =  _("The file is too large (max %1 MB)", Math.round(maxsize/1000000) );
 	
 function hide_all() {
     $("div.gedcom").hide();
@@ -40,7 +40,7 @@ function checkFileSize() {
  	try {
 	 	var input = document.getElementById('file');
  	 	var file = input.files[0];
- 	 	if (file.size > 60000000) {
+ 	 	if (file.size > maxsize) {
 			alert(TOOLARGE);
 			return false;
  	 	}
