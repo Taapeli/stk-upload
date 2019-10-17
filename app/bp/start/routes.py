@@ -45,19 +45,21 @@ def guest_start():
 @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start():
-    """ Home page for logged in user (from login page or home button) 
-        or anonymous user (home)
+    """ Opening the home page for logged in user (from login page or home button) 
+        or anonymous user (home).
+        
+        Note. The home page for anonymous user is routes.entry in app/routes.py
     """
     if "gedcom_user" in session: del session["gedcom_user"]  
     
-    if current_user.is_authenticated:
-        role_names = [role.name for role in current_user.roles]
-        logger.info("-> bp.start.routes.start user {}/{}, roles {}".\
-                    format(current_user.username, current_user.email, role_names))
-        return render_template('/start/index_logged.html')
-    else:
-        logger.info('-> bp.start.routes.start Anonymous user')
-        return render_template('/start/guest_index.html')
+#     if current_user.is_authenticated:
+    role_names = [role.name for role in current_user.roles]
+    logger.info("-> bp.start.routes.start user {}/{}, roles {}".\
+                format(current_user.username, current_user.email, role_names))
+    return render_template('/start/index_logged.html')
+#     else:
+#         logger.info('-> bp.start.routes.start Anonymous user')
+#         return render_template('/start/guest_index.html')
 
 @shareds.app.route('/thankyou')
 def thankyou():

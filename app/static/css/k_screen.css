@@ -245,6 +245,17 @@ a.navlink:hover, a.navlink:active {
     content: "\260D";   /* RIGHTWARDS DOUBLE ARROW / SOUTH EAST ARROW TO CORNER? */
 }
 
+#lastitem_badge {
+    text-align: center;
+}
+#lastitem_badge > i {
+    background-color:#999; 
+    padding:3px 30px 3px 30px; 
+    color:white; 
+    border-radius:15px;
+}
+
+
 /* General Text
 ----------------------------------------------------- */
 /*h1 {
