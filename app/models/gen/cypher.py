@@ -44,11 +44,10 @@ class Cypher_person():
     '''
 # For Person_pg v3
     get_by_user = """
-MATCH (b:UserProfile {username:$user}) --> (:Batch)
+MATCH (b:UserProfile {username:$user}) -[:HAS_LOADED]-> (:Batch)
        -[:OWNS]-> (p:Person {uuid:$uuid})
 RETURN p"""
-    get_public = """
-MATCH (p:Person {uuid:$uuid}) 
+    get_public = """MATCH (p:Person {uuid:$uuid}) 
 RETURN p"""
     get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
