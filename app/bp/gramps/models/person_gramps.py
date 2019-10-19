@@ -22,7 +22,7 @@ from shareds import logger
 #import models.dbutil
 
 from models.gen.person import Person
-from models.cypher_gramps import Cypher_person_w_handle
+from models.cypher_gramps import Cypher_person_w_handle, Cypher_media_in_batch
 from models.gen.note import Note
 
 
@@ -154,12 +154,18 @@ class Person_gramps(Person):
         # The order of medias is stored in MEDIA link
         try:
             order = 0
-            for handle in self.media_handles:
-                tx.run(Cypher_person_w_handle.link_media, 
-                       p_handle=self.handle, m_handle=handle, order=order)
+            for handle, crop in self.media_handles:
+                r_attr = {'order':order}
+                if crop:
+                    r_attr['left']  = crop[0]
+                    r_attr['upper'] = crop[1]
+                    r_attr['right'] = crop[2]
+                    r_attr['lower'] = crop[3]
+                tx.run(Cypher_media_in_batch.link_media, 
+                       p_handle=self.handle, m_handle=handle, r_attr=r_attr)
                 order =+ 1
         except Exception as err:
-            print("iError: Person.save medias: {0} {1}".format(err, self.id), file=stderr)
+            print("iError: Person.save media: {0} {1}".format(err, self.id), file=stderr)
 
         # The relations to the Family node will be created in Family.save(),
         # because the Family object is not yet created

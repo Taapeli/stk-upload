@@ -122,6 +122,7 @@
 	               {% endif %}</td>
 
 	                <td class="ColumnPerson"><div>
+	                   {% if p.owners %}
 	                   {% for ow in p.owners %}
                            {% if ow == user %}
                            <div class="detail_link" alt="{{p.uniq_id}}">
@@ -134,6 +135,11 @@
                            </div>
                            {% endif %}
 	                   {% endfor %}
+	                   {% else %}
+                           <div class="detail_link" alt="{{p.uniq_id}}">
+                             {{p.sex_symbol()}} {{macro.person(p)}}
+                           </div>
+	                   {% endif %}
 
 		               {% for name in p.names %}
 		                  {% if not loop.first %}<br><small>

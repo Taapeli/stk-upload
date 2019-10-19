@@ -327,7 +327,7 @@ class DOM_handler():
 
             for ref in event.getElementsByTagName('objref'):
                 if ref.hasAttribute("hlink"):
-                    e.media_handles.append(ref.getAttribute("hlink"))
+                    e.media_handles.append((ref.getAttribute("hlink"), None))
                     ##print(f'# Event {e.id} has pic {e.media_handles[-1]}')
 
             try:
@@ -566,8 +566,25 @@ class DOM_handler():
 
             for person_objref in person.getElementsByTagName('objref'):
                 if person_objref.hasAttribute("hlink"):
-                    p.media_handles.append(person_objref.getAttribute("hlink"))
-                    ##print(f'# Person {p.id} has pic {p.media_handles[-1]}')
+                    media_href = person_objref.getAttribute("hlink")
+                    ##print(f'# Person {p.id} has pic {media_href}')
+                    '''   <objref hlink="_d69a346507d4767dc6f">
+                           <region corner1_x="33" corner1_y="11" corner2_x="38" corner2_y="24"/>
+                          </objref>
+                        The region defines picture crop by coordinates 
+                        crop = (left, upper, right, lower)
+                    '''
+                    crop = None
+                    for region in person_objref.getElementsByTagName('region'):
+                        if region.hasAttribute("corner1_x"):
+                            left = region.getAttribute("corner1_x")
+                            left = region.getAttribute('corner1_x')
+                            upper = region.getAttribute('corner1_y')
+                            right = region.getAttribute('corner2_x')
+                            lower = region.getAttribute('corner2_y')
+                            crop = (left, upper, right, lower)
+                            print(f'# Person {p.id} pic {media_href} has crop region {crop}')
+                    p.media_handles.append((media_href, crop))
 
             for person_url in person.getElementsByTagName('url'):
                 n = Note()

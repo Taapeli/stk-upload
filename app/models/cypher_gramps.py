@@ -261,7 +261,8 @@ MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
     link_media = """
 MATCH (p:Person {handle: $p_handle})
 MATCH (m:Media  {handle: $m_handle})
-MERGE (p) -[r:MEDIA {order:$order}]-> (m)"""
+MERGE (p) -[r:MEDIA]-> (m)
+  SET r = $r_attr"""
 
 # use models.gen.cypher.Cypher_name (there is no handle)
 
