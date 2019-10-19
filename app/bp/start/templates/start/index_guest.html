@@ -1,10 +1,9 @@
-{# _scene/index_scene.html_ #}
-{% extends "a_layout.html" %}
+{# _scene/index_guest.html_ #}
+{% extends "start/s_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _('Logged on user') }}{% endblock %}
+{% block title %}{{ _('Anonymous user') }}{% endblock %}
 {% block body %}
 {{ super() }}
-
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 {{ hamburger_menu((
@@ -14,30 +13,15 @@
 <div id="startdiv">
   <div>
     <h2>{{ _('Exploring Isotammi Database') }}</h2>
-    {% if current_user.name %}
+{#  {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
     </p>
     {% endif %}
-
+#}
 {# <p><small>{{session}}</small></p> #}
 
         <div class="row">
-{#  {% if current_user.is_authenticated and current_user.has_role('member') %}
-           <div class="startbox">
-             <div style="display: inline-block;">
-               <form method="get" action="/scene/persons_all/">
-                 <input name="div" type="hidden" value="2">
-                 <h3>{{ _('My Candidate Family Tree') }}</h3>
-                 <p>{{ _('View your own candidate material and compare with Isotammi tietokanta database') }}</p>
-                 <div class="submit"> 
-                    <button type="submit">{{ _('Start Exploring') }}</button>
-                 </div>
-               </form>
-            </div>
-           </div>
-    {% endif %}    
-#} 
            <div class="startbox">
              <div style="display: inline-block;">
                <form method="get" action="/scene/persons_all/">
@@ -45,24 +29,33 @@
      {% if current_user.is_authenticated and 
         ( current_user.has_role('member') or current_user.has_role('admin') ) %}
                 <h3>{{ _('Select Material for Browsing') }}</h3>
-                <p>{% set filt = session['owner_filter'] %}<br>
+                <p>{% set filt = session['owner_filter'] %}
+	                <input type="checkbox" name="div" value="1"
+	                    {% if filt == 1 or filt == 3 %}checked{% endif %}
+	                    >{{ _('Demo database') }}<br>
+	                <input type="checkbox" name="div2" value="2"
+	                    {% if filt == 2 or filt == 3 %}checked{% endif %}
+	                    >{{ _('My candidate material') }}<br>
+                 </p>
+{#              <p>{% set filt = session['owner_filter'] %}<br>
                   <input type="radio" name="div" value="1" 
                     {% if filt == 1 %}checked{% endif %}>{{ _('Demo database') }}<br>
                   <input type="radio" name="div" value="2" 
                     {% if filt == 2 or filt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
-{#                <input type="radio" name="div" value="4" style="cursor:not-allowed" 
+                <input type="radio" name="div" value="4" style="cursor:not-allowed" 
                     {% if filt == 4 or filt == 5 %}checked{% endif %}>{{ _('Selected set of material') }}<br>
-#}                 &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
+                 &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
                     {% if filt == 3 or filt == 5 %}checked{% endif %}>
                         {{ _('Compare to Demo Database') }} 
                 </p>
+#}
      {% else %}
                 <h3>{{ _('The Browsed Material') }}</h3>
                 <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
                 <input name="div" type="hidden" value="1">
      {% endif %}
                 <div class="submit"> 
-                    <button type="submit">{{ _('Start Exploring') }}</button>
+                    <button type="submit">{{ _('Continue') }}</button>
                  </div>
                </form>
              </div>

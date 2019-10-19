@@ -146,13 +146,14 @@ class OwnerFilter():
             user = user_session.get('username', None)
         self.user = user
 
-        """ Store the request parameters div=2&cmp=1 as session variable owner_filter.
+        """ Store the request parameters div=1&div2=2&cmp=1 as session variable owner_filter.
             Returns owner filter name if detected, otherwise False
         """
         div = 0
         if request:
             # The div argument from request is stored in self.filter
-            div = int(request.args.get('div', 0))
+            div2 = int(request.args.get('div2', 0))
+            div = div2 + int(request.args.get('div', 0))
             if div:
                 if request.args.get('cmp', ''):
                     div = div | 1

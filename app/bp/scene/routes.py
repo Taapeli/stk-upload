@@ -35,26 +35,11 @@ def scene():
     """ Home page for scene narrative pages ('kertova') for anonymous. """    
     print(f"--- {request}")
     print(f"--- {user_session}")
-    #print("-> bp.scene.routes.scene")
     my_filter = OwnerFilter(user_session, current_user, request)
     my_filter.set_scope_from_request(request, 'person_scope')
-    print(f"-> bp.scene.routes.scene: home saving '{my_filter.scope[0]}'")
-    return render_template('/scene/index_scene.html')
+    logger.info(f"-> bp.scene.routes.scene '{my_filter.scope[0]}'")
+    return render_template('/start/index_guest.html')
 
-
-# @bp.route('/scene/persons/restricted')
-# def show_persons_restricted(selection=None):
-#     """ NOT IN USE Show list of selected Persons, limited information.
-#  
-#         for non-logged users from login_user.html """
-#     if not current_user.is_authenticated:
-#         # Tässä aseta sisäänkirjautumattoman käyttäjän rajoittavat parametrit.
-#         # Vaihtoehtoisesti kutsu toista metodia.
-#         keys = ('all',)
-#     persons = read_persons_with_events(keys)
-#     print("-> bp.scene.routes.show_persons_restricted")
-#     return render_template("/scene/persons.html", persons=persons, 
-#                            menuno=1, rule=keys)
 
 # ------------------------- Menu 1: Person search ------------------------------
 
@@ -68,7 +53,7 @@ def show_person_list(selection=None):
             name = request.form['name']
             rule = request.form['rule']
             keys = (rule, name)
-            print(f"-> bp.scene.routes.show_person_list POST {keys}")
+            logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
             return render_template("/scene/persons.html", persons=persons, menuno=0,
                                    name=name, rule=keys, elapsed=time.time()-t0)
@@ -85,7 +70,7 @@ def show_person_list(selection=None):
         else:
             keys = ('surname',)
         persons = read_persons_with_events(keys)
-        print(f"-> bp.scene.routes.show_person_list GET {keys}")
+        logger.info(f"-> bp.scene.routes.show_person_list GET {keys}")
 
     return render_template("/scene/persons.html", persons=persons,
                            menuno=0, rule=keys, elapsed=time.time()-t0)
@@ -104,7 +89,7 @@ def show_persons_by_refname(refname, opt=""):
     ref = ('ref' in opt)
     order = 0
     persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
-    print("-> bp.scene.routes.show_persons_by_refname")
+    logger.info("-> bp.scene.routes.show_persons_by_refname")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order, rule=keys)
 
@@ -129,7 +114,7 @@ def show_all_persons_list(opt=''):
     elif 'pn' in opt: order = 2 # firstname
     else: order = 0             # surname
     persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
-    print("-> bp.scene.routes.show_all_persons_list")
+    logger.info("-> bp.scene.routes.show_all_persons_list")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order,rule=keys, elapsed=time.time()-t0)
 
@@ -141,10 +126,10 @@ def show_all_persons_list(opt=''):
 @bp.route('/scene/persons_all/')
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
-def show_my_persons():
+def show_persons_all():
     """ List all persons for menu(12).
 
-        Both my own and other persons depending on url attribute div
+        Both my own and other persons depending on sum of url attributes div + div2
         or session variables.
 
         The position in persons list is defined by -
@@ -162,7 +147,7 @@ def show_my_persons():
     # About how mamy items to read
     count = int(request.args.get('c', 100))
 
-    #print(f"-> bp.scene.routes.show_my_persons: read persons forward from '{my_filter.scope[0]}'")
+    logger.info(f"-> bp.scene.routes.show_my_persons: forward from '{my_filter.scope[0]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
 
@@ -203,7 +188,7 @@ def show_person_pg_v2_v3(uid=None):
 #     for e in person.events:
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
-    print("-> bp.scene.routes.show_person_pg_v2_v3")
+    logger.info("-> bp.scene.routes.show_person_pg_v2_v3")
     #print (f"Current language {current_user.language}")
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
@@ -236,7 +221,7 @@ def show_person_v1(pid):
                       format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
     except KeyError as e:
         return redirect(url_for('virhesivu', code=2, text=str(e)))
-    print("-> bp.scene.routes.show_person_v1")
+    logger.info("-> bp.scene.routes.show_person_v1")
     return render_template("/scene/person_v1.html", person=person, events=events, 
                            photos=photos, citations=citations, families=families, 
                            elapsed=time.time()-t0)
@@ -251,6 +236,7 @@ def show_event(uniq_id):
         Derived from bp.tools.routes.show_baptism_data()
     """
     event, persons = get_event_participants(uniq_id)
+    logger.info("-> bp.scene.routes.show_event")
     return render_template("/scene/event.html",
                            event=event, persons=persons)
 
@@ -274,6 +260,7 @@ def show_families():
     # 'families' has Family objects
     families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
 
+    logger.info("-> bp.scene.routes.show_families")
     return render_template("/scene/families.html", families=families, 
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
@@ -284,19 +271,18 @@ def show_family_page(fid):
         fid = id(Family)
     """
     try:
-#         family = Family_combo()   #, events = get_place_with_events(fid)
-#         family.uniq_id = fid
         family = Family_combo.get_family_data(fid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
+    logger.info("-> bp.scene.routes.show_family_page")
     return render_template("/scene/family.html", family=family, menuno=3)
 
 @bp.route('/pop/family=<int:fid>')
 def show_family_popup(fid):
     """ Small Family pop-up.
     """
-    #TODO Gen only fewer pieces of data
+    #TODO Create a pop-up window; Gen only fewer pieces of data
     family = Family_combo.get_family_data(fid)
     return render_template("/scene/family_pop.html", family=family)
 
@@ -315,6 +301,7 @@ def show_places():
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
 #         print ("# {} ".format(p))
+    logger.info("-> bp.scene.routes.show_places")
     return render_template("/scene/places.html", locations=locations, 
                            elapsed=time.time()-t0)
 
@@ -337,6 +324,7 @@ def show_place_page(locid):
 #         print ("# {} ".format(p))
 #     for u in place.notes:
 #         print ("# {} ".format(u))
+    logger.info("-> bp.scene.routes.show_place_page")
     return render_template("/scene/place_events.html", locid=locid, place=place, 
                            events=events, locations=place_list)
 
@@ -350,6 +338,7 @@ def show_sources():
         sources = Source.get_source_list()
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+    logger.info("-> bp.scene.routes.show_sources")
     return render_template("/scene/sources.html", sources=sources)
 
 
@@ -361,6 +350,7 @@ def show_source_page(sourceid):
         source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+    logger.info("-> bp.scene.routes.show_source_page")
     return render_template("/scene/source_events.html",
                            source=source, citations=citations)
 
@@ -370,6 +360,7 @@ def fetch_media(fname):
     """
     uuid = request.args.get("id")
     fullname, mimetype = media.get_fullname(uuid)
+    logger.info("-> bp.scene.routes.fetch_media")
     return send_file(fullname, mimetype=mimetype)        
 
 @bp.route('/scene/thumbnail')
@@ -380,6 +371,5 @@ def fetch_thumbnail():
     thumbname = media.get_thumbname(uuid)
     print(thumbname)
     mimetype='image/jpg'
+    logger.info("-> bp.scene.routes.fetch_thumbnail")
     return send_file(thumbname, mimetype=mimetype)
-
-

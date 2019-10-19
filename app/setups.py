@@ -77,6 +77,10 @@ class Role(RoleMixin):
         self.description = kwargs['description']
 #        self.timestamp = kwargs['timestamp']
 
+    def __str__(self):
+        """ Role name in ui language """
+        return _(self.name)
+
     @staticmethod
     def has_role(name, role_list):
         '''
@@ -122,7 +126,7 @@ class User(UserMixin):
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
 
-# 
+
 # class UserProfile():
 #     """ Object describing dynamic user properties """
 #     uid = ''
