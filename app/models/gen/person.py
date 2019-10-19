@@ -131,10 +131,10 @@ class Person(NodeObject):
 
     def sex_symbol(self):
         " Returns person's sex as string"
-        symbols = {SEX_UNKOWN:_(''), 
-                   SEX_MALE:_('♂'),
-                   SEX_FEMALE:_('♀'),
-                   SEX_NOT_APPLICABLE:_('-')}
+        symbols = {SEX_UNKOWN:'', 
+                   SEX_MALE:'♂',
+                   SEX_FEMALE:'♀',
+                   SEX_NOT_APPLICABLE:'-'}
         return symbols.get(self.sex, '?')
 
     def child_by_sex(self):

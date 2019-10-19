@@ -38,7 +38,7 @@ def scene():
     my_filter = OwnerFilter(user_session, current_user, request)
     my_filter.set_scope_from_request(request, 'person_scope')
     logger.info(f"-> bp.scene.routes.scene '{my_filter.scope[0]}'")
-    return render_template('/scene/index_scene.html')
+    return render_template('/start/index_guest.html')
 
 
 # ------------------------- Menu 1: Person search ------------------------------

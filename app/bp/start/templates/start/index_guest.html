@@ -1,10 +1,9 @@
-{# _scene/index_scene.html_ #}
-{% extends "a_layout.html" %}
+{# _scene/index_guest.html_ #}
+{% extends "start/s_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _('Logged on user') }}{% endblock %}
+{% block title %}{{ _('Anonymous user') }}{% endblock %}
 {% block body %}
 {{ super() }}
-
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 {{ hamburger_menu((
@@ -14,12 +13,12 @@
 <div id="startdiv">
   <div>
     <h2>{{ _('Exploring Isotammi Database') }}</h2>
-    {% if current_user.name %}
+{#  {% if current_user.name %}
     <p>{{ _('User') }} <b>{{current_user.name}}</b> &lt;{{current_user.email}}&gt;
        {{ _('with roles') }} [ {% for r in current_user.roles %}{{r.name}} {% endfor %} ]<br>
     </p>
     {% endif %}
-
+#}
 {# <p><small>{{session}}</small></p> #}
 
         <div class="row">

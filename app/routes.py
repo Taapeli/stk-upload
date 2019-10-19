@@ -29,11 +29,12 @@ def entry():
 #        print("Authenticated guest user at entry") 
         logout_user()
 
-    logger.info(f'-> routes.entry')
+    logger.info(f'-> routes.entry anon={current_user.is_authenticated}')
     if current_user.is_authenticated:
         # Home page for logged in user
-        return redirect(url_for('start'))
-    return render_template('/entry_index.html')
+        return redirect(url_for('start_logged'))
+    # If not logged in, a login page is shown here first
+    return render_template('/index_entry.html')
 
 """ -------------------------- Yleinen virhesivu ------------------------------
 """

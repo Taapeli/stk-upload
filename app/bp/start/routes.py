@@ -32,19 +32,19 @@ def force_https():
         return redirect(request.url.replace('http://', 'https://'))
     
 @shareds.app.route('/start/guest', methods=['GET', 'POST'])
-def guest_start():
+def start_guest():
     """ Home page for a guest user (from login page or home button) 
         or anonymous user (home)
     """
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
-    logger.info('-> bp.start.routes.guest_start: Anonymous user')
-    return render_template('/scene/index_scene.html')
+    logger.info('-> bp.start.routes.start_guest: Anonymous user')
+    return render_template('/start/index_guest.html')
     
 @shareds.app.route('/start/logged', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def start():
+def start_logged():
     """ Opening the home page for logged in user (from login page or home button) 
         or anonymous user (home).
         
@@ -54,8 +54,8 @@ def start():
     
 #     if current_user.is_authenticated:
     role_names = [role.name for role in current_user.roles]
-    logger.info("-> bp.start.routes.start user {}/{}, roles {}".\
-                format(current_user.username, current_user.email, role_names))
+    logger.info("-> bp.start.routes.start_logged "
+                f"user {current_user.username}/{current_user.email}, roles {role_names}")
     return render_template('/start/index_logged.html')
 #     else:
 #         logger.info('-> bp.start.routes.start Anonymous user')
