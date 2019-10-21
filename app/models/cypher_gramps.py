@@ -106,9 +106,10 @@ with c
     merge (e) -[r:CITATION]-> (c)"""
 
     link_media = """
-MATCH (n:Event) WHERE n.handle=$handle
-MATCH (m:Media) WHERE m.handle=$m_handle
-MERGE (p) -[r:MEDIA {order:$order}]-> (m)"""
+MATCH (e:Event {handle: $handle})
+MATCH (m:Media  {handle: $m_handle})
+  CREATE (e) -[r:MEDIA]-> (m)
+    SET r = $r_attr"""
 
 
 class Cypher_family_w_handle():
@@ -261,7 +262,8 @@ MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
     link_media = """
 MATCH (p:Person {handle: $p_handle})
 MATCH (m:Media  {handle: $m_handle})
-MERGE (p) -[r:MEDIA {order:$order}]-> (m)"""
+  CREATE (p) -[r:MEDIA]-> (m)
+    SET r = $r_attr"""
 
 # use models.gen.cypher.Cypher_name (there is no handle)
 

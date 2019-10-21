@@ -271,6 +271,7 @@ def update_user(username):
 @roles_accepted('admin', 'audit')
 def list_uploads(username):
     upload_list = uploads.list_uploads(username) 
+    logger.info(f"-> bp.admin.routes.list_uploads")
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
 
 @bp.route('/admin/list_uploads_all', methods=['POST'])
@@ -283,6 +284,7 @@ def list_uploads_for_users():
     else:
         users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
+    logger.info(f"-> bp.admin.routes.list_uploads_for_users {users}")
     return render_template("/admin/uploads.html", uploads=upload_list,  
                            users=users, num_requested_users=len(requested_users), 
                            num_users=len(users))
@@ -293,6 +295,7 @@ def list_uploads_for_users():
 def list_uploads_all():
     users = shareds.user_datastore.get_users()
     upload_list = list(uploads.list_uploads_all(users))
+    logger.info(f"-> bp.admin.routes.list_uploads_all")
     return render_template("/admin/uploads.html", uploads=upload_list )
 
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
@@ -306,7 +309,8 @@ def start_load_to_neo4j(username,xmlname):
 @bp.route('/admin/list_threads', methods=['GET'])
 @login_required
 @roles_accepted('admin', 'audit')
-def list_threads(): # for debugging
+def list_threads(): 
+    ''' Thread list for debugging. '''
     import threading
     s = "<pre>\n"
     s += "Threads:\n"
@@ -348,6 +352,7 @@ def show_upload_log(username,xmlfile):
 def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
+    logger.info(f"-> bp.admin.routes.xml_delete")
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------

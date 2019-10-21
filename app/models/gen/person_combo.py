@@ -547,7 +547,7 @@ return path"""
     
             # Create a list with the mentioned user name, if present
             if o_filter.user:
-                p.owners = record.get('owners',[])
+                p.owners = record.get('owners',[o_filter.user])
                                                                                                                                 
             # Events
     

@@ -50,7 +50,7 @@ class Event_combo(Event):
         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
         self.place = None       # Place node, if included
-        self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
+        self.media_ref = []     # uniq_ids (preovious self.objref_hlink had gramps handles)
         self.note_ref = []      # uniq_ids (previously note[])
         
         self.citations = []     # For creating display sets

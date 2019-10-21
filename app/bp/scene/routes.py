@@ -58,7 +58,7 @@ def show_person_list(selection=None):
             return render_template("/scene/persons.html", persons=persons, menuno=0,
                                    name=name, rule=keys, elapsed=time.time()-t0)
         except Exception as e:
-            logger.debug("iError {} in show_person_list".format(e))
+            logger.info("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
     else:
         # the code below is executed if the request method
@@ -147,7 +147,7 @@ def show_persons_all():
     # About how mamy items to read
     count = int(request.args.get('c', 100))
 
-    logger.info(f"-> bp.scene.routes.show_my_persons: forward from '{my_filter.scope[0]}'")
+    logger.info(f"-> bp.scene.routes.show_persons_all: forward from '{my_filter.scope[0]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
 

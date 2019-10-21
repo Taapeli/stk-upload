@@ -325,10 +325,7 @@ class DOM_handler():
                     e.citation_handles.append(ref.getAttribute("hlink"))
                     ##print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
 
-            for ref in event.getElementsByTagName('objref'):
-                if ref.hasAttribute("hlink"):
-                    e.media_handles.append(ref.getAttribute("hlink"))
-                    ##print(f'# Event {e.id} has pic {e.media_handles[-1]}')
+            self._extract_mediaref(event, e)
 
             try:
                 self.save_and_link_handle(e)
@@ -564,10 +561,7 @@ class DOM_handler():
                 if person_eventref.hasAttribute("role"):
                     p.eventref_role.append(person_eventref.getAttribute("role"))
 
-            for person_objref in person.getElementsByTagName('objref'):
-                if person_objref.hasAttribute("hlink"):
-                    p.media_handles.append(person_objref.getAttribute("hlink"))
-                    ##print(f'# Person {p.id} has pic {p.media_handles[-1]}')
+            self._extract_mediaref(person, p)
 
             for person_url in person.getElementsByTagName('url'):
                 n = Note()
@@ -592,6 +586,8 @@ class DOM_handler():
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
+            if p.media_handles: 
+                print(f'# saving Person {p.id}: media_handles {p.media_handles}')
             self.save_and_link_handle(p, batch_id=self.batch_id)
             #print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
@@ -926,3 +922,45 @@ class DOM_handler():
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
 
+    def _extract_mediaref(self, dom_object, p):
+        ''' Check if dom_object has media reference and extract it to p.media_handles.
+
+            Example:
+                <objref hlink="_d485d4484ef70ec50c6">
+                 <region corner1_x="0" corner1_y="21" corner2_x="100" corner2_y="91"/>
+                  <citationref hlink="_d68cc45b6aa6ab09483"/>
+                  <noteref hlink="_d485d4425c02e773ed8"/>
+                </objref>
+
+            region      set picture crop = (left, upper, right, lower)
+                        <region corner1_x="0" corner1_y="21" corner2_x="100" corner2_y="91"/>
+            citationref citation reference
+            noteref    note reference
+
+            TODO: process citationref, noteref too
+        '''
+        for objref in dom_object.getElementsByTagName('objref'):
+            if objref.hasAttribute("hlink"):
+                media_href = objref.getAttribute("hlink")
+
+                crop = None
+                for region in objref.getElementsByTagName('region'):
+                    if region.hasAttribute("corner1_x"):
+                        left = region.getAttribute('corner1_x')
+                        upper = region.getAttribute('corner1_y')
+                        right = region.getAttribute('corner2_x')
+                        lower = region.getAttribute('corner2_y')
+                        crop = int(left), int(upper), int(right), int(lower)
+                        print(f'# Object {p.id} pic handle={media_href} crop={crop}')
+                if crop == None:
+                    print(f'# Object {p.id} has pic handle={media_href}')
+
+                for region in objref.getElementsByTagName('citationref'):
+                    #TODO: media citationref
+                    print(f'# - EI TOTEUTETTU: media {p.id} citationref')
+
+                for region in objref.getElementsByTagName('noteref'):
+                    #TODO: media noteref
+                    print(f'# - EI TOTEUTETTU: media {p.id} noteref')
+
+                p.media_handles.append((media_href, crop))

@@ -67,7 +67,6 @@ class Event(NodeObject):
             Planned from gramps_loader:
                 place_handles[]    str paikan handle (ent. place_hlink)
                 citation_handles[] str viittauksen handle (ent. citationref_hlink)
-                media_handles[]    str median handle (ent. objref_hlink)
                 #place_hlink       str paikan handle
                 #citation_ref      str viittauksen handle
                 #objref_hlink      str median handle
