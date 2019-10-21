@@ -128,7 +128,7 @@ def background_load_to_neo4j(username,filename):
         for step in steps:
             print(step)
         if not batch_id:
-            raise RuntimeError("Run Failed")
+            raise RuntimeError("Run Failed, missing batch_id")
 
         set_meta(username,filename,status=STATUS_DONE)
         msg = "{}:\nStored the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)

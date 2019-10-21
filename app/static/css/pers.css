@@ -255,7 +255,7 @@ table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
 }
 
 div.steps { margin: 1em;}
-div.steps > div {
+div.steps div {
 	border-style: solid;
 	border-radius: 5px;
 	border-width: 1px 3px 3px 1px;

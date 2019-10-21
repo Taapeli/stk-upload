@@ -43,6 +43,7 @@ def show_upload_log(xmlfile):
 @roles_accepted('research', 'admin')
 def list_uploads():
     upload_list = uploads.list_uploads(current_user.username) 
+    logger.info(f"-> bp.gramps.routes.list_uploads")
     return render_template("/gramps/uploads.html", uploads=upload_list)
 
 @bp.route('/gramps/upload', methods=['POST'])
