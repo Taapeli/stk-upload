@@ -19,8 +19,6 @@ import datetime
 from sys import stderr
 from shareds import logger
 
-#import models.dbutil
-
 from models.gen.person import Person
 from models.cypher_gramps import Cypher_person_w_handle
 from models.gen.note import Note
@@ -68,7 +66,7 @@ class Person_gramps(Person):
         # Gramps handles (and roles)
         self.eventref_hlink = []        # handles of Events
         self.eventref_role = []         # ... and roles
-        self.media_handles = []          # handles of Media (prev. objref_hlink)
+        self.media_handles = []         # handles of Media [(handle,crop)]
         self.parentin_hlink = []        # handle for parent family
         self.noteref_hlink = []         # 
         self.citationref_hlink = []     # models.gen.citation.Citation
@@ -97,9 +95,6 @@ class Person_gramps(Person):
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
 
         today = str(datetime.date.today())
-#         if not self.handle:
-#             handles = models.dbutil.get_new_handles(3)
-#             self.handle = handles.pop()
 
         self.uuid = self.newUuid()
         # Save the Person node under UserProfile; all attributes are replaced
@@ -120,7 +115,6 @@ class Person_gramps(Person):
 
             result = tx.run(Cypher_person_w_handle.create_to_batch, 
                             batch_id=batch_id, p_attr=p_attr, date=today)
-#             self.uniq_id = result.single()[0]
             ids = []
             for record in result:
                 self.uniq_id = record[0]
@@ -153,7 +147,7 @@ class Person_gramps(Person):
             print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Media nodes
-        # The order of medias shall be stored in MEDIA link
+        # The order of medias shall be stored in the MEDIA link
         try:
             order = 0
             for handle, crop in self.media_handles:

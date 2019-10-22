@@ -236,13 +236,6 @@ MERGE (b) -[r:OWNS]-> (p)
     SET p = $p_attr
 RETURN ID(p) as uniq_id"""
 
-#    create = """
-#MATCH (u:UserProfile {username: $username})
-#MERGE (p:Person {handle: $p_attr.handle})
-#MERGE (u) -[r:REVISION {date: $date}]-> (p)
-#    SET p = $p_attr
-#RETURN ID(p) as uniq_id"""
-
     link_name = """
 CREATE (n:Name) SET n = $n_attr
 WITH n

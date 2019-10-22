@@ -21,7 +21,7 @@ from flask_babelex import _
 from models import email, util, syslog 
 from ..gramps import gramps_loader
 import shareds
-from models.cypher_gramps import Cypher_batch
+#from models.cypher_gramps import Cypher_batch
 from ..admin.models.cypher_adm import Cypher_stats
 
 STATUS_UPLOADED     = "uploaded"
