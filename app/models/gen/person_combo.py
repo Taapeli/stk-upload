@@ -48,19 +48,22 @@
 from sys import stderr
 
 import shareds
+from .dates import DateRange
 from .person import Person
 from .person_name import Name
+
 from .event_combo import Event_combo
 #from .family_combo import Family_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
 from .place_combo import Place_combo
-from .dates import DateRange
+from .citation import Citation
+from .note import Note
+from .media import Media
 try:
     from models.gen.family_combo import Family_combo
 except ImportError:
     pass
-#from models.owner import OwnerFilter
 
 
 class Person_combo(Person):
@@ -418,6 +421,98 @@ return path"""
                 pass
 
         except Exception as e:
+            print(f"Could not read places for person {self.id} objects {objs}: {e}")
+        return
+
+    def _read_object_citation_note_media(self, session, objs):
+        ''' Read Citations, Notes, Medias for all objects in objs.
+        
+            (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+        '''
+        new_objs = []
+        try:
+            uids = list(objs.keys())
+            results = session.run(Cypher_person.get_citation_note_media,
+                                  uid_list=uids)
+            for record in results:
+                # <Record label='Person' uniq_id=327766
+                #    r=<Relationship id=426799
+                #        nodes=(
+                #            <Node id=327766 labels=set() properties={}>, 
+                #            <Node id=327770 labels={'Note'}
+                #                properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 
+                #                    'id': 'N2-I0033', 'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
+                #                    'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}>
+                #        ) 
+                #        type='NOTE' properties={}>
+                #    y=<Node id=327770 labels={'Note'}
+                #            properties={'text': 'Nekrologi HS 4.7.1922 s. 4', 'id': 'N2-I0033', 
+                #                'type': 'Web Search', 'uuid': '14a26a62a6b446339b971c7a54941ed4', 
+                #                'url': 'https://nakoislehti.hs.fi/e7df520d-d47d-497d-a8a0-a6eb3c00d0b5/4', 'change': 0}
+                # >    >
+
+                # The existing object x
+                x_label = record['label']
+                x_uniq_id = record['uniq_id']
+                x = objs[x_uniq_id]
+
+                # Relation r between (x) --> (y)
+                rel = record['r']
+                #rel_type = rel.type
+                #rel_properties = 
+
+                # Target y is a Citation, Note or Media
+                y_node = record['y']    # 
+                y_label = list(y_node.labels)[0]
+                y_uniq_id = y_node.id
+                print(f'# Link ({x_uniq_id}:{x_label}) --> ({y_uniq_id}:{y_label})')
+                for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
+                if y_label == "Citation":
+                    o = objs.get(y_uniq_id, None)
+                    if not o:
+                        o = Citation.from_node(y_node)
+                        objs[o.uniq_id] = o
+                    # Store reference to the first object
+                    if hasattr(x, 'citation_ref'):
+                        x.citation_ref.append(o.uniq_id)
+                    else:
+                        x.citaton_ref = [o.uniq_id]
+                elif y_label == "Note":
+                    o = objs.get(y_uniq_id, None)
+                    if not o:
+                        o = Note.from_node(y_node)
+                        objs[o.uniq_id] = o
+                    # Store reference to the first object
+                    if hasattr(x, 'note_ref'):
+                        x.note_ref.append(o.uniq_id)
+                    else:
+                        x.note_ref.append(o.uniq_id)
+                elif y_label == "Media":
+                    o = objs.get(y_uniq_id, None)
+                    if not o:
+                        o = Media.from_node(y_node)
+                        objs[o.uniq_id] = o
+                        # Get relation properties
+                        r_order = rel.get('order')
+                        if r_order != None:
+                            o.order = r_order
+                            left = rel.get('left')
+                            if left != None:
+                                upper = rel.get('upper')
+                                right = rel.get('right')
+                                lower = rel.get('lower')
+                                o.crop = (left, upper, right, lower)
+                                print(f'#\tMedia order={o.order}, crop={o.crop}')
+                    # Store reference to the first object
+                    if hasattr(x, 'media_ref'):
+                        x.media_ref.append(o.uniq_id)
+                    else:
+                        x.media_ref.append(o.uniq_id)
+
+#                 z_node = record['z']    # Next to y
+                pass
+
+        except Exception as e:
             print(f"Could not read places for person {self.uuid} objects {objs}: {e}")
         return
 
@@ -447,6 +542,11 @@ return path"""
                 #      (pl) --> (pi:Place)
                 #      (pi) --> (pin:Place_name)
                 p._read_object_places(session, objs)
+
+                # 5. Read their connected nodes z: Citations, Notes, Medias
+                #    for y in p, x, fe, z, s, r
+                #        (y) --> (z:Citation|Note|Media)
+                p._read_object_citation_note_media(session, objs)
 
         if objs:
             print(f"# Nodes for Person {p.uniq_id} are {list(objs.keys())}")
