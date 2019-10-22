@@ -68,6 +68,11 @@ OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
 RETURN x, pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
+    get_citation_note_media = """
+MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+    WHERE ID(x) IN $uid_list
+//OPTIONAL MATCH (y) --> (z)
+RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
 
 #For Person_pg v2
     all_nodes_query_w_apoc="""
