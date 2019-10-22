@@ -35,7 +35,7 @@ class Batches(object):
         result = shareds.driver.session().run(Cypher_stats.get_batches, user=self.user)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
-            #    properties={'mediapath': '/home/jm/my_own.media', 
+            #    properties={ // 'mediapath': '/home/jm/my_own.media', 
             #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps', 
             #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787, 
             #        'status': 'completed'}> 

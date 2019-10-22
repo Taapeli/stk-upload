@@ -19,25 +19,25 @@ def get_server_location():
     return ':'.join((dbloc[0],str(dbloc[1])))
 
 
-def get_new_handles(inc=1):
-    ''' Create a sequence of new handle keys 
-        Huom: Ei juuri käytössä models.gen.person.Person.save, 
-              omia avaimia ei ole tarkoitus generoida!
-    '''
-    ret = []
-
-    with shareds.driver.session() as session:
-        with session.begin_transaction() as tx:
-            for record in tx.run('''
-MERGE (a:Seq) 
-SET a.handle = coalesce(a.handle, 10000) + {inc} 
-RETURN a.handle AS handle''', {"inc": inc} ):
-                newhand=record["handle"]
-            tx.commit()
-
-    for i in range(inc, 0, -1):
-        ret.append("Handle{}".format(newhand - i))
-    return (ret)
+# def get_new_handles(inc=1):
+#     ''' Create a sequence of new handle keys. NOT  IN USE 
+#         Huom: Ei juuri käytössä models.gen.person.Person.save, 
+#               omia avaimia ei ole tarkoitus generoida!
+#     '''
+#     ret = []
+# 
+#     with shareds.driver.session() as session:
+#         with session.begin_transaction() as tx:
+#             for record in tx.run('''
+# MERGE (a:Seq) 
+# SET a.handle = coalesce(a.handle, 10000) + {inc} 
+# RETURN a.handle AS handle''', {"inc": inc} ):
+#                 newhand=record["handle"]
+#             tx.commit()
+# 
+#     for i in range(inc, 0, -1):
+#         ret.append("Handle{}".format(newhand - i))
+#     return (ret)
 
 
 #TODO: Korjaa tämä: skeema sch määrittelemättä

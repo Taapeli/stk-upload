@@ -123,12 +123,15 @@
 
 	                <td class="ColumnPerson"><div>
 	                   {% if p.owners %}
+	                       {# Special hack, see "Can a Jinja variable's scope extend beyond in an inner block?" #}
+	                       {% set not_mine = [False] %}
 	                   {% for ow in p.owners %}
                            {% if ow == user %}
                            <div class="detail_link" alt="{{p.uniq_id}}">
                              {{p.sex_symbol()}} {{macro.person(p)}}
                            </div>
                            {% else %}
+                                {% set _x = not_mine.append(not not_mine.pop()) %}
                            <span class="owner">&nbsp;{{ow}}&nbsp;</span>
                            <div class="no_detail" title="Ei katseluoikeutta!">
                              {{p.sex_symbol()}} {{ macro.person_name(p.names[0]) }}
@@ -142,8 +145,8 @@
 	                   {% endif %}
 
 		               {% for name in p.names %}
-		                  {% if not loop.first %}<br><small>
-		                      <span class="typedesc">{{name.type|transl('nt')}}</span> 
+		                  {% if not loop.first %}<br>
+		                      <small{% if not_mine[0] %} style="color:lightslategray;"{% endif %}>
 		                      {{ macro.person_name(name) }}</small>
                           {% endif %}
                        {% endfor %}
