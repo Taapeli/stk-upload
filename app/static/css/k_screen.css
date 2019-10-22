@@ -144,7 +144,7 @@ img#logo {
 }
 .no_detail {
 	display: inline; 
-	color: #6d898a;
+	color: lightslategray;
 }
 li.minor { list-style-type: circle; }
 li.major { list-style-type: square; }
