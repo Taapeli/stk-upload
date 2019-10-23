@@ -476,7 +476,7 @@ return path"""
                     if hasattr(x, 'citation_ref'):
                         x.citation_ref.append(o.uniq_id)
                     else:
-                        x.citaton_ref = [o.uniq_id]
+                        print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
                 elif y_label == "Note":
                     o = objs.get(y_uniq_id, None)
                     if not o:
@@ -486,7 +486,7 @@ return path"""
                     if hasattr(x, 'note_ref'):
                         x.note_ref.append(o.uniq_id)
                     else:
-                        x.note_ref.append(o.uniq_id)
+                        print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
                 elif y_label == "Media":
                     o = objs.get(y_uniq_id, None)
                     if not o:
@@ -507,9 +507,9 @@ return path"""
                     if hasattr(x, 'media_ref'):
                         x.media_ref.append(o.uniq_id)
                     else:
-                        x.media_ref.append(o.uniq_id)
-
-#                 z_node = record['z']    # Next to y
+                        print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+                else:
+                    print(f'Error: No rule for ({x_label}) --> ({y_label})')            
                 pass
 
         except Exception as e:

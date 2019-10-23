@@ -1,0 +1,308 @@
+{# _templates/scene/person_pg.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}{{ _("Person's details") }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+<style>
+u { color: DarkKhaki; text-decoration: none; }
+</style>
+
+<div id="startdiv">
+    <h2>{{ _("Person's details") }}</h2>
+    <!-- owner {{person.owner}}, next {{next}}, filter {{session['owner_filter']}}</small> -->
+</div>
+
+{{ macro.menu(menuno) }}
+    <div class="content" id="IndividualDetail">
+
+        {% if person.media_ref %}<div class="snapshot">
+            <div class="thumbnail">
+                <a href="#indivgallery">{% set photo = obj[person.media_ref[0]] %}
+	                <img alt="({{ _('Photo') }})" 
+	                     src="/scene/thumbnail?id={{photo.uuid}}" 
+	                     title="key = {{photo.uuid_str()}}"/>
+                </a>
+                <div>{{photo.description}}</div>
+            </div>
+        </div>{% endif %}
+
+        <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
+            <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b>
+        </h3>
+
+        {% set myid = person.uniq_id %}
+        {# set mybirth = "" %}{% for e in events %}
+            {% if e.type == "Birth" %}{% set mybirth = e.date %}{% endif %}{% endfor #}
+        
+        <div id="summaryarea">
+            <table>
+                <tr>
+                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="ColumnValue">
+                        {{macro.all_obj_ids(person)}} /
+                        <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
+                        <span style="font-size:70%;background:lightgray;">&nbsp;
+                            <a href="/scene/person={{person.uniq_id}}">v1</a> /
+                            <a href="/scene/person/{{person.uniq_id}}">v2</a> /
+                            <a href="/scene/person?uuid={{person.uuid}}">v3</a> &nbsp;
+                        </span>
+                    </td>
+                    {% if person.citation_ref %}
+                    <td class="ColumnValue" rowspan="2"><small>{{ _("Source") }}:
+                        {% for cr in person.citation_ref %}
+                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                        {% endfor %}</small>
+                    </td>{% endif %}
+                </tr>
+
+                {% for pname in person.names|sort(attribute='order') %}<tr>
+                    <td class="ColumnAttribute">{{pname.order + 1}}. {{pname.type|transl('nt')}}</td>
+                    <td class="ColumnValue">
+                        <span title="{{ _('first name') }}">{{pname.firstname}}</span>
+                        <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
+                        {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
+                        <b title="{{ _('surname') }}">{{pname.surname}}</b>
+                    </td>
+                </tr>{% endfor %}
+                   
+                {% if person.sex %}<tr>
+                    <td class="ColumnAttribute">{{ _("Gender") }}</td>
+                    <td class="ColumnValue">{{ person.sex_symbol() }} {{ person.sex_str() }}</td>
+                </tr>{% endif %}
+                {% if person.priv %}<tr>
+                    <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
+                </tr>{% endif %}
+                
+                {% if person.confidence > '' %}<tr>
+                    <td class="ColumnAttribute">{{ _("Confidence of data") }}</td>
+                    <td class="ColumnValue">{{ macro.stars(person.confidence|float) }}</td>
+                </tr>{% endif %}
+<!--            <tr>
+                    <td class="ColumnAttribute">{{ _("Age at death") }}</td>
+                    <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
+                </tr>
+-->
+            </table>
+        </div>
+
+        {% if person.note_ref %}<ul>
+        {% for ref in person.note_ref %}<div class="grampsstylednote">
+         <p><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+            {{ macro.notelink(obj[ref]) }}{#obj[ref].text#}</p>
+        </div>{% endfor %}</ul>{% endif %}
+
+        <div class="subsection" id="events">
+            <h4>{{ _("Events") }}</h4>
+            <table class="infolist eventlist">
+                <thead>
+                    <tr>
+                        <th class="ColumnSources">{{ _("Source") }}</th>
+                        <th class="ColumnEvent">{{ _("Event") }}</th>
+                        <th class="ColumnDate">{{ _("Date") }}</th>
+                        <th class="ColumnPlace">{{ _("Place") }}</th>
+                        <th class="ColumnDescription">{{ _("Description and Notes") }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+        {% for e in person.events|sort(attribute='dates') %}
+                    <tr>
+                    {% if e.type == "Cause Of Death" %}
+                        {% set t_cause_of_death = e %}
+                    {% else %}
+{#  person.events[0].citation_ref[0] = 90323
+    objs[person.events[0].citation_ref[0]] = <models.gen.citation.Citation object at 0x7f0a24696ac8> = cr
+    objs[person.events[0].citation_ref[0]].mark = '1a'
+#}
+                        <td class="ColumnSources">{% for cr in e.citation_ref %}
+                           <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                        {% endfor %}</td>
+
+                        {% if e.uuid %}{% set uuid = e.uuid %}{% else %}{% set uuid = "" %}{% endif %}
+                        <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
+                            <div class="magnifier" alt="{{e.uniq_id}}">
+                            {% if e.type == "Baptism" %}<a href="/scene/event/{{e.uniq_id}}"
+                                class="inlink">&rarr;&nbsp;{% endif %}{{e.type|transl('evt')}}
+                            {% if e.role and e.role != "Primary" %}<span 
+                                class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
+                        </td>
+
+                        <td class="ColumnDate">{{e.dates}}</td>
+
+                        <td class="ColumnPlace">{% set br=0 %}{% for pref in e.place_ref %}
+                            {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
+                            <a href="/scene/location/uuid={{obj[pref].uuid}}" class="inlink"
+                             title="{{ _('of type') }} {{obj[pref].type}}; {{ _('see details of place') }}">
+                            {{macro.place_names_lang(obj[pref])}}</a>{% if obj[pref].uppers 
+                              %}, <small>{{macro.place_names_lang(obj[pref].uppers[0])}}</small>{% endif %}
+                            {% endfor %}
+                        </td>
+
+                        <td class="ColumnDescription"><div>{{e.description}}</div>
+                            <div>{% if e.type == "Death" and t_cause_of_death %}<span 
+                                    class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span>
+                                        {{t_cause_of_death.description}}
+                                        {% if t_cause_of_death.dates %}{{t_cause_of_death.dates}}{% endif %}
+                                        {{t_cause_of_death.clearnames|join(' • ')}}<br>
+                            	{% endif %}
+                            	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
+	                            	<li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+	                            	  {{ macro.notelink(obj[ref]) }}</li>
+	                            	{% endfor %}</ul>{% endif %}
+                                {% if e.place_ref %}<ul class="eventnotes">
+                                    {% for pref in e.place_ref %}
+                                        {% for ref in obj[pref].note_ref %}
+                                   <li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+                                        {{ macro.notelink(obj[ref]) }}</li>{% endfor %}
+                                    {% endfor %}</ul>{% endif %}
+                            </div>
+                        </td>
+                    {% endif %}
+
+                    </tr>
+         {% endfor %}
+                 </tbody>
+            </table>
+        </div>
+
+        <div class="subsection" id="families">
+            <h4>{{ _("Families") }}</h4>
+
+{% if person.families_as_child %}
+            <div class="mainbox" title="{{ _('Families') }}">
+                <p>{{ _("Parents' family") }}</p>
+            {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
+                <div class="groupbox">
+	                <div class="familybox" title="{{ _('family') }} {{fam.id}}">
+                        <p><a href="/scene/family={{fam.uniq_id}}" title="{{fam.id}}" class="inlink">
+                             {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
+                           {{fam.marriage_dates}}</p>
+	                    <ul>{% if fam.father %}
+	                        <li>{{ _("Man") }}: {{ macro.person(fam.father, myid) }}</li>
+	                {% endif %}{% if fam.mother %}
+	                        <li>{{ _("Wife") }}: {{ macro.person(fam.mother, myid) }}</li>
+	                {% endif %}{% if fam.children|count %}
+	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
+	                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>{% endfor %}
+	                        </ul></li>
+	                {% endif %}
+	                    </ul>
+	                </div>
+                </div>
+            </div>
+            {% endif %}{% endfor %}
+{% endif %}
+
+            <div class="mainbox" title="{{ _('Central person') }}">
+	            <p>{{person.names[0].firstname}} {{ _("self") }}</p>
+	            <div class="groupbox">
+		            <div class="personbox" title="{{ _('Self') }}">
+		                <span title="{{ _('first name') }}">{{person.names[0].firstname}}</span>
+		                {% if not person.names[0].surname %}<i title="{{ _('patronymic') }}">{{person.names[0].suffix}}</i>
+		                {% else %}<b title="{{ _('surname') }}">{{person.names[0].prefix}} {{person.names[0].surname}}</b>
+		                {% endif %}
+		            </div>
+	            </div>
+	        </div>
+
+{% if person.families_as_parent %}
+            <div class="mainbox" title="{{ _('Own families') }}">
+                <p>{{ _("As Parent in Family") }}</p>
+	            <div class="groupbox">
+		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
+		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
+		                <p><a href="/scene/family={{fam.uniq_id}}" title="{{fam.id}}" class="inlink">
+                             {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
+                           {{fam.marriage_dates}}</p>
+		                <ul>{% if fam.father %}
+		                        <li>{{ _("Father") }}: {{ macro.person(fam.father, myid) }}</li>
+		                {% endif %}{% if fam.mother %}
+		                        <li>{{ _("Mother") }}: {{ macro.person(fam.mother, myid) }}</li>
+		                {% endif %}{% if fam.children|count %}
+		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
+		                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>
+		                         {% endfor %}</ul></li>
+		                {% endif %}
+		                    </ul>
+		                </ol></div>
+		            {% endif %}{% endfor %}
+	             </div>
+             </div>
+{% endif %}
+
+        </div>
+
+        <div class="subsection" id="indivgallery">
+            <h4>{{ _("Media") }}</h4>
+        {% for ref in person.media_ref %}
+            <div class="thumbnail">{% set photo=obj[ref] %}
+                <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
+	                <img alt="({{ _('Photo') }})" 
+	                     src="/scene/thumbnail?id={{photo.uuid}}" 
+	                     title="key = {{photo.uuid_str()}}"/>
+                </a>
+                <div style="word-break: break-all;">
+                    {{photo.description}}</div>
+            </div>
+        {% endfor %}
+            <div class="fullclear"></div>
+        </div>
+<!--
+        <div class="subsection scene">
+            <h4>{{ _("Narrated") }}</h4>
+            <div class="grampsstylednote">
+                <p>
+                {{ _("Note") }}
+                </p>
+            </div>
+        </div>
+-->
+        <!-- div class="subsection" id="tree"><h4>Esivanhemmat -->
+
+        <div class="subsection" id="sourcerefs">
+            <h4>{{ _("Source references") }}</h4>
+{#
+		    mark_obj.mark               = '1a'
+		    cita = obj[mark_obj.c_id]   = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
+		    cita.page                   = 'Wiala'
+		    source = obj[mark_obj.s_id] = <models.gen.source.Source object at 0x7f1374e1a978>
+		    source.stitle               = 'Akaa rippikirja 1774-1779'
+		    obj[mark_obj.r_ids[0]]      = <models.gen.repository.Repository object at 0x7f1374e1ae48>
+		    obj[mark_obj.r_ids[0]].rname = 'Akaan seurakunnan arkisto'
+#}<!-- {% for m in marks %}
+     {{m}}{% endfor %}
+ -->
+<ul>
+{% for s_id, mark_list in marks|groupby('s_id') %}
+    <li><!-- Source -->{% if s_id > 0 %}{% set source = obj[s_id] %}
+                    <a href="/scene/source={{source.uniq_id}}" class="inlink"
+                     title="[{{s_id}}] {{ _('See source %(name)s details', name=source.id) }}"
+                     >{{source.stitle}}</a>
+            {% else %}<b title="{{mark_list}}">{{ _("No source information!") }}</b>{% endif %}
+            <!-- Repository -->
+            {% if mark_list[0].r_ids %} – {{obj[mark_list[0].r_ids[0]].rname}}
+            {% else %}<b title="{{mark_list}}">{{ _("No archive information!") }}</b>
+            {% if mark_list[0].r_ids|length > 1 %}<b> JA MUITA ARKISTOJA</b>{% endif %}
+            {% endif %}
+        <ul>
+    {% for mark_obj in mark_list %}
+        <!-- Citation -->
+            {% if mark_obj.c_id > 0 %}
+                {% set cita = obj[mark_obj.c_id] %}{% set conf = cita.confidence | int %}
+             <li id="sref{{ mark_obj.mark }}" {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %} >
+                  <span title="[{{mark_obj.c_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
+                      {{ mark_obj.mark }} {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+                  </span> {{ cita.noteref }}
+                {% for nref in cita.note_ref %}&nbsp; – <i>{{ _("see:") }}&nbsp;</i> {{ macro.notelink(obj[nref]) }}{% endfor %}
+             </li>
+            {% endif %}
+        </li>
+    {% endfor %}</ul>
+    </li>
+{% endfor %}
+</ul>
+
+        </div>
+    </div>
+{% endblock %}
+

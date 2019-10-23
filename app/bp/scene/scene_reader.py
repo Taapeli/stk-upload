@@ -123,6 +123,10 @@ def get_person_full_data(uuid, owner):
     #    for f
     #       (f) --> (fp:Person) -[*1]-> (fpn:Name)
     #       (f) --> (fe:Event)
+    # 3. Read their connected nodes z: Citations, Notes, Medias
+    #    for y in p, x, fe, z, s, r
+    #        (y) --> (z:Citation|Note|Media)
+
 
     try:
         person, objs = Person_combo.get_person_full(uuid, owner)
@@ -131,15 +135,19 @@ def get_person_full_data(uuid, owner):
         print(f"Henkilötietojen {uuid} luku epäonnistui: {e}")
         return (None, None, None)
 
-    return (person, objs, [])
+    fns = Footnotes()
+    set_citations(person.citation_ref, fns, objs)
+    for e in person.events:
+#         for pref in e.place_ref:
+#             e.clearnames = e.clearnames + objs[pref].show_names_list()
+#             for nref in objs[pref].note_ref:
+#                 note = objs[nref]
+#                 print ("  place {} note {}".format(objs[pref].id, note))
+        set_citations(e.citation_ref, fns, objs)
 
-    # 3. Read their connected nodes z: Citations, Notes, Medias and Places
-    #    for y in p, x, fe, z, s, r
-    #        (y) --> (z:Citation|Note|Media|Place)
-
-    # 4. Read Place names pn
-    #    for pl in z:Place
-    #        (pl) --> (pn:Place_name)
+    # Return Person with included objects, list of note, citation etc. objects
+    # and footnotes
+    return (person, objs, fns.getNotes())
 
     # 5. Read Sources s and Repositories r for all Citations
     #   5. for c in z:Citation

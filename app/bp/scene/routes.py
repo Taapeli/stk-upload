@@ -177,10 +177,21 @@ def show_person_pg_v2_v3(uid=None):
     else:
         user=None
     
-    if isinstance(uid, int):    # v2 Person page data
+    if isinstance(uid, int):
+        # v2 Person page
         person, objs, marks = get_a_person_for_display_apoc(uid, user)
-    else:                       # v3 Person page data
-        person, objs, marks = get_person_full_data(uid, user)
+        logger.info("-> bp.scene.routes.show_person_pg_v2")
+        if not person:
+            return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
+        #print (f"Current language {current_user.language}")
+        from bp.scene.models.media import get_thumbname
+        for i in person.media_ref:
+            print(get_thumbname(objs[i].uuid))
+        return render_template("/scene/person_pg.html", person=person, obj=objs, 
+                               marks=marks, menuno=12, elapsed=time.time()-t0)
+
+    # v3 Person page
+    person, objs, marks = get_person_full_data(uid, user)
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 #     for m in marks:
@@ -190,10 +201,9 @@ def show_person_pg_v2_v3(uid=None):
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
     logger.info("-> bp.scene.routes.show_person_pg_v2_v3")
     #print (f"Current language {current_user.language}")
-    from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
         print(get_thumbname(objs[i].uuid))
-    return render_template("/scene/person_pg.html", person=person, obj=objs, 
+    return render_template("/scene/person.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
 
