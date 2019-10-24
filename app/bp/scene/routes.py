@@ -168,7 +168,7 @@ def show_person_v2(uid=None):
         user=None
     # v2 Person page data
     person, objs, marks = get_a_person_for_display_apoc(uid, user)
-    logger.info("-> bp.scene.routes.show_person_pg_v2")
+    logger.info("-> bp.scene.routes.show_v2")
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
     #print (f"Current language {current_user.language}")
@@ -182,7 +182,7 @@ def show_person_v2(uid=None):
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_person_pg_v2_v3(uid=None):
+def show_person_pg_v3(uid=None):
     """ One Person with all connected nodes - NEW version 3.
     
         Note: not using apoc any more.
@@ -196,7 +196,7 @@ def show_person_pg_v2_v3(uid=None):
         user=current_user.username
     else:
         user=None
-    logger.info("-> bp.scene.routes.show_person_pg_v2_v3")
+    logger.info("-> bp.scene.routes.show_person_v3")
     
     # v3 Person page
     person, objs, marks = get_person_full_data(uid, user)

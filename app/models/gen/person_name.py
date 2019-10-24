@@ -13,29 +13,31 @@ from .cypher import Cypher_person
 from .cypher import Cypher_name
 
 class Name:
-    """ Nimi
+    """ Person name.
 
         Properties:
-                type                str nimen tyyppi
+                type                str Name type: 'Birth name', ...
                 order               int name order of Person etc. (from Gramps xml)
-                alt                 str muun nimen numero
                 firstname           str etunimi
                 surname             str sukunimi
                 prefix              str etuliite
-                suffix              str patronyymi
-                citation_handles    str lähteen viitteet
+                suffix              str patronyme / patronyymi
+                citation_handles[]  str gramps handles for citations
+                citation_ref[]      int uniq_ids of citation nodes
     """
 
     def __init__(self, givn='', surn='', pref='', suff=''):
         """ Luo uuden name-instanssin """
         self.type = ''
-        #self.alt = ''   #Todo: Should be removed?
         self.order = None
         self.firstname = givn
         self.surname = surn
         self.prefix = pref
         self.suffix = suff
+        # For gramps xml?
         self.citation_handles = []
+        # For person page
+        self.citation_ref = []
 
     def __str__(self):
         # Gedcom style key
@@ -92,18 +94,6 @@ class Name:
             print("iError (Name.save): {0}".format(err), file=stderr)            
 
 
-#     @staticmethod
-#     def get_people_with_refname(refname):
-#         """ Korjaa: refname-kenttää ei ole, käytä Refname-nodea
-#             Etsi kaikki henkilöt, joiden referenssinimi on annettu"""
-# 
-#         query = """
-#             MATCH (p:Person)-[r:NAME]->(n:Name) WHERE n.refname STARTS WITH '{}'
-#                 RETURN p.handle AS handle
-#             """.format(refname)
-#         return shareds.driver.session().run(query)
-
-
     @staticmethod
     def get_people_with_same_name():
         """ Etsi kaikki henkilöt, joiden nimi on sama"""
@@ -118,19 +108,6 @@ class Name:
                 n2.firstname, n2.suffix, n2.surname]) AS ids
             """.format()
         return shareds.driver.session().run(query)
-
-
-#     @staticmethod
-#     def get_ids_of_people_with_refname_and_user_given(userid, refname):
-#         """ Korjaa: refname-kenttää ei ole, käytä Refname-nodea
-#             Etsi kaikki käyttäjän henkilöt, joiden referenssinimi on annettu"""
-# 
-#         query = """
-#             MATCH (u:User)-[r:REVISION]->(p:Person)-[s:NAME]->(n:Name)
-#                 WHERE u.userid='{}' AND n.refname STARTS WITH '{}'
-#                 RETURN ID(p) AS id
-#             """.format(userid, refname)
-#         return shareds.driver.session().run(query)
 
 
     @staticmethod

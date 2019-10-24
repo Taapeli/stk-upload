@@ -5,8 +5,9 @@ Created on 24.9.2018
 
 @author: jm
 '''
-from .models.footnote import Footnotes, SourceFootnote
+from models.person_reader import PersonReader
 
+from .models.footnote import Footnotes, SourceFootnote
 from models.gen.from_node import get_object_from_node
 from models.gen.person_combo import Person_combo #, Person_as_member
 from shareds import logger
@@ -129,7 +130,7 @@ def get_person_full_data(uuid, owner):
 
 
     try:
-        person, objs = Person_combo.get_person_full(uuid, owner)
+        person, objs = PersonReader.get_person_full(uuid, owner)
     except Exception as e:
         traceback.print_exc()
         print(f"Henkilötietojen {uuid} luku epäonnistui: {e}")
@@ -152,9 +153,6 @@ def get_person_full_data(uuid, owner):
     # 5. Read Sources s and Repositories r for all Citations
     #   5. for c in z:Citation
     #        (c) --> (s:Source) --> (r:Repository)
-
-    
-        # Create gen objects tree: Person with all connected objects
 
 
 def get_a_person_for_display_apoc(uid, user):
@@ -350,7 +348,7 @@ def set_citations(refs, fns, objs):
             print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
         else:
             print("- no source / {}".format(ref))
-
+    pass
 
 def connect_object_as_leaf(src, target, rel_type=None):
     ''' Subroutine for Person page display.
