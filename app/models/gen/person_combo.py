@@ -219,7 +219,7 @@ return path"""
                     self.events.append(x_obj)
                     objs[x_obj.uniq_id] = x_obj 
                 print(f"# ({self.id}) -[:{rel_type} {role}]-> (:{label} '{x_obj}')")
-         
+
         except Exception as e:
             print(f"Could not read names and events for person {self.uuid}: {e}")
         return
@@ -536,6 +536,9 @@ return path"""
                 #      (f) --> (fp:Person) -[*1]-> (fpn:Name)
                 #      (f) --> (fe:Event)
                 p._read_person_families(session, objs)
+
+                # Sort Events by date
+                p.events.sort(key=lambda x: x.dates)
 
                 # 4. for pl in z:Place, ph
                 #      (pl) --> (pn:Place_name)
