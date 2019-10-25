@@ -182,7 +182,7 @@ def show_person_v2(uid=None):
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_person_pg_v3(uid=None):
+def show_person_v3(uid=None):
     """ One Person with all connected nodes - NEW version 3.
     
         Note: not using apoc any more.

@@ -131,6 +131,28 @@ class Person_combo(Person):
 
 
     @staticmethod
+    def get_my_person(session, uuid, user):
+        ''' Read a person, who must belong to user's Batch, if user is given.
+        '''
+        try:
+            if user != 'guest':    # Select person owned by user
+                record = session.run(Cypher_person.get_by_user,
+                                     uuid=uuid, user=user).single()
+            else:       # Select person from public database
+                #TODO: Rule for public database is missing, taking all!
+                record = session.run(Cypher_person.get_public,
+                                     uuid=uuid).single()
+            if record == None:
+                raise LookupError(f"Person {uuid} not found.")
+            node = record[0]
+            return Person_combo.from_node(node)
+
+        except Exception as e:
+            print(f"Could not read person {uuid}: {e}")
+            return None
+
+
+    @staticmethod
     def get_person_paths(uniq_id):
         ''' Read a person and paths for all connected nodes.
         '''

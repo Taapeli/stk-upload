@@ -16,91 +16,40 @@ from .gen.media import Media
 from .gen.cypher import Cypher_person
 
 
-class PersonReader(Person_combo):
+class PersonReader():
     '''
     Person reader is used for reading Person and all essential other nodes.
     '''
 
 
     def __init__(self):
+        ''' Creates a Person from db node and essential connected nodes.
+
+             The Person in db must belong to user's Batch, if user is given.
+             
+             Version 3 / 25.10.2019 / JMä
         '''
-        Constructor
-        '''
-        Person_combo.__init__(self)
+        self.person = None
+        self.objs = {}
+        self.session = shareds.driver.session()
 
 
-    @staticmethod
-    def get_person_full(uuid, user):
-        ''' Read a person and paths for essential connected nodes. (Version 3)
+    def get_person(self, uuid, owner):
+        ''' Read Person p, if not denied. '''
+        self.person = Person_combo.get_my_person(self.session, uuid, owner)
+        if not isinstance(self.person, Person_combo):
+            print(f"A Person uuid={uuid} excepted, got {self.person}")
+            raise PermissionError(f"Person {uuid} is not available, got {self.person}")
 
-            The Person must belong to user's Batch, if user is given.
-        '''
-        objs = {}
-        with shareds.driver.session() as session:
-            # 1. Read Person p, if not denied
-            p = PersonReader.get_person_node(session, uuid, objs, user)
-            if isinstance(p,Person_combo):
+        self.objs[self.person.uniq_id] = self.person
 
-                # 1. (p:Person) --> (x:Name|Event)
-                p.read_person_names_events(session, objs)
 
-                # 2. (p:Person) <-- (f:Family)
-                #    for f
-                #      (f) --> (fp:Person) -[*1]-> (fpn:Name)
-                #      (f) --> (fe:Event)
-                p.read_person_families(session, objs)
-
-                # Sort Events by date
-                p.events.sort(key=lambda x: x.dates)
-
-                # 4. for pl in z:Place, ph
-                #      (pl) --> (pn:Place_name)
-                #      (pl) --> (pi:Place)
-                #      (pi) --> (pin:Place_name)
-                p.read_object_places(session, objs)
-
-                # 5. Read their connected nodes z: Citations, Notes, Medias
-                #    for y in p, x, fe, z, s, r
-                #        (y) --> (z:Citation|Note|Media)
-                new_objs = [-1]
-                while len(new_objs) > 0:
-                    new_objs = p.read_object_citation_note_media(session, objs, new_objs)
-
-        if objs:
-            print(f"# Nodes for Person {p.uniq_id} are {list(objs.keys())}")
-        return p, objs
-
-    @staticmethod
-    def get_person_node(session, uuid, objs, user):
-        ''' Read a person, who must belong to user's Batch, if user is given.
+    def read_person_names_events(self):
+        ''' Read names and events to Person object p.
         '''
         try:
-            if user != 'guest':    # Select person owned by user
-                record = session.run(Cypher_person.get_by_user,
-                                     uuid=uuid, user=user).single()
-            else:       # Select person from public database
-                #TODO: Rule for public database is missing, taking all!
-                record = session.run(Cypher_person.get_public,
-                                     uuid=uuid).single()
-            if record == None:
-                raise LookupError(f"Person {uuid} not found.")
-            node = record[0]
-            p = PersonReader.from_node(node)
-            print(f"#Person {p}")
-            objs[p.uniq_id] = p
-        except Exception as e:
-            print(f"Could not read person {uuid}: {e}")
-            return None
-
-        return p
-
-
-    def read_person_names_events(self, session, objs):
-        ''' Read names and events to Person object.
-        '''
-        try:
-            results = session.run(Cypher_person.get_names_events,
-                                  uid=self.uniq_id)
+            results = self.session.run(Cypher_person.get_names_events,
+                                       uid=self.person.uniq_id)
             for record in results:
                 # <Record rel=<Relationship id=453912
                 #    nodes=(
@@ -120,20 +69,21 @@ class PersonReader(Person_combo):
                 #print(f"# -[:{rel_type} {relation._properties}]-> (x:{label})")
                 if label == 'Name':
                     x_obj = Name.from_node(node)
-                    self.names.append(x_obj)
-                    objs[x_obj.uniq_id] = x_obj
+                    self.person.names.append(x_obj)
+                    self.objs[x_obj.uniq_id] = x_obj
                 elif label == 'Event':
                     x_obj = Event_combo.from_node(node)
                     x_obj.role = role
-                    self.events.append(x_obj)
-                    objs[x_obj.uniq_id] = x_obj 
-                print(f"# ({self.id}) -[:{rel_type} {role}]-> (:{label} '{x_obj}')")
+                    self.person.events.append(x_obj)
+                    self.objs[x_obj.uniq_id] = x_obj 
+                print(f"# ({self.person.id}) -[:{rel_type} {role}]-> (:{label} '{x_obj}')")
 
         except Exception as e:
-            print(f"Could not read names and events for person {self.uuid}: {e}")
+            print(f"Could not read names and events for person {self.person.uuid}: {e}")
         return
 
-    def read_person_families(self, session, objs):
+
+    def read_person_families(self):
         ''' Read the families, where this Person is a member.
 
             Also return the Family members with their birth event
@@ -145,8 +95,8 @@ class PersonReader(Person_combo):
                  (f) --> (fe:Event)
         '''
         try:
-            results = session.run(Cypher_person.get_families,
-                                  uid=self.uniq_id)
+            results = self.session.run(Cypher_person.get_families,
+                                       uid=self.person.uniq_id)
             for record in results:
                 # <Record
                 #  rel=<Relationship id=671269
@@ -183,27 +133,28 @@ class PersonReader(Person_combo):
                 family.role = rel_type
                 family.marriage_dates = ""  # type string or DataRange
                 if rel_type == "CHILD":
-                    self.families_as_child.append(family)
+                    self.person.families_as_child.append(family)
                 elif rel_type == "PARENT":
-                    self.families_as_parent.append(family)
-                print(f"# ({self.id}) -[:{rel_type} {role}]-> (:Family '{family}')")
+                    self.person.families_as_parent.append(family)
+                print(f"# ({self.person.id}) -[:{rel_type} {role}]-> (:Family '{family}')")
 
                 # 3. Family Events
                 #TODO: Cause of death is not displayed!
 
                 for event_node in record['events']:
                     f_event = Event_combo.from_node(event_node)
-                    print(f"# event {f_event}")
+                    print(f"#\tevent {f_event}")
                     if f_event.type == "Marriage":
                         family.marriage_dates = f_event.dates
                     # Add family events to person events, too
                     if rel_type == "PARENT":
                         f_event.role = "Family"
-                        print(f"# ({self.id}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
-                        self.events.append(f_event)
-                        # Add Event to list of those events, who's references are searched
-                        if not f_event.uniq_id in objs.keys():
-                            objs[f_event.uniq_id] = f_event
+                        print(f"# ({self.person.id}) -[:EVENT {f_event.role}]-> (:Event '{f_event}')")
+                        self.person.events.append(f_event)
+                        # Add Event to list of those events, who's Citation etc
+                        # references must be checked
+                        if not f_event.uniq_id in self.objs.keys():
+                            self.objs[f_event.uniq_id] = f_event
 
                 # 4. Family members and their birth events
 
@@ -246,16 +197,17 @@ class PersonReader(Person_combo):
                     pass
 
         except Exception as e:
-            print(f"Could not read families for person {self.uuid}: {e}")
+            print(f"Could not read families for person {self.person.uuid}: {e}")
         return
 
-    def read_object_places(self, session, objs):
+
+    def read_object_places(self):
         ''' Read Place hierarchies for all objects in objs.
         '''
         try:
-            uids = list(objs.keys())
-            results = session.run(Cypher_person.get_places,
-                                  uid_list=uids)
+            uids = list(self.objs.keys())
+            results = self.session.run(Cypher_person.get_places,
+                                       uid_list=uids)
             for record in results:
                 # <Record 
                 #    x=<Node id=426916 labels={'Event'} 
@@ -288,7 +240,7 @@ class PersonReader(Person_combo):
                 #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
                 #    ]>
 
-                node = record['x']
+                node = record['x']      #TODO: Only label and uniq_id needed
                 src_label = list(node.labels)[0]
                 if src_label == "Event":
                     #src = Event_combo.from_node(node)
@@ -298,7 +250,7 @@ class PersonReader(Person_combo):
                     raise TypeError('An Event excepted, got {src_label}')
 
                 # Use the Event from Person events
-                for e in self.events:
+                for e in self.person.events:
                     if e.uniq_id == src_uniq_id:
                         src = e
                         break
@@ -306,9 +258,9 @@ class PersonReader(Person_combo):
                     raise LookupError("ERROR: Unknown Event {src_uniq_id}!?")
 
                 pl = Place_combo.from_node(record['pl'])
-                if not pl.uniq_id in objs.keys():
+                if not pl.uniq_id in self.objs.keys():
                     # A new place
-                    objs[pl.uniq_id] = pl
+                    self.objs[pl.uniq_id] = pl
                     #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
                     pl.set_names_from_nodes(record['pnames'])
                 #else:
@@ -319,21 +271,22 @@ class PersonReader(Person_combo):
                 if record['pi']:
                     pl_in = Place_combo.from_node(record['pi'])
                     ##print(f"# Hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
-                    if pl_in.uniq_id in objs:
-                        pl.uppers.append(objs[pl_in.uniq_id])
+                    if pl_in.uniq_id in self.objs:
+                        pl.uppers.append(self.objs[pl_in.uniq_id])
                         ##print(f"# - Using a known place {objs[pl_in.uniq_id]}")
                     else:
                         pl.uppers.append(pl_in)
-                        objs[pl_in.uniq_id] = pl_in
+                        self.objs[pl_in.uniq_id] = pl_in
                         pl_in.set_names_from_nodes(record['pinames'])
                         #print(f"#  ({pl_in} names {pl_in.names})")
                 pass
 
         except Exception as e:
-            print(f"Could not read places for person {self.id} objects {objs}: {e}")
+            print(f"Could not read places for person {self.person.id} objects {self.objs}: {e}")
         return
 
-    def read_object_citation_note_media(self, session, objs, active_objs=[]):
+
+    def read_object_citation_note_media(self, active_objs=[]):
         ''' Read Citations, Notes, Medias for list of objects.
 
                 (x) -[r:CITATION|NOTE|MEDIA]-> (y)
@@ -349,11 +302,11 @@ class PersonReader(Person_combo):
                 uids = active_objs
             else:
                 # Search (x) -[r:CITATION|NOTE|MEDIA]-> (y)
-                uids = list(objs.keys())
+                uids = list(self.objs.keys())
             print(f'# --- Search Citations, Notes, Medias for {uids}')
 
-            results = session.run(Cypher_person.get_citation_note_media,
-                                  uid_list=uids)
+            results = self.session.run(Cypher_person.get_citation_note_media,
+                                       uid_list=uids)
             for record in results:
                 # <Record label='Person' uniq_id=327766
                 #    r=<Relationship id=426799
@@ -374,7 +327,7 @@ class PersonReader(Person_combo):
                 # The existing object x
                 x_label = record['label']
                 x_uniq_id = record['uniq_id']
-                x = objs[x_uniq_id]
+                x = self.objs[x_uniq_id]
 
                 # Relation r between (x) --> (y)
                 rel = record['r']
@@ -388,10 +341,10 @@ class PersonReader(Person_combo):
 #                 print(f'# Link ({x_uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
                 for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
                 if y_label == "Citation":
-                    o = objs.get(y_uniq_id, None)
+                    o = self.objs.get(y_uniq_id, None)
                     if not o:
                         o = Citation.from_node(y_node)
-                        objs[o.uniq_id] = o
+                        self.objs[o.uniq_id] = o
                         new_objs.append(o.uniq_id)
                     # Store reference to referee object
                     if hasattr(x, 'citation_ref'):
@@ -401,10 +354,10 @@ class PersonReader(Person_combo):
                     print(f'# ({x_label}:{x_uniq_id}) --> (Citation:{o.id})')
 
                 elif y_label == "Note":
-                    o = objs.get(y_uniq_id, None)
+                    o = self.objs.get(y_uniq_id, None)
                     if not o:
                         o = Note.from_node(y_node)
-                        objs[o.uniq_id] = o
+                        self.objs[o.uniq_id] = o
                         new_objs.append(o.uniq_id)
                     # Store reference to referee object
                     if hasattr(x, 'note_ref'):
@@ -414,10 +367,10 @@ class PersonReader(Person_combo):
                     print(f'# ({x_label}:{x_uniq_id}) --> ({y_label}:{o.id})')
 
                 elif y_label == "Media":
-                    o = objs.get(y_uniq_id, None)
+                    o = self.objs.get(y_uniq_id, None)
                     if not o:
                         o = Media.from_node(y_node)
-                        objs[o.uniq_id] = o
+                        self.objs[o.uniq_id] = o
                         new_objs.append(o.uniq_id)
                         # Get relation properties
                         r_order = rel.get('order')
@@ -442,5 +395,5 @@ class PersonReader(Person_combo):
                 pass
 
         except Exception as e:
-            print(f"Could not read places for person {self.uuid} objects {objs}: {e}")
+            print(f"Could not read places for person {self.person.uuid} objects {self.objs}: {e}")
         return new_objs
