@@ -72,8 +72,13 @@ RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id,
     get_citation_note_media = """
 MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
     WHERE ID(x) IN $uid_list
-//OPTIONAL MATCH (y) --> (z)
 RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
+    #        (c) --> (s:Source) --> (r:Repository)
+    get_sources = """
+MATCH (c:Citation) -[:SOURCE]-> (s:Source)
+    WHERE ID(c) IN $uid_list
+    OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
+RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 
 #For Person_pg v2
     all_nodes_query_w_apoc="""

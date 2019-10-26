@@ -139,7 +139,7 @@ def get_person_full_data(uuid, owner):
     # 6. Read Sources s and Repositories r for all Citations
     #    for c in z:Citation
     #        (c) --> (s:Source) --> (r:Repository)
-    pass
+    reader.read_sources_repositories()
 
     # Create Citation index
     fns = Footnotes()

@@ -6,14 +6,18 @@ Created on 24.10.2019
 import traceback
 
 import shareds
+
 from .gen.person_combo import Person_combo
 from .gen.person_name import Name
 from .gen.event_combo import Event_combo
 from .gen.family_combo import Family_combo
 from .gen.place_combo import Place_combo
-from .gen.citation import Citation
 from .gen.note import Note
 from .gen.media import Media
+from .gen.citation import Citation
+from .gen.source import Source
+from .gen.repository import Repository
+
 from .gen.cypher import Cypher_person
 
 
@@ -25,18 +29,24 @@ class PersonReader():
 
     def __init__(self):
         ''' Creates a Person from db node and essential connected nodes.
-
-             The Person in db must belong to user's Batch, if user is given.
              
              Version 3 / 25.10.2019 / JMä
         '''
-        self.person = None
-        self.objs = {}
         self.session = shareds.driver.session()
+
+        # Person node with Names and Events included
+        self.person = None
+        # Referenced nodes, not directly saved in self.person
+        self.objs = {}
+        # Citations found
+        self.citations = {}
 
 
     def get_person(self, uuid, owner):
-        ''' Read Person p, if not denied. '''
+        ''' Read Person p, if not denied.
+ 
+            The Person must belong to user's Batch, if owner is given.
+       '''
         self.person = Person_combo.get_my_person(self.session, uuid, owner)
         if not isinstance(self.person, Person_combo):
             traceback.print_exc()
@@ -342,6 +352,8 @@ class PersonReader():
                     o = self.objs.get(y_uniq_id, None)
                     if not o:
                         o = Citation.from_node(y_node)
+                        # The list of Citations, for further reference search
+                        self.citations[o.uniq_id] = o
                         self.objs[o.uniq_id] = o
                         new_objs.append(o.uniq_id)
                     # Store reference to referee object
@@ -398,3 +410,60 @@ class PersonReader():
         except Exception as e:
             print(f"Could not read places for person {self.person.uuid} objects {self.objs}: {e}")
         return new_objs
+
+
+    def read_sources_repositories(self):
+        ''' Read Place hierarchies for all objects in objs.
+        '''
+        if len(self.citations) == 0:
+            return
+
+        uids = list(self.citations.keys())
+        results = self.session.run(Cypher_person.get_sources,
+                               uid_list=uids)
+        for record in results:
+            # <Record label='Citation' uniq_id=392761 
+            #    s=<Node id=397146 labels={'Source'} 
+            #        properties={'id': 'S1723', 'stitle': 'Hauhon seurakunnan rippikirja 1757-1764', 
+            #            'uuid': 'f704b8b90c0640efbade4332e126a294', 'spubinfo': '', 'sauthor': '', 'change': 1563727817}>
+            #    rel=<Relationship id=566238 
+            #      nodes=(
+            #        <Node id=397146 labels={'Source'} 
+            #            properties={'id': 'S1723', 'stitle': 'Hauhon seurakunnan rippikirja 1757-1764', 
+            #                'uuid': 'f704b8b90c0640efbade4332e126a294', 'spubinfo': '', 'sauthor': '', 'change': 1563727817}>, 
+            #        <Node id=316903 labels={'Repository'}
+            #            properties={'id': 'R0157', 'rname': 'Hauhon seurakunnan arkisto', 'type': 'Archive', 
+            #                'uuid': '7ac1615894ea4457ba634c644e8921d6', 'change': 1563727817}>) 
+            #      type='REPOSITORY' 
+            #      properties={'medium': 'Book'}>
+            #    r=<Node id=316903 labels={'Repository'}
+            #        properties={'id': 'R0157', 'rname': 'Hauhon seurakunnan arkisto', 'type': 'Archive', 
+            #            'uuid': '7ac1615894ea4457ba634c644e8921d6', 'change': 1563727817}>
+            # >
+            
+            # 1. The Citation node
+            uniq_id = record['uniq_id']
+            cita = self.objs[uniq_id]
+    
+            # 2. The Source node
+            node = record['s']
+            source = Source.from_node(node)
+            if not source.uniq_id in self.objs:
+                self.objs[source.uniq_id] = source
+    
+            # 3. Medium from REPOSITORY relation
+            relation = record['rel']
+            medium = relation.get('medium', "")
+            
+            # 4. The Repository node
+            node = record['r']
+            repo = Repository.from_node(node)
+            if not repo.uniq_id in self.objs:
+                self.objs[repo.uniq_id] = repo
+            
+            # Referencing a (Source, Repository, medium) tuple
+            cita.source_repo.append((source.uniq_id, repo.uniq_id, medium))
+            print(f"# ({uniq_id}:Citation) --> (:Source '{source}') -[:REPOSITORY {medium}]-> (:Repository '{repo}')")
+
+        return
+
