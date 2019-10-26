@@ -66,7 +66,8 @@ MATCH (x) -[:PLACE]-> (pl:Place)
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
-RETURN x, pl, COLLECT(DISTINCT pn) AS pnames,
+RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, 
+    pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
     get_citation_note_media = """
 MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)

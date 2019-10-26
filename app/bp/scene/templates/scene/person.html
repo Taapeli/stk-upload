@@ -37,8 +37,8 @@ u { color: DarkKhaki; text-decoration: none; }
         
         <div id="summaryarea">
             <table>
-                <tr>
-                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                <tr">
+                    <td class="ColumnAttribute" style="padding-bottom: .5em;">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
                         {{macro.all_obj_ids(person)}} /
                         <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
@@ -49,7 +49,7 @@ u { color: DarkKhaki; text-decoration: none; }
                         </span>
                     </td>
                     {% if person.citation_ref %}
-                    <td class="ColumnValue" rowspan="2"><small>{{ _("Source") }}:
+                    <td class="ColumnValue"><small><b>{{ _("Source") }}:</b>
                         {% for cr in person.citation_ref %}
                             <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
                         {% endfor %}</small>
@@ -64,6 +64,12 @@ u { color: DarkKhaki; text-decoration: none; }
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <b title="{{ _('surname') }}">{{pname.surname}}</b>
                     </td>
+                    {% if pname.citation_ref %}
+                    <td class="ColumnValue"><small><b>{{ _("Source") }}:</b>
+                        {% for cr in pname.citation_ref %}
+                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                        {% endfor %}</small>
+                    </td>{% endif %}
                 </tr>{% endfor %}
                    
                 {% if person.sex %}<tr>

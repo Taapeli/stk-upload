@@ -152,6 +152,20 @@ def get_person_full_data(uuid, owner):
     return (reader.person, reader.objs, fns.getNotes())
 
 
+def set_citations(refs, fns, objs):
+    ''' Create person citation references for foot notes '''
+    for ref in refs:
+        if ref in objs:
+            cit = objs[ref]
+            fn = SourceFootnote.from_citation_objs(cit, objs)
+            cit.mark = fn.mark
+            sl = fns.merge(fn)
+            print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
+        else:
+            print("- no source / {}".format(ref))
+    pass
+
+
 def get_a_person_for_display_apoc(uid, user):
     """ Get a Person with all connected nodes for display in Person page (v2).
 
@@ -333,19 +347,6 @@ def get_a_person_for_display_apoc(uid, user):
     # and footnotes
     return (person, objs, fns.getNotes())
 
-
-def set_citations(refs, fns, objs):
-    ''' Create person citation references for foot notes '''
-    for ref in refs:
-        if ref in objs:
-            cit = objs[ref]
-            fn = SourceFootnote.from_citation_objs(cit, objs)
-            cit.mark = fn.mark
-            sl = fns.merge(fn)
-            print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
-        else:
-            print("- no source / {}".format(ref))
-    pass
 
 def connect_object_as_leaf(src, target, rel_type=None):
     ''' Subroutine for Person page display.

@@ -209,11 +209,7 @@ class PersonReader():
             results = self.session.run(Cypher_person.get_places,
                                        uid_list=uids)
             for record in results:
-                # <Record 
-                #    x=<Node id=426916 labels={'Event'} 
-                #        properties={'datetype': 0, 'change': 1543867969, 'description': '', 
-                #            'id': 'E6600', 'date2': 1913866, 'type': 'Baptism', 
-                #            'date1': 1913866, 'uuid': 'cd6c826d30a741dea41df2ab207ec810'}> 
+                # <Record label='Event' uniq_id=426916 
                 #    pl=<Node id=306042 labels={'Place'}
                 #        properties={'id': 'P0456', 'type': 'Parish', 'uuid': '7aeb4e26754d46d0aacfd80910fa1bb1',
                 #            'pname': 'Helsingin seurakunnat', 'change': 1543867969}> 
@@ -240,11 +236,10 @@ class PersonReader():
                 #        <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
                 #    ]>
 
-                node = record['x']      #TODO: Only label and uniq_id needed
-                src_label = list(node.labels)[0]
+                src_label = record['label']
                 if src_label == "Event":
                     #src = Event_combo.from_node(node)
-                    src_uniq_id = node.id
+                    src_uniq_id = record['uniq_id']
                     src = None
                 else:
                     raise TypeError('An Event excepted, got {src_label}')
