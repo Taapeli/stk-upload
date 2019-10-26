@@ -3,8 +3,9 @@ Created on 24.10.2019
 
 @author: jm
 '''
-import shareds
+import traceback
 
+import shareds
 from .gen.person_combo import Person_combo
 from .gen.person_name import Name
 from .gen.event_combo import Event_combo
@@ -38,7 +39,7 @@ class PersonReader():
         ''' Read Person p, if not denied. '''
         self.person = Person_combo.get_my_person(self.session, uuid, owner)
         if not isinstance(self.person, Person_combo):
-            print(f"A Person uuid={uuid} excepted, got {self.person}")
+            traceback.print_exc()
             raise PermissionError(f"Person {uuid} is not available, got {self.person}")
 
         self.objs[self.person.uniq_id] = self.person
@@ -51,13 +52,14 @@ class PersonReader():
             results = self.session.run(Cypher_person.get_names_events,
                                        uid=self.person.uniq_id)
             for record in results:
-                # <Record rel=<Relationship id=453912
-                #    nodes=(
-                #        <Node id=261207 labels=set() properties={}>,
-                #        <Node id=261208 labels={'Name'}
-                #            properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
-                #                'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>)
-                #    type='NAME' properties={}>
+                # <Record
+                #    rel=<Relationship id=453912
+                #        nodes=(
+                #            <Node id=261207 labels=set() properties={}>,
+                #            <Node id=261208 labels={'Name'}
+                #                properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
+                #                    'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>)
+                #        type='NAME' properties={}>
                 #    x=<Node id=261208 labels={'Name'}
                 #        properties={'firstname': 'Vilhelm Edvard', 'type': 'Also Known As',
                 #            'suffix': '', 'surname': 'Koch', 'prefix': '', 'order': 0}>>
@@ -68,15 +70,17 @@ class PersonReader():
                 label = list(record['x'].labels)[0]
                 #print(f"# -[:{rel_type} {relation._properties}]-> (x:{label})")
                 if label == 'Name':
-                    x_obj = Name.from_node(node)
-                    self.person.names.append(x_obj)
-                    self.objs[x_obj.uniq_id] = x_obj
+                    x = Name.from_node(node)
+                    self.person.names.append(x)
+                    self.objs[x.uniq_id] = x
                 elif label == 'Event':
-                    x_obj = Event_combo.from_node(node)
-                    x_obj.role = role
-                    self.person.events.append(x_obj)
-                    self.objs[x_obj.uniq_id] = x_obj 
-                print(f"# ({self.person.id}) -[:{rel_type} {role}]-> (:{label} '{x_obj}')")
+                    x = Event_combo.from_node(node)
+                    x.role = role
+                    self.person.events.append(x)
+                    self.objs[x.uniq_id] = x 
+                    if x.type == "Cause Of Death":
+                        self.person.cause_of_death = x
+                print(f"# ({self.person.id}) -[:{rel_type} {role}]-> ({x.uniq_id}:{label} '{x}')")
 
         except Exception as e:
             print(f"Could not read names and events for person {self.person.uuid}: {e}")
@@ -131,7 +135,7 @@ class PersonReader():
                 node = record['family']
                 family = Family_combo.from_node(node)
                 family.role = rel_type
-                family.marriage_dates = ""  # type string or DataRange
+                family.marriage_dates = ""  # string "" or a DataRange
                 if rel_type == "CHILD":
                     self.person.families_as_child.append(family)
                 elif rel_type == "PARENT":
@@ -143,7 +147,7 @@ class PersonReader():
 
                 for event_node in record['events']:
                     f_event = Event_combo.from_node(event_node)
-                    print(f"#\tevent {f_event}")
+                    #print(f"#\tevent {f_event}")
                     if f_event.type == "Marriage":
                         family.marriage_dates = f_event.dates
                     # Add family events to person events, too
@@ -169,8 +173,6 @@ class PersonReader():
                     # member_node = <Node id=428883 labels={'Person'} properties={'sortname': 'Järnefelt##Caspar Woldemar', ... }>
                     # name_node = <Node id=428884 labels={'Name'} properties={'firstname': 'Caspar Woldemar' ...}>
                     # event_node = <Node id=267935 labels={'Event'} properties={'type': 'Birth', ... }>
-#                     start = relation.start
-#                     end = relation.end
                     role = relation['role']
                     member = Person_combo.from_node(member_node)
                     if name_node:
@@ -184,10 +186,11 @@ class PersonReader():
                     else:
                         event = None
 
-#                     if rel_type == "CHILD":
-#                         print(f"#  parent's family ({start}) -[:CHILD {relation._properties}]-> ({end}) {member} {name} {event}")
-#                     elif rel_type == "PARENT":
-#                         print(f"#  own family ({start}) -[:PARENT {relation._properties}]-> ({end}) {member} {name} {event}")
+                    if rel_type == "CHILD":
+                        print(f"#  parent's family ({relation.start}) -[:CHILD {relation._properties}]-> ({relation.end}) {member} {name} {event}")
+                    elif rel_type == "PARENT":
+                        print(f"#  own family ({relation.start}) -[:PARENT {relation._properties}]-> ({relation.end}) {member} {name} {event}")
+
                     if role == "father":
                         family.father = member
                     elif role == "mother":
@@ -237,12 +240,11 @@ class PersonReader():
                 #    ]>
 
                 src_label = record['label']
-                if src_label == "Event":
-                    #src = Event_combo.from_node(node)
-                    src_uniq_id = record['uniq_id']
-                    src = None
-                else:
-                    raise TypeError('An Event excepted, got {src_label}')
+                if src_label != "Event":
+                    traceback.print_exc()
+                    raise TypeError(f'An Event excepted, got {src_label}')
+                src_uniq_id = record['uniq_id']
+                src = None
 
                 # Use the Event from Person events
                 for e in self.person.events:
@@ -250,7 +252,8 @@ class PersonReader():
                         src = e
                         break
                 if not src:
-                    raise LookupError("ERROR: Unknown Event {src_uniq_id}!?")
+                    traceback.print_exc()
+                    raise LookupError(f"ERROR: Unknown Event {src_uniq_id}!?")
 
                 pl = Place_combo.from_node(record['pl'])
                 if not pl.uniq_id in self.objs.keys():
@@ -345,8 +348,9 @@ class PersonReader():
                     if hasattr(x, 'citation_ref'):
                         x.citation_ref.append(o.uniq_id)
                     else:
-                        print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    print(f'# ({x_label}:{x_uniq_id}) --> (Citation:{o.id})')
+                        traceback.print_exc()
+                        raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
+                    #print(f'# ({x_label}:{x_uniq_id}) --> (Citation:{o.id})')
 
                 elif y_label == "Note":
                     o = self.objs.get(y_uniq_id, None)
@@ -358,8 +362,8 @@ class PersonReader():
                     if hasattr(x, 'note_ref'):
                         x.note_ref.append(o.uniq_id)
                     else:
-                        print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    print(f'# ({x_label}:{x_uniq_id}) --> ({y_label}:{o.id})')
+                        traceback.print_exc()
+                        raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
 
                 elif y_label == "Media":
                     o = self.objs.get(y_uniq_id, None)
@@ -383,10 +387,12 @@ class PersonReader():
                         x.media_ref.append(o.uniq_id)
                     else:
                         print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    print(f'# ({x_label}:{x_uniq_id}) --> ({y_label}:{o.id})')
+                    print(f'# ({x_label}:{x_uniq_id} {x}) --> ({y_label}:{o.id})')
 
                 else:
-                    print(f'Error: No rule for ({x_label}) --> ({y_label})')            
+                    traceback.print_exc()
+                    raise NotImplementedError(f'No rule for ({x_label}) --> ({y_label})')            
+                print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
                 pass
 
         except Exception as e:

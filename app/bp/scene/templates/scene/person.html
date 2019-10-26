@@ -103,27 +103,20 @@ u { color: DarkKhaki; text-decoration: none; }
             <table class="infolist eventlist">
                 <thead>
                     <tr>
-                        <th class="ColumnSources">{{ _("Source") }}</th>
                         <th class="ColumnEvent">{{ _("Event") }}</th>
                         <th class="ColumnDate">{{ _("Date") }}</th>
                         <th class="ColumnPlace">{{ _("Place") }}</th>
+                        <th class="ColumnSources">{{ _("Source") }}</th>
                         <th class="ColumnDescription">{{ _("Description and Notes") }}</th>
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in person.events %} {# |sort(attribute='dates') #}
+        {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
-                    {% if e.type == "Cause Of Death" %}
-                        {% set t_cause_of_death = e %}
-                    {% else %}
 {#  person.events[0].citation_ref[0] = 90323
     objs[person.events[0].citation_ref[0]] = <models.gen.citation.Citation object at 0x7f0a24696ac8> = cr
     objs[person.events[0].citation_ref[0]].mark = '1a'
 #}
-                        <td class="ColumnSources">{% for cr in e.citation_ref %}
-                           <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
-                        {% endfor %}</td>
-
                         {% if e.uuid %}{% set uuid = e.uuid %}{% else %}{% set uuid = "" %}{% endif %}
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
@@ -144,12 +137,16 @@ u { color: DarkKhaki; text-decoration: none; }
                             {% endfor %}
                         </td>
 
+                        <td class="ColumnSources">{% for cr in e.citation_ref %}
+                           <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                        {% endfor %}</td>
+
                         <td class="ColumnDescription"><div>{{e.description}}</div>
-                            <div>{% if e.type == "Death" and t_cause_of_death %}<span 
+                            <div>{% if e.type == "Death" and person.cause_of_death %}<span 
                                     class="typedesc">{{ "Cause Of Death"|transl('notet') }}</span>
-                                        {{t_cause_of_death.description}}
-                                        {% if t_cause_of_death.dates %}{{t_cause_of_death.dates}}{% endif %}
-                                        {{t_cause_of_death.clearnames|join(' • ')}}<br>
+                                        {% if person.cause_of_death.dates %}{{person.cause_of_death.dates}}{% endif %}
+                                        {{person.cause_of_death.description}}
+                                        {{macro.place_names_lang(person.cause_of_death)}}<br>
                             	{% endif %}
                             	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
 	                            	<li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
@@ -163,8 +160,8 @@ u { color: DarkKhaki; text-decoration: none; }
                                     {% endfor %}</ul>{% endif %}
                             </div>
                         </td>
-                    {% endif %}
-
+{#                  {% endif %}
+#}
                     </tr>
          {% endfor %}
                  </tbody>

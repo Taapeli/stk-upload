@@ -63,7 +63,7 @@ class Place_combo(Place):
             lv = self.level
         else:
             lv = ""
-        return f"{self.uniq_id} {self.pname} ({self.type}) {lv}"
+        return f"{self.pname} ({self.type}) {lv}"
 
 
 #     @classmethod from_node(cls, node):
