@@ -89,14 +89,11 @@ u { color: DarkKhaki; text-decoration: none; }
                     <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
                 </tr>
 -->
+{% if person.note_ref %}
+                <tr><td></td><td>▸ <a href="#notes" class="inlink">{{ _('See') }} {{ _('Person Notes') }}</a></td></tr>
+{% endif %}
             </table>
         </div>
-
-        {% if person.note_ref %}<ul>
-        {% for ref in person.note_ref %}<div class="grampsstylednote">
-         <p><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
-            {{ macro.notelink(obj[ref]) }}{#obj[ref].text#}</p>
-        </div>{% endfor %}</ul>{% endif %}
 
         <div class="subsection" id="events">
             <h4>{{ _("Events") }}</h4>
@@ -170,7 +167,7 @@ u { color: DarkKhaki; text-decoration: none; }
 
         <div class="subsection" id="families">
             <h4>{{ _("Families") }}</h4>
-
+{% set myid = person.uuid %}
 {% if person.families_as_child %}
             <div class="mainbox" title="{{ _('Families') }}">
                 <p>{{ _("Parents' family") }}</p>
@@ -184,7 +181,7 @@ u { color: DarkKhaki; text-decoration: none; }
 	                        <li>{{ _("Man") }}: {{ macro.person(fam.father, myid) }}</li>
 	                {% endif %}{% if fam.mother %}
 	                        <li>{{ _("Wife") }}: {{ macro.person(fam.mother, myid) }}</li>
-	                {% endif %}{% if fam.children|count %}
+	                {% endif %}{% if fam.children %}
 	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
 	                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>{% endfor %}
 	                        </ul></li>
@@ -236,7 +233,7 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>
 
         <div class="subsection" id="indivgallery">
-            <h4>{{ _("Media") }}</h4>
+            <h4>{{ _("Media files") }}</h4>
         {% for ref in person.media_ref %}
             <div class="thumbnail">{% set photo=obj[ref] %}
                 <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
@@ -250,6 +247,19 @@ u { color: DarkKhaki; text-decoration: none; }
         {% endfor %}
             <div class="fullclear"></div>
         </div>
+
+{% if person.note_ref %}
+        <div class="subsection" id="notes">
+            <h4>{{ _("Person Notes") }}</h4>
+            <ul>
+            {% for ref in person.note_ref %}
+            <div class="grampsstylednote">
+                 <p><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+                    {{ macro.notelink(obj[ref]) }}{#obj[ref].text#}</p>
+            </div>{% endfor %}</ul>
+        </div>
+{% endif %}
+
 <!--
         <div class="subsection scene">
             <h4>{{ _("Narrated") }}</h4>
