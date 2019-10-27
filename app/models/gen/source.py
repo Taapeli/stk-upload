@@ -42,6 +42,7 @@ class Source(NodeObject):
 #         self.repocitory = None  # Repository object For creating display sets (vanhempi)
 
         # For display combo
+        #Todo: onko repositories, citations käytössä?
         self.repositories = []
         self.citations = []
         self.notes = []

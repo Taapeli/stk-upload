@@ -155,17 +155,37 @@ def show_persons_all():
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 
-
 @bp.route('/scene/person/<int:uid>')
+#     @login_required
+@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
+def show_person_v2(uid=None):
+    """ One Person with all connected nodes - version 3 with apoc
+    """
+    t0 = time.time()
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    # v2 Person page data
+    person, objs, marks = get_a_person_for_display_apoc(uid, user)
+    logger.info("-> bp.scene.routes.show_v2")
+    if not person:
+        return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
+    #print (f"Current language {current_user.language}")
+    from bp.scene.models.media import get_thumbname
+    for i in person.media_ref:
+        print(get_thumbname(objs[i].uuid))
+    return render_template("/scene/person_pg.html", person=person, obj=objs, 
+                           marks=marks, menuno=12, elapsed=time.time()-t0)
+
+
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_person_pg_v2_v3(uid=None):
+def show_person_v3(uid=None):
     """ One Person with all connected nodes - NEW version 3.
     
         Note: not using apoc any more.
-    
-        Korvaamaan metodi show_person_page()
     """
     t0 = time.time()
     uid = request.args.get('uuid', uid)
@@ -176,11 +196,10 @@ def show_person_pg_v2_v3(uid=None):
         user=current_user.username
     else:
         user=None
+    logger.info("-> bp.scene.routes.show_person_v3")
     
-    if isinstance(uid, int):    # v2 Person page data
-        person, objs, marks = get_a_person_for_display_apoc(uid, user)
-    else:                       # v3 Person page data
-        person, objs, marks = get_person_full_data(uid, user)
+    # v3 Person page
+    person, objs, marks = get_person_full_data(uid, user)
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 #     for m in marks:
@@ -188,12 +207,11 @@ def show_person_pg_v2_v3(uid=None):
 #     for e in person.events:
 #         for ni in e.note_ref:
 #             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
-    logger.info("-> bp.scene.routes.show_person_pg_v2_v3")
     #print (f"Current language {current_user.language}")
-    from bp.scene.models.media import get_thumbname
-    for i in person.media_ref:
-        print(get_thumbname(objs[i].uuid))
-    return render_template("/scene/person_pg.html", person=person, obj=objs, 
+    #from bp.scene.models.media import get_thumbname
+    #for i in person.media_ref:
+    #    print(get_thumbname(objs[i].uuid))
+    return render_template("/scene/person.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
 

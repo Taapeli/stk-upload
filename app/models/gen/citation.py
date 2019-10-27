@@ -49,8 +49,13 @@ class Citation(NodeObject):
         self.page = ''
         self.confidence = ''
         self.mark = ''          # citation mark like '1a', if defined
-        self.noteref_hlink = []
+
+        self.noteref_hlink = [] # Gramps handle
         self.source_handle = ''
+
+        self.source_repo = []   # Tuples (Source id, Repository id, medium)
+                                # - example (397146, 316903, 'Book')
+                                #   (used in person.html v3)
         self.source_id = None   # uniq_ids of Source objects, for creating display sets
         self.citators = []      # Lähde-sivulle
         self.note_ref = []
