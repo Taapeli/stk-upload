@@ -80,15 +80,14 @@ class Citation(NodeObject):
         n.confidence = node['confidence']
         n.page = node['page']
 #TODO: Remove dateval processing later
-        if 'datetype' in node:
-            n.dates = DateRange(node['datetype'], node['date1'], node['date2'])
-        elif 'dateval' in node:
-            try:
-                if node['dateval']:
-                    n.dates = DateRange(node['dateval'])
-            except ValueError as e:
-                print(f"Error: {getattr(e, 'message', repr(e))} in {n}")
-        n.dateval = str(n.dates) if n.dates else ""
+        n.dates = DateRange.from_node(node)
+#         elif 'dateval' in node:
+#             try:
+#                 if node['dateval']:
+#                     n.dates = DateRange(node['dateval'])
+#             except ValueError as e:
+#                 print(f"Error: {getattr(e, 'message', repr(e))} in {n}")
+#         n.dateval = str(n.dates) if n.dates else ""
 
         return n
 

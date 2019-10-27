@@ -493,11 +493,15 @@ def get_source_with_events(sourceid):
             n = Note.from_node(node)
             s.notes.append(n)
 
-    result = Source.get_citating_nodes(sourceid)
+#     result = Source.get_citating_nodes(sourceid)
+        import shareds
+        from models.gen.cypher import Cypher_source
+        result = shareds.driver.session().run(Cypher_source.get_citators_of_source, 
+                                              sid=int(sourceid))
 
     citations = {}
     notes = {}
-    persons = dict()    # {uniq_id: clearname}
+    clearnames = dict()    # {uniq_id: clearname}
 
     for record in result:               # Nodes record
         # Example: Person directly linked to Citation
@@ -516,10 +520,7 @@ def get_source_with_events(sourceid):
 
         # Example: Person or Family Event linked to Citation
         # <Record c_id=89824
-        #         c=<Node id=89824 labels={'Citation'}
-        #            properties={'confidence': '2', 'dateval': '', 'change': 1526840499,
-        #                          'handle': '_de2f3ce67264ec83c7136ea12a', 'id': 'C1812',
-        #                          'page': 'Födda 1771 58. kaste'}>
+        #         c=<Node id=89824 labels={'Citation'}...>
         #           x_id=81210 label='Event'
         #           x=<Node id=81210 labels=set()
         #              properties={'date1': 1813643, 'description': '', 'date2': 1813643,
@@ -528,62 +529,58 @@ def get_source_with_events(sourceid):
         #                          'type': 'Birth', 'attr_value': '', 'datetype': 0}>
         #           p_id=73543>
 
-        c_id = record['c_id']
-        if c_id not in citations.keys():
+        node = record['c']
+        c = Citation.from_node(node)
+        if c.uniq_id not in citations.keys():
             # A new citation
-            c = Citation()
-            c.uniq_id = c_id
-            citations[c_id] = c
+            citations[c.uniq_id] = c
         else:
             # Use previous
-            c = citations[c_id]
+            c = citations[c.uniq_id]
 
-        c_node = record['c']
-        c.id = c_node['id']
-        c.page = c_node['page']
-        c.confidence = c_node['confidence']
-        
-        c_notes = record['notes']
-        for n_node in c_notes:
-            n_id = n_node['id']
-            if n_id not in notes.keys():
-                note = Note.from_node(n_node)
-                c.note_ref.append(note)
-                notes[n_id] = n_id
-                    
-        p_uid = record['p_id']
-        x_node = record['x']
-        #x_uid = x_node.id
+        # Notes
+        n_nodes = record['notes']
+        for node in n_nodes:
+            n = Note.from_node(node)
+            if n.uniq_id not in notes.keys():
+                c.note_ref.append(n)
+                notes[n.uniq_id] = n
+
+        # Referring node:  Person, Family, Name ... as NodeRef structure
+        root_uid = record['p_id']
+        root_label = record.get('p_label')
+        node = record['x']
+        x_uid = node.id    # Nearest referring node (Event, Person, Name, ...)
         noderef = NodeRef()
-        # Referring Person or Family
-        noderef.uniq_id = p_uid      # 72104
-        noderef.id = x_node['id']    # 'I1069' or 'E2821'
-        noderef.label = next(iter(x_node.labels))   # Get a member of a frozenset
-        event_role = record['role']
+        noderef.uniq_id = root_uid      # 72104
+        noderef.id = node['id']    # 'I1069' or 'E2821' TODO Why?
+        noderef.label = list(node.labels)[0]   # Get a member of a frozenset
 
-        print('Citation {} {} {} {} {}'.format(c.uniq_id, event_role,
-                                               noderef.label, noderef.uniq_id, noderef.id))
+        event_role = record.get('role', "")
+        print(f'{root_label} {root_uid} Citation {c.uniq_id} {noderef.label}({event_role}) {noderef.uniq_id} {noderef.id}')
 
-        if event_role == 'Family':  # Family event witch is cdirectply connected to a Person Event
-            noderef.label = 'Family Event'
-#             couple = Family.get_marriage_parent_names(x_uid)
-#             noderef.clearname = " <> ".join(list(couple.values()))
-#         else:                       # Person event
-        if p_uid not in persons.keys():
-            noderef.clearname = Name.get_clearname(noderef.uniq_id)
-            persons[noderef.uniq_id] = noderef.clearname
+        if noderef.label == "Person":
+            pass #noderef.eventtype = 'self'
+        elif noderef.label == "Family":
+            noderef.eventtype = _('Family')
+        elif noderef.label == "Name":
+            noderef.eventtype = f"{node['order']+1}. {_('Name').lower()}"
+        elif noderef.label == "Event":
+            noderef.eventtype = _(node['type'])
+            noderef.edates = DateRange.from_node(node)
+
+        if noderef.uniq_id not in clearnames.keys():
+            if event_role == 'Family':
+                # Family event witch is directply connected to a Person Event
+                parent_names = Family_combo.get_marriage_parent_names(x_uid)
+                noderef.clearname = f"{parent_names['father']} <> {parent_names['mother']}"
+            else:
+                # Read Person names as cleartext string
+                noderef.clearname = Name.get_clearname(noderef.uniq_id)
+            clearnames[root_uid] = noderef.clearname
         else:
-            noderef.clearname = persons[p_uid]
+            noderef.clearname = clearnames[root_uid]
 
-        if 'Event' in noderef.label:
-            # noderef: "Event <event_type> <person p_uid>"
-            noderef.eventtype = x_node['type']
-            if x_node['date1']:
-                noderef.edates = DateRange(x_node['datetype'], x_node['date1'], x_node['date2'])
-                noderef.date = noderef.edates.estimate()
-#         if noderef.label == 'Person':
-#             # noderef: "Person <clearname>"
-#             noderef.label = 'Person'
         c.citators.append(noderef)
 
     return (s, list(citations.values()))

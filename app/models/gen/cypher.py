@@ -437,9 +437,9 @@ return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
     collect(distinct [id(p), n, rn]) as names'''
 
     get_wedding_couple_names = """
-match (e:Event) <-- (:Family) -[r:PARENT|FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)
+match (e:Event) <-- (:Family) -[r:PARENT]-> (p:Person) -[:NAME]-> (n:Name)
     where ID(e)=$eid
-return type(r) as frole, id(p) as pid, collect(n) as names"""
+return r.role as frole, id(p) as pid, collect(n) as names"""
 
 
     get_dates_parents = """
@@ -637,14 +637,14 @@ RETURN source, COLLECT(n) as notes"""
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
-with c
-    match (c) <-[:CITATION]- (x)
+match (c) <-[:CITATION]- (x)
     optional match (c) -[:NOTE]-> (n:Note)
-    optional match (x) <-[re:EVENT]- (p)
-    return id(c) as c_id, c, collect(n) as notes, re.role as role,
-           id(x) as x_id, labels(x)[0] as label, x, 
-           coalesce(id(p), id(x))  as p_id
-    order by c_id, p_id"""
+    optional match (s) -[:REPOSITORY]-> (r:Repository)
+    optional match (x) <-[re:EVENT|NAME|MEDIA]- (p)
+return id(c) as c_id, c, collect(n) as notes, re.role as role,
+       labels(x)[0] as label, x, 
+       coalesce(id(p), id(x)) as p_id, labels(p)[0] as p_label, r
+order by c_id, p_id"""
 
 
 class Cypher_repository():

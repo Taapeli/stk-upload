@@ -97,7 +97,22 @@ MATCH (family:Family)-[r:EVENT]->(event:Event)
   WHERE ID(family)=$pid
 RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
         return  shareds.driver.session().run(query, {"pid": pid})
-    
+
+    @staticmethod
+    def find_family_for_event(event_uniq_id):
+        """ Returns Family instance which has given Event.
+
+            NOT IN USE. For models.datareader.get_source_with_events
+        """                
+        query = """
+MATCH (family:Family)-[r:EVENT]->(event)
+  WHERE ID(event)=$pid
+RETURN family"""
+        result = shareds.driver.session().run(query, pid=event_uniq_id)
+        for record in result:
+            f = Family_combo.from_node(record[0])
+            return f
+        raise LookupError(f"Family {event_uniq_id} not found")
     
     def get_family_data_by_id(self):
         """ Luetaan perheen tiedot.
@@ -608,43 +623,50 @@ RETURN family"""
 #         return (families)
 
 
-#     @staticmethod       
-#     def get_marriage_parent_names(event_uniq_id):
-#         """ Find the parents and all their names - not in use!
-# 
-#             Called from models.datareader.get_source_with_events
-#             #Should use [:PARENT] link
-#         
-#             Returns a dictionary like 
-#             {'FATHER': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
-# 
-# ╒════════╤═════╤═══════════════════════════════════════════════════╕
-# │"frole" │"pid"│"names"                                            │
-# ╞════════╪═════╪═══════════════════════════════════════════════════╡
-# │"FATHER"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
-# │        │     │suffix":"","surname":"Forstén"}]                   │
-# ├────────┼─────┼───────────────────────────────────────────────────┤
-# │"MOTHER"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
-# │        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
-# │        │     │alt":"1","firstname":"Catharina Margareta","type":"│
-# │        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
-# └────────┴─────┴───────────────────────────────────────────────────┘
-#         """
-#                         
-#         result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
-#                                               eid=event_uniq_id)
-#         namedict = {}
-#         for record in result:
-#             role = record['frole']
-# #             pid = record['pid']
-#             names = []
-#             for name in record['names']:
-#                 fn = name['firstname']
-#                 sn = name['surname']
-#                 pn = name['suffix']
-#                 names.append("{} {} {}".format(fn, pn, sn))
-#             namedict[role] = ' • '.join(names)
-#         return namedict
+    @staticmethod       
+    def get_marriage_parent_names(event_uniq_id):
+        """ 
+        Find the parents and all their names.
+
+        Called from models.datareader.get_source_with_events
+    
+        Returns a dictionary like 
+        {'father': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
+        
+        ╒════════╤═════╤═══════════════════════════════════════════════════╕
+        │"frole" │"pid"│"names"                                            │
+        ╞════════╪═════╪═══════════════════════════════════════════════════╡
+        │"father"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
+        │        │     │suffix":"","surname":"Forstén"}]                   │
+        ├────────┼─────┼───────────────────────────────────────────────────┤
+        │"mother"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
+        │        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
+        │        │     │alt":"1","firstname":"Catharina Margareta","type":"│
+        │        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
+        └────────┴─────┴───────────────────────────────────────────────────┘
+        """
+                         
+        result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
+                                              eid=event_uniq_id)
+        namedict = {}
+        for record in result:
+            # <Record frole='father' pid=320750 
+            #    names=[
+            #        <Node id=320751 labels={'Name'} 
+            #            properties={'firstname': 'Carl Gustaf', 'type': 'Birth Name',
+            #                'suffix': '', 'surname': 'Swan', 'prefix': '', 'order': 0}>, 
+            #        <Node id=320752 labels={'Name'} properties={'firstname': 'Karl Gustaf', ...}>
+            #    ]
+            # >
+            role = record['frole']
+            names = []
+            for name in record['names']:
+                fn = name['firstname']
+                sn = name['surname']
+                pn = name['suffix']
+                names.append("{} {} {}".format(fn, pn, sn))
+            namedict[role] = ' • '.join(names)
+        return namedict
 
 
     def get_parent_by_id(self, role='father'):
