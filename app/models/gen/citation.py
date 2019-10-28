@@ -79,15 +79,7 @@ class Citation(NodeObject):
         n.uuid = node['uuid']
         n.confidence = node['confidence']
         n.page = node['page']
-#TODO: Remove dateval processing later
         n.dates = DateRange.from_node(node)
-#         elif 'dateval' in node:
-#             try:
-#                 if node['dateval']:
-#                     n.dates = DateRange(node['dateval'])
-#             except ValueError as e:
-#                 print(f"Error: {getattr(e, 'message', repr(e))} in {n}")
-#         n.dateval = str(n.dates) if n.dates else ""
 
         return n
 
@@ -306,6 +298,13 @@ class NodeRef():
             eventtype        str type for Event
             edates           DateRange date expression for Event
             date             str date for Event
+        
+        TODO Plan
+            (b:baseObject) --> (a:activeObject) --> (c:Citation)
+            b.type=Person|Family     for linking object page
+            a.type=Person|Event|Name for display style
+            c                        to display
+                + remove: self.date
     '''
     def __init__(self):
         self.label = ''

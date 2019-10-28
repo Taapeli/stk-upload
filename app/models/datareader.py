@@ -203,7 +203,7 @@ def recreate_refnames():
 def read_cite_sour_repo(uniq_id=None):
     """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
     
-        Called from bp.tools.routes.pick_selection
+        Called from bp.tools.routes.pick_selection  -  NOT IN USE?
     """
 
     sources = []
@@ -214,8 +214,8 @@ def read_cite_sour_repo(uniq_id=None):
         e.uniq_id = pid
         if record_cite['type']:
             e.type = record_cite['type']
-        if record_cite['date']:
-            e.date = record_cite['date']
+#         if record_cite['date']:
+#             e.date = record_cite['date']
         if record_cite['dates']:
             e.dates = DateRange(record_cite['dates'])
 
@@ -551,6 +551,7 @@ def get_source_with_events(sourceid):
         root_label = record.get('p_label')
         node = record['x']
         x_uid = node.id    # Nearest referring node (Event, Person, Name, ...)
+
         noderef = NodeRef()
         noderef.uniq_id = root_uid      # 72104
         noderef.id = node['id']    # 'I1069' or 'E2821' TODO Why?
@@ -570,6 +571,7 @@ def get_source_with_events(sourceid):
             noderef.edates = DateRange.from_node(node)
 
         if noderef.uniq_id not in clearnames.keys():
+            #Todo: aseta tässä baseObject.type jne ???
             if event_role == 'Family':
                 # Family event witch is directply connected to a Person Event
                 parent_names = Family_combo.get_marriage_parent_names(x_uid)
@@ -670,7 +672,7 @@ def get_person_data_by_id(pid):
         # Read event with uniq_id's of related Place (Note, and Citation?)
         e.get_event_combo()        # Read data to e
         if e.type == "Birth":
-            my_birth_date = e.date
+            my_birth_date = e.dates.estimate()
 
         for ref in e.place_ref:
             place = Place_combo.get_w_notes(ref)

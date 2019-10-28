@@ -437,9 +437,9 @@ return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
     collect(distinct [id(p), n, rn]) as names'''
 
     get_wedding_couple_names = """
-match (e:Event) <-- (:Family) -[r:PARENT]-> (p:Person) -[:NAME]-> (n:Name)
-    where ID(e)=$eid
-return r.role as frole, id(p) as pid, collect(n) as names"""
+MATCH (e:Event) <-[:EVENT]- (:Family) -[r:PARENT]-> (p:Person) -[:NAME]-> (n:Name)
+    WHERE ID(e)=$eid
+RETURN r.role AS frole, id(p) AS pid, COLLECT(n) AS names"""
 
 
     get_dates_parents = """

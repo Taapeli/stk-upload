@@ -633,6 +633,7 @@ RETURN family"""
         Returns a dictionary like 
         {'father': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
         
+        TODO: Return list, not dictionary. Any not used fields?
         ╒════════╤═════╤═══════════════════════════════════════════════════╕
         │"frole" │"pid"│"names"                                            │
         ╞════════╪═════╪═══════════════════════════════════════════════════╡
