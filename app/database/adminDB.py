@@ -263,11 +263,36 @@ def create_lock_constraint():
         "create constraint on (l:Lock) assert l.id is unique"
     )
 
-def create_uuid_constraint():
-    # can be created multiple times!
-    shareds.driver.session().run( 
-        "create constraint on (m:Media) assert m.uuid is unique"
-    )
+def create_uuid_constraints():
+    # constraints can be created multiple times!
+    with shareds.driver.session() as session:
+        session.run( 
+            "create constraint on (n:Media) assert n.uuid is unique"
+        )
+        session.run( 
+            "create constraint on (n:Event) assert n.uuid is unique"
+        )
+        session.run( 
+            "create constraint on (n:Family) assert n.uuid is unique"
+        )
+        session.run( 
+            "create constraint on (n:Note) assert n.uuid is unique"
+        )
+        session.run( 
+            "create constraint on (n:Person) assert n.uuid is unique"
+        )
+        session.run( 
+            "create constraint on (n:Citation) assert n.uuid is unique"
+        )
+        session.run( 
+            "create constraint on (n:Source) assert n.uuid is unique"
+        )
+        session.run( 
+            "create constraint on (n:Repository) assert n.uuid is unique"
+        )
+        session.run( 
+            "create constraint on (n:Place) assert n.uuid is unique"
+        )
 
 def initialize_db():
     # Fix chaanged schema
@@ -286,6 +311,6 @@ def initialize_db():
         create_guest_user()
 
     create_lock_constraint()
-    create_uuid_constraint()
+    create_uuid_constraints()
 
 
