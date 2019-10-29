@@ -12,13 +12,21 @@ td ul li p { margin: 0 0 0.3em 0; }
 </style>
 
 <div id="startdiv">
-    <h2>{{ _('List of Sources') }}</h2>
+    <h2>{{ _('List of Sources') }}{% if title %} ({{title}}){% endif %}</h2>
 </div>
 
 {{ macro.menu(5) }}
 	<div class="content" id="Individuals">
 		<p id="description">
 		{{ _('This page contains a directory of all sources.') }}
+		</p>
+		<p id="description">{{ _("Select theme:") }}
+          <a href="/scene/sources" class="inlink">{{ _('all') }}</a> |
+          <a href="/scene/sources/birth" class="inlink">{{ _('birth') }}</a> |
+          <a href="/scene/sources/babtism" class="inlink">{{ _('babtism') }}</a> |
+          <a href="/scene/sources/wedding" class="inlink">{{ _('wedding') }}</a> |
+          <a href="/scene/sources/death" class="inlink">{{ _('death') }}</a> |
+          <a href="/scene/sources/move" class="inlink">{{ _('move') }}</a>
 		</p>
 		<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>

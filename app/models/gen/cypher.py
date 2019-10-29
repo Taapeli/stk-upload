@@ -623,6 +623,18 @@ RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes,
        collect(DISTINCT [r.medium, rep]) as repositories,
        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
 ORDER BY toUpper(s.stitle)"""
+    get_selected_sources_w_notes = """
+MATCH (s:Source)
+        WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
+WITH s ORDER BY toUpper(s.stitle)
+    OPTIONAL MATCH (s) -[:NOTE]-> (note)
+    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+       collect(DISTINCT [r.medium, rep]) as repositories,
+       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+ORDER BY toUpper(s.stitle)"""
 
     get_a_source_w_notes = """
 MATCH (source:Source) WHERE ID(source)=$sid
