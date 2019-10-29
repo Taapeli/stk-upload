@@ -137,13 +137,11 @@ return s'''
     
     @staticmethod       
     def get_source_w_notes(uniq_id):
-        """ Luetaan lähteen tiedot """
+        """ Read Source with connected Repositories and Notes.
+
+            Luetaan lähteen tiedot
+        """
                         
-#         query = """
-#             MATCH (source:Source)
-#                 WHERE ID(source)={}
-#                 RETURN source.stitle AS stitle
-#             """.format(self.uniq_id)
         return  shareds.driver.session().run(Cypher_source.get_a_source_w_notes,
                                              sid=uniq_id)
     
@@ -210,7 +208,8 @@ return s'''
 
         ret = []
         if filt and len(filt) == 3:
-            theme, y1, y2 = filt
+            # Filtered by theme
+            theme, _y1, _y2 = filt
             THEMES = {"birth": ('syntyneet','födda'),
                       "babtism": ('kastetut','döpta'),
                       "wedding": ('vihityt','vigda'),
@@ -219,11 +218,12 @@ return s'''
                 }
             key1, key2 = THEMES[theme]
             title = key1
-            print(f'# Sources containing "{key2}" or "{key2}"')
+            print(f'# Sources containing "{key1}" or "{key2}"')
             with shareds.driver.session() as session:
                 result = session.run(Cypher_source.get_selected_sources_w_notes,
                                      key1=key1, key2=key2)
         else:
+            # Show all
             title = ""
             with shareds.driver.session() as session:
                 result = session.run(Cypher_source.get_sources_w_notes)
@@ -265,9 +265,9 @@ return s'''
 #                 s.cit_cnt = record['cit_cnt']
 #                 s.ref_cnt = record['ref_cnt']
             ret.append(s)
-            
+
         return ret, title
-    
+
     @staticmethod       
     def get_source_citation (uniq_id):
         """ Voidaan lukea lähteitä viittauksineen kannasta

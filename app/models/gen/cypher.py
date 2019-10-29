@@ -615,6 +615,7 @@ class Cypher_source():
 
     get_sources_w_notes = """
 MATCH (s:Source)
+WITH s ORDER BY toUpper(s.stitle)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
@@ -638,14 +639,9 @@ ORDER BY toUpper(s.stitle)"""
 
     get_a_source_w_notes = """
 MATCH (source:Source) WHERE ID(source)=$sid
-OPTIONAL MATCH (source) -[:NOTE]-> (n)
-RETURN source, COLLECT(n) as notes"""
-#     get_repositories_w_notes = """
-# MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
-#     WHERE ID(source) = $sid
-# OPTIONAL MATCH (repo) -[:NOTE]-> (note:Note)
-# RETURN r.medium AS medium, repo, COLLECT(note) AS notes"""
-
+    OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
+    OPTIONAL MATCH (source) -[:NOTE]-> (n)
+RETURN source, COLLECT(n) AS notes, COLLECT([r.medium,rep]) AS reps"""
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 

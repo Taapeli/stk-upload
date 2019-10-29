@@ -475,23 +475,34 @@ def get_source_with_events(sourceid):
 
     result = Source.get_source_w_notes(sourceid)
     for record in result:
-        # Record: <Record 
-        #    source=<Node id=242395 labels={'Source'} 
-        #        properties={'handle': '_d9d28fe83184fd33368', 'id': 'S0052', 
-        #        'stitle': 'Hämeenlinna ksrk syntyneet 1850-1874', 'change': '1543225947'}> 
+        # <Record source=<Node id=312705 labels={'Source'} 
+        #    properties={'id': 'S0278', 'stitle': 'Taivassalon seurakunnan vihit...', 
+        #        'uuid': '6e75056295854ca28d14338d29c202d8', 'spubinfo': '', 'sauthor': '', 'change': 1566726449}>
         #    notes=[
-        #        <Node id=234937 labels={'Note'} 
-        #            properties={'handle': '_d9d291becb75743756e', 'text': '', 
-        #                'id': 'N2213', 'type': 'Citation', 
-        #                'url': 'http://digi.narc.fi/digi/view.ka?kuid=6062348', 
-        #                'change': 1532807569}>
-        #    ]>
-
+        #        <Node id=316600 labels={'Note'}
+        #            properties={'id': 'N4817', 'text': 'Sisältää myös kuolleet ja haudatut', 
+        #                'type': 'Source Note', 'uuid': '43171020689c46b0bb7b1f565aad4d58', 
+        #                'change': 1566726446}>
+        #        ]
+        #    reps=[
+        #        ['Book', 
+        #         <Node id=316858 labels={'Repository'} 
+        #            properties={'id': 'R0068', 'rname': 'Taivassalon seurakunnan arkisto', 
+        #            'type': 'Archive', 'uuid': '41a44def1a2b43c88001d8c1bad9d6e6', 
+        #            'change': 1569934209}>]
+        #        ]
+        # >
         s = Source.from_node(record['source'])
+        # Add notes
         notes = record['notes']
         for node in notes:
             n = Note.from_node(node)
             s.notes.append(n)
+        # Add repositories and their mediums
+        for medium, node in record['reps']:
+            rep = Repository.from_node(node)
+            rep.medium = medium
+            s.repositories.append(rep)
 
 #     result = Source.get_citating_nodes(sourceid)
         import shareds

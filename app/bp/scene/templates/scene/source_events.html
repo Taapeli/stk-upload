@@ -21,9 +21,17 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
     <div class="content" id="IndividualDetail">
 	    <h3 style="position:sticky; top:0;" title="{{ _('Source') }}">{{source.stitle}}</h3>
 	        <div id="summaryarea">
-            {% if source.notes %}<ul>{% for note in source.notes %}
-                <li>{{ macro.notelink(note) }}</li>
-            {% endfor %}</ul>{% endif %}
+
+{% for repo in source.repositories %}
+               <p id="description">
+                  <span class="typedesc">{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
+                  {{ _('in the repository') }} <b>{{repo.rname}}</b></p>
+{% endfor %}
+{% if source.notes %}
+	            <ul>{% for note in source.notes %}
+	                <li>{{ macro.notelink(note) }}</li>
+	            {% endfor %}</ul>
+{% endif %}
 	        </div>
 
 	        <div class="subsection" id="citations">
@@ -39,7 +47,7 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 	        		  <td class="Citation">
 	        		    <div title="{{c.confidence|transl("conf")}} – {{ _('confidence') }} ({{c.confidence}}/4)"
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
-	   					  {{ _( "Page" ) }} {{c.page}} 
+	   					  {{ _( "Page" ) }} <b>{{c.page}}</b> 
 	   					  {{ macro.stars(c.confidence|float) }}
                           {% set conf = c.confidence | int %} 
 
@@ -59,7 +67,7 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
                               <a href="/scene/person/{{noderef.uniq_id}}" class="inlink"
                                  title="{{ _('see details of person %(id)s', id=noderef.id) }}">
                                  {{noderef.clearname}}</a>
-	                           {{noderef.eventtype}}
+	                          <i>{{noderef.eventtype}}</i>
 	                           {% if noderef.edates %}{{noderef.edates}}{% endif %}
                			    </li>
 	                    {% endfor %}

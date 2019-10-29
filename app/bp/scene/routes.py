@@ -352,6 +352,13 @@ def show_place_page(locid):
 @bp.route('/scene/sources/<theme>')
 def show_sources(theme=None):
     """ Lähdeluettelon näyttäminen ruudulla for menu(5)
+    
+        Todo: Examples?
+            /scene/sources --> birth; shorter list?
+            /scene/sources/all    <-- now no theme
+            /scene/sources/birth
+            /scene/sources/wedding?year1=1800%year2=1850 <-- todo
+
     """
     if theme:
         # Todo: Possible year filter? Needs pre-calculated varibles?
