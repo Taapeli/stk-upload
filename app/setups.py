@@ -1,5 +1,5 @@
 from flask_security import Security, UserMixin, RoleMixin
-from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, ValidationError
+from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, PasswordField, ValidationError
 from wtforms import SelectField, SubmitField, BooleanField
 from flask_security.utils import _
 from flask_mail import Mail
@@ -18,6 +18,7 @@ import logging
 #from flask_login.utils import current_user
 #from flask.globals import session
 import json
+from flask_babelex import lazy_gettext
 logger = logging.getLogger('stkserver') 
 
 
@@ -168,8 +169,11 @@ class User(UserMixin):
      
 class ExtendedLoginForm(LoginForm):
 
-    email = StringField('Email or Username', validators=[Required('Email required') ])
-    submit = SubmitField(_('Login'))
+    email = StringField(lazy_gettext('Email or Username'), validators=[Required('Email required') ])
+    password = PasswordField(lazy_gettext('Password'),
+                             validators=[Required('Email required')])
+    remember = BooleanField(lazy_gettext('Remember Me'))
+    submit = SubmitField(lazy_gettext('Login'))
 
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
