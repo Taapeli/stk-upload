@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-10-30 19:01+0200\n"
+"POT-Creation-Date: 2019-10-30 19:51+0200\n"
 "PO-Revision-Date: 2019-08-16 16:32+0300\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -2997,19 +2997,19 @@ msgstr "Meddelande:"
 msgid "Send request"
 msgstr "Skicka begäran"
 
-#: bp/start/routes.py:84
+#: bp/start/routes.py:90
 msgid "Join message sent"
 msgstr "Meddelande om anslutning till Isotammi sent"
 
-#: bp/start/routes.py:86
+#: bp/start/routes.py:92
 msgid "Sending join message failed"
 msgstr ""
 
-#: bp/start/routes.py:135
+#: bp/start/routes.py:141
 msgid "Update did not work1"
 msgstr "Uppdateringen fungerade1 inte"
 
-#: bp/start/routes.py:138
+#: bp/start/routes.py:144
 msgid "Update did not work"
 msgstr "Uppdateringen fungerade inte"
 
@@ -3088,7 +3088,7 @@ msgstr "Mina GEDCOM filer"
 
 #: bp/start/templates/start/index_logged.html:42
 msgid "Your Candidate Materials"
-msgstr ""
+msgstr "Dina kandidaterande materialer"
 
 #: bp/start/templates/start/index_logged.html:44
 msgid ""
@@ -3147,13 +3147,13 @@ msgstr ""
 msgid "Join Isotammi"
 msgstr "Anslut Isotammi"
 
-#: bp/start/templates/start/join.html:49 templates/index_entry.html:70
+#: bp/start/templates/start/join.html:49 templates/index_entry.html:58
 msgid "Join us"
 msgstr "Ansluta dig"
 
 #: bp/start/templates/start/join.html:50
-msgid "Enroll as a test user on this page"
-msgstr "Kom med som en testanvähdare"
+msgid "Enroll as a user on this page"
+msgstr "Ansöka en anvähdare"
 
 #: bp/start/templates/start/join.html:52
 msgid "Approval"
@@ -3306,8 +3306,8 @@ msgstr "Min profil"
 msgid "Log in to this application"
 msgstr "Logga in denna applikation"
 
-#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:50
-#: templates/index_entry.html:56
+#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:64
+#: templates/index_entry.html:70
 msgid "Log in"
 msgstr "Logga in"
 
@@ -3373,7 +3373,7 @@ msgid "Welcome to Isotammi"
 msgstr "Välkommen till Isotammi"
 
 #: bp/stk_security/templates/security/login_user.html:10
-msgid "Welcome to Isotammi Service"
+msgid "Log in to Isotammi Service"
 msgstr "Välkommen till Isotammi service"
 
 #: bp/stk_security/templates/security/login_user.html:19
@@ -3395,8 +3395,8 @@ msgid "Then you can register in and create your user id."
 msgstr "Sedan kan du registrera dig och skapa ditt användar-ID."
 
 #: bp/stk_security/templates/security/login_user.html:42
-msgid "Enroll as a test user"
-msgstr "Anmäla dig som test användare"
+msgid "Enroll as a user"
+msgstr "Ansöka en användare"
 
 #: bp/stk_security/templates/security/register_user.html:4
 msgid "Registration"
@@ -4189,48 +4189,48 @@ msgstr ""
 "validerad data av finländsk släktforskning."
 
 #: templates/index_entry.html:38
-msgid "See the process for your data"
-msgstr "Se processen för din data"
-
-#: templates/index_entry.html:40
 msgid "For more info see also documents -"
 msgstr "För mer information se även dokument -"
 
-#: templates/index_entry.html:43
+#: templates/index_entry.html:41
 msgid "Why Isotammi database"
 msgstr "Varför Isotammi databasen"
+
+#: templates/index_entry.html:43
+msgid "See the process for your data"
+msgstr "Se processen för din data"
 
 #: templates/index_entry.html:45
 msgid "Gedcom data healing services"
 msgstr "Servece för att förbätttra GEDCOM-data"
 
+#: templates/index_entry.html:50
+msgid "Look at demo data in Isotammi Database"
+msgstr "Bekanta dig med demodata i Isotammi Databasen"
+
 #: templates/index_entry.html:51
+msgid "Here you can see a restricted view on demo genealogical data."
+msgstr "Här kan du se en begränsad syn på demo basens genealogiska data."
+
+#: templates/index_entry.html:54
+msgid "Explore demo"
+msgstr "Utforska demo"
+
+#: templates/index_entry.html:56
+msgid "To see the full data, you can fill the registration form here"
+msgstr ""
+
+#: templates/index_entry.html:65
 msgid "As a member of <i>Suomen sukututkimusseura</i>, you can log in,"
 msgstr "Som medlem i <i> Genealogiska Samfundet i Finland </i> kan du logga in,"
 
-#: templates/index_entry.html:52
+#: templates/index_entry.html:66
 msgid ""
 "refine the structure of your own data and get full access to the demo "
 "database"
 msgstr ""
 "förbättra strukturen avr dina egna data och få full tillgång till demo "
 "databasen"
-
-#: templates/index_entry.html:62
-msgid "Look at demo data in Isotammi Database"
-msgstr "Bekanta dig med demodata i Isotammi Databasen"
-
-#: templates/index_entry.html:63
-msgid "Here you can see a restricted view on demo genealogical data."
-msgstr "Här kan du se en begränsad syn på demo basens genealogiska data."
-
-#: templates/index_entry.html:66
-msgid "Explore demo"
-msgstr "Utforska demo"
-
-#: templates/index_entry.html:68
-msgid "To see the full data, you can fill the registration form here"
-msgstr ""
 
 #: templates/jinja_filters.py:36
 msgid "Birth Name"

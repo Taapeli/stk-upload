@@ -30,17 +30,23 @@ def force_https():
         host = request.host.split(":")[0]
         if host in {"localhost","127.0.0.1"}: return
         return redirect(request.url.replace('http://', 'https://'))
-    
+
+# @shareds.app.route('/')
+#     Home page for a guest user (from login page or home button) 
+#     or anonymous user (home)
+#
+#     @See: routes.entry
+
 @shareds.app.route('/start/guest', methods=['GET', 'POST'])
 def start_guest():
-    """ Home page for a guest user (from login page or home button) 
-        or anonymous user (home)
+    """ Scene start page for a guest user.
     """
     user = shareds.user_datastore.get_user('guest')
     secutils.login_user(user)
     logger.info('-> bp.start.routes.start_guest: Anonymous user')
     return render_template('/start/index_guest.html')
-    
+
+
 @shareds.app.route('/start/logged', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')

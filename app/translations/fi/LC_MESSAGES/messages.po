@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-10-30 19:01+0200\n"
+"POT-Creation-Date: 2019-10-30 19:51+0200\n"
 "PO-Revision-Date: 2019-10-03 10:35+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -2993,19 +2993,19 @@ msgstr "Viesti:"
 msgid "Send request"
 msgstr "Lähetä pyyntö"
 
-#: bp/start/routes.py:84
+#: bp/start/routes.py:90
 msgid "Join message sent"
 msgstr "Liittymisviesti lähetetty"
 
-#: bp/start/routes.py:86
+#: bp/start/routes.py:92
 msgid "Sending join message failed"
 msgstr "Liittymisviestin lähettäminen ei onnistunut"
 
-#: bp/start/routes.py:135
+#: bp/start/routes.py:141
 msgid "Update did not work1"
 msgstr "Päivitys ei onnistunut"
 
-#: bp/start/routes.py:138
+#: bp/start/routes.py:144
 msgid "Update did not work"
 msgstr "Päivitys ei onnistunut"
 
@@ -3143,13 +3143,13 @@ msgstr "Ohjesivulle"
 msgid "Join Isotammi"
 msgstr "Liity Isotammeen"
 
-#: bp/start/templates/start/join.html:49 templates/index_entry.html:70
+#: bp/start/templates/start/join.html:49 templates/index_entry.html:58
 msgid "Join us"
-msgstr "Liity"
+msgstr "Liity mukaan"
 
 #: bp/start/templates/start/join.html:50
-msgid "Enroll as a test user on this page"
-msgstr "Liity testikäyttäjäksi tämän sivun lomakkeella"
+msgid "Enroll as a user on this page"
+msgstr "Hae käyttäjäksi tämän sivun lomakkeella"
 
 #: bp/start/templates/start/join.html:52
 msgid "Approval"
@@ -3157,7 +3157,7 @@ msgstr "Hyväksyminen"
 
 #: bp/start/templates/start/join.html:53
 msgid "You are granted to register by Office"
-msgstr "Toimisto tarkastaa jäsenyyden ja ilmoittaa sinulle"
+msgstr "Isotammen tuki tarkastaa jäsenyyden ja ilmoittaa sinulle"
 
 #: bp/start/templates/start/join.html:56
 msgid "Create your user name and password"
@@ -3197,7 +3197,7 @@ msgstr "Kiitos!"
 #: bp/start/templates/start/my_message.html:4
 #: bp/start/templates/start/my_message.html:41
 msgid "Contact administrators"
-msgstr "Viesti Toimistoon"
+msgstr "Viesti tukeen"
 
 #: bp/start/templates/start/my_message.html:53
 msgid "Message from Isotammi user"
@@ -3230,12 +3230,12 @@ msgstr "Pyydä lisäoikeuksia"
 
 #: bp/start/templates/start/my_settings.html:78
 msgid "Send a message to Isotammi office to acquire permission for new steps."
-msgstr "Lähetä viesti toimistoon saadaksesi lisäoikeuksia."
+msgstr "Lähetä viesti Isotammen tukeen saadaksesi lisäoikeuksia."
 
 #: bp/start/templates/start/my_settings.html:80
 #: bp/start/templates/start/s_macros.html:26
 msgid "Contact administrator"
-msgstr "Viesti toimistoon"
+msgstr "Ota yhteys tukeen"
 
 #: bp/start/templates/start/my_settings.html:89
 msgid "Candidate Materials"
@@ -3287,7 +3287,7 @@ msgstr "Sivun ohje"
 
 #: bp/start/templates/start/s_macros.html:25
 msgid "Message to the administrator"
-msgstr "Pyyntö tai ilmoitus Toimistolle"
+msgstr "Pyyntö tai ilmoitus tukeen"
 
 #: bp/start/templates/start/s_macros.html:28
 msgid "User profile settings"
@@ -3301,8 +3301,8 @@ msgstr "Käyttäjäprofiilini"
 msgid "Log in to this application"
 msgstr "Kirjaudu sovellukseen"
 
-#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:50
-#: templates/index_entry.html:56
+#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:64
+#: templates/index_entry.html:70
 msgid "Log in"
 msgstr "Kirjaudu sisään"
 
@@ -3366,8 +3366,8 @@ msgid "Welcome to Isotammi"
 msgstr "Tervetuloa Isotammeen"
 
 #: bp/stk_security/templates/security/login_user.html:10
-msgid "Welcome to Isotammi Service"
-msgstr "Tervetuloa Isotammi-palveluun"
+msgid "Log in to Isotammi Service"
+msgstr "Kirjautuminen Isotammi-palveluun"
 
 #: bp/stk_security/templates/security/login_user.html:19
 msgid "Login with your credentials"
@@ -3379,15 +3379,15 @@ msgstr "Eikö kirjautuminen onnistu?"
 
 #: bp/stk_security/templates/security/login_user.html:38
 msgid "You must first ask for enrolling a user from administrator."
-msgstr "Sinun on pyydettävä kutsu Isotammen toimistosta."
+msgstr "Sinun on pyydettävä kutsu Isotammen tuesta."
 
 #: bp/stk_security/templates/security/login_user.html:39
 msgid "Then you can register in and create your user id."
 msgstr "Sitten voit rekisteröityä käyttäjäksi."
 
 #: bp/stk_security/templates/security/login_user.html:42
-msgid "Enroll as a test user"
-msgstr "Ilmoittaudu testikäyttäjäksi"
+msgid "Enroll as a user"
+msgstr "Hae käyttäjäksi"
 
 #: bp/stk_security/templates/security/register_user.html:4
 msgid "Registration"
@@ -4180,52 +4180,50 @@ msgid ""
 "<i>Isotammi Database</i> is a system for co'operatively collect validated"
 " Finnish Genealogy data."
 msgstr ""
-"<i>Isotammi-järjestelmä</i> rakennetaan, jotta voimme yhteistyössä koota "
-"suuren luotettavasti tarkastettujen sukutietojen kokoelman."
+"<i>Isotammen</i> tarkoituksena on koota yhteistyössä suuri luotettavien "
+"sukutietojen kokoelma."
 
 #: templates/index_entry.html:38
-msgid "See the process for your data"
-msgstr "Katso miten sukutietosi voidaan liittää Isotammen aineistoon"
-
-#: templates/index_entry.html:40
 msgid "For more info see also documents -"
-msgstr "Lisätietoja kuvauksissa –"
+msgstr "Lue lisää –"
 
-#: templates/index_entry.html:43
+#: templates/index_entry.html:41
 msgid "Why Isotammi database"
 msgstr "Mikä on Isotammi-järjestelmä?"
+
+#: templates/index_entry.html:43
+msgid "See the process for your data"
+msgstr "Katso miten sukutietosi voidaan liittää Isotammen aineistoon"
 
 #: templates/index_entry.html:45
 msgid "Gedcom data healing services"
 msgstr "Sukutietojen vakiointi Gedcom-ohjelmillamme"
 
+#: templates/index_entry.html:50
+msgid "Look at demo data in Isotammi Database"
+msgstr "Selaa Isotammen demoaineistoa"
+
 #: templates/index_entry.html:51
+msgid "Here you can see a restricted view on demo genealogical data."
+msgstr "Tässä rajattu näkymä esimerkkiaineistoon."
+
+#: templates/index_entry.html:54
+msgid "Explore demo"
+msgstr "Selaa aineistoa"
+
+#: templates/index_entry.html:56
+msgid "To see the full data, you can fill the registration form here"
+msgstr "Rekisteröitymällä näet täydelliset tiedot"
+
+#: templates/index_entry.html:65
 msgid "As a member of <i>Suomen sukututkimusseura</i>, you can log in,"
 msgstr "<i>Suomen sukututkimusseuran</i> jäsenenä voit kirjatua sisään,"
 
-#: templates/index_entry.html:52
+#: templates/index_entry.html:66
 msgid ""
 "refine the structure of your own data and get full access to the demo "
 "database"
 msgstr "parantaa omien tietojesi rakennetta ja saada pääsyn koko demokantaan"
-
-#: templates/index_entry.html:62
-msgid "Look at demo data in Isotammi Database"
-msgstr "Selaa Isotammen demoaineistoa"
-
-#: templates/index_entry.html:63
-msgid "Here you can see a restricted view on demo genealogical data."
-msgstr "Tässä rajattu näkymä esimerkkiaineistoon."
-
-#: templates/index_entry.html:66
-msgid "Explore demo"
-msgstr "Selaa esimerkkiaineistoa"
-
-#: templates/index_entry.html:68
-msgid "To see the full data, you can fill the registration form here"
-msgstr ""
-"Hankkiaksesi oikeuden katsoa täydellisiä tietoja, täytä kirjautumislomake"
-" tässä"
 
 #: templates/jinja_filters.py:36
 msgid "Birth Name"

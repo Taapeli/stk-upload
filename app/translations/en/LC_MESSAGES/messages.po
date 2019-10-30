@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-10-30 19:01+0200\n"
+"POT-Creation-Date: 2019-10-30 19:51+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -2989,19 +2989,19 @@ msgstr ""
 msgid "Send request"
 msgstr ""
 
-#: bp/start/routes.py:84
+#: bp/start/routes.py:90
 msgid "Join message sent"
 msgstr ""
 
-#: bp/start/routes.py:86
+#: bp/start/routes.py:92
 msgid "Sending join message failed"
 msgstr ""
 
-#: bp/start/routes.py:135
+#: bp/start/routes.py:141
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:138
+#: bp/start/routes.py:144
 msgid "Update did not work"
 msgstr ""
 
@@ -3135,12 +3135,12 @@ msgstr ""
 msgid "Join Isotammi"
 msgstr ""
 
-#: bp/start/templates/start/join.html:49 templates/index_entry.html:70
+#: bp/start/templates/start/join.html:49 templates/index_entry.html:58
 msgid "Join us"
 msgstr ""
 
 #: bp/start/templates/start/join.html:50
-msgid "Enroll as a test user on this page"
+msgid "Enroll as a user on this page"
 msgstr ""
 
 #: bp/start/templates/start/join.html:52
@@ -3290,8 +3290,8 @@ msgstr ""
 msgid "Log in to this application"
 msgstr ""
 
-#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:50
-#: templates/index_entry.html:56
+#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:64
+#: templates/index_entry.html:70
 msgid "Log in"
 msgstr ""
 
@@ -3353,7 +3353,7 @@ msgid "Welcome to Isotammi"
 msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:10
-msgid "Welcome to Isotammi Service"
+msgid "Log in to Isotammi Service"
 msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:19
@@ -3373,7 +3373,7 @@ msgid "Then you can register in and create your user id."
 msgstr ""
 
 #: bp/stk_security/templates/security/login_user.html:42
-msgid "Enroll as a test user"
+msgid "Enroll as a user"
 msgstr ""
 
 #: bp/stk_security/templates/security/register_user.html:4
@@ -4163,45 +4163,45 @@ msgid ""
 msgstr ""
 
 #: templates/index_entry.html:38
-msgid "See the process for your data"
-msgstr ""
-
-#: templates/index_entry.html:40
 msgid "For more info see also documents -"
 msgstr ""
 
-#: templates/index_entry.html:43
+#: templates/index_entry.html:41
 msgid "Why Isotammi database"
+msgstr ""
+
+#: templates/index_entry.html:43
+msgid "See the process for your data"
 msgstr ""
 
 #: templates/index_entry.html:45
 msgid "Gedcom data healing services"
 msgstr ""
 
-#: templates/index_entry.html:51
-msgid "As a member of <i>Suomen sukututkimusseura</i>, you can log in,"
-msgstr ""
-
-#: templates/index_entry.html:52
-msgid ""
-"refine the structure of your own data and get full access to the demo "
-"database"
-msgstr ""
-
-#: templates/index_entry.html:62
+#: templates/index_entry.html:50
 msgid "Look at demo data in Isotammi Database"
 msgstr ""
 
-#: templates/index_entry.html:63
+#: templates/index_entry.html:51
 msgid "Here you can see a restricted view on demo genealogical data."
 msgstr ""
 
-#: templates/index_entry.html:66
+#: templates/index_entry.html:54
 msgid "Explore demo"
 msgstr ""
 
-#: templates/index_entry.html:68
+#: templates/index_entry.html:56
 msgid "To see the full data, you can fill the registration form here"
+msgstr ""
+
+#: templates/index_entry.html:65
+msgid "As a member of <i>Suomen sukututkimusseura</i>, you can log in,"
+msgstr ""
+
+#: templates/index_entry.html:66
+msgid ""
+"refine the structure of your own data and get full access to the demo "
+"database"
 msgstr ""
 
 #: templates/jinja_filters.py:36
