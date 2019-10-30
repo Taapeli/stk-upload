@@ -217,14 +217,13 @@ return s'''
                       "move": ('muuttaneet','flyttade')
                 }
             key1, key2 = THEMES[theme]
-            title = key1
             print(f'# Sources containing "{key1}" or "{key2}"')
             with shareds.driver.session() as session:
                 result = session.run(Cypher_source.get_selected_sources_w_notes,
                                      key1=key1, key2=key2)
         else:
             # Show all
-            title = ""
+            theme = ""
             with shareds.driver.session() as session:
                 result = session.run(Cypher_source.get_sources_w_notes)
 
@@ -266,7 +265,7 @@ return s'''
 #                 s.ref_cnt = record['ref_cnt']
             ret.append(s)
 
-        return ret, title
+        return ret, theme
 
     @staticmethod       
     def get_source_citation (uniq_id):

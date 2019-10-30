@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-10-29 18:50+0200\n"
+"POT-Creation-Date: 2019-10-30 19:01+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -1283,12 +1283,16 @@ msgid "Unsupported type: "
 msgstr ""
 
 #: bp/gedcom/templates/g_layout.html:25 bp/scene/templates/scene/layout.html:25
+#: bp/start/templates/start/s_layout.html:26 templates/a_layout.html:24
+#: templates/ladattu2.html:10 templates/virhe_lataus.html:20
+msgid "Back to Front Page"
+msgstr ""
+
+#: bp/gedcom/templates/g_layout.html:25
 #: bp/scene/templates/scene/persons.html:121
 #: bp/scene/templates/scene/persons_list.html:120
 #: bp/scene/templates/scene/places.html:50
 #: bp/scene/templates/scene/sources.html:57
-#: bp/start/templates/start/s_layout.html:26 templates/a_layout.html:24
-#: templates/ladattu2.html:10 templates/virhe_lataus.html:20
 msgid "Back to Top"
 msgstr ""
 
@@ -2914,7 +2918,13 @@ msgid "Media in the repository"
 msgstr ""
 
 #: bp/scene/templates/scene/sources.html:48
-msgid "events, persons, etc., referred to as \"> referenced"
+msgid "events, persons, etc., referred from"
+msgstr ""
+
+#: bp/scene/templates/scene/sources.html:48
+#: bp/tools/templates/tools/source_citations.html:20
+#: templates/cite_sour_repo.html:25
+msgid "References"
 msgstr ""
 
 #: bp/scene/templates/scene/sources.html:66
@@ -3579,11 +3589,6 @@ msgstr ""
 
 #: bp/tools/templates/tools/source_citations.html:15
 msgid "Title"
-msgstr ""
-
-#: bp/tools/templates/tools/source_citations.html:20
-#: templates/cite_sour_repo.html:25
-msgid "References"
 msgstr ""
 
 #: bp/tools/templates/tools/source_citations.html:24

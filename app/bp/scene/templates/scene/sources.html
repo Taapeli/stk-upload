@@ -13,7 +13,7 @@ td ul li p { margin: 0 0 0.3em 0; }
 </style>
 
 <div id="startdiv">
-    <h2>{{ _('List of Sources') }}{% if title %} ({{title}}){% endif %}</h2>
+    <h2>{{ _('List of Sources') }}{% if title %} ({{ _(title) }}){% endif %}</h2>
 </div>
 
 {{ macro.menu(5) }}
@@ -45,7 +45,7 @@ td ul li p { margin: 0 0 0.3em 0; }
                     <th>{{ _('Source, notes') }}</th>
                     <th>{{ _('Media in the repository') }}</th>
 {#                  <th title="{{ _('Citations') }}">{{ _('citated') }}</th> #}
-                    <th title="{{ _('events, persons, etc., referred to as "> referenced') }}</th>
+                    <th title="{{ _('events, persons, etc., referred from') }}">{{ _('References') }}</th>
 				</tr>
 			</thead>
 			<tbody>

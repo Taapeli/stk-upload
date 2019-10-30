@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-10-29 18:50+0200\n"
+"POT-Creation-Date: 2019-10-30 19:01+0200\n"
 "PO-Revision-Date: 2019-10-03 10:35+0300\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
@@ -1283,12 +1283,16 @@ msgid "Unsupported type: "
 msgstr "Tyyppiä ei tueta:"
 
 #: bp/gedcom/templates/g_layout.html:25 bp/scene/templates/scene/layout.html:25
+#: bp/start/templates/start/s_layout.html:26 templates/a_layout.html:24
+#: templates/ladattu2.html:10 templates/virhe_lataus.html:20
+msgid "Back to Front Page"
+msgstr "Palaa etusivulle"
+
+#: bp/gedcom/templates/g_layout.html:25
 #: bp/scene/templates/scene/persons.html:121
 #: bp/scene/templates/scene/persons_list.html:120
 #: bp/scene/templates/scene/places.html:50
 #: bp/scene/templates/scene/sources.html:57
-#: bp/start/templates/start/s_layout.html:26 templates/a_layout.html:24
-#: templates/ladattu2.html:10 templates/virhe_lataus.html:20
 msgid "Back to Top"
 msgstr "Palaa alkuun"
 
@@ -1980,7 +1984,7 @@ msgstr "valittu tiedosto"
 
 #: bp/gramps/templates/gramps/uploads.html:161
 msgid "Saving data"
-msgstr ""
+msgstr "Talletetaan"
 
 #: bp/gramps/templates/gramps/uploads.html:162
 msgid "Download the Gramps file"
@@ -1992,7 +1996,7 @@ msgstr "Näytä viimeisin loki"
 
 #: bp/gramps/templates/gramps/uploads.html:166
 msgid "Delete data"
-msgstr ""
+msgstr "Poistetaan"
 
 #: bp/gramps/templates/gramps/uploads.html:167
 msgid "Delete the file"
@@ -2462,7 +2466,7 @@ msgstr "ks."
 #: bp/scene/templates/scene/person.html:91
 #: bp/scene/templates/scene/person.html:251
 msgid "Person Notes"
-msgstr ""
+msgstr "Henkilön lisätietoja"
 
 #: bp/scene/templates/scene/person.html:97
 #: bp/scene/templates/scene/person_pg.html:96
@@ -2861,7 +2865,7 @@ msgstr "Lähteeseen liitetyt tapahtumat"
 
 #: bp/scene/templates/scene/source_events.html:28
 msgid "in the repository"
-msgstr ""
+msgstr "arkistossa"
 
 #: bp/scene/templates/scene/source_events.html:38
 msgid "Source References and Events"
@@ -2879,47 +2883,53 @@ msgstr "Lähdeluettelo"
 #: bp/scene/templates/scene/sources.html:22
 #, python-format
 msgid "This page contains a directory of %(num)s sources."
-msgstr ""
+msgstr "Tällä sivulla näytetään %(num)s lähdettä."
 
 #: bp/scene/templates/scene/sources.html:24
 msgid "Select theme:"
-msgstr ""
+msgstr "Valitse aihe:"
 
 #: bp/scene/templates/scene/sources.html:25
 msgid "all"
-msgstr ""
+msgstr "kaikki"
 
 #: bp/scene/templates/scene/sources.html:26
 msgid "birth"
-msgstr ""
+msgstr "syntymä"
 
 #: bp/scene/templates/scene/sources.html:27
 msgid "babtism"
-msgstr ""
+msgstr "kaste"
 
 #: bp/scene/templates/scene/sources.html:28
 msgid "wedding"
-msgstr ""
+msgstr "vihkiminen"
 
 #: bp/scene/templates/scene/sources.html:29
 msgid "death"
-msgstr ""
+msgstr "kuolema"
 
 #: bp/scene/templates/scene/sources.html:30
 msgid "move"
-msgstr ""
+msgstr "muutto"
 
 #: bp/scene/templates/scene/sources.html:45
 msgid "Source, notes"
-msgstr ""
+msgstr "Lähde, lisätiedot"
 
 #: bp/scene/templates/scene/sources.html:46
 msgid "Media in the repository"
-msgstr ""
+msgstr "Muoto arkistossa"
 
 #: bp/scene/templates/scene/sources.html:48
-msgid "events, persons, etc., referred to as \"> referenced"
-msgstr "Tapahtumia, henkilöitä jne., josta viitattu\">viitattu"
+msgid "events, persons, etc., referred from"
+msgstr "viittauksia tapahtumista, henkilöistä jne."
+
+#: bp/scene/templates/scene/sources.html:48
+#: bp/tools/templates/tools/source_citations.html:20
+#: templates/cite_sour_repo.html:25
+msgid "References"
+msgstr "Viittauksia"
 
 #: bp/scene/templates/scene/sources.html:66
 msgid "unused"
@@ -2961,7 +2971,7 @@ msgstr "En tiedä"
 
 #: bp/start/forms.py:30
 msgid "How many years have you been doing genealogical research?"
-msgstr "Monta vuotta olet harrastanut sukututkimusta?"
+msgstr "Montako vuotta olet harrastanut sukututkimusta?"
 
 #: bp/start/forms.py:31
 msgid "What genealogy software are you mainly using?"
@@ -3001,7 +3011,7 @@ msgstr "Päivitys ei onnistunut"
 
 #: bp/start/templates/start/index_guest.html:4
 msgid "Anonymous user"
-msgstr ""
+msgstr "Tunnistamaton käyttäjä"
 
 #: bp/start/templates/start/index_guest.html:15
 msgid "Exploring Isotammi Database"
@@ -3102,7 +3112,7 @@ msgstr "Tutustu Isotammen sukupuihin"
 msgid ""
 "View your own data as candidate material and compare it with demo "
 "database."
-msgstr ""
+msgstr "Katso tarjokasaineistoasi demoaineiston oheella"
 
 #: bp/start/templates/start/index_logged.html:74
 msgid "Admin Operations"
@@ -3599,11 +3609,6 @@ msgstr "Lähteen tiedot"
 #: bp/tools/templates/tools/source_citations.html:15
 msgid "Title"
 msgstr "Otsikko"
-
-#: bp/tools/templates/tools/source_citations.html:20
-#: templates/cite_sour_repo.html:25
-msgid "References"
-msgstr "Viittaukset"
 
 #: bp/tools/templates/tools/source_citations.html:24
 msgid "Identifier<br />Date<br />Page<br />Confidence"
