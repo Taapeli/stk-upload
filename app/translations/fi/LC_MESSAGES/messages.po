@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-10-30 19:51+0200\n"
-"PO-Revision-Date: 2019-10-30 22:33+0200\n"
+"POT-Creation-Date: 2019-10-31 09:24+0200\n"
+"PO-Revision-Date: 2019-10-31 09:25+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.6.0\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
 #: chkdate.py:13
@@ -37,60 +37,74 @@ msgstr "ruotsi"
 msgid "English"
 msgstr "englanti"
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:172
+#: setups.py:173
+msgid "Email or Username"
+msgstr "Sähköposti tai käyttäjätunnus"
+
+#: setups.py:174 setups.py:186
+msgid "Password"
+msgstr "Salasana"
+
+#: setups.py:176
+msgid "Remember Me"
+msgstr "Muista minut"
+
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:177
 msgid "Login"
 msgstr "Kirjautuminen"
 
-#: setups.py:176
-msgid "Email Address"
-msgstr "Sähköpostiosoite"
+#: bp/admin/forms.py:37 bp/admin/forms.py:106 bp/admin/forms.py:142
+#: bp/admin/templates/admin/list_users.html:83
+#: bp/admin/templates/admin/list_users_mails.html:87 setups.py:181
+msgid "Email address"
+msgstr "Sähköposti"
 
-#: setups.py:177
+#: setups.py:182
 msgid "I have read and agree the "
-msgstr "Olen lukenut ja hyväksynyt"
+msgstr ""
 
-#: setups.py:177
+#: setups.py:182
 msgid "Terms of use"
-msgstr "Käyttöehdot"
+msgstr ""
+
+#: setups.py:183
+msgid "I have read and agree the <a href='static/termsofuse.html'>Terms of use</a>"
+msgstr "Hyväksyn <a href='static/termsofuse.html'>käyttöehdot</a>"
 
 #: bp/start/templates/start/join.html:55 bp/stk_security/templates/security/_menu.html:5
-#: setups.py:180
+#: setups.py:188
 msgid "Register"
 msgstr "Rekisteröidy"
 
-#: setups.py:184
+#: setups.py:192
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr "Olen lukenut ja hyväksynyt käyttöehdot"
 
-#: setups.py:192
+#: setups.py:200
 msgid "Email address has been confirmed earlier"
 msgstr "Sähköpostisi on jo vahvistettu"
 
-#: setups.py:194
+#: setups.py:202
 msgid "Email address has not been approved yet"
 msgstr "Sähköpostiasi ei ole vahvistettu vielä"
 
-#: setups.py:198
+#: setups.py:206
 msgid "Email address must be an authorized one"
 msgstr "Vain vahvistettua sähköpostiosoitetta käytetään"
 
-#: setups.py:203
+#: setups.py:211
 msgid "Username has been reserved already"
 msgstr "Tämä käyttäjätunnus on jo varattu"
 
-#: setups.py:211
-msgid "Language required"
-msgstr "Kieli on pakollinen"
-
-#: bp/admin/forms.py:39 setups.py:236
-msgid "User name"
+#: setups.py:213 templates/del_table_users.html:39
+msgid "Username"
 msgstr "Käyttäjätunnus"
 
 #: bp/admin/templates/admin/list_users.html:82
 #: bp/admin/templates/admin/list_users_mails.html:86
 #: bp/scene/templates/scene/place_events.html:118 bp/tools/templates/tools/person2.html:16
 #: bp/tools/templates/tools/table_persons.html:20
-#: bp/tools/templates/tools/table_refnames.html:33 setups.py:236
+#: bp/tools/templates/tools/table_refnames.html:33 setups.py:214 setups.py:244
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Nimi"
@@ -98,9 +112,17 @@ msgstr "Nimi"
 #: bp/admin/forms.py:42 bp/admin/forms.py:45 bp/admin/forms.py:145 bp/admin/forms.py:148
 #: bp/admin/templates/admin/list_users.html:84
 #: bp/admin/templates/admin/list_users_mails.html:88 bp/start/forms.py:18
-#: bp/start/forms.py:22 setups.py:236
+#: bp/start/forms.py:22 setups.py:217 setups.py:244
 msgid "Language"
 msgstr "Kieli"
+
+#: setups.py:219
+msgid "Language required"
+msgstr "Kieli on pakollinen"
+
+#: bp/admin/forms.py:39 setups.py:244
+msgid "User name"
+msgstr "Käyttäjätunnus"
 
 #: bp/admin/cvs_refnames.py:49
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
@@ -117,12 +139,6 @@ msgstr "Käyttäjän id"
 #: bp/admin/forms.py:35 bp/admin/forms.py:75 bp/admin/forms.py:104 bp/admin/forms.py:140
 msgid "Email Address:"
 msgstr "Sähköpostiosoite:"
-
-#: bp/admin/forms.py:37 bp/admin/forms.py:106 bp/admin/forms.py:142
-#: bp/admin/templates/admin/list_users.html:83
-#: bp/admin/templates/admin/list_users_mails.html:87
-msgid "Email address"
-msgstr "Sähköposti"
 
 #: bp/admin/forms.py:38
 msgid "Username:"
@@ -3951,10 +3967,6 @@ msgstr "Roolit"
 msgid "Create Username"
 msgstr "Luo käyttäjätunnus"
 
-#: templates/del_table_users.html:39
-msgid "Username"
-msgstr "Käyttäjätunnus"
-
 #: templates/del_table_users.html:41
 msgid "Create a new user or update the old one"
 msgstr "Luo uusi käyttäjä tai päivitä vanha"
@@ -4724,12 +4736,3 @@ msgstr "Tiedoston lataaminen ei onnistu"
 #: templates/virhe_lataus.html:14
 msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
-
-msgid "Email or Username"
-msgstr "Sähköposti tai käyttäjätunnus"
-
-msgid "Password"
-msgstr "Salasana"
-
-msgid "Remember Me"
-msgstr "Muista minut"
