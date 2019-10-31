@@ -6,7 +6,7 @@ Created on 17.11.2017
 Sovelluksen toiminnallisuutta ohjaavat tiedot  
 '''
 
-from flask_babelex import _
+from flask_babelex import lazy_gettext as _l
  
 print('Reading application config.py')
 DEBUG = False
@@ -27,9 +27,9 @@ SECURITY_POST_LOGOUT_VIEW = '/'
 #SECURITY_CHANGE_PASSWORD_TEMPLATE = 'security/change_password.html'
 SECURITY_SEND_REGISTER_EMAIL = True
 
-LANGUAGES = [("fi",_("Finnish")),
-             ("sv",_("Swedish")),
-             ("en",_("English"))]
+LANGUAGES = [("fi",_l("Finnish")),
+             ("sv",_l("Swedish")),
+             ("en",_l("English"))]
 
 LANGS = [LANGUAGE[0] for LANGUAGE in LANGUAGES]
 

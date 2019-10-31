@@ -37,61 +37,77 @@ msgstr "Svenska"
 msgid "English"
 msgstr "Engelska"
 
-#: bp/stk_security/templates/security/_menu.html:10 setups.py:172
+#: setups.py:173
+msgid "Email or Username"
+msgstr ""
+
+#: setups.py:174 setups.py:186
+msgid "Password"
+msgstr ""
+
+#: setups.py:176
+msgid "Remember Me"
+msgstr ""
+
+#: bp/stk_security/templates/security/_menu.html:10 setups.py:177
 msgid "Login"
 msgstr "Logga in"
 
-#: setups.py:176
-msgid "Email Address"
+#: bp/admin/forms.py:37 bp/admin/forms.py:106 bp/admin/forms.py:142
+#: bp/admin/templates/admin/list_users.html:83
+#: bp/admin/templates/admin/list_users_mails.html:87 setups.py:181
+msgid "Email address"
 msgstr "Epost address"
 
-#: setups.py:177
+#: setups.py:182
 msgid "I have read and agree the "
-msgstr "Jag har läst och godkänner "
+msgstr ""
 
-#: setups.py:177
+#: setups.py:182
 msgid "Terms of use"
-msgstr "Användar vilkoren"
+msgstr ""
+
+#: setups.py:183
+msgid ""
+"I have read and agree the <a href='static/termsofuse.html'>Terms of "
+"use</a>"
+msgstr ""
 
 #: bp/start/templates/start/join.html:55
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:180
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:188
 msgid "Register"
 msgstr "Registrera"
 
-#: setups.py:184
+#: setups.py:192
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr "Indikera att du har läst och godkänner användar vilkoren"
 
-#: setups.py:192
+#: setups.py:200
 msgid "Email address has been confirmed earlier"
 msgstr "E-postadressen har bekräftats tidigare"
 
-#: setups.py:194
+#: setups.py:202
 msgid "Email address has not been approved yet"
 msgstr "E-postadressen har inte godkänts ännu"
 
-#: setups.py:198
+#: setups.py:206
 msgid "Email address must be an authorized one"
 msgstr "Epost addressen måste vara godkänd av administratören"
 
-#: setups.py:203
+#: setups.py:211
 msgid "Username has been reserved already"
 msgstr "Användarnamnet redan reserverat"
 
-#: setups.py:211
-msgid "Language required"
-msgstr "Språk som krävs"
-
-#: bp/admin/forms.py:39 setups.py:236
-msgid "User name"
-msgstr "Användar namn"
+#: setups.py:213 templates/del_table_users.html:39
+msgid "Username"
+msgstr "Användarnamn"
 
 #: bp/admin/templates/admin/list_users.html:82
 #: bp/admin/templates/admin/list_users_mails.html:86
 #: bp/scene/templates/scene/place_events.html:118
 #: bp/tools/templates/tools/person2.html:16
 #: bp/tools/templates/tools/table_persons.html:20
-#: bp/tools/templates/tools/table_refnames.html:33 setups.py:236
+#: bp/tools/templates/tools/table_refnames.html:33 setups.py:214 setups.py:244
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Namn"
@@ -99,9 +115,17 @@ msgstr "Namn"
 #: bp/admin/forms.py:42 bp/admin/forms.py:45 bp/admin/forms.py:145
 #: bp/admin/forms.py:148 bp/admin/templates/admin/list_users.html:84
 #: bp/admin/templates/admin/list_users_mails.html:88 bp/start/forms.py:18
-#: bp/start/forms.py:22 setups.py:236
+#: bp/start/forms.py:22 setups.py:217 setups.py:244
 msgid "Language"
 msgstr "Språk"
+
+#: setups.py:219
+msgid "Language required"
+msgstr "Språk som krävs"
+
+#: bp/admin/forms.py:39 setups.py:244
+msgid "User name"
+msgstr "Användar namn"
 
 #: bp/admin/cvs_refnames.py:49
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
@@ -119,12 +143,6 @@ msgstr "Användarens id"
 #: bp/admin/forms.py:140
 msgid "Email Address:"
 msgstr "Epost address:"
-
-#: bp/admin/forms.py:37 bp/admin/forms.py:106 bp/admin/forms.py:142
-#: bp/admin/templates/admin/list_users.html:83
-#: bp/admin/templates/admin/list_users_mails.html:87
-msgid "Email address"
-msgstr "Epost address"
 
 #: bp/admin/forms.py:38
 msgid "Username:"
@@ -4064,10 +4082,6 @@ msgstr "roller"
 #: templates/del_table_users.html:37
 msgid "Create Username"
 msgstr "Skapa användarnamn"
-
-#: templates/del_table_users.html:39
-msgid "Username"
-msgstr "Användarnamn"
 
 #: templates/del_table_users.html:41
 msgid "Create a new user or update the old one"
