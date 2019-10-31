@@ -219,9 +219,10 @@ def display_changed_lines(old_lines, new_lines, linenum=None):
 
 def display_changes(lines,item,linenum=None):
     class Out:
-        lines = []
+        def __init__(self):
+            self.lines = []
         def emit(self,line):
-            lines.append(line)
+            self.lines.append(line)
 
     out = Out()
 
@@ -234,6 +235,6 @@ def display_changes(lines,item,linenum=None):
         else:
             item.print_items(out)
     
-        display_changed_lines(lines,out.lines)
+        display_changed_lines(lines,out.lines, linenum)
     
         
