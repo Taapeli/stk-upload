@@ -216,7 +216,7 @@ def test_gedcom_transform_nimet(client):
     )
 
 def test_gedcom_transform_dates(client):
-    dotest_gedcom_transform(client,"dates.ged","dates.py","Muunnos 'Päivämäärät' käynnistettiin",
+    dotest_gedcom_transform(client,"dates.ged","dates.py","Muunnos 'Dates' käynnistettiin",
         display_invalid_dates="on",
         add_cont_if_no_level_number="on",
         insert_dummy_tags="on",
