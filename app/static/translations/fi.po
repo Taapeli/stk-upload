@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-10-31 09:24+0200\n"
-"PO-Revision-Date: 2019-10-31 09:21+0200\n"
+"POT-Creation-Date: 2019-10-31 17:43+0200\n"
+"PO-Revision-Date: 2019-10-31 09:25+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.6.0\n"
+"Generated-By: Babel 2.7.0\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -40,13 +40,13 @@ msgstr "englanti"
 msgid "Email or Username"
 msgstr "Sähköposti tai käyttäjätunnus"
 
-#: setups.py:174 setups.py:186
+#: setups.py:174 setups.py:183
 msgid "Password"
-msgstr ""
+msgstr "Salasana"
 
 #: setups.py:176
 msgid "Remember Me"
-msgstr ""
+msgstr "Muista minut"
 
 #: bp/stk_security/templates/security/_menu.html:10 setups.py:177
 msgid "Login"
@@ -59,45 +59,37 @@ msgid "Email address"
 msgstr "Sähköposti"
 
 #: setups.py:182
-msgid "I have read and agree the "
-msgstr ""
-
-#: setups.py:182
-msgid "Terms of use"
-msgstr ""
-
-#: setups.py:183
 msgid ""
 "I have read and agree the <a href='static/termsofuse.html'>Terms of "
 "use</a>"
 msgstr "Hyväksyn <a href='static/termsofuse.html'>käyttöehdot</a>"
 
 #: bp/start/templates/start/join.html:55
-#: bp/stk_security/templates/security/_menu.html:5 setups.py:188
+#: bp/stk_security/templates/security/_menu.html:5 setups.py:185
 msgid "Register"
 msgstr "Rekisteröidy"
 
-#: setups.py:192
+#: setups.py:189
 msgid "Please indicate that you have read and agree to the Terms and Conditions"
 msgstr "Olen lukenut ja hyväksynyt käyttöehdot"
 
-#: setups.py:200
+#: setups.py:197
 msgid "Email address has been confirmed earlier"
 msgstr "Sähköpostisi on jo vahvistettu"
 
-#: setups.py:202
+#: setups.py:199
 msgid "Email address has not been approved yet"
 msgstr "Sähköpostiasi ei ole vahvistettu vielä"
 
-#: setups.py:206
+#: setups.py:203
 msgid "Email address must be an authorized one"
 msgstr "Vain vahvistettua sähköpostiosoitetta käytetään"
 
-#: setups.py:211
+#: setups.py:208
 msgid "Username has been reserved already"
 msgstr "Tämä käyttäjätunnus on jo varattu"
 
-#: setups.py:213 templates/del_table_users.html:39
+#: setups.py:210 templates/del_table_users.html:39
 msgid "Username"
 msgstr "Käyttäjätunnus"
 
@@ -106,7 +98,7 @@ msgstr "Käyttäjätunnus"
 #: bp/scene/templates/scene/place_events.html:118
 #: bp/tools/templates/tools/person2.html:16
 #: bp/tools/templates/tools/table_persons.html:20
-#: bp/tools/templates/tools/table_refnames.html:33 setups.py:214 setups.py:244
+#: bp/tools/templates/tools/table_refnames.html:33 setups.py:211 setups.py:239
 #: templates/del_table_users.html:40 templates/repo_sources.html:15
 msgid "Name"
 msgstr "Nimi"
@@ -114,15 +106,15 @@ msgstr "Nimi"
 #: bp/admin/forms.py:42 bp/admin/forms.py:45 bp/admin/forms.py:145
 #: bp/admin/forms.py:148 bp/admin/templates/admin/list_users.html:84
 #: bp/admin/templates/admin/list_users_mails.html:88 bp/start/forms.py:18
-#: bp/start/forms.py:22 setups.py:217 setups.py:244
+#: bp/start/forms.py:22 setups.py:212 setups.py:239
 msgid "Language"
 msgstr "Kieli"
 
-#: setups.py:219
+#: setups.py:214
 msgid "Language required"
 msgstr "Kieli on pakollinen"
 
-#: bp/admin/forms.py:39 setups.py:244
+#: bp/admin/forms.py:39 setups.py:239
 msgid "User name"
 msgstr "Käyttäjätunnus"
 
@@ -1077,7 +1069,7 @@ msgid "Select"
 msgstr "Valitse"
 
 #: bp/dupsearch/templates/dupsearch.html:31
-#: bp/gedcom/templates/gedcom_info.html:23
+#: bp/gedcom/templates/gedcom_info.html:27
 #: bp/gramps/templates/gramps/uploads.html:84
 #: bp/start/templates/start/my_settings.html:124
 msgid "File"
@@ -1323,7 +1315,7 @@ msgstr "Suomen Sukututkimusseuran tietokanta"
 msgid "Instructions"
 msgstr "Ohjeita"
 
-#: bp/gedcom/templates/gedcom_info.html:16
+#: bp/gedcom/templates/gedcom_info.html:20
 #: bp/gedcom/templates/gedcom_list.html:4
 #: bp/gedcom/templates/gedcom_list.html:16
 #: bp/start/templates/start/index_logged.html:28
@@ -1332,13 +1324,13 @@ msgstr "Ohjeita"
 msgid "Gedcom tools"
 msgstr "Gedcom-työkalut"
 
-#: bp/gedcom/templates/gedcom_info.html:24
+#: bp/gedcom/templates/gedcom_info.html:28
 #: bp/gedcom/templates/gedcom_list.html:16
 msgid "user"
 msgstr "käyttäjätunnus"
 
-#: bp/gedcom/templates/gedcom_info.html:25
-#: bp/gedcom/templates/gedcom_info.html:175
+#: bp/gedcom/templates/gedcom_info.html:29
+#: bp/gedcom/templates/gedcom_info.html:179
 #: bp/gedcom/templates/gedcom_list.html:42
 #: bp/scene/templates/scene/event.html:42
 #: bp/scene/templates/scene/person_v1.html:85
@@ -1348,190 +1340,190 @@ msgstr "käyttäjätunnus"
 msgid "Description"
 msgstr "Kuvaus"
 
-#: bp/gedcom/templates/gedcom_info.html:27
+#: bp/gedcom/templates/gedcom_info.html:31
 msgid "Update description"
 msgstr "Päivitä kuvaus"
 
-#: bp/gedcom/templates/gedcom_info.html:33
+#: bp/gedcom/templates/gedcom_info.html:37
 msgid "Allow help desk to view data"
 msgstr "Salli Tukitoiminnon tarkastella tietoja"
 
-#: bp/gedcom/templates/gedcom_info.html:35
+#: bp/gedcom/templates/gedcom_info.html:39
 msgid "Permission updated"
 msgstr "Lupa päivitetty"
 
-#: bp/gedcom/templates/gedcom_info.html:40
+#: bp/gedcom/templates/gedcom_info.html:44
 msgid "Show GEDCOM info"
 msgstr "Näytä tiedot"
 
-#: bp/gedcom/templates/gedcom_info.html:46
+#: bp/gedcom/templates/gedcom_info.html:50
 msgid "Switch to another GEDCOM"
 msgstr "Vaihda käsiteltävä tiedosto"
 
-#: bp/gedcom/templates/gedcom_info.html:55
+#: bp/gedcom/templates/gedcom_info.html:59
 msgid "Statistics"
 msgstr "Tietoja"
 
-#: bp/gedcom/templates/gedcom_info.html:58
+#: bp/gedcom/templates/gedcom_info.html:62
 #: bp/gramps/templates/gramps/uploads.html:129
 msgid "Upload time"
 msgstr "Viety palvelimelle"
 
-#: bp/gedcom/templates/gedcom_info.html:63
+#: bp/gedcom/templates/gedcom_info.html:67
 msgid "File size"
 msgstr "Tiedoston koko"
 
-#: bp/gedcom/templates/gedcom_info.html:64
+#: bp/gedcom/templates/gedcom_info.html:68
 msgid "bytes"
 msgstr "tavua"
 
-#: bp/gedcom/templates/gedcom_info.html:68
+#: bp/gedcom/templates/gedcom_info.html:72
 msgid "Gedcom date"
 msgstr "Aineiston päivämäärä"
 
-#: bp/gedcom/templates/gedcom_info.html:73
+#: bp/gedcom/templates/gedcom_info.html:77
 msgid "Submitter"
 msgstr "Tutkija"
 
-#: bp/gedcom/templates/gedcom_info.html:78
+#: bp/gedcom/templates/gedcom_info.html:82
 msgid "Gedcom version"
 msgstr "Gedcom-versio"
 
-#: bp/gedcom/templates/gedcom_info.html:83
+#: bp/gedcom/templates/gedcom_info.html:87
 msgid "Encoding"
 msgstr "Havaittu merkistö"
 
-#: bp/gedcom/templates/gedcom_info.html:87
+#: bp/gedcom/templates/gedcom_info.html:91
 msgid "Gedcom charset"
 msgstr "Ilmoitettu merkistö"
 
-#: bp/gedcom/templates/gedcom_info.html:91
+#: bp/gedcom/templates/gedcom_info.html:95
 msgid "Source program"
 msgstr "Käytetty ohjelma"
 
-#: bp/gedcom/templates/gedcom_info.html:104
+#: bp/gedcom/templates/gedcom_info.html:108
 msgid "Number of individuals"
 msgstr "Henkilöitä"
 
-#: bp/gedcom/templates/gedcom_info.html:106
+#: bp/gedcom/templates/gedcom_info.html:110
 msgid "Number of families"
 msgstr "Perheitä"
 
-#: bp/gedcom/templates/gedcom_info.html:108
+#: bp/gedcom/templates/gedcom_info.html:112
 msgid "Number of unique places"
 msgstr "Paikkoja"
 
-#: bp/gedcom/templates/gedcom_info.html:110
+#: bp/gedcom/templates/gedcom_info.html:114
 msgid "Number of notes"
 msgstr "Lisätietoja"
 
-#: bp/gedcom/templates/gedcom_info.html:112
+#: bp/gedcom/templates/gedcom_info.html:116
 msgid "Number of citations"
 msgstr "Lähdeviittauksia"
 
-#: bp/gedcom/templates/gedcom_info.html:114
+#: bp/gedcom/templates/gedcom_info.html:118
 msgid "Number of sources"
 msgstr "Lähteitä"
 
-#: bp/gedcom/templates/gedcom_info.html:116
+#: bp/gedcom/templates/gedcom_info.html:120
 msgid "Number of repositories"
 msgstr "Arkistoja"
 
-#: bp/gedcom/templates/gedcom_info.html:118
+#: bp/gedcom/templates/gedcom_info.html:122
 msgid "Number of multimedia objects"
 msgstr "Liitetiedostoja"
 
-#: bp/gedcom/templates/gedcom_info.html:127
+#: bp/gedcom/templates/gedcom_info.html:131
 msgid "Actions"
 msgstr "Toiminnot"
 
-#: bp/gedcom/templates/gedcom_info.html:129
+#: bp/gedcom/templates/gedcom_info.html:133
 msgid "Choose a transformation to perform for this GEDCOM"
 msgstr "Valitse muunnos"
 
-#: bp/gedcom/templates/gedcom_info.html:130
+#: bp/gedcom/templates/gedcom_info.html:134
 msgid "Choose a transformation"
 msgstr "Valitse muunnos"
 
-#: bp/gedcom/templates/gedcom_info.html:134
+#: bp/gedcom/templates/gedcom_info.html:138
 msgid "Display previous versions of this GEDCOM"
 msgstr "Näytä edellinen versio"
 
-#: bp/gedcom/templates/gedcom_info.html:135
+#: bp/gedcom/templates/gedcom_info.html:139
 msgid "Versions management"
 msgstr "Versioiden hallinta"
 
-#: bp/gedcom/templates/gedcom_info.html:140
-#: bp/gedcom/templates/gedcom_info.html:141
+#: bp/gedcom/templates/gedcom_info.html:144
+#: bp/gedcom/templates/gedcom_info.html:145
 msgid "Fetch this GEDCOM"
 msgstr "Nouda tämä tiedosto työasemallesi"
 
-#: bp/gedcom/templates/gedcom_info.html:145
-#: bp/gedcom/templates/gedcom_info.html:146
+#: bp/gedcom/templates/gedcom_info.html:149
+#: bp/gedcom/templates/gedcom_info.html:150
 msgid "Remove this GEDCOM"
 msgstr "Poista tämä Gedcom palvelimelta"
 
-#: bp/gedcom/templates/gedcom_info.html:152
+#: bp/gedcom/templates/gedcom_info.html:156
 msgid "Technical analysis"
 msgstr "Tekninen analyysi"
 
-#: bp/gedcom/templates/gedcom_info.html:158
+#: bp/gedcom/templates/gedcom_info.html:162
 msgid "Show transformation history"
 msgstr "Näytä muunnoshistoria"
 
-#: bp/gedcom/templates/gedcom_info.html:168
+#: bp/gedcom/templates/gedcom_info.html:172
 msgid "Transformations"
 msgstr "Muunnokset"
 
-#: bp/gedcom/templates/gedcom_info.html:185
+#: bp/gedcom/templates/gedcom_info.html:189
 msgid "Versions"
 msgstr "Versiot"
 
-#: bp/gedcom/templates/gedcom_info.html:188
+#: bp/gedcom/templates/gedcom_info.html:192
 msgid "Delete old versions"
 msgstr "Poista vanhat versiot"
 
-#: bp/gedcom/templates/gedcom_info.html:189
+#: bp/gedcom/templates/gedcom_info.html:193
 msgid "Compare versions"
 msgstr "Vertaile versioita"
 
-#: bp/gedcom/templates/gedcom_info.html:190
+#: bp/gedcom/templates/gedcom_info.html:194
 msgid "No previous versions"
 msgstr "Ei aiempia versioita"
 
-#: bp/gedcom/templates/gedcom_info.html:198
+#: bp/gedcom/templates/gedcom_info.html:202
 msgid "Transformation history"
 msgstr "Muunnoshistoria"
 
-#: bp/gedcom/templates/gedcom_info.html:210
+#: bp/gedcom/templates/gedcom_info.html:214
 msgid "GEDCOM comparison"
 msgstr "Tiedostoversioiden vertailu"
 
-#: bp/gedcom/templates/gedcom_info.html:222
+#: bp/gedcom/templates/gedcom_info.html:226
 msgid "Results"
 msgstr "Tulokset"
 
-#: bp/gedcom/templates/gedcom_info.html:241
+#: bp/gedcom/templates/gedcom_info.html:245
 msgid "Perform transformation"
 msgstr "Suorita muunnos"
 
-#: bp/gedcom/templates/gedcom_info.html:253
+#: bp/gedcom/templates/gedcom_info.html:257
 msgid "Transformation results"
 msgstr "Muunnoksen tulokset"
 
-#: bp/gedcom/templates/gedcom_info.html:255
+#: bp/gedcom/templates/gedcom_info.html:259
 msgid "Old version is saved as"
 msgstr "Vanha versio tallennetaan nimellä"
 
-#: bp/gedcom/templates/gedcom_info.html:257
+#: bp/gedcom/templates/gedcom_info.html:261
 msgid "Revert to old version"
 msgstr "Palauta vanha versio"
 
-#: bp/gedcom/templates/gedcom_info.html:260
+#: bp/gedcom/templates/gedcom_info.html:264
 msgid "Not saved yet"
 msgstr "Ei vielä tallennettu"
 
-#: bp/gedcom/templates/gedcom_info.html:261
+#: bp/gedcom/templates/gedcom_info.html:265
 msgid "Save result"
 msgstr "Tallenna tulos"
 
