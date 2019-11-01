@@ -121,7 +121,7 @@ def get_person_full_data(uuid, owner):
     #      (f) --> (fe:Event)
     reader.read_person_families()
     #    Sort Events by date
-    reader.person.events.sort(key=lambda x: x.dates)
+    reader.person.events.sort()
 
     # 4. for pl in z:Place, ph
     #      (pl) --> (pn:Place_name)

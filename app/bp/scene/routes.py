@@ -175,7 +175,7 @@ def show_person_v2(uid=None):
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
         print(get_thumbname(objs[i].uuid))
-    return render_template("/scene/person_pg.html", person=person, obj=objs, 
+    return render_template("/scene/person_v2.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
 

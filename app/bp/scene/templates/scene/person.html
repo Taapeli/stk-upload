@@ -29,6 +29,11 @@ u { color: DarkKhaki; text-decoration: none; }
 
         <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b>
+            {% if person.citation_ref %}<sup>
+                {% for cr in person.citation_ref %}
+                    <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                {% endfor %}</sup>
+            {% endif %}
         </h3>
 
         {% set myid = person.uniq_id %}
@@ -46,12 +51,6 @@ u { color: DarkKhaki; text-decoration: none; }
                             <a href="/scene/person?uuid={{person.uuid}}">v3</a> &nbsp;
                         </span>
                     </td>
-                    {% if person.citation_ref %}
-                    <td class="ColumnValue"><small><b>{{ _("Source") }}:</b>
-                        {% for cr in person.citation_ref %}
-                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
-                        {% endfor %}</small>
-                    </td>{% endif %}
                 </tr>
 
                 {% for pname in person.names|sort(attribute='order') %}<tr>
@@ -61,13 +60,13 @@ u { color: DarkKhaki; text-decoration: none; }
                         <i title="{{ _('patronymic') }}">{{pname.suffix}}</i>
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <b title="{{ _('surname') }}">{{pname.surname}}</b>
+
+	                    {% if pname.citation_ref %}<sup>
+	                        {% for cr in pname.citation_ref %}
+	                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+	                        {% endfor %}</sup>
+	                    {% endif %}
                     </td>
-                    {% if pname.citation_ref %}
-                    <td class="ColumnValue"><small><b>{{ _("Source") }}:</b>
-                        {% for cr in pname.citation_ref %}
-                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
-                        {% endfor %}</small>
-                    </td>{% endif %}
                 </tr>{% endfor %}
                    
                 {% if person.sex %}<tr>
@@ -101,24 +100,35 @@ u { color: DarkKhaki; text-decoration: none; }
                         <th class="ColumnEvent">{{ _("Event") }}</th>
                         <th class="ColumnDate">{{ _("Date") }}</th>
                         <th class="ColumnPlace">{{ _("Place") }}</th>
-                        <th class="ColumnSources">{{ _("Source") }}</th>
                         <th class="ColumnDescription">{{ _("Description and Notes") }}</th>
                     </tr>
                 </thead>
                 <tbody>
-        {% for e in person.events if e.type != "Cause Of Death" %}
+{% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
 {#  person.events[0].citation_ref[0] = 90323
     objs[person.events[0].citation_ref[0]] = <models.gen.citation.Citation object at 0x7f0a24696ac8> = cr
     objs[person.events[0].citation_ref[0]].mark = '1a'
 #}
-                        {% if e.uuid %}{% set uuid = e.uuid %}{% else %}{% set uuid = "" %}{% endif %}
+    {% if e.uuid %}{% set uuid = e.uuid %}{% else %}{% set uuid = "" %}{% endif %}
+
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
-                            {% if e.type == "Baptism" %}<a href="/scene/event/{{e.uniq_id}}"
-                                class="inlink">&rarr;&nbsp;{% endif %}{{e.type|transl('evt')}}
-                            {% if e.role and e.role != "Primary" %}<span 
-                                class="typedesc">({{e.role|transl('role')}})</span>{% endif %}
+    {% if e.type == "Baptism" %}    <a href="/scene/event/{{e.uniq_id}}" class="inlink">&rarr;&nbsp;
+                                    {{e.type|transl('evt')}}
+                                </a>
+    {% else %}                      {{e.type|transl('evt')}}
+    {% endif %}
+    {% if e.role and e.role != "Primary" %}
+                            <span class="typedesc">({{e.role|transl('role')}})</span>
+    {% endif %}
+
+    {% if e.citation_ref %}<sup>
+        {% for cr in e.citation_ref %}
+	                           <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+	   {% endfor %}</sup>
+    {% endif %}
+                            </div>
                         </td>
 
                         <td class="ColumnDate">{{e.dates}}</td>
@@ -131,10 +141,6 @@ u { color: DarkKhaki; text-decoration: none; }
                               %}, <small>{{macro.place_names_lang(obj[pref].uppers[0])}}</small>{% endif %}
                             {% endfor %}
                         </td>
-
-                        <td class="ColumnSources">{% for cr in e.citation_ref %}
-                           <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
-                        {% endfor %}</td>
 
                         <td class="ColumnDescription"><div>{{e.description}}</div>
                             <div>{% if e.type == "Death" and person.cause_of_death %}<span 
@@ -158,7 +164,7 @@ u { color: DarkKhaki; text-decoration: none; }
 {#                  {% endif %}
 #}
                     </tr>
-         {% endfor %}
+{% endfor %}
                  </tbody>
             </table>
         </div>
@@ -258,17 +264,8 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>
 {% endif %}
 
-<!--
-        <div class="subsection scene">
-            <h4>{{ _("Narrated") }}</h4>
-            <div class="grampsstylednote">
-                <p>
-                {{ _("Note") }}
-                </p>
-            </div>
-        </div>
--->
-        <!-- div class="subsection" id="tree"><h4>Esivanhemmat -->
+<!-- <div class="subsection scene"> <h4>{{ _("Narrated") }}</h4> ... -->
+<!-- div class="subsection" id="tree"><h4>Esivanhemmat -->
 
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>

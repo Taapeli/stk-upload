@@ -785,6 +785,7 @@ i + div.grampsstylednote p {
 }
 div.grampsstylednote p {
     margin: 4px;
+    text-indent: -2em;
 }
 
 /* Subsection : Family Map
