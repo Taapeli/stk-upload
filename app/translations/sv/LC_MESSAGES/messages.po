@@ -3084,7 +3084,7 @@ msgstr "Isotammi användarens start sida"
 
 #: bp/start/templates/start/index_logged.html:14
 msgid "User's home page for Isotammi Services"
-msgstr "Användarens startsida till Isotammi Service"
+msgstr "Startsida till Isotammi Service"
 
 #: bp/start/templates/start/index_logged.html:29
 msgid ""
