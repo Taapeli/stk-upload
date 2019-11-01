@@ -520,7 +520,7 @@ RETURN COLLECT(n) AS names LIMIT 15
             if record["edates"][0] != None:
                 dates = DateRange(record["edates"])
                 e.dates = str(dates)
-                e.date = dates.estimate()
+#                 e.date = dates.estimate()
             e.role = record["role"]
             e.names = []
             for node in record["names"]:

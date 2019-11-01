@@ -34,29 +34,17 @@ div.startbox { min-height: 270px;}
 				     style="float:left; width:50%">
 				<p>
 					{{ _('<i>Isotammi Database</i> is a system for co\'operatively collect validated Finnish Genealogy data.') }} 
-					<a href="http://wiki.isotammi.net/wiki/Oma_aineisto_Isotammeen" 
-					 target="esite">{{ _('See the process for your data') }}</a>.
 				</p>
 				<p>{{ _("For more info see also documents -") }}</p>
 				<ul class="compact">
 					<li><a href="http://wiki.isotammi.net/wiki/Suomikanta_ja_sen_hy%C3%B6dynt%C3%A4minen"
 					 target="esite">{{ _('Why Isotammi database') }}</a></li>
+                    <li><a href="http://wiki.isotammi.net/wiki/Oma_aineisto_Isotammeen" 
+                     target="esite">{{ _('See the process for your data') }}</a></li>
 					<li><a href="http://wiki.isotammi.net/wiki/Sukutietojen_vakiointi_Gedcom-ohjelmilla"
 					 target="esite">{{ _('Gedcom data healing services') }}</a></li>
 				</ul>
 			</div>
-
-            <div class="startbox">
-                <h3>{{ _('Log in') }}</h3>
-                <p>{{ _('As a member of <i>Suomen sukututkimusseura</i>, you can log in,') }}
-                   {{ _('refine the structure of your own data and get full access to the demo database') }}.
-                </p>
-                <form method="get">
-                    <div class="submit">
-                       <button type="submit" formaction="/start/logged">{{ _('Log in') }}</button>
-                    </div>
-                </form>
-            </div>
 
 			<div class="startbox">
 				<h3>{{ _('Look at demo data in Isotammi Database') }}</h3>
@@ -71,6 +59,18 @@ div.startbox { min-height: 270px;}
                     </div>
 				</form>
 			</div>
+
+            <div class="startbox">
+                <h3>{{ _('Log in') }}</h3>
+                <p>{{ _('As a member of <i>Suomen sukututkimusseura</i>, you can log in,') }}
+                   {{ _('refine the structure of your own data and get full access to the demo database') }}.
+                </p>
+                <form method="get">
+                    <div class="submit">
+                       <button type="submit" formaction="/start/logged">{{ _('Log in') }}</button>
+                    </div>
+                </form>
+            </div>
 
 	   </div>
 	</div>

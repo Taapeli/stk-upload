@@ -437,9 +437,9 @@ return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
     collect(distinct [id(p), n, rn]) as names'''
 
     get_wedding_couple_names = """
-match (e:Event) <-- (:Family) -[r:PARENT]-> (p:Person) -[:NAME]-> (n:Name)
-    where ID(e)=$eid
-return r.role as frole, id(p) as pid, collect(n) as names"""
+MATCH (e:Event) <-[:EVENT]- (:Family) -[r:PARENT]-> (p:Person) -[:NAME]-> (n:Name)
+    WHERE ID(e)=$eid
+RETURN r.role AS frole, id(p) AS pid, COLLECT(n) AS names"""
 
 
     get_dates_parents = """
@@ -615,6 +615,19 @@ class Cypher_source():
 
     get_sources_w_notes = """
 MATCH (s:Source)
+WITH s ORDER BY toUpper(s.stitle)
+    OPTIONAL MATCH (s) -[:NOTE]-> (note)
+    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+       collect(DISTINCT [r.medium, rep]) as repositories,
+       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+ORDER BY toUpper(s.stitle)"""
+    get_selected_sources_w_notes = """
+MATCH (s:Source)
+        WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
+WITH s ORDER BY toUpper(s.stitle)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
@@ -626,14 +639,9 @@ ORDER BY toUpper(s.stitle)"""
 
     get_a_source_w_notes = """
 MATCH (source:Source) WHERE ID(source)=$sid
-OPTIONAL MATCH (source) -[:NOTE]-> (n)
-RETURN source, COLLECT(n) as notes"""
-#     get_repositories_w_notes = """
-# MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
-#     WHERE ID(source) = $sid
-# OPTIONAL MATCH (repo) -[:NOTE]-> (note:Note)
-# RETURN r.medium AS medium, repo, COLLECT(note) AS notes"""
-
+    OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
+    OPTIONAL MATCH (source) -[:NOTE]-> (n)
+RETURN source, COLLECT(n) AS notes, COLLECT([r.medium,rep]) AS reps"""
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 

@@ -349,15 +349,30 @@ def show_place_page(locid):
 # ------------------------------ Menu 5: Sources --------------------------------
 
 @bp.route('/scene/sources')
-def show_sources():
+@bp.route('/scene/sources/<theme>')
+def show_sources(theme=None):
     """ Lähdeluettelon näyttäminen ruudulla for menu(5)
+    
+        Todo: Examples?
+            /scene/sources --> birth; shorter list?
+            /scene/sources/all    <-- now no theme
+            /scene/sources/birth
+            /scene/sources/wedding?year1=1800%year2=1850 <-- todo
+
     """
+    if theme:
+        # Todo: Possible year filter? Needs pre-calculated varibles?
+        year1 = request.args.get('year1', None)
+        year2 = request.args.get('year2', None)
+        filt = (theme, year1, year2)
+    else:
+        filt=None
     try:
-        sources = Source.get_source_list()
+        sources, title = Source.get_source_list(filt)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_sources")
-    return render_template("/scene/sources.html", sources=sources)
+    return render_template("/scene/sources.html", sources=sources, title=title)
 
 
 @bp.route('/scene/source=<int:sourceid>')

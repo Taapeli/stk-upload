@@ -289,7 +289,7 @@ class DateRange():
         if node['datetype'] != None:
             return DateRange(node['datetype'], node['date1'], node['date2'])
 
-        return None
+        return DateRange()
 
 
     def estimate(self):

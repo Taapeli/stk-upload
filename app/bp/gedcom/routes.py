@@ -209,6 +209,7 @@ def gedcom_info(gedcom):
     return render_template('gedcom_info.html', 
                            user=gedcom_utils.get_gedcom_user(), gedcom=gedcom, 
                            filename=filename, info=info, transforms=transforms, 
+                           maxsize=shareds.app.config.get("MAX_CONTENT_LENGTH"),
                            metadata=metadata)
 
 @bp.route('/gedcom/update_desc/<gedcom>', methods=['POST'])

@@ -138,7 +138,7 @@
 	                </div></td>
 
 	              <td class="ColumnEvent">
-	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='date') %}
+	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='dates') %}
 		              <li><i>{{e.type|transl('evt')}}</i> {{e.description}}
 		              {% if e.dates %}{{e.dates}} {% endif %}
 		              {% if e.place %} | {{e.place}}{% endif %}</li>

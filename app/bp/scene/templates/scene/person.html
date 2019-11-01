@@ -32,8 +32,6 @@ u { color: DarkKhaki; text-decoration: none; }
         </h3>
 
         {% set myid = person.uniq_id %}
-        {# set mybirth = "" %}{% for e in events %}
-            {% if e.type == "Birth" %}{% set mybirth = e.date %}{% endif %}{% endfor #}
         
         <div id="summaryarea">
             <table>
@@ -182,7 +180,7 @@ u { color: DarkKhaki; text-decoration: none; }
 	                {% endif %}{% if fam.mother %}
 	                        <li>{{ _("Wife") }}: {{ macro.person(fam.mother, myid) }}</li>
 	                {% endif %}{% if fam.children %}
-	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
+	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
 	                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>{% endfor %}
 	                        </ul></li>
 	                {% endif %}
@@ -219,7 +217,7 @@ u { color: DarkKhaki; text-decoration: none; }
 		                {% endif %}{% if fam.mother %}
 		                        <li>{{ _("Mother") }}: {{ macro.person(fam.mother, myid) }}</li>
 		                {% endif %}{% if fam.children|count %}
-		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort(attribute='birth_date') %}
+		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
 		                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>
 		                         {% endfor %}</ul></li>
 		                {% endif %}

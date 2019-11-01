@@ -413,7 +413,7 @@ class PersonReader():
 
 
     def read_sources_repositories(self):
-        ''' Read Place hierarchies for all objects in objs.
+        ''' Read Place hierarchies for all objects in self.objs.
         '''
         if len(self.citations) == 0:
             return

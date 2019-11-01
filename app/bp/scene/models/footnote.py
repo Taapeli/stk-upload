@@ -181,7 +181,7 @@ class SourceFootnote():
                     n.repo = objs[rep]
                     r_ids.append(n.repo.uniq_id)
         n.cites[0].ids = [r_ids, s_id, n.cites[0].uniq_id]
-        print("- ind=(r,s,c)={}".format(n.cites[0].ids))
+        #print("- ind=(r,s,c)={}".format(n.cites[0].ids))
         return n
 
 
