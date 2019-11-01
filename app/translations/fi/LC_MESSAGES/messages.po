@@ -3074,7 +3074,7 @@ msgstr "Käyttäjän alkusivu"
 
 #: bp/start/templates/start/index_logged.html:14
 msgid "User's home page for Isotammi Services"
-msgstr "Käyttäjän Isotammi-aloitussivu"
+msgstr "Isotammen aloitussivusi"
 
 #: bp/start/templates/start/index_logged.html:29
 msgid ""
@@ -3116,7 +3116,7 @@ msgstr "Lisää ja muokkaa"
 
 #: bp/start/templates/start/index_logged.html:59
 msgid "Look at the Family Trees"
-msgstr "Tutustu Isotammen sukupuihin"
+msgstr "Selaa sukupuitasi"
 
 #: bp/start/templates/start/index_logged.html:60
 msgid ""
