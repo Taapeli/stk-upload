@@ -18,12 +18,12 @@ u { color: DarkKhaki; text-decoration: none; }
 
         {% if person.media_ref %}<div class="snapshot">
             <div class="thumbnail">
-                <a href="#indivgallery">{% set photo = obj[person.media_ref[0]] %}
+                <div><a href="#indivgallery">{% set photo = obj[person.media_ref[0]] %}
 	                <img alt="({{ _('Photo') }})" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
 	                     title="key = {{photo.uuid_str()}}"/>
-                </a>
-                <div>{{photo.description}}</div>
+                </a></div>
+                <p style="margin:0;">{{photo.description}}</p>
             </div>
         </div>{% endif %}
 
@@ -245,8 +245,7 @@ u { color: DarkKhaki; text-decoration: none; }
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
 	                     title="key = {{photo.uuid_str()}}"/>
                 </a>
-                <div style="word-break: break-all;">
-                    {{photo.description}}</div>
+                <p>{{photo.description}}</p>
             </div>
         {% endfor %}
             <div class="fullclear"></div>

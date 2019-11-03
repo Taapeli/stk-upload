@@ -80,7 +80,7 @@ body > div {
 }
 .content div.snapshot {
     float: right;
-    margin: 2em;
+    margin: 2em 2em 0 2em;
 }
 .fullclear {
     clear: both;
@@ -752,10 +752,16 @@ div#families table.attrlist td.ColumnType {
 #indivgallery .thumbnail {
     float: left;
     max-width: 130px;
-    max-height: 150px;
+    //max-height: 150px;
     font-size: smaller;
     text-align: center;
     margin: 0.8em 0.5em;
+}
+div.thumbnail div a img {
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: .5em;
 }
 #indivgallery > div.thumbnail {
     margin-left: 15px;
@@ -763,16 +769,12 @@ div#families table.attrlist td.ColumnType {
     padding: 5px; 
     text-align: center;
 }
-div.thumbnail > div {
-	word-break: break-all;
+div.thumbnail > p {
 	color: gray;
+	word-wrap: break-word;
 }
 #indivgallery img {
     border: solid 1px #999;
-}
-#indivgallery span {
-/* ## remove this line and the comment markers from the line below to hide description in Indivifual Gallery
-    display: none; */
 }
 
 /* Subsection : Narrative
