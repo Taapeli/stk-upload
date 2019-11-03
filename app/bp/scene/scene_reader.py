@@ -149,7 +149,7 @@ def get_person_full_data(uuid, owner):
 
     # Return Person with included objects, list of note, citation etc. objects
     # and footnotes
-    return (reader.person, reader.objs, fns.getNotes())
+    return (reader.person, reader.objs, fns.getFootnotes())
 
 
 def set_citations(refs, fns, objs):
@@ -160,7 +160,8 @@ def set_citations(refs, fns, objs):
             fn = SourceFootnote.from_citation_objs(cit, objs)
             cit.mark = fn.mark
             sl = fns.merge(fn)
-            print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
+            print("- fnotes {} source {}, cit {}: c= {} {} '{}'".\
+                  format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
         else:
             print("- no source / {}".format(ref))
     pass
@@ -345,7 +346,7 @@ def get_a_person_for_display_apoc(uid, user):
 
     # Return Person with included objects, list of note, citation etc. objects
     # and footnotes
-    return (person, objs, fns.getNotes())
+    return (person, objs, fns.getFootnotes())
 
 
 def connect_object_as_leaf(src, target, rel_type=None):

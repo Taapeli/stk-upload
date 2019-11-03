@@ -263,9 +263,9 @@ u { color: DarkKhaki; text-decoration: none; }
             <h4>{{ _("Source references") }}</h4>
 {#
 		    mark_obj.mark               = '1a'
-		    cita = obj[mark_obj.c_id]   = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
+		    cita = obj[mark_obj.citation_id]   = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
 		    cita.page                   = 'Wiala'
-		    source = obj[mark_obj.s_id] = <models.gen.source.Source object at 0x7f1374e1a978>
+		    source = obj[mark_obj.source_id] = <models.gen.source.Source object at 0x7f1374e1a978>
 		    source.stitle               = 'Akaa rippikirja 1774-1779'
 		    obj[mark_obj.r_ids[0]]      = <models.gen.repository.Repository object at 0x7f1374e1ae48>
 		    obj[mark_obj.r_ids[0]].rname = 'Akaan seurakunnan arkisto'
@@ -273,10 +273,10 @@ u { color: DarkKhaki; text-decoration: none; }
      {{m}}{% endfor %}
  -->
 <ul>
-{% for s_id, mark_list in marks|groupby('s_id') %}
-    <li><!-- Source -->{% if s_id > 0 %}{% set source = obj[s_id] %}
+{% for source_id, mark_list in marks|groupby('source_id') %}
+    <li><!-- Source -->{% if source_id > 0 %}{% set source = obj[source_id] %}
                     <a href="/scene/source={{source.uniq_id}}" class="inlink"
-                     title="[{{s_id}}] {{ _('See source %(name)s details', name=source.id) }}"
+                     title="[{{source_id}}] {{ _('See source %(name)s details', name=source.id) }}"
                      >{{source.stitle}}</a>
             {% else %}<b title="{{mark_list}}">{{ _("No source information!") }}</b>{% endif %}
             <!-- Repository -->
@@ -287,10 +287,10 @@ u { color: DarkKhaki; text-decoration: none; }
         <ul>
     {% for mark_obj in mark_list %}
         <!-- Citation -->
-            {% if mark_obj.c_id > 0 %}
-                {% set cita = obj[mark_obj.c_id] %}{% set conf = cita.confidence | int %}
+            {% if mark_obj.citation_id > 0 %}
+                {% set cita = obj[mark_obj.citation_id] %}{% set conf = cita.confidence | int %}
              <li id="sref{{ mark_obj.mark }}" {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %} >
-                  <span title="[{{mark_obj.c_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
+                  <span title="[{{mark_obj.citation_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
                       {{ mark_obj.mark }} {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
                   </span> {{ cita.noteref }}
                 {% for nref in cita.note_ref %}&nbsp; – <i>{{ _("see:") }}&nbsp;</i> {{ macro.notelink(obj[nref]) }}{% endfor %}

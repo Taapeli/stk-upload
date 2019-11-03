@@ -203,10 +203,10 @@ def show_person_v3(uid=None):
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 #     for m in marks:
-#         print("Citation mark {}".format(m))
+#         print(f"Citation mark {m}")
 #     for e in person.events:
 #         for ni in e.note_ref:
-#             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
+#             print(f"Event {e.uniq_id} Note {ni}: {objs[ni]}")
     #print (f"Current language {current_user.language}")
     #from bp.scene.models.media import get_thumbname
     #for i in person.media_ref:

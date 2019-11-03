@@ -33,7 +33,7 @@ Created on 23.10.2018
 
 @author: jm
 '''
-from models.gen.citation import Citation
+from models.gen.citation import Citation, CitationMark
 
 class Footnotes():
     ''' A structure for organizing footnotes for source citations '''
@@ -79,23 +79,13 @@ class Footnotes():
         return (new.mark, i1, 0)
 
 
-    def getNotes(self):
+    def getFootnotes(self):
         lst = []
         for n in self.fnotes:
             for c in n.cites:
                 lst.append(CitationMark(c.mark, c.ids))
         return lst
 
-
-class CitationMark():
-    def __init__(self, mark=None, ids=[-1, -1, -1]):
-        self.mark = mark
-        self.r_ids = ids[0]
-        self.s_id = ids[1]
-        self.c_id = ids[2]
-
-    def __str__(self):
-        return "{}: r={},s={},c={}".format(self.mark, self.r_ids, self.s_id, self.c_id)
 
 class SourceFootnote():
     '''
@@ -186,13 +176,13 @@ class SourceFootnote():
 
 
     def setmark(self, i, j):
-        ''' Sets mark by indexes i, j as a string "1a 
-            for this SourceFootnote and .cites[-1]"
+        ''' Sets mark by indexes i, j as a string " 1a"
+            for this SourceFootnote and .cites[-1]
         '''
         letters = "abcdefghijklmnopqrstizåäö*"
         #self.cites[-1].mark2 = j
         mark2 = j
         if mark2 >= len(letters):
             mark2 = len(letters) - 1
-        self.mark = "{}{}".format(i + 1, letters[mark2])
+        self.mark = f"{i + 1:2d}{letters[mark2]}"
         self.cites[-1].mark = self.mark

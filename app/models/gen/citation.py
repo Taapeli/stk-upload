@@ -42,13 +42,13 @@ class Citation(NodeObject):
     """
 
     def __init__(self):
-        """ Luo uuden citation-instanssin """
+        """ Creates a Citation instance """
+
         NodeObject.__init__(self)
-    
         self.dates = None
         self.page = ''
         self.confidence = ''
-        self.mark = ''          # citation mark like '1a', if defined
+        self.mark = None        # citation mark object for display references
 
         self.noteref_hlink = [] # Gramps handle
         self.source_handle = ''
@@ -62,7 +62,7 @@ class Citation(NodeObject):
 
 
     def __str__(self):
-        return "{} '{}'".format(self.id, self.page)
+        return f"{self.id} '{self.page}'"
 
 
     @classmethod
@@ -289,8 +289,21 @@ class Citation(NodeObject):
         return
 
 
+class CitationMark():
+    """ Object representing a citation mark '1a', ... """
+    def __init__(self, mark=None, ids=[-1, -1, -1]):
+        self.mark = mark
+        self.repository_ids = ids[0]
+        self.source_id = ids[1]
+        self.citation_id = ids[2]
+
+    def __str__(self):
+        return "{}: r={},s={},c={}".format(self.mark, self.repository_ids, self.source_id, self.citation_id)
+
+
 class NodeRef():
-    ''' Carries data of citating nodes
+    ''' Carries data of citating objects.
+
             label            str (optional) Person or Event
             uniq_id          int Persons uniq_id
             source_id        int The uniq_id of the Source citated
@@ -298,7 +311,10 @@ class NodeRef():
             eventtype        str type for Event
             edates           DateRange date expression for Event
             date             str date for Event
-        
+
+        Used in from models.datareader.get_source_with_events
+        and scene/source_events.html
+
         TODO Plan
             (b:baseObject) --> (a:activeObject) --> (c:Citation)
             b.type=Person|Family     for linking object page
