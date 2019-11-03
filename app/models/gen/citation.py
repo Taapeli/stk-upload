@@ -48,21 +48,23 @@ class Citation(NodeObject):
         self.dates = None
         self.page = ''
         self.confidence = ''
-        self.mark = None        # citation mark object for display references
+        self.mark = None        # citation mark display references
+        self.mark_sorter = 0    # citation grouping by source variable
 
         self.noteref_hlink = [] # Gramps handle
         self.source_handle = ''
 
-        self.source_repo = []   # Tuples (Source id, Repository id, medium)
-                                # - example (397146, 316903, 'Book')
-                                #   (used in person.html v3)
-        self.source_id = None   # uniq_ids of Source objects, for creating display sets
+        # For displaying citations in person.html
+        self.source_id = None
+        self.source_medium = ""
+#         self.repository_id = None
+
         self.citators = []      # Lähde-sivulle
         self.note_ref = []
 
 
     def __str__(self):
-        return f"{self.id} '{self.page}'"
+        return f"{self.mark} {self.id} '{self.page}'"
 
 
     @classmethod
@@ -290,7 +292,7 @@ class Citation(NodeObject):
 
 
 class CitationMark():
-    """ Object representing a citation mark '1a', ... """
+    """ Object representing a citation mark '1a', for Footnote """
     def __init__(self, mark=None, ids=[-1, -1, -1]):
         self.mark = mark
         self.repository_ids = ids[0]

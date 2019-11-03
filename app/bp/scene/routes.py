@@ -199,11 +199,11 @@ def show_person_v3(uid=None):
     logger.info("-> bp.scene.routes.show_person_v3")
     
     # v3 Person page
-    person, objs, marks = get_person_full_data(uid, user)
+    person, objs, citations = get_person_full_data(uid, user)
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
-#     for m in marks:
-#         print(f"Citation mark {m}")
+#     for c in citations:
+#         print(f"##### {c} / {c.source_id}:{objs[c.source_id]} / {objs[c.source_id].repositories}")
 #     for e in person.events:
 #         for ni in e.note_ref:
 #             print(f"Event {e.uniq_id} Note {ni}: {objs[ni]}")
@@ -212,7 +212,7 @@ def show_person_v3(uid=None):
     #for i in person.media_ref:
     #    print(get_thumbname(objs[i].uuid))
     return render_template("/scene/person.html", person=person, obj=objs, 
-                           marks=marks, menuno=12, elapsed=time.time()-t0)
+                           citations=citations, menuno=12, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/uuid=<pid>')

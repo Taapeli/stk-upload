@@ -40,6 +40,8 @@ class PersonReader():
         self.objs = {}
         # Citations found
         self.citations = {}
+        # Counters by Sources and Repositories source_counter[source_id][citation_id]
+        self.source_counter = {}
 
 
     def get_person(self, uuid, owner):
@@ -334,8 +336,7 @@ class PersonReader():
 
                 # The existing object x
                 x_label = record['label']
-                x_uniq_id = record['uniq_id']
-                x = self.objs[x_uniq_id]
+                x = self.objs[record['uniq_id']]
 
                 # Relation r between (x) --> (y)
                 rel = record['r']
@@ -346,12 +347,15 @@ class PersonReader():
                 y_node = record['y']    # 
                 y_label = list(y_node.labels)[0]
                 y_uniq_id = y_node.id
-#                 print(f'# Link ({x_uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
+#                 print(f'# Link ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
                 for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
                 if y_label == "Citation":
                     o = self.objs.get(y_uniq_id, None)
                     if not o:
                         o = Citation.from_node(y_node)
+                        if not x.uniq_id in o.citators:
+                            # This citation is referenced by x
+                            o.citators.append(x.uniq_id)
                         # The list of Citations, for further reference search
                         self.citations[o.uniq_id] = o
                         self.objs[o.uniq_id] = o
@@ -362,7 +366,7 @@ class PersonReader():
                     else:
                         traceback.print_exc()
                         raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    #print(f'# ({x_label}:{x_uniq_id}) --> (Citation:{o.id})')
+                    print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
 
                 elif y_label == "Note":
                     o = self.objs.get(y_uniq_id, None)
@@ -399,7 +403,7 @@ class PersonReader():
                         x.media_ref.append(o.uniq_id)
                     else:
                         print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    print(f'# ({x_label}:{x_uniq_id} {x}) --> ({y_label}:{o.id})')
+                    print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
 
                 else:
                     traceback.print_exc()
@@ -419,8 +423,7 @@ class PersonReader():
             return
 
         uids = list(self.citations.keys())
-        results = self.session.run(Cypher_person.get_sources,
-                               uid_list=uids)
+        results = self.session.run(Cypher_person.get_sources, uid_list=uids)
         for record in results:
             # <Record label='Citation' uniq_id=392761 
             #    s=<Node id=397146 labels={'Source'} 
@@ -462,8 +465,65 @@ class PersonReader():
                 self.objs[repo.uniq_id] = repo
             
             # Referencing a (Source, Repository, medium) tuple
-            cita.source_repo.append((source.uniq_id, repo.uniq_id, medium))
+            cita.source_id = source.uniq_id
+            cita.source_medium = medium
+            if not repo.uniq_id in source.repositories:
+                source.repositories.append(repo.uniq_id)
             print(f"# ({uniq_id}:Citation) --> (:Source '{source}') -[:REPOSITORY {medium}]-> (:Repository '{repo}')")
 
         return
 
+
+    def set_citation_marks(self, refs):    #, citations, objs):
+        ''' Create person citation references for foot notes.
+        
+            For marks creation, different sources and citations 
+            are counted in source_counter[source_id][citation_id]
+
+        '''
+        for referer_id in refs:
+            if referer_id in self.citations.keys():
+                # Current citation object
+                cit = self.citations[referer_id]
+                
+                # Referencing a (Source, Repository, medium) tuple
+                source_id = cit.source_id
+                source = self.objs[source_id]
+                if source_id:
+                    print(f"## ({self.objs[referer_id]}) --> ({cit.uniq_id}:{cit}) --> "
+                            f"(:Source '{self.objs[source_id]}')"
+                            f" -[{{{cit.source_medium}}}]-> "
+                            f"({len(source.repositories)} Repositories '{source.repositories[0]}')")
+    
+                    if not source_id in self.source_counter.keys():
+                        self.source_counter[source_id] = {cit.uniq_id: -1}
+                    cit_counter = self.source_counter[source_id]
+                    if not cit.uniq_id in cit_counter:
+                        cit_counter[cit.uniq_id] = -1
+                    cit_counter[cit.uniq_id] += 1
+
+                    nr_citation = cit_counter[cit.uniq_id]
+                    nr_source = len(self.source_counter) - 1
+
+                    self.citation_mark(cit, nr_source, nr_citation)
+
+                    print(f"- fnotes {cit} source {self.objs[source_id]}")
+                else:
+                    print("- no source / {}".format(referer_id))
+            else:
+                print(f" Referoija ei ole citaatti: {referer_id}")
+        pass
+
+
+    def citation_mark(self, cit, i, j):
+        ''' Creates citation mark by indexes i, j meaning a string " 1a".
+
+        '''
+        letters = "abcdefghijklmnopqrstizåäö*"
+        mark2 = j
+        if mark2 >= len(letters):
+            mark2 = len(letters) - 1
+        cit.mark = f"{i + 1:2d}{letters[mark2]}"
+        cit.mark_sorter = i
+        print (f"# - mark {cit.mark}")
+    

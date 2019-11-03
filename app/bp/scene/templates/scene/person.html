@@ -266,29 +266,38 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
 {#
-		    mark_obj.mark                     = '1a'
-		    cita = obj[mark_obj.citation_id]  = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
+		    cita = citations[0]               = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
+            cita.mark                         = '1a'
 		    cita.page                         = 'Wiala'
-		    source = obj[mark_obj.source_id]  = <models.gen.source.Source object at 0x7f1374e1a978>
-		    source.stitle                     = 'Akaa rippikirja 1774-1779'
-		    obj[mark_obj.r_ids[0]]            = <models.gen.repository.Repository object at 0x7f1374e1ae48>
-		    obj[mark_obj.r_ids[0]].rname      = 'Akaan seurakunnan arkisto'
-#}<!-- {% for m in marks %}
-     {{m}}{% endfor %}
- -->
+		    source = obj[cita.source_id]      = <models.gen.source.Source object at 0x7f1374e1a978>
+            source.stitle                     = 'Akaa rippikirja 1774-1779'
+            cita.medium                       = 'Book'
+		    source.repositories[0]            = <models.gen.repository.Repository object at 0x7f1374e1ae48>
+		    source.repositories[0].rname      = 'Akaan seurakunnan arkisto'
+#}
+
 <ul>
-{% for source_id, mark_list in marks|sort(attribute='mark')|groupby('source_id') %}
-    <li><!-- Source -->{% if source_id > 0 %}{% set source = obj[source_id] %}
+{% for clist in citations | groupby('mark_sorter') %}
+    <li><!-- Source -- {{ clist.grouper }} {{clist.list}}  -->
+        {% set c = clist.list[0] %}
+        {% if c.source_id %}{% set source = obj[c.source_id] %}
                     <a href="/scene/source={{source.uniq_id}}" class="inlink"
                      title="[{{source_id}}] {{ _('See source %(name)s details', name=source.id) }}"
                      >{{source.stitle}}</a>
-            {% else %}<b title="{{mark_list}}">{{ _("No source information!") }}</b>{% endif %}
-            <!-- Repository -->
-            {% if mark_list[0].repository_ids %} – {{obj[mark_list[0].r_ids[0]].rname}}
-            {% else %}<b title="{{mark_list}}">{{ _("No archive information!") }}</b>
-            {% if mark_list[0].r_ids|length > 1 %}<b> JA MUITA ARKISTOJA</b>{% endif %}
-            {% endif %}
-        <ul>
+	            <!-- Repository -->
+	            {% if source.repositories %} – {{obj[source.repositories[0]].rname}}
+                    {% if source.repositories|length > 1 %}<b> JA MUITA ARKISTOJA</b>{% endif %}
+	            {% else %}  <b title="{{source}}">{{ _("No archive information!") }}</b>
+	            {% endif %}
+        {% else %}<b title="{{c}}">{{ _("No source information!") }}</b>
+        {% endif %}
+        {% for cit in clist.list %}
+            <div style="margin-left:1em;">{{cit}}</div>
+        {% endfor %}
+     {% endfor %}
+   </li>
+{#
+    <ul>
     {% for mark_obj in mark_list %}
         <!-- Citation -->
             {% if mark_obj.citation_id > 0 %}
@@ -303,7 +312,9 @@ u { color: DarkKhaki; text-decoration: none; }
         </li>
     {% endfor %}</ul>
     </li>
-{% endfor %}
+
+#}
+
 </ul>
 
         </div>
