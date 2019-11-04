@@ -17,7 +17,6 @@ from .gen.media import Media
 from .gen.citation import Citation
 from .gen.source import Source
 from .gen.repository import Repository
-
 from .gen.cypher import Cypher_person
 
 
@@ -198,10 +197,10 @@ class PersonReader():
                     else:
                         event = None
 
-                    if rel_type == "CHILD":
-                        print(f"#  parent's family ({relation.start}) -[:CHILD {relation._properties}]-> ({relation.end}) {member} {name} {event}")
-                    elif rel_type == "PARENT":
-                        print(f"#  own family ({relation.start}) -[:PARENT {relation._properties}]-> ({relation.end}) {member} {name} {event}")
+#                     if rel_type == "CHILD":
+#                         print(f"#  parent's family ({relation.start}) -[:CHILD {relation._properties}]-> ({relation.end}) {member} {name} {event}")
+#                     elif rel_type == "PARENT":
+#                         print(f"#  own family ({relation.start}) -[:PARENT {relation._properties}]-> ({relation.end}) {member} {name} {event}")
 
                     if role == "father":
                         family.father = member
@@ -348,7 +347,7 @@ class PersonReader():
                 y_label = list(y_node.labels)[0]
                 y_uniq_id = y_node.id
 #                 print(f'# Link ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
-                for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
+#                 for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
                 if y_label == "Citation":
                     o = self.objs.get(y_uniq_id, None)
                     if not o:
@@ -366,7 +365,7 @@ class PersonReader():
                     else:
                         traceback.print_exc()
                         raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
+                    #print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
 
                 elif y_label == "Note":
                     o = self.objs.get(y_uniq_id, None)
@@ -403,7 +402,7 @@ class PersonReader():
                         x.media_ref.append(o.uniq_id)
                     else:
                         print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
+                    #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
 
                 else:
                     traceback.print_exc()
@@ -469,7 +468,7 @@ class PersonReader():
             cita.source_medium = medium
             if not repo.uniq_id in source.repositories:
                 source.repositories.append(repo.uniq_id)
-            print(f"# ({uniq_id}:Citation) --> (:Source '{source}') -[:REPOSITORY {medium}]-> (:Repository '{repo}')")
+            #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') -[:REPOSITORY {medium}]-> (:Repository '{repo}')")
 
         return
 
@@ -490,10 +489,10 @@ class PersonReader():
                 source_id = cit.source_id
                 source = self.objs[source_id]
                 if source_id:
-                    print(f"## ({self.objs[referer_id]}) --> ({cit.uniq_id}:{cit}) --> "
-                            f"(:Source '{self.objs[source_id]}')"
-                            f" -[{{{cit.source_medium}}}]-> "
-                            f"({len(source.repositories)} Repositories '{source.repositories[0]}')")
+#                     print(f"## ({self.objs[referer_id]}) --> ({cit.uniq_id}:{cit}) --> "
+#                             f"(:Source '{self.objs[source_id]}')"
+#                             f" -[{{{cit.source_medium}}}]-> "
+#                             f"({len(source.repositories)} Repositories '{source.repositories[0]}')")
     
                     if not source_id in self.source_counter.keys():
                         self.source_counter[source_id] = {cit.uniq_id: -1}
@@ -525,5 +524,5 @@ class PersonReader():
             mark2 = len(letters) - 1
         cit.mark = f"{i + 1:2d}{letters[mark2]}"
         cit.mark_sorter = i
-        print (f"# - mark {cit.mark}")
+        #print (f"# - mark {cit.mark}")
     

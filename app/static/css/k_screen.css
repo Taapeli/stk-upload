@@ -239,10 +239,10 @@ a.navlink:hover, a.navlink:active {
     background: bisque;
     padding-right: 5px;
     padding-left: 5px;
+    white-space:nowrap;
 }
 .outlink::before {
-    /* font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f360"; */
-    content: "\260D";   /* RIGHTWARDS DOUBLE ARROW / SOUTH EAST ARROW TO CORNER? */
+    content: "🔗 ";  
 }
 
 #lastitem_badge {
@@ -628,21 +628,33 @@ ul.eventnotes {
     text-align: center;
 }
 
-/*    Sources
+/*    Sources and Citations list
 ------------------------------------------------------ */
-div#SourceDetail {
-    margin: 0 auto;
+div.sourceDesc { 
+	margin: .5em 3em; 
+    text-indent: -1.3em;
+	}
+div.sourceDesc::before {
+    content: "▣";
 }
 
-/*    Citations
------------------------------------------------------- */
-td.CitationId { 
-	width: 4em;
-	padding-top: 5pt; 
-    color: gray;
-    font-size: 75%;
+div.sourceDesc div.citaDesc {
+    margin-left: 4em;
+    text-indent: -1.7em;
 }
-td.Citation { padding:4px; }
+
+/*	div#SourceDetail {
+	    margin: 0 auto;
+	}
+	
+	td.CitationId { 
+		width: 4em;
+		padding-top: 5pt; 
+	    color: gray;
+	    font-size: 75%;
+	}
+	td.Citation { padding:4px; }
+*/
 
 /* Contact
 ----------------------------------------------------- */

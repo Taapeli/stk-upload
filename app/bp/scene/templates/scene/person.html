@@ -274,48 +274,40 @@ u { color: DarkKhaki; text-decoration: none; }
             cita.medium                       = 'Book'
 		    source.repositories[0]            = <models.gen.repository.Repository object at 0x7f1374e1ae48>
 		    source.repositories[0].rname      = 'Akaan seurakunnan arkisto'
+<ul>
 #}
 
-<ul>
 {% for clist in citations | groupby('mark_sorter') %}
-    <li><!-- Source -- {{ clist.grouper }} {{clist.list}}  -->
+    <div class="sourceDesc"><!-- Source {{ clist.grouper }} -->
         {% set c = clist.list[0] %}
         {% if c.source_id %}{% set source = obj[c.source_id] %}
-                    <a href="/scene/source={{source.uniq_id}}" class="inlink"
-                     title="[{{source_id}}] {{ _('See source %(name)s details', name=source.id) }}"
-                     >{{source.stitle}}</a>
+                   <a href="/scene/source={{source.uniq_id}}" class="inlink"
+                      title="[{{c.id}}] {{ _('See source %(name)s details', name=source.id) }}">
+                      {{source.stitle}}</a>
 	            <!-- Repository -->
-	            {% if source.repositories %} – {{obj[source.repositories[0]].rname}}
-                    {% if source.repositories|length > 1 %}<b> JA MUITA ARKISTOJA</b>{% endif %}
+	            {% if source.repositories %} –
+	               <span class="typedesc">{{ c.source_medium|transl('medium') }}</span>
+	               <i>{{obj[source.repositories[0]].rname}}</i>
+                   {% if source.repositories|length > 1 %}<b> JA MUITA ARKISTOJA</b>{% endif %}
 	            {% else %}  <b title="{{source}}">{{ _("No archive information!") }}</b>
 	            {% endif %}
         {% else %}<b title="{{c}}">{{ _("No source information!") }}</b>
         {% endif %}
-        {% for cit in clist.list %}
-            <div style="margin-left:1em;">{{cit}}</div>
-        {% endfor %}
-     {% endfor %}
-   </li>
-{#
-    <ul>
-    {% for mark_obj in mark_list %}
         <!-- Citation -->
-            {% if mark_obj.citation_id > 0 %}
-                {% set cita = obj[mark_obj.citation_id] %}{% set conf = cita.confidence | int %}
-             <li id="sref{{ mark_obj.mark }}" {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %} >
-                  <span title="[{{mark_obj.citation_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
-                      {{ mark_obj.mark }} {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
+        {% for cita in clist.list %}
+             {% set conf = cita.confidence | int %}
+             <div class="citaDesc" id="sref{{ cita.mark }}"
+                {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %}>
+                  <span title="[{{cita.id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
+                      <b>{{ cita.mark }}</b> {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
                   </span> {{ cita.noteref }}
-                {% for nref in cita.note_ref %}&nbsp; – <i>{{ _("see:") }}&nbsp;</i> {{ macro.notelink(obj[nref]) }}{% endfor %}
-             </li>
-            {% endif %}
-        </li>
-    {% endfor %}</ul>
-    </li>
-
-#}
-
-</ul>
+                {% for nref in cita.note_ref %}
+                    &nbsp;–&nbsp;<i>{{ _("see:") }}</i>&nbsp;{{ macro.notelink(obj[nref]) }}
+                {% endfor %}
+             </div>
+        {% endfor %}
+   </div>
+{% endfor %}
 
         </div>
     </div>

@@ -85,19 +85,6 @@ def get_person_full_data(uuid, owner):
 
     - The Person is identified by uuid key.
 
-
-    Footnote processing
-    
-    Each Citation reference is stored in in person.citation_ref and other objects. 
-    The citation in Person page shall be expressed as footnote reference, which
-    is created using class bp.scene.models.footnote.Footnotes.
-    
-    For a citation, data must be collected from path
-    (cite:Citation) -[*]-> (source:Source) -[1]-> (repo:Repository)
-    with method bp.scene.models.footnote.SourceFootnote.from_citation_objs .
-
-
-    #TODO: Describe footnote processing in "/scene/person_pg.html" template
     """
 
     try:
@@ -321,8 +308,8 @@ def get_a_person_for_display_apoc(uid, user):
                 # Create new object
                 try:
                     src_obj = get_object_from_node(src_node)
-                    print(" new objs[{}] <- {} {}".\
-                          format(src_obj.uniq_id, src_label, src_obj))
+                    #print(" new objs[{}] <- {} {}".\
+                    #      format(src_obj.uniq_id, src_label, src_obj))
                     objs[src_obj.uniq_id] = src_obj
                 except Exception as e:
                     print("{}: Could not set {}".format(e, src_obj))

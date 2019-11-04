@@ -203,7 +203,8 @@ def show_person_v3(uid=None):
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 #     for c in citations:
-#         print(f"##### {c} / {c.source_id}:{objs[c.source_id]} / {objs[c.source_id].repositories}")
+#         print(f"##### {c} / {c.source_id}:{objs[c.source_id]} -[{c.source_medium}]->"
+#               f" {objs[c.source_id].repositories}")
 #     for e in person.events:
 #         for ni in e.note_ref:
 #             print(f"Event {e.uniq_id} Note {ni}: {objs[ni]}")
