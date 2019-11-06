@@ -1,3 +1,5 @@
+''' Utilities for processing gedcom data
+'''
 import importlib
 import logging
 import os
@@ -19,7 +21,7 @@ DOC_SERVER = 'http://mwikitammi.paas.datacenter.fi/index.php'
 # --------------------- GEDCOM functions ------------------------
 
 def init_log(logfile): 
-    ''' Define log file and save one previous log '''
+    ''' Define log file and save one previous log. '''
     try:
         if os.open(logfile, os.O_RDONLY):
             os.rename(logfile, logfile + '~')
@@ -28,14 +30,17 @@ def init_log(logfile):
     logging.basicConfig(filename=logfile, level=logging.INFO, format='%(levelname)s:%(message)s')
 
 def history_init(gedcom_fname):
+    ''' Initialize history file. '''
     history_file_name = gedcom_fname + "-history"
     open(history_file_name,"w").write("{}: Uploaded {}\n".format(util.format_timestamp(),gedcom_fname))
     
 def history_append(gedcom_fname,line):
+    ''' Add a line to history file. '''
     history_file_name = gedcom_fname + "-history"
     open(history_file_name,"a").write("{}\n".format(line))
 
 def history_append_args(args):
+    ''' Add given arguments to history file. '''
     history_file_name = args.input_gedcom + "-history"
     with open(history_file_name,"a") as f:
         for name,value in sorted(vars(args).items()):
@@ -67,6 +72,7 @@ def get_info(input_gedcom, enc):
         return Nullinfo()
     
 def analyze(input_gedcom, enc):
+    ''' Get statistics of given gedcom file. '''
     class Options:
         display_changes = False
         encoding = enc
@@ -86,28 +92,34 @@ def analyze(input_gedcom, enc):
         return "error"
 
 def read_gedcom(filename):
+    ''' Return all gedcom file rows using default or ISO8859-1 encoding. '''
     try:
         return open(filename).readlines()
     except UnicodeDecodeError:
         return open(filename,encoding="ISO8859-1").readlines()
 
 def get_gedcom_user():
+    ''' Return current user name. '''
     return session.get("gedcom_user",current_user.username)
 
 def get_gedcom_folder(username=None):
+    ''' Return user's gedcom data directory. '''
     if username is None:
         username = get_gedcom_user()
     return os.path.join(GEDCOM_DATA, username)
 
 def gedcom_fullname(gedcom):
+    ''' Return gedcom filename. '''
     return os.path.join(get_gedcom_folder(),secure_filename(gedcom))
 
 def get_metadata(gedcom):
+    ''' Return given gedcom metadata from *-meta file. '''
     gedcom_folder = get_gedcom_folder()
     gedcom_fullname = os.path.join(gedcom_folder, secure_filename(gedcom))
     return get_metadata2(gedcom_fullname)
 
 def get_metadata2(gedcom_fullname):
+    ''' Return given gedcom file metadata from corresponding meta file. '''
     try:
         metaname = gedcom_fullname + "-meta"
         return eval(open(metaname).read())
@@ -115,12 +127,15 @@ def get_metadata2(gedcom_fullname):
         return {}
 
 def save_metadata(gedcom,metadata):
+    ''' Save updated or new gedcom metadata. '''
     gedcom_folder = get_gedcom_folder()
     metaname = os.path.join(gedcom_folder, secure_filename(gedcom) + "-meta")
     open(metaname,"w").write(repr(metadata))
     
 def get_transforms():
+    ''' Search available transformations and return list of their properties. '''
     class Transform: pass
+
     trans_dir = os.path.join(GEDCOM_APP, "transforms")
     names = sorted([name for name in os.listdir(trans_dir) \
                     if name.endswith(".py") and not name.startswith("_")])
@@ -161,6 +176,7 @@ def get_transforms():
 
 
 def list_gedcoms(username):
+    ''' Search transformations and return list of their names and metadata. '''
     gedcom_folder = get_gedcom_folder(username)
     try:
         names = sorted([name for name in os.listdir(gedcom_folder) 
@@ -181,12 +197,15 @@ def list_gedcoms(username):
     return files
 
 def removefile(fname): 
+    ''' Remove file. '''
     try:
         os.remove(fname)
     except FileNotFoundError:
         pass
 
 def display_changed_lines(old_lines, new_lines, linenum=None):
+    ''' Print diff list of two line sets as html in user language strating from linenum.
+    '''
     if old_lines is None: 
         print("<div><b>"+_("Added:")+"</b></div><gedcom-text>", end="")
         for line in new_lines:
@@ -217,7 +236,9 @@ def display_changed_lines(old_lines, new_lines, linenum=None):
     print()
     print("<hr>")  
 
-def display_changes(lines,item,linenum=None):
+def display_changes(lines, item, linenum=None):
+    ''' Print diff list of two line sets as html in user language? 
+    '''
     class Out:
         def __init__(self):
             self.lines = []
@@ -235,6 +256,6 @@ def display_changes(lines,item,linenum=None):
         else:
             item.print_items(out)
     
-        display_changed_lines(lines,out.lines, linenum)
+        display_changed_lines(lines, out.lines, linenum)
     
         
