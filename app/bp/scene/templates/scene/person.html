@@ -27,8 +27,8 @@ u { color: DarkKhaki; text-decoration: none; }
             </div>
         </div>{% endif %}
 
-        <h3 style="position:sticky; top:0;">{{person.names[0].firstname}} 
-            <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b>
+        <h3 style="position:sticky; top:0;" title="{{ _('Top') }}"><a href="#">{{person.names[0].firstname}} 
+            <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b></a>
             {% if person.citation_ref %}<sup>
                 {% for cr in person.citation_ref %}
                     <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
@@ -88,7 +88,7 @@ u { color: DarkKhaki; text-decoration: none; }
 -->
 {% if person.note_ref %}
                 <tr><td></td>
-                    <td>▸ <a href="#notes" class="inlink">{{ _('See') }}
+                    <td>► <a href="#notes" class="inlink">{{ _('See') }}
                     {{ _('Person Notes') }}</a></td>
                 </tr>
 {% endif %}
@@ -254,12 +254,11 @@ u { color: DarkKhaki; text-decoration: none; }
 {% if person.note_ref %}
         <div class="subsection" id="notes">
             <h4>{{ _("Person Notes") }}</h4>
-            <ul>
             {% for ref in person.note_ref %}
             <div class="grampsstylednote">
-                 <p><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
-                    {{ macro.notelink(obj[ref]) }}{#obj[ref].text#}</p>
-            </div>{% endfor %}</ul>
+                 <p>► <span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+                    {{ macro.notelink(obj[ref]) }}</p>
+            </div>{% endfor %}
         </div>
 {% endif %}
 
@@ -301,8 +300,7 @@ u { color: DarkKhaki; text-decoration: none; }
                   <span title="[{{cita.id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
                       <b>{{ cita.mark }}</b> {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
                   </span> {{ cita.noteref }}
-                {% for nref in cita.note_ref %}
-                    &nbsp;–&nbsp;<i>{{ _("see:") }}</i>&nbsp;{{ macro.notelink(obj[nref]) }}
+                {% for nref in cita.note_ref %} &nbsp;►&nbsp;{{ macro.notelink(obj[nref]) }}
                 {% endfor %}
              </div>
         {% endfor %}

@@ -635,7 +635,7 @@ div.sourceDesc {
     text-indent: -1.3em;
 	}
 div.sourceDesc::before {
-    content: "▣";
+    content: "►";   /* BLACK RIGHT-POINTING POINTER */
 }
 
 div.sourceDesc div.citaDesc {
@@ -789,18 +789,20 @@ div.thumbnail > p {
     border: solid 1px #999;
 }
 
-/* Subsection : Narrative
+/* Subsection : Notes (Narrative)
 ----------------------------------------------------- */
-h4 + div.grampsstylednote, a.familymap {
-    margin: 1em 15px;
-}
-i + div.grampsstylednote p {
-    margin: 0 0 0.3em 0;
-}
 div.grampsstylednote p {
-    margin: 4px;
-    text-indent: -2em;
+    margin: 1em 4em;
+    text-indent: -3em;
+    text-align: justify;
 }
+/*  h4 + div.grampsstylednote, a.familymap {
+	    margin: 1em 15px 1em ;
+	}
+	i + div.grampsstylednote p {
+	    margin: 0 0 0.3em 0;
+	}
+*/
 
 /* Subsection : Family Map
 ----------------------------------------------------- */

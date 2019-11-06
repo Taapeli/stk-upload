@@ -134,8 +134,8 @@
            target="_blank">{{note.url|transl('urldomain')}}</a> –
     {% endif %}
     {% if note.text %}
-	    {% set list1 = note.text.split('\n') %}
-	    {% for l in list1 %}
+	    {% set lines = note.text.split('\n') %}
+	    {% for l in lines %}
 	       {% if loop.index > 1 %}<br>{% endif %}
 	       <i>{{ l }}</i>
 	    {% endfor %}
