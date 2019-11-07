@@ -12,7 +12,8 @@
 {{ macro.menu(4) }}
 	<div class="content" id="Individuals">
 		<p id="description">
-		{{ _('This page contains a directory of all the places and the closest lower-level locations beneath them.') }}
+		{{ _('This page contains a directory of all %(n)s places and the closest lower-level locations beneath them.',
+		  n=locations|count) }}
 		</p>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
