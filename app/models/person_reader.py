@@ -39,8 +39,8 @@ class PersonReader():
         self.objs = {}
         # Citations found
         self.citations = {}
-        # Counters by Sources and Repositories source_counter[source_id][citation_id]
-        self.source_counter = {}
+        # Counters by Sources and Repositories source_citations[source_id][citation_id]
+        self.source_citations = {}
 
 
     def get_person(self, uuid, owner):
@@ -310,7 +310,7 @@ class PersonReader():
                 # Search next level destinations x) -[r:CITATION|NOTE|MEDIA]-> (y)
                 uids = active_objs
             else:
-                # Search (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+                # Search all (x) -[r:CITATION|NOTE|MEDIA]-> (y)
                 uids = list(self.objs.keys())
             print(f'# --- Search Citations, Notes, Medias for {uids}')
 
@@ -346,8 +346,8 @@ class PersonReader():
                 y_node = record['y']    # 
                 y_label = list(y_node.labels)[0]
                 y_uniq_id = y_node.id
-#                 print(f'# Link ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
-#                 for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
+                #print(f'# Linking ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
+                #for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
                 if y_label == "Citation":
                     o = self.objs.get(y_uniq_id, None)
                     if not o:
@@ -407,7 +407,7 @@ class PersonReader():
                 else:
                     traceback.print_exc()
                     raise NotImplementedError(f'No rule for ({x_label}) --> ({y_label})')            
-                print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
+                #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
                 pass
 
         except Exception as e:
@@ -477,40 +477,45 @@ class PersonReader():
         ''' Create person citation references for foot notes.
         
             For marks creation, different sources and citations 
-            are counted in source_counter[source_id][citation_id]
+            are counted in source_citations[source_id][citation_id]
 
         '''
-        for referer_id in refs:
-            if referer_id in self.citations.keys():
-                # Current citation object
-                cit = self.citations[referer_id]
-                
+        for cit_id in refs:
+            # Current citation object
+            cit = self.citations[cit_id]
+            if cit.mark == "":
+                # Create new citation mark
+
                 # Referencing a (Source, Repository, medium) tuple
                 source_id = cit.source_id
-                source = self.objs[source_id]
                 if source_id:
-#                     print(f"## ({self.objs[referer_id]}) --> ({cit.uniq_id}:{cit}) --> "
-#                             f"(:Source '{self.objs[source_id]}')"
-#                             f" -[{{{cit.source_medium}}}]-> "
-#                             f"({len(source.repositories)} Repositories '{source.repositories[0]}')")
+                    #source = self.objs[source_id]
+                    #print(f"## ({cit.uniq_id}:{cit}) --> "
+                    #        f"(:Source '{self.objs[source_id]}')"
+                    #        f" -[{{{cit.source_medium}}}]-> "
+                    #        f"({len(source.repositories)} Repositories '{source.repositories[0]}')")
     
-                    if not source_id in self.source_counter.keys():
-                        self.source_counter[source_id] = {cit.uniq_id: -1}
-                    cit_counter = self.source_counter[source_id]
-                    if not cit.uniq_id in cit_counter:
-                        cit_counter[cit.uniq_id] = -1
-                    cit_counter[cit.uniq_id] += 1
+                    if not source_id in self.source_citations.keys():
+                        # Create new mark number
+                        self.source_citations[source_id] = {cit.uniq_id: 0}
+                        cit_counter = self.source_citations[source_id]
+                        if not cit.uniq_id in cit_counter.keys():
+                            cit_counter[cit.uniq_id] = len(cit_counter) - 1
+                    else:
+                        # Create new mark letter in a used number
+                        cit_counter = self.source_citations[source_id]
+                        if not cit.uniq_id in cit_counter.keys():
+                            cit_counter[cit.uniq_id] = len(cit_counter)
 
-                    nr_citation = cit_counter[cit.uniq_id]
-                    nr_source = len(self.source_counter) - 1
+                    nr1 = len(self.source_citations) - 1
+                    nr2 = cit_counter[cit.uniq_id]
+                    self.citation_mark(cit, nr1, nr2)
 
-                    self.citation_mark(cit, nr_source, nr_citation)
-
-                    print(f"- fnotes {cit} source {self.objs[source_id]}")
+                    #print(f"- fnotes{cit} --> source {self.objs[source_id]}")
                 else:
-                    print("- no source / {}".format(referer_id))
-            else:
-                print(f" Referoija ei ole citaatti: {referer_id}")
+                    print("- no source / {}".format(cit_id))
+#             else:
+#                 print(f"# - ok: {cit}")
         pass
 
 

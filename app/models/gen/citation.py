@@ -48,7 +48,7 @@ class Citation(NodeObject):
         self.dates = None
         self.page = ''
         self.confidence = ''
-        self.mark = None        # citation mark display references
+        self.mark = ""          # citation mark display references
         self.mark_sorter = 0    # citation grouping by source variable
 
         self.noteref_hlink = [] # Gramps handle

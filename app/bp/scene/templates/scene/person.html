@@ -30,8 +30,8 @@ u { color: DarkKhaki; text-decoration: none; }
         <h3 style="position:sticky; top:0;" title="{{ _('Top') }}"><a href="#">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b></a>
             {% if person.citation_ref %}<sup>
-                {% for cr in person.citation_ref %}
-                    <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+                {% for cr in person.citation_ref %}{% set mark = obj[cr].mark %}
+                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
                 {% endfor %}</sup>
             {% endif %}
         </h3>
@@ -62,8 +62,8 @@ u { color: DarkKhaki; text-decoration: none; }
                         <b title="{{ _('surname') }}">{{pname.surname}}</b>
 
 	                    {% if pname.citation_ref %}<sup>
-	                        {% for cr in pname.citation_ref %}
-	                            <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+	                        {% for cr in pname.citation_ref %}{% set mark = obj[cr].mark %}
+                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
 	                        {% endfor %}</sup>
 	                    {% endif %}
                     </td>
@@ -125,8 +125,8 @@ u { color: DarkKhaki; text-decoration: none; }
     {% endif %}
 
     {% if e.citation_ref %}<sup>
-        {% for cr in e.citation_ref %}
-	                           <a href="#sref{{obj[cr].mark}}">{{obj[cr].mark}}</a>
+        {% for cr in e.citation_ref %}{% set mark = obj[cr].mark %}
+                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
 	   {% endfor %}</sup>
     {% endif %}
                             </div>
@@ -150,16 +150,24 @@ u { color: DarkKhaki; text-decoration: none; }
                                         {{person.cause_of_death.description}}
                                         {{macro.place_names_lang(person.cause_of_death)}}<br>
                             	{% endif %}
-                            	{% if e.note_ref %}<ul class="eventnotes">{% for ref in e.note_ref %}
-	                            	<li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
-	                            	  {{ macro.notelink(obj[ref]) }}</li>
-	                            	{% endfor %}</ul>{% endif %}
-                                {% if e.place_ref %}<ul class="eventnotes">
-                                    {% for pref in e.place_ref %}
-                                        {% for ref in obj[pref].note_ref %}
-                                   <li><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
-                                        {{ macro.notelink(obj[ref]) }}</li>{% endfor %}
-                                    {% endfor %}</ul>{% endif %}
+                            {% if e.note_ref %}
+                            	{% for ref in e.note_ref %}{% set note = obj[ref] %}
+	                            	<div><span class="typedesc">{{ note.type|transl('notet') }}</span>
+				            {% if note.citation_ref %}<sup>
+				                {% for cr in note.citation_ref %}{% set mark = obj[cr].mark %}
+				                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
+				                {% endfor %}</sup>
+				            {% endif %}
+	                            	  {{ macro.notelink(note) }}</div>
+	                            {% endfor %}
+                           	{% endif %}
+                            {% if e.place_ref %}
+                                {% for pref in e.place_ref %}
+                                    {% for ref in obj[pref].note_ref %}
+                               <div><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
+                                    {{ macro.notelink(obj[ref]) }}</div>{% endfor %}
+                                {% endfor %}
+                            {% endif %}
                             </div>
                         </td>
 {#                  {% endif %}
@@ -236,6 +244,7 @@ u { color: DarkKhaki; text-decoration: none; }
 {% endif %}
         </div>
 
+{% if person.media_ref %}
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media files") }}</h4>
         {% for ref in person.media_ref %}
@@ -250,15 +259,22 @@ u { color: DarkKhaki; text-decoration: none; }
         {% endfor %}
             <div class="fullclear"></div>
         </div>
+{% endif %}
 
 {% if person.note_ref %}
         <div class="subsection" id="notes">
             <h4>{{ _("Person Notes") }}</h4>
-            {% for ref in person.note_ref %}
+    {% for ref in person.note_ref %}{% set note = obj[ref] %}
             <div class="grampsstylednote">
-                 <p>► <span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
-                    {{ macro.notelink(obj[ref]) }}</p>
-            </div>{% endfor %}
+                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
+            {% if note.citation_ref %}<sup>
+                {% for cr in note.citation_ref %}{% set mark = obj[cr].mark %}
+                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
+                {% endfor %}</sup>
+            {% endif %}
+                    {{ macro.notelink(note) }}</p>
+            </div>
+    {% endfor %}
         </div>
 {% endif %}
 

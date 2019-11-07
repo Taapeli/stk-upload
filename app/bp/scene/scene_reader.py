@@ -104,10 +104,12 @@ def get_person_full_data(uuid, owner):
 
     # 3. (p:Person) <-- (f:Family)
     #    for f
-    #      (f) --> (fp:Person) -[*1]-> (fpn:Name)
+    #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
+    #      (fp)--> (me:Event{type:Birth})
     #      (f) --> (fe:Event)
     reader.read_person_families()
-    #    Sort Events by date
+
+    #    Sort all Person and family Events by date
     reader.person.events.sort()
 
     # 4. for pl in z:Place, ph
