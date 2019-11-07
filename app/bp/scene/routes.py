@@ -297,6 +297,25 @@ def show_family_page(fid):
     logger.info("-> bp.scene.routes.show_family_page")
     return render_template("/scene/family.html", family=family, menuno=3)
 
+
+@bp.route('/scene/family', methods=['GET'])
+def show_family(uid=None):
+    """ One Family.
+    
+    """
+    
+    uid = request.args.get('uuid', uid)
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
+    
+    try:
+        family = Family_combo.get_family_data(uid)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    logger.info("-> bp.scene.routes.show_family")
+    return render_template("/scene/family.html", family=family, menuno=3)
+
 @bp.route('/pop/family=<int:fid>')
 def show_family_popup(fid):
     """ Small Family pop-up.

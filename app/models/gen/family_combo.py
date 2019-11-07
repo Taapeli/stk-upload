@@ -162,7 +162,7 @@ RETURN family"""
     
     
     @staticmethod
-    def get_family_data(uniq_id):
+    def get_family_data(uuid):
         """ Read Family information including Events, Children, Notes and Sources.
         
             1) read 
@@ -211,7 +211,7 @@ RETURN family"""
         with shareds.driver.session() as session:
             try:
                 result = session.run(Cypher_family.get_family_data, 
-                                     pid=uniq_id)
+                                     pid=uuid)
                 for record in result:
                     if record['f']:
                         # <Node id=272710 labels={'Family'} 
@@ -438,6 +438,7 @@ RETURN family"""
                 f_node = record['f']
                 family = Family_combo(f_node.id)
                 family.id = f_node['id']
+                family.uuid = f_node['uuid']
                 family.type = f_node['rel_type']
                 family.father_sortname = f_node['father_sortname']
                 family.mother_sortname = f_node['mother_sortname']
@@ -461,6 +462,7 @@ RETURN family"""
                             pp = Person_as_member()
                             uniq_id = parent_node.id
                             pp.uniq_id = uniq_id
+                            pp.uuid = parent_node['uuid']
                             pp.sortname = parent_node['sortname']
                             pp.sex = parent_node['sex']
                             if role == 'father':
@@ -480,6 +482,7 @@ RETURN family"""
                     #    'date2': 1609920, 'date1': 1609920}>
                     child = Person_as_member()
                     child.uniq_id = ch.id
+                    child.uuid = ch['uuid']
                     child.sortname = ch['sortname']
                     family.children.append(child)
                 
