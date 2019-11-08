@@ -175,7 +175,7 @@ def show_person_v2(uid=None):
     from bp.scene.models.media import get_thumbname
     for i in person.media_ref:
         print(get_thumbname(objs[i].uuid))
-    return render_template("/scene/person_pg.html", person=person, obj=objs, 
+    return render_template("/scene/person_v2.html", person=person, obj=objs, 
                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
 
@@ -199,20 +199,21 @@ def show_person_v3(uid=None):
     logger.info("-> bp.scene.routes.show_person_v3")
     
     # v3 Person page
-    person, objs, marks = get_person_full_data(uid, user)
+    person, objs, citations = get_person_full_data(uid, user)
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
-#     for m in marks:
-#         print("Citation mark {}".format(m))
+#     for c in citations:
+#         print(f"##### {c} / {c.source_id}:{objs[c.source_id]} -[{c.source_medium}]->"
+#               f" {objs[c.source_id].repositories}")
 #     for e in person.events:
 #         for ni in e.note_ref:
-#             print("Event {} Note {}: {}".format(e.uniq_id, ni, objs[ni]))
+#             print(f"Event {e.uniq_id} Note {ni}: {objs[ni]}")
     #print (f"Current language {current_user.language}")
     #from bp.scene.models.media import get_thumbname
     #for i in person.media_ref:
     #    print(get_thumbname(objs[i].uuid))
     return render_template("/scene/person.html", person=person, obj=objs, 
-                           marks=marks, menuno=12, elapsed=time.time()-t0)
+                           citations=citations, menuno=12, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/uuid=<pid>')
@@ -294,6 +295,25 @@ def show_family_page(fid):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     logger.info("-> bp.scene.routes.show_family_page")
+    return render_template("/scene/family.html", family=family, menuno=3)
+
+
+@bp.route('/scene/family', methods=['GET'])
+def show_family(uid=None):
+    """ One Family.
+    
+    """
+    
+    uid = request.args.get('uuid', uid)
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
+    
+    try:
+        family = Family_combo.get_family_data(uid)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    logger.info("-> bp.scene.routes.show_family")
     return render_template("/scene/family.html", family=family, menuno=3)
 
 @bp.route('/pop/family=<int:fid>')

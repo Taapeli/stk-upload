@@ -17,7 +17,6 @@ from .gen.media import Media
 from .gen.citation import Citation
 from .gen.source import Source
 from .gen.repository import Repository
-
 from .gen.cypher import Cypher_person
 
 
@@ -40,6 +39,8 @@ class PersonReader():
         self.objs = {}
         # Citations found
         self.citations = {}
+        # Counters by Sources and Repositories source_citations[source_id][citation_id]
+        self.source_citations = {}
 
 
     def get_person(self, uuid, owner):
@@ -196,10 +197,10 @@ class PersonReader():
                     else:
                         event = None
 
-                    if rel_type == "CHILD":
-                        print(f"#  parent's family ({relation.start}) -[:CHILD {relation._properties}]-> ({relation.end}) {member} {name} {event}")
-                    elif rel_type == "PARENT":
-                        print(f"#  own family ({relation.start}) -[:PARENT {relation._properties}]-> ({relation.end}) {member} {name} {event}")
+#                     if rel_type == "CHILD":
+#                         print(f"#  parent's family ({relation.start}) -[:CHILD {relation._properties}]-> ({relation.end}) {member} {name} {event}")
+#                     elif rel_type == "PARENT":
+#                         print(f"#  own family ({relation.start}) -[:PARENT {relation._properties}]-> ({relation.end}) {member} {name} {event}")
 
                     if role == "father":
                         family.father = member
@@ -309,7 +310,7 @@ class PersonReader():
                 # Search next level destinations x) -[r:CITATION|NOTE|MEDIA]-> (y)
                 uids = active_objs
             else:
-                # Search (x) -[r:CITATION|NOTE|MEDIA]-> (y)
+                # Search all (x) -[r:CITATION|NOTE|MEDIA]-> (y)
                 uids = list(self.objs.keys())
             print(f'# --- Search Citations, Notes, Medias for {uids}')
 
@@ -334,8 +335,7 @@ class PersonReader():
 
                 # The existing object x
                 x_label = record['label']
-                x_uniq_id = record['uniq_id']
-                x = self.objs[x_uniq_id]
+                x = self.objs[record['uniq_id']]
 
                 # Relation r between (x) --> (y)
                 rel = record['r']
@@ -346,12 +346,15 @@ class PersonReader():
                 y_node = record['y']    # 
                 y_label = list(y_node.labels)[0]
                 y_uniq_id = y_node.id
-#                 print(f'# Link ({x_uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
-                for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
+                #print(f'# Linking ({x.uniq_id}:{x_label} {x}) --> ({y_uniq_id}:{y_label})')
+                #for k, v in rel._properties.items(): print(f"#\trel.{k}: {v}")
                 if y_label == "Citation":
                     o = self.objs.get(y_uniq_id, None)
                     if not o:
                         o = Citation.from_node(y_node)
+                        if not x.uniq_id in o.citators:
+                            # This citation is referenced by x
+                            o.citators.append(x.uniq_id)
                         # The list of Citations, for further reference search
                         self.citations[o.uniq_id] = o
                         self.objs[o.uniq_id] = o
@@ -362,7 +365,7 @@ class PersonReader():
                     else:
                         traceback.print_exc()
                         raise LookupError(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    #print(f'# ({x_label}:{x_uniq_id}) --> (Citation:{o.id})')
+                    #print(f'# ({x_label}:{x.uniq_id}) --> (Citation:{o.id})')
 
                 elif y_label == "Note":
                     o = self.objs.get(y_uniq_id, None)
@@ -399,12 +402,12 @@ class PersonReader():
                         x.media_ref.append(o.uniq_id)
                     else:
                         print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
-                    print(f'# ({x_label}:{x_uniq_id} {x}) --> ({y_label}:{o.id})')
+                    #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
 
                 else:
                     traceback.print_exc()
                     raise NotImplementedError(f'No rule for ({x_label}) --> ({y_label})')            
-                print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
+                #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
                 pass
 
         except Exception as e:
@@ -419,8 +422,7 @@ class PersonReader():
             return
 
         uids = list(self.citations.keys())
-        results = self.session.run(Cypher_person.get_sources,
-                               uid_list=uids)
+        results = self.session.run(Cypher_person.get_sources, uid_list=uids)
         for record in results:
             # <Record label='Citation' uniq_id=392761 
             #    s=<Node id=397146 labels={'Source'} 
@@ -462,8 +464,70 @@ class PersonReader():
                 self.objs[repo.uniq_id] = repo
             
             # Referencing a (Source, Repository, medium) tuple
-            cita.source_repo.append((source.uniq_id, repo.uniq_id, medium))
-            print(f"# ({uniq_id}:Citation) --> (:Source '{source}') -[:REPOSITORY {medium}]-> (:Repository '{repo}')")
+            cita.source_id = source.uniq_id
+            cita.source_medium = medium
+            if not repo.uniq_id in source.repositories:
+                source.repositories.append(repo.uniq_id)
+            #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') -[:REPOSITORY {medium}]-> (:Repository '{repo}')")
 
         return
 
+
+    def set_citation_marks(self, refs):    #, citations, objs):
+        ''' Create person citation references for foot notes.
+        
+            For marks creation, different sources and citations 
+            are counted in source_citations[source_id][citation_id]
+
+        '''
+        for cit_id in refs:
+            # Current citation object
+            cit = self.citations[cit_id]
+            if cit.mark == "":
+                # Create new citation mark
+
+                # Referencing a (Source, Repository, medium) tuple
+                source_id = cit.source_id
+                if source_id:
+                    #source = self.objs[source_id]
+                    #print(f"## ({cit.uniq_id}:{cit}) --> "
+                    #        f"(:Source '{self.objs[source_id]}')"
+                    #        f" -[{{{cit.source_medium}}}]-> "
+                    #        f"({len(source.repositories)} Repositories '{source.repositories[0]}')")
+    
+                    if not source_id in self.source_citations.keys():
+                        # Create new mark number
+                        self.source_citations[source_id] = {cit.uniq_id: 0}
+                        cit_counter = self.source_citations[source_id]
+                        if not cit.uniq_id in cit_counter.keys():
+                            cit_counter[cit.uniq_id] = len(cit_counter) - 1
+                    else:
+                        # Create new mark letter in a used number
+                        cit_counter = self.source_citations[source_id]
+                        if not cit.uniq_id in cit_counter.keys():
+                            cit_counter[cit.uniq_id] = len(cit_counter)
+
+                    nr1 = len(self.source_citations) - 1
+                    nr2 = cit_counter[cit.uniq_id]
+                    self.citation_mark(cit, nr1, nr2)
+
+                    #print(f"- fnotes{cit} --> source {self.objs[source_id]}")
+                else:
+                    print("- no source / {}".format(cit_id))
+#             else:
+#                 print(f"# - ok: {cit}")
+        pass
+
+
+    def citation_mark(self, cit, i, j):
+        ''' Creates citation mark by indexes i, j meaning a string " 1a".
+
+        '''
+        letters = "abcdefghijklmnopqrstizåäö*"
+        mark2 = j
+        if mark2 >= len(letters):
+            mark2 = len(letters) - 1
+        cit.mark = f"{i + 1:2d}{letters[mark2]}"
+        cit.mark_sorter = i
+        #print (f"# - mark {cit.mark}")
+    

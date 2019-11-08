@@ -368,7 +368,7 @@ RETURN f, p.pname AS marriage_place,
     ORDER BY f.mother_sortname LIMIT $limit"""
     
     get_family_data = """
-MATCH (f:Family) WHERE ID(f)=$pid
+MATCH (f:Family) WHERE f.uuid=$pid
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
     OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
     OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})

@@ -41,8 +41,7 @@ def process_gedcom(arglist, transform_module):
     See sukujutut.py as an example
     """
 
-    msg = _("Transform '{}' started at {}").format(transform_module.name, 
-                                                   util.format_timestamp())
+    msg = _(f"Transform '{transform_module.name}' started at {util.format_timestamp()}")
     LOG.info(f"------ {msg} ------")
 
     parser = ArgumentParser()
@@ -139,8 +138,11 @@ def process_gedcom(arglist, transform_module):
 
 
 def build_parser(filename, _gedcom, _gedcom_filename):
+    ''' Returns transformation module and parser options list.
+    '''
     modname = filename[:-3]
     transform_module = importlib.import_module("bp.gedcom.transforms."+modname)
+    logging.info(f'Transformer {modname} {transform_module.version} for {_gedcom}')
 
     class Arg:
         def __init__(self, name, name2, action, atype, choices, default, ahelp):
@@ -151,8 +153,12 @@ def build_parser(filename, _gedcom, _gedcom_filename):
             self.choices = choices
             self.default = default
             self.help = ahelp
+        def __str__(self):
+            return f'{self.name} {self.help}'
 
     class Parser:
+        ''' Defines Gedcom parser command with options.
+        '''
         def __init__(self):
             self.args = []
         def add_argument(self, name, name2=None, action='store', 

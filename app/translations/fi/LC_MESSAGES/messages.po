@@ -2849,10 +2849,10 @@ msgstr "Paikat"
 
 #: bp/scene/templates/scene/places.html:15
 msgid ""
-"This page contains a directory of all the places and the closest lower-"
+"This page contains a directory of all %(n)s places and the closest lower-"
 "level locations beneath them."
 msgstr ""
-"Tällä sivulla on hakemisto kaikista paikoista ja niihin välittömästi "
+"Tällä sivulla on hakemisto kaikista %(n)a paikasta ja niihin välittömästi "
 "sisältyvistä paikoista."
 
 #: bp/scene/templates/scene/places.html:40

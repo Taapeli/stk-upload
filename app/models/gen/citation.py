@@ -42,27 +42,29 @@ class Citation(NodeObject):
     """
 
     def __init__(self):
-        """ Luo uuden citation-instanssin """
+        """ Creates a Citation instance """
+
         NodeObject.__init__(self)
-    
         self.dates = None
         self.page = ''
         self.confidence = ''
-        self.mark = ''          # citation mark like '1a', if defined
+        self.mark = ""          # citation mark display references
+        self.mark_sorter = 0    # citation grouping by source variable
 
         self.noteref_hlink = [] # Gramps handle
         self.source_handle = ''
 
-        self.source_repo = []   # Tuples (Source id, Repository id, medium)
-                                # - example (397146, 316903, 'Book')
-                                #   (used in person.html v3)
-        self.source_id = None   # uniq_ids of Source objects, for creating display sets
+        # For displaying citations in person.html
+        self.source_id = None
+        self.source_medium = ""
+#         self.repository_id = None
+
         self.citators = []      # Lähde-sivulle
         self.note_ref = []
 
 
     def __str__(self):
-        return "{} '{}'".format(self.id, self.page)
+        return f"{self.mark} {self.id} '{self.page}'"
 
 
     @classmethod
@@ -289,8 +291,21 @@ class Citation(NodeObject):
         return
 
 
+class CitationMark():
+    """ Object representing a citation mark '1a', for Footnote """
+    def __init__(self, mark=None, ids=[-1, -1, -1]):
+        self.mark = mark
+        self.repository_ids = ids[0]
+        self.source_id = ids[1]
+        self.citation_id = ids[2]
+
+    def __str__(self):
+        return "{}: r={},s={},c={}".format(self.mark, self.repository_ids, self.source_id, self.citation_id)
+
+
 class NodeRef():
-    ''' Carries data of citating nodes
+    ''' Carries data of citating objects.
+
             label            str (optional) Person or Event
             uniq_id          int Persons uniq_id
             source_id        int The uniq_id of the Source citated
@@ -298,7 +313,10 @@ class NodeRef():
             eventtype        str type for Event
             edates           DateRange date expression for Event
             date             str date for Event
-        
+
+        Used in from models.datareader.get_source_with_events
+        and scene/source_events.html
+
         TODO Plan
             (b:baseObject) --> (a:activeObject) --> (c:Citation)
             b.type=Person|Family     for linking object page
