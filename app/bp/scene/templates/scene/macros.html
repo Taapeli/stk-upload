@@ -82,6 +82,12 @@
     {% if not name.surname %}<i>{{name.suffix}}</i>{% endif %} {{name.prefix}} <b>{{name.surname}}</b>
 {%- endmacro %}
 
+{% macro person_name_plain(name) -%}
+    {#  Shows a Person name in plaintext. Shows firstname and a surname or patronyme. #}
+    {{name.firstname}}
+    {% if name.surname %}{{name.prefix}} {{name.surname}}{% else %}{{name.suffix}}{% endif %}
+{%- endmacro %}
+
 {% macro person_name_long(name) -%}
     {#  Formats a Person name. Shows all firstname, patronyme and surname. #}
     {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>

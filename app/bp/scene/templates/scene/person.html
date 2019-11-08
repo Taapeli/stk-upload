@@ -1,9 +1,9 @@
 {# _templates/scene/person_pg.html_ #}
 {% extends "/scene/layout.html" %}
-{% block title %}{{ _("Person's details") }}{% endblock %}
+{% import '/scene/macros.html' as macro with context %}
+{% block title %}{{ macro.person_name_plain(person.names[0]) }}{% endblock %}
 {% block body %}
 {{ super() }}
-{% import '/scene/macros.html' as macro with context %}
 <style>
 u { color: DarkKhaki; text-decoration: none; }
 </style>
