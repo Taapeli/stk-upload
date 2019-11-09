@@ -11,7 +11,7 @@ function jump(initial) {
 }
 
 
-var cit_tbl = ["rivi1", "rivi2"];	//Table of citations (for person.html etc)
+var cit_tbl = [];	//Table of citations (for person.html etc)
 
 function listCitations(tbl) {
 	// Display cit_tbl table
@@ -28,6 +28,27 @@ function listCitations(tbl) {
 	console.log("Citation table=" + cit_tbl);
 }
 
-function setCitation(cit) {
-	// Finds or creates next mark symbol for given citation
+function getCitations(tbl) {
+	var x = document.getElementsByTagName("sup");
+	var i;
+	var ret = "";
+	for (i = 0; i < x.length; i++) {
+	    ret += " " + x[i].innerText;
+		a = x[i].firstElementChild;
+		if (a.nodeName == "A") {
+		    ret += ">" + a.id;
+		}
+	}
+	document.getElementById("demo").innerHTML = ret;
+	listCitations(tbl)
+}
+
+function setCitation(cits, sou) {
+	// Finds or creates mark symbol for given citation
+	ret = []
+	for (cit in cits) {
+		mark = "1a"
+		cit_tbl.append([mark, cit, sou])
+		ret.append(mark)
+	}
 }

@@ -128,7 +128,8 @@ u { color: DarkKhaki; text-decoration: none; }
 
     {% if e.citation_ref %}<sup>
         {% for cr in e.citation_ref %}{% set mark = obj[cr].mark %}
-                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
+                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}"
+                      id="c{{obj[cr].uniq_id}}">{{mark}}</a>
 	   {% endfor %}</sup>
     {% endif %}
                             </div>
@@ -179,6 +180,18 @@ u { color: DarkKhaki; text-decoration: none; }
                  </tbody>
             </table>
         </div>
+
+{% if true %}
+        <div class="subsection" id="notes">
+            <h4>Js-testaus</h4>
+            <div id="citTest">
+               <div><button type="button" onclick="getCitations('citTbl')">Try it</button></div>
+               <div><table id="citTbl"><body><tr><td>Tähän vastaus</td></tr></body></table></div>
+               <div id="demo">Sisällöt</div>
+            </div>
+        </div>
+{% endif %}
+
 
         <div class="subsection" id="families">
             <h4>{{ _("Families") }}</h4>
@@ -327,16 +340,6 @@ u { color: DarkKhaki; text-decoration: none; }
 
         </div>
     </div>
-
-{% if False %}
-        <div class="subsection" id="notes">
-            <h4>Js-testaus</h4>
-			<div id="citTest">
-			   <div><button type="button" onclick="listCitations('citTbl')">Try it</button></div>
-			   <div><table id="citTbl"><body><tr><td>Tähän vastaus</td></tr></body></table></div>
-			</div>
-        </div>
-{% endif %}
 
 {% endblock %}
 
