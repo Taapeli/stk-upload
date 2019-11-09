@@ -32,4 +32,5 @@ function listCitations(tbl) {
 
 function setCitation(cit) {
 	// Finds or creates next mark symbol for given citation
+	return cit.mark;
 }

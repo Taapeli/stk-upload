@@ -12,18 +12,51 @@ u { color: DarkKhaki; text-decoration: none; }
 <!-- <script>
 // var cits = ["rivi1", "rivi2"];
 
-// function showTable() {
-//  var t = document.getElementById("demo");
-//  for (i = 0; i < cits.length; i++) { 
-//      t.innerHTML += "<tr><td>rivi x</td><td>" + cits[i] + "</td><tr>";
-//  }
-//  console.log("cists=" + cits);
-// }
-</script> -->
+{% set glob = namespace(cits=[]) %} {# members [mark, source, cit] #}
+
+{% macro citdump() -%}
+    <table style="border: 2px solid brown;">
+        <tr><th>mark</th><th>source</th><th>cita</th></tr>
+    {% for c in glob.cits %}
+        <tr><td>"{{c[0]}}"</td><td>{{c[1]}}</td><td>{{c[2]}}</td></tr>
+    {% endfor %}
+    </table>
+{%- endmacro %}
+
+{%- macro citmark(cit) -%}
+    {#  Finds or creates the mark symbol for given citation.
+    
+        The mark symbol "1a" is formatted by counting different
+        loc.source, loc.cita values found in global citations table glob.cits
+        before current citation (cit.uniq_id, cit.source_ref).
+     #}
+    {% set loc = namespace(found=false,source=0,cita=0) %}
+
+	{% for mark, source, cita in glob.cits if not loc.found %}
+	   {% if source == cit.source_id %}<!-- {{source}} == {{cit.source_id}} -->
+	       {% if cita == cit.uniq_id %}<!-- cita {{cita}} != {{cit.uniq_id}} -->
+               {# A known source/citation combination #}
+	           {{mark}}
+	           {% set loc.found = true %}
+	       {% else %}<!-- cita {{cita}} != {{cit.uniq_id}} -->
+	           {% set loc.cita = loc.cita + 1 %}
+	       {% endif %}
+       {% else %}<!-- {{source}} != {{cit.source_id}} -->
+           {% set loc.source = loc.source + 1 %}
+	   {% endif %}
+	{% endfor %}
+
+    {% if not loc.found %}
+		{# This source/citation is not in global citations table #}
+		{% set mark = (loc.source + 1) ~ "abcderfghijklmopqrstuvwxyzåäö"[loc.cita] %}
+		{% set glob.cits = glob.cits + [[mark|trim, cit.source_id, cit.uniq_id]] %}
+	    {{ mark }}
+	{% endif %}
+{%- endmacro %}
+
 
 <div id="startdiv">
     <h2>{{ _("Person's details") }}</h2>
-    <!-- owner {{person.owner}}, next {{next}}, filter {{session['owner_filter']}}</small> -->
 </div>
 
 {{ macro.menu(menuno) }}
@@ -53,7 +86,7 @@ u { color: DarkKhaki; text-decoration: none; }
         
         <div id="summaryarea">
             <table>
-                <tr">
+                <tr>
                     <td class="ColumnAttribute" style="padding-bottom: .5em;">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
                         {{macro.all_obj_ids(person)}} /
@@ -138,9 +171,11 @@ u { color: DarkKhaki; text-decoration: none; }
     {% endif %}
 
     {% if e.citation_ref %}<sup>
-        {% for cr in e.citation_ref %}{% set mark = obj[cr].mark %}
-                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
-	   {% endfor %}</sup>
+        {% for cr in e.citation_ref %}
+            {% set mark %}{{ citmark(obj[cr]) }}{% endset %}
+                            <a href="#sref{{mark|trim}}" title="{{ _('Citation') }} {{mark|trim}}">
+                                {{mark|trim}}/{{obj[cr].mark|trim}}</a>
+	   {% endfor %}        </sup>
     {% endif %}
                             </div>
                         </td>
@@ -189,7 +224,109 @@ u { color: DarkKhaki; text-decoration: none; }
 {% endfor %}
                  </tbody>
             </table>
+{{ citdump() }}
         </div>
+
+
+        <div class="subsection" id="families">
+            <h4>{{ _("Families") }}</h4>
+{% set myid = person.uuid %}
+{% if person.families_as_child %}
+            <div class="mainbox" title="{{ _('Families') }}">
+                <p>{{ _("Parents' family") }}</p>
+            {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
+                <div class="groupbox">
+	                <div class="familybox" title="{{ _('family') }} {{fam.id}}">
+                        <p><a href="/scene/family={{fam.uniq_id}}" title="{{fam.id}}" class="inlink">
+                             {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
+                           {{fam.marriage_dates}}</p>
+	                    <ul>{% if fam.father %}
+	                        <li>{{ _("Man") }}: {{ macro.person(fam.father, myid) }}</li>
+	                {% endif %}{% if fam.mother %}
+	                        <li>{{ _("Wife") }}: {{ macro.person(fam.mother, myid) }}</li>
+	                {% endif %}{% if fam.children %}
+	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
+	                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>{% endfor %}
+	                        </ul></li>
+	                {% endif %}
+	                    </ul>
+	                </div>
+                </div>
+            </div>
+            {% endif %}{% endfor %}
+{% endif %}
+
+            <div class="mainbox" title="{{ _('Central person') }}">
+	            <p>{{person.names[0].firstname}} {{ _("self") }}</p>
+	            <div class="groupbox">
+		            <div class="personbox" title="{{ _('Self') }}">
+		                <span title="{{ _('first name') }}">{{person.names[0].firstname}}</span>
+		                {% if not person.names[0].surname %}<i title="{{ _('patronymic') }}">{{person.names[0].suffix}}</i>
+		                {% else %}<b title="{{ _('surname') }}">{{person.names[0].prefix}} {{person.names[0].surname}}</b>
+		                {% endif %}
+		            </div>
+	            </div>
+	        </div>
+
+{% if person.families_as_parent %}
+            <div class="mainbox" title="{{ _('Own families') }}">
+                <p>{{ _("As Parent in Family") }}</p>
+	            <div class="groupbox">
+		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
+		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
+		                <p><a href="/scene/family={{fam.uniq_id}}" title="{{fam.id}}" class="inlink">
+                             {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
+                           {{fam.marriage_dates}}</p>
+		                <ul>{% if fam.father %}
+		                        <li>{{ _("Father") }}: {{ macro.person(fam.father, myid) }}</li>
+		                {% endif %}{% if fam.mother %}
+		                        <li>{{ _("Mother") }}: {{ macro.person(fam.mother, myid) }}</li>
+		                {% endif %}{% if fam.children|count %}
+		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
+		                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>
+		                         {% endfor %}</ul></li>
+		                {% endif %}
+		                    </ul>
+		                </ol></div>
+		            {% endif %}{% endfor %}
+	             </div>
+             </div>
+{% endif %}
+        </div>
+
+{% if person.media_ref %}
+        <div class="subsection" id="indivgallery">
+            <h4>{{ _("Media files") }}</h4>
+        {% for ref in person.media_ref %}
+            <div class="thumbnail">{% set photo=obj[ref] %}
+                <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
+	                <img alt="({{ _('Photo') }})" 
+	                     src="/scene/thumbnail?id={{photo.uuid}}" 
+	                     title="key = {{photo.uuid_str()}}"/>
+                </a>
+                <p>{{photo.description}}</p>
+            </div>
+        {% endfor %}
+            <div class="fullclear"></div>
+        </div>
+{% endif %}
+
+{% if person.note_ref %}
+        <div class="subsection" id="notes">
+            <h4>{{ _("Person Notes") }}</h4>
+    {% for ref in person.note_ref %}{% set note = obj[ref] %}
+            <div class="grampsstylednote">
+                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
+            {% if note.citation_ref %}<sup>
+                {% for cr in note.citation_ref %}{% set mark = obj[cr].mark %}
+                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
+                {% endfor %}</sup>
+            {% endif %}
+                    {{ macro.notelink(note) }}</p>
+            </div>
+    {% endfor %}
+        </div>
+{% endif %}
 
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
@@ -226,7 +363,7 @@ u { color: DarkKhaki; text-decoration: none; }
              {% set conf = cita.confidence | int %}
              <div class="citaDesc" id="sref{{ cita.mark }}"
                 {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %}>
-                  <span title="[{{cita.id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
+                  <span title="[{{cita.id}} nr:{{cita.uniq_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
                       <b>{{ cita.mark }}</b> {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
                   </span> {{ cita.noteref }}
                 {% for nref in cita.note_ref %} &nbsp;►&nbsp;{{ macro.notelink(obj[nref]) }}
@@ -239,7 +376,7 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>
     </div>
 
-{% if False %}
+{% if false %}
         <div class="subsection" id="notes">
             <h4>Js-testaus</h4>
 			<div id="citTest">
