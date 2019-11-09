@@ -1,4 +1,4 @@
-{# _templates/scene/person_pg.html_ #}
+{# _templates/scene/person.html_ #}
 {% extends "/scene/layout.html" %}
 {% import '/scene/macros.html' as macro with context %}
 {% block title %}{{ macro.person_name_plain(person.names[0]) }}{% endblock %}
@@ -6,6 +6,8 @@
 {{ super() }}
 <style>
 u { color: DarkKhaki; text-decoration: none; }
+#citTest { margin:1em; }
+#citTest div { display: inline-block; }
 </style>
 <!-- <script>
 // var cits = ["rivi1", "rivi2"];
@@ -236,5 +238,16 @@ u { color: DarkKhaki; text-decoration: none; }
 
         </div>
     </div>
+
+{% if False %}
+        <div class="subsection" id="notes">
+            <h4>Js-testaus</h4>
+			<div id="citTest">
+			   <div><button type="button" onclick="listCitations('citTbl')">Try it</button></div>
+			   <div><table id="citTbl"><body><tr><td>Tähän vastaus</td></tr></body></table></div>
+			</div>
+        </div>
+{% endif %}
+
 {% endblock %}
 

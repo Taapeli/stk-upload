@@ -113,6 +113,7 @@ class Event(NodeObject):
             obj = cls()
         obj.uniq_id = node.id
         obj.id = node['id']
+        obj.uuid = node['uuid']
         obj.type = node['type']
         obj.handle = node['handle']
         obj.change = node['change']

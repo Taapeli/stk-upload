@@ -13,13 +13,23 @@ function jump(initial) {
 var cit_tbl = ["rivi1", "rivi2"];
 //Table of citations (for person.html etc)
 
-function showTable() {
+var cit_tbl = ["rivi1", "rivi2"];	//Table of citations (for person.html etc)
+
+function listCitations(tbl) {
 	// Display cit_tbl table
-	var t = document.getElementById("demo");
-	t.innerHTML = "<tr><th>cists type is " + typeof cit_tbl + "</th><tr>";
-	for (i = 0; i < cit_tbl.length; i++) { 
-		t.innerHTML += "<tr><td>rivi x</td><td>" + cit_tbl[i] + "</td><tr>";
+	var t = document.getElementById(tbl);
+	t.innerHTML = "<tr><th>mark</th><th>source</th><th>citation</th></th><tr>";
+	for (i = 0; i < cit_tbl.length; i++) {
+		if (cit_tbl[i].length == 3) {
+			t.innerHTML += "<tr><td>" + cit_tbl[i][2] + "</td><td>" 
+				+ cit_tbl[i][0] + "</td><td>" + cit_tbl[i][1] + "</td><tr>";
+		} else {
+			t.innerHTML += "<tr><td>rivi x</td><td>" + cit_tbl[i] + "</td><tr>";
+		}
 	}
-	console.log("cists=" + cit_tbl);
+	console.log("Citation table=" + cit_tbl);
 }
-showTable()
+
+function setCitation(cit) {
+	// Finds or creates next mark symbol for given citation
+}
