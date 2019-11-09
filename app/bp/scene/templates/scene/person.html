@@ -189,7 +189,7 @@ u { color: DarkKhaki; text-decoration: none; }
             {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="{{ _('family') }} {{fam.id}}">
-                        <p><a href="/scene/family={{fam.uniq_id}}" title="{{fam.id}}" class="inlink">
+                        <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.uuid}}" class="inlink">
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 	                    <ul>{% if fam.father %}
@@ -226,7 +226,7 @@ u { color: DarkKhaki; text-decoration: none; }
 	            <div class="groupbox">
 		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
 		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-		                <p><a href="/scene/family={{fam.uniq_id}}" title="{{fam.id}}" class="inlink">
+		                <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.uuid}}" class="inlink">
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 		                <ul>{% if fam.father %}
