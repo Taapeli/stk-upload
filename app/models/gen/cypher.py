@@ -471,15 +471,12 @@ class Cypher_place():
     '''
     Cypher clases for creating and accessing Places
     '''
-
     
-   
-
     get_person_events = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
   WHERE id(l) = $locid
 MATCH (p) --> (n:Name)
-RETURN id(p) AS uid, r.role AS role,
+RETURN p.uuid AS uuid, r.role AS role,
   COLLECT(n) AS names,
   e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
 ORDER BY edates[1]"""

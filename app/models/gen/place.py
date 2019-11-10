@@ -211,7 +211,7 @@ class Place(NodeObject):
 
             e = Event_combo()
             # Fields uid (person uniq_id) and names are on standard in Event_combo
-            e.uid = record["uid"]
+            e.uid = record["uuid"]
             e.type = record["etype"]
             if record["edates"][0] != None:
                 e.dates = DateRange(record["edates"])
