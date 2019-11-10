@@ -8,7 +8,11 @@
 u { color: DarkKhaki; text-decoration: none; }
 #citTest { margin:1em; }
 #citTest div { display: inline-block; }
+#citTbl  td { border: 2px solid brown; }
 </style>
+<script>
+var tbl = new citTable();
+</script>
 
 <div id="startdiv">
     <h2>{{ _("Person's details") }}</h2>
@@ -42,7 +46,7 @@ u { color: DarkKhaki; text-decoration: none; }
         
         <div id="summaryarea">
             <table>
-                <tr">
+                <tr>
                     <td class="ColumnAttribute" style="padding-bottom: .5em;">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">
                         {{macro.all_obj_ids(person)}} /
@@ -129,7 +133,7 @@ u { color: DarkKhaki; text-decoration: none; }
     {% if e.citation_ref %}<sup>
         {% for cr in e.citation_ref %}{% set mark = obj[cr].mark %}
                     <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}"
-                      id="c{{obj[cr].uniq_id}}">{{mark}}</a>
+                      id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">{{mark}}</a>
 	   {% endfor %}</sup>
     {% endif %}
                             </div>
@@ -185,9 +189,9 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="notes">
             <h4>Js-testaus</h4>
             <div id="citTest">
-               <div><button type="button" onclick="getCitations('citTbl')">Try it</button></div>
+               <div><button type="button" onclick="tbl.findCitations('demo', 'citTbl')">Try it</button></div>
                <div><table id="citTbl"><body><tr><td>Tähän vastaus</td></tr></body></table></div>
-               <div id="demo">Sisällöt</div>
+               <div id="demo"><p>Sisällöt</p></div>
             </div>
         </div>
 {% endif %}
@@ -342,4 +346,3 @@ u { color: DarkKhaki; text-decoration: none; }
     </div>
 
 {% endblock %}
-
