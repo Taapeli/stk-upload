@@ -1012,7 +1012,7 @@ def get_place_with_events (loc_id):
         parent  isäsolmun id
 
     event_table:
-        uid           person's uniq_id
+        uuid          person's uuid
         names         list of tuples [name_type, given_name, surname]
         etype         event type
         edates        event date

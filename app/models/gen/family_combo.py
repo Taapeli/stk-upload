@@ -436,17 +436,7 @@ RETURN family"""
                 #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
                 #    'id': 'F0000', 'change': 1507492602}>
                 f_node = record['f']
-                family = Family_combo(f_node.id)
-                family.id = f_node['id']
-                family.uuid = f_node['uuid']
-                family.type = f_node['rel_type']
-                family.father_sortname = f_node['father_sortname']
-                family.mother_sortname = f_node['mother_sortname']
-                datetype = f_node['datetype']
-                date1 = f_node['date1']
-                date2 = f_node['date2']
-                if datetype != None:
-                    family.marriage_date = DateRange(datetype, date1, date2)
+                family = Family_combo.from_node(f_node)
                 family.marriage_place = record['marriage_place']
 
                 uniq_id = -1

@@ -128,8 +128,8 @@
         {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
-                            <a href="/scene/person/{{e.uid}}" class="id"
-                              title="{{ _("See Person's Details") }}">{{e.uid}}</a>
+                            <a href="/scene/person?uuid={{e.uid}}" class="id"
+                              title="{{ _("See Person's Details") }}"> ---&gt; </a>
                         </td>
                         <td>{% for pn in e.names|sort(attribute='order') %}
                          {% if loop.index > 1 %}<br>{% endif %}

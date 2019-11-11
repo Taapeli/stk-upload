@@ -171,3 +171,15 @@
          endif %}{{ n.name|safe }}
     {% endfor %}
 {%- endmacro %}
+
+{% macro citation_link(cit_list, obj) -%}
+    {# Creates <sup>citation link</sup> for each citation.
+       - cit_list   list of citation uniq_ids
+       - obj        dict of objects: obj[uniq_id] = Citation object
+     #}
+    {% if cit_list %}<sup>{% for cr in cit_list %}
+                    <a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
+    {% endfor %}</sup>{% endif %}
+{%- endmacro %}
+
+

@@ -8,6 +8,7 @@
 u { color: DarkKhaki; text-decoration: none; }
 #citTest { margin:1em; }
 #citTest div { display: inline-block; }
+#citTbl  td { border: 2px solid brown; }
 </style>
 <!-- <script>
 // var cits = ["rivi1", "rivi2"];
@@ -75,11 +76,7 @@ u { color: DarkKhaki; text-decoration: none; }
 
         <h3 style="position:sticky; top:0;" title="{{ _('Top') }}"><a href="#">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b></a>
-            {% if person.citation_ref %}<sup>
-                {% for cr in person.citation_ref %}{% set mark = obj[cr].mark %}
-                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
-                {% endfor %}</sup>
-            {% endif %}
+            {{macro.citation_link(person.citation_ref, obj)}}
         </h3>
 
         {% set myid = person.uniq_id %}
@@ -107,11 +104,7 @@ u { color: DarkKhaki; text-decoration: none; }
                         {% if pname.prefix %}<span title="etuliite">{{pname.prefix}}</span>{% endif %}
                         <b title="{{ _('surname') }}">{{pname.surname}}</b>
 
-	                    {% if pname.citation_ref %}<sup>
-	                        {% for cr in pname.citation_ref %}{% set mark = obj[cr].mark %}
-                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
-	                        {% endfor %}</sup>
-	                    {% endif %}
+	                    {{macro.citation_link(pname.citation_ref, obj)}}
                     </td>
                 </tr>{% endfor %}
                    
@@ -167,16 +160,9 @@ u { color: DarkKhaki; text-decoration: none; }
     {% else %}                      {{e.type|transl('evt')}}
     {% endif %}
     {% if e.role and e.role != "Primary" %}
-                            <span class="typedesc">({{e.role|transl('role')}})</span>
+                                <span class="typedesc">({{e.role|transl('role')}})</span>
     {% endif %}
-
-    {% if e.citation_ref %}<sup>
-        {% for cr in e.citation_ref %}
-            {% set mark %}{{ citmark(obj[cr]) }}{% endset %}
-                            <a href="#sref{{mark|trim}}" title="{{ _('Citation') }} {{mark|trim}}">
-                                {{mark|trim}}/{{obj[cr].mark|trim}}</a>
-	   {% endfor %}        </sup>
-    {% endif %}
+                                {{macro.citation_link(e.citation_ref, obj)}}
                             </div>
                         </td>
 
@@ -201,11 +187,7 @@ u { color: DarkKhaki; text-decoration: none; }
                             {% if e.note_ref %}
                             	{% for ref in e.note_ref %}{% set note = obj[ref] %}
 	                            	<div><span class="typedesc">{{ note.type|transl('notet') }}</span>
-				            {% if note.citation_ref %}<sup>
-				                {% for cr in note.citation_ref %}{% set mark = obj[cr].mark %}
-				                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
-				                {% endfor %}</sup>
-				            {% endif %}
+				                      {{macro.citation_link(note.citation_ref, obj)}}
 	                            	  {{ macro.notelink(note) }}</div>
 	                            {% endfor %}
                            	{% endif %}
@@ -227,6 +209,17 @@ u { color: DarkKhaki; text-decoration: none; }
 {{ citdump() }}
         </div>
 
+{% if true %}
+        <div class="subsection" id="notes">
+            <h4>Js-testaus</h4>
+            <div id="citTest">
+<!--                <div><button type="button" onclick="tbl.findCitations('demo', 'citTbl')">Try it</button></div> -->
+               <div><table id="citTbl"><body><tr><td>Tähän vastaus</td></tr></body></table></div>
+               <div id="demo"><p>Sisällöt</p></div>
+            </div>
+        </div>
+{% endif %}
+
 
         <div class="subsection" id="families">
             <h4>{{ _("Families") }}</h4>
@@ -237,7 +230,7 @@ u { color: DarkKhaki; text-decoration: none; }
             {% for fam in person.families_as_child %}{% if fam.role == "CHILD" %}
                 <div class="groupbox">
 	                <div class="familybox" title="{{ _('family') }} {{fam.id}}">
-                        <p><a href="/scene/family={{fam.uniq_id}}" title="{{fam.id}}" class="inlink">
+                        <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.uuid}}" class="inlink">
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 	                    <ul>{% if fam.father %}
@@ -274,7 +267,7 @@ u { color: DarkKhaki; text-decoration: none; }
 	            <div class="groupbox">
 		            {% for fam in person.families_as_parent %}{% if fam.role != "CHILD" %}
 		            <div class="familybox" title="perhe {{fam.id}} {{fam.role}}">
-		                <p><a href="/scene/family={{fam.uniq_id}}" title="{{fam.id}}" class="inlink">
+		                <p><a href="/scene/family?uuid={{fam.uuid}}" title="{{fam.uuid}}" class="inlink">
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 		                <ul>{% if fam.father %}
@@ -317,11 +310,7 @@ u { color: DarkKhaki; text-decoration: none; }
     {% for ref in person.note_ref %}{% set note = obj[ref] %}
             <div class="grampsstylednote">
                  <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
-            {% if note.citation_ref %}<sup>
-                {% for cr in note.citation_ref %}{% set mark = obj[cr].mark %}
-                    <a href="#sref{{mark}}" title="{{ _('Citation') }} {{mark}}">{{mark}}</a>
-                {% endfor %}</sup>
-            {% endif %}
+                    {{macro.citation_link(note.citation_ref, obj)}}
                     {{ macro.notelink(note) }}</p>
             </div>
     {% endfor %}
@@ -361,7 +350,7 @@ u { color: DarkKhaki; text-decoration: none; }
         <!-- Citation -->
         {% for cita in clist.list %}
              {% set conf = cita.confidence | int %}
-             <div class="citaDesc" id="sref{{ cita.mark }}"
+             <div class="citaDesc" id="sref{{ cita.mark|trim }}"
                 {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %}>
                   <span title="[{{cita.id}} nr:{{cita.uniq_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
                       <b>{{ cita.mark }}</b> {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
@@ -375,16 +364,9 @@ u { color: DarkKhaki; text-decoration: none; }
 
         </div>
     </div>
-
-{% if false %}
-        <div class="subsection" id="notes">
-            <h4>Js-testaus</h4>
-			<div id="citTest">
-			   <div><button type="button" onclick="listCitations('citTbl')">Try it</button></div>
-			   <div><table id="citTbl"><body><tr><td>Tähän vastaus</td></tr></body></table></div>
-			</div>
-        </div>
-{% endif %}
-
+<script>
+var tbl = new citTable();
+tbl.findCitations('demo', 'citTbl');
+</script>
 {% endblock %}
 
