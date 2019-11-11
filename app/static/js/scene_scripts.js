@@ -15,9 +15,9 @@ function citTable() {
 	// Manage citations table and indexes "1a", ... for each.
 	this.cTbl = [];
 
-	this.getMark = function (s_id, c_id) {
-		// Todo
-	    return (s_id + 1) + "abcderfghijklmopqrstuvwxyzåäö"[c_id];
+	this.getMark = function (i, j) {
+		// Create mark "1a" for given cTbl line and citation column
+	    return (i + 1) + "abcderfghijklmopqrstuvwxyzåäö"[j];
 	}
 
 	this.add = function(s_id, c_id) {
@@ -26,34 +26,38 @@ function citTable() {
 	    //this.mark = (s_id + 1) + "abcderfghijklmopqrstuvwxyzåäö"[c_id];
 		var line;
 		var l = this.cTbl.length;
+		var j = -1;	// Index of selected citation
 		for (i = 0; i < l; i++) {
+			// Browse sources
 			line = this.cTbl[i];
 			if (line[0] == s_id) {
-				// Matching source
 				var cits = line[1];
-				var a = cits.indexOf(c_id);
-				if (a < 0) {
+				var j = cits.indexOf(c_id);
+				if (j < 0) {
 					// No match; add a new citation to this source
-					this.cTbl[i][1].push(c_id);
+					var z = this.cTbl[i][1]
+					j = z.length
+					z.push(c_id);
 				}
-				return this.cTbl[i];
+				return this.getMark(i, j);
 			}
 		}
 		line = [s_id, [c_id]];
 		this.cTbl.push(line);
+		return this.getMark(this.cTbl.length - 1, 0)
 	}
 
 	this.lister = function(destination) {
 		// Display citations table in destination element.
 
 		var t = document.getElementById(destination);
-		t.innerHTML = "<tr><th>source</th><th>citation</th></th><tr>";
+		t.innerHTML = "<tr><th>mark</th><th>source</th><th>citation (a,b,…)</th></th><tr>";
 
 		var l = this.cTbl.length;
 		for (i = 0; i < l; i++) {
 			line = this.cTbl[i];
-			t.innerHTML += "<tr><td>" + line[0] + "</td><td>" 
-				+ line[1] + "</td><tr>";
+			t.innerHTML += "<tr><td>" + (i + 1) + "x</td><td>" + 
+				line[0] + "</td><td>" + line[1] + "</td><tr>";
 		}
 		console.log("Citation table=" + this.cTbl);
 	}
@@ -69,9 +73,12 @@ function citTable() {
 		    ret += " " + x[i].innerText;
 			var a = x[i].firstElementChild;
 			if (a.nodeName == "A" && a.id != "" ) {
-			    ret += ">" + a.id + '<br>';
+				// <sup><a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
 			    var arr = a.id.split('-');
-			    this.add(Number(arr[0]), Number(arr[1]));
+			    mark = this.add(Number(arr[0]), Number(arr[1]));
+			    a.href = "#sref" + mark;
+			    a.innerText = mark;
+			    ret += mark + ">" + a.id + '<br>';
 			} else { ret += '<br>' }
 		}
 		document.getElementById(textDest).innerHTML = ret;	// Text result
