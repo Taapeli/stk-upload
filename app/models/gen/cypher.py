@@ -476,7 +476,7 @@ class Cypher_place():
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
   WHERE id(l) = $locid
 MATCH (p) --> (n:Name)
-RETURN p.uuid AS uuid, r.role AS role,
+RETURN p AS person, r.role AS role,
   COLLECT(n) AS names,
   e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
 ORDER BY edates[1]"""

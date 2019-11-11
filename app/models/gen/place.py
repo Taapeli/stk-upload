@@ -194,6 +194,9 @@ class Place(NodeObject):
         |      |         |x":"von"}]         │             │                   │
         └──────┴─────────┴───────────────────┴─────────────┴───────────────────┘
         """
+        # Import here to handle circular dependency 
+        from .person_combo import Person_combo
+
         result = shareds.driver.session().run(Cypher_place.get_person_events, 
                                               locid=int(loc_id))
         ret = []
@@ -209,9 +212,9 @@ class Place(NodeObject):
             #  etype='Baptism' 
             #  edates=[0, 1782139, 1782139]>
 
+            p = record["person"]
             e = Event_combo()
-            # Fields uid (person uniq_id) and names are on standard in Event_combo
-            e.uid = record["uuid"]
+            e.person = Person_combo.from_node(p)
             e.type = record["etype"]
             if record["edates"][0] != None:
                 e.dates = DateRange(record["edates"])
