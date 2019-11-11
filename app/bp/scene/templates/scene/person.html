@@ -13,7 +13,6 @@ u { color: DarkKhaki; text-decoration: none; }
 
 <div id="startdiv">
     <h2>{{ _("Person's details") }}</h2>
-    <!-- owner {{person.owner}}, next {{next}}, filter {{session['owner_filter']}}</small> -->
 </div>
 
 {{ macro.menu(menuno) }}
@@ -165,12 +164,14 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>
 
 {% if true %}
-        <div class="subsection" id="notes">
+        <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
-<!--                <div><button type="button" onclick="tbl.findCitations('demo', 'citTbl')">Try it</button></div> -->
-               <div><table id="citTbl"><body><tr><td>Tähän vastaus</td></tr></body></table></div>
-               <div id="demo"><p>Sisällöt</p></div>
+               <div><button type="button" onclick="tbl.findCitations('dbug')">Etsi viitteet<sup>*</sup></button><br>
+                    <button type="button" onclick="tbl.listCitations('citTbl')">Viitetaulukko</button><br>
+                    <button type="button" onclick="tbl.sourceReferences('sourcerefContent')">Lisää karkea lähdeluettelo</button></div>
+               <div id="dbug"><p>Löydetyt viitteet</p></div>
+               <div><table id="citTbl"><body><tr><td>Viitteet lähteittäin</td></tr></body></table></div>
             </div>
         </div>
 {% endif %}
@@ -274,6 +275,7 @@ u { color: DarkKhaki; text-decoration: none; }
 
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
+            <div id="sourcerefContent"></div>
 {#
 		    cita = citations[0]               = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
             cita.mark                         = '1a'
@@ -321,7 +323,6 @@ u { color: DarkKhaki; text-decoration: none; }
     </div>
 <script>
 var tbl = new citTable();
-tbl.findCitations('demo', 'citTbl');
 </script>
 {% endblock %}
 
