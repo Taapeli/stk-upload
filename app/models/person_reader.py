@@ -473,6 +473,34 @@ class PersonReader():
         return
 
 
+    def get_citations_js(self):
+        ''' Create code for generating Javascript objecs representing
+            Citations, Sources and Repositories with their Notes.
+            
+            js-style person[id] = {name: "John", age: 31, city: "New York"}
+        '''
+        #notes = []
+        js = 'var citations = {};'
+        for o in self.objs:
+            if isinstance(o, Citation):
+                js += f'citations[{o.uniq_id}] = '
+                js +=  '{ '
+                js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
+                js += f'id:"{o.id}", note_ref:{o.noteref}, '
+                js += f'page:"{o.page}", source_id:{o.source_id}, '  
+                js += f'source_medium:"{o.source_medium}",uuid:"{o.uuid}"'
+                js +=  '};'
+
+            if isinstance(o, Source):
+                pass    # Todo
+            if isinstance(o, Repository):
+                pass    # Todo
+        # Find referenced Notes
+        #for o in notes:
+            pass    # Todo
+        return js
+
+
     def set_citation_marks(self, refs):    #, citations, objs):
         ''' Create person citation references for foot notes.
         

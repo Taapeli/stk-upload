@@ -10,51 +10,6 @@ u { color: DarkKhaki; text-decoration: none; }
 #citTest div { display: inline-block; }
 #citTbl  td { border: 2px solid brown; }
 </style>
-<!-- <script>
-// var cits = ["rivi1", "rivi2"];
-
-{% set glob = namespace(cits=[]) %} {# members [mark, source, cit] #}
-
-{% macro citdump() -%}
-    <table style="border: 2px solid brown;">
-        <tr><th>mark</th><th>source</th><th>cita</th></tr>
-    {% for c in glob.cits %}
-        <tr><td>"{{c[0]}}"</td><td>{{c[1]}}</td><td>{{c[2]}}</td></tr>
-    {% endfor %}
-    </table>
-{%- endmacro %}
-
-{%- macro citmark(cit) -%}
-    {#  Finds or creates the mark symbol for given citation.
-    
-        The mark symbol "1a" is formatted by counting different
-        loc.source, loc.cita values found in global citations table glob.cits
-        before current citation (cit.uniq_id, cit.source_ref).
-     #}
-    {% set loc = namespace(found=false,source=0,cita=0) %}
-
-	{% for mark, source, cita in glob.cits if not loc.found %}
-	   {% if source == cit.source_id %}<!-- {{source}} == {{cit.source_id}} -->
-	       {% if cita == cit.uniq_id %}<!-- cita {{cita}} != {{cit.uniq_id}} -->
-               {# A known source/citation combination #}
-	           {{mark}}
-	           {% set loc.found = true %}
-	       {% else %}<!-- cita {{cita}} != {{cit.uniq_id}} -->
-	           {% set loc.cita = loc.cita + 1 %}
-	       {% endif %}
-       {% else %}<!-- {{source}} != {{cit.source_id}} -->
-           {% set loc.source = loc.source + 1 %}
-	   {% endif %}
-	{% endfor %}
-
-    {% if not loc.found %}
-		{# This source/citation is not in global citations table #}
-		{% set mark = (loc.source + 1) ~ "abcderfghijklmopqrstuvwxyzåäö"[loc.cita] %}
-		{% set glob.cits = glob.cits + [[mark|trim, cit.source_id, cit.uniq_id]] %}
-	    {{ mark }}
-	{% endif %}
-{%- endmacro %}
-
 
 <div id="startdiv">
     <h2>{{ _("Person's details") }}</h2>
@@ -148,10 +103,6 @@ u { color: DarkKhaki; text-decoration: none; }
                 <tbody>
 {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
-{#  person.events[0].citation_ref[0] = 90323
-    objs[person.events[0].citation_ref[0]] = <models.gen.citation.Citation object at 0x7f0a24696ac8> = cr
-    objs[person.events[0].citation_ref[0]].mark = '1a'
-#}
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
     {% if e.type == "Baptism" %}    <a href="/scene/event/{{e.uniq_id}}" class="inlink">&rarr;&nbsp;
@@ -200,13 +151,10 @@ u { color: DarkKhaki; text-decoration: none; }
                             {% endif %}
                             </div>
                         </td>
-{#                  {% endif %}
-#}
                     </tr>
 {% endfor %}
                  </tbody>
             </table>
-{{ citdump() }}
         </div>
 
 {% if true %}
@@ -320,6 +268,7 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
             <div id="sourcerefContent"></div>
+
 {#
 		    cita = citations[0]               = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
             cita.mark                         = '1a'
@@ -330,7 +279,6 @@ u { color: DarkKhaki; text-decoration: none; }
 		    source.repositories[0]            = <models.gen.repository.Repository object at 0x7f1374e1ae48>
 		    source.repositories[0].rname      = 'Akaan seurakunnan arkisto'
 <ul>
-#}
 
 {% for clist in citations | groupby('mark_sorter') %}
     <div class="sourceDesc"><!-- Source {{ clist.grouper }} -->
@@ -362,6 +310,7 @@ u { color: DarkKhaki; text-decoration: none; }
         {% endfor %}
    </div>
 {% endfor %}
+#}
 
         </div>
     </div>

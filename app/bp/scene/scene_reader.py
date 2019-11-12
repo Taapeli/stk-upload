@@ -14,7 +14,7 @@ from shareds import logger
 import traceback
 
 
-def get_person_full_data(uuid, owner):
+def get_person_full_data(uuid, owner, js=False):
     """ Get a Person with all connected nodes for display in Person page.
 
 
@@ -130,17 +130,24 @@ def get_person_full_data(uuid, owner):
     #        (c) --> (s:Source) --> (r:Repository)
     reader.read_sources_repositories()
 
-    # Create Citation reference marks
-    reader.set_citation_marks(reader.person.citation_ref)
-    for e in reader.person.events:
-        reader.set_citation_marks(e.citation_ref)
+    if js:
+        # Create Javascript code to create source/citation list
+        jscode = reader.get_citations_js()
 
-    # Created sorted Citation list
-    citlist = sorted(reader.citations.values(), key=lambda x: x.mark)
+        # Return Person with included objects,  and javascript code to create
+        # Citations, Sources and Repositories with their Notes
+        return (reader.person, reader.objs, jscode)
+    else:
+        # Create Citation reference marks
+        reader.set_citation_marks(reader.person.citation_ref)
+        for e in reader.person.events:
+            reader.set_citation_marks(e.citation_ref)
+    
+        # Created sorted Citation list
+        citlist = sorted(reader.citations.values(), key=lambda x: x.mark)
             
-    # Return Person with included objects, list of note, citation etc. objects
-    # and footnotes
-    return (reader.person, reader.objs, citlist)
+        # Return Person with included objects, list of note, citation etc. objects
+        return (reader.person, reader.objs, citlist)
 
 
 def from_citation_objs(cls, citation_obj, objs):
