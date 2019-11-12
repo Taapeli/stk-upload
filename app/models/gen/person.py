@@ -180,8 +180,8 @@ class Person(NodeObject):
         if not obj:
             obj = cls()
         obj.uuid = node.get('uuid')
-        if 'handle' in node:
-            obj.handle = node.get('handle')
+#         if 'handle' in node:
+#             obj.handle = node.get('handle')
         obj.uniq_id = node.id
         obj.id = node['id']
         obj.sex = node.get('sex', 'UNKNOWN')

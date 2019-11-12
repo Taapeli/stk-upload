@@ -63,7 +63,7 @@ class Place_combo(Place):
             lv = self.level
         else:
             lv = ""
-        return f"{self.uniq_id} {self.pname} ({self.type}) {lv}"
+        return f"{self.pname} ({self.type}) {lv}"
 
 
 #     @classmethod from_node(cls, node):
@@ -357,13 +357,13 @@ class Place_combo(Place):
             pn = Place_name.from_node(node)
             if pn.lang == "":
                 no_lang.append(pn)
-                print(f"#  other {len(self.names)} (Place_name {pn.uniq_id} {pn})")
+                ##print(f"# - no lang {len(self.names)} (Place_name {pn.uniq_id} {pn})")
             elif pn.lang == current_user.language:
                 own_lang.append(pn)
-                print(f"#      own (Place_name {pn.uniq_id} {pn})")
+                ##print(f"# - my lang (Place_name {pn.uniq_id} {pn})")
             else:
                 alien_lang.append(pn)
-                print(f"#    alien (Place_name {pn})")
+                ##print(f"# - alien lang (Place_name {pn})")
 
         if own_lang:
             self.names = own_lang
@@ -371,8 +371,8 @@ class Place_combo(Place):
             self.names = no_lang
         else:
             self.names = alien_lang
-        for pn in self.names:
-            print(f"#  names: {pn}")
+        #for pn in self.names:
+        #    print(f"#  names: {pn}")
 
 
     def namelist_w_lang(self):
@@ -520,7 +520,7 @@ RETURN COLLECT(n) AS names LIMIT 15
             if record["edates"][0] != None:
                 dates = DateRange(record["edates"])
                 e.dates = str(dates)
-                e.date = dates.estimate()
+#                 e.date = dates.estimate()
             e.role = record["role"]
             e.names = []
             for node in record["names"]:

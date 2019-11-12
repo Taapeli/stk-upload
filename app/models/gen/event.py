@@ -9,7 +9,6 @@
         - __init__()
         - get_event_combo()
         - get_baptism_data()
-        - get_cite_sour_repo() static <-- get_citation_path()?
         - get_event_cite()
        Event, lähteet, huomautukset, henkilön uniq_id
 
@@ -114,16 +113,16 @@ class Event(NodeObject):
             obj = cls()
         obj.uniq_id = node.id
         obj.id = node['id']
+        obj.uuid = node['uuid']
         obj.type = node['type']
         obj.handle = node['handle']
         obj.change = node['change']
         if "datetype" in node:
-            #TODO: Talletetaanko DateRange -objekti vai vain str?
             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
-            obj.date = obj.dates.estimate()
+#             obj.date = obj.dates.estimate()
         else:
             obj.dates = DateRange()
-            obj.date = ""
+#             obj.date = ""
         obj.description = node['description'] or ''
         obj.attr = node['attr'] or dict()
 #         obj.attr_type = node['attr_type'] or ''
@@ -137,12 +136,12 @@ class Event(NodeObject):
         query = """
  MATCH (e:Event) WHERE NOT EXISTS((:Citation)<-[:CITATION]-(e:Event))
  RETURN ID(e) AS uniq_id, e
- ORDER BY e.type, e.date"""
+ ORDER BY e.type, e.date1"""
                 
         result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
-                  'description', 'date', 'dates', 'attr']
+                  'description', 'dates', 'attr']
         lists = []
         
         for record in result:
@@ -158,12 +157,12 @@ class Event(NodeObject):
         query = """
  MATCH (e:Event) WHERE NOT EXISTS((:Place)<-[:PLACE]-(e:Event))
  RETURN ID(e) AS uniq_id, e
- ORDER BY e.type, e.date"""
+ ORDER BY e.type, e.date1"""
                 
         result = shareds.driver.session().run(query)
         
         titles = ['uniq_id', 'handle', 'change', 'id', 'type', 
-                  'description', 'date', 'dates', 'attr']
+                  'description', 'dates', 'attr']
         lists = []
         
         for record in result:
@@ -201,10 +200,10 @@ class Event(NodeObject):
             data_line.append(ev['description'])
         else:
             data_line.append('-')
-        if ev['date']:
-            data_line.append(ev['date'])
-        else:
-            data_line.append('-')
+#         if ev['date']:
+#             data_line.append(ev['date'])
+#         else:
+#             data_line.append('-')
         if ev['dates']:
             data_line.append(str(DateRange(ev['dates'])))
         else:
@@ -240,7 +239,7 @@ class Event(NodeObject):
         print ("Id: " + self.id)
         print ("Type: " + self.type)
         print ("Description: " + self.description)
-        print ("Dateval: " + self.date)
+        print ("Dateval: " + self.dates)
         print ("Dates: " + str(self.dates))
         #print ("Place_hlink: " + self.place_hlink)
         print ("Attr: " + str(self.attr))
@@ -258,7 +257,7 @@ class Event(NodeObject):
             print ("Id: " + self.id + " # " + comp_event.id)
             print ("Type: " + self.type + " # " + comp_event.type)
             print ("Description: " + self.description + " # " + comp_event.description)
-            print ("Dateval: " + self.date + " # " + comp_event.date)
+            print ("Dateval: " + self.dates + " # " + comp_event.dates)
             print ("Dates: " + str(self.dates) + " # " + str(comp_event.dates))
             print ("Place: " + pname1 + " # " + pname2)
         # Give points if dates match

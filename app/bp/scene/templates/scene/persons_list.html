@@ -160,7 +160,7 @@
 
                   <td class="ColumnEvent">
             {% if p.events is iterable %}
-                <div>{% for e in p.events|sort(attribute='date') %}
+                <div>{% for e in p.events|sort() %}
                     {% if e.type == "Birth" or e.type == "Death" %}{% set ecl = "major" %}
                     {% else %}{% set ecl = "minor" %}{% endif %}
                       <div class="eventgrid">

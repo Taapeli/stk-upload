@@ -17,12 +17,13 @@
     <link rel="stylesheet" href="//jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
 -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/static/js/gettext.js"></script>
     <script src="/static/js/scene_scripts.js"></script>
 </head>
 <body>
 {% block body %}
     <h1><a href="/"><img id="logo" src="/static/tam.png" 
-             alt="{{ _('Back to Top') }}" title="{{ _('Back to Top') }}"
+             alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
              onmouseover="this.src='/static/tam1.png';" 
              onmouseout="this.src='/static/tam.png';"/></a>
         <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>

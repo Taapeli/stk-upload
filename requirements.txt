@@ -1,11 +1,7 @@
-bcrypt==3.1.7
-Flask==1.1.1
+bcrypt==3.1.6
+Flask==1.0.2
 Flask-BabelEx==0.9.3
 Flask-Security==3.0.0
-neo4j==1.7.5
+neo4j==1.7.2
 treelib==1.5.5
-<<<<<<< HEAD
-Pillow==6.2.1
-=======
 pillow>=6.2.0
->>>>>>> branch 'master' of https://github.com/Taapeli/stk-upload.git

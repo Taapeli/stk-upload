@@ -155,17 +155,37 @@ def show_persons_all():
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 
-
 @bp.route('/scene/person/<int:uid>')
+#     @login_required
+@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
+def show_person_v2(uid=None):
+    """ One Person with all connected nodes - version 3 with apoc
+    """
+    t0 = time.time()
+    if current_user.is_authenticated:
+        user=current_user.username
+    else:
+        user=None
+    # v2 Person page data
+    person, objs, marks = get_a_person_for_display_apoc(uid, user)
+    logger.info("-> bp.scene.routes.show_v2")
+    if not person:
+        return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
+    #print (f"Current language {current_user.language}")
+    from bp.scene.models.media import get_thumbname
+    for i in person.media_ref:
+        print(get_thumbname(objs[i].uuid))
+    return render_template("/scene/person_v2.html", person=person, obj=objs, 
+                           marks=marks, menuno=12, elapsed=time.time()-t0)
+
+
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_person_pg_v2_v3(uid=None):
+def show_person_v3(uid=None):
     """ One Person with all connected nodes - NEW version 3.
     
         Note: not using apoc any more.
-    
-        Korvaamaan metodi show_person_page()
     """
     t0 = time.time()
     uid = request.args.get('uuid', uid)
@@ -176,6 +196,7 @@ def show_person_pg_v2_v3(uid=None):
         user=current_user.username
     else:
         user=None
+    logger.info("-> bp.scene.routes.show_person_v3")
     
     # v3 Person page
     person, objs, jscode = get_person_full_data(uid, user, js=True)
@@ -267,6 +288,25 @@ def show_family_page(fid):
     logger.info("-> bp.scene.routes.show_family_page")
     return render_template("/scene/family.html", family=family, menuno=3)
 
+
+@bp.route('/scene/family', methods=['GET'])
+def show_family(uid=None):
+    """ One Family.
+    
+    """
+    
+    uid = request.args.get('uuid', uid)
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
+    
+    try:
+        family = Family_combo.get_family_data(uid)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    logger.info("-> bp.scene.routes.show_family")
+    return render_template("/scene/family.html", family=family, menuno=3)
+
 @bp.route('/pop/family=<int:fid>')
 def show_family_popup(fid):
     """ Small Family pop-up.
@@ -320,15 +360,30 @@ def show_place_page(locid):
 # ------------------------------ Menu 5: Sources --------------------------------
 
 @bp.route('/scene/sources')
-def show_sources():
+@bp.route('/scene/sources/<theme>')
+def show_sources(theme=None):
     """ Lähdeluettelon näyttäminen ruudulla for menu(5)
+    
+        Todo: Examples?
+            /scene/sources --> birth; shorter list?
+            /scene/sources/all    <-- now no theme
+            /scene/sources/birth
+            /scene/sources/wedding?year1=1800%year2=1850 <-- todo
+
     """
+    if theme:
+        # Todo: Possible year filter? Needs pre-calculated varibles?
+        year1 = request.args.get('year1', None)
+        year2 = request.args.get('year2', None)
+        filt = (theme, year1, year2)
+    else:
+        filt=None
     try:
-        sources = Source.get_source_list()
+        sources, title = Source.get_source_list(filt)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_sources")
-    return render_template("/scene/sources.html", sources=sources)
+    return render_template("/scene/sources.html", sources=sources, title=title)
 
 
 @bp.route('/scene/source=<int:sourceid>')

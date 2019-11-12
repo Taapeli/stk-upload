@@ -134,21 +134,21 @@
 {% if cnt %}
     {% for f in families %}
         <tr>
-            <td><a href="/scene/family={{f.uniq_id}}" class="inlink"
-                   title="{{ _('Go to family page') }}">{{f.type|transl('marr')}}</a>
+            <td><a href="/scene/family?uuid={{f.uuid}}" class="inlink"
+                   title="{{ _('Go to family page') }}">{{f.rel_type|transl('marr')}}</a>
                 {% if f.marriage_place %}{{f.marriage_place}}{% endif %}
-                {% if f.marriage_date %}{{f.marriage_date}}{% endif %}
+                {% if f.dates %}{{f.dates}}{% endif %}
                 <br><span class="id" title="{{ _('Original ID') }}">{{f.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{f.uniq_id}}</span>
                 </td>
-            <td>{% if f.father.uniq_id %} <!-- &#9794; -->
-                <a href="/scene/person={{f.father.uniq_id}}" class="inlink"
+            <td>{% if f.father.uuid %} <!-- &#9794; -->
+                <a href="/scene/person?uuid={{f.father.uuid}}" class="inlink"
                    title="{{f.father_sortname}}">
                 {{ macro.person_name_long(f.father.names[0]) }}</a>
             {% else %} –
             {% endif %}</td>
-            <td>{% if f.mother.uniq_id %} <!-- &#9792; -->
-                <a href="/scene/person={{f.mother.uniq_id}}" class="inlink"
+            <td>{% if f.mother.uuid %} <!-- &#9792; -->
+                <a href="/scene/person?uuid={{f.mother.uuid}}" class="inlink"
                    title="{{f.mother_sortname}}">
                 {{ macro.person_name_long(f.mother.names[0]) }}</a>
             {% else %} –
@@ -157,7 +157,7 @@
             <td><small>{% if f.no_of_children %}
                 {{ ngettext('%(num)d child', '%(num)d children', f.no_of_children) }}:
             {% endif %}
-            {% for c in f.children %}<br><a href="/scene/person={{c.uniq_id}}"
+            {% for c in f.children %}<br><a href="/scene/person?uuid={{c.uuid}}"
                 title="{{c.sortname}}">{{ macro.person_name_by_sortname(c) }}</a>
             {% endfor %}</small></td>
         </tr>

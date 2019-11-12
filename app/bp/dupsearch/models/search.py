@@ -108,7 +108,7 @@ def generate_searchkey1(n,count,rec):
         event = Event.from_node(e)
         etype = event.type
         if etype not in {'Birth','Death'}: continue
-        edate = event.date
+        edate = event.dates.estimate()
         if pl: 
             eplace = pl.get('pname')
         else:

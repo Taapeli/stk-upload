@@ -3,6 +3,7 @@ var _ = function(msgid,args) { return gt.strargs(gt.gettext(msgid),args); };
 var ngettext = function(msgid, msgid_plural, n) { return gt.ngettext(msgid, msgid_plural, n); };
 	
 function jump(initial) {
+	// Jump to a #id address and scroll a little back (for person_list.html etc)
 	var elem = $("a[name="+initial+"]");
     var rect = elem.get(0).getBoundingClientRect();
 	var y = rect.top;

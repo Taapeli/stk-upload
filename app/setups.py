@@ -1,5 +1,5 @@
 from flask_security import Security, UserMixin, RoleMixin
-from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, ValidationError
+from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, PasswordField, ValidationError
 from wtforms import SelectField, SubmitField, BooleanField
 from flask_security.utils import _
 from flask_mail import Mail
@@ -18,6 +18,8 @@ import logging
 #from flask_login.utils import current_user
 #from flask.globals import session
 import json
+from flask_babelex import lazy_gettext as _l
+
 logger = logging.getLogger('stkserver') 
 
 
@@ -168,16 +170,19 @@ class User(UserMixin):
      
 class ExtendedLoginForm(LoginForm):
 
-    email = StringField('Email or Username', validators=[Required('Email required') ])
-    submit = SubmitField(_('Login'))
+    email = StringField(_l('Email or Username'), validators=[Required('Email required') ])
+    password = PasswordField(_l('Password'),
+                             validators=[Required('Password required')])
+    remember = BooleanField(_l('Remember Me'))
+    submit = SubmitField(_l('Login'))
 
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
-    email = StringField(_('Email Address'), validators=[Required('Email required') ])
-    agree = BooleanField( _('I have read and agree the ') + "<a href='static/termsofuse.html' >" +  _('Terms of use') + " </a>")
-#    agree = BooleanField(_('I have read and agree to the Terms and Conditions of use'))
-#    terms = SubmitField(_('See the terms of use'))
-    submit = SubmitField(_('Register'))
+    email = StringField(_l('Email address'), validators=[Required('Email required') ])
+    agree = BooleanField( _l("I have read and agree the <a href='static/termsofuse.html'>Terms of use</a>"))
+    password = PasswordField(_l('Password'),
+                             validators=[Required('Password required')])
+    submit = SubmitField(_l('Register'))
  
     def validate_agree(self, field):
         if not field.data:
@@ -202,11 +207,9 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
         if user:
             raise ValidationError(_('Username has been reserved already'))
 
-    username = StringField('Username', validators=[Required('Username required')])
-    name = StringField('Name', validators=[Required('Name required')])
-    #language = StringField('Language', validators=[Required('Language required')])
-
-    language = SelectField('Language', 
+    username = StringField(_l('Username'), validators=[Required('Username required')])
+    name = StringField(_l('Name'), validators=[Required('Name required')])
+    language = SelectField(_l('Language'), 
                 choices=shareds.app.config.get('LANGUAGES'),
                 validators=[Required(_('Language required'))])
 

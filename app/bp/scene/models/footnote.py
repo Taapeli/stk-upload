@@ -33,7 +33,7 @@ Created on 23.10.2018
 
 @author: jm
 '''
-from models.gen.citation import Citation
+from models.gen.citation import Citation, CitationMark
 
 class Footnotes():
     ''' A structure for organizing footnotes for source citations '''
@@ -79,23 +79,13 @@ class Footnotes():
         return (new.mark, i1, 0)
 
 
-    def getNotes(self):
+    def getFootnotes(self):
         lst = []
         for n in self.fnotes:
             for c in n.cites:
                 lst.append(CitationMark(c.mark, c.ids))
         return lst
 
-
-class CitationMark():
-    def __init__(self, mark=None, ids=[-1, -1, -1]):
-        self.mark = mark
-        self.r_ids = ids[0]
-        self.s_id = ids[1]
-        self.c_id = ids[2]
-
-    def __str__(self):
-        return "{}: r={},s={},c={}".format(self.mark, self.r_ids, self.s_id, self.c_id)
 
 class SourceFootnote():
     '''
@@ -151,25 +141,25 @@ class SourceFootnote():
 
 
     @classmethod
-    def from_citation_objs(cls, cit, objs):
+    def from_citation_objs(cls, citation_obj, objs):
         ''' Creates a SourceFootnote from Citation structure components
             using objects from dictionary objs
 
-            cit                 Citation object ~ from objs[cref]
-            - cit.page          str     Citation page text
-            source              Source object ~ from objs[cit.source]
+            citation_obj        Citation object ~ from objs[cref]
+            - citation_obj.page str     Citation page text
+            source              Source object ~ from objs[citation_obj.source]
             - source.stitle     str     Source title
                                 source href="#sref{{ source.uniq_id }}"
             repo                Repository object ~ from objs[source.repositories[]]
             - repo.rname        str     Repository name"
         '''
-        if not ( isinstance(cit, Citation) and isinstance(objs, dict) ):
-            raise TypeError("SourceFootnote: Invalid arguments {}".format(cit))
+        if not ( isinstance(citation_obj, Citation) and isinstance(objs, dict) ):
+            raise TypeError(f"SourceFootnote: Invalid arguments {citation_obj}")
 
         n = cls()
-        n.cites.append(cit)
-        if cit.source_id in objs:
-            n.source = objs[cit.source_id]
+        n.cites.append(citation_obj)
+        if citation_obj.source_id in objs:
+            n.source = objs[citation_obj.source_id]
             s_id = n.source.uniq_id
         else:
             s_id = -1
@@ -181,18 +171,18 @@ class SourceFootnote():
                     n.repo = objs[rep]
                     r_ids.append(n.repo.uniq_id)
         n.cites[0].ids = [r_ids, s_id, n.cites[0].uniq_id]
-        print("- ind=(r,s,c)={}".format(n.cites[0].ids))
+        #print("- ind=(r,s,c)={}".format(n.cites[0].ids))
         return n
 
 
     def setmark(self, i, j):
-        ''' Sets mark by indexes i, j as a string "1a 
-            for this SourceFootnote and .cites[-1]"
+        ''' Sets mark by indexes i, j as a string " 1a"
+            for this SourceFootnote and .cites[-1]
         '''
         letters = "abcdefghijklmnopqrstizåäö*"
         #self.cites[-1].mark2 = j
         mark2 = j
         if mark2 >= len(letters):
             mark2 = len(letters) - 1
-        self.mark = "{}{}".format(i + 1, letters[mark2])
+        self.mark = f"{i + 1:2d}{letters[mark2]}"
         self.cites[-1].mark = self.mark
