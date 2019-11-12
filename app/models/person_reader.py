@@ -473,6 +473,49 @@ class PersonReader():
         return
 
 
+    def get_citations_js(self):
+        ''' Create code for generating Javascript objecs representing
+            Citations, Sources and Repositories with their Notes.
+            
+            js-style person[id] = {name: "John", age: 31, city: "New York"}
+        '''
+        def unquote(s):
+            ''' Change quites (") to fancy quotes (“) '''
+            return s.replace('"', '“');
+
+        #notes = []
+        js = 'var citations = {};\nvar sources = {};\n'
+        for o in self.objs.values():
+            if isinstance(o, Citation):
+                js += f'citations[{o.uniq_id}] = '
+                js +=  '{ '
+                js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
+                js += f'id:"{o.id}", note_ref:{o.note_ref}, '
+                page = unquote(o.page)
+                js += f'page:"{page}", source_id:{o.source_id}, '  
+                js += f'source_medium:"{o.source_medium}",uuid:"{o.uuid}" '
+                js +=  '};\n'
+
+            if isinstance(o, Source):
+                js += f'sources[{o.uniq_id}] = '
+                js +=  '{ '
+                js += f'id:"{o.id}", note_ref:{o.note_ref}, '
+                sauthor = unquote(o.sauthor)
+                js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
+                spubinfo = unquote(o.spubinfo)
+                stitle = unquote(o.stitle)
+                js += f'spubinfo:"{spubinfo}", stitle:"{stitle}", '
+                js += f'uuid:"{o.uuid}" '
+                js +=  '};\n'
+
+            if isinstance(o, Repository):
+                pass    # Todo
+        # Find referenced Notes
+        #for o in notes:
+            pass    # Todo
+        return js
+
+
     def set_citation_marks(self, refs):    #, citations, objs):
         ''' Create person citation references for foot notes.
         

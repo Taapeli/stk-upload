@@ -103,10 +103,6 @@ u { color: DarkKhaki; text-decoration: none; }
                 <tbody>
 {% for e in person.events if e.type != "Cause Of Death" %}
                     <tr>
-{#  person.events[0].citation_ref[0] = 90323
-    objs[person.events[0].citation_ref[0]] = <models.gen.citation.Citation object at 0x7f0a24696ac8> = cr
-    objs[person.events[0].citation_ref[0]].mark = '1a'
-#}
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
     {% if e.type == "Baptism" %}    <a href="/scene/event/{{e.uniq_id}}" class="inlink">&rarr;&nbsp;
@@ -155,8 +151,6 @@ u { color: DarkKhaki; text-decoration: none; }
                             {% endif %}
                             </div>
                         </td>
-{#                  {% endif %}
-#}
                     </tr>
 {% endfor %}
                  </tbody>
@@ -167,9 +161,8 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
-               <div><button type="button" onclick="tbl.findCitations('dbug')">Etsi viitteet<sup>*</sup></button><br>
-                    <button type="button" onclick="tbl.listCitations('citTbl')">Viitetaulukko</button><br>
-                    <button type="button" onclick="tbl.sourceReferences('sourcerefContent')">Lisää karkea lähdeluettelo</button></div>
+               <div><button type="button" onclick="tbl.findCitations('dbug','citTbl')">*) Etsi viitteet</button><br>
+                    <button type="button" onclick="tbl.sourceReferences('sourcerefContent','citTbl')">Lisää lähdeluettelo</button></div>
                <div id="dbug"><p>Löydetyt viitteet</p></div>
                <div><table id="citTbl"><body><tr><td>Viitteet lähteittäin</td></tr></body></table></div>
             </div>
@@ -276,6 +269,8 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
             <div id="sourcerefContent"></div>
+
+<script>{{jscode|safe}}</script>
 {#
 		    cita = citations[0]               = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
             cita.mark                         = '1a'
@@ -286,7 +281,6 @@ u { color: DarkKhaki; text-decoration: none; }
 		    source.repositories[0]            = <models.gen.repository.Repository object at 0x7f1374e1ae48>
 		    source.repositories[0].rname      = 'Akaan seurakunnan arkisto'
 <ul>
-#}
 
 {% for clist in citations | groupby('mark_sorter') %}
     <div class="sourceDesc"><!-- Source {{ clist.grouper }} -->
@@ -309,7 +303,7 @@ u { color: DarkKhaki; text-decoration: none; }
              {% set conf = cita.confidence | int %}
              <div class="citaDesc" id="sref{{ cita.mark|trim }}"
                 {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %}>
-                  <span title="[{{cita.id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
+                  <span title="[{{cita.id}} nr:{{cita.uniq_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
                       <b>{{ cita.mark }}</b> {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
                   </span> {{ cita.noteref }}
                 {% for nref in cita.note_ref %} &nbsp;►&nbsp;{{ macro.notelink(obj[nref]) }}
@@ -318,6 +312,7 @@ u { color: DarkKhaki; text-decoration: none; }
         {% endfor %}
    </div>
 {% endfor %}
+#}
 
         </div>
     </div>
