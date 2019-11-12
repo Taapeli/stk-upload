@@ -10,7 +10,6 @@ function jump(initial) {
 	window.scroll(0,window.scrollY+y-30);
 };
 
-var cit_tbl = ["rivi1", "rivi2"];
 //Table of citations (for person.html etc)
 
 function citTable() {
@@ -64,7 +63,7 @@ function citTable() {
 		console.log("Citation table=" + this.cTbl);
 	}
 
-	this.findCitations = function(textDest) {
+	this.findCitations = function(textDest,tblDest) {
 		// Search html <sup> tags and add the citations to this.cTbl.
 		var x = document.getElementsByTagName("sup");
 		var i;
@@ -84,6 +83,8 @@ function citTable() {
 			}
 		}
 		document.getElementById(textDest).innerHTML = ret;
+		// Show citation refeference table
+		this.listCitations(tblDest);
 	}
 
 	this.sourceReferences = function(destination) {
@@ -104,7 +105,7 @@ function citTable() {
 				nodeA.appendChild(textnode);
 				var nodeSource = document.createElement("DIV");
 				nodeSource.setAttribute("class", "sourceDesc");
-				nodeSource.style.color = "green";
+				//nodeSource.style.color = "green";
 				nodeSource.appendChild(nodeA);
 				t.appendChild(nodeSource);
 
@@ -124,16 +125,25 @@ function citTable() {
 //		        {% else %}<b title="{{c}}">{{ _("No source information!") }}</b>
 //		        {% endif %}
 			}
-			// Show Citations
+			// Show Citations defined by
+			// 	citations[395801] = { confidence:"2", dates:"–", id:"C0867", 
+			//		note_ref:[442899], page:"sivu 115", source_id:312820, 
+			//		source_medium:"Book",uuid:"5eab898287ed42289890d5b9020ec2e3"};
 			for (j=0; j<line[1].length; j++) {
 				var mark = this.getMark(i, j);
+				var cObj = citations[line[i, j + 1]]
+				console.log("Citation[" + i + "," + j + "]" + cObj);
 				var nodeB = document.createElement("B");
 				var textnode = document.createTextNode(mark + ' ');
 				nodeB.appendChild(textnode);
 				
 				var nodeA = document.createElement("SPAN");
 				nodeA.appendChild(nodeB);
-				var textnode = document.createTextNode("Page X");
+				var text = cObj['page'] + ", luetettavuus=" + cObj['confidence'];
+				if (cObj['note_ref']) {
+					text += " ► note " + cObj['note_ref'];
+				}
+				var textnode = document.createTextNode(text);
 				nodeA.appendChild(textnode);
 
 				var nodeB = document.createElement("DIV");
@@ -152,7 +162,6 @@ function citTable() {
 //	         </div>;
 			}
 		}
-		console.log("Citation table=" + this.cTbl);
 	}
 }
 

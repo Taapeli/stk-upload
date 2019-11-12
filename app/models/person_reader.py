@@ -480,16 +480,16 @@ class PersonReader():
             js-style person[id] = {name: "John", age: 31, city: "New York"}
         '''
         #notes = []
-        js = 'var citations = {};'
-        for o in self.objs:
+        js = 'var citations = {};\n'
+        for o in self.objs.values():
             if isinstance(o, Citation):
                 js += f'citations[{o.uniq_id}] = '
                 js +=  '{ '
                 js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
-                js += f'id:"{o.id}", note_ref:{o.noteref}, '
+                js += f'id:"{o.id}", note_ref:{o.note_ref}, '
                 js += f'page:"{o.page}", source_id:{o.source_id}, '  
-                js += f'source_medium:"{o.source_medium}",uuid:"{o.uuid}"'
-                js +=  '};'
+                js += f'source_medium:"{o.source_medium}",uuid:"{o.uuid}" '
+                js +=  '};\n'
 
             if isinstance(o, Source):
                 pass    # Todo

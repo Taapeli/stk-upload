@@ -161,9 +161,8 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
-               <div><button type="button" onclick="tbl.findCitations('dbug')">Etsi viitteet<sup>*</sup></button><br>
-                    <button type="button" onclick="tbl.listCitations('citTbl')">Viitetaulukko</button><br>
-                    <button type="button" onclick="tbl.sourceReferences('sourcerefContent')">Lisää karkea lähdeluettelo</button></div>
+               <div><button type="button" onclick="tbl.findCitations('dbug','citTbl')">*) Etsi viitteet</button><br>
+                    <button type="button" onclick="tbl.sourceReferences('sourcerefContent','citTbl')">Lisää alas lähdeluettelo</button></div>
                <div id="dbug"><p>Löydetyt viitteet</p></div>
                <div><table id="citTbl"><body><tr><td>Viitteet lähteittäin</td></tr></body></table></div>
             </div>
@@ -271,6 +270,7 @@ u { color: DarkKhaki; text-decoration: none; }
             <h4>{{ _("Source references") }}</h4>
             <div id="sourcerefContent"></div>
 
+<script>{{jscode|safe}}</script>
 {#
 		    cita = citations[0]               = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
             cita.mark                         = '1a'
