@@ -480,7 +480,7 @@ class PersonReader():
             js-style person[id] = {name: "John", age: 31, city: "New York"}
         '''
         #notes = []
-        js = 'var citations = {};\n'
+        js = 'var citations = {};\nvar sources = {};\n'
         for o in self.objs.values():
             if isinstance(o, Citation):
                 js += f'citations[{o.uniq_id}] = '
@@ -492,7 +492,14 @@ class PersonReader():
                 js +=  '};\n'
 
             if isinstance(o, Source):
-                pass    # Todo
+                js += f'sources[{o.uniq_id}] = '
+                js +=  '{ '
+                js += f'id:"{o.id}", note_ref:{o.note_ref}, '
+                js += f'repositories:{o.repositories}, sauthor:"{o.sauthor}", '
+                js += f'spubinfo:"{o.spubinfo}", stitle:"{o.stitle}", '
+                js += f'uuid:"{o.uuid}" '
+                js +=  '};\n'
+
             if isinstance(o, Repository):
                 pass    # Todo
         # Find referenced Notes

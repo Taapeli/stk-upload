@@ -97,19 +97,45 @@ function citTable() {
 		for (i = 0; i < l; i++) {
 			line = this.cTbl[i];
 			if (line[0] != source_id) {
-				// New Source
+				// Show new Source
+				// 	sources[312820] = { id:"S0408", note_ref:[], repositories:[316840],
+				//		sauthor:"", spubinfo:"", stitle:"Askainen kuolleet 1888-1890", 
+				//		uuid:"f83d3ff5c5cb49f1a71060b9456ab59e" };
+				//
+		        // <a href="/scene/source=208153" class="inlink" title="[C0866] Lähteen S1418 tiedot">
+		        //    Taivassalon seurakunnan syntyneiden ja kastettujen luettelot 1790-1850 (I C:4)</a>
 				source_id = line[0];
-				var nodeA = document.createElement("A");
-				var textnode = document.createTextNode(" Lähde " + source_id);
-				nodeA.href = '/scene/source=' + source_id;
-				nodeA.appendChild(textnode);
+				var sObj = sources[source_id];
+
 				var nodeSource = document.createElement("DIV");
 				nodeSource.setAttribute("class", "sourceDesc");
 				//nodeSource.style.color = "green";
-				nodeSource.appendChild(nodeA);
 				t.appendChild(nodeSource);
 
-//			    <div class="sourceDesc"><!-- Source {{ clist.grouper }} -->
+				var nodeA = document.createElement("A");
+				nodeA.href = '/scene/source=' + source_id;
+				nodeA.setAttribute("class", "inlink");
+				nodeA.setAttribute("title", "Lähteen " + sObj.id + " tiedot");
+				var textnode = document.createTextNode(sObj.stitle);
+				nodeA.appendChild(textnode);
+				nodeSource.appendChild(nodeA);
+				nodeSource.appendChild(document.createTextNode(' – '));
+				
+				// Todo: citation.source_medium:"book" siirrettävä Source-nodeen?
+				// 	– <span class="typedesc">kirja</span>
+				var nodeMedium = document.createElement("SPAN");
+				nodeMedium.setAttribute("class", "typedesc");
+				textnode = document.createTextNode("(medium)");
+				nodeMedium.appendChild(textnode);
+				nodeSource.appendChild(nodeMedium);
+				
+				// Todo: repository
+				// <i>Taivassalon seurakunnan arkisto</i>
+				var nodeRepo = document.createElement("I");
+				var textnode = document.createTextNode(" (arkisto)");
+				nodeSource.appendChild(textnode);
+
+//			    <div class="sourceDesc">	<!-- Source {{ clist.grouper }} -->
 //		        {% set c = clist.list[0] %}
 //		        {% if c.source_id %}{% set source = obj[c.source_id] %}
 //		                   <a href="/scene/source={{source.uniq_id}}" class="inlink"
@@ -125,43 +151,62 @@ function citTable() {
 //		        {% else %}<b title="{{c}}">{{ _("No source information!") }}</b>
 //		        {% endif %}
 			}
+
 			// Show Citations defined by
 			// 	citations[395801] = { confidence:"2", dates:"–", id:"C0867", 
 			//		note_ref:[442899], page:"sivu 115", source_id:312820, 
 			//		source_medium:"Book",uuid:"5eab898287ed42289890d5b9020ec2e3"};
+			//
+			// <div class="citaDesc" id="sref 2b">
+            //   <span title="[C0866] normaali luottamustaso (2)">
+            //     <b> 2b</b> Sivu: Vigde år 1828 October 28 &nbsp; ★★☆☆☆
+			//   </span> 
+            //   &nbsp;►&nbsp;<a href="http://digi.narc.fi/digi/view.ka?kuid=5364234"
+            //     class="outlink" target="_blank">digi.narc.fi</a> –
+			// </div>
 			for (j=0; j<line[1].length; j++) {
 				var mark = this.getMark(i, j);
-				var cObj = citations[line[i, j + 1]]
-				console.log("Citation[" + i + "," + j + "]" + cObj);
-				var nodeB = document.createElement("B");
-				var textnode = document.createTextNode(mark + ' ');
-				nodeB.appendChild(textnode);
+				cita_id = line[1][j];
+				var cObj = citations[cita_id];
+
+				var nodeCitaDiv = document.createElement("DIV");
+				nodeCitaDiv.setAttribute("id", "sref" + mark);
+				nodeCitaDiv.setAttribute("class", "citaDesc");
+				nodeSource.appendChild(nodeCitaDiv);
 				
-				var nodeA = document.createElement("SPAN");
-				nodeA.appendChild(nodeB);
-				var text = cObj['page'] + ", luetettavuus=" + cObj['confidence'];
+				var nodeCitaSpan = document.createElement("SPAN");
+				nodeCitaSpan.setAttribute("title", cObj.id + " luottamustaso " + cObj.confidence);
+				
+				var nodeCitaB = document.createElement("B");
+				nodeCitaB.appendChild(document.createTextNode(mark + ' '));
+				nodeCitaSpan.appendChild(nodeCitaB);
+				var text = cObj.page + " " + stars(cObj.confidence);
+				nodeCitaSpan.appendChild(document.createTextNode(text));
+				nodeCitaDiv.appendChild(nodeCitaSpan);
+
 				if (cObj['note_ref']) {
-					text += " ► note " + cObj['note_ref'];
+					text = " ► note " + cObj.note_ref + " ";
+					nodeCitaDiv.appendChild(document.createTextNode(text));
+					
+					var nodeNoteA = document.createElement("A");
+					nodeNoteA.setAttribute("class", "inlink");
+					nodeNoteA.setAttribute("target", "_blank");
+					nodeNoteA.setAttribute("href", "#");
+					nodeNoteA.appendChild(document.createTextNode("(example.org)"));
+					nodeCitaDiv.appendChild(nodeNoteA);
 				}
-				var textnode = document.createTextNode(text);
-				nodeA.appendChild(textnode);
-
-				var nodeB = document.createElement("DIV");
-				nodeB.setAttribute("class", "citaDesc");
-				nodeB.id = "sref" + mark;
-				nodeB.appendChild(nodeA);
-
-				nodeSource.appendChild(nodeB);
-				
-//			 <div class="citaDesc" id="sref{{ cita.mark|trim }}" ...>
-//	            <span title="[{{cita.id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
-//	                <b>{{ cita.mark }}</b> {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
-//	            </span> {{ cita.noteref }}
-//	          {% for nref in cita.note_ref %} &nbsp;►&nbsp;{{ macro.notelink(obj[nref]) }}
-//	          {% endfor %}
-//	         </div>;
 			}
 		}
 	}
 }
 
+function stars(value) {
+	// Returns stars ★★☆☆☆ according to value 0..4
+	var ret = '';
+	var x = parseInt(value);
+	for (i = 0; i < 5; i++) {
+		if (x > i) 	{ ret += '★' }
+		else 		{ ret += '☆' }
+	}
+	return ret;
+}
