@@ -158,12 +158,14 @@ u { color: DarkKhaki; text-decoration: none; }
         </div>
 
 {% if true %}
-        <div class="subsection" id="notes">
+        <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
-<!--                <div><button type="button" onclick="tbl.findCitations('demo', 'citTbl')">Try it</button></div> -->
-               <div><table id="citTbl"><body><tr><td>Tähän vastaus</td></tr></body></table></div>
-               <div id="demo"><p>Sisällöt</p></div>
+               <div><button type="button" onclick="tbl.findCitations('dbug')">Etsi viitteet<sup>*</sup></button><br>
+                    <button type="button" onclick="tbl.listCitations('citTbl')">Viitetaulukko</button><br>
+                    <button type="button" onclick="tbl.sourceReferences('sourcerefContent')">Lisää karkea lähdeluettelo</button></div>
+               <div id="dbug"><p>Löydetyt viitteet</p></div>
+               <div><table id="citTbl"><body><tr><td>Viitteet lähteittäin</td></tr></body></table></div>
             </div>
         </div>
 {% endif %}
@@ -316,9 +318,6 @@ u { color: DarkKhaki; text-decoration: none; }
     </div>
 <script>
 var tbl = new citTable();
-tbl.findCitations('demo');
-tbl.listCitations('citTbl');
-tbl.sourceReferences('sourcerefContent');
 </script>
 {% endblock %}
 

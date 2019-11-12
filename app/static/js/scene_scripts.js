@@ -70,23 +70,24 @@ function citTable() {
 		var i;
 		var ret = "";
 		for (i = 0; i < x.length; i++) {
-		    ret += " " + x[i].innerText;
 			var a = x[i].firstElementChild;
-			if (a.nodeName == "A" && a.id != "" ) {
-				// <sup><a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
-			    var arr = a.id.split('-');
-			    mark = this.add(Number(arr[0]), Number(arr[1]));
-			    a.href = "#sref" + mark;
-			    a.innerText = mark;
-			    ret += mark + ">" + a.id + '<br>';
-			} else { ret += '<br>' }
+			if (a != null) {
+			    ret += " " + x[i].innerText;
+				if (a.nodeName == "A" && a.id != "" ) {
+					// <sup><a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
+				    var arr = a.id.split('-');
+				    mark = this.add(Number(arr[0]), Number(arr[1]));
+				    a.href = "#sref" + mark;
+				    a.innerText = mark;
+				    ret += mark + ">" + a.id + '<br>';
+				} else { ret += '<br>' }
+			}
 		}
-		document.getElementById(textDest).innerHTML = ret;	// Text result
+		document.getElementById(textDest).innerHTML = ret;
 	}
 
 	this.sourceReferences = function(destination) {
 		// Display citations table in destination element.
-
 		var t = document.getElementById(destination);
 		this.cTbl.sort(function(a, b){return a[0]-b[0]});
 		
