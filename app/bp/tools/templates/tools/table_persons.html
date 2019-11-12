@@ -33,7 +33,7 @@
     	{% if p.events %}
         	{% for event in p.events %} {{tr_tag|safe}} {% set tr_tag="<tr>" %}
 	    		<td style="align:right;">{{event.type}}</td>
-	    		<td>{{event.dates}}</td>
+	    		<td>{{event.date}}</td>
 	    		<td>{{event.place}}</td>
 	    	</tr>
 			{% endfor %}

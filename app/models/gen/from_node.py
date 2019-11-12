@@ -24,7 +24,7 @@ def get_object_from_node(node):
     try:
         label = list(node.labels)[0]
     except Exception as e:
-        print("{} Empty node? {}".format(e, node))
+        print("{} Tyhjä node? {}".format(e, node))
         return None
 
     if label == "Event":

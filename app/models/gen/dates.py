@@ -218,54 +218,54 @@ class DateRange():
         - if other is None or MISSING value, it is treated as smallest value
         - If self is MISSING value, self is always ordered largest value
 
-        self  cmp   other    | lt    le    eq      ge    gt     ne
-        ----- ---   -----    + ----  ----  ----    ----  ----  ----
-        missing  missign/None| False True  True    True  False False  
-        missing     exists   | True  True  False   False False True   
-        exists   missign/None| False False False   True  True  True   
-               <             | True  True  False   False False True   
-               =             | False True  True    True  False False  
-               >             | False False False   True  True  True   
+                  other ----------------
+        op        None   >     =     <    # self <op> other = True?
+        --        ----  ----  ----  ----
+        lt        False True  False True
+        le        False True  True  True
+        eq        False False True  True
+        ge        True  False True  True
+        gt        True  False False True
+        ne        True  True  False True
 
         #TODO Compare all DateRange types, now DR_DATE is assumed!
     '''
     def __lt__(self, other):
-        if other == None or other.datetype == DR['MISSING']:
+        if self.datetype == DR['MISSING']:
             return False
-        elif self.datetype == DR['MISSING']:
-            return True
-        return self.date1.intvalue < other.date1.intvalue
-
+        if other:
+            return self.date1.intvalue < other.date1.intvalue
+        return False
     def __le__(self, other):
         if self.datetype == DR['MISSING']:
-            return True
-        if other == None or other.datetype == DR['MISSING']:
             return False
-        return self.date1.intvalue <= other.date1.intvalue
-
+        if other:
+            return self.date1.intvalue <= other.date1.intvalue
+        return False
     def __eq__(self, other):
-        if other == None or other.datetype == DR['MISSING']:
-            return self.datetype == DR['MISSING']
-        return self.date1.intvalue == other.date1.intvalue
-
-    def __ge__(self, other):
-        if other == None or other.datetype == DR['MISSING']:
-            return True
         if self.datetype == DR['MISSING']:
-            return False
-        return self.date1.intvalue >= other.date1.intvalue
-
+            return self.date1.intvalue == other.date1.intvalue
+        if other:
+            return self.date1.intvalue == other.date1.intvalue
+        return False
+    def __ge__(self, other):
+        if self.datetype == DR['MISSING']:
+            return True
+        if other:
+            return self.date1.intvalue >= other.date1.intvalue
+        return True
     def __gt__(self, other):
         if self.datetype == DR['MISSING']:
-            return False
-        if other == None or other.datetype == DR['MISSING']:
             return True
-        return self.date1.intvalue > other.date1.intvalue
-
+        if other:
+            return self.date1.intvalue > other.date1.intvalue
+        return True
     def __ne__(self, other):
-        if other == None or other.datetype == DR['MISSING']:
-            return self.datetype != DR['MISSING']
-        return self.date1.intvalue != other.date1.intvalue
+        if self.datetype == DR['MISSING']:
+            return self.date1.intvalue != other.date1.intvalue
+        if other:
+            return self.date1.intvalue != other.date1.intvalue
+        return True
 
     @staticmethod
     def minus(d1, d2):
@@ -280,17 +280,6 @@ class DateRange():
         '''
         #TODO calculate
         return d1
-
-    @classmethod
-    def from_node(cls, node):
-        '''
-                Extracts a DateRange value from any db node, if present.
-        '''
-        if node['datetype'] != None:
-            return DateRange(node['datetype'], node['date1'], node['date2'])
-
-        return DateRange()
-
 
     def estimate(self):
         """ Gives a date estimate """
@@ -484,8 +473,6 @@ class DateRange():
                 - if the day part is 15 --> only year-month are given
                 - if the month part is 6 --> only year is given
             """
-            if self.intvalue == -1:
-                return "-1"
             vec = self.vector()
             if len(vec) > 2:
                 return "{:04d}-{:02d}-{:02d}".format(vec[0], vec[1], vec[2])
@@ -509,8 +496,6 @@ class DateRange():
                 The string is now a Finnish style "20.9.2017" date 
                 (or shortened "9.2017" or "2017", when the month or day are zeroes).
             """
-            if self.intvalue == -1:
-                return "–"
             try:
                 if self.intvalue == 0:
                     # Missing date

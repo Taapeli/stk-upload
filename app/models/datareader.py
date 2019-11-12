@@ -203,7 +203,7 @@ def recreate_refnames():
 def read_cite_sour_repo(uniq_id=None):
     """ Lukee tietokannasta Repository-, Source- ja Citation- objektit näytettäväksi.
     
-        Called from bp.tools.routes.pick_selection  -  NOT IN USE?
+        Called from bp.tools.routes.pick_selection
     """
 
     sources = []
@@ -214,8 +214,8 @@ def read_cite_sour_repo(uniq_id=None):
         e.uniq_id = pid
         if record_cite['type']:
             e.type = record_cite['type']
-#         if record_cite['date']:
-#             e.date = record_cite['date']
+        if record_cite['date']:
+            e.date = record_cite['date']
         if record_cite['dates']:
             e.dates = DateRange(record_cite['dates'])
 
@@ -475,44 +475,29 @@ def get_source_with_events(sourceid):
 
     result = Source.get_source_w_notes(sourceid)
     for record in result:
-        # <Record source=<Node id=312705 labels={'Source'} 
-        #    properties={'id': 'S0278', 'stitle': 'Taivassalon seurakunnan vihit...', 
-        #        'uuid': '6e75056295854ca28d14338d29c202d8', 'spubinfo': '', 'sauthor': '', 'change': 1566726449}>
+        # Record: <Record 
+        #    source=<Node id=242395 labels={'Source'} 
+        #        properties={'handle': '_d9d28fe83184fd33368', 'id': 'S0052', 
+        #        'stitle': 'Hämeenlinna ksrk syntyneet 1850-1874', 'change': '1543225947'}> 
         #    notes=[
-        #        <Node id=316600 labels={'Note'}
-        #            properties={'id': 'N4817', 'text': 'Sisältää myös kuolleet ja haudatut', 
-        #                'type': 'Source Note', 'uuid': '43171020689c46b0bb7b1f565aad4d58', 
-        #                'change': 1566726446}>
-        #        ]
-        #    reps=[
-        #        ['Book', 
-        #         <Node id=316858 labels={'Repository'} 
-        #            properties={'id': 'R0068', 'rname': 'Taivassalon seurakunnan arkisto', 
-        #            'type': 'Archive', 'uuid': '41a44def1a2b43c88001d8c1bad9d6e6', 
-        #            'change': 1569934209}>]
-        #        ]
-        # >
+        #        <Node id=234937 labels={'Note'} 
+        #            properties={'handle': '_d9d291becb75743756e', 'text': '', 
+        #                'id': 'N2213', 'type': 'Citation', 
+        #                'url': 'http://digi.narc.fi/digi/view.ka?kuid=6062348', 
+        #                'change': 1532807569}>
+        #    ]>
+
         s = Source.from_node(record['source'])
-        # Add notes
         notes = record['notes']
         for node in notes:
             n = Note.from_node(node)
             s.notes.append(n)
-        # Add repositories and their mediums
-        for medium, node in record['reps']:
-            rep = Repository.from_node(node)
-            rep.medium = medium
-            s.repositories.append(rep)
 
-#     result = Source.get_citating_nodes(sourceid)
-        import shareds
-        from models.gen.cypher import Cypher_source
-        result = shareds.driver.session().run(Cypher_source.get_citators_of_source, 
-                                              sid=int(sourceid))
+    result = Source.get_citating_nodes(sourceid)
 
     citations = {}
     notes = {}
-    clearnames = dict()    # {uniq_id: clearname}
+    persons = dict()    # {uniq_id: clearname}
 
     for record in result:               # Nodes record
         # Example: Person directly linked to Citation
@@ -531,7 +516,10 @@ def get_source_with_events(sourceid):
 
         # Example: Person or Family Event linked to Citation
         # <Record c_id=89824
-        #         c=<Node id=89824 labels={'Citation'}...>
+        #         c=<Node id=89824 labels={'Citation'}
+        #            properties={'confidence': '2', 'dateval': '', 'change': 1526840499,
+        #                          'handle': '_de2f3ce67264ec83c7136ea12a', 'id': 'C1812',
+        #                          'page': 'Födda 1771 58. kaste'}>
         #           x_id=81210 label='Event'
         #           x=<Node id=81210 labels=set()
         #              properties={'date1': 1813643, 'description': '', 'date2': 1813643,
@@ -540,60 +528,62 @@ def get_source_with_events(sourceid):
         #                          'type': 'Birth', 'attr_value': '', 'datetype': 0}>
         #           p_id=73543>
 
-        node = record['c']
-        c = Citation.from_node(node)
-        if c.uniq_id not in citations.keys():
+        c_id = record['c_id']
+        if c_id not in citations.keys():
             # A new citation
-            citations[c.uniq_id] = c
+            c = Citation()
+            c.uniq_id = c_id
+            citations[c_id] = c
         else:
             # Use previous
-            c = citations[c.uniq_id]
+            c = citations[c_id]
 
-        # Notes
-        n_nodes = record['notes']
-        for node in n_nodes:
-            n = Note.from_node(node)
-            if n.uniq_id not in notes.keys():
-                c.note_ref.append(n)
-                notes[n.uniq_id] = n
-
-        # Referring node:  Person, Family, Name ... as NodeRef structure
-        root_uid = record['p_id']
-        root_label = record.get('p_label')
-        node = record['x']
-        x_uid = node.id    # Nearest referring node (Event, Person, Name, ...)
-
+        c_node = record['c']
+        c.id = c_node['id']
+        c.page = c_node['page']
+        c.confidence = c_node['confidence']
+        
+        c_notes = record['notes']
+        for n_node in c_notes:
+            n_id = n_node['id']
+            if n_id not in notes.keys():
+                note = Note.from_node(n_node)
+                c.note_ref.append(note)
+                notes[n_id] = n_id
+                    
+        p_uid = record['p_id']
+        x_node = record['x']
+        #x_uid = x_node.id
         noderef = NodeRef()
-        noderef.uniq_id = root_uid      # 72104
-        noderef.id = node['id']    # 'I1069' or 'E2821' TODO Why?
-        noderef.label = list(node.labels)[0]   # Get a member of a frozenset
+        # Referring Person or Family
+        noderef.uniq_id = p_uid      # 72104
+        noderef.id = x_node['id']    # 'I1069' or 'E2821'
+        noderef.label = next(iter(x_node.labels))   # Get a member of a frozenset
+        event_role = record['role']
 
-        event_role = record.get('role', "")
-        print(f'{root_label} {root_uid} Citation {c.uniq_id} {noderef.label}({event_role}) {noderef.uniq_id} {noderef.id}')
+        print('Citation {} {} {} {} {}'.format(c.uniq_id, event_role,
+                                               noderef.label, noderef.uniq_id, noderef.id))
 
-        if noderef.label == "Person":
-            pass #noderef.eventtype = 'self'
-        elif noderef.label == "Family":
-            noderef.eventtype = _('Family')
-        elif noderef.label == "Name":
-            noderef.eventtype = f"{node['order']+1}. {_('Name').lower()}"
-        elif noderef.label == "Event":
-            noderef.eventtype = _(node['type'])
-            noderef.edates = DateRange.from_node(node)
-
-        if noderef.uniq_id not in clearnames.keys():
-            #Todo: aseta tässä baseObject.type jne ???
-            if event_role == 'Family':
-                # Family event witch is directply connected to a Person Event
-                parent_names = Family_combo.get_marriage_parent_names(x_uid)
-                noderef.clearname = f"{parent_names['father']} <> {parent_names['mother']}"
-            else:
-                # Read Person names as cleartext string
-                noderef.clearname = Name.get_clearname(noderef.uniq_id)
-            clearnames[root_uid] = noderef.clearname
+        if event_role == 'Family':  # Family event witch is cdirectply connected to a Person Event
+            noderef.label = 'Family Event'
+#             couple = Family.get_marriage_parent_names(x_uid)
+#             noderef.clearname = " <> ".join(list(couple.values()))
+#         else:                       # Person event
+        if p_uid not in persons.keys():
+            noderef.clearname = Name.get_clearname(noderef.uniq_id)
+            persons[noderef.uniq_id] = noderef.clearname
         else:
-            noderef.clearname = clearnames[root_uid]
+            noderef.clearname = persons[p_uid]
 
+        if 'Event' in noderef.label:
+            # noderef: "Event <event_type> <person p_uid>"
+            noderef.eventtype = x_node['type']
+            if x_node['date1']:
+                noderef.edates = DateRange(x_node['datetype'], x_node['date1'], x_node['date2'])
+                noderef.date = noderef.edates.estimate()
+#         if noderef.label == 'Person':
+#             # noderef: "Person <clearname>"
+#             noderef.label = 'Person'
         c.citators.append(noderef)
 
     return (s, list(citations.values()))
@@ -683,7 +673,7 @@ def get_person_data_by_id(pid):
         # Read event with uniq_id's of related Place (Note, and Citation?)
         e.get_event_combo()        # Read data to e
         if e.type == "Birth":
-            my_birth_date = e.dates.estimate()
+            my_birth_date = e.date
 
         for ref in e.place_ref:
             place = Place_combo.get_w_notes(ref)
@@ -1012,7 +1002,7 @@ def get_place_with_events (loc_id):
         parent  isäsolmun id
 
     event_table:
-        person        person's info
+        uid           person's uniq_id
         names         list of tuples [name_type, given_name, surname]
         etype         event type
         edates        event date

@@ -9,7 +9,7 @@
 {% if event %}
 	<h4>{{ _('Identifier') }}: {{event.uniq_id}}</h4>
 	{% if event.type %}<h4>{{ _('Type') }}: {{event.type}}</h4>{% endif %}
-    {% if event.dates %}<h4>{{ _('Date') }}: {{event.dates}}</h4>
+    {% if event.date %}<h4>{{ _('Date') }}: {{event.date}}</h4>
 	{% elif event.daterange %}<h3>{{ _('Date') }}: {{event.daterange}}</h4>
 	{% endif %}
 	{% if event.place %}<h4>{{ _('Place') }}: {{event.place |join(' • ')}}</h4>{% endif %}

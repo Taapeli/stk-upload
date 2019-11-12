@@ -66,19 +66,13 @@ MATCH (x) -[:PLACE]-> (pl:Place)
 OPTIONAL MATCH (pl) -[:NAME]-> (pn:Place_name)
 OPTIONAL MATCH (pl) -[ri:IS_INSIDE]-> (pi:Place)
 OPTIONAL MATCH (pi) -[:NAME]-> (pin:Place_name)
-RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, 
-    pl, COLLECT(DISTINCT pn) AS pnames,
+RETURN x, pl, COLLECT(DISTINCT pn) AS pnames,
     pi, COLLECT(DISTINCT pin) AS pinames"""
     get_citation_note_media = """
 MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
     WHERE ID(x) IN $uid_list
+//OPTIONAL MATCH (y) --> (z)
 RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
-    #        (c) --> (s:Source) --> (r:Repository)
-    get_sources = """
-MATCH (c:Citation) -[:SOURCE]-> (s:Source)
-    WHERE ID(c) IN $uid_list
-    OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
-RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 
 #For Person_pg v2
     all_nodes_query_w_apoc="""
@@ -368,7 +362,7 @@ RETURN f, p.pname AS marriage_place,
     ORDER BY f.mother_sortname LIMIT $limit"""
     
     get_family_data = """
-MATCH (f:Family) WHERE f.uuid=$pid
+MATCH (f:Family) WHERE ID(f)=$pid
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
     OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
     OPTIONAL MATCH (pp) -[:EVENT]-> (pbe:Event {type:"Birth"})
@@ -437,9 +431,9 @@ return f.id as f_id, f.rel_type as rel_type,  type(r0) as myrole,
     collect(distinct [id(p), n, rn]) as names'''
 
     get_wedding_couple_names = """
-MATCH (e:Event) <-[:EVENT]- (:Family) -[r:PARENT]-> (p:Person) -[:NAME]-> (n:Name)
-    WHERE ID(e)=$eid
-RETURN r.role AS frole, id(p) AS pid, COLLECT(n) AS names"""
+match (e:Event) <-- (:Family) -[r:PARENT|FATHER|MOTHER]-> (p:Person) -[:NAME]-> (n:Name)
+    where ID(e)=$eid
+return type(r) as frole, id(p) as pid, collect(n) as names"""
 
 
     get_dates_parents = """
@@ -471,12 +465,15 @@ class Cypher_place():
     '''
     Cypher clases for creating and accessing Places
     '''
+
     
+   
+
     get_person_events = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
   WHERE id(l) = $locid
 MATCH (p) --> (n:Name)
-RETURN p AS person, r.role AS role,
+RETURN id(p) AS uid, r.role AS role,
   COLLECT(n) AS names,
   e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
 ORDER BY edates[1]"""
@@ -612,19 +609,6 @@ class Cypher_source():
 
     get_sources_w_notes = """
 MATCH (s:Source)
-WITH s ORDER BY toUpper(s.stitle)
-    OPTIONAL MATCH (s) -[:NOTE]-> (note)
-    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
-    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
-       collect(DISTINCT [r.medium, rep]) as repositories,
-       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
-ORDER BY toUpper(s.stitle)"""
-    get_selected_sources_w_notes = """
-MATCH (s:Source)
-        WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
-WITH s ORDER BY toUpper(s.stitle)
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
@@ -636,20 +620,25 @@ ORDER BY toUpper(s.stitle)"""
 
     get_a_source_w_notes = """
 MATCH (source:Source) WHERE ID(source)=$sid
-    OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (source) -[:NOTE]-> (n)
-RETURN source, COLLECT(n) AS notes, COLLECT([r.medium,rep]) AS reps"""
+OPTIONAL MATCH (source) -[:NOTE]-> (n)
+RETURN source, COLLECT(n) as notes"""
+#     get_repositories_w_notes = """
+# MATCH (source:Source) -[r:REPOSITORY]-> (repo:Repository)
+#     WHERE ID(source) = $sid
+# OPTIONAL MATCH (repo) -[:NOTE]-> (note:Note)
+# RETURN r.medium AS medium, repo, COLLECT(note) AS notes"""
+
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 
-match (c) <-[:CITATION]- (x)
+with c
+    match (c) <-[:CITATION]- (x)
     optional match (c) -[:NOTE]-> (n:Note)
-    optional match (s) -[:REPOSITORY]-> (r:Repository)
-    optional match (x) <-[re:EVENT|NAME|MEDIA]- (p)
-return id(c) as c_id, c, collect(n) as notes, re.role as role,
-       labels(x)[0] as label, x, 
-       coalesce(id(p), id(x)) as p_id, labels(p)[0] as p_label, r
-order by c_id, p_id"""
+    optional match (x) <-[re:EVENT]- (p)
+    return id(c) as c_id, c, collect(n) as notes, re.role as role,
+           id(x) as x_id, labels(x)[0] as label, x, 
+           coalesce(id(p), id(x))  as p_id
+    order by c_id, p_id"""
 
 
 class Cypher_repository():

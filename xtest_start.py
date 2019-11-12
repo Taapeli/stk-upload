@@ -27,7 +27,7 @@ def client():
     rv = login(client)
     #txt = "Oma sukupuuni"
     #txt = "Suomikannan käyttäjän alkusivu"
-    txt = "Isotammen aloitussivusi"
+    txt = "Käyttäjän Isotammi-aloitussivu"
     assert txt in rv.data.decode("utf-8")
 
     yield client

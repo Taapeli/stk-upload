@@ -1,15 +1,10 @@
 '''
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
-Todo:
-    Miten paikkakuntiin saisi kokoluokituksen? Voisi näyttää sopivan zoomauksen karttaan
-    1. _Pieniä_ talo, kortteli, tontti, tila,  rakennus
-    2. _Keskikokoisia_ kylä, kaupunginosa, pitäjä, kaupunki, 
-    3. _Suuria_ maa, osavaltio, lääni
-    - Loput näyttäisi keskikokoisina
-
 @author: jm
 '''
+
+#from sys import stderr
 
 import  shareds
 from .base import NodeObject
@@ -44,6 +39,11 @@ class Place(NodeObject):
         """ Creates a new Place instance.
         """
         NodeObject.__init__(self)
+#         self.uuid = None        # UUID
+#         self.uniq_id = None     # Neo4j object id
+#         self.change = 0         # Object change time
+#         self.id = ''            # Gedcom object id like "I1234"
+#         self.handle = ''       # Gramps handle (?)
         self.uniq_id = uniq_id
         self.type = ''
         self.names = []
@@ -194,9 +194,6 @@ class Place(NodeObject):
         |      |         |x":"von"}]         │             │                   │
         └──────┴─────────┴───────────────────┴─────────────┴───────────────────┘
         """
-        # Import here to handle circular dependency 
-        from .person_combo import Person_combo
-
         result = shareds.driver.session().run(Cypher_place.get_person_events, 
                                               locid=int(loc_id))
         ret = []
@@ -212,9 +209,9 @@ class Place(NodeObject):
             #  etype='Baptism' 
             #  edates=[0, 1782139, 1782139]>
 
-            p = record["person"]
             e = Event_combo()
-            e.person = Person_combo.from_node(p)
+            # Fields uid (person uniq_id) and names are on standard in Event_combo
+            e.uid = record["uid"]
             e.type = record["etype"]
             if record["edates"][0] != None:
                 e.dates = DateRange(record["edates"])

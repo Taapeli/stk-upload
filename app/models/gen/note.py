@@ -129,7 +129,7 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
     ORDER BY n.type"""
                 result =  session.run(query)
 
-        titles = ['uniq_id', 'change', 'id', 'priv', 'type', 'text', 'url', 'ref']
+        titles = ['uniq_id', 'handle', 'change', 'id', 'priv', 'type', 'text', 'url', 'ref']
         notes = []
 
         for record in result:

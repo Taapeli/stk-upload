@@ -42,29 +42,22 @@ class Citation(NodeObject):
     """
 
     def __init__(self):
-        """ Creates a Citation instance """
-
+        """ Luo uuden citation-instanssin """
         NodeObject.__init__(self)
+    
         self.dates = None
         self.page = ''
         self.confidence = ''
-        self.mark = ""          # citation mark display references
-        self.mark_sorter = 0    # citation grouping by source variable
-
-        self.noteref_hlink = [] # Gramps handle
+        self.mark = ''          # citation mark like '1a', if defined
+        self.noteref_hlink = []
         self.source_handle = ''
-
-        # For displaying citations in person.html
-        self.source_id = None
-        self.source_medium = ""
-#         self.repository_id = None
-
+        self.source_id = None   # uniq_ids of Source objects, for creating display sets
         self.citators = []      # Lähde-sivulle
         self.note_ref = []
 
 
     def __str__(self):
-        return f"{self.mark} {self.id} '{self.page}'"
+        return "{} '{}'".format(self.id, self.page)
 
 
     @classmethod
@@ -81,7 +74,16 @@ class Citation(NodeObject):
         n.uuid = node['uuid']
         n.confidence = node['confidence']
         n.page = node['page']
-        n.dates = DateRange.from_node(node)
+#TODO: Remove dateval processing later
+        if 'datetype' in node:
+            n.dates = DateRange(node['datetype'], node['date1'], node['date2'])
+        elif 'dateval' in node:
+            try:
+                if node['dateval']:
+                    n.dates = DateRange(node['dateval'])
+            except ValueError as e:
+                print(f"Error: {getattr(e, 'message', repr(e))} in {n}")
+        n.dateval = str(n.dates) if n.dates else ""
 
         return n
 
@@ -291,21 +293,8 @@ class Citation(NodeObject):
         return
 
 
-class CitationMark():
-    """ Object representing a citation mark '1a', for Footnote """
-    def __init__(self, mark=None, ids=[-1, -1, -1]):
-        self.mark = mark
-        self.repository_ids = ids[0]
-        self.source_id = ids[1]
-        self.citation_id = ids[2]
-
-    def __str__(self):
-        return "{}: r={},s={},c={}".format(self.mark, self.repository_ids, self.source_id, self.citation_id)
-
-
 class NodeRef():
-    ''' Carries data of citating objects.
-
+    ''' Carries data of citating nodes
             label            str (optional) Person or Event
             uniq_id          int Persons uniq_id
             source_id        int The uniq_id of the Source citated
@@ -313,16 +302,6 @@ class NodeRef():
             eventtype        str type for Event
             edates           DateRange date expression for Event
             date             str date for Event
-
-        Used in from models.datareader.get_source_with_events
-        and scene/source_events.html
-
-        TODO Plan
-            (b:baseObject) --> (a:activeObject) --> (c:Citation)
-            b.type=Person|Family     for linking object page
-            a.type=Person|Event|Name for display style
-            c                        to display
-                + remove: self.date
     '''
     def __init__(self):
         self.label = ''

@@ -4,7 +4,6 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-{% set cnt=sources|count %}
 <style>
 td.ColumnSource ul { margin: 0.5em;}
 td.ColumnSource ul li { font-size: smaller; }
@@ -13,21 +12,13 @@ td ul li p { margin: 0 0 0.3em 0; }
 </style>
 
 <div id="startdiv">
-    <h2>{{ _('List of Sources') }}{% if title %} ({{ _(title) }}){% endif %}</h2>
+    <h2>{{ _('List of Sources') }}</h2>
 </div>
 
 {{ macro.menu(5) }}
 	<div class="content" id="Individuals">
 		<p id="description">
-		  {{ _('This page contains a directory of %(num)s sources.',num=cnt) }}
-		</p>
-		<p id="description">{{ _("Select theme:") }}
-          <a href="/scene/sources" class="inlink">{{ _('all') }}</a> |
-          <a href="/scene/sources/birth" class="inlink">{{ _('birth') }}</a> |
-          <a href="/scene/sources/babtism" class="inlink">{{ _('babtism') }}</a> |
-          <a href="/scene/sources/wedding" class="inlink">{{ _('wedding') }}</a> |
-          <a href="/scene/sources/death" class="inlink">{{ _('death') }}</a> |
-          <a href="/scene/sources/move" class="inlink">{{ _('move') }}</a>
+		{{ _('This page contains a directory of all sources.') }}
 		</p>
 		<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
@@ -42,10 +33,10 @@ td ul li p { margin: 0 0 0.3em 0; }
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-                    <th>{{ _('Source, notes') }}</th>
-                    <th>{{ _('Media in the repository') }}</th>
-{#                  <th title="{{ _('Citations') }}">{{ _('citated') }}</th> #}
-                    <th title="{{ _('events, persons, etc., referred from') }}">{{ _('References') }}</th>
+                    <th>{{ _('Source') }}, {{ _('Notes') }}</th>
+                    <th>{{ _('In the repository') }}</th>
+                    <th title="{{ _('Citations') }}">{{ _('citated') }}</th>
+                    <th title="{{ _('events, persons, etc., referred to as "> referenced') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -74,17 +65,14 @@ td ul li p { margin: 0 0 0.3em 0; }
             </td>
             <td class="Archive">{% if s.repositories|length > 1 %}
                 <ul>{% for repo in s.repositories %}
-                    <li title="{{ _('Repository Name') }}">
-                        <span class="typedesc">{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
-                        {{repo.rname}}</li>
+                    <li title="{{ _('Repository Name') }}">{{repo.rname}} 
+                        <i>{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</i></li>
                 {% endfor %}</ul>
             {% elif s.repositories %}{% set repo = s.repositories[0] %}
-                <span title="{{ _('Repository Name') }}">
-                        <span class="typedesc">{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</span>
-                        {{repo.rname}}</span>
+                <span title="{{ _('Repository Name') }}">{{repo.rname}} 
+                        <i>{% if repo.medium %}{{repo.medium|transl('medium')}}{% endif %}</i></span>
             {% endif %}</td>
-{#          <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
-#}
+            <td class="numbers">{% if s.cit_cnt %}{{s.cit_cnt}}{% endif %}</td>
             <td class="numbers">{% if s.ref_cnt %}{{s.ref_cnt}}{% endif %}</td>
             </tr>
 	    {% endfor %}

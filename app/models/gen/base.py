@@ -98,7 +98,7 @@ class NodeObject():
         if self.uuid:
             return self.uuid[:6]
         else:
-            return ""
+            return None
 
     def uuid_str(self):
         ''' Display uuid in short form, or show self.uniq_id is missing. '''
