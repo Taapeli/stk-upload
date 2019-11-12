@@ -479,6 +479,10 @@ class PersonReader():
             
             js-style person[id] = {name: "John", age: 31, city: "New York"}
         '''
+        def unquote(s):
+            ''' Change quites (") to fancy quotes (“) '''
+            return s.replace('"', '“');
+
         #notes = []
         js = 'var citations = {};\nvar sources = {};\n'
         for o in self.objs.values():
@@ -487,7 +491,8 @@ class PersonReader():
                 js +=  '{ '
                 js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
                 js += f'id:"{o.id}", note_ref:{o.note_ref}, '
-                js += f'page:"{o.page}", source_id:{o.source_id}, '  
+                page = unquote(o.page)
+                js += f'page:"{page}", source_id:{o.source_id}, '  
                 js += f'source_medium:"{o.source_medium}",uuid:"{o.uuid}" '
                 js +=  '};\n'
 
@@ -495,8 +500,11 @@ class PersonReader():
                 js += f'sources[{o.uniq_id}] = '
                 js +=  '{ '
                 js += f'id:"{o.id}", note_ref:{o.note_ref}, '
-                js += f'repositories:{o.repositories}, sauthor:"{o.sauthor}", '
-                js += f'spubinfo:"{o.spubinfo}", stitle:"{o.stitle}", '
+                sauthor = unquote(o.sauthor)
+                js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
+                spubinfo = unquote(o.spubinfo)
+                stitle = unquote(o.stitle)
+                js += f'spubinfo:"{spubinfo}", stitle:"{stitle}", '
                 js += f'uuid:"{o.uuid}" '
                 js +=  '};\n'
 
