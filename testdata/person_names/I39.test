@@ -15,5 +15,6 @@ display_changes = false
 1 CHAR UTF-8
 0 @I39 INDI
 1 NAME Matti Pekka/Mattila/
+2 NOTE _orig_NAME Matti Pekka*/Mattila/
 2 NOTE _CALL Pekka
 0 TRLR

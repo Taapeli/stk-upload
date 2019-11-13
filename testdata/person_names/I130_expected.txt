@@ -1,7 +1,0 @@
-0 HEAD
-1 CHAR UTF-8
-0 @I130 INDI
-1 NAME Johan/Mattila/Henrici2 NOTE _orig_NAME Johan Henrici/Mattila/
-0 TRLR
-1 CONT 
-0 TRLR

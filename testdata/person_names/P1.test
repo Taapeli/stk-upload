@@ -14,6 +14,10 @@ display_changes = false
 0 HEAD
 1 CHAR UTF-8
 0 @P1@ INDI
-1 NAME RITVA PIRJO H./Jylhä\sinisalo	oivonen/
-2 NSFX
+1 NAME Ritva Pirjo H./Jylhä/
+2 NOTE _orig_NAME RITVA PIRJO H./JYLHÄ\SINISALO\TOIVONEN/ 
+1 NAME Ritva Pirjo H./Sinisalo/
+2 TYPE aka
+1 NAME Ritva Pirjo H./Toivonen/
+2 TYPE aka
 0 TRLR

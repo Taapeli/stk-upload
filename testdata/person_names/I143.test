@@ -14,6 +14,7 @@ display_changes = false
 0 HEAD
 1 CHAR UTF-8
 0 @I143 INDI
-1 NAME poika//Mattsson
+1 NAME N//Mattsson
+2 NOTE _orig_NAME poika//Mattsson
 2 NSFX Mattsson
 0 TRLR

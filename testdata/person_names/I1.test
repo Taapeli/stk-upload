@@ -8,6 +8,7 @@ display_changes = false
 1 CHAR UTF-8
 0 @I1 INDI
 1 NAME Matti/Frisk os. Mattila/
+1 NOTE note
 0 TRLR
 
 [expected]
@@ -15,6 +16,8 @@ display_changes = false
 1 CHAR UTF-8
 0 @I1 INDI
 1 NAME Matti/Mattila/
+2 NOTE _orig_NAME Matti/Frisk os. Mattila/
 2 TYPE birth
 1 NAME Matti/Frisk/
+1 NOTE note
 0 TRLR

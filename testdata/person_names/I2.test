@@ -16,6 +16,8 @@ display_changes = false
 0 @I2 INDI
 1 NAME Matti/Laine/
 2 NOTE _orig_NAME Matti/Reipas e. Frisk os. Laine/
-1 NAME Matti/Frisk/
+2 TYPE birth
 1 NAME Matti/Reipas/
+1 NAME Matti/Frisk/
+2 TYPE entinen
 0 TRLR

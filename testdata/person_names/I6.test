@@ -16,9 +16,11 @@ display_changes = false
 0 @I6 INDI
 1 NAME Matti/Mönkkönen/
 2 NOTE _orig_NAME Matti/Hällström (af Hällström) e. Hellström, os. Mönkkönen/
-1 NAME Matti/Hellström ,/
+2 TYPE birth
 1 NAME Matti/Hällström/
 1 NAME Matti/Hällström/
-2 TYPE tunnettu myös
+2 TYPE aka
 2 SPFX af
+1 NAME Matti/Hellström/
+2 TYPE entinen
 0 TRLR

@@ -15,6 +15,7 @@ display_changes = false
 1 CHAR UTF-8
 0 @I10 INDI
 1 NAME Matti/Heikkilä/
+2 NOTE _orig_NAME Matti/Heikkilä,Mattila/
 1 NAME Matti/Mattila/
 2 TYPE aka
 0 TRLR

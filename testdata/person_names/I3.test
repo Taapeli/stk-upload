@@ -14,9 +14,11 @@ display_changes = false
 0 HEAD
 1 CHAR UTF-8
 0 @I3 INDI
-1 NAME Matti/Damm/
-2 NOTE _orig_NAME Matti/Lehti os. Lampi e. af Damm/
-2 SPFX af
 1 NAME Matti/Lampi/
+2 NOTE _orig_NAME Matti/Lehti os. Lampi e. af Damm/
+2 TYPE birth
 1 NAME Matti/Lehti/
+1 NAME Matti/Damm/
+2 TYPE entinen
+2 SPFX af
 0 TRLR
