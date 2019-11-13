@@ -142,7 +142,7 @@ class Person_combo(Person):
                 #TODO: Rule for public database is missing, taking all!
                 record = session.run(Cypher_person.get_public,
                                      uuid=uuid).single()
-            if record == None:
+            if record is None:
                 raise LookupError(f"Person {uuid} not found.")
             node = record[0]
             return Person_combo.from_node(node)
