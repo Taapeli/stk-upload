@@ -46,7 +46,7 @@ from .. import transformer
 from ..transformer import Item 
 from flask_babelex import _
 
-version = "0.3kku"
+version = "0.4kku"
 doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Names-ohjelma"
 name = _("Personal names") + ' ' + version
 
@@ -76,6 +76,8 @@ def add_args(parser):
 def normalize(namestring):
     return namestring.replace(" /","/").replace("/ ","/")
 
+NO_CHANGE = True
+DELETE = None
 
 class PersonNames(transformer.Transformation):
 
@@ -94,49 +96,75 @@ class PersonNames(transformer.Transformation):
         are applied to the Gedcom but they are not displayed with the --display-changes option.
         """
         #print(f"#Item {item.linenum}: {item.list()}<br>")
-        if item.path.find('.INDI') < 0:
-            return True
-
-        if item.tag == "NAME":
+        if item.tag != "INDI": return NO_CHANGE
+        subitems = []
+        changed = False
+        name_changed = False
+        saved_givn = None
+        saved_nsfx = None
+        for subitem in item.children:
+            if subitem.tag != "NAME": 
+                subitems.append(subitem)
+                continue
             pn = PersonName()
-            parseresult = pn.process_NAME(item.value)
+            orig_name = subitem.value
+            parseresult = pn.process_NAME(subitem.value)
             if parseresult is None: return True
             n = parseresult.name_parts
-            newitems = []
+            print(n.givn,saved_givn)
+            if n.givn and saved_givn is None:
+                saved_givn = n.givn
+            if n.givn == "" and saved_givn is not None:
+                n.givn = saved_givn 
             first = True
-            changed = False
             if len(parseresult.surnames) > 1: changed = True
             for pn in sorted(parseresult.surnames,key=self.surname_sortkey):
                 if pn.prefix:
-                    surname = f"{pn.prefix} {pn.surn}"
+                    #surname = f"{pn.prefix} {pn.surn}"
+                    surname = pn.surn
                 else:
                     surname = pn.surn
                 namestring = f"{n.givn}/{surname}/{n.nsfx}"
-                if normalize(namestring) != normalize(item.value): changed = True
-                newitem = Item(f"{item.level} NAME {namestring}")
-                newitem.children = item.children
-                item.children = []
+                if normalize(namestring) != normalize(subitem.value): 
+                    name_changed = True
+                    item2 = Item(f"{subitem.level+1} NOTE _orig_NAME {orig_name}")
+                    #subitem.children.append(item2)
+                newitem = Item(f"{subitem.level} NAME {namestring}")
+                newitem.children = subitem.children
+                subitem.children = []
                 if pn.name_type:
                     typename = surnameparser.TYPE_NAMES.get(pn.name_type,"unknown")
-                    typeitem = Item(f"{item.level+1} TYPE {typename}")
+                    typeitem = Item(f"{subitem.level+1} TYPE {typename}")
                     newitem.children.append(typeitem)
                     changed = True
                 if first:
                     if n.call_name:
-                        item2 = Item(f"{item.level+1} CALL {n.call_name}")
+                        item2 = Item(f"{subitem.level+1} CALL {n.call_name}")
                         newitem.children.append(item2)
                         changed = True
                     if n.nick_name:
-                        item2 = Item(f"{item.level+1} NICK {n.nick_name}")
+                        item2 = Item(f"{subitem.level+1} NICK {n.nick_name}")
                         newitem.children.append(item2)
                         changed = True
-                newitems.append(newitem)
+                    if n.nsfx:
+                        item2 = Item(f"{subitem.level+1} NSFX {n.nsfx}")
+                        newitem.children.append(item2)
+                        changed = True
+                if pn.prefix:
+                    item2 = Item(f"{subitem.level+1} SPFX {pn.prefix}")
+                    newitem.children.append(item2)
+                    changed = True
+                subitems.append(newitem)
                 first = False
-            if not changed: return True
-            return newitems
+        if name_changed:
+            item2 = Item(f"{subitem.level+1} NOTE _orig_NAME {orig_name}")
+            subitems[0].children.insert(0,item2)
+        if changed:
+            item.children = subitems 
+            return item
 
-        return True
-    
+        return NO_CHANGE
+
         # ---- TEKEMÄTTÄ: ----
         #2. If there is SURN.NOTE etc without any name, move their Notes and  
         #   Sources to NAME level

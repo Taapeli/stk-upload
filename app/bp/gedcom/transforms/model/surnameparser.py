@@ -85,7 +85,14 @@ class SurnameParser:
             names = re.split(r"[/,]",surname)
             for name in names:
                 name = name.strip()
-                if name: surnames.append(SurnameInfo(name,name_type,""))
+                parts = name.split()
+                prefixes =  {'af','von','de'}
+                if len(parts) > 1 and parts[0] in prefixes:
+                    prefix = parts[0]
+                    name = " ".join(parts[1:])
+                else:
+                    prefix = ""
+                if name: surnames.append(SurnameInfo(name,name_type,prefix))
                 name_type = Name_types.AKA
         return surnames
 
