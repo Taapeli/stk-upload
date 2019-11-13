@@ -82,7 +82,7 @@ class SurnameParser:
         surnames = []
         for name_type, namelist in surnames1:
             surname = " ".join(namelist)
-            names = re.split(r"[/,]",surname)
+            names = re.split(r"[/,\\]",surname)
             for name in names:
                 name = name.strip()
                 parts = name.split()
