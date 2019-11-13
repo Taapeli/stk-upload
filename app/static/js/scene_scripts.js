@@ -98,9 +98,13 @@ function citTable() {
 				}
 			}
 		}
-		document.getElementById(textDest).innerHTML = ret;
-		// Show citation refeference table
-		this.listCitations(tblDest);
+		if (textDest) {
+			document.getElementById(textDest).innerHTML = ret;
+		}
+		if (tblDest) {
+			// Show citation refeference table
+			this.listCitations(tblDest);
+		}
 	}
 
 

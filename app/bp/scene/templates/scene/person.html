@@ -157,7 +157,7 @@ u { color: DarkKhaki; text-decoration: none; }
             </table>
         </div>
 
-{% if true %}
+{% if false %}
         <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
@@ -318,6 +318,8 @@ u { color: DarkKhaki; text-decoration: none; }
     </div>
 <script>
 var tbl = new citTable();
+tbl.findCitations('','')
+tbl.sourceReferences('sourcerefContent','')
 </script>
 {% endblock %}
 
