@@ -28,6 +28,8 @@ TYPE_NAMES = {
     Name_types.PREVIOUS_NAME: "entinen",
 }
 
+PREFIXES =  {'af','de','der','van','von'}
+
 @dataclass
 class SurnameInfo:
     surn:str = ""
@@ -86,10 +88,13 @@ class SurnameParser:
             for name in names:
                 name = name.strip()
                 parts = name.split()
-                prefixes =  {'af','von','de'}
-                if len(parts) > 1 and parts[0] in prefixes:
-                    prefix = parts[0]
-                    name = " ".join(parts[1:])
+                if len(parts) > 1 and parts[0] in PREFIXES:
+                    prefix_list = []
+                    while len(parts) > 1 and parts[0] in PREFIXES:
+                        prefix_list.append( parts[0] )
+                        name = " ".join(parts[1:])
+                        parts = name.split()
+                    prefix = " ".join(prefix_list)
                 else:
                     prefix = ""
                 if name: surnames.append(SurnameInfo(name,name_type,prefix))
