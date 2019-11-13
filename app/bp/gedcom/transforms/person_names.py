@@ -79,13 +79,12 @@ def add_args(parser):
 def normalize(namestring):
     return namestring.replace(" /","/").replace("/ ","/")
 
-<<<<<<< Upstream, based on branch 'master' of https://github.com/Taapeli/stk-upload.git
+
 NO_CHANGE = True
 DELETE = None
-=======
+
 def capitalize(name):
     return " ".join(n.capitalize() for n in name.split())
->>>>>>> 6da04f3 Person names transformation v0.4
 
 class PersonNames(transformer.Transformation):
 
@@ -127,22 +126,11 @@ class PersonNames(transformer.Transformation):
             first = True
             if len(parseresult.surnames) > 1: changed = True
             for pn in sorted(parseresult.surnames,key=self.surname_sortkey):
-<<<<<<< Upstream, based on branch 'master' of https://github.com/Taapeli/stk-upload.git
-                if pn.prefix:
-                    #surname = f"{pn.prefix} {pn.surn}"
-                    surname = pn.surn
-                else:
-                    surname = pn.surn
-                namestring = f"{n.givn}/{surname}/{n.nsfx}"
-                if normalize(namestring) != normalize(subitem.value): 
-                    name_changed = True
-=======
                 surname = capitalize(pn.surn)
                 namestring = f"{capitalize(n.givn)}/{surname}/{n.nsfx}"
                 if normalize(namestring) != normalize(subitem.value): 
                     name_changed = True
                     changed = True
->>>>>>> 6da04f3 Person names transformation v0.4
                     item2 = Item(f"{subitem.level+1} NOTE _orig_NAME {orig_name}")
                     #subitem.children.append(item2)
                 newitem = Item(f"{subitem.level} NAME {namestring}")
@@ -155,11 +143,7 @@ class PersonNames(transformer.Transformation):
                     changed = True
                 if first:
                     if n.call_name:
-<<<<<<< Upstream, based on branch 'master' of https://github.com/Taapeli/stk-upload.git
-                        item2 = Item(f"{subitem.level+1} CALL {n.call_name}")
-=======
                         item2 = Item(f"{subitem.level+1} NOTE _CALL {n.call_name}")
->>>>>>> 6da04f3 Person names transformation v0.4
                         newitem.children.append(item2)
                         changed = True
                     if n.nick_name:
