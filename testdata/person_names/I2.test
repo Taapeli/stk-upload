@@ -1,0 +1,21 @@
+[description]
+
+[options]
+display_changes = false
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I2 INDI
+1 NAME Matti/Reipas e. Frisk os. Laine/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I2 INDI
+1 NAME Matti/Laine/
+2 NOTE _orig_NAME Matti/Reipas e. Frisk os. Laine/
+1 NAME Matti/Frisk/
+1 NAME Matti/Reipas/
+0 TRLR

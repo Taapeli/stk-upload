@@ -1,0 +1,24 @@
+[description]
+Automaattinen järjestyksen kääntäminen + pilkut + yhdistäminen
+
+[options]
+auto_order = true
+add_commas = true
+auto_combine = true
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Finland Loviisan mlk Kirkonkylä
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Kirkonkylä, Loviisan mlk, Finland
+0 TRLR
+

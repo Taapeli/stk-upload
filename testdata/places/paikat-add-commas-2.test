@@ -1,0 +1,22 @@
+[description]
+Pilkkujen lisääminen
+
+[options]
+add_commas = True
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Kirkonkylä Loviisa Finland
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Kirkonkylä, Loviisa, Finland
+0 TRLR
+

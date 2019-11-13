@@ -1,0 +1,24 @@
+[description]
+
+[options]
+display_changes = false
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I6 INDI
+1 NAME Matti/Hällström (af Hällström) e. Hellström, os. Mönkkönen/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I6 INDI
+1 NAME Matti/Mönkkönen/
+2 NOTE _orig_NAME Matti/Hällström (af Hällström) e. Hellström, os. Mönkkönen/
+1 NAME Matti/Hellström ,/
+1 NAME Matti/Hällström/
+1 NAME Matti/Hällström/
+2 TYPE tunnettu myös
+2 SPFX af
+0 TRLR

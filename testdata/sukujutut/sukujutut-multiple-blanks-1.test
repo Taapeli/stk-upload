@@ -1,0 +1,19 @@
+[description]
+Poista ylimääräiset välilyönnit
+
+[options]
+remove_multiple_blanks = true
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME    a  bbb  
+1 PLAC    a  bbb  
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a bbb
+1 PLAC a bbb
+0 TRLR

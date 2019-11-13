@@ -1,0 +1,20 @@
+[description]
+
+[options]
+display_changes = false
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I1 INDI
+1 NAME Matti/Frisk os. Mattila/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I1 INDI
+1 NAME Matti/Mattila/
+2 TYPE birth
+1 NAME Matti/Frisk/
+0 TRLR

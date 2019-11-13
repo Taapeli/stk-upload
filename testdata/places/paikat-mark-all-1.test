@@ -1,0 +1,27 @@
+[description]
+Match
+
+[options]
+match = Loviisa
+mark_all_matching = tur
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Finland, Loviisa, Kirkonkylä
+1 DEAT
+2 PLAC Helsinki, Finland
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC-X Finland, Loviisa, Kirkonkylä
+1 DEAT
+2 PLAC Helsinki, Finland
+0 TRLR
+

@@ -1,0 +1,19 @@
+[description]
+
+[options]
+display_changes = false
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @P1@ INDI
+1 NAME RITVA PIRJO H./JYLHÄ\SINISALO\TOIVONEN/ 
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @P1@ INDI
+1 NAME RITVA PIRJO H./Jylhä\sinisalo	oivonen/
+2 NSFX
+0 TRLR

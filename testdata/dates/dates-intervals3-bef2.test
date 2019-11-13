@@ -1,0 +1,19 @@
+[options]
+handle_intervals3 = true
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 DATE <1888
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 DATE BEF 1888
+0 TRLR
+

@@ -1,0 +1,22 @@
+[description]
+Automaattinen järjestyksen kääntäminen
+
+[options]
+auto_order = true
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Finland, Loviisa, Kirkonkylä
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Kirkonkylä, Loviisa, Finland
+0 TRLR
+

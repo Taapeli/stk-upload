@@ -1,0 +1,19 @@
+[options]
+handle_dd_mm_yyyy = true
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 DATE 12.5.1888
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 DATE 12 MAY 1888
+0 TRLR
+

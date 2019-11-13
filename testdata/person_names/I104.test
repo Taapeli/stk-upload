@@ -1,0 +1,20 @@
+[description]
+
+[options]
+display_changes = false
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I104 INDI
+1 NAME Matti Pekanpoika/Mattila/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I104 INDI
+1 NAME Matti/Mattila/Pekanpoika
+2 NOTE _orig_NAME Matti Pekanpoika/Mattila/
+2 NSFX Pekanpoika
+0 TRLR

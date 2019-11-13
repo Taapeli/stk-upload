@@ -1,0 +1,21 @@
+[description]
+
+[options]
+display_changes = false
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I4 INDI
+1 NAME Matti/Mattila (Matts)/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I4 INDI
+1 NAME Matti/Mattila/
+2 NOTE _orig_NAME Matti/Mattila (Matts)/
+1 NAME Matti/Matts/
+2 TYPE tunnettu myös
+0 TRLR
