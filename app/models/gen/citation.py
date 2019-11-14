@@ -56,7 +56,7 @@ class Citation(NodeObject):
 
         # For displaying citations in person.html
         self.source_id = None
-        self.source_medium = ""
+#         self.source_medium = "" # see repository
 #         self.repository_id = None
 
         self.citators = []      # Lähde-sivulle

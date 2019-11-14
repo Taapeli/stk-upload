@@ -157,7 +157,7 @@ u { color: DarkKhaki; text-decoration: none; }
             </table>
         </div>
 
-{% if false %}
+{% if debug %}
         <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
@@ -269,57 +269,16 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
             <div id="sourcerefContent"></div>
-
-<script>{{jscode|safe}}</script>
-{#
-		    cita = citations[0]               = <models.gen.citation.Citation object at 0x7f1374e1a6a0>
-            cita.mark                         = '1a'
-		    cita.page                         = 'Wiala'
-		    source = obj[cita.source_id]      = <models.gen.source.Source object at 0x7f1374e1a978>
-            source.stitle                     = 'Akaa rippikirja 1774-1779'
-            cita.medium                       = 'Book'
-		    source.repositories[0]            = <models.gen.repository.Repository object at 0x7f1374e1ae48>
-		    source.repositories[0].rname      = 'Akaan seurakunnan arkisto'
-<ul>
-
-{% for clist in citations | groupby('mark_sorter') %}
-    <div class="sourceDesc"><!-- Source {{ clist.grouper }} -->
-        {% set c = clist.list[0] %}
-        {% if c.source_id %}{% set source = obj[c.source_id] %}
-                   <a href="/scene/source={{source.uniq_id}}" class="inlink"
-                      title="[{{c.id}}] {{ _('See source %(name)s details', name=source.id) }}">
-                      {{source.stitle}}</a>
-	            <!-- Repository -->
-	            {% if source.repositories %} –
-	               <span class="typedesc">{{ c.source_medium|transl('medium') }}</span>
-	               <i>{{obj[source.repositories[0]].rname}}</i>
-                   {% if source.repositories|length > 1 %}<b> JA MUITA ARKISTOJA</b>{% endif %}
-	            {% else %}  <b title="{{source}}">{{ _("No archive information!") }}</b>
-	            {% endif %}
-        {% else %}<b title="{{c}}">{{ _("No source information!") }}</b>
-        {% endif %}
-        <!-- Citation -->
-        {% for cita in clist.list %}
-             {% set conf = cita.confidence | int %}
-             <div class="citaDesc" id="sref{{ cita.mark|trim }}"
-                {% if cita.confidence and cita.confidence < "2" %}style="color:red"{% endif %}>
-                  <span title="[{{cita.id}} nr:{{cita.uniq_id}}] {{cita.confidence|transl("conf")}} {{ _('confidence') }} ({{cita.confidence}})">
-                      <b>{{ cita.mark }}</b> {{ _("Page") }}: {{cita.page}} &nbsp; {{ macro.stars(conf) }}
-                  </span> {{ cita.noteref }}
-                {% for nref in cita.note_ref %} &nbsp;►&nbsp;{{ macro.notelink(obj[nref]) }}
-                {% endfor %}
-             </div>
-        {% endfor %}
-   </div>
-{% endfor %}
-#}
-
         </div>
     </div>
+
 <script>
+{{jscode|safe}}
 var tbl = new citTable();
-tbl.findCitations('','')
-tbl.sourceReferences('sourcerefContent','')
+    {% if not debug %}
+tbl.findCitations('','');
+tbl.sourceReferences('sourcerefContent','');
+    {% endif %}
 </script>
 {% endblock %}
 

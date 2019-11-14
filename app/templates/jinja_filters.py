@@ -11,7 +11,7 @@ from flask_babelex import _
 from models.gen.person import SEX_FEMALE, SEX_MALE, SEX_UNKOWN
 
 
-def translate(term, var_name, lang="fi"):
+def translate(term, var_name):
     """ Given term is translated depending of var_name name.
         The lang parameter is not used
 

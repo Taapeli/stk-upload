@@ -25,7 +25,7 @@ class Repository(NodeObject):
             id              str    esim. "R0001"
             rname           str    arkiston nimi
             type            str    arkiston tyyppi
-            medium          str    from relation.medium
+            medium          str    from Source --> Repository relation.medium
             notes           Note[]
      """
 
@@ -103,9 +103,12 @@ class Repository(NodeObject):
 
     @staticmethod       
     def get_w_source (uniq_id):
-        """ Voidaan lukea repositoreja sourceneen kannasta
-        """
+        """ Read repository/repositories from database with their referencing sources.
 
+            For each repository, there may be some sources with different medium.
+
+            Voidaan lukea repositoreja sourceneen kannasta.
+        """
         with shareds.driver.session() as session:
             if uniq_id:
                 return session.run(Cypher_repository.get_w_sources, rid=uniq_id)

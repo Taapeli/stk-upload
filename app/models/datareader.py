@@ -305,7 +305,7 @@ def get_repositories(uniq_id=None):
             s.stitle = node[1]
             s.sauthor = node[2]
             s.spubinfo = node[3]
-            s.reporef_medium = node[4]
+            s.reporef_medium = node[4]  #Todo: Should use repository.medium
             r.sources.append(s)
 
         repositories.append(r)
@@ -753,7 +753,7 @@ def get_person_data_by_id(pid):
                         s.stitle = source[1]
                         s.sauthor = source[2]
                         s.spubinfo = source[3]
-                        s.reporef_medium = source[4]
+                        s.reporef_medium = source[4]  #Todo: Should use repository.medium
 
                         r = Repository()
                         r.uniq_id = source[5]

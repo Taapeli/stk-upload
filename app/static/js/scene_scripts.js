@@ -81,6 +81,9 @@ function citTable() {
 
 	this.findCitations = function(textDest,tblDest) {
 		// Search html <sup> tags and add the citations to this.cTbl.
+		//
+		// If textDst is present, dipslay list of all sups found
+		// If tblDest is present, display result: table of sources and their citations
 		var sups = document.getElementsByTagName("sup");
 		var i, j, node, nodes, ret = "";
 		for (i = 0; i < sups.length; i++) {
@@ -120,7 +123,7 @@ function citTable() {
 
 		var sObj;	// Source from database
 		var cObj;	// Citation from database
-		var i, j;
+		var i, j, k;
 
 		for (i = 0; i < this.cTbl.length; i++) {
 			// line is [source_id, [cita_id, ...]], one line per each source
@@ -153,20 +156,27 @@ function citTable() {
 			var textnode = document.createTextNode(sObj.stitle);
 			nodeSourceA.appendChild(textnode);
 			nodeSource.appendChild(nodeSourceA);
-			nodeSource.appendChild(document.createTextNode(' – '));
 			
-			// Todo: citation.source_medium:"book" siirrettävä Source-nodeen?
-			// 	– <span class="typedesc">kirja</span>
-			var nodeMedium = document.createElement("SPAN");
-			nodeMedium.setAttribute("class", "typedesc");
-			textnode = document.createTextNode("(medium)");
-			nodeMedium.appendChild(textnode);
-			nodeSource.appendChild(nodeMedium);
-			
-			// Todo: repository <i>Taivassalon seurakunnan arkisto</i>
-			var nodeRepo = document.createElement("I");
-			textnode = document.createTextNode(" (arkisto)");
-			nodeSource.appendChild(textnode);
+			// A source may have references to multiple repositories
+			for (k = 0; k < sObj.repositories.length;  k++) {
+
+				var rObj = repositories[sObj.repositories[k]];
+				textnode = document.createTextNode(" – ");
+				nodeSource.appendChild(textnode);
+				
+				// Medium:– <span class="typedesc">kirja</span>
+				var nodeMedium = document.createElement("SPAN");
+				nodeMedium.setAttribute("class", "typedesc");
+				textnode = document.createTextNode(rObj.medium);
+				nodeMedium.appendChild(textnode);
+				nodeSource.appendChild(nodeMedium);
+				
+				// Repository: <i>Taivassalon seurakunnan arkisto</i>
+				var nodeRepo = document.createElement("I");
+				textnode = document.createTextNode(" " + rObj.rname);
+				nodeSource.appendChild(textnode);
+			}
+
 
 			citas = line[1];	// = this.cTbl[i,j]
 			//console.log("Citations "+ citas +" of source " + source_id);

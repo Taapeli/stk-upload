@@ -192,7 +192,7 @@ RETURN  //ID(event) AS id,    event.type AS type,
 # 
 #             Voidaan lukea läheitä viittauksineen kannasta  --  NOT IN USE
 #         """
-#         #TODO Change name: get_citation_path ??
+#         #Change name: get_citation_path ??
 # 
 #         if uniq_id:
 #             where = "WHERE ID(event)={} ".format(uniq_id)

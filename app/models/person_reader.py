@@ -4,8 +4,8 @@ Created on 24.10.2019
 @author: jm
 '''
 import traceback
-
 import shareds
+#from flask_babelex import _
 
 from .gen.person_combo import Person_combo
 from .gen.person_name import Name
@@ -19,6 +19,8 @@ from .gen.source import Source
 from .gen.repository import Repository
 from .gen.cypher import Cypher_person
 
+#TODO: repository type and medium translations should be somewhere else!
+from templates.jinja_filters import translate
 
 class PersonReader():
     '''
@@ -416,7 +418,7 @@ class PersonReader():
 
 
     def read_sources_repositories(self):
-        ''' Read Place hierarchies for all objects in self.objs.
+        ''' Read Source -> Repository hierarchies for all self.citations.
         '''
         if len(self.citations) == 0:
             return
@@ -460,15 +462,16 @@ class PersonReader():
             # 4. The Repository node
             node = record['r']
             repo = Repository.from_node(node)
+            repo.medium = medium
             if not repo.uniq_id in self.objs:
                 self.objs[repo.uniq_id] = repo
             
-            # Referencing a (Source, Repository, medium) tuple
+            # Referencing a (Source, medium, Repository) tuple
             cita.source_id = source.uniq_id
-            cita.source_medium = medium
+            #cita.source_medium = medium
             if not repo.uniq_id in source.repositories:
                 source.repositories.append(repo.uniq_id)
-            #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') -[:REPOSITORY {medium}]-> (:Repository '{repo}')")
+            #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
 
         return
 
@@ -484,21 +487,18 @@ class PersonReader():
             return s.replace('"', '“');
 
         #notes = []
-        js = 'var citations = {};\nvar sources = {};\n'
+        js = '\nvar citations = {};\nvar sources = {};\nvar repositories = {};\n'
         for o in self.objs.values():
             if isinstance(o, Citation):
-                js += f'citations[{o.uniq_id}] = '
-                js +=  '{ '
+                js += f'citations[{o.uniq_id}] = {{ '
                 js += f'confidence:"{o.confidence}", dates:"{o.dates}", '
                 js += f'id:"{o.id}", note_ref:{o.note_ref}, '
                 page = unquote(o.page)
-                js += f'page:"{page}", source_id:{o.source_id}, '  
-                js += f'source_medium:"{o.source_medium}",uuid:"{o.uuid}" '
+                js += f'page:"{page}", source_id:{o.source_id}, uuid:"{o.uuid}" '
                 js +=  '};\n'
 
             if isinstance(o, Source):
-                js += f'sources[{o.uniq_id}] = '
-                js +=  '{ '
+                js += f'sources[{o.uniq_id}] = {{ '
                 js += f'id:"{o.id}", note_ref:{o.note_ref}, '
                 sauthor = unquote(o.sauthor)
                 js += f'repositories:{o.repositories}, sauthor:"{sauthor}", '
@@ -509,7 +509,13 @@ class PersonReader():
                 js +=  '};\n'
 
             if isinstance(o, Repository):
-                pass    # Todo
+                js += f'repositories[{o.uniq_id}] = {{ '
+                medium = translate(o.medium, 'medium')
+                atype = translate(o.type, 'rept')
+                js += f'uuid:"{o.uuid}", id:"{o.id}", type:"{atype}", rname:"{o.rname}", '
+                # Media type 
+                js += f'medium:"{medium}", notes:{o.notes}, sources:{o.sources}'
+                js +=  '};\n'
         # Find referenced Notes
         #for o in notes:
             pass    # Todo

@@ -184,14 +184,18 @@ def show_person_v2(uid=None):
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def show_person_v3(uid=None):
     """ One Person with all connected nodes - NEW version 3.
-    
-        Note: not using apoc any more.
+
+        Arguments:
+        - uuid=     persons uuid
+        - debug=1   optinal for javascript tests
     """
     t0 = time.time()
     uid = request.args.get('uuid', uid)
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
 
+    dbg = request.args.get('debug', None)
+    print(dbg)
     if current_user.is_authenticated:
         user=current_user.username
     else:
@@ -204,7 +208,7 @@ def show_person_v3(uid=None):
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
     return render_template("/scene/person.html", person=person, obj=objs, 
-                           jscode=jscode, menuno=12, elapsed=time.time()-t0)
+                           jscode=jscode, menuno=12, debug=dbg, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/uuid=<pid>')
