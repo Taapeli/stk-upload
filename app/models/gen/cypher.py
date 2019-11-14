@@ -648,8 +648,9 @@ match (c) <-[:CITATION]- (x)
     optional match (x) <-[re:EVENT|NAME|MEDIA]- (p)
 return id(c) as c_id, c, collect(n) as notes, re.role as role,
        labels(x)[0] as label, x, 
-       coalesce(id(p), id(x)) as p_id, labels(p)[0] as p_label, r
-order by c_id, p_id"""
+       coalesce(p.uuid, x.uuid) as p_uuid, 
+       coalesce(ID(p), ID(x)) as p_uid, labels(p)[0] as p_label, r
+order by c_id, p_uuid"""
 
 
 class Cypher_repository():

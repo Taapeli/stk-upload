@@ -64,7 +64,7 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 	                          {% else %}
 	                           {{ _('The person') }}
 	                          {% endif %}
-                              <a href="/scene/person/{{noderef.uniq_id}}" class="inlink"
+                              <a href="/scene/person?uuid={{noderef.uuid}}" class="inlink"
                                  title="{{ _('see details of person %(id)s', id=noderef.id) }}">
                                  {{noderef.clearname}}</a>
 	                          <i>{{noderef.eventtype}}</i>

@@ -558,18 +558,20 @@ def get_source_with_events(sourceid):
                 notes[n.uniq_id] = n
 
         # Referring node:  Person, Family, Name ... as NodeRef structure
-        root_uid = record['p_id']
+        root_uuid = record['p_uuid']
+        root_uniq_id = record['p_uid']
         root_label = record.get('p_label')
         node = record['x']
         x_uid = node.id    # Nearest referring node (Event, Person, Name, ...)
 
         noderef = NodeRef()
-        noderef.uniq_id = root_uid      # 72104
+        noderef.uuid = root_uuid      # 72104
+        noderef.uniq_id = root_uniq_id      # 72104
         noderef.id = node['id']    # 'I1069' or 'E2821' TODO Why?
         noderef.label = list(node.labels)[0]   # Get a member of a frozenset
 
         event_role = record.get('role', "")
-        print(f'{root_label} {root_uid} Citation {c.uniq_id} {noderef.label}({event_role}) {noderef.uniq_id} {noderef.id}')
+        print(f'{root_label} {root_uuid} Citation {c.uniq_id} {noderef.label}({event_role}) {noderef.uuid} {noderef.uniq_id} {noderef.id}')
 
         if noderef.label == "Person":
             pass #noderef.eventtype = 'self'
@@ -581,7 +583,7 @@ def get_source_with_events(sourceid):
             noderef.eventtype = _(node['type'])
             noderef.edates = DateRange.from_node(node)
 
-        if noderef.uniq_id not in clearnames.keys():
+        if noderef.uuid not in clearnames.keys():
             #Todo: aseta tässä baseObject.type jne ???
             if event_role == 'Family':
                 # Family event witch is directply connected to a Person Event
@@ -590,9 +592,9 @@ def get_source_with_events(sourceid):
             else:
                 # Read Person names as cleartext string
                 noderef.clearname = Name.get_clearname(noderef.uniq_id)
-            clearnames[root_uid] = noderef.clearname
+            clearnames[root_uuid] = noderef.clearname
         else:
-            noderef.clearname = clearnames[root_uid]
+            noderef.clearname = clearnames[root_uuid]
 
         c.citators.append(noderef)
 
