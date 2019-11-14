@@ -35,7 +35,7 @@ class Repository(NodeObject):
         self.type = ''
         self.rname = ''
         self.medium = ''
-        self.notes = []     # contains Note instances
+        self.notes = []     # contains Note instances or Note.uniq_id values
 
         self.sources = []   # For creating display sets (Not used??)
 

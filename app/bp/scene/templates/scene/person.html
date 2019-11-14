@@ -29,7 +29,7 @@ u { color: DarkKhaki; text-decoration: none; }
             </div>
         </div>{% endif %}
 
-        <h3 style="position:sticky; top:0;" title="{{ _('Top') }}"><a href="#">{{person.names[0].firstname}} 
+        <h3 class="sticky" title="{{ _('Top') }}"><a href="#">{{person.names[0].firstname}} 
             <i>{{person.names[0].suffix}}</i> {{person.names[0].prefix}} <b>{{person.names[0].surname}}</b></a>
             {{macro.citation_link(person.citation_ref, obj)}}
         </h3>
@@ -268,6 +268,8 @@ u { color: DarkKhaki; text-decoration: none; }
 
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
+            {# Reference list is created below in /static/js/scene_scripts.js
+               method citTable.sourceReferences() #}
             <div id="sourcerefContent"></div>
         </div>
     </div>

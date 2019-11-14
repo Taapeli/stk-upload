@@ -11,10 +11,10 @@ function jump(initial) {
 };
 
 function stars(value) {
-	// Returns stars ★★☆☆☆ according to value 0..4
+	// Returns stars ★★☆☆ according to value 0..4, where 2 = normal
 	var ret = '';
 	var x = parseInt(value);
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i < 4; i++) {
 		if (x > i) 	{ ret += '★' }
 		else 		{ ret += '☆' }
 	}
@@ -175,8 +175,10 @@ function citTable() {
 				var nodeRepo = document.createElement("I");
 				textnode = document.createTextNode(" " + rObj.rname);
 				nodeSource.appendChild(textnode);
-			}
 
+			}
+			this.viewNotes(nodeSource, sObj.note_ref)
+			this.viewNotes(nodeSource, rObj.notes)
 
 			citas = line[1];	// = this.cTbl[i,j]
 			//console.log("Citations "+ citas +" of source " + source_id);
@@ -221,22 +223,30 @@ function citTable() {
 				nodeCitaSpan.appendChild(document.createTextNode(text));
 				nodeCitaDiv.appendChild(nodeCitaSpan);
 
-				if (cObj.note_ref) {
-					var text = " ► note " + cObj.note_ref + " ";
-					nodeCitaDiv.appendChild(document.createTextNode(text));
-
-					var nodeNoteA = document.createElement("A");
-					nodeNoteA.setAttribute("class", "inlink");
-					nodeNoteA.setAttribute("target", "_blank");
-					nodeNoteA.setAttribute("href", "#");
-					nodeNoteA.appendChild(document.createTextNode("(example.org)"));
-					nodeCitaDiv.appendChild(nodeNoteA);
-				}
-
+				this.viewNotes(nodeCitaDiv, cObj.note_ref)
 			}
 			line = undefined;
 		}
 	} // sourceReferences()
 
+	
+	this.viewNotes = function(htmlObject, note_ref) {
+		// Display the Note texts and links in htmlObject.
+		var k;
+		for (k = 0; k < note_ref.length; k++) {
+			var note = notes[note_ref[k]]
+			var text = " –► " + note.text + " ";
+			htmlObject.appendChild(document.createTextNode(text));
+
+			var nodeNoteA = document.createElement("A");
+			nodeNoteA.setAttribute("class", "outlink");
+			nodeNoteA.setAttribute("target", "_blank");
+			nodeNoteA.setAttribute("href", note.url);
+			text = nodeNoteA.hostname;
+			nodeNoteA.appendChild(document.createTextNode(text));
+			htmlObject.appendChild(nodeNoteA);
+		}
+
+	}
 }
 

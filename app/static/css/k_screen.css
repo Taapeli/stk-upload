@@ -270,6 +270,7 @@ h3 {
 .sticky {  /* Stk/JMä */
     position: sticky; 
     top: 0;
+    background-color: white;
 }
 h4 {
     font-size: medium;
