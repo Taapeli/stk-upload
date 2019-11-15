@@ -215,6 +215,9 @@ function citTable() {
 
 				var nodeCitaSpan = document.createElement("SPAN");
 				nodeCitaSpan.setAttribute("title", cObj.id + " luottamustaso " + cObj.confidence);
+				if (cObj.confidence < "2") {
+					nodeCitaSpan.style.color = "red";
+				}
 
 				var nodeCitaB = document.createElement("B");
 				nodeCitaB.appendChild(document.createTextNode(mark + ' '));
