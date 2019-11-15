@@ -74,11 +74,6 @@ MATCH (x) -[r:CITATION|NOTE|MEDIA]-> (y)
     WHERE ID(x) IN $uid_list
 RETURN LABELS(x)[0] AS label, ID(x) AS uniq_id, r, y"""
     #        (c) --> (s:Source) --> (r:Repository)
-    get_sources = """
-MATCH (c:Citation) -[:SOURCE]-> (s:Source)
-    WHERE ID(c) IN $uid_list
-    OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
-RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 
 #For Person_pg v2
     all_nodes_query_w_apoc="""
@@ -598,17 +593,11 @@ class Cypher_source():
     '''
     Cypher class for creating and accessing Sources
     '''
-#     source_list = """
-# MATCH (s:Source)
-#     OPTIONAL MATCH (s) <-[:SOURCE]- (c:Citation)
-#     OPTIONAL MATCH (c) <-[:NOTE]- (note)
-#     OPTIONAL MATCH (c) <-[:CITATION]- (cit)
-#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
-# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
-#        rep.rname AS repository, r.medium AS medium,
-#        COUNT(c) AS cit_cnt, COUNT(cit) AS ref_cnt 
-# ORDER BY toUpper(s.stitle)
-# """
+    get_sources_repositories = """
+MATCH (c:Citation) -[:SOURCE]-> (s:Source)
+    WHERE ID(c) IN $uid_list
+    OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
+RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 
     get_sources_w_notes = """
 MATCH (s:Source)

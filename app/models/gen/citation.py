@@ -291,20 +291,10 @@ class Citation(NodeObject):
         return
 
 
-class CitationMark():
-    """ Object representing a citation mark '1a', for Footnote """
-    def __init__(self, mark=None, ids=[-1, -1, -1]):
-        self.mark = mark
-        self.repository_ids = ids[0]
-        self.source_id = ids[1]
-        self.citation_id = ids[2]
-
-    def __str__(self):
-        return "{}: r={},s={},c={}".format(self.mark, self.repository_ids, self.source_id, self.citation_id)
-
-
 class NodeRef():
     ''' Carries data of citating objects.
+    
+        Used only in models.datareader.get_source_with_events
 
             label            str (optional) Person or Event
             uniq_id          int Persons uniq_id

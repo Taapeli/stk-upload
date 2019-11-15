@@ -6,15 +6,16 @@ Created on 24.9.2018
 @author: jm
 '''
 from models.person_reader import PersonReader
+from models.source_citation_reader import read_sources_repositories, get_citations_js
 
 from models.gen.from_node import get_object_from_node
 from models.gen.person_combo import Person_combo #, Person_as_member
-from models.gen.citation import Citation
+#from models.gen.citation import Citation
 from shareds import logger
 import traceback
 
 
-def get_person_full_data(uuid, owner, js=False):
+def get_person_full_data(uuid, owner):
     """ Get a Person with all connected nodes for display in Person page.
 
 
@@ -128,60 +129,14 @@ def get_person_full_data(uuid, owner, js=False):
     # 6. Read Sources s and Repositories r for all Citations
     #    for c in z:Citation
     #        (c) --> (s:Source) --> (r:Repository)
-    reader.read_sources_repositories()
+    read_sources_repositories(reader.session, reader.objs, reader.citations)
 
-    if js:
-        # Create Javascript code to create source/citation list
-        jscode = reader.get_citations_js()
+    # Create Javascript code to create source/citation list
+    jscode = get_citations_js(reader.objs)
 
-        # Return Person with included objects,  and javascript code to create
-        # Citations, Sources and Repositories with their Notes
-        return (reader.person, reader.objs, jscode)
-    else:
-        # Create Citation reference marks
-        reader.set_citation_marks(reader.person.citation_ref)
-        for e in reader.person.events:
-            reader.set_citation_marks(e.citation_ref)
-    
-        # Created sorted Citation list
-        citlist = sorted(reader.citations.values(), key=lambda x: x.mark)
-            
-        # Return Person with included objects, list of note, citation etc. objects
-        return (reader.person, reader.objs, citlist)
-
-
-def from_citation_objs(cls, citation_obj, objs):
-    ''' Creates a SourceFootnote from Citation structure components
-        using objects from dictionary objs
-
-        citation_obj                 Citation object ~ from objs[cref]
-        - citation_obj.page          str     Citation page text
-        source              Source object ~ from objs[citation_obj.source]
-        - source.stitle     str     Source title
-                            source href="#sref{{ source.uniq_id }}"
-        repo                Repository object ~ from objs[source.repositories[]]
-        - repo.rname        str     Repository name"
-    '''
-    if not ( isinstance(citation_obj, Citation) and isinstance(objs, dict) ):
-        raise TypeError(f"SourceFootnote: Invalid arguments {citation_obj}")
-
-    n = cls()
-    n.cites.append(citation_obj)
-    if citation_obj.source_id in objs:
-        n.source = objs[citation_obj.source_id]
-        s_id = n.source.uniq_id
-    else:
-        s_id = -1
-
-    r_ids = []
-    if n.source:
-        for rep in n.source.repositories:
-            if rep in objs:
-                n.repo = objs[rep]
-                r_ids.append(n.repo.uniq_id)
-    n.cites[0].ids = [r_ids, s_id, n.cites[0].uniq_id]
-    #print("- ind=(r,s,c)={}".format(n.cites[0].ids))
-    return n
+    # Return Person with included objects,  and javascript code to create
+    # Citations, Sources and Repositories with their Notes
+    return (reader.person, reader.objs, jscode)
 
 
 def get_a_person_for_display_apoc(uid, user):

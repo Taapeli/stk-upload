@@ -2,6 +2,8 @@
     Gives service to collect citation references, and display the reference links
     and Sources list, where the links point to.
     
+    USED ONLY in bp.scene.scene_reader.get_a_person_for_display_apoc
+    
     Use case plan:
         ref = Foornotes()
         ref.merge(SourceFootNote.from_citation_objs(citation, objs))
@@ -33,7 +35,7 @@ Created on 23.10.2018
 
 @author: jm
 '''
-from models.gen.citation import Citation, CitationMark
+from models.gen.citation import Citation
 
 class Footnotes():
     ''' A structure for organizing footnotes for source citations '''
@@ -186,3 +188,19 @@ class SourceFootnote():
             mark2 = len(letters) - 1
         self.mark = f"{i + 1:2d}{letters[mark2]}"
         self.cites[-1].mark = self.mark
+
+
+class CitationMark():
+    """ Object representing a citation mark '1a', for Footnote.
+    
+        Moved here from models.gen.citation / JMä 15.11.2019
+    """
+    def __init__(self, mark=None, ids=[-1, -1, -1]):
+        self.mark = mark
+        self.repository_ids = ids[0]
+        self.source_id = ids[1]
+        self.citation_id = ids[2]
+ 
+    def __str__(self):
+        return "{}: r={},s={},c={}".format(self.mark, self.repository_ids, self.source_id, self.citation_id)
+

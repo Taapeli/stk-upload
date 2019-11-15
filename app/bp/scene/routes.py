@@ -203,7 +203,7 @@ def show_person_v3(uid=None):
     logger.info("-> bp.scene.routes.show_person_v3")
     
     # v3 Person page
-    person, objs, jscode = get_person_full_data(uid, user, js=True)
+    person, objs, jscode = get_person_full_data(uid, user)
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
