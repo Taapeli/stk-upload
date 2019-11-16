@@ -201,23 +201,26 @@ class Place(NodeObject):
                                               locid=int(loc_id))
         ret = []
         for record in result:
-            # <Record uid=414999 role='Primary' 
-            #  names=[
-            #    <Node id=415001 labels={'Name'} 
-            #        properties={'firstname': 'Esajas', 'type': 'Also Known As', 
-            #            'suffix': '', 'prefix': '', 'surname': 'Hildeen', 'order': 1}>, 
-            #    <Node id=415000 labels={'Name'} 
-            #        properties={'firstname': 'Esaias', 'type': 'Birth Name', 
-            #            'suffix': '', 'prefix': '', 'surname': 'Hildén', 'order': 0}>] 
-            #  etype='Baptism' 
-            #  edates=[0, 1782139, 1782139]>
+            # <Record 
+            #    person=<Node id=301000 labels={'Person'}
+            #        properties={'sortname': 'Järnefelt#Gustav Johan#', 'datetype': 19, 
+            #            'confidence': '', 'sex': 1, 'change': 1507492602, 'id': 'I0209', 
+            #            'date2': 1803341, 'date1': 1722646, 'uuid': 'e7a927ab20a642df8f5397d5cd4af3ff'}> 
+            #    role='Primary'
+            #    names=[
+            #        <Node id=301001 labels={'Name'}
+            #            properties={'firstname': 'Gustav Johan', 'type': 'Birth Name', 
+            #                'suffix': '', 'prefix': '', 'surname': 'Järnefelt', 'order': 0}>] 
+            #    event=<Node id=308363 labels={'Event'}
+            #        properties={'datetype': 0, 'change': 1501665587, 'description': '', 
+            #            'id': 'E0516', 'date2': 1803341, 'type': 'Death', 'date1': 1803341, 
+            #            'uuid': 'a9e15f03f4df4847849c6b53b1fdbbde'}>
+            # >
 
-            p = record["person"]
-            e = Event_combo()
-            e.person = Person_combo.from_node(p)
-            e.type = record["etype"]
-            if record["edates"][0] != None:
-                e.dates = DateRange(record["edates"])
+            node = record["event"]
+            e = Event_combo.from_node(node)
+            node = record["person"]
+            e.person = Person_combo.from_node(node)
             e.role = record["role"]
             e.names = []
             for node in record["names"]:

@@ -5,11 +5,13 @@
 
 
 {% macro stars(value) -%}
-   {# Changed 2018-12-10: Don't use version 5 of fontawesome.com #}
-   {# https://www.w3schools.com/charsets/ref_utf_symbols.asp
-      filled BLACK STAR ★   open WHITE STAR ☆ 
-      WHITE FROWNING FACE &#9785; BLACK FLAG &#9873;
-      SOUTH EAST ARROW TO CORNER &#8690; (outlink)
+   {# Confidence value as stars. 
+      Alternative method: scene_scripts.js:stars()
+
+      https://www.w3schools.com/charsets/ref_utf_symbols.asp
+      - filled BLACK STAR ★   open WHITE STAR ☆ 
+      - WHITE FROWNING FACE &#9785; BLACK FLAG &#9873;
+      - SOUTH EAST ARROW TO CORNER &#8690; (outlink)
    #}
    {% if value < 2 %}
      {% if value == 0 %}&#9873;&#9873;

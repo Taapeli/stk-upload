@@ -469,12 +469,12 @@ class Cypher_place():
     
     get_person_events = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
-  WHERE id(l) = $locid
-MATCH (p) --> (n:Name)
+    WHERE id(l) = $locid
+    MATCH (p) --> (n:Name)
+WITH p, r, e, l, n ORDER BY n.order
 RETURN p AS person, r.role AS role,
-  COLLECT(n) AS names,
-  e.type AS etype, [e.datetype, e.date1, e.date2] AS edates
-ORDER BY edates[1]"""
+    COLLECT(n) AS names, e AS event
+ORDER BY e.date1"""
 
     get_name_hierarchies = """
 MATCH (a:Place) -[:NAME]-> (pn:Place_name)

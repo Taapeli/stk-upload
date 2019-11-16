@@ -33,8 +33,8 @@
         {% endif %}</div>
       {% endif %}
 
-    <h3 style="position:sticky; top:0;">{{ _(place.type)|title }}
-        {{ macro.place_names(place) }}</h3>
+    <h3 class="sticky" title="{{ _('Top') }}"><a href="#">{{ _(place.type)|title }}
+        {{ macro.place_names(place) }}</a></h3>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -114,8 +114,7 @@
             <table class="infolist eventlist">
                 <thead>
                     <tr>
-                        <th class="ColumnId">{{ _('Person') }}</th>
-                        <th class="ColumnPerson">{{ _('Name') }}</th>
+                        <th class="ColumnPerson">{{ _('Person') }}</th>
                         <th class="ColumnEvent">{{ _('Event') }}</th>
                         <th class="ColumnDate">{{ _('Date') }}</th>
  <!--                   <th class="ColumnDescription">{{ _('Description') }}</th>
@@ -128,24 +127,25 @@
         {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
-                            <a href="/scene/person?uuid={{e.person.uuid}}" class="id"
-                              title="{{ _("See Person's Details") }}">
-                              <span class="idno">Uuid:{{e.person.uuid_short()}} /</span>
-                              <span class="id" title="{{ _('Original ID') }}">{{e.person.id}}</span></a>
-                        </td>
-                        <td>{% for pn in e.names|sort(attribute='order') %}
-                         {% if loop.index > 1 %}<br>{% endif %}
+                        {% for pn in e.names|sort(attribute='order') %}
+                         {% if loop.index == 1 %}
                          {% if pn.type != "Birth Name" %}
                             <span class="typedesc">{{pn.type|transl('nt')}}</span>
                          {% endif %}
-                           {{pn.firstname}} 
-	                       {% if pn.surname %} {{pn.prefix}} <b>{{pn.surname}}</b>
-	                       {% else %}<i>{{pn.suffix}}</i>{% endif %}
+                         <a href="/scene/person?uuid={{e.person.uuid}}" class="inlink"
+                            title="{{ _("See Person's Details") }}">{{ macro.person_name_long(pn) }}</a>
+                         {% else %}
+                          <small><br> – 
+                         {% if pn.type != "Birth Name" %}
+                            <span class="typedesc">{{pn.type|transl('nt')}}</span>
+                         {% endif %}
+                            {{ macro.person_name_long(pn) }}</small>
+                         {% endif %}
                          {% endfor %}
                         </td>
                         <td class="ColumnEvent">{{e.type|transl('evt')}}
                           {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
-                        <td class="ColumnDate">{% if e.dates %}{{e.dates}}{% else %}–{% endif %}</td>
+                        <td class="ColumnDate">{{e.dates}}</td>
 <!--
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">

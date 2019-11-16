@@ -83,7 +83,7 @@ u { color: DarkKhaki; text-decoration: none; }
 {% if person.note_ref %}
                 <tr><td></td>
                     <td>► <a href="#notes" class="inlink">{{ _('See') }}
-                    {{ _('Person Notes') }}</a></td>
+                    {{person.note_ref|count}} {{ _('person notes') }}</a></td>
                 </tr>
 {% endif %}
             </table>
