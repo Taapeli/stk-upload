@@ -41,7 +41,7 @@ def process_gedcom(arglist, transform_module):
     See sukujutut.py as an example
     """
 
-    msg = _(f"Transform '{transform_module.name}' started at {util.format_timestamp()}")
+    msg = _("Transform '{}' started at {}").format(transform_module.name, util.format_timestamp())
     LOG.info(f"------ {msg} ------")
 
     parser = ArgumentParser()
