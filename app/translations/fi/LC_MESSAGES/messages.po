@@ -2467,8 +2467,16 @@ msgid "See"
 msgstr ""
 
 #: bp/scene/templates/scene/person.html:86
-msgid "person notes"
-msgstr ""
+msgid "See person note"
+msgstr "Ks. henkilön lisätiedot"
+
+#: bp/scene/templates/scene/person.html:87
+msgid "See %(num)s person notes"
+msgstr "Ks. henkilön %(num)s lisätietoa"
+
+#: bp/scene/templates/scene/person.html:251
+msgid "Person Notes"
+msgstr "Henkilön lisätietoja"
 
 #: bp/scene/templates/scene/person.html:93
 #: bp/scene/templates/scene/person_v1.html:78

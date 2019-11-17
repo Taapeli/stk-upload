@@ -62,7 +62,7 @@ def show_person_list(selection=None):
             flash("Valitse haettava nimi ja tyyppi", category='warning')
     else:
         # the code below is executed if the request method
-        # was GET or the credentials were invalid
+        # was GET (no search name given) or the credentials were invalid
         persons = []
         if selection:
             # Use selection filter
@@ -99,8 +99,11 @@ def show_persons_by_refname(refname, opt=""):
 def show_all_persons_list(opt=''):
     """ List all persons for menu(1)    OLD MODEL WITHOUT User selection
 
+        Linked from admin/refnames only
+
         The string opt may include keys 'ref', 'sn', 'pn' in arbitary order
         with no delimiters. You may write 'refsn', 'ref:sn' 'sn-ref' etc.
+
         TODO Should have restriction by owner's UserProfile 
     """
     t0 = time.time()
@@ -280,7 +283,7 @@ def show_families():
 
 @bp.route('/scene/family=<int:fid>')
 def show_family_page(fid):
-    """ Home page for a Family.
+    """ Home page for a Family.    OBSOLETE: use show_family
 
         fid = id(Family)
     """
@@ -313,7 +316,7 @@ def show_family(uid=None):
 
 @bp.route('/pop/family=<int:fid>')
 def show_family_popup(fid):
-    """ Small Family pop-up.
+    """ Small Family pop-up. EXPERIMENTAL
     """
     #TODO Create a pop-up window; Gen only fewer pieces of data
     family = Family_combo.get_family_data(fid)
@@ -401,6 +404,8 @@ def show_source_page(sourceid):
     logger.info("-> bp.scene.routes.show_source_page")
     return render_template("/scene/source_events.html",
                            source=source, citations=citations)
+
+# ------------------------------ Media --------------------------------
 
 @bp.route('/scene/media/<fname>')
 def fetch_media(fname):
