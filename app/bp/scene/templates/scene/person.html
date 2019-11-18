@@ -248,7 +248,7 @@ u { color: DarkKhaki; text-decoration: none; }
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
 	                     title="key = {{photo.uuid_str()}}"/>
                 </a>
-                <p>{{photo.description}}</p>
+                <p>{{photo.description}}{{ macro.notelink(photo) }}</p>
             </div>
         {% endfor %}
             <div class="fullclear"></div>

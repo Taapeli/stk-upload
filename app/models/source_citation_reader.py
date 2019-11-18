@@ -87,8 +87,10 @@ def get_citations_js(objs):
         js-style person[id] = {name: "John", age: 31, city: "New York"}
     '''
     def unquote(s):
-        ''' Change quites (") to fancy quotes (“) '''
-        return s.replace('"', '“');
+        ''' Change quites (") to fancy quotes (“)
+            Change new lines to '¤' symbol
+        '''
+        return s.replace('"', '“').replace('\n','¤');
 
     notes = []
     js  = 'var citations = {};\nvar sources = {};\n'

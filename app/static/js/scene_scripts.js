@@ -158,9 +158,10 @@ function citTable() {
 			nodeSource.appendChild(nodeSourceA);
 			
 			// A source may have references to multiple repositories
+			var rObj;
 			for (k = 0; k < sObj.repositories.length;  k++) {
 
-				var rObj = repositories[sObj.repositories[k]];
+				rObj = repositories[sObj.repositories[k]];
 				textnode = document.createTextNode(" – ");
 				nodeSource.appendChild(textnode);
 				
@@ -177,8 +178,10 @@ function citTable() {
 				nodeSource.appendChild(textnode);
 
 			}
-			this.viewNotes(nodeSource, sObj.note_ref)
-			this.viewNotes(nodeSource, rObj.notes)
+			this.viewNotes(nodeSource, sObj.note_ref);
+			if (rObj) {
+				this.viewNotes(nodeSource, rObj.notes)
+			}
 
 			citas = line[1];	// = this.cTbl[i,j]
 			//console.log("Citations "+ citas +" of source " + source_id);
@@ -235,19 +238,34 @@ function citTable() {
 	
 	this.viewNotes = function(htmlObject, note_ref) {
 		// Display the Note texts and links in htmlObject.
-		var k;
+		// Text is reprenseted as italics and split to lines vy '¤' character
+		// Url link is named by the url's domain name
+		var k, l, note, text;
 		for (k = 0; k < note_ref.length; k++) {
-			var note = notes[note_ref[k]]
-			var text = " –► " + note.text + " ";
-			htmlObject.appendChild(document.createTextNode(text));
-
-			var nodeNoteA = document.createElement("A");
-			nodeNoteA.setAttribute("class", "outlink");
-			nodeNoteA.setAttribute("target", "_blank");
-			nodeNoteA.setAttribute("href", note.url);
-			text = nodeNoteA.hostname;
-			nodeNoteA.appendChild(document.createTextNode(text));
-			htmlObject.appendChild(nodeNoteA);
+			note = notes[note_ref[k]]
+			if (note.url || note.text) {
+				var lines = note.text.split("¤");
+				htmlObject.appendChild(document.createTextNode(" –► "));
+				var nodeI = document.createElement("I");
+				nodeI.appendChild(document.createTextNode(lines[0] + " "));
+				for (l=1; l < lines.length; l++) {
+					if (lines[l].length > 0) {
+						nodeI.appendChild(document.createElement("BR"));
+						nodeI.appendChild(document.createTextNode(lines[l]));
+					}
+				}
+				nodeI.appendChild(document.createTextNode(' '));
+				htmlObject.appendChild(nodeI);
+			}
+			if (note.url) {
+				var nodeNoteA = document.createElement("A");
+				nodeNoteA.setAttribute("class", "outlink");
+				nodeNoteA.setAttribute("target", "_blank");
+				nodeNoteA.setAttribute("href", note.url);
+				text = nodeNoteA.hostname;
+				nodeNoteA.appendChild(document.createTextNode(text));
+				htmlObject.appendChild(nodeNoteA);
+			}
 		}
 
 	}
