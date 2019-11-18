@@ -59,22 +59,22 @@ def read_sources_repositories(session, objs, citations=None):
         if not source.uniq_id in objs:
             objs[source.uniq_id] = source
 
-        # 3. Medium from REPOSITORY relation
-        relation = record['rel']
-        medium = relation.get('medium', "")
-        
-        # 4. The Repository node
-        node = record['r']
-        repo = Repository.from_node(node)
-        repo.medium = medium
-        if not repo.uniq_id in objs:
-            objs[repo.uniq_id] = repo
+        if record['rel']:
+            # 3. Medium from REPOSITORY relation
+            relation = record['rel']
+            medium = relation.get('medium', "")
+
+            # 4. The Repository node
+            node = record['r']
+            repo = Repository.from_node(node)
+            repo.medium = medium
+            if not repo.uniq_id in objs:
+                objs[repo.uniq_id] = repo
+            if not repo.uniq_id in source.repositories:
+                source.repositories.append(repo.uniq_id)
         
         # Referencing a (Source, medium, Repository) tuple
         cita.source_id = source.uniq_id
-        #cita.source_medium = medium
-        if not repo.uniq_id in source.repositories:
-            source.repositories.append(repo.uniq_id)
         #print(f"# ({uniq_id}:Citation) --> (:Source '{source}') --> (:Repository '{repo}')")
 
     return
