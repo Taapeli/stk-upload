@@ -16,6 +16,7 @@ class Name_types(Enum):
 TYPES = {'os.':Name_types.BIRTH_NAME, 
          'o.s.':Name_types.BIRTH_NAME, 
          's.':Name_types.BIRTH_NAME, 
+         'född':Name_types.BIRTH_NAME, 
          'ent.':Name_types.PREVIOUS_NAME, 
          'e.':Name_types.PREVIOUS_NAME, 
 }
@@ -37,6 +38,19 @@ class SurnameInfo:
     prefix:str = ""
 
 class ParseError(Exception): pass
+
+
+def splitlist(inputlist, separators):
+    result = []
+    curword = []
+    for w in inputlist:
+        if w in separators:
+            result.append(" ".join(curword))
+            curword = []
+        else:
+            curword.append(w)
+    if curword: result.append(" ".join(curword))
+    return result
 
 class SurnameParser:
     
@@ -70,8 +84,8 @@ class SurnameParser:
         # 'surn" on merkkijono, joissa ei pitäisi olla sulkumerkkejä
         # Lisätään välilyöntejä, jotta nimityypit ("os." jne) erottuvat.
         # Hajotetaan merkkijono listaksi ja kutsutaan metodia '_parse_surnames_list'
-        # Lopuksi tutkitaan metodin palauttamat arvot ja jos sukunimessä on kauttaviiva
-        # tai pilkku, hajotetaan ne vielä "aka"-sukunimiksi
+        # Lopuksi tutkitaan metodin palauttamat arvot ja jos sukunimessä on sana 'eli' tai 'tai'
+        # tai ne on erotettu kauttaviivalla tai pilkulla, niin hajotetaan ne vielä "aka"-sukunimiksi
         i = surn.find("(")
         if i >= 0: raise ParseError(f"Expected no '(': '{surn}'")
         i = surn.find(")")
@@ -79,26 +93,28 @@ class SurnameParser:
         for s in TYPES.keys():
             surn = surn.replace(f" {s}",f" {s} ") # separate "os.Mäkinen" -> "os. Mäkinen"
             surn = surn.replace(f",{s}",f" {s} ") # separate "Virtanen,os. Mäkinen" -> "Virtanen, os. Mäkinen"
-            surn = surn.replace(f",{s[:-1]} ",f" {s} ") # separate "Virtanen,os Mäkinen" -> "Virtanen, os Mäkinen"
+            if s[-1] == ".": 
+                surn = surn.replace(f",{s[:-1]} ",f" {s} ") # separate "Virtanen,os Mäkinen" -> "Virtanen, os Mäkinen"
         surnames1 = self._parse_surnames_list(surn.split())
         surnames = []
         for name_type, namelist in surnames1:
-            surname = " ".join(namelist)
-            names = re.split(r"[/,\\]",surname)
-            for name in names:
-                name = name.strip()
-                parts = name.split()
-                if len(parts) > 1 and parts[0] in PREFIXES:
-                    prefix_list = []
-                    while len(parts) > 1 and parts[0] in PREFIXES:
-                        prefix_list.append( parts[0] )
-                        name = " ".join(parts[1:])
-                        parts = name.split()
-                    prefix = " ".join(prefix_list)
-                else:
-                    prefix = ""
-                if name: surnames.append(SurnameInfo(name,name_type,prefix))
-                name_type = Name_types.AKA
+            surnames2 = splitlist(namelist,{'eli','l.','tai', 'eller'})
+            for surname in surnames2:
+                names = re.split(r"[/,\\]",surname)
+                for name in names:
+                    name = name.strip()
+                    parts = name.split()
+                    if len(parts) > 1 and parts[0] in PREFIXES:
+                        prefix_list = []
+                        while len(parts) > 1 and parts[0] in PREFIXES:
+                            prefix_list.append( parts[0] )
+                            name = " ".join(parts[1:])
+                            parts = name.split()
+                        prefix = " ".join(prefix_list)
+                    else:
+                        prefix = ""
+                    if name: surnames.append(SurnameInfo(name,name_type,prefix))
+                    name_type = Name_types.AKA
         return surnames
 
     def _find_first_type(self,words):

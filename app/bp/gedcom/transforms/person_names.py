@@ -86,6 +86,12 @@ DELETE = None
 def capitalize(name):
     return " ".join(n.capitalize() for n in name.split())
 
+
+def get_subitem(subitem, tagname):
+    for c in subitem.children:
+        if c.tag == tagname: return c.value
+    return None
+
 class PersonNames(transformer.Transformation):
 
     def transform(self, item, _options, _phase):
@@ -125,6 +131,7 @@ class PersonNames(transformer.Transformation):
                 n.givn = saved_givn 
             first = True
             if len(parseresult.surnames) > 1: changed = True
+            orig_nsfx = get_subitem(subitem,'NSFX')
             for pn in sorted(parseresult.surnames,key=self.surname_sortkey):
                 surname = capitalize(pn.surn)
                 namestring = f"{capitalize(n.givn)}/{surname}/{n.nsfx}"
@@ -135,13 +142,16 @@ class PersonNames(transformer.Transformation):
                     #subitem.children.append(item2)
                 newitem = Item(f"{subitem.level} NAME {namestring}")
                 newitem.children = subitem.children
-                subitem.children = []
+                subitem.children = []  # ???
                 if pn.name_type:
                     typename = surnameparser.TYPE_NAMES.get(pn.name_type,"unknown")
                     typeitem = Item(f"{subitem.level+1} TYPE {typename}")
                     newitem.children.append(typeitem)
                     changed = True
                 if first:
+                    if n.patronymic_conflict:
+                        item3 = Item(f"{subitem.level+1} NOTE _W {_('patronyymiristiriita')}")
+                        newitem.children.append(item3)
                     if n.call_name:
                         item2 = Item(f"{subitem.level+1} NOTE _CALL {n.call_name}")
                         newitem.children.append(item2)
@@ -151,9 +161,13 @@ class PersonNames(transformer.Transformation):
                         newitem.children.append(item2)
                         changed = True
                     if n.nsfx:
-                        item2 = Item(f"{subitem.level+1} NSFX {n.nsfx}")
-                        newitem.children.append(item2)
-                        changed = True
+                        if not orig_nsfx:
+                            item2 = Item(f"{subitem.level+1} NSFX {n.nsfx}")
+                            newitem.children.append(item2)
+                            changed = True
+                        if orig_nsfx and orig_nsfx != n.nsfx and not n.patronymic_conflict:
+                            item3 = Item(f"{subitem.level+1} NOTE _W {_('patronyymiristiriita 2')}")
+                            newitem.children.append(item3)
                 if pn.prefix:
                     item2 = Item(f"{subitem.level+1} SPFX {pn.prefix}")
                     newitem.children.append(item2)
