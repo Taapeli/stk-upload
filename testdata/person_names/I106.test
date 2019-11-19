@@ -16,5 +16,6 @@ display_changes = false
 0 @I106 INDI
 1 NAME Matti/Mattila/Pettersson
 2 NOTE _orig_NAME Matti Pettersson/Mattila/Andersson
+2 NOTE _W patronyymiristiriita
 2 NSFX Pettersson
 0 TRLR

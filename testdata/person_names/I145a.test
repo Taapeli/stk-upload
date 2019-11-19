@@ -6,12 +6,14 @@
 0 HEAD
 1 CHAR UTF-8
 0 @I145 INDI
-1 NAME Pauli/Frimodig/
+1 NAME Thomas Pauli/Frimodig/
 0 TRLR
 
 [expected]
 0 HEAD
 1 CHAR UTF-8
 0 @I145 INDI
-1 NAME Pauli/Frimodig/
+1 NAME Thomas/Frimodig/Pauli
+2 NOTE _orig_NAME Thomas Pauli/Frimodig/
+2 NSFX Pauli
 0 TRLR

@@ -6,7 +6,7 @@
 0 HEAD
 1 CHAR UTF-8
 0 @I10 INDI
-1 NAME Matti/Heikkilä,Mattila/
+1 NAME Matti/Heikkilä l. Mattila/
 0 TRLR
 
 [expected]
@@ -14,7 +14,7 @@
 1 CHAR UTF-8
 0 @I10 INDI
 1 NAME Matti/Heikkilä/
-2 NOTE _orig_NAME Matti/Heikkilä,Mattila/
+2 NOTE _orig_NAME Matti/Heikkilä l. Mattila/
 1 NAME Matti/Mattila/
 2 TYPE aka
 0 TRLR

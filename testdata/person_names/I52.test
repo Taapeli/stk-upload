@@ -1,7 +1,6 @@
 [description]
 
 [options]
-display_changes = false
 
 [original]
 0 HEAD
