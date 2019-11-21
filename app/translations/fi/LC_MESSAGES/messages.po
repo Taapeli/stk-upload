@@ -393,27 +393,27 @@ msgstr ""
 #: bp/admin/templates/admin/access_management.html:3
 #: bp/admin/templates/admin/access_management.html:17
 msgid "Management of access to batches"
-msgstr ""
+msgstr "Ehdokasaineistojen käyttöoikeuksien hallinta"
 
 #: bp/admin/templates/admin/access_management.html:19
 msgid "Add access for user"
-msgstr ""
+msgstr "Lisää oikeus käyttäjälle"
 
 #: bp/admin/templates/admin/access_management.html:25
 msgid "to batchid"
-msgstr ""
+msgstr "erään"
 
 #: bp/admin/templates/admin/access_management.html:30
 msgid "Add access"
-msgstr ""
+msgstr "Lisää pääsy"
 
 #: bp/admin/templates/admin/access_management.html:32
 msgid "Current accesses"
-msgstr ""
+msgstr "Voimassa olevat käyttöoikeudet"
 
 #: bp/admin/templates/admin/access_management.html:34
 msgid "Delete marked"
-msgstr ""
+msgstr "Poista merkityt"
 
 #: bp/admin/templates/admin/access_management.html:39
 #: bp/admin/templates/admin/admin.html:39
@@ -424,13 +424,17 @@ msgstr ""
 #: bp/start/templates/start/my_message.html:47
 #: bp/start/templates/start/my_settings.html:33
 msgid "User"
-msgstr ""
+msgstr "käyttäjä"
 
 #: bp/admin/templates/admin/access_management.html:40
 #: bp/dupsearch/templates/dupsearch.html:29
 #: bp/gramps/templates/gramps/uploads.html:87
 msgid "Batch"
-msgstr ""
+msgstr "Erä"
+
+msgid "Objects"
+msgstr "Kohteita"
+
 
 #: bp/admin/templates/admin/admin.html:4
 msgid "Administrator"

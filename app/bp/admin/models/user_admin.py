@@ -480,11 +480,13 @@ class UserAdmin():
             for rec in shareds.driver.session().run(Cypher_adm.list_accesses):
                 user = dict(rec.get("user"))
                 batch = dict(rec.get("batch"))
-                batch["file"] = batch["file"].split("/")[-1].replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
-                rel = dict(rec.get("r"))
+                batch["file"] = batch["file"].split("/")[-1].\
+                    replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
+                #rel = dict(rec.get("r"))
                 rel_id = rec.get("rel_id")
-                access = dict(user=user,batch=batch,rel_id=rel_id)
-                print("access:",access)
+                cnt_own = rec.get("cnt")
+                access = dict(user=user, batch=batch, rel_id=rel_id, cnt=cnt_own)
+                print("access:", access)
                 rsp.append(access)
             return rsp
 

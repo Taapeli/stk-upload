@@ -138,9 +138,16 @@ DELETE c'''
 
 # Access management
 
+#     list_accesses = """
+# MATCH (user:User) -[:SUPPLEMENTED]->(userprofile:UserProfile) -[r:HAS_ACCESS]-> (batch:Batch) RETURN *,id(r) as rel_id
+#     """
     list_accesses = """
-MATCH (user:User) -[:SUPPLEMENTED]->(userprofile:UserProfile) -[r:HAS_ACCESS]-> (batch:Batch) RETURN *,id(r) as rel_id
-    """
+MATCH (user:User) -[:SUPPLEMENTED]-> (userprofile:UserProfile)
+    -[r:HAS_ACCESS]-> (batch:Batch)
+WITH user, userprofile, batch, id(r) as rel_id
+    OPTIONAL MATCH (batch) -[ow:OWNS]-> ()
+RETURN user, userprofile, batch, rel_id, count(ow) AS cnt
+    LIMIT 200"""
 
     add_access = """
 MATCH (user:UserProfile{username:$username}), (batch:Batch{id:$batchid})

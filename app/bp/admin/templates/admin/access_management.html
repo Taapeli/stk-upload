@@ -30,22 +30,23 @@
     <button v-on:click="add_access()" v-bind:disabled="!user || !batch">{{ _("Add access") }}</button>
     <p>
     <h3>{{ _("Current accesses") }}</h3>
-    <p>
-    <button v-on:click="delete_accesses()">{{ _("Delete marked") }}</button>
-    <p>
     <table border>
         <tr>
             <td>
             <th><a href="#" v-on:click="sort_by_user()">{{ _("User") }}</a>
             <th><a href="#" v-on:click="sort_by_batch()">{{ _("Batch") }}</a>
+            <th><a href="#" v-on:click="sort_by_cnt()">{{ _("Objects") }}</a>
         </tr>
         <tr v-for="access in accesses">
             <td><input type=checkbox v-model="access.selected">
         	<td>${ access.user | render_user } 
-        	<td>${ access.batch | render_batch }
+            <td>${ access.batch | render_batch }
+            <td class="center">${ access.cnt }
         </tr>
     </table>
-
+    <p>
+    <button v-on:click="delete_accesses()">{{ _("Delete marked") }}</button>
+    <p>
     
 </div>
 
@@ -56,18 +57,18 @@ function log(msg) {
 }
 
 function stringsort(a, b) {
-  var nameA = a.toUpperCase(); // ignore upper and lowercase
-  var nameB = b.toUpperCase(); // ignore upper and lowercase
-  if (nameA < nameB) {
-    return -1;
-  }
-  if (nameA > nameB) {
-    return 1;
-  }
+	  var nameA = a.toUpperCase(); // ignore upper and lowercase
+	  var nameB = b.toUpperCase(); // ignore upper and lowercase
+	  if (nameA < nameB) {
+	    return -1;
+	  }
+	  if (nameA > nameB) {
+	    return 1;
+	  }
 
-  // names must be equal
-  return 0;
-}
+	  // names must be equal
+	  return 0;
+	}
 
 var app = new Vue({
     delimiters: ['${', '}'],
@@ -98,6 +99,7 @@ var app = new Vue({
         batches: [],
         user: undefined,
         batch: undefined,
+        cnt: 0,
     }, // data
     methods: {
         init: function() {
@@ -191,6 +193,9 @@ var app = new Vue({
         },
         sort_by_batch: function() {
             app.accesses = app.accesses.sort( (a1,a2) => { return stringsort(a1.batch.id,a2.batch.id);} );
+        },
+        sort_by_cnt: function() {
+            app.accesses = app.accesses.sort( (a1,a2) => { return (a1.cnt < a2.cnt);} );
         },
     } // methods
 
