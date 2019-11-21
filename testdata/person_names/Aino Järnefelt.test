@@ -1,0 +1,23 @@
+[description]
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @P1@ INDI
+1 NAME Aino/Järnefelt/
+1 NAME /Sibelius/
+2 TYPE married
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @P1@ INDI
+1 NAME Aino/Järnefelt/
+1 NAME Aino/Sibelius/
+2 NOTE _orig_NAME /Sibelius/
+2 TYPE married
+0 TRLR
+
