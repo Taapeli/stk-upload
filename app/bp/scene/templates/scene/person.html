@@ -121,13 +121,15 @@ u { color: DarkKhaki; text-decoration: none; }
 
                         <td class="ColumnDate">{{e.dates}}</td>
 
-                        <td class="ColumnPlace">{% set br=0 %}{% for pref in e.place_ref %}
+                        <td class="ColumnPlace">{% set br=0 %}
+			  {% for pref in e.place_ref %}
                             {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
                             <a href="/scene/location/uuid={{obj[pref].uuid}}" class="inlink"
                              title="{{ _('of type') }} {{obj[pref].type}}; {{ _('see details of place') }}">
-                            {{macro.place_names_lang(obj[pref])}}</a>{% if obj[pref].uppers 
-                              %}, <small>{{macro.place_names_lang(obj[pref].uppers[0])}}</small>{% endif %}
-                            {% endfor %}
+                              {{macro.place_names_lang(obj[pref])}}</a>
+			    {% if obj[pref].uppers%},<small>{{macro.place_names_lang(obj[pref].uppers[0])}}</small>
+			    {% endif %}
+                          {% endfor %}
                         </td>
 
                         <td class="ColumnDescription"><div>{{e.description}}</div>

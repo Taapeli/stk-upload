@@ -58,9 +58,14 @@ td { padding-right:1em;}
             <table style="margin-top:1em;"><tbody>
         {% for e in family.events|sort(attribute='dates') %}
                 <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
-                    <td class="Value">{{e.dates}}</td>
-                    <td class="Value"><a href="/scene/location={{e.place.uniq_id}}"
-                            class="inlink">{{e.place.pname}}</a></td>
+                    <td class="ColumnDate">{{e.dates}}</td>
+                    <td class="ColumnPlace">
+                    <a href="/scene/location/uuid={{e.place.uuid}}" class="inlink"
+                       title="{{ _('of type') }} {{e.place.type}}; {{ _('see details of place') }}">
+                      {{macro.place_names_lang(e.place)}}</a>{% if e.place.uppers %},
+		    <small>{{macro.place_names_lang(e.place.uppers[0])}}</small>
+		    {% endif %}
+		  </td>
                 </tr>
         {% endfor %}
             </tbody></table>
