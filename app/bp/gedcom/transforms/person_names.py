@@ -127,7 +127,7 @@ class PersonNames(transformer.Transformation):
             print(n.givn,saved_givn)
             if n.givn and saved_givn is None:
                 saved_givn = n.givn
-            if n.givn == "" and saved_givn is not None:
+            if n.givn == "N" and saved_givn is not None:
                 n.givn = saved_givn 
             first = True
             if len(parseresult.surnames) > 1: changed = True
