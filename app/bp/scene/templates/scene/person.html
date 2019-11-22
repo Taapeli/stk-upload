@@ -8,7 +8,7 @@
 u { color: DarkKhaki; text-decoration: none; }
 #citTest { margin:1em; }
 #citTest div { display: inline-block; }
-#citTbl  td { border: 2px solid brown; }
+#citTbl td, #notTbl td { border: 2px solid brown; }
 </style>
 
 <div id="startdiv">
@@ -122,14 +122,14 @@ u { color: DarkKhaki; text-decoration: none; }
                         <td class="ColumnDate">{{e.dates}}</td>
 
                         <td class="ColumnPlace">{% set br=0 %}
-			  {% for pref in e.place_ref %}
+			  {% for pref in e.place_ref %}{% set pl = obj[pref] %}
                             {% if br == 0 %}{% set br = 1 %}{% else %}/{% endif %}
-                            <a href="/scene/location/uuid={{obj[pref].uuid}}" class="inlink"
-                             title="{{ _('of type') }} {{obj[pref].type}}; {{ _('see details of place') }}">
-                              {{macro.place_names_lang(obj[pref])}}</a>
-			    {% if obj[pref].uppers%},<small>{{macro.place_names_lang(obj[pref].uppers[0])}}</small>
-			    {% endif %}
-                          {% endfor %}
+                            <a href="/scene/location/uuid={{pl.uuid}}" class="inlink"
+                             title="{{ _('of type') }} {{pl.type}}; {{ _('see details of place') }}">
+                              {{macro.place_names_lang(pl)}}</a
+                            >{{macro.note_link(pl.note_ref, obj)}}{% if pl.uppers %},
+                            <small>{{macro.place_names_lang(pl.uppers[0])}}</small>{% endif %}
+               {% endfor %}
                         </td>
 
                         <td class="ColumnDescription"><div>{{e.description}}</div>
@@ -165,10 +165,11 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
-               <div><button type="button" onclick="tbl.findCitations('dbug','citTbl')">*) Etsi viitteet</button><br>
+               <div><button type="button" onclick="tbl.findReferences('dbug','citTbl','notTbl')">*) Etsi viitteet</button><br>
                     <button type="button" onclick="tbl.sourceReferences('sourcerefContent','citTbl')">Lisää lähdeluettelo</button></div>
                <div id="dbug"><p>Löydetyt viitteet</p></div>
                <div><table id="citTbl"><body><tr><td>Viitteet lähteittäin</td></tr></body></table></div>
+               <div><table id="notTbl"><body><tr><td>Viitteet huomautuksiin</td></tr></body></table></div>
             </div>
         </div>
 {% endif %}
@@ -282,7 +283,7 @@ u { color: DarkKhaki; text-decoration: none; }
 {{jscode|safe}}
 var tbl = new citTable();
     {% if not debug %}
-tbl.findCitations('','');
+tbl.findReferences('','','');
 tbl.sourceReferences('sourcerefContent','');
     {% endif %}
 </script>

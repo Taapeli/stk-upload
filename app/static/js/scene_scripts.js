@@ -26,16 +26,22 @@ function stars(value) {
 
 function citTable() {
 	// Manage citations table and indexes "1a", ... for each.
+	// Manage notes table and indexes "i", "ii", ... for each.
 	this.cTbl = [];
+	this.nTbl = [];
 
-
-	this.getMark = function (i, j) {
+	this.getCiteMark = function (i, j) {
 		// Create mark "1a" for given cTbl line and citation column
 	    return (i + 1) + "abcderfghijklmopqrstuvwxyzåäö"[j];
 	}
 
+	this.getNoteMark = function (i) {
+		// Create mark "N1" for given nTbl row
+	    return "n" + (i + 1);
+	}
 
-	this.add = function(s_id, c_id) {
+
+	this.addC = function(s_id, c_id) {
 		// Adds a citation to source.
 		// The lines of this.cTbl are arrays [source_id, [citation_id, ...]]
 	    //this.mark = (s_id + 1) + "abcderfghijklmopqrstuvwxyzåäö"[c_id];
@@ -54,12 +60,28 @@ function citTable() {
 					j = z.length
 					z.push(c_id);
 				}
-				return this.getMark(i, j);
+				return this.getCiteMark(i, j);
 			}
 		}
 		line = [s_id, [c_id]];
 		this.cTbl.push(line);
-		return this.getMark(this.cTbl.length - 1, 0)
+		return this.getCiteMark(this.cTbl.length - 1, 0)
+	}
+
+	this.addN = function(n_id) {
+		// Adds a note reference.
+		// Table this.nTbl has uniq_ids of Notes found.
+	    // Note references are marked by N1, N2, ...
+		var l = this.nTbl.length;
+		for (i = 0; i < l; i++) {
+			// Browse Notes
+			if (this.nTbl[i] == n_id) {
+				return this.getNoteMark(i);
+			}
+		}
+		// No match; add a new note reference
+		this.nTbl.push(n_id);
+		return this.getNoteMark(this.nTbl.length - 1)
 	}
 
 
@@ -67,7 +89,8 @@ function citTable() {
 		// Display citations table in destination element.
 
 		var t = document.getElementById(destination);
-		t.innerHTML = "<tr><th>mark</th><th>source</th><th>citation (a,b,…)</th></th><tr>";
+		var line;
+		t.innerHTML = "<tr><th>mark</th><th>source</th><th>citation (a,b,…)</th><tr>";
 
 		var l = this.cTbl.length;
 		for (i = 0; i < l; i++) {
@@ -79,11 +102,28 @@ function citTable() {
 	}
 
 
-	this.findCitations = function(textDest,tblDest) {
-		// Search html <sup> tags and add the citations to this.cTbl.
+	this.listNotes = function(destination) {
+		// Display notes table in destination element.
+
+		var t = document.getElementById(destination);
+		var line;
+		t.innerHTML = "<tr><th>mark</th><th>note</th></th><tr>";
+
+		var l = this.nTbl.length;
+		for (i = 0; i < l; i++) {
+			line = this.nTbl[i];
+			t.innerHTML += "<tr><td>" + (i + 1) + "</td><td>" + line + "</td><tr>";
+		}
+		console.log("Citation table=" + this.cTbl);
+	}
+
+
+	this.findReferences = function(textDest,tblCita,tblNote) {
+		// Search html <sup> tags and add the citations to this.cTbl and notes to nTbl.
 		//
 		// If textDst is present, dipslay list of all sups found
-		// If tblDest is present, display result: table of sources and their citations
+		// If tblCita is present, display result: table of sources and their citations
+		// If tblNote is present, display result: table of notes
 		var sups = document.getElementsByTagName("sup");
 		var i, j, node, nodes, ret = "";
 		for (i = 0; i < sups.length; i++) {
@@ -91,22 +131,35 @@ function citTable() {
 			for (j = 0; j < nodes.length; j++) {
 				node = nodes[j];
 				if (node.nodeName == "A" && node.id != "" ) {
-					// <sup><a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
-				    var arr = node.id.split('-');
-				    // Store source and citation ids
-				    mark = this.add(Number(arr[0]), Number(arr[1]));
-				    node.href = "#sref" + mark;
-				    node.innerText = mark;
-				    ret += mark + ">" + node.id + '<br>';
+					if (node.id[0] == "N") {
+					    // Store note id
+						// <sup><a id="N{{{{pl.note_ref.uniq_id}}">*</a>
+					    mark = this.addN(Number(node.id.substr(1)));
+					    node.href = "#sref" + mark;
+					    node.innerText = mark;
+					    ret += mark + ">" + node.id + '<br>';
+					} else {
+					    // Store source and citation ids
+						// <sup><a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
+					    var arr = node.id.split('-');
+					    mark = this.addC(Number(arr[0]), Number(arr[1]));
+					    node.href = "#sref" + mark;
+					    node.innerText = mark;
+					    ret += mark + ">" + node.id + '<br>';
+					}
 				}
 			}
 		}
 		if (textDest) {
 			document.getElementById(textDest).innerHTML = ret;
 		}
-		if (tblDest) {
+		if (tblCita) {
 			// Show citation refeference table
-			this.listCitations(tblDest);
+			this.listCitations(tblCita);
+		}
+		if (tblNote) {
+			// Show citation refeference table
+			this.listNotes(tblNote);
 		}
 	}
 
@@ -203,7 +256,7 @@ function citTable() {
 	            //     class="outlink" target="_blank">digi.narc.fi</a> –
 				// </div>
 	
-				mark = this.getMark(i, j);
+				mark = this.getCiteMark(i, j);
 				cObj = citations[cita_id];
 				if ( !(sObj instanceof Object) ) {
 					console.log("ERROR No data for citation "+ cita_id +" of source " + source_id);
