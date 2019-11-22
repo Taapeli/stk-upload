@@ -162,8 +162,8 @@
 {% macro place_names_lang(pl) -%}
     {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
     {% for n in pl.names %}{% if not loop.first %} / {% endif %}
-       {{ n.name|safe }}{% endfor 
-%}{%- endmacro %}
+       {{ n.name|safe }}{% endfor %}
+{%- endmacro %}
 
 {% macro place_names(pl) -%}
     {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}

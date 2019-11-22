@@ -6,7 +6,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 import  shareds
 
-from .cypher import Cypher_family
+from .cypher import Cypher_family, Cypher_person
 from .family import Family
 from .event_combo import Event_combo
 from .person_name import Name
@@ -231,16 +231,24 @@ RETURN family"""
                                 #        'date2': 1875043, 'type': 'Marriage', 'date1': 1875043}>
                                 e = Event_combo.from_node(event_node)
                                 if place_node:
-                                    # place_node:
-                                    # <Node id=251746 labels={'Place'} 
-                                    #    properties={'coord': [60.5625, 21.609722222222224], 'handle': '_dc388cd23f634d21dbce8ea8775', 
-                                    #        'id': 'P0468', 'type': 'City', 'pname': 'Taivassalo', 
-                                    #        'change': 1556953682}>
+                                    # place_node: <Node id=73479 labels={'Place'} properties={'coord':
+                                    # [60.5625, 21.609722222222224], 'id': 'P0468', 'type': 'City', 'uuid':
+                                    # 'd1d0693de1714a47acf6442d64246a50', 'pname': 'Taivassalo', 'change':
+                                    # 1556953682}>
                                     e.place = Place_combo.from_node(place_node)
+
+                                    # Look for surrounding place:
+                                    res = session.run(Cypher_person.get_places, uid_list=[e.uniq_id])
+                                    for rec in res:
+                                        e.place.set_names_from_nodes(rec['pnames'])
+                                        if rec['pi']:
+                                            pl_in = Place_combo.from_node(rec['pi'])
+                                            pl_in.set_names_from_nodes(rec['pinames'])
+                                            e.place.uppers.append(pl_in)
 
                                 family.events.append(e)
         
-                        uniq_id = -1
+                        uniq_id = -1 # ???
                         
                         for role, person_node, name_node, birth_node, death_node in record['parent']:
                             # ['mother', 
