@@ -99,7 +99,7 @@ u { color: DarkKhaki; text-decoration: none; }
                         <th class="ColumnEvent">{{ _("Event") }}</th>
                         <th class="ColumnDate">{{ _("Date") }}</th>
                         <th class="ColumnPlace">{{ _("Place") }}</th>
-                        <th class="ColumnDescription">{{ _("Description and Notes") }}</th>
+                        <th class="ColumnDescription">{{ _("Description") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -146,26 +146,33 @@ u { color: DarkKhaki; text-decoration: none; }
 	                            	  {{ macro.notelink(note) }}</div>
 	                            {% endfor %}
                            	{% endif %}
-                            {% if e.place_ref %}
+{#                          {% if e.place_ref %}
                                 {% for pref in e.place_ref %}
                                     {% for ref in obj[pref].note_ref %}
                                <div><span class="typedesc">{{ obj[ref].type|transl('notet') }}</span>
                                     {{ macro.notelink(obj[ref]) }}</div>{% endfor %}
                                 {% endfor %}
                             {% endif %}
+#}
                             </div>
                         </td>
                     </tr>
 {% endfor %}
                  </tbody>
             </table>
+            <div id="noteContent"><p class="nodesTitle">{{ _('Place notes') }}</p>
+            {# Place foot notes are created in /static/js/scene_scripts.js
+               method refTable.noteReferences() #}
+            </div>
         </div>
+
 
 {% if debug %}
         <div class="subsection" id="notes" style="color:green">
             <h4>Js-testaus</h4>
             <div id="citTest">
                <div><button type="button" onclick="tbl.findReferences('dbug','citTbl','notTbl')">*) Etsi viitteet</button><br>
+                    <button type="button" onclick="tbl.noteReferences('noteContent','citTbl')">Lisää paikkojen huomautukset</button><br>
                     <button type="button" onclick="tbl.sourceReferences('sourcerefContent','citTbl')">Lisää lähdeluettelo</button></div>
                <div id="dbug"><p>Löydetyt viitteet</p></div>
                <div><table id="citTbl"><body><tr><td>Viitteet lähteittäin</td></tr></body></table></div>
@@ -274,17 +281,18 @@ u { color: DarkKhaki; text-decoration: none; }
         <div class="subsection" id="sourcerefs">
             <h4>{{ _("Source references") }}</h4>
             {# Reference list is created below in /static/js/scene_scripts.js
-               method citTable.sourceReferences() #}
+               method refTable.sourceReferences() #}
             <div id="sourcerefContent"></div>
         </div>
     </div>
 
 <script>
 {{jscode|safe}}
-var tbl = new citTable();
+var tbl = new refTable();
     {% if not debug %}
 tbl.findReferences('','','');
 tbl.sourceReferences('sourcerefContent','');
+tbl.noteReferences('noteContent','');
     {% endif %}
 </script>
 {% endblock %}

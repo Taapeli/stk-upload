@@ -22,9 +22,9 @@ function stars(value) {
 }
 
 
-// --------- Manage Source Citations by citTable object ----------
+// --------- Manage Source Citations and Notes by refTable object ----------
 
-function citTable() {
+function refTable() {
 	// Manage citations table and indexes "1a", ... for each.
 	// Manage notes table and indexes "i", "ii", ... for each.
 	this.cTbl = [];
@@ -36,8 +36,8 @@ function citTable() {
 	}
 
 	this.getNoteMark = function (i) {
-		// Create mark "N1" for given nTbl row
-	    return "n" + (i + 1);
+		// Create mark "1" for given nTbl row
+	    return "" + (i + 1);
 	}
 
 
@@ -68,19 +68,21 @@ function citTable() {
 		return this.getCiteMark(this.cTbl.length - 1, 0)
 	}
 
-	this.addN = function(n_id) {
+	this.addNote = function(noteId, url, text, rType) {
 		// Adds a note reference.
-		// Table this.nTbl has uniq_ids of Notes found.
-	    // Note references are marked by N1, N2, ...
+		// Table this.nTbl rows has 4 elements: [uniq_id, url, text, rType]
+		var line;
 		var l = this.nTbl.length;
 		for (i = 0; i < l; i++) {
 			// Browse Notes
-			if (this.nTbl[i] == n_id) {
-				return this.getNoteMark(i);
+			line = this.nTbl[i];
+			if (line[0] == noteId) {
+				return this.getNoteMark(i, line);
 			}
 		}
 		// No match; add a new note reference
-		this.nTbl.push(n_id);
+		line = [noteId, url, text, rType]
+		this.nTbl.push(line);
 		return this.getNoteMark(this.nTbl.length - 1)
 	}
 
@@ -107,14 +109,16 @@ function citTable() {
 
 		var t = document.getElementById(destination);
 		var line;
-		t.innerHTML = "<tr><th>mark</th><th>note</th></th><tr>";
+		t.innerHTML = "<tr><th>mark</th><th>id</th><th>url</th><th>text</th><th>type</th><tr>";
 
 		var l = this.nTbl.length;
 		for (i = 0; i < l; i++) {
+			//noteId, url, text, rType = this.nTbl[i];
 			line = this.nTbl[i];
-			t.innerHTML += "<tr><td>" + (i + 1) + "</td><td>" + line + "</td><tr>";
+			console.log("Notes["+i+"]=" + this.nTbl[i]);
+			t.innerHTML += "<tr><td>" + (i + 1) + "</td><td>" + line[0] + 
+				"</td><td>" + line[1] + "</td><td>" + line[2] + "</td><td>" + line[3] + "</td><tr>";
 		}
-		console.log("Citation table=" + this.cTbl);
 	}
 
 
@@ -133,8 +137,25 @@ function citTable() {
 				if (node.nodeName == "A" && node.id != "" ) {
 					if (node.id[0] == "N") {
 					    // Store note id
-						// <sup><a id="N{{{{pl.note_ref.uniq_id}}">*</a>
-					    mark = this.addN(Number(node.id.substr(1)));
+						// <sup><a id="N428950">https://example.com/GRid=385555
+						//			<i>Maria Borgin hautakivi Ahvenistolla</i></a></sup>
+						var noteId, parts, part, text, rType, u, url;
+						noteId = Number(node.id.substr(1));
+						parts = node.childNodes;
+						for (k = 0; k < parts.length; k++) {
+							part = parts[k];
+							if (part.nodeName == "#text" ) {
+								u = part.data.replace(/ \n/, "");
+								if (u) {
+									url = part.data;
+								}
+							} else if (part.nodeName == "I") {
+								text = part.innerText;
+							} else if (part.nodeName == "B") {
+								rType = part.innerText;
+							}
+						}
+					    mark = this.addNote(noteId, url, text, rType);
 					    node.href = "#sref" + mark;
 					    node.innerText = mark;
 					    ret += mark + ">" + node.id + '<br>';
@@ -151,6 +172,7 @@ function citTable() {
 			}
 		}
 		if (textDest) {
+			// Show citations and notes found from  sup > a elements
 			document.getElementById(textDest).innerHTML = ret;
 		}
 		if (tblCita) {
@@ -231,9 +253,9 @@ function citTable() {
 				nodeSource.appendChild(textnode);
 
 			}
-			this.viewNotes(nodeSource, sObj.note_ref);
+			this.viewCitaNotes(nodeSource, sObj.note_ref);
 			if (rObj) {
-				this.viewNotes(nodeSource, rObj.notes)
+				this.viewCitaNotes(nodeSource, rObj.notes)
 			}
 
 			citas = line[1];	// = this.cTbl[i,j]
@@ -282,14 +304,14 @@ function citTable() {
 				nodeCitaSpan.appendChild(document.createTextNode(text));
 				nodeCitaDiv.appendChild(nodeCitaSpan);
 
-				this.viewNotes(nodeCitaDiv, cObj.note_ref)
+				this.viewCitaNotes(nodeCitaDiv, cObj.note_ref)
 			}
 			line = undefined;
 		}
 	} // sourceReferences()
 
 	
-	this.viewNotes = function(htmlObject, note_ref) {
+	this.viewCitaNotes = function(htmlObject, note_ref) {
 		// Display the Note texts and links in htmlObject.
 		// Text is reprenseted as italics and split to lines vy '¤' character
 		// Url link is named by the url's domain name
@@ -322,5 +344,67 @@ function citTable() {
 		}
 
 	}
+
+	this.noteReferences = function(destination) {
+		//
+		// Display the foot notes by stored (place) notes.
+		//
+		var t = document.getElementById(destination);
+		var noteId, url, text, rType;
+		var mark;	// note index like "1"
+		var line, i, j, k;
+
+		if (this.nTbl.length) {
+			// Show title and the notes
+			t.style.display = "block";
+		}
+
+		for (i = 0; i < this.nTbl.length; i++) {
+
+			// Next Note: noteId, url, text, rType
+
+			line = this.nTbl[i];
+			noteId = line[0];
+			url = line[1].trim();
+			text = line[2];
+			rType = line[3];
+
+			// line = [428951, "https://example.com/us.htm", "Note text here", "viite"]
+			// Result:
+	        // <p> 1) <span class="typedesc">viite</span>
+			// <a href="http://example.com/us.htm" class="outlink" target="_blank">example.com</a> –
+	        //  <i>Note text here</i>
+			// </p>
+		    
+			var nodeP = document.createElement("P");
+			//nodeSource.setAttribute("class", "sourceDesc");
+			//nodeSource.style.color = "green";
+			t.appendChild(nodeP);
+			nodeP.append(document.createTextNode((i + 1) + ") "));
+			
+			var nodeType = document.createElement("SPAN");
+			nodeType.setAttribute("class", "typedesc");
+			nodeType.setAttribute("id", "sref" + (i + 1));
+			nodeType.appendChild(document.createTextNode(rType + "  "));
+			nodeP.appendChild(nodeType);
+
+			if (url) {
+				var nodeLink = document.createElement("A");
+				nodeLink.href = url.trim();
+				nodeLink.setAttribute("target", "_blank");
+				nodeLink.setAttribute("class", "outlink");
+				nodeLink.appendChild(document.createTextNode(nodeLink.hostname));
+				nodeP.appendChild(nodeLink);
+			}
+
+			if (text) {
+				var nodeText = document.createElement("I");
+				nodeText.appendChild(document.createTextNode(text));
+				nodeP.appendChild(nodeText);
+			}
+		}
+		line = undefined;
+	} // noteReferences()
+
 }
 
