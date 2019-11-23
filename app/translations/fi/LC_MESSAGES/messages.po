@@ -2516,7 +2516,7 @@ msgid "Description and Notes"
 msgstr "Lisätietoja"
 
 msgid "Place Notes"
-msgstr "Paikan huomautuksia"
+msgstr "Paikan lisätietoja"
 
 #: bp/scene/templates/scene/person.html:129
 #: bp/scene/templates/scene/person_pg.html:135
