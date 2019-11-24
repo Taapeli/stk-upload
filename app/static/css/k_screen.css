@@ -271,6 +271,7 @@ h3 {
     position: sticky; 
     top: 0;
     background-color: white;
+    max-width: max-content;
 }
 h4 {
     font-size: medium;

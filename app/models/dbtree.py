@@ -8,6 +8,7 @@ Created on 8.9.2017
 import sys
 from neo4j import GraphDatabase, basic_auth
 import treelib
+from models.gen.dates import DateRange
 
 import logging
 logger = logging.getLogger('stkserver')
@@ -78,10 +79,33 @@ class DbTree():
             └──────────────────────────────┴────┴───────┘
         """
         self.node_id = node_id
+        last_node = None
+        node_relations = []
         with self.driver.session() as session:
             result = session.run(self.query, locid=int(node_id))
-            return [(record["nodes"], record["lv"], record["r"]) 
-                    for record in result]
+            for record in result:
+                r = record["r"]
+                # r = [<Relationship id=673979 nodes=(<Node>, <Node>)
+                #        type='IS_INSIDE' properties={'date1': 1248448, 'datetype': 4, 'date2': 1377472}>
+                #     ]
+                for i in range(len(r)):
+                    rtype = r[i].type
+                    dates = DateRange.from_node(r[i])
+                    if not node_relations:
+                        # Add this endnode to previous relation
+                        node_relations.append((dates,r[i].start_node))
+                        last_node = r[i].start_node
+                    if r[i].nodes[0] == last_node:
+                        # Add this endnode to previous relation
+                        node_relations.append((dates,r[i].end_node))
+                        print(f"{rtype} {[n['pname'] for n in r[i].nodes]} {dates}")
+                        #print(f"{i*'    '} {r[i].start_node['pname']} < {r[i].end_node['pname']}")
+                        last_node = r[i].end_node
+                    else:
+                        print(f"{rtype} {[(n[1]['pname'],str(n[0])) for n in node_relations]}")
+                        yield node_relations
+
+            yield node_relations
 
 
     def load_to_tree_struct(self, node_id):
@@ -106,16 +130,26 @@ class DbTree():
         # Juurisolu 0 mahdollistaa solun lisäämisen ylimmän varsinaisen solun
         # yläpuolelle
         self.tree.create_node('', 0)
-        nstack.append((0, "root", "", -9999))
+        nstack.append((0, "*", "root", "", -9999))
     
-        for nodes, level, relations in self._get_tree_branches(node_id):
+        for relations in self._get_tree_branches(node_id):
             # The result has all nodes in the relation and their connections
             # Tuloksessa on kaikki ko. relaatioon osallistuvat solut ja niiden
             # väliset yksittäiset yhteydet
+            #
+            # <Relationship id=673979 nodes=(<Node>, <Node>) 
+            #    type='IS_INSIDE' properties={}>
+            rtype = relations.type
+            nodes = relations.nodes
+            dates = DateRange.from_node(relations)
+            level = 0   # Todo
+
             for node in nodes:
-                # <Node id=287043 labels={'Place'} 
-                #    properties={'handle': '_df87894b3d441856d402c87b38d', 'id': 'P0122', 
-                #    'type': 'Country', 'pname': 'Suomi', 'change': 1556957839}>
+                # <Node id=429694 labels={'Place'} 
+                #    properties={'coord': [59.43722222222222, 24.74527777777778], 
+                #        'id': 'P0040', 'type': 'City', 'uuid': 'dafbdfc45393446ba4927f9d52341844', 
+                #        'pname': 'Tallinna', 'change': 1556811111}>
+
                 if not node.id in nl:
                     nl[node.id] = node.get(self.name_field_name)            #["pname"]
                     nstack.append((node.id,
