@@ -345,9 +345,9 @@ def show_places():
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in locations:
 #         print ("# {} ".format(p))
-    logger.info("-> bp.scene.routes.show_places")
+    logger.info(f"-> bp.scene.routes.show_places: forward from '{my_filter.scope[0]}'")
     return render_template("/scene/places.html", locations=locations, 
-                           elapsed=time.time()-t0)
+                           owner_filter=my_filter, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/location/uuid=<locid>')

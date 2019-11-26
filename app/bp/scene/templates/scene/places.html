@@ -4,6 +4,8 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
+{% set user = owner_filter.user %}
+{% set next = owner_filter.scope %}
 
 <div id="startdiv">
     <h2>{{ _('Places List') }}</h2>
@@ -36,8 +38,15 @@
              </fieldset>
            </form>
        </div>
-		<div id="alphanav">
+        {% set last = locations|last %}
+		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
+			    <li>{% if next[0] > ' ' %}
+			         <a href="/scene/locations?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+			    {% else %}<span class="navlink">|&lt;</span>
+			    {% endif %}</li>
+                <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
+
         {% for p in locations %}
         	{% set ini = p.pname[0]|list|first %}
             {% if loop.changed(ini) %}
@@ -45,6 +54,12 @@
                 <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
             {% endif %}
         {% endfor %}
+            {% if next[1].startswith('>') %}
+                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
+            {% else %}
+	            <li><a href="/scene/locations?{{ {'fw':next[1]} | urlencode }}" 
+	                 title="{{ _('next page') }}" class="navlink"> &gt; </a></li>
+            {% endif %}
 			</ul>
 		</div>
 		<table class="IndividualList">

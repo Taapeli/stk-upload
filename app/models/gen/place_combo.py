@@ -385,12 +385,50 @@ class Place_combo(Place):
                         # ntype, Place_combo.namelist_w_lang( (name,) ))
             return list(placedict.values())
 
+        def _read_place_list(o_filter, limit):
+            """ Read Place data from given fw 
+            """
+            # Select a) filter by user b) show Isotammi common data (too)
+            show_by_owner = o_filter.use_owner_filter()
+            show_with_common = o_filter.use_common()
+            user = o_filter.user
+            try:
+                """
+                               show_by_owner    show_all
+                            +-------------------------------
+                with common |  me + common      common
+                no common   |  me                -
+                """
+                with shareds.driver.session() as session:
+                    if show_by_owner:
+
+                        if show_with_common: 
+                            #1 get all with owner name for all
+                            print("_read_place_list: by owner with common")
+                            result = session.run(Cypher_place.get_name_hierarchies,
+                                                 user=user, fw=fw, limit=limit)
+
+                        else: 
+                            #2 get my own (no owner name needed)
+                            print("_read_place_list: by owner only")
+                            result = session.run(Cypher_place.get_my_name_hierarchies,
+                                                 user=user, fw=fw, limit=limit)
+
+                    else: 
+                        #3 == #1 simulates common by reading all
+                        print("_read_place_list: common only")
+                        result = session.run(Cypher_place.get_name_hierarchies, #user=user, 
+                                             fw=fw, limit=limit)
+                        
+                    return result
+            except Exception as e:
+                print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
+                raise      
+
 
         ret = []
-        user = o_filter.user
         fw = o_filter.next_name_fw()     # next name
-        result = shareds.driver.session().run(Cypher_place.get_my_name_hierarchies,
-                                                     user=user, fw=fw, limit=limit)
+        result = _read_place_list(o_filter, limit)
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
@@ -425,6 +463,13 @@ class Place_combo(Place):
             p.uppers = combine_places(record['upper'])
             p.lowers = combine_places(record['lower'])
             ret.append(p)
+            
+        # Update the page scope according to items really found 
+        if ret:
+            o_filter.update_session_scope('person_scope', 
+                                          ret[0].pname, ret[-1].pname, 
+                                          limit, len(ret))
+
         # Return sorted by first name in the list p.pname
         return sorted(ret, key=lambda x:x.pname)
 
