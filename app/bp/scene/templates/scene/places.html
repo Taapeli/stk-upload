@@ -24,6 +24,18 @@
         </ol>
       {% endif %}
     {% endwith %}
+       <div>
+           <form action="/scene/locations">
+             <fieldset>
+                <input type="hidden" name="c" value="50" >
+                <label for="fw">{{ _('Go to') }}</label>
+                <input type="text" name="fw" size="8" 
+                 title="{{ _('Starting letters of place') }}" 
+                 placeholder="{{ _('Place') }}">
+                <input type="submit" value=" > ">
+             </fieldset>
+           </form>
+       </div>
 		<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
         {% for p in locations %}
