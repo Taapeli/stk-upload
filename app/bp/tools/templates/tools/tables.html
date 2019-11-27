@@ -5,7 +5,9 @@
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
 {# import 'start/s_macros.html' as macro #}
-
+<style>
+h1 { background-color: #f9f8bf; }
+</style>
 {{ hamburger_menu((
    ) ) }}
 
@@ -13,7 +15,7 @@
   <div>
     <h2>{{ _('Technical views') }}</h2>
     <div class="row">
-        <div class="startbox">
+        <div class="startbox audit">
 	        <h3>{{ _('Data Views as tables') }}</h3>
 	        <ul>
 	            <li><a href="/listall/persons">{{ _('Show people') }}</a></li>
@@ -28,7 +30,7 @@
                 <li><a href="/list/refnames">{{ _('List reference names') }}</a></li>
             </ul>
          </div>
-         <div class="startbox">
+         <div class="startbox audit">
             <h3>{{ _('Find possible doubles') }}</h3>
             <ul>
                 <li><a href="/listall/same_name">{{ _('Find people with the same name') }}</a></li>
@@ -36,7 +38,7 @@
                 <li><a href="/listall/same_deathday">{{ _('Find people with the same date of death') }}</a></li>
 	        </ul>
         </div>
-        <div class="startbox">
+        <div class="startbox audit">
             <h3>{{ _('Problem Solving Tools') }}</h3>
             <ul>
                 <li><a href="/listall/people_wo_birth">{{ _('Persons without birth event') }}</a></li>
@@ -48,7 +50,7 @@
             </ul>
         </div>
 
-{#      <div class="startbox">
+{#      <div class="startbox audit">
           <h3>{{ _('Exit') }}</h3>
           <p>▸ <a href="/login">{{ _('Return main page') }}</a></p>
         </div>

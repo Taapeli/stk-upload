@@ -1,7 +1,7 @@
-{# _scene/index_guest.html_ #}
+{# _scene/index_scene.html_ #}
 {% extends "start/s_layout.html" %}
 {% include "security/_messages.html" %}
-{% block title %}{{ _('Anonymous user') }}{% endblock %}
+{% block title %}{{ _('Materials') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
@@ -61,7 +61,23 @@
              </div>
            </div>
 
-   </div>
+
+    {% if current_user.is_authenticated and 
+        ( current_user.has_role('audit') or current_user.has_role('admin') ) %}
+     <div class="startbox audit">
+         <h3>{{ _('Table format tools') }}</h3>
+         <p>{{ _('A variety of more technical listings and problem solving tools.') }}
+         {{ _('The data includes accepted and candidate materials of all users.') }}
+         </p>
+         <form method="get" action="/tables">
+            <div class="submit"> 
+               <button type="submit">{{ _('Explore the database') }}</button>
+            </div>
+         </form>
+     </div>
+     {% endif %}
+
+    </div>
   </div>
 </div>
 {% endblock %}

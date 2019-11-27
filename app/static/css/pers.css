@@ -93,6 +93,7 @@ div#paluu {
 }
 
 .admin {background-color: pink;}
+.audit {background-color: #f9f8bf;} /* yellowish */
 .gedtools {background-color: lightsteelblue;}
 .startbox h3, .startbox2 h3 { margin-top: 5px; margin-bottom: 5px; }
 .startbox div, .startbox2 div { display: inline-block; width: 100%; }
