@@ -1,7 +1,7 @@
 [description]
+Toinen etunimi suluissa -> nimi pois, NICK
 
 [options]
-display_changes = false
 
 [original]
 0 HEAD
