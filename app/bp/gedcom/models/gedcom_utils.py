@@ -146,6 +146,10 @@ def get_transforms():
         t.name = name
         t.modname = name[0:-3]
         transformer = importlib.import_module("bp.gedcom.transforms."+t.modname)
+
+        # have to reload because the user may have changed language -> name and docline may change
+        importlib.reload(transformer) 
+
         doc = transformer.__doc__
         if doc:
             t.doc = doc
@@ -156,13 +160,16 @@ def get_transforms():
             t.docline = ""
         if hasattr(transformer,"docline"):
             t.docline = transformer.docline
-        if hasattr(transformer,"doclink"):
-            if transformer.doclink.startswith('/'):
-                t.doclink = DOC_SERVER + transformer.doclink
-            else:
-                t.doclink = transformer.doclink
-        else:
-            t.doclink = ""
+        
+        doclink = ""
+        if hasattr(transformer,"doclinks"):
+            lang = session.get('lang',"")
+            doclink = transformer.doclinks.get(lang,"")
+        if not doclink and hasattr(transformer,"doclink"):
+            doclink = transformer.doclink
+        if doclink.startswith('/'):
+            doclink = DOC_SERVER + doclink
+        t.doclink = doclink
 
         if hasattr(transformer,"name"):
             t.displayname = transformer.name
