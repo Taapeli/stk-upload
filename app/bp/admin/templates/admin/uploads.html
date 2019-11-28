@@ -77,8 +77,12 @@
 	           			{{ _("Store to database") }}</a> |
 	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a> |
-	           		<a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
-	           			{{ _("Delete file") }}</a> &nbsp;
+                    <a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
+                        {{ _("Delete file") }}</a>
+{% if upload.batch_id %}
+                    <a href=/audit/movein/{{upload.batch_id}}>
+                       | <i>{{ _("Move to Suomi-kanta") }}</a></i> &nbsp;
+{% endif %}
 	           	</td>
 	       </tr>
 	    {% endfor %}

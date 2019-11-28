@@ -117,6 +117,7 @@ ul.compact {
 ul.compact > li {list-style-type: disc}
 
 .not-allowed {cursor: not-allowed;}
+.editlink::before { content: "✎ "; }
 
 table, th, td {
     border: 1px solid silver;
@@ -251,8 +252,15 @@ div.legend { /* Not used? */
      border-left: 6px solid silver;
 }
 table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
-   border:none;
-   outline:none;
+    border:none;
+    outline:none;
+    margin: 1em 4em; 
+    font-size: 90%;
+    border-left: 6px solid silver;
+}
+table.legend > tbody > tr > td, table.legend > tbody > tr > th {
+    border:none;
+    outline:none;
 }
 
 div.steps { margin: 1em;}
