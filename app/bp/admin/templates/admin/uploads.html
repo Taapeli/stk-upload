@@ -79,7 +79,7 @@
 	           			{{ _("Show log") }}</a> |
                     <a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
                         {{ _("Delete file") }}</a>
-{% if upload.batch_id %}
+{% if upload.batch_id and current_user.has_role('audit') %}
                     <a href=/audit/movein/{{upload.batch_id}}>
                        | <i>{{ _("Move to Suomi-kanta") }}</a></i> &nbsp;
 {% endif %}

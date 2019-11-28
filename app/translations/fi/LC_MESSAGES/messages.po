@@ -515,9 +515,13 @@ msgstr "Referenssinimet"
 msgid "Set the estimated birth and death dates of a person"
 msgstr "Aseta henkilön arvioidut syntymä- ja kuolinajat"
 
-#: bp/admin/templates/admin/admin.html:74
+#: bp/admin/templates/admin/admin.html:71
 msgid "Access management"
-msgstr "Käyttöoikeuksien hallinta"
+msgstr "Tuontierien käyttöoikeudet"
+
+#: bp/admin/templates/admin/admin.html:73
+msgid "Data maintenance"
+msgstr "Tietojen huolto"
 
 #: bp/admin/templates/admin/admin.html:83
 msgid "Application management"
@@ -780,8 +784,8 @@ msgstr "Ei käyttäjiä"
 
 #: bp/admin/templates/admin/list_users.html:114
 #: bp/admin/templates/admin/list_users_mails.html:119
-msgid "Show uploaded Gramps files"
-msgstr "Näytä ladatut Gramps-tiedostot"
+msgid "Gramps Files and Candicate Materials"
+msgstr "Ehdokasaineistot ja Gramps-tiedostot"
 
 #: bp/admin/templates/admin/list_users.html:115
 #: bp/admin/templates/admin/list_users_mails.html:120
@@ -795,7 +799,7 @@ msgstr "Isotammen käyttäjät"
 
 #: bp/admin/templates/admin/list_users_mails.html:131
 msgid "Users and user candidates"
-msgstr "Käyttäjät ja käyttäjäendokkaat"
+msgstr "Käyttäjät ja käyttäjäehdokkaat"
 
 #: bp/admin/templates/admin/list_users_mails.html:133
 msgid "<th>email</th><th>role</th><th>creator</th><th>created</th><th>registered</th>"
@@ -1049,7 +1053,11 @@ msgstr "erä %(batch_id)s; %(persons)d henkilöä"
 #: bp/admin/templates/admin/uploads.html:77
 #: bp/gramps/templates/gramps/uploads.html:163
 msgid "Store to database"
-msgstr "Tallenna tietokantaan"
+msgstr "Vie tietokantaan"
+
+#: bp/admin/templates/admin/uploads.html:84
+msgid "Move to Suomi-kanta"
+msgstr "Siirrä Suomi-kantaan"
 
 #: bp/admin/templates/admin/uploads.html:79
 msgid "Show log"
@@ -2099,6 +2107,11 @@ msgstr "Perheluettelo"
 #, python-format
 msgid "Displaying %(num)s distinct families"
 msgstr "Näytetään %(num)s perhettä"
+
+#: bp/scene/templates/scene/places.html:36
+#, python-format
+msgid "Displaying %(num)s distinct places"
+msgstr "Näytetään %(num)s paikkaa"
 
 #: bp/scene/templates/scene/families.html:37
 #: bp/scene/templates/scene/persons_list.html:41

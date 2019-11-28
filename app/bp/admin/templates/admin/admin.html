@@ -68,10 +68,14 @@ function confirm_delete(url) {
           <ul>
               <li><a href="/admin/list_users">{{ _('Usernames and uploaded materials') }}</a></li>
               <li><a href="/admin/allowed_emails">{{ _('User candidates') }}</a></li>
+              <li><a href="/admin/access_management">{{ _('Access management') }}</a></li>
           </ul>
-          <li><a href="/admin/refnames">{{ _('Reference names') }}</a></li>
-          <li><a href="/admin/set/estimated_dates">{{ _('Set the estimated birth and death dates of a person') }}</a></li>
-          <li><a href="/admin/access_management">{{ _('Access management') }}</a></li>
+          <li>{{ _('Data maintenance') }}</li>
+          <ul>
+	          <li><a href="/admin/refnames">{{ _('Reference names') }}</a></li>
+	          <li><a href="/admin/set/estimated_dates">
+	             {{ _('Set the estimated birth and death dates of a person') }}</a></li>
+          </ul>
         </ul>
       </div>
     </div>{% endif %}
