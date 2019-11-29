@@ -5,19 +5,35 @@ Created on 28.11.2019
  
 '''
 from . import bp
+from bp.admin.users import Batches
 
-from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
-from flask_security import login_required, roles_accepted, roles_required, current_user
-from flask_babelex import _
-
-import shareds
+from flask import render_template, request, redirect, url_for #, send_from_directory, flash, session, jsonify
+from flask_security import login_required, roles_accepted #, roles_required, current_user
+# from flask_babelex import _
+# 
+# import shareds
 
 # Admin start page
-@bp.route('/audit/movein/<batch>',  methods=['GET', 'POST'])
+@bp.route('/audit/movein/<batch_name>',  methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'audit')
-def move_in(batch):
-    """ Move accepted Batch to Suomi-kanta """    
-    print(f"-> bp.audit.routes.move_in {batch}")
-    return render_template('/audit/approve.html', batch=batch)
+def move_in(batch_name):
+    """ Moving selected Batch to Suomi-kanta """    
+    print(f"-> bp.audit.routes.move_in {batch_name}")
+    batch_reader = Batches()
+    user, batch_id, tstring, labels = batch_reader.get_batch_stats(batch_name)
+    print(f'# User batches {user}/{batch_id}, nodes {labels},')
+
+    return render_template('/audit/approve.html', user=user, batch=batch_id, 
+                           time=tstring, label_cnt=labels)
+
+@bp.route('/audit/movenow',  methods=['POST'])
+@login_required
+@roles_accepted('admin', 'audit')
+def move_now():
+    """ Move the accepted Batch to Suomi-kanta """
+    user = request.form['user']
+    batch_id = request.form['batch']
+    print(f"bp.audit.routes.move_now {user}/{batch_id}")
+    return render_template('/audit/got_in.html', user=user, batch=batch_id)
 

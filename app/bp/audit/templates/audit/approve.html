@@ -1,10 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
-<p><i>Ähäkutti!</i></p>
-</body>
-</html>
+{# _audit/approve.html_ #}
+{% extends "audit/au_layout.html" %}
+{% block title %}{{ _("Material for Suomi-kanta") }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<div id="startdiv">
+    <div>
+        <h2>{{ _("Moving batch to Suomi-kanta") }}</h2>
+
+        <div class="startbox2">
+            <h3>{{ _('Selected Batch') }}</h3>
+            <table width="100%">
+                <tr>
+                    {% set w = (100.0 / (label_cnt|length + 3) | round(0,'floor')) | int %}
+                    <th>{{ _('Batch id') }}</th>
+                    {% for label, cnt in label_cnt %}<th style="width: {{w}}%">{{label}}</th>{% endfor %}
+                </tr>
+                <tr>
+                    <td>{{batch}}{% if time %}<br>
+                    <small>{{ _('saved at') }} {{time}}</small>{% endif %}
+                    </td> {% for label, cnt in label_cnt %}
+                    <td class="right">{{cnt}}</td> {% endfor %}
+                </tr>
+            </table>
+            <form action="/audit/movenow" method="post">     
+                <p>{{ _('From user') }} <b>{{user}}</b></p>        
+	            <div class="submit"> 
+                   <input type="hidden" value="{{batch}}" name="batch">
+                   <input type="hidden" value="{{user}}" name="user">
+                   <input type="submit" value="{{ _('Move to Suomi-kanta') }}" />
+	            </div>
+                <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back without changes') }}</a></p>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

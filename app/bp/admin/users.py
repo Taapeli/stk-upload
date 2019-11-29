@@ -21,7 +21,7 @@ class Batches(object):
 
     def __init__(self, user=None):
         '''
-        Decide, which users are included in reports
+        Decide, which user is included in reports (if limited)
         '''
         self.user = user
 
@@ -70,3 +70,43 @@ class Batches(object):
 
         return sorted(labels), users
 
+
+    def get_batch_stats(self, batch_id):
+        ''' Get statistics of user Batch contents.
+        
+            u["usr1"].append({batch:"usr1 2019-05-03.001", "Family":94, "Note":224, "Person":153})
+        '''
+        labels = []
+        batch = None
+        result = shareds.driver.session().run(Cypher_stats.get_single_batch, batch=batch_id)
+        for record in result:
+            # <Record batch=<Node id=319388 labels={'Batch'} 
+            #    properties={ // 'mediapath': '/home/jm/my_own.media', 
+            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps', 
+            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787, 
+            #        'status': 'completed'}> 
+            #  label='Note'
+            #  cnt=2>
+
+            if not batch:
+                batch = record['batch']
+                user = batch.get('user')
+                #batch_id = batch.get('id')
+                ts = batch.get('timestamp')
+                if ts:
+                    t = float(ts)/1000.
+                    tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+                else:
+                    tstring = ""
+            label = record.get('label', '')
+            cnt = record['cnt']
+            labels.append((label,cnt))
+
+#             key = f'{user}/{batch_id}/{tstring}'
+#             if not key in users:
+#                 users[key] = {}
+#             users[key][label] = cnt
+
+            #print(f'users[{key}] {users[key]}')
+
+        return user, batch_id, tstring, sorted(labels)

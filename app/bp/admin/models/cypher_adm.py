@@ -170,6 +170,11 @@ return b as batch,
     labels(x)[0] as label, count(x) as cnt 
     order by batch.user, batch.id'''
 
+    get_single_batch = '''
+match (b:Batch {id:$batch}) 
+optional match (b) -[:OWNS]-> (x)
+return b as batch, labels(x)[0] as label, count(x) as cnt'''
+
     get_user_batch_names = '''
 match (b:Batch) where b.user = $user
 optional match (b) -[r:OWNS]-> (:Person)

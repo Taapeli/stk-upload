@@ -1,13 +1,10 @@
 {# tools/tables.html_ #}
-{% extends "a_layout.html" %}
+{% extends "/audit/au_layout.html" %}
 {% block title %}{{ _('Data Views') }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% from "start/s_macros.html" import hamburger_menu with context %}
 {# import 'start/s_macros.html' as macro #}
-<style>
-h1 { background-color: #f9f8bf; }
-</style>
 {{ hamburger_menu((
    ) ) }}
 
