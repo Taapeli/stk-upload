@@ -1,0 +1,50 @@
+{# _admin/batch_clear.html_ #}
+{% extends "audit/au_layout.html" %}
+{% block title %}{{ _("Material for Suomi-kanta") }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<div id="startdiv">
+    <div>
+{% if user %}
+    	<h2>{{ _("Empty batches for user") }} {{ user }}</h2>
+{% else %}
+	    <h2>{{ _("Empty batches") }}</h2>
+{% endif %}
+    
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+    {% endif %}
+{% endwith %}
+ 
+	<div class="startbox">
+<!-- 	    <h3>{{ _('Selected Batch') }}</h3> -->
+        <p>Näytetään ensimmäisiä</p>
+	    <table width="100%">
+           <tr>
+	            <th>{{ _("User") }}</th>
+                <th>{{ _("Batch") }}</th>
+           </tr>
+	    {% for batch in uploads %}
+	       <tr>
+               <td>{{batch.user}}</td>
+	           <td class="msg_INFO">{{batch.id}} ({{batch.status}})</td>
+	       </tr>
+	    {% endfor %}
+	    </table>
+	</div>
+	<p>{{ _("Number of empty batches shown") }}: {{ uploads|count }}</p>
+    <p>&rtrif; <a href="/admin/list_users">{{ _("List of users") }}</a></p>
+{% endblock %}
+</body>
+</html>
+

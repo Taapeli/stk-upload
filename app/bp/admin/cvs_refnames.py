@@ -7,9 +7,9 @@ import logging
 import time
 
 from models.gen.refname import Refname, REFTYPES
-from models.gen.user import User
+#from models.gen.user import User
 from models.gen.person import Person
-
+import shareds
 
 def load_refnames(pathname):
     """ Reads reference names from a local csv file. 
@@ -30,7 +30,9 @@ def load_refnames(pathname):
     empties = 0
     
     with open(pathname, 'r', newline='', encoding='utf-8') as f:
-        tx = User.beginTransaction()
+        #tx = User.beginTransaction()
+        tx = shareds.driver.session().begin_transaction()
+
         reader=csv.DictReader(f, dialect='excel')
         t0 = time.time()
         for row in reader:

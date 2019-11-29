@@ -181,3 +181,13 @@ optional match (b) -[r:OWNS]-> (:Person)
 return b.id as batch, b.timestamp as timestamp, b.status as status,
     count(r) as persons 
     order by batch'''
+
+    get_user_empty_batches = '''
+MATCH (a:Batch {user:$user}) 
+WHERE NOT ((a)-[:OWNS]->())
+RETURN a AS batch ORDER BY a.id DESC'''
+
+    get_empty_batches = '''
+MATCH (a:Batch) 
+WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
+RETURN a AS batch ORDER BY a.id DESC'''

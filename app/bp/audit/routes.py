@@ -34,6 +34,6 @@ def move_now():
     """ Move the accepted Batch to Suomi-kanta """
     user = request.form['user']
     batch_id = request.form['batch']
-    print(f"bp.audit.routes.move_now {user}/{batch_id}")
+    print(f"-> bp.audit.routes.move_now {user}/{batch_id}")
     return render_template('/audit/got_in.html', user=user, batch=batch_id)
 

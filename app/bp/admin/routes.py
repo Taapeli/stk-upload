@@ -11,7 +11,7 @@ import os
 
 import json
 import logging 
-import inspect
+#import inspect
 import traceback
 
 from bp.gramps.models import batch
@@ -35,6 +35,8 @@ from .. gedcom.models import gedcom_utils
 from .. import gedcom
 from models import email
 from models import syslog 
+from models.gen.batch import Batch
+
 
 # Admin start page
 @bp.route('/admin',  methods=['GET', 'POST'])
@@ -69,6 +71,26 @@ def clear_my_db():
         return render_template("/admin/talletettu.html", text=msg)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+@bp.route('/admin/clear_batches', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('research', 'admin')
+def clear_empty_batches():
+    """ Show or clear unused batches. """
+    user=None
+    try:
+        if request.form:
+            clear = request.form.get('clear', False)
+            if clear:
+                #Todo Remoce empry Batches
+                pass
+        batches = Batch.list_empty_batches(user)
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        
+    logger.info(f"-> bp.admin.routes.clear_empty_batches {user}")
+    return render_template("/admin/batch_clear.html", uploads=batches,  
+                           user=user)
 
 
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
