@@ -78,17 +78,18 @@ def clear_my_db():
 def clear_empty_batches():
     """ Show or clear unused batches. """
     user=None
+    clear=False
     try:
         if request.form:
             clear = request.form.get('clear', False)
             if clear:
-                #Todo Remoce empry Batches
+                flash('#Todo ohjelmoitava Remove empry Batches')
                 pass
-        batches = Batch.list_empty_batches(user)
+        batches = Batch.list_empty_batches()
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
         
-    logger.info(f"-> bp.admin.routes.clear_empty_batches {user}")
+    logger.info(f"-> bp.admin.routes.clear_empty_batches, clear={clear}")
     return render_template("/admin/batch_clear.html", uploads=batches,  
                            user=user)
 
@@ -306,10 +307,9 @@ def list_uploads_for_users():
     else:
         users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
-    logger.info(f"-> bp.admin.routes.list_uploads_for_users {users}")
+    logger.info(f"-> bp.admin.routes.list_uploads_for_users")
     return render_template("/admin/uploads.html", uploads=upload_list,  
-                           users=users, num_requested_users=len(requested_users), 
-                           num_users=len(users))
+                           users=users, num_requested_users=len(requested_users))
 
 @bp.route('/admin/list_uploads_all', methods=['GET'])
 @login_required

@@ -171,9 +171,9 @@ return b as batch,
     order by batch.user, batch.id'''
 
     get_single_batch = '''
-match (b:Batch {id:$batch}) 
+match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
 optional match (b) -[:OWNS]-> (x)
-return b as batch, labels(x)[0] as label, count(x) as cnt'''
+return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
 
     get_user_batch_names = '''
 match (b:Batch) where b.user = $user
@@ -182,12 +182,16 @@ return b.id as batch, b.timestamp as timestamp, b.status as status,
     count(r) as persons 
     order by batch'''
 
-    get_user_empty_batches = '''
-MATCH (a:Batch {user:$user}) 
-WHERE NOT ((a)-[:OWNS]->())
-RETURN a AS batch ORDER BY a.id DESC'''
-
     get_empty_batches = '''
 MATCH (a:Batch) 
 WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
 RETURN a AS batch ORDER BY a.id DESC'''
+
+
+class Cypher_audit():
+    
+    move_batch_todo = '''
+MATCH (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:"2019-11-18.002"}) 
+WITH up, r, b ORDER BY b.id DESC LIMIT 10
+RETURN up, r, b'''
+    

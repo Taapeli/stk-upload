@@ -5,10 +5,10 @@
     {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
     {% if num_requested_users %}
-    	{% if num_users == 1 %}
+    	{% if users|length == 1 %}
 	    	<h2>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
     	{% else %}
-    		<h2>{{ _("Uploads for %(n)s users", n=num_users) }}</h2>
+    		<h2>{{ _("Uploads for %(n)s users", n=users|length) }}</h2>
 		{% endif %}
     {% else %}
 	    <h2>{{ _("Uploads for all users") }}</h2>
@@ -81,7 +81,7 @@
                         {{ _("Delete file") }}</a>
 {% if upload.batch_id and current_user.has_role('audit') %}
                     <a href=/audit/movein/{{upload.batch_id}}>
-                       | <i>{{ _("Move to Suomi-kanta") }}</a></i> &nbsp;
+                       | <i>{{ _("Move to Isotammi database") }}</a></i> &nbsp;
 {% endif %}
 	           	</td>
 	       </tr>

@@ -492,8 +492,8 @@ msgid "User and reference information management"
 msgstr "Käyttäjien ja referenssitietojen hallinta"
 
 #: bp/admin/templates/admin/admin.html:67
-msgid "Active and pending users, including –"
-msgstr "Aktiiviset ja odottavat käyttäjät, ml."
+msgid "Active and pending users"
+msgstr "Aktiiviset ja odottavat käyttäjät"
 
 #: bp/admin/templates/admin/admin.html:69
 msgid "Usernames and uploaded materials"
@@ -530,6 +530,10 @@ msgstr "Sovelluksen hallinta"
 #: bp/admin/templates/admin/admin.html:85
 msgid "Display application log"
 msgstr "Näytä sovelluksen loki"
+
+#: bp/admin/templates/admin/admin.html:86
+msgid "Empty batches"
+msgstr "Tyhjät tuontierät"
 
 #: bp/admin/templates/admin/admin.html:86
 msgid "List all application pages"
@@ -1056,7 +1060,7 @@ msgid "Store to database"
 msgstr "Vie tietokantaan"
 
 #: bp/admin/templates/admin/uploads.html:84
-msgid "Move to Suomi-kanta"
+msgid "Move to Isotammi database"
 msgstr "Siirrä Suomi-kantaan"
 
 #: bp/admin/templates/admin/uploads.html:79
@@ -1066,6 +1070,48 @@ msgstr "Näytä loki"
 #: bp/admin/templates/admin/uploads.html:81
 msgid "Delete file"
 msgstr "Poista tiedosto"
+
+#: bp/admin/templates/admin/batch_clear.html:45
+msgid "Number of empty batches"
+msgstr "Tyhjiä eriä"
+
+#: bp/admin/templates/admin/batch_clear.html:47
+msgid "The empty batches will be removed, except those which are created today."
+msgstr "Tyhjät erät poistetaan, paitsi tänään luodut."
+
+#: bp/admin/templates/admin/batch_clear.html:51
+msgid "Remove"
+msgstr "Poista"
+
+#: bp/admin/templates/audit/approve.html:13
+msgid "Moving batch to Isotammi database"
+msgstr "Siirretään tuontierä Suomi-kantaan"
+
+#: bp/admin/templates/audit/approve.html:16
+msgid "Selected Batch"
+msgstr "Valittu tuontierä"
+
+#: bp/admin/templates/audit/approve.html:31
+msgid "From user"
+msgstr "Käyttäjältä"
+
+#: bp/admin/templates/audit/approve.html:37
+msgid "Go back without changes"
+msgstr "Palaa ilman muutoksia"
+
+#: bp/admin/templates/audit/approve.html:3
+#: bp/admin/templates/audit/got_in.html:3
+msgid "Material for Isotammi database"
+msgstr "Siirto Suomi-kantaan"
+
+#: bp/admin/templates/audit/got_in.html:13
+msgid "Moved batch to Isotammi database"
+msgstr "Tuontierä siirretty Suomi-kantaan"
+
+#: bp/admin/templates/audit/got_in.html:13
+msgid "Moved batch to Isotammi database"
+msgstr "Tuontierä siirretty Suomi-kantaan"
+
 
 #: bp/dupsearch/templates/dupsearch.html:3
 #: bp/dupsearch/templates/dupsearch.html:22
@@ -4816,7 +4862,7 @@ msgstr "Repositoryn tiedot"
 
 #: templates/repo_sources.html:8
 msgid "Repository"
-msgstr "Arkiston"
+msgstr "Arkisto"
 
 #: templates/repo_sources.html:24
 msgid "URL href"

@@ -73,8 +73,6 @@ class Batches(object):
 
     def get_batch_stats(self, batch_id):
         ''' Get statistics of user Batch contents.
-        
-            u["usr1"].append({batch:"usr1 2019-05-03.001", "Family":94, "Note":224, "Person":153})
         '''
         labels = []
         batch = None
@@ -110,3 +108,25 @@ class Batches(object):
             #print(f'users[{key}] {users[key]}')
 
         return user, batch_id, tstring, sorted(labels)
+    
+    def TODO_move_batch_owner(self, batch_id):
+        ''' Move Batch to Isotammi database.
+        
+            Before: 
+            (up:UserProfile) -[:HAS_LOADED]-> (b:Batch {id:$batch}) -[:OWNS]-> (x)
+            
+            After:
+            (ip:UserProfile{username:'*suomi*'}) -[:HAS_LOADED]-> (b:Batch {id:$batch}) -[:OWNS]-> (x)
+        '''
+        result = shareds.driver.session().run(Cypher_stats.get_single_batch, batch=batch_id)
+        for record in result:
+            # <Record batch=<Node id=319388 labels={'Batch'} 
+            #    properties={ // 'mediapath': '/home/jm/my_own.media', 
+            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps', 
+            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787, 
+            #        'status': 'completed'}> 
+            #  label='Note'
+            #  cnt=2>
+
+            pass
+

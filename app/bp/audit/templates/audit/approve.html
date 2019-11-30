@@ -1,6 +1,6 @@
 {# _audit/approve.html_ #}
-{% extends "audit/au_layout.html" %}
-{% block title %}{{ _("Material for Suomi-kanta") }}{% endblock %}
+{% extends "audit/layout.html" %}
+{% block title %}{{ _("Material for Isotammi database") }} 1/2{% endblock %}
 {% block body %}
 {{ super() }}
 {% include "security/_messages.html" %}
@@ -10,20 +10,20 @@
 
 <div id="startdiv">
     <div>
-        <h2>{{ _("Moving batch to Suomi-kanta") }}</h2>
+        <h2>{{ _("Moving batch to Isotammi database") }}</h2>
 
         <div class="startbox2">
             <h3>{{ _('Selected Batch') }}</h3>
             <table width="100%">
                 <tr>
-                    {% set w = (100.0 / (label_cnt|length + 3) | round(0,'floor')) | int %}
+                    {% set w = (100.0 / (label_nodes|length + 3) | round(0,'floor')) | int %}
                     <th>{{ _('Batch id') }}</th>
-                    {% for label, cnt in label_cnt %}<th style="width: {{w}}%">{{label}}</th>{% endfor %}
+                    {% for label, cnt in label_nodes %}<th style="width: {{w}}%">{{ _(label) }}</th>{% endfor %}
                 </tr>
                 <tr>
                     <td>{{batch}}{% if time %}<br>
                     <small>{{ _('saved at') }} {{time}}</small>{% endif %}
-                    </td> {% for label, cnt in label_cnt %}
+                    </td> {% for label, cnt in label_nodes %}
                     <td class="right">{{cnt}}</td> {% endfor %}
                 </tr>
             </table>
@@ -32,7 +32,7 @@
 	            <div class="submit"> 
                    <input type="hidden" value="{{batch}}" name="batch">
                    <input type="hidden" value="{{user}}" name="user">
-                   <input type="submit" value="{{ _('Move to Suomi-kanta') }}" />
+                   <input type="submit" value="{{ _('Move to Isotammi database') }}" />
 	            </div>
                 <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back without changes') }}</a></p>
             </form>

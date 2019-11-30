@@ -1,6 +1,6 @@
-{# _audit/approve.html_ #}
-{% extends "audit/au_layout.html" %}
-{% block title %}{{ _("Material for Suomi-kanta") }}{% endblock %}
+{# _audit/got_in.html_ #}
+{% extends "audit/layout.html" %}
+{% block title %}{{ _("Material for Isotammi database") }} 2/2{% endblock %}
 {% block body %}
 {{ super() }}
 {% include "security/_messages.html" %}
@@ -10,7 +10,7 @@
 
 <div id="startdiv">
     <div>
-        <h2>{{ _("Moved batch to Suomi-kanta") }}</h2>
+        <h2>{{ _("Moved batch to Isotammi database") }}</h2>
 
         <div class="startbox2">
             <h3>{{ _('Selected Batch') }} <i>{{user}}/{{ batch }}</i></h3>

@@ -1,6 +1,6 @@
 {# _admin/batch_clear.html_ #}
-{% extends "audit/au_layout.html" %}
-{% block title %}{{ _("Material for Suomi-kanta") }}{% endblock %}
+{% extends "audit/layout.html" %}
+{% block title %}{{ _("Empty batches") }}{% endblock %}
 {% block body %}
 {{ super() }}
 {% include "security/_messages.html" %}
@@ -16,19 +16,8 @@
 	    <h2>{{ _("Empty batches") }}</h2>
 {% endif %}
     
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-    {% endif %}
-{% endwith %}
- 
 	<div class="startbox">
 <!-- 	    <h3>{{ _('Selected Batch') }}</h3> -->
-        <p>Näytetään ensimmäisiä</p>
 	    <table width="100%">
            <tr>
 	            <th>{{ _("User") }}</th>
@@ -42,8 +31,20 @@
 	    {% endfor %}
 	    </table>
 	</div>
-	<p>{{ _("Number of empty batches shown") }}: {{ uploads|count }}</p>
-    <p>&rtrif; <a href="/admin/list_users">{{ _("List of users") }}</a></p>
+
+    <div class="startbox">
+        <h3>{{ _("Number of empty batches") }}: {{ uploads|count }}</h3>
+        <p>{{ _("The empty batches will be removed, except those which are created today.") }}</p>
+        <form action="/admin/clear_batches" method="post">     
+		<div class="submit"> 
+		   <input type="hidden" value="{{batch}}" name="batch">
+		   <input type="hidden" value="{{user}}" name="user">
+           <input type="hidden" value="True" name="clear">
+		   <input type="submit" value="{{ _('Remove') }}" />
+		</div>
+		</form>
+    </div>
+
 {% endblock %}
 </body>
 </html>
