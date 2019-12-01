@@ -42,6 +42,9 @@ table.transparent tbody tr td {
              onmouseout="this.src='/static/tam.png';"/></a>
         <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
         <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
+    <div id="paluu">
+        <a href="/audit">{{ _('Audit home') }}</a>
+    </div>
     {% endblock %}
 
     <div class="fullclear"></div>

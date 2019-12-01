@@ -92,7 +92,7 @@ table.transparent tbody tr td {
 				<tr>
 					{% set w = (100.0 / (labels|length + 3) | round(0,'floor')) | int %}
 					<th>{{ _('Batch id') }}</th> {% for label in labels %}
-					<th style="width: {{w}}">{{label}}</th>{% endfor %}
+					<th style="width: {{w}}">{{ _(label|trim) }}</th>{% endfor %}
 				</tr>
 				{% for key1,item in batches.items() %} {% set user0 = user %}
                 {% set user, batch, time = key1.split('/') %}

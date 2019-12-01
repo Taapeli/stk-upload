@@ -153,11 +153,18 @@ RETURN user, userprofile, batch, rel_id, count(ow) AS cnt
 MATCH (user:UserProfile{username:$username}), (batch:Batch{id:$batchid})
 MERGE (user)-[r:HAS_ACCESS]->(batch)
 RETURN r,id(r) as rel_id
-    """
+"""
 
     delete_accesses = """
 MATCH (a) -[r:HAS_ACCESS]->(b) WHERE id(r) in $idlist DELETE r
-    """
+"""
+
+    drop_empty_batches = '''
+MATCH (a:Batch) 
+    WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS $today
+DETACH DELETE a
+RETURN COUNT(a) AS cnt'''
+
 
 
 class Cypher_stats():

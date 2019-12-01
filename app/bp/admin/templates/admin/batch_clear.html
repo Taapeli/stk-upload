@@ -15,7 +15,8 @@
 {% else %}
 	    <h2>{{ _("Empty batches") }}</h2>
 {% endif %}
-    
+ 
+ {% if uploads|count > 0 %}
 	<div class="startbox">
 <!-- 	    <h3>{{ _('Selected Batch') }}</h3> -->
 	    <table width="100%">
@@ -31,16 +32,21 @@
 	    {% endfor %}
 	    </table>
 	</div>
+{% endif %}
 
     <div class="startbox">
         <h3>{{ _("Number of empty batches") }}: {{ uploads|count }}</h3>
+{% if removed > 0 %}
+        <p>{{ _('Removed %(n)s batches', n=removed) }}</p>
+{% endif %}
         <p>{{ _("The empty batches will be removed, except those which are created today.") }}</p>
         <form action="/admin/clear_batches" method="post">     
 		<div class="submit"> 
 		   <input type="hidden" value="{{batch}}" name="batch">
 		   <input type="hidden" value="{{user}}" name="user">
            <input type="hidden" value="True" name="clear">
-		   <input type="submit" value="{{ _('Remove') }}" />
+		   <input type="submit" value="{{ _('Remove') }}" 
+		    {% if uploads|count == 0 %}disabled{% endif %} />
 		</div>
 		</form>
     </div>

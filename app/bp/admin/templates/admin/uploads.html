@@ -24,8 +24,8 @@
       {% endif %}
     {% endwith %}
     <div class="helptext">
-    	<b>{{ _("Status for differents steps in XML file upload:") }}</b>
     	<table class=legend>
+        <tr><td colspan="3"><b>{{ _("Status for differents steps in XML file upload:") }}</b>
     	<tr>
     	<td>1
     	<td>{{ _("UPLOADED") }}     
@@ -39,11 +39,14 @@
     	<td>{{ _("STORED") }}
     	<td>{{ _("the file content has been stored to the database") }}
     	<tr>
-    	<td>4
+        <td>4
+        <td>{{ _("REMOVED") }}
+        <td>{{ _("not found any more") }}
+        <tr>
+    	<td>-
     	<td>{{ _("ERROR") }} / {{ _("FAILED") }}
     	<td>{{ _("there was an error") }}
     	</table>
-	<p>
     </div>
         <table>
            <tr>

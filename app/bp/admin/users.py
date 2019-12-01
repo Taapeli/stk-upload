@@ -57,6 +57,8 @@ class Batches(object):
                 tstring = ""
             label = record['label']
             if not label: label = ""
+            # Trick: Set Person as first in sort order!
+            if label == "Person": label = " Person"
             if label and not label in labels:
                 labels.append(label)
             cnt = record['cnt']
@@ -70,8 +72,8 @@ class Batches(object):
 
         return sorted(labels), users
 
-
-    def get_batch_stats(self, batch_id):
+    @staticmethod
+    def get_batch_stats(batch_id):
         ''' Get statistics of user Batch contents.
         '''
         labels = []
@@ -97,6 +99,8 @@ class Batches(object):
                 else:
                     tstring = ""
             label = record.get('label', '')
+            # Trick: Set Person as first in sort order!
+            if label == "Person": label = " Person"
             cnt = record['cnt']
             labels.append((label,cnt))
 

@@ -81,6 +81,20 @@
      </div>
     {% endif %}
 
+    {% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
+        <div class="startbox audit">
+           <div style="display: inline-block;">
+           <form method="get" action="/audit">
+              <h3>{{ _('Isotammi auditor') }}</h3>
+              <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
+            <div class="submit"> 
+               <button type="submit">{{ _('Continue') }}</button>
+            </div>
+         </form>
+      </div>
+     </div>
+    {% endif %}
+
     <div class="startbox">
       <div style="display: inline-block;">
        <form method="get" action="http://wiki.isotammi.net/wiki/Työkaluja" target="_blank">

@@ -1,4 +1,4 @@
-{# _audit/approve.html_ #}
+{# _audit/move_in_1.html_ #}
 {% extends "audit/layout.html" %}
 {% block title %}{{ _("Material for Isotammi database") }} 1/2{% endblock %}
 {% block body %}
@@ -18,7 +18,7 @@
                 <tr>
                     {% set w = (100.0 / (label_nodes|length + 3) | round(0,'floor')) | int %}
                     <th>{{ _('Batch id') }}</th>
-                    {% for label, cnt in label_nodes %}<th style="width: {{w}}%">{{ _(label) }}</th>{% endfor %}
+                    {% for label, cnt in label_nodes %}<th style="width: {{w}}%">{{ _(label|trim) }}</th>{% endfor %}
                 </tr>
                 <tr>
                     <td>{{batch}}{% if time %}<br>
@@ -34,7 +34,7 @@
                    <input type="hidden" value="{{user}}" name="user">
                    <input type="submit" value="{{ _('Move to Isotammi database') }}" />
 	            </div>
-                <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back without changes') }}</a></p>
+<!--            <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back without changes') }}</a></p> -->
             </form>
         </div>
 

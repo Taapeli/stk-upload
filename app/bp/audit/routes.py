@@ -16,28 +16,30 @@ from flask_security import login_required, roles_accepted #, roles_required, cur
 # 
 # import shareds
 
-# Admin start page
+@bp.route('/audit')
+#TODO: Audit homa pege is missing
+def audit_home():
+    return render_template('/audit/index.html')
+
 @bp.route('/audit/movein/<batch_name>',  methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'audit')
-def move_in(batch_name):
+def move_in_1(batch_name):
     """ Moving selected Batch to Isotammi database """    
-    print(f"-> bp.audit.routes.move_in {batch_name}")
-    batch_reader = Batches()
-    user, batch_id, tstring, labels = batch_reader.get_batch_stats(batch_name)
-    logger.info(f'# User batches {user} / {batch_id}')
+    user, batch_id, tstring, labels = Batches.get_batch_stats(batch_name)
+    logger.info(f' bp.audit.routes.move_in_1 batch {user} / {batch_name}')
 
-    return render_template('/audit/approve.html', user=user, batch=batch_id, 
+    return render_template('/audit/move_in_1.html', user=user, batch=batch_id, 
                            time=tstring, label_nodes=labels)
 
 @bp.route('/audit/movenow',  methods=['POST'])
 @login_required
 @roles_accepted('admin', 'audit')
-def move_now():
+def move_in_2():
     """ Move the accepted Batch to Isotammi database """
     user = request.form['user']
     batch_id = request.form['batch']
     
-    logger.info(f"-> bp.audit.routes.move_now {user} / {batch_id}")
-    return render_template('/audit/got_in.html', user=user, batch=batch_id)
+    logger.info(f' bp.audit.routes.move_in_2 batch {user} / {batch_id}')
+    return render_template('/audit/move_in_2.html', user=user, batch=batch_id)
 

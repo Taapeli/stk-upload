@@ -1,0 +1,30 @@
+{# _audit/index.html_ #}
+{% extends "audit/layout.html" %}
+{% block title %}{{ _("Isotammi auditor") }} 1/2{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<div id="startdiv">
+    <div>
+        <h2>{{ _("Isotammi auditor") }}</h2>
+
+        <div class="startbox">
+            <h3>{{ _('Operations') }}</h3>
+            <ul>
+            <li><a href="/tables">{{ _("Table format tools") }}</a>.
+	           {{ _('The data includes accepted and candidate materials of all users.') }}
+	        </li>
+            <li><a href="/admin/list_uploads_all">
+                {{ _("Select a batch to be moved to Isotammi database") }}
+                </a></li>
+            <li><a href="/admin/clear_batches">{{ _("Remove empty batches") }}</a></li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

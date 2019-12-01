@@ -79,11 +79,14 @@ def clear_empty_batches():
     """ Show or clear unused batches. """
     user=None
     clear=False
+    cnt = -1
     try:
         if request.form:
             clear = request.form.get('clear', False)
             if clear:
-                flash('#Todo ohjelmoitava Remove empry Batches')
+                cnt = Batch.drop_empty_batches()
+                if cnt == 0:
+                    flash(_('No empty batches removed'), 'warning')
                 pass
         batches = Batch.list_empty_batches()
     except Exception as e:
@@ -91,7 +94,7 @@ def clear_empty_batches():
         
     logger.info(f"-> bp.admin.routes.clear_empty_batches, clear={clear}")
     return render_template("/admin/batch_clear.html", uploads=batches,  
-                           user=user)
+                           user=user, removed=cnt)
 
 
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
