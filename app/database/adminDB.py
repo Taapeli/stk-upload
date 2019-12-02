@@ -207,55 +207,58 @@ def do_schema_fixes():
             shareds.user_datastore.put(guest)
             print("Guest user added")            
     else:    
-        print(f"adminDB.do_schema_fixes: none")
+        print(f"database.adminDB.do_schema_fixes.do_schema_fixes: none")
     return
 
-    change_HIERARCY_to_IS_INSIDE = """
+    if False:
+        change_HIERARCY_to_IS_INSIDE = """
 MATCH (a) -[r:HIERARCY]-> (b)
     MERGE (a) -[rr:IS_INSIDE]-> (b)
         set rr = {datetype:r.datetype, date1:r.date1, date2:r.date2}
     DELETE r
 RETURN count(rr)"""
-    change_userName_to_username = """
+        change_userName_to_username = """
 match (u:UserProfile) where exists(u.userName)
     set u.username = u.userName
     set u.userName = null
 return count(u)"""
-    change_Repocitory_to_Repository = """
+        change_Repocitory_to_Repository = """
 match (a:Repocitory)
     set a:Repository
     remove a:Repocitory
 return count(a)"""
-    change_Family_dates = """
+        change_Family_dates = """
 match (f:Family) where f.datetype=3 and not exists(f.date1)
     set f.datatype = 1
     set f.data1 = f.data2
 return count(f)"""
-    change_wrong_supplemented_direction = """
+        change_wrong_supplemented_direction = """
 MATCH (u:User)<-[r:SUPPLEMENTED]-(p:UserProfile) 
     DELETE r 
     CREATE (u) -[:SUPPLEMENTED]-> (p)
 return count(u)"""
 
-    with shareds.driver.session() as session: 
-        try:
-            result = session.run(change_HIERARCY_to_IS_INSIDE)
-            cnt1 = result.single()[0]
-            result = session.run(change_userName_to_username)
-            cnt2 = result.single()[0]
-            result = session.run(change_Repocitory_to_Repository)
-            cnt3 = result.single()[0]
-            result = session.run(change_Family_dates)
-            cnt4 = result.single()[0]
-            result = session.run(change_wrong_supplemented_direction)
-            cnt5 = result.single()[0]
-
-            print(f"adminDB.do_schema_fixes: changed {cnt1} relatios, {cnt2} properties, "
-                  f"{cnt3} labels, {cnt4} families, {cnt5} supplemented directions")
-
-        except Exception as e:
-            logger.error(f"{e} in database.adminDB.do_schema_fixes")
-            return
+        with shareds.driver.session() as session: 
+            try:
+                result = session.run(change_HIERARCY_to_IS_INSIDE)
+                cnt1 = result.single()[0]
+                result = session.run(change_userName_to_username)
+                cnt2 = result.single()[0]
+                result = session.run(change_Repocitory_to_Repository)
+                cnt3 = result.single()[0]
+                result = session.run(change_Family_dates)
+                cnt4 = result.single()[0]
+                result = session.run(change_wrong_supplemented_direction)
+                cnt5 = result.single()[0]
+    
+                print(f"adminDB.do_schema_fixes: changed {cnt1} relatios, {cnt2} properties, "
+                      f"{cnt3} labels, {cnt4} families, {cnt5} supplemented directions")
+    
+            except Exception as e:
+                logger.error(f"{e} in database.adminDB.do_schema_fixes")
+                return
+    else:
+        print("database.adminDB.do_schema_fixes: No schema changes tried")
 
 def create_lock_constraint():
     # can be created multiple times!

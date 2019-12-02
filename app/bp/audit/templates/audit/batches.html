@@ -1,18 +1,11 @@
-{# _admin/uploads.html_ #}
-{% extends "/admin/layout.html" %}
-{% block title %}{{ _("Uploads") }}{% endblock %}
+{# _audit/batches.html_ #}
+{# Copied from admin/uploads_all #}
+{% extends "/audit/layout.html" %}
+{% block title %}{{ _("Batches") }}{% endblock %}
 {% block body %}
     {{ super() }}
-    <!-- meta http-equiv="refresh" content="30" -->
-    {% if num_requested_users %}
-    	{% if users|length == 1 %}
-	    	<h2>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
-    	{% else %}
-    		<h2>{{ _("Uploads for %(n)s users", n=users|length) }}</h2>
-		{% endif %}
-    {% else %}
-	    <h2>{{ _("Uploads for all users") }}</h2>
-    {% endif %}
+   
+	<h2>{{ _("Batches") }}</h2>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -48,18 +41,18 @@
     	<td>{{ _("there was an error") }}
     	</table>
     </div>
-    
     <div class="content">
         <table>
            <tr>
 			    {% if not user %}
-	                <th>{{ _("User id") }}</th>
+	                <th>{{ _("User") }}</th>
 			    {% endif %}
                 <th>{{ _("Gramps file / uploaded at") }}</th>
                 <th>{{ _("Status") }}</th>
                 <th>{{ _("Operations") }}</th>
            </tr>
-	    {% for upload in uploads %}
+{% for upload in uploads %}
+    {% if upload.batch_id and current_user.has_role('audit') %}
 	       <tr>
 			    {% if not user %}
                   {% if current_user.username == upload.user %}
@@ -78,20 +71,15 @@
 	           	{% endif %}
                </td>
 	           <td class="msg_INFO">
-{% if upload.xmlname %}
-	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
-	           			{{ _("Store to database") }}</a> |
-{% endif %}
 	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
-	           			{{ _("Show log") }}</a> |
-                    <a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
-                        {{ _("Delete file") }}</a>
+	           			{{ _("Show log") }}</a><br>
+                    <a href=/audit/movein/{{upload.batch_id}}>
+                       <i>{{ _("Move to Isotammi database") }}</a></i>
 	           	</td>
 	       </tr>
-	    {% endfor %}
+    {% endif %}
+{% endfor %}
 	    </table>
-	    <br>
-	    {{ _("Number of files") }}: {{ uploads|count }}
     <p>&rtrif; <a href="/admin/list_users">{{ _("List of users") }}</a></p>
     </div>
 {% endblock %}

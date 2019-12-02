@@ -297,7 +297,7 @@ def update_user(username):
 @roles_accepted('admin', 'audit')
 def list_uploads(username):
     upload_list = uploads.list_uploads(username) 
-    logger.info(f"-> bp.admin.routes.list_uploads")
+    logger.info(f"-> bp.admin.routes.list_uploads user={username}")
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
 
 @bp.route('/admin/list_uploads_all', methods=['POST'])
@@ -316,11 +316,11 @@ def list_uploads_for_users():
 
 @bp.route('/admin/list_uploads_all', methods=['GET'])
 @login_required
-@roles_accepted('admin', 'audit')
+@roles_accepted('admin')
 def list_uploads_all():
     users = shareds.user_datastore.get_users()
     upload_list = list(uploads.list_uploads_all(users))
-    logger.info(f"-> bp.admin.routes.list_uploads_all")
+    logger.info(f"-> bp.admin.routes.list_uploads_all (no user)")
     return render_template("/admin/uploads.html", uploads=upload_list )
 
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])

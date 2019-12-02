@@ -65,9 +65,9 @@ function confirm_delete(url) {
       <div style="display: inline-block;">
         <h3>{{ _('User and reference information management') }}</h3>
         <ul>
-          <li><a href="/admin/list_all_users">{{ _('Active and pending users') }}</a></li>
           <li><a href="/admin/list_users">{{ _('Usernames and uploaded materials') }}</a></li>
           <li><a href="/admin/allowed_emails">{{ _('User candidates') }}</a></li>
+          <li><a href="/admin/list_all_users">{{ _('Active and pending users') }}</a></li>
           <li><a href="/admin/access_management">{{ _('Access management') }}</a></li>
           </ul>
       </div>
@@ -75,7 +75,7 @@ function confirm_delete(url) {
 {% endif %}
 
 {% if current_user.is_authenticated 
-   and (current_user.has_role('admin') or current_user.has_role('master')) %}
+   and (current_user.has_role('audit') or current_user.has_role('master')) %}
     <div class="startbox audit">
       <div style="display: inline-block;">
         <h3>{{ _('Data maintenance') }}</h3>

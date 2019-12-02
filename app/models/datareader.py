@@ -500,9 +500,10 @@ def get_source_with_events(sourceid):
             s.notes.append(n)
         # Add repositories and their mediums
         for medium, node in record['reps']:
-            rep = Repository.from_node(node)
-            rep.medium = medium
-            s.repositories.append(rep)
+            if node:
+                rep = Repository.from_node(node)
+                rep.medium = medium
+                s.repositories.append(rep)
 
 #     result = Source.get_citating_nodes(sourceid)
         import shareds
