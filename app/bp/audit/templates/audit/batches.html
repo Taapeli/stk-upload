@@ -59,28 +59,27 @@
                     <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>{% else %}
                     <td>{{upload.user}}{% endif %}</td>
 			      {% endif %}
-	           <td class="msg_INFO">
-    	           <a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}>
+	           <td><a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}
+    	             title="{{ _("Download file") }}">
     	               {{upload.xmlname}}</a> {{upload.upload_time_s}} 
 	           </td>
-	           <td class="msg_INFO">{{upload.status}}
+	           <td>{{upload.status}}
 	           	{% if upload.batch_id %}
 	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
 	           	   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
 	           	   {% endif %}
 	           	{% endif %}
                </td>
-	           <td class="msg_INFO">
-	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
+	           <td><a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a><br>
-                    <a href=/audit/movein/{{upload.batch_id}}>
+                   <a href=/audit/movein/{{upload.batch_id}}>
                        <i>{{ _("Move to Isotammi database") }}</a></i>
 	           	</td>
 	       </tr>
     {% endif %}
 {% endfor %}
 	    </table>
-    <p>&rtrif; <a href="/admin/list_users">{{ _("List of users") }}</a></p>
+    <p>&rtrif; <a href="/admin/readlog">{{ _('Display application log') }}</a></p>
     </div>
 {% endblock %}
 </body>

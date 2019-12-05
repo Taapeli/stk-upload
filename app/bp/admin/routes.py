@@ -495,8 +495,11 @@ def site_map():
 #------------------- Log -------------------------
 @bp.route("/admin/readlog")
 @login_required
-@roles_accepted('admin')
+@roles_accepted('admin','audit')
 def readlog():
+    """ Show log events.
+        Layout depend on role: reddish for admin, yellowish for audit
+    """
     direction = request.args.get("direction")
     startid_arg = request.args.get("id")
     if startid_arg:
