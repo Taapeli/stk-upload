@@ -1,4 +1,6 @@
-{% extends "/admin/layout.html" %}
+{% if current_user.has_role('admin') %}{% extends "/admin/layout.html" %}
+{% else %}{% extends "/audit/layout.html" %}
+{% endif %}
 {% block title %}{{ _("Syslog") }}{% endblock %}
 {% block body %}
     {{ super() }}
@@ -9,7 +11,7 @@
         <table>
            <tr>
                 <th>{{ _("Time") }}</th>
-                <th>{{ _("User id") }}</th>
+                <th>{{ _("User") }}</th>
                 <th>{{ _("Type") }}</th>
                 <th>{{ _("Content") }}</th>
            </tr>
@@ -31,12 +33,12 @@
 	    <div style="margin-top:1em;">
 	{% if ns.first %}
 	    <a href="readlog?direction=backward&id={{ ns.first.id }}" class="navlink">
-	       {{ _("Older events") }} {{ns.first.row.timestr}}</a> 
+	       ◀ {{ _("Older events") }} {{ns.first.row.timestr}}</a> 
     {% endif %}
     &mdash;
 	{% if ns.last %}
 	   <a href="readlog?direction=forward&id={{ ns.last.id }}" class="navlink">
-	       {{ _("Newer events") }} {{ns.last.row.timestr}}</a>
+	       {{ _("Newer events") }} {{ns.last.row.timestr}} ▶</a>
     {% endif %}
     <p>&rtrif; <a href="javascript:history.back()">{{ _("Back") }}</a></p>
         </div>

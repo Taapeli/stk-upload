@@ -11,12 +11,13 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request #, redirect, url_for , send_from_directory, flash, session, jsonify
-from flask_security import login_required, roles_accepted #, roles_required, current_user
+from flask_security import login_required, roles_accepted, current_user #, roles_required
 # from flask_babelex import _
 
 import shareds
+from .models.batch_merge import Batch_merge
 from bp.admin import uploads
-
+from models import syslog 
 
 @bp.route('/audit')
 @login_required
@@ -54,9 +55,10 @@ def move_in_1(batch_name):
 @roles_accepted('audit')
 def move_in_2():
     """ Move the accepted Batch to Isotammi database """
-    user = request.form['user']
+    owner = request.form['user']
     batch_id = request.form['batch']
-    
-    logger.info(f' bp.audit.routes.move_in_2 {user} / {batch_id}')
-    return render_template('/audit/move_in_2.html', user=user, batch=batch_id)
+    Batch_merge().move_whole_batch(batch_id, owner)
+    syslog.log(type="batch to Isotammi", batch=batch_id, by=owner)
+    logger.info(f' bp.audit.routes.move_in_2 {owner} / {batch_id}')
+    return render_template('/audit/move_in_2.html', user=owner, batch=batch_id)
 
