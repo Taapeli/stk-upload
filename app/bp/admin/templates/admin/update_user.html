@@ -26,7 +26,13 @@ label { display: inline-block; width:140pt; }
    	      {{ render_field_with_errors(form.name) }}
    	      {{ render_field_with_errors(form.language) }}	
     	  {{ render_field_with_errors(form.is_active) }}
-   	      {{ render_field_with_errors(form.roles) }}
+   	      <p>
+   	      <label for="roles">Roles</label>
+   	      {% for role in form.roles.iter_choices() %}
+   	      	<input name="roles" type=checkbox {% if role[2] %}checked{% endif %} value="{{ role[0] }}">{{role[1]}}
+			<br><label></label>
+      	  {% endfor %}
+      	  </p>
 	      <p> {{ form.confirmed_at.label }}  {{ form.confirmed_at(readonly=true) }} </p>   	      
    	      <p> {{ form.last_login_at.label }}  {{ form.last_login_at(readonly=true) }} </p>
     	  <p> {{ form.last_login_ip.label }}  {{ form.last_login_ip(readonly=true) }} </p>
