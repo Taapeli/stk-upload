@@ -45,7 +45,7 @@ function checkFileSize() {
 			return false;
  	 	}
  	}
- 	catch {
+ 	catch (err) {
  	}
 	return true;
 }
