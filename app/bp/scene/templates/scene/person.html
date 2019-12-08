@@ -108,11 +108,9 @@ u { color: DarkKhaki; text-decoration: none; }
                     <tr>
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
-    {% if e.type == "Baptism" %}    <a href="/scene/event/{{e.uniq_id}}" class="inlink">&rarr;&nbsp;
-                                    {{e.type|transl('evt')}}
-                                </a>
-    {% else %}                      {{e.type|transl('evt')}}
-    {% endif %}
+                                <a href="/scene/event/{{e.uniq_id}}" class="inlink">
+                                {% if e.type == "Baptism" %}&rarr;&nbsp;{% endif %}
+                                    {{e.type|transl('evt')}}</a>
     {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>
     {% endif %}
