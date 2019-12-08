@@ -25,9 +25,12 @@ if not app:
 
 @shareds.app.route('/')
 def entry():
-    ''' Home page for
+    ''' Home page needing autentication.
+
         1. a guest user (from login page or home button) or anonymous user (home)
         2. authenticated user
+
+        When not autenticated, should show a login page first!
     '''
     if current_user.has_role("guest"):
 #        print("Authenticated guest user at entry") 

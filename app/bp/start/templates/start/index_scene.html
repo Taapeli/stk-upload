@@ -27,7 +27,7 @@
                <form method="get" action="/scene/persons_all/">
 
      {% if current_user.is_authenticated and 
-        ( current_user.has_role('member') or current_user.has_role('admin') ) %}
+        ( current_user.has_role('research') or current_user.has_role('admin') ) %}
                 <h3>{{ _('Select Material for Browsing') }}</h3>
                 <p>{% set filt = session['owner_filter'] %}
 	                <input type="checkbox" name="div" value="1"

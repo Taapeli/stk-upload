@@ -20,7 +20,7 @@ u { color: DarkKhaki; text-decoration: none; }
 
         {% if person.media_ref %}<div class="snapshot">
             <div class="thumbnail">
-                <div><a href="#indivgallery">{% set photo = obj[person.media_ref[0]] %}
+                <div><a href="#indivgallery">{% set photo = obj[person.media_ref[0][0]] %}
 	                <img alt="({{ _('Photo') }})" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
 	                     title="key = {{photo.uuid_str()}}"/>
@@ -250,14 +250,16 @@ u { color: DarkKhaki; text-decoration: none; }
 {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media files") }}</h4>
-        {% for ref in person.media_ref %}
+        {% for ref, crop in person.media_ref %}
             <div class="thumbnail">{% set photo=obj[ref] %}
                 <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
 	                <img alt="({{ _('Photo') }})" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
 	                     title="key = {{photo.uuid_str()}}"/>
                 </a>
-                <p>{{photo.description}}{{ macro.notelink(photo) }}</p>
+                <p>{{photo.description}}{{ macro.notelink(photo) }}
+{% if crop %}<br><i>crop {{crop}}</i>{% endif %}
+                </p>
             </div>
         {% endfor %}
             <div class="fullclear"></div>

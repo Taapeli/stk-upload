@@ -51,8 +51,7 @@
            </div>
     {% endif %}           
 
-    {% if current_user.is_authenticated and 
-        ( current_user.has_role('member') or current_user.has_role('research') ) %}
+    {% if current_user.is_authenticated and current_user.has_role('research') %}
            <div class="startbox" style="border:1.5pt solid #7e6b53;box-shadow: 5px 5px 5px grey;">
              <div style="display: inline-block;">
                <form method="get" action="/scene">
