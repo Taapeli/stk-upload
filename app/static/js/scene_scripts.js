@@ -253,6 +253,12 @@ function refTable() {
 				nodeSource.appendChild(textnode);
 
 			}
+			if (sObj.repositories.length == 0) {
+				var nodeRepo = document.createElement("B");
+				textnode = document.createTextNode(" Arkistotieto puuttuu!");
+				nodeRepo.appendChild(textnode);
+				nodeSource.appendChild(nodeRepo)
+			}
 			this.viewCitaNotes(nodeSource, sObj.note_ref);
 			if (rObj) {
 				this.viewCitaNotes(nodeSource, rObj.notes)
