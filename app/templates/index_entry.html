@@ -53,13 +53,16 @@ div.startbox { min-height: 270px;}
 					<div class="submit">
 						<button type="submit">{{ _('Explore demo') }}</button>
 					</div>
+		    {% if not config['DEMO'] %}
                     <p>{{ _("To see the full data, you can fill the registration form here") }}.</p>
                     <div class="submit">
                        <button type="submit" formaction="/join">{{ _('Join us') }}</button>
                     </div>
+			{% endif %}
 				</form>
 			</div>
 
+		    {% if not config['DEMO'] %}
             <div class="startbox">
                 <h3>{{ _('Log in') }}</h3>
                 <p>{{ _('As a member of <i>Suomen sukututkimusseura</i>, you can log in,') }}
@@ -71,7 +74,8 @@ div.startbox { min-height: 270px;}
                     </div>
                 </form>
             </div>
-
+			{% endif %}
+			
 	   </div>
 	</div>
 </div>
