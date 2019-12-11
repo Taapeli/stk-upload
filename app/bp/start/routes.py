@@ -49,7 +49,7 @@ def start_guest():
 
 @shareds.app.route('/start/logged', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
+#@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start_logged():
     """ Opening the home page for logged in user (from login page or home button) 
         or anonymous user (home).

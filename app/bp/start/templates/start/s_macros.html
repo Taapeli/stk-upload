@@ -5,7 +5,7 @@
         You may adjust position by by re-defining css top and right values of
         #menuToggle top and right and #menu margin-top.
     #}
-    
+    {% if not config['DEMO'] %}
 	<nav role="navigation" >
 	{# https://codepen.io/erikterwan/pen/EVzeRP #}
 	{# items is a list of tuples (url, label, hover title) 
@@ -43,4 +43,5 @@
 	    </ul>
 	  </div>
 	</nav>
+	{% endif %}
 {%- endmacro %}

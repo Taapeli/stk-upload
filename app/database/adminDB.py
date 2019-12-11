@@ -97,7 +97,7 @@ def build_master_user():
              'login_count': 0            
              } )
             
-def create_master_user(master_user):
+def create_master_user():
     master_user = build_master_user()
     with shareds.driver.session() as session: 
         try:
