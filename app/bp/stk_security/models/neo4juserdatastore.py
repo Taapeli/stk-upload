@@ -12,6 +12,7 @@ from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, Const
 from datetime import datetime
 #import shareds
 import logging
+import traceback
 logger = logging.getLogger('neo4juserdatastore')
 
 driver = None
@@ -92,6 +93,7 @@ class Neo4jUserDatastore(UserDatastore):
 #            print(userRecord.id)
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
+            print(user)
             if user.confirmed_at:
                 user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
             if user.last_login_at:    
@@ -101,6 +103,7 @@ class Neo4jUserDatastore(UserDatastore):
             return user
         except Exception as ex:
             print(ex)
+            traceback.print_exc()
 #  
 #     def email_accepted(self, proposed_email):
 #         return proposed_email == self.find_allowed_email(proposed_email)
@@ -205,6 +208,7 @@ class Neo4jUserDatastore(UserDatastore):
             confirmtime = None 
             if user.confirmed_at == None:
                 confirmtime = UserAdmin.confirm_allowed_email(tx, user.email)['confirmed_at']
+                #confirmtime = int(confirmtime.timestamp() * 1000),
 #            elif user.username == 'guest':  
 #                pass   
             else: 
@@ -216,7 +220,8 @@ class Neo4jUserDatastore(UserDatastore):
                 email=user.email,
                 password=user.password, 
                 is_active=user.is_active,
-                confirmed_at = int(user.confirmed_at.timestamp() * 1000),            
+                #confirmed_at = int(user.confirmed_at.timestamp() * 1000),            
+                confirmed_at = confirmtime,            
                 roles=rolelist,
                 username = user.username,
                 name = user.name,
