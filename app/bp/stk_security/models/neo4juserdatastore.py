@@ -94,6 +94,9 @@ class Neo4jUserDatastore(UserDatastore):
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
             print(user)
+            user.confirmed_at = 0
+            user.last_login_at = 0
+            user.current_login_at = 0
             if user.confirmed_at:
                 user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
             if user.last_login_at:    
