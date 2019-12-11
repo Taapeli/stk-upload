@@ -39,7 +39,7 @@ def entry():
     logger.info(f'-> routes.entry auth={current_user.is_authenticated}')
     if current_user.is_authenticated:
         # Home page for logged in user
-        return redirect(url_for('start.start_logged'))
+        return redirect(url_for('start_logged'))
     # If not logged in, a login page is shown here first
     return render_template('/index_entry.html')
 
