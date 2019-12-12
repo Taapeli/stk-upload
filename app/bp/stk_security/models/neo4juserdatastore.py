@@ -93,7 +93,7 @@ class Neo4jUserDatastore(UserDatastore):
 #            print(userRecord.id)
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
-            print(user)
+            
             user.confirmed_at = 0
             user.last_login_at = 0
             user.current_login_at = 0
