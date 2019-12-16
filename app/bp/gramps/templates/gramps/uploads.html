@@ -27,6 +27,8 @@ function selectFile(sel, batch_id, xml_name) {
 	    buttons[i].disabled = false;
 	    if (buttons[i].id == 'download' && xml_name == '')
 	        buttons[i].disabled = true;
+	    if (buttons[i].id == 'analyze' && xml_name == '')
+	        buttons[i].disabled = true;
 	    if (buttons[i].id == 'start_upload' && xml_name == '')
 	        buttons[i].disabled = true;
 	    if (buttons[i].id == 'batch_delete' && batch_id == '')
@@ -46,6 +48,12 @@ $(document).ready( function() {
     
     $("#download").click(function(e) {
         $("#form").attr("action","/gramps/xml_download/" + 
+                document.getElementById('nm').innerText);
+        $("#form").submit();
+    });
+    
+    $("#analyze").click(function(e) {
+        $("#form").attr("action","/gramps/xml_analyze/" + 
                 document.getElementById('nm').innerText);
         $("#form").submit();
     });
@@ -173,6 +181,7 @@ function confirm_delete(subj, name) {
 	    <h3>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h3>
         <div>{{ _("Saving data") }}:
             <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
+            <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
             <button id="start_upload" disabled>{{ _("Store to database") }}</button>
             <button id="show_log" disabled>{{ _("Show last log") }}</button>
         </div>
