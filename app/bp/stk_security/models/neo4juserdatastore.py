@@ -229,8 +229,8 @@ class Neo4jUserDatastore(UserDatastore):
                 username = user.username,
                 name = user.name,
                 language = user.language, 
-                last_login_at = 0, #int(user.last_login_at.timestamp() * 1000),
-                current_login_at = 0, #int(user.current_login_at.timestamp() * 1000),
+                last_login_at = int(user.last_login_at.timestamp() * 1000) if user.last_login_at else None,
+                current_login_at = int(user.current_login_at.timestamp() * 1000) if user.current_login_at else None,
                 last_login_ip = user.last_login_ip,
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )
