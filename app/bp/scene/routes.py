@@ -184,8 +184,8 @@ def show_person_v2(uid=None):
 
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
-@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_person_v3(uid=None):
+@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin', 'guest')
+def     show_person_v3(uid=None):
     """ One Person with all connected nodes - NEW version 3.
 
         Arguments:
