@@ -54,6 +54,9 @@ def analyze(username, filename):
     place_citation_cnt = 0
     source_repository_cnt = 0
     
+    event_no_citation_cnt = 0 # How many events do not have any citationref?
+    event_with_citation_cnt = 0 # How many citationrefs this event has?
+    
     citation_flag = False
     event_flag = False
     family_flag = False
@@ -65,6 +68,11 @@ def analyze(username, filename):
 
     for line in f:
         line_cnt += 1
+        found_private = line.find('priv="1"')
+        if found_private > 1:
+            fault = "Private attribute in line: " + str(line_cnt)
+            text.append(fault)
+            text.append(" ")
         word = line.split()
         if len(word) > 0:
             if word[0] == "<citation":
@@ -76,9 +84,12 @@ def analyze(username, filename):
             elif word[0] == "<event":
                 event_flag = True
                 event_cnt += 1
+                event_with_citation_cnt = 0
             elif word[0] == "</event>":
                 event_flag = False
-            
+                if event_with_citation_cnt == 0:
+                    event_no_citation_cnt += 1
+                    
             elif word[0] == "<family":
                 family_flag = True
                 family_cnt += 1
@@ -119,6 +130,7 @@ def analyze(username, filename):
             elif word[0] == "<citationref":
                 if event_flag:
                     event_citation_cnt += 1
+                    event_with_citation_cnt += 1
             
                 elif family_flag:
                     family_citation_cnt += 1
@@ -145,12 +157,16 @@ def analyze(username, filename):
                     citation_source_cnt += 1
 
 
-    text.append("In the xml file there are:")
+    text.append(" ")
+    text.append("Statistics of the xml file:")
     text.append(str(citation_cnt) + " Citations, which have references to: " + 
       str(citation_source_cnt) + " Sources,")
     text.append(" ")
-    text.append(str(event_cnt) + " Events, which have references to: " +
-      str(event_citation_cnt) + " Citations,")
+    text.append(str(event_cnt) + " Events,")
+    text.append(" ")
+    text.append(str(event_citation_cnt) + " Citation references in Events,")
+    text.append(" ")
+    text.append(str(event_no_citation_cnt) + " Events, which do not have Citation references,")
     text.append(" ")
     text.append(str(family_cnt) + " Families, which have references to: " +
       str(family_citation_cnt) + " Citations,")
