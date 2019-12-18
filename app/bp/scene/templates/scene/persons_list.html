@@ -126,7 +126,7 @@
 	                       {# Special hack, see "Can a Jinja variable's scope extend beyond in an inner block?" #}
 	                       {% set not_mine = [False] %}
 	                   {% for ow in p.owners %}
-                           {% if ow == user %}
+                           {% if config['DEMO'] or ow == user %}
                            <div class="detail_link" alt="{{p.uniq_id}}">
                              {{p.sex_symbol()}} {{macro.person(p)}}
                            </div>

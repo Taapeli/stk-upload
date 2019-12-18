@@ -31,7 +31,7 @@ function add_gedcom_links() {
 
 function clear_others() {
 	if (this.checked) { // uncheck other options, clear text input
-		$("input.transform_option").prop("checked", false);
+		$("input.transform_option[type=checkbox]").prop("checked", false);
 		$("input.transform_option[type=text]").val("");
 	}
 }
