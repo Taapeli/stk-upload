@@ -1,37 +1,5 @@
 '''
-
-    Event hierarkiasuunnitelma 23.8.2018/JMä
-
-    class gen.event.*Event*(): 
-       vain Event-noden parametrit (uniq_id, tyyppi, handle, päivämäärät)
-
-    class *Event_compound*(Event): 
-        - __init__()
-        - get_event_combo()
-        - get_baptism_data()
-        - get_cite_sour_repo() static <-- get_citation_path()?
-        - get_event_cite()
-       Event, lähteet, huomautukset, henkilön uniq_id
-
-    2. *Event_w_person*: 
-       Event ja ja siihen liittyvät Person-nodet ja roolit (ehkä myös nimet?)
-    3. *Event_w_place*: 
-       Event ja liittyvät paikat (pyydettäessä myös paikannimet?)
-
-    Nämä siis periytyvät Event-luokasta ja sisältävät tarpeen mukaan 
-    tietokantametodit _read(), get()_ ja _save()_ (_read_ hakukenttien avulla, 
-    _get_ uniq_id:n avulla). L
-    
-    isäksi on kätevä olla metodi __str__(), joka antaa lyhyen sanalliseen muodon
-    "syntynyt välillä 1.3.1840...31.3.1840 Hauho".
-    
-    Ehkä _save()_-metodi koskee vain Event-nodea, ei liittyvä nodeja? 
-    Ehkä yhteydet myös?
-    
-    Prosessointiin ja näyttöihin tehdään tarpeen mukaan bisnes-luokkia, 
-    jotka sisältävät esim. poiminta-, yhdistely- ja muokkaussääntöjä ja 
-    siellä ehkä hoidetaan isompien kokonaisuuksien talletus 
-    (kuten henkilö + nimet ja lähteet).
+    Event class for Gramps XML conversion to Neo4j.
 
 Created on 2.5.2017
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
@@ -45,15 +13,18 @@ from models.cypher_gramps import Cypher_event_w_handle
 
 
 class Event_gramps(Event):
-    """ An Event from Gramps xml file
+    """ An Event from Gramps xml file.
+
         Tapahtuma grampsista tuotuna
-            
+
         Event properties for gramps_loader:
                 note_handles[]     str lisätiedon handle (ent. noteref_hlink)
             Planned from gramps_loader:
                 place_handles[]    str paikan handle (ent. place_hlink)
                 citation_handles[] str viittauksen handle (ent. citationref_hlink)
-                media_handles[]    str median handle (ent. objref_hlink)
+            media_handles[]     list media ref tuples:    (ent. objref_hlink)
+                                str media_handle
+                                tuple picture crop = (int left, int upper, int right, int lower)
 #             Properties from Gramps:
 #                 attr_type          str lisätiedon tyyppi
 #                 attr_value         str lisätiedon arvo
@@ -62,7 +33,7 @@ class Event_gramps(Event):
                 objref_hlink       str median handle
      """
 
-    def __init__(self):             # , eid='', desc='', handle=''):
+    def __init__(self):
         """ Luo uuden event-instanssin """
         Event.__init__(self)
         self.note_handles = []      # Note handles (previous noteref_hlink had
@@ -146,9 +117,15 @@ class Event_gramps(Event):
         try:
             # Make relation to the Media nodes
             order = 1
-            for handle in self.media_handles:
+            for handle, crop in self.media_handles:
+                r_attr = {'order':order}
+                if crop:
+                    r_attr['left']  = crop[0]
+                    r_attr['upper'] = crop[1]
+                    r_attr['right'] = crop[2]
+                    r_attr['lower'] = crop[3]
                 tx.run(Cypher_event_w_handle.link_media, 
-                       handle=self.handle, m_handle=handle, order=order)
+                       handle=self.handle, m_handle=handle, r_attr=r_attr)
                 order =+ 1
         except Exception as err:
             print("iError: Event_link_media: {0}".format(err), file=stderr)

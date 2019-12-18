@@ -47,8 +47,8 @@ _BABY = {"vauva":"U", "poikavauva":"M", "tyttövauva":"F",
          "poikalapsi":"M", "tyttölapsi":"F", "lapsi":"U",
          "fröken":"F", "junfru":"F", "herr":"M", 
          "neiti":"F", "rouva":"F", "herra":"M", 
-         "(vauva)":"U", "(poikavauva)":"M", "(tyttövauva)":"F", 
-         "(poikalapsi)":"M", "(tyttölapsi)":"F", "(lapsi)":"U",
+         "(vauva)":"U", "(poikavauva)":"M", "(tyttövauva)":"F", "tyttö":"N",
+         "(poikalapsi)":"M", "(tyttölapsi)":"F", "(lapsi)":"U","poika":"M",
          "barn":"U", "son":"M", "gåsse":"M", 
          "dotter":"F", "flicke":"F", "fl.barn":"U", "dödf.barn":"U",
          "(barn)":"U", "(son)":"M", "(gåsse)":"M", 
@@ -62,6 +62,7 @@ class NameParts:
     call_name = None
     nick_name = None
     changed = False
+    patronymic_conflict = False 
 
 @dataclass
 class ParseResult:
@@ -121,6 +122,7 @@ class PersonName:
         name_parts = self._evaluate_givn(givn)
         if name_parts.nsfx and nsfx and name_parts.nsfx != nsfx:
             pass # conflict..
+            name_parts.patronymic_conflict = True 
         if not name_parts.nsfx: name_parts.nsfx = nsfx
         surnameparser = SurnameParser()
         surnames = surnameparser.parse_surnames(surn)
@@ -151,21 +153,21 @@ class PersonName:
         
         # 1.1a) Find if last givn is actually a patronyme; mark it as new nsfx 
        
-        if len(gnames) > 0:
+        if len(gnames) > 1:
             nm = gnames[-1]
             pn = _match_patronyme(nm)
-            if pn != None:
+            if pn is not None:
                 name_parts.nsfx = pn
                 name_parts.givn = ' '.join(gnames[0:-1])
                 name_parts.changed = True
 
         # 1.1b) A generic baby name replaced as no name
-            elif gnames[0] in _BABY:
-                # A unnamed baby
-                name_parts.givn = _NONAME
-                name_parts.sex = _BABY[gnames[0]]
-                name_parts.changed = True
-                return name_parts
+        if givn in _BABY:
+            # A unnamed baby
+            name_parts.givn = _NONAME
+            name_parts.sex = _BABY[givn]
+            name_parts.changed = True
+            return name_parts
 
         gnames = name_parts.givn.split()
         parts = []
@@ -184,6 +186,7 @@ class PersonName:
             else:
                 parts.append(nm)
         name_parts.givn = " ".join(parts)
+        if name_parts.givn == "": name_parts.givn = "N"
         return name_parts
                 
 

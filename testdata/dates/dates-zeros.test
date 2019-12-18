@@ -1,0 +1,19 @@
+[options]
+handle_zeros = true
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 DATE 00.05.1888
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 DATE MAY 1888
+0 TRLR
+

@@ -1,0 +1,20 @@
+[description]
+Latinalainen patronyymi
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I130 INDI
+1 NAME Johan Henrici/Mattila/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I130 INDI
+1 NAME Johan/Mattila/Henrici
+2 NOTE _orig_NAME Johan Henrici/Mattila/
+2 NSFX Henrici
+0 TRLR

@@ -80,7 +80,7 @@ body > div {
 }
 .content div.snapshot {
     float: right;
-    margin: 2em;
+    margin: 2em 2em 0 2em;
 }
 .fullclear {
     clear: both;
@@ -144,7 +144,7 @@ img#logo {
 }
 .no_detail {
 	display: inline; 
-	color: #6d898a;
+	color: lightslategray;
 }
 li.minor { list-style-type: circle; }
 li.major { list-style-type: square; }
@@ -239,11 +239,22 @@ a.navlink:hover, a.navlink:active {
     background: bisque;
     padding-right: 5px;
     padding-left: 5px;
+    white-space:nowrap;
 }
 .outlink::before {
-    /* font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f360"; */
-    content: "\260D";   /* RIGHTWARDS DOUBLE ARROW / SOUTH EAST ARROW TO CORNER? */
+    content: "🔗 ";  
 }
+
+#lastitem_badge {
+    text-align: center;
+}
+#lastitem_badge > i {
+    background-color:#999; 
+    padding:3px 30px 3px 30px; 
+    color:white; 
+    border-radius:15px;
+}
+
 
 /* General Text
 ----------------------------------------------------- */
@@ -259,6 +270,8 @@ h3 {
 .sticky {  /* Stk/JMä */
     position: sticky; 
     top: 0;
+    background-color: white;
+    max-width: max-content;
 }
 h4 {
     font-size: medium;
@@ -269,6 +282,15 @@ h4 {
 }
 p#description {
     padding-left: 15px;
+}
+div#noteContent {
+    padding: 1em 0 0 3.5em;
+    text-indent: -1.5em;
+    display: none;
+}
+div#noteContent p.nodesTitle {
+	font-weight: bold;
+    padding-bottom: 3px;
 }
 a {
     color: black;
@@ -617,21 +639,33 @@ ul.eventnotes {
     text-align: center;
 }
 
-/*    Sources
+/*    Sources and Citations list
 ------------------------------------------------------ */
-div#SourceDetail {
-    margin: 0 auto;
+div.sourceDesc { 
+	margin: .5em 3em; 
+    text-indent: -1.3em;
+	}
+div.sourceDesc::before {
+    content: "►";   /* BLACK RIGHT-POINTING POINTER */
 }
 
-/*    Citations
------------------------------------------------------- */
-td.CitationId { 
-	width: 4em;
-	padding-top: 5pt; 
-    color: gray;
-    font-size: 75%;
+div.sourceDesc div.citaDesc {
+    margin-left: 4em;
+    text-indent: -1.7em;
 }
-td.Citation { padding:4px; }
+
+/*	div#SourceDetail {
+	    margin: 0 auto;
+	}
+	
+	td.CitationId { 
+		width: 4em;
+		padding-top: 5pt; 
+	    color: gray;
+	    font-size: 75%;
+	}
+	td.Citation { padding:4px; }
+*/
 
 /* Contact
 ----------------------------------------------------- */
@@ -710,19 +744,21 @@ div#families table.attrlist td.ColumnType {
     align-self: flex-start;
     width: 200px;
     margin: 1em;
-    font-size: 80%;
+    font-size: 90%;
 }
 .familybox {
-	width: 250px;
+	width: 350px;
 	border: 1px solid gray; 
     border-radius: 10px;
     background: bisque;
     flex-wrap: wrap;
     align-self: flex-start;
-    font-size: 80%;
+    font-size: 90%;
     margin: 10px;
 }
 .familybox p { padding-left: 1em; padding-top: 1em; }
+.familybox ul li ul { padding-left: 1.5em; }
+
 .groupbox {
     display: flex;
     align-items: flex-start;
@@ -739,10 +775,16 @@ div#families table.attrlist td.ColumnType {
 #indivgallery .thumbnail {
     float: left;
     max-width: 130px;
-    max-height: 150px;
+    //max-height: 150px;
     font-size: smaller;
     text-align: center;
     margin: 0.8em 0.5em;
+}
+div.thumbnail div a img {
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: .5em;
 }
 #indivgallery > div.thumbnail {
     margin-left: 15px;
@@ -750,29 +792,28 @@ div#families table.attrlist td.ColumnType {
     padding: 5px; 
     text-align: center;
 }
-div.thumbnail > div {
-	word-break: break-all;
+div.thumbnail > p {
 	color: gray;
+	word-wrap: break-word;
 }
 #indivgallery img {
     border: solid 1px #999;
 }
-#indivgallery span {
-/* ## remove this line and the comment markers from the line below to hide description in Indivifual Gallery
-    display: none; */
-}
 
-/* Subsection : Narrative
+/* Subsection : Notes (Narrative)
 ----------------------------------------------------- */
-h4 + div.grampsstylednote, a.familymap {
-    margin: 1em 15px;
-}
-i + div.grampsstylednote p {
-    margin: 0 0 0.3em 0;
-}
 div.grampsstylednote p {
-    margin: 4px;
+    margin: 1em 4em;
+    text-indent: -3em;
+    text-align: justify;
 }
+/*  h4 + div.grampsstylednote, a.familymap {
+	    margin: 1em 15px 1em ;
+	}
+	i + div.grampsstylednote p {
+	    margin: 0 0 0.3em 0;
+	}
+*/
 
 /* Subsection : Family Map
 ----------------------------------------------------- */

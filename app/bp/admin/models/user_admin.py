@@ -434,7 +434,7 @@ class UserAdmin():
     def _update_user (cls, tx, user):    
 
         try:
-            logging.debug('user update' + user.email + ' ' + user.name)
+            logging.debug(f'user update {user.email} {user.name}')
             if user.username == 'master': 
                 user.roles = ['master']
 #   Identifier and history fields are not to be updated
@@ -472,3 +472,47 @@ class UserAdmin():
         except Exception as ex:
             logging.error('Exception: ', ex)            
             raise
+
+    @staticmethod 
+    def get_accesses():
+        try:
+            rsp = []
+            for rec in shareds.driver.session().run(Cypher_adm.list_accesses):
+                user = dict(rec.get("user"))
+                batch = dict(rec.get("batch"))
+                batch["file"] = batch["file"].split("/")[-1].\
+                    replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
+                #rel = dict(rec.get("r"))
+                rel_id = rec.get("rel_id")
+                cnt_own = rec.get("cnt")
+                access = dict(user=user, batch=batch, rel_id=rel_id, cnt=cnt_own)
+                print("access:", access)
+                rsp.append(access)
+            return rsp
+
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+
+    
+    @staticmethod
+    def add_access(username, batchid):
+        try:
+            rsp = shareds.driver.session().run(Cypher_adm.add_access,username=username,batchid=batchid).single()
+            return rsp
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+    
+    @staticmethod
+    def delete_accesses(idlist):
+        try:
+            rsp = shareds.driver.session().run(Cypher_adm.delete_accesses,idlist=idlist).single()
+            return rsp
+        except ServiceUnavailable as ex:
+            logging.debug(ex.message)
+            return None                 
+    
+    
+    
+        

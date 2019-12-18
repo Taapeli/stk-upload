@@ -1,42 +1,51 @@
 {# _templates/start/s_layout.html_ #}
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fi" lang="fi">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %} - {{ config.STK_SYSNAME }}</title>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pers.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{% endblock %} - {{ config.STK_SYSNAME }}</title>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pers.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src="/static/js/help.js?"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="/static/js/help.js?"></script>
 
-	<!-- i18n for Javascript: -->
-	<link rel="gettext" type="application/x-po" href="/static/translations/{{ session.language }}.po">
-	<script src="/static/js/gettext.js"></script>
-  </head>
-  
-  <body>
-{% block body %}
-    <h1><a href="/"><img id="logo" src="/static/tam.png" alt="{{ _('Back to Top') }}" title="{{ _('Back to Top') }}"
-             onmouseover="this.src='/static/tam1.png';" 
-             onmouseout="this.src='/static/tam.png';"/></a>
-        <div class="curr_user"><a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}</a></div>
-        <i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i></h1>
+<!-- i18n for Javascript: {{ session.lang }}-->
+<link rel="gettext" type="application/x-po" href="/static/translations/{{ session.lang }}.po">
+<script src="/static/js/gettext.js"></script>
+</head>
 
-{% endblock %}
-    <div class="fullclear"></div>
-    <div id="footer">
-        <span id="createdate">{{ config.STK_SYSNAME }} &nbsp;
-        {% if elapsed %}
-        <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
-        {% endif %}
-        {{ _('Version') }} {{ 'app'|app_date }}</span>
-    <div class="fullclear"></div>
+<body>
+	{% block body %}
+	<h1>
+		<a href="/"><img id="logo" src="/static/tam.png"
+			alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
+			onmouseover="this.src='/static/tam1.png';"
+			onmouseout="this.src='/static/tam.png';" /></a>
+		<div class="curr_user">
+			<a href="/settings" title="{{ _('My profile') }}">{{current_user.username}}
+			<span style="letter-spacing: 0;">
+                {% if current_user.roles %}
+                [{% for r in current_user.roles %} {{r}} {% endfor %}]
+                {% endif %}
+            </span></a>
+		</div>
+		<i>{{ config.STK_SYSNAME }} – {{ _('The Genealogical Society of Finland') }}</i>
+	</h1>
 
-<div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>
+	{% endblock %}
+	<div class="fullclear"></div>
+	<div id="footer">
+		<span id="createdate">{{ config.STK_SYSNAME }} &nbsp; {% if
+			elapsed %} <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+			{% endif %} {{ _('Version') }} {{ 'app'|app_date }}
+		</span>
+		<div class="fullclear"></div>
 
-</body></html>
+		<div id="ohjeikkuna" title="{{ _('Instructions') }}"></div>
+</body>
+</html>

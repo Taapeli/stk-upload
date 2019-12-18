@@ -1,0 +1,20 @@
+[description]
+Sukunimessä useita etuliitteitä
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I11 INDI
+1 NAME Matti/von der Goltz/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I11 INDI
+1 NAME Matti/Goltz/
+2 NOTE _orig_NAME Matti/von der Goltz/
+2 SPFX von der
+0 TRLR

@@ -5,6 +5,10 @@
 {% block body %}
 {{ super() }}
 
+<script>
+var maxsize = {{ maxsize }};  // to be used in gedcom_scripts.js
+</script>
+
 <script src="/static/js/gedcom_scripts.js?37"></script>
 
 <script>

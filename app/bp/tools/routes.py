@@ -22,7 +22,7 @@ from . import api
 
 @bp.route('/tables')
 @login_required
-@roles_accepted('member', 'admin')
+@roles_accepted('audit', 'admin')
 def datatables():
     """ Home page for table format tools """
     return render_template("/tools/tables.html")

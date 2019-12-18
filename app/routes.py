@@ -9,8 +9,8 @@ import logging
 logger = logging.getLogger('stkserver')
 #import time
 
-from flask import render_template, request #, g, redirect, url_for, flash
-from flask_security import login_required #, current_user, roles_accepted # ,roles_required
+from flask import render_template, request, redirect, url_for #, g, flash
+from flask_security import login_required, logout_user, current_user # ,roles_required
 
 # i18n: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n-legacy
 #from flask_babelex import Babel
@@ -23,6 +23,26 @@ if not app:
     raise RuntimeError("Start this application in '..' from 'run.py' or 'runssl.py'")
 
 
+@shareds.app.route('/')
+def entry():
+    ''' Home page needing autentication.
+
+        1. a guest user (from login page or home button) or anonymous user (home)
+        2. authenticated user
+
+        When not autenticated, should show a login page first!
+    '''
+    if current_user.has_role("guest"):
+#        print("Authenticated guest user at entry") 
+        logout_user()
+
+    logger.info(f'-> routes.entry auth={current_user.is_authenticated}')
+    if current_user.is_authenticated:
+        # Home page for logged in user
+        return redirect(url_for('start_logged'))
+    # If not logged in, a login page is shown here first
+    return render_template('/index_entry.html')
+
 """ -------------------------- Yleinen virhesivu ------------------------------
 """
 
@@ -30,7 +50,7 @@ if not app:
 @app.route('/virhe_lataus/<int:code>/<text>')
 def virhesivu(code, text=''):
     """ Virhesivu näytetään """
-    logging.debug('Virhesivu ' + str(code) )
+    logger.debug(f'-> routes.virhesivu {code} {text}')
     return render_template("virhe_lataus.html", code=code, text=text)
 '''
 babel = Babel(app)

@@ -50,7 +50,7 @@ class Event_combo(Event):
         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
         self.place = None       # Place node, if included
-        self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
+        self.media_ref = []     # uniq_ids (preovious self.objref_hlink had gramps handles)
         self.note_ref = []      # uniq_ids (previously note[])
         
         self.citations = []     # For creating display sets
@@ -167,53 +167,55 @@ return r.role as role, e as event,
 
 
     def get_baptism_data(self):
-        """ Read the persons related to this babtism Event.  (for bp.tools)
+        """ Read the persons related to this babtism Event.
 
-            Luetaan kastetapahtuman henkilöt nimineen
+            Luetaan kastetapahtuman henkilöt nimineen.
+            
+            Called from event.html link
         """
 
         query = """
 MATCH (event:Event) <-[r:EVENT]- (p:Person) 
     WHERE ID(event)=$pid
 OPTIONAL MATCH (p) -[:NAME]-> (n:Name)
-RETURN  ID(event) AS id,    event.type AS type, 
-        event.date AS date, event.dates AS dates,
+RETURN  //ID(event) AS id,    event.type AS type,
+        //[event.datetype, event.date1, event.date2] AS dates,
         ID(p) AS person_id, r.role AS role, 
         COLLECT([n.firstname, n.surname]) AS person_names 
     ORDER BY r.role DESC"""
         return  shareds.driver.session().run(query, pid=self.uniq_id)
 
 
-    @staticmethod       
-    def get_cite_sour_repo (uniq_id):
-        """ Get the Citations, Sources and Repositories related to this Event
-
-            Voidaan lukea läheitä viittauksineen kannasta
-        """
-        #TODO Change name: get_citation_path ??
-
-        if uniq_id:
-            where = "WHERE ID(event)={} ".format(uniq_id)
-        else:
-            where = ''
-        
-        query = """
- MATCH (event:Event) -[a:CITATION]-> (citation:Citation)
-        -[b:SOURCE]-> (source:Source)
-        -[c:REPOSITORY]-> (repo:Repository) {0}
- RETURN ID(event) AS id, event.type AS type, 
-        event.date AS date, event.dates AS dates, 
-        COLLECT([ID(citation), citation.dateval, citation.page, 
-                citation.confidence, ID(source), source.stitle, c.medium,
-                ID(repo), repo.rname, repo.type] ) AS sources
- ORDER BY event.date""".format(where)
+#     @staticmethod       
+#     def get_cite_sour_repo (uniq_id):
+#         """ Get the Citations, Sources and Repositories related to this Event.
+# 
+#             Voidaan lukea läheitä viittauksineen kannasta  --  NOT IN USE
+#         """
+#         #Change name: get_citation_path ??
+# 
+#         if uniq_id:
+#             where = "WHERE ID(event)={} ".format(uniq_id)
+#         else:
+#             where = ''
+#         
+#         query = """
+#  MATCH (event:Event) -[a:CITATION]-> (citation:Citation)
+#         -[b:SOURCE]-> (source:Source)
+#         -[c:REPOSITORY]-> (repo:Repository) {0}
+#  RETURN ID(event) AS id, event.type AS type, // event.date AS date,
+#         event.datetype AS datetype, event.date1 AS date1, event.date2 AS date2,
+#         COLLECT([ID(citation), citation.dateval, citation.page, 
+#                 citation.confidence, ID(source), source.stitle, c.medium,
+#                 ID(repo), repo.rname, repo.type] ) AS sources
+#  ORDER BY event.date1""".format(where)
                 
         return shareds.driver.session().run(query)
 
 
     @staticmethod       
     def get_event_cite (uniq_id):
-        """ Get an Event with the connected Citations 
+        """ Get an Event with the connected Citations.  - NOT IN USE
 
             Voidaan lukea tapahtuman tiedot lähdeviittauksineen kannasta
         """
@@ -225,10 +227,10 @@ RETURN  ID(event) AS id,    event.type AS type,
         
         query = """
 MATCH (event:Event) -[a:CITATION]-> (citation:Citation) {0}
-RETURN ID(event) AS id, event.type AS type, 
-       event.date AS date, event.dates AS dates, 
+RETURN ID(event) AS id, event.type AS type, // event.date AS date, event.dates AS dates, 
+       [event.datetype, event.date1, event.date2] AS dates,
        COLLECT( [ID(citation), citation.dateval, citation.page,
                  citation.confidence] ) AS sources
-ORDER BY event.date""".format(where)
+ORDER BY event.date1""".format(where)
 
         return shareds.driver.session().run(query)

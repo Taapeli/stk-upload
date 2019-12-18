@@ -9,14 +9,16 @@ Created on 8.8.2018
 
 import os
 
+import json
 import logging 
-import inspect
+#import inspect
 import traceback
-#import datetime
-#from _pickle import Unpickler
+
+from bp.gramps.models import batch
+
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, send_from_directory, flash, session
+from flask import render_template, request, redirect, url_for, send_from_directory, flash, session, jsonify
 from flask_security import login_required, roles_accepted, roles_required, current_user
 from flask_babelex import _
 
@@ -33,6 +35,8 @@ from .. gedcom.models import gedcom_utils
 from .. import gedcom
 from models import email
 from models import syslog 
+from models.gen.batch import Batch
+
 
 # Admin start page
 @bp.route('/admin',  methods=['GET', 'POST'])
@@ -45,6 +49,7 @@ def admin():
 
 
 @bp.route('/admin/clear_db/<string:opt>')
+@login_required
 @roles_required('admin')
 def clear_db(opt):
     """ Clear database - with no confirmation! """
@@ -67,10 +72,35 @@ def clear_my_db():
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
+@bp.route('/admin/clear_batches', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('research', 'admin')
+def clear_empty_batches():
+    """ Show or clear unused batches. """
+    user=None
+    clear=False
+    cnt = -1
+    try:
+        if request.form:
+            clear = request.form.get('clear', False)
+            if clear:
+                cnt = Batch.drop_empty_batches()
+                if cnt == 0:
+                    flash(_('No empty batches removed'), 'warning')
+                pass
+        batches = Batch.list_empty_batches()
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        
+    logger.info(f"-> bp.admin.routes.clear_empty_batches, clear={clear}")
+    return render_template("/admin/batch_clear.html", uploads=batches,  
+                           user=user, removed=cnt)
+
 
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
 @bp.route('/admin/set/estimated_dates')
 @bp.route('/admin/set/estimated_dates/<int:uid>')
+@login_required
 @roles_required('admin')
 def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
@@ -80,12 +110,14 @@ def estimate_dates(uid=None):
 
 # Refnames homa page
 @bp.route('/admin/refnames')
-#@roles_required('admin')
+@login_required
+@roles_required('admin')
 def refnames():
     """ Operations for reference names """
     return render_template("/admin/reference.html")
 
 @bp.route('/admin/set/refnames')
+@login_required
 @roles_accepted('member', 'admin')
 def set_all_person_refnames():
     """ Setting reference names for all persons """
@@ -94,6 +126,7 @@ def set_all_person_refnames():
     return render_template("/admin/talletettu.html", text=message, uri=dburi)
 
 @bp.route('/admin/upload_csv', methods=['POST'])
+@login_required
 @roles_required('admin')
 def upload_csv():
     """ Load a cvs file to temp directory for processing in the server
@@ -264,6 +297,7 @@ def update_user(username):
 @roles_accepted('admin', 'audit')
 def list_uploads(username):
     upload_list = uploads.list_uploads(username) 
+    logger.info(f"-> bp.admin.routes.list_uploads user={username}")
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
 
 @bp.route('/admin/list_uploads_all', methods=['POST'])
@@ -276,16 +310,17 @@ def list_uploads_for_users():
     else:
         users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
+    logger.info(f"-> bp.admin.routes.list_uploads_for_users")
     return render_template("/admin/uploads.html", uploads=upload_list,  
-                           users=users, num_requested_users=len(requested_users), 
-                           num_users=len(users))
+                           users=users, num_requested_users=len(requested_users))
 
 @bp.route('/admin/list_uploads_all', methods=['GET'])
 @login_required
-@roles_accepted('admin', 'audit')
+@roles_accepted('admin')
 def list_uploads_all():
     users = shareds.user_datastore.get_users()
     upload_list = list(uploads.list_uploads_all(users))
+    logger.info(f"-> bp.admin.routes.list_uploads_all (no user)")
     return render_template("/admin/uploads.html", uploads=upload_list )
 
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
@@ -297,8 +332,10 @@ def start_load_to_neo4j(username,xmlname):
     return redirect(url_for('admin.list_uploads', username=username))
 
 @bp.route('/admin/list_threads', methods=['GET'])
+@login_required
 @roles_accepted('admin', 'audit')
-def list_threads(): # for debugging
+def list_threads(): 
+    ''' Thread list for debugging. '''
     import threading
     s = "<pre>\n"
     s += "Threads:\n"
@@ -323,6 +360,7 @@ def xml_download(username,xmlfile):
     #attachment_filename=xmlfile+".gz") 
 
 @bp.route('/admin/show_upload_log/<username>/<xmlfile>')
+@login_required
 @roles_accepted('member', 'admin')
 def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(username)
@@ -339,6 +377,7 @@ def show_upload_log(username,xmlfile):
 def xml_delete(username,xmlfile):
     uploads.delete_files(username,xmlfile)
     syslog.log(type="gramps file uploaded",file=xmlfile,user=username)
+    logger.info(f"-> bp.admin.routes.xml_delete")
     return redirect(url_for('admin.list_uploads', username=username))
 
 #------------------- GEDCOMs -------------------------
@@ -389,6 +428,7 @@ def send_email():
     
 @shareds.app.route('/admin/send_emails',methods=["post"])
 @login_required
+@roles_accepted('admin', 'audit')
 def send_emails():
     subject = request.form["subject"]
     body = request.form["message"]
@@ -455,8 +495,11 @@ def site_map():
 #------------------- Log -------------------------
 @bp.route("/admin/readlog")
 @login_required
-@roles_accepted('admin')
+@roles_accepted('admin','audit')
 def readlog():
+    """ Show log events.
+        Layout depend on role: reddish for admin, yellowish for audit
+    """
     direction = request.args.get("direction")
     startid_arg = request.args.get("id")
     if startid_arg:
@@ -466,3 +509,67 @@ def readlog():
     recs = syslog.readlog(direction,startid)
     return render_template("/admin/syslog.html", recs=recs)
     
+
+#------------------- Access Management -------------------------
+@bp.route("/admin/access_management")
+@login_required
+@roles_accepted('admin')
+def access_management():
+    return render_template("/admin/access_management.html")
+
+@bp.route('/admin/fetch_users', methods=['GET'])
+@login_required
+@roles_accepted('admin')
+def fetch_users():
+    userlist = shareds.user_datastore.get_users()
+    users = [
+        dict(
+            username=user.username,
+            name=user.name,
+            email=user.email,
+        )
+        for user in userlist if user.username != 'master']
+    return jsonify(users)
+
+@bp.route('/admin/fetch_batches', methods=['GET'])
+@login_required
+@roles_accepted('admin')
+def fetch_batches():
+    batch_list = list(batch.get_batches())
+    for b in batch_list:
+        file = b.get('file')
+        if file:
+            file = file.split("/")[-1].replace("_clean.gramps",".gramps").replace("_clean.gpkg",".gpkg")
+            b['file'] = file 
+    return jsonify(batch_list)
+
+@bp.route('/admin/fetch_accesses', methods=['GET'])
+@login_required
+@roles_accepted('admin')
+def fetch_accesses():
+    access_list = UserAdmin.get_accesses();
+    return jsonify(access_list)
+
+@bp.route('/admin/add_access', methods=['POST'])
+@login_required
+@roles_accepted('admin')
+def add_access():
+    data = json.loads(request.data)
+    print(data)
+    username = data.get("username")
+    batchid = data.get("batchid")
+    rsp = UserAdmin.add_access(username,batchid)
+    print(rsp)
+    print(rsp.get("r"))
+    return jsonify(dict(rsp.get("r")))
+
+@bp.route('/admin/delete_accesses', methods=['POST'])
+@login_required
+@roles_accepted('admin')
+def delete_accesses():
+    data = json.loads(request.data)
+    print(data)
+    rsp = UserAdmin.delete_accesses(data)
+    return jsonify(rsp)
+
+

@@ -1,0 +1,18 @@
+[description]
+Kaksiosainen sukunimi (pysyy entisellään)
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I8 INDI
+1 NAME Matti/Garcia Marquez/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I8 INDI
+1 NAME Matti/Garcia Marquez/
+0 TRLR

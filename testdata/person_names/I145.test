@@ -1,0 +1,18 @@
+[description]
+Pauli ei ole patronyymi jo se on ainoa etunimi
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I145 INDI
+1 NAME Pauli/Frimodig/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I145 INDI
+1 NAME Pauli/Frimodig/
+0 TRLR

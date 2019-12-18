@@ -1,0 +1,21 @@
+[description]
+Tai-sanalla eroteltu sukunimi -> aka
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I10 INDI
+1 NAME Matti/Heikkilä tai Mattila/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I10 INDI
+1 NAME Matti/Heikkilä/
+2 NOTE _orig_NAME Matti/Heikkilä tai Mattila/
+1 NAME Matti/Mattila/
+2 TYPE aka
+0 TRLR

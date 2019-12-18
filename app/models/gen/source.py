@@ -42,6 +42,7 @@ class Source(NodeObject):
 #         self.repocitory = None  # Repository object For creating display sets (vanhempi)
 
         # For display combo
+        #Todo: onko repositories, citations käytössä?
         self.repositories = []
         self.citations = []
         self.notes = []
@@ -136,13 +137,11 @@ return s'''
     
     @staticmethod       
     def get_source_w_notes(uniq_id):
-        """ Luetaan lähteen tiedot """
+        """ Read Source with connected Repositories and Notes.
+
+            Luetaan lähteen tiedot
+        """
                         
-#         query = """
-#             MATCH (source:Source)
-#                 WHERE ID(source)={}
-#                 RETURN source.stitle AS stitle
-#             """.format(self.uniq_id)
         return  shareds.driver.session().run(Cypher_source.get_a_source_w_notes,
                                              sid=uniq_id)
     
@@ -187,10 +186,14 @@ return s'''
 
 
     @staticmethod       
-    def get_source_list():
-        """ Reading all sources with notes and repositories.
+    def get_source_list(filt=None):
+        """ Read all sources with notes and repositories, optionally limited by keywords.
         
-            Luetaan kaikki lähteet 
+            Luetaan kaikki lähteet tai teeman mukaan valittuna.
+            
+            filt example: ("birth", 1800, 1820)
+            
+            Todo: filter by years would need pre-calculated variables
         """
 # ╒═════════╤═════╤════════════════╤════════════════╤═════════╤═════════╤═════════╕
 # │"uniq_id"│"id" │"stitle"        │"repository"    │"medium" │"cit_cnt"│"ref_cnt"│
@@ -204,7 +207,26 @@ return s'''
 # └───────┴───────┴────────────────┴────────────────┴────────────┴──────┴─────────┘
 
         ret = []
-        result = shareds.driver.session().run(Cypher_source.get_sources_w_notes)
+        if filt and len(filt) == 3:
+            # Filtered by theme
+            theme, _y1, _y2 = filt
+            THEMES = {"birth": ('syntyneet','födda'),
+                      "babtism": ('kastetut','döpta'),
+                      "wedding": ('vihityt','vigda'),
+                      "death": ('kuolleet','döda'),
+                      "move": ('muuttaneet','flyttade')
+                }
+            key1, key2 = THEMES[theme]
+            print(f'# Sources containing "{key1}" or "{key2}"')
+            with shareds.driver.session() as session:
+                result = session.run(Cypher_source.get_selected_sources_w_notes,
+                                     key1=key1, key2=key2)
+        else:
+            # Show all
+            theme = ""
+            with shareds.driver.session() as session:
+                result = session.run(Cypher_source.get_sources_w_notes)
+
         for _uniq_id, source, notes, repositories, cit_cnt, ref_cnt in result:
             # <Record
             # 0  uniq_id=242567 
@@ -235,17 +257,16 @@ return s'''
                     rep = Repository.from_node(repo_item[1])
                     rep.medium = repo_item[0]
                     s.repositories.append(rep)
-#             s.repo_name = record['repository']
-#             s.medium = record['medium']
+#                 s.repo_name = record['repository']
+#                 s.medium = record['medium']
             s.cit_cnt = cit_cnt
             s.ref_cnt = ref_cnt
-#             s.cit_cnt = record['cit_cnt']
-#             s.ref_cnt = record['ref_cnt']
+#                 s.cit_cnt = record['cit_cnt']
+#                 s.ref_cnt = record['ref_cnt']
             ret.append(s)
-            
-        return ret
-            
-    
+
+        return ret, theme
+
     @staticmethod       
     def get_source_citation (uniq_id):
         """ Voidaan lukea lähteitä viittauksineen kannasta

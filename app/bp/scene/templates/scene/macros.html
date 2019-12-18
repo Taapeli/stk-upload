@@ -5,23 +5,25 @@
 
 
 {% macro stars(value) -%}
-   {# Changed 2018-12-10: Don't use version 5 of fontawesome.com #}
-   {# https://www.w3schools.com/charsets/ref_utf_symbols.asp
-      filled BLACK STAR &#9733;   open WHITE STAR &#9734; 
-      WHITE FROWNING FACE &#9785; BLACK FLAG &#9873;
-      SOUTH EAST ARROW TO CORNER &#8690; (outlink)
+   {# Confidence value as stars. 
+      Alternative method: scene_scripts.js:stars()
+
+      https://www.w3schools.com/charsets/ref_utf_symbols.asp
+      - filled BLACK STAR ★   open WHITE STAR ☆ HALF STAR ½
+      - WHITE FROWNING FACE &#9785; BLACK FLAG &#9873;
+      - SOUTH EAST ARROW TO CORNER &#8690; (outlink)
    #}
    {% if value < 2 %}
      {% if value == 0 %}&#9873;&#9873;
      {% else %}&#9873;
      {% endif %}
    {% else %}
-     {% if   value < 2.25 %}&#9733;&#9733;
-     {% elif value < 2.75 %}&#9733;&#9734;
-     {% elif value < 3.25 %}&#9733;&#9733;
-     {% elif value < 3.75 %}&#9733;&#9733;&#9734;
-     {% elif value < 4.25 %}&#9733;&#9733;&#9733;
-     {% elif value < 4.75 %}&#9733;&#9733;&#9733;&#9734;
+     {% if   value < 2.25 %}★★☆☆☆
+     {% elif value < 2.75 %}★½☆☆
+     {% elif value < 3.25 %}★★☆☆☆
+     {% elif value < 3.75 %}★★½☆
+     {% elif value < 4.25 %}★★★☆☆
+     {% elif value < 4.75 %}★★★½;
      {% endif %}
    {% endif %}                           
 {%- endmacro %}
@@ -71,9 +73,7 @@
 
 {% macro all_obj_ids(obj) -%}
     {#  Formats object keys for display. #}
-    {% if obj.uuid %}
-    <tt title="{{ _('UUID key') }}">{{obj.uuid[:6]}}</tt> /
-    {% endif %}
+    <tt title="{{ _('UUID key') }}">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
 {%- endmacro %}
@@ -84,27 +84,33 @@
     {% if not name.surname %}<i>{{name.suffix}}</i>{% endif %} {{name.prefix}} <b>{{name.surname}}</b>
 {%- endmacro %}
 
+{% macro person_name_plain(name) -%}
+    {#  Shows a Person name in plaintext. Shows firstname and a surname or patronyme. #}
+    {{name.firstname}}
+    {% if name.surname %}{{name.prefix}} {{name.surname}}{% else %}{{name.suffix}}{% endif %}
+{%- endmacro %}
+
 {% macro person_name_long(name) -%}
     {#  Formats a Person name. Shows all firstname, patronyme and surname. #}
     {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>
 {%- endmacro %}
 
-{% macro sex(person) -%}
-    {#  Shows Person gender symbol (only for man and woman). #}
-    {% if person.sex == 1 %}&#9794;{% elif person.sex == 2 %}&#9792;{% endif %}
+{% macro person_name_by_sortname(p) -%}
+    {#  Formats a Person name from person.sortname field. #}
+    {% set nm = p.sortname.split('#') %}
+    {{nm[2]}} <i>{{nm[1]}}</i> <b>{{nm[0]}}</b>
 {%- endmacro %}
 
-{% macro person(p, uuid) -%}
+{% macro person(p, uuid="-") -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
-    <!-- {{p.uuid}} {{uuid}} -->
     {% if p.uuid == uuid %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
     {% else %}{% if p.uuid %}
     <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.uuid[:6]) }} (nr. {{p.uniq_id}})">
+        title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr. {{p.uniq_id}})">
     {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">{% endif %}
-        {% if p.names|length %}{{ person_name(p.names[0]) }}</a>
+        {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>
         {% endif %}
@@ -133,12 +139,13 @@
     {#  Displays a Note text and link out #}
     {% if note.url %}
         <a href="{{note.url}}" class="outlink" 
-           target="_blank">{{note.url|transl('urldomain')}}</a>
+           target="_blank">{{note.url|transl('urldomain')}}</a> –
     {% endif %}
     {% if note.text %}
-	    {% set list1 = note.text.split('\n') %}
-	    {% for l in list1 %}
-	       <p><i>{{ l }}</i></p>
+	    {% set lines = note.text.split('\n') %}
+	    {% for l in lines %}
+	       {% if loop.index > 1 %}<br>{% endif %}
+	       <i>{{ l }}</i>
 	    {% endfor %}
     {% endif %}
 {%- endmacro %}
@@ -152,6 +159,12 @@
     <td>{% for l in list1 %}{{ l }} {% endfor %}</td>
 {%- endmacro %}
 
+{% macro place_names_lang(pl) -%}
+    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
+    {% for n in pl.names %}{% if not loop.first %} / {% endif %}
+       {{ n.name|safe }}{% endfor 
+%}{%- endmacro %}
+
 {% macro place_names(pl) -%}
     {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
     {% for n in pl.names|sort(attribute='lang') %}
@@ -160,3 +173,25 @@
          endif %}{{ n.name|safe }}
     {% endfor %}
 {%- endmacro %}
+
+{% macro citation_link(cit_list, obj) -%}
+    {# Creates template <sup>citation link</sup> for each citation.
+       - cit_list   list of citation uniq_ids
+       - obj        dict of objects: obj[uniq_id] = Citation object
+     #}
+    {% if cit_list %}<sup>{% for cr in cit_list %}
+                    <a id="{{obj[cr].source_id}}-{{obj[cr].uniq_id}}">*</a>
+    {% endfor %}</sup>{% endif %}
+{%- endmacro %}
+
+{% macro note_link(note_list, obj) -%}{#
+       Creates template <sup>note link</sup> for each citation.
+       - note_list  list of note uniq_ids
+       - obj        dict of objects: obj[uniq_id] = Note object
+
+#}{% if note_list %}<sup>{% for cr in note_list %}{%set note = obj[cr] %}
+       <a id="N{{note.uniq_id}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
+         <i>{{note.text}}</i></a>{% endfor %}</sup>{% endif 
+%}{%- endmacro %}
+
+

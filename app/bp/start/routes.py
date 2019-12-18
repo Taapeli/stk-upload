@@ -11,7 +11,7 @@ from ..gedcom.models import gedcom_utils
 logger = logging.getLogger('stkserver')
 
 from flask import render_template, request, session , flash
-from flask_security import login_required, roles_accepted, current_user
+from flask_security import login_required, roles_accepted, current_user, utils as secutils
 from flask_babelex import _
 
 import shareds
@@ -30,23 +30,42 @@ def force_https():
         host = request.host.split(":")[0]
         if host in {"localhost","127.0.0.1"}: return
         return redirect(request.url.replace('http://', 'https://'))
-    
-@shareds.app.route('/', methods=['GET', 'POST'])
-def start():
-    """ Home page for logged in user (from login page or home button) 
-        or anonymous user (home)
+
+# @shareds.app.route('/')
+#     Home page for a guest user (from login page or home button) 
+#     or anonymous user (home)
+#
+#     @See: routes.entry
+
+@shareds.app.route('/start/guest', methods=['GET', 'POST'])
+def start_guest():
+    """ Scene start page for a guest user.
+    """
+    user = shareds.user_datastore.get_user('guest')
+    secutils.login_user(user)
+    logger.info('-> bp.start.routes.start_guest: Anonymous user')
+    return render_template('/start/index_guest.html')
+
+
+@shareds.app.route('/start/logged', methods=['GET', 'POST'])
+@login_required
+#@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
+def start_logged():
+    """ Opening the home page for logged in user (from login page or home button) 
+        or anonymous user (home).
+        
+        Note. The home page for anonymous user is routes.entry in app/routes.py
     """
     if "gedcom_user" in session: del session["gedcom_user"]  
     
-    if current_user.is_authenticated:
-        role_names = [role.name for role in current_user.roles]
-        logger.info("Start user {}/{}, roles {}".\
-                    format(current_user.username, current_user.email, role_names))
-        return render_template('/start/index_logged.html')
-    else:
-#        session['lang'] = new_lang
-        logger.info('Anonymous user')
-        return render_template('/start/guest_index.html')
+#     if current_user.is_authenticated:
+    role_names = [role.name for role in current_user.roles]
+    logger.info("-> bp.start.routes.start_logged "
+                f"user {current_user.username}/{current_user.email}, roles {role_names}")
+    return render_template('/start/index_logged.html')
+#     else:
+#         logger.info('-> bp.start.routes.start Anonymous user')
+#         return render_template('/start/guest_index.html')
 
 @shareds.app.route('/thankyou')
 def thankyou():
@@ -57,6 +76,7 @@ def join():
     from bp.admin.models.user_admin import UserProfile, UserAdmin
 
     form = JoinForm()
+    logger.info('-> bp.start.routes.join')
     msg = ""
     for name,value in request.form.items():
         msg += f"\n{name}: {value}"
@@ -97,17 +117,21 @@ def my_message():
 def send_email():
     subject = request.form["subject"]
     body = request.form["message"]
-    email.email_admin(_(subject),
+    ok = email.email_admin(_(subject),
                       body,
                       sender=(current_user.name,current_user.email))
-    return "ok"
+    if ok:
+        return "ok"
+    else:
+        return "failed"
 
 @shareds.app.route('/settings',methods=["GET","POST"])
 @login_required
 def my_settings():
     lang = request.form.get("lang")
+    is_guest = current_user.username == "guest"
     referrer = request.form.get("referrer",default=request.referrer)
-    print("-> bp.start.routes.my_settings")
+    logger.info(f"-> bp.start.routes.my_settings lang={lang}, guest={is_guest}")
     if lang:
         try:
             from bp.admin.models.user_admin import UserAdmin # can't import earlier
@@ -128,6 +152,7 @@ def my_settings():
     print(f'# Gedcoms {gedcoms}')
     
     return render_template("/start/my_settings.html",
+                           is_guest=is_guest,
                            referrer=referrer,
                            roles=current_user.roles,
                            labels=labels,
@@ -140,7 +165,7 @@ def my_settings():
 @roles_accepted('admin', 'master')
 def admin():
     """ Home page for administrator """    
-    print("-> bp.start.routes.admin")
+    logger.info("-> bp.start.routes.admin")
     return render_template('/admin/admin.html')
 
 

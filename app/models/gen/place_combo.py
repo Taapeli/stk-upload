@@ -63,7 +63,7 @@ class Place_combo(Place):
             lv = self.level
         else:
             lv = ""
-        return f"{self.uniq_id} {self.pname} ({self.type}) {lv}"
+        return f"{self.pname} ({self.type}) {lv}"
 
 
 #     @classmethod from_node(cls, node):
@@ -335,6 +335,185 @@ class Place_combo(Place):
         return sorted(ret, key=lambda x:x.pname)
 
 
+    @staticmethod
+    def get_my_place_hierarchy(o_filter, limit):
+        """ Get a list on Place_combo objects with nearest heirarchy neighbours.
+        
+            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+
+            Esim.
+╒══════╤═════════╤════════════════════╤═══════╤════════════════════╤════════════════════╕
+│"id"  │"type"   │"name"              │"coord"│"upper"             │"lower"             │
+╞══════╪═════════╪════════════════════╪═══════╪════════════════════╪════════════════════╡
+│290228│"Borough"│[{"name":"1. Kaupung│null   │[[287443,"City","Arc│[[290226,"Tontti","T│
+│      │         │inosa","lang":""}]  │       │topolis","la"],[2874│ontti 23",""]]      │
+│      │         │                    │       │43,"City","Björnebor│                    │
+│      │         │                    │       │g","sv"],[287443,"Ci│                    │
+│      │         │                    │       │ty","Pori",""],[2874│                    │
+│      │         │                    │       │43,"City","Пори","ru│                    │
+│      │         │                    │       │"]]                 │                    │
+└─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
+"""
+        def combine_places(pn_tuples):
+            """ Creates a list of Places with names combined from given names.
+            
+                Kenttä pl_tuple sisältää Places-tietoja 
+                tuplena [[28101, "City", "Lovisa", "sv"]].
+
+                Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
+                Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
+            """
+            placedict = {}
+            for nid, nuuid, ntype, name, lang in pn_tuples:
+                if nid: # id of a lower place
+                    pn = Place_name(name=name, lang=lang)
+                    if nid in placedict:
+                        # Append name to existing Place_combo
+                        placedict[nid].names.append(pn)
+                        if pn.lang in ['fi', '']:
+                            # Default language name
+                            #TODO use language from current_user's preferences
+                            placedict[nid].pname = pn.name
+                    else:
+                        # Add a new Place_combo
+                        p = Place_combo(nid)
+                        p.uuid = nuuid
+                        p.type = ntype
+                        p.names.append(pn)
+                        p.pname = pn.name
+                        placedict[nid] = p
+                        # ntype, Place_combo.namelist_w_lang( (name,) ))
+            return list(placedict.values())
+
+        def _read_place_list(o_filter, limit):
+            """ Read Place data from given fw 
+            """
+            # Select a) filter by user b) show Isotammi common data (too)
+            show_by_owner = o_filter.use_owner_filter()
+            show_with_common = o_filter.use_common()
+            user = o_filter.user
+            try:
+                """
+                               show_by_owner    show_all
+                            +-------------------------------
+                with common |  me + common      common
+                no common   |  me                -
+                """
+                with shareds.driver.session() as session:
+                    if show_by_owner:
+
+                        if show_with_common: 
+                            #1 get all with owner name for all
+                            print("_read_place_list: by owner with common")
+                            result = session.run(Cypher_place.get_name_hierarchies,
+                                                 user=user, fw=fw, limit=limit)
+
+                        else: 
+                            #2 get my own (no owner name needed)
+                            print("_read_place_list: by owner only")
+                            result = session.run(Cypher_place.get_my_name_hierarchies,
+                                                 user=user, fw=fw, limit=limit)
+
+                    else: 
+                        #3 == #1 simulates common by reading all
+                        print("_read_place_list: common only")
+                        result = session.run(Cypher_place.get_name_hierarchies, #user=user, 
+                                             fw=fw, limit=limit)
+                        
+                    return result
+            except Exception as e:
+                print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
+                raise      
+
+
+        ret = []
+        fw = o_filter.next_name_fw()     # next name
+        result = _read_place_list(o_filter, limit)
+        for record in result:
+            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
+            # alemmista paikoista
+            #
+            # Record: <Record id=290228 type='Borough' 
+            #    names=[<Node id=290235 labels={'Place_name'} 
+            #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
+            #    coord=None
+            #    upper=[
+            #        [287443, 'City', 'Arctopolis', 'la'], 
+            #        [287443, 'City', 'Björneborg', 'sv'], 
+            #        [287443, 'City', 'Pori', ''], 
+            #        [287443, 'City', 'Пори', 'ru']] 
+            #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
+            # >
+            pl_id =record['id']
+            p = Place_combo(pl_id)
+            p.uuid =record['uuid']
+            p.type = record.get('type')
+            if record['coord']:
+                p.coord = Point(record['coord']).coord
+            # Set place names and default display name pname
+            for nnode in record.get('names'):
+                pn = Place_name.from_node(nnode)
+                if pn.lang in ['fi', '']:
+                    # Default language name
+                    #TODO use language from current_user's preferences
+                    p.pname = pn.name
+                p.names.append(pn)
+            if p.pname == '' and p.names:
+                p.pname = p.names[0].name
+            p.uppers = combine_places(record['upper'])
+            p.lowers = combine_places(record['lower'])
+            ret.append(p)
+            
+        # Update the page scope according to items really found 
+        if ret:
+            o_filter.update_session_scope('person_scope', 
+                                          ret[0].pname, ret[-1].pname, 
+                                          limit, len(ret))
+
+        # Return sorted by first name in the list p.pname
+        return sorted(ret, key=lambda x:x.pname)
+
+
+    def set_names_from_nodes(self, nodes):
+        ''' Filter Name objects from a list of Cypher nodes to self.names.
+        
+            Fill self.names with Place_names by following rules:
+            1. Place_names using lang == current_user.language
+            2. Place_names using lang == ""
+            3. If none found, use the last Place_name
+            Place_names using other languages are discarded
+
+            nodes=[
+                <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
+                <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
+            ]>
+        '''
+        own_lang = []
+        no_lang = []
+        alien_lang = []
+        from flask_security import current_user
+        for node in nodes:
+            pn = Place_name.from_node(node)
+            if pn.lang == "":
+                no_lang.append(pn)
+                ##print(f"# - no lang {len(self.names)} (Place_name {pn.uniq_id} {pn})")
+            elif pn.lang == current_user.language:
+                own_lang.append(pn)
+                ##print(f"# - my lang (Place_name {pn.uniq_id} {pn})")
+            else:
+                alien_lang.append(pn)
+                ##print(f"# - alien lang (Place_name {pn})")
+
+        if own_lang:
+            self.names = own_lang
+        elif no_lang:
+            self.names = no_lang
+        else:
+            self.names = alien_lang
+        #for pn in self.names:
+        #    print(f"#  names: {pn}")
+
+
     def namelist_w_lang(self):
         """ Return a vector of name data for this place.
          
@@ -480,7 +659,7 @@ RETURN COLLECT(n) AS names LIMIT 15
             if record["edates"][0] != None:
                 dates = DateRange(record["edates"])
                 e.dates = str(dates)
-                e.date = dates.estimate()
+#                 e.date = dates.estimate()
             e.role = record["role"]
             e.names = []
             for node in record["names"]:

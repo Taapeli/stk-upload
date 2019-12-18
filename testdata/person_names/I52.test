@@ -1,0 +1,20 @@
+[description]
+Ensimmäinen etunimi merkitty tähdellä -> tähti pois, NOTE _CALL
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I52 INDI
+1 NAME Matti* Pekka/Mattila/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I52 INDI
+1 NAME Matti Pekka/Mattila/
+2 NOTE _orig_NAME Matti* Pekka/Mattila/
+2 NOTE _CALL Matti
+0 TRLR

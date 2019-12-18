@@ -20,6 +20,175 @@ import os
 from bp.scene.models import media
 
 
+def get_upload_folder(username): 
+    ''' Returns upload directory for given user'''
+    return os.path.join("uploads", username)
+
+def analyze(username, filename):
+    # Read the xml file
+    upload_folder = get_upload_folder(username) 
+    pathname = os.path.join(upload_folder,filename)
+    print("Pathname: " + pathname)
+    
+    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    
+    f = open(file_cleaned, "r")
+    
+    text = []
+    line_cnt = 0
+    
+    citation_cnt = 0
+    event_cnt = 0
+    family_cnt = 0
+    object_cnt = 0
+    person_cnt = 0
+    place_cnt = 0
+    repository_cnt = 0
+    source_cnt = 0
+    
+    citation_source_cnt = 0
+    event_citation_cnt = 0
+    family_citation_cnt = 0
+    object_citation_cnt = 0
+    person_citation_cnt = 0
+    place_citation_cnt = 0
+    source_repository_cnt = 0
+    
+    event_no_citation_cnt = 0 # How many events do not have any citationref?
+    event_with_citation_cnt = 0 # How many citationrefs this event has?
+    
+    citation_flag = False
+    event_flag = False
+    family_flag = False
+    object_flag = False
+    person_flag = False
+    place_flag = False
+    repository_flag = False
+    source_flag = False
+
+    for line in f:
+        line_cnt += 1
+        found_private = line.find('priv="1"')
+        if found_private > 1:
+            fault = "Private attribute in line: " + str(line_cnt)
+            text.append(fault)
+            text.append(" ")
+        word = line.split()
+        if len(word) > 0:
+            if word[0] == "<citation":
+                citation_flag = True
+                citation_cnt += 1
+            elif word[0] == "</citation":
+                citation_flag = False
+        
+            elif word[0] == "<event":
+                event_flag = True
+                event_cnt += 1
+                event_with_citation_cnt = 0
+            elif word[0] == "</event>":
+                event_flag = False
+                if event_with_citation_cnt == 0:
+                    event_no_citation_cnt += 1
+                    
+            elif word[0] == "<family":
+                family_flag = True
+                family_cnt += 1
+            elif word[0] == "</family>":
+                family_flag = False
+            
+            elif word[0] == "<object":
+                object_flag = True
+                object_cnt += 1
+            elif word[0] == "</object>":
+                object_flag = False
+            
+            elif word[0] == "<person":
+                person_flag = True
+                person_cnt += 1
+            elif word[0] == "</person>":
+                person_flag = False
+            
+            elif word[0] == "<placeobj":
+                place_flag = True
+                place_cnt += 1
+            elif word[0] == "</placeobj>":
+                place_flag = False
+            
+            elif word[0] == "<repository":
+                repository_flag = True
+                repository_cnt += 1
+            elif word[0] == "</repository>":
+                repository_flag = False
+            
+            elif word[0] == "<source":
+                source_flag = True
+                source_cnt += 1
+            elif word[0] == "</source>":
+                source_flag = False
+            
+            
+            elif word[0] == "<citationref":
+                if event_flag:
+                    event_citation_cnt += 1
+                    event_with_citation_cnt += 1
+            
+                elif family_flag:
+                    family_citation_cnt += 1
+            
+                elif object_flag:
+                    object_citation_cnt += 1
+            
+                elif place_flag:
+                    place_citation_cnt += 1
+            
+                elif person_flag:
+                    person_citation_cnt += 1
+                else:
+                    print("Unidentified citationref in line: " + str(line_cnt))
+            
+            
+            elif word[0] == "<reporef":
+                if source_flag:
+                    source_repository_cnt += 1
+            
+            
+            elif word[0] == "<sourceref":
+                if citation_flag:
+                    citation_source_cnt += 1
+
+
+    text.append(" ")
+    text.append("Statistics of the xml file:")
+    text.append(str(citation_cnt) + " Citations, which have references to: " + 
+      str(citation_source_cnt) + " Sources,")
+    text.append(" ")
+    text.append(str(event_cnt) + " Events,")
+    text.append(" ")
+    text.append(str(event_citation_cnt) + " Citation references in Events,")
+    text.append(" ")
+    text.append(str(event_no_citation_cnt) + " Events, which do not have Citation references,")
+    text.append(" ")
+    text.append(str(family_cnt) + " Families, which have references to: " +
+      str(family_citation_cnt) + " Citations,")
+    text.append(" ")
+    text.append(str(object_cnt) + " Objects, which have references to: " +
+      str(object_citation_cnt) + " Citations,")
+    text.append(" ")
+    text.append(str(person_cnt) + " Persons, which have references to: " +
+      str(person_citation_cnt) + " Citations,")
+    text.append(" ")
+    text.append(str(place_cnt) + " Places, which have references to: " +
+      str(place_citation_cnt) + " Citations,")
+    text.append(" ")
+    text.append(str(repository_cnt) + " Repositors and")
+    text.append(" ")
+    text.append(str(source_cnt) + " Sources, which have references to: " +
+      str(source_repository_cnt) + " Repositories")
+    
+    f.close()
+    
+    return(text)
+
 def xml_to_neo4j(pathname, userid='Taapeli'):
     """ 
     Reads a Gramps xml file, and saves the information to db 

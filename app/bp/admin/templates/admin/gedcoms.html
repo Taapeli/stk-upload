@@ -22,6 +22,8 @@
         </ol>
       {% endif %}
     {% endwith %}
+
+    <div class="content">
         <table>
            <tr>
                 <th>{{ _("User id") }}</th>
@@ -36,7 +38,8 @@
 	    </table>
 	    <br>
 	    {{ _("Number of files") }}: {{ gedcom_list|count }}
-    <p>&rtrif; <a href="list_users">{{ _("List of users") }}</a></p>
+        <p>&rtrif; <a href="list_users">{{ _("List of users") }}</a></p>
+    </div>
 {% endblock %}
 </body>
 </html>

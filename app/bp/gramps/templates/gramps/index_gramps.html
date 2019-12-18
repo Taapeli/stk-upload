@@ -11,6 +11,25 @@
    ) ) }}
 
 
+
+<script>
+var TOOLARGE =  _("The file is too large (max 60 MB)");
+
+function checkFileSize() {
+ 	try {
+	 	var input = document.getElementById('filenm');
+ 	 	var file = input.files[0];
+ 	 	if (file.size > 60000000) {
+			alert(TOOLARGE);
+			return false;
+ 	 	}
+ 	}
+ 	catch {
+ 	}
+	return true;
+}
+</script>
+
 <div id="startdiv">
   <div>
     <h2>{{ _('Candidate material xml files') }}</h2>
@@ -29,7 +48,7 @@
                    <input type="file" name="filenm" accept=".gramps,.gpkg"/>
                  </div>
                  <div class="submit"> 
-                    <input type="submit" value="{{ _('Send') }}" />
+                    <input type="submit" value="{{ _('Send') }}" onclick="checkFileSize()"/>
                  </div>
                  </form>
          </div>

@@ -1,0 +1,22 @@
+[description]
+Patronyymikonflikti
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I105 INDI
+1 NAME Matti Pettersson/Mattila/
+2 NSFX Andersson
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I105 INDI
+1 NAME Matti/Mattila/Pettersson
+2 NOTE _orig_NAME Matti Pettersson/Mattila/
+2 NSFX Andersson
+2 NOTE _W patronyymiristiriita
+0 TRLR

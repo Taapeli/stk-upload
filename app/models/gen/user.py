@@ -1,5 +1,9 @@
 '''
-    Connecting database and user administration
+    Connecting database.
+    
+    No user administration any more.
+    
+    NOT USED any more only in models.gen.refname.Refname
 
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 

@@ -51,15 +51,14 @@
            </div>
     {% endif %}           
 
-    {% if current_user.is_authenticated and 
-        ( current_user.has_role('member') or current_user.has_role('research') ) %}
+    {% if current_user.is_authenticated and current_user.has_role('research') %}
            <div class="startbox" style="border:1.5pt solid #7e6b53;box-shadow: 5px 5px 5px grey;">
              <div style="display: inline-block;">
-               <form method="get" action="/scene">
+               <form method="get" action="/scene/persons_all">
                  <h3>{{ _('Look at the Family Trees') }}</h3>
-                 <p>{{ _('View your own data as candidate material and compare it with Isotammi database.') }}</p>
+                 <p>{{ _('View your own data as candidate material') }}</p>
                  <div class="submit"> 
-                    <button type="submit">{{ _('Family Trees') }}</button>
+                    <button type="submit">{{ _('Continue') }}</button>
                  </div>
                </form>
             </div>
@@ -75,6 +74,20 @@
               <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
             <div class="submit"> 
                <button type="submit">{{ _('Maintenance') }}</button>
+            </div>
+         </form>
+      </div>
+     </div>
+    {% endif %}
+
+    {% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
+        <div class="startbox audit">
+           <div style="display: inline-block;">
+           <form method="get" action="/audit">
+              <h3>{{ _('Isotammi auditor') }}</h3>
+              <p>{{ _('Operations between user candidate materials and Isotammi database') }}.</p>
+            <div class="submit"> 
+               <button type="submit">{{ _('Continue') }}</button>
             </div>
          </form>
       </div>

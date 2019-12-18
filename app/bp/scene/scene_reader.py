@@ -5,16 +5,142 @@ Created on 24.9.2018
 
 @author: jm
 '''
-from .models.footnote import Footnotes, SourceFootnote
+from models.person_reader import PersonReader
+from models.source_citation_reader import read_sources_repositories, get_citations_js
 
 from models.gen.from_node import get_object_from_node
 from models.gen.person_combo import Person_combo #, Person_as_member
+#from models.gen.citation import Citation
 from shareds import logger
 import traceback
 
 
-def get_a_person_for_display_apoc(uid, user):
+def get_person_full_data(uuid, owner):
     """ Get a Person with all connected nodes for display in Person page.
+
+
+    Obtaining Person object tree
+
+    For Person data page we must have all business objects, which has connection
+    to current Person. This is done in the following steps:
+
+    1. (p:Person) --> (x:Name|Event)
+    2. (p:Person) <-- (f:Family)
+       for f
+       (f) --> (fp:Person) -[*1]-> (fpn:Name)
+       (f) --> (fe:Event)
+    3. for z in p, x, fe, z, s, r
+       (y) --> (z:Citation|Note|Media)
+    4. for pl in z:Place, ph
+       (pl) --> (pn:Place_name)
+       (pl) --> (ph:Place)
+    5. for c in z:Citation
+       (c) --> (s:Source) --> (r:Repository)
+
+    p:Person
+      +-- x:Name
+      |     +-- z:Citation (2)
+      |     +-- z:Note (3)
+      |     +-- z:Media (4)
+(1)   +-- x:Event
+      |     +-- z:Place
+      |     |     +-- pn:Place_name
+      |     |     +-- z:Place (hierarkia)
+      |     |     +-- z:Citation (2)
+      |     |     +-- z:Note (3)
+      |     |     +-- z:Media (4)
+      |     +-- z:Citation (2)
+      |     +-- z:Note (3)
+      |     +-- z:Media (4)
+      +-- f:Family
+      |     +-- fp:Person
+      |     |     +-- fpn:Name
+      |     +-- fe:Event (1)
+      |     +-- z:Citation (2)
+      |     +-- z:Note (3)
+      |     +-- z:Media (4)
+(2)   +-- z:Citation
+      |     +-- s:Source
+      |     |     +-- r:Repository
+      |     |     |     +-- z:Citation (2)
+      |     |     |     +-- z:Note (3)
+      |     |     |     +-- z:Media (4)
+      |     |     +-- z:Citation (2)
+      |     |     +-- z:Note (3)
+      |     |     +-- z:Media (4)
+      |     +-- z:Note (3)
+      |     +-- z:Media (4)
+(3)    +-- z:Note
+      |     +-- z:Citation (2)
+      |     +-- z:Media (4)
+(4)   +-- z:Media
+            +-- z:Citation (2)
+            +-- z:Note (3)
+      
+    The objects are stored in PersonReader.person object p tree.
+    - x and f: included objects (in p.names etc)
+    - others: reference to "PersonReader.objs" dictionary (p.citation_ref[] etc)
+
+    For ex. Sources may be referenced multiple times and we want to process them 
+    once only.
+
+    - The Person is identified by uuid key.
+
+    """
+
+    try:
+        reader = PersonReader()
+
+        # 1. Read Person p, if not denied
+        reader.get_person(uuid, owner)
+        print(f"#Person {reader.person}")
+
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Could not read Person {uuid}: {e}")
+        return None, None, None
+
+    # 2. (p:Person) --> (x:Name|Event)
+    reader.read_person_names_events()
+
+    # 3. (p:Person) <-- (f:Family)
+    #    for f
+    #      (f) --> (fp:Person) -[*1]-> (fpn:Name) # members
+    #      (fp)--> (me:Event{type:Birth})
+    #      (f) --> (fe:Event)
+    reader.read_person_families()
+
+    #    Sort all Person and family Events by date
+    reader.person.events.sort()
+
+    # 4. for pl in z:Place, ph
+    #      (pl) --> (pn:Place_name)
+    #      (pl) --> (pi:Place)
+    #      (pi) --> (pin:Place_name)
+    reader.read_object_places()
+
+    # 5. Read their connected nodes z: Citations, Notes, Medias
+    #    for y in p, x, fe, z, s, r
+    #        (y) --> (z:Citation|Note|Media)
+    new_objs = [-1]
+    while len(new_objs) > 0:
+        new_objs = reader.read_object_citation_note_media(new_objs)
+
+    # 6. Read Sources s and Repositories r for all Citations
+    #    for c in z:Citation
+    #        (c) --> (s:Source) --> (r:Repository)
+    read_sources_repositories(reader.session, reader.objs, reader.citations)
+
+    # Create Javascript code to create source/citation list
+    jscode = get_citations_js(reader.objs)
+
+    # Return Person with included objects,  and javascript code to create
+    # Citations, Sources and Repositories with their Notes
+    return (reader.person, reader.objs, jscode)
+
+
+def get_a_person_for_display_apoc(uid, user):
+    """ Get a Person with all connected nodes for display in Person page (v2).
 
 
     Person object tree is creation
@@ -68,6 +194,21 @@ def get_a_person_for_display_apoc(uid, user):
     
     #TODO: Process user parameter to check user permissions
     """
+
+    from bp.scene.models.footnote import SourceFootnote
+
+    def set_citations(refs, fns, objs):
+        ''' Create person_pg citation references for foot notes '''
+        for ref in refs:
+            if ref in objs:
+                cit = objs[ref]
+                fn = SourceFootnote.from_citation_objs(cit, objs)
+                cit.mark = fn.mark
+                sl = fns.merge(fn)
+                print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
+            else:
+                print("- no source / {}".format(ref))
+
 
     # 1. Read person p and paths for all nodes connected to p
     person=None
@@ -131,8 +272,8 @@ def get_a_person_for_display_apoc(uid, user):
                 # Create new object
                 try:
                     src_obj = get_object_from_node(src_node)
-                    print(" new objs[{}] <- {} {}".\
-                          format(src_obj.uniq_id, src_label, src_obj))
+                    #print(" new objs[{}] <- {} {}".\
+                    #      format(src_obj.uniq_id, src_label, src_obj))
                     objs[src_obj.uniq_id] = src_obj
                 except Exception as e:
                     print("{}: Could not set {}".format(e, src_obj))
@@ -180,6 +321,7 @@ def get_a_person_for_display_apoc(uid, user):
 
     # 5. Generate clear names for event places and create citation footnotes
 
+    from bp.scene.models.footnote import Footnotes
     fns = Footnotes()
     set_citations(person.citation_ref, fns, objs)
     for e in person.events:
@@ -192,20 +334,7 @@ def get_a_person_for_display_apoc(uid, user):
 
     # Return Person with included objects, list of note, citation etc. objects
     # and footnotes
-    return (person, objs, fns.getNotes())
-
-
-def set_citations(refs, fns, objs):
-    ''' Create person_pg citation references for foot notes '''
-    for ref in refs:
-        if ref in objs:
-            cit = objs[ref]
-            fn = SourceFootnote.from_citation_objs(cit, objs)
-            cit.mark = fn.mark
-            sl = fns.merge(fn)
-            print("- fnotes {} source {}, cit {}: c= {} {} '{}'".format(sl[0], sl[1], sl[2], cit.uniq_id, cit.id, cit.page))
-        else:
-            print("- no source / {}".format(ref))
+    return (person, objs, fns.getFootnotes())
 
 
 def connect_object_as_leaf(src, target, rel_type=None):

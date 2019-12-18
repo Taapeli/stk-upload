@@ -1,0 +1,20 @@
+[description]
+Ainoa etunimi suluissa -> nimi korvattu N:llä, NICK
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I91 INDI
+1 NAME (Matti)/Mattila/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I91 INDI
+1 NAME N/Mattila/
+2 NOTE _orig_NAME (Matti)/Mattila/
+2 NICK Matti
+0 TRLR

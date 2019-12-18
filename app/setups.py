@@ -1,5 +1,5 @@
 from flask_security import Security, UserMixin, RoleMixin
-from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, ValidationError
+from flask_security.forms import LoginForm, ConfirmRegisterForm, Required, StringField, PasswordField, ValidationError
 from wtforms import SelectField, SubmitField, BooleanField
 from flask_security.utils import _
 from flask_mail import Mail
@@ -15,52 +15,54 @@ from templates import jinja_filters
 from datetime import datetime
 
 import logging
-from flask_login.utils import current_user
-from flask.globals import session
+#from flask_login.utils import current_user
+#from flask.globals import session
 import json
+from flask_babelex import lazy_gettext as _l
+
 logger = logging.getLogger('stkserver') 
 
 
 #===================== Classes to create user session ==========================
-
-class SetupCypher():
-    """ Cypher classes for setup """
-
-    set_user_constraint = '''
-        CREATE CONSTRAINT ON (user:User) 
-            ASSERT user.username IS UNIQUE'''
-    
-    role_create = '''
-        CREATE (role:Role {level: $level, name: $name, 
-                           description: $description, timestamp: $timestamp})'''
-
-    master_check_existence = """
-        MATCH  (user:User) 
-        WHERE user.username = 'master' 
-        RETURN COUNT(user)"""
-        
-    email_val = """
-        MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN a"""
-        
-    master_create = ('''
-        MATCH  (role:Role) WHERE role.name = 'admin'
-        CREATE (user:User 
-            {username : $username, 
-            password : $password,  
-            email : $email, 
-            name : $name,
-            language : $language, 
-            is_active : $is_active,
-            confirmed_at : $confirmed_at, 
-            roles : $roles,
-            last_login_at : $last_login_at,
-            current_login_at : $current_login_at,
-            last_login_ip : $last_login_ip,
-            current_login_ip : $current_login_ip,
-            login_count : $login_count} )           
-            -[:HAS_ROLE]->(role)
-        ''' ) 
-
+#  
+# class SetupCypher():
+#     """ Cypher classes for setup """
+# 
+#     set_user_constraint = '''
+#         CREATE CONSTRAINT ON (user:User) 
+#             ASSERT user.username IS UNIQUE'''
+#     
+#     role_create = '''
+#         CREATE (role:Role {level: $level, name: $name, 
+#                            description: $description, timestamp: $timestamp})'''
+# 
+#     master_check_existence = """
+#         MATCH  (user:User) 
+#         WHERE user.username = 'master' 
+#         RETURN COUNT(user)"""
+#         
+#     email_val = """
+#         MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN a"""
+#         
+#     master_create = ('''
+#         MATCH  (role:Role) WHERE role.name = 'admin'
+#         CREATE (user:User 
+#             {username : $username, 
+#             password : $password,  
+#             email : $email, 
+#             name : $name,
+#             language : $language, 
+#             is_active : $is_active,
+#             confirmed_at : $confirmed_at, 
+#             roles : $roles,
+#             last_login_at : $last_login_at,
+#             current_login_at : $current_login_at,
+#             last_login_ip : $last_login_ip,
+#             current_login_ip : $current_login_ip,
+#             login_count : $login_count} )           
+#             -[:HAS_ROLE]->(role)
+#         ''' ) 
+#  
        
 class Role(RoleMixin):
     """ Object describing any application user roles,
@@ -76,6 +78,10 @@ class Role(RoleMixin):
         self.name = kwargs['name']
         self.description = kwargs['description']
 #        self.timestamp = kwargs['timestamp']
+
+    def __str__(self):
+        """ Role name in ui language """
+        return _(self.name)
 
     @staticmethod
     def has_role(name, role_list):
@@ -122,7 +128,7 @@ class User(UserMixin):
         self.current_login_ip = kwargs.get('current_login_ip')
         self.login_count = kwargs.get('login_count')        
 
-# 
+
 # class UserProfile():
 #     """ Object describing dynamic user properties """
 #     uid = ''
@@ -164,16 +170,19 @@ class User(UserMixin):
      
 class ExtendedLoginForm(LoginForm):
 
-    email = StringField('Email or Username', validators=[Required('Email required') ])
-    submit = SubmitField(_('Login'))
+    email = StringField(_l('Email or Username'), validators=[Required('Email required') ])
+    password = PasswordField(_l('Password'),
+                             validators=[Required('Password required')])
+    remember = BooleanField(_l('Remember Me'))
+    submit = SubmitField(_l('Login'))
 
 class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
 
-    email = StringField(_('Email Address'), validators=[Required('Email required') ])
-    agree = BooleanField( _('I have read and agree the ') + "<a href='static/termsofuse.html' >" +  _('Terms of use') + " </a>")
-#    agree = BooleanField(_('I have read and agree to the Terms and Conditions of use'))
-#    terms = SubmitField(_('See the terms of use'))
-    submit = SubmitField(_('Register'))
+    email = StringField(_l('Email address'), validators=[Required('Email required') ])
+    agree = BooleanField( _l("I have read and agree the <a href='static/termsofuse.html'>Terms of use</a>"))
+    password = PasswordField(_l('Password'),
+                             validators=[Required('Password required')])
+    submit = SubmitField(_l('Register'))
  
     def validate_agree(self, field):
         if not field.data:
@@ -198,11 +207,9 @@ class ExtendedConfirmRegisterForm(ConfirmRegisterForm):
         if user:
             raise ValidationError(_('Username has been reserved already'))
 
-    username = StringField('Username', validators=[Required('Username required')])
-    name = StringField('Name', validators=[Required('Name required')])
-    #language = StringField('Language', validators=[Required('Language required')])
-
-    language = SelectField('Language', 
+    username = StringField(_l('Username'), validators=[Required('Username required')])
+    name = StringField(_l('Name'), validators=[Required('Name required')])
+    language = SelectField(_l('Language'), 
                 choices=shareds.app.config.get('LANGUAGES'),
                 validators=[Required(_('Language required'))])
 
@@ -288,13 +295,12 @@ def _jinja2_filter_datetime(datetime, fmt=None):
 #     return urlencode(u)
 
 @shareds.app.template_filter('transl')
-def _jinja2_filter_translate(term, var_name, lang="fi"):
+def _jinja2_filter_translate(term, var_name):
     """ Given term is translated depending of var_name name.
 
         Example: event type code e.type in jinja template: {{e.type|transl('evt')}}
-        and language [TODO]
     """
-    return jinja_filters.translate(term, var_name, lang)
+    return jinja_filters.translate(term, var_name)
 
 @shareds.app.template_filter('is_list')
 def _is_list(value):

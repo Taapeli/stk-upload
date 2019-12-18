@@ -4,6 +4,20 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
+{% set cnt = locations|count %}
+{% set user = owner_filter.user %}
+{% set next = owner_filter.scope %}
+{% set filt_owners = owner_filter.filter %}
+{% if filt_owners == 3 or filt_owners == 5 %}{#
+	#   common_own   011 3 = 1+2 = user's data & demo
+	#   common_batch 101 5 = 1+4 = user batch & demo #}
+	{% set multi_owners = filt_owners - 1 %}
+    {% set my_set = owner_filter.choices.as_str[filt_owners-1] %}
+    {% set my_common = _('Demo-data') %}
+{% else %}
+    {% set multi_owners = 0 %}
+    {% set my_set = owner_filter.choices.as_str[filt_owners] %}
+{% endif %}
 
 <div id="startdiv">
     <h2>{{ _('Places List') }}</h2>
@@ -11,20 +25,55 @@
 
 {{ macro.menu(4) }}
 	<div class="content" id="Individuals">
-		<p id="description">
-		{{ _('This page contains a directory of all the places and the closest lower-level locations beneath them.') }}
-		</p>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ol  class='flashes'>
-        {% for category, message in messages %}
-          <li class='flash_{{category}}'>{{ message }}</li>
-        {% endfor %}
-        </ol>
-      {% endif %}
-    {% endwith %}
-		<div id="alphanav">
+        <div id="summaryarea">
+            <div class="flex-container">
+				<div id="description">
+                   <p>{{ _('Displaying %(num)s distinct places', num=cnt) }}
+                       {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
+                       {% else %}{{ _('from begin') }},
+                       {% endif %}{{ _('data set') }}
+                       <b>{% if multi_owners %}
+                            &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
+                       {% else %}{{my_set}}
+                       {% endif %}</b>
+                       {% if user %}
+                       (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
+                            style="text-decoration-line: underline;">Vaihda</a></i>).
+                       {% endif %}</p>
+	           </div>
+	           <div>
+		           <form action="/scene/locations">
+		             <fieldset>
+		                <input type="hidden" name="c" value="50" >
+		                <label for="fw">{{ _('Go to') }}</label>
+		                <input type="text" name="fw" size="8" 
+		                 title="{{ _('Starting letters of place') }}" 
+		                 placeholder="{{ _('Place') }}">
+		                <input type="submit" value=" > ">
+		             </fieldset>
+		           </form>
+		       </div>
+			</div>
+		    {% with messages = get_flashed_messages(with_categories=true) %}
+		      {% if messages %}
+		        <ol  class='flashes'>
+		        {% for category, message in messages %}
+		          <li class='flash_{{category}}'>{{ message }}</li>
+		        {% endfor %}
+		        </ol>
+		      {% endif %}
+		    {% endwith %}
+       </div>
+       
+        {% set last = locations|last %}
+		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
+			    <li>{% if next[0] > ' ' %}
+			         <a href="/scene/locations?fw=%20" title="{{ _('first page') }}" class="navlink">|&lt;</a>
+			    {% else %}<span class="navlink">|&lt;</span>
+			    {% endif %}</li>
+                <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
+
         {% for p in locations %}
         	{% set ini = p.pname[0]|list|first %}
             {% if loop.changed(ini) %}
@@ -32,6 +81,12 @@
                 <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
             {% endif %}
         {% endfor %}
+            {% if next[1].startswith('>') %}
+                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
+            {% else %}
+	            <li><a href="/scene/locations?{{ {'fw':next[1]} | urlencode }}" 
+	                 title="{{ _('next page') }}" class="navlink"> &gt; </a></li>
+            {% endif %}
 			</ul>
 		</div>
 		<table class="IndividualList">

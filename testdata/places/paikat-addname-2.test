@@ -1,0 +1,23 @@
+[description]
+Maan nimen lisääminen ja järjestyksen kääntäminen
+
+[options]
+addname = Suomi
+reverse = true
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Loviisa, Kirkonkylä
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Kirkonkylä, Loviisa, Suomi
+0 TRLR
+

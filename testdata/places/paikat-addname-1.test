@@ -1,0 +1,22 @@
+[description]
+Maan nimen lisääminen
+
+[options]
+addname = Suomi
+
+[original]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Loviisa
+0 TRLR
+
+[expected]
+0 HEAD
+0 @I1@ INDI
+1 NAME a
+1 BIRT
+2 PLAC Loviisa, Suomi
+0 TRLR
+

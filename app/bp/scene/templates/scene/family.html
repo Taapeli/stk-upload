@@ -18,6 +18,16 @@ td { padding-right:1em;}
 {{ macro.menu(menuno) }}
     <div class="content" id="IndividualDetail">
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
         <h3>{{ _("Family")|capitalize }}</h3>
         <div id="summaryarea">
             <table><tbody>
@@ -33,10 +43,8 @@ td { padding-right:1em;}
             {% for p in [family.father, family.mother]%}
                 {% if p %}
                 <tr><td class="ColumnAttribute">{{p.role|transl('role')|capitalize}}</td>
-                    <td class="Value"><span class="id">{{p.id}}</span>
-                        {{ macro.person(p, uuid) }}
-                    </td>
-                    <td class="Value">{% if p.event_birth.dates %}&#x2606;{{ p.event_birth.dates }}{% endif %}
+                    <td class="Value">{{ macro.person(p, uuid) }}</td>
+                    <td class="Value">{% if p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
                                       {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
                     </td>
                 </tr>
@@ -50,9 +58,14 @@ td { padding-right:1em;}
             <table style="margin-top:1em;"><tbody>
         {% for e in family.events|sort(attribute='dates') %}
                 <tr><td class="ColumnAttribute">{{e.type|transl('evt')|capitalize}}</td>
-                    <td class="Value">{{e.dates}}</td>
-                    <td class="Value"><a href="/scene/location={{e.place.uniq_id}}"
-                            class="inlink">{{e.place.pname}}</a></td>
+                    <td class="ColumnDate">{{e.dates}}</td>
+                    <td class="ColumnPlace">
+                    <a href="/scene/location/uuid={{e.place.uuid}}" class="inlink"
+                       title="{{ _('of type') }} {{e.place.type}}; {{ _('see details of place') }}">
+                      {{macro.place_names_lang(e.place)}}</a>{% if e.place.uppers %},
+		    <small>{{macro.place_names_lang(e.place.uppers[0])}}</small>
+		    {% endif %}
+		  </td>
                 </tr>
         {% endfor %}
             </tbody></table>
@@ -66,10 +79,8 @@ td { padding-right:1em;}
         <!-- |sort(attribute='event_birth.dates') -->
         {% for p in family.children %}
                 <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
-                    <td class="Value"><span class="id">{{p.id}}</span>
-                        {{ macro.person(p, uuid) }}
-                    </td>
-                    <td class="Value">{% if p.event_birth.dates %}&#x2606;{{ p.event_birth.dates }}{% endif %}
+                    <td class="Value">{{ macro.person(p, uuid) }}</td>
+                    <td class="Value">{% if p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
                                       {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
                     </td>
                 </tr>
@@ -98,5 +109,6 @@ td { padding-right:1em;}
 		{% endif %}
 
     </div>
+</div>
 {% endblock %}
 

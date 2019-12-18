@@ -35,7 +35,11 @@ Mallia sorsapohjaksi löytynee Data Entry Grampletista, jonka kautta voi syött�
 """
 
 version = "2.0"
-doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Marriages-ohjelma"
+#doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Marriages-ohjelma"
+doclinks = {
+    'fi': "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Marriages-ohjelma",
+    'sv': "http://wiki.isotammi.net/wiki/Gedcom_verktyg_Marriages",
+}    
 
 from flask_babelex import _
 name = _("Marriages") 

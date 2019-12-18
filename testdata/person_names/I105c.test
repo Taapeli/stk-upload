@@ -1,0 +1,22 @@
+[description]
+Patronyymin siirto suffiksiksi
+Olemassaoleva NSFX ennalleen
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I105 INDI
+1 NAME Matti Pettersson/Mattila/
+2 NSFX Pettersson
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I105 INDI
+1 NAME Matti/Mattila/Pettersson
+2 NOTE _orig_NAME Matti Pettersson/Mattila/
+2 NSFX Pettersson
+0 TRLR

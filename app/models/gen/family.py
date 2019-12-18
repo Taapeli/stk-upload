@@ -41,9 +41,9 @@ class Family(NodeObject):
 
 
     def __str__(self):
-        if self.rel_type:   rel = self.rel_type
-        else:               rel = 'undefined relation'
-        return "{} {}".format(self.id, rel)
+        if self.rel_type:   rel = self.rel_type.lower()
+        else:               rel = _('undefined relation')
+        return "{} {}".format(self.id, rel, self.dates)
 
     
     @classmethod
@@ -71,6 +71,17 @@ class Family(NodeObject):
             n.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return n
 
+    def sortnames(self):
+        ''' Return 'family name' created from sortnames.
+        
+            Note. Consider using Family_combo.get_marriage_parent_names instead 
+        '''
+        a = self.father_sortname.split('#')
+        fn = f"{a[0]} {a[2]} {a[1]}"
+        a = self.mother_sortname.split('#')
+        mn = f"{a[0]} {a[2]} {a[1]}"
+        
+        return f"{fn} <> {mn}"
     
     @staticmethod       
     def get_total():

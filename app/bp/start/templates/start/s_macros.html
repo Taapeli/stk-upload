@@ -5,7 +5,7 @@
         You may adjust position by by re-defining css top and right values of
         #menuToggle top and right and #menu margin-top.
     #}
-    
+    {% if not config['DEMO'] %}
 	<nav role="navigation" >
 	{# https://codepen.io/erikterwan/pen/EVzeRP #}
 	{# items is a list of tuples (url, label, hover title) 
@@ -19,10 +19,10 @@
 	      <a href="/" title="{{ _('Start page') }}"><li>{{ _('Home') }}</li></a>
 
 	      <a id="help" href="#" title="{{ _('Instructions for this page') }}" 
-	      	language={{ session.lang }} target="_blank">
+	      	language="{{ session.lang }}" target="_blank">
 	        <li>{{ _('Help') }}</li></a>
 
-	       <a href="/message" title="{{_('Message to the administrator')}}">
+	       <a href="/message" title="{{_('Message to the administrator')}}" target="_blank">
 	        <li>{{_('Contact administrator')}}</li></a>
 
 	       <a href="/settings" title="{{_('User profile settings')}}">
@@ -43,4 +43,5 @@
 	    </ul>
 	  </div>
 	</nav>
+	{% endif %}
 {%- endmacro %}

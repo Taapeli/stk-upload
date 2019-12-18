@@ -98,7 +98,6 @@ class DOM_handler():
         self.handle_to_node = {}            # dbKeys(uuid, uniq_id)
         self.person_ids = []                # List of processed Person node unique id's
         self.family_ids = []                # List of processed Family node unique id's
-#         self.place_ids = []                 # List of processed Place node unique id's
         self.tx = None                      # Transaction not opened
         self.batch_id = None
 
@@ -150,6 +149,7 @@ class DOM_handler():
         self.tx.run(cypher_add_links,batch_id=self.batch_id)
 
     def set_mediapath(self, path):
+        ''' Store media files path. '''
         self.tx.run("match (b:Batch{id:$batch_id}) set b.mediapath = $path", 
                     batch_id=self.batch_id, path=path)
 
@@ -243,7 +243,7 @@ class DOM_handler():
 
 
     def handle_events(self):
-        # Get all the events in the collection
+        ''' Get all the events in the collection '''
         events = self.collection.getElementsByTagName("event")
 
         print ("***** {} Events *****".format(len(events)))
@@ -289,13 +289,8 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one description tag in an event",
                                      'level':"WARNING", 'count':e.id})
 
-            # Dates:
-            #     <daterange start="1820" stop="1825" quality="estimated"/>
-            #     <datespan start="1840-01-01" stop="1850-06-30" quality="calculated"/>
-            #     <dateval val="1870" type="about"/>
-            #     <datestr val="1700-luvulla" />    # Not processed!
             try:
-                # Gramps_DateRange or None
+                # Returns Gramps_DateRange or None
                 e.dates = self._extract_daterange(event)
                 #TODO: val="1700-luvulla" muunnettava Noteksi
             except:
@@ -325,10 +320,8 @@ class DOM_handler():
                     e.citation_handles.append(ref.getAttribute("hlink"))
                     ##print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
 
-            for ref in event.getElementsByTagName('objref'):
-                if ref.hasAttribute("hlink"):
-                    e.media_handles.append(ref.getAttribute("hlink"))
-                    ##print(f'# Event {e.id} has pic {e.media_handles[-1]}')
+            # Handle <objref>
+            self._extract_mediaref(event, e)
 
             try:
                 self.save_and_link_handle(e)
@@ -343,7 +336,7 @@ class DOM_handler():
 
 
     def handle_families(self):
-        # Get all the families in the collection
+        ''' Get all the families in the collection. '''
         families = self.collection.getElementsByTagName("family")
 
         print ("***** {} Families *****".format(len(families)))
@@ -383,7 +376,7 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one mother tag in a family",
                                      'level':"WARNING", 'count':f.id})
 
-#TODO: Yhdistä kentät eventref_hlink ja eventref_role kentäksi eventref ?
+#TODO: Yhdistä kentät eventref_hlink ja eventref_role kentiksi eventref [(handle, role)] ?
             for ref in family.getElementsByTagName('eventref'):
                 if ref.hasAttribute("hlink"):
                     f.eventref_hlink.append(ref.getAttribute("hlink"))
@@ -415,7 +408,7 @@ class DOM_handler():
 
 
     def handle_notes(self):
-        # Get all the notes in the collection
+        ''' Get all the notes in the collection. '''
         notes = self.collection.getElementsByTagName("note")
 
         print ("***** {} Notes *****".format(len(notes)))
@@ -449,7 +442,7 @@ class DOM_handler():
 
 
     def handle_media(self):
-        # Get all the media in the collection (in Gramps 'object')
+        ''' Get all the media in the collection (Gramps term 'object'). '''
         media = self.collection.getElementsByTagName("object")
 
         print ("***** {} Media *****".format(len(media)))
@@ -458,7 +451,6 @@ class DOM_handler():
 
         # Details of each media object
         for obj in media:
-
             o = Media()
             # Extract handle, change and id
             self._extract_base(obj, o)
@@ -484,7 +476,7 @@ class DOM_handler():
 
 
     def handle_people(self):
-        # Get all the people in the collection
+        ''' Get all the people in the collection. '''
         people = self.collection.getElementsByTagName("person")
 
         person_count = len(people)
@@ -564,10 +556,8 @@ class DOM_handler():
                 if person_eventref.hasAttribute("role"):
                     p.eventref_role.append(person_eventref.getAttribute("role"))
 
-            for person_objref in person.getElementsByTagName('objref'):
-                if person_objref.hasAttribute("hlink"):
-                    p.media_handles.append(person_objref.getAttribute("hlink"))
-                    ##print(f'# Person {p.id} has pic {p.media_handles[-1]}')
+            # Handle <objref>
+            self._extract_mediaref(person, p)
 
             for person_url in person.getElementsByTagName('url'):
                 n = Note()
@@ -592,6 +582,8 @@ class DOM_handler():
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
+            if p.media_handles: 
+                print(f'# saving Person {p.id}: media_handles {p.media_handles}')
             self.save_and_link_handle(p, batch_id=self.batch_id)
             #print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
@@ -694,14 +686,12 @@ class DOM_handler():
             # The place_keys has been updated 
             counter += 1
             
-#             self.place_ids.append(pl.uniq_id)
-
         self.blog.log_event({'title':"Places", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
 
     def handle_repositories(self):
-        # Get all the repositories in the collection
+        ''' Get all the repositories in the collection. '''
         repositories = self.collection.getElementsByTagName("repository")
 
         print ("***** {} Repositories *****".format(len(repositories)))
@@ -745,7 +735,7 @@ class DOM_handler():
 
 
     def handle_sources(self):
-        # Get all the sources in the collection
+        ''' Get all the sources in the collection. '''
         sources = self.collection.getElementsByTagName("source")
 
         print ("***** {} Sources *****".format(len(sources)))
@@ -806,7 +796,7 @@ class DOM_handler():
         self.blog.log_event({'title':"Sources", 'count':counter, 
                              'elapsed':time.time()-t0}) #, 'percent':1})
 
-# -----------------------------------------------------------------------------
+# -------------------------- Other process steps -------------------------------
 
     def set_family_sortname_dates(self):
         ''' Set sortnames and lifetime dates for each Family in the list self.family_ids.
@@ -865,8 +855,8 @@ class DOM_handler():
                             
         self.blog.log_event({'title':"Estimated person lifetimes", 
                              'count':cnt, 'elapsed':time.time()-t0}) 
-#                            ,  'percent':1})
 
+# --------------------------- DOM subtree procesors ----------------------------
 
     def _extract_daterange(self, obj):
         """ Extract date information from these kind of date formats:
@@ -926,3 +916,45 @@ class DOM_handler():
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
 
+    def _extract_mediaref(self, dom_object, p):
+        ''' Check if dom_object has media reference and extract it to p.media_handles.
+
+            Example:
+                <objref hlink="_d485d4484ef70ec50c6">
+                  <region corner1_x="0" corner1_y="21" corner2_x="100" corner2_y="91"/>
+                  <citationref hlink="_d68cc45b6aa6ab09483"/>
+                  <noteref hlink="_d485d4425c02e773ed8"/>
+                </objref>
+
+            region      set picture crop = (left, upper, right, lower)
+                        <region corner1_x="0" corner1_y="21" corner2_x="100" corner2_y="91"/>
+            citationref citation reference
+            noteref    note reference
+
+            TODO: process citationref, noteref too
+        '''
+        for objref in dom_object.getElementsByTagName('objref'):
+            if objref.hasAttribute("hlink"):
+                media_href = objref.getAttribute("hlink")
+
+                crop = None
+                for region in objref.getElementsByTagName('region'):
+                    if region.hasAttribute("corner1_x"):
+                        left = region.getAttribute('corner1_x')
+                        upper = region.getAttribute('corner1_y')
+                        right = region.getAttribute('corner2_x')
+                        lower = region.getAttribute('corner2_y')
+                        crop = int(left), int(upper), int(right), int(lower)
+                        print(f'# Object {p.id} pic handle={media_href} crop={crop}')
+                if crop == None:
+                    print(f'# Object {p.id} has pic handle={media_href}')
+
+                for region in objref.getElementsByTagName('citationref'):
+                    #TODO: media citationref
+                    print(f'# - EI TOTEUTETTU: media {p.id} citationref')
+
+                for region in objref.getElementsByTagName('noteref'):
+                    #TODO: media noteref
+                    print(f'# - EI TOTEUTETTU: media {p.id} noteref')
+
+                p.media_handles.append((media_href, crop))

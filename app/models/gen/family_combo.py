@@ -6,14 +6,17 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 import  shareds
 
-from .cypher import Cypher_family
+from .cypher import Cypher_family, Cypher_person
 from .family import Family
-from .person_combo import Person_combo, Person_as_member
 from .event_combo import Event_combo
 from .person_name import Name
 from .note import Note
-from models.gen.dates import DateRange
-from models.gen.place_combo import Place_combo
+from .dates import DateRange
+from .place_combo import Place_combo
+
+# Import these later to handle circular dependencies where referencing from Person classes! 
+#from .person_combo import Person_combo
+#from .person_combo import Person_as_member
 
 
 class Family_combo(Family):
@@ -46,6 +49,7 @@ class Family_combo(Family):
         self.events = []            # Event objects
         self.notes = []
         self.sources = []
+        self.marriage_dates = None
         self.note_ref = []          # For a page, where same note may be referenced
                                     # from multiple events and other objects
 
@@ -93,7 +97,22 @@ MATCH (family:Family)-[r:EVENT]->(event:Event)
   WHERE ID(family)=$pid
 RETURN r.role AS eventref_role, event.handle AS eventref_hlink"""
         return  shareds.driver.session().run(query, {"pid": pid})
-    
+
+    @staticmethod
+    def find_family_for_event(event_uniq_id):
+        """ Returns Family instance which has given Event.
+
+            NOT IN USE. For models.datareader.get_source_with_events
+        """                
+        query = """
+MATCH (family:Family)-[r:EVENT]->(event)
+  WHERE ID(event)=$pid
+RETURN family"""
+        result = shareds.driver.session().run(query, pid=event_uniq_id)
+        for record in result:
+            f = Family_combo.from_node(record[0])
+            return f
+        raise LookupError(f"Family {event_uniq_id} not found")
     
     def get_family_data_by_id(self):
         """ Luetaan perheen tiedot.
@@ -143,7 +162,7 @@ RETURN family"""
     
     
     @staticmethod
-    def get_family_data(uniq_id):
+    def get_family_data(uuid):
         """ Read Family information including Events, Children, Notes and Sources.
         
             1) read 
@@ -174,6 +193,8 @@ RETURN family"""
                 Family_combo.children, .names, event_birth, event_death
             Returns a Family object with other objects included
         """
+        # Import here to handle circular dependency 
+        from .person_combo import Person_combo
 
         def set_birth_death(person, birth_node, death_node):
             '''
@@ -190,7 +211,7 @@ RETURN family"""
         with shareds.driver.session() as session:
             try:
                 result = session.run(Cypher_family.get_family_data, 
-                                     pid=uniq_id)
+                                     pid=uuid)
                 for record in result:
                     if record['f']:
                         # <Node id=272710 labels={'Family'} 
@@ -210,16 +231,24 @@ RETURN family"""
                                 #        'date2': 1875043, 'type': 'Marriage', 'date1': 1875043}>
                                 e = Event_combo.from_node(event_node)
                                 if place_node:
-                                    # place_node:
-                                    # <Node id=251746 labels={'Place'} 
-                                    #    properties={'coord': [60.5625, 21.609722222222224], 'handle': '_dc388cd23f634d21dbce8ea8775', 
-                                    #        'id': 'P0468', 'type': 'City', 'pname': 'Taivassalo', 
-                                    #        'change': 1556953682}>
+                                    # place_node: <Node id=73479 labels={'Place'} properties={'coord':
+                                    # [60.5625, 21.609722222222224], 'id': 'P0468', 'type': 'City', 'uuid':
+                                    # 'd1d0693de1714a47acf6442d64246a50', 'pname': 'Taivassalo', 'change':
+                                    # 1556953682}>
                                     e.place = Place_combo.from_node(place_node)
+
+                                    # Look for surrounding place:
+                                    res = session.run(Cypher_person.get_places, uid_list=[e.uniq_id])
+                                    for rec in res:
+                                        e.place.set_names_from_nodes(rec['pnames'])
+                                        if rec['pi']:
+                                            pl_in = Place_combo.from_node(rec['pi'])
+                                            pl_in.set_names_from_nodes(rec['pinames'])
+                                            e.place.uppers.append(pl_in)
 
                                 family.events.append(e)
         
-                        uniq_id = -1
+                        uniq_id = -1 # ???
                         
                         for role, person_node, name_node, birth_node, death_node in record['parent']:
                             # ['mother', 
@@ -339,6 +368,9 @@ RETURN family"""
     @staticmethod       
     def get_families(o_filter, opt='father', limit=100):
         """ Find families from the database """
+
+        # Import here to handle circular dependency 
+        from .person_combo import Person_as_member
         
         def _read_family_list(o_filter, opt, limit):
             """ Read Family data from given fw/fwm
@@ -412,16 +444,7 @@ RETURN family"""
                 #    properties={'rel_type': 'Married', 'handle': '_d78e9a206e0772ede0d', 
                 #    'id': 'F0000', 'change': 1507492602}>
                 f_node = record['f']
-                family = Family_combo(f_node.id)
-                family.id = f_node['id']
-                family.type = f_node['rel_type']
-                family.father_sortname = f_node['father_sortname']
-                family.mother_sortname = f_node['mother_sortname']
-                datetype = f_node['datetype']
-                date1 = f_node['date1']
-                date2 = f_node['date2']
-                if datetype != None:
-                    family.marriage_date = DateRange(datetype, date1, date2)
+                family = Family_combo.from_node(f_node)
                 family.marriage_place = record['marriage_place']
 
                 uniq_id = -1
@@ -437,6 +460,7 @@ RETURN family"""
                             pp = Person_as_member()
                             uniq_id = parent_node.id
                             pp.uniq_id = uniq_id
+                            pp.uuid = parent_node['uuid']
                             pp.sortname = parent_node['sortname']
                             pp.sex = parent_node['sex']
                             if role == 'father':
@@ -456,6 +480,7 @@ RETURN family"""
                     #    'date2': 1609920, 'date1': 1609920}>
                     child = Person_as_member()
                     child.uniq_id = ch.id
+                    child.uuid = ch['uuid']
                     child.sortname = ch['sortname']
                     family.children.append(child)
                 
@@ -599,43 +624,51 @@ RETURN family"""
 #         return (families)
 
 
-#     @staticmethod       
-#     def get_marriage_parent_names(event_uniq_id):
-#         """ Find the parents and all their names - not in use!
-# 
-#             Called from models.datareader.get_source_with_events
-#             #Should use [:PARENT] link
-#         
-#             Returns a dictionary like 
-#             {'FATHER': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
-# 
-# ╒════════╤═════╤═══════════════════════════════════════════════════╕
-# │"frole" │"pid"│"names"                                            │
-# ╞════════╪═════╪═══════════════════════════════════════════════════╡
-# │"FATHER"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
-# │        │     │suffix":"","surname":"Forstén"}]                   │
-# ├────────┼─────┼───────────────────────────────────────────────────┤
-# │"MOTHER"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
-# │        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
-# │        │     │alt":"1","firstname":"Catharina Margareta","type":"│
-# │        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
-# └────────┴─────┴───────────────────────────────────────────────────┘
-#         """
-#                         
-#         result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
-#                                               eid=event_uniq_id)
-#         namedict = {}
-#         for record in result:
-#             role = record['frole']
-# #             pid = record['pid']
-#             names = []
-#             for name in record['names']:
-#                 fn = name['firstname']
-#                 sn = name['surname']
-#                 pn = name['suffix']
-#                 names.append("{} {} {}".format(fn, pn, sn))
-#             namedict[role] = ' • '.join(names)
-#         return namedict
+    @staticmethod       
+    def get_marriage_parent_names(event_uniq_id):
+        """ 
+        Find the parents and all their names.
+
+        Called from models.datareader.get_source_with_events
+    
+        Returns a dictionary like 
+        {'father': (77654, 'Mattias Abrahamsson  • Matts  Lindlöf'), ...}
+        
+        TODO: Return list, not dictionary. Any not used fields?
+        ╒════════╤═════╤═══════════════════════════════════════════════════╕
+        │"frole" │"pid"│"names"                                            │
+        ╞════════╪═════╪═══════════════════════════════════════════════════╡
+        │"father"│73538│[{"alt":"","firstname":"Carl","type":"Birth Name","│
+        │        │     │suffix":"","surname":"Forstén"}]                   │
+        ├────────┼─────┼───────────────────────────────────────────────────┤
+        │"mother"│73540│[{"alt":"","firstname":"Catharina Margareta","type"│
+        │        │     │:"Birth Name","suffix":"","surname":"Stenfeldt"},{"│
+        │        │     │alt":"1","firstname":"Catharina Margareta","type":"│
+        │        │     │Also Known As","suffix":"","surname":"Forstén"}]   │
+        └────────┴─────┴───────────────────────────────────────────────────┘
+        """
+                         
+        result = shareds.driver.session().run(Cypher_family.get_wedding_couple_names, 
+                                              eid=event_uniq_id)
+        namedict = {}
+        for record in result:
+            # <Record frole='father' pid=320750 
+            #    names=[
+            #        <Node id=320751 labels={'Name'} 
+            #            properties={'firstname': 'Carl Gustaf', 'type': 'Birth Name',
+            #                'suffix': '', 'surname': 'Swan', 'prefix': '', 'order': 0}>, 
+            #        <Node id=320752 labels={'Name'} properties={'firstname': 'Karl Gustaf', ...}>
+            #    ]
+            # >
+            role = record['frole']
+            names = []
+            for name in record['names']:
+                fn = name['firstname']
+                sn = name['surname']
+                pn = name['suffix']
+                names.append("{} {} {}".format(fn, pn, sn))
+            namedict[role] = ' • '.join(names)
+        return namedict
 
 
     def get_parent_by_id(self, role='father'):

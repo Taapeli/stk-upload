@@ -42,22 +42,29 @@ class Citation(NodeObject):
     """
 
     def __init__(self):
-        """ Luo uuden citation-instanssin """
+        """ Creates a Citation instance """
+
         NodeObject.__init__(self)
-    
         self.dates = None
         self.page = ''
         self.confidence = ''
-        self.mark = ''          # citation mark like '1a', if defined
-        self.noteref_hlink = []
+        self.mark = ""          # citation mark display references
+        self.mark_sorter = 0    # citation grouping by source variable
+
+        self.noteref_hlink = [] # Gramps handle
         self.source_handle = ''
-        self.source_id = None   # uniq_ids of Source objects, for creating display sets
+
+        # For displaying citations in person.html
+        self.source_id = None
+#         self.source_medium = "" # see repository
+#         self.repository_id = None
+
         self.citators = []      # Lähde-sivulle
         self.note_ref = []
 
 
     def __str__(self):
-        return "{} '{}'".format(self.id, self.page)
+        return f"{self.mark} {self.id} '{self.page}'"
 
 
     @classmethod
@@ -74,16 +81,7 @@ class Citation(NodeObject):
         n.uuid = node['uuid']
         n.confidence = node['confidence']
         n.page = node['page']
-#TODO: Remove dateval processing later
-        if 'datetype' in node:
-            n.dates = DateRange(node['datetype'], node['date1'], node['date2'])
-        elif 'dateval' in node:
-            try:
-                if node['dateval']:
-                    n.dates = DateRange(node['dateval'])
-            except ValueError as e:
-                print(f"Error: {getattr(e, 'message', repr(e))} in {n}")
-        n.dateval = str(n.dates) if n.dates else ""
+        n.dates = DateRange.from_node(node)
 
         return n
 
@@ -294,7 +292,10 @@ class Citation(NodeObject):
 
 
 class NodeRef():
-    ''' Carries data of citating nodes
+    ''' Carries data of citating objects.
+    
+        Used only in models.datareader.get_source_with_events
+
             label            str (optional) Person or Event
             uniq_id          int Persons uniq_id
             source_id        int The uniq_id of the Source citated
@@ -302,6 +303,16 @@ class NodeRef():
             eventtype        str type for Event
             edates           DateRange date expression for Event
             date             str date for Event
+
+        Used in from models.datareader.get_source_with_events
+        and scene/source_events.html
+
+        TODO Plan
+            (b:baseObject) --> (a:activeObject) --> (c:Citation)
+            b.type=Person|Family     for linking object page
+            a.type=Person|Event|Name for display style
+            c                        to display
+                + remove: self.date
     '''
     def __init__(self):
         self.label = ''

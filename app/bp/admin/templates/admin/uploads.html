@@ -1,14 +1,14 @@
-{# _myapp/templates/gr_result.html_ #}
+{# _admin/uploads.html_ #}
 {% extends "/admin/layout.html" %}
 {% block title %}{{ _("Uploads") }}{% endblock %}
 {% block body %}
     {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
     {% if num_requested_users %}
-    	{% if num_users == 1 %}
+    	{% if users|length == 1 %}
 	    	<h2>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
     	{% else %}
-    		<h2>{{ _("Uploads for %(n)s users", n=num_users) }}</h2>
+    		<h2>{{ _("Uploads for %(n)s users", n=users|length) }}</h2>
 		{% endif %}
     {% else %}
 	    <h2>{{ _("Uploads for all users") }}</h2>
@@ -24,8 +24,8 @@
       {% endif %}
     {% endwith %}
     <div class="helptext">
-    	<b>{{ _("Status for differents steps in XML file upload:") }}</b>
     	<table class=legend>
+        <tr><td colspan="3"><b>{{ _("Status for differents steps in XML file upload:") }}</b>
     	<tr>
     	<td>1
     	<td>{{ _("UPLOADED") }}     
@@ -39,12 +39,17 @@
     	<td>{{ _("STORED") }}
     	<td>{{ _("the file content has been stored to the database") }}
     	<tr>
-    	<td>4
+        <td>4
+        <td>{{ _("REMOVED") }}
+        <td>{{ _("not found any more") }}
+        <tr>
+    	<td>-
     	<td>{{ _("ERROR") }} / {{ _("FAILED") }}
     	<td>{{ _("there was an error") }}
     	</table>
-	<p>
     </div>
+    
+    <div class="content">
         <table>
            <tr>
 			    {% if not user %}
@@ -73,12 +78,14 @@
 	           	{% endif %}
                </td>
 	           <td class="msg_INFO">
+{% if upload.xmlname %}
 	           		<a href=/admin/start_upload/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Store to database") }}</a> |
+{% endif %}
 	           		<a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
 	           			{{ _("Show log") }}</a> |
-	           		<a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
-	           			{{ _("Delete file") }}</a> &nbsp;
+                    <a href=/admin/xml_delete/{{upload.user}}/{{upload.xmlname | urlencode}}>
+                        {{ _("Delete file") }}</a>
 	           	</td>
 	       </tr>
 	    {% endfor %}
@@ -86,6 +93,7 @@
 	    <br>
 	    {{ _("Number of files") }}: {{ uploads|count }}
     <p>&rtrif; <a href="/admin/list_users">{{ _("List of users") }}</a></p>
+    </div>
 {% endblock %}
 </body>
 </html>

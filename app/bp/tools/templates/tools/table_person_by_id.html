@@ -65,7 +65,7 @@
 				{% endif %}</td>
     		<td>{% if event.type %}{{event.type}}{% endif %}</td>
     		<td>{% if event.datetype %} {{event.datetype}} {% endif %}
-    		    {% if event.date %}{{event.date}}{% elif event.daterange %}{{event.daterange}}{% endif %}</td>
+    		    {% if event.dates %}{{event.dates}}{% endif %}</td>
     		<td>{% if event.place %}{{event.place |join(' • ')}}{% endif %}</td>
     		<td>{% if event.description %}{{event.description}}{% endif %}</td>
             <td>{% if event.citation_ref %}

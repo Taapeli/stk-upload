@@ -1,0 +1,22 @@
+[description]
+Suluissa oleva sukunimi etuliitteellä -> aka, SPFX
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I5 INDI
+1 NAME Matti/Hällström (af Hällström)/
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I5 INDI
+1 NAME Matti/Hällström/
+2 NOTE _orig_NAME Matti/Hällström (af Hällström)/
+1 NAME Matti/Hällström/
+2 TYPE aka
+2 SPFX af
+0 TRLR

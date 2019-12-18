@@ -6,17 +6,17 @@
     <h2>
     {% if code == 1 %}
         {{ _('Invalid input file') }}
-    {% else %}
-        {% if code == 415 %}
+    {% elif code == 2 %}
+        {{ _('No permission') }}
+    {% elif code == 415 %}
         {{ _('Unable to load file') }}
-        {% else %}
+    {% else %}
         {{ _('Unable to load file, code =') }}{{code}}
-        {% endif %}
     {% endif %}
     </h2>
     {% if text %}
     <p>{{text}}</p>
     {% endif %}
-    <p>&gt; <a href="/">{{ _('Back to Top') }}</a>
+    <p>&gt; <a href="/">{{ _('Back to Front Page') }}</a>
 {% endblock %}
 

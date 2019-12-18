@@ -19,6 +19,7 @@ RETURN b.id AS bid
     batch_create = """
 MATCH (u:UserProfile {username: $b_attr.user})
 MERGE (u) -[:HAS_LOADED]-> (b:Batch {id: $b_attr.id})
+MERGE (u) -[:HAS_ACCESS]-> (b)
     SET b = $b_attr
     SET b.timestamp = timestamp()"""
 
@@ -105,9 +106,10 @@ with c
     merge (e) -[r:CITATION]-> (c)"""
 
     link_media = """
-MATCH (n:Event) WHERE n.handle=$handle
-MATCH (m:Media) WHERE m.handle=$m_handle
-MERGE (p) -[r:MEDIA {order:$order}]-> (m)"""
+MATCH (e:Event {handle: $handle})
+MATCH (m:Media  {handle: $m_handle})
+  CREATE (e) -[r:MEDIA]-> (m)
+    SET r = $r_attr"""
 
 
 class Cypher_family_w_handle():
@@ -234,13 +236,6 @@ MERGE (b) -[r:OWNS]-> (p)
     SET p = $p_attr
 RETURN ID(p) as uniq_id"""
 
-#    create = """
-#MATCH (u:UserProfile {username: $username})
-#MERGE (p:Person {handle: $p_attr.handle})
-#MERGE (u) -[r:REVISION {date: $date}]-> (p)
-#    SET p = $p_attr
-#RETURN ID(p) as uniq_id"""
-
     link_name = """
 CREATE (n:Name) SET n = $n_attr
 WITH n
@@ -260,7 +255,8 @@ MERGE (p) -[r:EVENT {role: $role}]-> (e)"""
     link_media = """
 MATCH (p:Person {handle: $p_handle})
 MATCH (m:Media  {handle: $m_handle})
-MERGE (p) -[r:MEDIA {order:$order}]-> (m)"""
+  CREATE (p) -[r:MEDIA]-> (m)
+    SET r = $r_attr"""
 
 # use models.gen.cypher.Cypher_name (there is no handle)
 

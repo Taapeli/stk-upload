@@ -12,6 +12,7 @@ from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, Const
 from datetime import datetime
 #import shareds
 import logging
+import traceback
 logger = logging.getLogger('neo4juserdatastore')
 
 driver = None
@@ -92,6 +93,10 @@ class Neo4jUserDatastore(UserDatastore):
 #            print(userRecord.id)
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
+            
+            user.confirmed_at = 0
+            user.last_login_at = 0
+            user.current_login_at = 0
             if user.confirmed_at:
                 user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
             if user.last_login_at:    
@@ -101,6 +106,7 @@ class Neo4jUserDatastore(UserDatastore):
             return user
         except Exception as ex:
             print(ex)
+            traceback.print_exc()
 #  
 #     def email_accepted(self, proposed_email):
 #         return proposed_email == self.find_allowed_email(proposed_email)
@@ -129,21 +135,21 @@ class Neo4jUserDatastore(UserDatastore):
             
     def _put_user (self, tx, user):    # ============ New user ==============
 
-        allowed_email = UserAdmin.find_allowed_email(user.email)
-        if (allowed_email == None) or (allowed_email.approved != True):
-            return(None)
-#            raise(ValidationError("Email address not accepted"))
+        if not user.username == 'guest':
+            allowed_email = UserAdmin.find_allowed_email(user.email)
+            if (allowed_email == None) or (allowed_email.approved != True):
+                return(None)
         if len(user.roles) == 0:
-            user.roles = [allowed_email.default_role]     
-        user.confirmed_at = None
+            user.roles = [allowed_email.default_role] 
+#        user.confirmed_at = None
         user.is_active = True
         try:
-            logger.info('_put_user new %s %s', user.email, user.roles[0])                
+            logger.info('_put_user new %s %s', user.username, user.roles[0])                
             result = tx.run(Cypher.user_register,
                 email = user.email,
                 password = user.password, 
                 is_active = user.is_active,
-#                     confirmed_at = user.confirmed_at,            
+                confirmed_at = user.confirmed_at,            
                 roles = user.roles,
                 username = user.username,
                 name = user.name,
@@ -157,7 +163,10 @@ class Neo4jUserDatastore(UserDatastore):
             node = result.single()
             if node:
                 userRecord = node['user']
-                status = allowed_email.approved
+                if user.username == 'guest':
+                    status = None
+                else:    
+                    status = allowed_email.approved
                 if (status == None) or (status == True):
 #                userNode = (record['user'])
 #                logger.debug(userNode)
@@ -198,25 +207,30 @@ class Neo4jUserDatastore(UserDatastore):
                     rolelist.append(roleToAdd)
         try:
             logger.debug('_put_user update' + user.email + ' ' + user.name)
-#   Confirm time is copied from allowed email if not in the user aregument        
+#   Confirm time is copied from allowed email if not in the user argument        
             confirmtime = None 
             if user.confirmed_at == None:
                 confirmtime = UserAdmin.confirm_allowed_email(tx, user.email)['confirmed_at']
-            else:     
-                confirmtime = int(user.confirmed_at.timestamp() * 1000)
+                #confirmtime = int(confirmtime.timestamp() * 1000),
+#            elif user.username == 'guest':  
+#                pass   
+            else: 
+#                temp1 = datetime.fromtimestamp(float(user.confirmed_at/1000))    
+                confirmtime = user.confirmed_at
                                                    
             result = tx.run(Cypher.user_update, 
                 id=user.username, 
                 email=user.email,
                 password=user.password, 
                 is_active=user.is_active,
+                #confirmed_at = int(user.confirmed_at.timestamp() * 1000),            
                 confirmed_at = confirmtime,            
                 roles=rolelist,
                 username = user.username,
                 name = user.name,
                 language = user.language, 
-                last_login_at = int(user.last_login_at.timestamp() * 1000),
-                current_login_at = int(user.current_login_at.timestamp() * 1000),
+                last_login_at = int(user.last_login_at.timestamp() * 1000) if user.last_login_at else None,
+                current_login_at = int(user.current_login_at.timestamp() * 1000) if user.current_login_at else None,
                 last_login_ip = user.last_login_ip,
                 current_login_ip = user.current_login_ip,
                 login_count = user.login_count )

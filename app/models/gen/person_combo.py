@@ -48,13 +48,22 @@
 from sys import stderr
 
 import shareds
+from .dates import DateRange
 from .person import Person
 from .person_name import Name
+
 from .event_combo import Event_combo
+#from .family_combo import Family_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
-from .dates import DateRange
-#from models.owner import OwnerFilter
+# from .place_combo import Place_combo
+# from .citation import Citation
+# from .note import Note
+# from .media import Media
+# try:
+#     from models.gen.family_combo import Family_combo
+# except ImportError:
+#     pass
 
 
 class Person_combo(Person):
@@ -122,6 +131,28 @@ class Person_combo(Person):
 
 
     @staticmethod
+    def get_my_person(session, uuid, user):
+        ''' Read a person, who must belong to user's Batch, if user is given.
+        '''
+        try:
+            if user != 'guest':    # Select person owned by user
+                record = session.run(Cypher_person.get_by_user,
+                                     uuid=uuid, user=user).single()
+            else:       # Select person from public database
+                #TODO: Rule for public database is missing, taking all!
+                record = session.run(Cypher_person.get_public,
+                                     uuid=uuid).single()
+            if record is None:
+                raise LookupError(f"Person {uuid} not found.")
+            node = record[0]
+            return Person_combo.from_node(node)
+
+        except Exception as e:
+            print(f"Could not read person {uuid}: {e}")
+            return None
+
+
+    @staticmethod
     def get_person_paths(uniq_id):
         ''' Read a person and paths for all connected nodes.
         '''
@@ -134,6 +165,7 @@ return path"""
 #     with p, relationships(path) as rel
 # return extract(x IN rel | [id(startnode(x)), type(x), x.role, endnode(x)]) as relations"""
         return  shareds.driver.session().run(query, pid=uniq_id)
+
 
     @staticmethod
     def get_person_paths_apoc(uid):
@@ -246,7 +278,7 @@ return path"""
     
             # Create a list with the mentioned user name, if present
             if o_filter.user:
-                p.owners = record.get('owners',[])
+                p.owners = record.get('owners',[o_filter.user])
                                                                                                                                 
             # Events
     

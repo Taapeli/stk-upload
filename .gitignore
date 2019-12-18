@@ -19,3 +19,5 @@ training
 kku/
 /media/
 app/static/tmp/
+
+app/messages.pot

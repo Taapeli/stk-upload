@@ -1,0 +1,21 @@
+[description]
+poika -> N
+patronyymi
+
+[options]
+
+[original]
+0 HEAD
+1 CHAR UTF-8
+0 @I143 INDI
+1 NAME poika//Mattsson
+0 TRLR
+
+[expected]
+0 HEAD
+1 CHAR UTF-8
+0 @I143 INDI
+1 NAME N//Mattsson
+2 NOTE _orig_NAME poika//Mattsson
+2 NSFX Mattsson
+0 TRLR

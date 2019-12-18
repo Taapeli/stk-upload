@@ -1,0 +1,22 @@
+{# _audit/move_in_2.html_ #}
+{% extends "audit/layout.html" %}
+{% block title %}{{ _("Material for Isotammi database") }} 2/2{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<div id="startdiv">
+    <div>
+        <h2>{{ _("Moved batch to Isotammi database") }}</h2>
+
+        <div class="startbox2">
+            <h3>{{ _('Selected Batch') }} <i>{{user}}/{{ batch }}</i></h3>
+            <p>Piti siirrettämän Suomi-kantaan, vaan ei vielä toimi.</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

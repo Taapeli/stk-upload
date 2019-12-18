@@ -19,14 +19,23 @@ table, td {
 $(document).ready( function() {
     $('#send').click( function() {
 		$.post("/send_email",$("form").serialize(), 
-		function(rsp) {
-			alert("{{ _('Message sent') }}");
+		function(rsp) {	
+			console.log(rsp);
+			if (rsp == "ok") {
+				alert("{{ _('Message sent') }}");
+				window.close();
+			}
+			else	
+				alert("{{ _('Message send failed') }}");
 		}
 	).fail(
 		function(rsp) {
 			alert("{{ _('Message send failed') }}");
 		}
 	);
+    });
+    $('#close').click( function() {
+		window.close();
     });
 });
 </script>
@@ -54,6 +63,7 @@ $(document).ready( function() {
          </p>
          <div> 
             <input type="button" id="send" value="{{ _('Apply') }}" />
+            <input type="button" id="close" value="{{ _('Close') }}" />
          </div>
          </form>
     </div>
