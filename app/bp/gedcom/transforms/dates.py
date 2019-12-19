@@ -15,6 +15,10 @@ name = _("Dates")
 docline = _('Correct some invalid date formats')
 
 #doclink = "http://wiki.isotammi.net/wiki/Gedcom:Gedcom-Dates-ohjelma"
+doclinks = {
+    'fi': "http://wiki.isotammi.net/wiki/Gedcom_työkalut_Päivämäärät"
+}    
+
 
 def add_args(parser):
     parser.add_argument('--display_invalid_dates', action='store_true',
