@@ -9,6 +9,9 @@ version = "2.0"
 from flask_babelex import _
 name = _("Unmark")
 docline = _("Restores marked tags: <tag>-X -> <tag>")
+doclinks = {
+    'fi': "http://wiki.isotammi.net/wiki/Poista_tag_X_merkinnät", 
+}    
 
 from .. import transformer
 
