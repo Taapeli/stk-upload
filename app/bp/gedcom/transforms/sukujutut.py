@@ -14,6 +14,7 @@ from ..transformer import Item
 from flask_babelex import _
 
 name = _("Sukujutut")
+version = "1.0"
 doclink = "/Sukujutut-muunnos"
 docline = _("Sukujutut transformations")
 
