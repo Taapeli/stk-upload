@@ -46,6 +46,8 @@ def analyze(username, filename):
     repository_cnt = 0
     source_cnt = 0
     
+    event_line_cnt = 0
+    
     citation_source_cnt = 0
     event_citation_cnt = 0
     family_citation_cnt = 0
@@ -65,6 +67,10 @@ def analyze(username, filename):
     place_flag = False
     repository_flag = False
     source_flag = False
+    
+    event_birth_flag = False
+    event_birthdate_flag = False
+    event_birth_citation_flag = False
 
     for line in f:
         line_cnt += 1
@@ -84,12 +90,22 @@ def analyze(username, filename):
             elif word[0] == "<event":
                 event_flag = True
                 event_cnt += 1
+                event_line_cnt = line_cnt
                 event_with_citation_cnt = 0
             elif word[0] == "</event>":
                 event_flag = False
                 if event_with_citation_cnt == 0:
                     event_no_citation_cnt += 1
+                if event_birth_flag == True:
+                    if (not event_birthdate_flag) and (not event_birth_citation_flag):
+                        fault = "No birthdate nor citationref for a Birth event in line: " + str(event_line_cnt)
+                        text.append(fault)
+                        text.append(" ")
+                    event_birth_flag = False   
+                    event_birthdate_flag = False   
+                    event_birth_citation_flag = False   
                     
+                                     
             elif word[0] == "<family":
                 family_flag = True
                 family_cnt += 1
@@ -155,6 +171,25 @@ def analyze(username, filename):
             elif word[0] == "<sourceref":
                 if citation_flag:
                     citation_source_cnt += 1
+                    
+        if event_flag:
+            birth_found = line.find("Birth")
+            if event_birth_flag:
+                birthdate_found = line.find("dateval")
+                if birthdate_found > 0:
+                    event_birthdate_flag = True
+                birthdate_found = line.find("daterange")
+                if birthdate_found > 0:
+                    event_birthdate_flag = True
+                birthdate_found = line.find("datespan")
+                if birthdate_found > 0:
+                    event_birthdate_flag = True
+                birth_citation_found = line.find("citationref")
+                if birth_citation_found > 0:
+                    event_birth_citation_flag = True
+            elif birth_found > 0:
+                event_birth_flag = True
+                    
 
 
     text.append(" ")
