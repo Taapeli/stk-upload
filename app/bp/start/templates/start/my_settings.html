@@ -56,6 +56,10 @@ table.transparent tbody tr td {
 				  >{{ _("English") }}</option>
 					</select> <input type="hidden" name="referrer" value="{{ referrer }}" />
 				</form>
+				{% if apikey %}
+				<p>
+				<b>API Key:</b> {{ apikey }}
+				{% endif %}
 				<div class="submit">
 					&rtrif; <a href="{{ referrer }}">{{ _('Go back') }}</a>
 				</div>

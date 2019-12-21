@@ -5,12 +5,9 @@
     {{ super() }}
     <h2>{{ _("Analyze of the Gramps XML") }}</h2>
       {% if text %}
-        <table>
-           <tr><th>{{ _("Analyze") }}</th>
-           </tr>
+           <h3>{{ _("Analyze") }}</h3>
 	    {% for line in text %}
-	       <tr><td>{{line}}</td>
-	       </tr>
+	       <p>{{line}}</p>
 	    {% endfor %}</table>
 	{% endif %}
     <p>&rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>
