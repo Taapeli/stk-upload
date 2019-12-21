@@ -243,6 +243,20 @@ def display_changed_lines(old_lines, new_lines, linenum=None):
     print()
     print("<hr>")  
 
+def print_differences(lines1, lines2, linenum):
+    # remove duplicates from the beginning and from the end
+    while lines1 and lines2:
+        if lines1[0] != lines2[0]: break
+        lines1 = lines1[1:]
+        lines2 = lines2[1:]
+        if linenum is not None: linenum += 1
+        
+    while lines1 and lines2:
+        if lines1[-1] != lines2[-1]: break
+        lines1 = lines1[:-1]
+        lines2 = lines2[:-1]
+    display_changed_lines(lines1, lines2, linenum)
+
 def display_changes(lines, item, linenum=None):
     ''' Print diff list of two line sets as html in user language? 
     '''
@@ -252,17 +266,15 @@ def display_changes(lines, item, linenum=None):
         def emit(self,line):
             self.lines.append(line)
 
-    out = Out()
-
     if not item:
-        display_changed_lines(lines,None)
+        new_lines = []
     else:
+        out = Out()
         if isinstance(item, list):
             for it in item:
                 it.print_items(out)
         else:
             item.print_items(out)
-    
-        display_changed_lines(lines, out.lines, linenum)
-    
-        
+        new_lines = out.lines
+    print_differences(lines, new_lines, linenum)
+

@@ -16,6 +16,7 @@ from flask_babelex import _
 
 import shareds
 from models import email
+from bp.api import api
 
 from bp.start.forms import JoinForm
 from bp.admin.users import Batches
@@ -155,6 +156,7 @@ def my_settings():
                            is_guest=is_guest,
                            referrer=referrer,
                            roles=current_user.roles,
+                           apikey=api.get_apikey(current_user),
                            labels=labels,
                            batches=user_batches,
                            gedcoms=gedcoms)
