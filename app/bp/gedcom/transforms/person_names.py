@@ -124,7 +124,6 @@ class PersonNames(transformer.Transformation):
             parseresult = pn.process_NAME(subitem.value)
             if parseresult is None: return True
             n = parseresult.name_parts
-            print(n.givn,saved_givn)
             if n.givn and saved_givn is None:
                 saved_givn = n.givn
             if n.givn == "N" and saved_givn is not None:
