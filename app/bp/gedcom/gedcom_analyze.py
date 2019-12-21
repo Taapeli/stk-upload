@@ -186,6 +186,7 @@ class Analyzer(transformer.Transformation):
 
         self.with_sources = LineCounter(_("With sources"))
         self.without_sources = LineCounter(_("Without sources"))
+        self.place_with_no_hierarchy = LineCounter(_("Places without hierarchy"))
         
         self.genders = defaultdict(int)
         self.invalid_pointers = []
@@ -279,6 +280,9 @@ class Analyzer(transformer.Transformation):
                     break
             else:  
                 self.without_sources.add(path,item)
+
+        if item.tag == "PLAC" and item.value and item.value.find(",") == -1:
+            self.place_with_no_hierarchy.add(item.value,item)
         
         return True
 
@@ -308,6 +312,7 @@ class Analyzer(transformer.Transformation):
         self.novalues.display()
         self.too_many.display()
         self.family_with_no_parents.display()
+        self.place_with_no_hierarchy.display()
         
         self.submitter_refs2 = LineCounter(_("Submitters"))
         for xref,itemlist in self.submitter_refs.values.items():
