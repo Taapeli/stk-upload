@@ -106,7 +106,7 @@ class DbTree():
         # Juurisolu 0 mahdollistaa solun lisäämisen ylimmän varsinaisen solun
         # yläpuolelle
         self.tree.create_node('', 0)
-        nstack.append((0, "root", "", -9999))
+        nstack.append((0, "", "root", "", -9999))
     
         for nodes, level, relations in self._get_tree_branches(node_id):
             # The result has all nodes in the relation and their connections
