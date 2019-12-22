@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-12-18 19:43+0200\n"
-"PO-Revision-Date: 2019-12-18 19:46+0200\n"
+"POT-Creation-Date: 2019-12-21 19:45+0200\n"
+"PO-Revision-Date: 2019-12-21 19:45+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -843,7 +843,7 @@ msgid "Log of Gramps XML upload"
 msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
 #: bp/admin/templates/admin/load_result.html:19
-#: bp/gramps/templates/gramps/analyze_xml.html:16 bp/gramps/templates/gramps/result.html:27
+#: bp/gramps/templates/gramps/analyze_xml.html:13 bp/gramps/templates/gramps/result.html:27
 msgid "Return"
 msgstr "Palaa"
 
@@ -969,7 +969,7 @@ msgstr "Tiedot talletettu"
 msgid "Store to Database"
 msgstr "Tietojen talletus kantaan"
 
-#: bp/admin/templates/admin/talletettu.html:28 bp/start/templates/start/my_settings.html:60
+#: bp/admin/templates/admin/talletettu.html:28 bp/start/templates/start/my_settings.html:64
 #: bp/tools/templates/tools/person2.html:43
 #: bp/tools/templates/tools/source_citations.html:35 templates/cite_sour_repo.html:75
 #: templates/db_test.html:10 templates/repo_sources.html:54
@@ -1130,11 +1130,11 @@ msgid "Moving batch to Isotammi database"
 msgstr "Siirretään tuontierä Suomi-kantaan"
 
 #: bp/audit/templates/audit/move_in_1.html:20 bp/gramps/templates/gramps/uploads.html:152
-#: bp/start/templates/start/my_settings.html:94
+#: bp/start/templates/start/my_settings.html:98
 msgid "Batch id"
 msgstr "Tarjokasaineisto"
 
-#: bp/audit/templates/audit/move_in_1.html:25 bp/start/templates/start/my_settings.html:101
+#: bp/audit/templates/audit/move_in_1.html:25 bp/start/templates/start/my_settings.html:105
 msgid "saved at"
 msgstr "talletettu"
 
@@ -1154,7 +1154,7 @@ msgstr "Tuontierä siirretty Suomi-kantaan"
 msgid "Duplicates search"
 msgstr "Duplikaattien haku"
 
-#: bp/dupsearch/templates/dupsearch.html:25 bp/start/templates/start/my_settings.html:113
+#: bp/dupsearch/templates/dupsearch.html:25 bp/start/templates/start/my_settings.html:117
 msgid "Data Batches"
 msgstr "Tuontierät"
 
@@ -1163,7 +1163,7 @@ msgid "Select"
 msgstr "Valitse"
 
 #: bp/dupsearch/templates/dupsearch.html:31 bp/gedcom/templates/gedcom_info.html:27
-#: bp/gramps/templates/gramps/uploads.html:92 bp/start/templates/start/my_settings.html:124
+#: bp/gramps/templates/gramps/uploads.html:92 bp/start/templates/start/my_settings.html:128
 msgid "File"
 msgstr "Tiedosto"
 
@@ -1247,32 +1247,36 @@ msgstr "Lähteillä varustetut"
 msgid "Without sources"
 msgstr "Ilman lähteitä"
 
-#: bp/gedcom/gedcom_analyze.py:292
+#: bp/gedcom/gedcom_analyze.py:189
+msgid "Places without hierarchy"
+msgstr "Paikat ilman hierarkiaa"
+
+#: bp/gedcom/gedcom_analyze.py:296
 msgid "Genders"
 msgstr "Sukupuolet"
 
-#: bp/gedcom/gedcom_analyze.py:312
+#: bp/gedcom/gedcom_analyze.py:317
 msgid "Submitters"
 msgstr "Tutkijat"
 
-#: bp/gedcom/gedcom_analyze.py:320
+#: bp/gedcom/gedcom_analyze.py:325
 msgid "Missing paths"
 msgstr "Puuttuvat pakolliset tiedot"
 
-#: bp/gedcom/gedcom_analyze.py:326
+#: bp/gedcom/gedcom_analyze.py:331
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr "TYPE-kentän arvot %(parent_path)s-rakenteissa"
 
-#: bp/gedcom/gedcom_analyze.py:330
+#: bp/gedcom/gedcom_analyze.py:335
 msgid "Invalid pointers"
 msgstr "Vialliset osoittimet"
 
-#: bp/gedcom/gedcom_analyze.py:338
+#: bp/gedcom/gedcom_analyze.py:343
 msgid "Missing records"
 msgstr "Puuttuvat tietueet"
 
-#: bp/gedcom/gedcom_analyze.py:346
+#: bp/gedcom/gedcom_analyze.py:351
 msgid "Unused records"
 msgstr "Käyttämättömät tiedot"
 
@@ -1396,8 +1400,8 @@ msgstr "Suomen Sukututkimusseuran tietokanta"
 
 #: bp/gedcom/templates/gedcom_info.html:20 bp/gedcom/templates/gedcom_list.html:4
 #: bp/gedcom/templates/gedcom_list.html:16 bp/start/templates/start/index_logged.html:28
-#: bp/start/templates/start/my_settings.html:141
-#: bp/start/templates/start/my_settings.html:149
+#: bp/start/templates/start/my_settings.html:145
+#: bp/start/templates/start/my_settings.html:153
 msgid "Gedcom tools"
 msgstr "Gedcom-työkalut"
 
@@ -1409,7 +1413,7 @@ msgstr "käyttäjätunnus"
 #: bp/gedcom/templates/gedcom_list.html:42 bp/scene/templates/scene/event.html:42
 #: bp/scene/templates/scene/person.html:103 bp/scene/templates/scene/person_v1.html:85
 #: bp/scene/templates/scene/place_events.html:120
-#: bp/start/templates/start/my_settings.html:127
+#: bp/start/templates/start/my_settings.html:131
 #: bp/tools/templates/tools/table_baptism_data.html:16
 msgid "Description"
 msgstr "Kuvaus"
@@ -1646,47 +1650,47 @@ msgstr "Päivämäärät"
 msgid "Correct some invalid date formats"
 msgstr "Korjaa virheellisiä päivämääriä"
 
-#: bp/gedcom/transforms/dates.py:21
+#: bp/gedcom/transforms/dates.py:25
 msgid "Display invalid dates"
 msgstr "Näytä virheelliset päivämäärät"
 
-#: bp/gedcom/transforms/dates.py:23
+#: bp/gedcom/transforms/dates.py:27
 msgid "Change 31.12.1999 to 31 DEC 1999"
 msgstr "31.12.1999 -> 31 DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:25
+#: bp/gedcom/transforms/dates.py:29
 msgid "Change 1999-12-31 to 31 DEC 1999"
 msgstr "1999-12-31 -> 31 DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:27
+#: bp/gedcom/transforms/dates.py:31
 msgid "Change 1999-12 to DEC 1999"
 msgstr "1999-12 -> DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:29
+#: bp/gedcom/transforms/dates.py:33
 msgid "Change [00.]12.1999 to DEC 1999"
 msgstr "[00.]12.1999 -> DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:31
+#: bp/gedcom/transforms/dates.py:35
 msgid "Change 00 DEC 1999 to DEC 1999"
 msgstr "00 DEC 1999 -> DEC 1999"
 
-#: bp/gedcom/transforms/dates.py:33
+#: bp/gedcom/transforms/dates.py:37
 msgid "Change 1950-[19]59 to FROM 1950 TO 1959"
 msgstr "1950-[19]59 -> FROM 1950 TO 1959"
 
-#: bp/gedcom/transforms/dates.py:35
+#: bp/gedcom/transforms/dates.py:39
 msgid "Change 1950-/>1950 to FROM/AFT 1950"
 msgstr "1950-/>1950 -> FROM/AFT 1950"
 
-#: bp/gedcom/transforms/dates.py:37
+#: bp/gedcom/transforms/dates.py:41
 msgid "Change -1950/<1950 to TO/BEF 1950"
 msgstr "-1950/<1950 -> TO/BEF 1950"
 
-#: bp/gedcom/transforms/dates.py:87
+#: bp/gedcom/transforms/dates.py:91
 msgid "Invalid dates:"
 msgstr "Virheellisiä päivämääriä:"
 
-#: bp/gedcom/transforms/dates.py:96
+#: bp/gedcom/transforms/dates.py:100
 #, python-format
 msgid "%(date)s (line %(linkstr)s)<br>"
 msgstr "%(date)s (rivillä %(linkstr)s)<br>\t"
@@ -1868,71 +1872,71 @@ msgstr "Yhdistä PLAC- ja ADDR-merkinnät"
 msgid "Sukujutut"
 msgstr "Sukujutut"
 
-#: bp/gedcom/transforms/sukujutut.py:18
+#: bp/gedcom/transforms/sukujutut.py:19
 msgid "Sukujutut transformations"
 msgstr "Sukujutut muunnokset"
 
-#: bp/gedcom/transforms/sukujutut.py:230
+#: bp/gedcom/transforms/sukujutut.py:231
 msgid "Remove invalid DATE tags"
 msgstr "Poista virheelliset DATE-tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:232
+#: bp/gedcom/transforms/sukujutut.py:233
 msgid "Remove empty NOTE tags"
 msgstr "Poista tyhjät NOTE-tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:234
+#: bp/gedcom/transforms/sukujutut.py:235
 msgid "Remove DATE AVOLIITTO tags"
 msgstr "Poista DATE AVOLIITTO-tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:236
+#: bp/gedcom/transforms/sukujutut.py:237
 msgid "Remove invalid DATEs for DIV tags"
 msgstr "Poista DIV tunnisteiden virheelliset DATE-tiedot"
 
-#: bp/gedcom/transforms/sukujutut.py:238
+#: bp/gedcom/transforms/sukujutut.py:239
 msgid "Remove empty GIVN and SURN tags"
 msgstr "Poista tyhjät GIVN- ja SURN-tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:240
+#: bp/gedcom/transforms/sukujutut.py:241
 msgid "Remove duplicate SOUR lines under NAME"
 msgstr "Poista tupla SOUR rivit NAME-tunnisteryhmässä"
 
-#: bp/gedcom/transforms/sukujutut.py:242
+#: bp/gedcom/transforms/sukujutut.py:243
 msgid "Remove REFN tags"
 msgstr "Poista REFN-tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:244
+#: bp/gedcom/transforms/sukujutut.py:245
 msgid "Remove STAT tags"
 msgstr "Poista STAT-tunnisteet"
 
-#: bp/gedcom/transforms/sukujutut.py:246
+#: bp/gedcom/transforms/sukujutut.py:247
 msgid "Move level 3 NOTEs to level 2 to save them"
 msgstr "Muuta 3-tason NOTE-tunnisteet 2-tasolle, niiden säästämiseksi"
 
-#: bp/gedcom/transforms/sukujutut.py:248
+#: bp/gedcom/transforms/sukujutut.py:249
 msgid "Insert ADR1 tags under ADDR"
 msgstr "Lisää ADR1-tunnisteet ADDR-tunnisteryhmään"
 
-#: bp/gedcom/transforms/sukujutut.py:250
+#: bp/gedcom/transforms/sukujutut.py:251
 msgid "Change PLAC tags to NOTEs under certain events"
 msgstr "Vaihda eräissä tapahtumissa PLAC-tunnisteet NOTE-tunnisteiksi"
 
-#: bp/gedcom/transforms/sukujutut.py:252
+#: bp/gedcom/transforms/sukujutut.py:253
 msgid "Change event types \"Kaksonen\" and \"Kolmonen\" to NOTEs"
 msgstr "Muuta \"Kaksonen\" ja \"kolmonen\" tapahtumatyypit NOTE-riveiksi"
 
-#: bp/gedcom/transforms/sukujutut.py:254
+#: bp/gedcom/transforms/sukujutut.py:255
 msgid "Remove trailing and multiple consecutive spaces in person and place names"
 msgstr "Poista alku- ja peräkkäiset välilyönnit henkilön ja paikan nimistä"
 
-#: bp/gedcom/transforms/sukujutut.py:256
+#: bp/gedcom/transforms/sukujutut.py:257
 msgid "Change EMIG to RESI"
 msgstr "Vaihda EMIG-tunniste RESI-tunnisteeseen"
 
-#: bp/gedcom/transforms/sukujutut.py:258
+#: bp/gedcom/transforms/sukujutut.py:259
 msgid "Move an event NOTE to citation PAGE"
 msgstr "Siirrä lisätieto lainauksen Osa/Sivu-tietoon"
 
-#: bp/gedcom/transforms/sukujutut.py:260
+#: bp/gedcom/transforms/sukujutut.py:261
 msgid "Move a SOUR under NOTE to upper level"
 msgstr "Siirrä SOUR ylemmän tason NOTE:n alle"
 
@@ -1944,7 +1948,7 @@ msgstr "Poista tag-X-merkinnät"
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr "Poistaa \"-X\"-merkityistä tunnisteista \"-X\" :n"
 
-#: bp/gramps/gramps_loader.py:287 bp/gramps/xml_dom_handler.py:125
+#: bp/gramps/gramps_loader.py:338 bp/gramps/xml_dom_handler.py:125
 msgid "Database save failed due to {} {}"
 msgstr "Talletus tietokantaan epäonnistui, syy {} {}"
 
@@ -1965,7 +1969,7 @@ msgstr ""
 msgid "Analyze of the Gramps XML"
 msgstr "Gramps-tiedoston analyysi"
 
-#: bp/gramps/templates/gramps/analyze_xml.html:9
+#: bp/gramps/templates/gramps/analyze_xml.html:8
 msgid "Analyze"
 msgstr ""
 
@@ -2120,7 +2124,7 @@ msgstr "Tunnisteet"
 #: bp/scene/templates/scene/event.html:46 bp/scene/templates/scene/person.html:101
 #: bp/scene/templates/scene/person_v1.html:83 bp/scene/templates/scene/person_v2.html:102
 #: bp/scene/templates/scene/place_events.html:119
-#: bp/start/templates/start/my_settings.html:125
+#: bp/start/templates/start/my_settings.html:129
 #: bp/tools/templates/tools/table_baptism_data.html:12
 #: bp/tools/templates/tools/table_baptism_data.html:13
 #: bp/tools/templates/tools/table_persons.html:22 templates/cite_sour_repo.html:19
@@ -2975,19 +2979,19 @@ msgstr "Viesti:"
 msgid "Send request"
 msgstr "Lähetä pyyntö"
 
-#: bp/start/routes.py:90
+#: bp/start/routes.py:91
 msgid "Join message sent"
 msgstr "Liittymisviesti lähetetty"
 
-#: bp/start/routes.py:92
+#: bp/start/routes.py:93
 msgid "Sending join message failed"
 msgstr "Liittymisviestin lähettäminen ei onnistunut"
 
-#: bp/start/routes.py:141
+#: bp/start/routes.py:142
 msgid "Update did not work1"
 msgstr "Päivitys ei onnistunut"
 
-#: bp/start/routes.py:144
+#: bp/start/routes.py:145
 msgid "Update did not work"
 msgstr "Päivitys ei onnistunut"
 
@@ -3053,8 +3057,8 @@ msgid "Send your gedcom files and experiment various cleanup functions"
 msgstr "Lähetä oma gedcom-tiedostosi palvelimelle ja kokeile eri vakiointitoimia"
 
 #: bp/start/templates/start/index_logged.html:32
-#: bp/start/templates/start/my_settings.html:121
-#: bp/start/templates/start/my_settings.html:146
+#: bp/start/templates/start/my_settings.html:125
+#: bp/start/templates/start/my_settings.html:150
 msgid "My Gedcom files"
 msgstr "Gedcom-tiedostot"
 
@@ -3204,47 +3208,47 @@ msgstr "Kirjaudu ulos"
 msgid "Change language"
 msgstr "Vaihda kieltä"
 
-#: bp/start/templates/start/my_settings.html:66
+#: bp/start/templates/start/my_settings.html:70
 msgid "Active Roles"
 msgstr "Määritellyt roolit"
 
-#: bp/start/templates/start/my_settings.html:76
+#: bp/start/templates/start/my_settings.html:80
 msgid "Ask for a new role"
 msgstr "Pyydä lisäoikeuksia"
 
-#: bp/start/templates/start/my_settings.html:78
+#: bp/start/templates/start/my_settings.html:82
 msgid "Send a message to Isotammi office to acquire permission for new steps."
 msgstr "Lähetä viesti Isotammen tukeen saadaksesi lisäoikeuksia."
 
-#: bp/start/templates/start/my_settings.html:80 bp/start/templates/start/s_macros.html:26
+#: bp/start/templates/start/my_settings.html:84 bp/start/templates/start/s_macros.html:26
 msgid "Contact administrator"
 msgstr "Ota yhteys tukeen"
 
-#: bp/start/templates/start/my_settings.html:89
+#: bp/start/templates/start/my_settings.html:93
 msgid "Candidate Materials"
 msgstr "Tarjokasaineistot"
 
-#: bp/start/templates/start/my_settings.html:90
+#: bp/start/templates/start/my_settings.html:94
 msgid "The amount of some data nodes included in your candidate data batches."
 msgstr "Tarjokasaineistosi tietojen lukumääriä"
 
-#: bp/start/templates/start/my_settings.html:108
+#: bp/start/templates/start/my_settings.html:112
 msgid "Upload or remove a file or candidate batch"
 msgstr "Lähetä tai poista Gramps-tiedosto tai tarjokasaineisto"
 
-#: bp/start/templates/start/my_settings.html:114
+#: bp/start/templates/start/my_settings.html:118
 msgid "You have no candidate data loaded in the database."
 msgstr "Sinulla ei ole tarjokasaineistoja kannassa."
 
-#: bp/start/templates/start/my_settings.html:116
+#: bp/start/templates/start/my_settings.html:120
 msgid "Upload another file"
 msgstr "Talleta aineistojasi tästä"
 
-#: bp/start/templates/start/my_settings.html:126
+#: bp/start/templates/start/my_settings.html:130
 msgid "Bytes"
 msgstr "merkkiä"
 
-#: bp/start/templates/start/my_settings.html:147
+#: bp/start/templates/start/my_settings.html:151
 msgid "You have no Gedcom files in the server."
 msgstr "Palvelimella ei ole yhtään gedcom-tiedostoasi."
 
@@ -3431,67 +3435,67 @@ msgstr ""
 "Jos lähettämämme rekisteröitymisen vahvistuslinkki ei toimi enää, voit pyytää uutta "
 "tässä."
 
-#: bp/tools/routes.py:65
+#: bp/tools/routes.py:64
 msgid "Note List"
 msgstr "Huomautukset"
 
-#: bp/tools/routes.py:65
+#: bp/tools/routes.py:64
 msgid "Note Items"
 msgstr "Note-kohteet"
 
-#: bp/tools/routes.py:84 templates/cite_sour_repo.html:55
+#: bp/tools/routes.py:83 templates/cite_sour_repo.html:55
 msgid "Repositories"
 msgstr "Arkistot"
 
-#: bp/tools/routes.py:84
+#: bp/tools/routes.py:83
 msgid "Repository data"
 msgstr "Arkistotiedot (repository)"
 
-#: bp/tools/routes.py:112
+#: bp/tools/routes.py:111
 msgid "Material type"
 msgstr "Aineistotyypin"
 
-#: bp/tools/routes.py:112
+#: bp/tools/routes.py:111
 msgid "processing still missing"
 msgstr "käsittely puuttuu vielä"
 
-#: bp/tools/routes.py:165
+#: bp/tools/routes.py:164
 msgid "{} in Family {}/{}"
 msgstr "{} perheessä {} / {}"
 
-#: bp/tools/routes.py:167
+#: bp/tools/routes.py:166
 msgid " Mother: {}/{} p. {}"
 msgstr "  Äiti: {} / {} s. {}"
 
-#: bp/tools/routes.py:169
+#: bp/tools/routes.py:168
 msgid " Father: {}/{} p. {}"
 msgstr "  Isä:  {} / {} s. {}"
 
-#: bp/tools/routes.py:172
+#: bp/tools/routes.py:171
 msgid " Child ({}): {}/{} * {}"
 msgstr "    Lapsi ({}): {} / {} *{}"
 
-#: bp/tools/routes.py:174 bp/tools/routes.py:341
+#: bp/tools/routes.py:173 bp/tools/routes.py:340
 msgid "Wrong Search key"
 msgstr "Väärä hakuavain"
 
-#: bp/tools/routes.py:259
+#: bp/tools/routes.py:258
 msgid "Only the OID can retrieve"
 msgstr "Vain avaimella voi hakea"
 
-#: bp/tools/routes.py:332
+#: bp/tools/routes.py:331
 msgid "{} in the family {} / {}"
 msgstr "{} perheessä {} / {}"
 
-#: bp/tools/routes.py:334
+#: bp/tools/routes.py:333
 msgid "  Mother: {} / {} s. {}"
 msgstr "  Äiti: {} / {} s. {}"
 
-#: bp/tools/routes.py:336
+#: bp/tools/routes.py:335
 msgid "  Father:  {} / {} s. {}"
 msgstr "  Isä:  {} / {} s. {}"
 
-#: bp/tools/routes.py:339
+#: bp/tools/routes.py:338
 msgid "    Child ({}): {} / {} *{}"
 msgstr "    Lapsi ({}): {} / {} *{}"
 
