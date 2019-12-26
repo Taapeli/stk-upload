@@ -26,6 +26,10 @@ table.transparent tbody tr td {
 	<div>
 		<h2>{{ _("My Profile Page") }}</h2>
 
+                <div id="return_on_title">
+                    <a href="{{ referrer }}"><button>{{ _('Go back') }}</button></a>
+                </div>
+
 		{% if current_user is defined and current_user.is_authenticated %}
 
 		<div class=startbox>
@@ -56,14 +60,10 @@ table.transparent tbody tr td {
 				  >{{ _("English") }}</option>
 					</select> <input type="hidden" name="referrer" value="{{ referrer }}" />
 				</form>
-				{% if apikey %}
-				<p>
-				<b>API Key:</b> {{ apikey }}
-				{% endif %}
-				<div class="submit">
-					&rtrif; <a href="{{ referrer }}">{{ _('Go back') }}</a>
-				</div>
 			</div>
+            {% if apikey %}
+            <h4>API Key</h4><div>{{ apikey }}</div>
+            {% endif %}
 		</div>
 
 		<div class=startbox>
