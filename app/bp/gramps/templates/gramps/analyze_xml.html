@@ -3,12 +3,19 @@
 {% block title %}{{ _("Gramps to Neo5j analyze") }}{% endblock %}
 {% block body %}
     {{ super() }}
+<style>
+div.content > p {
+    margin: 0.5em 1em;
+}
+</style>
     <h2>{{ _("Analyze of the Gramps XML") }}</h2>
       {% if text %}
-           <h3>{{ _("Analyze") }}</h3>
+        <div class="content">
+           <h3>{{ _("Results") }}</h3>
 	    {% for line in text %}
 	       <p>{{line}}</p>
-	    {% endfor %}</table>
+	    {% endfor %}
+        </div>
 	{% endif %}
     <p>&rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>
 {% endblock %}
