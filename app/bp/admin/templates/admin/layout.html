@@ -5,8 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config.STK_SYSNAME }} – {% block title %}{% endblock %} – {{ _('Admin pages') }}</title>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"></link>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pers.css') }}"></link>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pers.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/hamburger.css') }}">
 
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script> 
@@ -27,7 +27,7 @@
 	   ) ) }}
 
     <div id="paluu">
-        <a href="/admin">&#9881; Admin home</a>
+        <a href="/admin">&#9881; {{ _('Admin home') }}</a>
     </div>
 
     {% endblock %}

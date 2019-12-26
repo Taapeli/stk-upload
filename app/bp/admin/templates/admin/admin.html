@@ -42,8 +42,8 @@ function confirm_delete(url) {
           <i>{{ 'git'|app_date }}</i></span>
    
     <div class="row">
-    {% if current_user.is_authenticated 
-        and (current_user.has_role('admin') or current_user.has_role('master'))  %}
+{% if current_user.is_authenticated 
+   and (current_user.has_role('admin') or current_user.has_role('master'))  %}
     <div class="startbox admin">
       <div style="display: inline-block;">
         <h3>{{ _('Database Emptyings') }}</h3>
@@ -56,28 +56,41 @@ function confirm_delete(url) {
               <li>{{ _('Delete all my imported data') }} ➔ <a href="/settings">{{ _("My Home Page") }}</a></li>
            </ul>
       </div>
-    </div>{% endif %}
+    </div>
+{% endif %}
 
-    {% if current_user.is_authenticated 
-        and (current_user.has_role('admin') or current_user.has_role('master')) %}
+{% if current_user.is_authenticated 
+   and (current_user.has_role('admin') or current_user.has_role('master')) %}
     <div class="startbox admin">
       <div style="display: inline-block;">
         <h3>{{ _('User and reference information management') }}</h3>
         <ul>
-          <li><a href="/admin/list_all_users">{{ _('Active and pending users, including –') }}</a></li>
-          <ul>
-              <li><a href="/admin/list_users">{{ _('Usernames and uploaded materials') }}</a></li>
-              <li><a href="/admin/allowed_emails">{{ _('User candidates') }}</a></li>
-          </ul>
-          <li><a href="/admin/refnames">{{ _('Reference names') }}</a></li>
-          <li><a href="/admin/set/estimated_dates">{{ _('Set the estimated birth and death dates of a person') }}</a></li>
+          <li><a href="/admin/list_users">{{ _('Usernames and uploaded materials') }}</a></li>
+          <li><a href="/admin/allowed_emails">{{ _('User candidates') }}</a></li>
+          <li><a href="/admin/list_all_users">{{ _('Active and pending users') }}</a></li>
           <li><a href="/admin/access_management">{{ _('Access management') }}</a></li>
+          </ul>
+      </div>
+    </div>
+{% endif %}
+
+{% if current_user.is_authenticated 
+   and (current_user.has_role('audit') or current_user.has_role('master')) %}
+    <div class="startbox audit">
+      <div style="display: inline-block;">
+        <h3>{{ _('Data maintenance') }}</h3>
+        <ul>
+            <li><a href="/admin/refnames">{{ _('Reference names') }}</a></li>
+            <li><a href="/admin/set/estimated_dates">
+               {{ _('Set the estimated birth and death dates of a person') }}</a></li>
+            <li><a href="/admin/clear_batches">{{ _('Empty batches') }}</a></li>
         </ul>
       </div>
-    </div>{% endif %}
+    </div>
+{% endif %}
 
-    {% if current_user.is_authenticated 
-        and (current_user.has_role('admin') or current_user.has_role('master')) %}
+{% if current_user.is_authenticated 
+   and (current_user.has_role('admin') or current_user.has_role('master')) %}
     <div class="startbox admin">
       <div style="display: inline-block;">
         <h3>{{ _('Application management') }}</h3>
@@ -86,7 +99,8 @@ function confirm_delete(url) {
           <li><a href="/admin/site-map">{{ _('List all application pages') }}</a></li>
         </ul>
       </div>
-    </div>{% endif %}
+    </div>
+{% endif %}
 
   </div>{# row #}
 </div>

@@ -11,7 +11,7 @@ import os
 
 import json
 import logging 
-import inspect
+#import inspect
 import traceback
 
 from bp.gramps.models import batch
@@ -35,6 +35,8 @@ from .. gedcom.models import gedcom_utils
 from .. import gedcom
 from models import email
 from models import syslog 
+from models.gen.batch import Batch
+
 
 # Admin start page
 @bp.route('/admin',  methods=['GET', 'POST'])
@@ -69,6 +71,30 @@ def clear_my_db():
         return render_template("/admin/talletettu.html", text=msg)
     except Exception as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+@bp.route('/admin/clear_batches', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('research', 'admin')
+def clear_empty_batches():
+    """ Show or clear unused batches. """
+    user=None
+    clear=False
+    cnt = -1
+    try:
+        if request.form:
+            clear = request.form.get('clear', False)
+            if clear:
+                cnt = Batch.drop_empty_batches()
+                if cnt == 0:
+                    flash(_('No empty batches removed'), 'warning')
+                pass
+        batches = Batch.list_empty_batches()
+    except Exception as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+        
+    logger.info(f"-> bp.admin.routes.clear_empty_batches, clear={clear}")
+    return render_template("/admin/batch_clear.html", uploads=batches,  
+                           user=user, removed=cnt)
 
 
 #TODO Ei varmaan pitäisi enää olla käytössä käytössä?
@@ -271,7 +297,7 @@ def update_user(username):
 @roles_accepted('admin', 'audit')
 def list_uploads(username):
     upload_list = uploads.list_uploads(username) 
-    logger.info(f"-> bp.admin.routes.list_uploads")
+    logger.info(f"-> bp.admin.routes.list_uploads user={username}")
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
 
 @bp.route('/admin/list_uploads_all', methods=['POST'])
@@ -284,18 +310,17 @@ def list_uploads_for_users():
     else:
         users = [user for user in shareds.user_datastore.get_users() if user.username in requested_users]
     upload_list = list(uploads.list_uploads_all(users))
-    logger.info(f"-> bp.admin.routes.list_uploads_for_users {users}")
+    logger.info(f"-> bp.admin.routes.list_uploads_for_users")
     return render_template("/admin/uploads.html", uploads=upload_list,  
-                           users=users, num_requested_users=len(requested_users), 
-                           num_users=len(users))
+                           users=users, num_requested_users=len(requested_users))
 
 @bp.route('/admin/list_uploads_all', methods=['GET'])
 @login_required
-@roles_accepted('admin', 'audit')
+@roles_accepted('admin')
 def list_uploads_all():
     users = shareds.user_datastore.get_users()
     upload_list = list(uploads.list_uploads_all(users))
-    logger.info(f"-> bp.admin.routes.list_uploads_all")
+    logger.info(f"-> bp.admin.routes.list_uploads_all (no user)")
     return render_template("/admin/uploads.html", uploads=upload_list )
 
 @bp.route('/admin/start_upload/<username>/<xmlname>', methods=['GET'])
@@ -470,8 +495,11 @@ def site_map():
 #------------------- Log -------------------------
 @bp.route("/admin/readlog")
 @login_required
-@roles_accepted('admin')
+@roles_accepted('admin','audit')
 def readlog():
+    """ Show log events.
+        Layout depend on role: reddish for admin, yellowish for audit
+    """
     direction = request.args.get("direction")
     startid_arg = request.args.get("id")
     if startid_arg:

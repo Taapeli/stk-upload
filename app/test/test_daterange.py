@@ -183,6 +183,20 @@ class Test(unittest.TestCase):
         self.assertEqual(s + '-00-00', ds)
 
 
+    def testDateRange_add_years(self):
+        """
+        Add years to date
+        """
+        d = DateRange(DR['DATE'], "2047-01-09").add_years(3)
+        ds = str(d)
+        self.assertEqual(ds, "9.1.2050")
+
+        d = DateRange(DR['BETWEEN'], date(2017, 4, 8), date(2017, 10, 16))
+        da = d.add_years(-100)
+        dl = da.to_list()
+        self.assertEqual(dl, [4, "1917-04-08", "1917-10-16"])
+        self.assertEqual(str(da), "between 8.4.1917 … 16.10.1917")
+        
     def testNodeObject_sort(self):
         cmp = NodeObject(1)
         cmp.dates = DateRange("1917-12-15")

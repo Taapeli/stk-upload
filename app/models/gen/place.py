@@ -13,7 +13,7 @@ Todo:
 
 import  shareds
 from .base import NodeObject
-from .dates import DateRange
+#from .dates import DateRange
 from .cypher import Cypher_place
 from .event_combo import Event_combo
 from .person_name import Name

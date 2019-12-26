@@ -500,9 +500,10 @@ def get_source_with_events(sourceid):
             s.notes.append(n)
         # Add repositories and their mediums
         for medium, node in record['reps']:
-            rep = Repository.from_node(node)
-            rep.medium = medium
-            s.repositories.append(rep)
+            if node:
+                rep = Repository.from_node(node)
+                rep.medium = medium
+                s.repositories.append(rep)
 
 #     result = Source.get_citating_nodes(sourceid)
         import shareds
@@ -1025,9 +1026,11 @@ def get_place_with_events (loc_id):
     except AttributeError as e:
         traceback.print_exc()
         flash(f"Place {loc_id} not found", 'error')
+        traceback.print_exc()
         return None, None, None
     except ValueError as e:
         flash(str(e), 'error')
+        traceback.print_exc()
         place_list = []
             
     event_table = Place.get_place_events(place.uniq_id)

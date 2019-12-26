@@ -1,0 +1,87 @@
+{# _audit/batches.html_ #}
+{# Copied from admin/uploads_all #}
+{% extends "/audit/layout.html" %}
+{% block title %}{{ _("Batches") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+   
+	<h2>{{ _("Batches") }}</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+    <div class="helptext">
+    	<table class=legend>
+        <tr><td colspan="3"><b>{{ _("Status for differents steps in XML file upload:") }}</b>
+    	<tr>
+    	<td>1
+    	<td>{{ _("UPLOADED") }}     
+    	<td>{{ _("the file has been uploaded to server") }}
+    	<tr>
+    	<td>2
+    	<td>{{ _("STORING") }}
+    	<td>{{ _("the file content is being stored to the database") }}
+    	<tr>
+    	<td>3
+    	<td>{{ _("STORED") }}
+    	<td>{{ _("the file content has been stored to the database") }}
+    	<tr>
+        <td>4
+        <td>{{ _("REMOVED") }}
+        <td>{{ _("not found any more") }}
+        <tr>
+    	<td>-
+    	<td>{{ _("ERROR") }} / {{ _("FAILED") }}
+    	<td>{{ _("there was an error") }}
+    	</table>
+    </div>
+    <div class="content">
+        <table>
+           <tr>
+			    {% if not user %}
+	                <th>{{ _("User") }}</th>
+			    {% endif %}
+                <th>{{ _("Gramps file / uploaded at") }}</th>
+                <th>{{ _("Status") }}</th>
+                <th>{{ _("Operations") }}</th>
+           </tr>
+{% for upload in uploads %}
+    {% if upload.batch_id and current_user.has_role('audit') %}
+	       <tr>
+			    {% if not user %}
+                  {% if current_user.username == upload.user %}
+                    <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>{% else %}
+                    <td>{{upload.user}}{% endif %}</td>
+			      {% endif %}
+	           <td><a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}
+    	             title="{{ _("Download file") }}">
+    	               {{upload.xmlname}}</a> {{upload.upload_time_s}} 
+	           </td>
+	           <td>{{upload.status}}
+	           	{% if upload.batch_id %}
+	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
+	           	   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
+	           	   {% endif %}
+	           	{% endif %}
+               </td>
+	           <td><a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
+	           			{{ _("Show log") }}</a><br>
+                   <a href=/audit/movein/{{upload.batch_id}}>
+                       <i>{{ _("Move to Isotammi database") }}</a></i>
+	           	</td>
+	       </tr>
+    {% endif %}
+{% endfor %}
+	    </table>
+    <p>&rtrif; <a href="/admin/readlog">{{ _('Display application log') }}</a></p>
+    </div>
+{% endblock %}
+</body>
+</html>
+

@@ -434,7 +434,7 @@ class UserAdmin():
     def _update_user (cls, tx, user):    
 
         try:
-            logging.debug('user update' + user.email + ' ' + user.name)
+            logging.debug(f'user update {user.email} {user.name}')
             if user.username == 'master': 
                 user.roles = ['master']
 #   Identifier and history fields are not to be updated

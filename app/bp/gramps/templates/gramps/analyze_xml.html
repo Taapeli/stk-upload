@@ -1,0 +1,17 @@
+{# _myapp/templates/gr_result.html_ #}
+{% extends "a_layout.html" %}
+{% block title %}{{ _("Gramps to Neo5j analyze") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+    <h2>{{ _("Analyze of the Gramps XML") }}</h2>
+      {% if text %}
+           <h3>{{ _("Analyze") }}</h3>
+	    {% for line in text %}
+	       <p>{{line}}</p>
+	    {% endfor %}</table>
+	{% endif %}
+    <p>&rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>
+{% endblock %}
+</body>
+</html>
+

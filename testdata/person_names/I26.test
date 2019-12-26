@@ -1,7 +1,7 @@
 [description]
+Ainoa etunimi merkitty tähdellä -> tähti pois, NOTE _CALL
 
 [options]
-display_changes = false
 
 [original]
 0 HEAD

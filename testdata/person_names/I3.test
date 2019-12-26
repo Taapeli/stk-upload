@@ -1,7 +1,9 @@
 [description]
+os. -> syntymänimi
+e.  -> entinen
+af  -> SPFX
 
 [options]
-display_changes = false
 
 [original]
 0 HEAD

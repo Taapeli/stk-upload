@@ -91,10 +91,10 @@ $(document).ready( function() {
 		                	<td>{% if u.is_active %} {{ _("Active") }} {%else%} {{ _("Inactive") }} {%endif%}</td>
 		                    <td>{% if u.current_login_at %} {{(u.current_login_at / 1000) | timestamp }} {% endif %}</td>
 		                    <td>{% if current_user.username == u.username %}
-		                      &#9733; <a href="update_user/{{u.username}}" title="{{ _('Edit me') }}">
-		                          <b>{{u.username}}</b></a>
+		                      <a href="update_user/{{u.username}}" class="editlink" title="{{ _('Edit me') }}">
+		                          <b>{{u.username}}</b></a>&#9733;
 		                      {% else %}
-		                      <a href="update_user/{{u.username}}" title="{{ _('Edit') }}">
+		                      <a href="update_user/{{u.username}}" class="editlink" title="{{ _('Edit') }}">
 		                          {{u.username}}</a>
 		                      {% endif %}
 		                    </td>
@@ -111,7 +111,7 @@ $(document).ready( function() {
 		        </table>
 		        <p>
 		        <h3>{{ _("Operations for selected users") }}</h3>
-					<button id="list_uploads">{{ _("Show uploaded Gramps files") }}</button>
+					<button id="list_uploads">{{ _("Gramps Files and Candicate Materials") }}</button>
 		        	<button id="list_gedcoms">{{ _("Uploaded GEDCOMs") }}</button>
 		        	<button id="send_email">{{ _("Send email") }}</button>
 	        </form>

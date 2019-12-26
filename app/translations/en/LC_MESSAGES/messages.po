@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-10-31 17:43+0200\n"
+"POT-Creation-Date: 2019-12-21 19:45+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.6.0\n"
 
 #: chkdate.py:13
 msgid "Undefined"
@@ -95,7 +95,6 @@ msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:82
 #: bp/admin/templates/admin/list_users_mails.html:86
-#: bp/scene/templates/scene/place_events.html:118
 #: bp/tools/templates/tools/person2.html:16
 #: bp/tools/templates/tools/table_persons.html:20
 #: bp/tools/templates/tools/table_refnames.html:33 setups.py:211 setups.py:239
@@ -118,7 +117,7 @@ msgstr ""
 msgid "User name"
 msgstr ""
 
-#: bp/admin/cvs_refnames.py:49
+#: bp/admin/cvs_refnames.py:51
 msgid "Not valid field names \"Name,Refname,Reftype,Source,Gender\" {}"
 msgstr ""
 
@@ -306,61 +305,73 @@ msgstr ""
 msgid "Update allowed email"
 msgstr ""
 
-#: bp/admin/routes.py:82
+#: bp/admin/routes.py:89
+msgid "No empty batches removed"
+msgstr ""
+
+#: bp/admin/routes.py:108
 msgid "estimated lifetime"
 msgstr ""
 
-#: bp/admin/routes.py:99
+#: bp/admin/routes.py:125
 msgid "Done"
 msgstr ""
 
-#: bp/admin/routes.py:135
+#: bp/admin/routes.py:161
 msgid "Data type '{}' is not supported"
 msgstr ""
 
-#: bp/admin/routes.py:138
+#: bp/admin/routes.py:164
 msgid "Missing proper column title: "
 msgstr ""
 
-#: bp/admin/routes.py:182
+#: bp/admin/routes.py:208
 msgid "Allowed email updated"
 msgstr ""
 
-#: bp/admin/routes.py:249
+#: bp/admin/routes.py:275
 msgid "User updated"
 msgstr ""
 
-#: bp/admin/routes.py:306 bp/gramps/routes.py:88
+#: bp/admin/routes.py:331 bp/gramps/routes.py:89
 #, python-format
 msgid "Data import from %(i)s to database has been started."
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:233
-#: bp/admin/uploads.py:262 bp/gramps/templates/gramps/uploads.html:116
+#: bp/admin/templates/admin/uploads.html:31 bp/admin/uploads.py:234
+#: bp/admin/uploads.py:263 bp/audit/templates/audit/batches.html:24
+#: bp/gramps/templates/gramps/uploads.html:127
 msgid "UPLOADED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:236
+#: bp/admin/templates/admin/uploads.html:47 bp/admin/uploads.py:237
+#: bp/audit/templates/audit/batches.html:40
+#: bp/gramps/templates/gramps/uploads.html:143
 msgid "ERROR"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:238
-#: bp/admin/uploads.py:263 bp/gramps/templates/gramps/uploads.html:117
+#: bp/admin/templates/admin/uploads.html:35 bp/admin/uploads.py:239
+#: bp/admin/uploads.py:264 bp/audit/templates/audit/batches.html:28
+#: bp/gramps/templates/gramps/uploads.html:131
 msgid "STORING"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:240
-#: bp/admin/uploads.py:261 bp/admin/uploads.py:277
-#: bp/gramps/templates/gramps/uploads.html:119
+#: bp/admin/templates/admin/uploads.html:39 bp/admin/uploads.py:241
+#: bp/admin/uploads.py:262 bp/admin/uploads.py:278
+#: bp/audit/templates/audit/batches.html:32
+#: bp/gramps/templates/gramps/uploads.html:135
 msgid "STORED"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:244
-#: bp/gramps/templates/gramps/uploads.html:123
+#: bp/admin/templates/admin/uploads.html:47 bp/admin/uploads.py:245
+#: bp/audit/templates/audit/batches.html:40
+#: bp/gramps/templates/gramps/uploads.html:143
 msgid "FAILED"
 msgstr ""
 
-#: bp/admin/uploads.py:246 bp/gramps/templates/gramps/uploads.html:122
+#: bp/admin/templates/admin/uploads.html:43 bp/admin/uploads.py:247
+#: bp/audit/templates/audit/batches.html:36
+#: bp/gramps/templates/gramps/uploads.html:139
 msgid "REMOVED"
 msgstr ""
 
@@ -412,25 +423,33 @@ msgstr ""
 msgid "Current accesses"
 msgstr ""
 
-#: bp/admin/templates/admin/access_management.html:34
-msgid "Delete marked"
-msgstr ""
-
-#: bp/admin/templates/admin/access_management.html:39
+#: bp/admin/templates/admin/access_management.html:36
 #: bp/admin/templates/admin/admin.html:39
+#: bp/admin/templates/admin/batch_clear.html:24
 #: bp/admin/templates/admin/list_users.html:81
 #: bp/admin/templates/admin/list_users_mails.html:85
+#: bp/admin/templates/admin/syslog.html:14
+#: bp/audit/templates/audit/batches.html:48
 #: bp/dupsearch/templates/dupsearch.html:30
 #: bp/gramps/templates/gramps/index_gramps.html:36
-#: bp/start/templates/start/my_message.html:47
+#: bp/start/templates/start/my_message.html:52
 #: bp/start/templates/start/my_settings.html:33
 msgid "User"
 msgstr ""
 
-#: bp/admin/templates/admin/access_management.html:40
+#: bp/admin/templates/admin/access_management.html:37
+#: bp/admin/templates/admin/batch_clear.html:25
 #: bp/dupsearch/templates/dupsearch.html:29
-#: bp/gramps/templates/gramps/uploads.html:87
+#: bp/gramps/templates/gramps/uploads.html:95
 msgid "Batch"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:38
+msgid "Objects"
+msgstr ""
+
+#: bp/admin/templates/admin/access_management.html:48
+msgid "Delete marked"
 msgstr ""
 
 #: bp/admin/templates/admin/admin.html:4
@@ -482,47 +501,59 @@ msgstr ""
 msgid "My Home Page"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:65
+#: bp/admin/templates/admin/admin.html:66
 msgid "User and reference information management"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:67
-msgid "Active and pending users, including –"
-msgstr ""
-
-#: bp/admin/templates/admin/admin.html:69
+#: bp/admin/templates/admin/admin.html:68
 msgid "Usernames and uploaded materials"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:70
+#: bp/admin/templates/admin/admin.html:69
 #: bp/admin/templates/admin/allowed_emails.html:50
 msgid "User candidates"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:72
-#: bp/scene/templates/scene/persons.html:135
+#: bp/admin/templates/admin/admin.html:70
+msgid "Active and pending users"
+msgstr ""
+
+#: bp/admin/templates/admin/admin.html:71
+msgid "Access management"
+msgstr ""
+
+#: bp/admin/templates/admin/admin.html:81
+msgid "Data maintenance"
+msgstr ""
+
+#: bp/admin/templates/admin/admin.html:83
+#: bp/scene/templates/scene/persons.html:134
 #: bp/tools/templates/tools/table_refnames.html:18
 #: templates/join_persons.html:74
 msgid "Reference names"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:73
+#: bp/admin/templates/admin/admin.html:85
 msgid "Set the estimated birth and death dates of a person"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:74
-msgid "Access management"
+#: bp/admin/templates/admin/admin.html:86
+#: bp/admin/templates/admin/batch_clear.html:3
+#: bp/admin/templates/admin/batch_clear.html:16
+msgid "Empty batches"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:83
+#: bp/admin/templates/admin/admin.html:96
 msgid "Application management"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:85
+#: bp/admin/templates/admin/admin.html:98
+#: bp/audit/templates/audit/batches.html:82
+#: bp/audit/templates/audit/index.html:21
 msgid "Display application log"
 msgstr ""
 
-#: bp/admin/templates/admin/admin.html:86
+#: bp/admin/templates/admin/admin.html:99
 msgid "List all application pages"
 msgstr ""
 
@@ -624,6 +655,33 @@ msgstr ""
 msgid "Delete unregistered users"
 msgstr ""
 
+#: bp/admin/templates/admin/batch_clear.html:14
+msgid "Empty batches for user"
+msgstr ""
+
+#: bp/admin/templates/admin/batch_clear.html:21
+#: bp/audit/templates/audit/move_in_1.html:16
+#: bp/audit/templates/audit/move_in_2.html:16
+msgid "Selected Batch"
+msgstr ""
+
+#: bp/admin/templates/admin/batch_clear.html:38
+msgid "Number of empty batches"
+msgstr ""
+
+#: bp/admin/templates/admin/batch_clear.html:40
+#, python-format
+msgid "Removed %(n)s batches"
+msgstr ""
+
+#: bp/admin/templates/admin/batch_clear.html:42
+msgid "The empty batches will be removed, except those which are created today."
+msgstr ""
+
+#: bp/admin/templates/admin/batch_clear.html:48
+msgid "Remove"
+msgstr ""
+
 #: bp/admin/templates/admin/gedcoms.html:3
 msgid "GEDCOMs"
 msgstr ""
@@ -641,24 +699,23 @@ msgstr ""
 msgid "GEDCOMs for all users"
 msgstr ""
 
-#: bp/admin/templates/admin/gedcoms.html:27
-#: bp/admin/templates/admin/syslog.html:12
-#: bp/admin/templates/admin/uploads.html:51
+#: bp/admin/templates/admin/gedcoms.html:29
+#: bp/admin/templates/admin/uploads.html:56
 msgid "User id"
 msgstr ""
 
-#: bp/admin/templates/admin/gedcoms.html:28
+#: bp/admin/templates/admin/gedcoms.html:30
 msgid "GEDCOM file"
 msgstr ""
 
-#: bp/admin/templates/admin/gedcoms.html:38
-#: bp/admin/templates/admin/uploads.html:87
+#: bp/admin/templates/admin/gedcoms.html:40
+#: bp/admin/templates/admin/uploads.html:94
 msgid "Number of files"
 msgstr ""
 
-#: bp/admin/templates/admin/gedcoms.html:39
+#: bp/admin/templates/admin/gedcoms.html:41
 #: bp/admin/templates/admin/message.html:59
-#: bp/admin/templates/admin/uploads.html:88
+#: bp/admin/templates/admin/uploads.html:95
 msgid "List of users"
 msgstr ""
 
@@ -670,15 +727,17 @@ msgstr ""
 msgid "Admin-Start Page"
 msgstr ""
 
-#: bp/admin/templates/admin/layout.html:20 bp/gedcom/templates/g_layout.html:28
-#: bp/scene/templates/scene/layout.html:28
+#: bp/admin/templates/admin/layout.html:20
+#: bp/audit/templates/audit/layout.html:43 bp/gedcom/templates/g_layout.html:28
+#: bp/scene/templates/scene/layout.html:29
 #: bp/start/templates/start/s_layout.html:30 templates/a_layout.html:27
 msgid "My profile"
 msgstr ""
 
 #: bp/admin/templates/admin/layout.html:21
-#: bp/scene/templates/scene/layout.html:29
-#: bp/scene/templates/scene/layout.html:40
+#: bp/audit/templates/audit/layout.html:44
+#: bp/scene/templates/scene/layout.html:30
+#: bp/scene/templates/scene/layout.html:41
 #: bp/start/templates/start/s_layout.html:37 templates/a_layout.html:28
 msgid "The Genealogical Society of Finland"
 msgstr ""
@@ -709,8 +768,13 @@ msgstr ""
 msgid "Select displayed data"
 msgstr ""
 
-#: bp/admin/templates/admin/layout.html:39 bp/gedcom/templates/g_layout.html:45
-#: bp/scene/templates/scene/layout.html:42
+#: bp/admin/templates/admin/layout.html:30
+msgid "Admin home"
+msgstr ""
+
+#: bp/admin/templates/admin/layout.html:39
+#: bp/audit/templates/audit/layout.html:56 bp/gedcom/templates/g_layout.html:45
+#: bp/scene/templates/scene/layout.html:43
 #: bp/start/templates/start/s_layout.html:45 templates/a_layout.html:37
 msgid "Version"
 msgstr ""
@@ -774,8 +838,7 @@ msgid "No users"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:114
-#: bp/admin/templates/admin/list_users_mails.html:119
-msgid "Show uploaded Gramps files"
+msgid "Gramps Files and Candicate Materials"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users.html:115
@@ -786,6 +849,10 @@ msgstr ""
 #: bp/admin/templates/admin/list_users_mails.html:3
 #: bp/admin/templates/admin/list_users_mails.html:58
 msgid "Isotammi User List"
+msgstr ""
+
+#: bp/admin/templates/admin/list_users_mails.html:119
+msgid "Show uploaded Gramps files"
 msgstr ""
 
 #: bp/admin/templates/admin/list_users_mails.html:131
@@ -813,6 +880,7 @@ msgid "Log of Gramps XML upload"
 msgstr ""
 
 #: bp/admin/templates/admin/load_result.html:19
+#: bp/gramps/templates/gramps/analyze_xml.html:13
 #: bp/gramps/templates/gramps/result.html:27
 msgid "Return"
 msgstr ""
@@ -828,18 +896,18 @@ msgid "Message sent"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:27
-#: bp/start/templates/start/my_message.html:27
-#: bp/start/templates/start/my_message.html:31
+#: bp/start/templates/start/my_message.html:29
+#: bp/start/templates/start/my_message.html:33
 msgid "Message send failed"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:39
-#: bp/start/templates/start/my_message.html:45
+#: bp/start/templates/start/my_message.html:50
 msgid "Write a message"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:46
-#: bp/start/templates/start/my_message.html:52
+#: bp/start/templates/start/my_message.html:57
 msgid "Subject"
 msgstr ""
 
@@ -848,12 +916,12 @@ msgid "Message from Isotammi admin"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:49
-#: bp/start/templates/start/my_message.html:55
+#: bp/start/templates/start/my_message.html:60
 msgid "Message"
 msgstr ""
 
 #: bp/admin/templates/admin/message.html:54
-#: bp/start/templates/start/my_message.html:60
+#: bp/start/templates/start/my_message.html:65
 msgid "Apply"
 msgstr ""
 
@@ -893,7 +961,7 @@ msgid "Listings"
 msgstr ""
 
 #: bp/admin/templates/admin/reference.html:34
-#: bp/tools/templates/tools/tables.html:28
+#: bp/tools/templates/tools/tables.html:27
 msgid "List reference names"
 msgstr ""
 
@@ -909,16 +977,16 @@ msgstr ""
 msgid "Do not use"
 msgstr ""
 
-#: bp/admin/templates/admin/syslog.html:2
-#: bp/admin/templates/admin/syslog.html:8
+#: bp/admin/templates/admin/syslog.html:4
+#: bp/admin/templates/admin/syslog.html:10
 msgid "Syslog"
 msgstr ""
 
-#: bp/admin/templates/admin/syslog.html:11
+#: bp/admin/templates/admin/syslog.html:13
 msgid "Time"
 msgstr ""
 
-#: bp/admin/templates/admin/syslog.html:13
+#: bp/admin/templates/admin/syslog.html:15
 #: bp/scene/templates/scene/place_events.html:66
 #: bp/scene/templates/scene/place_events.html:91
 #: bp/tools/templates/tools/table_baptism_data.html:11
@@ -928,19 +996,19 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: bp/admin/templates/admin/syslog.html:14
+#: bp/admin/templates/admin/syslog.html:16
 msgid "Content"
 msgstr ""
 
-#: bp/admin/templates/admin/syslog.html:34
+#: bp/admin/templates/admin/syslog.html:36
 msgid "Older events"
 msgstr ""
 
-#: bp/admin/templates/admin/syslog.html:39
+#: bp/admin/templates/admin/syslog.html:41
 msgid "Newer events"
 msgstr ""
 
-#: bp/admin/templates/admin/syslog.html:41
+#: bp/admin/templates/admin/syslog.html:43
 msgid "Back"
 msgstr ""
 
@@ -953,7 +1021,7 @@ msgid "Store to Database"
 msgstr ""
 
 #: bp/admin/templates/admin/talletettu.html:28
-#: bp/start/templates/start/my_settings.html:60
+#: bp/start/templates/start/my_settings.html:64
 #: bp/tools/templates/tools/person2.html:43
 #: bp/tools/templates/tools/source_citations.html:35
 #: templates/cite_sour_repo.html:75 templates/db_test.html:10
@@ -969,7 +1037,7 @@ msgstr ""
 msgid "Allowed email list"
 msgstr ""
 
-#: bp/admin/templates/admin/update_user.html:41
+#: bp/admin/templates/admin/update_user.html:47
 msgid "User list"
 msgstr ""
 
@@ -990,68 +1058,171 @@ msgstr ""
 msgid "Uploads for all users"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:27
+#: bp/admin/templates/admin/uploads.html:28
+#: bp/audit/templates/audit/batches.html:21
 msgid "Status for differents steps in XML file upload:"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:32
-#: bp/gramps/templates/gramps/uploads.html:116
+#: bp/audit/templates/audit/batches.html:25
+#: bp/gramps/templates/gramps/uploads.html:128
 msgid "the file has been uploaded to server"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:36
-#: bp/gramps/templates/gramps/uploads.html:117
+#: bp/audit/templates/audit/batches.html:29
+#: bp/gramps/templates/gramps/uploads.html:132
 msgid "the file content is being stored to the database"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:40
-#: bp/gramps/templates/gramps/uploads.html:119
+#: bp/audit/templates/audit/batches.html:33
+#: bp/gramps/templates/gramps/uploads.html:136
 msgid "the file content has been stored to the database"
 msgstr ""
 
 #: bp/admin/templates/admin/uploads.html:44
-#: bp/gramps/templates/gramps/uploads.html:123
+#: bp/audit/templates/audit/batches.html:37
+msgid "not found any more"
+msgstr ""
+
+#: bp/admin/templates/admin/uploads.html:48
+#: bp/audit/templates/audit/batches.html:41
+#: bp/gramps/templates/gramps/uploads.html:144
 msgid "there was an error"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:53
+#: bp/admin/templates/admin/uploads.html:58
+#: bp/audit/templates/audit/batches.html:50
 msgid "Gramps file / uploaded at"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:54
-#: bp/gramps/templates/gramps/uploads.html:133
+#: bp/admin/templates/admin/uploads.html:59
+#: bp/audit/templates/audit/batches.html:51
+#: bp/gramps/templates/gramps/uploads.html:154
 msgid "Status"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:55
+#: bp/admin/templates/admin/uploads.html:60
+#: bp/audit/templates/audit/batches.html:52
+#: bp/audit/templates/audit/index.html:16
 msgid "Operations"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:61
+#: bp/admin/templates/admin/uploads.html:66
+#: bp/audit/templates/audit/batches.html:59
 msgid "me"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:70
-#: bp/gramps/templates/gramps/uploads.html:143
+#: bp/admin/templates/admin/uploads.html:75
+#: bp/audit/templates/audit/batches.html:68
+#: bp/gramps/templates/gramps/uploads.html:164
 msgid "deleted from database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:71
+#: bp/admin/templates/admin/uploads.html:76
+#: bp/audit/templates/audit/batches.html:69
 #, python-format
 msgid "batch %(batch_id)s; %(persons)d persons"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:77
-#: bp/gramps/templates/gramps/uploads.html:163
+#: bp/admin/templates/admin/uploads.html:83
+#: bp/gramps/templates/gramps/uploads.html:185
 msgid "Store to database"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:79
+#: bp/admin/templates/admin/uploads.html:86
+#: bp/audit/templates/audit/batches.html:74
 msgid "Show log"
 msgstr ""
 
-#: bp/admin/templates/admin/uploads.html:81
+#: bp/admin/templates/admin/uploads.html:88
 msgid "Delete file"
+msgstr ""
+
+#: bp/audit/templates/audit/batches.html:4
+#: bp/audit/templates/audit/batches.html:8
+msgid "Batches"
+msgstr ""
+
+#: bp/audit/templates/audit/batches.html:63
+msgid "Download file"
+msgstr ""
+
+#: bp/audit/templates/audit/batches.html:76
+#: bp/audit/templates/audit/move_in_1.html:35
+msgid "Move to Isotammi database"
+msgstr ""
+
+#: bp/audit/templates/audit/index.html:3 bp/audit/templates/audit/index.html:13
+#: bp/start/templates/start/index_logged.html:87
+msgid "Isotammi auditor"
+msgstr ""
+
+#: bp/audit/templates/audit/index.html:18
+#: bp/start/templates/start/index_scene.html:68
+msgid "Table format tools"
+msgstr ""
+
+#: bp/audit/templates/audit/index.html:19
+#: bp/start/templates/start/index_scene.html:70
+msgid "The data includes accepted and candidate materials of all users."
+msgstr ""
+
+#: bp/audit/templates/audit/index.html:23
+msgid "Select a batch to be moved to Isotammi database"
+msgstr ""
+
+#: bp/audit/templates/audit/index.html:25
+msgid "Remove empty batches"
+msgstr ""
+
+#: bp/audit/templates/audit/layout.html:40 bp/gedcom/templates/g_layout.html:25
+#: bp/scene/templates/scene/layout.html:26
+#: bp/start/templates/start/s_layout.html:26 templates/a_layout.html:24
+#: templates/ladattu2.html:10 templates/virhe_lataus.html:20
+msgid "Back to Front Page"
+msgstr ""
+
+#: bp/audit/templates/audit/layout.html:46
+msgid "Audit home"
+msgstr ""
+
+#: bp/audit/templates/audit/layout.html:60 bp/gedcom/templates/g_layout.html:49
+#: bp/start/templates/start/s_layout.html:49 templates/a_layout.html:41
+msgid "Instructions"
+msgstr ""
+
+#: bp/audit/templates/audit/move_in_1.html:3
+#: bp/audit/templates/audit/move_in_2.html:3
+msgid "Material for Isotammi database"
+msgstr ""
+
+#: bp/audit/templates/audit/move_in_1.html:13
+msgid "Moving batch to Isotammi database"
+msgstr ""
+
+#: bp/audit/templates/audit/move_in_1.html:20
+#: bp/gramps/templates/gramps/uploads.html:152
+#: bp/start/templates/start/my_settings.html:98
+msgid "Batch id"
+msgstr ""
+
+#: bp/audit/templates/audit/move_in_1.html:25
+#: bp/start/templates/start/my_settings.html:105
+msgid "saved at"
+msgstr ""
+
+#: bp/audit/templates/audit/move_in_1.html:31
+msgid "From user"
+msgstr ""
+
+#: bp/audit/templates/audit/move_in_1.html:37
+msgid "Go back without changes"
+msgstr ""
+
+#: bp/audit/templates/audit/move_in_2.html:13
+msgid "Moved batch to Isotammi database"
 msgstr ""
 
 #: bp/dupsearch/templates/dupsearch.html:3
@@ -1060,7 +1231,7 @@ msgid "Duplicates search"
 msgstr ""
 
 #: bp/dupsearch/templates/dupsearch.html:25
-#: bp/start/templates/start/my_settings.html:113
+#: bp/start/templates/start/my_settings.html:117
 msgid "Data Batches"
 msgstr ""
 
@@ -1070,8 +1241,8 @@ msgstr ""
 
 #: bp/dupsearch/templates/dupsearch.html:31
 #: bp/gedcom/templates/gedcom_info.html:27
-#: bp/gramps/templates/gramps/uploads.html:84
-#: bp/start/templates/start/my_settings.html:124
+#: bp/gramps/templates/gramps/uploads.html:92
+#: bp/start/templates/start/my_settings.html:128
 msgid "File"
 msgstr ""
 
@@ -1155,32 +1326,36 @@ msgstr ""
 msgid "Without sources"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:292
+#: bp/gedcom/gedcom_analyze.py:189
+msgid "Places without hierarchy"
+msgstr ""
+
+#: bp/gedcom/gedcom_analyze.py:296
 msgid "Genders"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:312
+#: bp/gedcom/gedcom_analyze.py:317
 msgid "Submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:320
+#: bp/gedcom/gedcom_analyze.py:325
 msgid "Missing paths"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:326
+#: bp/gedcom/gedcom_analyze.py:331
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:330
+#: bp/gedcom/gedcom_analyze.py:335
 msgid "Invalid pointers"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:338
+#: bp/gedcom/gedcom_analyze.py:343
 msgid "Missing records"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:346
+#: bp/gedcom/gedcom_analyze.py:351
 msgid "Unused records"
 msgstr ""
 
@@ -1226,19 +1401,19 @@ msgstr ""
 msgid "Invalid GEDCOM; no level %s lines"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:191
+#: bp/gedcom/models/gedcom_utils.py:217
 msgid "Added:"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:198
+#: bp/gedcom/models/gedcom_utils.py:224
 msgid "Deleted:"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:206
+#: bp/gedcom/models/gedcom_utils.py:232
 msgid "Replaced:"
 msgstr ""
 
-#: bp/gedcom/models/gedcom_utils.py:213
+#: bp/gedcom/models/gedcom_utils.py:239
 msgid "With:"
 msgstr ""
 
@@ -1246,62 +1421,56 @@ msgstr ""
 msgid "Transform '{}' started at {}"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:50
+#: bp/gedcom/models/processor.py:49
 msgid "Name of the input GEDCOM file"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:51
+#: bp/gedcom/models/processor.py:50
 msgid "Name of the log file"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:54 bp/gedcom/models/processor.py:234
+#: bp/gedcom/models/processor.py:53 bp/gedcom/models/processor.py:240
 msgid "Display changed rows"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:56
+#: bp/gedcom/models/processor.py:55
 msgid "Do not produce an output file"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:58
+#: bp/gedcom/models/processor.py:57
 msgid "Do not produce a log in the output file"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:61
+#: bp/gedcom/models/processor.py:60
 msgid "Encoding of the input GEDCOM"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:100
+#: bp/gedcom/models/processor.py:99
 msgid "Total {num} change"
 msgid_plural "Total {num} changes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: bp/gedcom/models/processor.py:109 bp/gedcom/models/processor.py:114
+#: bp/gedcom/models/processor.py:108 bp/gedcom/models/processor.py:113
 msgid "File saved as {}"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:111
+#: bp/gedcom/models/processor.py:110
 msgid "Old file saved as {}"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:115
+#: bp/gedcom/models/processor.py:114
 msgid "Transform '{}' ended at {}"
 msgstr ""
 
-#: bp/gedcom/models/processor.py:203
+#: bp/gedcom/models/processor.py:209
 msgid "Unsupported type: "
-msgstr ""
-
-#: bp/gedcom/templates/g_layout.html:25 bp/scene/templates/scene/layout.html:25
-#: bp/start/templates/start/s_layout.html:26 templates/a_layout.html:24
-#: templates/ladattu2.html:10 templates/virhe_lataus.html:20
-msgid "Back to Front Page"
 msgstr ""
 
 #: bp/gedcom/templates/g_layout.html:25
 #: bp/scene/templates/scene/persons.html:121
-#: bp/scene/templates/scene/persons_list.html:120
-#: bp/scene/templates/scene/places.html:50
+#: bp/scene/templates/scene/persons_list.html:122
+#: bp/scene/templates/scene/places.html:105
 #: bp/scene/templates/scene/sources.html:57
 msgid "Back to Top"
 msgstr ""
@@ -1310,17 +1479,12 @@ msgstr ""
 msgid "A Database of the Genealogical Society of Finland"
 msgstr ""
 
-#: bp/gedcom/templates/g_layout.html:49
-#: bp/start/templates/start/s_layout.html:49 templates/a_layout.html:41
-msgid "Instructions"
-msgstr ""
-
 #: bp/gedcom/templates/gedcom_info.html:20
 #: bp/gedcom/templates/gedcom_list.html:4
 #: bp/gedcom/templates/gedcom_list.html:16
 #: bp/start/templates/start/index_logged.html:28
-#: bp/start/templates/start/my_settings.html:141
-#: bp/start/templates/start/my_settings.html:149
+#: bp/start/templates/start/my_settings.html:145
+#: bp/start/templates/start/my_settings.html:153
 msgid "Gedcom tools"
 msgstr ""
 
@@ -1333,9 +1497,10 @@ msgstr ""
 #: bp/gedcom/templates/gedcom_info.html:179
 #: bp/gedcom/templates/gedcom_list.html:42
 #: bp/scene/templates/scene/event.html:42
+#: bp/scene/templates/scene/person.html:103
 #: bp/scene/templates/scene/person_v1.html:85
-#: bp/scene/templates/scene/place_events.html:121
-#: bp/start/templates/start/my_settings.html:127
+#: bp/scene/templates/scene/place_events.html:120
+#: bp/start/templates/start/my_settings.html:131
 #: bp/tools/templates/tools/table_baptism_data.html:16
 msgid "Description"
 msgstr ""
@@ -1365,7 +1530,7 @@ msgid "Statistics"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:62
-#: bp/gramps/templates/gramps/uploads.html:129
+#: bp/gramps/templates/gramps/uploads.html:150
 msgid "Upload time"
 msgstr ""
 
@@ -1575,47 +1740,47 @@ msgstr ""
 msgid "Correct some invalid date formats"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:21
+#: bp/gedcom/transforms/dates.py:25
 msgid "Display invalid dates"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:23
+#: bp/gedcom/transforms/dates.py:27
 msgid "Change 31.12.1999 to 31 DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:25
+#: bp/gedcom/transforms/dates.py:29
 msgid "Change 1999-12-31 to 31 DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:27
+#: bp/gedcom/transforms/dates.py:31
 msgid "Change 1999-12 to DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:29
+#: bp/gedcom/transforms/dates.py:33
 msgid "Change [00.]12.1999 to DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:31
+#: bp/gedcom/transforms/dates.py:35
 msgid "Change 00 DEC 1999 to DEC 1999"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:33
+#: bp/gedcom/transforms/dates.py:37
 msgid "Change 1950-[19]59 to FROM 1950 TO 1959"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:35
+#: bp/gedcom/transforms/dates.py:39
 msgid "Change 1950-/>1950 to FROM/AFT 1950"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:37
+#: bp/gedcom/transforms/dates.py:41
 msgid "Change -1950/<1950 to TO/BEF 1950"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:87
+#: bp/gedcom/transforms/dates.py:91
 msgid "Invalid dates:"
 msgstr ""
 
-#: bp/gedcom/transforms/dates.py:96
+#: bp/gedcom/transforms/dates.py:100
 #, python-format
 msgid "%(date)s (line %(linkstr)s)<br>"
 msgstr ""
@@ -1624,11 +1789,11 @@ msgstr ""
 msgid "Baptisms"
 msgstr ""
 
-#: bp/gedcom/transforms/marriages.py:41
+#: bp/gedcom/transforms/marriages.py:45
 msgid "Marriages"
 msgstr ""
 
-#: bp/gedcom/transforms/marriages.py:42
+#: bp/gedcom/transforms/marriages.py:46
 msgid "Splitting of data in PLAC of MARR"
 msgstr ""
 
@@ -1636,29 +1801,29 @@ msgstr ""
 msgid "Personal names"
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:63
+#: bp/gedcom/transforms/person_names.py:66
 msgid "Mark missing name parts as \"N\""
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:67
+#: bp/gedcom/transforms/person_names.py:70
 msgid "Recognize_patronymes"
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:69
+#: bp/gedcom/transforms/person_names.py:72
 msgid "Call names and aliases"
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:71
+#: bp/gedcom/transforms/person_names.py:74
 msgid "Create surname history from multiple names"
 msgstr ""
 
-#: bp/gedcom/transforms/person_names.py:73
+#: bp/gedcom/transforms/person_names.py:76
 msgid "Process_nonstd_ALIA_lines"
 msgstr ""
 
-#: bp/gedcom/transforms/places.py:11 bp/scene/templates/scene/macros.html:56
+#: bp/gedcom/transforms/places.py:11 bp/scene/templates/scene/macros.html:58
 #: bp/scene/templates/scene/places.html:3
-#: bp/tools/templates/tools/tables.html:27
+#: bp/tools/templates/tools/tables.html:26
 msgid "Places"
 msgstr ""
 
@@ -1798,71 +1963,71 @@ msgstr ""
 msgid "Sukujutut"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:18
+#: bp/gedcom/transforms/sukujutut.py:19
 msgid "Sukujutut transformations"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:230
+#: bp/gedcom/transforms/sukujutut.py:231
 msgid "Remove invalid DATE tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:232
+#: bp/gedcom/transforms/sukujutut.py:233
 msgid "Remove empty NOTE tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:234
+#: bp/gedcom/transforms/sukujutut.py:235
 msgid "Remove DATE AVOLIITTO tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:236
+#: bp/gedcom/transforms/sukujutut.py:237
 msgid "Remove invalid DATEs for DIV tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:238
+#: bp/gedcom/transforms/sukujutut.py:239
 msgid "Remove empty GIVN and SURN tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:240
+#: bp/gedcom/transforms/sukujutut.py:241
 msgid "Remove duplicate SOUR lines under NAME"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:242
+#: bp/gedcom/transforms/sukujutut.py:243
 msgid "Remove REFN tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:244
+#: bp/gedcom/transforms/sukujutut.py:245
 msgid "Remove STAT tags"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:246
+#: bp/gedcom/transforms/sukujutut.py:247
 msgid "Move level 3 NOTEs to level 2 to save them"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:248
+#: bp/gedcom/transforms/sukujutut.py:249
 msgid "Insert ADR1 tags under ADDR"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:250
+#: bp/gedcom/transforms/sukujutut.py:251
 msgid "Change PLAC tags to NOTEs under certain events"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:252
+#: bp/gedcom/transforms/sukujutut.py:253
 msgid "Change event types \"Kaksonen\" and \"Kolmonen\" to NOTEs"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:254
+#: bp/gedcom/transforms/sukujutut.py:255
 msgid "Remove trailing and multiple consecutive spaces in person and place names"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:256
+#: bp/gedcom/transforms/sukujutut.py:257
 msgid "Change EMIG to RESI"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:258
+#: bp/gedcom/transforms/sukujutut.py:259
 msgid "Move an event NOTE to citation PAGE"
 msgstr ""
 
-#: bp/gedcom/transforms/sukujutut.py:260
+#: bp/gedcom/transforms/sukujutut.py:261
 msgid "Move a SOUR under NOTE to upper level"
 msgstr ""
 
@@ -1874,17 +2039,29 @@ msgstr ""
 msgid "Restores marked tags: <tag>-X -> <tag>"
 msgstr ""
 
-#: bp/gramps/gramps_loader.py:134 bp/gramps/xml_dom_handler.py:125
+#: bp/gramps/gramps_loader.py:338 bp/gramps/xml_dom_handler.py:125
 msgid "Database save failed due to {} {}"
 msgstr ""
 
-#: bp/gramps/routes.py:132
+#: bp/gramps/routes.py:140
 #, python-format
 msgid "Batch id %(batch_id)s has been deleted"
 msgstr ""
 
 #: bp/gramps/xml_dom_handler.py:113
 msgid "Database save failed"
+msgstr ""
+
+#: bp/gramps/templates/gramps/analyze_xml.html:3
+msgid "Gramps to Neo5j analyze"
+msgstr ""
+
+#: bp/gramps/templates/gramps/analyze_xml.html:6
+msgid "Analyze of the Gramps XML"
+msgstr ""
+
+#: bp/gramps/templates/gramps/analyze_xml.html:8
+msgid "Analyze"
 msgstr ""
 
 #: bp/gramps/templates/gramps/index_gramps.html:3
@@ -1947,84 +2124,83 @@ msgstr ""
 msgid "Uploads from Gramps"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:85
+#: bp/gramps/templates/gramps/uploads.html:93
 msgid "Are you sure you want to delete the XML file?"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:88
+#: bp/gramps/templates/gramps/uploads.html:96
 msgid "Are you sure you want to delete this batch from database?"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:103
+#: bp/gramps/templates/gramps/uploads.html:111
 msgid "Uploaded Candidate Materials"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:114
+#: bp/gramps/templates/gramps/uploads.html:124
 msgid "Steps for uploading Gramps files"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:122
+#: bp/gramps/templates/gramps/uploads.html:140
 msgid "Not found any more"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:130
+#: bp/gramps/templates/gramps/uploads.html:151
 msgid "Gramps file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:131
-#: bp/start/templates/start/my_settings.html:94
-msgid "Batch id"
-msgstr ""
-
-#: bp/gramps/templates/gramps/uploads.html:132
+#: bp/gramps/templates/gramps/uploads.html:153
 msgid "Person count"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:151
+#: bp/gramps/templates/gramps/uploads.html:172
 msgid "See if ready"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:160
+#: bp/gramps/templates/gramps/uploads.html:181
 msgid "Operations for"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:160
+#: bp/gramps/templates/gramps/uploads.html:181
 msgid "the selected file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:161
+#: bp/gramps/templates/gramps/uploads.html:182
 msgid "Saving data"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:162
+#: bp/gramps/templates/gramps/uploads.html:183
 msgid "Download the Gramps file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:164
+#: bp/gramps/templates/gramps/uploads.html:184
+msgid "Analyze the Gramps file"
+msgstr ""
+
+#: bp/gramps/templates/gramps/uploads.html:186
 msgid "Show last log"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:166
+#: bp/gramps/templates/gramps/uploads.html:188
 msgid "Delete data"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:167
+#: bp/gramps/templates/gramps/uploads.html:189
 msgid "Delete the file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:168
+#: bp/gramps/templates/gramps/uploads.html:190
 msgid "Delete from database"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:173
+#: bp/gramps/templates/gramps/uploads.html:195
 msgid "Send a new Gramps file"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:175
+#: bp/gramps/templates/gramps/uploads.html:197
 msgid "Look at your candidate materials"
 msgstr ""
 
-#: bp/gramps/templates/gramps/uploads.html:177
+#: bp/gramps/templates/gramps/uploads.html:199
 msgid "Return to front page"
 msgstr ""
 
@@ -2034,18 +2210,18 @@ msgstr ""
 
 #: bp/scene/templates/scene/event.html:27
 #: bp/scene/templates/scene/family.html:34
-#: bp/scene/templates/scene/person.html:39
-#: bp/scene/templates/scene/person_pg.html:41
+#: bp/scene/templates/scene/person.html:42
 #: bp/scene/templates/scene/person_v1.html:27
+#: bp/scene/templates/scene/person_v2.html:41
 msgid "Identifiers"
 msgstr ""
 
 #: bp/scene/templates/scene/event.html:46
-#: bp/scene/templates/scene/person.html:102
-#: bp/scene/templates/scene/person_pg.html:102
+#: bp/scene/templates/scene/person.html:101
 #: bp/scene/templates/scene/person_v1.html:83
-#: bp/scene/templates/scene/place_events.html:120
-#: bp/start/templates/start/my_settings.html:125
+#: bp/scene/templates/scene/person_v2.html:102
+#: bp/scene/templates/scene/place_events.html:119
+#: bp/start/templates/start/my_settings.html:129
 #: bp/tools/templates/tools/table_baptism_data.html:12
 #: bp/tools/templates/tools/table_baptism_data.html:13
 #: bp/tools/templates/tools/table_persons.html:22
@@ -2054,9 +2230,10 @@ msgid "Date"
 msgstr ""
 
 #: bp/scene/templates/scene/event.html:50
-#: bp/scene/templates/scene/person.html:103
-#: bp/scene/templates/scene/person_pg.html:103
+#: bp/scene/templates/scene/person.html:102
 #: bp/scene/templates/scene/person_v1.html:84
+#: bp/scene/templates/scene/person_v2.html:103
+#: bp/scene/templates/scene/places.html:51
 #: bp/tools/templates/tools/table_baptism_data.html:15
 #: bp/tools/templates/tools/table_persons.html:23
 #: templates/select_refcols.html:37 templates/select_refcols.html:65
@@ -2069,15 +2246,15 @@ msgstr ""
 
 #: bp/scene/templates/scene/event.html:66
 #: bp/scene/templates/scene/persons.html:111
-#: bp/scene/templates/scene/persons_list.html:104
+#: bp/scene/templates/scene/persons_list.html:106
 #: bp/scene/templates/scene/place_events.html:117
 #: bp/tools/templates/tools/person2.html:8
 msgid "Person"
 msgstr ""
 
 #: bp/scene/templates/scene/event.html:73
-#: bp/scene/templates/scene/person.html:197
-#: bp/scene/templates/scene/person_pg.html:199
+#: bp/scene/templates/scene/person.html:215
+#: bp/scene/templates/scene/person_v2.html:199
 msgid "Self"
 msgstr ""
 
@@ -2097,23 +2274,27 @@ msgstr ""
 
 #: bp/scene/templates/scene/families.html:37
 #: bp/scene/templates/scene/persons_list.html:41
+#: bp/scene/templates/scene/places.html:32
 #, python-format
 msgid "starting <tt>%(name)s</tt>"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:38
 #: bp/scene/templates/scene/persons_list.html:42
+#: bp/scene/templates/scene/places.html:33
 msgid "from begin"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:39
-#: bp/scene/templates/scene/persons_list.html:43
+#: bp/scene/templates/scene/persons_list.html:44
+#: bp/scene/templates/scene/places.html:34
 msgid "data set"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:54
 #: bp/scene/templates/scene/families.html:67
-#: bp/scene/templates/scene/persons_list.html:57
+#: bp/scene/templates/scene/persons_list.html:59
+#: bp/scene/templates/scene/places.html:48
 msgid "Go to"
 msgstr ""
 
@@ -2121,10 +2302,10 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:93
 #: bp/scene/templates/scene/families.html:94
 #: bp/scene/templates/scene/families.html:184
-#: bp/scene/templates/scene/person.html:216
-#: bp/scene/templates/scene/person_pg.html:218
+#: bp/scene/templates/scene/person.html:234
 #: bp/scene/templates/scene/person_v1.html:150
 #: bp/scene/templates/scene/person_v1.html:178
+#: bp/scene/templates/scene/person_v2.html:218
 #: bp/tools/templates/tools/table_families.html:21
 #: bp/tools/templates/tools/table_families_by_id.html:67
 msgid "Father"
@@ -2132,7 +2313,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/families.html:56
 #: bp/scene/templates/scene/families.html:69
-#: bp/scene/templates/scene/persons_list.html:59
+#: bp/scene/templates/scene/persons_list.html:61
 msgid "Starting letters of surname"
 msgstr ""
 
@@ -2141,7 +2322,7 @@ msgstr ""
 #: bp/scene/templates/scene/person_v1.html:46
 #: bp/scene/templates/scene/persons.html:39
 #: bp/scene/templates/scene/persons.html:68
-#: bp/scene/templates/scene/persons_list.html:60
+#: bp/scene/templates/scene/persons_list.html:62
 #: bp/tools/templates/tools/table_surnames.html:10
 msgid "Surname"
 msgstr ""
@@ -2150,10 +2331,10 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:109
 #: bp/scene/templates/scene/families.html:110
 #: bp/scene/templates/scene/families.html:196
-#: bp/scene/templates/scene/person.html:218
-#: bp/scene/templates/scene/person_pg.html:220
+#: bp/scene/templates/scene/person.html:236
 #: bp/scene/templates/scene/person_v1.html:152
 #: bp/scene/templates/scene/person_v1.html:180
+#: bp/scene/templates/scene/person_v2.html:220
 #: bp/tools/templates/tools/table_families.html:23
 #: bp/tools/templates/tools/table_families_by_id.html:91
 msgid "Mother"
@@ -2161,7 +2342,7 @@ msgstr ""
 
 #: bp/scene/templates/scene/families.html:90
 #: bp/scene/templates/scene/families.html:182
-#: bp/scene/templates/scene/persons_list.html:79
+#: bp/scene/templates/scene/persons_list.html:81
 msgid "Top of page"
 msgstr ""
 
@@ -2169,8 +2350,9 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:109
 #: bp/scene/templates/scene/families.html:184
 #: bp/scene/templates/scene/families.html:196
-#: bp/scene/templates/scene/persons_list.html:81
-#: bp/scene/templates/scene/persons_list.html:192
+#: bp/scene/templates/scene/persons_list.html:83
+#: bp/scene/templates/scene/persons_list.html:194
+#: bp/scene/templates/scene/places.html:72
 msgid "first page"
 msgstr ""
 
@@ -2178,13 +2360,14 @@ msgstr ""
 #: bp/scene/templates/scene/families.html:116
 #: bp/scene/templates/scene/families.html:189
 #: bp/scene/templates/scene/families.html:201
-#: bp/scene/templates/scene/persons_list.html:93
+#: bp/scene/templates/scene/persons_list.html:95
+#: bp/scene/templates/scene/places.html:85
 msgid "no next page"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:129
-#: bp/scene/templates/scene/person.html:174
-#: bp/scene/templates/scene/person_pg.html:176
+#: bp/scene/templates/scene/person.html:192
+#: bp/scene/templates/scene/person_v2.html:176
 #: bp/tools/templates/tools/table_families_by_id.html:44
 #: bp/tools/templates/tools/table_families_by_id.html:54
 #: bp/tools/templates/tools/table_person_by_id.html:39
@@ -2193,26 +2376,26 @@ msgid "family"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:130
-#: bp/scene/templates/scene/person.html:179
-#: bp/scene/templates/scene/person_pg.html:181
+#: bp/scene/templates/scene/person.html:197
+#: bp/scene/templates/scene/person_v2.html:181
 msgid "Man"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:131
-#: bp/scene/templates/scene/person.html:181
-#: bp/scene/templates/scene/person_pg.html:183
+#: bp/scene/templates/scene/person.html:199
+#: bp/scene/templates/scene/person_v2.html:183
 msgid "Wife"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:132
-#: bp/scene/templates/scene/family.html:71
+#: bp/scene/templates/scene/family.html:76
 #: bp/scene/templates/scene/family_pop.html:71
-#: bp/scene/templates/scene/person.html:183
-#: bp/scene/templates/scene/person.html:220
-#: bp/scene/templates/scene/person_pg.html:185
-#: bp/scene/templates/scene/person_pg.html:222
+#: bp/scene/templates/scene/person.html:201
+#: bp/scene/templates/scene/person.html:238
 #: bp/scene/templates/scene/person_v1.html:154
 #: bp/scene/templates/scene/person_v1.html:182
+#: bp/scene/templates/scene/person_v2.html:185
+#: bp/scene/templates/scene/person_v2.html:222
 #: bp/tools/templates/tools/table_families_by_id.html:115
 msgid "Children"
 msgstr ""
@@ -2222,7 +2405,7 @@ msgid "Go to family page"
 msgstr ""
 
 #: bp/scene/templates/scene/families.html:141
-#: bp/scene/templates/scene/persons_list.html:158
+#: bp/scene/templates/scene/persons_list.html:160
 msgid "Original ID"
 msgstr ""
 
@@ -2238,7 +2421,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: bp/scene/templates/scene/families.html:168
-#: bp/scene/templates/scene/persons_list.html:182
+#: bp/scene/templates/scene/persons_list.html:184
 msgid "The last item found"
 msgstr ""
 
@@ -2254,16 +2437,16 @@ msgstr ""
 #: bp/scene/templates/scene/family.html:31
 #: bp/scene/templates/scene/family_pop.html:3
 #: bp/scene/templates/scene/family_pop.html:40
-#: bp/scene/templates/scene/person.html:176
-#: bp/scene/templates/scene/person.html:213
-#: bp/scene/templates/scene/person_pg.html:178
-#: bp/scene/templates/scene/person_pg.html:215
+#: bp/scene/templates/scene/person.html:194
+#: bp/scene/templates/scene/person.html:231
 #: bp/scene/templates/scene/person_v1.html:147
 #: bp/scene/templates/scene/person_v1.html:148
 #: bp/scene/templates/scene/person_v1.html:175
 #: bp/scene/templates/scene/person_v1.html:176
+#: bp/scene/templates/scene/person_v2.html:178
+#: bp/scene/templates/scene/person_v2.html:215
 #: bp/tools/templates/tools/table_families_by_id.html:37
-#: models/datareader.py:577 templates/jinja_filters.py:75
+#: models/datareader.py:580 templates/jinja_filters.py:75
 #: templates/jinja_filters.py:81
 msgid "Family"
 msgstr ""
@@ -2279,25 +2462,36 @@ msgstr ""
 msgid "Family Events"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:87
+#: bp/scene/templates/scene/family.html:64
+#: bp/scene/templates/scene/person.html:127
+#: bp/scene/templates/scene/person_v2.html:135
+msgid "of type"
+msgstr ""
+
+#: bp/scene/templates/scene/family.html:64
+#: bp/scene/templates/scene/person.html:127
+#: bp/scene/templates/scene/person_v2.html:135
+msgid "see details of place"
+msgstr ""
+
+#: bp/scene/templates/scene/family.html:92
 #: bp/tools/templates/tools/ng_compare.html:54
 #: bp/tools/templates/tools/ng_compare.html:112
 msgid "Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:96
-#: bp/scene/templates/scene/macros.html:59
+#: bp/scene/templates/scene/family.html:101
+#: bp/scene/templates/scene/macros.html:61
 #: bp/scene/templates/scene/person_v1.html:87
-#: bp/scene/templates/scene/place_events.html:123
+#: bp/scene/templates/scene/place_events.html:122
 #: bp/scene/templates/scene/sources.html:3 templates/cite_sour_repo.html:39
 #: templates/repo_sources.html:38
 msgid "Sources"
 msgstr ""
 
-#: bp/scene/templates/scene/family.html:101
-#: bp/scene/templates/scene/person.html:305
-#: bp/scene/templates/scene/person_pg.html:294
+#: bp/scene/templates/scene/family.html:106
 #: bp/scene/templates/scene/person_v1.html:311
+#: bp/scene/templates/scene/person_v2.html:294
 #: bp/scene/templates/scene/source_events.html:50
 #: templates/cite_sour_repo.html:29
 msgid "Page"
@@ -2307,129 +2501,124 @@ msgstr ""
 msgid "Family Page"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:38
+#: bp/scene/templates/scene/macros.html:40
 msgid "Search for people"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:38
+#: bp/scene/templates/scene/macros.html:40
 msgid "Search"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:45
+#: bp/scene/templates/scene/macros.html:47
 msgid "Person list by default name"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:45
+#: bp/scene/templates/scene/macros.html:47
 #: bp/scene/templates/scene/persons.html:14
 #: bp/scene/templates/scene/persons_list.html:29
 #: bp/tools/templates/tools/table_refnames.html:37
 msgid "Persons"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:53
-#: bp/scene/templates/scene/person.html:167
-#: bp/scene/templates/scene/person.html:170
-#: bp/scene/templates/scene/person_pg.html:169
-#: bp/scene/templates/scene/person_pg.html:172
+#: bp/scene/templates/scene/macros.html:55
+#: bp/scene/templates/scene/person.html:185
+#: bp/scene/templates/scene/person.html:188
 #: bp/scene/templates/scene/person_v1.html:141
 #: bp/scene/templates/scene/person_v1.html:143
+#: bp/scene/templates/scene/person_v2.html:169
+#: bp/scene/templates/scene/person_v2.html:172
 msgid "Families"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:62
+#: bp/scene/templates/scene/macros.html:64
 msgid "Thumbnails"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:62
+#: bp/scene/templates/scene/macros.html:64
 msgid "Pictures and other Media"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:65
+#: bp/scene/templates/scene/macros.html:67
 msgid "Get more info"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:65
+#: bp/scene/templates/scene/macros.html:67
 msgid "Log in to Isotammi"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:74
+#: bp/scene/templates/scene/macros.html:76
 msgid "UUID key"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:76
+#: bp/scene/templates/scene/macros.html:78
 msgid "number"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:102
-#: bp/scene/templates/scene/macros.html:104
-#: bp/scene/templates/scene/macros.html:121
+#: bp/scene/templates/scene/macros.html:110
+#: bp/scene/templates/scene/macros.html:112
+#: bp/scene/templates/scene/macros.html:129
 #: bp/scene/templates/scene/persons.html:127
 #: bp/scene/templates/scene/source_events.html:68
 #, python-format
 msgid "see details of person %(id)s"
 msgstr ""
 
-#: bp/scene/templates/scene/macros.html:107
-#: bp/scene/templates/scene/macros.html:125
+#: bp/scene/templates/scene/macros.html:115
+#: bp/scene/templates/scene/macros.html:133
 msgid "Anonymous"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:3
-#: bp/scene/templates/scene/person.html:12
-#: bp/scene/templates/scene/person_pg.html:3
-#: bp/scene/templates/scene/person_pg.html:12
+#: bp/scene/templates/scene/person.html:15
 #: bp/scene/templates/scene/person_v1.html:3
 #: bp/scene/templates/scene/person_v1.html:9
+#: bp/scene/templates/scene/person_v2.html:3
+#: bp/scene/templates/scene/person_v2.html:12
 #: bp/tools/templates/tools/person2.html:3
 msgid "Person's details"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:22
-#: bp/scene/templates/scene/person.html:238
-#: bp/scene/templates/scene/person_pg.html:22
-#: bp/scene/templates/scene/person_pg.html:240
-#: bp/scene/templates/scene/person_v1.html:199 templates/jinja_filters.py:166
+#: bp/scene/templates/scene/person.html:24
+#: bp/scene/templates/scene/person.html:256
+#: bp/scene/templates/scene/person_v1.html:199
+#: bp/scene/templates/scene/person_v2.html:22
+#: bp/scene/templates/scene/person_v2.html:240 templates/jinja_filters.py:166
 msgid "Photo"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:42
-#: bp/scene/templates/scene/person_pg.html:44
+#: bp/scene/templates/scene/person.html:32
+#: bp/scene/templates/scene/persons.html:96
+#: bp/scene/templates/scene/place_events.html:36
+#: bp/scene/templates/scene/places.html:70
+#: bp/scene/templates/scene/sources.html:33
+msgid "Top"
+msgstr ""
+
+#: bp/scene/templates/scene/person.html:45
 #: bp/scene/templates/scene/person_v1.html:33
+#: bp/scene/templates/scene/person_v2.html:44
 msgid "Sorting key"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:50
-#: bp/scene/templates/scene/person.html:66
-#: bp/scene/templates/scene/person.html:104
-#: bp/scene/templates/scene/person_pg.html:52
-#: bp/scene/templates/scene/person_pg.html:100
-#: bp/scene/templates/scene/source_events.html:22
-#: bp/scene/templates/scene/sources.html:66
-#: bp/tools/templates/tools/source_citations.html:8
-#: bp/tools/templates/tools/table_refnames_1.html:28
-msgid "Source"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:60
-#: bp/scene/templates/scene/person.html:198
-#: bp/scene/templates/scene/person_pg.html:62
-#: bp/scene/templates/scene/person_pg.html:200
+#: bp/scene/templates/scene/person.html:58
+#: bp/scene/templates/scene/person.html:216
+#: bp/scene/templates/scene/person_v2.html:62
+#: bp/scene/templates/scene/person_v2.html:200
 #: bp/scene/templates/scene/persons.html:7
 msgid "first name"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:61
-#: bp/scene/templates/scene/person.html:199
-#: bp/scene/templates/scene/person_pg.html:63
-#: bp/scene/templates/scene/person_pg.html:201
+#: bp/scene/templates/scene/person.html:59
+#: bp/scene/templates/scene/person.html:217
+#: bp/scene/templates/scene/person_v2.html:63
+#: bp/scene/templates/scene/person_v2.html:201
 #: bp/scene/templates/scene/persons.html:7
 msgid "patronymic"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:63
-#: bp/scene/templates/scene/person.html:200
-#: bp/scene/templates/scene/person_pg.html:65
-#: bp/scene/templates/scene/person_pg.html:202
+#: bp/scene/templates/scene/person.html:61
+#: bp/scene/templates/scene/person.html:218
+#: bp/scene/templates/scene/person_v2.html:65
+#: bp/scene/templates/scene/person_v2.html:202
 #: bp/scene/templates/scene/persons.html:7
 #: bp/tools/templates/tools/table_baptism_data.html:22
 #: bp/tools/templates/tools/table_families_by_id.html:11
@@ -2442,46 +2631,46 @@ msgstr ""
 msgid "surname"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:74
-#: bp/scene/templates/scene/person_pg.html:70
+#: bp/scene/templates/scene/person.html:68
 #: bp/scene/templates/scene/person_v1.html:58
+#: bp/scene/templates/scene/person_v2.html:70
 #: bp/tools/templates/tools/table_refnames.html:35
 msgid "Gender"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:78
-#: bp/scene/templates/scene/person_pg.html:74
+#: bp/scene/templates/scene/person.html:72
 #: bp/scene/templates/scene/person_v1.html:62
+#: bp/scene/templates/scene/person_v2.html:74
 #: bp/scene/templates/scene/place_events.html:74
 #: bp/scene/templates/scene/place_events.html:98
 msgid "Private data"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:82
-#: bp/scene/templates/scene/person_pg.html:78
+#: bp/scene/templates/scene/person.html:76
 #: bp/scene/templates/scene/person_v1.html:66
+#: bp/scene/templates/scene/person_v2.html:78
 msgid "Confidence of data"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:86
-#: bp/scene/templates/scene/person_pg.html:82
+#: bp/scene/templates/scene/person.html:80
 #: bp/scene/templates/scene/person_v1.html:70
+#: bp/scene/templates/scene/person_v2.html:82
 msgid "Age at death"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:91 templates/jinja_filters.py:120
-msgid "See"
+#: bp/scene/templates/scene/person.html:87
+msgid "See person note"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:91
-#: bp/scene/templates/scene/person.html:251
-msgid "Person Notes"
+#: bp/scene/templates/scene/person.html:88
+#, python-format
+msgid "See %(num)d person notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:97
-#: bp/scene/templates/scene/person_pg.html:96
+#: bp/scene/templates/scene/person.html:96
 #: bp/scene/templates/scene/person_v1.html:78
-#: bp/scene/templates/scene/persons_list.html:105
+#: bp/scene/templates/scene/person_v2.html:96
+#: bp/scene/templates/scene/persons_list.html:107
 #: bp/scene/templates/scene/place_events.html:112
 #: bp/tools/templates/tools/ng_compare.html:36
 #: bp/tools/templates/tools/ng_compare.html:94
@@ -2490,117 +2679,60 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:101
-#: bp/scene/templates/scene/person_pg.html:101
+#: bp/scene/templates/scene/person.html:100
 #: bp/scene/templates/scene/person_v1.html:82
-#: bp/scene/templates/scene/place_events.html:119
+#: bp/scene/templates/scene/person_v2.html:101
+#: bp/scene/templates/scene/place_events.html:118
 #: templates/cite_sour_repo.html:8
 msgid "Event"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:105
-#: bp/scene/templates/scene/person_pg.html:104
-msgid "Description and Notes"
+#: bp/scene/templates/scene/person.html:162
+msgid "Place Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:129
-#: bp/scene/templates/scene/person_pg.html:135
-msgid "of type"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:129
-#: bp/scene/templates/scene/person_pg.html:135
-msgid "see details of place"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:171
-#: bp/scene/templates/scene/person_pg.html:173
+#: bp/scene/templates/scene/person.html:189
 #: bp/scene/templates/scene/person_v1.html:144
+#: bp/scene/templates/scene/person_v2.html:173
 msgid "Parents' family"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:194
-#: bp/scene/templates/scene/person_pg.html:196
+#: bp/scene/templates/scene/person.html:212
+#: bp/scene/templates/scene/person_v2.html:196
 msgid "Central person"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:195
-#: bp/scene/templates/scene/person_pg.html:197
+#: bp/scene/templates/scene/person.html:213
 #: bp/scene/templates/scene/person_v1.html:165
 #: bp/scene/templates/scene/person_v1.html:167
+#: bp/scene/templates/scene/person_v2.html:197
 msgid "self"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:207
-#: bp/scene/templates/scene/person_pg.html:209
+#: bp/scene/templates/scene/person.html:225
 #: bp/scene/templates/scene/person_v1.html:171
+#: bp/scene/templates/scene/person_v2.html:209
 msgid "Own families"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:208
-#: bp/scene/templates/scene/person_pg.html:210
+#: bp/scene/templates/scene/person.html:226
 #: bp/scene/templates/scene/person_v1.html:172
+#: bp/scene/templates/scene/person_v2.html:210
 msgid "As Parent in Family"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:234
+#: bp/scene/templates/scene/person.html:252
 #: bp/tools/templates/tools/table_media.html:14
 msgid "Media files"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:263
-#: bp/scene/templates/scene/person_pg.html:252
-#: bp/scene/templates/scene/person_v1.html:211
-msgid "Narrated"
+#: bp/scene/templates/scene/person.html:271
+msgid "Person Notes"
 msgstr ""
 
-#: bp/scene/templates/scene/person.html:266
-#: bp/scene/templates/scene/person_pg.html:255
-#: bp/scene/templates/scene/person_v1.html:86
-#: bp/scene/templates/scene/person_v1.html:214
-#: bp/scene/templates/scene/place_events.html:68
-#: bp/scene/templates/scene/place_events.html:86
-#: bp/scene/templates/scene/place_events.html:122
-msgid "Note"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:274
-#: bp/scene/templates/scene/person_pg.html:263
+#: bp/scene/templates/scene/person.html:283
+#: bp/scene/templates/scene/person_v2.html:263
 msgid "Source references"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:290
-#: bp/scene/templates/scene/person_pg.html:279
-#, python-format
-msgid "See source %(name)s details"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:292
-#: bp/scene/templates/scene/person_pg.html:281
-msgid "No source information!"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:295
-#: bp/scene/templates/scene/person_pg.html:284
-msgid "No archive information!"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:304
-#: bp/scene/templates/scene/person_pg.html:293
-#: bp/scene/templates/scene/person_v1.html:307
-#: bp/scene/templates/scene/source_events.html:48
-#: bp/tools/templates/tools/table_sources.html:33
-msgid "confidence"
-msgstr ""
-
-#: bp/scene/templates/scene/person.html:307
-#: bp/scene/templates/scene/person_pg.html:296
-msgid "see:"
-msgstr ""
-
-#: bp/scene/templates/scene/person_pg.html:236
-#: bp/scene/templates/scene/person_v1.html:195
-msgid "Media"
 msgstr ""
 
 #: bp/scene/templates/scene/person_v1.html:15
@@ -2631,6 +2763,15 @@ msgstr ""
 msgid "This will contain a Person Note"
 msgstr ""
 
+#: bp/scene/templates/scene/person_v1.html:86
+#: bp/scene/templates/scene/person_v1.html:214
+#: bp/scene/templates/scene/person_v2.html:255
+#: bp/scene/templates/scene/place_events.html:68
+#: bp/scene/templates/scene/place_events.html:86
+#: bp/scene/templates/scene/place_events.html:121
+msgid "Note"
+msgstr ""
+
 #: bp/scene/templates/scene/person_v1.html:109
 msgid "of Type"
 msgstr ""
@@ -2648,12 +2789,22 @@ msgstr ""
 msgid "Central Person"
 msgstr ""
 
+#: bp/scene/templates/scene/person_v1.html:195
+#: bp/scene/templates/scene/person_v2.html:236
+msgid "Media"
+msgstr ""
+
+#: bp/scene/templates/scene/person_v1.html:211
+#: bp/scene/templates/scene/person_v2.html:252
+msgid "Narrated"
+msgstr ""
+
 #: bp/scene/templates/scene/person_v1.html:221
 msgid "Ahnentafel Report"
 msgstr ""
 
 #: bp/scene/templates/scene/person_v1.html:286
-#: bp/scene/templates/scene/place_events.html:167
+#: bp/scene/templates/scene/place_events.html:169
 #: bp/scene/templates/scene/source_events.html:17
 msgid "Source References"
 msgstr ""
@@ -2661,6 +2812,43 @@ msgstr ""
 #: bp/scene/templates/scene/person_v1.html:300
 #, python-format
 msgid "see details of source %(id)s"
+msgstr ""
+
+#: bp/scene/templates/scene/person_v1.html:307
+#: bp/scene/templates/scene/person_v2.html:293
+#: bp/scene/templates/scene/source_events.html:48
+#: bp/tools/templates/tools/table_sources.html:33
+msgid "confidence"
+msgstr ""
+
+#: bp/scene/templates/scene/person_v2.html:52
+#: bp/scene/templates/scene/person_v2.html:100
+#: bp/scene/templates/scene/source_events.html:22
+#: bp/scene/templates/scene/sources.html:66
+#: bp/tools/templates/tools/source_citations.html:8
+#: bp/tools/templates/tools/table_refnames_1.html:28
+msgid "Source"
+msgstr ""
+
+#: bp/scene/templates/scene/person_v2.html:104
+msgid "Description and Notes"
+msgstr ""
+
+#: bp/scene/templates/scene/person_v2.html:279
+#, python-format
+msgid "See source %(name)s details"
+msgstr ""
+
+#: bp/scene/templates/scene/person_v2.html:281
+msgid "No source information!"
+msgstr ""
+
+#: bp/scene/templates/scene/person_v2.html:284
+msgid "No archive information!"
+msgstr ""
+
+#: bp/scene/templates/scene/person_v2.html:296
+msgid "see:"
 msgstr ""
 
 #: bp/scene/templates/scene/persons.html:3
@@ -2730,16 +2918,10 @@ msgstr ""
 msgid "Search word (beginning part)"
 msgstr ""
 
-#: bp/scene/templates/scene/persons.html:96
-#: bp/scene/templates/scene/places.html:27
-#: bp/scene/templates/scene/sources.html:33
-msgid "Top"
-msgstr ""
-
 #: bp/scene/templates/scene/persons.html:100
-#: bp/scene/templates/scene/persons_list.html:89
-#: bp/scene/templates/scene/places.html:31
-#: bp/scene/templates/scene/places.html:32
+#: bp/scene/templates/scene/persons_list.html:91
+#: bp/scene/templates/scene/places.html:80
+#: bp/scene/templates/scene/places.html:81
 #: bp/scene/templates/scene/sources.html:37
 msgid "Alphabetical Menu"
 msgstr ""
@@ -2748,15 +2930,16 @@ msgstr ""
 msgid "Person's events"
 msgstr ""
 
-#: bp/scene/templates/scene/persons.html:136
+#: bp/scene/templates/scene/persons.html:135
 msgid "Keywords"
 msgstr ""
 
-#: bp/scene/templates/scene/persons.html:157
+#: bp/scene/templates/scene/persons.html:156
 msgid "No one found with search keys"
 msgstr ""
 
 #: bp/scene/templates/scene/persons_list.html:17
+#: bp/scene/templates/scene/places.html:16
 msgid "Demo-data"
 msgstr ""
 
@@ -2769,20 +2952,22 @@ msgstr ""
 msgid "Displaying %(num)s distinct persons"
 msgstr ""
 
-#: bp/scene/templates/scene/persons_list.html:84
+#: bp/scene/templates/scene/persons_list.html:86
+#: bp/scene/templates/scene/places.html:75
 msgid "previous page"
 msgstr ""
 
-#: bp/scene/templates/scene/persons_list.html:96
+#: bp/scene/templates/scene/persons_list.html:98
+#: bp/scene/templates/scene/places.html:88
 msgid "next page"
 msgstr ""
 
-#: bp/scene/templates/scene/persons_list.html:190
+#: bp/scene/templates/scene/persons_list.html:192
 #, python-format
 msgid "No one found with search keys starting \"%(name)s\""
 msgstr ""
 
-#: bp/scene/templates/scene/persons_list.html:192
+#: bp/scene/templates/scene/persons_list.html:194
 msgid "Go to the first person"
 msgstr ""
 
@@ -2808,7 +2993,7 @@ msgid "on Google Map"
 msgstr ""
 
 #: bp/scene/templates/scene/place_events.html:31
-#: bp/scene/templates/scene/places.html:41
+#: bp/scene/templates/scene/places.html:96
 msgid "Location"
 msgstr ""
 
@@ -2825,43 +3010,46 @@ msgstr ""
 msgid "Additional Information"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:132
+#: bp/scene/templates/scene/place_events.html:136
 msgid "See Person's Details"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:161
+#: bp/scene/templates/scene/place_events.html:163
 msgid "No events"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:168
+#: bp/scene/templates/scene/place_events.html:170
 msgid "No source pointers found"
 msgstr ""
 
-#: bp/scene/templates/scene/place_events.html:173
+#: bp/scene/templates/scene/place_events.html:175
 msgid "The required place was not found."
 msgstr ""
 
-#: bp/scene/templates/scene/places.html:9
+#: bp/scene/templates/scene/places.html:23
 msgid "Places List"
 msgstr ""
 
-#: bp/scene/templates/scene/places.html:15
-msgid ""
-"This page contains a directory of all the places and the closest lower-"
-"level locations beneath them."
+#: bp/scene/templates/scene/places.html:31
+#, python-format
+msgid "Displaying %(num)s distinct places"
 msgstr ""
 
-#: bp/scene/templates/scene/places.html:40
+#: bp/scene/templates/scene/places.html:50
+msgid "Starting letters of place"
+msgstr ""
+
+#: bp/scene/templates/scene/places.html:95
 msgid "Location, related places"
 msgstr ""
 
-#: bp/scene/templates/scene/places.html:56
+#: bp/scene/templates/scene/places.html:111
 #, python-format
 msgid "see details of place %(id)s"
 msgstr ""
 
-#: bp/scene/templates/scene/places.html:62
-#: bp/scene/templates/scene/places.html:69
+#: bp/scene/templates/scene/places.html:117
+#: bp/scene/templates/scene/places.html:124
 msgid "Go to location"
 msgstr ""
 
@@ -2999,19 +3187,19 @@ msgstr ""
 msgid "Send request"
 msgstr ""
 
-#: bp/start/routes.py:90
+#: bp/start/routes.py:91
 msgid "Join message sent"
 msgstr ""
 
-#: bp/start/routes.py:92
+#: bp/start/routes.py:93
 msgid "Sending join message failed"
 msgstr ""
 
-#: bp/start/routes.py:141
+#: bp/start/routes.py:142
 msgid "Update did not work1"
 msgstr ""
 
-#: bp/start/routes.py:144
+#: bp/start/routes.py:145
 msgid "Update did not work"
 msgstr ""
 
@@ -3020,48 +3208,40 @@ msgid "Anonymous user"
 msgstr ""
 
 #: bp/start/templates/start/index_guest.html:15
+#: bp/start/templates/start/index_scene.html:15
 msgid "Exploring Isotammi Database"
 msgstr ""
 
 #: bp/start/templates/start/index_guest.html:31
+#: bp/start/templates/start/index_scene.html:31
 msgid "Select Material for Browsing"
 msgstr ""
 
 #: bp/start/templates/start/index_guest.html:35
+#: bp/start/templates/start/index_scene.html:35
 msgid "Demo database"
 msgstr ""
 
 #: bp/start/templates/start/index_guest.html:38
+#: bp/start/templates/start/index_scene.html:38
 msgid "My candidate material"
 msgstr ""
 
 #: bp/start/templates/start/index_guest.html:53
+#: bp/start/templates/start/index_scene.html:53
 msgid "The Browsed Material"
 msgstr ""
 
 #: bp/start/templates/start/index_guest.html:54
+#: bp/start/templates/start/index_scene.html:54
 msgid "You can view only approved and public material in Demo Database"
 msgstr ""
 
 #: bp/start/templates/start/index_guest.html:58
-#: bp/start/templates/start/index_logged.html:62
+#: bp/start/templates/start/index_logged.html:61
+#: bp/start/templates/start/index_logged.html:90
+#: bp/start/templates/start/index_scene.html:58
 msgid "Continue"
-msgstr ""
-
-#: bp/start/templates/start/index_guest.html:68
-msgid "Table format tools"
-msgstr ""
-
-#: bp/start/templates/start/index_guest.html:69
-msgid "A variety of more technical listings and problem solving tools."
-msgstr ""
-
-#: bp/start/templates/start/index_guest.html:70
-msgid "The data includes accepted and candidate materials of all users."
-msgstr ""
-
-#: bp/start/templates/start/index_guest.html:74
-msgid "Explore the database"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:4
@@ -3083,8 +3263,8 @@ msgid "Send your gedcom files and experiment various cleanup functions"
 msgstr ""
 
 #: bp/start/templates/start/index_logged.html:32
-#: bp/start/templates/start/my_settings.html:121
-#: bp/start/templates/start/my_settings.html:146
+#: bp/start/templates/start/my_settings.html:125
+#: bp/start/templates/start/my_settings.html:150
 msgid "My Gedcom files"
 msgstr ""
 
@@ -3106,38 +3286,52 @@ msgstr ""
 msgid "Browse and Manage"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:59
+#: bp/start/templates/start/index_logged.html:58
 msgid "Look at the Family Trees"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:60
-msgid ""
-"View your own data as candidate material and compare it with demo "
-"database."
+#: bp/start/templates/start/index_logged.html:59
+msgid "View your own data as candidate material"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:74
+#: bp/start/templates/start/index_logged.html:73
 msgid "Admin Operations"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:75
+#: bp/start/templates/start/index_logged.html:74
 msgid "Manage users, reference data sets and do database maintenance tasks"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:77
+#: bp/start/templates/start/index_logged.html:76
 msgid "Maintenance"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:87
+#: bp/start/templates/start/index_logged.html:88
+msgid "Operations between user candidate materials and Isotammi database"
+msgstr ""
+
+#: bp/start/templates/start/index_logged.html:100
 msgid "Tools and Links"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:89
+#: bp/start/templates/start/index_logged.html:102
 msgid "Study our supplementary stand-alone and Gramps utilities in our tools page"
 msgstr ""
 
-#: bp/start/templates/start/index_logged.html:91
+#: bp/start/templates/start/index_logged.html:104
 msgid "Help page"
+msgstr ""
+
+#: bp/start/templates/start/index_scene.html:4
+msgid "Materials"
+msgstr ""
+
+#: bp/start/templates/start/index_scene.html:69
+msgid "A variety of more technical listings and problem solving tools."
+msgstr ""
+
+#: bp/start/templates/start/index_scene.html:74
+msgid "Explore the database"
 msgstr ""
 
 #: bp/start/templates/start/join.html:5 bp/start/templates/start/join.html:36
@@ -3145,7 +3339,7 @@ msgstr ""
 msgid "Join Isotammi"
 msgstr ""
 
-#: bp/start/templates/start/join.html:49 templates/index_entry.html:58
+#: bp/start/templates/start/join.html:49 templates/index_entry.html:63
 msgid "Join us"
 msgstr ""
 
@@ -3194,12 +3388,16 @@ msgid "Thank You!"
 msgstr ""
 
 #: bp/start/templates/start/my_message.html:4
-#: bp/start/templates/start/my_message.html:41
+#: bp/start/templates/start/my_message.html:46
 msgid "Contact administrators"
 msgstr ""
 
-#: bp/start/templates/start/my_message.html:53
+#: bp/start/templates/start/my_message.html:58
 msgid "Message from Isotammi user"
+msgstr ""
+
+#: bp/start/templates/start/my_message.html:66
+msgid "Close"
 msgstr ""
 
 #: bp/start/templates/start/my_settings.html:3
@@ -3219,52 +3417,48 @@ msgstr ""
 msgid "Change language"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:66
+#: bp/start/templates/start/my_settings.html:70
 msgid "Active Roles"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:76
+#: bp/start/templates/start/my_settings.html:80
 msgid "Ask for a new role"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:78
+#: bp/start/templates/start/my_settings.html:82
 msgid "Send a message to Isotammi office to acquire permission for new steps."
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:80
+#: bp/start/templates/start/my_settings.html:84
 #: bp/start/templates/start/s_macros.html:26
 msgid "Contact administrator"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:89
+#: bp/start/templates/start/my_settings.html:93
 msgid "Candidate Materials"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:90
+#: bp/start/templates/start/my_settings.html:94
 msgid "The amount of some data nodes included in your candidate data batches."
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:101
-msgid "saved at"
-msgstr ""
-
-#: bp/start/templates/start/my_settings.html:108
+#: bp/start/templates/start/my_settings.html:112
 msgid "Upload or remove a file or candidate batch"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:114
+#: bp/start/templates/start/my_settings.html:118
 msgid "You have no candidate data loaded in the database."
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:116
+#: bp/start/templates/start/my_settings.html:120
 msgid "Upload another file"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:126
+#: bp/start/templates/start/my_settings.html:130
 msgid "Bytes"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:147
+#: bp/start/templates/start/my_settings.html:151
 msgid "You have no Gedcom files in the server."
 msgstr ""
 
@@ -3300,8 +3494,8 @@ msgstr ""
 msgid "Log in to this application"
 msgstr ""
 
-#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:64
-#: templates/index_entry.html:70
+#: bp/start/templates/start/s_macros.html:38 templates/index_entry.html:71
+#: templates/index_entry.html:77
 msgid "Log in"
 msgstr ""
 
@@ -3445,67 +3639,67 @@ msgid ""
 "sent, you can ask for a new one."
 msgstr ""
 
-#: bp/tools/routes.py:65
+#: bp/tools/routes.py:64
 msgid "Note List"
 msgstr ""
 
-#: bp/tools/routes.py:65
+#: bp/tools/routes.py:64
 msgid "Note Items"
 msgstr ""
 
-#: bp/tools/routes.py:84 templates/cite_sour_repo.html:55
+#: bp/tools/routes.py:83 templates/cite_sour_repo.html:55
 msgid "Repositories"
 msgstr ""
 
-#: bp/tools/routes.py:84
+#: bp/tools/routes.py:83
 msgid "Repository data"
 msgstr ""
 
-#: bp/tools/routes.py:112
+#: bp/tools/routes.py:111
 msgid "Material type"
 msgstr ""
 
-#: bp/tools/routes.py:112
+#: bp/tools/routes.py:111
 msgid "processing still missing"
 msgstr ""
 
-#: bp/tools/routes.py:165
+#: bp/tools/routes.py:164
 msgid "{} in Family {}/{}"
 msgstr ""
 
-#: bp/tools/routes.py:167
+#: bp/tools/routes.py:166
 msgid " Mother: {}/{} p. {}"
 msgstr ""
 
-#: bp/tools/routes.py:169
+#: bp/tools/routes.py:168
 msgid " Father: {}/{} p. {}"
 msgstr ""
 
-#: bp/tools/routes.py:172
+#: bp/tools/routes.py:171
 msgid " Child ({}): {}/{} * {}"
 msgstr ""
 
-#: bp/tools/routes.py:174 bp/tools/routes.py:341
+#: bp/tools/routes.py:173 bp/tools/routes.py:340
 msgid "Wrong Search key"
 msgstr ""
 
-#: bp/tools/routes.py:259
+#: bp/tools/routes.py:258
 msgid "Only the OID can retrieve"
 msgstr ""
 
-#: bp/tools/routes.py:332
+#: bp/tools/routes.py:331
 msgid "{} in the family {} / {}"
 msgstr ""
 
-#: bp/tools/routes.py:334
+#: bp/tools/routes.py:333
 msgid "  Mother: {} / {} s. {}"
 msgstr ""
 
-#: bp/tools/routes.py:336
+#: bp/tools/routes.py:335
 msgid "  Father:  {} / {} s. {}"
 msgstr ""
 
-#: bp/tools/routes.py:339
+#: bp/tools/routes.py:338
 msgid "    Child ({}): {} / {} *{}"
 msgstr ""
 
@@ -3744,7 +3938,7 @@ msgstr ""
 msgid "link"
 msgstr ""
 
-#: bp/tools/templates/tools/table_person_by_id.html:56 models/datareader.py:581
+#: bp/tools/templates/tools/table_person_by_id.html:56 models/datareader.py:584
 msgid "type"
 msgstr ""
 
@@ -3863,87 +4057,87 @@ msgstr ""
 msgid "Data Views"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:14
+#: bp/tools/templates/tools/tables.html:13
 msgid "Technical views"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:17
+#: bp/tools/templates/tools/tables.html:16
 msgid "Data Views as tables"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:19
+#: bp/tools/templates/tools/tables.html:18
 msgid "Show people"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:20
+#: bp/tools/templates/tools/tables.html:19
 msgid "Show families"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:21
+#: bp/tools/templates/tools/tables.html:20
 msgid "List of surnames"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:22
+#: bp/tools/templates/tools/tables.html:21
 msgid "List of media files, called recordings"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:23
+#: bp/tools/templates/tools/tables.html:22
 msgid "List of repositories"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:24
+#: bp/tools/templates/tools/tables.html:23
 msgid "(on Repository page sources in Repository)"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:25
+#: bp/tools/templates/tools/tables.html:24
 msgid "List of sources (references on the source page)"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:26
+#: bp/tools/templates/tools/tables.html:25
 msgid "Comments"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:32
+#: bp/tools/templates/tools/tables.html:31
 msgid "Find possible doubles"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:34
+#: bp/tools/templates/tools/tables.html:33
 msgid "Find people with the same name"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:35
+#: bp/tools/templates/tools/tables.html:34
 msgid "Find people with the same birth date"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:36
+#: bp/tools/templates/tools/tables.html:35
 msgid "Find people with the same date of death"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:40
+#: bp/tools/templates/tools/tables.html:39
 msgid "Problem Solving Tools"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:42
+#: bp/tools/templates/tools/tables.html:41
 msgid "Persons without birth event"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:43
+#: bp/tools/templates/tools/tables.html:42
 msgid "Senior Citizens, Top twenty"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:44
+#: bp/tools/templates/tools/tables.html:43
 msgid "Events without place information"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:45
+#: bp/tools/templates/tools/tables.html:44
 msgid "Unreferenced sources"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:46
+#: bp/tools/templates/tools/tables.html:45
 msgid "Sources without a repository"
 msgstr ""
 
-#: bp/tools/templates/tools/tables.html:47
+#: bp/tools/templates/tools/tables.html:46
 msgid "Unreferenced Events"
 msgstr ""
 
@@ -3976,15 +4170,15 @@ msgstr ""
 msgid "Showing places"
 msgstr ""
 
-#: models/datareader.py:609 models/datareader.py:622
+#: models/datareader.py:612 models/datareader.py:625
 msgid "Source list"
 msgstr ""
 
-#: models/datareader.py:610
+#: models/datareader.py:613
 msgid "Showing sources without source citations"
 msgstr ""
 
-#: models/datareader.py:623
+#: models/datareader.py:626
 msgid "Showing sources without a repository"
 msgstr ""
 
@@ -4012,27 +4206,27 @@ msgstr ""
 msgid "my batch and Isotammi"
 msgstr ""
 
-#: models/gen/dates.py:184
+#: models/gen/dates.py:220
 msgid "calculated "
 msgstr ""
 
-#: models/gen/dates.py:187
+#: models/gen/dates.py:223
 msgid "estimated "
 msgstr ""
 
-#: models/gen/dates.py:197
+#: models/gen/dates.py:233
 msgid "{}till {}"
 msgstr ""
 
-#: models/gen/dates.py:200
+#: models/gen/dates.py:236
 msgid "{}from {}"
 msgstr ""
 
-#: models/gen/dates.py:205
+#: models/gen/dates.py:241
 msgid "{}between {} … {}"
 msgstr ""
 
-#: models/gen/dates.py:208
+#: models/gen/dates.py:244
 msgid "{}about {}"
 msgstr ""
 
@@ -4192,19 +4386,19 @@ msgstr ""
 msgid "Here you can see a restricted view on demo genealogical data."
 msgstr ""
 
-#: templates/index_entry.html:54
+#: templates/index_entry.html:58
 msgid "Explore demo"
 msgstr ""
 
-#: templates/index_entry.html:56
+#: templates/index_entry.html:61
 msgid "To see the full data, you can fill the registration form here"
 msgstr ""
 
-#: templates/index_entry.html:65
+#: templates/index_entry.html:72
 msgid "As a member of <i>Suomen sukututkimusseura</i>, you can log in,"
 msgstr ""
 
-#: templates/index_entry.html:66
+#: templates/index_entry.html:73
 msgid ""
 "refine the structure of your own data and get full access to the demo "
 "database"
@@ -4425,6 +4619,10 @@ msgstr ""
 
 #: templates/jinja_filters.py:106
 msgid "confidence 4/4"
+msgstr ""
+
+#: templates/jinja_filters.py:120
+msgid "See"
 msgstr ""
 
 #: templates/jinja_filters.py:122 templates/jinja_filters.py:136

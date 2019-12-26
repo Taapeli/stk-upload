@@ -1,0 +1,57 @@
+{# _admin/batch_clear.html_ #}
+{% extends "audit/layout.html" %}
+{% block title %}{{ _("Empty batches") }}{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<div id="startdiv">
+    <div>
+{% if user %}
+    	<h2>{{ _("Empty batches for user") }} {{ user }}</h2>
+{% else %}
+	    <h2>{{ _("Empty batches") }}</h2>
+{% endif %}
+ 
+ {% if uploads|count > 0 %}
+	<div class="startbox">
+<!-- 	    <h3>{{ _('Selected Batch') }}</h3> -->
+	    <table width="100%">
+           <tr>
+	            <th>{{ _("User") }}</th>
+                <th>{{ _("Batch") }}</th>
+           </tr>
+	    {% for batch in uploads %}
+	       <tr>
+               <td>{{batch.user}}</td>
+	           <td class="msg_INFO">{{batch.id}} ({{batch.status}})</td>
+	       </tr>
+	    {% endfor %}
+	    </table>
+	</div>
+{% endif %}
+
+    <div class="startbox">
+        <h3>{{ _("Number of empty batches") }}: {{ uploads|count }}</h3>
+{% if removed > 0 %}
+        <p>{{ _('Removed %(n)s batches', n=removed) }}</p>
+{% endif %}
+        <p>{{ _("The empty batches will be removed, except those which are created today.") }}</p>
+        <form action="/admin/clear_batches" method="post">     
+		<div class="submit"> 
+		   <input type="hidden" value="{{batch}}" name="batch">
+		   <input type="hidden" value="{{user}}" name="user">
+           <input type="hidden" value="True" name="clear">
+		   <input type="submit" value="{{ _('Remove') }}" 
+		    {% if uploads|count == 0 %}disabled{% endif %} />
+		</div>
+		</form>
+    </div>
+
+{% endblock %}
+</body>
+</html>
+

@@ -1,7 +1,10 @@
 [description]
+Suluissa oleva sukunimi -> aka
+e.  -> entinen
+os. -> syntymänimi
+af  -> SPFX
 
 [options]
-xdisplay_changes = false
 
 [original]
 0 HEAD

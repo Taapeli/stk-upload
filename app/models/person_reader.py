@@ -390,16 +390,19 @@ class PersonReader():
                         r_order = rel.get('order')
                         if r_order != None:
                             o.order = r_order
-                            left = rel.get('left')
-                            if left != None:
-                                upper = rel.get('upper')
-                                right = rel.get('right')
-                                lower = rel.get('lower')
-                                o.crop = (left, upper, right, lower)
-                                print(f'#\tMedia order={o.order}, crop={o.crop}')
                     # Store reference to referee object
                     if hasattr(x, 'media_ref'):
-                        x.media_ref.append(o.uniq_id)
+                        # Add media reference crop attributes
+                        left = rel.get('left')
+                        if left != None:
+                            upper = rel.get('upper')
+                            right = rel.get('right')
+                            lower = rel.get('lower')
+                            crop = (left, upper, right, lower)
+                        else:
+                            crop = None
+                        print(f'#\tMedia ref {o.uniq_id} order={o.order}, crop={crop}')
+                        x.media_ref.append((o.uniq_id,crop))
                     else:
                         print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
                     #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')

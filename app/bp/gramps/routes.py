@@ -18,6 +18,7 @@ from flask_babelex import _
 import shareds
 from models import loadfile, email, util, syslog 
 from . import bp
+from . import gramps_loader
 from ..admin import uploads
 from .models import batch
 
@@ -95,6 +96,13 @@ def error_page(code, text=''):
     """ Virhesivu näytetään """
     logging.debug('Virhesivu ' + str(code) )
     return render_template("virhe_lataus.html", code=code, text=text)
+
+@bp.route('/gramps/xml_analyze/<xmlfile>')
+@login_required
+@roles_accepted('research', 'admin')
+def xml_analyze(xmlfile):
+    text = gramps_loader.analyze(current_user.username, xmlfile)
+    return render_template("/gramps/analyze_xml.html", text=text)
 
 @bp.route('/gramps/xml_delete/<xmlfile>')
 @login_required

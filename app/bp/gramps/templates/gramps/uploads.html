@@ -17,7 +17,7 @@ function selectFile(sel, batch_id, xml_name) {
     // Button rules for selected row:
     //   id           disabled
     // download     if xml_name
-    // start_upload if xml_name         // to database
+    // start_upload if xml_name         // (bring to database)
     // show_log     always
     // batch_delete if batch_id
     // xml_delete   if not batch_id
@@ -26,6 +26,8 @@ function selectFile(sel, batch_id, xml_name) {
     {
 	    buttons[i].disabled = false;
 	    if (buttons[i].id == 'download' && xml_name == '')
+	        buttons[i].disabled = true;
+	    if (buttons[i].id == 'analyze' && xml_name == '')
 	        buttons[i].disabled = true;
 	    if (buttons[i].id == 'start_upload' && xml_name == '')
 	        buttons[i].disabled = true;
@@ -46,6 +48,12 @@ $(document).ready( function() {
     
     $("#download").click(function(e) {
         $("#form").attr("action","/gramps/xml_download/" + 
+                document.getElementById('nm').innerText);
+        $("#form").submit();
+    });
+    
+    $("#analyze").click(function(e) {
+        $("#form").attr("action","/gramps/xml_analyze/" + 
                 document.getElementById('nm').innerText);
         $("#form").submit();
     });
@@ -111,17 +119,30 @@ function confirm_delete(subj, name) {
       {% endif %}
     {% endwith %}
 
-    <h3>{{ _("Steps for uploading Gramps files") }}</h3>
-    <div class="steps">
-        <div>1. {{ _("UPLOADED") }}<br>{{ _("the file has been uploaded to server") }}</div> –
-        <div>2. {{ _("STORING") }}<br>{{ _("the file content is being stored to the database") }}</div>
-        –
-        <div>3. {{ _("STORED") }}<br>{{ _("the file content has been stored to the database") }}</div>
-        &nbsp;
-        <div class="bg">
-	        <div class="exception">{{ _("REMOVED") }}<br>{{ _("Not found any more") }}</div>
-	        <div class="exception">{{ _("FAILED") }}<br>{{ _("there was an error") }}</div>
-        </div>
+    <div class="helptext">
+        <table class=legend>
+        <tr><td colspan="3"><b>{{ _("Steps for uploading Gramps files") }}</b>
+        <tr>
+        <td>1
+        <td>{{ _("UPLOADED") }}     
+        <td>{{ _("the file has been uploaded to server") }}
+        <tr>
+        <td>2
+        <td>{{ _("STORING") }}
+        <td>{{ _("the file content is being stored to the database") }}
+        <tr>
+        <td>3
+        <td>{{ _("STORED") }}
+        <td>{{ _("the file content has been stored to the database") }}
+        <tr>
+        <td>4
+        <td>{{ _("REMOVED") }}
+        <td>{{ _("Not found any more") }}
+        <tr>
+        <td>5
+        <td>{{ _("ERROR") }} / {{ _("FAILED") }}
+        <td>{{ _("there was an error") }}
+        </table>
     </div>
 
     <table class="fileselect" style="border-width: 2px 3px 3px 2px; min-width: 725px;">
@@ -160,6 +181,7 @@ function confirm_delete(subj, name) {
 	    <h3>{{ _("Operations for") }} <i id="nm">({{ _('the selected file') }})</i></h3>
         <div>{{ _("Saving data") }}:
             <button id="download" disabled>{{ _("Download the Gramps file") }}</button>
+            <button id="analyze" disabled>{{ _("Analyze the Gramps file") }}</button>
             <button id="start_upload" disabled>{{ _("Store to database") }}</button>
             <button id="show_log" disabled>{{ _("Show last log") }}</button>
         </div>

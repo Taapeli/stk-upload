@@ -16,6 +16,7 @@ from flask_babelex import _
 
 import shareds
 from models import email
+from bp.api import api
 
 from bp.start.forms import JoinForm
 from bp.admin.users import Batches
@@ -49,7 +50,7 @@ def start_guest():
 
 @shareds.app.route('/start/logged', methods=['GET', 'POST'])
 @login_required
-@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
+#@roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
 def start_logged():
     """ Opening the home page for logged in user (from login page or home button) 
         or anonymous user (home).
@@ -155,6 +156,7 @@ def my_settings():
                            is_guest=is_guest,
                            referrer=referrer,
                            roles=current_user.roles,
+                           apikey=api.get_apikey(current_user),
                            labels=labels,
                            batches=user_batches,
                            gedcoms=gedcoms)

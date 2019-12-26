@@ -60,6 +60,8 @@ syslog_cypher_read_forward = """
 """
 
 def log(type,**kwargs):
+    """ Create a Syslog event node with given arguments and timestamp.
+    """
     try:
         user=current_user.username
     except:
@@ -68,8 +70,9 @@ def log(type,**kwargs):
     timestr=util.format_timestamp(timestamp)
     msg = json.dumps(kwargs)
     try:
-        shareds.driver.session().run( syslog_cypher_write, type=type, user=user, msg=msg, time=timestamp,timestr=timestr)
-    except Exception as ex:
+        shareds.driver.session().run(syslog_cypher_write, type=type, user=user,
+                                     msg=msg, time=timestamp, timestr=timestr)
+    except Exception:
         traceback.print_exc()
     
 def readlog(direction="backward",startid=None):

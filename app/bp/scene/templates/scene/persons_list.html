@@ -39,8 +39,9 @@
 	           <div id="description">
                    <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
                        {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
-                       {% else %}{{ _('from begin') }},
-                       {% endif %}{{ _('data set') }}
+                       {% else %}{{ _('from begin') }}
+                       {% endif %}
+                       <!-- ,{{ _('data set') }}
                        <b>{% if multi_owners %}
                             &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
                        {% else %}{{my_set}}
@@ -49,6 +50,7 @@
                        (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
                             style="text-decoration-line: underline;">Vaihda</a></i>).
                        {% endif %}</p>
+                       -->
 	           </div>
 	           <div>
 	               <form action="/scene/persons_all">
@@ -126,7 +128,7 @@
 	                       {# Special hack, see "Can a Jinja variable's scope extend beyond in an inner block?" #}
 	                       {% set not_mine = [False] %}
 	                   {% for ow in p.owners %}
-                           {% if ow == user %}
+                           {% if config['DEMO'] or ow == user %}
                            <div class="detail_link" alt="{{p.uniq_id}}">
                              {{p.sex_symbol()}} {{macro.person(p)}}
                            </div>

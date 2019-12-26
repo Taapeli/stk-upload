@@ -93,13 +93,10 @@ div#paluu {
 }
 
 .admin {background-color: pink;}
+.audit {background-color: #f9f8bf;} /* yellowish */
 .gedtools {background-color: lightsteelblue;}
 .startbox h3, .startbox2 h3 { margin-top: 5px; margin-bottom: 5px; }
 .startbox div, .startbox2 div { display: inline-block; width: 100%; }
-/* Changed 1.3.2019/JMä
-.startbox ul, .startbox2 ul { display: inline-block; width: 100%; 
-    list-style-type: none; margin-left: -24pt; }
-*/
 .startbox ul, .startbox2 ul {
     list-style-type: disc;
     margin-left: -26px;
@@ -116,6 +113,7 @@ ul.compact {
 ul.compact > li {list-style-type: disc}
 
 .not-allowed {cursor: not-allowed;}
+.editlink::before { content: "✎ "; }
 
 table, th, td {
     border: 1px solid silver;
@@ -190,7 +188,7 @@ li.itemrow {
 
 .flashes {
     font-size: 10pt;
-    margin: 2em;
+    margin: 2em 6em;
     padding: 0.5em 3em;
     color: darkblue;
     border: solid 2pt darkblue; 
@@ -250,8 +248,15 @@ div.legend { /* Not used? */
      border-left: 6px solid silver;
 }
 table.legend, table.legend > tbody > tr > td, table.legend > tbody > tr > th {
-   border:none;
-   outline:none;
+    border:none;
+    outline:none;
+    margin: 1em 4em; 
+    font-size: 90%;
+    border-left: 6px solid silver;
+}
+table.legend > tbody > tr > td, table.legend > tbody > tr > th {
+    border:none;
+    outline:none;
 }
 
 div.steps { margin: 1em;}
@@ -316,3 +321,6 @@ a.navlink:hover, a.navlink:active {
   background-color: gray;
 }
 
+div.content {
+	margin: 2em;
+}

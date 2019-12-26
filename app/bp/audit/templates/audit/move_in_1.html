@@ -1,0 +1,43 @@
+{# _audit/move_in_1.html_ #}
+{% extends "audit/layout.html" %}
+{% block title %}{{ _("Material for Isotammi database") }} 1/2{% endblock %}
+{% block body %}
+{{ super() }}
+{% include "security/_messages.html" %}
+{% from "start/s_macros.html" import hamburger_menu with context %}
+
+{{ hamburger_menu() }}
+
+<div id="startdiv">
+    <div>
+        <h2>{{ _("Moving batch to Isotammi database") }}</h2>
+
+        <div class="startbox2">
+            <h3>{{ _('Selected Batch') }}</h3>
+            <table width="100%">
+                <tr>
+                    {% set w = (100.0 / (label_nodes|length + 3) | round(0,'floor')) | int %}
+                    <th>{{ _('Batch id') }}</th>
+                    {% for label, cnt in label_nodes %}<th style="width: {{w}}%">{{ _(label|trim) }}</th>{% endfor %}
+                </tr>
+                <tr>
+                    <td>{{batch}}{% if time %}<br>
+                    <small>{{ _('saved at') }} {{time}}</small>{% endif %}
+                    </td> {% for label, cnt in label_nodes %}
+                    <td class="right">{{cnt}}</td> {% endfor %}
+                </tr>
+            </table>
+            <form action="/audit/movenow" method="post">     
+                <p>{{ _('From user') }} <b>{{user}}</b></p>        
+	            <div class="submit"> 
+                   <input type="hidden" value="{{batch}}" name="batch">
+                   <input type="hidden" value="{{user}}" name="user">
+                   <input type="submit" value="{{ _('Move to Isotammi database') }}" />
+	            </div>
+<!--            <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back without changes') }}</a></p> -->
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

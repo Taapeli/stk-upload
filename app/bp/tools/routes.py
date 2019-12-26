@@ -18,11 +18,10 @@ from models import datareader          # Tietojen haku kannasta (tai työtiedost
 from .models import dataupdater         # Tietojen päivitysmetodit: joinpersons
 
 from . import bp
-from . import api
 
 @bp.route('/tables')
 @login_required
-@roles_accepted('member', 'admin')
+@roles_accepted('audit', 'admin')
 def datatables():
     """ Home page for table format tools """
     return render_template("/tools/tables.html")
@@ -378,39 +377,3 @@ def henkiloiden_yhdistely():
     flash('Yhdistettiin (muka) ' + str(base_id) + " + " + str(join_ids) )
     return redirect(url_for('pick_selection', ehto='names='+names))
 
-@bp.route('/api/v1/search', methods=['GET'])
-def api_v1_search():
-    lookfor = request.args.get("lookfor")
-    print(lookfor)
-    if not lookfor: return jsonify(dict(
-            status="Error",
-            statusText="Missing argument 'lookfor'",
-        ))
-    rsp = api.search(lookfor) 
-    response = jsonify(rsp)
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response 
-
-@bp.route('/api/v1/record', methods=['GET'])
-def api_v1_record():
-    rid = request.args.get("id")
-    if not rid: return jsonify(dict(
-            status="Error",
-            statusText="Missing argument 'id'",
-        ))
-    rsp = api.record(int(rid)) 
-    response = jsonify(rsp)
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response 
-
-@bp.route('/api/v1/record_with_subs', methods=['GET'])
-def api_v1_record_with_subs():
-    rid = request.args.get("id")
-    if not rid: return jsonify(dict(
-            status="Error",
-            statusText="Missing argument 'id'",
-        ))
-    rsp = api.record_with_subs(int(rid)) 
-    response = jsonify(rsp)
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response 

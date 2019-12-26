@@ -36,8 +36,14 @@ shareds.app.register_blueprint(gramps_bp)
 from bp.admin import bp as admin_bp
 shareds.app.register_blueprint(admin_bp)
 
+from bp.audit import bp as audit_bp
+shareds.app.register_blueprint(audit_bp)
+
 from bp.dupsearch import bp as dupsearch_bp
 shareds.app.register_blueprint(dupsearch_bp)
+
+from bp.api import bp as api_bp
+shareds.app.register_blueprint(api_bp)
 
 @shareds.babel.localeselector
 def get_locale():

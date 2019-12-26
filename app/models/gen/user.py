@@ -3,7 +3,7 @@
     
     No user administration any more.
     
-    USED only in models.gen.refname.Refname
+    NOT USED any more only in models.gen.refname.Refname
 
 Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
