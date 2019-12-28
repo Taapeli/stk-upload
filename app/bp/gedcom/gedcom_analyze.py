@@ -189,6 +189,8 @@ class Analyzer(transformer.Transformation):
         self.without_sources = LineCounter(_("Without sources"))
         self.place_with_no_hierarchy = LineCounter(_("Places without hierarchy"))
         self.invalid_surnames = LineCounter(_("Possibly invalid surnames"))
+        self.invalid_firstnames = LineCounter(_("Possibly invalid firstnames"))
+
         self.genders = defaultdict(int)
         self.invalid_pointers = []
         self.mandatory_paths = {
@@ -202,6 +204,7 @@ class Analyzer(transformer.Transformation):
             "TRLR",
         }
         self.parser = nameparser.SurnameParser()
+        self.parser2 = nameparser.NameParser()
 
     def transform(self,item,options,phase):
         if 0:
@@ -295,6 +298,12 @@ class Analyzer(transformer.Transformation):
                     self.parser.parse_sukunimet(surnames)
                 except xparser.ParseError:
                     self.invalid_surnames.add(surnames,item)
+            if i > 0:
+                firstnames = item.value[:i]
+                try:    
+                    self.parser2.parse_etunimet(firstnames)
+                except xparser.ParseError:
+                    self.invalid_firstnames.add(firstnames,item)
 
         return True
 
@@ -326,6 +335,7 @@ class Analyzer(transformer.Transformation):
         self.family_with_no_parents.display()
         self.place_with_no_hierarchy.display()
         self.invalid_surnames.display()
+        self.invalid_firstnames.display()
         
         self.submitter_refs2 = LineCounter(_("Submitters"))
         for xref,itemlist in self.submitter_refs.values.items():

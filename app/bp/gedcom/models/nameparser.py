@@ -109,3 +109,57 @@ class SurnameParser:
 
       
     
+class NameParser:
+    '''
+    name := etunimi* "/" sukunimet "/" patronyymi
+    
+    etunimi := nimi ["*"] | "(" nimi ")"
+     
+    '''
+    def parse_name(self,name):
+        i = name.find("/")
+        j = name.rfind("/")
+        if i >= 0:
+            etunimistring = name[:i]
+            rv_etunimet = self.parse_etunimet(etunimistring)
+        if i+1 < j:
+            sukunimet = name[i+1:j]
+            p = SurnameParser()
+            rv_sukunimet = p.parse_sukunimet(sukunimet)
+        patronyymistring = name[j+1].strip()
+        p = Parser(patronyymistring)
+        p.parse(NAME,END)
+        patronyymi = p.value
+        return SimpleNamespace(etunimet=rv_etunimet,
+                               sukunimet=rv_sukunimet,
+                               patronyymi=patronyymi)
+
+    def parse_etunimet(self,etunimistring):
+        p = Parser(etunimistring)
+        etunimet = []
+        while True:
+            i = p.parse(NAME,"(",'"',END)
+            if i == 1:
+                nimi = p.value
+                if p.optional("*"):
+                    tyyppi = "CALL"
+                elif p.optional("."):
+                    tyyppi = "PATRO"
+                else:
+                    tyyppi = ""
+            if i == 2:
+                p.parse(NAME)
+                nimi = p.value
+                p.parse(")")
+                tyyppi = "NICK"
+            if i == 3:
+                p.parse(NAME)
+                nimi = p.value
+                p.parse('"')
+                tyyppi = "NICK"
+            if i == 4: 
+                break
+            etunimet.append((tyyppi,nimi))
+        return etunimet
+                
+                
