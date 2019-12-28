@@ -6,7 +6,7 @@ from contextlib import redirect_stdout
 
 from . import transformer
 from flask_babelex import _, ngettext
-from bp.gedcom.models import nameparser, myparser
+from bp.gedcom.models import nameparser, xparser
 
 name = _("GEDCOM Analyzer")
 
@@ -293,7 +293,7 @@ class Analyzer(transformer.Transformation):
                 surnames = item.value[i+1:j]
                 try:    
                     self.parser.parse_sukunimet(surnames)
-                except myparser.ParseError:
+                except xparser.ParseError:
                     self.invalid_surnames.add(surnames,item)
 
         return True
