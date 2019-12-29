@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-12-28 18:36+0200\n"
+"POT-Creation-Date: 2019-12-29 10:24+0200\n"
 "PO-Revision-Date: 2018-06-30 15:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -22,17 +22,17 @@ msgstr ""
 msgid "Undefined"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:52 config.py:30
+#: bp/start/templates/start/my_settings.html:56 config.py:30
 #: templates/select_refcols.html:48 templates/select_refcols.html:76
 msgid "Finnish"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:54 config.py:31
+#: bp/start/templates/start/my_settings.html:58 config.py:31
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:56 config.py:32
+#: bp/start/templates/start/my_settings.html:60 config.py:32
 msgid "English"
 msgstr ""
 
@@ -433,7 +433,7 @@ msgstr ""
 #: bp/dupsearch/templates/dupsearch.html:30
 #: bp/gramps/templates/gramps/index_gramps.html:36
 #: bp/start/templates/start/my_message.html:52
-#: bp/start/templates/start/my_settings.html:33
+#: bp/start/templates/start/my_settings.html:37
 msgid "User"
 msgstr ""
 
@@ -880,7 +880,7 @@ msgid "Log of Gramps XML upload"
 msgstr ""
 
 #: bp/admin/templates/admin/load_result.html:19
-#: bp/gramps/templates/gramps/analyze_xml.html:13
+#: bp/gramps/templates/gramps/analyze_xml.html:20
 #: bp/gramps/templates/gramps/result.html:27
 msgid "Return"
 msgstr ""
@@ -1021,7 +1021,7 @@ msgid "Store to Database"
 msgstr ""
 
 #: bp/admin/templates/admin/talletettu.html:28
-#: bp/start/templates/start/my_settings.html:64
+#: bp/start/templates/start/my_settings.html:30
 #: bp/tools/templates/tools/person2.html:43
 #: bp/tools/templates/tools/source_citations.html:35
 #: templates/cite_sour_repo.html:75 templates/db_test.html:10
@@ -1334,32 +1334,36 @@ msgstr ""
 msgid "Possibly invalid surnames"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:308
+#: bp/gedcom/gedcom_analyze.py:192
+msgid "Possibly invalid firstnames"
+msgstr ""
+
+#: bp/gedcom/gedcom_analyze.py:317
 msgid "Genders"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:330
+#: bp/gedcom/gedcom_analyze.py:340
 msgid "Submitters"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:338
+#: bp/gedcom/gedcom_analyze.py:348
 msgid "Missing paths"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:344
+#: bp/gedcom/gedcom_analyze.py:354
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:348
+#: bp/gedcom/gedcom_analyze.py:358
 msgid "Invalid pointers"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:356
+#: bp/gedcom/gedcom_analyze.py:366
 msgid "Missing records"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:364
+#: bp/gedcom/gedcom_analyze.py:374
 msgid "Unused records"
 msgstr ""
 
@@ -1669,6 +1673,7 @@ msgid "GEDCOM comparison"
 msgstr ""
 
 #: bp/gedcom/templates/gedcom_info.html:226
+#: bp/gramps/templates/gramps/analyze_xml.html:14
 msgid "Results"
 msgstr ""
 
@@ -2060,12 +2065,8 @@ msgstr ""
 msgid "Gramps to Neo5j analyze"
 msgstr ""
 
-#: bp/gramps/templates/gramps/analyze_xml.html:6
+#: bp/gramps/templates/gramps/analyze_xml.html:11
 msgid "Analyze of the Gramps XML"
-msgstr ""
-
-#: bp/gramps/templates/gramps/analyze_xml.html:8
-msgid "Analyze"
 msgstr ""
 
 #: bp/gramps/templates/gramps/index_gramps.html:3
@@ -3412,12 +3413,12 @@ msgstr ""
 msgid "My Profile Page"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:42
+#: bp/start/templates/start/my_settings.html:46
 #: bp/start/templates/start/s_macros.html:41
 msgid "Logout"
 msgstr ""
 
-#: bp/start/templates/start/my_settings.html:47
+#: bp/start/templates/start/my_settings.html:51
 msgid "Change language"
 msgstr ""
 
