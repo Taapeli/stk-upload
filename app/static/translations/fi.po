@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-12-21 19:45+0200\n"
-"PO-Revision-Date: 2019-12-18 19:46+0200\n"
+"POT-Creation-Date: 2019-12-29 10:24+0200\n"
+"PO-Revision-Date: 2019-12-28 18:37+0200\n"
 "Last-Translator: \n"
 "Language: fi_FI\n"
 "Language-Team: \n"
@@ -22,17 +22,17 @@ msgstr ""
 msgid "Undefined"
 msgstr "Määrittelemätön"
 
-#: bp/start/templates/start/my_settings.html:52 config.py:30
+#: bp/start/templates/start/my_settings.html:56 config.py:30
 #: templates/select_refcols.html:48 templates/select_refcols.html:76
 msgid "Finnish"
 msgstr "suomi"
 
-#: bp/start/templates/start/my_settings.html:54 config.py:31
+#: bp/start/templates/start/my_settings.html:58 config.py:31
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr "ruotsi"
 
-#: bp/start/templates/start/my_settings.html:56 config.py:32
+#: bp/start/templates/start/my_settings.html:60 config.py:32
 msgid "English"
 msgstr "englanti"
 
@@ -433,7 +433,7 @@ msgstr "Voimassa olevat käyttöoikeudet"
 #: bp/dupsearch/templates/dupsearch.html:30
 #: bp/gramps/templates/gramps/index_gramps.html:36
 #: bp/start/templates/start/my_message.html:52
-#: bp/start/templates/start/my_settings.html:33
+#: bp/start/templates/start/my_settings.html:37
 msgid "User"
 msgstr "Käyttäjä"
 
@@ -880,7 +880,7 @@ msgid "Log of Gramps XML upload"
 msgstr "Loki Gramps-tiedoston latauksesta palvelimelle"
 
 #: bp/admin/templates/admin/load_result.html:19
-#: bp/gramps/templates/gramps/analyze_xml.html:13
+#: bp/gramps/templates/gramps/analyze_xml.html:20
 #: bp/gramps/templates/gramps/result.html:27
 msgid "Return"
 msgstr "Palaa"
@@ -1021,7 +1021,7 @@ msgid "Store to Database"
 msgstr "Tietojen talletus kantaan"
 
 #: bp/admin/templates/admin/talletettu.html:28
-#: bp/start/templates/start/my_settings.html:64
+#: bp/start/templates/start/my_settings.html:30
 #: bp/tools/templates/tools/person2.html:43
 #: bp/tools/templates/tools/source_citations.html:35
 #: templates/cite_sour_repo.html:75 templates/db_test.html:10
@@ -1278,84 +1278,92 @@ msgstr "Luo indeksi"
 msgid "Drop index"
 msgstr "Poista indeksi"
 
-#: bp/gedcom/gedcom_analyze.py:10
+#: bp/gedcom/gedcom_analyze.py:11
 msgid "GEDCOM Analyzer"
 msgstr "Gedcom-analysointi"
 
-#: bp/gedcom/gedcom_analyze.py:160
+#: bp/gedcom/gedcom_analyze.py:161
 #, python-format
 msgid "count=%(num)d, line %(lines)s"
 msgid_plural "count=%(num)d, lines %(lines)s"
 msgstr[0] "%(num)d kpl, rivillä %(lines)s"
 msgstr[1] "%(num)d kpl, riveillä %(lines)s"
 
-#: bp/gedcom/gedcom_analyze.py:165 bp/gedcom/transforms/places.py:143
+#: bp/gedcom/gedcom_analyze.py:166 bp/gedcom/transforms/places.py:143
 #: bp/gramps/templates/gramps/result.html:18
 msgid "Count"
 msgstr "Lukumäärä"
 
-#: bp/gedcom/gedcom_analyze.py:175
+#: bp/gedcom/gedcom_analyze.py:176
 msgid "Invalid tag hierarchy"
 msgstr "Virheellinen hierarkia"
 
-#: bp/gedcom/gedcom_analyze.py:176
+#: bp/gedcom/gedcom_analyze.py:177
 msgid "No value"
 msgstr "Ei arvoa"
 
-#: bp/gedcom/gedcom_analyze.py:177
+#: bp/gedcom/gedcom_analyze.py:178
 msgid "Invalid dates"
 msgstr "Virheellisiä päivämääriä"
 
-#: bp/gedcom/gedcom_analyze.py:178
+#: bp/gedcom/gedcom_analyze.py:179
 msgid "Too many child tags"
 msgstr "Liian monta alariviä"
 
-#: bp/gedcom/gedcom_analyze.py:179
+#: bp/gedcom/gedcom_analyze.py:180
 msgid "Records for submitters"
 msgstr "Tutkijakohtaiset tietueiden lukumäärät"
 
-#: bp/gedcom/gedcom_analyze.py:180
+#: bp/gedcom/gedcom_analyze.py:181
 msgid "Families with no parents"
 msgstr "Perheet joilla ei vanhempia"
 
-#: bp/gedcom/gedcom_analyze.py:187
+#: bp/gedcom/gedcom_analyze.py:188
 msgid "With sources"
 msgstr "Lähteillä varustetut"
 
-#: bp/gedcom/gedcom_analyze.py:188
+#: bp/gedcom/gedcom_analyze.py:189
 msgid "Without sources"
 msgstr "Ilman lähteitä"
 
-#: bp/gedcom/gedcom_analyze.py:189
+#: bp/gedcom/gedcom_analyze.py:190
 msgid "Places without hierarchy"
+msgstr "Paikat ilman hierarkiaa"
+
+#: bp/gedcom/gedcom_analyze.py:191
+msgid "Possibly invalid surnames"
+msgstr "Ehkä viallisia sukunimiä"
+
+#: bp/gedcom/gedcom_analyze.py:192
+msgid "Possibly invalid firstnames"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:296
+#: bp/gedcom/gedcom_analyze.py:317
 msgid "Genders"
 msgstr "Sukupuolet"
 
-#: bp/gedcom/gedcom_analyze.py:317
+#: bp/gedcom/gedcom_analyze.py:340
 msgid "Submitters"
 msgstr "Tutkijat"
 
-#: bp/gedcom/gedcom_analyze.py:325
+#: bp/gedcom/gedcom_analyze.py:348
 msgid "Missing paths"
 msgstr "Puuttuvat pakolliset tiedot"
 
-#: bp/gedcom/gedcom_analyze.py:331
+#: bp/gedcom/gedcom_analyze.py:354
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr "TYPE-kentän arvot %(parent_path)s-rakenteissa"
 
-#: bp/gedcom/gedcom_analyze.py:335
+#: bp/gedcom/gedcom_analyze.py:358
 msgid "Invalid pointers"
 msgstr "Vialliset osoittimet"
 
-#: bp/gedcom/gedcom_analyze.py:343
+#: bp/gedcom/gedcom_analyze.py:366
 msgid "Missing records"
 msgstr "Puuttuvat tietueet"
 
-#: bp/gedcom/gedcom_analyze.py:351
+#: bp/gedcom/gedcom_analyze.py:374
 msgid "Unused records"
 msgstr "Käyttämättömät tiedot"
 
@@ -1665,6 +1673,7 @@ msgid "GEDCOM comparison"
 msgstr "Tiedostoversioiden vertailu"
 
 #: bp/gedcom/templates/gedcom_info.html:226
+#: bp/gramps/templates/gramps/analyze_xml.html:14
 msgid "Results"
 msgstr "Tulokset"
 
@@ -2056,13 +2065,9 @@ msgstr "Talletus tietokantaan epäonnistui"
 msgid "Gramps to Neo5j analyze"
 msgstr ""
 
-#: bp/gramps/templates/gramps/analyze_xml.html:6
+#: bp/gramps/templates/gramps/analyze_xml.html:11
 msgid "Analyze of the Gramps XML"
 msgstr "Gramps-tiedoston analyysi"
-
-#: bp/gramps/templates/gramps/analyze_xml.html:8
-msgid "Analyze"
-msgstr ""
 
 #: bp/gramps/templates/gramps/index_gramps.html:3
 msgid "Isotammi User's Candidate Material"
@@ -3417,12 +3422,12 @@ msgstr "Käyttäjän asetukset"
 msgid "My Profile Page"
 msgstr "Profiilini"
 
-#: bp/start/templates/start/my_settings.html:42
+#: bp/start/templates/start/my_settings.html:46
 #: bp/start/templates/start/s_macros.html:41
 msgid "Logout"
 msgstr "Kirjaudu ulos"
 
-#: bp/start/templates/start/my_settings.html:47
+#: bp/start/templates/start/my_settings.html:51
 msgid "Change language"
 msgstr "Vaihda kieltä"
 

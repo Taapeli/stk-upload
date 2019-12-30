@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-12-21 19:45+0200\n"
+"POT-Creation-Date: 2019-12-29 10:24+0200\n"
 "PO-Revision-Date: 2019-11-08 01:03+0200\n"
 "Last-Translator: Lars Holm <lasse@the-holms.org>\n"
 "Language: sv\n"
@@ -22,17 +22,17 @@ msgstr ""
 msgid "Undefined"
 msgstr "Odefinerad"
 
-#: bp/start/templates/start/my_settings.html:52 config.py:30
+#: bp/start/templates/start/my_settings.html:56 config.py:30
 #: templates/select_refcols.html:48 templates/select_refcols.html:76
 msgid "Finnish"
 msgstr "Finska"
 
-#: bp/start/templates/start/my_settings.html:54 config.py:31
+#: bp/start/templates/start/my_settings.html:58 config.py:31
 #: templates/select_refcols.html:49 templates/select_refcols.html:77
 msgid "Swedish"
 msgstr "Svenska"
 
-#: bp/start/templates/start/my_settings.html:56 config.py:32
+#: bp/start/templates/start/my_settings.html:60 config.py:32
 msgid "English"
 msgstr "Engelska"
 
@@ -433,7 +433,7 @@ msgstr ""
 #: bp/dupsearch/templates/dupsearch.html:30
 #: bp/gramps/templates/gramps/index_gramps.html:36
 #: bp/start/templates/start/my_message.html:52
-#: bp/start/templates/start/my_settings.html:33
+#: bp/start/templates/start/my_settings.html:37
 msgid "User"
 msgstr "Användare"
 
@@ -882,7 +882,7 @@ msgid "Log of Gramps XML upload"
 msgstr "Log av Gramps XML uppladdning"
 
 #: bp/admin/templates/admin/load_result.html:19
-#: bp/gramps/templates/gramps/analyze_xml.html:13
+#: bp/gramps/templates/gramps/analyze_xml.html:20
 #: bp/gramps/templates/gramps/result.html:27
 msgid "Return"
 msgstr "Tillbaka"
@@ -1023,7 +1023,7 @@ msgid "Store to Database"
 msgstr "Spara till databasen"
 
 #: bp/admin/templates/admin/talletettu.html:28
-#: bp/start/templates/start/my_settings.html:64
+#: bp/start/templates/start/my_settings.html:30
 #: bp/tools/templates/tools/person2.html:43
 #: bp/tools/templates/tools/source_citations.html:35
 #: templates/cite_sour_repo.html:75 templates/db_test.html:10
@@ -1280,84 +1280,92 @@ msgstr "Skapa index"
 msgid "Drop index"
 msgstr "Tag bort index"
 
-#: bp/gedcom/gedcom_analyze.py:10
+#: bp/gedcom/gedcom_analyze.py:11
 msgid "GEDCOM Analyzer"
 msgstr "GEDCOM-analysator"
 
-#: bp/gedcom/gedcom_analyze.py:160
+#: bp/gedcom/gedcom_analyze.py:161
 #, python-format
 msgid "count=%(num)d, line %(lines)s"
 msgid_plural "count=%(num)d, lines %(lines)s"
 msgstr[0] "antal =%(num)d, rad %(lines)s"
 msgstr[1] "antal =%(num)d, rad %(lines)s"
 
-#: bp/gedcom/gedcom_analyze.py:165 bp/gedcom/transforms/places.py:143
+#: bp/gedcom/gedcom_analyze.py:166 bp/gedcom/transforms/places.py:143
 #: bp/gramps/templates/gramps/result.html:18
 msgid "Count"
 msgstr "Antal"
 
-#: bp/gedcom/gedcom_analyze.py:175
+#: bp/gedcom/gedcom_analyze.py:176
 msgid "Invalid tag hierarchy"
 msgstr "Ogiltig tagghierarki"
 
-#: bp/gedcom/gedcom_analyze.py:176
+#: bp/gedcom/gedcom_analyze.py:177
 msgid "No value"
 msgstr "Inget värde"
 
-#: bp/gedcom/gedcom_analyze.py:177
+#: bp/gedcom/gedcom_analyze.py:178
 msgid "Invalid dates"
 msgstr "Ogiltiga datum"
 
-#: bp/gedcom/gedcom_analyze.py:178
+#: bp/gedcom/gedcom_analyze.py:179
 msgid "Too many child tags"
 msgstr "För många underordnade Taggar"
 
-#: bp/gedcom/gedcom_analyze.py:179
+#: bp/gedcom/gedcom_analyze.py:180
 msgid "Records for submitters"
 msgstr "Poster för inlämnare"
 
-#: bp/gedcom/gedcom_analyze.py:180
+#: bp/gedcom/gedcom_analyze.py:181
 msgid "Families with no parents"
 msgstr "Familjer utan föräldrar"
 
-#: bp/gedcom/gedcom_analyze.py:187
+#: bp/gedcom/gedcom_analyze.py:188
 msgid "With sources"
 msgstr "Med källor"
 
-#: bp/gedcom/gedcom_analyze.py:188
+#: bp/gedcom/gedcom_analyze.py:189
 msgid "Without sources"
 msgstr "Utan källor"
 
-#: bp/gedcom/gedcom_analyze.py:189
+#: bp/gedcom/gedcom_analyze.py:190
 msgid "Places without hierarchy"
 msgstr ""
 
-#: bp/gedcom/gedcom_analyze.py:296
+#: bp/gedcom/gedcom_analyze.py:191
+msgid "Possibly invalid surnames"
+msgstr ""
+
+#: bp/gedcom/gedcom_analyze.py:192
+msgid "Possibly invalid firstnames"
+msgstr ""
+
+#: bp/gedcom/gedcom_analyze.py:317
 msgid "Genders"
 msgstr "Könen"
 
-#: bp/gedcom/gedcom_analyze.py:317
+#: bp/gedcom/gedcom_analyze.py:340
 msgid "Submitters"
 msgstr "Insändare"
 
-#: bp/gedcom/gedcom_analyze.py:325
+#: bp/gedcom/gedcom_analyze.py:348
 msgid "Missing paths"
 msgstr "Sökvägar som saknas"
 
-#: bp/gedcom/gedcom_analyze.py:331
+#: bp/gedcom/gedcom_analyze.py:354
 #, python-format
 msgid "TYPEs for %(parent_path)s"
 msgstr "Typer för %(parent_path)s"
 
-#: bp/gedcom/gedcom_analyze.py:335
+#: bp/gedcom/gedcom_analyze.py:358
 msgid "Invalid pointers"
 msgstr "Ogiltiga pekare"
 
-#: bp/gedcom/gedcom_analyze.py:343
+#: bp/gedcom/gedcom_analyze.py:366
 msgid "Missing records"
 msgstr "Saknade poster"
 
-#: bp/gedcom/gedcom_analyze.py:351
+#: bp/gedcom/gedcom_analyze.py:374
 msgid "Unused records"
 msgstr "Oanvända poster"
 
@@ -1667,6 +1675,7 @@ msgid "GEDCOM comparison"
 msgstr "GEDCOM jämförelse"
 
 #: bp/gedcom/templates/gedcom_info.html:226
+#: bp/gramps/templates/gramps/analyze_xml.html:14
 msgid "Results"
 msgstr "Resultat"
 
@@ -2060,12 +2069,8 @@ msgstr "Det gick inte att spara databasen"
 msgid "Gramps to Neo5j analyze"
 msgstr ""
 
-#: bp/gramps/templates/gramps/analyze_xml.html:6
+#: bp/gramps/templates/gramps/analyze_xml.html:11
 msgid "Analyze of the Gramps XML"
-msgstr ""
-
-#: bp/gramps/templates/gramps/analyze_xml.html:8
-msgid "Analyze"
 msgstr ""
 
 #: bp/gramps/templates/gramps/index_gramps.html:3
@@ -3431,12 +3436,12 @@ msgstr "Inställningar av användaren"
 msgid "My Profile Page"
 msgstr "Min profilsida"
 
-#: bp/start/templates/start/my_settings.html:42
+#: bp/start/templates/start/my_settings.html:46
 #: bp/start/templates/start/s_macros.html:41
 msgid "Logout"
 msgstr "Utloggning"
 
-#: bp/start/templates/start/my_settings.html:47
+#: bp/start/templates/start/my_settings.html:51
 msgid "Change language"
 msgstr "Byt språk"
 
