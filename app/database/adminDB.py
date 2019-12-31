@@ -189,26 +189,6 @@ def do_schema_fixes():
     
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
     """
-    if True:
-        if not role_exists("guest"):
-            with shareds.driver.session() as session:
-                try:    
-                    session.write_transaction(create_role, ROLES[0])
-                    print("Guest role added") 
-                except CypherSyntaxError as cex:
-                    print('Session ', cex)
-                except CypherError as cex:
-                    print('Session ', cex)
-                except ConstraintError as cex:
-                    print('Session ', cex)
-                                  
-        if not user_exists("guest"):
-            guest = build_guest_user()
-            shareds.user_datastore.put(guest)
-            print("Guest user added")            
-    else:    
-        print(f"database.adminDB.do_schema_fixes.do_schema_fixes: none")
-    return
 
     if False:
         change_HIERARCY_to_IS_INSIDE = """
