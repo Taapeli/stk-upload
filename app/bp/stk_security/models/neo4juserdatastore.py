@@ -94,9 +94,9 @@ class Neo4jUserDatastore(UserDatastore):
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
             
-            user.confirmed_at = 0
-            user.last_login_at = 0
-            user.current_login_at = 0
+#             user.confirmed_at = 0
+#             user.last_login_at = 0
+#             user.current_login_at = 0
             if user.confirmed_at:
                 user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
             if user.last_login_at:    
@@ -214,9 +214,11 @@ class Neo4jUserDatastore(UserDatastore):
                 #confirmtime = int(confirmtime.timestamp() * 1000),
 #            elif user.username == 'guest':  
 #                pass   
-            else: 
-#                temp1 = datetime.fromtimestamp(float(user.confirmed_at/1000))    
-                confirmtime = user.confirmed_at
+            else:
+                if isinstance(user.confirmed_at, datetime): 
+#                temp1 = datetime.fromtimestamp(float(user.confirmed_at/1000))
+#                   updated for confirmation
+                    confirmtime = int(user.confirmed_at.timestamp() * 1000)
                                                    
             result = tx.run(Cypher.user_update, 
                 id=user.username, 
