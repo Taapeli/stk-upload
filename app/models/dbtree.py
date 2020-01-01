@@ -82,10 +82,13 @@ class DbTree():
         last_node = None
         node_relations = []
         with self.driver.session() as session:
-            result = session.run(self.query, locid=int(node_id))
+            result = session.run(self.query, locid=node_id)
             for record in result:
+                nodes = record["nodes"]
+                lv = record["lv"]
+                print(f"At level {lv} got {len(nodes)} nodes")
                 r = record["r"]
-                # r = [<Relationship id=673979 nodes=(<Node>, <Node>)
+                # r = [<Relationship id=673979 nodes=(<start_node>, <end_node>)
                 #        type='IS_INSIDE' properties={'date1': 1248448, 'datetype': 4, 'date2': 1377472}>
                 #     ]
                 for i in range(len(r)):
@@ -93,16 +96,16 @@ class DbTree():
                     dates = DateRange.from_node(r[i])
                     if not node_relations:
                         # Add this endnode to previous relation
-                        node_relations.append((dates,r[i].start_node))
+                        node_relations.append((dates,r[i].start_node,lv))
                         last_node = r[i].start_node
-                    if r[i].nodes[0] == last_node:
+                    if r[i].start_node == last_node:
                         # Add this endnode to previous relation
-                        node_relations.append((dates,r[i].end_node))
+                        node_relations.append((dates,r[i].end_node,lv))
                         print(f"{rtype} {[n['pname'] for n in r[i].nodes]} {dates}")
-                        #print(f"{i*'    '} {r[i].start_node['pname']} < {r[i].end_node['pname']}")
+                        print(f"{(i+2)*'    '} {r[i].start_node['pname']} < {r[i].end_node['pname']}")
                         last_node = r[i].end_node
                     else:
-                        print(f"{rtype} {[(n[1]['pname'],str(n[0])) for n in node_relations]}")
+                        print(f"Got {rtype} relations {[(n[1]['pname'],str(n[0]),n[2]) for n in node_relations]}")
                         yield node_relations
 
             yield node_relations
@@ -139,24 +142,29 @@ class DbTree():
             #
             # <Relationship id=673979 nodes=(<Node>, <Node>) 
             #    type='IS_INSIDE' properties={}>
-            rtype = relations.type
-            nodes = relations.nodes
-            dates = DateRange.from_node(relations)
+#             rtype = relations.type
+#             nodes = relations.nodes
+#             dates = DateRange.from_node(relations)
             level = 0   # Todo
 
-            for node in nodes:
+            for dates, node, level in relations:
                 # <Node id=429694 labels={'Place'} 
                 #    properties={'coord': [59.43722222222222, 24.74527777777778], 
                 #        'id': 'P0040', 'type': 'City', 'uuid': 'dafbdfc45393446ba4927f9d52341844', 
                 #        'pname': 'Tallinna', 'change': 1556811111}>
 
                 if not node.id in nl:
-                    nl[node.id] = node.get(self.name_field_name)            #["pname"]
+                    nl[node.id] = node.get(self.name_field_name)   #["pname"]
                     nstack.append((node.id,
                                    node.get('uuid'), 
                                    node.get(self.type_field_name), #["type"], 
-                                   node.get(self.name_field_name),          #["pname"], 
+                                   node.get(self.name_field_name), #["pname"], 
                                    level))
+# TODO Muistiin:
+# Pitäisi saada oikeat relaatiot (lower) -[r:IS_INSIDE]-> (upper)
+# - kuka on kenenkin alla
+# - mitkä päivämäärät on voimassa
+
             for rel in relations:
                 # Walk thru all (start)-->(end) relations
                 #

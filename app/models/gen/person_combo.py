@@ -135,7 +135,7 @@ class Person_combo(Person):
         ''' Read a person, who must belong to user's Batch, if user is given.
         '''
         try:
-            if user != 'guest':    # Select person owned by user
+            if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
                 record = session.run(Cypher_person.get_by_user,
                                      uuid=uuid, user=user).single()
             else:       # Select person from public database
