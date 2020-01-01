@@ -79,7 +79,7 @@ def show_person_list(selection=None):
 @bp.route('/scene/persons/ref=<string:refname>/<opt>')
 @login_required
 def show_persons_by_refname(refname, opt=""):
-    """ List persons by refname.
+    """ List persons by refname for menu(0).
     """
     keys = ('refname', refname)
     if current_user.is_authenticated:

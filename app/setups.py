@@ -23,46 +23,9 @@ from flask_babelex import lazy_gettext as _l
 logger = logging.getLogger('stkserver') 
 
 
-#===================== Classes to create user session ==========================
-#  
-# class SetupCypher():
-#     """ Cypher classes for setup """
-# 
-#     set_user_constraint = '''
-#         CREATE CONSTRAINT ON (user:User) 
-#             ASSERT user.username IS UNIQUE'''
-#     
-#     role_create = '''
-#         CREATE (role:Role {level: $level, name: $name, 
-#                            description: $description, timestamp: $timestamp})'''
-# 
-#     master_check_existence = """
-#         MATCH  (user:User) 
-#         WHERE user.username = 'master' 
-#         RETURN COUNT(user)"""
-#         
-#     email_val = """
-#         MATCH (a:Allowed_email) WHERE a.allowed_email = $email RETURN a"""
-#         
-#     master_create = ('''
-#         MATCH  (role:Role) WHERE role.name = 'admin'
-#         CREATE (user:User 
-#             {username : $username, 
-#             password : $password,  
-#             email : $email, 
-#             name : $name,
-#             language : $language, 
-#             is_active : $is_active,
-#             confirmed_at : $confirmed_at, 
-#             roles : $roles,
-#             last_login_at : $last_login_at,
-#             current_login_at : $current_login_at,
-#             last_login_ip : $last_login_ip,
-#             current_login_ip : $current_login_ip,
-#             login_count : $login_count} )           
-#             -[:HAS_ROLE]->(role)
-#         ''' ) 
-#  
+# Classes to create user session 
+# See: database.cypher_setup.SetupCypher
+
        
 class Role(RoleMixin):
     """ Object describing any application user roles,
@@ -130,42 +93,7 @@ class User(UserMixin):
 
 
 # class UserProfile():
-#     """ Object describing dynamic user properties """
-#     uid = ''
-#     name = ''
-#     username = ''
-#     language = ''
-#     numSessions = 0
-#     lastSessionTime = None  
-# 
-#     def __init__(self, **kwargs):
-#         self.username = kwargs.get('username')
-#         self.name = kwargs.get('name')
-#         self.language = kwargs.get('language')
-#         self.numSessions = kwargs['numSessions']
-#         self.lastSessionTime = kwargs.get('lastSessionTime')
-# 
-#     def newSession(self):   
-#         self.numSessions += 1
-#         self.lastSessionTime = datetime.timestamp() 
-# 
-#      
-# class Allowed_email():
-#     """ Object for storing an allowed user to register in """
-#     allowed_email = ''
-#     default_role = ''
-#     approved = False
-#     creator = ''
-#     created_at = ''
-#     confirmed_at = ''
-#        
-#     def __init__(self, **kwargs):
-#         self.allowed_email = kwargs.get('allowed_email')
-#         self.default_role = kwargs.get('default_role') 
-#         self.approved = kwargs.get('approved')
-#         self.creator = kwargs.get('creator')
-#         self.created_at = kwargs.get('created_at')         
-#         self.confirmed_at = kwargs.get('confirmed_at') 
+# See: bp.admin.models.user_admin.UserProfile
 
      
 class ExtendedLoginForm(LoginForm):
@@ -241,7 +169,7 @@ def security_register_processor():
 adminDB.initialize_db() 
 
 """ 
-    Application filter definitions 
+    Jinja application filter definitions 
 """
 
 @shareds.app.template_filter('pvt')
@@ -285,14 +213,6 @@ def _jinja2_filter_datetime(datetime, fmt=None):
         return s
     except:
         return "Error"
-
-# @shareds.app.template_filter('urlencode')
-# def _jinja2_filter_urlencode(u):
-#     """ Urlencode argument dictionary.
-#     
-#         {'fw':'Mainio#Jalmari Yrjö'} --> 'fw=Mainio%23Jalmari+Yrj%C3%B6'
-#     """
-#     return urlencode(u)
 
 @shareds.app.template_filter('transl')
 def _jinja2_filter_translate(term, var_name):
