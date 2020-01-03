@@ -33,7 +33,7 @@ CREATE (ae:Allowed_email {
     allowed_email_confirm = """
 MATCH (ae:Allowed_email)
   WHERE ae.allowed_email = $email 
-SET ae.confirmed_at = timestamp()
+SET ae.confirmed_at = $confirmtime
 RETURN ae """
              
     allowed_email_update = """
