@@ -296,6 +296,7 @@ def update_user(username):
 @login_required
 @roles_accepted('admin', 'audit')
 def list_uploads(username):
+    # List uploads; also from '/audit/list_uploads' page
     upload_list = uploads.list_uploads(username) 
     logger.info(f"-> bp.admin.routes.list_uploads user={username}")
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
@@ -361,7 +362,7 @@ def xml_download(username,xmlfile):
 
 @bp.route('/admin/show_upload_log/<username>/<xmlfile>')
 @login_required
-@roles_accepted('member', 'admin')
+@roles_accepted('member', 'admin', 'audit')
 def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(username)
     fname = os.path.join(upload_folder,xmlfile + ".log")

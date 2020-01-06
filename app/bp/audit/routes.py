@@ -57,8 +57,12 @@ def move_in_2():
     """ Move the accepted Batch to Isotammi database """
     owner = request.form['user']
     batch_id = request.form['batch']
-#     Batch_merge().move_whole_batch(batch_id, owner)
+    operator = current_user.username
+    merger = Batch_merge()
+    counters = merger.move_whole_batch(batch_id, owner, operator)
     syslog.log(type="batch to Isotammi", batch=batch_id, by=owner)
-    logger.info(f' bp.audit.routes.move_in_2 {owner} / {batch_id}')
-    return render_template('/audit/move_in_2.html', user=owner, batch=batch_id)
+    logger.info(f' bp.audit.routes.move_in_2 {owner} / {batch_id} {counters}')
+    return render_template('/audit/move_in_2.html', user=owner, batch=batch_id,
+                           node_cnt=counters.nodes_created,
+                           rel_cnt=counters.relationships_created)
 

@@ -13,8 +13,13 @@
         <h2>{{ _("Moved batch to Isotammi database") }}</h2>
 
         <div class="startbox2">
-            <h3>{{ _('Selected Batch') }} <i>{{user}}/{{ batch }}</i></h3>
-            <p>Piti siirrettämän Suomi-kantaan, vaan ei vielä toimi.</p>
+            <h3>{{ _('User Batch') }} <i>{{ batch }}</i></h3>
+            <p>{{ _('From user') }} <i>{{user}}</i></p>
+            <p>{{ _('Moved %(cnt_objs)s objects from %(batch_id)s to Common Database',
+                     cnt_objs=rel_cnt, batch_id=batch) }}</p>
+{% if time %}
+            <p>{{ _('Time') }} {{time}}</p>
+{% endif %}
         </div>
 
     </div>
