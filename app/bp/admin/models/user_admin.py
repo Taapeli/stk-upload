@@ -217,9 +217,9 @@ class UserAdmin():
             raise  
           
     @classmethod
-    def confirm_allowed_email(cls, tx, email):
+    def confirm_allowed_email(cls, tx, email, confirmtime):
         try:
-            for record in tx.run(Cypher_adm.allowed_email_confirm, email=email):
+            for record in tx.run(Cypher_adm.allowed_email_confirm, email=email, confirmtime=confirmtime):
                 return(record['ae'])
         except CypherError as ex:
             logging.error('CypherError: ', ex.message, ' ', ex.code)            
