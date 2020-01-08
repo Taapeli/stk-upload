@@ -10,9 +10,9 @@ from bp.admin.users import Batches
 import logging
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request #, redirect, url_for , send_from_directory, flash, session, jsonify
-from flask_security import login_required, roles_accepted, current_user #, roles_required
-# from flask_babelex import _
+from flask import render_template, request, redirect, url_for, flash #, send_from_directory, session, jsonify
+from flask_security import login_required, roles_accepted, current_user
+from flask_babelex import _
 
 import shareds
 from .models.batch_merge import Batch_merge
@@ -59,10 +59,12 @@ def move_in_2():
     batch_id = request.form['batch']
     operator = current_user.username
     merger = Batch_merge()
-    counters = merger.move_whole_batch(batch_id, owner, operator)
-    syslog.log(type="batch to Isotammi", batch=batch_id, by=owner)
-    logger.info(f' bp.audit.routes.move_in_2 {owner} / {batch_id} {counters}')
-    return render_template('/audit/move_in_2.html', user=owner, batch=batch_id,
-                           node_cnt=counters.nodes_created,
-                           rel_cnt=counters.relationships_created)
+    msg = merger.move_whole_batch(batch_id, owner, operator)
+    flash(_("Transfer succeeded: ") + msg)
+    logger.info(f' bp.audit.routes.move_in_2 {owner} / {batch_id} {msg}')
+    syslog.log(type="batch to Common data", batch=batch_id, by=owner, msg=msg)
+    return redirect(url_for('audit.move_in_1', batch_name=batch_id))
+#     return render_template('/audit/move_in_2.html', user=owner, batch=batch_id,
+#                            node_cnt=counters.nodes_created,
+#                            rel_cnt=counters.relationships_created)
 

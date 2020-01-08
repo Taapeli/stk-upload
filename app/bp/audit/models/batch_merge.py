@@ -4,7 +4,8 @@ Created on 5.12.2019
 @author: jm
 '''
 import shareds
-from flask_login.utils import current_user
+from flask_babelex import _
+#from flask_login.utils import current_user
 
 
 class Batch_merge(object):
@@ -31,7 +32,7 @@ MERGE (root:Root {id:$batch, user:$user, operator:$oper})
     SET root.timestamp = timestamp()
 WITH root
     MATCH (b:Batch {id:$batch}) -[o:OWNS|OWNS_OTHER]-> (x)
-    WITH root, o, b, x LIMIT 5
+    WITH root, o, b, x LIMIT 25
         DELETE o
         CREATE (root) -[:PASSED]-> (x)'''
 
@@ -50,10 +51,22 @@ WITH root
         operator    active auditor user id
 
         '''
-        counters = None
+        relationships_created = 0
+        nodes_created = 0
+        new_relationships = -1
+
         with shareds.driver.session() as session:
-            result = session.run(self.cypher_cp_batch_to_root, 
-                                 user=user, batch=batch_id, oper=operator)
+            tx = session.begin_transaction()
+            # while new_relationships != 0:
+            result = tx.run(self.cypher_cp_batch_to_root, 
+                            user=user, batch=batch_id, oper=operator)
             counters = result.summary().counters
-        print(counters)
-        return counters
+            print(counters)
+            new_relationships = counters.relationships_created
+            relationships_created += new_relationships
+            nodes_created += counters.nodes_created
+
+        msg = _("moved %(new_rel)s objects to ", new_rel=relationships_created)
+        if nodes_created: msg += _("a new Common data set")
+        else:             msg += _("Common data set")
+        return msg

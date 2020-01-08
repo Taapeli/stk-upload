@@ -50,8 +50,6 @@ class DataAdmin():
             logging.info(msg)
             result = shareds.driver.session().run(Cypher_adm.remove_data_nodes)
         elif opt == "my_own":
-            #return "NOT COMPLETED! Todo: Can not remove user's data nodes"
-
             # It is possible to check, id there are nodes whith a foreign owners, 
             # too. It takes 60s for 750 persons data:
             #
