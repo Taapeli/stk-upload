@@ -131,17 +131,18 @@ class Person_combo(Person):
 
 
     @staticmethod
-    def get_my_person(session, uuid, user):
-        ''' Read a person, who must belong to user's Batch, if user is given.
+    def get_my_person(session, uuid, user, use_common):
+        ''' Read a person from common data or user's own Batch.
         '''
         try:
-            if user != 'guest':    # Select person owned by user
-                record = session.run(Cypher_person.get_by_user,
-                                     uuid=uuid, user=user).single()
-            else:       # Select person from public database
-                #TODO: Rule for public database is missing, taking all!
+            if use_common or user == 'guest':
+                # Select person from public database
                 record = session.run(Cypher_person.get_public,
                                      uuid=uuid).single()
+            else:
+                # Select person owned by user
+                record = session.run(Cypher_person.get_by_user,
+                                     uuid=uuid, user=user).single()
             if record is None:
                 raise LookupError(f"Person {uuid} not found.")
             node = record[0]
@@ -214,6 +215,7 @@ return path"""
                         if show_with_common: 
                             #1 get all with owner name for all
                             print("_read_person_list: by owner with common")
+                            #Todo: obsolete with no approved common data?
                             result = session.run(Cypher_person.read_all_persons_with_events_starting_name,
                                                  user=user, start_name=fw_from, limit=limit)
                             # Returns person, names, events, owners
@@ -226,9 +228,9 @@ return path"""
                             # Returns person, names, events
 
                     else: 
-                        #3 == #1 simulates common by reading all
-                        print("_read_person_list: common only")
-                        result = session.run(Cypher_person.read_all_persons_with_events_starting_name, #user=user, 
+                        #3 == #1 read approved common data
+                        print("_read_person_list: approved common only")
+                        result = session.run(Cypher_person.read_approved_persons_with_events_starting_name,
                                              start_name=fw_from, limit=limit)
                         # Returns person, names, events, owners
                         

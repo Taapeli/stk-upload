@@ -47,7 +47,7 @@ class Cypher_person():
 MATCH (b:UserProfile {username:$user}) -[:HAS_LOADED]-> (:Batch)
        -[:OWNS]-> (p:Person {uuid:$uuid})
 RETURN p"""
-    get_public = """MATCH (p:Person {uuid:$uuid}) 
+    get_public = """MATCH () -[:PASSED]-> (p:Person {uuid:$uuid}) 
 RETURN p"""
     get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
@@ -110,6 +110,26 @@ RETURN p as person,
     COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events 
     ORDER BY person.sortname"""
 
+# Common data
+    read_approved_persons_with_events_starting_name = """
+MATCH () -[:PASSED]-> (p:Person)
+    WHERE p.sortname >= $start_name
+WITH p //, COLLECT(DISTINCT b.user) as owners
+ORDER BY p.sortname LIMIT $limit
+    MATCH (p:Person) -[:NAME]-> (n:Name)
+    OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
+    OPTIONAL MATCH (p) <-[:PARENT|MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
+WITH p, n, re.role as role, e, f.rel_type as rel, fe //, owners
+ORDER BY p.sortname, n.order
+    OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
+    OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
+RETURN p as person, 
+    COLLECT(distinct n) as names, 
+    COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events
+    //, owners
+ORDER BY person.sortname"""
+
+#Todo: obsolete with no approved common data
     read_all_persons_with_events_starting_name = """
 MATCH (b:Batch) -[:OWNS]-> (p:Person)
     WHERE p.sortname >= $start_name
@@ -127,20 +147,6 @@ RETURN p as person,
     COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events,
     owners
 ORDER BY person.sortname"""
-
-#     xxxx_all_persons_with_events_from_name = """
-# MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
-#     WHERE p.sortname >= $start_name
-# WITH p, b.user as user ORDER BY p.sortname LIMIT $limit
-#   MATCH (p:Person) -[:NAME]-> (n:Name)
-#   WITH p, n ORDER BY p.sortname, n.order, user
-#     OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
-#     OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
-# RETURN p as person, 
-#     collect(distinct n) as names, 
-#     collect(distinct [e, pl.pname, rn.role]) as events,
-#     user
-# ORDER BY p.sortname"""
 
 
 

@@ -10,11 +10,11 @@
 {% set next = owner_filter.scope %}
 {% set filt_owners = owner_filter.filter %}
 {% if filt_owners == 3 or filt_owners == 5 %}{#
-	#   common_own   011 3 = 1+2 = user's data & demo
-	#   common_batch 101 5 = 1+4 = user batch & demo #}
+	#   common_own   011 3 = 1+2 = user's data & common
+	#   common_batch 101 5 = 1+4 = user batch & common #}
 	{% set multi_owners = filt_owners - 1 %}
     {% set my_set = owner_filter.choices.as_str[filt_owners-1] %}
-    {% set my_common = _('Demo-data') %}
+    {% set my_common = _('Approved common data') %}
 {% else %}
     {% set multi_owners = 0 %}
     {% set my_set = owner_filter.choices.as_str[filt_owners] %}
@@ -41,16 +41,15 @@
                        {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
                        {% else %}{{ _('from begin') }}
                        {% endif %}
-                       <!-- ,{{ _('data set') }}
+                       {{ _('data set') }}
                        <b>{% if multi_owners %}
                             &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
                        {% else %}{{my_set}}
                        {% endif %}</b>
                        {% if user %}
-                       (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
-                            style="text-decoration-line: underline;">Vaihda</a></i>).
+                       (<i><a href="/" title="{{ _('Change the data set shown') }}" 
+                            style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
                        {% endif %}</p>
-                       -->
 	           </div>
 	           <div>
 	               <form action="/scene/persons_all">

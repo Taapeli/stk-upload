@@ -23,15 +23,19 @@ from .gen.cypher import Cypher_person
 class PersonReader():
     '''
     Person reader is used for reading Person and all essential other nodes.
+
+            Version 3 / 25.10.2019 / JMä
     '''
 
 
-    def __init__(self):
+    def __init__(self, use_common):
         ''' Creates a Person from db node and essential connected nodes.
-             
-             Version 3 / 25.10.2019 / JMä
+
+            if use_common = True, read from approved common data
+            else from user's own batch
         '''
         self.session = shareds.driver.session()
+        self.use_common = use_common
 
         # Person node with Names and Events included
         self.person = None
@@ -46,9 +50,9 @@ class PersonReader():
     def get_person(self, uuid, owner):
         ''' Read Person p, if not denied.
  
-            The Person must belong to user's Batch, if owner is given.
+            The Person must belong to user's Batch, if not using common data.
        '''
-        self.person = Person_combo.get_my_person(self.session, uuid, owner)
+        self.person = Person_combo.get_my_person(self.session, uuid, owner, self.use_common)
         if not isinstance(self.person, Person_combo):
             traceback.print_exc()
             raise PermissionError(f"Person {uuid} is not available, got {self.person}")

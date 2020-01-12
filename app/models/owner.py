@@ -23,9 +23,9 @@ class OwnerFilter():
         - owner_filter  int     Code expressing filter method by data owners
                                 from request.div or session.owner_filter.
                                 Default = 1 (common) if neither present
-            COMMON - 1          published common data 'Isotammi'
+            COMMON - 1          approved common data 'Isotammi'
             OWN - 2             all user's own candidate materials
-            BATCH - 3           selected Batch set
+            BATCH - 3           a selected Batch set
             COMMON+OWN
             COMMON+BATCH
         - scope          list   Boundary names for current display page [from, to]
@@ -67,11 +67,11 @@ class OwnerFilter():
         def __init__(self):
             ''' Initialise choise texts in user language '''
             self.as_str = {
-                self.COMMON:              N_('Isotammi database'), 
+                self.COMMON:              N_('approved common data'), 
                 self.OWN:                 N_('all my candidate data'), 
-                self.BATCH:               N_('my candidate batch'),
-                self.COMMON + self.OWN:   N_('my own and Isotammi'), 
-                self.COMMON + self.BATCH: N_('my batch and Isotammi')
+                self.BATCH:               N_('my selected candidate batch'),
+                self.COMMON + self.OWN:   N_('my own and approved common data'), 
+                self.COMMON + self.BATCH: N_('my selected batch and approved common data')
             }
             self.batch_name = None
 

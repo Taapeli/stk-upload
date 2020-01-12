@@ -198,15 +198,16 @@ def     show_person_v3(uid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
 
     dbg = request.args.get('debug', None)
-    print(dbg)
     if current_user.is_authenticated:
         user=current_user.username
+        ofilter = user_session.get('owner_filter',0)
+        use_common = (ofilter == 1)
     else:
         user=None
     logger.info("-> bp.scene.routes.show_person_v3")
     
     # v3 Person page
-    person, objs, jscode = get_person_full_data(uid, user)
+    person, objs, jscode = get_person_full_data(uid, user, use_common)
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
