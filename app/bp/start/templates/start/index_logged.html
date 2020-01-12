@@ -20,8 +20,8 @@
 #}
         <div class="row">
 
-    {% if current_user.is_authenticated and 
-       (current_user.has_role('gedcom') or current_user.has_role('research')) %}
+{% if current_user.is_authenticated and 
+   (current_user.has_role('gedcom') or current_user.has_role('research')) %}
          <div class="startbox gedtools">
             <div style="display: inline-block;">
             <form method="get" action="/gedcom">
@@ -34,9 +34,9 @@
             </form>
             </div>
          </div>
-     {% endif %}
+{% endif %}
 
-    {% if current_user.is_authenticated and current_user.has_role('research') %}
+{% if current_user.is_authenticated and current_user.has_role('research') %}
            <div class="startbox">
              <div style="display: inline-block;">
                 <h3>{{ _('Your Candidate Materials') }}</h3>
@@ -49,14 +49,14 @@
                  </form>
              </div>
            </div>
-    {% endif %}           
+{% endif %}           
 
            <div class="startbox">
              <div style="display: inline-block;">
                <form method="get" action="/scene/persons_all/">
 
-     {% if current_user.is_authenticated and 
-        ( current_user.has_role('research') or current_user.has_role('admin') ) %}
+{% if current_user.is_authenticated and 
+   ( current_user.has_role('research') or current_user.has_role('admin') ) %}
                  <h3>{{ _('Browse Isotammi Database') }}</h3>
                  <p>{{ _('View your own candidate material or all approved common data') }}.</p>
                  <p>{% set filt = session['owner_filter'] %}
@@ -67,14 +67,14 @@
 {#
                    &nbsp;&nbsp;└─ <input type="checkbox" name="cmp" value="1"  
                     {% if filt == 3 or filt == 5 %}checked{% endif %}>
-                        {{ _('Compare to Demo Database') }} 
+                        {{ _('Compare to approved Isotammi data') }} 
 #}
                 </p>
-     {% else %}
+{% else %}
                  <h3>{{ _('The Browsed Material') }}</h3>
                  <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
                  <input name="div" type="hidden" value="1">
-     {% endif %}
+{% endif %}
 
                  <div class="submit"> 
                     <button type="submit">{{ _('Continue') }}</button>
@@ -83,7 +83,7 @@
              </div>
            </div>
     
-    {% if current_user.is_authenticated and 
+{% if current_user.is_authenticated and 
             (current_user.has_role('admin') or current_user.has_role('master') ) %}
         <div class="startbox admin">
            <div style="display: inline-block;">
@@ -96,9 +96,9 @@
          </form>
       </div>
      </div>
-    {% endif %}
+{% endif %}
 
-    {% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
+{% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
         <div class="startbox audit">
            <div style="display: inline-block;">
            <form method="get" action="/audit">
@@ -110,7 +110,7 @@
          </form>
       </div>
      </div>
-    {% endif %}
+{% endif %}
 
     <div class="startbox">
       <div style="display: inline-block;">
