@@ -24,6 +24,12 @@ MATCH (p:Refname) WHERE (p)<-[:BASENAME]-(:Refname{name:$lookedfor})
 MATCH (q:Refname) WHERE (q)-[:BASENAME]->(p)
 RETURN p.name AS basename, COLLECT(q.name) AS namegroup
 """
+cypher_fetch_namefamily = """
+match (n:Refname {name:"Lissu"})
+optional match (n) --> (m:Refname)
+with coalesce(m, n) AS base
+optional match (base) <-- (o:Refname)
+return base,o  limit 25"""
 
 def search_refname(lookedfor):
     print(f"Looking for name {lookedfor}")
