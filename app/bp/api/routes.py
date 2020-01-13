@@ -5,12 +5,69 @@
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import request, redirect, url_for, flash, jsonify
 from flask_security import roles_accepted, login_required #, current_user ,roles_required
 from flask_babelex import _
 
 from . import bp
+from . import apikey
 from . import api
+from .v0 import placeapi
+
+@bp.route('/placeapi/v0/search', methods=['POST'])
+def placeapi_v0_search():
+    key = request.form.get("apikey")
+    if not apikey.is_validkey(key): return jsonify(dict(
+            status="Error",
+            statusText="Wrong API Key",
+        ))
+    
+    lookfor = request.form.get("lookfor")
+    print(lookfor)
+    if not lookfor: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'lookfor'",
+        ))
+    rsp = placeapi.search(lookfor) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+@bp.route('/placeapi/v0/record', methods=['POST'])
+def placeapi_v0_record():
+    key = request.form.get("apikey")
+    if not apikey.is_validkey(key): return jsonify(dict(
+            status="Error",
+            statusText="Wrong API Key",
+        ))
+
+    rid = request.form.get("id")
+    if not rid: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'id'",
+        ))
+    rsp = placeapi.record(int(rid)) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+@bp.route('/placeapi/v0/record_with_subs', methods=['POST'])
+def placeapi_v0_record_with_subs():
+    key = request.form.get("apikey")
+    if not apikey.is_validkey(key): return jsonify(dict(
+            status="Error",
+            statusText="Wrong API Key",
+        ))
+
+    rid = request.form.get("id")
+    if not rid: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'id'",
+        ))
+    rsp = placeapi.record_with_subs(int(rid)) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
 
 @bp.route('/api/v1/search', methods=['GET'])
 def api_v1_search():

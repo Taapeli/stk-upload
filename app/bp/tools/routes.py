@@ -31,6 +31,8 @@ def datatables():
 """
 
 @bp.route('/listall/<string:subj>')
+@login_required
+@roles_accepted('audit', 'admin')
 def show_table_data(subj):
     """ Person etc listings
         tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
