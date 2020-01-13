@@ -5,7 +5,10 @@ Created on 5.12.2019
 '''
 import shareds
 from flask_babelex import _
-#from flask_login.utils import current_user
+from flask import flash
+
+import logging
+logger = logging.getLogger('stkserver')
 
 
 class Batch_merge(object):
@@ -32,9 +35,10 @@ MERGE (root:Root {id:$batch, user:$user, operator:$oper})
     SET root.timestamp = timestamp()
 WITH root
     MATCH (b:Batch {id:$batch}) -[o:OWNS|OWNS_OTHER]-> (x)
-    WITH root, o, b, x LIMIT 25
+    WITH root, o, b, x LIMIT 100
         DELETE o
-        CREATE (root) -[:PASSED]-> (x)'''
+        CREATE (root) -[:PASSED]-> (x)
+        RETURN x'''
 
     def __init__(self):
         '''
@@ -54,19 +58,45 @@ WITH root
         relationships_created = 0
         nodes_created = 0
         new_relationships = -1
+        moved_nodes = {}
+        text = ""
 
         with shareds.driver.session() as session:
-            tx = session.begin_transaction()
-            # while new_relationships != 0:
-            result = tx.run(self.cypher_cp_batch_to_root, 
-                            user=user, batch=batch_id, oper=operator)
-            counters = result.summary().counters
-            print(counters)
-            new_relationships = counters.relationships_created
-            relationships_created += new_relationships
-            nodes_created += counters.nodes_created
+            try:
+                tx = session.begin_transaction()
+                # while new_relationships != 0:
+                result = tx.run(self.cypher_cp_batch_to_root, 
+                                user=user, batch=batch_id, oper=operator)
+                counters = result.summary().counters
+                print(counters)
+                new_relationships = counters.relationships_created
+                relationships_created += new_relationships
+                nodes_created += counters.nodes_created
+                for record in result:
+                    # <Record x=<Node id=318538 labels={'Place'} 
+                    #    properties={'id': 'P0294', 'type': 'Farm', 
+                    #        'uuid': '2d93295ef606433a8e339967e50bf6b0', 'pname': 'Sottungsby', 
+                    #        'change': 1495632125}>>
+                    node = record[0]
+                    label = list(node.labels)[0]
+                    text += ' ' + node['id']
+                    if label in moved_nodes:
+                        moved_nodes[label] += 1
+                    else:
+                        moved_nodes[label] = 1
+
+                logger.info(f"-moved {text}")
+                tx.commit()
+
+            except Exception as e:
+                msg = _("No objects transferred: ") + str(e)
+                flash(msg, "flash_error")
+                logger.error(msg)
+                return msg
 
         msg = _("moved %(new_rel)s objects to ", new_rel=relationships_created)
         if nodes_created: msg += _("a new Common data set")
         else:             msg += _("Common data set")
+
+        flash(_("Transfer succeeded: ") + msg)
         return msg
