@@ -48,7 +48,7 @@ class Batches(object):
             ts = batch.get('timestamp')
             if ts:
                 t = float(ts)/1000.
-                tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+                tstring = datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
 #                 tstring = datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M")
 #                 d, t = tstring.split()
 #                 if batch[:10] == d:
