@@ -21,6 +21,7 @@ from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
 from models.gen.place_combo import Place_combo
 from models.gen.source import Source
+from models.gen.media import Media
 
 from models.datareader import read_persons_with_events
 from models.datareader import get_person_data_by_id # -- vanhempi versio ---
@@ -415,6 +416,33 @@ def show_source_page(sourceid):
                            source=source, citations=citations)
 
 # ------------------------------ Media --------------------------------
+
+@bp.route('/scene/medias')
+def show_medias():
+    """ List of Medias for menu(5)
+    """
+    t0 = time.time()
+    print(f"--- {request}")
+    print(f"--- {user_session}")
+    # Set filter by owner and the data selection
+    my_filter = OwnerFilter(user_session, current_user, request)
+    # Which range of data is shown
+    my_filter.set_scope_from_request(request, 'person_scope')
+    count = request.args.get('c', 100, type=int)
+    uuid = request.args.get('uuid', None, type=str)
+    try:
+        medias = []
+        result = Media.get_medias(uniq_id=uuid, o_filter=my_filter, limit=count)
+        for record in result:
+            node = record[0]
+            m = Media.from_node(node)
+            medias.append(m)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    logger.info(f"-> bp.scene.media.show_medias: forward from '{my_filter.scope[0]}'")
+    return render_template("/scene/medias.html", medias=medias, 
+                           owner_filter=my_filter, elapsed=time.time()-t0)
+
 
 @bp.route('/scene/media/<fname>')
 def fetch_media(fname):

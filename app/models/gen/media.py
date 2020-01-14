@@ -66,12 +66,16 @@ class Media(NodeObject):
         return n
 
     @staticmethod
-    def get_medias(uniq_id):
+    def get_medias(uniq_id=None, o_filter=None, limit=100):
         """ Lukee kaikki tallenteet tietokannasta """
                         
         if uniq_id:
             query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
             return  shareds.driver.session().run(query, id=uniq_id)
+        elif o_filter:
+            user = o_filter.user
+            query = "MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (o:Media) WHERE  prof.username = $user RETURN o ORDER BY o.description LIMIT $limit"
+            return  shareds.driver.session().run(query, user=user, limit=limit)
         else:
             query = "MATCH (o:Media) RETURN o"
             return  shareds.driver.session().run(query)
