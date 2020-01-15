@@ -429,13 +429,15 @@ def show_medias():
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
     count = request.args.get('c', 100, type=int)
-    uuid = request.args.get('uuid', None, type=str)
+    uuid = request.args.get('uuid', 0, type=int)
     try:
         medias = []
         result = Media.get_medias(uniq_id=uuid, o_filter=my_filter, limit=count)
         for record in result:
+            vconn = record['count']
             node = record[0]
             m = Media.from_node(node)
+            m.conn = vconn
             medias.append(m)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))

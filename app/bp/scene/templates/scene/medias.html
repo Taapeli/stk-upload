@@ -96,21 +96,17 @@
 
 <table id="medias">
     <tr><th>{{ _("Title") }}</th>
+    	<th>{{ _("Num_of_references") }}</th>
     </tr>
 {% if cnt %}
     {% for m in medias %}
         <tr>
             <td><a href="/scene/medias?uuid={{m.uuid}}" class="inlink"
-                   title="{{ _('Go to media page') }}"></a>
+                   title="{{ _('Go to media page') }}">{{ m.description }}</a>
                 <br><span class="id" title="{{ _('Original ID') }}">{{m.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{m.uniq_id}}</span>
-                </td>
-            <td>{% if m.description %} <!-- &#9794; -->
-                <a href="/scene/medias?uuid={{m.uniq_id}}" class="inlink"
-                   title="{{m.description}}">
-                {{ m.description }}</a>
-            {% else %} –
-            {% endif %}</td>
+            </td>
+            <td align="center">{{m.conn}}</td>
         </tr>
     {% endfor %}
 

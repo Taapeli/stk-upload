@@ -74,7 +74,7 @@ class Media(NodeObject):
             return  shareds.driver.session().run(query, id=uniq_id)
         elif o_filter:
             user = o_filter.user
-            query = "MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (o:Media) WHERE  prof.username = $user RETURN o ORDER BY o.description LIMIT $limit"
+            query = "MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () WHERE  prof.username = $user RETURN o, COUNT(r) AS count ORDER BY o.description LIMIT $limit"
             return  shareds.driver.session().run(query, user=user, limit=limit)
         else:
             query = "MATCH (o:Media) RETURN o"
