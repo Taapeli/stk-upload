@@ -213,7 +213,8 @@ def     show_person_v3(uid=None):
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
     return render_template("/scene/person.html", person=person, obj=objs, 
-                           jscode=jscode, menuno=12, debug=dbg, elapsed=time.time()-t0)
+                           jscode=jscode, menuno=12, debug=dbg, root=person.root,
+                           elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/uuid=<pid>')

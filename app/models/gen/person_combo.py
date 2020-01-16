@@ -137,16 +137,26 @@ class Person_combo(Person):
         try:
             if use_common or user == 'guest':
                 # Select person from public database
+                root_type = "PASSED"
                 record = session.run(Cypher_person.get_public,
                                      uuid=uuid).single()
             else:
                 # Select person owned by user
+                root_type = "OWNS"
                 record = session.run(Cypher_person.get_by_user,
                                      uuid=uuid, user=user).single()
             if record is None:
                 raise LookupError(f"Person {uuid} not found.")
             node = record[0]
-            return Person_combo.from_node(node)
+            p = Person_combo.from_node(node)
+            # <Node id=259641 labels={'Root'} 
+            #    properties={'id': '2020-01-03.001', 'user': 'jpek',
+            #        'operator': 'admin_user', 'timestamp': 1578418320006}>
+            node = record[1]
+            user = node.get('user', "")
+            bid = node.get('id', "")
+            p.root = (root_type, user, bid)
+            return p
 
         except Exception as e:
             print(f"Could not read person {uuid}: {e}")
