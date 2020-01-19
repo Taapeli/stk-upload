@@ -913,7 +913,7 @@ with r, e, pl
     def get_family_members (uniq_id):
         """ Read the Families and member names connected to given Person.
 
-            for '/scene/person=<string:uniq_id>'
+            for obsolete '/scene/person=<string:uniq_id>'
         """
 
         return shareds.driver.session().run(Cypher_family.get_persons_family_members, 

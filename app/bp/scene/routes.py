@@ -162,25 +162,26 @@ def show_persons_all():
 @bp.route('/scene/person/<int:uid>')
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_person_v2(uid=None):
+def obsolete_show_person_v2(uid=None):
     """ One Person with all connected nodes - version 3 with apoc
     """
-    t0 = time.time()
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    # v2 Person page data
-    person, objs, marks = get_a_person_for_display_apoc(uid, user)
-    logger.info("-> bp.scene.routes.show_v2")
-    if not person:
-        return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
-    #print (f"Current language {current_user.language}")
-    from bp.scene.models.media import get_thumbname
-    for i in person.media_ref:
-        print(get_thumbname(objs[i].uuid))
-    return render_template("/scene/person_v2.html", person=person, obj=objs, 
-                           marks=marks, menuno=12, elapsed=time.time()-t0)
+    return 'Obsolete: show_person_v2<br><a href="javascript:history.back()">Go Back</a>'
+#     t0 = time.time()
+#     if current_user.is_authenticated:
+#         user=current_user.username
+#     else:
+#         user=None
+#     # v2 Person page data
+#     person, objs, marks = get_a_person_for_display_apoc(uid, user)
+#     logger.info("-> bp.scene.routes.show_v2")
+#     if not person:
+#         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
+#     #print (f"Current language {current_user.language}")
+#     from bp.scene.models.media import get_thumbname
+#     for i in person.media_ref:
+#         print(get_thumbname(objs[i].uuid))
+#     return render_template("/scene/person_v2.html", person=person, obj=objs, 
+#                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person', methods=['GET'])
@@ -220,31 +221,32 @@ def     show_person_v3(uid=None):
 @bp.route('/scene/person/uuid=<pid>')
 @bp.route('/scene/person=<int:pid>')
 #     @login_required
-def show_person_v1(pid):
+def obsolete_show_person_v1(pid):
     """ Full homepage for a Person in database (v1 versio).
 
         The pid may be 1) an uuid or 2) an uniq_id
     """
-    t0 = time.time()
-    try:
-        person, events, photos, citations, families = get_person_data_by_id(pid)
-        for f in families:
-            print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
-            if f.mother:
-                print("  Mother: {} / {} s. {}".\
-                      format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-            if f.father:
-                print("  Father:  {} / {} s. {}".\
-                      format(f.father.uniq_id, f.father.id, f.father.birth_date))
-            for c in f.children:
-                print("    Child ({}): {} / {} s. {}".\
-                      format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=2, text=str(e)))
-    logger.info("-> bp.scene.routes.show_person_v1")
-    return render_template("/scene/person_v1.html", person=person, events=events, 
-                           photos=photos, citations=citations, families=families, 
-                           elapsed=time.time()-t0)
+    return 'Obsolete: show_person_v1<br><a href="javascript:history.back()">Go Back</a>'
+#     t0 = time.time()
+#     try:
+#         person, events, photos, citations, families = get_person_data_by_id(pid)
+#         for f in families:
+#             print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
+#             if f.mother:
+#                 print("  Mother: {} / {} s. {}".\
+#                       format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+#             if f.father:
+#                 print("  Father:  {} / {} s. {}".\
+#                       format(f.father.uniq_id, f.father.id, f.father.birth_date))
+#             for c in f.children:
+#                 print("    Child ({}): {} / {} s. {}".\
+#                       format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
+#     except KeyError as e:
+#         return redirect(url_for('virhesivu', code=2, text=str(e)))
+#     logger.info("-> bp.scene.routes.show_person_v1")
+#     return render_template("/scene/person_v1.html", person=person, events=events, 
+#                            photos=photos, citations=citations, families=families, 
+#                            elapsed=time.time()-t0)
 
 
 @bp.route('/scene/event/<int:uniq_id>')

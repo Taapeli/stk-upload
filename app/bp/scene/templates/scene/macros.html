@@ -105,15 +105,9 @@
     {#  Creates a Person name and link using uuid (for family tree graph). #}
     {% if p.uuid == uuid %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
-    {% else %}{% if p.uuid %}
+    {% else %}
     <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr. {{p.uniq_id}})">
-    {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">{% endif %}
-        {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
-	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
-	    {% else %}{{ _('Anonymous') }}</a>
-        {% endif %}
     {% endif %}
 {%- endmacro %}
                     

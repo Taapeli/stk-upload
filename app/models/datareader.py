@@ -641,7 +641,11 @@ def get_people_by_surname(surname):
 
 
 def get_person_data_by_id(pid):
-    """ Get 5 data sets:                    ---- vanhempi versio ----
+    """ Get 5 data sets:                        ---- vanhempi versio ----
+        Obsolete? still used in
+        - /compare/uniq_id=311006,315556 
+        - /lista/person_data/<string:uniq_id>
+        - /lista/person_data/<string:uniq_id>
 
         The given pid may be an uuid (str) or uniq_id (int).
 

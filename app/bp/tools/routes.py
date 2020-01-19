@@ -159,9 +159,9 @@ def compare_person_page(cond):
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
-                datareader.get_person_data_by_id(uniq_id_1)
+                datareader.get_person_data_by_id(int(uniq_id_1))
             person2, events2, photos2, sources2, families2 = \
-                datareader.get_person_data_by_id(uniq_id_2)
+                datareader.get_person_data_by_id(int(uniq_id_2))
             for f in families:
                 print (_('{} in Family {}/{}').format(f.role, f.uniq_id, f.id))
                 if f.mother:

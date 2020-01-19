@@ -140,7 +140,7 @@ def get_person_full_data(uuid, owner, use_common=True):
 
 
 def get_a_person_for_display_apoc(uid, user):
-    """ Get a Person with all connected nodes for display in Person page (v2).
+    """ Get a Person with all connected nodes for display in obsolete Person page v2.
 
 
     Person object tree is creation
