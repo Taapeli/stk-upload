@@ -24,7 +24,7 @@
     <p><small>– Kaikki data, ei huomioida aineiston omistajaa</small></p>
 </div>
 
-{{ macro.menu(4) }}
+{{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
@@ -38,8 +38,8 @@
                        {% else %}{{my_set}}
                        {% endif %}</b>
                        {% if user %}
-                       (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
-                            style="text-decoration-line: underline;">Vaihda</a></i>).
+                       (<i><a href="/" title="{{ _('Change the data set shown') }}" 
+                            style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
                        {% endif %}</p>
 	           </div>
 	           <div>

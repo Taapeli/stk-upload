@@ -351,7 +351,7 @@ def show_places():
 #     for p in locations:
 #         print ("# {} ".format(p))
     logger.info(f"-> bp.scene.routes.show_places: forward from '{my_filter.scope[0]}'")
-    return render_template("/scene/places.html", locations=locations, 
+    return render_template("/scene/places.html", locations=locations, menuno=4,
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 
