@@ -431,11 +431,9 @@ def show_medias():
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
-    count = request.args.get('c', 100, type=int)
-    uuid = request.args.get('uuid', 0, type=int)
     try:
         medias = []
-        result = Media.get_medias(uniq_id=uuid, o_filter=my_filter, limit=count)
+        result = Media.get_medias(uniq_id=None, o_filter=my_filter, limit=100)
         for record in result:
             vconn = record['count']
             node = record[0]
@@ -447,6 +445,23 @@ def show_medias():
     logger.info(f"-> bp.scene.media.show_medias: forward from '{my_filter.scope[0]}'")
     return render_template("/scene/medias.html", medias=medias, 
                            owner_filter=my_filter, elapsed=time.time()-t0)
+
+@bp.route('/scene/media', methods=['GET'])
+def show_media(uid=None):
+    """ 
+        One Media
+    """
+    uid = request.args.get('uuid', uid)
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
+    
+    try:
+        media = Media.get_one(uid)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    logger.info("-> bp.scene.routes.show_media")
+    return render_template("/scene/media.html", media=media, menuno=6)
 
 
 @bp.route('/scene/media/<fname>')

@@ -1,0 +1,19 @@
+{# /scene/templates/scene/media.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}{{ _('Media data') }} (scenemedias){% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+<script src="/static/infobox.js"></script>
+
+<h2>{{ _('Media data') }}</h2>
+
+<p>{{ _("Title") }}:{{ media.description }}</p>
+<p>{{ _('Original ID') }}: {{media.id}}</p> 
+<p><div class="thumbnail">
+            <img alt="({{ _('Photo') }})" 
+                 src="/scene/thumbnail?id={{media.uuid}}" 
+                 title="key = {{media.uuid_str()}}"/>
+        </div></p>
+
+{% endblock %}

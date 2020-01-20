@@ -702,7 +702,7 @@ class Cypher_media():
 
     get_by_uuid = """
 MATCH (obj:Media)
-    WHERE Iobj.uuid = $rid
+    WHERE obj.uuid = $rid
 RETURN obj"""
 
     get_by_uniq_id = """
