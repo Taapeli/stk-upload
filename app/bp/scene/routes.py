@@ -425,7 +425,6 @@ def show_medias():
     """ List of Medias for menu(5)
     """
     t0 = time.time()
-    limit = 20
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set filter by owner and the data selection
@@ -433,28 +432,7 @@ def show_medias():
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'media_scope')
     try:
-        medias = []
-        result = Media.get_medias(uniq_id=None, o_filter=my_filter, limit=limit)
-        for record in result:
-            # <Record o=<Node id=393949 labels={'Media'}
-            #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg', 
-            #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg', 
-            #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1', 
-            #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}> 
-            #    credit='juha'
-            #    batch_id='2020-01-02.001'
-            #    count=1>
-            node = record['o']
-            m = Media.from_node(node)
-            m.conn = record.get('count', 0)
-            m.credit = record.get('credit')
-            m.batch = record.get('batch_id')
-            medias.append(m)
-
-        # Update the page scope according to items really found 
-        if medias:
-            my_filter.update_session_scope('media_scope', 
-                medias[0].description, medias[-1].description, limit, len(medias))
+        medias = Media.read_my_media_list(my_filter, 20)
 
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))

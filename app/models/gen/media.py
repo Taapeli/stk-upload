@@ -51,12 +51,6 @@ class Media(NodeObject):
             'mime': 'image/gif', 'change': 1524411014}>
         '''
         n = super(Media, cls).from_node(node)
-#         n = cls()
-#         n.uniq_id = node.id
-#         n.id = node['id']
-#         n.uuid = node['uuid']
-#         n.handle = node['handle']
-#         n.change = node['change']
         n.description = node['description']
         n.src = node['src']
         n.mime = node['mime']
@@ -66,6 +60,35 @@ class Media(NodeObject):
             n.name = ""
         return n
 
+
+    @staticmethod
+    def read_my_media_list(my_filter, limit):
+        """ Read Media object list using my_filter.
+        """
+        medias = []
+        result = Media.get_medias(uniq_id=None, o_filter=my_filter, limit=limit)
+        for record in result: 
+            # <Record o=<Node id=393949 labels={'Media'}
+            #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
+            #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
+            #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
+            #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}>
+            #    credit='juha'
+            #    batch_id='2020-01-02.001'
+            #    count=1>
+            node = record['o']
+            m = Media.from_node(node)
+            m.conn = record.get('count', 0)
+            m.credit = record.get('credit')
+            m.batch = record.get('batch_id')
+            medias.append(m)
+        
+    # Update the page scope according to items really found
+        if medias:
+            my_filter.update_session_scope('media_scope', 
+                medias[0].description, medias[-1].description, limit, len(medias))
+        return medias
+    
     @staticmethod
     def get_medias(uniq_id=None, o_filter=None, limit=100):
         """ Reads Media objects from user batch or common data using filter. """
@@ -79,26 +102,14 @@ class Media(NodeObject):
             show_common = o_filter.use_common()
             if show_common:
                 # Show approved common data
-                cypher_media_common = """
-MATCH (prof) -[:PASSED]-> (o:Media) <- [r:MEDIA] - () 
-    WHERE o.description >= $start_name 
-RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
-    ORDER BY o.description LIMIT $limit"""
-                return shareds.driver.session().run(
-                    cypher_media_common, user=user, start_name=fw_from, limit=limit)
+                return shareds.driver.session().run(Cypher_media.read_common_media,
+                                                    user=user, start_name=fw_from, limit=limit)
             else:
                 # Show user Batch
-                cypher_media_by_batch = """
-MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () 
-    WHERE  prof.user = $user AND o.description >= $start_name
-RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
-    ORDER BY o.description LIMIT $limit"""
-                return  shareds.driver.session().run(
-                    cypher_media_by_batch, start_name=fw_from, user=user, limit=limit)
+                return  shareds.driver.session().run(Cypher_media.read_my_own_media,
+                                                     start_name=fw_from, user=user, limit=limit)
         else:
-            query = "MATCH (o:Media) RETURN o"
-            return  shareds.driver.session().run(query)
-
+            return  shareds.driver.session().run(Cypher_media.get_all)
 
     @staticmethod
     def get_one(oid):

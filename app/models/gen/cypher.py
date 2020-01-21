@@ -715,3 +715,17 @@ MATCH (obj:Media) <-[r:MEDIA] - (person:Person)
     WHERE obj.uuid = $rid
 RETURN obj, COLLECT(person)"""
 
+    get_all = "MATCH (o:Media) RETURN o"
+
+    # Media list by description with count limit
+    read_common_media = """
+MATCH (prof) -[:PASSED]-> (o:Media) <- [r:MEDIA] - () 
+WHERE o.description >= $start_name 
+RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+    ORDER BY o.description LIMIT $limit"""
+
+    read_my_own_media = """
+MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () 
+WHERE  prof.user = $user AND o.description >= $start_name
+RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+    ORDER BY o.description LIMIT $limit"""
