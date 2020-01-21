@@ -8,6 +8,7 @@ from sys import stderr
 
 from .base import NodeObject
 from .cypher import Cypher_media
+from .person import Person
 from models.cypher_gramps import Cypher_media_in_batch
 import shareds
 import os
@@ -91,15 +92,20 @@ class Media(NodeObject):
             with shareds.driver.session() as session:
                 if isinstance(oid, int):
                     # User uniq_id
-                    record = session.run(Cypher_media.get_by_uniq_id,
+                    record, record2 = session.run(Cypher_media.get_by_uniq_id,
                                          rid=oid).single()
                 else:
                     # Use UUID
-                    record = session.run(Cypher_media.get_by_uuid,
+                    record, record2 = session.run(Cypher_media.get_person_by_uuid,
                                          rid=oid).single()
 
                 if record:
-                    return Media.from_node(record['obj'])
+                    media = Media.from_node(record)
+                    media.ref = []
+                    for person in record2:
+                        p = Person.from_node(person)
+                        media.ref.append(p)
+                    return (media)
         return None
 
         

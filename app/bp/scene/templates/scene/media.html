@@ -8,12 +8,25 @@
 
 <h2>{{ _('Media data') }}</h2>
 
-<p>{{ _("Title") }}:{{ media.description }}</p>
-<p>{{ _('Original ID') }}: {{media.id}}</p> 
-<p><div class="thumbnail">
-            <img alt="({{ _('Photo') }})" 
-                 src="/scene/thumbnail?id={{media.uuid}}" 
-                 title="key = {{media.uuid_str()}}"/>
-        </div></p>
+{% if media %}
+	<p>{{ _("Title") }}:{{ media.description }}</p>
+	<p>{{ _('Original ID') }}: {{media.id}}</p> 
+	<p><div class="thumbnail">
+	            <img alt="({{ _('Photo') }})" 
+	                 src="/scene/thumbnail?id={{media.uuid}}" 
+	                 title="key = {{media.uuid_str()}}"/>
+	        </div></p>
+	        
+<h3>{{ _('References') }}</h3>
+	
+    {% if media.ref %}
+	    {% for p in media.ref %}
+    		<p><a href="/scene/person?uuid={{p.uuid}}"
+	                     title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">{{p.sortname}}</a></p>
+	    {% endfor %}
+    {% else %}
+    -
+	{% endif %}
+{% endif %}
 
 {% endblock %}

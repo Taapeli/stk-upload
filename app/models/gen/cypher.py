@@ -710,3 +710,8 @@ MATCH (obj:Media)
     WHERE ID(obj) = $rid
 RETURN obj"""
 
+    get_person_by_uuid = """
+MATCH (obj:Media) <-[r:MEDIA] - (person:Person) 
+    WHERE obj.uuid = $rid
+RETURN obj, COLLECT(person)"""
+
