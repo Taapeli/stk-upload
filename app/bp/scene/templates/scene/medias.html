@@ -23,7 +23,7 @@
 
 <div id="startdiv">
 	<h2>{{ _('List of Medias') }}</h2>
-    <p><small>{{cnt}} medias, user {{user}}</small>
+<!--     <p><small>{{cnt}} medias, user {{user}}</small> -->
 	
 </div>
 
@@ -41,18 +41,18 @@
                        {% else %}{{my_set}}
                        {% endif %}</b>
                        {% if user %}
-                       (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
-                            style="text-decoration-line: underline;">Vaihda</a></i>).
+                       (<i><a href="/" title="{{ _('Change the data set shown') }}" 
+                            style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
                        {% endif %}</p>
 	           </div>
 	           <div>
 	               <form action="/scene/medias">
 	                 <fieldset>
 	                    <input type="hidden" name="c" value="50" >
-	                    <label for="fw">{{ _('Go to') }} {{ _('Media') }}</label>
+	                    <label for="fw">{{ _('Go to') }}</label>
 	                    <input type="text" name="fw" size="8" 
 	                     title="{{ _('Starting letters of media') }}" 
-	                     placeholder="{{ _('Media') }}">
+	                     placeholder="{{ _('Title') }}">
 	                    <input type="submit" value=" > ">
 	                 </fieldset>
 	               </form>
@@ -81,7 +81,7 @@
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu"
                           style="cursor:not-allowed"> &lt; </span></li>
-             	{% if next[1].startswith('>') %}
+             	{% if next[1] == None or next[1].startswith('>') %}
 	                <li><span class="navlink" title="{{ _('no next page') }}"
 	                          style="cursor:not-allowed"> &gt; </span></li>
 	            {% else %}
@@ -96,7 +96,8 @@
 
 <table id="medias">
     <tr><th>{{ _("Title") }}</th>
-    	<th>{{ _("Num_of_references") }}</th>
+        <th>{{ _("References") }}</th>
+        <th>{{ _("Picture") }}</th>
     </tr>
 {% if cnt %}
     {% for m in medias %}
@@ -105,9 +106,12 @@
                    title="{{ _('Go to media page') }}">{{ m.description }}</a>
                 <br><span class="id" title="{{ _('Original ID') }}">{{m.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{m.uniq_id}}</span>
+                <br><span style="color:gray; font-size:80%;">{{ _('Origin from') }}
+                    <i>{{m.credit}}</i> {{m.batch}}</span>
             </td>
             <td align="center">{{m.conn}}</td>
-            <td><div class="thumbnail">
+            <td style=" margin-left: auto; margin-right: auto;">
+                <div style="text-align: center;">
                 <img alt="({{ _('Photo') }})" 
                      src="/scene/thumbnail?id={{m.uuid}}" 
                      title="key = {{m.uuid_str()}}"/>
@@ -115,7 +119,7 @@
         </tr>
     {% endfor %}
 
-    {% if next[1].startswith('>') %}
+    {% if next[1] == None or next[1].startswith('>') %}
         <tr><td colspan="4" id="lastitem_badge">
                 <i>{{ _('The last item found') }}</i>
             </td>
@@ -137,7 +141,7 @@
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-             	{% if next[1].startswith('>') %}
+             	{% if next[1] == None or next[1].startswith('>') %}
 	                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
 	            {% else %}
 	                <li><a href="/scene/medias?{{ {'fw':next[1]} | urlencode }}"

@@ -68,15 +68,33 @@ class Media(NodeObject):
 
     @staticmethod
     def get_medias(uniq_id=None, o_filter=None, limit=100):
-        """ Lukee kaikki tallenteet tietokannasta """
+        """ Reads Media objects from user batch or common data using filter. """
                         
         if uniq_id:
             query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
             return  shareds.driver.session().run(query, id=uniq_id)
         elif o_filter:
             user = o_filter.user
-            query = "MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () WHERE  prof.username = $user RETURN o, COUNT(r) AS count ORDER BY o.description LIMIT $limit"
-            return  shareds.driver.session().run(query, user=user, limit=limit)
+            fw_from = o_filter.next_name_fw()     # next name
+            show_common = o_filter.use_common()
+            if show_common:
+                # Show approved common data
+                cypher_media_common = """
+MATCH (prof) -[:PASSED]-> (o:Media) <- [r:MEDIA] - () 
+    WHERE o.description >= $start_name 
+RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+    ORDER BY o.description LIMIT $limit"""
+                return shareds.driver.session().run(
+                    cypher_media_common, user=user, start_name=fw_from, limit=limit)
+            else:
+                # Show user Batch
+                cypher_media_by_batch = """
+MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () 
+    WHERE  prof.user = $user AND o.description >= $start_name
+RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+    ORDER BY o.description LIMIT $limit"""
+                return  shareds.driver.session().run(
+                    cypher_media_by_batch, start_name=fw_from, user=user, limit=limit)
         else:
             query = "MATCH (o:Media) RETURN o"
             return  shareds.driver.session().run(query)
