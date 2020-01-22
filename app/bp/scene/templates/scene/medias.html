@@ -94,20 +94,21 @@
 
 <section id="lista">
 
-<table id="medias">
+{% if cnt %}
+  <table id="medias">
     <tr><th>{{ _("Title") }}</th>
         <th>{{ _("References") }}</th>
-        <th>{{ _("Picture") }}</th>
+        <th style="text-align: center;">{{ _("Picture") }}</th>
+    {% if owner_filter.use_common() %}
+        <th>{{ _('User Batch') }}</th>
+    {% endif %}
     </tr>
-{% if cnt %}
     {% for m in medias %}
         <tr>
             <td><a href="/scene/media?uuid={{m.uuid}}" class="inlink"
                    title="{{ _('Go to media page') }}">{{ m.description }}</a>
                 <br><span class="id" title="{{ _('Original ID') }}">{{m.id}}</span> 
                 <span class="idno" title="{{ _('Key') }}">{{m.uniq_id}}</span>
-                <br><span style="color:gray; font-size:80%;">{{ _('Origin from') }}
-                    <i>{{m.credit}}</i> {{m.batch}}</span>
             </td>
             <td align="center">{{m.conn}}</td>
             <td style=" margin-left: auto; margin-right: auto;">
@@ -116,6 +117,9 @@
                      src="/scene/thumbnail?id={{m.uuid}}" 
                      title="key = {{m.uuid_str()}}"/>
             </div></td>
+       {% if owner_filter.use_common() %}
+            <td><i>{{m.credit}}</i><br>{{m.batch}}</td>
+       {% endif %}
         </tr>
     {% endfor %}
 
@@ -125,14 +129,8 @@
             </td>
         </tr>
     {% endif %}
-{% else %}
-        <tr><td colspan="5">{{ _('No medias') }}</td></tr>
-{% endif %}
-</table>
-<p>&nbsp;</p>
-
-<div>
-    {% if cnt %}
+  </table>
+  <div style="margin-top: 1em;">
         {% set last = medias|last %}
         <div id="alphanav">{% set alpha = "¤" %}
             <ul><li><a href="#" title="{{ _('Top of page') }}">&uarr;</a></li>
@@ -141,15 +139,23 @@
                 {% else %}<span class="navlink">|&lt;</span>
                 {% endif %}</li>
                 <li><span class="navlink" title="edellinen sivu" style="cursor:not-allowed"> &lt; </span></li>
-             	{% if next[1] == None or next[1].startswith('>') %}
-	                <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
-	            {% else %}
-	                <li><a href="/scene/medias?{{ {'fw':next[1]} | urlencode }}"
-	                	title="seuraava sivu" class="navlink"> &gt; </a></li>
-            	{% endif %}
+                {% if next[1] == None or next[1].startswith('>') %}
+                    <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
+                {% else %}
+                    <li><a href="/scene/medias?{{ {'fw':next[1]} | urlencode }}"
+                        title="seuraava sivu" class="navlink"> &gt; </a></li>
+                {% endif %}
             </ul>
         </div>
-    {% endif %}
-</div>
+  </div>
+{% else %}
+  <div class="NotFound">
+      <p>{{ _('No media found with search keys starting "%(name)s"', name=next[0]) }}.</p>
+      {% if next[0] %}<p>&nbsp;&#9656; <a href="/scene/medias?fw=%20" 
+          title="{{ _('first page') }}">{{ _("Go to the first media") }}</a></p>
+      {% endif %}
+  </div>
+{% endif %}
+<p>&nbsp;</p>
 
 {% endblock %}
