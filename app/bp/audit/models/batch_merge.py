@@ -30,12 +30,13 @@ class Batch_merge(object):
     '''
 
 # Find some OWNS relations for given $batch and replace them with Root STK relations
+#Todo: Remove limit?
     cypher_cp_batch_to_root = '''
 MERGE (root:Root {id:$batch, user:$user, operator:$oper})
     SET root.timestamp = timestamp()
 WITH root
     MATCH (b:Batch {id:$batch}) -[o:OWNS|OWNS_OTHER]-> (x)
-    WITH root, o, b, x LIMIT 100
+    WITH root, o, b, x LIMIT 3000
         DELETE o
         CREATE (root) -[:PASSED]-> (x)
         RETURN x'''
@@ -79,13 +80,13 @@ WITH root
                     #        'change': 1495632125}>>
                     node = record[0]
                     label = list(node.labels)[0]
-                    text += ' ' + node['id']
+                    text += ' ' + node.get('id','-')
                     if label in moved_nodes:
                         moved_nodes[label] += 1
                     else:
                         moved_nodes[label] = 1
 
-                logger.info(f"-moved {text}")
+                logger.info(f"-moved {text[:500]} ...")
                 tx.commit()
 
             except Exception as e:

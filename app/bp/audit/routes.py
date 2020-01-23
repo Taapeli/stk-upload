@@ -10,9 +10,9 @@ from bp.admin.users import Batches
 import logging
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, flash #, send_from_directory, session, jsonify
+from flask import render_template, request, redirect, url_for #, flash, send_from_directory, session, jsonify
 from flask_security import login_required, roles_accepted, current_user
-from flask_babelex import _
+#from flask_babelex import _
 
 import shareds
 from .models.batch_merge import Batch_merge
@@ -45,10 +45,13 @@ def list_uploads():
 def move_in_1(batch_name):
     """ Confirm Batch move to Isotammi database """    
     user, batch_id, tstring, labels = Batches.get_batch_stats(batch_name)
-    logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}')
+    total = 0
+    for _label, cnt in labels:
+        total += cnt
+    logger.info(f' bp.audit.routes.move_in_1 {user} / {batch_name}, total {total} nodes')
 
     return render_template('/audit/move_in_1.html', user=user, batch=batch_id, 
-                           time=tstring, label_nodes=labels)
+                           label_nodes=labels, total=total, time=tstring)
 
 @bp.route('/audit/movenow',  methods=['POST'])
 @login_required
