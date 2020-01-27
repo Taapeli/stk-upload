@@ -8,6 +8,7 @@ Extracted 23.5.2019 from models.gen.place.Place
 import  shareds
 from .place import Place, Place_name, Point
 from .note import Note
+from .media import Media
 from .dates import DateRange
 from .cypher import Cypher_place
 from models.dbtree import DbTree
@@ -161,6 +162,11 @@ class Place_combo(Place):
                 for notes_node in place_record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
+
+                for medias_node in place_record['medias']:
+                    m = Media.from_node(medias_node)
+                    pl.media_ref.append(m)
+                    
                 if not (pl.type and pl.id):
                     logger.error(f"Place_combo.read_w_notes: missing data for {pl}")
 

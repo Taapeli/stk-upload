@@ -517,9 +517,11 @@ RETURN place,
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE place.uuid=$uuid
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
+OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
 RETURN place, 
     COLLECT(DISTINCT n) AS names,
-    COLLECT (DISTINCT note) AS notes"""
+    COLLECT (DISTINCT note) AS notes,
+    COLLECT (DISTINCT media) AS medias"""
 
     place_get_one = """
 match (p:Place) where ID(p)=$pid
