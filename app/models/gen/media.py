@@ -136,10 +136,14 @@ class Media(NodeObject):
                         node_label = str(node._labels)
                         if 'Person' in node_label:
                             p = Person.from_node(node)
-                            media.ref.append(p)
+                            p_type = 'Person'
+                            data = [p_type,p]
+                            media.ref.append(data)
                         elif 'Place' in node_label:
                             p = Place.from_node(node)
-                            media.ref.append(p)
+                            p_type = 'Place'
+                            data = [p_type,p]
+                            media.ref.append(data)
                     return (media)
         return None
 
