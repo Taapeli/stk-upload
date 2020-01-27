@@ -681,6 +681,12 @@ class DOM_handler():
                     pl.noteref_hlink.append(placeobj_noteref.getAttribute("hlink"))
                     ##print(f'# Place {pl.id} has note {pl.noteref_hlink[-1]}')
 
+            # Handle <objref>
+            self._extract_mediaref(placeobj, pl)
+
+            if pl.media_handles: 
+                print(f'# saving Place {pl.id}: media_handles {pl.media_handles}')
+
             # Save Place, Place_names, Notes and connect to hierarchy
             self.save_and_link_handle(pl, batch_id=self.batch_id, place_keys=place_keys)
             # The place_keys has been updated 

@@ -327,6 +327,13 @@ MATCH (pl:Place) WHERE id(pl) = $pid
 MATCH (n:Note)  WHERE n.handle=$hlink
 CREATE (pl) -[r:NOTE]-> (n)"""
 
+    link_media = """
+MATCH (p:Place {handle: $p_handle})
+MATCH (m:Media  {handle: $m_handle})
+  CREATE (p) -[r:MEDIA]-> (m)
+    SET r = $r_attr"""
+
+
 # class Cypher_place_w_handle():
 #     """ For Place class """
 

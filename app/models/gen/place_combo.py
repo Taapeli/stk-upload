@@ -27,6 +27,7 @@ class Place_combo(Place):
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
                 note_ref[]          int uniq_ids of Notes
+                media_ref[]         int uniq_ids of Medias
             Defined in Place:
                 handle
                 change
@@ -56,6 +57,7 @@ class Place_combo(Place):
         self.uppers = []        # Upper place objects for hirearchy display
         self.notes = []         # Notes connected to this place
         self.note_ref = []      # uniq_ids of Notes
+        self.media_ref = []     # uniq_id of models.gen.media.Media
 
 
     def __str__(self):
