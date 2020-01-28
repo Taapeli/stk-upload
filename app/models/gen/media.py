@@ -9,6 +9,7 @@ from sys import stderr
 from .base import NodeObject
 from .cypher import Cypher_media
 from .person import Person
+from .place import Place
 from models.cypher_gramps import Cypher_media_in_batch
 import shareds
 import os
@@ -125,15 +126,24 @@ class Media(NodeObject):
                                          rid=oid).single()
                 else:
                     # Use UUID
-                    record, record2 = session.run(Cypher_media.get_person_by_uuid,
+                    record, record2 = session.run(Cypher_media.get_by_uuid,
                                          rid=oid).single()
 
                 if record:
                     media = Media.from_node(record)
                     media.ref = []
-                    for person in record2:
-                        p = Person.from_node(person)
-                        media.ref.append(p)
+                    for node in record2:
+                        node_label = str(node._labels)
+                        if 'Person' in node_label:
+                            p = Person.from_node(node)
+                            p_type = 'Person'
+                            data = [p_type,p]
+                            media.ref.append(data)
+                        elif 'Place' in node_label:
+                            p = Place.from_node(node)
+                            p_type = 'Place'
+                            data = [p_type,p]
+                            media.ref.append(data)
                     return (media)
         return None
 

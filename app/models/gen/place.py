@@ -33,6 +33,7 @@ class Place(NodeObject):
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
                 note_ref[]          int uniq_ids of Notes
+                media_ref[]         int uniq_ids of Medias
             May be defined in Place_gramps:
                 surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
                 citation_ref[]      int uniq_ids of Citations

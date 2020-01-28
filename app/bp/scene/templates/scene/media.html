@@ -21,8 +21,13 @@
 	
     {% if media.ref %}
 	    {% for p in media.ref %}
-    		<p><a href="/scene/person?uuid={{p.uuid}}"
-	                     title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">{{p.sortname}}</a></p>
+	    	{% if p[0] == 'Person' %}
+	    		<p><a href="/scene/person?uuid={{p[1].uuid}}"
+		                     title="{{ _('see details of person %(id)s', id=p[1].uuid_short()) }} (nr={{p[1].uniq_id}})">{{p[1].sortname}}</a></p>
+		    {% elif p[0] == 'Place' %}
+	    		<p><a href="/scene/location/uuid={{p[1].uuid}}"
+		                     title="{{ _('see details of person %(id)s', id=p[1].uuid_short()) }} (nr={{p[1].uniq_id}})">{{p[1].pname}}</a></p>
+		    {% endif %}
 	    {% endfor %}
     {% else %}
     -
