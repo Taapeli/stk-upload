@@ -35,55 +35,17 @@ return b as batch,
     labels(x)[0] as label, count(x) as cnt 
     order by batch.user, batch.id'''
 
-# ╒══════╤════════════════╤════════════╤═════╕
-# │"user"│"id"            │"label"     │"cnt"│
-# ╞══════╪════════════════╪════════════╪═════╡
-# │"jpek"│"2020-01-03.001"│"Note"      │17   │
-# ├──────┼────────────────┼────────────┼─────┤
-# │"jpek"│"2020-01-03.001"│"Place"     │30   │
-# ├──────┼────────────────┼────────────┼─────┤
-# │"jpek"│"2020-01-03.002"│"Media"     │1    │
-# ├──────┼────────────────┼────────────┼─────┤
-# │"jpek"│"2020-01-03.002"│"Note"      │7    │
-# ├──────┼────────────────┼────────────┼─────┤
-# │"juha"│"2020-01-02.001"│"Citation"  │11   │
-# ├──────┼────────────────┼────────────┼─────┤
-# │"juha"│"2020-01-02.001"│"Event"     │1    │
-# └──────┴────────────────┴────────────┴─────┘
-    get_my_auditions = '''
-match (b:Audition) where b.auditor = "$oper"
-optional match (b) -[:PASSED]-> (x)
-return b.user as user, b.id as id, labels(x)[0] as label, count(x) as cnt 
-    order by user, id, label'''
+    get_single_batch = '''
+match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
+optional match (b) -[:OWNS]-> (x)
+return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
 
-# ╒════════════╤═════╕
-# │"label"     │"cnt"│
-# ╞════════════╪═════╡
-# │"Family"    │12   │
-# ├────────────┼─────┤
-# │"Media"     │1    │
-# ├────────────┼─────┤
-# │"Person"    │25   │
-# └────────────┴─────┘
-    get_single_audition = '''
-match (b:Audition {id:$batch}) 
-optional match (b) -[:PASSED]-> (x)
-return labels(x)[0] as label, count(x) as cnt'''
-
-# ╒════════════════╤═════════════╤══════════╤════════╤═════════╕
-# │"audition"      │"timestamp"  │"auditor" │"status"│"persons"│
-# ╞════════════════╪═════════════╪══════════╪════════╪═════════╡
-# │"2020-01-02.001"│1579789440355│"juha"    │null    │2146     │
-# ├────────────────┼─────────────┼──────────┼────────┼─────────┤
-# │"2020-01-23.001"│1579794614154│"juha"    │null    │25       │
-# └────────────────┴─────────────┴──────────┴────────┴─────────┘
-    get_my_audition_names = '''
-match (b:Audition) where b.auditor = $oper
-optional match (b) -[r:PASSED]-> (:Person)
-return b.id as audition, b.timestamp as timestamp, 
-    b.auditor as auditor, b.status as status,
+    get_user_batch_names = '''
+match (b:Batch) where b.user = $user
+optional match (b) -[r:OWNS]-> (:Person)
+return b.id as batch, b.timestamp as timestamp, b.status as status,
     count(r) as persons 
-order by audition'''
+    order by batch'''
 
     get_empty_batches = '''
 MATCH (a:Batch) 
