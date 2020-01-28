@@ -149,9 +149,9 @@ class Person_combo(Person):
                 raise LookupError(f"Person {uuid} not found.")
             node = record[0]
             p = Person_combo.from_node(node)
-            # <Node id=259641 labels={'Root'} 
+            # <Node id=259641 labels={'Audition'} 
             #    properties={'id': '2020-01-03.001', 'user': 'jpek',
-            #        'operator': 'admin_user', 'timestamp': 1578418320006}>
+            #        'auditor': 'admin_user', 'timestamp': 1578418320006}>
             node = record[1]
             user = node.get('user', "")
             bid = node.get('id', "")

@@ -6,11 +6,11 @@ Created on 6.5.2019
 from datetime import datetime
  
 import shareds
-from .cypher_audit import Cypher_stats
+from .cypher_audit import Cypher_stats, Cypher_batch_stats
 
-class Batches(object):
+class Audition(object):
     '''
-    Methods for collectiong user batch statistics.
+    Methods for processing user batch and audition.
     
     Target example:
     user    batch                   "Family"    "Note"    "Person"
@@ -26,6 +26,7 @@ class Batches(object):
         self.user = user
         self.is_audit = is_audit
 
+
     def get_user_batch_stats(self):
         ''' Get statistics of user Batch contents.
         
@@ -33,7 +34,8 @@ class Batches(object):
         '''
         labels = []
         users = {}
-        result = shareds.driver.session().run(Cypher_stats.get_batches, user=self.user)
+        result = shareds.driver.session().run(Cypher_batch_stats.get_batches,
+                                              user=self.user)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
             #    properties={ // 'mediapath': '/home/jm/my_own.media', 
@@ -44,6 +46,7 @@ class Batches(object):
             #  cnt=2>
             batch = record['batch']
             label = record['label']
+            if label == None: label = '-'
             cnt = record['cnt']
             batch_id = batch.get('id')
             ts = batch.get('timestamp')
@@ -79,7 +82,8 @@ class Batches(object):
         '''
         labels = []
         batch = None
-        result = shareds.driver.session().run(Cypher_stats.get_single_batch, batch=batch_id)
+        result = shareds.driver.session().run(Cypher_batch_stats.get_single_batch, 
+                                              batch=batch_id)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
             #    properties={ // 'mediapath': '/home/jm/my_own.media', 
@@ -99,7 +103,8 @@ class Batches(object):
                     tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
                 else:
                     tstring = ""
-            label = record.get('label', '')
+            label = record['label']
+            if label == None: label = '-'
             # Trick: Set Person as first in sort order!
             if label == "Person": label = " Person"
             cnt = record['cnt']
@@ -119,13 +124,15 @@ class Batches(object):
         ''' Get statistics of all common data contents approved by current user.
         '''
         labels = []
-        batch = None
+        audit_id = None
 
-        result = shareds.driver.session().run(Cypher_stats.get_auditions, user=user)
+        result = shareds.driver.session().run(Cypher_stats.get_my_auditions, 
+                                              user=user)
         for record in result:
             pass
 
-        result = shareds.driver.session().run(Cypher_stats.get_single_batch, batch=audit_id)
+        result = shareds.driver.session().run(Cypher_batch_stats.get_single_batch, 
+                                              batch=audit_id)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
             #    properties={ // 'mediapath': '/home/jm/my_own.media', 
@@ -135,7 +142,7 @@ class Batches(object):
             #  label='Note'
             #  cnt=2>
 
-            if not batch:
+            if not audit_id: #Todo: Väärin! batch?
                 batch = record['batch']
                 user = batch.get('user')
                 #audit_id = batch.get('id')
@@ -158,4 +165,4 @@ class Batches(object):
 
             #print(f'users[{key}] {users[key]}')
 
-        return user, batch_id, tstring, sorted(labels)
+        return user, audit_id, tstring, sorted(labels)

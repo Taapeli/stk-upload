@@ -19,11 +19,12 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from models import email, util, syslog 
-from models.gen.batch import Batch
+#from models.gen.batch import Batch
 from ..gramps import gramps_loader
 import shareds
 #from models.cypher_gramps import Cypher_batch
-from ..admin.models.cypher_adm import Cypher_stats
+#from ..admin.models.cypher_adm import Cypher_stats
+from bp.audit.models.cypher_audit import Cypher_batch_stats
 
 STATUS_UPLOADED     = "uploaded"
 STATUS_LOADING      = "loading"
@@ -205,7 +206,7 @@ def list_uploads(username):
     '''
     # 1. List Batches, their status and Person count
     batches = {}
-    result = shareds.driver.session().run(Cypher_stats.get_user_batch_names, 
+    result = shareds.driver.session().run(Cypher_batch_stats.get_user_batch_names, 
                                           user=username)
     for record in result:
         # <Record batch='2019-08-12.001' timestamp=None persons=1949>
