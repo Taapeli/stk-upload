@@ -56,6 +56,7 @@ from .event_combo import Event_combo
 #from .family_combo import Family_combo
 from .cypher import Cypher_person, Cypher_family
 from .place import Place, Place_name
+import traceback
 # from .place_combo import Place_combo
 # from .citation import Citation
 # from .note import Note
@@ -1068,7 +1069,7 @@ with distinct x
 
 
     @staticmethod
-    def estimate_lifetimes(tx, uids=[]):
+    def zzzestimate_lifetimes(tx, uids=[]):
         """ Sets an estimated lifietime to Person.dates.
 
             Stores it as Person properties: datetype, date1, and date2
@@ -1097,6 +1098,92 @@ with distinct x
         print("Estimated lifetime for {} persons".format(pers_count))
         return pers_count
 
+    @staticmethod
+    def estimate_lifetimes(tx, uids):
+        """ Sets an estimated lifietime to Person.dates.
+
+            Stores it as Person properties: datetype, date1, and date2
+
+            The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
+            sets all lifetimes.
+
+            Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+            
+            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
+            and models.dataupdater.set_estimated_dates
+        """
+        print("calculating lifetime estimates")
+        from models import timespan
+        from models.gen.dates import DR 
+        from pprint import pprint
+        try:
+            result = tx.run(Cypher_person.fetch_persons_for_lifetime_estimates, idlist=uids)
+            personlist = []
+            personmap = {}
+            for rec in result:
+                p = timespan.Person()
+                p.pid = rec['pid']
+                p.gramps_id = rec['p']['id']
+                events = rec['events']
+                for e,role in events:
+                    if e is None: continue
+                    #print("e:",e)
+                    eventtype = e['type']
+                    datetype = e['datetype']
+                    datetype1 = None
+                    datetype2 = None
+                    if datetype == DR['DATE']:
+                        datetype1 = "exact"
+                    elif datetype == DR['BEFORE']:
+                        datetype1 = "before"
+                    elif datetype == DR['AFTER']:
+                        datetype1 = "after"
+                    elif datetype == DR['BETWEEN']:
+                        datetype1 = "after"
+                        datetype2 = "before"
+                    elif datetype == DR['PERIOD']:
+                        datetype1 = "after"
+                        datetype2 = "before"
+                    date1 = e['date1']
+                    date2 = e['date2']
+                    if datetype1 and date1 is not None:
+                        year1 = date1 // 1024
+                        ev = timespan.Event(eventtype,datetype1,year1,role)
+                        p.events.append(ev)
+                    if datetype2 and date2 is not None:
+                        year2 = date2 // 1024
+                        ev = timespan.Event(eventtype,datetype2,year2,role)
+                        p.events.append(ev)
+                p.parent_pids = []
+                for parent,pid in rec['parents']:
+                    if pid: p.parent_pids.append(pid)
+                p.child_pids = []
+                for parent,pid in rec['children']:
+                    if pid: p.child_pids.append(pid)
+                personlist.append(p)
+                personmap[p.pid] = p
+            for p in personlist:
+                for pid in p.parent_pids:
+                    p.parents.append(personmap[pid])
+                for pid in p.child_pids:
+                    p.children.append(personmap[pid])
+            timespan.calculate_estimates(personlist)
+            for p in personlist:
+                result = tx.run(Cypher_person.update_person_lifetime_estimates, id=p.pid,
+                                earliest_possible_birth_year = p.earliest_possible_birth_year,
+                                earliest_possible_death_year = p.earliest_possible_death_year,
+                                latest_possible_birth_year = p.latest_possible_birth_year,
+                                latest_possible_death_year = p.latest_possible_death_year )
+                                
+        except Exception as err:
+            print("iError (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
+            traceback.print_exc()
+            return 0
+
+        counters = result.consume().counters
+        pers_count = int(counters.properties_set/3)
+        print("Estimated lifetime for {} persons".format(pers_count))
+        return pers_count
 
     def print_compared_data(self, comp_person, print_out=True):
         """ Tulostaa kahden henkilön tiedot vieretysten. """

@@ -243,6 +243,25 @@ WHERE NOT (dmax IS NULL OR dmin IS NULL)
     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
 RETURN null"""
 
+    fetch_persons_for_lifetime_estimates = """
+MATCH (p:Person) 
+    WHERE id(p) IN $idlist
+OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
+OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family) -[:CHILD]-> (c)
+OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
+RETURN p, id(p) as pid, collect(distinct [e,r.role]) AS events,
+    collect(distinct [c,id(c)]) as children,
+    collect(distinct [parent,id(parent)]) as parents
+"""
+    update_person_lifetime_estimates = """
+MATCH (p:Person) 
+    WHERE id(p) = $id
+SET p.earliest_possible_birth_year = $earliest_possible_birth_year,
+    p.earliest_possible_death_year = $earliest_possible_death_year,
+    p.latest_possible_birth_year = $latest_possible_birth_year,
+    p.latest_possible_death_year = $latest_possible_death_year
+"""
+
     get_by_uuid_w_names_notes = """
 MATCH (b:Batch) -[:OWNS]-> (person:Person) -[r:NAME]-> (name:Name)
   WHERE person.uuid=$pid
