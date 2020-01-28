@@ -19,10 +19,10 @@ class Batch_merge(object):
     
     Replace the (b:Batch {id:...}) -[o:OWNS]-> (x)
                 relations with given Batch id
-    with        (s:Root {id:...}) -[:PASSED]-> (x)
+    with        (s:Audition {id:...}) -[:PASSED]-> (x)
                 with same id
     
-    The Root node should include
+    The Audition node should include
     - id = b.id    User Batch id
     - user         käyttäjä
     - admin        the user who executed the transfer
@@ -37,13 +37,13 @@ class Batch_merge(object):
         '''
         pass
 
-    def move_whole_batch(self, batch_id, user, operator):
+    def move_whole_batch(self, batch_id, user, auditor):
         '''
-        Move all Batch elements which are supplemented by given user to Root.
+        Move all Batch elements which are supplemented by given user to Audition.
 
         batch_id    active Batch
         user        owner of the Batch
-        operator    active auditor user id
+        auditor    active auditor user id
 
         '''
         relationships_created = 0
@@ -57,7 +57,7 @@ class Batch_merge(object):
                 tx = session.begin_transaction()
                 # while new_relationships != 0: ?
                 result = tx.run(Cypher_audit.copy_batch_to_root, 
-                                user=user, batch=batch_id, oper=operator)
+                                user=user, batch=batch_id, oper=auditor)
                 counters = result.summary().counters
                 print(counters)
                 new_relationships = counters.relationships_created
