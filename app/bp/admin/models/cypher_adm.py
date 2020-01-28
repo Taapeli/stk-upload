@@ -193,12 +193,3 @@ return b.id as batch, b.timestamp as timestamp, b.status as status,
 MATCH (a:Batch) 
 WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
 RETURN a AS batch ORDER BY a.id DESC'''
-
-
-class Cypher_audit():
-    
-    move_batch_todo = '''
-MATCH (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:"2019-11-18.002"}) 
-WITH up, r, b ORDER BY b.id DESC LIMIT 10
-RETURN up, r, b'''
-    

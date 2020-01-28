@@ -4,6 +4,8 @@ Created on 5.12.2019
 @author: jm
 '''
 import shareds
+from .cypher_audit import Cypher_audit
+
 from flask_babelex import _
 from flask import flash
 
@@ -29,18 +31,6 @@ class Batch_merge(object):
     #Todo: Make decisions, which items should be moved, merged or left alone
     '''
 
-# Find some OWNS relations for given $batch and replace them with Root STK relations
-#Todo: Remove limit?
-    cypher_cp_batch_to_root = '''
-MERGE (root:Root {id:$batch, user:$user, operator:$oper})
-    SET root.timestamp = timestamp()
-WITH root
-    MATCH (b:Batch {id:$batch}) -[o:OWNS|OWNS_OTHER]-> (x)
-    WITH root, o, b, x LIMIT 3000
-        DELETE o
-        CREATE (root) -[:PASSED]-> (x)
-        RETURN x'''
-
     def __init__(self):
         '''
         Constructor
@@ -65,8 +55,8 @@ WITH root
         with shareds.driver.session() as session:
             try:
                 tx = session.begin_transaction()
-                # while new_relationships != 0:
-                result = tx.run(self.cypher_cp_batch_to_root, 
+                # while new_relationships != 0: ?
+                result = tx.run(Cypher_audit.copy_batch_to_root, 
                                 user=user, batch=batch_id, oper=operator)
                 counters = result.summary().counters
                 print(counters)
