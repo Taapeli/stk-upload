@@ -10,9 +10,12 @@
 
 from timespan import Person, Event
 from timespan import calculate_estimates
-from timespan import BIRTH, DEATH, MARRIAGE, BURIAL, BAPTISM
+from timespan import BIRTH, DEATH, MARRIAGE, BURIAL, BAPTISM, MIN, MAX
 import timespan
 timespan.MAX_AGE = 100
+timespan.MAX_BAPTISM_DELAY = 0
+timespan.MAX_BURIAL_DELAY = 0
+timespan.MAX_PARENT_DEATH_CHILD_BIRTH_GAP = 0
 
 def xtest(name,*events):
     return
@@ -85,10 +88,10 @@ def test_none():
     ]
     persons = [p1]
     calculate_estimates(persons)
-    assert p1.earliest_possible_birth_year is None
-    assert p1.latest_possible_birth_year is None
-    assert p1.earliest_possible_death_year is None
-    assert p1.latest_possible_death_year is None
+    assert p1.earliest_possible_birth_year is MIN
+    assert p1.latest_possible_birth_year is MAX
+    assert p1.earliest_possible_death_year is MIN
+    assert p1.latest_possible_death_year is MAX
     
 
 def test0():
@@ -97,10 +100,10 @@ def test0():
     ]
     persons = [p1]
     calculate_estimates(persons)
-    assert p1.earliest_possible_birth_year is None
-    assert p1.latest_possible_birth_year is None
-    assert p1.earliest_possible_death_year is None
-    assert p1.latest_possible_death_year is None
+    assert p1.earliest_possible_birth_year is MIN
+    assert p1.latest_possible_birth_year is MAX
+    assert p1.earliest_possible_death_year is MIN
+    assert p1.latest_possible_death_year is MAX
     
 
 def test1():
@@ -387,9 +390,9 @@ def test13f():
     persons = [p1,p2]
     calculate_estimates(persons)
     assert p1.earliest_possible_birth_year == 1885
-    assert p1.latest_possible_birth_year is None
+    assert p1.latest_possible_birth_year is MAX
     assert p1.earliest_possible_death_year == 1950
-    assert p1.latest_possible_death_year is None
+    assert p1.latest_possible_death_year is MAX
 
 def test13g():
     p1 = Person()
@@ -458,9 +461,9 @@ def test13j():
     p2.parents = [p1]
     persons = [p1,p2]
     calculate_estimates(persons)
-    assert p1.earliest_possible_birth_year is None
+    assert p1.earliest_possible_birth_year is MIN
     assert p1.latest_possible_birth_year == 1935
-    assert p1.earliest_possible_death_year is None
+    assert p1.earliest_possible_death_year is MIN
     assert p1.latest_possible_death_year == 2035
 
 def xtest14():
