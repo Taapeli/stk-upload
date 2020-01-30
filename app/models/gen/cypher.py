@@ -247,9 +247,13 @@ RETURN null"""
 MATCH (p:Person) 
     WHERE id(p) IN $idlist
 OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
-OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family) -[:CHILD]-> (c)
+OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
+OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
 OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
-RETURN p, id(p) as pid, collect(distinct [e,r.role]) AS events,
+OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
+RETURN p, id(p) as pid, 
+    collect(distinct [e,r.role]) AS events,
+    collect(distinct [fam_event,r2.role]) AS fam_events,
     collect(distinct [c,id(c)]) as children,
     collect(distinct [parent,id(parent)]) as parents
 """

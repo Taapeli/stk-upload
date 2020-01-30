@@ -8,14 +8,14 @@
 # pylint: disable=too-many-branches
 # pylint: disable=no-member
 
-from timespan import Person, Event
-from timespan import calculate_estimates
-from timespan import BIRTH, DEATH, MARRIAGE, BURIAL, BAPTISM, MIN, MAX
-import timespan
-timespan.MAX_AGE = 100
-timespan.MAX_BAPTISM_DELAY = 0
-timespan.MAX_BURIAL_DELAY = 0
-timespan.MAX_PARENT_DEATH_CHILD_BIRTH_GAP = 0
+from lifetime import Person, Event
+from lifetime import calculate_estimates
+from lifetime import BIRTH, DEATH, MARRIAGE, BURIAL, BAPTISM, MIN, MAX
+import lifetime
+lifetime.MAX_AGE = 100
+lifetime.MAX_BAPTISM_DELAY = 0
+lifetime.MAX_BURIAL_DELAY = 0
+lifetime.MAX_PARENT_DEATH_CHILD_BIRTH_GAP = 0
 
 def xtest(name,*events):
     return

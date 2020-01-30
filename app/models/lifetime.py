@@ -78,9 +78,14 @@ class Year:
         if other.valuetype == "normal":
             return self.value == other.value
         return True
-#    def __lt__(self,other):
-#        if self.valuetype == "min": return True
-#        if self.valuetype == "max": return False
+    def getvalue(self):
+        if self.valuetype == "normal":
+            return self.value
+        if self.valuetype == "min":
+            return -9999
+        if self.valuetype == "max":
+            return 9999
+        
 
 MIN = Year("min",None)
 MAX = Year("max",None)
@@ -184,6 +189,9 @@ def __calculate_estimates1(p):
                 __update_range(p,DEATH,year-MAX_BURIAL_DELAY,year)
             else:
                 __update_range(p,DEATH,year,year+MAX_AGE)
+            if e.eventtype == MARRIAGE and e.role == 'Family':
+                __update_range(p,BIRTH,MIN,year-MIN_MARR_AGE)
+                __update_range(p,DEATH,year,year-MIN_MARR_AGE+MAX_AGE)
             __update_range(p,BIRTH,year-MAX_AGE,year)
 
         if e.datetype == "after": 
@@ -199,7 +207,7 @@ def __calculate_estimates1(p):
                 __update_range(p,DEATH,year,MAX)
 
         if e.datetype == "before": 
-            if e.eventtype == MARRIAGE and e.role == 'Primary':
+            if e.eventtype == MARRIAGE and e.role == 'Family':
                 __update_range(p,BIRTH,MIN,year-MIN_MARR_AGE)
             __update_range(p,BIRTH,MIN,year)
             if e.eventtype == DEATH and e.role == 'Primary':
@@ -232,7 +240,6 @@ def calculate_estimates(personlist):
         __calculate_estimates1(p)
     n = 0
     while True:
-        print(n,len(personlist))
         personlist2 = set()
         for p in personlist:
             orig = __get_estimates(p)
