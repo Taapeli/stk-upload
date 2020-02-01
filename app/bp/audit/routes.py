@@ -5,8 +5,7 @@ Created on 28.11.2019
  
 '''
 from . import bp
-from bp.audit.models.audition import Audition
-#from bp.admin.users import Batches
+from models.gen.batch import Batch
 
 import logging
 logger = logging.getLogger('stkserver')
@@ -45,7 +44,7 @@ def list_uploads():
 @roles_accepted('audit')
 def move_in_1(batch_name):
     """ Confirm Batch move to Isotammi database """    
-    user, batch_id, tstring, labels = Audition.get_batch_stats(batch_name)
+    user, batch_id, tstring, labels = Batch.get_batch_stats(batch_name)
     total = 0
     for _label, cnt in labels:
         total += cnt

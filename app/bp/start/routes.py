@@ -19,9 +19,10 @@ from models import email
 from bp.api import api
 
 from bp.start.forms import JoinForm
-from bp.audit.models.audition import Audition
+#from bp.audit.models.audition import Audition
 #from models.gen.batch import Batch
 #from bp.admin.users import Batches
+from models.gen.batch import Batch
 
 """ Application route definitions
 """ 
@@ -147,8 +148,7 @@ def my_settings():
             flash(_("Update did not work"),category='flash_error')
             traceback.print_exc()
 
-    batch_reader = Audition(current_user.username)
-    labels, user_batches = batch_reader.get_user_batch_stats()
+    labels, user_batches = Batch.get_user_stats(current_user.username)
     print(f'# User batches {user_batches}')
 
     gedcoms = gedcom_utils.list_gedcoms(current_user.username)

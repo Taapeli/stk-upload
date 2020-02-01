@@ -754,3 +754,31 @@ MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - ()
 WHERE  prof.user = $user AND o.description >= $start_name
 RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
     ORDER BY o.description LIMIT $limit"""
+
+class Cypher_batch():
+    # Read information of user Batches and data connected to them
+
+    get_batches = '''
+match (b:Batch) 
+    where b.user = $user and b.status = "completed"
+optional match (b) -[:OWNS]-> (x)
+return b as batch,
+    labels(x)[0] as label, count(x) as cnt 
+    order by batch.user, batch.id'''
+
+    get_single_batch = '''
+match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
+optional match (b) -[:OWNS]-> (x)
+return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
+
+    get_user_batch_names = '''
+match (b:Batch) where b.user = $user
+optional match (b) -[r:OWNS]-> (:Person)
+return b.id as batch, b.timestamp as timestamp, b.status as status,
+    count(r) as persons 
+    order by batch'''
+
+    get_empty_batches = '''
+MATCH (a:Batch) 
+WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
+RETURN a AS batch ORDER BY a.id DESC'''

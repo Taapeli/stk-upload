@@ -8,7 +8,9 @@ Created on 29.11.2019
 from models.util import format_timestamp
 import shareds
 from bp.admin.models.cypher_adm import Cypher_adm
-from bp.audit.models.cypher_audit import Cypher_batch_stats
+#from bp.audit.models.cypher_audit import Cypher_batch_stats
+from models.gen.cypher import Cypher_batch
+
 from datetime import date, datetime
 
 
@@ -57,15 +59,14 @@ class Batch():
         return obj
 
 
-    def get_user_batch_stats(self):
+    @staticmethod
+    def get_user_stats(user):
         ''' Get statistics of user Batch contents.
         
-            u["usr1"].append({batch:"usr1 2019-05-03.001", "Family":94, "Note":224, "Person":153})
         '''
-        labels = []
+        titles = []
         users = {}
-        result = shareds.driver.session().run(Cypher_batch_stats.get_batches, 
-                                              user=self.user)
+        result = shareds.driver.session().run(Cypher_batch.get_batches, user=user)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
             #    properties={ // 'mediapath': '/home/jm/my_own.media', 
@@ -74,11 +75,12 @@ class Batch():
             #        'status': 'completed'}> 
             #  label='Note'
             #  cnt=2>
-            batch = record['batch']
+            b = Batch.from_node(record['batch'])
             label = record['label']
             cnt = record['cnt']
-            batch_id = batch.get('id')
-            ts = batch.get('timestamp')
+
+            batch_id = b.id
+            ts = b.timestamp
             if ts:
                 t = float(ts)/1000.
                 tstring = datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
@@ -88,23 +90,59 @@ class Batch():
 #                     tstring = t
             else:
                 tstring = ""
-            label = record['label']
-            if not label: label = ""
+#             label = record['label']
+#             if not label: label = ""
             # Trick: Set Person as first in sort order!
             if label == "Person": label = " Person"
-            if label and not label in labels:
-                labels.append(label)
+            if label and not label in titles:
+                titles.append(label)
             cnt = record['cnt']
 
-            key = f'{self.user}/{batch_id}/{tstring}'
+            key = f'{user}/{batch_id}/{tstring}'
             if not key in users:
                 users[key] = {}
             users[key][label] = cnt
 
-            #print(f'users[{key}] {users[key]}')
+            print(f'users[{key}] {users[key]}')
 
-        return sorted(labels), users
+        return sorted(titles), users
 
+    @staticmethod
+    def get_batch_stats(batch_id):
+        ''' Get statistics of given Batch contents.
+        '''
+        labels = []
+        batch = None
+        result = shareds.driver.session().run(Cypher_batch.get_single_batch, 
+                                              batch=batch_id)
+        for record in result:
+            # <Record batch=<Node id=319388 labels={'Batch'} 
+            #    properties={ // 'mediapath': '/home/jm/my_own.media', 
+            #        'file': 'uploads/jpek/Julius_vanhemmat_clean.gramps', 
+            #        'id': '2019-08-21.002', 'user': 'jpek', 'timestamp': 1566398894787, 
+            #        'status': 'completed'}> 
+            #  label='Note'
+            #  cnt=2>
+
+            if not batch:
+                batch = record['batch']
+                user = batch.get('user')
+                #batch_id = batch.get('id')
+                ts = batch.get('timestamp')
+                if ts:
+                    t = float(ts)/1000.
+                    tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+                else:
+                    tstring = ""
+            label = record['label']
+            if label == None: label = '-'
+            # Trick: Set Person as first in sort order!
+            if label == "Person": label = " Person"
+            cnt = record['cnt']
+            labels.append((label,cnt))
+
+        return user, batch_id, tstring, sorted(labels)
+ 
 
     @staticmethod
     def list_empty_batches():
@@ -113,7 +151,7 @@ class Batch():
         batches = []
         class Upload: pass
 
-        result = shareds.driver.session().run(Cypher_stats.get_empty_batches)
+        result = shareds.driver.session().run(Cypher_batch.get_empty_batches)
 
         for record in result:
             # <Node id=317098 labels={'Batch'}

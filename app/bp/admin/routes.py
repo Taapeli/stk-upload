@@ -24,18 +24,19 @@ from flask_babelex import _
 
 import shareds
 from setups import User, Allowed_email #, Role
-from models import dbutil, dataupdater, loadfile, datareader, util
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
+
 from .cvs_refnames import load_refnames
 from .forms import AllowedEmailForm, UpdateAllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils
 from .. import gedcom
+
+from models import dbutil, dataupdater, loadfile, datareader, util
 from models import email
 from models import syslog 
-from models.gen.batch import Batch
 
 
 # Admin start page
@@ -77,6 +78,8 @@ def clear_my_db():
 @roles_accepted('research', 'admin')
 def clear_empty_batches():
     """ Show or clear unused batches. """
+    from models.gen.batch import Batch
+
     user=None
     clear=False
     cnt = -1
