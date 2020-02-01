@@ -257,6 +257,32 @@ def create_uuid_constraints():
             "create constraint on (n:Place) assert n.uuid is unique"
         )
 
+def set_confirmed_at():
+    """
+    For some reason many User nodes were missing the 'confirmed_at'
+    property. This code creates the missing properties by copying
+    it from the corresponding 'Allowed_email' node. The actual value
+    is in fact not very important.
+    """
+    stmt = """
+        match (allowed:Allowed_email),(user:User) 
+        where not exists(user.confirmed_at) and 
+              allowed.allowed_email=user.email
+        return count(user) as count
+    """
+    result = shareds.driver.session().run(stmt).single()
+    count = result['count']
+    print(f"Setting confirmed_at for {count} users") 
+
+    stmt = """
+        match (allowed:Allowed_email),(user:User) 
+        where not exists(user.confirmed_at) and 
+              allowed.allowed_email=user.email
+        set user.confirmed_at = allowed.confirmed_at
+    """
+    shareds.driver.session().run(stmt)
+
+
 def initialize_db():
     # Fix chaanged schema
     do_schema_fixes()
@@ -275,5 +301,6 @@ def initialize_db():
 
     create_lock_constraint()
     create_uuid_constraints()
+    set_confirmed_at()
 
 
