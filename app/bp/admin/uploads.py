@@ -249,7 +249,8 @@ def list_uploads(username):
                 status_text = _("REMOVED")
 
             if not batch_id in batches:
-                #status_text = _("REMOVED")
+                if status_text == _("STORED"):
+                    status_text = _("REMOVED")
                 batch_id = ""
                 person_count = 0
             else:
