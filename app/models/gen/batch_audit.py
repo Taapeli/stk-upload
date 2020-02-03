@@ -226,13 +226,17 @@ class Audition():
 
 
     @staticmethod
-    def get_auditor_stats(auditor):
+    def get_auditor_stats(auditor=None):
         ''' Get statistics of auditor's audition batch contents.
         '''
         titles = []
         labels = {}
-        result = shareds.driver.session().run(Cypher_audition.get_my_auditions,
-                                              oper=auditor)
+        if auditor:
+            result = shareds.driver.session().run(Cypher_audition.get_my_auditions,
+                                                  oper=auditor)
+        else:
+            result = shareds.driver.session().run(Cypher_audition.get_all_auditions,
+                                                  oper=auditor)
         for record in result:
             # <Record
             #    b=<Node id=439060 labels={'Audition'}
@@ -250,7 +254,7 @@ class Audition():
             if label and not label in titles:
                 titles.append(label)
 
-            key = f'{auditor}/{b.id}/{b.updated}'
+            key = f'{b.auditor}/{b.user}/{b.id}/{b.updated}'
             if not key in labels:
                 labels[key] = {}
             labels[key][label] = cnt

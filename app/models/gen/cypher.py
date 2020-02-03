@@ -808,6 +808,12 @@ optional match (b) -[:PASSED]-> (x)
 return b, labels(x)[0] as label, count(x) as cnt 
     order by b.user, b.id, label'''
 
+    get_all_auditions = '''
+match (b:Audition)
+optional match (b) -[:PASSED]-> (x)
+return b, labels(x)[0] as label, count(x) as cnt 
+    order by b.user, b.id, label'''
+
     get_single_audition = '''
 match (b:Audition {id:$batch}) 
 optional match (b) -[:PASSED]-> (x)

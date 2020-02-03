@@ -76,12 +76,15 @@ def move_in_2():
 
 # --------------------- List Approved data batches ----------------------------
 
-@bp.route('/audit/approvals',  methods=['GET', 'POST'])
+@bp.route('/audit/approvals/<who>',  methods=['GET', 'POST'])
 @login_required
 @roles_accepted('audit')
-def audit_approvals():
+def audit_approvals(who=None):
     """ List Audition batches """
-    auditor = current_user.username
+    if who == "all":
+        auditor=None
+    else:
+        auditor = current_user.username
     titles, batches = Audition.get_auditor_stats(auditor)
     # {'matti/2020-01-03.001/13.01.2020 20:30': {'Note': 17, 'Place': 30, 'Repository': 3}, 
     #  'teppo/2020-01-03.002/23.01.2020 15:52': {...} ...}

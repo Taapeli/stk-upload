@@ -8,7 +8,7 @@
   
   <div class="content">
     <p>
-        {{ _('Total <b>%(tot)s</b> objects approved by <i>%(aud)s</i>', aud=user, tot=total) }}
+        {{ _('Total <b>%(tot)s</b> objects', tot=total) }}
     </p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -27,16 +27,21 @@
                 <th>{{ _("Batch id") }}</th>
 {% for t in titles %}<th>{{t}}</th>{% endfor %}
            </tr>
-
-    {% for key, labels in batches.items() %}
-	       <tr>{% set l = key.split('/') %}
-               <td>{{l[0]}}</td>
-               <td><b>{{l[1]}}</b><br><small>{{l[2]}}</small></td>
-        {% for t in titles %}
+{% set keys = batches.keys()|sort %}
+{% set ns = namespace(auditor='-') %}
+{% for key in keys %}
+    {% set labels = batches[key] %}
+    {% set l = key.split('/') %}<!-- {{ auditor }} ? {{ l[0] }} -->
+    {% if l[0] != ns.auditor %}{% set ns.auditor = l[0] %}
+           <tr><th colspan="{{ titles|length + 2 }}"><i>{{ _("Auditor") }} {{ ns.auditor }}</i></th></tr>
+	{% endif %}
+           <tr><td class="center">{{l[1]}}</td>
+               <td><b>{{l[2]}}</b><br><small>{{l[3]}}</small></td>
+    {% for t in titles %}
 	           <td class="right">{{ labels[t] }}</td>
-        {% endfor %}
-	       </tr>
     {% endfor %}
+	       </tr>
+{% endfor %}
             
 	    </table>
     <p>&rtrif; <a href="/admin/readlog">{{ _('Display application log') }}</a></p>
