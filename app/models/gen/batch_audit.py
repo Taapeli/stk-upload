@@ -9,7 +9,7 @@ from models.util import format_timestamp
 import shareds
 from bp.admin.models.cypher_adm import Cypher_adm
 #from bp.audit.models.cypher_audit import Cypher_batch_stats
-from models.gen.cypher import Cypher_batch
+from models.gen.cypher import Cypher_batch, Cypher_audition
 
 from datetime import date, datetime
 
@@ -203,7 +203,7 @@ class Audition():
         self.updated = ""   # timestamp as string
 
     def __str__(self):
-        return f"{self.user} / {self.id}"
+        return f"{self.auditor} > {self.user} {self.id}"
 
     @classmethod
     def from_node(cls, node):
@@ -220,7 +220,8 @@ class Audition():
         obj.id = node.get('id', None)
         #obj.status = node.get('status', "")
         obj.timestamp = node.get('timestamp', 0)
-        obj.updated = format_timestamp(obj.timestamp)
+        if obj.timestamp:
+            obj.updated = format_timestamp(obj.timestamp/1000.)
         return obj
 
 
@@ -229,8 +230,9 @@ class Audition():
         ''' Get statistics of auditor's audition batch contents.
         '''
         titles = []
-        users = {}
-        result = shareds.driver.session().run(Cypher_batch.get_batches, auditor=auditor)
+        labels = {}
+        result = shareds.driver.session().run(Cypher_audition.get_my_auditions,
+                                              oper=auditor)
         for record in result:
             # <Record
             #    b=<Node id=439060 labels={'Audition'}
@@ -238,36 +240,23 @@ class Audition():
             #        'user': 'jpek', 'timestamp': 1578940247182}> 
             #    label='Note'
             #    cnt=17>
-            b = Audition.from_node(record['batch'])
+            b = Audition.from_node(record['b'])
             label = record['label']
             if not label: label = ""
             cnt = record['cnt']
-
-            batch_id = b.id
-            ts = b.timestamp
-            if ts:
-                t = float(ts)/1000.
-                tstring = datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
-                d, t = tstring.split()
-                if batch_id[:10] == d:
-                    tstring = t
-            else:
-                tstring = ""
 
             # Trick: Set Person as first in sort order!
             if label == "Person": label = " Person"
             if label and not label in titles:
                 titles.append(label)
-            cnt = record['cnt']
 
-            key = f'{auditor}/{batch_id}/{tstring}'
-            if not key in users:
-                users[key] = {}
-            users[key][label] = cnt
+            key = f'{auditor}/{b.id}/{b.updated}'
+            if not key in labels:
+                labels[key] = {}
+            labels[key][label] = cnt
+            #print(f'labels[{key}] {labels[key]}')
 
-            print(f'users[{key}] {users[key]}')
-
-        return sorted(titles), users
+        return sorted(titles), labels
 
     @staticmethod
     def get_stats(audit_id):

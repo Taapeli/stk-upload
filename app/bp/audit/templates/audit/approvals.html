@@ -4,8 +4,13 @@
 {% block body %}
     {{ super() }}
    
-	<h2>TODO {{ _("Auditions") }}</h2>
-    
+  <h2>{{ _("Auditions and Amount of Objects") }}</h2>
+  
+  <div class="content">
+    <p>
+        {{ _('Total <b>%(tot)s</b> objects approved by <i>%(aud)s</i>', aud=user, tot=total) }}
+    </p>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ol  class='flashes'>
@@ -16,47 +21,26 @@
       {% endif %}
     {% endwith %}
 
-    <div class="content">
         <table>
            <tr>
-			    {% if not user %}
-	                <th>{{ _("User") }}</th>
-			    {% endif %}
-                <th>{{ _("Gramps file / uploaded at") }}</th>
-                <th>{{ _("Status") }}</th>
-                <th>{{ _("Operations") }}</th>
+                <th>{{ _("Researcher") }}</th>
+                <th>{{ _("Batch id") }}</th>
+{% for t in titles %}<th>{{t}}</th>{% endfor %}
            </tr>
 
-{% for upload in uploads %}
-    {% if upload.batch_id and current_user.has_role('audit') %}
-	       <tr>
-			    {% if not user %}
-                  {% if current_user.username == upload.user %}
-                    <td title="{{ _('me') }}">&#9733; <b>{{upload.user}}</b></td>{% else %}
-                    <td>{{upload.user}}{% endif %}</td>
-			      {% endif %}
-	           <td><a href=/admin/xml_download/{{upload.user}}/{{upload.xmlname | urlencode}}
-    	             title="{{ _("Download file") }}">
-    	               {{upload.xmlname}}</a> {{upload.upload_time_s}} 
-	           </td>
-	           <td>{{upload.status}}
-	           	{% if upload.batch_id %}
-	           	   {% if upload.status == "LADATTU" %}({{_( "deleted from database" ) }})
-	           	   {% else %}({{ _("batch %(batch_id)s; %(persons)d persons", batch_id= upload.batch_id,persons=upload.count) }})
-	           	   {% endif %}
-	           	{% endif %}
-               </td>
-	           <td><a href=/admin/show_upload_log/{{upload.user}}/{{upload.xmlname | urlencode}}>
-	           			{{ _("Show log") }}</a><br>
-                   <a href=/audit/movein/{{upload.batch_id}}>
-                       <i>{{ _("Move to Isotammi database") }}</a></i>
-	           	</td>
+    {% for key, labels in batches.items() %}
+	       <tr>{% set l = key.split('/') %}
+               <td>{{l[0]}}</td>
+               <td><b>{{l[1]}}</b><br><small>{{l[2]}}</small></td>
+        {% for t in titles %}
+	           <td class="right">{{ labels[t] }}</td>
+        {% endfor %}
 	       </tr>
-    {% endif %}
-{% endfor %}
+    {% endfor %}
+            
 	    </table>
     <p>&rtrif; <a href="/admin/readlog">{{ _('Display application log') }}</a></p>
-    </div>
+  </div>
 {% endblock %}
 </body>
 </html>

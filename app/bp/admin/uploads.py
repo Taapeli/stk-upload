@@ -180,25 +180,9 @@ def initiate_background_load_to_neo4j(userid,filename):
     syslog.log(type="storing to database initiated",file=filename,user=userid)
     return False
 
+#Removed / 3.2.2020/JMä
 # def batch_count(username,batch_id):
-#     count = shareds.driver.session().run(Cypher_batch.batch_count, 
-#                                          user=username, bid=batch_id).single().value()
-#     return count
-# #     with shareds.driver.session() as session:
-# #         tx = session.begin_transaction()
-# #         count = tx.run(Cypher_batch.batch_count, user=username, bid=batch_id).single().value()
-# #         tx.commit()
-# #         return count
-#         
 # def batch_person_count(username,batch_id):
-#     count = shareds.driver.session().run(Cypher_batch.batch_person_count, 
-#                                          user=username, bid=batch_id).single().value()
-#     return count
-# #     with shareds.driver.session() as session:
-# #         tx = session.begin_transaction()
-# #         count = tx.run(Cypher_batch.batch_person_count, user=username, bid=batch_id).single().value()
-# #         tx.commit()
-# #         return count
 
 def list_uploads(username):
     ''' Gets a list of uploaded files and their process status.

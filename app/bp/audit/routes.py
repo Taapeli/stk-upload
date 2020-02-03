@@ -80,13 +80,19 @@ def move_in_2():
 @login_required
 @roles_accepted('audit')
 def audit_approvals():
-    """ #Todo: List Audition batches """    
-    user, batch_id, tstring, labels = Audition.get_stats(current_user.username)
+    """ List Audition batches """
+    auditor = current_user.username
+    titles, batches = Audition.get_auditor_stats(auditor)
+    # {'matti/2020-01-03.001/13.01.2020 20:30': {'Note': 17, 'Place': 30, 'Repository': 3}, 
+    #  'teppo/2020-01-03.002/23.01.2020 15:52': {...} ...}
     total = 0
-    for _label, cnt in labels:
-        total += cnt
-    logger.info(f' bp.audit.routes.audit_approvals {user} / {batch_id}, total {total} nodes')
+    for key in batches.keys():
+        #print(key + ":")
+        for _lbl, cnt in batches[key].items():
+            #print (f'    {_lbl} = {cnt}')
+            total += cnt
+    logger.info(f' bp.audit.routes.audit_approvals {auditor} {len(batches)} batches, total {total} nodes')
 
-    return render_template('/audit/approvals.html', user=user, batch=batch_id, 
-                           label_nodes=labels, total=total, time=tstring)
+    return render_template('/audit/approvals.html', user=auditor, total=total,
+                           titles=titles, batches=batches)
 

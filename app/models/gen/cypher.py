@@ -755,6 +755,7 @@ WHERE  prof.user = $user AND o.description >= $start_name
 RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
     ORDER BY o.description LIMIT $limit"""
 
+
 class Cypher_batch():
     # Read information of user Batches and data connected to them
 
@@ -796,3 +797,26 @@ RETURN a AS batch ORDER BY a.id DESC'''
 MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
 OPTIONAL MATCH (b) -[*]-> (n) 
 DETACH DELETE b, n"""
+
+
+class Cypher_audition():
+    ' Query Audition materials '
+
+    get_my_auditions = '''
+match (b:Audition {auditor: $oper})
+optional match (b) -[:PASSED]-> (x)
+return b, labels(x)[0] as label, count(x) as cnt 
+    order by b.user, b.id, label'''
+
+    get_single_audition = '''
+match (b:Audition {id:$batch}) 
+optional match (b) -[:PASSED]-> (x)
+return labels(x)[0] as label, count(x) as cnt'''
+
+    get_my_audition_names = '''
+match (b:Audition) where b.auditor = $oper
+optional match (b) -[r:PASSED]-> (:Person)
+return b.id as audition, b.timestamp as timestamp, 
+    b.auditor as auditor, b.status as status,
+    count(r) as persons 
+order by audition'''
