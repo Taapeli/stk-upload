@@ -3,7 +3,8 @@ from flask_security import login_required, roles_accepted, roles_required, curre
 from flask_babelex import _
 from . import bp
 
-from bp.gramps.models import batch
+#from bp.gramps.models import batch
+from models.gen.batch_audit import Batch
 from bp.dupsearch.models import search
 from types import SimpleNamespace
 import json
@@ -17,7 +18,7 @@ def dupsearch():
 @bp.route('/dupsearch/batches',  methods=['GET'])
 @login_required
 def batches():
-    batch_list = list(batch.get_batches())
+    batch_list = list(Batch.get_batches())
     for b in batch_list:
         file = b.get('file')
         if file:

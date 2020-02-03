@@ -2,6 +2,7 @@
 Created on Jul 3, 2019
 
 @author: kari
+# Methods moved to models.gen.batch_audit
 '''
 
 import shareds

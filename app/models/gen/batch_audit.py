@@ -48,6 +48,27 @@ class Batch():
         obj.upload = format_timestamp(obj.timestamp)
         return obj
 
+    @staticmethod
+    def delete_batch(username, batch_id):
+        with shareds.driver.session() as session:
+            result = session.run(Cypher_batch.delete,
+                                 username=username, batch_id=batch_id)
+            return result
+                
+    @staticmethod
+    def get_filename(username, batch_id):
+        with shareds.driver.session() as session:
+            result = session.run(Cypher_batch.get_filename,
+                                 username=username, batch_id=batch_id).single()
+            return result.get('b.file')
+    
+    @staticmethod
+    def get_batches():
+        result = shareds.driver.session().run(Cypher_batch.list_all)
+        for rec in result:
+            print("p",rec.get('b').items())
+            yield dict(rec.get('b'))
+
 
     @staticmethod
     def get_user_stats(user):

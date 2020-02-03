@@ -14,7 +14,7 @@ import logging
 #import inspect
 import traceback
 
-from bp.gramps.models import batch #TODO: move into models.gen.batch_audit
+#from bp.gramps.models import batch #TODO: move into models.gen.batch_audit
 
 logger = logging.getLogger('stkserver')
 
@@ -539,7 +539,10 @@ def fetch_users():
 @login_required
 @roles_accepted('admin')
 def fetch_batches():
-    batch_list = list(batch.get_batches())
+
+    from models.gen.batch_audit import Batch
+
+    batch_list = list(Batch.get_batches())
     for b in batch_list:
         file = b.get('file')
         if file:
