@@ -19,7 +19,7 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from models import email, util, syslog 
-#from models.gen.batch import Batch
+#from models.gen.batch_audit import Batch
 from ..gramps import gramps_loader
 import shareds
 #from models.cypher_gramps import Cypher_batch
@@ -293,7 +293,7 @@ def list_uploads_all(users):
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.
-# --> models.gen.batch.Batch.list_empty_batches
+# --> models.gen.batch_audit.Batch.list_empty_batches
 
 
 def removefile(fname): 

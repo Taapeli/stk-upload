@@ -14,7 +14,7 @@ import logging
 #import inspect
 import traceback
 
-from bp.gramps.models import batch
+from bp.gramps.models import batch #TODO: move into models.gen.batch_audit
 
 logger = logging.getLogger('stkserver')
 
@@ -78,7 +78,7 @@ def clear_my_db():
 @roles_accepted('research', 'admin')
 def clear_empty_batches():
     """ Show or clear unused batches. """
-    from models.gen.batch import Batch
+    from models.gen.batch_audit import Batch
 
     user=None
     clear=False
@@ -483,7 +483,7 @@ def site_map():
             url = rule.rule
             #url = url_for(rule.endpoint, **(rule.defaults or {}))
             try:
-                view_function = shareds.app.view_functions[rule.endpoint]
+                _view_function = shareds.app.view_functions[rule.endpoint]
                 login_required, roles = find_roles(rule.rule, endpoints)
             except:
                 traceback.print_exc()

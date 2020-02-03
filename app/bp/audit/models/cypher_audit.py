@@ -51,8 +51,8 @@ class Cypher_stats():
     get_my_auditions = '''
 match (b:Audition {auditor: $oper})
 optional match (b) -[:PASSED]-> (x)
-return b.user as user, b.id as id, labels(x)[0] as label, count(x) as cnt 
-    order by user, id, label'''
+return b, labels(x)[0] as label, count(x) as cnt 
+    order by b.user, b.id, label'''
 
 # ╒════════════╤═════╕
 # │"label"     │"cnt"│

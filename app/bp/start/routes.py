@@ -19,10 +19,7 @@ from models import email
 from bp.api import api
 
 from bp.start.forms import JoinForm
-#from bp.audit.models.audition import Audition
-#from models.gen.batch import Batch
-#from bp.admin.users import Batches
-from models.gen.batch import Batch
+from models.gen.batch_audit import Batch
 
 """ Application route definitions
 """ 

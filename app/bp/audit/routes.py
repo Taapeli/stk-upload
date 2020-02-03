@@ -5,7 +5,6 @@ Created on 28.11.2019
  
 '''
 from . import bp
-from models.gen.batch import Batch
 
 import logging
 logger = logging.getLogger('stkserver')
@@ -15,7 +14,10 @@ from flask_security import login_required, roles_accepted, current_user
 #from flask_babelex import _
 
 import shareds
+from models.gen.batch_audit import Batch, Audition
 from .models.batch_merge import Batch_merge
+#from .models.audition import Audition
+
 from bp.admin import uploads
 from models import syslog 
 
@@ -24,6 +26,8 @@ from models import syslog
 @roles_accepted('audit')
 def audit_home():
     return render_template('/audit/index.html')
+
+# ------------------------- User Gramps uploads --------------------------------
 
 @bp.route('/audit/list_uploads', methods=['GET'])
 @login_required
@@ -38,6 +42,8 @@ def list_uploads():
     logger.info(f"-> bp.audit.routes.list_uploads")
     return render_template("/audit/batches.html", uploads=upload_list )
 
+
+# --------------------- Move Batch to Approved data ----------------------------
 
 @bp.route('/audit/movein/<batch_name>',  methods=['GET', 'POST'])
 @login_required
@@ -66,3 +72,21 @@ def move_in_2():
     msg = merger.move_whole_batch(batch_id, owner, auditor)
     syslog.log(type="batch to Common data", batch=batch_id, by=owner, msg=msg)
     return redirect(url_for('audit.move_in_1', batch_name=batch_id))
+
+
+# --------------------- List Approved data batches ----------------------------
+
+@bp.route('/audit/approvals',  methods=['GET', 'POST'])
+@login_required
+@roles_accepted('audit')
+def audit_approvals():
+    """ #Todo: List Audition batches """    
+    user, batch_id, tstring, labels = Audition.get_stats(current_user.username)
+    total = 0
+    for _label, cnt in labels:
+        total += cnt
+    logger.info(f' bp.audit.routes.audit_approvals {user} / {batch_id}, total {total} nodes')
+
+    return render_template('/audit/approvals.html', user=user, batch=batch_id, 
+                           label_nodes=labels, total=total, time=tstring)
+

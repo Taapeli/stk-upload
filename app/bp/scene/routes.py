@@ -473,7 +473,14 @@ def fetch_thumbnail():
     """
     uuid = request.args.get("id")
     thumbname = media.get_thumbname(uuid)
-    print(thumbname)
+    #print(thumbname)
     mimetype='image/jpg'
     logger.info("-> bp.scene.routes.fetch_thumbnail")
-    return send_file(thumbname, mimetype=mimetype)
+    try:
+        ret = send_file(thumbname, mimetype=mimetype)
+        return ret
+    except FileNotFoundError as e:
+        print("#TODO: /scene/thumbnail should use a default pic for missing image")
+        logger.info(f"-> bp.scene.routes.fetch_thumbnail: {e}")
+        return None
+        
