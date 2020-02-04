@@ -12,9 +12,10 @@
 	<p>{{ _("Title") }}:{{ media.description }}</p>
 	<p>{{ _('Original ID') }}: {{media.id}}</p> 
 	<p><div class="thumbnail">
+	            <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
 	            <img alt="({{ _('Photo') }})" 
 	                 src="/scene/thumbnail?id={{media.uuid}}" 
-	                 title="key = {{media.uuid_str()}}"/>
+	                 title="key = {{media.uuid_str()}}"/></a>
 	        </div></p>
 	        
 <h3>{{ _('References') }}</h3>
