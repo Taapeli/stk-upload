@@ -32,6 +32,110 @@ def analyze(username, filename):
     
     file_cleaned, file_displ, cleaning_log = file_clean(pathname)
     
+
+    ''' Get XML DOM parser and start DOM elements handler transaction '''
+    handler = DOM_handler(file_cleaned, username)
+    
+    text = []
+    
+    citation_source_cnt = 0
+    event_citation_cnt = 0
+    family_citation_cnt = 0
+    object_citation_cnt = 0
+    person_citation_cnt = 0
+    place_citation_cnt = 0
+    source_repository_cnt = 0
+    
+    event_no_citation_cnt = 0 # How many events do not have any citationref?
+
+    citations = handler.collection.getElementsByTagName("citation")
+    citation_cnt = len(citations)
+    if len(citations) > 0:
+        for citation in citations:
+            citation_source_cnt += len(citation.getElementsByTagName('sourceref') )
+        
+    events = handler.collection.getElementsByTagName("event")
+    event_cnt = len(events)
+    if len(events) > 0:
+        for event in events:
+            event_citation_cnt += len(event.getElementsByTagName('citationref') )
+            if len(event.getElementsByTagName('citationref') ) == 0:
+                event_no_citation_cnt += 1
+
+    families = handler.collection.getElementsByTagName("family")
+    family_cnt = len(families)
+    if len(families) > 0:
+        for family in families:
+            family_citation_cnt += len(family.getElementsByTagName('citationref') )
+
+    objects = handler.collection.getElementsByTagName("object")
+    object_cnt = len(objects)
+    if len(objects) > 0:
+        for media in objects:
+            object_citation_cnt += len(media.getElementsByTagName('citationref') )
+
+    persons = handler.collection.getElementsByTagName("person")
+    person_cnt = len(persons)
+    if len(persons) > 0:
+        for person in persons:
+            person_citation_cnt += len(person.getElementsByTagName('citationref') )
+
+    places = handler.collection.getElementsByTagName("placeobj")
+    place_cnt = len(places)
+    if len(places) > 0:
+        for place in places:
+            place_citation_cnt += len(place.getElementsByTagName('citationref') )
+
+    repositorys = handler.collection.getElementsByTagName("repository")
+    repository_cnt = len(repositorys)
+
+    sources = handler.collection.getElementsByTagName("source")
+    source_cnt = len(sources)
+    if len(sources) > 0:
+        for source in sources:
+            source_repository_cnt += len(source.getElementsByTagName('reporef') )
+
+                    
+
+
+    text.append(" ")
+    text.append("Statistics of the xml file:")
+    text.append(str(citation_cnt) + " Citations, which have references to: " + 
+      str(citation_source_cnt) + " Sources,")
+    text.append(" ")
+    text.append(str(event_cnt) + " Events,")
+    text.append(" ")
+    text.append(str(event_citation_cnt) + " Citation references in Events,")
+    text.append(" ")
+    text.append(str(event_no_citation_cnt) + " Events, which do not have Citation references,")
+    text.append(" ")
+    text.append(str(family_cnt) + " Families, which have references to: " +
+      str(family_citation_cnt) + " Citations,")
+    text.append(" ")
+    text.append(str(object_cnt) + " Objects, which have references to: " +
+      str(object_citation_cnt) + " Citations,")
+    text.append(" ")
+    text.append(str(person_cnt) + " Persons, which have references to: " +
+      str(person_citation_cnt) + " Citations,")
+    text.append(" ")
+    text.append(str(place_cnt) + " Places, which have references to: " +
+      str(place_citation_cnt) + " Citations,")
+    text.append(" ")
+    text.append(str(repository_cnt) + " Repositors and")
+    text.append(" ")
+    text.append(str(source_cnt) + " Sources, which have references to: " +
+      str(source_repository_cnt) + " Repositories")
+    
+    return(text)
+
+def analyze_old(username, filename):
+    # Read the xml file
+    upload_folder = get_upload_folder(username) 
+    pathname = os.path.join(upload_folder,filename)
+    print("Pathname: " + pathname)
+    
+    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    
     f = open(file_cleaned, "r")
     
     text = []
