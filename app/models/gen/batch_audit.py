@@ -8,8 +8,7 @@ Created on 29.11.2019
 from models.util import format_timestamp
 import shareds
 from bp.admin.models.cypher_adm import Cypher_adm
-#from bp.audit.models.cypher_audit import Cypher_batch_stats
-from models.gen.cypher import Cypher_batch, Cypher_audition
+from models.gen.cypher import Cypher_batch, Cypher_audit
 
 from datetime import date, datetime
 
@@ -185,14 +184,14 @@ class Batch():
         return cnt
 
 
-class Audition():
+class Audit():
     '''
-    Audition batch node and statistics about them. 
+    Audit batch node and statistics about them. 
     '''
 
     def __init__(self, auditor=None):
         '''
-        Creates an Audition object.
+        Creates an Audit object.
         '''
         self.uniq_id = None
         self.auditor = auditor
@@ -207,9 +206,9 @@ class Audition():
 
     @classmethod
     def from_node(cls, node):
-        ''' Convert a Neo4j node to an Audition object.
+        ''' Convert a Neo4j node to an Audit object.
 
-        <Node id=439060 labels={'Audition'}
+        <Node id=439060 labels={'Audit'}
             properties={'auditor': 'juha', 'id': '2020-01-03.001', 
                         'user': 'jpek', 'timestamp': 1578940247182}>
         '''
@@ -232,19 +231,19 @@ class Audition():
         titles = []
         labels = {}
         if auditor:
-            result = shareds.driver.session().run(Cypher_audition.get_my_auditions,
+            result = shareds.driver.session().run(Cypher_audit.get_my_audits,
                                                   oper=auditor)
         else:
-            result = shareds.driver.session().run(Cypher_audition.get_all_auditions,
+            result = shareds.driver.session().run(Cypher_audit.get_all_audits,
                                                   oper=auditor)
         for record in result:
             # <Record
-            #    b=<Node id=439060 labels={'Audition'}
+            #    b=<Node id=439060 labels={'Audit'}
             #        properties={'auditor': 'juha', 'id': '2020-01-03.001', 
             #        'user': 'jpek', 'timestamp': 1578940247182}> 
             #    label='Note'
             #    cnt=17>
-            b = Audition.from_node(record['b'])
+            b = Audit.from_node(record['b'])
             label = record['label']
             if not label: label = ""
             cnt = record['cnt']

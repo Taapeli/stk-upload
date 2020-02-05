@@ -19,13 +19,13 @@ class Batch_merge(object):
     
     Replace the (b:Batch {id:...}) -[o:OWNS]-> (x)
                 relations with given Batch id
-    with        (s:Audition {id:...}) -[:PASSED]-> (x)
+    with        (s:Audit {id:...}) -[:PASSED]-> (x)
                 with same id
     
-    The Audition node should include
+    The Audit node should include
     - id = b.id    User Batch id
     - user         käyttäjä
-    - admin        the user who executed the transfer
+    - auditor      the user who executed the transfer
     - timestamp    viimeisin muutosaika
     - 
     #Todo: Make decisions, which items should be moved, merged or left alone
@@ -39,7 +39,7 @@ class Batch_merge(object):
 
     def move_whole_batch(self, batch_id, user, auditor):
         '''
-        Move all Batch elements which are supplemented by given user to Audition.
+        Move all Batch elements which are supplemented by given user to Audit.
 
         batch_id    active Batch
         user        owner of the Batch

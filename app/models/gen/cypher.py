@@ -799,30 +799,30 @@ OPTIONAL MATCH (b) -[*]-> (n)
 DETACH DELETE b, n"""
 
 
-class Cypher_audition():
-    ' Query Audition materials '
+class Cypher_audit():
+    ' Query Audit materials '
 
-    get_my_auditions = '''
-match (b:Audition {auditor: $oper})
+    get_my_audits = '''
+match (b:Audit {auditor: $oper})
 optional match (b) -[:PASSED]-> (x)
 return b, labels(x)[0] as label, count(x) as cnt 
     order by b.user, b.id, label'''
 
-    get_all_auditions = '''
-match (b:Audition)
+    get_all_audits = '''
+match (b:Audit)
 optional match (b) -[:PASSED]-> (x)
 return b, labels(x)[0] as label, count(x) as cnt 
     order by b.user, b.id, label'''
 
-    get_single_audition = '''
-match (b:Audition {id:$batch}) 
-optional match (b) -[:PASSED]-> (x)
-return labels(x)[0] as label, count(x) as cnt'''
-
-    get_my_audition_names = '''
-match (b:Audition) where b.auditor = $oper
-optional match (b) -[r:PASSED]-> (:Person)
-return b.id as audition, b.timestamp as timestamp, 
-    b.auditor as auditor, b.status as status,
-    count(r) as persons 
-order by audition'''
+#     get_single_audit = '''
+# match (b:Audit {id:$batch}) 
+# optional match (b) -[:PASSED]-> (x)
+# return labels(x)[0] as label, count(x) as cnt'''
+# 
+#     get_my_audit_names = '''
+# match (b:Audit) where b.auditor = $oper
+# optional match (b) -[r:PASSED]-> (:Person)
+# return b.id as audition, b.timestamp as timestamp, 
+#     b.auditor as auditor, b.status as status,
+#     count(r) as persons 
+# order by audition'''

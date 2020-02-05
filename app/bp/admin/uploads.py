@@ -19,12 +19,8 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from models import email, util, syslog 
-#from models.gen.batch_audit import Batch
 from ..gramps import gramps_loader
 import shareds
-#from models.cypher_gramps import Cypher_batch
-#from ..admin.models.cypher_adm import Cypher_stats
-#from bp.audit.models.cypher_audit import Cypher_batch_stats
 from models.gen.cypher import Cypher_batch
 
 STATUS_UPLOADED     = "uploaded"

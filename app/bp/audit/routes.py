@@ -5,6 +5,7 @@ Created on 28.11.2019
  
 '''
 from . import bp
+import time
 
 import logging
 logger = logging.getLogger('stkserver')
@@ -14,7 +15,7 @@ from flask_security import login_required, roles_accepted, current_user
 #from flask_babelex import _
 
 import shareds
-from models.gen.batch_audit import Batch, Audition
+from models.gen.batch_audit import Batch, Audit
 from .models.batch_merge import Batch_merge
 #from .models.audition import Audition
 
@@ -80,12 +81,13 @@ def move_in_2():
 @login_required
 @roles_accepted('audit')
 def audit_approvals(who=None):
-    """ List Audition batches """
+    """ List Audit batches """
+    t0 = time.time()
     if who == "all":
         auditor=None
     else:
         auditor = current_user.username
-    titles, batches = Audition.get_auditor_stats(auditor)
+    titles, batches = Audit.get_auditor_stats(auditor)
     # {'matti/2020-01-03.001/13.01.2020 20:30': {'Note': 17, 'Place': 30, 'Repository': 3}, 
     #  'teppo/2020-01-03.002/23.01.2020 15:52': {...} ...}
     total = 0
@@ -97,5 +99,5 @@ def audit_approvals(who=None):
     logger.info(f' bp.audit.routes.audit_approvals {auditor} {len(batches)} batches, total {total} nodes')
 
     return render_template('/audit/approvals.html', user=auditor, total=total,
-                           titles=titles, batches=batches)
+                           titles=titles, batches=batches, elapsed=time.time()-t0)
 

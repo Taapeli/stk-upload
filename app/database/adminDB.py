@@ -191,19 +191,27 @@ def do_schema_fixes():
     """
 
     if True:
-        change_Root_to_Audition = '''
+        change_Root_to_Audit = '''
 MATCH (n:Root)
-    SET n:Audition
+    SET n:Audit
     SET n.auditor = n.operator
     REMOVE n:Root
     SET n.operator = Null
 RETURN count(n)'''
         
+        change_Audition_to_Audit = '''
+MATCH (n:Audition)
+    SET n:Audit
+    REMOVE n:Audition
+RETURN count(n)'''
+        
 
         with shareds.driver.session() as session: 
             try:
-                result = session.run(change_Root_to_Audition)
+                result = session.run(change_Root_to_Audit)
                 cnt1 = result.single()[0]
+                result = session.run(change_Audition_to_Audit)
+                cnt2 = result.single()[0]
 #                 result = session.run(change_userName_to_username)
 #                 cnt2 = result.single()[0]
 #                 result = session.run(change_Repocitory_to_Repository)
@@ -212,7 +220,7 @@ RETURN count(n)'''
 #                 cnt4 = result.single()[0]
 #                 result = session.run(change_wrong_supplemented_direction)
 #                 cnt5 = result.single()[0]
-                print(f"adminDB.do_schema_fixes: changed {cnt1} labels")
+                print(f"adminDB.do_schema_fixes: fixed {cnt1} Root labels, {cnt2} Audition labels")
     
             except Exception as e:
                 logger.error(f"{e} in database.adminDB.do_schema_fixes")
