@@ -47,16 +47,30 @@ def analyze(username, filename):
     source_repository_cnt = 0
     
     event_no_citation_cnt = 0 # How many events do not have any citationref?
+    
+    # Estimated times per item (ms)
+    e_citation = 26
+    e_event = 47
+    e_family = 82
+    e_object = 2
+    e_note = 1
+    e_person = 130
+    e_place = 2
+    e_repository = 1
+    e_source = 6
+    e_total = 0
 
     citations = handler.collection.getElementsByTagName("citation")
     citation_cnt = len(citations)
-    if len(citations) > 0:
+    if citation_cnt > 0:
+        e_total += citation_cnt * e_citation / 1000
         for citation in citations:
             citation_source_cnt += len(citation.getElementsByTagName('sourceref') )
         
     events = handler.collection.getElementsByTagName("event")
     event_cnt = len(events)
-    if len(events) > 0:
+    if event_cnt > 0:
+        e_total += event_cnt * e_event / 1000
         for event in events:
             event_citation_cnt += len(event.getElementsByTagName('citationref') )
             if len(event.getElementsByTagName('citationref') ) == 0:
@@ -64,34 +78,46 @@ def analyze(username, filename):
 
     families = handler.collection.getElementsByTagName("family")
     family_cnt = len(families)
-    if len(families) > 0:
+    if family_cnt > 0:
+        e_total += family_cnt * e_family / 1000
         for family in families:
             family_citation_cnt += len(family.getElementsByTagName('citationref') )
 
+    notes = handler.collection.getElementsByTagName("note")
+    note_cnt = len(notes)
+    if note_cnt > 0:
+        e_total += note_cnt * e_note / 1000
+
     objects = handler.collection.getElementsByTagName("object")
     object_cnt = len(objects)
-    if len(objects) > 0:
+    if object_cnt > 0:
+        e_total += object_cnt * e_object / 1000
         for media in objects:
             object_citation_cnt += len(media.getElementsByTagName('citationref') )
 
     persons = handler.collection.getElementsByTagName("person")
     person_cnt = len(persons)
-    if len(persons) > 0:
+    if person_cnt > 0:
+        e_total += person_cnt * e_person / 1000
         for person in persons:
             person_citation_cnt += len(person.getElementsByTagName('citationref') )
 
     places = handler.collection.getElementsByTagName("placeobj")
     place_cnt = len(places)
-    if len(places) > 0:
+    if place_cnt > 0:
+        e_total += place_cnt * e_place / 1000
         for place in places:
             place_citation_cnt += len(place.getElementsByTagName('citationref') )
 
     repositorys = handler.collection.getElementsByTagName("repository")
     repository_cnt = len(repositorys)
+    if repository_cnt > 0:
+        e_total += repository_cnt * e_repository / 1000
 
     sources = handler.collection.getElementsByTagName("source")
     source_cnt = len(sources)
-    if len(sources) > 0:
+    if source_cnt > 0:
+        e_total += source_cnt * e_source / 1000
         for source in sources:
             source_repository_cnt += len(source.getElementsByTagName('reporef') )
 
@@ -112,6 +138,8 @@ def analyze(username, filename):
     text.append(str(family_cnt) + " Families, which have references to: " +
       str(family_citation_cnt) + " Citations,")
     text.append(" ")
+    text.append(str(note_cnt) + " Notes,")
+    text.append(" ")
     text.append(str(object_cnt) + " Objects, which have references to: " +
       str(object_citation_cnt) + " Citations,")
     text.append(" ")
@@ -125,6 +153,8 @@ def analyze(username, filename):
     text.append(" ")
     text.append(str(source_cnt) + " Sources, which have references to: " +
       str(source_repository_cnt) + " Repositories")
+    text.append(" ")
+    text.append("Estimated storing time: " + str(int(e_total)) + " seconds")
     
     return(text)
 
