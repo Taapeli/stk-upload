@@ -1070,36 +1070,37 @@ with distinct x
 
     @staticmethod
     def zzzestimate_lifetimes(tx, uids=[]):
-        """ Sets an estimated lifietime to Person.dates.
-
-            Stores it as Person properties: datetype, date1, and date2
-
-            The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
-            sets all lifetimes.
-
-            Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
-            
-            Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
-            and models.dataupdater.set_estimated_dates
-        """
-        try:
-            if not uids:
-                result = tx.run(Cypher_person.set_est_lifetimes_all)
-            else:
-                if isinstance(uids, int):
-                    uids = [uids]
-                result = tx.run(Cypher_person.set_est_lifetimes, idlist=uids)
-        except Exception as err:
-            print("iError (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
-            return 0
-
-        counters = result.consume().counters
-        pers_count = int(counters.properties_set/3)
-        print("Estimated lifetime for {} persons".format(pers_count))
-        return pers_count
+        print("Obsolete zzzestimate_lifetimes REMOVED")
+#         """ Sets an estimated lifietime to Person.dates.
+# 
+#             Stores it as Person properties: datetype, date1, and date2
+# 
+#             The argument 'uids' is a list of uniq_ids of Person nodes; if empty,
+#             sets all lifetimes.
+# 
+#             Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
+#             
+#             Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
+#             and models.dataupdater.set_estimated_dates
+#         """
+#         try:
+#             if not uids:
+#                 result = tx.run(Cypher_person.set_est_lifetimes_all)
+#             else:
+#                 if isinstance(uids, int):
+#                     uids = [uids]
+#                 result = tx.run(Cypher_person.set_est_lifetimes, idlist=uids)
+#         except Exception as err:
+#             print("iError (Person_combo.save:estimate_lifetimes): {0}".format(err), file=stderr)
+#             return 0
+# 
+#         counters = result.consume().counters
+#         pers_count = int(counters.properties_set/3)
+#         print("Estimated lifetime for {} persons".format(pers_count))
+#         return pers_count
 
     @staticmethod
-    def estimate_lifetimes(tx, uids):
+    def estimate_lifetimes(tx, uids=[]):
         """ Sets an estimated lifetime to Person.dates.
 
             Stores it as Person properties: datetype, date1, and date2
@@ -1116,7 +1117,10 @@ with distinct x
         from models import lifetime
         from models.gen.dates import DR 
         try:
-            result = tx.run(Cypher_person.fetch_persons_for_lifetime_estimates, idlist=uids)
+            if uids:
+                result = tx.run(Cypher_person.fetch_selected_for_lifetime_estimates, idlist=uids)
+            else:
+                result = tx.run(Cypher_person.fetch_all_for_lifetime_estimates)
             personlist = []
             personmap = {}
             for rec in result:
@@ -1155,10 +1159,10 @@ with distinct x
                         ev = lifetime.Event(eventtype,datetype2,year2,role)
                         p.events.append(ev)
                 p.parent_pids = []
-                for parent,pid in rec['parents']:
+                for _parent,pid in rec['parents']:
                     if pid: p.parent_pids.append(pid)
                 p.child_pids = []
-                for parent,pid in rec['children']:
+                for _parent,pid in rec['children']:
                     if pid: p.child_pids.append(pid)
                 personlist.append(p)
                 personmap[p.pid] = p
@@ -1169,7 +1173,7 @@ with distinct x
                     p.children.append(personmap[pid])
             lifetime.calculate_estimates(personlist)
             for p in personlist:
-                result = tx.run(Cypher_person.update_person_lifetime_estimates, 
+                result = tx.run(Cypher_person.update_lifetime_estimate, 
                                 id=p.pid,
                                 earliest_possible_birth_year = p.earliest_possible_birth_year.getvalue(),
                                 earliest_possible_death_year = p.earliest_possible_death_year.getvalue(),
@@ -1177,7 +1181,7 @@ with distinct x
                                 latest_possible_death_year = p.latest_possible_death_year.getvalue() )
                                 
             pers_count = len(personlist)
-            print("Estimated lifetime for {} persons".format(pers_count))
+            print(f"Estimated lifetime for {pers_count} persons")
             return pers_count
 
         except Exception as err:

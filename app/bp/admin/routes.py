@@ -107,7 +107,11 @@ def clear_empty_batches():
 @roles_required('admin')
 def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    message = dataupdater.set_estimated_person_dates(list(uid))
+    if uid:
+        uids=list(uid)
+    else:
+        uids=[]
+    message = dataupdater.set_estimated_person_dates(uids)
     ext = _("estimated lifetime")
     return render_template("/admin/talletettu.html", text=message, info=ext)
 

@@ -6,20 +6,6 @@
 #
 # 12.2.2018 / JMä
 
-# class Cypher_event():
-#     '''
-#     Cypher clases for creating and accessing Events
-#     '''
-
-# class Cypher_family():
-#     '''
-#     Cypher clases for creating and accessing Family objects
-#     '''
-
-# class Cypher_media():
-#     '''
-#     Cypher clases for creating and accessing Media objects
-#     '''
 
 class Cypher_note():
     '''
@@ -84,15 +70,15 @@ CALL apoc.path.subgraphAll(p, {maxLevel:4,
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), properties(x), id(endnode(x))]) as relations,
         extract(x in nodes | x) as nodelist"""
-    #TODO Obsolete
-    all_nodes_uniq_id_query_w_apoc="""
-MATCH (p:Person) WHERE id(p) = $uniq_id
-CALL apoc.path.subgraphAll(p, {maxLevel:4, 
-        relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<PARENT'}) 
-    YIELD nodes, relationships
-RETURN extract(x IN relationships | 
-        [id(startnode(x)), type(x), properties(x), id(endnode(x))]) as relations,
-        extract(x in nodes | x) as nodelist"""
+#     #TODO Obsolete
+#     all_nodes_uniq_id_query_w_apoc="""
+# MATCH (p:Person) WHERE id(p) = $uniq_id
+# CALL apoc.path.subgraphAll(p, {maxLevel:4, 
+#         relationshipFilter: 'EVENT>|NAME>|PLACE>|CITATION>|SOURCE>|REPOSITORY>|NOTE>|MEDIA|HIERARCHY>|<CHILD|<PARENT'}) 
+#     YIELD nodes, relationships
+# RETURN extract(x IN relationships | 
+#         [id(startnode(x)), type(x), properties(x), id(endnode(x))]) as relations,
+#         extract(x in nodes | x) as nodelist"""
 
 # Ver 0.2 Person lists with names and events
     read_my_persons_with_events_starting_name = """
@@ -226,24 +212,24 @@ SET person.confidence=$confidence"""
 MATCH (person:Person) WHERE ID(person) = $id
 SET person.sortname=$key"""
 
-    set_est_lifetimes = """
-MATCH (p:Person) -[r:EVENT]-> (e:Event)
-    WHERE id(p) IN $idlist
-WITH p, collect(e) AS events, 
-    max(e.date2) AS dmax, min(e.date1) AS dmin
-WHERE NOT (dmax IS NULL OR dmin IS NULL)
-    SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
-RETURN null"""
+#Replased by update_lifetime_estimate etc. / 2020-02-06
+#     set_est_lifetimes = """
+# MATCH (p:Person) -[r:EVENT]-> (e:Event)
+#     WHERE id(p) IN $idlist
+# WITH p, collect(e) AS events, 
+#     max(e.date2) AS dmax, min(e.date1) AS dmin
+# WHERE NOT (dmax IS NULL OR dmin IS NULL)
+#     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
+# RETURN null"""
+#     set_est_lifetimes_all = """
+# MATCH (p:Person) -[r:EVENT]-> (e:Event)
+# WITH p, collect(e) AS events, 
+#     max(e.date2) AS dmax, min(e.date1) AS dmin
+# WHERE NOT (dmax IS NULL OR dmin IS NULL)
+#     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
+# RETURN null"""
 
-    set_est_lifetimes_all = """
-MATCH (p:Person) -[r:EVENT]-> (e:Event)
-WITH p, collect(e) AS events, 
-    max(e.date2) AS dmax, min(e.date1) AS dmin
-WHERE NOT (dmax IS NULL OR dmin IS NULL)
-    SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
-RETURN null"""
-
-    fetch_persons_for_lifetime_estimates = """
+    fetch_selected_for_lifetime_estimates = """
 MATCH (p:Person) 
     WHERE id(p) IN $idlist
 OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
@@ -257,13 +243,26 @@ RETURN p, id(p) as pid,
     collect(distinct [c,id(c)]) as children,
     collect(distinct [parent,id(parent)]) as parents
 """
-    update_person_lifetime_estimates = """
+    update_lifetime_estimate = """
 MATCH (p:Person) 
     WHERE id(p) = $id
 SET p.earliest_possible_birth_year = $earliest_possible_birth_year,
     p.earliest_possible_death_year = $earliest_possible_death_year,
     p.latest_possible_birth_year = $latest_possible_birth_year,
     p.latest_possible_death_year = $latest_possible_death_year
+"""
+    fetch_all_for_lifetime_estimates = """
+MATCH (p:Person) 
+OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
+OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
+OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
+OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
+OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
+RETURN p, id(p) as pid, 
+    collect(distinct [e,r.role]) AS events,
+    collect(distinct [fam_event,r2.role]) AS fam_events,
+    collect(distinct [c,id(c)]) as children,
+    collect(distinct [parent,id(parent)]) as parents
 """
 
     get_by_uuid_w_names_notes = """
