@@ -36,12 +36,12 @@ from models.owner import OwnerFilter
 import traceback
 
 
-def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
+def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=False, order=0):
     """ Reads Person Name and Event objects for display.
-        If currentuser is defined, restrict to her objects.
+        If args['user'] is defined, restrict to her objects.
 
         Returns Person objects, whith included Events and Names
-        and optionally Refnames
+        and optionally Refnames (if args['take_refnames'])
 
         NOTE. Called with
             keys = ('uniq_id', uid)     in bp.scene.routes.show_person_list
@@ -56,7 +56,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
     persons = []
     p = None
     p_uniq_id = None
-    result = Person_combo.get_person_combos(keys, user, take_refnames=take_refnames, order=order)
+    result = Person_combo.get_person_combos(keys, args=args) #user, take_refnames=take_refnames, order=order)
     for record in result:
         '''
         # <Record
@@ -82,7 +82,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
             # The same person is not created again
             p = Person_combo.from_node(node)
             p_uniq_id = p.uniq_id
-            if take_refnames and record['refnames']:
+            if args.get('take_refnames',False) and record['refnames']:
                 refnlist = sorted(record['refnames'])
                 p.refnames = ", ".join(refnlist)
             for nnode in record['names']:

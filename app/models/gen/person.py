@@ -108,6 +108,10 @@ class Person(NodeObject):
             confidence            float "2.0" tietojen luotettavuus
             sortname              str default name as "surname#suffix#firstname"
             datetype,date1,date2  DateRange dates # estimated life time
+            earliest_possible_birth_year  int lifetime estimate limits
+            earliest_possible_death_year  int
+            latest_possible_birth_year    int
+            latest_possible_death_year    int
             change                int 1536324580
            }
      """
@@ -120,6 +124,11 @@ class Person(NodeObject):
         self.confidence = ''
         self.sortname = ''
         self.dates = None    # Daterange: Estimated datetype, date1, date2
+
+        self.earliest_possible_birth_year = None
+        self.earliest_possible_death_year = None
+        self.latest_possible_birth_year = None
+        self.latest_possible_death_year = None
 
     def __str__(self):
         dates = self.dates if self.dates else ''
@@ -180,8 +189,6 @@ class Person(NodeObject):
         if not obj:
             obj = cls()
         obj.uuid = node.get('uuid')
-#         if 'handle' in node:
-#             obj.handle = node.get('handle')
         obj.uniq_id = node.id
         obj.id = node['id']
         obj.sex = node.get('sex', 'UNKNOWN')
@@ -189,6 +196,11 @@ class Person(NodeObject):
         obj.confidence = node.get('confidence', '')
         obj.sortname = node['sortname']
         obj.priv = node['priv']
+        obj.earliest_possible_birth_year = node['earliest_possible_birth_year']
+        obj.earliest_possible_death_year = node['earliest_possible_death_year']
+        obj.latest_possible_birth_year = node['latest_possible_birth_year']
+        obj.latest_possible_death_year = node['latest_possible_death_year']
+
         if "datetype" in node:
             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return obj
@@ -199,7 +211,6 @@ class Person(NodeObject):
         """ Sets a sorting key "Klick#Jönsdotter#Brita Helena" 
             using given default Name node
         """
-
         key = namenode.key_surname()
         return tx.run(Cypher_person.set_sortname, id=uniq_id, key=key)
         
@@ -226,9 +237,7 @@ class Person(NodeObject):
     def get_total():
         """ Tulostaa henkilöiden määrän tietokannassa """
 
-        query = """
-            MATCH (p:Person) RETURN COUNT(p)
-            """
+        query = "MATCH (p:Person) RETURN COUNT(p)"
         results =  shareds.driver.session().run(query)
 
         for result in results:

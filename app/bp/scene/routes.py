@@ -83,13 +83,12 @@ def show_persons_by_refname(refname, opt=""):
     """ List persons by refname for menu(0).
     """
     keys = ('refname', refname)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
     ref = ('ref' in opt)
     order = 0
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    args = {'ref': ref, 'order': order}
+    if current_user.is_authenticated:
+        args['user'] = current_user.username
+    persons = read_persons_with_events(keys, args=args)
     logger.info("-> bp.scene.routes.show_persons_by_refname")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order, rule=keys)
@@ -109,15 +108,14 @@ def show_all_persons_list(opt=''):
     """
     t0 = time.time()
     keys = ('all',)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
     ref = ('ref' in opt)
     if 'fn' in opt: order = 1   # firstname
     elif 'pn' in opt: order = 2 # firstname
     else: order = 0             # surname
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    args = {'ref': ref, 'order': order}
+    if current_user.is_authenticated:
+        args['user'] = current_user.username
+    persons = read_persons_with_events(keys, args=args) #user=user, take_refnames=ref, order=order)
     logger.info("-> bp.scene.routes.show_all_persons_list")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order,rule=keys, elapsed=time.time()-t0)

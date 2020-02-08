@@ -38,13 +38,15 @@ def show_table_data(subj):
         tietokannan henkiloiden tai käyttäjien näyttäminen ruudulla 
     """
     t0 = time.time()
-#     if subj == "henkilot":
-#         dburi = models.dbutil.get_server_location()
-#         persons = datareader.lue_henkilot()
-#         return render_template("table_persons.html", persons=persons, uri=dburi)
+    if request.args:
+        args=request.args
+    else:
+        args={}
+
     if subj == "persons":
-        persons = datareader.read_persons_with_events()
-        return render_template("/tools/table_persons.html", persons=persons, elapsed=time.time()-t0)
+        persons = datareader.read_persons_with_events(args=args)
+        return render_template("/tools/table_persons.html", persons=persons, 
+                               elapsed=time.time()-t0)
     elif subj == "surnames":
         surnames = Name.get_surnames()
         return render_template("/tools/table_surnames.html", surnames=surnames, elapsed=time.time()-t0)
@@ -236,7 +238,7 @@ def pick_selection(cond):
     try:
         if key == 'name':               # A prototype for later development
             value=value.title()
-            persons = datareader.read_persons_with_events(keys=['surname',value])
+            persons = datareader.read_persons_with_events(keys=('surname',value))
             return render_template("/tools/join_persons.html",
                                    persons=persons, pattern=value)
         elif key == 'cite_sour_repo':   # from table_person_by_id.html Ei käytössä
@@ -254,7 +256,7 @@ def pick_selection(cond):
             return render_template("/tools/source_citations.html",
                                    sources=sources)
         elif key == 'uniq_id':          # from table_persons2.html
-            persons = datareader.read_persons_with_events(("uniq_id",value))
+            persons = datareader.read_persons_with_events(keys=("uniq_id",value))
             return render_template("/tools/person2.html", persons=persons)
         else:
             raise(KeyError(_('Only the OID can retrieve')))

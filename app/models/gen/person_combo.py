@@ -55,7 +55,7 @@ from .person_name import Name
 from .event_combo import Event_combo
 #from .family_combo import Family_combo
 from .cypher import Cypher_person, Cypher_family
-from .place import Place, Place_name
+#from .place import Place, Place_name
 import traceback
 # from .place_combo import Place_combo
 # from .citation import Citation
@@ -114,17 +114,10 @@ class Person_combo(Person):
         self.note_ref = []              # uniq_id of models.gen.note.Note
         self.notes = []                 # 
         #remove: self.noteref_hlink = []
-
-        self.media_ref = []             # uniq_id of models.gen.media.Media
+        self.media_ref = []             # uniq_ids of models.gen.media.Media
                                         # (previous self.objref_hlink[])
 
         # Other variables
-
-        #self.urls = []                 # REMOVED: Now use note_ref[]
-
-        #self.est_birth = ''            # REMOVED: Now use Daterange self.dates
-        #self.est_death = ''
-
         self.role = ''                  # Role in Family
         self.families_as_child = []     # - Propably one only
         self.families_as_parent =[]
@@ -695,14 +688,12 @@ RETURN person, name
 
 
     @staticmethod
-    def get_person_combos (keys, currentuser, take_refnames=False, order=0):
+    def get_person_combos (keys, args={}): #, currentuser, take_refnames=False, order=0):
         """ Read Persons with Names, Events, Refnames (reference names) and Places.
         
             Version 0.1
             Called from models.datareader.read_persons_with_events
             
-            UUSI KORVAAMAAN get_events_k:n
-
              a) selected by unique id
                 keys=['uniq_id', uid]    by person's uniq_id (for table_person_by_id.html)
              b) selected by name
@@ -714,7 +705,8 @@ RETURN person, name
             If currentuser is defined, select only her Events
 
             #TODO: take_refnames should determine, if refnames are returned, too
-            #TODO: filter by owner
+            #TODO: filter by owner using args['user']
+
         """
         if keys:
             rule=keys[0]
@@ -746,6 +738,7 @@ RETURN person, name
                 elif rule == 'refname':
                     return session.run(Cypher_person.get_events_by_refname, name=key)
                 elif rule == 'all':
+                    order = args.get('order')
                     if order == 1:      # order by first name
                         return session.run(Cypher_person.get_events_all_firstname)
                     elif order == 2:    # order by patroname
@@ -764,150 +757,89 @@ RETURN person, name
 #         """ OBSOLETE Read Persons with Names, Events and Refnames (reference names)
 # 
 #             - tilalle tulee Person_combo.get_person_combos
-#             Called from models.datareader.read_persons_with_events
+
+#     # Not in use!
+#     def get_my_places(self, cleartext_list=False):
+#         ''' Stores all Places with their Place_names in self.places list.
 # 
-#              a) selected by unique id
-#                 keys=['uniq_id', uid]    by person's uniq_id (for table_person_by_id.html)
-#              b) selected by name
-#                 keys=['all']             all
-#                 keys=['surname', name]   by start of surname
-#                 keys=['firstname', name] by start of the first of first names
-#                 keys=['patronyme', name] by start of patronyme name
-#                 keys=['refname', name]   by exact refname
-#             If currentuser is defined, select only her Events
-# 
-#             #TODO: take_refnames should determine, if refnames are returned, too
-#         """
-#         if keys:
-#             rule=keys[0]
-#             key=keys[1].title() if len(keys) > 1 else None
-#             print("Selected {} '{}'".format(rule, key))
-#         else:
-#             rule="all"
-#             key=""
-# 
-# # ╒═════╤════════════════╤═══════════╤════════╤═════════════════╤═════════════════╕
-# # │"id" │"firstname"     │"surname"  │"suffix"│"refnames"       │"events"         │
-# # ╞═════╪════════════════╪═══════════╪════════╪═════════════════╪═════════════════╡
-# # │31844│"August Wilhelm"│"Wallenius"│""      │["August","Wilhel│[[29933,"Baptism"│
-# # │     │                │           │        │m","Wallenius"]  │, ...            │
-# # └─────┴────────────────┴───────────┴────────┴─────────────────┴─────────────────┘
-# # There is also fields confidence, est_birth, est_death, which are empty for now
-# 
-# #TODO: filter by owner
-# 
-#         try:
-#             with shareds.driver.session() as session:
-#                 if rule == 'uniq_id':
-#                     return session.run(Cypher_person.get_events_uniq_id, id=int(key))
-#                 elif rule == 'refname':
-#                     return session.run(Cypher_person.get_events_by_refname, name=key)
-#                 elif rule == 'all':
-#                     if order == 1:      # order by first name
-#                         return session.run(Cypher_person.get_events_all_firstname)
-#                     elif order == 2:    # order by patroname
-#                         return session.run(Cypher_person.get_events_all_patronyme)
-#                     else:
-#                         return session.run(Cypher_person.get_events_all)
-#                 else:
-#                     # Selected names and name types (untested?)
-#                     return session.run(Cypher_person.get_events_by_refname_use,
-#                                        attr={'use':rule, 'name':key})
-#         except Exception as err:
-#             print("iError get_events_k: {1} {0}".format(err, keys), file=stderr)
-
-
-    # Not in use!
-    def get_my_places(self, cleartext_list=False):
-        ''' Stores all Places with their Place_names in self.places list.
-
-            Finds names which are connected to any personal Events
-        '''
-
-        get_places_w_names = """
-match (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (pl:Place)
-    where id(p)=$pid
-with r, e, pl
-    optional match (pl) -[:NAME]-> (pname:Place_name)
-    return r.role as r_role, id(e) as e_id, 
-        pl as place, collect(pname) as pnames"""
-    
-# ╒═════════╤══════╤════════════════════════════════╤════════════════════════════════╕
-# │"r_role" │"e_id"│"place"                         │"pnames"                        │
-# ╞═════════╪══════╪════════════════════════════════╪════════════════════════════════╡
-# │"Primary"│72501 │{"coord":[60.5,27.2],"handle":"_│[{"name":"Hamina","lang":""}]   │
-# │         │      │de189e6c36c3f1e676c22ed6559","id│                                │
-# │         │      │":"P0004","type":"Town","pname":│                                │
-# │         │      │"Hamina","change":1536051348}   │                                │
-# ├─────────┼──────┼────────────────────────────────┼────────────────────────────────┤
-# │"Primary"│72500 │{"handle":"_ddd39c4088f165882c16│[{"name":"Kaivopuisto","lang":""│
-# │         │      │0493e88","id":"P0001","type":"Bo│},{"name":"Brunspark","lang":"sv│
-# │         │      │rough","pname":"Kaivopuisto","ch│"}]                             │
-# │         │      │ange":1536051387}               │                                │
-# └─────────┴──────┴────────────────────────────────┴────────────────────────────────┘
-
-        result = shareds.driver.session().run(get_places_w_names, pid=self.uniq_id)
-        for record in result:
-            ''' <Record r_role='Primary' e_id=72501 pl_id=72486 
-                    place=<Node id=72486 labels={'Place'} 
-                        properties={'handle': '_de189e6c36c3f1e676c22ed6559', 
-                        'change': 1536051348, 'id': 'P0004', 'type': 'Town', 
-                        'pname': 'Hamina', 'coord': [60.5, 27.2]}> 
-                    pnames=[<Node id=72487 labels={'Place_name'} 
-                        properties={'lang': '', 'name': 'Hamina'}>]>
-            '''
-            # Fill Place properties:
-            #     handle
-            #     change
-            #     id                  esim. "P0001"
-            #     type                str paikan tyyppi
-            #     pname               str paikan nimi
-            #     names[]:
-            #        name             str paikan nimi
-            #        lang             str kielikoodi
-            #        dates            DateRange date expression
-
-            e_id = record['e_id']
-            
-            for my_e in self.events:
-                if e_id == my_e.uniq_id:
-                    # Found current event, create a Place there
-                    placerec = record['place']
-                    print("event {}: {} <- place {}: {}".\
-                          format(my_e.uniq_id, my_e, placerec.id, placerec['pname']))
-                    # Get Place data
-                    pl = Place()
-                    pl.uniq_id = placerec.id
-                    pl.type = placerec['type']
-                    pl.pname = placerec['pname']
-                    pl.id = placerec['id']
-                    pl.handle = placerec['handle']
-                    pl.change = placerec['change']
-                    # Get the Place_names
-                    for node in record['pnames']:
-                        pn = Place_name.from_node(node)
-                        pl.names.append(pn)
-
-                    if cleartext_list:
-                        my_e.clearnames = my_e.clearnames + pl.show_names_list()
-                    my_e.place = pl
-
-#         for e in self.events:
-#             print("event {}: {}".format(e.uniq_id, e))
-#             if e.place == None:
-#                 print("- no place")
-#             else:
-#                 for n in e.place.names:
-#                     print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
-
-
-#     def get_all_notes(self):
-#         ''' Finds all Note and Weburl
-#             which are connected to Person, Events or Families
-#             and stores them in self.notes and self.Weburl lists
+#             Finds names which are connected to any personal Events
 #         '''
-#         # Mihin tarvitaan?
-#         pass
+# 
+#         get_places_w_names = """
+# match (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (pl:Place)
+#     where id(p)=$pid
+# with r, e, pl
+#     optional match (pl) -[:NAME]-> (pname:Place_name)
+#     return r.role as r_role, id(e) as e_id, 
+#         pl as place, collect(pname) as pnames"""
+#     
+# # ╒═════════╤══════╤════════════════════════════════╤════════════════════════════════╕
+# # │"r_role" │"e_id"│"place"                         │"pnames"                        │
+# # ╞═════════╪══════╪════════════════════════════════╪════════════════════════════════╡
+# # │"Primary"│72501 │{"coord":[60.5,27.2],"handle":"_│[{"name":"Hamina","lang":""}]   │
+# # │         │      │de189e6c36c3f1e676c22ed6559","id│                                │
+# # │         │      │":"P0004","type":"Town","pname":│                                │
+# # │         │      │"Hamina","change":1536051348}   │                                │
+# # ├─────────┼──────┼────────────────────────────────┼────────────────────────────────┤
+# # │"Primary"│72500 │{"handle":"_ddd39c4088f165882c16│[{"name":"Kaivopuisto","lang":""│
+# # │         │      │0493e88","id":"P0001","type":"Bo│},{"name":"Brunspark","lang":"sv│
+# # │         │      │rough","pname":"Kaivopuisto","ch│"}]                             │
+# # │         │      │ange":1536051387}               │                                │
+# # └─────────┴──────┴────────────────────────────────┴────────────────────────────────┘
+# 
+#         result = shareds.driver.session().run(get_places_w_names, pid=self.uniq_id)
+#         for record in result:
+#             ''' <Record r_role='Primary' e_id=72501 pl_id=72486 
+#                     place=<Node id=72486 labels={'Place'} 
+#                         properties={'handle': '_de189e6c36c3f1e676c22ed6559', 
+#                         'change': 1536051348, 'id': 'P0004', 'type': 'Town', 
+#                         'pname': 'Hamina', 'coord': [60.5, 27.2]}> 
+#                     pnames=[<Node id=72487 labels={'Place_name'} 
+#                         properties={'lang': '', 'name': 'Hamina'}>]>
+#             '''
+#             # Fill Place properties:
+#             #     handle
+#             #     change
+#             #     id                  esim. "P0001"
+#             #     type                str paikan tyyppi
+#             #     pname               str paikan nimi
+#             #     names[]:
+#             #        name             str paikan nimi
+#             #        lang             str kielikoodi
+#             #        dates            DateRange date expression
+# 
+#             e_id = record['e_id']
+#             
+#             for my_e in self.events:
+#                 if e_id == my_e.uniq_id:
+#                     # Found current event, create a Place there
+#                     placerec = record['place']
+#                     print("event {}: {} <- place {}: {}".\
+#                           format(my_e.uniq_id, my_e, placerec.id, placerec['pname']))
+#                     # Get Place data
+#                     pl = Place()
+#                     pl.uniq_id = placerec.id
+#                     pl.type = placerec['type']
+#                     pl.pname = placerec['pname']
+#                     pl.id = placerec['id']
+#                     pl.handle = placerec['handle']
+#                     pl.change = placerec['change']
+#                     # Get the Place_names
+#                     for node in record['pnames']:
+#                         pn = Place_name.from_node(node)
+#                         pl.names.append(pn)
+# 
+#                     if cleartext_list:
+#                         my_e.clearnames = my_e.clearnames + pl.show_names_list()
+#                     my_e.place = pl
+# 
+# #         for e in self.events:
+# #             print("event {}: {}".format(e.uniq_id, e))
+# #             if e.place == None:
+# #                 print("- no place")
+# #             else:
+# #                 for n in e.place.names:
+# #                     print("- place {} name {}: {}".format(e.place.uniq_id, n.uniq_id, n))
 
 
     @staticmethod
