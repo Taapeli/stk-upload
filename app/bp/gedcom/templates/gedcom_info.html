@@ -65,7 +65,7 @@ var gedcom = "{{ gedcom }}";
 
                     {% if metadata.size %}
 	                    <tr><td>{{ _('File size') }}
-	                        <td class="right">{{metadata.size}} {{ _('bytes') }}
+	                        <td class="right">{{metadata.size|int_thousands}} {{ _('bytes') }}
                     {% endif %}
 
                     {% if 1  or info.date %}
@@ -106,19 +106,19 @@ var gedcom = "{{ gedcom }}";
                     {% endif %}
 
 				    <tr><td>{{ _("Number of individuals") }}</td>
-				        <td class="right">{{ info.num_individuals }}</td></tr>
+				        <td class="right">{{ info.num_individuals | int_thousands }}</td></tr>
 				    <tr><td>{{ _("Number of families") }}</td>
-				        <td class="right">{{ info.num_families }}</td></tr>
+				        <td class="right">{{ info.num_families | int_thousands }}</td></tr>
 				    <tr><td>{{ _("Number of unique places") }}</td>
-				        <td class="right">{{ info.num_places }}</td></tr>
+				        <td class="right">{{ info.num_places | int_thousands }}</td></tr>
 				    <tr><td>{{ _("Number of notes") }}</td>
-				        <td class="right">{{ info.num_notes }}</td></tr>
+				        <td class="right">{{ info.num_notes | int_thousands }}</td></tr>
 				    <tr><td>{{ _("Number of citations") }}</td>
-				        <td class="right">{{ info.num_citations }}</td></tr>
+				        <td class="right">{{ info.num_citations | int_thousands }}</td></tr>
 				    <tr><td>{{ _("Number of sources") }}</td>
-				        <td class="right">{{ info.num_sources }}</td></tr>
+				        <td class="right">{{ info.num_sources | int_thousands }}</td></tr>
 				    <tr><td>{{ _("Number of repositories") }}</td>
-				        <td class="right">{{ info.num_repos }}</td></tr>
+				        <td class="right">{{ info.num_repos | int_thousands }}</td></tr>
 				    <tr><td>{{ _("Number of multimedia objects") }}</td>
 				        <td class="right">{{ info.num_multimedia }}</td></tr>
 			    </table>

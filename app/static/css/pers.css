@@ -210,6 +210,7 @@ li.itemrow {
 	margin-left: auto;
 	text-align: right;
 	}
+.nowrap { white-space: nowrap; }
 
 div.fullclear {
     clear: both;

@@ -24,12 +24,12 @@
                     <td>{{batch}}{% if time %}<br>
                     <small>{{ _('saved at') }} {{time}}</small>{% endif %}
                     </td> {% for label, cnt in label_nodes %}
-                    <td class="right">{{cnt}}</td> {% endfor %}
+                    <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor %}
                 </tr>
             </table>
-            <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total, user=user) }}</p>        
+            <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
 {% if total %}
-            <p>{{ _('Note. Pressing the button moves only a limited amount of data (for test only!).') }}        
+            <p>{{ _('<b>Note</b> (for test only!). Pressing the button moves only a limited amount of data.') }}        
                {{ _('If needed, press again to move the others.') }}</p>        
             <form action="/audit/movenow" method="post">
 	            <div class="submit">

@@ -214,6 +214,15 @@ def _jinja2_filter_datetime(datetime, fmt=None):
     except:
         return "Error"
 
+@shareds.app.template_filter('int_thousands')
+def _jinja2_filter_int_thousands(i):
+    """ Integer presented with space as thousands separator '1 000 000'. """
+    if isinstance(i, int):
+        return format(i, ",").replace(',',' ')
+    else:
+        return str(i)
+
+
 @shareds.app.template_filter('transl')
 def _jinja2_filter_translate(term, var_name):
     """ Given term is translated depending of var_name name.

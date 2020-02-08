@@ -136,7 +136,7 @@ table.transparent tbody tr td {
 					<td>{% if file.metadata.upload_time %} {% set date =
 						file.metadata.upload_time.split() %} {% set d = date[1].split('-')
 						%} {{d[2]}}.{{d[1]}}.{{d[0]}} {% endif %}</td>
-					<td class="right">{{ file.metadata.size }}</td>
+					<td class="right nowrap">{{ file.metadata.size|int_thousands }}</td>
 					<td colspan="4">{{ file.metadata.desc|escape }}</td>
 				</tr>
 				{% endfor %}

@@ -3,12 +3,15 @@
 {% block title %}{{ _("Auditions") }}{% endblock %}
 {% block body %}
     {{ super() }}
-   
+<style>
+tr.mytitle > th { color:gray; font-size: 95%; }
+</style>
+
   <h2>{{ _("Auditions and Amount of Objects") }}</h2>
   
   <div class="content">
     <p>
-        {{ _('Total <b>%(tot)s</b> objects', tot=total) }}
+        {{ _('Total <b>%(tot)s</b> objects', tot=total|int_thousands) }}
     </p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -22,23 +25,23 @@
     {% endwith %}
 
         <table>
-           <tr>
-                <th>{{ _("Researcher") }}</th>
-                <th>{{ _("Batch id") }}</th>
-{% for t in titles %}<th>{{t}}</th>{% endfor %}
-           </tr>
 {% set keys = batches.keys()|sort %}
 {% set ns = namespace(auditor='-') %}
 {% for key in keys %}
     {% set labels = batches[key] %}
-    {% set l = key.split('/') %}<!-- {{ auditor }} ? {{ l[0] }} -->
+    {% set l = key.split('/') %}
     {% if l[0] != ns.auditor %}{% set ns.auditor = l[0] %}
            <tr><th colspan="{{ titles|length + 2 }}"><i>{{ _("Auditor") }} {{ ns.auditor }}</i></th></tr>
+           <tr class="mytitle">
+                <th>{{ _("Researcher") }}</th>
+                <th>{{ _("Batch id") }}</th>
+        {% for t in titles %}<th>{{ _(t) }}</th>{% endfor %}
+           </tr>
 	{% endif %}
            <tr><td class="center">{{l[1]}}</td>
                <td><b>{{l[2]}}</b><br><small>{{l[3]}}</small></td>
     {% for t in titles %}
-	           <td class="right">{{ labels[t] }}</td>
+	           <td class="right nowrap">{{ labels[t] | int_thousands }}</td>
     {% endfor %}
 	       </tr>
 {% endfor %}
