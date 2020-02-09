@@ -7,7 +7,21 @@
 
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
+<style>
+td {
+    position: relative;
+}
+.progress {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	z-index: -1;
+}
+</style>
+
 <script>
+var PROGRESS_INTERVAL = 10000;
 var selected_batch_id = '';
 
 function selectFile(sel, batch_id, xml_name) {
@@ -37,6 +51,26 @@ function selectFile(sel, batch_id, xml_name) {
 	        buttons[i].disabled = true;
     }
 };
+
+function update_progress(xmlfile) {
+	// see http://jsfiddle.net/kedctfmj/3/
+	$.get("get_progress/" + encodeURIComponent(xmlfile), (rsp) => {
+		var progress_div = $("td div.progress[data-name='"+xmlfile+"']");
+		var batch_id_column = progress_div.parent().prev().prev();
+		progress_div.css("background","lightgreen");
+		if (rsp.progress == 0) rsp.progress = 1;
+		progress_div.get(0).style.width = rsp.progress + "%";
+		if (rsp.status == "loading") 
+			setTimeout(function() {update_progress(xmlfile)}, PROGRESS_INTERVAL);
+		else
+			if (rsp.status == "done") {
+				progress_div.parent().text('{{ _("STORED") }}');
+				batch_id_column.text(rsp.batch_id);
+			}
+			else
+				progress_div.parent().text('{{ _("ERROR") }}');
+	});
+}
 
 $(document).ready( function() {
 
@@ -166,11 +200,12 @@ function confirm_delete(subj, name) {
                 {% endif %}</td>
                <td class="center">{% if upload.count %}{{upload.count}}{% endif %}</td>
 	           <td>{{upload.status}}
+	           		<div class="progress" data-name='{{upload.xmlname}}'></div>
                 
                 {% if upload.loading %}
-                    <a href="javascript:window.location.href=window.location.href"
-                     title="{{ _('See if ready') }}"
-                     style="text-decoration: none;font-weight: bold;font-size: large;">↻</a>
+                     <script>
+	                     setTimeout( function() {update_progress('{{upload.xmlname}}')}, 1000 );
+                     </script>
                 {% endif %}
 	           </td>
 	       </tr>

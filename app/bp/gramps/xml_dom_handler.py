@@ -6,10 +6,12 @@ Extracted from gramps_loader.py on 2.12.2018
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
+from collections import defaultdict
 import logging
+import re
 import time
 import xml.dom.minidom
-import re
+
 from flask_babelex import _
 
 from .models.person_gramps import Person_gramps
@@ -29,6 +31,7 @@ from models.gen.citation import Citation
 from models.gen.repository import Repository
 
 from models import dataupdater
+import threading
 
 
 def pick_url(src):
@@ -100,6 +103,7 @@ class DOM_handler():
         self.family_ids = []                # List of processed Family node unique id's
         self.tx = None                      # Transaction not opened
         self.batch_id = None
+        self.progress = defaultdict(int)    # key=object type, value=count of objects processed
 
     def begin_tx(self, session):
         self.tx = session.begin_transaction()
@@ -162,6 +166,10 @@ class DOM_handler():
         e.save(self.tx, **kwargs)
         self.handle_to_node[e.handle] = self.dbKeys(e.uuid, e.uniq_id)
         #print(f'# {e.__class__.__name__} [{e.handle}] --> {self.handle_to_node[e.handle]}')
+        #self.blog.add(self.tx)
+        self.progress[e.__class__.__name__] += 1
+        this_thread = threading.current_thread()
+        this_thread.progress = dict(self.progress)
 
    
     # ---------------------   XML subtree handlers   --------------------------

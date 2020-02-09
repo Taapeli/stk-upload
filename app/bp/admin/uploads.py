@@ -89,6 +89,9 @@ def set_meta(username,filename,**kwargs):
     upload_folder = get_upload_folder(username) 
     name = "{}.meta".format(filename)
     metaname = os.path.join(upload_folder,name)
+    update_metafile(metaname,**kwargs)
+
+def update_metafile(metaname,**kwargs):
     try:
         meta = eval(open(metaname).read())
     except FileNotFoundError:
@@ -100,6 +103,11 @@ def get_meta(metaname):
     ''' Reads status information from .meta file '''
     try:
         meta = eval(open(metaname).read())
+        status= meta.get("status")
+        if status == STATUS_LOADING:
+            stat = os.stat(metaname)
+            if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
+                meta["status"] = STATUS_ERROR
     except FileNotFoundError:
         meta = {}
     return meta
@@ -107,7 +115,8 @@ def get_meta(metaname):
 def i_am_alive(metaname,parent_thread):
     ''' Checks, if backgroud thread is still alive '''
     while os.path.exists(metaname) and parent_thread.is_alive():
-        Path(metaname).touch()
+        update_metafile(metaname,
+                        progress=parent_thread.progress)
         time.sleep(10)
 
 def background_load_to_neo4j(username,filename):
@@ -121,6 +130,9 @@ def background_load_to_neo4j(username,filename):
         os.makedirs(upload_folder, exist_ok=True)
         set_meta(username,filename,status=STATUS_LOADING)
         this_thread = threading.current_thread()
+        this_thread.progress = {}
+        counts = gramps_loader.analyze_xml(username, filename)
+        update_metafile(metaname,counts=counts)
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
         steps,batch_id = gramps_loader.xml_to_neo4j(pathname,username)
         set_meta(username,filename,batch_id=batch_id)
@@ -205,7 +217,6 @@ def list_uploads(username):
     for name in names:
         if name.endswith(".meta"):
             fname = os.path.join(upload_folder,name)
-            stat = os.stat(fname)
             xmlname = name.rsplit(".",maxsplit=1)[0]
             meta = get_meta(fname)
             status = meta["status"]
@@ -215,16 +226,15 @@ def list_uploads(username):
             if status == STATUS_UPLOADED:
                 status_text = _("UPLOADED")
             elif status == STATUS_LOADING:
-                if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
-                    status_text = _("ERROR")
-                else:
-                    status_text = _("STORING") 
+                status_text = _("STORING") 
             elif status == STATUS_DONE:
                 status_text = _("STORED")
                 if 'batch_id' in meta:
                     batch_id = meta['batch_id']
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
+            elif status == STATUS_ERROR:
+                status_text = _("ERROR")
             elif status == STATUS_REMOVED:
                 status_text = _("REMOVED")
 
