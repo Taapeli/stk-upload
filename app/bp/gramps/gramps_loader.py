@@ -24,7 +24,7 @@ def get_upload_folder(username):
     ''' Returns upload directory for given user'''
     return os.path.join("uploads", username)
 
-def analyze(username, filename):
+def analyze_xml(username, filename):
     # Read the xml file
     upload_folder = get_upload_folder(username) 
     pathname = os.path.join(upload_folder,filename)
@@ -35,8 +35,6 @@ def analyze(username, filename):
 
     ''' Get XML DOM parser and start DOM elements handler transaction '''
     handler = DOM_handler(file_cleaned, username)
-    
-    text = []
     
     citation_source_cnt = 0
     event_citation_cnt = 0
@@ -121,9 +119,37 @@ def analyze(username, filename):
         for source in sources:
             source_repository_cnt += len(source.getElementsByTagName('reporef') )
 
+    counts = {}
+    for name,value in locals().items():
+        if name.endswith("_cnt"):
+            counts[name] = value
+    counts["e_total"] = e_total
+    return counts
                     
 
+def analyze(username, filename):
+    values = analyze_xml(username, filename)
 
+    text = []
+    citation_cnt = values["citation_cnt"]
+    citation_source_cnt = values["citation_source_cnt"]
+    event_cnt = values["event_cnt"]
+    event_citation_cnt = values["event_citation_cnt"]
+    event_no_citation_cnt = values["event_no_citation_cnt"]
+    family_cnt = values["family_cnt"]
+    family_citation_cnt = values["family_citation_cnt"]
+    note_cnt = values["note_cnt"]
+    object_cnt = values["object_cnt"]
+    object_citation_cnt = values["object_citation_cnt"]
+    person_cnt = values["person_cnt"]
+    person_citation_cnt = values["person_citation_cnt"]
+    place_cnt = values["place_cnt"]
+    place_citation_cnt = values["place_citation_cnt"]
+    repository_cnt = values["repository_cnt"]
+    source_cnt = values["source_cnt"]
+    source_repository_cnt = values["source_repository_cnt"]
+    e_total = values["e_total"]
+    
     text.append(" ")
     text.append("Statistics of the xml file:")
     text.append(str(citation_cnt) + " Citations, which have references to: " + 
