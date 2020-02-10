@@ -9,6 +9,7 @@ from flask import send_file
 from bp.scene.models import media
 logger = logging.getLogger('stkserver')
 import time
+from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
@@ -16,7 +17,7 @@ from flask_security import current_user, login_required, roles_accepted
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
-from bp.scene.scene_reader import get_a_person_for_display_apoc
+#from bp.scene.scene_reader import get_a_person_for_display_apoc
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
 from models.gen.place_combo import Place_combo
@@ -24,13 +25,16 @@ from models.gen.source import Source
 from models.gen.media import Media
 
 from models.datareader import read_persons_with_events
-from models.datareader import get_person_data_by_id # -- vanhempi versio ---
+#from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_event_participants
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.owner import OwnerFilter
 
+LAST_YEAR_ALLOWED=datetime.now().year - 120
+
 # Narrative start page
+
 @bp.route('/scene',  methods=['GET', 'POST'])
 def scene():
     """ Home page for scene narrative pages ('kertova') for anonymous. """    
@@ -57,7 +61,9 @@ def show_person_list(selection=None):
             logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
             return render_template("/scene/persons.html", persons=persons, menuno=0,
-                                   name=name, rule=keys, elapsed=time.time()-t0)
+                                   name=name, rule=keys, 
+                                   last_year_allowed=LAST_YEAR_ALLOWED, 
+                                   elapsed=time.time()-t0)
         except Exception as e:
             logger.info("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
@@ -185,7 +191,7 @@ def obsolete_show_person_v2(uid=None):
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin', 'guest')
-def     show_person_v3(uid=None):
+def     show_person(uid=None):
     """ One Person with all connected nodes - NEW version 3.
 
         Arguments:
@@ -194,8 +200,8 @@ def     show_person_v3(uid=None):
     """
     t0 = time.time()
     uid = request.args.get('uuid', uid)
-    if not uid:
-        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
+#     if not uid:
+#         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
 
     dbg = request.args.get('debug', None)
     if current_user.is_authenticated:
@@ -204,7 +210,7 @@ def     show_person_v3(uid=None):
         use_common = (ofilter == 1)
     else:
         user=None
-    logger.info("-> bp.scene.routes.show_person_v3")
+    logger.info("-> bp.scene.routes.show_person")
     
     # v3 Person page
     person, objs, jscode = get_person_full_data(uid, user, use_common)
@@ -213,7 +219,7 @@ def     show_person_v3(uid=None):
 
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=person.root,
-                           elapsed=time.time()-t0)
+                           last_year_allowed=LAST_YEAR_ALLOWED, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/uuid=<pid>')

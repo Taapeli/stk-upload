@@ -29,12 +29,14 @@ class Cypher_person():
     Cypher clases for creating and accessing Places
     '''
 # For Person_pg v3
-    get_by_user = """
-MATCH (b:UserProfile {username:$user}) -[:HAS_LOADED]-> (batch:Batch)
-       -[:OWNS]-> (p:Person {uuid:$uuid})
-RETURN p, batch"""
-    get_public = """MATCH (root) -[:PASSED]-> (p:Person {uuid:$uuid}) 
-RETURN p, root"""
+    get_person = """MATCH (root) -[r:OWNS|PASSED]-> (p:Person {uuid:$uuid}) 
+RETURN p, type(r) AS root_type, root"""
+#     get_by_user = """
+# MATCH (b:UserProfile {username:$user}) -[:HAS_LOADED]-> (batch:Batch)
+#        -[:OWNS]-> (p:Person {uuid:$uuid})
+# RETURN p, batch"""
+#     get_public = """MATCH (root) -[:PASSED]-> (p:Person {uuid:$uuid}) 
+# RETURN p, root"""
     get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
 RETURN rel, x ORDER BY x.order"""
@@ -156,10 +158,12 @@ ORDER BY TOUPPER(name.surname), name.firstname limit 20"""
 
 # Ver 0.1 different person lists
     _get_events_tail = """
+ OPTIONAL MATCH (batch:Batch) -[:OWNS]-> (person)
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-RETURN person, COLLECT(DISTINCT name) as names,
+RETURN batch.user AS user, person, 
+    COLLECT(DISTINCT name) AS names,
     COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [r.role, event, place.pname]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 

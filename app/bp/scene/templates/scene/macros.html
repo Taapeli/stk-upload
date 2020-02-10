@@ -172,6 +172,18 @@
     {% endfor %}
 {%- endmacro %}
 
+{% macro lifetimes(p) -%}
+    {# Displays Person's life time estimates '1662/1709 — 1726/1819' #}
+    {% if p.latest_possible_death_year != 9999 %}
+	    {% if p.earliest_possible_birth_year != p.latest_possible_birth_year %}
+	        {{p.earliest_possible_birth_year}}/{% endif 
+	    %}{{p.latest_possible_birth_year}} &ndash; {{p.earliest_possible_death_year}}{%
+	     if p.earliest_possible_death_year != p.latest_possible_death_year 
+	     %}/{{p.latest_possible_death_year}}
+	     {% endif %}
+	{% endif %}
+{%- endmacro %}
+
 {% macro citation_link(cit_list, obj) -%}
     {# Creates template <sup>citation link</sup> for each citation.
        - cit_list   list of citation uniq_ids

@@ -101,6 +101,7 @@ class Person_combo(Person):
         # For embadded or referenced child objects, displaying Person page
         # @see Plan bp.scene.data_reader.connect_object_as_leaf
 
+        self.user = None                # Researcher batch owner, if any
         self.names = []                 # models.gen.person_name.Name
 
         self.events = []                # models.gen.event_combo.Event_combo
@@ -110,10 +111,8 @@ class Person_combo(Person):
         self.event_death = None
 
         self.citation_ref = []          # models.gen.citation.Citation
-        #remove: self.citations = []
         self.note_ref = []              # uniq_id of models.gen.note.Note
         self.notes = []                 # 
-        #remove: self.noteref_hlink = []
         self.media_ref = []             # uniq_ids of models.gen.media.Media
                                         # (previous self.objref_hlink[])
 
@@ -127,33 +126,49 @@ class Person_combo(Person):
     @staticmethod
     def get_my_person(session, uuid, user, use_common):
         ''' Read a person from common data or user's own Batch.
+
+            -   If you have selected to use common approved data, you can read
+                both your own and passed data.
+
+            -   If you havn't delected common data, you can read 
+                only your own data.
         '''
         try:
-            if use_common or user == 'guest':
-                # Select person from public database
-                root_type = "PASSED"
-                record = session.run(Cypher_person.get_public,
-                                     uuid=uuid).single()
-            else:
-                # Select person owned by user
-                root_type = "OWNS"
-                record = session.run(Cypher_person.get_by_user,
-                                     uuid=uuid, user=user).single()
+            record = session.run(Cypher_person.get_person, uuid=uuid).single()
+            # <Record 
+            #    p=<Node id=434495 labels={'Person'} properties={'sortname': '#Valborg#Matintytär', 
+            #        'earliest_possible_death_year': 1726, 'confidence': '', 'sex': 2, 'change': 1489929214, 
+            #        'latest_possible_birth_year': 1709, 'latest_possible_death_year': 1819, 'id': 'I0208', 
+            #        'uuid': 'a698ebcee0a84c78bfeeaeaff1736c00', 'earliest_possible_birth_year': 1662}> 
+            #    root_type='OWNS' 
+            #    root=<Node id=436587 labels={'Batch'} properties={'mediapath': '/home/jm/Mäkeläiset_2017-11-07.gpkg.media', 
+            #        'file': 'uploads/juha/Silius_esivanhemmat_clean.xml', 'id': '2020-02-05.001', 'user': 'juha', 
+            #        'timestamp': 1580913105068, 'status': 'completed'}>
+            # >
             if record is None:
                 raise LookupError(f"Person {uuid} not found.")
-            node = record[0]
+            root_type = record['root_type']
+            if use_common or user == 'guest':
+                # Select person from public database
+                if root_type == "OWN":
+                    raise LookupError("Person {uuid} not allowed.")
+            else:
+                # Select the person only if owned by user
+                if root_type == "PASSED":
+                    pass    # Allow reading on passed persons, too (?)
+            node = record['p']
             p = Person_combo.from_node(node)
-            # <Node id=259641 labels={'Audit'} 
+            # p = <Node id=259641 labels={'Audit'} 
             #    properties={'id': '2020-01-03.001', 'user': 'jpek',
             #        'auditor': 'admin_user', 'timestamp': 1578418320006}>
-            node = record[1]
-            user = node.get('user', "")
+            node = record['root']
+            nodeuser = node.get('user', "")
             bid = node.get('id', "")
-            p.root = (root_type, user, bid)
+            p.root = (root_type, nodeuser, bid)
             return p
 
         except Exception as e:
-            print(f"Could not read person {uuid}: {e}")
+            print(f"Could not read person: {e}")
             return None
 
 
@@ -689,7 +704,8 @@ RETURN person, name
 
     @staticmethod
     def get_person_combos (keys, args={}): #, currentuser, take_refnames=False, order=0):
-        """ Read Persons with Names, Events, Refnames (reference names) and Places.
+        """ Read Persons with Names, Events, Refnames (reference names) and Places
+            and Researcher's username.
         
             Version 0.1
             Called from models.datareader.read_persons_with_events

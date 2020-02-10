@@ -60,6 +60,7 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
     for record in result:
         '''
         # <Record
+            user=None,
             person=<Node id=80307 labels={'Person'}
                 properties={'id': 'I0119', 'confidence': '2.5', 'sex': '1',
                      'change': 1507492602, 'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
@@ -90,7 +91,9 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
                 if 'initial' in record and record['initial']:
                     pname.initial = record['initial']
                 p.names.append(pname)
-
+        # Eventuel Researcher or blank
+        p.user = record.get('user')
+        
         # Events
 
         for role, event, place in record['events']:

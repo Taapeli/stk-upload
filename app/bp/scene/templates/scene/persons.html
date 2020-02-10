@@ -15,7 +15,7 @@
 	{% endif %}
 	<!-- Rule = {{rule}} for {{cnt}} persons -->
 	
-	<p><small>– Kaikki data, ei huomioida aineiston omistajaa</small></p>
+	<p><small style="color:red">– Kaikki data, ei huomioida aineiston omistajaa</small></p>
 </div>
 
 {{ macro.menu(menuno) }}
@@ -108,44 +108,51 @@
 		<table class="IndividualList">
 			<thead>
 				<tr><th></th>
-					<th>{{ _('Person') }}</th>
+                    <th>{{ _('Owner') }}</th>
+                    <th>{{ _('Person') }}</th>
                     <th>{{ _("Person's events") }}</th>
-                    <!-- th>{{ _('Family Events') }}</th -->
 				</tr>
 			</thead>
 			<tbody>
 	    {% for p in persons %}
+	        {% set nohide = ( p.latest_possible_death_year < last_year_allowed ) %}
 	            <tr><td class="ColumnAlpha">
 					{% set ini = p.names[0].initial|upper %}
                     {% if loop.changed(ini) %}
 		               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
 					{% endif %}
 					</td>
+					
+					<td style="text-align:center;">{% if p.user %}{{p.user}}{% endif %}
+					</td>
 
 	                <td class="ColumnPerson"><div>
 	                   <a href="/scene/person?uuid={{p.uuid}}"
 	                     title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
+	        {% if nohide %}
 		               {{p.names[0].firstname}} 
 		               {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
 		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
-		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}
-		               <small class="idno">[{{ p.uuid_short() }}</small>
+		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}</a>
+		               <small class="idno">[{{ p.uuid_short() }}]</small>
 		               {% if p.refnames %}
 		               <br><small class="refname" title="{{ _('Reference names') }}">
-		                  {{ _('Keywords') }}: {{p.refnames}}
+		                  {{ _('Keywords') }}: {{p.refnames}}</small>
 		               {% endif %}
+            {% else %}<i style="color:darkred;">N.N. ({{ _('privacy protected') }})</i></a>{% endif %} 
+	                    <br><small style="color:olive">
+	                       {{ macro.lifetimes(p) }}
+	                     </small>
 	                </div></td>
 
 	              <td class="ColumnEvent">
-	        {% if p.events %}<ul>{% for e in p.events|sort(attribute='dates') %}
+            {% if nohide and p.events %}<ul>
+                {% for e in p.events|sort(attribute='dates') %}
 		              <li><i>{{e.type|transl('evt')}}</i> {{e.description}}
 		              {% if e.dates %}{{e.dates}} {% endif %}
 		              {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
 	        {% endif %}
-	              </td><!-- Perheen tapahtumat tähän?
-                  <td class="ColumnEvent">
-                  </td> -->
 	           </tr>
 	    {% endfor %}
 				</tr>
