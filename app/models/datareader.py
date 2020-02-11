@@ -283,7 +283,7 @@ def get_repositories(uniq_id=None):
     │        │        │        │        │        │       │"]]     │        │
     └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
     """
-    titles = ['change', 'handle', 'id', 'rname', 'type', 'uniq_id', 'notes', 'sources']
+    titles = ['change', 'uniq_id', 'id', 'rname', 'type', 'sources', 'notes']
     repositories = []
     result = Repository.get_w_source(uniq_id)
     for record in result:
@@ -295,7 +295,7 @@ def get_repositories(uniq_id=None):
         r.uniq_id = record['uniq_id']
         r.rname = record['rname'] or ''
         r.change = record['change']
-        r.handle = record['handle']
+        #r.handle = record['handle']
         r.type = record['type'] or ''
         r.id = record['id'] or ''
         for node in record['notes']:

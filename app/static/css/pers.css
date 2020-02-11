@@ -332,6 +332,10 @@ a.navlink:hover, a.navlink:active {
   background-color: gray;
 }
 
+.gedcom_id { color: sienna; text-align: right; 
+    font-family: monospace
+}
+
 div.content {
 	margin: 2em;
 }

@@ -535,9 +535,11 @@ ORDER BY names[0].name LIMIT $limit"""
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE ID(place)=$place_id
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
+OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
 RETURN place, 
     COLLECT(DISTINCT n) AS names,
-    COLLECT (DISTINCT note) AS notes"""
+    COLLECT (DISTINCT note) AS notes,
+    COLLECT (DISTINCT media) AS medias"""
 
     get_w_names_notes_uuid = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)

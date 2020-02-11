@@ -74,7 +74,13 @@ u { color: DarkKhaki; text-decoration: none; }
                 </tr>
                <tr>
                     <td class="ColumnAttribute">{{ _("Age at death") }}</td>
-                    <td class="ColumnValue">{{ _('at least') }}
+                    <td class="ColumnValue">
+            {% if person.latest_possible_death_year != person.earliest_possible_death_year or
+                  person.latest_possible_birth_year != person.earliest_possible_birth_year %}
+                        {{ _('at least') }}
+            {% else %}
+                        {{ _('about') }}
+            {% endif %}
                         {{person.earliest_possible_death_year - person.latest_possible_birth_year}}
                         {{ _('years') }}
                     </td>

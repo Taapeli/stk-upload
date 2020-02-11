@@ -29,7 +29,7 @@ td {vertical-align: top;}
         {% set ecnt = p.events|count %}{% if ecnt %}{% else %}{% set ecnt = 1 %}{% endif %}
         {% set tr_tag = "" %}
             <tr>
-                <td rowspan="{{ecnt}}">
+                <td rowspan="{{ecnt}}"><small class="gedcom_id">{{ p.id }}</small><br>
                     <a href="/scene/person?uuid={{p.uuid}}">{{ p.uuid_short() }}</a>
                     <small>(<a href="/pick/uniq_id={{p.uniq_id}}" style="text-decoration: none;">{{p.uniq_id}}</a>)</small>
                 </td>

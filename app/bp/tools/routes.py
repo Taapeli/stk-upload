@@ -158,6 +158,7 @@ def compare_person_page(cond):
     """
     key, value = cond.split('=')
     uniq_id_1, uniq_id_2 = value.split(',')
+    print(f"-> bp.tools.routes.compare_person_page {cond}")
     try:
         if key == 'uniq_id':
             person, events, photos, sources, families = \
