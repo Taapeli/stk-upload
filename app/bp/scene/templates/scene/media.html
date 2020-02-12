@@ -77,7 +77,8 @@ p {margin-left:15px;}
 	<div class="pic_container">
         <div class="pic">
             <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
-            	<img alt="picture {{media.description}}" src="{{media.src | safe }}" 
+            	<img alt="picture {{media.description}}" 
+            		 src="/scene/media/{{media.name}}?id={{media.uuid}}" 
                  	 title="key = {{media.uuid_str()}}"/></a>
         </div>
 	</div>
