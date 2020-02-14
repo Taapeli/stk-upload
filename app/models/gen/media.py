@@ -120,30 +120,45 @@ class Media(NodeObject):
         """
         if oid:
             with shareds.driver.session() as session:
-                if isinstance(oid, int):
-                    # User uniq_id
-                    record, record2 = session.run(Cypher_media.get_by_uniq_id,
-                                         rid=oid).single()
-                else:
-                    # Use UUID
-                    record, record2 = session.run(Cypher_media.get_by_uuid,
-                                         rid=oid).single()
+#                 if isinstance(oid, int):
+#                     # User uniq_id
+#                     record, record2 = session.run(Cypher_media.get_by_uniq_id,
+#                                          rid=oid).single()
+#                 else:
+                # Use UUID
+                record, record2 = session.run(Cypher_media.get_by_uuid,
+                                              rid=oid).single()
 
                 if record:
+                    # <Node id=435174 labels={'Media'}
+                    #    properties={'src': 'Albumi-Silius/kuva002.jpg', 'batch_id': '2020-02-14.001',
+                    #        'mime': 'image/jpeg', 'change': 1574187478, 'description': 'kuva002',
+                    #        'id': 'O0024', 'uuid': 'fa2e240493434912986c2540b52a9464'}>
                     media = Media.from_node(record)
                     media.ref = []
-                    for node in record2:
-                        node_label = str(node._labels)
-                        if 'Person' in node_label:
-                            p = Person.from_node(node)
-                            p_type = 'Person'
-                            data = [p_type,p]
-                            media.ref.append(data)
-                        elif 'Place' in node_label:
-                            p = Place.from_node(node)
-                            p_type = 'Place'
-                            data = [p_type,p]
-                            media.ref.append(data)
+                    for node, prop in record2:
+                        # node = <Node id=435368 labels={'Person'}
+                        #    properties={'sortname': 'Silius#Carl Gustaf#', ...}>
+                        # ref = {'order': 1, 'right': 100, 'left': 0, 'lower': 96, 'upper': 15}
+                        label, = node.labels   # Get the 1st label
+                        if label == 'Person':
+                            obj = Person.from_node(node)
+                        elif label == 'Place':
+                            obj = Place.from_node(node)
+                        else:
+                            obj = None
+                        # Has the relation cropping properties?
+                        left = prop.get('left')
+                        if left != None:
+                            upper = prop.get('upper')
+                            right = prop.get('right')
+                            lower = prop.get('lower')
+                            crop = (left, upper, right, lower)
+                        else:
+                            crop = None
+
+                        # A list [object label, object, relation properties]
+                        media.ref.append([label,obj,crop])
                     return (media)
         return None
 

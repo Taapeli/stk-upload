@@ -15,9 +15,9 @@ p {margin-left:15px;}
 }
 .pic_container {
   width: 100%;
-  padding-top: 100%; /* 1:1 Aspect Ratio */
+  /*padding-top: 100%; /* 1:1 Aspect Ratio */
   position: relative;
-  border: 2px solid brown;
+  /* border: 2px solid brown; */
 }
 .pic {
   position: absolute;
@@ -25,6 +25,10 @@ p {margin-left:15px;}
   left: 0;
   bottom: 0;
   right: 0;
+}
+.pic > img {
+  max-width: 100%;
+  max-height: 100%;
 }
 </style>
 
@@ -57,16 +61,20 @@ p {margin-left:15px;}
 		
 	    {% if media.ref %}
 	    <ul>
-		    {% for p in media.ref %}
-		    	{% if p[0] == 'Person' %}
-		    		<li><a href="/scene/person?uuid={{p[1].uuid}}"
-			               title="{{ _('see details of person %(id)s', id=p[1].uuid_short()) }} (nr={{p[1].uniq_id}})">
-			               {{p[1].sortname}}</a>
-			    {% elif p[0] == 'Place' %}
-		    		<li><a href="/scene/location/uuid={{p[1].uuid}}"
-			               title="{{ _('see details of place %(id)s', id=p[1].uuid_short()) }} (nr={{p[1].uniq_id}})">
-			               {{p[1].pname}}</a>
+		    {% for label,obj,crop in media.ref %}
+		      <li>{{ _(label) }}:
+		    	{% if label == 'Person' %}
+		    		<a href="/scene/person?uuid={{obj.uuid}}"
+			               title="{{ _('see details of person %(id)s', id=obj.uuid_short()) }} (nr={{obj.uniq_id}})">
+			               {{obj.sortname}}</a>
+			    {% elif label == 'Place' %}
+		    		<a href="/scene/location/uuid={{obj.uuid}}"
+			               title="{{ _('see details of place %(id)s', id=obj.uuid_short()) }} (nr={{obj.uniq_id}})">
+			               {{obj.pname}}</a>
+			    {% else %}{{obj.id}}
 			    {% endif %}
+			    {% if crop %}{{ _('with cropping') }}: {{crop}}{% endif %}
+			  </li>
 		    {% endfor %}
 		</ul>
 	    {% else %}
@@ -76,10 +84,9 @@ p {margin-left:15px;}
 
 	<div class="pic_container">
         <div class="pic">
-            <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
             	<img alt="picture {{media.description}}" 
             		 src="/scene/media/{{media.name}}?id={{media.uuid}}" 
-                 	 title="key = {{media.uuid_str()}}"/></a>
+                 	 title="key = {{media.uuid_str()}}"/>
         </div>
 	</div>
   </div>

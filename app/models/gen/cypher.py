@@ -730,20 +730,15 @@ return r order by r.type"""
 
 class Cypher_media():
 
-    get_by_uuid = """
-MATCH (obj:Media)
-    WHERE obj.uuid = $rid
-RETURN obj"""
-
-    get_by_uniq_id = """
-MATCH (obj:Media)
-    WHERE ID(obj) = $rid
-RETURN obj"""
+#     get_by_uniq_id = """
+# MATCH (obj:Media)
+#     WHERE ID(obj) = $rid
+# RETURN obj"""
 
     get_by_uuid = """
 MATCH (obj:Media) <-[r:MEDIA] - (n) 
     WHERE obj.uuid = $rid
-RETURN obj, COLLECT(n)"""
+RETURN obj, COLLECT([n, properties(r)]) as ref"""
 
     get_all = "MATCH (o:Media) RETURN o"
 
