@@ -135,13 +135,15 @@ def background_load_to_neo4j(username,filename):
         update_metafile(metaname,counts=counts)
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
         steps,batch_id = gramps_loader.xml_to_neo4j(pathname,username)
-        set_meta(username,filename,batch_id=batch_id)
         for step in steps:
             print(step)
         if not batch_id:
             raise RuntimeError("Run Failed, missing batch_id")
 
-        set_meta(username,filename,status=STATUS_DONE)
+        if os.path.exists(metaname): 
+            set_meta(username,filename,
+                     batch_id=batch_id,
+                     status=STATUS_DONE)
         msg = "{}:\nStored the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
         msg += "\nBatch id: {}".format(batch_id)
         msg += "\nLog file: {}".format(logname)
