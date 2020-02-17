@@ -8,7 +8,9 @@
 <style>
 h3 {margin-top: 1em;}
 p {margin-left:15px;}
-#flex {display: flex; height:75vh;}
+#flex {display: flex; /*height:75vh;*/
+    flex-wrap: wrap;
+}
 #flex > div {
     margin:.5em; padding: 1em;
     width: 45%; min-height: 60%;
@@ -30,7 +32,8 @@ p {margin-left:15px;}
   max-width: 100%;
   max-height: 100%;
 }
-tr > td {vertical-align: middle;}
+td.value {width:100%;}
+/* tr > td {vertical-align: middle;} */
 tr > td > img {
     margin: 0.5em;
     vertical-align: middle;
@@ -41,7 +44,7 @@ tr > td > img {
   <h2>{{ _('Media data') }}</h2>
 </div>
 
-{{ macro.menu(6) }}
+{{ macro.menu(menuno) }}
 <div class="content" id="IndividualDetail">
 
 {% if media %}
@@ -50,7 +53,7 @@ tr > td > img {
   <div id="flex">
 
     <div>
-		<h3>{{ media.description }}</h3>
+		<h3>{{ _("Picture") }} <i>{{ media.description }}</i></h3>
 
         <div id="summaryarea">
             <table>
@@ -58,15 +61,18 @@ tr > td > img {
                     <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
                     <td class="ColumnValue">{{macro.all_obj_ids(media)}}</td>
                 </tr>
-	            <tr><td>{{ _('Thumbnail') }}</td>
-	               <td><img alt="({{ _('Thumbnail') }})" align="left"
+	            <tr><td><br>{{ _('Thumbnail') }}</td>
+	               <td class="value"><img alt="({{ _('Thumbnail') }})" align="left"
                      src="/scene/thumbnail?id={{media.uuid}}" 
                      title="key = {{media.uuid_str()}}"/>
+                     <p style="nowrap;">{{ _("Size") }} {{size[0]}} x {{size[1]}} px
+                     <br>&rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
+                            {{ _('Show fullscreen') }}</a>
+                     </p>
                    </td>
                </tr>
                <tr><td></td>
-                   <td>▸ <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
-                            {{ _('Show fullscreen') }}</a>
+                   <td>
                    </td>
 	            </tr>
 	        </table>
@@ -88,7 +94,11 @@ tr > td > img {
 			               {{obj.pname}}</a>
 			    {% else %}{{obj.id}}
 			    {% endif %}</i>
-			    {% if crop %}{{ _('with cropping') }}: {{crop}}{% endif %}
+			    {% if crop %}{{ _('cropped') }}<br>{% set cr_str = ( crop|join(',') ) %}
+			         <img alt="({{ _('Thumbnail') }})"
+                        src="/scene/media/kuva2?id={{media.uuid}}&crop={{cr_str}}" 
+                        title="{{crop}} %"/>
+			    {% endif %}
 			  </li>
 		    {% endfor %}
 		</ul>
@@ -104,6 +114,7 @@ tr > td > img {
                  	 title="key = {{media.uuid_str()}}"/>
         </div>
 	</div>
+	<div class="fullclear"></div>
   </div>
 {% endif %}
 </div>

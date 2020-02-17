@@ -4,8 +4,9 @@ Created on 12.8.2018
 @author: jm
 '''
 import logging 
+import io
 #import os
-from flask import send_file
+from flask import send_file, Response
 from bp.scene.models import media
 logger = logging.getLogger('stkserver')
 import time
@@ -454,22 +455,43 @@ def show_media(uid=None):
         return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
     
     try:
-        media = Media.get_one(uid)
+        mediaobj = Media.get_one(uid)
+        fullname, _mimetype = media.get_fullname(mediaobj.uuid)
+        size = media.get_image_size(fullname)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     logger.info("-> bp.scene.routes.show_media")
-    return render_template("/scene/media.html", media=media, menuno=6)
+    return render_template("/scene/media.html", media=mediaobj, size=size, menuno=6)
 
 
 @bp.route('/scene/media/<fname>')
 def fetch_media(fname):
-    """ Fetch media file, assumes jpg, fix later...
+    """ Fetch media file, full size of cropped. 
+    
+        Arguments examples:
+            id    id=63995268bd2348aeb6c70b5259f6743f   uuid of Media
+            crop  crop=150,200,600,600                  pixel coordinates as %
+                                                        (left,upper,right,lower)
+    
+        #TODO. Assumes jpg. Accept other file formats
     """
     uuid = request.args.get("id")
+    crop = request.args.get("crop")
+    # show_thumb for cropped image only
+    show_thumb = request.args.get("full", "0") == "0"
     fullname, mimetype = media.get_fullname(uuid)
-    logger.info("-> bp.scene.routes.fetch_media")
-    return send_file(fullname, mimetype=mimetype)        
+    if crop:
+        # crop dimensions are diescribed as % of width and height
+        image = media.get_cropped_image(fullname, crop, show_thumb)
+        logger.info("-> bp.scene.routes.fetch_media cropped png")
+        # Create a png image in memery and display it
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        return Response(buffer.getvalue(), mimetype='image/png')
+    else:
+        logger.info("-> bp.scene.routes.fetch_media")
+        return send_file(fullname, mimetype=mimetype)        
 
 @bp.route('/scene/thumbnail')
 def fetch_thumbnail():
@@ -483,8 +505,9 @@ def fetch_thumbnail():
     try:
         ret = send_file(thumbname, mimetype=mimetype)
         return ret
-    except FileNotFoundError as e:
-        print("#TODO: /scene/thumbnail should use a default pic for missing image")
-        logger.info(f"-> bp.scene.routes.fetch_thumbnail: {e}")
-        return None
+    except FileNotFoundError:
+        # Show default image
+        ret = send_file(url_for('static', filename='noone.jpg'), mimetype=mimetype)
+        logger.warning(f"-> bp.scene.routes.fetch_thumbnail: missing {thumbname}")
+        return ret
         

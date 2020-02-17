@@ -204,7 +204,6 @@ MATCH (n:Audition)
     SET n:Audit
     REMOVE n:Audition
 RETURN count(n)'''
-        
 
         with shareds.driver.session() as session: 
             try:
@@ -212,19 +211,34 @@ RETURN count(n)'''
                 cnt1 = result.single()[0]
                 result = session.run(change_Audition_to_Audit)
                 cnt2 = result.single()[0]
-#                 result = session.run(change_userName_to_username)
-#                 cnt2 = result.single()[0]
-#                 result = session.run(change_Repocitory_to_Repository)
-#                 cnt3 = result.single()[0]
-#                 result = session.run(change_Family_dates)
-#                 cnt4 = result.single()[0]
-#                 result = session.run(change_wrong_supplemented_direction)
-#                 cnt5 = result.single()[0]
                 print(f"adminDB.do_schema_fixes: fixed {cnt1} Root labels, {cnt2} Audition labels")
-    
             except Exception as e:
                 logger.error(f"{e} in database.adminDB.do_schema_fixes")
                 return
+
+
+            dropped=0
+            created=0
+            try:
+                for label in ['Person', 'Event', 'Place', 'Family']:
+                    result = session.run(f'DROP INDEX ON :{label}(gramps_handle)')
+                    counters = result.summary().counters
+                    dropped += counters.indexes_removed
+            except Exception as e:
+                pass
+
+            for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
+                          'Note', 'Person', 'Place', 'Place_name', 'Repository',
+                          'Source']:
+                try:
+                    result = session.run(f'CREATE INDEX ON :{label}(handle)')
+                    counters = result.summary().counters
+                    created += counters.indexes_added
+                except Exception as e:
+                    logger.info(f"Index for {label}.handle not created: {e}")
+
+            print(f"adminDB.do_schema_fixes: index updates: {dropped} removed, {created} created")
+
     else:
         print("database.adminDB.do_schema_fixes: No schema changes tried")
 
