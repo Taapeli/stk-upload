@@ -469,10 +469,13 @@ def show_media(uid=None):
 def fetch_media(fname):
     """ Fetch media file, full size of cropped. 
     
-        Arguments examples:
-            id    id=63995268bd2348aeb6c70b5259f6743f   uuid of Media
-            crop  crop=150,200,600,600                  pixel coordinates as %
-                                                        (left,upper,right,lower)
+        Example:
+        http://127.0.0.1:5000/scene/media/kuva2?id=63995268bd2348aeb6c70b5259f6743f&crop=0,21,100,91&full=1
+
+        Arguments:
+            id    uuid of Media
+            crop  pixel coordinates as "left,upper,right,lower" %
+            full  "1" = show full size, "0" thumbnail size (default)
     
         #TODO. Assumes jpg. Accept other file formats
     """
