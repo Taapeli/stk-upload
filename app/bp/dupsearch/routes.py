@@ -19,12 +19,15 @@ def dupsearch():
 @login_required
 def batches():
     batch_list = list(Batch.get_batches())
+    completed_batches = []
     for b in batch_list:
         file = b.get('file')
-        if file:
+        status = b.get('status')
+        if file and status == 'completed':
             file = file.split("/")[-1].replace("_clean.gramps",".gramps")
             b['file'] = file 
-    return jsonify(batch_list)
+            completed_batches.append(b)
+    return jsonify(completed_batches)
 
 @bp.route('/dupsearch/generate_keys/<batchid>',  methods=['GET'])
 @login_required
