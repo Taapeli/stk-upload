@@ -1,0 +1,55 @@
+{# _audit/auditions.html_ #}
+{% extends "/audit/layout.html" %}
+{% block title %}{{ _("Auditions") }}{% endblock %}
+{% block body %}
+    {{ super() }}
+<style>
+tr.mytitle > th { color:gray; font-size: 95%; }
+</style>
+
+  <h2>{{ _("Auditions and Amount of Objects") }}</h2>
+  
+  <div class="content">
+    <p>
+        {{ _('Total <b>%(tot)s</b> objects', tot=total|int_thousands) }}
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ol  class='flashes'>
+        {% for category, message in messages %}
+          <li class='flash_{{category}}'>{{ message }}</li>
+        {% endfor %}
+        </ol>
+      {% endif %}
+    {% endwith %}
+
+        <table>
+{% set keys = batches.keys()|sort %}
+{% set ns = namespace(auditor='-') %}
+{% for key in keys %}
+    {% set labels = batches[key] %}
+    {% set l = key.split('/') %}
+    {% if l[0] != ns.auditor %}{% set ns.auditor = l[0] %}
+           <tr><th colspan="{{ titles|length + 2 }}"><i>{{ _("Auditor") }} {{ ns.auditor }}</i></th></tr>
+           <tr class="mytitle">
+                <th>{{ _("Researcher") }}</th>
+                <th>{{ _("Batch id") }}</th>
+        {% for t in titles %}<th>{{ _(t) }}</th>{% endfor %}
+           </tr>
+	{% endif %}
+           <tr><td class="center">{{l[1]}}</td>
+               <td><b>{{l[2]}}</b><br><small>{{l[3]}}</small></td>
+    {% for t in titles %}
+	           <td class="right nowrap">{{ labels[t] | int_thousands }}</td>
+    {% endfor %}
+	       </tr>
+{% endfor %}
+            
+	    </table>
+    <p>&rtrif; <a href="/admin/readlog">{{ _('Display application log') }}</a></p>
+  </div>
+{% endblock %}
+</body>
+</html>
+

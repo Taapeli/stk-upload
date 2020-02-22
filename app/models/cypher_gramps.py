@@ -33,41 +33,15 @@ WITH u, b
     MERGE (u) -[:CURRENT_LOAD]-> (b)
 """
 
-    batch_list = """
-MATCH (u:UserProfile {username: $user})
-MATCH (u) -[:HAS_LOADED]-> (b:Batch) 
-RETURN b AS bid
-ORDER BY bid 
-    """
+#Moved to models.gen.batch_audit / 3.2.2020/JMä
+#     batch_list = """
+#     batch_list_all = """
+#     batch_delete = """
+#     get_batch_filename = """
 
-    batch_list_all = """
-MATCH (b:Batch) 
-RETURN b 
-    """
-
+#Removed / 3.2.2020/JMä
 #     batch_count = """
-# MATCH (u:UserProfile {username: $user})
-# MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid})
-# RETURN COUNT(b) as cnt
-# """
-
 #     batch_person_count = """
-# MATCH (u:UserProfile {username: $user})
-# MATCH (u) -[r:HAS_LOADED]-> (b:Batch {id: $bid}) --> (p:Person)
-# RETURN COUNT(p) as cnt
-# """
-
-    batch_delete = """
-MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
-OPTIONAL MATCH
-    (b) -[*]-> (n) 
-DETACH DELETE b, n
-"""
-    
-    get_batch_filename = """
-MATCH (b:Batch {id: $batch_id, user: $username}) 
-RETURN b.file
-"""
 
 # ==============================================================================
 
@@ -326,6 +300,13 @@ WITH n
 MATCH (pl:Place) WHERE id(pl) = $pid
 MATCH (n:Note)  WHERE n.handle=$hlink
 CREATE (pl) -[r:NOTE]-> (n)"""
+
+    link_media = """
+MATCH (p:Place {handle: $p_handle})
+MATCH (m:Media  {handle: $m_handle})
+  CREATE (p) -[r:MEDIA]-> (m)
+    SET r = $r_attr"""
+
 
 # class Cypher_place_w_handle():
 #     """ For Place class """

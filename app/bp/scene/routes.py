@@ -4,11 +4,13 @@ Created on 12.8.2018
 @author: jm
 '''
 import logging 
+import io
 #import os
-from flask import send_file
+from flask import send_file, Response
 from bp.scene.models import media
 logger = logging.getLogger('stkserver')
 import time
+from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, flash, session as user_session
 from flask_security import current_user, login_required, roles_accepted
@@ -16,20 +18,24 @@ from flask_security import current_user, login_required, roles_accepted
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
-from bp.scene.scene_reader import get_a_person_for_display_apoc
+#from bp.scene.scene_reader import get_a_person_for_display_apoc
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
 from models.gen.place_combo import Place_combo
 from models.gen.source import Source
+from models.gen.media import Media
 
 from models.datareader import read_persons_with_events
-from models.datareader import get_person_data_by_id # -- vanhempi versio ---
+#from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_event_participants
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 from models.owner import OwnerFilter
 
+LAST_YEAR_ALLOWED=datetime.now().year - 120
+
 # Narrative start page
+
 @bp.route('/scene',  methods=['GET', 'POST'])
 def scene():
     """ Home page for scene narrative pages ('kertova') for anonymous. """    
@@ -56,7 +62,9 @@ def show_person_list(selection=None):
             logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
             return render_template("/scene/persons.html", persons=persons, menuno=0,
-                                   name=name, rule=keys, elapsed=time.time()-t0)
+                                   name=name, rule=keys, 
+                                   last_year_allowed=LAST_YEAR_ALLOWED, 
+                                   elapsed=time.time()-t0)
         except Exception as e:
             logger.info("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
@@ -79,16 +87,15 @@ def show_person_list(selection=None):
 @bp.route('/scene/persons/ref=<string:refname>/<opt>')
 @login_required
 def show_persons_by_refname(refname, opt=""):
-    """ List persons by refname.
+    """ List persons by refname for menu(0).
     """
     keys = ('refname', refname)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
     ref = ('ref' in opt)
     order = 0
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    args = {'ref': ref, 'order': order}
+    if current_user.is_authenticated:
+        args['user'] = current_user.username
+    persons = read_persons_with_events(keys, args=args)
     logger.info("-> bp.scene.routes.show_persons_by_refname")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order, rule=keys)
@@ -108,15 +115,14 @@ def show_all_persons_list(opt=''):
     """
     t0 = time.time()
     keys = ('all',)
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
     ref = ('ref' in opt)
     if 'fn' in opt: order = 1   # firstname
     elif 'pn' in opt: order = 2 # firstname
     else: order = 0             # surname
-    persons = read_persons_with_events(keys, user=user, take_refnames=ref, order=order)
+    args = {'ref': ref, 'order': order}
+    if current_user.is_authenticated:
+        args['user'] = current_user.username
+    persons = read_persons_with_events(keys, args=args) #user=user, take_refnames=ref, order=order)
     logger.info("-> bp.scene.routes.show_all_persons_list")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
                            order=order,rule=keys, elapsed=time.time()-t0)
@@ -161,31 +167,32 @@ def show_persons_all():
 @bp.route('/scene/person/<int:uid>')
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin')
-def show_person_v2(uid=None):
+def obsolete_show_person_v2(uid=None):
     """ One Person with all connected nodes - version 3 with apoc
     """
-    t0 = time.time()
-    if current_user.is_authenticated:
-        user=current_user.username
-    else:
-        user=None
-    # v2 Person page data
-    person, objs, marks = get_a_person_for_display_apoc(uid, user)
-    logger.info("-> bp.scene.routes.show_v2")
-    if not person:
-        return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
-    #print (f"Current language {current_user.language}")
-    from bp.scene.models.media import get_thumbname
-    for i in person.media_ref:
-        print(get_thumbname(objs[i].uuid))
-    return render_template("/scene/person_v2.html", person=person, obj=objs, 
-                           marks=marks, menuno=12, elapsed=time.time()-t0)
+    return 'Obsolete: show_person_v2<br><a href="javascript:history.back()">Go Back</a>'
+#     t0 = time.time()
+#     if current_user.is_authenticated:
+#         user=current_user.username
+#     else:
+#         user=None
+#     # v2 Person page data
+#     person, objs, marks = get_a_person_for_display_apoc(uid, user)
+#     logger.info("-> bp.scene.routes.show_v2")
+#     if not person:
+#         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
+#     #print (f"Current language {current_user.language}")
+#     from bp.scene.models.media import get_thumbname
+#     for i in person.media_ref:
+#         print(get_thumbname(objs[i].uuid))
+#     return render_template("/scene/person_v2.html", person=person, obj=objs, 
+#                            marks=marks, menuno=12, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person', methods=['GET'])
 #     @login_required
 @roles_accepted('member', 'gedcom', 'research', 'audit', 'admin', 'guest')
-def     show_person_v3(uid=None):
+def     show_person(uid=None):
     """ One Person with all connected nodes - NEW version 3.
 
         Arguments:
@@ -194,54 +201,57 @@ def     show_person_v3(uid=None):
     """
     t0 = time.time()
     uid = request.args.get('uuid', uid)
-    if not uid:
-        return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
+#     if not uid:
+#         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
 
     dbg = request.args.get('debug', None)
-    print(dbg)
     if current_user.is_authenticated:
         user=current_user.username
+        ofilter = user_session.get('owner_filter',0)
+        use_common = (ofilter == 1)
     else:
         user=None
-    logger.info("-> bp.scene.routes.show_person_v3")
+    logger.info("-> bp.scene.routes.show_person")
     
     # v3 Person page
-    person, objs, jscode = get_person_full_data(uid, user)
+    person, objs, jscode = get_person_full_data(uid, user, use_common)
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
     return render_template("/scene/person.html", person=person, obj=objs, 
-                           jscode=jscode, menuno=12, debug=dbg, elapsed=time.time()-t0)
+                           jscode=jscode, menuno=12, debug=dbg, root=person.root,
+                           last_year_allowed=LAST_YEAR_ALLOWED, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/uuid=<pid>')
 @bp.route('/scene/person=<int:pid>')
 #     @login_required
-def show_person_v1(pid):
+def obsolete_show_person_v1(pid):
     """ Full homepage for a Person in database (v1 versio).
 
         The pid may be 1) an uuid or 2) an uniq_id
     """
-    t0 = time.time()
-    try:
-        person, events, photos, citations, families = get_person_data_by_id(pid)
-        for f in families:
-            print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
-            if f.mother:
-                print("  Mother: {} / {} s. {}".\
-                      format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
-            if f.father:
-                print("  Father:  {} / {} s. {}".\
-                      format(f.father.uniq_id, f.father.id, f.father.birth_date))
-            for c in f.children:
-                print("    Child ({}): {} / {} s. {}".\
-                      format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=2, text=str(e)))
-    logger.info("-> bp.scene.routes.show_person_v1")
-    return render_template("/scene/person_v1.html", person=person, events=events, 
-                           photos=photos, citations=citations, families=families, 
-                           elapsed=time.time()-t0)
+    return 'Obsolete: show_person_v1<br><a href="javascript:history.back()">Go Back</a>'
+#     t0 = time.time()
+#     try:
+#         person, events, photos, citations, families = get_person_data_by_id(pid)
+#         for f in families:
+#             print ("{} in Family {} / {}".format(f.role, f.uniq_id, f.id))
+#             if f.mother:
+#                 print("  Mother: {} / {} s. {}".\
+#                       format(f.mother.uniq_id, f.mother.id, f.mother.birth_date))
+#             if f.father:
+#                 print("  Father:  {} / {} s. {}".\
+#                       format(f.father.uniq_id, f.father.id, f.father.birth_date))
+#             for c in f.children:
+#                 print("    Child ({}): {} / {} s. {}".\
+#                       format(c.sex_str(), c.uniq_id, c.id, c.birth_date))
+#     except KeyError as e:
+#         return redirect(url_for('virhesivu', code=2, text=str(e)))
+#     logger.info("-> bp.scene.routes.show_person_v1")
+#     return render_template("/scene/person_v1.html", person=person, events=events, 
+#                            photos=photos, citations=citations, families=families, 
+#                            elapsed=time.time()-t0)
 
 
 @bp.route('/scene/event/<int:uniq_id>')
@@ -346,7 +356,7 @@ def show_places():
 #     for p in locations:
 #         print ("# {} ".format(p))
     logger.info(f"-> bp.scene.routes.show_places: forward from '{my_filter.scope[0]}'")
-    return render_template("/scene/places.html", locations=locations, 
+    return render_template("/scene/places.html", locations=locations, menuno=4,
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 
@@ -413,16 +423,78 @@ def show_source_page(sourceid):
     return render_template("/scene/source_events.html",
                            source=source, citations=citations)
 
-# ------------------------------ Media --------------------------------
+# ------------------------------ Menu 6: Media --------------------------------
+
+@bp.route('/scene/medias')
+def show_medias():
+    """ List of Medias for menu(5)
+    """
+    t0 = time.time()
+    print(f"--- {request}")
+    print(f"--- {user_session}")
+    # Set filter by owner and the data selection
+    my_filter = OwnerFilter(user_session, current_user, request)
+    # Which range of data is shown
+    my_filter.set_scope_from_request(request, 'media_scope')
+    try:
+        medias = Media.read_my_media_list(my_filter, 20)
+
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+    logger.info(f"-> bp.scene.media.show_medias: forward from '{my_filter.scope[0]}'")
+    return render_template("/scene/medias.html", medias=medias, 
+                           owner_filter=my_filter, elapsed=time.time()-t0)
+
+@bp.route('/scene/media', methods=['GET'])
+def show_media(uid=None):
+    """ 
+        One Media
+    """
+    uid = request.args.get('uuid', uid)
+    if not uid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
+    
+    try:
+        mediaobj = Media.get_one(uid)
+        fullname, _mimetype = media.get_fullname(mediaobj.uuid)
+        size = media.get_image_size(fullname)
+    except KeyError as e:
+        return redirect(url_for('virhesivu', code=1, text=str(e)))
+
+    logger.info("-> bp.scene.routes.show_media")
+    return render_template("/scene/media.html", media=mediaobj, size=size, menuno=6)
+
 
 @bp.route('/scene/media/<fname>')
 def fetch_media(fname):
-    """ Fetch media file, assumes jpg, fix later...
+    """ Fetch media file, full size of cropped. 
+    
+        Example:
+        http://127.0.0.1:5000/scene/media/kuva2?id=63995268bd2348aeb6c70b5259f6743f&crop=0,21,100,91&full=1
+
+        Arguments:
+            id    uuid of Media
+            crop  pixel coordinates as "left,upper,right,lower" %
+            full  "1" = show full size, "0" thumbnail size (default)
+    
+        #TODO. Assumes jpg. Accept other file formats
     """
     uuid = request.args.get("id")
+    crop = request.args.get("crop")
+    # show_thumb for cropped image only
+    show_thumb = request.args.get("full", "0") == "0"
     fullname, mimetype = media.get_fullname(uuid)
-    logger.info("-> bp.scene.routes.fetch_media")
-    return send_file(fullname, mimetype=mimetype)        
+    if crop:
+        # crop dimensions are diescribed as % of width and height
+        image = media.get_cropped_image(fullname, crop, show_thumb)
+        logger.info("-> bp.scene.routes.fetch_media cropped png")
+        # Create a png image in memery and display it
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        return Response(buffer.getvalue(), mimetype='image/png')
+    else:
+        logger.info("-> bp.scene.routes.fetch_media")
+        return send_file(fullname, mimetype=mimetype)        
 
 @bp.route('/scene/thumbnail')
 def fetch_thumbnail():
@@ -430,7 +502,15 @@ def fetch_thumbnail():
     """
     uuid = request.args.get("id")
     thumbname = media.get_thumbname(uuid)
-    print(thumbname)
+    #print(thumbname)
     mimetype='image/jpg'
     logger.info("-> bp.scene.routes.fetch_thumbnail")
-    return send_file(thumbname, mimetype=mimetype)
+    try:
+        ret = send_file(thumbname, mimetype=mimetype)
+        return ret
+    except FileNotFoundError:
+        # Show default image
+        ret = send_file(url_for('static', filename='noone.jpg'), mimetype=mimetype)
+        logger.warning(f"-> bp.scene.routes.fetch_thumbnail: missing {thumbname}")
+        return ret
+        

@@ -36,12 +36,12 @@ from models.owner import OwnerFilter
 import traceback
 
 
-def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0):
+def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=False, order=0):
     """ Reads Person Name and Event objects for display.
-        If currentuser is defined, restrict to her objects.
+        If args['user'] is defined, restrict to her objects.
 
         Returns Person objects, whith included Events and Names
-        and optionally Refnames
+        and optionally Refnames (if args['take_refnames'])
 
         NOTE. Called with
             keys = ('uniq_id', uid)     in bp.scene.routes.show_person_list
@@ -56,10 +56,11 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
     persons = []
     p = None
     p_uniq_id = None
-    result = Person_combo.get_person_combos(keys, user, take_refnames=take_refnames, order=order)
+    result = Person_combo.get_person_combos(keys, args=args) #user, take_refnames=take_refnames, order=order)
     for record in result:
         '''
         # <Record
+            user=None,
             person=<Node id=80307 labels={'Person'}
                 properties={'id': 'I0119', 'confidence': '2.5', 'sex': '1',
                      'change': 1507492602, 'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
@@ -82,7 +83,7 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
             # The same person is not created again
             p = Person_combo.from_node(node)
             p_uniq_id = p.uniq_id
-            if take_refnames and record['refnames']:
+            if args.get('take_refnames',False) and record['refnames']:
                 refnlist = sorted(record['refnames'])
                 p.refnames = ", ".join(refnlist)
             for nnode in record['names']:
@@ -90,7 +91,9 @@ def read_persons_with_events(keys=None, user=None, take_refnames=False, order=0)
                 if 'initial' in record and record['initial']:
                     pname.initial = record['initial']
                 p.names.append(pname)
-
+        # Eventuel Researcher or blank
+        p.user = record.get('user')
+        
         # Events
 
         for role, event, place in record['events']:
@@ -280,7 +283,7 @@ def get_repositories(uniq_id=None):
     │        │        │        │        │        │       │"]]     │        │
     └────────┴────────┴────────┴────────┴────────┴───────┴────────┴────────┘
     """
-    titles = ['change', 'handle', 'id', 'rname', 'type', 'uniq_id', 'notes', 'sources']
+    titles = ['change', 'uniq_id', 'id', 'rname', 'type', 'sources', 'notes']
     repositories = []
     result = Repository.get_w_source(uniq_id)
     for record in result:
@@ -292,7 +295,7 @@ def get_repositories(uniq_id=None):
         r.uniq_id = record['uniq_id']
         r.rname = record['rname'] or ''
         r.change = record['change']
-        r.handle = record['handle']
+        #r.handle = record['handle']
         r.type = record['type'] or ''
         r.id = record['id'] or ''
         for node in record['notes']:
@@ -641,7 +644,11 @@ def get_people_by_surname(surname):
 
 
 def get_person_data_by_id(pid):
-    """ Get 5 data sets:                    ---- vanhempi versio ----
+    """ Get 5 data sets:                        ---- vanhempi versio ----
+        Obsolete? still used in
+        - /compare/uniq_id=311006,315556 
+        - /lista/person_data/<string:uniq_id>
+        - /lista/person_data/<string:uniq_id>
 
         The given pid may be an uuid (str) or uniq_id (int).
 

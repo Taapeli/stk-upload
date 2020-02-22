@@ -8,6 +8,8 @@
 u { color: DarkKhaki; text-decoration: none; }
 table {margin-top:1em;}
 td { padding-right:1em;}
+.source-flex { display: flex; }
+.source-flex > div {padding: 0 0 0 1em; }
 </style>
 
 <div id="startdiv">
@@ -69,6 +71,19 @@ td { padding-right:1em;}
                 </tr>
         {% endfor %}
             </tbody></table>
+
+        {% if family.sources %}<div class="source-flex">
+            <div><p><b>{{ _("Sources") }}:</b></p></div>
+            <div>{% for data in family.sources %}
+                <p>► <a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>, 
+                    {{ data[3] }}, {{ data[4] }}
+                    {{ _("Page") }}: {{ data[5] }}
+                    <br>&nbsp; – {{ data[0] }}</p>
+
+            {% endfor %}</div>
+        </div>
+        {% endif %}
+
       </div>
       {% endif %}
 
@@ -95,19 +110,9 @@ td { padding-right:1em;}
  				<tr>{% if n.text %}<td>{{ n.text }}</p></td>{% endif %}
  				{% if n.url %}<td><a href="{{ n.url }}">{{ n.url }}</a></td>{% endif %}</tr>
             {% endfor %}
-            </table><br>
+            </table>
         {% endif %}
-        
-        {% if family.sources %}<h3>{{ _("Sources") }}</h3>
-            <table>
-            {% for data in family.sources %}
-         		<tr><td>{{ data[0] }}: 
-         		<a href="/scene/source={{ data[1] }}" class="inlink">{{ data[2] }}</a>, {{ data[3] }}, {{ data[4] }}
-         		{{ _("Page") }}: {{ data[5] }}</td></tr>
-            {% endfor %}
-            </table><br>
-		{% endif %}
-
+        <p>&nbsp;</p>
     </div>
 </div>
 {% endblock %}

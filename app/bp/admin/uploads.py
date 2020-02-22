@@ -19,11 +19,9 @@ logger = logging.getLogger('stkserver')
 from flask_babelex import _
 
 from models import email, util, syslog 
-from models.gen.batch import Batch
 from ..gramps import gramps_loader
 import shareds
-#from models.cypher_gramps import Cypher_batch
-from ..admin.models.cypher_adm import Cypher_stats
+from models.gen.cypher import Cypher_batch
 
 STATUS_UPLOADED     = "uploaded"
 STATUS_LOADING      = "loading"
@@ -91,6 +89,9 @@ def set_meta(username,filename,**kwargs):
     upload_folder = get_upload_folder(username) 
     name = "{}.meta".format(filename)
     metaname = os.path.join(upload_folder,name)
+    update_metafile(metaname,**kwargs)
+
+def update_metafile(metaname,**kwargs):
     try:
         meta = eval(open(metaname).read())
     except FileNotFoundError:
@@ -102,6 +103,11 @@ def get_meta(metaname):
     ''' Reads status information from .meta file '''
     try:
         meta = eval(open(metaname).read())
+        status= meta.get("status")
+        if status == STATUS_LOADING:
+            stat = os.stat(metaname)
+            if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
+                meta["status"] = STATUS_ERROR
     except FileNotFoundError:
         meta = {}
     return meta
@@ -109,7 +115,8 @@ def get_meta(metaname):
 def i_am_alive(metaname,parent_thread):
     ''' Checks, if backgroud thread is still alive '''
     while os.path.exists(metaname) and parent_thread.is_alive():
-        Path(metaname).touch()
+        update_metafile(metaname,
+                        progress=parent_thread.progress)
         time.sleep(10)
 
 def background_load_to_neo4j(username,filename):
@@ -123,15 +130,20 @@ def background_load_to_neo4j(username,filename):
         os.makedirs(upload_folder, exist_ok=True)
         set_meta(username,filename,status=STATUS_LOADING)
         this_thread = threading.current_thread()
+        this_thread.progress = {}
+        counts = gramps_loader.analyze_xml(username, filename)
+        update_metafile(metaname,counts=counts)
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
         steps,batch_id = gramps_loader.xml_to_neo4j(pathname,username)
-        set_meta(username,filename,batch_id=batch_id)
         for step in steps:
             print(step)
         if not batch_id:
             raise RuntimeError("Run Failed, missing batch_id")
 
-        set_meta(username,filename,status=STATUS_DONE)
+        if os.path.exists(metaname): 
+            set_meta(username,filename,
+                     batch_id=batch_id,
+                     status=STATUS_DONE)
         msg = "{}:\nStored the file {} from user {} to neo4j".format(util.format_timestamp(),pathname,username)
         msg += "\nBatch id: {}".format(batch_id)
         msg += "\nLog file: {}".format(logname)
@@ -178,25 +190,9 @@ def initiate_background_load_to_neo4j(userid,filename):
     syslog.log(type="storing to database initiated",file=filename,user=userid)
     return False
 
+#Removed / 3.2.2020/JMä
 # def batch_count(username,batch_id):
-#     count = shareds.driver.session().run(Cypher_batch.batch_count, 
-#                                          user=username, bid=batch_id).single().value()
-#     return count
-# #     with shareds.driver.session() as session:
-# #         tx = session.begin_transaction()
-# #         count = tx.run(Cypher_batch.batch_count, user=username, bid=batch_id).single().value()
-# #         tx.commit()
-# #         return count
-#         
 # def batch_person_count(username,batch_id):
-#     count = shareds.driver.session().run(Cypher_batch.batch_person_count, 
-#                                          user=username, bid=batch_id).single().value()
-#     return count
-# #     with shareds.driver.session() as session:
-# #         tx = session.begin_transaction()
-# #         count = tx.run(Cypher_batch.batch_person_count, user=username, bid=batch_id).single().value()
-# #         tx.commit()
-# #         return count
 
 def list_uploads(username):
     ''' Gets a list of uploaded files and their process status.
@@ -205,7 +201,7 @@ def list_uploads(username):
     '''
     # 1. List Batches, their status and Person count
     batches = {}
-    result = shareds.driver.session().run(Cypher_stats.get_user_batch_names, 
+    result = shareds.driver.session().run(Cypher_batch.get_user_batch_names, 
                                           user=username)
     for record in result:
         # <Record batch='2019-08-12.001' timestamp=None persons=1949>
@@ -223,7 +219,6 @@ def list_uploads(username):
     for name in names:
         if name.endswith(".meta"):
             fname = os.path.join(upload_folder,name)
-            stat = os.stat(fname)
             xmlname = name.rsplit(".",maxsplit=1)[0]
             meta = get_meta(fname)
             status = meta["status"]
@@ -233,21 +228,21 @@ def list_uploads(username):
             if status == STATUS_UPLOADED:
                 status_text = _("UPLOADED")
             elif status == STATUS_LOADING:
-                if stat.st_mtime < time.time() - 60: # not updated within last minute -> assume failure
-                    status_text = _("ERROR")
-                else:
-                    status_text = _("STORING") 
+                status_text = _("STORING") 
             elif status == STATUS_DONE:
                 status_text = _("STORED")
                 if 'batch_id' in meta:
                     batch_id = meta['batch_id']
             elif status == STATUS_FAILED:
                 status_text = _("FAILED")
+            elif status == STATUS_ERROR:
+                status_text = _("ERROR")
             elif status == STATUS_REMOVED:
                 status_text = _("REMOVED")
 
             if not batch_id in batches:
-                #status_text = _("REMOVED")
+                if status_text == _("STORED"):
+                    status_text = _("REMOVED")
                 batch_id = ""
                 person_count = 0
             else:
@@ -290,7 +285,7 @@ def list_uploads_all(users):
 
 # def list_empty_batches(username=None):
 #     ''' Gets a list of db Batches without any linked data.
-# --> models.gen.batch.Batch.list_empty_batches
+# --> models.gen.batch_audit.Batch.list_empty_batches
 
 
 def removefile(fname): 

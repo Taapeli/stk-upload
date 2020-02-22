@@ -386,6 +386,16 @@ div#nav ul li.CurrentSection a {
 #subnavigation ul li.CurrentSection a {
     background-color: white;
 }
+
+.credit {
+    position: absolute;
+    top: 40px;
+    right: 10px;
+    color: #7e6b53;
+    font-size: 8pt;
+/*  border: 3px solid #73AD21; */
+}
+
 /* Alphabet Navigation
 ----------------------------------------------------- */
 div#alphanav {

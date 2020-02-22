@@ -15,7 +15,7 @@ from shareds import logger
 import traceback
 
 
-def get_person_full_data(uuid, owner):
+def get_person_full_data(uuid, owner, use_common=True):
     """ Get a Person with all connected nodes for display in Person page.
 
 
@@ -89,7 +89,7 @@ def get_person_full_data(uuid, owner):
     """
 
     try:
-        reader = PersonReader()
+        reader = PersonReader(use_common)
 
         # 1. Read Person p, if not denied
         reader.get_person(uuid, owner)
@@ -140,7 +140,7 @@ def get_person_full_data(uuid, owner):
 
 
 def get_a_person_for_display_apoc(uid, user):
-    """ Get a Person with all connected nodes for display in Person page (v2).
+    """ Get a Person with all connected nodes for display in obsolete Person page v2.
 
 
     Person object tree is creation

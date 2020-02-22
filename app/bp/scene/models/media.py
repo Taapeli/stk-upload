@@ -58,3 +58,31 @@ def get_thumbname(uuid):
             make_thumbnail(fname,thumbname)
         return thumbname
     return ""
+
+def get_image_size(path):
+    # Get image size as tuple (width, height)
+    image = Image.open(path)
+    return image.size
+
+def get_cropped_image(path, crop, thumbsize=False):
+    ''' From given Image file, crop image by given % coordinates.
+        If thumbsize=True, scale to 128 x 128 size
+
+        crop "0,15,100,96" -> upper_left=(0%,15%), lower_right(100%,96%) 
+        
+        The coordinate system that starts with (0, 0) in the upper left corner.
+        The first two values of the box tuple specify the upper left starting 
+        position of the crop box. The third and fourth values specify the 
+        distance in pixels from this starting position towards the right and 
+        bottom direction respectively.
+    '''
+    x1,y1, x2,y2 = crop.split(',')
+    image = Image.open(path)
+    width, heigth = image.size
+    box = [float(x1)*width/100., float(y1)*heigth/100.,
+           float(x2)*width/100., float(y2)*heigth/100.]
+    print(f"size=({width},{heigth}), crop={crop} => box={box}")
+    image = image.crop(box)
+    if thumbsize:
+        image.thumbnail((128,128))
+    return image

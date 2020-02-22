@@ -60,8 +60,8 @@
                   {% endif %}><a href="/scene/sources"
                    title="{{ _('Sources') }}">{{ _('Sources') }}</a></li>
                 <li{% if value == 6 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed"
-                   title="{{ _('Thumbnails') }}">{{ _('Pictures and other Media') }}</a></li>
+                  {% endif %}><a href="/scene/medias" class="CurrentSection"
+                   title="{{ _('Thumbnails') }}">{{ _('Pictures') }}</a></li>
         {% if not current_user or not current_user.is_authenticated %}
                 <li id="loginpadge"><a href="/login"
                      title="{{ _('Get more info') }}">{{ _('Log in to Isotammi') }}!</a></li>
@@ -104,12 +104,10 @@
 {% macro person(p, uuid="-") -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
     {% if p.uuid == uuid %}
-    <span class="myself">&nbsp;(itse)&nbsp;</span>
-    {% else %}{% if p.uuid %}
+    <span class="myself">&nbsp;({{ _('self') }})&nbsp;</span>
+    {% else %}
     <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr. {{p.uniq_id}})">
-    {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">{% endif %}
         {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>
@@ -172,6 +170,18 @@
         {% if n.lang %}<span class='typedesc'>{{n.lang}}</span>&nbsp;{% 
          endif %}{{ n.name|safe }}
     {% endfor %}
+{%- endmacro %}
+
+{% macro lifetimes(p) -%}
+    {# Displays Person's life time estimates '1662/1709 — 1726/1819' #}
+    {% if p.latest_possible_death_year != 9999 %}
+	    {% if p.earliest_possible_birth_year != p.latest_possible_birth_year %}
+	        {{p.earliest_possible_birth_year}}/{% endif 
+	    %}{{p.latest_possible_birth_year}} &ndash; {{p.earliest_possible_death_year}}{%
+	     if p.earliest_possible_death_year != p.latest_possible_death_year 
+	     %}/{{p.latest_possible_death_year}}
+	     {% endif %}
+	{% endif %}
 {%- endmacro %}
 
 {% macro citation_link(cit_list, obj) -%}

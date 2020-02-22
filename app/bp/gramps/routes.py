@@ -11,7 +11,7 @@ import time
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import render_template, request, redirect, url_for, send_from_directory, flash
+from flask import render_template, request, redirect, url_for, send_from_directory, flash, jsonify
 from flask_security import login_required, roles_accepted, current_user # ,roles_required
 from flask_babelex import _
 
@@ -20,7 +20,7 @@ from models import loadfile, email, util, syslog
 from . import bp
 from . import gramps_loader
 from ..admin import uploads
-from .models import batch
+#from .models import batch
 
 @bp.route('/gramps')
 @login_required
@@ -127,7 +127,10 @@ def xml_download(xmlfile):
 @login_required
 @roles_accepted('research', 'admin')
 def batch_delete(batch_id):
-    filename = batch.get_filename(current_user.username,batch_id)
+
+    from models.gen.batch_audit import Batch
+
+    filename = Batch.get_filename(current_user.username,batch_id)
     metafile = filename.replace("_clean.",".") + ".meta"
     if os.path.exists(metafile):
         data = eval(open(metafile).read())
@@ -135,8 +138,57 @@ def batch_delete(batch_id):
             del data['batch_id']
             data['status'] = uploads.STATUS_REMOVED
             open(metafile,"w").write(repr(data))
-    batch.delete_batch(current_user.username,batch_id)
+    Batch.delete_batch(current_user.username,batch_id)
     syslog.log(type="batch_id deleted",batch_id=batch_id) 
     flash(_("Batch id %(batch_id)s has been deleted", batch_id=batch_id), 'info')
     referrer = request.headers.get("Referer")                               
     return redirect(referrer)
+
+@bp.route('/gramps/get_progress/<xmlfile>')
+@login_required
+@roles_accepted('research', 'admin')
+def get_progress(xmlfile):
+    xml_folder = uploads.get_upload_folder(current_user.username)
+    xml_folder = os.path.abspath(xml_folder)
+    filename = os.path.join(xml_folder,xmlfile)
+    metaname = filename.replace("_clean.",".") + ".meta"
+    meta = uploads.get_meta(metaname)
+
+    status = meta.get("status")
+    if status is None:
+        return jsonify({"status":"error"})
+
+    counts = meta.get("counts")
+    if counts is None:
+        return jsonify({"status":status,"progress":0})
+
+    progress = meta.get("progress")
+    if progress is None:
+        return jsonify({"status":status,"progress":0})
+
+    total = 0
+    total += counts["citation_cnt"]
+    total += counts["event_cnt"]
+    total += counts["family_cnt"]
+    total += counts["note_cnt"]
+    total += counts["person_cnt"]
+    total += counts["place_cnt"]
+    total += counts["object_cnt"]
+    total += counts["source_cnt"]
+    total += counts["repository_cnt"]
+    done = 0
+    done += progress.get("Citation", 0)
+    done += progress.get("Event_gramps", 0)
+    done += progress.get("Family_gramps", 0)
+    done += progress.get("Note", 0)
+    done += progress.get("Person_gramps", 0)
+    done += progress.get("Place_gramps", 0)
+    done += progress.get("Media", 0)
+    done += progress.get("Source_gramps", 0)
+    done += progress.get("Repository", 0)
+    rsp = {
+        "status":status,
+        "progress":100*done//total,
+        "batch_id":meta.get("batch_id"),
+    }
+    return jsonify(rsp)

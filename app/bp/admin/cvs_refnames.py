@@ -5,6 +5,7 @@
 import csv
 import logging
 import time
+from flask_babelex import _
 
 from models.gen.refname import Refname, REFTYPES
 #from models.gen.user import User

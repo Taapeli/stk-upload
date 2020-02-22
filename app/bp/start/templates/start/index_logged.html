@@ -18,10 +18,10 @@
        <span style="font-size:8pt; color:gray">{{ _('Git Application Version' ) }} 
           <i>{{ 'git'|app_date }}</i></span></p>
 #}
-        <div class="row">
+    <div class="row">
 
-    {% if current_user.is_authenticated and 
-       (current_user.has_role('gedcom') or current_user.has_role('research')) %}
+{% if current_user.is_authenticated and 
+   (current_user.has_role('gedcom') or current_user.has_role('research')) %}
          <div class="startbox gedtools">
             <div style="display: inline-block;">
             <form method="get" action="/gedcom">
@@ -34,9 +34,9 @@
             </form>
             </div>
          </div>
-     {% endif %}
+{% endif %}
 
-    {% if current_user.is_authenticated and current_user.has_role('research') %}
+{% if current_user.is_authenticated and current_user.has_role('research') %}
            <div class="startbox">
              <div style="display: inline-block;">
                 <h3>{{ _('Your Candidate Materials') }}</h3>
@@ -49,38 +49,56 @@
                  </form>
              </div>
            </div>
-    {% endif %}           
+{% endif %}           
 
-    {% if current_user.is_authenticated and current_user.has_role('research') %}
-           <div class="startbox" style="border:1.5pt solid #7e6b53;box-shadow: 5px 5px 5px grey;">
+           <div class="startbox">
              <div style="display: inline-block;">
-               <form method="get" action="/scene/persons_all">
-                 <h3>{{ _('Look at the Family Trees') }}</h3>
-                 <p>{{ _('View your own data as candidate material') }}</p>
+               <form method="get" action="/scene/persons_all/">
+
+{% if current_user.is_authenticated and 
+   ( current_user.has_role('research') or current_user.has_role('admin') ) %}
+                 <h3>{{ _('Browse Isotammi Database') }}</h3>
+                 <p>{{ _('View your own candidate material or all approved common data') }}.</p>
+                 <p>{% set filt = session['owner_filter'] %}
+                   <input type="radio" name="div" value="1" 
+                    {% if filt == 1 %}checked{% endif %}>{{ _('The approved Isotammi data') }}<br>
+                   <input type="radio" name="div" value="2" 
+                    {% if filt == 2 or filt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
+{#
+                   &nbsp;&nbsp;└─ <input type="checkbox" name="cmp" value="1"  
+                    {% if filt == 3 or filt == 5 %}checked{% endif %}>
+                        {{ _('Compare to approved Isotammi data') }} 
+#}
+                </p>
+{% else %}
+                 <h3>{{ _('The Browsed Material') }}</h3>
+                 <p>{{ _('You can view only approved and public material in Demo Database') }}.</p>
+                 <input name="div" type="hidden" value="1">
+{% endif %}
+
                  <div class="submit"> 
                     <button type="submit">{{ _('Continue') }}</button>
                  </div>
                </form>
-            </div>
+             </div>
            </div>
-    {% endif %}
     
-    {% if current_user.is_authenticated and 
+{% if current_user.is_authenticated and 
             (current_user.has_role('admin') or current_user.has_role('master') ) %}
-        <div class="startbox admin">
-           <div style="display: inline-block;">
-           <form method="get" action="/admin">
-              <h3>{{ _('Admin Operations') }}</h3>
-              <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
+      <div class="startbox admin">
+        <div style="display: inline-block;">
+          <form method="get" action="/admin">
+            <h3>{{ _('Admin Operations') }}</h3>
+            <p>{{ _('Manage users, reference data sets and do database maintenance tasks') }}.</p>
             <div class="submit"> 
                <button type="submit">{{ _('Maintenance') }}</button>
             </div>
-         </form>
+          </form>
+        </div>
       </div>
-     </div>
-    {% endif %}
+{% endif %}
 
-    {% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
+{% if current_user.is_authenticated and (current_user.has_role('audit') ) %}
         <div class="startbox audit">
            <div style="display: inline-block;">
            <form method="get" action="/audit">
@@ -92,7 +110,7 @@
          </form>
       </div>
      </div>
-    {% endif %}
+{% endif %}
 
     <div class="startbox">
       <div style="display: inline-block;">

@@ -4,14 +4,20 @@
 {% block body %}
 {{ super() }}
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<style>
+#flex {display: flex;}
+#flex > div {margin:.5em; padding: 1em; border: 2px solid brown;}
+h3 {margin-top: 1em;}
+</style>
 
 	<br><br>
-	<div ng-app="myApp" ng-controller="compareCtrl">
-	<table><tr><td>
+<div ng-app="myApp" ng-controller="compareCtrl">
+  <div id="flex">
+	<div>
 
 <h2>{{ _("Person data") }}</h2>
 <section id="lista">
-<h2>{{ _("Names") }}</h2>
+<h3>{{ _("Names") }}</h3>
 <table>
     <tr>
     	<th colspan="6"><a target="_blank" href="/scene/person={a names[0].uniq_id a}">
@@ -31,9 +37,7 @@
 	</tr>
 </table>
 
-<p>&nbsp;</p>
-
-<h2>{{ _("Events") }}</h2>
+<h3>{{ _("Events") }}</h3>
 <table>
     <tr>
     	<th ng-repeat="x in e_columns">{a x.column a}</th>
@@ -48,10 +52,8 @@
 	</tr>
 </table>
 
-<br>
-<br>
 
-<h2>{{ _("Notes") }}</h2>
+<h3>{{ _("Notes") }}</h3>
 <table>
     <tr>
     	<th ng-repeat="x in u_columns">{a x.column a}</th>
@@ -65,12 +67,13 @@
 </table>
 </section>
 
-</td><td>
+    </div>
+    <div>
 
 <h2>{{ _("Person data") }}</h2>
 <section id="lista">
 <table>
-    <h2>{{ _("Names") }}</h2>
+    <h3>{{ _("Names") }}</h3>
     <tr>
     	<th colspan="6"><a target="_blank" href="/scene/person={a names2[0].uniq_id a}">
     	{{ _('Link to Narrated Page') }}</a></th>
@@ -89,9 +92,7 @@
 	</tr>
 </table>
 
-<p>&nbsp;</p>
-
-<h2>{{ _("Events") }}</h2>
+<h3>{{ _("Events") }}</h3>
 <table>
     <tr>
     	<th ng-repeat="x in e_columns">{a x.column a}</th>
@@ -106,10 +107,7 @@
 	</tr>
 </table>
 
-<br>
-<br>
-
-<h2>{{ _("Notes") }}</h2>
+<h3>{{ _("Notes") }}</h3>
 <table>
     <tr>
     	<th ng-repeat="x in u_columns">{a x.column a}</th>
@@ -123,9 +121,9 @@
 </table>
 </section>
 
-</td></tr></table>
+    </div>
+  </div> {#flex#}
 </div>
-<br>
 <br>
 
 <script>
@@ -154,10 +152,9 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
 	{% for event in events %}
         {uniq_id:'{{event.uniq_id}}',type:'{{event.type}}',
         {% if event.dates %}date:'{{event.dates}}',
-        {% elif event.daterange %}date:'{{event.daterange}}',
         {% else %}date:'-',
         {% endif %}
-		location:'{% for loc in event.place %}{{loc}} * {% endfor %}',
+		location:'{{event.place }}',
         description:'{{event.description}}'},
     {% endfor %}
     ];
@@ -165,10 +162,9 @@ var app = angular.module('myApp', []).controller('compareCtrl', function($scope)
 	{% for event in events2 %}
         {uniq_id:'{{event.uniq_id}}',type:'{{event.type}}',
         {% if event.dates %}date:'{{event.dates}}',
-        {% elif event.daterange %}date:'{{event.daterange}}',
         {% else %}date:'-',
         {% endif %}
-		location:'{% for loc in event.place %}{{loc}} * {% endfor %}',
+		location:'{{event.place }}',
         description:'{{event.description}}'},
     {% endfor %}
     ];

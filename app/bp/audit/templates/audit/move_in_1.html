@@ -24,18 +24,24 @@
                     <td>{{batch}}{% if time %}<br>
                     <small>{{ _('saved at') }} {{time}}</small>{% endif %}
                     </td> {% for label, cnt in label_nodes %}
-                    <td class="right">{{cnt}}</td> {% endfor %}
+                    <td class="right nowrap">{{cnt|int_thousands}}</td> {% endfor %}
                 </tr>
             </table>
-            <form action="/audit/movenow" method="post">     
-                <p>{{ _('From user') }} <b>{{user}}</b></p>        
-	            <div class="submit"> 
+            <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
+{% if total %}
+            <p>{{ _('<b>Note</b> (for test only!). Pressing the button moves only a limited amount of data.') }}        
+               {{ _('If needed, press again to move the others.') }}</p>        
+            <form action="/audit/movenow" method="post">
+	            <div class="submit">
                    <input type="hidden" value="{{batch}}" name="batch">
                    <input type="hidden" value="{{user}}" name="user">
                    <input type="submit" value="{{ _('Move to Isotammi database') }}" />
 	            </div>
 <!--            <p>&rtrif; <a href="{{ referrer }}">{{ _('Go back without changes') }}</a></p> -->
             </form>
+{% else %}
+            <p>{{ _('– There is no more data to move in this batch') }}.</p>        
+{% endif %}
         </div>
 
     </div>

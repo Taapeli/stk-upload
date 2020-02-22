@@ -33,7 +33,7 @@ CREATE (ae:Allowed_email {
     allowed_email_confirm = """
 MATCH (ae:Allowed_email)
   WHERE ae.allowed_email = $email 
-SET ae.confirmed_at = timestamp()
+SET ae.confirmed_at = $confirmtime
 RETURN ae """
              
     allowed_email_update = """
@@ -138,9 +138,6 @@ DELETE c'''
 
 # Access management
 
-#     list_accesses = """
-# MATCH (user:User) -[:SUPPLEMENTED]->(userprofile:UserProfile) -[r:HAS_ACCESS]-> (batch:Batch) RETURN *,id(r) as rel_id
-#     """
     list_accesses = """
 MATCH (user:User) -[:SUPPLEMENTED]-> (userprofile:UserProfile)
     -[r:HAS_ACCESS]-> (batch:Batch)
@@ -165,40 +162,3 @@ MATCH (a:Batch)
 DETACH DELETE a
 RETURN COUNT(a) AS cnt'''
 
-
-
-class Cypher_stats():
-    
-    get_batches = '''
-match (b:Batch) 
-    where b.user = $user and b.status = "completed"
-optional match (b) -[:OWNS]-> (x)
-return b as batch,
-    labels(x)[0] as label, count(x) as cnt 
-    order by batch.user, batch.id'''
-
-    get_single_batch = '''
-match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
-optional match (b) -[:OWNS]-> (x)
-return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
-
-    get_user_batch_names = '''
-match (b:Batch) where b.user = $user
-optional match (b) -[r:OWNS]-> (:Person)
-return b.id as batch, b.timestamp as timestamp, b.status as status,
-    count(r) as persons 
-    order by batch'''
-
-    get_empty_batches = '''
-MATCH (a:Batch) 
-WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
-RETURN a AS batch ORDER BY a.id DESC'''
-
-
-class Cypher_audit():
-    
-    move_batch_todo = '''
-MATCH (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:"2019-11-18.002"}) 
-WITH up, r, b ORDER BY b.id DESC LIMIT 10
-RETURN up, r, b'''
-    
