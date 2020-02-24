@@ -130,7 +130,7 @@ class Person_combo(Person):
             -   If you have selected to use common approved data, you can read
                 both your own and passed data.
 
-            -   If you havn't delected common data, you can read 
+            -   If you havn't selected common data, you can read 
                 only your own data.
         '''
         try:

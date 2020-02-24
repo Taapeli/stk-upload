@@ -123,7 +123,7 @@
     {% if ch.uniq_id == uniq_id %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
     {% else %}
-    <a href="/scene/person{{delim}}{{ch.uniq_id}}" class="inlink" 
+    <a href="/scene/person?uuid={{ch.uuid}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=ch.id) }}">
         {% if ch.names|length %}
         {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> {{ch.names[0].prefix}} <b>{{ch.names[0].surname}}</b></a>
@@ -176,10 +176,10 @@
     {# Displays Person's life time estimates '1662/1709 — 1726/1819' #}
     {% if p.latest_possible_death_year != 9999 %}
 	    {% if p.earliest_possible_birth_year != p.latest_possible_birth_year %}
-	        {{p.earliest_possible_birth_year}}/{% endif 
+	        {{p.earliest_possible_birth_year}}…{% endif 
 	    %}{{p.latest_possible_birth_year}} &ndash; {{p.earliest_possible_death_year}}{%
 	     if p.earliest_possible_death_year != p.latest_possible_death_year 
-	     %}/{{p.latest_possible_death_year}}
+	     %}…{{p.latest_possible_death_year}}
 	     {% endif %}
 	{% endif %}
 {%- endmacro %}
