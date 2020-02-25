@@ -6,15 +6,16 @@ import logging
 logger = logging.getLogger('stkserver')
 
 from flask import request, redirect, url_for, flash, jsonify
-from flask_security import roles_accepted, login_required #, current_user ,roles_required
+from flask_security import roles_accepted, login_required #, render_template, current_user ,roles_required
 from flask_babelex import _
 
 from . import bp
 from . import apikey
 from . import api
-from .v0 import placeapi
+from . import placeapi
+from . import refnameapi
 
-@bp.route('/placeapi/v0/search', methods=['POST'])
+@bp.route('/placeapi/search', methods=['POST'])
 def placeapi_v0_search():
     key = request.form.get("apikey")
     if not apikey.is_validkey(key): return jsonify(dict(
@@ -33,16 +34,18 @@ def placeapi_v0_search():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
-@bp.route('/placeapi/v0/record', methods=['POST'])
+@bp.route('/placeapi/record', methods=['POST'])
 def placeapi_v0_record():
     key = request.form.get("apikey")
-    if not apikey.is_validkey(key): return jsonify(dict(
+    if not apikey.is_validkey(key): 
+        return jsonify(dict(
             status="Error",
             statusText="Wrong API Key",
         ))
 
     rid = request.form.get("id")
-    if not rid: return jsonify(dict(
+    if not rid: 
+        return jsonify(dict(
             status="Error",
             statusText="Missing argument 'id'",
         ))
@@ -51,24 +54,97 @@ def placeapi_v0_record():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
-@bp.route('/placeapi/v0/record_with_subs', methods=['POST'])
+@bp.route('/placeapi/record_with_subs', methods=['POST'])
 def placeapi_v0_record_with_subs():
     key = request.form.get("apikey")
-    if not apikey.is_validkey(key): return jsonify(dict(
+    if not apikey.is_validkey(key): 
+        return jsonify(dict(
             status="Error",
             statusText="Wrong API Key",
         ))
 
     rid = request.form.get("id")
-    if not rid: return jsonify(dict(
+    if not rid: 
+        return jsonify(dict(
             status="Error",
             statusText="Missing argument 'id'",
         ))
-    rsp = placeapi.record_with_subs(int(rid)) 
+        
+    rsp = placeapi.record_with_subs(rid) 
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
+# @bp.route('/placeapi/v0/record_with_selected_subs', methods=['POST'])
+# def placeapi_v0_record_with_selected_subs():
+#     key = request.form.get("apikey")
+#     if not apikey.is_validkey(key): 
+#         return jsonify(dict(
+#             status="Error",
+#             statusText="Wrong API Key",
+#         ))
+# 
+#     rid = request.form.get("id")
+#     if not rid: 
+#         return jsonify(dict(
+#             status="Error",
+#             statusText="Missing argument 'id'",
+#         ))
+#         
+#     selects = request.form.get("selects")
+#     if not selects: 
+#         return jsonify(dict(
+#             status="Error",
+#             statusText="Missing argument 'selects'",
+#         )) 
+#            
+#     rsp = placeapi.record_with_seleted_subs(int(rid, selects)) 
+#     response = jsonify(rsp)
+#     response.headers['Access-Control-Allow-Origin'] = '*'
+#     return response
+
+@bp.route('/refnameapi/search', methods=['POST'])
+def refnameapi_v0_basename():
+    key = request.form.get("apikey")
+    if not apikey.is_validkey(key): return jsonify(dict(
+            status="Error",
+            statusText="Wrong API Key",
+        ))
+    
+    lookfor = request.form.get("lookfor")
+#    print(lookfor)
+    if not lookfor: 
+        return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'lookfor'",
+        ))
+    rsp = refnameapi.search_refname(lookfor) 
+    response = jsonify(rsp)
+    print(response)    
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+@bp.route('/refnameapi/fetch', methods=['POST'])
+def refnameapi_v0_namefamily():
+    key = request.form.get("apikey")
+    if not apikey.is_validkey(key): return jsonify(dict(
+            status="Error",
+            statusText="Wrong API Key",
+        ))
+    
+    lookfor = request.form.get("lookfor")
+#    print(lookfor)
+    if not lookfor: return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'lookfor'",
+        ))
+    rsp = refnameapi.fetch_namefamily(lookfor) 
+    response = jsonify(rsp)
+    print(response)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+                 
 @bp.route('/api/v1/search', methods=['GET'])
 def api_v1_search():
     lookfor = request.args.get("lookfor")
