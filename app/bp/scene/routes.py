@@ -53,6 +53,8 @@ def scene():
 def show_person_list(selection=None):
     """ Show list of selected Persons for menu(0). """
     t0 = time.time()
+    my_filter = OwnerFilter(user_session, current_user, request)
+    my_filter.set_scope_from_request(request, 'person_scope')
     if request.method == 'POST':
         try:
             # Selection from search form
@@ -61,6 +63,11 @@ def show_person_list(selection=None):
             keys = (rule, name)
             logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
+            #if my_filter.use_common():  
+            #    persons = [p for p in persons if not p.too_new]
+            #else:
+            #    for p in persons:
+            #        p.too_new = False
             return render_template("/scene/persons.html", persons=persons, menuno=0,
                                    name=name, rule=keys, 
                                    last_year_allowed=LAST_YEAR_ALLOWED, 
@@ -370,6 +377,11 @@ def show_place_page(locid):
         # List 'place_list' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events
         place, place_list, events = get_place_with_events(locid)
+        my_filter = OwnerFilter(user_session, current_user, request)
+        my_filter.set_scope_from_request(request, 'person_scope')
+        #if my_filter.use_common():
+        #    events = [e for e in events if not e.person.too_new]
+        
     except KeyError as e:
         import traceback
         traceback.print_exc()

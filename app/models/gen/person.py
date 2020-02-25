@@ -83,6 +83,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
     
     The standard specifies that its use may be referred to by the designator "SEX". 
 '''
+from datetime import datetime
 
 import shareds
 from .base import NodeObject
@@ -95,6 +96,8 @@ SEX_UNKOWN = 0
 SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
+
+LAST_YEAR_ALLOWED = datetime.now().year - 51
 
 class Person(NodeObject):
     """ Henkilö
@@ -200,7 +203,7 @@ class Person(NodeObject):
         obj.earliest_possible_death_year = node['earliest_possible_death_year']
         obj.latest_possible_birth_year = node['latest_possible_birth_year']
         obj.latest_possible_death_year = node['latest_possible_death_year']
-
+        obj.too_new = obj.latest_possible_death_year > LAST_YEAR_ALLOWED
         if "datetype" in node:
             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return obj

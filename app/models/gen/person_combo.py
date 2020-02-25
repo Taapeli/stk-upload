@@ -213,14 +213,15 @@ return path"""
             ordered by Person.sortname
         """
 
+        show_by_owner = o_filter.use_owner_filter()
+        show_with_common = o_filter.use_common()
+        #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
+        user = o_filter.user
+
         def _read_person_list(o_filter, limit):
             """ Read Person data from given fw_from 
             """
             # Select a) filter by user b) show Isotammi common data (too)
-            show_by_owner = o_filter.use_owner_filter()
-            show_with_common = o_filter.use_common()
-            #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
-            user = o_filter.user
             try:
                 """
                                show_by_owner    show_all
@@ -289,6 +290,7 @@ return path"""
             node = record['person']
             # The same person is not created again
             p = Person_combo.from_node(node)
+            #if show_with_common and p.too_new: continue
 
 #             if take_refnames and record['refnames']:
 #                 refnlist = sorted(record['refnames'])

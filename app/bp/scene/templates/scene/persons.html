@@ -115,7 +115,7 @@
 			</thead>
 			<tbody>
 	    {% for p in persons %}
-	        {% set nohide = ( p.latest_possible_death_year < last_year_allowed ) %}
+	        {% set nohide = not p.too_new %}
 	            <tr><td class="ColumnAlpha">
 					{% set ini = p.names[0].initial|upper %}
                     {% if loop.changed(ini) %}

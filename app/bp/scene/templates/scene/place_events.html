@@ -156,25 +156,13 @@
         {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
-                        {% for pn in e.names|sort(attribute='order') %}
-                         {% if loop.index == 1 %}
-                         {% if pn.type != "Birth Name" %}
-                            <span class="typedesc">{{pn.type|transl('nt')}}</span>
-                         {% endif %}
-                         <a href="/scene/person?uuid={{e.person.uuid}}" class="inlink"
-                            title="{{ _("See Person's Details") }}">{{ macro.person_name_long(pn) }}</a>
-                         {% else %}
-                          <small><br> – 
-                         {% if pn.type != "Birth Name" %}
-                            <span class="typedesc">{{pn.type|transl('nt')}}</span>
-                         {% endif %}
-                            {{ macro.person_name_long(pn) }}</small>
-                         {% endif %}
-                         {% endfor %}
+	                        {{ macro.person_names_anon(e.person, e.names) }}
                         </td>
-                        <td class="ColumnEvent">{{e.type|transl('evt')}}
-                          {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
-                        <td class="ColumnDate">{{e.dates}}</td>
+                        {% if 1 or not e.person.too_new %}
+	                        <td class="ColumnEvent">{{e.type|transl('evt')}}
+	                          {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
+	                        <td class="ColumnDate">{{e.dates}}</td>
+                        {% endif %}
 <!--
                         <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">

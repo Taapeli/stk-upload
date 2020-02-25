@@ -95,6 +95,35 @@
     {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>
 {%- endmacro %}
 
+{% macro person_names(person, names) -%}
+    {#  Formats a Person name with link. Shows altername names also. #}
+    {% for pn in names|sort(attribute='order') %}
+     {% if loop.index == 1 %}
+         {% if pn.type != "Birth Name" %}
+            <span class="typedesc">{{pn.type|transl('nt')}}</span>
+         {% endif %}
+         <a href="/scene/person?uuid={{person.uuid}}" class="inlink"
+            title="{{ _("See Person's Details") }}">{{ person_name_long(pn) }}</a>
+     {% else %}
+      <small><br> – 
+         {% if pn.type != "Birth Name" %}
+            <span class="typedesc">{{pn.type|transl('nt')}}</span>
+         {% endif %}
+        {{ person_name_long(pn) }}</small>
+     {% endif %}
+    {% endfor %}
+{%- endmacro %}
+
+{% macro person_names_anon(person, names) -%}
+    {#  Formats a Person name with link. Shows altername names also. #}
+    {#  Anonymizes too new persons. #}
+    {% if person.too_new %}
+        N.N.
+    {% else %}
+		{{ person_names(person, names) }}
+     {% endif %}
+{%- endmacro %}
+
 {% macro person_name_by_sortname(p) -%}
     {#  Formats a Person name from person.sortname field. #}
     {% set nm = p.sortname.split('#') %}
