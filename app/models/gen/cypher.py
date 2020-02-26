@@ -200,8 +200,9 @@ WITH person, name""" + _get_events_tail + _get_events_surname
 
     get_confidences_all = """
 MATCH (person:Person)
-OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
-RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+OPTIONAL MATCH (person) -[:EVENT]-> (:Event) -[:CITATION]-> (c1:Citation)
+OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
+RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
     get_confidence = """
 MATCH (person:Person) WHERE ID(person)=$id
