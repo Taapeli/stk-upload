@@ -5,8 +5,8 @@
 import logging 
 logger = logging.getLogger('stkserver')
 
-from flask import request, redirect, url_for, flash, jsonify
-from flask_security import roles_accepted, login_required #, render_template, current_user ,roles_required
+from flask import request, jsonify
+# from flask_security import roles_accepted, login_required #, render_template, current_user ,roles_required
 from flask_babelex import _
 
 from . import bp
@@ -18,14 +18,15 @@ from . import refnameapi
 @bp.route('/placeapi/search', methods=['POST'])
 def placeapi_v0_search():
     key = request.form.get("apikey")
-    if not apikey.is_validkey(key): return jsonify(dict(
+    if not apikey.is_validkey(key): 
+        return jsonify(dict(
             status="Error",
             statusText="Wrong API Key",
         ))
-    
+#    print(f"Request.form = {request.form}")    
     lookfor = request.form.get("lookfor")
-    print(lookfor)
-    if not lookfor: return jsonify(dict(
+    if not lookfor: 
+        return jsonify(dict(
             status="Error",
             statusText="Missing argument 'lookfor'",
         ))
@@ -42,7 +43,7 @@ def placeapi_v0_record():
             status="Error",
             statusText="Wrong API Key",
         ))
-
+    print(f"Request.form = {request.form}")
     rid = request.form.get("id")
     if not rid: 
         return jsonify(dict(
@@ -62,15 +63,20 @@ def placeapi_v0_record_with_subs():
             status="Error",
             statusText="Wrong API Key",
         ))
-
+    print(f"Request.form = {request.form}")
     rid = request.form.get("id")
     if not rid: 
         return jsonify(dict(
             status="Error",
             statusText="Missing argument 'id'",
         ))
-        
-    rsp = placeapi.record_with_subs(rid) 
+    d1 = request.form.get("d1") 
+    d2 = request.form.get("d2")
+    dt = request.form.get("dt") 
+    if d1 and d2 and dt:          
+        rsp = placeapi.record_with_subs(rid, d1=d1, d2=d2, dt=dt) 
+    else:
+        rsp = placeapi.record_with_subs(rid)    
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 

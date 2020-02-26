@@ -53,13 +53,26 @@ MATCH p = (:Place {pname:'Angelniemi', type:'City'})-[:IS_INSIDE*]->(up:Place)
 RETURN p, 
     COLLECT(DISTINCT [ur, up]) as largerPlaces
 """    
-
+ 
 cypher_record = """
 MATCH (p:Place) WHERE p.id = $id 
     OPTIONAL MATCH (p)-[:NAME]->(pn:Place_name)
     OPTIONAL MATCH (p)-[:NOTE]->(n:Note)    
     OPTIONAL MATCH (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
     OPTIONAL MATCH (p)-[h1:IS_INSIDE]->(largerPlace:Place) 
+RETURN p,
+    COLLECT(DISTINCT pn.pname) as pnames,
+    COLLECT(DISTINCT n) as pnotes,
+    COLLECT (DISTINCT [h1, largerPlace, largerPlace.id]) as largerPlaces,
+    COLLECT (DISTINCT [h2, smallerPlace, smallerPlace.id]) as smallerPlaces
+"""
+
+cypher_record_at = """
+MATCH (p:Place) WHERE p.id = $id 
+    OPTIONAL MATCH (p)-[:NAME]->(pn:Place_name)
+    OPTIONAL MATCH (p)-[:NOTE]->(n:Note)    
+    OPTIONAL MATCH (p)-[h1:IS_INSIDE {date1: $d1, date2: $d1, datetype: $dt}]->(largerPlace:Place) 
+    OPTIONAL MATCH (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
 RETURN p,
     COLLECT(DISTINCT pn.pname) as pnames,
     COLLECT(DISTINCT n) as pnotes,
@@ -160,11 +173,19 @@ def record(oid):
     }
 
 
-def record_with_subs(oid):
+def record_with_subs(oid, **kwargs):
     print(f"Getting record {oid} with all subs")
-    result = shareds.driver.session().run(cypher_record, id=oid).single()
+    if 'd1' in kwargs and 'd2' in kwargs and 'dt' in kwargs:
+        dt = int(kwargs['dt'])
+        d1 = int(kwargs['d1'])
+        d2 = int(kwargs['d2'])
+        result = shareds.driver.session().run(cypher_record_at, id=oid, dt=dt, d1=d1, d2=d2).single() 
+ #       result = shareds.driver.session().run(cypher_record, id=oid).single()   
+    else:    
+        result = shareds.driver.session().run(cypher_record, id=oid).single()
     print(result)
-    if not result: return dict(status="Not found",statusText="Not found",resultCount=0)
+    if not result: 
+        return dict(status="Not found",statusText="Not found",resultCount=0)
     p = result.get('p')
 #    print(f"id={p['id']} name={p['pname']}")
     largerPlaces = __process_places(result['largerPlaces'])
