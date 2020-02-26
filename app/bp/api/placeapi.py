@@ -118,8 +118,8 @@ def search(lookedfor):
 #        smallerPlaces = rec['smallerPlaces']
         for urel, largerPlace in largerPlaces:
 #            urel=up['ur'] 
-            print(urel)
-            print(largerPlace)
+#            print(urel)
+#            print(largerPlace)
             upper = dict(
                 id = largerPlace['id'],
                 pname = largerPlace['pname'],
@@ -130,7 +130,7 @@ def search(lookedfor):
                 datetype = urel[0]['datetype'] if urel[0]['datetype'] else None,
                 timespan =  DateRange(urel[0]['datetype'], urel[0]['date1'], urel[0]['date2']).__str__() if urel[0]['datetype'] else None
                 )
-            print(upper)
+#            print(upper)
             if upper not in uppers:
                 uppers.append(upper)
         r = dict(
@@ -153,7 +153,7 @@ def search(lookedfor):
 def record(oid):
     print(f"Getting record {oid}")
     result = shareds.driver.session().run(cypher_record,id=oid).single()
-    print(result)
+#    print(result)
     if not result: return dict(status="OK",resultCount=0)
     p = result.get('p')
     largerPlaces = __process_places(result['largerPlaces'])
@@ -183,7 +183,7 @@ def record_with_subs(oid, **kwargs):
  #       result = shareds.driver.session().run(cypher_record, id=oid).single()   
     else:    
         result = shareds.driver.session().run(cypher_record, id=oid).single()
-    print(result)
+#    print(result)
     if not result: 
         return dict(status="Not found",statusText="Not found",resultCount=0)
     p = result.get('p')
