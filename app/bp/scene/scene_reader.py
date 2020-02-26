@@ -125,6 +125,14 @@ def get_person_full_data(uuid, owner, use_common=True):
     new_objs = [-1]
     while len(new_objs) > 0:
         new_objs = reader.read_object_citation_note_media(new_objs)
+        
+    # Calculate the average confidence of the sources
+    summa = 0
+    for cita in reader.citations.values():
+        summa += int(cita.confidence)
+        
+    aver = summa / len(reader.citations)
+    reader.person.confidence = "%0.1f" % aver # string with one decimal
 
     # 6. Read Sources s and Repositories r for all Citations
     #    for c in z:Citation
