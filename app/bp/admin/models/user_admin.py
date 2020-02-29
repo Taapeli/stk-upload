@@ -437,6 +437,8 @@ class UserAdmin():
             logging.debug(f'user update {user.email} {user.name}')
             if user.username == 'master': 
                 user.roles = ['master']
+            if user.username == 'guest': 
+                user.roles = ['guest']    
 #   Identifier and history fields are not to be updated
             result = tx.run(Cypher_adm.user_update, 
                 email = user.email,
@@ -445,7 +447,7 @@ class UserAdmin():
                 language = user.language,              
                 is_active = user.is_active,
                 roles = user.roles)
-            if user.username != 'master':
+            if user.username != 'master' or 'guest':
 #   Find list of previous user -> role connections
                 prev_roles = [rolenode.name for rolenode in shareds.user_datastore.find_UserRoles(user.email)]
 #   Delete connections that are not in edited connection list            
