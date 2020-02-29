@@ -626,7 +626,7 @@ RETURN COLLECT(n) AS names LIMIT 15
                 if p.names:
                     p.pname = p.names[0].name
                     
-                logger.info("# {}".format(p))
+                #logger.info("# {}".format(p))
                 p.parent = n.bpointer
                 ret.append(p)
         return ret

@@ -86,86 +86,36 @@ class DbTree():
 
     def load_to_tree_struct(self, node_id):
         """ Build a tree structure in memory from Neo4j query result
-            about self.node_id
+            about a Place with id=self.node_id
     
             Result must have the following mandatory fields:
-                nodes   terminal nodes
-                r       relation between terminal nodes
-                lv      lenght of the relation SIZE(r); 
-                        negative, if upwards to the root of the tree
+                nodes       terminal nodes
+                relations   list of relations so that node with id=rel.end is 
+                            the parent of node with id=rel.start
             Other field names from arguments:
                 name_field_name  node instance display name
                 type_field_name  node instance type
                 
         """
         self.tree = treelib.Tree()
-        nl = {}
-        nl[0] = 'root'
-        nstack = []
-        rl = {}
-        # Juurisolu 0 mahdollistaa solun lisäämisen ylimmän varsinaisen solun
-        # yläpuolelle
-        self.tree.create_node('', 0)
-        nstack.append((0, "", "root", "", -9999))
+        self.tree.create_node('', 0)  # an initial parent for all nodes
     
-        for nodes, level, relations in self._get_tree_branches(node_id):
-            # The result has all nodes in the relation and their connections
-            # Tuloksessa on kaikki ko. relaatioon osallistuvat solut ja niiden
-            # väliset yksittäiset yhteydet
+        hierarchy_result = self._get_tree_branches(node_id)
+        # first create all nodes (under initial parent)
+        for nodes, _level, relations in hierarchy_result:
             for node in nodes:
-                # <Node id=287043 labels={'Place'} 
-                #    properties={'handle': '_df87894b3d441856d402c87b38d', 'id': 'P0122', 
-                #    'type': 'Country', 'pname': 'Suomi', 'change': 1556957839}>
-                if not node.id in nl:
-                    nl[node.id] = node.get(self.name_field_name)            #["pname"]
-                    nstack.append((node.id,
-                                   node.get('uuid'), 
-                                   node.get(self.type_field_name), #["type"], 
-                                   node.get(self.name_field_name),          #["pname"], 
-                                   level))
+                if not self.tree.contains(node.id):
+                    self.tree.create_node(node.get(self.name_field_name), node.id, parent=0, 
+                                          data={self.type_field_name:node.get(self.type_field_name),'uuid':node.get('uuid')})
+    
+        # then move all nodes under correct parent
+        for nodes, _level, relations in hierarchy_result:
             for rel in relations:
-                # Walk thru all (start)-->(end) relations
-                #
-                # <Relationship id=117186 
-                #    nodes=(
-                #        <Node id=287984 labels={'Place'} 
-                #            properties={'coord': [60.64, 22.58], 'handle': '_dd4067f458c6cdc4f0e8e33254a', 
-                #                'id': 'P0616', 'type': 'City', 'pname': 'Aura', 'change': 1556955829}>, 
-                #        <Node id=287043 labels={'Place'} 
-                #            properties={'handle': '_df87894b3d441856d402c87b38d', 
-                #                'id': 'P0122', 'type': 'Country', 'pname': 'Suomi', 'change': 1556957839}>)
-                #    type='IS_INSIDE' properties={}>
-
-                if not rel.id in rl:
-                    rl[rel.id] = rel.end
-                    nid, nuuid, ntype, nname, lv = nstack.pop()
-                    if not nid:
-                        # ** FAILED! **
-                        logger.error(f"Hierarchy tree error: {nid}, {ntype}, {nname}, {lv}")
-#                         raise ValueError(f"Hierarchy tree error: {nid}, {ntype}, {nname}, {lv}")
-                        return self.tree
-
-                    if len(rl) == 1:    # Ensimmäinen solmu rootin alle
-                        nid1, nuuid1, ntype1, nname1, _lv1 = nstack.pop()
-                        rl[0] = rel.end
-                        logger.debug("create_node('{}', '{}', parent={}, data={})".\
-                                     format(nname1, nid1, 0, {'type':ntype1}))
-                        self.tree.create_node(nname1, nid1, parent=0, 
-                                              data={self.type_field_name:ntype1,'uuid':nuuid1})
-                    if lv > 0:
-                        parent = rel.end
-                    else:
-                        parent = self.tree.parent(rel.start).identifier
-                    # Add the new node by side on current; then move current under that 
-                    # Lisätään uusi solu ensin nykyisen rinnalle ja sitten siirretään nykyinen uuden alle
-                    logger.debug("create_node('{}', '{}', parent={}, data={})".\
-                                 format(nname, nid, parent, {'type':ntype}))
-                    self.tree.create_node(nname, nid, parent=parent, 
-                                          data={self.type_field_name:ntype,'uuid':nuuid})
-                    if lv < 0:
-                        logger.debug("  move_node('{}', '{}')".format(rel.start, nid))
-                        self.tree.move_node(rel.start, nid)
+                self.tree.move_node(rel.start, rel.end)
         return self.tree
+
+
+
 
 
     def print_tree(self):
