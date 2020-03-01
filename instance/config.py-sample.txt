@@ -36,66 +36,6 @@ MAIL_DEBUG = True
 ADMIN_EMAIL_FROM = '<sähköposti>'
 ADMIN_EMAIL_TO = '<oma sähköposti>'
 
-'''
-instance/config.py
-
-Instanssin toimintaympäristöä ohjaavat tiedot 
-
-Created on 17.11.2017
-@author: TimNal
-
-Changed 27.1. - 7.3.2019 / JMä
-'''
-STK_SYSNAME = 'Isotest'
-
-#DEBUG = False # Turns on debugging features in Flask
-DEBUG = True # Turns on debugging features in Flask
-FORCE_HTTPS = True
-
-##DB_HOST_PORT = "10.80.11.56"
-#DB_HOST_PORT = "node79277-stk-b.paas.datacenter.fi"
-#DB_USER = "admin"
-#DB_AUTH = "*"
-
-print('Luetaan instanssin config.py')
-
-#=============== Neo4j-tietokannan konfigurointi ================== 
-
-# 28.1.2019 / JMä
-#NEO4J_HOST = '10.80.11.56'
-#NEO4J_PORT = 7687
-NEO4J_URI = "bolt://10.80.12.144:7687"
-NEO4J_USERNAME = 'neo4j'
-NEO4J_PASSWORD = 'HpndN7c4rWgSLa'
-
-#=============== Salausavainten konfigurointi ================== 
-SECRET_KEY = 'super-secret'
-SECURITY_PASSWORD_SALT = 'more-secret'
-SECURITY_LOGIN_SALT = 'most-secret'
-SECURITY_CONFIRM_SALT = 'less-secret'
-
-#=============== Sähköpostin konfigurointi ==================
-MAIL_SERVER = 'smtp.gmail.com'
-#MAIL_SERVER = 'localhost'
-MAIL_PORT = 465
-#MAIL_USE_SSL = False
-MAIL_USE_SSL = True
-SECURITY_EMAIL_SENDER = "isotammi.tsto@gmail.com"
-#MAIL_DEFAULT_SENDER = 'Stk-admin'
-# Mail sender username
-MAIL_USERNAME = 'stk.sukututkimusseura+isotest@gmail.com'         # Sovelluksen oma sähköpostiosoite
-MAIL_PASSWORD = '2000ssSeura'                   # Sovelluksen sähköpostin salasana
-MAIL_ASCII_ATTACHMENTS = False
-MAIL_SUPPRESS_SEND = False
-MAX_EMAILS = None
-MAIL_DEBUG = True
-
-ADMIN_EMAIL_FROM = "isotammi.tsto@gmail.com"
-ADMIN_EMAIL_TO = "isotammi.tsto@gmail.com" 
-
-GUEST_USER_EMAIL = 'none'
-GUEST_USER_PASSWORD = 'dGFhcGVsaQ=='
-
 MAX_CONTENT_LENGTH = 30 * 1024 * 1024 # = 30MB    # change also LimitRequestBody in /etc/httpd/conf/httpd.conf if needed
 LIBSVM_FOLDER = "/var/www/webroot/libsvm-3.23"
 DEMO_URL = "https://demo.isotammi.net"
