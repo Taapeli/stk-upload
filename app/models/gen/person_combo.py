@@ -65,7 +65,9 @@ import traceback
 #     from models.gen.family_combo import Family_combo
 # except ImportError:
 #     pass
+import re
 
+re_years_range = re.compile(r'(\d+)-(\d+)')
 
 class Person_combo(Person):
     """ A Person combined from database person node, names, events etc.
@@ -757,13 +759,23 @@ RETURN person, name
                     return session.run(Cypher_person.get_events_by_refname, name=key)
                 elif rule == 'all':
                     # XXX tänne rajaus args['years'] mukaan
+                    first = None
+                    last = None
+                    if 'years' in args:
+                        match = re_years_range.match(args['years'])
+                        if match:
+                            first = int(match.group(1))
+                            last = int(match.group(2))
                     order = args.get('order')
                     if order == 1:      # order by first name
+                        #return session.run(Cypher_person.get_events_all_firstname(first, last))
                         return session.run(Cypher_person.get_events_all_firstname)
                     elif order == 2:    # order by patroname
+                        #return session.run(Cypher_person.get_events_all_patronyme(first, last))
                         return session.run(Cypher_person.get_events_all_patronyme)
                     else:
-                        return session.run(Cypher_person.get_events_all)
+                        return session.run(Cypher_person().get_events_all(first, last))
+                        #return session.run(Cypher_person.get_events_all)
                 else:
                     # Selected names and name types (untested?)
                     return session.run(Cypher_person.get_events_by_refname_use,

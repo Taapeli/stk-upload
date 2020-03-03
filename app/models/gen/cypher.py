@@ -173,14 +173,32 @@ RETURN batch.user AS user, person,
     _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
     ORDER BY TOUPPER(names[0].suffix), names[0].surname, names[0].firstname"""
 
-    get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_surname
+    def limit_years_clause(self, first, last):
+        """Clause to limit results to person's lifetime between FIRST and LAST (if not None).
+"""
+        if first is None:
+            return ""
+        if first > last:
+            (first,last) = (last,first)
+        return f"""
+WHERE person.earliest_possible_birth_year <= {last}
+  AND person.latest_possible_death_year >= {first}
+"""
 
-    get_events_all_firstname = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_firstname
+    def get_events_all(self, first, last):
+        return "MATCH (person:Person) -[:NAME]-> (name:Name)" \
+               + self.limit_years_clause(first, last) \
+               + self._get_events_tail + self._get_events_surname
 
-    get_events_all_patronyme = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_patronyme
+    def get_events_all_firstname(self, first, last):
+        return "MATCH (person:Person) -[:NAME]-> (name:Name)" \
+                + self.limit_years_clause(first, last) \
+                + self._get_events_tail + self._get_events_firstname
+
+    def get_events_all_patronyme(self, first, last):
+        return "MATCH (person:Person) -[:NAME]-> (name:Name)" \
+                + self.limit_years_clause(first, last) \
+                + self._get_events_tail + self._get_events_patronyme
 
     get_events_uniq_id = """
 MATCH (person:Person) -[:NAME]-> (name:Name)

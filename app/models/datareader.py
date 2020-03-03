@@ -95,11 +95,11 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
         # Person
 
         node = record['person']
-        # XXX tämä paras paikka suodattaa args['years'] mukaan?
-        if 'years' in args and not overlaps(node['earliest_possible_birth_year'], 
-                                            node['latest_possible_death_year'],
-                                            args['years']):
-            continue
+        # XXX tämä tehoton paikka suodattaa args['years'] mukaan?
+        #if 'years' in args and not overlaps(node['earliest_possible_birth_year'],
+        #                                    node['latest_possible_death_year'],
+        #                                    args['years']):
+        #    continue
         if node.id != p_uniq_id:
             # The same person is not created again
             p = Person_combo.from_node(node)
