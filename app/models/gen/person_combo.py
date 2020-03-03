@@ -756,6 +756,7 @@ RETURN person, name
                 elif rule == 'refname':
                     return session.run(Cypher_person.get_events_by_refname, name=key)
                 elif rule == 'all':
+                    # XXX tänne rajaus args['years'] mukaan
                     order = args.get('order')
                     if order == 1:      # order by first name
                         return session.run(Cypher_person.get_events_all_firstname)
