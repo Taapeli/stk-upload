@@ -758,7 +758,7 @@ RETURN person, name
                 elif rule == 'refname':
                     return session.run(Cypher_person.get_events_by_refname, name=key)
                 elif rule == 'all':
-                    # XXX tänne rajaus args['years'] mukaan
+                    # Rajaus args['years'] mukaan
                     first = None
                     last = None
                     if 'years' in args:
@@ -768,14 +768,11 @@ RETURN person, name
                             last = int(match.group(2))
                     order = args.get('order')
                     if order == 1:      # order by first name
-                        #return session.run(Cypher_person.get_events_all_firstname(first, last))
-                        return session.run(Cypher_person.get_events_all_firstname)
+                        return session.run(Cypher_person().get_events_all_firstname(first, last))
                     elif order == 2:    # order by patroname
-                        #return session.run(Cypher_person.get_events_all_patronyme(first, last))
-                        return session.run(Cypher_person.get_events_all_patronyme)
+                        return session.run(Cypher_person().get_events_all_patronyme(first, last))
                     else:
                         return session.run(Cypher_person().get_events_all(first, last))
-                        #return session.run(Cypher_person.get_events_all)
                 else:
                     # Selected names and name types (untested?)
                     return session.run(Cypher_person.get_events_by_refname_use,

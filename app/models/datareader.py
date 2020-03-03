@@ -34,9 +34,7 @@ from models.gen.repository import Repository
 from models.gen.dates import DateRange
 from models.owner import OwnerFilter
 import traceback
-import re
-from _ast import Or
-from _operator import or_
+
 
 def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=False, order=0):
     """ Reads Person Name and Event objects for display.
@@ -54,17 +52,6 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
             keys = ['surname',value]    in routes.pick_selection
             keys = ("uniq_id",value)    in routes.pick_selection
     """
-    def overlaps(beg, end, years):
-        """ Check if YEARS range overlaps range BEG .. END.
-        """
-        re_range = re.compile(r'(\d+)-(\d+)')
-        match = re_range.match(years)
-        if match:
-            first = int(match.group(1))
-            last = int(match.group(2))
-            return (first >= beg and first <= end or
-                    last >= beg and last <= end)
-        return True
 
     persons = []
     p = None
@@ -95,11 +82,6 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
         # Person
 
         node = record['person']
-        # XXX tämä tehoton paikka suodattaa args['years'] mukaan?
-        #if 'years' in args and not overlaps(node['earliest_possible_birth_year'],
-        #                                    node['latest_possible_death_year'],
-        #                                    args['years']):
-        #    continue
         if node.id != p_uniq_id:
             # The same person is not created again
             p = Person_combo.from_node(node)
