@@ -160,7 +160,7 @@ def show_persons_all():
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
-    # About how mamy items to read
+    # How many objects are shown?
     count = int(request.args.get('c', 100))
 
     logger.info(f"-> bp.scene.routes.show_persons_all: forward from '{my_filter.scope[0]}'")
@@ -401,22 +401,21 @@ def show_place_page(locid):
 def show_sources(theme=None):
     """ Lähdeluettelon näyttäminen ruudulla for menu(5)
     
-        Todo: Examples?
-            /scene/sources --> birth; shorter list?
-            /scene/sources/all    <-- now no theme
-            /scene/sources/birth
-            /scene/sources/wedding?year1=1800%year2=1850 <-- todo
+        Possible args example: ?years=1800-1899&theme=birth
+        - source years (#todo)
+        - theme, one of {"birth", "babtism", "wedding", "death", "move"}
+        Missing theme or years = all
+        Theme may also be expressed in url path
 
     """
-    if theme:
-        # Todo: Possible year filter? Needs pre-calculated varibles?
-        year1 = request.args.get('year1', None)
-        year2 = request.args.get('year2', None)
-        filt = (theme, year1, year2)
+    if request.args:
+        args=request.args
     else:
-        filt=None
+        args={}
+    if theme:
+        args['theme'] = theme
     try:
-        sources, title = Source.get_source_list(filt)
+        sources, title = Source.get_source_list(args)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_sources")

@@ -21,7 +21,7 @@ class OwnerFilter():
         
         - user          str     Username from current_user, if any
         - owner_filter  int     Code expressing filter method by data owners
-                                from request.div or session.owner_filter.
+                                from request.div+div2 or session.owner_filter.
                                 Default = 1 (common) if neither present
             COMMON - 1          approved common data 'Isotammi'
             OWN - 2             all user's own candidate materials
@@ -57,12 +57,12 @@ class OwnerFilter():
     NEXT_END = '>'    # end reached: there is nothing forwards
 
 
-    class OwnerChoices():
+    class MaterialChoices():
         """ Represents all possible combibations of selection by owner and batch. 
         """
         COMMON = 1
         OWN = 2
-        BATCH = 4
+        BATCH = 4   # Currently not implemented
 
         def __init__(self):
             ''' Initialise choise texts in user language '''
@@ -133,35 +133,51 @@ class OwnerFilter():
             Set filtering properties from user session, request and current user.
         '''
         self.session = user_session
-        self.choices = self.OwnerChoices()
-        self.filter = self.OwnerChoices.COMMON
+        self.choices = self.MaterialChoices()   # set of allowed material choices
+        self.filter = self.MaterialChoices.COMMON
+        self.years = []                         # example [1800, 1899]
 
         ''' Set active user, if any username '''
         if current_user:
             if current_user.is_active and current_user.is_authenticated:
-                user = current_user.username
+                self.user = current_user.username
             else:
-                user = None
+                self.user = None
         else:
-            user = user_session.get('username', None)
-        self.user = user
+            self.user = user_session.get('username', None)
 
         """ Store the request parameters div=1&div2=2&cmp=1 as session variable owner_filter.
             Returns owner filter name if detected, otherwise False
         """
-        div = 0
+        new_selection = 0
         if request:
-            # The div argument from request is stored in self.filter
-            div2 = int(request.args.get('div2', 0))
-            div = div2 + int(request.args.get('div', 0))
-            if div:
-                if request.args.get('cmp', ''):
-                    div = div | 1
-                self.filter = self.choices.get_valid_key(div)
+            # Selected years (from-to)
+            #    years=1111-2222
+            years = request.args.get('years', None)
+            if years:
+                y1, y2 = years.split('-')
+                if y1:  yi1 = int(y1)
+                else:   yi1 = 0
+                if y2:  yi2 = int(y2)
+                else:   yi2 = 9999
+                self.years = [yi1, yi2]     # selected years [from, to]
+                print(f'OwnerFilter: Objects between years {self.years}')
+
+            # Selected material for display
+            #    div=1 -> show approved material
+            #    div2=2 -> show researcher's own data
+            new_selection = int(request.args.get('div', 0)) + int(request.args.get('div2', 0))
+            if new_selection:
+                # Take also common data?
+                if request.args.get('cmp', ''): 
+                    new_selection = new_selection | 1
+                # Got new material selection?
+                self.filter = self.choices.get_valid_key(new_selection)
                 if self.filter:
                     self.session['owner_filter'] = self.filter
                     print(f"OwnerFilter: Now owner_filter={self.filter}")
-        if div == 0:
+
+        if new_selection == 0:
             # If got no request owner_filter, use session value or 1
             self.filter = user_session.get('owner_filter', self.choices.COMMON)
             print(f"OwnerFilter: Uses same or default owner_filter={self.filter}")
@@ -177,7 +193,7 @@ class OwnerFilter():
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner.
 
-            Always when others but self.OwnerChoices.OWN only are required
+            Always when others but self.MaterialChoices.OWN only are required
         '''
         
         return (self.filter & 2) > 0
@@ -185,7 +201,7 @@ class OwnerFilter():
     def use_common(self):
         ''' Tells, if you should select objects from common database.
 
-            Always when self.OwnerChoices.COMMON is required
+            Always when self.MaterialChoices.COMMON is required
         '''
         return (self.filter & 1) > 0
 

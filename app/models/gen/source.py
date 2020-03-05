@@ -186,7 +186,7 @@ return s'''
 
 
     @staticmethod       
-    def get_source_list(filt=None):
+    def get_source_list(args=[]):
         """ Read all sources with notes and repositories, optionally limited by keywords.
         
             Luetaan kaikki lähteet tai teeman mukaan valittuna.
@@ -207,9 +207,9 @@ return s'''
 # └───────┴───────┴────────────────┴────────────────┴────────────┴──────┴─────────┘
 
         ret = []
-        if filt and len(filt) == 3:
+        theme = args.get('theme', '')
+        if theme:
             # Filtered by theme
-            theme, _y1, _y2 = filt
             THEMES = {"birth": ('syntyneet','födda'),
                       "babtism": ('kastetut','döpta'),
                       "wedding": ('vihityt','vigda'),
@@ -223,7 +223,6 @@ return s'''
                                      key1=key1, key2=key2)
         else:
             # Show all
-            theme = ""
             with shareds.driver.session() as session:
                 result = session.run(Cypher_source.get_sources_w_notes)
 
