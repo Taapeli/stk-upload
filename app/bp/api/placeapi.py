@@ -44,14 +44,14 @@ cypher_search = """
 MATCH (p:Place {pname:$pname, type:'City'}) WHERE left(p.id, 2) = 'Pr'
     OPTIONAL MATCH (p)-[ur:IS_INSIDE*]->(up:Place)
 RETURN p, 
-    COLLECT(DISTINCT [ur, up]) as largerPlaces
+    COLLECT(DISTINCT [ur, up, up.id]) as largerPlaces
 """
 
 """ or
 MATCH p = (:Place {pname:'Angelniemi', type:'City'})-[:IS_INSIDE*]->(up:Place)
     WITH *, relationships(p) AS ur
 RETURN p, 
-    COLLECT(DISTINCT [ur, up]) as largerPlaces
+    COLLECT(DISTINCT [ur, up, up.id]) as largerPlaces
 """    
  
 cypher_record = """
@@ -59,7 +59,7 @@ MATCH (p:Place) WHERE p.id = $id
     OPTIONAL MATCH (p)-[:NAME]->(pn:Place_name)
     OPTIONAL MATCH (p)-[:NOTE]->(n:Note)    
     OPTIONAL MATCH (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
-    OPTIONAL MATCH (p)-[h1:IS_INSIDE]->(largerPlace:Place) 
+    OPTIONAL MATCH (p)-[h1:IS_INSIDE*]->(largerPlace:Place) 
 RETURN p,
     COLLECT(DISTINCT pn.pname) as pnames,
     COLLECT(DISTINCT n) as pnotes,
@@ -80,18 +80,18 @@ RETURN p,
     COLLECT (DISTINCT [h2, smallerPlace, smallerPlace.id]) as smallerPlaces
 """
 
-# cypher_selected_records_with_subs = """
-# MATCH (p:Place) WHERE p.id IN $oids 
-#     OPTIONAL MATCH (p)-[:NAME]->(pn:Place_name)
-#     OPTIONAL MATCH (p)-[:NOTE]->(n:Note)    
-#     OPTIONAL MATCH (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
-#     OPTIONAL MATCH (p)-[h1:IS_INSIDE]->(largerPlace:Place) 
-# RETURN p,
-#     COLLECT(DISTINCT pn.pname) as pnames,
-#     COLLECT(DISTINCT n) as pnotes,
-#     COLLECT (DISTINCT [h1, largerPlace, largerPlace.id]) as largerPlaces,
-#     COLLECT (DISTINCT [h2, smallerPlace, smallerPlace.id]) as smallerPlaces
-# """
+cypher_selected_records_with_subs = """
+MATCH (p:Place) WHERE p.id IN $oids 
+    OPTIONAL MATCH (p)-[:NAME]->(pn:Place_name)
+    OPTIONAL MATCH (p)-[:NOTE]->(n:Note)    
+    OPTIONAL MATCH (smallerPlace:Place)-[h2:IS_INSIDE]->(p) 
+    OPTIONAL MATCH (p)-[h1:IS_INSIDE]->(largerPlace:Place) 
+RETURN p,
+    COLLECT(DISTINCT pn.pname) as pnames,
+    COLLECT(DISTINCT n) as pnotes,
+    COLLECT (DISTINCT [h1, largerPlace, largerPlace.id]) as largerPlaces,
+    COLLECT (DISTINCT [h2, smallerPlace, smallerPlace.id]) as smallerPlaces
+"""
 
 # cypher_record_with_selected_subs = """
 # MATCH (p:Place) WHERE p.id = $oid 
@@ -108,31 +108,32 @@ RETURN p,
 
 
 def search(lookedfor):
-    print(f"Looking for {lookedfor}")
-    result = shareds.driver.session().run(cypher_search, pname=lookedfor)
+#    print(f"Looking for {lookedfor}")
+    result = shareds.driver.session().run(cypher_search, pname=lookedfor)#
     records = []
     for rec in  result:
         p = rec['p']
-        largerPlaces = rec['largerPlaces']
-        uppers = []
-#        smallerPlaces = rec['smallerPlaces']
-        for urel, largerPlace in largerPlaces:
-#            urel=up['ur'] 
-#            print(urel)
-#            print(largerPlace)
-            upper = dict(
-                id = largerPlace['id'],
-                pname = largerPlace['pname'],
-                type = largerPlace['type'],
-                coord = largerPlace.get('coord'),
-                date1 = urel[0]['date1'] if urel[0]['date1'] else None,
-                date2 = urel[0]['date2'] if urel[0]['date2'] else None,
-                datetype = urel[0]['datetype'] if urel[0]['datetype'] else None,
-                timespan =  DateRange(urel[0]['datetype'], urel[0]['date1'], urel[0]['date2']).__str__() if urel[0]['datetype'] else None
-                )
-#            print(upper)
-            if upper not in uppers:
-                uppers.append(upper)
+        uppers = __process_larger_places(rec['largerPlaces'])
+#         largerPlaces = rec['largerPlaces']
+#         uppers = []
+# #        smallerPlaces = rec['smallerPlaces']
+#         for urel, largerPlace in largerPlaces:
+# #            urel=up['ur'] 
+# #            print(urel)
+# #            print(largerPlace)
+#             upper = dict(
+#                 id = largerPlace['id'],
+#                 pname = largerPlace['pname'],
+#                 type = largerPlace['type'],
+#                 coord = largerPlace.get('coord'),
+#                 date1 = urel[0]['date1'] if urel[0]['date1'] else None,
+#                 date2 = urel[0]['date2'] if urel[0]['date2'] else None,
+#                 datetype = urel[0]['datetype'] if urel[0]['datetype'] else None,
+#                 timespan =  DateRange(urel[0]['datetype'], urel[0]['date1'], urel[0]['date2']).__str__() if urel[0]['datetype'] else None
+#                 )
+# #            print(upper)
+#             if upper not in uppers:
+#                 uppers.append(upper)
         r = dict(
             uuid=p['uuid'],
             pname=p['pname'],
@@ -151,12 +152,12 @@ def search(lookedfor):
 
 
 def record(oid):
-    print(f"Getting record {oid}")
+#    print(f"Getting record {oid}")
     result = shareds.driver.session().run(cypher_record,id=oid).single()
 #    print(result)
     if not result: return dict(status="OK",resultCount=0)
     p = result.get('p')
-    largerPlaces = __process_places(result['largerPlaces'])
+    largerPlaces = __process_larger_places(result['largerPlaces'])
     smallerPlaces = __process_places(result['smallerPlaces'])
 
     record = dict(
@@ -174,13 +175,13 @@ def record(oid):
 
 
 def record_with_subs(oid, **kwargs):
-    print(f"Getting record {oid} with all subs")
+#    print(f"Getting record {oid} with all subs")
     if 'd1' in kwargs and 'd2' in kwargs and 'dt' in kwargs:
         dt = int(kwargs['dt'])
         d1 = int(kwargs['d1'])
         d2 = int(kwargs['d2'])
-        result = shareds.driver.session().run(cypher_record_at, id=oid, dt=dt, d1=d1, d2=d2).single() 
- #       result = shareds.driver.session().run(cypher_record, id=oid).single()   
+        result = shareds.driver.session().run(cypher_record, id=oid, dt=dt, d1=d1, d2=d2).single() 
+#       result = shareds.driver.session().run(cypher_record, id=oid).single()   
     else:    
         result = shareds.driver.session().run(cypher_record, id=oid).single()
 #    print(result)
@@ -188,7 +189,7 @@ def record_with_subs(oid, **kwargs):
         return dict(status="Not found",statusText="Not found",resultCount=0)
     p = result.get('p')
 #    print(f"id={p['id']} name={p['pname']}")
-    largerPlaces = __process_places(result['largerPlaces'])
+    largerPlaces = __process_larger_places(result['largerPlaces'])
     smallerPlaces = __process_places(result['smallerPlaces'])
 
     resultrecord = dict(
@@ -206,6 +207,27 @@ def record_with_subs(oid, **kwargs):
      "record": resultrecord, 
     }
 
+def __process_larger_places(largerPlaces):
+    uppers = []       
+    for urel, largerPlace, lid in largerPlaces:
+#            urel=up['ur'] 
+#            print(urel)
+#            print(largerPlace)
+        upper = dict(
+            id = largerPlace['id'],
+            pname = largerPlace['pname'],
+            type = largerPlace['type'],
+            coord = largerPlace.get('coord'),
+            date1 = urel[0]['date1'] if urel[0]['date1'] else None,
+            date2 = urel[0]['date2'] if urel[0]['date2'] else None,
+            datetype = urel[0]['datetype'] if urel[0]['datetype'] else None,
+            timespan =  DateRange(urel[0]['datetype'], urel[0]['date1'], urel[0]['date2']).__str__() if urel[0]['datetype'] else None
+            )
+#            print(upper)
+        if upper not in uppers:
+            uppers.append(upper)
+    return uppers    
+    
 def __process_places(places):
     rplaces = []
     for h1, place, pid in places: 

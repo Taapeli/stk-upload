@@ -50,7 +50,7 @@ def fetch_namefamily(rname):
 #    print(f"Getting name family of {rname}")
     result = shareds.driver.session().run(cypher_fetch_namefamily, lookfor=rname)
     if not result:
-        print(f"namefamily for {rname}  not found") 
+#        print(f"namefamily for {rname}  not found") 
         return dict(status="Not found",statusText="Not found",resultCount=0)
     for rec in result:
         namefamily = rec['namefamily']
@@ -60,6 +60,6 @@ def fetch_namefamily(rname):
             "resultCount": 1,
             "record": namefamily, 
                }
-    print(f"No namefamily in result for {rname} found")     
+#    print(f"No namefamily in result for {rname} found")     
     return dict(status="Not found",statusText="Not found",resultCount=0)   
 
