@@ -668,35 +668,39 @@ MATCH (c:Citation) -[:SOURCE]-> (s:Source)
     OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
 RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 
-    get_sources_w_notes = """
-MATCH (s:Source)
-WITH s ORDER BY toUpper(s.stitle)
-    OPTIONAL MATCH (s) -[:NOTE]-> (note)
-    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
-    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
-       collect(DISTINCT [r.medium, rep]) as repositories,
-       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
-ORDER BY toUpper(s.stitle)"""
-    get_selected_sources_w_notes = """
-MATCH (s:Source)
-        WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
-WITH s ORDER BY toUpper(s.stitle)
-    OPTIONAL MATCH (s) -[:NOTE]-> (note)
-    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
-    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
-       collect(DISTINCT [r.medium, rep]) as repositories,
-       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
-ORDER BY toUpper(s.stitle)"""
-
-    get_a_source_w_notes = """
-MATCH (source:Source) WHERE ID(source)=$sid
-    OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (source) -[:NOTE]-> (n)
-RETURN source, COLLECT(n) AS notes, COLLECT([r.medium,rep]) AS reps"""
+#v0.4: pe.Source_cypher.SourceCypher.get_auditted_set
+#     get_sources_w_notes = """
+# MATCH (s:Source)
+# WITH s ORDER BY toUpper(s.stitle)
+#     OPTIONAL MATCH (s) -[:NOTE]-> (note)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+#     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        collect(DISTINCT [r.medium, rep]) as repositories,
+#        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)"""
+#
+#v0.4: pe.Source_cypher.SourceCypher.get_auditted_selection_set
+#     get_selected_sources_w_notes = """
+# MATCH (s:Source)
+#         WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
+# WITH s ORDER BY toUpper(s.stitle)
+#     OPTIONAL MATCH (s) -[:NOTE]-> (note)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+#     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        collect(DISTINCT [r.medium, rep]) as repositories,
+#        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)"""
+# 
+#v0.4: pe.Source_cypher.SourceCypher.get_an_auditted_selection_set
+#     get_a_source_w_notes = """
+# MATCH (source:Source) WHERE ID(source)=$sid
+#     OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
+#     OPTIONAL MATCH (source) -[:NOTE]-> (n)
+# RETURN source, COLLECT(n) AS notes, COLLECT([r.medium,rep]) AS reps"""
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 

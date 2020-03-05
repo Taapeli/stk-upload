@@ -425,7 +425,8 @@ def show_sources(series=None):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_sources")
-    return render_template("/scene/sources.html", sources=sources, title=title)
+    return render_template("/scene/sources.html", sources=sources, title=title,
+                           owner_filter=my_filter)
 
 
 @bp.route('/scene/source=<int:sourceid>')

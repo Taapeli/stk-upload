@@ -10,10 +10,10 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 import shareds
 from .base import NodeObject
-from .cypher import Cypher_source
+from pe.source_cypher import SourceCypher   # v0.4 structures
+from .cypher import Cypher_source  # obsolete v0.3 structures
 from .repository import Repository
 from .note import Note
-#from models.cypher_gramps import Cypher_source_w_handle
 
 
 class Source(NodeObject):
@@ -34,12 +34,7 @@ class Source(NodeObject):
         self.stitle = ''
         self.sauthor = ''
         self.spubinfo = ''
-        
-#         self.citation_ref = []  # uniq_ids (previous citationref_hlink = '')
-#         self.place_ref = []     # uniq_ids (previous placeref_hlink = '')
-#         self.media_ref = []     # uniq_ids (proveous self.objref_hlink = '')
         self.note_ref = []      # uniq_ids (previously note[])
-#         self.repocitory = None  # Repository object For creating display sets (vanhempi)
 
         # For display combo
         #Todo: onko repositories, citations käytössä?
@@ -142,7 +137,7 @@ return s'''
             Luetaan lähteen tiedot
         """
                         
-        return  shareds.driver.session().run(Cypher_source.get_a_source_w_notes,
+        return  shareds.driver.session().run(SourceCypher.get_own_sets,
                                              sid=uniq_id)
     
     
@@ -185,45 +180,71 @@ return s'''
                                             sid=int(sourceid))
 
 
-    @staticmethod       
+    @staticmethod
     def get_source_list(o_filter=None):
         """ Read all sources with notes and repositories, optionally limited by keywords.
         
-            Todo: Luetaan valitut lähteet teeman mukaan valittuna.
             Todo: Valinta vuosien mukaan
             Todo: tuloksen sivuttaminen esim. 100 kpl / sivu
         """
-# ╒═════════╤═════╤════════════════╤════════════════╤═════════╤═════════╤═════════╕
-# │"uniq_id"│"id" │"stitle"        │"repository"    │"medium" │"cit_cnt"│"ref_cnt"│
-# ╞═══════╪═══════╪════════════════╪════════════════╪════════════╪══════╪═════════╡
-# │29442  │"S0253"│"Ansioluetteloko│"Kansallisarkist│"Book"      │1     │1        │
-# │       │       │koelma"         │o"              │            │      │         │
-# ├───────┼───────┼────────────────┼────────────────┼────────────┼──────┼─────────┤
-# │29212  │"S0004"│"Borgåbladet"   │"Kansalliskirjas│"Newspaper" │1     │0        │
-# │       │       │                │ton digitoidut s│            │      │         │
-# │       │       │                │anomalehdet"    │            │      │         │
-# └───────┴───────┴────────────────┴────────────────┴────────────┴──────┴─────────┘
+        sources = []
 
-        ret = []
-        if o_filter.series:
-            # Filtered by series (Lähdesarja)
-            THEMES = {"birth": ('syntyneet','födda'),
-                      "babtism": ('kastetut','döpta'),
-                      "wedding": ('vihityt','vigda'),
-                      "death": ('kuolleet','döda'),
-                      "move": ('muuttaneet','flyttade')
-                }
-            key1, key2 = THEMES[o_filter.series]
-            print(f'# Sources containing "{key1}" or "{key2}"')
-            with shareds.driver.session() as session:
-                result = session.run(Cypher_source.get_selected_sources_w_notes,
-                                     key1=key1, key2=key2)
-        else:
-            # Show all
-            with shareds.driver.session() as session:
-                result = session.run(Cypher_source.get_sources_w_notes)
+        with shareds.driver.session() as session:
+            if o_filter.series:
+                # Filtered by series (Lähdesarja)
+                THEMES = {"birth": ('syntyneet','födda'),
+                          "babtism": ('kastetut','döpta'),
+                          "wedding": ('vihityt','vigda'),
+                          "death": ('kuolleet','döda'),
+                          "move": ('muuttaneet','flyttade')
+                    }
+                key1, key2 = THEMES[o_filter.series]
+                print(f'# Sources containing "{key1}" or "{key2}"')
+            
+                if o_filter.filter == o_filter.choices.COMMON: 
+                    print("get_source_list: approved common only")
+                    result = session.run(SourceCypher.get_auditted_set_selections,
+                                         key1=key1, key2=key2)
+                elif o_filter.filter == o_filter.choices.OWN:
+                    # Show my researcher data
+                    print("get_source_list: my researcher data")
+                    result = session.run(SourceCypher.get_own_set_selections,
+                                         key1=key1, key2=key2)
+                else:
+                    # No other choices implemented
+                    raise KeyError(f"get_source_list: invalid filter value {o_filter.filter}")
+            else:
+                # Show all series
+                if o_filter.filter == o_filter.choices.COMMON: 
+                    print("get_source_list: approved common only")
+                    result = session.run(SourceCypher.get_auditted_sets)
+                elif o_filter.filter == o_filter.choices.OWN:
+                    # Show my researcher data
+                    print("get_source_list: my researcher data")
+                    result = session.run(SourceCypher.get_own_sets)
+                else:
+                    # No other choices implemented
+                    raise KeyError(f"get_source_list: invalid filter value {o_filter.filter}")
 
-        for _uniq_id, source, notes, repositories, cit_cnt, ref_cnt in result:
+        for record in result:
+            # <Record 
+            #    owner_type='PASSED' 
+            #    source=<Node id=333338 labels={'Source'}
+            #        properties={'id': 'S0029', 'stitle': 'Lapinjärvi vihityt 1788-1803 vol  es346', 
+            #            'uuid': '4637e07dcc7f42c09236a8482fb01b7c', 'spubinfo': '', 'sauthor': '', 
+            #            'change': 1532807569}>
+            #    notes=[
+            #        <Node id=445002 labels={'Note'} 
+            #            properties={'id': 'N2207', 'text': '', 'type': 'Source Note', 
+            #                'uuid': 'e6efcc1fbcad4dcd85352fd95cd5bf35', 'url': 'http://www.sukuhistoria.fi/sshy/sivut/jasenille/paikat.php?bid=3788',
+            #                'change': 1532807569}>] 
+            #    repositories=[
+            #        [   'Book', 
+            #            <Node id=393661 labels={'Repository'} 
+            #                properties={'id': 'R0003', 'rname': 'Lapinjärven seurakunnan arkisto',
+            #                    'type': 'Archive', 'uuid': 'b6171feb05bc47de87ee509a79821d8f',
+            #                    'change': 1577815469}>]] cit_cnt=0 ref_cnt=0>
+            
             # <Record
             # 0  uniq_id=242567 
             # 1  source=<Node id=242567 labels={'Source'} 
@@ -240,28 +261,24 @@ return s'''
             # 4  cit_cnt=1 
             # 5  ref_cnt=1
             # >
-
+            source = record['source']
             s = Source.from_node(source)
-
+            notes = record['notes']
             for note in notes:
                 n = Note.from_node(note)
                 s.notes.append(n)
-
-            for repo_item in repositories:
+            repositories = record['repositories']
+            for repo in repositories:
                 # [medium, repo_node]
-                if repo_item[1] != None:
-                    rep = Repository.from_node(repo_item[1])
-                    rep.medium = repo_item[0]
+                if repo[1] != None:
+                    rep = Repository.from_node(repo[1])
+                    rep.medium = repo[0]
                     s.repositories.append(rep)
-#                 s.repo_name = record['repository']
-#                 s.medium = record['medium']
-            s.cit_cnt = cit_cnt
-            s.ref_cnt = ref_cnt
-#                 s.cit_cnt = record['cit_cnt']
-#                 s.ref_cnt = record['ref_cnt']
-            ret.append(s)
+            s.cit_cnt = record['cit_cnt']
+            s.ref_cnt = record['ref_cnt']
+            sources.append(s)
 
-        return ret, o_filter.series
+        return sources, o_filter.series
 
     @staticmethod       
     def get_source_citation (uniq_id):

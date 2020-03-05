@@ -4,7 +4,6 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-{% set cnt=sources|count %}
 <style>
 td.ColumnSource ul { margin: 0.5em;}
 td.ColumnSource ul li { font-size: smaller; }
@@ -14,22 +13,31 @@ td ul li p { margin: 0 0 0.3em 0; }
 
 <div id="startdiv">
     <h2>{{ _('List of Sources') }}{% if title %} ({{ _(title) }}){% endif %}</h2>
-    <p><small>– Kaikki data, ei huomioida aineiston omistajaa</small></p>
 </div>
 
 {{ macro.menu(5) }}
-	<div class="content" id="Individuals">
-		<p id="description">
-		  {{ _('This page contains a directory of %(num)s sources.',num=cnt) }}
-		</p>
-		<p id="description">{{ _("Select series:") }}
-          <a href="/scene/sources" class="inlink">{{ _('all') }}</a> |
-          <a href="/scene/sources/birth" class="inlink">{{ _('birth') }}</a> |
-          <a href="/scene/sources/babtism" class="inlink">{{ _('babtism') }}</a> |
-          <a href="/scene/sources/wedding" class="inlink">{{ _('wedding') }}</a> |
-          <a href="/scene/sources/death" class="inlink">{{ _('death') }}</a> |
-          <a href="/scene/sources/move" class="inlink">{{ _('move') }}</a>
-		</p>
+    <div class="content" id="Individuals">
+        <div id="summaryarea">
+            <div class="flex-container">
+	            <div id="description">
+		            <p>{{ _('This page contains a directory of %(num)s sources.',num=sources|count) }}
+		                {{ _('data set') }} <b>{{ owner_filter.owner_str() }}</b>
+{% if owner_filter.user %}
+		                (<i><a href="/" title="{{ _('Change the data set shown') }}" 
+		                     style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
+{% endif %}         </p>
+					<p>{{ _("Select series:") }}
+			          <a href="/scene/sources" class="inlink">{{ _('all') }}</a> |
+			          <a href="/scene/sources/birth" class="inlink">{{ _('birth') }}</a> |
+			          <a href="/scene/sources/babtism" class="inlink">{{ _('babtism') }}</a> |
+			          <a href="/scene/sources/wedding" class="inlink">{{ _('wedding') }}</a> |
+			          <a href="/scene/sources/death" class="inlink">{{ _('death') }}</a> |
+			          <a href="/scene/sources/move" class="inlink">{{ _('move') }}</a>
+					</p>
+				</div>
+            </div>
+        </div>
+
 		<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
         {% for s in sources %}
