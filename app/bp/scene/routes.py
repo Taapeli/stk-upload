@@ -156,7 +156,7 @@ def show_persons_all():
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selection
+    # Set filter by owner and the data selections
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
@@ -283,7 +283,7 @@ def show_families():
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selection
+    # Set filter by owner and the data selections
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
@@ -348,7 +348,7 @@ def show_places():
     t0 = time.time()
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selection
+    # Set filter by owner and the data selections
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
@@ -397,25 +397,31 @@ def show_place_page(locid):
 # ------------------------------ Menu 5: Sources --------------------------------
 
 @bp.route('/scene/sources')
-@bp.route('/scene/sources/<theme>')
-def show_sources(theme=None):
+@bp.route('/scene/sources/<series>')
+def show_sources(series=None):
     """ Lähdeluettelon näyttäminen ruudulla for menu(5)
     
-        Possible args example: ?years=1800-1899&theme=birth
+        Possible args example: ?years=1800-1899&series=birth
         - source years (#todo)
-        - theme, one of {"birth", "babtism", "wedding", "death", "move"}
-        Missing theme or years = all
+        - series, one of {"birth", "babtism", "wedding", "death", "move"}
+        Missing series or years = all
         Theme may also be expressed in url path
 
     """
-    if request.args:
-        args=request.args
-    else:
-        args={}
-    if theme:
-        args['theme'] = theme
+    print(f"--- {request}")
+    print(f"--- {user_session}")
+    # Set filter by owner and the data selections
+    my_filter = OwnerFilter(user_session, current_user, request)
+#Todo: show by page
+#     # Which range of data is shown
+#     my_filter.set_scope_from_request(request, 'source_scope')
+#     # How many objects are shown?
+#     count = int(request.args.get('c', 100))
+
+    if series:
+        my_filter.series = series
     try:
-        sources, title = Source.get_source_list(args)
+        sources, title = Source.get_source_list(my_filter)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_sources")
@@ -443,7 +449,7 @@ def show_medias():
     t0 = time.time()
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selection
+    # Set filter by owner and the data selections
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'media_scope')

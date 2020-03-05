@@ -186,14 +186,12 @@ return s'''
 
 
     @staticmethod       
-    def get_source_list(args=[]):
+    def get_source_list(o_filter=None):
         """ Read all sources with notes and repositories, optionally limited by keywords.
         
-            Luetaan kaikki lähteet tai teeman mukaan valittuna.
-            
-            filt example: ("birth", 1800, 1820)
-            
-            Todo: filter by years would need pre-calculated variables
+            Todo: Luetaan valitut lähteet teeman mukaan valittuna.
+            Todo: Valinta vuosien mukaan
+            Todo: tuloksen sivuttaminen esim. 100 kpl / sivu
         """
 # ╒═════════╤═════╤════════════════╤════════════════╤═════════╤═════════╤═════════╕
 # │"uniq_id"│"id" │"stitle"        │"repository"    │"medium" │"cit_cnt"│"ref_cnt"│
@@ -207,16 +205,15 @@ return s'''
 # └───────┴───────┴────────────────┴────────────────┴────────────┴──────┴─────────┘
 
         ret = []
-        theme = args.get('theme', '')
-        if theme:
-            # Filtered by theme
+        if o_filter.series:
+            # Filtered by series (Lähdesarja)
             THEMES = {"birth": ('syntyneet','födda'),
                       "babtism": ('kastetut','döpta'),
                       "wedding": ('vihityt','vigda'),
                       "death": ('kuolleet','döda'),
                       "move": ('muuttaneet','flyttade')
                 }
-            key1, key2 = THEMES[theme]
+            key1, key2 = THEMES[o_filter.series]
             print(f'# Sources containing "{key1}" or "{key2}"')
             with shareds.driver.session() as session:
                 result = session.run(Cypher_source.get_selected_sources_w_notes,
@@ -264,7 +261,7 @@ return s'''
 #                 s.ref_cnt = record['ref_cnt']
             ret.append(s)
 
-        return ret, theme
+        return ret, o_filter.series
 
     @staticmethod       
     def get_source_citation (uniq_id):

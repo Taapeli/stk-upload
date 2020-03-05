@@ -3131,7 +3131,7 @@ msgid "This page contains a directory of %(num)s sources."
 msgstr ""
 
 #: bp/scene/templates/scene/sources.html:25
-msgid "Select theme:"
+msgid "Select series:"
 msgstr ""
 
 #: bp/scene/templates/scene/sources.html:27

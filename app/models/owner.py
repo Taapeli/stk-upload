@@ -136,6 +136,7 @@ class OwnerFilter():
         self.choices = self.MaterialChoices()   # set of allowed material choices
         self.filter = self.MaterialChoices.COMMON
         self.years = []                         # example [1800, 1899]
+        self.series = None                      # Source data theme like "birth"
 
         ''' Set active user, if any username '''
         if current_user:
@@ -162,6 +163,9 @@ class OwnerFilter():
                 else:   yi2 = 9999
                 self.years = [yi1, yi2]     # selected years [from, to]
                 print(f'OwnerFilter: Objects between years {self.years}')
+
+            # Selected document series for Sources
+            self.series = request.args.get('series', None)
 
             # Selected material for display
             #    div=1 -> show approved material
