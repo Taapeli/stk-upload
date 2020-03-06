@@ -696,11 +696,11 @@ RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 # ORDER BY toUpper(s.stitle)"""
 # 
 #v0.4: pe.Source_cypher.SourceCypher.get_an_auditted_selection_set
-#     get_a_source_w_notes = """
-# MATCH (source:Source) WHERE ID(source)=$sid
-#     OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
-#     OPTIONAL MATCH (source) -[:NOTE]-> (n)
-# RETURN source, COLLECT(n) AS notes, COLLECT([r.medium,rep]) AS reps"""
+    get_a_source_w_notes = """
+MATCH (source:Source) WHERE ID(source)=$sid
+    OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
+    OPTIONAL MATCH (source) -[:NOTE]-> (n)
+RETURN source, COLLECT(n) AS notes, COLLECT([r.medium,rep]) AS reps"""
 
     get_citators_of_source = """
 match (s) <-[:SOURCE]- (c:Citation) where id(s)=$sid 

@@ -135,9 +135,11 @@ return s'''
         """ Read Source with connected Repositories and Notes.
 
             Luetaan lähteen tiedot
+            
+            #Todo: Use new SourceCypher and material selection!
         """
                         
-        return  shareds.driver.session().run(SourceCypher.get_own_sets,
+        return  shareds.driver.session().run(Cypher_source.get_a_source_w_notes,
                                              sid=uniq_id)
     
     

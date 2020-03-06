@@ -19,7 +19,7 @@ td ul li p { margin: 0 0 0.3em 0; }
     <div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
-	            <div id="description">
+	            <div style="width:100%">
 		            <p>{{ _('This page contains a directory of %(num)s sources.',num=sources|count) }}
 		                {{ _('data set') }} <b>{{ owner_filter.owner_str() }}</b>
 {% if owner_filter.user %}

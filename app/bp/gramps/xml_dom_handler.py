@@ -243,7 +243,7 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one sourceref tag in a citation",
                                      'level':"WARNING",'count':c.id})
 
-            self.save_and_link_handle(c)
+            self.save_and_link_handle(c, batch_id=self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Citations", 'count':counter, 
@@ -804,7 +804,7 @@ class DOM_handler():
                 s.repositories.append(r)
 
             #elf.save_and_link_handle(r, self.batch_id)
-            self.save_and_link_handle(s)
+            self.save_and_link_handle(s, batch_id=self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Sources", 'count':counter, 
