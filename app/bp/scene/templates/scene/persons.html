@@ -51,6 +51,15 @@
 		    	cnt ) 
 		    }}
             </h3>
+			   {% if num_hidden %}
+			   		<small style="margin-left:30px">
+				    {{ ngettext(
+				    	'%(num)s person hidden because of privacy protection', 
+				    	'%(num)s people hidden because of privacy protection', 
+				    	num_hidden ) 
+				    }}
+			   		</small>
+			   {% endif %}
             {% else %}
             <h3>{{ _('Select people to display') }}</h3>{% endif %}
 			<div id="searching">

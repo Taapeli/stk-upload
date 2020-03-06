@@ -68,7 +68,9 @@ def show_person_list(selection=None):
             #else:
             #    for p in persons:
             #        p.too_new = False
-            return render_template("/scene/persons.html", persons=persons, menuno=0,
+            persons2 = [p for p in persons if not p.too_new]
+            return render_template("/scene/persons.html", persons=persons2, menuno=0,
+                                   num_hidden = len(persons) - len(persons2), 
                                    name=name, rule=keys, 
                                    last_year_allowed=LAST_YEAR_ALLOWED, 
                                    elapsed=time.time()-t0)
