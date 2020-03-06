@@ -131,7 +131,8 @@
 	          {% for ow in p.owners %}
 	             {% if config['DEMO'] or ow == user %}
                             <div class="detail_link" alt="{{p.uniq_id}}">
-                                 {{p.sex_symbol()}} {{macro.person(p)}}
+                                 {{p.sex_symbol()}} 
+ 								{{ macro.person_names_anon(p, p.names) }}
                             </div>
                  {% else %}{% set _x = not_mine.append(not not_mine.pop()) %}
                             <span class="owner">&nbsp;{{ow}}&nbsp;</span>
@@ -142,16 +143,13 @@
 	          {% endfor %}
 	       {% else %}
                             <div class="detail_link" alt="{{p.uniq_id}}">
-                                {{p.sex_symbol()}} {{macro.person(p)}}
+                                {{p.sex_symbol()}} 
+								{{ macro.person_names_anon(p, p.names) }}
+                                {# macro.person(p) #}
                             </div>
 	       {% endif %}
 
-		   {% for name in p.names %}
-		      {% if not loop.first %}<br>
-		                     <small{% if not_mine[0] %} style="color:lightslategray;"{% endif %}>
-		                         {{ macro.person_name(name) }}</small>
-              {% endif %}
-           {% endfor %}
+           
 
                              <br>
            {% if p.uuid %}   <span class="idno">Uuid:{{p.uuid_short()}} /</span>

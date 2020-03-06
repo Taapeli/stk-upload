@@ -13,6 +13,7 @@ from .person_name import Name
 from .note import Note
 from .dates import DateRange
 from .place_combo import Place_combo
+from models.gen.person import Person
 
 # Import these later to handle circular dependencies where referencing from Person classes! 
 #from .person_combo import Person_combo
@@ -458,6 +459,8 @@ RETURN family"""
                         if uniq_id != parent_node.id:
                             # Skip person with double default name
                             pp = Person_as_member()
+                            pp = Person.from_node(parent_node)
+                            Person_as_member.__init__(pp)
                             uniq_id = parent_node.id
                             pp.uniq_id = uniq_id
                             pp.uuid = parent_node['uuid']
@@ -479,6 +482,8 @@ RETURN family"""
                     #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
                     #    'date2': 1609920, 'date1': 1609920}>
                     child = Person_as_member()
+                    child = Person.from_node(ch)
+                    Person_as_member.__init__(child)
                     child.uniq_id = ch.id
                     child.uuid = ch['uuid']
                     child.sortname = ch['sortname']
