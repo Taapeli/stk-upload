@@ -166,8 +166,10 @@ def show_persons_all():
     logger.info(f"-> bp.scene.routes.show_persons_all: forward from '{my_filter.scope[0]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
-
-    return render_template("/scene/persons_list.html", persons=persons, menuno=12, 
+    persons2 = [p for p in persons if not p.too_new]
+    return render_template("/scene/persons_list.html", persons=persons2,
+                           num_hidden = len(persons) - len(persons2), 
+                           menuno=12, 
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 
