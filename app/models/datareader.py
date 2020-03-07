@@ -119,7 +119,7 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
 
 
 def read_refnames():
-    """ Reads all Refname objects for display
+    """ Reads all Refname objects for table display
         (n:Refname)-[r]->(m)
     """
     t0 = time.time()
@@ -319,29 +319,59 @@ def get_repositories(uniq_id=None):
     return (titles, repositories)
 
 
-def read_same_birthday(uniq_id=None):
-    """ Lukee tietokannasta Person-objektit, joilla on sama syntymäaika, näytettäväksi
+def read_same_eventday(event_type):
+    """ Lukee tietokannasta henkilötiedot, joilla on sama syntymäaika, näytettäväksi
     """
 
     ids = []
-    result = Person_combo.get_people_with_same_birthday()
+    if event_type == "Birth":
+        result = Person_combo.get_people_with_same_birthday()
+    elif event_type == "Death":
+        result = Person_combo.get_people_with_same_deathday()
+    else:
+        raise NotImplementedError("Only Birth and Death accepted")
+
     for record in result:
-        new_array = record['ids']
-        ids.append(new_array)
+        # <Record 
+        #    id1=259451 name1=['Julius Ferdinand', '', 'Lundahl'] 
+        #    birth1=[0, 1861880, 1861880] death1=[0, 1898523, 1898523] 
+        #    id2=494238 name2=['Julius Ferdinand', '', 'Lundahl'] 
+        #    birth2=[0, 1861880, 1861880] death2=[0, 1898523, 1898523]
+        # >
 
-    return (ids)
+        uniq_id = record['id1']
+        name  = record['name1']
+        b = record['birth1']
+        birth =  DateRange(b)
+        d = record['death1']
+        death =  DateRange(d)
+        l = [uniq_id, name, birth, death]
+
+        uniq_id = record['id2']
+        name  = record['name2']
+        b = record['birth2']
+        birth =  DateRange(b)
+        d = record['death2']
+        death =  DateRange(d)
+        l.extend([uniq_id, name, DateRange(birth), DateRange(death)])
+
+        print(f'found {l[0]} {l[1]} {l[2]}, {l[3]}')
+        print(f'   -- {l[4]} {l[5]} {l[6]}, {l[7]}')
+        ids.append(l)
+
+    return ids
 
 
-def read_same_deathday(uniq_id=None):
-    """ Lukee tietokannasta Person-objektit, joilla on sama kuolinaika, näytettäväksi
-    """
-
-    ids = []
-    result = Person_combo.get_people_with_same_deathday()
-    for record in result:
-        ids.append(record['ids'])
-
-    return (ids)
+# def read_same_deathday(uniq_id=None):
+#     """ Lukee tietokannasta Person-objektit, joilla on sama kuolinaika, näytettäväksi
+#     """
+# 
+#     ids = []
+#     result = Person_combo.get_people_with_same_deathday()
+#     for record in result:
+#         ids.append(record['ids'])
+# 
+#     return (ids)
 
 
 def read_same_name(uniq_id=None):
@@ -648,7 +678,8 @@ def get_people_by_surname(surname):
 
 def get_person_data_by_id(pid):
     """ Get 5 data sets:                        ---- vanhempi versio ----
-        Obsolete? still used in
+
+        ###Obsolete? still used in
         - /compare/uniq_id=311006,315556 
         - /lista/person_data/<string:uniq_id>
         - /lista/person_data/<string:uniq_id>
@@ -868,18 +899,6 @@ def get_person_data_by_id(pid):
         nodes[e.uniq_id] = e
     for e in family_list:
         nodes[e.uniq_id] = e
-#     if True:        # Näitä ei tarvita?
-#         result = Person_combo.get_ref_weburls(list(nodes.keys()))
-#         for wu in result:
-#             print("({} {}) -[{}]-> ({} ({} {}))".\
-#                   format(wu["root"] or '?', wu["root_id"] or '?',
-#                          wu["rtype"] or '?', wu["label"],
-#                          wu["target"] or '?', wu["id"] or '?'))
-#     print("")
-        #TODO Talleta Note- ja Citation objektit oikeisiin objekteihin
-        #     Perusta objektien kantaluokka Node, jossa muuttujat jäsenten
-        #     tallettamiseen.
-        # - Onko talletettava jäsenet vai viitteet niihin? Ei kai ole niin paljon toistoa?
 
     return (p, events, photos, citations, family_list)
 

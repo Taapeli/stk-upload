@@ -46,15 +46,14 @@
         - set_estimated_life()          Aseta est_birth ja est_death - Obsolete
     - from models.datareader.get_person_data_by_id 
       (returns list: person, events, photos, sources, families)
-        - get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)
+       #- get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)
         - get_event_data_by_id(self)    Luetaan henkilön tapahtumien id:t
         - get_media_id(self)            Luetaan henkilön tallenteen id
     - from models.datareader.get_families_data_by_id and Person_combo.get_hlinks_by_id
-        - get_her_families_by_id(self)  Luetaan naisen perheiden id:t
-        - get_his_families_by_id(self)  Luetaan miehen perheiden id:t
-        - get_parentin_id(self)         Luetaan henkilön syntymäperheen id
+       #- get_families_by_id(self)      Luetaan perheiden id:t
+       #- get_parentin_id(self)         Luetaan henkilön syntymäperheen id
     - from Person_combo.get_hlinks_by_id
-        - get_citation_id(self)         Luetaan henkilöön liittyvän viittauksen id
+       #- get_citation_id(self)         Luetaan henkilöön liittyvän viittauksen id
 
     - table-näyttöjä varten
         - get_person_and_name_data_by_id(self)

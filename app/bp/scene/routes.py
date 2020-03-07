@@ -168,7 +168,8 @@ def show_persons_all():
     # How many objects are shown?
     count = int(request.args.get('c', 100))
 
-    logger.info(f"-> bp.scene.routes.show_persons_all: forward from '{my_filter.scope[0]}'")
+    logger.info("-> bp.scene.routes.show_persons_all: "
+               f"{my_filter.owner_str()} forward from '{my_filter.scope[0]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
     if my_filter.use_common():  
