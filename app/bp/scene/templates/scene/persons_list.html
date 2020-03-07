@@ -141,7 +141,7 @@
 	             {% if config['DEMO'] or ow == user %}
                             <div class="detail_link" alt="{{p.uniq_id}}">
                                  {{p.sex_symbol()}} 
- 								{{ macro.person_names_anon(p, p.names) }}
+                                {{ macro.person(p) }}
                             </div>
                  {% else %}{% set _x = not_mine.append(not not_mine.pop()) %}
                             <span class="owner">&nbsp;{{ow}}&nbsp;</span>
@@ -153,8 +153,7 @@
 	       {% else %}
                             <div class="detail_link" alt="{{p.uniq_id}}">
                                 {{p.sex_symbol()}} 
-								{{ macro.person_names_anon(p, p.names) }}
-                                {# macro.person(p) #}
+                                {{ macro.person(p) }}
                             </div>
 	       {% endif %}
 

@@ -63,14 +63,12 @@ def show_person_list(selection=None):
             keys = (rule, name)
             logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
-            #if my_filter.use_common():  
-            #    persons = [p for p in persons if not p.too_new]
-            #else:
-            #    for p in persons:
-            #        p.too_new = False
-            persons2 = [p for p in persons if not p.too_new]
+            if my_filter.use_common():  
+                persons2 = [p for p in persons if not p.too_new]
+            else:
+                persons2 = persons
             return render_template("/scene/persons.html", persons=persons2, menuno=0,
-                                   num_hidden = len(persons) - len(persons2), 
+                                   num_hidden=len(persons)-len(persons2), 
                                    name=name, rule=keys, 
                                    last_year_allowed=LAST_YEAR_ALLOWED, 
                                    elapsed=time.time()-t0)
@@ -89,7 +87,12 @@ def show_person_list(selection=None):
         persons = read_persons_with_events(keys)
         logger.info(f"-> bp.scene.routes.show_person_list GET {keys}")
 
-    return render_template("/scene/persons.html", persons=persons,
+    if my_filter.use_common():  
+        persons2 = [p for p in persons if not p.too_new]
+    else:
+        persons2 = persons
+    return render_template("/scene/persons.html", persons=persons2,
+                           num_hidden=len(persons)-len(persons2), 
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons/ref=<string:refname>')
@@ -168,9 +171,12 @@ def show_persons_all():
     logger.info(f"-> bp.scene.routes.show_persons_all: forward from '{my_filter.scope[0]}'")
     t0 = time.time()
     persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
-    persons2 = [p for p in persons if not p.too_new]
+    if my_filter.use_common():  
+        persons2 = [p for p in persons if not p.too_new]
+    else:
+        persons2 = persons
     return render_template("/scene/persons_list.html", persons=persons2,
-                           num_hidden = len(persons) - len(persons2), 
+                           num_hidden=len(persons)-len(persons2), 
                            menuno=12, 
                            owner_filter=my_filter, elapsed=time.time()-t0)
 

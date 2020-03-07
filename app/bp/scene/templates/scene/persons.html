@@ -125,6 +125,7 @@
 			<tbody>
 	    {% for p in persons %}
 	        {% set nohide = not p.too_new %}
+	        {% set nohide = True %}
 	            <tr><td class="ColumnAlpha">
 					{% set ini = p.names[0].initial|upper %}
                     {% if loop.changed(ini) %}
