@@ -759,20 +759,23 @@ RETURN person, name
                     return session.run(Cypher_person.get_events_by_refname, name=key)
                 elif rule == 'all':
                     # Rajaus args['years'] mukaan
-                    first = None
-                    last = None
                     if 'years' in args:
-                        match = re_years_range.match(args['years'])
-                        if match:
-                            first = int(match.group(1))
-                            last = int(match.group(2))
+                        years = args['years'].split('-')
+                        if len(years) < 2:
+                            years.append(years[0])
+                        for i in [0,1]:
+                            years[i] = int(years[i])
+                        if years[0] > years[1]:
+                            (years[0],years[1]) = (years[1],years[0])
+                    else:
+                        years = [-9999, 9999]
                     order = args.get('order')
                     if order == 1:      # order by first name
-                        return session.run(Cypher_person().get_events_all_firstname(first, last))
+                        return session.run(Cypher_person.get_events_all_firstname, years=years)
                     elif order == 2:    # order by patroname
-                        return session.run(Cypher_person().get_events_all_patronyme(first, last))
+                        return session.run(Cypher_person.get_events_all_patronyme, years=years)
                     else:
-                        return session.run(Cypher_person().get_events_all(first, last))
+                        return session.run(Cypher_person.get_events_all, years=years)
                 else:
                     # Selected names and name types (untested?)
                     return session.run(Cypher_person.get_events_by_refname_use,
