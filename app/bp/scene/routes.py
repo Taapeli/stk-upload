@@ -365,16 +365,15 @@ def show_places():
     my_filter.set_scope_from_request(request, 'person_scope')
     count = request.args.get('c', 100, type=int)
     try:
-        # 'locations' has Place objects, which include also the lists of
+        # The list has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-#        locations = Place_combo.get_place_hierarchy()
-        locations = Place_combo.get_my_place_hierarchy(o_filter=my_filter, limit=count)
+        places = Place_combo.get_my_place_hierarchy(o_filter=my_filter, limit=count)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in locations:
+#     for p in places:
 #         print ("# {} ".format(p))
     logger.info(f"-> bp.scene.routes.show_places: forward from '{my_filter.scope[0]}'")
-    return render_template("/scene/places.html", locations=locations, menuno=4,
+    return render_template("/scene/places.html", places=places, menuno=4,
                            owner_filter=my_filter, elapsed=time.time()-t0)
 
 

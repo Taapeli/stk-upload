@@ -14,7 +14,7 @@ class SourceCypher():
     _match_own = "MATCH (s:Source) <-[owner:OWNS|OWNS_OTHER]- ()"
 
     _sets = """
-WITH type(owner) as owner_type, s ORDER BY toUpper(s.stitle)
+WITH type(owner) as owner_type, s
     OPTIONAL MATCH (s) -[:NOTE]-> (note)
     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)

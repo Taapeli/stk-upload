@@ -71,6 +71,17 @@
     </div>
 {%- endmacro %}
 
+{% macro select_dataset() -%}
+    {#  Show and change data: researcher data or approced common data. #}
+       {{ _('data set') }} <b>{{ owner_filter.owner_str() }}</b>
+	{% if owner_filter.user %}
+	    {% if owner_filter.filter == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
+	    {%endif%}
+            (<i><a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}" 
+                 style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
+    {% endif %}
+{%- endmacro %}
+
 {% macro all_obj_ids(obj) -%}
     {#  Formats object keys for display. #}
     <tt title="{{ _('UUID key') }}">{{obj.uuid_short()}}</tt> /
@@ -136,7 +147,7 @@
         N.N.
     {% else %}
         <a href="/scene/person?uuid={{p.uuid}}"
-            title="{{p.sortname}}">{{ person_name_by_sortname(p) }}</a>
+            title="{{ _("See Person's Details") }}">{{ person_name_by_sortname(p) }}</a>
      {% endif %}
 {%- endmacro %}
 

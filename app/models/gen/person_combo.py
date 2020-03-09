@@ -214,11 +214,6 @@ class Person_combo(Person):
             ordered by Person.sortname
         """
 
-        show_by_owner = o_filter.use_owner_filter()
-        show_with_common = o_filter.use_common()
-        #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
-        user = o_filter.user
-
         def _read_person_list(o_filter, limit):
             """ Read Person data from given fw_from 
             """
@@ -260,6 +255,12 @@ class Person_combo(Person):
                 print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
                 raise      
 
+            # end _read_person_list ---------------
+
+        show_by_owner = o_filter.use_owner_filter()
+        show_with_common = o_filter.use_common()
+        #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
+        user = o_filter.user
 
         persons = []
         fw_from = o_filter.next_name_fw()     # next person name

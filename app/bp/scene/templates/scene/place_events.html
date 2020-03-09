@@ -10,7 +10,7 @@
 </div>
 
 {{ macro.menu(4) }}
-    <div class="content" id="IndividualDetail">
+    <div class="content" id="Place">
 {% if place %}
       {% if place.coord %}
         <div id="map">{% if '°' in place.coord %}
@@ -56,6 +56,14 @@
             {% endfor %}</ul>
         </div>
 
+        <div id="summaryarea">
+            <table><tbody>
+                <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="Value">{{macro.all_obj_ids(place)}}</td>
+                    <td></td>
+                </tr>
+            </tbody></table>
+        </div>
     {% if place.notes %}
         <div id="events">
             <h4>{{ _('Website') }}</h4>
