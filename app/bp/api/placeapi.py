@@ -24,6 +24,7 @@ https://isotammi.net/api/v1/record?id=123
 
 """
 import pprint
+# from builtins import None
 
 cypher_search0 = """
     match (p:Place {pname:$pname}) 
@@ -114,26 +115,6 @@ def search(lookedfor):
     for rec in  result:
         p = rec['p']
         uppers = __process_larger_places(rec['largerPlaces'])
-#         largerPlaces = rec['largerPlaces']
-#         uppers = []
-# #        smallerPlaces = rec['smallerPlaces']
-#         for urel, largerPlace in largerPlaces:
-# #            urel=up['ur'] 
-# #            print(urel)
-# #            print(largerPlace)
-#             upper = dict(
-#                 id = largerPlace['id'],
-#                 pname = largerPlace['pname'],
-#                 type = largerPlace['type'],
-#                 coord = largerPlace.get('coord'),
-#                 date1 = urel[0]['date1'] if urel[0]['date1'] else None,
-#                 date2 = urel[0]['date2'] if urel[0]['date2'] else None,
-#                 datetype = urel[0]['datetype'] if urel[0]['datetype'] else None,
-#                 timespan =  DateRange(urel[0]['datetype'], urel[0]['date1'], urel[0]['date2']).__str__() if urel[0]['datetype'] else None
-#                 )
-# #            print(upper)
-#             if upper not in uppers:
-#                 uppers.append(upper)
         r = dict(
             uuid=p['uuid'],
             pname=p['pname'],
@@ -153,7 +134,7 @@ def search(lookedfor):
 
 def record(oid):
 #    print(f"Getting record {oid}")
-    result = shareds.driver.session().run(cypher_record,id=oid).single()
+    result = shareds.driver.session().run(cypher_record, id=oid).single()
 #    print(result)
     if not result: return dict(status="OK",resultCount=0)
     p = result.get('p')
@@ -180,7 +161,7 @@ def record_with_subs(oid, **kwargs):
         dt = int(kwargs['dt'])
         d1 = int(kwargs['d1'])
         d2 = int(kwargs['d2'])
-        result = shareds.driver.session().run(cypher_record, id=oid, dt=dt, d1=d1, d2=d2).single() 
+        result = shareds.driver.session().run(cypher_record_at, id=oid, dt=dt, d1=d1, d2=d2).single() 
 #       result = shareds.driver.session().run(cypher_record, id=oid).single()   
     else:    
         result = shareds.driver.session().run(cypher_record, id=oid).single()
@@ -208,24 +189,32 @@ def record_with_subs(oid, **kwargs):
     }
 
 def __process_larger_places(largerPlaces):
-    uppers = []       
-    for urel, largerPlace, lid in largerPlaces:
-#            urel=up['ur'] 
-#            print(urel)
-#            print(largerPlace)
-        upper = dict(
-            id = largerPlace['id'],
-            pname = largerPlace['pname'],
-            type = largerPlace['type'],
-            coord = largerPlace.get('coord'),
-            date1 = urel[0]['date1'] if urel[0]['date1'] else None,
-            date2 = urel[0]['date2'] if urel[0]['date2'] else None,
-            datetype = urel[0]['datetype'] if urel[0]['datetype'] else None,
-            timespan =  DateRange(urel[0]['datetype'], urel[0]['date1'], urel[0]['date2']).__str__() if urel[0]['datetype'] else None
-            )
-#            print(upper)
-        if upper not in uppers:
-            uppers.append(upper)
+    uppers = [] 
+    if largerPlaces != None:      
+        for urel, largerPlace, lid in largerPlaces:
+            d1 = d2 = dt = None
+            if urel and urel[0]:
+                print(f"urel  {urel[0].values()} ")
+                d1 = urel[0]['date1'] if urel else None
+                d2 = urel[0]['date2'] if urel and urel[0]['date2'] else None
+                dt = urel[0]['datetype'] if urel[0]['datetype'] else None
+            print(largerPlace)
+            upper = dict(
+                id = largerPlace['id'],
+                pname = largerPlace['pname'],
+                type = largerPlace['type'],
+                coord = largerPlace.get('coord'),
+#                date1 = urel[0]['date1'] if urel and urel[0]['date1'] else None,
+#                date2 = urel[0]['date2'] if urel and urel[0]['date2'] else None,
+#                datetype = urel[0]['datetype'] if urel[0]['datetype'] else None,
+                date1 = d1,
+                date2 = d2,
+                datetype = dt,                
+                timespan =  DateRange(dt, d1, d2).__str__() if dt else None
+                )
+    #            print(upper)
+            if upper not in uppers:
+                uppers.append(upper)
     return uppers    
     
 def __process_places(places):
