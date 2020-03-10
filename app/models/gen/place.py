@@ -18,6 +18,7 @@ from .cypher import Cypher_place
 from .event_combo import Event_combo
 from .person_name import Name
 
+
 class Place(NodeObject):
     """ Place / Paikka:
 
@@ -253,50 +254,7 @@ class Place(NodeObject):
         return True
 
 
-#     save() - see PlaceGramps.save()
-#     def save(self, tx):
-#         """ Saves a Place with Place_names and hierarchy links """
-# 
-#         p_attr = {}
-#         try:
-#             p_attr = {"handle": self.handle,
-#                       "change": self.change,
-#                       "id": self.id,
-#                       "type": self.type,
-#                       "pname": self.pname}
-#             if self.coord:
-#                 # If no coordinates, don't set coord attribute
-#                 p_attr.update({"coord": self.coord.get_coordinates()})
-#             result = tx.run(Cypher_place_w_handle.create, p_attr=p_attr)
-#             self.uniq_id = result.single()[0]
-#         except Exception as err:
-#             print("iError Place.create: {0} attr={}".format(err, p_attr), file=stderr)
-# 
-#         try:
-#             for i in range(len(self.names)):
-#                 #TODO: Check, if this name exists; then update or create new
-#                 n_attr = {"name": self.names[i].name,
-#                           "lang": self.names[i].lang}
-#                 if self.names[i].dates:
-#                     # If date information, add datetype, date1 and date2
-#                     n_attr.update(self.names[i].dates.for_db())
-#                 tx.run(Cypher_place_w_handle.add_name,
-#                        handle=self.handle, n_attr=n_attr)
-#         except Exception as err:
-#             print("iError Place.add_name: {0}".format(err), file=stderr)
-#
-#         # Make place note relations
-#         for i in range(len(self.noteref_hlink)):
-#             try:
-#                 tx.run(Cypher_place_w_handle.link_note,
-#                        handle=self.handle, hlink=self.noteref_hlink[i])
-#             except Exception as err:
-#                 print("iError Place.link_note: {0}".format(err), file=stderr)
-# 
-#         return
-
-
-class Place_name:
+class Place_name():
     """ Paikan nimi
 
         Properties:
@@ -335,6 +293,26 @@ class Place_name:
         pn.lang = node.get('lang', '')
         pn.dates = node.get('dates')
         return pn
+
+    def _lang_key(self, obj):
+        ''' Name comparison key by 1) language, 2) name '''
+        lang_order = {'fi':'0', 'sv':'1', 'vi': '2', 'de':'3', 'la':'4', 'ru':'5', '':'6'}
+        if obj:
+            if obj.lang in lang_order.keys():
+                return lang_order[obj.lang] + ':' + obj.name
+            return 'x:' + obj.name
+        return ""
+
+    def __lt__(self, other):
+        a = self._lang_key(self)
+        b = self._lang_key(other)
+        return a < b
+        #return self._lang_key(self) < self.lang_key(other)
+    def __le__(self, other):        return self._lang_key(self) <= self.lang_key(other)
+    def __eq__(self, other):        return self._lang_key(self) == self.lang_key(other)
+    def __ge__(self, other):        return self._lang_key(self) >= self.lang_key(other)
+    def __gt__(self, other):        return self._lang_key(self) > self.lang_key(other)
+    def __ne__(self, other):        return self._lang_key(self) != self.lang_key(other)
 
 
 class Point:

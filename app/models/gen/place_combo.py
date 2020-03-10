@@ -269,40 +269,8 @@ class Place_combo(Place):
 │      │         │                    │       │ty","Pori",""],[2874│                    │
 │      │         │                    │       │43,"City","Пори","ru│                    │
 │      │         │                    │       │"]]                 │                    │
-└─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
+└──────┴─────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
 """
-        def combine_places(pn_tuples):
-            """ Creates a list of Places with names combined from given names.
-            
-                Kenttä pl_tuple sisältää Places-tietoja 
-                tuplena [[28101, "City", "Lovisa", "sv"]].
-
-                Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
-                Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
-            """
-            placedict = {}
-            for nid, nuuid, ntype, name, lang in pn_tuples:
-                if nid: # id of a lower place
-                    pn = Place_name(name=name, lang=lang)
-                    if nid in placedict:
-                        # Append name to existing Place_combo
-                        placedict[nid].names.append(pn)
-                        if pn.lang in ['fi', '']:
-                            # Default language name
-                            #TODO use language from current_user's preferences
-                            placedict[nid].pname = pn.name
-                    else:
-                        # Add a new Place_combo
-                        p = Place_combo(nid)
-                        p.uuid = nuuid
-                        p.type = ntype
-                        p.names.append(pn)
-                        p.pname = pn.name
-                        placedict[nid] = p
-                        # ntype, Place_combo.namelist_w_lang( (name,) ))
-            return list(placedict.values())
-
-
         ret = []
         result = shareds.driver.session().run(Cypher_place.get_name_hierarchies)
         for record in result:
@@ -336,8 +304,8 @@ class Place_combo(Place):
                 p.names.append(pn)
             if p.pname == '' and p.names:
                 p.pname = p.names[0].name
-            p.uppers = combine_places(record['upper'])
-            p.lowers = combine_places(record['lower'])
+            p.uppers = Place_combo._combine_places(record['upper'])
+            p.lowers = Place_combo._combine_places(record['lower'])
             ret.append(p)
         # Return sorted by first name in the list p.pname
         return sorted(ret, key=lambda x:x.pname)
@@ -362,36 +330,6 @@ class Place_combo(Place):
 │      │         │                    │       │"]]                 │                    │
 └─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
 """
-        def combine_places(pn_tuples):
-            """ Creates a list of Places with names combined from given names.
-            
-                Kenttä pl_tuple sisältää Places-tietoja 
-                tuplena [[28101, "City", "Lovisa", "sv"]].
-
-                Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
-                Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
-            """
-            placedict = {}
-            for nid, nuuid, ntype, name, lang in pn_tuples:
-                if nid: # id of a lower place
-                    pn = Place_name(name=name, lang=lang)
-                    if nid in placedict:
-                        # Append name to existing Place_combo
-                        placedict[nid].names.append(pn)
-                        if pn.lang in ['fi', '']:
-                            # Default language name
-                            #TODO use language from current_user's preferences
-                            placedict[nid].pname = pn.name
-                    else:
-                        # Add a new Place_combo
-                        p = Place_combo(nid)
-                        p.uuid = nuuid
-                        p.type = ntype
-                        p.names.append(pn)
-                        p.pname = pn.name
-                        placedict[nid] = p
-                        # ntype, Place_combo.namelist_w_lang( (name,) ))
-            return list(placedict.values())
 
         def _read_place_list(o_filter, limit):
             """ Read Place data from given fw 
@@ -461,17 +399,19 @@ class Place_combo(Place):
             # Set place names and default display name pname
             for nnode in record.get('names'):
                 pn = Place_name.from_node(nnode)
-                if pn.lang in ['fi', '']:
-                    # Default language name
-                    #TODO use language from current_user's preferences
-                    p.pname = pn.name
+#                 if pn.lang in ['fi', '']:
+#                     # Default language name
+#                     #TODO use language from current_user's preferences
+#                     p.pname = pn.name
                 p.names.append(pn)
+            if len(p.names) > 1:
+                p.names.sort()
             if p.pname == '' and p.names:
                 p.pname = p.names[0].name
-            p.uppers = combine_places(record['upper'])
-            p.lowers = combine_places(record['lower'])
+            p.uppers = Place_combo._combine_places(record['upper'])
+            p.lowers = Place_combo._combine_places(record['lower'])
             ret.append(p)
-            
+
         # Update the page scope according to items really found 
         if ret:
             o_filter.update_session_scope('person_scope', 
@@ -479,7 +419,45 @@ class Place_combo(Place):
                                           limit, len(ret))
 
         # Return sorted by first name in the list p.pname
-        return sorted(ret, key=lambda x:x.pname)
+        return sorted(ret, key=lambda x:x.names[0].name if x.names else "")
+
+
+    @staticmethod
+    def _combine_places(pn_tuples):
+        """ Creates a list of Places with names combined from given names.
+        
+            The pl_tuple has Places data as a tuple [[28101, "City", "Lovisa", "sv"]].
+
+            Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
+            Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
+            
+            TODO. Lajittele paikannimet kielen mukaan (si, sv, <muut>, "")
+                  ja aakkosjärjestykseen
+        """
+        placedict = {}
+        for nid, nuuid, ntype, name, lang in pn_tuples:
+            if nid: # id of a lower place
+                pn = Place_name(name=name, lang=lang)
+                if nid in placedict:
+                    # Append name to existing Place_combo
+                    placedict[nid].names.append(pn)
+                    placedict[nid].names.sort()
+#                     if pn.lang in ['fi', '']:
+#                         # Default language name
+#                         #TODO use language from current_user's preferences
+#                         placedict[nid].pname = pn.name
+                else:
+                    # Add a new Place_combo
+                    p = Place_combo(nid)
+                    p.uuid = nuuid
+                    p.type = ntype
+                    p.names.append(pn)
+                    p.pname = pn.name
+                    placedict[nid] = p
+                    # ntype, Place_combo.namelist_w_lang( (name,) ))
+        li = list(placedict.values())
+        ret = sorted(li, key=lambda x: x.names[0].name if x.names else "")
+        return ret
 
 
     def set_names_from_nodes(self, nodes):

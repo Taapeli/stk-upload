@@ -215,7 +215,7 @@
 
 {% macro place_names(pl) -%}
     {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
-    {% for n in pl.names|sort(attribute='lang') %}
+    {% for n in pl.names %} {# pre-sorted, no |sort(attribute='lang') #}
         {% if not loop.first %} • {% endif %}
         {% if n.lang %}<span class='typedesc'>{{n.lang}}</span>&nbsp;{% 
          endif %}{{ n.name|safe }}

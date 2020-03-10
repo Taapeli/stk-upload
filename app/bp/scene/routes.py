@@ -378,31 +378,29 @@ def show_places():
 
 
 @bp.route('/scene/location/uuid=<locid>')
-@bp.route('/scene/location=<int:locid>')
+#@bp.route('/scene/location=<int:locid>')
 def show_place_page(locid):
-    """ Home page for a Place, shows events and place hierarchy
-        locid = id(Place)
+    """ Home page for a Place, shows events and place hierarchy.
     """
     try:
         # List 'place_list' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events
-        place, place_list, events = get_place_with_events(locid)
         my_filter = OwnerFilter(user_session, current_user, request)
         my_filter.set_scope_from_request(request, 'person_scope')
         #if my_filter.use_common():
         #    events = [e for e in events if not e.person.too_new]
-        
+        place, place_list, events = get_place_with_events(locid)
+
     except KeyError as e:
         import traceback
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in place_list:
-#         print ("# {} ".format(p))
-#     for u in place.notes:
-#         print ("# {} ".format(u))
+#     for p in place_list:        print (f"# {p} ")
+#     for e in events:            print (f"# {e} {e.description}")
+#     for u in place.notes:       print (f"# {u} ")
     logger.info("-> bp.scene.routes.show_place_page")
-    return render_template("/scene/place_events.html", locid=locid, place=place, 
-                           events=events, locations=place_list)
+    return render_template("/scene/place_events.html", place=place, 
+                           events=events, pl_hierarchy=place_list)
 
 # ------------------------------ Menu 5: Sources --------------------------------
 
