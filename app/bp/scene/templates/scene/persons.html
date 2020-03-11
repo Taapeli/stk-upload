@@ -14,8 +14,6 @@
 	{% else %}<H2>{{ _('Persons') }}</h2>
 	{% endif %}
 	<!-- Rule = {{rule}} for {{cnt}} persons -->
-	
-	<p><small style="color:red">– Kaikki data, ei huomioida aineiston omistajaa</small></p>
 </div>
 
 {{ macro.menu(menuno) }}
@@ -51,14 +49,18 @@
 		    	cnt ) 
 		    }}
             </h3>
+            <p style="color:red">
+                – Kaikki data, ei valitettavasti huomioida aineiston omistajaa
+            </p>
 			   {% if num_hidden %}
-			   		<small style="margin-left:30px">
+			 <p><small style="margin-left:30px">
 				    {{ ngettext(
 				    	'%(num)s person hidden because of privacy protection', 
 				    	'%(num)s people hidden because of privacy protection', 
 				    	num_hidden ) 
 				    }}
 			   		</small>
+			</p>
 			   {% endif %}
             {% else %}
             <h3>{{ _('Select people to display') }}</h3>{% endif %}
@@ -70,7 +72,8 @@
                   <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p>
                   <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
                     <input type="text" name="name" id="snam" 
-                     {% if name %}value="{{name}}"{% endif %} required>
+                     {% if name %}value="{{name}}"
+                     {% else %}placeholder="{{ _('Name') }}"{% endif %} required>
                      <br>
                   <input type="radio" name="rule" id="ssur" value="surname"
                    {% if selection == "surname" %}checked{% endif %}>

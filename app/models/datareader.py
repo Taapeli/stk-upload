@@ -625,7 +625,11 @@ def get_source_with_events(sourceid):
             if event_role == 'Family':
                 # Family event witch is directply connected to a Person Event
                 parent_names = Family_combo.get_marriage_parent_names(x_uid)
-                noderef.clearname = f"{parent_names['father']} <> {parent_names['mother']}"
+                if 'father' in parent_names:
+                    noderef.clearname += parent_names['father']
+                noderef.clearname += " <> "
+                if 'mother' in parent_names:
+                    noderef.clearname += parent_names['mother']
             else:
                 # Read Person names as cleartext string
                 noderef.clearname = Name.get_clearname(noderef.uniq_id)

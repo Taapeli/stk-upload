@@ -439,6 +439,10 @@ div#parents > table.infolist,
 h3 + table.infolist {
     width: auto;
 }
+div#summaryarea > p {
+	margin:0.5em;
+    margin-left:2em;
+}
 table tr th {
     text-align: left;
     background-color: #EEE;
