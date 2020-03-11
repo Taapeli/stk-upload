@@ -8,7 +8,7 @@ Changed 13.6.2018/JMä: get_notes() result from list(str) to list(Note)
 
 from sys import stderr
 
-from .base import NodeObject
+from bl.base import NodeObject
 from .cypher import Cypher_note
 from models.cypher_gramps import Cypher_note_in_batch # Cypher_note_w_handle,
 import shareds

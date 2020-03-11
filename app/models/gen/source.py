@@ -9,7 +9,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 
 import shareds
-from .base import NodeObject
+from bl.base import NodeObject
 from pe.source_cypher import SourceCypher   # v0.4 structures
 from .cypher import Cypher_source  # obsolete v0.3 structures
 from .repository import Repository

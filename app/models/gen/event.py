@@ -40,7 +40,7 @@ Created on 2.5.2017
 @author: Jorma Haapasalo <jorma.haapasalo@pp.inet.fi>
 '''
 
-from .base import NodeObject
+from bl.base import NodeObject
 from .dates import DateRange
 import  shareds
 

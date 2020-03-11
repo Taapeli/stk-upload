@@ -6,7 +6,7 @@ Created on 22.7.2017
 
 from sys import stderr
 
-from .base import NodeObject
+from bl.base import NodeObject
 from .cypher import Cypher_media
 from .person import Person
 from .place import Place

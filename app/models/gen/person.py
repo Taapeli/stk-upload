@@ -85,7 +85,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 from datetime import datetime
 
 import shareds
-from .base import NodeObject
+from bl.base import NodeObject
 from .cypher import Cypher_person
 from .dates import DateRange
 

@@ -13,7 +13,7 @@ from models.gen.dates import DateRange
 logger = logging.getLogger('stkserver')
 
 import shareds
-from .base import NodeObject
+from bl.base import NodeObject
 from models.cypher_gramps import Cypher_citation_w_handle
 from .cypher import Cypher_citation
 

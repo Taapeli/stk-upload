@@ -12,7 +12,7 @@ Todo:
 '''
 
 import  shareds
-from .base import NodeObject
+from bl.base import NodeObject
 #from .dates import DateRange
 from .cypher import Cypher_place
 from .event_combo import Event_combo
