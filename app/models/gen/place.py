@@ -13,6 +13,8 @@ Todo:
 
 import  shareds
 from bl.base import NodeObject
+from bl.place import PlaceName
+
 #from .dates import DateRange
 from .cypher import Cypher_place
 from .event_combo import Event_combo
@@ -128,7 +130,7 @@ class Place(NodeObject):
             for node in record['names']:
                 # <Node id=78278 labels={'Place_name'} properties={'lang': '', 
                 #    'name': 'Kangasalan srk'}>
-                plname = Place_name.from_node(node)
+                plname = PlaceName.from_node(node)
                 names.append(str(plname))
                 pl.names.append(plname)
             pl.clearname = ' • '.join(names)
@@ -143,11 +145,6 @@ class Place(NodeObject):
 #     @staticmethod def get_my_places():    # Use: Place_combo.get_my_places()
 #         """ Luetaan kaikki paikat kannasta
 #         """
-
-#     @staticmethod get_place_hierarchy(), see Place_combo.get_place_hierarchy()
-#         """ Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-#             Place list with upper and lower places in herarchy
-
 
     @staticmethod
     def namelist_w_lang(field):
@@ -254,141 +251,141 @@ class Place(NodeObject):
         return True
 
 
-class Place_name():
-    """ Paikan nimi
-
-        Properties:
-                name             str nimi
-                lang             str kielikoodi
-                dates            DateRange aikajakso
-    """
-
-    def __init__(self, name='', lang=''):
-        """ Luo uuden name-instanssin """
-        self.name = name
-        self.lang = lang
-        self.dates = None
-
-    def __str__(self):
-        if self.dates:
-            d = "/" + str(self.dates)
-        else:
-            d = ""
-        if self.lang != '':
-            return f"'{self.name}' ({self.lang}){d}"
-        else:
-            return f"'{self.name}'{d}"
-
-    @classmethod
-    def from_node(cls, node):
-        ''' models.gen.place.Place_name.from_node
-        Transforms a db node to an object of type Place_name.
-        
-        <Node id=78278 labels={'Place_name'} 
-            properties={'lang': '', 'name': 'Kangasalan srk'}>
-        '''
-        pn = cls()  # Place_name()
-        pn.uniq_id = node.id
-        pn.name = node.get('name', '?')
-        pn.lang = node.get('lang', '')
-        pn.dates = node.get('dates')
-        return pn
-
-    def _lang_key(self, obj):
-        ''' Name comparison key by 1) language, 2) name '''
-        lang_order = {'fi':'0', 'sv':'1', 'vi': '2', 'de':'3', 'la':'4', 'ru':'5', '':'6'}
-        if obj:
-            if obj.lang in lang_order.keys():
-                return lang_order[obj.lang] + ':' + obj.name
-            return 'x:' + obj.name
-        return ""
-
-    def __lt__(self, other):
-        a = self._lang_key(self)
-        b = self._lang_key(other)
-        return a < b
-        #return self._lang_key(self) < self.lang_key(other)
-    def __le__(self, other):        return self._lang_key(self) <= self.lang_key(other)
-    def __eq__(self, other):        return self._lang_key(self) == self.lang_key(other)
-    def __ge__(self, other):        return self._lang_key(self) >= self.lang_key(other)
-    def __gt__(self, other):        return self._lang_key(self) > self.lang_key(other)
-    def __ne__(self, other):        return self._lang_key(self) != self.lang_key(other)
-
-
-class Point:
-    """ Paikan koordinaatit
-
-        Properties:
-            coord   coordinates of the point as list [lat, lon]
-                    (north, east directions in degrees)
-    """
-    _point_coordinate_tr = str.maketrans(',°′″\\\'"NESWPIEL', '.              ')
+# class Place_name(): --> bl.place.PlaceName
+#     """ Paikan nimi
+# 
+#         Properties:
+#                 name             str nimi
+#                 lang             str kielikoodi
+#                 dates            DateRange aikajakso
+#     """
+# 
+#     def __init__(self, name='', lang=''):
+#         """ Luo uuden name-instanssin """
+#         self.name = name
+#         self.lang = lang
+#         self.dates = None
+# 
+#     def __str__(self):
+#         if self.dates:
+#             d = "/" + str(self.dates)
+#         else:
+#             d = ""
+#         if self.lang != '':
+#             return f"'{self.name}' ({self.lang}){d}"
+#         else:
+#             return f"'{self.name}'{d}"
+# 
+#     @classmethod
+#     def from_node(cls, node):
+#         ''' models.gen.place.Place_name.from_node
+#         Transforms a db node to an object of type Place_name.
+#         
+#         <Node id=78278 labels={'Place_name'} 
+#             properties={'lang': '', 'name': 'Kangasalan srk'}>
+#         '''
+#         pn = cls()  # Place_name()
+#         pn.uniq_id = node.id
+#         pn.name = node.get('name', '?')
+#         pn.lang = node.get('lang', '')
+#         pn.dates = node.get('dates')
+#         return pn
+# 
+#     def _lang_key(self, obj):
+#         ''' Name comparison key by 1) language, 2) name '''
+#         lang_order = {'fi':'0', 'sv':'1', 'vi': '2', 'de':'3', 'la':'4', 'ru':'5', '':'6'}
+#         if obj:
+#             if obj.lang in lang_order.keys():
+#                 return lang_order[obj.lang] + ':' + obj.name
+#             return 'x:' + obj.name
+#         return ""
+# 
+#     def __lt__(self, other):
+#         a = self._lang_key(self)
+#         b = self._lang_key(other)
+#         return a < b
+#         #return self._lang_key(self) < self.lang_key(other)
+#     def __le__(self, other):        return self._lang_key(self) <= self.lang_key(other)
+#     def __eq__(self, other):        return self._lang_key(self) == self.lang_key(other)
+#     def __ge__(self, other):        return self._lang_key(self) >= self.lang_key(other)
+#     def __gt__(self, other):        return self._lang_key(self) > self.lang_key(other)
+#     def __ne__(self, other):        return self._lang_key(self) != self.lang_key(other)
 
 
-    def __init__(self,  lon,  lat=None):
-        """ Create a new Point instance.
-            Arguments may be:
-            - lon(float), lat(float)    - real coordinates
-            - lon(str), lat(str)        - coordinates to be converted
-            - [lon, lat]                - ready coordinate vector (list or tuple)
-        """
-        self.coord = None
-        try:
-            if isinstance(lon, (list, tuple)):
-                # is (lon, lat) or [lon, lat]
-                if len(lon) >= 2 and \
-                        isinstance(lon[0], float) and isinstance(lon[1], float):
-                    self.coord = list(lon)    # coord = [lat, lon]
-                else:
-                    raise(ValueError, "Point({}) are not two floats".format(lon))
-            else:
-                self.coord = [lon, lat]
-
-            # Now the arguments are in self.coord[0:1]
-
-            ''' If coordinate value is string, the characters '°′″'"NESWPIEL'
-                and '\' are replaced by space and the comma by dot with this table.
-                (These letters stand for North, East, ... Pohjoinen, Itä ...)
-            '''
-
-            for i in list(range(len(self.coord))):   # [0,1]
-                # If a coordinate is float, it's ok
-                x = self.coord[i]
-                if not isinstance(x, float):
-                    if not x:
-                        raise ValueError("Point arg empty ({})".format(self.coord))
-                    if isinstance(x, str):
-                        # String conversion to float:
-                        #   example "60° 37' 34,647N" gives ['60', '37', '34.647']
-                        #   and "26° 11\' 7,411"I" gives
-                        a = x.translate(self._point_coordinate_tr).split()
-                        if not a:
-                            raise ValueError("Point arg error {}".format(self.coord))
-                        degrees = float(a[0])
-                        if len(a) > 1:
-                            if len(a) == 3:     # There are minutes and second
-                                minutes = float(a[1])
-                                seconds = float(a[2])
-                                self.coord[i] = degrees + minutes/60. + seconds/3600.
-                            else:               # There are no seconds
-                                minutes = float(a[1])
-                                self.coord[i] = degrees + minutes/60.
-                        else:                   # Only degrees
-                                self.coord[i] = degrees
-                    else:
-                        raise ValueError("Point arg type is {}".format(self.coord[i]))
-        except:
-            raise
-
-    def __str__(self):
-        if self.coord:
-            return "({:0.4f}, {:0.4f})".format(self.coord[0], self.coord[1])
-        else:
-            return ""
-
-    def get_coordinates(self):
-        """ Return the Point coordinates as list (leveys- ja pituuspiiri) """
-
-        return self.coord
+# class Point: --> bl.place_coordinates.Point
+#     """ Paikan koordinaatit
+# 
+#         Properties:
+#             coord   coordinates of the point as list [lat, lon]
+#                     (north, east directions in degrees)
+#     """
+#     _point_coordinate_tr = str.maketrans(',°′″\\\'"NESWPIEL', '.              ')
+# 
+# 
+#     def __init__(self,  lon,  lat=None):
+#         """ Create a new Point instance.
+#             Arguments may be:
+#             - lon(float), lat(float)    - real coordinates
+#             - lon(str), lat(str)        - coordinates to be converted
+#             - [lon, lat]                - ready coordinate vector (list or tuple)
+#         """
+#         self.coord = None
+#         try:
+#             if isinstance(lon, (list, tuple)):
+#                 # is (lon, lat) or [lon, lat]
+#                 if len(lon) >= 2 and \
+#                         isinstance(lon[0], float) and isinstance(lon[1], float):
+#                     self.coord = list(lon)    # coord = [lat, lon]
+#                 else:
+#                     raise(ValueError, "Point({}) are not two floats".format(lon))
+#             else:
+#                 self.coord = [lon, lat]
+# 
+#             # Now the arguments are in self.coord[0:1]
+# 
+#             ''' If coordinate value is string, the characters '°′″'"NESWPIEL'
+#                 and '\' are replaced by space and the comma by dot with this table.
+#                 (These letters stand for North, East, ... Pohjoinen, Itä ...)
+#             '''
+# 
+#             for i in list(range(len(self.coord))):   # [0,1]
+#                 # If a coordinate is float, it's ok
+#                 x = self.coord[i]
+#                 if not isinstance(x, float):
+#                     if not x:
+#                         raise ValueError("Point arg empty ({})".format(self.coord))
+#                     if isinstance(x, str):
+#                         # String conversion to float:
+#                         #   example "60° 37' 34,647N" gives ['60', '37', '34.647']
+#                         #   and "26° 11\' 7,411"I" gives
+#                         a = x.translate(self._point_coordinate_tr).split()
+#                         if not a:
+#                             raise ValueError("Point arg error {}".format(self.coord))
+#                         degrees = float(a[0])
+#                         if len(a) > 1:
+#                             if len(a) == 3:     # There are minutes and second
+#                                 minutes = float(a[1])
+#                                 seconds = float(a[2])
+#                                 self.coord[i] = degrees + minutes/60. + seconds/3600.
+#                             else:               # There are no seconds
+#                                 minutes = float(a[1])
+#                                 self.coord[i] = degrees + minutes/60.
+#                         else:                   # Only degrees
+#                                 self.coord[i] = degrees
+#                     else:
+#                         raise ValueError("Point arg type is {}".format(self.coord[i]))
+#         except:
+#             raise
+# 
+#     def __str__(self):
+#         if self.coord:
+#             return "({:0.4f}, {:0.4f})".format(self.coord[0], self.coord[1])
+#         else:
+#             return ""
+# 
+#     def get_coordinates(self):
+#         """ Return the Point coordinates as list (leveys- ja pituuspiiri) """
+# 
+#         return self.coord
 
 

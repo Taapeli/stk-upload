@@ -16,12 +16,15 @@ from flask import render_template, request, redirect, url_for, flash, session as
 from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
+from ui.owner import OwnerFilter
+from bl.place import PlaceBl
+
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
 #from bp.scene.scene_reader import get_a_person_for_display_apoc
 from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
-from models.gen.place_combo import Place_combo
+#from models.gen.place_combo import Place_combo
 from models.gen.source import Source
 from models.gen.media import Media
 
@@ -30,7 +33,6 @@ from models.datareader import read_persons_with_events
 from models.datareader import get_event_participants
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
-from models.owner import OwnerFilter
 
 LAST_YEAR_ALLOWED=datetime.now().year - 120
 
@@ -363,11 +365,11 @@ def show_places():
     my_filter = OwnerFilter(user_session, current_user, request)
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
-    count = request.args.get('c', 100, type=int)
+    my_filter.count = request.args.get('c', 100, type=int)
     try:
         # The list has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        places = Place_combo.get_my_place_hierarchy(o_filter=my_filter, limit=count)
+        places = PlaceBl.get_list(o_filter=my_filter)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in places:

@@ -1,5 +1,5 @@
 import sys
-from models.owner import OwnerFilter
+from ui.owner import OwnerFilter
 import pytest
 from flask.globals import request
 # logging.basicConfig(level=logging.INFO)

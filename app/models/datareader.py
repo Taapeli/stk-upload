@@ -32,7 +32,7 @@ from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.dates import DateRange
-from models.owner import OwnerFilter
+from ui.owner import OwnerFilter
 import traceback
 
 

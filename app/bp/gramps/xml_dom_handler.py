@@ -21,7 +21,7 @@ from .models.source_gramps import Source_gramps
 from .models.place_gramps import Place_gramps
 from .batchlogger import Log
 
-from models.gen.place import Place_name, Point
+from bl.place import PlaceName, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.note import Note
 from models.gen.media import Media
@@ -638,7 +638,7 @@ class DOM_handler():
 
             for placeobj_pname in placeobj.getElementsByTagName('pname'):
                 if placeobj_pname.hasAttribute("value"):
-                    placename = Place_name()
+                    placename = PlaceName()
                     placename.name = placeobj_pname.getAttribute("value")
                     if placename.name:
                         if pl.pname == '':

@@ -17,7 +17,11 @@ Todo:
 '''
 
 from bl.base import NodeObject
-# import  shareds
+from bl.place_coordinates import Point
+from pe.place import _read_place_list
+
+
+# import shareds
 # from .dates import DateRange
 # from .cypher import Cypher_place
 # from .event_combo import Event_combo
@@ -27,13 +31,12 @@ class Place(NodeObject):
     """ Place / Paikka:
 
         Properties:
-            Defined here:
-                handle
+            Defined in NodeObject:
                 change
                 id                  esim. "P0001"
                 type                str paikan tyyppi
                 pname               str paikan nimi
-            May be defined in Place_combo:
+            May be defined in PlaceBl:
                 names[]             PlaceName
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
@@ -82,3 +85,213 @@ class Place(NodeObject):
         p.pname = node['pname'] or ''
         p.coord = node['coord'] or None
         return p
+
+
+class PlaceBl(Place):
+    """ Place / Paikka:
+
+        Properties, might be defined in here:
+                names[]             PlaceName
+                coord               str paikan koordinaatit (leveys- ja pituuspiiri)
+                surrounding[]       int uniq_ids of upper
+                note_ref[]          int uniq_ids of Notes
+                media_ref[]         int uniq_ids of Medias
+            May be defined in Place_gramps:
+                surround_ref[]      dictionaries {'hlink':handle, 'dates':dates}
+                citation_ref[]      int uniq_ids of Citations
+                placeref_hlink      str paikan osoite
+                noteref_hlink       str huomautuksen osoite (tulostuksessa Note-olioita)
+     """
+
+    def __init__(self, uniq_id=None, ptype="", level=None):
+        """ Creates a new Place_combo instance.
+
+            You may also give for printout eventuell hierarhy level
+        """
+        Place.__init__(self, uniq_id)
+        
+        if ptype:
+            self.type = ptype
+        self.names = []
+        if level != None:
+            self.level = level
+
+        self.uppers = []        # Upper place objects for hirearchy display
+        self.notes = []         # Notes connected to this place
+        self.note_ref = []      # uniq_ids of Notes
+        self.media_ref = []     # uniq_id of models.gen.media.Media
+
+
+    @staticmethod
+    def get_list(o_filter):
+        """ Get a list on Place_combo objects with nearest heirarchy neighbours.
+        
+            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+
+            Esim.
+╒══════╤═════════╤════════════════════╤═══════╤════════════════════╤════════════════════╕
+│"id"  │"type"   │"name"              │"coord"│"upper"             │"lower"             │
+╞══════╪═════════╪════════════════════╪═══════╪════════════════════╪════════════════════╡
+│290228│"Borough"│[{"name":"1. Kaupung│null   │[[287443,"City","Arc│[[290226,"Tontti","T│
+│      │         │inosa","lang":""}]  │       │topolis","la"],[2874│ontti 23",""]]      │
+│      │         │                    │       │43,"City","Björnebor│                    │
+│      │         │                    │       │g","sv"],[287443,"Ci│                    │
+│      │         │                    │       │ty","Pori",""],[2874│                    │
+│      │         │                    │       │43,"City","Пори","ru│                    │
+│      │         │                    │       │"]]                 │                    │
+└─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
+"""
+
+#         def _read_place_list(o_filter): --> pe.place._read_place_list
+#             """ Read Place data from given fw 
+#             """
+
+        ret = []
+#         fw = o_filter.next_name_fw()     # next name
+        result = _read_place_list(o_filter)
+        for record in result:
+            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
+            # alemmista paikoista
+            #
+            # Record: <Record id=290228 type='Borough' 
+            #    names=[<Node id=290235 labels={'Place_name'} 
+            #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
+            #    coord=None
+            #    upper=[
+            #        [287443, 'City', 'Arctopolis', 'la'], 
+            #        [287443, 'City', 'Björneborg', 'sv'], 
+            #        [287443, 'City', 'Pori', ''], 
+            #        [287443, 'City', 'Пори', 'ru']] 
+            #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
+            # >
+            pl_id =record['id']
+            p = PlaceBl(pl_id)
+            p.uuid =record['uuid']
+            p.type = record.get('type')
+            if record['coord']:
+                p.coord = Point(record['coord']).coord
+            # Set place names and default display name pname
+            for nnode in record.get('names'):
+                pn = PlaceName.from_node(nnode)
+#                 if pn.lang in ['fi', '']:
+#                     # Default language name
+#                     #TODO use language from current_user's preferences
+#                     p.pname = pn.name
+                p.names.append(pn)
+            if len(p.names) > 1:
+                p.names.sort()
+            if p.pname == '' and p.names:
+                p.pname = p.names[0].name
+            p.uppers = PlaceBl._combine_places(record['upper'])
+            p.lowers = PlaceBl._combine_places(record['lower'])
+            ret.append(p)
+
+        # Update the page scope according to items really found 
+        if ret:
+            o_filter.update_session_scope('person_scope', 
+                                          ret[0].pname, ret[-1].pname, 
+                                          o_filter.count, len(ret))
+
+        # Return sorted by first name in the list p.pname
+        return sorted(ret, key=lambda x:x.names[0].name if x.names else "")
+
+
+    @staticmethod
+    def _combine_places(pn_tuples):
+        """ Creates a list of Places with names combined from given names.
+        
+            The pl_tuple has Places data as a tuple [[28101, "City", "Lovisa", "sv"]].
+
+            Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
+            Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
+            
+            TODO. Lajittele paikannimet kielen mukaan (si, sv, <muut>, "")
+                  ja aakkosjärjestykseen
+        """
+        placedict = {}
+        for nid, nuuid, ntype, name, lang in pn_tuples:
+            if nid: # id of a lower place
+                pn = PlaceName(name=name, lang=lang)
+                if nid in placedict:
+                    # Append name to existing Place_combo
+                    placedict[nid].names.append(pn)
+                    placedict[nid].names.sort()
+#                     if pn.lang in ['fi', '']:
+#                         # Default language name
+#                         #TODO use language from current_user's preferences
+#                         placedict[nid].pname = pn.name
+                else:
+                    # Add a new Place_combo
+                    p = PlaceBl(nid)
+                    p.uuid = nuuid
+                    p.type = ntype
+                    p.names.append(pn)
+                    p.pname = pn.name
+                    placedict[nid] = p
+                    # ntype, Place_combo.namelist_w_lang( (name,) ))
+        li = list(placedict.values())
+        ret = sorted(li, key=lambda x: x.names[0].name if x.names else "")
+        return ret
+
+
+
+class PlaceName():
+    """ Paikan nimi
+
+        Properties:
+                name             str nimi
+                lang             str kielikoodi
+                dates            DateRange aikajakso
+    """
+
+    def __init__(self, name='', lang=''):
+        """ Luo uuden name-instanssin """
+        self.name = name
+        self.lang = lang
+        self.dates = None
+
+    def __str__(self):
+        if self.dates:
+            d = "/" + str(self.dates)
+        else:
+            d = ""
+        if self.lang != '':
+            return f"'{self.name}' ({self.lang}){d}"
+        else:
+            return f"'{self.name}'{d}"
+
+    @classmethod
+    def from_node(cls, node):
+        ''' models.gen.place.Place_name.from_node
+        Transforms a db node to an object of type Place_name.
+        
+        <Node id=78278 labels={'Place_name'} 
+            properties={'lang': '', 'name': 'Kangasalan srk'}>
+        '''
+        pn = cls()  # Place_name()
+        pn.uniq_id = node.id
+        pn.name = node.get('name', '?')
+        pn.lang = node.get('lang', '')
+        pn.dates = node.get('dates')
+        return pn
+
+    def _lang_key(self, obj):
+        ''' Name comparison key by 1) language, 2) name '''
+        lang_order = {'fi':'0', 'sv':'1', 'vi': '2', 'de':'3', 'la':'4', 'ru':'5', '':'6'}
+        if obj:
+            if obj.lang in lang_order.keys():
+                return lang_order[obj.lang] + ':' + obj.name
+            return 'x:' + obj.name
+        return ""
+
+    def __lt__(self, other):
+        a = self._lang_key(self)
+        b = self._lang_key(other)
+        return a < b
+        #return self._lang_key(self) < self.lang_key(other)
+    def __le__(self, other):        return self._lang_key(self) <= self.lang_key(other)
+    def __eq__(self, other):        return self._lang_key(self) == self.lang_key(other)
+    def __ge__(self, other):        return self._lang_key(self) >= self.lang_key(other)
+    def __gt__(self, other):        return self._lang_key(self) > self.lang_key(other)
+    def __ne__(self, other):        return self._lang_key(self) != self.lang_key(other)
+

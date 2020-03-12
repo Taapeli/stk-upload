@@ -137,6 +137,7 @@ class OwnerFilter():
         self.filter = self.MaterialChoices.COMMON
         self.years = []                         # example [1800, 1899]
         self.series = None                      # Source data theme like "birth"
+        self.count = 10000                      # Max count ow objects to display
 
         ''' Set active user, if any username '''
         if current_user:
