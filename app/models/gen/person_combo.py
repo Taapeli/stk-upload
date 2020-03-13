@@ -205,7 +205,7 @@ class Person_combo(Person):
 
 
     @staticmethod
-    def read_my_persons_list(o_filter, limit=100):
+    def read_my_persons_list(o_context, limit=100):
         """ Reads Person Name and Event objects for display.
 
             By default, 100 names are got beginning from fw_from 
@@ -214,7 +214,7 @@ class Person_combo(Person):
             ordered by Person.sortname
         """
 
-        def _read_person_list(o_filter, limit):
+        def _read_person_list(o_context, limit):
             """ Read Person data from given fw_from 
             """
             # Select a) filter by user b) show Isotammi common data (too)
@@ -257,18 +257,18 @@ class Person_combo(Person):
 
             # end _read_person_list ---------------
 
-        show_by_owner = o_filter.use_owner_filter()
-        show_with_common = o_filter.use_common()
+        show_by_owner = o_context.use_owner_filter()
+        show_with_common = o_context.use_common()
         #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
-        user = o_filter.user
+        user = o_context.user
 
         persons = []
-        fw_from = o_filter.next_name_fw()     # next person name
+        fw_from = o_context.next_name_fw()     # next person name
 
-        ustr = "user " + o_filter.user if o_filter.user else "no user"
+        ustr = "user " + o_context.user if o_context.user else "no user"
         print(f"read_my_persons_list: Get max {limit} persons "
               f"for {ustr} starting at {fw_from!r}")
-        result = _read_person_list(o_filter, limit)
+        result = _read_person_list(o_context, limit)
 
         for record in result:
             ''' <Record 
@@ -302,8 +302,8 @@ class Person_combo(Person):
                 p.names.append(pname)
     
             # Create a list with the mentioned user name, if present
-            if o_filter.user:
-                p.owners = record.get('owners',[o_filter.user])
+            if o_context.user:
+                p.owners = record.get('owners',[o_context.user])
                                                                                                                                 
             # Events
     
@@ -319,14 +319,14 @@ class Person_combo(Person):
 
         # Update the page scope according to items really found 
         if persons:
-            o_filter.update_session_scope('person_scope', 
+            o_context.update_session_scope('person_scope', 
                                           persons[0].sortname, persons[-1].sortname, 
                                           limit, len(persons))
 
         #Todo: remove this later
-        if 'next_person' in o_filter.session: # Unused field
-            o_filter.session.pop('next_person')
-            o_filter.session.modified = True
+        if 'next_person' in o_context.session: # Unused field
+            o_context.session.pop('next_person')
+            o_context.session.modified = True
 
         return (persons)
 

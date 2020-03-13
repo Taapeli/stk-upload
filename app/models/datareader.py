@@ -32,7 +32,7 @@ from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.dates import DateRange
-from ui.owner import OwnerFilter
+from ui.user_context import UserContext
 import traceback
 
 
@@ -445,13 +445,13 @@ def read_families():
     """ Lukee tietokannasta Family- objektit näytettäväksi
     """
 
-    my_filter = OwnerFilter(user_session, current_user, request)
+    my_filter = UserContext(user_session, current_user, request)
     # Which range of data is shown
     my_filter.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
     count = request.args.get('c', 100, type=int)
 
-    families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
+    families = Family_combo.get_families(o_context=my_filter, opt=opt, limit=count)
     
     return (families)
 

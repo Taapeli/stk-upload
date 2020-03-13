@@ -5,18 +5,18 @@
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
 {% set cnt = places|count %}
-{% set user = owner_filter.user %}
-{% set next = owner_filter.scope %}
-{% set filt_owners = owner_filter.filter %}
-{% if filt_owners == 3 or filt_owners == 5 %}{#
+{% set user = user_context.user %}
+{% set next = user_context.scope %}
+{% set ctxt = user_context.context %}
+{% if ctxt == 3 or ctxt == 5 %}{#
 	#   common_own   011 3 = 1+2 = user's data & demo
 	#   common_batch 101 5 = 1+4 = user batch & demo #}
-	{% set multi_owners = filt_owners - 1 %}
-    {% set my_set = owner_filter.choices.as_str[filt_owners-1] %}
+	{% set multi_owners = ctxt - 1 %}
+    {% set my_set = user_context.choices.as_str[ctxt-1] %}
     {% set my_common = _('Demo-data') %}
 {% else %}
     {% set multi_owners = 0 %}
-    {% set my_set = owner_filter.choices.as_str[filt_owners] %}
+    {% set my_set = user_context.choices.as_str[ctxt] %}
 {% endif %}
 
 <div id="startdiv">

@@ -7,8 +7,8 @@
 <script src="/static/infobox.js"></script>
 
 {% set cnt = medias|count %}
-{% set user = owner_filter.user %}
-{% set next = owner_filter.scope %}
+{% set user = user_context.user %}
+{% set next = user_context.scope %}
 
 <div id="startdiv">
 	<h2>{{ _('List of Medias') }}</h2>
@@ -81,7 +81,7 @@
     <tr><th>{{ _("Title") }}</th>
         <th style="text-align: center;">{{ _("Picture") }}</th>
         <th>{{ _("References") }}</th>
-    {% if owner_filter.use_common() %}
+    {% if user_context.use_common() %}
         <th>{{ _('User Batch') }}</th>
     {% endif %}
     </tr>
@@ -102,7 +102,7 @@
 	                </a>
             </div></td>
             <td align="center">{{m.conn}}</td>
-       {% if owner_filter.use_common() %}
+       {% if user_context.use_common() %}
             <td><i>{{m.credit}}</i><br>{{m.batch}}</td>
        {% endif %}
         </tr>

@@ -312,7 +312,7 @@ class Place_combo(Place):
 #         return sorted(ret, key=lambda x:x.pname)
 
 
-#     def get_my_place_hierarchy(o_filter):   # @staticmethod --> bl.place.PlaceBl.get_list
+#     def get_my_place_hierarchy(o_context):   # @staticmethod --> bl.place.PlaceBl.get_list
 #         """ Get a list on Place_combo objects with nearest heirarchy neighbours.
 #         
 #             Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
@@ -331,13 +331,13 @@ class Place_combo(Place):
 # └─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
 # """
 # 
-#         def _read_place_list(o_filter):
+#         def _read_place_list(o_context):
 #             """ Read Place data from given fw 
 #             """
 #             # Select a) filter by user b) show Isotammi common data (too)
-#             show_by_owner = o_filter.use_owner_filter()
-#             show_with_common = o_filter.use_common()
-#             user = o_filter.user
+#             show_by_owner = o_context.use_owner_filter()
+#             show_with_common = o_context.use_common()
+#             user = o_context.user
 #             try:
 #                 """
 #                                show_by_owner    show_all
@@ -352,19 +352,19 @@ class Place_combo(Place):
 #                             #1 get all with owner name for all
 #                             print("_read_place_list: by owner with common")
 #                             result = session.run(Cypher_place.get_name_hierarchies,
-#                                                  user=user, fw=fw, limit=o_filter.count)
+#                                                  user=user, fw=fw, limit=o_context.count)
 # 
 #                         else: 
 #                             #2 get my own (no owner name needed)
 #                             print("_read_place_list: by owner only")
 #                             result = session.run(Cypher_place.get_my_name_hierarchies,
-#                                                  user=user, fw=fw, limit=o_filter.count)
+#                                                  user=user, fw=fw, limit=o_context.count)
 # 
 #                     else: 
 #                         #3 == #1 simulates common by reading all
 #                         print("_read_place_list: common only")
 #                         result = session.run(Cypher_place.get_name_hierarchies, #user=user, 
-#                                              fw=fw, limit=o_filter.count)
+#                                              fw=fw, limit=o_context.count)
 #                         
 #                     return result
 #             except Exception as e:
@@ -373,8 +373,8 @@ class Place_combo(Place):
 # 
 # 
 #         ret = []
-#         fw = o_filter.next_name_fw()     # next name
-#         result = _read_place_list(o_filter, o_filter.count)
+#         fw = o_context.next_name_fw()     # next name
+#         result = _read_place_list(o_context, o_context.count)
 #         for record in result:
 #             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
 #             # alemmista paikoista
@@ -414,9 +414,9 @@ class Place_combo(Place):
 # 
 #         # Update the page scope according to items really found 
 #         if ret:
-#             o_filter.update_session_scope('person_scope', 
+#             o_context.update_session_scope('person_scope', 
 #                                           ret[0].pname, ret[-1].pname, 
-#                                           o_filter.count, len(ret))
+#                                           o_context.count, len(ret))
 # 
 #         # Return sorted by first name in the list p.pname
 #         return sorted(ret, key=lambda x:x.names[0].name if x.names else "")

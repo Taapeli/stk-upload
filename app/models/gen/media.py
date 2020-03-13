@@ -67,7 +67,7 @@ class Media(NodeObject):
         """ Read Media object list using my_filter.
         """
         medias = []
-        result = Media.get_medias(uniq_id=None, o_filter=my_filter, limit=limit)
+        result = Media.get_medias(uniq_id=None, o_context=my_filter, limit=limit)
         for record in result: 
             # <Record o=<Node id=393949 labels={'Media'}
             #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
@@ -91,16 +91,16 @@ class Media(NodeObject):
         return medias
     
     @staticmethod
-    def get_medias(uniq_id=None, o_filter=None, limit=100):
-        """ Reads Media objects from user batch or common data using filter. """
+    def get_medias(uniq_id=None, o_context=None, limit=100):
+        """ Reads Media objects from user batch or common data using context. """
                         
         if uniq_id:
             query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
             return  shareds.driver.session().run(query, id=uniq_id)
-        elif o_filter:
-            user = o_filter.user
-            fw_from = o_filter.next_name_fw()     # next name
-            show_common = o_filter.use_common()
+        elif o_context:
+            user = o_context.user
+            fw_from = o_context.next_name_fw()     # next name
+            show_common = o_context.use_common()
             if show_common:
                 # Show approved common data
                 return shareds.driver.session().run(Cypher_media.read_common_media,

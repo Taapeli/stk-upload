@@ -16,7 +16,7 @@ from flask import render_template, request, redirect, url_for, flash, session as
 from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
-from ui.owner import OwnerFilter
+from ui.user_context import UserContext
 from bl.place import PlaceBl
 
 from . import bp
@@ -43,9 +43,9 @@ def scene():
     """ Home page for scene narrative pages ('kertova') for anonymous. """    
     print(f"--- {request}")
     print(f"--- {user_session}")
-    my_filter = OwnerFilter(user_session, current_user, request)
-    my_filter.set_scope_from_request(request, 'person_scope')
-    logger.info(f"-> bp.scene.routes.scene '{my_filter.scope[0]}'")
+    my_context = UserContext(user_session, current_user, request)
+    my_context.set_scope_from_request(request, 'person_scope')
+    logger.info(f"-> bp.scene.routes.scene '{my_context.scope[0]}'")
     return render_template('/start/index_scene.html')
 
 
@@ -55,8 +55,8 @@ def scene():
 def show_person_list(selection=None):
     """ Show list of selected Persons for menu(0). """
     t0 = time.time()
-    my_filter = OwnerFilter(user_session, current_user, request)
-    my_filter.set_scope_from_request(request, 'person_scope')
+    my_context = UserContext(user_session, current_user, request)
+    my_context.set_scope_from_request(request, 'person_scope')
     if request.method == 'POST':
         try:
             # Selection from search form
@@ -65,7 +65,7 @@ def show_person_list(selection=None):
             keys = (rule, name)
             logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
-            if my_filter.use_common():  
+            if my_context.use_common():  
                 persons2 = [p for p in persons if not p.too_new]
             else:
                 persons2 = persons
@@ -82,14 +82,14 @@ def show_person_list(selection=None):
         # was GET (no search name given) or the credentials were invalid
         persons = []
         if selection:
-            # Use selection filter
+            # Use selection context
             keys = selection.split('=')
         else:
             keys = ('surname',)
         persons = read_persons_with_events(keys)
         logger.info(f"-> bp.scene.routes.show_person_list GET {keys}")
 
-    if my_filter.use_common():  
+    if my_context.use_common():  
         persons2 = [p for p in persons if not p.too_new]
     else:
         persons2 = persons
@@ -163,25 +163,25 @@ def show_persons_all():
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selections
-    my_filter = OwnerFilter(user_session, current_user, request)
+    # Set context by owner and the data selections
+    my_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request, 'person_scope')
+    my_context.set_scope_from_request(request, 'person_scope')
     # How many objects are shown?
     count = int(request.args.get('c', 100))
 
     logger.info("-> bp.scene.routes.show_persons_all: "
-               f"{my_filter.owner_str()} forward from '{my_filter.scope[0]}'")
+               f"{my_context.owner_str()} forward from '{my_context.scope[0]}'")
     t0 = time.time()
-    persons = Person_combo.read_my_persons_list(o_filter=my_filter, limit=count)
-    if my_filter.use_common():  
+    persons = Person_combo.read_my_persons_list(o_context=my_context, limit=count)
+    if my_context.use_common():  
         persons2 = [p for p in persons if not p.too_new]
     else:
         persons2 = persons
     return render_template("/scene/persons_list.html", persons=persons2,
                            num_hidden=len(persons)-len(persons2), 
                            menuno=12, 
-                           owner_filter=my_filter, elapsed=time.time()-t0)
+                           user_context=my_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/<int:uid>')
@@ -227,7 +227,7 @@ def     show_person(uid=None):
     dbg = request.args.get('debug', None)
     if current_user.is_authenticated:
         user=current_user.username
-        ofilter = user_session.get('owner_filter',0)
+        ofilter = user_session.get('user_context',0)
         use_common = (ofilter == 1)
     else:
         user=None
@@ -296,20 +296,20 @@ def show_families():
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selections
-    my_filter = OwnerFilter(user_session, current_user, request)
+    # Set context by owner and the data selections
+    my_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request, 'person_scope')
+    my_context.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
     count = request.args.get('c', 100, type=int)
     t0 = time.time()
         
     # 'families' has Family objects
-    families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
+    families = Family_combo.get_families(o_context=my_context, opt=opt, limit=count)
 
     logger.info("-> bp.scene.routes.show_families")
     return render_template("/scene/families.html", families=families, 
-                           owner_filter=my_filter, elapsed=time.time()-t0)
+                           user_context=my_context, elapsed=time.time()-t0)
 
 @bp.route('/scene/family=<int:fid>')
 def show_family_page(fid):
@@ -361,22 +361,22 @@ def show_places():
     t0 = time.time()
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selections
-    my_filter = OwnerFilter(user_session, current_user, request)
+    # Set context by owner and the data selections
+    my_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request, 'person_scope')
-    my_filter.count = request.args.get('c', 100, type=int)
+    my_context.set_scope_from_request(request, 'person_scope')
+    my_context.count = request.args.get('c', 100, type=int)
     try:
         # The list has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        places = PlaceBl.get_list(o_filter=my_filter)
+        places = PlaceBl.get_list(o_context=my_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in places:
 #         print ("# {} ".format(p))
-    logger.info(f"-> bp.scene.routes.show_places: forward from '{my_filter.scope[0]}'")
+    logger.info(f"-> bp.scene.routes.show_places: forward from '{my_context.scope[0]}'")
     return render_template("/scene/places.html", places=places, menuno=4,
-                           owner_filter=my_filter, elapsed=time.time()-t0)
+                           user_context=my_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/location/uuid=<locid>')
@@ -387,9 +387,9 @@ def show_place_page(locid):
     try:
         # List 'place_list' has Place objects with 'parent' field pointing to
         # upper place in hierarcy. Events
-        my_filter = OwnerFilter(user_session, current_user, request)
-        my_filter.set_scope_from_request(request, 'person_scope')
-        #if my_filter.use_common():
+        my_context = UserContext(user_session, current_user, request)
+        my_context.set_scope_from_request(request, 'person_scope')
+        #if my_context.use_common():
         #    events = [e for e in events if not e.person.too_new]
         place, place_list, events = get_place_with_events(locid)
 
@@ -420,23 +420,23 @@ def show_sources(series=None):
     """
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selections
-    my_filter = OwnerFilter(user_session, current_user, request)
+    # Set context by owner and the data selections
+    my_context = UserContext(user_session, current_user, request)
 #Todo: show by page
 #     # Which range of data is shown
-#     my_filter.set_scope_from_request(request, 'source_scope')
+#     my_context.set_scope_from_request(request, 'source_scope')
 #     # How many objects are shown?
 #     count = int(request.args.get('c', 100))
 
     if series:
-        my_filter.series = series
+        my_context.series = series
     try:
-        sources, title = Source.get_source_list(my_filter)
+        sources, title = Source.get_source_list(my_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_sources")
     return render_template("/scene/sources.html", sources=sources, title=title,
-                           owner_filter=my_filter)
+                           user_context=my_context)
 
 
 @bp.route('/scene/source=<int:sourceid>')
@@ -460,18 +460,18 @@ def show_medias():
     t0 = time.time()
     print(f"--- {request}")
     print(f"--- {user_session}")
-    # Set filter by owner and the data selections
-    my_filter = OwnerFilter(user_session, current_user, request)
+    # Set context by owner and the data selections
+    my_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request, 'media_scope')
+    my_context.set_scope_from_request(request, 'media_scope')
     try:
-        medias = Media.read_my_media_list(my_filter, 20)
+        medias = Media.read_my_media_list(my_context, 20)
 
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-    logger.info(f"-> bp.scene.media.show_medias: forward from '{my_filter.scope[0]}'")
+    logger.info(f"-> bp.scene.media.show_medias: forward from '{my_context.scope[0]}'")
     return render_template("/scene/medias.html", medias=medias, 
-                           owner_filter=my_filter, elapsed=time.time()-t0)
+                           user_context=my_context, elapsed=time.time()-t0)
 
 @bp.route('/scene/media', methods=['GET'])
 def show_media(uid=None):

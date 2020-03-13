@@ -59,14 +59,14 @@
    ( current_user.has_role('research') or current_user.has_role('admin') ) %}
                  <h3>{{ _('Browse Isotammi Database') }}</h3>
                  <p>{{ _('View your own candidate material or all approved common data') }}.</p>
-                 <p>{% set filt = session['owner_filter'] %}
+                 <p>{% set ctxt = session['user_context'] %}
                    <input type="radio" name="div" value="1" 
-                    {% if filt == 1 %}checked{% endif %}>{{ _('The approved Isotammi data') }}<br>
+                    {% if ctxt == 1 %}checked{% endif %}>{{ _('The approved Isotammi data') }}<br>
                    <input type="radio" name="div" value="2" 
-                    {% if filt == 2 or filt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
+                    {% if ctxt == 2 or ctxt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
 {#
                    &nbsp;&nbsp;└─ <input type="checkbox" name="cmp" value="1"  
-                    {% if filt == 3 or filt == 5 %}checked{% endif %}>
+                    {% if ctxt == 3 or ctxt == 5 %}checked{% endif %}>
                         {{ _('Compare to approved Isotammi data') }} 
 #}
                 </p>

@@ -14,14 +14,14 @@ from urllib.parse import unquote_plus
 from flask_babelex import lazy_gettext as N_
 
 
-class OwnerFilter():
+class UserContext():
     """ Store filter values for finding the active subset of database.
     
         Settings stored in self:
         
         - user          str     Username from current_user, if any
-        - owner_filter  int     Code expressing filter method by data owners
-                                from request.div+div2 or session.owner_filter.
+        - user_context  int     Code expressing filter method by data owners
+                                from request.div+div2 or session.user_context.
                                 Default = 1 (common) if neither present
             COMMON - 1          approved common data 'Isotammi'
             OWN - 2             all user's own candidate materials
@@ -57,7 +57,7 @@ class OwnerFilter():
     NEXT_END = '>'    # end reached: there is nothing forwards
 
 
-    class MaterialChoices():
+    class ChoicesOfView():
         """ Represents all possible combibations of selection by owner and batch. 
         """
         COMMON = 1
@@ -124,7 +124,7 @@ class OwnerFilter():
             else:
                 # No request
                 self.session[self.session_var] = self.scope
-                print(f"OwnerFilter: Now {self.session_var} is cleared")
+                print(f"UserContext: Now {self.session_var} is cleared")
                 return self.scope
             
     
@@ -133,8 +133,8 @@ class OwnerFilter():
             Set filtering properties from user session, request and current user.
         '''
         self.session = user_session
-        self.choices = self.MaterialChoices()   # set of allowed material choices
-        self.filter = self.MaterialChoices.COMMON
+        self.choices = self.ChoicesOfView()   # set of allowed material choices
+        self.context = self.ChoicesOfView.COMMON
         self.years = []                         # example [1800, 1899]
         self.series = None                      # Source data theme like "birth"
         self.count = 10000                      # Max count ow objects to display
@@ -148,8 +148,8 @@ class OwnerFilter():
         else:
             self.user = user_session.get('username', None)
 
-        """ Store the request parameters div=1&div2=2&cmp=1 as session variable owner_filter.
-            Returns owner filter name if detected, otherwise False
+        """ Store the request parameters div=1&div2=2&cmp=1 as session variable user_context.
+            Returns owner context name if detected, otherwise False
         """
         new_selection = 0
         if request:
@@ -163,7 +163,7 @@ class OwnerFilter():
                 if y2:  yi2 = int(y2)
                 else:   yi2 = 9999
                 self.years = [yi1, yi2]     # selected years [from, to]
-                print(f'OwnerFilter: Objects between years {self.years}')
+                print(f'UserContext: Objects between years {self.years}')
 
             # Selected document series for Sources
             self.series = request.args.get('series', None)
@@ -177,38 +177,40 @@ class OwnerFilter():
                 if request.args.get('cmp', ''): 
                     new_selection = new_selection | 1
                 # Got new material selection?
-                self.filter = self.choices.get_valid_key(new_selection)
-                if self.filter:
-                    self.session['owner_filter'] = self.filter
-                    print(f"OwnerFilter: Now owner_filter={self.filter}")
+                self.context = self.choices.get_valid_key(new_selection)
+                if self.context:
+                    self.session['user_context'] = self.context
+                    print(f"UserContext: Now user_context={self.context}")
+            # Clear obslete session variable
+            user_session.pop('owner_filter', None)
 
         if new_selection == 0:
-            # If got no request owner_filter, use session value or 1
-            self.filter = user_session.get('owner_filter', self.choices.COMMON)
-            print(f"OwnerFilter: Uses same or default owner_filter={self.filter}")
+            # If got no request user_context, use session value or 1
+            self.context = user_session.get('user_context', self.choices.COMMON)
+            print(f"UserContext: Uses same or default user_context={self.context}")
 
 
     def owner_str(self):
         # Return current owner choise as text 
         try:
-            return self.choices.as_str[self.filter]
+            return self.choices.as_str[self.context]
         except:
             return ''
 
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner.
 
-            Always when others but self.MaterialChoices.OWN only are required
+            Always when others but self.ChoicesOfView.OWN only are required
         '''
         
-        return (self.filter & 2) > 0
+        return (self.context & 2) > 0
     
     def use_common(self):
         ''' Tells, if you should select objects from common database.
 
-            Always when self.MaterialChoices.COMMON is required
+            Always when self.ChoicesOfView.COMMON is required
         '''
-        return (self.filter & 1) > 0
+        return (self.context & 1) > 0
 
 
     def set_scope_from_request(self, request, var_name):
@@ -219,7 +221,7 @@ class OwnerFilter():
         """
         self.nextpoint = self.NextStartPoint(self.session, var_name)
         self.scope = self.nextpoint.set_next_from_request(request)
-        print(f"OwnerFilter: Now next item={self.scope}")
+        print(f"UserContext: Now next item={self.scope}")
 
 
     def update_session_scope(self, var_name, name1, name2, limit, rec_cnt):

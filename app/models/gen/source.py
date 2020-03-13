@@ -183,7 +183,7 @@ return s'''
 
 
     @staticmethod
-    def get_source_list(o_filter=None):
+    def get_source_list(o_context=None):
         """ Read all sources with notes and repositories, optionally limited by keywords.
         
             Todo: Valinta vuosien mukaan
@@ -192,7 +192,7 @@ return s'''
         sources = []
 
         with shareds.driver.session() as session:
-            if o_filter.series:
+            if o_context.series:
                 # Filtered by series (Lähdesarja)
                 THEMES = {"birth": ('syntyneet','födda'),
                           "babtism": ('kastetut','döpta'),
@@ -200,33 +200,33 @@ return s'''
                           "death": ('kuolleet','döda'),
                           "move": ('muuttaneet','flyttade')
                     }
-                key1, key2 = THEMES[o_filter.series]
+                key1, key2 = THEMES[o_context.series]
                 print(f'# Sources containing "{key1}" or "{key2}"')
             
-                if o_filter.filter == o_filter.choices.COMMON: 
+                if o_context.context == o_context.choices.COMMON: 
                     print("get_source_list: approved common only")
                     result = session.run(SourceCypher.get_auditted_set_selections,
                                          key1=key1, key2=key2)
-                elif o_filter.filter == o_filter.choices.OWN:
+                elif o_context.context == o_context.choices.OWN:
                     # Show my researcher data
                     print("get_source_list: my researcher data")
                     result = session.run(SourceCypher.get_own_set_selections,
                                          key1=key1, key2=key2)
                 else:
                     # No other choices implemented
-                    raise KeyError(f"get_source_list: invalid filter value {o_filter.filter}")
+                    raise KeyError(f"get_source_list: invalid context value {o_context.context}")
             else:
                 # Show all series
-                if o_filter.filter == o_filter.choices.COMMON: 
+                if o_context.context == o_context.choices.COMMON: 
                     print("get_source_list: approved common only")
                     result = session.run(SourceCypher.get_auditted_sets)
-                elif o_filter.filter == o_filter.choices.OWN:
+                elif o_context.context == o_context.choices.OWN:
                     # Show my researcher data
                     print("get_source_list: my researcher data")
                     result = session.run(SourceCypher.get_own_sets)
                 else:
                     # No other choices implemented
-                    raise KeyError(f"get_source_list: invalid filter value {o_filter.filter}")
+                    raise KeyError(f"get_source_list: invalid context value {o_context.context}")
 
         for record in result:
             # <Record 
@@ -280,7 +280,7 @@ return s'''
             s.ref_cnt = record['ref_cnt']
             sources.append(s)
 
-        return sources, o_filter.series
+        return sources, o_context.series
 
     @staticmethod       
     def get_source_citation (uniq_id):

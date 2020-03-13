@@ -6,13 +6,13 @@ Created on 12.3.2020
 import shareds
 from .place_cypher import CypherPlace
 
-def _read_place_list(o_filter):
+def _read_place_list(o_context):
     """ Read Place data from given fw 
     """
     # Select a) filter by user b) show Isotammi common data (too)
-    show_by_owner = o_filter.use_owner_filter()
-    show_with_common = o_filter.use_common()
-    user = o_filter.user
+    show_by_owner = o_context.use_owner_filter()
+    show_with_common = o_context.use_common()
+    user = o_context.user
     try:
         """
                        show_by_owner    show_all
@@ -20,7 +20,7 @@ def _read_place_list(o_filter):
         with common |  me + common      common
         no common   |  me                -
         """
-        fw = o_filter.next_name_fw()     # next name
+        fw = o_context.next_name_fw()     # next name
         with shareds.driver.session() as session:
             if show_by_owner:
 
@@ -28,19 +28,19 @@ def _read_place_list(o_filter):
                     #1 get all with owner name for all
                     print("_read_place_list: by owner with common")
                     result = session.run(CypherPlace.get_name_hierarchies,
-                                         user=user, fw=fw, limit=o_filter.count)
+                                         user=user, fw=fw, limit=o_context.count)
 
                 else: 
                     #2 get my own (no owner name needed)
                     print("_read_place_list: by owner only")
                     result = session.run(CypherPlace.get_my_name_hierarchies,
-                                         user=user, fw=fw, limit=o_filter.count)
+                                         user=user, fw=fw, limit=o_context.count)
 
             else: 
                 #3 == #1 simulates common by reading all
                 print("_read_place_list: common only")
                 result = session.run(CypherPlace.get_name_hierarchies, #user=user, 
-                                     fw=fw, limit=o_filter.count)
+                                     fw=fw, limit=o_context.count)
                 
             return result
     except Exception as e:

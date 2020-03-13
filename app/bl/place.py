@@ -122,7 +122,7 @@ class PlaceBl(Place):
 
 
     @staticmethod
-    def get_list(o_filter):
+    def get_list(o_context):
         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
         
             Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
@@ -141,13 +141,13 @@ class PlaceBl(Place):
 └─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
 """
 
-#         def _read_place_list(o_filter): --> pe.place._read_place_list
+#         def _read_place_list(o_context): --> pe.place._read_place_list
 #             """ Read Place data from given fw 
 #             """
 
         ret = []
-#         fw = o_filter.next_name_fw()     # next name
-        result = _read_place_list(o_filter)
+#         fw = o_context.next_name_fw()     # next name
+        result = _read_place_list(o_context)
         for record in result:
             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
             # alemmista paikoista
@@ -187,9 +187,9 @@ class PlaceBl(Place):
 
         # Update the page scope according to items really found 
         if ret:
-            o_filter.update_session_scope('person_scope', 
+            o_context.update_session_scope('person_scope', 
                                           ret[0].pname, ret[-1].pname, 
-                                          o_filter.count, len(ret))
+                                          o_context.count, len(ret))
 
         # Return sorted by first name in the list p.pname
         return sorted(ret, key=lambda x:x.names[0].name if x.names else "")

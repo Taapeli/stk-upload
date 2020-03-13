@@ -369,20 +369,20 @@ RETURN family"""
 
 
     @staticmethod       
-    def get_families(o_filter, opt='father', limit=100):
+    def get_families(o_context, opt='father', limit=100):
         """ Find families from the database """
 
         # Import here to handle circular dependency 
         from .person_combo import Person_as_member
         
-        def _read_family_list(o_filter, opt, limit):
+        def _read_family_list(o_context, opt, limit):
             """ Read Family data from given fw/fwm
             """
             # Select a) filter by user b) show Isotammi common data (too)
-            show_by_owner = o_filter.use_owner_filter()
-            show_with_common = o_filter.use_common()
+            show_by_owner = o_context.use_owner_filter()
+            show_with_common = o_context.use_common()
             #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
-            user = o_filter.user
+            user = o_context.user
             try:
                 """
                                show_by_owner    show_all
@@ -434,12 +434,12 @@ RETURN family"""
                 raise      
                 
         families = []
-        fw = o_filter.next_name_fw()     # next name
+        fw = o_context.next_name_fw()     # next name
 
-        ustr = "user " + o_filter.user if o_filter.user else "no user"
+        ustr = "user " + o_context.user if o_context.user else "no user"
         print(f"read_my_family_list: Get max {limit} persons "
               f"for {ustr} starting at {fw!r}")
-        result = _read_family_list(o_filter, opt, limit)
+        result = _read_family_list(o_context, opt, limit)
         
         for record in result:
             if record['f']:
@@ -498,11 +498,11 @@ RETURN family"""
         # Update the page scope according to items really found 
         if families:
             if opt == 'father':
-                o_filter.update_session_scope('person_scope', 
+                o_context.update_session_scope('person_scope', 
                                               families[0].father_sortname, families[-1].father_sortname, 
                                               limit, len(families))
             else:
-                o_filter.update_session_scope('person_scope', 
+                o_context.update_session_scope('person_scope', 
                                               families[0].mother_sortname, families[-1].mother_sortname, 
                                               limit, len(families))
 
