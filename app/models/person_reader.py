@@ -6,12 +6,14 @@ Created on 24.10.2019
 import traceback
 import shareds
 #from flask_babelex import _
+from bl.place import PlaceBl
+from ui.place import place_names_from_nodes
 
 from .gen.person_combo import Person_combo
 from .gen.person_name import Name
 from .gen.event_combo import Event_combo
 from .gen.family_combo import Family_combo
-from .gen.place_combo import Place_combo
+#from .gen.place_combo import Place_combo
 from .gen.note import Note
 from .gen.media import Media
 from .gen.citation import Citation
@@ -270,19 +272,19 @@ class PersonReader():
                     traceback.print_exc()
                     raise LookupError(f"ERROR: Unknown Event {src_uniq_id}!?")
 
-                pl = Place_combo.from_node(record['pl'])
+                pl = PlaceBl.from_node(record['pl'])
                 if not pl.uniq_id in self.objs.keys():
                     # A new place
                     self.objs[pl.uniq_id] = pl
                     #print(f"# new place (x:{src_label} {src.uniq_id} {src}) --> (pl:Place {pl.uniq_id} type:{pl.type})")
-                    pl.set_names_from_nodes(record['pnames'])
+                    pl.names = place_names_from_nodes(record['pnames'])
                 #else:
                 #   print(f"# A known place (x:{src_label} {src.uniq_id} {src}) --> ({list(record['pl'].labels)[0]} {objs[pl.uniq_id]})")
                 src.place_ref.append(pl.uniq_id)
 
                 # Surrounding places
                 if record['pi']:
-                    pl_in = Place_combo.from_node(record['pi'])
+                    pl_in = PlaceBl.from_node(record['pi'])
                     ##print(f"# Hierarchy ({pl}) -[:IS_INSIDE]-> (pi:Place {pl_in})")
                     if pl_in.uniq_id in self.objs:
                         pl.uppers.append(self.objs[pl_in.uniq_id])
@@ -290,7 +292,7 @@ class PersonReader():
                     else:
                         pl.uppers.append(pl_in)
                         self.objs[pl_in.uniq_id] = pl_in
-                        pl_in.set_names_from_nodes(record['pinames'])
+                        pl_in.names = place_names_from_nodes(record['pinames'])
                         #print(f"#  ({pl_in} names {pl_in.names})")
                 pass
 

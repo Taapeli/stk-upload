@@ -5,6 +5,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 #from sys import stderr
 import  shareds
+from bl.place import PlaceBl
+from ui.place import place_names_from_nodes
 
 from .cypher import Cypher_family, Cypher_person
 from .family import Family
@@ -12,7 +14,7 @@ from .event_combo import Event_combo
 from .person_name import Name
 from .note import Note
 from .dates import DateRange
-from .place_combo import Place_combo
+#from .place_combo import Place_combo
 from models.gen.person import Person
 
 # Import these later to handle circular dependencies where referencing from Person classes! 
@@ -236,15 +238,15 @@ RETURN family"""
                                     # [60.5625, 21.609722222222224], 'id': 'P0468', 'type': 'City', 'uuid':
                                     # 'd1d0693de1714a47acf6442d64246a50', 'pname': 'Taivassalo', 'change':
                                     # 1556953682}>
-                                    e.place = Place_combo.from_node(place_node)
+                                    e.place = PlaceBl.from_node(place_node)
 
                                     # Look for surrounding place:
                                     res = session.run(Cypher_person.get_places, uid_list=[e.uniq_id])
                                     for rec in res:
-                                        e.place.set_names_from_nodes(rec['pnames'])
+                                        e.place.names = place_names_from_nodes(rec['pnames'])
                                         if rec['pi']:
-                                            pl_in = Place_combo.from_node(rec['pi'])
-                                            pl_in.set_names_from_nodes(rec['pinames'])
+                                            pl_in = PlaceBl.from_node(rec['pi'])
+                                            pl_in.names = place_names_from_nodes(rec['pinames'])
                                             e.place.uppers.append(pl_in)
 
                                 family.events.append(e)

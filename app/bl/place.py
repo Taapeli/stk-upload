@@ -20,7 +20,6 @@ from bl.base import NodeObject
 from bl.place_coordinates import Point
 from pe.place import _read_place_list
 
-
 # import shareds
 # from .dates import DateRange
 # from .cypher import Cypher_place
@@ -104,7 +103,7 @@ class PlaceBl(Place):
      """
 
     def __init__(self, uniq_id=None, ptype="", level=None):
-        """ Creates a new Place_combo instance.
+        """ Creates a new PlaceBl instance.
 
             You may also give for printout eventuell hierarhy level
         """
@@ -124,7 +123,7 @@ class PlaceBl(Place):
 
     @staticmethod
     def get_list(o_filter):
-        """ Get a list on Place_combo objects with nearest heirarchy neighbours.
+        """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
         
             Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
 
@@ -195,7 +194,6 @@ class PlaceBl(Place):
         # Return sorted by first name in the list p.pname
         return sorted(ret, key=lambda x:x.names[0].name if x.names else "")
 
-
     @staticmethod
     def _combine_places(pn_tuples):
         """ Creates a list of Places with names combined from given names.
@@ -213,7 +211,7 @@ class PlaceBl(Place):
             if nid: # id of a lower place
                 pn = PlaceName(name=name, lang=lang)
                 if nid in placedict:
-                    # Append name to existing Place_combo
+                    # Append name to existing PlaceBl
                     placedict[nid].names.append(pn)
                     placedict[nid].names.sort()
 #                     if pn.lang in ['fi', '']:
@@ -221,18 +219,21 @@ class PlaceBl(Place):
 #                         #TODO use language from current_user's preferences
 #                         placedict[nid].pname = pn.name
                 else:
-                    # Add a new Place_combo
+                    # Add a new PlaceBl
                     p = PlaceBl(nid)
                     p.uuid = nuuid
                     p.type = ntype
                     p.names.append(pn)
                     p.pname = pn.name
                     placedict[nid] = p
-                    # ntype, Place_combo.namelist_w_lang( (name,) ))
+                    # ntype, PlaceBl.namelist_w_lang( (name,) ))
         li = list(placedict.values())
         ret = sorted(li, key=lambda x: x.names[0].name if x.names else "")
         return ret
 
+#     def set_place_names_from_nodes(self, nodes): --> ui.place.place_names_from_nodes
+#         ''' Filter user language Name objects from a list of Cypher nodes to self.names.
+#         self.names = place_names_from_nodes(nodes)
 
 
 class PlaceName():
