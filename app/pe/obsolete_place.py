@@ -4,7 +4,7 @@ Created on 12.3.2020
 @author: jm
 '''
 import shareds
-from .place_cypher import CypherPlace
+from pe.neo4j.place_cypher import CypherPlace
 
 def _read_place_list(o_context):
     """ Read Place data from given fw 
@@ -13,6 +13,7 @@ def _read_place_list(o_context):
     show_by_owner = o_context.use_owner_filter()
     show_with_common = o_context.use_common()
     user = o_context.user
+    fw = o_context.next_name_fw()     # next name
     try:
         """
                        show_by_owner    show_all
@@ -20,7 +21,6 @@ def _read_place_list(o_context):
         with common |  me + common      common
         no common   |  me                -
         """
-        fw = o_context.next_name_fw()     # next name
         with shareds.driver.session() as session:
             if show_by_owner:
 

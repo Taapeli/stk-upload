@@ -9,8 +9,8 @@ class CypherPlace():
     Neo4j Cypher clases for Place objects
     '''
 
-    get_name_hierarchies = """
-MATCH (a:Place) -[:NAME]-> (pn:Place_name)
+    get_common_name_hierarchies = """
+MATCH (b) -[:PASSED]-> (a:Place) -[:NAME]-> (pn:Place_name)
     WHERE a.pname >= $fw
 OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
 OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)

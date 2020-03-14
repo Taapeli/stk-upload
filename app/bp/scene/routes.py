@@ -369,7 +369,7 @@ def show_places():
     try:
         # The list has Place objects, which include also the lists of
         # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        places = PlaceBl.get_list(o_context=my_context)
+        places = PlaceBl.get_list(u_context=my_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 #     for p in places:
