@@ -2,9 +2,11 @@ from models.gen.person_combo import Person_combo
 from models.gen.cypher import Cypher_person
 from models.gen.person_name import Name
 from models.gen.event_combo import Event_combo
-class Neo4jDBdriver:
 
-    
+
+class Neo4jDBdriver:
+    ''' Methods for accessing Neo4j database.
+    '''
     def __init__(self, driver):
         self.driver = driver
     
@@ -91,22 +93,35 @@ class Neo4jDBdriver:
         return (persons)
 
 
-
 class Personresult:
+    ''' Person's result object.
+    '''
     def __init__(self, persons):
         self.error = 0  
         self.num_hidden = 10  
         self.persons = persons  
 
+
 class DBreader:
+    ''' Public methods for accessing active database.
     
-    def __init__(self, dbdriver, my_filter, privacylimit):
+        
+    '''
+    def __init__(self, dbdriver, my_context):
+        ''' Create a reader object with db driver and user context.
+        '''
         self.dbdriver = dbdriver
-        self.my_filter = my_filter  
-        self.username = my_filter.user
+        self.user_context = my_context  
+        self.username = my_context.user
     
-    def person_list(self, limit, start, include):
-        persons = self.dbdriver.person_list(self.username, self.my_filter.next_name_fw(), limit=limit)
+    def person_list(self):
+        ''' List person data including all data needed to Person page.
+        
+            Calls Neo4jDBdriver.person_list(user, fw_from, limit)
+        '''
+        fw = self.user_context.next_name_fw()
+        persons = self.dbdriver.person_list(self.user_context.user, 
+                                            fw, self.user_context.count)
         personresult = Personresult(persons)
         return personresult
     

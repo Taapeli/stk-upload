@@ -87,7 +87,7 @@
 	                <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
                 {% endif %}{% endif %}
             {% endfor %}
-            {% if next[1].startswith('>') %}
+            {% if next[1] and next[1].startswith('>') %}
                 <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
             {% else %}
 	            <li><a href="/scene/persons_all/?{{ {'fw':next[1]} | urlencode }}" 
@@ -175,7 +175,7 @@
            {% endif %}
 	    {% endfor %}
 
-        {% if next[1].startswith('>') %}
+        {% if next[1] != None and next[1].startswith('>') %}
                 <tr><td class="ColumnAlpha"></td>
                     <td colspan="2" id="lastitem_badge">
                         <i>{{ _('The last item found') }}</i>

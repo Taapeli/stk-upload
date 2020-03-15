@@ -445,13 +445,13 @@ def read_families():
     """ Lukee tietokannasta Family- objektit näytettäväksi
     """
 
-    my_filter = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request, 'person_scope')
+    u_context.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
     count = request.args.get('c', 100, type=int)
 
-    families = Family_combo.get_families(o_context=my_filter, opt=opt, limit=count)
+    families = Family_combo.get_families(o_context=u_context, opt=opt, limit=count)
     
     return (families)
 

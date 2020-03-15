@@ -148,7 +148,6 @@ def show_all_persons_list(opt=''):
 
 # -------------------------- Menu 12 Persons by user ---------------------------
 
-
 @bp.route('/scene/persons_all/')
 @login_required
 @roles_accepted('guest', 'research', 'audit', 'admin')
@@ -158,44 +157,7 @@ def show_persons_all():
         Both my own and other persons depending on sum of url attributes div + div2
         or session variables.
 
-        The position in persons list is defined by -
-           1. by attribute fw, if defined (the forward arrow or from seach field)
-           2. by session next_person[1], if defined (the page last visited)
-              #TODO: next_person[0] is not in use, yet (backward arrow)
-           3. otherwise "" (beginning)
-    """
-    print(f"--- {request}")
-    print(f"--- {user_session}")
-    # Set context by owner and the data selections
-    my_context = UserContext(user_session, current_user, request)
-    # Which range of data is shown
-    my_context.set_scope_from_request(request, 'person_scope')
-    # How many objects are shown?
-    count = int(request.args.get('c', 100))
-
-    logger.info("-> bp.scene.routes.show_persons_all: "
-               f"{my_context.owner_str()} forward from '{my_context.scope[0]}'")
-    t0 = time.time()
-    persons = Person_combo.read_my_persons_list(o_context=my_context, limit=count)
-    if my_context.use_common():  
-        persons2 = [p for p in persons if not p.too_new]
-    else:
-        persons2 = persons
-    return render_template("/scene/persons_list.html", persons=persons2,
-                           num_hidden=len(persons)-len(persons2), 
-                           menuno=12, 
-                           user_context=my_context, elapsed=time.time()-t0)
-
-@bp.route('/scene/persons_all2/')
-@login_required
-@roles_accepted('guest', 'research', 'audit', 'admin')
-def show_persons_all2():
-    """ List all persons for menu(12).
-
-        Both my own and other persons depending on sum of url attributes div + div2
-        or session variables.
-
-        The position in persons list is defined by -
+        The position in persons list is defined by –
            1. by attribute fw, if defined (the forward arrow or from seach field)
            2. by session next_person[1], if defined (the page last visited)
               #TODO: next_person[0] is not in use, yet (backward arrow)
@@ -204,33 +166,27 @@ def show_persons_all2():
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set filter by owner and the data selections
-    my_filter = OwnerFilter(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request, 'person_scope')
+    u_context.set_scope_from_request(request, 'person_scope')
     # How many objects are shown?
-    count = int(request.args.get('c', 100))
+    u_context.count = int(request.args.get('c', 100))
+    u_context.privacy_years = 50
 
     logger.info("-> bp.scene.routes.show_persons_all: "
-               f"{my_filter.owner_str()} forward from '{my_filter.scope[0]}'")
+               f"{u_context.owner_str()} forward from '{u_context.scope[0]}'")
     t0 = time.time()
 
     dbdriver = Neo4jDBdriver(shareds.driver)
+    db = DBreader(dbdriver, u_context) 
     
-    db = DBreader( dbdriver, my_filter, privacylimit=50 ) 
-    
-    personsresult = db.person_list(
-        limit=count, 
-        start=None, 
-        include=["events"])
-    print(personsresult.error)
-    print(personsresult.persons)
-    print(personsresult.num_hidden)
-    
-    persons = personsresult.persons
-    return render_template("/scene/persons_list.html", persons=persons,
-                           num_hidden=personsresult.num_hidden, 
-                           menuno=12, 
-                           owner_filter=my_filter, elapsed=time.time()-t0)
+    res = db.person_list()
+#         limit=count, start=None, include=["events"])
+    print(f'Got {len(res.persons)} persons with {res.num_hidden} hidden and {res.error} errors')
+    return render_template("/scene/persons_list.html", persons=res.persons,
+                           num_hidden=res.num_hidden, 
+                           user_context=u_context,
+                           menuno=12, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/<int:uid>')

@@ -63,11 +63,11 @@ class Media(NodeObject):
 
 
     @staticmethod
-    def read_my_media_list(my_filter, limit):
-        """ Read Media object list using my_filter.
+    def read_my_media_list(u_context, limit):
+        """ Read Media object list using u_context.
         """
         medias = []
-        result = Media.get_medias(uniq_id=None, o_context=my_filter, limit=limit)
+        result = Media.get_medias(uniq_id=None, o_context=u_context, limit=limit)
         for record in result: 
             # <Record o=<Node id=393949 labels={'Media'}
             #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
@@ -86,7 +86,7 @@ class Media(NodeObject):
         
     # Update the page scope according to items really found
         if medias:
-            my_filter.update_session_scope('media_scope', 
+            u_context.update_session_scope('media_scope', 
                 medias[0].description, medias[-1].description, limit, len(medias))
         return medias
     
