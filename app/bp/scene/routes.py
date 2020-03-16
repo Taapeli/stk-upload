@@ -35,7 +35,7 @@ from models.datareader import get_event_participants
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 
-from bp.db.db import Neo4jDBdriver, DBreader
+from pe.db import Neo4jDBdriver, DBreader
 
 LAST_YEAR_ALLOWED=datetime.now().year - 120
 
