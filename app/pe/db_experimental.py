@@ -119,9 +119,13 @@ class DBreader:
         
             Calls Neo4jDBdriver.person_list(user, fw_from, limit)
         '''
-        fw = self.user_context.next_name_fw()
-        persons = self.dbdriver.person_list(self.user_context.user, 
-                                            fw, self.user_context.count)
+        context = self.user_context
+        fw = context.next_name_fw()
+        if context.context == context.ChoicesOfView.COMMON:
+            use_user = context.user
+        else:
+            use_user=None
+        persons = self.dbdriver.person_list(use_user, fw, context.count)
         personresult = Personresult(persons)
         return personresult
     
