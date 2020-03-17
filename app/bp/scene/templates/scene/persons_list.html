@@ -18,13 +18,7 @@
 {% endif %}
 
 <div id="startdiv">
-	{% if session['user_context'] %}
-	    <h2>{{ _('Persons filtered by') }} {{ user_context.owner_str() }}</h2>
-	{# if rule[0] == 'refname' %}
-	    <h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2> #}
-	{% else %}
-	    <h2>{{ _('Persons') }}</h2>
-	{% endif %}
+    <h2>{{ _('Persons filtered by') }} {{ user_context.owner_str() }}</h2>
 </div>
 
 {{ macro.menu(menuno) }}

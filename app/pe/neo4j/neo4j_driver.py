@@ -4,7 +4,7 @@ from models.gen.person_name import Name
 from models.gen.event_combo import Event_combo
 
 
-class Neo4jDBdriver:
+class Neo4jDriver:
     ''' Methods for accessing Neo4j database.
     '''
     def __init__(self, driver):
@@ -79,18 +79,7 @@ class Neo4jDBdriver:
 
             persons.append(p)   
 
-        # Update the page scope according to items really found 
-#         if persons:
-#             o_filter.update_session_scope('person_scope', 
-#                                           persons[0].sortname, persons[-1].sortname, 
-#                                           limit, len(persons))
-# 
-#         #Todo: remove this later
-#         if 'next_person' in o_filter.session: # Unused field
-#             o_filter.session.pop('next_person')
-#             o_filter.session.modified = True
-
-        return (persons)
+        return persons
 
 
 class Personresult:
@@ -117,7 +106,7 @@ class DBreader:
     def person_list(self):
         ''' List person data including all data needed to Person page.
         
-            Calls Neo4jDBdriver.person_list(user, fw_from, limit)
+            Calls Neo4jDriver.person_list(user, fw_from, limit)
         '''
         context = self.user_context
         fw = context.next_name_fw()
@@ -126,12 +115,20 @@ class DBreader:
         else:
             use_user=None
         persons = self.dbdriver.person_list(use_user, fw, context.count)
+
+        # Update the page scope according to items really found 
+        if persons:
+            context.update_session_scope('person_scope', 
+                                          persons[0].sortname, persons[-1].sortname, 
+                                          context.count, len(persons))
+ 
+        #Todo: remove this later
+        if 'next_person' in context.session: # Remove an obsolete field
+            context.session.pop('next_person')
+            context.session.modified = True
+
         personresult = Personresult(persons)
+        #Todo:Calculate hidden persons
+        personresult.num_hidden = 0
         return personresult
-    
-    
-    
-    
-
-
 

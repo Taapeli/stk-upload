@@ -17,19 +17,42 @@ from flask_babelex import lazy_gettext as N_
 class UserContext():
     """ Store filter values for finding the active subset of database.
     
+        Usage:
+            #    Create context with defaults from session and request (1)
+            u_context = UserContext(user_session, current_user, request)
+
+            #    Set the scope of data keys using request arguments or previous defalts (2)
+            u_context.set_scope_from_request(request, 'person_scope')
+            
+            #    Set other variables: how many objects shall be shown
+            u_context.count = int(request.args.get('c', 100))
+            #        Privacy limit: how many years from (calculated) death year
+            u_context.privacy_years = 50
+
+            #    < Execute data search here >
+
+            #    Update data scope for next search
+            context.update_session_scope('person_scope', 
+                                          persons[0].sortname, persons[-1].sortname, 
+                                          context.count, len(persons))
+
         Settings stored in self:
-        
+
+        (1) user context: username and which material to display
         - user          str     Username from current_user, if any
         - user_context  int     Code expressing filter method by data owners
                                 from request.div+div2 or session.user_context.
                                 Default = 1 (common) if neither present
+
             COMMON - 1          approved common data 'Isotammi'
             OWN - 2             all user's own candidate materials
             BATCH - 3           a selected Batch set
             COMMON+OWN
             COMMON+BATCH
+
+        (2) sort key limits displayed in current page
         - scope          list   Boundary names for current display page [from, to]
-        
+
                                 For Persons page, the scope variable in
                                 user session is 'person_scope' and the values 
                                 are from Person.sortname field.
@@ -42,14 +65,14 @@ class UserContext():
             - The same boundary names are included in next pages, too
               to ensure no duplicate names are skipped.
 
-        scope[0] (from which name to display, forwards):
-            ' '              from first name of data
-            name             from a name given
-            NEXT_END '>'     bottom reached: there is nothing forwards
-        scope[1] (from which name to display, backwards):
-            NEXT_END '>'     from last name of data
-            name             from a name given
-            NEXT_START '<'   top reached: there is nothing before
+            scope[0] (from which name to display, forwards):
+                ' '              from first name of data
+                name             from a name given
+                NEXT_END '>'     bottom reached: there is nothing forwards
+            scope[1] (from which name to display, backwards):
+                NEXT_END '>'     from last name of data
+                name             from a name given
+                NEXT_START '<'   top reached: there is nothing before
 
     #TODO self.batch_id not set or used
     """

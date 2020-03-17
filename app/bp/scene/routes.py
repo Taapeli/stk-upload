@@ -23,7 +23,7 @@ from bl.place import PlaceBl
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
 #from bp.scene.scene_reader import get_a_person_for_display_apoc
-from models.gen.person_combo import Person_combo
+#from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
 #from models.gen.place_combo import Place_combo
 from models.gen.source import Source
@@ -35,7 +35,7 @@ from models.datareader import get_event_participants
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 
-from pe.db_experimental import Neo4jDBdriver, DBreader
+from pe.neo4j.neo4j_driver import Neo4jDriver, DBreader
 
 LAST_YEAR_ALLOWED=datetime.now().year - 120
 
@@ -177,14 +177,14 @@ def show_persons_all():
                f"{u_context.owner_str()} forward from '{u_context.scope[0]}'")
     t0 = time.time()
 
-    dbdriver = Neo4jDBdriver(shareds.driver)
+    dbdriver = Neo4jDriver(shareds.driver)
     db = DBreader(dbdriver, u_context) 
     
-    res = db.person_list()
+    results = db.person_list()
 #         limit=count, start=None, include=["events"])
-    print(f'Got {len(res.persons)} persons with {res.num_hidden} hidden and {res.error} errors')
-    return render_template("/scene/persons_list.html", persons=res.persons,
-                           num_hidden=res.num_hidden, 
+    print(f'Got {len(results.persons)} persons with {results.num_hidden} hidden and {results.error} errors')
+    return render_template("/scene/persons_list.html", persons=results.persons,
+                           num_hidden=results.num_hidden, 
                            user_context=u_context,
                            menuno=12, elapsed=time.time()-t0)
 
