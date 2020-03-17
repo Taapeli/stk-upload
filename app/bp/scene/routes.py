@@ -35,9 +35,10 @@ from models.datareader import get_event_participants
 from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 
-from pe.neo4j.neo4j_driver import Neo4jDriver, DBreader
+from pe.neo4j.reader import Neo4jDriver
+from pe.db_reader import DBreader
 
-LAST_YEAR_ALLOWED=datetime.now().year - 120
+LAST_YEAR_ALLOWED=datetime.now().year - 50
 
 # Narrative start page
 
@@ -171,7 +172,7 @@ def show_persons_all():
     u_context.set_scope_from_request(request, 'person_scope')
     # How many objects are shown?
     u_context.count = int(request.args.get('c', 100))
-    u_context.privacy_years = 50
+    u_context.privacy_limit = LAST_YEAR_ALLOWED
 
     logger.info("-> bp.scene.routes.show_persons_all: "
                f"{u_context.owner_str()} forward from '{u_context.scope[0]}'")

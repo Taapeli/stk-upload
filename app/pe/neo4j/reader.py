@@ -13,7 +13,7 @@ class Neo4jDriver:
     def person_list(self, user, fw_from, limit):
         """ Read Person data from given fw_from 
         """
-        # Select a) filter by user b) show Isotammi common data (too)
+        # Select a) filter by user or b) show Isotammi common data (too)
         try:
             with self.driver.session() as session:
                 if user is None: 
@@ -28,7 +28,7 @@ class Neo4jDriver:
                                          user=user, start_name=fw_from, limit=limit)
                 # Returns person, names, events
         except Exception as e:
-            print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
+            print('Error pe.neo4j.reader.Neo4jDriver.person_list: {} {}'.format(e.__class__.__name__, e))            
             raise      
 
         persons = []
@@ -68,7 +68,6 @@ class Neo4jDriver:
                 p.owners = record.get('owners',[user])
                                                                                                                                 
             # Events
-    
             for enode, pname, role in record['events']:
                 if enode != None:
                     e = Event_combo.from_node(enode)
@@ -80,55 +79,4 @@ class Neo4jDriver:
             persons.append(p)   
 
         return persons
-
-
-class Personresult:
-    ''' Person's result object.
-    '''
-    def __init__(self, persons):
-        self.error = 0  
-        self.num_hidden = 10  
-        self.persons = persons  
-
-
-class DBreader:
-    ''' Public methods for accessing active database.
-    
-        
-    '''
-    def __init__(self, dbdriver, my_context):
-        ''' Create a reader object with db driver and user context.
-        '''
-        self.dbdriver = dbdriver
-        self.user_context = my_context  
-        self.username = my_context.user
-    
-    def person_list(self):
-        ''' List person data including all data needed to Person page.
-        
-            Calls Neo4jDriver.person_list(user, fw_from, limit)
-        '''
-        context = self.user_context
-        fw = context.next_name_fw()
-        if context.context == context.ChoicesOfView.COMMON:
-            use_user = context.user
-        else:
-            use_user=None
-        persons = self.dbdriver.person_list(use_user, fw, context.count)
-
-        # Update the page scope according to items really found 
-        if persons:
-            context.update_session_scope('person_scope', 
-                                          persons[0].sortname, persons[-1].sortname, 
-                                          context.count, len(persons))
- 
-        #Todo: remove this later
-        if 'next_person' in context.session: # Remove an obsolete field
-            context.session.pop('next_person')
-            context.session.modified = True
-
-        personresult = Personresult(persons)
-        #Todo:Calculate hidden persons
-        personresult.num_hidden = 0
-        return personresult
 

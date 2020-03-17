@@ -27,7 +27,7 @@ class UserContext():
             #    Set other variables: how many objects shall be shown
             u_context.count = int(request.args.get('c', 100))
             #        Privacy limit: how many years from (calculated) death year
-            u_context.privacy_years = 50
+            u_context.privacy_limit = 1920
 
             #    < Execute data search here >
 
