@@ -183,7 +183,7 @@ def show_persons_all():
     
     results = db.person_list()
 #         limit=count, start=None, include=["events"])
-    print(f'Got {len(results.persons)} persons with {results.num_hidden} hidden and {results.error} errors')
+    print(f'Got {len(results.items)} persons with {results.num_hidden} hidden and {results.error} errors')
     return render_template("/scene/persons_list.html", persons=results.items,
                            num_hidden=results.num_hidden, 
                            user_context=u_context,

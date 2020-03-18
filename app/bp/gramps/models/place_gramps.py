@@ -6,8 +6,11 @@ Created on 11.3.2019
 
 from sys import stderr
 
+from bl.place import PlaceName, Place   # Do not remove
+from bl.place_coordinates import Point  # needed in bl.place
+
 from models.gen.dates import DateRange
-from models.gen.place import Place
+#from models.gen.place import Place
 from models.cypher_gramps import Cypher_place_in_batch
 from shareds import logger
 import traceback
@@ -70,7 +73,7 @@ class Place_gramps(Place):
                 tx.run(Cypher_place_in_batch.link_hier,
                        handle=place.handle, hlink=upper['hlink'], r_attr=r_attr)
             except Exception as err:
-                print("iError Place.link_hier: {0}".format(err), file=stderr)
+                print("iError Place_gramps.make_hierarchy: {0}".format(err), file=stderr)
 
 
     def save(self, tx, **kwargs):   # batch_id, place_keys=None):
@@ -98,7 +101,7 @@ class Place_gramps(Place):
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
         else:
-            raise RuntimeError(f"Place_gramps.save needs batch_id for {self.id}")
+            raise RuntimeError(f"Place_gramps.save needs a batch_id for {self.id}")
 
         # Create or update this Place
 

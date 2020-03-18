@@ -4,7 +4,8 @@ Created on 17.3.2020
 @author: jm
 '''
 
-from bl.place import PlaceBl, PlaceName, Point
+from bl.place import PlaceBl, PlaceName
+from bl.place_coordinates import Point
 from .place_cypher import CypherPlace
 
 #Todo: Change Old style includes to bl classes
@@ -143,8 +144,8 @@ class Neo4jDriver:
                 p.names.sort()
             if p.pname == '' and p.names:
                 p.pname = p.names[0].name
-            p.uppers = PlaceBl._combine_places(record['upper'])
-            p.lowers = PlaceBl._combine_places(record['lower'])
+            p.uppers = PlaceBl.combine_places(record['upper'])
+            p.lowers = PlaceBl.combine_places(record['lower'])
             ret.append(p)
 
         # Return sorted by first name in the list p.pname
