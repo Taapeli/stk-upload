@@ -35,22 +35,53 @@ class DBreader:
                                           persons[0].sortname, persons[-1].sortname, 
                                           context.count, len(persons))
 
-        #Todo: remove this later
+        #Todo: remove this after next main version
         if 'next_person' in context.session: # Remove an obsolete field
             context.session.pop('next_person')
             context.session.modified = True
 
         person_result = PersonResult(persons)
-        #Todo:Calculate hidden persons
+#Todo:Calculate hidden persons
         #person_result.num_hidden = 0
         return person_result
 
 
+    def place_list(self):
+        """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+        
+            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+"""
+
+        context = self.user_context
+        fw = context.next_name_fw()
+        if context.context == context.ChoicesOfView.COMMON:
+            use_user = context.user
+        else:
+            use_user=None
+        places = self.dbdriver.place_list(use_user, fw, context.count)
+
+        # Update the page scope according to items really found 
+        if places:
+            context.update_session_scope('place_scope', 
+                                          places[0].pname, places[-1].pname, 
+                                          context.count, len(places))
+        place_result = PlaceResult(places)
+        return place_result
+
+
+class PlaceResult:
+    ''' Person's result object.
+    '''
+    def __init__(self, items):
+        self.error = 0  
+        self.num_hidden = 0
+        self.items = items  
+
 class PersonResult:
     ''' Person's result object.
     '''
-    def __init__(self, persons):
+    def __init__(self, items):
         self.error = 0  
         self.num_hidden = 0
-        self.persons = persons  
+        self.items = items  
 

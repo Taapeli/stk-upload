@@ -184,7 +184,7 @@ def show_persons_all():
     results = db.person_list()
 #         limit=count, start=None, include=["events"])
     print(f'Got {len(results.persons)} persons with {results.num_hidden} hidden and {results.error} errors')
-    return render_template("/scene/persons_list.html", persons=results.persons,
+    return render_template("/scene/persons_list.html", persons=results.items,
                            num_hidden=results.num_hidden, 
                            user_context=u_context,
                            menuno=12, elapsed=time.time()-t0)
@@ -350,13 +350,13 @@ def show_family(uid=None):
     logger.info("-> bp.scene.routes.show_family")
     return render_template("/scene/family.html", family=family, menuno=3)
 
-@bp.route('/pop/family=<int:fid>')
-def show_family_popup(fid):
-    """ Small Family pop-up. EXPERIMENTAL
-    """
-    #TODO Create a pop-up window; Gen only fewer pieces of data
-    family = Family_combo.get_family_data(fid)
-    return render_template("/scene/family_pop.html", family=family)
+# @bp.route('/pop/family=<int:fid>')
+# def show_family_popup(fid):
+#     """ Small Family pop-up. EXPERIMENTAL
+#     """
+#     #TODO Create a pop-up window; Gen only fewer pieces of data
+#     family = Family_combo.get_family_data(fid)
+#     return render_template("/scene/family_pop.html", family=family)
 
 # ------------------------------ Menu 4: Places --------------------------------
 
@@ -368,21 +368,25 @@ def show_places():
     print(f"--- {request}")
     print(f"--- {user_session}")
     # Set context by owner and the data selections
-    my_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_context.set_scope_from_request(request, 'person_scope')
-    my_context.count = request.args.get('c', 100, type=int)
-    try:
-        # The list has Place objects, which include also the lists of
-        # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
-        places = PlaceBl.get_list(u_context=my_context)
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in places:
+    u_context.set_scope_from_request(request, 'place_scope')
+    u_context.count = request.args.get('c', 100, type=int)
+
+
+    dbdriver = Neo4jDriver(shareds.driver)
+    db = DBreader(dbdriver, u_context) 
+
+    # The list has Place objects, which include also the lists of
+    # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
+
+    results = db.place_list()
+
+#     for p in result.items:
 #         print ("# {} ".format(p))
-    logger.info(f"-> bp.scene.routes.show_places: forward from '{my_context.scope[0]}'")
-    return render_template("/scene/places.html", places=places, menuno=4,
-                           user_context=my_context, elapsed=time.time()-t0)
+    logger.info(f"-> bp.scene.routes.show_places: forward from '{u_context.scope[0]}'")
+    return render_template("/scene/places.html", places=results.items, menuno=4,
+                           user_context=u_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/location/uuid=<locid>')

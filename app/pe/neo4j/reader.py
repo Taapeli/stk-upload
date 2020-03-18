@@ -1,3 +1,13 @@
+'''
+Created on 17.3.2020
+
+@author: jm
+'''
+
+from bl.place import PlaceBl, PlaceName, Point
+from .place_cypher import CypherPlace
+
+#Todo: Change Old style includes to bl classes
 from models.gen.person_combo import Person_combo
 from models.gen.cypher import Cypher_person
 from models.gen.person_name import Name
@@ -79,4 +89,64 @@ class Neo4jDriver:
             persons.append(p)   
 
         return persons
+
+
+    def place_list(self, user, fw_from, limit):
+        ''' Read place list from given start point
+        '''
+        #fw = self.context.next_name_fw()
+        with self.driver.session() as session: 
+            if user == None: 
+                #1 get approved common data
+                print("pe.neo4j.reader.Neo4jDriver.place_list: by owner with common")
+                result = session.run(CypherPlace.get_common_name_hierarchies,
+                                     user=user, fw=fw_from, 
+                                     limit=limit)
+            else: 
+                #2 get my own (no owner name needed)
+                print("pe.neo4j.reader.Neo4jDriver.place_list: by owner only")
+                result = session.run(CypherPlace.get_my_name_hierarchies,
+                                     user=user, fw=fw_from, 
+                                     limit=limit)
+
+        ret =[]
+        for record in result:
+            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
+            # alemmista paikoista
+            #
+            # Record: <Record id=290228 type='Borough' 
+            #    names=[<Node id=290235 labels={'Place_name'} 
+            #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
+            #    coord=None
+            #    upper=[
+            #        [287443, 'City', 'Arctopolis', 'la'], 
+            #        [287443, 'City', 'Björneborg', 'sv'], 
+            #        [287443, 'City', 'Pori', ''], 
+            #        [287443, 'City', 'Пори', 'ru']] 
+            #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
+            # >
+            pl_id =record['id']
+            p = PlaceBl(pl_id)
+            p.uuid =record['uuid']
+            p.type = record.get('type')
+            if record['coord']:
+                p.coord = Point(record['coord']).coord
+            # Set place names and default display name pname
+            for nnode in record.get('names'):
+                pn = PlaceName.from_node(nnode)
+#                 if pn.lang in ['fi', '']:
+#                     # Default language name
+#                     #TODO use language from current_user's preferences
+#                     p.pname = pn.name
+                p.names.append(pn)
+            if len(p.names) > 1:
+                p.names.sort()
+            if p.pname == '' and p.names:
+                p.pname = p.names[0].name
+            p.uppers = PlaceBl._combine_places(record['upper'])
+            p.lowers = PlaceBl._combine_places(record['lower'])
+            ret.append(p)
+
+        # Return sorted by first name in the list p.pname
+        return sorted(ret, key=lambda x:x.names[0].name if x.names else "")
 

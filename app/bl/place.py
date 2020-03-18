@@ -120,75 +120,75 @@ class PlaceBl(Place):
         self.note_ref = []      # uniq_ids of Notes
         self.media_ref = []     # uniq_id of models.gen.media.Media
 
-
-    @staticmethod
-    def get_list(u_context):
-        """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
-        
-            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-
-            Esim.
-╒══════╤═════════╤════════════════════╤═══════╤════════════════════╤════════════════════╕
-│"id"  │"type"   │"name"              │"coord"│"upper"             │"lower"             │
-╞══════╪═════════╪════════════════════╪═══════╪════════════════════╪════════════════════╡
-│290228│"Borough"│[{"name":"1. Kaupung│null   │[[287443,"City","Arc│[[290226,"Tontti","T│
-│      │         │inosa","lang":""}]  │       │topolis","la"],[2874│ontti 23",""]]      │
-│      │         │                    │       │43,"City","Björnebor│                    │
-│      │         │                    │       │g","sv"],[287443,"Ci│                    │
-│      │         │                    │       │ty","Pori",""],[2874│                    │
-│      │         │                    │       │43,"City","Пори","ru│                    │
-│      │         │                    │       │"]]                 │                    │
-└─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
-"""
-
-        ret = []
-        dbreader = DbReader(u_context)
-        result = dbreader.place_list()
-        for record in result:
-            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
-            # alemmista paikoista
-            #
-            # Record: <Record id=290228 type='Borough' 
-            #    names=[<Node id=290235 labels={'Place_name'} 
-            #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
-            #    coord=None
-            #    upper=[
-            #        [287443, 'City', 'Arctopolis', 'la'], 
-            #        [287443, 'City', 'Björneborg', 'sv'], 
-            #        [287443, 'City', 'Pori', ''], 
-            #        [287443, 'City', 'Пори', 'ru']] 
-            #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
-            # >
-            pl_id =record['id']
-            p = PlaceBl(pl_id)
-            p.uuid =record['uuid']
-            p.type = record.get('type')
-            if record['coord']:
-                p.coord = Point(record['coord']).coord
-            # Set place names and default display name pname
-            for nnode in record.get('names'):
-                pn = PlaceName.from_node(nnode)
-#                 if pn.lang in ['fi', '']:
-#                     # Default language name
-#                     #TODO use language from current_user's preferences
-#                     p.pname = pn.name
-                p.names.append(pn)
-            if len(p.names) > 1:
-                p.names.sort()
-            if p.pname == '' and p.names:
-                p.pname = p.names[0].name
-            p.uppers = PlaceBl._combine_places(record['upper'])
-            p.lowers = PlaceBl._combine_places(record['lower'])
-            ret.append(p)
-
-        # Update the page scope according to items really found 
-        if ret:
-            u_context.update_session_scope('person_scope', 
-                                          ret[0].pname, ret[-1].pname, 
-                                          u_context.count, len(ret))
-
-        # Return sorted by first name in the list p.pname
-        return sorted(ret, key=lambda x:x.names[0].name if x.names else "")
+# 
+#     @staticmethod
+#     def get_list(u_context):
+#         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+#         
+#             Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+# 
+#             Esim.
+# ╒══════╤═════════╤════════════════════╤═══════╤════════════════════╤════════════════════╕
+# │"id"  │"type"   │"name"              │"coord"│"upper"             │"lower"             │
+# ╞══════╪═════════╪════════════════════╪═══════╪════════════════════╪════════════════════╡
+# │290228│"Borough"│[{"name":"1. Kaupung│null   │[[287443,"City","Arc│[[290226,"Tontti","T│
+# │      │         │inosa","lang":""}]  │       │topolis","la"],[2874│ontti 23",""]]      │
+# │      │         │                    │       │43,"City","Björnebor│                    │
+# │      │         │                    │       │g","sv"],[287443,"Ci│                    │
+# │      │         │                    │       │ty","Pori",""],[2874│                    │
+# │      │         │                    │       │43,"City","Пори","ru│                    │
+# │      │         │                    │       │"]]                 │                    │
+# └─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
+# """
+# 
+#         ret = []
+#         dbreader = DbReader(u_context)
+#         result = dbreader.place_list()
+#         for record in result:
+#             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
+#             # alemmista paikoista
+#             #
+#             # Record: <Record id=290228 type='Borough' 
+#             #    names=[<Node id=290235 labels={'Place_name'} 
+#             #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
+#             #    coord=None
+#             #    upper=[
+#             #        [287443, 'City', 'Arctopolis', 'la'], 
+#             #        [287443, 'City', 'Björneborg', 'sv'], 
+#             #        [287443, 'City', 'Pori', ''], 
+#             #        [287443, 'City', 'Пори', 'ru']] 
+#             #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
+#             # >
+#             pl_id =record['id']
+#             p = PlaceBl(pl_id)
+#             p.uuid =record['uuid']
+#             p.type = record.get('type')
+#             if record['coord']:
+#                 p.coord = Point(record['coord']).coord
+#             # Set place names and default display name pname
+#             for nnode in record.get('names'):
+#                 pn = PlaceName.from_node(nnode)
+# #                 if pn.lang in ['fi', '']:
+# #                     # Default language name
+# #                     #TODO use language from current_user's preferences
+# #                     p.pname = pn.name
+#                 p.names.append(pn)
+#             if len(p.names) > 1:
+#                 p.names.sort()
+#             if p.pname == '' and p.names:
+#                 p.pname = p.names[0].name
+#             p.uppers = PlaceBl._combine_places(record['upper'])
+#             p.lowers = PlaceBl._combine_places(record['lower'])
+#             ret.append(p)
+# 
+#         # Update the page scope according to items really found 
+#         if ret:
+#             u_context.update_session_scope('person_scope', 
+#                                           ret[0].pname, ret[-1].pname, 
+#                                           u_context.count, len(ret))
+# 
+#         # Return sorted by first name in the list p.pname
+#         return sorted(ret, key=lambda x:x.names[0].name if x.names else "")
 
     @staticmethod
     def _combine_places(pn_tuples):
