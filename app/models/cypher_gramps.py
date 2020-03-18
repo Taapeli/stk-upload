@@ -269,7 +269,7 @@ CREATE (u) -[:OWNS]-> (pl)"""
 
     add_name = """
 MATCH (pl:Place) WHERE id(pl) = $pid
-CREATE (pl) -[r:NAME]-> (n:Place_name)
+CREATE (pl) -[r:NAME {order:$order}]-> (n:Place_name)
     SET n = $n_attr"""
 
     # Link to a known upper Place

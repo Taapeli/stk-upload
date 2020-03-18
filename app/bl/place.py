@@ -173,6 +173,7 @@ class PlaceName():
                 name             str nimi
                 lang             str kielikoodi
                 dates            DateRange aikajakso
+                order            int display order of various names of a place
     """
 
     def __init__(self, name='', lang=''):
@@ -180,6 +181,7 @@ class PlaceName():
         self.name = name
         self.lang = lang
         self.dates = None
+        self.order = 0
 
     def __str__(self):
         if self.dates:

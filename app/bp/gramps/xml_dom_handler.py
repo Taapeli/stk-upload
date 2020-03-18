@@ -19,6 +19,9 @@ from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
 from .models.place_gramps import Place_gramps
+from bl.place import PlaceName
+from bl.place_coordinates import Point
+
 from .batchlogger import Log
 
 from models.gen.dates import Gramps_DateRange
@@ -635,9 +638,12 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one ptitle in a place",
                                      'level':"WARNING", 'count':pl.id})
 
+            place_order = 0
             for placeobj_pname in placeobj.getElementsByTagName('pname'):
                 if placeobj_pname.hasAttribute("value"):
                     placename = PlaceName()
+                    placename.order = place_order
+                    place_order += 1
                     placename.name = placeobj_pname.getAttribute("value")
                     if placename.name:
                         if pl.pname == '':

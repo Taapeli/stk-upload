@@ -6,9 +6,7 @@ Created on 11.3.2019
 
 from sys import stderr
 
-from bl.place import PlaceName, Place   # Do not remove
-from bl.place_coordinates import Point  # needed in bl.place
-
+from bl.place import Place
 from models.gen.dates import DateRange
 #from models.gen.place import Place
 from models.cypher_gramps import Cypher_place_in_batch
@@ -76,7 +74,7 @@ class Place_gramps(Place):
                 print("iError Place_gramps.make_hierarchy: {0}".format(err), file=stderr)
 
 
-    def save(self, tx, **kwargs):   # batch_id, place_keys=None):
+    def save(self, tx, **kwargs):
         """ Saves a Place with Place_names, notes and hierarchy links.
 
             The 'uniq_id's of already created nodes can be found in 'place_keys' 
@@ -160,7 +158,8 @@ class Place_gramps(Place):
                           "lang": name.lang}
                 if name.dates:
                     n_attr.update(name.dates.for_db())
-                tx.run(Cypher_place_in_batch.add_name, pid=self.uniq_id, n_attr=n_attr)
+                tx.run(Cypher_place_in_batch.add_name, 
+                       pid=self.uniq_id, order=name.order, n_attr=n_attr)
         except Exception as err:
             print("iError Place.add_name: {err}", file=stderr)
             raise
