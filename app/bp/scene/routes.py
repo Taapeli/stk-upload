@@ -59,16 +59,18 @@ def scene():
 def show_person_list(selection=None):
     """ Show list of selected Persons for menu(0). """
     t0 = time.time()
-    my_context = UserContext(user_session, current_user, request)
-    #my_context.set_scope_from_request(request, 'person_scope')
+    u_context = UserContext(user_session, current_user, request)
+    #u_context.set_scope_from_request(request, 'person_scope')
+    args={}
+    args['user'] = u_context.user
+    args['context_code'] = u_context.context
     if request.method == 'POST':
         try:
             # Selection from search form
-            name = request.form['name']
-            rule = request.form['rule']
-            keys = (rule, name)
-            logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
-            persons = read_persons_with_events(keys)
+            keys = (request.form['rule'], request.form['name'])
+            logger.info(f"-> bp.scene.routes.show_person_list POST {keys}, {args}")
+            #TODO: filter by user in the read method
+            persons = read_persons_with_events(keys, args)
 
         except Exception as e:
             logger.info("iError {} in show_person_list".format(e))
@@ -82,23 +84,31 @@ def show_person_list(selection=None):
             keys = selection.split('=')
         else:
             keys = ('surname',)
-        logger.info(f"-> bp.scene.routes.show_person_list GET {keys}")
-        persons = read_persons_with_events(keys)
+        logger.info(f"-> bp.scene.routes.show_person_list GET {keys}, {args}")
+        #TODO: filter by user in the read method
+        persons = read_persons_with_events(keys, args)
 
+    # If Context is COMMON (1):
+    #    - show both own candidate and approved materials
+    #    - but hide candadate materials of other users
+    # If Context is OWN (2): show all own candidate materials
+    select_users = [None] # COMMON, no user
+    if u_context.use_owner_filter():
+        #select_users.append(None)
+        select_users.append(u_context.user)
     hidden=0
-    if my_context.use_common():
-        persons_out = []
-        for p in persons:
-            print(f'Person {p.id} too new={p.too_new}, owner {p.user}')
-            if p.too_new or p.user not in [None, my_context.user]:
-                hidden += 1
-            else:
-                persons_out.append(p)
-    else:
-        persons_out = persons
+    persons_out = []
+    for p in persons:
+        if p.too_new and p.user != u_context.user:
+            print(f'Hide {p.sortname} too_new={p.too_new}, owner {p.user}')
+            hidden += 1
+        else:
+            #print(f'Show {p.sortname} too_new={p.too_new}, owner {p.user}')
+            persons_out.append(p)
+    print(f'--> bp.scene.routes.show_person_list shows {len(persons_out)}/{len(persons)} persons')
 
     return render_template("/scene/persons.html", persons=persons_out,
-                           user_context=my_context, num_hidden=hidden, 
+                           user_context=u_context, num_hidden=hidden, 
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons/ref=<string:refname>')

@@ -213,6 +213,13 @@ class UserContext():
             print(f"UserContext: Uses same or default user_context={self.context}")
 
 
+    def get_my_user_id(self):
+        # Return current user id, if my candidate data is chosen
+        if self.context == self.choices.OWN:
+            return self.user
+        else:
+            return ''
+
     def owner_str(self):
         # Return current owner choise as text 
         try:

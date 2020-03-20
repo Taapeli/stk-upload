@@ -38,7 +38,7 @@ import traceback
 
 def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=False, order=0):
     """ Reads Person Name and Event objects for display.
-        If args['user'] is defined, restrict to her objects.
+        Filter persons by args['context_code'].
 
         Returns Person objects, whith included Events and Names
         and optionally Refnames (if args['take_refnames'])
@@ -56,6 +56,8 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
     persons = []
     p = None
     p_uniq_id = None
+    context_code = args.get('context_code')
+
     result = Person_combo.get_person_combos(keys, args=args) #user, take_refnames=take_refnames, order=order)
     for record in result:
         '''

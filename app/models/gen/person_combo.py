@@ -757,10 +757,13 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
                 keys=['firstname', name] by start of the first of first names
                 keys=['patronyme', name] by start of patronyme name
                 keys=['refname', name]   by exact refname
-            If currentuser is defined, select only her Events
+
+            Do filtering persons by args['context_code']:
+                1 = COMMON    approved common data
+                2 = OWN       my candidate data 
+                COMMON + OWN: both my own and approved common data
 
             #TODO: take_refnames should determine, if refnames are returned, too
-            #TODO: filter by owner using args['user']
 
         """
         if keys:
@@ -770,21 +773,8 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
         else:
             rule="all"
             key=""
-# ╒════════════════════╤════════════════════╤════════════════════╤════════════════════╤═════════╕
-# │"person"            │"name"              │"refnames"          │"events"            │"initial"│
-# ╞════════════════════╪════════════════════╪════════════════════╪════════════════════╪═════════╡
-# │{"handle":"_da692a09│{"alt":"","firstname│["Helena","Brita","K│[["Primary",{"datety│"K"      │
-# │bac110d27fa326f0a7",│":"Brita Helena","ty│lick"]              │pe":0,"change":15009│         │
-# │"id":"I0119","priv":│pe":"Birth Name","su│                    │07890,"description":│         │
-# │"","sex":"2","con   │ffix":"","surname":"│                    │"","handle":"_da692d│         │
-# │fidence":"2.5","chan│Klick"}             │                    │0fb975c8e8ae9c4986d2│         │
-# │ge":1507492602}     │                    │                    │3","attr_type":"","i│         │
-# │                    │                    │                    │d":"E0161","date2":1│         │
-# │                    │                    │                    │754183,"type":"Birth│         │
-# │                    │                    │                    │","date1":1754183,"a│         │
-# │                    │                    │                    │ttr_value":""},null]│         │
-# │                    │                    │                    │,...]               │         │
-# └────────────────────┴────────────────────┴────────────────────┴────────────────────┴─────────┘
+        user = args.get('user')
+        context_code = args.get('context_code')
 
         try:
             with shareds.driver.session() as session:
@@ -812,9 +802,16 @@ RETURN ID(p1) AS id1, [n1.firstname, n1.suffix, n1.surname] AS name1,
                     else:
                         return session.run(Cypher_person.get_events_all, years=years)
                 else:
-                    # Selected names and name types (untested?)
-                    return session.run(Cypher_person.get_events_by_refname_use,
-                                       attr={'use':rule, 'name':key})
+                    # Selected names and name types
+                    if context_code == 1: # COMMON
+                        return session.run(Cypher_person.get_common_events_by_refname_use,
+                                           attr={'use':rule, 'name':key})
+                    elif context_code == 2: # OWN
+                        return session.run(Cypher_person.get_my_events_by_refname_use,
+                                           attr={'use':rule, 'name':key}, user=user)
+                    else: # From my OWN Batch & approved COMMON
+                        return session.run(Cypher_person.get_both_events_by_refname_use,
+                                           attr={'use':rule, 'name':key}, user=user)
         except Exception as err:
             print("iError get_person_combos: {1} {0}".format(err, keys), file=stderr)
 

@@ -196,10 +196,28 @@ MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:
 """ + _get_events_tail + _get_events_surname
 
     # With attr={'use':rule, 'name':name}
-    get_events_by_refname_use = """
+    get_common_events_by_refname_use = """
 MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[:PASSED]- (batch)
 WHERE search.name STARTS WITH $attr.name
 WITH search, person
+MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH person, name""" + _get_events_tail + _get_events_surname
+
+    # With attr={'use':rule, 'name':name}, user=user
+    get_my_events_by_refname_use = """
+MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[:OWNS]- (:Batch {user:$user})
+WHERE search.name STARTS WITH $attr.name
+WITH search, person
+MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH person, name""" + _get_events_tail + _get_events_surname
+
+    get_both_events_by_refname_use = """
+MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[re:OWNS|PASSED]- (b:Batch)
+WHERE search.name STARTS WITH $attr.name
+WITH search, person, re WHERE type(re) = "PASSED" or b.user = $user
 MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
 

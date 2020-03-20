@@ -87,8 +87,10 @@
     {% if user_context.user %}
         {% if user_context.context == 1 %}{%set newdiv = 2%}
             {{ _('Views the approved common data only.') }}
-        {%else%}{% set newdiv=1 %}
-            {{ _('Views both your candidate material and approved common data.') }}
+        {%else%}
+            {% if user_context.context == 2 %}{%set newdiv = 1%}
+                {{ _('Views your candidate materials.') }}
+            {%endif%}
         {%endif%}
             (<i><a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}" 
                  style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).

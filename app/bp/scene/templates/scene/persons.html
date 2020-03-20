@@ -24,15 +24,15 @@ div#description_box p {
     <div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
-{% if cnt %}
                 <div id="description_box">
+{% if cnt %}
                     <p>{{ ngettext('Displaying %(num)s person.', 
                                     'Displaying %(num)s persons.', cnt ) }}
-                       {{ _('If the person has many names, they will appear in the list under each name.') }}
+                       {{ _('If the person has many names, they may appear in the list under each name.') }}
                     </p>
                     <p>{{ _('Note that family events are not included.') }} </p>
                     </p>
-                    
+{% endif %}
                     <ul>
                         <li>{{ macro.select_dataset_menu_1() }}</li>
     {% if rule[0] == 'all' %}
@@ -56,8 +56,8 @@ div#description_box p {
     {% endif %}
                     </ul>
                 </div>
-{% endif %}
-                <div style="min-width: 400px;background: bisque;">
+
+                <div id="searching">
                    <fieldset>
                        {% if rule[0] %}{% set selection = rule[0] %}
                        {% else %}{% set selection = "surname" %}
@@ -141,7 +141,7 @@ div#description_box p {
 					
 				<td style="text-align:center; padding:3px;">
 		    {%- if p.user %}{{p.user}}
-		    {% else %}<i><small style="color:gray;">{{ _('common')}}</small></i>
+		    {% else %} – 
 		    {% endif %}
 				</td>
 
@@ -161,7 +161,7 @@ div#description_box p {
             {% endif %}
                         <br><small style="color:olive">{{ macro.lifetimes(p) }}</small>
             {% if p.too_new %}
-		                <br><i style="color:red;">{{ _('Too recent for public display!') }}</i>
+		                <br><small><i style="color:red;">{{ _('Too recent for display to others!') }}</i></small>
 		    {% endif %}
 	                </div>
                 </td>

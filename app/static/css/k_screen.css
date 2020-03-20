@@ -319,12 +319,14 @@ a[href]:hover, a[href]:active {
 }
 
 #searching {
+	background: bisque;
     margin: 1em;
     border: 1px solid #CCC;
-    padding: 1em;
-    background-color: bisque;
-    color: black;
-    max-width: 30em;
+    padding: 5px;
+    padding: 5px;
+    width: 400px;
+    min-width: 200px;
+    max-width: 430px;
 }
 .flashes {
     color: darkblue;
