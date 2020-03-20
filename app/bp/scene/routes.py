@@ -69,14 +69,21 @@ def show_person_list(selection=None):
             keys = (rule, name)
             logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
-            if my_context.use_common():  
-                persons2 = [p for p in persons if not p.too_new]
+            hidden=0
+            if my_context.use_common():
+                persons_out = []
+                for p in persons:
+                    print(f'Person {p.id} too new={p.too_new}, owner {p.user}')
+                    if p.too_new or p.user not in [None, my_context.user]:
+                        hidden += 1
+                    else:
+                        persons_out.append(p)
+#                 persons2 = [p for p in persons if not p.too_new]
             else:
-                persons2 = persons
-            return render_template("/scene/persons.html", persons=persons2, menuno=0,
-                                   num_hidden=len(persons)-len(persons2), 
-                                   name=name, rule=keys, 
-                                   last_year_allowed=LAST_YEAR_ALLOWED, 
+                persons_out = persons
+            return render_template("/scene/persons.html", persons=persons_out, menuno=0,
+                                   num_hidden=hidden, name=name, rule=keys, 
+#                                    last_year_allowed=LAST_YEAR_ALLOWED, 
                                    elapsed=time.time()-t0)
         except Exception as e:
             logger.info("iError {} in show_person_list".format(e))
