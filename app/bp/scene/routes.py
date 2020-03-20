@@ -60,7 +60,7 @@ def show_person_list(selection=None):
     """ Show list of selected Persons for menu(0). """
     t0 = time.time()
     my_context = UserContext(user_session, current_user, request)
-    my_context.set_scope_from_request(request, 'person_scope')
+    #my_context.set_scope_from_request(request, 'person_scope')
     if request.method == 'POST':
         try:
             # Selection from search form
@@ -69,22 +69,7 @@ def show_person_list(selection=None):
             keys = (rule, name)
             logger.info(f"-> bp.scene.routes.show_person_list POST {keys}")
             persons = read_persons_with_events(keys)
-            hidden=0
-            if my_context.use_common():
-                persons_out = []
-                for p in persons:
-                    print(f'Person {p.id} too new={p.too_new}, owner {p.user}')
-                    if p.too_new or p.user not in [None, my_context.user]:
-                        hidden += 1
-                    else:
-                        persons_out.append(p)
-#                 persons2 = [p for p in persons if not p.too_new]
-            else:
-                persons_out = persons
-            return render_template("/scene/persons.html", persons=persons_out, menuno=0,
-                                   num_hidden=hidden, name=name, rule=keys, 
-#                                    last_year_allowed=LAST_YEAR_ALLOWED, 
-                                   elapsed=time.time()-t0)
+
         except Exception as e:
             logger.info("iError {} in show_person_list".format(e))
             flash("Valitse haettava nimi ja tyyppi", category='warning')
@@ -97,15 +82,23 @@ def show_person_list(selection=None):
             keys = selection.split('=')
         else:
             keys = ('surname',)
-        persons = read_persons_with_events(keys)
         logger.info(f"-> bp.scene.routes.show_person_list GET {keys}")
+        persons = read_persons_with_events(keys)
 
-    if my_context.use_common():  
-        persons2 = [p for p in persons if not p.too_new]
+    hidden=0
+    if my_context.use_common():
+        persons_out = []
+        for p in persons:
+            print(f'Person {p.id} too new={p.too_new}, owner {p.user}')
+            if p.too_new or p.user not in [None, my_context.user]:
+                hidden += 1
+            else:
+                persons_out.append(p)
     else:
-        persons2 = persons
-    return render_template("/scene/persons.html", persons=persons2,
-                           num_hidden=len(persons)-len(persons2), 
+        persons_out = persons
+
+    return render_template("/scene/persons.html", persons=persons_out,
+                           user_context=my_context, num_hidden=hidden, 
                            menuno=0, rule=keys, elapsed=time.time()-t0)
 
 @bp.route('/scene/persons/ref=<string:refname>')
@@ -114,6 +107,9 @@ def show_person_list(selection=None):
 def show_persons_by_refname(refname, opt=""):
     """ List persons by refname for menu(0).
     """
+    logger.warning("#TODO: fix material selevtion or remove action show_persons_by_refname")
+
+    my_context = UserContext(user_session, current_user, request)
     keys = ('refname', refname)
     ref = ('ref' in opt)
     order = 0
@@ -123,7 +119,7 @@ def show_persons_by_refname(refname, opt=""):
     persons = read_persons_with_events(keys, args=args)
     logger.info("-> bp.scene.routes.show_persons_by_refname")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           order=order, rule=keys)
+                           user_context=my_context, order=order, rule=keys)
 
 @bp.route('/scene/persons/all/<string:opt>')
 @bp.route('/scene/persons/all/')
@@ -138,7 +134,10 @@ def show_all_persons_list(opt=''):
 
         TODO Should have restriction by owner's UserProfile 
     """
+    logger.warning("#TODO: fix material selevtion or remove action show_all_persons_list")
+
     t0 = time.time()
+    my_context = UserContext(user_session, current_user, request)
     keys = ('all',)
     ref = ('ref' in opt)
     if 'fn' in opt: order = 1   # firstname
@@ -150,7 +149,8 @@ def show_all_persons_list(opt=''):
     persons = read_persons_with_events(keys, args=args) #user=user, take_refnames=ref, order=order)
     logger.info("-> bp.scene.routes.show_all_persons_list")
     return render_template("/scene/persons.html", persons=persons, menuno=1, 
-                           order=order,rule=keys, elapsed=time.time()-t0)
+                           user_context=my_context, order=order,
+                           rule=keys, elapsed=time.time()-t0)
 
 
 

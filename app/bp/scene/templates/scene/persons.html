@@ -7,7 +7,11 @@
 {% set ordname = [_('surname'), _('first name'), _('patronymic')] %}
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
-
+<style>
+div#description_box p {
+    margin: 0.5em;
+}
+</style>
 <div id="startdiv">
 	{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
 	{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
@@ -21,38 +25,39 @@
         <div id="summaryarea">
             <div class="flex-container">
 {% if cnt %}
-                <div id="description_box" style="max-width:50%">
-                    <p id="description">
-                        {{ ngettext('Displaying %(num)s person.', 
+                <div id="description_box">
+                    <p>{{ ngettext('Displaying %(num)s person.', 
                                     'Displaying %(num)s persons.', cnt ) }}
-                        {{ _('If the person has many names, they will appear in the list under each name.') }}
-                        <br>{{ _('Note that family events are not included.') }}
-                        <br>{{ _('The owner is you or "common", when found in the approved data.') }}
+                       {{ _('If the person has many names, they will appear in the list under each name.') }}
+                    </p>
+                    <p>{{ _('Note that family events are not included.') }} </p>
+                    </p>
+                    
+                    <ul>
+                        <li>{{ macro.select_dataset_menu_1() }}</li>
     {% if rule[0] == 'all' %}
-                        <br>{{ _('Sorted by %(order)s.', order=ordname[order]) }}
-                        <br>&rtrif; {{ _('Change Order:') }} 
+                        <li>{{ _('Sorted by %(order)s.', order=ordname[order]) }}
+                            {{ _('Change Order:') }} 
         {% if order != 0 %}<a href="/scene/persons/all/" 
                               class="inlink">{{ _('Surname') }}</a> /{% endif %}
         {% if order != 1 %}<a href="/scene/persons/all/fn" 
                               class="inlink">{{ _('First Name') }}</a> /{% endif %}
         {% if order != 2 %}<a href="/scene/persons/all/pn" 
                               class="inlink">{{ _('Patronymic or Matronymic') }}</a>{% endif %}.
+                        </li>
     {% endif %}
-                    </p>
-
-        {% if num_hidden %}
-        <p><small style="margin-left:30px">
-               {{ ngettext(
-                  '%(num)s person hidden because of privacy protection', 
-                  '%(num)s people hidden because of privacy protection', 
-                  num_hidden ) 
-               }}
-            </small>
-        </p>
-        {% endif %}
-               </div>
+    {% if num_hidden %}
+                        <li>{{ ngettext(
+                              '%(num)s person hidden because of privacy protection', 
+                              '%(num)s people hidden because of privacy protection', 
+                              num_hidden ) 
+                            }}.
+                        </li>
+    {% endif %}
+                    </ul>
+                </div>
 {% endif %}
-               <div style="min-width: 400px;background: bisque;">
+                <div style="min-width: 400px;background: bisque;">
                    <fieldset>
                        {% if rule[0] %}{% set selection = rule[0] %}
                        {% else %}{% set selection = "surname" %}
@@ -77,7 +82,7 @@
                            <input type="submit" value="Hae">
                        </form>
                    </fieldset>
-               </div>
+                </div>
             </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
@@ -154,10 +159,10 @@
 		                <br><small class="refname" title="{{ _('Reference names') }}">
 		                  {{ _('Keywords') }}: {{p.refnames}}</small>
             {% endif %}
+                        <br><small style="color:olive">{{ macro.lifetimes(p) }}</small>
             {% if p.too_new %}
-		                <br><span color="red">{{ _('Too young for public display!') }}</span>
+		                <br><i style="color:red;">{{ _('Too recent for public display!') }}</i>
 		    {% endif %}
-	                    <br><small style="color:olive">{{ macro.lifetimes(p) }}</small>
 	                </div>
                 </td>
 
