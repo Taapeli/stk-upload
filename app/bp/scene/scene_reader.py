@@ -100,6 +100,9 @@ def get_person_full_data(uuid, owner, use_common=True):
         print(f"Could not read Person {uuid}: {e}")
         return None, None, None
 
+    if use_common and reader.person.too_new: 
+        return None, None, None
+    
     # 2. (p:Person) --> (x:Name|Event)
     reader.read_person_names_events()
 

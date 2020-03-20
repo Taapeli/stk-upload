@@ -40,9 +40,13 @@ class DBreader:
             context.session.pop('next_person')
             context.session.modified = True
 
-        person_result = PersonResult(persons)
-#Todo:Calculate hidden persons
-        #person_result.num_hidden = 0
+        if use_user is None:
+            persons2 = [p for p in persons if not p.too_new]
+            num_hidden = len(persons) - len(persons2)
+        else:
+            persons2 = persons
+            num_hidden = 0
+        person_result = PersonResult(persons2, num_hidden)
         return person_result
 
 
@@ -80,8 +84,8 @@ class PlaceResult:
 class PersonResult:
     ''' Person's result object.
     '''
-    def __init__(self, items):
+    def __init__(self, items, num_hidden):
         self.error = 0  
-        self.num_hidden = 0
+        self.num_hidden = num_hidden
         self.items = items  
 

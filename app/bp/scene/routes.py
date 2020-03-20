@@ -238,7 +238,7 @@ def     show_person(uid=None):
     else:
         user=None
     logger.info("-> bp.scene.routes.show_person")
-    
+
     # v3 Person page
     person, objs, jscode = get_person_full_data(uid, user, use_common)
     if not person:
