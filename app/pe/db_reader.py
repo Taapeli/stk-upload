@@ -59,9 +59,9 @@ class DBreader:
         context = self.user_context
         fw = context.next_name_fw()
         if context.context == context.ChoicesOfView.COMMON:
-            use_user = context.user
+            use_user = None
         else:
-            use_user=None
+            use_user = context.user
         places = self.dbdriver.place_list(use_user, fw, context.count)
 
         # Update the page scope according to items really found 
