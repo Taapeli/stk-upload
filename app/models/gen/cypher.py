@@ -394,6 +394,18 @@ RETURN f, p.pname AS marriage_place,
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.father_sortname LIMIT $limit"""
     
+    read_families_common_p = """
+MATCH () -[:PASSED]-> (f:Family) WHERE f.father_sortname>=$fw
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.father_sortname LIMIT $limit"""
+
     read_families_m = """
 MATCH (f:Family) WHERE f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
@@ -409,6 +421,18 @@ RETURN f, p.pname AS marriage_place,
     read_my_families_m = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
     WHERE prof.username = $user AND f.mother_sortname>=$fwm
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.mother_sortname LIMIT $limit"""
+
+    read_families_common_m = """
+MATCH () -[:PASSED]-> (f:Family) WHERE f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
