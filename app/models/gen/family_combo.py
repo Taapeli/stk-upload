@@ -367,6 +367,22 @@ RETURN family"""
         return tx.run(Cypher_family.set_dates_sortname, 
                       id=uniq_id, f_attr=f_attr)
 
+    @staticmethod       
+    def hide_privacy_protected_families(families):
+        fams2 = []
+        for fam in families:
+            if ((not fam.father or fam.father.too_new) and
+               (not fam.mother or fam.mother.too_new)):
+                continue   # do not include this family
+            fams2.append(fam)
+            children2 = []
+            for c in fam.children:
+                if c.too_new: continue
+                children2.append(c)
+            fam.num_children = len(fam.children)
+            fam.num_hidden_children = len(fam.children) - len(children2)
+            fam.children = children2
+        return fams2
 
     @staticmethod       
     def get_families(o_context, opt='father', limit=100):
@@ -506,7 +522,9 @@ RETURN family"""
                                               families[0].mother_sortname, families[-1].mother_sortname, 
                                               limit, len(families))
 
-        return (families)
+        if o_context.use_common:
+            families = Family_combo.hide_privacy_protected_families(families)
+        return families
 
     
 #     @staticmethod       
