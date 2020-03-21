@@ -16,6 +16,8 @@ from .note import Note
 from .dates import DateRange
 #from .place_combo import Place_combo
 from models.gen.person import Person
+from ui.user_context import UserContext
+from models.gen import family
 
 # Import these later to handle circular dependencies where referencing from Person classes! 
 #from .person_combo import Person_combo
@@ -165,7 +167,7 @@ RETURN family"""
     
     
     @staticmethod
-    def get_family_data(uuid):
+    def get_family_data(uuid, context: UserContext):
         """ Read Family information including Events, Children, Notes and Sources.
         
             1) read 
@@ -224,7 +226,7 @@ RETURN family"""
                         #        'datetype': 3, 'date2': 1878089, 'date1': 1875043}>
                         node = record['f']
                         family = Family_combo.from_node(node)
-
+                        
                         for event_node, place_node in record['family_event']:
                             if event_node:
                                 # event_node:
@@ -286,7 +288,13 @@ RETURN family"""
                                         family.father = p
                                     elif role == 'mother':
                                         family.mother = p
-                        
+
+                        if not context.use_common():
+                            if family.father: family.father.too_new = False
+                            if family.mother: family.mother.too_new = False
+
+                        family.no_of_children = 0
+                        family.num_hidden_children = 0
                         for person_node, name_node, birth_node, death_node in record['child']:
                             # record['child'][0]:
                             # [<Node id=235176 labels={'Person'} 
@@ -304,13 +312,20 @@ RETURN family"""
                             #        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
                             # ]
                             if person_node:
+                                family.no_of_children += 1
                                 p = Person_combo.from_node(person_node)
                                 if name_node:
                                     p.names.append(Name.from_node(name_node))
                                 set_birth_death(p, birth_node, death_node)
+                                if context.use_common():
+                                    if p.too_new:
+                                        family.num_hidden_children += 1
+                                        continue
+                                else: 
+                                    p.too_new = False
                                 family.children.append(p)
                         
-                        family.no_of_children = len(family.children)
+                        #family.no_of_children = len(family.children)
                             
                         for repository_node, source_node, citation_node in record['sources']:
                             # record['sources'][0]:
@@ -341,6 +356,7 @@ RETURN family"""
                             note.text = n['text']
                             note.url = n['url']
                             family.notes.append(note)
+
             
             except Exception as e:
                 print('Error get_family_data: {} {}'.format(e.__class__.__name__, e))            
@@ -734,6 +750,9 @@ RETURN ID(person) AS father"""
             for i in range(len(self.childref_hlink)):
                 print ("Childref_hlink: " + self.childref_hlink[i])
         return True
+
+     
+     
 
 
 #    @staticmethod       

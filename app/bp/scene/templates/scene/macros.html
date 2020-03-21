@@ -180,6 +180,15 @@
     {% endif %}
 {%- endmacro %}
                     
+{% macro person_anon(p, uuid="-") -%}
+    {#  Creates a Person name and link using uuid (for family tree graph). #}
+    {% if p.too_new %}
+	    N N
+    {% else %}
+	    {{ person(p, uuid) }}
+    {% endif %}
+{%- endmacro %}
+
 {% macro member(ch, uniq_id, delim) -%} {# OBSOLETE, Better version: macro person #}
     {#  Creates a Person name and link (for family tree graph). 
         Optional 'delim' can be "=" for older person page

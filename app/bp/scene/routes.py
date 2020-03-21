@@ -359,8 +359,9 @@ def show_family(uid=None):
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
     
+    my_context = UserContext(user_session, current_user, request)
     try:
-        family = Family_combo.get_family_data(uid)
+        family = Family_combo.get_family_data(uid, my_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
