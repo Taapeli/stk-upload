@@ -379,7 +379,6 @@ RETURN family"""
             for c in fam.children:
                 if c.too_new: continue
                 children2.append(c)
-            fam.num_children = len(fam.children)
             fam.num_hidden_children = len(fam.children) - len(children2)
             fam.children = children2
         return fams2
@@ -436,12 +435,12 @@ RETURN family"""
                         if opt == 'father':
                             #3 == #1 simulates common by reading all
                             print("_read_families_p: common only")
-                            result = session.run(Cypher_family.read_families_p, #user=user, 
+                            result = session.run(Cypher_family.read_families_common_p, #user=user, 
                                                  fw=fw, limit=limit)
                         elif opt == 'mother':
                             #1 get all with owner name for all
                             print("_read_families_m: common only")
-                            result = session.run(Cypher_family.read_families_m,
+                            result = session.run(Cypher_family.read_families_common_m,
                                                  fwm=fw, limit=limit)
                         
                     return result
@@ -509,6 +508,10 @@ RETURN family"""
                 
                 if record['no_of_children']:
                     family.no_of_children = record['no_of_children']
+                family.num_hidden_children = 0
+                if not o_context.use_common():
+                    if family.father: family.father.too_new = False
+                    if family.mother: family.mother.too_new = False
                 families.append(family)
                 
         # Update the page scope according to items really found 
@@ -522,7 +525,7 @@ RETURN family"""
                                               families[0].mother_sortname, families[-1].mother_sortname, 
                                               limit, len(families))
 
-        if o_context.use_common:
+        if o_context.use_common():
             families = Family_combo.hide_privacy_protected_families(families)
         return families
 
