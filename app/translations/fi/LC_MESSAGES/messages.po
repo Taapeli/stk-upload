@@ -2558,8 +2558,8 @@ msgid "Notes"
 msgstr "Lisätiedot"
 
 #: bp/scene/templates/scene/layout.html:38
-msgid "Credits"
-msgstr "Alkuperä"
+msgid "Origin from"
+msgstr "Alkuperäiset tiedot"
 
 #: bp/scene/templates/scene/layout.html:39
 msgid "User data"
@@ -2818,7 +2818,7 @@ msgstr "Arvioidut vuodet"
 
 #: bp/scene/templates/scene/person.html:71
 msgid "confidential"
-msgstr "henkilötietoa ei saa julkaista"
+msgstr "henkilötietoa ei julkaista"
 
 #: bp/scene/templates/scene/person.html:76
 msgid "Age at death"

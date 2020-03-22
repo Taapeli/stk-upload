@@ -2564,8 +2564,8 @@ msgid "Notes"
 msgstr "Anteckningar"
 
 #: bp/scene/templates/scene/layout.html:38
-msgid "Credits"
-msgstr ""
+msgid "Origin from"
+msgstr "Data från"
 
 #: bp/scene/templates/scene/layout.html:39
 msgid "User data"
@@ -2820,11 +2820,11 @@ msgstr "Privat data"
 
 #: bp/scene/templates/scene/person.html:68
 msgid "Estimated years"
-msgstr ""
+msgstr "Värderdade år"
 
 #: bp/scene/templates/scene/person.html:71
 msgid "confidential"
-msgstr ""
+msgstr "confidentiell"
 
 #: bp/scene/templates/scene/person.html:76
 msgid "Age at death"
@@ -2832,15 +2832,15 @@ msgstr "Ålder vid död"
 
 #: bp/scene/templates/scene/person.html:80
 msgid "at least"
-msgstr ""
+msgstr "minst"
 
 #: bp/scene/templates/scene/person.html:82
 msgid "about"
-msgstr ""
+msgstr "runt"
 
 #: bp/scene/templates/scene/person.html:85
 msgid "years"
-msgstr ""
+msgstr "år"
 
 #: bp/scene/templates/scene/person.html:90
 msgid "Confidence of data"

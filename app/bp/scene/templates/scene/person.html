@@ -266,7 +266,9 @@ u { color: DarkKhaki; text-decoration: none; }
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
 	                     title="key = {{photo.uuid_str()}}"/>
                 </a>
-                <p>{{photo.description}}{{ macro.notelink(photo) }}
+                <p><a href="/scene/media?uuid={{photo.uuid}}"
+                      title="{{ _('Photo information') }}">
+                      {{photo.description}}</a> {{ macro.notelink(photo) }}
 {% if crop %}<br><i>crop {{crop}}</i>{% endif %}
                 </p>
             </div>

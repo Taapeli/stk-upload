@@ -56,7 +56,6 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
     persons = []
     p = None
     p_uniq_id = None
-    context_code = args.get('context_code')
 
     result = Person_combo.get_person_combos(keys, args=args) #user, take_refnames=take_refnames, order=order)
     for record in result:

@@ -18,7 +18,7 @@ from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
 from ui.user_context import UserContext
-from bl.place import PlaceBl
+#from bl.place import PlaceBl
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
@@ -38,7 +38,7 @@ from models.datareader import get_source_with_events
 from pe.neo4j.reader import Neo4jDriver
 from pe.db_reader import DBreader
 
-LAST_YEAR_ALLOWED=datetime.now().year - 50
+LAST_YEAR_ALLOWED=datetime.now().year # For people's privacy protection
 
 # Narrative start page
 
