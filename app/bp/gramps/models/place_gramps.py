@@ -6,7 +6,7 @@ Created on 11.3.2019
 
 from sys import stderr
 
-from bl.place import Place
+from bl.place import Place, PlaceBl
 from models.gen.dates import DateRange
 #from models.gen.place import Place
 from models.cypher_gramps import Cypher_place_in_batch
@@ -14,7 +14,7 @@ from shareds import logger
 import traceback
 
 
-class Place_gramps(Place):     
+class Place_gramps(PlaceBl):     
     """ For storing Place from Gramps xml to database.
 
         Properties:
@@ -158,11 +158,34 @@ class Place_gramps(Place):
                           "lang": name.lang}
                 if name.dates:
                     n_attr.update(name.dates.for_db())
-                tx.run(Cypher_place_in_batch.add_name, 
-                       pid=self.uniq_id, order=name.order, n_attr=n_attr)
+                result = tx.run(Cypher_place_in_batch.add_name, 
+                                pid=self.uniq_id, order=name.order, n_attr=n_attr)
+                name.uniq_id = result.single()[0]
+                print(f"# ({self.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
         except Exception as err:
             print("iError Place.add_name: {err}", file=stderr)
             raise
+#TODO
+        # Create default links for given languages
+        try:
+            def_names = self.find_default_names(self.names, ('fi', 'sv'))
+            if def_names['fi'] == def_names['sv']:
+                result = tx.run(Cypher_place_in_batch.link_name_lang_single, 
+                                place_id=self.uniq_id, fi_id=def_names['fi'])
+            else:
+                result = tx.run(Cypher_place_in_batch.link_name_lang, 
+                                place_id=self.uniq_id,
+                                fi_id=def_names['fi'], sv_id=def_names['sv'])
+            x = None
+            for x, fi, sv in result:
+                print(f"# Linked ({x}:Place)-['fi']->({fi}), -['sv']->({sv})")
+            if not x:
+                print("iError Place.find_default_names - not created "
+                      f"Place {self.uniq_id}, names {def_names}", file=stderr)
+
+        except Exception as err:
+            print(f"iError Place.find_default_names: {err}", file=stderr)
+            #raise
 
         # Make hierarchy relations to upper Place nodes
 
@@ -243,3 +266,4 @@ class Place_gramps(Place):
             print("iError: Place_gramps.save media: {0} {1}".format(err, self.id), file=stderr)
 
         return
+

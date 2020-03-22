@@ -140,6 +140,11 @@ class Neo4jDriver:
 #                     #TODO use language from current_user's preferences
 #                     p.pname = pn.name
                 p.names.append(pn)
+
+#             # TESTING
+#             def_names = PlaceBl.find_default_names(p.names, ('fi','sv'))
+#             print(f"Place {p.uniq_id} def.names fi:{def_names['fi']} / sv:{def_names['sv']}")
+
             if len(p.names) > 1:
                 p.names.sort()
             if p.pname == '' and p.names:

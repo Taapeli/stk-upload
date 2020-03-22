@@ -15,6 +15,7 @@ Todo:
 
 @author: jm
 '''
+from sys import stderr
 
 from bl.base import NodeObject
 #from bl.place_coordinates import Point
@@ -72,7 +73,6 @@ class Place(NodeObject):
         <Node id=78279 labels={'Place'} 
             properties={'handle': '_da68e12a415d936f1f6722d57a', 'id': 'P0002', 
                 'change': 1500899931, 'pname': 'Kangasalan srk', 'type': 'Parish'}>
-
         '''
         p = cls()
         p.uniq_id = node.id
@@ -84,6 +84,55 @@ class Place(NodeObject):
         p.pname = node['pname'] or ''
         p.coord = node['coord'] or None
         return p
+
+
+    @staticmethod
+    def find_default_names(names:list, use_langs:list):
+        ''' Select default names for listed use_langs list.
+
+            Rules for name selection
+            - if a Place_name with given lang ('if') is found, use it
+            - else if a Place_name with no lang ('') is found, use it
+            - else use any name
+        '''
+        if not names:
+            return None
+        selection = {}
+        #print(f'# ---- Place {names[0].name}')
+        try:
+            # 1.     find matching languages for use_langs
+            for lang in use_langs:
+                for name in names:
+                    if name.lang == lang:
+                        # A matching language
+                        #print(f'# select {lang}: {name.name} {name.uniq_id}')
+                        selection[lang] = name.uniq_id
+                    else:
+                        if lang == 'fi': print(f'#           {name}')
+            # 2. find replacing languages, if not matching
+            for lang in use_langs:
+                if not lang in selection.keys():
+                    # Maybe a missing language is found?
+                    for name in names:
+                        if name.lang == '' and not lang in selection.keys():
+                            #print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
+                            selection[lang] = name.uniq_id
+                if not lang in selection.keys():
+                    # No missing language, select any
+                    for name in names:
+                        if  not lang in selection.keys():
+                            #print(f'# select {lang}>{name.lang}: {name.name} {name.uniq_id}')
+                            selection[lang] = name.uniq_id
+    
+            ret = {}
+            for lang in use_langs:
+                ret[lang] = selection[lang]
+            return ret
+
+        except Exception as e:
+            print(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
+        return
+
 
 
 class PlaceBl(Place):
@@ -123,6 +172,7 @@ class PlaceBl(Place):
 
 #     def get_list(u_context):    # @staticmethod --> pe.db_reader.DBreader.place_list
 #         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
+
 
     @staticmethod
     def combine_places(pn_tuples):
