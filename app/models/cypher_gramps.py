@@ -273,31 +273,6 @@ CREATE (pl) -[r:NAME {order:$order}]-> (n:Place_name)
     SET n = $n_attr
 RETURN ID(n) AS uniq_id"""
 
-    link_name_lang = """
-MATCH (fi:Place_name) <-[:NAME]- (place:Place),
-    (place) -[:NAME]-> (sv:Place_name)  
-    WHERE ID(place) = $place_id AND ID(fi) = $fi_id AND ID(sv) = $sv_id
-OPTIONAL MATCH (place) -[r:NAME_LANG]-> ()
-    DELETE r
-MERGE (place) -[:NAME_LANG {lang:'fi'}]-> (fi)
-MERGE (place) -[:NAME_LANG {lang:'sv'}]-> (sv)
-RETURN DISTINCT ID(place) AS pl, ID(fi) AS fi, ID(sv) AS sv"""
-
-    link_name_lang_single = """
-MATCH (n:Place_name) <-[:NAME]- (place:Place)  
-    WHERE ID(place) = $place_id AND ID(n) = $fi_id
-OPTIONAL MATCH (place) -[r:NAME_LANG]-> ()
-    DELETE r
-MERGE (place) -[:NAME_LANG {lang:'fi'}]-> (n)
-MERGE (place) -[:NAME_LANG {lang:'sv'}]-> (n)
-RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
-
-#     link_name_lang = """
-# MATCH (n:Name)   WHERE ID(n) = $name_id
-# MATCH (pl:Place) WHERE ID(pl) = $place_id
-# CREATE (pl) -[r:NAME_LANG {lang:$lang}]-> (n:Place_name)
-# """
-
     # Link to a known upper Place
     link_hier = """
 MATCH (pl:Place) WHERE id(pl) = $plid

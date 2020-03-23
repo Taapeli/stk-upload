@@ -32,3 +32,24 @@ RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
     COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
 ORDER BY names[0].name LIMIT $limit"""
 
+# Default language names update with $place_id, $fi_id, $sv_id
+    link_name_lang = """
+MATCH (fi:Place_name) <-[:NAME]- (place:Place),
+    (place) -[:NAME]-> (sv:Place_name)  
+    WHERE ID(place) = $place_id AND ID(fi) = $fi_id AND ID(sv) = $sv_id
+OPTIONAL MATCH (place) -[r:NAME_LANG]-> ()
+    DELETE r
+MERGE (place) -[:NAME_LANG {lang:'fi'}]-> (fi)
+MERGE (place) -[:NAME_LANG {lang:'sv'}]-> (sv)
+RETURN DISTINCT ID(place) AS pl, ID(fi) AS fi, ID(sv) AS sv"""
+
+# Default language names update with $place_id, $fi_id; sv_id is the same
+    link_name_lang_single = """
+MATCH (n:Place_name) <-[:NAME]- (place:Place)  
+    WHERE ID(place) = $place_id AND ID(n) = $fi_id
+OPTIONAL MATCH (place) -[r:NAME_LANG]-> ()
+    DELETE r
+MERGE (place) -[:NAME_LANG {lang:'fi'}]-> (n)
+MERGE (place) -[:NAME_LANG {lang:'sv'}]-> (n)
+RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
+
