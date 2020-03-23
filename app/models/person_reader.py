@@ -422,4 +422,19 @@ class PersonReader():
         except Exception as e:
             print(f"Could not read places for person {self.person.uuid} objects {self.objs}: {e}")
         return new_objs
+
+    def remove_privacy_limit_from_family(self, family):
+        if family.father: family.father.too_new = False
+        if family.mother: family.mother.too_new = False
+        for c in family.children:
+            c.too_new = False
+
+    def remove_privacy_limit_from_families(self):
+        for family in self.person.families_as_child:
+            self.remove_privacy_limit_from_family(family)
+        for family in self.person.families_as_parent:
+            self.remove_privacy_limit_from_family(family)
+            
+    
+    
     

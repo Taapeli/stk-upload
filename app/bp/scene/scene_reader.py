@@ -112,6 +112,7 @@ def get_person_full_data(uuid, owner, use_common=True):
     #      (fp)--> (me:Event{type:Birth})
     #      (f) --> (fe:Event)
     reader.read_person_families()
+    if not use_common: reader.remove_privacy_limit_from_families()
 
     #    Sort all Person and family Events by date
     reader.person.events.sort()
