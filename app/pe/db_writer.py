@@ -31,3 +31,12 @@ class DBwriter(object):
         self.dbdriver.place_set_default_names(place.uniq_id, 
                                               def_names['fi'], def_names['sv'])
 
+
+    def media_save_w_handles(self, uniq_id, media_refs):
+        ''' Save media object and it's Note and Citation references
+            using their Gramps handles.
+        '''
+
+        if media_refs:
+            self.dbdriver.media_save_w_handles(uniq_id, media_refs)
+

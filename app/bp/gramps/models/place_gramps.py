@@ -56,7 +56,7 @@ class Place_gramps(PlaceBl):
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.notes = []
         self.noteref_hlink = []
-        self.media_handles = []         # handles of Media [(handle,crop)]
+        self.media_refs = []         # handles of Media [(handle,crop)]
 
 
     @staticmethod
@@ -237,23 +237,10 @@ class Place_gramps(PlaceBl):
             #print(f"iError Place.link_notes {self.noteref_hlink}: {err}", file=stderr)
             raise
 
-        # Make relations to the Media nodes
-        # The order of medias shall be stored in the MEDIA link
-        try:
-            order = 0
-            for handle, crop in self.media_handles:
-                r_attr = {'order':order}
-                if crop:
-                    r_attr['left']  = crop[0]
-                    r_attr['upper'] = crop[1]
-                    r_attr['right'] = crop[2]
-                    r_attr['lower'] = crop[3]
-                #print(f'# Creating ({self.id} uniq_id:{self.uniq_id} handle:{self.handle}) -[:MEDIA {r_attr}]-> (handle:{handle})')
-                tx.run(Cypher_place_in_batch.link_media, 
-                       p_handle=self.handle, m_handle=handle, r_attr=r_attr)
-                order =+ 1
-        except Exception as err:
-            print("iError: Place_gramps.save media: {0} {1}".format(err, self.id), file=stderr)
-
+        # Make relations to the Media nodes and their Note and Citation references
+        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        db = DBwriter(dbdriver)
+        db.media_save_w_handles(self.uniq_id, self.media_refs)
+            
         return
 

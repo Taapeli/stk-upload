@@ -79,11 +79,11 @@ with c
     match (e:Event)  where e.handle=$handle
     merge (e) -[r:CITATION]-> (c)"""
 
-    link_media = """
-MATCH (e:Event {handle: $handle})
-MATCH (m:Media  {handle: $m_handle})
-  CREATE (e) -[r:MEDIA]-> (m)
-    SET r = $r_attr"""
+#     link_media = """
+# MATCH (e:Event {handle: $handle})
+# MATCH (m:Media  {handle: $m_handle})
+#   CREATE (e) -[r:MEDIA]-> (m)
+#     SET r = $r_attr"""
 
 
 class Cypher_family_w_handle():

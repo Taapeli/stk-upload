@@ -7,7 +7,11 @@ Created on 2.5.2017
 import datetime
 from sys import stderr
 
+import shareds
 from shareds import logger
+
+from pe.neo4j.writer import Neo4jWriteDriver
+from pe.db_writer import DBwriter
 from models.gen.event import Event
 from models.cypher_gramps import Cypher_event_w_handle
 
@@ -18,13 +22,11 @@ class Event_gramps(Event):
         Tapahtuma grampsista tuotuna
 
         Event properties for gramps_loader:
-                note_handles[]     str lisätiedon handle (ent. noteref_hlink)
+                note_handles[]      str lisätiedon handle (ent. noteref_hlink)
             Planned from gramps_loader:
-                place_handles[]    str paikan handle (ent. place_hlink)
-                citation_handles[] str viittauksen handle (ent. citationref_hlink)
-            media_handles[]     list media ref tuples:    (ent. objref_hlink)
-                                str media_handle
-                                tuple picture crop = (int left, int upper, int right, int lower)
+                place_handles[]     str paikan handle (ent. place_hlink)
+                citation_handles[]  str viittauksen handle (ent. citationref_hlink)
+                media_refs[]        list of MediaRefResult objects (ent. objref_hlink)
 #             Properties from Gramps:
 #                 attr_type          str lisätiedon tyyppi
 #                 attr_value         str lisätiedon arvo
@@ -41,7 +43,7 @@ class Event_gramps(Event):
         self.citation_handles = []  # (previous citationref_hlink)
 
         self.place_hlink = ''
-        self.media_handles = []
+        self.media_refs = []
 
         self.citations = []   # For creating display sets
         self.names = []   # For creating display sets
@@ -99,7 +101,7 @@ class Event_gramps(Event):
             # Make relations to the Note nodes
             if self.note_handles:
                 result = tx.run(Cypher_event_w_handle.link_notes, handle=self.handle,
-                       note_handles=self.note_handles)
+                                note_handles=self.note_handles)
                 _cnt = result.single()["cnt"]
                 #print(f"##Luotiin {cnt} Note-yhteyttä: {self.id}->{self.note_handles}")
         except Exception as err:
@@ -114,20 +116,10 @@ class Event_gramps(Event):
         except Exception as err:
             print("iError: Event_link_citations: {0}".format(err), file=stderr)
 
-        try:
-            # Make relation to the Media nodes
-            order = 1
-            for handle, crop in self.media_handles:
-                r_attr = {'order':order}
-                if crop:
-                    r_attr['left']  = crop[0]
-                    r_attr['upper'] = crop[1]
-                    r_attr['right'] = crop[2]
-                    r_attr['lower'] = crop[3]
-                tx.run(Cypher_event_w_handle.link_media, 
-                       handle=self.handle, m_handle=handle, r_attr=r_attr)
-                order =+ 1
-        except Exception as err:
-            print("iError: Event_link_media: {0}".format(err), file=stderr)
+        # Make relations to the Media nodes and their Note and Citation references
+        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        db = DBwriter(dbdriver)
+        db.media_save_w_handles(self.uniq_id, self.media_refs)
             
         return
+

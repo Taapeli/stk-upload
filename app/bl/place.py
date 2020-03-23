@@ -15,17 +15,12 @@ Todo:
 
 @author: jm
 '''
-from sys import stderr
+import logging 
+logger = logging.getLogger('stkserver')
 
-from bl.base import NodeObject
-#from bl.place_coordinates import Point
-#from pe.neo4j.neo4j_reader import DbReader
+from .base import NodeObject
+#from .place_coordinates import Point
 
-# import shareds
-# from .dates import DateRange
-# from .cypher import Cypher_place
-# from .event_combo import Event_combo
-# from .person_name import Name
 
 class Place(NodeObject):
     """ Place / Paikka:
@@ -107,8 +102,7 @@ class Place(NodeObject):
                         # A matching language
                         #print(f'# select {lang}: {name.name} {name.uniq_id}')
                         selection[lang] = name.uniq_id
-                    else:
-                        if lang == 'fi': print(f'#           {name}')
+#                   elif lang == 'fi': print(f'#           {name}')
             # 2. find replacing languages, if not matching
             for lang in use_langs:
                 if not lang in selection.keys():
@@ -130,7 +124,7 @@ class Place(NodeObject):
             return ret
 
         except Exception as e:
-            print(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
+            logger.error(f"bl.place.PlaceBl.find_default_names {selection}: {e}")
         return
 
 

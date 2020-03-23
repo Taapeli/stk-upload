@@ -17,8 +17,11 @@ Created on 18.10.2018
 
 import datetime
 from sys import stderr
+import shareds
 from shareds import logger
 
+from pe.neo4j.writer import Neo4jWriteDriver
+from pe.db_writer import DBwriter
 from models.gen.person import Person
 from models.cypher_gramps import Cypher_person_w_handle
 from models.gen.note import Note
@@ -46,9 +49,7 @@ class Person_gramps(Person):
         The handles of referred objects are in variables:
             eventref_hlink[]    str tapahtuman handle
             - eventref_role[]   str edellisen rooli
-            media_handles[]     list media ref tuples:         (ent. objref_hlink)
-                                str media_handle
-                                tuple picture crop = (int left, int upper, int right, int lower)
+            media_refs[]        list of MediaRefResult objects (ent. objref_hlink)
             parentin_hlink[]    str vanhempien uniq_id
             noteref_hlink[]     str huomautuksen uniq_id
             citationref_hlink[] str viittauksen uniq_id    (ent.citationref_hlink)
@@ -66,7 +67,7 @@ class Person_gramps(Person):
         # Gramps handles (and roles)
         self.eventref_hlink = []        # handles of Events
         self.eventref_role = []         # ... and roles
-        self.media_handles = []         # handles of Media [(handle,crop)]
+        self.media_refs = []         # handles of Media [(handle,crop)]
         self.parentin_hlink = []        # handle for parent family
         self.noteref_hlink = []         # 
         self.citationref_hlink = []     # models.gen.citation.Citation
@@ -146,23 +147,10 @@ class Person_gramps(Person):
         except Exception as err:
             print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
 
-        # Make relations to the Media nodes
-        # The order of medias shall be stored in the MEDIA link
-        try:
-            order = 0
-            for handle, crop in self.media_handles:
-                r_attr = {'order':order}
-                if crop:
-                    r_attr['left']  = crop[0]
-                    r_attr['upper'] = crop[1]
-                    r_attr['right'] = crop[2]
-                    r_attr['lower'] = crop[3]
-                #print(f'# Creating ({self.id} uniq_id:{self.uniq_id} handle:{self.handle}) -[:MEDIA {r_attr}]-> (handle:{handle})')
-                tx.run(Cypher_person_w_handle.link_media, 
-                       p_handle=self.handle, m_handle=handle, r_attr=r_attr)
-                order =+ 1
-        except Exception as err:
-            print("iError: Person_gramps.save media: {0} {1}".format(err, self.id), file=stderr)
+        # Make relations to the Media nodes and it's Note and Citation references
+        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        db = DBwriter(dbdriver)
+        db.media_save_w_handles(self.uniq_id, self.media_refs)
 
         # The relations to the Family node will be created in Family.save(),
         # because the Family object is not yet created
