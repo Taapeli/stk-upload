@@ -61,8 +61,11 @@ def get_thumbname(uuid):
 
 def get_image_size(path):
     # Get image size as tuple (width, height)
-    image = Image.open(path)
-    return image.size
+    try:
+        image = Image.open(path)
+        return image.size
+    except Exception as e:
+        return None
 
 def get_cropped_image(path, crop, thumbsize=False):
     ''' From given Image file, crop image by given % coordinates.

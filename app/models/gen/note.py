@@ -150,7 +150,7 @@ RETURN ID(n) AS uniq_id, n, count(a) AS ref
             results =  session.run("MATCH (n:Note) RETURN COUNT(n)")
             for result in results:
                 return str(result[0])
-        return '0'
+        return 0
 
 
     @staticmethod

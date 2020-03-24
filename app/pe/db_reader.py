@@ -74,7 +74,7 @@ class DBreader:
 
 
 class PlaceResult:
-    ''' Person's result object.
+    ''' Place's result object.
     '''
     def __init__(self, items):
         self.error = 0  

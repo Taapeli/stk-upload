@@ -165,7 +165,7 @@ class Place_gramps(PlaceBl):
                 result = tx.run(Cypher_place_in_batch.add_name, 
                                 pid=self.uniq_id, order=name.order, n_attr=n_attr)
                 name.uniq_id = result.single()[0]
-                print(f"# ({self.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
+                #print(f"# ({self.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
         except Exception as err:
             print("iError Place.add_name: {err}", file=stderr)
             raise

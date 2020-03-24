@@ -86,8 +86,8 @@ class Event_gramps(Event):
                 if len(ids) > 1:
                     print("iError updated multiple Events {} - {}, attr={}".format(self.id, ids, e_attr))
         except Exception as err:
-            print("iError: Event_save: {0} attr={1}".format(err, e_attr), file=stderr)
-            raise RuntimeError("Could not save Event {}".format(self.id))
+            print(f"iError: Event_save: {err} attr={e_attr}", file=stderr)
+            raise RuntimeError(f"Could not save Event {self.id}")
 
         try:
             # Make relation to the Place node

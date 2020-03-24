@@ -65,8 +65,10 @@ tr > td > img {
 	               <td class="value"><img alt="({{ _('Thumbnail') }})" align="left"
                      src="/scene/thumbnail?id={{media.uuid}}" 
                      title="key = {{media.uuid_str()}}"/>
-                     <p style="nowrap;">{{ _("Size") }} {{size[0]}} x {{size[1]}} px
-                     <br>&rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
+    
+                     <p style="nowrap;">{% if size %}
+                        {{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>{%endif%}
+                     &rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
                             {{ _('Show fullscreen') }}</a>
                      </p>
                    </td>

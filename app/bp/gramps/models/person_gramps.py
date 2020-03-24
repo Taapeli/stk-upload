@@ -95,6 +95,8 @@ class Person_gramps(Person):
         else:
             raise RuntimeError(f"Person_gramps.save needs batch_id for {self.id}")
 
+        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        db = DBwriter(dbdriver)
         today = str(datetime.date.today())
 
         self.uuid = self.newUuid()
@@ -127,7 +129,8 @@ class Person_gramps(Person):
                 print("iWarning got no uniq_id for Person {}".format(p_attr))
 
         except Exception as err:
-            print("iError: Person_gramps.save: {0} attr={1}".format(err, p_attr), file=stderr)
+            logger.error(f"Person_gramps.save: {err} in Person {self.id} {p_attr}")
+            #print("iError: Person_gramps.save: {0} attr={1}".format(err, p_attr), file=stderr)
 
         # Save Name nodes under the Person node
         for name in self.names:
@@ -145,12 +148,12 @@ class Person_gramps(Person):
                        e_handle=self.eventref_hlink[i], 
                        role=self.eventref_role[i])
         except Exception as err:
-            print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
+            logger.error(f"Person_gramps.save: {err} in linking Event {self.handle} -> {self.eventref_hlink[i]}")
+            #print("iError: Person_gramps.save events: {0} {1}".format(err, self.id), file=stderr)
 
         # Make relations to the Media nodes and it's Note and Citation references
-        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
-        db = DBwriter(dbdriver)
         db.media_save_w_handles(self.uniq_id, self.media_refs)
+
 
         # The relations to the Family node will be created in Family.save(),
         # because the Family object is not yet created
@@ -161,8 +164,7 @@ class Person_gramps(Person):
                 tx.run(Cypher_person_w_handle.link_note,
                        p_handle=self.handle, n_handle=handle)
         except Exception as err:
-            logger.error(f"Person_gramps.save: {err} in linking Notes {self.handle} -> {self.noteref_hlink}")
-            #print("iError: Person.save notes: {0} {1}".format(err, self.id), file=stderr)
+            logger.error(f"Person_gramps.save: {err} in linking Notes {self.handle} -> {handle}")
 
         # Make relations to the Citation nodes
         try:
@@ -170,6 +172,6 @@ class Person_gramps(Person):
                 tx.run(Cypher_person_w_handle.link_citation,
                        p_handle=self.handle, c_handle=handle)
         except Exception as err:
-            print("iError: Person_gramps.save:Citation: {0} {1}".format(err, self.id), file=stderr)
+            logger.error(f"Person_gramps.save: {err} in linking Citations {self.handle} -> {handle}")
         return
 

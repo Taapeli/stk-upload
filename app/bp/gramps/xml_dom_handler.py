@@ -21,6 +21,7 @@ from .models.source_gramps import Source_gramps
 from .models.place_gramps import Place_gramps
 from bl.place import PlaceName
 from bl.place_coordinates import Point
+from bl.media import MediaRefResult
 
 from .batchlogger import Log
 
@@ -131,13 +132,15 @@ class DOM_handler():
                                      format(e.__class__.__name__, e)), 'level':"ERROR"})
 
     def remove_handles(self):
+#         print("remove_handles NOT DONE!")
+#         return
         cypher_remove_handles = """
             match (b:Batch {id:$batch_id}) -[*]-> (a)
             remove a.handle
             return labels(a)[0]
         """
         ids = []
-        results = self.tx.run(cypher_remove_handles,batch_id=self.batch_id)
+        results = self.tx.run(cypher_remove_handles, batch_id=self.batch_id)
         for result in results:
             ids.append(result[0])
         print (f'# - removed handle from {len(ids)} nodes')
@@ -592,8 +595,8 @@ class DOM_handler():
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
-            if p.media_refs: 
-                print(f'# saving Person {p.id}: media_refs {p.media_refs}')
+            for ref in p.media_refs: 
+                print(f'# saving Person {p.id}: media_ref {ref}')
             self.save_and_link_handle(p, batch_id=self.batch_id)
             #print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
@@ -951,27 +954,11 @@ class DOM_handler():
             citationref citation reference
             noteref     note reference
         '''
-        class MediaRefResult():
-            ''' Result object containin media reference with supplemental data.
-            '''
-            def __init__(self):
-                self.media_href = None
-                self.crop = []              # Four coordinates
-                self.note_handles = []      # list of note handles
-                self.citation_handles = []  # list of citation handles
-
-            def __str__(self):
-                s = self.media_href
-                if self.crop: s += f' crop({self.crop})'
-                if self.note_handles: s += f' notes({self.note_handles})'
-                if self.citation_handles: s += f' citations({self.citation_handles})'
-                return s
-        #-------
-
-        resu = MediaRefResult()
+        result_list = []
         for objref in dom_object.getElementsByTagName('objref'):
             if objref.hasAttribute("hlink"):
-                resu.media_href = objref.getAttribute("hlink")
+                resu = MediaRefResult()
+                resu.media_handle = objref.getAttribute("hlink")
 
                 for region in objref.getElementsByTagName('region'):
                     if region.hasAttribute("corner1_x"):
@@ -980,8 +967,8 @@ class DOM_handler():
                         right = region.getAttribute('corner2_x')
                         lower = region.getAttribute('corner2_y')
                         resu.crop = int(left), int(upper), int(right), int(lower)
-                        print(f'#_extract_mediaref: Pic handle={resu.media_href} crop={resu.crop}')
-                if not resu.crop: print(f'#_extract_mediaref: Pic handle={resu.media_href}')
+                        print(f'#_extract_mediaref: Pic handle={resu.media_handle} crop={resu.crop}')
+                if not resu.crop: print(f'#_extract_mediaref: Pic handle={resu.media_handle}')
 
                 # Add note and citation references
                 for ref in objref.getElementsByTagName('noteref'):
@@ -994,5 +981,6 @@ class DOM_handler():
                         resu.citation_handles.append(ref.getAttribute("hlink"))
                         print(f'#_extract_mediaref: Cite {resu.citation_handles[-1]}')
 
-                return resu
-        return None
+                result_list.append(resu)
+
+        return result_list
