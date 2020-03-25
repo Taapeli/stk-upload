@@ -66,8 +66,8 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
               properties={'sortname': 'Järnefelt#Elin Ailama#',
              'id': 'I1623', 'uuid': 'c9beb251259a4c48bf433645cbe4362c',
              'sex': 2, 'confidence': '', 'change': 1561976921,
-             'earliest_possible_birth_year': 1870, 'latest_possible_birth_year': 1870,
-             'earliest_possible_death_year': 1953, 'latest_possible_death_year': 1953}>
+             'birth_low': 1870, 'birth_high': 1870,
+             'death_low': 1953, 'death_high': 1953}>
             name=<Node id=80308 labels={'Name'}
                 properties={'type': 'Birth Name', 'suffix': '', 'order': 0,
                     'surname': 'Klick', 'firstname': 'Brita Helena'}>

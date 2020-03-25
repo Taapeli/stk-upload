@@ -248,12 +248,12 @@
 
 {% macro lifetimes(p) -%}
     {# Displays Person's life time estimates '1662/1709 — 1726/1819' #}
-    {% if p.latest_possible_death_year != 9999 %}
-	    {% if p.earliest_possible_birth_year != p.latest_possible_birth_year %}
-	        {{p.earliest_possible_birth_year}}…{% endif 
-	    %}{{p.latest_possible_birth_year}} &ndash; {{p.earliest_possible_death_year}}{%
-	     if p.earliest_possible_death_year != p.latest_possible_death_year 
-	     %}…{{p.latest_possible_death_year}}
+    {% if p.death_high != 9999 %}
+	    {% if p.birth_low != p.birth_high %}
+	        {{p.birth_low}}…{% endif 
+	    %}{{p.birth_high}} &ndash; {{p.death_low}}{%
+	     if p.death_low != p.death_high 
+	     %}…{{p.death_high}}
 	     {% endif %}
 	{% endif %}
 {%- endmacro %}

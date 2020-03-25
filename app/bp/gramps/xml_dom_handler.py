@@ -137,25 +137,30 @@ class DOM_handler():
         cypher_remove_handles = """
             match (b:Batch {id:$batch_id}) -[*]-> (a)
             remove a.handle
-            return labels(a)[0]
+            return count(a),labels(a)[0]
         """
-        ids = []
+        total = 0
         results = self.tx.run(cypher_remove_handles, batch_id=self.batch_id)
-        for result in results:
-            ids.append(result[0])
-        print (f'# - removed handle from {len(ids)} nodes')
+        for count, label in results:
+            print(f'# - cleaned {count} {label} handles')
+            total += count
+        print (f'# --- removed handle from {total} nodes')
 
 
     def add_links(self):
         ''' Link the Nodes without OWNS link to Batch
         '''
         cypher_add_links = """
-            match (n) where exists (n.handle)
+           match (n) where exists (n.handle)
             match (b:Batch{id:$batch_id})
             merge (b)-[:OWNS_OTHER]->(n)
             remove n.handle
+            return count(n)
         """
-        self.tx.run(cypher_add_links,batch_id=self.batch_id)
+        result = self.tx.run(cypher_add_links,batch_id=self.batch_id)
+        counters = result.consume().counters
+        if counters.relationships_created:
+            print(f"Created {counters['relationships_created']} relations")
 
     def set_mediapath(self, path):
         ''' Store media files path. '''

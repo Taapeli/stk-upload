@@ -174,8 +174,8 @@ RETURN batch.user AS user, person,
     ORDER BY TOUPPER(names[0].suffix), names[0].surname, names[0].firstname"""
 
     _limit_years_clause = """
-WHERE person.earliest_possible_birth_year <= $years[1]
-  AND person.latest_possible_death_year >= $years[0]
+WHERE person.birth_low <= $years[1]
+  AND person.death_high >= $years[0]
 """
 
     get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
@@ -275,10 +275,10 @@ RETURN p, id(p) as pid,
     update_lifetime_estimate = """
 MATCH (p:Person) 
     WHERE id(p) = $id
-SET p.earliest_possible_birth_year = $earliest_possible_birth_year,
-    p.earliest_possible_death_year = $earliest_possible_death_year,
-    p.latest_possible_birth_year = $latest_possible_birth_year,
-    p.latest_possible_death_year = $latest_possible_death_year
+SET p.birth_low = $birth_low,
+    p.death_low = $death_low,
+    p.birth_high = $birth_high,
+    p.death_high = $death_high
 """
     fetch_all_for_lifetime_estimates = """
 MATCH (p:Person) 

@@ -67,7 +67,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 </tr>{% endif %}
                 <tr><td class="ColumnAttribute">{{ _('Estimated years') }}</td>
                     <td class="ColumnValue">{{ macro.lifetimes(person) }}
-           {% if person.latest_possible_death_year >= last_year_allowed %}
+           {% if person.death_high >= last_year_allowed %}
                         <span style="color:red">{{ _('confidential') }}!</span>
            {% endif %}
                     </td>
@@ -75,13 +75,13 @@ u { color: DarkKhaki; text-decoration: none; }
                <tr>
                     <td class="ColumnAttribute">{{ _("Age at death") }}</td>
                     <td class="ColumnValue">
-            {% if person.latest_possible_death_year != person.earliest_possible_death_year or
-                  person.latest_possible_birth_year != person.earliest_possible_birth_year %}
+            {% if person.death_high != person.death_low or
+                  person.birth_high != person.birth_low %}
                         {{ _('at least') }}
             {% else %}
                         {{ _('about') }}
             {% endif %}
-                        {{person.earliest_possible_death_year - person.latest_possible_birth_year}}
+                        {{person.death_low - person.birth_high}}
                         {{ _('years') }}
                     </td>
                 </tr>

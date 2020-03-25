@@ -138,9 +138,9 @@ class Person_combo(Person):
             record = session.run(Cypher_person.get_person, uuid=uuid).single()
             # <Record 
             #    p=<Node id=434495 labels={'Person'} properties={'sortname': '#Valborg#Matintytär', 
-            #        'earliest_possible_death_year': 1726, 'confidence': '', 'sex': 2, 'change': 1489929214, 
-            #        'latest_possible_birth_year': 1709, 'latest_possible_death_year': 1819, 'id': 'I0208', 
-            #        'uuid': 'a698ebcee0a84c78bfeeaeaff1736c00', 'earliest_possible_birth_year': 1662}> 
+            #        'death_low': 1726, 'confidence': '', 'sex': 2, 'change': 1489929214, 
+            #        'birth_high': 1709, 'death_high': 1819, 'id': 'I0208', 
+            #        'uuid': 'a698ebcee0a84c78bfeeaeaff1736c00', 'birth_low': 1662}> 
             #    root_type='OWNS' 
             #    root=<Node id=436587 labels={'Batch'} properties={'mediapath': '/home/jm/Mäkeläiset_2017-11-07.gpkg.media', 
             #        'file': 'uploads/juha/Silius_esivanhemmat_clean.xml', 'id': '2020-02-05.001', 'user': 'juha', 
@@ -1069,10 +1069,10 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
             for p in personlist:
                 result = tx.run(Cypher_person.update_lifetime_estimate, 
                                 id=p.pid,
-                                earliest_possible_birth_year = p.earliest_possible_birth_year.getvalue(),
-                                earliest_possible_death_year = p.earliest_possible_death_year.getvalue(),
-                                latest_possible_birth_year = p.latest_possible_birth_year.getvalue(),
-                                latest_possible_death_year = p.latest_possible_death_year.getvalue() )
+                                birth_low = p.birth_low.getvalue(),
+                                death_low = p.death_low.getvalue(),
+                                birth_high = p.birth_high.getvalue(),
+                                death_high = p.death_high.getvalue() )
                                 
             pers_count = len(personlist)
             print(f"Estimated lifetime for {pers_count} persons")

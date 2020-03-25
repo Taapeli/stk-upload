@@ -110,10 +110,10 @@ class Person(NodeObject):
             confidence            float "2.0" tietojen luotettavuus
             sortname              str default name as "surname#suffix#firstname"
             datetype,date1,date2  DateRange dates # estimated life time
-            earliest_possible_birth_year  int lifetime estimate limits
-            earliest_possible_death_year  int
-            latest_possible_birth_year    int
-            latest_possible_death_year    int
+            birth_low             int lifetime years estimate limits like 1720
+            death_low             int
+            birth_high            int
+            death_high            int
             change                int 1536324580
            }
      """
@@ -127,10 +127,10 @@ class Person(NodeObject):
         self.sortname = ''
         self.dates = None    # Daterange: Estimated datetype, date1, date2
 
-        self.earliest_possible_birth_year = None
-        self.earliest_possible_death_year = None
-        self.latest_possible_birth_year = None
-        self.latest_possible_death_year = None
+        self.birth_low = None
+        self.death_low = None
+        self.birth_high = None
+        self.death_high = None
 
     def __str__(self):
         dates = self.dates if self.dates else ''
@@ -198,11 +198,17 @@ class Person(NodeObject):
         obj.confidence = node.get('confidence', '')
         obj.sortname = node['sortname']
         obj.priv = node['priv']
-        obj.earliest_possible_birth_year = node['earliest_possible_birth_year']
-        obj.earliest_possible_death_year = node['earliest_possible_death_year']
-        obj.latest_possible_birth_year = node['latest_possible_birth_year']
-        obj.latest_possible_death_year = node['latest_possible_death_year']
-        obj.too_new = obj.latest_possible_death_year > LAST_YEAR_ALLOWED
+        obj.birth_low = node['birth_low']
+        if obj.birth_low:
+            obj.birth_high = node['birth_high']
+            obj.death_low = node['death_low']
+            obj.death_high = node['death_high']
+        else:
+            obj.birth_low = node['earliest_possible_birth_year']
+            obj.death_low = node['earliest_possible_death_year']
+            obj.birth_high = node['latest_possible_birth_year']
+            obj.death_high = node['latest_possible_death_year']
+        obj.too_new = obj.death_high > LAST_YEAR_ALLOWED
         if "datetype" in node:
             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return obj
