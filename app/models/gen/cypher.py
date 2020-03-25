@@ -806,6 +806,13 @@ return b as batch,
     labels(x)[0] as label, count(x) as cnt 
     order by batch.user, batch.id'''
 
+    get_passed = '''
+match (b:Audit) 
+    where b.user = $user
+optional match (b) -[:PASSED]-> (x)
+return b as batch, count(x) as cnt 
+    order by batch.id'''
+
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
 optional match (b) -[:OWNS]-> (x)

@@ -45,6 +45,7 @@ class Batch():
         obj.status = node.get('status', "")
         obj.timestamp = node.get('timestamp', 0)
         obj.upload = format_timestamp(obj.timestamp)
+        obj.auditor = node.get('auditor', None)
         return obj
 
     @staticmethod
@@ -72,9 +73,24 @@ class Batch():
     @staticmethod
     def get_user_stats(user):
         ''' Get statistics of user Batch contents.
+        
+            If the Batch has been moved to an Audit batch, tis method returns
+            ("Audit", count) to user_data data
         '''
+        # Get your approved batches
+        approved = {}
+        result = shareds.driver.session().run(Cypher_batch.get_passed, user=user)
+        for node, count in result:
+            # <Record batch=<Node id=435790 labels={'Audit'} 
+            #    properties={'auditor': 'juha', 'id': '2020-03-24.002', 
+            #    'user': 'juha', 'timestamp': 1585070354153}>
+            #  cnt=200>
+            b = Batch.from_node(node)
+            approved[b.id] = count
+
+        # Get current researcher batches
         titles = []
-        users = {}
+        user_data = {}
         result = shareds.driver.session().run(Cypher_batch.get_batches, user=user)
         for record in result:
             # <Record batch=<Node id=319388 labels={'Batch'} 
@@ -85,35 +101,41 @@ class Batch():
             #  label='Note'
             #  cnt=2>
             b = Batch.from_node(record['batch'])
-            label = record['label']
-            if not label: label = ""
+            label = record.get('label')
+            if not label: label = ''
             cnt = record['cnt']
-
+                    
             batch_id = b.id
-            ts = b.timestamp
-            if ts:
-                t = float(ts)/1000.
-                tstring = datetime.fromtimestamp(t).strftime("%d.%m.%Y %H:%M")
-                d, t = tstring.split()
-                if batch_id[:10] == d:
-                    tstring = t
-            else:
-                tstring = ""
+            tstring = Batch.timestamp_to_str(b.timestamp)
 
             # Trick: Set Person as first in sort order!
             if label == "Person": label = " Person"
             if label and not label in titles:
                 titles.append(label)
-            cnt = record['cnt']
 
             key = f'{user}/{batch_id}/{tstring}'
-            if not key in users:
-                users[key] = {}
-            users[key][label] = cnt
+            if not key in user_data:
+                user_data[key] = {}
+            user_data[key][label] = cnt
 
-            print(f'users[{key}] {users[key]}')
+            audited = approved.get(batch_id)
+            if audited:
+                user_data[key]['Audit'] = audited
 
-        return sorted(titles), users
+            print(f'user_data[{key}] {user_data[key]}')
+
+        return sorted(titles), user_data
+
+
+    @staticmethod
+    def timestamp_to_str(ts):
+        ''' Timestamp to display format. '''
+        if ts:
+            t = float(ts) / 1000.
+            tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
+        else:
+            tstring = ""
+        return tstring
 
     @staticmethod
     def get_batch_stats(batch_id):
@@ -137,13 +159,8 @@ class Batch():
                 user = batch.get('user')
                 #batch_id = batch.get('id')
                 ts = batch.get('timestamp')
-                if ts:
-                    t = float(ts)/1000.
-                    tstring = datetime.fromtimestamp(t).strftime("%-d.%-m.%Y %H:%M")
-                else:
-                    tstring = ""
-            label = record['label']
-            if label == None: label = '-'
+                tstring = Batch.timestamp_to_str(ts)
+            label = record.get('label','-')
             # Trick: Set Person as first in sort order!
             if label == "Person": label = " Person"
             cnt = record['cnt']

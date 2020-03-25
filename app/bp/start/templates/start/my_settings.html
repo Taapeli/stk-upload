@@ -30,7 +30,7 @@ table.transparent tbody tr td {
                     <a href="{{ referrer }}"><button>{{ _('Go back') }}</button></a>
                 </div>
 
-		{% if current_user is defined and current_user.is_authenticated %}
+{% if current_user is defined and current_user.is_authenticated %}
 
 		<div class=startbox>
 			<h3>
@@ -87,8 +87,8 @@ table.transparent tbody tr td {
 			{% endif %}
 		</div>
 
-        {% if not is_guest %}
-		{% if batches %}
+  {% if not is_guest %}
+    {% if batches %}
 		<div class="startbox2">
 			<h3>{{ _('Candidate Materials') }}</h3>
 			<p>{{ _('The amount of some data nodes included in your candidate data batches.') }}
@@ -98,21 +98,29 @@ table.transparent tbody tr td {
 					<th>{{ _('Batch id') }}</th> {% for label in labels %}
 					<th style="width: {{w}}">{{ _(label|trim) }}</th>{% endfor %}
 				</tr>
-				{% for key1,item in batches.items() %} {% set user0 = user %}
-                {% set user, batch, time = key1.split('/') %}
+        {% for key1,item in batches.items() %} {% set user0 = user %}
+            {% set user, batch, time = key1.split('/') %}
 				<tr>
 					<td>{{batch}}{% if time %}<br>
-					<small>{{ _('saved at') }} {{time}}</small>{% endif %}
-					</td> {% for label in labels %}
-					<td class="right">{{item[label]}}</td> {% endfor %}
+					<small>{{time}}</small>{% endif %}
+					</td>
+            {% if item['Audit'] %}
+                    <td colspan="{{labels|count}}">
+                        {{ _("Approved %(n)s objects", n=item['Audit']) }}
+                    </td>
+            {% else %}
+                {% for label in labels %}
+					<td class="right">{{item[label]}}</td>
+                {% endfor %}
+            {% endif %}
 				</tr>
-				{% endfor %}
+		{% endfor %}
 			</table>
 			<p class="goto">
 				&rtrif; <a href="/gramps">{{ _('Upload or remove a file or candidate batch') }}</a>
 			</p>
 		</div>
-		{% else %}
+    {% else %}
 		<div class="startbox">
 			<h3>{{ _('Data Batches') }}</h3>
 			<p>{{ _('You have no candidate data loaded in the database.') }}</p>
@@ -120,7 +128,8 @@ table.transparent tbody tr td {
 				&rtrif; <a href="/gramps">{{ _('Upload another file') }}</a>
 			</p>
 		</div>
-		{% endif %}{# Batches #} {% if gedcoms %}
+    {% endif %}{# Batches #}
+    {% if gedcoms %}
 		<div class="startbox2">
 			<h3>{{ _('My Gedcom files') }}</h3>
 			<table width="100%">
@@ -145,7 +154,7 @@ table.transparent tbody tr td {
 				&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a>
 			</p>
 		</div>
-		{% else %}
+    {% else %}
 		<div class="startbox">
 			<h3>{{ _('My Gedcom files') }}</h3>
 			<p>{{ _('You have no Gedcom files in the server.') }}</p>
@@ -153,9 +162,9 @@ table.transparent tbody tr td {
 				&rtrif; <a href="/gedcom">{{ _('Gedcom tools') }}</a>
 			</p>
 		</div>
-		{% endif %}{# Gedcoms #} 
-		{% endif %}{# not is_guest #}
-		{% endif %}{# is_authenticated #}
+    {% endif %}{# Gedcoms #} 
+  {% endif %}{# not is_guest #}
+{% endif %}{# is_authenticated #}
 	</div>
 </div>
 {% endblock %}
