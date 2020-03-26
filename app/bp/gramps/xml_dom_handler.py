@@ -160,7 +160,7 @@ class DOM_handler():
         result = self.tx.run(cypher_add_links,batch_id=self.batch_id)
         counters = result.consume().counters
         if counters.relationships_created:
-            print(f"Created {counters['relationships_created']} relations")
+            print(f"Created {counters.relationships_created} relations")
 
     def set_mediapath(self, path):
         ''' Store media files path. '''
