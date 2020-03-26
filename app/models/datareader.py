@@ -607,12 +607,20 @@ def get_source_with_events(sourceid):
         noderef.uniq_id = root_uniq_id      # 72104
         noderef.id = node['id']    # 'I1069' or 'E2821' TODO Why?
         noderef.label = list(node.labels)[0]   # Get a member of a frozenset
+        noderef.obj = record['p']    # node for Person or Family etc
 
         event_role = record.get('role', "")
         print(f'{root_label} {root_uuid} Citation {c.uniq_id} {noderef.label}({event_role}) {noderef.uuid} {noderef.uniq_id} {noderef.id}')
 
+        noderef.person = None
+        noderef.family = None
+        if 'Person' in noderef.obj.labels:
+            noderef.person = Person_combo.from_node(noderef.obj)
+        if 'Family' in noderef.obj.labels:
+            noderef.family = Family.from_node(noderef.obj)
+            
         if noderef.label == "Person":
-            pass #noderef.eventtype = 'self'
+            pass
         elif noderef.label == "Family":
             noderef.eventtype = _('Family')
         elif noderef.label == "Name":

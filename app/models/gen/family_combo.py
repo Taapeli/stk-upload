@@ -391,10 +391,7 @@ RETURN family"""
                (not fam.mother or fam.mother.too_new)):
                 continue   # do not include this family
             fams2.append(fam)
-            children2 = []
-            for c in fam.children:
-                if c.too_new: continue
-                children2.append(c)
+            children2 = [c for c in fam.children if not c.too_new]
             fam.num_hidden_children = len(fam.children) - len(children2)
             fam.children = children2
         return fams2

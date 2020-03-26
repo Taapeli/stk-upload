@@ -471,11 +471,23 @@ def show_sources(series=None):
 def show_source_page(sourceid):
     """ Home page for a Source with referring Event and Person data
     """
+    my_context = UserContext(user_session, current_user, request)
     try:
         source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_source_page")
+    if my_context.use_common():
+        for c in citations:
+            citators2 = []
+            for noderef in c.citators:
+                if noderef.person:
+                    if not noderef.person.too_new:
+                        citators2.append(noderef)
+                else:
+                    citators2.append(noderef)
+            c.citators = citators2
+                
     return render_template("/scene/source_events.html",
                            source=source, citations=citations)
 
