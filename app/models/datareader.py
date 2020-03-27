@@ -606,7 +606,7 @@ def get_source_with_events(sourceid):
         noderef.uuid = root_uuid      # 72104
         noderef.uniq_id = root_uniq_id      # 72104
         noderef.id = node['id']    # 'I1069' or 'E2821' TODO Why?
-        noderef.label = list(node.labels)[0]   # Get a member of a frozenset
+        noderef.label = root_label
         noderef.obj = record['p']    # node for Person or Family etc
 
         event_role = record.get('role', "")
@@ -622,7 +622,7 @@ def get_source_with_events(sourceid):
         if noderef.label == "Person":
             pass
         elif noderef.label == "Family":
-            noderef.eventtype = _('Family')
+            noderef.eventtype = _(node['type'])
         elif noderef.label == "Name":
             noderef.eventtype = f"{node['order']+1}. {_('Name').lower()}"
         elif noderef.label == "Event":
@@ -632,7 +632,7 @@ def get_source_with_events(sourceid):
         if noderef.uuid not in clearnames.keys():
             #Todo: aseta tässä baseObject.type jne ???
             if event_role == 'Family':
-                # Family event witch is directply connected to a Person Event
+                # Family event witch is directly connected to a Person Event
                 parent_names = Family_combo.get_marriage_parent_names(x_uid)
                 if 'father' in parent_names:
                     noderef.clearname += parent_names['father']

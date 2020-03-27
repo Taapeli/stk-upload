@@ -36,6 +36,10 @@ msgstr "ruotsi"
 msgid "English"
 msgstr "englanti"
 
+#: bp/start/templates/start/my_settings.html:109
+msgid "Approved %(n)s objects"
+msgstr "Hyväksyttynä %(n)s erilaista kohdetta"
+
 #: setups.py:101
 msgid "Email or Username"
 msgstr "Sähköposti tai käyttäjätunnus"
@@ -2653,6 +2657,10 @@ msgstr "itse"
 #, python-format
 msgid "see details of person %(id)s"
 msgstr "Katso henkilön %(id)s tiedot"
+
+#: bp/scene/templates/scene/source_events.html:71
+msgid "see details of family"
+msgstr "Katso perheen tiedot"
 
 #: bp/scene/templates/scene/macros.html:178
 #: bp/scene/templates/scene/macros.html:196
