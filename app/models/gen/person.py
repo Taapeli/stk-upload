@@ -96,7 +96,6 @@ SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
 
-LAST_YEAR_ALLOWED = datetime.now().year - 51
 
 class Person(NodeObject):
     """ Henkilö
@@ -208,7 +207,8 @@ class Person(NodeObject):
             obj.death_low = node['earliest_possible_death_year']
             obj.birth_high = node['latest_possible_birth_year']
             obj.death_high = node['latest_possible_death_year']
-        obj.too_new = obj.death_high > LAST_YEAR_ALLOWED
+        last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
+        obj.too_new = obj.death_high > last_year_allowed
         if "datetype" in node:
             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return obj

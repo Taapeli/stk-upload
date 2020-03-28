@@ -38,8 +38,6 @@ from models.datareader import get_source_with_events
 from pe.neo4j.reader import Neo4jDriver
 from pe.db_reader import DBreader
 
-LAST_YEAR_ALLOWED=datetime.now().year # For people's privacy protection
-
 # Narrative start page
 
 @bp.route('/scene',  methods=['GET', 'POST'])
@@ -189,7 +187,7 @@ def show_persons_all():
     u_context.set_scope_from_request(request, 'person_scope')
     # How many objects are shown?
     u_context.count = int(request.args.get('c', 100))
-    u_context.privacy_limit = LAST_YEAR_ALLOWED
+    u_context.privacy_limit = shareds.PRIVACY_LIMIT
 
     logger.info("-> bp.scene.routes.show_persons_all: "
                f"{u_context.owner_str()} forward from '{u_context.scope[0]}'")
@@ -261,9 +259,10 @@ def     show_person(uid=None):
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
+    last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=person.root,
-                           last_year_allowed=LAST_YEAR_ALLOWED, elapsed=time.time()-t0)
+                           last_year_allowed=last_year_allowed, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/person/uuid=<pid>')
