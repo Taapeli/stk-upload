@@ -7,19 +7,24 @@ Created on 8.3.2019
 class Cypher_adm():
     ' Cypher clauses for admin purposes'
     
-    remove_all_nodes = "MATCH (a) DETACH DELETE a"
+    remove_all_nodes = """
+MATCH (a) 
+WITH a LIMIT $limit
+DETACH DELETE a"""
 
     remove_data_nodes = """
 MATCH (a) 
-where not ( 'UserProfile' IN labels(a)
+WHERE NOT ( 'UserProfile' IN labels(a)
     OR 'Allowed_email' IN labels(a)
     OR 'User' IN labels(a)
     OR 'Guest' IN labels(a)
     OR 'Role' IN labels(a) )
+WITH  a LIMIT $limit
 DETACH DELETE a"""
 
     remove_my_nodes = """
 MATCH (u:UserProfile) -[*]-> (a) WHERE u.username=$user
+WITH a LIMIT $limit
 DETACH DELETE a"""
 
     allowed_email_register = """
@@ -44,15 +49,6 @@ SET ae.default_role = $role,
     ae.creator = $creator
 RETURN ae"""
 
-#     allowed_email_update = """
-# MATCH (email:allowed_email {allowed_email: $email})    
-# SET email.default_role = $role,
-#     email.creator = $admin_name,
-#     email.approved = $approved,
-#     email.created_at = $created_at,     
-#     email.confirmed_at = $confirmed_at
-# RETURN email""" 
-      
     allowed_emails_get = """
 MATCH (ae:Allowed_email)
 RETURN DISTINCT ae 
