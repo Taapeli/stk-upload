@@ -117,9 +117,10 @@ class Event_gramps(Event):
             print("iError: Event_link_citations: {0}".format(err), file=stderr)
 
         # Make relations to the Media nodes and their Note and Citation references
-        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
-        db = DBwriter(dbdriver)
-        db.media_save_w_handles(self.uniq_id, self.media_refs)
+        if self.media_refs:
+            dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+            db = DBwriter(dbdriver)
+            db.media_save_w_handles(self.uniq_id, self.media_refs)
             
         return
 

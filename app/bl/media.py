@@ -22,12 +22,13 @@ class MediaRefResult():
     '''
     def __init__(self):
         self.media_handle = None
+        self.media_order = 0        # Media reference order nr
         self.crop = []              # Four coordinates
         self.note_handles = []      # list of note handles
         self.citation_handles = []  # list of citation handles
 
     def __str__(self):
-        s = self.media_handle
+        s = f'{self.media_handle} [{self.media_order}]'
         if self.crop: s += f' crop({self.crop})'
         if self.note_handles: s += f' notes({self.note_handles})'
         if self.citation_handles: s += f' citations({self.citation_handles})'

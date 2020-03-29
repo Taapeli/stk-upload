@@ -960,11 +960,14 @@ class DOM_handler():
             noteref     note reference
         '''
         result_list = []
+        media_nr = -1
         for objref in dom_object.getElementsByTagName('objref'):
             if objref.hasAttribute("hlink"):
                 resu = MediaRefResult()
                 resu.media_handle = objref.getAttribute("hlink")
-
+                media_nr += 1
+                resu.media_order = media_nr
+    
                 for region in objref.getElementsByTagName('region'):
                     if region.hasAttribute("corner1_x"):
                         left = region.getAttribute('corner1_x')
@@ -972,9 +975,9 @@ class DOM_handler():
                         right = region.getAttribute('corner2_x')
                         lower = region.getAttribute('corner2_y')
                         resu.crop = int(left), int(upper), int(right), int(lower)
-                        print(f'#_extract_mediaref: Pic handle={resu.media_handle} crop={resu.crop}')
-                if not resu.crop: print(f'#_extract_mediaref: Pic handle={resu.media_handle}')
-
+                        print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle} crop={resu.crop}')
+                if not resu.crop: print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle}')
+    
                 # Add note and citation references
                 for ref in objref.getElementsByTagName('noteref'):
                     if ref.hasAttribute("hlink"):
@@ -985,7 +988,7 @@ class DOM_handler():
                     if ref.hasAttribute("hlink"):
                         resu.citation_handles.append(ref.getAttribute("hlink"))
                         print(f'#_extract_mediaref: Cite {resu.citation_handles[-1]}')
-
+    
                 result_list.append(resu)
 
         return result_list

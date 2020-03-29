@@ -49,41 +49,45 @@ class Batch_merge(object):
         relationships_created = 0
         nodes_created = 0
         new_relationships = -1
-        moved_nodes = {}
-        text = ""
+        moved_nodes = 0
+        label_sets = [  # Grouped to not too big chunks in logical order
+            ("Note"),
+            ("Repository", "Media"),
+            ("Place", "Place_name", "Source", "Citation"),
+            ("Event"),
+            ("Person", "Name"),
+            ("Family")
+            ]
 
-        with shareds.driver.session() as session:
-            try:
-                tx = session.begin_transaction()
-                # while new_relationships != 0: ?
-                result = tx.run(Cypher_audit.copy_batch_to_audition, 
-                                user=user, batch=batch_id, oper=auditor)
-                counters = result.summary().counters
-                print(counters)
-                new_relationships = counters.relationships_created
-                relationships_created += new_relationships
-                nodes_created += counters.nodes_created
-                for record in result:
+        try:
+            with shareds.driver.session() as session:
+                for labels in label_sets:
+                    count = 0
+                    tx = session.begin_transaction()
+                    # while new_relationships != 0: ?
+                    result = tx.run(Cypher_audit.copy_batch_to_audition, 
+                                    user=user, batch=batch_id, oper=auditor,
+                                    labels=labels)
+                    counters = result.summary().counters
+                    print(counters)
+                    new_relationships = counters.relationships_created
+                    relationships_created += new_relationships
+                    nodes_created += counters.nodes_created
+                    record = result.single()
                     # <Record x=<Node id=318538 labels={'Place'} 
                     #    properties={'id': 'P0294', 'type': 'Farm', 
                     #        'uuid': '2d93295ef606433a8e339967e50bf6b0', 'pname': 'Sottungsby', 
                     #        'change': 1495632125}>>
-                    node = record[0]
-                    label = list(node.labels)[0]
-                    text += ' ' + node.get('id','-')
-                    if label in moved_nodes:
-                        moved_nodes[label] += 1
-                    else:
-                        moved_nodes[label] = 1
+                    cnt = record[0]
+                    moved_nodes += cnt
+                    logger.info(f"Batch_merge.move_whole_batch: moved {cnt} nodes of type {labels}")
+                    tx.commit()
 
-                logger.info(f"-moved {text[:500]} ...")
-                tx.commit()
-
-            except Exception as e:
-                msg = _("No objects transferred: ") + str(e)
-                flash(msg, "flash_error")
-                logger.error(msg)
-                return msg
+        except Exception as e:
+            msg = _("No objects transferred: ") + str(e)
+            flash(msg, "flash_error")
+            logger.error(msg)
+            return msg
 
         msg = _("moved %(new_rel)s objects to ", new_rel=relationships_created)
         if nodes_created: msg += _("a new Common data set")

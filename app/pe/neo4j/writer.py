@@ -64,10 +64,9 @@ class Neo4jWriteDriver(object):
         '''
         doing = "?"
         try:
-            order = 0
             for resu in media_refs:
                 doing = f"{uniq_id}->Media {resu.media_handle}"
-                r_attr = {'order':order}
+                r_attr = {'order':resu.media_order}
                 if resu.crop:
                     r_attr['left'] = resu.crop[0]
                     r_attr['upper'] = resu.crop[1]
@@ -76,24 +75,23 @@ class Neo4jWriteDriver(object):
                 result = self.tx.run(CypherObjectWHandle.link_media, 
                                      root_id=uniq_id, handle=resu.media_handle, 
                                      r_attr=r_attr)
-                media_id = result.single()[0]
-                order =+ 1 
+                uniq_id = result.single()[0]    # for media object
 
                 for handle in resu.note_handles:
-                    doing = f"{media_id}->Note {handle}"
+                    doing = f"{uniq_id}->Note {handle}"
 #                     result = self.tx.run('MATCH (s), (t) WHERE ID(s)=$root_id and t.handle=$handle RETURN s,t', 
-#                         root_id=media_id, handle=handle)
+#                         root_id=uniq_id, handle=handle)
 #                     for s,t in result: print(f"\nMedia {s}\n"Note {t}")
                     self.tx.run(CypherObjectWHandle.link_note, 
-                                root_id=media_id, handle=handle)
+                                root_id=uniq_id, handle=handle)
 
                 for handle in resu.citation_handles:
-                    doing = f"{media_id}->Citation {handle}"
+                    doing = f"{uniq_id}->Citation {handle}"
 #                     result = self.tx.run('MATCH (s), (t) WHERE ID(s)=$root_id and t.handle=$handle RETURN s,t', 
-#                         root_id=media_id, handle=handle)
+#                         root_id=uniq_id, handle=handle)
 #                     for s,t in result: print(f"\nMedia {s}\nCite {t}")
                     self.tx.run(CypherObjectWHandle.link_citation, 
-                                root_id=media_id, handle=handle)
+                                root_id=uniq_id, handle=handle)
 
         except Exception as err:
             logger.error(f"Neo4jWriteDriver.media_save_w_handles {doing}: {err}")
