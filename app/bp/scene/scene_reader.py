@@ -360,7 +360,7 @@ def connect_object_as_leaf(src, target, rel_type=None):
     Plan 17 Sep 2018 / JMä
 
     The following relation targets are stored as instances in root object 
-    'src_obj' variable:
+    'src' variable:
         (:Person)                not linked to self
         -[:NAME]-> (:Name)       to .names[]
         -[:EVENT]-> (:Event)     to .events[]

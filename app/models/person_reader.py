@@ -392,10 +392,8 @@ class PersonReader():
                         o = Media.from_node(y_node)
                         self.objs[o.uniq_id] = o
                         new_objs.append(o.uniq_id)
-                        # Get relation properties
-                        r_order = rel.get('order')
-                        if r_order != None:
-                            o.order = r_order
+                    # Get relation properties
+                    order = rel.get('order')
                     # Store reference to referee object
                     if hasattr(x, 'media_ref'):
                         # Add media reference crop attributes
@@ -407,8 +405,8 @@ class PersonReader():
                             crop = (left, upper, right, lower)
                         else:
                             crop = None
-                        print(f'#\tMedia ref {o.uniq_id} order={o.order}, crop={crop}')
-                        x.media_ref.append((o.uniq_id,crop))
+                        print(f'#\tMedia ref {o.uniq_id} order={order}, crop={crop}')
+                        x.media_ref.append((o.uniq_id,crop,order))
                     else:
                         print(f'Error: No field for {x_label}.{y_label.lower()}_ref')            
                     #print(f'# ({x_label}:{x.uniq_id} {x}) --> ({y_label}:{o.id})')
@@ -417,7 +415,7 @@ class PersonReader():
                     traceback.print_exc()
                     raise NotImplementedError(f'No rule for ({x_label}) --> ({y_label})')            
                 #print(f'# ({x_label}:{x}) --> ({y_label}:{o.id})')
-                pass
+                x.media_ref.sort(key=lambda x: x[2])
 
         except Exception as e:
             print(f"Could not read places for person {self.person.uuid} objects {self.objs}: {e}")

@@ -115,6 +115,7 @@ def get_meta(metaname):
 def i_am_alive(metaname,parent_thread):
     ''' Checks, if backgroud thread is still alive '''
     while os.path.exists(metaname) and parent_thread.is_alive():
+        print(parent_thread.progress)
         update_metafile(metaname,
                         progress=parent_thread.progress)
         time.sleep(10)
@@ -125,6 +126,7 @@ def background_load_to_neo4j(username,filename):
     pathname = os.path.join(upload_folder,filename)
     metaname = pathname+".meta"
     logname =  pathname+".log"
+    update_metafile(metaname, progress={})
     steps = []
     try:
         os.makedirs(upload_folder, exist_ok=True)
@@ -132,7 +134,7 @@ def background_load_to_neo4j(username,filename):
         this_thread = threading.current_thread()
         this_thread.progress = {}
         counts = gramps_loader.analyze_xml(username, filename)
-        update_metafile(metaname,counts=counts)
+        update_metafile(metaname,counts=counts,progress={})
         threading.Thread(target=lambda: i_am_alive(metaname,this_thread),name="i_am_alive for " + filename).start()
         steps,batch_id = gramps_loader.xml_to_neo4j(pathname,username)
         for step in steps:

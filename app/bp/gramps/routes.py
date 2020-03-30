@@ -171,7 +171,7 @@ def get_progress(xmlfile):
     total += counts["event_cnt"]
     total += counts["family_cnt"]
     total += counts["note_cnt"]
-    total += counts["person_cnt"]
+    total += 2*counts["person_cnt"] # include refnames update
     total += counts["place_cnt"]
     total += counts["object_cnt"]
     total += counts["source_cnt"]
@@ -186,9 +186,10 @@ def get_progress(xmlfile):
     done += progress.get("Media", 0)
     done += progress.get("Source_gramps", 0)
     done += progress.get("Repository", 0)
+    done += progress.get("refnames", 0)
     rsp = {
         "status":status,
-        "progress":100*done//total,
+        "progress":99*done//total,
         "batch_id":meta.get("batch_id"),
     }
     return jsonify(rsp)

@@ -19,11 +19,16 @@ u { color: DarkKhaki; text-decoration: none; }
     <div class="content" id="IndividualDetail">
 
         {% if person.media_ref %}<div class="snapshot">
+           {% set ref = person.media_ref[0] -%}
+           {% set photo = obj[ref[0]] -%}
+           {% set crop = ref[1] -%}
+           {% set ord = ref[2] -%}
             <div class="thumbnail">
-                <div><a href="#indivgallery">{% set photo = obj[person.media_ref[0][0]] %}
+                <div><a href="#indivgallery">
 	                <img alt="({{ _('Photo') }})" 
+                         src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
-	                     title="key = {{photo.uuid_str()}}"/>
+	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
                 </a></div>
                 <p style="margin:0;">{{photo.description}}</p>
             </div>
@@ -259,17 +264,17 @@ u { color: DarkKhaki; text-decoration: none; }
 {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media files") }}</h4>
-        {% for ref, crop in person.media_ref %}
+        {% for ref, crop, ord in person.media_ref %}
             <div class="thumbnail">{% set photo=obj[ref] %}
                 <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
-	                <img alt="({{ _('Photo') }})" 
-	                     src="/scene/thumbnail?id={{photo.uuid}}" 
-	                     title="key = {{photo.uuid_str()}}"/>
+	                <img alt="({{ _('Photo') }}) {{ord}}" 
+	                     src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop|replace(" ", "")}}" 
+	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
                 </a>
                 <p><a href="/scene/media?uuid={{photo.uuid}}"
                       title="{{ _('Photo information') }}">
                       {{photo.description}}</a> {{ macro.notelink(photo) }}
-{% if crop %}<br><i>crop {{crop}}</i>{% endif %}
+{% if crop %}<br><i>{{ _('crop') }} {{crop}}</i>{% endif %}
                 </p>
             </div>
         {% endfor %}

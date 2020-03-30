@@ -13,13 +13,13 @@ p {margin-left:15px;}
 }
 #flex > div {
     margin:.5em; padding: 1em;
-    width: 45%; min-height: 60%;
+    width: 43%; 
 }
 .pic_container {
-  width: 100%;
+  /*width: 100%; */
   /*padding-top: 100%; /* 1:1 Aspect Ratio */
   position: relative;
-  /* border: 2px solid brown; */
+  min-height: 250px;
 }
 .pic {
   position: absolute;
@@ -31,6 +31,7 @@ p {margin-left:15px;}
 .pic > img {
   max-width: 100%;
   max-height: 100%;
+  border: solid 1pt gray;
 }
 td.value {width:100%;}
 /* tr > td {vertical-align: middle;} */
@@ -116,8 +117,8 @@ tr > td > img {
                  	 title="key = {{media.uuid_str()}}"/>
         </div>
 	</div>
-	<div class="fullclear"></div>
   </div>
+  <div class="fullclear"></div>
 {% endif %}
 </div>
 

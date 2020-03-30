@@ -259,6 +259,7 @@ def     show_person(uid=None):
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
+    for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=person.root,
@@ -531,6 +532,7 @@ def show_media(uid=None):
     logger.info("-> bp.scene.routes.show_media")
     return render_template("/scene/media.html", media=mediaobj, size=size, menuno=6)
 
+# ----------- Access media file ---------------
 
 @bp.route('/scene/media/<fname>')
 def fetch_media(fname):
@@ -568,7 +570,10 @@ def fetch_thumbnail():
     """ Fetch thumbnail
     """
     uuid = request.args.get("id")
-    thumbname = media.get_thumbname(uuid)
+    crop = request.args.get("crop")
+    if crop == "None":  
+        crop = None
+    thumbname = media.get_thumbname(uuid, crop)
     #print(thumbname)
     mimetype='image/jpg'
     logger.info("-> bp.scene.routes.fetch_thumbnail")
