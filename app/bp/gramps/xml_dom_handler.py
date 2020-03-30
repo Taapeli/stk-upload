@@ -167,6 +167,10 @@ class DOM_handler():
         self.tx.run("match (b:Batch{id:$batch_id}) set b.mediapath = $path", 
                     batch_id=self.batch_id, path=path)
 
+    def update_progress(self, key):
+        self.progress[key] += 1
+        this_thread = threading.current_thread()
+        this_thread.progress = dict(self.progress)
 
     def save_and_link_handle(self, e, **kwargs):
         ''' Save object and store its identifiers in the dictionary by handle.
@@ -175,15 +179,10 @@ class DOM_handler():
         '''
         e.save(self.tx, **kwargs)
         self.handle_to_node[e.handle] = self.dbKeys(e.uuid, e.uniq_id)
-        #print(f'# {e.__class__.__name__} [{e.handle}] --> {self.handle_to_node[e.handle]}')
-        #self.blog.add(self.tx)
-        self.progress[e.__class__.__name__] += 1
-        this_thread = threading.current_thread()
-        this_thread.progress = dict(self.progress)
+        self.update_progress(e.__class__.__name__)
 
    
     # ---------------------   XML subtree handlers   --------------------------
-
 
     def handle_header(self):
         ''' Store eventuel media path from XML header to Batch node.
@@ -859,6 +858,7 @@ class DOM_handler():
         from models.dataupdater import set_person_name_properties
 
         for p_id in self.person_ids:
+            self.update_progress('refnames')
             if p_id != None:
                 rc, sc = set_person_name_properties(tx=self.tx, uniq_id=p_id)
                 refname_count += rc
