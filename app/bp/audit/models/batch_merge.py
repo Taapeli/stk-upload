@@ -51,25 +51,24 @@ class Batch_merge(object):
         new_relationships = -1
         moved_nodes = 0
         label_sets = [  # Grouped to not too big chunks in logical order
-            ("Note"),
-            ("Repository", "Media"),
-            ("Place", "Place_name", "Source", "Citation"),
-            ("Event"),
-            ("Person", "Name"),
-            ("Family")
+                ["Note"],
+                ["Repository", "Media"],
+                ["Place", "Place_name", "Source", "Citation"],
+                ["Event"],
+                ["Person", "Name"],
+                ["Family"]
             ]
 
         try:
             with shareds.driver.session() as session:
                 for labels in label_sets:
-                    count = 0
                     tx = session.begin_transaction()
                     # while new_relationships != 0: ?
                     result = tx.run(Cypher_audit.copy_batch_to_audition, 
                                     user=user, batch=batch_id, oper=auditor,
                                     labels=labels)
                     counters = result.summary().counters
-                    print(counters)
+                    #print(counters)
                     new_relationships = counters.relationships_created
                     relationships_created += new_relationships
                     nodes_created += counters.nodes_created
