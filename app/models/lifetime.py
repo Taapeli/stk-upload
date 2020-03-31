@@ -7,32 +7,38 @@
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-branches
 
-# Methods to calculate the possible lifespan of people.
-#
-# People are represented by objects of class Person.
-# Each person has three properties, all are lists
-# - parents
-# - children
-# - events
-# Parents and children are lists of the corresponding Person objects.
-# Events are objects with three properties: eventtype, datetype and year
-# - eventtype: one of BIRTH, DEATH, MARRIAGE, "resi" (or basically anything- only birth, death and marriage have special handling)
-# - datetype: one of: "exact", "before", "after"
-# - year: integer representing the year of the event, or None if not known
-#
-# Usage:
-# First call "calculate_estimates" for all persons. Then call "__calculate_estimates2" for all persons. The first call only calculates the
-# estimates based on the events of the person itself. The latter call then examines each person's parents and children and updates
-# the estimates accordingly.
-#
-# The result is that these four properties are set for each person:
-# - earliest_possible_birth_year
-# - latest_possible_birth_year
-# - earliest_possible_death_year
-# - latest_possible_death_year
+'''
+    Methods to calculate the possible lifespan of people.
+    
+    People are represented by objects of class Person.
+    Each person has three properties, all are lists
+    - parents
+    - children
+    - events
+    Parents and children are lists of the corresponding Person objects.
+    Events are objects with three properties: eventtype, datetype and year
+    - eventtype: one of BIRTH, DEATH, MARRIAGE, "resi" (or basically anything – 
+      only birth, death and marriage have special handling)
+    - datetype: one of: "exact", "before", "after"
+    - year: integer representing the year of the event, or None if not known
+    
+    Usage:
+    First call "calculate_estimates" for all persons. 
+    Then call "__calculate_estimates_family" for all persons. 
+    The first call only calculates the estimates based on the events of the person itself. 
+    The latter call then examines each person's parents and children and updates
+    the estimates accordingly.
+    
+    The result is that these four properties are set for each person:
+    - birth_low
+    - birth_high
+    - death_low
+    - death_high
+'''
+
 import sys
 from dataclasses import dataclass
-from json.decoder import _decode_uXXXX
+#from json.decoder import _decode_uXXXX
 
 MAX_AGE = 110
 MIN_MARR_AGE = 15
@@ -147,32 +153,32 @@ def __update_range(p,eventtype,low,high):
     
 def __get_estimates(p):                        
     return (
-        p.earliest_possible_birth_year,
-        p.latest_possible_birth_year,
-        p.earliest_possible_death_year,
-        p.latest_possible_death_year
+        p.birth_low,
+        p.birth_high,
+        p.death_low,
+        p.death_high
     )
 
 def __update_estimates(p):                        
-    p.earliest_possible_birth_year = p.estimates[BIRTH][0]
-    p.latest_possible_birth_year = p.estimates[BIRTH][1]
-    p.earliest_possible_death_year = p.estimates[DEATH][0]
-    p.latest_possible_death_year = p.estimates[DEATH][1]
+    p.birth_low = p.estimates[BIRTH][0]
+    p.birth_high = p.estimates[BIRTH][1]
+    p.death_low = p.estimates[DEATH][0]
+    p.death_high = p.estimates[DEATH][1]
 
-    p.earliest_possible_death_year = ymax(p.earliest_possible_death_year,p.earliest_possible_birth_year)
-    p.earliest_possible_birth_year = ymax(p.earliest_possible_death_year-MAX_AGE,p.earliest_possible_birth_year)
-    p.latest_possible_birth_year = ymin(p.latest_possible_birth_year,p.latest_possible_death_year)
-    p.latest_possible_death_year = ymin(p.latest_possible_birth_year+MAX_AGE,p.latest_possible_death_year)
+    p.death_low = ymax(p.death_low,p.birth_low)
+    p.birth_low = ymax(p.death_low-MAX_AGE,p.birth_low)
+    p.birth_high = ymin(p.birth_high,p.death_high)
+    p.death_high = ymin(p.birth_high+MAX_AGE,p.death_high)
 
             
 def __calculate_estimates1(p):
     """
     Update values based on personal events
     """
-    p.earliest_possible_birth_year = MIN
-    p.earliest_possible_death_year = MIN
-    p.latest_possible_birth_year = MAX
-    p.latest_possible_death_year = MAX
+    p.birth_low = MIN
+    p.death_low = MIN
+    p.birth_high = MAX
+    p.death_high = MAX
     p.estimates = {BIRTH:(MIN,MAX),DEATH:(MIN,MAX)}
     for e in p.events:
         if e.year is None: 
@@ -219,18 +225,18 @@ def __calculate_estimates1(p):
 
     __update_estimates(p)
 
-def __calculate_estimates2(p):
+def __calculate_estimates_family(p):
     """
     Update values based on parent and children values
     """
     for par in p.parents:
-        __update_range(p,BIRTH,par.earliest_possible_birth_year+MIN_CHILD_AGE,MAX)
-        __update_range(p,BIRTH,MIN,par.latest_possible_death_year+MAX_PARENT_DEATH_CHILD_BIRTH_GAP)   # a child may be born after father's death
-        __update_range(p,BIRTH,MIN,par.latest_possible_birth_year+MAX_CHILD_AGE)
+        __update_range(p,BIRTH,par.birth_low+MIN_CHILD_AGE,MAX)
+        __update_range(p,BIRTH,MIN,par.death_high+MAX_PARENT_DEATH_CHILD_BIRTH_GAP)   # a child may be born after father's death
+        __update_range(p,BIRTH,MIN,par.birth_high+MAX_CHILD_AGE)
     for c in p.children:
-        __update_range(p,BIRTH,c.earliest_possible_birth_year-MAX_CHILD_AGE,MAX)
-        __update_range(p,BIRTH,MIN,c.latest_possible_birth_year-MIN_CHILD_AGE)
-        __update_range(p,DEATH,c.earliest_possible_birth_year-MAX_PARENT_DEATH_CHILD_BIRTH_GAP,MAX)  # father may have died before a child was born
+        __update_range(p,BIRTH,c.birth_low-MAX_CHILD_AGE,MAX)
+        __update_range(p,BIRTH,MIN,c.birth_high-MIN_CHILD_AGE)
+        __update_range(p,DEATH,c.birth_low-MAX_PARENT_DEATH_CHILD_BIRTH_GAP,MAX)  # father may have died before a child was born
 
     __update_estimates(p)
 
@@ -243,7 +249,7 @@ def calculate_estimates(personlist):
         personlist2 = set()
         for p in personlist:
             orig = __get_estimates(p)
-            __calculate_estimates2(p)
+            __calculate_estimates_family(p)
             new = __get_estimates(p)
             if new != orig:
                 for parent in p.parents:

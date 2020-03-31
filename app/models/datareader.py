@@ -32,13 +32,13 @@ from models.gen.citation import Citation, NodeRef
 from models.gen.source import Source
 from models.gen.repository import Repository
 from models.gen.dates import DateRange
-from models.owner import OwnerFilter
+from ui.user_context import UserContext
 import traceback
 
 
 def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=False, order=0):
     """ Reads Person Name and Event objects for display.
-        If args['user'] is defined, restrict to her objects.
+        Filter persons by args['context_code'].
 
         Returns Person objects, whith included Events and Names
         and optionally Refnames (if args['take_refnames'])
@@ -56,14 +56,18 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
     persons = []
     p = None
     p_uniq_id = None
+
     result = Person_combo.get_person_combos(keys, args=args) #user, take_refnames=take_refnames, order=order)
     for record in result:
         '''
         # <Record
             user=None,
-            person=<Node id=80307 labels={'Person'}
-                properties={'id': 'I0119', 'confidence': '2.5', 'sex': '1',
-                     'change': 1507492602, 'handle': '_da692a09bac110d27fa326f0a7', 'priv': ''}>
+            person=<Node id=48883 labels={'Person'}
+              properties={'sortname': 'Järnefelt#Elin Ailama#',
+             'id': 'I1623', 'uuid': 'c9beb251259a4c48bf433645cbe4362c',
+             'sex': 2, 'confidence': '', 'change': 1561976921,
+             'birth_low': 1870, 'birth_high': 1870,
+             'death_low': 1953, 'death_high': 1953}>
             name=<Node id=80308 labels={'Name'}
                 properties={'type': 'Birth Name', 'suffix': '', 'order': 0,
                     'surname': 'Klick', 'firstname': 'Brita Helena'}>
@@ -116,7 +120,7 @@ def read_persons_with_events(keys=None, args={}): #, user=None, take_refnames=Fa
 
 
 def read_refnames():
-    """ Reads all Refname objects for display
+    """ Reads all Refname objects for table display
         (n:Refname)-[r]->(m)
     """
     t0 = time.time()
@@ -316,29 +320,59 @@ def get_repositories(uniq_id=None):
     return (titles, repositories)
 
 
-def read_same_birthday(uniq_id=None):
-    """ Lukee tietokannasta Person-objektit, joilla on sama syntymäaika, näytettäväksi
+def read_same_eventday(event_type):
+    """ Lukee tietokannasta henkilötiedot, joilla on sama syntymäaika, näytettäväksi
     """
 
     ids = []
-    result = Person_combo.get_people_with_same_birthday()
+    if event_type == "Birth":
+        result = Person_combo.get_people_with_same_birthday()
+    elif event_type == "Death":
+        result = Person_combo.get_people_with_same_deathday()
+    else:
+        raise NotImplementedError("Only Birth and Death accepted")
+
     for record in result:
-        new_array = record['ids']
-        ids.append(new_array)
+        # <Record 
+        #    id1=259451 name1=['Julius Ferdinand', '', 'Lundahl'] 
+        #    birth1=[0, 1861880, 1861880] death1=[0, 1898523, 1898523] 
+        #    id2=494238 name2=['Julius Ferdinand', '', 'Lundahl'] 
+        #    birth2=[0, 1861880, 1861880] death2=[0, 1898523, 1898523]
+        # >
 
-    return (ids)
+        uniq_id = record['id1']
+        name  = record['name1']
+        b = record['birth1']
+        birth =  DateRange(b)
+        d = record['death1']
+        death =  DateRange(d)
+        l = [uniq_id, name, birth, death]
+
+        uniq_id = record['id2']
+        name  = record['name2']
+        b = record['birth2']
+        birth =  DateRange(b)
+        d = record['death2']
+        death =  DateRange(d)
+        l.extend([uniq_id, name, DateRange(birth), DateRange(death)])
+
+        print(f'found {l[0]} {l[1]} {l[2]}, {l[3]}')
+        print(f'   -- {l[4]} {l[5]} {l[6]}, {l[7]}')
+        ids.append(l)
+
+    return ids
 
 
-def read_same_deathday(uniq_id=None):
-    """ Lukee tietokannasta Person-objektit, joilla on sama kuolinaika, näytettäväksi
-    """
-
-    ids = []
-    result = Person_combo.get_people_with_same_deathday()
-    for record in result:
-        ids.append(record['ids'])
-
-    return (ids)
+# def read_same_deathday(uniq_id=None):
+#     """ Lukee tietokannasta Person-objektit, joilla on sama kuolinaika, näytettäväksi
+#     """
+# 
+#     ids = []
+#     result = Person_combo.get_people_with_same_deathday()
+#     for record in result:
+#         ids.append(record['ids'])
+# 
+#     return (ids)
 
 
 def read_same_name(uniq_id=None):
@@ -412,13 +446,13 @@ def read_families():
     """ Lukee tietokannasta Family- objektit näytettäväksi
     """
 
-    my_filter = OwnerFilter(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     # Which range of data is shown
-    my_filter.set_scope_from_request(request, 'person_scope')
+    u_context.set_scope_from_request(request, 'person_scope')
     opt = request.args.get('o', 'father', type=str)
     count = request.args.get('c', 100, type=int)
 
-    families = Family_combo.get_families(o_filter=my_filter, opt=opt, limit=count)
+    families = Family_combo.get_families(o_context=u_context, opt=opt, limit=count)
     
     return (families)
 
@@ -572,15 +606,23 @@ def get_source_with_events(sourceid):
         noderef.uuid = root_uuid      # 72104
         noderef.uniq_id = root_uniq_id      # 72104
         noderef.id = node['id']    # 'I1069' or 'E2821' TODO Why?
-        noderef.label = list(node.labels)[0]   # Get a member of a frozenset
+        noderef.label = root_label
+        noderef.obj = record['p']    # node for Person or Family etc
 
         event_role = record.get('role', "")
         print(f'{root_label} {root_uuid} Citation {c.uniq_id} {noderef.label}({event_role}) {noderef.uuid} {noderef.uniq_id} {noderef.id}')
 
+        noderef.person = None
+        noderef.family = None
+        if 'Person' in noderef.obj.labels:
+            noderef.person = Person_combo.from_node(noderef.obj)
+        if 'Family' in noderef.obj.labels:
+            noderef.family = Family.from_node(noderef.obj)
+            
         if noderef.label == "Person":
-            pass #noderef.eventtype = 'self'
+            pass
         elif noderef.label == "Family":
-            noderef.eventtype = _('Family')
+            noderef.eventtype = _(node['type'])
         elif noderef.label == "Name":
             noderef.eventtype = f"{node['order']+1}. {_('Name').lower()}"
         elif noderef.label == "Event":
@@ -590,9 +632,13 @@ def get_source_with_events(sourceid):
         if noderef.uuid not in clearnames.keys():
             #Todo: aseta tässä baseObject.type jne ???
             if event_role == 'Family':
-                # Family event witch is directply connected to a Person Event
+                # Family event witch is directly connected to a Person Event
                 parent_names = Family_combo.get_marriage_parent_names(x_uid)
-                noderef.clearname = f"{parent_names['father']} <> {parent_names['mother']}"
+                if 'father' in parent_names:
+                    noderef.clearname += parent_names['father']
+                noderef.clearname += " <> "
+                if 'mother' in parent_names:
+                    noderef.clearname += parent_names['mother']
             else:
                 # Read Person names as cleartext string
                 noderef.clearname = Name.get_clearname(noderef.uniq_id)
@@ -645,7 +691,8 @@ def get_people_by_surname(surname):
 
 def get_person_data_by_id(pid):
     """ Get 5 data sets:                        ---- vanhempi versio ----
-        Obsolete? still used in
+
+        ###Obsolete? still used in
         - /compare/uniq_id=311006,315556 
         - /lista/person_data/<string:uniq_id>
         - /lista/person_data/<string:uniq_id>
@@ -865,18 +912,6 @@ def get_person_data_by_id(pid):
         nodes[e.uniq_id] = e
     for e in family_list:
         nodes[e.uniq_id] = e
-#     if True:        # Näitä ei tarvita?
-#         result = Person_combo.get_ref_weburls(list(nodes.keys()))
-#         for wu in result:
-#             print("({} {}) -[{}]-> ({} ({} {}))".\
-#                   format(wu["root"] or '?', wu["root_id"] or '?',
-#                          wu["rtype"] or '?', wu["label"],
-#                          wu["target"] or '?', wu["id"] or '?'))
-#     print("")
-        #TODO Talleta Note- ja Citation objektit oikeisiin objekteihin
-        #     Perusta objektien kantaluokka Node, jossa muuttujat jäsenten
-        #     tallettamiseen.
-        # - Onko talletettava jäsenet vai viitteet niihin? Ei kai ole niin paljon toistoa?
 
     return (p, events, photos, citations, family_list)
 

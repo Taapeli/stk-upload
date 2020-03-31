@@ -10,8 +10,9 @@
 </div>
 
 {{ macro.menu(4) }}
-    <div class="content" id="IndividualDetail">
+    <div class="content" id="Place">
 {% if place %}
+    {% set locid = place.uuid %}
       {% if place.coord %}
         <div id="map">{% if '°' in place.coord %}
         {{ _('Invalid coordinates') }}: {{place.coord}}
@@ -45,39 +46,34 @@
         </ol>
       {% endif %}
     {% endwith %}
-            <ul>{% for p in locations %}
+            <ul>{% for p in pl_hierarchy %}
                 <li style="margin-left: {{p.level * 2}}em;">
-                {% if p.uniq_id == locid %}<span class="id">{{p.uniq_id}}</span>
-                    <b>{{ macro.place_names(p) }}</b>
-                {% else %}<a href="/scene/location/uuid={{p.uuid}}" class="inlink"><b>
+                {% if p.uuid == locid %}
+                    <b style="font-size:larger;">{{ macro.place_names(p) }}</b>
+                {% else %}<a href="/scene/location/uuid={{p.uuid}}" class="inlink">
                     {{ macro.place_names(p) }}
-                </b></a>
+                </a>
                 {% endif %} <span class="typedesc">&nbsp;{{p.type|transl('lt')}}</span></li>
             {% endfor %}</ul>
         </div>
 
+        <div id="summaryarea">
+            <table><tbody>
+                <tr><td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="Value">{{macro.all_obj_ids(place)}}</td>
+                    <td></td>
+                </tr>
+            </tbody></table>
+        </div>
     {% if place.notes %}
-        <div id="events">
-            <h4>{{ _('Website') }}</h4>
-            <table class="infolist eventlist">
-                <thead>
-                    <tr>
-                        <th> </th>
-                        <th class="ColumnDescription">{{ _('Type') }}</th>
-                        <th class="ColumnDescription">{{ _('Reference') }}</th>
-                        <th class="ColumnDescription">{{ _('Note') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-        {% for u in place.notes %}
-                    <tr>
-                        <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(u.priv) }}</td> 
-                        <td class="ColumnDescription">{{u.type|transl('notet')}}</td> 
-                        {{ macro.notelink_2col(u) }} 
-                    </tr>
-         {% endfor %}
-                 </tbody>
-            </table>
+        <div id="notes">
+            <h4>{{ _('Notes') }}</h4>
+         {% for note in place.notes %}
+            <div class="grampsstylednote">
+                 <p>► <span class="typedesc">{{ note.type|transl('notet') }}</span>
+                    {{ macro.notelink(note) }}</p>
+            </div>
+        {% endfor %}
         </div>
     {% endif %}
 
@@ -146,8 +142,8 @@
                         <th class="ColumnPerson">{{ _('Person') }}</th>
                         <th class="ColumnEvent">{{ _('Event') }}</th>
                         <th class="ColumnDate">{{ _('Date') }}</th>
- <!--                   <th class="ColumnDescription">{{ _('Description') }}</th>
-                        <th class="ColumnNotes">{{ _('Note') }}</th>
+                        <th class="ColumnDescription">{{ _('Description') }}</th>
+<!--                    <th class="ColumnNotes">{{ _('Note') }}</th>
                         <th class="ColumnSources">{{ _('Sources') }}</th>
 -->
                     </tr>
@@ -156,27 +152,15 @@
         {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
-                        {% for pn in e.names|sort(attribute='order') %}
-                         {% if loop.index == 1 %}
-                         {% if pn.type != "Birth Name" %}
-                            <span class="typedesc">{{pn.type|transl('nt')}}</span>
-                         {% endif %}
-                         <a href="/scene/person?uuid={{e.person.uuid}}" class="inlink"
-                            title="{{ _("See Person's Details") }}">{{ macro.person_name_long(pn) }}</a>
-                         {% else %}
-                          <small><br> – 
-                         {% if pn.type != "Birth Name" %}
-                            <span class="typedesc">{{pn.type|transl('nt')}}</span>
-                         {% endif %}
-                            {{ macro.person_name_long(pn) }}</small>
-                         {% endif %}
-                         {% endfor %}
+	                        {{ macro.person_names_anon(e.person, e.names) }}
                         </td>
-                        <td class="ColumnEvent">{{e.type|transl('evt')}}
-                          {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
-                        <td class="ColumnDate">{{e.dates}}</td>
+                        {% if 1 or not e.person.too_new %}
+	                        <td class="ColumnEvent">{{e.type|transl('evt')}}
+	                          {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
+	                        <td class="ColumnDate">{{e.dates}}</td>
+                        {% endif %}
+                        <td class="ColumnDescription">{{e.description}}</td>
 <!--
-                        <td class="ColumnDescription">&nbsp;</td>
                         <td class="ColumnNotes">
                             <div></div>
                         </td>

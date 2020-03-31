@@ -173,14 +173,19 @@ RETURN batch.user AS user, person,
     _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
     ORDER BY TOUPPER(names[0].suffix), names[0].surname, names[0].firstname"""
 
+    _limit_years_clause = """
+WHERE person.birth_low <= $years[1]
+  AND person.death_high >= $years[0]
+"""
+
     get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_surname
+        + _limit_years_clause + _get_events_tail + _get_events_surname
 
     get_events_all_firstname = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_firstname
+        + _limit_years_clause + _get_events_tail + _get_events_firstname
 
     get_events_all_patronyme = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_patronyme
+        + _limit_years_clause + _get_events_tail + _get_events_patronyme
 
     get_events_uniq_id = """
 MATCH (person:Person) -[:NAME]-> (name:Name)
@@ -191,22 +196,42 @@ MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:
 """ + _get_events_tail + _get_events_surname
 
     # With attr={'use':rule, 'name':name}
-    get_events_by_refname_use = """
+    get_common_events_by_refname_use = """
 MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[:PASSED]- (batch)
 WHERE search.name STARTS WITH $attr.name
 WITH search, person
 MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
 
+    # With attr={'use':rule, 'name':name}, user=user
+    get_my_events_by_refname_use = """
+MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[:OWNS]- (:Batch {user:$user})
+WHERE search.name STARTS WITH $attr.name
+WITH search, person
+MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH person, name""" + _get_events_tail + _get_events_surname
+
+    get_both_events_by_refname_use = """
+MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[re:OWNS|PASSED]- (b:Batch)
+WHERE search.name STARTS WITH $attr.name
+WITH search, person, re WHERE type(re) = "PASSED" or b.user = $user
+MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH person, name""" + _get_events_tail + _get_events_surname
+
     get_confidences_all = """
 MATCH (person:Person)
-OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
-RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+OPTIONAL MATCH (person) -[:EVENT]-> (:Event) -[:CITATION]-> (c1:Citation)
+OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
+RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
     get_confidence = """
 MATCH (person:Person) WHERE ID(person)=$id
-OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
-RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
+OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
+RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
     set_confidence = """
 MATCH (person:Person) WHERE ID(person)=$id
@@ -250,10 +275,10 @@ RETURN p, id(p) as pid,
     update_lifetime_estimate = """
 MATCH (p:Person) 
     WHERE id(p) = $id
-SET p.earliest_possible_birth_year = $earliest_possible_birth_year,
-    p.earliest_possible_death_year = $earliest_possible_death_year,
-    p.latest_possible_birth_year = $latest_possible_birth_year,
-    p.latest_possible_death_year = $latest_possible_death_year
+SET p.birth_low = $birth_low,
+    p.death_low = $death_low,
+    p.birth_high = $birth_high,
+    p.death_high = $death_high
 """
     fetch_all_for_lifetime_estimates = """
 MATCH (p:Person) 
@@ -369,6 +394,18 @@ RETURN f, p.pname AS marriage_place,
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.father_sortname LIMIT $limit"""
     
+    read_families_common_p = """
+MATCH () -[:PASSED]-> (f:Family) WHERE f.father_sortname>=$fw
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.father_sortname LIMIT $limit"""
+
     read_families_m = """
 MATCH (f:Family) WHERE f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
@@ -384,6 +421,18 @@ RETURN f, p.pname AS marriage_place,
     read_my_families_m = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
     WHERE prof.username = $user AND f.mother_sortname>=$fwm
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.mother_sortname LIMIT $limit"""
+
+    read_families_common_m = """
+MATCH () -[:PASSED]-> (f:Family) WHERE f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
@@ -508,28 +557,6 @@ RETURN p AS person, r.role AS role,
     COLLECT(n) AS names, e AS event
 ORDER BY e.date1"""
 
-    get_name_hierarchies = """
-MATCH (a:Place) -[:NAME]-> (pn:Place_name)
-    WHERE a.pname >= $fw
-OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
-    COLLECT(DISTINCT pn) AS names, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
-ORDER BY names[0].name LIMIT $limit"""
-
-    get_my_name_hierarchies = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (a:Place)
-    WHERE prof.username = $user AND a.pname >= $fw
-MATCH (a:Place) -[:NAME]-> (pn:Place_name)
-OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
-    COLLECT(DISTINCT pn) AS names, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
-ORDER BY names[0].name LIMIT $limit"""
 
     get_w_names_notes = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
@@ -648,30 +675,34 @@ MATCH (c:Citation) -[:SOURCE]-> (s:Source)
     OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
 RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 
-    get_sources_w_notes = """
-MATCH (s:Source)
-WITH s ORDER BY toUpper(s.stitle)
-    OPTIONAL MATCH (s) -[:NOTE]-> (note)
-    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
-    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
-       collect(DISTINCT [r.medium, rep]) as repositories,
-       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
-ORDER BY toUpper(s.stitle)"""
-    get_selected_sources_w_notes = """
-MATCH (s:Source)
-        WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
-WITH s ORDER BY toUpper(s.stitle)
-    OPTIONAL MATCH (s) -[:NOTE]-> (note)
-    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
-    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
-       collect(DISTINCT [r.medium, rep]) as repositories,
-       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
-ORDER BY toUpper(s.stitle)"""
-
+#v0.4: pe.Source_cypher.SourceCypher.get_auditted_set
+#     get_sources_w_notes = """
+# MATCH (s:Source)
+# WITH s ORDER BY toUpper(s.stitle)
+#     OPTIONAL MATCH (s) -[:NOTE]-> (note)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+#     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        collect(DISTINCT [r.medium, rep]) as repositories,
+#        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)"""
+#
+#v0.4: pe.Source_cypher.SourceCypher.get_auditted_selection_set
+#     get_selected_sources_w_notes = """
+# MATCH (s:Source)
+#         WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
+# WITH s ORDER BY toUpper(s.stitle)
+#     OPTIONAL MATCH (s) -[:NOTE]-> (note)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+#     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        collect(DISTINCT [r.medium, rep]) as repositories,
+#        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)"""
+# 
+#v0.4: pe.Source_cypher.SourceCypher.get_an_auditted_selection_set
     get_a_source_w_notes = """
 MATCH (source:Source) WHERE ID(source)=$sid
     OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
@@ -687,6 +718,7 @@ match (c) <-[:CITATION]- (x)
 return id(c) as c_id, c, collect(n) as notes, re.role as role,
        labels(x)[0] as label, x, 
        coalesce(p.uuid, x.uuid) as p_uuid, 
+       coalesce(p, x) as p, 
        coalesce(ID(p), ID(x)) as p_uid, labels(p)[0] as p_label, r
 order by c_id, p_uuid"""
 
@@ -774,6 +806,13 @@ optional match (b) -[:OWNS]-> (x)
 return b as batch,
     labels(x)[0] as label, count(x) as cnt 
     order by batch.user, batch.id'''
+
+    get_passed = '''
+match (b:Audit) 
+    where b.user = $user
+optional match (b) -[:PASSED]-> (x)
+return b as batch, count(x) as cnt 
+    order by batch.id'''
 
     get_single_batch = '''
 match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 

@@ -79,11 +79,11 @@ with c
     match (e:Event)  where e.handle=$handle
     merge (e) -[r:CITATION]-> (c)"""
 
-    link_media = """
-MATCH (e:Event {handle: $handle})
-MATCH (m:Media  {handle: $m_handle})
-  CREATE (e) -[r:MEDIA]-> (m)
-    SET r = $r_attr"""
+#     link_media = """
+# MATCH (e:Event {handle: $handle})
+# MATCH (m:Media  {handle: $m_handle})
+#   CREATE (e) -[r:MEDIA]-> (m)
+#     SET r = $r_attr"""
 
 
 class Cypher_family_w_handle():
@@ -269,8 +269,9 @@ CREATE (u) -[:OWNS]-> (pl)"""
 
     add_name = """
 MATCH (pl:Place) WHERE id(pl) = $pid
-CREATE (pl) -[r:NAME]-> (n:Place_name)
-    SET n = $n_attr"""
+CREATE (pl) -[r:NAME {order:$order}]-> (n:Place_name)
+    SET n = $n_attr
+RETURN ID(n) AS uniq_id"""
 
     # Link to a known upper Place
     link_hier = """
@@ -342,13 +343,15 @@ class Cypher_source_w_handle():
 #      saman omistajan duplikaatit gramps_handlen mukaan
 #      Nyt tulee aina uusi instanssi
 
-    create = """
-MERGE (s:Source {handle: $s_attr.handle})
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:OWNS]-> (s:Source {handle: $s_attr.handle}) 
     SET s = $s_attr
 RETURN ID(s) as uniq_id"""
 #     create = """
-# CREATE (s:Source)
-# SET s = $s_attr"""
+# MERGE (s:Source {handle: $s_attr.handle})
+#     SET s = $s_attr
+# RETURN ID(s) as uniq_id"""
 
     link_note = """
 MATCH (n:Source) WHERE n.handle=$handle
@@ -364,10 +367,16 @@ MERGE (n) -[r:REPOSITORY {medium:$medium}]-> (m)"""
 class Cypher_citation_w_handle():
     """ For Citation class """
 
-    create = """
-CREATE (n:Citation)
-    SET n = $c_attr
-RETURN ID(n) as uniq_id"""
+    create_to_batch = """
+MATCH (b:Batch {id: $batch_id})
+MERGE (b) -[r:OWNS]-> (c:Citation {handle: $c_attr.handle}) 
+    SET c = $c_attr
+RETURN ID(c) as uniq_id"""
+
+#     create = """
+# CREATE (n:Citation)
+#     SET n = $c_attr
+# RETURN ID(n) as uniq_id"""
 
     link_note = """
 MERGE (n:Citation {handle: $handle})

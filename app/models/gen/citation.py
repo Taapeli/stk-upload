@@ -13,9 +13,9 @@ from models.gen.dates import DateRange
 logger = logging.getLogger('stkserver')
 
 import shareds
-from .base import NodeObject
-from .cypher import Cypher_citation
+from bl.base import NodeObject
 from models.cypher_gramps import Cypher_citation_w_handle
+from .cypher import Cypher_citation
 
 
 class Citation(NodeObject):
@@ -32,13 +32,6 @@ class Citation(NodeObject):
                 source_handle    str handle of source   _or_
                 source_id        int uniq_id of a Source object
                 citators         NodeRef nodes referring this citation
-
-    #TODO: Remove references to "dateval" variable when reading from db
-    
-         object attributes     db attributes
-         -----------------     -------------
-    OLD: dateval str           {dateval: "2015-03-08"}
-    NEW: dates DateRange       {datetype: 0, date1: 1898523, date2: 1898523}
     """
 
     def __init__(self):
@@ -56,8 +49,6 @@ class Citation(NodeObject):
 
         # For displaying citations in person.html
         self.source_id = None
-#         self.source_medium = "" # see repository
-#         self.repository_id = None
 
         self.citators = []      # Lähde-sivulle
         self.note_ref = []
@@ -84,6 +75,7 @@ class Citation(NodeObject):
         n.dates = DateRange.from_node(node)
 
         return n
+
 
 #     @staticmethod       
 #     def get_persons_citations (uniq_id):
@@ -239,12 +231,13 @@ class Citation(NodeObject):
             print ("Sourceref_hlink: " + self.source_handle)
         return True
 
-
     def save(self, tx, **kwargs):
         """ Saves this Citation and connects it to it's Notes and Sources.
         """
-        if kwargs:
-            print(f"Warning: Citation.save: extra arguments {kwargs}!")
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Citation_gramps.save needs batch_id for {self.id}")
             
         self.uuid = self.newUuid()
         c_attr = {}
@@ -260,7 +253,8 @@ class Citation(NodeObject):
             if self.dates:
                 c_attr.update(self.dates.for_db())
 
-            result = tx.run(Cypher_citation_w_handle.create, c_attr=c_attr)
+            result = tx.run(Cypher_citation_w_handle.create_to_batch,
+                            batch_id=batch_id, c_attr=c_attr)
             ids = []
             for record in result:
                 self.uniq_id = record[0]

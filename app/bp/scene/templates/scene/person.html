@@ -19,11 +19,16 @@ u { color: DarkKhaki; text-decoration: none; }
     <div class="content" id="IndividualDetail">
 
         {% if person.media_ref %}<div class="snapshot">
+           {% set ref = person.media_ref[0] -%}
+           {% set photo = obj[ref[0]] -%}
+           {% set crop = ref[1] -%}
+           {% set ord = ref[2] -%}
             <div class="thumbnail">
-                <div><a href="#indivgallery">{% set photo = obj[person.media_ref[0][0]] %}
+                <div><a href="#indivgallery">
 	                <img alt="({{ _('Photo') }})" 
+                         src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
-	                     title="key = {{photo.uuid_str()}}"/>
+	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
                 </a></div>
                 <p style="margin:0;">{{photo.description}}</p>
             </div>
@@ -67,7 +72,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 </tr>{% endif %}
                 <tr><td class="ColumnAttribute">{{ _('Estimated years') }}</td>
                     <td class="ColumnValue">{{ macro.lifetimes(person) }}
-           {% if person.latest_possible_death_year >= last_year_allowed %}
+           {% if person.death_high >= last_year_allowed %}
                         <span style="color:red">{{ _('confidential') }}!</span>
            {% endif %}
                     </td>
@@ -75,13 +80,13 @@ u { color: DarkKhaki; text-decoration: none; }
                <tr>
                     <td class="ColumnAttribute">{{ _("Age at death") }}</td>
                     <td class="ColumnValue">
-            {% if person.latest_possible_death_year != person.earliest_possible_death_year or
-                  person.latest_possible_birth_year != person.earliest_possible_birth_year %}
+            {% if person.death_high != person.death_low or
+                  person.birth_high != person.birth_low %}
                         {{ _('at least') }}
             {% else %}
                         {{ _('about') }}
             {% endif %}
-                        {{person.earliest_possible_death_year - person.latest_possible_birth_year}}
+                        {{person.death_low - person.birth_high}}
                         {{ _('years') }}
                     </td>
                 </tr>
@@ -119,8 +124,7 @@ u { color: DarkKhaki; text-decoration: none; }
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
                                 <a href="/scene/event/{{e.uniq_id}}" class="inlink">
-                                {% if e.type == "Baptism" %}&rarr;&nbsp;{% endif %}
-                                    {{e.type|transl('evt')}}</a>
+                                   {{e.type|transl('evt')}}</a>
     {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>
     {% endif %}
@@ -204,12 +208,12 @@ u { color: DarkKhaki; text-decoration: none; }
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 	                    <ul>{% if fam.father %}
-	                        <li>{{ _("Man") }}: {{ macro.person(fam.father, myid) }}</li>
+	                        <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
 	                {% endif %}{% if fam.mother %}
-	                        <li>{{ _("Wife") }}: {{ macro.person(fam.mother, myid) }}</li>
+	                        <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
 	                {% endif %}{% if fam.children %}
 	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
-	                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>{% endfor %}
+	                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>{% endfor %}
 	                        </ul></li>
 	                {% endif %}
 	                    </ul>
@@ -241,12 +245,12 @@ u { color: DarkKhaki; text-decoration: none; }
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 		                <ul>{% if fam.father %}
-		                        <li>{{ _("Father") }}: {{ macro.person(fam.father, myid) }}</li>
+		                        <li>{{ _("Father") }}: {{ macro.person_anon(fam.father, myid) }}</li>
 		                {% endif %}{% if fam.mother %}
-		                        <li>{{ _("Mother") }}: {{ macro.person(fam.mother, myid) }}</li>
+		                        <li>{{ _("Mother") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
 		                {% endif %}{% if fam.children|count %}
 		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
-		                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>
+		                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
 		                         {% endfor %}</ul></li>
 		                {% endif %}
 		                    </ul>
@@ -260,15 +264,17 @@ u { color: DarkKhaki; text-decoration: none; }
 {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media files") }}</h4>
-        {% for ref, crop in person.media_ref %}
+        {% for ref, crop, ord in person.media_ref %}
             <div class="thumbnail">{% set photo=obj[ref] %}
                 <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
-	                <img alt="({{ _('Photo') }})" 
-	                     src="/scene/thumbnail?id={{photo.uuid}}" 
-	                     title="key = {{photo.uuid_str()}}"/>
+	                <img alt="({{ _('Photo') }}) {{ord}}" 
+	                     src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop|replace(" ", "")}}" 
+	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
                 </a>
-                <p>{{photo.description}}{{ macro.notelink(photo) }}
-{% if crop %}<br><i>crop {{crop}}</i>{% endif %}
+                <p><a href="/scene/media?uuid={{photo.uuid}}"
+                      title="{{ _('Photo information') }}">
+                      {{photo.description}}</a> {{ macro.notelink(photo) }}
+{% if crop %}<br><i>{{ _('crop') }} {{crop}}</i>{% endif %}
                 </p>
             </div>
         {% endfor %}

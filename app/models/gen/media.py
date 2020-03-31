@@ -6,7 +6,7 @@ Created on 22.7.2017
 
 from sys import stderr
 
-from .base import NodeObject
+from bl.base import NodeObject
 from .cypher import Cypher_media
 from .person import Person
 from .place import Place
@@ -63,11 +63,11 @@ class Media(NodeObject):
 
 
     @staticmethod
-    def read_my_media_list(my_filter, limit):
-        """ Read Media object list using my_filter.
+    def read_my_media_list(u_context, limit):
+        """ Read Media object list using u_context.
         """
         medias = []
-        result = Media.get_medias(uniq_id=None, o_filter=my_filter, limit=limit)
+        result = Media.get_medias(uniq_id=None, o_context=u_context, limit=limit)
         for record in result: 
             # <Record o=<Node id=393949 labels={'Media'}
             #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
@@ -86,21 +86,21 @@ class Media(NodeObject):
         
     # Update the page scope according to items really found
         if medias:
-            my_filter.update_session_scope('media_scope', 
+            u_context.update_session_scope('media_scope', 
                 medias[0].description, medias[-1].description, limit, len(medias))
         return medias
     
     @staticmethod
-    def get_medias(uniq_id=None, o_filter=None, limit=100):
-        """ Reads Media objects from user batch or common data using filter. """
+    def get_medias(uniq_id=None, o_context=None, limit=100):
+        """ Reads Media objects from user batch or common data using context. """
                         
         if uniq_id:
             query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
             return  shareds.driver.session().run(query, id=uniq_id)
-        elif o_filter:
-            user = o_filter.user
-            fw_from = o_filter.next_name_fw()     # next name
-            show_common = o_filter.use_common()
+        elif o_context:
+            user = o_context.user
+            fw_from = o_context.next_name_fw()     # next name
+            show_common = o_context.use_common()
             if show_common:
                 # Show approved common data
                 return shareds.driver.session().run(Cypher_media.read_common_media,

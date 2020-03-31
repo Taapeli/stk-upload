@@ -14,22 +14,45 @@ from urllib.parse import unquote_plus
 from flask_babelex import lazy_gettext as N_
 
 
-class OwnerFilter():
+class UserContext():
     """ Store filter values for finding the active subset of database.
     
+        Usage:
+            #    Create context with defaults from session and request (1)
+            u_context = UserContext(user_session, current_user, request)
+
+            #    Set the scope of data keys using request arguments or previous defalts (2)
+            u_context.set_scope_from_request(request, 'person_scope')
+            
+            #    Set other variables: how many objects shall be shown
+            u_context.count = int(request.args.get('c', 100))
+            #        Privacy limit: how many years from (calculated) death year
+            u_context.privacy_limit = shareds.PRIVACY_LIMIT
+
+            #    < Execute data search here >
+
+            #    Update data scope for next search
+            context.update_session_scope('person_scope', 
+                                          persons[0].sortname, persons[-1].sortname, 
+                                          context.count, len(persons))
+
         Settings stored in self:
-        
+
+        (1) user context: username and which material to display
         - user          str     Username from current_user, if any
-        - owner_filter  int     Code expressing filter method by data owners
-                                from request.div or session.owner_filter.
+        - user_context  int     Code expressing filter method by data owners
+                                from request.div+div2 or session.user_context.
                                 Default = 1 (common) if neither present
+
             COMMON - 1          approved common data 'Isotammi'
             OWN - 2             all user's own candidate materials
             BATCH - 3           a selected Batch set
             COMMON+OWN
             COMMON+BATCH
+
+        (2) sort key limits displayed in current page
         - scope          list   Boundary names for current display page [from, to]
-        
+
                                 For Persons page, the scope variable in
                                 user session is 'person_scope' and the values 
                                 are from Person.sortname field.
@@ -42,14 +65,14 @@ class OwnerFilter():
             - The same boundary names are included in next pages, too
               to ensure no duplicate names are skipped.
 
-        scope[0] (from which name to display, forwards):
-            ' '              from first name of data
-            name             from a name given
-            NEXT_END '>'     bottom reached: there is nothing forwards
-        scope[1] (from which name to display, backwards):
-            NEXT_END '>'     from last name of data
-            name             from a name given
-            NEXT_START '<'   top reached: there is nothing before
+            scope[0] (from which name to display, forwards):
+                ' '              from first name of data
+                name             from a name given
+                NEXT_END '>'     bottom reached: there is nothing forwards
+            scope[1] (from which name to display, backwards):
+                NEXT_END '>'     from last name of data
+                name             from a name given
+                NEXT_START '<'   top reached: there is nothing before
 
     #TODO self.batch_id not set or used
     """
@@ -57,12 +80,12 @@ class OwnerFilter():
     NEXT_END = '>'    # end reached: there is nothing forwards
 
 
-    class OwnerChoices():
+    class ChoicesOfView():
         """ Represents all possible combibations of selection by owner and batch. 
         """
         COMMON = 1
         OWN = 2
-        BATCH = 4
+        BATCH = 4   # Currently not implemented
 
         def __init__(self):
             ''' Initialise choise texts in user language '''
@@ -124,7 +147,7 @@ class OwnerFilter():
             else:
                 # No request
                 self.session[self.session_var] = self.scope
-                print(f"OwnerFilter: Now {self.session_var} is cleared")
+                print(f"UserContext: Now {self.session_var} is cleared")
                 return self.scope
             
     
@@ -133,61 +156,91 @@ class OwnerFilter():
             Set filtering properties from user session, request and current user.
         '''
         self.session = user_session
-        self.choices = self.OwnerChoices()
-        self.filter = self.OwnerChoices.COMMON
+        self.choices = self.ChoicesOfView()   # set of allowed material choices
+        self.context = self.ChoicesOfView.COMMON
+        self.years = []                         # example [1800, 1899]
+        self.series = None                      # Source data theme like "birth"
+        self.count = 10000                      # Max count ow objects to display
 
         ''' Set active user, if any username '''
         if current_user:
             if current_user.is_active and current_user.is_authenticated:
-                user = current_user.username
+                self.user = current_user.username
             else:
-                user = None
+                self.user = None
         else:
-            user = user_session.get('username', None)
-        self.user = user
+            self.user = user_session.get('username', None)
 
-        """ Store the request parameters div=1&div2=2&cmp=1 as session variable owner_filter.
-            Returns owner filter name if detected, otherwise False
+        """ Store the request parameters div=1&div2=2&cmp=1 as session variable user_context.
+            Returns owner context name if detected, otherwise False
         """
-        div = 0
+        new_selection = 0
         if request:
-            # The div argument from request is stored in self.filter
-            div2 = int(request.args.get('div2', 0))
-            div = div2 + int(request.args.get('div', 0))
-            if div:
-                if request.args.get('cmp', ''):
-                    div = div | 1
-                self.filter = self.choices.get_valid_key(div)
-                if self.filter:
-                    self.session['owner_filter'] = self.filter
-                    print(f"OwnerFilter: Now owner_filter={self.filter}")
-        if div == 0:
-            # If got no request owner_filter, use session value or 1
-            self.filter = user_session.get('owner_filter', self.choices.COMMON)
-            print(f"OwnerFilter: Uses same or default owner_filter={self.filter}")
+            # Selected years (from-to)
+            #    years=1111-2222
+            years = request.args.get('years', None)
+            if years:
+                y1, y2 = years.split('-')
+                if y1:  yi1 = int(y1)
+                else:   yi1 = 0
+                if y2:  yi2 = int(y2)
+                else:   yi2 = 9999
+                self.years = [yi1, yi2]     # selected years [from, to]
+                print(f'UserContext: Objects between years {self.years}')
 
+            # Selected document series for Sources
+            self.series = request.args.get('series', None)
+
+            # Selected material for display
+            #    div=1 -> show approved material
+            #    div2=2 -> show researcher's own data
+            new_selection = int(request.args.get('div', 0)) + int(request.args.get('div2', 0))
+            if new_selection:
+                # Take also common data?
+                if request.args.get('cmp', ''): 
+                    new_selection = new_selection | 1
+                # Got new material selection?
+                self.context = self.choices.get_valid_key(new_selection)
+                if self.context:
+                    self.session['user_context'] = self.context
+                    print(f"UserContext: Now user_context={self.context}")
+            # Clear obslete session variable
+            user_session.pop('owner_filter', None)
+
+        if new_selection == 0:
+            # If got no request user_context, use session value or 1
+            self.context = user_session.get('user_context', self.choices.COMMON)
+            print(f"UserContext: Uses same or default user_context={self.context}")
+
+
+    def get_my_user_id(self):
+        # Return current user id, if my candidate data is chosen
+        if self.context == self.choices.OWN:
+            return self.user
+        else:
+            return ''
 
     def owner_str(self):
         # Return current owner choise as text 
         try:
-            return self.choices.as_str[self.filter]
+            return self.choices.as_str[self.context]
         except:
             return ''
 
     def use_owner_filter(self):
         ''' Tells, if you should select object by data owner.
 
-            Always when others but self.OwnerChoices.OWN only are required
+            Always when others but self.ChoicesOfView.OWN only are required
         '''
         
-        return (self.filter & 2) > 0
+        return (self.context & 2) > 0
     
     def use_common(self):
         ''' Tells, if you should select objects from common database.
 
-            Always when self.OwnerChoices.COMMON is required
+            Always when self.ChoicesOfView.COMMON is required
         '''
-        return (self.filter & 1) > 0
+        return (self.context & 1) > 0
 
 
     def set_scope_from_request(self, request, var_name):
@@ -198,7 +251,7 @@ class OwnerFilter():
         """
         self.nextpoint = self.NextStartPoint(self.session, var_name)
         self.scope = self.nextpoint.set_next_from_request(request)
-        print(f"OwnerFilter: Now next item={self.scope}")
+        print(f"UserContext: Now next item={self.scope}")
 
 
     def update_session_scope(self, var_name, name1, name2, limit, rec_cnt):

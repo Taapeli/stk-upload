@@ -1,5 +1,5 @@
 import sys
-from models.owner import OwnerFilter
+from ui.user_context import UserContext
 import pytest
 from flask.globals import request
 # logging.basicConfig(level=logging.INFO)
@@ -9,7 +9,7 @@ def user_env():
     ''' Set a typical set of user session, current user and http request
     '''
     user_session = {}
-    user_session['owner_filter'] = 1
+    user_session['user_context'] = 1
     user_session['lang'] = 'en'
     # # Set current user
     class CurrentUser():pass
@@ -27,17 +27,17 @@ def user_env():
 
 
 def test_ownerfilter_nouser():
-    # OwnerFilter(user_session)
+    # UserContext(user_session)
     user_session = {}
-    user_session['owner_filter'] = 1
+    user_session['user_context'] = 1
 
-    f = OwnerFilter(user_session)
+    f = UserContext(user_session)
 
-    assert f.filter == 1
+    assert f.context == 1
     assert f.owner_str() == 'Isotammi database'
 
-    user_session['owner_filter'] = 2
-    assert f.filter == 1
+    user_session['user_context'] = 2
+    assert f.context == 1
     assert f.owner_str() == 'Isotammi database', "No user gets wrong data"
 
 
@@ -48,13 +48,13 @@ def test_ownerfilter_user_selection(user_env):
 
         <Request 'http://127.0.0.1:5000/scene/persons_all/?div=2&cmp=1' [GET]>
         <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
-            'lang': 'en', 'next_person': ['', '>'], 'owner_filter': 2, 'user_id': 'juha'}>
+            'lang': 'en', 'next_person': ['', '>'], 'user_context': 2, 'user_id': 'juha'}>
     '''
     user_session, current_user, request = user_env
 
-    f = OwnerFilter(user_session, current_user, request)
+    f = UserContext(user_session, current_user, request)
 
-    assert f.filter == 1
+    assert f.context == 1
     assert f.owner_str() == 'Isotammi database'
     x = f.use_owner_filter()
     assert x == False, "use_owner_filter() failed"
@@ -71,12 +71,12 @@ def test_ownerfilter_next_item(user_env):
 
         <Request 'http://127.0.0.1:5000/scene/persons_all/?div=2&cmp=1' [GET]>
         <User Session {'_fresh': True, '_id': '...', 'csrf_token': '...', 
-            'lang': 'en', 'next_person': ['', '>'], 'owner_filter': 2, 'user_id': 'juha'}>
+            'lang': 'en', 'next_person': ['', '>'], 'user_context': 2, 'user_id': 'juha'}>
     '''
     user_session, current_user, request = user_env
 
-    # 0. Initialize OwnerFilter with current session, user and request info
-    f = OwnerFilter(user_session, current_user, request)
+    # 0. Initialize UserContext with current session, user and request info
+    f = UserContext(user_session, current_user, request)
     
     # 1. In the beginning
     user_session['person_scope'] = ['', '<']

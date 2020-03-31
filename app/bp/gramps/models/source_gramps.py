@@ -42,8 +42,10 @@ class Source_gramps(Source):
     def save(self, tx, **kwargs):
         """ Saves this Source and connect it to Notes and Repositories.
         """
-        if kwargs:
-            print(f"Warning: Sitation_save: extra arguments {kwargs}!")
+        if 'batch_id' in kwargs:
+            batch_id = kwargs['batch_id']
+        else:
+            raise RuntimeError(f"Source_gramps.save needs batch_id for {self.id}")
             
         self.uuid = self.newUuid()
         s_attr = {}
@@ -58,8 +60,8 @@ class Source_gramps(Source):
                 "spubinfo": self.spubinfo
             }
 
-#             self.uniq_id = tx.run(Cypher_source_w_handle.create, s_attr=s_attr).single()[0]
-            result = tx.run(Cypher_source_w_handle.create, s_attr=s_attr)
+            result = tx.run(Cypher_source_w_handle.create_to_batch,
+                            batch_id=batch_id, s_attr=s_attr)
             ids = []
             for record in result:
                 self.uniq_id = record[0]

@@ -1,6 +1,6 @@
-from flask import render_template, request, redirect, url_for, session, jsonify
-from flask_security import login_required, roles_accepted, roles_required, current_user
-from flask_babelex import _
+from flask import render_template, request, jsonify #, redirect, url_for, session
+from flask_security import login_required #, roles_accepted, roles_required, current_user
+#from flask_babelex import _
 from . import bp
 
 #from bp.gramps.models import batch

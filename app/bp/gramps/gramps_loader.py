@@ -190,7 +190,7 @@ def analyze_old(username, filename):
     pathname = os.path.join(upload_folder,filename)
     print("Pathname: " + pathname)
     
-    file_cleaned, file_displ, cleaning_log = file_clean(pathname)
+    file_cleaned, _file_displ, _cleaning_log = file_clean(pathname)
     
     f = open(file_cleaned, "r")
     

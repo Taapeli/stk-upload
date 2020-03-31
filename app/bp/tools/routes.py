@@ -87,10 +87,10 @@ def show_table_data(subj):
                                headings=(_('Repositories'), _('Repository data')),
                                titles=titles, objs=obj, elapsed=time.time()-t0)
     elif subj == 'same_birthday':
-        ids = datareader.read_same_birthday()
+        ids = datareader.read_same_eventday('Birth')
         return render_template("/tools/ng_same_person.html", subj=subj, ids=ids, elapsed=time.time()-t0)
     elif subj == 'same_deathday':
-        ids = datareader.read_same_deathday()
+        ids = datareader.read_same_eventday('Death')
         return render_template("/tools/ng_same_person.html", subj=subj, ids=ids, elapsed=time.time()-t0)
     elif subj == 'same_name':
         ids = datareader.read_same_name()

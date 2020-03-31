@@ -6,7 +6,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 #from sys import stderr
 import  shareds
 
-from .base import NodeObject
+from bl.base import NodeObject
 from .dates import DateRange
 
 

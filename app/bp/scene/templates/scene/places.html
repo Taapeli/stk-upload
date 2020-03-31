@@ -4,19 +4,19 @@
 {% block body %}
 {{ super() }}
 {% import '/scene/macros.html' as macro with context %}
-{% set cnt = locations|count %}
-{% set user = owner_filter.user %}
-{% set next = owner_filter.scope %}
-{% set filt_owners = owner_filter.filter %}
-{% if filt_owners == 3 or filt_owners == 5 %}{#
+{% set cnt = places|count %}
+{% set user = user_context.user %}
+{% set next = user_context.scope %}
+{% set ctxt = user_context.context %}
+{% if ctxt == 3 or ctxt == 5 %}{#
 	#   common_own   011 3 = 1+2 = user's data & demo
 	#   common_batch 101 5 = 1+4 = user batch & demo #}
-	{% set multi_owners = filt_owners - 1 %}
-    {% set my_set = owner_filter.choices.as_str[filt_owners-1] %}
+	{% set multi_owners = ctxt - 1 %}
+    {% set my_set = user_context.choices.as_str[ctxt-1] %}
     {% set my_common = _('Demo-data') %}
 {% else %}
     {% set multi_owners = 0 %}
-    {% set my_set = owner_filter.choices.as_str[filt_owners] %}
+    {% set my_set = user_context.choices.as_str[ctxt] %}
 {% endif %}
 
 <div id="startdiv">
@@ -28,19 +28,12 @@
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
-				<div id="description">
+				<div id="description_box">
                    <p>{{ _('Displaying %(num)s distinct places', num=cnt) }}
                        {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
                        {% else %}{{ _('from begin') }},
-                       {% endif %}{{ _('data set') }}
-                       <b>{% if multi_owners %}
-                            &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
-                       {% else %}{{my_set}}
-                       {% endif %}</b>
-                       {% if user %}
-                       (<i><a href="/" title="{{ _('Change the data set shown') }}" 
-                            style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
-                       {% endif %}</p>
+                       {% endif %}{{ macro.select_dataset() }}
+                   </p>
 	           </div>
 	           <div>
 		           <form action="/scene/locations">
@@ -66,7 +59,7 @@
 		    {% endwith %}
        </div>
        
-        {% set last = locations|last %}
+        {% set last = places|last %}
 		<div id="alphanav">{% set alpha = "¤" %}
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
 			    <li>{% if next[0] > ' ' %}
@@ -75,7 +68,7 @@
 			    {% endif %}</li>
                 <li><span class="navlink" title="{{ _('previous page') }}" style="cursor:not-allowed"> &lt; </span></li>
 
-        {% for p in locations %}
+        {% for p in places %}
         	{% set ini = p.pname[0]|list|first %}
             {% if loop.changed(ini) %}
                 <!-- li><a href="#{{ini}}" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li -->
@@ -98,8 +91,8 @@
 				</tr>
 			</thead>
 			<tbody>
-	{% if locations %}
-	    {% for p in locations %}
+	{% if places %}
+	    {% for p in places %}
 	    	{% set ini = p.pname[0]|list|first %}
             <tr><td class="ColumnAlpha">
 	            {% if loop.changed(ini) %}

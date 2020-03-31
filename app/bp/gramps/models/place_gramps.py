@@ -6,14 +6,19 @@ Created on 11.3.2019
 
 from sys import stderr
 
+import shareds
+from bl.place import Place, PlaceBl
+from pe.neo4j.writer import Neo4jWriteDriver
+from pe.db_writer import DBwriter
+
 from models.gen.dates import DateRange
-from models.gen.place import Place
+#from models.gen.place import Place
 from models.cypher_gramps import Cypher_place_in_batch
 from shareds import logger
 import traceback
 
 
-class Place_gramps(Place):     
+class Place_gramps(PlaceBl):     
     """ For storing Place from Gramps xml to database.
 
         Properties:
@@ -51,7 +56,7 @@ class Place_gramps(Place):
         self.surround_ref = []  # members are dictionaries {'hlink':hlink, 'dates':dates}
         self.notes = []
         self.noteref_hlink = []
-        self.media_handles = []         # handles of Media [(handle,crop)]
+        self.media_refs = []         # handles of Media [(handle,crop)]
 
 
     @staticmethod
@@ -70,10 +75,10 @@ class Place_gramps(Place):
                 tx.run(Cypher_place_in_batch.link_hier,
                        handle=place.handle, hlink=upper['hlink'], r_attr=r_attr)
             except Exception as err:
-                print("iError Place.link_hier: {0}".format(err), file=stderr)
+                print("iError Place_gramps.make_hierarchy: {0}".format(err), file=stderr)
 
 
-    def save(self, tx, **kwargs):   # batch_id, place_keys=None):
+    def save(self, tx, **kwargs):
         """ Saves a Place with Place_names, notes and hierarchy links.
 
             The 'uniq_id's of already created nodes can be found in 'place_keys' 
@@ -98,7 +103,7 @@ class Place_gramps(Place):
         if 'batch_id' in kwargs:
             batch_id = kwargs['batch_id']
         else:
-            raise RuntimeError(f"Place_gramps.save needs batch_id for {self.id}")
+            raise RuntimeError(f"Place_gramps.save needs a batch_id for {self.id}")
 
         # Create or update this Place
 
@@ -157,10 +162,20 @@ class Place_gramps(Place):
                           "lang": name.lang}
                 if name.dates:
                     n_attr.update(name.dates.for_db())
-                tx.run(Cypher_place_in_batch.add_name, pid=self.uniq_id, n_attr=n_attr)
+                result = tx.run(Cypher_place_in_batch.add_name, 
+                                pid=self.uniq_id, order=name.order, n_attr=n_attr)
+                name.uniq_id = result.single()[0]
+                #print(f"# ({self.uniq_id}:Place)-[:NAME]->({name.uniq_id}:{name})")
         except Exception as err:
             print("iError Place.add_name: {err}", file=stderr)
             raise
+
+        # Select default names for default languages
+        def_names = PlaceBl.find_default_names(self.names, ['fi', 'sv'])
+        # Update default language name links
+        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        db = DBwriter(dbdriver)
+        db.place_set_default_names(self, def_names)
 
         # Make hierarchy relations to upper Place nodes
 
@@ -222,22 +237,10 @@ class Place_gramps(Place):
             #print(f"iError Place.link_notes {self.noteref_hlink}: {err}", file=stderr)
             raise
 
-        # Make relations to the Media nodes
-        # The order of medias shall be stored in the MEDIA link
-        try:
-            order = 0
-            for handle, crop in self.media_handles:
-                r_attr = {'order':order}
-                if crop:
-                    r_attr['left']  = crop[0]
-                    r_attr['upper'] = crop[1]
-                    r_attr['right'] = crop[2]
-                    r_attr['lower'] = crop[3]
-                #print(f'# Creating ({self.id} uniq_id:{self.uniq_id} handle:{self.handle}) -[:MEDIA {r_attr}]-> (handle:{handle})')
-                tx.run(Cypher_place_in_batch.link_media, 
-                       p_handle=self.handle, m_handle=handle, r_attr=r_attr)
-                order =+ 1
-        except Exception as err:
-            print("iError: Place_gramps.save media: {0} {1}".format(err, self.id), file=stderr)
-
+        # Make relations to the Media nodes and their Note and Citation references
+        dbdriver = Neo4jWriteDriver(shareds.driver, tx)
+        db = DBwriter(dbdriver)
+        db.media_save_w_handles(self.uniq_id, self.media_refs)
+            
         return
+

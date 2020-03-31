@@ -14,7 +14,6 @@ td { padding-right:1em;}
 
 <div id="startdiv">
     <h2>{{ _("Family details") }}</h2>
-    <!-- owner {{family.owner}}, next {{next}}, filter {{session['owner_filter']}}</small> -->
 </div>
 
 {{ macro.menu(menuno) }}
@@ -45,7 +44,7 @@ td { padding-right:1em;}
             {% for p in [family.father, family.mother]%}
                 {% if p %}
                 <tr><td class="ColumnAttribute">{{p.role|transl('role')|capitalize}}</td>
-                    <td class="Value">{{ macro.person(p, uuid) }}</td>
+                    <td class="Value">{{ macro.person_anon(p, uuid) }}</td>
                     <td class="Value">{% if p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
                                       {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
                     </td>
@@ -87,21 +86,27 @@ td { padding-right:1em;}
       </div>
       {% endif %}
 
-        {% if family.children %} 
-        <h3>{{ _("Children") }}</h3>
-        <div id="summaryarea">
-            <table style="margin-top:1em;"><tbody>
-        <!-- |sort(attribute='event_birth.dates') -->
-        {% for p in family.children %}
-                <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
-                    <td class="Value">{{ macro.person(p, uuid) }}</td>
-                    <td class="Value">{% if p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
-                                      {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
-                    </td>
-                </tr>
-        {% endfor %}
-            </tbody></table>
-      </div>
+        {% if family.no_of_children %} 
+	        <h3>{{ _("Children") }}</h3>
+	        <div id="summaryarea">
+	            <table style="margin-top:1em;"><tbody>
+	        <!-- |sort(attribute='event_birth.dates') -->
+	        {% for p in family.children %}
+	                <tr><td class="ColumnAttribute">{{p.sex|transl('child')}}</td>
+	                    <td class="Value">{{ macro.person(p, uuid) }}</td>
+	                    <td class="Value">{% if p.event_birth.dates %}&star;{{ p.event_birth.dates }}{% endif %}
+	                                      {% if p.event_death.dates %}&#x271D;{{ p.event_death.dates }}{% endif %}
+	                    </td>
+	                </tr>
+	        {% endfor %}
+	            </tbody></table>
+	    	{% if family.num_hidden_children %}
+		        <table>
+		        	<tr><td class="Value">
+			        	({{ _("hidden") }}: {{ family.num_hidden_children }}) 
+		    	</table>
+	    	{% endif %}
+ 			</div>
         {% endif %}
  
         {% if family.notes %}<h3>{{ _("Notes") }}</h3>

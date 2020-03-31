@@ -7,77 +7,95 @@
 {% set ordname = [_('surname'), _('first name'), _('patronymic')] %}
 {% if order == '' %}{% set order=0 %}{% endif %}
 {% set cnt = persons | count %}
-
+<style>
+div#description_box p {
+    margin: 0.5em;
+}
+</style>
 <div id="startdiv">
 	{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
 	{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
 	{% else %}<H2>{{ _('Persons') }}</h2>
 	{% endif %}
 	<!-- Rule = {{rule}} for {{cnt}} persons -->
-	
-	<p><small style="color:red">– Kaikki data, ei huomioida aineiston omistajaa</small></p>
 </div>
 
 {{ macro.menu(menuno) }}
-	<div class="content" id="Individuals">
+    <div class="content" id="Individuals">
         <div id="summaryarea">
-    {% if menuno > 0 %}
-            <p id="description">
-    {{ ngettext(
-    	'Displaying %(num)s person in %(order)s order.', 
-    	'Displaying %(num)s persons in %(order)s order.', 
-    	cnt, order=ordname[order] ) 
-    }}
-    {{ _('If the person has many names, they will appear in the list under each name.') }}
-    {{ _('Note that family events are not included.') }}
-    <br> 
-    <br> 
-    {{ _("Clicking a name will take you to the selected person's page.")}} 
-      {% if rule[0] == 'all' %}<br>
-    &rtrif; {{ _('Change Order:') }} 
+            <div class="flex-container">
+                <div id="description_box">
+{% if cnt %}
+                    <p>{{ ngettext('Displaying %(num)s person.', 
+                                    'Displaying %(num)s persons.', cnt ) }}
+                       {{ _('If the person has many names, they may appear in the list under each name.') }}
+                    </p>
+                    <p>{{ _('Note that family events are not included.') }} </p>
+                    </p>
+{% endif %}
+                    <ul>
+                        <li>{{ macro.select_dataset_menu_1() }}</li>
+    {% if rule[0] == 'all' %}
+                        <li>{{ _('Sorted by %(order)s.', order=ordname[order]) }}
+                            {{ _('Change Order:') }} 
         {% if order != 0 %}<a href="/scene/persons/all/" 
-            class="inlink">{{ _('Surname') }}</a> /{% endif %}
+                              class="inlink">{{ _('Surname') }}</a> /{% endif %}
         {% if order != 1 %}<a href="/scene/persons/all/fn" 
-            class="inlink">{{ _('First Name') }}</a> /{% endif %}
+                              class="inlink">{{ _('First Name') }}</a> /{% endif %}
         {% if order != 2 %}<a href="/scene/persons/all/pn" 
-            class="inlink">{{ _('Patronymic or Matronymic') }}</a>{% endif %}.
-      {% endif %}
-            </p>
-    {% else %}{% if cnt %}
-            <h3>
-		    {{ ngettext(
-		    	'Showing %(num)s person name', 
-		    	'Showing %(num)s person names', 
-		    	cnt ) 
-		    }}
-            </h3>
-            {% else %}
-            <h3>{{ _('Select people to display') }}</h3>{% endif %}
-			<div id="searching">
-				{% if rule[0] %}{% set selection = rule[0] %}
-				{% else %}{% set selection = "surname" %}{% endif %}
+                              class="inlink">{{ _('Patronymic or Matronymic') }}</a>{% endif %}.
+                        </li>
+    {% endif %}
+    {% if num_hidden %}
+                        <li>{{ ngettext(
+                              '%(num)s person hidden because of privacy protection', 
+                              '%(num)s people hidden because of privacy protection', 
+                              num_hidden ) 
+                            }}.
+                        </li>
+    {% endif %}
+                    </ul>
+                </div>
 
-			    <form  action="/scene/persons" method="post">
-                  <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p>
-                  <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
-                    <input type="text" name="name" id="snam" 
-                     {% if name %}value="{{name}}"{% endif %} required>
-                     <br>
-                  <input type="radio" name="rule" id="ssur" value="surname"
-                   {% if selection == "surname" %}checked{% endif %}>
-                    <label for="ssur">{{ _('Surname') }}</label>
-                  <input type="radio" name="rule" id="sfir" value="firstname"
-                   {% if selection == "firstname" %}checked{% endif %}>
-                    <label for="sfir">{{ _('Firstname') }}</label>
-                  <input type="radio" name="rule" id="ssuf" value="patronyme"
-                   {% if selection == "patronyme" %}checked{% endif %}>
-                    <label for="ssuf">{{ _('Patronymic') }}</label>
-				  <input type="submit" value="Hae">
-			    </form>
-
-			</div>
-			{% endif %}
-
+                <div id="searching">
+                   <fieldset>
+                       {% if rule[0] %}{% set selection = rule[0] %}
+                       {% else %}{% set selection = "surname" %}
+                       {% endif %}
+           
+                       <form  action="/scene/persons" method="post">
+                           <p>{{ _('Search takes place from beginning of selected name part, e.g. in Surname "Sib" coincides with the name "Sibbe".') }}</p>
+                           <label for="snam">{{ _('Search word (beginning part)') }}&nbsp; </label>
+                           <input type="text" name="name" id="snam" 
+                              {% if name %}value="{{name}}"
+                              {% else %}placeholder="{{ _('Name') }}"{% endif %} required>
+                           <br>
+                           <input type="radio" name="rule" id="ssur" value="surname"
+                            {% if selection == "surname" %}checked{% endif %}>
+                           <label for="ssur">{{ _('Surname') }}</label>
+                           <input type="radio" name="rule" id="sfir" value="firstname"
+                            {% if selection == "firstname" %}checked{% endif %}>
+                           <label for="sfir">{{ _('Firstname') }}</label>
+                           <input type="radio" name="rule" id="ssuf" value="patronyme"
+                            {% if selection == "patronyme" %}checked{% endif %}>
+                           <label for="ssuf">{{ _('Patronymic') }}</label>
+                           <input type="submit" value="Hae">
+                       </form>
+                   </fieldset>
+                </div>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <ol  class='flashes'>
+                {% for category, message in messages %}
+                  <li class='flash_{{category}}'>{{ message }}</li>
+                {% endfor %}
+                </ol>
+              {% endif %}
+            {% endwith %}
+       </div>
+       
+    <div>
 	        {% with messages = get_flashed_messages(with_categories=true) %}
 	          {% if messages %}
 	            <ul  class='flashes'>
@@ -88,11 +106,11 @@
 	          {% endif %}
 	        {% endwith %}
 
-        </div>
+    </div><!-- summaryarea -->
 
-    {% if persons|count > 0 %}
+{% if persons|count > 0 %}
 
-		<div id="alphanav">
+	<div id="alphanav">
 			<ul><li><a href="#" title="{{ _('Top') }}">&uarr;</a></li>
 	        {% for p in persons %}
 	        	{% set ini = p.names[0].initial|upper %}
@@ -101,68 +119,71 @@
 	            {% endif %}
 	        {% endfor %}
 			</ul>
-		</div>
+	</div>
 
-		</ul>
-		</div>
-		<table class="IndividualList">
-			<thead>
-				<tr><th></th>
-                    <th>{{ _('Owner') }}</th>
-                    <th>{{ _('Person') }}</th>
-                    <th>{{ _("Person's events") }}</th>
-				</tr>
-			</thead>
-			<tbody>
+	<table class="IndividualList">
+		<thead>
+			<tr><th></th>
+                   <th>{{ _('Owner') }}</th>
+                   <th>{{ _('Person') }}</th>
+                   <th>{{ _("Person's events") }}</th>
+			</tr>
+		</thead>
+		<tbody>
 	    {% for p in persons %}
-	        {% set nohide = ( p.latest_possible_death_year < last_year_allowed ) %}
-	            <tr><td class="ColumnAlpha">
-					{% set ini = p.names[0].initial|upper %}
-                    {% if loop.changed(ini) %}
-		               <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
-					{% endif %}
-					</td>
+	        <tr>
+                <td class="ColumnAlpha">
+            {% set ini = p.names[0].initial|upper %}
+            {% if loop.changed(ini) %}
+		            <a id="{{ini}}" name="{{ini}}" title="{{ _('Back to Top') }}" href="#">{{ini}}</a>
+			{% endif %}
+				</td>
 					
-					<td style="text-align:center;">{% if p.user %}{{p.user}}{% endif %}
-					</td>
+				<td style="text-align:center; padding:3px;">
+		    {%- if p.user %}{{p.user}}
+		    {% else %} – 
+		    {% endif %}
+				</td>
 
-	                <td class="ColumnPerson"><div>
-	                   <a href="/scene/person?uuid={{p.uuid}}"
-	                     title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
-	        {% if nohide %}
-		               {{p.names[0].firstname}} 
-		               {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
-		               {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
-		               {% else %}<i>{{p.names[0].suffix}}</i>{% endif %}</a>
-		               <small class="idno">[{{ p.uuid_short() }}]</small>
-		               {% if p.refnames %}
-		               <br><small class="refname" title="{{ _('Reference names') }}">
+	            <td class="ColumnPerson">
+                    <div>
+	                    <a href="/scene/person?uuid={{p.uuid}}"
+	                      title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr={{p.uniq_id}})">
+                          {{p.names[0].firstname}} 
+            {% if p.names[0].prefix %} {{p.names[0].prefix}}{% endif %}
+            {% if p.names[0].surname %} <b>{{p.names[0].surname}}</b>
+            {% else %}    <i>{{p.names[0].suffix}}</i>
+            {% endif %} </a>
+		                <small class="idno">[{{ p.uuid_short() }}]</small>
+		    {% if p.refnames %}
+		                <br><small class="refname" title="{{ _('Reference names') }}">
 		                  {{ _('Keywords') }}: {{p.refnames}}</small>
-		               {% endif %}
-            {% else %}<i style="color:darkred;">N.N. ({{ _('privacy protected') }})</i></a>{% endif %} 
-	                    <br><small style="color:olive">
-	                       {{ macro.lifetimes(p) }}
-	                     </small>
-	                </div></td>
+            {% endif %}
+                        <br><small style="color:olive">{{ macro.lifetimes(p) }}</small>
+            {% if p.too_new %}
+		                <br><small><i style="color:red;">{{ _('Too recent for display to others!') }}</i></small>
+		    {% endif %}
+	                </div>
+                </td>
 
-	              <td class="ColumnEvent">
-            {% if nohide and p.events %}<ul>
+	            <td class="ColumnEvent">
+            {% if p.events %}<ul>
                 {% for e in p.events|sort(attribute='dates') %}
-		              <li><i>{{e.type|transl('evt')}}</i> {{e.description}}
-		              {% if e.dates %}{{e.dates}} {% endif %}
-		              {% if e.place %} | {{e.place}}{% endif %}</li>
+		            <li><i>{{e.type|transl('evt')}}</i> {{e.description}}
+		            {% if e.dates %}{{e.dates}} {% endif %}
+		            {% if e.place %} | {{e.place}}{% endif %}</li>
 		        {% endfor %}</ul>
 	        {% endif %}
-	           </tr>
+                </td>
+	        </tr>
 	    {% endfor %}
-				</tr>
-            </tbody>
-        </table>
-	{% elif rule | count > 1 %}
-        <div class="NotFound">
-            <p>{{ _('No one found with search keys') }}.</p>
-        </div>
-        <p>&nbsp;</p>
-	{% endif %}
-	</div>
+        </tbody>
+    </table>
+{% elif rule | count > 1 %}
+    <div class="NotFound">
+        <p>{{ _('No one found with search keys') }}.</p>
+    </div>
+    <p>&nbsp;</p>
+{% endif %}
+</div><!-- Individuals -->
 {% endblock %}

@@ -247,6 +247,7 @@ a.navlink:hover, a.navlink:active {
 
 #lastitem_badge {
     text-align: center;
+    padding: 1em;
 }
 #lastitem_badge > i {
     background-color:#999; 
@@ -283,6 +284,9 @@ h4 {
 p#description {
     padding-left: 15px;
 }
+div#description_box {
+    width: 450px;
+}
 div#noteContent {
     padding: 1em 0 0 3.5em;
     text-indent: -1.5em;
@@ -314,23 +318,15 @@ a[href]:hover, a[href]:active {
     padding-left: 15px;
 }
 
-/* Search form (31.10.2017/JMä)
------------------------------------------------------ */
-/*#searchform {
-    background: #999;
-    color: white;
-    margin-left: 3em;
-    margin-bottom: 1em;
-    padding: 3px;
-    max-width: 40em;
-}*/
 #searching {
+	background: bisque;
     margin: 1em;
     border: 1px solid #CCC;
-    padding: 1em;
-    background-color: bisque;
-    color: black;
-    max-width: 30em;
+    padding: 5px;
+    padding: 5px;
+    width: 400px;
+    min-width: 200px;
+    max-width: 430px;
 }
 .flashes {
     color: darkblue;
@@ -444,6 +440,10 @@ div#summaryarea > table.infolist,
 div#parents > table.infolist,
 h3 + table.infolist {
     width: auto;
+}
+div#summaryarea > p {
+	margin:0.5em;
+    margin-left:2em;
 }
 table tr th {
     text-align: left;

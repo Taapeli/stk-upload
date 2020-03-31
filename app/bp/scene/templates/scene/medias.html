@@ -7,43 +7,23 @@
 <script src="/static/infobox.js"></script>
 
 {% set cnt = medias|count %}
-{% set user = owner_filter.user %}
-{% set next = owner_filter.scope %}
-{% set filt_owners = owner_filter.filter %}
-{% if filt_owners == 3 or filt_owners == 5 %}{#
-	#   common_own   011 3 = 1+2 = users data & Isotammi
-	#   common_batch 101 5 = 1+4 = user batch & Isotammi #}
-	{% set multi_owners = filt_owners - 1 %}
-    {% set my_set = owner_filter.choices.as_str[filt_owners-1] %}
-    {% set my_common = "Isotammi" %}
-{% else %}
-    {% set multi_owners = 0 %}
-    {% set my_set = owner_filter.choices.as_str[filt_owners] %}
-{% endif %}
+{% set user = user_context.user %}
+{% set next = user_context.scope %}
 
 <div id="startdiv">
 	<h2>{{ _('List of Medias') }}</h2>
-<!--     <p><small>{{cnt}} medias, user {{user}}</small> -->
-	
 </div>
 
 {{ macro.menu(6) }}
     <div class="content" id="Medias">
         <div id="summaryarea">
             <div class="flex-container">
-               <div id="description">
+               <div id="description_box">
                    <p>{{ _('Displaying %(num)s distinct medias', num=cnt) }}
                        {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
                        {% else %}{{ _('from begin') }},
-                       {% endif %}{{ _('data set') }}
-                       <b>{% if multi_owners %}
-                            &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
-                       {% else %}{{my_set}}
-                       {% endif %}</b>
-                       {% if user %}
-                       (<i><a href="/" title="{{ _('Change the data set shown') }}" 
-                            style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
-                       {% endif %}</p>
+                       {% endif %}{{ macro.select_dataset() }}
+                   </p>
 	           </div>
 	           <div>
 	               <form action="/scene/medias">
@@ -58,6 +38,7 @@
 	               </form>
 	           </div>
             </div>
+            <div>
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
                 <ul  class='flashes'>
@@ -67,6 +48,7 @@
                 </ul>
               {% endif %}
             {% endwith %}
+            </div>
         </div>
 
     {% if cnt %}
@@ -99,7 +81,7 @@
     <tr><th>{{ _("Title") }}</th>
         <th style="text-align: center;">{{ _("Picture") }}</th>
         <th>{{ _("References") }}</th>
-    {% if owner_filter.use_common() %}
+    {% if user_context.use_common() %}
         <th>{{ _('User Batch') }}</th>
     {% endif %}
     </tr>
@@ -120,7 +102,7 @@
 	                </a>
             </div></td>
             <td align="center">{{m.conn}}</td>
-       {% if owner_filter.use_common() %}
+       {% if user_context.use_common() %}
             <td><i>{{m.credit}}</i><br>{{m.batch}}</td>
        {% endif %}
         </tr>

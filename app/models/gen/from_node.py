@@ -3,6 +3,8 @@ Created on 8.10.2018
 
 @author: jm
 '''
+from bl.place import PlaceBl, PlaceName
+
 from .citation import Citation
 from .event_combo import Event_combo
 from .family_combo import Family_combo
@@ -10,10 +12,10 @@ from .media import Media
 from .note import Note
 from .person_combo import Person_combo
 from .person_name import Name
-from .place import Place_name
+#from .place import Place_name
 from .repository import Repository
 from .source import Source
-from models.gen.place_combo import Place_combo
+#from models.gen.place_combo import Place_combo
 
 
 def get_object_from_node(node):
@@ -42,9 +44,9 @@ def get_object_from_node(node):
     elif label == "Repository":
         return Repository.from_node(node)
     elif label == "Place":
-        return Place_combo.from_node(node)
+        return PlaceBl.from_node(node)
     elif label == "Place_name":
-        return Place_name.from_node(node)
+        return PlaceName.from_node(node)
     elif label == "Note":
         return Note.from_node(node)
     elif label == "Family":

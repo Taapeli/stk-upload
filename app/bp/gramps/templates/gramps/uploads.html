@@ -62,13 +62,8 @@ function update_progress(xmlfile) {
 		progress_div.get(0).style.width = rsp.progress + "%";
 		if (rsp.status == "loading") 
 			setTimeout(function() {update_progress(xmlfile)}, PROGRESS_INTERVAL);
-		else
-			if (rsp.status == "done") {
-				progress_div.parent().text('{{ _("STORED") }}');
-				batch_id_column.text(rsp.batch_id);
-			}
-			else
-				progress_div.parent().text('{{ _("ERROR") }}');
+		else 
+			location.reload();
 	});
 }
 

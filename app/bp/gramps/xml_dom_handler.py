@@ -19,9 +19,12 @@ from .models.event_gramps import Event_gramps
 from .models.family_gramps import Family_gramps
 from .models.source_gramps import Source_gramps
 from .models.place_gramps import Place_gramps
+from bl.place import PlaceName
+from bl.place_coordinates import Point
+from bl.media import MediaRefResult
+
 from .batchlogger import Log
 
-from models.gen.place import Place_name, Point
 from models.gen.dates import Gramps_DateRange
 from models.gen.note import Note
 from models.gen.media import Media
@@ -129,34 +132,45 @@ class DOM_handler():
                                      format(e.__class__.__name__, e)), 'level':"ERROR"})
 
     def remove_handles(self):
+#         print("remove_handles NOT DONE!")
+#         return
         cypher_remove_handles = """
             match (b:Batch {id:$batch_id}) -[*]-> (a)
             remove a.handle
-            return labels(a)[0]
+            return count(a),labels(a)[0]
         """
-        ids = []
-        results = self.tx.run(cypher_remove_handles,batch_id=self.batch_id)
-        for result in results:
-            ids.append(result[0])
-        print (f'# - removed handle from {len(ids)} nodes')
+        total = 0
+        results = self.tx.run(cypher_remove_handles, batch_id=self.batch_id)
+        for count, label in results:
+            print(f'# - cleaned {count} {label} handles')
+            total += count
+        print (f'# --- removed handle from {total} nodes')
 
 
     def add_links(self):
         ''' Link the Nodes without OWNS link to Batch
         '''
         cypher_add_links = """
-            match (n) where exists (n.handle)
+           match (n) where exists (n.handle)
             match (b:Batch{id:$batch_id})
             merge (b)-[:OWNS_OTHER]->(n)
             remove n.handle
+            return count(n)
         """
-        self.tx.run(cypher_add_links,batch_id=self.batch_id)
+        result = self.tx.run(cypher_add_links,batch_id=self.batch_id)
+        counters = result.consume().counters
+        if counters.relationships_created:
+            print(f"Created {counters.relationships_created} relations")
 
     def set_mediapath(self, path):
         ''' Store media files path. '''
         self.tx.run("match (b:Batch{id:$batch_id}) set b.mediapath = $path", 
                     batch_id=self.batch_id, path=path)
 
+    def update_progress(self, key):
+        self.progress[key] += 1
+        this_thread = threading.current_thread()
+        this_thread.progress = dict(self.progress)
 
     def save_and_link_handle(self, e, **kwargs):
         ''' Save object and store its identifiers in the dictionary by handle.
@@ -165,15 +179,10 @@ class DOM_handler():
         '''
         e.save(self.tx, **kwargs)
         self.handle_to_node[e.handle] = self.dbKeys(e.uuid, e.uniq_id)
-        #print(f'# {e.__class__.__name__} [{e.handle}] --> {self.handle_to_node[e.handle]}')
-        #self.blog.add(self.tx)
-        self.progress[e.__class__.__name__] += 1
-        this_thread = threading.current_thread()
-        this_thread.progress = dict(self.progress)
+        self.update_progress(e.__class__.__name__)
 
    
     # ---------------------   XML subtree handlers   --------------------------
-
 
     def handle_header(self):
         ''' Store eventuel media path from XML header to Batch node.
@@ -243,7 +252,7 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one sourceref tag in a citation",
                                      'level':"WARNING",'count':c.id})
 
-            self.save_and_link_handle(c)
+            self.save_and_link_handle(c, batch_id=self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Citations", 'count':counter, 
@@ -328,8 +337,8 @@ class DOM_handler():
                     e.citation_handles.append(ref.getAttribute("hlink"))
                     ##print(f'# Event {e.id} has cite {e.citation_handles[-1]}')
 
-            # Handle <objref>
-            self._extract_mediaref(event, e)
+            # Handle <objref> with citations and notes
+            e.media_refs = self._extract_mediaref(event)
 
             try:
                 self.save_and_link_handle(e)
@@ -565,7 +574,7 @@ class DOM_handler():
                     p.eventref_role.append(person_eventref.getAttribute("role"))
 
             # Handle <objref>
-            self._extract_mediaref(person, p)
+            p.media_refs = self._extract_mediaref(person)
 
             for person_url in person.getElementsByTagName('url'):
                 n = Note()
@@ -590,8 +599,8 @@ class DOM_handler():
                     p.citationref_hlink.append(person_citationref.getAttribute("hlink"))
                     ##print(f'# Person {p.id} has cite {p.citationref_hlink[-1]}')
 
-            if p.media_handles: 
-                print(f'# saving Person {p.id}: media_handles {p.media_handles}')
+            for ref in p.media_refs: 
+                print(f'# saving Person {p.id}: media_ref {ref}')
             self.save_and_link_handle(p, batch_id=self.batch_id)
             #print(f'# Person [{p.handle}] --> {self.handle_to_node[p.handle]}')
             counter += 1
@@ -636,9 +645,12 @@ class DOM_handler():
                 self.blog.log_event({'title':"More than one ptitle in a place",
                                      'level':"WARNING", 'count':pl.id})
 
+            place_order = 0
             for placeobj_pname in placeobj.getElementsByTagName('pname'):
                 if placeobj_pname.hasAttribute("value"):
-                    placename = Place_name()
+                    placename = PlaceName()
+                    placename.order = place_order
+                    place_order += 1
                     placename.name = placeobj_pname.getAttribute("value")
                     if placename.name:
                         if pl.pname == '':
@@ -690,10 +702,10 @@ class DOM_handler():
                     ##print(f'# Place {pl.id} has note {pl.noteref_hlink[-1]}')
 
             # Handle <objref>
-            self._extract_mediaref(placeobj, pl)
+            pl.media_refs = self._extract_mediaref(placeobj)
 
-            if pl.media_handles: 
-                print(f'# saving Place {pl.id}: media_handles {pl.media_handles}')
+            if pl.media_refs: 
+                print(f'# saving Place {pl.id}: media_refs {pl.media_refs}')
 
             # Save Place, Place_names, Notes and connect to hierarchy
             self.save_and_link_handle(pl, batch_id=self.batch_id, place_keys=place_keys)
@@ -804,7 +816,7 @@ class DOM_handler():
                 s.repositories.append(r)
 
             #elf.save_and_link_handle(r, self.batch_id)
-            self.save_and_link_handle(s)
+            self.save_and_link_handle(s, batch_id=self.batch_id)
             counter += 1
 
         self.blog.log_event({'title':"Sources", 'count':counter, 
@@ -846,6 +858,7 @@ class DOM_handler():
         from models.dataupdater import set_person_name_properties
 
         for p_id in self.person_ids:
+            self.update_progress('refnames')
             if p_id != None:
                 rc, sc = set_person_name_properties(tx=self.tx, uniq_id=p_id)
                 refname_count += rc
@@ -930,8 +943,9 @@ class DOM_handler():
         if dom.hasAttribute("id"):
             node.id = dom.getAttribute("id")
 
-    def _extract_mediaref(self, dom_object, p):
-        ''' Check if dom_object has media reference and extract it to p.media_handles.
+
+    def _extract_mediaref(self, dom_object):
+        ''' Check if dom_object has media reference and extract it to p.media_refs.
 
             Example:
                 <objref hlink="_d485d4484ef70ec50c6">
@@ -943,32 +957,38 @@ class DOM_handler():
             region      set picture crop = (left, upper, right, lower)
                         <region corner1_x="0" corner1_y="21" corner2_x="100" corner2_y="91"/>
             citationref citation reference
-            noteref    note reference
-
-            TODO: process citationref, noteref too
+            noteref     note reference
         '''
+        result_list = []
+        media_nr = -1
         for objref in dom_object.getElementsByTagName('objref'):
             if objref.hasAttribute("hlink"):
-                media_href = objref.getAttribute("hlink")
-
-                crop = None
+                resu = MediaRefResult()
+                resu.media_handle = objref.getAttribute("hlink")
+                media_nr += 1
+                resu.media_order = media_nr
+    
                 for region in objref.getElementsByTagName('region'):
                     if region.hasAttribute("corner1_x"):
                         left = region.getAttribute('corner1_x')
                         upper = region.getAttribute('corner1_y')
                         right = region.getAttribute('corner2_x')
                         lower = region.getAttribute('corner2_y')
-                        crop = int(left), int(upper), int(right), int(lower)
-                        print(f'# Object {p.id} pic handle={media_href} crop={crop}')
-                if crop == None:
-                    print(f'# Object {p.id} has pic handle={media_href}')
+                        resu.crop = int(left), int(upper), int(right), int(lower)
+                        print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle} crop={resu.crop}')
+                if not resu.crop: print(f'#_extract_mediaref: Pic {resu.media_order} handle={resu.media_handle}')
+    
+                # Add note and citation references
+                for ref in objref.getElementsByTagName('noteref'):
+                    if ref.hasAttribute("hlink"):
+                        resu.note_handles.append(ref.getAttribute("hlink"))
+                        print(f'#_extract_mediaref: Note {resu.note_handles[-1]}')
+                           
+                for ref in objref.getElementsByTagName('citationref'):
+                    if ref.hasAttribute("hlink"):
+                        resu.citation_handles.append(ref.getAttribute("hlink"))
+                        print(f'#_extract_mediaref: Cite {resu.citation_handles[-1]}')
+    
+                result_list.append(resu)
 
-                for region in objref.getElementsByTagName('citationref'):
-                    #TODO: media citationref
-                    print(f'# - EI TOTEUTETTU: media {p.id} citationref')
-
-                for region in objref.getElementsByTagName('noteref'):
-                    #TODO: media noteref
-                    print(f'# - EI TOTEUTETTU: media {p.id} noteref')
-
-                p.media_handles.append((media_href, crop))
+        return result_list

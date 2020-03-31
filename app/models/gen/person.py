@@ -46,15 +46,14 @@
         - set_estimated_life()          Aseta est_birth ja est_death - Obsolete
     - from models.datareader.get_person_data_by_id 
       (returns list: person, events, photos, sources, families)
-        - get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)
+       #- get_hlinks_by_id(self)        Luetaan henkilön linkit (_hlink)
         - get_event_data_by_id(self)    Luetaan henkilön tapahtumien id:t
         - get_media_id(self)            Luetaan henkilön tallenteen id
     - from models.datareader.get_families_data_by_id and Person_combo.get_hlinks_by_id
-        - get_her_families_by_id(self)  Luetaan naisen perheiden id:t
-        - get_his_families_by_id(self)  Luetaan miehen perheiden id:t
-        - get_parentin_id(self)         Luetaan henkilön syntymäperheen id
+       #- get_families_by_id(self)      Luetaan perheiden id:t
+       #- get_parentin_id(self)         Luetaan henkilön syntymäperheen id
     - from Person_combo.get_hlinks_by_id
-        - get_citation_id(self)         Luetaan henkilöön liittyvän viittauksen id
+       #- get_citation_id(self)         Luetaan henkilöön liittyvän viittauksen id
 
     - table-näyttöjä varten
         - get_person_and_name_data_by_id(self)
@@ -83,9 +82,10 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
     
     The standard specifies that its use may be referred to by the designator "SEX". 
 '''
+from datetime import datetime
 
 import shareds
-from .base import NodeObject
+from bl.base import NodeObject
 from .cypher import Cypher_person
 from .dates import DateRange
 
@@ -95,6 +95,7 @@ SEX_UNKOWN = 0
 SEX_MALE = 1
 SEX_FEMALE = 2
 SEX_NOT_APPLICABLE = 9
+
 
 class Person(NodeObject):
     """ Henkilö
@@ -108,10 +109,10 @@ class Person(NodeObject):
             confidence            float "2.0" tietojen luotettavuus
             sortname              str default name as "surname#suffix#firstname"
             datetype,date1,date2  DateRange dates # estimated life time
-            earliest_possible_birth_year  int lifetime estimate limits
-            earliest_possible_death_year  int
-            latest_possible_birth_year    int
-            latest_possible_death_year    int
+            birth_low             int lifetime years estimate limits like 1720
+            death_low             int
+            birth_high            int
+            death_high            int
             change                int 1536324580
            }
      """
@@ -125,10 +126,10 @@ class Person(NodeObject):
         self.sortname = ''
         self.dates = None    # Daterange: Estimated datetype, date1, date2
 
-        self.earliest_possible_birth_year = None
-        self.earliest_possible_death_year = None
-        self.latest_possible_birth_year = None
-        self.latest_possible_death_year = None
+        self.birth_low = None
+        self.death_low = None
+        self.birth_high = None
+        self.death_high = None
 
     def __str__(self):
         dates = self.dates if self.dates else ''
@@ -196,11 +197,18 @@ class Person(NodeObject):
         obj.confidence = node.get('confidence', '')
         obj.sortname = node['sortname']
         obj.priv = node['priv']
-        obj.earliest_possible_birth_year = node['earliest_possible_birth_year']
-        obj.earliest_possible_death_year = node['earliest_possible_death_year']
-        obj.latest_possible_birth_year = node['latest_possible_birth_year']
-        obj.latest_possible_death_year = node['latest_possible_death_year']
-
+        obj.birth_low = node['birth_low']
+        if obj.birth_low:
+            obj.birth_high = node['birth_high']
+            obj.death_low = node['death_low']
+            obj.death_high = node['death_high']
+        else:
+            obj.birth_low = node['earliest_possible_birth_year']
+            obj.death_low = node['earliest_possible_death_year']
+            obj.birth_high = node['latest_possible_birth_year']
+            obj.death_high = node['latest_possible_death_year']
+        last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
+        obj.too_new = obj.death_high > last_year_allowed
         if "datetype" in node:
             obj.dates = DateRange(node["datetype"], node["date1"], node["date2"])
         return obj
