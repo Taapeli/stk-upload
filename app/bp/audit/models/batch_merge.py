@@ -4,78 +4,94 @@ Created on 5.12.2019
 @author: jm
 '''
 import shareds
-from flask_login.utils import current_user
+from .cypher_audit import Cypher_audit
+
+from flask_babelex import _
+from flask import flash
+
+import logging
+logger = logging.getLogger('stkserver')
 
 
 class Batch_merge(object):
     '''
-    Methods to move a new Batch to Isotammi database
+    Methods to move User Batch items to Common Data.
+    
+    Replace the (b:Batch {id:...}) -[o:OWNS]-> (x)
+                relations with given Batch id
+    with        (s:Audit {id:...}) -[:PASSED]-> (x)
+                with same id
+    
+    The Audit node should include
+    - id = b.id    User Batch id
+    - user         käyttäjä
+    - auditor      the user who executed the transfer
+    - timestamp    viimeisin muutosaika
+    - 
+    #Todo: Make decisions, which items should be moved, merged or left alone
     '''
-    ROOT_USER = "master"
-
-    find_master_profile = '''
-match (root:User {username:$root})
-merge (root) -[:SUPPLEMENTED]-> (rp:UserProfile {username:$root})
-on create set rp.timestamp = timestamp()
-return rp'''
-
-    find_relation_to_remove = '''
-match (u:User {username:'juha'})
-     -[:SUPPLEMENTED]-> (up:UserProfile)
-     -[ur:HAS_LOADED]-> (b:Batch{id:'2019-11-17.001'})
-return id(ur) AS ur_rel_id, id(b) AS b_id    '''
-    audit_batch = '''
-match (u:User {username:$owner})
-     -[:SUPPLEMENTED]-> (up:UserProfile)
-     -[:HAS_LOADED]-> (b:Batch{id:$batch})
-return u,up,b'''
-
-    move_batch_to_root = '''
-match (u:User {username:$user}) -[:SUPPLEMENTED]-> (up0:UserProfile)
-    -[r0:HAS_LOADED]-> (b:Batch{id:$batch})
-match (root:User {username:$root}) -[:SUPPLEMENTED]-> (up1:UserProfile)
-optional match (up1) -[r1:HAS_LOADED]-> (b)
-return up0, r0, b, r1, up1'''
 
     def __init__(self):
         '''
-        Constructor; check existence of root UserProfile
+        Constructor
         '''
-        self.root_uniq_id = None    # Root user's id()
+        pass
 
-        count = None
-        with shareds.driver.session() as session:
-            result = session.run(self.find_master_profile, root=self.ROOT_USER)
-            count = result.summary().counters.nodes_created
-            record = result.single()
-            self.root_uniq_id = record['rp'].id
-            print(record['rp'])
-        if count:
-            print(f'Created {count} UserProfile for Isotammi root')
-    
-    def move_whole_batch(self, batch_id, user):
+    def move_whole_batch(self, batch_id, user, auditor):
         '''
-        A Batch supplemented by given user moved to root user.
+        Move all Batch elements which are supplemented by given user to Audit.
 
-        1. Tuontierä auditoidaan ja lisätään linkki 
-               (auditor:UserProfile)-[a:AUDITED {timestamp}]->(b:Batch)
-        2. Siirrossa linkki
-                (researcher:UserProfile)-[:HAS_LOADED]->(b:Batch)
-           korvataan
-               (researcher:UserProfile)-[g:GAVE {timestamp}]->(b_root:Batch)
-        2. ja lisätään 
-                (root:UserProfile)-[g:HAS_LOADED]->(b_root:Batch)
-           (toiminnallisesti sama kuin tutkijan omistuslinkki)
+        batch_id    active Batch
+        user        owner of the Batch
+        auditor    active auditor user id
+
         '''
-        auditor_profile = f"todo {current_user.username}-profile" 
-        b = "todo batch-node"
-        researcher_profile = f"todo {user}-profile"
-        
-        counters = None
-        with shareds.driver.session() as session:
-            result = session.run(self.move_batch_to_root, 
-                                 user=user, batch=batch_id, root=self.ROOT_USER)
-            counters = result.summary().counters
-            record = result.single()
-            print(record['rp'])
-        print(counters)
+        relationships_created = 0
+        nodes_created = 0
+        new_relationships = -1
+        moved_nodes = 0
+        label_sets = [  # Grouped to not too big chunks in logical order
+            ("Note"),
+            ("Repository", "Media"),
+            ("Place", "Place_name", "Source", "Citation"),
+            ("Event"),
+            ("Person", "Name"),
+            ("Family")
+            ]
+
+        try:
+            with shareds.driver.session() as session:
+                for labels in label_sets:
+                    count = 0
+                    tx = session.begin_transaction()
+                    # while new_relationships != 0: ?
+                    result = tx.run(Cypher_audit.copy_batch_to_audition, 
+                                    user=user, batch=batch_id, oper=auditor,
+                                    labels=labels)
+                    counters = result.summary().counters
+                    print(counters)
+                    new_relationships = counters.relationships_created
+                    relationships_created += new_relationships
+                    nodes_created += counters.nodes_created
+                    record = result.single()
+                    # <Record x=<Node id=318538 labels={'Place'} 
+                    #    properties={'id': 'P0294', 'type': 'Farm', 
+                    #        'uuid': '2d93295ef606433a8e339967e50bf6b0', 'pname': 'Sottungsby', 
+                    #        'change': 1495632125}>>
+                    cnt = record[0]
+                    moved_nodes += cnt
+                    logger.info(f"Batch_merge.move_whole_batch: moved {cnt} nodes of type {labels}")
+                    tx.commit()
+
+        except Exception as e:
+            msg = _("No objects transferred: ") + str(e)
+            flash(msg, "flash_error")
+            logger.error(msg)
+            return msg
+
+        msg = _("moved %(new_rel)s objects to ", new_rel=relationships_created)
+        if nodes_created: msg += _("a new Common data set")
+        else:             msg += _("Common data set")
+
+        flash(_("Transfer succeeded: ") + msg)
+        return msg

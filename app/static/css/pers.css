@@ -44,7 +44,7 @@ h1 div.curr_user a {
 h1 div.curr_user a:hover { text-decoration: underline; }
 
 h4 {
-    margin-bottom: 0.5em;
+    margin: 0.5em 0;
 }
 div#paluu {
     position: absolute;
@@ -68,6 +68,10 @@ div#paluu {
 	text-decoration: none; 
     color: black;
 }
+#return_on_title {
+	margin: -44px 10px 10px 240px;
+}
+
 #createdate { font-size:8pt; }
 
 #startdiv {
@@ -206,6 +210,7 @@ li.itemrow {
 	margin-left: auto;
 	text-align: right;
 	}
+.nowrap { white-space: nowrap; }
 
 div.fullclear {
     clear: both;
@@ -242,7 +247,10 @@ div.fullclear {
     color: gray;
 }
 
-div.legend { /* Not used? */
+/* Legend
+----------------------------------------------------- */
+
+div.legend {
      margin-left:4em; 
      font-size: 90%;
      border-left: 6px solid silver;
@@ -296,6 +304,9 @@ div.steps div.active {
 	min-width: 725px;
 }
 
+/* Navigation, buttons
+----------------------------------------------------- */
+
 div.right-button { /* Area for Next button located in right corner */
 	display: -webkit-flex; /* Safari */
 	-webkit-justify-content: right; /* Safari 6.1+ */
@@ -319,6 +330,10 @@ div.right-button p {
 }
 a.navlink:hover, a.navlink:active {
   background-color: gray;
+}
+
+.gedcom_id { color: sienna; text-align: right; 
+    font-family: monospace
 }
 
 div.content {

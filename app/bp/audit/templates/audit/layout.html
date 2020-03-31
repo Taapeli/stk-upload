@@ -50,6 +50,10 @@ table.transparent tbody tr td {
     <div class="fullclear"></div>
     <div id="footer">
         <span id="createdate">{{ config.STK_SYSNAME }} &nbsp;
+        {% if time0 %}
+            {% set elapsed = time.time()-time0 %}
+            <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
+        {% endif %}
         {% if elapsed %}
             <tt>time {{'%0.4f'| format(elapsed|float)}}s</tt> &nbsp;
         {% endif %}

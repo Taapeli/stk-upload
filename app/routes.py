@@ -12,6 +12,7 @@ logger = logging.getLogger('stkserver')
 from flask import render_template, request, redirect, url_for #, g, flash
 from flask_security import login_required, logout_user, current_user # ,roles_required
 
+from flask_babelex import get_locale
 # i18n: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n-legacy
 #from flask_babelex import Babel
 #from flask_babelex import _
@@ -36,12 +37,16 @@ def entry():
 #        print("Authenticated guest user at entry") 
         logout_user()
 
-    logger.info(f'-> routes.entry auth={current_user.is_authenticated}')
     if current_user.is_authenticated:
         # Home page for logged in user
         return redirect(url_for('start_logged'))
+
+    lang = get_locale().language
+    demo_site = f"{app.config['DEMO_URL']}?lang={lang}"
+    logger.info(f'-> routes.entry auth={current_user.is_authenticated} demo={demo_site}')
+
     # If not logged in, a login page is shown here first
-    return render_template('/index_entry.html')
+    return render_template('/index_entry.html', demo_site=demo_site)
 
 """ -------------------------- Yleinen virhesivu ------------------------------
 """

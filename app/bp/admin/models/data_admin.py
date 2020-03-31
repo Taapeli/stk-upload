@@ -39,19 +39,42 @@ class DataAdmin():
         raise ValueError(_("User {} has not admin privileges").format(self.username))
 
 
+
+    def _remove_chuncks(self, cypher_clause, user=None):
+        ''' Execute Delete cypher clause in appropiate chuncks. '''
+        LIMIT=2000
+        cnt_all = 0
+        cnt_nodes = -1
+        while cnt_nodes:
+            if user:
+                result = shareds.driver.session().run(cypher_clause, limit=LIMIT,
+                                                      user=user)
+            else:
+                result = shareds.driver.session().run(cypher_clause, limit=LIMIT)
+            counters = result.consume().counters
+            if counters:
+                cnt_nodes = counters.nodes_deleted
+                cnt_relations = counters.relationships_deleted
+                cnt_all += cnt_nodes
+                print(f"Deleted {cnt_nodes} nodes, {cnt_relations} relations")
+            else:
+                print("That's All, Folks!")
+        
+        return cnt_all
+
     def db_reset(self, opt=None):
         if opt == "total":
             """ Koko kanta tyhjennetään """
             msg = _("All data is deleted. ")
             logging.info(msg)
-            result = shareds.driver.session().run(Cypher_adm.remove_all_nodes)
+            cnt = self._remove_chuncks(Cypher_adm.remove_all_nodes)
+
         elif opt == "save_users":
             msg = _("All data but users and roles are removed.")
             logging.info(msg)
-            result = shareds.driver.session().run(Cypher_adm.remove_data_nodes)
-        elif opt == "my_own":
-            #return "NOT COMPLETED! Todo: Can not remove user's data nodes"
+            cnt = self._remove_chuncks(Cypher_adm.remove_data_nodes)
 
+        elif opt == "my_own":
             # It is possible to check, id there are nodes whith a foreign owners, 
             # too. It takes 60s for 750 persons data:
             #
@@ -63,12 +86,9 @@ class DataAdmin():
 
             msg = _("All persons and event by %(un)s are removed.", un=self.username)
             logging.info(msg)
-            result = shareds.driver.session().run(Cypher_adm.remove_my_nodes, 
-                                                  user=self.username)
-            
-        counters = result.consume().counters
-        msg2 = _("Removed %(cn)d nodes, %(cr)d relations", 
-                 cn=counters.nodes_deleted, cr=counters.relationships_deleted)
+            cnt = self._remove_chuncks(Cypher_adm.remove_my_nodes, user=self.username)
+
+        msg2 = _('Removed %(cnt)d nodes', cnt=cnt)
         logging.info(msg2)
         return '\n'.join((msg, msg2))
 

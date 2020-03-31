@@ -6,51 +6,41 @@
 {% import '/scene/macros.html' as macro with context %}
 
 {% set cnt = persons|count %}
-{% set user = owner_filter.user %}
-{% set next = owner_filter.scope %}
-{% set filt_owners = owner_filter.filter %}
-{% if filt_owners == 3 or filt_owners == 5 %}{#
-	#   common_own   011 3 = 1+2 = user's data & demo
-	#   common_batch 101 5 = 1+4 = user batch & demo #}
-	{% set multi_owners = filt_owners - 1 %}
-    {% set my_set = owner_filter.choices.as_str[filt_owners-1] %}
-    {% set my_common = _('Demo-data') %}
+{# set user = user_context.user #}
+{% set next = user_context.scope %}
+{% set ctxt = user_context.context %}
+{% if ctxt == 3 or ctxt == 5 %}{#
+	#   common_own   011 3 = 1+2 = user's data & common
+	#   common_batch 101 5 = 1+4 = user batch & common #}
+	{% set multi_owners = ctxt - 1 %}
 {% else %}
     {% set multi_owners = 0 %}
-    {% set my_set = owner_filter.choices.as_str[filt_owners] %}
 {% endif %}
 
 <div id="startdiv">
-	{% if session['owner_filter'] %}
-	    <h2>{{ _('Persons filtered by') }} {{ owner_filter.owner_str() }}</h2>
-	{# elif rule[0] == 'refname' %}
-	    <h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2> #}
-	{% else %}
-	    <h2>{{ _('Persons') }}</h2>
-	{% endif %}
-	
-<!-- 	<p><small>{{cnt}} persons, user {{user}}, filter {{filt_owners}} {{my_set}}, next {{next}}</small></p> -->
+    <h2>{{ _('Persons filtered by') }} {{ user_context.owner_str() }}</h2>
 </div>
 
 {{ macro.menu(menuno) }}
 	<div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
-	           <div id="description">
+	           <div id="description_box">
                    <p>{{ _('Displaying %(num)s distinct persons', num=cnt) }}
-                       {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }},
+                       {% if next[0] > ' ' %}{{ _('starting <tt>%(name)s</tt>', name=next[0]) }}
                        {% else %}{{ _('from begin') }}
                        {% endif %}
-                       <!-- ,{{ _('data set') }}
-                       <b>{% if multi_owners %}
-                            &FilledSmallSquare;&nbsp;{{my_set}} / <span class="owner">&nbsp;{{my_common}}&nbsp;</span>.
-                       {% else %}{{my_set}}
-                       {% endif %}</b>
-                       {% if user %}
-                       (<i><a href="/scene?{{ {'fw':next[0]} | urlencode }}" title="vaihda poimintasääntöä" 
-                            style="text-decoration-line: underline;">Vaihda</a></i>).
-                       {% endif %}</p>
-                       -->
+                       {% if num_hidden %}
+                       		<br>-
+						    {{ ngettext(
+						    	'%(num)s person hidden because of privacy protection', 
+						    	'%(num)s people hidden because of privacy protection', 
+						    	num_hidden ) 
+						    }}
+                       {% endif %}
+                       <br>-
+                       {{ macro.select_dataset() }}
+                       </p>
 	           </div>
 	           <div>
 	               <form action="/scene/persons_all">
@@ -91,7 +81,7 @@
 	                <li><a href="javascript:jump('{{ini}}')" title="{{ _('Alphabetical Menu') }}: {{ini}}">{{ini}}</a></li>
                 {% endif %}{% endif %}
             {% endfor %}
-            {% if next[1].startswith('>') %}
+            {% if next[1] and next[1].startswith('>') %}
                 <li><span class="navlink" title="{{ _('no next page') }}" style="cursor:not-allowed"> &gt; </span></li>
             {% else %}
 	            <li><a href="/scene/persons_all/?{{ {'fw':next[1]} | urlencode }}" 
@@ -111,74 +101,75 @@
 
 	    {% for p in persons %}
 	       {% if multi_owners %}
-               {% set owner_but_me = p.owners | sort %}
+              {% set owner_but_me = p.owners | sort %}
 	       {% else %}{% set owner_but_me = [] %}
 	       {% endif %}
 	            <tr><td class="ColumnAlpha">
-	               {% set ini = p.sortname[0] %}
-	               {% if loop.changed(ini) %}
-		               {% if ini == "#" %}{% set symbol = '–' %}
-		               {% else %}{% set symbol = ini %}{% endif %}
+           {% set ini = p.sortname[0] %}
+           {% if loop.changed(ini) %}
+              {% if ini == "#" %}{% set symbol = '–' %}
+              {% else %}{% set symbol = ini %}{% endif %}
 		               <a id="{{symbol}}" name="{{ini}}" title="{{ _('Back to Top') }}" 
 		                  href="#">{{symbol}}</a>
-	               {% endif %}</td>
+	       {% endif %}
+	                </td>
 
-	                <td class="ColumnPerson"><div>
-	                   {% if p.owners %}
-	                       {# Special hack, see "Can a Jinja variable's scope extend beyond in an inner block?" #}
-	                       {% set not_mine = [False] %}
-	                   {% for ow in p.owners %}
-                           {% if config['DEMO'] or ow == user %}
-                           <div class="detail_link" alt="{{p.uniq_id}}">
-                             {{p.sex_symbol()}} {{macro.person(p)}}
-                           </div>
-                           {% else %}
-                                {% set _x = not_mine.append(not not_mine.pop()) %}
-                           <span class="owner">&nbsp;{{ow}}&nbsp;</span>
-                           <div class="no_detail" title="Ei katseluoikeutta!">
-                             {{p.sex_symbol()}} {{ macro.person_name(p.names[0]) }}
-                           </div>
-                           {% endif %}
-	                   {% endfor %}
-	                   {% else %}
-                           <div class="detail_link" alt="{{p.uniq_id}}">
-                             {{p.sex_symbol()}} {{macro.person(p)}}
-                           </div>
-	                   {% endif %}
+	                <td class="ColumnPerson">
+	                    <div>
+           {% if p.owners %}
+              {# Special hack, see "Can a Jinja variable's scope extend beyond in an inner block?" #}
+              {% set not_mine = [False] %}
+	          {% for ow in p.owners %}
+	             {% if config['DEMO'] or ow == user_context.user %}
+                            <div class="detail_link" alt="{{p.uniq_id}}">
+                                 {{p.sex_symbol()}} 
+                                {{ macro.person(p) }}
+                            </div>
+                 {% else %}{% set _x = not_mine.append(not not_mine.pop()) %}
+                            <span class="owner">&nbsp;{{ow}}&nbsp;</span>
+                            <div class="no_detail" title="Ei katseluoikeutta!">
+                                 {{p.sex_symbol()}} {{ macro.person_name(p.names[0]) }}
+                            </div>
+                 {% endif %}
+	          {% endfor %}
+	       {% else %}
+                            <div class="detail_link" alt="{{p.uniq_id}}">
+                                {{p.sex_symbol()}} 
+                                {{ macro.person(p) }}
+                            </div>
+	       {% endif %}
 
-		               {% for name in p.names %}
-		                  {% if not loop.first %}<br>
-		                      <small{% if not_mine[0] %} style="color:lightslategray;"{% endif %}>
-		                      {{ macro.person_name(name) }}</small>
-                          {% endif %}
-                       {% endfor %}
+           
 
-                       <br>
-                       {% if p.uuid %}<span class="idno">Uuid:{{p.uuid_short()}} /</span>
-	                   {% endif %}
-                               {# TODO Remove the test link at ']' #}
-                       <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
-	                </div></td>
+                             <br>
+           {% if p.uuid %}   <span class="idno">Uuid:{{p.uuid_short()}} /</span>
+	       {% endif %}
+                             <span class="id" title="{{ _('Original ID') }}">{{p.id}}</span>
+	                    </div>
+	                </td>
 
-                  <td class="ColumnEvent">
-            {% if p.events is iterable %}
-                <div>{% for e in p.events|sort() %}
-                    {% if e.type == "Birth" or e.type == "Death" %}{% set ecl = "major" %}
-                    {% else %}{% set ecl = "minor" %}{% endif %}
-                      <div class="eventgrid">
-                          <div class="col col_event">
-                             <span class="evtype {{ecl}}">{{e.type|transl('evt')|lower}}</span>
-                             {{e.description}}</div>
-                          <div class="col col_date">
-                             {% if e.dates %}{{e.dates}} {% endif %}
-                             {% if e.place %} | {{e.place}}{% endif %}</div>
+                <td class="ColumnEvent">
+           {% if p.events is iterable %}
+                    <div>
+              {% for e in p.events|sort() %}
+                 {% if e.type == "Birth" or e.type == "Death" %}{% set ecl = "major" %}
+                 {% else %}{% set ecl = "minor" %}{% endif %}
+                        <div class="eventgrid">
+                            <div class="col col_event">
+                                <span class="evtype {{ecl}}">{{e.type|transl('evt')|lower}}</span>
+                                {{e.description}}</div>
+                            <div class="col col_date">
+                                {% if e.dates %}{{e.dates}} {% endif %}
+                                {% if e.place %} | {{e.place}}{% endif %}</div>
                       </div>
-                {% endfor %}</div>
-            {% else %}<u>See person {{p.events}}</u></td>
-            {% endif %}
+              {% endfor %}
+                    </div>
+           {% else %}<u>See person {{p.events}}</u>
+                </td>
+           {% endif %}
 	    {% endfor %}
 
-        {% if next[1].startswith('>') %}
+        {% if next[1] != None and next[1].startswith('>') %}
                 <tr><td class="ColumnAlpha"></td>
                     <td colspan="2" id="lastitem_badge">
                         <i>{{ _('The last item found') }}</i>

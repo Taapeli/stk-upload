@@ -134,7 +134,8 @@ class DateRange():
             method, and the components formats are not checked.
         '''
 
-        if len(args) == 0:
+        if len(args) == 0 or \
+                (isinstance(args[0], (list, tuple)) and args[0][0] == None):
             # Missing date value, needed for comparisons
             self.datetype = DR['MISSING']
             self.date1 = self.DateInt()

@@ -7,19 +7,24 @@ Created on 8.3.2019
 class Cypher_adm():
     ' Cypher clauses for admin purposes'
     
-    remove_all_nodes = "MATCH (a) DETACH DELETE a"
+    remove_all_nodes = """
+MATCH (a) 
+WITH a LIMIT $limit
+DETACH DELETE a"""
 
     remove_data_nodes = """
 MATCH (a) 
-where not ( 'UserProfile' IN labels(a)
+WHERE NOT ( 'UserProfile' IN labels(a)
     OR 'Allowed_email' IN labels(a)
     OR 'User' IN labels(a)
     OR 'Guest' IN labels(a)
     OR 'Role' IN labels(a) )
+WITH  a LIMIT $limit
 DETACH DELETE a"""
 
     remove_my_nodes = """
 MATCH (u:UserProfile) -[*]-> (a) WHERE u.username=$user
+WITH a LIMIT $limit
 DETACH DELETE a"""
 
     allowed_email_register = """
@@ -33,7 +38,7 @@ CREATE (ae:Allowed_email {
     allowed_email_confirm = """
 MATCH (ae:Allowed_email)
   WHERE ae.allowed_email = $email 
-SET ae.confirmed_at = timestamp()
+SET ae.confirmed_at = $confirmtime
 RETURN ae """
              
     allowed_email_update = """
@@ -44,15 +49,6 @@ SET ae.default_role = $role,
     ae.creator = $creator
 RETURN ae"""
 
-#     allowed_email_update = """
-# MATCH (email:allowed_email {allowed_email: $email})    
-# SET email.default_role = $role,
-#     email.creator = $admin_name,
-#     email.approved = $approved,
-#     email.created_at = $created_at,     
-#     email.confirmed_at = $confirmed_at
-# RETURN email""" 
-      
     allowed_emails_get = """
 MATCH (ae:Allowed_email)
 RETURN DISTINCT ae 
@@ -138,9 +134,6 @@ DELETE c'''
 
 # Access management
 
-#     list_accesses = """
-# MATCH (user:User) -[:SUPPLEMENTED]->(userprofile:UserProfile) -[r:HAS_ACCESS]-> (batch:Batch) RETURN *,id(r) as rel_id
-#     """
     list_accesses = """
 MATCH (user:User) -[:SUPPLEMENTED]-> (userprofile:UserProfile)
     -[r:HAS_ACCESS]-> (batch:Batch)
@@ -165,40 +158,3 @@ MATCH (a:Batch)
 DETACH DELETE a
 RETURN COUNT(a) AS cnt'''
 
-
-
-class Cypher_stats():
-    
-    get_batches = '''
-match (b:Batch) 
-    where b.user = $user and b.status = "completed"
-optional match (b) -[:OWNS]-> (x)
-return b as batch,
-    labels(x)[0] as label, count(x) as cnt 
-    order by batch.user, batch.id'''
-
-    get_single_batch = '''
-match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
-optional match (b) -[:OWNS]-> (x)
-return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
-
-    get_user_batch_names = '''
-match (b:Batch) where b.user = $user
-optional match (b) -[r:OWNS]-> (:Person)
-return b.id as batch, b.timestamp as timestamp, b.status as status,
-    count(r) as persons 
-    order by batch'''
-
-    get_empty_batches = '''
-MATCH (a:Batch) 
-WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
-RETURN a AS batch ORDER BY a.id DESC'''
-
-
-class Cypher_audit():
-    
-    move_batch_todo = '''
-MATCH (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:"2019-11-18.002"}) 
-WITH up, r, b ORDER BY b.id DESC LIMIT 10
-RETURN up, r, b'''
-    

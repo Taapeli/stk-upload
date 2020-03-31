@@ -6,20 +6,6 @@
 #
 # 12.2.2018 / JMä
 
-# class Cypher_event():
-#     '''
-#     Cypher clases for creating and accessing Events
-#     '''
-
-# class Cypher_family():
-#     '''
-#     Cypher clases for creating and accessing Family objects
-#     '''
-
-# class Cypher_media():
-#     '''
-#     Cypher clases for creating and accessing Media objects
-#     '''
 
 class Cypher_note():
     '''
@@ -43,12 +29,14 @@ class Cypher_person():
     Cypher clases for creating and accessing Places
     '''
 # For Person_pg v3
-    get_by_user = """
-MATCH (b:UserProfile {username:$user}) -[:HAS_LOADED]-> (:Batch)
-       -[:OWNS]-> (p:Person {uuid:$uuid})
-RETURN p"""
-    get_public = """MATCH (p:Person {uuid:$uuid}) 
-RETURN p"""
+    get_person = """MATCH (root) -[r:OWNS|PASSED]-> (p:Person {uuid:$uuid}) 
+RETURN p, type(r) AS root_type, root"""
+#     get_by_user = """
+# MATCH (b:UserProfile {username:$user}) -[:HAS_LOADED]-> (batch:Batch)
+#        -[:OWNS]-> (p:Person {uuid:$uuid})
+# RETURN p, batch"""
+#     get_public = """MATCH (root) -[:PASSED]-> (p:Person {uuid:$uuid}) 
+# RETURN p, root"""
     get_names_events = """
 MATCH (p:Person) -[rel:NAME|EVENT]-> (x) WHERE ID(p) = $uid
 RETURN rel, x ORDER BY x.order"""
@@ -84,7 +72,7 @@ CALL apoc.path.subgraphAll(p, {maxLevel:4,
 RETURN extract(x IN relationships | 
         [id(startnode(x)), type(x), properties(x), id(endnode(x))]) as relations,
         extract(x in nodes | x) as nodelist"""
-    #TODO Obsolete
+#     #TODO Obsolete
     all_nodes_uniq_id_query_w_apoc="""
 MATCH (p:Person) WHERE id(p) = $uniq_id
 CALL apoc.path.subgraphAll(p, {maxLevel:4, 
@@ -110,6 +98,26 @@ RETURN p as person,
     COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events 
     ORDER BY person.sortname"""
 
+# Common data
+    read_approved_persons_with_events_starting_name = """
+MATCH () -[:PASSED]-> (p:Person)
+    WHERE p.sortname >= $start_name
+WITH p //, COLLECT(DISTINCT b.user) as owners
+ORDER BY p.sortname LIMIT $limit
+    MATCH (p:Person) -[:NAME]-> (n:Name)
+    OPTIONAL MATCH (p) -[re:EVENT]-> (e:Event)
+    OPTIONAL MATCH (p) <-[:PARENT|MOTHER|FATHER]- (f:Family) -[rf:EVENT]-> (fe:Event)
+WITH p, n, re.role as role, e, f.rel_type as rel, fe //, owners
+ORDER BY p.sortname, n.order
+    OPTIONAL MATCH (e) -[:PLACE]-> (pl:Place)
+    OPTIONAL MATCH (fe) -[:PLACE]-> (fpl:Place)
+RETURN p as person, 
+    COLLECT(distinct n) as names, 
+    COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events
+    //, owners
+ORDER BY person.sortname"""
+
+#Todo: obsolete with no approved common data
     read_all_persons_with_events_starting_name = """
 MATCH (b:Batch) -[:OWNS]-> (p:Person)
     WHERE p.sortname >= $start_name
@@ -127,20 +135,6 @@ RETURN p as person,
     COLLECT(distinct [e, pl.pname, role]) + COLLECT(distinct [fe, fpl.pname, rel]) AS events,
     owners
 ORDER BY person.sortname"""
-
-#     xxxx_all_persons_with_events_from_name = """
-# MATCH (b:Batch) -[:BATCH_MEMBER]-> (p:Person)
-#     WHERE p.sortname >= $start_name
-# WITH p, b.user as user ORDER BY p.sortname LIMIT $limit
-#   MATCH (p:Person) -[:NAME]-> (n:Name)
-#   WITH p, n ORDER BY p.sortname, n.order, user
-#     OPTIONAL MATCH (p) -[rn:EVENT]-> (e:Event)
-#     OPTIONAL MATCH (e) -[rpl:PLACE]-> (pl:Place)
-# RETURN p as person, 
-#     collect(distinct n) as names, 
-#     collect(distinct [e, pl.pname, rn.role]) as events,
-#     user
-# ORDER BY p.sortname"""
 
 
 
@@ -164,10 +158,12 @@ ORDER BY TOUPPER(name.surname), name.firstname limit 20"""
 
 # Ver 0.1 different person lists
     _get_events_tail = """
+ OPTIONAL MATCH (batch:Batch) -[:OWNS]-> (person)
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
  OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
-RETURN person, COLLECT(DISTINCT name) as names,
+RETURN batch.user AS user, person, 
+    COLLECT(DISTINCT name) AS names,
     COLLECT(DISTINCT refn.name) AS refnames,
     COLLECT(DISTINCT [r.role, event, place.pname]) AS events"""
     _get_events_surname = """, TOUPPER(LEFT(name.surname,1)) as initial 
@@ -177,14 +173,19 @@ RETURN person, COLLECT(DISTINCT name) as names,
     _get_events_patronyme = """, LEFT(name.suffix,1) as initial 
     ORDER BY TOUPPER(names[0].suffix), names[0].surname, names[0].firstname"""
 
+    _limit_years_clause = """
+WHERE person.birth_low <= $years[1]
+  AND person.death_high >= $years[0]
+"""
+
     get_events_all = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_surname
+        + _limit_years_clause + _get_events_tail + _get_events_surname
 
     get_events_all_firstname = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_firstname
+        + _limit_years_clause + _get_events_tail + _get_events_firstname
 
     get_events_all_patronyme = "MATCH (person:Person) -[:NAME]-> (name:Name)" \
-        + _get_events_tail + _get_events_patronyme
+        + _limit_years_clause + _get_events_tail + _get_events_patronyme
 
     get_events_uniq_id = """
 MATCH (person:Person) -[:NAME]-> (name:Name)
@@ -195,22 +196,42 @@ MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:
 """ + _get_events_tail + _get_events_surname
 
     # With attr={'use':rule, 'name':name}
-    get_events_by_refname_use = """
+    get_common_events_by_refname_use = """
 MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[:PASSED]- (batch)
 WHERE search.name STARTS WITH $attr.name
 WITH search, person
 MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
 
+    # With attr={'use':rule, 'name':name}, user=user
+    get_my_events_by_refname_use = """
+MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[:OWNS]- (:Batch {user:$user})
+WHERE search.name STARTS WITH $attr.name
+WITH search, person
+MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH person, name""" + _get_events_tail + _get_events_surname
+
+    get_both_events_by_refname_use = """
+MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+    <-[re:OWNS|PASSED]- (b:Batch)
+WHERE search.name STARTS WITH $attr.name
+WITH search, person, re WHERE type(re) = "PASSED" or b.user = $user
+MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH person, name""" + _get_events_tail + _get_events_surname
+
     get_confidences_all = """
 MATCH (person:Person)
-OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
-RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+OPTIONAL MATCH (person) -[:EVENT]-> (:Event) -[:CITATION]-> (c1:Citation)
+OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
+RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
     get_confidence = """
 MATCH (person:Person) WHERE ID(person)=$id
-OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c:Citation)
-RETURN ID(person) AS uniq_id, COLLECT(c.confidence) AS list"""
+OPTIONAL MATCH (person) -[:EVENT]-> (event:Event) -[r:CITATION]-> (c1:Citation)
+OPTIONAL MATCH (person) <-[:PARENT]- (:Family) - [:EVENT] -> (:Event) -[:CITATION]-> (c2:Citation)
+RETURN ID(person) AS uniq_id, COLLECT(c1.confidence) + COLLECT(c2.confidence) AS list"""
 
     set_confidence = """
 MATCH (person:Person) WHERE ID(person)=$id
@@ -220,22 +241,58 @@ SET person.confidence=$confidence"""
 MATCH (person:Person) WHERE ID(person) = $id
 SET person.sortname=$key"""
 
-    set_est_lifetimes = """
-MATCH (p:Person) -[r:EVENT]-> (e:Event)
-    WHERE id(p) IN $idlist
-WITH p, collect(e) AS events, 
-    max(e.date2) AS dmax, min(e.date1) AS dmin
-WHERE NOT (dmax IS NULL OR dmin IS NULL)
-    SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
-RETURN null"""
+#Replased by update_lifetime_estimate etc. / 2020-02-06
+#     set_est_lifetimes = """
+# MATCH (p:Person) -[r:EVENT]-> (e:Event)
+#     WHERE id(p) IN $idlist
+# WITH p, collect(e) AS events, 
+#     max(e.date2) AS dmax, min(e.date1) AS dmin
+# WHERE NOT (dmax IS NULL OR dmin IS NULL)
+#     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
+# RETURN null"""
+#     set_est_lifetimes_all = """
+# MATCH (p:Person) -[r:EVENT]-> (e:Event)
+# WITH p, collect(e) AS events, 
+#     max(e.date2) AS dmax, min(e.date1) AS dmin
+# WHERE NOT (dmax IS NULL OR dmin IS NULL)
+#     SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
+# RETURN null"""
 
-    set_est_lifetimes_all = """
-MATCH (p:Person) -[r:EVENT]-> (e:Event)
-WITH p, collect(e) AS events, 
-    max(e.date2) AS dmax, min(e.date1) AS dmin
-WHERE NOT (dmax IS NULL OR dmin IS NULL)
-    SET p.date1 = dmin, p.date2 = dmax, p.datetype = 19
-RETURN null"""
+    fetch_selected_for_lifetime_estimates = """
+MATCH (p:Person) 
+    WHERE id(p) IN $idlist
+OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
+OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
+OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
+OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
+OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
+RETURN p, id(p) as pid, 
+    collect(distinct [e,r.role]) AS events,
+    collect(distinct [fam_event,r2.role]) AS fam_events,
+    collect(distinct [c,id(c)]) as children,
+    collect(distinct [parent,id(parent)]) as parents
+"""
+    update_lifetime_estimate = """
+MATCH (p:Person) 
+    WHERE id(p) = $id
+SET p.birth_low = $birth_low,
+    p.death_low = $death_low,
+    p.birth_high = $birth_high,
+    p.death_high = $death_high
+"""
+    fetch_all_for_lifetime_estimates = """
+MATCH (p:Person) 
+OPTIONAL MATCH (p)-[r:EVENT]-> (e:Event)
+OPTIONAL MATCH (p) <-[:PARENT]- (fam1:Family)
+OPTIONAL MATCH (fam1:Family) -[:CHILD]-> (c)
+OPTIONAL MATCH (p) <-[:CHILD]- (fam2:Family) -[:PARENT]-> (parent)
+OPTIONAL MATCH (fam1)-[r2:EVENT]-> (fam_event:Event)
+RETURN p, id(p) as pid, 
+    collect(distinct [e,r.role]) AS events,
+    collect(distinct [fam_event,r2.role]) AS fam_events,
+    collect(distinct [c,id(c)]) as children,
+    collect(distinct [parent,id(parent)]) as parents
+"""
 
     get_by_uuid_w_names_notes = """
 MATCH (b:Batch) -[:OWNS]-> (person:Person) -[r:NAME]-> (name:Name)
@@ -337,6 +394,18 @@ RETURN f, p.pname AS marriage_place,
     COUNT(DISTINCT pc) AS no_of_children 
     ORDER BY f.father_sortname LIMIT $limit"""
     
+    read_families_common_p = """
+MATCH () -[:PASSED]-> (f:Family) WHERE f.father_sortname>=$fw
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]-> (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.father_sortname LIMIT $limit"""
+
     read_families_m = """
 MATCH (f:Family) WHERE f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
@@ -352,6 +421,18 @@ RETURN f, p.pname AS marriage_place,
     read_my_families_m = """
 MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (f:Family)
     WHERE prof.username = $user AND f.mother_sortname>=$fwm
+OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
+OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
+OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
+OPTIONAL MATCH (f) -[:EVENT]-> (:Event {type:"Marriage"})-[:PLACE]->(p:Place)
+RETURN f, p.pname AS marriage_place,
+    COLLECT([r.role, pp, np]) AS parent, 
+    COLLECT(DISTINCT pc) AS child, 
+    COUNT(DISTINCT pc) AS no_of_children 
+    ORDER BY f.mother_sortname LIMIT $limit"""
+
+    read_families_common_m = """
+MATCH () -[:PASSED]-> (f:Family) WHERE f.mother_sortname>=$fwm
 OPTIONAL MATCH (f) -[r:PARENT]-> (pp:Person)
 OPTIONAL MATCH (pp) -[:NAME]-> (np:Name {order:0}) 
 OPTIONAL MATCH (f) -[:CHILD]- (pc:Person) 
@@ -476,44 +557,26 @@ RETURN p AS person, r.role AS role,
     COLLECT(n) AS names, e AS event
 ORDER BY e.date1"""
 
-    get_name_hierarchies = """
-MATCH (a:Place) -[:NAME]-> (pn:Place_name)
-    WHERE a.pname >= $fw
-OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
-    COLLECT(DISTINCT pn) AS names, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
-ORDER BY names[0].name LIMIT $limit"""
-
-    get_my_name_hierarchies = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (a:Place)
-    WHERE prof.username = $user AND a.pname >= $fw
-MATCH (a:Place) -[:NAME]-> (pn:Place_name)
-OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
-    COLLECT(DISTINCT pn) AS names, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
-ORDER BY names[0].name LIMIT $limit"""
 
     get_w_names_notes = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE ID(place)=$place_id
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
+OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
 RETURN place, 
     COLLECT(DISTINCT n) AS names,
-    COLLECT (DISTINCT note) AS notes"""
+    COLLECT (DISTINCT note) AS notes,
+    COLLECT (DISTINCT media) AS medias"""
 
     get_w_names_notes_uuid = """
 MATCH (place:Place) -[:NAME]-> (n:Place_name)
     WHERE place.uuid=$uuid
 OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
+OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
 RETURN place, 
     COLLECT(DISTINCT n) AS names,
-    COLLECT (DISTINCT note) AS notes"""
+    COLLECT (DISTINCT note) AS notes,
+    COLLECT (DISTINCT media) AS medias"""
 
     place_get_one = """
 match (p:Place) where ID(p)=$pid
@@ -612,30 +675,34 @@ MATCH (c:Citation) -[:SOURCE]-> (s:Source)
     OPTIONAL MATCH (s) -[rel:REPOSITORY]-> (r:Repository)
 RETURN LABELS(c)[0] AS label, ID(c) AS uniq_id, s, rel, r"""
 
-    get_sources_w_notes = """
-MATCH (s:Source)
-WITH s ORDER BY toUpper(s.stitle)
-    OPTIONAL MATCH (s) -[:NOTE]-> (note)
-    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
-    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
-       collect(DISTINCT [r.medium, rep]) as repositories,
-       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
-ORDER BY toUpper(s.stitle)"""
-    get_selected_sources_w_notes = """
-MATCH (s:Source)
-        WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
-WITH s ORDER BY toUpper(s.stitle)
-    OPTIONAL MATCH (s) -[:NOTE]-> (note)
-    OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
-    OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
-    OPTIONAL MATCH (c) <-[:CITATION]- (citator)
-RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
-       collect(DISTINCT [r.medium, rep]) as repositories,
-       COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
-ORDER BY toUpper(s.stitle)"""
-
+#v0.4: pe.Source_cypher.SourceCypher.get_auditted_set
+#     get_sources_w_notes = """
+# MATCH (s:Source)
+# WITH s ORDER BY toUpper(s.stitle)
+#     OPTIONAL MATCH (s) -[:NOTE]-> (note)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+#     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        collect(DISTINCT [r.medium, rep]) as repositories,
+#        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)"""
+#
+#v0.4: pe.Source_cypher.SourceCypher.get_auditted_selection_set
+#     get_selected_sources_w_notes = """
+# MATCH (s:Source)
+#         WHERE s.stitle CONTAINS $key1 OR s.stitle CONTAINS $key2 
+# WITH s ORDER BY toUpper(s.stitle)
+#     OPTIONAL MATCH (s) -[:NOTE]-> (note)
+#     OPTIONAL MATCH (s) -[r:REPOSITORY]-> (rep:Repository)
+#     OPTIONAL MATCH (c:Citation) -[:SOURCE]-> (s)
+#     OPTIONAL MATCH (c) <-[:CITATION]- (citator)
+# RETURN ID(s) AS uniq_id, s as source, collect(DISTINCT note) as notes, 
+#        collect(DISTINCT [r.medium, rep]) as repositories,
+#        COUNT(c) AS cit_cnt, COUNT(citator) AS ref_cnt 
+# ORDER BY toUpper(s.stitle)"""
+# 
+#v0.4: pe.Source_cypher.SourceCypher.get_an_auditted_selection_set
     get_a_source_w_notes = """
 MATCH (source:Source) WHERE ID(source)=$sid
     OPTIONAL MATCH (source) -[r:REPOSITORY]-> (rep:Repository)
@@ -651,6 +718,7 @@ match (c) <-[:CITATION]- (x)
 return id(c) as c_id, c, collect(n) as notes, re.role as role,
        labels(x)[0] as label, x, 
        coalesce(p.uuid, x.uuid) as p_uuid, 
+       coalesce(p, x) as p, 
        coalesce(ID(p), ID(x)) as p_uid, labels(p)[0] as p_label, r
 order by c_id, p_uuid"""
 
@@ -694,13 +762,106 @@ return r order by r.type"""
 
 class Cypher_media():
 
+#     get_by_uniq_id = """
+# MATCH (obj:Media)
+#     WHERE ID(obj) = $rid
+# RETURN obj"""
+
     get_by_uuid = """
-MATCH (obj:Media)
-    WHERE Iobj.uuid = $rid
-RETURN obj"""
+MATCH (obj:Media) <-[r:MEDIA] - (n) 
+    WHERE obj.uuid = $rid
+RETURN obj, COLLECT([n, properties(r)]) as ref"""
 
-    get_by_uniq_id = """
-MATCH (obj:Media)
-    WHERE ID(obj) = $rid
-RETURN obj"""
+    get_all = "MATCH (o:Media) RETURN o"
 
+    # Media list by description with count limit
+    read_common_media = """
+MATCH (prof) -[:PASSED]-> (o:Media) <- [r:MEDIA] - () 
+WHERE o.description >= $start_name 
+RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+    ORDER BY o.description LIMIT $limit"""
+
+    read_my_own_media = """
+MATCH (prof) -[:OWNS]-> (o:Media) <- [r:MEDIA] - () 
+WHERE  prof.user = $user AND o.description >= $start_name
+RETURN o, prof.user as credit, prof.id as batch_id, COUNT(r) AS count
+    ORDER BY o.description LIMIT $limit"""
+
+
+class Cypher_batch():
+    # Read information of user Batches and data connected to them
+
+    get_filename = """
+MATCH (b:Batch {id: $batch_id, user: $username}) 
+RETURN b.file"""
+
+    list_all = """
+MATCH (b:Batch) 
+RETURN b """
+
+    get_batches = '''
+match (b:Batch) 
+    where b.user = $user and b.status = "completed"
+optional match (b) -[:OWNS]-> (x)
+return b as batch,
+    labels(x)[0] as label, count(x) as cnt 
+    order by batch.user, batch.id'''
+
+    get_passed = '''
+match (b:Audit) 
+    where b.user = $user
+optional match (b) -[:PASSED]-> (x)
+return b as batch, count(x) as cnt 
+    order by batch.id'''
+
+    get_single_batch = '''
+match (up:UserProfile) -[r:HAS_LOADED]-> (b:Batch {id:$batch}) 
+optional match (b) -[:OWNS]-> (x)
+return up as profile, b as batch, labels(x)[0] as label, count(x) as cnt'''
+
+    get_user_batch_names = '''
+match (b:Batch) where b.user = $user
+optional match (b) -[r:OWNS]-> (:Person)
+return b.id as batch, b.timestamp as timestamp, b.status as status,
+    count(r) as persons 
+    order by batch'''
+
+    get_empty_batches = '''
+MATCH (a:Batch) 
+WHERE NOT ((a)-[:OWNS]->()) AND NOT a.id CONTAINS "2019-10"
+RETURN a AS batch ORDER BY a.id DESC'''
+
+    # Batch removal
+    delete = """
+MATCH (u:UserProfile{username:$username}) -[:HAS_LOADED]-> (b:Batch{id:$batch_id}) 
+OPTIONAL MATCH (b) -[*]-> (n) 
+DETACH DELETE b, n"""
+
+
+class Cypher_audit():
+    ' Query Audit materials '
+
+    get_my_audits = '''
+match (b:Audit {auditor: $oper})
+optional match (b) -[:PASSED]-> (x)
+return b, labels(x)[0] as label, count(x) as cnt 
+    order by b.user, b.id, label'''
+
+    get_all_audits = '''
+match (b:Audit)
+optional match (b) -[:PASSED]-> (x)
+return b, labels(x)[0] as label, count(x) as cnt 
+    order by b.user, b.id, label'''
+
+#     get_single_audit = '''
+# match (b:Audit {id:$batch}) 
+# optional match (b) -[:PASSED]-> (x)
+# return labels(x)[0] as label, count(x) as cnt'''
+# 
+#     get_my_audit_names = '''
+# match (b:Audit) where b.auditor = $oper
+# optional match (b) -[r:PASSED]-> (:Person)
+# return b.id as audition, b.timestamp as timestamp, 
+#     b.auditor as auditor, b.status as status,
+#     count(r) as persons 
+# order by audition'''

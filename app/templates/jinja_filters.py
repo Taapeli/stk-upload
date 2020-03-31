@@ -141,7 +141,8 @@ def translate(term, var_name):
             "Place Note": _("Place Note"), #"paikan lisätieto"
             "Repository Note": _("Repository Note"), #"arkiston lisätieto"
             "Source Note": _("Source Note"), #"lähteen lisätieto"
-            "Web Search": _("Web Search") #"Verkosta löytynyt"
+            "Web Search": _("Web Search"), #"Verkosta löytynyt"
+            "Web Home": _("Home Page") #"Kotisivu"
             }
     elif var_name == "rept":
         # Repository types

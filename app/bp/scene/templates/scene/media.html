@@ -1,0 +1,125 @@
+{# /scene/templates/scene/media.html_ #}
+{% extends "/scene/layout.html" %}
+{% block title %}{{ _('Media data') }} (scenemedias){% endblock %}
+{% block body %}
+{{ super() }}
+{% import '/scene/macros.html' as macro with context %}
+<script src="/static/infobox.js"></script>
+<style>
+h3 {margin-top: 1em;}
+p {margin-left:15px;}
+#flex {display: flex; /*height:75vh;*/
+    flex-wrap: wrap;
+}
+#flex > div {
+    margin:.5em; padding: 1em;
+    width: 43%; 
+}
+.pic_container {
+  /*width: 100%; */
+  /*padding-top: 100%; /* 1:1 Aspect Ratio */
+  position: relative;
+  min-height: 250px;
+}
+.pic {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+.pic > img {
+  max-width: 100%;
+  max-height: 100%;
+  border: solid 1pt gray;
+}
+td.value {width:100%;}
+/* tr > td {vertical-align: middle;} */
+tr > td > img {
+    margin: 0.5em;
+    vertical-align: middle;
+}
+</style>
+
+<div id="startdiv">
+  <h2>{{ _('Media data') }}</h2>
+</div>
+
+{{ macro.menu(menuno) }}
+<div class="content" id="IndividualDetail">
+
+{% if media %}
+
+
+  <div id="flex">
+
+    <div>
+		<h3>{{ _("Picture") }} <i>{{ media.description }}</i></h3>
+
+        <div id="summaryarea">
+            <table>
+                <tr>
+                    <td class="ColumnAttribute">{{ _("Identifiers") }}</td>
+                    <td class="ColumnValue">{{macro.all_obj_ids(media)}}</td>
+                </tr>
+	            <tr><td><br>{{ _('Thumbnail') }}</td>
+	               <td class="value"><img alt="({{ _('Thumbnail') }})" align="left"
+                     src="/scene/thumbnail?id={{media.uuid}}" 
+                     title="key = {{media.uuid_str()}}"/>
+    
+                     <p style="nowrap;">{% if size %}
+                        {{ _("Size") }} {{size[0]}} x {{size[1]}} px<br>{%endif%}
+                     &rtrif; <a href="/scene/media/{{media.name}}?id={{media.uuid}}">
+                            {{ _('Show fullscreen') }}</a>
+                     </p>
+                   </td>
+               </tr>
+               <tr><td></td>
+                   <td>
+                   </td>
+	            </tr>
+	        </table>
+		</div>
+
+	    <h3>{{ _('References') }}</h3>
+		
+	    {% if media.ref %}
+	    <ul>
+		    {% for label,obj,crop in media.ref %}
+		      <li>{{ _(label) }}:<i>
+		    	{% if label == 'Person' %}
+		    		<a href="/scene/person?uuid={{obj.uuid}}"
+			               title="{{ _('see details of person %(id)s', id=obj.uuid_short()) }} (nr={{obj.uniq_id}})">
+			               {{obj.sortname|replace("#", " ")}}</a>
+			    {% elif label == 'Place' %}
+		    		<a href="/scene/location/uuid={{obj.uuid}}"
+			               title="{{ _('see details of place %(id)s', id=obj.uuid_short()) }} (nr={{obj.uniq_id}})">
+			               {{obj.pname}}</a>
+			    {% else %}{{obj.id}}
+			    {% endif %}</i>
+			    {% if crop %}{{ _('cropped') }}<br>{% set cr_str = ( crop|join(',') ) %}
+			         <img alt="({{ _('Thumbnail') }})"
+                        src="/scene/media/kuva2?id={{media.uuid}}&crop={{cr_str}}" 
+                        title="{{crop}} %"/>
+			    {% endif %}
+			  </li>
+		    {% endfor %}
+		</ul>
+	    {% else %}
+	    -
+		{% endif %}
+	</div>
+
+	<div class="pic_container">
+        <div class="pic">
+            	<img alt="picture {{media.description}}" 
+            		 src="/scene/media/{{media.name}}?id={{media.uuid}}" 
+                 	 title="key = {{media.uuid_str()}}"/>
+        </div>
+	</div>
+  </div>
+  <div class="fullclear"></div>
+{% endif %}
+</div>
+
+{% endblock %}

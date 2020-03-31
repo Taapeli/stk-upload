@@ -5,6 +5,8 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 '''
 #from sys import stderr
 import  shareds
+from bl.place import PlaceBl
+from ui.place import place_names_from_nodes
 
 from .cypher import Cypher_family, Cypher_person
 from .family import Family
@@ -12,7 +14,10 @@ from .event_combo import Event_combo
 from .person_name import Name
 from .note import Note
 from .dates import DateRange
-from .place_combo import Place_combo
+#from .place_combo import Place_combo
+from models.gen.person import Person
+from ui.user_context import UserContext
+from models.gen import family
 
 # Import these later to handle circular dependencies where referencing from Person classes! 
 #from .person_combo import Person_combo
@@ -162,7 +167,7 @@ RETURN family"""
     
     
     @staticmethod
-    def get_family_data(uuid):
+    def get_family_data(uuid, context: UserContext):
         """ Read Family information including Events, Children, Notes and Sources.
         
             1) read 
@@ -221,7 +226,7 @@ RETURN family"""
                         #        'datetype': 3, 'date2': 1878089, 'date1': 1875043}>
                         node = record['f']
                         family = Family_combo.from_node(node)
-
+                        
                         for event_node, place_node in record['family_event']:
                             if event_node:
                                 # event_node:
@@ -235,15 +240,15 @@ RETURN family"""
                                     # [60.5625, 21.609722222222224], 'id': 'P0468', 'type': 'City', 'uuid':
                                     # 'd1d0693de1714a47acf6442d64246a50', 'pname': 'Taivassalo', 'change':
                                     # 1556953682}>
-                                    e.place = Place_combo.from_node(place_node)
+                                    e.place = PlaceBl.from_node(place_node)
 
                                     # Look for surrounding place:
                                     res = session.run(Cypher_person.get_places, uid_list=[e.uniq_id])
                                     for rec in res:
-                                        e.place.set_names_from_nodes(rec['pnames'])
+                                        e.place.names = place_names_from_nodes(rec['pnames'])
                                         if rec['pi']:
-                                            pl_in = Place_combo.from_node(rec['pi'])
-                                            pl_in.set_names_from_nodes(rec['pinames'])
+                                            pl_in = PlaceBl.from_node(rec['pi'])
+                                            pl_in.names = place_names_from_nodes(rec['pinames'])
                                             e.place.uppers.append(pl_in)
 
                                 family.events.append(e)
@@ -283,7 +288,13 @@ RETURN family"""
                                         family.father = p
                                     elif role == 'mother':
                                         family.mother = p
-                        
+
+                        if not context.use_common():
+                            if family.father: family.father.too_new = False
+                            if family.mother: family.mother.too_new = False
+
+                        family.no_of_children = 0
+                        family.num_hidden_children = 0
                         for person_node, name_node, birth_node, death_node in record['child']:
                             # record['child'][0]:
                             # [<Node id=235176 labels={'Person'} 
@@ -301,13 +312,20 @@ RETURN family"""
                             #        'id': 'E1887', 'date2': 1877226, 'type': 'Death', 'date1': 1877226}>
                             # ]
                             if person_node:
+                                family.no_of_children += 1
                                 p = Person_combo.from_node(person_node)
                                 if name_node:
                                     p.names.append(Name.from_node(name_node))
                                 set_birth_death(p, birth_node, death_node)
+                                if context.use_common():
+                                    if p.too_new:
+                                        family.num_hidden_children += 1
+                                        continue
+                                else: 
+                                    p.too_new = False
                                 family.children.append(p)
                         
-                        family.no_of_children = len(family.children)
+                        #family.no_of_children = len(family.children)
                             
                         for repository_node, source_node, citation_node in record['sources']:
                             # record['sources'][0]:
@@ -338,6 +356,7 @@ RETURN family"""
                             note.text = n['text']
                             note.url = n['url']
                             family.notes.append(note)
+
             
             except Exception as e:
                 print('Error get_family_data: {} {}'.format(e.__class__.__name__, e))            
@@ -364,22 +383,34 @@ RETURN family"""
         return tx.run(Cypher_family.set_dates_sortname, 
                       id=uniq_id, f_attr=f_attr)
 
+    @staticmethod       
+    def hide_privacy_protected_families(families):
+        fams2 = []
+        for fam in families:
+            if ((not fam.father or fam.father.too_new) and
+               (not fam.mother or fam.mother.too_new)):
+                continue   # do not include this family
+            fams2.append(fam)
+            children2 = [c for c in fam.children if not c.too_new]
+            fam.num_hidden_children = len(fam.children) - len(children2)
+            fam.children = children2
+        return fams2
 
     @staticmethod       
-    def get_families(o_filter, opt='father', limit=100):
+    def get_families(o_context, opt='father', limit=100):
         """ Find families from the database """
 
         # Import here to handle circular dependency 
         from .person_combo import Person_as_member
         
-        def _read_family_list(o_filter, opt, limit):
+        def _read_family_list(o_context, opt, limit):
             """ Read Family data from given fw/fwm
             """
             # Select a) filter by user b) show Isotammi common data (too)
-            show_by_owner = o_filter.use_owner_filter()
-            show_with_common = o_filter.use_common()
+            show_by_owner = o_context.use_owner_filter()
+            show_with_common = o_context.use_common()
             #print("read_my_persons_list: by owner={}, with common={}".format(show_by_owner, show_with_common))
-            user = o_filter.user
+            user = o_context.user
             try:
                 """
                                show_by_owner    show_all
@@ -417,12 +448,12 @@ RETURN family"""
                         if opt == 'father':
                             #3 == #1 simulates common by reading all
                             print("_read_families_p: common only")
-                            result = session.run(Cypher_family.read_families_p, #user=user, 
+                            result = session.run(Cypher_family.read_families_common_p, #user=user, 
                                                  fw=fw, limit=limit)
                         elif opt == 'mother':
                             #1 get all with owner name for all
                             print("_read_families_m: common only")
-                            result = session.run(Cypher_family.read_families_m,
+                            result = session.run(Cypher_family.read_families_common_m,
                                                  fwm=fw, limit=limit)
                         
                     return result
@@ -431,12 +462,12 @@ RETURN family"""
                 raise      
                 
         families = []
-        fw = o_filter.next_name_fw()     # next name
+        fw = o_context.next_name_fw()     # next name
 
-        ustr = "user " + o_filter.user if o_filter.user else "no user"
+        ustr = "user " + o_context.user if o_context.user else "no user"
         print(f"read_my_family_list: Get max {limit} persons "
               f"for {ustr} starting at {fw!r}")
-        result = _read_family_list(o_filter, opt, limit)
+        result = _read_family_list(o_context, opt, limit)
         
         for record in result:
             if record['f']:
@@ -458,6 +489,8 @@ RETURN family"""
                         if uniq_id != parent_node.id:
                             # Skip person with double default name
                             pp = Person_as_member()
+                            pp = Person.from_node(parent_node)
+                            Person_as_member.__init__(pp)
                             uniq_id = parent_node.id
                             pp.uniq_id = uniq_id
                             pp.uuid = parent_node['uuid']
@@ -479,6 +512,8 @@ RETURN family"""
                     #    'handle': '_d78e9a2696000bfd2e0', 'id': 'I0001', 
                     #    'date2': 1609920, 'date1': 1609920}>
                     child = Person_as_member()
+                    child = Person.from_node(ch)
+                    Person_as_member.__init__(child)
                     child.uniq_id = ch.id
                     child.uuid = ch['uuid']
                     child.sortname = ch['sortname']
@@ -486,20 +521,26 @@ RETURN family"""
                 
                 if record['no_of_children']:
                     family.no_of_children = record['no_of_children']
+                family.num_hidden_children = 0
+                if not o_context.use_common():
+                    if family.father: family.father.too_new = False
+                    if family.mother: family.mother.too_new = False
                 families.append(family)
                 
         # Update the page scope according to items really found 
         if families:
             if opt == 'father':
-                o_filter.update_session_scope('person_scope', 
+                o_context.update_session_scope('person_scope', 
                                               families[0].father_sortname, families[-1].father_sortname, 
                                               limit, len(families))
             else:
-                o_filter.update_session_scope('person_scope', 
+                o_context.update_session_scope('person_scope', 
                                               families[0].mother_sortname, families[-1].mother_sortname, 
                                               limit, len(families))
 
-        return (families)
+        if o_context.use_common():
+            families = Family_combo.hide_privacy_protected_families(families)
+        return families
 
     
 #     @staticmethod       
@@ -706,6 +747,9 @@ RETURN ID(person) AS father"""
             for i in range(len(self.childref_hlink)):
                 print ("Childref_hlink: " + self.childref_hlink[i])
         return True
+
+     
+     
 
 
 #    @staticmethod       

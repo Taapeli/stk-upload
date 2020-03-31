@@ -14,7 +14,7 @@ import logging
 #import inspect
 import traceback
 
-from bp.gramps.models import batch
+#from bp.gramps.models import batch #TODO: move into models.gen.batch_audit
 
 logger = logging.getLogger('stkserver')
 
@@ -24,18 +24,19 @@ from flask_babelex import _
 
 import shareds
 from setups import User, Allowed_email #, Role
-from models import dbutil, dataupdater, loadfile, datareader, util
 from bp.admin.models.data_admin import DataAdmin
 from bp.admin.models.user_admin import UserAdmin
+
 from .cvs_refnames import load_refnames
 from .forms import AllowedEmailForm, UpdateAllowedEmailForm, UpdateUserForm
 from . import bp
 from . import uploads
 from .. gedcom.models import gedcom_utils
 from .. import gedcom
+
+from models import dbutil, dataupdater, loadfile, datareader, util
 from models import email
 from models import syslog 
-from models.gen.batch import Batch
 
 
 # Admin start page
@@ -77,6 +78,8 @@ def clear_my_db():
 @roles_accepted('research', 'admin')
 def clear_empty_batches():
     """ Show or clear unused batches. """
+    from models.gen.batch_audit import Batch
+
     user=None
     clear=False
     cnt = -1
@@ -104,7 +107,11 @@ def clear_empty_batches():
 @roles_required('admin')
 def estimate_dates(uid=None):
     """ syntymä- ja kuolinaikojen arvioiden asettaminen henkilöille """
-    message = dataupdater.set_estimated_person_dates(list(uid))
+    if uid:
+        uids=list(uid)
+    else:
+        uids=[]
+    message = dataupdater.set_estimated_person_dates(uids)
     ext = _("estimated lifetime")
     return render_template("/admin/talletettu.html", text=message, info=ext)
 
@@ -296,6 +303,7 @@ def update_user(username):
 @login_required
 @roles_accepted('admin', 'audit')
 def list_uploads(username):
+    # List uploads; also from '/audit/list_uploads' page
     upload_list = uploads.list_uploads(username) 
     logger.info(f"-> bp.admin.routes.list_uploads user={username}")
     return render_template("/admin/uploads.html", uploads=upload_list, user=username)
@@ -361,7 +369,7 @@ def xml_download(username,xmlfile):
 
 @bp.route('/admin/show_upload_log/<username>/<xmlfile>')
 @login_required
-@roles_accepted('member', 'admin')
+@roles_accepted('member', 'admin', 'audit')
 def show_upload_log(username,xmlfile):
     upload_folder = uploads.get_upload_folder(username)
     fname = os.path.join(upload_folder,xmlfile + ".log")
@@ -479,7 +487,7 @@ def site_map():
             url = rule.rule
             #url = url_for(rule.endpoint, **(rule.defaults or {}))
             try:
-                view_function = shareds.app.view_functions[rule.endpoint]
+                _view_function = shareds.app.view_functions[rule.endpoint]
                 login_required, roles = find_roles(rule.rule, endpoints)
             except:
                 traceback.print_exc()
@@ -535,7 +543,10 @@ def fetch_users():
 @login_required
 @roles_accepted('admin')
 def fetch_batches():
-    batch_list = list(batch.get_batches())
+
+    from models.gen.batch_audit import Batch
+
+    batch_list = list(Batch.get_batches())
     for b in batch_list:
         file = b.get('file')
         if file:

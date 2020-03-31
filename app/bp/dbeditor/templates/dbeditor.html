@@ -1,0 +1,404 @@
+{# templates/admin/start.html_ #}
+{% extends "/admin/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _('Administrator') }}{% endblock %}
+{% block body %}
+{{ super() }}
+
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+
+<style>
+table {
+    border-collapse: collapse;
+}
+.box1 {
+    display: inline-block;
+    vertical-align:top;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    background-color: bisque;
+    width: 10%;
+    min-height: 200px;
+    border-radius: 15px;
+}
+
+.box2 {
+    vertical-align:top;
+    background-color: bisque;
+    border-radius: 15px;
+}
+
+.box {
+    display: inline-block;
+    float:right;
+    vertical-align:top;
+    padding: 1em; 
+    background-color: bisque;
+    width: 80%;
+    min-height: 200px;
+    border-radius: 15px;
+}
+input.error {
+    background: yellow;
+}
+
+</style>
+
+<div id="dbEditor" style="margin-left:50px; padding-bottom: 2em;">
+  <h2>DB Editor</h2>
+
+    <div class="box1">
+        <h3>Labels</h3>
+        <table border xwidth="100%">
+        <tr>
+            <th>Label</th>
+        </tr>
+        <tr v-for="label in labels">
+        	<td><a href="#" v-on:click="select_label(label,$event)">${ label }</a>
+        </tr>
+        </table>
+
+    </div>
+
+    <div class="box" v-if="listview">
+        <h3>${ label }</h3>
+        <a href="#" v-on:click="get_nodes(label,skip-50)">Prev 25</a>
+        <a href="#" v-on:click="get_nodes(label,skip)">Next 25</a>
+        <table border xwidth="100%">
+        <tr>
+            <th>Id
+            <th v-for="attr in attrs">
+                <span v-on:click="open_search(attr)">${ attr }</span>
+                <span v-show="search_attr == attr">
+                    <br>
+                    <input v-model="searchpattern" v-bind:size="50" v-bind:class="{ error: hasError }">
+                    <br>
+                    <button v-on:click="search($event,node,attr)">Search</button>
+                    <button v-on:click="cancelsearch($event,node,attr)">Cancel</button>
+                    <button v-on:click="searchpattern = ''">Clear</button>
+                    <input type="radio" value="string" v-model="datatype">String
+                    <input type="radio" value="number" v-model="datatype">Number
+                    <input type="radio" value="date"   v-model="datatype">Date
+                </span>
+            </th>
+        </tr>
+        <tr v-for="node in nodes">
+            <td><a href="#" v-on:click="editnode(node)">${ node.id }</a>
+            <td v-for="attr in attrs" v-on:click="edit(node,attr)">
+                <span v-show="node.edited_attr != attr">${ node.attrs[attr] }</span>
+                <span v-show="node.edited_attr == attr">
+                    <input v-model="node.attrs[attr]" v-bind:size="50" v-bind:class="{ error: hasError }">
+                    <br>
+                    <button v-on:click="update($event,node,attr)">Update</button><button v-on:click="cancel($event,node,attr)">Cancel</button>
+                    <input type="radio" value="string" v-model="datatype">String
+                    <input type="radio" value="number" v-model="datatype">Number
+                    <input type="radio" value="date"   v-model="datatype">Date
+                </span>
+            </td>
+        </tr>
+        </table>
+    </div>
+
+    <div class="box" v-if="editform">
+    <div class="box2">
+        <h3>${ label }</h3>
+        <!--
+        <a href="#" v-on:click="get_nodes(label,skip-1)">Prev</a>
+        <a href="#" v-on:click="get_nodes(label,skip)">Next</a>
+        -->
+        <table border xwidth="100%">
+            <td>Id<td v-on:click="find(node)">${ node.id }</a>
+                <span v-show="edit_key">
+                    <input v-model="nodeid" v-bind:size="50" type='number'>
+                    <button v-on:click="fetch($event)">Fetch</button><button v-on:click="cancel_fetch($event,node,attr)">Cancel</button>
+                </span>
+            <tr v-for="attr in attrs1">
+            <td>
+                ${ attr }
+            <td v-on:click="edit(node,attr)">
+                <span v-show="node.edited_attr != attr">${ node.attrs[attr] }</span>
+                <span v-show="node.edited_attr == attr">
+                    <input v-model="node.attrs[attr]" v-bind:size="50" v-bind:class="{ error: hasError }">
+                    <br>
+                    <button v-on:click="update($event,node,attr)">Update</button><button v-on:click="cancel($event,node,attr)">Cancel</button>
+                    <input type="radio" value="string" v-model="datatype">String
+                    <input type="radio" value="number" v-model="datatype">Number
+                    <input type="radio" value="date"   v-model="datatype">Date
+                </span>
+            </tr>
+        </table>
+    </div>
+
+    <div class="box2" cv-if="editform">
+        <b>(n) <span style="font-size:26px">&rarr;</span> (${ label } )</b>
+        <table border>
+            <tr v-for="link in links.links2">
+            <td>(${link.labels[0]} <a href="#" v-on:click="label=link.labels[0];node=link.a;nodeid=link.id;fetch($event)">${ link.id }</a>)
+                -[:${link.rtype} <span v-if="link.r.role">role=${link.r.role}</span>]-> (${ label } )
+        </table>
+    </div>
+
+    <div class="box2" cv-if="editform">
+        <b v-show="links1length">(${ label }) <span style="font-size:26px">&rarr;</span> (n)</b>
+        <table border>
+            <tr v-for="link in links.links1">
+            <td> (${ label } ) -[:${link.rtype} <span v-if="link.r.role">role=${link.r.role}</span>]->
+            (${link.labels[0]} <a href="#" v-on:click="label=link.labels[0];node=link.a;nodeid=link.id;fetch($event)">${ link.id }</a>)
+        </table>
+    </div>
+
+    <button v-on:click="editform=false;listview=true">Done</button>
+
+    </div>
+
+    
+</div>
+
+<script>
+
+function log(msg) {
+	console.log(msg);
+}
+
+function numeric(str) {
+    return !isNaN(new Number(str));
+}
+
+var app = new Vue({
+    delimiters: ['${', '}'],
+    el: '#dbEditor',
+    created: function() {
+        this.init();    
+    },
+    filters: {
+        truncate: function(value, size) {
+            if (value.length > size) {
+                value = value.substring(0, size-3) + '...';
+            }
+            return value;
+        }
+    },
+    data: {
+        listview: false,
+        labels: [],
+        label:undefined,
+        nodes: [],
+        node:undefined,
+        attrs: [],
+        attrs1: [],
+        editing: false,
+        hasError: false,
+        skip:0,
+        nodeid:undefined,
+        edit_key: false,
+        editform: false,
+        datatype: 'string',
+        search_attr: undefined,
+        searchpattern: '',
+        links: [],
+        links1length: 0
+    }, // data
+    methods: {
+        init: function() {
+            this.get_labels();
+        },
+
+		select_label:  function(label,event) {
+    		log("labels="+app.labels);
+    		log("label="+label);
+    		log("e="+event);
+    		app.label = label;
+    		app.skip = 0;
+    		app.editform = false;
+            app.editing = false;
+            app.listview = true;
+    		app.get_nodes(label,0);
+		},
+
+        get_nodes: function(label,skip) {
+	        if (skip < 0) skip = 0;
+    		app.editform = false;
+            axios.get('nodes/'+label+"/"+skip).
+                then(function(rsp, status) {
+                    log(rsp);
+        		    let attrs = [];
+        		    app.skip = skip;
+		            rsp.data.forEach(rec => {
+		                let id = rec.id;
+		                let node = rec.attrs;
+		                log(node);
+		                for (attr in node) {
+		                    if (attrs.indexOf(attr) == -1) {
+            		            log("attr:"+attr);
+            		            attrs.push(attr);
+		                    }
+	                    }
+	                    rec.edited_attr = false;
+	                    app.skip++;
+		            });
+		            log("attrs:"+attrs);
+                    app.nodes = rsp.data;
+		            app.attrs = attrs;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Fetching nodes failed";
+                });
+        },
+        get_labels: function(q) {
+            this.labels = ['Person','Family'];
+            //return 
+            axios.get('labels').
+                then(function(rsp, status) {
+                    log(rsp);
+                    app.labels = rsp.data;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					app.status = "Fetching labels failed";
+                });
+        },
+        editnode: function(node) {
+            log("editnode:"+node.id);
+            app.node = node;
+            app.editform = true;
+            app.nodeid = node.id;
+            app.attrs1 = []
+            for (attr in node.attrs) app.attrs1.push(attr);
+            app.editing = false;
+            app.listview = false;
+            app.fetch_links();
+        },        
+        edit: function(node,attr) {
+            log("edit:"+node.id+","+attr+"(datatype="+app.datatype+")");
+            if (app.editing) return;
+            this.original_value = node.attrs[attr];
+            app.datatype = 'string';
+            if (numeric(this.original_value)) {
+                app.datatype = 'number';
+            }
+            app.node = node;
+            app.editing = true;
+            app.node.edited_attr = attr;
+            Vue.set(app.node, 'edited_attr', attr);
+			app.hasError = false;
+            log("node=");
+            log(app.node);
+            log(node);
+        },        
+        find: function(node) {
+            log("find:"+node.id);
+            app.nodeid = node.id;
+            app.edit_key = true;
+        },        
+        fetch: function(event) {
+            log("fetch:"+app.nodeid);
+            event.stopPropagation();
+            axios.get('fetch/' + app.nodeid).
+                then(function(rsp, status) {
+                    log("rsp.data.n=")
+                    log(rsp.data.n);
+                    log("rsp.data.labels=")
+                    log(rsp.data.labels);
+                    app.node = {id:app.nodeid,attrs:rsp.data.n,edited_attr:undefined};
+                    app.label = rsp.data.label;
+                    app.attrs1 = []
+                    for (attr in app.node.attrs) app.attrs1.push(attr);
+                    app.fetch_links();
+                    app.edit_key = false;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					log("Fetching node failed");
+					app.status = "Fetching node failed";
+                });
+        },
+        fetch_links: function() {
+            log("fetch links:"+app.nodeid);
+            //event.stopPropagation();
+            axios.get('fetch_links/' + app.node.id).
+                then(function(rsp, status) {
+                    log("rsp.data="+rsp.data);
+                    app.links = rsp.data;
+                    app.links1length = app.links.links1.length;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					log("Fetching links failed");
+					app.status = "Fetching links failed";
+                });
+        },
+        cancel_fetch: function(event,node,attr) {
+            log("cancel fetch:"+node.id+","+attr);
+            event.stopPropagation();
+            app.edit_key = false;
+        },
+        update: function(event,node,attr) {
+            log("update:"+node.id+","+attr+"(datatype="+app.datatype+")");
+            event.stopPropagation();
+            log("value:",node.attrs[attr]);
+            log(node);
+            axios.post('update',{id:node.id,label:app.label,attr:attr,value:node.attrs[attr],datatype:app.datatype}).
+                then(function(rsp, status) {
+                    log(rsp);
+                    node.edited_attr = undefined;
+                    app.editing = false;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					log("Fetching links failed");
+					app.hasError = true;
+					app.status = "Update failed";
+                });
+            return false;
+        },        
+        cancel: function(event,node,attr) {
+            log("cancel:"+node.id+","+attr);
+            event.stopPropagation();
+            node.attrs[attr] = this.original_value;
+            node.edited_attr = undefined;
+            app.editing = false;
+            return false;
+        },        
+        open_search: function(attr) {
+            log("open_search:"+attr);
+            if (app.editing) return;
+            app.search_attr = attr;
+			app.hasError = false;
+            app.editing = true;
+        },
+        search: function(event,node,attr) {
+            log("search:"+app.label+","+attr+"(datatype="+app.datatype+")="+app.searchpattern);
+            event.stopPropagation();
+            axios.post('search',{label:app.label,attr:attr,pattern:app.searchpattern,datatype:app.datatype}).
+                then(function(rsp, status) {
+                    log(rsp);
+                    rsp.data.forEach( node => { node.edited_attr = false; });
+                    app.nodes = rsp.data;
+                    app.search_attr = undefined;
+                    app.editing = false;
+                }).
+                catch(function(rsp, status) {
+                    log(rsp);
+					log("Search failed");
+					app.hasError = true;
+					app.status = "Search failed";
+                });
+            return false;
+        },        
+        cancelsearch: function(event,node,attr) {
+            log("cancelsearch:"+attr);
+            event.stopPropagation();
+            app.search_attr = undefined;
+            app.editing = false;
+			app.hasError = false;
+            return false;
+        }        
+    } // methods
+
+});
+
+</script>
+
+{% endblock %}
