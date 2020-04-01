@@ -13,7 +13,7 @@ from .note import Note
 from .media import Media
 from .dates import DateRange
 from .cypher import Cypher_place
-from models.dbtree import DbTree
+#from models.dbtree import DbTree
 from models.gen.event_combo import Event_combo
 from models.gen.person_name import Name
 
@@ -515,97 +515,97 @@ class Place_combo(Place):
         return ret
 
 
-    @staticmethod
-    def get_place_tree(locid):
-        """ Haetaan koko paikkojen ketju paikan locid ympärillä
-            Palauttaa listan paikka-olioita ylimmästä alimpaan.
-            Jos hierarkiaa ei ole, listalla on vain oma Place_combo.
-
-            Esim. Tuutarin hierarkia
-                  2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala
-                  tulee tietokannasta näin:
-            ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
-            │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
-            ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
-            │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
-            ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-            │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
-            ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-            │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
-            └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
-            Metodi palauttaa siitä listan
-                Place(result[0].id2) # Artjärvi City
-                Place(result[0].id1) # Männistö Village
-                Place(result[1].id1) # Pekkala Farm
-            Muuttuja lv on taso:
-                >0 = ylemmät,
-                 0 = tämä,
-                <0 = alemmat
-        """
-
-        # Query for Place hierarcy
-        hier_query = """
-MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
-    UNION
-MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
-"""
-        # Query for single Place without hierarcy
-        root_query = """
-MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.uuid as uuid, p.pname AS name
-"""
-        # Query to get names for a Place
-        name_query="""
-MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid
-RETURN COLLECT(n) AS names LIMIT 15
-"""
-
-        t = DbTree(shareds.driver, hier_query, 'pname', 'type')
-        t.load_to_tree_struct(locid)
-        if t.tree.depth() == 0:
-            # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
-            # Hae oman paikan tiedot ilman yhteyksiä
-            with shareds.driver.session() as session:
-                result = session.run(root_query, locid=int(locid))
-                record = result.single()
-                t.tree.create_node(record["name"], locid, parent=0,
-                                   data={'type': record["type"],'uuid':record['uuid']})
-        ret = []
-        for node in t.tree.expand_tree(mode=t.tree.DEPTH):
-            logger.debug(f"{t.tree.depth(t.tree[node])} {t.tree[node]} {t.tree[node].bpointer}")
-            if node != 0:
-                n = t.tree[node]
-
-                # Get all names
-                with shareds.driver.session() as session:
-                    result = session.run(name_query, locid=node)
-                    record = result.single()
-#                     Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
-#                     josta tehdään ["Svartholm (sv)","Svartholma"]
+#     @staticmethod
+#     def get_place_tree(locid):
+#         """ Haetaan koko paikkojen ketju paikan locid ympärillä
+#             Palauttaa listan paikka-olioita ylimmästä alimpaan.
+#             Jos hierarkiaa ei ole, listalla on vain oma Place_combo.
+# 
+#             Esim. Tuutarin hierarkia
+#                   2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala
+#                   tulee tietokannasta näin:
+#             ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
+#             │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
+#             ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
+#             │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
+#             ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
+#             │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
+#             ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
+#             │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
+#             └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
+#             Metodi palauttaa siitä listan
+#                 Place(result[0].id2) # Artjärvi City
+#                 Place(result[0].id1) # Männistö Village
+#                 Place(result[1].id1) # Pekkala Farm
+#             Muuttuja lv on taso:
+#                 >0 = ylemmät,
+#                  0 = tämä,
+#                 <0 = alemmat
+#         """
+# 
+#         # Query for Place hierarcy
+#         hier_query = """
+# MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
+#     RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
+#     UNION
+# MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
+#     RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
+# """
+#         # Query for single Place without hierarcy
+#         root_query = """
+# MATCH (p:Place) WHERE ID(p) = $locid
+# RETURN p.type AS type, p.uuid as uuid, p.pname AS name
+# """
+#         # Query to get names for a Place
+#         name_query="""
+# MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid
+# RETURN COLLECT(n) AS names LIMIT 15
+# """
+# 
+#         t = DbTree(shareds.driver, hier_query, 'pname', 'type')
+#         t.load_to_tree_struct(locid)
+#         if t.tree.depth() == 0:
+#             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
+#             # Hae oman paikan tiedot ilman yhteyksiä
+#             with shareds.driver.session() as session:
+#                 result = session.run(root_query, locid=int(locid))
+#                 record = result.single()
+#                 t.tree.create_node(record["name"], locid, parent=0,
+#                                    data={'type': record["type"],'uuid':record['uuid']})
+#         ret = []
+#         for node in t.tree.expand_tree(mode=t.tree.DEPTH):
+#             logger.debug(f"{t.tree.depth(t.tree[node])} {t.tree[node]} {t.tree[node].bpointer}")
+#             if node != 0:
+#                 n = t.tree[node]
+# 
+#                 # Get all names
+#                 with shareds.driver.session() as session:
+#                     result = session.run(name_query, locid=node)
+#                     record = result.single()
+# #                     Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
+# #                     josta tehdään ["Svartholm (sv)","Svartholma"]
+# #                     
+#                     # <Record names=[
+#                     #    <Node id=289028 labels={'Place_name'} 
+#                     #        properties={'name': 'Finland', 'lang': 'sv'}>, 
+#                     #    <Node id=289027 labels={'Place_name'} 
+#                     #        properties={'name': 'Suomi', 'lang': ''}>, 
+#                     #    <Node id=289029 labels={'Place_name'} 
+#                     #        properties={'name': 'Finnland', 'lang': 'de'}>
+#                     # ]>
+#                 lv = t.tree.depth(n)
+#                 p = Place_combo(uniq_id=node, ptype=n.data['type'], level=lv)
+#                 p.uuid = n.data['uuid']
+#                 for node in record['names']:
+#                     p.names.append(PlaceName.from_node(node))
+#                 # TODO: Order by lang here!
+#                 if p.names:
+#                     p.pname = p.names[0].name
 #                     
-                    # <Record names=[
-                    #    <Node id=289028 labels={'Place_name'} 
-                    #        properties={'name': 'Finland', 'lang': 'sv'}>, 
-                    #    <Node id=289027 labels={'Place_name'} 
-                    #        properties={'name': 'Suomi', 'lang': ''}>, 
-                    #    <Node id=289029 labels={'Place_name'} 
-                    #        properties={'name': 'Finnland', 'lang': 'de'}>
-                    # ]>
-                lv = t.tree.depth(n)
-                p = Place_combo(uniq_id=node, ptype=n.data['type'], level=lv)
-                p.uuid = n.data['uuid']
-                for node in record['names']:
-                    p.names.append(PlaceName.from_node(node))
-                # TODO: Order by lang here!
-                if p.names:
-                    p.pname = p.names[0].name
-                    
-                #logger.info("# {}".format(p))
-                p.parent = n.bpointer
-                ret.append(p)
-        return ret
+#                 #logger.info("# {}".format(p))
+#                 p.parent = n.bpointer
+#                 ret.append(p)
+#         return ret
 
 
     @staticmethod
