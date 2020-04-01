@@ -73,27 +73,12 @@
 
 {% macro select_dataset() -%}
     {#  Show and change data: researcher data or approved common data. #}
-       {{ _('data set') }} <b>{{ user_context.owner_str() }}</b>
+       {{ user_context.owner_str() }}
     {% if user_context.user %}
         {% if user_context.context == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
         {%endif%}
-            (<i><a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}" 
-                 style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
-    {% endif %}
-{%- endmacro %}
-
-{% macro select_dataset_menu_1() -%}
-    {#  Show and change data: approved common data, possibly with researcher data. #}
-    {% if user_context.user %}
-        {% if user_context.context == 1 %}{%set newdiv = 2%}
-            {{ _('Views the approved common data only.') }}
-        {%else%}
-            {% if user_context.context == 2 %}{%set newdiv = 1%}
-                {{ _('Views your candidate materials.') }}
-            {%endif%}
-        {%endif%}
-            (<i><a href="?div={{newdiv}}" title="{{ _('Change the data set shown') }}" 
-                 style="text-decoration-line: underline;">{{ _('Change') }}</a></i>).
+            (<i><a href="?div={{newdiv}}" 
+                 title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a></i>)
     {% endif %}
 {%- endmacro %}
 

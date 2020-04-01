@@ -5170,22 +5170,22 @@ msgid "Unable to load file, code ="
 msgstr ""
 
 #: ui/user_context.py:93
-msgid "approved common data"
+msgid "Approved common data"
 msgstr ""
 
 #: ui/user_context.py:94
-msgid "all my candidate data"
+msgid "My candidate data"
 msgstr ""
 
 #: ui/user_context.py:95
-msgid "my selected candidate batch"
+msgid "My selected candidate batch"
 msgstr ""
 
 #: ui/user_context.py:96
-msgid "my own and approved common data"
+msgid "My own and approved common data"
 msgstr ""
 
 #: ui/user_context.py:97
-msgid "my selected batch and approved common data"
+msgid "My selected batch and approved common data"
 msgstr ""
 

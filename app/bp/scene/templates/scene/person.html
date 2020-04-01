@@ -264,15 +264,17 @@ u { color: DarkKhaki; text-decoration: none; }
 {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media files") }}</h4>
-        {% for ref, crop, ord in person.media_ref %}
-            <div class="thumbnail">{% set photo=obj[ref] %}
+        {% for ref, crop0, ord in person.media_ref %}
+           {% set photo=obj[ref] %}
+           {% set crop=crop0|replace(" ", "") %}
+            <div class="thumbnail">
                 <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
 	                <img alt="({{ _('Photo') }}) {{ord}}" 
-	                     src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop|replace(" ", "")}}" 
+	                     src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
 	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
                 </a>
                 <p><a href="/scene/media?uuid={{photo.uuid}}"
-                      title="{{ _('Photo information') }}">
+                      title="{{ _('Go to photo page') }}">
                       {{photo.description}}</a> {{ macro.notelink(photo) }}
 {% if crop %}<br><i>{{ _('crop') }} {{crop}}</i>{% endif %}
                 </p>

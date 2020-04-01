@@ -90,11 +90,11 @@ class UserContext():
         def __init__(self):
             ''' Initialise choise texts in user language '''
             self.as_str = {
-                self.COMMON:              N_('approved common data'), 
-                self.OWN:                 N_('all my candidate data'), 
-                self.BATCH:               N_('my selected candidate batch'),
-                self.COMMON + self.OWN:   N_('my own and approved common data'), 
-                self.COMMON + self.BATCH: N_('my selected batch and approved common data')
+                self.COMMON:              N_('Approved common data'), 
+                self.OWN:                 N_('My candidate data'), 
+                self.BATCH:               N_('My selected candidate batch'),
+                self.COMMON + self.OWN:   N_('My own and approved common data'), 
+                self.COMMON + self.BATCH: N_('My selected batch and approved common data')
             }
             self.batch_name = None
 

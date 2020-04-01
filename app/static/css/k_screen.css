@@ -73,6 +73,11 @@ body > div {
     margin-left:50px;
     margin-bottom:1em;
 }
+#startdiv h2 {margin-bottom: 0;}
+#startdiv div {color: #006;}
+#startdiv div i a {
+	color: #006;
+	text-decoration-line: underline;}
 
 .content {
     background-color: white;
