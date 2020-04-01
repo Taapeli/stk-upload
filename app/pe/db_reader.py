@@ -62,7 +62,7 @@ class DBreader:
             use_user = None
         else:
             use_user = context.user
-        places = self.dbdriver.place_list(use_user, fw, context.count)
+        places = self.dbdriver.place_list(use_user, fw, context.count, lang=context.lang)
 
         # Update the page scope according to items really found 
         if places:

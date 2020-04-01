@@ -1,8 +1,13 @@
+# Jinja macros for Scene pages
+# 1.4.2020 / JMä
+
+
+# 0. Common widgets
+
 {% macro lock(value) -%}
     {# Draws a lock icon, is value is '1' #}
 	{% if value == '1' %}&#x1F512;{% endif %}                           
 {%- endmacro %}
-
 
 {% macro stars(value) -%}
    {# Confidence value as stars. 
@@ -27,6 +32,9 @@
      {% endif %}
    {% endif %}                           
 {%- endmacro %}
+
+
+# 1. Page tabs
 
 {% macro menu(value) -%}
   {% if current_user and current_user.is_authenticated %}{% set hide = 0 %}
@@ -82,12 +90,18 @@
     {% endif %}
 {%- endmacro %}
 
+
+# 2. Data display
+
 {% macro all_obj_ids(obj) -%}
     {#  Formats object keys for display. #}
     <tt title="{{ _('UUID key') }}">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
 {%- endmacro %}
+
+
+# 2.1 Person
 
 {% macro person_name(name) -%}
     {#  Formats a Person name. Shows firstname and a surname or patronyme. #}
@@ -191,7 +205,22 @@
         {% endif %}
     {% endif %}
 {%- endmacro %}
-                    
+
+{% macro lifetimes(p) -%}
+    {# Displays Person's life time estimates '1662/1709 — 1726/1819' #}
+    {% if p.death_high != 9999 %}
+        {% if p.birth_low != p.birth_high %}
+            {{p.birth_low}}…{% endif 
+        %}{{p.birth_high}} &ndash; {{p.death_low}}{%
+         if p.death_low != p.death_high 
+         %}…{{p.death_high}}
+         {% endif %}
+    {% endif %}
+{%- endmacro %}
+
+
+# 2.2 Note and citation
+
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
     {% if note.url %}
@@ -216,33 +245,6 @@
     <td>{% for l in list1 %}{{ l }} {% endfor %}</td>
 {%- endmacro %}
 
-{% macro place_names_lang(pl) -%}
-    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
-    {% for n in pl.names %}{% if not loop.first %} / {% endif %}
-       {{ n.name|safe }}{% endfor 
-%}{%- endmacro %}
-
-{% macro place_names(pl) -%}
-    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
-    {% for n in pl.names %} {# pre-sorted, no |sort(attribute='lang') #}
-        {% if not loop.first %} • {% endif %}
-        {% if n.lang %}<span class='typedesc'>{{n.lang}}</span>&nbsp;{% 
-         endif %}{{ n.name|safe }}
-    {% endfor %}
-{%- endmacro %}
-
-{% macro lifetimes(p) -%}
-    {# Displays Person's life time estimates '1662/1709 — 1726/1819' #}
-    {% if p.death_high != 9999 %}
-	    {% if p.birth_low != p.birth_high %}
-	        {{p.birth_low}}…{% endif 
-	    %}{{p.birth_high}} &ndash; {{p.death_low}}{%
-	     if p.death_low != p.death_high 
-	     %}…{{p.death_high}}
-	     {% endif %}
-	{% endif %}
-{%- endmacro %}
-
 {% macro citation_link(cit_list, obj) -%}
     {# Creates template <sup>citation link</sup> for each citation.
        - cit_list   list of citation uniq_ids
@@ -262,5 +264,23 @@
        <a id="N{{note.uniq_id}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
          <i>{{note.text}}</i></a>{% endfor %}</sup>{% endif 
 %}{%- endmacro %}
+
+
+# 2.3 Place
+
+{% macro place_names_lang(pl) -%}
+    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
+    {% for n in pl.names %}{% if not loop.first %} / {% endif %}
+       {{ n.name|safe }}{% endfor 
+%}{%- endmacro %}
+
+{% macro place_names(pl) -%}
+    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
+    {% for n in pl.names %} {# pre-sorted, no |sort(attribute='lang') #}
+        {% if not loop.first %} • {% endif %}
+    {#  {% if n.lang %}<span class='typedesc'>{{n.lang}}</span>&nbsp;{% endif %} #}
+        {{ n.name|safe }}
+    {% endfor %}
+{%- endmacro %}
 
 

@@ -92,7 +92,7 @@ class Neo4jDriver:
         return persons
 
 
-    def place_list(self, user, fw_from, limit):
+    def place_list(self, user, fw_from, limit, lang='fi'):
         ''' Read place list from given start point
         '''
         #fw = self.context.next_name_fw()
@@ -101,14 +101,14 @@ class Neo4jDriver:
                 #1 get approved common data
                 print("pe.neo4j.reader.Neo4jDriver.place_list: by owner with common")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
-                                     user=user, fw=fw_from, 
-                                     limit=limit)
+                                     user=user, fw=fw_from, limit=limit,
+                                     lang=lang)
             else: 
                 #2 get my own (no owner name needed)
                 print("pe.neo4j.reader.Neo4jDriver.place_list: by owner only")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
-                                     user=user, fw=fw_from, 
-                                     limit=limit)
+                                     user=user, fw=fw_from, limit=limit,
+                                     lang=lang)
 
         ret =[]
         for record in result:

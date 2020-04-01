@@ -45,6 +45,7 @@ gray                    #999
 gray light              #CCC
 gray very light         #EEE
 white                   #FFF
+dark blue               #006
 --------------------------------------------------------------------------------------------------
 Characteristic of this style is that it uses the full width of the browser
 window and that horizontal highlighting bars extend over the full width of
@@ -153,7 +154,7 @@ img#logo {
 }
 li.minor { list-style-type: circle; }
 li.major { list-style-type: square; }
-.inlink { color: #000066; background: LemonChiffon; }
+.inlink { color: #006; background: LemonChiffon; }
 .outlink { text-decoration: underline; color:gray}
 .refname { color:gray; font-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
@@ -164,7 +165,7 @@ td.numbers {
     padding-right: 2em;
 }
 td.ColumnEvent ul li i {
-	color: #000066;
+	color: #006;
 }
 .typedesc {
 	font-variant: small-caps;
@@ -577,9 +578,9 @@ ul.eventnotes {
 .eventgrid {  display: flex; }
 .eventgrid .col { float: left; }
 .eventgrid .col.col_event { width: 15em; }
-.eventgrid .col.col_event span.evtype {
+.eventgrid .col.col_event span.#006 {
     font-style: italic;
-    color: #000066;
+    color: #006;
 }
 .eventgrid .col.col_date { width: 60%; }
 .major { font-weight: bold; }
