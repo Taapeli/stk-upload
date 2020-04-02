@@ -32,7 +32,7 @@ from models.gen.media import Media
 from models.datareader import read_persons_with_events
 #from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_event_participants
-from models.datareader import get_place_with_events
+#from models.datareader import get_place_with_events
 from models.datareader import get_source_with_events
 
 from pe.neo4j.reader import Neo4jDriver
@@ -391,7 +391,6 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 100, type=int)
 
-
     dbdriver = Neo4jDriver(shareds.driver)
     db = DBreader(dbdriver, u_context) 
 
@@ -408,29 +407,29 @@ def show_places():
 
 
 @bp.route('/scene/location/uuid=<locid>')
-#@bp.route('/scene/location=<int:locid>')
 def show_place_page(locid):
     """ Home page for a Place, shows events and place hierarchy.
     """
     try:
-        # List 'place_list' has Place objects with 'parent' field pointing to
-        # upper place in hierarcy. Events
-        my_context = UserContext(user_session, current_user, request)
-        my_context.set_scope_from_request(request, 'person_scope')
-        #if my_context.use_common():
-        #    events = [e for e in events if not e.person.too_new]
-        place, place_list, events = get_place_with_events(locid)
+        u_context = UserContext(user_session, current_user, request)
+        u_context.set_scope_from_request(request, 'place_scope')
+
+        dbdriver = Neo4jDriver(shareds.driver)
+        db = DBreader(dbdriver, u_context) 
+    
+        results = db.get_place_with_events(locid)
+        #place, place_list, events = get_place_with_events(locid)
 
     except KeyError as e:
         import traceback
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in place_list:        print (f"# {p} ")
+#     for p in hierarchy:         print (f"# {p} ")
 #     for e in events:            print (f"# {e} {e.description}")
 #     for u in place.notes:       print (f"# {u} ")
     logger.info("-> bp.scene.routes.show_place_page")
-    return render_template("/scene/place_events.html", place=place, 
-                           events=events, pl_hierarchy=place_list)
+    return render_template("/scene/place_events.html", place=results.items, 
+                           events=results.events, pl_hierarchy=results.hierarchy)
 
 # ------------------------------ Menu 5: Sources --------------------------------
 

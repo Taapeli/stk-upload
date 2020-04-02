@@ -1045,38 +1045,38 @@ def get_families_data_by_id(uniq_id):
     return (p, families)
 
 
-def get_place_with_events (loc_id):
-    """ Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
-        Palauttaa paikkahierarkian ja (henkilö)tapahtumat muodossa
-        [Place_list, Event_table].
-
-    place_list: Lista Place-objekteja, joissa kentät
-        id      locid eli uniq_id
-        type    paikan tyyppi (Farm, Village, ...)
-        pname   paikannimi
-        parent  isäsolmun id
-
-    event_table:
-        person        person's info
-        names         list of tuples [name_type, given_name, surname]
-        etype         event type
-        edates        event date
-    """
-    place = Place_combo.get_w_notes(loc_id)
-    try:
-        place_list = Place_combo.get_place_tree(place.uniq_id)
-    except AttributeError as e:
-        traceback.print_exc()
-        flash(f"Place {loc_id} not found", 'error')
-        traceback.print_exc()
-        return None, None, None
-    except ValueError as e:
-        flash(str(e), 'error')
-        traceback.print_exc()
-        place_list = []
-            
-    event_table = Place.get_place_events(place.uniq_id)
-    return (place, place_list, event_table)
+# def get_place_with_events (loc_id): --> DBreader.get_place_with_events
+#     """ Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
+#         Palauttaa paikkahierarkian ja (henkilö)tapahtumat muodossa
+#         [Place_list, Event_table].
+# 
+#     place_list: Lista Place-objekteja, joissa kentät
+#         id      locid eli uniq_id
+#         type    paikan tyyppi (Farm, Village, ...)
+#         pname   paikannimi
+#         parent  isäsolmun id
+# 
+#     event_table:
+#         person        person's info
+#         names         list of tuples [name_type, given_name, surname]
+#         etype         event type
+#         edates        event date
+#     """
+#     place = Place_combo.get_w_notes(loc_id)
+#     try:
+#         place_list = Place_combo.get_place_tree(place.uniq_id)
+#     except AttributeError as e:
+#         traceback.print_exc()
+#         flash(f"Place {loc_id} not found", 'error')
+#         traceback.print_exc()
+#         return None, None, None
+#     except ValueError as e:
+#         flash(str(e), 'error')
+#         traceback.print_exc()
+#         place_list = []
+#             
+#     event_table = Place.get_place_events(place.uniq_id)
+#     return (place, place_list, event_table)
 
 
 def get_note_list(uniq_id=None):

@@ -3,19 +3,24 @@ Created on 17.3.2020
 
 @author: jm
 '''
+import traceback
 
 class DBreader:
     ''' Public methods for accessing active database.
     
         Returns a PersonResult object
     '''
-    def __init__(self, dbdriver, my_context):
+    def __init__(self, dbdriver, u_context):
         ''' Create a reader object with db driver and user context.
         '''
         self.dbdriver = dbdriver
-        self.user_context = my_context  
-        self.username = my_context.user
-    
+        self.user_context = u_context  
+        self.username = u_context.user
+        if u_context.context == u_context.ChoicesOfView.COMMON:
+            self.use_user = None
+        else:
+            self.use_user = u_context.user
+   
     def person_list(self):
         ''' List person data including all data needed to Person page.
         
@@ -23,11 +28,7 @@ class DBreader:
         '''
         context = self.user_context
         fw = context.next_name_fw()
-        if context.context == context.ChoicesOfView.COMMON:
-            use_user = None
-        else:
-            use_user = context.user
-        persons = self.dbdriver.person_list(use_user, fw, context.count)
+        persons = self.dbdriver.person_list(self.use_user, fw, context.count)
 
         # Update the page scope according to items really found 
         if persons:
@@ -40,7 +41,7 @@ class DBreader:
             context.session.pop('next_person')
             context.session.modified = True
 
-        if use_user is None:
+        if self.use_user is None:
             persons2 = [p for p in persons if not p.too_new]
             num_hidden = len(persons) - len(persons2)
         else:
@@ -58,11 +59,8 @@ class DBreader:
 
         context = self.user_context
         fw = context.next_name_fw()
-        if context.context == context.ChoicesOfView.COMMON:
-            use_user = None
-        else:
-            use_user = context.user
-        places = self.dbdriver.place_list(use_user, fw, context.count, lang=context.lang)
+        places = self.dbdriver.place_list(self.use_user, fw, context.count, 
+                                          lang=context.lang)
 
         # Update the page scope according to items really found 
         if places:
@@ -73,13 +71,57 @@ class DBreader:
         return place_result
 
 
+    def get_place_with_events(self, uuid):
+        """ Read the place hierarchy and events connected to this place.
+        
+            Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
+            Palauttaa paikkahierarkian ja (henkilö)tapahtumat muodossa
+            [Place_list, Event_table].
+    
+        place_list: A list of Place objects containing
+            id          int uniq_id
+            type        str paikan tyyppi (Farm, Village, ...)
+            pname       str paikannimi
+            parent      int uniq_if of upper place in hierarchy isäsolmun id
+    
+        event_table:
+            person        person's info
+            names         list of tuples [name_type, given_name, surname]
+            etype         event type
+            edates        event date
+        """
+        place = self.dbdriver.get_place_w_notes(self.use_user, uuid, 
+                                                self.user_context.lang)
+        place_result = PlaceResult(place)
+        if not place:
+            place_result.error = f"DBreader.get_place_with_events: {self.use_user} - no Place with uuid={uuid}"
+            return place_result
+        try:
+            place_result.hierarchy = \
+                self.dbdriver.get_place_tree(place.uniq_id, lang=self.user_context.lang)
+
+        except AttributeError as e:
+            traceback.print_exc()
+            place_result.error = f"Place tree for {place.uniq_id}: {e}"
+            return place_result
+        except ValueError as e:
+            place_result.error = f"Place tree for {place.uniq_id}: {e}"
+            traceback.print_exc()
+                
+        place_result.events = self.dbdriver.get_place_events(place.uniq_id)
+        return place_result     #(place, place_list, event_table)
+
+
+
 class PlaceResult:
     ''' Place's result object.
     '''
-    def __init__(self, items):
+    def __init__(self, items=[]):
         self.error = 0  
         self.num_hidden = 0
-        self.items = items  
+        self.items = items
+        self.hierarchy = []    # Hirearchy tree
+        self.events = []        # Events for selected place
 
 class PersonResult:
     ''' Person's result object.

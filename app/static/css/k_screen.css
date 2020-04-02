@@ -168,10 +168,15 @@ td.ColumnEvent ul li i {
 	color: #006;
 }
 .typedesc {
-	font-variant: small-caps;
-	text-transform: uppercase;
-	font-size: 84%;
-/* 	color: darkslategray; */
+    font-variant: small-caps;
+    text-transform: uppercase;
+    font-size: 84%;
+}
+.langcode {
+    font-variant: small-caps;
+    text-transform: uppercase;
+    font-size: 84%;
+    color: darkslategray;
 }
 
 div.NotFound {
