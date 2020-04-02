@@ -1045,7 +1045,7 @@ def get_families_data_by_id(uniq_id):
     return (p, families)
 
 
-# def get_place_with_events (loc_id):
+# def get_place_with_events (loc_id): --> DBreader.get_place_with_events
 #     """ Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
 #         Palauttaa paikkahierarkian ja (henkilö)tapahtumat muodossa
 #         [Place_list, Event_table].
