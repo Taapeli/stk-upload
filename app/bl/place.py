@@ -252,6 +252,27 @@ class PlaceName():
         pn.dates = node.get('dates')
         return pn
 
+    @staticmethod
+    def arrange_other_names(namelist:list):
+        ''' Arrange Place_name objects by name usefullness.
+        
+            The dafault language name processed outside this method
+            - First local names fi, sv
+            - Then names without lang
+            - Last other language names
+        '''
+        n_local = []
+        n_unknown = []
+        n_other = []
+        for nm in namelist:
+            if nm.lang in ['fi', 'sv']:
+                n_local.append(nm)
+            elif nm.lang == '':
+                n_unknown.append(nm)
+            else:
+                n_other.append(nm)
+        return n_local + n_unknown + n_other
+
     def _lang_key(self, obj):
         ''' Name comparison key by 1) language, 2) name '''
         lang_order = {'fi':'0', 'sv':'1', 'vi': '2', 'de':'3', 'la':'4', 'ru':'5', '':'6'}

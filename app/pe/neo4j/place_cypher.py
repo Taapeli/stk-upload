@@ -76,22 +76,29 @@ RETURN p AS person, r.role AS role,
     COLLECT(n) AS names, e AS event
 ORDER BY e.date1"""
 
-     # Query for Place hierarcy
-    hier_query = """
-MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
+    # Queries for Place page hierarcy
+    read_pl_hierarchy = """
+MATCH x= (p:Place)<-[:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
+    WITH NODES(x) AS nodes, relationships(x) as r
+    RETURN nodes, SIZE(r) AS lv, r
     UNION
-MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
+MATCH x= (p:Place)-[:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
+    WITH NODES(x) AS nodes, relationships(x) as r
+    RETURN nodes, SIZE(r)*-1 AS lv, r
 """
     # Query for single Place without hierarcy
     root_query = """
 MATCH (p:Place) WHERE ID(p) = $locid
 RETURN p.type AS type, p.uuid as uuid, p.pname AS name
 """
-    # Query to get names for a Place
-    name_query="""
-MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid
-RETURN COLLECT(n) AS names LIMIT 15
+    # Query to get names for a Place with $locid, $lang
+    read_pl_names="""
+MATCH (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
+    WHERE ID(place) = $locid
+with place, name
+    OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) WHERE not n = name
+RETURN name, COLLECT(n) AS names LIMIT 15
 """
+# MATCH (l:Place)-[:NAME]->(n:Place_name) WHERE ID(l) = $locid
+# RETURN COLLECT(n) AS names LIMIT 15
 

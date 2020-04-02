@@ -97,7 +97,8 @@ class DBreader:
             place_result.error = f"DBreader.get_place_with_events: {self.use_user} - no Place with uuid={uuid}"
             return place_result
         try:
-            place_result.hierarchy = self.dbdriver.get_place_tree(place.uniq_id)
+            place_result.hierarchy = \
+                self.dbdriver.get_place_tree(place.uniq_id, lang=self.user_context.lang)
 
         except AttributeError as e:
             traceback.print_exc()

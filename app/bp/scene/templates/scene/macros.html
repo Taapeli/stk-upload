@@ -269,18 +269,18 @@
 # 2.3 Place
 
 {% macro place_names_lang(pl) -%}
-    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
+    {# Displays Place_combo name variations as "Rymättylä / Rimito" #}
     {% for n in pl.names %}{% if not loop.first %} / {% endif %}
        {{ n.name|safe }}{% endfor 
 %}{%- endmacro %}
 
 {% macro place_names(pl) -%}
-    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
+    {# Displays Place_combo name variations as "Rymättylä • SV Rimito" #}
     {% for n in pl.names %} {# pre-sorted, no |sort(attribute='lang') #}
         {% if not loop.first %} • {% endif %}
-    {#  {% if n.lang %}<span class='typedesc'>{{n.lang}}</span>&nbsp;{% endif %} #}
+        {% if n.lang %}<span class='langcode'>{{n.lang}}</span>{% endif %}
         {{ n.name|safe }}
-    {% endfor %}
+    {%- endfor %}
 {%- endmacro %}
 
 

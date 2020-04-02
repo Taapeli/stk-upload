@@ -213,8 +213,10 @@ class Neo4jDriver:
 #             return None
 
 
-    def get_place_tree(self, locid):
-        """ Haetaan koko paikkojen ketju paikan locid ympärillä
+    def get_place_tree(self, locid, lang="fi"):
+        """ Read upper and lower places around this place.
+        
+            Haetaan koko paikkojen ketju paikan locid ympärillä
             Palauttaa listan paikka-olioita ylimmästä alimpaan.
             Jos hierarkiaa ei ole, listalla on vain oma Place_combo.
 
@@ -239,7 +241,7 @@ class Neo4jDriver:
                  0 = tämä,
                 <0 = alemmat
         """
-        t = DbTree(self.driver, CypherPlace.hier_query, 'pname', 'type')
+        t = DbTree(self.driver, CypherPlace.read_pl_hierarchy, 'pname', 'type')
         t.load_to_tree_struct(locid)
         if t.tree.depth() == 0:
             # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
@@ -250,35 +252,38 @@ class Neo4jDriver:
                 t.tree.create_node(record["name"], locid, parent=0,
                                    data={'type': record["type"],'uuid':record['uuid']})
         ret = []
-        for node in t.tree.expand_tree(mode=t.tree.DEPTH):
-            logger.debug(f"{t.tree.depth(t.tree[node])} {t.tree[node]} {t.tree[node].bpointer}")
-            if node != 0:
-                n = t.tree[node]
+        for tnode in t.tree.expand_tree(mode=t.tree.DEPTH):
+            logger.debug(f"{t.tree.depth(t.tree[tnode])} {t.tree[tnode]} {t.tree[tnode].bpointer}")
+            if tnode != 0:
+                n = t.tree[tnode]
 
-                # Get all names
+                # Get all names: default lang: 'name' and others: 'names'
                 with self.driver.session() as session:
-                    result = session.run(CypherPlace.name_query, locid=node)
+                    result = session.run(CypherPlace.read_pl_names,
+                                         locid=tnode, lang=lang)
                     record = result.single()
-#                     Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
-#                     josta tehdään ["Svartholm (sv)","Svartholma"]
-#                     
-                    # <Record names=[
-                    #    <Node id=289028 labels={'Place_name'} 
-                    #        properties={'name': 'Finland', 'lang': 'sv'}>, 
-                    #    <Node id=289027 labels={'Place_name'} 
-                    #        properties={'name': 'Suomi', 'lang': ''}>, 
-                    #    <Node id=289029 labels={'Place_name'} 
-                    #        properties={'name': 'Finnland', 'lang': 'de'}>
-                    # ]>
+                    # <Record
+                    #    name=<Node id=514413 labels={'Place_name'}
+                    #        properties={'name': 'Suomi', 'lang': ''}>
+                    #    names=[<Node id=514415 labels={'Place_name'}
+                    #            properties={'name': 'Finnland', 'lang': 'de'}>, 
+                    #        <Node id=514414 labels={'Place_name'} ...}>
+                    #    ]
+                    # >
                 lv = t.tree.depth(n)
-                p = PlaceBl(uniq_id=node, ptype=n.data['type'], level=lv)
+                p = PlaceBl(uniq_id=tnode, ptype=n.data['type'], level=lv)
                 p.uuid = n.data['uuid']
+                node = record['name']    
+                p.names.append(PlaceName.from_node(node))
+                oth_names = []
                 for node in record['names']:
-                    p.names.append(PlaceName.from_node(node))
-                # TODO: Order by lang here!
-                if p.names:
-                    p.pname = p.names[0].name
-                    
+                    oth_names.append(PlaceName.from_node(node))
+                # Arrage names by local language first 
+                lst = PlaceName.arrange_other_names(oth_names)
+                p.names += lst
+                
+                # TODO: Order by lang here! (The order field is not in use) 
+                p.pname = p.names[0].name
                 #logger.info("# {}".format(p))
                 p.parent = n.bpointer
                 ret.append(p)
