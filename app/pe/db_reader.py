@@ -51,7 +51,7 @@ class DBreader:
         return person_result
 
 
-    def place_list(self):
+    def get_place_list(self):
         """ Get a list on PlaceBl objects with nearest heirarchy neighbours.
         
             Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
@@ -59,8 +59,8 @@ class DBreader:
 
         context = self.user_context
         fw = context.next_name_fw()
-        places = self.dbdriver.place_list(self.use_user, fw, context.count, 
-                                          lang=context.lang)
+        places = self.dbdriver.get_place_list_fw(self.use_user, fw, context.count, 
+                                                 lang=context.lang)
 
         # Update the page scope according to items really found 
         if places:
@@ -75,20 +75,8 @@ class DBreader:
         """ Read the place hierarchy and events connected to this place.
         
             Luetaan aneettuun paikkaan liittyvä hierarkia ja tapahtumat
-            Palauttaa paikkahierarkian ja (henkilö)tapahtumat muodossa
-            [Place_list, Event_table].
+            Palauttaa paikkahierarkian ja (henkilö)tapahtumat.
     
-        place_list: A list of Place objects containing
-            id          int uniq_id
-            type        str paikan tyyppi (Farm, Village, ...)
-            pname       str paikannimi
-            parent      int uniq_if of upper place in hierarchy isäsolmun id
-    
-        event_table:
-            person        person's info
-            names         list of tuples [name_type, given_name, surname]
-            etype         event type
-            edates        event date
         """
         place = self.dbdriver.get_place_w_notes(self.use_user, uuid, 
                                                 self.user_context.lang)
@@ -109,7 +97,7 @@ class DBreader:
             traceback.print_exc()
                 
         place_result.events = self.dbdriver.get_place_events(place.uniq_id)
-        return place_result     #(place, place_list, event_table)
+        return place_result
 
 
 
@@ -121,7 +109,7 @@ class PlaceResult:
         self.num_hidden = 0
         self.items = items
         self.hierarchy = []    # Hirearchy tree
-        self.events = []        # Events for selected place
+        self.events = []       # Events for selected place
 
 class PersonResult:
     ''' Person's result object.

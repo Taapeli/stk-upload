@@ -98,69 +98,59 @@ class Neo4jDriver:
         return persons
 
 
-    def place_list(self, user, fw_from, limit, lang='fi'):
+    def get_place_list_fw(self, user, fw_from, limit, lang='fi'):
         ''' Read place list from given start point
         '''
-        #fw = self.context.next_name_fw()
+        ret = []
         with self.driver.session() as session: 
             if user == None: 
                 #1 get approved common data
-                print("pe.neo4j.reader.Neo4jDriver.place_list: by owner with common")
+                print("pe.neo4j.reader.Neo4jDriver.get_place_list_fw: from common")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
-                                     user=user, fw=fw_from, limit=limit,
-                                     lang=lang)
+                                     fw=fw_from, limit=limit, lang=lang)
             else: 
-                #2 get my own (no owner name needed)
-                print("pe.neo4j.reader.Neo4jDriver.place_list: by owner only")
+                #2 get my own
+                print("pe.neo4j.reader.Neo4jDriver.get_place_list_fw: by owner")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
-                                     user=user, fw=fw_from, limit=limit,
-                                     lang=lang)
-
-        ret =[]
+                                     user=user, fw=fw_from, limit=limit, lang=lang)
         for record in result:
-            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
-            # alemmista paikoista
-            #
-            # Record: <Record id=290228 type='Borough' 
-            #    names=[<Node id=290235 labels={'Place_name'} 
-            #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
-            #    coord=None
-            #    upper=[
-            #        [287443, 'City', 'Arctopolis', 'la'], 
-            #        [287443, 'City', 'Björneborg', 'sv'], 
-            #        [287443, 'City', 'Pori', ''], 
-            #        [287443, 'City', 'Пори', 'ru']] 
-            #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
-            # >
-            pl_id =record['id']
-            p = PlaceBl(pl_id)
-            p.uuid =record['uuid']
-            p.type = record.get('type')
-            if record['coord']:
-                p.coord = Point(record['coord']).coord
+            # <Record 
+            #    place=<Node id=514341 labels={'Place'}
+            #        properties={'coord': [61.49, 23.76], 
+            #            'id': 'P0300', 'type': 'City', 'uuid': '8fbe632144584d30aa75701b49f15484', 
+            #            'pname': 'Tampere', 'change': 1585409704}>
+            #    name=<Node id=514342 labels={'Place_name'}
+            #        properties={'name': 'Tampere', 'lang': ''}> 
+            #    names=[<Node id=514344 labels={'Place_name'}
+            #            properties={'name': 'Tampereen kaupunki', 'lang': ''}>, 
+            #        <Node id=514343 ...>]
+            #    uses=4
+            #    upper=[[514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finnland', 'de'],
+            #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Finland', 'sv'],
+            #        [514289, 'b16a6ee2c7a24e399d45554faa8fb094', 'Country', 'Suomi', '']
+            #    ]
+            #    lower=[[None, None, None, None, None]]>
+            node = record["place"]
+            p = PlaceBl.from_node(node)
+            p.ref_cnt = record['uses']
+
             # Set place names and default display name pname
-            for nnode in record.get('names'):
-                pn = PlaceName.from_node(nnode)
-#                 if pn.lang in ['fi', '']:
-#                     # Default language name
-#                     #TODO use language from current_user's preferences
-#                     p.pname = pn.name
-                p.names.append(pn)
+            node = record['name']    
+            p.names.append(PlaceName.from_node(node))
+            oth_names = []
+            for node in record['names']:
+                oth_names.append(PlaceName.from_node(node))
+            # Arrage names by local language first 
+            lst = PlaceName.arrange_names(oth_names)
 
-#             # TESTING
-#             def_names = PlaceBl.find_default_names(p.names, ('fi','sv'))
-#             print(f"Place {p.uniq_id} def.names fi:{def_names['fi']} / sv:{def_names['sv']}")
+            p.names += lst
 
-            if len(p.names) > 1:
-                p.names.sort()
-            if p.pname == '' and p.names:
-                p.pname = p.names[0].name
-            p.uppers = PlaceBl.combine_places(record['upper'])
-            p.lowers = PlaceBl.combine_places(record['lower'])
+            p.uppers = PlaceBl.combine_places(record['upper'], lang)
+            p.lowers = PlaceBl.combine_places(record['lower'], lang)
             ret.append(p)
 
         # Return sorted by first name in the list p.pname
-        return sorted(ret, key=lambda x:x.names[0].name if x.names else "")
+        return sorted(ret, key=lambda x:x.names[0].name)
 
 
     def get_place_w_notes(self, user, uuid, lang='fi'): 
@@ -170,8 +160,12 @@ class Neo4jDriver:
         """
         pl = None
         with self.driver.session() as session:
-            result = session.run(CypherPlace.get_w_names_notes,
-                                       user=user, uuid=uuid, lang=lang)
+            if user == None: 
+                result = session.run(CypherPlace.get_common_w_names_notes,
+                                     uuid=uuid, lang=lang)
+            else:
+                result = session.run(CypherPlace.get_my_w_names_notes,
+                                     user=user, uuid=uuid, lang=lang)
             for record in result:
                 # <Record 
                 #    place=<Node id=514286 labels={'Place'} 
@@ -279,7 +273,7 @@ class Neo4jDriver:
                 for node in record['names']:
                     oth_names.append(PlaceName.from_node(node))
                 # Arrage names by local language first 
-                lst = PlaceName.arrange_other_names(oth_names)
+                lst = PlaceName.arrange_names(oth_names)
                 p.names += lst
                 
                 # TODO: Order by lang here! (The order field is not in use) 

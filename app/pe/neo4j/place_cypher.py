@@ -9,28 +9,32 @@ class CypherPlace():
     Neo4j Cypher clases for Place objects
     '''
 
+    _get_name_hierarchies_tail = """
+    OPTIONAL MATCH (place:Place) -[:NAME]-> (pn:Place_name)
+        WHERE NOT pn = name
+//  WITH place, name, COLLECT(DISTINCT pn) AS names, COUNT(ref) AS uses
+        OPTIONAL MATCH (place:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
+        OPTIONAL MATCH (place:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
+        RETURN place, name, COUNT(DISTINCT ref) AS uses,
+            COLLECT(DISTINCT pn) AS names,
+            COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
+            COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
+    ORDER BY name.name"""
+
     get_common_name_hierarchies = """
-MATCH (b) -[:PASSED]-> (a:Place) -[:NAME]-> (pn:Place_name)
-    WHERE a.pname >= $fw
-OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME]-> (don:Place_name)
-RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
-    COLLECT(DISTINCT pn) AS names, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
-ORDER BY names[0].name LIMIT $limit"""
+MATCH () -[:PASSED]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
+    WHERE name.name >= $fw
+WITH place, name ORDER BY name.name LIMIT  $limit
+    OPTIONAL MATCH (place:Place) <-[:PLACE]- (ref)
+""" + _get_name_hierarchies_tail
 
     get_my_name_hierarchies = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (b:Batch) -[:OWNS]-> (a:Place)
-    WHERE prof.username = $user AND a.pname >= $fw
-MATCH (a:Place) -[:NAME_LANG {lang:$lang}]-> (pn:Place_name)
-OPTIONAL MATCH (a:Place) -[:IS_INSIDE]-> (up:Place) -[:NAME_LANG {lang:$lang}]-> (upn:Place_name)
-OPTIONAL MATCH (a:Place) <-[:IS_INSIDE]- (do:Place) -[:NAME_LANG {lang:$lang}]-> (don:Place_name)
-RETURN ID(a) AS id, a.uuid as uuid, a.type AS type,
-    COLLECT(DISTINCT pn) AS names, a.coord AS coord,
-    COLLECT(DISTINCT [ID(up), up.uuid, up.type, upn.name, upn.lang]) AS upper,
-    COLLECT(DISTINCT [ID(do), do.uuid, do.type, don.name, don.lang]) AS lower
-ORDER BY names[0].name LIMIT $limit"""
+MATCH (b:Batch) -[:OWNS]-> (place:Place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
+    WHERE b.user = $user AND name.name >= $fw
+WITH place, name ORDER BY name.name LIMIT $limit
+    OPTIONAL MATCH (place:Place) <-[:PLACE]- (ref) <-[*2]- (b:Batch)
+        WHERE b.user = $user
+""" + _get_name_hierarchies_tail
 
 # Default language names update with $place_id, $fi_id, $sv_id
     link_name_lang = """
@@ -54,11 +58,9 @@ MERGE (place) -[:NAME_LANG {lang:'sv'}]-> (n)
 RETURN DISTINCT ID(place) AS pl, ID(n) AS fi, ID(n) AS sv"""
 
 # For place page
-    get_w_names_notes = """
-MATCH (prof:UserProfile) -[:HAS_LOADED]-> (:Batch) -[:OWNS]-> (place:Place)
-    WHERE prof.username = $user AND place.uuid=$uuid
+    _get_w_names_notes_tail = """
 MATCH (place) -[:NAME_LANG {lang:$lang}]-> (name:Place_name)
-with place, name
+WITH place, name
     OPTIONAL MATCH (place) -[:NAME]-> (n:Place_name) WHERE not n = name
     OPTIONAL MATCH (place) -[nr:NOTE]-> (note:Note)
     OPTIONAL MATCH (place) -[mr:MEDIA]-> (media:Media)
@@ -66,6 +68,12 @@ RETURN place, name,
     COLLECT(DISTINCT n) AS names,
     COLLECT (DISTINCT note) AS notes,
     COLLECT (DISTINCT media) AS medias"""
+    get_common_w_names_notes = """
+MATCH () -[:PASSED]-> (place:Place)
+    WHERE place.uuid=$uuid""" + _get_w_names_notes_tail
+    get_my_w_names_notes = """
+MATCH (prof:UserProfile) -[:HAS_LOADED]-> (:Batch) -[:OWNS]-> (place:Place)
+    WHERE prof.username = $user AND place.uuid=$uuid""" + _get_w_names_notes_tail
 
     get_person_events = """
 MATCH (p:Person) -[r:EVENT]-> (e:Event) -[:PLACE]-> (l:Place)
