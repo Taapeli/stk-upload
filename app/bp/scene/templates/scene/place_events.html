@@ -35,7 +35,7 @@
       {% endif %}
 
     <h3 class="sticky" title="{{ _('Top') }}"><a href="#">
-        {{ place.name.name }} ({{ _(place.type|lower) }})</a></h3>
+        {{ place.name.name }} ({{ place.type|transl('lt') }})</a></h3>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

@@ -397,7 +397,7 @@ def show_places():
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
-    results = db.place_list()
+    results = db.get_place_list()
 
 #     for p in result.items:
 #         print ("# {} ".format(p))
@@ -412,7 +412,7 @@ def show_place_page(locid):
     """
     try:
         u_context = UserContext(user_session, current_user, request)
-        u_context.set_scope_from_request(request, 'place_scope')
+        #u_context.set_scope_from_request(request, 'place_scope')
 
         dbdriver = Neo4jDriver(shareds.driver)
         db = DBreader(dbdriver, u_context) 

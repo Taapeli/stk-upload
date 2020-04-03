@@ -88,9 +88,11 @@
 				<tr><th></th>
                     <th style="maxwidth:50%">{{ _('Location, related places') }}</th>
                     <th>{{ _('Location') }}</th>
+                    <th>{{ _('References') }}</th>
 				</tr>
 			</thead>
 			<tbody>
+   
 	{% if places %}
 	    {% for p in places %}
 	    	{% set ini = p.pname[0]|list|first %}
@@ -101,9 +103,13 @@
                 </td>
                 <td class="ColumnPerson">
                    <div>
-                      <a href="/scene/location/uuid={{p.uuid}}" class="inlink"
+                      <a href="/scene/location/uuid={{p.uuid}}"
+                    {% if not p.ref_cnt %} class="dimmed" 
+                        title="{{  _('No references to place %(uuid)s', uuid=p.uuid_str()) }}"
+                    {% else %} class="inlink"
                         title="{{ _('see details of place %(id)s', id=p.uniq_id) }}"
-                        id="{{p.uniq_id}}"><b>{{ macro.place_names(p) }}</b></a>
+                    {%- endif %}>
+                        <b>{{ macro.place_names(p) }}</b></a>
                       <span class="typedesc">{{p.type|transl('lt')}}</span>
 			    {% if p.uppers[0] %}{% set e = p.uppers[0] %}
 						<span class="typedesc">{{e.type|transl('lt_in')}}</span>
@@ -121,7 +127,10 @@
 		        {% endfor %}
 		           </ul>
 	        {% endif %}
-	        <td>{% if p.coord %}({{p.coord[0]|round(4)}}, {{p.coord[1]|round(4)}}){% endif %}</td>
+	        <td>{% if p.coord %}
+                <small>({{p.coord[0]|round(4)}}, {{p.coord[1]|round(4)}})</small>
+            {% endif %}</td>
+            <td class="numbers">{% if p.ref_cnt %}{{p.ref_cnt}}{% endif %}</td>
 	    {% endfor %}
 	{% endif %}
 				</tr>
