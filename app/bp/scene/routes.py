@@ -9,6 +9,7 @@ import io
 from flask import send_file, Response
 from bp.scene.models import media
 import shareds
+import os
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
@@ -581,7 +582,7 @@ def fetch_thumbnail():
         return ret
     except FileNotFoundError:
         # Show default image
-        ret = send_file(url_for('static', filename='noone.jpg'), mimetype=mimetype)
+        ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
         logger.warning(f"-> bp.scene.routes.fetch_thumbnail: missing {thumbname}")
         return ret
         
