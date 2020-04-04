@@ -144,13 +144,13 @@ class Neo4jDriver:
             lst = PlaceName.arrange_names(oth_names)
 
             p.names += lst
-
+            p.pname = p.names[0].name
             p.uppers = PlaceBl.combine_places(record['upper'], lang)
             p.lowers = PlaceBl.combine_places(record['lower'], lang)
             ret.append(p)
 
-        # Return sorted by first name in the list p.pname
-        return sorted(ret, key=lambda x:x.names[0].name)
+        # Return sorted by first name in the list p.names -> p.pname
+        return sorted(ret, key=lambda x:x.pname)
 
 
     def get_place_w_notes(self, user, uuid, lang='fi'): 
