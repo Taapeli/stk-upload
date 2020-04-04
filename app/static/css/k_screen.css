@@ -105,6 +105,9 @@ h1 {
     padding: 2px;
     width: 100%;
 }
+h1.own { border-bottom: solid 3pt #e0bc91; }
+h1.passed { border-bottom: solid 2pt #6884be; }
+
 h1 div.curr_user {
     float: right; 
     margin-right: 30px; 

@@ -21,8 +21,12 @@
     <script src="/static/js/scene_scripts.js"></script>
 </head>
 <body>
+{% if user_context %}
+  {% if user_context.context == 1 %}{% set material_st = "passed" %}
+  {% elif user_context.context == 2 %}{% set material_st = "own" %}
+{% endif %}{% endif %}
 {% block body %}
-    <h1><a href="/"><img id="logo" src="/static/tam.png" 
+    <h1 class={{material_st}}><a href="/"><img id="logo" src="/static/tam.png" 
              alt="{{ _('Back to Front Page') }}" title="{{ _('Back to Front Page') }}"
              onmouseover="this.src='/static/tam1.png';" 
              onmouseout="this.src='/static/tam.png';"/></a>
