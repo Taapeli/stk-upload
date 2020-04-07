@@ -254,7 +254,7 @@ class Place_combo(Place):
         return (titles, lists)
 
 
-#     def get_place_hierarchy():  # @staticmethod --> Neo4jDriver.place_list
+#     def get_place_hierarchy():  # @staticmethod --> Neo4jDriver.get_place_list
 #         """ Get a list on Place_combo objects with nearest heirarchy neighbours.
 #         
 #             Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
@@ -343,70 +343,9 @@ class Place_combo(Place):
 #             Palauttaa listan paikka-olioita ylimmästä alimpaan.
 
 
-#     def get_place_events(loc_id): @staticmethod > DBreader.get_place_with_events
+#     def get_place_events(loc_id): @staticmethod > DBreader.dr_get_place_with_events
 #         """ Haetaan paikkaan liittyvät tapahtumat sekä
 #             osallisen henkilön nimitiedot.
-# 
-#         Palauttaa esimerkin mukaiset tiedot:
-#         ╒══════╤═════════╤═══════════════════╤═════════════╤═══════════════════╕
-#         │"uid" │"role"   │"names"            │"etype"      │"edates"           │
-#         ╞══════╪═════════╪═══════════════════╪═════════════╪═══════════════════╡
-#         │305353│"Primary"│[{"firstname":"Eva │"Residence"  │[3,1863872,1866944]│
-#         │      │         │Sophia","type":"Bir│             │                   │
-#         │      │         │th Name","suffix":"│             │                   │
-#         │      │         │","surname":"Forsté│             │                   │
-#         │      │         │n","order":0, "pref│             │                   │
-#         |      |         |ix":""}]           │             │                   │
-#         ├──────┼─────────┼───────────────────┼─────────────┼───────────────────┤
-#         │305450│"Primary"│[{"firstname":"Erik│"Occupation" │[3,1863872,1866944]│
-#         │      │         │ Berndt","type":"Bi│             │                   │
-#         │      │         │rth Name","suffix":│             │                   │
-#         │      │         │"","surname":"Konow│             │                   │
-#         │      │         │","order":0, "prefi│             │                   │
-#         |      |         |x":"von"}]         │             │                   │
-#         └──────┴─────────┴───────────────────┴─────────────┴───────────────────┘
-#         """
-#         result = shareds.driver.session().run(Cypher_place.get_person_events, 
-#                                               locid=int(loc_id))
-#         ret = []
-#         for record in result:
-#             e = Event_combo()
-#             # Fields uid (person uniq_id) and names are on standard in Event_combo
-#             e.uid = record["uid"]
-#             e.type = record["etype"]
-#             if record["edates"][0] != None:
-#                 dates = DateRange(record["edates"])
-#                 e.dates = str(dates)
-# #                 e.date = dates.estimate()
-#             e.role = record["role"]
-#             e.names = []
-#             for node in record["names"]:
-#                 e.names.append(Name.from_node(node))
-#             ret.append(e)
-#         return ret
-# 
-#     @staticmethod
-#     def get_total():
-#         """ Tulostaa paikkojen määrän tietokannassa """
-# 
-#         query = "MATCH (p:Place) RETURN COUNT(p)"
-#         results =  shareds.driver.session().run(query)
-#         for result in results:
-#             return str(result[0])
-# 
-# 
-#     def print_data(self):
-#         """ Tulostaa tiedot """
-#         print ("*****Placeobj*****")
-#         print ("Handle: " + self.handle)
-#         print ("Change: {}".format(self.change))
-#         print ("Id: " + self.id)
-#         print ("Type: " + self.type)
-#         if self.pname:
-#             print ("Pname: " + self.pname)
-#         if self.coord:
-#             print ("Coord: {}".format(self.coord))
-#         return True
 
 
 #     save() - see PlaceGramps.save()

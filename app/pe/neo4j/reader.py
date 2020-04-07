@@ -27,7 +27,7 @@ class Neo4jDriver:
     def __init__(self, driver):
         self.driver = driver
     
-    def person_list(self, user, fw_from, limit):
+    def dr_get_person_list(self, user, fw_from, limit):
         """ Read Person data from given fw_from 
         """
         # Select a) filter by user or b) show Isotammi common data (too)
@@ -45,7 +45,7 @@ class Neo4jDriver:
                                          user=user, start_name=fw_from, limit=limit)
                 # Returns person, names, events
         except Exception as e:
-            print('Error pe.neo4j.reader.Neo4jDriver.person_list: {} {}'.format(e.__class__.__name__, e))            
+            print('Error pe.neo4j.reader.Neo4jDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
             raise      
 
         persons = []
@@ -98,19 +98,19 @@ class Neo4jDriver:
         return persons
 
 
-    def get_place_list_fw(self, user, fw_from, limit, lang='fi'):
+    def dr_get_place_list_fw(self, user, fw_from, limit, lang='fi'):
         ''' Read place list from given start point
         '''
         ret = []
         with self.driver.session() as session: 
             if user == None: 
                 #1 get approved common data
-                print("pe.neo4j.reader.Neo4jDriver.get_place_list_fw: from common")
+                print("pe.neo4j.reader.Neo4jDriver.dr_get_place_list_fw: from common")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
                                      fw=fw_from, limit=limit, lang=lang)
             else: 
                 #2 get my own
-                print("pe.neo4j.reader.Neo4jDriver.get_place_list_fw: by owner")
+                print("pe.neo4j.reader.Neo4jDriver.dr_get_place_list_fw: by owner")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
                                      user=user, fw=fw_from, limit=limit, lang=lang)
         for record in result:
@@ -153,10 +153,8 @@ class Neo4jDriver:
         return sorted(ret, key=lambda x:x.pname)
 
 
-    def get_place_w_notes(self, user, uuid, lang='fi'): 
-        """ Returns the Place_combo with Notes and PlaceNames included.
-
-            #TODO: Luetaan Notes ja Citations vasta get_persondata_by_id() lopuksi??
+    def dr_get_place_w_na_no_me(self, user, uuid, lang='fi'): 
+        """ Returns the PlaceBl with Notes and PlaceNames included.
         """
         pl = None
         with self.driver.session() as session:
@@ -207,7 +205,7 @@ class Neo4jDriver:
 #             return None
 
 
-    def get_place_tree(self, locid, lang="fi"):
+    def dr_get_place_tree(self, locid, lang="fi"):
         """ Read upper and lower places around this place.
         
             Haetaan koko paikkojen ketju paikan locid ympärillä
@@ -283,7 +281,7 @@ class Neo4jDriver:
                 ret.append(p)
         return ret
 
-    def get_place_events(self, uniq_id):
+    def dr_get_place_events(self, uniq_id):
         """ Find events and persons associated to given Place
         
             Haetaan paikkaan liittyvät tapahtumat sekä

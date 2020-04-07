@@ -21,14 +21,14 @@ class DBreader:
         else:
             self.use_user = u_context.user
    
-    def person_list(self):
+    def get_person_list(self):
         ''' List person data including all data needed to Person page.
         
-            Calls Neo4jDriver.person_list(user, fw_from, limit)
+            Calls Neo4jDriver.dr_get_person_list(user, fw_from, limit)
         '''
         context = self.user_context
         fw = context.next_name_fw()
-        persons = self.dbdriver.person_list(self.use_user, fw, context.count)
+        persons = self.dbdriver.dr_get_person_list(self.use_user, fw, context.count)
 
         # Update the page scope according to items really found 
         if persons:
@@ -59,7 +59,7 @@ class DBreader:
 
         context = self.user_context
         fw = context.next_name_fw()
-        places = self.dbdriver.get_place_list_fw(self.use_user, fw, context.count, 
+        places = self.dbdriver.dr_get_place_list_fw(self.use_user, fw, context.count, 
                                                  lang=context.lang)
 
         # Update the page scope according to items really found 
@@ -78,15 +78,15 @@ class DBreader:
             Palauttaa paikkahierarkian ja (henkilö)tapahtumat.
     
         """
-        place = self.dbdriver.get_place_w_notes(self.use_user, uuid, 
-                                                self.user_context.lang)
+        place = self.dbdriver.dr_get_place_w_na_no_me(self.use_user, uuid, 
+                                                      self.user_context.lang)
         place_result = PlaceResult(place)
         if not place:
             place_result.error = f"DBreader.get_place_with_events: {self.use_user} - no Place with uuid={uuid}"
             return place_result
         try:
             place_result.hierarchy = \
-                self.dbdriver.get_place_tree(place.uniq_id, lang=self.user_context.lang)
+                self.dbdriver.dr_get_place_tree(place.uniq_id, lang=self.user_context.lang)
 
         except AttributeError as e:
             traceback.print_exc()
@@ -96,7 +96,7 @@ class DBreader:
             place_result.error = f"Place tree for {place.uniq_id}: {e}"
             traceback.print_exc()
                 
-        place_result.events = self.dbdriver.get_place_events(place.uniq_id)
+        place_result.events = self.dbdriver.dr_get_place_events(place.uniq_id)
         return place_result
 
 
