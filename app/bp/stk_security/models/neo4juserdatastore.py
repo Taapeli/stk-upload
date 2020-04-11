@@ -94,9 +94,9 @@ class Neo4jUserDatastore(UserDatastore):
             user.id = user.username
             user.roles = self.find_UserRoles(user.email)
             
-            user.confirmed_at = 0
-            user.last_login_at = 0
-            user.current_login_at = 0
+#             user.confirmed_at = 0
+#             user.last_login_at = 0
+#             user.current_login_at = 0
             if user.confirmed_at:
                 user.confirmed_at = datetime.fromtimestamp(float(user.confirmed_at)/1000)
             if user.last_login_at:    
@@ -195,7 +195,11 @@ class Neo4jUserDatastore(UserDatastore):
             raise
 
     def _update_user (self, tx, user):         # ============ User update ==============
-        
+
+#         print(user.email, user.confirmed_at)
+
+        confirmtime = int(user.confirmed_at.timestamp() * 1000) if user.confirmed_at else None   
+ 
         if user.username == 'master': 
             rolelist = ['master']
         else:    
@@ -207,17 +211,7 @@ class Neo4jUserDatastore(UserDatastore):
                     rolelist.append(roleToAdd)
         try:
             logger.debug('_put_user update' + user.email + ' ' + user.name)
-#   Confirm time is copied from allowed email if not in the user argument        
-            confirmtime = None 
-            if user.confirmed_at == None:
-                confirmtime = UserAdmin.confirm_allowed_email(tx, user.email)['confirmed_at']
-                #confirmtime = int(confirmtime.timestamp() * 1000),
-#            elif user.username == 'guest':  
-#                pass   
-            else: 
-#                temp1 = datetime.fromtimestamp(float(user.confirmed_at/1000))    
-                confirmtime = user.confirmed_at
-                                                   
+
             result = tx.run(Cypher.user_update, 
                 id=user.username, 
                 email=user.email,
@@ -249,8 +243,13 @@ class Neo4jUserDatastore(UserDatastore):
                     tx.run(Cypher.user_role_add, 
                            email = user.email,
                            name = rolename)        
-            logger.info('User with email address {} updated'.format(user.email)) 
+            logger.info('User with email address {} updated'.format(user.email))
+#   Confirm time is copied to allowed email         
+            if user.confirmed_at:
+                UserAdmin.confirm_allowed_email(tx, user.email, confirmtime)   
+
             return (userRecord)
+        
         except CypherError as ex:
             logger.error('CypherError', ex)            
             raise ex            
@@ -480,7 +479,7 @@ class Neo4jUserDatastore(UserDatastore):
             raise
 
 
-    def confirm_email(self, email, confirmtime):
+    def _confirm_email(self, email, confirmtime):
         try:
             with driver.session() as session:
                 with session.begin_transaction() as tx:

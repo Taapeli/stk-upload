@@ -1,9 +1,10 @@
-from flask import render_template, request, redirect, url_for, session, jsonify
-from flask_security import login_required, roles_accepted, roles_required, current_user
-from flask_babelex import _
+from flask import render_template, request, jsonify #, redirect, url_for, session
+from flask_security import login_required #, roles_accepted, roles_required, current_user
+#from flask_babelex import _
 from . import bp
 
-from bp.gramps.models import batch
+#from bp.gramps.models import batch
+from models.gen.batch_audit import Batch
 from bp.dupsearch.models import search
 from types import SimpleNamespace
 import json
@@ -17,13 +18,16 @@ def dupsearch():
 @bp.route('/dupsearch/batches',  methods=['GET'])
 @login_required
 def batches():
-    batch_list = list(batch.get_batches())
+    batch_list = list(Batch.get_batches())
+    completed_batches = []
     for b in batch_list:
         file = b.get('file')
-        if file:
+        status = b.get('status')
+        if file and status == 'completed':
             file = file.split("/")[-1].replace("_clean.gramps",".gramps")
             b['file'] = file 
-    return jsonify(batch_list)
+            completed_batches.append(b)
+    return jsonify(completed_batches)
 
 @bp.route('/dupsearch/generate_keys/<batchid>',  methods=['GET'])
 @login_required

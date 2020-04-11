@@ -8,7 +8,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 from sys import stderr
 
-from .base import NodeObject
+from bl.base import NodeObject
 from models.cypher_gramps import Cypher_repository_in_batch
 from .cypher import Cypher_repository
 from .note import Note

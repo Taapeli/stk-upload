@@ -19,11 +19,16 @@ u { color: DarkKhaki; text-decoration: none; }
     <div class="content" id="IndividualDetail">
 
         {% if person.media_ref %}<div class="snapshot">
+           {% set ref = person.media_ref[0] -%}
+           {% set photo = obj[ref[0]] -%}
+           {% set crop = ref[1] -%}
+           {% set ord = ref[2] -%}
             <div class="thumbnail">
-                <div><a href="#indivgallery">{% set photo = obj[person.media_ref[0][0]] %}
+                <div><a href="#indivgallery">
 	                <img alt="({{ _('Photo') }})" 
+                         src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
 	                     src="/scene/thumbnail?id={{photo.uuid}}" 
-	                     title="key = {{photo.uuid_str()}}"/>
+	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
                 </a></div>
                 <p style="margin:0;">{{photo.description}}</p>
             </div>
@@ -43,12 +48,6 @@ u { color: DarkKhaki; text-decoration: none; }
                     <td class="ColumnValue">
                         {{macro.all_obj_ids(person)}} /
                         <span class="id" title='{{ _("Sorting key") }}'>{{person.sortname}}</span>
-{#                      <span style="font-size:70%;background:lightgray;">&nbsp;
-                            <a href="/scene/person={{person.uniq_id}}">v1</a> /
-                            <a href="/scene/person/{{person.uniq_id}}">v2</a> /
-                            <a href="/scene/person?uuid={{person.uuid}}">v3</a> &nbsp;
-                        </span>
-#}
                     </td>
                 </tr>
 
@@ -71,16 +70,32 @@ u { color: DarkKhaki; text-decoration: none; }
                 {% if person.priv %}<tr>
                     <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
                 </tr>{% endif %}
+                <tr><td class="ColumnAttribute">{{ _('Estimated years') }}</td>
+                    <td class="ColumnValue">{{ macro.lifetimes(person) }}
+           {% if person.death_high >= last_year_allowed %}
+                        <span style="color:red">{{ _('confidential') }}!</span>
+           {% endif %}
+                    </td>
+                </tr>
+               <tr>
+                    <td class="ColumnAttribute">{{ _("Age at death") }}</td>
+                    <td class="ColumnValue">
+            {% if person.death_high != person.death_low or
+                  person.birth_high != person.birth_low %}
+                        {{ _('at least') }}
+            {% else %}
+                        {{ _('about') }}
+            {% endif %}
+                        {{person.death_low - person.birth_high}}
+                        {{ _('years') }}
+                    </td>
+                </tr>
                 
                 {% if person.confidence > '' %}<tr>
                     <td class="ColumnAttribute">{{ _("Confidence of data") }}</td>
                     <td class="ColumnValue">{{ macro.stars(person.confidence|float) }}</td>
                 </tr>{% endif %}
-<!--            <tr>
-                    <td class="ColumnAttribute">{{ _("Age at death") }}</td>
-                    <td class="ColumnValue">66 vuotta 10 kuukautta 21 päivää</td>
-                </tr>
--->
+   
 {% if person.note_ref %}
                 <tr><td></td>
                    <td>–► <a href="#notes" class="inlink">
@@ -109,8 +124,7 @@ u { color: DarkKhaki; text-decoration: none; }
                         <td class="ColumnEvent" title="{{e.id}} {{e.uuid_short()}} nr:{{e.uniq_id}}">
                             <div class="magnifier" alt="{{e.uniq_id}}">
                                 <a href="/scene/event/{{e.uniq_id}}" class="inlink">
-                                {% if e.type == "Baptism" %}&rarr;&nbsp;{% endif %}
-                                    {{e.type|transl('evt')}}</a>
+                                   {{e.type|transl('evt')}}</a>
     {% if e.role and e.role != "Primary" %}
                                 <span class="typedesc">({{e.role|transl('role')}})</span>
     {% endif %}
@@ -194,12 +208,12 @@ u { color: DarkKhaki; text-decoration: none; }
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 	                    <ul>{% if fam.father %}
-	                        <li>{{ _("Man") }}: {{ macro.person(fam.father, myid) }}</li>
+	                        <li>{{ _("Man") }}: {{ macro.person_anon(fam.father, myid) }}</li>
 	                {% endif %}{% if fam.mother %}
-	                        <li>{{ _("Wife") }}: {{ macro.person(fam.mother, myid) }}</li>
+	                        <li>{{ _("Wife") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
 	                {% endif %}{% if fam.children %}
 	                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
-	                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>{% endfor %}
+	                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>{% endfor %}
 	                        </ul></li>
 	                {% endif %}
 	                    </ul>
@@ -231,12 +245,12 @@ u { color: DarkKhaki; text-decoration: none; }
                              {{ _("Family") }} {{fam.rel_type|transl('marr')|lower}}</a>
                            {{fam.marriage_dates}}</p>
 		                <ul>{% if fam.father %}
-		                        <li>{{ _("Father") }}: {{ macro.person(fam.father, myid) }}</li>
+		                        <li>{{ _("Father") }}: {{ macro.person_anon(fam.father, myid) }}</li>
 		                {% endif %}{% if fam.mother %}
-		                        <li>{{ _("Mother") }}: {{ macro.person(fam.mother, myid) }}</li>
+		                        <li>{{ _("Mother") }}: {{ macro.person_anon(fam.mother, myid) }}</li>
 		                {% endif %}{% if fam.children|count %}
 		                        <li>{{ _("Children") }}<ul>{% for ch in fam.children|sort %}
-		                            <li>{{ch.child_by_sex()}}: {{ macro.person(ch, myid) }}</li>
+		                            <li>{{ch.child_by_sex()}}: {{ macro.person_anon(ch, myid) }}</li>
 		                         {% endfor %}</ul></li>
 		                {% endif %}
 		                    </ul>
@@ -250,15 +264,19 @@ u { color: DarkKhaki; text-decoration: none; }
 {% if person.media_ref %}
         <div class="subsection" id="indivgallery">
             <h4>{{ _("Media files") }}</h4>
-        {% for ref, crop in person.media_ref %}
-            <div class="thumbnail">{% set photo=obj[ref] %}
+        {% for ref, crop0, ord in person.media_ref %}
+           {% set photo=obj[ref] %}
+           {% set crop=crop0|replace(" ", "") %}
+            <div class="thumbnail">
                 <a href="/scene/media/{{photo.name}}?id={{photo.uuid}}">
-	                <img alt="({{ _('Photo') }})" 
-	                     src="/scene/thumbnail?id={{photo.uuid}}" 
-	                     title="key = {{photo.uuid_str()}}"/>
+	                <img alt="({{ _('Photo') }} {{ord}})" 
+	                     src="/scene/thumbnail?id={{photo.uuid}}&crop={{crop}}" 
+	                     title="{{ _('Photo') }} {{ord}}, id={{photo.id}}"/>
                 </a>
-                <p>{{photo.description}}{{ macro.notelink(photo) }}
-{% if crop %}<br><i>crop {{crop}}</i>{% endif %}
+                <p><a href="/scene/media?uuid={{photo.uuid}}"
+                      title="{{ _('Go to photo page') }}">
+                      {{photo.description}}</a> {{ macro.notelink(photo) }}
+{% if crop and not crop == "None" %}<br><i>{{ _('crop') }} {{crop}}</i>{% endif %}
                 </p>
             </div>
         {% endfor %}

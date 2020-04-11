@@ -1,8 +1,13 @@
+# Jinja macros for Scene pages
+# 1.4.2020 / JMä
+
+
+# 0. Common widgets
+
 {% macro lock(value) -%}
     {# Draws a lock icon, is value is '1' #}
 	{% if value == '1' %}&#x1F512;{% endif %}                           
 {%- endmacro %}
-
 
 {% macro stars(value) -%}
    {# Confidence value as stars. 
@@ -18,15 +23,18 @@
      {% else %}&#9873;
      {% endif %}
    {% else %}
-     {% if   value < 2.25 %}★★☆☆☆
-     {% elif value < 2.75 %}★½☆☆
-     {% elif value < 3.25 %}★★☆☆☆
-     {% elif value < 3.75 %}★★½☆
-     {% elif value < 4.25 %}★★★☆☆
-     {% elif value < 4.75 %}★★★½;
+     {% if   value < 1.25 %}★☆☆☆
+     {% elif value < 1.75 %}★½☆☆
+     {% elif value < 2.25 %}★★☆☆
+     {% elif value < 2.75 %}★★½☆
+     {% elif value < 3.25 %}★★★☆
+     {% elif value < 3.75 %}★★★½;
      {% endif %}
    {% endif %}                           
 {%- endmacro %}
+
+
+# 1. Page tabs
 
 {% macro menu(value) -%}
   {% if current_user and current_user.is_authenticated %}{% set hide = 0 %}
@@ -60,8 +68,8 @@
                   {% endif %}><a href="/scene/sources"
                    title="{{ _('Sources') }}">{{ _('Sources') }}</a></li>
                 <li{% if value == 6 %} class="CurrentSection"
-                  {% endif %}><a href="#" class="dimmed"
-                   title="{{ _('Thumbnails') }}">{{ _('Pictures and other Media') }}</a></li>
+                  {% endif %}><a href="/scene/medias" class="CurrentSection"
+                   title="{{ _('Thumbnails') }}">{{ _('Pictures') }}</a></li>
         {% if not current_user or not current_user.is_authenticated %}
                 <li id="loginpadge"><a href="/login"
                      title="{{ _('Get more info') }}">{{ _('Log in to Isotammi') }}!</a></li>
@@ -71,12 +79,30 @@
     </div>
 {%- endmacro %}
 
+{% macro select_dataset() -%}
+    {#  Show and change data: researcher data or approved common data. #}
+    {% if not config['DEMO'] %}{{ user_context.owner_str() }}
+       {% if user_context.user %}
+           {% if user_context.context == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
+           {%endif%}
+            (<i><a href="?div={{newdiv}}" 
+                 title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a></i>)
+       {% endif %}
+    {% endif %}
+{%- endmacro %}
+
+
+# 2. Data display
+
 {% macro all_obj_ids(obj) -%}
     {#  Formats object keys for display. #}
     <tt title="{{ _('UUID key') }}">{{obj.uuid_short()}}</tt> /
     <span class="gedcom_id" title="Gedcom ID">{{obj.id}}</span> /
     <span class="id" title="{{ _("number") }}">{{obj.uniq_id}}</span>
 {%- endmacro %}
+
+
+# 2.1 Person
 
 {% macro person_name(name) -%}
     {#  Formats a Person name. Shows firstname and a surname or patronyme. #}
@@ -95,21 +121,58 @@
     {{name.firstname}} <i>{{name.suffix}}</i> {{name.prefix}} <b>{{name.surname}}</b>
 {%- endmacro %}
 
+{% macro person_names(person, names) -%}
+    {#  Formats a Person name with link. Shows altername names also. #}
+    {% for pn in names|sort(attribute='order') %}
+     {% if loop.index == 1 %}
+         {% if pn.type != "Birth Name" %}
+            <span class="typedesc">{{pn.type|transl('nt')}}</span>
+         {% endif %}
+         <a href="/scene/person?uuid={{person.uuid}}" class="inlink"
+            title="{{ _("See Person's Details") }}">{{ person_name_long(pn) }}</a>
+     {% else %}
+      <small><br> – 
+         {% if pn.type != "Birth Name" %}
+            <span class="typedesc">{{pn.type|transl('nt')}}</span>
+         {% endif %}
+        {{ person_name_long(pn) }}</small>
+     {% endif %}
+    {% endfor %}
+{%- endmacro %}
+
+{% macro person_names_anon(person, names) -%}
+    {#  Formats a Person name with link. Shows altername names also. #}
+    {#  Anonymizes too new persons. #}
+    {% if person.too_new %}
+        N N
+    {% else %}
+		{{ person_names(person, names) }}
+     {% endif %}
+{%- endmacro %}
+
 {% macro person_name_by_sortname(p) -%}
     {#  Formats a Person name from person.sortname field. #}
     {% set nm = p.sortname.split('#') %}
     {{nm[2]}} <i>{{nm[1]}}</i> <b>{{nm[0]}}</b>
 {%- endmacro %}
 
+{% macro person_name_by_sortname_anon(p) -%}
+    {#  Formats a Person name from person.sortname field. #}
+    {% if p.too_new %}
+        N N
+    {% else %}
+        <a href="/scene/person?uuid={{p.uuid}}"
+            title="{{ _("See Person's Details") }}">{{ person_name_by_sortname(p) }}</a>
+     {% endif %}
+{%- endmacro %}
+
 {% macro person(p, uuid="-") -%}
     {#  Creates a Person name and link using uuid (for family tree graph). #}
     {% if p.uuid == uuid %}
-    <span class="myself">&nbsp;(itse)&nbsp;</span>
-    {% else %}{% if p.uuid %}
+    <span class="myself">&nbsp;({{ _('self') }})&nbsp;</span>
+    {% else %}
     <a href="/scene/person?uuid={{p.uuid}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=p.uuid_short()) }} (nr. {{p.uniq_id}})">
-    {% else %}<a href="/scene/person={{p.uniq_id}}" class="inlink" 
-        title="{{ _('see details of person %(id)s', id=p.uniq_id) }}">{% endif %}
         {% if p.names|length > 0 %}{{ person_name(p.names[0]) }}</a>
 	        {% if p.birth_date %}s.&nbsp;{{p.birth_date|pvm}}{% endif %}
 	    {% else %}{{ _('Anonymous') }}</a>
@@ -117,6 +180,15 @@
     {% endif %}
 {%- endmacro %}
                     
+{% macro person_anon(p, uuid="-") -%}
+    {#  Creates a Person name and link using uuid (for family tree graph). #}
+    {% if p.too_new %}
+	    N N
+    {% else %}
+	    {{ person(p, uuid) }}
+    {% endif %}
+{%- endmacro %}
+
 {% macro member(ch, uniq_id, delim) -%} {# OBSOLETE, Better version: macro person #}
     {#  Creates a Person name and link (for family tree graph). 
         Optional 'delim' can be "=" for older person page
@@ -125,7 +197,7 @@
     {% if ch.uniq_id == uniq_id %}
     <span class="myself">&nbsp;(itse)&nbsp;</span>
     {% else %}
-    <a href="/scene/person{{delim}}{{ch.uniq_id}}" class="inlink" 
+    <a href="/scene/person?uuid={{ch.uuid}}" class="inlink" 
         title="{{ _('see details of person %(id)s', id=ch.id) }}">
         {% if ch.names|length %}
         {{ch.names[0].firstname}} <i>{{ch.names[0].suffix}}</i> {{ch.names[0].prefix}} <b>{{ch.names[0].surname}}</b></a>
@@ -134,7 +206,22 @@
         {% endif %}
     {% endif %}
 {%- endmacro %}
-                    
+
+{% macro lifetimes(p) -%}
+    {# Displays Person's life time estimates '1662/1709 — 1726/1819' #}
+    {% if p.death_high != 9999 %}
+        {% if p.birth_low != p.birth_high %}
+            {{p.birth_low}}…{% endif 
+        %}{{p.birth_high}} &ndash; {{p.death_low}}{%
+         if p.death_low != p.death_high 
+         %}…{{p.death_high}}
+         {% endif %}
+    {% endif %}
+{%- endmacro %}
+
+
+# 2.2 Note and citation
+
 {% macro notelink(note) -%}
     {#  Displays a Note text and link out #}
     {% if note.url %}
@@ -159,21 +246,6 @@
     <td>{% for l in list1 %}{{ l }} {% endfor %}</td>
 {%- endmacro %}
 
-{% macro place_names_lang(pl) -%}
-    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
-    {% for n in pl.names %}{% if not loop.first %} / {% endif %}
-       {{ n.name|safe }}{% endfor 
-%}{%- endmacro %}
-
-{% macro place_names(pl) -%}
-    {# Displays Place_combo name variations as "Rymättylä • Rimito (sv)" #}
-    {% for n in pl.names|sort(attribute='lang') %}
-        {% if not loop.first %} • {% endif %}
-        {% if n.lang %}<span class='typedesc'>{{n.lang}}</span>&nbsp;{% 
-         endif %}{{ n.name|safe }}
-    {% endfor %}
-{%- endmacro %}
-
 {% macro citation_link(cit_list, obj) -%}
     {# Creates template <sup>citation link</sup> for each citation.
        - cit_list   list of citation uniq_ids
@@ -193,5 +265,23 @@
        <a id="N{{note.uniq_id}}"><b>{{note.type|transl('notet')}}</b> {{note.url}}
          <i>{{note.text}}</i></a>{% endfor %}</sup>{% endif 
 %}{%- endmacro %}
+
+
+# 2.3 Place
+
+{% macro place_names_lang(pl) -%}
+    {# Displays Place_combo name variations as "Rymättylä / Rimito" #}
+    {% for n in pl.names %}{% if not loop.first %} / {% endif %}
+       {{ n.name|safe }}{% endfor 
+%}{%- endmacro %}
+
+{% macro place_names(pl) -%}
+    {# Displays Place_combo name variations as "Rymättylä • SV Rimito" #}
+    {% for n in pl.names %} {# pre-sorted, no |sort(attribute='lang') #}
+        {% if not loop.first %} • {% endif %}
+        {% if n.lang %}<span class='langcode'>{{n.lang}}</span>{% endif %}
+        {{ n.name|safe }}
+    {%- endfor %}
+{%- endmacro %}
 
 

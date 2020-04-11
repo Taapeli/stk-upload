@@ -6,8 +6,10 @@ Created on 22.7.2017
 
 from sys import stderr
 
-from .base import NodeObject
+from bl.base import NodeObject
 from .cypher import Cypher_media
+from .person import Person
+from .place import Place
 from models.cypher_gramps import Cypher_media_in_batch
 import shareds
 import os
@@ -50,12 +52,6 @@ class Media(NodeObject):
             'mime': 'image/gif', 'change': 1524411014}>
         '''
         n = super(Media, cls).from_node(node)
-#         n = cls()
-#         n.uniq_id = node.id
-#         n.id = node['id']
-#         n.uuid = node['uuid']
-#         n.handle = node['handle']
-#         n.change = node['change']
         n.description = node['description']
         n.src = node['src']
         n.mime = node['mime']
@@ -65,17 +61,56 @@ class Media(NodeObject):
             n.name = ""
         return n
 
+
     @staticmethod
-    def get_medias(uniq_id):
-        """ Lukee kaikki tallenteet tietokannasta """
+    def read_my_media_list(u_context, limit):
+        """ Read Media object list using u_context.
+        """
+        medias = []
+        result = Media.get_medias(uniq_id=None, o_context=u_context, limit=limit)
+        for record in result: 
+            # <Record o=<Node id=393949 labels={'Media'}
+            #        properties={'src': 'Users/Pekan Book/OneDrive/Desktop/Sibelius_kuvat/Aino Järnefelt .jpg',
+            #            'batch_id': '2020-01-02.001', 'mime': 'image/jpeg',
+            #            'change': 1572816614, 'description': 'Aino Järnefelt (1871-) nro 1',
+            #            'id': 'O0001', 'uuid': 'b4b11fbd8c054252b51703769e7a6850'}>
+            #    credit='juha'
+            #    batch_id='2020-01-02.001'
+            #    count=1>
+            node = record['o']
+            m = Media.from_node(node)
+            m.conn = record.get('count', 0)
+            m.credit = record.get('credit')
+            m.batch = record.get('batch_id')
+            medias.append(m)
+        
+    # Update the page scope according to items really found
+        if medias:
+            u_context.update_session_scope('media_scope', 
+                medias[0].description, medias[-1].description, limit, len(medias))
+        return medias
+    
+    @staticmethod
+    def get_medias(uniq_id=None, o_context=None, limit=100):
+        """ Reads Media objects from user batch or common data using context. """
                         
         if uniq_id:
             query = "MATCH (o:Media) WHERE ID(o)=$id RETURN o"
             return  shareds.driver.session().run(query, id=uniq_id)
+        elif o_context:
+            user = o_context.user
+            fw_from = o_context.next_name_fw()     # next name
+            show_common = o_context.use_common()
+            if show_common:
+                # Show approved common data
+                return shareds.driver.session().run(Cypher_media.read_common_media,
+                                                    user=user, start_name=fw_from, limit=limit)
+            else:
+                # Show user Batch
+                return  shareds.driver.session().run(Cypher_media.read_my_own_media,
+                                                     start_name=fw_from, user=user, limit=limit)
         else:
-            query = "MATCH (o:Media) RETURN o"
-            return  shareds.driver.session().run(query)
-
+            return  shareds.driver.session().run(Cypher_media.get_all)
 
     @staticmethod
     def get_one(oid):
@@ -85,17 +120,46 @@ class Media(NodeObject):
         """
         if oid:
             with shareds.driver.session() as session:
-                if isinstance(oid, int):
-                    # User uniq_id
-                    record = session.run(Cypher_media.get_by_uniq_id,
-                                         rid=oid).single()
-                else:
-                    # Use UUID
-                    record = session.run(Cypher_media.get_by_uuid,
-                                         rid=oid).single()
+#                 if isinstance(oid, int):
+#                     # User uniq_id
+#                     record, record2 = session.run(Cypher_media.get_by_uniq_id,
+#                                          rid=oid).single()
+#                 else:
+                # Use UUID
+                record, record2 = session.run(Cypher_media.get_by_uuid,
+                                              rid=oid).single()
 
                 if record:
-                    return Media.from_node(record['obj'])
+                    # <Node id=435174 labels={'Media'}
+                    #    properties={'src': 'Albumi-Silius/kuva002.jpg', 'batch_id': '2020-02-14.001',
+                    #        'mime': 'image/jpeg', 'change': 1574187478, 'description': 'kuva002',
+                    #        'id': 'O0024', 'uuid': 'fa2e240493434912986c2540b52a9464'}>
+                    media = Media.from_node(record)
+                    media.ref = []
+                    for node, prop in record2:
+                        # node = <Node id=435368 labels={'Person'}
+                        #    properties={'sortname': 'Silius#Carl Gustaf#', ...}>
+                        # ref = {'order': 1, 'right': 100, 'left': 0, 'lower': 96, 'upper': 15}
+                        label, = node.labels   # Get the 1st label
+                        if label == 'Person':
+                            obj = Person.from_node(node)
+                        elif label == 'Place':
+                            obj = Place.from_node(node)
+                        else:
+                            obj = None
+                        # Has the relation cropping properties?
+                        left = prop.get('left')
+                        if left != None:
+                            upper = prop.get('upper')
+                            right = prop.get('right')
+                            lower = prop.get('lower')
+                            crop = (left, upper, right, lower)
+                        else:
+                            crop = None
+
+                        # A list [object label, object, relation properties]
+                        media.ref.append([label,obj,crop])
+                    return (media)
         return None
 
         

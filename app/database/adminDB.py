@@ -189,74 +189,56 @@ def do_schema_fixes():
     
         #TODO: Muokataan tätä aina kun skeema muuttuu (tai muutos on ohi)
     """
-    if True:
-        if not role_exists("guest"):
-            with shareds.driver.session() as session:
-                try:    
-                    session.write_transaction(create_role, ROLES[0])
-                    print("Guest role added") 
-                except CypherSyntaxError as cex:
-                    print('Session ', cex)
-                except CypherError as cex:
-                    print('Session ', cex)
-                except ConstraintError as cex:
-                    print('Session ', cex)
-                                  
-        if not user_exists("guest"):
-            guest = build_guest_user()
-            shareds.user_datastore.put(guest)
-            print("Guest user added")            
-    else:    
-        print(f"database.adminDB.do_schema_fixes.do_schema_fixes: none")
-    return
 
-    if False:
-        change_HIERARCY_to_IS_INSIDE = """
-MATCH (a) -[r:HIERARCY]-> (b)
-    MERGE (a) -[rr:IS_INSIDE]-> (b)
-        set rr = {datetype:r.datetype, date1:r.date1, date2:r.date2}
-    DELETE r
-RETURN count(rr)"""
-        change_userName_to_username = """
-match (u:UserProfile) where exists(u.userName)
-    set u.username = u.userName
-    set u.userName = null
-return count(u)"""
-        change_Repocitory_to_Repository = """
-match (a:Repocitory)
-    set a:Repository
-    remove a:Repocitory
-return count(a)"""
-        change_Family_dates = """
-match (f:Family) where f.datetype=3 and not exists(f.date1)
-    set f.datatype = 1
-    set f.data1 = f.data2
-return count(f)"""
-        change_wrong_supplemented_direction = """
-MATCH (u:User)<-[r:SUPPLEMENTED]-(p:UserProfile) 
-    DELETE r 
-    CREATE (u) -[:SUPPLEMENTED]-> (p)
-return count(u)"""
+    if True:
+        change_Root_to_Audit = '''
+MATCH (n:Root)
+    SET n:Audit
+    SET n.auditor = n.operator
+    REMOVE n:Root
+    SET n.operator = Null
+RETURN count(n)'''
+        
+        change_Audition_to_Audit = '''
+MATCH (n:Audition)
+    SET n:Audit
+    REMOVE n:Audition
+RETURN count(n)'''
 
         with shareds.driver.session() as session: 
             try:
-                result = session.run(change_HIERARCY_to_IS_INSIDE)
+                result = session.run(change_Root_to_Audit)
                 cnt1 = result.single()[0]
-                result = session.run(change_userName_to_username)
+                result = session.run(change_Audition_to_Audit)
                 cnt2 = result.single()[0]
-                result = session.run(change_Repocitory_to_Repository)
-                cnt3 = result.single()[0]
-                result = session.run(change_Family_dates)
-                cnt4 = result.single()[0]
-                result = session.run(change_wrong_supplemented_direction)
-                cnt5 = result.single()[0]
-    
-                print(f"adminDB.do_schema_fixes: changed {cnt1} relatios, {cnt2} properties, "
-                      f"{cnt3} labels, {cnt4} families, {cnt5} supplemented directions")
-    
+                print(f"adminDB.do_schema_fixes: fixed {cnt1} Root labels, {cnt2} Audition labels")
             except Exception as e:
                 logger.error(f"{e} in database.adminDB.do_schema_fixes")
                 return
+
+
+            dropped=0
+            created=0
+            try:
+                for label in ['Person', 'Event', 'Place', 'Family']:
+                    result = session.run(f'DROP INDEX ON :{label}(gramps_handle)')
+                    counters = result.summary().counters
+                    dropped += counters.indexes_removed
+            except Exception as e:
+                pass
+
+            for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
+                          'Note', 'Person', 'Place', 'Place_name', 'Repository',
+                          'Source']:
+                try:
+                    result = session.run(f'CREATE INDEX ON :{label}(handle)')
+                    counters = result.summary().counters
+                    created += counters.indexes_added
+                except Exception as e:
+                    logger.info(f"Index for {label}.handle not created: {e}")
+
+            print(f"adminDB.do_schema_fixes: index updates: {dropped} removed, {created} created")
+
     else:
         print("database.adminDB.do_schema_fixes: No schema changes tried")
 
@@ -297,6 +279,32 @@ def create_uuid_constraints():
             "create constraint on (n:Place) assert n.uuid is unique"
         )
 
+def set_confirmed_at():
+    """
+    For some reason many User nodes were missing the 'confirmed_at'
+    property. This code creates the missing properties by copying
+    it from the corresponding 'Allowed_email' node. The actual value
+    is in fact not very important.
+    """
+    stmt = """
+        match (allowed:Allowed_email),(user:User) 
+        where not exists(user.confirmed_at) and 
+              allowed.allowed_email=user.email
+        return count(user) as count
+    """
+    result = shareds.driver.session().run(stmt).single()
+    count = result['count']
+    print(f"Setting confirmed_at for {count} users") 
+
+    stmt = """
+        match (allowed:Allowed_email),(user:User) 
+        where not exists(user.confirmed_at) and 
+              allowed.allowed_email=user.email
+        set user.confirmed_at = allowed.confirmed_at
+    """
+    shareds.driver.session().run(stmt)
+
+
 def initialize_db():
     # Fix chaanged schema
     do_schema_fixes()
@@ -315,5 +323,6 @@ def initialize_db():
 
     create_lock_constraint()
     create_uuid_constraints()
+    set_confirmed_at()
 
 

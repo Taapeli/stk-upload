@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import os
+import re
 import traceback
+
 from neo4j import GraphDatabase
 from models.gen.event import Event
 import shareds
@@ -67,17 +69,7 @@ def list_batch(rec):
     print(f"{id:14s} {user:16s} {file:60s} {status}")
 
 def sanitize(name):
-    name = (name
-    .replace("'","_")
-    .replace("/","_")
-    .replace("[","_")
-    .replace("]","_")
-    .replace("(","_")
-    .replace(")","_")
-    .replace("?","_")
-    .replace("*","_")
-    .replace(":","_"))
-    return name
+    return re.sub(r"[^a-z|0-9|åöä]","_",name,flags=re.IGNORECASE)
     
 def generate_searchkey1(n,count,rec):   
     """
@@ -285,6 +277,7 @@ def display_matches(args,p,pid,pn,rec,matches):
         
     
 def __search_dups(n,count,args,rec,matches):   
+    if n % 100 == 0: print(f"Searching {n}/{count}")
     pid = rec.get('pid')
     p = rec.get('p')
 

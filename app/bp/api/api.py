@@ -1,3 +1,6 @@
+# Database queries from outside
+# Note. This is older version of placepai.py by kkj
+#
 import shareds
 from models.gen.dates import DateRange
 """

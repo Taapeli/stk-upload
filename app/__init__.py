@@ -45,6 +45,9 @@ shareds.app.register_blueprint(dupsearch_bp)
 from bp.api import bp as api_bp
 shareds.app.register_blueprint(api_bp)
 
+from bp.dbeditor import bp as dbeditor_bp
+shareds.app.register_blueprint(dbeditor_bp)
+
 @shareds.babel.localeselector
 def get_locale():
     reqlang = request.args.get('lang')

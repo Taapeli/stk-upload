@@ -25,3 +25,5 @@ user_model = None
 role_model = None
 
 DEFAULT_ROLE = 'member'    # Value overridden with configuration in application setup
+
+PRIVACY_LIMIT = 0

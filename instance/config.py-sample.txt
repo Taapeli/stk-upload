@@ -36,3 +36,8 @@ MAIL_DEBUG = True
 ADMIN_EMAIL_FROM = '<sähköposti>'
 ADMIN_EMAIL_TO = '<oma sähköposti>'
 
+MAX_CONTENT_LENGTH = 30 * 1024 * 1024 # = 30MB    # change also LimitRequestBody in /etc/httpd/conf/httpd.conf if needed
+LIBSVM_FOLDER = "/var/www/webroot/libsvm-3.23"
+DEMO_URL = "https://demo.isotammi.net"
+
+

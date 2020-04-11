@@ -45,6 +45,7 @@ gray                    #999
 gray light              #CCC
 gray very light         #EEE
 white                   #FFF
+dark blue               #006
 --------------------------------------------------------------------------------------------------
 Characteristic of this style is that it uses the full width of the browser
 window and that horizontal highlighting bars extend over the full width of
@@ -73,6 +74,11 @@ body > div {
     margin-left:50px;
     margin-bottom:1em;
 }
+#startdiv h2 {margin-bottom: 0;}
+#startdiv div {color: #006;}
+#startdiv div i a {
+	color: #006;
+	text-decoration-line: underline;}
 
 .content {
     background-color: white;
@@ -99,6 +105,9 @@ h1 {
     padding: 2px;
     width: 100%;
 }
+h1.own { border-bottom: solid 3pt #e0bc91; }
+h1.passed { border-bottom: solid 2pt #6884be; }
+
 h1 div.curr_user {
     float: right; 
     margin-right: 30px; 
@@ -148,7 +157,7 @@ img#logo {
 }
 li.minor { list-style-type: circle; }
 li.major { list-style-type: square; }
-.inlink { color: #000066; background: LemonChiffon; }
+.inlink { color: #006; background: LemonChiffon; }
 .outlink { text-decoration: underline; color:gray}
 .refname { color:gray; font-size: 80%; }
 .dimmed { color: #555; font-style: italic;  font-size: 80%; }
@@ -159,13 +168,18 @@ td.numbers {
     padding-right: 2em;
 }
 td.ColumnEvent ul li i {
-	color: #000066;
+	color: #006;
 }
 .typedesc {
-	font-variant: small-caps;
-	text-transform: uppercase;
-	font-size: 84%;
-/* 	color: darkslategray; */
+    font-variant: small-caps;
+    text-transform: uppercase;
+    font-size: 84%;
+}
+.langcode {
+    font-variant: small-caps;
+    text-transform: uppercase;
+    font-size: 84%;
+    color: darkslategray;
 }
 
 div.NotFound {
@@ -247,6 +261,7 @@ a.navlink:hover, a.navlink:active {
 
 #lastitem_badge {
     text-align: center;
+    padding: 1em;
 }
 #lastitem_badge > i {
     background-color:#999; 
@@ -283,6 +298,9 @@ h4 {
 p#description {
     padding-left: 15px;
 }
+div#description_box {
+    width: 450px;
+}
 div#noteContent {
     padding: 1em 0 0 3.5em;
     text-indent: -1.5em;
@@ -314,23 +332,15 @@ a[href]:hover, a[href]:active {
     padding-left: 15px;
 }
 
-/* Search form (31.10.2017/JMä)
------------------------------------------------------ */
-/*#searchform {
-    background: #999;
-    color: white;
-    margin-left: 3em;
-    margin-bottom: 1em;
-    padding: 3px;
-    max-width: 40em;
-}*/
 #searching {
+	background: bisque;
     margin: 1em;
     border: 1px solid #CCC;
-    padding: 1em;
-    background-color: bisque;
-    color: black;
-    max-width: 30em;
+    padding: 5px;
+    padding: 5px;
+    width: 400px;
+    min-width: 200px;
+    max-width: 430px;
 }
 .flashes {
     color: darkblue;
@@ -386,6 +396,16 @@ div#nav ul li.CurrentSection a {
 #subnavigation ul li.CurrentSection a {
     background-color: white;
 }
+
+.credit {
+    position: absolute;
+    top: 40px;
+    right: 10px;
+    color: #7e6b53;
+    font-size: 8pt;
+/*  border: 3px solid #73AD21; */
+}
+
 /* Alphabet Navigation
 ----------------------------------------------------- */
 div#alphanav {
@@ -434,6 +454,10 @@ div#summaryarea > table.infolist,
 div#parents > table.infolist,
 h3 + table.infolist {
     width: auto;
+}
+div#summaryarea > p {
+	margin:0.5em;
+    margin-left:2em;
 }
 table tr th {
     text-align: left;
@@ -562,9 +586,9 @@ ul.eventnotes {
 .eventgrid {  display: flex; }
 .eventgrid .col { float: left; }
 .eventgrid .col.col_event { width: 15em; }
-.eventgrid .col.col_event span.evtype {
+.eventgrid .col.col_event span.#006 {
     font-style: italic;
-    color: #000066;
+    color: #006;
 }
 .eventgrid .col.col_date { width: 60%; }
 .major { font-weight: bold; }

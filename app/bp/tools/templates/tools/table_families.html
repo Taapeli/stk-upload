@@ -16,7 +16,7 @@
 <h4>Sort by clicking a column of the table</h4>
 <section id="lista">
 <table id="families">
-    <tr><th onclick="sortTable(0)" style="cursor:pointer">{{ _("Uniq_id") }}</th>
+    <tr><th onclick="sortTable(0)" style="cursor:pointer">{{ _("Family") }}</th>
         <th>{{ _("id of Father") }}</th>
         <th onclick="sortTable(2)" style="cursor:pointer">{{ _("Father") }}</th>
         <th>{{ _("id of Mother") }}</th>
@@ -28,14 +28,19 @@
 {% if families %}
     {% for f in families %}
         <tr>
-                <td>{{f.uniq_id}}</td>
-                <td><a href="/scene/person={{f.father.uniq_id}}">{{f.father.uniq_id}}</a></td>
+                <td><a href="/scene/family?uuid={{f.uuid}}">{{f.uuid_short()}}</a>
+                </td>
+                <td>{% if f.father %}
+                    <a href="/scene/person?uuid={{f.father.uuid}}">{{f.father.uuid_short()}}</a>
+                {% endif %}</td>
                 {% if f.father.names %}
                     <td>{{f.father.names[0].firstname}} {{f.father.names[0].suffix}} {{f.father.names[0].surname}}</td>
                 {% else %}
                     <td>-</td>
                 {% endif %}
-                <td><a href="/scene/person={{f.mother.uniq_id}}">{{f.mother.uniq_id}}</a></td>
+                <td>{% if f.mother %}
+                    <a href="/scene/person?uuid={{f.mother.uuid}}">{{f.mother.uuid_short()}}</a>
+                {% endif %}</td>
                 {% if f.mother.names %}
                     <td>{{f.mother.names[0].firstname}} {{f.mother.names[0].suffix}} {{f.mother.names[0].surname}}</td>
                 {% else %}
@@ -43,7 +48,7 @@
                 {% endif %}
                 <td>{{f.type}}</td>
                 <td>{{f.no_of_children}}</td>
-                <td>{% for c in f.children %}<a href="/scene/person={{c.uniq_id}}">{{c.uniq_id}}</a> {% endfor %}</td>
+                <td>{% for c in f.children %}<a href="/scene/person?uuid={{c.uuid}}">{{c.uuid_short()}}</a> {% endfor %}</td>
         </tr>
     {% endfor %}
 {% else %}

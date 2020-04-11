@@ -29,23 +29,27 @@
      {% if current_user.is_authenticated and 
         ( current_user.has_role('research') or current_user.has_role('admin') ) %}
                 <h3>{{ _('Select Material for Browsing') }}</h3>
-                <p>{% set filt = session['owner_filter'] %}
+                <p>
+        {% set ctxt = session['user_context'] %}
+        {% if (not ctxt) and session['owner_filter'] %}
+            {% set ctxt = session['owner_filter'] %}
+        {% endif %}
 	                <input type="checkbox" name="div" value="1"
-	                    {% if filt == 1 or filt == 3 %}checked{% endif %}
-	                    >{{ _('Demo database') }}<br>
+	                    {% if ctxt == 1 or ctxt == 3 %}checked{% endif %}
+	                    >{{ _('Approved data') }}<br>
 	                <input type="checkbox" name="div2" value="2"
-	                    {% if filt == 2 or filt == 3 %}checked{% endif %}
+	                    {% if ctxt == 2 or ctxt == 3 %}checked{% endif %}
 	                    >{{ _('My candidate material') }}<br>
                  </p>
-{#              <p>{% set filt = session['owner_filter'] %}<br>
+{#              <p>{% set ctxt = session['user_context'] %}<br>
                   <input type="radio" name="div" value="1" 
-                    {% if filt == 1 %}checked{% endif %}>{{ _('Demo database') }}<br>
+                    {% if ctxt == 1 %}checked{% endif %}>{{ _('Demo database') }}<br>
                   <input type="radio" name="div" value="2" 
-                    {% if filt == 2 or filt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
+                    {% if ctxt == 2 or ctxt == 3 %}checked{% endif %}>{{ _('My candidate material') }}<br>
                 <input type="radio" name="div" value="4" style="cursor:not-allowed" 
-                    {% if filt == 4 or filt == 5 %}checked{% endif %}>{{ _('Selected set of material') }}<br>
+                    {% if ctxt == 4 or ctxt == 5 %}checked{% endif %}>{{ _('Selected set of material') }}<br>
                  &nbsp;&nbsp;&#9492;&#9472; <input type="checkbox" name="cmp" value="1"  
-                    {% if filt == 3 or filt == 5 %}checked{% endif %}>
+                    {% if ctxt == 3 or ctxt == 5 %}checked{% endif %}>
                         {{ _('Compare to Demo Database') }} 
                 </p>
 #}

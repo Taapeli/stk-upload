@@ -6,13 +6,16 @@ Extracted 23.5.2019 from models.gen.place.Place
 '''
 
 import  shareds
-from .place import Place, Place_name, Point
+from bl.place import Place, PlaceName
+
+#from .place import Place, Place_name, Point
 from .note import Note
+from .media import Media
 from .dates import DateRange
 from .cypher import Cypher_place
-from models.dbtree import DbTree
-from models.gen.event_combo import Event_combo
-from models.gen.person_name import Name
+#from models.dbtree import DbTree
+#from models.gen.event_combo import Event_combo
+#from models.gen.person_name import Name
 
 import logging
 logger = logging.getLogger('stkserver')
@@ -27,6 +30,7 @@ class Place_combo(Place):
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
                 note_ref[]          int uniq_ids of Notes
+                media_ref[]         int uniq_ids of Medias
             Defined in Place:
                 handle
                 change
@@ -56,6 +60,7 @@ class Place_combo(Place):
         self.uppers = []        # Upper place objects for hirearchy display
         self.notes = []         # Notes connected to this place
         self.note_ref = []      # uniq_ids of Notes
+        self.media_ref = []     # uniq_id of models.gen.media.Media
 
 
     def __str__(self):
@@ -88,7 +93,7 @@ class Place_combo(Place):
 
     @staticmethod
     def read_place_w_names(uniq_id):
-        """ Reads Place_combo nodes or selected node with Place_name objects.
+        """ Reads Place_combo nodes or selected node with PlaceName objects.
         """
         result = None
         with shareds.driver.session() as session:
@@ -107,7 +112,7 @@ class Place_combo(Place):
             for node in record['names']:
                 # <Node id=78278 labels={'Place_name'} properties={'lang': '', 
                 #    'name': 'Kangasalan srk'}>
-                plname = Place_name.from_node(node)
+                plname = PlaceName.from_node(node)
                 names.append(str(plname))
                 pl.names.append(plname)
             pl.clearname = ' • '.join(names)
@@ -151,7 +156,7 @@ class Place_combo(Place):
                 pl = Place_combo.from_node(node)
 
                 for names_node in place_record["names"]:
-                    pl.names.append(Place_name.from_node(names_node))
+                    pl.names.append(PlaceName.from_node(names_node))
 #                     if pl.names[-1].lang in ['fi', '']:
 #                         #TODO: use current_user's lang
 #                         pl.pname = pl.names[-1].name
@@ -159,6 +164,11 @@ class Place_combo(Place):
                 for notes_node in place_record['notes']:
                     n = Note.from_node(notes_node)
                     pl.notes.append(n)
+
+                for medias_node in place_record['medias']:
+                    m = Media.from_node(medias_node)
+                    pl.media_ref.append(m)
+                    
                 if not (pl.type and pl.id):
                     logger.error(f"Place_combo.read_w_notes: missing data for {pl}")
 
@@ -244,274 +254,70 @@ class Place_combo(Place):
         return (titles, lists)
 
 
-    @staticmethod
-    def get_place_hierarchy():
-        """ Get a list on Place_combo objects with nearest heirarchy neighbours.
-        
-            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-
-            Esim.
-╒══════╤═════════╤════════════════════╤═══════╤════════════════════╤════════════════════╕
-│"id"  │"type"   │"name"              │"coord"│"upper"             │"lower"             │
-╞══════╪═════════╪════════════════════╪═══════╪════════════════════╪════════════════════╡
-│290228│"Borough"│[{"name":"1. Kaupung│null   │[[287443,"City","Arc│[[290226,"Tontti","T│
-│      │         │inosa","lang":""}]  │       │topolis","la"],[2874│ontti 23",""]]      │
-│      │         │                    │       │43,"City","Björnebor│                    │
-│      │         │                    │       │g","sv"],[287443,"Ci│                    │
-│      │         │                    │       │ty","Pori",""],[2874│                    │
-│      │         │                    │       │43,"City","Пори","ru│                    │
-│      │         │                    │       │"]]                 │                    │
-└─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
-"""
-        def combine_places(pn_tuples):
-            """ Creates a list of Places with names combined from given names.
-            
-                Kenttä pl_tuple sisältää Places-tietoja 
-                tuplena [[28101, "City", "Lovisa", "sv"]].
-
-                Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
-                Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
-            """
-            placedict = {}
-            for nid, nuuid, ntype, name, lang in pn_tuples:
-                if nid: # id of a lower place
-                    pn = Place_name(name=name, lang=lang)
-                    if nid in placedict:
-                        # Append name to existing Place_combo
-                        placedict[nid].names.append(pn)
-                        if pn.lang in ['fi', '']:
-                            # Default language name
-                            #TODO use language from current_user's preferences
-                            placedict[nid].pname = pn.name
-                    else:
-                        # Add a new Place_combo
-                        p = Place_combo(nid)
-                        p.uuid = nuuid
-                        p.type = ntype
-                        p.names.append(pn)
-                        p.pname = pn.name
-                        placedict[nid] = p
-                        # ntype, Place_combo.namelist_w_lang( (name,) ))
-            return list(placedict.values())
-
-
-        ret = []
-        result = shareds.driver.session().run(Cypher_place.get_name_hierarchies)
-        for record in result:
-            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
-            # alemmista paikoista
-            #
-            # Record: <Record id=290228 type='Borough' 
-            #    names=[<Node id=290235 labels={'Place_name'} 
-            #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
-            #    coord=None
-            #    upper=[
-            #        [287443, 'City', 'Arctopolis', 'la'], 
-            #        [287443, 'City', 'Björneborg', 'sv'], 
-            #        [287443, 'City', 'Pori', ''], 
-            #        [287443, 'City', 'Пори', 'ru']] 
-            #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
-            # >
-            pl_id =record['id']
-            p = Place_combo(pl_id)
-            p.uuid =record['uuid']
-            p.type = record.get('type')
-            if record['coord']:
-                p.coord = Point(record['coord']).coord
-            # Set place names and default display name pname
-            for nnode in record.get('names'):
-                pn = Place_name.from_node(nnode)
-                if pn.lang in ['fi', '']:
-                    # Default language name
-                    #TODO use language from current_user's preferences
-                    p.pname = pn.name
-                p.names.append(pn)
-            if p.pname == '' and p.names:
-                p.pname = p.names[0].name
-            p.uppers = combine_places(record['upper'])
-            p.lowers = combine_places(record['lower'])
-            ret.append(p)
-        # Return sorted by first name in the list p.pname
-        return sorted(ret, key=lambda x:x.pname)
+#     def get_place_hierarchy():  # @staticmethod --> Neo4jDriver.get_place_list
+#         """ Get a list on Place_combo objects with nearest heirarchy neighbours.
+#         
+#             Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
+# 
+#             Esim.
+# ╒══════╤═════════╤════════════════════╤═══════╤════════════════════╤════════════════════╕
+# │"id"  │"type"   │"name"              │"coord"│"upper"             │"lower"             │
+# ╞══════╪═════════╪════════════════════╪═══════╪════════════════════╪════════════════════╡
+# │290228│"Borough"│[{"name":"1. Kaupung│null   │[[287443,"City","Arc│[[290226,"Tontti","T│
+# │      │         │inosa","lang":""}]  │       │topolis","la"],[2874│ontti 23",""]]      │
+# │      │         │                    │       │43,"City","Björnebor│                    │
+# │      │         │                    │       │g","sv"],[287443,"Ci│                    │
+# │      │         │                    │       │ty","Pori",""],[2874│                    │
+# │      │         │                    │       │43,"City","Пори","ru│                    │
+# │      │         │                    │       │"]]                 │                    │
+# └──────┴─────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
+# """
+#         ret = []
+#         result = shareds.driver.session().run(Cypher_place.get_name_hierarchies)
+#         for record in result:
+#             # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
+#             # alemmista paikoista
+#             #
+#             # Record: <Record id=290228 type='Borough' 
+#             #    names=[<Node id=290235 labels={'Place_name'} 
+#             #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
+#             #    coord=None
+#             #    upper=[
+#             #        [287443, 'City', 'Arctopolis', 'la'], 
+#             #        [287443, 'City', 'Björneborg', 'sv'], 
+#             #        [287443, 'City', 'Pori', ''], 
+#             #        [287443, 'City', 'Пори', 'ru']] 
+#             #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
+#             # >
+#             pl_id =record['id']
+#             p = Place_combo(pl_id)
+#             p.uuid =record['uuid']
+#             p.type = record.get('type')
+#             if record['coord']:
+#                 p.coord = Point(record['coord']).coord
+#             # Set place names and default display name pname
+#             for nnode in record.get('names'):
+#                 pn = Place_name.from_node(nnode)
+#                 if pn.lang in ['fi', '']:
+#                     # Default language name
+#                     #TODO use language from current_user's preferences
+#                     p.pname = pn.name
+#                 p.names.append(pn)
+#             if p.pname == '' and p.names:
+#                 p.pname = p.names[0].name
+#             p.uppers = Place_combo._combine_places(record['upper'])
+#             p.lowers = Place_combo._combine_places(record['lower'])
+#             ret.append(p)
+#         # Return sorted by first name in the list p.pname
+#         return sorted(ret, key=lambda x:x.pname)
 
 
-    @staticmethod
-    def get_my_place_hierarchy(o_filter, limit):
-        """ Get a list on Place_combo objects with nearest heirarchy neighbours.
-        
-            Haetaan paikkaluettelo ml. hierarkiassa ylemmät ja alemmat
-
-            Esim.
-╒══════╤═════════╤════════════════════╤═══════╤════════════════════╤════════════════════╕
-│"id"  │"type"   │"name"              │"coord"│"upper"             │"lower"             │
-╞══════╪═════════╪════════════════════╪═══════╪════════════════════╪════════════════════╡
-│290228│"Borough"│[{"name":"1. Kaupung│null   │[[287443,"City","Arc│[[290226,"Tontti","T│
-│      │         │inosa","lang":""}]  │       │topolis","la"],[2874│ontti 23",""]]      │
-│      │         │                    │       │43,"City","Björnebor│                    │
-│      │         │                    │       │g","sv"],[287443,"Ci│                    │
-│      │         │                    │       │ty","Pori",""],[2874│                    │
-│      │         │                    │       │43,"City","Пори","ru│                    │
-│      │         │                    │       │"]]                 │                    │
-└─────┴──────────┴────────────────────┴───────┴────────────────────┴────────────────────┘
-"""
-        def combine_places(pn_tuples):
-            """ Creates a list of Places with names combined from given names.
-            
-                Kenttä pl_tuple sisältää Places-tietoja 
-                tuplena [[28101, "City", "Lovisa", "sv"]].
-
-                Jos sama Place esiintyy uudestaan, niiden nimet yhdistetään.
-                Jos nimeen on liitetty kielikoodi, se laitetaan sulkuihin mukaan.
-            """
-            placedict = {}
-            for nid, nuuid, ntype, name, lang in pn_tuples:
-                if nid: # id of a lower place
-                    pn = Place_name(name=name, lang=lang)
-                    if nid in placedict:
-                        # Append name to existing Place_combo
-                        placedict[nid].names.append(pn)
-                        if pn.lang in ['fi', '']:
-                            # Default language name
-                            #TODO use language from current_user's preferences
-                            placedict[nid].pname = pn.name
-                    else:
-                        # Add a new Place_combo
-                        p = Place_combo(nid)
-                        p.uuid = nuuid
-                        p.type = ntype
-                        p.names.append(pn)
-                        p.pname = pn.name
-                        placedict[nid] = p
-                        # ntype, Place_combo.namelist_w_lang( (name,) ))
-            return list(placedict.values())
-
-        def _read_place_list(o_filter, limit):
-            """ Read Place data from given fw 
-            """
-            # Select a) filter by user b) show Isotammi common data (too)
-            show_by_owner = o_filter.use_owner_filter()
-            show_with_common = o_filter.use_common()
-            user = o_filter.user
-            try:
-                """
-                               show_by_owner    show_all
-                            +-------------------------------
-                with common |  me + common      common
-                no common   |  me                -
-                """
-                with shareds.driver.session() as session:
-                    if show_by_owner:
-
-                        if show_with_common: 
-                            #1 get all with owner name for all
-                            print("_read_place_list: by owner with common")
-                            result = session.run(Cypher_place.get_name_hierarchies,
-                                                 user=user, fw=fw, limit=limit)
-
-                        else: 
-                            #2 get my own (no owner name needed)
-                            print("_read_place_list: by owner only")
-                            result = session.run(Cypher_place.get_my_name_hierarchies,
-                                                 user=user, fw=fw, limit=limit)
-
-                    else: 
-                        #3 == #1 simulates common by reading all
-                        print("_read_place_list: common only")
-                        result = session.run(Cypher_place.get_name_hierarchies, #user=user, 
-                                             fw=fw, limit=limit)
-                        
-                    return result
-            except Exception as e:
-                print('Error _read_person_list: {} {}'.format(e.__class__.__name__, e))            
-                raise      
+#     def get_my_place_hierarchy(o_context):   # @staticmethod --> bl.place.PlaceBl.get_list
+#         """ Get a list on Place_combo objects with nearest heirarchy neighbours.
 
 
-        ret = []
-        fw = o_filter.next_name_fw()     # next name
-        result = _read_place_list(o_filter, limit)
-        for record in result:
-            # Luodaan paikka ja siihen taulukko liittyvistä hierarkiassa lähinnä
-            # alemmista paikoista
-            #
-            # Record: <Record id=290228 type='Borough' 
-            #    names=[<Node id=290235 labels={'Place_name'} 
-            #        properties={'name': '1. Kaupunginosa', 'lang': ''}>] 
-            #    coord=None
-            #    upper=[
-            #        [287443, 'City', 'Arctopolis', 'la'], 
-            #        [287443, 'City', 'Björneborg', 'sv'], 
-            #        [287443, 'City', 'Pori', ''], 
-            #        [287443, 'City', 'Пори', 'ru']] 
-            #    lower=[[290226, 'Tontti', 'Tontti 23', '']]
-            # >
-            pl_id =record['id']
-            p = Place_combo(pl_id)
-            p.uuid =record['uuid']
-            p.type = record.get('type')
-            if record['coord']:
-                p.coord = Point(record['coord']).coord
-            # Set place names and default display name pname
-            for nnode in record.get('names'):
-                pn = Place_name.from_node(nnode)
-                if pn.lang in ['fi', '']:
-                    # Default language name
-                    #TODO use language from current_user's preferences
-                    p.pname = pn.name
-                p.names.append(pn)
-            if p.pname == '' and p.names:
-                p.pname = p.names[0].name
-            p.uppers = combine_places(record['upper'])
-            p.lowers = combine_places(record['lower'])
-            ret.append(p)
-            
-        # Update the page scope according to items really found 
-        if ret:
-            o_filter.update_session_scope('person_scope', 
-                                          ret[0].pname, ret[-1].pname, 
-                                          limit, len(ret))
-
-        # Return sorted by first name in the list p.pname
-        return sorted(ret, key=lambda x:x.pname)
-
-
-    def set_names_from_nodes(self, nodes):
-        ''' Filter Name objects from a list of Cypher nodes to self.names.
-        
-            Fill self.names with Place_names by following rules:
-            1. Place_names using lang == current_user.language
-            2. Place_names using lang == ""
-            3. If none found, use the last Place_name
-            Place_names using other languages are discarded
-
-            nodes=[
-                <Node id=305800 labels={'Place_name'} properties={'name': 'Helsingfors', 'lang': ''}>, 
-                <Node id=305799 labels={'Place_name'} properties={'name': 'Helsinki', 'lang': 'sv'}>
-            ]>
-        '''
-        own_lang = []
-        no_lang = []
-        alien_lang = []
-        from flask_security import current_user
-        for node in nodes:
-            pn = Place_name.from_node(node)
-            if pn.lang == "":
-                no_lang.append(pn)
-                ##print(f"# - no lang {len(self.names)} (Place_name {pn.uniq_id} {pn})")
-            elif pn.lang == current_user.language:
-                own_lang.append(pn)
-                ##print(f"# - my lang (Place_name {pn.uniq_id} {pn})")
-            else:
-                alien_lang.append(pn)
-                ##print(f"# - alien lang (Place_name {pn})")
-
-        if own_lang:
-            self.names = own_lang
-        elif no_lang:
-            self.names = no_lang
-        else:
-            self.names = alien_lang
-        #for pn in self.names:
-        #    print(f"#  names: {pn}")
+#     def _combine_places(pn_tuples):    # @staticmethod --> PlaceBl.combine_places
+#         """ Creates a list of Places with names combined from given names.
 
 
     def namelist_w_lang(self):
@@ -531,164 +337,15 @@ class Place_combo(Place):
         return ret
 
 
-    @staticmethod
-    def get_place_tree(locid):
-        """ Haetaan koko paikkojen ketju paikan locid ympärillä
-            Palauttaa listan paikka-olioita ylimmästä alimpaan.
-            Jos hierarkiaa ei ole, listalla on vain oma Place_combo.
 
-            Esim. Tuutarin hierarkia
-                  2 Venäjä -> 1 Inkeri -> 0 Tuutari -> -1 Nurkkala
-                  tulee tietokannasta näin:
-            ╒════╤═══════╤═════════╤══════════╤═══════╤═════════╤═════════╕
-            │"lv"│"id1"  │"type1"  │"name1"   │"id2"  │"type2"  │"name2"  │
-            ╞════╪═══════╪═════════╪══════════╪═══════╪═════════╪═════════╡
-            │"2" │"21774"│"Region" │"Tuutari" │"21747"│"Country"│"Venäjä" │
-            ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-            │"1" │"21774"│"Region" │"Tuutari" │"21773"│"State"  │"Inkeri" │
-            ├────┼───────┼─────────┼──────────┼───────┼─────────┼─────────┤
-            │"-1"│"21775"│"Village"│"Nurkkala"│"21774"│"Region" │"Tuutari"│
-            └────┴───────┴─────────┴──────────┴───────┴─────────┴─────────┘
-            Metodi palauttaa siitä listan
-                Place(result[0].id2) # Artjärvi City
-                Place(result[0].id1) # Männistö Village
-                Place(result[1].id1) # Pekkala Farm
-            Muuttuja lv on taso:
-                >0 = ylemmät,
-                 0 = tämä,
-                <0 = alemmat
-        """
-
-        # Query for Place hierarcy
-        hier_query = """
-MATCH x= (p:Place)<-[r:IS_INSIDE*]-(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r) AS lv, r
-    UNION
-MATCH x= (p:Place)-[r:IS_INSIDE*]->(i:Place) WHERE ID(p) = $locid
-    RETURN NODES(x) AS nodes, SIZE(r)*-1 AS lv, r
-"""
-        # Query for single Place without hierarcy
-        root_query = """
-MATCH (p:Place) WHERE ID(p) = $locid
-RETURN p.type AS type, p.uuid as uuid, p.pname AS name
-"""
-        # Query to get names for a Place
-        name_query="""
-MATCH (l:Place)-->(n:Place_name) WHERE ID(l) = $locid
-RETURN COLLECT(n) AS names LIMIT 15
-"""
-
-        t = DbTree(shareds.driver, hier_query, 'pname', 'type')
-        t.load_to_tree_struct(locid)
-        if t.tree.depth() == 0:
-            # Vain ROOT-solmu: Tällä paikalla ei ole hierarkiaa.
-            # Hae oman paikan tiedot ilman yhteyksiä
-            with shareds.driver.session() as session:
-                result = session.run(root_query, locid=int(locid))
-                record = result.single()
-                t.tree.create_node(record["name"], locid, parent=0,
-                                   data={'type': record["type"],'uuid':record['uuid']})
-        ret = []
-        for node in t.tree.expand_tree(mode=t.tree.DEPTH):
-            logger.debug(f"{t.tree.depth(t.tree[node])} {t.tree[node]} {t.tree[node].bpointer}")
-            if node != 0:
-                n = t.tree[node]
-
-                # Get all names
-                with shareds.driver.session() as session:
-                    result = session.run(name_query, locid=node)
-                    record = result.single()
-#                     Kysely palauttaa esim. [["Svartholm","sv"],["Svartholma",""]]
-#                     josta tehdään ["Svartholm (sv)","Svartholma"]
-#                     
-                    # <Record names=[
-                    #    <Node id=289028 labels={'Place_name'} 
-                    #        properties={'name': 'Finland', 'lang': 'sv'}>, 
-                    #    <Node id=289027 labels={'Place_name'} 
-                    #        properties={'name': 'Suomi', 'lang': ''}>, 
-                    #    <Node id=289029 labels={'Place_name'} 
-                    #        properties={'name': 'Finnland', 'lang': 'de'}>
-                    # ]>
-                lv = t.tree.depth(n)
-                p = Place_combo(uniq_id=node, ptype=n.data['type'], level=lv)
-                p.uuid = n.data['uuid']
-                for node in record['names']:
-                    p.names.append(Place_name.from_node(node))
-                # TODO: Order by lang here!
-                if p.names:
-                    p.pname = p.names[0].name
-                    
-                logger.info("# {}".format(p))
-                p.parent = n.bpointer
-                ret.append(p)
-        return ret
+#     def get_place_tree(locid): # @staticmethod > Neo4jDriver.get_place_tree
+#         """ Haetaan koko paikkojen ketju paikan locid ympärillä
+#             Palauttaa listan paikka-olioita ylimmästä alimpaan.
 
 
-    @staticmethod
-    def get_place_events(loc_id):
-        """ Haetaan paikkaan liittyvät tapahtumat sekä
-            osallisen henkilön nimitiedot.
-
-        Palauttaa esimerkin mukaiset tiedot:
-        ╒══════╤═════════╤═══════════════════╤═════════════╤═══════════════════╕
-        │"uid" │"role"   │"names"            │"etype"      │"edates"           │
-        ╞══════╪═════════╪═══════════════════╪═════════════╪═══════════════════╡
-        │305353│"Primary"│[{"firstname":"Eva │"Residence"  │[3,1863872,1866944]│
-        │      │         │Sophia","type":"Bir│             │                   │
-        │      │         │th Name","suffix":"│             │                   │
-        │      │         │","surname":"Forsté│             │                   │
-        │      │         │n","order":0, "pref│             │                   │
-        |      |         |ix":""}]           │             │                   │
-        ├──────┼─────────┼───────────────────┼─────────────┼───────────────────┤
-        │305450│"Primary"│[{"firstname":"Erik│"Occupation" │[3,1863872,1866944]│
-        │      │         │ Berndt","type":"Bi│             │                   │
-        │      │         │rth Name","suffix":│             │                   │
-        │      │         │"","surname":"Konow│             │                   │
-        │      │         │","order":0, "prefi│             │                   │
-        |      |         |x":"von"}]         │             │                   │
-        └──────┴─────────┴───────────────────┴─────────────┴───────────────────┘
-        """
-        result = shareds.driver.session().run(Cypher_place.get_person_events, 
-                                              locid=int(loc_id))
-        ret = []
-        for record in result:
-            e = Event_combo()
-            # Fields uid (person uniq_id) and names are on standard in Event_combo
-            e.uid = record["uid"]
-            e.type = record["etype"]
-            if record["edates"][0] != None:
-                dates = DateRange(record["edates"])
-                e.dates = str(dates)
-#                 e.date = dates.estimate()
-            e.role = record["role"]
-            e.names = []
-            for node in record["names"]:
-                e.names.append(Name.from_node(node))
-            ret.append(e)
-        return ret
-
-    @staticmethod
-    def get_total():
-        """ Tulostaa paikkojen määrän tietokannassa """
-
-        query = "MATCH (p:Place) RETURN COUNT(p)"
-        results =  shareds.driver.session().run(query)
-        for result in results:
-            return str(result[0])
-
-
-    def print_data(self):
-        """ Tulostaa tiedot """
-        print ("*****Placeobj*****")
-        print ("Handle: " + self.handle)
-        print ("Change: {}".format(self.change))
-        print ("Id: " + self.id)
-        print ("Type: " + self.type)
-        if self.pname:
-            print ("Pname: " + self.pname)
-        if self.coord:
-            print ("Coord: {}".format(self.coord))
-        return True
+#     def get_place_events(loc_id): @staticmethod > DBreader.dr_get_place_with_events
+#         """ Haetaan paikkaan liittyvät tapahtumat sekä
+#             osallisen henkilön nimitiedot.
 
 
 #     save() - see PlaceGramps.save()

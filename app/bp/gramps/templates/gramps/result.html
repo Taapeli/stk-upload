@@ -20,8 +20,8 @@
            </tr>
 	    {% for e in batch_events %}
 	       <tr><td class="msg_{{e.level}}">{{e.title}}</td>
-               <td class="right">{% if e.count %} {{e.count}} {% endif %}</td>
-               <td class="right">{% if e.elapsed %} {{'%.4f'| format(e.elapsed|float)}} {% endif %}</td>
+               <td class="right nowrap">{% if e.count %} {{e.count|int_thousands}} {% endif %}</td>
+               <td class="right nowrap">{% if e.elapsed %} {{'%.4f'| format(e.elapsed|float)}} {% endif %}</td>
 	       </tr>
 	    {% endfor %}</table>
     <p>&rtrif; <a href="/gramps/uploads">{{ _("Return") }}</a></p>

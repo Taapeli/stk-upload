@@ -4,7 +4,9 @@
 {% block body %}
 {{ super() }}
 <script src="/static/infobox.js"></script>
-        
+<style>
+td {vertical-align: top;}
+</style>
 {% from "start/s_macros.html" import hamburger_menu with context %}
 
 {{ hamburger_menu((
@@ -16,8 +18,8 @@
 
 <section id="lista">
 <table>
-    <tr><th>{{ _("Uniq_id") }}</th>
-        <th>{{ _("Name") }}</th>
+    <tr><th>{{ _("Links") }}</th>
+        <th>{{ _("Name") }}, {{_("Lifetime")}}</th>
         <th>{{ _("Event type") }}</th>
         <th>{{ _("Date") }}</th>
         <th>{{ _("Place") }}</th>
@@ -27,9 +29,21 @@
         {% set ecnt = p.events|count %}{% if ecnt %}{% else %}{% set ecnt = 1 %}{% endif %}
         {% set tr_tag = "" %}
             <tr>
-                <td rowspan="{{ecnt}}"><a href="/pick/uniq_id={{p.uniq_id}}">{{p.uniq_id}}</a></td>
+                <td rowspan="{{ecnt}}"><small class="gedcom_id">{{ p.id }}</small><br>
+                    <a href="/scene/person?uuid={{p.uuid}}">{{ p.uuid_short() }}</a>
+                    <small>(<a href="/pick/uniq_id={{p.uniq_id}}" style="text-decoration: none;">{{p.uniq_id}}</a>)</small>
+                </td>
                 <td rowspan="{{ecnt}}">{{p.names[0].firstname}} <b>{{p.names[0].surname}}</b>
-                    <br><small class="id">{{p.sortname}}</small></td>
+                    <br><small class="id">{{p.sortname}}</small>
+                    <br><i>{{ _('lived') }}
+			        {% if p.birth_low != p.birth_high %}
+			            {{p.birth_low}}…{%
+                    endif -%}{{p.birth_high}} 
+                        – {{p.death_low}}{%
+                    if p.death_low != p.death_high %}…{{p.death_high}}
+			        {% endif -%}
+                    </i>
+                </td>
     	{% if p.events %}
         	{% for event in p.events %} {{tr_tag|safe}} {% set tr_tag="<tr>" %}
 	    		<td style="align:right;">{{event.type}}</td>

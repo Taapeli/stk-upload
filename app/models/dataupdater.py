@@ -71,7 +71,7 @@ def set_confidence_values(tx, uniq_id=None, batch_logger=None):
     return
 
 
-def set_estimated_person_dates(uids=None):
+def set_estimated_person_dates(uids=[]):
     """ Sets an estimated lifetime in Person.dates.
 
         Asettaa kaikille tai valituille henkilölle arvioidut syntymä- ja kuolinajat
