@@ -81,12 +81,13 @@
 
 {% macro select_dataset() -%}
     {#  Show and change data: researcher data or approved common data. #}
-       {{ user_context.owner_str() }}
-    {% if user_context.user %}
-        {% if user_context.context == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
-        {%endif%}
+    {% if not config['DEMO'] %}{{ user_context.owner_str() }}
+       {% if user_context.user %}
+           {% if user_context.context == 1 %}{%set newdiv = 2%}{%else%}{% set newdiv=1 %}
+           {%endif%}
             (<i><a href="?div={{newdiv}}" 
                  title="{{ _('Change the data set shown') }}">{{ _('Change') }}</a></i>)
+       {% endif %}
     {% endif %}
 {%- endmacro %}
 

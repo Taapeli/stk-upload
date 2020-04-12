@@ -197,7 +197,7 @@ def show_persons_all():
     dbdriver = Neo4jDriver(shareds.driver)
     db = DBreader(dbdriver, u_context) 
     
-    results = db.person_list()
+    results = db.get_person_list()
 #         limit=count, start=None, include=["events"])
     print(f'Got {len(results.items)} persons with {results.num_hidden} hidden and {results.error} errors')
     return render_template("/scene/persons_list.html", persons=results.items,

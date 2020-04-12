@@ -3342,8 +3342,8 @@ msgid "My Gedcom files"
 msgstr "Gedcom-tiedostot"
 
 #: bp/start/templates/start/index_logged.html:42
-msgid "Your Candidate Materials"
-msgstr "Tarjokasaineistosi"
+msgid "My candicate materials and files"
+msgstr "Gramps-tiedostot ja tarjokasaineistot"
 
 #: bp/start/templates/start/index_logged.html:44
 msgid ""

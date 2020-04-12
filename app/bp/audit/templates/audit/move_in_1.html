@@ -29,8 +29,6 @@
             </table>
             <p>{{ _('Total %(cnt)s nodes from user <b>%(user)s</b>.', cnt=total|int_thousands, user=user) }}</p>        
 {% if total %}
-            <p>{{ _('<b>Note</b> (for test only!). Pressing the button moves only a limited amount of data.') }}        
-               {{ _('If needed, press again to move the others.') }}</p>        
             <form action="/audit/movenow" method="post">
 	            <div class="submit">
                    <input type="hidden" value="{{batch}}" name="batch">

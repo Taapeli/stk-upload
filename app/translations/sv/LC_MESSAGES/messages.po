@@ -3337,8 +3337,8 @@ msgid "My Gedcom files"
 msgstr "Mina GEDCOM filer"
 
 #: bp/start/templates/start/index_logged.html:42
-msgid "Your Candidate Materials"
-msgstr "Ditt Kandidat Material"
+msgid "My candicate materials and files"
+msgstr "Dina Gramps fil och kandidat material"
 
 #: bp/start/templates/start/index_logged.html:44
 msgid ""

@@ -53,7 +53,8 @@ class Batch_merge(object):
         label_sets = [  # Grouped to not too big chunks in logical order
                 ["Note"],
                 ["Repository", "Media"],
-                ["Place", "Place_name", "Source", "Citation"],
+                ["Place", "Place_name"],
+                ["Source", "Citation"],
                 ["Event"],
                 ["Person", "Name"],
                 ["Family"]
