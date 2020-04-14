@@ -159,7 +159,8 @@ def analyze(username, filename):
     text.append(" ")
     text.append(str(event_citation_cnt) + " Citation references in Events,")
     text.append(" ")
-    text.append(str(event_no_citation_cnt) + " Events, which do not have Citation references,")
+    text.append(str(event_no_citation_cnt) + " Events, which do not have a Citation reference \
+     (NOTE! This should be near or equal to zero),")
     text.append(" ")
     text.append(str(family_cnt) + " Families, which have references to: " +
       str(family_citation_cnt) + " Citations,")
