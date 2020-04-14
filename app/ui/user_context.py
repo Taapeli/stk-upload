@@ -36,6 +36,17 @@ class UserContext():
                                           persons[0].sortname, persons[-1].sortname, 
                                           context.count, len(persons))
 
+        Useful methods:
+            get_my_user_id()            Get effective user id or None
+            owner_str()                 Get owner descripition in current language
+            use_owner_filter()          True, if data is filtered by owner id
+            use_common()                True, if using common data
+            privacy_ok(obj)             returns True, if there is no privacy reason
+                                        to hide given object
+            set_scope_from_request()    update session scope by request params
+            update_session_scope()      update session scope by actually found items
+            next_name_fw()              set next object forwards
+
         Settings stored in self:
 
         (1) user context: username and which material to display
@@ -149,8 +160,8 @@ class UserContext():
                 self.session[self.session_var] = self.scope
                 print(f"UserContext: Now {self.session_var} is cleared")
                 return self.scope
-            
-    
+
+
     def __init__(self, user_session, current_user=None, request=None):
         '''
             Set filtering properties from user session, request and current user.
@@ -243,6 +254,21 @@ class UserContext():
         '''
         return (self.context & 1) > 0
 
+    def privacy_ok(self, obj):
+        ''' Returns True, if there is no privacy reason to hide given object.
+        
+            Rules:
+            - if common data (not researcher's own)
+              - use obj.too_new variable, if available
+            - else allow
+        '''
+        if self.use_common():
+            # Privacy limits only for common data
+            try:
+                return (obj.too_new == False)
+            except: # No privacy limit for this kind of object
+                pass
+        return True
 
     def set_scope_from_request(self, request, var_name):
         """ Eventuel request fw or bw parameters are stored in session['person_scope'].

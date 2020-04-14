@@ -100,6 +100,47 @@ class DBreader:
         return place_result
 
 
+    def get_source_with_references(self, uuid, u_context):
+        """ Read the source, repository and events etc referencing this source.
+        
+            Returns a SourceResult object, where items = SourceDb object.
+            - item.notes[]      Notes connected to Source
+            - item.repositories Repositories for Source
+            - item.citations    Citating Persons, Events, Families and Medias
+                                as [label, object] tuples(?)
+                                
+        """
+        source = self.dbdriver.dr_get_source_w_repository(self.use_user, uuid)
+        source_result = SourceResult(source)
+        if not source:
+            source_result.error = f"DBreader.get_source_with_references: {self.use_user} - no Source with uuid={uuid}"
+            return source_result
+        
+        citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
+
+        for c_id, c in citations.items():
+            c.notes = notes[c_id]           # List of notes
+            for target in targets[c_id]:
+                if u_context.privacy_ok(target):
+                    c.citators.append(target)
+                else:
+                    print(f'DBreader.get_source_with_references: hide {target}')
+
+            source_result.citations.append(c)
+
+        return source_result
+
+
+# ------------------------------ Result sets ----------------------------------
+
+class SourceResult:
+    ''' Source's result object.
+    '''
+    def __init__(self, items=[]):
+        self.error = 0  
+        self.num_hidden = 0
+        self.items = items
+        self.citations = []    # Events etc referencing the selected source
 
 class PlaceResult:
     ''' Place's result object.

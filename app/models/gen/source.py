@@ -10,7 +10,7 @@ Created on 2.5.2017 from Ged-prepare/Bus/classes/genealogy.py
 
 import shareds
 from bl.base import NodeObject
-from pe.source_cypher import SourceCypher   # v0.4 structures
+from pe.neo4j.cypher_source import CypherSource  # v0.4.1 structures
 from .cypher import Cypher_source  # obsolete v0.3 structures
 from .repository import Repository
 from .note import Note
@@ -136,7 +136,7 @@ return s'''
 
             Luetaan lähteen tiedot
             
-            #Todo: Use new SourceCypher and material selection!
+            #Todo: Use new CypherSource and material selection!
         """
                         
         return  shareds.driver.session().run(Cypher_source.get_a_source_w_notes,
@@ -205,12 +205,12 @@ return s'''
             
                 if o_context.context == o_context.choices.COMMON: 
                     print("get_source_list: approved common only")
-                    result = session.run(SourceCypher.get_auditted_set_selections,
+                    result = session.run(CypherSource.get_auditted_set_selections,
                                          key1=key1, key2=key2)
                 elif o_context.context == o_context.choices.OWN:
                     # Show my researcher data
                     print("get_source_list: my researcher data")
-                    result = session.run(SourceCypher.get_own_set_selections,
+                    result = session.run(CypherSource.get_own_set_selections,
                                          key1=key1, key2=key2)
                 else:
                     # No other choices implemented
@@ -219,11 +219,11 @@ return s'''
                 # Show all series
                 if o_context.context == o_context.choices.COMMON: 
                     print("get_source_list: approved common only")
-                    result = session.run(SourceCypher.get_auditted_sets)
+                    result = session.run(CypherSource.get_auditted_sets)
                 elif o_context.context == o_context.choices.OWN:
                     # Show my researcher data
                     print("get_source_list: my researcher data")
-                    result = session.run(SourceCypher.get_own_sets)
+                    result = session.run(CypherSource.get_own_sets)
                 else:
                     # No other choices implemented
                     raise KeyError(f"get_source_list: invalid context value {o_context.context}")

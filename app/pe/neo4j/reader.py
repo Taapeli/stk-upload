@@ -4,11 +4,14 @@ Created on 17.3.2020
 @author: jm
 '''
 import logging
+from models.gen.family_combo import Family_combo
 logger = logging.getLogger('stkserver')
 
 from bl.place import PlaceBl, PlaceName
-from bl.place_coordinates import Point
-from .place_cypher import CypherPlace
+from pe.neo4j.neo_source import SourceDb
+#from bl.place_coordinates import Point
+from .cypher_place import CypherPlace
+from .cypher_source import CypherSource
 
 #Todo: Change Old style includes to bl classes
 from models.gen.person_combo import Person_combo
@@ -17,11 +20,12 @@ from models.gen.person_name import Name
 from models.gen.event_combo import Event_combo
 from models.gen.note import Note
 from models.gen.media import Media
+from models.gen.repository import Repository
 from models.dbtree import DbTree
-from models.gen.dates import DateRange
+from models.gen.citation import Citation
 
 
-class Neo4jDriver:
+class Neo4jReadDriver:
     ''' Methods for accessing Neo4j database.
     '''
     def __init__(self, driver):
@@ -45,7 +49,7 @@ class Neo4jDriver:
                                          user=user, start_name=fw_from, limit=limit)
                 # Returns person, names, events
         except Exception as e:
-            print('Error pe.neo4j.reader.Neo4jDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
+            print('Error pe.neo4j.reader.Neo4jReadDriver.dr_get_person_list: {} {}'.format(e.__class__.__name__, e))            
             raise      
 
         persons = []
@@ -105,12 +109,12 @@ class Neo4jDriver:
         with self.driver.session() as session: 
             if user == None: 
                 #1 get approved common data
-                print("pe.neo4j.reader.Neo4jDriver.dr_get_place_list_fw: from common")
+                print("pe.neo4j.reader.Neo4jReadDriver.dr_get_place_list_fw: from common")
                 result = session.run(CypherPlace.get_common_name_hierarchies,
                                      fw=fw_from, limit=limit, lang=lang)
             else: 
                 #2 get my own
-                print("pe.neo4j.reader.Neo4jDriver.dr_get_place_list_fw: by owner")
+                print("pe.neo4j.reader.Neo4jReadDriver.dr_get_place_list_fw: by owner")
                 result = session.run(CypherPlace.get_my_name_hierarchies,
                                      user=user, fw=fw_from, limit=limit, lang=lang)
         for record in result:
@@ -317,4 +321,141 @@ class Neo4jDriver:
                 e.person.names.append(Name.from_node(node))
             ret.append(e)
         return ret
+
+
+    def dr_get_source_w_repository(self, user, uuid): 
+        """ Returns the PlaceBl with Notes and PlaceNames included.
+        """
+        source = None
+        with self.driver.session() as session:
+            if user == None: 
+                result = session.run(CypherSource.get_auditted_set_single_selection,
+                                     uuid=uuid)
+            else:
+                result = session.run(CypherSource.get_own_set_single_selection,
+                                     user=user, uuid=uuid)
+            for record in result:
+                # <Record 
+                #    owner_type='PASSED'
+                #    source=<Node id=340694 labels={'Source'}
+                #        properties={'id': 'S1112', 'stitle': 'Aamulehti (sanomalehti)',
+                #            'uuid': '3ac9c9e3c3a0490f8e064225b90139e1', 'spubinfo': '',
+                #            'sauthor': '', 'change': 1585409705}>
+                #    notes=[]
+                #    reps=[
+                #        ['Book', <Node id=337715 labels={'Repository'}
+                #            properties={'id': 'R0002', 'rname': 'Kansalliskirjaston digitoidut sanomalehdet',
+                #                'type': 'Collection', 'uuid': '2fc57cc64197461eb94a4bcc02da9ff9',
+                #                'change': 1585409708}>]]
+                # >
+                source_node = record['source']
+                source = SourceDb.from_node(source_node)
+                notes = record['notes']
+                for note in notes:
+                    n = Note.from_node(note)
+                    source.notes.append(n)
+                repositories = record['reps']
+                for medium, repo_node in repositories:
+                    if repo_node != None:
+                        rep = Repository.from_node(repo_node)
+                        rep.medium = medium
+                        source.repositories.append(rep)
+    
+            return source
+
+
+    def dr_get_source_citations(self, sourceid):
+        """ Read Events and Person, Family and Media citating this Source.
+
+            Returns
+            - citation      Citation node
+            - notes         list of Note nodes for this citation
+            - near          node connected derectly to Citation
+            - targets       list of the Person or Family nodes 
+                            (from near or behind near)
+        """
+
+        def obj_from_node(node, role=None):
+            ''' Create Person or Family object from node
+            '''
+            if 'Person' in node.labels:
+                obj = Person_combo.from_node(node)
+            elif 'Family' in node.labels:
+                obj = Family_combo.from_node(node)
+            else:
+                raise NotImplementedError('Person or Family expexted: {node.labels}')
+            obj.role = role
+            if obj.role == 'Primary':
+                obj.role = None
+            return obj
+
+        citations = {}      # {uniq_id:citation_object}
+        notes = {}          # {uniq_id:[note_object]}
+        #near = {}           # {uniq_id:object}
+        targets = {}         # {uniq_id:[object]} Person or Family
+
+        with self.driver.session() as session:
+            result = session.run(CypherSource.get_citators_of_source, 
+                                 uniq_id=int(sourceid))
+        for record in result:
+            # <Record        # (1) A Person or Family
+            #                #     referencing directly Citation
+            #    citation=<Node id=342041 labels={'Citation'}
+            #        properties={'id': 'C2840', 'page': '11.10.1907 sivu 2',
+            #            'uuid': '03b2c7a7dac84701b67612bf10f60b6b', 'confidence': '2',
+            #            'change': 1585409708}>
+            #    notes=[<Node id=384644 labels={'Note'}
+            #        properties={'id': 'N3556', 'text': '', 'type': 'Citation', 'uuid': '4a377b0e936d4e68a72cad64a4925db9',
+            #            'url': 'https://digi.kansalliskirjasto.fi/sanomalehti/binding/609338?page=2&term=Sommer&term=Maria&term=Sommerin&term=sommer',
+            #            'change': 1585409709}>]
+            #    near=<Node id=347773 labels={'Person'}
+            #            properties={'sortname': 'Johansson#Gustaf#', 'death_high': 1920, 'confidence': '2.0',
+            #                'sex': 1, 'change': 1585409699, 'birth_low': 1810, 'birth_high': 1810,
+            #                'id': 'I1745', 'uuid': 'dfc866bfa9274071b37ccc2f6c33abed',
+            #                'death_low': 1852}>
+            #    far=[]
+            # >
+            # <Record        # (2) A Person or Family having an Event, Name, or Media
+            #                #     referencing the Citation
+            #    citation=<Node id=342042 labels={'Citation'} properties={...}>
+            #    notes=[<Node id=381700 labels={'Note'} properties={...}>]
+            #    near=<Node id=359150 labels={'Event'}
+            #        properties={'datetype': 0, 'change': 1585409703, 'description': '',
+            #            'id': 'E5451', 'date2': 1953097, 'type': 'Death', 'date1': 1953097,
+            #            'uuid': '467b67c1a0f84b8baed150b030a7bef0'}>
+            #    far=[
+            #         [<Node id=347835 labels={'Person'}
+            #            properties={'sortname': 'Sommer#Arthur#',...}>,
+            #          'Primary']
+            #    ]
+            # >
+            citation_node = record['citation']
+            note_nodes = record['notes']
+            near_node = record['near']
+            far_nodes = record['far']
+
+            uniq_id = citation_node.id
+            citation = Citation.from_node(citation_node)
+            citations[uniq_id] = citation
+
+            notelist = []
+            for node in note_nodes:
+                notelist.append(Note.from_node(node))
+            if notelist:
+                notes[uniq_id] = notelist
+
+            targetlist = []
+            for node, role in far_nodes:
+                if not node: continue
+                obj = obj_from_node(node, role)
+                if obj:         # Far node is the Person or Family
+                    obj.eventtype = near_node['type']
+                    targetlist.append(obj)
+            if not targetlist:  # No far node: there is a middle node near
+                obj = obj_from_node(near_node)
+                targetlist.append(obj)
+            targets[uniq_id] = targetlist
+
+        # Result dictionaries using key = Citation uniq_id
+        return citations, notes, targets
 
