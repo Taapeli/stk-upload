@@ -52,7 +52,7 @@ match (c) <-[:CITATION]- (x)
 with c,x
     optional match (c) -[:NOTE]-> (n:Note)
     optional match (x) <-[re:EVENT|NAME|MEDIA]- (pe)
-return c as citation, collect(n) as notes, x as near,
+return c as citation, collect(distinct n) as notes, x as near,
     collect(distinct [pe, re.role]) as far
 order by c.id, x.id"""
 

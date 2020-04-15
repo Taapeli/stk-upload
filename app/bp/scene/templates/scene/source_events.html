@@ -55,18 +55,18 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
                           {% endif %}
 
 	               		  <ol type="a">
-	               		{% for indi in c.citators|sort(attribute='date') %}
+	               		{% for indi in c.citators %}
 	                        <li>
                           {% if indi.eventtype %}
-                                 {{ _(indi.eventtype)|title }}
-                             {% if indi.eventtype %}
-                                 <i>{{indi.role}}</i>
+                                 {{ _(indi.eventtype)|capitalize }}
+                             {% if indi.role %}
+                                 <i>{{indi.role|transl('role')}}</i>
                              {% endif -%}
                           {% endif -%}
-                          {% if indi.label == "Family" %}
+                          {% if indi.id[0] == "F" %}
                                  <a href="/scene/family?uuid={{indi.uuid}}" class="inlink"
-                                    title="{{ _('see details of family') }}">
-                                    {{indi.clearname}}</a>
+                                    title="{{ _('see details of family') }}"> 
+                                    {{ indi.clearname | replace("#", " ") }}</a>
                           {% else %}
                                  <a href="/scene/person?uuid={{indi.uuid}}" class="inlink"
                                     title="{{ _('see details of person %(id)s', id=indi.id) }}">

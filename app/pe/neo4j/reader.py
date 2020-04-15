@@ -360,7 +360,7 @@ class Neo4jReadDriver:
                         rep = Repository.from_node(repo_node)
                         rep.medium = medium
                         source.repositories.append(rep)
-    
+
             return source
 
 
@@ -382,6 +382,7 @@ class Neo4jReadDriver:
                 obj = Person_combo.from_node(node)
             elif 'Family' in node.labels:
                 obj = Family_combo.from_node(node)
+                obj.clearname = obj.father_sortname+' <> '+obj.mother_sortname
             else:
                 raise NotImplementedError('Person or Family expexted: {node.labels}')
             obj.role = role

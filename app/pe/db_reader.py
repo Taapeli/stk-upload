@@ -119,7 +119,8 @@ class DBreader:
         citations, notes, targets = self.dbdriver.dr_get_source_citations(source.uniq_id)
 
         for c_id, c in citations.items():
-            c.notes = notes[c_id]           # List of notes
+            if c_id in notes:
+                c.notes = notes[c_id]
             for target in targets[c_id]:
                 if u_context.privacy_ok(target):
                     c.citators.append(target)
