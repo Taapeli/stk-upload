@@ -34,9 +34,9 @@ from models.datareader import read_persons_with_events
 #from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_event_participants
 #from models.datareader import get_place_with_events
-from models.datareader import get_source_with_events
+#from models.datareader import get_source_with_events
 
-from pe.neo4j.reader import Neo4jDriver
+from pe.neo4j.reader import Neo4jReadDriver
 from pe.db_reader import DBreader
 
 # Narrative start page
@@ -194,7 +194,7 @@ def show_persons_all():
                f"{u_context.owner_str()} forward from '{u_context.scope[0]}'")
     t0 = time.time()
 
-    dbdriver = Neo4jDriver(shareds.driver)
+    dbdriver = Neo4jReadDriver(shareds.driver)
     db = DBreader(dbdriver, u_context) 
     
     results = db.get_person_list()
@@ -245,12 +245,6 @@ def     show_person(uid=None):
     uid = request.args.get('uuid', uid)
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
-#     if current_user.is_authenticated:
-#         user=current_user.username
-#         ofilter = user_session.get('user_context',0)
-#         use_common = (ofilter == 1)
-#     else:
-#         user=None
     logger.info("-> bp.scene.routes.show_person")
 
     # v3 Person page
@@ -258,7 +252,7 @@ def     show_person(uid=None):
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
-    for ref in person.media_ref: print(f'media ref {ref}')
+    #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=person.root,
@@ -339,17 +333,9 @@ def show_families():
 #     """ Home page for a Family.    OBSOLETE: use show_family
 #         fid = id(Family)
 #     """
-#     try:
-#         family = Family_combo.get_family_data(fid)
-#     except KeyError as e:
-#         return redirect(url_for('virhesivu', code=1, text=str(e)))
-# 
-#     logger.info("-> bp.scene.routes.show_family_page")
-#     return render_template("/scene/family.html", family=family, menuno=3)
-
 
 @bp.route('/scene/family', methods=['GET'])
-def show_family(uid=None):
+def show_family_page(uid=None):
     """ One Family.
     """
     uid = request.args.get('uuid', uid)
@@ -362,7 +348,7 @@ def show_family(uid=None):
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    logger.info("-> bp.scene.routes.show_family")
+    logger.info("-> bp.scene.routes.show_family_page")
     return render_template("/scene/family.html", 
                            family=family, menuno=3, user_context=u_context)
 
@@ -389,7 +375,7 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 100, type=int)
 
-    dbdriver = Neo4jDriver(shareds.driver)
+    dbdriver = Neo4jReadDriver(shareds.driver)
     db = DBreader(dbdriver, u_context) 
 
     # The list has Place objects, which include also the lists of
@@ -410,7 +396,7 @@ def show_place_page(locid):
     """
     try:
         u_context = UserContext(user_session, current_user, request)
-        dbdriver = Neo4jDriver(shareds.driver)
+        dbdriver = Neo4jReadDriver(shareds.driver)
         db = DBreader(dbdriver, u_context) 
     
         results = db.get_place_with_events(locid)
@@ -463,29 +449,30 @@ def show_sources(series=None):
                            user_context=my_context)
 
 
-@bp.route('/scene/source=<int:sourceid>')
-def show_source_page(sourceid):
+@bp.route('/scene/source', methods=['GET'])
+#@bp.route('/scene/source=<string:sourceid>')
+def show_source_page(sourceid=None):
     """ Home page for a Source with referring Event and Person data
     """
+    uuid = request.args.get('uuid', sourceid)
+    if not uuid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Source key"))
     u_context = UserContext(user_session, current_user, request)
     try:
-        source, citations = get_source_with_events(sourceid)
+        dbdriver = Neo4jReadDriver(shareds.driver)
+        db = DBreader(dbdriver, u_context) 
+    
+        results = db.get_source_with_references(uuid, u_context)
+        #source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_source_page")
-    if u_context.use_common():
-        for c in citations:
-            citators2 = []
-            for noderef in c.citators:
-                if noderef.person:
-                    if not noderef.person.too_new:
-                        citators2.append(noderef)
-                else:
-                    citators2.append(noderef)
-            c.citators = citators2
-                
-    return render_template("/scene/source_events.html", source=source,
-                           citations=citations, user_context=u_context)
+#     for c in results.citations:
+#         for i in c.citators:
+#             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
+#             else:               print(f'{c} – person {i} {i.sortname}')
+    return render_template("/scene/source_events.html", source=results.items,
+                           citations=results.citations, user_context=u_context)
 
 # ------------------------------ Menu 6: Media --------------------------------
 

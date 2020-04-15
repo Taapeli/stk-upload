@@ -13,6 +13,9 @@ from .family import Family
 from .event_combo import Event_combo
 from .person_name import Name
 from .note import Note
+from .source import Source
+from .citation import Citation
+from .repository import Repository
 from .dates import DateRange
 #from .place_combo import Place_combo
 from models.gen.person import Person
@@ -178,12 +181,6 @@ RETURN family"""
                 (e:Event) --> (en:Note)
                 (f:Family) --> (fac:Citation) --> (fas:Source) --> (far:Repository)
                 (e:Event) --> (evc:Citation) --> (evs:Source) --> (evr:Repository)
-╒═══════════════╤═══════════════╤═══════════════╤═══════════════╤═══════════════╤═══════╕
-│"family"       │"events"       │"parents"      │"children"     │"sources"      │"notes"│
-╞═══════════════╪═══════════════╪═══════════════╪═══════════════╪═══════════════╪═══════╡
-│family         │[event, fep]   │[r.role, parent│[child, cn, ce]│[ID(event), re,│[note] │
-│               │               │, pn, pe]      │               │s, c]          │       │
-└───────────────┴───────────────┴───────────────┴───────────────┴───────────────┴───────┘
  
             2) read
                 (pp:Person) --> (ppe:Event) --> (:Place)
@@ -209,10 +206,9 @@ RETURN family"""
                 person.event_birth = Event_combo.from_node(birth_node)
             if death_node:
                 person.event_death = Event_combo.from_node(death_node)
-
+        #------------
 
         family = None
-
         with shareds.driver.session() as session:
             try:
                 result = session.run(Cypher_family.get_family_data, 
@@ -253,8 +249,7 @@ RETURN family"""
 
                                 family.events.append(e)
         
-                        uniq_id = -1 # ???
-                        
+                        uniq_id = -1
                         for role, person_node, name_node, birth_node, death_node in record['parent']:
                             # ['mother', 
                             #    <Node id=235105 labels={'Person'} 
@@ -341,20 +336,15 @@ RETURN family"""
                             #        /* dates missing here */, 'change': 1543186596, 'confidence': '2'}>
                             # ]
                             if repository_node:
-                                rname = repository_node['rname']
-                                s_pid = source_node.id
-                                stitle = source_node['stitle']
-                                sauthor = source_node['sauthor']
-                                spubinfo = source_node['spubinfo']
-                                page = citation_node['page']
-                                family.sources.append([rname, s_pid, stitle, sauthor, spubinfo, page])
+                                source = Source.from_node(source_node)
+                                cita = Citation.from_node(citation_node)
+                                repo = Repository.from_node(repository_node)
+                                source.repositories.append(repo)
+                                source.citations.append(cita)
+                                family.sources.append(source)
                             
-                        for n in record['note']:
-                            note = Note()
-                            note.uniq_id = n.id
-                            note.type = n['type']
-                            note.text = n['text']
-                            note.url = n['url']
+                        for node in record['note']:
+                            note = Note.from_node(node)
                             family.notes.append(note)
 
             

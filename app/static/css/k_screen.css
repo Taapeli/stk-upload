@@ -586,7 +586,7 @@ ul.eventnotes {
 .eventgrid {  display: flex; }
 .eventgrid .col { float: left; }
 .eventgrid .col.col_event { width: 15em; }
-.eventgrid .col.col_event span.#006 {
+.eventgrid .col.col_event span {
     font-style: italic;
     color: #006;
 }
