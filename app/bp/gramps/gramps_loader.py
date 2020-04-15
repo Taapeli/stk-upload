@@ -47,15 +47,15 @@ def analyze_xml(username, filename):
     event_no_citation_cnt = 0 # How many events do not have any citationref?
     
     # Estimated times per item (ms)
-    e_citation = 26
-    e_event = 47
-    e_family = 82
-    e_object = 2
-    e_note = 1
-    e_person = 130
-    e_place = 2
-    e_repository = 1
-    e_source = 6
+    e_citation = 3
+    e_event = 3
+    e_family = 4
+    e_object = 6
+    e_note = 3
+    e_person = 16
+    e_place = 6
+    e_repository = 2
+    e_source = 3
     e_total = 0
 
     citations = handler.collection.getElementsByTagName("citation")
@@ -159,7 +159,8 @@ def analyze(username, filename):
     text.append(" ")
     text.append(str(event_citation_cnt) + " Citation references in Events,")
     text.append(" ")
-    text.append(str(event_no_citation_cnt) + " Events, which do not have Citation references,")
+    text.append(str(event_no_citation_cnt) + " Events, which do not have a Citation reference \
+     (NOTE! This should be near or equal to zero),")
     text.append(" ")
     text.append(str(family_cnt) + " Families, which have references to: " +
       str(family_citation_cnt) + " Citations,")
