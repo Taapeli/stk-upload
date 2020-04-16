@@ -130,6 +130,105 @@ def analyze_xml(username, filename):
 def analyze(username, filename):
     values = analyze_xml(username, filename)
 
+    references = []
+    
+    class Analyze_row(): pass
+    
+    row = Analyze_row()
+    row.individ = "Event"
+    row.number_of_individs = values["event_no_citation_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = 0
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Citation"
+    row.number_of_individs = values["citation_cnt"]
+    row.reference = "Source"
+    row.number_of_references = values["citation_source_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Event"
+    row.number_of_individs = values["event_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["event_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Family"
+    row.number_of_individs = values["family_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["family_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Object"
+    row.number_of_individs = values["object_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["object_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Person"
+    row.number_of_individs = values["person_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["person_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Place"
+    row.number_of_individs = values["place_cnt"]
+    row.reference = "Citation"
+    row.number_of_references = values["place_citation_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Source"
+    row.number_of_individs = values["source_cnt"]
+    row.reference = "Repository"
+    row.number_of_references = values["source_repository_cnt"]
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Note"
+    row.number_of_individs = values["note_cnt"]
+    row.reference = " "
+    row.number_of_references = 0
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Repository"
+    row.number_of_individs = values["repository_cnt"]
+    row.reference = " "
+    row.number_of_references = 0
+    
+    references.append(row)
+    
+    row = Analyze_row()
+    row.individ = "Estimated time (sec):"
+    e_total = values["e_total"]
+    row.number_of_individs = str(int(e_total))
+    row.reference = " "
+    row.number_of_references = 0
+    
+    references.append(row)
+    
+    return(references)
+                    
+
+def analyze_old2(username, filename):
+    values = analyze_xml(username, filename)
+
     text = []
     citation_cnt = values["citation_cnt"]
     citation_source_cnt = values["citation_source_cnt"]
