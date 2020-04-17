@@ -13,15 +13,15 @@ div.content > p {
 		<div class="content">
 			<h3>{{ _("Results") }}</h3>
 			<table>
-				<th>{{ _("Individ") }}</th>
 				<th>{{ _("Number_of") }}</th>
-				<th>{{ _("Reference") }}</th>
+				<th>{{ _("Individs with reference to") }}</th>
 				<th>{{ _("Number_of") }}</th>
+				<th>{{ _("References") }}</th>
 				{% for line in references %}
-			       <tr><td>{{line.individ}}</td>
-			       <td>{{line.number_of_individs}}</td>
-			       <td>{{line.reference}}</td>
+			       <tr><td>{{line.number_of_individs}}</td>
+			       <td>{{line.individ}}</td>
 			       <td>{{line.number_of_references}}</td>
+			       <td>{{line.reference}}</td></tr>
 			    {% endfor %}
 		    </table>
         </div>

@@ -135,10 +135,10 @@ def analyze(username, filename):
     class Analyze_row(): pass
     
     row = Analyze_row()
-    row.individ = "Event"
+    row.individ = "Events with no references to"
     row.number_of_individs = values["event_no_citation_cnt"]
     row.reference = "Citation"
-    row.number_of_references = 0
+    row.number_of_references = " "
     
     references.append(row)
     
@@ -167,6 +167,14 @@ def analyze(username, filename):
     references.append(row)
     
     row = Analyze_row()
+    row.individ = "Note"
+    row.number_of_individs = values["note_cnt"]
+    row.reference = " "
+    row.number_of_references = " "
+    
+    references.append(row)
+    
+    row = Analyze_row()
     row.individ = "Object"
     row.number_of_individs = values["object_cnt"]
     row.reference = "Citation"
@@ -191,6 +199,14 @@ def analyze(username, filename):
     references.append(row)
     
     row = Analyze_row()
+    row.individ = "Repository"
+    row.number_of_individs = values["repository_cnt"]
+    row.reference = " "
+    row.number_of_references = " "
+    
+    references.append(row)
+    
+    row = Analyze_row()
     row.individ = "Source"
     row.number_of_individs = values["source_cnt"]
     row.reference = "Repository"
@@ -199,27 +215,11 @@ def analyze(username, filename):
     references.append(row)
     
     row = Analyze_row()
-    row.individ = "Note"
-    row.number_of_individs = values["note_cnt"]
-    row.reference = " "
-    row.number_of_references = 0
-    
-    references.append(row)
-    
-    row = Analyze_row()
-    row.individ = "Repository"
-    row.number_of_individs = values["repository_cnt"]
-    row.reference = " "
-    row.number_of_references = 0
-    
-    references.append(row)
-    
-    row = Analyze_row()
     row.individ = "Estimated time (sec):"
     e_total = values["e_total"]
-    row.number_of_individs = str(int(e_total))
+    row.number_of_individs = " "
     row.reference = " "
-    row.number_of_references = 0
+    row.number_of_references = str(int(e_total))
     
     references.append(row)
     
