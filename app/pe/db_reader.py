@@ -4,6 +4,7 @@ Created on 17.3.2020
 @author: jm
 '''
 import traceback
+from models.gen.person_combo import Person_combo
 
 class DBreader:
     ''' Public methods for accessing active database.
@@ -123,6 +124,9 @@ class DBreader:
                 c.notes = notes[c_id]
             for target in targets[c_id]:
                 if u_context.privacy_ok(target):
+                    # Insert person name and life events
+                    if isinstance(target, Person_combo):
+                        self.dbdriver.dr_inlay_person_lifedata(target)
                     c.citators.append(target)
                 else:
                     print(f'DBreader.get_source_with_references: hide {target}')

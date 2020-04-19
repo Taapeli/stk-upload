@@ -6,6 +6,8 @@
 {{ super() }}
 <style>
 div#summaryarea ul li p { margin: 0 0 0.3em 0; }
+td.Citation {padding:.3em;}
+td.Citation div ol {padding-top:.3em;}
 </style>
 
 
@@ -46,11 +48,10 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
                           {% if c.confidence and c.confidence < "2" %}style="color:red"{% endif %}>
 	   					  {{ _( "Page" ) }} <b>{{c.page}}</b> 
 	   					  {{ macro.stars(c.confidence|float) }}
-                          {% set conf = c.confidence | int %} 
 
                           {% if c.notes %}
                             {% for note in c.notes %}
-                                {{ macro.notelink(note) }}
+                                <br>{{ macro.notelink(note) }}
                             {% endfor %}
                           {% endif %}
 
@@ -58,21 +59,19 @@ div#summaryarea ul li p { margin: 0 0 0.3em 0; }
 	               		{% for indi in c.citators %}
 	                        <li>
                           {% if indi.eventtype %}
-                                 {{ _(indi.eventtype)|capitalize }}
-                             {% if indi.role %}
-                                 <i>{{indi.role|transl('role')}}</i>
-                             {% endif -%}
+                                 {{ _(indi.eventtype)|capitalize 
+                             }}{% if indi.role %}
+                                 <i>{{indi.role|transl('role')}}</i>{% endif -%}:
                           {% endif -%}
                           {% if indi.id[0] == "F" %}
                                  <a href="/scene/family?uuid={{indi.uuid}}" class="inlink"
                                     title="{{ _('see details of family') }}"> 
                                     {{ indi.clearname | replace("#", " ") }}</a>
                           {% else %}
-                                 <a href="/scene/person?uuid={{indi.uuid}}" class="inlink"
-                                    title="{{ _('see details of person %(id)s', id=indi.id) }}">
-                                    {{indi.sortname|replace("#", " ")}}</a>
+                                 {{ macro.person_name_by_sortname_anon(indi) }}
+                                 {% if indi.event_birth.dates %}{{ indi.event_birth.dates }}{% endif %} &ndash;
+                                 {% if indi.event_death.dates %}{{ indi.event_death.dates }}{% endif %}
                           {% endif %}
-	                             {{ macro.lifetimes(indi) }}
                			    </li>
 	                    {% endfor %}
 	                      </ol>

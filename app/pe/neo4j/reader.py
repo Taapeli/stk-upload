@@ -17,6 +17,7 @@ from .cypher_source import CypherSource
 from models.gen.person_combo import Person_combo
 from models.gen.cypher import Cypher_person
 from models.gen.person_name import Name
+from models.gen.event import Event
 from models.gen.event_combo import Event_combo
 from models.gen.note import Note
 from models.gen.media import Media
@@ -364,7 +365,7 @@ class Neo4jReadDriver:
             return source
 
 
-    def dr_get_source_citations(self, sourceid):
+    def dr_get_source_citations(self, sourceid:int):
         """ Read Events and Person, Family and Media citating this Source.
 
             Returns
@@ -397,7 +398,7 @@ class Neo4jReadDriver:
 
         with self.driver.session() as session:
             result = session.run(CypherSource.get_citators_of_source, 
-                                 uniq_id=int(sourceid))
+                                 uniq_id=sourceid)
         for record in result:
             # <Record        # (1) A Person or Family
             #                #     referencing directly Citation
@@ -459,4 +460,35 @@ class Neo4jReadDriver:
 
         # Result dictionaries using key = Citation uniq_id
         return citations, notes, targets
+
+
+    def dr_inlay_person_lifedata(self, person): 
+        """ Reads person's default name, bith event and death event into Person obj.
+        """
+        with self.driver.session() as session:
+            result = session.run(CypherSource.get_person_lifedata,
+                                 pid=person.uniq_id)
+            for record in result:
+                # <Record
+                #    name=<Node id=379934 labels={'Name'} 
+                #        properties={'firstname': 'Gustaf', 'type': 'Also Known As', 'suffix': '', 'prefix': '', 
+                #            'surname': 'Johansson', 'order': 0}>
+                #    events=[
+                #        <Node id=492911 labels={'Event'} 
+                #            properties={'datetype': 0, 'change': 1577803201, 'description': '', 
+                #                'id': 'E7750', 'date2': 1853836, 'type': 'Birth', 'date1': 1853836, 
+                #                'uuid': '794e0c9e6f15479cb5d33dc4cf245a7d'}>
+                #    ]
+                #>
+                name_node = record['name']
+                person.names.append(Name.from_node(name_node))
+                events = record['events']
+                for node in events:
+                    e = Event.from_node(node)
+                    if e.type == "Birth":
+                        person.event_birth = e
+                    else:
+                        person.event_death = e
+        return
+
 
