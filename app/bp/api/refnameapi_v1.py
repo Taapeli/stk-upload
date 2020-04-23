@@ -50,6 +50,15 @@ cypher_remove_from_namefamily = """
     DELETE rel
 """
 
+cypher_add_name = """
+    MERGE (r:Refname{name:$name}) SET r.source = $source
+"""
+
+cypher_del_name = """
+    MATCH (r:Refname{name:$name}) 
+    DETACH DELETE r
+"""
+
 def search(prefix, usage, match):  
     "Returns refnames starting with or containing prefix (case-insensitive)"
     if match == "startswith":
@@ -125,4 +134,16 @@ def remove_from_family(basename, names_to_remove, usage):
     return fetch(basename, usage)
 
 
+def addname(name, source):
+    result = shareds.driver.session().run(cypher_add_name, name=name, source=source)
+    return {"status":"OK",
+     "statusText":"OK",
+    }
 
+def delnames(names_to_remove):
+    with shareds.driver.session() as tx:
+        for name in names_to_remove:
+            result = tx.run(cypher_del_name, name=name)
+    return {"status":"OK",
+     "statusText":"OK",
+    }

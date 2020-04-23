@@ -80,8 +80,8 @@ span.initial3 a {
 	    <input type="button" id="search" value="Haku" :disabled="q.length < 1" v-on:click="search(q)">
 		<input type=radio v-model="match" value="startswith">starts with
 		<input type=radio v-model="match" value="contains">contains
-		<!-- br>
-	    <input type="button" id="addname" value="Lisää hakuteksti uutena nimenä" :disabled="q.length < 1" v-on:click="addname(q)" -->
+		<p>
+	    <input type="button" id="addname" value="Lisää hakuteksti uutena nimenä" :disabled="q.length < 1" @click="addname(q)">
 		<p>
 		<span class="initial" v-for="initial in initials"><a v-if="initial<='Z'" href="#" @click="make_initials1(initial)">{{initial}}</a></span>
 		<p>
@@ -116,7 +116,7 @@ span.initial3 a {
 	        <p>
 	        Nimien lukumäärä: {{ names.length }}
 	        <p>
-	        <!-- input type="button" :disabled="selected.length == 0" @click="delete_selected()" value="Poista valitut kannasta" -->
+	        <input type="button" :disabled="selected.length == 0" @click="delete_selected()" value="Poista valitut kannasta">
 	        <input type="button" :disabled="selected.length == 0" v-show="basename" :value="addtitle()" @click="add_to_family()">
 	    </form>
 	</div>
@@ -139,7 +139,7 @@ span.initial3 a {
 	        Nimien lukumäärä: {{ familynames.length }}
 	        <p>
 	        <input type="button" :disabled="selected2.length == 0" @click="remove_from_family()" value="Poista valitut nimiperheestä">
-	        <!-- input type="button" :disabled="selected2.length == 0" @click="delete_selected2()" value="Poista valitut kannasta" -->
+	        <input type="button" :disabled="selected2.length == 0" @click="delete_selected2()" value="Poista valitut kannasta">
 	    </form>
 	</div>
 	</div>
@@ -199,7 +199,6 @@ var app = new Vue({
             axios.post('/refnameapi/v1/search', params ).
             //axios.post('/refnameapi/v1/prefixes', params ).
                 then(function(rsp, status) {
-                    log(rsp);
                     app.names = rsp.data.records;
                     app.selected = [];
                     app.lastquery = q;
@@ -270,14 +269,26 @@ var app = new Vue({
         delete_selected: function() {
         	log("delete");
         	log(app.selected);
+			const params = new URLSearchParams();
+			params.append('names', encodeURIComponent(this.selected));
+            axios.post('/refnameapi/v1/delnames', params ).
+                then(function(rsp, status) {
+                    app.search(app.lastquery);
+	        		app.fetch_namefamily(app.basename);
+                });
     	},
         delete_selected2: function() {
         	log("delete2");
         	log(app.selected2);
+			const params = new URLSearchParams();
+			params.append('names', encodeURIComponent(this.selected2));
+            axios.post('/refnameapi/v1/delnames', params ).
+                then(function(rsp, status) {
+                    app.search(app.lastquery);
+	        		app.fetch_namefamily(app.basename);
+                });
     	},
         remove_from_family: function() {
-        	log("remove2");
-        	log(app.selected2);
 			const params = new URLSearchParams();
 			params.append('basename', encodeURIComponent(this.basename));
 			params.append('names', encodeURIComponent(this.selected2));
@@ -289,8 +300,6 @@ var app = new Vue({
                 });
     	},
         add_to_family: function() {
-        	log("add to " + this.basename);
-        	log(this.selected);
 			const params = new URLSearchParams();
 			params.append('basename', encodeURIComponent(this.basename));
 			params.append('names', encodeURIComponent(this.selected));
@@ -300,6 +309,22 @@ var app = new Vue({
                     app.familynames = rsp.data.names;
                     app.search(app.lastquery);
                     app.selected2.push(...app.selected);
+                });
+    	},
+        addname: function(newname) {
+			const params = new URLSearchParams();
+			params.append('name', encodeURIComponent(newname));
+            axios.post('/refnameapi/v1/addname', params ).
+                then(function(rsp, status) {
+                    app.search(app.q);
+                });
+    	},
+        delname: function(name) {
+			const params = new URLSearchParams();
+			params.append('name', encodeURIComponent(name));
+            axios.post('/refnameapi/v1/delname', params ).
+                then(function(rsp, status) {
+                    app.search(app.q);
                 });
     	},
     } // methods

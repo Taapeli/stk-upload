@@ -4,7 +4,8 @@
 
 import logging 
 import urllib
-from flask_security import roles_accepted
+from flask_security import roles_accepted, current_user
+
 logger = logging.getLogger('stkserver')
 
 from flask import request, jsonify
@@ -233,6 +234,28 @@ def refnameapi_remove_from_family():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
+@bp.route('/refnameapi/v1/addname', methods=['POST'])
+@roles_accepted('admin', 'audit')
+def refnameapi_addname():
+    "add_a new name"
+    name = request.form.get("name")
+    name = urllib.parse.unquote(name)
+    source = f"Käyttäjän {current_user.username} lisäämä"
+    rsp = refnameapi_v1.addname(name, source) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+@bp.route('/refnameapi/v1/delnames', methods=['POST'])
+@roles_accepted('admin', 'audit')
+def refnameapi_delnames():
+    "delete a name"
+    names = request.form.get("names")
+    names = urllib.parse.unquote(names).split(",")
+    rsp = refnameapi_v1.delnames(names)
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
 
 @bp.route('/api/v1/search', methods=['GET'])
 def api_v1_search():
