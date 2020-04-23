@@ -154,6 +154,14 @@ function log(msg) {
     console.log(msg);
 }
 
+function removeFromArray(arr, value) { 
+    var index = arr.indexOf(value);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+    return arr;
+}
+
 var initial_place = {name:"Antrea",id:52800,type:"City"};
 
 var app = new Vue({
@@ -163,6 +171,7 @@ var app = new Vue({
     },
     data: {
         q: "Bea",
+        lastquery:"Bea",
         use:"firstname",
         match:"startswith",
         hakutulos: true,
@@ -211,6 +220,7 @@ var app = new Vue({
             return axios.post('/refnameapi/v1/prefixes', params );
         },
         fetch_namefamily: function(name) {
+        	if (!name) return;
 			const params = new URLSearchParams();
 			params.append('lookfor', encodeURIComponent(name));
 			params.append('usage', this.use );
@@ -218,8 +228,8 @@ var app = new Vue({
             axios.post('/refnameapi/v1/fetch', params ).
                 then(function(rsp, status) {
                     app.basename = name;
-                    app.familynames = rsp.data.names;
                     app.selected2 = [];
+                    app.familynames = rsp.data.names;
                 });
             	
         },
@@ -309,20 +319,13 @@ var app = new Vue({
                     app.familynames = rsp.data.names;
                     app.search(app.lastquery);
                     app.selected2.push(...app.selected);
+                    app.selected2 = removeFromArray(app.selected2, app.basename);
                 });
     	},
         addname: function(newname) {
 			const params = new URLSearchParams();
 			params.append('name', encodeURIComponent(newname));
             axios.post('/refnameapi/v1/addname', params ).
-                then(function(rsp, status) {
-                    app.search(app.q);
-                });
-    	},
-        delname: function(name) {
-			const params = new URLSearchParams();
-			params.append('name', encodeURIComponent(name));
-            axios.post('/refnameapi/v1/delname', params ).
                 then(function(rsp, status) {
                     app.search(app.q);
                 });
