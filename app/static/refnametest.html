@@ -56,6 +56,10 @@ span.initial3 a {
 	border: 1px;
 }
 
+a.bolded {
+	font-weight: bold;
+}
+
 </style>
 
 </head>
@@ -73,7 +77,6 @@ span.initial3 a {
 		<input type=radio v-model="use" @change="select_type()" value="surname">surname
 		<input type=radio v-model="use" @change="select_type()" value="patronyme">patronyme
 		<input type=radio v-model="use" @change="select_type()" value="matronyme">matronyme
-
 		<p>
 	    Hakuteksti: <input v-model="q" v-on:keyup.enter="search(q)" size="40" placeholder="Kirjoita hakuteksti tähän">
 
@@ -102,7 +105,8 @@ span.initial3 a {
 	            <tr v-for="namedata in names">
 	            	<td><input type="checkbox" v-model="selected" 
 	            		:value="namedata.name">
-	                <td><a href="#" v-if="namedata.is_basename" 
+	                <td><a href="#" v-if="namedata.is_basename"
+	                	:class="{bolded:namedata.name == basename}" 
 	                	@click="fetch_namefamily(namedata.name)">
 	                	{{ namedata.name }}
 	                	</a>
@@ -127,8 +131,12 @@ span.initial3 a {
 	        Kantanimi: <b>{{ basename }}</b>
 	        <br>
 	        Nimityyppi: <b>{{ use }}</b>
-	        <br>
-	        Isän/äidin nimi: <b>{{ parentname }}</b>
+			<br>
+	        <span v-show="use == 'patronyme' || use == 'matronyme'">
+		        Isän/äidin nimi: 
+		        <a href="#" @click="fetch_namefamily(parentname, 'firstname')">
+		        <b>{{ parentname }}</b></a>
+	        </span>
 	        <p>
 	        <table border>
 	            <tr><th><th>Nimi</th></tr>
@@ -222,8 +230,9 @@ var app = new Vue({
 			params.append('usage', this.use );
             return axios.post('/refnameapi/v1/prefixes', params );
         },
-        fetch_namefamily: function(name) {
+        fetch_namefamily: function(name, newtype) {
         	if (!name) return;
+        	if (newtype) this.use = newtype;
 			const params = new URLSearchParams();
 			params.append('lookfor', encodeURIComponent(name));
 			params.append('usage', this.use );
