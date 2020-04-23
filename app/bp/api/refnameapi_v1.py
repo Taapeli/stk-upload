@@ -27,7 +27,6 @@ cypher_search_refname_v1 = """
 cypher_search_refname_contains_v1 = """
     MATCH (r:Refname)  
     WHERE toLower(r.name) CONTAINS toLower($prefix)
-       AND EXISTS ((r) -[:BASENAME{use:$usage}]-> ())
     OPTIONAL MATCH (r) -[:BASENAME*{use:$usage}]-> (base:Refname)
         WHERE NOT EXISTS ((base) -[:BASENAME{use:$usage}]-> (:Refname))
     RETURN r.name as name, r.source as source, base.name as basename
