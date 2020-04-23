@@ -106,18 +106,18 @@ def prefixes(prefix, usage):
 
 
 def fetch(basename, usage):
-    result = shareds.driver.session().run(cypher_fetch_namefamily, lookfor=basename, usage=usage)
+    result = shareds.driver.session().run(cypher_fetch_namefamily, lookfor=basename, usage=usage).single()
     if not result:
-        return dict(status="Not found",statusText="Not found",resultCount=0)
-    for rec in result:
-        names = rec['names']
-        basename = rec['basename']
-        return {"status":"OK",
-            "statusText":"OK",
-            "resultCount": 1,
-            "names": sorted(names), 
-               }
-    return dict(status="Not found",statusText="Not found",resultCount=0)   
+        return dict(status="Not found",statusText="Not found",
+                    resultCount=0,
+                    names=[])
+    names = result['names']
+    basename = result['basename']
+    return {"status":"OK",
+        "statusText":"OK",
+        "resultCount": 1,
+        "names": sorted(names), 
+    }
 
 def add_to_family(basename, names_to_add, usage):
     with shareds.driver.session() as tx:
