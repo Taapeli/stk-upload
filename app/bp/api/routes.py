@@ -3,6 +3,8 @@
 # KKu 19.12.2019
 
 import logging 
+import urllib
+from flask_security import roles_accepted
 logger = logging.getLogger('stkserver')
 
 from flask import request, jsonify
@@ -14,6 +16,7 @@ from . import apikey
 from . import api
 from . import placeapi
 from . import refnameapi
+from . import refnameapi_v1
 
 @bp.route('/placeapi/search', methods=['POST'])
 def placeapi_v0_search():
@@ -150,7 +153,87 @@ def refnameapi_v0_namefamily():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
-                 
+@bp.route('/refnameapi/v1/search', methods=['POST'])
+@roles_accepted('admin', 'audit')
+def refnameapi_search_v1():
+    lookfor = request.form.get("lookfor")
+    lookfor = urllib.parse.unquote(lookfor)
+#    print(lookfor)
+    if not lookfor: 
+        return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'lookfor'",
+        ))
+    usage = 'firstname'
+    usage = request.form.get("usage")
+    match = request.form.get("match")
+    rsp = refnameapi_v1.search(lookfor, usage, match) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+@bp.route('/refnameapi/v1/prefixes', methods=['POST'])
+@roles_accepted('admin', 'audit')
+def refnameapi_prefixes_v1():
+    lookfor = request.form.get("lookfor")
+    lookfor = urllib.parse.unquote(lookfor)
+    if lookfor is None: 
+        return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'lookfor'",
+        ))
+    usage = request.form.get("usage")
+    rsp = refnameapi_v1.prefixes(lookfor, usage) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+@bp.route('/refnameapi/v1/fetch', methods=['POST'])
+@roles_accepted('admin', 'audit')
+def refnameapi_fetch_v1():
+    "Fetch a name family"
+    lookfor = request.form.get("lookfor")
+    lookfor = urllib.parse.unquote(lookfor)
+    if lookfor is None: 
+        return jsonify(dict(
+            status="Error",
+            statusText="Missing argument 'lookfor'",
+        ))
+    usage = request.form.get("usage")
+    rsp = refnameapi_v1.fetch(lookfor, usage) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+        
+@bp.route('/refnameapi/v1/add_to_family', methods=['POST'])
+@roles_accepted('admin', 'audit')
+def refnameapi_add_to_family_v1():
+    "add_to_family"
+    basename = request.form.get("basename")
+    basename = urllib.parse.unquote(basename)
+    names = request.form.get("names")
+    names = urllib.parse.unquote(names).split(",")
+    usage = request.form.get("usage")
+    rsp = refnameapi_v1.add_to_family(basename, names, usage) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+@bp.route('/refnameapi/v1/remove_from_family', methods=['POST'])
+@roles_accepted('admin', 'audit')
+def refnameapi_remove_from_family():
+    "add_to_family"
+    basename = request.form.get("basename")
+    basename = urllib.parse.unquote(basename)
+    names = request.form.get("names")
+    names = urllib.parse.unquote(names).split(",")
+    usage = request.form.get("usage")
+    rsp = refnameapi_v1.remove_from_family(basename, names, usage) 
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+
+
 @bp.route('/api/v1/search', methods=['GET'])
 def api_v1_search():
     lookfor = request.args.get("lookfor")
