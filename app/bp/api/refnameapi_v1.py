@@ -35,7 +35,8 @@ cypher_search_refname_contains_v1 = """
 cypher_fetch_namefamily = """
     MATCH (base:Refname {name:$lookfor})
     OPTIONAL MATCH (base) <-[:BASENAME*{use:$usage}]- (o:Refname)
-    RETURN base.name as basename, COLLECT(o.name) AS names
+    OPTIONAL MATCH (base) -[:PARENTNAME]- (parentname:Refname)
+    RETURN base.name as basename, COLLECT(o.name) AS names, parentname.name as parentname
 """
 
 cypher_add_to_namefamily = """
@@ -104,7 +105,7 @@ def prefixes(prefix, usage):
     }
 
 
-def fetch(basename, usage):
+def fetch_namefamily(basename, usage):
     result = shareds.driver.session().run(cypher_fetch_namefamily, lookfor=basename, usage=usage).single()
     if not result:
         return dict(status="Not found",statusText="Not found",
@@ -112,10 +113,12 @@ def fetch(basename, usage):
                     names=[])
     names = result['names']
     basename = result['basename']
+    parentname = result['parentname']
     return {"status":"OK",
         "statusText":"OK",
         "resultCount": 1,
         "names": sorted(names), 
+        "parentname": parentname,
     }
 
 def add_to_family(basename, names_to_add, usage):
@@ -123,14 +126,14 @@ def add_to_family(basename, names_to_add, usage):
         for name in names_to_add:
             if name != basename:
                 result = tx.run(cypher_add_to_namefamily, basename=basename, name=name, usage=usage)
-    return fetch(basename, usage)
+    return fetch_namefamily(basename, usage)
 
 def remove_from_family(basename, names_to_remove, usage):
     with shareds.driver.session() as tx:
         for name in names_to_remove:
             if name != basename:
                 result = tx.run(cypher_remove_from_namefamily, basename=basename, name=name, usage=usage)
-    return fetch(basename, usage)
+    return fetch_namefamily(basename, usage)
 
 
 def addname(name, source):

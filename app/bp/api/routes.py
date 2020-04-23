@@ -134,7 +134,7 @@ def refnameapi_v0_basename():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
-@bp.route('/refnameapi/fetch', methods=['POST'])
+@bp.route('/refnameapi/fetch_namefamily', methods=['POST'])
 def refnameapi_v0_namefamily():
     key = request.form.get("apikey")
     if not apikey.is_validkey(key): return jsonify(dict(
@@ -189,7 +189,7 @@ def refnameapi_prefixes_v1():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
-@bp.route('/refnameapi/v1/fetch', methods=['POST'])
+@bp.route('/refnameapi/v1/fetch_namefamily', methods=['POST'])
 @roles_accepted('admin', 'audit')
 def refnameapi_fetch_v1():
     "Fetch a name family"
@@ -201,7 +201,7 @@ def refnameapi_fetch_v1():
             statusText="Missing argument 'lookfor'",
         ))
     usage = request.form.get("usage")
-    rsp = refnameapi_v1.fetch(lookfor, usage) 
+    rsp = refnameapi_v1.fetch_namefamily(lookfor, usage) 
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 

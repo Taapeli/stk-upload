@@ -89,7 +89,7 @@ span.initial3 a {
 		<p>
 		<span class="initial2" v-show="prefix" v-for="initial in initials2"><a href="#" @click="make_initials2(initial)">{{initial}}</a></span>
 		<p>
-		<span class="initial3" v-show="prefix2" v-for="initial in initials3"><a href="#" @click="search(initial)">{{initial}}</a></span>
+		<span class="initial3" v-show="prefix2" v-for="initial in initials3"><a href="#" @click="q=initial;search(initial)">{{initial}}</a></span>
 	
     </div>
     <div>
@@ -127,6 +127,8 @@ span.initial3 a {
 	        Kantanimi: <b>{{ basename }}</b>
 	        <br>
 	        Nimityyppi: <b>{{ use }}</b>
+	        <br>
+	        Isän/äidin nimi: <b>{{ parentname }}</b>
 	        <p>
 	        <table border>
 	            <tr><th><th>Nimi</th></tr>
@@ -181,6 +183,7 @@ var app = new Vue({
         basename: "",
         names: [],
         familynames: [],
+        parentname: "",
         initials: [],
         initials2: [],
         initials3: [],
@@ -225,11 +228,12 @@ var app = new Vue({
 			params.append('lookfor', encodeURIComponent(name));
 			params.append('usage', this.use );
             //axios.post('/refnameapi/v1/search', params ).
-            axios.post('/refnameapi/v1/fetch', params ).
+            axios.post('/refnameapi/v1/fetch_namefamily', params ).
                 then(function(rsp, status) {
                     app.basename = name;
                     app.selected2 = [];
                     app.familynames = rsp.data.names;
+                    app.parentname = rsp.data.parentname;
                 });
             	
         },
