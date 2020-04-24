@@ -10,6 +10,7 @@ body {
 
 table {
     border-collapse: collapse;
+    width: 100%;
 }
 
 </style>
@@ -23,16 +24,30 @@ div.box {
     margin: 0 1em 1em 0;
     padding: 1em; 
     background-color: bisque;
-    width: 400px;
+    width: 450px;
     min-height: 200px;
     border-radius: 15px;
 	display: inline-block;
-	xbackground: lightsteelblue;
 }
 
 div.box1 {
    	width: 100%;
     min-height: 100px;
+}
+
+div.box2 {
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+th {
+ 	position: sticky; 
+ 	top: -1px;
+ 	background: #eee;
+}
+
+td.checkbox {
+	width: 30px;
 }
 
 span.initial a {
@@ -58,6 +73,10 @@ span.initial3 a {
 
 a.bolded {
 	font-weight: bold;
+}
+
+tr.opened {
+	background: lightgreen;
 }
 
 </style>
@@ -100,28 +119,34 @@ a.bolded {
 	<div class="box">
 	    <form v-show="hakutulos">
 	        <h4>Hakutulos</h4>
-	        <table border>
-	            <tr><th><th>Nimi</th><th>Nimiperhe</th><th>Lähde</tr>
-	            <tr v-for="namedata in names">
-	            	<td><input type="checkbox" v-model="selected" 
-	            		:value="namedata.name">
-	                <td><a href="#" v-if="namedata.is_basename"
-	                	:class="{bolded:namedata.name == basename}" 
-	                	@click="fetch_namefamily(namedata.name)">
-	                	{{ namedata.name }}
-	                	</a>
-		                <span v-if="!namedata.is_basename">{{ namedata.name }}</span>
-	                <td><a href="#" @click="fetch_namefamily(namedata.basename)">
-		                {{ namedata.basename }}
-		                </a>
-	                <td>{{ namedata.source }}
-	            </tr>
-	        </table>
-	        <p>
 	        Nimien lukumäärä: {{ names.length }}
 	        <p>
 	        <input type="button" :disabled="selected.length == 0" @click="delete_selected()" value="Poista valitut kannasta">
 	        <input type="button" :disabled="selected.length == 0" v-show="basename" :value="addtitle()" @click="add_to_family()">
+	        <div class=box2>
+		        <table border>
+		        	<thead>
+		            <tr><th><th>Nimi</th><th>Nimiperhe</th><th>Lähde</tr>
+		        	</thead>
+		        	<tbody>
+		            <tr v-for="namedata in names" :class="{opened:namedata.name == basename}"  >
+		            	<td><input type="checkbox" v-model="selected" 
+		            		:value="namedata.name">
+		                <td><a href="#" v-if="namedata.is_basename"
+		                	:class="{bolded:namedata.name == basename}" 
+		                	@click="fetch_namefamily(namedata.name)">
+		                	{{ namedata.name }}
+		                	</a>
+			                <span v-if="!namedata.is_basename">{{ namedata.name }}</span>
+		                <td><a href="#" @click="fetch_namefamily(namedata.basename)">
+			                {{ namedata.basename }}
+			                </a>
+		                <td>{{ namedata.source }}
+		            </tr>
+		        	</tbody>
+		        </table>
+	        </div>
+	        <p>
 	    </form>
 	</div>
 	    
@@ -138,18 +163,21 @@ a.bolded {
 		        <b>{{ parentname }}</b></a>
 	        </span>
 	        <p>
-	        <table border>
-	            <tr><th><th>Nimi</th></tr>
-	            <tr v-for="name in familynames">
-	            	<td><input type="checkbox" v-model="selected2" :value="name">
-	                <td>{{ name }}
-	            </tr>
-	        </table>
-	        <p>
 	        Nimien lukumäärä: {{ familynames.length }}
 	        <p>
 	        <input type="button" :disabled="selected2.length == 0" @click="remove_from_family()" value="Poista valitut nimiperheestä">
 	        <input type="button" :disabled="selected2.length == 0" @click="delete_selected2()" value="Poista valitut kannasta">
+	        <p>
+	        <div class=box2>
+	        <table border>
+	            <tr><th><th>Nimi</th></tr>
+	            <tr v-for="name in familynames">
+	            	<td class=checkbox><input type="checkbox" v-model="selected2" :value="name">
+	                <td>{{ name }}
+	            </tr>
+	        </table>
+			</div>
+	        <p>
 	    </form>
 	</div>
 	</div>
