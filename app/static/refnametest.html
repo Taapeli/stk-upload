@@ -1,0 +1,382 @@
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: Verdana, Helvetica, sans-serif;
+  background-color: #DDDDDD;
+} 
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+</style>
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+
+<style>
+div.box {
+    display: inline-block;
+    vertical-align:top;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    background-color: bisque;
+    width: 450px;
+    min-height: 200px;
+    border-radius: 15px;
+	display: inline-block;
+}
+
+div.box1 {
+   	width: 100%;
+    min-height: 100px;
+}
+
+div.box2 {
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+th {
+ 	position: sticky; 
+ 	top: -1px;
+ 	background: #eee;
+}
+
+td.checkbox {
+	width: 30px;
+}
+
+span.initial a {
+	background: lightsteelblue;
+	margin: 10px;
+	padding: 5px;
+	border: 1px;
+}
+
+span.initial2 a {
+	background: chartreuse;
+	margin: 10px;
+	padding: 5px;
+	border: 1px;
+}
+
+span.initial3 a {
+	background: lightyellow;
+	margin: 10px;
+	padding: 5px;
+	border: 1px;
+}
+
+a.bolded {
+	font-weight: bold;
+}
+
+tr.opened {
+	background: lightgreen;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h4>Referenssinimet</h4>
+
+<p>
+
+<div id="myApp">
+
+	<div class="box box1">
+		<input type=radio v-model="use" @change="select_type()" value="firstname">firstname
+		<input type=radio v-model="use" @change="select_type()" value="surname">surname
+		<input type=radio v-model="use" @change="select_type()" value="patronyme">patronyme
+		<input type=radio v-model="use" @change="select_type()" value="matronyme">matronyme
+		<p>
+	    Hakuteksti: <input v-model="q" v-on:keyup.enter="search(q)" size="40" placeholder="Kirjoita hakuteksti tähän">
+
+	    <input type="button" id="search" value="Haku" :disabled="q.length < 1" v-on:click="search(q)">
+		<input type=radio v-model="match" value="startswith">starts with
+		<input type=radio v-model="match" value="contains">contains
+		<p>
+	    <input type="button" id="addname" value="Lisää hakuteksti uutena nimenä" :disabled="q.length < 1" @click="addname(q)">
+		<p>
+		<span class="initial" v-for="initial in initials"><a v-if="initial<='Z'" href="#" @click="make_initials1(initial)">{{initial}}</a></span>
+		<p>
+		<span class="initial" v-for="initial in initials"><a v-if="initial>'Z'" href="#" @click="make_initials1(initial)">{{initial}}</a></span>
+		<p>
+		<span class="initial2" v-show="prefix" v-for="initial in initials2"><a href="#" @click="make_initials2(initial)">{{initial}}</a></span>
+		<p>
+		<span class="initial3" v-show="prefix2" v-for="initial in initials3"><a href="#" @click="q=initial;search(initial)">{{initial}}</a></span>
+	
+    </div>
+    <div>
+    
+	<div class="box">
+	    <form v-show="hakutulos">
+	        <h4>Hakutulos</h4>
+	        Nimien lukumäärä: {{ names.length }}
+	        <p>
+	        <input type="button" :disabled="selected.length == 0" @click="delete_selected()" value="Poista valitut kannasta">
+	        <input type="button" :disabled="selected.length == 0" v-show="basename" :value="addtitle()" @click="add_to_family()">
+	        <div class=box2>
+		        <table border>
+		        	<thead>
+		            <tr><th><th>Nimi</th><th>Nimiperhe</th><th>Lähde</tr>
+		        	</thead>
+		        	<tbody>
+		            <tr v-for="namedata in names" :class="{opened:namedata.name == basename}"  >
+		            	<td><input type="checkbox" v-model="selected" 
+		            		:value="namedata.name">
+		                <td><a href="#" v-if="namedata.is_basename"
+		                	:class="{bolded:namedata.name == basename}" 
+		                	@click="fetch_namefamily(namedata.name)">
+		                	{{ namedata.name }}
+		                	</a>
+			                <span v-if="!namedata.is_basename">{{ namedata.name }}</span>
+		                <td><a href="#" @click="fetch_namefamily(namedata.basename)">
+			                {{ namedata.basename }}
+			                </a>
+		                <td>{{ namedata.source }}
+		            </tr>
+		        	</tbody>
+		        </table>
+	        </div>
+	        <p>
+	    </form>
+	</div>
+	    
+	<div class="box" v-show="basename">
+	    <form>
+	        <h4>Nimiperhe</h4>
+	        Kantanimi: <b>{{ basename }}</b>
+	        <br>
+	        Nimityyppi: <b>{{ use }}</b>
+			<br>
+	        <span v-show="use == 'patronyme' || use == 'matronyme'">
+		        Isän/äidin nimi: 
+		        <a href="#" @click="fetch_namefamily(parentname, 'firstname')">
+		        <b>{{ parentname }}</b></a>
+	        </span>
+	        <p>
+	        Nimien lukumäärä: {{ familynames.length }}
+	        <p>
+	        <input type="button" :disabled="selected2.length == 0" @click="remove_from_family()" value="Poista valitut nimiperheestä">
+	        <input type="button" :disabled="selected2.length == 0" @click="delete_selected2()" value="Poista valitut kannasta">
+	        <p>
+	        <div class=box2>
+	        <table border>
+	            <tr><th><th>Nimi</th></tr>
+	            <tr v-for="name in familynames">
+	            	<td class=checkbox><input type="checkbox" v-model="selected2" :value="name">
+	                <td>{{ name }}
+	            </tr>
+	        </table>
+			</div>
+	        <p>
+	    </form>
+	</div>
+	</div>
+	
+    <div class="modal" ng-if="loading"></div>
+
+</div>
+</body>
+
+<script>
+function log(msg) {
+    console.log(msg);
+}
+
+function removeFromArray(arr, value) { 
+    var index = arr.indexOf(value);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+    return arr;
+}
+
+var initial_place = {name:"Antrea",id:52800,type:"City"};
+
+var app = new Vue({
+    el: '#myApp',
+    created: function() {
+        this.init();    
+    },
+    data: {
+        q: "Bea",
+        lastquery:"Bea",
+        use:"firstname",
+        match:"startswith",
+        hakutulos: true,
+        selected: [],
+        selected2: [],
+        records: [],
+        basename: "",
+        names: [],
+        familynames: [],
+        parentname: "",
+        initials: [],
+        initials2: [],
+        initials3: [],
+        prefix: "",
+        prefix2: "",
+        prefix3: "",
+    }, // data
+    methods: {
+        init: function() {
+            //this.setplace(initial_place);
+            /*
+            for (var i=97;i<123;i++) this.initials.push(String.fromCharCode(i));
+            this.initials.push("ä");
+            this.initials.push("å");
+            this.initials.push("ö");
+            */
+            this.make_initials();
+            this.search(this.q);
+        },
+        search: function(q) {
+			const params = new URLSearchParams();
+			params.append('lookfor', encodeURIComponent(q));
+			params.append('usage', this.use );
+			params.append('match', this.match );
+            axios.post('/refnameapi/v1/search', params ).
+            //axios.post('/refnameapi/v1/prefixes', params ).
+                then(function(rsp, status) {
+                    app.names = rsp.data.records;
+                    app.selected = [];
+                    app.lastquery = q;
+                });
+        },
+        fetch_prefixes: function(prefix) {
+			const params = new URLSearchParams();
+			params.append('lookfor', encodeURIComponent(prefix));
+			params.append('usage', this.use );
+            return axios.post('/refnameapi/v1/prefixes', params );
+        },
+        fetch_namefamily: function(name, newtype) {
+        	if (!name) return;
+        	if (newtype) this.use = newtype;
+			const params = new URLSearchParams();
+			params.append('lookfor', encodeURIComponent(name));
+			params.append('usage', this.use );
+            //axios.post('/refnameapi/v1/search', params ).
+            axios.post('/refnameapi/v1/fetch_namefamily', params ).
+                then(function(rsp, status) {
+                    app.basename = name;
+                    app.selected2 = [];
+                    app.familynames = rsp.data.names;
+                    app.parentname = rsp.data.parentname;
+                });
+            	
+        },
+        make_initials: function() {
+        	this.prefix = ""
+        	this.prefix2 = "";
+        	this.names = [];
+	        this.fetch_prefixes("").
+                then(function(rsp, status) {
+                    app.initials = rsp.data.records;
+                    log("initials");
+                    log(app.initials);
+                });
+        },
+        make_initials1: function(q) {
+        	console.log(q);
+        	app.prefix = q; // toUpperCase();
+        	app.prefix2 = "";
+        	app.names = [];
+	        this.fetch_prefixes(app.prefix).
+                then(function(rsp, status) {
+                    app.initials2 = rsp.data.records;
+                });
+        },
+        make_initials2: function(q) {
+        	console.log(q);
+        	app.prefix2 = q;
+        	app.names = [];
+	        this.fetch_prefixes(app.prefix2).
+                then(function(rsp, status) {
+                    if (rsp.data.records.length == 0)
+                    	app.search(app.prefix2);
+                    app.initials3 = rsp.data.records;
+                });
+        },
+        make_initials3: function(q) {
+        	console.log(q);
+        	app.prefix3 = q;
+        },
+        addtitle: function() {
+        	return "Lisää valitut nimiperheeseen " + this.basename;
+    	},
+        select_type: function(nametype) {
+        	if (this.basename)
+        		this.fetch_namefamily(this.basename);
+    	},
+        delete_selected: function() {
+        	log("delete");
+        	log(app.selected);
+			const params = new URLSearchParams();
+			params.append('names', encodeURIComponent(this.selected));
+            axios.post('/refnameapi/v1/delnames', params ).
+                then(function(rsp, status) {
+                    app.search(app.lastquery);
+	        		app.fetch_namefamily(app.basename);
+                });
+    	},
+        delete_selected2: function() {
+        	log("delete2");
+        	log(app.selected2);
+			const params = new URLSearchParams();
+			params.append('names', encodeURIComponent(this.selected2));
+            axios.post('/refnameapi/v1/delnames', params ).
+                then(function(rsp, status) {
+                    app.search(app.lastquery);
+	        		app.fetch_namefamily(app.basename);
+                });
+    	},
+        remove_from_family: function() {
+			const params = new URLSearchParams();
+			params.append('basename', encodeURIComponent(this.basename));
+			params.append('names', encodeURIComponent(this.selected2));
+			params.append('usage', this.use );
+            axios.post('/refnameapi/v1/remove_from_family', params ).
+                then(function(rsp, status) {
+                    app.familynames = rsp.data.names;
+                    app.search(app.lastquery);
+                });
+    	},
+        add_to_family: function() {
+			const params = new URLSearchParams();
+			params.append('basename', encodeURIComponent(this.basename));
+			params.append('names', encodeURIComponent(this.selected));
+			params.append('usage', this.use );
+            axios.post('/refnameapi/v1/add_to_family', params ).
+                then(function(rsp, status) {
+                    app.familynames = rsp.data.names;
+                    app.search(app.lastquery);
+                    app.selected2.push(...app.selected);
+                    app.selected2 = removeFromArray(app.selected2, app.basename);
+                });
+    	},
+        addname: function(newname) {
+			const params = new URLSearchParams();
+			params.append('name', encodeURIComponent(newname));
+            axios.post('/refnameapi/v1/addname', params ).
+                then(function(rsp, status) {
+                    app.search(app.q);
+                });
+    	},
+    } // methods
+
+});
+
+</script>
+
+
+</html>
+
