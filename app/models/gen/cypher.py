@@ -192,17 +192,24 @@ MATCH (person:Person) -[:NAME]-> (name:Name)
 WHERE ID(person) = $id""" + _get_events_tail
 
     get_events_by_refname = """
-MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:Name) 
+MATCH path = ( (rn0:Refname {name:$name}) -[:BASENAME*0..3]- (:Refname))
+WITH nodes(path) AS x UNWIND x AS rn
+    MATCH (rn) -[:REFNAME]-> (person:Person) -[:NAME]-> (name:Name)
 """ + _get_events_tail + _get_events_surname
+#Replaced 26.4.2020
+#MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:Name) 
 
     # With attr={'use':rule, 'name':name}
     get_common_events_by_refname_use = """
-MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
-    <-[:PASSED]- (batch)
+MATCH path = ( (search:Refname) -[:BASENAME*0..3 {use:$attr.use}]- (:Refname) )
 WHERE search.name STARTS WITH $attr.name
-WITH search, person
-MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH search, nodes(path) AS x UNWIND x AS rn
+    MATCH (rn) -[:REFNAME {use:$attr.use}]-> (person:Person) <-[:PASSED]- (batch)
+    MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
+#Replaced 26.4.2020
+#MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+#    <-[:PASSED]- (batch)
 
     # With attr={'use':rule, 'name':name}, user=user
     get_my_events_by_refname_use = """
@@ -622,7 +629,7 @@ RETURN ID(a) as rid"""
     get_all = """
 MATCH (n:Refname)
 OPTIONAL MATCH (n) -[r]-> (m:Refname)
-OPTIONAL MATCH (n) -[l:BASENAME]-> (p:Person)
+OPTIONAL MATCH (n) -[l:REFNAME]-> (p:Person)
 RETURN n,
     COLLECT(DISTINCT [type(r), r.use, m]) AS r_ref,
     COLLECT(DISTINCT l.use) AS l_uses, COUNT(p) AS uses

@@ -235,34 +235,48 @@ def do_schema_fixes():
 # RETURN count(n)'''
 
     if True:
-        change_BASENAME_to_REFNAME = """
-MATCH (a:Person) -[r:BASENAME]-> (b:Refname)
-    MERGE (a) -[rr:REFNAME]-> (b)
-        set rr = {datetype:r.datetype, date1:r.date1, date2:r.date2}
-    DELETE r
+        change_persons_BASENAME_to_REFNAME = """
+MATCH (a:Person) <-[r0:BASENAME]- (b:Refname)
+WITH a, r0, b
+    CREATE (a) <-[r:REFNAME {use:r0.use}]- (b)
+    DELETE r0
+RETURN count(r)
+"""
+        # call with (use0="matronyme", use1="mother") or (use0="patronyme", use1="father")
+        change_matronyme_BASENAME_to_PARENTNAME = """
+MATCH (b:Refname) -[r0:BASENAME {use:$use0}]-> (c:Refname)
+WITH b, r0, c, r0.use as old
+    CREATE (b) <-[r:PARENTNAME {use:$use1}]- (c)
+    DELETE r0
+RETURN count(r)
 """
 
         with shareds.driver.session() as session: 
-#             try:
-#                 result = session.run(change_Root_to_Audit)
-#                 cnt1 = result.single()[0]
-#                 result = session.run(change_Audition_to_Audit)
-#                 cnt2 = result.single()[0]
-#                 print(f"adminDB.do_schema_fixes: fixed {cnt1} Root labels, {cnt2} Audition labels")
-#             except Exception as e:
-#                 logger.error(f"{e} in database.adminDB.do_schema_fixes")
-#                 return
-
+            try:
+                result = session.run(change_persons_BASENAME_to_REFNAME)
+                cnt1 = result.single()[0]
+                result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
+                                     use0="matronyme", use1="mother")
+                cnt2 = result.single()[0]
+                result = session.run(change_matronyme_BASENAME_to_PARENTNAME,
+                                     use0="patronyme", use1="father")
+                cnt3 = result.single()[0]
+                print(f"adminDB.do_schema_fixes: fixed Refname links {cnt1} REFNAME, {cnt2} matronyme, {cnt3} patronyme")
+            except Exception as e:
+                logger.error(f"{e} in database.adminDB.do_schema_fixes")
+                return
 
             dropped=0
             created=0
-            try:
-                for label in ['Person', 'Event', 'Place', 'Family']:
-                    result = session.run(f'DROP INDEX ON :{label}(gramps_handle)')
-                    counters = result.summary().counters
-                    dropped += counters.indexes_removed
-            except Exception as e:
-                pass
+
+# Removed 21.4.2020 
+#             try:
+#                 for label in ['Person', 'Event', 'Place', 'Family']:
+#                     result = session.run(f'DROP INDEX ON :{label}(gramps_handle)')
+#                     counters = result.summary().counters
+#                     dropped += counters.indexes_removed
+#             except Exception as e:
+#                 pass
 
             for label in ['Citation', 'Event', 'Family', 'Media', 'Name',
                           'Note', 'Person', 'Place', 'Place_name', 'Repository',
