@@ -1,6 +1,10 @@
-<html>
-<head>
-<meta charset="utf-8">
+{# templates/admin/start.html_ #}
+{% extends "/admin/layout.html" %}
+{% include "security/_messages.html" %}
+{% block title %}{{ _('Administrator') }}{% endblock %}
+{% block body %}}
+{{ super() }}
+
 <style>
 
 body {
@@ -47,7 +51,7 @@ th {
 }
 
 td.checkbox {
-	width: 30px;
+	width: 20px;
 }
 
 span.initial a {
@@ -105,13 +109,13 @@ tr.opened {
 		<p>
 	    <input type="button" id="addname" value="Lisää hakuteksti uutena nimenä" :disabled="q.length < 1" @click="addname(q)">
 		<p>
-		<span class="initial" v-for="initial in initials"><a v-if="initial<='Z'" href="#" @click="make_initials1(initial)">{{initial}}</a></span>
+		<span class="initial" v-for="initial in initials"><a v-if="initial<='Z'" href="#" @click="make_initials1(initial)">${initial}</a></span>
 		<p>
-		<span class="initial" v-for="initial in initials"><a v-if="initial>'Z'" href="#" @click="make_initials1(initial)">{{initial}}</a></span>
+		<span class="initial" v-for="initial in initials"><a v-if="initial>'Z'" href="#" @click="make_initials1(initial)">${initial}</a></span>
 		<p>
-		<span class="initial2" v-show="prefix" v-for="initial in initials2"><a href="#" @click="make_initials2(initial)">{{initial}}</a></span>
+		<span class="initial2" v-show="prefix" v-for="initial in initials2"><a href="#" @click="make_initials2(initial)">${initial}</a></span>
 		<p>
-		<span class="initial3" v-show="prefix2" v-for="initial in initials3"><a href="#" @click="q=initial;search(initial)">{{initial}}</a></span>
+		<span class="initial3" v-show="prefix2" v-for="initial in initials3"><a href="#" @click="q=initial;search(initial)">${initial}</a></span>
 	
     </div>
     <div>
@@ -119,7 +123,7 @@ tr.opened {
 	<div class="box">
 	    <form v-show="hakutulos">
 	        <h4>Hakutulos</h4>
-	        Nimien lukumäärä: {{ names.length }}
+	        Nimien lukumäärä: ${ names.length }
 	        <p>
 	        <input type="button" :disabled="selected.length == 0" @click="delete_selected()" value="Poista valitut kannasta">
 	        <input type="button" :disabled="selected.length == 0" v-show="basename" :value="addtitle()" @click="add_to_family()">
@@ -130,18 +134,19 @@ tr.opened {
 		        	</thead>
 		        	<tbody>
 		            <tr v-for="namedata in names" :class="{opened:namedata.name == basename}"  >
-		            	<td><input type="checkbox" v-model="selected" 
+		            	<td class="checkbox">
+		            		<input type="checkbox" v-model="selected" 
 		            		:value="namedata.name">
 		                <td><a href="#" v-if="namedata.is_basename"
 		                	:class="{bolded:namedata.name == basename}" 
 		                	@click="fetch_namefamily(namedata.name)">
-		                	{{ namedata.name }}
+		                	${ namedata.name }
 		                	</a>
-			                <span v-if="!namedata.is_basename">{{ namedata.name }}</span>
+			                <span v-if="!namedata.is_basename">${ namedata.name }</span>
 		                <td><a href="#" @click="fetch_namefamily(namedata.basename)">
-			                {{ namedata.basename }}
+			                ${ namedata.basename }
 			                </a>
-		                <td>{{ namedata.source }}
+		                <td>${ namedata.source }
 		            </tr>
 		        	</tbody>
 		        </table>
@@ -153,17 +158,17 @@ tr.opened {
 	<div class="box" v-show="basename">
 	    <form>
 	        <h4>Nimiperhe</h4>
-	        Kantanimi: <b>{{ basename }}</b>
+	        Kantanimi: <b>${ basename }</b>
 	        <br>
-	        Nimityyppi: <b>{{ use }}</b>
+	        Nimityyppi: <b>${ use }</b>
 			<br>
 	        <span v-show="use == 'patronyme' || use == 'matronyme'">
 		        Isän/äidin nimi: 
 		        <a href="#" @click="fetch_namefamily(parentname, 'firstname')">
-		        <b>{{ parentname }}</b></a>
+		        <b>${ parentname }</b></a>
 	        </span>
 	        <p>
-	        Nimien lukumäärä: {{ familynames.length }}
+	        Nimien lukumäärä: ${ familynames.length }
 	        <p>
 	        <input type="button" :disabled="selected2.length == 0" @click="remove_from_family()" value="Poista valitut nimiperheestä">
 	        <input type="button" :disabled="selected2.length == 0" @click="delete_selected2()" value="Poista valitut kannasta">
@@ -173,7 +178,7 @@ tr.opened {
 	            <tr><th><th>Nimi</th></tr>
 	            <tr v-for="name in familynames">
 	            	<td class=checkbox><input type="checkbox" v-model="selected2" :value="name">
-	                <td>{{ name }}
+	                <td>${ name }
 	            </tr>
 	        </table>
 			</div>
@@ -204,6 +209,7 @@ var initial_place = {name:"Antrea",id:52800,type:"City"};
 
 var app = new Vue({
     el: '#myApp',
+    delimiters: ['${', '}'],
     created: function() {
         this.init();    
     },
@@ -377,6 +383,4 @@ var app = new Vue({
 
 </script>
 
-
-</html>
-
+{% endblock %}
