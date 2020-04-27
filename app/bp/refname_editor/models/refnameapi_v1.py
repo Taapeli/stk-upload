@@ -58,6 +58,10 @@ cypher_del_name = """
     MATCH (r:Refname{name:$name}) 
     DETACH DELETE r
 """
+cypher_save_name = """
+    MATCH (r:Refname {name:$original_name})
+    SET r.name = $name, r.source = $source
+"""
 
 def search(prefix, usage, match):  
     "Returns refnames starting with or containing prefix (case-insensitive)"
@@ -146,6 +150,15 @@ def delnames(names_to_remove):
     with shareds.driver.session() as tx:
         for name in names_to_remove:
             result = tx.run(cypher_del_name, name=name)
+    return {"status":"OK",
+     "statusText":"OK",
+    }
+
+
+def save_name(original_name, name, source):
+    result = shareds.driver.session().run(cypher_save_name, 
+        original_name=original_name,
+        name=name, source=source)
     return {"status":"OK",
      "statusText":"OK",
     }

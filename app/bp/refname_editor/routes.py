@@ -131,3 +131,15 @@ def refnameapi_delnames():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response 
 
+@app.route('/refnameapi/v1/save_name', methods=['POST'])
+@roles_accepted('admin', 'audit')
+def refnameapi_save_name():
+    "save new values for name and source"
+    original_name = urllib.parse.unquote(request.form.get("original_name"))
+    name = urllib.parse.unquote(request.form.get("name"))
+    source = urllib.parse.unquote(request.form.get("source"))
+    rsp = refnameapi_v1.save_name(original_name, name, source)
+    response = jsonify(rsp)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response 
+

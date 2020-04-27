@@ -31,7 +31,6 @@ div.box {
     width: 450px;
     min-height: 200px;
     border-radius: 15px;
-	display: inline-block;
 }
 
 div.box1 {
@@ -83,6 +82,17 @@ tr.opened {
 	background: lightgreen;
 }
 
+div#edit_dialog {
+    display: inline-block;
+    vertical-align:top;
+	background: lightgreen;
+    width: 250px;
+    height: 200px;
+    margin: 0 1em 1em 0;
+    padding: 1em; 
+    border-radius: 15px;
+}
+
 </style>
 
 </head>
@@ -127,16 +137,19 @@ tr.opened {
 	        <p>
 	        <input type="button" :disabled="selected.length == 0" @click="delete_selected()" value="Poista valitut kannasta">
 	        <input type="button" :disabled="selected.length == 0" v-show="basename" :value="addtitle()" @click="add_to_family()">
+	        <input type="button" :disabled="selected.length != 1" value="Muokkaa" @click="edit_name()">
 	        <div class=box2>
 		        <table border>
 		        	<thead>
 		            <tr><th><th>Nimi</th><th>Nimiperhe</th><th>Lähde</tr>
 		        	</thead>
 		        	<tbody>
-		            <tr v-for="namedata in names" :class="{opened:namedata.name == basename}"  >
+		            <tr v-for="namedata in names" 
+		            	:class="{opened:namedata.name == basename}"  
+	            	>
 		            	<td class="checkbox">
 		            		<input type="checkbox" v-model="selected" 
-		            		:value="namedata.name">
+		            		:value="namedata">
 		                <td><a href="#" v-if="namedata.is_basename"
 		                	:class="{bolded:namedata.name == basename}" 
 		                	@click="fetch_namefamily(namedata.name)">
@@ -155,7 +168,7 @@ tr.opened {
 	    </form>
 	</div>
 	    
-	<div class="box" v-show="basename">
+	<div class="box" v-if="basename">
 	    <form>
 	        <h4>Nimiperhe</h4>
 	        Kantanimi: <b>${ basename }</b>
@@ -185,8 +198,22 @@ tr.opened {
 	        <p>
 	    </form>
 	</div>
+
+	<div id="edit_dialog" class="box" v-show="edited_name" :style="edit_style()">
+		Editing <b>${ edited_name }</b>
+		<p>
+		<table border>
+			<tr><td><b>Name</b>
+				<td><input v-model="edited_name">
+			<tr><td><b>Lähde</b>
+				<td><input v-model="edited_source">
+		</table>
+		<input type="button" value="Talleta" @click="save_name()">
+		<input type="button" value="Peruuta" @click="edited_name = null">
 	</div>
-	
+		
+	</div>
+
     <div class="modal" ng-if="loading"></div>
 
 </div>
@@ -232,6 +259,9 @@ var app = new Vue({
         prefix: "",
         prefix2: "",
         prefix3: "",
+        edited_name: "",
+        original_edited_name: "",
+        edited_source: "",
     }, // data
     methods: {
         init: function() {
@@ -327,7 +357,8 @@ var app = new Vue({
         	log("delete");
         	log(app.selected);
 			const params = new URLSearchParams();
-			params.append('names', encodeURIComponent(this.selected));
+			var names = this.selected.map(namedata => namedata.name);
+			params.append('names', encodeURIComponent(names));
             axios.post('/refnameapi/v1/delnames', params ).
                 then(function(rsp, status) {
                     app.search(app.lastquery);
@@ -358,14 +389,15 @@ var app = new Vue({
     	},
         add_to_family: function() {
 			const params = new URLSearchParams();
+			var names = this.selected.map(namedata => namedata.name);
 			params.append('basename', encodeURIComponent(this.basename));
-			params.append('names', encodeURIComponent(this.selected));
+			params.append('names', encodeURIComponent(names));
 			params.append('usage', this.use );
             axios.post('/refnameapi/v1/add_to_family', params ).
                 then(function(rsp, status) {
                     app.familynames = rsp.data.names;
                     app.search(app.lastquery);
-                    app.selected2.push(...app.selected);
+                    app.selected2.push(...names);
                     app.selected2 = removeFromArray(app.selected2, app.basename);
                 });
     	},
@@ -375,6 +407,27 @@ var app = new Vue({
             axios.post('/refnameapi/v1/addname', params ).
                 then(function(rsp, status) {
                     app.search(app.q);
+                });
+    	},
+        edit_name: function() {
+        	this.basename = "";
+			this.original_edited_name = this.selected[0].name;
+			this.edited_name = this.original_edited_name;
+			this.edited_source = this.selected[0].source;
+    	},
+        edit_style: function() {
+        	return "";
+    	},
+        save_name: function() {
+			const params = new URLSearchParams();
+			params.append('original_name', encodeURIComponent(this.original_edited_name));
+			params.append('name', encodeURIComponent(this.edited_name));
+			params.append('source', encodeURIComponent(this.edited_source));
+            axios.post('/refnameapi/v1/save_name', params ).
+                then(function(rsp, status) {
+                    app.q = app.edited_name;
+                    app.search(app.q);
+					app.edited_name = "";
                 });
     	},
     } // methods
