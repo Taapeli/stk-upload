@@ -114,7 +114,7 @@ def refnameapi_addname():
     "add_a new name"
     name = request.form.get("name")
     name = urllib.parse.unquote(name)
-    source = f"Käyttäjän {current_user.username} lisäämä"
+    source = f"Käyttäjän {current_user.name} lisäämä"
     rsp = refnameapi_v1.addname(name, source) 
     response = jsonify(rsp)
     response.headers['Access-Control-Allow-Origin'] = '*'

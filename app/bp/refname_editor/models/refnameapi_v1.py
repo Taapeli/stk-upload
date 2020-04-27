@@ -1,35 +1,13 @@
 import shareds
-from models.gen.dates import DateRange
-"""
-https://isotammi.net/api/v0/search?lookfor=Pekka
---> {"status":"OK",
-     "statusText":"OK",
-     "resultCount": 2,
-     "records":[ { "id":"123", "name":"Antrea", "type":"place"},
-                 { "id":"333", "name":"Antrea", "type":"village"},
-               ]
-    }
-
- 
-"""
-import pprint
 from _operator import itemgetter
 
-#       AND EXISTS ((r) -[:BASENAME{use:$usage}]-> ())
 cypher_search_refname_v1 = """
     MATCH (r:Refname)  
-    WHERE toLower(r.name) STARTS WITH toLower($prefix)
+    WHERE toLower(r.name) %(search_type)s toLower($prefix)
     OPTIONAL MATCH (r) -[:BASENAME*{use:$usage}]-> (base:Refname)
         WHERE NOT EXISTS ((base) -[:BASENAME{use:$usage}]-> (:Refname))
-    RETURN r.name as name, r.source as source, base.name as basename
-"""
-
-cypher_search_refname_contains_v1 = """
-    MATCH (r:Refname)  
-    WHERE toLower(r.name) CONTAINS toLower($prefix)
-    OPTIONAL MATCH (r) -[:BASENAME*{use:$usage}]-> (base:Refname)
-        WHERE NOT EXISTS ((base) -[:BASENAME{use:$usage}]-> (:Refname))
-    RETURN r.name as name, r.source as source, base.name as basename
+    OPTIONAL MATCH (r) -[:BASENAME{use:$usage}]- (x:Refname)
+    RETURN r.name as name, r.source as source, base.name as basename, count(x) as num_neighbors
 """
 
 cypher_fetch_namefamily = """
@@ -66,17 +44,21 @@ cypher_save_name = """
 def search(prefix, usage, match):  
     "Returns refnames starting with or containing prefix (case-insensitive)"
     if match == "startswith":
-        result = shareds.driver.session().run(cypher_search_refname_v1, 
-                                            prefix=prefix, usage=usage)
+        cypher = cypher_search_refname_v1 % {'search_type': "STARTS WITH"}
     else:
-        result = shareds.driver.session().run(cypher_search_refname_contains_v1, 
-                                            prefix=prefix, usage=usage)
+        cypher = cypher_search_refname_v1 % {'search_type': "CONTAINS"}
+    result = shareds.driver.session().run(cypher, 
+                                        prefix=prefix, usage=usage)
     records = []
     for rec in  result:
         name = rec['name']
         source = rec['source']
         basename = rec['basename']
-        records.append(dict(name=name,source=source,basename=basename,is_basename=(basename is None)))
+        num_neighbors = rec['num_neighbors']
+        records.append(dict(name=name,source=source,basename=basename,
+                            is_basename=(basename is None),
+                            num_neighbors=num_neighbors
+                            ))
    
 #    records.append(surroundedBy=sorted(places1,key=lambda x:x['name']))    
     return {"status":"OK",
@@ -90,7 +72,8 @@ def prefixes(prefix, usage):
     Returns next longer prefixes for names starting with prefix (case-sensitive)
     E.g. for the prefix "Jo" return the list ["Joh","Jos"] if there are names that start with those prefixes.
     """
-    cypher = cypher_search_refname_v1.replace("toLower","") # this is case-sensitive
+    cypher = cypher_search_refname_v1 % {'search_type': "STARTS WITH"}
+    cypher = cypher.replace("toLower","") # this is case-sensitive
     result = shareds.driver.session().run(cypher, prefix=prefix, usage=usage)
     prefixlen = len(prefix)+1
     prefixes = set()
