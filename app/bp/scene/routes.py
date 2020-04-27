@@ -63,6 +63,7 @@ def show_person_list(selection=None):
     args={}
     args['user'] = u_context.user
     args['context_code'] = u_context.context
+    persons = []
     if request.method == 'POST':
         try:
             # Selection from search form
@@ -114,7 +115,7 @@ def show_person_list(selection=None):
 @bp.route('/scene/persons/ref=<string:refname>/<opt>')
 @login_required
 def show_persons_by_refname(refname, opt=""):
-    """ List persons by refname for menu(0).
+    """ List persons by refname for menu(0). Called from /list/refnames
     """
     logger.warning("#TODO: fix material selevtion or remove action show_persons_by_refname")
 

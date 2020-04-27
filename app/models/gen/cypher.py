@@ -137,13 +137,13 @@ RETURN p as person,
 ORDER BY person.sortname"""
 
 
-
+#Todo Fix this? Or an example only?
     read_persons_list_by_refn = """
-MATCH p = (search:Refname) -[:BASENAME*1..3 {use:'surname'}]-> (person:Person)
+MATCH p = (search:Refname) -[:BASENAME*0..3 {use:'surname'}]-> (person:Person)
 WHERE search.name STARTS WITH 'Kottu'
 WITH search, person
 MATCH (person) -[:NAME]-> (name:Name)
-OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
+OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
 WITH name, person, COLLECT(DISTINCT refn.name) AS refnames, 
     TOUPPER(LEFT(name.surname,1)) as initial
 OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
@@ -157,11 +157,12 @@ RETURN CASE WHEN name.order = 0 THEN id(person) END as id,
 ORDER BY TOUPPER(name.surname), name.firstname limit 20"""
 
 # Ver 0.1 different person lists
+#Todo Fix this: (person) <-[:REFNAME]-
     _get_events_tail = """
  OPTIONAL MATCH (batch:Batch) -[:OWNS]-> (person)
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
- OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
+ OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
 RETURN batch.user AS user, person, 
     COLLECT(DISTINCT name) AS names,
     COLLECT(DISTINCT refn.name) AS refnames,
@@ -192,29 +193,38 @@ MATCH (person:Person) -[:NAME]-> (name:Name)
 WHERE ID(person) = $id""" + _get_events_tail
 
     get_events_by_refname = """
-MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:Name) 
+MATCH path = ( (rn0:Refname {name:$name}) -[:BASENAME*0..3]- (:Refname))
+WITH nodes(path) AS x UNWIND x AS rn
+    MATCH (rn) -[:REFNAME]-> (person:Person) -[:NAME]-> (name:Name)
 """ + _get_events_tail + _get_events_surname
+#Replaced 26.4.2020
+#MATCH (refn:Refname {name:$name}) -[:BASENAME*1..3]-> (person:Person) --> (name:Name) 
 
     # With attr={'use':rule, 'name':name}
     get_common_events_by_refname_use = """
-MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
-    <-[:PASSED]- (batch)
+MATCH path = ( (search:Refname) -[:BASENAME*0..3 {use:$attr.use}]- (:Refname) )
 WHERE search.name STARTS WITH $attr.name
-WITH search, person
-MATCH (person) -[:NAME]-> (name:Name {order:0})
+WITH search, nodes(path) AS x UNWIND x AS rn
+    MATCH (rn) -[:REFNAME {use:$attr.use}]-> (person:Person) <-[:PASSED]- (batch)
+    MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
+#Replaced 26.4.2020
+#MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+#    <-[:PASSED]- (batch)
 
     # With attr={'use':rule, 'name':name}, user=user
     get_my_events_by_refname_use = """
-MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
-    <-[:OWNS]- (:Batch {user:$user})
-WHERE search.name STARTS WITH $attr.name
-WITH search, person
-MATCH (person) -[:NAME]-> (name:Name {order:0})
+MATCH path = ( (search:Refname) -[:BASENAME*0..3]- (:Refname))
+    WHERE search.name STARTS WITH $attr.name
+WITH nodes(path) AS x UNWIND x AS rn
+    MATCH (rn) -[:REFNAME {use:$attr.use}]-> (person:Person) 
+          <-[:OWNS]- (:Batch {user:$user})
+    MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
 
+#Todo Fix this: (person) <-[:REFNAME]-
     get_both_events_by_refname_use = """
-MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+MATCH p = (search:Refname) -[:BASENAME*0..3 {use:$attr.use}]-> (person:Person)
     <-[re:OWNS|PASSED]- (b:Batch)
 WHERE search.name STARTS WITH $attr.name
 WITH search, person, re WHERE type(re) = "PASSED" or b.user = $user
@@ -614,7 +624,7 @@ RETURN ID(a) AS aid, a.name AS aname"""
     link_person_to = """
 MATCH (p:Person) WHERE ID(p) = $pid
 MERGE (a:Refname {name:$name})
-MERGE (a) -[:BASENAME {use:$use}]-> (p)
+MERGE (a) -[:REFNAME {use:$use}]-> (p)
 RETURN ID(a) as rid"""
 
     # Get all Refnames. Returns a list of Refname objects, with referenced names,
@@ -622,7 +632,7 @@ RETURN ID(a) as rid"""
     get_all = """
 MATCH (n:Refname)
 OPTIONAL MATCH (n) -[r]-> (m:Refname)
-OPTIONAL MATCH (n) -[l:BASENAME]-> (p:Person)
+OPTIONAL MATCH (n) -[l:REFNAME]-> (p:Person)
 RETURN n,
     COLLECT(DISTINCT [type(r), r.use, m]) AS r_ref,
     COLLECT(DISTINCT l.use) AS l_uses, COUNT(p) AS uses

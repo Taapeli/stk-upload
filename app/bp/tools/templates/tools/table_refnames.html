@@ -29,21 +29,25 @@
 <div>
 <!--section id="lista"-->
 <table style="width:500pt">
-    <tr><th>{{ _('Oid') }}</th>
-        <th>{{ _('Name') }}</th>
+    <tr><th>{{ _('Name') }}</th>
         <th>{{ _('Type ~ Ref. name') }}</th>
-        <th>{{ _('Gender') }}</th>
+{#      <th>{{ _('Gender') }}</th>
+#}
         <th>{{ _('Name Source') }}</th>
         <th>{{ _('Persons') }}</th>
     </tr>
     {% for r in names %}
         <tr>
-            <td class="id">{{r.rid}}</td>
             <td>{% if not r.refname %}<b>{% endif %}{{r.name}}
                 {% if not r.refname %}</b>{% endif %}</td>
-            <td><span class="typevar">{{rt[r.reftype]}}</span>
+            <td><span class="typevar">
+      {% for t in r.reftype.split(', ') %}
+            {{rt[t]}}
+      {% endfor %}
+                </span>
             {% if r.refname %} ~ {{r.refname}}{% endif %}</td>
-            <td class="center">{% if r.sex %}{{ r.sex_str() }}{% endif %}</td>
+{#          <td class="center">{% if r.sex %}{{ r.sex_str() }}{% endif %}</td>
+#}
             <td>{% if r.source %}{{r.source}}{% endif %}</td>
             <td class="center">{% if r.usecount %}
             <a href="/scene/persons/ref={{r.name}}">{{r.usecount}}</a>{% endif %}</td>

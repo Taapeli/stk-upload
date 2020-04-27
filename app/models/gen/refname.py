@@ -96,8 +96,8 @@ class Refname:
 
     def __str__(self):
         s = "(:REFNAME id:{}, name:'{}'".format(self.uniq_id, self.name)
-        if 'sex' in dir(self):
-            s += ", sex:'{}'".format(self.sex)
+        if 'sex' in dir(self) and self.sex:
+            s += ", sex:{}".format(self.sex)
         if 'refname' in dir(self):
             s += ") -[{}]-> (Refname ".format(self.reftype)
             if 'vid' in dir(self):
@@ -362,19 +362,22 @@ class Refname:
                 rn = Refname.from_node(node)
                 reftypes = []
                 refnames = []
-                for r in result['r_ref']:
+                for typ, role, r_node in result['r_ref']:
                     # Referenced name exists
-                    # r[0] is in ('BASENAME', 'PARENTNAME')
-                    if r[1]:
-                        reftypes.append(r[1])
-                    if r[2]:
-                        refnames.append(r[2]["name"])
+                    if typ:
+                        # in ('REFNAME', 'BASENAME', 'PARENTNAME'):
+                        #print(f'# {rn} -> {role} {r_node["name"]} -> {result["l_uses"]}')
+                        if role:
+                            reftypes.append(role)
+                        if r_node:
+                            refnames.append(r_node["name"])
                 rn.usecount = result["uses"]
                 if rn.usecount > 0:
                     # References from a Person exists
                     for l in result['l_uses']:
                         if not l in reftypes:
                             reftypes.append(l)
+                    reftypes.reverse()
                 rn.refname = ", ".join(refnames)
                 rn.reftype = ", ".join(reftypes)
                 ret.append(rn)
