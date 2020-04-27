@@ -137,13 +137,13 @@ RETURN p as person,
 ORDER BY person.sortname"""
 
 
-
+#Todo Fix this? Or an example only?
     read_persons_list_by_refn = """
-MATCH p = (search:Refname) -[:BASENAME*1..3 {use:'surname'}]-> (person:Person)
+MATCH p = (search:Refname) -[:BASENAME*0..3 {use:'surname'}]-> (person:Person)
 WHERE search.name STARTS WITH 'Kottu'
 WITH search, person
 MATCH (person) -[:NAME]-> (name:Name)
-OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
+OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
 WITH name, person, COLLECT(DISTINCT refn.name) AS refnames, 
     TOUPPER(LEFT(name.surname,1)) as initial
 OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
@@ -157,11 +157,12 @@ RETURN CASE WHEN name.order = 0 THEN id(person) END as id,
 ORDER BY TOUPPER(name.surname), name.firstname limit 20"""
 
 # Ver 0.1 different person lists
+#Todo Fix this: (person) <-[:REFNAME]-
     _get_events_tail = """
  OPTIONAL MATCH (batch:Batch) -[:OWNS]-> (person)
  OPTIONAL MATCH (person) -[r:EVENT]-> (event:Event)
  OPTIONAL MATCH (event) -[:PLACE]-> (place:Place)
- OPTIONAL MATCH (person) <-[:BASENAME*1..3]- (refn:Refname)
+ OPTIONAL MATCH (person) <-[:BASENAME*0..3]- (refn:Refname)
 RETURN batch.user AS user, person, 
     COLLECT(DISTINCT name) AS names,
     COLLECT(DISTINCT refn.name) AS refnames,
@@ -213,15 +214,17 @@ WITH person, name""" + _get_events_tail + _get_events_surname
 
     # With attr={'use':rule, 'name':name}, user=user
     get_my_events_by_refname_use = """
-MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
-    <-[:OWNS]- (:Batch {user:$user})
-WHERE search.name STARTS WITH $attr.name
-WITH search, person
-MATCH (person) -[:NAME]-> (name:Name {order:0})
+MATCH path = ( (search:Refname) -[:BASENAME*0..3]- (:Refname))
+    WHERE search.name STARTS WITH $attr.name
+WITH nodes(path) AS x UNWIND x AS rn
+    MATCH (rn) -[:REFNAME {use:$attr.use}]-> (person:Person) 
+          <-[:OWNS]- (:Batch {user:$user})
+    MATCH (person) -[:NAME]-> (name:Name {order:0})
 WITH person, name""" + _get_events_tail + _get_events_surname
 
+#Todo Fix this: (person) <-[:REFNAME]-
     get_both_events_by_refname_use = """
-MATCH p = (search:Refname) -[:BASENAME*1..3 {use:$attr.use}]-> (person:Person)
+MATCH p = (search:Refname) -[:BASENAME*0..3 {use:$attr.use}]-> (person:Person)
     <-[re:OWNS|PASSED]- (b:Batch)
 WHERE search.name STARTS WITH $attr.name
 WITH search, person, re WHERE type(re) = "PASSED" or b.user = $user
@@ -621,7 +624,7 @@ RETURN ID(a) AS aid, a.name AS aname"""
     link_person_to = """
 MATCH (p:Person) WHERE ID(p) = $pid
 MERGE (a:Refname {name:$name})
-MERGE (a) -[:BASENAME {use:$use}]-> (p)
+MERGE (a) -[:REFNAME {use:$use}]-> (p)
 RETURN ID(a) as rid"""
 
     # Get all Refnames. Returns a list of Refname objects, with referenced names,

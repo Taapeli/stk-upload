@@ -575,7 +575,7 @@ def xml_to_neo4j(pathname, userid='Taapeli'):
             handler.set_family_sortname_dates()
 
             handler.remove_handles()
-            handler.add_links()
+            handler.add_missing_links()
 
 # Huom. Paikkahierarkia on tehty metodissa Place_gramps.save niin että
 #       aluksi luodaan tarvittaessa viitattu ylempi paikka vajailla tiedoilla.

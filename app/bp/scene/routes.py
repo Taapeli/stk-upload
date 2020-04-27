@@ -63,6 +63,7 @@ def show_person_list(selection=None):
     args={}
     args['user'] = u_context.user
     args['context_code'] = u_context.context
+    persons = []
     if request.method == 'POST':
         try:
             # Selection from search form
