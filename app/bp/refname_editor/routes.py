@@ -23,13 +23,13 @@ app = shareds.app
  
 
 @app.route("/refname_editor/")
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def index1():
     fname = "refname_editor.html"
     return render_template(fname)
 
 @app.route('/refnameapi/v1/search', methods=['POST'])
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def refnameapi_search_v1():
     lookfor = request.form.get("lookfor")
     lookfor = urllib.parse.unquote(lookfor)
@@ -48,7 +48,7 @@ def refnameapi_search_v1():
     return response 
 
 @app.route('/refnameapi/v1/prefixes', methods=['POST'])
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def refnameapi_prefixes_v1():
     lookfor = request.form.get("lookfor")
     lookfor = urllib.parse.unquote(lookfor)
@@ -64,7 +64,7 @@ def refnameapi_prefixes_v1():
     return response 
 
 @app.route('/refnameapi/v1/fetch_namefamily', methods=['POST'])
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def refnameapi_fetch_v1():
     "Fetch a name family"
     lookfor = request.form.get("lookfor")
@@ -81,7 +81,7 @@ def refnameapi_fetch_v1():
     return response 
         
 @app.route('/refnameapi/v1/add_to_family', methods=['POST'])
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def refnameapi_add_to_family_v1():
     "add_to_family"
     basename = request.form.get("basename")
@@ -95,7 +95,7 @@ def refnameapi_add_to_family_v1():
     return response 
 
 @app.route('/refnameapi/v1/remove_from_family', methods=['POST'])
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def refnameapi_remove_from_family():
     "add_to_family"
     basename = request.form.get("basename")
@@ -109,7 +109,7 @@ def refnameapi_remove_from_family():
     return response 
 
 @app.route('/refnameapi/v1/addname', methods=['POST'])
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def refnameapi_addname():
     "add_a new name"
     name = request.form.get("name")
@@ -121,7 +121,7 @@ def refnameapi_addname():
     return response 
 
 @app.route('/refnameapi/v1/delnames', methods=['POST'])
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def refnameapi_delnames():
     "delete a name"
     names = request.form.get("names")
@@ -132,7 +132,7 @@ def refnameapi_delnames():
     return response 
 
 @app.route('/refnameapi/v1/save_name', methods=['POST'])
-@roles_accepted('admin', 'audit')
+@roles_accepted('audit')
 def refnameapi_save_name():
     "save new values for name and source"
     original_name = urllib.parse.unquote(request.form.get("original_name"))
