@@ -51,7 +51,7 @@ cypher_remove_from_namefamily = """
 """
 
 cypher_add_name = """
-    MERGE (r:Refname{name:$name}) SET r.source = $source
+    MERGE (r:Refname{name:$name}) ON CREATE SET r.source = $source
 """
 
 cypher_del_name = """
