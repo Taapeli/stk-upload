@@ -21,11 +21,12 @@ if not app:
 
 @app.before_request
 def before_request():
-    if current_user.is_authenticated:
-        logger.filters[0].user = current_user.username
-    else:
-        logger.filters[0].user = '<anon>'
-    #print (f'current_user for {logger.name}: {logger.filters[0].user}')
+    if logger.filters:
+        if current_user.is_authenticated:
+            logger.filters[0].user = current_user.username
+        else:
+            logger.filters[0].user = '<anon>'
+        #print (f'current_user for {logger.name}: {logger.filters[0].user}')
 
 
 @app.route('/')
