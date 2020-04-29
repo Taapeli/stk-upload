@@ -4,29 +4,34 @@ import logging
 class ContextFilter(logging.Filter):
     """
     This is a filter which injects contextual information into the log.
-
-    Rather than use actual contextual information, we just use random
-    data in this demo.
     """
 
-    USERS = ['mari', 'li', 'katri']
-
     def __init__(self):
-        from random import choice
-        self.user = choice(ContextFilter.USERS)
+        self.user = "<Nobody>" # choice(ContextFilter.USERS)
 
     def filter(self, record):
-        record.user = self.user #choice(ContextFilter.USERS)
+        if hasattr(self,'user'):
+            record.user = self.user
+        else:
+            record.user = '-'
+            print("# setups.ContextFilter.filter: 'user' not defined")
         return True
 
-print("Start loggers here")
+"""
+    Logger configuration
+"""
+print("Config Stk logger here")
 logging.basicConfig(level=logging.INFO, format=('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger = logging.getLogger('')
+logger.addFilter(ContextFilter())
 logger = logging.getLogger('stkserver')
+
+#logger = logging.getLogger('stkserver') 
+formatter = logging.Formatter('%(asctime)s %(name)s %(user)-7s %(levelname)-5s %(message)s')
 fh = logging.FileHandler('/tmp/stkserver.log')
 fh.setLevel(logging.DEBUG)
-logger.addFilter(ContextFilter())
-formatter = logging.Formatter('%(asctime)s %(name)s %(user)-7s %(levelname)-5s %(message)s')
 fh.setFormatter(formatter)
+logger.addFilter(ContextFilter())
 logger.addHandler(fh)
 
 # logger.basicConfig(level=logging.DEBUG,
