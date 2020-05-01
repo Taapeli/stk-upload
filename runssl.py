@@ -2,6 +2,7 @@
 
 from app import app 
 import logging
+from os import path
 
 class ContextFilter(logging.Filter):
     """
@@ -34,9 +35,11 @@ logger = logging.getLogger('')
 logger.addFilter(ContextFilter())
 logger = logging.getLogger('stkserver')
 
-#logger = logging.getLogger('stkserver') 
 formatter = logging.Formatter('%(asctime)s %(name)s %(user)-7s %(levelname)-5s %(message)s')
-fh = logging.FileHandler('/tmp/stkserver.log')
+if path.isdir('/var/log/httpd'):
+    fh = logging.FileHandler('/var/log/httpd/stkserver.log')
+else:
+    fh = logging.FileHandler('/tmp/stkserver.log')
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addFilter(ContextFilter())
