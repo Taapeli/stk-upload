@@ -70,7 +70,7 @@ u { color: DarkKhaki; text-decoration: none; }
                 {% if person.priv %}<tr>
                     <td class="ColumnValue" title="{{ _('Private data') }}">{{ macro.lock(person.priv) }}</td>
                 </tr>{% endif %}
-                <tr><td class="ColumnAttribute">{{ _('Estimated years') }}</td>
+                <tr><td class="ColumnAttribute">{{ _('Years') }}</td>
                     <td class="ColumnValue">{{ macro.lifetimes(person) }}
            {% if person.death_high >= last_year_allowed %}
                         <span style="color:red">{{ _('confidential') }}!</span>

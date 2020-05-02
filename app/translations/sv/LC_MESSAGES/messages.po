@@ -2823,8 +2823,8 @@ msgid "Private data"
 msgstr "Privat data"
 
 #: bp/scene/templates/scene/person.html:68
-msgid "Estimated years"
-msgstr "Värderdade år"
+msgid "Years"
+msgstr "År"
 
 #: bp/scene/templates/scene/person.html:71
 msgid "confidential"

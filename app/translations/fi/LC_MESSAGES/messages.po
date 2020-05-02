@@ -2829,8 +2829,8 @@ msgid "Private data"
 msgstr "Yksityinen tieto"
 
 #: bp/scene/templates/scene/person.html:68
-msgid "Estimated years"
-msgstr "Arvioidut vuodet"
+msgid "Years"
+msgstr "Vuodet"
 
 #: bp/scene/templates/scene/person.html:71
 msgid "confidential"
