@@ -135,15 +135,16 @@ class Person_combo(Person):
                 only your own data.
         '''
         try:
-            if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
-                record = session.run(Cypher_person.get_by_user,
-                                     uuid=uuid, user=user).single()
-            else:       # Select person from public database
-                #TODO: Rule for public database is missing, taking all!
-                record = session.run(Cypher_person.get_public,
-                                     uuid=uuid).single()
+#             if False:   # TODO Use user permissions user != 'guest':    # Select person owned by user
+#                 record = session.run(Cypher_person.get_by_user,
+#                                      uuid=uuid, user=user).single()
+#             else:       # Select person from public database
+#                 #TODO: Rule for public database is missing, taking any
+            record = session.run(Cypher_person.get_person,
+                                 uuid=uuid).single()
             if record is None:
                 raise LookupError(f"Person {uuid} not found.")
+
             root_type = record['root_type']
             if use_common or user == 'guest':
                 # Select person from public database
@@ -153,6 +154,7 @@ class Person_combo(Person):
                 # Select the person only if owned by user
                 if root_type == "PASSED":
                     pass    # Allow reading on passed persons, too (?)
+
             node = record['p']
             p = Person_combo.from_node(node)
             # p = <Node id=259641 labels={'Audit'} 

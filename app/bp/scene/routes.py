@@ -7,7 +7,6 @@ import logging
 import io
 #import os
 from flask import send_file, Response
-from bp.scene.models import media
 import shareds
 import os
 logger = logging.getLogger('stkserver')
@@ -19,10 +18,12 @@ from flask_security import current_user, login_required, roles_accepted
 #from flask_babelex import _
 
 from ui.user_context import UserContext
+from bl.place import PlaceReader
 #from bl.place import PlaceBl
 
 from . import bp
 from bp.scene.scene_reader import get_person_full_data
+from bp.scene.models import media
 #from bp.scene.scene_reader import get_a_person_for_display_apoc
 #from models.gen.person_combo import Person_combo
 from models.gen.family_combo import Family_combo
@@ -246,7 +247,7 @@ def     show_person(uid=None):
     uid = request.args.get('uuid', uid)
     dbg = request.args.get('debug', None)
     u_context = UserContext(user_session, current_user, request)
-    logger.info("-> bp.scene.routes.show_person")
+    logger.info(f"-> bp.scene.routes.show_person u={u_context.owner_or_common()}")
 
     # v3 Person page
     person, objs, jscode = get_person_full_data(uid, u_context.user, u_context.use_common())
@@ -377,30 +378,33 @@ def show_places():
     u_context.count = request.args.get('c', 100, type=int)
 
     dbdriver = Neo4jReadDriver(shareds.driver)
-    db = DBreader(dbdriver, u_context) 
+    rd = PlaceReader(dbdriver, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
-    results = db.get_place_list()
+    results = rd.get_list()
+    #results = db.get_place_list()
 
 #     for p in result.items:
 #         print ("# {} ".format(p))
-    logger.info(f"-> bp.scene.routes.show_places: forward from '{u_context.scope[0]}'")
+    logger.info("-> bp.scene.routes.show_places "\
+               f"u={u_context.owner_or_common()} fw='{u_context.next_name_fw()}'")
     return render_template("/scene/places.html", places=results.items, menuno=4,
                            user_context=u_context, elapsed=time.time()-t0)
 
 
 @bp.route('/scene/location/uuid=<locid>')
-def show_place_page(locid):
+def show_place(locid):
     """ Home page for a Place, shows events and place hierarchy.
     """
     try:
         u_context = UserContext(user_session, current_user, request)
         dbdriver = Neo4jReadDriver(shareds.driver)
-        db = DBreader(dbdriver, u_context) 
+        rd = PlaceReader(dbdriver, u_context) 
     
-        results = db.get_place_with_events(locid)
+        results = rd.get_with_events(locid)
+        #results = db.get_place_with_events(locid)
         #place, place_list, events = get_place_with_events(locid)
 
     except KeyError as e:
@@ -410,7 +414,7 @@ def show_place_page(locid):
 #     for p in hierarchy:         print (f"# {p} ")
 #     for e in events:            print (f"# {e} {e.description}")
 #     for u in place.notes:       print (f"# {u} ")
-    logger.info("-> bp.scene.routes.show_place_page")
+    logger.info(f"-> bp.scene.routes.show_place u={u_context.owner_or_common()} n={len(results.events)}")
     return render_template("/scene/place_events.html", place=results.items, 
                            pl_hierarchy=results.hierarchy,
                            user_context=u_context, events=results.events)
