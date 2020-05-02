@@ -2623,7 +2623,7 @@ msgstr ""
 #: bp/scene/templates/scene/macros.html:81
 #: bp/scene/templates/scene/macros.html:96
 msgid "Change"
-msgstr ""
+msgstr "byta"
 
 #: bp/scene/templates/scene/macros.html:89
 msgid "Views the approved common data only."
@@ -2756,6 +2756,10 @@ msgstr ""
 msgid "Photo"
 msgstr "Foto"
 
+#: bp/scene/templates/scene/person.html:277
+msgid "Go to photo page"
+msgstr "Till fotosidan"
+
 #: bp/scene/templates/scene/medias.html:138
 #, python-format
 msgid "No media found with search keys starting \"%(name)s\""
@@ -2819,8 +2823,8 @@ msgid "Private data"
 msgstr "Privat data"
 
 #: bp/scene/templates/scene/person.html:68
-msgid "Estimated years"
-msgstr "Värderdade år"
+msgid "Years"
+msgstr "År"
 
 #: bp/scene/templates/scene/person.html:71
 msgid "confidential"
@@ -3333,8 +3337,8 @@ msgid "My Gedcom files"
 msgstr "Mina GEDCOM filer"
 
 #: bp/start/templates/start/index_logged.html:42
-msgid "Your Candidate Materials"
-msgstr "Ditt Kandidat Material"
+msgid "My candicate materials and files"
+msgstr "Dina Gramps fil och kandidat material"
 
 #: bp/start/templates/start/index_logged.html:44
 msgid ""
@@ -3362,7 +3366,7 @@ msgstr ""
 
 #: bp/start/templates/start/index_logged.html:64
 msgid "The approved Isotammi data"
-msgstr ""
+msgstr "Godkänt gemensam material"
 
 #: bp/start/templates/start/index_logged.html:91
 msgid "Admin Operations"
@@ -5215,22 +5219,22 @@ msgid "Unable to load file, code ="
 msgstr "Kan ej ladda filen, kod ="
 
 #: ui/user_context.py:93
-msgid "approved common data"
-msgstr ""
+msgid "Approved common data"
+msgstr "Godkänt gemensam material"
 
 #: ui/user_context.py:94
-msgid "all my candidate data"
-msgstr "allt mitt kandiderande material"
+msgid "My candidate data"
+msgstr "Mitt kandiderande material"
 
 #: ui/user_context.py:95
-msgid "my selected candidate batch"
+msgid "My selected candidate batch"
 msgstr ""
 
 #: ui/user_context.py:96
-msgid "my own and approved common data"
+msgid "My own and approved common data"
 msgstr ""
 
 #: ui/user_context.py:97
-msgid "my selected batch and approved common data"
+msgid "My selected batch and approved common data"
 msgstr ""
 

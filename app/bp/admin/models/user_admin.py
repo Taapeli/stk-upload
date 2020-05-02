@@ -14,6 +14,7 @@ from neo4j.exceptions import ServiceUnavailable, CypherError, ClientError, Const
 
 from .cypher_adm import Cypher_adm
 
+logger = logging.getLogger('stkserver')
 
 class Allowed_email():
     """ Object for storing an allowed user to register in """
@@ -490,6 +491,7 @@ class UserAdmin():
                 access = dict(user=user, batch=batch, rel_id=rel_id, cnt=cnt_own)
                 print("access:", access)
                 rsp.append(access)
+            logger.info(f"-> bp.admin.models.user_admin.UserAdmin.get_accesses n={len(rsp)}")
             return rsp
 
         except ServiceUnavailable as ex:
@@ -500,6 +502,7 @@ class UserAdmin():
     @staticmethod
     def add_access(username, batchid):
         try:
+            logger.info(f"-> bp.admin.models.user_admin.UserAdmin.add_access u={username} b={batchid}")
             rsp = shareds.driver.session().run(Cypher_adm.add_access,username=username,batchid=batchid).single()
             return rsp
         except ServiceUnavailable as ex:
@@ -509,6 +512,7 @@ class UserAdmin():
     @staticmethod
     def delete_accesses(idlist):
         try:
+            logger.info(f"-> bp.admin.models.user_admin.UserAdmin.delete_accesses i={idlist}")
             rsp = shareds.driver.session().run(Cypher_adm.delete_accesses,idlist=idlist).single()
             return rsp
         except ServiceUnavailable as ex:

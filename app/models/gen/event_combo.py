@@ -54,7 +54,7 @@ class Event_combo(Event):
         self.note_ref = []      # uniq_ids (previously note[])
         
         self.citations = []     # For creating display sets
-        self.personnames = []   # Person names connected; for creating display
+        self.person = None        # Persons names connected; for creating display
         #self.notes = []         # For creating display sets
         #self.places = []        # Places of the event (for person list)
 

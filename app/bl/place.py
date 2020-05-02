@@ -133,7 +133,7 @@ class PlaceBl(Place):
     """ Place / Paikka:
 
         Properties, might be defined in here:
-                names[]             PlaceName
+                names[]             PlaceName default name first
                 coord               str paikan koordinaatit (leveys- ja pituuspiiri)
                 surrounding[]       int uniq_ids of upper
                 note_ref[]          int uniq_ids of Notes
@@ -162,6 +162,7 @@ class PlaceBl(Place):
         self.notes = []         # Notes connected to this place
         self.note_ref = []      # uniq_ids of Notes
         self.media_ref = []     # uniq_id of models.gen.media.Media
+        self.ref_cnt = None     # for display: count of referencing objects
 
 
 #     def get_list(u_context):    # @staticmethod --> pe.db_reader.DBreader.place_list
@@ -169,7 +170,7 @@ class PlaceBl(Place):
 
 
     @staticmethod
-    def combine_places(pn_tuples):
+    def combine_places(pn_tuples, lang):
         """ Creates a list of Places with names combined from given names.
         
             The pl_tuple has Places data as a tuple [[28101, "City", "Lovisa", "sv"]].
@@ -181,29 +182,25 @@ class PlaceBl(Place):
                   ja aakkosjärjestykseen
         """
         placedict = {}
-        for nid, nuuid, ntype, name, lang in pn_tuples:
+        for nid, nuuid, ntype, name, nlang in pn_tuples:
             if nid: # id of a lower place
-                pn = PlaceName(name=name, lang=lang)
+                pn = PlaceName(name=name, lang=nlang)
                 if nid in placedict:
                     # Append name to existing PlaceBl
                     placedict[nid].names.append(pn)
                     placedict[nid].names.sort()
-#                     if pn.lang in ['fi', '']:
-#                         # Default language name
-#                         #TODO use language from current_user's preferences
-#                         placedict[nid].pname = pn.name
                 else:
                     # Add a new PlaceBl
                     p = PlaceBl(nid)
                     p.uuid = nuuid
                     p.type = ntype
                     p.names.append(pn)
-                    p.pname = pn.name
                     placedict[nid] = p
-                    # ntype, PlaceBl.namelist_w_lang( (name,) ))
-        li = list(placedict.values())
-        ret = sorted(li, key=lambda x: x.names[0].name if x.names else "")
-        return ret
+        place_list = list(placedict.values())
+        for p in place_list:
+            p.names = PlaceName.arrange_names(p.names, lang)
+            p.pname = p.names[0]
+        return place_list
 
 #     def set_place_names_from_nodes(self, nodes): --> ui.place.place_names_from_nodes
 #         ''' Filter user language Name objects from a list of Cypher nodes to self.names.
@@ -251,6 +248,57 @@ class PlaceName():
         pn.lang = node.get('lang', '')
         pn.dates = node.get('dates')
         return pn
+
+    @staticmethod
+    def arrange_names(namelist:list, lang:str=None):
+        ''' Arrange Place_name objects by name usefullness.
+        
+            If lang attribute is present, the default language name is processed
+            outside this method.
+            
+            Order:
+            - First local names fi, sv
+            - Then names without lang
+            - Last other language names
+        '''
+        n_default = []
+        n_local = []
+        n_unknown = []
+        n_other = []
+        if lang == 'fi':   other_lang = 'sv'
+        elif lang == 'sv': other_lang = 'fi'
+        else:              other_lang = None
+        for nm in namelist:
+            if lang != None and nm.lang == lang:
+                n_local.append(nm)
+            elif nm.lang in ['fi', 'sv'] and nm.lang != other_lang:
+                n_local.append(nm)
+            elif nm.lang == '':
+                n_unknown.append(nm)
+            else:
+                n_other.append(nm)
+        return n_default + n_local + n_unknown + n_other
+
+#     @staticmethod
+#     def arrange_other_names(namelist:list):
+#         ''' Arrange Place_name objects by name usefullness.
+#         
+#             The default language name is processed outside this method
+#             - First local names fi, sv
+#             - Then names without lang
+#             - Last other language names
+#         '''
+#         n_local = []
+#         n_unknown = []
+#         n_other = []
+#         for nm in namelist:
+#             if nm.lang in ['fi', 'sv']:
+#                 n_local.append(nm)
+#             elif nm.lang == '':
+#                 n_unknown.append(nm)
+#             else:
+#                 n_other.append(nm)
+#         return n_local + n_unknown + n_other
 
     def _lang_key(self, obj):
         ''' Name comparison key by 1) language, 2) name '''

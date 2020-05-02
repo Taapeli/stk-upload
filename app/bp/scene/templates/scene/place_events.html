@@ -34,8 +34,8 @@
         {% endif %}</div>
       {% endif %}
 
-    <h3 class="sticky" title="{{ _('Top') }}"><a href="#">{{ _(place.type)|title }}
-        {{ macro.place_names(place) }}</a></h3>
+    <h3 class="sticky" title="{{ _('Top') }}"><a href="#">
+        {{ place.name.name }} ({{ place.type|transl('lt') }})</a></h3>
         <div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -152,13 +152,12 @@
         {% for e in events|sort %}
                     <tr>
                         <td class="ColumnPerson">
-	                        {{ macro.person_names_anon(e.person, e.names) }}
+	                        {{ macro.person_names_anon(e.person, e.person.names) }}
                         </td>
-                        {% if 1 or not e.person.too_new %}
-	                        <td class="ColumnEvent">{{e.type|transl('evt')}}
-	                          {% if e.role != "Primary" %}<span class="typedesc">({{e.role|transl('role')}})</span>{% endif %}</td>
-	                        <td class="ColumnDate">{{e.dates}}</td>
-                        {% endif %}
+                        {# e.person.too_new checked in pe.neo4j.reader #}
+                        <td class="ColumnEvent">{{e.type|transl('evt')}}
+                          {% if e.role != "Primary" %}<span class="langcode">({{e.role|transl('role')}})</span>{% endif %}</td>
+                        <td class="ColumnDate">{{e.dates}}</td>
                         <td class="ColumnDescription">{{e.description}}</td>
 <!--
                         <td class="ColumnNotes">

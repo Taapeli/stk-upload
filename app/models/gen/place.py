@@ -169,63 +169,10 @@ class Place(NodeObject):
 #             Palauttaa listan paikka-olioita ylimmästä alimpaan.
 
 
-    @staticmethod
-    def get_place_events(loc_id):
-        """ Haetaan paikkaan liittyvät tapahtumat sekä
-            osallisen henkilön nimitiedot.
+#     def get_place_events(loc_id): @staticmethod --> pe.neo4j.reader.Neo4jDriver.dr_get_place_events
+#         """ Haetaan paikkaan liittyvät tapahtumat sekä
+#             osallisen henkilön nimitiedot.
 
-        Palauttaa esimerkin mukaiset tiedot:
-        ╒══════╤═════════╤═══════════════════╤═════════════╤═══════════════════╕
-        │"uid" │"role"   │"names"            │"etype"      │"edates"           │
-        ╞══════╪═════════╪═══════════════════╪═════════════╪═══════════════════╡
-        │305353│"Primary"│[{"firstname":"Eva │"Residence"  │[3,1863872,1866944]│
-        │      │         │Sophia","type":"Bir│             │                   │
-        │      │         │th Name","suffix":"│             │                   │
-        │      │         │","surname":"Forsté│             │                   │
-        │      │         │n","order":0, "pref│             │                   │
-        |      |         |ix":""}]           │             │                   │
-        ├──────┼─────────┼───────────────────┼─────────────┼───────────────────┤
-        │305450│"Primary"│[{"firstname":"Erik│"Occupation" │[3,1863872,1866944]│
-        │      │         │ Berndt","type":"Bi│             │                   │
-        │      │         │rth Name","suffix":│             │                   │
-        │      │         │"","surname":"Konow│             │                   │
-        │      │         │","order":0, "prefi│             │                   │
-        |      |         |x":"von"}]         │             │                   │
-        └──────┴─────────┴───────────────────┴─────────────┴───────────────────┘
-        """
-        # Import here to handle circular dependency 
-        from .person_combo import Person_combo
-
-        result = shareds.driver.session().run(Cypher_place.get_person_events, 
-                                              locid=int(loc_id))
-        ret = []
-        for record in result:
-            # <Record 
-            #    person=<Node id=301000 labels={'Person'}
-            #        properties={'sortname': 'Järnefelt#Gustav Johan#', 'datetype': 19, 
-            #            'confidence': '', 'sex': 1, 'change': 1507492602, 'id': 'I0209', 
-            #            'date2': 1803341, 'date1': 1722646, 'uuid': 'e7a927ab20a642df8f5397d5cd4af3ff'}> 
-            #    role='Primary'
-            #    names=[
-            #        <Node id=301001 labels={'Name'}
-            #            properties={'firstname': 'Gustav Johan', 'type': 'Birth Name', 
-            #                'suffix': '', 'prefix': '', 'surname': 'Järnefelt', 'order': 0}>] 
-            #    event=<Node id=308363 labels={'Event'}
-            #        properties={'datetype': 0, 'change': 1501665587, 'description': '', 
-            #            'id': 'E0516', 'date2': 1803341, 'type': 'Death', 'date1': 1803341, 
-            #            'uuid': 'a9e15f03f4df4847849c6b53b1fdbbde'}>
-            # >
-
-            node = record["event"]
-            e = Event_combo.from_node(node)
-            node = record["person"]
-            e.person = Person_combo.from_node(node)
-            e.role = record["role"]
-            e.names = []
-            for node in record["names"]:
-                e.names.append(Name.from_node(node))
-            ret.append(e)
-        return ret
 
     @staticmethod
     def get_total():

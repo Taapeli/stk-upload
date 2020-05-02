@@ -9,6 +9,7 @@ import io
 from flask import send_file, Response
 from bp.scene.models import media
 import shareds
+import os
 logger = logging.getLogger('stkserver')
 import time
 from datetime import datetime
@@ -32,10 +33,10 @@ from models.gen.media import Media
 from models.datareader import read_persons_with_events
 #from models.datareader import get_person_data_by_id # -- vanhempi versio ---
 from models.datareader import get_event_participants
-from models.datareader import get_place_with_events
-from models.datareader import get_source_with_events
+#from models.datareader import get_place_with_events
+#from models.datareader import get_source_with_events
 
-from pe.neo4j.reader import Neo4jDriver
+from pe.neo4j.reader import Neo4jReadDriver
 from pe.db_reader import DBreader
 
 # Narrative start page
@@ -62,6 +63,7 @@ def show_person_list(selection=None):
     args={}
     args['user'] = u_context.user
     args['context_code'] = u_context.context
+    persons = []
     if request.method == 'POST':
         try:
             # Selection from search form
@@ -113,7 +115,7 @@ def show_person_list(selection=None):
 @bp.route('/scene/persons/ref=<string:refname>/<opt>')
 @login_required
 def show_persons_by_refname(refname, opt=""):
-    """ List persons by refname for menu(0).
+    """ List persons by refname for menu(0). Called from /list/refnames
     """
     logger.warning("#TODO: fix material selevtion or remove action show_persons_by_refname")
 
@@ -193,10 +195,10 @@ def show_persons_all():
                f"{u_context.owner_str()} forward from '{u_context.scope[0]}'")
     t0 = time.time()
 
-    dbdriver = Neo4jDriver(shareds.driver)
+    dbdriver = Neo4jReadDriver(shareds.driver)
     db = DBreader(dbdriver, u_context) 
     
-    results = db.person_list()
+    results = db.get_person_list()
 #         limit=count, start=None, include=["events"])
     print(f'Got {len(results.items)} persons with {results.num_hidden} hidden and {results.error} errors')
     return render_template("/scene/persons_list.html", persons=results.items,
@@ -242,28 +244,21 @@ def     show_person(uid=None):
     """
     t0 = time.time()
     uid = request.args.get('uuid', uid)
-#     if not uid:
-#         return redirect(url_for('virhesivu', code=1, text="Missing Person key"))
-
     dbg = request.args.get('debug', None)
-    if current_user.is_authenticated:
-        user=current_user.username
-        ofilter = user_session.get('user_context',0)
-        use_common = (ofilter == 1)
-    else:
-        user=None
+    u_context = UserContext(user_session, current_user, request)
     logger.info("-> bp.scene.routes.show_person")
 
     # v3 Person page
-    person, objs, jscode = get_person_full_data(uid, user, use_common)
+    person, objs, jscode = get_person_full_data(uid, u_context.user, u_context.use_common())
     if not person:
         return redirect(url_for('virhesivu', code=2, text="Ei oikeutta katsoa tätä henkilöä"))
 
-    for ref in person.media_ref: print(f'media ref {ref}')
+    #for ref in person.media_ref: print(f'media ref {ref}')
     last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
     return render_template("/scene/person.html", person=person, obj=objs, 
                            jscode=jscode, menuno=12, debug=dbg, root=person.root,
-                           last_year_allowed=last_year_allowed, elapsed=time.time()-t0)
+                           last_year_allowed=last_year_allowed, elapsed=time.time()-t0,
+                           user_context=u_context)
 
 
 @bp.route('/scene/person/uuid=<pid>')
@@ -334,39 +329,29 @@ def show_families():
     return render_template("/scene/families.html", families=families, 
                            user_context=my_context, elapsed=time.time()-t0)
 
-@bp.route('/scene/family=<int:fid>')
-def show_family_page(fid):
-    """ Home page for a Family.    OBSOLETE: use show_family
-
-        fid = id(Family)
-    """
-    try:
-        family = Family_combo.get_family_data(fid)
-    except KeyError as e:
-        return redirect(url_for('virhesivu', code=1, text=str(e)))
-
-    logger.info("-> bp.scene.routes.show_family_page")
-    return render_template("/scene/family.html", family=family, menuno=3)
-
+# @bp.route('/scene/family=<int:fid>')
+# def show_family_page(fid):
+#     """ Home page for a Family.    OBSOLETE: use show_family
+#         fid = id(Family)
+#     """
 
 @bp.route('/scene/family', methods=['GET'])
-def show_family(uid=None):
+def show_family_page(uid=None):
     """ One Family.
-    
     """
-    
     uid = request.args.get('uuid', uid)
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Family key"))
     
-    my_context = UserContext(user_session, current_user, request)
+    u_context = UserContext(user_session, current_user, request)
     try:
-        family = Family_combo.get_family_data(uid, my_context)
+        family = Family_combo.get_family_data(uid, u_context)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
-    logger.info("-> bp.scene.routes.show_family")
-    return render_template("/scene/family.html", family=family, menuno=3)
+    logger.info("-> bp.scene.routes.show_family_page")
+    return render_template("/scene/family.html", 
+                           family=family, menuno=3, user_context=u_context)
 
 # @bp.route('/pop/family=<int:fid>')
 # def show_family_popup(fid):
@@ -391,14 +376,13 @@ def show_places():
     u_context.set_scope_from_request(request, 'place_scope')
     u_context.count = request.args.get('c', 100, type=int)
 
-
-    dbdriver = Neo4jDriver(shareds.driver)
+    dbdriver = Neo4jReadDriver(shareds.driver)
     db = DBreader(dbdriver, u_context) 
 
     # The list has Place objects, which include also the lists of
     # nearest upper and lower Places as place[i].upper[] and place[i].lower[]
 
-    results = db.place_list()
+    results = db.get_place_list()
 
 #     for p in result.items:
 #         print ("# {} ".format(p))
@@ -408,29 +392,28 @@ def show_places():
 
 
 @bp.route('/scene/location/uuid=<locid>')
-#@bp.route('/scene/location=<int:locid>')
 def show_place_page(locid):
     """ Home page for a Place, shows events and place hierarchy.
     """
     try:
-        # List 'place_list' has Place objects with 'parent' field pointing to
-        # upper place in hierarcy. Events
-        my_context = UserContext(user_session, current_user, request)
-        my_context.set_scope_from_request(request, 'person_scope')
-        #if my_context.use_common():
-        #    events = [e for e in events if not e.person.too_new]
-        place, place_list, events = get_place_with_events(locid)
+        u_context = UserContext(user_session, current_user, request)
+        dbdriver = Neo4jReadDriver(shareds.driver)
+        db = DBreader(dbdriver, u_context) 
+    
+        results = db.get_place_with_events(locid)
+        #place, place_list, events = get_place_with_events(locid)
 
     except KeyError as e:
         import traceback
         traceback.print_exc()
         return redirect(url_for('virhesivu', code=1, text=str(e)))
-#     for p in place_list:        print (f"# {p} ")
+#     for p in hierarchy:         print (f"# {p} ")
 #     for e in events:            print (f"# {e} {e.description}")
 #     for u in place.notes:       print (f"# {u} ")
     logger.info("-> bp.scene.routes.show_place_page")
-    return render_template("/scene/place_events.html", place=place, 
-                           events=events, pl_hierarchy=place_list)
+    return render_template("/scene/place_events.html", place=results.items, 
+                           pl_hierarchy=results.hierarchy,
+                           user_context=u_context, events=results.events)
 
 # ------------------------------ Menu 5: Sources --------------------------------
 
@@ -467,29 +450,30 @@ def show_sources(series=None):
                            user_context=my_context)
 
 
-@bp.route('/scene/source=<int:sourceid>')
-def show_source_page(sourceid):
+@bp.route('/scene/source', methods=['GET'])
+#@bp.route('/scene/source=<string:sourceid>')
+def show_source_page(sourceid=None):
     """ Home page for a Source with referring Event and Person data
     """
-    my_context = UserContext(user_session, current_user, request)
+    uuid = request.args.get('uuid', sourceid)
+    if not uuid:
+        return redirect(url_for('virhesivu', code=1, text="Missing Source key"))
+    u_context = UserContext(user_session, current_user, request)
     try:
-        source, citations = get_source_with_events(sourceid)
+        dbdriver = Neo4jReadDriver(shareds.driver)
+        db = DBreader(dbdriver, u_context) 
+    
+        results = db.get_source_with_references(uuid, u_context)
+        #source, citations = get_source_with_events(sourceid)
     except KeyError as e:
         return redirect(url_for('virhesivu', code=1, text=str(e)))
     logger.info("-> bp.scene.routes.show_source_page")
-    if my_context.use_common():
-        for c in citations:
-            citators2 = []
-            for noderef in c.citators:
-                if noderef.person:
-                    if not noderef.person.too_new:
-                        citators2.append(noderef)
-                else:
-                    citators2.append(noderef)
-            c.citators = citators2
-                
-    return render_template("/scene/source_events.html",
-                           source=source, citations=citations)
+#     for c in results.citations:
+#         for i in c.citators:
+#             if i.id[0] == "F":  print(f'{c} – family {i} {i.clearname}')
+#             else:               print(f'{c} – person {i} {i.sortname}')
+    return render_template("/scene/source_events.html", source=results.items,
+                           citations=results.citations, user_context=u_context)
 
 # ------------------------------ Menu 6: Media --------------------------------
 
@@ -519,6 +503,7 @@ def show_media(uid=None):
         One Media
     """
     uid = request.args.get('uuid', uid)
+    my_context = UserContext(user_session, current_user, request)
     if not uid:
         return redirect(url_for('virhesivu', code=1, text="Missing Media key"))
     
@@ -530,13 +515,14 @@ def show_media(uid=None):
         return redirect(url_for('virhesivu', code=1, text=str(e)))
 
     logger.info("-> bp.scene.routes.show_media")
-    return render_template("/scene/media.html", media=mediaobj, size=size, menuno=6)
+    return render_template("/scene/media.html", media=mediaobj, size=size,
+                           user_context=my_context, menuno=6)
 
 # ----------- Access media file ---------------
 
 @bp.route('/scene/media/<fname>')
 def fetch_media(fname):
-    """ Fetch media file, full size of cropped. 
+    """ Fetch media file to display full screen.
     
         Example:
         http://127.0.0.1:5000/scene/media/kuva2?id=63995268bd2348aeb6c70b5259f6743f&crop=0,21,100,91&full=1
@@ -553,36 +539,43 @@ def fetch_media(fname):
     # show_thumb for cropped image only
     show_thumb = request.args.get("full", "0") == "0"
     fullname, mimetype = media.get_fullname(uuid)
-    if crop:
-        # crop dimensions are diescribed as % of width and height
-        image = media.get_cropped_image(fullname, crop, show_thumb)
-        logger.info("-> bp.scene.routes.fetch_media cropped png")
-        # Create a png image in memery and display it
-        buffer = io.BytesIO()
-        image.save(buffer, format="PNG")
-        return Response(buffer.getvalue(), mimetype='image/png')
-    else:
-        logger.info("-> bp.scene.routes.fetch_media")
-        return send_file(fullname, mimetype=mimetype)        
+    try:
+        if crop:
+            # crop dimensions are diescribed as % of width and height
+            image = media.get_cropped_image(fullname, crop, show_thumb)
+            logger.info("-> bp.scene.routes.fetch_media cropped png")
+            # Create a png image in memery and display it
+            buffer = io.BytesIO()
+            image.save(buffer, format="PNG")
+            return Response(buffer.getvalue(), mimetype='image/png')
+        else:
+            logger.info("-> bp.scene.routes.fetch_media")
+            return send_file(fullname, mimetype=mimetype)        
+    except FileNotFoundError:
+        # Show default image
+        ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
+        logger.warning(f"-> bp.scene.routes.fetch_thumbnail: missing {fullname}")
+        return ret
 
 @bp.route('/scene/thumbnail')
 def fetch_thumbnail():
-    """ Fetch thumbnail
+    """ Fetch thumbnail file to display
     """
     uuid = request.args.get("id")
     crop = request.args.get("crop")
-    if crop == "None":  
+    if crop == "None":
         crop = None
-    thumbname = media.get_thumbname(uuid, crop)
-    #print(thumbname)
+    logger.info(f"-> bp.scene.routes.fetch_thumbnail {uuid}")
     mimetype='image/jpg'
-    logger.info("-> bp.scene.routes.fetch_thumbnail")
+    thumbname = "(no file)"
     try:
+        thumbname = media.get_thumbname(uuid, crop)
+        #print(thumbname)
         ret = send_file(thumbname, mimetype=mimetype)
         return ret
     except FileNotFoundError:
         # Show default image
-        ret = send_file(url_for('static', filename='noone.jpg'), mimetype=mimetype)
+        ret = send_file(os.path.join('static', 'noone.jpg'), mimetype=mimetype)
         logger.warning(f"-> bp.scene.routes.fetch_thumbnail: missing {thumbname}")
         return ret
         

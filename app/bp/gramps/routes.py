@@ -101,8 +101,8 @@ def error_page(code, text=''):
 @login_required
 @roles_accepted('research', 'admin')
 def xml_analyze(xmlfile):
-    text = gramps_loader.analyze(current_user.username, xmlfile)
-    return render_template("/gramps/analyze_xml.html", text=text)
+    references = gramps_loader.analyze(current_user.username, xmlfile)
+    return render_template("/gramps/analyze_xml.html", references=references)
 
 @bp.route('/gramps/xml_delete/<xmlfile>')
 @login_required

@@ -198,15 +198,9 @@ class Person(NodeObject):
         obj.sortname = node['sortname']
         obj.priv = node['priv']
         obj.birth_low = node['birth_low']
-        if obj.birth_low:
-            obj.birth_high = node['birth_high']
-            obj.death_low = node['death_low']
-            obj.death_high = node['death_high']
-        else:
-            obj.birth_low = node['earliest_possible_birth_year']
-            obj.death_low = node['earliest_possible_death_year']
-            obj.birth_high = node['latest_possible_birth_year']
-            obj.death_high = node['latest_possible_death_year']
+        obj.birth_high = node['birth_high']
+        obj.death_low = node['death_low']
+        obj.death_high = node['death_high']
         last_year_allowed = datetime.now().year - shareds.PRIVACY_LIMIT
         obj.too_new = obj.death_high > last_year_allowed
         if "datetype" in node:

@@ -147,7 +147,7 @@ class DOM_handler():
         print (f'# --- removed handle from {total} nodes')
 
 
-    def add_links(self):
+    def add_missing_links(self):
         ''' Link the Nodes without OWNS link to Batch
         '''
         cypher_add_links = """

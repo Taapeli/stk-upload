@@ -15,26 +15,24 @@ div#description_box p {
 <div id="startdiv">
 	{% if rule[0] == 'all' %}<h2>{{ _('Persons ordered by') }} {{ ordname[order] }}</h2>
 	{% elif rule[0] == 'refname' %}<h2>{{ _('Persons carrying a Name') }} {{ rule[1] }}</h2>
-	{% else %}<H2>{{ _('Persons') }}</h2>
+	{% else %}<h2>{{ _('Persons') }}</h2>
 	{% endif %}
-	<!-- Rule = {{rule}} for {{cnt}} persons -->
+    <div>{{ macro.select_dataset() }}</div>
 </div>
 
 {{ macro.menu(menuno) }}
     <div class="content" id="Individuals">
         <div id="summaryarea">
             <div class="flex-container">
-                <div id="description_box">
 {% if cnt %}
+                <div>
                     <p>{{ ngettext('Displaying %(num)s person.', 
-                                    'Displaying %(num)s persons.', cnt ) }}
+                                   'Displaying %(num)s persons.', cnt ) }}
                        {{ _('If the person has many names, they may appear in the list under each name.') }}
                     </p>
                     <p>{{ _('Note that family events are not included.') }} </p>
                     </p>
-{% endif %}
                     <ul>
-                        <li>{{ macro.select_dataset_menu_1() }}</li>
     {% if rule[0] == 'all' %}
                         <li>{{ _('Sorted by %(order)s.', order=ordname[order]) }}
                             {{ _('Change Order:') }} 
@@ -56,6 +54,7 @@ div#description_box p {
     {% endif %}
                     </ul>
                 </div>
+{% endif %}
 
                 <div id="searching">
                    <fieldset>

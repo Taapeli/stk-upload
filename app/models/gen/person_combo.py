@@ -1003,7 +1003,6 @@ RETURN a, [x IN RELATIONSHIPS(path)] AS li
             Called from bp.gramps.xml_dom_handler.DOM_handler.set_estimated_dates
             and models.dataupdater.set_estimated_dates
         """
-        print("Calculating lifetime estimates")
         from models import lifetime
         from models.gen.dates import DR 
         try:

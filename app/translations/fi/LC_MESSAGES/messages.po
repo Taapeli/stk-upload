@@ -2621,7 +2621,7 @@ msgstr "Vaihda näytettävää aineistoa"
 #: bp/scene/templates/scene/macros.html:81
 #: bp/scene/templates/scene/macros.html:96
 msgid "Change"
-msgstr "Vaihda"
+msgstr "vaihda"
 
 #: bp/scene/templates/scene/macros.html:89
 msgid "Views the approved common data only."
@@ -2708,6 +2708,10 @@ msgstr "Katso paikan %(id)s tiedot"
 msgid "cropped"
 msgstr "rajattu"
 
+#: bp/scene/templates/scene/person.html:271
+msgid "crop"
+msgstr "rajaus"
+
 #: bp/scene/templates/scene/medias.html:3
 msgid "List of medias"
 msgstr "Mediatiedostot"
@@ -2757,6 +2761,10 @@ msgstr "Siirry mediasivulle"
 #: templates/jinja_filters.py:167
 msgid "Photo"
 msgstr "kuva"
+
+#: bp/scene/templates/scene/person.html:277
+msgid "Go to photo page"
+msgstr "kuvasivulle"
 
 #: bp/scene/templates/scene/medias.html:138
 #, python-format
@@ -2821,8 +2829,8 @@ msgid "Private data"
 msgstr "Yksityinen tieto"
 
 #: bp/scene/templates/scene/person.html:68
-msgid "Estimated years"
-msgstr "Arvioidut vuodet"
+msgid "Years"
+msgstr "Vuodet"
 
 #: bp/scene/templates/scene/person.html:71
 msgid "confidential"
@@ -3334,8 +3342,8 @@ msgid "My Gedcom files"
 msgstr "Gedcom-tiedostot"
 
 #: bp/start/templates/start/index_logged.html:42
-msgid "Your Candidate Materials"
-msgstr "Tarjokasaineistosi"
+msgid "My candicate materials and files"
+msgstr "Gramps-tiedostot ja tarjokasaineistot"
 
 #: bp/start/templates/start/index_logged.html:44
 msgid ""
@@ -5199,22 +5207,22 @@ msgid "Unable to load file, code ="
 msgstr "Tiedoston lataus ei onnistu, koodi="
 
 #: ui/user_context.py:93
-msgid "approved common data"
-msgstr "hyväksytty Isotammi-aineisto"
+msgid "Approved common data"
+msgstr "Hyväksytty Isotammi-aineisto"
 
 #: ui/user_context.py:94
-msgid "all my candidate data"
-msgstr "kaikki tarjokasaineistoni"
+msgid "My candidate data"
+msgstr "Tarjokasaineistoni"
 
 #: ui/user_context.py:95
-msgid "my selected candidate batch"
-msgstr "valittu tarjokasaineistoni"
+msgid "My selected candidate batch"
+msgstr "Valittu tarjokasaineistoni"
 
 #: ui/user_context.py:96
-msgid "my own and approved common data"
-msgstr "omat tarjokasaineistoni ja hyväksytty Isotammi-aineisto"
+msgid "My own and approved common data"
+msgstr "Omat tarjokasaineistoni ja hyväksytty Isotammi-aineisto"
 
 #: ui/user_context.py:97
-msgid "my selected batch and approved common data"
-msgstr "valittu tarjokasaineistoni ja hyväksytty Isotammi-aineisto"
+msgid "My selected batch and approved common data"
+msgstr "Valittu tarjokasaineistoni ja hyväksytty Isotammi-aineisto"
 

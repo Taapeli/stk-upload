@@ -6,8 +6,8 @@ Created on 23.3.2020
 import logging 
 logger = logging.getLogger('stkserver')
 
-from .place_cypher import CypherPlace
-from .gramps_cypher import CypherObjectWHandle
+from .cypher_place import CypherPlace
+from .cypher_gramps import CypherObjectWHandle
 
 
 class Neo4jWriteDriver(object):

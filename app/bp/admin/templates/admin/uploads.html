@@ -4,7 +4,7 @@
 {% block body %}
     {{ super() }}
     <!-- meta http-equiv="refresh" content="30" -->
-    {% if num_requested_users %}
+    {% if users %}
     	{% if users|length == 1 %}
 	    	<h2>{{ _("Uploads for user") }} <i>{{users[0].username}} ({{users[0].name}})</i></h2>
     	{% else %}

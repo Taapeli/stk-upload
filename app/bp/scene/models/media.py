@@ -26,7 +26,8 @@ def make_thumbnail(fname, thumbname, crop=None):
             im.thumbnail(size)
         im.convert('RGB').save(thumbname, "JPEG")
     except FileNotFoundError as e:
-        print(f'ERROR in bp.scene.models.media.make_thumbnail file "{fname}"\n{e}')
+        print(f'bp.scene.models.media.make_thumbnail: {e}')
+        raise
 
 def get_media_files_folder(batch_id):
     media_folder = os.path.join(media_base_folder,batch_id)
@@ -52,7 +53,8 @@ def get_thumbname(uuid, crop=None):
     ''' Find stored thumbnail file name; create a new file, if needed.
         If there is crop parameter, its value is added to thumbname.
     '''
-    rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",uuid=uuid).single()
+    rec = shareds.driver.session().run("match (m:Media{uuid:$uuid}) return m",
+                                       uuid=uuid).single()
     if rec:
         m = rec['m']
         batch_id = m['batch_id']
@@ -69,7 +71,9 @@ def get_thumbname(uuid, crop=None):
             thumbdir, _x = os.path.split(thumbname)
             os.makedirs(thumbdir, exist_ok=True)
             make_thumbnail(fname,thumbname,crop=crop)
+        # Thumbnail picture found/created
         return thumbname
+    # No db Media node
     return ""
 
 def get_image_size(path):

@@ -210,7 +210,7 @@ function refTable() {
 			//		sauthor:"", spubinfo:"", stitle:"Askainen kuolleet 1888-1890", 
 			//		uuid:"f83d3ff5c5cb49f1a71060b9456ab59e" };
 			//
-	        // <a href="/scene/source=208153" class="inlink" title="[C0866] Lähteen S1418 tiedot">
+	        // <a href="/scene/source?uuid=f83d3ff5c5cb49f1a71060b9456ab59e" class="inlink" title="[C0866] Lähteen S1418 tiedot">
 	        //    Taivassalon seurakunnan syntyneiden ja kastettujen luettelot 1790-1850 (I C:4)</a>
 			source_id = line[0];
 			sObj = sources[source_id];
@@ -225,7 +225,7 @@ function refTable() {
 			t.appendChild(nodeSource);
 
 			var nodeSourceA = document.createElement("A");
-			nodeSourceA.href = '/scene/source=' + source_id;
+			nodeSourceA.href = '/scene/source?uuid=' + sObj.uuid;
 			nodeSourceA.setAttribute("class", "inlink");
 			nodeSourceA.setAttribute("title", "Lähteen " + sObj.id + " tiedot");
 			var textnode = document.createTextNode(sObj.stitle);

@@ -36,6 +36,17 @@ class UserContext():
                                           persons[0].sortname, persons[-1].sortname, 
                                           context.count, len(persons))
 
+        Useful methods:
+            get_my_user_id()            Get effective user id or None
+            owner_str()                 Get owner descripition in current language
+            use_owner_filter()          True, if data is filtered by owner id
+            use_common()                True, if using common data
+            privacy_ok(obj)             returns True, if there is no privacy reason
+                                        to hide given object
+            set_scope_from_request()    update session scope by request params
+            update_session_scope()      update session scope by actually found items
+            next_name_fw()              set next object forwards
+
         Settings stored in self:
 
         (1) user context: username and which material to display
@@ -90,11 +101,11 @@ class UserContext():
         def __init__(self):
             ''' Initialise choise texts in user language '''
             self.as_str = {
-                self.COMMON:              N_('approved common data'), 
-                self.OWN:                 N_('all my candidate data'), 
-                self.BATCH:               N_('my selected candidate batch'),
-                self.COMMON + self.OWN:   N_('my own and approved common data'), 
-                self.COMMON + self.BATCH: N_('my selected batch and approved common data')
+                self.COMMON:              N_('Approved common data'), 
+                self.OWN:                 N_('My candidate data'), 
+                self.BATCH:               N_('My selected candidate batch'),
+                self.COMMON + self.OWN:   N_('My own and approved common data'), 
+                self.COMMON + self.BATCH: N_('My selected batch and approved common data')
             }
             self.batch_name = None
 
@@ -149,8 +160,8 @@ class UserContext():
                 self.session[self.session_var] = self.scope
                 print(f"UserContext: Now {self.session_var} is cleared")
                 return self.scope
-            
-    
+
+
     def __init__(self, user_session, current_user=None, request=None):
         '''
             Set filtering properties from user session, request and current user.
@@ -161,6 +172,7 @@ class UserContext():
         self.years = []                         # example [1800, 1899]
         self.series = None                      # Source data theme like "birth"
         self.count = 10000                      # Max count ow objects to display
+        self.lang = user_session.get('lang','') # User language
 
         ''' Set active user, if any username '''
         if current_user:
@@ -242,6 +254,21 @@ class UserContext():
         '''
         return (self.context & 1) > 0
 
+    def privacy_ok(self, obj):
+        ''' Returns True, if there is no privacy reason to hide given object.
+        
+            Rules:
+            - if common data (not researcher's own)
+              - use obj.too_new variable, if available
+            - else allow
+        '''
+        if self.use_common():
+            # Privacy limits only for common data
+            try:
+                return (obj.too_new == False)
+            except: # No privacy limit for this kind of object
+                pass
+        return True
 
     def set_scope_from_request(self, request, var_name):
         """ Eventuel request fw or bw parameters are stored in session['person_scope'].
@@ -251,7 +278,7 @@ class UserContext():
         """
         self.nextpoint = self.NextStartPoint(self.session, var_name)
         self.scope = self.nextpoint.set_next_from_request(request)
-        print(f"UserContext: Now next item={self.scope}")
+        print(f"UserContext: Now {var_name} next item={self.scope}")
 
 
     def update_session_scope(self, var_name, name1, name2, limit, rec_cnt):
@@ -273,7 +300,7 @@ class UserContext():
         if self.scope[0] > ' ':
             self.scope[0] = name1
         if scope0 != self.scope:
-            print(f"update_session_scope: New scope {self.scope[0]!r} – {self.scope[1]!r}")
+            print(f"update_session_scope: New {var_name} scope {self.scope[0]!r} – {self.scope[1]!r}")
 
         self.session[var_name] = self.scope
         print(f"--> {repr(self.session)}")

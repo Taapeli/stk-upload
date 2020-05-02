@@ -7,15 +7,10 @@ import urllib
 
 import logging 
 logger = logging.getLogger('stkserver')
-#import time
 
 from flask import render_template, request, redirect, url_for #, g, flash
 from flask_security import login_required, logout_user, current_user # ,roles_required
-
 from flask_babelex import get_locale
-# i18n: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xiv-i18n-and-l10n-legacy
-#from flask_babelex import Babel
-#from flask_babelex import _
 
 import shareds
 
@@ -24,7 +19,17 @@ if not app:
     raise RuntimeError("Start this application in '..' from 'run.py' or 'runssl.py'")
 
 
-@shareds.app.route('/')
+@app.before_request
+def before_request():
+    if logger.filters:
+        if current_user.is_authenticated:
+            logger.filters[0].user = current_user.username
+        else:
+            logger.filters[0].user = '<anon>'
+        #print (f'current_user for {logger.name}: {logger.filters[0].user}')
+
+
+@app.route('/')
 def entry():
     ''' Home page needing autentication.
 
@@ -72,7 +77,7 @@ def get_locale():
     #return request.accept_languages.best_match(get('LANGUAGES'))
     '''
 
-@shareds.app.route('/help')
+@app.route('/help')
 @login_required
 def app_help():
     url = request.args.get("url")

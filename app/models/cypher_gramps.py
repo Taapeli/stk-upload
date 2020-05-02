@@ -27,11 +27,13 @@ MERGE (u) -[:HAS_ACCESS]-> (b)
 MATCH (u:UserProfile {username: $user})
 MATCH (u) -[:HAS_LOADED]-> (b:Batch {id: $bid})
     SET b.status="completed"
-WITH u, b
-    OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
-        DELETE c
-    MERGE (u) -[:CURRENT_LOAD]-> (b)
 """
+#Removed 2.5.2020
+# WITH u, b
+#     OPTIONAL MATCH (u) -[c:CURRENT_LOAD]-> (:Batch)
+#         DELETE c
+#     MERGE (u) -[:CURRENT_LOAD]-> (b)
+# """
 
 #Moved to models.gen.batch_audit / 3.2.2020/JMä
 #     batch_list = """
