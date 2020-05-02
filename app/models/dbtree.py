@@ -8,7 +8,6 @@ Created on 8.9.2017
 import sys
 from neo4j import GraphDatabase, basic_auth
 import treelib
-from models.gen.dates import DateRange
 
 import logging
 logger = logging.getLogger('stkserver')
@@ -79,36 +78,10 @@ class DbTree():
             └──────────────────────────────┴────┴───────┘
         """
         self.node_id = node_id
-        last_node = None
-        node_relations = []
         with self.driver.session() as session:
-            result = session.run(self.query, locid=node_id)
-            for record in result:
-                nodes = record["nodes"]
-                lv = record["lv"]
-                print(f"At level {lv} got {len(nodes)} nodes")
-                r = record["r"]
-                # r = [<Relationship id=673979 nodes=(<start_node>, <end_node>)
-                #        type='IS_INSIDE' properties={'date1': 1248448, 'datetype': 4, 'date2': 1377472}>
-                #     ]
-                for i in range(len(r)):
-                    rtype = r[i].type
-                    dates = DateRange.from_node(r[i])
-                    if not node_relations:
-                        # Add this endnode to previous relation
-                        node_relations.append((dates,r[i].start_node,lv))
-                        last_node = r[i].start_node
-                    if r[i].start_node == last_node:
-                        # Add this endnode to previous relation
-                        node_relations.append((dates,r[i].end_node,lv))
-                        print(f"{rtype} {[n['pname'] for n in r[i].nodes]} {dates}")
-                        print(f"{(i+2)*'    '} {r[i].start_node['pname']} < {r[i].end_node['pname']}")
-                        last_node = r[i].end_node
-                    else:
-                        print(f"Got {rtype} relations {[(n[1]['pname'],str(n[0]),n[2]) for n in node_relations]}")
-                        yield node_relations
-
-            yield node_relations
+            result = session.run(self.query, locid=int(node_id))
+            return [(record["nodes"], record["lv"], record["r"]) 
+                    for record in result]
 
 
     def load_to_tree_struct(self, node_id):
